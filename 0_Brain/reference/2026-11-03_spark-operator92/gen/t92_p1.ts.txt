@@ -1,0 +1,143 @@
+// KS-1868 (operator 92 screen, originate documentRepo): the read catch of getDocument (line 265), the list catch of listDocuments (line 298) and the
+// update catch of updateDocument (line 697) of services/originate/src/repositories/documentRepo.ts read the thrown value inside the logger call's
+// arguments, unguarded (`err?.message?.includes(...)` then `err instanceof Error ? err.message : String(err)`). A thrown value whose read throws (a revoked
+// Proxy, an Error whose message getter throws) makes the catch itself throw: the line is never logged and the caller sees the TypeError of the failed read
+// where an ordinary Error is logged and rethrown as is. The cells make the database stand-in reject with such a value and assert the original value is
+// rethrown and the logged line carries text (the constant when the value cannot be turned into text). The uuid-syntax refusal of getDocument stays
+// unlogged. Harness: the real module with ../db and ../utils/logger replaced by plain stand-ins; the database stand-in is passed as the `db` argument
+// (no database, no network).
+const mockH: { logs: { level: string; message: string; meta: Record<string, unknown> | undefined }[] } = { logs: [] };
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: () => Promise.resolve([]), $executeRaw: () => Promise.resolve(0) },
+  withTenant: () => undefined,
+}));
+jest.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    mockH.logs.push({ level, message, meta });
+  };
+  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
+});
+
+import { getDocument, listDocuments, updateDocument } from '../repositories/documentRepo';
+
+const TENANT = '33333333-3333-4333-8333-333333333333';
+const ROW = {
+  id: '11111111-1111-4111-8111-111111111111',
+  external_id: 'doc-ks1868',
+  document_type: 'document',
+  status: 'draft',
+  owner_user_id: '22222222-2222-4222-8222-222222222222',
+  title: 'ks1868',
+  content_hash: 'h',
+  metadata: {},
+  certification_metadata: {},
+};
+const READ = 'DB read failed';
+const LIST = 'DB list failed';
+const UPDATE = 'DB update failed for document';
+
+beforeEach(() => {
+  mockH.logs.length = 0;
+});
+
+const LINES = (message: string) => mockH.logs.filter((l) => l.message === message);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string => {
+  const v = l?.meta?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+/** A database stand-in whose read rejects with the value. */
+const readFails = (value: unknown): any => ({
+  $queryRaw: () => Promise.reject(value),
+  $executeRaw: () => Promise.resolve(0),
+});
+/** A database stand-in whose read answers one row and whose write rejects with the value. */
+const writeFails = (value: unknown): any => ({
+  $queryRaw: () => Promise.resolve([ROW]),
+  $executeRaw: () => Promise.reject(value),
+});
+
+async function outcome(fn: () => Promise<unknown>, value: unknown): Promise<{ rejected: boolean; same: boolean }> {
+  try {
+    await fn();
+    return { rejected: false, same: false };
+  } catch (e) {
+    return { rejected: true, same: Object.is(e, value) };
+  }
+}
+const read = (value: unknown) => outcome(() => getDocument('doc-ks1868', TENANT, readFails(value)), value);
+const list = (value: unknown) => outcome(() => listDocuments(TENANT, undefined, readFails(value)), value);
+const update = (value: unknown) => outcome(() => updateDocument('doc-ks1868', TENANT, { status: 'signed' }, writeFails(value)), value);
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+const CONSTANT = 'unreadable thrown value';
+
+describe('KS-1868 the originate documentRepo read, list and update catches log text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from the read is logged with its message and rethrown as is', async () => {
+    const e = new Error('read boom');
+    expect(await read(e)).toEqual({ rejected: true, same: true });
+    expect(LINES(READ)).toHaveLength(1);
+    expect(reasonOf(LINES(READ)[0])).toBe('read boom');
+  });
+  it('control ks1868 C2: a uuid-syntax Error from the read is rethrown as is and not logged', async () => {
+    const e = new Error('invalid input syntax for type uuid: "x"');
+    expect(await read(e)).toEqual({ rejected: true, same: true });
+    expect(LINES(READ)).toHaveLength(0);
+  });
+  it('control ks1868 C3: an ordinary Error from the list is logged with its message and rethrown as is', async () => {
+    const e = new Error('list boom');
+    expect(await list(e)).toEqual({ rejected: true, same: true });
+    expect(LINES(LIST)).toHaveLength(1);
+    expect(reasonOf(LINES(LIST)[0])).toBe('list boom');
+  });
+  it('control ks1868 C4: an ordinary Error from the update is logged with its message and rethrown as is', async () => {
+    const e = new Error('update boom');
+    expect(await update(e)).toEqual({ rejected: true, same: true });
+    expect(LINES(UPDATE)).toHaveLength(1);
+    expect(reasonOf(LINES(UPDATE)[0])).toBe('update boom');
+  });
+  it('RED ks1868 R1: a read failure that is a revoked Proxy is logged as text and rethrown as is, as for an ordinary Error', async () => {
+    expect(await read(revokedProxy())).toEqual({ rejected: true, same: true });
+    expect(LINES(READ)).toHaveLength(1);
+    expect(reasonOf(LINES(READ)[0])).toBe(CONSTANT);
+  });
+  it('RED ks1868 R2: a read failure that is an Error whose message getter throws is logged as text and rethrown as is, as for an ordinary Error', async () => {
+    expect(await read(getterThrows())).toEqual({ rejected: true, same: true });
+    expect(LINES(READ)).toHaveLength(1);
+    expect(reasonOf(LINES(READ)[0])).toBe(CONSTANT);
+  });
+  it('RED ks1868 R3: a list failure that is a revoked Proxy is logged as text and rethrown as is, as for an ordinary Error', async () => {
+    expect(await list(revokedProxy())).toEqual({ rejected: true, same: true });
+    expect(LINES(LIST)).toHaveLength(1);
+    expect(reasonOf(LINES(LIST)[0])).toBe(CONSTANT);
+  });
+  it('RED ks1868 R4: a list failure that is an Error whose message getter throws is logged as text and rethrown as is, as for an ordinary Error', async () => {
+    expect(await list(getterThrows())).toEqual({ rejected: true, same: true });
+    expect(LINES(LIST)).toHaveLength(1);
+    expect(reasonOf(LINES(LIST)[0])).toBe(CONSTANT);
+  });
+  it('RED ks1868 R5: an update failure that is a revoked Proxy is logged as text and rethrown as is, as for an ordinary Error', async () => {
+    expect(await update(revokedProxy())).toEqual({ rejected: true, same: true });
+    expect(LINES(UPDATE)).toHaveLength(1);
+    expect(reasonOf(LINES(UPDATE)[0])).toBe(CONSTANT);
+  });
+  it('RED ks1868 R6: an update failure that is an Error whose message getter throws is logged as text and rethrown as is, as for an ordinary Error', async () => {
+    expect(await update(getterThrows())).toEqual({ rejected: true, same: true });
+    expect(LINES(UPDATE)).toHaveLength(1);
+    expect(reasonOf(LINES(UPDATE)[0])).toBe(CONSTANT);
+  });
+});

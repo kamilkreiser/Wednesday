@@ -1,0 +1,195 @@
+diff --git a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+--- a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
++++ b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+@@ -1911,6 +1911,13 @@
+     }
+   } catch (err: any) {
+     // Never fail the verify on a migration hiccup — just log.
+-    logger.error('[KS-158] mfa_secret re-encrypt failed', { userId, error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('[KS-158] mfa_secret re-encrypt failed', { userId, error: reason });
+   }
+ }
+@@ -1979,6 +1986,13 @@
+     }
+   } catch (err: any) {
+     // Never fail the login on a migration hiccup — just log.
+-    logger.error('[KS-171] platform_admins.mfa_secret re-encrypt failed', { adminId, error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('[KS-171] platform_admins.mfa_secret re-encrypt failed', { adminId, error: reason });
+   }
+ }
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-user-repo-mfa-reencrypt-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-user-repo-mfa-reencrypt-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-user-repo-mfa-reencrypt-catches-unreadable-throw.test.ts
+@@ -0,0 +1,157 @@
++import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
++
++// KS-1868 (operator 93 screen, auth userRepo): the catches of reencryptMfaSecretIfLegacy (line 1914) and reencryptPlatformAdminMfaSecretIfLegacy
++// (line 1982) of services/auth/src/repositories/userRepo.ts pass `err?.message` straight into the error line's meta object, unguarded. `?.` guards
++// null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch throw, so the
++// function REJECTS although both are documented as never failing the verify / the login ("never throws - a migration hiccup must not fail the login"),
++// where an ordinary Error is logged and the function resolves; an Error whose message is readable but not a string (a Symbol) is handed to the logger
++// uncoerced and silently dropped from the JSON line. The cells make the first query of each function reject with such a value and assert the function
++// resolves and the line carries text (the constant when the value cannot be turned into text). Harness: the ks1186 userRepo suite's mocks (the shared
++// module spread from the real one, the subject-DEK store and the logger as stand-ins) with `../db` and `pg` replaced by plain stand-ins that reject the
++// query with the cell's value (no database, no network).
++const h = vi.hoisted(() => {
++  process.env.NODE_ENV = 'development';
++  return { toThrow: undefined as unknown, errors: [] as unknown[][] };
++});
++
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const actual = await importOriginal<Record<string, unknown>>();
++  return {
++    ...actual,
++    encryptField: async (v: string) => v,
++    decryptField: async (v: string) => v,
++    encryptFieldWithDek: async (v: string) => v,
++    decryptFieldWithDek: async (v: string) => v,
++    isSubjectDekCiphertext: () => false,
++    isEncryptedPii: () => false,
++    lookupHash: (v: string) => `hash:${v}`,
++  };
++});
++
++vi.mock('../services/subjectDeks', () => ({
++  subjectDeks: {
++    getDek: async () => 'test-dek',
++    getOrCreateDek: async () => 'test-dek',
++  },
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    warn: () => undefined,
++    error: (...args: unknown[]) => {
++      h.errors.push(args);
++    },
++  },
++}));
++
++vi.mock('../db', () => ({
++  query: (..._args: unknown[]) => Promise.reject(h.toThrow),
++}));
++
++vi.mock('pg', () => ({
++  Pool: function PoolMock() {
++    return {
++      query: (..._args: unknown[]) => Promise.reject(h.toThrow),
++      end: async () => undefined,
++    };
++  },
++}));
++
++import { reencryptMfaSecretIfLegacy, reencryptPlatformAdminMfaSecretIfLegacy } from '../repositories/userRepo';
++
++const MFA = '[KS-158] mfa_secret re-encrypt failed';
++const ADMIN = '[KS-171] platform_admins.mfa_secret re-encrypt failed';
++const realPlatformUrl = process.env.PLATFORM_DATABASE_URL;
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.errors.length = 0;
++  process.env.PLATFORM_DATABASE_URL = 'postgresql://test:test@localhost:5432/platform';
++});
++afterAll(() => {
++  if (realPlatformUrl === undefined) delete process.env.PLATFORM_DATABASE_URL;
++  else process.env.PLATFORM_DATABASE_URL = realPlatformUrl;
++});
++
++const LINE = (message: string): Record<string, unknown>[] =>
++  h.errors.filter((a) => a[0] === message).map((a) => a[1] as Record<string, unknown>);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
++
++async function run(which: 'mfa' | 'admin', value: unknown): Promise<{ threw: boolean }> {
++  h.toThrow = value;
++  try {
++    if (which === 'mfa') await reencryptMfaSecretIfLegacy('user-1');
++    else await reencryptPlatformAdminMfaSecretIfLegacy('admin-1');
++    return { threw: false };
++  } catch {
++    return { threw: true };
++  }
++}
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the userRepo re-encrypt catches resolve and log text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the mfa re-encrypt query is logged with its message and the call resolves', async () => {
++    expect(await run('mfa', new Error('db boom'))).toEqual({ threw: false });
++    expect(LINE(MFA)).toHaveLength(1);
++    expect(reasonOf(LINE(MFA)[0])).toBe('db boom');
++    expect(LINE(MFA)[0].userId).toBe('user-1');
++  });
++  it('control ks1868 C2: a thrown plain string from the mfa re-encrypt query is logged without a message and the call resolves', async () => {
++    expect(await run('mfa', 'plain boom')).toEqual({ threw: false });
++    expect(LINE(MFA)).toHaveLength(1);
++    expect(reasonOf(LINE(MFA)[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C3: an ordinary Error from the platform-admin re-encrypt query is logged with its message and the call resolves', async () => {
++    expect(await run('admin', new Error('platform boom'))).toEqual({ threw: false });
++    expect(LINE(ADMIN)).toHaveLength(1);
++    expect(reasonOf(LINE(ADMIN)[0])).toBe('platform boom');
++    expect(LINE(ADMIN)[0].adminId).toBe('admin-1');
++  });
++  it('RED ks1868 R1: a revoked Proxy from the mfa re-encrypt query is logged as text and the call resolves, as for an ordinary Error', async () => {
++    expect(await run('mfa', revokedProxy())).toEqual({ threw: false });
++    expect(LINE(MFA)).toHaveLength(1);
++    expect(reasonOf(LINE(MFA)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message is a Symbol from the mfa re-encrypt query is logged as text and the call resolves, as for an ordinary Error', async () => {
++    expect(await run('mfa', withMessage(Symbol('ks1868')))).toEqual({ threw: false });
++    expect(LINE(MFA)).toHaveLength(1);
++    expect(reasonOf(LINE(MFA)[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R3: an Error whose message getter throws from the mfa re-encrypt query is logged as text and the call resolves, as for an ordinary Error', async () => {
++    expect(await run('mfa', getterThrows())).toEqual({ threw: false });
++    expect(LINE(MFA)).toHaveLength(1);
++    expect(reasonOf(LINE(MFA)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: a revoked Proxy from the platform-admin re-encrypt query is logged as text and the call resolves, as for an ordinary Error', async () => {
++    expect(await run('admin', revokedProxy())).toEqual({ threw: false });
++    expect(LINE(ADMIN)).toHaveLength(1);
++    expect(reasonOf(LINE(ADMIN)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: an Error whose message is a Symbol from the platform-admin re-encrypt query is logged as text and the call resolves, as for an ordinary Error', async () => {
++    expect(await run('admin', withMessage(Symbol('ks1868')))).toEqual({ threw: false });
++    expect(LINE(ADMIN)).toHaveLength(1);
++    expect(reasonOf(LINE(ADMIN)[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R6: an Error whose message getter throws from the platform-admin re-encrypt query is logged as text and the call resolves, as for an ordinary Error', async () => {
++    expect(await run('admin', getterThrows())).toEqual({ threw: false });
++    expect(LINE(ADMIN)).toHaveLength(1);
++    expect(reasonOf(LINE(ADMIN)[0])).toBe('unreadable thrown value');
++  });
++});

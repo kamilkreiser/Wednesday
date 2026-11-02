@@ -1,0 +1,150 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p1_originate_document_repo_read_list_update_catches_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts b/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts
+--- a/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts
++++ b/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts
+@@ -262,8 +262,17 @@
+     if (rows.length > 0) return fromDbRow(rows[0]);
+     return null;
+   } catch (err: any) {
+-    if (!err?.message?.includes('invalid input syntax for type uuid')) {
+-      logger.warn('DB read failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    let isUuidSyntax = false;
++    try {
++      isUuidSyntax = !!err?.message?.includes('invalid input syntax for type uuid');
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      isUuidSyntax = false;
++      reason = 'unreadable thrown value';
++    }
++    if (!isUuidSyntax) {
++      logger.warn('DB read failed', { error: reason });
+     }
+     throw err;
+   }
+@@ -296,6 +305,12 @@
+     return { items: paginated, total: all.length };
+   } catch (err: any) {
+-    logger.warn('DB list failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('DB list failed', { error: reason });
+     throw err;
+   }
+ }
+@@ -694,6 +709,12 @@
+     // so both writers could pass it and both recorded a revocation.
+     if (guardStatus !== null && affected === 0) return null;
+   } catch (err: any) {
+-    logger.error('DB update failed for document', { id, error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB update failed for document', { id, error: reason });
+     throw err;
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p2_originate_documents_get_by_id_outer_catch_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -1234,7 +1234,13 @@
+         ...(createdOnBehalfOf ? { createdOnBehalfOf } : {}),
+       });
+     } catch (error) {
+-      logger.error('Failed to get document', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to get document', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get document' } });
+     }
+   },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p3_referral_service_save_code_and_get_code_by_string_catches_guard_message
+diff --git a/Blockchain/Dev/services/referral/src/services/referralService.ts b/Blockchain/Dev/services/referral/src/services/referralService.ts
+--- a/Blockchain/Dev/services/referral/src/services/referralService.ts
++++ b/Blockchain/Dev/services/referral/src/services/referralService.ts
+@@ -65,5 +65,14 @@
+         [c.id, c.code, c.ownerId, c.ownerWalletAddress || null, c.isActive, c.maxUses || null,
+          c.currentUses, c.customLabel || null, JSON.stringify(c.metadata || {}), c.createdAt, c.expiresAt || null]
+       );
+-    } catch (err: any) { logger.error('DB save code failed', { error: err?.message }); }
++    } catch (err: any) {
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB save code failed', { error: reason });
++    }
+   }
+@@ -226,7 +235,14 @@
+       if (result.rows.length === 0) return null;
+       return this.rowToReferralCode(result.rows[0]);
+     } catch (err: any) {
+-      logger.error('DB read code by string failed', { error: err?.message, code });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB read code by string failed', { error: reason, code });
+       return null;
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p4_prism_db_probe_db_catch_guard_message
+diff --git a/Blockchain/Dev/services/prism/src/db.ts b/Blockchain/Dev/services/prism/src/db.ts
+--- a/Blockchain/Dev/services/prism/src/db.ts
++++ b/Blockchain/Dev/services/prism/src/db.ts
+@@ -121,6 +121,13 @@
+     return { ok: dbAvailable };
+   } catch (err: any) {
+     dbAvailable = false;
+-    return { ok: false, error: err?.message };
++    let reason: string | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? undefined : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    return { ok: false, error: reason };
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p5_timestamping_db_probe_db_catch_guard_message
+diff --git a/Blockchain/Dev/services/timestamping/src/db.ts b/Blockchain/Dev/services/timestamping/src/db.ts
+--- a/Blockchain/Dev/services/timestamping/src/db.ts
++++ b/Blockchain/Dev/services/timestamping/src/db.ts
+@@ -96,6 +96,13 @@
+     return { ok: dbAvailable };
+   } catch (err: any) {
+     dbAvailable = false;
+-    return { ok: false, error: err?.message };
++    let reason: string | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? undefined : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    return { ok: false, error: reason };
+   }
+ }
+

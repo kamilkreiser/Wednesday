@@ -1,0 +1,53 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p8_timestamping_index_db_lookup_by_id_document_hash_catches_guard_message
+diff --git a/Blockchain/Dev/services/timestamping/src/index.ts b/Blockchain/Dev/services/timestamping/src/index.ts
+--- a/Blockchain/Dev/services/timestamping/src/index.ts
++++ b/Blockchain/Dev/services/timestamping/src/index.ts
+@@ -774,7 +774,14 @@
+     if (result.rows.length === 0) return undefined;
+     return rowToTimestamp(result.rows[0]);
+   } catch (err: any) {
+-    log('warn', 'DB lookup by id failed', { id, error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    log('warn', 'DB lookup by id failed', { id, error: reason });
+     return undefined;
+   }
+ }
+@@ -786,7 +793,14 @@
+     const result = await query('SELECT * FROM ts_timestamps WHERE document_id = $1 ORDER BY created_at DESC', [documentId]);
+     return result.rows.map(rowToTimestamp);
+   } catch (err: any) {
+-    log('warn', 'DB lookup by document failed', { documentId, error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    log('warn', 'DB lookup by document failed', { documentId, error: reason });
+     return [];
+   }
+ }
+@@ -798,7 +812,14 @@
+     const result = await query('SELECT * FROM ts_timestamps WHERE hash = $1 ORDER BY created_at DESC', [hash]);
+     return result.rows.map(rowToTimestamp);
+   } catch (err: any) {
+-    log('warn', 'DB lookup by hash failed', { hash, error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    log('warn', 'DB lookup by hash failed', { hash, error: reason });
+     return [];
+   }
+ }
+

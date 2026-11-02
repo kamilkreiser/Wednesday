@@ -1,0 +1,124 @@
+diff --git a/Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts b/Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts
+--- a/Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts
++++ b/Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts
+@@ -307,3 +307,10 @@
+   } catch (err: any) {
+-    logger.warn('[TSA] RFC-3161 request exception', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('[TSA] RFC-3161 request exception', { error: reason });
+   }
+diff --git a/Blockchain/Dev/services/timestamping/src/__tests__/ks1868-timestamping-create-timestamp-request-exception-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/timestamping/src/__tests__/ks1868-timestamping-create-timestamp-request-exception-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/timestamping/src/__tests__/ks1868-timestamping-create-timestamp-request-exception-catch-unreadable-throw.test.ts
+@@ -0,0 +1,104 @@
++import { describe, it, expect, beforeEach, vi } from 'vitest';
++
++// KS-1868 (operator 91 screen, timestamping qualified TSA): the request-exception catch of createTimestamp (line 308) of
++// services/timestamping/src/tsa/qualified-tsa.ts passes `err?.message` straight into the logger's meta object, unguarded. A
++// thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch itself throw, so
++// createTimestamp REJECTS instead of logging the failure and falling back to its documented mock token ("Falls back to a mock
++// token if no TSA is reachable"), as an ordinary Error does; an Error whose message is readable but not a string (a Symbol) is
++// handed to the logger uncoerced. The cells make the RFC-3161 request throw such a value and assert createTimestamp resolves
++// with the mock fallback and the logged value is text (the constant when the value cannot be turned into text). Harness: the
++// real module with the RFC-3161 client and verifier replaced by plain stand-ins and the logger by a plain recording object (no
++// network, no ASN.1 libraries).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logged: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('../tsa/rfc3161-client', () => ({
++  requestTimestamp: async () => {
++    throw h.toThrow;
++  },
++}));
++vi.mock('../tsa/rfc3161-verify', () => ({
++  verifyRfc3161Token: async () => ({ valid: false }),
++}));
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.logged.push({ level, message, meta });
++  };
++  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
++});
++
++import { createTimestamp } from '../tsa/qualified-tsa';
++
++const EXC = '[TSA] RFC-3161 request exception';
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logged.length = 0;
++});
++
++async function run(value: unknown): Promise<{ ok: boolean; mock: boolean }> {
++  h.toThrow = value;
++  try {
++    const r = await createTimestamp({ hash: 'a'.repeat(64), hashAlgorithm: 'sha256' } as Parameters<typeof createTimestamp>[0]);
++    return { ok: true, mock: r.mock === true };
++  } catch {
++    return { ok: false, mock: false };
++  }
++}
++const LINES = () => h.logged.filter((l) => l.message === EXC);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string => {
++  const v = l?.meta?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the createTimestamp request-exception catch falls back to the mock token and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the RFC-3161 request is logged with its message and createTimestamp answers the mock token', async () => {
++    expect(await run(new Error('tsa down'))).toEqual({ ok: true, mock: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('tsa down');
++  });
++  it('control ks1868 C2: a thrown plain string is logged without a message and createTimestamp answers the mock token', async () => {
++    expect(await run('plain boom')).toEqual({ ok: true, mock: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C3: an Error with an empty message is logged with the empty text and createTimestamp answers the mock token', async () => {
++    expect(await run(new Error(''))).toEqual({ ok: true, mock: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('');
++  });
++  it('RED ks1868 R1: a request failure that is a revoked Proxy is logged as text and createTimestamp answers the mock token, as for an ordinary Error', async () => {
++    expect(await run(revokedProxy())).toEqual({ ok: true, mock: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: a request failure that is an Error whose message getter throws is logged as text and createTimestamp answers the mock token, as for an ordinary Error', async () => {
++    expect(await run(getterThrows())).toEqual({ ok: true, mock: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: a request failure that is an Error whose message is a Symbol is logged as text and createTimestamp answers the mock token, as for an ordinary Error', async () => {
++    expect(await run(withMessage(Symbol('ks1868')))).toEqual({ ok: true, mock: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('Symbol(ks1868)');
++  });
++});

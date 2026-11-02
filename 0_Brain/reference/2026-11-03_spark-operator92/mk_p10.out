@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p10_transfer_index_load_from_db_catch_guard_message
+diff --git a/Blockchain/Dev/services/transfer/src/index.ts b/Blockchain/Dev/services/transfer/src/index.ts
+--- a/Blockchain/Dev/services/transfer/src/index.ts
++++ b/Blockchain/Dev/services/transfer/src/index.ts
+@@ -324,6 +324,13 @@
+       notifications: nResult.rows.length,
+     });
+   } catch (err: any) {
+-    log('warn', 'Failed to load from DB — starting with empty in-memory state', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    log('warn', 'Failed to load from DB — starting with empty in-memory state', { error: reason });
+   }
+ }
+

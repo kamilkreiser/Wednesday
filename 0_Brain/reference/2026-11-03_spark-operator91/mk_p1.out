@@ -1,0 +1,19 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p1_m365_user_erased_subscriber_loop_closed_catch_guard_message
+diff --git a/Blockchain/Dev/services/m365-integration/src/userErasedSubscriber.ts b/Blockchain/Dev/services/m365-integration/src/userErasedSubscriber.ts
+--- a/Blockchain/Dev/services/m365-integration/src/userErasedSubscriber.ts
++++ b/Blockchain/Dev/services/m365-integration/src/userErasedSubscriber.ts
+@@ -41,5 +41,12 @@
+       });
+     })
+     .catch((err) => {
+-      log('[cascade] subscriber loop terminated', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('[cascade] subscriber loop terminated', { error: reason });
+     });
+

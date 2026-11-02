@@ -1,0 +1,125 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// KS-1868 (operator 91 screen, m365-integration token crypto): the encrypt-failed catch of encryptToken (line 57) and the
+// decrypt-failed catch of decryptToken (line 96) of services/m365-integration/src/security/tokenCrypto.ts pass `err?.message`
+// straight into the logger's meta object, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message
+// getter throws) makes the catch itself throw: the line is never logged, encryptToken THROWS instead of answering null (its own
+// comment says a throw there discards the whole connection row) and decryptToken throws instead of answering undefined (the
+// re-authenticate path); an Error whose message is readable but not a string (a Symbol) is handed to the logger uncoerced. The
+// cells make the shared encrypt / decrypt functions throw such a value and assert the function answers what an ordinary Error gets
+// and the logged value is text (the constant when the value cannot be turned into text). Harness: the real module with
+// `@secuura/shared` replaced by plain stand-ins (encrypt and decrypt throw the value, every stored value counts as encrypted) and
+// the logger by a plain recording object (no keyring, no database).
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  logged: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
+}));
+
+vi.mock('@secuura/shared', () => ({
+  encryptField: () => {
+    throw h.toThrow;
+  },
+  decryptField: () => {
+    throw h.toThrow;
+  },
+  isEncryptedPii: () => true,
+}));
+
+vi.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    h.logged.push({ level, message, meta });
+  };
+  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
+});
+
+import { encryptToken, decryptToken } from '../security/tokenCrypto';
+
+const ENC = '[KS-488 C-3] token encryption unavailable — storing NULL, connection will need re-auth';
+const DEC = '[KS-488 C-3] M365 token decrypt failed';
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.logged.length = 0;
+});
+
+function enc(value: unknown): { threw: boolean; out: string | null | undefined } {
+  h.toThrow = value;
+  try {
+    return { threw: false, out: encryptToken('plain-token', 'access_token', 'conn-1') };
+  } catch {
+    return { threw: true, out: undefined };
+  }
+}
+function dec(value: unknown): { threw: boolean; out: string | undefined } {
+  h.toThrow = value;
+  try {
+    return { threw: false, out: decryptToken('v1:stored', 'access_token', 'conn-1') };
+  } catch {
+    return { threw: true, out: 'threw' };
+  }
+}
+const LINES = (message: string) => h.logged.filter((l) => l.message === message);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string => {
+  const v = l?.meta?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 the token encrypt and decrypt catches answer as for an ordinary Error and log text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from encryptField is logged with its message and encryptToken answers null', () => {
+    expect(enc(new Error('keyring missing'))).toEqual({ threw: false, out: null });
+    expect(LINES(ENC)).toHaveLength(1);
+    expect(reasonOf(LINES(ENC)[0])).toBe('keyring missing');
+  });
+  it('control ks1868 C2: an ordinary Error from decryptField is logged with its message and decryptToken answers undefined', () => {
+    expect(dec(new Error('aad mismatch'))).toEqual({ threw: false, out: undefined });
+    expect(LINES(DEC)).toHaveLength(1);
+    expect(reasonOf(LINES(DEC)[0])).toBe('aad mismatch');
+  });
+  it('control ks1868 C3: a thrown plain string from encryptField is logged without a message and encryptToken answers null', () => {
+    expect(enc('plain boom')).toEqual({ threw: false, out: null });
+    expect(LINES(ENC)).toHaveLength(1);
+    expect(reasonOf(LINES(ENC)[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: an encrypt failure that is a revoked Proxy is logged as text and encryptToken answers null, as for an ordinary Error', () => {
+    expect(enc(revokedProxy())).toEqual({ threw: false, out: null });
+    expect(LINES(ENC)).toHaveLength(1);
+    expect(reasonOf(LINES(ENC)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an encrypt failure that is an Error whose message is a Symbol is logged as text and encryptToken answers null, as for an ordinary Error', () => {
+    expect(enc(withMessage(Symbol('ks1868')))).toEqual({ threw: false, out: null });
+    expect(LINES(ENC)).toHaveLength(1);
+    expect(reasonOf(LINES(ENC)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: a decrypt failure that is a revoked Proxy is logged as text and decryptToken answers undefined, as for an ordinary Error', () => {
+    expect(dec(revokedProxy())).toEqual({ threw: false, out: undefined });
+    expect(LINES(DEC)).toHaveLength(1);
+    expect(reasonOf(LINES(DEC)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R4: a decrypt failure that is an Error whose message getter throws is logged as text and decryptToken answers undefined, as for an ordinary Error', () => {
+    expect(dec(getterThrows())).toEqual({ threw: false, out: undefined });
+    expect(LINES(DEC)).toHaveLength(1);
+    expect(reasonOf(LINES(DEC)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R5: a decrypt failure that is an Error whose message is a Symbol is logged as text and decryptToken answers undefined, as for an ordinary Error', () => {
+    expect(dec(withMessage(Symbol('ks1868')))).toEqual({ threw: false, out: undefined });
+    expect(LINES(DEC)).toHaveLength(1);
+    expect(reasonOf(LINES(DEC)[0])).toBe('Symbol(ks1868)');
+  });
+});

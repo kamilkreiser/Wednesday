@@ -1,0 +1,37 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p2_auth_user_erased_subscriber_handler_failed_and_loop_closed_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/userErasedSubscriber.ts b/Blockchain/Dev/services/auth/src/services/userErasedSubscriber.ts
+--- a/Blockchain/Dev/services/auth/src/services/userErasedSubscriber.ts
++++ b/Blockchain/Dev/services/auth/src/services/userErasedSubscriber.ts
+@@ -94,15 +94,29 @@
+           userAnonymised,
+         });
+       } catch (err: any) {
++        let reason: string | null | undefined;
++        try {
++          const m = err?.message;
++          reason = m === undefined || m === null ? m : String(m);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.error('[cascade] user.erased handler failed', {
+           userId,
+           dsrId,
+-          error: err?.message,
++          error: reason,
+         });
+         // Re-throw so the bus retries up to its max attempts and dead-letters
+         throw err;
+       }
+     })
+     .catch((err) => {
+-      logger.error('[cascade] subscriber loop terminated', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('[cascade] subscriber loop terminated', { error: reason });
+     });
+

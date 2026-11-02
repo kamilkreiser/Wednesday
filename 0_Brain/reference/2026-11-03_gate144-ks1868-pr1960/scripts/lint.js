@@ -1,0 +1,16 @@
+const { spawnSync, execFileSync } = require('child_process'); const fs = require('fs'); const crypto = require('crypto');
+const G = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate144-ks1868-pr1960';
+const R = G + '/repo', D = R + '/Blockchain/Dev', B = D + '/node_modules/.bin', A = D + '/services/api-gateway';
+const sha = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const files = ['src/services/redis.ts', 'src/__tests__/ks1868-gateway-redis-listener-and-connect-catch-unreadable-throw.test.ts'];
+const run = (label, args) => { const r = spawnSync(B + '/eslint', args, { cwd: A, encoding: 'utf8' }); fs.writeFileSync(G + '/logs/eslint_' + label + '.log', (r.stdout || '') + (r.stderr || '') + '\nfiles=' + args.join(',') + '\nrc=' + r.status + '\n'); console.log(label, 'rc', r.status, ((r.stdout || '').match(/\d+ problems?.*$/m) || ['0 problems'])[0]); };
+run('head', files);
+const P = A + '/src/services/redis.ts', h = sha(P);
+fs.writeFileSync(P, execFileSync('git', ['-C', R, 'show', '2d3b3bb3:Blockchain/Dev/services/api-gateway/src/services/redis.ts']));
+run('base_redis', ['src/services/redis.ts']);
+fs.writeFileSync(P, execFileSync('git', ['-C', R, 'show', 'pr1960:Blockchain/Dev/services/api-gateway/src/services/redis.ts']));
+console.log('restore', sha(P) === h ? 'OK' : 'FAIL');
+const pl = A + '/src/zz_g144_planted.ts';
+fs.writeFileSync(pl, 'export function f(): number { const unused = 1; debugger; return 2; }\n');
+run('planted', ['src/zz_g144_planted.ts']);
+fs.mkdirSync(G + '/logs/_quarantine', { recursive: true }); fs.renameSync(pl, G + '/logs/_quarantine/zz_g144_planted.ts');

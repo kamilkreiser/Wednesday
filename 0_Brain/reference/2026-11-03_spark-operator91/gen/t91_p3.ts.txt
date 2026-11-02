@@ -1,0 +1,150 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// KS-1868 (operator 91 screen, billing chargeable events): the table-bootstrap catch of ensureTable (line 62), the table-verify
+// catch of loadChargeEventsFromDb (line 124) and the insert catch of createChargeEvent (line 178) of
+// services/billing/src/chargeable-events.ts log `{ error: err?.message }` with the read INSIDE the logger call's arguments, unguarded.
+// A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch itself throw: the line is
+// never logged, loadChargeEventsFromDb (the boot ready hook) REJECTS instead of resolving, and a hostile ensureTable failure
+// escapes into the outer catch of createChargeEvent so that the INSERT is skipped, where an ordinary Error from ensureTable is
+// logged and the INSERT still runs; an Error whose message is readable but not a string (a Symbol) is handed to the logger
+// uncoerced. The cells make the db stand-in reject one statement with such a value and assert the function resolves, the line
+// carries text (the constant when the value cannot be turned into text) and the INSERT is issued as for an ordinary Error. Harness:
+// the real module with ../db replaced by a plain stand-in (its query rejects the chosen statement with the value), the shared
+// tenant helpers by plain pass-through functions and the logger by a plain recording object (no database).
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  failOn: undefined as RegExp | undefined,
+  sqls: [] as string[],
+  logged: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  query: (sql: string) => {
+    h.sqls.push(String(sql));
+    if (h.failOn && h.failOn.test(String(sql))) return Promise.reject(h.toThrow);
+    return Promise.resolve({ rows: [{ cnt: '0' }] });
+  },
+}));
+
+vi.mock('@secuura/shared', () => ({
+  runWithTenantId: (_tenant: unknown, fn: () => unknown) => fn(),
+  runWithPlatformScope: (fn: () => unknown) => fn(),
+}));
+
+vi.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    h.logged.push({ level, message, meta });
+  };
+  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
+});
+
+type Ce = typeof import('../chargeable-events');
+const TENANT = 'a0000000-0000-4000-8000-000000000001';
+const ENSURE = 'Failed to ensure billing_charge_events table';
+const VERIFY = 'Failed to verify billing_charge_events table';
+const INSERT = 'DB insert failed for charge event';
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.failOn = undefined;
+  h.sqls.length = 0;
+  h.logged.length = 0;
+});
+
+async function freshCe(): Promise<Ce> {
+  vi.resetModules();
+  return import('../chargeable-events');
+}
+async function create(failOn: RegExp, value: unknown): Promise<{ ok: boolean; inserted: boolean }> {
+  h.failOn = failOn;
+  h.toThrow = value;
+  const ce = await freshCe();
+  try {
+    await ce.createChargeEvent('certification_sign', 'cert_1', 'user_1', TENANT);
+    return { ok: true, inserted: h.sqls.some((s) => /INSERT INTO billing_charge_events/.test(s)) };
+  } catch {
+    return { ok: false, inserted: false };
+  }
+}
+async function verify(value: unknown): Promise<{ ok: boolean }> {
+  h.failOn = /COUNT\(\*\)/;
+  h.toThrow = value;
+  const ce = await freshCe();
+  try {
+    await ce.loadChargeEventsFromDb();
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
+const LINES = (message: string) => h.logged.filter((l) => l.message === message);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string => {
+  const v = l?.meta?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 the charge-event table and insert catches log text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from the table bootstrap is logged with its message and the INSERT still runs', async () => {
+    expect(await create(/CREATE TABLE/, new Error('ddl failed'))).toEqual({ ok: true, inserted: true });
+    expect(LINES(ENSURE)).toHaveLength(1);
+    expect(reasonOf(LINES(ENSURE)[0])).toBe('ddl failed');
+  });
+  it('control ks1868 C2: an ordinary Error from the table verify query is logged with its message and the call resolves', async () => {
+    expect(await verify(new Error('count failed'))).toEqual({ ok: true });
+    expect(LINES(VERIFY)).toHaveLength(1);
+    expect(reasonOf(LINES(VERIFY)[0])).toBe('count failed');
+  });
+  it('control ks1868 C3: an ordinary Error from the INSERT is logged with its message and the event is still returned', async () => {
+    expect(await create(/INSERT INTO billing_charge_events/, new Error('insert failed'))).toEqual({ ok: true, inserted: true });
+    expect(LINES(INSERT)).toHaveLength(1);
+    expect(reasonOf(LINES(INSERT)[0])).toBe('insert failed');
+  });
+  it('RED ks1868 R1: a table bootstrap failure that is a revoked Proxy is logged as text and the INSERT still runs, as for an ordinary Error', async () => {
+    expect(await create(/CREATE TABLE/, revokedProxy())).toEqual({ ok: true, inserted: true });
+    expect(LINES(ENSURE)).toHaveLength(1);
+    expect(reasonOf(LINES(ENSURE)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: a table bootstrap failure that is an Error whose message is a Symbol is logged as text and the INSERT still runs, as for an ordinary Error', async () => {
+    expect(await create(/CREATE TABLE/, withMessage(Symbol('ks1868')))).toEqual({ ok: true, inserted: true });
+    expect(LINES(ENSURE)).toHaveLength(1);
+    expect(reasonOf(LINES(ENSURE)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: a table verify failure that is an Error whose message getter throws resolves and is logged as text, as for an ordinary Error', async () => {
+    expect(await verify(getterThrows())).toEqual({ ok: true });
+    expect(LINES(VERIFY)).toHaveLength(1);
+    expect(reasonOf(LINES(VERIFY)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R4: a table verify failure that is a revoked Proxy resolves and is logged as text, as for an ordinary Error', async () => {
+    expect(await verify(revokedProxy())).toEqual({ ok: true });
+    expect(LINES(VERIFY)).toHaveLength(1);
+    expect(reasonOf(LINES(VERIFY)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R5: an INSERT failure that is a revoked Proxy is logged as text and the event is still returned, as for an ordinary Error', async () => {
+    expect(await create(/INSERT INTO billing_charge_events/, revokedProxy())).toEqual({ ok: true, inserted: true });
+    expect(LINES(INSERT)).toHaveLength(1);
+    expect(reasonOf(LINES(INSERT)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R6: an INSERT failure that is an Error whose message is a Symbol is logged as text and the event is still returned, as for an ordinary Error', async () => {
+    expect(await create(/INSERT INTO billing_charge_events/, withMessage(Symbol('ks1868')))).toEqual({ ok: true, inserted: true });
+    expect(LINES(INSERT)).toHaveLength(1);
+    expect(reasonOf(LINES(INSERT)[0])).toBe('Symbol(ks1868)');
+  });
+});

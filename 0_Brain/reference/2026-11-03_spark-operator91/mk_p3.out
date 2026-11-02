@@ -1,0 +1,49 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p3_billing_chargeable_events_table_and_insert_catches_guard_message
+diff --git a/Blockchain/Dev/services/billing/src/chargeable-events.ts b/Blockchain/Dev/services/billing/src/chargeable-events.ts
+--- a/Blockchain/Dev/services/billing/src/chargeable-events.ts
++++ b/Blockchain/Dev/services/billing/src/chargeable-events.ts
+@@ -59,6 +59,13 @@
+     tableEnsured = true;
+     logger.info('billing_charge_events table ensured');
+   } catch (err: any) {
+-    logger.warn('Failed to ensure billing_charge_events table', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to ensure billing_charge_events table', { error: reason });
+   }
+ }
+@@ -121,6 +128,13 @@
+     ));
+     logger.info('billing_charge_events table ready', { rowCount: result.rows[0]?.cnt ?? '0' });
+   } catch (err: any) {
+-    logger.warn('Failed to verify billing_charge_events table', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to verify billing_charge_events table', { error: reason });
+   }
+ }
+@@ -175,5 +189,12 @@
+       logger.warn('DB not available — charge event not persisted', { eventId: id });
+     }
+   } catch (err: any) {
+-    logger.warn('DB insert failed for charge event', { error: err?.message, eventId: id });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('DB insert failed for charge event', { error: reason, eventId: id });
+   }
+

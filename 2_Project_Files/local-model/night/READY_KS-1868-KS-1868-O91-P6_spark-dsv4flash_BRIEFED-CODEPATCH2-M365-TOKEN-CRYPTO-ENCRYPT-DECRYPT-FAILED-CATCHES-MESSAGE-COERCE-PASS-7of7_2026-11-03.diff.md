@@ -1,0 +1,199 @@
+# READY — KS-1868-KS-1868-O91-P6 (spark-dsv4flash, briefed, code_patch2, vitest) — PASS 7/7 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message/out.md.checker/patch.diff`** (from `ls` at 07:30 2026-11-03; it is `cat` of the section files in order: `cmp` rc 0: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message/out.md.checker/section_1.diff`, `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message/out.md.checker/section_2.diff`). Checker A2 (verbatim from checker.out): `PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message-control/out.md.checker/patch.diff` rc 0, Wednesday).
+
+**Held 07:30 2026-11-03 by Wednesday after a source read (hold_ready.py, code_patch path — every clause below is COPIED from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message/out.md.checker`, not typed; the artefact each came from is named in brackets).** Tip `7ad0dcc14e5c565be7d7dbd0d24a357f3c3b06b6`.
+- Touched-file set [checker.out A3, verbatim]: `PASS A3 (code_patch2) touched-file set == the declared set: { Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts } + { Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts }`
+- Declared set [input.json product_file + suggested_test_file]: `Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts` (product) and `Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts` (test) — equal to numstat.out's set (2 files).
+- numstat [out.md.checker/numstat.out, verbatim]:
+```
+16	2	Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts
+125	0	Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts
+```
+- Product hunk `+` count [checker.out A3c, verbatim]: `PASS A3c every '+' line the brief adds is in the declared sections (16 line(s), multiset), and no tip line is re-added as a '+' in any product (A3d)` — no expected_plus in the input; not re-measured here.
+- Byte-exactness [checker.out A3i, verbatim]: `A3i: brief '+' lines byte-exact incl. leading whitespace in: tokenCrypto.ts`
+- CODE_PATCH2 (rung 3, 1 product files + 1 test file(s)) — identity was PER-FILE A3x, not a single-file A3i. Product files (brief `File:` lines == input.json product_files): `Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts`; test(s): `Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts`. [checker.out PASS A3x, verbatim]: `PASS A3x every declared file's '+' lines are byte-identical to the brief's, in order (SUMMARY declared=2 measured=2 ok=2 diff=0 unmeasured=0)`. [brief_bytes.out, verbatim]: `OK Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts 16 '+' line(s) byte-identical to the brief, in order; OK Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts 125 '+' line(s) byte-identical to the brief, in order; SUMMARY declared=2 measured=2 ok=2 diff=0 unmeasured=0`
+- Hunk audit [out.md.checker/hunk_audit.out, first line verbatim]: `sections=2 miscounted_sections=0`
+- Sections [out.md.checker/sections.json + section_<k>.opts + apply_check_strict_<k>.out]:
+- section 1 `section_1.diff` → `Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts` (hunks=2, miscount=0; applied file per `section_1.opts`: `section_1.diff`, git-apply options: `(none — strict)`; `apply_check_strict_1.out`: EMPTY (strict apply --check clean))
+- section 2 `section_2.diff` → `Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts` (hunks=1, miscount=0; applied file per `section_2.opts`: `section_2.diff`, git-apply options: `(none — strict)`; `apply_check_strict_2.out`: EMPTY (strict apply --check clean))
+- RED-FIRST [checker.out A4, verbatim]: `PASS A4 RED-FIRST: the declared test(s) fail with every test section and no product section (5 failed / 8 run; controls green; assertion reds)` [red_first.json: failed=5 of total=8; red cell(s): ['KS-1868 the token encrypt and decrypt catches answer as for an ordinary Error and log text for a hostile thrown value RED ks1868 R1: an encrypt failure that is a revoked Proxy is logged as text and encryptToken answers null, as for an ordinary Error', 'KS-1868 the token encrypt and decrypt catches answer as for an ordinary Error and log text for a hostile thrown value RED ks1868 R2: an encrypt failure that is an Error whose message is a Symbol is logged as text and encryptToken answers null, as for an ordinary Error', 'KS-1868 the token encrypt and decrypt catches answer as for an ordinary Error and log text for a hostile thrown value RED ks1868 R3: a decrypt failure that is a revoked Proxy is logged as text and decryptToken answers undefined, as for an ordinary Error', 'KS-1868 the token encrypt and decrypt catches answer as for an ordinary Error and log text for a hostile thrown value RED ks1868 R4: a decrypt failure that is an Error whose message getter throws is logged as text and decryptToken answers undefined, as for an ordinary Error', 'KS-1868 the token encrypt and decrypt catches answer as for an ordinary Error and log text for a hostile thrown value RED ks1868 R5: a decrypt failure that is an Error whose message is a Symbol is logged as text and decryptToken answers undefined, as for an ordinary Error']]
+- GREEN-AFTER [checker.out A5, verbatim]: `PASS A5 GREEN-AFTER: every declared test passes with all 1 product section(s) (8 passed / 8 run)` [green_after.json: failed=0 of total=8, success=True]
+- Whole suite [out.md.checker/suite_delta.out, verbatim]: `baseline: total=289 failed=0 | after: total=297 failed=0` · `NEW reds: []` [baseline_suite.json total=289 failed=0; after_suite.json total=297 failed=0]
+- A6 [verbatim]: `PASS A6 whole services/m365-integration suite: no NEW red vs the untouched tip` · A7 [verbatim]: `PASS A7 tsc --noEmit for services/m365-integration: rc 0 after the patch (baseline rc=0)`
+- SUMMARY [checker.out, verbatim]: `SUMMARY files=2 products=1 tests=1 red_first=yes apply_mode=strict`
+
+**PR NOTES for the raise seat:** CODE_PATCH — PRODUCT BYTES CHANGE: `Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts` (+16/-2 per numstat.out) and the test file `Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts` (+125/-0); 2 files in all (code_patch2: products Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts). Apply PER SECTION with the checker's apply mode — section 1 `section_1.diff`: `git apply -p1` (strict); section 2 `section_2.diff`: `git apply -p1` (strict) — at the tip `7ad0dcc14e5c565be7d7dbd0d24a357f3c3b06b6` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product code changes) — the gate decides. Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message/input.json`. Brief (given by --brief; its `# ` heading names KS-1868): `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message/KS-1868.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o91_p6_m365_token_crypto_encrypt_and_decrypt_failed_catches_guard_message/checker.out`.
+
+```diff
+diff --git a/Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts b/Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts
+--- a/Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts
++++ b/Blockchain/Dev/services/m365-integration/src/security/tokenCrypto.ts
+@@ -52,9 +52,16 @@
+     // Storing NULL means: the connection persists, the token does not, and the
+     // caller's `if (!connection.accessToken)` re-auth path runs. A credential we
+     // cannot protect is one we decline to keep.
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error(
+       '[KS-488 C-3] token encryption unavailable — storing NULL, connection will need re-auth',
+-      { connectionId, column, error: err?.message },
++      { connectionId, column, error: reason },
+     );
+     return null;
+   }
+@@ -90,10 +97,17 @@
+     // re-authenticates, rather than throwing and taking the whole connection
+     // read down with it. This is also the path a ciphertext lifted from another
+     // row or the other column lands on — AAD verification fails.
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('[KS-488 C-3] M365 token decrypt failed', {
+       connectionId,
+       column,
+-      error: err?.message,
++      error: reason,
+     });
+     return undefined;
+   }
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-token-crypto-failed-catches-unreadable-throw.test.ts
+@@ -0,0 +1,125 @@
++import { describe, it, expect, beforeEach, vi } from 'vitest';
++
++// KS-1868 (operator 91 screen, m365-integration token crypto): the encrypt-failed catch of encryptToken (line 57) and the
++// decrypt-failed catch of decryptToken (line 96) of services/m365-integration/src/security/tokenCrypto.ts pass `err?.message`
++// straight into the logger's meta object, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message
++// getter throws) makes the catch itself throw: the line is never logged, encryptToken THROWS instead of answering null (its own
++// comment says a throw there discards the whole connection row) and decryptToken throws instead of answering undefined (the
++// re-authenticate path); an Error whose message is readable but not a string (a Symbol) is handed to the logger uncoerced. The
++// cells make the shared encrypt / decrypt functions throw such a value and assert the function answers what an ordinary Error gets
++// and the logged value is text (the constant when the value cannot be turned into text). Harness: the real module with
++// `@secuura/shared` replaced by plain stand-ins (encrypt and decrypt throw the value, every stored value counts as encrypted) and
++// the logger by a plain recording object (no keyring, no database).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logged: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('@secuura/shared', () => ({
++  encryptField: () => {
++    throw h.toThrow;
++  },
++  decryptField: () => {
++    throw h.toThrow;
++  },
++  isEncryptedPii: () => true,
++}));
++
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.logged.push({ level, message, meta });
++  };
++  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
++});
++
++import { encryptToken, decryptToken } from '../security/tokenCrypto';
++
++const ENC = '[KS-488 C-3] token encryption unavailable — storing NULL, connection will need re-auth';
++const DEC = '[KS-488 C-3] M365 token decrypt failed';
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logged.length = 0;
++});
++
++function enc(value: unknown): { threw: boolean; out: string | null | undefined } {
++  h.toThrow = value;
++  try {
++    return { threw: false, out: encryptToken('plain-token', 'access_token', 'conn-1') };
++  } catch {
++    return { threw: true, out: undefined };
++  }
++}
++function dec(value: unknown): { threw: boolean; out: string | undefined } {
++  h.toThrow = value;
++  try {
++    return { threw: false, out: decryptToken('v1:stored', 'access_token', 'conn-1') };
++  } catch {
++    return { threw: true, out: 'threw' };
++  }
++}
++const LINES = (message: string) => h.logged.filter((l) => l.message === message);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string => {
++  const v = l?.meta?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the token encrypt and decrypt catches answer as for an ordinary Error and log text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from encryptField is logged with its message and encryptToken answers null', () => {
++    expect(enc(new Error('keyring missing'))).toEqual({ threw: false, out: null });
++    expect(LINES(ENC)).toHaveLength(1);
++    expect(reasonOf(LINES(ENC)[0])).toBe('keyring missing');
++  });
++  it('control ks1868 C2: an ordinary Error from decryptField is logged with its message and decryptToken answers undefined', () => {
++    expect(dec(new Error('aad mismatch'))).toEqual({ threw: false, out: undefined });
++    expect(LINES(DEC)).toHaveLength(1);
++    expect(reasonOf(LINES(DEC)[0])).toBe('aad mismatch');
++  });
++  it('control ks1868 C3: a thrown plain string from encryptField is logged without a message and encryptToken answers null', () => {
++    expect(enc('plain boom')).toEqual({ threw: false, out: null });
++    expect(LINES(ENC)).toHaveLength(1);
++    expect(reasonOf(LINES(ENC)[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1: an encrypt failure that is a revoked Proxy is logged as text and encryptToken answers null, as for an ordinary Error', () => {
++    expect(enc(revokedProxy())).toEqual({ threw: false, out: null });
++    expect(LINES(ENC)).toHaveLength(1);
++    expect(reasonOf(LINES(ENC)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an encrypt failure that is an Error whose message is a Symbol is logged as text and encryptToken answers null, as for an ordinary Error', () => {
++    expect(enc(withMessage(Symbol('ks1868')))).toEqual({ threw: false, out: null });
++    expect(LINES(ENC)).toHaveLength(1);
++    expect(reasonOf(LINES(ENC)[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R3: a decrypt failure that is a revoked Proxy is logged as text and decryptToken answers undefined, as for an ordinary Error', () => {
++    expect(dec(revokedProxy())).toEqual({ threw: false, out: undefined });
++    expect(LINES(DEC)).toHaveLength(1);
++    expect(reasonOf(LINES(DEC)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: a decrypt failure that is an Error whose message getter throws is logged as text and decryptToken answers undefined, as for an ordinary Error', () => {
++    expect(dec(getterThrows())).toEqual({ threw: false, out: undefined });
++    expect(LINES(DEC)).toHaveLength(1);
++    expect(reasonOf(LINES(DEC)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: a decrypt failure that is an Error whose message is a Symbol is logged as text and decryptToken answers undefined, as for an ordinary Error', () => {
++    expect(dec(withMessage(Symbol('ks1868')))).toEqual({ threw: false, out: undefined });
++    expect(LINES(DEC)).toHaveLength(1);
++    expect(reasonOf(LINES(DEC)[0])).toBe('Symbol(ks1868)');
++  });
++});
+```

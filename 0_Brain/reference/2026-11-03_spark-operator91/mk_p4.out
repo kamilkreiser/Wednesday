@@ -1,0 +1,50 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p4_billing_chargeable_events_lookup_update_and_summary_catches_guard_message
+diff --git a/Blockchain/Dev/services/billing/src/chargeable-events.ts b/Blockchain/Dev/services/billing/src/chargeable-events.ts
+--- a/Blockchain/Dev/services/billing/src/chargeable-events.ts
++++ b/Blockchain/Dev/services/billing/src/chargeable-events.ts
+@@ -235,6 +235,13 @@
+       };
+     }
+   } catch (err: any) {
+-    logger.warn('DB lookup failed for charge event', { error: err?.message, eventId });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('DB lookup failed for charge event', { error: reason, eventId });
+     return null;
+   }
+@@ -262,5 +269,12 @@
+       [status, JSON.stringify(event.metadata ?? {}), eventId, tenantId]
+     ));
+   } catch (err: any) {
+-    logger.warn('DB update failed for charge event', { error: err?.message, eventId });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('DB update failed for charge event', { error: reason, eventId });
+   }
+@@ -415,7 +429,14 @@
+       discountApplied: applicableDiscount?.discountPercent || 0,
+     };
+   } catch (err: any) {
+-    logger.warn('DB query failed for usage summary — returning empty defaults', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('DB query failed for usage summary — returning empty defaults', { error: reason });
+     return {
+       period: { start: startDate, end: endDate },
+       totalEvents: 0,
+

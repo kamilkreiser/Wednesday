@@ -1,0 +1,53 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p11_originate_email_acs_init_acs_send_and_smtp_send_catches_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/services/email.ts b/Blockchain/Dev/services/originate/src/services/email.ts
+--- a/Blockchain/Dev/services/originate/src/services/email.ts
++++ b/Blockchain/Dev/services/originate/src/services/email.ts
+@@ -136,7 +136,14 @@
+     console.log(`[Email] ACS client initialised (sender=${ACS_SENDER_ADDRESS})`);
+     return acsClient;
+   } catch (err: any) {
+-    console.error(`[Email] Failed to init ACS client (will fall back to SMTP): ${err?.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email] Failed to init ACS client (will fall back to SMTP): ${reason}`);
+     return null;
+   }
+ }
+@@ -163,7 +170,14 @@
+     console.error(`[Email/ACS] Send failed for ${options.to}: status=${result.status}`, result.error);
+     return false;
+   } catch (err: any) {
+-    console.error(`[Email/ACS] Send threw for ${options.to}: ${err?.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email/ACS] Send threw for ${options.to}: ${reason}`);
+     return false;
+   }
+ }
+@@ -203,7 +217,14 @@
+     console.log(`[Email/SMTP] Sent to ${options.to}: ${options.subject} (messageId: ${info.messageId})`);
+     return true;
+   } catch (error: any) {
+-    console.error(`[Email/SMTP] Failed to send to ${options.to}: ${error.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = error.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email/SMTP] Failed to send to ${options.to}: ${reason}`);
+     return false;
+   }
+ }
+

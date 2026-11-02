@@ -1,0 +1,22 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p7_tokenisation_vault_detokenise_decrypt_failed_catch_guard_message
+diff --git a/Blockchain/Dev/services/tokenisation/src/vault.ts b/Blockchain/Dev/services/tokenisation/src/vault.ts
+--- a/Blockchain/Dev/services/tokenisation/src/vault.ts
++++ b/Blockchain/Dev/services/tokenisation/src/vault.ts
+@@ -76,9 +76,15 @@
+       // the token is the lookup key and is auditable in the vault_entries
+       // table directly).
+       const tokenHash = require('node:crypto').createHash('sha256').update(tok).digest('hex').slice(0, 16);
++      let reason: string;
++      try {
++        reason = (err as Error)?.message ?? String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       // eslint-disable-next-line no-console
+       console.error('[tokenisation/vault] decrypt failed', {
+-        tenantId, tokenHash, error: (err as Error)?.message ?? String(err),
++        tenantId, tokenHash, error: reason,
+       });
+       return { token: tok, value: null };
+     }
+

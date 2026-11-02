@@ -1,0 +1,207 @@
+diff --git a/Blockchain/Dev/services/auth/src/services/userErasedSubscriber.ts b/Blockchain/Dev/services/auth/src/services/userErasedSubscriber.ts
+--- a/Blockchain/Dev/services/auth/src/services/userErasedSubscriber.ts
++++ b/Blockchain/Dev/services/auth/src/services/userErasedSubscriber.ts
+@@ -94,15 +94,29 @@
+           userAnonymised,
+         });
+       } catch (err: any) {
++        let reason: string | null | undefined;
++        try {
++          const m = err?.message;
++          reason = m === undefined || m === null ? m : String(m);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.error('[cascade] user.erased handler failed', {
+           userId,
+           dsrId,
+-          error: err?.message,
++          error: reason,
+         });
+         // Re-throw so the bus retries up to its max attempts and dead-letters
+         throw err;
+       }
+     })
+     .catch((err) => {
+-      logger.error('[cascade] subscriber loop terminated', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('[cascade] subscriber loop terminated', { error: reason });
+     });
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-user-erased-subscriber-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-user-erased-subscriber-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-user-erased-subscriber-catches-unreadable-throw.test.ts
+@@ -0,0 +1,167 @@
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++
++// KS-1868 (operator 91 screen, auth user.erased subscriber): the handler-failed catch and the subscription-closed `.catch` of
++// startUserErasedSubscriber in services/auth/src/services/userErasedSubscriber.ts log `{ error: err?.message }` with the read INSIDE the
++// logger call's arguments, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes
++// the handler-failed catch throw BEFORE its line is logged and before the original value is rethrown (the bus then receives a
++// different error), and makes the subscription-closed catch handler throw (an unhandled rejection, which ends a Node process by
++// default); an Error whose message is readable but not a string (a Symbol) is handed to the logger uncoerced. The cells make the
++// session revoke step throw such a value and call the subscribed handler / make the subscription reject with such a value, and
++// assert the ORIGINAL value is rethrown, no unhandled rejection is raised, and the logged value is text (the constant when the
++// value cannot be turned into text). Harness: the real subscriber with the event bus replaced by a plain stand-in that hands over
++// the handler (or rejects), plain functions for the session revoke, the db query and the DEK cache, and a plain recording
++// logger (no Redis, no database).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  mode: 'handler' as 'handler' | 'loop',
++  handler: undefined as undefined | ((event: unknown) => Promise<void>),
++  logged: [] as { message: string; meta: Record<string, unknown> | undefined }[],
++  unhandled: 0,
++}));
++
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const actual = await importOriginal<Record<string, unknown>>();
++  return {
++    ...actual,
++    initEventBus: () => undefined,
++    getEventBus: () => ({
++      subscribe: (_types: unknown, _group: unknown, handler: (event: unknown) => Promise<void>) => {
++        h.handler = handler;
++        return h.mode === 'loop' ? Promise.reject(h.toThrow) : new Promise<void>(() => undefined);
++      },
++    }),
++  };
++});
++
++vi.mock('../db', () => ({
++  query: async () => ({ rows: [{ count: 1 }] }),
++}));
++
++vi.mock('../services/session', () => ({
++  revokeAllUserSessions: async () => {
++    throw h.toThrow;
++  },
++}));
++
++vi.mock('../services/subjectDeks', () => ({
++  subjectDeks: { evict: () => undefined },
++}));
++
++vi.mock('../utils/logger', () => {
++  const rec = (message: string, meta?: Record<string, unknown>) => {
++    h.logged.push({ message, meta });
++  };
++  return { logger: { info: () => undefined, warn: () => undefined, debug: () => undefined, error: rec } };
++});
++
++import { startUserErasedSubscriber } from '../services/userErasedSubscriber';
++
++const FAILED = '[cascade] user.erased handler failed';
++const LOOP = '[cascade] subscriber loop terminated';
++const SAVED_LISTENERS = process.listeners('unhandledRejection');
++const onUnhandled = () => {
++  h.unhandled += 1;
++};
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.mode = 'handler';
++  h.handler = undefined;
++  h.logged.length = 0;
++  h.unhandled = 0;
++  process.env.REDIS_URL = 'redis://stub.invalid:6379';
++  process.removeAllListeners('unhandledRejection');
++  process.on('unhandledRejection', onUnhandled);
++});
++afterEach(() => {
++  process.removeListener('unhandledRejection', onUnhandled);
++  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
++});
++
++async function runHandler(value: unknown): Promise<{ rejected: boolean; same: boolean }> {
++  h.toThrow = value;
++  h.mode = 'handler';
++  await startUserErasedSubscriber();
++  try {
++    await (h.handler as (event: unknown) => Promise<void>)({ payload: { userId: 'u1', dsrId: 'd1' } });
++    return { rejected: false, same: false };
++  } catch (e) {
++    return { rejected: true, same: Object.is(e, value) };
++  }
++}
++async function runLoop(value: unknown): Promise<{ unhandled: number }> {
++  h.toThrow = value;
++  h.mode = 'loop';
++  await startUserErasedSubscriber();
++  await new Promise<void>((resolve) => setTimeout(resolve, 25));
++  return { unhandled: h.unhandled };
++}
++const LINES = (message: string) => h.logged.filter((c) => c.message === message);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (c: { meta: Record<string, unknown> | undefined } | undefined): string => {
++  const v = c?.meta?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the user.erased subscriber rethrows the original value and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the session revoke is rethrown as is and logged with its message', async () => {
++    const err = new Error('revoke failed');
++    expect(await runHandler(err)).toEqual({ rejected: true, same: true });
++    expect(LINES(FAILED)).toHaveLength(1);
++    expect(reasonOf(LINES(FAILED)[0])).toBe('revoke failed');
++  });
++  it('control ks1868 C2: a thrown plain string is rethrown as is and logged without a message', async () => {
++    expect(await runHandler('plain boom')).toEqual({ rejected: true, same: true });
++    expect(LINES(FAILED)).toHaveLength(1);
++    expect(reasonOf(LINES(FAILED)[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C3: an ordinary Error closing the subscription raises no unhandled rejection and is logged with its message', async () => {
++    expect(await runLoop(new Error('stream closed'))).toEqual({ unhandled: 0 });
++    expect(LINES(LOOP)).toHaveLength(1);
++    expect(reasonOf(LINES(LOOP)[0])).toBe('stream closed');
++  });
++  it('RED ks1868 R1: a revoke failure that is a revoked Proxy is rethrown as is and logged as text, as for an ordinary Error', async () => {
++    const v = revokedProxy();
++    expect(await runHandler(v)).toEqual({ rejected: true, same: true });
++    expect(LINES(FAILED)).toHaveLength(1);
++    expect(reasonOf(LINES(FAILED)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: a revoke failure that is an Error whose message getter throws is rethrown as is and logged as text, as for an ordinary Error', async () => {
++    const v = getterThrows();
++    expect(await runHandler(v)).toEqual({ rejected: true, same: true });
++    expect(LINES(FAILED)).toHaveLength(1);
++    expect(reasonOf(LINES(FAILED)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: a revoke failure that is an Error whose message is a Symbol is rethrown as is and logged as text, as for an ordinary Error', async () => {
++    const v = withMessage(Symbol('ks1868'));
++    expect(await runHandler(v)).toEqual({ rejected: true, same: true });
++    expect(LINES(FAILED)).toHaveLength(1);
++    expect(reasonOf(LINES(FAILED)[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R4: a revoked Proxy closing the subscription raises no unhandled rejection and is logged as text, as for an ordinary Error', async () => {
++    expect(await runLoop(revokedProxy())).toEqual({ unhandled: 0 });
++    expect(LINES(LOOP)).toHaveLength(1);
++    expect(reasonOf(LINES(LOOP)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: an Error whose message getter throws closing the subscription raises no unhandled rejection and is logged as text, as for an ordinary Error', async () => {
++    expect(await runLoop(getterThrows())).toEqual({ unhandled: 0 });
++    expect(LINES(LOOP)).toHaveLength(1);
++    expect(reasonOf(LINES(LOOP)[0])).toBe('unreadable thrown value');
++  });
++});

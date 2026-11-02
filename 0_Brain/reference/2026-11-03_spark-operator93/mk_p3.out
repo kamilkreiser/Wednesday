@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o93_p3_prism_index_load_from_db_catch_guard_message
+diff --git a/Blockchain/Dev/services/prism/src/index.ts b/Blockchain/Dev/services/prism/src/index.ts
+--- a/Blockchain/Dev/services/prism/src/index.ts
++++ b/Blockchain/Dev/services/prism/src/index.ts
+@@ -289,6 +289,13 @@
+     }
+     logger.info('Loaded credentials from DB', { count: creds.rows.length });
+   } catch (err: any) {
+-    logger.warn('Failed to load credentials from DB', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to load credentials from DB', { error: reason });
+   }
+ }
+

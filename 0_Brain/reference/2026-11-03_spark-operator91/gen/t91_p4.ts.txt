@@ -1,0 +1,165 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// KS-1868 (operator 91 screen, billing chargeable events): the lookup catch (line 238) and the update catch (line 265) of
+// processChargeEvent and the query catch (line 418) of getUsageSummary in services/billing/src/chargeable-events.ts log
+// `{ error: err?.message }` with the read INSIDE the logger call's arguments, unguarded. A thrown value whose read throws (a revoked
+// Proxy, an Error whose message getter throws) makes the catch itself throw: the warn line is never logged and the function
+// REJECTS where an ordinary Error makes processChargeEvent answer null (lookup), answer the event (update) and getUsageSummary answer
+// its empty defaults; an Error whose message is readable but not a string (a Symbol) is handed to the logger uncoerced. The cells
+// make the db stand-in reject one statement with such a value and assert the function resolves with the ordinary answer and the
+// line carries text (the constant when the value cannot be turned into text). Harness: the real module with ../db replaced by a plain
+// stand-in (its query answers the lookup with one pending event and rejects the chosen statement with the value), the shared tenant
+// helpers by plain pass-through functions and the logger by a plain recording object (no database).
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  failOn: undefined as RegExp | undefined,
+  logged: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  query: (sql: string) => {
+    if (h.failOn && h.failOn.test(String(sql))) return Promise.reject(h.toThrow);
+    if (/SELECT id, event_type/.test(String(sql))) {
+      return Promise.resolve({
+        rows: [
+          {
+            id: 'ce_1',
+            event_type: 'certification_sign',
+            certification_id: 'cert_1',
+            initiated_by: 'user_1',
+            amount: '1',
+            currency: 'ADA',
+            status: 'pending',
+            metadata: {},
+            created_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      });
+    }
+    return Promise.resolve({ rows: [] });
+  },
+}));
+
+vi.mock('@secuura/shared', () => ({
+  runWithTenantId: (_tenant: unknown, fn: () => unknown) => fn(),
+  runWithPlatformScope: (fn: () => unknown) => fn(),
+}));
+
+vi.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    h.logged.push({ level, message, meta });
+  };
+  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
+});
+
+type Ce = typeof import('../chargeable-events');
+const TENANT = 'a0000000-0000-4000-8000-000000000001';
+const LOOKUP = 'DB lookup failed for charge event';
+const UPDATE = 'DB update failed for charge event';
+const SUMMARY = 'DB query failed for usage summary — returning empty defaults';
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.failOn = undefined;
+  h.logged.length = 0;
+});
+
+async function freshCe(): Promise<Ce> {
+  vi.resetModules();
+  return import('../chargeable-events');
+}
+async function process_(failOn: RegExp, value: unknown): Promise<{ ok: boolean; answer: string }> {
+  h.failOn = failOn;
+  h.toThrow = value;
+  const ce = await freshCe();
+  try {
+    const ev = await ce.processChargeEvent('ce_1', 'completed', TENANT);
+    return { ok: true, answer: ev === null ? 'null' : 'event:' + ev.status };
+  } catch {
+    return { ok: false, answer: '' };
+  }
+}
+async function summary(value: unknown): Promise<{ ok: boolean; answer: string }> {
+  h.failOn = /COUNT\(\*\)/;
+  h.toThrow = value;
+  const ce = await freshCe();
+  try {
+    const s = await ce.getUsageSummary('user_1', TENANT, new Date('2026-01-01T00:00:00.000Z'), new Date('2026-02-01T00:00:00.000Z'));
+    return { ok: true, answer: 'events:' + s.totalEvents };
+  } catch {
+    return { ok: false, answer: '' };
+  }
+}
+const LINES = (message: string) => h.logged.filter((l) => l.message === message);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string => {
+  const v = l?.meta?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+const LOOKUP_SQL = /SELECT id, event_type/;
+const UPDATE_SQL = /UPDATE billing_charge_events/;
+
+describe('KS-1868 the charge-event lookup, update and usage-summary catches log text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from the lookup is logged with its message and processChargeEvent answers null', async () => {
+    expect(await process_(LOOKUP_SQL, new Error('lookup failed'))).toEqual({ ok: true, answer: 'null' });
+    expect(LINES(LOOKUP)).toHaveLength(1);
+    expect(reasonOf(LINES(LOOKUP)[0])).toBe('lookup failed');
+  });
+  it('control ks1868 C2: an ordinary Error from the update is logged with its message and processChargeEvent answers the event', async () => {
+    expect(await process_(UPDATE_SQL, new Error('update failed'))).toEqual({ ok: true, answer: 'event:completed' });
+    expect(LINES(UPDATE)).toHaveLength(1);
+    expect(reasonOf(LINES(UPDATE)[0])).toBe('update failed');
+  });
+  it('control ks1868 C3: an ordinary Error from the usage query is logged with its message and getUsageSummary answers its empty defaults', async () => {
+    expect(await summary(new Error('query failed'))).toEqual({ ok: true, answer: 'events:0' });
+    expect(LINES(SUMMARY)).toHaveLength(1);
+    expect(reasonOf(LINES(SUMMARY)[0])).toBe('query failed');
+  });
+  it('RED ks1868 R1: a lookup failure that is a revoked Proxy is logged as text and processChargeEvent answers null, as for an ordinary Error', async () => {
+    expect(await process_(LOOKUP_SQL, revokedProxy())).toEqual({ ok: true, answer: 'null' });
+    expect(LINES(LOOKUP)).toHaveLength(1);
+    expect(reasonOf(LINES(LOOKUP)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: a lookup failure that is an Error whose message is a Symbol is logged as text and processChargeEvent answers null, as for an ordinary Error', async () => {
+    expect(await process_(LOOKUP_SQL, withMessage(Symbol('ks1868')))).toEqual({ ok: true, answer: 'null' });
+    expect(LINES(LOOKUP)).toHaveLength(1);
+    expect(reasonOf(LINES(LOOKUP)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: an update failure that is a revoked Proxy is logged as text and processChargeEvent answers the event, as for an ordinary Error', async () => {
+    expect(await process_(UPDATE_SQL, revokedProxy())).toEqual({ ok: true, answer: 'event:completed' });
+    expect(LINES(UPDATE)).toHaveLength(1);
+    expect(reasonOf(LINES(UPDATE)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R4: an update failure that is an Error whose message getter throws is logged as text and processChargeEvent answers the event, as for an ordinary Error', async () => {
+    expect(await process_(UPDATE_SQL, getterThrows())).toEqual({ ok: true, answer: 'event:completed' });
+    expect(LINES(UPDATE)).toHaveLength(1);
+    expect(reasonOf(LINES(UPDATE)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R5: a usage query failure that is a revoked Proxy is logged as text and getUsageSummary answers its empty defaults, as for an ordinary Error', async () => {
+    expect(await summary(revokedProxy())).toEqual({ ok: true, answer: 'events:0' });
+    expect(LINES(SUMMARY)).toHaveLength(1);
+    expect(reasonOf(LINES(SUMMARY)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R6: a usage query failure that is an Error whose message is a Symbol is logged as text and getUsageSummary answers its empty defaults, as for an ordinary Error', async () => {
+    expect(await summary(withMessage(Symbol('ks1868')))).toEqual({ ok: true, answer: 'events:0' });
+    expect(LINES(SUMMARY)).toHaveLength(1);
+    expect(reasonOf(LINES(SUMMARY)[0])).toBe('Symbol(ks1868)');
+  });
+});

@@ -1,0 +1,35 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o93_p5_auth_user_repo_mfa_reencrypt_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+--- a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
++++ b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+@@ -1911,6 +1911,13 @@
+     }
+   } catch (err: any) {
+     // Never fail the verify on a migration hiccup — just log.
+-    logger.error('[KS-158] mfa_secret re-encrypt failed', { userId, error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('[KS-158] mfa_secret re-encrypt failed', { userId, error: reason });
+   }
+ }
+@@ -1979,6 +1986,13 @@
+     }
+   } catch (err: any) {
+     // Never fail the login on a migration hiccup — just log.
+-    logger.error('[KS-171] platform_admins.mfa_secret re-encrypt failed', { adminId, error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('[KS-171] platform_admins.mfa_secret re-encrypt failed', { adminId, error: reason });
+   }
+ }
+

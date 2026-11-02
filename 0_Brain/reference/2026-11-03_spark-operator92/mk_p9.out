@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p9_referral_leaderboard_build_leaderboard_catch_guard_message
+diff --git a/Blockchain/Dev/services/referral/src/routes/leaderboard.ts b/Blockchain/Dev/services/referral/src/routes/leaderboard.ts
+--- a/Blockchain/Dev/services/referral/src/routes/leaderboard.ts
++++ b/Blockchain/Dev/services/referral/src/routes/leaderboard.ts
+@@ -283,7 +283,14 @@
+       badge: getTierBadge((row.current_tier || 'starter').toUpperCase()),
+     }));
+   } catch (err: any) {
+-    logger.error('Leaderboard DB query failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Leaderboard DB query failed', { error: reason });
+     return [];
+   }
+ }
+

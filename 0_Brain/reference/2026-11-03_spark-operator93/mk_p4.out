@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o93_p4_originate_anchor_state_sync_heal_write_catch_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+--- a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
++++ b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+@@ -597,7 +597,13 @@
+       logger.info('Verify heal: anchor state confirmed through the resolver (KS-584, KS-1384 R2b)', { documentId: input.documentId, anchorId, txHash: d.tx, via: d.via, written });
+     } catch (err: unknown) {
+       // Presentation already has the decision; the write is convergence, and the reconcile and the poller are the catch-all.
+-      logger.warn('Verify heal: the confirmed write failed (presentation unaffected)', { documentId: input.documentId, error: err instanceof Error ? err.message : String(err) });
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('Verify heal: the confirmed write failed (presentation unaffected)', { documentId: input.documentId, error: reason });
+     }
+   }
+   return healed;
+

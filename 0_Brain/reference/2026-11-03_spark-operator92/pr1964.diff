@@ -1,0 +1,639 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts
+new file mode 100644
+index 000000000..6745fe539
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts
+@@ -0,0 +1,236 @@
++// KS-1868: three document routes of originate (POST /:id/sign/request, GET /:id/lifecycle-events and the public GET /:id/sig-json) log
++// `error: <reading of the caught value>` in their outer catch as `error instanceof Error ? error.message : String(error)`, unguarded. A revoked Proxy
++// makes `instanceof` throw inside the catch, and an Error whose `message` getter returns a revoked Proxy, a null-prototype object or a Symbol hands the
++// logger a value it cannot format; the route then never answers. The cells make the first document read reject with such a value and assert the route
++// answers the constant 500 and the logged reason is text (the constant when it cannot be turned into text). The shapes the guard of the repo layer
++// swallows by accident are not used: the rejection is thrown by the document read itself, which has no inner catch on these three routes.
++// Controls pin an ordinary Error and a thrown plain string (a non-Error is logged as its own text). A hang is a null answer (abort signal), not a jest
++// timeout. Harness: the ks466 malformed-id suite (same module mocks). Nothing is written.
++const mockState: { toThrow: unknown; errored: unknown[][]; reads: number; writes: number } = {
++  toThrow: undefined,
++  errored: [],
++  reads: 0,
++  writes: 0,
++};
++
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
++process.env.SIMULATE_ANCHORING = 'true';
++
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: (..._args: unknown[]) => {
++    mockState.reads += 1;
++    return Promise.reject(mockState.toThrow);
++  },
++  listDocuments: jest.fn(),
++  saveDocument: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve({ dbId: '99999999-9999-4999-8999-999999999999', inserted: true });
++  },
++  updateDocument: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve(undefined);
++  },
++  getSigningRequest: jest.fn(),
++  saveSigningRequest: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve(undefined);
++  },
++  deleteSigningRequest: jest.fn(),
++  generateContentHash: jest.fn(() => 'a'.repeat(64)),
++  seedDemoDocuments: jest.fn(async () => undefined),
++  assertNoCycle: jest.fn(async () => undefined),
++}));
++
++jest.mock('../repositories/shareRepo', () => ({
++  createShare: jest.fn(),
++}));
++
++jest.mock('../repositories/lifecycleEventRepo', () => ({
++  createLifecycleEvent: jest.fn(),
++  setLifecycleEventAnchor: jest.fn(),
++  listLifecycleEvents: (..._args: unknown[]) => {
++    mockState.reads += 1;
++    return Promise.reject(mockState.toThrow);
++  },
++}));
++
++jest.mock('../events', () => ({
++  publishEvent: jest.fn(async () => undefined),
++  EventTypes: {
++    DOCUMENT_CREATED: 'document.created',
++    DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred',
++    DOCUMENT_VERSIONED: 'document.versioned',
++  },
++}));
++
++jest.mock('../services/threadTokenClient', () => ({
++  mintAndRegisterThreadToken: jest.fn(async () => ({})),
++}));
++
++jest.mock('../routes/verification', () => ({
++  registerInPlatformRegistry: jest.fn(async () => undefined),
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
++    next();
++  },
++}));
++
++jest.mock('../middleware/rbac', () => ({
++  isAllowedByRoleOrScope: () => true,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    warn: () => undefined,
++    error: (...args: unknown[]) => {
++      mockState.errored.push(args);
++    },
++  },
++}));
++
++import express from 'express';
++import { documentsRouter, publicDocumentsRouter } from '../routes/documents';
++
++const app = express();
++// Same mount order as index.ts: public router first, then the auth-gated one.
++app.use('/api/documents', express.json(), publicDocumentsRouter);
++app.use('/api/documents', express.json(), documentsRouter);
++
++const DOC = 'doc-ks1868-lookup-target';
++let baseUrl = '';
++let server: ReturnType<typeof app.listen>;
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  const address = server.address();
++  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
++});
++
++afterAll(() => server?.close());
++
++beforeEach(() => {
++  mockState.toThrow = undefined;
++  mockState.errored.length = 0;
++  mockState.reads = 0;
++  mockState.writes = 0;
++});
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++/** An Error whose `message` getter succeeds and returns the (non-string) value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++/** The logged `error` field of the logger call that carries this first argument, as a string; the type name when it is not one. */
++const reasonOf = (first: string): string => {
++  const calls = mockState.errored.filter((c) => c[0] === first);
++  if (calls.length !== 1) return '<' + calls.length + ' calls>';
++  const v = (calls[0][1] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++let unhandled = 0;
++const onUnhandled = () => {
++  unhandled += 1;
++};
++beforeAll(() => {
++  process.on('unhandledRejection', onUnhandled);
++});
++afterAll(() => {
++  process.removeListener('unhandledRejection', onUnhandled);
++});
++beforeEach(() => {
++  unhandled = 0;
++});
++
++async function call(method: string, path: string, body?: unknown): Promise<{ status: number; code: string | undefined } | null> {
++  try {
++    const res = await fetch(`${baseUrl}${path}`, {
++      method,
++      headers: { 'content-type': 'application/json' },
++      body: body === undefined ? undefined : JSON.stringify(body),
++      signal: AbortSignal.timeout(1500),
++    });
++    const payload = (await res.json()) as { error?: { code?: string } };
++    return { status: res.status, code: payload.error?.code };
++  } catch {
++    return null;
++  }
++}
++
++const SIGN_REQUEST: [string, string, string, unknown] = ['POST', `/api/documents/${DOC}/sign/request`, 'Failed to create signing request', { walletAddress: 'addr_test1ks1868' }];
++const LIFECYCLE: [string, string, string, unknown] = ['GET', `/api/documents/${DOC}/lifecycle-events`, 'Failed to list lifecycle events', undefined];
++const SIG_JSON: [string, string, string, unknown] = ['GET', `/api/documents/${DOC}/sig-json`, 'Failed to get sig-json', undefined];
++
++async function route(r: [string, string, string, unknown], thrown: unknown, reason: string): Promise<void> {
++  mockState.toThrow = thrown;
++  expect(await call(r[0], r[1], r[3])).toEqual({ status: 500, code: 'INTERNAL_ERROR' });
++  expect(unhandled).toBe(0);
++  expect(mockState.errored).toHaveLength(1);
++  expect(reasonOf(r[2])).toBe(reason);
++  expect(mockState.reads).toBe(1);
++  expect(mockState.writes).toBe(0);
++}
++const CONSTANT = 'unreadable thrown value';
++
++describe('KS-1868 the originate document lookup routes log text for a hostile thrown value', () => {
++  it('control ks1868 C1 POST /:id/sign/request: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(SIGN_REQUEST, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C2 GET /:id/lifecycle-events: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(LIFECYCLE, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C3 GET /:id/sig-json: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(SIG_JSON, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C4 POST /:id/sign/request: a thrown plain string is logged as its own text and the route answers 500', async () => {
++    await route(SIGN_REQUEST, 'plain boom', 'plain boom');
++  });
++
++  it('RED ks1868 R1 POST /:id/sign/request: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(SIGN_REQUEST, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R2 POST /:id/sign/request: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(SIGN_REQUEST, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R3 POST /:id/sign/request: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(SIGN_REQUEST, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++
++  it('RED ks1868 R4 GET /:id/lifecycle-events: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(LIFECYCLE, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R5 GET /:id/lifecycle-events: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(LIFECYCLE, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R6 GET /:id/lifecycle-events: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(LIFECYCLE, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++
++  it('RED ks1868 R7 GET /:id/sig-json: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(SIG_JSON, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R8 GET /:id/sig-json: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(SIG_JSON, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R9 GET /:id/sig-json: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(SIG_JSON, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++});
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-signing-routes-message-coercion-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-signing-routes-message-coercion-unreadable-throw.test.ts
+new file mode 100644
+index 000000000..bf9a7f9a9
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-signing-routes-message-coercion-unreadable-throw.test.ts
+@@ -0,0 +1,236 @@
++// KS-1868: three document SIGNING routes of originate (POST /:id/sign, POST /:id/sign-cert and POST /:id/sign-wallet) log
++// `error: <reading of the caught value>` in their outer catch as `error instanceof Error ? error.message : String(error)`, unguarded. A revoked Proxy
++// makes `instanceof` throw inside the catch, and an Error whose `message` getter returns a revoked Proxy, a null-prototype object or a Symbol hands the
++// logger a value it cannot format; the route then never answers. The cells make the first document read reject with such a value and assert the route
++// answers the constant 500, nothing is written and the logged reason is text (the constant when it cannot be turned into text). The rejection is thrown
++// by the document read itself, which has no inner catch on these three routes, and it comes before any signing, any signature check and any write.
++// Controls pin an ordinary Error and a thrown plain string (a non-Error is logged as its own text). A hang is a null answer (abort signal), not a jest
++// timeout. Harness: the ks466 malformed-id suite (same module mocks). Nothing is written.
++const mockState: { toThrow: unknown; errored: unknown[][]; reads: number; writes: number } = {
++  toThrow: undefined,
++  errored: [],
++  reads: 0,
++  writes: 0,
++};
++
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
++process.env.SIMULATE_ANCHORING = 'true';
++
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: (..._args: unknown[]) => {
++    mockState.reads += 1;
++    return Promise.reject(mockState.toThrow);
++  },
++  listDocuments: jest.fn(),
++  saveDocument: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve({ dbId: '99999999-9999-4999-8999-999999999999', inserted: true });
++  },
++  updateDocument: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve(undefined);
++  },
++  getSigningRequest: jest.fn(),
++  saveSigningRequest: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve(undefined);
++  },
++  deleteSigningRequest: jest.fn(),
++  generateContentHash: jest.fn(() => 'a'.repeat(64)),
++  seedDemoDocuments: jest.fn(async () => undefined),
++  assertNoCycle: jest.fn(async () => undefined),
++}));
++
++jest.mock('../repositories/shareRepo', () => ({
++  createShare: jest.fn(),
++}));
++
++jest.mock('../repositories/lifecycleEventRepo', () => ({
++  createLifecycleEvent: jest.fn(),
++  setLifecycleEventAnchor: jest.fn(),
++  listLifecycleEvents: (..._args: unknown[]) => {
++    mockState.reads += 1;
++    return Promise.reject(mockState.toThrow);
++  },
++}));
++
++jest.mock('../events', () => ({
++  publishEvent: jest.fn(async () => undefined),
++  EventTypes: {
++    DOCUMENT_CREATED: 'document.created',
++    DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred',
++    DOCUMENT_VERSIONED: 'document.versioned',
++  },
++}));
++
++jest.mock('../services/threadTokenClient', () => ({
++  mintAndRegisterThreadToken: jest.fn(async () => ({})),
++}));
++
++jest.mock('../routes/verification', () => ({
++  registerInPlatformRegistry: jest.fn(async () => undefined),
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
++    next();
++  },
++}));
++
++jest.mock('../middleware/rbac', () => ({
++  isAllowedByRoleOrScope: () => true,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    warn: () => undefined,
++    error: (...args: unknown[]) => {
++      mockState.errored.push(args);
++    },
++  },
++}));
++
++import express from 'express';
++import { documentsRouter, publicDocumentsRouter } from '../routes/documents';
++
++const app = express();
++// Same mount order as index.ts: public router first, then the auth-gated one.
++app.use('/api/documents', express.json(), publicDocumentsRouter);
++app.use('/api/documents', express.json(), documentsRouter);
++
++const DOC = 'doc-ks1868-lookup-target';
++let baseUrl = '';
++let server: ReturnType<typeof app.listen>;
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  const address = server.address();
++  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
++});
++
++afterAll(() => server?.close());
++
++beforeEach(() => {
++  mockState.toThrow = undefined;
++  mockState.errored.length = 0;
++  mockState.reads = 0;
++  mockState.writes = 0;
++});
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++/** An Error whose `message` getter succeeds and returns the (non-string) value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++/** The logged `error` field of the logger call that carries this first argument, as a string; the type name when it is not one. */
++const reasonOf = (first: string): string => {
++  const calls = mockState.errored.filter((c) => c[0] === first);
++  if (calls.length !== 1) return '<' + calls.length + ' calls>';
++  const v = (calls[0][1] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++let unhandled = 0;
++const onUnhandled = () => {
++  unhandled += 1;
++};
++beforeAll(() => {
++  process.on('unhandledRejection', onUnhandled);
++});
++afterAll(() => {
++  process.removeListener('unhandledRejection', onUnhandled);
++});
++beforeEach(() => {
++  unhandled = 0;
++});
++
++async function call(method: string, path: string, body?: unknown): Promise<{ status: number; code: string | undefined } | null> {
++  try {
++    const res = await fetch(`${baseUrl}${path}`, {
++      method,
++      headers: { 'content-type': 'application/json' },
++      body: body === undefined ? undefined : JSON.stringify(body),
++      signal: AbortSignal.timeout(1500),
++    });
++    const payload = (await res.json()) as { error?: { code?: string } };
++    return { status: res.status, code: payload.error?.code };
++  } catch {
++    return null;
++  }
++}
++
++const SIGN: [string, string, string, unknown] = ['POST', `/api/documents/${DOC}/sign`, 'Failed to sign document', { signature: 'ks1868-signature', nonce: 'ks1868-nonce' }];
++const SIGN_CERT: [string, string, string, unknown] = ['POST', `/api/documents/${DOC}/sign-cert`, 'Failed to sign document via issuer cert', {}];
++const SIGN_WALLET: [string, string, string, unknown] = ['POST', `/api/documents/${DOC}/sign-wallet`, 'Failed to sign document via wallet', { walletAddress: 'addr_test1ks1868', signature: 'ab', key: 'cd' }];
++
++async function route(r: [string, string, string, unknown], thrown: unknown, reason: string): Promise<void> {
++  mockState.toThrow = thrown;
++  expect(await call(r[0], r[1], r[3])).toEqual({ status: 500, code: 'INTERNAL_ERROR' });
++  expect(unhandled).toBe(0);
++  expect(mockState.errored).toHaveLength(1);
++  expect(reasonOf(r[2])).toBe(reason);
++  expect(mockState.reads).toBe(1);
++  expect(mockState.writes).toBe(0);
++}
++const CONSTANT = 'unreadable thrown value';
++
++describe('KS-1868 the originate document signing routes log text for a hostile thrown value', () => {
++  it('control ks1868 C1 POST /:id/sign: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(SIGN, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C2 POST /:id/sign-cert: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(SIGN_CERT, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C3 POST /:id/sign-wallet: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(SIGN_WALLET, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C4 POST /:id/sign: a thrown plain string is logged as its own text and the route answers 500', async () => {
++    await route(SIGN, 'plain boom', 'plain boom');
++  });
++
++  it('RED ks1868 R1 POST /:id/sign: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(SIGN, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R2 POST /:id/sign: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(SIGN, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R3 POST /:id/sign: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(SIGN, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++
++  it('RED ks1868 R4 POST /:id/sign-cert: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(SIGN_CERT, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R5 POST /:id/sign-cert: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(SIGN_CERT, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R6 POST /:id/sign-cert: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(SIGN_CERT, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++
++  it('RED ks1868 R7 POST /:id/sign-wallet: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(SIGN_WALLET, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R8 POST /:id/sign-wallet: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(SIGN_WALLET, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R9 POST /:id/sign-wallet: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(SIGN_WALLET, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++});
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+index 04f12bb4f..0c08f8ea0 100644
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -1282,7 +1282,13 @@ documentsRouter.post(
+         documentId: id,
+       });
+     } catch (error) {
+-      logger.error('Failed to create signing request', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to create signing request', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create signing request' } });
+     }
+   },
+@@ -1363,7 +1369,13 @@ documentsRouter.post(
+         signedAt: now,
+       });
+     } catch (error) {
+-      logger.error('Failed to sign document', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to sign document', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to sign document' } });
+     }
+   },
+@@ -3193,7 +3205,13 @@ documentsRouter.get(
+       const events = await listLifecycleEvents(id, tenantId, (req as any).db);
+       return res.json({ documentId: id, count: events.length, events });
+     } catch (error) {
+-      logger.error('Failed to list lifecycle events', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to list lifecycle events', { error: reason });
+       return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list lifecycle events' } });
+     }
+   },
+@@ -3464,8 +3482,14 @@ documentsRouter.post(
+         sigJsonUrl: `/api/documents/${newExternalId}/sig-json`,
+       });
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Failed to sign document via issuer cert', {
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       return res.status(500).json({
+         success: false,
+@@ -3653,8 +3677,14 @@ documentsRouter.post(
+         sigWallet: sigWalletEnvelope,
+       });
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Failed to sign document via wallet', {
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       return res.status(500).json({
+         success: false,
+@@ -3714,8 +3744,14 @@ publicDocumentsRouter.get(
+       res.setHeader('Content-Disposition', `inline; filename="${id}.sig.json"`);
+       return res.status(200).json(sigJson);
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Failed to get sig-json', {
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       return res.status(500).json({
+         success: false,
+diff --git a/Projects Documents/fragments/cheat/KS-1868-documents-routes.html b/Projects Documents/fragments/cheat/KS-1868-documents-routes.html
+new file mode 100644
+index 000000000..0298b5ae6
+--- /dev/null
++++ b/Projects Documents/fragments/cheat/KS-1868-documents-routes.html	
+@@ -0,0 +1,23 @@
++<h2>Six originate document routes answer 500 and log text when a thrown value is unreadable &mdash; KS-1868, originate</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The outer catch of <code>POST /:id/sign/request</code>, <code>GET /:id/lifecycle-events</code>, <code>GET /:id/sig-json</code>, <code>POST /:id/sign</code>, <code>/sign-cert</code> and <code>/sign-wallet</code> in <code>documents.ts</code> read the caught value's message with no guard. A revoked Proxy, a throwing <code>message</code> getter or a <code>BigInt</code> message made the catch itself throw: the route never answered and nothing was logged. Each read now sits in an inner try and gives <code>'unreadable thrown value'</code> or the message as a string; the route answers its usual 500.
++    </td></tr><tr><td>Two held Spark passes (O83-P2, O83-P3) applied byte for byte with strict <code>git apply --check -p1</code>. TIER 1 by the coordinator's ruling (the signing routes write before the catch). An ordinary Error and a plain string behave exactly as before. The held cells' <code>unhandledRejection</code> assertion is vacuous in this jest environment (a deliberate unhandled rejection was seen 0 times).
++    </td></tr></table>
++</div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> KS-1868 stays open (six of its 253 sites). A real database, a booted service, the signing routes with the real logger, the four platform suites, an LTS Node and any deploy were not run.
++    </td></tr></table>
++</div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest src/__tests__/ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts src/__tests__/ks1868-documents-signing-routes-message-coercion-unreadable-throw.test.ts   # 26 cells
++cd Blockchain/Dev/services/originate &amp;&amp; npm test                                        # 202 files / 2360 tests</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>26</strong> in 2 files (13 + 13); red first, by assertion: 9 of 13 in each file failed without the change, 4 and 4 controls passed</td></tr>
++<tr><td>originate unit suite</td><td>originate 200 files / 2334 tests, then 202 files / <strong>2360 tests, 2360 pass</strong></td></tr>
++<tr><td>tsc with tests</td><td><strong>0 errors before and 0 after</strong> (<code>node</code> and <code>jest</code> types); a planted type error reported once as <code>TS2322</code></td></tr>
++<tr><td>eslint</td><td>0 errors, 0 warnings on the 2 test files; a planted file raised <code>no-unused-vars</code> and <code>no-debugger</code></td></tr>
++<tr><td>base against head</td><td>12 thrown values through each of 3 lookup routes, real winston logger, 0 rule failures: BigInt message, throwing getter and revoked Proxy had no answer at base and answer 500 at head</td></tr>
++<tr><td>unhandledRejection listener</td><td>positive control saw <strong>0 of 1</strong> deliberate unhandled rejections, so the held <code>expect(unhandled).toBe(0)</code> cannot fail</td></tr>
++<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-11-02/03 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0, eslint 10.7.0; develop <code>4d1ab2cb6574</code></td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+diff --git a/Projects Documents/fragments/flow/KS-1868-documents-routes.html b/Projects Documents/fragments/flow/KS-1868-documents-routes.html
+new file mode 100644
+index 000000000..dc107a223
+--- /dev/null
++++ b/Projects Documents/fragments/flow/KS-1868-documents-routes.html	
+@@ -0,0 +1,23 @@
++<h2><!--n-->. Six originate document routes answer 500 and log text when a thrown value is unreadable (KS-1868, originate)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> Six outer catch blocks in <code>Blockchain/Dev/services/originate/src/routes/documents.ts</code> logged <code>error: error instanceof Error ? error.message : String(error)</code> with no guard: <code>POST /:id/sign/request</code>, <code>GET /:id/lifecycle-events</code>, <code>GET /:id/sig-json</code>, <code>POST /:id/sign</code>, <code>POST /:id/sign-cert</code> and <code>POST /:id/sign-wallet</code>. A revoked Proxy makes <code>instanceof</code> throw inside the catch; an Error whose <code>message</code> getter throws or returns a value that cannot be turned into text makes the read, or the logger's <code>JSON.stringify</code>, throw. The route then never answered. Each read now sits in an inner try: <code>reason = String(error instanceof Error ? error.message : error)</code>, and a throwing read gives the constant <code>'unreadable thrown value'</code>. Product bytes: <code>documents.ts</code> +42/-6, six hunks.
++    </td></tr><tr><td>Two new test files, 26 cells: <code>ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts</code> (the three lookup routes) and <code>ks1868-documents-signing-routes-message-coercion-unreadable-throw.test.ts</code> (the three signing routes), 13 cells each. Controls (C1 to C4) show an ordinary Error and a thrown plain string still answer 500 with their own text; red cells (R1 to R9) show a revoked Proxy, an Error whose message is a null-prototype object and an Error whose message is a Symbol answer 500 and log text. The patches are held Spark passes O83-P2 and O83-P3, applied byte for byte with strict <code>git apply --check -p1</code> (rc 0 on both, and rc 1 on a copy of each with one context line's content corrupted; together, forward and reversed, the same tree). The coordinator ruled the change TIER 1 (Opus gate): the three signing routes write before their catch.
++    </td></tr></table>
++<h3><!--n-->.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Red without the change, green with it, and no other cell moves.</strong></td><td> <strong>Red first, by assertion, develop <code>4d1ab2cb6574</code>:</strong> with the two test files and no product change, 9 of 13 failed in each file (R1 to R9), every one with an assertion error and none by crash; the 4 and 4 controls passed.
++    </td></tr><tr><td><strong>Whole originate unit suite</strong> (jest): originate 200 files / 2334 tests, then 202 files / <strong>2360 tests, 2360 pass</strong>.
++    </td></tr><tr><td><strong>Base against head, twelve thrown values through each lookup route</strong> (the module under test is real, with the held test's module mocks; the logger is the REAL originate winston logger, read from its Console transport; a hang is a null answer at a 1500 ms abort), judged mechanically. An ordinary Error, <code>null</code>, <code>undefined</code> and a plain string are identical at base and head. A <code>BigInt</code> message, a throwing <code>message</code> getter and a revoked Proxy gave NO ANSWER at base (the request was aborted at 1500 ms and no line was logged) and answer 500 <code>INTERNAL_ERROR</code> at head with one logged line; a null, undefined, number, Symbol or cyclic message already answered 500 and now logs a string (<code>"null"</code>, <code>"42"</code>, <code>"Symbol(sym)"</code>, <code>"[object Object]"</code>). 0 rule failures. The three signing routes were NOT recorded this way; they rest on the held cells (below).
++    </td></tr></table>
++<h3><!--n-->.2 What changes for callers and for the held tests' unhandled-rejection check</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Hostile thrown values only; a normal error is logged and answered exactly as before.</strong></td><td> The three signing routes share their catch with later steps of each route: <code>sign</code> writes with <code>updateDocument</code> before it, and <code>sign-cert</code> and <code>sign-wallet</code> write with <code>saveDocument</code>. A hostile value thrown after such a write now gets the same constant 500 an ordinary Error gets at that step; the write stays written, as it does for an ordinary Error (read, not run).
++    </td></tr><tr><td><strong>The held cells' <code>expect(unhandled).toBe(0)</code> is vacuous in this jest environment (measured).</strong> The operator flagged as unmeasured whether <code>process.on('unhandledRejection')</code> fires here. A positive control, a deliberately unhandled rejection made inside the same environment with the same listener, was seen <strong>0 times</strong> (jest-circus reported it as the cell's own failure instead), so that assertion cannot fail. The hang is established by the null answer at the abort, not by the listener.
++    </td></tr></table>
++<h3><!--n-->.3 Environment and figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-11-02/03 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats.</strong></td><td> Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0, eslint 10.7.0; develop <code>4d1ab2cb6574</code> for the base. <code>tsc</code> with the test files in the program (the service tsconfig excludes them; <code>node</code> and <code>jest</code> types), a planted type error reported once as <code>TS2322</code>: <strong>0 errors before and 0 after</strong>. eslint on the two test files: 0 errors, 0 warnings, and a planted file raised <code>no-unused-vars</code> and <code>no-debugger</code>. Originate is not one of the services the test-types ratchet names.
++    </td></tr></table>
++<h3><!--n-->.4 What this does not prove</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Six catch blocks, not the ticket.</strong></td><td> KS-1868 stays open: it lists 253 catch and log sites that read a thrown value unguarded; this change covers six, in originate's document routes. The other sites are not touched. The goldens are operator-authored: whether a real thrown value of this kind occurs is not shown here.
++    </td></tr><tr><td>Not run: a real Postgres, a booted originate service, the three signing routes with the real logger, a hostile value after a write on a real database, the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), Node 24 or any LTS Node, any deploy.
++    </td></tr></table>
++<h3><!--n-->.5 Running it</h3>
++<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest src/__tests__/ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts src/__tests__/ks1868-documents-signing-routes-message-coercion-unreadable-throw.test.ts   # 26 cells
++cd Blockchain/Dev/services/originate &amp;&amp; npm test                                        # 202 files / 2360 tests</code></pre>

@@ -1,0 +1,130 @@
+diff --git a/Blockchain/Dev/services/timestamping/src/db.ts b/Blockchain/Dev/services/timestamping/src/db.ts
+--- a/Blockchain/Dev/services/timestamping/src/db.ts
++++ b/Blockchain/Dev/services/timestamping/src/db.ts
+@@ -96,6 +96,13 @@
+     return { ok: dbAvailable };
+   } catch (err: any) {
+     dbAvailable = false;
+-    return { ok: false, error: err?.message };
++    let reason: string | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? undefined : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    return { ok: false, error: reason };
+   }
+ }
+diff --git a/Blockchain/Dev/services/timestamping/src/__tests__/ks1868-timestamping-db-probe-db-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/timestamping/src/__tests__/ks1868-timestamping-db-probe-db-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/timestamping/src/__tests__/ks1868-timestamping-db-probe-db-catch-unreadable-throw.test.ts
+@@ -0,0 +1,107 @@
++import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
++
++// KS-1868 (operator 92 screen, timestamping db module): the catch of probeDb (line 99) of services/timestamping/src/db.ts returns `{ ok: false, error: err?.message }`, unguarded.
++// `?.` guards null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch throw, so
++// probeDb REJECTS: initDb rejects at boot instead of resolving false, and a failed background re-probe rejects inside the retry timer (an unhandled rejection
++// that also ends the retry chain, so the service stays degraded for good); an Error whose message is not a string (a Symbol) is handed to JSON.stringify
++// uncoerced and silently dropped from the line. The cells make the probe query reject with such a value and assert initDb resolves false and the unavailable
++// line carries text (the constant when the value cannot be turned into text). Harness: the real module with pg replaced by a plain stand-in Pool (its query
++// rejects with the value) and console.log replaced by a plain recording function (no database).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  lines: [] as string[],
++}));
++
++vi.mock('pg', () => ({
++  Pool: function PoolMock() {
++    return {
++      query: (..._args: unknown[]) => Promise.reject(h.toThrow),
++      on: (_event: string, _fn: (e: unknown) => void) => undefined,
++      end: async () => undefined,
++      connect: async () => undefined,
++    };
++  },
++}));
++
++type Db = typeof import('../db');
++const realLog = console.log;
++const realUrl = process.env.DATABASE_URL;
++afterAll(() => {
++  console.log = realLog;
++  if (realUrl === undefined) delete process.env.DATABASE_URL;
++  else process.env.DATABASE_URL = realUrl;
++});
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.lines.length = 0;
++  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
++  console.log = (...args: unknown[]) => {
++    if (typeof args[0] === 'string') h.lines.push(args[0]);
++  };
++});
++
++async function freshDb(): Promise<Db> {
++  vi.resetModules();
++  return import('../db');
++}
++async function init(value: unknown): Promise<{ ok: boolean; value: boolean | undefined }> {
++  h.toThrow = value;
++  const db = await freshDb();
++  try {
++    const v = await db.initDb();
++    await db.closeDb();
++    return { ok: true, value: v };
++  } catch {
++    await db.closeDb();
++    return { ok: false, value: undefined };
++  }
++}
++const LINE = (message: string): Record<string, unknown>[] =>
++  h.lines.map((l) => JSON.parse(l) as Record<string, unknown>).filter((o) => o.message === message);
++const UNAVAILABLE = 'Database unavailable — using in-memory fallback until it comes up, retrying in background (KS-377)';
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the timestamping availability probe survives and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the probe query resolves initDb false and is logged with its message', async () => {
++    expect(await init(new Error('probe boom'))).toEqual({ ok: true, value: false });
++    expect(LINE(UNAVAILABLE)).toHaveLength(1);
++    expect(reasonOf(LINE(UNAVAILABLE)[0])).toBe('probe boom');
++  });
++  it('control ks1868 C2: a plain string from the probe query resolves initDb false and is logged without a message', async () => {
++    expect(await init('plain boom')).toEqual({ ok: true, value: false });
++    expect(LINE(UNAVAILABLE)).toHaveLength(1);
++    expect(reasonOf(LINE(UNAVAILABLE)[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1: a revoked Proxy from the probe query resolves initDb false and is logged as text, as for an ordinary Error', async () => {
++    expect(await init(revokedProxy())).toEqual({ ok: true, value: false });
++    expect(LINE(UNAVAILABLE)).toHaveLength(1);
++    expect(reasonOf(LINE(UNAVAILABLE)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message is a Symbol from the probe query resolves initDb false and is logged as text, as for an ordinary Error', async () => {
++    expect(await init(withMessage(Symbol('ks1868')))).toEqual({ ok: true, value: false });
++    expect(LINE(UNAVAILABLE)).toHaveLength(1);
++    expect(reasonOf(LINE(UNAVAILABLE)[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R3: an Error whose message getter throws from the probe query resolves initDb false and is logged as text, as for an ordinary Error', async () => {
++    expect(await init(getterThrows())).toEqual({ ok: true, value: false });
++    expect(LINE(UNAVAILABLE)).toHaveLength(1);
++    expect(reasonOf(LINE(UNAVAILABLE)[0])).toBe('unreadable thrown value');
++  });
++});

@@ -1,0 +1,134 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/userErasedSubscriber.ts b/Blockchain/Dev/services/m365-integration/src/userErasedSubscriber.ts
+--- a/Blockchain/Dev/services/m365-integration/src/userErasedSubscriber.ts
++++ b/Blockchain/Dev/services/m365-integration/src/userErasedSubscriber.ts
+@@ -41,5 +41,12 @@
+       });
+     })
+     .catch((err) => {
+-      log('[cascade] subscriber loop terminated', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('[cascade] subscriber loop terminated', { error: reason });
+     });
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-user-erased-subscriber-loop-closed-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-user-erased-subscriber-loop-closed-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-user-erased-subscriber-loop-closed-catch-unreadable-throw.test.ts
+@@ -0,0 +1,112 @@
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++
++// KS-1868 (operator 91 screen, m365-integration user.erased subscriber): the `.catch` that closes the subscription of
++// startUserErasedSubscriber in services/m365-integration/src/userErasedSubscriber.ts logs `{ error: err?.message }` with the read
++// INSIDE the log call's arguments, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter
++// throws) makes that catch handler itself throw, so the promise it returns rejects with nothing to handle it (an unhandled
++// rejection, which ends a Node process by default) and the line is never logged; an Error whose message is readable but not a
++// string (a Symbol) is handed to the log uncoerced. The cells make the subscription reject with such a value and assert no
++// unhandled rejection and a logged line that carries text (the constant when the value cannot be turned into text). Harness: the real
++// subscriber with the event bus replaced by a plain stand-in whose `subscribe` rejects with the value, and a plain recording
++// function for the log (no Redis).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logged: [] as unknown[][],
++  unhandled: 0,
++}));
++
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const actual = await importOriginal<Record<string, unknown>>();
++  return {
++    ...actual,
++    initEventBus: () => undefined,
++    getEventBus: () => ({
++      subscribe: () => Promise.reject(h.toThrow),
++    }),
++  };
++});
++
++import { startUserErasedSubscriber } from '../userErasedSubscriber';
++
++const LOOP = '[cascade] subscriber loop terminated';
++const SAVED_LISTENERS = process.listeners('unhandledRejection');
++const onUnhandled = () => {
++  h.unhandled += 1;
++};
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logged.length = 0;
++  h.unhandled = 0;
++  process.env.REDIS_URL = 'redis://stub.invalid:6379';
++  process.removeAllListeners('unhandledRejection');
++  process.on('unhandledRejection', onUnhandled);
++});
++afterEach(() => {
++  process.removeListener('unhandledRejection', onUnhandled);
++  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
++});
++
++async function run(value: unknown): Promise<{ unhandled: number }> {
++  h.toThrow = value;
++  await startUserErasedSubscriber((msg: string, ctx?: Record<string, unknown>) => {
++    h.logged.push([msg, ctx]);
++  });
++  await new Promise<void>((resolve) => setTimeout(resolve, 25));
++  return { unhandled: h.unhandled };
++}
++const LINES = () => h.logged.filter((c) => c[0] === LOOP);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (c: unknown[] | undefined): string => {
++  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the subscription-closed catch logs text and raises no unhandled rejection for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error closing the subscription raises no unhandled rejection and is logged with its message', async () => {
++    expect(await run(new Error('stream closed'))).toEqual({ unhandled: 0 });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('stream closed');
++  });
++  it('control ks1868 C2: a thrown plain string raises no unhandled rejection and is logged without a message', async () => {
++    expect(await run('plain boom')).toEqual({ unhandled: 0 });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C3: an Error with an empty message raises no unhandled rejection and is logged with the empty text', async () => {
++    expect(await run(new Error(''))).toEqual({ unhandled: 0 });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('');
++  });
++  it('RED ks1868 R1: a revoked Proxy closing the subscription raises no unhandled rejection and is logged as text, as for an ordinary Error', async () => {
++    expect(await run(revokedProxy())).toEqual({ unhandled: 0 });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws raises no unhandled rejection and is logged as text, as for an ordinary Error', async () => {
++    expect(await run(getterThrows())).toEqual({ unhandled: 0 });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: an Error whose message is a Symbol raises no unhandled rejection and is logged as text, as for an ordinary Error', async () => {
++    expect(await run(withMessage(Symbol('ks1868')))).toEqual({ unhandled: 0 });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('Symbol(ks1868)');
++  });
++});

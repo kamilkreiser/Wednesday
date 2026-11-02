@@ -1,0 +1,115 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+
+// KS-1868 (operator 92 screen, transfer index): the catch of loadFromDb (line 327) of services/transfer/src/index.ts passes `err?.message` straight into the
+// log line's meta object, unguarded. `?.` guards null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error whose message getter
+// throws) makes the catch throw, so loadFromDb REJECTS, and with it the DB boot task (`runDbBootTasks`) that the database module runs on its ready path, where an
+// ordinary Error is logged and loadFromDb resolves (the service starts with empty in-memory state); an Error whose message is readable but not a string
+// (a Symbol) is handed to JSON.stringify uncoerced and silently dropped from the line. The cells make the load query reject with such a value and assert loadFromDb
+// resolves and the line carries text (the constant when the value cannot be turned into text). Harness: the real index.ts (it listens on an ephemeral port at
+// import) with `./db` replaced by a stand-in that is available, never settles `initDb` and rejects the load query once the cell arms it, and console.log by a plain
+// recording function (no database, no network).
+const h = vi.hoisted(() => {
+  process.env.PORT = '0';
+  return {
+    toThrow: undefined as unknown,
+    armed: false,
+    lines: [] as string[],
+  };
+});
+
+vi.mock('../db', () => ({
+  initDb: () => new Promise<boolean>(() => {}),
+  isDbAvailable: () => true,
+  closeDb: async () => undefined,
+  query: (..._args: unknown[]) => (h.armed ? Promise.reject(h.toThrow) : Promise.resolve({ rows: [], rowCount: 0 })),
+}));
+
+const realLog = console.log;
+type Idx = typeof import('../index');
+let loadFromDb: Idx['loadFromDb'];
+
+beforeAll(async () => {
+  console.log = (...args: unknown[]) => {
+    if (typeof args[0] === 'string') h.lines.push(args[0]);
+  };
+  ({ loadFromDb } = await import('../index'));
+});
+afterAll(() => {
+  console.log = realLog;
+});
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.armed = false;
+  h.lines.length = 0;
+});
+
+const LOAD = 'Failed to load from DB — starting with empty in-memory state';
+const LINE = (): Record<string, unknown>[] =>
+  h.lines
+    .map((l) => {
+      try {
+        return JSON.parse(l) as Record<string, unknown>;
+      } catch {
+        return {} as Record<string, unknown>;
+      }
+    })
+    .filter((o) => o.message === LOAD);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
+
+async function load(value: unknown): Promise<{ threw: boolean }> {
+  h.toThrow = value;
+  h.armed = true;
+  try {
+    await loadFromDb();
+    return { threw: false };
+  } catch {
+    return { threw: true };
+  } finally {
+    h.armed = false;
+  }
+}
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 the transfer loadFromDb catch resolves and logs text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from the load query is logged with its message and loadFromDb resolves', async () => {
+    expect(await load(new Error('db boom'))).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('db boom');
+  });
+  it('control ks1868 C2: a thrown plain string is logged without a message and loadFromDb resolves', async () => {
+    expect(await load('plain boom')).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: a revoked Proxy from the load query is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await load(revokedProxy())).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an Error whose message is a Symbol from the load query is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await load(withMessage(Symbol('ks1868')))).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: an Error whose message getter throws from the load query is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await load(getterThrows())).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('unreadable thrown value');
+  });
+});

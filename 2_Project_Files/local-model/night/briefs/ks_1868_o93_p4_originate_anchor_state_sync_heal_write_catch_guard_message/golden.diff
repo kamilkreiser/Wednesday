@@ -1,0 +1,142 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+--- a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
++++ b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+@@ -597,7 +597,13 @@
+       logger.info('Verify heal: anchor state confirmed through the resolver (KS-584, KS-1384 R2b)', { documentId: input.documentId, anchorId, txHash: d.tx, via: d.via, written });
+     } catch (err: unknown) {
+       // Presentation already has the decision; the write is convergence, and the reconcile and the poller are the catch-all.
+-      logger.warn('Verify heal: the confirmed write failed (presentation unaffected)', { documentId: input.documentId, error: err instanceof Error ? err.message : String(err) });
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('Verify heal: the confirmed write failed (presentation unaffected)', { documentId: input.documentId, error: reason });
+     }
+   }
+   return healed;
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-anchor-state-sync-heal-write-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-anchor-state-sync-heal-write-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-anchor-state-sync-heal-write-catch-unreadable-throw.test.ts
+@@ -0,0 +1,119 @@
++// KS-1868 (operator 93 screen, originate anchorStateSync): the catch around the confirmed write of healAnchorForVerify (line 600) of
++// services/originate/src/services/anchorStateSync.ts reads `err instanceof Error ? err.message : String(err)` inside the logger call's arguments, unguarded.
++// A thrown value whose read throws (a revoked Proxy: `instanceof` throws; an Error whose message getter throws) makes the catch throw, so
++// healAnchorForVerify REJECTS and the verify presents nothing, where an ordinary Error is logged ("presentation unaffected") and the healed blob is
++// returned for presentation;  The cells make the
++// conditional blob write reject with such a value and assert the verify resolves with the confirmed blob and the line carries text (the constant
++// when the value cannot be turned into text). Harness: the ks1384 verify-heals suite (same mocks and fetch stand-in); the write stand-in is a plain
++// function, not jest.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy before the code under test saw it.
++const mockState: { toThrow: unknown; warned: unknown[][]; writes: number } = { toThrow: undefined, warned: [], writes: 0 };
++
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: async () => null,
++  updateDocument: async () => {
++    throw new Error('updateDocument must not be called by a heal');
++  },
++  writeAnchorBlobIf: (..._a: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.reject(mockState.toThrow);
++  },
++}));
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    error: () => undefined,
++    warn: (...args: unknown[]) => {
++      mockState.warned.push(args);
++    },
++  },
++}));
++
++import { healAnchorForVerify } from '../services/anchorStateSync';
++import { verifyHealFetch } from './helpers/verifyHealFetch';
++
++const DOC = 'doc-ks1868-heal-write';
++const PK = '7c1868b2-0000-4000-8000-0000000000a5';
++const TENANT = 'a0000000-0000-4000-8000-000000000001';
++const TX_OLD = '0a'.repeat(32);
++const TX_CREATE = 'c1'.repeat(32);
++const T_CREATE = '2026-10-31T10:00:00.000Z';
++const OLD = '2026-10-31T09:00:00.000Z';
++const realFetch = global.fetch;
++
++beforeEach(() => {
++  mockState.toThrow = undefined;
++  mockState.warned.length = 0;
++  mockState.writes = 0;
++  const f = verifyHealFetch({
++    row: { id: 'anchor_v', documentId: DOC, status: 'failed', transactionHash: null, errorMessage: 'All inputs are spent' },
++    ownCreate: { outcome: 'found', bound: { tx: TX_CREATE, blockNumber: 4242 }, loose: [] },
++  });
++  global.fetch = f.fetch as unknown as typeof fetch;
++});
++afterAll(() => {
++  global.fetch = realFetch;
++});
++
++const WRITE_FAILED = 'Verify heal: the confirmed write failed (presentation unaffected)';
++const LINE = (): Record<string, unknown>[] =>
++  mockState.warned.filter((a) => a[0] === WRITE_FAILED).map((a) => a[1] as Record<string, unknown>);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
++
++async function heal(value: unknown): Promise<{ threw: boolean; status: unknown; txHash: unknown }> {
++  mockState.toThrow = value;
++  try {
++    const presented = (await healAnchorForVerify({
++      documentId: DOC,
++      documentPk: PK,
++      tenantId: TENANT,
++      blob: { status: 'pending', txHash: TX_OLD, anchorId: 'anchor_v', createAttempts: [T_CREATE], blockHeight: null, anchoredAt: T_CREATE },
++      contentHash: 'a'.repeat(64),
++      updatedAt: OLD,
++      authHeader: 'Bearer v',
++      write: true,
++    })) as Record<string, unknown> | null;
++    return { threw: false, status: presented?.status, txHash: presented?.txHash };
++  } catch {
++    return { threw: true, status: undefined, txHash: undefined };
++  }
++}
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the healAnchorForVerify write catch presents the healed blob and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the write is logged with its message and the verify presents the confirmed blob', async () => {
++    expect(await heal(new Error('write boom'))).toEqual({ threw: false, status: 'confirmed', txHash: TX_CREATE });
++    expect(mockState.writes).toBe(1);
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('write boom');
++  });
++  it('control ks1868 C2: a thrown plain string is logged as its text and the verify presents the confirmed blob', async () => {
++    expect(await heal('plain boom')).toEqual({ threw: false, status: 'confirmed', txHash: TX_CREATE });
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('plain boom');
++  });
++  it('RED ks1868 R1: a revoked Proxy from the write is logged as text and the verify presents the confirmed blob, as for an ordinary Error', async () => {
++    expect(await heal(revokedProxy())).toEqual({ threw: false, status: 'confirmed', txHash: TX_CREATE });
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws from the write is logged as text and the verify presents the confirmed blob, as for an ordinary Error', async () => {
++    expect(await heal(getterThrows())).toEqual({ threw: false, status: 'confirmed', txHash: TX_CREATE });
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('unreadable thrown value');
++  });
++});

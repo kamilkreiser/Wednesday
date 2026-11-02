@@ -1,0 +1,114 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+
+// KS-1868 (operator 93 screen, prism index): the catch of loadFromDb (line 292) of services/prism/src/index.ts passes `err?.message` straight into the
+// warn line's meta object, unguarded. `?.` guards null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error whose message getter
+// throws) makes the catch throw, so loadFromDb REJECTS, and with it the ready hook that the database module runs on its ready path (initDb(loadFromDb)),
+// where an ordinary Error is logged and loadFromDb resolves (the credential cache stays empty); an Error whose message is readable but not a string (a
+// Symbol) is handed to the logger uncoerced and silently dropped from the line. The cells make the credentials query reject with such a value and assert
+// loadFromDb resolves and the line carries text (the constant when the value cannot be turned into text). Harness: the real index.ts (it listens on an
+// ephemeral port at import) with `./db` replaced by a stand-in that is available, hands the ready hook over (initDb never settles) and rejects the
+// credentials query once the cell arms it, and the service logger replaced by a plain recording object (no database, no network).
+const h = vi.hoisted(() => {
+  process.env.PORT = '0';
+  return {
+    hook: undefined as undefined | (() => Promise<void>),
+    toThrow: undefined as unknown,
+    armed: false,
+    warned: [] as unknown[][],
+  };
+});
+
+vi.mock('../db', () => ({
+  initDb: (hook: () => Promise<void>) => {
+    h.hook = hook;
+    return new Promise<boolean>(() => {});
+  },
+  isDbAvailable: () => true,
+  closeDb: async () => undefined,
+  query: (..._args: unknown[]) => (h.armed ? Promise.reject(h.toThrow) : Promise.resolve({ rows: [], rowCount: 0 })),
+}));
+
+vi.mock('../utils/logger', () => ({
+  logger: {
+    info: () => undefined,
+    debug: () => undefined,
+    error: () => undefined,
+    warn: (...args: unknown[]) => {
+      h.warned.push(args);
+    },
+  },
+}));
+
+beforeAll(async () => {
+  await import('../index');
+});
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.armed = false;
+  h.warned.length = 0;
+});
+afterAll(() => {
+  h.armed = false;
+});
+
+const LOAD = 'Failed to load credentials from DB';
+const LINE = (): Record<string, unknown>[] => h.warned.filter((a) => a[0] === LOAD).map((a) => a[1] as Record<string, unknown>);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
+
+async function load(value: unknown): Promise<{ threw: boolean }> {
+  h.toThrow = value;
+  h.armed = true;
+  try {
+    await (h.hook as () => Promise<void>)();
+    return { threw: false };
+  } catch {
+    return { threw: true };
+  } finally {
+    h.armed = false;
+  }
+}
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 the prism loadFromDb catch resolves and logs text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from the credentials query is logged with its message and loadFromDb resolves', async () => {
+    expect(await load(new Error('db boom'))).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('db boom');
+  });
+  it('control ks1868 C2: a thrown plain string is logged without a message and loadFromDb resolves', async () => {
+    expect(await load('plain boom')).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: a revoked Proxy from the credentials query is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await load(revokedProxy())).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an Error whose message is a Symbol from the credentials query is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await load(withMessage(Symbol('ks1868')))).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: an Error whose message getter throws from the credentials query is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await load(getterThrows())).toEqual({ threw: false });
+    expect(LINE()).toHaveLength(1);
+    expect(reasonOf(LINE()[0])).toBe('unreadable thrown value');
+  });
+});

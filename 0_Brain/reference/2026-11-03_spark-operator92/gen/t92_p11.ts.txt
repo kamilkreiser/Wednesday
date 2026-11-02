@@ -1,0 +1,130 @@
+import { describe, it, expect, afterAll, beforeEach, afterEach, vi } from 'vitest';
+import type { RequestHandler } from 'express';
+
+// KS-1868 (operator 92 screen, timestamping index): the catch of ensureTable (line 120) of services/timestamping/src/index.ts passes `err?.message` straight into
+// the log line's meta object, unguarded. `?.` guards null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error whose message getter
+// throws) makes the catch throw, so ensureTable REJECTS and the failure is attributed to its caller (the readiness check logs a TypeError as 'DB verification
+// failed' and the 'Failed to ensure ts_timestamps table' line is never written) where an ordinary Error is logged by ensureTable itself and the table creation
+// is retried on the next call; an Error whose message is readable but not a string (a Symbol) is handed to JSON.stringify uncoerced and silently dropped from the
+// line. The cells make the table-creation statement reject with such a value while the service boots (the boot readiness check calls ensureTable first) and
+// assert the line is logged by ensureTable with text (the constant when the value cannot be turned into text) and no unhandled rejection is raised. Harness: the
+// real index.ts (a fresh copy per cell; it listens on an ephemeral port at import); `./db` is a stand-in that is available, answers the schema-privilege probe yes and rejects the CREATE TABLE statement;
+// the shared JWT check is a pass-through; console.log is a plain recording function (no database, no network).
+const h = vi.hoisted(() => {
+  process.env.PORT = '0';
+  return {
+    toThrow: undefined as unknown,
+    lines: [] as string[],
+    unhandled: 0,
+  };
+});
+
+vi.mock('../db', () => ({
+  initDb: async () => true,
+  isDbAvailable: () => true,
+  closeDb: async () => undefined,
+  query: (sql: string, ..._args: unknown[]) =>
+    String(sql).includes('has_schema_privilege')
+      ? Promise.resolve({ rows: [{ ok: true }] })
+      : String(sql).includes('CREATE TABLE')
+        ? Promise.reject(h.toThrow)
+        : Promise.resolve({ rows: [{ count: '0' }] }),
+}));
+vi.mock('@secuura/shared', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  authenticate: () => ((_req, _res, next) => next()) as RequestHandler,
+}));
+
+const realLog = console.log;
+const SAVED_LISTENERS = process.listeners('unhandledRejection');
+const onUnhandled = () => {
+  h.unhandled += 1;
+};
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.lines.length = 0;
+  h.unhandled = 0;
+  process.removeAllListeners('unhandledRejection');
+  process.on('unhandledRejection', onUnhandled);
+  console.log = (...args: unknown[]) => {
+    if (typeof args[0] === 'string') h.lines.push(args[0]);
+  };
+});
+afterEach(() => {
+  console.log = realLog;
+  process.removeListener('unhandledRejection', onUnhandled);
+  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
+});
+afterAll(() => {
+  console.log = realLog;
+});
+
+const ENSURE = 'Failed to ensure ts_timestamps table';
+const LINE = (message: string): Record<string, unknown>[] =>
+  h.lines
+    .map((l) => {
+      try {
+        return JSON.parse(l) as Record<string, unknown>;
+      } catch {
+        return {} as Record<string, unknown>;
+      }
+    })
+    .filter((o) => o.message === message);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
+
+async function boot(value: unknown): Promise<{ unhandled: number }> {
+  h.toThrow = value;
+  vi.resetModules();
+  await import('../index');
+  for (let i = 0; i < 100 && !h.lines.some((l) => l.includes('Timestamping Service started')); i++) {
+    await new Promise<void>((resolve) => setTimeout(resolve, 20));
+  }
+  await new Promise<void>((resolve) => setTimeout(resolve, 25));
+  return { unhandled: h.unhandled };
+}
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 the timestamping ensureTable catch logs text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from the table creation is logged by ensureTable with its message', async () => {
+    expect(await boot(new Error('ddl boom'))).toEqual({ unhandled: 0 });
+    expect(LINE(ENSURE)).toHaveLength(1);
+    expect(reasonOf(LINE(ENSURE)[0])).toBe('ddl boom');
+  });
+  it('control ks1868 C2: a thrown plain string is logged by ensureTable without a message', async () => {
+    expect(await boot('plain boom')).toEqual({ unhandled: 0 });
+    expect(LINE(ENSURE)).toHaveLength(1);
+    expect(reasonOf(LINE(ENSURE)[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: a revoked Proxy from the table creation is logged by ensureTable as text, as for an ordinary Error', async () => {
+    expect(await boot(revokedProxy())).toEqual({ unhandled: 0 });
+    expect(LINE(ENSURE)).toHaveLength(1);
+    expect(reasonOf(LINE(ENSURE)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an Error whose message is a Symbol from the table creation is logged by ensureTable as text, as for an ordinary Error', async () => {
+    expect(await boot(withMessage(Symbol('ks1868')))).toEqual({ unhandled: 0 });
+    expect(LINE(ENSURE)).toHaveLength(1);
+    expect(reasonOf(LINE(ENSURE)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: an Error whose message getter throws from the table creation is logged by ensureTable as text, as for an ordinary Error', async () => {
+    expect(await boot(getterThrows())).toEqual({ unhandled: 0 });
+    expect(LINE(ENSURE)).toHaveLength(1);
+    expect(reasonOf(LINE(ENSURE)[0])).toBe('unreadable thrown value');
+  });
+});

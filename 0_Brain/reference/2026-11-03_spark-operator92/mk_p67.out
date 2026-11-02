@@ -1,0 +1,85 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p6_wallet_connector_server_session_save_get_disconnect_list_db_catches_guard_message
+diff --git a/Blockchain/Dev/services/wallet-connector/src/server.ts b/Blockchain/Dev/services/wallet-connector/src/server.ts
+--- a/Blockchain/Dev/services/wallet-connector/src/server.ts
++++ b/Blockchain/Dev/services/wallet-connector/src/server.ts
+@@ -64,6 +64,13 @@
+       [s.sessionId, s.walletType, s.address, s.connected, s.connectedAt]
+     );
+   } catch (err: any) {
+-    logger.error('DB save session failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB save session failed', { error: reason });
+   }
+ }
+@@ -186,6 +193,13 @@
+         memConnectedWallets.set(sessionId, session);
+       }
+     } catch (err: any) {
+-      logger.error('DB get session failed', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB get session failed', { error: reason });
+     }
+   }
+@@ -214,6 +228,13 @@
+     try {
+       await query('UPDATE svc_wallet_sessions SET connected = false WHERE id = $1', [sessionId]);
+     } catch (err: any) {
+-      logger.error('DB disconnect session failed', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB disconnect session failed', { error: reason });
+     }
+   }
+@@ -298,6 +319,13 @@
+         memConnectedWallets.set(row.id, session);
+       }
+     } catch (err: any) {
+-      logger.error('DB list sessions failed', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB list sessions failed', { error: reason });
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o92_p7_staking_verify_db_ready_catch_guard_message
+diff --git a/Blockchain/Dev/services/staking/src/routes/stake.ts b/Blockchain/Dev/services/staking/src/routes/stake.ts
+--- a/Blockchain/Dev/services/staking/src/routes/stake.ts
++++ b/Blockchain/Dev/services/staking/src/routes/stake.ts
+@@ -145,6 +145,13 @@
+     poolStats.totalStaked = Number(row.total);
+     logger.info(`[Staking] DB ready — ${poolStats.stakerCount} stake positions (total staked: ${poolStats.totalStaked})`);
+   } catch (err: any) {
+-    logger.error('[Staking] Failed to verify DB readiness for stake positions', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('[Staking] Failed to verify DB readiness for stake positions', { error: reason });
+   }
+ }
+

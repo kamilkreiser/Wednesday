@@ -1,0 +1,28 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o93_p1_m365_sharepoint_download_and_hash_item_catch_guard_message
+diff --git a/Blockchain/Dev/services/m365-integration/src/sharepoint/client.ts b/Blockchain/Dev/services/m365-integration/src/sharepoint/client.ts
+--- a/Blockchain/Dev/services/m365-integration/src/sharepoint/client.ts
++++ b/Blockchain/Dev/services/m365-integration/src/sharepoint/client.ts
+@@ -234,7 +234,21 @@
+       lastModified: item.lastModifiedDateTime,
+     };
+   } catch (err: any) {
+-    logger.warn('[Graph] downloadAndHashItem failed', { error: err?.message, cause: err?.cause?.message, code: err?.cause?.code, itemId });
++    let reason: string | null | undefined;
++    let cause: string | null | undefined;
++    let code: unknown;
++    try {
++      const m = err?.message;
++      const cm = err?.cause?.message;
++      reason = m === undefined || m === null ? m : String(m);
++      cause = cm === undefined || cm === null ? cm : String(cm);
++      code = err?.cause?.code;
++    } catch {
++      reason = 'unreadable thrown value';
++      cause = undefined;
++      code = undefined;
++    }
++    logger.warn('[Graph] downloadAndHashItem failed', { error: reason, cause, code, itemId });
+     return null;
+   }
+ }
+

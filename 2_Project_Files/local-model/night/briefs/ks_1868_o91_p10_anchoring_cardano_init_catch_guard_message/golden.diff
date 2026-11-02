@@ -1,0 +1,148 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/cardano/index.ts b/Blockchain/Dev/services/anchoring/src/cardano/index.ts
+--- a/Blockchain/Dev/services/anchoring/src/cardano/index.ts
++++ b/Blockchain/Dev/services/anchoring/src/cardano/index.ts
+@@ -112,7 +112,14 @@
+     logger.info(`[Cardano] Integration ready — network: ${network}`);
+     return true;
+   } catch (err: any) {
+-    logger.error(`[Cardano] Initialisation failed: ${err?.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error(`[Cardano] Initialisation failed: ${reason}`);
+     return false;
+   }
+ }
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-cardano-init-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-cardano-init-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-cardano-init-catch-unreadable-throw.test.ts
+@@ -0,0 +1,124 @@
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++
++// KS-1868 (operator 91 screen, anchoring cardano module): the initialisation catch of initCardano (line 115) of
++// services/anchoring/src/cardano/index.ts interpolates `err?.message` into the logger.error template, unguarded.
++// A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch itself throw:
++// initCardano REJECTS to its boot caller (index.ts, `await initCardano(...)`) instead of logging and answering false (real
++// minting unavailable, `cardanoConfigured` already recorded as true so /health can say "configured but not ready"); an Error
++// whose message is readable but not a string is interpolated by the template literal, which throws for a Symbol. The cells
++// make the Blockfrost provider initialisation throw such a value and assert initCardano resolves false and the logged line
++// carries text (the constant when the value cannot be turned into text). Harness: the real module with ./provider, ./wallet,
++// ./transaction, ./confirmation, the mock provider, the wallet view and spend modules and the attempt-family module replaced by
++// plain stand-ins and the logger by a plain recording object (no Blockfrost, no wallet).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  errors: [] as unknown[][],
++}));
++
++vi.mock('../cardano/provider', () => ({
++  initProvider: () => {
++    throw h.toThrow;
++  },
++  fetchProtocolParams: async () => ({}),
++  fetchUtxosAll: async () => [],
++  fetchLiveTip: async () => null,
++  getTransaction: async () => null,
++  submitTransaction: async () => 'hash',
++}));
++vi.mock('../cardano/wallet', () => ({ initWallet: () => ({ address: 'addr_test1stub' }) }));
++vi.mock('../cardano/transaction', () => ({ buildAnchorTransaction: async () => ({}) }));
++vi.mock('../cardano/confirmation', () => ({ waitForConfirmation: async () => ({}) }));
++vi.mock('../mocks/mockProvider', () => ({ MockAnchoringProvider: class MockAnchoringProviderStub {} }));
++vi.mock('../walletView', () => ({ platformWalletView: () => ({}) }));
++vi.mock('../walletSpend', () => ({ spendFromView: () => ({}), payloadDigest: () => 'digest' }));
++vi.mock('../attemptFamily', () => ({ platformBootArm: { observe: () => undefined } }));
++vi.mock('../utils/logger', () => {
++  const rec = (message: string) => {
++    h.errors.push([message]);
++  };
++  return { logger: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: rec } };
++});
++
++import { initCardano } from '../cardano';
++
++const PREFIX = '[Cardano] Initialisation failed: ';
++const realKey = process.env.BLOCKFROST_API_KEY;
++const realMnemonic = process.env.PLATFORM_WALLET_MNEMONIC;
++const realDemo = process.env.DEMO_MODE;
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.errors.length = 0;
++  delete process.env.DEMO_MODE;
++  process.env.BLOCKFROST_API_KEY = 'preprodStubKey';
++  process.env.PLATFORM_WALLET_MNEMONIC = 'stub mnemonic words';
++});
++afterEach(() => {
++  if (realKey === undefined) delete process.env.BLOCKFROST_API_KEY;
++  else process.env.BLOCKFROST_API_KEY = realKey;
++  if (realMnemonic === undefined) delete process.env.PLATFORM_WALLET_MNEMONIC;
++  else process.env.PLATFORM_WALLET_MNEMONIC = realMnemonic;
++  if (realDemo === undefined) delete process.env.DEMO_MODE;
++  else process.env.DEMO_MODE = realDemo;
++});
++
++async function run(value: unknown): Promise<{ ok: boolean; value: boolean | undefined }> {
++  h.toThrow = value;
++  try {
++    return { ok: true, value: await initCardano('preprod') };
++  } catch {
++    return { ok: false, value: undefined };
++  }
++}
++const LINES = () => h.errors.filter((a) => typeof a[0] === 'string' && (a[0] as string).startsWith(PREFIX));
++/** The text after the prefix of the logged line. */
++const reasonOf = (a: unknown[] | undefined): string => (a ? (a[0] as string).slice(PREFIX.length) : '<none>');
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the initCardano catch answers false and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the provider init is logged with its message and initCardano answers false', async () => {
++    expect(await run(new Error('provider boom'))).toEqual({ ok: true, value: false });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('provider boom');
++  });
++  it('control ks1868 C2: a thrown plain string is logged as undefined text and initCardano answers false', async () => {
++    expect(await run('plain boom')).toEqual({ ok: true, value: false });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('undefined');
++  });
++  it('control ks1868 C3: an Error with an empty message is logged with the empty text and initCardano answers false', async () => {
++    expect(await run(new Error(''))).toEqual({ ok: true, value: false });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('');
++  });
++  it('RED ks1868 R1: a provider init failure that is a revoked Proxy is logged as text and initCardano answers false, as for an ordinary Error', async () => {
++    expect(await run(revokedProxy())).toEqual({ ok: true, value: false });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: a provider init failure that is an Error whose message getter throws is logged as text and initCardano answers false, as for an ordinary Error', async () => {
++    expect(await run(getterThrows())).toEqual({ ok: true, value: false });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: a provider init failure that is an Error whose message is a Symbol is logged as text and initCardano answers false, as for an ordinary Error', async () => {
++    expect(await run(withMessage(Symbol('ks1868')))).toEqual({ ok: true, value: false });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('Symbol(ks1868)');
++  });
++});

@@ -1,0 +1,52 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p5_originate_charge_events_pricing_connection_and_fetch_catches_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/services/chargeEvents.ts b/Blockchain/Dev/services/originate/src/services/chargeEvents.ts
+--- a/Blockchain/Dev/services/originate/src/services/chargeEvents.ts
++++ b/Blockchain/Dev/services/originate/src/services/chargeEvents.ts
+@@ -79,6 +79,13 @@
+       logger.info('Pricing loaded from database', { eventTypes: rows.length });
+     }
+   } catch (err: any) {
+-    logger.warn('Failed to load pricing from DB, using defaults', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to load pricing from DB, using defaults', { error: reason });
+   }
+ }
+@@ -122,8 +129,14 @@
+     await prisma.$queryRaw`SELECT 1`;
+     logger.info('chargeEvents: database connection verified');
+   } catch (err: any) {
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('chargeEvents: database connection FAILED — charge events will not be available', {
+-      error: err instanceof Error ? err.message : String(err),
++      error: reason,
+     });
+     throw new Error('Database is required for charge event operations');
+   }
+@@ -221,7 +234,14 @@
+       createdAt: r.created_at?.toISOString?.() || r.created_at,
+     }));
+   } catch (err: any) {
+-    logger.warn('Failed to fetch charge events from DB', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to fetch charge events from DB', { error: reason });
+     throw err;
+   }
+ }
+

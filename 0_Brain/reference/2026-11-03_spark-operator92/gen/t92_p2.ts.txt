@@ -1,0 +1,207 @@
+// KS-1868 (operator 92 screen, originate documents route GET /:id): the outer catch (line 1231) of the GET /:id route of
+// services/originate/src/routes/documents.ts logs `error: <reading of the caught value>` as `error instanceof Error ? error.message : String(error)`,
+// unguarded. A revoked Proxy makes `instanceof` throw inside the catch, and an Error whose `message` getter throws makes the read throw; the catch then
+// throws, the route never answers and the rejection of the async handler is unhandled. The cells let the document read succeed and make the anchor-state
+// re-check (the step after the ownership check) reject with such a value, and assert the route answers the constant 500 and the logged reason is text
+// (the constant when it cannot be turned into text). The rejection is thrown AFTER the inner `dbErr?.message?.includes(...)` catch of the document read, which
+// is a separate control-flow site not touched here and would turn a hostile value from the read itself into a TypeError first. Controls pin an ordinary
+// Error and a thrown plain string. A hang is a null answer (abort signal), not a jest timeout. Harness: the module mocks of the existing documents-route
+// suites (the ks466 malformed-id suite shape). Nothing is written.
+const mockState: { toThrow: unknown; errored: unknown[][]; reconciles: number } = {
+  toThrow: undefined,
+  errored: [],
+  reconciles: 0,
+};
+
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+process.env.SIMULATE_ANCHORING = 'true';
+
+jest.mock('../repositories/documentRepo', () => ({
+  getDocument: (..._args: unknown[]) =>
+    Promise.resolve({
+      id: 'doc-ks1868-get-target',
+      documentUuid: '99999999-9999-4999-8999-999999999999',
+      type: 'document',
+      status: 'draft',
+      owner: { id: '11111111-2222-4333-8444-555555555555' },
+      data: {},
+      contentHash: 'a'.repeat(64),
+      signatures: [],
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    }),
+  listDocuments: jest.fn(),
+  saveDocument: jest.fn(),
+  updateDocument: jest.fn(),
+  getSigningRequest: jest.fn(),
+  saveSigningRequest: jest.fn(),
+  deleteSigningRequest: jest.fn(),
+  generateContentHash: jest.fn(() => 'a'.repeat(64)),
+  seedDemoDocuments: jest.fn(async () => undefined),
+  assertNoCycle: jest.fn(async () => undefined),
+}));
+
+jest.mock('../services/anchorStateSync', () => ({
+  pollAnchorUntilConfirmed: jest.fn(),
+  ownCreateTimestampsOf: jest.fn(() => ({})),
+  reconcileDocumentAnchorState: (..._args: unknown[]) => {
+    mockState.reconciles += 1;
+    return Promise.reject(mockState.toThrow);
+  },
+}));
+
+jest.mock('../repositories/shareRepo', () => ({
+  createShare: jest.fn(),
+}));
+
+jest.mock('../repositories/lifecycleEventRepo', () => ({
+  createLifecycleEvent: jest.fn(),
+  setLifecycleEventAnchor: jest.fn(),
+  listLifecycleEvents: jest.fn(),
+}));
+
+jest.mock('../events', () => ({
+  publishEvent: jest.fn(async () => undefined),
+  EventTypes: {
+    DOCUMENT_CREATED: 'document.created',
+    DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred',
+    DOCUMENT_VERSIONED: 'document.versioned',
+  },
+}));
+
+jest.mock('../services/threadTokenClient', () => ({
+  mintAndRegisterThreadToken: jest.fn(async () => ({})),
+}));
+
+jest.mock('../routes/verification', () => ({
+  registerInPlatformRegistry: jest.fn(async () => undefined),
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
+    next();
+  },
+}));
+
+jest.mock('../middleware/rbac', () => ({
+  isAllowedByRoleOrScope: () => true,
+}));
+
+jest.mock('../utils/logger', () => ({
+  logger: {
+    info: () => undefined,
+    debug: () => undefined,
+    warn: () => undefined,
+    error: (...args: unknown[]) => {
+      mockState.errored.push(args);
+    },
+  },
+}));
+
+import express from 'express';
+import { documentsRouter, publicDocumentsRouter } from '../routes/documents';
+
+const app = express();
+// Same mount order as index.ts: public router first, then the auth-gated one.
+app.use('/api/documents', express.json(), publicDocumentsRouter);
+app.use('/api/documents', express.json(), documentsRouter);
+
+const DOC = 'doc-ks1868-get-target';
+let baseUrl = '';
+let server: ReturnType<typeof app.listen>;
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  const address = server.address();
+  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
+});
+
+afterAll(() => server?.close());
+
+beforeEach(() => {
+  mockState.toThrow = undefined;
+  mockState.errored.length = 0;
+  mockState.reconciles = 0;
+});
+
+const revokedProxy = (): unknown => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+/** The logged `error` field of the logger call that carries this first argument, as a string; the type name when it is not one. */
+const reasonOf = (first: string): string => {
+  const calls = mockState.errored.filter((c) => c[0] === first);
+  if (calls.length !== 1) return '<' + calls.length + ' calls>';
+  const v = (calls[0][1] as { error?: unknown } | undefined)?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+let unhandled = 0;
+const onUnhandled = () => {
+  unhandled += 1;
+};
+beforeAll(() => {
+  process.on('unhandledRejection', onUnhandled);
+});
+afterAll(() => {
+  process.removeListener('unhandledRejection', onUnhandled);
+});
+beforeEach(() => {
+  unhandled = 0;
+});
+
+async function getRoute(): Promise<{ status: number; code: string | undefined } | null> {
+  try {
+    const res = await fetch(`${baseUrl}/api/documents/${DOC}`, {
+      method: 'GET',
+      headers: { 'content-type': 'application/json' },
+      signal: AbortSignal.timeout(1500),
+    });
+    const payload = (await res.json()) as { error?: { code?: string } };
+    return { status: res.status, code: payload.error?.code };
+  } catch {
+    return null;
+  }
+}
+
+const GET_LOG = 'Failed to get document';
+
+async function route(thrown: unknown, reason: string): Promise<void> {
+  mockState.toThrow = thrown;
+  expect(await getRoute()).toEqual({ status: 500, code: 'INTERNAL_ERROR' });
+  expect(unhandled).toBe(0);
+  expect(mockState.errored).toHaveLength(1);
+  expect(reasonOf(GET_LOG)).toBe(reason);
+  expect(mockState.reconciles).toBe(1);
+}
+const CONSTANT = 'unreadable thrown value';
+
+describe('KS-1868 the originate GET /:id route logs text for a hostile thrown value', () => {
+  it('control ks1868 C1 GET /:id: an ordinary Error is logged with its own message and the route answers 500', async () => {
+    await route(new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
+  });
+
+  it('control ks1868 C2 GET /:id: a thrown plain string is logged as its own text and the route answers 500', async () => {
+    await route('plain boom', 'plain boom');
+  });
+
+  it('RED ks1868 R1 GET /:id: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
+    await route(revokedProxy(), CONSTANT);
+  });
+
+  it('RED ks1868 R2 GET /:id: an Error whose message getter throws logs the constant reason and the route answers 500', async () => {
+    await route(getterThrows(), CONSTANT);
+  });
+});

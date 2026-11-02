@@ -1,0 +1,146 @@
+// KS-1868 (operator 91 screen, originate charge events): the pricing-load catch of loadPricing (line 82), the connection-check catch
+// of verifyDbReady (line 126) and the fetch catch of getChargeEventsByCertification (line 224) of
+// services/originate/src/services/chargeEvents.ts read the thrown value inside the logger call's arguments, unguarded
+// (`err?.message`, `err instanceof Error ? err.message : String(err)`). A thrown value whose read throws (a revoked Proxy, an Error
+// whose message getter throws) makes the catch itself throw: loadPricing REJECTS instead of keeping the default prices,
+// verifyDbReady rejects with the TypeError the read threw instead of its documented 'Database is required for charge event
+// operations' error, and getChargeEventsByCertification rejects with that TypeError instead of rethrowing the original value; an
+// Error whose message is readable but not a string (a Symbol) is handed to the logger uncoerced. The cells make the Prisma stand-in
+// reject with such a value and assert the ordinary outcome (resolve; the documented error; the original value) and a logged
+// line that carries text (the constant when the value cannot be turned into text). Harness: the real module with the Prisma
+// client of ../db replaced by a plain stand-in whose tagged-template query rejects with the value, and the logger by a plain
+// recording object (no database).
+const mockH: {
+  failure: { value: unknown } | undefined;
+  logs: { level: string; message: string; meta: Record<string, unknown> | undefined }[];
+} = { failure: undefined, logs: [] };
+
+jest.mock('../db', () => ({
+  prisma: {
+    $queryRaw: () => (mockH.failure ? Promise.reject(mockH.failure.value) : Promise.resolve([])),
+    $executeRaw: () => Promise.resolve(0),
+  },
+}));
+jest.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    mockH.logs.push({ level, message, meta });
+  };
+  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
+});
+
+type Ce = typeof import('../services/chargeEvents');
+const PRICING = 'Failed to load pricing from DB, using defaults';
+const CONN = 'chargeEvents: database connection FAILED — charge events will not be available';
+const FETCH = 'Failed to fetch charge events from DB';
+const DOCUMENTED = 'Database is required for charge event operations';
+
+beforeEach(() => {
+  mockH.failure = undefined;
+  mockH.logs.length = 0;
+});
+
+function freshCe(): Ce {
+  jest.resetModules();
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require('../services/chargeEvents') as Ce;
+}
+async function pricing(value: unknown): Promise<{ ok: boolean }> {
+  mockH.failure = { value };
+  const ce = freshCe();
+  try {
+    await ce.loadPricing();
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
+async function conn(value: unknown): Promise<{ rejected: boolean; message: string }> {
+  mockH.failure = { value };
+  const ce = freshCe();
+  try {
+    await ce.verifyDbReady();
+    return { rejected: false, message: '' };
+  } catch (e) {
+    return { rejected: true, message: e instanceof Error ? e.message : '<not an Error>' };
+  }
+}
+async function fetchEvents(value: unknown): Promise<{ rejected: boolean; same: boolean }> {
+  mockH.failure = { value };
+  const ce = freshCe();
+  try {
+    await ce.getChargeEventsByCertification('cert_1', 'a0000000-0000-4000-8000-000000000001');
+    return { rejected: false, same: false };
+  } catch (e) {
+    return { rejected: true, same: Object.is(e, value) };
+  }
+}
+const LINES = (message: string) => mockH.logs.filter((l) => l.message === message);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string => {
+  const v = l?.meta?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 the charge-event pricing, connection and fetch catches log text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from the pricing query is logged with its message and loadPricing resolves', async () => {
+    expect(await pricing(new Error('pricing failed'))).toEqual({ ok: true });
+    expect(LINES(PRICING)).toHaveLength(1);
+    expect(reasonOf(LINES(PRICING)[0])).toBe('pricing failed');
+  });
+  it('control ks1868 C2: an ordinary Error from the connection check is logged with its message and verifyDbReady rejects with the documented error', async () => {
+    expect(await conn(new Error('conn failed'))).toEqual({ rejected: true, message: DOCUMENTED });
+    expect(LINES(CONN)).toHaveLength(1);
+    expect(reasonOf(LINES(CONN)[0])).toBe('conn failed');
+  });
+  it('control ks1868 C3: an ordinary Error from the fetch is logged with its message and rethrown as is', async () => {
+    expect(await fetchEvents(new Error('fetch failed'))).toEqual({ rejected: true, same: true });
+    expect(LINES(FETCH)).toHaveLength(1);
+    expect(reasonOf(LINES(FETCH)[0])).toBe('fetch failed');
+  });
+  it('RED ks1868 R1: a pricing failure that is a revoked Proxy is logged as text and loadPricing resolves, as for an ordinary Error', async () => {
+    expect(await pricing(revokedProxy())).toEqual({ ok: true });
+    expect(LINES(PRICING)).toHaveLength(1);
+    expect(reasonOf(LINES(PRICING)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: a pricing failure that is an Error whose message is a Symbol is logged as text and loadPricing resolves, as for an ordinary Error', async () => {
+    expect(await pricing(withMessage(Symbol('ks1868')))).toEqual({ ok: true });
+    expect(LINES(PRICING)).toHaveLength(1);
+    expect(reasonOf(LINES(PRICING)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: a connection-check failure that is a revoked Proxy is logged as text and verifyDbReady rejects with the documented error, as for an ordinary Error', async () => {
+    expect(await conn(revokedProxy())).toEqual({ rejected: true, message: DOCUMENTED });
+    expect(LINES(CONN)).toHaveLength(1);
+    expect(reasonOf(LINES(CONN)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R4: a connection-check failure that is an Error whose message getter throws is logged as text and verifyDbReady rejects with the documented error, as for an ordinary Error', async () => {
+    expect(await conn(getterThrows())).toEqual({ rejected: true, message: DOCUMENTED });
+    expect(LINES(CONN)).toHaveLength(1);
+    expect(reasonOf(LINES(CONN)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R5: a fetch failure that is a revoked Proxy is logged as text and rethrown as is, as for an ordinary Error', async () => {
+    expect(await fetchEvents(revokedProxy())).toEqual({ rejected: true, same: true });
+    expect(LINES(FETCH)).toHaveLength(1);
+    expect(reasonOf(LINES(FETCH)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R6: a fetch failure that is an Error whose message is a Symbol is logged as text and rethrown as is, as for an ordinary Error', async () => {
+    expect(await fetchEvents(withMessage(Symbol('ks1868')))).toEqual({ rejected: true, same: true });
+    expect(LINES(FETCH)).toHaveLength(1);
+    expect(reasonOf(LINES(FETCH)[0])).toBe('Symbol(ks1868)');
+  });
+});

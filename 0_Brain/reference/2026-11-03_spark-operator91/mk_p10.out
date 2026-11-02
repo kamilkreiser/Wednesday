@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p10_anchoring_cardano_init_catch_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/cardano/index.ts b/Blockchain/Dev/services/anchoring/src/cardano/index.ts
+--- a/Blockchain/Dev/services/anchoring/src/cardano/index.ts
++++ b/Blockchain/Dev/services/anchoring/src/cardano/index.ts
+@@ -112,7 +112,14 @@
+     logger.info(`[Cardano] Integration ready — network: ${network}`);
+     return true;
+   } catch (err: any) {
+-    logger.error(`[Cardano] Initialisation failed: ${err?.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error(`[Cardano] Initialisation failed: ${reason}`);
+     return false;
+   }
+ }
+

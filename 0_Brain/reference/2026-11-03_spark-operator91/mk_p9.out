@@ -1,0 +1,17 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p9_timestamping_create_timestamp_request_exception_catch_guard_message
+diff --git a/Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts b/Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts
+--- a/Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts
++++ b/Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts
+@@ -307,3 +307,10 @@
+   } catch (err: any) {
+-    logger.warn('[TSA] RFC-3161 request exception', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('[TSA] RFC-3161 request exception', { error: reason });
+   }
+

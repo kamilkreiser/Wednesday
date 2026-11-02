@@ -1,0 +1,151 @@
+diff --git a/Blockchain/Dev/services/referral/src/services/referralService.ts b/Blockchain/Dev/services/referral/src/services/referralService.ts
+--- a/Blockchain/Dev/services/referral/src/services/referralService.ts
++++ b/Blockchain/Dev/services/referral/src/services/referralService.ts
+@@ -65,5 +65,14 @@
+         [c.id, c.code, c.ownerId, c.ownerWalletAddress || null, c.isActive, c.maxUses || null,
+          c.currentUses, c.customLabel || null, JSON.stringify(c.metadata || {}), c.createdAt, c.expiresAt || null]
+       );
+-    } catch (err: any) { logger.error('DB save code failed', { error: err?.message }); }
++    } catch (err: any) {
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB save code failed', { error: reason });
++    }
+   }
+@@ -226,7 +235,14 @@
+       if (result.rows.length === 0) return null;
+       return this.rowToReferralCode(result.rows[0]);
+     } catch (err: any) {
+-      logger.error('DB read code by string failed', { error: err?.message, code });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB read code by string failed', { error: reason, code });
+       return null;
+     }
+   }
+diff --git a/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-service-save-code-and-code-by-string-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-service-save-code-and-code-by-string-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-service-save-code-and-code-by-string-catches-unreadable-throw.test.ts
+@@ -0,0 +1,111 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868 (operator 92 screen, referral service): the save catch of dbSaveReferralCode (line 68) and the read catch of dbGetCodeByString (line 229) of
++// services/referral/src/services/referralService.ts pass `err?.message` straight into the logger's meta object, unguarded. `?.` guards null and undefined
++// only: a thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch throw, so generateCode / getCodeByString
++// REJECT where an ordinary Error gets a logged failure and the fallback (the generated code is still returned; `undefined`). The cells make the database
++// stand-in reject the one statement with such a value and assert the public method still resolves with the fallback and the failure is logged as text.
++// The stand-in rejects with a plain function, not vi.fn(): a spy could inspect a revoked Proxy and fail before the code under test saw it. Harness: the
++// real module with ../db and ../utils/logger replaced by plain stand-ins; every other statement answers an empty result; no database, no network.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  failOn: '' as string,
++  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: (sql: string, ..._args: unknown[]) =>
++    h.failOn !== '' && String(sql).includes(h.failOn) ? Promise.reject(h.toThrow) : Promise.resolve({ rows: [] }),
++}));
++
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.logs.push({ level, message, meta });
++  };
++  return { createLogger: () => ({ debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') }) };
++});
++
++import { referralService } from '../services/referralService';
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.failOn = '';
++  h.logs.length = 0;
++});
++
++const LOG = (message: string) => h.logs.filter((l) => l.message === message);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta?: Record<string, unknown> } | undefined): string => {
++  const e = l?.meta?.error;
++  return typeof e === 'string' ? e : '<' + typeof e + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++type Out = { threw: boolean; value?: unknown };
++async function run(fn: () => Promise<unknown>, failOn: string, value: unknown): Promise<Out> {
++  h.failOn = failOn;
++  h.toThrow = value;
++  try {
++    return { threw: false, value: await fn() };
++  } catch {
++    return { threw: true };
++  }
++}
++
++const SITES = [
++  { name: 'getCodeByString (dbGetCodeByString)', log: 'DB read code by string failed', failOn: 'WHERE code = $1', call: () => referralService.getCodeByString('KS1868CODE'), fallback: undefined },
++  { name: 'generateCode (dbSaveReferralCode)', log: 'DB save code failed', failOn: 'INSERT INTO svc_referral_codes', call: async () => (await referralService.generateCode('user-ks1868')).ownerId, fallback: 'user-ks1868' },
++];
++
++describe('KS-1868 referral service: the code read and the code save catches survive a thrown value they cannot read', () => {
++  it('control ks1868 C1: an ordinary Error from getCodeByString is logged with its message and the fallback is answered', async () => {
++    const s = SITES[0];
++    expect(await run(s.call, s.failOn, new Error('db boom'))).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('db boom');
++  });
++  it('control ks1868 C2: an ordinary Error from the code save of generateCode is logged with its message and the code is still returned', async () => {
++    const s = SITES[1];
++    expect(await run(s.call, s.failOn, new Error('db boom'))).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('db boom');
++  });
++  it('RED ks1868 R1: a revoked Proxy from getCodeByString is logged as text and the fallback is answered', async () => {
++    const s = SITES[0];
++    expect(await run(s.call, s.failOn, revokedProxy())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws from getCodeByString is logged as text and the fallback is answered', async () => {
++    const s = SITES[0];
++    expect(await run(s.call, s.failOn, getterThrows())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: a revoked Proxy from the code save of generateCode is logged as text and the code is still returned', async () => {
++    const s = SITES[1];
++    expect(await run(s.call, s.failOn, revokedProxy())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: an Error whose message getter throws from the code save of generateCode is logged as text and the code is still returned', async () => {
++    const s = SITES[1];
++    expect(await run(s.call, s.failOn, getterThrows())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++});

@@ -1,0 +1,112 @@
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
+
+// KS-1868 (operator 91 screen, tokenisation vault): the decrypt-failed catch of detokenise (line 81) of
+// services/tokenisation/src/vault.ts reads `(err as Error)?.message ?? String(err)` inside console.error's arguments, unguarded.
+// A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws, a value whose message is absent and
+// whose String() conversion throws) makes the catch itself throw: the line is never logged and detokenise REJECTS for the whole
+// batch instead of answering `value: null` for the entry that could not be decrypted, as an ordinary Error does. The cells make
+// the decrypt step throw such a value and assert detokenise resolves with the null entry and the logged value is text (the
+// constant when the value cannot be read). Harness: the real vault module with ./db and ./crypto replaced by plain stand-ins (the
+// query answers one vault row; decrypt throws the value) and console.error replaced by a plain recording function (no database).
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  errors: [] as unknown[][],
+}));
+
+vi.mock('../db.js', () => ({
+  query: async () => ({
+    rows: [{ token: 'tok_1', encrypted_value: Buffer.from('x'), iv: 'iv', auth_tag: Buffer.from('t') }],
+  }),
+}));
+
+vi.mock('../crypto.js', () => ({
+  encrypt: () => ({ ciphertext: Buffer.from('x'), iv: 'iv', authTag: Buffer.from('t') }),
+  generateToken: () => 'tok_generated',
+  decrypt: () => {
+    throw h.toThrow;
+  },
+}));
+
+import { detokenise } from '../vault.js';
+
+const FAILED = '[tokenisation/vault] decrypt failed';
+const realError = console.error;
+afterAll(() => {
+  console.error = realError;
+});
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.errors.length = 0;
+  console.error = (...args: unknown[]) => {
+    h.errors.push(args);
+  };
+});
+
+async function run(value: unknown): Promise<{ ok: boolean; answer: string }> {
+  h.toThrow = value;
+  try {
+    const out = await detokenise('tenant-1', ['tok_1'], 'a2V5');
+    return { ok: true, answer: out.map((o) => o.token + ':' + String(o.value)).join(',') };
+  } catch {
+    return { ok: false, answer: '' };
+  }
+}
+const LINES = () => h.errors.filter((a) => a[0] === FAILED);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (a: unknown[] | undefined): string => {
+  const v = (a?.[1] as { error?: unknown } | undefined)?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+/** A value with no message whose String() conversion throws. */
+const stringThrows = (): unknown => ({
+  toString() {
+    throw new Error('toString boom');
+  },
+});
+
+describe('KS-1868 the detokenise decrypt-failed catch answers a null entry and logs text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from decrypt is logged with its message and the entry answers null', async () => {
+    expect(await run(new Error('bad auth tag'))).toEqual({ ok: true, answer: 'tok_1:null' });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('bad auth tag');
+  });
+  it('control ks1868 C2: a thrown plain string from decrypt is logged as its text and the entry answers null', async () => {
+    expect(await run('plain boom')).toEqual({ ok: true, answer: 'tok_1:null' });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('plain boom');
+  });
+  it('control ks1868 C3: an Error with an empty message is logged with the empty text and the entry answers null', async () => {
+    expect(await run(new Error(''))).toEqual({ ok: true, answer: 'tok_1:null' });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('');
+  });
+  it('RED ks1868 R1: a decrypt failure that is a revoked Proxy is logged as text and the entry answers null, as for an ordinary Error', async () => {
+    expect(await run(revokedProxy())).toEqual({ ok: true, answer: 'tok_1:null' });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: a decrypt failure that is an Error whose message getter throws is logged as text and the entry answers null, as for an ordinary Error', async () => {
+    expect(await run(getterThrows())).toEqual({ ok: true, answer: 'tok_1:null' });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R3: a decrypt failure with no message whose String() conversion throws is logged as text and the entry answers null, as for an ordinary Error', async () => {
+    expect(await run(stringThrows())).toEqual({ ok: true, answer: 'tok_1:null' });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
+  });
+});

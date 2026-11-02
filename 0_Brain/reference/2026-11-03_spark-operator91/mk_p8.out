@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o91_p8_nft_certificate_cardano_init_catch_guard_message
+diff --git a/Blockchain/Dev/services/nft-certificate/src/cardano/index.ts b/Blockchain/Dev/services/nft-certificate/src/cardano/index.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/cardano/index.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/cardano/index.ts
+@@ -55,7 +55,14 @@
+     console.log(`[Cardano-NFT] Integration ready — network: ${network}`);
+     return true;
+   } catch (err: any) {
+-    console.error(`[Cardano-NFT] Initialisation failed: ${err?.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Cardano-NFT] Initialisation failed: ${reason}`);
+     return false;
+   }
+ }
+

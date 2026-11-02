@@ -1,0 +1,130 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/webhooks.ts b/Blockchain/Dev/services/originate/src/routes/webhooks.ts
+--- a/Blockchain/Dev/services/originate/src/routes/webhooks.ts
++++ b/Blockchain/Dev/services/originate/src/routes/webhooks.ts
+@@ -550,7 +550,14 @@
+     logger.info('Webhook dispatch', { eventType, total: webhooks.length, delivered });
+     return delivered;
+   } catch (err: any) {
+-    logger.warn('Webhook dispatch failed', { eventType, error: err.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Webhook dispatch failed', { eventType, error: reason });
+     return 0;
+   }
+ }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-webhooks-dispatch-event-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-webhooks-dispatch-event-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-webhooks-dispatch-event-catch-unreadable-throw.test.ts
+@@ -0,0 +1,106 @@
++// KS-1868 (operator 93 screen, originate webhooks): the outer catch of dispatchEvent (line 553) of services/originate/src/routes/webhooks.ts reads
++// `err.message` inside the logger call's arguments, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws)
++// makes the catch throw, so dispatchEvent REJECTS where an ordinary Error is logged and it resolves 0 (the callers fire it as a best-effort notification);
++// an Error whose message is readable but not a string (a Symbol) is handed to the logger uncoerced and dropped from the JSON line. The cells make the
++// delivery request reject with such a value (the stand-in of the outbound request, which dispatchEvent awaits inside its try) and assert dispatchEvent
++// resolves 0 and the line carries text (the constant when the value cannot be turned into text). Harness: the ks914 deliverWebhook suite (same mocks);
++// the database stand-in answers one active webhook row; the outbound request stand-in is a plain function, not jest.fn(): a spy inspects what it
++// rejects with and could itself fail on a revoked Proxy before the code under test saw it. Nothing is written and nothing is sent.
++const mockState: { toThrow: unknown; warned: unknown[][] } = { toThrow: undefined, warned: [] };
++
++jest.mock('../db', () => ({ prisma: { $queryRaw: jest.fn(), $executeRaw: jest.fn() } }));
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    error: () => undefined,
++    warn: (...args: unknown[]) => {
++      mockState.warned.push(args);
++    },
++  },
++}));
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    encryptField: (v: unknown) => v,
++    decryptField: (v: unknown) => v,
++    runWithTenantId: (_t: unknown, fn: () => unknown) => fn(),
++    assertSafeOutboundUrl: jest.fn(),
++    safeOutboundRequest: (..._args: unknown[]) => Promise.reject(mockState.toThrow),
++  }),
++);
++
++import { dispatchEvent } from '../routes/webhooks';
++
++const db = {
++  $queryRaw: (..._args: unknown[]) =>
++    Promise.resolve([{ id: '11111111-2222-4333-8444-555555555555', url: 'https://subscriber.example/hook', secret_v2: null }]),
++  $executeRaw: (..._args: unknown[]) => Promise.resolve(1),
++};
++
++const FAILED = 'Webhook dispatch failed';
++const LINE = (): Record<string, unknown>[] =>
++  mockState.warned.filter((a) => a[0] === FAILED).map((a) => a[1] as Record<string, unknown>);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
++
++async function dispatch(value: unknown): Promise<{ threw: boolean; delivered: number | undefined }> {
++  mockState.toThrow = value;
++  try {
++    return { threw: false, delivered: await dispatchEvent('document.created', { id: 'doc-1' }, db) };
++  } catch {
++    return { threw: true, delivered: undefined };
++  }
++}
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the dispatchEvent catch resolves 0 and logs text for a hostile thrown value', () => {
++  beforeEach(() => {
++    mockState.toThrow = undefined;
++    mockState.warned.length = 0;
++  });
++
++  it('control ks1868 C1: an ordinary Error from the delivery request is logged with its message and dispatchEvent resolves 0', async () => {
++    expect(await dispatch(new Error('send boom'))).toEqual({ threw: false, delivered: 0 });
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('send boom');
++    expect(LINE()[0].eventType).toBe('document.created');
++  });
++  it('control ks1868 C2: a thrown plain string is logged without a message and dispatchEvent resolves 0', async () => {
++    expect(await dispatch('plain boom')).toEqual({ threw: false, delivered: 0 });
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1: a revoked Proxy from the delivery request is logged as text and dispatchEvent resolves 0, as for an ordinary Error', async () => {
++    expect(await dispatch(revokedProxy())).toEqual({ threw: false, delivered: 0 });
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message is a Symbol from the delivery request is logged as text and dispatchEvent resolves 0, as for an ordinary Error', async () => {
++    expect(await dispatch(withMessage(Symbol('ks1868')))).toEqual({ threw: false, delivered: 0 });
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R3: an Error whose message getter throws from the delivery request is logged as text and dispatchEvent resolves 0, as for an ordinary Error', async () => {
++    expect(await dispatch(getterThrows())).toEqual({ threw: false, delivered: 0 });
++    expect(LINE()).toHaveLength(1);
++    expect(reasonOf(LINE()[0])).toBe('unreadable thrown value');
++  });
++});

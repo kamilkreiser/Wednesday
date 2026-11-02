@@ -1,0 +1,914 @@
+diff --git a/Blockchain/Dev/services/referral/src/__tests__/ks1868-fraud-detection-load-from-db-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/referral/src/__tests__/ks1868-fraud-detection-load-from-db-catch-unreadable-throw.test.ts
+new file mode 100644
+index 0000000000..78a479ee59
+--- /dev/null
++++ b/Blockchain/Dev/services/referral/src/__tests__/ks1868-fraud-detection-load-from-db-catch-unreadable-throw.test.ts
+@@ -0,0 +1,95 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868 (operator 90 screen, referral fraud detection): the catch of loadFromDb in services/referral/src/services/fraudDetection.ts
++// (line 114) passes `err?.message` straight into the logger's meta object, unguarded. `?.` guards null and undefined only: a thrown
++// value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch throw, so loadFromDb REJECTS where
++// an ordinary Error gets a logged warning and a resolved call (the service starts with empty fraud data); an Error whose message is a
++// Symbol is handed to the logger uncoerced. The cells make the database stand-in reject with such a value and assert loadFromDb
++// still resolves and the warning carries text. The stand-in rejects with a plain function, not vi.fn(): a spy could inspect a revoked
++// Proxy and fail before the code under test saw it. Harness: the real module with ../db and ../utils/logger replaced by plain
++// stand-ins; no database, no network.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: (..._args: unknown[]) => Promise.reject(h.toThrow),
++}));
++
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.logs.push({ level, message, meta });
++  };
++  return { createLogger: () => ({ debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') }) };
++});
++
++import { fraudDetectionService } from '../services/fraudDetection';
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logs.length = 0;
++});
++
++const WARN = 'Failed to load fraud data from DB';
++const LOG = () => h.logs.filter((l) => l.message.startsWith(WARN));
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta?: Record<string, unknown> } | undefined): string => {
++  const e = l?.meta?.error;
++  return typeof e === 'string' ? e : '<' + typeof e + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++async function loadWith(value: unknown): Promise<{ threw: boolean }> {
++  h.toThrow = value;
++  try {
++    await fraudDetectionService.loadFromDb();
++    return { threw: false };
++  } catch {
++    return { threw: true };
++  }
++}
++
++describe('KS-1868 fraud detection: loadFromDb survives a thrown value it cannot read', () => {
++  it('control ks1868 C1: an ordinary Error is logged with its message and loadFromDb resolves', async () => {
++    expect(await loadWith(new Error('db boom'))).toEqual({ threw: false });
++    expect(LOG()).toHaveLength(1);
++    expect(reasonOf(LOG()[0])).toBe('db boom');
++  });
++  it('control ks1868 C2: a plain string is logged without a message and loadFromDb resolves', async () => {
++    expect(await loadWith('plain boom')).toEqual({ threw: false });
++    expect(LOG()).toHaveLength(1);
++    expect(reasonOf(LOG()[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1: a revoked Proxy is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
++    expect(await loadWith(revokedProxy())).toEqual({ threw: false });
++    expect(LOG()).toHaveLength(1);
++    expect(reasonOf(LOG()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
++    expect(await loadWith(getterThrows())).toEqual({ threw: false });
++    expect(LOG()).toHaveLength(1);
++    expect(reasonOf(LOG()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: an Error whose message is a Symbol is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
++    expect(await loadWith(withMessage(Symbol('ks1868')))).toEqual({ threw: false });
++    expect(LOG()).toHaveLength(1);
++    expect(reasonOf(LOG()[0])).toBe('Symbol(ks1868)');
++  });
++});
+diff --git a/Blockchain/Dev/services/referral/src/__tests__/ks1868-milestone-service-db-read-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/referral/src/__tests__/ks1868-milestone-service-db-read-catches-unreadable-throw.test.ts
+new file mode 100644
+index 0000000000..b8e2ecc4c8
+--- /dev/null
++++ b/Blockchain/Dev/services/referral/src/__tests__/ks1868-milestone-service-db-read-catches-unreadable-throw.test.ts
+@@ -0,0 +1,133 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868 (operator 90 screen, referral milestone service): three catch blocks of services/referral/src/services/milestoneService.ts
++// pass `err?.message` straight into the logger's meta object, unguarded: dbGetUserProgress (line 124), dbGetPendingRewards (line 159)
++// and verifyDbReady (line 238). `?.` guards null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error
++// whose message getter throws) makes the catch throw, so the public method REJECTS where an ordinary Error gets a logged failure and
++// the fallback (a fresh default progress, an empty reward list, a resolved verification). The cells make the database stand-in
++// reject with such a value and assert the method still resolves with the fallback and the failure is logged as text. The stand-in
++// rejects with a plain function, not vi.fn(): a spy could inspect a revoked Proxy and fail before the code under test saw it.
++// Harness: the real module with ../db and ../utils/logger replaced by plain stand-ins; no database, no network.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: (..._args: unknown[]) => Promise.reject(h.toThrow),
++}));
++
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.logs.push({ level, message, meta });
++  };
++  return { createLogger: () => ({ debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') }) };
++});
++
++import { milestoneService } from '../services/milestoneService';
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logs.length = 0;
++});
++
++const LOG = (prefix: string) => h.logs.filter((l) => l.message.startsWith(prefix));
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta?: Record<string, unknown> } | undefined): string => {
++  const e = l?.meta?.error;
++  return typeof e === 'string' ? e : '<' + typeof e + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++const PROGRESS = 'DB read user progress failed';
++const PENDING = 'DB read pending rewards failed';
++const VERIFY = 'Milestone table verification failed';
++
++async function progressWith(value: unknown): Promise<{ threw: boolean; userId?: string; qualified?: number }> {
++  h.toThrow = value;
++  try {
++    const p = await milestoneService.getUserProgress('user-ks1868');
++    return { threw: false, userId: p.userId, qualified: p.qualifiedReferrals };
++  } catch {
++    return { threw: true };
++  }
++}
++async function pendingWith(value: unknown): Promise<{ threw: boolean; rewards?: unknown[] }> {
++  h.toThrow = value;
++  try {
++    return { threw: false, rewards: await milestoneService.getPendingRewards('user-ks1868') };
++  } catch {
++    return { threw: true };
++  }
++}
++async function verifyWith(value: unknown): Promise<{ threw: boolean }> {
++  h.toThrow = value;
++  try {
++    await milestoneService.verifyDbReady();
++    return { threw: false };
++  } catch {
++    return { threw: true };
++  }
++}
++
++describe('KS-1868 milestone service: the three DB read catches survive a thrown value they cannot read', () => {
++  it('control ks1868 C1: an ordinary Error from the progress read is logged with its message and the fresh default progress is answered', async () => {
++    expect(await progressWith(new Error('db boom'))).toEqual({ threw: false, userId: 'user-ks1868', qualified: 0 });
++    expect(LOG(PROGRESS)).toHaveLength(1);
++    expect(reasonOf(LOG(PROGRESS)[0])).toBe('db boom');
++  });
++  it('control ks1868 C2: an ordinary Error from the pending-rewards read is logged with its message and an empty list is answered', async () => {
++    expect(await pendingWith(new Error('db boom'))).toEqual({ threw: false, rewards: [] });
++    expect(LOG(PENDING)).toHaveLength(1);
++    expect(reasonOf(LOG(PENDING)[0])).toBe('db boom');
++  });
++  it('control ks1868 C3: an ordinary Error from the table verification is logged with its message and the call resolves', async () => {
++    expect(await verifyWith(new Error('db boom'))).toEqual({ threw: false });
++    expect(LOG(VERIFY)).toHaveLength(1);
++    expect(reasonOf(LOG(VERIFY)[0])).toBe('db boom');
++  });
++  it('RED ks1868 R1: a revoked Proxy from the progress read is logged as text and the fresh default progress is answered', async () => {
++    expect(await progressWith(revokedProxy())).toEqual({ threw: false, userId: 'user-ks1868', qualified: 0 });
++    expect(LOG(PROGRESS)).toHaveLength(1);
++    expect(reasonOf(LOG(PROGRESS)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws from the progress read is logged as text and the fresh default progress is answered', async () => {
++    expect(await progressWith(getterThrows())).toEqual({ threw: false, userId: 'user-ks1868', qualified: 0 });
++    expect(LOG(PROGRESS)).toHaveLength(1);
++    expect(reasonOf(LOG(PROGRESS)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: a revoked Proxy from the pending-rewards read is logged as text and an empty list is answered', async () => {
++    expect(await pendingWith(revokedProxy())).toEqual({ threw: false, rewards: [] });
++    expect(LOG(PENDING)).toHaveLength(1);
++    expect(reasonOf(LOG(PENDING)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: an Error whose message getter throws from the pending-rewards read is logged as text and an empty list is answered', async () => {
++    expect(await pendingWith(getterThrows())).toEqual({ threw: false, rewards: [] });
++    expect(LOG(PENDING)).toHaveLength(1);
++    expect(reasonOf(LOG(PENDING)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: a revoked Proxy from the table verification is logged as text and the call resolves', async () => {
++    expect(await verifyWith(revokedProxy())).toEqual({ threw: false });
++    expect(LOG(VERIFY)).toHaveLength(1);
++    expect(reasonOf(LOG(VERIFY)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R6: an Error whose message getter throws from the table verification is logged as text and the call resolves', async () => {
++    expect(await verifyWith(getterThrows())).toEqual({ threw: false });
++    expect(LOG(VERIFY)).toHaveLength(1);
++    expect(reasonOf(LOG(VERIFY)[0])).toBe('unreadable thrown value');
++  });
++});
+diff --git a/Blockchain/Dev/services/referral/src/__tests__/ks1868-milestone-service-db-write-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/referral/src/__tests__/ks1868-milestone-service-db-write-catches-unreadable-throw.test.ts
+new file mode 100644
+index 0000000000..faa1a3c1f4
+--- /dev/null
++++ b/Blockchain/Dev/services/referral/src/__tests__/ks1868-milestone-service-db-write-catches-unreadable-throw.test.ts
+@@ -0,0 +1,111 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868 (operator 90 screen, referral milestone service): the two WRITE catches of services/referral/src/services/milestoneService.ts,
++// dbSavePendingReward (line 194) and dbSaveMilestoneProgress (line 180), pass `err?.message` straight into the logger's meta object,
++// unguarded. `?.` guards null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error whose message getter
++// throws) makes the catch throw, so checkAndAwardMilestones REJECTS where an ordinary Error gets a logged failure and the awarded
++// milestones and rewards are still answered (the failed save is swallowed by design). The cells let the read answer "no row yet" and
++// make ONE of the two INSERT statements reject with the value under test, with a first-referral count of 1 (one milestone, one
++// reward) for the reward save and a count of 0 for the progress save. The stand-in rejects with a plain function, not vi.fn(): a spy could inspect a revoked Proxy and fail before the code
++// under test saw it. Harness: the real module with ../db and ../utils/logger replaced by plain stand-ins; no database, no network.
++const h = vi.hoisted(() => ({
++  failOn: '' as string,
++  toThrow: undefined as unknown,
++  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: (text: string, ..._args: unknown[]) => {
++    if (text.includes('INSERT INTO svc_referral_milestones_rewards') && h.failOn === 'reward') return Promise.reject(h.toThrow);
++    if (text.includes('INSERT INTO svc_referral_milestones ') && h.failOn === 'progress') return Promise.reject(h.toThrow);
++    return Promise.resolve({ rows: [] });
++  },
++}));
++
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.logs.push({ level, message, meta });
++  };
++  return { createLogger: () => ({ debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') }) };
++});
++
++import { milestoneService } from '../services/milestoneService';
++
++beforeEach(() => {
++  h.failOn = '';
++  h.toThrow = undefined;
++  h.logs.length = 0;
++});
++
++const LOG = (prefix: string) => h.logs.filter((l) => l.message.startsWith(prefix));
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta?: Record<string, unknown> } | undefined): string => {
++  const e = l?.meta?.error;
++  return typeof e === 'string' ? e : '<' + typeof e + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++const SAVE_REWARD = 'DB save pending reward failed';
++const SAVE_PROGRESS = 'DB save milestone failed';
++
++async function awardWith(failOn: string, value: unknown, referrals = 1): Promise<{ threw: boolean; milestones?: number; rewards?: number }> {
++  h.failOn = failOn;
++  h.toThrow = value;
++  try {
++    const r = await milestoneService.checkAndAwardMilestones('user-ks1868', referrals);
++    return { threw: false, milestones: r.newMilestones.length, rewards: r.rewards.length };
++  } catch {
++    return { threw: true };
++  }
++}
++const OK = { threw: false, milestones: 1, rewards: 1 };
++// Progress-save cells use a count of 0: no milestone is achieved, so the progress row serialises (an achieved milestone carries a BigInt
++// reward amount, and JSON.stringify of it throws a TypeError of its own inside the same try, before the statement runs).
++const OK0 = { threw: false, milestones: 0, rewards: 0 };
++
++describe('KS-1868 milestone service: the two DB write catches survive a thrown value they cannot read', () => {
++  it('control ks1868 C1: an ordinary Error from the reward save is logged with its message and the award is still answered', async () => {
++    expect(await awardWith('reward', new Error('db boom'))).toEqual(OK);
++    expect(LOG(SAVE_REWARD)).toHaveLength(1);
++    expect(reasonOf(LOG(SAVE_REWARD)[0])).toBe('db boom');
++  });
++  it('control ks1868 C2: an ordinary Error from the progress save is logged with its message and the award is still answered', async () => {
++    expect(await awardWith('progress', new Error('db boom'), 0)).toEqual(OK0);
++    expect(LOG(SAVE_PROGRESS)).toHaveLength(1);
++    expect(reasonOf(LOG(SAVE_PROGRESS)[0])).toBe('db boom');
++  });
++  it('RED ks1868 R1: a revoked Proxy from the reward save is logged as text and the award is still answered', async () => {
++    expect(await awardWith('reward', revokedProxy())).toEqual(OK);
++    expect(LOG(SAVE_REWARD)).toHaveLength(1);
++    expect(reasonOf(LOG(SAVE_REWARD)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws from the reward save is logged as text and the award is still answered', async () => {
++    expect(await awardWith('reward', getterThrows())).toEqual(OK);
++    expect(LOG(SAVE_REWARD)).toHaveLength(1);
++    expect(reasonOf(LOG(SAVE_REWARD)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: a revoked Proxy from the progress save is logged as text and the award is still answered', async () => {
++    expect(await awardWith('progress', revokedProxy(), 0)).toEqual(OK0);
++    expect(LOG(SAVE_PROGRESS)).toHaveLength(1);
++    expect(reasonOf(LOG(SAVE_PROGRESS)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: an Error whose message getter throws from the progress save is logged as text and the award is still answered', async () => {
++    expect(await awardWith('progress', getterThrows(), 0)).toEqual(OK0);
++    expect(LOG(SAVE_PROGRESS)).toHaveLength(1);
++    expect(reasonOf(LOG(SAVE_PROGRESS)[0])).toBe('unreadable thrown value');
++  });
++});
+diff --git a/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-db-pool-error-and-ready-hook-unreadable-throw.test.ts b/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-db-pool-error-and-ready-hook-unreadable-throw.test.ts
+new file mode 100644
+index 0000000000..7025b5f597
+--- /dev/null
++++ b/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-db-pool-error-and-ready-hook-unreadable-throw.test.ts
+@@ -0,0 +1,149 @@
++import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
++
++// KS-1868 (operator 86 screen, referral db module): the pg pool 'error' listener (line 36) and the boot-work catch of
++// runDbReadyHook (line 95) of services/referral/src/db.ts pass `err.message` / `err?.message` straight into dbLog's meta
++// object, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the
++// listener / the catch itself throw: an exception thrown by a listener of the pool's 'error' event escapes the EventEmitter
++// and is an uncaught exception, and a throwing runDbReadyHook makes initDb REJECT instead of resolving with the availability
++// flag; an Error whose message is not a string (a Symbol) is handed to JSON.stringify uncoerced and silently dropped from the
++// line. The cells emit such a value to the captured listener / make the onReady hook reject with it and assert the listener
++// returns, initDb resolves and the line carries text (the constant when the value cannot be turned into text). Harness: the
++// real module with pg replaced by a plain stand-in Pool (it hands over the 'error' listener; its query answers the probe) and
++// console.log replaced by a plain recording function (no database).
++const h = vi.hoisted(() => ({
++  listener: undefined as undefined | ((e: unknown) => void),
++  lines: [] as string[],
++}));
++
++vi.mock('pg', () => ({
++  Pool: function PoolMock() {
++    return {
++      query: async () => ({ rows: [{ ok: 1 }] }),
++      on: (event: string, fn: (e: unknown) => void) => {
++        if (event === 'error') h.listener = fn;
++      },
++      end: async () => undefined,
++      connect: async () => undefined,
++    };
++  },
++}));
++
++vi.mock('@secuura/shared', () => ({
++  applyTenantGuc: async () => undefined,
++  runWithTenantId: async (_t: unknown, fn: () => unknown) => fn(),
++}));
++
++type Db = typeof import('../db');
++const realLog = console.log;
++const realUrl = process.env.DATABASE_URL;
++afterAll(() => {
++  console.log = realLog;
++  if (realUrl === undefined) delete process.env.DATABASE_URL;
++  else process.env.DATABASE_URL = realUrl;
++});
++beforeEach(() => {
++  h.listener = undefined;
++  h.lines.length = 0;
++  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
++  console.log = (...args: unknown[]) => {
++    if (typeof args[0] === 'string') h.lines.push(args[0]);
++  };
++});
++
++async function freshDb(): Promise<Db> {
++  vi.resetModules();
++  return import('../db');
++}
++async function emit(value: unknown): Promise<{ threw: boolean }> {
++  const db = await freshDb();
++  db.getPool();
++  try {
++    (h.listener as (e: unknown) => void)(value);
++    return { threw: false };
++  } catch {
++    return { threw: true };
++  }
++}
++async function hook(value: unknown): Promise<{ ok: boolean; value: boolean | undefined }> {
++  const db = await freshDb();
++  try {
++    return {
++      ok: true,
++      value: await db.initDb(async () => {
++        throw value;
++      }),
++    };
++  } catch {
++    return { ok: false, value: undefined };
++  }
++}
++const LINE = (message: string): Record<string, unknown>[] =>
++  h.lines.map((l) => JSON.parse(l) as Record<string, unknown>).filter((o) => o.message === message);
++const POOL = 'DB pool unexpected error';
++const HOOK = 'DB ready boot work failed';
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the pool error listener and the boot-work catch survive and log text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error reaching the pool listener does not throw and is logged with its message', async () => {
++    expect(await emit(new Error('pool boom'))).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('pool boom');
++  });
++  it('control ks1868 C2: a plain string reaching the pool listener does not throw and is logged without a message', async () => {
++    expect(await emit('plain boom')).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C3: an ordinary Error from the onReady hook leaves initDb resolving true and is logged with its message', async () => {
++    expect(await hook(new Error('hydrate failed'))).toEqual({ ok: true, value: true });
++    expect(LINE(HOOK)).toHaveLength(1);
++    expect(reasonOf(LINE(HOOK)[0])).toBe('hydrate failed');
++  });
++  it('control ks1868 C4: a thrown number from the onReady hook leaves initDb resolving true and is logged without a message', async () => {
++    expect(await hook(42)).toEqual({ ok: true, value: true });
++    expect(LINE(HOOK)).toHaveLength(1);
++    expect(reasonOf(LINE(HOOK)[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1: a revoked Proxy reaching the pool listener does not throw and is logged as text, as for an ordinary Error', async () => {
++    expect(await emit(revokedProxy())).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message is a Symbol reaching the pool listener does not throw and is logged as text, as for an ordinary Error', async () => {
++    expect(await emit(withMessage(Symbol('ks1868')))).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R3: an onReady hook failure that is a revoked Proxy leaves initDb resolving true and is logged as text, as for an ordinary Error', async () => {
++    expect(await hook(revokedProxy())).toEqual({ ok: true, value: true });
++    expect(LINE(HOOK)).toHaveLength(1);
++    expect(reasonOf(LINE(HOOK)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: an onReady hook failure that is an Error whose message getter throws leaves initDb resolving true and is logged as text, as for an ordinary Error', async () => {
++    expect(await hook(getterThrows())).toEqual({ ok: true, value: true });
++    expect(LINE(HOOK)).toHaveLength(1);
++    expect(reasonOf(LINE(HOOK)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: an onReady hook failure that is an Error whose message is a Symbol leaves initDb resolving true and is logged as text, as for an ordinary Error', async () => {
++    expect(await hook(withMessage(Symbol('ks1868')))).toEqual({ ok: true, value: true });
++    expect(LINE(HOOK)).toHaveLength(1);
++    expect(reasonOf(LINE(HOOK)[0])).toBe('Symbol(ks1868)');
++  });
++});
+diff --git a/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-service-db-read-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-service-db-read-catches-unreadable-throw.test.ts
+new file mode 100644
+index 0000000000..3172ee7f52
+--- /dev/null
++++ b/Blockchain/Dev/services/referral/src/__tests__/ks1868-referral-service-db-read-catches-unreadable-throw.test.ts
+@@ -0,0 +1,146 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868 (operator 90 screen, referral service): four DB read catches of services/referral/src/services/referralService.ts pass
++// `err?.message` straight into the logger's meta object, unguarded: dbGetReferralCode (line 168), dbGetCodesByOwner (line 180),
++// dbGetReferralsByReferrer (line 204) and dbGetRewardsByUser (line 216). `?.` guards null and undefined only: a thrown value whose
++// read throws (a revoked Proxy, an Error whose message getter throws) makes the catch throw, so the public read REJECTS where an
++// ordinary Error gets a logged failure and the fallback (`undefined` or an empty list). The cells make the database stand-in
++// reject with such a value and assert the public method still resolves with the fallback and the failure is logged as text. The
++// stand-in rejects with a plain function, not vi.fn(): a spy could inspect a revoked Proxy and fail before the code under test saw
++// it. Harness: the real module with ../db and ../utils/logger replaced by plain stand-ins; no database, no network.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: (..._args: unknown[]) => Promise.reject(h.toThrow),
++}));
++
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.logs.push({ level, message, meta });
++  };
++  return { createLogger: () => ({ debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') }) };
++});
++
++import { referralService } from '../services/referralService';
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logs.length = 0;
++});
++
++const LOG = (message: string) => h.logs.filter((l) => l.message === message);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta?: Record<string, unknown> } | undefined): string => {
++  const e = l?.meta?.error;
++  return typeof e === 'string' ? e : '<' + typeof e + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++type Out = { threw: boolean; value?: unknown };
++async function run(fn: () => Promise<unknown>, value: unknown): Promise<Out> {
++  h.toThrow = value;
++  try {
++    return { threw: false, value: await fn() };
++  } catch {
++    return { threw: true };
++  }
++}
++
++const SITES = [
++  { name: 'getCodeById (dbGetReferralCode)', log: 'DB read referral code failed', call: () => referralService.getCodeById('code-ks1868'), fallback: undefined },
++  { name: 'getUserCodes (dbGetCodesByOwner)', log: 'DB read codes by owner failed', call: () => referralService.getUserCodes('user-ks1868'), fallback: [] as unknown[] },
++  { name: 'getReferralsByReferrer (dbGetReferralsByReferrer)', log: 'DB read referrals by referrer failed', call: () => referralService.getReferralsByReferrer('user-ks1868'), fallback: [] as unknown[] },
++  { name: 'getUserRewards (dbGetRewardsByUser)', log: 'DB read rewards by user failed', call: () => referralService.getUserRewards('user-ks1868'), fallback: [] as unknown[] },
++];
++
++describe('KS-1868 referral service: the four DB read catches survive a thrown value they cannot read', () => {
++  it('control ks1868 C1: an ordinary Error from getCodeById is logged with its message and the fallback is answered', async () => {
++    const s = SITES[0];
++    expect(await run(s.call, new Error('db boom'))).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('db boom');
++  });
++  it('control ks1868 C2: an ordinary Error from getUserCodes is logged with its message and the fallback is answered', async () => {
++    const s = SITES[1];
++    expect(await run(s.call, new Error('db boom'))).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('db boom');
++  });
++  it('control ks1868 C3: an ordinary Error from getReferralsByReferrer is logged with its message and the fallback is answered', async () => {
++    const s = SITES[2];
++    expect(await run(s.call, new Error('db boom'))).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('db boom');
++  });
++  it('control ks1868 C4: an ordinary Error from getUserRewards is logged with its message and the fallback is answered', async () => {
++    const s = SITES[3];
++    expect(await run(s.call, new Error('db boom'))).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('db boom');
++  });
++  it('RED ks1868 R1: a revoked Proxy from getCodeById is logged as text and the fallback is answered', async () => {
++    const s = SITES[0];
++    expect(await run(s.call, revokedProxy())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws from getCodeById is logged as text and the fallback is answered', async () => {
++    const s = SITES[0];
++    expect(await run(s.call, getterThrows())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: a revoked Proxy from getUserCodes is logged as text and the fallback is answered', async () => {
++    const s = SITES[1];
++    expect(await run(s.call, revokedProxy())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: an Error whose message getter throws from getUserCodes is logged as text and the fallback is answered', async () => {
++    const s = SITES[1];
++    expect(await run(s.call, getterThrows())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: a revoked Proxy from getReferralsByReferrer is logged as text and the fallback is answered', async () => {
++    const s = SITES[2];
++    expect(await run(s.call, revokedProxy())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R6: an Error whose message getter throws from getReferralsByReferrer is logged as text and the fallback is answered', async () => {
++    const s = SITES[2];
++    expect(await run(s.call, getterThrows())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R7: a revoked Proxy from getUserRewards is logged as text and the fallback is answered', async () => {
++    const s = SITES[3];
++    expect(await run(s.call, revokedProxy())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R8: an Error whose message getter throws from getUserRewards is logged as text and the fallback is answered', async () => {
++    const s = SITES[3];
++    expect(await run(s.call, getterThrows())).toEqual({ threw: false, value: s.fallback });
++    expect(LOG(s.log)).toHaveLength(1);
++    expect(reasonOf(LOG(s.log)[0])).toBe('unreadable thrown value');
++  });
++});
+diff --git a/Blockchain/Dev/services/referral/src/db.ts b/Blockchain/Dev/services/referral/src/db.ts
+index df8fd53e05..e3d6d5ccb4 100644
+--- a/Blockchain/Dev/services/referral/src/db.ts
++++ b/Blockchain/Dev/services/referral/src/db.ts
+@@ -34,7 +34,14 @@ export function getPool(): Pool {
+     });
+ 
+     pool.on('error', (err: Error) => {
+-      dbLog('error', 'DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      dbLog('error', 'DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+@@ -94,7 +101,14 @@ async function runDbReadyHook(): Promise<void> {
+     await onDbReady();
+   } catch (err: any) {
+     // Boot work failing must not un-flag an otherwise reachable DB.
+-    dbLog('error', 'DB ready boot work failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    dbLog('error', 'DB ready boot work failed', { error: reason });
+   }
+ }
+ 
+diff --git a/Blockchain/Dev/services/referral/src/services/fraudDetection.ts b/Blockchain/Dev/services/referral/src/services/fraudDetection.ts
+index dda2e02f0a..40f7780156 100644
+--- a/Blockchain/Dev/services/referral/src/services/fraudDetection.ts
++++ b/Blockchain/Dev/services/referral/src/services/fraudDetection.ts
+@@ -111,7 +111,14 @@ export class FraudDetectionService {
+       }
+       logger.info('Loaded fraud data from DB', { ips: this.memIpReferralCounts.size, devices: this.memDeviceReferralCounts.size, flaggedUsers: this.memKnownFraudUsers.size });
+     } catch (err: any) {
+-      logger.warn('Failed to load fraud data from DB — starting empty', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('Failed to load fraud data from DB — starting empty', { error: reason });
+     }
+   }
+ 
+diff --git a/Blockchain/Dev/services/referral/src/services/milestoneService.ts b/Blockchain/Dev/services/referral/src/services/milestoneService.ts
+index 2dfbbc4ce8..989b96ed51 100644
+--- a/Blockchain/Dev/services/referral/src/services/milestoneService.ts
++++ b/Blockchain/Dev/services/referral/src/services/milestoneService.ts
+@@ -121,7 +121,14 @@ export class MilestoneService {
+       const r = result.rows[0];
+       return this.rowToProgress(r);
+     } catch (err: any) {
+-      logger.error('DB read user progress failed', { userId, error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB read user progress failed', { userId, error: reason });
+       return null;
+     }
+   }
+@@ -156,7 +163,14 @@ export class MilestoneService {
+       }));
+     } catch (err: any) {
+       // Table may not exist yet — fall back gracefully
+-      logger.error('DB read pending rewards failed', { userId, error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB read pending rewards failed', { userId, error: reason });
+       return [];
+     }
+   }
+@@ -177,7 +191,16 @@ export class MilestoneService {
+         [userId, JSON.stringify(progress.milestonesAchieved || []), progress.qualifiedReferrals || 0,
+          progress.totalMilestoneRewards?.toString() || '0', progress.currentTier || null]
+       );
+-    } catch (err: any) { logger.error('DB save milestone failed', { error: err?.message }); }
++    } catch (err: any) {
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB save milestone failed', { error: reason });
++    }
+   }
+ 
+   private async dbSavePendingReward(reward: Reward): Promise<void> {
+@@ -191,7 +214,14 @@ export class MilestoneService {
+          reward.sourceId, reward.sourceType, reward.createdAt, JSON.stringify(reward.metadata || {})]
+       );
+     } catch (err: any) {
+-      logger.error('DB save pending reward failed', { rewardId: reward.id, error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB save pending reward failed', { rewardId: reward.id, error: reason });
+     }
+   }
+ 
+@@ -235,7 +265,14 @@ export class MilestoneService {
+       const result = await query('SELECT COUNT(*) AS cnt FROM svc_referral_milestones');
+       logger.info('Milestone DB verified', { rows: result.rows[0]?.cnt });
+     } catch (err: any) {
+-      logger.warn('Milestone table verification failed — table may need migration', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('Milestone table verification failed — table may need migration', { error: reason });
+     }
+   }
+ 
+diff --git a/Blockchain/Dev/services/referral/src/services/referralService.ts b/Blockchain/Dev/services/referral/src/services/referralService.ts
+index b46ec92224..320cde4744 100644
+--- a/Blockchain/Dev/services/referral/src/services/referralService.ts
++++ b/Blockchain/Dev/services/referral/src/services/referralService.ts
+@@ -165,7 +165,14 @@ export class ReferralService {
+       if (result.rows.length === 0) return null;
+       return this.rowToReferralCode(result.rows[0]);
+     } catch (err: any) {
+-      logger.error('DB read referral code failed', { error: err?.message, id });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB read referral code failed', { error: reason, id });
+       return null;
+     }
+   }
+@@ -177,7 +184,14 @@ export class ReferralService {
+       const result = await query('SELECT * FROM svc_referral_codes WHERE owner_id = $1', [ownerId]);
+       return result.rows.map((r: any) => this.rowToReferralCode(r));
+     } catch (err: any) {
+-      logger.error('DB read codes by owner failed', { error: err?.message, ownerId });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB read codes by owner failed', { error: reason, ownerId });
+       return [];
+     }
+   }
+@@ -201,7 +215,14 @@ export class ReferralService {
+       const result = await query('SELECT * FROM svc_referrals WHERE referrer_id = $1', [referrerId]);
+       return result.rows.map((r: any) => this.rowToReferral(r));
+     } catch (err: any) {
+-      logger.error('DB read referrals by referrer failed', { error: err?.message, referrerId });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB read referrals by referrer failed', { error: reason, referrerId });
+       return [];
+     }
+   }
+@@ -213,7 +234,14 @@ export class ReferralService {
+       const result = await query('SELECT * FROM svc_referral_rewards WHERE user_id = $1', [userId]);
+       return result.rows.map((r: any) => this.rowToReward(r));
+     } catch (err: any) {
+-      logger.error('DB read rewards by user failed', { error: err?.message, userId });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB read rewards by user failed', { error: reason, userId });
+       return [];
+     }
+   }
+diff --git a/Projects Documents/fragments/cheat/KS-1868-referral-db-and-milestones.html b/Projects Documents/fragments/cheat/KS-1868-referral-db-and-milestones.html
+new file mode 100644
+index 0000000000..d0d78d111d
+--- /dev/null
++++ b/Projects Documents/fragments/cheat/KS-1868-referral-db-and-milestones.html	
+@@ -0,0 +1,17 @@
++<h2>Referral's pool listener, ready hook, milestone, referral-service and fraud-load catches keep logging when the thrown value is unreadable &mdash; KS-1868, referral, TIER 1</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Fourteen catches in <code>services/referral/src</code> (the pool listener and ready hook in <code>db.ts</code>, the progress, pending-reward, verify and two write catches in <code>milestoneService.ts</code>, four read catches in <code>referralService.ts</code>, the load catch in <code>fraudDetection.ts</code>) read <code>err.message</code> unguarded. A revoked Proxy or a throwing <code>message</code> getter made that read throw, so the call rejected. Each now logs text, or the constant <code>unreadable thrown value</code>, and takes its ordinary fallback. That fallback is not harmless here: a failed progress read becomes a fresh default and the milestone check awards every qualifying milestone again as CLAIMABLE rewards; a failed fraud load starts the fraud service empty.
++    </td></tr><tr><td>The five edits are held Spark passes O89-P2, O90-P4, O90-P5, O90-P11 and O90-P12, applied strictly and never hand-edited. TIER 1 (Opus gate) for the reward and fraud outcomes.
++    </td></tr></table>
++</div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> KS-1868 stays open. A real Postgres, a boot on a box, the unguarded reads that remain in <code>referralService.ts</code>, the four platform suites, whole-suite CI and Node 24 were not run.
++    </td></tr></table>
++</div>
++<h3>Running the cells</h3>
++<pre><code>npm --prefix Blockchain/Dev/services/referral test -- src/__tests__/ks1868-milestone-service-db-read-catches-unreadable-throw.test.ts   # 9 cells; four more files hold 32
++npm --prefix Blockchain/Dev/services/referral test                                                                                      # 12 files / 77 cells</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>41</strong> in 5 files; red first: 26 of 41 failed without the change, all by assertion; 15 controls green</td></tr>
++<tr><td>suite, before then after</td><td>referral 36 then 77 (measured 2026-11-03, Node v26.8.1)</td></tr>
++</table>
+diff --git a/Projects Documents/fragments/flow/KS-1868-referral-db-and-milestones.html b/Projects Documents/fragments/flow/KS-1868-referral-db-and-milestones.html
+new file mode 100644
+index 0000000000..d92549464d
+--- /dev/null
++++ b/Projects Documents/fragments/flow/KS-1868-referral-db-and-milestones.html	
+@@ -0,0 +1,11 @@
++<h2><!--n-->. Referral's pool listener, ready hook, milestone, referral-service and fraud-load catches keep logging when the thrown value is unreadable (KS-1868, referral, TIER 1)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> Five held passes in <code>services/referral/src</code>: <code>db.ts</code> (the pg pool <code>'error'</code> listener and the <code>runDbReadyHook</code> catch), <code>services/milestoneService.ts</code> (three database read catches and the table-verify catch in one pass, two write catches in another), <code>services/referralService.ts</code> (four database read catches) and <code>services/fraudDetection.ts</code> (the load-from-database catch). Each passed <code>err.message</code> or <code>err?.message</code> into the log call; for a revoked Proxy or an Error whose <code>message</code> getter throws, that read threw inside the catch, so the call rejected instead of taking its fallback: <code>null</code> or an empty list for a read, a swallowed failure for a write, an empty start for the fraud load. Each read now sits in a try (<code>String(message)</code>, or the constant <code>unreadable thrown value</code>), so a hostile value takes the same fallback an ordinary Error already takes. <strong>This changes outcomes, not only log lines:</strong> a failed progress read returns the fresh default, and the milestone check then awards every milestone the user qualifies for as new CLAIMABLE rewards (6 of 6 in the recorder), and the fraud service starts with no counters.
++    </td></tr><tr><td>Forty-one new cells in five new test files: <code>ks1868-referral-db-pool-error-and-ready-hook-unreadable-throw.test.ts</code> (149 lines, 9 cells), <code>ks1868-milestone-service-db-read-catches-unreadable-throw.test.ts</code> (133 lines, 9), <code>ks1868-milestone-service-db-write-catches-unreadable-throw.test.ts</code> (111 lines, 6), <code>ks1868-referral-service-db-read-catches-unreadable-throw.test.ts</code> (146 lines, 12) and <code>ks1868-fraud-detection-load-from-db-catch-unreadable-throw.test.ts</code> (95 lines, 5). Cell ids <code>control ks1868 C1</code> onward and <code>RED ks1868 R1</code> onward in each. The product bytes are <code>db.ts</code> (+16/-2), <code>fraudDetection.ts</code> (+8/-1), <code>milestoneService.ts</code> (+42/-5) and <code>referralService.ts</code> (+32/-4). A scratch recorder (not committed) drove eight real entry points with the real winston logger and only <code>../db</code> replaced: at base a revoked Proxy and a throwing getter made seven of them reject; at head all seven take the ordinary-Error outcome; <code>generateCode</code> still rejects at head because it reaches two sites these passes do not touch.
++    </td></tr></table>
++<h3><!--n-->.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Red without the change, green with it, and no other cell moves.</strong></td><td> <strong>Red first, by assertion, develop <code>26955bf1b828</code>:</strong> with only the test hunks applied, 26 of 41 cells failed (every failure an <code>AssertionError</code>) and the 15 controls passed. The first run also failed control C1 of the db file on a 5000 ms timeout (22266 ms) under load; it was re-run once and is not counted. With the product hunks added, 41 of 41 pass. The two passes on <code>milestoneService.ts</code> apply to the same tree in either order (tree <code>317ef362257b</code>, forward and reversed, with all five passes).
++    </td></tr><tr><td><strong>Whole referral suite, before then after:</strong> 7 files / 36 cells then 12 / 77. The first default run after the change failed one cell, the db file's control C1, on the 5000 ms timeout (7619 ms at load); it is not counted, and the re-run read 77 of 77. <code>tsc -p</code> on the service tsconfig: 0 errors, and 0 with the tests included, at base and head. eslint on the ten changed files: no findings.
++    </td></tr></table>
++<h3><!--n-->.2 What it does not cover</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A real Postgres or <code>pg</code> pool, a boot on a box, an HTTP request, whether a real thrown value of this kind occurs, the other unguarded reads in <code>referralService.ts</code> (lines 68, 85, 99, 206, 257, 270, 286, 302 and 327 at the base) and in <code>db.ts</code> (<code>probeDb</code>), whole-suite CI, the four platform suites and Node 24. KS-1868 stays open.
++    </td></tr></table>
