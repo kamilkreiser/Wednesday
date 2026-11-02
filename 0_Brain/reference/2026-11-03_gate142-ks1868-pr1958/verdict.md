@@ -104,3 +104,7 @@ The live PR body; the real `getTransaction` and a real Blockfrost client (provid
 
 ## Processes
 All runs I started (npm ci, shared build, probe matrix x2, suites, mutants, tsc, eslint, fragments) have finished; none left (ps clean).
+
+---
+## ADDENDUM (Wednesday, 2026-11-03 morning seat) — mutant headline corrected
+The BLUF and the section-5 header say 26 runs, 23 killed, 3 survived. Section 5's own table (13 mutants x 2 sites) has **19 KILLED and 7 SURVIVED**: M4 at both sites, M5 on the poll, M6 at both sites, M12 at both sites. Of the 7, 5 are real survivors (S-M4, C-M4, S-M6, S-M12, C-M12) and 2 equivalent (C-M5, C-M6), as the section's own text says. Counted by Seat B 79th by script (its evidence/gate142_mutant_count.out, ADDENDUM mail 18:46Z). The verdict (GO WITH NOTES) does not change: G142-F1/F6 name the real survivors and the probe shows the behaviour correct. PR 1958 merged as 35d23ac61e13 on that verdict.
