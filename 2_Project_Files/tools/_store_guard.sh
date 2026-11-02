@@ -46,7 +46,7 @@ store_guard() {
   local behind; behind="$(git -C "$root" rev-list --count HEAD..origin/main -- "$rel" 2>/dev/null || echo 0)"
   if [ "${behind:-0}" -gt 0 ]; then
     echo "store_guard: REFUSED — origin/main has $behind newer commit(s) touching $rel." >&2
-    git -C "$root" log --oneline -3 HEAD..origin/main -- "$rel" >&2
+    git -C "$root" log --format='%h' -3 HEAD..origin/main -- "$rel" >&2   # hashes only: a subject here can be another client's (ledger 2026-11-02 w=4)
     echo "  PULL FIRST. Writing now would revert whatever those commits changed," >&2
     echo "  and on this file that means losing Kam's rulings." >&2
     return 7
