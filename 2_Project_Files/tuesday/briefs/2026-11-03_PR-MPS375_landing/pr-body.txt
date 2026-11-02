@@ -1,0 +1,13 @@
+Test only change. One file changes (the template isolation test); no product byte and no scanner line is changed.
+
+What it adds:
+- Three guards over the Templates files (a raw string, a preprocessor line, a format after a colon in an interpolation hole). The format guard now reads the regular, verbatim ($@ and @$) and escaped-quote forms, not only a hole first in a regular string.
+- The control fact now also checks that the preprocessor guard sees a directive on a later line, that the guard list holds the three shapes in order, and that each entry fires on its own planted line.
+- One fact for each of four scanner decision points (the hole depth, the doubled quote of a verbatim string, the backslash of a regular string, the quote character literal), with two added cases that close the depth and the escaped-apostrophe gaps.
+- The three comments are corrected. They say which forms the format guard reads and name the forms it still does not read: a string literal or a quote character literal inside an earlier hole of the same string, and a nested pair of braces before the colon in the hole. Other forms are not guarded.
+
+Left as it is: the doubled-brace branch of the scanner is reported as equivalent to the fall-through and is neither pinned nor removed.
+
+Also left as it is, and ticketed: two forms the format guard reads today have no row of their own, so a narrowed pattern that skipped them would leave every row green: a multi-line verbatim string with a format hole after a line break, and a hole split over two lines. The fix is two literal rows.
+
+Verified before this change: full build and test of the solution at the merged tree, both with no warnings; every guard and branch row turns red under a planted fault.
