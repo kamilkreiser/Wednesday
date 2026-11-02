@@ -35,11 +35,11 @@ model: claude-sonnet-5-5 -- C2 (`model-routing.md:92`; the Jira comment is a C7 
 8. `df -g` under 25 GiB.
 
 ## Stamp
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Launch authority and hard stop (READY 90, HARD STOP 180 minutes after Step-0, absolute clocks written by you): ____
-- SLOT REC-359 the one Jira comment (FILE or HOLD; default HOLD; recommended FILE): ____
-- SLOT REC-CLAR the C-86 entry on `records/b1184` and its land (FILE or HOLD; default HOLD; recommended FILE): ____
+- STAMP: STAMPED 06:47 AEDT 2026-11-03 by Tuesday s233. Read whole: this kit lines 1-67 and the drafter's reply. stamp_paths_check run ALONE at code main 314b53f6 rc 0 (OK 7); SHOW PurchaseCalculator.cs:338, PurchaseInput.cs:40, docs/ENGINE.md:166 as the kit says. Root records repo HEAD ccf68fb (read by rev-parse), highest heading C-85 at :2325 (grep -n). The note-words card mps-359-persite-note-words-1103 is already POSTED to the product owner (HTTP 201): your comment's 'go to the product owner first, as a wording card' is true at your write. The pane list in the kit's first line is stale (M86 and G308 have since closed): REFUSE 3 still governs.
+- LAUNCH WINDOW: From 06:47 until 09:30 AEDT today; launch_when_cool, one waiter at load1 below 7. Live beside you: Datasec/MPS-G307, Datasec/MPS-M85, Datasec/NexusAI-N93, fleet-monitor.
+- Launch authority and hard stop (READY 90, HARD STOP 180 minutes after Step-0, absolute clocks written by you): Tuesday, under the product owner's 2026-11-03 06:38:29 ruling (option a) and 06:39:15 addendum on MPSCALC-359, and the standing rule that every Datasec project keeps his clarifications verbatim (2026-09-17). READY = your Step-0 date + 90 minutes, HARD STOP = + 180 minutes, both written absolute by you at Step 0, and not after 11:00 AEDT today.
+- SLOT REC-359 the one Jira comment (FILE or HOLD; default HOLD; recommended FILE): FILE
+- SLOT REC-CLAR the C-86 entry on `records/b1184` and its land (FILE or HOLD; default HOLD; recommended FILE): FILE
 
 ## THE WORK
 **Step 0.** `date`; `df -g` (STOP under 25); copy this kit into `1_Project_Definition/Briefs/` (`cmp`, sha256); absolute target and hard stop; REFUSE; `Briefs/2026-11-03_B1184_STATUS.md` (first line `RECORDS B1184: PENDING`; STATUS-NOW, last line `WORKING: <step>, <time>` true after every step). Take the `*-before` files and the Jira counts ONCE. **Never `du` over `.tools`; never open `.tools/b1169`, `.tools/wt-b1169-*` or any `.tools/b11*` except `b1171` (read) and `b1184`.**
@@ -64,4 +64,4 @@ ASCII; `<<NAME>>` printed by program in the same action as the write; after the 
 ## UNMEASURED by the drafter
 No write; MPSCALC counts (total, Done, Backlog); the state of the panes' branches; G307's scope; whether the project's Jira text scan accepts the long-dash substitution (it is ASCII by construction); the contents of the decision store; the hosted state; whether any later message from the product owner changed the ruling after 06:39:15.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 06:47 by Tuesday s233: kit lines 1-67 and the drafter's reply
