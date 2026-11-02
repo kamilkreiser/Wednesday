@@ -15189,5 +15189,33 @@
   "project": "Secuura",
   "ts": "2026-11-02T11:42:01.520325+11:00",
   "text": "Billing double credit, your ruling a: the ticket is filed as KS-1933, at High. I've approved the seat's design, and it's building now. Nothing deploys without your tap.\n\nHow it works: each Stripe payment gets one record in our database, claimed before the credit goes to Stripe. A second event, a retry or a replay for the same payment finds that record and adds nothing. It needs one new database table, which won't run anywhere until a deploy.\n\nOne gap remains, narrower than today's. If Stripe applies the credit and the connection drops before we hear back, a retry can still credit again. Closing that means writing the payment ID onto the Stripe customer record, which is a new field in Stripe. I've kept that out; it's yours if you want it.\n\nThe seat also found two more money bugs, both getting tickets, neither being fixed yet. First, a checkout session is credited even when it isn't paid yet, which matters only if delayed payment methods are on. Second, the credit routine can add twice when two updates race.\n\nYour one Stripe check is now three questions. Is the endpoint subscribed to checkout.session.completed, to payment_intent.succeeded, or both? And are delayed payment methods enabled?"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T12:05:04.578468+11:00",
+  "text": "Billing update: the fix for crediting a purchase only once is built and proven, and goes to its Opus gate next. All 22 new tests pass, including a run on a real throwaway Postgres where 20 simultaneous claims produced exactly one credit. The two bugs it found are filed: KS-1934 for the unpaid-checkout credit and KS-1935 for the credit routine that can add twice.\n\nOne thing you should know, which I've checked in the code myself. A purchase through the portal today probably credits nothing at all. The checkout only attaches a Stripe customer if the logged-in user has one, and nothing in our auth service ever sets that. With no customer, the webhook logs No customer ID and grants zero credits. So the double credit can't happen through the portal yet; the bigger gap is that paid purchases may not credit at all. KS-1897 already tracks this. If the portal is taking real payments, that's the urgent one."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T12:09:37.375070+11:00",
+  "text": "On it. Here's the board as it stands, from the counting tool. 18 Urgent and 206 High tickets are open. 129 of those are In Progress or In Review, and 137 already have a GitHub PR linked. So a lot of the in-progress ones are probably built and waiting on a gate, a merge or a deploy, not unstarted.\n\nThere's no Dependency label on the board, so I've taken you to mean the dependency and advisory tickets. That's 8 of the 18 Urgent ones, the push freezes on npm advisories, plus 12 tickets with depend in the title. Tell me if you meant something else.\n\nI won't guess an ETA. Three triage agents are now reading every one of the 232 tickets against its PR and develop. Each ticket gets a bucket: done but not closed, PR open, buildable by an agent and how big, waiting on you, or blocked. You'll get the plan and a realistic finish time in about an hour.\n\nMeanwhile the fleet keeps going. Two PRs merged this morning and PR 1917 is queued. Raise seats, a billing seat and three Spark operators are working, and a third raise seat launches as soon as the machine has room."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T12:09:47.781192+11:00",
+  "text": "Correction to my last message: two Spark operators are running, not three. A third finished this morning with five fixes held. One raise seat is working now and a second launches when the machine has room."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T12:19:20.319865+11:00",
+  "text": "Your tickets, read one by one, the plan is attached. Of the 232 Urgent, High and dependency tickets, 100 are already merged and deployed to kintsugi; the board just never closed them. That's most of your In Progress pile. 91 are work agents can build, about 176 seat hours. 21 need a decision from you; they're listed in the plan. The rest are blocked, stale, or waiting on Stuart or Peter.\n\nPlan: close-out seats start now, checking each of the 100 against the dev box and closing it with an evidence comment. Dependency work goes first: two advisory exceptions run out on the 9th and would freeze every push again. Then build seats take the 91 in batches, Urgent first, each through a QA gate and a merge. The Spark takes the mechanical ones.\n\nWhen: about two days to close the 100. About four to five days of round-the-clock fleet time for everything agents can build. That's an estimate: the machine runs three or four seats at once, and every push takes fifteen to twenty-five minutes. The big risks are the weekly allowance and your 21 decisions. I'll put those on fleet activity as cards, each with a recommended default.\n📎 file in the live drawer: PLAN.md (id f-f487cb8b4d)"
  }
 ]
