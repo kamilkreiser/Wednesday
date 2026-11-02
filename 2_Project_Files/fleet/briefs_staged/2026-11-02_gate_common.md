@@ -25,6 +25,7 @@ Read gate 90's verdict WHOLE first — it is the shape and the bar: `/Volumes/De
 ## Limits
 - zsh with hooks: never `cd` (absolute paths, `git -C`); `RC=$?` on the same line; outputs to files; no `=====`; deletes only of your own scratch by literal path; macOS has no `timeout`.
 - Writes ONLY under your workdir. Never into `/Volumes/DevMASTER/!CODING/` (the deploy key is read, not copied).
+- **Your shell's cwd is WEDNESDAY'S OWN TREE, not your clone.** Every test runner is anchored to your tree explicitly: `vitest run --root <your tree>/<service>`, `npx --prefix <dir>`, `jest --rootDir <dir>`, `npm --prefix <dir>`. A bare `vitest run` from the cwd scans Wednesday's tree, runs other copies of the tests and writes `node_modules/.vite` into it (gate 119, 2026-11-02: it did, and the GO path's stray check refused on it). Stop every background run you started before you report, and list it as stopped.
 - Secuura content only. No secrets in any file you write.
 - Write verdict.md with a Bash heredoc (`cat > .../verdict.md <<'EOF'`) — the Write tool refuses subagent report files.
 
