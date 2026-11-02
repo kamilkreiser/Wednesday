@@ -56774,9 +56774,9 @@
   ],
   "recommended": "a",
   "ts": "2026-11-03T05:55:48.785355+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-03T06:40:30.389061+11:00",
   "prior_rulings_overridden": [
    "2026-08-28 09:33",
    "CARD secuura-ks670-blockfrost-plan",
@@ -56788,6 +56788,47 @@
    "CARD wed-morning-plan-1031",
    "CARD wed-morning-plan-1101",
    "CARD wed-morning-plan-1102"
+  ]
+ },
+ {
+  "id": "secuura-pr1961-erasure-skip-not-shredded-1103",
+  "client_project": "Secuura/Blockchain",
+  "title": "FYI before merge: a GDPR erasure can complete while one encrypted row stays readable (pre-existing; PR 1961 makes a rare case behave the same)",
+  "bluf": "For your information before I merge PR 1961. The QA gate (Opus, gate 145) ran the real GDPR erasure with only the database replaced. If one document-lifecycle event row cannot be decrypted during the erasure, the sweep skips it, and the erasure still reports completed. That row stays encrypted under the PLATFORM keyring, not the person's own key, so destroying the person's key in step 11 does not erase it: anyone with the platform keys, including from backups, can still read the email in it. This is how it works today for an ordinary decrypt error. PR 1961 only changes a rarer case (an unreadable error value), which used to abort the erasure loudly and now completes quietly the same way. So merging does not create the gap; it makes one more path land in it. A High ticket is being filed now for the gap itself, with two fix shapes: record skipped rows and do not mark the request completed while any remain, or encrypt those payloads under the person's own key so step 11 erases them. Limits: measured with a stand-in database and test keys, not a live system. I recommend a: merge 1961 on its gate, and fix the gap under the new ticket.",
+  "default_action": "a after 4 hours without a ruling: merge PR 1961 on its gate; the gap stays a High ticket in the normal queue",
+  "options": [
+   {
+    "key": "a",
+    "label": "Merge PR 1961 on its gate; fix the erasure gap under the new High ticket",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Hold PR 1961 until the erasure gap is fixed, so the rare case keeps aborting loudly",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Merge, and also make the erasure gap fix the next raise seat's first job",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T06:28:44.624101+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-03T06:40:26.981350+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-10 11:41",
+   "2026-09-13 16:55",
+   "2026-09-14 21:52",
+   "2026-09-15 16:36",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-erasure-door-absolute-form-bypass",
+   "CARD secuura-ks1187-erasure-door-reads-back",
+   "CARD secuura-ks695-erasure-merge-timing-1013",
+   "CARD secuura-ks1580-erasure-revoked-key-code-1019",
+   "CARD secuura-ks758-erasure-log-subject-ref-1020"
   ]
  }
 ]
