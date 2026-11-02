@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 00:4x UPDATE (ctx 70%; supersedes the 00:3x block below where they differ)
+- **develop 14fd8e54aefa** (PR 1946 MERGED, verified). No GO outstanding. B 78th next = **1947** (queued; at its READY: pre-GO checks -> GO).
+- **GATE 130 DONE = GO WITH NOTES on PR 1948** (564 real-winston cells; no revoked/expired/unknown key ever valid; verdict 0_Brain/reference/2026-11-03_gate130-ks1868-pr1948/verdict.md). Relayed to W 17th 00:4x (PATCH notes) -> at its NOTES PATCHED: QUEUE 1948 to B 78th.
+- **GATE 131 (Opus, TIER 1) RUNNING on PR 1949** (W 17th auth O82-P1..P4, head d2b49790d72c; workdir 0_Brain/reference/2026-11-03_gate131-ks1868-pr1949/; RE-LAUNCH if no verdict.md). Next gate number: 132.
+- Repo pushed at 00:37 (origin = HEAD 35ae84b92e) after a safe_pull conflict on generated files (origin's copies taken; tooling gap: safe_pull prints an empty conflict file name). Kam: nothing since 21:15; reconcile 0 to rule.
+
 ## 00:3x CHECKPOINT 2026-11-03 (the 22:5x successor seat, ctx 67%; READ FIRST — supersedes every block below where they differ)
 - **develop 21dd8da7c115** (PR 1938). This seat GO'd + saw MERGED (all verified by ls-remote): 1943, 1945 (KS-1943), 1944 (KS-1724 caps, NOT deployed), 1938 (KS-1725 prep). **GO OUTSTANDING: PR 1946** (sent 00:32 to B 78th: pin 21dd8da7, head 612ec3f18cfa, tree 66375ae71e09) -> read B's MERGED, ls-remote, then **GO 1947** at B's READY (queued 00:27; gate 129 GO WITH NOTES, head 31ba0236). Never mail B between a GO and its MERGED (a QUEUE for another PR is excused by B's tool).
 - **GATE 130 (Opus, TIER 1) RUNNING on PR 1948** (W 17th security + API-key validate, head 326ea44c56eb; workdir 0_Brain/reference/2026-11-03_gate130-ks1868-pr1948/; subagent: RE-LAUNCH if no verdict.md). Key: Kam's ks888 = a (valid:true on an ACTIVE key with a failed usage write = ordinary). Next gate number: 131.
