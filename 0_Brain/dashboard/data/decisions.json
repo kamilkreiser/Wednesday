@@ -55218,5 +55218,38 @@
    "CARD hpsmpoc-na-ignore-reading",
    "CARD hpsmpoc-optin-warning-text-1006"
   ]
+ },
+ {
+  "id": "composer-98-scanner-round-cap-1102",
+  "client_project": "Datasec/Security-Composer",
+  "title": "Composer: land the deploy-document scanner test after its second NO GO, or spend a third round?",
+  "bluf": "Kam picks what happens to PCOMP-98 at the round cap. The branch is one test file that scans DEPLOY.md's commands for lines bash would refuse to paste; no product or DEPLOY.md byte changes. Gate B1108 (round 2 of 2, NO GO, two Majors): everything the old scanner caught is still caught, 0 lost over 5,255 blocks run in a real bash, and the first gate's finding is closed. The two Majors are gaps: three states no row pins, and one new shape neither old nor new scanner reports (a stray reserved word after an open bracket, 4 lines). Figures are the gate's, not re-run by Tuesday. CodeQL has not scanned it because no PR exists yet. Earlier cards sharing a word are other subjects.",
+  "default_action": "If Kam has not ruled by 16:00 today, Tuesday does a after re-reading the PR, main and CodeQL. The tests are additive and a later edit reverses them. Nothing deploys.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Land it and ticket the gaps",
+    "detail": "Tuesday opens the PR, lands it through checks and CodeQL, and a records seat tickets the rows owed: 3 state cells, 1 row for the new shape, 1 for the here-document form. PCOMP-98 stays open until those rows land, because its clause 4 is not met if the new shape counts. Not deployed."
+   },
+   {
+    "key": "b",
+    "label": "Third round before landing",
+    "detail": "A builder adds those rows on this branch and a third gate runs. Costs several hours on a loaded machine, and the Composer lanes queued behind it wait."
+   },
+   {
+    "key": "c",
+    "label": "Order a fixed scan for the new shape",
+    "detail": "As b, and the scanner itself also models a stray reserved word. Larger, and new behaviour needs its own gate."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:08:10.667987+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 17:03",
+   "2026-09-10 20:15"
+  ]
  }
 ]
