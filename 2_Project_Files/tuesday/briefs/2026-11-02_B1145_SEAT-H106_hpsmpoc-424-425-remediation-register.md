@@ -96,22 +96,22 @@ No path outside the property; no change to `RoadmapScreen.tsx` (the line at `:75
 
 ## Stamp
 The unstamped copy reads 15 such lines. Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- GATE-ROUND (default ROUND 1 OF 2 on class "remediation register read and refusal rules", no NO GO before): ____
-- GATE-TIER (default tier 1 Opus, G1, model-routing.md:108): ____
-- WORDS-425-SUBMITTED (the exact refusal sentence for Evidence submitted, in backticks, from the product owner): ____
-- WORDS-425-VERIFIED (the exact refusal sentence for Verified complete, in backticks; the unchanged sentence is the one at remediation-store.ts:41): ____
-- SCOPE-425-EMPTY (`refuse` or `accept`: whether an EMPTY reference is refused for Evidence submitted): ____
-- KEYS (none in a changed line or the message): ____
-- SCOPE-OUT (three paths; no word beyond the slots; Not started and In progress unchanged): ____
-- LAUNCH WINDOW (until; load1; live seats): ____
-- Stamped by (the seat that READ this brief and its drafter report): ____
-- Launch authority: ____
-- Hard stop and target READY (AEDT clocks written at Step 0): ____
-- Head, main and open PRs at launch (expected main `5f128fb...` or later, 0 PRs): ____
-- Model receipt line and load1 at launch: ____
+- STAMP: B1145 stamped by Tuesday s228 at 19:20. Q-1 W1 by the product owner's ruling (see Launch authority). Q-2 refuse (same). Q-3 accept the silent overwrite as within ruling b. Q-4 a malformed customer node stays a whole-register null. Q-5 leave RoadmapScreen.tsx:75 untouched. Q-6 tier 1 Opus. Q-7 kit size accepted. Q-8 ports 9600-9609 and pane Datasec/HPSM-POC-H106. Path check run alone before this stamp: 25 OK, 1 WRONG-DIR that is the kit's project-folder path .tools/wt-b1113-fix/web/package-lock.json (present on disk), 15 new-or-out-of-repo (helpers and STATUS files, each present by test -e).
+- GATE-ROUND (default ROUND 1 OF 2 on class "remediation register read and refusal rules", no NO GO before): ROUND 1 OF 2 on class "remediation register read and refusal rules", no NO GO before
+- GATE-TIER (default tier 1 Opus, G1, model-routing.md:108): tier 1 Opus, G1, model-routing.md:108 (a parser drop is lost data at the next save; customer-facing refusal words)
+- WORDS-425-SUBMITTED (the exact refusal sentence for Evidence submitted, in backticks, from the product owner): `Add an evidence reference before marking an action Evidence submitted.`
+- WORDS-425-VERIFIED (the exact refusal sentence for Verified complete, in backticks; the unchanged sentence is the one at remediation-store.ts:41): `Add an evidence reference before marking an action Verified complete.`
+- SCOPE-425-EMPTY (`refuse` or `accept`: whether an EMPTY reference is refused for Evidence submitted): refuse
+- KEYS (none in a changed line or the message): none: no ticket key, card id, B-number or person's name in a changed line or a commit message
+- SCOPE-OUT (three paths; no word beyond the slots; Not started and In progress unchanged): the three paths of the property only; no visible word beyond the two WORDS slots; Not started and In progress byte-identical in behaviour; RoadmapScreen.tsx untouched
+- LAUNCH WINDOW (until; load1; live seats): until 23:00 AEDT 2026-11-02; load1 under 7 by launch_when_cool; NOT before HPSM-POC G288 (kit B1130) has started its census chain or recorded its end; live seats at stamp: HPSM-POC G288, G289, G291; NexusAI N90, N91; MPS G290, G292, G294; Composer C81
+- Stamped by (the seat that READ this brief and its drafter report): Tuesday s228, which read this kit (lines 1-118) and its DRAFTER-REPORT (lines 1-60) whole
+- Launch authority: the product owner's live-board rulings 2026-11-02: hpsmpoc-424-saved-register-one-bad-entry-1102 = b (18:00), hpsmpoc-425-evidence-submitted-invisible-1102 = b (17:59), hpsmpoc-425-evidence-sentence-1102 = a (19:14:45, the WORDS-425-SUBMITTED sentence, Verified unchanged; that card stated that an EMPTY reference is then refused too, and he did not contest it: SCOPE-425-EMPTY refuse); his 2026-11-01 21:41:12 AEDT instruction to work the HPSM-POC backlog
+- Hard stop and target READY (AEDT clocks written at Step 0): written by you at Step 0: target READY Step 0 plus 3 h, hard stop Step 0 plus 4 h, never later than 01:30 AEDT 2026-11-03
+- Head, main and open PRs at launch (expected main `5f128fb...` or later, 0 PRs): main 5f128fb890341e2b0d52b337fe527a59ceafd70a re-read by gh api at 19:20, ahead 0 of 5f128fb; open PRs 0; matching-refs b1145 0 (control b1113 1); re-read all three at your Step 0
+- Model receipt line and load1 at launch: read both at your Step 0 (Sonnet by BRIEF_SEAT_LEVEL=sonnet in the launch line)
 
 **Your commission is THIS file (read-only);** Step 0 copies it unchanged into `.../HPSM-POC/1_Project_Definition/Briefs/`.
 **Launch (Tuesday), ONE waiter:** `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/HPSM-POC-H106 "WED_USAGE_STOP=100 BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-02_B1145_SEAT-H106_hpsmpoc-424-425-remediation-register.md'"` (level inside the quotes).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s228 at 19:20: kit lines 1-118 and DRAFTER-REPORT lines 1-60
