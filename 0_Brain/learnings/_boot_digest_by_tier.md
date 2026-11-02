@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-03 00:32 from 259 lesson files (1,121,197 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 213. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-03 03:20 from 259 lesson files (1,122,905 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 213. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -4940,7 +4940,7 @@ sections (open the file for these): The general rule · How to apply · Related
 and reload"* on the strength of the seat's report that it was bind-mounted. The seat did that,
 and:
 
-sections (open the file for these): Why this is a lesson and not a docker footnote · How to apply
+sections (open the file for these): Why this is a lesson and not a docker footnote · How to apply · EXTENSION 2026-11-03 — a `docker restart` of the SAME container re-binds too; and an rsync ORPHANS a running single-file mount (Seat D 49th, measured)
 
 ## How to apply
 
@@ -4964,6 +4964,13 @@ sections (open the file for these): Why this is a lesson and not a docker footno
 [[2026-08-11_a-check-that-cannot-fail-is-not-a-check]] ·
 [[2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint]] ·
 [[2026-08-03_mental-model-not-source-of-truth]] · [[2026-09-06_green-local-proof-is-not-evidence-about-a-different-environment]].
+
+## EXTENSION 2026-11-03 — a `docker restart` of the SAME container re-binds too; and an rsync ORPHANS a running single-file mount (Seat D 49th, measured)
+**Measured on kintsugi 2026-11-02 15:52Z (UTC):** the gateway container saw inode 1311652, which `find -inum` returned 0 paths for (unlinked), while the host path was inode 1311594 — the D 48th rsync of 2026-11-01 had replaced the file and left the running container on the old, orphaned inode. Bytes were identical, so nothing looked wrong. `docker restart -t 10` of the same container (same image c2d077694649, same config) re-bound the mount: the container then saw 1311594 and the new blob's sha, and the served log line proved it (`rl=247`). Demo, whose host and container shared inode 1311685, took the change by an in-place write (`cat new > existing`) + `nginx -s reload`, StartedAt unmoved.
+**The rule, extended:**
+1. **Three ways to make a single-file bind mount serve new bytes:** write IN PLACE (keeps the inode; a reload suffices) · `docker restart` the same container (re-resolves the path at start; brief downtime) · recreate (also re-resolves, but `compose up --force-recreate` may SWAP the image if the tag moved — on 2026-11-03 both boxes' `dev-nginx-gateway` tag was ahead of the running image).
+2. **Every deploy that rsyncs a single-file-mounted config must compare host vs container-seen inode AND sha afterwards.** An rsync that ships identical bytes still orphans the mount, and the NEXT content change then silently never reaches the container.
+3. Before choosing a route, measure both inodes (`stat` on the host path, `stat` inside the container) and `find -inum` the container's inode on the host: 0 paths = orphaned.
 
 
 ## An additive sync does not just fail to DELETE — it CREATES files, and every glob in the system treats them as input

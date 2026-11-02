@@ -1,0 +1,15 @@
+const path=require('path'); const DEV=process.argv[2]; const {createRequire}=require('module'); const req=createRequire(path.join(DEV,'package.json'));
+const withCompat=process.argv[3]==='compat'; let compat=null; if(withCompat) compat=require(path.join(DEV,'packages/shared/dist/validation/zod3-compat.js'));
+const {z}=req('zod');
+const show=(label,s,v)=>{const r=s.safeParse(v); console.log(label, JSON.stringify(v), r.success?'OK '+JSON.stringify(r.data):JSON.stringify(compat?compat.zod3Issues(r.error.issues):r.error.issues.map(i=>({code:i.code,origin:i.origin,expected:i.expected,message:i.message}))));};
+show('str.min8 []', z.string().min(8), []);
+show('str.min8 [..]', z.string().min(8), ['a']);
+show('str.min8 {}', z.string().min(8), {});
+show('str.max3 [1,2,3,4]', z.string().max(3), [1,2,3,4]);
+show('str.length6 []', z.string().length(6), []);
+show('str.email []', z.string().email(), []);
+show('num.min1 null', z.number().min(1), null);
+show('num.int.min1 "x"', z.number().int().min(1), 'x');
+show('obj{a:str.min2}', z.object({a:z.string().min(2)}), {a:[]});
+show('array.min2 "x"', z.array(z.string()).min(2), 'x');
+show('str.min8 null', z.string().min(8), null);

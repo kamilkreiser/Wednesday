@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-03 00:32 from 259 lesson files (1,120,987 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-03 03:20 from 259 lesson files (1,122,695 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4992,7 +4992,7 @@ sections (open the file for these): The general rule · How to apply · Related
 and reload"* on the strength of the seat's report that it was bind-mounted. The seat did that,
 and:
 
-sections (open the file for these): Why this is a lesson and not a docker footnote · How to apply
+sections (open the file for these): Why this is a lesson and not a docker footnote · How to apply · EXTENSION 2026-11-03 — a `docker restart` of the SAME container re-binds too; and an rsync ORPHANS a running single-file mount (Seat D 49th, measured)
 
 ## How to apply
 
@@ -5016,6 +5016,13 @@ sections (open the file for these): Why this is a lesson and not a docker footno
 [[2026-08-11_a-check-that-cannot-fail-is-not-a-check]] ·
 [[2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint]] ·
 [[2026-08-03_mental-model-not-source-of-truth]] · [[2026-09-06_green-local-proof-is-not-evidence-about-a-different-environment]].
+
+## EXTENSION 2026-11-03 — a `docker restart` of the SAME container re-binds too; and an rsync ORPHANS a running single-file mount (Seat D 49th, measured)
+**Measured on kintsugi 2026-11-02 15:52Z (UTC):** the gateway container saw inode 1311652, which `find -inum` returned 0 paths for (unlinked), while the host path was inode 1311594 — the D 48th rsync of 2026-11-01 had replaced the file and left the running container on the old, orphaned inode. Bytes were identical, so nothing looked wrong. `docker restart -t 10` of the same container (same image c2d077694649, same config) re-bound the mount: the container then saw 1311594 and the new blob's sha, and the served log line proved it (`rl=247`). Demo, whose host and container shared inode 1311685, took the change by an in-place write (`cat new > existing`) + `nginx -s reload`, StartedAt unmoved.
+**The rule, extended:**
+1. **Three ways to make a single-file bind mount serve new bytes:** write IN PLACE (keeps the inode; a reload suffices) · `docker restart` the same container (re-resolves the path at start; brief downtime) · recreate (also re-resolves, but `compose up --force-recreate` may SWAP the image if the tag moved — on 2026-11-03 both boxes' `dev-nginx-gateway` tag was ahead of the running image).
+2. **Every deploy that rsyncs a single-file-mounted config must compare host vs container-seen inode AND sha afterwards.** An rsync that ships identical bytes still orphans the mount, and the NEXT content change then silently never reaches the container.
+3. Before choosing a route, measure both inodes (`stat` on the host path, `stat` inside the container) and `find -inum` the container's inode on the host: 0 paths = orphaned.
 
 
 ## An additive sync does not just fail to DELETE — it CREATES files, and every glob in the system treats them as input

@@ -1,0 +1,18 @@
+const path=require('path'); const DEV=process.argv[2]; const {createRequire}=require('module'); const req=createRequire(path.join(DEV,'package.json'));
+let compat=null; if(process.argv[3]==='compat') compat=require(path.join(DEV,'packages/shared/dist/validation/zod3-compat.js'));
+const {z}=req('zod');
+const show=(label,s,v)=>{const r=s.safeParse(v); console.log(label, r.success?'OK':JSON.stringify((compat?compat.zod3Issues(r.error.issues):r.error.issues).map(i=>i.code+':'+JSON.stringify(i.path)+(i.code==='custom'?i.message:''))));};
+const A=z.array(z.string().min(2)).min(2).max(3);
+show('arr max3, 4 bad', A, ['a','b','c','d']);
+show('arr max3, 4 good', A, ['aa','bb','cc','dd']);
+show('arr min2, 1 bad', A, ['a']);
+show('arr max3, 3 bad', A, ['a','b','c']);
+show('obj arr max3 4 bad + other bad', z.object({x:A, y:z.string()}), {x:['a','b','c','d'], y:1});
+show('str max3 + regex', z.string().max(3).regex(/^\d+$/), 'abcdef');
+show('str min5 email', z.string().min(5).email(), 'ab');
+show('obj refine after field fail', z.object({a:z.string().min(3), b:z.string()}).refine(()=>false,{message:'R'}), {a:'x', b:'y'});
+show('obj refine after type fail', z.object({a:z.string(), b:z.string()}).refine(()=>false,{message:'R'}), {a:1, b:'y'});
+show('obj superRefine dirty', z.object({a:z.string().min(3)}).superRefine((v,ctx)=>ctx.addIssue({code:'custom',message:'S'})), {a:'x'});
+show('strict extra + field', z.object({a:z.string()}).strict(), {a:1, zz:1});
+show('record bad val', z.record(z.string(), z.number()), {a:'x', b:'y'});
+show('enum + max on arr', z.array(z.enum(['a','b'])).max(1), ['c','d']);

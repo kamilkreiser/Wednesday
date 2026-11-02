@@ -1,0 +1,208 @@
+// KS-1868 (QA gate 114, G114-F1 and F2): the originate anchor routes log `error: <reason>` in three catches (getAnchorByDocumentId
+// warn, the GET /:documentId route catch and verifyAnchorsDbReady) where `reason` is `err instanceof Error ? err.message :
+// String(err)`. PR 1932 guards the READ; an Error whose message is readable but not a string (a revoked Proxy, an object whose
+// toString throws, a null-prototype object, a Symbol) passes it to the logger as is, and the real winston throws while formatting
+// it. The cells reject with an Error whose `message` getter RETURNS such a value and assert the logged reason is text (the
+// constant when it cannot be turned into text), the route answers the constant 500 and verifyAnchorsDbReady throws the constant
+// error. G114-F2: the GET uses an abort signal (a hang is a null answer, not a jest timeout), unhandled rejections are counted, and
+// the rejection of verifyAnchorsDbReady is read through a plain `.then(ok, err)` (no jest matcher touches a hostile value).
+// Controls pin a thrown plain string (a non-Error is logged as its own text). Harness: the ks1868 anchors test. Nothing is written.
+const mockState: { toThrow: unknown; warned: unknown[][]; errored: unknown[][]; writes: number } = {
+  toThrow: undefined,
+  warned: [],
+  errored: [],
+  writes: 0,
+};
+
+jest.mock('../db', () => ({
+  prisma: {
+    $queryRaw: (..._args: unknown[]) => Promise.reject(mockState.toThrow),
+    $executeRaw: (..._args: unknown[]) => {
+      mockState.writes += 1;
+      return Promise.reject(mockState.toThrow);
+    },
+  },
+  getTenantManager: jest.fn(() => null),
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
+    next();
+  },
+}));
+
+jest.mock('../middleware/rbac', () => ({ isAllowedByRoleOrScope: () => true }));
+
+jest.mock('../utils/logger', () => ({
+  logger: {
+    info: () => undefined,
+    debug: () => undefined,
+    warn: (...args: unknown[]) => {
+      mockState.warned.push(args);
+    },
+    error: (...args: unknown[]) => {
+      mockState.errored.push(args);
+    },
+  },
+}));
+
+import express from 'express';
+import { anchorsRouter, verifyAnchorsDbReady } from '../routes/anchors';
+
+const app = express();
+app.use('/api/anchors', express.json(), anchorsRouter);
+
+const DOC = 'doc-ks1868-lookup-target';
+const DB_READY_MESSAGE = 'Database is required for anchor operations';
+
+let baseUrl = '';
+let server: ReturnType<typeof app.listen>;
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  const address = server.address();
+  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
+});
+
+afterAll(() => server?.close());
+
+beforeEach(() => {
+  mockState.toThrow = undefined;
+  mockState.warned.length = 0;
+  mockState.errored.length = 0;
+  mockState.writes = 0;
+  delete process.env.SIMULATE_ANCHORING;
+});
+
+const revokedProxy = (): unknown => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+const toStringThrows = (): unknown => ({
+  toString() {
+    throw new Error('ts boom');
+  },
+});
+/** An Error whose `message` getter succeeds and returns the (non-string) value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+/** The logged `error` field of a logger call as a string; the type name when it is not one. */
+const reasonOf = (c: unknown[] | undefined): string => {
+  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+const SHAPES: Array<[string, () => unknown, string]> = [
+  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
+  ['an object whose toString throws', toStringThrows, 'unreadable thrown value'],
+  ['a null-prototype object', () => Object.create(null), 'unreadable thrown value'],
+  ['a Symbol', () => Symbol('ks1868'), 'Symbol(ks1868)'],
+];
+
+let unhandled = 0;
+const onUnhandled = () => {
+  unhandled += 1;
+};
+beforeAll(() => {
+  process.on('unhandledRejection', onUnhandled);
+});
+afterAll(() => {
+  process.removeListener('unhandledRejection', onUnhandled);
+});
+beforeEach(() => {
+  unhandled = 0;
+});
+
+async function getAnchor(): Promise<{ status: number; code: string | undefined } | null> {
+  try {
+    const res = await fetch(`${baseUrl}/api/anchors/${DOC}`, { signal: AbortSignal.timeout(1500) });
+    const body = (await res.json()) as { error?: { code?: string } };
+    return { status: res.status, code: body.error?.code };
+  } catch {
+    return null;
+  }
+}
+const readyOutcome = (): Promise<string> =>
+  verifyAnchorsDbReady().then(
+    () => 'resolved',
+    (e: unknown) => (e instanceof Error ? e.message : '<non-error>'),
+  );
+async function route(thrown: unknown, reason: string): Promise<void> {
+  mockState.toThrow = thrown;
+  expect(await getAnchor()).toEqual({ status: 500, code: 'INTERNAL_ERROR' });
+  expect(unhandled).toBe(0);
+  expect(mockState.warned).toHaveLength(1);
+  expect(mockState.warned[0][0]).toBe('Failed to fetch anchor from DB');
+  expect(reasonOf(mockState.warned[0])).toBe(reason);
+  expect(mockState.errored).toHaveLength(1);
+  expect(mockState.errored[0][0]).toBe('Failed to get anchor');
+  expect(reasonOf(mockState.errored[0])).toBe(reason);
+  expect(mockState.writes).toBe(0);
+}
+async function ready(thrown: unknown, reason: string): Promise<void> {
+  mockState.toThrow = thrown;
+  expect(await readyOutcome()).toBe(DB_READY_MESSAGE);
+  expect(mockState.errored).toHaveLength(1);
+  expect(reasonOf(mockState.errored[0])).toBe(reason);
+}
+
+describe('KS-1868 the originate anchor catches log text for a hostile non-string message', () => {
+  it('control ks1868 C1 GET /:documentId: an ordinary Error is logged with its own message on both lines and the route answers 500', async () => {
+    await route(new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
+  });
+
+  it('control ks1868 C2 verifyAnchorsDbReady: an ordinary Error is logged with its own message and the constant error is thrown', async () => {
+    await ready(new Error('db down'), 'db down');
+  });
+
+  it('control ks1868 C3 GET /:documentId: a thrown plain string is logged as its own text on both lines and the route answers 500', async () => {
+    await route('plain boom', 'plain boom');
+  });
+
+  it('control ks1868 C4 verifyAnchorsDbReady: a thrown plain string is logged as its own text and the constant error is thrown', async () => {
+    await ready('plain boom', 'plain boom');
+  });
+
+  it('RED ks1868 R1 GET /:documentId: a rejection whose message is a revoked Proxy logs the constant reason and both lines carry it and the route answers 500', async () => {
+    await route(withMessage(SHAPES[0][1]()), SHAPES[0][2]);
+  });
+
+  it('RED ks1868 R2 GET /:documentId: a rejection whose message is an object whose toString throws logs the constant reason and both lines carry it and the route answers 500', async () => {
+    await route(withMessage(SHAPES[1][1]()), SHAPES[1][2]);
+  });
+
+  it('RED ks1868 R3 GET /:documentId: a rejection whose message is a null-prototype object logs the constant reason and both lines carry it and the route answers 500', async () => {
+    await route(withMessage(SHAPES[2][1]()), SHAPES[2][2]);
+  });
+
+  it('RED ks1868 R4 GET /:documentId: a rejection whose message is a Symbol logs the Symbol text and both lines carry it and the route answers 500', async () => {
+    await route(withMessage(SHAPES[3][1]()), SHAPES[3][2]);
+  });
+
+  it('RED ks1868 R5 verifyAnchorsDbReady: a rejection whose message is a revoked Proxy logs the constant reason and the constant error is thrown', async () => {
+    await ready(withMessage(SHAPES[0][1]()), SHAPES[0][2]);
+  });
+
+  it('RED ks1868 R6 verifyAnchorsDbReady: a rejection whose message is an object whose toString throws logs the constant reason and the constant error is thrown', async () => {
+    await ready(withMessage(SHAPES[1][1]()), SHAPES[1][2]);
+  });
+
+  it('RED ks1868 R7 verifyAnchorsDbReady: a rejection whose message is a null-prototype object logs the constant reason and the constant error is thrown', async () => {
+    await ready(withMessage(SHAPES[2][1]()), SHAPES[2][2]);
+  });
+
+  it('RED ks1868 R8 verifyAnchorsDbReady: a rejection whose message is a Symbol logs the Symbol text and the constant error is thrown', async () => {
+    await ready(withMessage(SHAPES[3][1]()), SHAPES[3][2]);
+  });
+});
+
+describe('G137 witness', () => {
+  it('W1 the unhandledRejection counter sees a deliberate unhandled rejection', async () => {
+    unhandled = 0;
+    void Promise.reject(new Error('g137 witness rejection'));
+    await new Promise((r) => setTimeout(r, 100));
+    expect(unhandled).toBe(1);
+  });
+});
