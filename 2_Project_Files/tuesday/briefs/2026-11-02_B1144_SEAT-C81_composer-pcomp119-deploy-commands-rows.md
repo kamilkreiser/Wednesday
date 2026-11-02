@@ -90,12 +90,12 @@ Also run the unmutated copy (c0: 0 red) first and last. SEVERITY: STOP on a plan
 First line at Step 0: `BUILD B1144: PENDING`. After Step 1: `BUILD B1144: BASE GREEN 104 of 104`. After Step 3: `BUILD B1144: ROWS WRITTEN, PREDICTIONS FILED`. After Step 4: `BUILD B1144: PLANTS <k> of <n> AS PREDICTED`. The last line is one of the two markers of Step 6, and nothing follows it.
 
 ## STAMP (Tuesday fills each slot at launch; one word or clock each)
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Main head at launch (full sha): ____
-- Open PRs at launch: ____
-- Launch authority and hard stop: ____
-- C80 (B1140) REPORTED, its last STATUS line quoted: ____
-- SLOTS (ROWS `A1 A2 A3 B1 C1`; PLANTS `P1 P2 P3 P4`): ____
+- STAMP: STAMPED 18:32 AEDT 2026-11-02 by Tuesday s227, kit read whole with the report's Q; path check run alone in an earlier message (rc 0, 17 OK). Q1 yes, the ticket's own Done-when is the working clause set; Q2 yes; Q3 the gate kit names the round; Q4 no.
+- LAUNCH WINDOW: Until 21:00 AEDT 2026-11-02, one waiter at load1 below 7; a Composer gate (G293) may follow and shares the heavy lock: take it only through heavy.sh.
+- Main head at launch (full sha): 69b01339237dd4175a1afed249f9537756845188 (read by gh api by Tuesday at C80's READY; REFUSE 4 re-reads it).
+- Open PRs at launch: #91, #86, #85 per the drafter; re-read at REFUSE 5.
+- Launch authority and hard stop: Tuesday, on the product owner's 2026-10-24 every-boot rule; READY 150, HARD STOP 240 minutes after Step 0, absolute.
+- C80 (B1140) REPORTED, its last STATUS line quoted: yes: READY FOR QA: B1140 | branch b1140/composer-pcomp23-change-report-footer @ 57ecad389b677ec41cf8176c7ab57f845adcc33c | 2 
+- SLOTS (ROWS `A1 A2 A3 B1 C1`; PLANTS `P1 P2 P3 P4`): ROWS A1 A2 A3 B1 C1; PLANTS P1 P2 P3 P4.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 18:32 by Tuesday s227, whole file.
