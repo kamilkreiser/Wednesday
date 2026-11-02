@@ -1,0 +1,15 @@
+const { spawnSync, execFileSync } = require('child_process'); const fs = require('fs'); const crypto = require('crypto');
+const G = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate148-ks1868-pr1970', R = G + '/repo', D = R + '/Blockchain/Dev', A = D + '/services/api-gateway';
+const SC = G + '/logs/_held_ratchet'; fs.mkdirSync(SC, { recursive: true });
+const sha = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const prod = ['security', 'rateLimitEnforce', 'audit'].map((f) => 'src/middleware/' + f + '.ts');
+const tests = ['ks1868-audit-write-failed-catch-unreadable-throw.test.ts', 'ks1868-brute-force-redis-catch-unreadable-throw.test.ts', 'ks1868-rate-limit-enforce-message-coercion-unreadable-throw.test.ts'];
+const run = (label) => { const r = spawnSync('node', [D + '/scripts/typecheck-tests/check.cjs', 'services/api-gateway'], { cwd: D, encoding: 'utf8' }); fs.writeFileSync(G + '/logs/ratchet_' + label + '.log', (r.stdout || '') + (r.stderr || '') + '\nrc=' + r.status + '\n'); console.log(label, 'rc', r.status, ((r.stdout || '') + (r.stderr || '')).trim().split('\n').slice(-2).join(' | ')); };
+run('head');
+const h = prod.map((p) => sha(A + '/' + p));
+for (const p of prod) fs.writeFileSync(A + '/' + p, execFileSync('git', ['-C', R, 'show', '4d1ab2cb:Blockchain/Dev/services/api-gateway/' + p]));
+for (const t of tests) fs.renameSync(A + '/src/__tests__/' + t, SC + '/' + t);
+run('base');
+for (const t of tests) fs.renameSync(SC + '/' + t, A + '/src/__tests__/' + t);
+for (const p of prod) fs.writeFileSync(A + '/' + p, execFileSync('git', ['-C', R, 'show', 'pr1970:Blockchain/Dev/services/api-gateway/' + p]));
+console.log('restore', prod.every((p, i) => sha(A + '/' + p) === h[i]) ? 'OK' : 'FAIL');
