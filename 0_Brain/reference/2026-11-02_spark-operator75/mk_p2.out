@@ -1,0 +1,46 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o75_p2_anchoring_read_route_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/anchoring/src/index.ts b/Blockchain/Dev/services/anchoring/src/index.ts
+--- a/Blockchain/Dev/services/anchoring/src/index.ts
++++ b/Blockchain/Dev/services/anchoring/src/index.ts
+@@ -692,5 +692,11 @@
+         return res.json(buildResponse('db', payload, row));
+       }
+     } catch (err: any) {
+-      log('warn', 'verify-by-hash: local DB lookup failed', { error: err?.message });
++      let reason: string;
++      try {
++        reason = err?.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('warn', 'verify-by-hash: local DB lookup failed', { error: reason });
+     }
+@@ -1302,5 +1308,11 @@
+         }
+       }
+     } catch (err: any) {
+-      log('warn', 'DB lookup anchor by content hash failed', { error: err?.message });
++      let reason: string;
++      try {
++        reason = err?.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('warn', 'DB lookup anchor by content hash failed', { error: reason });
+     }
+@@ -1805,7 +1817,13 @@
+     if (result.rows.length === 0) return undefined;
+     return rowToAnchor(result.rows[0]);
+   } catch (err: any) {
+-    log('warn', 'DB lookup anchor by tx failed', { txHash, error: err?.message });
++    let reason: string;
++    try {
++      reason = err?.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    log('warn', 'DB lookup anchor by tx failed', { txHash, error: reason });
+     return undefined;
+   }
+ }
+

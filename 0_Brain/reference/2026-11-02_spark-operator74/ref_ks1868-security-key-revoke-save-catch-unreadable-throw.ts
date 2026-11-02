@@ -1,0 +1,164 @@
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import crypto from 'crypto';
+import type { Server } from 'http';
+import type { AddressInfo } from 'net';
+
+process.env.SECURITY_DISABLE_BOOT = '1';
+
+// KS-1868: the save catch of the key REVOKE route (DELETE /api/keys/:id) must still log its KS-888 line and
+// answer 500 when the save rejects with a value whose `code` cannot be read (an object whose `code` getter
+// throws). dbSaveApiKey reads only `err?.message` before it rethrows, so a value with a readable message and
+// an unreadable code reaches the route's catch raw. The key is minted first (the db stand-in accepts that
+// INSERT), then the stand-in rejects the revoke's upsert with the test's value.
+// The db stand-in rejects with a plain function, not a vi.fn(): a spy inspects what it rejects with.
+// The route runs on a real loopback listener with a real RS256 token, as in ks888. The service logs through
+// console.log (JSON lines).
+const ctl = vi.hoisted(() => ({
+  boom: undefined as unknown,
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  initDb: async () => true,
+  query: async (statement: string) => {
+    if (/^\s*INSERT\s+INTO\s+svc_api_keys/i.test(String(statement)) && ctl.boom !== undefined) return Promise.reject(ctl.boom);
+    return { rows: [], rowCount: 0 };
+  },
+  transaction: async (run: (client: unknown) => Promise<unknown>) =>
+    run({
+      query: () => Promise.resolve({ rows: [], rowCount: 0 }),
+    }),
+}));
+
+const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const SIGNING_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+const VERIFY_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+
+const ORG_ID = '18680000-0000-4000-8000-000000001868';
+const TENANT_ID = 'c0000000-0000-4000-8000-000000001868';
+const captured: string[] = [];
+const refusalLines = () =>
+  captured.filter((s) => s.includes('KS-888: API key revoke not stored')).map((s) => JSON.parse(s) as { infra?: boolean; code?: unknown });
+
+let listener: Server;
+let root = '';
+
+function platformToken(): string {
+  const now = Math.floor(Date.now() / 1000);
+  const head = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+  const claims = Buffer.from(JSON.stringify({ sub: 'ks1868-test', iat: now, exp: now + 300, role: 'super_admin' })).toString('base64url');
+  const sig = crypto.sign('RSA-SHA256', Buffer.from(head + '.' + claims), SIGNING_PEM).toString('base64url');
+  return head + '.' + claims + '.' + sig;
+}
+
+async function call(method: string, path: string, payload?: unknown): Promise<{ status: number; text: string; body: any }> {
+  try {
+    const res = await fetch(root + path, {
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + platformToken() },
+      body: payload === undefined ? undefined : JSON.stringify(payload),
+      signal: AbortSignal.timeout(3000),
+    });
+    const text = await res.text();
+    let body: any;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = undefined;
+    }
+    return { status: res.status, text, body };
+  } catch {
+    return { status: 0, text: '', body: undefined };
+  }
+}
+
+async function mintThenRevoke(boom: unknown): Promise<{ status: number; text: string; body: any }> {
+  ctl.boom = undefined;
+  const minted = await call('POST', '/api/keys', { name: 'ks1868 revoke', organizationId: ORG_ID, tenantId: TENANT_ID, scopes: ['documents:read'] });
+  const id = String(minted.body?.data?.id);
+  ctl.boom = boom;
+  return call('DELETE', '/api/keys/' + id);
+}
+
+const REVOKE_NOT_STORED = {
+  status: 500,
+  code: 'INTERNAL_ERROR',
+  message: 'The API key revoke could not be saved, so it may not survive a restart',
+};
+const summary = (r: { status: number; body: any }) => ({ status: r.status, code: r.body?.error?.code, message: r.body?.error?.message });
+
+beforeAll(async () => {
+  process.env.JWT_PUBLIC_KEY = Buffer.from(VERIFY_PEM, 'utf8').toString('base64');
+  delete process.env.JWT_JWKS_URL;
+  delete process.env.AUTH_SERVICE_URL;
+  const app = (await import('../index')).default;
+  await new Promise<void>((resolve) => {
+    listener = app.listen(0, '127.0.0.1', resolve);
+  });
+  root = 'http://127.0.0.1:' + (listener.address() as AddressInfo).port;
+});
+
+afterAll(async () => {
+  await new Promise<void>((resolve) => listener.close(() => resolve()));
+});
+
+beforeEach(() => {
+  ctl.boom = undefined;
+  captured.length = 0;
+  vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+    captured.push(String(args[0]));
+  });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('KS-1868 the save catch of the key revoke route reads the thrown value safely', () => {
+  it('control ks1868 C1 an ordinary Error from the save logs the KS-888 line and answers 500', async () => {
+    const r = await mintThenRevoke(new Error('db down'));
+    expect(summary(r)).toEqual(REVOKE_NOT_STORED);
+    expect(refusalLines()).toHaveLength(1);
+    expect(refusalLines()[0].infra).toBe(false);
+  });
+
+  it('control ks1868 C2 a revoke whose save lands answers 200', async () => {
+    const r = await mintThenRevoke(undefined);
+    expect({ status: r.status, success: r.body?.success, message: r.body?.message }).toEqual({ status: 200, success: true, message: 'API key revoked' });
+    expect(refusalLines()).toHaveLength(0);
+  });
+
+  it('control ks1868 C3 a revoked Proxy from the save is already turned into an ordinary Error by dbSaveApiKey and answers 500', async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    const r = await mintThenRevoke(proxy);
+    expect(summary(r)).toEqual(REVOKE_NOT_STORED);
+    expect(refusalLines()).toHaveLength(1);
+    expect(refusalLines()[0].infra).toBe(false);
+  });
+
+  it('RED ks1868 R1 a value with a readable message and a throwing code getter logs the KS-888 line and answers 500', async () => {
+    const r = await mintThenRevoke({
+      message: 'db down',
+      get code(): string {
+        throw new Error('getter boom');
+      },
+    });
+    expect(summary(r)).toEqual(REVOKE_NOT_STORED);
+    expect(refusalLines()).toHaveLength(1);
+    expect(refusalLines()[0].infra).toBe(false);
+  });
+
+  it('RED ks1868 R2 an Error whose code getter throws logs the KS-888 line and answers 500', async () => {
+    const err = new Error('db down');
+    Object.defineProperty(err, 'code', {
+      get() {
+        throw new Error('getter boom');
+      },
+    });
+    const r = await mintThenRevoke(err);
+    expect(summary(r)).toEqual(REVOKE_NOT_STORED);
+    expect(refusalLines()).toHaveLength(1);
+    expect(refusalLines()[0].infra).toBe(false);
+  });
+});

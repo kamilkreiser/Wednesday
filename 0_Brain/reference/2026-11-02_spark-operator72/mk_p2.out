@@ -1,0 +1,51 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o72_p2_nft_blockchain_verifier_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
+@@ -66,6 +66,12 @@
+       // A malformed key or unsupported network must degrade to
+       // "verification disabled", never escape as a 500.
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.warn('Blockfrost client init failed – on-chain verification disabled', {
+-        error: err instanceof Error ? err.message : String(err),
++        error: reason,
+       });
+       return null;
+@@ -101,3 +107,8 @@
+     } catch (err: unknown) {
+       // Blockfrost returns 404 for transactions not yet on-chain
+-      const statusCode = (err as { status_code?: number }).status_code;
++      let statusCode: number | undefined;
++      try {
++        statusCode = (err as { status_code?: number }).status_code;
++      } catch {
++        statusCode = undefined;
++      }
+@@ -109,7 +120,19 @@
+-      logger.error('Error verifying transaction', { error: err instanceof Error ? err.message : String(err) });
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Error verifying transaction', { error: reason });
++      let errorText: string;
++      try {
++        errorText = (err as Error).message ?? 'Unknown error';
++      } catch {
++        errorText = 'unreadable thrown value';
++      }
+       return {
+         verified: false,
+         status: 'error',
+-        error: (err as Error).message ?? 'Unknown error',
++        error: errorText,
+       };
+     }
+

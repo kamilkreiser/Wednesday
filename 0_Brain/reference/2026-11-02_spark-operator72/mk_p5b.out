@@ -1,0 +1,19 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o72_p5_admin_identity_seed_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -1235,6 +1235,12 @@
+       }
+       log('info', '[Identity] Seeded demo organizations and identity users');
+     } catch (err) {
+-      log('warn', '[Identity] Seed skipped: ' + (err as Error).message);
++      let reason: string;
++      try {
++        reason = (err as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('warn', '[Identity] Seed skipped: ' + reason);
+     }
+   }
+

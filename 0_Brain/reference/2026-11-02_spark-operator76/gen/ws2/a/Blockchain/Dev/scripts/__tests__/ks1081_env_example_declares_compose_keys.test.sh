@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# =============================================================================
+# TESTS for Blockchain/Dev/env.example - KS-1081: the canonical env template must declare the
+# five keys that docker-compose.yml reads with an empty default, so a .env bootstrapped from it
+# carries them forward.
+# =============================================================================
+# Reads the two files with grep only; nothing is started, no network, no docker.
+#
+# Usage: bash Blockchain/Dev/scripts/__tests__/ks1081_env_example_declares_compose_keys.test.sh
+# =============================================================================
+
+set -uo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEV_DIR="$(cd "$HERE/../.." && pwd)"
+TEMPLATE="$DEV_DIR/env.example"
+COMPOSE="$DEV_DIR/docker-compose.yml"
+PASS=0; FAIL=0
+
+check() {
+    local desc="$1" want="$2" got="$3"
+    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
+    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
+}
+
+# declared_empty <key>: prints 1 when env.example has a line that is exactly KEY= (an empty value), else 0
+declared_empty() {
+    if grep -qxF "$1=" "$TEMPLATE"; then echo 1; else echo 0; fi
+}
+
+# compose_default_empty <key>: prints 1 when docker-compose.yml interpolates ${KEY:-} (empty default), else 0
+compose_default_empty() {
+    if grep -qF "\${$1:-}" "$COMPOSE"; then echo 1; else echo 0; fi
+}
+
+# --- CELL 0 (CONTROL, tip AND after): a key the template already declares is seen by the matcher ---
+check "CONTROL the matcher sees GATEWAY_VOUCH_SECRET declared empty in env.example" "1" "$(declared_empty GATEWAY_VOUCH_SECRET)"
+
+# --- CELL 1 (CONTROL, tip AND after): compose reads the five keys with an empty default ---
+BOTH=""
+for k in ADMIN_USER_PASSWORD ENABLE_DEMO_SEED ALLOW_DEFAULT_SEED_PASSWORDS TSA_URL TSA_AUTH_KEY; do
+    [[ "$(compose_default_empty "$k")" == "1" ]] || BOTH="${BOTH}${k} "
+done
+check "CONTROL docker-compose.yml reads all five keys with an empty default" "" "${BOTH% }"
+
+# --- CELLS 2-6 (RED at the tip): each key is declared empty in env.example ---
+check "env.example declares ADMIN_USER_PASSWORD empty" "1" "$(declared_empty ADMIN_USER_PASSWORD)"
+check "env.example declares ENABLE_DEMO_SEED empty" "1" "$(declared_empty ENABLE_DEMO_SEED)"
+check "env.example declares ALLOW_DEFAULT_SEED_PASSWORDS empty" "1" "$(declared_empty ALLOW_DEFAULT_SEED_PASSWORDS)"
+check "env.example declares TSA_URL empty" "1" "$(declared_empty TSA_URL)"
+check "env.example declares TSA_AUTH_KEY empty" "1" "$(declared_empty TSA_AUTH_KEY)"
+
+echo ""
+echo "ks1081_env_example_declares_compose_keys: ${PASS} passed, ${FAIL} failed"
+(( FAIL == 0 ))

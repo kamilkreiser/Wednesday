@@ -1,0 +1,110 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1938_o77_p1_originate_gdpr_retention_sweep_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/services/gdprService.ts b/Blockchain/Dev/services/originate/src/services/gdprService.ts
+--- a/Blockchain/Dev/services/originate/src/services/gdprService.ts
++++ b/Blockchain/Dev/services/originate/src/services/gdprService.ts
+@@ -496,9 +496,21 @@
+           WHERE id = ${policy.id}::uuid
+         `;
+       } catch (err: any) {
+-        logger.error('Retention enforcement failed', { dataType: policy.data_type, error: err instanceof Error ? err.message : String(err) });
++        let reason: string;
++        try {
++          reason = err instanceof Error ? err.message : String(err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.error('Retention enforcement failed', { dataType: policy.data_type, error: reason });
+       }
+     }
+   } catch (err: any) {
+-    logger.error('Retention enforcement error', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Retention enforcement error', { error: reason });
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o77_p2_originate_signatories_nominate_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/signatories.ts b/Blockchain/Dev/services/originate/src/routes/signatories.ts
+--- a/Blockchain/Dev/services/originate/src/routes/signatories.ts
++++ b/Blockchain/Dev/services/originate/src/routes/signatories.ts
+@@ -123,13 +123,25 @@
+         },
+       });
+     } catch (error: any) {
+-      if (error.code === '23505') {
++      let code: unknown;
++      try {
++        code = error.code;
++      } catch {
++        code = undefined;
++      }
++      if (code === '23505') {
+         return res.status(409).json({
+           success: false,
+           error: { code: 'CONFLICT', message: 'This user is already an authorised signatory for this organisation' },
+         });
+       }
+-      logger.error('Failed to nominate signatory', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to nominate signatory', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to nominate signatory' } });
+     }
+   },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o77_p3_originate_third_party_verifiers_register_approve_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts b/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
+--- a/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
++++ b/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
+@@ -100,13 +100,25 @@
+         message: 'Registration submitted. Awaiting platform approval.',
+       });
+     } catch (error: any) {
+-      if (error.code === '23505') {
++      let code: unknown;
++      try {
++        code = error.code;
++      } catch {
++        code = undefined;
++      }
++      if (code === '23505') {
+         return res.status(409).json({
+           success: false,
+           error: { code: 'CONFLICT', message: 'A verifier with this email is already registered' },
+         });
+       }
+-      logger.error('Failed to register verifier', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to register verifier', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to register verifier' } });
+     }
+   },
+@@ -196,7 +208,13 @@
+         note: 'Store this API key securely. It will not be shown again.',
+       });
+     } catch (error) {
+-      logger.error('Failed to approve verifier', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to approve verifier', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to approve verifier' } });
+     }
+   },
+

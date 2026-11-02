@@ -1,0 +1,164 @@
+diff --git a/Blockchain/Dev/services/security/src/db.ts b/Blockchain/Dev/services/security/src/db.ts
+--- a/Blockchain/Dev/services/security/src/db.ts
++++ b/Blockchain/Dev/services/security/src/db.ts
+@@ -98,7 +98,13 @@
+   try {
+     await onDbReady();
+   } catch (err: any) {
++    let reason: string;
++    try {
++      reason = err?.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     // Boot work failing must not un-flag an otherwise reachable DB.
+-    dbLog('error', 'DB ready boot work failed', { error: err?.message });
++    dbLog('error', 'DB ready boot work failed', { error: reason });
+   }
+ }
+@@ -110,6 +116,12 @@
+     return { ok: dbAvailable };
+   } catch (err: any) {
+     dbAvailable = false;
+-    return { ok: false, error: err?.message };
++    let reason: string;
++    try {
++      reason = err?.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    return { ok: false, error: reason };
+   }
+ }
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1868-security-db-probe-and-hook-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1868-security-db-probe-and-hook-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1868-security-db-probe-and-hook-catches-unreadable-throw.test.ts
+@@ -0,0 +1,127 @@
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++
++// KS-1868: two catches in the security db module (src/db.ts) read `err?.message` of a rejected call: probeDb (the
++// availability probe) and runDbReadyHook (the one-shot boot work). When the call rejects with a value whose message
++// cannot be read (a revoked Proxy, an Error whose `message` getter throws) that read throws INSIDE the catch, so
++// `initDb` rejects instead of resolving. After the fix each catch logs the constant 'unreadable thrown value' and
++// carries on exactly as it does for an ordinary Error: a failed probe leaves the database unavailable and
++// `initDb` resolves false; a failed boot hook is logged and `initDb` resolves true. Nothing is stored either way.
++// The pg stand-in rejects with a plain function, not a vi.fn(): a spy inspects what it rejects with and could
++// itself fail on a revoked Proxy before the code under test saw it.
++const ctl = vi.hoisted(() => ({
++  probeBoom: undefined as unknown,
++}));
++
++vi.mock('pg', () => ({
++  Pool: function PoolMock() {
++    return {
++      query: () => (ctl.probeBoom !== undefined ? Promise.reject(ctl.probeBoom) : Promise.resolve({ rows: [{ ok: 1 }] })),
++      on: () => undefined,
++      end: () => Promise.resolve(undefined),
++      connect: () => Promise.resolve(undefined),
++    };
++  },
++}));
++
++const lines: Array<{ level: string; message: string; error?: unknown }> = [];
++
++/** Fresh copy of the module per cell: db.ts holds module-level state. */
++async function importDb() {
++  vi.resetModules();
++  return import('../db');
++}
++
++const lineOf = (message: string) => lines.filter((l) => l.message.startsWith(message)).map((l) => ({ level: l.level, error: l.error }));
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++const messageGetterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++/** Settle a promise into a value so a rejection is an ordinary assertion failure, not a thrown error. */
++const settle = (p: Promise<boolean>): Promise<{ resolved: boolean; value?: boolean }> =>
++  p.then(
++    (value) => ({ resolved: true, value }),
++    () => ({ resolved: false }),
++  );
++const PROBE_FAILED = 'Database unavailable';
++const HOOK_FAILED = 'DB ready boot work failed';
++
++describe('KS-1868 the catches of the security db module read the thrown value safely', () => {
++  let current: { closeDb: () => Promise<void> } | undefined;
++
++  beforeEach(() => {
++    ctl.probeBoom = undefined;
++    lines.length = 0;
++    process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
++    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
++      try {
++        const o = JSON.parse(String(args[0]));
++        lines.push({ level: o.level, message: String(o.message), error: o.error });
++      } catch {
++        /* not a JSON line */
++      }
++    });
++  });
++
++  afterEach(async () => {
++    if (current) await current.closeDb();
++    current = undefined;
++    vi.restoreAllMocks();
++    delete process.env.DATABASE_URL;
++  });
++
++  it('control ks1868 C1 an ordinary Error from the probe is logged with its message and initDb resolves false', async () => {
++    ctl.probeBoom = new Error('db down');
++    const db = await importDb();
++    current = db;
++    expect(await settle(db.initDb())).toEqual({ resolved: true, value: false });
++    expect(lineOf(PROBE_FAILED)).toEqual([{ level: 'warn', error: 'db down' }]);
++  });
++
++  it('control ks1868 C2 an ordinary Error from the boot hook is logged with its message and initDb resolves true', async () => {
++    const db = await importDb();
++    current = db;
++    expect(await settle(db.initDb(() => Promise.reject(new Error('hook down'))))).toEqual({ resolved: true, value: true });
++    expect(lineOf(HOOK_FAILED)).toEqual([{ level: 'error', error: 'hook down' }]);
++  });
++
++  it('RED ks1868 R1 a revoked Proxy from the probe is logged as the constant and initDb resolves false', async () => {
++    ctl.probeBoom = revokedProxy();
++    const db = await importDb();
++    current = db;
++    expect(await settle(db.initDb())).toEqual({ resolved: true, value: false });
++    expect(lineOf(PROBE_FAILED)).toEqual([{ level: 'warn', error: 'unreadable thrown value' }]);
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws from the probe is logged as the constant and initDb resolves false', async () => {
++    ctl.probeBoom = messageGetterThrows();
++    const db = await importDb();
++    current = db;
++    expect(await settle(db.initDb())).toEqual({ resolved: true, value: false });
++    expect(lineOf(PROBE_FAILED)).toEqual([{ level: 'warn', error: 'unreadable thrown value' }]);
++  });
++
++  it('RED ks1868 R3 a revoked Proxy from the boot hook is logged as the constant and initDb resolves true', async () => {
++    const db = await importDb();
++    current = db;
++    const boom = revokedProxy();
++    expect(await settle(db.initDb(() => Promise.reject(boom)))).toEqual({ resolved: true, value: true });
++    expect(lineOf(HOOK_FAILED)).toEqual([{ level: 'error', error: 'unreadable thrown value' }]);
++  });
++
++  it('RED ks1868 R4 an Error whose message getter throws from the boot hook is logged as the constant and initDb resolves true', async () => {
++    const db = await importDb();
++    current = db;
++    const boom = messageGetterThrows();
++    expect(await settle(db.initDb(() => Promise.reject(boom)))).toEqual({ resolved: true, value: true });
++    expect(lineOf(HOOK_FAILED)).toEqual([{ level: 'error', error: 'unreadable thrown value' }]);
++  });
++});

@@ -1,0 +1,50 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o72_p1_nft_ipfs_provider_upload_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts
+@@ -106,9 +106,15 @@
+         pinned: true,
+       };
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = (error as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       return {
+         success: false,
+-        error: `Pinata upload error: ${(error as Error).message}`,
++        error: `Pinata upload error: ${reason}`,
+       };
+     }
+   }
+@@ -201,6 +207,12 @@
+         pinned: true,
+       };
+     } catch (error) {
+-      return { success: false, error: `Infura upload error: ${(error as Error).message}` };
++      let reason: string;
++      try {
++        reason = (error as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      return { success: false, error: `Infura upload error: ${reason}` };
+     }
+   }
+@@ -278,6 +290,12 @@
+         pinned: true,
+       };
+     } catch (error) {
+-      return { success: false, error: `Web3.Storage upload error: ${(error as Error).message}` };
++      let reason: string;
++      try {
++        reason = (error as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      return { success: false, error: `Web3.Storage upload error: ${reason}` };
+     }
+   }
+

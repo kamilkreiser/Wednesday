@@ -1,0 +1,51 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o75_p1_originate_anchors_db_ready_and_get_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/anchors.ts b/Blockchain/Dev/services/originate/src/routes/anchors.ts
+--- a/Blockchain/Dev/services/originate/src/routes/anchors.ts
++++ b/Blockchain/Dev/services/originate/src/routes/anchors.ts
+@@ -48,8 +48,14 @@
+     await prisma.$queryRaw`SELECT 1`;
+     logger.info('anchors: database connection verified');
+   } catch (err: any) {
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('anchors: database connection FAILED — anchor operations will not be available', {
+-      error: err instanceof Error ? err.message : String(err),
++      error: reason,
+     });
+     throw new Error('Database is required for anchor operations');
+   }
+@@ -88,7 +94,13 @@
+     if (rows.length > 0) return anchorFromDbRow(rows[0]);
+     return null;
+   } catch (err: any) {
+-    logger.warn('Failed to fetch anchor from DB', { documentId, error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to fetch anchor from DB', { documentId, error: reason });
+     // KS-1657: this catch returned null, and the only caller (GET /:documentId) reads null as "no anchor on record" and answers 404
+     // with `anchored: false`. A failed read and a genuine absence were therefore one answer. Rethrow so the fault reaches the route's own
+     // catch (a constant 500); null now means one thing only, zero rows. The warn log above is kept. Kam, 2026-10-28: "a — Fix it".
+@@ -200,7 +212,13 @@
+         verified: !simulated,
+       });
+     } catch (error) {
+-      logger.error('Failed to get anchor', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to get anchor', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get anchor' } });
+     }
+   }
+

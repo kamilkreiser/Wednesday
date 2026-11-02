@@ -1,0 +1,49 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o72_p4_admin_integration_test_user_forward_audit_export_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -1015,7 +1015,13 @@
+           }
+           return;
+         } catch (err: any) {
+-          res.json({ success: false, message: `Network error: ${err.message}`, latencyMs: Date.now() - start, troubleshooting: ['Check that the API gateway has outbound internet access.', 'Verify the network name (mainnet, preprod, preview) is correct.'] });
++          let reason: string;
++          try {
++            reason = err.message;
++          } catch {
++            reason = 'unreadable thrown value';
++          }
++          res.json({ success: false, message: `Network error: ${reason}`, latencyMs: Date.now() - start, troubleshooting: ['Check that the API gateway has outbound internet access.', 'Verify the network name (mainnet, preprod, preview) is correct.'] });
+           return;
+         }
+       }
+@@ -1498,6 +1504,12 @@
+       const body = await jsonOrEmpty(upstream);
+       res.status(upstream.status).json(body);
+     } catch (err: any) {
+-      res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable', details: { details: err.message } } });
++      let reason: string;
++      try {
++        reason = err.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable', details: { details: reason } } });
+     }
+   });
+@@ -1605,7 +1617,13 @@
+       res.setHeader('Content-Disposition', `attachment; filename=secuura-audit-${new Date().toISOString().slice(0, 10)}.csv`);
+       res.send(csv);
+     } catch (err) {
+-      log('error', '[AuditExport] Failed', { error: (err as Error).message });
++      let reason: string;
++      try {
++        reason = (err as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('error', '[AuditExport] Failed', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to export audit logs' } });
+     }
+   });
+

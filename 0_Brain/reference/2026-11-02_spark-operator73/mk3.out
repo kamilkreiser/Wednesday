@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o73_p3_auth_internal_connector_token_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/auth/src/routes/internal.ts b/Blockchain/Dev/services/auth/src/routes/internal.ts
+--- a/Blockchain/Dev/services/auth/src/routes/internal.ts
++++ b/Blockchain/Dev/services/auth/src/routes/internal.ts
+@@ -77,7 +77,13 @@
+     });
+     return res.json({ success: true, data: { token, expiresIn } });
+   } catch (err) {
+-    logger.error('connector-token exchange failed', { error: (err as Error).message });
++    let reason: string;
++    try {
++      reason = (err as Error).message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('connector-token exchange failed', { error: reason });
+     return res.status(502).json({
+       success: false,
+       error: { code: 'BAD_GATEWAY', message: 'Key validation unavailable' },
+

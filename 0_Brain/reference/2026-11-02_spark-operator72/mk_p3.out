@@ -1,0 +1,50 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o72_p3_admin_organization_route_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -1452,7 +1452,13 @@
+       }
+       res.status(201).json({ id, name, type: type || 'Organization', status: status || 'pending', userCount: 0, documentCount: 0, createdAt: new Date().toISOString() });
+     } catch (err) {
+-      log('error', '[Orgs] Create failed', { error: (err as Error).message });
++      let reason: string;
++      try {
++        reason = (err as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('error', '[Orgs] Create failed', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create organization' } });
+     }
+   });
+@@ -1472,7 +1478,13 @@
+         res.json({ success: true });
+       }
+     } catch (err) {
+-      log('error', '[Orgs] Update failed', { error: (err as Error).message });
++      let reason: string;
++      try {
++        reason = (err as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('error', '[Orgs] Update failed', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update organization' } });
+     }
+   });
+@@ -1511,7 +1523,13 @@
+       }
+       res.json({ success: true });
+     } catch (err) {
+-      log('error', '[Orgs] Delete failed', { error: (err as Error).message });
++      let reason: string;
++      try {
++        reason = (err as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('error', '[Orgs] Delete failed', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete organization' } });
+     }
+   });
+

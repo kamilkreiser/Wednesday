@@ -1,0 +1,48 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o74_p4_security_validate_route_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -512,6 +512,12 @@
+       [k.id, k.lastUsedAt || null]
+     ));
+   } catch (err: any) {
+-    logger.error('DB save API key failed', { error: err?.message });
++    let reason: string;
++    try {
++      reason = err?.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB save API key failed', { error: reason });
+   }
+ }
+@@ -1894,7 +1900,13 @@
+       if (revokedInMemory) apiKey.isActive = false;
+       memApiKeys.set(apiKey.id, apiKey);
+     } catch (err: any) {
+-      logger.error('KS-1370: stored API key state could not be read', { error: err?.message });
++      let reason: string;
++      try {
++        reason = err?.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('KS-1370: stored API key state could not be read', { error: reason });
+       return res.status(503).json({
+         success: false,
+         error: { code: 'SERVICE_UNAVAILABLE', message: 'Unable to verify key' },
+@@ -1917,6 +1929,12 @@
+         memApiKeys.set(apiKey.id, apiKey);
+       }
+     } catch (err: any) {
+-      logger.warn('DB fallback for api-key validation failed', { error: err?.message });
++      let reason: string;
++      try {
++        reason = err?.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('DB fallback for api-key validation failed', { error: reason });
+     }
+   }
+

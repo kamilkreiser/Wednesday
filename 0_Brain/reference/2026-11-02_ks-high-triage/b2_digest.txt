@@ -1,0 +1,935 @@
+### KS-771 | In Progress | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-22
+Review stream: build, supply chain and release gates
+PRs: ['#798 MERGED e7cfe4b5 deployed=y']
+keycommits: ['27857e4f docs(process): record the four review streams as the standing process (KS-485, KS-770, KS-771, KS-772']
+rel=[]
+DESC: '**Review stream for Peter — one review, one test pass, 18 tickets.**\n\n## The one test pass — and the assertion IS the pass\n\nFrom a **clean checkout on macOS**:\n\n1. `bash scripts/preflight/preflight.sh`\n2. `bash scripts/preflight/lockfile-cleanroom.sh` (minutes'
+COMMENTS(4):
+  [2026-09-05 kamil.kreiser@secuura.ai] '**Pointer, not a new ask:** the current PR-status answer (which PRs are live on develop, which are open and at what review state, measured `2026-09-05T04:00:52Z`) is posted as a comment on **KS-485**, so there is one place for it '
+  [2026-09-06 kamil.kreiser@secuura.ai] '# Test block for Peter — six changes, one review, one pass\n\n## BLUF\n\n**Six harness changes are ready for you as ONE block, not six reviews.** Every one is the same defect: **an instrument that reported a result it could not suppor'
+  [2026-10-22 peter@obeden.com] 'BLUF: Thank you, Kamil. I am happy with the block (#842 to #848), and no item fails.'
+
+### KS-775 | In Progress | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-17
+[Decision] Own the express 4 -> 5 call before the qs fuse lapses 2026-09-10 - KS-409 was archived and nothing replaced it
+PRs: ['#1036 MERGED 8c2f7b3f deployed=y', '#801 MERGED 82340b05 deployed=y', '#798 MERGED e7cfe4b5 deployed=y']
+keycommits: ['82340b05 KS-775: extend the two qs fuses to 2026-09-24 with the measurement beside the date (#801)', 'e7cfe4b5 docs(KS-775): the express 4 → 5 migration plan — 28 locks, two break sites, and a fuse decision (#798']
+rel=[('related', 'out', 'KS-763', 'started')]
+DESC: '## BLUF\n\n**Nothing currently owns the express 4 -> 5 decision, and the two qs advisories un-baseline on 2026-09-10.** KS-409 (*Express 4 -> 5 migration, all 15 services*) was **archived on 2026-09-02T10:26:32** while it was still the remedy named by the qs bas'
+COMMENTS(5):
+  [2026-09-04 peter@obeden.com] '## Review outcome — PR #801: NOT approved yet (state, not substance)\n\nReviewed 2026-09-04 by Peter. GitHub comment: https://github.com/Secuura/Distributed_Secuura/pull/801#issuecomment-5536875795\n\n**BLUF: the decision, the date an'
+  [2026-09-04 kamil.kreiser@secuura.ai] '## #801 conflict resolved, all three of Peter\'s numbers re-measured and confirmed — back with him\n\nHead `6c0074bfc` (fast-forward from `c37a65955`, **no force-push** — there was no approval to void; Peter\'s position was "NOT appro'
+  [2026-09-17 kamil.kreiser@secuura.ai] 'qs rows fixed in range on express 4; the express 5 migration ruled 2026-09-03 is unchanged'
+
+### KS-801 | In Progress | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-10-12
+Security: four gateway path predicates are case-sensitive while Express routing is not — `/API/...` skips media-type enforcement on EVERY path, and is still proxied
+PRs: ['#1459 not-on-develop(open/closed?)', '#817 MERGED 0f6854cc deployed=y']
+keycommits: ["67235236 KS-801: a case variant of a gateway path gets the canonical path's guard"]
+rel=[('related', 'in', 'KS-1469', 'started'), ('related', 'in', 'KS-1461', 'started')]
+DESC: "Filed out of KS-781's re-gate (3), finding **P3-5**. **Pre-existing** — not introduced by #812, and deliberately NOT fixed there (it is four predicates plus a routing-mode decision, which does not belong inside an OAuth security PR).\n\n## Mechanism\n\n`services/a"
+COMMENTS(8):
+  [2026-10-12 kamil.kreiser@secuura.ai] "## BLUF\n**The fix this ticket prefers (`app.set('case sensitive routing', true)`) is unsafe, and it is also incomplete.** Measured on develop `65d7722f83a6`: with it fully applied, `POST /api/anchors/BATCH` from a machine caller *"
+  [2026-10-12 kamil.kreiser@secuura.ai] "## BLUF\n**PR #1459 is up for this ticket** at head `11028c7f6b1455138ad20b9848e32a21f11297dc`, for a tier-1 QA gate. It folds the case of the gateway's path predicates, as the ticket's first option says, and leaves routing case-in"
+  [2026-10-12 kamil.kreiser@secuura.ai] "## BLUF\n**PR #1459 merged** as squash `672352369b8ade45d35a7c0e8a9c1656730feaa1` on develop (one parent, `f5a2402625a814313bc498eff6c0614cc0d321b6`), on Wednesday's GO of 2026-10-12T05:58:42Z bound to head `11028c7f6b1455138ad20b9"
+
+### KS-806 | In Review | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-19
+Security: the synthetic wallet email buckets on walletAddress.slice(0,8) — degenerate for every addr_test1…/stake… address, so a colliding wallet takes the create branch and gets an object the account gate cannot reach
+PRs: ['#1643 not-on-develop(open/closed?)', '#1476 not-on-develop(open/closed?)', '#819 MERGED 6dc083ba deployed=y']
+keycommits: ['efc84906 KS-806: wallet accounts get a collision-free synthetic email; wallet.local is reserved']
+rel=[]
+DESC: 'Filed from the KS-796 QA pass (PASS 1 @ `1e4b6fbbe`), finding **Q5**. Severity set from the **code reading**, not from a row count — see the census section, which is the reason this is not filed Low.\n\n## The defect\n\n`services/auth/src/routes/wallet.ts:171` bui'
+COMMENTS(6):
+  [2026-10-12 kamil.kreiser@secuura.ai] '## BLUF\n**KS-806 is built and up as PR #1476 (head `acfb8ffd4825`), waiting for an Opus gate.** The synthetic email of a NEW wallet is now derived from the full address, so two wallets can no longer collide on `addr_tes...@wallet.'
+  [2026-10-12 kamil.kreiser@secuura.ai] '## BLUF\n**Round 2 of KS-806 is up: PR #1476, head `5350664167a0`, for a fresh Opus delta gate.** The first gate (`acfb8ffd4825`) found one Major and two Minors; this fixes them. `wallet.local` is no longer registrable on `/registe'
+  [2026-10-12 kamil.kreiser@secuura.ai] "**PR #1476 is merged and verified at source. KS-806 stays OPEN: nothing is deployed.**\n\nSquash `efc84906f92ae802c60ac64f88caf65ff45ed05d` is `develop` at origin.\n\n**What it fixes.** A NEW wallet's synthetic email was `${walletAddr"
+
+### KS-869 | In Progress | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-17
+connectorId is never persisted — svc_api_keys.connector_id is written by nothing and read by nothing, so it dies on restart; blocks KS-577 and nulls KS-843's cutover evidence
+PRs: ['#880 MERGED 7d7f6bd5 deployed=y', '#854 not-on-develop(open/closed?)']
+keycommits: ["0c559490 KS-869: persist connector_id, so a key's connectorId survives the process"]
+rel=[('related', 'in', 'KS-1042', 'completed'), ('related', 'in', 'KS-880', 'started'), ('related', 'out', 'KS-843', 'started'), ('related', 'out', 'KS-577', 'started')]
+DESC: "## BLUF\n\n`svc_api_keys.connector_id` **exists as a column and NOTHING in the security service ever writes it or reads it.** A key's `connectorId` lives only in the in-process `memApiKeys` map, from the moment it is minted until the service restarts. After a re"
+COMMENTS(7):
+  [2026-09-06 kamil.kreiser@secuura.ai] "**Board correction — this ticket was moved by MY commit, not by anyone deciding to work it.**\n\nLinear's GitHub integration transitions any ticket whose id appears in a commit message or PR body. My commits carried `Refs …` trailer"
+  [2026-09-07 kamil.kreiser@secuura.ai] "**Moving this out of `Tested Not Deployed` — it is not finished.**\n\nMeasured in a catalogue pass over all 293 open tickets, resolving this ticket's Linear PR attachments against the GitHub API:\n\n| PR | state |\n| -- | -- |\n| #854 |"
+  [2026-09-08 kamil.kreiser@secuura.ai] '**Moved `In Review` → `Blocked`. It is waiting on Kam, and that should be visible on the board.**\n\nThe 2026-09-07 comment already established this ticket is part-shipped: **#854 merged** to `develop`\n@ `50913d2c3`, **#880 still op'
+
+### KS-932 | In Progress | None | labels=[] | upd=2026-10-22
+timeoutMs does not bound DNS resolution — a hung lookup leaves safeOutboundRequest pending well past its declared deadline
+PRs: ['#1004 MERGED 40fe4db6 deployed=y']
+keycommits: ["40fe4db6 KS-932: bound DNS resolution by safeOutboundRequest's timeoutMs (#1004)"]
+rel=[('related', 'in', 'KS-1179', 'started')]
+DESC: '## Residual, NOT a regression — and it is the same class as the defect that opened the #868 gate\n\n### Measured by the gate\n\nWith the lookup hung and a **300 ms** declared bound, the call was **still pending at 2503 ms**. The probe\'s FAIL condition was "settled'
+COMMENTS(3):
+  [2026-09-16 kamil.kreiser@secuura.ai] "## BLUF\nPR #1004 raises the fix at head `6d077d3fe35cd5f3c09d394553d320e97b1abe32`, not yet merged. `safeOutboundRequest`'s `timeoutMs` now bounds DNS resolution, and DNS shares one budget with the request. One product file in `pa"
+  [2026-09-16 kamil.kreiser@secuura.ai] "## BLUF\n**Done.** PR #1004 merged as squash `40fe4db6963cd11dba06bd46e0b00af39e68ef3a` on develop (parent `dd66863dd`); not deployed. `safeOutboundRequest`'s `timeoutMs` now bounds DNS resolution, and DNS shares one budget with th"
+  [2026-09-16 kamil.kreiser@secuura.ai] '## BLUF\nMerged `40fe4db69` (PR #1004, `packages/shared/src/security/ssrf-guard.ts`); offline gates green; NOT Done per secuura-test-discipline §5f — live sweep owed (torn-down rebuilt stack, all containers verified up), unverified'
+
+### KS-937 | In Progress | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-09
+KS-921 residue: the re-link guard's awk parser is still case-sensitive — a lowercase `copy --from=builder … node_modules` reports 1 of 1 CLEAN, which is the #851 outage shape exactly
+PRs: ['#1444 not-on-develop(open/closed?)', '#876 MERGED 852e1fff deployed=y', '#874 MERGED bc067e3e deployed=y']
+keycommits: ['40ed3573 KS-937: the re-link guard accepts relative destinations and uid-0 users with a group']
+rel=[]
+DESC: "## The re-link guard's own coverage and correctness residue — two false cleans, two false blocks, and a blind spot in the cross-check\n\nFrom the **#870 tier-1 re-gate** (PASS WITH FINDINGS, verdict 2026-09-06T12:31Z; merged at\n`066cff67554a5bd5398fcc9fb4b9ade42"
+COMMENTS(1):
+  [2026-09-13 kamil.kreiser@secuura.ai] "**Held open — a residue by this ticket's own words; not moved by the 2026-09-14 class-h pass** (card secuura-fourteen-merged-own-pr-tickets-never-moved, close-by-residue; re-verified at source by s218).\n- Residue (the description'"
+
+### KS-962 | In Progress | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-28
+The api-gateway user seed throws 42P10 on every boot and has never seeded anything — remove its INSERT, do NOT repoint the conflict target
+PRs: ['#973 MERGED 81800225 deployed=y']
+keycommits: ['81800225 KS-950 / KS-962: the main-DB user statement creates no row — it re-syncs tenant_id/tenant_slug on row']
+rel=[('related', 'in', 'KS-1356', 'backlog'), ('related', 'in', 'KS-1145', 'backlog'), ('related', 'in', 'KS-1128', 'started'), ('related', 'out', 'KS-960', 'backlog')]
+DESC: "**Reverted out of #885 by Kam's** `split` **ruling (2026-09-07 12:13).** The defect is real; the fix that was written for it was wrong, and this ticket carries both so the next attempt does not repeat it.\n\n## The defect\n\n`services/api-gateway/src/startup-migra"
+COMMENTS(9):
+  [2026-09-13 kamil.kreiser@secuura.ai] "## BLUF\nQA gate verdict on PR #973 at `ca2a9109cebf7ed73f916367b7c78b76d137e35c`, tier 1, round 2 of 2: **GO WITH FINDINGS** — 0 Blocker / 0 Major / 0 Minor / Polish only / 2 coverage NOTES (CN-1 ID3's capture half has no size ass"
+  [2026-09-13 kamil.kreiser@secuura.ai] '**PR #973 squash-merged onto develop as `818002259820e30817b5b5e26f91d23d8761d21b` (M16), 2026-09-13 11:29:24Z, VERIFIED** (one parent == M15 `1c38077ba`; tree == the prediction `5152ba3e0`; T..M == the three files; blobs equal). '
+  [2026-09-13 kamil.kreiser@secuura.ai] 'Held In Progress on the 2026-09-14 default of card secuura-fourteen-merged-own-pr-tickets-never-moved: #973 is merged (818002259820e30817b5b5e26f91d23d8761d21b, 2026-09-13T11:29:24Z) and the ticket closes only when a deploy seat v'
+
+### KS-966 | In Progress | None | labels=[] | upd=2026-10-22
+Retire the published SYSTEM_ADMIN credential (Kam: rotate-properly) — a deletion, not a rotation: no new shared secret is needed
+PRs: ['#888 MERGED 3af1d37b deployed=y']
+keycommits: ['9710cc1f KS-966 round 2: close the documented setup path, and the two arms the id-keyed remediation could not ']
+rel=[('related', 'in', 'KS-1413', 'backlog'), ('related', 'in', 'KS-1081', 'started'), ('related', 'in', 'PS-851', 'completed'), ('related', 'in', 'PS-855', 'completed'), ('related', 'in', 'KS-969', 'started'), ('related', 'in', 'KS-1082', 'backlog'), ('related', 'in', 'KS-955', 'completed'), ('related', 'in', 'KS-668', 'backlog'), ('related', 'in', 'KS-968', 'started'), ('related', 'in', 'KS-972', 'started')]
+DESC: '**Kam ruled** `rotate-properly` **(2026-09-07 11:43:32).** This is the ticket for that work; it was executed before it was filed, which is the cause of a naming error recorded at the bottom.\n\n## What the measurement changed about the job\n\nThe card described a '
+COMMENTS(7):
+  [2026-09-07 kamil.kreiser@secuura.ai] 'Moved back to `In Progress`. The #888 merge auto-transitioned this to `In Review`, but nothing here is waiting on a reviewer — items 1 and 2 are merged and **items 3 and 4 are open work on this same ticket**. `In Review` would hav'
+  [2026-09-07 kamil.kreiser@secuura.ai] '**Items 3 and 4 are CLOSED against KS-969.** Both were stood down on measurement rather than executed; the reasons are on KS-969 so the next reader lands on them instead of re-deriving.\n\n**Item 4 — stood down on TWO independent gr'
+  [2026-09-11 peter@obeden.com] "Consequence measured 2026-09-11 (KS-1016 verification, slot 4): with no published admin default, Playwright's auth-setup password resolves to the provisioned admin actor's password or `''` (`config/environment.ts:196-210`). When p"
+
+### KS-968 | In Review | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-28
+MAJOR: when both platform-admin rows exist the id-row rewrite throws 23505, the seed loop swallows it, and the KS-966 F3 email arm never runs — with a green cell standing over the hole
+PRs: ['#1800 MERGED 92a02a35 deployed=y', '#1485 not-on-develop(open/closed?)', '#905 MERGED ede711ca deployed=y']
+keycommits: ['8f674b3c KS-968: with both platform-admin rows present the email row is neutralised', 'ede711ca KS-968: warn, at the column, that comparing users.email to a literal is void (#905)']
+rel=[('related', 'in', 'KS-1168', 'backlog'), ('related', 'out', 'KS-960', 'backlog'), ('related', 'out', 'KS-966', 'started')]
+DESC: '**MAJOR. When both rows exist, the platform-admin remediation throws 23505, the loop swallows it, and the email-keyed arm — the whole KS-966 F3 fix — NEVER RUNS. A green cell stands over the hole.**\n\n**"Both rows present" is not an exotic state. It is the stat'
+COMMENTS(11):
+  [2026-10-12 kamil.kreiser@secuura.ai] '## BLUF\n**The mechanism the ticket describes is still in the code on `develop` `a31b775`; leaves my lot.** #905 added the schema comment only ("this PR closes nothing on this ticket", its own words). In `repositories/userRepo.ts` '
+  [2026-10-12 kamil.kreiser@secuura.ai] '## BLUF\n**KS-968 is built and up as PR #1485 (head `ebdb123d5963`), waiting for an Opus gate. The regression test runs against a REAL Postgres, as this ticket asked.** With both the id row and a distinct row holding `admin@secuura'
+  [2026-10-12 kamil.kreiser@secuura.ai] '## BLUF\n**KS-968 is merged: #1485, squash `8f674b3c46e7`, on `develop`. The ticket stays open until auth is deployed with it, and the DEPLOY NOTE below must be read first.**\n\n## Recommendation\nDo not deploy this to an environment '
+
+### KS-974 | In Progress | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-25
+Published bound vs runtime bound on rate-limit scope: /check enforces code UNITS against a published code-POINT maxLength, and scopeField bounds the untrimmed string
+PRs: ['#1198 MERGED a314a9bc deployed=y']
+keycommits: ['a314a9bc KS-974 CHECKKEYCP SCOPETRIM: /check bounds the key by code points, scope by trimmed value (#1198)']
+rel=[]
+DESC: '## BLUF\n\n**Two places where the PUBLISHED bound does not match the bound the runtime enforces.** F-1 is MAJOR and leads: `/api/rate-limit/check` publishes `maxLength: 256` and enforces **UTF-16 code units**, on the route with **no role gate** — so the publishe'
+COMMENTS(4):
+  [2026-09-25 kamil.kreiser@secuura.ai] '**RULING — Kam, live board, 2026-09-22 20:53-20:54.** Card `secuura-ks974-lone-surrogate-key-check-and-reset`, option **a**, verbatim:\n\n> Leave both routes as designed; correct the record on KS-974\n\n**This comment is the correctio'
+  [2026-09-25 kamil.kreiser@secuura.ai] "## Item 2's `.trim()` made one of `scopeField()`'s refines unreachable — a check that cannot fail\n\nFound while building KS-976 item 1 at develop `6ab9d5021e96`, because a control cell of mine asserted the detail text KS-976 quotes"
+  [2026-09-25 kamil.kreiser@secuura.ai] '## CORRECTION to my comment above — the refine is NOT unreachable. I withdraw that claim.\n\nThe QA tier-1 gate measured it, and I have re-measured it independently before writing this. **`must not be blank` fires.** `.trim().min(1)'
+
+### KS-998 | In Review | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-26
+KS-989 gate residue: the formatting gate fails OPEN on missing deps and reads the WORKING TREE, not the push — four items on one path
+PRs: ['#1729 MERGED 1b550684 deployed=y', '#1553 MERGED 53b429ed deployed=y', '#1545 not-on-develop(open/closed?)', '#1540 MERGED 0662f721 deployed=y', '#1532 MERGED 405e33a1 deployed=y', '#1530 MERGED 1b550684 deployed=y', '#1442 not-on-develop(open/closed?)', '#1422 not-on-develop(open/closed?)', '#1407 not-on-develop(open/closed?)']
+keycommits: ['0662f721 KS-998 item 3: the gate checks lock sources and scrubs the install env', '405e33a1 KS-998 item 2: the hook judges each pushed ref, the gate the pushed commit']
+rel=[('related', 'in', 'KS-772', 'unstarted'), ('related', 'in', 'KS-1583', 'backlog')]
+DESC: '## BLUF\n\n**[#906](<https://github.com/Secuura/Distributed_Secuura/pull/906>) shipped the KS-989 formatting gate and it works — but the QA gate found four ways it does not catch what it appears to. Two are MAJOR. One of them is the path by which instance 6 itse'
+COMMENTS(6):
+  [2026-10-12 kamil.kreiser@secuura.ai] '## Item 1 BUILT — pull request [#1532](https://github.com/Secuura/Distributed_Secuura/pull/1532), head `3dbfdf7e3644`, Opus tier, red first. Item 2 (variant A′) and KS-1483 are separate.\n\nFacts only. The numbers, the mutant table '
+  [2026-10-13 kamil.kreiser@secuura.ai] 'BLUF: KS-998 item 2 is up for the gate. Pull request 1540, head c6d103ffc4692cb075287eb8143715989abeafab (remote ref read with ls-remote), base develop, branch feature/ks-998-item2-gate-judges-the-push.\n\nWhat it carries: the pre-p'
+  [2026-10-13 kamil.kreiser@secuura.ai] "BLUF: KS-998 item 3 is up for the gate. Pull request 1545, head 50f0552ce011ac9d8c4caddf67bc747a7fed2d5b (remote ref read with ls-remote), base develop, stacked on pull request 1540's squash 405e33a10613 (merged in). It carries Mi"
+
+### KS-1012 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-28
+The `require-pr-gates` ruleset survived the Actions retirement: 7 required checks that can never report, 0 required approvals, and ALWAYS bypass for admins
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1366', 'started'), ('related', 'in', 'KS-418', 'backlog'), ('related', 'out', 'KS-412', 'backlog')]
+DESC: '## BLUF\n\n`develop` **and** `main` **carry an ACTIVE ruleset that enforces nothing for an admin and is unsatisfiable for everyone else.** It requires seven status-check contexts whose workflows no longer exist, requires **zero** approving reviews, and grants `A'
+COMMENTS(0):
+
+
+### KS-1038 | Backlog | kamil.kreiser@secuura.ai | labels=['slots-not-fully-isolated'] | upd=2026-10-06
+tests/e2e auth-exhaustive races its OWN lockout — same commit gives 1 or 11 failures, so the suite cannot gate anything
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-724', 'completed'), ('related', 'out', 'KS-734', 'started')]
+DESC: '## BLUF\n\n`tests/e2e/tests/auth-exhaustive.spec.ts` **is non-deterministic against an unchanged product.** It brute-forces logins, `playwright.config.ts` sets `fullyParallel: true`, and every run leaves **4** `lockout:*` **keys** in redis — so its own ordinary '
+COMMENTS(0):
+
+
+### KS-1051 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-05
+develop is RED on the services/originate jest suite and NOTHING catches it — the suite is a blocking gate nowhere automated
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-709', 'backlog'), ('related', 'in', 'KS-1398', 'backlog'), ('related', 'in', 'KS-1146', 'backlog'), ('related', 'out', 'KS-961', 'started')]
+DESC: "## BLUF\n\n`develop` **is RED on the** `services/originate` **jest suite right now, and no instrument in this repository objects.** Measured tonight: 2 of 4 cells in `ks444-webhooks-create-description-guard.test.ts` fail on develop's own blob. **The suite is a b"
+COMMENTS(1):
+  [2026-09-14 kamil.kreiser@secuura.ai] "**Carried here from KS-826 — closed as Duplicate of this ticket and archived on 2026-09-14 (s222), under Kam's 2026-09-14 08:55 standing rule (true duplicates are closed and archived by us, no external review).** KS-826's survivin"
+
+### KS-1055 | Backlog | None | labels=[] | upd=2026-10-22
+Per-tenant databases never receive the file migrations — CORE_MIGRATIONS FORCEs RLS with ZERO policies, so a per-tenant DB is dark on 5 core tables from boot 1 (permanent)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1235', 'backlog'), ('related', 'out', 'KS-1054', 'started')]
+DESC: '## BLUF\n\n**Per-tenant databases receive** `CORE_MIGRATIONS` **and NEVER the file migrations — not on any boot.** Measured, not read. The consequence is not "039 is missing": `CORE_MIGRATIONS` **enables and FORCEs** row-level security on five core tables while '
+COMMENTS(0):
+
+
+### KS-1080 | Backlog | None | labels=['systemTest'] | upd=2026-10-22
+SECURITY (local test stack): akto-autoheal runs as root with /var/run/docker.sock RW — env-scoping is only as strong as who holds the socket
+PRs: []
+keycommits: []
+rel=[]
+DESC: "**BLUF —** `akto-autoheal` **runs as uid=0 root with** `/var/run/docker.sock` **mounted read-write, which grants host-equivalent read of EVERY container's environment through the daemon API and therefore defeats environment-variable scoping as a security contr"
+COMMENTS(1):
+  [2026-09-10 kamil.kreiser@secuura.ai] '**Risk classification — this lands in Peter\'s §1b "systemTest gate / report / baseline logic" high-risk class.**\n\nAdded per Wednesday\'s routing note, because the class is not obvious from the title. `akto-autoheal` is part of the '
+
+### KS-1100 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-12
+Kintsugi deploy 4554b25e2: four live changes have no QA gate record — #872 (KS-732), #896 (compose ADMIN_USER_PASSWORD), #728 (KS-671), #808 (KS-663)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1107', 'backlog'), ('related', 'out', 'KS-663', 'started'), ('related', 'out', 'KS-601', 'started')]
+DESC: "## BLUF\n\n* **Four changes now running on kintsugi have no QA gate record:**\n  * #872 (auth, KS-732);\n  * #896 (compose, `ADMIN_USER_PASSWORD` passed into auth);\n  * #728 (anchoring, KS-671);\n  * #808 (originate's published contract, KS-663).\n\n  Kintsugi runs d"
+COMMENTS(1):
+  [2026-09-12 kamil.kreiser@secuura.ai] "## BLUF\n\n* **A dedicated QA-gate login now exists on kintsugi ONLY, and it authenticates.** This carries out Kam's `qa-login` ruling.\n  * **Account:** local part `qa-gate-ks1100-owner-4662d9`, domain example.com. User id `dd05f3be"
+
+### KS-1107 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-12
+POST /api/auth/register accepts a client-supplied organizationId with no existence or membership check — impact not traced
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-1100', 'backlog')]
+DESC: '## BLUF\n\n* `POST /api/auth/register` **lets an anonymous caller choose the organisation its new account belongs to.**\n  * `registerSchema` accepts `organizationId` as any UUID (`services/auth/src/routes/auth.ts:139`).\n  * The handler stores it on the new user '
+COMMENTS(0):
+
+
+### KS-1148 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-09
+CI-runner environment gaps (one class, two jobs): `Security Scanning` runs `audit:contract` with no install, so `audit-locks.mjs` dies on `Cannot find package 'semver'` (7 of 59 cases red); `PR Security Gates` runs the shell suites with no build, so `ks949_main_seed_idempotence` aborts on a missing `packages/shared/dist` — the jobs' setup, not the code
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1443', 'completed'), ('related', 'in', 'KS-1139', 'started'), ('related', 'in', 'KS-1154', 'backlog'), ('related', 'out', 'KS-1324', 'completed'), ('related', 'out', 'KS-1138', 'backlog'), ('related', 'out', 'KS-1331', 'completed'), ('related', 'out', 'KS-1296', 'started')]
+DESC: '## BLUF\n\nTwo CI jobs run test code whose runtime prerequisites the job never installs or builds. Both reds are **environment gaps on the runner**, not defects in the code under test — each suite is green locally on a tree that has a root `node_modules` and a b'
+COMMENTS(7):
+  [2026-10-07 peter@obeden.com] '## Follow-up to my comment above: the three untracked suites now have measured causes, and they are NOT the same class as (a)/(b)\n\nKamil, my earlier comment said I knew the symptoms but not the causes of these three. I have now re'
+  [2026-10-07 peter@obeden.com] "## Still live 2026-10-07: seen again on PR 1414 (KS-1439, Schemathesis 4.29.4)\n\n**BLUF.** Kamil, a one-line recurrence for this ticket. On PR 1414 (head `3e3185e4d`, the Schemathesis 4.29.4 bump), the `Security Scanning` workflow'"
+  [2026-10-09 kamil.kreiser@secuura.ai] '## Recurrence ×3 on 2026-10-09: the same job, step and seven tests on three consecutive PR merge-ins\n\n**BLUF.** The `Security Scanning` → `Dependency Audit` job failed at its audit-contract step on the merge-ins of three PRs that '
+
+### KS-1149 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-26
+A push whose pre-push gate runs past ~6 min dies with rc 141 after the gate PASSED — GitHub closes the idle SSH session git opened before the hook; the launcher's core.sshCommand has no keepalive
+PRs: []
+keycommits: []
+rel=[]
+DESC: '## BLUF\n\n**A Platform K push whose pre-push gate runs longer than ~6 minutes dies with** `rc 141` **(SIGPIPE) and** `Connection to github.com closed by remote host.` **— after the gate has PASSED.** git opens the SSH session to read the remote refs BEFORE the '
+COMMENTS(2):
+  [2026-09-14 kamil.kreiser@secuura.ai] "**Launcher edited by s220 on Kam's 11:09 ruling (`delegate`); takes effect at each seat's next launch.** `Blockchain/Launch_Claude.command` (project root, outside the repo) — the two `core.sshCommand` values it writes into `2_Proj"
+  [2026-10-26 kamil.kreiser@secuura.ai] '**Measured 2026-10-25/26 (UTC) on the same box and the same hook, with the idle cutoff isolated and with the per-command keepalive.** Facts only.\n\n**Idle cutoff, isolated.** `git push --dry-run` to the real origin through a scratc'
+
+### KS-1184 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-16
+workflow-approve persists the instance approved before the forward, so a refused forward strands it: re-approve and reject answer 400, no re-forward path, the kept document unusable until TTL (KS-1087 gate F2)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1183', 'started'), ('related', 'out', 'KS-1087', 'started')]
+DESC: '## BLUF\n\n`POST /api/workflow-instances/:id/approve` persists the instance `approved` (`services/api-gateway/src/routes/verification.ts:970-972`) BEFORE it forwards the pending document to originate. So after any refused forward the workflow is stranded:\n\n* a r'
+COMMENTS(1):
+  [2026-09-16 kamil.kreiser@secuura.ai] "## BLUF\nRecord from the tier-1 QA gate on PR #1010 (KS-1183, merged as `1125607e9`), for whoever designs this ticket's fix. After a lost 201, the gateway answers **502 with the pending document kept while originate's copy exists**"
+
+### KS-1214 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-11-01
+mcp-server POST /hash hashes any server-local file named by a caller-supplied filePath, with no auth - measure deployed exposure first
+PRs: []
+keycommits: []
+rel=[]
+DESC: "## BLUF\n\n**mcp-server's REST mirror** `POST /hash` **returns the SHA-256 of any server-local file named by a caller-supplied** `filePath`**, with no authentication.** On error it echoes `err.message`, which tells the caller whether a path exists. **Severity is"
+COMMENTS(2):
+  [2026-10-31 kamil.kreiser@secuura.ai] '## BLUF\n\n**QA gate 46 (on PR #1850, KS 1410) re-found this defect and measured it with local probes. It is wider than the original read: `filePath` is also read by `POST /verify` and `POST /verify-batch`. The server checks no cred'
+  [2026-11-01 kamil.kreiser@secuura.ai] '**BLUF:** QA gate 82 on pull request 1897 re-read this route at source (its finding G82-F2, Medium): `POST /hash` in `Blockchain/Dev/services/mcp-server/src/http-server.ts` still answers 500 with the thrown message, and for a bad '
+
+### KS-1235 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-26
+Under multi-tenancy, auth's tenant-pool statements carry no tenant GUC: with fail-closed RLS every approve's level UPDATE matches 0 rows
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-1055', 'backlog'), ('related', 'out', 'KS-174', 'started'), ('related', 'out', 'KS-1194', 'started')]
+DESC: "## BLUF\n\n**With** `MULTI_TENANCY_ENABLED` **on, auth's** `db.ts` **sends every statement that carries a tenant argument through** `tenantManager.getPool(tenantId).query()`**: a raw pool query with no tenant GUC.** Under fail-closed RLS, a tenant-scoped UPDATE "
+COMMENTS(0):
+
+
+### KS-1280 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-19
+POST /api/certifications/:id/verify forwards a revoked session's Bearer to originate: the gateway's session check never runs on this route
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-834', 'backlog')]
+DESC: "## BLUF\n\n`POST /api/certifications/:id/verify` (api-gateway `routes/verification.ts:784`, mounted with no `authenticateToken`) forwards whatever `Authorization` the caller sent to originate's `GET /api/documents/:id` (`:788`). Measured in-process: a **REVOKED*"
+COMMENTS(0):
+
+
+### KS-1372 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-12
+api-gateway failed-login lockout is inert: createBruteForceProtection installs recordFailure, but no production code ever calls it — it can never block
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1461', 'started')]
+DESC: "## Summary\n\nFor when you have a moment, Kamil. The gateway's failed-login lockout (`createBruteForceProtection`, `api-gateway/src/middleware/security.ts:146-192`) looks as though it never engages: it only blocks once `recordFailure()` has run, and nothing outs"
+COMMENTS(0):
+
+
+### KS-1376 | Backlog | None | labels=[] | upd=2026-10-22
+Security: certifications ends RLS FORCE with no tenant_isolation policy on every fresh database, permanently
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1401', 'started')]
+DESC: '**Found by the gate39 QA pass over PR #1332 (N-G39-1, Major). Facts only.**\n\n## What is wrong\n\nOn a **fresh bare database**, `public.certifications` ends with row-level security **ENABLED and FORCED but with no** `tenant_isolation` **policy**. RLS with no poli'
+COMMENTS(0):
+
+
+### KS-1379 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-30
+PR #1339's standalone locks were re-resolved from bare manifests: ~1,000 non-target moves, incl. runtime bullmq/msgpackr 2 and @azure/identity/msal-node 6
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1400', 'backlog'), ('related', 'in', 'KS-1398', 'backlog')]
+DESC: "Raised from **gate41's finding N-1339-2** (Major, non-blocking) on PR #1339 (KS-1378, the four-package advisory bump). Wednesday ruled this a ticket rather than a fold-in for round 2, because the only mechanism the gate's own fix-shape offers is `npm install -"
+COMMENTS(1):
+  [2026-09-29 kamil.kreiser@secuura.ai] "**Added from gate42 (QA/Secuura-batch1339r2) as a checklist item on this ticket, not a new ticket.**\n\nThe gate found this ticket's condition **met to the letter but not in substance**: `services/queue` and `services/m365-integrati"
+
+### KS-1383 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-12
+Verify is not bound to the credential's proof: a revoked credential resubmitted with another LIVE id still verifies true
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1522', 'backlog'), ('related', 'in', 'KS-1375', 'started')]
+DESC: "`Refs KS-1375`\n\n## BLUF\n\nCredential verification is not bound to the credential's own proof. A **revoked** credential\nresubmitted carrying **another live credential's id** verifies `true` on **both** verify routes. This\nis pre-existing: it reproduces at the me"
+COMMENTS(1):
+  [2026-10-12 kamil.kreiser@secuura.ai] "**BLUF: where the bypass exists, measured; and the priority is raised from none to High (2) on Wednesday's ruling.**\n\n**Environments, in one line:** the bypass exists wherever the proof is not verified, that is `NODE_ENV` other th"
+
+### KS-1390 | Todo | kamil.kreiser@secuura.ai | labels=['Improvement'] | upd=2026-09-30
+The e2e-v2 harness is platform-k's only browser, portal and accessibility coverage — 222 tests, runnable by hand, named in no gate and absent from the gate inventory
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1398', 'backlog'), ('related', 'out', 'KS-964', 'backlog'), ('related', 'out', 'KS-1380', 'started'), ('related', 'out', 'KS-669', 'started'), ('related', 'out', 'KS-734', 'started'), ('related', 'out', 'KS-965', 'started'), ('related', 'out', 'KS-1393', 'unstarted')]
+DESC: '## BLUF\n\n`Blockchain/Dev/tests/e2e-v2/` holds **24 spec files and 222 tests** across four tiers — including every browser journey and the only accessibility coverage platform-k has — and it is wired into nothing. It is not in `.githooks/pre-push`, it has no ro'
+COMMENTS(1):
+  [2026-09-29 peter@obeden.com] '**BLUF:** Hi Kamil, thanks for picking this up. While grounding a plan for this ticket I found six more things that bear on it. Each one was re-checked from source on `develop` **`8c810023f`** (29 Sep), not taken from memory. The '
+
+### KS-1429 | Backlog | None | labels=['systemTest'] | upd=2026-10-22
+systemTest: owner-scoped cross-tenant /api/status test (split from KS-588 test 5) — waits on KS-692's bind-creator half
+PRs: ['#1403 MERGED fa690e5a deployed=y']
+keycommits: []
+rel=[('blocks', 'in', 'KS-692', 'started'), ('related', 'out', 'KS-1352', 'started')]
+DESC: "## Summary\n\nThis is the genuine cross-tenant form of [KS-588](https://linear.app/secuura/issue/KS-588/systemtest-schemathesis-apistatus-authorization-revoked-session)'s test 5, split out on 2026-10-06 so that [KS-588](https://linear.app/secuura/issue/KS-588/sy"
+COMMENTS(1):
+  [2026-10-06 peter@obeden.com] '## Test Evidence — PR https://github.com/Secuura/Distributed_Secuura/pull/1403 (harness, head `d1d9f54d7`)\n\n*Split from #1399 (closed) into four PRs: A harness #1403, B package refresh #1401, C observability #1400 (merged), D docs'
+
+### KS-1430 | Backlog | None | labels=['systemTest'] | upd=2026-10-22
+systemTest: the pre-rotation key is dead after rotate:true (split from KS-568 row 4) — waits on KS-577 revoke-on-rotate
+PRs: ['#1403 MERGED fa690e5a deployed=y']
+keycommits: []
+rel=[('blocks', 'in', 'KS-577', 'started'), ('related', 'out', 'KS-583', 'unstarted'), ('related', 'out', 'KS-576', 'unstarted')]
+DESC: '## Summary\n\n[KS-568](https://linear.app/secuura/issue/KS-568/systemtest-schemathesis-sk-connector-identity-regression-coverage-ks) row 4 proves that read-back survives key rotation. Kam ruled on 2026-08-07 that rotation must also **revoke the prior key**. As s'
+COMMENTS(1):
+  [2026-10-06 peter@obeden.com] '## Test Evidence — PR https://github.com/Secuura/Distributed_Secuura/pull/1403 (harness, head `d1d9f54d7`)\n\n*Split from #1399 (closed) into four PRs: A harness #1403, B package refresh #1401, C observability #1400 (merged), D docs'
+
+### KS-1483 | Backlog | None | labels=[] | upd=2026-10-22
+pre-push gate: pushing a branch that is not checked out skips the preflight, because the hook diffs HEAD and not the pushed commits
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1583', 'backlog'), ('related', 'out', 'KS-884', 'started')]
+DESC: '**BLUF.** `.githooks/pre-push` decides whether to run the preflight from `HEAD` (`git diff --name-only "@{upstream}" HEAD` at `:80`, `"$_b" HEAD` at `:184`), and the preflight then tests the working tree. The refs git hands the hook on stdin are read only for '
+COMMENTS(4):
+  [2026-10-13 kamil.kreiser@secuura.ai] 'BLUF: KS-1483 is folded into KS-998 item 2, pull request 1540 (head c6d103ffc4692cb075287eb8143715989abeafab). The hook now reads the ref lines git hands it and judges each pushed sha, instead of deciding from HEAD; a pushed sha t'
+  [2026-10-13 kamil.kreiser@secuura.ai] '**Staying open after #1545.** Item 3 of KS-998 merged to `develop` as `0662f7213cc08d962b745fa6998fc2a3f47499a5`. Taking the three recommendation sentences in order, against what is now on develop:\n\n1. *"Compute the changed set pe'
+  [2026-10-19 kamil.kreiser@secuura.ai] "## BLUF\n\n**This ticket's BLUF is stale, and its own Recommendation item 2 is already in the code.** The hook no longer *skips* the preflight for a branch that is not checked out — it **REFUSES the push**, with very nearly the mess"
+
+### KS-1486 | Backlog | None | labels=[] | upd=2026-10-22
+Wallet login: two simultaneous first logins for one address issue a token for an id that is not in the database (4 of 5 rounds)
+PRs: []
+keycommits: []
+rel=[]
+DESC: '## BLUF\n\nPre-existing on develop, found by the Opus gate on #1476 (KS-806) and filed at the priority Wednesday asked for. Two concurrent FIRST wallet logins for the same address both succeed with 200, only one row is created, and in 4 of 5 measured rounds one '
+COMMENTS(0):
+
+
+### KS-1498 | Backlog | None | labels=[] | upd=2026-10-22
+Wallet login: a suspended account stored under a mixed-case address can be evaded by logging in with the lower-case form (needs a case-insensitive lookup, a migration)
+PRs: []
+keycommits: []
+rel=[]
+DESC: '## BLUF\n\nResidual declared on #1476 (KS-806) and confirmed by its Opus delta gate (round 3), filed at the priority Wednesday asked for. A wallet account whose `wallet_address` was stored before #1476 in a NON-canonical casing and has since been SUSPENDED refus'
+COMMENTS(0):
+
+
+### KS-1516 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-12
+Timestamping: the opentimestamps and blockchain types still report verified true, and /verify accepts a forged proof with no stored row (KS-753 gate m2)
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-753', 'started')]
+DESC: '**ACTION (owner: the timestamping build lane, with a policy decision first):** decide what an `opentimestamps` or `blockchain` timestamp may claim when nothing external ever checked it, then make creation and `/api/timestamps/verify` agree with that decision, '
+COMMENTS(0):
+
+
+### KS-1535 | Backlog | None | labels=[] | upd=2026-10-22
+POLICY (Kam's call): role ADMIN is a KEY_ADMIN_ROLE that the KS-764 organisation arm never engages for, so a tenant ADMIN can mint a key for any organisation in its tenant
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1570', 'started'), ('related', 'in', 'KS-1536', 'started'), ('related', 'out', 'KS-1533', 'started')]
+DESC: "## BLUF\n\n`ADMIN` **is in** `KEY_ADMIN_ROLES` **but in neither** `PLATFORM_ROLES` **nor** `ORG_BOUNDED_ROLES`**, so the KS-764 organisation arm is skipped for it entirely and** `decideTenantAccess` **falls through to** `allow: 'same-tenant'`**.** After KS-1533 "
+COMMENTS(1):
+  [2026-10-12 kamil.kreiser@secuura.ai] "## RULED — Kam: leave `ADMIN` unbounded for now, and change it before deployment\n\nThis ticket's question — is the tenant `ADMIN` role's cross-organisation reach by design or a gap? — **was ruled on the live board.** Times as the b"
+
+### KS-1574 | Backlog | None | labels=[] | upd=2026-10-22
+GET /api/keys has no organisation arm: an ORG_ADMIN or ISSUER_ADMIN lists another organisation's keys in the same tenant
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-1553', 'started'), ('related', 'out', 'KS-1570', 'started'), ('related', 'out', 'KS-1533', 'started')]
+DESC: "## BLUF\n\n`GET /api/keys` **has no organisation arm.** An `ORG_ADMIN` or `ISSUER_ADMIN` of organisation A lists organisation B's API keys when B is in the same tenant, using B's exact id. The mint and the revoke are both organisation-bounded for these roles; th"
+COMMENTS(1):
+  [2026-10-13 kamil.kreiser@secuura.ai] "**Facts only, for whoever builds this list bound. Filed on Wednesday's GO for pull request 1533 (KS-1553 (a)), as the gate's Minor m3 (verdict sha256/16 `4fc478e33f32e0b3`). Build the bound on `normaliseOrgId` equality, because th"
+
+### KS-1640 | Backlog | None | labels=[] | upd=2026-10-29
+Chain-first verify blobs hard-code `anchored: true` and drop anchoring's status/acknowledged, so a 'submitting' or failed anchor reads isAnchored: true (v1 + v2)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1805', 'backlog'), ('related', 'in', 'KS-608', 'completed'), ('related', 'in', 'KS-772', 'unstarted'), ('related', 'in', 'KS-1634', 'completed')]
+DESC: '## BLUF\n\n**The chain-first verify branches build their blockchain blob with** `anchored: true` **hard-coded and no** `status`**, which makes the honest-anchor guard** `settled` **BY CONSTRUCTION.** An anchoring reply that is still in flight or has failed — `st'
+COMMENTS(0):
+
+
+### KS-1646 | Backlog | None | labels=[] | upd=2026-10-22
+A fresh clone has no pre-push gate: core.hooksPath is unset, so the 16-leg preflight silently does not run
+PRs: []
+keycommits: []
+rel=[]
+DESC: '**BLUF: a working copy cloned from GitHub has NO pre-push gate.** `core.hooksPath` **is unset in a fresh clone,** `.git/hooks/pre-push` **does not exist there, so the 16-leg preflight does not run — silently. The push just succeeds. A worktree off the shared c'
+COMMENTS(0):
+
+
+### KS-1688 | Backlog | None | labels=[] | upd=2026-10-29
+Security: POST /api/documents/:id/version has NO per-document access check on its source - any write-role caller in the tenant can derive a new version from another organisation's document (the sibling of the certify path KS-1557/#1619 closed)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1814', 'started'), ('related', 'in', 'KS-1695', 'started'), ('related', 'out', 'KS-695', 'started'), ('related', 'out', 'PS-1126', 'completed'), ('related', 'out', 'KS-1557', 'started')]
+DESC: "## BLUF\n\n`POST /api/documents/:id/version` **checks a ROLE, a SCOPE and the TENANT, and nothing about the caller's relationship to the source document.** Any write-role caller in the tenant can derive a new version from **another organisation's** document, and"
+COMMENTS(3):
+  [2026-10-19 stuart.jamieson@secuura.ai] "@kamil.kreiser — answering the open question from S's code at develop `355e6e6` (20 Oct), with the one edge that matters stated plainly.\n\n**In the normal case, no: S only ever versions documents it originated itself, under the sam"
+  [2026-10-20 kamil.kreiser@secuura.ai] "## BLUF — measured interaction with the KS-1557 fix, and why this ticket's fix must come SECOND\nThe KS-1557 fix (a `create:connector` provenance row recorded for the connector that mints a document) **widens what the unauthorised "
+  [2026-10-20 stuart.jamieson@secuura.ai] '@kamil.kreiser — your 00:13 note lists "whether Platform S ever versions a document it did not originate" as unmeasurable from your side: it is answered in my comment above (19 Oct 23:36 UTC). Short form: **no** — S versions only '
+
+### KS-1690 | Backlog | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-10-20
+auth: the OAuth refresh_token grant never checks the ORIGIN SESSION, so a revoked session's refresh token still redeems and mints a brand-new session (oauth.ts:988-1089)
+PRs: []
+keycommits: []
+rel=[]
+DESC: "## BLUF\n\n`POST /api/oauth/token` **with** `grant_type=refresh_token` **never reads** `decoded.sessionId`**, so revoking a user's sessions does not reach the OAuth refresh path.** A refresh token issued before a revocation still redeems, and mints a *brand-new*"
+COMMENTS(1):
+  [2026-10-20 kamil.kreiser@secuura.ai] "## Gate BS1 confirms this ticket's scoping, with TWO CONDITIONS\n\nGate BS1 (Opus, tier 1) reviewed the scoping of this ticket against KS-1150 R-2 while gating PR #1655, and **confirmed it is correct** — the origin-session half here"
+
+### KS-1696 | Backlog | None | labels=['Bug'] | upd=2026-10-22
+Security: GET /api/gdpr/deletion-log with no userId reads every tenant's deletion log — unfiltered SELECT on a table with no tenant_id, admitted to ORG_ADMIN
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-758', 'started')]
+DESC: "**BLUF —** `GET /api/gdpr/deletion-log` **called with no** `userId` **runs an unfiltered** `SELECT` **over** `data_deletion_log`**, a table with no** `tenant_id` **column and no RLS policy, and the route admits** `ORG_ADMIN`**. So one organisation's admin can "
+COMMENTS(1):
+  [2026-10-20 stuart.jamieson@secuura.ai] "@kamil.kreiser — what of Platform S's is on that surface, from S's code at develop `61bdbd3` (20 Oct), for the ruling. **S never reads `GET /api/gdpr/deletion-log`**: S's erasure client (`Services/Erasure/PlatformKErasureClient.cs"
+
+### KS-1699 | Backlog | None | labels=['Bug'] | upd=2026-10-22
+Security: three certification write routes have NO per-record access check - POST /:id/verify, /:id/share and /:id/recertify, while /:id/revoke checks the issuer and /issue gates on a write role
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1703', 'backlog'), ('related', 'out', 'KS-1695', 'started'), ('related', 'out', 'KS-834', 'backlog'), ('related', 'out', 'KS-1664', 'backlog')]
+DESC: '## BLUF\n\n`POST /api/certifications/:id/verify`**,** `/:id/share` **and** `/:id/recertify` **carry no per-record access check.** They look a certification up by primary key and act on it. The only authorization on the path is the router-wide `authenticate()` pl'
+COMMENTS(1):
+  [2026-10-20 stuart.jamieson@secuura.ai] "@kamil.kreiser — Platform S's side, from S's code at develop `61bdbd3` (20 Oct), so the audience question has one measured client in it: **S never calls `POST /api/certifications/:id/verify`, `/:id/share`, `/:id/recertify` or `/:i"
+
+### KS-1739 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-26
+Node 26's semver-major Readable.read() change truncates every synchronous cbor.encode() to its first byte on host test runs - images pin node:24 and are unaffected
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-1625', 'backlog'), ('related', 'out', 'KS-1729', 'completed'), ('related', 'out', 'KS-1734', 'completed'), ('related', 'out', 'KS-1727', 'backlog')]
+DESC: "**Node 26.0.0 removed the behaviour** `cbor`**'s synchronous encoder depends on, so on a Node 26 host every** `cbor.encode()` **of a value longer than one byte returns only its first byte. Host-side test runs are affected; the deployed images are not. The fail"
+COMMENTS(0):
+
+
+### KS-1740 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-27
+No supported way to put a user in a second tenant on a local stack — needed for cross-tenant systemTest peers (split from KS-1674)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-492', 'backlog'), ('related', 'in', 'KS-955', 'completed'), ('related', 'in', 'KS-485', 'unstarted'), ('blocks', 'out', 'KS-1741', 'backlog'), ('related', 'out', 'KS-1703', 'backlog'), ('related', 'out', 'KS-1674', 'completed'), ('related', 'out', 'KS-1704', 'backlog')]
+DESC: '**BLUF:** systemTest needs two ordinary (non-super-admin) users in two **different** tenants on a local slot, so the Schemathesis `object_level_authorization` check (BOLA/IDOR, WFC 906) can test cross-tenant isolation. On develop there is no supported route th'
+COMMENTS(0):
+
+
+### KS-1741 | Backlog | peter@obeden.com | labels=['systemTest'] | upd=2026-10-27
+systemTest (Schemathesis): run the object_level_authorization leg with peers in two different tenants (split from KS-1674)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-485', 'unstarted'), ('blocks', 'in', 'KS-1740', 'backlog'), ('related', 'out', 'KS-1674', 'completed'), ('related', 'out', 'KS-1704', 'backlog'), ('related', 'out', 'KS-1703', 'backlog'), ('related', 'out', 'KS-492', 'backlog')]
+DESC: '> ⛔ **Blocked by** [KS-1740](https://linear.app/secuura/issue/KS-1740/no-supported-way-to-put-a-user-in-a-second-tenant-on-a-local-stack) (2026-10-27). Parked until [KS-1740](https://linear.app/secuura/issue/KS-1740/no-supported-way-to-put-a-user-in-a-second-t'
+COMMENTS(1):
+  [2026-10-27 peter@obeden.com] '**Paused (2026-10-27): parked until KS-1740 lands.**\n\n* Where: step 1 of the ticket workflow (reading). No plan written, no code changed.\n* Uncommitted work: none. No worktree or branch created.\n* Slot: none claimed; no stack up.\n'
+
+### KS-1819 | Backlog | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-10-29
+anchoring POST /api/anchors/thread-mint spends the platform wallet outside withWalletLock for any authenticated caller (fee drain)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1839', 'backlog'), ('related', 'out', 'KS-1384', 'started')]
+DESC: '**BLUF:** `POST /api/anchors/thread-mint` has no role check, and a non-dry-run call signs and submits a mint transaction from the platform wallet without taking `withWalletLock`, which the anchoring paths use. By the source, any caller with a valid token that '
+COMMENTS(0):
+
+
+### KS-1820 | Backlog | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-10-29
+nft-certificate is handed the same platform wallet mnemonic as anchoring, and POST /api/nft/mint has no role check
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1838', 'backlog'), ('related', 'in', 'KS-1837', 'backlog'), ('related', 'in', 'KS-1836', 'started'), ('related', 'out', 'KS-1384', 'started')]
+DESC: '**BLUF:** The nft-certificate service is configured with the same `PLATFORM_WALLET_MNEMONIC` as anchoring, so two processes can spend one wallet with no shared lock, and `POST /api/nft/mint` has no role check, so any authenticated caller can trigger a real min'
+COMMENTS(0):
+
+
+### KS-1821 | Backlog | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-10-29
+anchoring: the in-lock confirmed write omits the transaction hash, so a same-payload upsert can leave a confirmed row with a NULL hash
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-1384', 'started')]
+DESC: '**BLUF:** Inferred from the code, not reproduced. The in-lock `confirmed` write carries no `transactionHash`, the front-door upsert overwrites the stored hash on conflict, and guard 2 treats a row without a 64-hex hash as "no known submission". A same-payload '
+COMMENTS(0):
+
+
+### KS-1831 | Backlog | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-10-30
+POST /api/documents/:id/sign: any tenant user can sign any document, can turn a revoked document into signed, and no signature is verified
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-1814', 'started')]
+DESC: "**BLUF:** originate `POST /api/documents/:id/sign` (`Blockchain/Dev/services/originate/src/routes/documents.ts:1271-1346` at develop `d7ddfa1f6433`) checks authentication, the request body, the caller's tenant and the signing nonce, and nothing about the calle"
+COMMENTS(2):
+  [2026-10-29 kamil.kreiser@secuura.ai] '**BLUF:** QA gate 19 on pull request 1814 (KS-1814, head `277e5ba6b7ae`) found that this ticket\'s defect also re-opens KS-1814\'s "a revoked document must not be anchored", through a chain of routes. Fixing this route (a terminal-s'
+  [2026-10-30 kamil.kreiser@secuura.ai] '**BLUF:** The reach of `POST /api/documents/:id/sign` is wider than "any tenant user": a connector (`sk_`) key holding only `documents:read` gets through the gateway to it, and the connector token satisfies the handler\'s user chec'
+
+### KS-1833 | Backlog | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-10-29
+POST /api/documents/:id/lifecycle-events: any tenant user can record a lifecycle event on any document and trigger its anchor emission
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-1814', 'started')]
+DESC: "**BLUF:** originate `POST /api/documents/:id/lifecycle-events` (`Blockchain/Dev/services/originate/src/routes/documents.ts:2757-2877` at develop `d7ddfa1f6433`) checks authentication, the action vocabulary, the payload's shape and the caller's tenant, and noth"
+COMMENTS(0):
+
+
+### KS-1855 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-30
+The gateway answers four admin and verify routes from stand-ins registered before the proxy: fixed audit-log arrays, an always-empty verification queue, and certification verify that always says verified:false
+PRs: []
+keycommits: []
+rel=[]
+DESC: '**BLUF:** The api-gateway answers four routes itself, from stand-ins registered before the proxy to the real service, with no environment guard around them: `GET /api/admin/audit-logs` and `GET /api/security/audit` return fixed arrays of fabricated rows (actor'
+COMMENTS(0):
+
+
+### KS-188 | Todo | stuart.jamieson@secuura.ai | labels=['Bug'] | upd=2026-10-12
+Stateful testing: declare OpenAPI `links` + `operationId` so POST→GET→DELETE chains are exercised (currently 0 of 613 links covered)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1502', 'canceled'), ('related', 'in', 'KS-1442', 'completed'), ('related', 'in', 'KS-593', 'started'), ('related', 'in', 'KS-256', 'started'), ('related', 'in', 'KS-665', 'started'), ('related', 'in', 'KS-485', 'unstarted'), ('related', 'in', 'KS-565', 'backlog'), ('related', 'in', 'KS-492', 'backlog'), ('related', 'out', 'KS-591', 'started'), ('related', 'out', 'KS-1015', 'started'), ('related', 'out', 'KS-61', 'unstarted')]
+DESC: '## Status update (2026-07-10) — the symptom changed, the gap did not\n\nThe original report said the **Stateful Testing tab is always empty** and zero scenarios run. That is **no longer accurate**, and the ticket has been rewritten around what a current sweep ac'
+COMMENTS(7):
+  [2026-09-18 peter@obeden.com] '**Measured 2026-09-18 (KS-1268 bump sweeps, slot 1, head `52df64f84`) — how seed-dependent the stateful phase is with zero declared `links`:**\n\n| run | Schemathesis | seed | stateful scenarios | steps | distinct ops chained |\n|---'
+  [2026-09-18 peter@obeden.com] '## Stateful `max-steps` measurement (from KS-1271 G, 2026-09-18)\n\nSlot 1, Schemathesis 4.27.2, branch `feature/ks-1271-…` @ `e6b4c26d5`, `--phases stateful --max-examples 25 --workers 1`, scratch-dir copy of `schemathesis.toml` + '
+  [2026-10-07 peter@obeden.com] '## Addendum 2026-10-07 (KS-1439 sweeps, Schemathesis 4.29.3 and 4.29.4): stateful pairs counted per run\n\n**BLUF.** Stuart, an evidence-only note for this stateful-testing ticket, from the KS-1439 version bump. Three runs on one se'
+
+### KS-1890 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-31
+tenant-provisioning checks no role on its own routes: any signed-in caller who reaches the service can suspend, archive, edit or delete any tenant
+PRs: []
+keycommits: []
+rel=[]
+DESC: '## BLUF\n\n`services/tenant-provisioning` **verifies the bearer token on every** `/api/*` **route (**`index.ts:182`**) but checks no role on any of them.** Any caller with a valid JWT who reaches the service directly, rather than through the gateway, can list, r'
+COMMENTS(0):
+
+
+### KS-1931 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-11-01
+kyc: dbGetVerificationsByUser returns [] on any read error, so the GDPR erasure cascade (dbDeleteUserData) continues with an incomplete list, against its own comment
+PRs: []
+keycommits: []
+rel=[]
+DESC: '**BLUF:** `dbGetVerificationsByUser` in `Blockchain/Dev/services/kyc/src/index.ts` (`:207-221`) catches every ordinary database or decrypt error, logs it and returns `[]`. `dbDeleteUserData` (`:332`), the GDPR erasure cascade, calls it at `:350` to collect leg'
+COMMENTS(1):
+  [2026-11-01 kamil.kreiser@secuura.ai] '**BLUF:** gate 85 on pull request 1900 found two more points in the same erasure path, which belong with this ticket. Both come from a probe with a stand-in database through the `DELETE` route and the real `user.erased` subscriber'
+
+### KS-1933 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-11-02
+Billing: one Stripe purchase can be credited more than once (two events, post-grant retry, finalise/release catches)
+PRs: []
+keycommits: []
+rel=[]
+DESC: "**BLUF:** One Stripe purchase can add certification credits to a customer's balance twice. QA gate 95 (Opus, 2026-11-02) ran the real billing webhooks router with only the database and the Stripe service replaced, and measured three ways it happens plus two ca"
+COMMENTS(0):
+
+
+### KS-1935 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-11-02
+Billing: addCertificationCredits' optimistic lock is not a compare-and-set, so one call can credit twice under a concurrent write
+PRs: []
+keycommits: []
+rel=[]
+DESC: '**BLUF:** `StripeService.addCertificationCredits` keeps the credit balance in Stripe customer metadata and calls its read-update-verify loop "optimistic locking", but Stripe\'s customer update is unconditional, so the loop is not a compare-and-set. When a concu'
+COMMENTS(0):
+
+
+### KS-1936 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-11-02
+api-gateway: ORG_ADMIN and ISSUER_ADMIN can set any user's verification level (tenant bound unmeasured)
+PRs: []
+keycommits: []
+rel=[]
+DESC: '**BLUF:** In the api-gateway, `PATCH /api/admin/identity/users/:id/level` sits behind `requireAdmin`, and `requireAdmin` admits `ORG_ADMIN` and `ISSUER_ADMIN` (and the lower-case `issuer_admin`). A probe with a stub database showed both roles reach the handler'
+COMMENTS(0):
+
+
+### KS-239 | Backlog | stuart.jamieson@secuura.ai | labels=[] | upd=2026-08-12
+[Decision] Erasure: multi-step to trigger, but irreversible + complete once executed — confirm no recoverable off-chain link survives (incl. backups)
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-229', 'started')]
+DESC: 'Decision/confirmation for **Stuart** (split out of [KS-234](https://linear.app/secuura/issue/KS-234/document-the-gdpr-art-17-erasure-vs-on-chain-immutability-position)). This is the foundation of the whole GDPR Art.17 position, so it needs an explicit sign-off'
+COMMENTS(2):
+  [2026-06-18 kamil.kreiser@secuura.ai] "**Erasure-surface enumeration + key correction (verified against code, 2026-06-18).**\n\n⚠️ **Premise correction:** this ticket says 'per-tenant DEKs already exist' — they don't. PII is encrypted with a **single master key** (`encry"
+  [2026-08-12 kamil.kreiser@secuura.ai] "**BLUF — the decision is still open and still Stuart's, but its technical foundation moved: the mechanism this ticket assumes (crypto-shred via per-subject keys) does not exist and is gated on KS-291. Verified 2026-08-12, nothing "
+
+### KS-304 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-02
+Tokenise personal/identifying data — mint a privacy token (Platform S/K by journey origin) and thread it through the APIs
+PRs: ['#297 MERGED 0dacbdb1 deployed=y']
+keycommits: ['0dacbdb1 docs(compliance): cite KS-304 as the issuer-name tokenisation ticket (KS-234 follow-up) (#297)']
+rel=[]
+DESC: '## Context\n\nGDPR data-minimisation / privacy. Spun out of the KS-234 DPIA work: today an individual/sole-trader **issuer name can land in plaintext on the immutable Cardano chain** (KS-234 §5.1, accepted as a disclosed residual *pending this ticket*). Tokenisi'
+COMMENTS(1):
+  [2026-09-02 kamil.kreiser@secuura.ai] '## RULED — Kam\'s action, not ours\n\n**Kam, dashboard decision card, 2026-09-02 19:35 AEST** (card `secuura-ks304-ks256-bounces`), relayed with provenance by the coordinator: **"KS-304 → tell Stuart S goes first (your message)."**\n\n'
+
+### KS-329 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-02
+Phase 2 — JWT RS256 → hybrid (RS256 + ML-DSA-65)
+PRs: []
+keycommits: []
+rel=[('blocks', 'in', 'KS-756', 'backlog')]
+DESC: "> **⚠ RE-MEASURED 2026-08-12 (session 19) — the shim blocker below is DEAD, and the real blocker is different. Kam's ruling needed on a design change; see the pinned comment for the measurements.**\n>\n> `jose` 6.2.8 signs and verifies ML-DSA JWTs on Node 24 tod"
+COMMENTS(6):
+  [2026-09-02 kamil.kreiser@secuura.ai] "## DESIGN NOTE — ruling (a) implemented against measured numbers, not the banner's\n\n**BLUF — the ruling is right, and it is cheaper than it looks in one place and dearer in another. The mechanism it names is already half-built in-"
+  [2026-09-02 kamil.kreiser@secuura.ai] 'Split filed as **KS-756** — *Wire up the opaque refresh token that `createSession` already mints* (P2, project *Auth, Tenancy & Access Control*), related as blocking this ticket. It carries the scope, the transition decision and t'
+  [2026-09-02 kamil.kreiser@secuura.ai] '## Catalogue pass — the description\'s bounce is **STALE**; this is actionable, and blocked elsewhere\n\nThe description leads with *"Kam\'s ruling needed on a design change"*. **That ruling landed** — 2026-09-02, the opaque refresh t'
+
+### KS-485 | Todo | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-10-29
+Security review — plan, methodology & handover (Platform K)
+PRs: []
+keycommits: ['27857e4f docs(process): record the four review streams as the standing process (KS-485, KS-770, KS-771, KS-772']
+rel=[('related', 'in', 'KS-1814', 'started'), ('related', 'in', 'KS-772', 'unstarted'), ('related', 'in', 'PS-1279', 'completed'), ('related', 'in', 'PS-1287', 'backlog'), ('related', 'in', 'KS-1617', 'started'), ('related', 'in', 'KS-1448', 'started'), ('related', 'in', 'KS-695', 'started'), ('related', 'out', 'KS-1704', 'backlog'), ('related', 'out', 'KS-1705', 'backlog'), ('related', 'out', 'KS-1740', 'backlog'), ('related', 'out', 'KS-1741', 'backlog'), ('related', 'out', 'KS-1703', 'backlog'), ('related', 'out', 'KS-1674', 'completed'), ('related', 'out', 'KS-1032', 'started'), ('related', 'out', 'KS-1709', 'completed'), ('related', 'out', 'PS-319', 'started'), ('related', 'out', 'PS-317', 'completed'), ('related', 'out', 'PS-481', 'completed'), ('related', 'out', 'PS-463', 'completed'), ('related', 'out', 'PS-524', 'completed'), ('related', 'out', 'PS-465', 'completed'), ('related', 'out', 'PS-499', 'completed'), ('related', 'out', 'PS-287', 'completed'), ('related', 'out', 'KS-581', 'unstarted'), ('related', 'out', 'KS-607', 'backlog'), ('related', 'out', 'KS-188', 'unstarted'), ('related', 'out', 'KS-263', 'backlog')]
+DESC: '> **This issue is the coordination hub and living plan for the Platform K security review.** It holds the scope, threat model, methodology, the index of review work-streams, the evidence-cited findings register, remediation sequencing, and full handover contex'
+COMMENTS(100):
+  [2026-10-29 kamil.kreiser@secuura.ai] '**BLUF:** Three security-class tickets are open in Backlog from the 2026-10-29 reading of nft-certificate (develop d7ddfa1f6433). They are listed here because the two stream registers they would belong to are archived (KS-486, str'
+  [2026-10-29 kamil.kreiser@secuura.ai] "**BLUF:** develop `429ba4824915` is deployed and verified on **both** boxes: kintsugi (dev-ps) first, then demo-pk (uat-ps). Two consumer-visible changes: a foreign tenant's anchor now reads 404 on the two anchor GETs, and `signat"
+  [2026-10-29 kamil.kreiser@secuura.ai] '**BLUF:** develop `e3d8456ec81d` is deployed and verified on **both** boxes: kintsugi (dev-ps) first, then demo-pk (uat-ps). Two consumer-visible changes: the anchor retry route now checks role, document access and revoked state, '
+
+### KS-491 | Todo | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-09-30
+Review F — Edge, WAF, DDoS & anti-automation
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1374', 'started'), ('related', 'in', 'KS-1102', 'backlog'), ('related', 'in', 'KS-658', 'backlog'), ('related', 'in', 'KS-492', 'backlog'), ('related', 'out', 'KS-648', 'backlog')]
+DESC: '> ## ✅ F-9 RESOLVED — added 2026-08-17. **The row is FALSE at the live edge: all three portals already serve their own CSP. Do NOT add one at the gateway — it would break them.**\n>\n> **F-9 is closed on this ticket. KS-491 itself stays OPEN** for the two rows t'
+COMMENTS(8):
+  [2026-09-28 peter@obeden.com] "## Small finding for this register: the gateway sends `Server: nginx` on every route (LOW)\n\nRecording it here as the edge/WAF work-stream's home. It came up in the Akto OWASP scan during KS-1286 (Akto 2.35.6, slot 2, 2026-09-28, t"
+  [2026-09-28 peter@obeden.com] "@kamil.kreiser — a gentle follow-up on the `Server: nginx` note above, for when you have a moment. It's a small item, and the priority here stays as it is (the WAF, Postgres/Redis and CAPTCHA rows matter more). It does have one re"
+  [2026-09-30 peter@obeden.com] 'Register entry: **KS-1397**, LOW (CWE-16). The nginx gateway sends `Server: nginx` on every response. The version is already hidden (`Blockchain/Dev/docker/nginx-gateway/nginx.conf:24` `server_tokens off`) and upstream `Server` is'
+
+### KS-525 | Backlog | peter@obeden.com | labels=['systemTest'] | upd=2026-10-26
+Playwright: end-to-end flow coverage across all 310 published API operations
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-1628', 'completed'), ('related', 'out', 'KS-492', 'backlog')]
+DESC: '## ⚠ Re-grounding — 2026-10-26 (read this first)\n\nNothing below has been started — no commit references [KS-525](https://linear.app/secuura/issue/KS-525/playwright-end-to-end-flow-coverage-across-all-310-published-api) and none of the Phase 0 helpers exist on '
+COMMENTS(2):
+  [2026-07-24 peter@obeden.com] '@kamil.kreiser @stuart.jamieson — a small ask, whenever it suits you. No urgency; neither of these blocks the work starting.\n\nTwo of the 23 flows in this ticket assert a **documented product state that we currently have no way to '
+  [2026-07-25 peter@obeden.com] 'Mask all GDPR data, access and secret keys'
+
+### KS-565 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-27
+Sweeps 2026-08-05: untracked failures across 10 ops — response-schema recurrence (KS-498 residual), 3 genuine 500s, non-envelope 5xx on by-design-503 ops, undocumented status
+PRs: ['#1403 MERGED fa690e5a deployed=y', '#757 MERGED 0874b0eb deployed=y', '#756 MERGED 80880bb7 deployed=y']
+keycommits: ['d1d9f54d systemTest/schemathesis: harness hardening, live connector tests, Python 3.14.8 floor (KS-571, KS-572']
+rel=[('related', 'in', 'KS-1762', 'completed'), ('related', 'in', 'KS-955', 'completed'), ('related', 'in', 'KS-1641', 'completed'), ('related', 'in', 'KS-1743', 'backlog'), ('related', 'in', 'KS-608', 'completed'), ('related', 'in', 'KS-1680', 'completed'), ('related', 'in', 'KS-1502', 'canceled'), ('related', 'in', 'KS-693', 'started'), ('related', 'in', 'KS-1442', 'completed'), ('related', 'in', 'KS-1435', 'started'), ('related', 'in', 'KS-1357', 'backlog'), ('related', 'in', 'KS-593', 'started'), ('related', 'out', 'KS-1511', 'started'), ('related', 'out', 'KS-1042', 'completed'), ('related', 'out', 'KS-1269', 'started'), ('related', 'out', 'KS-1015', 'started'), ('related', 'out', 'KS-1359', 'started'), ('related', 'out', 'KS-1371', 'started'), ('related', 'out', 'KS-753', 'started'), ('related', 'out', 'KS-752', 'started'), ('related', 'out', 'KS-627', 'backlog'), ('related', 'out', 'KS-595', 'backlog'), ('related', 'out', 'KS-591', 'started'), ('related', 'out', 'KS-61', 'unstarted'), ('related', 'out', 'KS-256', 'started'), ('related', 'out', 'KS-188', 'unstarted')]
+DESC: 'Findings from two runs on the same code, 2026-08-05: `full-2026-08-05T08-44-00Z` and `pre-merge-2026-08-05T09-18-45Z` (Schemathesis 4.24.3, 316/318 operations, 316/317 past auth, no health-check suppression, untruncated messages). Everything else in those runs'
+COMMENTS(22):
+  [2026-10-09 peter@obeden.com] "**Measured on Schemathesis 4.30.0 (KS-1455, 2026-10-09)**, across three runs on slot 4 at `bf9568582`: the `pr` tier, `full` seed 1455 and `full` seed 20261009. Five of this ticket's nine baseline pairs recurred:\n* `response_schem"
+  [2026-10-09 peter@obeden.com] 'For context: these results were measured on the KS-1455 branch (`feature/ks-1455-bump-systemtest-schemathesis-pin-4294-4300-or-later-release`, PR https://github.com/Secuura/Distributed_Secuura/pull/1438), which is going to be merg'
+  [2026-10-21 peter@obeden.com] '**BLUF:** this adds one more genuine 500 on schema-compliant input to §2, in the same class. `POST /api/documents` answers **500** when `title` is longer than 500 characters, because nothing checks the length before Postgres rejec'
+
+### KS-576 | Todo | kamil.kreiser@secuura.ai | labels=['Feature'] | upd=2026-10-06
+Bulk re-key: one admin-authorised rotate across a named set of externalRefs
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1430', 'backlog'), ('related', 'in', 'PS-740', 'completed'), ('related', 'in', 'PS-319', 'started'), ('blocks', 'in', 'KS-577', 'started'), ('related', 'in', 'KS-581', 'unstarted'), ('related', 'out', 'KS-579', 'unstarted'), ('related', 'out', 'KS-582', 'unstarted'), ('related', 'out', 'KS-583', 'unstarted')]
+DESC: '## BLUF\n\n@peter asked for **one** admin-authorised action that re-keys a named set of Organisations by `externalRef`, instead of N separate `register-connector` calls during an incident. The loop itself is **1–2 days**.\n\n**It must not ship before** [KS-577](ht'
+COMMENTS(2):
+  [2026-09-02 stuart.jamieson@secuura.ai] "## Proposal from the S side: make the re-key **grant-driven**, with S as the executor\n\nContext: investigating key expiry/recovery after S's local provisioning key lapsed on 2026-08-31 (PS-319). Verified in code on both sides, S to"
+  [2026-09-02 stuart.jamieson@secuura.ai] 'Re-filed as its own issue now the cap has cleared: **[PS-740](https://linear.app/secuura/issue/PS-740/sk-key-recovery-a-keyinvalid-state-a-supported-inlet-for-a-rotated)** — the S-side half of the grant-driven re-key (KeyInvalid s'
+
+### KS-590 | Backlog | None | labels=['systemTest'] | upd=2026-10-22
+systemTest (Schemathesis): verify-by-hash must not resolve to an arbitrary registration — anchored-ancestor + cross-tenant field disclosure (KS-584 class)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1597', 'backlog'), ('related', 'in', 'KS-1119', 'started'), ('related', 'in', 'KS-608', 'completed')]
+DESC: '## Status: parked — not actionable yet\n\n**Blocked on** [KS-584](https://linear.app/secuura/issue/KS-584/verify-by-hash-selects-the-wrong-registration-certified-documents) (Kamil, Urgent). That ticket has to decide *what correct resolution means* before a regre'
+COMMENTS(4):
+  [2026-08-12 kamil.kreiser@secuura.ai] "## BLUF\n**The P3 /v2 contract your tests can pin is now ready-to-land** (draft PR [#666](https://github.com/Secuura/Distributed_Secuura/pull/666), holding for Kam's cutover word) — this note is so your KS-590 regression work can t"
+  [2026-08-12 peter@obeden.com] '## Unparking check 2026-08-12 (agent, grounded against develop `52368d8c3`)\n\n**The blocker this ticket was parked behind has moved.** [KS-584](https://linear.app/secuura/issue/KS-584) is now *In Review* with two merges on develop:'
+  [2026-10-06 peter@obeden.com] '## Status check 2026-10-06: not parked any more; four disclosure questions still need Kamil\n\n**BLUF:** The "parked — not actionable yet" header is out of date. KS-584 is **Deployed to UAT**, and the `/api/v2/verification/verify` c'
+
+### KS-598 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-13
+Architecture P1: defuse the MULTI_TENANCY registry upsert — it silently collapses registrations per (hash, tenant) if the flag is ever enabled
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1590', 'backlog'), ('related', 'out', 'KS-1336', 'started')]
+DESC: "**Ask:** In the same phase that touches registration (plan-sheet requirement — not later, not beside), defuse `platform_document_registry`'s armed landmine: UNIQUE `uq_pdr_hash_tenant (content_hash, tenant_id)` + `ON CONFLICT (content_hash, tenant_id) DO UPDAT"
+COMMENTS(1):
+  [2026-09-02 kamil.kreiser@secuura.ai] '## Confirmed live on `develop` `541acae81` — the landmine is still armed, both halves\n\n**The upsert**, `services/originate/src/routes/verification.ts:396` (read from `origin/develop`, not the working tree):\n\n```sql\nON CONFLICT (co'
+
+### KS-602 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-12
+BM-1: Certification model — certification = attestation + signing + optional watermarking; any modification → new version → mandatory re-certification
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'PS-1145', 'completed')]
+DESC: '## BLUF\n\n**Certification is an UMBRELLA term** = attestation + signing + (optional) watermarking. Attestation = a user attesting a document is correct — on-chain, distinct from the file itself. Watermarking is a distinct, optional element. **ANY modification ('
+COMMENTS(0):
+
+
+### KS-603 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-02
+BM-2: Verification is a configurable workflow via smart contracts — record the workflow path, not casual views
+PRs: []
+keycommits: []
+rel=[]
+DESC: '## BLUF\n\n**Verification is a CONFIGURABLE WORKFLOW, not a fixed function.** Clients configure verification workflows via smart contracts; Secuura does NOT prescribe compliance. The workflow PATH is verified against the smart contract and recorded; simple inter'
+COMMENTS(0):
+
+
+### KS-607 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-02
+GET /api/anchors/{id} and verify report different statuses for the same anchor — 91 UAT anchors read "failed" while verify says confirmed
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-485', 'unstarted'), ('related', 'out', 'KS-492', 'backlog'), ('blocks', 'out', 'KS-608', 'completed'), ('related', 'out', 'PS-577', 'completed')]
+DESC: 'Raised from the S side 2026-08-12 (S ticket: [PS-577](<https://linear.app/secuura/issue/PS-577>)). @kamil.kreiser — one authenticated call settles this; details below.\n\n## The observation\n\nPlatform S polls `GET /api/anchors/{id}` to learn when an anchor confir'
+COMMENTS(2):
+  [2026-08-12 peter@obeden.com] '## One question ahead of the investigation — it gates the systemTest leg\n\n@kamil.kreiser — before you dig into this, there is a single semantics question whose answer decides whether the systemTest regression for this class can be'
+  [2026-08-12 kamil.kreiser@secuura.ai] '@peter — **answering your gating question, so KS-608 can be written.**\n\n## BLUF\n\n**Same lifecycle fact, different resolution scope — NOT two facts by design.** Your outcome 4 is ruled out and **KS-608 survives**. But its invariant'
+
+### KS-61 | Todo | stuart.jamieson@secuura.ai | labels=['Bug'] | upd=2026-09-21
+OpenAPI compliance: documentation gaps across the spec (descriptions, parameter docs, operationId)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-565', 'backlog'), ('related', 'in', 'KS-188', 'unstarted'), ('related', 'out', 'KS-627', 'backlog')]
+DESC: '## Overview\n\nA compliance matrix over our API definitions identified gaps in the documentation features clients rely on. Still no urgency — this remains a reminder ticket, best addressed per-API as each is touched.\n\n## Which standard\n\nThe original analysis was'
+COMMENTS(3):
+  [2026-06-03 peter@obeden.com] '## Status Update — Significant Compliance Improvement (2026-06-03)\n\n**Status: IMPROVED** ✅ (from 63.6% → high compliance on core features)\n\n---\n\n## Current Compliance (2026-06-03)\n\n**Endpoints Analyzed:** 329 (was 335 in original '
+  [2026-06-03 peter@obeden.com] "## Link: Schemathesis Stateful Testing (KS-188)\n\n**Related Issue:** KS-188 - Schemathesis: Stateful Testing Configured But Produces Zero Execution Results\n\nThis ticket's gaps directly impact KS-188's ability to execute stateful te"
+  [2026-09-14 peter@obeden.com] '## Results 2026-09-14 (Schemathesis 4.27.1) — the spec-documentation gaps the sweep can see\n\nFrom `full-2026-09-14T15-04-07Z-slot3` (342 ops, 0 errored; `develop` @ `64c386e04`), the contract-documentation findings a sweep exposes'
+
+### KS-624 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-02
+prism issues VCs with random bytes as the Ed25519 proof and verifies them as passed — the A-11 fraud pattern fixed in vc-issuer, never fixed here
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-627', 'backlog')]
+DESC: '## BLUF\n\n`services/prism` issues verifiable credentials whose `Ed25519Signature2020` proof is **64 random bytes**, and its `/verify` returns `passed: true` without checking anything. This is the identical pattern that was ruled fraud-grade and **fixed in** `vc'
+COMMENTS(1):
+  [2026-08-13 kamil.kreiser@secuura.ai] '## A third instance of this pattern exists — and it was remediated on 2026-08-13, before your ruling\n\nRecording this here **so your ruling covers three instances knowingly rather than\ntwo blindly.** This is an input to the decisio'
+
+### KS-636 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-05
+node:24-alpine carries a CRITICAL (CVE-2026-59873) — our own base-image watchdog flagged it on 2026-08-01 and the failure went unread
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-638', 'backlog'), ('related', 'out', 'KS-365', 'started')]
+DESC: "## BLUF\n\n**The base-image CVE watchdog fired on 2026-08-01 and nobody heard it.** Its scheduled run failed — which is, by the workflow's own design, the alarm — reporting `node:24-alpine`**: 1 CRITICAL / 4 HIGH — CVE-2026-59873**. That is the base image for **"
+COMMENTS(1):
+  [2026-08-15 kamil.kreiser@secuura.ai] '## Evidence only — what the Kintsugi rebuild actually baked (2026-08-15, session 35)\n\n**No action taken on this ticket: not closed, not re-scoped, not re-prioritised, and the watch was NOT dispatched.** Adding evidence for whoever'
+
+### KS-638 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-07
+The extranet test board has never shown a green run — 0 passed in 22, and the latest red is E2E 210/0 with Schemathesis producing no results
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-139', 'backlog'), ('related', 'out', 'KS-636', 'backlog')]
+DESC: "## BLUF\n\n**The team's own status board has never once been green.** The extranet Testing tab has recorded **22 Platform K runs since 2026-05-25: 17** `failed`**, 5** `error`**, 0** `passed`**.** Not one.\n\nAnd the most recent red is misleading: **E2E passed 210"
+COMMENTS(1):
+  [2026-09-07 kamil.kreiser@secuura.ai] '**Measured 2026-09-07, in a catalogue pass over all 293 open tickets:** GitHub Actions is retired for this repo and I verified it directly rather than taking it on trust. **2,000 runs across 20 API pages are 100% `startup_failure`'
+
+### KS-655 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-05
+KS-78 drift check is wrong three ways — reports 7 commits of drift where 212 exist, labels `develop` as `main`, and anchors to a stock redis image
+PRs: []
+keycommits: []
+rel=[]
+DESC: '## BLUF\n\n**The KS-78 local-drift check reports a number that is real but labelled with the wrong branch, anchored to the wrong containers, and computed from the wrong kind of timestamp.** Today it printed **7 commits** of drift. The drift that actually exists,'
+COMMENTS(2):
+  [2026-08-17 kamil.kreiser@secuura.ai] '## CORRECTION to this ticket\'s filed diagnosis — dated 2026-08-18\n\n## BLUF\n**The filed diagnosis is wrong in a way that would send the next fixer to the wrong line.** This ticket records that the KS-78 drift counter *"counts `deve'
+  [2026-09-02 kamil.kreiser@secuura.ai] '## Catalogue pass — **BOUNCE**, no state change\n\nThe remaining actor is **@kam**, named by this ticket\'s own text: *"Changing it is Kam\'s call, and Wednesday is carrying the fleet-wide fix on the WED board gated on his go-ahead."*'
+
+### KS-668 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-05
+Compose seeds published *123 credentials by default, and the 11 rotation vars never reach the auth container from .env — every compose deploy (local, demo VM, Kintsugi)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1413', 'backlog'), ('related', 'out', 'KS-969', 'started'), ('related', 'out', 'KS-955', 'completed'), ('related', 'out', 'KS-966', 'started'), ('related', 'out', 'KS-972', 'started'), ('related', 'out', 'KS-601', 'started')]
+DESC: '## BLUF\n\n**Any compose deploy of this platform comes up seeding the published** `*123` **credentials, and the documented way to rotate them silently does nothing unless you happen to put them in the one undocumented file.** Two halves of the same asymmetry in '
+COMMENTS(1):
+  [2026-09-10 peter@obeden.com] "**One more instance of the same mechanism, found during the KS-1016 verification run (2026-09-10).**\n\n`ADMIN_USER_PASSWORD` is read by `services/auth/src/repositories/userRepo.ts:1123` (`requiredSeedPw('ADMIN_USER_PASSWORD')`) and"
+
+### KS-678 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-05
+#568 publishes 17 URLs on secuura.io — an unresolving, seemingly unowned domain (KS-669 class; no guard rule covers URLs)
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-256', 'started'), ('related', 'out', 'KS-665', 'started'), ('related', 'out', 'KS-669', 'started')]
+DESC: '## BLUF\n\n**#568 publishes 17 URLs on** `secuura.io` **— a domain that does not resolve and that we do not appear to own.** This is the same class as [[KS-669]] (`exports.secuura.com`, an unowned for-sale domain in the published spec), three weeks on, and it is'
+COMMENTS(2):
+  [2026-08-21 kamil.kreiser@secuura.ai] '## BLUF\n\n**Fixed and pushed — but the fix is four times bigger than this ticket implies, because changing the generator alone would have fixed nothing.** The 17 published URLs are **not** synthesised at generation time; they are b'
+  [2026-09-05 kamil.kreiser@secuura.ai] '**In Review reconciliation 2026-09-05 → Backlog.**\n\nNever started — no PR and no remote branch. In Review was the wrong state, not a stale ticket: inert since the day it opened, 2026-08-21.\n\nThis is a state correction, not a judge'
+
+### KS-683 | Todo | kamil.kreiser@secuura.ai | labels=['Bug'] | upd=2026-09-09
+Anchor-status standoff: a consumer repolls anchors K reports as terminally failed — K's labelling is already honest (KS-587), so the fix is terminal-state handling, not a new K signal
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'PS-805', 'completed'), ('related', 'out', 'PS-645', 'completed')]
+DESC: '## BLUF\n\n**The standoff is real, but its stated mechanism is wrong — and measuring demo inverted the ownership.** The premise going in was *"K reports simulated anchors as* `confirmed`*; Platform S\'s honesty rule refuses a* `mock_tx_` *hash; S repolls forever.'
+COMMENTS(3):
+  [2026-08-21 stuart.jamieson@secuura.ai] 'Layer 1 is implemented on Platform-S: https://github.com/Secuura/platform-s/pull/581 (PS-644, In Review).\n\nYour measurement reshaped the fix, so recording what changed because of it:\n\n- **`failed` is now effectively terminal — as '
+  [2026-08-21 stuart.jamieson@secuura.ai] "**Layer 1 is merged** — PS-644's slow-lane parking landed on Platform-S develop (`f29173c`, PR #581) and PS-644 is Done. Verified live before merge: 19 suite-created anchors all parked after one status poll each, and 0 anchor GETs"
+  [2026-08-21 kamil.kreiser@secuura.ai] '## Confirmed at demo\'s edge — the loop is gone, and the slow lane left its own signature rather than just a silence\n\n## BLUF\n\n@stuart.jamieson — **measured on demo, your fix works, and the evidence is better than "the traffic stop'
+
+### KS-696 | Todo | kamil.kreiser@secuura.ai | labels=['systemTest'] | upd=2026-10-22
+Akto pr-scan is non-deterministic — three runs on near-identical code gave 1 HIGH / 1 HIGH (different endpoint) / 0 HIGH
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1711', 'backlog'), ('related', 'in', 'KS-1680', 'completed'), ('related', 'in', 'KS-724', 'completed'), ('related', 'out', 'KS-709', 'backlog')]
+DESC: '## BLUF\n\n**Three Akto** `test:pr` **runs tonight, same harness, same command, gave three different answers — and none of the three carried a captured request or response.** A gate that answers differently on identical input cannot be read either way: its PASS '
+COMMENTS(4):
+  [2026-08-27 kamil.kreiser@secuura.ai] "## BLUF\n\n**Measured: three `test:pr` runs on a frozen commit and an untouched stack, 35–47 s apart. Akto's own issue count came back 2 / 0 / 2 — and the platform answers those endpoints identically 20/20.** So the variance is insi"
+  [2026-08-27 kamil.kreiser@secuura.ai] "## BLUF\n\n**Re-measured on the fixed harness: six runs on one frozen commit, all with healthy captures. The variance is real — but this ticket's headline figure was partly an artifact of [KS-700](https://linear.app/secuura/issue/KS"
+  [2026-09-28 peter@obeden.com] '@kamil.kreiser — could you take a look? Some of the variance you measured here may now have a mechanism.\n\nYour six-run table showed buckets moving on identical code with the total exactly conserved (4,702 every time), `known-fp` g'
+
+### KS-709 | Backlog | kamil.kreiser@secuura.ai | labels=['systemTest'] | upd=2026-10-30
+Akto reports a PASS for a test that executed NOTHING — 'clean 0 / not-applicable 969 ✓' is a second false-zero axis that richCaptureFailed does not catch
+PRs: []
+keycommits: ['4f7766a3 KS-1286: Akto 2.22.2 → 2.35.6, honest coverage (KS-709 / KS-724), paced tiers, stall stop, and no tes']
+rel=[('related', 'in', 'KS-1609', 'completed'), ('related', 'in', 'KS-1768', 'completed'), ('related', 'in', 'KS-1608', 'completed'), ('related', 'in', 'KS-1711', 'backlog'), ('related', 'in', 'KS-1610', 'backlog'), ('related', 'in', 'KS-1374', 'started'), ('related', 'in', 'KS-696', 'unstarted'), ('related', 'in', 'KS-441', 'started'), ('related', 'in', 'KS-725', 'unstarted'), ('related', 'in', 'KS-724', 'completed'), ('related', 'out', 'KS-1083', 'backlog'), ('related', 'out', 'KS-1032', 'started'), ('related', 'out', 'KS-955', 'completed'), ('related', 'out', 'KS-1051', 'backlog')]
+DESC: "## BLUF\n\n**KS-700 closes one false-zero axis and this is the other one.** On @PeterObeden's 2026-08-28 review run, `analytics: code injection` returned **clean 0 · not-applicable 969** and reported **✓**. The capture *succeeded* — so `richCaptureFailed` is cor"
+COMMENTS(12):
+  [2026-10-15 peter@obeden.com] '**BLUF:** KS-1447 now fails these runs. `assertScanExecuted` (`systemTest/akto/tests/fixtures.ts`, commit `c554b6344` on the KS-1447 branch) runs on every tier before `assertNoVulnerabilities`. It fails a scan when no result reach'
+  [2026-10-15 peter@obeden.com] '**Ruling (Peter, 2026-10-15): Option A.** The KS-1447 zero-execution gate (`assertScanExecuted`) stays. The four scans it fails (Document BOLA, KYC Object-Level Auth, BUG-ISOLATION-001 Cross-Tenant BOLA, Verifier Rate Limit) are f'
+  [2026-10-27 peter@obeden.com] '**BLUF:** four scoped Akto scans in `test:security` currently execute nothing on `develop`. The KS-1447 gate now fails them correctly, but the HTML report headline still reads PASSED. Measured on 2026-10-27 under KS-1608, on two s'
+
+### KS-716 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-07
+The whole super-admin surface is silently unscanned — no system_admin block means the HAR replay fallback never fires (0 of 16 endpoints, incl. KS-694's GDPR routes)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-724', 'completed'), ('related', 'in', 'KS-725', 'unstarted')]
+DESC: '## BLUF\n\nEvery **super-admin-only** endpoint is invisible to Akto on a stock local checkout, and nothing says so. `config/secrets.yml` carries no `system_admin` block — `config/secrets.example.yml` documents one — so `resolveReplayTokens()` returns `adminToken'
+COMMENTS(1):
+  [2026-09-30 peter@obeden.com] '## BLUF\n\nOne observation for this ticket, measured rather than reasoned: when the **issuer** token is dead, the system-admin fallback feeds the replay **completely on its own**. So the fallback does work where a `system_admin` blo'
+
+### KS-725 | Todo | kamil.kreiser@secuura.ai | labels=['systemTest'] | upd=2026-10-22
+test:pr never re-imports the OpenAPI spec, so Akto scans a collection that has drifted from it — a declared operation is not a scanned one
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-709', 'backlog'), ('related', 'out', 'KS-716', 'unstarted')]
+DESC: '> **Origin.** Parked on [KS-712](https://linear.app/secuura/issue/KS-712) comment `718362a9` (2026-08-28T22:30:04Z) under "Related, found today and unfiled for the same reason" — `issueCreate` was refusing workspace-wide. Filed 2026-08-29. **No new measurement'
+COMMENTS(2):
+  [2026-08-31 kamil.kreiser@secuura.ai] "## BLUF\n\n**Measured today: after a spec re-import, Akto CAN see `identityCommitment` at parameter level.** This ticket's premise — that `test:pr` never re-imports, so a newly declared field is invisible to Akto — is confirmed by t"
+  [2026-09-28 peter@obeden.com] '@kamil.kreiser — could you take a look? This is your ticket and I have **not** touched it, but there is now a measured reason it matters more than when you filed it.\n\nRe-verified today on `feature/ks-1286-…` (2026-09-28): the prem'
+
+### KS-735 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-12
+Verify results show the user nothing about what was registered — a renamed file confirms green with no explanation (PS-723)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1106', 'backlog')]
+DESC: '## BLUF\n\n**A verify result shows the user nothing about what was registered, so a renamed file confirms green with no way to notice the rename.** Stuart hit this on PS-723 and ruled the direction: *"it should be explained to the user, otherwise confusion will '
+COMMENTS(1):
+  [2026-09-02 kamil.kreiser@secuura.ai] '## Catalogue pass — **BOUNCE**, no state change\n\nThe remaining actor is **@PeterObeden**, named by this ticket\'s own text: *"the flat-vs-nested contract question in §2 — that is Peter\'s call"*, and *"the contract question — Peter\''
+
+### KS-756 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-14
+Wire up the opaque refresh token that createSession already mints — one write site, zero read sites (KS-329 ruling (a) prerequisite)
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1150', 'started'), ('blocks', 'out', 'KS-329', 'backlog')]
+DESC: "**BLUF —** `createSession` **has minted an opaque refresh token on every session since the session service was written, and nothing has ever read it. One write site, zero read sites, measured with a control. Wiring it up is the prerequisite Kam's KS-329 ruling"
+COMMENTS(0):
+
+
+### KS-768 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-05
+audit-locks scans 35 of 45 lockfiles — 3 vulnerable locks have coverage from neither gate
+PRs: []
+keycommits: ['9ca2636e fix(audit): one lockfile corpus, derived from git, with the blind spot declared instead of accidental']
+rel=[]
+DESC: '## BLUF\n\n`audit-locks.mjs` **scans 35 of the repo\'s 45 lockfiles, and three of the ten it cannot see carry a vulnerable package right now** — with coverage from neither gate. The script prints "35 standalone lockfiles" as its headline, which reads like a total'
+COMMENTS(1):
+  [2026-09-03 kamil.kreiser@secuura.ai] "**Delivered in PR [#796](https://github.com/Secuura/Distributed_Secuura/pull/796)** (`d81db2f06`), as `scripts/audit/lock-discovery.mjs` + `lock-discovery.test.mjs`.\n\nThe corpus is now **derived, not typed**: `git ls-files '*packa"
+
+### KS-770 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-28
+Review stream: API contract and the four platform suites
+PRs: []
+keycommits: ['27857e4f docs(process): record the four review streams as the standing process (KS-485, KS-770, KS-771, KS-772']
+rel=[]
+DESC: '**Review stream for Peter — one review, one test pass, 19 tickets.**\n\n## The one test pass\n\n1. Regenerate the OpenAPI spec, then **restart** the api-gateway container. The yaml is bind-mounted, so a restart publishes it and a rebuild does not.\n2. `cd systemTes'
+COMMENTS(4):
+  [2026-09-05 kamil.kreiser@secuura.ai] '**Pointer, not a new ask:** the current PR-status answer (which PRs are live on develop, which are open and at what review state, measured `2026-09-05T04:00:52Z`) is posted as a comment on **KS-485**, so there is one place for it '
+  [2026-09-05 kamil.kreiser@secuura.ai] '## RECORD ONLY — Kam\'s ruling on the #800 status question. No new ask, nothing for Peter to action here.\n\n### `secuura-800-peter-nudge-2026-09-03` — Kam, recorded 2026-09-04 08:38\n**Verbatim: `doconly` = "Facts-only status doc, no'
+  [2026-09-28 peter@obeden.com] '**Superseded figure, for the record.** This ticket\'s description quotes the k6 smoke wall-clock as "`npm run test:smoke` — **53 s measured**" (from `Blockchain/Dev/docs/DEV-PROCESS.md`, undated, no host).\n\nRe-measured under KS-135'
+
+### KS-772 | Todo | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-29
+Review stream: S<->K integration contract
+PRs: []
+keycommits: ['27857e4f docs(process): record the four review streams as the standing process (KS-485, KS-770, KS-771, KS-772']
+rel=[('related', 'in', 'KS-1809', 'backlog'), ('related', 'in', 'PS-1324', 'started'), ('related', 'in', 'KS-1683', 'started'), ('related', 'in', 'PS-1284', 'started'), ('related', 'in', 'PS-1283', 'backlog'), ('related', 'in', 'KS-1584', 'started'), ('related', 'in', 'KS-1557', 'started'), ('related', 'in', 'KS-1402', 'started'), ('related', 'out', 'PS-1360', 'completed'), ('related', 'out', 'KS-1717', 'started'), ('related', 'out', 'PS-1357', 'completed'), ('related', 'out', 'KS-485', 'unstarted'), ('related', 'out', 'PS-1325', 'completed'), ('related', 'out', 'KS-1709', 'completed'), ('related', 'out', 'PS-1319', 'completed'), ('related', 'out', 'PS-1317', 'completed'), ('related', 'out', 'PS-1313', 'completed'), ('related', 'out', 'PS-870', 'completed'), ('related', 'out', 'PS-1311', 'completed'), ('related', 'out', 'KS-1679', 'started'), ('related', 'out', 'KS-1677', 'started'), ('related', 'out', 'PS-981', 'completed'), ('related', 'out', 'KS-1639', 'started'), ('related', 'out', 'KS-1673', 'started'), ('related', 'out', 'KS-1661', 'started'), ('related', 'out', 'KS-1685', 'backlog'), ('related', 'out', 'KS-1116', 'started'), ('related', 'out', 'KS-1640', 'backlog'), ('related', 'out', 'KS-1662', 'started'), ('related', 'out', 'KS-1653', 'started'), ('related', 'out', 'KS-1642', 'started'), ('related', 'out', 'KS-1580', 'backlog'), ('related', 'out', 'KS-1660', 'started'), ('related', 'out', 'KS-1032', 'started'), ('related', 'out', 'KS-1645', 'started'), ('related', 'out', 'KS-1659', 'started'), ('related', 'out', 'PS-1091', 'canceled'), ('related', 'out', 'KS-1637', 'completed'), ('related', 'out', 'KS-1506', 'started'), ('related', 'out', 'KS-1387', 'started'), ('related', 'out', 'KS-623', 'started'), ('related', 'out', 'KS-1503', 'started'), ('related', 'out', 'KS-1638', 'started'), ('related', 'out', 'KS-1539', 'started'), ('related', 'out', 'PS-1299', 'canceled'), ('related', 'out', 'KS-1634', 'completed'), ('related', 'out', 'KS-1628', 'completed'), ('related', 'out', 'KS-1629', 'started'), ('related', 'out', 'KS-1626', 'started'), ('related', 'out', 'KS-1195', 'started'), ('related', 'out', 'PS-1201', 'completed'), ('related', 'out', 'PS-1126', 'completed'), ('related', 'out', 'KS-1114', 'started'), ('related', 'out', 'KS-1612', 'started'), ('related', 'out', 'KS-1509', 'started'), ('related', 'out', 'PS-1285', 'completed'), ('related', 'out', 'KS-1604', 'backlog'), ('related', 'out', 'KS-1596', 'backlog')]
+DESC: '**Review stream for Stuart — one review, one test pass, 20 tickets.**\n\n## The one test pass — run from Platform S against Platform K\n\nThe acceptance here is an S-side behaviour, so this is the only stream whose pass the K-side author cannot run alone:\n\nregiste'
+COMMENTS(100):
+  [2026-10-29 kamil.kreiser@secuura.ai] '**BLUF:** develop `6d41673e0f79` is deployed and verified on **both** boxes: kintsugi (dev-ps) first, then demo-pk (uat-ps). It carries four PRs: hono v2 in mcp-server, `did:jwk` accepted for the actor and organisation DIDs with a'
+  [2026-10-29 kamil.kreiser@secuura.ai] "**BLUF:** develop `429ba4824915` is deployed and verified on **both** boxes: kintsugi (dev-ps) first, then demo-pk (uat-ps). Two consumer-visible changes: a foreign tenant's anchor now reads 404 on the two anchor GETs, and `signat"
+  [2026-10-29 kamil.kreiser@secuura.ai] '**BLUF:** develop `e3d8456ec81d` is deployed and verified on **both** boxes: kintsugi (dev-ps) first, then demo-pk (uat-ps). Two consumer-visible changes: the anchor retry route now checks role, document access and revoked state, '
+
+### KS-787 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-05
+S revokes that emit no lifecycle event, or emit share-permission-change, are indistinguishable on K from a document that was never revoked
+PRs: []
+keycommits: []
+rel=[]
+DESC: "## BLUF\n\n**K cannot tell a revoked document from one that was never revoked, when S's revoke path emits no lifecycle event — and cannot tell a revoke from an ordinary permission change when S emits** `share-permission-change` **instead of** `share-revoke`**.**"
+COMMENTS(0):
+
+
+### KS-889 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-06
+KS-869's COALESCE backfill has an EMPTY window — the 39 pre-existing keys never backfill, so the KS-843 cutover flip still has no usable evidence
+PRs: []
+keycommits: []
+rel=[]
+DESC: '## BLUF\n\n**KS-869 does not fix the KS-843 cutover\'s evidence problem for keys that already exist.** The `COALESCE(EXCLUDED.connector_id, svc_api_keys.connector_id)` backfill I described as filling pre-fix rows "for free" **has no window in which to fire**. Fou'
+COMMENTS(1):
+  [2026-09-06 kamil.kreiser@secuura.ai] '## Measured on the demo box — a backfill is NOT possible; re-mint is the only path\n\n**BLUF: NO.** Nothing on the `svc_api_keys` row determines the connector for the pre-existing keys. A backfill would recover **5 of 32 active keys'
+
+### KS-939 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-13
+Launcher: the assembled boot prompt is asserted by no cell — KS-907's fix can vanish at 18/0, and the seat sentence misled a live seat tonight
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1606', 'backlog')]
+DESC: '**Nothing asserts what the boot prompt actually SAYS.** The launcher computes `$GIT_SYNC_STEP`, the suite reads it from a standalone marker, and the prompt the session actually receives is checked by no cell. Two consumers have now been proven wrong through th'
+COMMENTS(1):
+  [2026-09-06 kamil.kreiser@secuura.ai] '**Provenance note, at Wednesday\'s request.**\n\nThe claim in this ticket that items 1 and 2 are *"literally the same variable\'s journey into `$INITIAL_PROMPT`"* is **this seat\'s measurement, not Wednesday\'s endorsement.** She has no'
+
+### KS-951 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-05
+The default-password CI gate catches one shape and calls it clean — 16 published passwords are exempt by design, and 4 of 5 canaries walk past it
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1413', 'backlog')]
+DESC: '## The finding\n\n`Blockchain/Dev/scripts/check-no-default-passwords.sh` is a **live CI gate** (`pr-security-gates.yml:63`, `security-scan.yml:422`). It is far blinder than its name suggests, and the documented exemption is the *small* half.\n\n## The exemption (k'
+COMMENTS(0):
+
+
+### KS-967 | Backlog | None | labels=[] | upd=2026-10-22
+Neither credential guard can see a value in a .env.example — one scans the wrong roots and extensions, the other excludes the file and self-tests the exclusion
+PRs: []
+keycommits: []
+rel=[]
+DESC: '**Two credential guards run on every push and NEITHER could see the one that mattered.** KS-966 F1 was a live exposure — `Blockchain/Dev/.env.example` shipped a value for `ADMIN_USER_PASSWORD`, and `docs/DEPLOYMENT.md:381` plus `services/api-gateway/src/docs/d'
+COMMENTS(0):
+
+
+### KS-987 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-10-29
+A deploy that rsyncs the OpenAPI spec and does not restart api-gateway ships a silently stale published contract — rsync breaks the bind mount by inode
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-1823', 'started'), ('related', 'in', 'KS-1505', 'started')]
+DESC: '## BLUF\n\n**The demo redeploy runbook can ship a stale published API contract with every check passing.** `docs/openapi/secuura-api.yaml` is a **file-level** bind mount into `api-gateway` (`docker-compose.yml:542`, `:ro`). `rsync` **writes a temp file and renam'
+COMMENTS(2):
+  [2026-09-07 kamil.kreiser@secuura.ai] '## Possible overlap with KS-656 — check before implementing item 3\n\nWhile verifying a different finding I hit `Blockchain/Dev/scripts/preflight/preflight.sh`, whose step **8** is:\n\n> `8. served-spec consistency -> KS-656 (every ot'
+  [2026-09-14 kamil.kreiser@secuura.ai] "**Carried here from KS-1021 — closed as Duplicate of this ticket and archived on 2026-09-14 (s222), under Kam's 2026-09-14 08:55 standing rule (true duplicates are closed and archived by us, no external review).** One mechanism: `"
+
+### KS-995 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-08
+Archiving a ticket silently archives its sub-issues, including NON-TERMINAL ones — and the parent-side check cannot detect it
+PRs: []
+keycommits: []
+rel=[('related', 'in', 'KS-174', 'started'), ('related', 'in', 'KS-996', 'backlog')]
+DESC: '## BLUF\n\n`issueArchive` **cascades to sub-issues.** Archiving 23 terminal tickets on 2026-09-08 also archived **KS-918 (Backlog)** and **KS-920 (In Progress)** — children of **KS-490**. Neither was in any target list. **In Progress is live work.**\n\n**And the o'
+COMMENTS(0):
+
+
+### KS-996 | Backlog | kamil.kreiser@secuura.ai | labels=[] | upd=2026-09-08
+95 archived tickets sit in NON-TERMINAL states — measure whether a cascade put them there
+PRs: []
+keycommits: []
+rel=[('related', 'out', 'KS-995', 'backlog')]
+DESC: '## BLUF\n\n**97 archived tickets on the KS+PS boards are in non-terminal states.** Two were archived today (mine, restored the same session). **The other 95 predate this session and nobody has established how they got there.**\n\n```\nBacklog     83\nTodo         6\n'
+COMMENTS(0):
+

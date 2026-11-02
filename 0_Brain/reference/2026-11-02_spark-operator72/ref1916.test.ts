@@ -1,0 +1,167 @@
+/**
+ * KS-1868: three identity-admin route catches in routes/admin.ts (GET /api/admin/identity/users, GET /api/admin/identity/organizations,
+ * PATCH /api/admin/identity/users/:id/level) log `{ error: err instanceof Error ? err.message : String(err) }` before answering a constant 500.
+ * That read can itself throw (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws throws on `.message`), and then
+ * the catch escapes: no log, no 500, the async handler rejects and Express 4 does not answer the request. Each read now sits in its own try
+ * and falls back to the constant `unreadable thrown value`.
+ *
+ * The handler under test is the LAST function of the route (the one after requireAdmin / the body parser), taken from the route table and
+ * called directly with a fake request and response, so the defect shows as an unchanged response and not as a hung request. The database
+ * stand-in is a plain function that rejects with the thrown value (a vi.fn() could inspect a revoked Proxy before the code under test does).
+ */
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { Router } from 'express';
+import { createAdminRoutes, type AdminRouteDeps } from '../routes/admin';
+
+type Logged = { level: string; message: string; meta: { error?: unknown } | undefined };
+type Res58 = { statusCode: number; body: unknown; status(c: number): Res58; json(b: unknown): Res58 };
+
+const ks = {
+  thrown: undefined as { value: unknown } | undefined,
+  logs: [] as Logged[],
+  queries: [] as Array<{ text: string; params: unknown[] | undefined }>,
+};
+
+function mkRes(): Res58 {
+  const r: Res58 = {
+    statusCode: 200,
+    body: undefined,
+    status(c) {
+      r.statusCode = c;
+      return r;
+    },
+    json(b) {
+      r.body = b;
+      return r;
+    },
+  };
+  return r;
+}
+
+function buildRouter(): Router {
+  return createAdminRoutes({
+    authenticateToken: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+    query: (text: string, params?: unknown[]) => {
+      ks.queries.push({ text, params });
+      if (ks.thrown) return Promise.reject(ks.thrown.value);
+      return Promise.resolve({ rows: [{ id: 'u-1' }], rowCount: 1 });
+    },
+    isDbAvailable: () => false,
+    redisService: {},
+    services: {},
+    log: (level: string, message: string, meta?: { error?: unknown }) => {
+      ks.logs.push({ level, message, meta });
+    },
+  } as unknown as AdminRouteDeps);
+}
+
+function handlerFor(rt: Router, method: string, path: string): (req: unknown, res: unknown) => Promise<void> {
+  const layers = (rt as unknown as { stack: Array<{ route?: { path: string; methods: Record<string, boolean>; stack: Array<{ handle: (req: unknown, res: unknown) => Promise<void> }> } }> }).stack;
+  const layer = layers.find((l) => l.route && l.route.path === path && l.route.methods[method]);
+  if (!layer || !layer.route) throw new Error('route not found: ' + method + ' ' + path);
+  const stack = layer.route.stack;
+  return stack[stack.length - 1].handle;
+}
+
+const TID = 'd5800000-0000-4000-8000-000000000001';
+
+/** Run a route handler. A handler that rejects (the defect) leaves the response untouched at 200. */
+async function invoke(method: string, path: string): Promise<Res58> {
+  const res = mkRes();
+  const req = {
+    params: { id: TID },
+    body: { verificationLevel: 'HIGH' },
+    query: {},
+    headers: {},
+    user: { userId: 'admin-58', role: 'SYSTEM_ADMIN', email: 'admin-58@test.io', verificationLevel: 'HIGH' },
+  };
+  await handlerFor(buildRouter(), method, path)(req, res).catch(() => undefined);
+  return res;
+}
+
+function revoked(): unknown {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function getterError(): unknown {
+  return Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+}
+
+type Case58 = { name: string; method: string; path: string; failed: string; answer: string };
+
+const CASES58: Case58[] = [
+  { name: 'GET users', method: 'get', path: '/api/admin/identity/users', failed: '[Identity] Failed to fetch users', answer: 'Failed to fetch identity users' },
+  { name: 'GET organizations', method: 'get', path: '/api/admin/identity/organizations', failed: '[Identity] Failed to fetch organizations', answer: 'Failed to fetch identity organizations' },
+  { name: 'PATCH level', method: 'patch', path: '/api/admin/identity/users/:id/level', failed: '[Identity] Failed to update level', answer: 'Failed to update verification level' },
+];
+
+const expected500 = (c: Case58) => ({ success: false, error: { code: 'INTERNAL_ERROR', message: c.answer } });
+const failedLog = (c: Case58): Logged | undefined => ks.logs.find((l) => l.level === 'error' && l.message === c.failed);
+
+beforeEach(() => {
+  ks.thrown = undefined;
+  ks.logs.length = 0;
+  ks.queries.length = 0;
+});
+
+describe.each(CASES58)('KS-1868 identity admin $name catch reads the thrown value safely', (c) => {
+  it(`RED ks1868 R1 ${c.name}: a revoked Proxy thrown value is logged as a constant reason and the route still answers its constant 500`, async () => {
+    ks.thrown = { value: revoked() };
+    const res = await invoke(c.method, c.path);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(expected500(c));
+    expect(failedLog(c)?.meta).toEqual({ error: 'unreadable thrown value' });
+  });
+
+  it(`RED ks1868 R2 ${c.name}: an Error whose message getter throws is logged as a constant reason and the route still answers its constant 500`, async () => {
+    ks.thrown = { value: getterError() };
+    const res = await invoke(c.method, c.path);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(expected500(c));
+    expect(failedLog(c)?.meta).toEqual({ error: 'unreadable thrown value' });
+  });
+
+  it(`control ks1868 C1 ${c.name}: an ordinary Error logs its message and the answer is the constant 500 without it`, async () => {
+    ks.thrown = { value: new Error('db boom 10.0.0.7') };
+    const res = await invoke(c.method, c.path);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(expected500(c));
+    expect(JSON.stringify(res.body)).not.toContain('db boom');
+    expect(failedLog(c)?.meta).toEqual({ error: 'db boom 10.0.0.7' });
+  });
+
+  it(`control ks1868 C2 ${c.name}: a thrown string is logged as itself, as before`, async () => {
+    ks.thrown = { value: 'plain string failure' };
+    const res = await invoke(c.method, c.path);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(expected500(c));
+    expect(failedLog(c)?.meta).toEqual({ error: 'plain string failure' });
+  });
+});
+
+describe('KS-1868 identity admin PATCH level: what is written does not change', () => {
+  it('RED ks1868 R3 PATCH level: with an unreadable failure the one UPDATE was still issued with the same parameters, and nothing else is written', async () => {
+    ks.thrown = { value: revoked() };
+    await invoke('patch', '/api/admin/identity/users/:id/level');
+    expect(ks.queries.length).toBe(1);
+    expect(ks.queries[0].text).toContain('UPDATE users SET verification_level');
+    expect(ks.queries[0].params).toEqual(['HIGH', TID]);
+    expect(failedLog(CASES58[2])?.meta).toEqual({ error: 'unreadable thrown value' });
+  });
+
+  it('control ks1868 C3 PATCH level: a successful update answers 200 with the new level and logs no error', async () => {
+    const res = await invoke('patch', '/api/admin/identity/users/:id/level');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ success: true, userId: TID, verificationLevel: 'HIGH' });
+    expect(ks.queries.length).toBe(1);
+    expect(ks.logs.filter((l) => l.level === 'error')).toEqual([]);
+  });
+});

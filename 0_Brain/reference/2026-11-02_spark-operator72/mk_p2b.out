@@ -1,0 +1,34 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o72_p2_nft_blockchain_verifier_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
+@@ -65,8 +65,14 @@
+     } catch (err: unknown) {
+       // A malformed key or unsupported network must degrade to
+       // "verification disabled", never escape as a 500.
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.warn('Blockfrost client init failed – on-chain verification disabled', {
+-        error: err instanceof Error ? err.message : String(err),
++        error: reason,
+       });
+       return null;
+     }
+@@ -100,4 +106,12 @@
+       };
+     } catch (err: unknown) {
+       // Blockfrost returns 404 for transactions not yet on-chain
++      try {
++        void (err as { status_code?: number }).status_code;
++        void (err instanceof Error ? err.message : String(err));
++        void (err as Error).message;
++      } catch {
++        logger.error('Error verifying transaction', { error: 'unreadable thrown value' });
++        return { verified: false, status: 'error', error: 'unreadable thrown value' };
++      }
+       const statusCode = (err as { status_code?: number }).status_code;
+

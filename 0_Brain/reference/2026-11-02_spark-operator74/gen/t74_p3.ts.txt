@@ -1,0 +1,184 @@
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import crypto from 'crypto';
+import type { Server } from 'http';
+import type { AddressInfo } from 'net';
+
+process.env.SECURITY_DISABLE_BOOT = '1';
+
+// KS-1868: the save catches of dbSaveAuditLog and dbSaveSecurityEvent (src/index.ts) log `err?.message` and swallow the
+// failure. When the insert rejects with a value whose message cannot be read (a revoked Proxy, an Error whose
+// `message` getter throws) that read throws INSIDE the catch: the failure line is never logged, the helper rejects,
+// and the route (POST /api/audit, POST /api/events) answers 500 for a record that was already kept in memory.
+// After the fix the line is logged with the constant 'unreadable thrown value' and the helper swallows the failure
+// exactly as it does for an ordinary Error, so the routes answer the 201 an ordinary Error already gets. Nothing
+// is stored in the database either way.
+// The db stand-in rejects with a plain function, not a vi.fn(): a spy inspects what it rejects with. The logger is
+// replaced by plain functions that record the line. The routes run on a real loopback listener with a real RS256
+// token, as in ks888.
+const ctl = vi.hoisted(() => ({
+  boom: undefined as unknown,
+  errors: [] as Array<{ message: string; error: unknown }>,
+}));
+
+vi.mock('../utils/logger', () => ({
+  logger: {
+    error: (message: string, meta?: { error?: unknown }) => {
+      ctl.errors.push({ message, error: meta?.error });
+    },
+    warn: () => undefined,
+    info: () => undefined,
+    debug: () => undefined,
+  },
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  initDb: async () => true,
+  query: async (statement: string) => {
+    if (/^\s*INSERT\s+INTO\s+(audit_logs|svc_security_events)/i.test(String(statement)) && ctl.boom !== undefined) return Promise.reject(ctl.boom);
+    return { rows: [], rowCount: 0 };
+  },
+  transaction: async (run: (client: unknown) => Promise<unknown>) =>
+    run({
+      query: () => Promise.resolve({ rows: [], rowCount: 0 }),
+    }),
+}));
+
+const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const SIGNING_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+const VERIFY_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+
+const captured: string[] = [];
+
+let listener: Server;
+let root = '';
+
+function platformToken(): string {
+  const now = Math.floor(Date.now() / 1000);
+  const head = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+  const claims = Buffer.from(JSON.stringify({ sub: 'ks1868-test', iat: now, exp: now + 300, role: 'super_admin' })).toString('base64url');
+  const sig = crypto.sign('RSA-SHA256', Buffer.from(head + '.' + claims), SIGNING_PEM).toString('base64url');
+  return head + '.' + claims + '.' + sig;
+}
+
+async function call(method: string, path: string, payload?: unknown): Promise<{ status: number; text: string; body: any }> {
+  try {
+    const res = await fetch(root + path, {
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + platformToken() },
+      body: payload === undefined ? undefined : JSON.stringify(payload),
+      signal: AbortSignal.timeout(3000),
+    });
+    const text = await res.text();
+    let body: any;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = undefined;
+    }
+    return { status: res.status, text, body };
+  } catch {
+    return { status: 0, text: '', body: undefined };
+  }
+}
+
+const AUDIT = { action: 'ks1868.probe', resourceType: 'ks1868' };
+const EVENT = { eventType: 'ks1868.probe', severity: 'low', source: 'ks1868' };
+const postAudit = () => call('POST', '/api/audit', AUDIT);
+const postEvent = () => call('POST', '/api/events', EVENT);
+const failLines = (message: string) => ctl.errors.filter((e) => e.message === message);
+const AUDIT_FAIL = 'DB save audit log failed';
+const EVENT_FAIL = 'DB save event failed';
+const revokedProxy = (): unknown => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+const messageGetterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+beforeAll(async () => {
+  process.env.JWT_PUBLIC_KEY = Buffer.from(VERIFY_PEM, 'utf8').toString('base64');
+  delete process.env.JWT_JWKS_URL;
+  delete process.env.AUTH_SERVICE_URL;
+  const app = (await import('../index')).default;
+  await new Promise<void>((resolve) => {
+    listener = app.listen(0, '127.0.0.1', resolve);
+  });
+  root = 'http://127.0.0.1:' + (listener.address() as AddressInfo).port;
+});
+
+afterAll(async () => {
+  await new Promise<void>((resolve) => listener.close(() => resolve()));
+});
+
+beforeEach(() => {
+  ctl.boom = undefined;
+  ctl.errors.length = 0;
+  captured.length = 0;
+  vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+    captured.push(String(args[0]));
+  });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('KS-1868 the save catches of dbSaveAuditLog and dbSaveSecurityEvent read the thrown value safely', () => {
+  it('control ks1868 C1 an ordinary Error from the audit insert is logged with its message and POST /api/audit answers 201', async () => {
+    ctl.boom = new Error('db down');
+    const r = await postAudit();
+    expect({ status: r.status, success: r.body?.success }).toEqual({ status: 201, success: true });
+    expect(failLines(AUDIT_FAIL)).toEqual([{ message: AUDIT_FAIL, error: 'db down' }]);
+  });
+
+  it('control ks1868 C2 an ordinary Error from the event insert is logged with its message and POST /api/events answers 201', async () => {
+    ctl.boom = new Error('db down');
+    const r = await postEvent();
+    expect({ status: r.status, success: r.body?.success }).toEqual({ status: 201, success: true });
+    expect(failLines(EVENT_FAIL)).toEqual([{ message: EVENT_FAIL, error: 'db down' }]);
+  });
+
+  it('control ks1868 C3 inserts that land answer 201 and log no failure', async () => {
+    const a = await postAudit();
+    const e = await postEvent();
+    expect([a.status, e.status]).toEqual([201, 201]);
+    expect(failLines(AUDIT_FAIL)).toHaveLength(0);
+    expect(failLines(EVENT_FAIL)).toHaveLength(0);
+  });
+
+  it('RED ks1868 R1 a revoked Proxy from the audit insert is logged as the constant and POST /api/audit answers 201', async () => {
+    ctl.boom = revokedProxy();
+    const r = await postAudit();
+    expect({ status: r.status, success: r.body?.success }).toEqual({ status: 201, success: true });
+    expect(failLines(AUDIT_FAIL)).toEqual([{ message: AUDIT_FAIL, error: 'unreadable thrown value' }]);
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws from the audit insert is logged as the constant and POST /api/audit answers 201', async () => {
+    ctl.boom = messageGetterThrows();
+    const r = await postAudit();
+    expect({ status: r.status, success: r.body?.success }).toEqual({ status: 201, success: true });
+    expect(failLines(AUDIT_FAIL)).toEqual([{ message: AUDIT_FAIL, error: 'unreadable thrown value' }]);
+  });
+
+  it('RED ks1868 R3 a revoked Proxy from the event insert is logged as the constant and POST /api/events answers 201', async () => {
+    ctl.boom = revokedProxy();
+    const r = await postEvent();
+    expect({ status: r.status, success: r.body?.success }).toEqual({ status: 201, success: true });
+    expect(failLines(EVENT_FAIL)).toEqual([{ message: EVENT_FAIL, error: 'unreadable thrown value' }]);
+  });
+
+  it('RED ks1868 R4 an Error whose message getter throws from the event insert is logged as the constant and POST /api/events answers 201', async () => {
+    ctl.boom = messageGetterThrows();
+    const r = await postEvent();
+    expect({ status: r.status, success: r.body?.success }).toEqual({ status: 201, success: true });
+    expect(failLines(EVENT_FAIL)).toEqual([{ message: EVENT_FAIL, error: 'unreadable thrown value' }]);
+  });
+});

@@ -1,0 +1,115 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// KS-1868: `IPFSService.fetch` must still answer ServiceUnavailableError (503) and log its warning when the
+// thrown value itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter
+// throws, throws on `.message`). Two catch blocks: the gateway request, and the gateway body read.
+// The gateway stand-ins are plain functions, not vi.fn(): a spy inspects what it rejects with and could itself
+// fail on a revoked Proxy before the code under test saw it.
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  warn: vi.fn(),
+}));
+
+vi.mock('../utils/logger', () => ({
+  logger: { info: vi.fn(), warn: h.warn, error: vi.fn(), debug: vi.fn() },
+}));
+
+import { IPFSService } from '../services/ipfs.service';
+
+const CID = 'QmKs1868Unreadable';
+
+const service = () => new IPFSService('pinata', { apiKey: 'k', secretKey: 's', gateway: 'http://gateway.invalid/ipfs' });
+
+// Assertions read statusCode and code, as ks1240b does: vitest can resolve @secuura/shared to another module copy.
+const answer = async (): Promise<unknown> => {
+  try {
+    await service().fetch(CID);
+    return 'resolved';
+  } catch (e: any) {
+    return { statusCode: e?.statusCode, code: e?.code };
+  }
+};
+
+const UNAVAILABLE = { statusCode: 503, code: 'SERVICE_UNAVAILABLE' };
+
+const LINES = (text: string) => h.warn.mock.calls.filter((c) => String(c[0]).includes(text));
+
+const requestRejects = () => vi.stubGlobal('fetch', () => Promise.reject(h.toThrow));
+const bodyRejects = () =>
+  vi.stubGlobal('fetch', () =>
+    Promise.resolve({ status: 200, ok: true, arrayBuffer: () => Promise.reject(h.toThrow) }),
+  );
+
+const revoked = () => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+
+const badGetter = () =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 `IPFSService.fetch` reads the thrown value safely', () => {
+  beforeEach(() => {
+    h.toThrow = undefined;
+    h.warn.mockReset();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('control ks1868 C1 request: an ordinary Error logs its message and answers 503', async () => {
+    h.toThrow = new Error('connect refused');
+    requestRejects();
+    expect(await answer()).toEqual(UNAVAILABLE);
+    expect(LINES('IPFS gateway unreachable')).toHaveLength(1);
+    expect(LINES('IPFS gateway unreachable')[0][1]).toEqual({ cid: CID, error: 'connect refused' });
+  });
+
+  it('control ks1868 C2 body: an ordinary Error logs its message and answers 503', async () => {
+    h.toThrow = new Error('stream reset');
+    bodyRejects();
+    expect(await answer()).toEqual(UNAVAILABLE);
+    expect(LINES('IPFS gateway body read failed')).toHaveLength(1);
+    expect(LINES('IPFS gateway body read failed')[0][1]).toEqual({ cid: CID, error: 'stream reset' });
+  });
+
+  it('RED ks1868 R1 request: a revoked Proxy thrown value logs a constant reason and answers 503', async () => {
+    h.toThrow = revoked();
+    requestRejects();
+    expect(await answer()).toEqual(UNAVAILABLE);
+    expect(LINES('IPFS gateway unreachable')).toHaveLength(1);
+    expect(LINES('IPFS gateway unreachable')[0][1]).toEqual({ cid: CID, error: 'unreadable thrown value' });
+  });
+
+  it('RED ks1868 R2 request: an Error whose message getter throws logs a constant reason and answers 503', async () => {
+    h.toThrow = badGetter();
+    requestRejects();
+    expect(await answer()).toEqual(UNAVAILABLE);
+    expect(LINES('IPFS gateway unreachable')).toHaveLength(1);
+    expect(LINES('IPFS gateway unreachable')[0][1]).toEqual({ cid: CID, error: 'unreadable thrown value' });
+  });
+
+  it('RED ks1868 R3 body: a revoked Proxy thrown value logs a constant reason and answers 503', async () => {
+    h.toThrow = revoked();
+    bodyRejects();
+    expect(await answer()).toEqual(UNAVAILABLE);
+    expect(LINES('IPFS gateway body read failed')).toHaveLength(1);
+    expect(LINES('IPFS gateway body read failed')[0][1]).toEqual({ cid: CID, error: 'unreadable thrown value' });
+  });
+
+  it('RED ks1868 R4 body: an Error whose message getter throws logs a constant reason and answers 503', async () => {
+    h.toThrow = badGetter();
+    bodyRejects();
+    expect(await answer()).toEqual(UNAVAILABLE);
+    expect(LINES('IPFS gateway body read failed')).toHaveLength(1);
+    expect(LINES('IPFS gateway body read failed')[0][1]).toEqual({ cid: CID, error: 'unreadable thrown value' });
+  });
+});

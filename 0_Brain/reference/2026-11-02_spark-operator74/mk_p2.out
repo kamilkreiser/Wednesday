@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o74_p2_security_save_api_key_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -472,7 +472,13 @@
+     const st = apiKeyInsertStatement(k);
+     await runWithTenantId(k.tenantId, () => query(st.text, st.values));
+   } catch (err: any) {
+-    logger.error('DB save API key failed', { error: err?.message });
++    let reason: string;
++    try {
++      reason = err?.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB save API key failed', { error: reason });
+     // KS-888: re-throws only for a caller that opts in, and each caller that opts in catches it in its own try.
+     // Any other caller keeps this log-only swallow: a throw into a handler that takes no next is an unhandled
+     // rejection, and that ends the process.
+

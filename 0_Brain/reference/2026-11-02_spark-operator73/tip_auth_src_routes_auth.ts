@@ -1,0 +1,1466 @@
+/**
+ * =============================================================================
+ * AUTH ROUTES — Login, Register, Logout, Token Refresh, Password Reset
+ * =============================================================================
+ * All user data is persisted to PostgreSQL via the userRepo repository.
+ * Falls back to in-memory storage when the database is unavailable.
+ * =============================================================================
+ */
+
+import { Router, Response, NextFunction } from 'express';
+import { randomUUID, createHash, randomBytes } from 'crypto';
+import { z } from 'zod';
+import { AuthenticatedRequest, User, TokenResponse, LoginRequest } from '../types';
+import { hashPassword, verifyPassword, checkPasswordStrength, generateResetToken, shouldRehashAfterVerify } from '../services/password';
+import { generateTokenPair, verifyRefreshToken, decodeToken } from '../services/jwt';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email';
+import { createSession, revokeSession, revokeAllUserSessions, getSession, rotateSessionRefreshToken, isRedisAvailable } from '../services/session';
+import { denylistRefreshJti, isRefreshJtiDenylisted } from '../services/refreshDenylist';
+import { query } from '../db';
+// KS-796 F-1: `verifyBackupCode` left this file when login's regular-user
+// branch moved onto the shared gate, which consumes backup codes itself.
+// Worth recording rather than just deleting: the ONLY remaining consumer of
+// `verifyTotpCode` here is the PLATFORM-ADMIN branch, and it never called
+// `verifyBackupCode` at all — so a platform admin cannot log in with a backup
+// code while a regular user can. Pre-existing, not introduced here, and the
+// same shape as KS-737 (the more privileged branch is the laxer one). Recorded
+// on KS-796; not fixed in this round.
+import { verifyTotpCode } from '../services/totp';
+import { authenticate } from '../middleware/authenticate';
+import { meHandler } from './users';
+import {
+  AppError,
+  BadRequestError,
+  InvalidCredentialsError,
+  ConflictError,
+  NotFoundError,
+  MfaRequiredError,
+  // F-11: AccountSuspendedError no longer thrown at /login (uniform error)
+  ValidationError,
+  // KS-795 (KS-781 door 2): the social callback may not auto-link on an
+  // unsound email claim — it refuses rather than falling through to create.
+  SocialEmailUnavailableError,
+  SocialSignInRefusedError,
+  OAuthStateInvalidError,
+  OAuthProviderError,
+  ServiceUnavailableError,
+  weakPasswordIssues,
+} from '../middleware/errorHandler';
+import { logger } from '../utils/logger';
+import { isReservedWalletEmail, RESERVED_WALLET_EMAIL_MESSAGE } from '../utils/walletEmail';
+import * as userRepo from '../repositories/userRepo';
+import { publishEvent, EventTypes } from '../events';
+
+const maskEmail = (email: string) => {
+  const [local, domain] = email.split('@');
+  return `${local[0]}***@${domain}`;
+};
+
+export const authRoutes = Router();
+
+// =============================================================================
+// SEED DEMO USERS — runs once at startup via the repository
+// =============================================================================
+setTimeout(() => {
+  userRepo.seedDemoUsers(hashPassword).catch((err) =>
+    logger.error('Failed to seed demo users', { error: err }),
+  );
+}, 2000);
+
+// =============================================================================
+// VALIDATION SCHEMAS
+// =============================================================================
+/**
+ * KS-622: the accepted shapes for login's second factor — 6 digits (TOTP) or 8
+ * alphanumeric (backup code; base32 is a subset, and verifyBackupCode
+ * upper-cases so lowercase is accepted). Exported so a test can assert it stays
+ * in lockstep with the published spec's pattern, which is a separate literal in
+ * auth.openapi.ts and would otherwise drift silently.
+ *
+ * Both branches are ASCII-only, preserving the KS-518 property that the spec's
+ * code-POINT count and this runtime code-UNIT check agree.
+ */
+import {
+  MFA_CODE_PATTERN,
+  mfaCodeRuntimeSchema,
+  enforcePasswordLoginGates,
+  assertAccountMayReceiveCredential,
+} from '../services/passwordLoginGate';
+// Re-exported so existing importers (and the KS-622 lockstep test, which asserts
+// this stays in step with the published spec's separate literal) are unaffected
+// by the move into the shared credential layer.
+export { MFA_CODE_PATTERN };
+
+// KS-796 F-6: exported so the shared-definition claim can be ASSERTED rather
+// than described. Nothing else imports it; it is not part of the route contract.
+export const loginSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(1),
+  // KS-283: a TOTP code is exactly 6 decimal digits. The old `.length(6)`
+  // counted UTF-16 code units, so a schema-valid 6-code-point string with
+  // astral chars (which Schemathesis generates) was >6 code units and 400'd —
+  // surfacing as a positive_data_acceptance failure. Both branches below are
+  // ASCII-only, so the spec's code-point count and this runtime check still
+  // agree.
+  // KS-622: WIDENED to accept a backup code here. `/api/auth/mfa/verify` used
+  // to be the only redemption path and it redeemed without any proof of factor
+  // one; it is now retired (410). Login is the correct home because it has
+  // already verified the password before it looks at this field. 6 digits =
+  // TOTP; 8 alphanumeric = backup code (base32 is a subset, and
+  // verifyBackupCode upper-cases, so lowercase is accepted).
+  // KS-781 P3-4: the SHARED shape, so login and /api/oauth/authorize cannot
+  // disagree about what a second factor may look like. Previously this was a
+  // bare regex while authorize accepted `""` — measured as 400 vs 302 on the
+  // same body. `""` normalises to absent; a malformed code is still a 400.
+  mfaCode: mfaCodeRuntimeSchema,
+  deviceId: z.string().optional(),
+  // Pen-test F-10 + KS-43: refresh token is set as an httpOnly cookie by
+  // default. Mobile / non-browser clients that can't use cookies should
+  // explicitly request the body field by setting `clientType: 'native'`
+  // or `'api'`. Browser clients leave this unset and only get the cookie
+  // — so an XSS that reads `response.body` cannot exfiltrate the refresh
+  // token. `'api'` additionally opts into single-session: each new 'api'
+  // login revokes prior 'api' sessions for the same user (stolen-token
+  // protection for headless API callers).
+  clientType: z.enum(['browser', 'native', 'api']).optional(),
+});
+
+/**
+ * Pen-test F-10 helper. True when the login response should include the
+ * refresh token in the JSON body (in addition to the httpOnly cookie).
+ * Defaults to false (browser flow). Override per-request via clientType.
+ */
+function shouldEmitRefreshTokenInBody(clientType: string | undefined): boolean {
+  return clientType === 'native' || clientType === 'api';
+}
+
+const registerSchema = z.object({
+  // KS-806: wallet.local is the synthetic domain of wallet accounts and is not registrable (utils/walletEmail.ts).
+  email: z.string().trim().email().refine((e) => !isReservedWalletEmail(e), { message: RESERVED_WALLET_EMAIL_MESSAGE }),
+  password: z.string().min(8),
+  firstName: z.string().trim().min(1).optional(),
+  lastName: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1).optional(),
+  organizationId: z.string().uuid().optional(),
+  // Pen-test F-10: opt-in body refresh token (mobile/native clients).
+  clientType: z.enum(['browser', 'native', 'api']).optional(),
+}).strip();
+
+const forgotPasswordSchema = z.object({
+  email: z.string().trim().email(),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string(),
+  password: z.string().min(8),
+});
+
+// =============================================================================
+// POST /api/auth/register
+// =============================================================================
+authRoutes.post('/register', async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    // KS-82 (2026-05-15): registration always creates OWNER-role accounts
+    // server-side (line ~161 below). Accepting a client-supplied `role`
+    // field would be a privilege-escalation vector — anyone could register
+    // as SYSTEM_ADMIN. The defensive `registerSchema.strip()` silently
+    // dropped the field, which made callers think they had asserted a
+    // role when in reality nothing they sent was honoured. Surface the
+    // rejection explicitly so callers know their request was modified.
+    if (req.body && typeof req.body === 'object' && 'role' in req.body) {
+      // KS-82: privilege-escalation defence. Client-supplied `role` is a
+      // validation failure of the request payload (not a malformed-syntax
+      // bad request), so 422 VALIDATION_ERROR per the auth service's error
+      // convention — matches the surrounding `checkPasswordStrength` reject.
+      throw new ValidationError(
+        'role is not a permitted field on /register — accounts are always created with the OWNER role and elevated by an admin via /api/admin/users/{id}/role',
+      );
+    }
+
+    const data = registerSchema.parse(req.body);
+
+    // Derive firstName/lastName from "name" field when not supplied directly
+    let firstName = data.firstName;
+    let lastName = data.lastName;
+    if (!firstName && !lastName && data.name) {
+      const parts = data.name.trim().split(/\s+/);
+      firstName = parts[0];
+      lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
+    }
+
+    // KS-74: An INVITED stub may already exist for this email (created by an
+    // issuer via POST /api/users/stub before the recipient signed up). Claim
+    // it instead of erroring on "email already registered" — the whole point
+    // of the stub is that the recipient eventually completes the registration.
+    // ACTIVE / SUSPENDED / DEACTIVATED stay as a 409 conflict (existing
+    // behaviour) — only INVITED is claimable.
+    const existingForEmail = await userRepo.getUserByEmail(data.email);
+    const claimingInvitedStub = existingForEmail?.status === 'INVITED';
+    if (existingForEmail && !claimingInvitedStub) {
+      throw new ConflictError('Email already registered');
+    }
+
+    // Password strength check
+    const strength = checkPasswordStrength(data.password);
+    if (!strength.isStrong) {
+      throw new ValidationError('Password is too weak', weakPasswordIssues(strength.feedback, 'password'));
+    }
+
+    const passwordHash = await hashPassword(data.password);
+    const userId = claimingInvitedStub ? existingForEmail!.id : randomUUID();
+
+    // F-04-allowed: /api/auth/register is intentionally unauthenticated (no
+    // req.user yet — the user does not exist) and the auth service does not
+    // mount extractTenantContext (which would 400 in prod on a missing
+    // header). The gateway IS the trust boundary here: it strips client-sent
+    // x-tenant-* and re-injects a value derived from the request's hostname /
+    // tenant-override before forwarding. Direct hits on the service that
+    // bypass the gateway will simply land on the no-tenant path below.
+    const tenantId = req.headers['x-tenant-id'] as string | undefined; // F-04-allowed
+    const tenantSlug = req.headers['x-tenant-slug'] as string | undefined; // F-04-allowed
+
+    const displayName = firstName && lastName
+      ? `${firstName} ${lastName}`
+      : data.name || undefined;
+
+    const user: User = {
+      id: userId,
+      email: data.email.toLowerCase(),
+      emailVerified: false,
+      passwordHash,
+      firstName,
+      lastName,
+      displayName,
+      phoneVerified: false,
+      mfaEnabled: false,
+      role: 'OWNER',
+      verificationLevel: 'BASIC',
+      organizationId: data.organizationId,
+      // KS-74: when claiming an INVITED stub the row's tenant_id was pinned
+      // by whichever issuer created it. Preserve it rather than overwriting
+      // with the request header — otherwise a register call without the
+      // tenant header would wipe the stub's tenant binding.
+      tenantId: claimingInvitedStub ? existingForEmail!.tenantId : tenantId,
+      tenantSlug: claimingInvitedStub ? existingForEmail!.tenantSlug : tenantSlug,
+      status: 'ACTIVE',
+      createdAt: claimingInvitedStub ? existingForEmail!.createdAt : new Date(),
+      updatedAt: new Date(),
+    };
+
+    // createUser is idempotent via ON CONFLICT (email_lookup_hash) — for the
+    // claim path it'll UPDATE the existing INVITED row in place, flipping
+    // status to 'active' via the ON CONFLICT clause's COALESCE-and-update
+    // shape plus the explicit user.status='ACTIVE' value above. The
+    // updated_at is bumped server-side.
+    await userRepo.createUser(user);
+    if (claimingInvitedStub) {
+      // ON CONFLICT in createUser doesn't update status (the SET list is
+      // narrow on purpose). Apply it explicitly so the stub flips to ACTIVE
+      // and the row gains the password hash etc. on the same write.
+      await userRepo.updateUserOrThrow(userId, {
+        status: 'ACTIVE',
+        passwordHash,
+        firstName,
+        lastName,
+        displayName,
+        emailVerified: false,
+        role: 'OWNER',
+      }, 'Claiming the invited account');
+      logger.info('KS-74: invited stub claimed on register', { userId });
+    }
+
+    // Generate email verification token
+    const verifyToken = randomBytes(32).toString('hex');
+    const verifyHash = createHash('sha256').update(verifyToken).digest('hex');
+    await userRepo.storeEmailToken(verifyHash, userId, new Date(Date.now() + 24 * 3600000));
+
+    // Send verification email (or log in dev if SMTP not configured)
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:6882';
+    const verifyUrl = `${baseUrl}/verify-email?token=${verifyToken}`;
+    const emailSent = await sendVerificationEmail(user.email, verifyUrl);
+    if (!emailSent && process.env.NODE_ENV !== 'production') {
+      logger.info('Email verification link (SMTP not configured)', {
+        email: user.email,
+        url: verifyUrl,
+      });
+    }
+
+    // Create session
+    const session = await createSession(
+      user,
+      req.ip,
+      req.get('user-agent'),
+      undefined,
+      data.clientType ?? 'browser',
+    );
+    const tokens = generateTokenPair(user, session.id);
+
+    logger.info('User registered', { userId, email: maskEmail(user.email) });
+
+    // Publish user.registered event (fire-and-forget)
+    publishEvent(EventTypes.USER_REGISTERED, {
+      userId,
+      email: user.email,
+      role: user.role,
+      verificationLevel: user.verificationLevel,
+    }).catch(err => {
+      let reason: string;
+      try {
+        reason = err instanceof Error ? err.message : String(err);
+      } catch {
+        reason = 'unreadable thrown value';
+      }
+      logger.error('Failed to publish event', { error: reason });
+    });
+
+    const response: TokenResponse = {
+      accessToken: tokens.accessToken,
+      // F-10: only include in body for native clients
+      ...(shouldEmitRefreshTokenInBody(data.clientType) ? { refreshToken: tokens.refreshToken } : {}),
+      expiresIn: tokens.expiresIn,
+      tokenType: 'Bearer',
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role,
+        verificationLevel: user.verificationLevel,
+      },
+    };
+
+    res.status(201).json({ success: true, data: response });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// POST /api/auth/login
+// =============================================================================
+authRoutes.post('/login', async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    const data = loginSchema.parse(req.body) as LoginRequest;
+
+    // Pen-test F-06 — application-level account lockout. Defence-in-depth
+    // on top of the per-IP gateway rate limit. If this (email, source-ip-
+    // /24) is currently locked out, throw the SAME error as a wrong
+    // password (F-11 — no enumeration), then return.
+    const { isLockedOut, recordFailure, recordSuccess } = await import('../services/accountLockout');
+    const { getRedisClient } = await import('../services/session');
+    const lockoutRedis = getRedisClient();
+    const sourceIp = (req.ip as string) || (req.socket?.remoteAddress as string) || '';
+    if (await isLockedOut(lockoutRedis, data.email, sourceIp)) {
+      logger.warn('login: blocked by account lockout', { email: maskEmail(data.email), ip: sourceIp });
+      throw new InvalidCredentialsError();
+    }
+
+    // --- Super-admin login: check platform_admins table first ---
+    const platformAdmin = await userRepo.getPlatformAdmin(data.email);
+    if (platformAdmin) {
+      const isValid = await verifyPassword(data.password, platformAdmin.passwordHash);
+      if (!isValid) {
+        await recordFailure(lockoutRedis, data.email, sourceIp);
+        throw new InvalidCredentialsError();
+      }
+
+      // T1-B (F-12 phase 2) — UPGRADE-ON-VERIFY for platform_admins.
+      // Same migration logic as the regular-user path below; the difference
+      // is the table lives in PLATFORM_DATABASE_URL (separate DB from the
+      // main `secuura` DB), so we go through the dedicated repo helper.
+      if (shouldRehashAfterVerify(platformAdmin.passwordHash)) {
+        try {
+          const newHash = await hashPassword(data.password);
+          await userRepo.updatePlatformAdminPassword(platformAdmin.id, newHash);
+          logger.info('UPGRADE-ON-VERIFY (platform_admin): rehashed bcrypt → argon2id', {
+            adminId: platformAdmin.id,
+          });
+        } catch (err: any) {
+          logger.warn('UPGRADE-ON-VERIFY (platform_admin) rehash failed (non-fatal)', {
+            adminId: platformAdmin.id,
+            error: err?.message,
+          });
+        }
+      }
+
+      const syntheticUser: User = {
+        id: platformAdmin.id,
+        email: platformAdmin.email,
+        emailVerified: true,
+        passwordHash: platformAdmin.passwordHash,
+        displayName: platformAdmin.name,
+        phoneVerified: false,
+        mfaEnabled: platformAdmin.mfaEnabled,
+        mfaSecret: platformAdmin.mfaSecret || undefined,
+        role: 'SYSTEM_ADMIN' as const,
+        verificationLevel: 'ENHANCED',
+        status: 'ACTIVE',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        tenantId: undefined,
+        tenantSlug: undefined,
+      };
+
+      // KS-737. This condition used to be
+      //   `mfaEnabled && mfaSecret && data.mfaCode`
+      // with `data.mfaCode` as part of the GUARD, so omitting the field skipped
+      // the whole block and execution fell through to createSession() +
+      // generateTokenPair() on the password alone — a full SYSTEM_ADMIN session.
+      // A second factor that can be declined by omitting an input is not a
+      // second factor. `mfaEnabled` was never consulted on its own.
+      //
+      // Now shaped exactly like the regular-user branch below, which already
+      // failed CLOSED on both states. That the MORE privileged path was the
+      // laxer one is the part worth remembering: this branch exists because
+      // platform admins are not in `users`, and it drifted from its sibling
+      // without anything comparing them.
+      //
+      // Pre-existing, not introduced by #745: present at cfe1f0678:344 and
+      // unchanged at 8a6790fb2:361.
+      if (syntheticUser.mfaEnabled) {
+        // Leg 1: no code supplied. MfaRequiredError, not a session — and not a
+        // counted lockout failure either, since prompting for the second factor
+        // is not a failed attempt (KS-622's reasoning, which the regular-user
+        // branch already applies).
+        if (!data.mfaCode) throw new MfaRequiredError();
+
+        // Leg 2: mfa_enabled true with no secret. The regular-user branch calls
+        // this a configuration error and refuses; this branch used to skip it
+        // silently, which is the same fail-open wearing a different shape.
+        if (!syntheticUser.mfaSecret) {
+          logger.error('MFA enabled but no secret found for platform admin', {
+            adminId: platformAdmin.id,
+          });
+          throw new BadRequestError('MFA configuration error. Please contact support.');
+        }
+
+        const isValidTotp = verifyTotpCode(syntheticUser.mfaSecret, data.mfaCode);
+        if (!isValidTotp) {
+          // KS-622 (#745 review): count a FAILED SECOND FACTOR toward the
+          // (email, /24) lockout. Every other recordFailure call site is
+          // password-stage, so before this an attacker who already held the
+          // password could grind the second factor unbounded by the lockout —
+          // exactly the "single email targeted across IPs" case
+          // services/accountLockout.ts exists for. The remaining bound was
+          // login_strict, 15 req / 15 min PER IP, which scales with IPs.
+          await recordFailure(lockoutRedis, data.email, sourceIp);
+          throw new InvalidCredentialsError();
+        }
+        // KS-171: the admin just proved control of the seed — lazily encrypt a
+        // legacy-plaintext platform_admins.mfa_secret at rest (no-op if already
+        // encrypted; non-fatal on failure).
+        await userRepo.reencryptPlatformAdminMfaSecretIfLegacy(platformAdmin.id);
+      }
+
+      const session = await createSession(
+        syntheticUser,
+        req.ip,
+        req.get('user-agent'),
+        data.deviceId,
+        data.clientType ?? 'browser',
+      );
+      const tokens = generateTokenPair(
+        { ...syntheticUser, role: platformAdmin.role as any },
+        session.id,
+      );
+
+      logger.info('Platform admin logged in', { userId: platformAdmin.id, email: maskEmail(platformAdmin.email), role: platformAdmin.role });
+
+      res.cookie('refresh_token', tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/api/auth',
+      });
+
+      const response: TokenResponse = {
+        accessToken: tokens.accessToken,
+        // F-10: only include in body for native clients
+        ...(shouldEmitRefreshTokenInBody(data.clientType) ? { refreshToken: tokens.refreshToken } : {}),
+        expiresIn: tokens.expiresIn,
+        tokenType: 'Bearer',
+        user: {
+          id: syntheticUser.id,
+          email: syntheticUser.email,
+          displayName: syntheticUser.displayName,
+          role: platformAdmin.role as any,
+          verificationLevel: syntheticUser.verificationLevel,
+        },
+      };
+
+      // F-06: clear lockout counter on successful platform-admin auth
+      await recordSuccess(lockoutRedis, data.email, sourceIp);
+      res.json({ success: true, data: response });
+      return;
+    }
+
+    // KS-796 F-1 (QA PASS 1 on #819 — BLOCKER) — /api/auth/login is now the SAME
+    // door as /api/oauth/authorize, not a fourth hand-rolled copy of it.
+    //
+    // What stood here was `getUserByEmail` plus its OWN status DENY-list, its own
+    // `!passwordHash` check, its own `verifyPassword` and its own MFA block. The
+    // status copy is the finding: it named SUSPENDED and DEACTIVATED, so a
+    // PENDING or INVITED account minted a full token pair HERE while the shared
+    // allow-list refused it at every other door. Measured by the gate at
+    // `ba6c60e35`, `pending` and `invited` each: login=1, authorize=0,
+    // wallet/verify=0, wallet/authenticate=0, refresh=0.
+    //
+    // Worth keeping for the next reader: the 20-case suite this PR added asserted
+    // the PREDICATE and never asserted that this door CONSULTS it, which is how a
+    // change written to close Q1 shipped with Q1 still open. An allow-list is only
+    // as good as the number of call sites that consult it, and no unit test over
+    // the predicate can count those.
+    //
+    // The uniform refusal the removed comment demanded is exactly what the gate
+    // guarantees: unknown email, wrong password, SSO-only, locked-out AND a
+    // refused status all return `invalid_credentials` (pen-test F-11). Suspension
+    // is still never surfaced here; it belongs after authentication would
+    // otherwise have succeeded.
+    //
+    // TWO DELIBERATE BEHAVIOUR CHANGES, both restated in the PR body:
+    //   1. `mfaEnabled` with no `mfaSecret` now returns the uniform 401 instead
+    //      of a 400 "MFA configuration error" — which told an UNAUTHENTICATED
+    //      caller that the account exists and is misconfigured. Nothing asserts
+    //      the 400 (no test, no spec entry; grepped). The platform-admin branch
+    //      above keeps its 400: platform admins are not `users` rows and do not
+    //      pass through this gate.
+    //   2. UPGRADE-ON-VERIFY now runs after the WHOLE gate rather than between
+    //      the password check and MFA, so a login that fails its second factor no
+    //      longer rewrites the password hash.
+    const gate = await enforcePasswordLoginGates({
+      email: data.email,
+      password: data.password,
+      mfaCode: data.mfaCode,
+      sourceIp,
+      route: 'auth/login',
+    });
+    if (!gate.ok) {
+      if (gate.reason === 'mfa_required') throw new MfaRequiredError();
+      throw new InvalidCredentialsError();
+    }
+    const user = gate.user;
+
+    // T1-B (F-12 phase 2) — UPGRADE-ON-VERIFY. Bcrypt hashes are still
+    // accepted by verifyPassword(), but on each successful login we
+    // rehash with Argon2id and persist. Over time, every active user
+    // migrates without any user-visible change. Failure to upgrade is
+    // logged but does NOT block login (the verified password still
+    // counts; we'll retry on the next login).
+    if (user.passwordHash && shouldRehashAfterVerify(user.passwordHash)) {
+      try {
+        const newHash = await hashPassword(data.password);
+        await userRepo.updateUser(user.id, { passwordHash: newHash });
+        logger.info('UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id', { userId: user.id });
+      } catch (err: any) {
+        logger.warn('UPGRADE-ON-VERIFY rehash failed (non-fatal)', { userId: user.id, error: err?.message });
+      }
+    }
+
+    // Resolve tenant if not already set on the user
+    if (!user.tenantId && process.env.MULTI_TENANCY_ENABLED === 'true') {
+      try {
+        const platformUrl = process.env.PLATFORM_DATABASE_URL;
+        if (platformUrl) {
+          const pg = require('pg');
+          const pPool = new pg.Pool({ connectionString: platformUrl, max: 2 });
+          const domain = user.email.split('@')[1]?.toLowerCase();
+          // Match full domain or root domain (e.g., student.ox.ac.uk matches ox.ac.uk)
+          const domainParts = domain.split('.');
+          const rootDomain = domainParts.length > 2 ? domainParts.slice(-domainParts.length + 1).join('.') : domain;
+          // For academic/country TLDs (ac.uk, co.uk, com.au), root = last 3 parts
+          const isCountryTld = /\.(ac|co|com|org|net|gov)\.\w{2}$/.test(domain);
+          const effectiveRoot = isCountryTld && domainParts.length > 3
+            ? domainParts.slice(-3).join('.')
+            : rootDomain;
+          const tenantResult = await pPool.query(
+            `SELECT id, slug FROM tenants WHERE LOWER(domain) = $1 OR LOWER(domain) = $2 OR LOWER(domain) = $3 LIMIT 1`,
+            [domain, rootDomain, effectiveRoot]
+          );
+          if (tenantResult.rows.length > 0) {
+            user.tenantId = tenantResult.rows[0].id;
+            user.tenantSlug = tenantResult.rows[0].slug;
+            // Persist tenant association for future logins.
+            // KS-458 limitation: under fail-closed RLS this cross-tenant
+            // re-assignment (old tenant -> resolved tenant) cannot satisfy
+            // USING and WITH CHECK with a single GUC and becomes a no-op.
+            // The block only runs when MULTI_TENANCY_ENABLED=true (off in
+            // local/demo); if that mode is ever enabled it needs its own
+            // SECURITY DEFINER assign function (tracked on KS-458).
+            await query('UPDATE users SET tenant_id = $1, tenant_slug = $2 WHERE id = $3',
+              [user.tenantId, user.tenantSlug, user.id]);
+          }
+          await pPool.end();
+        }
+      } catch (err: any) {
+        logger.debug('Tenant resolution skipped', { error: err?.message });
+      }
+    }
+
+    // Update last login
+    await userRepo.updateUser(user.id, { lastLoginAt: new Date() });
+
+    // Create session & tokens
+    const session = await createSession(
+      user,
+      req.ip,
+      req.get('user-agent'),
+      data.deviceId,
+      data.clientType ?? 'browser',
+    );
+    const tokens = generateTokenPair(user, session.id);
+
+    logger.info('User logged in', { userId: user.id, email: maskEmail(user.email) });
+
+    // Publish user.login event (fire-and-forget)
+    publishEvent(EventTypes.USER_LOGIN, {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      ip: req.ip,
+    }).catch(err => {
+      let reason: string;
+      try {
+        reason = err instanceof Error ? err.message : String(err);
+      } catch {
+        reason = 'unreadable thrown value';
+      }
+      logger.error('Failed to publish event', { error: reason });
+    });
+
+    // Set refresh token as httpOnly cookie
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/api/auth',
+    });
+
+    const response: TokenResponse = {
+      accessToken: tokens.accessToken,
+      // F-10: only include in body for native clients
+      ...(shouldEmitRefreshTokenInBody(data.clientType) ? { refreshToken: tokens.refreshToken } : {}),
+      expiresIn: tokens.expiresIn,
+      tokenType: 'Bearer',
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role,
+        verificationLevel: user.verificationLevel,
+      },
+    };
+
+    // F-06: the lockout counter is cleared by the shared gate, not here.
+    //
+    // KS-796 F-1: this line used to be a second `recordSuccess`. Once the
+    // regular-user branch moved onto `enforcePasswordLoginGates`, the counter was
+    // cleared TWICE per successful login — caught by `ks622-mfa-failure-lockout`'s
+    // own CONTROL ("a SUCCESSFUL login records no failure and clears the counter"),
+    // which read `successes = 2` where it asserts 1. Both calls key the same
+    // counter (`normaliseEmailForKey` lower-cases and trims, so `data.email` and
+    // the gate's `user.email` derive one key), so it was idempotent — but a
+    // control that counts is exactly the instrument that should decide this, and
+    // it said one clear.
+    //
+    // Ownership now matches the gate's own documented contract: "clearing the
+    // counter is the shared gate's job, and it must happen only once every gate
+    // has passed" (`passwordLoginGate.ts`). The platform-admin branch above keeps
+    // its own `recordSuccess` — it does not pass through the gate.
+    res.json({ success: true, data: response });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// POST /api/auth/refresh
+// =============================================================================
+authRoutes.post('/refresh', async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    const refreshTokenValue: string | undefined =
+      (req as any).cookies?.refresh_token || req.body?.refreshToken;
+
+    if (!refreshTokenValue) throw new InvalidCredentialsError();
+
+    const payload = verifyRefreshToken(refreshTokenValue);
+
+    // KS-1151: an OAuth-minted refresh token — bound to a client (`client_id`,
+    // KS-823) and/or labelled `authMethod: 'oauth'` (KS-835) — is redeemable ONLY
+    // at POST /api/oauth/token, by the client it was issued to: the mirror of that
+    // grant's fail-closed binding refusal. Refused HERE, before the session
+    // lookup, so a refused token is neither rotated nor denylisted and the
+    // legitimate client's token stays alive at its own grant. Before this guard
+    // the route re-minted such a token as an UNBOUND, role-default login pair
+    // (the launder: a narrow OAuth grant became the user's full authority in one
+    // unauthenticated call). Both arms stay: a token minted before the label
+    // existed carries only `client_id`.
+    if (payload.client_id !== undefined || payload.authMethod === 'oauth') {
+      logger.warn('Refresh refused: OAuth-minted token presented at the interactive refresh route', {
+        userId: payload.userId,
+        clientId: payload.client_id ?? null,
+        authMethod: payload.authMethod ?? null,
+      });
+      throw new InvalidCredentialsError();
+    }
+
+    const session = await getSession(payload.sessionId);
+    if (!session) throw new InvalidCredentialsError();
+
+    // Audit A-05: detect token-reuse. If this jti was already rotated/revoked,
+    // an attacker is replaying. RFC 6819 §5.2.2.3 says burn the whole session
+    // — both the legitimate user and the attacker have to log in again, but
+    // the attacker no longer has a foothold.
+    if (payload.jti && (await isRefreshJtiDenylisted(payload.jti))) {
+      await revokeSession(session.id);
+      logger.warn('Refresh-token reuse detected — session revoked', {
+        userId: payload.userId,
+        sessionId: session.id,
+        jti: payload.jti,
+      });
+      res.clearCookie('refresh_token', { path: '/api/auth' });
+      throw new InvalidCredentialsError();
+    }
+
+    // KS-458: refresh runs pre-auth (the proven refresh token is the
+    // credential) — use the SECURITY DEFINER carve-out lookup.
+    const user = await userRepo.getUserByIdPreAuth(payload.userId);
+    if (!user || user.status !== 'ACTIVE') throw new InvalidCredentialsError();
+
+    const tokens = generateTokenPair(user, session.id);
+
+    // Rotate: invalidate the old refresh token by updating the session in Redis,
+    // and denylist the predecessor's jti for whatever's left of its natural
+    // lifetime. The session-record rotation alone is not enough — nothing in the
+    // /refresh path compared the incoming JWT against session.refreshToken.
+    await rotateSessionRefreshToken(session.id, tokens.refreshToken);
+    if (payload.jti && payload.exp) {
+      const remaining = payload.exp - Math.floor(Date.now() / 1000);
+      await denylistRefreshJti(payload.jti, remaining);
+    }
+
+    logger.info('Token refreshed', { userId: user.id });
+
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/api/auth',
+    });
+
+    res.json({
+      success: true,
+      data: {
+        accessToken: tokens.accessToken,
+        expiresIn: tokens.expiresIn,
+        tokenType: 'Bearer',
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// POST /api/auth/logout
+// =============================================================================
+authRoutes.post('/logout', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    if (req.sessionId) {
+      await revokeSession(req.sessionId);
+      logger.info('User logged out', { userId: req.user?.userId });
+    }
+
+    // Denylist the refresh JWT too. Session revocation already breaks /refresh
+    // (getSession returns null), but defending in depth means a future bug that
+    // skips the session check still can't replay this token.
+    const refreshCookie = (req as any).cookies?.refresh_token;
+    if (refreshCookie) {
+      const decoded = decodeToken(refreshCookie);
+      if (decoded?.jti && decoded.exp) {
+        const remaining = decoded.exp - Math.floor(Date.now() / 1000);
+        await denylistRefreshJti(decoded.jti, remaining).catch((err) => {
+          logger.warn('Logout denylist failed (non-fatal)', { error: err?.message });
+        });
+      }
+    }
+
+    res.clearCookie('refresh_token', { path: '/api/auth' });
+    res.json({ success: true, message: 'Logged out successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// POST /api/auth/forgot-password
+// =============================================================================
+authRoutes.post('/forgot-password', async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    const data = forgotPasswordSchema.parse(req.body);
+
+    // Always return success to prevent email enumeration
+    const user = await userRepo.getUserByEmail(data.email);
+
+    if (user) {
+      const { token, hash, expiresAt } = generateResetToken();
+      await userRepo.storeResetToken(hash, user.id, expiresAt);
+      logger.info('Password reset requested', { email: maskEmail(data.email) });
+
+      const frontendUrl = process.env.FRONTEND_URL;
+      if (!frontendUrl && (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging')) {
+        logger.error('FRONTEND_URL not set — password reset links will be malformed');
+      }
+      const resetUrl = `${frontendUrl || 'http://localhost:6882'}/reset-password?token=${token}`;
+      const resetEmailSent = await sendPasswordResetEmail(data.email, resetUrl);
+      if (!resetEmailSent && process.env.NODE_ENV !== 'production') {
+        logger.info('Password reset link (SMTP not configured)', { resetUrl });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'If the email exists, a password reset link has been sent',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// POST /api/auth/reset-password
+// =============================================================================
+authRoutes.post('/reset-password', async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    const data = resetPasswordSchema.parse(req.body);
+
+    const strength = checkPasswordStrength(data.password);
+    if (!strength.isStrong) {
+      throw new ValidationError('Password is too weak', weakPasswordIssues(strength.feedback, 'password'));
+    }
+
+    const tokenHash = createHash('sha256').update(data.token).digest('hex');
+    const stored = await userRepo.getResetToken(tokenHash);
+
+    if (!stored) {
+      throw new NotFoundError('Password reset token — invalid or already used');
+    }
+
+    if (new Date() > stored.expiresAt) {
+      await userRepo.consumeResetToken(tokenHash);
+      throw new BadRequestError('Password reset token has expired — please request a new one');
+    }
+
+    // KS-458: password reset runs pre-auth (the proven reset token is the
+    // credential) — use the SECURITY DEFINER carve-out lookup.
+    const user = await userRepo.getUserByIdPreAuth(stored.userId);
+    if (!user) {
+      await userRepo.consumeResetToken(tokenHash);
+      throw new NotFoundError('User');
+    }
+
+    const newHash = await hashPassword(data.password);
+    // KS-1052: check BEFORE consuming. The reset token is single-use, so
+    // burning it after a write that did not land leaves the user with a
+    // password that never changed and no token to try again with.
+    // KS-1407 B1: revokeAllUserSessions returns 0 WITHOUT throwing when the session store is
+    // down (session.ts:317-318 — createSession at :156 throws in the same condition). Writing
+    // the password, burning the single-use token and answering 200 would leave every old
+    // session to come back when Redis recovered. Confirm the revocation is POSSIBLE first.
+    if (!isRedisAvailable()) {
+      throw new ServiceUnavailableError(
+        'Your password was NOT reset: the session store cannot be reached, so your other sessions could not be ended. Nothing was changed and your reset link has not been used — please try it again shortly.',
+      );
+    }
+    await userRepo.updateUserOrThrow(user.id, { passwordHash: newHash }, 'Password reset');
+    // KS-1407: the old password minted sessions; none of them may outlive it. Before the token is burned, so a failing revocation leaves it usable for a retry.
+    // KS-1692 (gate BS1 N1): the flag check above is not the only way this can
+    // fail. `revokeAllUserSessions` can also THROW — a rejected Redis command
+    // rather than an unavailable client — and a throw here skipped the
+    // post-write re-assert entirely and landed in `next(error)` as a 500
+    // INTERNAL_ERROR. The password was written, the sessions were not revoked,
+    // and the caller was told only "unexpected error".
+    //
+    // Mapped onto the SAME post-write 503 as the check-then-act path, so a store
+    // that is DOWN and a store that THROWS are indistinguishable to the caller —
+    // which is the point: both mean "your password changed, your other sessions
+    // did not end". NOT `.catch(() => 0)`: that is the author's own A5 arm, it
+    // reds none of the KS-1407 cells, and it would turn this into a 200 with
+    // nothing revoked. This catch RE-THROWS; it never swallows.
+    let sessionsRevoked = 0;
+    try {
+      sessionsRevoked = await revokeAllUserSessions(user.id);
+    } catch (err: unknown) {
+      let reason: string;
+      try {
+        reason = err instanceof Error ? err.message : String(err);
+      } catch {
+        reason = 'unreadable thrown value';
+      }
+      logger.error('Password reset: the session revocation THREW after the password write', {
+        userId: user.id, error: reason,
+      });
+      throw new ServiceUnavailableError(
+        'Your password WAS reset, but your other sessions could not be ended because the session store became unreachable. Your reset link has NOT been used — please use it again shortly to end those sessions.',
+      );
+    }
+    logger.info('Password reset revoked the account sessions', { userId: user.id, sessionsRevoked });
+    // The guard above is a check-then-act: if the store dropped since, the call above returned
+    // its silent 0. Re-assert, and leave the single-use token UNBURNED so a retry can finish
+    // the job. The password really did change, and the message says so.
+    if (!isRedisAvailable()) {
+      throw new ServiceUnavailableError(
+        'Your password WAS reset, but your other sessions could not be ended because the session store became unreachable. Your reset link has NOT been used — please use it again shortly to end those sessions.',
+      );
+    }
+    await userRepo.consumeResetToken(tokenHash);
+
+    logger.info('Password reset completed', { userId: user.id });
+
+    res.json({
+      success: true,
+      message: 'Password has been reset successfully. You can now log in with your new password.',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// POST /api/auth/verify-email
+// =============================================================================
+authRoutes.post('/verify-email', async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    const { token } = req.body;
+    if (!token) throw new BadRequestError('Verification token required');
+
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const stored = await userRepo.getEmailToken(tokenHash);
+
+    if (!stored) {
+      throw new NotFoundError('Verification token — invalid or already used');
+    }
+
+    if (new Date() > stored.expiresAt) {
+      await userRepo.consumeEmailToken(tokenHash);
+      throw new BadRequestError('Verification token has expired — please request a new one');
+    }
+
+    // KS-458: email verification runs pre-auth (the proven email token is
+    // the credential) — use the SECURITY DEFINER carve-out lookup.
+    const user = await userRepo.getUserByIdPreAuth(stored.userId);
+    if (!user) {
+      await userRepo.consumeEmailToken(tokenHash);
+      throw new NotFoundError('User');
+    }
+
+    // KS-1052: check BEFORE consuming — same single-use token argument as
+    // the password reset above.
+    await userRepo.updateUserOrThrow(user.id, { emailVerified: true }, 'Email verification');
+    await userRepo.consumeEmailToken(tokenHash);
+
+    logger.info('Email verified', { userId: user.id, email: maskEmail(user.email) });
+
+    res.json({
+      success: true,
+      message: 'Email address verified successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// SOCIAL LOGIN ROUTES
+// =============================================================================
+
+import {
+  SocialProviderFactory,
+  mayAutoLinkByEmail,
+  type SocialProviderName,
+} from '../providers/social';
+import { storeOAuthState, consumeOAuthState } from '../services/oauthState';
+// generateTokenPair already imported above — used directly for social login token creation
+
+const socialFactory = new SocialProviderFactory();
+
+// -----------------------------------------------------------------
+// KS-1885 — ONLY TEXT OUR OWN CODE WROTE REACHES THE CLIENT.
+//
+// The callback put any exchange error's message into its 400 (and the error
+// handler logs that message). A provider token answer whose access_token holds
+// a newline makes fetch throw a TypeError that QUOTES the whole
+// `Bearer <token>` header (github, google, linkedin, microsoft_personal), and a
+// JSON null answer echoed V8's internal text (all six). KS-1791 replaced one
+// error name (SyntaxError); this replaces the rule. An AppError (the codebase's
+// client-safe class: the adapters' timeout and unreachable texts) and the
+// adapters' own exact texts pass; anything else gets the constant below. The
+// patterns are anchored at both ends, so a text that merely CONTAINS an adapter
+// text does not pass. If an adapter's wording changes it falls to the constant
+// (fails closed), and ks1240b's pinned texts go red to say so.
+// -----------------------------------------------------------------
+const EXCHANGE_FAILED_TEXT = 'the provider answer could not be read';
+const ADAPTER_EXCHANGE_TEXTS: readonly RegExp[] = [
+  /^(Apple|Facebook|GitHub|Google|LinkedIn|Microsoft) token exchange failed \((HTTP \d{3}|no access token)\)$/,
+  /^Failed to fetch (Facebook|GitHub|Google|LinkedIn|Microsoft) user profile( \(HTTP \d{3}\))?$/,
+];
+
+/** The exchange error's own text when our code wrote it; otherwise null. */
+function authoredExchangeText(err: unknown): string | null {
+  if (err instanceof AppError) return err.message;
+  const message = (err as { message?: unknown } | null | undefined)?.message;
+  return typeof message === 'string' && ADAPTER_EXCHANGE_TEXTS.some((re) => re.test(message)) ? message : null;
+}
+
+/** The thrown value's name when it is identifier-shaped, so a log line names the class and nothing else. */
+function exchangeErrorName(err: unknown): string {
+  const name = (err as { name?: unknown } | null | undefined)?.name;
+  return typeof name === 'string' && /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(name) ? name : 'unnamed';
+}
+
+// List enabled social providers
+authRoutes.get('/social/providers', (_req, res: Response) => {
+  const enabled = socialFactory.getEnabled();
+  res.json({ providers: enabled });
+});
+
+// Initiate OAuth flow — redirects to provider
+authRoutes.get('/social/:provider', async (req, res: Response, next) => {
+  try {
+    const providerName = req.params.provider as string;
+    if (!socialFactory.isValidProvider(providerName)) {
+      throw new BadRequestError(`Unknown social provider: ${providerName}`);
+    }
+    const provider = socialFactory.get(providerName as SocialProviderName);
+    if (!provider) {
+      throw new BadRequestError(`Social provider ${providerName} is not enabled in this deployment`);
+    }
+    const state = randomUUID();
+    // KS-722 Shape 1: persist BEFORE handing the value out. Minting a `state`
+    // we cannot later verify is precisely the defect this closes, so a storage
+    // failure must fail the initiate rather than produce an unverifiable flow.
+    //
+    // KS-819 F-5 — THIS IS AN UNAUTHENTICATED WRITE TO SHARED STATE, and it is
+    // left as one. Recorded here rather than "fixed", because the obvious
+    // repairs do not repair it: the write must precede the redirect (that is
+    // the whole point), and no caller is authenticated at this stage by
+    // construction — an unauthenticated sign-in flow is what this route IS.
+    //
+    // What bounds it, measured rather than assumed: the gateway limiter caps
+    // this route at 300/min, each key is one short value under a 600-second
+    // TTL, and the ceiling is therefore ~3,000 live keys per source — bounded
+    // rather than unbounded growth. Reachable only where a provider is
+    // configured, which no deployment does today.
+    //
+    // If that ever stops being true, the fix is a per-source cap on outstanding
+    // states, not a shorter TTL: the TTL bounds a leak's usefulness, not the
+    // write volume. Left as a residual on KS-819 with that reasoning stated,
+    // rather than closed with a change that would not close it.
+    await storeOAuthState(state, providerName);
+    const authUrl = provider.getAuthUrl(state);
+    res.json({ authUrl, state });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// OAuth callback — exchange code for profile, create/link user
+authRoutes.get('/social/:provider/callback', async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    const providerName = req.params.provider as string;
+    if (!socialFactory.isValidProvider(providerName)) {
+      throw new BadRequestError(`Unknown social provider: ${providerName}`);
+    }
+    const provider = socialFactory.get(providerName as SocialProviderName);
+    if (!provider) {
+      throw new BadRequestError(`Social provider ${providerName} is not enabled`);
+    }
+
+    // -----------------------------------------------------------------
+    // KS-722 Shape 1 — VERIFY THE `state` BEFORE THE CODE EXCHANGE.
+    //
+    // Placed ahead of the exchange deliberately. A forged callback must not
+    // cause an outbound token-exchange request to the provider: that is a side
+    // effect on a third party, driven by an unauthenticated caller.
+    //
+    // KS-819 F-1/F-2/F-4 — BUT NOT BEFORE THE CHECKS THAT NEED NOTHING.
+    //
+    // KS-722 read "before the exchange" as "first", and consuming BURNS. So the
+    // burn became reachable by requests that were never going to complete a
+    // sign-in, and the ORDER of the refusals leaked which one had happened:
+    //
+    //   · a codeless callback with a REAL state answered 400 (consume passed,
+    //     then the missing-code throw); with a forged one it answered 403. That
+    //     single difference is a validity oracle for anyone holding a candidate
+    //     `state` — and the probe destroyed the real one, so the user's own
+    //     callback then failed 403. One unauthenticated request, no sign-in.
+    //
+    //   · a provider `?error=` (the user pressed Cancel) took the same path:
+    //     "missing authorization code", with the state burned, so the retry
+    //     failed too.
+    //
+    // Both checks below decide on the request ALONE. Running them first costs
+    // the exchange-ordering nothing — the consume still precedes it — and it
+    // means a request that cannot complete never touches the store.
+    //
+    // The cross-provider burn (F-2) is NOT fixed here. Ordering cannot fix it,
+    // because a cross-provider callback carries a perfectly good code; it is
+    // fixed in `oauthState.ts` by putting the provider in the KEY, so the wrong
+    // provider misses rather than reading-then-comparing. Two findings, one
+    // root, two different repairs.
+    // -----------------------------------------------------------------
+    if (req.query.error !== undefined) {
+      // Logged, never echoed: attacker-controllable via the redirect.
+      logger.warn('Social callback — provider returned an error', {
+        provider: providerName,
+        providerError: String(req.query.error).slice(0, 200),
+        providerErrorDescription: req.query.error_description === undefined ? undefined : String(req.query.error_description).slice(0, 200),
+      });
+      throw new OAuthProviderError();
+    }
+
+    const code = req.query.code as string;
+    if (!code) throw new BadRequestError('Missing authorization code');
+
+    const state = req.query.state as string | undefined;
+    if (!(await consumeOAuthState(state ?? '', providerName))) {
+      throw new OAuthStateInvalidError();
+    }
+
+    let profile;
+    try {
+      profile = await provider.exchangeCode(code);
+    } catch (exchangeErr: unknown) {
+      // KS-1885 (widens KS-1791's SyntaxError-only rule): see authoredExchangeText. The status stays 400 for every
+      // exchange failure, as before; only a text our code did not write is replaced. Logged by provider and class only:
+      // the message is where the token is.
+      const authored = authoredExchangeText(exchangeErr);
+      logger.warn('Social callback: the provider code exchange failed', { provider: providerName, errorName: exchangeErrorName(exchangeErr) });
+      throw new BadRequestError(`OAuth authentication failed: ${authored ?? EXCHANGE_FAILED_TEXT}`);
+    }
+
+    const socialIdField = `${providerName}Id` as keyof import('../types').User;
+    let user = await userRepo.getUserBySocialId(providerName, profile.providerId);
+    /** KS-795 F-5: set when the email-link branch resolved an account whose
+     *  identity must be attached — but only once the gate has passed. */
+    let linkIdentityAfterGate = false;
+
+    // -----------------------------------------------------------------
+    // KS-795 F-4 — AN EMPTY EMAIL IS NEVER A KEY.
+    //
+    // Placed AFTER the provider-identity lookup on purpose. If the account was
+    // resolved by its social id, the profile's email is irrelevant and a
+    // returning caller must not be refused — that matters the day the social-id
+    // persistence defect is fixed and this lookup starts finding rows.
+    //
+    // Reached only when nothing was resolved by identity. Refusing TERMINALLY
+    // here is what makes the collision impossible rather than unlikely: it
+    // forecloses BOTH remaining paths at once — the email-link branch below
+    // (which an empty address skips) and, more importantly, CREATE, where two
+    // different provider ids carrying empty addresses collapse onto one row via
+    // `ON CONFLICT (email_lookup_hash) DO UPDATE` and mint a token pair for a
+    // user id that was never inserted.
+    //
+    // Cost, stated rather than discovered later: a provider that reports no
+    // address cannot complete a FIRST sign-in. Today that caller does not get an
+    // account either — it gets someone else's row — so this refuses cleanly
+    // what already fails silently.
+    // -----------------------------------------------------------------
+    // S130-F1 — GUARD THE VALUE THE REPOSITORY KEYS ON, NOT THE RAW ONE.
+    //
+    // This guard was `!profile.email`, which is falsy for `''` and TRUE for
+    // every whitespace-only address. The repository does not agree:
+    // `getUserByEmail`, `getUserByEmailLookup` and `createUser` all normalise
+    // with `.toLowerCase().trim()`, so `' '`, `'\t\t'` and `'  \n '` key on the
+    // SAME `email_lookup_hash` as a literal empty address.
+    //
+    // Two distinct provider identities carrying different whitespace therefore
+    // collapsed onto one row via `ON CONFLICT (email_lookup_hash) DO UPDATE` and
+    // minted two token pairs — the collision F-4 exists to foreclose, reached by
+    // walking AROUND the guard rather than through it. Measured before the fix:
+    // `''` refused, and each of the other three created a row and minted twice.
+    const profileEmail = String(profile.email ?? '').trim();
+
+    if (!user && !profileEmail) {
+      logger.warn('Social callback refused — provider supplied no email and no identity matched', {
+        provider: providerName,
+      });
+      throw new SocialEmailUnavailableError();
+    }
+
+    // KS-806: wallet.local is the synthetic domain of wallet accounts and no provider can have verified an address in it.
+    // A profile carrying one is refused (the uniform refusal) before it can link to an existing account or create one.
+    if (!user && isReservedWalletEmail(profileEmail)) {
+      logger.warn('Social callback refused — provider email is in the reserved wallet.local domain', { provider: providerName });
+      throw new SocialSignInRefusedError();
+    }
+
+    // S130-F3 — WHAT THIS CONDITION ACTUALLY DOES, corrected.
+    //
+    // It used to claim `&& profileEmail` was "a second, independent expression
+    // of the same invariant, so removing the guard alone cannot reopen the
+    // create-collision." That was measured FALSE: with the guard removed and
+    // this expression kept, rows=1, inserts=2, mints=2.
+    //
+    // The reason is structural. This condition guards the LINK branch only. The
+    // CREATE branch below is a bare `if (!user)` and never consults the email at
+    // all — so an empty address skips the link branch and lands in create, which
+    // is exactly where the collision happens. The guard above is the ONLY thing
+    // standing between an empty key and a row.
+    //
+    // Kept because it is still correct as a branch condition — an empty address
+    // is not a lookup key — but it is NOT a second line of defence, and the
+    // prose saying it was is what would have licensed deleting the guard.
+    if (!user && profileEmail) {
+      const existing = await userRepo.getUserByEmail(profileEmail);
+      if (existing) {
+        // ---------------------------------------------------------------
+        // KS-795 (KS-781 door 2) — DO NOT ATTACH A SOCIAL IDENTITY TO AN
+        // EXISTING ACCOUNT ON AN EMAIL MATCH ALONE.
+        //
+        // This branch used to link unconditionally and then mint a token
+        // pair, so a profile carrying the victim's address was enough to
+        // take over the victim's account. `profile.emailVerified` on its
+        // own is not the fix: facebook derives it from `Boolean(email)`
+        // and microsoft-personal hardcodes `true`, so the flag is
+        // unconditionally satisfied for those providers. See
+        // providers/social/emailVerificationTrust.ts for the derivation
+        // table this decision is made from.
+        //
+        // The refusal is TERMINAL rather than a fall-through: leaving
+        // `user` null here would reach the create branch below and insert
+        // a second row on an address that already has one.
+        // ---------------------------------------------------------------
+        if (!mayAutoLinkByEmail(providerName as SocialProviderName, profile.emailVerified)) {
+          logger.warn('Social auto-link refused — provider email claim is not sufficient proof', {
+            provider: providerName,
+            emailVerified: profile.emailVerified,
+            userId: existing.id,
+          });
+          // ⚠ The remedy this error names — sign in, then use the
+          // authenticated POST /api/auth/social/link — DOES NOT PERSIST TODAY.
+          // `userRepo.updateUser` has no social-id fields in its fieldMap, so
+          // every `{ googleId: ... }` write is silently dropped and no UPDATE
+          // is issued at all. Measured, with a control: `{ status }` issues
+          // `UPDATE users SET status = $1 ...`; `{ googleId }`,
+          // `{ microsoftPersonalId }` and the shape this route actually builds
+          // (`microsoft_personalId`) each issue ZERO. That affects `:1027` (the
+          // explicit link route) as much as the branch above, and it is a
+          // separate defect on a shared repository function — recorded in
+          // BACKLOG.md rather than widened into this security fix. The message
+          // states the INTENDED remedy; do not read it as one that works yet.
+          // KS-795 F-6: one refusal shape. The code this replaced named the
+          // account's existence and a remedy that writes nothing.
+          throw new SocialSignInRefusedError();
+        }
+
+        user = existing;
+        // KS-795 F-5: DEFERRED, not performed here. The identity is attached
+        // only after the account gate below says this account may receive a
+        // credential at all. See the F-5 note above the gate.
+        linkIdentityAfterGate = true;
+      }
+    }
+
+    if (!user) {
+      const now = new Date();
+      const newUser: User = {
+        id: randomUUID(),
+        // S130-F1: the trimmed value, so what is stored and what is hashed agree.
+        email: profileEmail,
+        emailVerified: profile.emailVerified,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        displayName: profile.displayName,
+        phoneVerified: false,
+        mfaEnabled: false,
+        verificationLevel: 'SOCIAL',
+        authMethod: 'social',
+        status: 'ACTIVE',
+        role: 'OWNER',
+        createdAt: now,
+        updatedAt: now,
+      };
+      (newUser as unknown as Record<string, unknown>)[socialIdField] = profile.providerId;
+      // ⚠ The social id assigned above does NOT reach the database. `createUser`'s
+      // INSERT names 22 columns and no social-id column is among them, while
+      // SOCIAL_ID_COLUMN_MAP declares six that `getUserBySocialId` queries -- so
+      // the create path drops it exactly as `updateUser` does, and NO path
+      // persists one. Consequence: `getUserBySocialId` can never return a row
+      // for a social user, so every returning caller re-enters the email-match
+      // branch for the life of the account. Recorded in BACKLOG.md; it is the
+      // reason the F-4 refusal above costs nothing that currently works.
+      user = await userRepo.createUser(newUser);
+    }
+
+    // -----------------------------------------------------------------
+    // KS-795 part (a) — THE ACCOUNT GATE, door 2.
+    //
+    // Part (b) stopped an UNSOUND email claim attaching a social identity to
+    // someone else's account. It did not ask the other question: may THIS
+    // account receive a credential at all? Above this line the route has three
+    // ways to arrive at `user` — an existing social id, an email link, or a
+    // freshly created row — and all three fell straight through to
+    // createSession + generateTokenPair. So a SUSPENDED account with a social
+    // identity already linked minted a full token pair on every callback,
+    // needing no linking step and no second factor.
+    //
+    // DELIBERATELY BROADER THAN "THE LINK PATH". The commission named the link
+    // branch; the gate is placed at the MINT instead, because the link branch
+    // is only one of three ways to reach it and the other two carry the same
+    // defect. A gate on one branch would have been a gate an attacker walks
+    // around by already being linked.
+    //
+    // The MFA case is a real refusal, not an omission: this callback has no
+    // channel to carry a second factor, so an MFA account cannot complete here
+    // and 403 MFA_REQUIRED is the honest answer. Minting without the factor is
+    // precisely the KS-781 class.
+    // -----------------------------------------------------------------
+    const gate = await assertAccountMayReceiveCredential(user, {
+      sourceIp: req.ip || '0.0.0.0',
+      route: 'GET /api/auth/social/:provider/callback',
+    });
+    if (!gate.ok) {
+      if (gate.reason === 'mfa_required') throw new MfaRequiredError();
+      // KS-795 F-6: same shape as the link refusal above -- an unauthenticated
+      // caller must not be able to tell a disabled account from a healthy one.
+      throw new SocialSignInRefusedError();
+    }
+
+    // -----------------------------------------------------------------
+    // KS-795 F-5 — THE GATE NOW PRECEDES BOTH WRITES.
+    //
+    // Two writes used to run BEFORE the gate: the identity link, and the
+    // `BASIC -> SOCIAL` verification-level upgrade. A REFUSED callback
+    // therefore still mutated the account it had just refused to authenticate.
+    //
+    // The verification-level write was the visible half. The link write is the
+    // dangerous one, and its danger is LATENT rather than current: today
+    // `updateUser` has no social-id fields in its fieldMap, so the write is
+    // silently dropped. The moment that persistence defect is repaired, a
+    // pre-gate link write would attach an ATTACKER's provider identity to a
+    // SUSPENDED victim's account -- the refusal would hold for this request and
+    // hand over a permanent key. That is why this reordering lands BEFORE the
+    // persistence fix, not after it.
+    //
+    // The lockout `recordFailure` inside the gate is deliberately NOT moved or
+    // suppressed. A refused callback SHOULD count against the lockout counter:
+    // the refusal is an authentication outcome, and not counting it would make
+    // this door a free oracle for probing account state. Confirmed as correct
+    // behaviour rather than assumed.
+    // -----------------------------------------------------------------
+    if (linkIdentityAfterGate) {
+      await userRepo.updateUser(user.id, { [socialIdField]: profile.providerId } as Record<string, string>);
+    }
+
+    if (user.verificationLevel === 'NONE' || user.verificationLevel === 'BASIC') {
+      await userRepo.updateUser(user.id, { verificationLevel: 'SOCIAL' });
+      user.verificationLevel = 'SOCIAL';
+    }
+
+    const session = await createSession(
+      user,
+      req.ip || '0.0.0.0',
+      req.headers['user-agent'] || '',
+      undefined,
+      'browser',
+    );
+    const tokens = generateTokenPair(user, session.id);
+
+    logger.info('Social login success', {
+      userId: user.id,
+      provider: providerName,
+      isNew: !user.lastLoginAt,
+    });
+
+    res.json({
+      success: true,
+      ...tokens,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Link social account to existing authenticated user
+//
+// KS-819 — NO `state` CHECK HERE, and that is a decision rather than an
+// oversight. The gate that filed this named it out of scope; it is recorded at
+// the call site so it is not rediscovered as a finding.
+//
+// The callback above needs `state` because it is a REDIRECT: the browser
+// arrives carrying parameters an attacker chose, with no other proof the flow
+// began here. This route is different on both counts — the caller is
+// authenticated, and the `code` arrives in a POST body, so the platform CSRF
+// token already supplies the provenance `state` supplies there.
+//
+// What it shares with the callback is the outbound exchange: a body-supplied
+// `code` drives a request to the provider. That is reachable only by an
+// authenticated caller, so it is rate-limited by identity rather than open to
+// the internet.
+//
+// The live defect on this route is not the missing `state` — it is that
+// `userRepo.updateUser` has no social-id fields in its fieldMap, so the write
+// below issues ZERO statements and the link never persists. Tracked in
+// BACKLOG.md; do not read the success response as proof the link happened.
+authRoutes.post('/social/link', authenticate(), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { provider: providerName, code } = req.body;
+    if (!providerName || !code) {
+      throw new BadRequestError('provider and code are required');
+    }
+    if (!socialFactory.isValidProvider(providerName)) {
+      throw new BadRequestError(`Unknown social provider: ${providerName}`);
+    }
+    const provider = socialFactory.get(providerName as SocialProviderName);
+    if (!provider) {
+      throw new BadRequestError(`Social provider ${providerName} is not enabled`);
+    }
+
+    let profile;
+    try {
+      profile = await provider.exchangeCode(code);
+    } catch (exchangeErr: unknown) {
+      // KS-1885 F3: this route answers what it answered before either way (500 INTERNAL_ERROR, or an AppError's own
+      // status). What changes is the LOG: the error handler logs err.message and err.stack, and a fetch TypeError's
+      // message quotes the Bearer header, token included. Our own texts are rethrown as they are; anything else is
+      // logged by provider and class only and replaced by a neutral Error.
+      if (authoredExchangeText(exchangeErr) !== null) throw exchangeErr;
+      logger.warn('Social link: the provider code exchange failed', { provider: providerName, errorName: exchangeErrorName(exchangeErr) });
+      // eslint-disable-next-line preserve-caught-error -- deliberately no `cause`: it would carry the raw exchange error (the token, in the fetch TypeError case) to anything that inspects this error, which is what this catch stops.
+      throw new Error('social link: the provider code exchange failed');
+    }
+    const existingUser = await userRepo.getUserBySocialId(providerName, profile.providerId);
+    if (existingUser && existingUser.id !== req.user!.userId) {
+      throw new ConflictError('This social account is already linked to another user');
+    }
+
+    const socialIdField = `${providerName}Id`;
+    await userRepo.updateUser(req.user!.userId, { [socialIdField]: profile.providerId } as Record<string, string>);
+
+    const user = await userRepo.getUserById(req.user!.userId);
+    if (user && (user.verificationLevel === 'NONE' || user.verificationLevel === 'BASIC')) {
+      await userRepo.updateUser(user.id, { verificationLevel: 'SOCIAL' });
+    }
+
+    logger.info('Social account linked', { userId: req.user!.userId, provider: providerName });
+
+    res.json({ success: true, provider: providerName, linked: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// GET /api/auth/me — Alias of /api/users/me (F-06 audit 2026-05-15)
+// =============================================================================
+// The "current authenticated user" concept lives on either surface depending
+// on the consumer's mental model. Issuer/admin/verifier portals and the
+// e2e-v2 tier1 `auth.api.spec.ts:113` hit `/api/auth/me`; the canonical
+// handler lives in routes/users.ts (`meHandler`). Re-mounting here avoids
+// duplication and matches the long-standing pen-test ISSUE-5 expectation.
+authRoutes.get('/me', authenticate(), meHandler);
+
+// Export the userRepo for use by other route modules (users.ts, mfa.ts, etc.)
+export { userRepo };

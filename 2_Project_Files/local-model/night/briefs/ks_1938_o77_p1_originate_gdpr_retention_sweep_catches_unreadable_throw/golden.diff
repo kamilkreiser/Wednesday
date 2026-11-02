@@ -1,0 +1,168 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/gdprService.ts b/Blockchain/Dev/services/originate/src/services/gdprService.ts
+--- a/Blockchain/Dev/services/originate/src/services/gdprService.ts
++++ b/Blockchain/Dev/services/originate/src/services/gdprService.ts
+@@ -496,9 +496,21 @@
+           WHERE id = ${policy.id}::uuid
+         `;
+       } catch (err: any) {
+-        logger.error('Retention enforcement failed', { dataType: policy.data_type, error: err instanceof Error ? err.message : String(err) });
++        let reason: string;
++        try {
++          reason = err instanceof Error ? err.message : String(err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.error('Retention enforcement failed', { dataType: policy.data_type, error: reason });
+       }
+     }
+   } catch (err: any) {
+-    logger.error('Retention enforcement error', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Retention enforcement error', { error: reason });
+   }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1938-gdpr-retention-sweep-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1938-gdpr-retention-sweep-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1938-gdpr-retention-sweep-catches-unreadable-throw.test.ts
+@@ -0,0 +1,136 @@
++// KS-1938 (originate services/gdprService.ts, enforceRetentionImpl): the retention sweep logged a failed policy in a per-policy catch and an outer catch, and read the thrown value
++// there as `err instanceof Error ? err.message : String(err)`. When the value cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws, throws
++// on `.message`) the read threw INSIDE the per-policy catch, left the loop, and the outer catch then logged a different error: every LATER policy was skipped for that run (no DELETE,
++// no deletion-log row, no last_enforcement_at stamp), where an ordinary Error lets the sweep continue. Each catch now reads the value inside its own try and logs the constant reason
++// `unreadable thrown value`. The database stand-in classifies each tagged-template statement and rejects the one the cell names with the thrown value (a plain function, not jest.fn():
++// a spy inspects what it rejects with and could itself fail on a revoked Proxy before the code under test saw it). Nothing is written to a real database.
++const mockState: { failOn: string | null; thrown: unknown; stmts: string[]; errored: unknown[][] } = {
++  failOn: null,
++  thrown: undefined,
++  stmts: [],
++  errored: [],
++};
++
++const MOCK_POLICIES = [
++  { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', data_type: 'user_sessions', retention_period_days: 30, deletion_method: 'delete', auto_delete: true },
++  { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2', data_type: 'verification_requests', retention_period_days: 30, deletion_method: 'delete', auto_delete: true },
++];
++
++function mockOpOf(strings: TemplateStringsArray): string {
++  const sql = strings.join('?').replace(/\s+/g, ' ').trim();
++  if (/FROM data_retention_policies/.test(sql)) return 'SELECT policies';
++  const del = /DELETE FROM (\w+)/.exec(sql);
++  if (del) return 'DELETE ' + del[1];
++  if (/INSERT INTO data_deletion_log/.test(sql)) return 'INSERT deletion_log';
++  if (/UPDATE data_retention_policies/.test(sql)) return 'UPDATE policy stamp';
++  return 'other';
++}
++
++async function mockStatement(strings: TemplateStringsArray): Promise<unknown> {
++  const op = mockOpOf(strings);
++  mockState.stmts.push(op);
++  if (mockState.failOn !== null && op === mockState.failOn) {
++    throw mockState.thrown;
++  }
++  if (op === 'SELECT policies') return MOCK_POLICIES;
++  if (op.startsWith('DELETE')) return 2;
++  if (op === 'INSERT deletion_log') {
++    return [{ id: 'x', data_type: 'd', records_affected: 2, deletion_method: 'delete', reason: 'r', performed_by: 'system', performed_at: new Date() }];
++  }
++  return 1;
++}
++
++jest.mock('../db', () => ({
++  prisma: {
++    $queryRaw: (strings: TemplateStringsArray) => mockStatement(strings),
++    $executeRaw: (strings: TemplateStringsArray) => mockStatement(strings),
++  },
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    warn: () => undefined,
++    debug: () => undefined,
++    error: (...args: unknown[]) => {
++      mockState.errored.push(args);
++    },
++  },
++}));
++
++import { enforceRetention } from '../services/gdprService';
++
++const UNREADABLE = 'unreadable thrown value';
++// What an ordinary Error gets when the FIRST policy's DELETE rejects: the failure is logged and the sweep goes on to the second policy.
++const SWEEP_CONTINUES = ['SELECT policies', 'DELETE user_sessions', 'DELETE verification_requests', 'INSERT deletion_log', 'UPDATE policy stamp'];
++
++beforeEach(() => {
++  mockState.failOn = null;
++  mockState.thrown = undefined;
++  mockState.stmts.length = 0;
++  mockState.errored.length = 0;
++});
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++async function sweep(failOn: string, thrown: unknown): Promise<{ settled: 'resolved' | 'rejected'; count: number }> {
++  mockState.failOn = failOn;
++  mockState.thrown = thrown;
++  try {
++    const logs = await enforceRetention();
++    return { settled: 'resolved', count: logs.length };
++  } catch {
++    return { settled: 'rejected', count: -1 };
++  }
++}
++
++describe('KS-1938 the retention sweep reads a thrown value safely and keeps going', () => {
++  it('control ks1938 C1 policy DELETE: an ordinary Error is logged with its own message and the second policy is still enforced', async () => {
++    expect(await sweep('DELETE user_sessions', new Error('db down'))).toEqual({ settled: 'resolved', count: 1 });
++    expect(mockState.stmts).toEqual(SWEEP_CONTINUES);
++    expect(mockState.errored).toEqual([['Retention enforcement failed', { dataType: 'user_sessions', error: 'db down' }]]);
++  });
++
++  it('control ks1938 C2 policy SELECT: an ordinary Error is logged with its own message and the sweep returns nothing', async () => {
++    expect(await sweep('SELECT policies', new Error('db down'))).toEqual({ settled: 'resolved', count: 0 });
++    expect(mockState.stmts).toEqual(['SELECT policies']);
++    expect(mockState.errored).toEqual([['Retention enforcement error', { error: 'db down' }]]);
++  });
++
++  it('RED ks1938 R1 policy DELETE: a revoked Proxy rejection is logged as a constant reason and the second policy is still enforced', async () => {
++    expect(await sweep('DELETE user_sessions', revokedProxy())).toEqual({ settled: 'resolved', count: 1 });
++    expect(mockState.stmts).toEqual(SWEEP_CONTINUES);
++    expect(mockState.errored).toEqual([['Retention enforcement failed', { dataType: 'user_sessions', error: UNREADABLE }]]);
++  });
++
++  it('RED ks1938 R2 policy DELETE: an Error whose message getter throws is logged as a constant reason and the second policy is still enforced', async () => {
++    expect(await sweep('DELETE user_sessions', getterThrows())).toEqual({ settled: 'resolved', count: 1 });
++    expect(mockState.stmts).toEqual(SWEEP_CONTINUES);
++    expect(mockState.errored).toEqual([['Retention enforcement failed', { dataType: 'user_sessions', error: UNREADABLE }]]);
++  });
++
++  it('RED ks1938 R3 policy SELECT: a revoked Proxy rejection is logged as a constant reason and the sweep returns nothing', async () => {
++    expect(await sweep('SELECT policies', revokedProxy())).toEqual({ settled: 'resolved', count: 0 });
++    expect(mockState.stmts).toEqual(['SELECT policies']);
++    expect(mockState.errored).toEqual([['Retention enforcement error', { error: UNREADABLE }]]);
++  });
++
++  it('RED ks1938 R4 policy SELECT: an Error whose message getter throws is logged as a constant reason and the sweep returns nothing', async () => {
++    expect(await sweep('SELECT policies', getterThrows())).toEqual({ settled: 'resolved', count: 0 });
++    expect(mockState.stmts).toEqual(['SELECT policies']);
++    expect(mockState.errored).toEqual([['Retention enforcement error', { error: UNREADABLE }]]);
++  });
++});

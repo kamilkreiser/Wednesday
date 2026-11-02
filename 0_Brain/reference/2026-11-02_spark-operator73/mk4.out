@@ -1,0 +1,31 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o73_p4_auth_oauth_authorize_post_and_token_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -805,5 +805,11 @@
+   } catch (error: any) {
+-    logger.error('OAuth authorize POST error', { error: error.message });
++    let reason: string;
++    try {
++      reason = error.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('OAuth authorize POST error', { error: reason });
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'server_error' } });
+   }
+ });
+@@ -1109,5 +1115,11 @@
+   } catch (error: any) {
+-    logger.error('OAuth token error', { error: error.message });
++    let reason: string;
++    try {
++      reason = error.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('OAuth token error', { error: reason });
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'server_error' } });
+   }
+ });
+

@@ -1,0 +1,234 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -805,5 +805,11 @@
+   } catch (error: any) {
+-    logger.error('OAuth authorize POST error', { error: error.message });
++    let reason: string;
++    try {
++      reason = error.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('OAuth authorize POST error', { error: reason });
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'server_error' } });
+   }
+ });
+@@ -1109,5 +1115,11 @@
+   } catch (error: any) {
+-    logger.error('OAuth token error', { error: error.message });
++    let reason: string;
++    try {
++      reason = error.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('OAuth token error', { error: reason });
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'server_error' } });
+   }
+ });
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1868-oauth-authorize-token-unreadable-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1868-oauth-authorize-token-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1868-oauth-authorize-token-unreadable-throw.test.ts
+@@ -0,0 +1,200 @@
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { AddressInfo } from 'node:net';
++import type { Server } from 'node:http';
++import express from 'express';
++
++// KS-1868: POST /api/oauth/authorize (the deny branch) and POST /api/oauth/token look the client app up first; when
++// that lookup REJECTS, each route's outer catch must still log its line and answer the constant 500 `server_error`
++// even if the rejection value cannot be read (a revoked Proxy throws on property reads; an Error whose `message`
++// getter throws, throws on `.message`). Today such a value makes the catch itself throw inside an async Express 4
++// handler: no response is sent (the request hangs) and Node sees an UNHANDLED REJECTION. The cells count unhandled
++// rejections themselves and give the client a short timeout, so a hang shows as a failed assertion. Harness: the
++// ks781 oauth route test (real router; collaborators mocked). The app lookup stand-in rejects with a plain function,
++// not a vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy before the code under
++// test saw it. No code is minted and no session is created on either path.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logged: [] as unknown[][],
++  unhandled: 0,
++  minted: 0,
++}));
++
++const capture = vi.hoisted(() => ({
++  debug: () => undefined,
++  info: () => undefined,
++  warn: () => undefined,
++  error: (...args: unknown[]) => {
++    h.logged.push(args);
++  },
++  log: () => undefined,
++}));
++vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
++
++vi.mock('../services/accountLockout', () => ({
++  isLockedOut: vi.fn(async () => false),
++  recordFailure: vi.fn(async () => 1),
++  recordSuccess: vi.fn(async () => undefined),
++}));
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => {
++    h.minted += 1;
++    return { id: 'sess-1' };
++  }),
++  getRedisClient: vi.fn(() => null),
++}));
++vi.mock('../services/password', () => ({ verifyPassword: vi.fn(async () => false) }));
++vi.mock('../services/oauth', () => ({
++  createAuthorizationCode: vi.fn(async () => {
++    h.minted += 1;
++    return 'MINTED_1868_CODE';
++  }),
++  createApp: vi.fn(), getAppById: vi.fn(), listApps: vi.fn(), updateApp: vi.fn(), rotateSecret: vi.fn(),
++  exchangeCode: vi.fn(), verifyClientSecret: vi.fn(),
++  getAppByClientId: (_clientId: string) => Promise.reject(h.toThrow),
++  validateScopes: vi.fn((requested: string[]) => requested ?? []),
++  parseScopeString: vi.fn(() => []), AVAILABLE_SCOPES: {},
++}));
++vi.mock('../repositories/userRepo', () => ({
++  getUserByEmail: vi.fn(async () => null),
++  getUserByIdPreAuth: vi.fn(async () => null),
++  updateUser: vi.fn(async () => null),
++  updateUserOrThrow: vi.fn(async () => null),
++  consumeBackupCode: vi.fn(async () => ({ consumed: false })),
++  reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++  getPlatformAdmin: vi.fn(async () => null),
++}));
++vi.mock('../services/jwt', () => ({
++  generateTokenPair: vi.fn(() => ({ accessToken: 'MINTED_1868_ACCESS', refreshToken: 'r', expiresIn: 900 })),
++  verifyRefreshToken: vi.fn(() => ({})),
++}));
++vi.mock('../services/refreshDenylist', () => ({ isRefreshJtiDenylisted: vi.fn(async () => false) }));
++vi.mock('../middleware/authenticate', () => ({ authenticate: () => (_r: unknown, _s: unknown, n: () => void) => n() }));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++
++const SAVED_LISTENERS = process.listeners('unhandledRejection');
++const onUnhandled = () => {
++  h.unhandled += 1;
++};
++
++let server: Server;
++let baseUrl = '';
++beforeAll(async () => {
++  process.removeAllListeners('unhandledRejection');
++  process.on('unhandledRejection', onUnhandled);
++  const { oauthRouter } = await import('../routes/oauth');
++  const app = express();
++  app.use(express.json());
++  app.use('/api/oauth', oauthRouter);
++  server = app.listen(0, '127.0.0.1');
++  await new Promise<void>((resolve) => server.once('listening', () => resolve()));
++  baseUrl = 'http://127.0.0.1:' + String((server.address() as AddressInfo).port);
++});
++afterAll(async () => {
++  server.closeAllConnections();
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++  process.removeListener('unhandledRejection', onUnhandled);
++  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
++});
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logged.length = 0;
++  h.unhandled = 0;
++  h.minted = 0;
++});
++
++const AUTHORIZE_LINES = () => h.logged.filter((c) => c[0] === 'OAuth authorize POST error');
++const TOKEN_LINES = () => h.logged.filter((c) => c[0] === 'OAuth token error');
++
++async function post(path: string, body: Record<string, unknown>): Promise<{ status: number; code: string | undefined; message: string | undefined; minted: number } | null> {
++  try {
++    const res = await fetch(baseUrl + path, {
++      method: 'POST',
++      headers: { 'Content-Type': 'application/json' },
++      body: JSON.stringify(body),
++      redirect: 'manual',
++      signal: AbortSignal.timeout(1500),
++    });
++    const text = await res.text();
++    let code: string | undefined;
++    let message: string | undefined;
++    try {
++      const parsed = JSON.parse(text);
++      code = parsed?.error?.code;
++      message = parsed?.error?.message;
++    } catch {
++      code = undefined;
++      message = undefined;
++    }
++    return { status: res.status, code, message, minted: h.minted };
++  } catch {
++    return null;
++  }
++}
++
++const authorizeDeny = () => post('/api/oauth/authorize', { action: 'deny', client_id: 'sec_ks1868', redirect_uri: 'https://app.test/cb' });
++const tokenExchange = () => post('/api/oauth/token', { grant_type: 'authorization_code', code: 'c-1868', client_id: 'sec_ks1868', redirect_uri: 'https://app.test/cb' });
++const SERVER_ERROR = { status: 500, code: 'INTERNAL_ERROR', message: 'server_error', minted: 0 };
++
++const getterThrows = () =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the oauth authorize and token catches read the rejection value safely', () => {
++  it('control ks1868 C1 authorize: an ordinary Error still logs its message and the route answers 500 server_error', async () => {
++    h.toThrow = new Error('app lookup down');
++    expect(await authorizeDeny()).toEqual(SERVER_ERROR);
++    expect(h.unhandled).toBe(0);
++    expect(AUTHORIZE_LINES()).toHaveLength(1);
++    expect(AUTHORIZE_LINES()[0][1]).toEqual({ error: 'app lookup down' });
++  });
++
++  it('control ks1868 C2 token: an ordinary Error still logs its message and the route answers 500 server_error', async () => {
++    h.toThrow = new Error('app lookup down');
++    expect(await tokenExchange()).toEqual(SERVER_ERROR);
++    expect(h.unhandled).toBe(0);
++    expect(TOKEN_LINES()).toHaveLength(1);
++    expect(TOKEN_LINES()[0][1]).toEqual({ error: 'app lookup down' });
++  });
++
++  it('RED ks1868 R1 authorize: a revoked Proxy rejection logs a constant reason and the route answers 500 server_error', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    expect(await authorizeDeny()).toEqual(SERVER_ERROR);
++    expect(h.unhandled).toBe(0);
++    expect(AUTHORIZE_LINES()).toHaveLength(1);
++    expect(AUTHORIZE_LINES()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 authorize: an Error whose message getter throws logs a constant reason and the route answers 500 server_error', async () => {
++    h.toThrow = getterThrows();
++    expect(await authorizeDeny()).toEqual(SERVER_ERROR);
++    expect(h.unhandled).toBe(0);
++    expect(AUTHORIZE_LINES()).toHaveLength(1);
++    expect(AUTHORIZE_LINES()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R3 token: a revoked Proxy rejection logs a constant reason and the route answers 500 server_error', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    expect(await tokenExchange()).toEqual(SERVER_ERROR);
++    expect(h.unhandled).toBe(0);
++    expect(TOKEN_LINES()).toHaveLength(1);
++    expect(TOKEN_LINES()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R4 token: an Error whose message getter throws logs a constant reason and the route answers 500 server_error', async () => {
++    h.toThrow = getterThrows();
++    expect(await tokenExchange()).toEqual(SERVER_ERROR);
++    expect(h.unhandled).toBe(0);
++    expect(TOKEN_LINES()).toHaveLength(1);
++    expect(TOKEN_LINES()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});

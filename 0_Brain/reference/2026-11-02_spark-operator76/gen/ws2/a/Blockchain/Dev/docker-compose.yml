@@ -1,0 +1,2387 @@
+# =============================================================================
+# SECUURA DEVELOPMENT ENVIRONMENT
+# =============================================================================
+# This docker-compose file sets up the complete Secuura development environment
+# including all microservices, databases, and local Cardano devnet.
+#
+# IMPORTANT: Default passwords are for LOCAL DEVELOPMENT ONLY.
+# For production/staging, set ALL passwords via a .env file or secrets manager:
+#   POSTGRES_PASSWORD, REDIS_PASSWORD, JWT_SECRET
+#
+# Usage:
+#   docker-compose up -d              # Start all services
+#   docker-compose up -d postgres redis  # Start only infrastructure
+#   docker-compose logs -f originate  # Follow logs for a service
+#   docker-compose down               # Stop all services
+#
+# =============================================================================
+
+# =============================================================================
+# STACK OWNERSHIP LABELS (KS-666)
+# =============================================================================
+# Merged into EVERY service below, so a running stack carries its owner, branch,
+# commit and start time on every container rather than on one marker alone.
+#
+# A YAML anchor cannot cross an `include:` boundary, so this block is declared in
+# each compose file that defines services — duplicated deliberately, not by
+# oversight.
+#
+# The `:-` defaults must NOT become `:?required`: required-variable syntax makes
+# every plain `docker compose config`/`ps` fail for anyone who has not exported
+# these, including both CI workflows.
+# KS-667 / s86-s87 trap: an image cannot say which commit it was built from. Tonight a
+# gateway image had to be identified by build TIME plus a content probe because it
+# carried no revision label, and the deploy-row base SHA in the KS-742 record had to be
+# inferred from an rsync manifest. `org.opencontainers.image.revision` makes that a fact
+# instead of an inference, permanently, for every future rollback image.
+#
+# Reuses STACK_COMMIT rather than introducing a second variable, so the image label and
+# the container label below can never disagree about which commit is running.
+x-image-labels: &image_labels
+  org.opencontainers.image.revision: "${STACK_COMMIT:-unknown}"
+  org.opencontainers.image.source: "https://github.com/Secuura/Distributed_Secuura"
+
+x-stack-labels: &stack_labels
+  com.secuura.stack.owner: "${STACK_OWNER:-unknown}"
+  com.secuura.stack.branch: "${STACK_BRANCH:-unknown}"
+  com.secuura.stack.commit: "${STACK_COMMIT:-unknown}"
+  # ISO 8601 UTC — KS-201 requires every timestamp be region-independent.
+  com.secuura.stack.started_at: "${STACK_STARTED_AT:-unknown}"
+
+services:
+  # ===========================================================================
+  # STACK OWNERSHIP MARKER (KS-666)
+  # ===========================================================================
+  # WHY: the VM hosts one shared, mutable stack. Before KS-666 nothing recorded
+  # who was using it, so the routine `down -v` + `git checkout develop` recovery
+  # path destroyed other people's checkouts, volumes and uncommitted work
+  # silently and reported success. This container is the ownership record that
+  # `scripts/stack_guard.sh` reads before any destructive operation.
+  #
+  # WHY A CONTAINER RATHER THAN A STATE FILE: a label dies with the stack, so it
+  # cannot outlive a crash or a manual teardown and go stale. A lease file can,
+  # and a stale lease is worse than none — it trains people to ignore it.
+  #
+  # WHY A MARKER *AS WELL AS* LABELS ON EVERY SERVICE: every service carries the
+  # `x-stack-labels` anchor (see the top of this file), so ownership is readable
+  # from any container. The marker adds one container that exists for no other
+  # reason, so ownership survives the moments when the rest of the stack does not
+  # — mid-build, mid-teardown, or when services are stopped individually. Reading
+  # ownership off a service that happens to be down would otherwise report "no
+  # stack running" while the stack is plainly up, which is the false all-clear
+  # this whole mechanism exists to avoid.
+  #
+  # The anchor is declared in BOTH compose files because a YAML anchor cannot
+  # cross an `include:` boundary — duplicated deliberately, not by oversight.
+  stack-marker:
+    image: busybox:1.37
+    container_name: ${STACK_PREFIX:-secuura}-stack-marker
+    restart: unless-stopped
+    user: "65534:65534"
+    # BusyBox's `sleep` takes integer seconds only — `sleep infinity` is a GNU
+    # coreutils extension and exits non-zero here, which under `restart:
+    # unless-stopped` would crash-loop the marker and intermittently blind the
+    # guard. Loop instead.
+    command: ["sh", "-c", "while true; do sleep 3600; done"]
+    labels:
+      <<: *stack_labels
+      com.secuura.stack.owner: "${STACK_OWNER:-unknown}"
+      com.secuura.stack.branch: "${STACK_BRANCH:-unknown}"
+      com.secuura.stack.commit: "${STACK_COMMIT:-unknown}"
+      # ISO 8601 UTC — KS-201 requires every timestamp be region-independent.
+      com.secuura.stack.started_at: "${STACK_STARTED_AT:-unknown}"
+    environment:
+      TZ: UTC
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 60s
+      timeout: 3s
+      retries: 2
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # INFRASTRUCTURE SERVICES
+  # ===========================================================================
+
+  postgres:
+    labels:
+      <<: *stack_labels
+    image: postgres:15-alpine
+    container_name: ${STACK_PREFIX:-secuura}-postgres
+    restart: unless-stopped
+    # LOCAL-DEV: raise the server connection ceiling well above default (100) so
+    # heavy local load/soak tests (e.g. cert-issuance concurrency, KS-207) never
+    # hit `53300 too_many_connections`. Local-only — dev/demo run on Azure, where
+    # KS-207 fronts a bounded Postgres with pgbouncer instead. Backstops the
+    # pgbouncer `max_db_connections = 0` (unlimited) in docker/pgbouncer.ini.
+    command: ["postgres", "-c", "max_connections=1000"]
+    environment:
+      TZ: UTC
+      # KS-165: every `${VAR:-default}` in this file is a LOCAL-DEV-ONLY
+      # fallback. This compose file is never used to deploy dev/demo — those run
+      # on Azure Container Apps with secrets injected from Key Vault (see
+      # deployment/azure/deploy.sh). So these defaults cannot reach a deployed
+      # environment, and the literals are throwaway local values, NOT real
+      # secrets (verified: the APP_DB_PASSWORD default below does not match the
+      # live dev secret). Production is additionally guarded by
+      # enforceProductionConfig (@secuura/shared), which FATALs on dev-default
+      # JWT/DB values. The defaults are intentionally kept so `docker compose up`
+      # works out-of-the-box — do NOT switch to `:?required` (it would break the
+      # team's existing local stacks, and a fresh volume bakes the DB password
+      # at first init).
+      POSTGRES_USER: ${POSTGRES_USER:-secuura}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secuura_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-secuura}
+      # Security settings
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+      # KS-72: forward APP_DB_* into the postgres container so the
+      # docker-entrypoint-initdb.d/01-create-app-role.sh script can provision
+      # the secuura_app role with the same password every service's
+      # DATABASE_URL is built from. Without this, a fresh volume hits the
+      # KS-8 guardrail ("FATAL: APP_DB_PASSWORD is not set"), the role is
+      # never created, subsequent init scripts are skipped, and every service
+      # auth-fails through pgbouncer.
+      APP_DB_USER: ${APP_DB_USER:-secuura_app}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}
+    # KS-614: bound to LOOPBACK, not 0.0.0.0. The old form published to every
+    # interface, and on the demo VM `ss -lntp` showed docker-proxy on
+    # 0.0.0.0:6432 with ufw inactive and an empty DOCKER-USER chain — i.e. no
+    # host firewall at all, leaving one Azure NSG rule as the sole control.
+    # Docker's published ports bypass ufw, so "we'll add a host firewall later"
+    # does not fix this; binding is what fixes it. Every in-repo consumer uses
+    # localhost, so loopback preserves local dev unchanged.
+    # (The previous "remove in production" comment was never a control.)
+    ports:
+      - "127.0.0.1:${POSTGRES_EXTERNAL_PORT:-6432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d
+      - ./docker/init-platform:/docker-entrypoint-initdb.d/platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-secuura}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # DATABASE MIGRATIONS (runs once before other services start)
+  # ===========================================================================
+
+  migrations:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/originate/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-migrations
+    command: ["sh", "scripts/run-migrations.sh"]
+    restart: "no"
+    environment:
+      - TZ=UTC
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-secuura}:${POSTGRES_PASSWORD:-secuura_dev_password}@postgres:5432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${POSTGRES_USER:-secuura}:${POSTGRES_PASSWORD:-secuura_dev_password}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  redis:
+    labels:
+      <<: *stack_labels
+    # KS-368: 7-alpine was security-only upstream; 8-alpine is the active line (AGPL option OK'd by Kam 2026-07-03)
+    image: redis:8-alpine
+    container_name: ${STACK_PREFIX:-secuura}-redis
+    restart: unless-stopped
+    # KS-614: bound to LOOPBACK, not 0.0.0.0 — see the postgres stanza above.
+    ports:
+      - "127.0.0.1:${REDIS_EXTERNAL_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    # Enable password authentication and persistence
+    command: >
+      redis-server 
+      --appendonly yes 
+      --requirepass ${REDIS_PASSWORD:-secuura_redis_dev}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-secuura_redis_dev}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # PGBOUNCER - Connection Pooling
+  # ===========================================================================
+  # Improves database performance by pooling connections.
+  # Enabled by default for all environments (transaction pooling mode).
+  # All services connect via pgbouncer:6432 instead of postgres:5432.
+  
+  pgbouncer:
+    labels:
+      <<: *stack_labels
+    build:
+      context: ./docker/pgbouncer
+      dockerfile: Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-pgbouncer
+    restart: unless-stopped
+    # KS-614: bound to LOOPBACK, not 0.0.0.0 — see the postgres stanza above.
+    ports:
+      - "127.0.0.1:${PGBOUNCER_PORT:-6433}:6432"
+    environment:
+      TZ: UTC
+      POSTGRES_USER: ${POSTGRES_USER:-secuura}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secuura_dev_password}
+      PGBOUNCER_ADMIN_PASSWORD: ${PGBOUNCER_ADMIN_PASSWORD:-${POSTGRES_PASSWORD:-secuura_dev_password}}
+      PGBOUNCER_STATS_PASSWORD: ${PGBOUNCER_STATS_PASSWORD:-${POSTGRES_PASSWORD:-secuura_dev_password}}
+      # T2-E Phase 2: PgBouncer needs to know about the secuura_app role so
+      # it can authenticate service connections that come through with the
+      # non-superuser role (which is the role the RLS policies actually
+      # apply to). Without this, services would auth-fail through the pooler.
+      APP_DB_USER: ${APP_DB_USER:-secuura_app}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}
+      # KS-207: pgbouncer config is env-driven (entrypoint.sh renders pgbouncer.ini).
+      # LOCAL keeps the unlimited ceilings explicitly here; Azure passes bounded
+      # values sized to the server's max_connections via bicep. Same image both ways.
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-secuura}
+      PGBOUNCER_MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-10000}
+      PGBOUNCER_DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE:-1000}
+      PGBOUNCER_RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-100}
+      PGBOUNCER_MAX_DB_CONNECTIONS: ${PGBOUNCER_MAX_DB_CONNECTIONS:-0}
+      PGBOUNCER_MAX_USER_CONNECTIONS: ${PGBOUNCER_MAX_USER_CONNECTIONS:-0}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # CARDANO LOCAL DEVNET (Yaci DevKit)
+  # ===========================================================================
+
+  # ===========================================================================
+  # CARDANO LOCAL DEVNET
+  # ===========================================================================
+  # Option 1: the `cardano-devnet` service below (yaci-cli, auto-starts):
+  #   docker compose --profile devnet up -d
+  # Option 2: Use Cardano Preview Testnet (requires sync time)
+  #   Connect to: https://preview.koios.rest
+  # ===========================================================================
+  
+  # Mock Cardano API for development (returns mock responses)
+  # Use this for quick local development without full devnet
+  cardano-mock:
+    labels:
+      <<: *stack_labels
+    image: nginx:alpine
+    container_name: ${STACK_PREFIX:-secuura}-cardano-mock
+    restart: unless-stopped
+    ports:
+      # KS-666: parameterised so a non-primary stack slot can offset its published
+      # ports and run alongside the primary one. Default is the original value, so
+      # slot 1 (the primary tree) binds exactly the ports it always did.
+      - "${CARDANO_MOCK_PORT:-6090}:80"
+    volumes:
+      - ./docker/cardano-mock:/usr/share/nginx/html:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    profiles:
+      - mock
+    networks:
+      - secuura-network
+
+  # ==========================================================================
+  # REAL CARDANO DEVNET (Yaci DevKit)
+  # ==========================================================================
+  # Enable with: docker-compose --profile devnet up -d
+  # This provides a full local Cardano network for realistic testing
+  # ==========================================================================
+  cardano-devnet:
+    labels:
+      <<: *stack_labels
+    # KS-372: the old `bloxbean/yaci-devkit:0.10.0` tag never existed on Docker Hub
+    # (the profile was unpullable). Devkit 0.10.x ships the devnet as bloxbean/yaci-cli;
+    # `create-node -o --start` boots it non-interactively (Spring Shell one-shot), and
+    # the trailing `tail -f /dev/null` keeps PID 1 alive while the node processes run.
+    # Port layout changed upstream: store API (/api/v1/...) is 8080, tx submit is 8090.
+    image: bloxbean/yaci-cli:0.10.6
+    container_name: ${STACK_PREFIX:-secuura}-cardano-devnet
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c", "java -jar /app/yaci-cli.jar create-node -o --start && tail -f /dev/null"]
+    ports:
+      # KS-666: parameterised for per-slot port offsetting (see cardano-mock above).
+      # Defaults preserve the original ports for the primary slot.
+      - "${CARDANO_N2N_PORT:-6091}:3001"        # Cardano node N2N
+      - "${YACI_STORE_PORT:-6092}:8080"         # Yaci Store API (/api/v1/... — epochs, utxos)
+      - "${CARDANO_ADMIN_PORT:-6093}:10000"     # Cluster admin API
+      - "${CARDANO_SUBMIT_PORT:-6094}:8090"     # Tx submit API (in-network consumers use cardano-devnet:8090)
+    environment:
+      - TZ=UTC
+      - node=node1
+      - yaci_cli_mode=native
+      - yaci_store_mode=native
+      - yaci_store_enabled=true
+      - ogmios_enabled=false
+      - kupo_enabled=false
+    volumes:
+      - cardano_data:/clusters
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/epochs/latest"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          # KS-372: raised from 0.5 CPU / 512M — cardano-node + yaci-store need
+          # real headroom; the old limits predate anyone actually running this.
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    profiles:
+      - devnet
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # CORE SERVICES (Phase 1 - Active)
+  # ===========================================================================
+
+  api-gateway:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-api-gateway
+    restart: unless-stopped
+    env_file:
+      - path: .env.local
+        required: false
+    # No external ports — accessed via nginx-gateway at /api/
+    environment:
+      - TZ=UTC
+      - NODE_ENV=${NODE_ENV:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=8080
+      # Swagger UI gate — default FALSE (BACKLOG 2026-07-17 / #555 decision):
+      # this same compose file runs the internet-facing demo VM, where the old
+      # `:-true` default published the full Swagger UI + raw spec and defeated
+      # the F-04 opt-in guard. Local dev opts in via ENABLE_PUBLIC_API_DOCS=true
+      # in Blockchain/Dev/.env (see env.example).
+      - ENABLE_PUBLIC_API_DOCS=${ENABLE_PUBLIC_API_DOCS:-false}
+      # KS-546 (Kam, 2026-07-31): the gateway SURVIVES unhandled promise
+      # rejections (log + continue) instead of Node's fail-fast exit — KS-529
+      # proved one unguarded async path here is a platform-wide outage. The
+      # gateway is the ONLY service with this; everything else keeps 'exit',
+      # and uncaughtException still exits everywhere.
+      - UNHANDLED_REJECTION_MODE=survive
+      # KS-1041 Step 2: proves to originate that a request came through this
+      # gateway before originate honours any identity/tenant/role header.
+      # Declared HERE and on `originate` only — deliberately NOT in
+      # `.env.local`, which api-gateway, auth, m365-integration and kyc all
+      # load, and which would therefore hand the secret to two services with
+      # no business holding it (measured: a .env.local value reads identically
+      # in all four containers). Compose passes through nothing a service does
+      # not declare, so this keeps the blast radius at 2 containers of 34.
+      # Empty default => header not sent => originate treats calls as
+      # unvouched and drops trust headers. Unconfigured loses privilege.
+      - GATEWAY_VOUCH_SECRET=${GATEWAY_VOUCH_SECRET:-}
+      # Core Services
+      - ORIGINATE_SERVICE_URL=http://originate:4000
+      - PRISM_SERVICE_URL=http://prism:4001
+      - WALLET_SERVICE_URL=http://wallet-connector:4002
+      - AUTH_SERVICE_URL=http://auth:4003
+      - TIMESTAMPING_SERVICE_URL=http://timestamping:4004
+      - ANCHORING_SERVICE_URL=http://anchoring:4005
+      - SECURITY_SERVICE_URL=http://security:4008
+      - M365_SERVICE_URL=http://m365-integration:4013
+      # Integration Services
+      - ANALYTICS_SERVICE_URL=http://analytics:4010
+      - KYC_SERVICE_URL=http://kyc:4011
+      - VC_ISSUER_SERVICE_URL=http://vc-issuer:4014
+      - STAKING_SERVICE_URL=http://staking:4015
+      - REFERRAL_SERVICE_URL=http://referral:4016
+      - GOVERNANCE_SERVICE_URL=http://governance:4017
+      - NFT_SERVICE_URL=http://nft-certificate:4018
+      - BILLING_SERVICE_URL=http://billing:4019
+      - TRANSFER_SERVICE_URL=http://transfer:4020
+      # Infrastructure - secured Redis connection
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      # KS-215: CORE_MIGRATIONS need DDL (CREATE TABLE/ROLE), but the runtime
+      # DATABASE_URL above is the least-priv secuura_app role (KS-92/KS-109), so
+      # startup-migrations fails "permission denied for schema public" and the
+      # CORE tables it owns (charge_events, platform_document_registry, ...) are
+      # never created on local — which 500s cert-issue. Give the gateway a
+      # superuser migration connection (the POSTGRES_USER owner, direct to
+      # postgres, NOT pgbouncer) so migrations run as owner. startup-migrations
+      # uses MIGRATION_DATABASE_URL || DATABASE_URL. Mirrors the Azure
+      # secuuraadmin MIGRATION_DATABASE_URL wired in KS-109.
+      - MIGRATION_DATABASE_URL=postgresql://${POSTGRES_USER:-secuura}:${POSTGRES_PASSWORD:-secuura_dev_password}@postgres:5432/${POSTGRES_DB:-secuura}
+      - MIGRATION_PLATFORM_DATABASE_URL=postgresql://${POSTGRES_USER:-secuura}:${POSTGRES_PASSWORD:-secuura_dev_password}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-2000}  # KS-206. KS-1374: env.example (local + CI) is 10000, .env.example (production-compose) is 2000; this fallback is what a stack with a silent .env inherits, including the demo VM.
+      # KS-191: dev/CI-only override to disable the per-IP login throttle so the
+      # schemathesis sweep's repeated single-IP logins don't read as 429 auth
+      # storms. Code-guarded to a non-prod NODE_ENV; defaults off so local dev keeps it.
+      - LOCAL_LOGIN_LIMITER_DISABLED=${LOCAL_LOGIN_LIMITER_DISABLED:-false}
+      # CORS — comma-separated list of allowed origins (production: set to your domains)
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:6100,http://localhost:6101,http://localhost:6102,http://localhost:6103,http://localhost:${GATEWAY_PORT:-6882},http://localhost:${WEBSITE_PORT:-6881}}
+      # CSRF Protection
+      - CSRF_SECRET=${CSRF_SECRET:-}
+      - CSRF_COOKIE_SECURE=${CSRF_COOKIE_SECURE:-false}
+      # Multi-tenancy
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - TOKENISATION_URL=http://tokenisation:4021
+      - TENANT_PROVISIONING_URL=http://tenant-provisioning:4022
+      - MCP_SERVER_URL=http://mcp-server:4023
+      # KS-466: the default tenant is keyed by UUID everywhere that matters
+      # (users.tenant_id, migration-039 backfill, userRepo/originate defaults,
+      # and the gateway's own index.ts default). The former ':-default' slug
+      # meant a tenantless admin's x-tenant-id was 'default', which fail-closed
+      # RLS could never match (UUID rows) — INSERTs 500'd, tenant-scoped reads
+      # returned nothing. Default to the canonical default-tenant UUID.
+      - DEFAULT_TENANT_ID=${DEFAULT_TENANT_ID:-a0000000-0000-4000-8000-000000000001}
+      # Test tokens (dev only — disabled by default, set ENABLE_TEST_TOKENS=true to enable)
+      - ENABLE_TEST_TOKENS=${ENABLE_TEST_TOKENS:-false}
+      # Mock endpoints (admin, verification, wallet mocks — disable in production)
+      - ENABLE_MOCK_ENDPOINTS=${ENABLE_MOCK_ENDPOINTS:-false}
+      # Social OAuth + IdP credentials loaded via env_file (.env.local)
+    # Resource limits for production stability
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    # Bind-mount the host's generated OpenAPI YAML over the image copy so
+    # `npm run generate-openapi` on the host triggers the gateway's dev-only
+    # fs.watch hot-reload without rebuilding the image. Read-only — the
+    # gateway never writes to it. Production deploys (Container Apps) don't
+    # use this compose file, so no prod surface added.
+    volumes:
+      - ./docs/openapi/secuura-api.yaml:/app/docs/openapi/secuura-api.yaml:ro
+    networks:
+      - secuura-network
+
+  originate:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/originate/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-originate
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6000:4000"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4000
+      # KS-294: V8's auto heap ceiling in this 512 MB container is only ~259 MB,
+      # so the process hit a JS-heap OOM under the load ramp with ~250 MB of the
+      # container budget unused. Size the old space to the container (leaving
+      # headroom for non-heap RSS) so GC uses the available memory before aborting.
+      # Pairs with the in-flight shedder in src/middleware/overloadProtection.ts.
+      - NODE_OPTIONS=--max-old-space-size=384
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - CARDANO_NODE_URL=http://cardano-devnet:8090
+      - CARDANO_NETWORK=${CARDANO_NETWORK:-devnet}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # KS-289: originate resolves recipient emails (certify → /api/users/stub,
+      # transfer-custody → /api/users/lookup) and signs (→ /api/issuer-certs/sign)
+      # by calling auth-service DIRECTLY, not through the public gateway — the
+      # gateway CSRF-blocks service POSTs and the old localhost:6882 fallback was
+      # unreachable inside this container (→ 502 "Recipient lookup unavailable").
+      - AUTH_SERVICE_URL=http://auth:4003
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      # KS-1041 Step 2: the gateway's proof that a request came through the
+      # edge. Without a match this service drops identity/tenant/role headers
+      # instead of honouring them — see the gateway-provenance middleware in
+      # src/index.ts for why stripping and not refusing. Declared on this
+      # service and api-gateway ONLY; deliberately not in `.env.local`, whose
+      # measured reach is four services. Empty default FAILS CLOSED: this
+      # service drops the gateway-set identity headers AND logs a warning
+      # naming the consequence at boot, so the loss is loud, not silent.
+      - GATEWAY_VOUCH_SECRET=${GATEWAY_VOUCH_SECRET:-}
+      # KS-1717: the HMAC key this service signs its own hops to anchoring with,
+      # so anchoring honours `x-emitter-internal` (skip the flat-anchor
+      # provenance row) only on a request originate made. Declared on this
+      # service and anchoring ONLY; not in `.env.local`. Empty default FAILS
+      # CLOSED: the marker goes unsigned, anchoring never honours it, and K's
+      # own hops each write a second action_provenance row until the secret is
+      # set on BOTH services.
+      - EMITTER_SIGNING_SECRET=${EMITTER_SIGNING_SECRET:-}
+      # KS-487 B-3 (#686 review): the demo-seed route's two gate flags, passed
+      # through so the documented `.env` opt-in actually reaches this container.
+      # originate declares no `env_file`, and compose passes through nothing a
+      # service does not declare, so before this a value in `.env` never
+      # arrived and opting in really meant editing THIS file. Both default to
+      # EMPTY, so the gate stays default-deny and behaviour is unchanged unless
+      # a developer opts in deliberately.
+      - ENABLE_DEMO_SEED=${ENABLE_DEMO_SEED:-}
+      # F7: this file used to disagree with itself — `:-}` here and `:-true`
+      # for auth below. One file must not hold two positions on a security
+      # flag, and KS-949 F5 resolves the disagreement toward DENY rather than
+      # toward the permissive value it was first resolved to. A flag that
+      # decides whether default seed passwords are allowed defaults to NOT
+      # allowing them; an operator who wants them says so explicitly.
+      - ALLOW_DEFAULT_SEED_PASSWORDS=${ALLOW_DEFAULT_SEED_PASSWORDS:-}
+      # SMTP email notifications — KS-488 C-5: no default points at a real mail
+      # provider. SMTP_ENABLED is the only switch and defaults off; an enabled
+      # transport with no SMTP_HOST/SMTP_FROM refuses to send rather than
+      # falling back to somebody else's server.
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+      - SMTP_ENABLED=${SMTP_ENABLED:-false}
+      # KS-488 C-5: optional recipient allow-list (comma/space separated domains
+      # or full addresses). UNSET = send to any recipient, i.e. the behaviour
+      # before the guard existed. Set it to bound who can receive Secuura mail.
+      - EMAIL_RECIPIENT_ALLOWLIST=${EMAIL_RECIPIENT_ALLOWLIST:-}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4000/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    networks:
+      - secuura-network
+
+  wallet-connector:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/wallet-connector/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-wallet-connector
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6002:4002"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4002
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - CARDANO_NODE_URL=http://cardano-devnet:8090
+      - CARDANO_NETWORK=${CARDANO_NETWORK:-devnet}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4002/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  auth:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/auth/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-auth
+    restart: unless-stopped
+    env_file:
+      - path: .env.local
+        required: false
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6003:4003"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4003
+      # KS-254: argon2 verifies run on the libuv threadpool (default 4) — raise
+      # it so concurrent logins hash in parallel instead of queueing four-wide.
+      # 8 × 64 MiB argon2 buffers ≈ 512 MiB peak, inside the 1G limit below.
+      - UV_THREADPOOL_SIZE=${AUTH_UV_THREADPOOL_SIZE:-8}
+      # KS-254: pool acquisition fails fast (KS-253 maps it to 503). Defaults
+      # in code: AUTH_DB_POOL_MAX=10, AUTH_DB_CONNECT_TIMEOUT_MS=2000.
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # KS-167/184/302: RS256-only (auth is the sole signer; HS256 removed). auth
+      # needs the keypair (JWT_PRIVATE_KEY base64 PEM + JWT_KEY_ID); every verifier
+      # needs JWT_PUBLIC_KEY (base64 PEM). bootstrap-env.sh generates these into .env.
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:-}
+      - JWT_KEY_ID=${JWT_KEY_ID:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-1d}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:${GATEWAY_PORT:-6882}}
+      # KS-480: connector token exchange validates sk_ keys against security
+      - SECURITY_SERVICE_URL=http://security:4008
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - DEMO_MODE=${DEMO_MODE:-true}
+      - ENABLE_TEST_TOKENS=${ENABLE_TEST_TOKENS:-false}
+      # Pen-test F-05 gate for the 11 documented per-tenant demo accounts
+      # (Oxford / BUPA / Apex / Greenfield / Delta; SEEDED_USERS_AND_ROLES.md §11).
+      # Defaults to DENY, like originate's line above: KS-949 F5 (8a519e63a)
+      # changed this value from `:-true` to `:-` and left the old "defaults to
+      # true" comment behind, which KS-955 found still telling readers the
+      # seed was on in local dev. To seed them, set
+      # ALLOW_DEFAULT_SEED_PASSWORDS=true in Blockchain/Dev/.env (not
+      # .env.local: this `environment:` entry overrides `env_file`) BEFORE the
+      # stack is built — auth seeds once at boot.
+      - ALLOW_DEFAULT_SEED_PASSWORDS=${ALLOW_DEFAULT_SEED_PASSWORDS:-}
+      # KS-971: forward the platform SYSTEM_ADMIN's seed password.
+      # (Carried on KS-682 too, byte-identical, so whichever PR lands first fixes fresh local
+      # stacks — measured 2026-09-10 on slot 1: without it the seeder logs "no password
+      # supplied" for admin@secuura.com, the bootstrap admin cannot grant roles, and the
+      # Playwright suite's fallback account 401s. The other lands as a no-op.)
+      #
+      # KS-964 removed the published fallback for admin@secuura.com — the seeder's
+      # `requiredSeedPw('ADMIN_USER_PASSWORD')` returns null when this is unset, and the account is
+      # then written with an unusable password hash and `status = 'suspended'`. That is correct, and
+      # it is why `admin@secuura.com / admin123` now returns 401 (KS-972).
+      #
+      # But this variable was forwarded to the auth service NOWHERE, so setting it in
+      # `Blockchain/Dev/.env` — the obvious place, and where `.env.example:133` templates it — could
+      # never reach the container: compose reads `.env` only to substitute `${...}` into variables
+      # listed here, and this one was not listed. The only route in was `.env.local`, the service's
+      # `env_file`. So the documented knob silently did nothing wherever it was most likely to be
+      # set, and the account stayed unusable however carefully it was configured.
+      #
+      # The `:-` default means an unset host variable arrives in the container as an EMPTY STRING,
+      # not as absent. That is safe here, and only because the seeder reads it as
+      # `process.env.ADMIN_USER_PASSWORD || null`: '' is falsy, so it takes the null branch, skips
+      # the account and leaves it suspended. Fail-closed either way — but if that read is ever
+      # changed to `?? null`, an empty string would become a seeded blank password on the
+      # cross-tenant SYSTEM_ADMIN. Verified with `docker compose config`: unset -> "", set -> value.
+      #
+      # NOTE: the sibling DEMO_*_PASSWORD / *_EMAIL overrides the seeder also reads are still not
+      # forwarded. They are unaffected by this defect because they carry published fallbacks and are
+      # gated on ALLOW_DEFAULT_SEED_PASSWORDS, so they work without an override — but a value set in
+      # `.env` expecting it to apply will not. Forwarding those is a separate change.
+      - ADMIN_USER_PASSWORD=${ADMIN_USER_PASSWORD:-}
+      # Email / SMTP — KS-488 C-5. This block previously defaulted SMTP_ENABLED
+      # to TRUE with a real provider as the host, so every deployment of this
+      # file ran the auth service with the transport ON, pointed at a third
+      # party, without anyone setting anything. Defaults off and empty now; see
+      # the note on the originate service above.
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+      - SMTP_ENABLED=${SMTP_ENABLED:-false}
+      # KS-488 C-5 — see the note on the originate service above.
+      - EMAIL_RECIPIENT_ALLOWLIST=${EMAIL_RECIPIENT_ALLOWLIST:-}
+      # Social OAuth, Entra ID, Auth0 credentials loaded via env_file (.env.local)
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4003/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          # KS-254: memory 512M -> 1G to match demo (services.bicep 1Gi) and give
+          # UV_THREADPOOL_SIZE=8 argon2 verifies (8 × 64 MiB) real headroom.
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  m365-integration:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/m365-integration/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-m365-integration
+    restart: unless-stopped
+    env_file:
+      - path: .env.local
+        required: false
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6013:4013"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4013
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      # Microsoft Graph API / Entra ID — credentials loaded from .env.local
+      - SHAREPOINT_SITE_URL=${SHAREPOINT_SITE_URL:-}
+      - ENTRA_REDIRECT_URI=${ENTRA_REDIRECT_URI:-http://localhost:6882/api/m365/callback}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4013/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  security:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/security/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-security
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6008:4008"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4008
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4008/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # W3C VERIFIABLE CREDENTIALS SERVICE (Phase 4 - Sprint 17)
+  # ===========================================================================
+
+  vc-issuer:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/vc-issuer/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-vc-issuer
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6014:4014"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4014
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      - VC_BASE_URL=${VC_BASE_URL:-https://secuura.io}
+      - STATUS_LIST_URL=${STATUS_LIST_URL:-https://secuura.io/credentials/status}
+      - ISSUER_DID=${ISSUER_DID:-did:prism:secuura_default_issuer}
+      - ISSUER_NAME=${ISSUER_NAME:-Secuura Platform}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4014/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # STAKING SERVICE (Phase 5 - Sprint 19)
+  # ===========================================================================
+
+  staking:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/staking/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-staking
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6015:4015"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4015
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4015/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # REFERRAL SERVICE (Phase 5 - Sprint 21)
+  # ===========================================================================
+
+  referral:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/referral/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-referral
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6016:4016"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4016
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      - REFERRER_REWARD=${REFERRER_REWARD:-50000000}
+      - REFERRED_REWARD=${REFERRED_REWARD:-25000000}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4016/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # SUPPORTING SERVICES (Phase 1 - Active but minimal)
+  # ===========================================================================
+
+  prism:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/prism/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-prism
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6001:4001"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4001
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      # Phase 1: Basic DID support only
+      - PRISM_MODE=basic
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  timestamping:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/timestamping/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-timestamping
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6004:4004"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4004
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      # RFC-3161 TSA configuration (optional — an EMPTY TSA_URL means the code default,
+      # D-Trust's eIDAS TSA; it does NOT mean "no provider". Measured on both boxes 2026-10-05.)
+      - TSA_URL=${TSA_URL:-}
+      - TSA_AUTH_KEY=${TSA_AUTH_KEY:-}
+      # KS-1404: the verifier refuses EVERY real RFC 3161 token with "no trust anchor configured"
+      # unless this names a readable PEM. The default points at the root shipped in the image, so
+      # the anchor is effective with no .env edit on any box; a box .env can still override it.
+      # ONE provider's root, per Kam's card secuura-ks1404-tsa-trust-and-library-1004 = a.
+      - TSA_TRUST_ANCHORS_PEM=${TSA_TRUST_ANCHORS_PEM:-/app/config/tsa-trust-anchors-dtrust.crt}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4004/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  anchoring:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/anchoring/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-anchoring
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6005:4005"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4005
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - CARDANO_NODE_URL=http://cardano-devnet:8090
+      - CARDANO_NETWORK=${CARDANO_NETWORK:-devnet}
+      - BLOCKFROST_API_KEY=${BLOCKFROST_API_KEY:-}
+      - PLATFORM_WALLET_MNEMONIC=${PLATFORM_WALLET_MNEMONIC:-}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      # Anchoring-specific: when BLOCKFROST_API_KEY + PLATFORM_WALLET_MNEMONIC
+      # are set in .env, default to live Cardano mode here. Other services
+      # may keep DEMO_MODE=true (originate's seeded demo docs etc.) without
+      # affecting whether anchors actually go on-chain.
+      - DEMO_MODE=${ANCHORING_DEMO_MODE:-false}
+      # KS-1717: verifies originate's signature on its `x-emitter-internal` hop
+      # (src/emitterGuard.ts). Declared here and on originate ONLY. Empty
+      # default FAILS CLOSED: no marker is honoured, and the boot log says so.
+      - EMITTER_SIGNING_SECRET=${EMITTER_SIGNING_SECRET:-}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4005/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # PHASE 2 SERVICES
+  # ===========================================================================
+
+  transfer:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/transfer/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-transfer
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6020:4020"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4020
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4020/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  kyc:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/kyc/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-kyc
+    restart: unless-stopped
+    env_file:
+      - path: .env.local
+        required: false
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6011:4011"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4011
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      # KS-426: the AUDIT B-13 KYC limiter (default 10/user/hr) exists to protect the
+      # real identity provider's billed quota. Local + the demo VM call a KYC stub (no
+      # ENTRA_*/KYC_PROVIDER configured here), so the quota concern doesn't apply and the
+      # limiter otherwise 429s the Schemathesis/integration suites. Lift it well clear of
+      # any sweep here; PRODUCTION keeps the 10 default (set via Azure bicep, not compose).
+      - KYC_RATE_LIMIT_PER_HOUR=${KYC_RATE_LIMIT_PER_HOUR:-100000}
+      # KYC_PROVIDER, ENTRA_*, KYC_CALLBACK_* loaded via env_file (.env.local)
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4011/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  analytics:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/analytics/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-analytics
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6010:4010"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4010
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4010/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # BILLING SERVICE (Phase 3 - Sprint 15)
+  # ===========================================================================
+
+  billing:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/billing/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-billing
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6019:4019"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4019
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      - STRIPE_MODE=${STRIPE_MODE:-test}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4019/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # GOVERNANCE SERVICE (Phase 4 - Sprint 14)
+  # ===========================================================================
+
+  governance:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/governance/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-governance
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6017:4017"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4017
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      - CARDANO_NETWORK=${CARDANO_NETWORK:-devnet}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4017/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # NFT CERTIFICATE SERVICE (Phase 4 - Sprint 17)
+  # ===========================================================================
+
+  nft-certificate:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/nft-certificate/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-nft-certificate
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6018:4018"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4018
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      # Cardano blockchain
+      - CARDANO_NETWORK=${CARDANO_NETWORK:-preprod}
+      - BLOCKFROST_API_KEY=${BLOCKFROST_API_KEY:-}
+      - PLATFORM_WALLET_MNEMONIC=${PLATFORM_WALLET_MNEMONIC:-}
+      # IPFS storage
+      - IPFS_PROVIDER=${IPFS_PROVIDER:-mock}
+      - IPFS_GATEWAY=${IPFS_GATEWAY:-https://gateway.pinata.cloud/ipfs}
+      - PINATA_API_KEY=${PINATA_API_KEY:-}
+      - PINATA_SECRET_KEY=${PINATA_SECRET_KEY:-}
+      - INFURA_PROJECT_ID=${INFURA_PROJECT_ID:-}
+      - INFURA_PROJECT_SECRET=${INFURA_PROJECT_SECRET:-}
+      - WEB3_STORAGE_TOKEN=${WEB3_STORAGE_TOKEN:-}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4018/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # MONITORING — moved to the standalone observability/ stack (KS-200)
+  # ===========================================================================
+  # The Grafana + Prometheus that used to live here (profile: monitoring, ports
+  # 6300/6301) were superseded by the shared, platform-wide observability stack
+  # at the repo root. Start it standalone: `cd observability && npm run start`.
+  # All dashboards, datasources, scrape config, and alert rules live there now.
+
+  # ===========================================================================
+  # PHASE 2+ SERVICES (Placeholder - Disabled by default)
+  # ===========================================================================
+
+  guardian:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/guardian/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-guardian
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6006:4006"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4006
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      - SERVICE_ENABLED=false
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    profiles:
+      - phase2
+    networks:
+      - secuura-network
+
+  queue:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/queue/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-queue
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6007:4007"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4007
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      # PII encryption (F-19) — keys sourced from .env so all services
+      # using @secuura/shared encryptField/decryptField/lookupHash can
+      # bootstrap the keyring at startup. Required by auth (email lookup
+      # hash for getUserByEmail), kyc, originate, midnight; harmless
+      # everywhere else. (BACKLOG #1.)
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PII_LOOKUP_HMAC_KEY=${PII_LOOKUP_HMAC_KEY:-}
+      - SERVICE_ENABLED=false
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    profiles:
+      - phase2
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # FRONTEND APPLICATIONS
+  # ===========================================================================
+
+  issuer-frontend:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: frontend/issuer/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-issuer-frontend
+    restart: unless-stopped
+    # No external ports — accessed via nginx-gateway on port 6882
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:6882/api
+      - VITE_CARDANO_NETWORK=devnet
+    depends_on:
+      - api-gateway
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
+    networks:
+      - secuura-network
+
+  verifier-frontend:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: frontend/verifier/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-verifier-frontend
+    restart: unless-stopped
+    # No external ports — accessed via nginx-gateway at /verify/
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:6882/api
+    depends_on:
+      - api-gateway
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
+    networks:
+      - secuura-network
+
+  admin-frontend:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: frontend/admin/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-admin-frontend
+    restart: unless-stopped
+    # No external ports — accessed via nginx-gateway at /admin/
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:6882/api
+      - VITE_ORIGINATE_URL=http://localhost:6882/originate
+      - VITE_ANALYTICS_URL=http://localhost:6882/analytics
+    depends_on:
+      - api-gateway
+      - analytics
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
+    networks:
+      - secuura-network
+
+  status-frontend:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: frontend/status/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-status-frontend
+    restart: unless-stopped
+    # No external ports — accessed via nginx-gateway at /status/
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
+    networks:
+      - secuura-network
+
+  website-frontend:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: frontend/website/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-website-frontend
+    restart: unless-stopped
+    # Direct access on port 6881 + accessible via nginx-gateway at /website/
+    ports:
+      - "${WEBSITE_PORT:-6881}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # TOKENISATION SERVICE (Multi-tenancy - PII protection)
+  # ===========================================================================
+
+  tokenisation:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/tokenisation/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-tokenisation
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6021:4021"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - PORT=4021
+      # KS-175 + RS256 cutover (KS-302): the tokenisation block was missing vars every other
+      # service declares — DATABASE_URL + the JWT verification key (shared envSchema →
+      # authenticate()) and PII_ENCRYPTION_KEY (the KEK that wraps tenant keys / PII).
+      # Without JWT_PUBLIC_KEY the RS256 verifier fails closed and 401s every authed request
+      # (before the route's platform-admin role check) — JWT_SECRET was dropped in the cutover
+      # but JWT_PUBLIC_KEY was never added here (demo's bicep has it; only local was missed).
+      # Without the KEK, key-wrapping fell back to an invalid dev placeholder ("Invalid key
+      # length", KS-288). The gateway's internal PII tokenise/detokenise calls hit the same
+      # failures. Match the other services' runtime wiring (least-priv secuura_app via
+      # pgbouncer + shared secrets + the RS256 public key).
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      - PII_ENCRYPTION_KEY=${PII_ENCRYPTION_KEY:-}
+      - PII_ENCRYPTION_KEY_VERSION=${PII_ENCRYPTION_KEY_VERSION:-1}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4021/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # TENANT PROVISIONING SERVICE (Multi-tenancy - DB lifecycle)
+  # ===========================================================================
+
+  tenant-provisioning:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/tenant-provisioning/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-tenant-provisioning
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6022:4022"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - PORT=4022
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - POSTGRES_USER=${POSTGRES_USER:-secuura}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secuura_dev_password}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DIRECT_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/${POSTGRES_DB:-secuura}
+      - TOKENISATION_URL=http://tokenisation:4021
+      # KS-336: mint the per-tenant Platform-S metering key via the security service
+      # (same value the gateway uses — security listens on 4008 in the local stack).
+      - SECURITY_SERVICE_URL=http://security:4008
+      - INIT_SCRIPTS_DIR=/app/init-scripts
+      # BACKLOG H13: tenant-provisioning's authenticate() middleware (from
+      # @secuura/shared) calls getJwtConfig() lazily on the first authed
+      # request. The shared loadConfig() requires JWT_SECRET + DATABASE_URL
+      # both present, even if the service only needs JWT_SECRET. Without
+      # them the proxied DELETE / PATCH / GET-by-id requests bounce with
+      # "Invalid environment configuration" and the gateway surfaces a
+      # misleading "service unavailable" 502. Same values as auth.
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+    volumes:
+      - ./docker/init:/app/init-scripts:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      tokenisation:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4022/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # MCP SERVER - AI agent integration (HTTP mode for package generation)
+  # ===========================================================================
+
+  mcp-server:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/mcp-server/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-mcp-server
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6023:4023"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - MCP_HTTP_PORT=4023
+      - SECUURA_API_URL=http://api-gateway:8080
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4023/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # DEMO SERVICE (Demo Infrastructure - Persona switching & state)
+  # ===========================================================================
+
+  demo-service:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: services/demo-service/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-demo-service
+    restart: unless-stopped
+    # Pen-test F-04: backend ports no longer published on host. Use
+    # `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d`
+    # to re-enable for local debugging.  Was: - "6030:4030"
+    environment:
+      - TZ=UTC
+      - NODE_ENV=development
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=4030
+      - AUTH_HOST=auth
+      - AUTH_PORT=4003
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-secuura_redis_dev}@redis:6379
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:${GATEWAY_PORT:-6882},http://localhost:${WEBSITE_PORT:-6881}}
+      - DEMO_MODE=${DEMO_MODE:-true}
+      # KS-641: demo-service refuses to start without BOTH of these. It mints
+      # real Platform Admin tokens without a caller credential, so it is an
+      # explicit opt-in, never a default, and never production.
+      # KS-641 (#737 review): NO default value, deliberately. `:-true` and a
+      # 26-char literal made all three branches of assertDemoServiceEnabled()
+      # unreachable on every deploy of this file — the guard worked precisely
+      # where we do not deploy. The demo VM runs this exact compose stack
+      # (DEPLOYMENT-ARCHITECTURE.md:32) and this block has no `profiles:` key,
+      # so `docker compose up` starts it. Same rule as #686/KS-487 B-3: refuses
+      # everywhere by default, and a developer opts in via .env. Populate with
+      # scripts/bootstrap-env.sh, which now generates the key.
+      - DEMO_SERVICE_ENABLED=${DEMO_SERVICE_ENABLED:-}
+      - DEMO_SERVICE_KEY=${DEMO_SERVICE_KEY:-}
+      - DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@pgbouncer:6432/${POSTGRES_DB:-secuura}
+      - PLATFORM_DATABASE_URL=postgresql://${APP_DB_USER:-secuura_app}:${APP_DB_PASSWORD:-YuBzECVdrAU9nUHhQDWMg2yMMSlgrxJP}@postgres:5432/secuura_platform
+      - MULTI_TENANCY_ENABLED=${MULTI_TENANCY_ENABLED:-false}
+    volumes:
+      - ./docker/seed:/seed:ro
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4030/demo-api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+  # ===========================================================================
+  # DEMO OVERLAY — BUILD SURFACE ONLY (KS-654)
+  # ===========================================================================
+  # This service exists so `docker compose build` compiles the overlay. It is
+  # not wired to anything at runtime and is not a dependency of any service.
+  #
+  # Why it is needed: frontend/demo-overlay had no lockfile and no Dockerfile,
+  # so nothing built it and no failure could surface. Its build was broken for
+  # 33 days (2026-07-15 -> 2026-08-17, KS-461's lucide icon name on an MUI
+  # import path) and was found only by accident. It is a root workspace member,
+  # so a broken build also breaks `npm run build --workspaces`. The image build
+  # is the red surface that was missing.
+  #
+  # Why it publishes nowhere: NOTHING SERVES THE OVERLAY. Verified 2026-08-17 —
+  # the gateway's `location /demo-overlay/` and sub_filter injection were
+  # removed in nginx-demo.conf:363-379 ("no functional value"), the URL 404s,
+  # and no .conf references the mount path. The bind-mount that used to be on
+  # nginx-gateway below was the misleading artefact: it made this look live.
+  # Revive-vs-retire is an open product decision on KS-654 — until it is taken,
+  # this builds and reports, and touches nothing.
+  demo-overlay:
+    labels:
+      <<: *stack_labels
+    build:
+      context: .
+      dockerfile: frontend/demo-overlay/Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-demo-overlay
+    restart: "no"
+    networks:
+      - secuura-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+
+  # ===========================================================================
+  # NGINX GATEWAY - Unified local entry point (port 6882)
+  # ===========================================================================
+
+  nginx-gateway:
+    labels:
+      <<: *stack_labels
+    build:
+      context: ./docker/nginx-gateway
+      dockerfile: Dockerfile
+      labels:
+        <<: *image_labels
+    container_name: ${STACK_PREFIX:-secuura}-nginx-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-6882}:80"
+    volumes:
+      - ./docker/nginx-gateway/nginx-demo.conf:/etc/nginx/conf.d/default.conf:ro
+      # KS-654: the `./frontend/demo-overlay/dist:/usr/share/nginx/demo-overlay`
+      # bind-mount was REMOVED here on 2026-08-17. Nothing read it — the
+      # `location /demo-overlay/` and sub_filter blocks were deleted from
+      # nginx-demo.conf (see :363-379), /demo-overlay/demo-overlay.js returns
+      # 404, and no directive references the mount path. The mount was the
+      # misleading artefact: it made an unserved, untracked, 33-day-broken
+      # bundle look live. Do not re-add it without also restoring the location
+      # block — that is the open revive-vs-retire decision on KS-654.
+    depends_on:
+      - issuer-frontend
+      - verifier-frontend
+      - admin-frontend
+      - status-frontend
+      - website-frontend
+      - api-gateway
+      - demo-service
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.125'
+          memory: 64M
+    networks:
+      - secuura-network
+
+  # =============================================================================
+  # LOCAL LLM - OLLAMA (Optional - start with: docker-compose --profile local-llm up -d ollama)
+  # Uses your pre-downloaded models from the host machine.
+  # On macOS Apple Silicon, prefer running Ollama natively (see scripts/start-ollama.sh)
+  # for GPU acceleration. Use this service for Linux / CI environments.
+  # =============================================================================
+
+  ollama:
+    labels:
+      <<: *stack_labels
+    # KS-366: pinned (was floating :latest — no reproducible pin); bump deliberately.
+    image: ollama/ollama:0.31.1
+    container_name: ${STACK_PREFIX:-secuura}-ollama
+    profiles:
+      - local-llm
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ${OLLAMA_MODELS_PATH:-~/.ollama}:/root/.ollama
+    environment:
+      - TZ=UTC
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-24h}
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-1}
+      - OLLAMA_MAX_LOADED_MODELS=${OLLAMA_MAX_LOADED_MODELS:-1}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - secuura-network
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+# All services share a single bridge network for local development.
+# Production deployments should use isolated internal/public networks.
+# =============================================================================
+
+networks:
+  secuura-network:
+    driver: bridge
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+
+volumes:
+  postgres_data:
+  redis_data:
+  cardano_data:
+  ollama_data:

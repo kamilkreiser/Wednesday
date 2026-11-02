@@ -1,0 +1,150 @@
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -1823,7 +1823,13 @@
+     ));
+     return res.json({ success: true, data: { userId, tenantId, organizationIds: r.rows.map((x) => x.o) } });
+   } catch (error) {
+-    if (error instanceof z.ZodError) return badRequestFromZod(res, error);
++    let isZod: boolean;
++    try {
++      isZod = error instanceof z.ZodError;
++    } catch {
++      return next(new Error('unreadable thrown value'));
++    }
++    if (isZod) return badRequestFromZod(res, error as z.ZodError);
+     return next(error);
+   }
+ });
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1868-security-admin-scopes-get-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1868-security-admin-scopes-get-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1868-security-admin-scopes-get-catch-unreadable-throw.test.ts
+@@ -0,0 +1,127 @@
++import { describe, it, expect, vi, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
++import crypto from 'crypto';
++import type { Server } from 'http';
++import type { AddressInfo } from 'net';
++
++process.env.SECURITY_DISABLE_BOOT = '1';
++
++// KS-1868: the catch of the admin-scopes READ route (GET /api/keys/admin-scopes/:userId) must still answer when
++// the scope query rejects with a value that cannot be read (a revoked Proxy throws on `instanceof`). Today the
++// catch itself throws in an async handler, so no answer is sent. After the fix such a value is handed to the
++// error handler as an ordinary Error, which is exactly what an ordinary non-infrastructure Error gets
++// (500 INTERNAL_ERROR). The route's own 400 for a query the schema refuses (a ZodError) is pinned by C3, the
++// cell the PUT route's suite added after gate 94 (G94-F2).
++// The db stand-in rejects with a plain function, not a vi.fn(): a spy inspects what it rejects with and could
++// itself fail on a revoked Proxy before the code under test saw it. The route runs on a real loopback listener
++// with a real RS256 token, as in ks888.
++const ctl = vi.hoisted(() => ({
++  boom: undefined as unknown,
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  initDb: async () => true,
++  query: async (statement: string) => {
++    if (/^\s*SELECT\s+1\s+FROM\s+users/i.test(String(statement))) return { rows: [{ one: 1 }], rowCount: 1 };
++    if (/admin_organisation_scopes/i.test(String(statement)) && ctl.boom !== undefined) return Promise.reject(ctl.boom);
++    return { rows: [], rowCount: 0 };
++  },
++  transaction: async (run: (client: unknown) => Promise<unknown>) =>
++    run({
++      query: () => Promise.resolve({ rows: [], rowCount: 0 }),
++    }),
++}));
++
++const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
++const SIGNING_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
++const VERIFY_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
++
++const USER_ID = '18680000-0000-4000-8000-000000000074';
++const TENANT_ID = 'c0000000-0000-4000-8000-000000001868';
++
++let listener: Server;
++let root = '';
++
++function platformToken(): string {
++  const now = Math.floor(Date.now() / 1000);
++  const head = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
++  const claims = Buffer.from(JSON.stringify({ sub: 'ks1868-test', iat: now, exp: now + 300, role: 'super_admin' })).toString('base64url');
++  const sig = crypto.sign('RSA-SHA256', Buffer.from(head + '.' + claims), SIGNING_PEM).toString('base64url');
++  return head + '.' + claims + '.' + sig;
++}
++
++async function getScopes(tenantId: string = TENANT_ID): Promise<{ status: number; text: string; body: any }> {
++  try {
++    const res = await fetch(root + '/api/keys/admin-scopes/' + USER_ID + '?tenantId=' + encodeURIComponent(tenantId), {
++      method: 'GET',
++      headers: { Authorization: 'Bearer ' + platformToken() },
++      signal: AbortSignal.timeout(3000),
++    });
++    const text = await res.text();
++    let body: any;
++    try {
++      body = JSON.parse(text);
++    } catch {
++      body = undefined;
++    }
++    return { status: res.status, text, body };
++  } catch {
++    return { status: 0, text: '', body: undefined };
++  }
++}
++
++const summary = (r: { status: number; body: any }) => ({ status: r.status, code: r.body?.error?.code });
++
++beforeAll(async () => {
++  process.env.JWT_PUBLIC_KEY = Buffer.from(VERIFY_PEM, 'utf8').toString('base64');
++  delete process.env.JWT_JWKS_URL;
++  delete process.env.AUTH_SERVICE_URL;
++  const app = (await import('../index')).default;
++  await new Promise<void>((resolve) => {
++    listener = app.listen(0, '127.0.0.1', resolve);
++  });
++  root = 'http://127.0.0.1:' + (listener.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  await new Promise<void>((resolve) => listener.close(() => resolve()));
++});
++
++beforeEach(() => {
++  ctl.boom = undefined;
++  vi.spyOn(console, 'log').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  vi.restoreAllMocks();
++});
++
++describe('KS-1868 the catch of the admin-scopes read route reads the thrown value safely', () => {
++  it('control ks1868 C1 an ordinary Error from the scope query answers 500 INTERNAL_ERROR', async () => {
++    ctl.boom = new Error('db down');
++    const r = await getScopes();
++    expect(summary(r)).toEqual({ status: 500, code: 'INTERNAL_ERROR' });
++  });
++
++  it('control ks1868 C2 a read whose query lands answers 200 with the organisation ids', async () => {
++    const r = await getScopes();
++    expect({ status: r.status, success: r.body?.success }).toEqual({ status: 200, success: true });
++    expect(r.body?.data?.organizationIds).toEqual([]);
++  });
++
++  it('control ks1868 C3 a query the schema refuses (a ZodError) still answers 400 BAD_REQUEST with the validation body', async () => {
++    const r = await getScopes('not-a-uuid');
++    expect(summary(r)).toEqual({ status: 400, code: 'BAD_REQUEST' });
++    expect(r.body?.success).toBe(false);
++    expect(r.body?.error?.message).toBe('Validation failed');
++    expect(r.body?.error?.details).toEqual(expect.arrayContaining([expect.objectContaining({ path: ['tenantId'] })]));
++  });
++
++  it('RED ks1868 R1 a revoked Proxy from the scope query answers 500 INTERNAL_ERROR', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    ctl.boom = proxy;
++    const r = await getScopes();
++    expect(summary(r)).toEqual({ status: 500, code: 'INTERNAL_ERROR' });
++  });
++});
