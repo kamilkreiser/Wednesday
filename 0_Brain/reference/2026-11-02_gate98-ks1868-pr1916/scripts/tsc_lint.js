@@ -1,0 +1,24 @@
+const { spawnSync } = require('child_process'); const fs = require('fs');
+const G = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate98-ks1868-pr1916';
+const D = G + '/repo/Blockchain/Dev', A = D + '/services/api-gateway', B = D + '/node_modules/.bin';
+const T = A + '/src/__tests__/ks1868-admin-identity-route-catches-p1-unreadable-throw.test.ts', M = A + '/src/routes/admin.ts';
+const run = (cmd, args, cwd, log) => { const r = spawnSync(cmd, args, { cwd, encoding: 'utf8', maxBuffer: 1 << 28 }); fs.writeFileSync(G + '/logs/' + log, (r.stdout || '') + (r.stderr || '') + '\nrc=' + r.status + '\n'); console.log(log, 'rc', r.status); };
+run('node', ['scripts/typecheck-tests/check.cjs', 'services/api-gateway'], D, 'leg16_head.log');
+run(B + '/tsc', ['-p', 'tsconfig.test.json'], A, 'tsc_tests_head.log');
+run(B + '/eslint', ['src/routes/admin.ts', 'src/__tests__/ks1868-admin-identity-route-catches-p1-unreadable-throw.test.ts'], A, 'eslint_pr_files.log');
+fs.writeFileSync(A + '/src/zz_gate98_planted.ts', 'export function f(): number { const unused = 1; debugger; return 2; }\n');
+run(B + '/eslint', ['src/zz_gate98_planted.ts'], A, 'eslint_planted.log');
+fs.mkdirSync(G + '/logs/_quarantine', { recursive: true });
+fs.renameSync(A + '/src/zz_gate98_planted.ts', G + '/logs/_quarantine/zz_gate98_planted.ts');
+const orig = fs.readFileSync(T, 'utf8');
+fs.writeFileSync(T, orig + '\nconst GATE98_UNUSED = 1;\n');
+run(B + '/tsc', ['-p', 'tsconfig.test.json'], A, 'tsc_tests_planted.log');
+fs.writeFileSync(T, orig); console.log('test restored', fs.readFileSync(T, 'utf8') === orig);
+// base: product at base, new test moved away
+const head = fs.readFileSync(M, 'utf8');
+fs.writeFileSync(M, fs.readFileSync(G + '/logs/admin_base.ts', 'utf8')); fs.renameSync(T, G + '/logs/_quarantine/newtest.ts');
+run('node', ['scripts/typecheck-tests/check.cjs', 'services/api-gateway'], D, 'leg16_base.log');
+run(B + '/tsc', ['-p', 'tsconfig.test.json'], A, 'tsc_tests_base.log');
+run(B + '/eslint', ['src/routes/admin.ts'], A, 'eslint_base.log');
+fs.writeFileSync(M, head); fs.renameSync(G + '/logs/_quarantine/newtest.ts', T);
+console.log('restored', fs.readFileSync(M, 'utf8') === head, fs.readFileSync(T, 'utf8') === orig);
