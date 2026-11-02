@@ -11,8 +11,10 @@
 #   4. base              develop as `git -C <Secuura checkout> ls-remote origin refs/heads/develop` reads it (or
 #                        SPARK_TIP), fetched into the durable cache clone spark/cache/src (origin = the checkout's own
 #                        GitHub origin + its core.sshCommand, so the builders' own `ls-remote origin` agrees — the
-#                        09-29/10-01 stale-origin fault cannot recur); node_modules symlinked FROM the Secuura checkout
-#                        INTO the cache (never the reverse); refuses if Blockchain/Dev/node_modules is absent there.
+#                        09-29/10-01 stale-origin fault cannot recur); node_modules symlinked FROM the deps checkout
+#                        (spark/cache/deps, built by spark/build_deps.sh; 2026-11-03 — no longer the Secuura checkout)
+#                        INTO the cache (never the reverse), stale links re-pointed; DRIFT CHECK first: deps/LOCK_KEY
+#                        must equal the tip's lock key (spark/lock_key.sh) else rc 5 HARNESS "run spark/build_deps.sh".
 #   5. stale brief       the brief's files must be unchanged between its `Tip:` and the pinned base -> rc 2 (pin
 #                        allow_drift=1 to override)
 #   6. input             night/build_input.sh (code_patch) | tasks/code_patch2/build_input2.sh (code_patch2: the same
@@ -75,6 +77,10 @@ SUBDIR="Blockchain/Dev"
 # node_modules dirs NOT linked into the cache (IMPROVEMENTS 2026-10-01: billing's own lock modules make tsc FAIL rc 2;
 # the root farm alone is green). Space-separated, relative to Blockchain/Dev.
 NM_EXCLUDE="${SPARK_NM_EXCLUDE:-services/billing}"
+# 2026-11-03: node_modules now come from the Wednesday-owned deps checkout (spark/build_deps.sh), NOT the Secuura checkout
+# (PR 1953 zod 3->4 left the Secuura checkout stale and every round HARNESS-failed). $SECUURA stays the origin/ls-remote source.
+DEPS="${SPARK_DEPS_CHECKOUT:-$CACHE/deps}"
+LOCK_KEY_FILE="${SPARK_LOCK_KEY_FILE:-$DEPS/LOCK_KEY}"
 
 BDIR=""; DRY=0; CONTROL=0; PINS=()
 for a in "$@"; do
@@ -166,7 +172,7 @@ trap 'rm -f "$LOCK/pid" "$LOCK/what" "$LOCK/work"; rmdir "$LOCK" 2>/dev/null' EX
 
 # ------------------------------------------------------------------ 4. base: cache clone at develop
 [ -d "$SECUURA/.git" ] || finish 5 "HARNESS — Secuura checkout missing at $SECUURA"
-[ -d "$SECUURA/$SUBDIR/node_modules" ] || finish 5 "HARNESS — $SECUURA/$SUBDIR/node_modules is absent: prepare_clone links node_modules FROM the source, so A4-A7 would fail 'Preset ts-jest not found' (IMPROVEMENTS 2026-09-27 19:22). A Secuura seat must install first"
+[ -d "$DEPS/$SUBDIR/node_modules" ] || finish 5 "HARNESS — $DEPS/$SUBDIR/node_modules is absent: prepare_clone links node_modules FROM the source, so A4-A7 would fail 'Preset ts-jest not found' (IMPROVEMENTS 2026-09-27 19:22). Run spark/build_deps.sh"
 ORIGIN_URL="$(git -C "$SECUURA" remote get-url origin 2>&1)"
 case "$ORIGIN_URL" in
   git@*|ssh://*|https://*) ;;
@@ -203,19 +209,37 @@ git -C "$SRC" checkout -q --detach -f "$TIP" 2>&1 | sed 's/^/round: checkout: /'
 [ "$(git -C "$SRC" rev-parse HEAD)" = "$TIP" ] || finish 5 "HARNESS — cache checkout is not at $TIP"
 say "base: develop $TIP ($TIP_HOW)"
 
-# node_modules: symlink FROM the Secuura checkout INTO the cache (first-level dirs under Blockchain/Dev, minus NM_EXCLUDE)
+# 2026-11-03 drift check: the deps store must have been built from the SAME package.json/package-lock.json set as the tip
+# (lock key = sha256 of sorted path+blob of every package.json/package-lock.json under Blockchain/Dev; spark/lock_key.sh).
+# Never runs npm inside a round.
+TIP_KEY="$(bash "$HERE/lock_key.sh" "$SRC" "$TIP" 2>&1)" || finish 5 "HARNESS — could not compute the tip lock key: $TIP_KEY"
+DEPS_KEY="$(awk 'NR==1{print $1}' "$LOCK_KEY_FILE" 2>/dev/null)"
+if [ "$DEPS_KEY" != "$TIP_KEY" ]; then
+  finish 5 "HARNESS — deps store lock key ${DEPS_KEY:-none} != tip lock key $TIP_KEY: run spark/build_deps.sh"
+fi
+say "deps: lock key $TIP_KEY matches the tip ($(cat "$LOCK_KEY_FILE"))"
+
+# node_modules: symlink FROM the deps checkout INTO the cache (first-level dirs under Blockchain/Dev, minus NM_EXCLUDE)
 NM_N=0
 while IFS= read -r nm; do
   [ -z "$nm" ] && continue
-  rel="${nm#"$SECUURA/$SUBDIR/"}"; rel="${rel%/node_modules}"; [ "$rel" = "node_modules" ] && rel="."
+  rel="${nm#"$DEPS/$SUBDIR/"}"; rel="${rel%/node_modules}"; [ "$rel" = "node_modules" ] && rel="."
   skip=0; for x in $NM_EXCLUDE; do [ "$rel" = "$x" ] && skip=1; done
   [ "$skip" -eq 1 ] && continue
   if [ "$rel" = "." ]; then t="$SRC/$SUBDIR/node_modules"; else t="$SRC/$SUBDIR/$rel/node_modules"; fi
   [ -d "$(dirname "$t")" ] || continue          # the dir is not at this tip
-  if [ ! -e "$t" ] && [ ! -L "$t" ]; then ln -s "$nm" "$t"; fi
+  if [ ! -e "$t" ] && [ ! -L "$t" ]; then ln -s "$nm" "$t"
+  elif [ -L "$t" ] && [ "$(readlink "$t")" != "$nm" ]; then ln -sfn "$nm" "$t"   # re-point a stale link (symlinks only; a real dir is never touched)
+  fi
   ex="/${t#"$SRC/"}"; grep -qxF "$ex" "$SRC/.git/info/exclude" 2>/dev/null || echo "$ex" >> "$SRC/.git/info/exclude"
   NM_N=$((NM_N+1))
-done < <(find "$SECUURA/$SUBDIR" -mindepth 1 -maxdepth 3 -name node_modules -not -path '*/node_modules/*' 2> "$STATE/nm_find.err")
+done < <(find "$DEPS/$SUBDIR" -mindepth 1 -maxdepth 3 -name node_modules -not -path '*/node_modules/*' 2> "$STATE/nm_find.err")
+# 2026-11-03: sweep leftover node_modules SYMLINKS in the cache that point anywhere but the deps store (e.g. the old
+# links into the Secuura checkout for dirs the deps store does not have, or NM_EXCLUDE'd ones). Symlinks only.
+while IFS= read -r l; do
+  [ -L "$l" ] || continue
+  case "$(readlink "$l")" in "$DEPS/"*) ;; *) unlink "$l" && say "cache: removed stale node_modules link $l" ;; esac
+done < <(find "$SRC/$SUBDIR" -mindepth 1 -maxdepth 3 -name node_modules -not -path '*/node_modules/*' 2>> "$STATE/nm_find.err")
 [ -e "$SRC/$SUBDIR/node_modules" ] || finish 5 "HARNESS — cache has no $SUBDIR/node_modules after linking"
 DIRTY="$(git -C "$SRC" status --porcelain --untracked-files=no | wc -l | tr -d ' ')"
 [ "$DIRTY" = "0" ] || finish 5 "HARNESS — cache checkout has $DIRTY tracked modification(s); it must be pristine at $TIP"
