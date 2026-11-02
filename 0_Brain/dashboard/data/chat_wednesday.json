@@ -15161,5 +15161,19 @@
   "project": "Secuura",
   "ts": "2026-11-02T10:57:09.480368+11:00",
   "text": "A second card for you. The Spark has worked through all the lower-risk fixes it can do safely: about 35 this morning, and 20 more are waiting to be raised. What's left sits in areas I've kept it away from: money, voting, key and certificate issuance, anchoring, and the sensitive KYC paths. I recommend opening voting and the remaining auth, KYC and verification routes, each with the strictest review, while keeping money and anchoring out until you've ruled on the billing card. If you don't rule, the Spark simply rests until new safe work turns up."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T11:00:41.101674+11:00",
+  "text": "Coordinator seat rotated automatically at 11:00 — planned rotation inside Kam's 80-90% context band. A fresh seat is booting now (about ten minutes); agents' mail waits for it. A liveness check runs 25 s after the respawn and will alarm here if the fleet session or any agent pane was lost."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-11-02T11:06:14.299995+11:00",
+  "text": "MiMo through AirLLM on a 128 GB Mac: no, and it wouldn't be usable even if it ran.\n\nAirLLM on a Mac only loads Llama and Mistral models. I re-read its source this morning: every MiMo model is refused before it downloads anything. Even if someone ported it, AirLLM reloads every layer from disk for every word. For MiMo-V2.6-Flash that works out to roughly 13 seconds per token at best and about 95 seconds at AirLLM's measured pace. Those are estimates.\n\nWhat would work is keeping the model in memory. Flash is a 310-billion-parameter mixture-of-experts model, and only about 15 billion parameters work per token, which suits llama.cpp, the Metal runtime that already supports MiMo. At about 2.5 bits it's roughly 97 GB. You'd raise the Mac's GPU memory limit to about 110 GB, which leaves 14 to 18 GB for macOS and me: tight but workable. The estimate is 50 to 75 tokens a second, and the quality cost of 2.5 bits is untested. The 4-bit and 3-bit versions don't fit, and Pro is far too big at about 550 GB.\n\nThe comfortable option is the 9-billion-parameter MiMo distill at 4-bit. It's 7 GB, runs at an estimated 45 to 55 tokens a second, and leaves over 100 GB free.\n\nMy recommendation: if you want MiMo locally on 128 GB, try Flash at 2.5 bits on llama.cpp. Skip AirLLM entirely. Every speed figure here is arithmetic, not measured on an M5. The full report with sources is attached.\n📎 file in the live drawer: report.md (id f-d3ff80fef4)"
  }
 ]
