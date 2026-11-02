@@ -1,0 +1,25 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o81_p2_security_audit_event_save_catches_coerce_message
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -176,7 +176,8 @@
+   } catch (err: any) {
+     let reason: string;
+     try {
+-      reason = err?.message;
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+@@ -198,7 +199,8 @@
+   } catch (err: any) {
+     let reason: string;
+     try {
+-      reason = err?.message;
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+

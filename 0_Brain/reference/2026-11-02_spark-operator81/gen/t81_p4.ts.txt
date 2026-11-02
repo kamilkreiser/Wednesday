@@ -1,0 +1,162 @@
+/**
+ * KS-1868 (QA gate 110, G110-F1): three identity catches in routes/admin.ts (GET /api/admin/identity/users, GET
+ * /api/admin/identity/organizations and PATCH /api/admin/identity/users/:id/level) read the thrown value inside a guard
+ * (`reason = err instanceof Error ? err.message : String(err)`) and pass `reason` to `log(...)` outside it. The guard covers only
+ * the READ. When the message getter SUCCEEDS and returns a hostile NON-string (a revoked Proxy, an object whose `toString`
+ * throws, a null-prototype object, a Symbol) the value reaches the real winston formatter as it is, which throws on some of them.
+ * The read is now wrapped in `String(...)` inside the same guard, so a value that cannot be turned into text lands in the existing
+ * catch and is logged as the constant 'unreadable thrown value' (a Symbol as its text). The routes answer the same constant 500
+ * an ordinary Error gets.
+ *
+ * The handler under test is the LAST function of the route, taken from the route table and called directly with a fake request and
+ * response. The database stand-in is a plain function that rejects with the thrown value for one statement (a vi.fn() could inspect a
+ * revoked Proxy before the code under test does). Logged values are compared by their type name so a revoked Proxy never reaches a matcher.
+ */
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { Router } from 'express';
+import { createAdminRoutes, type AdminRouteDeps } from '../routes/admin';
+
+type Logged = { level: string; message: string; meta: unknown };
+type ResSeed = { statusCode: number; body: unknown; status(c: number): ResSeed; json(b: unknown): ResSeed };
+
+const ks = {
+  thrown: undefined as { value: unknown } | undefined,
+  rejectOn: '' as string,
+  logs: [] as Logged[],
+  queries: [] as string[],
+};
+
+function mkRes(): ResSeed {
+  const r: ResSeed = {
+    statusCode: 200,
+    body: undefined,
+    status(c) {
+      r.statusCode = c;
+      return r;
+    },
+    json(b) {
+      r.body = b;
+      return r;
+    },
+  };
+  return r;
+}
+
+function buildRouter(): Router {
+  return createAdminRoutes({
+    authenticateToken: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+    query: (text: string) => {
+      ks.queries.push(text);
+      if (ks.thrown && ks.rejectOn !== '' && text.includes(ks.rejectOn)) return Promise.reject(ks.thrown.value);
+      if (text.includes('COUNT(*)')) return Promise.resolve({ rows: [{ cnt: '1' }], rowCount: 1 });
+      return Promise.resolve({ rows: [], rowCount: 1 });
+    },
+    isDbAvailable: () => true,
+    redisService: {},
+    services: {},
+    log: (level: string, message: string, meta?: unknown) => {
+      ks.logs.push({ level, message, meta });
+    },
+  } as unknown as AdminRouteDeps);
+}
+
+function handlerFor(rt: Router, method: string, path: string): (req: unknown, res: unknown) => Promise<void> {
+  const layers = (rt as unknown as { stack: Array<{ route?: { path: string; methods: Record<string, boolean>; stack: Array<{ handle: (req: unknown, res: unknown) => Promise<void> }> } }> }).stack;
+  const layer = layers.find((l) => l.route && l.route.path === path && l.route.methods[method]);
+  if (!layer || !layer.route) throw new Error('route not found: ' + method + ' ' + path);
+  const stack = layer.route.stack;
+  return stack[stack.length - 1].handle;
+}
+
+/** Run the route handler. A handler that rejects leaves the response untouched at 200 with no body. */
+async function invoke(method: string, path: string, params: Record<string, string> = {}, body: unknown = {}): Promise<ResSeed> {
+  const res = mkRes();
+  const req = {
+    params,
+    body,
+    query: {},
+    headers: {},
+    user: { userId: 'admin-72', role: 'SYSTEM_ADMIN', email: 'admin-72@test.io', verificationLevel: 'HIGH' },
+  };
+  await handlerFor(buildRouter(), method, path)(req, res).catch(() => undefined);
+  return res;
+}
+
+function revoked(): unknown {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+// An Error whose `message` getter succeeds but returns the given value.
+function withMessage(value: () => unknown): unknown {
+  return Object.create(Error.prototype, {
+    message: {
+      get() {
+        return value();
+      },
+    },
+  });
+}
+
+
+const logOf = (text: string) => ks.logs.filter((l) => l.level === 'error' && l.message === text).map((l) => (l.meta as { error?: unknown }).error).map((e) => (typeof e === 'string' ? e : typeof e));
+const ROUTES: Array<[string, string, string, Record<string, string>, unknown, string, string, string]> = [
+  ['users', 'get', '/api/admin/identity/users', {}, {}, 'FROM users u', '[Identity] Failed to fetch users', 'Failed to fetch identity users'],
+  ['organizations', 'get', '/api/admin/identity/organizations', {}, {}, "COALESCE(metadata->>'trust_level'", '[Identity] Failed to fetch organizations', 'Failed to fetch identity organizations'],
+  ['level', 'patch', '/api/admin/identity/users/:id/level', { id: '00000000-0000-4000-8000-000000001868' }, { verificationLevel: 'HIGH' }, 'UPDATE users SET verification_level', '[Identity] Failed to update level', 'Failed to update verification level'],
+];
+const hostile: Array<[string, () => unknown, string]> = [
+  ['a message that is a revoked Proxy', () => withMessage(revoked), 'unreadable thrown value'],
+  ['a message whose toString throws', () => withMessage(() => ({ toString() { throw new Error('toString boom'); } })), 'unreadable thrown value'],
+  ['a null-prototype message', () => withMessage(() => Object.create(null)), 'unreadable thrown value'],
+  ['a Symbol message', () => withMessage(() => Symbol('ks1868')), 'Symbol(ks1868)'],
+];
+
+beforeEach(() => {
+  ks.thrown = undefined;
+  ks.rejectOn = '';
+  ks.logs.length = 0;
+  ks.queries.length = 0;
+});
+
+describe('KS-1868 the identity route catches in admin.ts coerce a non-string message safely', () => {
+  it.each(ROUTES)('control ks1868 C1 %s: an ordinary Error is logged with its message and the route answers the constant 500', async (_n, method, path, params, body, sql, logText, answer) => {
+    ks.thrown = { value: new Error('db boom 10.0.0.7') };
+    ks.rejectOn = sql;
+    const res = await invoke(method, path, params, body);
+    expect(logOf(logText)).toEqual(['db boom 10.0.0.7']);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ success: false, error: { code: 'INTERNAL_ERROR', message: answer } });
+  });
+
+  it.each(ROUTES)('control ks1868 C2 %s: a thrown plain string is logged as itself and the route answers the constant 500', async (_n, method, path, params, body, sql, logText, answer) => {
+    ks.thrown = { value: 'plain string down' };
+    ks.rejectOn = sql;
+    const res = await invoke(method, path, params, body);
+    expect(logOf(logText)).toEqual(['plain string down']);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ success: false, error: { code: 'INTERNAL_ERROR', message: answer } });
+  });
+
+  type Cell = [number, string, string, string, Record<string, string>, unknown, string, string, string, string, () => unknown, string];
+  const cells: Cell[] = [];
+  let n = 0;
+  for (const r of ROUTES) {
+    for (const h of hostile) {
+      n += 1;
+      cells.push([n, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], h[0], h[1], h[2]]);
+    }
+  }
+  it.each(cells)(
+    'RED ks1868 R%s %s: %s is logged as its safe text and the route answers the constant 500',
+    async (_i, _n, method, path, params, body, sql, logText, answer, _what, make, text) => {
+      ks.thrown = { value: make() };
+      ks.rejectOn = sql;
+      const res = await invoke(method, path, params, body);
+      expect(logOf(logText)).toEqual([text]);
+      expect(res.statusCode).toBe(500);
+      expect(res.body).toEqual({ success: false, error: { code: 'INTERNAL_ERROR', message: answer } });
+    },
+  );
+});

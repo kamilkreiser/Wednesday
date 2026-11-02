@@ -1,0 +1,25 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o81_p1_security_db_probe_hook_catches_coerce_message
+diff --git a/Blockchain/Dev/services/security/src/db.ts b/Blockchain/Dev/services/security/src/db.ts
+--- a/Blockchain/Dev/services/security/src/db.ts
++++ b/Blockchain/Dev/services/security/src/db.ts
+@@ -100,7 +100,8 @@
+   } catch (err: any) {
+     let reason: string;
+     try {
+-      reason = err?.message;
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+@@ -118,7 +119,8 @@
+     dbAvailable = false;
+     let reason: string;
+     try {
+-      reason = err?.message;
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+
