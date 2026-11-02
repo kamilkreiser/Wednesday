@@ -83,14 +83,14 @@ First line of STATUS (placeholder at Step 0 `GATE VERDICT B1161: PENDING`): `GAT
 
 ## Stamp
 Tuesday fills each slot at launch; the drafter fills none. Tuesday copies this file to `.pre-stamp` BEFORE filling a slot. **The unstamped copy reads 9 lines with the four-underscore pattern (eight slot lines and the last line).** The drafter's Q-1 to Q-5 are answered in (S3).
-- (S1) STAMP (Tuesday: time, what was read, which drafter decisions are accepted or struck): ____
-- (S2) LAUNCH WINDOW (from the stamp until when; launch_when_cool, one waiter at a time; other panes): ____
-- (S3) Stamped by (Tuesday seat that READ this brief whole; Q-1 the cap and residue.md duty; Q-2 reuse of round 1's frame and programs; Q-3 Opus on G1; Q-4 seat G300, ports 9340-9349; Q-5 the builder's Q-1/Q-2 left to the product owner): ____
-- (S4) Launch authority (who, under which grant or ruling; round 2 of 2; whether the landing waits for the product owner on CV-1): ____
-- (S5) Items struck at the stamp, if any (NONE, or the item and the one-line reason): ____
-- (S6) Hard stop and target verdict (drafter suggests target 180 and HARD STOP 300 minutes after your Step-0 `date`, written absolute): ____
-- (S7) Head, main and PR state at launch (expected head `92d6b647...`, main `01bc16e4...`, `refs/heads/b1161*` none, PR #113 open; check-runs at launch): ____
-- (S8) Model receipt line and `uptime` load1 at launch (form: `model: claude-opus-5-5 -- G1 (model-routing.md:108) -- P1-P4 none -- gauge <n>%`): ____
+- (S1) STAMP (Tuesday: time, what was read, which drafter decisions are accepted or struck): STAMPED 00:11 AEDT 2026-11-03 by Tuesday s229; read: this kit 1-104 whole, the round-1 kit lines it binds (37, 38, 45, 46, 56, 57, 73-74, 80-81), the DRAFTER-REPORT summary; every drafter decision accepted
+- (S2) LAUNCH WINDOW (from the stamp until when; launch_when_cool, one waiter at a time; other panes): from the stamp until 04:00 AEDT 2026-11-03; launch_when_cool, one waiter at a time; live beside you: the MPS gate and a NexusAI records seat (other projects)
+- (S3) Stamped by (Tuesday seat that READ this brief whole; Q-1 the cap and residue.md duty; Q-2 reuse of round 1's frame and programs; Q-3 Opus on G1; Q-4 seat G300, ports 9340-9349; Q-5 the builder's Q-1/Q-2 left to the product owner): Tuesday s229, who read this brief whole. Q-1 yes: round 2 of 2 is the cap, residue.md on NO GO. Q-2 yes: reuse round 1's frame and programs by copy, and the by-reference incorporation of the round-1 kit stays (do not inline). Q-3 Opus on G1. Q-4 seat G300, ports 9340-9349 reserved, none published. Q-5 the builder's Q-1/Q-2 are the product owner's via card-input.txt. Q-6 pr-title.txt stays a landing file. Q-7 the one-digit-label blind spot stays graded by plant q4
+- (S4) Launch authority (who, under which grant or ruling; round 2 of 2; whether the landing waits for the product owner on CV-1): Tuesday under Kam's 2026-10-16 merge-once-tested grant for Datasec and his 2026-10-24 every-boot order; round 2 of 2; the landing does NOT wait for the product owner on CV-1 (three dots are a mark, not a word; the round-1 stamp's reading), the demo deploy does
+- (S5) Items struck at the stamp, if any (NONE, or the item and the one-line reason): NONE
+- (S6) Hard stop and target verdict (drafter suggests target 180 and HARD STOP 300 minutes after your Step-0 `date`, written absolute): target verdict 180 and HARD STOP 300 minutes after your Step-0 date, written as absolute clocks at Step 0
+- (S7) Head, main and PR state at launch (expected head `92d6b647...`, main `01bc16e4...`, `refs/heads/b1161*` none, PR #113 open; check-runs at launch): by gh api just before this stamp: head 92d6b647c66a62f0e166890c97c8882a3a9bf735, main 01bc16e4e9f27d5d23d4eb0cbc9ee0cbdfecbc17, PR #113 open at that head, check-runs 3 all success; .tools/b1161 absent; composer-heavy.lock absent
+- (S8) Model receipt line and `uptime` load1 at launch (form: `model: claude-opus-5-5 -- G1 (model-routing.md:108) -- P1-P4 none -- gauge <n>%`): model: claude-opus-5-5 -- G1 (model-routing.md:108) -- P1-P4 none -- gauge 57% (7d, statusline); load1 3.05 by uptime before the stamp
 
 ## Model, launch
 **Model: Opus** (`claude-opus-5-5`, from `levels.opus.model_id` in `/Volumes/Laptop-DEV/TUESDAY/0_Brain/dashboard/data/models_latest.json` line 17; **the launch MUST carry `BRIEF_SEAT_LEVEL=opus` inside the quotes**: `brief_seat.sh` defaults to Opus; spell it out), routing row **G1** `model-routing.md:108`; cap row G-cap `:111`. **B-number:** B1161. Pane `Datasec/Security-Composer-G300`. Suffix `G300`. Findings `B1161-n`. Ports 9340-9349, none expected.
@@ -101,4 +101,4 @@ Tuesday fills each slot at launch; the drafter fills none. Tuesday copies this f
 
 SELF-CHECK: drafted 2026-11-02 23:41 to 2026-11-03 00:10 AEDT (reads ended 00:08) by Tuesday's read-only gate-kit drafter (claude-sonnet-5-5) in the shape of the round-1 gate kit B1151, from the B1160 STATUS and kit, the B1151 STATUS, the head's two files raw (`grep -n` line numbers), the commit, `compare`, PR, `check-runs` and `code-scanning` reads, `model-routing.md`, `models_latest.json`, `lsof`, a kit scan, and lock/pane/`.tools` state. The drafter read the builder's plant table before writing the plant list; READ ORDER binds the gate seat. Nothing was built or run.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 00:11 by Tuesday s229: kit 1-104 and the round-1 kit's bound lines
