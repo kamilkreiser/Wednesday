@@ -11,7 +11,8 @@ supersede: REPLACED WHOLESALE ~08:18 AEDT 2026-11-03 by the morning seat (respaw
 ## SUBAGENTS OF THIS SEAT (they DIE at its rotation; re-launch from the workdir + today's note if no output)
 - **Gate 151** (Sonnet T2, PR 1967 demo-service state.ts, head 118cf6d9): workdir `0_Brain/reference/2026-11-03_gate151-ks1868-pr1967/`. ANSWER goes to **Seat W 21st** (not yet launched).
 - **Spark operator 92** (Sonnet): workdir `0_Brain/reference/2026-11-03_spark-operator92/`; supply = G149-F4 documentRepo.ts + GET /:id, referralService.ts :257/:68 (raise after the referral PR merges), G150-F3 probeDb prism/timestamping.
-- **W 21st brief DRAFTER** (Sonnet): out `2_Project_Files/fleet/briefs_staged/2026-11-03_seatW21_raise_continue.md` -> READ WHOLE, add a fresh SELF-CHECK, dry run, read the CAPACITY line, launch with SEAT_MODEL_ENV=claude-sonnet-5-5 (FULL -> waiter, template scratchpad w20_waiter.sh; NOT chained to the dry run: ledger 11-03).
+- ~~W 21st brief drafter~~ DONE: brief read whole, **Seat W 21st LAUNCHED 08:26** by the waiter at the first ROOM (pane %100, Sonnet 5.5). Its plan confirmation is owed; gate 151's ANSWER goes to it.
+- **Rotation note (08:2x):** this seat rotated at ~78% ctx at a clean boundary. Live: R 77th %98, B 81st %99, W 21st %100. PR 1965 head fb0a2bee is up (probably R 77th's PR 7; READY not yet received -> gate 148 Opus -> Kam card).
 
 ## OWED FIRST (merge chain; every GO after: no un-MERGED GO outstanding, push_queue list, gate_stray_check rc 0, ls-remote pin + head; subject `GO: merge PR <n> at <head12> on develop <pin12> (Seat B 81st)`)
 1. **PR 1964** (originate documents routes, T1, head 25c437f4): gate 149 GO WITH NOTES. R 77th asked to FILE a High ticket (G149-F1/F2 sign retry duplicates; F7 = existing KS-1831) + PATCH notes. QUEUE to B 81st at its NOTES PATCHED.
