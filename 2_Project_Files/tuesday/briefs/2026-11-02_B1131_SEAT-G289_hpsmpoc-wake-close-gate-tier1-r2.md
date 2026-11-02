@@ -34,7 +34,7 @@ Head `76116bc6` (tree `f171306d`), 3 commits on `c1457349`: A `d1c9f47e`, B `274
 
 ## REFUSE AT ONCE (last line `STOPPED: NEEDS TUESDAY`; each count with a control; all run against the live state at 15:2x, none fires; launch changes only what is said)
 - `/usr/bin/grep -c -E '_''_''_''_' <Step-0 copy>` prints 0 (control: the unstamped kit reads 8); last line `READ-WHOLE-BY-TUESDAY: DONE ...`; `## Stamp` names a launch authority and hard stop; `/usr/bin/grep -o -E '@[A-Z_]+''@' <copy> | wc -l` reads 0 (control: a scratch file with an at-sign, capitals, an underscore, an at-sign reads 1).
-- `tmux list-panes -a -F '#{@cockpit_name}' | /usr/bin/grep -c -E '^Datasec/HPSM-POC-G289$'` exactly 1 (**0 at drafting; your pane exists at launch**); `^Datasec/HPSM-POC-H103$` above 0 (the builder; 0 now; control `-G286` 1). NOT a stop: `-G286`, `-H102`, G or R panes.
+- `tmux list-panes -a -F '#{@cockpit_name}' | /usr/bin/grep -c -E '^Datasec/HPSM-POC-G289$'` exactly 1 (**0 at drafting; your pane exists at launch**); `^Datasec/HPSM-POC-H103$` above 0 (the builder; 0 now; control `-G288` 1). NOT a stop: `-G288`, G or R panes.
 - Head: `git/ref/heads/b1095/hpsmpoc-wake-close-path-and-narrative-pins` not `76116bc64a5c96bf72c51106a7b1a9ae0e3a1ac0`: `STOPPED: NEEDS TUESDAY head moved to <sha7>`. A PR now exists: not a stop; read its checks LAST (45 minutes at most), hosted CI is then no longer NOT RUN.
 - **Main moved past `5f128fb8`.** Property: STOP only if a moved path could change the wake retry, the Assessment open or close, the narrative guard, the build or the CI judging them. Pattern: B1107's REFUSE (main) pattern verbatim over `compare 5f128fb8...main`, count 0 (0 on main's 6 `api/` paths now; controls: the product file and the retry test file each 1) else `STOPPED: NEEDS TUESDAY main moved under the wake retry or the narrative guard (<paths>)`. `web/` and new `Api.Tests/Assessment/` paths: name them, no stop.
 - Builder STATUS last line does not begin `READY FOR QA: B1126 b1095/hpsmpoc-wake-close-path-and-narrative-pins @ 76116bc64a5c96bf72c51106a7b1a9ae0e3a1ac0` (count 1 now; control `zzz-no-such-b1131` 0), or lacks `## PRIOR WORK`.
@@ -44,16 +44,16 @@ Head `76116bc6` (tree `f171306d`), 3 commits on `c1457349`: A `d1c9f47e`, B `274
 
 ## Stamp
 Tuesday fills each slot; unstamped it reads 8 such lines.
-- (S1) STAMP: ____
-- (S2) LAUNCH WINDOW (load1, seats): ____
-- (S3) Round-count reading: ____
-- (S4) Launch authority (who, ruling; YES: fetch, restore, plants, gitleaks, GETs, landing files; NO: PR, push, Jira write, deploy, `az`): ____
-- (S5) Hard stop (180 / 240 min after Step 0): ____
-- (S6) Head, main, PRs, panes, `df` at launch: ____
-- (S7) Model receipt, load1 at launch: ____
+- (S1) STAMP: STAMPED 16:35 AEDT 2026-11-02 by Tuesday s226, kit read whole with its report; path check run alone in an earlier message (rc 0, 4 OK); the SHOW for SqlServerWakeRetry.cs:42 is main's line, the kit cites the head's: re-print yours. D1 to D9 accepted. Q1 moot, drive about 70 GiB and rising, and the one-worktree limit may stand. Q2 yes. Q3 Minor. Q4 merged, branch tree last. Q5 accepted. Corrected before this stamp: the pane control reads -G288, as G286 has closed.
+- (S2) LAUNCH WINDOW (load1, seats): Launch_when_cool, load1 under 7. Live beside you at this stamp: Datasec/HPSM-POC-G288 (web gate), Datasec/HPSM-POC-R136 (removal), Datasec/MPS-R139 (removal), Datasec/MPS-R141 (records). The kit's pane list is older. R136 holds the paths of live kits and trees touched within 3 days, so .tools/b1107 stays; if a script you need is gone, say so in a last line.
+- (S3) Round-count reading: Class A: B1107 NO GO, round 1 of 2; this is round 2 of 2; a NO GO is the cap, a card from residue.md. Class B: NO GO 0 before.
+- (S4) Launch authority (who, ruling; YES: fetch, restore, plants, gitleaks, GETs, landing files; NO: PR, push, Jira write, deploy, `az`): Tuesday, on the product owner's 2026-11-01 21:41:12 instruction and the 2026-10-24 every-boot rule. YES: fetch, restore, plants, gitleaks, GETs, landing files. NO: PR, push, Jira write, deploy, az.
+- (S5) Hard stop (180 / 240 min after Step 0): Target 180, HARD STOP 240 minutes after your Step-0 date, absolute AEDT; the kit's 20:00 outer bound is lifted to 21:30 for this gate only, because the launch is later than the kit assumed.
+- (S6) Head, main, PRs, panes, `df` at launch: Head 76116bc64a5c, main 5f128fb89034, open PRs 0, listeners on 9510-9519 0, builder last line count 1, all read by this seat just before the stamp. Panes as S2. Re-read df at Step 0.
+- (S7) Model receipt, load1 at launch: model: claude-opus-5-5 -- G1 -- gauge 44%; the launcher's own load read decides.
 
 ## Launch
 **Opus** (`claude-opus-5-5`, `models_latest.json:17`; the launch MUST carry `BRIEF_SEAT_LEVEL=opus` inside the quotes: `brief_seat.sh` line 24 defaults to Opus). Pane `Datasec/HPSM-POC-G289`.
 **Launch (Tuesday), ONE waiter:** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/HPSM-POC-G289 "WED_USAGE_STOP=100 BRIEF_SEAT_LEVEL=opus bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-02_B1131_SEAT-G289_hpsmpoc-wake-close-gate-tier1-r2.md'"`. Nothing deploys.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 16:35 by Tuesday s226, whole file.
