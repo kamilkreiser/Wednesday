@@ -1,0 +1,154 @@
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
+
+// KS-1868 (operator 88 screen, api-gateway redis service): the Redis client 'error' listener (line 92) and the connect catch
+// (lines 117-125) of services/api-gateway/src/services/redis.ts read the thrown value's message unguarded. A thrown value whose
+// read throws (a revoked Proxy, an Error whose message getter throws) makes the listener throw BEFORE it clears the
+// connected flag (so isRedisAvailable() keeps answering true while Redis is down) and makes the catch throw a TypeError from
+// inside the catch (initRedis rejects with it, instead of falling back in dev/test or refusing with the named production
+// error); an Error whose message is a Symbol is passed to the logger uncoerced. The cells make the client emit / fail with
+// such a value and assert the outcome an ordinary Error gets, with text in the log. Harness: the real module with ioredis
+// replaced by a plain stand-in class (it hands over its listeners; connect rejects with the value when asked) and the logger
+// by a plain recording object.
+const h = vi.hoisted(() => ({
+  listeners: {} as Record<string, (e: unknown) => void>,
+  connectFailure: undefined as undefined | { value: unknown },
+  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
+}));
+
+vi.mock('ioredis', () => ({
+  default: function RedisMock() {
+    return {
+      on: (event: string, fn: (e: unknown) => void) => {
+        h.listeners[event] = fn;
+      },
+      connect: async () => {
+        if (h.connectFailure) throw h.connectFailure.value;
+      },
+      ping: async () => 'PONG',
+    };
+  },
+}));
+vi.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    h.logs.push({ level, message, meta });
+  };
+  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
+});
+
+type Rs = typeof import('../services/redis');
+const realEnv = process.env.NODE_ENV;
+afterAll(() => {
+  process.env.NODE_ENV = realEnv;
+});
+beforeEach(() => {
+  h.listeners = {};
+  h.connectFailure = undefined;
+  h.logs.length = 0;
+  process.env.NODE_ENV = 'test';
+});
+
+async function freshRedis(): Promise<Rs> {
+  vi.resetModules();
+  return import('../services/redis');
+}
+async function emit(value: unknown): Promise<{ threw: boolean; available: boolean }> {
+  const rs = await freshRedis();
+  await rs.initRedis();
+  let threw = false;
+  try {
+    h.listeners.error(value);
+  } catch {
+    threw = true;
+  }
+  return { threw, available: rs.isRedisAvailable() };
+}
+async function connectFails(value: unknown, env: string): Promise<{ resolved: boolean; value: boolean | undefined; message: string }> {
+  process.env.NODE_ENV = env;
+  h.connectFailure = { value };
+  const rs = await freshRedis();
+  try {
+    return { resolved: true, value: await rs.initRedis(), message: '' };
+  } catch (e) {
+    return { resolved: false, value: undefined, message: (e as Error).message };
+  }
+}
+const LINE = (prefix: string): { level: string; message: string; meta: Record<string, unknown> | undefined }[] =>
+  h.logs.filter((l) => l.message.startsWith(prefix));
+const LISTENER = '[Redis] Connection error';
+const FALLBACK = '[Redis] Failed to connect, using in-memory fallback';
+const FATAL = '[Redis] FATAL';
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string =>
+  typeof l?.meta?.error === 'string' ? (l.meta.error as string) : '<' + typeof l?.meta?.error + '>';
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 the gateway Redis listener and connect catch survive and log text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from connect in dev/test makes initRedis answer false and is logged with its message', async () => {
+    expect(await connectFails(new Error('connect boom'), 'test')).toEqual({ resolved: true, value: false, message: '' });
+    expect(LINE(FALLBACK)).toHaveLength(1);
+    expect(reasonOf(LINE(FALLBACK)[0])).toBe('connect boom');
+  });
+  it('control ks1868 C2: an ordinary Error from connect in production rejects with the named production error carrying its message', async () => {
+    expect(await connectFails(new Error('connect boom'), 'production')).toEqual({
+      resolved: false,
+      value: undefined,
+      message: 'REDIS_REQUIRED_IN_PRODUCTION: connect boom',
+    });
+    expect(LINE(FATAL)).toHaveLength(1);
+    expect(reasonOf(LINE(FATAL)[0])).toBe('connect boom');
+  });
+  it('control ks1868 C3: an ordinary Error reaching the listener does not throw, is logged with its message and clears the connected flag', async () => {
+    expect(await emit(new Error('listener boom'))).toEqual({ threw: false, available: false });
+    expect(LINE(LISTENER)).toHaveLength(1);
+    expect(reasonOf(LINE(LISTENER)[0])).toBe('listener boom');
+  });
+  it('RED ks1868 R1: a revoked Proxy from connect in dev/test makes initRedis answer false and is logged as text, as for an ordinary Error', async () => {
+    expect(await connectFails(revokedProxy(), 'test')).toEqual({ resolved: true, value: false, message: '' });
+    expect(LINE(FALLBACK)).toHaveLength(1);
+    expect(reasonOf(LINE(FALLBACK)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: a revoked Proxy from connect in production rejects with the named production error and is logged as text, as for an ordinary Error', async () => {
+    expect(await connectFails(revokedProxy(), 'production')).toEqual({
+      resolved: false,
+      value: undefined,
+      message: 'REDIS_REQUIRED_IN_PRODUCTION: unreadable thrown value',
+    });
+    expect(LINE(FATAL)).toHaveLength(1);
+    expect(reasonOf(LINE(FATAL)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R3: an Error whose message is a Symbol from connect in dev/test makes initRedis answer false and is logged as text, as for an ordinary Error', async () => {
+    expect(await connectFails(withMessage(Symbol('ks1868')), 'test')).toEqual({ resolved: true, value: false, message: '' });
+    expect(LINE(FALLBACK)).toHaveLength(1);
+    expect(reasonOf(LINE(FALLBACK)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R4: a revoked Proxy reaching the listener does not throw, is logged as text and clears the connected flag, as for an ordinary Error', async () => {
+    expect(await emit(revokedProxy())).toEqual({ threw: false, available: false });
+    expect(LINE(LISTENER)).toHaveLength(1);
+    expect(reasonOf(LINE(LISTENER)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R5: an Error whose message getter throws reaching the listener does not throw, is logged as text and clears the connected flag, as for an ordinary Error', async () => {
+    expect(await emit(getterThrows())).toEqual({ threw: false, available: false });
+    expect(LINE(LISTENER)).toHaveLength(1);
+    expect(reasonOf(LINE(LISTENER)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R6: an Error whose message is a Symbol reaching the listener does not throw, is logged as text and clears the connected flag, as for an ordinary Error', async () => {
+    expect(await emit(withMessage(Symbol('ks1868')))).toEqual({ threw: false, available: false });
+    expect(LINE(LISTENER)).toHaveLength(1);
+    expect(reasonOf(LINE(LISTENER)[0])).toBe('Symbol(ks1868)');
+  });
+});

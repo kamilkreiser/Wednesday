@@ -1,0 +1,126 @@
+diff --git a/Blockchain/Dev/services/originate/src/events.ts b/Blockchain/Dev/services/originate/src/events.ts
+--- a/Blockchain/Dev/services/originate/src/events.ts
++++ b/Blockchain/Dev/services/originate/src/events.ts
+@@ -88,3 +88,10 @@
+     redis.on('error', (err) => {
+-      logger.debug('EventBus Redis error (non-fatal)', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.debug('EventBus Redis error (non-fatal)', { error: reason });
+     });
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-events-redis-error-listener-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-events-redis-error-listener-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-events-redis-error-listener-unreadable-throw.test.ts
+@@ -0,0 +1,106 @@
++// KS-1868 (operator 89 screen, originate event bus): the Redis 'error' listener (line 89) of initEventBus in
++// services/originate/src/events.ts passes `err.message` straight into the logger's meta object, unguarded. A thrown value whose
++// read throws (a revoked Proxy, an Error whose message getter throws) makes the listener throw: an exception thrown by a
++// listener of the client's 'error' event escapes the EventEmitter and is an uncaught exception; an Error whose message is not a
++// string (a Symbol) is passed to the logger uncoerced. The cells emit such a value to the captured listener and assert the
++// listener returns and the logged value is text (the constant when the value cannot be turned into text). Harness: the real
++// module with ioredis replaced by a plain stand-in class (it hands over the 'error' listener) and the logger by a plain
++// recording object (no Redis, no network).
++const mockH: {
++  listener: undefined | ((e: unknown) => void);
++  logs: { level: string; message: string; meta: Record<string, unknown> | undefined }[];
++} = { listener: undefined, logs: [] };
++
++jest.mock('ioredis', () => ({
++  __esModule: true,
++  default: function RedisMock() {
++    return {
++      status: 'wait',
++      on: (event: string, fn: (e: unknown) => void) => {
++        if (event === 'error') mockH.listener = fn;
++      },
++      connect: async () => undefined,
++      disconnect: () => undefined,
++      xadd: async () => '1-0',
++    };
++  },
++}));
++jest.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    mockH.logs.push({ level, message, meta });
++  };
++  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
++});
++
++type Ev = typeof import('../events');
++beforeEach(() => {
++  mockH.listener = undefined;
++  mockH.logs.length = 0;
++});
++
++function freshEvents(): Ev {
++  jest.resetModules();
++  // eslint-disable-next-line @typescript-eslint/no-require-imports
++  return require('../events') as Ev;
++}
++function emit(value: unknown): { threw: boolean } {
++  const ev = freshEvents();
++  ev.initEventBus('redis://localhost:6379');
++  try {
++    (mockH.listener as (e: unknown) => void)(value);
++    return { threw: false };
++  } catch {
++    return { threw: true };
++  }
++}
++const LINE = (message: string): { level: string; message: string; meta: Record<string, unknown> | undefined }[] =>
++  mockH.logs.filter((l) => l.message === message);
++const LISTENER = 'EventBus Redis error (non-fatal)';
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string =>
++  typeof l?.meta?.error === 'string' ? (l.meta.error as string) : '<' + typeof l?.meta?.error + '>';
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++
++describe('KS-1868 the Redis error listener survives and logs text for a hostile emitted value', () => {
++  it('control ks1868 C1: an ordinary Error reaching the Redis error listener does not throw and is logged with its message', () => {
++    expect(emit(new Error('redis down'))).toEqual({ threw: false });
++    expect(LINE(LISTENER)).toHaveLength(1);
++    expect(reasonOf(LINE(LISTENER)[0])).toBe('redis down');
++  });
++  it('control ks1868 C2: a plain string reaching the Redis error listener does not throw and is logged without a message', () => {
++    expect(emit('plain boom')).toEqual({ threw: false });
++    expect(LINE(LISTENER)).toHaveLength(1);
++    expect(reasonOf(LINE(LISTENER)[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1: a revoked Proxy reaching the Redis error listener does not throw and is logged as text, as for an ordinary Error', () => {
++    expect(emit(revokedProxy())).toEqual({ threw: false });
++    expect(LINE(LISTENER)).toHaveLength(1);
++    expect(reasonOf(LINE(LISTENER)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws reaching the Redis error listener does not throw and is logged as text, as for an ordinary Error', () => {
++    expect(emit(getterThrows())).toEqual({ threw: false });
++    expect(LINE(LISTENER)).toHaveLength(1);
++    expect(reasonOf(LINE(LISTENER)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: an Error whose message is a Symbol reaching the Redis error listener does not throw and is logged as text, as for an ordinary Error', () => {
++    expect(emit(withMessage(Symbol('ks1868')))).toEqual({ threw: false });
++    expect(LINE(LISTENER)).toHaveLength(1);
++    expect(reasonOf(LINE(LISTENER)[0])).toBe('Symbol(ks1868)');
++  });
++});

@@ -1,0 +1,103 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// KS-1868 (operator 87 screen, anchoring cardano confirmation module): the catch of waitForConfirmation (line 107 of
+// services/anchoring/src/cardano/confirmation.ts) builds the status text with the thrown value's message read INSIDE a
+// template literal, unguarded: `error: ${err?.message}`. A thrown value whose read throws (a revoked Proxy, an Error whose
+// message getter throws) or whose message is a Symbol (a template literal cannot convert a Symbol) makes the catch itself
+// throw, so the whole poll REJECTS on the first such attempt instead of counting the failed attempt and carrying on, as it
+// does for an ordinary Error. The cells make the (stand-in) getTransaction reject with such a value, with a single attempt
+// and a 1 ms delay, and assert the call resolves, counts the failed attempt and reports a status line of text (the constant
+// when the value cannot be turned into text). Harness: the real module with ./provider replaced by a plain stand-in.
+const h = vi.hoisted(() => ({
+  failure: undefined as undefined | { value: unknown },
+}));
+
+vi.mock('../cardano/provider', () => ({
+  getTransaction: async () => {
+    if (h.failure) throw h.failure.value;
+    return { block: 'block-1', block_height: 7, slot: 9 };
+  },
+}));
+
+import { waitForConfirmation } from '../cardano/confirmation';
+
+beforeEach(() => {
+  h.failure = undefined;
+});
+
+type Outcome = { ok: boolean; result: Awaited<ReturnType<typeof waitForConfirmation>> | undefined; statuses: string[] };
+async function poll(failure: { value: unknown } | undefined): Promise<Outcome> {
+  h.failure = failure;
+  const statuses: string[] = [];
+  try {
+    const result = await waitForConfirmation('tx-1', 1, 1, 1, (_attempt, status) => {
+      statuses.push(status);
+    });
+    return { ok: true, result, statuses };
+  } catch {
+    return { ok: false, result: undefined, statuses };
+  }
+}
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 waitForConfirmation counts a failed attempt and reports text for a hostile thrown value', () => {
+  it('control ks1868 C1: a transaction the chain answers is confirmed and no error status is reported', async () => {
+    const r = await poll(undefined);
+    expect(r.ok).toBe(true);
+    expect(r.result?.confirmed).toBe(true);
+    expect(r.result?.errored).toBe(0);
+    expect(r.statuses).toEqual([]);
+  });
+  it('control ks1868 C2: an ordinary Error counts one failed attempt and is reported with its message', async () => {
+    const r = await poll({ value: new Error('net boom') });
+    expect(r.ok).toBe(true);
+    expect(r.result?.confirmed).toBe(false);
+    expect(r.result?.errored).toBe(1);
+    expect(r.statuses).toEqual(['error: net boom']);
+  });
+  it('control ks1868 C3: a thrown plain string counts one failed attempt and is reported without a message', async () => {
+    const r = await poll({ value: 'plain boom' });
+    expect(r.ok).toBe(true);
+    expect(r.result?.errored).toBe(1);
+    expect(r.statuses).toEqual(['error: undefined']);
+  });
+  it('control ks1868 C4: a thrown number counts one failed attempt and is reported without a message', async () => {
+    const r = await poll({ value: 42 });
+    expect(r.ok).toBe(true);
+    expect(r.result?.errored).toBe(1);
+    expect(r.statuses).toEqual(['error: undefined']);
+  });
+  it('RED ks1868 R1: a revoked Proxy counts one failed attempt and is reported as text, as for an ordinary Error', async () => {
+    const r = await poll({ value: revokedProxy() });
+    expect(r.ok).toBe(true);
+    expect(r.result?.errored).toBe(1);
+    expect(r.statuses).toEqual(['error: unreadable thrown value']);
+  });
+  it('RED ks1868 R2: an Error whose message getter throws counts one failed attempt and is reported as text, as for an ordinary Error', async () => {
+    const r = await poll({ value: getterThrows() });
+    expect(r.ok).toBe(true);
+    expect(r.result?.errored).toBe(1);
+    expect(r.statuses).toEqual(['error: unreadable thrown value']);
+  });
+  it('RED ks1868 R3: an Error whose message is a Symbol counts one failed attempt and is reported as text, as for an ordinary Error', async () => {
+    const r = await poll({ value: withMessage(Symbol('ks1868')) });
+    expect(r.ok).toBe(true);
+    expect(r.result?.errored).toBe(1);
+    expect(r.statuses).toEqual(['error: Symbol(ks1868)']);
+  });
+});

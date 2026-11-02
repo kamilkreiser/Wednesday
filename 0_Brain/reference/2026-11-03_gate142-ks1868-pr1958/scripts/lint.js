@@ -1,0 +1,15 @@
+const { spawnSync } = require('child_process'); const fs = require('fs');
+const G = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate142-ks1868-pr1958';
+const D = G + '/repo/Blockchain/Dev', B = D + '/node_modules/.bin';
+fs.mkdirSync(G + '/logs/_quarantine', { recursive: true });
+const A = D + '/services/anchoring';
+const files = ['src/anchorStatusUpdate.ts','src/cardano/confirmation.ts','src/__tests__/ks1868-anchor-status-update-catch-unreadable-throw.test.ts','src/__tests__/ks1868-confirmation-wait-catch-unreadable-throw.test.ts'];
+const r = spawnSync(B + '/eslint', files, { cwd: A, encoding: 'utf8' });
+fs.writeFileSync(G + '/logs/eslint.log', (r.stdout || '') + (r.stderr || '') + '\nrc=' + r.status + '\n');
+console.log('eslint rc', r.status);
+const pl = A + '/src/zz_g142_planted.ts';
+fs.writeFileSync(pl, 'export function f(): number { const unused = 1; debugger; return 2; }\n');
+const p = spawnSync(B + '/eslint', ['src/zz_g142_planted.ts'], { cwd: A, encoding: 'utf8' });
+fs.writeFileSync(G + '/logs/eslint_planted.log', (p.stdout || '') + (p.stderr || '') + '\nrc=' + p.status + '\n');
+fs.renameSync(pl, G + '/logs/_quarantine/zz_g142_planted.ts');
+console.log('planted rc', p.status);

@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o89_p10_originate_db_init_prisma_catch_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/db.ts b/Blockchain/Dev/services/originate/src/db.ts
+--- a/Blockchain/Dev/services/originate/src/db.ts
++++ b/Blockchain/Dev/services/originate/src/db.ts
+@@ -446,7 +446,14 @@
+       await getPrismaClient().$queryRaw`SELECT 1`;
+       console.log('[DB] Prisma connection verified (single-tenant mode)');
+     } catch (err: any) {
+-      console.error('[DB] Prisma connection failed:', err.message);
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      console.error('[DB] Prisma connection failed:', reason);
+     }
+   }
+ }
+

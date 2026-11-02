@@ -1,0 +1,104 @@
+// KS-1868 (operator 89 screen, originate event bus): the catch of initEventBus (line 95) of services/originate/src/events.ts
+// passes `err?.message` straight into the logger's meta object, unguarded. A thrown value whose read throws (a revoked Proxy, an
+// Error whose message getter throws) makes the catch itself throw, so initEventBus THROWS instead of answering false (its
+// contract: "Returns true if Redis connection was established"; on failure the service carries on without events); an Error
+// whose message is not a string (a Symbol) is passed to the logger uncoerced. The cells make the Redis constructor throw
+// such a value and assert initEventBus answers false and the logged value is text (the constant when the value cannot be
+// turned into text). Harness: the real module with ioredis replaced by a plain stand-in class and the logger by a plain
+// recording object (no Redis, no network).
+const mockH: {
+  ctorFailure: undefined | { value: unknown };
+  logs: { level: string; message: string; meta: Record<string, unknown> | undefined }[];
+} = { ctorFailure: undefined, logs: [] };
+
+jest.mock('ioredis', () => ({
+  __esModule: true,
+  default: function RedisMock() {
+    if (mockH.ctorFailure) throw mockH.ctorFailure.value;
+    return {
+      status: 'wait',
+      on: () => undefined,
+      connect: async () => undefined,
+      disconnect: () => undefined,
+      xadd: async () => '1-0',
+    };
+  },
+}));
+jest.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    mockH.logs.push({ level, message, meta });
+  };
+  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
+});
+
+type Ev = typeof import('../events');
+beforeEach(() => {
+  mockH.ctorFailure = undefined;
+  mockH.logs.length = 0;
+});
+
+function freshEvents(): Ev {
+  jest.resetModules();
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require('../events') as Ev;
+}
+function init(value: unknown): { ok: boolean; value: boolean | undefined } {
+  mockH.ctorFailure = { value };
+  const ev = freshEvents();
+  try {
+    return { ok: true, value: ev.initEventBus('redis://localhost:6379') };
+  } catch {
+    return { ok: false, value: undefined };
+  }
+}
+const LINE = (message: string): { level: string; message: string; meta: Record<string, unknown> | undefined }[] =>
+  mockH.logs.filter((l) => l.message === message);
+const INIT = 'Failed to initialise EventBus';
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string =>
+  typeof l?.meta?.error === 'string' ? (l.meta.error as string) : '<' + typeof l?.meta?.error + '>';
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+
+describe('KS-1868 the event bus init catch survives and logs text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error from the Redis constructor makes initEventBus answer false and is logged with its message', () => {
+    expect(init(new Error('init boom'))).toEqual({ ok: true, value: false });
+    expect(LINE(INIT)).toHaveLength(1);
+    expect(reasonOf(LINE(INIT)[0])).toBe('init boom');
+  });
+  it('control ks1868 C2: a thrown number from the Redis constructor makes initEventBus answer false and is logged without a message', () => {
+    expect(init(42)).toEqual({ ok: true, value: false });
+    expect(LINE(INIT)).toHaveLength(1);
+    expect(reasonOf(LINE(INIT)[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: a revoked Proxy from the Redis constructor makes initEventBus answer false and is logged as text, as for an ordinary Error', () => {
+    expect(init(revokedProxy())).toEqual({ ok: true, value: false });
+    expect(LINE(INIT)).toHaveLength(1);
+    expect(reasonOf(LINE(INIT)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an Error whose message getter throws from the Redis constructor makes initEventBus answer false and is logged as text, as for an ordinary Error', () => {
+    expect(init(getterThrows())).toEqual({ ok: true, value: false });
+    expect(LINE(INIT)).toHaveLength(1);
+    expect(reasonOf(LINE(INIT)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R3: an Error whose message is a Symbol from the Redis constructor makes initEventBus answer false and is logged as text, as for an ordinary Error', () => {
+    expect(init(withMessage(Symbol('ks1868')))).toEqual({ ok: true, value: false });
+    expect(LINE(INIT)).toHaveLength(1);
+    expect(reasonOf(LINE(INIT)[0])).toBe('Symbol(ks1868)');
+  });
+});

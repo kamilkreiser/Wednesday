@@ -1,0 +1,144 @@
+diff --git a/Blockchain/Dev/services/originate/src/db.ts b/Blockchain/Dev/services/originate/src/db.ts
+--- a/Blockchain/Dev/services/originate/src/db.ts
++++ b/Blockchain/Dev/services/originate/src/db.ts
+@@ -446,7 +446,14 @@
+       await getPrismaClient().$queryRaw`SELECT 1`;
+       console.log('[DB] Prisma connection verified (single-tenant mode)');
+     } catch (err: any) {
+-      console.error('[DB] Prisma connection failed:', err.message);
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      console.error('[DB] Prisma connection failed:', reason);
+     }
+   }
+ }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-db-init-prisma-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-db-init-prisma-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-db-init-prisma-catch-unreadable-throw.test.ts
+@@ -0,0 +1,120 @@
++// KS-1868 (operator 89 screen, originate db module): the catch around the Prisma connection check in initDb (line 449) of
++// services/originate/src/db.ts passes `err.message` straight into console.error's arguments, unguarded. A thrown value whose
++// read throws (a revoked Proxy, an Error whose message getter throws) makes the catch itself throw, so initDb REJECTS instead of
++// logging the failure and resolving (the single-tenant boot path carries on and fails per request); an Error whose message is
++// not a string (a Symbol) is handed to console.error uncoerced. The cells make the Prisma connection check reject with such a
++// value and assert initDb resolves and the logged value is text (the constant when the value cannot be turned into text).
++// Harness: the real module with the Prisma client, its adapter, the shared package and the config replaced by plain stand-ins
++// and console.error by a plain recording function (no database, no network).
++const mockH: { failure: { value: unknown } | undefined; errors: unknown[][] } = { failure: undefined, errors: [] };
++
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    TenantPoolManager: function TenantPoolManagerMock() {
++      return {};
++    },
++    currentTenantId: () => undefined,
++    isPlatformScope: () => false,
++    queryWithTenantGuc: async () => ({ rows: [] }),
++    applyTenantGuc: async () => undefined,
++  }),
++);
++jest.mock('../config', () => ({ config: { databaseUrl: 'postgresql://test:test@localhost:5432/test', nodeEnv: 'test' } }));
++jest.mock('@prisma/client', () => ({
++  PrismaClient: function PrismaClientMock() {
++    return {
++      $queryRaw: async () => {
++        if (mockH.failure) throw mockH.failure.value;
++        return [{ '?column?': 1 }];
++      },
++      $executeRaw: async () => 0,
++      $disconnect: async () => undefined,
++    };
++  },
++}));
++jest.mock('@prisma/adapter-pg', () => ({
++  PrismaPg: function PrismaPgMock() {
++    return {};
++  },
++}));
++
++type Db = typeof import('../db');
++const realError = console.error;
++const realTenancy = process.env.MULTI_TENANCY_ENABLED;
++afterAll(() => {
++  console.error = realError;
++  if (realTenancy === undefined) delete process.env.MULTI_TENANCY_ENABLED;
++  else process.env.MULTI_TENANCY_ENABLED = realTenancy;
++});
++beforeEach(() => {
++  mockH.failure = undefined;
++  mockH.errors.length = 0;
++  delete process.env.MULTI_TENANCY_ENABLED;
++  console.error = (...args: unknown[]) => {
++    mockH.errors.push(args);
++  };
++});
++
++function freshDb(): Db {
++  jest.resetModules();
++  // eslint-disable-next-line @typescript-eslint/no-require-imports
++  return require('../db') as Db;
++}
++async function init(value: unknown): Promise<{ ok: boolean }> {
++  mockH.failure = { value };
++  const db = freshDb();
++  try {
++    await db.initDb();
++    return { ok: true };
++  } catch {
++    return { ok: false };
++  }
++}
++const FAILED = '[DB] Prisma connection failed:';
++const LINES = (): unknown[][] => mockH.errors.filter((a) => a[0] === FAILED);
++/** The logged second argument as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (a: unknown[] | undefined): string => (typeof a?.[1] === 'string' ? (a[1] as string) : '<' + typeof a?.[1] + '>');
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the initDb Prisma connection catch resolves and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the Prisma connection check leaves initDb resolving and is logged with its message', async () => {
++    expect(await init(new Error('prisma down'))).toEqual({ ok: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('prisma down');
++  });
++  it('control ks1868 C2: a thrown number from the Prisma connection check leaves initDb resolving and is logged without a message', async () => {
++    expect(await init(42)).toEqual({ ok: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1: a revoked Proxy from the Prisma connection check leaves initDb resolving and is logged as text, as for an ordinary Error', async () => {
++    expect(await init(revokedProxy())).toEqual({ ok: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws from the Prisma connection check leaves initDb resolving and is logged as text, as for an ordinary Error', async () => {
++    expect(await init(getterThrows())).toEqual({ ok: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: an Error whose message is a Symbol from the Prisma connection check leaves initDb resolving and is logged as text, as for an ordinary Error', async () => {
++    expect(await init(withMessage(Symbol('ks1868')))).toEqual({ ok: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('Symbol(ks1868)');
++  });
++});

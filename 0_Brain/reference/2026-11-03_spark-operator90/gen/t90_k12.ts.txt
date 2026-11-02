@@ -1,0 +1,95 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// KS-1868 (operator 90 screen, referral fraud detection): the catch of loadFromDb in services/referral/src/services/fraudDetection.ts
+// (line 114) passes `err?.message` straight into the logger's meta object, unguarded. `?.` guards null and undefined only: a thrown
+// value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch throw, so loadFromDb REJECTS where
+// an ordinary Error gets a logged warning and a resolved call (the service starts with empty fraud data); an Error whose message is a
+// Symbol is handed to the logger uncoerced. The cells make the database stand-in reject with such a value and assert loadFromDb
+// still resolves and the warning carries text. The stand-in rejects with a plain function, not vi.fn(): a spy could inspect a revoked
+// Proxy and fail before the code under test saw it. Harness: the real module with ../db and ../utils/logger replaced by plain
+// stand-ins; no database, no network.
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  query: (..._args: unknown[]) => Promise.reject(h.toThrow),
+}));
+
+vi.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    h.logs.push({ level, message, meta });
+  };
+  return { createLogger: () => ({ debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') }) };
+});
+
+import { fraudDetectionService } from '../services/fraudDetection';
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.logs.length = 0;
+});
+
+const WARN = 'Failed to load fraud data from DB';
+const LOG = () => h.logs.filter((l) => l.message.startsWith(WARN));
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta?: Record<string, unknown> } | undefined): string => {
+  const e = l?.meta?.error;
+  return typeof e === 'string' ? e : '<' + typeof e + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+async function loadWith(value: unknown): Promise<{ threw: boolean }> {
+  h.toThrow = value;
+  try {
+    await fraudDetectionService.loadFromDb();
+    return { threw: false };
+  } catch {
+    return { threw: true };
+  }
+}
+
+describe('KS-1868 fraud detection: loadFromDb survives a thrown value it cannot read', () => {
+  it('control ks1868 C1: an ordinary Error is logged with its message and loadFromDb resolves', async () => {
+    expect(await loadWith(new Error('db boom'))).toEqual({ threw: false });
+    expect(LOG()).toHaveLength(1);
+    expect(reasonOf(LOG()[0])).toBe('db boom');
+  });
+  it('control ks1868 C2: a plain string is logged without a message and loadFromDb resolves', async () => {
+    expect(await loadWith('plain boom')).toEqual({ threw: false });
+    expect(LOG()).toHaveLength(1);
+    expect(reasonOf(LOG()[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: a revoked Proxy is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await loadWith(revokedProxy())).toEqual({ threw: false });
+    expect(LOG()).toHaveLength(1);
+    expect(reasonOf(LOG()[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an Error whose message getter throws is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await loadWith(getterThrows())).toEqual({ threw: false });
+    expect(LOG()).toHaveLength(1);
+    expect(reasonOf(LOG()[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R3: an Error whose message is a Symbol is logged as text and loadFromDb resolves, as for an ordinary Error', async () => {
+    expect(await loadWith(withMessage(Symbol('ks1868')))).toEqual({ threw: false });
+    expect(LOG()).toHaveLength(1);
+    expect(reasonOf(LOG()[0])).toBe('Symbol(ks1868)');
+  });
+});

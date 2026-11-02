@@ -1,0 +1,141 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -69,2 +69,10 @@
+ // Initialize repository on module load
+-initRepo().catch((err) => logger.error('Failed to init repo', { error: err instanceof Error ? err.message : String(err) }));
++initRepo().catch((err) => {
++  let reason: string;
++  try {
++    reason = err instanceof Error ? err.message : String(err);
++  } catch {
++    reason = 'unreadable thrown value';
++  }
++  logger.error('Failed to init repo', { error: reason });
++});
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-init-repo-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-init-repo-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-init-repo-catch-unreadable-throw.test.ts
+@@ -0,0 +1,121 @@
++// KS-1868 (operator 90 screen, originate certifications router): services/originate/src/routes/certifications.ts starts the
++// repository at module load with `initRepo().catch((err) => logger.error('Failed to init repo', { error: err instanceof Error ?
++// err.message : String(err) }))` (line 70). When the rejection value cannot be read (a revoked Proxy throws on `instanceof`;
++// an Error whose message getter throws, throws on `.message`; an object with a null prototype throws in `String(...)`) the
++// arrow throws before it logs: the rejection of the `.catch` chain is unhandled (the service's unhandledRejection handler
++// then runs its shutdown path). Cells: load the real router with the repository stand-in rejecting with the value; assert the
++// failure is logged as text and nothing is left unhandled (jest fails the running test on an unhandled rejection). The
++// stand-in rejects with a plain function, not jest.fn(): a spy could inspect a revoked Proxy and fail before the code under
++// test saw it. Mocks follow ks1844-get-certification-by-id-answers-a-hostile-throw.test.ts. No database, no network.
++const mockState: { toThrow: unknown; errored: unknown[][] } = { toThrow: undefined, errored: [] };
++
++jest.mock('../repositories/certificationRepo', () => ({
++  initRepo: (..._args: unknown[]) => Promise.reject(mockState.toThrow),
++  getCertification: jest.fn(),
++  saveCertification: jest.fn(),
++  listCertifications: jest.fn(),
++  saveShare: jest.fn(),
++  getSharesByCertification: jest.fn(),
++  getLineageEvents: jest.fn(),
++  deleteCertification: jest.fn(),
++  reserveCertificationRow: jest.fn(),
++}));
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: jest.fn(async () => []), $executeRaw: jest.fn(async () => 1), $executeRawUnsafe: jest.fn() },
++}));
++jest.mock('../services/chargeEvents', () => ({
++  createChargeEvent: jest.fn(),
++  getChargeEventsByCertification: jest.fn(),
++}));
++jest.mock('../utils/notificationClient', () => ({
++  notifyDocumentCertified: jest.fn(async () => undefined),
++  notifyDocumentRevoked: jest.fn(async () => undefined),
++  notifyDocumentShared: jest.fn(async () => undefined),
++}));
++jest.mock('../events', () => ({
++  publishEvent: jest.fn(async () => undefined),
++  EventTypes: { CERTIFICATION_ISSUED: 'certification.issued' },
++}));
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: jest.fn(),
++  saveDocument: jest.fn(async () => undefined),
++  assertNoCycle: jest.fn(async () => undefined),
++  generateContentHash: jest.fn(() => 'hash'),
++}));
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    warn: () => undefined,
++    error: (...args: unknown[]) => {
++      mockState.errored.push(args);
++    },
++  },
++}));
++
++const INIT = 'Failed to init repo';
++
++beforeEach(() => {
++  mockState.toThrow = undefined;
++  mockState.errored.length = 0;
++  jest.resetModules();
++});
++
++/** Load the real router (its module-load initRepo() rejects with the value) and let the rejection settle. */
++async function loadWith(value: unknown): Promise<unknown[][]> {
++  mockState.toThrow = value;
++  require('../routes/certifications');
++  await new Promise<void>((resolve) => setImmediate(resolve));
++  await new Promise<void>((resolve) => setImmediate(resolve));
++  return mockState.errored.filter((a) => a[0] === INIT);
++}
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (a: unknown[] | undefined): string => {
++  const e = (a?.[1] as { error?: unknown } | undefined)?.error;
++  return typeof e === 'string' ? e : '<' + typeof e + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 certifications router: the module-load initRepo failure is logged as text for a hostile rejection value', () => {
++  it('control ks1868 C1: an ordinary Error rejection is logged with its message', async () => {
++    const logs = await loadWith(new Error('init boom'));
++    expect(logs).toHaveLength(1);
++    expect(reasonOf(logs[0])).toBe('init boom');
++  });
++  it('control ks1868 C2: a plain string rejection is logged as that string', async () => {
++    const logs = await loadWith('init string');
++    expect(logs).toHaveLength(1);
++    expect(reasonOf(logs[0])).toBe('init string');
++  });
++  it('RED ks1868 R1: a revoked Proxy rejection is logged as text, as for an ordinary Error', async () => {
++    const logs = await loadWith(revokedProxy());
++    expect(logs).toHaveLength(1);
++    expect(reasonOf(logs[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws is logged as text, as for an ordinary Error', async () => {
++    const logs = await loadWith(getterThrows());
++    expect(logs).toHaveLength(1);
++    expect(reasonOf(logs[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: an object with no prototype (String() throws) is logged as text, as for an ordinary Error', async () => {
++    const logs = await loadWith(Object.create(null));
++    expect(logs).toHaveLength(1);
++    expect(reasonOf(logs[0])).toBe('unreadable thrown value');
++  });
++});

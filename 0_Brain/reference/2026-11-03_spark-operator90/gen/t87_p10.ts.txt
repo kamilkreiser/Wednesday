@@ -1,0 +1,144 @@
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
+
+// KS-1868 (operator 86 screen, transfer db module): the pg pool 'error' listener (line 36) and the boot-work catch of
+// runDbReadyHook (line 96) of services/transfer/src/db.ts pass `err.message` / `err?.message` straight into dbLog's meta
+// object, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the
+// listener / the catch itself throw: an exception thrown by a listener of the pool's 'error' event escapes the EventEmitter
+// and is an uncaught exception, and a throwing runDbReadyHook makes initDb REJECT instead of resolving with the availability
+// flag; an Error whose message is not a string (a Symbol) is handed to JSON.stringify uncoerced and silently dropped from the
+// line. The cells emit such a value to the captured listener / make the onReady hook reject with it and assert the listener
+// returns, initDb resolves and the line carries text (the constant when the value cannot be turned into text). Harness: the
+// real module with pg replaced by a plain stand-in Pool (it hands over the 'error' listener; its query answers the probe) and
+// console.log replaced by a plain recording function (no database).
+const h = vi.hoisted(() => ({
+  listener: undefined as undefined | ((e: unknown) => void),
+  lines: [] as string[],
+}));
+
+vi.mock('pg', () => ({
+  Pool: function PoolMock() {
+    return {
+      query: async () => ({ rows: [{ ok: 1 }] }),
+      on: (event: string, fn: (e: unknown) => void) => {
+        if (event === 'error') h.listener = fn;
+      },
+      end: async () => undefined,
+      connect: async () => undefined,
+    };
+  },
+}));
+
+type Db = typeof import('../db');
+const realLog = console.log;
+const realUrl = process.env.DATABASE_URL;
+afterAll(() => {
+  console.log = realLog;
+  if (realUrl === undefined) delete process.env.DATABASE_URL;
+  else process.env.DATABASE_URL = realUrl;
+});
+beforeEach(() => {
+  h.listener = undefined;
+  h.lines.length = 0;
+  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
+  console.log = (...args: unknown[]) => {
+    if (typeof args[0] === 'string') h.lines.push(args[0]);
+  };
+});
+
+async function freshDb(): Promise<Db> {
+  vi.resetModules();
+  return import('../db');
+}
+async function emit(value: unknown): Promise<{ threw: boolean }> {
+  const db = await freshDb();
+  db.getPool();
+  try {
+    (h.listener as (e: unknown) => void)(value);
+    return { threw: false };
+  } catch {
+    return { threw: true };
+  }
+}
+async function hook(value: unknown): Promise<{ ok: boolean; value: boolean | undefined }> {
+  const db = await freshDb();
+  try {
+    return {
+      ok: true,
+      value: await db.initDb(async () => {
+        throw value;
+      }),
+    };
+  } catch {
+    return { ok: false, value: undefined };
+  }
+}
+const LINE = (message: string): Record<string, unknown>[] =>
+  h.lines.map((l) => JSON.parse(l) as Record<string, unknown>).filter((o) => o.message === message);
+const POOL = 'DB pool unexpected error';
+const HOOK = 'DB ready boot work failed';
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 the pool error listener and the boot-work catch survive and log text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error reaching the pool listener does not throw and is logged with its message', async () => {
+    expect(await emit(new Error('pool boom'))).toEqual({ threw: false });
+    expect(LINE(POOL)).toHaveLength(1);
+    expect(reasonOf(LINE(POOL)[0])).toBe('pool boom');
+  });
+  it('control ks1868 C2: a plain string reaching the pool listener does not throw and is logged without a message', async () => {
+    expect(await emit('plain boom')).toEqual({ threw: false });
+    expect(LINE(POOL)).toHaveLength(1);
+    expect(reasonOf(LINE(POOL)[0])).toBe('<undefined>');
+  });
+  it('control ks1868 C3: an ordinary Error from the onReady hook leaves initDb resolving true and is logged with its message', async () => {
+    expect(await hook(new Error('hydrate failed'))).toEqual({ ok: true, value: true });
+    expect(LINE(HOOK)).toHaveLength(1);
+    expect(reasonOf(LINE(HOOK)[0])).toBe('hydrate failed');
+  });
+  it('control ks1868 C4: a thrown number from the onReady hook leaves initDb resolving true and is logged without a message', async () => {
+    expect(await hook(42)).toEqual({ ok: true, value: true });
+    expect(LINE(HOOK)).toHaveLength(1);
+    expect(reasonOf(LINE(HOOK)[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: a revoked Proxy reaching the pool listener does not throw and is logged as text, as for an ordinary Error', async () => {
+    expect(await emit(revokedProxy())).toEqual({ threw: false });
+    expect(LINE(POOL)).toHaveLength(1);
+    expect(reasonOf(LINE(POOL)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an Error whose message is a Symbol reaching the pool listener does not throw and is logged as text, as for an ordinary Error', async () => {
+    expect(await emit(withMessage(Symbol('ks1868')))).toEqual({ threw: false });
+    expect(LINE(POOL)).toHaveLength(1);
+    expect(reasonOf(LINE(POOL)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: an onReady hook failure that is a revoked Proxy leaves initDb resolving true and is logged as text, as for an ordinary Error', async () => {
+    expect(await hook(revokedProxy())).toEqual({ ok: true, value: true });
+    expect(LINE(HOOK)).toHaveLength(1);
+    expect(reasonOf(LINE(HOOK)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R4: an onReady hook failure that is an Error whose message getter throws leaves initDb resolving true and is logged as text, as for an ordinary Error', async () => {
+    expect(await hook(getterThrows())).toEqual({ ok: true, value: true });
+    expect(LINE(HOOK)).toHaveLength(1);
+    expect(reasonOf(LINE(HOOK)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R5: an onReady hook failure that is an Error whose message is a Symbol leaves initDb resolving true and is logged as text, as for an ordinary Error', async () => {
+    expect(await hook(withMessage(Symbol('ks1868')))).toEqual({ ok: true, value: true });
+    expect(LINE(HOOK)).toHaveLength(1);
+    expect(reasonOf(LINE(HOOK)[0])).toBe('Symbol(ks1868)');
+  });
+});

@@ -1,0 +1,106 @@
+import { describe, it, expect } from 'vitest';
+import { runAnchorStatusUpdate, type RunStatusUpdateDeps } from '../anchorStatusUpdate';
+
+// KS-1868 (operator 87 screen, anchoring anchorStatusUpdate module): the catch of runAnchorStatusUpdate (line 225) passes
+// `err?.message` straight into the injected log call's meta object, unguarded. A thrown value whose read throws (a revoked
+// Proxy, an Error whose message getter throws) makes the catch itself throw, so runAnchorStatusUpdate REJECTS instead of
+// answering null as its contract says ("the statement threw" is null, logged at warn, never rethrown); an Error whose message
+// is not a string (a Symbol) is passed to the log uncoerced. The cells make the injected query reject with such a value and
+// assert the call resolves null and the warn line carries text (the constant when the value cannot be turned into text).
+// Harness: the real module; the four dependencies are plain functions (no database, no network).
+type Line = { level: string; message: string; meta: Record<string, unknown> | undefined };
+
+function deps(query: () => Promise<unknown>, lines: Line[]): RunStatusUpdateDeps {
+  return {
+    isDbAvailable: () => true,
+    ensureTables: async () => undefined,
+    query,
+    log: (level, message, meta) => {
+      lines.push({ level, message, meta });
+    },
+  };
+}
+async function run(failure: { value: unknown } | undefined): Promise<{ ok: boolean; value: number | null | undefined; lines: Line[] }> {
+  const lines: Line[] = [];
+  const query = async (): Promise<unknown> => {
+    if (failure) throw failure.value;
+    return { rowCount: 1 };
+  };
+  try {
+    return { ok: true, value: await runAnchorStatusUpdate(deps(query, lines), 'anchor-1', { status: 'failed' }), lines };
+  } catch {
+    return { ok: false, value: undefined, lines };
+  }
+}
+const FAILED = 'Failed to update anchor status in DB';
+const failedLines = (lines: Line[]): Line[] => lines.filter((l) => l.message === FAILED);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: Line | undefined): string => (typeof l?.meta?.error === 'string' ? (l.meta.error as string) : '<' + typeof l?.meta?.error + '>');
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 runAnchorStatusUpdate answers null and logs text for a hostile thrown value', () => {
+  it('control ks1868 C1: an update that matches a row resolves its row count and logs no failure', async () => {
+    const r = await run(undefined);
+    expect(r.ok).toBe(true);
+    expect(r.value).toBe(1);
+    expect(failedLines(r.lines)).toHaveLength(0);
+  });
+  it('control ks1868 C2: an ordinary Error from the query resolves null and is logged at warn with its message', async () => {
+    const r = await run({ value: new Error('update boom') });
+    expect(r.ok).toBe(true);
+    expect(r.value).toBeNull();
+    expect(failedLines(r.lines)).toHaveLength(1);
+    expect(failedLines(r.lines)[0].level).toBe('warn');
+    expect(reasonOf(failedLines(r.lines)[0])).toBe('update boom');
+  });
+  it('control ks1868 C3: a thrown plain string resolves null and is logged without a message', async () => {
+    const r = await run({ value: 'plain boom' });
+    expect(r.ok).toBe(true);
+    expect(r.value).toBeNull();
+    expect(failedLines(r.lines)).toHaveLength(1);
+    expect(reasonOf(failedLines(r.lines)[0])).toBe('<undefined>');
+  });
+  it('control ks1868 C4: a thrown number resolves null and is logged without a message', async () => {
+    const r = await run({ value: 42 });
+    expect(r.ok).toBe(true);
+    expect(r.value).toBeNull();
+    expect(failedLines(r.lines)).toHaveLength(1);
+    expect(reasonOf(failedLines(r.lines)[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: a revoked Proxy from the query resolves null and is logged as text, as for an ordinary Error', async () => {
+    const r = await run({ value: revokedProxy() });
+    expect(r.ok).toBe(true);
+    expect(r.value).toBeNull();
+    expect(failedLines(r.lines)).toHaveLength(1);
+    expect(reasonOf(failedLines(r.lines)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an Error whose message getter throws resolves null and is logged as text, as for an ordinary Error', async () => {
+    const r = await run({ value: getterThrows() });
+    expect(r.ok).toBe(true);
+    expect(r.value).toBeNull();
+    expect(failedLines(r.lines)).toHaveLength(1);
+    expect(reasonOf(failedLines(r.lines)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R3: an Error whose message is a Symbol resolves null and is logged as text, as for an ordinary Error', async () => {
+    const r = await run({ value: withMessage(Symbol('ks1868')) });
+    expect(r.ok).toBe(true);
+    expect(r.value).toBeNull();
+    expect(failedLines(r.lines)).toHaveLength(1);
+    expect(reasonOf(failedLines(r.lines)[0])).toBe('Symbol(ks1868)');
+  });
+});

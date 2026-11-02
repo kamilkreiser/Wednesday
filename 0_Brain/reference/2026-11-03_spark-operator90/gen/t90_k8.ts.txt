@@ -1,0 +1,119 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// KS-1868 (operator 90 screen, vc-issuer credential repository): three DB read catches of services/vc-issuer/src/repositories/credentialRepo.ts
+// pass `err?.message` straight into the logger's meta object, unguarded: getById (line 119), getRecordById (line 160) and getByHash
+// (line 188). `?.` guards null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error whose message getter
+// throws) makes the catch throw, so the read REJECTS where an ordinary Error gets a logged warning and the in-memory fallback. The
+// cells make the database stand-in reject the read with such a value and assert the call still resolves with the fallback (nothing
+// is stored in memory, so `undefined`) and the warning carries text. The stand-in rejects with a plain function, not vi.fn(): a
+// spy could inspect a revoked Proxy and fail before the code under test saw it. Harness: the real module with ../db and
+// ../utils/logger replaced by plain stand-ins, as in the sibling ks1868-credentialrepo-loadfromdb suite; the table check
+// (`LIMIT 0`) answers, only the read statement rejects. No database, no network.
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  query: (sql: string) => (/LIMIT 0/i.test(sql) ? Promise.resolve({ rows: [] }) : Promise.reject(h.toThrow)),
+}));
+
+vi.mock('../utils/logger', () => {
+  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
+    h.logs.push({ level, message, meta });
+  };
+  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
+});
+
+import * as repo from '../repositories/credentialRepo';
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.logs.length = 0;
+});
+
+const READ = 'DB read failed';
+const HASH = 'DB hash lookup failed';
+const LOG = (prefix: string) => h.logs.filter((l) => l.message.startsWith(prefix));
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (l: { meta?: Record<string, unknown> } | undefined): string => {
+  const e = l?.meta?.error;
+  return typeof e === 'string' ? e : '<' + typeof e + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+type Out = { threw: boolean; value?: unknown };
+async function run(fn: () => Promise<unknown>, value: unknown): Promise<Out> {
+  h.toThrow = value;
+  try {
+    return { threw: false, value: await fn() };
+  } catch {
+    return { threw: true };
+  }
+}
+const byId = () => repo.getById('cred-ks1868-missing');
+const recordById = () => repo.getRecordById('cred-ks1868-missing');
+const byHash = () => repo.getByHash('hash-ks1868-missing');
+const FALLBACK: Out = { threw: false, value: undefined };
+
+describe('KS-1868 credential repository: the three DB read catches survive a thrown value they cannot read', () => {
+  it('control ks1868 C1: an ordinary Error from getById is logged with its message and the memory fallback answers', async () => {
+    expect(await run(byId, new Error('db boom'))).toEqual(FALLBACK);
+    expect(LOG(READ)).toHaveLength(1);
+    expect(reasonOf(LOG(READ)[0])).toBe('db boom');
+  });
+  it('control ks1868 C2: an ordinary Error from getRecordById is logged with its message and the memory fallback answers', async () => {
+    expect(await run(recordById, new Error('db boom'))).toEqual(FALLBACK);
+    expect(LOG(READ)).toHaveLength(1);
+    expect(reasonOf(LOG(READ)[0])).toBe('db boom');
+  });
+  it('control ks1868 C3: an ordinary Error from getByHash is logged with its message and the memory fallback answers', async () => {
+    expect(await run(byHash, new Error('db boom'))).toEqual(FALLBACK);
+    expect(LOG(HASH)).toHaveLength(1);
+    expect(reasonOf(LOG(HASH)[0])).toBe('db boom');
+  });
+  it('RED ks1868 R1: a revoked Proxy from getById is logged as text and the memory fallback answers', async () => {
+    expect(await run(byId, revokedProxy())).toEqual(FALLBACK);
+    expect(LOG(READ)).toHaveLength(1);
+    expect(reasonOf(LOG(READ)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: an Error whose message getter throws from getById is logged as text and the memory fallback answers', async () => {
+    expect(await run(byId, getterThrows())).toEqual(FALLBACK);
+    expect(LOG(READ)).toHaveLength(1);
+    expect(reasonOf(LOG(READ)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R3: a revoked Proxy from getRecordById is logged as text and the memory fallback answers', async () => {
+    expect(await run(recordById, revokedProxy())).toEqual(FALLBACK);
+    expect(LOG(READ)).toHaveLength(1);
+    expect(reasonOf(LOG(READ)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R4: an Error whose message getter throws from getRecordById is logged as text and the memory fallback answers', async () => {
+    expect(await run(recordById, getterThrows())).toEqual(FALLBACK);
+    expect(LOG(READ)).toHaveLength(1);
+    expect(reasonOf(LOG(READ)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R5: a revoked Proxy from getByHash is logged as text and the memory fallback answers', async () => {
+    expect(await run(byHash, revokedProxy())).toEqual(FALLBACK);
+    expect(LOG(HASH)).toHaveLength(1);
+    expect(reasonOf(LOG(HASH)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R6: an Error whose message getter throws from getByHash is logged as text and the memory fallback answers', async () => {
+    expect(await run(byHash, getterThrows())).toEqual(FALLBACK);
+    expect(LOG(HASH)).toHaveLength(1);
+    expect(reasonOf(LOG(HASH)[0])).toBe('unreadable thrown value');
+  });
+});

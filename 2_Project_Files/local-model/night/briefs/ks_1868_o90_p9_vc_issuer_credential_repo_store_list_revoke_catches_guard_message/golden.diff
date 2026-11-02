@@ -1,0 +1,210 @@
+diff --git a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+--- a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+@@ -93,9 +93,16 @@
+       [credential.id, JSON.stringify(credential), owner.userId, owner.tenantId],
+     );
+   } catch (err: any) {
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.warn('DB write failed for credential — kept in memory', {
+       credentialId: credential.id,
+-      error: err?.message,
++      error: reason,
+     });
+   }
+ }
+@@ -389,6 +396,13 @@
+         total,
+       };
+     } catch (err: any) {
+-      logger.warn('DB list failed — falling back to memory', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('DB list failed — falling back to memory', { error: reason });
+     }
+   }
+@@ -478,6 +492,13 @@
+         [JSON.stringify(revokedCredential), credential.id],
+       );
+     } catch (err: any) {
+-      logger.warn('DB revoke update failed — kept in memory', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('DB revoke update failed — kept in memory', { error: reason });
+     }
+   }
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1868-credentialrepo-store-list-revoke-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1868-credentialrepo-store-list-revoke-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1868-credentialrepo-store-list-revoke-catches-unreadable-throw.test.ts
+@@ -0,0 +1,154 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868 (operator 90 screen, vc-issuer credential repository): three more catches of services/vc-issuer/src/repositories/credentialRepo.ts
++// pass `err?.message` straight into the logger's meta object, unguarded: store (line 98, the DB write), selectList (line 392, reached
++// through list) and revoke (line 481, the DB update). `?.` guards null and undefined only: a thrown value whose read throws (a
++// revoked Proxy, an Error whose message getter throws) makes the catch throw, so the call REJECTS where an ordinary Error gets a
++// logged warning and the in-memory result (store resolves with the credential kept in memory, revoke answers the revoked credential,
++// list answers the memory list). The cells make the database stand-in reject exactly ONE statement kind per cell (the INSERT, the
++// UPDATE or the COUNT) with the value under test. The stand-in rejects with a plain function, not vi.fn(): a spy could inspect a
++// revoked Proxy and fail before the code under test saw it. Harness: the real module with ../db and ../utils/logger replaced by plain
++// stand-ins, as in the sibling ks1868-credentialrepo-loadfromdb suite; no database, no network.
++const h = vi.hoisted(() => ({
++  failOn: '' as string,
++  toThrow: undefined as unknown,
++  logs: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: (sql: string) => {
++    if (/INSERT INTO vc_credentials_store/i.test(sql) && h.failOn === 'insert') return Promise.reject(h.toThrow);
++    if (/UPDATE vc_credentials_store/i.test(sql) && h.failOn === 'update') return Promise.reject(h.toThrow);
++    if (sql.toUpperCase().includes('COUNT(*)') && h.failOn === 'count') return Promise.reject(h.toThrow);
++    return Promise.resolve({ rows: [] });
++  },
++}));
++
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.logs.push({ level, message, meta });
++  };
++  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
++});
++
++import * as repo from '../repositories/credentialRepo';
++
++beforeEach(() => {
++  h.failOn = '';
++  h.toThrow = undefined;
++  h.logs.length = 0;
++});
++
++const WRITE = 'DB write failed for credential';
++const REVOKE = 'DB revoke update failed';
++const LIST = 'DB list failed';
++const LOG = (prefix: string) => h.logs.filter((l) => l.message.startsWith(prefix));
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta?: Record<string, unknown> } | undefined): string => {
++  const e = l?.meta?.error;
++  return typeof e === 'string' ? e : '<' + typeof e + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++const cred = (id: string): any => ({
++  id,
++  type: ['VerifiableCredential'],
++  issuer: 'did:example:issuer',
++  credentialSubject: { documentHash: 'hash-' + id },
++  credentialStatus: { revoked: false },
++});
++
++async function storeWith(value: unknown): Promise<{ threw: boolean }> {
++  h.failOn = 'insert';
++  h.toThrow = value;
++  try {
++    await repo.store(cred('cred-ks1868-store'));
++    return { threw: false };
++  } catch {
++    return { threw: true };
++  }
++}
++async function revokeWith(value: unknown): Promise<{ threw: boolean; revoked?: unknown }> {
++  await repo.store(cred('cred-ks1868-revoke'));
++  h.failOn = 'update';
++  h.toThrow = value;
++  h.logs.length = 0;
++  try {
++    const r = await repo.revoke('cred-ks1868-revoke', 'ks1868');
++    return { threw: false, revoked: (r as any)?.credentialStatus?.revoked };
++  } catch {
++    return { threw: true };
++  }
++}
++async function listWith(value: unknown): Promise<{ threw: boolean; hasTotal?: boolean }> {
++  h.failOn = 'count';
++  h.toThrow = value;
++  try {
++    const r = await repo.list();
++    return { threw: false, hasTotal: typeof r.total === 'number' };
++  } catch {
++    return { threw: true };
++  }
++}
++
++describe('KS-1868 credential repository: the store, revoke and list DB catches survive a thrown value they cannot read', () => {
++  it('control ks1868 C1: an ordinary Error from the store INSERT is logged with its message and store resolves', async () => {
++    expect(await storeWith(new Error('db boom'))).toEqual({ threw: false });
++    expect(LOG(WRITE)).toHaveLength(1);
++    expect(LOG(WRITE)[0].meta).toEqual({ credentialId: 'cred-ks1868-store', error: 'db boom' });
++  });
++  it('control ks1868 C2: an ordinary Error from the revoke UPDATE is logged with its message and the revoked credential is answered', async () => {
++    expect(await revokeWith(new Error('db boom'))).toEqual({ threw: false, revoked: true });
++    expect(LOG(REVOKE)).toHaveLength(1);
++    expect(reasonOf(LOG(REVOKE)[0])).toBe('db boom');
++  });
++  it('control ks1868 C3: an ordinary Error from the list COUNT is logged with its message and the memory list is answered', async () => {
++    expect(await listWith(new Error('db boom'))).toEqual({ threw: false, hasTotal: true });
++    expect(LOG(LIST)).toHaveLength(1);
++    expect(reasonOf(LOG(LIST)[0])).toBe('db boom');
++  });
++  it('RED ks1868 R1: a revoked Proxy from the store INSERT is logged as text and store resolves', async () => {
++    expect(await storeWith(revokedProxy())).toEqual({ threw: false });
++    expect(LOG(WRITE)).toHaveLength(1);
++    expect(LOG(WRITE)[0].meta).toEqual({ credentialId: 'cred-ks1868-store', error: 'unreadable thrown value' });
++  });
++  it('RED ks1868 R2: an Error whose message getter throws from the store INSERT is logged as text and store resolves', async () => {
++    expect(await storeWith(getterThrows())).toEqual({ threw: false });
++    expect(LOG(WRITE)).toHaveLength(1);
++    expect(LOG(WRITE)[0].meta).toEqual({ credentialId: 'cred-ks1868-store', error: 'unreadable thrown value' });
++  });
++  it('RED ks1868 R3: a revoked Proxy from the revoke UPDATE is logged as text and the revoked credential is answered', async () => {
++    expect(await revokeWith(revokedProxy())).toEqual({ threw: false, revoked: true });
++    expect(LOG(REVOKE)).toHaveLength(1);
++    expect(reasonOf(LOG(REVOKE)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: an Error whose message getter throws from the revoke UPDATE is logged as text and the revoked credential is answered', async () => {
++    expect(await revokeWith(getterThrows())).toEqual({ threw: false, revoked: true });
++    expect(LOG(REVOKE)).toHaveLength(1);
++    expect(reasonOf(LOG(REVOKE)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: a revoked Proxy from the list COUNT is logged as text and the memory list is answered', async () => {
++    expect(await listWith(revokedProxy())).toEqual({ threw: false, hasTotal: true });
++    expect(LOG(LIST)).toHaveLength(1);
++    expect(reasonOf(LOG(LIST)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R6: an Error whose message getter throws from the list COUNT is logged as text and the memory list is answered', async () => {
++    expect(await listWith(getterThrows())).toEqual({ threw: false, hasTotal: true });
++    expect(LOG(LIST)).toHaveLength(1);
++    expect(reasonOf(LOG(LIST)[0])).toBe('unreadable thrown value');
++  });
++});

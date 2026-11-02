@@ -1,0 +1,38 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o89_p5_originate_events_redis_error_listener_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/events.ts b/Blockchain/Dev/services/originate/src/events.ts
+--- a/Blockchain/Dev/services/originate/src/events.ts
++++ b/Blockchain/Dev/services/originate/src/events.ts
+@@ -88,3 +88,10 @@
+     redis.on('error', (err) => {
+-      logger.debug('EventBus Redis error (non-fatal)', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.debug('EventBus Redis error (non-fatal)', { error: reason });
+     });
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o89_p8_originate_events_init_catch_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/events.ts b/Blockchain/Dev/services/originate/src/events.ts
+--- a/Blockchain/Dev/services/originate/src/events.ts
++++ b/Blockchain/Dev/services/originate/src/events.ts
+@@ -92,7 +92,14 @@
+     logger.info('EventBus initialised for originate service');
+     return true;
+   } catch (err: any) {
+-    logger.warn('Failed to initialise EventBus', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to initialise EventBus', { error: reason });
+     return false;
+   }
+ }
+

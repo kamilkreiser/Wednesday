@@ -1,0 +1,156 @@
+import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
+
+// KS-1868 (operator 86 screen, transfer approval workflow service): the seed catch (line 345), the DB-not-ready catch (line 356)
+// and the processEscalations catch (line 629) of services/transfer/src/services/approvalWorkflowService.ts pass
+// `err?.message` straight into console.error / console.warn, unguarded. A thrown value whose read throws (a revoked Proxy, an
+// Error whose message getter throws) makes the catch itself throw, so verifyDbReady and processEscalations REJECT instead of
+// answering (the boot probe resolves; processEscalations returns its zero counts); a Symbol message is handed to the console
+// uncoerced. The cells make the database stand-in reject with such a value and assert the answer and the logged text (the
+// constant when the value cannot be turned into text). Harness: the real module with ../db and ./delegationService replaced by
+// plain stand-ins and console.error / console.warn replaced by plain recording functions (no database).
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  mode: 'probe' as 'probe' | 'seed' | 'escalate',
+  upserts: 0,
+  logged: [] as unknown[][],
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  query: (sql: string) => {
+    const text = String(sql);
+    if (h.mode === 'probe') return Promise.reject(h.toThrow);
+    if (h.mode === 'seed') {
+      if (/SELECT 1 FROM svc_approval_workflows/.test(text)) return Promise.resolve({ rows: [], rowCount: 0 });
+      h.upserts += 1;
+      return Promise.reject(h.toThrow);
+    }
+    return Promise.reject(h.toThrow);
+  },
+}));
+vi.mock('../services/delegationService', () => ({ delegationService: {} }));
+
+type Mod = typeof import('../services/approvalWorkflowService');
+let mod: Mod;
+const realError = console.error;
+const realWarn = console.warn;
+beforeAll(async () => {
+  mod = await import('../services/approvalWorkflowService');
+});
+afterAll(() => {
+  console.error = realError;
+  console.warn = realWarn;
+});
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.mode = 'probe';
+  h.upserts = 0;
+  h.logged.length = 0;
+  console.error = (...args: unknown[]) => {
+    h.logged.push(args);
+  };
+  console.warn = (...args: unknown[]) => {
+    h.logged.push(args);
+  };
+});
+
+async function settle<T>(p: () => Promise<T>): Promise<{ ok: boolean; value: T | undefined }> {
+  try {
+    return { ok: true, value: await p() };
+  } catch {
+    return { ok: false, value: undefined };
+  }
+}
+const probe = () => {
+  h.mode = 'probe';
+  return settle(() => mod.verifyDbReady());
+};
+const seed = () => {
+  h.mode = 'seed';
+  return settle(() => mod.verifyDbReady());
+};
+const escalate = () => {
+  h.mode = 'escalate';
+  return settle(() => mod.approvalWorkflowService.processEscalations());
+};
+const LINES = (prefix: string) => h.logged.filter((c) => typeof c[0] === 'string' && (c[0] as string).startsWith(prefix));
+const PROBE = '[approvalWorkflowService] DB tables not ready:';
+const SEED = '[approvalWorkflowService] Failed to seed workflow';
+const ESC = '[approvalWorkflowService] processEscalations error:';
+/** The logged message argument as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (c: unknown[] | undefined): string => (typeof c?.[1] === 'string' ? (c[1] as string) : '<' + typeof c?.[1] + '>');
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const ZERO = { escalatedCount: 0, timedOutCount: 0 };
+
+describe('KS-1868 the approval workflow catches answer as for an ordinary Error and log text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error in the boot probe resolves and is logged with its message', async () => {
+    h.toThrow = new Error('no table');
+    expect(await probe()).toEqual({ ok: true, value: undefined });
+    expect(LINES(PROBE)).toHaveLength(1);
+    expect(reasonOf(LINES(PROBE)[0])).toBe('no table');
+  });
+  it('control ks1868 C2: an ordinary Error in every seed upsert resolves and is logged once per workflow with its message', async () => {
+    h.toThrow = new Error('upsert failed');
+    expect(await seed()).toEqual({ ok: true, value: undefined });
+    expect(h.upserts).toBeGreaterThan(0);
+    expect(LINES(SEED)).toHaveLength(h.upserts);
+    expect(reasonOf(LINES(SEED)[0])).toBe('upsert failed');
+  });
+  it('control ks1868 C3: an ordinary Error in processEscalations returns the zero counts and is logged with its message', async () => {
+    h.toThrow = new Error('select failed');
+    expect(await escalate()).toEqual({ ok: true, value: ZERO });
+    expect(LINES(ESC)).toHaveLength(1);
+    expect(reasonOf(LINES(ESC)[0])).toBe('select failed');
+  });
+  it('control ks1868 C4: a thrown plain string in processEscalations returns the zero counts and is logged without a message', async () => {
+    h.toThrow = 'plain boom';
+    expect(await escalate()).toEqual({ ok: true, value: ZERO });
+    expect(LINES(ESC)).toHaveLength(1);
+    expect(reasonOf(LINES(ESC)[0])).toBe('<undefined>');
+  });
+  it('RED ks1868 R1: a boot probe failure that is a revoked Proxy resolves and is logged as text, as for an ordinary Error', async () => {
+    h.toThrow = revokedProxy();
+    expect(await probe()).toEqual({ ok: true, value: undefined });
+    expect(LINES(PROBE)).toHaveLength(1);
+    expect(reasonOf(LINES(PROBE)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R2: a boot probe failure that is an Error whose message is a Symbol resolves and is logged as text, as for an ordinary Error', async () => {
+    h.toThrow = withMessage(Symbol('ks1868'));
+    expect(await probe()).toEqual({ ok: true, value: undefined });
+    expect(LINES(PROBE)).toHaveLength(1);
+    expect(reasonOf(LINES(PROBE)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R3: a seed upsert failure that is a revoked Proxy resolves and is logged as text for every workflow, as for an ordinary Error', async () => {
+    h.toThrow = revokedProxy();
+    expect(await seed()).toEqual({ ok: true, value: undefined });
+    expect(h.upserts).toBeGreaterThan(0);
+    expect(LINES(SEED)).toHaveLength(h.upserts);
+    expect(reasonOf(LINES(SEED)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R4: a seed upsert failure that is an Error whose message is a Symbol resolves and is logged as text for every workflow, as for an ordinary Error', async () => {
+    h.toThrow = withMessage(Symbol('ks1868'));
+    expect(await seed()).toEqual({ ok: true, value: undefined });
+    expect(h.upserts).toBeGreaterThan(0);
+    expect(LINES(SEED)).toHaveLength(h.upserts);
+    expect(reasonOf(LINES(SEED)[0])).toBe('Symbol(ks1868)');
+  });
+  it('RED ks1868 R5: an escalation failure that is a revoked Proxy returns the zero counts and is logged as text, as for an ordinary Error', async () => {
+    h.toThrow = revokedProxy();
+    expect(await escalate()).toEqual({ ok: true, value: ZERO });
+    expect(LINES(ESC)).toHaveLength(1);
+    expect(reasonOf(LINES(ESC)[0])).toBe('unreadable thrown value');
+  });
+  it('RED ks1868 R6: an escalation failure that is an Error whose message is a Symbol returns the zero counts and is logged as text, as for an ordinary Error', async () => {
+    h.toThrow = withMessage(Symbol('ks1868'));
+    expect(await escalate()).toEqual({ ok: true, value: ZERO });
+    expect(LINES(ESC)).toHaveLength(1);
+    expect(reasonOf(LINES(ESC)[0])).toBe('Symbol(ks1868)');
+  });
+});

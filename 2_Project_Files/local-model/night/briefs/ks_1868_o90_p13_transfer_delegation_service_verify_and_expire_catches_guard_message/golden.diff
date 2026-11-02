@@ -1,0 +1,148 @@
+diff --git a/Blockchain/Dev/services/transfer/src/services/delegationService.ts b/Blockchain/Dev/services/transfer/src/services/delegationService.ts
+--- a/Blockchain/Dev/services/transfer/src/services/delegationService.ts
++++ b/Blockchain/Dev/services/transfer/src/services/delegationService.ts
+@@ -167,6 +167,13 @@
+   try {
+     await query('SELECT 1 FROM svc_transfer_delegations LIMIT 1');
+   } catch (err: any) {
+-    console.warn('[delegationService] DB tables not ready:', err?.message);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.warn('[delegationService] DB tables not ready:', reason);
+   }
+ }
+@@ -491,7 +498,14 @@
+       );
+       return result.rowCount ?? 0;
+     } catch (err: any) {
+-      console.error('[delegationService] processExpiredDelegations error:', err?.message);
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      console.error('[delegationService] processExpiredDelegations error:', reason);
+       return 0;
+     }
+   }
+diff --git a/Blockchain/Dev/services/transfer/src/__tests__/ks1868-delegation-service-db-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/transfer/src/__tests__/ks1868-delegation-service-db-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/transfer/src/__tests__/ks1868-delegation-service-db-catches-unreadable-throw.test.ts
+@@ -0,0 +1,109 @@
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++
++// KS-1868 (operator 90 screen, transfer delegation service): two catches of services/transfer/src/services/delegationService.ts pass
++// `err?.message` straight into a console call, unguarded: verifyDbReady (line 170, console.warn) and processExpiredDelegations (line 494,
++// console.error). `?.` guards null and undefined only: a thrown value whose read throws (a revoked Proxy, an Error whose message
++// getter throws) makes the catch throw while the call's arguments are built, so the call REJECTS where an ordinary Error gets a
++// console line and the documented outcome (verifyDbReady resolves; processExpiredDelegations answers 0). The cells make the database
++// stand-in reject with such a value, replace console.warn and console.error with plain recorders, and assert the call still resolves
++// with that outcome and the recorded argument is text. The stand-in rejects with a plain function, not vi.fn(): a spy could inspect a
++// revoked Proxy and fail before the code under test saw it. Harness: the real module with ../db replaced by a plain stand-in; no
++// database, no network.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  warns: [] as unknown[][],
++  errors: [] as unknown[][],
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: (..._args: unknown[]) => Promise.reject(h.toThrow),
++}));
++
++import { verifyDbReady, delegationService } from '../services/delegationService';
++
++const realWarn = console.warn;
++const realError = console.error;
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.warns.length = 0;
++  h.errors.length = 0;
++  console.warn = (...args: unknown[]) => {
++    h.warns.push(args);
++  };
++  console.error = (...args: unknown[]) => {
++    h.errors.push(args);
++  };
++});
++afterEach(() => {
++  console.warn = realWarn;
++  console.error = realError;
++});
++
++const WARN = '[delegationService] DB tables not ready:';
++const ERROR = '[delegationService] processExpiredDelegations error:';
++/** The second console argument as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const argOf = (calls: unknown[][], first: string): string => {
++  const c = calls.filter((a) => a[0] === first);
++  if (c.length !== 1) return '<' + c.length + ' calls>';
++  return typeof c[0][1] === 'string' ? (c[0][1] as string) : '<' + typeof c[0][1] + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++async function verifyWith(value: unknown): Promise<{ threw: boolean }> {
++  h.toThrow = value;
++  try {
++    await verifyDbReady();
++    return { threw: false };
++  } catch {
++    return { threw: true };
++  }
++}
++async function expireWith(value: unknown): Promise<{ threw: boolean; count?: number }> {
++  h.toThrow = value;
++  try {
++    return { threw: false, count: await delegationService.processExpiredDelegations() };
++  } catch {
++    return { threw: true };
++  }
++}
++
++describe('KS-1868 delegation service: the verifyDbReady and processExpiredDelegations catches survive a thrown value they cannot read', () => {
++  it('control ks1868 C1: an ordinary Error from verifyDbReady is written with its message and the call resolves', async () => {
++    expect(await verifyWith(new Error('db boom'))).toEqual({ threw: false });
++    expect(argOf(h.warns, WARN)).toBe('db boom');
++  });
++  it('control ks1868 C2: an ordinary Error from processExpiredDelegations is written with its message and 0 is answered', async () => {
++    expect(await expireWith(new Error('db boom'))).toEqual({ threw: false, count: 0 });
++    expect(argOf(h.errors, ERROR)).toBe('db boom');
++  });
++  it('RED ks1868 R1: a revoked Proxy from verifyDbReady is written as text and the call resolves', async () => {
++    expect(await verifyWith(revokedProxy())).toEqual({ threw: false });
++    expect(argOf(h.warns, WARN)).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws from verifyDbReady is written as text and the call resolves', async () => {
++    expect(await verifyWith(getterThrows())).toEqual({ threw: false });
++    expect(argOf(h.warns, WARN)).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: a revoked Proxy from processExpiredDelegations is written as text and 0 is answered', async () => {
++    expect(await expireWith(revokedProxy())).toEqual({ threw: false, count: 0 });
++    expect(argOf(h.errors, ERROR)).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R4: an Error whose message getter throws from processExpiredDelegations is written as text and 0 is answered', async () => {
++    expect(await expireWith(getterThrows())).toEqual({ threw: false, count: 0 });
++    expect(argOf(h.errors, ERROR)).toBe('unreadable thrown value');
++  });
++});

@@ -1,0 +1,136 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o89_q1_prism_db_pool_error_and_ready_hook_catches_guard_message
+diff --git a/Blockchain/Dev/services/prism/src/db.ts b/Blockchain/Dev/services/prism/src/db.ts
+--- a/Blockchain/Dev/services/prism/src/db.ts
++++ b/Blockchain/Dev/services/prism/src/db.ts
+@@ -36,5 +36,12 @@
+     pool.on('error', (err: Error) => {
+-      dbLog('error', 'DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      dbLog('error', 'DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+@@ -96,6 +103,13 @@
+     await onDbReady();
+   } catch (err: any) {
+     // Boot work failing must not un-flag an otherwise reachable DB.
+-    dbLog('error', 'DB ready boot work failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    dbLog('error', 'DB ready boot work failed', { error: reason });
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o89_q2_referral_db_pool_error_and_ready_hook_catches_guard_message
+diff --git a/Blockchain/Dev/services/referral/src/db.ts b/Blockchain/Dev/services/referral/src/db.ts
+--- a/Blockchain/Dev/services/referral/src/db.ts
++++ b/Blockchain/Dev/services/referral/src/db.ts
+@@ -36,5 +36,12 @@
+     pool.on('error', (err: Error) => {
+-      dbLog('error', 'DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      dbLog('error', 'DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+@@ -94,6 +101,13 @@
+     await onDbReady();
+   } catch (err: any) {
+     // Boot work failing must not un-flag an otherwise reachable DB.
+-    dbLog('error', 'DB ready boot work failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    dbLog('error', 'DB ready boot work failed', { error: reason });
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o89_q3_billing_db_pool_error_and_ready_hook_catches_guard_message
+diff --git a/Blockchain/Dev/services/billing/src/db.ts b/Blockchain/Dev/services/billing/src/db.ts
+--- a/Blockchain/Dev/services/billing/src/db.ts
++++ b/Blockchain/Dev/services/billing/src/db.ts
+@@ -32,5 +32,12 @@
+     pool.on('error', (err: Error) => {
+-      logger.error('DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+@@ -77,6 +84,13 @@
+     await onDbReady();
+   } catch (err: any) {
+     // Boot work failing must not un-flag an otherwise reachable DB.
+-    logger.error('DB ready boot work failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB ready boot work failed', { error: reason });
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o89_q4_vc_issuer_db_pool_error_and_ready_hook_catches_guard_message
+diff --git a/Blockchain/Dev/services/vc-issuer/src/db.ts b/Blockchain/Dev/services/vc-issuer/src/db.ts
+--- a/Blockchain/Dev/services/vc-issuer/src/db.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/db.ts
+@@ -31,5 +31,12 @@
+     pool.on('error', (err: Error) => {
+-      logger.error('DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+@@ -74,6 +81,13 @@
+     await onDbReady();
+   } catch (err: any) {
+     // Boot work failing must not un-flag an otherwise reachable DB.
+-    logger.error('DB ready boot work failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB ready boot work failed', { error: reason });
+   }
+ }
+

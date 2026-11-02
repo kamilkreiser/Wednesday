@@ -1,0 +1,46 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o89_p6_auth_issuer_cert_sweep_fire_and_forget_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts b/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
+--- a/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
++++ b/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
+@@ -106,12 +106,18 @@
+         name: row.name,
+         validUntil: row.validUntil.toISOString(),
+         daysRemaining: days,
+-      }).catch((err) =>
++      }).catch((err) => {
++        let reason: string;
++        try {
++          reason = String(err instanceof Error ? err.message : err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.warn('publishEvent ISSUER_CERT_EXPIRING_SOON failed', {
+           certId: row.id,
+           daysRemaining: days,
+-          error: err instanceof Error ? err.message : String(err),
+-        }),
+-      );
++          error: reason,
++        });
++      });
+     }
+   }
+@@ -151,7 +157,13 @@
+   // Run once at startup so any cert that expired while the service was
+   // down gets caught immediately. Errors are logged inside runIssuerCertSweep.
+-  runIssuerCertSweep().catch((err) =>
++  runIssuerCertSweep().catch((err) => {
++    let reason: string;
++    try {
++      reason = String(err instanceof Error ? err.message : err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('Initial issuer cert sweep failed', {
+-      error: err instanceof Error ? err.message : String(err),
+-    }),
+-  );
++      error: reason,
++    });
++  });
+

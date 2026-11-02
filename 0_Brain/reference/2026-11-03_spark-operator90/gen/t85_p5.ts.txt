@@ -1,0 +1,160 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import express from 'express';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+
+// KS-1868 (operator 85 screen, gateway brute force): the Redis-error catch of createBruteForceProtection in
+// services/api-gateway/src/middleware/security.ts logs `{ error: error instanceof Error ? error.message : String(error) }` with
+// the read INSIDE the logger call's arguments, unguarded, in a catch that exists to let the request through (fail open). A thrown
+// value whose read throws (a revoked Proxy: `instanceof` throws; an Error whose message getter throws) makes the catch itself
+// throw, so next() is never called and the async middleware rejects with no handler: the login request HANGS; an Error whose
+// message is readable but not a string is handed to the logger as is. The cells make the Redis read reject with such a value and
+// assert the request is let through (200) and the error line is logged as text (the constant when the value cannot be turned into
+// text). Harness: the real middleware on a real express app on loopback, with the logger and the redis service replaced by plain
+// stand-ins (no Redis).
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  fault: true,
+  reads: 0,
+  logged: [] as unknown[][],
+}));
+
+const capture = vi.hoisted(() => ({
+  debug: () => undefined,
+  info: () => undefined,
+  warn: () => undefined,
+  error: (...args: unknown[]) => {
+    h.logged.push(args);
+  },
+  log: () => undefined,
+}));
+vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
+vi.mock('../services/redis', async (importOriginal) => {
+  const real = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...real,
+    getBruteForceData: () => {
+      h.reads += 1;
+      return h.fault ? Promise.reject(h.toThrow) : Promise.resolve(null);
+    },
+    setBruteForceData: async () => undefined,
+    deleteBruteForceData: async () => undefined,
+  };
+});
+
+import { createBruteForceProtection } from '../middleware/security';
+
+const CONFIG = { bruteForce: { freeRetries: 2, minWait: 1000, maxWait: 60_000, lifetime: 900_000 }, suspiciousPatterns: [] };
+
+let srv: Server;
+let base = '';
+beforeAll(async () => {
+  const app = express();
+  app.use(createBruteForceProtection(CONFIG as never));
+  app.use((req, res) => {
+    res.status(200).json({ helperAttached: Boolean((req as unknown as { bruteForce?: unknown }).bruteForce) });
+  });
+  srv = app.listen(0, '127.0.0.1');
+  await new Promise<void>((r) => srv.once('listening', () => r()));
+  base = 'http://127.0.0.1:' + (srv.address() as AddressInfo).port;
+});
+afterAll(async () => {
+  srv.closeAllConnections();
+  await new Promise<void>((r) => srv.close(() => r()));
+});
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.fault = true;
+  h.reads = 0;
+  h.logged.length = 0;
+});
+
+/** POST to a path; status 0 when no answer arrives within 1.5 s (the request hangs). */
+async function hit(path: string): Promise<{ status: number; helper: boolean | null }> {
+  try {
+    const r = await fetch(base + path, { method: 'POST', signal: AbortSignal.timeout(1500) });
+    const j = (await r.json().catch(() => ({}))) as { helperAttached?: boolean };
+    return { status: r.status, helper: j.helperAttached ?? null };
+  } catch {
+    return { status: 0, helper: null };
+  }
+}
+const FAILED = '[BruteForce] Redis error, allowing request';
+const LINES = () => h.logged.filter((c) => c[0] === FAILED);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (c: unknown[] | undefined): string => {
+  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+const SHAPES: Array<[string, () => unknown, string]> = [
+  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
+  ['an Error whose message getter throws', getterThrows, 'unreadable thrown value'],
+  ['an Error whose message is a null-prototype object', () => withMessage(Object.create(null)), 'unreadable thrown value'],
+  ['an Error whose message is a Symbol', () => withMessage(Symbol('ks1868')), 'Symbol(ks1868)'],
+];
+
+describe('KS-1868 the brute-force Redis-error catch lets the request through and logs text for a hostile thrown value', () => {
+  it('control ks1868 C1: an ordinary Error lets the login request through (200, no helper) and is logged with its message', async () => {
+    h.toThrow = new Error('redis down');
+    expect(await hit('/api/auth/login')).toEqual({ status: 200, helper: false });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('redis down');
+  });
+  it('control ks1868 C2: a thrown plain string lets the request through (200) and is logged as its own text', async () => {
+    h.toThrow = 'plain boom';
+    expect(await hit('/api/auth/login')).toEqual({ status: 200, helper: false });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('plain boom');
+  });
+  it('control ks1868 C3: with no Redis fault the helper is attached (200) and nothing is logged', async () => {
+    h.fault = false;
+    expect(await hit('/api/auth/login')).toEqual({ status: 200, helper: true });
+    expect(LINES()).toHaveLength(0);
+  });
+  it('control ks1868 C4: a path that is not the login path never reads Redis', async () => {
+    h.toThrow = new Error('redis down');
+    expect(await hit('/api/documents')).toEqual({ status: 200, helper: false });
+    expect(h.reads).toBe(0);
+    expect(LINES()).toHaveLength(0);
+  });
+  it('RED ks1868 R1: a Redis rejection that is a revoked Proxy lets the login request through (200) and is logged as text, as for an ordinary Error', async () => {
+    h.toThrow = SHAPES[0][1]();
+    expect(await hit('/api/auth/login')).toEqual({ status: 200, helper: false });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[0][2]);
+  });
+  it('RED ks1868 R2: a Redis rejection that is an Error whose message getter throws lets the login request through (200) and is logged as text, as for an ordinary Error', async () => {
+    h.toThrow = SHAPES[1][1]();
+    expect(await hit('/api/auth/login')).toEqual({ status: 200, helper: false });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[1][2]);
+  });
+  it('RED ks1868 R3: a Redis rejection that is an Error whose message is a null-prototype object lets the login request through (200) and is logged as text, as for an ordinary Error', async () => {
+    h.toThrow = SHAPES[2][1]();
+    expect(await hit('/api/auth/login')).toEqual({ status: 200, helper: false });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[2][2]);
+  });
+  it('RED ks1868 R4: a Redis rejection that is an Error whose message is a Symbol lets the login request through (200) and is logged as text, as for an ordinary Error', async () => {
+    h.toThrow = SHAPES[3][1]();
+    expect(await hit('/api/auth/login')).toEqual({ status: 200, helper: false });
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[3][2]);
+  });
+});
