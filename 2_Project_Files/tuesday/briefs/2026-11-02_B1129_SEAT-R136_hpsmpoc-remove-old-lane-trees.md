@@ -24,12 +24,12 @@ An object is removed only if, READ AT THE MOMENT OF REMOVAL, ALL hold: (1) it is
 
 ## Stamp
 Tuesday fills each slot at launch; slot words are one word each, no slot is named inside this line. `AMOUNT` [ALL or `GIB<n>`: stop when avail has risen n GiB over the Step-0 avail; card option b = `GIB200`]. `PLAIN-COPIES` [HOLD or REMOVE: a plain copy with no git metadata; HOLD unless Tuesday says]. `RULING` [option letter and the clock of the product owner's ruling, as read by Tuesday].
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Launch authority and hard stop: ____
-- Heads at launch: ____
-- SLOTS: ____
-- RULING: ____
+- STAMP: STAMPED 16:12 AEDT 2026-11-02 by Tuesday s226, kit read whole with its report; path check run alone in an earlier message (rc 0, 6 OK). Report size 400545 bytes by ls -l at this stamp; HPSM-POC rows 1425 by grep over lines 151 to 2768. Q1 that reading; Q2 strict, a large HELD list is expected and fine; Q3 HOLD; Q4 yes; Q5 no, report any refusal; Q6 10 hours.
+- LAUNCH WINDOW: Until 20:00 AEDT 2026-11-02. Live beside you at this stamp: Datasec/HPSM-POC-R138 (records; it holds .tools/b1110 and .tools/b1134; its kit is under the live-kit rule of Step 1d) and Datasec/MPS-R137 (another project). No gate is live. Re-read at Step 0 and every batch.
+- Launch authority and hard stop: Tuesday, on the product owner's ruling below and his 2026-09-29 ruling on regenerable leavings, whose 3-day exclusion is clause 3. READY 8 hours, HARD STOP 10 hours after Step-0, written by you as absolute clocks.
+- Heads at launch: HPSM-POC code main 5f128fb89034, read by gh api just before this stamp. No removal depends on it.
+- SLOTS: AMOUNT ALL. PLAIN-COPIES HOLD.
+- RULING: a 16:10:03 AEDT 2026-11-02 live board, 'Remove the 845 GiB, project by project'; option text: each project's own seat removes its list, oldest first, one tree at a time, re-checking each, with free space measured after; starts with HPSM-POC. Any tree with uncommitted files or a commit not on GitHub is kept.
 
 ## THE WORK (the order is the order)
 **Step 0. Setup.** Copy this file unchanged to `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/`, `cmp`, sha256; REFUSE. `date`; `mkdir '.tools/b1129'`, `.tools/b1129/hb`, `.tools/b1129/runs`; write `runs/before.txt` ONCE: `df -k`, count and `du -sk` per class from the list, `uptime`. STATUS `1_Project_Definition/Briefs/2026-11-02_B1129_STATUS.md`: first line `REMOVAL B1129: PENDING`, then STATUS-NOW. **Heartbeat:** a background loop writes a counter, `date` and the current object every 30 s into `.tools/b1129/hb/heartbeat.txt` for the whole run; two reads 35 s apart must differ (a still file: STOP). **READY** target 8 hours, **HARD STOP** 10 hours after the Step-0 `date`, absolute AEDT. SEVERITY: STOP on a failed REFUSE or a still heartbeat.
@@ -54,4 +54,4 @@ STATUS-NOW (binding): the first line `REMOVAL B1129: PENDING` at Step 0 until th
 `READY FOR REVIEW: B1129 | removed <r> held <h> absent <a> of 1425 | lane <a>/1323 node_modules <b>/18 dotnet <c>/33 build <d>/51 | avail <GiB> -> <GiB> | stop <ALL done|figure reached|hard stop> | no push`
 `STOPPED: NEEDS TUESDAY <one question>` or `BLOCKED: <reason>`.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 16:12 by Tuesday s226, lines 1-57.

@@ -1,0 +1,12 @@
+From Tuesday, to SEAT-R138 (B1134), HPSM-POC. This file changes your kit. Copy it into `1_Project_Definition/Briefs/` beside your kit and name it in your STATUS. It wins where it speaks; everything else in the kit stands. Record in your STATUS that you read it before your first Jira write.
+
+**1. A new ruling, verbatim, live board, 2026-11-02 16:09:50 AEDT (read by Tuesday from the board): option a, "Accept the label". Option text as stored: "It goes out with the next HPSM-POC deploy".** It is about the label "Scored questions answered" on the two tiles. So the kit's statements that the label is held no longer hold, and the HOLD "no statement that the tile label is accepted" is lifted for this one fact. Nothing has been deployed: keep saying merged only.
+- **C-277:** add one sentence recording this ruling, with its words and clock, in place of the sentence that says the label is held.
+- **C-278:** no sentence says it is held.
+- **`<LAND-421>`:** replace the sentence `The tile label "Scored questions answered" is held from any deploy until the product owner has seen it.` with `The product owner accepted the tile label "Scored questions answered" on 2026-11-02 (entry C-277); it goes out with the next deploy.`
+- **`<LAND-420>`:** replace `the tile label is held from any deploy until the product owner has seen it` with `the product owner accepted the tile label on 2026-11-02 (entry C-277)`.
+- **Row B1134-8:** not written. Say so in STATUS.
+- **FOR TUESDAY item 5:** the delivered line's text says `tile label accepted`, not held. **Add a second line, printed the same way, STATUS only:** `decision_queue.sh --delivered hpsmpoc-scored-tile-label-1102 '<HPSM-POC records main <sha8> C-277>'`.
+- The stays-open words ("N answers so far") are unchanged: still not decided, and -420 stays comment only.
+
+**2. REFUSE 7's clause on `Datasec/HPSM-POC-R136` is withdrawn, including your pane re-reads before the Jira write, push and merge.** The product owner ruled the removal at 16:10:03; R136 runs beside you. It removes only objects of a fixed list that pass a check at the moment of removal, and it holds every path your kit names, `.tools/b1110` and `.tools/b1134` among them, because it reads the kits of live panes. **What to watch instead:** if a helper you need under `.tools/b1110` is missing, or `.tools/wt-b1134` changes under you, STOP with `STOPPED: NEEDS TUESDAY <path>`. The other clauses of REFUSE 7 stand. Your own STOP under 25 GiB stands.
