@@ -1,0 +1,43 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o88_p9_api_gateway_redis_listener_and_connect_catch_guard_message
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/redis.ts b/Blockchain/Dev/services/api-gateway/src/services/redis.ts
+--- a/Blockchain/Dev/services/api-gateway/src/services/redis.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/redis.ts
+@@ -91,4 +91,11 @@
+     redisClient.on('error', (err) => {
+-      logger.error('[Redis] Connection error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('[Redis] Connection error', { error: reason });
+       isConnected = false;
+     });
+@@ -112,13 +119,20 @@
+     // when N replicas are behind a load balancer) and sessions vanish on
+     // restart. In dev/test we still warn and fall back so local work keeps
+     // flowing.
++    let reason: string | null | undefined;
++    try {
++      const m = (error as Error)?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     if (process.env.NODE_ENV === 'production') {
+       logger.error('[Redis] FATAL: connection failed in production — refusing to start', {
+-        error: (error as Error).message,
++        error: reason,
+       });
+-      throw new Error('REDIS_REQUIRED_IN_PRODUCTION: ' + (error as Error).message);
+-    }
+-    logger.warn('[Redis] Failed to connect, using in-memory fallback (dev/test only)', { error: (error as Error).message });
++      throw new Error('REDIS_REQUIRED_IN_PRODUCTION: ' + reason);
++    }
++    logger.warn('[Redis] Failed to connect, using in-memory fallback (dev/test only)', { error: reason });
+     fallbackMode = true;
+     return false;
+   }
+

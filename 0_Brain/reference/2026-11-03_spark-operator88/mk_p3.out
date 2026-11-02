@@ -1,0 +1,17 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o88_p3_auth_events_redis_error_listener_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/events.ts b/Blockchain/Dev/services/auth/src/events.ts
+--- a/Blockchain/Dev/services/auth/src/events.ts
++++ b/Blockchain/Dev/services/auth/src/events.ts
+@@ -94,3 +94,10 @@
+     redis.on('error', (err) => {
+-      logger.debug('EventBus Redis error (non-fatal)', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.debug('EventBus Redis error (non-fatal)', { error: reason });
+     });
+

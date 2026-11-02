@@ -1,0 +1,55 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o88_p1_auth_events_init_catch_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/events.ts b/Blockchain/Dev/services/auth/src/events.ts
+--- a/Blockchain/Dev/services/auth/src/events.ts
++++ b/Blockchain/Dev/services/auth/src/events.ts
+@@ -98,7 +98,14 @@
+     logger.info('EventBus initialised for auth service');
+     return true;
+   } catch (err: any) {
+-    logger.warn('Failed to initialise EventBus', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to initialise EventBus', { error: reason });
+     return false;
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o88_p2_nft_certificate_db_pool_error_and_ready_hook_catches_guard_message
+diff --git a/Blockchain/Dev/services/nft-certificate/src/db.ts b/Blockchain/Dev/services/nft-certificate/src/db.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/db.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/db.ts
+@@ -35,5 +35,12 @@
+     pool.on('error', (err: Error) => {
+-      dbLog('error', 'DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      dbLog('error', 'DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+@@ -93,6 +100,13 @@
+     await onDbReady();
+   } catch (err: any) {
+     // Boot work failing must not un-flag an otherwise reachable DB.
+-    dbLog('error', 'DB ready boot work failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    dbLog('error', 'DB ready boot work failed', { error: reason });
+   }
+ }
+

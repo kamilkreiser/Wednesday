@@ -1,0 +1,19 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o88_p8_timestamping_db_pool_error_listener_guard_message
+diff --git a/Blockchain/Dev/services/timestamping/src/db.ts b/Blockchain/Dev/services/timestamping/src/db.ts
+--- a/Blockchain/Dev/services/timestamping/src/db.ts
++++ b/Blockchain/Dev/services/timestamping/src/db.ts
+@@ -35,5 +35,12 @@
+     pool.on('error', (err: Error) => {
+-      dbLog('error', 'DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      dbLog('error', 'DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+
