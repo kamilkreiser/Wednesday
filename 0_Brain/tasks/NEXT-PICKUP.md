@@ -8,6 +8,44 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 13:5x CHECKPOINT (Wednesday ctx 67%; READ FIRST)
+- **develop c0f9af13f94b** (27 first-parent squashes since d7691f35 by `git rev-list --first-parent --count`). Today this seat merged via B 75th/B 76th: 1916, 1912, 1917, 1913, 1920, 1919, 1918 (billing KS-1933). Nothing deployed. Billing deploy note: migration 056 must exist on the box before billing rolls (G100-F2).
+- **LIVE SEATS (cockpit status 13:51):** B 76th (%73 merge, queue empty), E 27th (%72: PR 1921 kyc, gate 103 GO WITH NOTES, doing ONE test-only push for G103-F3 -> DELTA CHECK -> queue to B 76th; then wrap), V 15th (%74: PR 1 BUILT AND PROVEN; 3 TIER-1 PRs, an OPUS gate per READY), S 12th (%75: close-out; plan CONFIRMED 13:49; ruled board actions first, then 50).
+- **STAGED (launch on ROOM):** U 9th (close_waiter), then R 74th + W 16th (rw_waiter after U 9th).
+- **SCORED today by this seat:** S 11th 0.95, U 8th 0.94, B 75th 0.96, F 22nd 0.96 (panes closed).
+- **SPARK:** operator 76 (small buildable tickets) running.
+- **KAM:** all 17 cards ruled (the work each becomes is in the 12:5x block); KS-968 card HELD; told about the billing merge + a corrected count (ledger w=12 composed-claim row: any count to Kam comes from a command in the same turn).
+- **OWED:** KS-961 (#887) seat; cards KS-1380/KS-1545/KS-657 (read priors first); the ruled BUILD work (KS-1561, 1516, 624, 590, 1389, 1669) and PLANNING (602, 603, 491, 1087, 1044 design+cost), KS-655 via each project's seat (Datasec via Tuesday), KS-1724/KS-1725 dependency baselines (expire 11-09) -> briefs as capacity frees; before/after board counts to Kam when the close-outs finish.
+
+## 13:4x STATE (READ FIRST)
+- **develop fcfa5dfdba9b** (#1919 merged; 26 squashes since d7691f35). **PR 1918 (billing KS-1933) DELTA-CHECKED + QUEUED to B 76th** (head bf674e75, tree a3fc3c00 = gate 100's prediction): at B's READY -> pre-GO checks -> GO -> tell F 22nd to wrap -> score F 22nd.
+- **Gate 103 (OPUS) running on PR 1921** (kyc). E 27th's 1919/1920 merged; after 1921: E 27th wraps.
+- **V 15th** confirmed 13:31 (3 TIER 1 PRs, Opus gate each).
+- **Third and fourth raise seats STAGED:** R 74th (`briefs_staged/2026-11-02_seatR74_raise_7passes.md`: O72 nft x2 + admin x3, O73 governance x2; 4 PRs) and W 16th (`..._seatW16_raise_11passes.md`: O73 auth x4, O74 security x5, O75 anchoring x2; 3 PRs, all TIER 1); both dry-run PASS. Launched by scratchpad `rw_waiter.sh` after U 9th, each on ROOM. Containment table: scratchpad `held_table2.txt`. NOTE for any future generated raise brief: the F 21st HOLDS section carries its own RULED block (duplicate), a stale "these five passes" line, the lane-F WRAP tag and `s-f21-*`; the scratchpad generator `gen/mkraise2.py` + the 13:4x fix script handle them; the lane-tag gate catches the tag.
+- **Spark:** operator 76 (small buildable tickets from triage) running; KS-1868 nearly exhausted (remaining: KYC/verification files after V 15th/E 27th merge, billing money sites after 1918 merges).
+
+## 13:2x STATE (READ FIRST)
+- **develop 04ff5262ad52** (#1913 d60ceca5, #1920 04ff5262 merged by B 76th; 25 squashes since d7691f35). V 15th LAUNCHED 13:19 (%74). close_waiter launches S 12th (~13:29) then U 9th (~13:39).
+- **Kam 13:19:40:** "there are also 52 tickets in review.  can you please action or clean up the board so that we can have an accurate view of where things stand". Triage C done (`0_Brain/reference/2026-11-02_ks-high-triage/triage_C_inreview.md`): 18 already on close-out lists + 23 DONE -> U 9th's second list (closeout_3.txt) + 6 WRONG-STATE -> S 12th moves 5 (KS-229 by ruling). OWED: KS-961 (#887 needs its one change or closing: brief a seat), cards KS-1380 (#1358 merged by mistake; Peter's revert #1360), KS-1545 (step 2), KS-657 (dead half of services/shared) after reading priors; report before/after counts to Kam when the close-outs finish.
+- **Gates running:** 101 (PR 1919, Sonnet), 103 (PR 1921 kyc, OPUS). F 22nd doing 1918's forward move -> DELTA CHECK -> queue 1918 to B 76th.
+
+## 13:1x STATE (READ FIRST; adds to the 12:5x block)
+- **B 76th LAUNCHED 13:01 (%73)**, plan CONFIRMED 13:0x: ITEMS 1-2 on PR 1913, READY TO MERGE -> Wednesday's pre-GO checks -> GO #1913 -> tell F 22nd "1913 merged" -> F 22nd's forward move on 1918 -> DELTA CHECK -> queue 1918 -> GO.
+- **Gates running (subagents of this seat):** 101 (Sonnet, PR 1919 originate), 102 (Sonnet, PR 1920 analytics). E 27th PR 3 (kyc TIER 1) READY pending -> OPUS gate.
+- **SPARK:** operator 73 DONE (6 TIER-1 passes held: governance x2, auth x4; report 0_Brain/reference/2026-11-02_spark-operator73/report.md); operator 74 (security) finishing; operator 75 (ANCHORING, tier 1; Kam's condition met) commissioned 13:1x. **HELD FOR RAISE now:** O72 x5 (nft x2 incl. P2 TIER 1, api-gateway admin x3) + O73 x6 (all TIER 1) + O74 (pending): a third raise seat (lane R; note the VOID 'Seat R 73rd' brief from 12:59Z yesterday — use R 74th) when capacity allows.
+- **Stray process lesson (ledger 13:11):** a hung recursive grep from operator 72 held load 14-17 for ~2 h; stopped. When capacity reads FULL > 20 min, LIST the top processes before waiting.
+
+## 12:5x STATE (READ FIRST; supersedes below where they differ)
+- **KAM RULED ALL 17 CARDS 12:42-12:44 (folded, live-board 200s)** and said 12:44:58: "looks like great progress.  in addition to the above, please archive anything done and merged". WORK EACH RULING BECOMES:
+  - BOARD (S 12th's brief, RULED BOARD ACTIONS section): KS-889 b close+archive (+ KS-843 comment: no flip, logged grace); KS-601 a close+archive; KS-229 b close+archive; KS-1336 a priority -> Medium; KS-762 c comment only.
+  - BUILD (Claude seats, gated, nothing deployed): KS-1561 a (certify only the ORIGINAL registrant; live verify), KS-1516 a (verified:false for opentimestamps/blockchain until a real check), KS-624 a (prism 501, stop 'basic'), KS-590 a (strict: no tenant-owned naming incl. org UUID on all four paths — NOTE the option detail said "confirm with Stuart first": a deploy of it needs Kam's word on telling Stuart), KS-1389 a (3-part slot-target/leg 13/pre-push change), KS-1669 a (docs note: Renovate for systemTest pins only).
+  - PLANNING/RESEARCH (documents only): KS-602 b + KS-603 b (sub-ticket breakdown + sizing), KS-491 a (costed WAF/CAPTCHA options note, no spend), KS-1087 b (read-only measure: do workflow-gated document types exist?), KS-1044 a (outside probe through the app for demo+kintsugi: DESIGN + COST note first; Kam approved spend in principle, product and price come back to him before any purchase).
+  - CROSS-PROJECT: KS-655 a (fix the KS-78 drift check in all 16 launcher copies): each project's own seat applies it; Datasec launchers are TUESDAY's scope (coordination mail only).
+- **Close-out seats now ARCHIVE** (Done + issueArchive, archivedAt read back), client-raised tickets included per Kam 12:44:58; briefs updated + dry-run PASS.
+- **GATE 100 = GO WITH NOTES on PR 1918** (billing KS-1933): relayed to F 22nd (PATCH G100-F1 manual recovery + F2 migration-before-billing deploy note + F7 wording). **PR 1913's hold is LIFTED** (card default: merge once the fix is gated). Order: B 76th merges 1913; then F 22nd merges develop into 1918, proves 1913's paths blob-EQUAL, retargets to develop, ONE push -> Wednesday's DELTA CHECK -> queue 1918 to B 76th -> GO. Then F 22nd wraps (score it).
+- **B 76th brief** `briefs_staged/2026-11-02_seatB76_merge_1913_1918_queue.md` (dry-run PASS). Launch order by scratchpad `b76_v15_waiter.sh` (pid 55502): B 76th, then V 15th; `close_waiter.sh` (pid 8235) then S 12th, U 9th. Load FULL (15.7) at 12:48.
+- **GATE 101 (Sonnet) RUNNING on PR 1919** (E 27th originate, head b22b6ec5). E 27th PR 2/PR 3 pushing; E 27th at ctx 65%.
+
 ## 12:2x KS BOARD PROGRAMME (Kam live 12:06:10; READ FIRST with the 11:1x block)
 - **Kam's ask (verbatim):** "can you please look at the current tickets, specifically the high priority and Dependency ones.  A lot of these are in progress.  This is great.  Can you use as many agents as possible and let me know when you think you will get through these". **Answered 12:2x** with `0_Brain/reference/2026-11-02_ks-high-triage/PLAN.md` (232 tickets = 100 DONE-not-closed, 91 buildable ~176 seat-h, 21 needs-Kam, 8 blocked, 7 stale, 4 client, 1 PR open; ETA ~2 days close-outs, ~4-5 days builds).
 - **develop 92a26320e30a** (#1917 merged; 23 squashes since d7691f35). **B 75th WRAPPED + SCORED 0.96, pane closed: merge lane EMPTY.** Launch B 76th (template briefs_staged/2026-11-02_seatB75_merge_1910_and_queue.md, re-keyed SECTION BY SECTION; the send_brief lane-tag gate now refuses a wrong-lane tag) when the first of: gate 100 verdict on PR 1918 (then 1913 -> 1918 in that order), E 27th's gated PRs.
