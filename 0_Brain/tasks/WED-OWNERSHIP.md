@@ -204,3 +204,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-31 22:51 | Kamils-MBP | Spark harness: test_only variant with a planted test-side red proof (no product tamper) + a doc-only tier | CLOSED |  2026-10-31 23:15 built: test_only_input + doc_only tiers, 47/47 arms re-run by Wednesday |
 | 2026-11-01 07:46 | Kamils-MBP | pane_close.sh: exempt the pane's own claude seat process listener (Claude Code 2.1.316 listens on 127.0.0.1) | CLOSED |  2026-11-01 07:48 fixed + armed, commit pushed |
 | 2026-11-02 06:07 | Kamils-Mac-mini | Launch_Wednesday.command boot step 3: seat-scope the scoreboard head read (Datasec seat reads Datasec rows only) | CLOSED |  2026-11-02 06:07 done 6b2134ff7; next boot is the test |
+| 2026-11-02 14:09 | Kamils-Mac-mini | store_guard refusal prints shas only, no commit subjects (client isolation) | OPEN | |
