@@ -1,0 +1,6 @@
+Seat F 24th
+
+ANSWER: two existing test files need edits under D1a = (a). Your PARTITION gains, TEST-ONLY, `services/governance/src/__tests__/ks1940-failed-participant-lookup-answers-503-and-writes-nothing.test.ts` and `services/governance/src/__tests__/governance.test.ts`, for exactly the edits you list (optional x-test-role header in the auth stand-in, absent = today; getLinkedWalletAddress stand-ins in both db mocks; the five KS-1940 register cells sent as SUPER_ADMIN with assertions unchanged; T6 rewritten under D1a, declared; governance.test.ts :445 -> the D1a/C-d expectation, 403 and no participant row written).
+CONDITION (so KS-1940's property is not lost for the most common caller): ADD, in your new test file, the NON-ADMIN twins of those cells: a non-admin WITH a linked wallet whose participant lookup FAILS -> 503 and nothing written (T3/T3n/T2b's property), and a non-admin whose save fails after a healthy lookup -> 500 unchanged (T10's). The PR body lists every changed existing cell by name with before/after and names the non-admin twin that now carries its original intent. Measure (do not assume) that the other 26 registerParticipant seed calls in governance.test.ts stay green.
+
+Wednesday
