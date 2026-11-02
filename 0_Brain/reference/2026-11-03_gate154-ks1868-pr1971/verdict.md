@@ -89,3 +89,6 @@ The live PR body; a real Postgres (a fake table honouring the statements' parame
 
 ## Processes
 All runs were foreground and finished (npm ci, shared build, vitest, tsc, eslint, fragments, mutants). I started no background process; `ps` shows nothing with this workdir in its command line other than the harness's own git-add. Nothing was written outside this workdir; no log file landed anywhere (winston console only). The clone is clean.
+
+## CORRECTION (appended by Wednesday 2026-11-03 09:4x AEDT; the gate's text above is left as written)
+The BLUF (line 4) and section 5's opening line say "16 killed, 6 survived". The gate's own table in section 5 gives **14 killed, 8 survived** of 22: M0, M1, M2, M4, M5, M8 killed at BOTH sites (12) + consume-only M10, M11 (2) = 14; M3, M6, M7, M9 survived at BOTH sites = 8. Caught by Seat B 81st (READY TO MERGE PR 1971, 22:37Z), recounted by Wednesday from the table. G154-F1 and the verdict are unaffected: no survivor can reintroduce the unreadable-value throw.
