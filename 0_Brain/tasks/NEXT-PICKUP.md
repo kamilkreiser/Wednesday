@@ -8,6 +8,16 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 23:0x CHECKPOINT (the 22:5x successor seat, ctx 51%; READ FIRST — supersedes every block below where they differ)
+- **develop 1584c0f0ff80** (PR 1943 squash; Wednesday's ls-remote). This seat GO'd + saw MERGED: 1943. PR 1942 MERGED as 36b967b987d2 (verified). **No GO outstanding; B 78th (%85) queue EMPTY.** Next for B: **1938** at S 13th's NOTES PATCHED (gate 120). Pre-GO checks every time; never mail a seat between a GO and its MERGED.
+- **GATE 126 (Opus, TIER 1) RUNNING on PR 1944** (S 13th, KS-1724 structural caps, head 3b11d11a2988; workdir 0_Brain/reference/2026-11-02_gate126-ks1724-pr1944/; subagent of this seat — RE-LAUNCH from that workdir + gate_common.md if no verdict.md and this seat died). STATUS sent to S 13th. Next gate number: 127.
+- **SPARK OPERATOR 85 (Sonnet) RUNNING** (subagent; holds o84 P2/P3 when their rounds pass — O84-P1 already HELD — then continues operator 83's screen; never-brief list: every src/index.ts, packages/shared, O80-O84 held files, open-PR files). Workdir 0_Brain/reference/2026-11-02_spark-operator85/; re-commission from spark_operator_common.md + operator 83's report if no report.md.
+- **S 13th:** PR 3 (zod 4, cf5ea9e4f14e, NOT pushed) — ANSWERED 23:0x: OVL_ALLOW (1796, users.ts) + (1798, users.ts) YES with conditions (re-measure both heads + merge-tree + planted control at its push turn; body overlap section; :778 acceptance stated; TIER 1). PR 5 driver 96779 requeued (head ce2130fd111c) after its hook refusal (no npm ci). PR 1938 notes patch owed.
+- **E 29th (%84):** its driver 65883 HOLDS the push lock since 11:54:18Z (KS-1943). At its READY: TIER 1 Opus gate. Its pane shows a ghost SUGGESTION ('go ahead, KS-1944 out…') — ignore; wake acked.
+- **Gates still owed at READY:** E 29th KS-1943 (T1), F 24th KS-1942 (T1), S 13th PR 5 edge log (T2 Sonnet) + PR 3 zod (T1), V 17th PR 5 retentionScheduler (T2), W 17th's 5 PRs (T1 x4, T2 x1). Held O83-P1..P4 + O84 passes await a raise seat. Follow-ups owed unchanged from the 22:4x block (G124-F5, G123-F3, G122-F4, KS-1724 demo deploy seat).
+- **Kam:** nothing since 21:15; 0 cards; reconcile 0 to rule. His 10-27 note on card wed-laptop-spotlight-load-1026 ("I think this is no longer relevant") is now RECORDED here: treat that card as closed by his word; do not re-raise.
+- Capacity FULL (load ~12, 6 seats). Gauge 7d 40%.
+
 ## 22:4x ROTATION HANDOVER (the 19:2x successor seat rotating at ctx 80%; READ FIRST — supersedes every block below where they differ)
 **FIRST WORK FOR THE SUCCESSOR, in order:**
 1. **GO OUTSTANDING: PR 1942** (sent 22:4x to B 78th: pin fbacb63af446, head 966909efd5f7, expected tree 111d52634931). Read B 78th's MERGED mail, then VERIFY by ls-remote that develop = the squash. Do NOT mail B 78th before its MERGED.
