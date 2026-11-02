@@ -56329,5 +56329,75 @@
    "CARD mps-345-importer-sentence-1102",
    "CARD hpsmpoc-425-evidence-submitted-invisible-1102"
   ]
+ },
+ {
+  "id": "secuura-ks1724-edge-request-size-measure-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1724: measure real request sizes before touching the eight 10 MB body limits?",
+  "bluf": "Your tap is needed only to allow one logging change on the demo box. Seat S 13th's KS-1724 work found eight JSON body limits of 10 MB or more (auth, kyc, originate, referral, staking, vc-issuer at 10 MB; nft-certificate 50 MB, capped by the 12 MB edge). Code cannot say which routes really receive over 1 MB: the demo edge log records response size, not request size. PR 4 (structural caps on arrays, node count and depth) does NOT change any limit and goes ahead regardless. Override reason: the 5 prior-ruling matches share only the words size, measure or edge (KS-329 refresh token, Studio purchase, smoke key, KS-1688 merge); none is about body limits.",
+  "default_action": "If Kam does not answer: option b, nothing changes and nothing is touched on any box; Wednesday re-raises it at the next monthly long-term meeting with Stuart.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Measure first",
+    "detail": "add the request size field to the demo edge log format (one nginx log line and a reload, by a deploy seat under the October grant), read sizes after 7 days, then bring a lower-limit proposal back to you"
+   },
+   {
+    "key": "b",
+    "label": "Leave the limits as they are",
+    "detail": "no measurement, no change; the structural caps in PR 4 still bound the expensive bodies"
+   },
+   {
+    "key": "c",
+    "label": "Lower now without measuring",
+    "detail": "drop the service parsers to 1 MB except the kyc and nft upload routes; risk: an unmeasured legitimate large body starts failing"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T19:05:47.407804+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-02T19:15:02.029126+11:00",
+  "prior_rulings_overridden": [
+   "CARD secuura-ks329-refresh-token-size",
+   "CARD wed-studio-256-measure-before-buying-1009",
+   "CARD secuura-demo-smoke-key-revoke-after-measure-1020",
+   "CARD secuura-ks1688-org-merge-edge-which-side-1020"
+  ]
+ },
+ {
+  "id": "secuura-ks1942-register-sets-any-wallet-stake-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1942: any logged-in user can set any wallet's governance stake and DRep flag. Intended for the demo, or fix?",
+  "bluf": "Your ruling is needed on what the product should do. Seat F 23rd filed KS-1942 (High) while fixing KS-1940: POST /participants/register takes walletAddress and stakedAmount from the caller with no ownership or stake check, so any authenticated user can set any wallet's stake, tier, vote power and DRep flag, and a re-register clears the committee flag. Read from code at develop, not exercised on any box. There is no on-chain stake check anywhere, so it may be deliberate demo behaviour. Nothing is built until you rule. Override reason: the 5 prior matches share only the words wallet or sets; the closest, KS-1223 (a referral wallet taken from a caller header), you ruled a = build a trusted source, which is why option a mirrors it.",
+  "default_action": "If Kam does not answer: nothing is built and nothing changes; KS-1942 stays open at High; Wednesday adds it to the next monthly long-term meeting with Stuart.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix it, as for KS-1223",
+    "detail": "a Claude seat builds a trusted source (the wallet linked to the signed-in user; stake from a real or admin-set value), red-first cells, Opus QA gate, merge on Wednesday's GO; design brought back first"
+   },
+   {
+    "key": "b",
+    "label": "Admin-only for now",
+    "detail": "restrict register to an admin role as a small change, gated; the ownership proof comes later"
+   },
+   {
+    "key": "c",
+    "label": "Intended for the demo",
+    "detail": "leave the behaviour, write that on KS-1942 and in the governance docs, close the ticket as by-design"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T19:12:16.610308+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-02T19:15:34.405524+11:00",
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
+   "CARD secuura-ks1223-referrer-wallet-source-1013",
+   "CARD secuura-ks1819-ks1820-wallet-routes-off-by-default-1030"
+  ]
  }
 ]
