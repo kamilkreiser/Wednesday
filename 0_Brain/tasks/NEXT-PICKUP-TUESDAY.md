@@ -26,6 +26,14 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🟢 DELTA 949 — 2026-11-02 20:04 FULL LIVE STATE (s228). **READ THIS FIRST; supersedes 948's WATCHERS, LIVE, READY, STAMPED lines. Rulings today 30; to-rule 0.**
+- **LANDED tonight (verified at source, not deployed, Kam told bf-eab74c205cdb):** HPSM-POC #276 -> main 491348ed (tree = gate's 104654d) · MPS #147 -> 80203089 · MPS #146 -> 48b749fb (3 blobs equal head).
+- **LIVE panes:** G288 %80 (census job4b STARTED 19:56:33 under ADDENDUM-1; hold LIFTED) · G291 %91 · G292 %92 · H106 %95 (launched 19:57:18, rung 5 read). **Watchers (re-arm at rotation):** B1130, B1147, B1150, B1145 STATUS.
+- **WAITER:** G296 B1154 (stamped) launch_when_cool running; if no `Datasec/Security-Composer-G296` pane and no waiter, launch by its kit's Launch line. **Then, one waiter at a time:** G295 B1153 (stamped 19:43) -> G297 B1155 (kit drafting, Sonnet C8; read whole + path check + stamp) -> G293 B1151 (63 KB, unread; after G296 on the Composer lock).
+- **NOW STARTABLE:** B1146 M80 (MPSCALC-358): b1139 landed; kit drafted 18:14 on an older main, unread; re-pin main 48b749fb before stamping.
+- **Records owed:** HPSM-POC B1131-1, -2; MPS B1152 N1-N6 + rental-twin q=1 gap, B1143 N-3; NexusAI R142 (B1149, unread kit); plus 942's list.
+- **OWED after G295:** RD-922 risk_conditions card (read the table's role first; `prior` before any add).
+
 ## 🟢 DELTA 948 — 2026-11-02 19:27 BOOT (s228, successor of s227; statusline 18% mid-load; 7d 50%). **READ THIS FIRST, then 947 and 946, whose lines stand except as said here. Rulings today 30, newest 19:14:45 (425 sentence = a, reconciled); to-rule 0.**
 - **WATCHERS (die at rotation; re-arm):** status_watch on B1130, B1131, B1147 (HPSM-POC) · B1148 (NexusAI) · B1143, B1150, B1152 (MPS). Path `<project>/1_Project_Definition/Briefs/2026-11-02_B<n>_STATUS.md`.
 - **LIVE panes:** G288 %80 · G289 %82 · N91 %90 (holding by design under the jest lock; acked 19:2x) · G290 %89 · G291 %91 · G292 %92 · G294 %94. **CLOSED:** N90 %88, C81 %93.
