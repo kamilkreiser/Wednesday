@@ -56633,5 +56633,120 @@
    "CARD mps-345-importer-sentence-1102",
    "CARD hpsmpoc-425-evidence-sentence-1102"
   ]
+ },
+ {
+  "id": "datasec-morning-plan-1103",
+  "client_project": "Datasec/All",
+  "title": "Datasec morning: 5 items await you; 6 changes landed overnight, nothing deployed",
+  "bluf": "Good morning. Awaiting you: 5 items (3 for Security Composer; 1 for HPSM-POC; 1 for NexusAI); each is already its own card. Overnight, since 23:00: 6 changes landed, each through CodeQL and its checks, the code changes also through their QA gates (#157 is a records-only change), none deployed: NexusAI #156, NexusAI #157, MPS #149, MPS #150, HPSM-POC #279, NexusAI #158. Running now: an MPS gate (the contract-sync test text, MPSCALC-374) and the MPS round-2 fix on MPSCALC-375; the Composer PCOMP-116 round-2 gate kit is being written. Today's plan: land what passes its gate; records seats for HPSM-POC (HPSMPOC-437) and NexusAI (RD-904 to 906); a fresh sweep of actionable tickets and feedback is running now and new lanes start from it, HPSM-POC first, then MPS, then Composer. At 09:00, if the Composer footer card is still open, its default lands PR #113 with its limit stated, not deployed. (Posted over the prior-ruling gate: its matches are the earlier daily morning cards, which boot step 10a renews each morning, and unrelated plan cards; read at the refusal.)",
+  "default_action": "Tuesday runs the plan; nothing deploys; the cards stay open until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Go with the plan",
+    "detail": "Agents keep working the tickets; each landing goes through its gate and CodeQL; your cards wait for you."
+   },
+   {
+    "key": "b",
+    "label": "Change the plan",
+    "detail": "Tell me on the board what to drop or add."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T06:01:59.128456+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-04 07:05",
+   "2026-09-10 11:25",
+   "CARD composer-demo-internal-text-plan",
+   "CARD hpsmpoc-plan-no-delete",
+   "CARD hpsmpoc-hosted-plan-approve",
+   "CARD hpsmpoc-review-week-larger-plan-1021",
+   "CARD datasec-morning-plan-1024",
+   "CARD datasec-morning-plan-1025",
+   "CARD datasec-morning-plan-1026",
+   "CARD datasec-morning-plan-1027",
+   "CARD datasec-morning-plan-1028",
+   "CARD datasec-morning-plan-1029",
+   "CARD datasec-morning-plan-1030",
+   "CARD datasec-morning-plan-1101",
+   "CARD datasec-morning-plan-1102"
+  ]
+ },
+ {
+  "id": "mps-373-rental-reconciler-lane-tier-1103",
+  "client_project": "Datasec/MPS",
+  "title": "MPS: build the rental reconciler fix (MPSCALC-373), and at which review tier?",
+  "bluf": "Decide whether to build MPSCALC-373 and how strictly it is reviewed. The ticket says the rental check multiplies a fleet-total line's pages by its quantity, which the register row R-29 forbids, so a fleet-total rental line agrees only at quantity one (RentalRecomputation.cs:88-89, ENGINE.md:40). The check is not wired to any endpoint, calculator or screen (RECONCILIATION.md:4), and the ticket leaves 'lane and tier' to you.",
+  "default_action": "If you never answer, Tuesday launches it as option a (tier 1, the MPSCALC-361 precedent) at the next free MPS slot; you can reverse it at any time before it lands.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build it, strict review (tier 1, as MPSCALC-361)",
+    "detail": "Same shape as the purchase twin MPSCALC-361, which is Done and whose text reads 'Tier 1 (number-affecting)'. First a pinning row green at the unedited code, then the basis brought into the rental check. Files named by the ticket: src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs (lines 88-89 multiply by line.Quantity), docs/ENGINE.md (R-29 at line 40, X-34 at line 160), one Engine test file."
+   },
+   {
+    "key": "b",
+    "label": "Build it, lighter review (tier 2)",
+    "detail": "Same change and files as a. The ticket's own reach statement is 'no Api response, screen, saved quote, proposal or file carries a reconciled figure', so the lighter review rests on that statement, which this draft did not re-probe."
+   },
+   {
+    "key": "c",
+    "label": "Do not build; leave the gap recorded",
+    "detail": "ENGINE.md:40 already says the fleet-total basis is 'Not yet in the independent reconciliation', and ENGINE.md:160 says the same for the rental line's total. The ticket would be closed with your decision recorded; a rental fleet-total line keeps reconciling only at quantity one."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T06:09:45.448376+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD mpscalc-purchase-mode-beside-rental-1010",
+   "CARD mpscalc-rental-full-proposal-1013",
+   "CARD mpscalc-rental-book-mockup-1013",
+   "CARD mpscalc-rental-parts-cents-rounding-1013",
+   "CARD mpscalc-rental-book-words-1014",
+   "CARD mpscalc-rental-pricing-callout-k15-vs-1014-1016",
+   "CARD mpscalc-panel-options-rental-and-tier-1017",
+   "CARD mpscalc-rental-caption-customisation-1017",
+   "CARD mpscalc-rental-credit-authorisation-1023"
+  ]
+ },
+ {
+  "id": "mps-359-persite-no-sites-count-1103",
+  "client_project": "Datasec/MPS",
+  "title": "MPS: what does a 'per site' component line count when a group has no sites, an empty list, or a site with zero devices (MPSCALC-359)?",
+  "bluf": "Tell us what a perSite line counts in three cases: no sites stated, an empty site list, and a site holding 0 devices. The ticket adds a fourth quantity rule, perSite ('a component counted once per site of the group'), and does not say; it is number-affecting, so it cannot be built until you answer.",
+  "default_action": "If you never answer, nothing is built: MPSCALC-359 stays in Backlog, Tuesday does not start it, and Tuesday asks again at the next MPS sweep.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Refuse the quote when a perSite line has no usable sites; count sites with at least one device",
+    "detail": "No sites stated or an empty list on a group with a perSite line blocks the quote, as a bad site list already does ('INVALID SITE ALLOCATION', PurchaseCalculator.cs:338; ENGINE.md:169: 'the quote prices nothing'). A site with 0 devices is not counted. A value that is not a known rule already blocks the quote (PurchaseInput.cs:39). Nothing is priced from a guess."
+   },
+   {
+    "key": "b",
+    "label": "Count what is listed; no sites or an empty list counts 0; a zero-device site still counts as a site",
+    "detail": "perSite quantity = typed quantity x the number of listed site entries. The group with no sites or an empty list gets 0 of that component with no message. ENGINE.md:169 says 'An empty list is no allocation: no check and no issue' and a device count 'from 0' is valid (PurchaseCalculator.cs:338), so this option reads those rules literally."
+   },
+   {
+    "key": "c",
+    "label": "Treat a group with no sites or an empty list as one site; count only sites with devices",
+    "detail": "perSite on a group without sites counts the typed quantity once (the whole group as one site); a listed zero-device site is not counted. FixedPerGroup already counts 'the whole group's' typed quantity once (PurchaseInput.cs:44-45), so this reads like it when no site exists."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T06:09:48.960833+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-17 08:04",
+   "CARD hpsmpoc-hosted-reset-confirm-count-1011",
+   "CARD hpsmpoc-frame-chip-count-1101"
+  ]
  }
 ]
