@@ -15329,5 +15329,54 @@
   "project": "Secuura",
   "ts": "2026-11-02T22:05:38.066993+11:00",
   "text": "For your information, no action required: the Mac is running hot tonight. Load reached about 22 with six agent seats running tests at once, and one PR's push gave up at the push lock's limit, which is 16. It's been relaunched, and the load is back down to about 13.\n\nOne thing is yours to decide if you want to: Avast antivirus is taking a large share of the processor, probably scanning the heavy test-dependency folders the seats keep rebuilding. Excluding the project's worktrees folder from scanning would likely free a lot of that. I haven't touched it, and nothing is broken."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-11-03T05:59:22.191581+11:00",
+  "text": "Morning, Kam. Twenty-one Secuura merges went in overnight, zod 4 among them, and nothing is waiting on you. One snag: the Spark's test setup was still using last week's packages, so it stalled once zod 4 landed. A fix is building now. The plan for today is on the morning card."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T06:10:33.927786+11:00",
+  "text": "For your information, a new High security finding, now ticket KS-1952. When the gateway loses Redis, its document-type checks let every document through. A type that requires MFA was allowed, where it is refused when Redis is up. It is not caused by last night's work: it happens on any Redis drop today. The QA gate measured it with the real gateway code but a stand-in Redis, two copies, no live server, so treat the scale as unconfirmed. The suggested fix is to refuse with a 503 while Redis is down, as two earlier fixes already do. The PR that surfaced it, 1960, does not make it worse and is cleared to merge. Nothing needed from you unless you want it prioritised ahead of the queue."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T06:40:59.755942+11:00",
+  "text": "Got both, thank you. PR 1961 will merge as soon as its merge seat has it ready, right after 1960, which is merging now. The erasure gap is ticket KS-1953, High, and it will be fixed under that ticket. Carrying on with the plan."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T07:06:53.634290+11:00",
+  "text": "For your information, the morning's QA gates turned up four existing problems, none caused by the PRs they were checking. All four are now High tickets. KS-1952: when the gateway loses Redis, its document-type checks let everything through, including MFA-required types. KS-1953: a GDPR erasure can complete while one lifecycle row stays readable under the platform keys, the one you ruled on. KS-1954: if the transfer approval sweep cannot read its workflows, steps that should escalate are marked timed out, so escalations are lost silently. KS-1955: if the kyc or wallet-connector erasure handler fails, that person's data stays in those services and nothing reports it, because no one reads the failed-event queue and the request is already marked complete. Each was measured with stand-in databases, not live systems. Two of the four are GDPR erasure gaps, so I'd put KS-1953 and KS-1955 next in line for a fix seat unless you want otherwise."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T09:01:33.353803+11:00",
+  "text": "For your information, two things before more merges. One: PR 1969, referral, has a card waiting for you. Its gate found that milestone rewards are being re-awarded today even with a healthy database, because saving progress always fails. I recommend merging and fixing that next. Two: I'm holding PR 1968, vc-issuer, without asking you. Its gate found a revoked credential can still verify as valid when the database read fails and the service's memory copy is stale, and that PR would extend it to one more error type. Your KS-1352 ruling says a revoked credential must fail, so I'm keeping it unmerged until the verify path stops trusting memory on a failed read. Two High tickets are being filed for the revocation gaps."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T09:05:41.396670+11:00",
+  "text": "Got it. PR 1969 merges as soon as its notes are in and the merge seat has it ready. The re-award bug and the missing owner check go to the front of the fix queue."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T09:37:01.785406+11:00",
+  "text": "Morning Kam. No action needed from you. I rotated at about 09:20 and picked up cleanly. PR 1964, the originate document routes, merged on its gate at 09:32, and PR 1971 is queued behind it. As you ruled at 09:05, a fix seat for the referral re-award bug and the missing owner check is being briefed now, ahead of the queue; its brief is with a drafter and I read it before it goes out. Two Opus and Sonnet gates are running: one for the api-gateway PR, whose fail-open question comes to you as a card before any merge, and one for the originate boot PR. The Spark is busy with a round and four queued. The machine is loaded by the push checks, so new seats wait for room."
  }
 ]
