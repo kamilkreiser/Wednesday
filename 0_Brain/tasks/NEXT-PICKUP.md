@@ -8,7 +8,13 @@ supersede: REPLACED WHOLESALE ~05:00 AEDT 2026-11-03 by the 03:2x successor seat
 
 # NEXT PICKUP — Tue 3 Nov 2026, ~05:00 AEDT (03:2x successor seat, ctx 66%)
 
-## UPDATE 05:15 (70% checkpoint; READ FIRST — supersedes STATE/GATES below where they differ)
+## UPDATE 05:26 (ctx 78%; READ FIRST — supersedes everything below where it differs)
+- **develop 4307ac876cae** (PR 1956 MERGED 18:12Z, verified). B 79th queue: **1953 -> 1957** (both QUEUED; GO each at its READY TO MERGE after the pre-GO checks; subjects `GO: merge PR <n> at <head12> on develop <pin12> (Seat B 79th)`). 1958 joins after R 76th's NOTES PATCHED.
+- **Gates (subagents of THIS seat: they DIE at rotation; if no verdict.md in the workdir after rotation, RE-LAUNCH from the commission in today's note):** 142 DONE (1958 GO WITH NOTES, ANSWER sent to R 76th). **143 RUNNING** Sonnet T2 on PR 1959 (W 19th's auth events bus, head a3c6feeab5e1): `0_Brain/reference/2026-11-03_gate143-ks1868-pr1959/`. Next: **144** = R 76th's PR 3 (originate, Opus T1, erasure crypto-shred FIRST), **145** = W 19th's PR 3 (api-gateway redis, Opus T1; hook started 18:23:24Z).
+- **Seats:** B 79th %94 merge; W 19th %93 (PR 3 pushing; then wrap ~75%); **R 76th %95 launched 05:23** (Sonnet; plan confirmation OWED; gate 142 ANSWER already in its inbox; first action = R 75th's PR 3 driver 49174 result).
+- **Spark operator 90 RUNNING** (13 model rows queued) — also a subagent of this seat: if it dies at rotation, check spark/done.md for o90 rows + night/ READY_*O90*, then re-commission.
+
+## UPDATE 05:15 (70% checkpoint)
 - **Merge chain:** PR 1956 GO sent 05:09 to **B 79th** (head a85e03f6 / develop 2d3b3bb3 / tree 4eee067f) — await MERGED, verify by ls-remote. **PR 1953 QUEUED to B 79th after 1956** (gate 140 GO WITH NOTES, notes patched by W 19th 18:10Z; chain-with-tail + audit-baseline + LOCK-PATH checks asked). At its READY: pre-GO checks -> GO `GO: merge PR 1953 at 928ee20c84dc on develop <pin12> (Seat B 79th)`.
 - **Gates:** 140 DONE (1953 GO WITH NOTES); 141 DONE (1957 GO WITH NOTES -> ANSWER to W 19th: patch notes + correct its '3 ipfs tsc errors' (gate measured 0)); **142 RUNNING** (Sonnet T2, PR 1958 = R 75th's PR 2, workdir `0_Brain/reference/2026-11-03_gate142-ks1868-pr1958/`). **143** = R 75th's PR 3 (Opus T1; erasure crypto-shred question first); **144** = W 19th's PR 3 redis (Opus T1).
 - **Seats:** R 75th WRAPPED 18:12Z, SCORED 0.93, pane closed; its PR 3 push = detached driver pid 49174 (alive). **Seat R 76th**: a Sonnet drafter is writing `2_Project_Files/fleet/briefs_staged/2026-11-03_seatR76_raise_continue.md` -> READ WHOLE, dry-run, launch at capacity ROOM (waiter pattern). W 19th %93 (ctx ~61% at 04:5x): PR 1957 notes owed, PR 2 + PR 3 in the push queue (drivers 14860, 92363). B 79th %94 merging.
