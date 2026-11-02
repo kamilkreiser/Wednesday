@@ -1,0 +1,210 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/verification.ts b/Blockchain/Dev/services/originate/src/routes/verification.ts
+--- a/Blockchain/Dev/services/originate/src/routes/verification.ts
++++ b/Blockchain/Dev/services/originate/src/routes/verification.ts
+@@ -1354,5 +1354,5 @@
+           if (rows.length > 0) {
+-            return respondExistenceOnly(
++            return await respondExistenceOnly(
+               rows[0],
+               'Document found by ID but no hash was provided. To verify integrity, provide the document file or its SHA-256 hash.',
+             );
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1939-verification-by-id-existence-answer-throw-is-answered.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1939-verification-by-id-existence-answer-throw-is-answered.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1939-verification-by-id-existence-answer-throw-is-answered.test.ts
+@@ -0,0 +1,195 @@
++// KS-1939 (originate routes/verification.ts, POST /api/verification/verify, strategy 2 by documentId): the handler answered a found document with
++// `return respondExistenceOnly(...)` INSIDE its lookup try, without `await`. respondExistenceOnly is async, so a throw inside it (a
++// field read, the response write) became a rejected promise that left the try and its catch, and the request got NO answer. With `return await` the
++// catch of the lookup block answers it, exactly as it answers an ordinary Error from the lookup query itself: HTTP 200 { verified: false, error: 'Verification lookup failed' }.
++// These cells use ORDINARY errors only (an unreadable thrown value in that catch is a separate pass). A real loopback listener; a request that gets no answer within the window
++// is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
++process.env.NODE_ENV = 'development';
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
++
++const mockLoggerError = jest.fn();
++const mockLoggerWarn = jest.fn();
++const mockExecuteRaw = jest.fn();
++let mockQueryRaw: () => Promise<unknown[]> = async () => [];
++
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: (..._args: unknown[]) => mockQueryRaw(), $executeRaw: (...args: unknown[]) => mockExecuteRaw(...args) },
++  getTenantManager: () => null,
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    runWithTenantId: (_t: unknown, fn: () => unknown) => fn(),
++    queryWithTenantGuc: jest.fn(),
++  }),
++);
++
++jest.mock('../repositories/documentRepo', () => ({
++  walkAncestors: jest.fn().mockResolvedValue({ lineage: [], truncated: false }),
++  walkDescendants: jest.fn().mockResolvedValue({ descendants: [], truncated: false }),
++  MAX_LINEAGE_DEPTH: 10,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: mockLoggerWarn, error: mockLoggerError, debug: jest.fn() },
++}));
++
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { verificationRouter } from '../routes/verification';
++
++const DOC = 'ks1939-doc';
++const HASH = 'f'.repeat(64);
++const LOOKUP_FAILED = { verified: false, error: 'Verification lookup failed' };
++
++function docRow(): Record<string, unknown> {
++  return {
++    id: '11111111-1111-4111-8111-111111111111',
++    external_id: DOC,
++    title: 'ks1939 title',
++    document_type: 'certificate',
++    content_hash: HASH,
++    status: 'certified',
++    certification_metadata: {},
++    metadata: {},
++    created_at: new Date(0),
++    certified_at: new Date(0),
++    organization_name: 'ks1939 org',
++  };
++}
++
++// The first query of the by-id strategy answers `first`; every later query answers no rows.
++function answerFirstQueryWith(first: unknown[]): void {
++  let n = 0;
++  mockQueryRaw = async () => (n++ === 0 ? first : []);
++}
++
++// The first query of the by-id strategy rejects with `thrown` (a plain function, not jest.fn(): a spy may inspect a revoked Proxy before the code under test sees it).
++function rejectFirstQueryWith(thrown: unknown): void {
++  mockQueryRaw = async () => {
++    throw thrown;
++  };
++}
++
++let armedJsonThrow: { thrown: unknown } | null = null;
++
++const app = express();
++app.use(express.json());
++app.use((_req: express.Request, res: express.Response, next: express.NextFunction) => {
++  const hook = armedJsonThrow;
++  armedJsonThrow = null;
++  if (hook) {
++    const realJson = res.json.bind(res);
++    let first = true;
++    res.json = ((body: unknown) => {
++      if (first) {
++        first = false;
++        throw hook.thrown;
++      }
++      return realJson(body);
++    }) as typeof res.json;
++  }
++  next();
++});
++app.use('/api/verification', verificationRouter);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => server?.close());
++beforeEach(() => {
++  jest.clearAllMocks();
++  mockQueryRaw = async () => [];
++  armedJsonThrow = null;
++});
++
++// POST /api/verification/verify with a body carrying ONLY a documentId (strategy 2, by id). No answer within the window is reported as the string NO ANSWER.
++async function verifyById(): Promise<{ status: number | 'NO ANSWER'; body: any }> {
++  try {
++    const res = await fetch(baseUrl + '/api/verification/verify', {
++      method: 'POST',
++      headers: { 'content-type': 'application/json' },
++      body: JSON.stringify({ documentId: DOC }),
++      signal: AbortSignal.timeout(1500),
++    });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER', body: null };
++  }
++}
++
++describe('KS-1939 POST /verify by documentId: a throw while building the existence answer is answered by the lookup catch', () => {
++  it('RED ks1939 R1: an ordinary Error thrown by the first res.json of the by-id answer is answered 200 lookup failed and logged', async () => {
++    answerFirstQueryWith([docRow()]);
++    armedJsonThrow = { thrown: new Error('ks1939 ordinary') };
++    const reply = await verifyById();
++    expect(reply).toEqual({ status: 200, body: LOOKUP_FAILED });
++    expect(mockLoggerWarn.mock.calls).toEqual([['Verification lookup failed', { documentId: DOC, error: 'ks1939 ordinary' }]]);
++    expect(mockLoggerError).not.toHaveBeenCalled();
++    expect(mockExecuteRaw).not.toHaveBeenCalled();
++  });
++
++  it('RED ks1939 R2: a thrown string from the by-id answer is answered 200 lookup failed', async () => {
++    answerFirstQueryWith([docRow()]);
++    armedJsonThrow = { thrown: 'ks1939 plain string' };
++    const reply = await verifyById();
++    expect(reply).toEqual({ status: 200, body: LOOKUP_FAILED });
++    expect(mockLoggerWarn.mock.calls).toEqual([['Verification lookup failed', { documentId: DOC, error: undefined }]]);
++    expect(mockLoggerError).not.toHaveBeenCalled();
++    expect(mockExecuteRaw).not.toHaveBeenCalled();
++  });
++
++  it('RED ks1939 R3: an ordinary Error thrown while reading the found row is answered 200 lookup failed', async () => {
++    const bad = docRow();
++    Object.defineProperty(bad, 'status', {
++      get() {
++        throw new Error('ks1939 status getter');
++      },
++    });
++    answerFirstQueryWith([bad]);
++    const reply = await verifyById();
++    expect(reply).toEqual({ status: 200, body: LOOKUP_FAILED });
++    expect(mockLoggerWarn.mock.calls).toEqual([['Verification lookup failed', { documentId: DOC, error: 'ks1939 status getter' }]]);
++    expect(mockLoggerError).not.toHaveBeenCalled();
++    expect(mockExecuteRaw).not.toHaveBeenCalled();
++  });
++
++  it('control ks1939 C1: an ordinary Error from the lookup query itself is answered 200 lookup failed, as before', async () => {
++    rejectFirstQueryWith(new Error('ks1939 query'));
++    const reply = await verifyById();
++    expect(reply).toEqual({ status: 200, body: LOOKUP_FAILED });
++    expect(mockLoggerWarn.mock.calls).toEqual([['Verification lookup failed', { documentId: DOC, error: 'ks1939 query' }]]);
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
++
++  it('control ks1939 C2: a found document still gets the existence-only answer, never a verdict', async () => {
++    answerFirstQueryWith([docRow()]);
++    const reply = await verifyById();
++    expect(reply.status).toBe(200);
++    expect(reply.body).toEqual(
++      expect.objectContaining({
++        verified: false,
++        documentId: DOC,
++        title: 'ks1939 title',
++        status: 'certified',
++        contentHash: HASH,
++        checks: expect.objectContaining({ documentExists: true, hashValid: false, integrityVerified: false }),
++      }),
++    );
++    expect(reply.body.error).toBeUndefined();
++    expect(String(reply.body.warning)).toContain('Document found by ID');
++    expect(mockLoggerWarn).not.toHaveBeenCalled();
++    expect(mockLoggerError).not.toHaveBeenCalled();
++    expect(mockExecuteRaw).not.toHaveBeenCalled();
++  });
++});

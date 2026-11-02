@@ -1,0 +1,253 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -653,10 +653,16 @@
+             });
+           }
+         } catch (delErr: any) {
++          let reason: string;
++          try {
++            reason = String(delErr instanceof Error ? delErr.message : delErr);
++          } catch {
++            reason = 'unreadable thrown value';
++          }
+           logger.error('KS-1633: the compensating delete failed, so a certification remains with no anchor', {
+             certId: id,
+             tenantId,
+-            error: delErr instanceof Error ? delErr.message : String(delErr),
++            error: reason,
+           });
+         }
+         return res.status(503).json({
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-issue-compensating-delete-catch-o79p5-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-issue-compensating-delete-catch-o79p5-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-issue-compensating-delete-catch-o79p5-unreadable-throw.test.ts
+@@ -0,0 +1,227 @@
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@127.0.0.1:1/test';
++process.env.SIMULATE_ANCHORING = 'true';
++
++// mockInject names the ONE failure a cell arms: the key says which stand-in throws the chosen value (reserve, anchor, saveDoc, update, charge, del, holder).
++let mockInject: Record<string, unknown> = {};
++const mockStore = new Map<string, any>();
++const mockLog = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
++const mockSaveCertification = jest.fn(async (..._a: unknown[]) => undefined);
++const mockCharge = jest.fn(async (..._a: unknown[]) => {
++  if ('charge' in mockInject) throw mockInject.charge;
++  return { id: 'charge-1' };
++});
++const mockDeleteCertification = jest.fn(async (..._a: unknown[]) => {
++  if ('del' in mockInject) throw mockInject.del;
++  return 1;
++});
++const mockReserve = jest.fn(async (..._a: unknown[]) => {
++  if ('reserve' in mockInject) throw mockInject.reserve;
++  return undefined;
++});
++const mockExecuteRaw = jest.fn(async (..._a: unknown[]) => {
++  if ('update' in mockInject) throw mockInject.update;
++  return 1;
++});
++const mockQueryRaw = jest.fn(async (..._a: unknown[]) => {
++  if ('holder' in mockInject) throw mockInject.holder;
++  return [{ id: 'holder-row' }];
++});
++
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: jest.fn(async (id: string) => mockStore.get(id) ?? null),
++  listDocuments: jest.fn(async () => ({ items: [...mockStore.values()], total: mockStore.size })),
++  saveDocument: jest.fn(async (record: any) => {
++    if ('saveDoc' in mockInject) throw mockInject.saveDoc;
++    const copy = JSON.parse(JSON.stringify(record));
++    if (!Array.isArray(copy.signatures)) copy.signatures = [];
++    mockStore.set(copy.id, copy);
++    return { dbId: '99999999-9999-4999-8999-999999999999', inserted: true };
++  }),
++  updateDocument: jest.fn(async () => undefined),
++  generateContentHash: jest.fn(() => 'a'.repeat(64)),
++  assertNoCycle: jest.fn(async () => undefined),
++  getOrganizationExternalRef: jest.fn(async () => null),
++}));
++jest.mock('../repositories/certificationRepo', () => ({
++  initRepo: jest.fn(async () => undefined),
++  getCertification: jest.fn(),
++  saveCertification: (...a: unknown[]) => mockSaveCertification(...a),
++  listCertifications: jest.fn(),
++  saveShare: jest.fn(),
++  getSharesByCertification: jest.fn(),
++  getLineageEvents: jest.fn(),
++  deleteCertification: (...a: unknown[]) => mockDeleteCertification(...a),
++  reserveCertificationRow: (...a: unknown[]) => mockReserve(...a),
++}));
++jest.mock('../db', () => ({ prisma: { $queryRaw: (...a: unknown[]) => mockQueryRaw(...a), $executeRaw: (...a: unknown[]) => mockExecuteRaw(...a), $executeRawUnsafe: jest.fn() } }));
++jest.mock('../services/chargeEvents', () => ({ createChargeEvent: (...a: unknown[]) => mockCharge(...a), getChargeEventsByCertification: jest.fn() }));
++jest.mock('../utils/notificationClient', () => ({ notifyDocumentCertified: jest.fn(async () => undefined), notifyDocumentRevoked: jest.fn(async () => undefined), notifyDocumentShared: jest.fn(async () => undefined) }));
++jest.mock('../repositories/shareRepo', () => ({ createShare: jest.fn() }));
++jest.mock('../repositories/lifecycleEventRepo', () => ({ createLifecycleEvent: jest.fn(), setLifecycleEventAnchor: jest.fn(), listLifecycleEvents: jest.fn() }));
++jest.mock('../events', () => ({ publishEvent: jest.fn(async () => undefined), EventTypes: { DOCUMENT_CREATED: 'document.created', DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred', DOCUMENT_VERSIONED: 'document.versioned', CERTIFICATION_ISSUED: 'certification.issued' } }));
++jest.mock('../services/threadTokenClient', () => ({ mintAndRegisterThreadToken: jest.fn(async () => ({})) }));
++jest.mock('../routes/verification', () => ({ registerInPlatformRegistry: jest.fn(async () => undefined) }));
++jest.mock('../services/anchorStateSync', () => ({ pollAnchorUntilConfirmed: jest.fn(async () => undefined), reconcileDocumentAnchorState: jest.fn(async (d: any) => d) }));
++jest.mock('../services/provenance', () => {
++  const actual = jest.requireActual('../services/provenance');
++  return { ...actual, recordActionProvenance: jest.fn(async () => undefined), getCreationProvenance: jest.fn(async () => null), wasCreatedByConnector: jest.fn(async () => true) };
++});
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    hasNulByte: jest.requireActual('@secuura/shared').hasNulByte,
++    runWithTenantId: jest.requireActual('@secuura/shared').runWithTenantId,
++    encryptField: jest.requireActual('@secuura/shared').encryptField,
++    decryptField: jest.requireActual('@secuura/shared').decryptField,
++    lookupHash: jest.requireActual('@secuura/shared').lookupHash,
++    verifyMessageSignature: jest.fn(() => true),
++  }),
++);
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    req.user = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
++    next();
++  },
++}));
++jest.mock('../utils/logger', () => ({ logger: mockLog }));
++
++import express from 'express';
++import { certificationsRouter } from '../routes/certifications';
++
++const TENANT = 'a0000000-0000-4000-8000-000000000001';
++const ISSUER = { userId: '11111111-2222-4333-8444-555555551868', role: 'ISSUER_ADMIN', verificationLevel: 'none', tenantId: TENANT };
++const SOURCE_ID = 'doc-src-1868';
++const UNREADABLE = 'unreadable thrown value';
++
++const app = express();
++app.use((req: any, _res, next) => { req.tenantId = TENANT; next(); });
++app.use('/api/certifications', express.json(), certificationsRouter);
++// One loopback stub plays auth (the issuer signature). The anchoring call never leaves the process: issue() answers it from a plain function.
++const stubApp = express();
++stubApp.use(express.json());
++stubApp.post('/api/issuer-certs/sign', (req, res) => {
++  res.json({ success: true, signature: 'ab', signatureAlgorithm: 'RSASSA-PSS-SHA256', signedContentHash: req.body.contentHash, signedAt: new Date().toISOString(),
++    cert: { id: 'c1', fingerprintSha256: 'f'.repeat(64), subject: 'CN=probe', issuer: 'CN=probe', certPem: 'PEM', validFrom: '2026-01-01', validUntil: '2027-01-01', trustLevel: 'self-signed' } });
++});
++let base = '';
++let stubBase = '';
++let server: ReturnType<typeof app.listen>;
++let stub: ReturnType<typeof stubApp.listen>;
++beforeAll(async () => {
++  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
++  await new Promise<void>((r) => { stub = stubApp.listen(0, '127.0.0.1', () => r()); });
++  const a = server.address(); base = 'http://127.0.0.1:' + String(typeof a === 'object' && a ? a.port : 0);
++  const s = stub.address(); stubBase = 'http://127.0.0.1:' + String(typeof s === 'object' && s ? s.port : 0);
++  process.env.AUTH_SERVICE_URL = stubBase;
++});
++afterAll(() => { server?.close(); stub?.close(); });
++
++beforeEach(() => {
++  mockInject = {};
++  mockStore.clear();
++  mockStore.set(SOURCE_ID, { id: SOURCE_ID, type: 'DOCUMENT', status: 'draft', owner: { id: ISSUER.userId }, data: { title: 'src' }, contentHash: 'sha256:' + 'a'.repeat(64), signatures: [], createdAt: '2026-10-01T00:00:00Z', updatedAt: '2026-10-01T00:00:00Z' });
++  mockSaveCertification.mockClear(); mockCharge.mockClear(); mockDeleteCertification.mockClear(); mockReserve.mockClear(); mockExecuteRaw.mockClear(); mockQueryRaw.mockClear();
++  mockLog.info.mockReset(); mockLog.warn.mockReset(); mockLog.error.mockReset();
++});
++
++const revokedProxy = (): object => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++const throwingMessageError = (): Error =>
++  Object.defineProperty(new Error('ks1868 hidden'), 'message', {
++    get(): string {
++      throw new Error('ks1868 message getter threw');
++    },
++  });
++const messageGetterReturningRevokedProxy = (): Error =>
++  Object.defineProperty(new Error('ks1868 hidden'), 'message', {
++    get(): unknown {
++      return revokedProxy();
++    },
++  });
++function useRealLogger(): void {
++  const real = jest.requireActual('../utils/logger').logger;
++  real.transports.forEach((t: { log?: (info: unknown, next: () => void) => void }) => {
++    t.log = (_info: unknown, next: () => void) => next();
++  });
++  mockLog.error.mockImplementation((...a: unknown[]) => (real.error as (...x: unknown[]) => unknown)(...a));
++  mockLog.warn.mockImplementation((...a: unknown[]) => (real.warn as (...x: unknown[]) => unknown)(...a));
++}
++
++// Issues one certification (parentDocumentId path). The anchoring call (the only fetch whose URL contains /api/anchors) is a PLAIN function: it accepts, or rejects with the value when the armed failure is `anchor`.
++async function issue(extra: Record<string, unknown> = {}): Promise<{ status: number | string; body: any; saved: number; charges: unknown[]; derived: number; deleted: number }> {
++  const clientFetch = globalThis.fetch;
++  (globalThis as any).fetch = (url: unknown, init?: unknown) => {
++    if (!String(url).includes('/api/anchors')) return clientFetch(url as string, init as RequestInit);
++    if ('anchor' in mockInject) return Promise.reject(mockInject.anchor);
++    return Promise.resolve(new Response(JSON.stringify({ success: true, data: { id: 'anchor-1868' } }), { status: 202, headers: { 'content-type': 'application/json' } }));
++  };
++  const state = () => ({
++    saved: mockSaveCertification.mock.calls.length,
++    charges: mockCharge.mock.calls.map((c) => c[0]),
++    derived: mockStore.size - 1,
++    deleted: mockDeleteCertification.mock.calls.length,
++  });
++  try {
++    const res = await clientFetch(base + '/api/certifications/issue', {
++      method: 'POST',
++      headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(ISSUER) },
++      body: JSON.stringify({ type: 'DOCUMENT', parentDocumentId: SOURCE_ID, data: { title: 'c' }, ...extra }),
++      signal: AbortSignal.timeout(3000),
++    });
++    return { status: res.status, body: await res.json().catch(() => ({})), ...state() };
++  } catch {
++    return { status: 'NO ANSWER', body: {}, ...state() };
++  } finally {
++    (globalThis as any).fetch = clientFetch;
++  }
++}
++
++// POST /api/certifications/issue, gate 105 G105-F5: in PRODUCTION an anchoring failure compensates the pre-anchor reservation row (deleteCertification) and answers 503. The catch around that delete
++// (`delErr`) logs `error: delErr instanceof Error ? delErr.message : String(delErr)` unguarded. An ORDINARY failure of the delete is logged and the route still answers the 503. An unreadable value
++// (a revoked Proxy; a message getter that throws; one that returns a hostile non-string, which the real logger cannot print) threw INSIDE the catch, so the outer catch answered 500 instead.
++// After the fix an unreadable delete failure gets the ordinary 503 and the catch logs the constant reason. NODE_ENV is set to production for the duration of one cell only, AFTER the real
++// logger module is loaded (the logger reads NODE_ENV once, at load).
++const CONTEXT_PREFIX = 'KS-1633: the compensating delete failed';
++const REFUSED_STATE = { saved: 0, charges: [] as unknown[], derived: 0, deleted: 1 };
++const realNodeEnv = process.env.NODE_ENV;
++afterEach(() => { process.env.NODE_ENV = realNodeEnv; });
++
++async function expectCompensationFailureAnswered503(thrown: unknown, logged: unknown, real = false): Promise<void> {
++  useRealLogger();
++  if (!real) {
++    mockLog.error.mockReset();
++    mockLog.warn.mockReset();
++  }
++  mockInject = { anchor: new Error('ks1868 anchoring down'), del: thrown };
++  process.env.NODE_ENV = 'production';
++  const r = await issue();
++  expect(r.status).toBe(503);
++  expect(r.body).toMatchObject({ success: false, error: { code: 'SERVICE_UNAVAILABLE' } });
++  expect({ saved: r.saved, charges: r.charges, derived: r.derived, deleted: r.deleted }).toEqual(REFUSED_STATE);
++  const lines = mockLog.error.mock.calls.filter((c) => String(c[0]).startsWith(CONTEXT_PREFIX));
++  expect(lines).toEqual([[expect.any(String), { certId: expect.any(String), tenantId: expect.any(String), error: logged }]]);
++}
++
++describe('KS-1868 G105-F5 POST /issue (production): the compensating-delete catch reads the thrown value safely', () => {
++  it('control ks1868 C1 delErr: an ordinary delete failure is logged with its own message and the route answers 503', async () => {
++    await expectCompensationFailureAnswered503(new Error('ks1868 ordinary'), 'ks1868 ordinary');
++  });
++
++  it('control ks1868 C2 delErr: a thrown string is logged as itself, as before', async () => {
++    await expectCompensationFailureAnswered503('ks1868 plain string', 'ks1868 plain string');
++  });
++
++  it('RED ks1868 R1 delErr: a revoked Proxy gets the ordinary 503 and logs the constant reason', async () => {
++    await expectCompensationFailureAnswered503(revokedProxy(), UNREADABLE);
++  });
++
++  it('RED ks1868 R2 delErr: an Error whose message getter throws gets the ordinary 503 and logs the constant reason', async () => {
++    await expectCompensationFailureAnswered503(throwingMessageError(), UNREADABLE);
++  });
++
++  it('RED ks1868 R3 delErr: an Error whose message getter returns a revoked Proxy gets the ordinary 503 through the real logger', async () => {
++    await expectCompensationFailureAnswered503(messageGetterReturningRevokedProxy(), UNREADABLE, true);
++  });
++});

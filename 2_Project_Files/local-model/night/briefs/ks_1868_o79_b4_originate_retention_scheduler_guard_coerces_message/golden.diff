@@ -1,0 +1,140 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/retentionScheduler.ts b/Blockchain/Dev/services/originate/src/services/retentionScheduler.ts
+--- a/Blockchain/Dev/services/originate/src/services/retentionScheduler.ts
++++ b/Blockchain/Dev/services/originate/src/services/retentionScheduler.ts
+@@ -50,7 +50,7 @@
+   } catch (err: any) {
+     let reason: string;
+     try {
+-      reason = err instanceof Error ? err.message : String(err);
++      reason = String(err instanceof Error ? err.message : err);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-retention-scheduler-guard-coerces-message-o79b4.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-retention-scheduler-guard-coerces-message-o79b4.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-retention-scheduler-guard-coerces-message-o79b4.test.ts
+@@ -0,0 +1,123 @@
++// KS-1868 (originate services/retentionScheduler.ts, runEnforcement, follow-up of the guard PR 1923 merged): the scheduled data-retention run catches a failure of `enforceRetention()` and reads it as
++// `err instanceof Error ? err.message : String(err)` inside its own try, with the constant `unreadable thrown value` when that throws. That expression does not coerce `message`: for an Error whose `message` getter
++// RETURNS a hostile non-string (a revoked Proxy; an object whose toJSON throws) `reason` is that object, and the REAL winston logger throws on it inside logger.error, outside the try, so the run's promise
++// rejects with nothing logged (the timer callbacks do not await or catch it: an unhandled rejection). The guard now wraps the same expression in String(...) (the form PR 1924 merged in routes/certifications.ts), so a
++// value String() cannot read lands in the fallback and an object becomes its string form. Nothing about WHEN or WHETHER enforcement runs changes. runEnforcement is module-private, so the cells start the scheduler
++// with a 10 ms startup delay under fake timers (setImmediate stays real so a pending rejection surfaces inside the cell that caused it) and let the first scheduled run fire. The cells that name the real logger send
++// logger.error through it (its transports' output swallowed, its formats still run); the jest.fn logger of the other cells cannot reproduce the failure, because it never formats its arguments.
++const mockEnforceRetention = jest.fn();
++const mockLoggerError = jest.fn();
++const mockLoggerInfo = jest.fn();
++
++jest.mock('../services/gdprService', () => ({
++  enforceRetention: mockEnforceRetention,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: mockLoggerInfo, warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
++}));
++
++import { startRetentionScheduler, stopRetentionScheduler } from '../services/retentionScheduler';
++
++beforeEach(() => {
++  jest.clearAllMocks();
++  jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick'] });
++  process.env.RETENTION_STARTUP_DELAY_MS = '10';
++});
++
++afterEach(() => {
++  stopRetentionScheduler();
++  jest.clearAllTimers();
++  jest.useRealTimers();
++  delete process.env.RETENTION_STARTUP_DELAY_MS;
++});
++
++async function firstRun(): Promise<void> {
++  startRetentionScheduler();
++  jest.advanceTimersByTime(10);
++  for (let i = 0; i < 20; i++) await Promise.resolve();
++  await new Promise<void>((resolve) => setImmediate(resolve));
++}
++
++async function runWithThrow(thrown: unknown): Promise<void> {
++  mockEnforceRetention.mockRejectedValueOnce(thrown);
++  await firstRun();
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++
++function messageGetterReturningRevokedProxy(): Error {
++  const e = new Error('ks1868 hidden');
++  Object.defineProperty(e, 'message', {
++    get(): unknown {
++      return revokedProxy();
++    },
++  });
++  return e;
++}
++
++function messageGetterReturningThrowingToJson(): Error {
++  const e = new Error('ks1868 hidden');
++  Object.defineProperty(e, 'message', {
++    get(): unknown {
++      return {
++        toJSON(): never {
++          throw new Error('ks1868 toJSON threw');
++        },
++      };
++    },
++  });
++  return e;
++}
++
++function useRealLogger(): void {
++  const real = jest.requireActual('../utils/logger').logger;
++  real.transports.forEach((t: { log?: (info: unknown, next: () => void) => void }) => {
++    t.log = (_info: unknown, next: () => void) => next();
++  });
++  mockLoggerError.mockImplementation((...a: unknown[]) => (real.error as (...x: unknown[]) => unknown)(...a));
++}
++
++// The logged value must already be a string when the logger is called (a typeof check, so that a hostile object is never printed by the assertion itself).
++const loggedTypes = (): string[] => mockLoggerError.mock.calls.map((c) => typeof (c[1] as { error?: unknown }).error);
++
++describe('KS-1868 retention scheduler reads a hostile message safely', () => {
++  afterEach(() => {
++    mockLoggerError.mockReset();
++  });
++
++  it('control ks1868 C1 runEnforcement: an ordinary Error logs its own message', async () => {
++    await runWithThrow(new Error('ks1868 ordinary'));
++    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
++    expect(mockLoggerError.mock.calls).toEqual([['Scheduled enforcement failed', { error: 'ks1868 ordinary' }]]);
++  });
++
++  it('control ks1868 C2 runEnforcement: an ordinary Error through the real logger logs its own message', async () => {
++    useRealLogger();
++    await runWithThrow(new Error('ks1868 ordinary'));
++    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
++    expect(loggedTypes()).toEqual(['string']);
++    expect(mockLoggerError.mock.calls).toEqual([['Scheduled enforcement failed', { error: 'ks1868 ordinary' }]]);
++  });
++
++  it('RED ks1868 R1 runEnforcement: an Error whose message getter returns a revoked Proxy is logged as the constant reason through the real logger', async () => {
++    useRealLogger();
++    await runWithThrow(messageGetterReturningRevokedProxy());
++    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
++    expect(loggedTypes()).toEqual(['string']);
++    expect(mockLoggerError.mock.calls).toEqual([['Scheduled enforcement failed', { error: 'unreadable thrown value' }]]);
++  });
++
++  it('RED ks1868 R2 runEnforcement: an Error whose message getter returns an object with a throwing toJSON is logged as its string form through the real logger', async () => {
++    useRealLogger();
++    await runWithThrow(messageGetterReturningThrowingToJson());
++    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
++    expect(loggedTypes()).toEqual(['string']);
++    expect(mockLoggerError.mock.calls).toEqual([['Scheduled enforcement failed', { error: '[object Object]' }]]);
++  });
++});

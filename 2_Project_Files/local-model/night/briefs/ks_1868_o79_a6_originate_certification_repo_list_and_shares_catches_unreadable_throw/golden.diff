@@ -1,0 +1,130 @@
+diff --git a/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts b/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
+--- a/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
++++ b/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
+@@ -203,7 +203,13 @@
+     const all = rows.map(fromDbRow);
+     return { items: all, total: all.length };
+   } catch (err: any) {
+-    logger.warn('DB list failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = String(err instanceof Error ? err.message : err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('DB list failed', { error: reason });
+     throw err;
+   }
+ }
+@@ -381,7 +387,13 @@
+       status: r.status,
+     }));
+   } catch (err: any) {
+-    logger.warn('Failed to fetch shares from DB', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = String(err instanceof Error ? err.message : err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to fetch shares from DB', { error: reason });
+     throw err;
+   }
+ }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-certification-repo-list-and-shares-catches-o79p6-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certification-repo-list-and-shares-catches-o79p6-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certification-repo-list-and-shares-catches-o79p6-unreadable-throw.test.ts
+@@ -0,0 +1,92 @@
++// KS-1868 (originate repositories/certificationRepo.ts, listCertifications and getSharesByCertification, gate 105 G105-F3/F5): when the query fails, each catch logs the failure as
++// `err instanceof Error ? err.message : String(err)` and then RE-THROWS the value it caught. An ordinary failure is logged once and the same Error reaches the caller. When the thrown value
++// cannot be read (a revoked Proxy makes `instanceof` throw; an Error whose `message` getter throws; one whose getter returns a hostile non-string, which the real logger cannot print) that read
++// threw INSIDE the catch, so the caller saw a TypeError in place of the value, nothing was logged, and the caller's own guard logged the TypeError text. Each catch now reads the value inside its
++// own try and logs the constant reason `unreadable thrown value`, then re-throws the same value an ordinary failure already gets. The database stand-in is passed as the `db` argument, so no
++// module-level prisma is touched, and is a plain function (a spy would inspect what it rejects with).
++const mockLog = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
++
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: jest.fn() },
++  withTenant: jest.fn(),
++}));
++
++jest.mock('../utils/logger', () => ({ logger: mockLog }));
++
++import { listCertifications, getSharesByCertification } from '../repositories/certificationRepo';
++
++const TENANT = 'a0000000-0000-4000-8000-0000000000aa';
++const CERT_ID = 'aaaaaaaa-1111-4111-8111-111111111111';
++const UNREADABLE = 'unreadable thrown value';
++
++const CASES = [
++  { fn: 'listCertifications', context: 'DB list failed', call: (db: unknown) => listCertifications(TENANT, undefined, db as any) },
++  { fn: 'getSharesByCertification', context: 'Failed to fetch shares from DB', call: (db: unknown) => getSharesByCertification(CERT_ID, db as any) },
++];
++
++// Resolves with the value the function rejected with (compared by identity, never printed), or the marker RESOLVED.
++async function rejectedWith(c: (typeof CASES)[number], thrown: unknown): Promise<{ same: boolean; resolved: boolean }> {
++  const db = { $queryRaw: async () => { throw thrown; } };
++  try {
++    await c.call(db);
++    return { same: false, resolved: true };
++  } catch (e) {
++    return { same: e === thrown, resolved: false };
++  }
++}
++
++const revokedProxy = (): object => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++const throwingMessageError = (): Error =>
++  Object.defineProperty(new Error('ks1868 hidden'), 'message', {
++    get(): string {
++      throw new Error('ks1868 message getter threw');
++    },
++  });
++const messageGetterReturningRevokedProxy = (): Error =>
++  Object.defineProperty(new Error('ks1868 hidden'), 'message', {
++    get(): unknown {
++      return revokedProxy();
++    },
++  });
++function useRealLogger(): void {
++  const real = jest.requireActual('../utils/logger').logger;
++  real.transports.forEach((t: { log?: (info: unknown, next: () => void) => void }) => {
++    t.log = (_info: unknown, next: () => void) => next();
++  });
++  mockLog.warn.mockImplementation((...a: unknown[]) => (real.warn as (...x: unknown[]) => unknown)(...a));
++}
++
++beforeEach(() => jest.clearAllMocks());
++afterEach(() => mockLog.warn.mockReset());
++
++describe.each(CASES)('KS-1868 certificationRepo $fn reads the thrown value safely', (c) => {
++  it(`control ks1868 C1 ${c.fn}: an ordinary Error is logged with its own message and re-thrown unchanged`, async () => {
++    expect(await rejectedWith(c, new Error('ks1868 ordinary'))).toEqual({ same: true, resolved: false });
++    expect(mockLog.warn.mock.calls).toEqual([[c.context, { error: 'ks1868 ordinary' }]]);
++  });
++
++  it(`control ks1868 C2 ${c.fn}: a thrown string is logged as itself and re-thrown unchanged, as before`, async () => {
++    expect(await rejectedWith(c, 'ks1868 plain string')).toEqual({ same: true, resolved: false });
++    expect(mockLog.warn.mock.calls).toEqual([[c.context, { error: 'ks1868 plain string' }]]);
++  });
++
++  it(`RED ks1868 R1 ${c.fn}: a revoked Proxy is logged as a constant reason and re-thrown unchanged`, async () => {
++    expect(await rejectedWith(c, revokedProxy())).toEqual({ same: true, resolved: false });
++    expect(mockLog.warn.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
++  });
++
++  it(`RED ks1868 R2 ${c.fn}: an Error whose message getter throws is logged as a constant reason and re-thrown unchanged`, async () => {
++    expect(await rejectedWith(c, throwingMessageError())).toEqual({ same: true, resolved: false });
++    expect(mockLog.warn.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
++  });
++
++  it(`RED ks1868 R3 ${c.fn}: an Error whose message getter returns a revoked Proxy is logged as a constant reason through the real logger and re-thrown unchanged`, async () => {
++    useRealLogger();
++    expect(await rejectedWith(c, messageGetterReturningRevokedProxy())).toEqual({ same: true, resolved: false });
++    expect(mockLog.warn.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
++  });
++});
