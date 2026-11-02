@@ -9,7 +9,7 @@ model: claude-opus-5-5 -- builder row C3 (`model-routing.md:93`); id: `/Volumes/
 "The pinning row exists and is green at the unedited product; after the change fleet-total quotes reconcile at every quantity, including the two cases that disagreed; the rows of MPS #137 stay green." Its fixture: a fleet total for a group of several devices under deal supplies; fixed 1 agrees, fixed 2 and unset 1 do not. It depends on nothing. 359 and 360 are LATER commits and not this kit.
 
 ## FACTS (MEASURED by the drafter 16:54:29 to 17:01:31 AEDT 2026-11-02: `date`, `gh api -X GET` raw at the pin, `grep -n`; re-measure at Step 0 and say in STATUS where they disagree)
-- Main `0d4022b9...` (#145; 1 parent). Open PRs #121, #120 (dependabot, lockfile only). No `b1139*` ref. Live MPS panes: M77, R141, R139 (see HOLDS; R139's fixed exclusions, kit B1135 line 37, name `.tools/dotnet` and `.tools/b1116`).
+- Main `0d4022b9...` (#145; 1 parent). Open PRs #121, #120 (dependabot, lockfile only). No `b1139*` ref. Live MPS pane at the stamp: M79 only (see HOLDS).
 - **The defect, at the pin.** `Reconciliation/PurchaseRecomputation.cs`: `:52` `QuantityOf` extends a per-device line to N x typed quantity; `:218`-`:219` add `quantityOf(line) * (line.MonoPagesPerDeviceMonth ?? 0m)` and the colour twin; `:205` the method, `:199-204` its doc. The calculator, `PurchaseCalculator.cs:918-919`, adds `LinePages(c.Quantity, c.Mono, c.Basis)` (`QuoteCalculator.cs:267`: `StatesLineTotal(basis) ? stated : quantity * stated`), so a `VolumeBasis.FleetTotal` line (`PurchaseInput.cs:109`, enum `QuoteInput.cs:17`) counts its pages ONCE, at quantity 0 too. The reconciler never reads `VolumeBasis` (0 hits under `Reconciliation/`; control: `ComponentQuantityRule` 1 hit), so the two agree only where the counted quantity is 1. The rental twin `RentalRecomputation.cs` also never reads it: out of scope.
 - **Hand-derived, NOT RUN:** `Toner` (`:41`), `DealSuppliesUsage()` (`:78`): cost per page 1/150, click 1/90. A total of 900 mono pages is revenue 10.00, cost 6.00 a month in the calculator at every quantity. The reconciler at N 5: unset q1 counts 4500 pages (50.00 / 30.00), fixed or manual q2 1800 (20.00 / 12.00), q1 900 (agrees); at q 0 it counts 0. Six of nine measures move (MonthlyRevenue, MonthlyCost, MonthlyGrossProfit, AnnualGrossProfit, ContractGrossProfit, ContractValue); the three upfront agree. The finding gate: `B1075_STATUS.md:76`.
 - Register: `docs/ENGINE.md` X-34 `:160` ends "Not yet in the independent reconciliation, as for R-29"; X-35 `:161` says the reconciliation "counts the same extended quantity from the input (upfront figures and deal pages)"; X-41 `:167` ends "X-34's limit there is unchanged"; R-29 `:40` (rental) says "Not yet" and STAYS.
@@ -52,20 +52,20 @@ model: claude-opus-5-5 -- builder row C3 (`model-routing.md:93`); id: `/Volumes/
 - `STOPPED: NEEDS TUESDAY` + ONE question; or `BLOCKED: <reason>`.
 
 ## HOLDS and PARTITION (both sides)
-No path outside the property. Live: M77 (a web test file), R141 (root records repo, Jira), R139 (removes old trees under `.tools`; `.tools/dotnet` is in its fixed exclusions, which your build depends on: SDK gone mid-run = `STOPPED: NEEDS TUESDAY`). 359 and 360 edit `PurchaseInput.cs` and `PurchaseCalculator.cs` AFTER this lands: touch neither.
+No path outside the property. Live: `Datasec/MPS-M79` (`tests/MpsCalc.Api.Tests/TemplateIsolationTests.cs` and `docs/API.md` only; intersection with your three paths 0). A gate seat for the branch `b1125/*` (`web/src/api/contract.sync.test.ts`) may start while you run: disjoint. SDK gone mid-run = `STOPPED: NEEDS TUESDAY`. 359 and 360 edit `PurchaseInput.cs` and `PurchaseCalculator.cs` AFTER this lands: touch neither.
 
 ## Stamp
 The unstamped `.pre-stamp` copy reads 9 such lines.
-- STAMP: ____
-- GATE-ROUND (default ROUND 1 OF 2, NO GO 0 before on this class, tier 1, G1): ____
-- LAUNCH WINDOW (until when; one waiter at load1 below 7): ____
-- Stamped by (D and Q of the drafter report accepted or overridden): ____
-- Launch authority: ____
-- Hard stop and target READY (150 and 300 minutes after Step 0, not after 22:00 AEDT): ____
-- Main and open PRs at launch (expected main 0d4022b9 or later): ____
-- Model receipt line and load1 at launch: ____
+- STAMP: STAMPED 17:37 AEDT 2026-11-02 by Tuesday s227, kit read whole with the drafter report; path check run alone in an earlier message (rc 0, 24 OK); SHOW lines for PurchaseCalculator.cs:918, QuoteCalculator.cs:267, PurchaseInput.cs:109, QuoteInput.cs:17, ReconciliationTypes.cs:55, ci.yml:42 read equal to the facts. Stale live-pane lines corrected by Tuesday before this stamp (FACTS and HOLDS).
+- GATE-ROUND (default ROUND 1 OF 2, NO GO 0 before on this class, tier 1, G1): ROUND 1 OF 2, NO GO 0 before on this class (new class: V4 engine, reconciler fleet-total page basis), tier 1, G1.
+- LAUNCH WINDOW (until when; one waiter at load1 below 7): Until 20:30 AEDT 2026-11-02, one waiter at load1 below 7. Live MPS beside you: M79 only. Re-read at Step 0.
+- Stamped by (D and Q of the drafter report accepted or overridden): Tuesday s227. D-1 to D-8 accepted. Q-1 two commits. Q-2 rental twin: not this kit, the next records seat tickets it. Q-3 new class as written. Q-4 Opus builder, C3. Q-5 launch when cool; M78 goes before the NexusAI lane, by the product owner's 2026-10-23 project order.
+- Launch authority: Tuesday, on the product owner's 2026-10-24 every-boot rule and his 2026-11-02 06:08 morning-plan tap; the ticket needs no new word and no ruling.
+- Hard stop and target READY (150 and 300 minutes after Step 0, not after 22:00 AEDT): READY 150, HARD STOP 300 minutes after Step 0, written absolute, and never after 22:00 AEDT 2026-11-02.
+- Main and open PRs at launch (expected main 0d4022b9 or later): Main 0d4022b93fcb read by gh api by Tuesday just before this stamp; open PRs #121, #120 (dependabot, lockfile only). Re-read at Step 0.
+- Model receipt line and load1 at launch: model: claude-opus-5-5 -- C3 -- gauge 46%; the waiter's own load read decides.
 
 **Your commission is THIS file (read-only):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-02_B1139_SEAT-M78_mps-361-fleet-total-reconcile.md`; Step 0 copies it unchanged into `1_Project_Definition/Briefs/`.
 **Launch (Tuesday), ONE waiter, level inside the quotes:** `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/MPS-M78 "WED_USAGE_STOP=100 BRIEF_SEAT_LEVEL=opus bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-02_B1139_SEAT-M78_mps-361-fleet-total-reconcile.md'"` No az. Nothing deploys.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 17:37 by Tuesday s227, whole file.
