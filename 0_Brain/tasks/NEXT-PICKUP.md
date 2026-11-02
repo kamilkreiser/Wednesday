@@ -3,10 +3,22 @@ date: 2026-11-03
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's (Mac mini).
 status: live
-supersede: REPLACED WHOLESALE 09:41 AEDT 2026-11-03 by the 09:2x rotation-successor seat (50% checkpoint). Previous kept as NEXT-PICKUP.md.pre-1103-0941 (and .pre-1103-0818). Replace wholesale; never stack.
+supersede: UPDATE BLOCK ADDED 10:24 (backup .pre-1103-1024); REPLACED WHOLESALE 09:41 AEDT 2026-11-03 by the 09:2x rotation-successor seat (50% checkpoint). Previous kept as NEXT-PICKUP.md.pre-1103-0941 (and .pre-1103-0818). Replace wholesale; never stack.
 ---
 
 # NEXT PICKUP — Tue 3 Nov 2026, 09:41 AEDT (successor seat, 50% checkpoint)
+
+## 🔴 UPDATE 10:24 (65% checkpoint — READ FIRST, supersedes below where it differs)
+- develop **66cbe4e52d5a** (PR 1971). Merged on Wednesday GOs today: 12 (1957-1963, 1966, 1967, 1969, 1964, 1971).
+- **READY TO QUEUE (all gated GO WITH NOTES, notes PATCHED, no cards), in order: PR 1972 (head 8c255e05), PR 1973 (e16104be), PR 1974 (35f1842f).** QUEUE each to **Seat B 82nd AFTER its plan confirmation** (never to an unbooted seat). Template: this seat's scratchpad queue_1971.md / go_1971.md shapes (subject `QUEUE: PR <n> at <head12> (Seat B 82nd)`; GO subject `GO: merge PR <n> at <head12> on develop <pin12> (Seat B 82nd)`).
+- **B 82nd waiter** `<this session scratchpad>/b82_waiter.sh` pid 62196 (ppid 1): launches Sonnet merge seat at ROOM (load1 < 7) after F 25th (done). Brief `2_Project_Files/fleet/briefs_staged/2026-11-03_seatB82_merge_queue.md` read whole. If the seat rotates, the waiter dies with nothing lost: re-arm from the brief (dry run already rc 0).
+- **Seat F 25th %101 LIVE (Opus, referral fix KS-1956 + KS-1957, Kam 09:05 = a, ahead of the queue)**, launched 10:04:49, rung-5 verified. Plan confirmation owed -> answer it (GO counts as Kam's word, 1030 card).
+- **PR 1970 = Kam card `secuura-pr1970-gateway-failopen-1103`** (AMENDED 09:5x: newline rateLimit only measured with a planted record). Default = stays unmerged. KS-1961 (High) filed by R 77th for the older fail-open. Gate 148 workdir committed.
+- **Gate 158** (Sonnet T2, PR 1975 transfer delegation, head bd9dd971): subagent of THIS seat; workdir `0_Brain/reference/2026-11-03_gate158-ks1868-pr1975/`; if no verdict.md after rotation, re-launch as RESUME. ANSWER -> W 21st (or W 22nd's FIRST ACTION if W 21st wrapped).
+- **R 77th %98 (ctx ~72%)**: PRs 8/9/10 built, drivers 3405 / 29196 / 33499 queued; READY FOR GATE each at VERIFIED -> gates (T1 Opus: 8 anchoring, 9 auth session; PR 10 auth credentials). **RULED: no PR 11 in this seat**; PR 11 (O83-P1 security revoke-on-rotate, T1) = Seat R 78th FIRST ACTION. **KAM CARD OWED after PR 10's gate re-measures:** isPasswordBreached (HIBP) has NO caller, so the password policy's documented breach check never runs.
+- **W 21st %100 (ctx ~71%)**: all items done after PR 1975's gate notes; Q5 (O91 x11) -> Seat W 22nd.
+- Operator 93's loops (78383, 78385) bounded to ~11:45. Spark busy.
+- Ledger today: +1 row (premise to Kam, 09:5x). Regenerate BOTH digests at wrap.
 
 ## SUBAGENTS OF THIS SEAT (they DIE at its rotation; re-launch as a RESUME of the workdir if no verdict.md / output)
 - **Gate 148 RESUME** (Opus T1, PR 1970 api-gateway middleware, head b078c7f4): workdir `0_Brain/reference/2026-11-03_gate148-ks1868-pr1970/` (still .gitignored until it reports: remove that line + commit the workdir when verdict.md lands). At verdict: ANSWER R 77th (notes) + **KAM CARD BEFORE ANY MERGE** on fail-open (precedent KS-1256 = fail closed).
