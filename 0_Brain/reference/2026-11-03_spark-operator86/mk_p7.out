@@ -1,0 +1,34 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o86_p7_api_gateway_db_pool_error_and_ready_hook_catches_guard_message
+diff --git a/Blockchain/Dev/services/api-gateway/src/db.ts b/Blockchain/Dev/services/api-gateway/src/db.ts
+--- a/Blockchain/Dev/services/api-gateway/src/db.ts
++++ b/Blockchain/Dev/services/api-gateway/src/db.ts
+@@ -36,5 +36,12 @@
+     pool.on('error', (err: Error) => {
+-      dbLog('error', 'DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      dbLog('error', 'DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+@@ -98,6 +105,13 @@
+     await onDbReady();
+   } catch (err: any) {
+     // Boot work failing must not un-flag an otherwise reachable DB.
+-    dbLog('error', 'DB ready boot work failed', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    dbLog('error', 'DB ready boot work failed', { error: reason });
+   }
+ }
+

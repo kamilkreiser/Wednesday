@@ -1,0 +1,14 @@
+const { spawnSync } = require('child_process'); const fs = require('fs');
+const G = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate131-ks1868-pr1949';
+const D = G + '/repo/Blockchain/Dev', A = D + '/services/auth', B = D + '/node_modules/.bin';
+const run = (cmd, args, cwd, log) => { const r = spawnSync(cmd, args, { cwd, encoding: 'utf8', maxBuffer: 1 << 26 }); fs.writeFileSync(G + '/logs/' + log, (r.stdout || '') + (r.stderr || '') + '\nrc=' + r.status + '\n'); console.log(log, 'rc', r.status); };
+const files = ['src/routes/auth.ts','src/routes/internal.ts','src/routes/issuerCerts.ts','src/routes/oauth.ts', ...fs.readdirSync(A + '/src/__tests__').filter((f) => /message-coercion-unreadable-throw/.test(f)).map((f) => 'src/__tests__/' + f)];
+console.log(files.length, 'files');
+run(B + '/eslint', files, A, 'eslint_pr_files.log');
+fs.writeFileSync(A + '/src/zz_gate131_planted.ts', 'export function f(): number { const unused = 1; debugger; return 2; }\n');
+run(B + '/eslint', ['src/zz_gate131_planted.ts'], A, 'eslint_planted.log');
+fs.renameSync(A + '/src/zz_gate131_planted.ts', G + '/logs/_quarantine/zz_gate131_planted.ts');
+const t = A + '/src/__tests__/ks1868-oauth-message-coercion-unreadable-throw.test.ts'; const orig = fs.readFileSync(t, 'utf8');
+fs.writeFileSync(t, orig + '\nconst GATE131_UNUSED: number = "x";\nexport {};\n');
+run('node', ['scripts/typecheck-tests/check.cjs', 'services/auth'], D, 'leg16_planted.log');
+fs.writeFileSync(t, orig); console.log('restored test file', fs.readFileSync(t, 'utf8') === orig);

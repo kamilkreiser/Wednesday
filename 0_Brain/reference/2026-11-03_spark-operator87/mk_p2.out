@@ -1,0 +1,35 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o87_p2_auth_db_pool_error_and_migration_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/db.ts b/Blockchain/Dev/services/auth/src/db.ts
+--- a/Blockchain/Dev/services/auth/src/db.ts
++++ b/Blockchain/Dev/services/auth/src/db.ts
+@@ -40,5 +40,12 @@
+     pool.on('error', (err: Error) => {
+-      logger.error('DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+@@ -157,7 +164,14 @@
+       await getPool().query(sql);
+     } catch (err: any) {
+       // Ignore errors (e.g., table doesn't exist yet, or constraint issues)
+-      logger.debug('Column migration skipped', { sql: sql.substring(0, 60), error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.debug('Column migration skipped', { sql: sql.substring(0, 60), error: reason });
+     }
+   }
+   logger.info('User column migrations applied');
+

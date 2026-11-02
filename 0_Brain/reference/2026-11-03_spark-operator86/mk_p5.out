@@ -1,0 +1,50 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o86_p5_transfer_approval_workflow_seed_probe_escalation_catches_guard_message
+diff --git a/Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts b/Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts
+--- a/Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts
++++ b/Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts
+@@ -342,7 +342,14 @@
+     try {
+       await dbUpsertWorkflow(workflow);
+     } catch (err: any) {
+-      console.error(`[approvalWorkflowService] Failed to seed workflow ${wf.id}:`, err?.message);
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      console.error(`[approvalWorkflowService] Failed to seed workflow ${wf.id}:`, reason);
+     }
+   }
+ }
+@@ -353,6 +360,13 @@
+     await query('SELECT 1 FROM svc_approval_workflows LIMIT 1');
+     await seedDefaultWorkflows();
+   } catch (err: any) {
+-    console.warn('[approvalWorkflowService] DB tables not ready:', err?.message);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.warn('[approvalWorkflowService] DB tables not ready:', reason);
+   }
+ }
+@@ -626,5 +640,12 @@
+         }
+       }
+     } catch (err: any) {
+-      console.error('[approvalWorkflowService] processEscalations error:', err?.message);
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      console.error('[approvalWorkflowService] processEscalations error:', reason);
+     }
+

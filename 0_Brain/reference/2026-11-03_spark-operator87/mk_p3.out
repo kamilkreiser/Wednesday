@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o87_p3_anchoring_status_update_catch_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/anchorStatusUpdate.ts b/Blockchain/Dev/services/anchoring/src/anchorStatusUpdate.ts
+--- a/Blockchain/Dev/services/anchoring/src/anchorStatusUpdate.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchorStatusUpdate.ts
+@@ -222,7 +222,14 @@
+     }
+     return affected;
+   } catch (err: any) {
+-    deps.log('warn', 'Failed to update anchor status in DB', { anchorId, error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    deps.log('warn', 'Failed to update anchor status in DB', { anchorId, error: reason });
+     return null;
+   }
+ }
+

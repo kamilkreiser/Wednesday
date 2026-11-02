@@ -1,0 +1,22 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o85_p6_originate_lifecycle_payload_codec_decrypt_catch_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/utils/lifecyclePayloadCodec.ts b/Blockchain/Dev/services/originate/src/utils/lifecyclePayloadCodec.ts
+--- a/Blockchain/Dev/services/originate/src/utils/lifecyclePayloadCodec.ts
++++ b/Blockchain/Dev/services/originate/src/utils/lifecyclePayloadCodec.ts
+@@ -53,9 +53,15 @@
+         const plain = decryptField(raw, context(eventId));
+         return plain ? (JSON.parse(plain) as Record<string, unknown>) : {};
+       } catch (err) {
++        let reason: string;
++        try {
++          reason = String(err instanceof Error ? err.message : err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.error('lifecycle payload decrypt failed', {
+           eventId,
+-          error: err instanceof Error ? err.message : String(err),
++          error: reason,
+         });
+         return { payloadUnavailable: true };
+       }
+

@@ -1,0 +1,168 @@
+import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
+
+// KS-1868 (operator 83 screen, oauth state): the catch of consumeOAuthState in services/auth/src/services/oauthState.ts logs
+// `{ provider, error: err instanceof Error ? err.message : String(err) }` with the read INSIDE the logger call's arguments,
+// unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch itself
+// throw, so the function REJECTS although its documented contract is "returns false, never throws" (KS-819 F-3) and the social
+// callback route answers an error instead of its authored 403 refusal; an Error whose message is readable but not a string is
+// handed to the logger as is. The cells make the Redis command reject with such a value and assert the function resolves false
+// (the refusal an ordinary Error gets), the line is logged as text (the constant when the value cannot be turned into text), and
+// the same for the MULTI fallback. Harness: the real module with the logger and the session module's getRedisClient replaced by
+// plain stand-ins (no Redis, no network).
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  mode: 'getdel-throws' as string,
+  stored: null as string | null,
+  logged: [] as unknown[][],
+}));
+
+const capture = vi.hoisted(() => ({
+  debug: () => undefined,
+  info: () => undefined,
+  warn: () => undefined,
+  error: (...args: unknown[]) => {
+    h.logged.push(args);
+  },
+  log: () => undefined,
+}));
+vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
+vi.mock('../services/session', () => ({
+  getRedisClient: () => {
+    if (h.mode === 'multi-throws') {
+      return {
+        multi: () => ({ get: () => ({ del: () => ({ exec: () => Promise.reject(h.toThrow) }) }) }),
+      };
+    }
+    return { getdel: () => (h.mode === 'getdel-returns' ? Promise.resolve(h.stored) : Promise.reject(h.toThrow)) };
+  },
+}));
+
+let consume: (state: string, provider: string) => Promise<boolean>;
+beforeAll(async () => {
+  consume = (await import('../services/oauthState')).consumeOAuthState;
+});
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.mode = 'getdel-throws';
+  h.stored = null;
+  h.logged.length = 0;
+});
+
+async function run(): Promise<{ ok: boolean; value: unknown }> {
+  try {
+    return { ok: true, value: await consume('state-1868', 'google') };
+  } catch {
+    return { ok: false, value: undefined };
+  }
+}
+const FAILED = '[OAuthState] Redis command failed — refusing social callback';
+const LINES = () => h.logged.filter((c) => c[0] === FAILED);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (c: unknown[] | undefined): string => {
+  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+const providerOf = (c: unknown[] | undefined): unknown => (c?.[1] as { provider?: unknown } | undefined)?.provider;
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+const SHAPES: Array<[string, () => unknown, string]> = [
+  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
+  ['an Error whose message getter throws', getterThrows, 'unreadable thrown value'],
+  ['an Error whose message is a null-prototype object', () => withMessage(Object.create(null)), 'unreadable thrown value'],
+  ['an Error whose message is a Symbol', () => withMessage(Symbol('ks1868')), 'Symbol(ks1868)'],
+];
+
+describe('KS-1868 the OAuth state consume catch refuses and logs text for a hostile thrown value', () => {
+  it('control ks1868 C1 getdel: an ordinary Error is refused (false) and logged with its message', async () => {
+    h.mode = 'getdel-throws';
+    h.toThrow = new Error('LOADING redis');
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe('LOADING redis');
+  });
+  it('control ks1868 C2 getdel: a thrown plain string is refused (false) and logged as its own text', async () => {
+    h.mode = 'getdel-throws';
+    h.toThrow = 'plain boom';
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe('plain boom');
+  });
+  it('control ks1868 C3 a stored value equal to the provider is accepted (true) and nothing is logged', async () => {
+    h.mode = 'getdel-returns';
+    h.stored = 'google';
+    expect(await run()).toEqual({ ok: true, value: true });
+    expect(LINES()).toHaveLength(0);
+  });
+  it('control ks1868 C4 the MULTI fallback: an ordinary Error is refused (false) and logged with its message', async () => {
+    h.mode = 'multi-throws';
+    h.toThrow = new Error('EXECABORT');
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe('EXECABORT');
+  });
+  it('RED ks1868 R1 getdel: a rejection that is a revoked Proxy is refused (false) and logged as text, as for an ordinary Error', async () => {
+    h.mode = 'getdel-throws';
+    h.toThrow = SHAPES[0][1]();
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[0][2]);
+  });
+  it('RED ks1868 R2 getdel: a rejection that is an Error whose message getter throws is refused (false) and logged as text, as for an ordinary Error', async () => {
+    h.mode = 'getdel-throws';
+    h.toThrow = SHAPES[1][1]();
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[1][2]);
+  });
+  it('RED ks1868 R3 getdel: a rejection that is an Error whose message is a null-prototype object is refused (false) and logged as text, as for an ordinary Error', async () => {
+    h.mode = 'getdel-throws';
+    h.toThrow = SHAPES[2][1]();
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[2][2]);
+  });
+  it('RED ks1868 R4 getdel: a rejection that is an Error whose message is a Symbol is refused (false) and logged as text, as for an ordinary Error', async () => {
+    h.mode = 'getdel-throws';
+    h.toThrow = SHAPES[3][1]();
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[3][2]);
+  });
+  it('RED ks1868 R5 the MULTI fallback: a rejection that is a revoked Proxy is refused (false) and logged as text, as for an ordinary Error', async () => {
+    h.mode = 'multi-throws';
+    h.toThrow = SHAPES[0][1]();
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[0][2]);
+  });
+  it('RED ks1868 R6 the MULTI fallback: a rejection that is an Error whose message is a Symbol is refused (false) and logged as text, as for an ordinary Error', async () => {
+    h.mode = 'multi-throws';
+    h.toThrow = SHAPES[3][1]();
+    expect(await run()).toEqual({ ok: true, value: false });
+    expect(LINES()).toHaveLength(1);
+    expect(providerOf(LINES()[0])).toBe('google');
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[3][2]);
+  });
+});

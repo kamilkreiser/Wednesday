@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o87_p6_auth_events_init_catch_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/events.ts b/Blockchain/Dev/services/auth/src/events.ts
+--- a/Blockchain/Dev/services/auth/src/events.ts
++++ b/Blockchain/Dev/services/auth/src/events.ts
+@@ -98,7 +98,14 @@
+     logger.info('EventBus initialised for auth service');
+     return true;
+   } catch (err: any) {
+-    logger.warn('Failed to initialise EventBus', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to initialise EventBus', { error: reason });
+     return false;
+   }
+ }
+

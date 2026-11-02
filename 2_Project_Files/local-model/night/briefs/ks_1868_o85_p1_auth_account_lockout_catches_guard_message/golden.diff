@@ -1,0 +1,217 @@
+diff --git a/Blockchain/Dev/services/auth/src/services/accountLockout.ts b/Blockchain/Dev/services/auth/src/services/accountLockout.ts
+--- a/Blockchain/Dev/services/auth/src/services/accountLockout.ts
++++ b/Blockchain/Dev/services/auth/src/services/accountLockout.ts
+@@ -89,7 +89,14 @@
+     const v = await redis.get(lockoutKey(email, ip));
+     return v !== null;
+   } catch (err: any) {
+-    logger.warn('lockout: redis error on isLockedOut — failing open', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('lockout: redis error on isLockedOut — failing open', { error: reason });
+     return false;
+   }
+ }
+@@ -119,7 +126,14 @@
+     }
+     return count;
+   } catch (err: any) {
+-    logger.warn('lockout: redis error on recordFailure — continuing', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('lockout: redis error on recordFailure — continuing', { error: reason });
+     return 0;
+   }
+ }
+@@ -130,6 +144,13 @@
+   try {
+     await redis.del(counterKey(email, ip), lockoutKey(email, ip));
+   } catch (err: any) {
+-    logger.warn('lockout: redis error on recordSuccess — non-fatal', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('lockout: redis error on recordSuccess — non-fatal', { error: reason });
+   }
+ }
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1868-account-lockout-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1868-account-lockout-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1868-account-lockout-catches-unreadable-throw.test.ts
+@@ -0,0 +1,162 @@
++import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
++
++// KS-1868 (operator 85 screen, account lockout): the three catches of services/auth/src/services/accountLockout.ts
++// (isLockedOut, recordFailure, recordSuccess) log `{ error: err?.message }` with the read INSIDE the logger call's
++// arguments, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the
++// catch itself throw, so the function REJECTS although the module documents that the lockout fails OPEN when Redis is down;
++// an Error whose message is readable but not a string is handed to the logger as is. The cells make the Redis command reject
++// with such a value and assert the function resolves with its fail-open value (the outcome an ordinary Error gets) and the
++// line is logged as text (the constant when the value cannot be turned into text). Harness: the real module with the logger
++// replaced by a plain stand-in and a plain-object Redis client (no Redis, no network).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logged: [] as unknown[][],
++}));
++
++const capture = vi.hoisted(() => ({
++  debug: () => undefined,
++  info: () => undefined,
++  warn: (...args: unknown[]) => {
++    h.logged.push(args);
++  },
++  error: () => undefined,
++  log: () => undefined,
++}));
++vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
++
++type Lockout = typeof import('../services/accountLockout');
++let mod: Lockout;
++beforeAll(async () => {
++  mod = await import('../services/accountLockout');
++});
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logged.length = 0;
++});
++
++/** A Redis client whose every command rejects with the thrown value, through plain functions (not spies). */
++const failingRedis = (): Parameters<Lockout['isLockedOut']>[0] => ({
++  get: () => Promise.reject(h.toThrow),
++  set: () => Promise.reject(h.toThrow),
++  incr: () => Promise.reject(h.toThrow),
++  expire: () => Promise.reject(h.toThrow),
++  del: () => Promise.reject(h.toThrow),
++});
++
++async function settle<T>(p: () => Promise<T>): Promise<{ ok: boolean; value: T | undefined }> {
++  try {
++    return { ok: true, value: await p() };
++  } catch {
++    return { ok: false, value: undefined };
++  }
++}
++const locked = () => settle(() => mod.isLockedOut(failingRedis(), 'user@example.com', '203.0.113.9'));
++const failure = () => settle(() => mod.recordFailure(failingRedis(), 'user@example.com', '203.0.113.9'));
++const success = () => settle(() => mod.recordSuccess(failingRedis(), 'user@example.com', '203.0.113.9'));
++
++const LOCKED = 'lockout: redis error on isLockedOut — failing open';
++const FAILURE = 'lockout: redis error on recordFailure — continuing';
++const SUCCESS = 'lockout: redis error on recordSuccess — non-fatal';
++const LINES = (msg: string) => h.logged.filter((c) => c[0] === msg);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (c: unknown[] | undefined): string => {
++  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++const SHAPES: Array<[string, () => unknown, string]> = [
++  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
++  ['an Error whose message getter throws', getterThrows, 'unreadable thrown value'],
++  ['an Error whose message is a null-prototype object', () => withMessage(Object.create(null)), 'unreadable thrown value'],
++  ['an Error whose message is a Symbol', () => withMessage(Symbol('ks1868')), 'Symbol(ks1868)'],
++];
++
++describe('KS-1868 the account lockout catches fail open and log text for a hostile thrown value', () => {
++  it('control ks1868 C1 isLockedOut: an ordinary Error fails open (false) and is logged with its message', async () => {
++    h.toThrow = new Error('LOADING redis');
++    expect(await locked()).toEqual({ ok: true, value: false });
++    expect(LINES(LOCKED)).toHaveLength(1);
++    expect(reasonOf(LINES(LOCKED)[0])).toBe('LOADING redis');
++  });
++  it('control ks1868 C2 isLockedOut: a thrown plain string has no message, fails open (false) and is logged with no error, as before', async () => {
++    h.toThrow = 'plain boom';
++    expect(await locked()).toEqual({ ok: true, value: false });
++    expect(LINES(LOCKED)).toHaveLength(1);
++    expect(reasonOf(LINES(LOCKED)[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C3 recordFailure: an ordinary Error continues (0) and is logged with its message', async () => {
++    h.toThrow = new Error('READONLY redis');
++    expect(await failure()).toEqual({ ok: true, value: 0 });
++    expect(LINES(FAILURE)).toHaveLength(1);
++    expect(reasonOf(LINES(FAILURE)[0])).toBe('READONLY redis');
++  });
++  it('control ks1868 C4 recordSuccess: an ordinary Error is non-fatal (resolves) and is logged with its message', async () => {
++    h.toThrow = new Error('CONNRESET redis');
++    expect(await success()).toEqual({ ok: true, value: undefined });
++    expect(LINES(SUCCESS)).toHaveLength(1);
++    expect(reasonOf(LINES(SUCCESS)[0])).toBe('CONNRESET redis');
++  });
++  it('RED ks1868 R1 isLockedOut: a rejection that is a revoked Proxy fails open (false) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[0][1]();
++    expect(await locked()).toEqual({ ok: true, value: false });
++    expect(LINES(LOCKED)).toHaveLength(1);
++    expect(reasonOf(LINES(LOCKED)[0])).toBe(SHAPES[0][2]);
++  });
++  it('RED ks1868 R2 isLockedOut: a rejection that is an Error whose message getter throws fails open (false) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[1][1]();
++    expect(await locked()).toEqual({ ok: true, value: false });
++    expect(LINES(LOCKED)).toHaveLength(1);
++    expect(reasonOf(LINES(LOCKED)[0])).toBe(SHAPES[1][2]);
++  });
++  it('RED ks1868 R3 isLockedOut: a rejection that is an Error whose message is a null-prototype object fails open (false) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[2][1]();
++    expect(await locked()).toEqual({ ok: true, value: false });
++    expect(LINES(LOCKED)).toHaveLength(1);
++    expect(reasonOf(LINES(LOCKED)[0])).toBe(SHAPES[2][2]);
++  });
++  it('RED ks1868 R4 isLockedOut: a rejection that is an Error whose message is a Symbol fails open (false) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[3][1]();
++    expect(await locked()).toEqual({ ok: true, value: false });
++    expect(LINES(LOCKED)).toHaveLength(1);
++    expect(reasonOf(LINES(LOCKED)[0])).toBe(SHAPES[3][2]);
++  });
++  it('RED ks1868 R5 recordFailure: a rejection that is a revoked Proxy continues (0) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[0][1]();
++    expect(await failure()).toEqual({ ok: true, value: 0 });
++    expect(LINES(FAILURE)).toHaveLength(1);
++    expect(reasonOf(LINES(FAILURE)[0])).toBe(SHAPES[0][2]);
++  });
++  it('RED ks1868 R6 recordFailure: a rejection that is an Error whose message is a Symbol continues (0) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[3][1]();
++    expect(await failure()).toEqual({ ok: true, value: 0 });
++    expect(LINES(FAILURE)).toHaveLength(1);
++    expect(reasonOf(LINES(FAILURE)[0])).toBe(SHAPES[3][2]);
++  });
++  it('RED ks1868 R7 recordSuccess: a rejection that is a revoked Proxy is non-fatal (resolves) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[0][1]();
++    expect(await success()).toEqual({ ok: true, value: undefined });
++    expect(LINES(SUCCESS)).toHaveLength(1);
++    expect(reasonOf(LINES(SUCCESS)[0])).toBe(SHAPES[0][2]);
++  });
++  it('RED ks1868 R8 recordSuccess: a rejection that is an Error whose message is a Symbol is non-fatal (resolves) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[3][1]();
++    expect(await success()).toEqual({ ok: true, value: undefined });
++    expect(LINES(SUCCESS)).toHaveLength(1);
++    expect(reasonOf(LINES(SUCCESS)[0])).toBe(SHAPES[3][2]);
++  });
++});

@@ -1,0 +1,177 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/cardano/threadTokenIndex.ts b/Blockchain/Dev/services/anchoring/src/cardano/threadTokenIndex.ts
+--- a/Blockchain/Dev/services/anchoring/src/cardano/threadTokenIndex.ts
++++ b/Blockchain/Dev/services/anchoring/src/cardano/threadTokenIndex.ts
+@@ -73,14 +73,21 @@
+     // The migration may not have run in older environments. Silently degrade
+     // to the metadata-label path — STRICT_THREAD_TOKEN_INDEX flips this to a
+     // hard error when the migration is mandatory.
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     if (STRICT_MODE) {
+       logger.error('state_thread_registry unavailable in STRICT mode', {
+-        error: err?.message,
++        error: reason,
+       });
+       throw err;
+     }
+     logger.debug('state_thread_registry not available — falling back to metadata-only', {
+-      error: err?.message,
++      error: reason,
+     });
+     return [];
+   }
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-thread-token-index-load-registry-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-thread-token-index-load-registry-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-thread-token-index-load-registry-catch-unreadable-throw.test.ts
+@@ -0,0 +1,145 @@
++import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
++
++// KS-1868 (operator 87 screen, anchoring thread-token index): the catch of loadActiveRegistry (lines 78 and 83 of
++// services/anchoring/src/cardano/threadTokenIndex.ts) pass `err?.message` straight into the logger's meta object in BOTH
++// branches (STRICT_THREAD_TOKEN_INDEX true: log and rethrow; false: log at debug and answer the empty registry),
++// unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch itself
++// throw: the call rejects with that read error instead of resolving [] (non-strict) or rethrowing the ORIGINAL value
++// (strict); an Error whose message is not a string (a Symbol) is passed to the logger uncoerced. The cells make the registry
++// query reject with such a value and assert the non-strict call resolves [] and the strict call rejects with the original
++// value, with the logged value text (the constant when the value cannot be turned into text). Harness: the real module with
++// the db module, the logger and @secuura/shared replaced by plain stand-ins (no database); STRICT_MODE is read when the
++// module loads, so each cell loads a fresh copy under the environment it needs.
++const h = vi.hoisted(() => ({
++  failure: undefined as undefined | { value: unknown },
++  lines: [] as { level: string; message: string; meta: Record<string, unknown> | undefined }[],
++}));
++
++vi.mock('../db', () => ({
++  query: async () => {
++    if (h.failure) throw h.failure.value;
++    return { rows: [{ document_id: 'doc-1', policy_id: 'pol-1', network: 'preprod', status: 'active' }] };
++  },
++}));
++vi.mock('../utils/logger', () => {
++  const rec = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    h.lines.push({ level, message, meta });
++  };
++  return { logger: { debug: rec('debug'), info: rec('info'), warn: rec('warn'), error: rec('error') } };
++});
++vi.mock('@secuura/shared', () => ({
++  utxoCarriesThreadToken: () => false,
++  selectThreadTokenUtxos: () => [],
++}));
++
++type Idx = typeof import('../cardano/threadTokenIndex');
++const realStrict = process.env.STRICT_THREAD_TOKEN_INDEX;
++afterAll(() => {
++  if (realStrict === undefined) delete process.env.STRICT_THREAD_TOKEN_INDEX;
++  else process.env.STRICT_THREAD_TOKEN_INDEX = realStrict;
++});
++beforeEach(() => {
++  h.failure = undefined;
++  h.lines.length = 0;
++});
++
++async function load(strict: boolean): Promise<Idx> {
++  process.env.STRICT_THREAD_TOKEN_INDEX = strict ? 'true' : 'false';
++  vi.resetModules();
++  return import('../cardano/threadTokenIndex');
++}
++type Outcome = { settled: 'resolved' | 'rejected'; value: unknown };
++async function call(strict: boolean, failure: { value: unknown } | undefined): Promise<Outcome> {
++  h.failure = failure;
++  const idx = await load(strict);
++  try {
++    return { settled: 'resolved', value: await idx.loadActiveRegistry('preprod' as never) };
++  } catch (e) {
++    return { settled: 'rejected', value: e };
++  }
++}
++const DEBUG_MSG = 'state_thread_registry not available — falling back to metadata-only';
++const STRICT_MSG = 'state_thread_registry unavailable in STRICT mode';
++const lineOf = (message: string): { level: string; message: string; meta: Record<string, unknown> | undefined }[] =>
++  h.lines.filter((l) => l.message === message);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (l: { meta: Record<string, unknown> | undefined } | undefined): string =>
++  typeof l?.meta?.error === 'string' ? (l.meta.error as string) : '<' + typeof l?.meta?.error + '>';
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 loadActiveRegistry degrades or rethrows the original value and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: a registry that reads resolves its entries and logs no failure', async () => {
++    const r = await call(false, undefined);
++    expect(r).toEqual({ settled: 'resolved', value: [{ documentId: 'doc-1', policyId: 'pol-1' }] });
++    expect(lineOf(DEBUG_MSG)).toHaveLength(0);
++  });
++  it('control ks1868 C2: an ordinary Error in non-strict mode resolves [] and is logged at debug with its message', async () => {
++    const r = await call(false, { value: new Error('registry boom') });
++    expect(r).toEqual({ settled: 'resolved', value: [] });
++    expect(lineOf(DEBUG_MSG)).toHaveLength(1);
++    expect(reasonOf(lineOf(DEBUG_MSG)[0])).toBe('registry boom');
++  });
++  it('control ks1868 C3: a thrown plain string in non-strict mode resolves [] and is logged without a message', async () => {
++    const r = await call(false, { value: 'plain boom' });
++    expect(r).toEqual({ settled: 'resolved', value: [] });
++    expect(lineOf(DEBUG_MSG)).toHaveLength(1);
++    expect(reasonOf(lineOf(DEBUG_MSG)[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C4: an ordinary Error in strict mode is logged with its message and rethrown as the same object', async () => {
++    const err = new Error('registry boom');
++    const r = await call(true, { value: err });
++    expect(r.settled).toBe('rejected');
++    expect(r.value).toBe(err);
++    expect(lineOf(STRICT_MSG)).toHaveLength(1);
++    expect(reasonOf(lineOf(STRICT_MSG)[0])).toBe('registry boom');
++  });
++  it('RED ks1868 R1: a revoked Proxy in non-strict mode resolves [] and is logged as text, as for an ordinary Error', async () => {
++    const r = await call(false, { value: revokedProxy() });
++    expect(r).toEqual({ settled: 'resolved', value: [] });
++    expect(lineOf(DEBUG_MSG)).toHaveLength(1);
++    expect(reasonOf(lineOf(DEBUG_MSG)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message getter throws in non-strict mode resolves [] and is logged as text, as for an ordinary Error', async () => {
++    const r = await call(false, { value: getterThrows() });
++    expect(r).toEqual({ settled: 'resolved', value: [] });
++    expect(lineOf(DEBUG_MSG)).toHaveLength(1);
++    expect(reasonOf(lineOf(DEBUG_MSG)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: an Error whose message is a Symbol in non-strict mode resolves [] and is logged as text, as for an ordinary Error', async () => {
++    const r = await call(false, { value: withMessage(Symbol('ks1868')) });
++    expect(r).toEqual({ settled: 'resolved', value: [] });
++    expect(lineOf(DEBUG_MSG)).toHaveLength(1);
++    expect(reasonOf(lineOf(DEBUG_MSG)[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R4: a revoked Proxy in strict mode is logged as text and rethrown as the same object, as for an ordinary Error', async () => {
++    const value = revokedProxy();
++    const r = await call(true, { value });
++    expect(r.settled).toBe('rejected');
++    expect(r.value === value).toBe(true);
++    expect(lineOf(STRICT_MSG)).toHaveLength(1);
++    expect(reasonOf(lineOf(STRICT_MSG)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: an Error whose message getter throws in strict mode is logged as text and rethrown as the same object, as for an ordinary Error', async () => {
++    const value = getterThrows();
++    const r = await call(true, { value });
++    expect(r.settled).toBe('rejected');
++    expect(r.value === value).toBe(true);
++    expect(lineOf(STRICT_MSG)).toHaveLength(1);
++    expect(reasonOf(lineOf(STRICT_MSG)[0])).toBe('unreadable thrown value');
++  });
++});

@@ -1,0 +1,29 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o87_p4_anchoring_thread_token_index_load_registry_catch_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/cardano/threadTokenIndex.ts b/Blockchain/Dev/services/anchoring/src/cardano/threadTokenIndex.ts
+--- a/Blockchain/Dev/services/anchoring/src/cardano/threadTokenIndex.ts
++++ b/Blockchain/Dev/services/anchoring/src/cardano/threadTokenIndex.ts
+@@ -73,14 +73,21 @@
+     // The migration may not have run in older environments. Silently degrade
+     // to the metadata-label path — STRICT_THREAD_TOKEN_INDEX flips this to a
+     // hard error when the migration is mandatory.
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     if (STRICT_MODE) {
+       logger.error('state_thread_registry unavailable in STRICT mode', {
+-        error: err?.message,
++        error: reason,
+       });
+       throw err;
+     }
+     logger.debug('state_thread_registry not available — falling back to metadata-only', {
+-      error: err?.message,
++      error: reason,
+     });
+     return [];
+   }
+

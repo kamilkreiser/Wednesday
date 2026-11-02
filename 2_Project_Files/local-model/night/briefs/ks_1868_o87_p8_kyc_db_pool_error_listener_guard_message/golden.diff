@@ -1,0 +1,130 @@
+diff --git a/Blockchain/Dev/services/kyc/src/db.ts b/Blockchain/Dev/services/kyc/src/db.ts
+--- a/Blockchain/Dev/services/kyc/src/db.ts
++++ b/Blockchain/Dev/services/kyc/src/db.ts
+@@ -35,5 +35,12 @@
+     pool.on('error', (err: Error) => {
+-      dbLog('error', 'DB pool unexpected error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      dbLog('error', 'DB pool unexpected error', { error: reason });
+     });
+   }
+   return pool;
+diff --git a/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-db-pool-error-listener-unreadable-throw.test.ts b/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-db-pool-error-listener-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-db-pool-error-listener-unreadable-throw.test.ts
+@@ -0,0 +1,108 @@
++import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
++
++// KS-1868 (operator 87 screen, kyc db module): the pg pool 'error' listener (line 36) of services/kyc/src/db.ts
++// passes `err.message` straight into dbLog's meta object, unguarded. A thrown value whose read throws (a revoked Proxy, an
++// Error whose message getter throws) makes the listener throw: an exception thrown by a listener of the pool's 'error' event
++// escapes the EventEmitter and is an uncaught exception; an Error whose message is not a string (a Symbol) is handed to
++// JSON.stringify uncoerced and silently dropped from the line. The cells emit such a value to the captured listener and assert
++// the listener returns and the line carries text (the constant when the value cannot be turned into text). Harness: the real
++// module with pg replaced by a plain stand-in Pool (it hands over the 'error' listener) and console.log replaced by a plain
++// recording function (no database).
++const h = vi.hoisted(() => ({
++  listener: undefined as undefined | ((e: unknown) => void),
++  lines: [] as string[],
++}));
++
++vi.mock('pg', () => ({
++  Pool: function PoolMock() {
++    return {
++      query: async () => ({ rows: [{ ok: 1 }] }),
++      on: (event: string, fn: (e: unknown) => void) => {
++        if (event === 'error') h.listener = fn;
++      },
++      end: async () => undefined,
++      connect: async () => undefined,
++    };
++  },
++}));
++
++type Db = typeof import('../db');
++const realLog = console.log;
++const realUrl = process.env.DATABASE_URL;
++afterAll(() => {
++  console.log = realLog;
++  if (realUrl === undefined) delete process.env.DATABASE_URL;
++  else process.env.DATABASE_URL = realUrl;
++});
++beforeEach(() => {
++  h.listener = undefined;
++  h.lines.length = 0;
++  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
++  console.log = (...args: unknown[]) => {
++    if (typeof args[0] === 'string') h.lines.push(args[0]);
++  };
++});
++
++async function freshDb(): Promise<Db> {
++  vi.resetModules();
++  return import('../db');
++}
++async function emit(value: unknown): Promise<{ threw: boolean }> {
++  const db = await freshDb();
++  db.getPool();
++  try {
++    (h.listener as (e: unknown) => void)(value);
++    return { threw: false };
++  } catch {
++    return { threw: true };
++  }
++}
++const LINE = (message: string): Record<string, unknown>[] =>
++  h.lines.map((l) => JSON.parse(l) as Record<string, unknown>).filter((o) => o.message === message);
++const POOL = 'DB pool unexpected error';
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (o: Record<string, unknown> | undefined): string => (typeof o?.error === 'string' ? (o.error as string) : '<' + typeof o?.error + '>');
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the pool error listener survives and log text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error reaching the pool listener does not throw and is logged with its message', async () => {
++    expect(await emit(new Error('pool boom'))).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('pool boom');
++  });
++  it('control ks1868 C2: a plain string reaching the pool listener does not throw and is logged without a message', async () => {
++    expect(await emit('plain boom')).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1: a revoked Proxy reaching the pool listener does not throw and is logged as text, as for an ordinary Error', async () => {
++    expect(await emit(revokedProxy())).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an Error whose message is a Symbol reaching the pool listener does not throw and is logged as text, as for an ordinary Error', async () => {
++    expect(await emit(withMessage(Symbol('ks1868')))).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R3: an Error whose message getter throws reaching the pool listener does not throw and is logged as text, as for an ordinary Error', async () => {
++    expect(await emit(getterThrows())).toEqual({ threw: false });
++    expect(LINE(POOL)).toHaveLength(1);
++    expect(reasonOf(LINE(POOL)[0])).toBe('unreadable thrown value');
++  });
++});

@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o85_p5_api_gateway_brute_force_redis_catch_guard_message
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/security.ts b/Blockchain/Dev/services/api-gateway/src/middleware/security.ts
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/security.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/security.ts
+@@ -194,8 +194,14 @@
+       next();
+     } catch (error) {
+       // On Redis error, allow the request through (fail open for availability)
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       winstonLogger.error('[BruteForce] Redis error, allowing request', {
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       next();
+     }
+

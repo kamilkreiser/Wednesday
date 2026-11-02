@@ -1,0 +1,284 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
+
+// KS-1868 (operator 83 screen, issuer cert sweep): the catches in services/auth/src/services/issuerCertSweep.ts log
+// `{ error: err instanceof Error ? err.message : String(err) }` with the read INSIDE the logger call's arguments, unguarded.
+// A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch itself throw; an Error
+// whose message is readable but not a string (a null-prototype object, a Symbol) is handed to the logger as is. The cells make the
+// repository, the event bus or the platform scope reject with such a value and assert the line is logged as text (the constant
+// when the value cannot be turned into text) and that the sweep goes on exactly as it does for an ordinary Error. Harness: the
+// real sweep module with the logger, event bus, repository and shared scope replaced by plain stand-ins (no database, no network).
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  expiredFail: false,
+  soonFailDays: 0,
+  expiredRows: [] as unknown[],
+  soonRows: {} as Record<number, unknown[]>,
+  soonCalls: [] as number[],
+  published: [] as string[],
+  expiredPublishFails: false,
+  soonPublishFails: false,
+  scopeFails: false,
+  logged: [] as unknown[][],
+  unhandled: 0,
+}));
+
+const capture = vi.hoisted(() => ({
+  debug: () => undefined,
+  info: () => undefined,
+  warn: (...args: unknown[]) => {
+    h.logged.push(['warn', ...args]);
+  },
+  error: (...args: unknown[]) => {
+    h.logged.push(['error', ...args]);
+  },
+  log: () => undefined,
+}));
+vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
+vi.mock('@secuura/shared', () => ({
+  runWithPlatformScope: (fn: () => Promise<unknown>) => (h.scopeFails ? Promise.reject(h.toThrow) : fn()),
+}));
+vi.mock('../events', () => ({
+  EventTypes: { ISSUER_CERT_EXPIRED: 'EXPIRED', ISSUER_CERT_EXPIRING_SOON: 'SOON' },
+  publishEvent: (type: string) => {
+    h.published.push(type);
+    if ((type === 'EXPIRED' && h.expiredPublishFails) || (type === 'SOON' && h.soonPublishFails)) {
+      return Promise.reject(h.toThrow);
+    }
+    return Promise.resolve(undefined);
+  },
+}));
+vi.mock('../repositories/issuerCertRepo', () => ({
+  markExpiredCerts: () => (h.expiredFail ? Promise.reject(h.toThrow) : Promise.resolve(h.expiredRows)),
+  findExpiringSoon: (days: number) => {
+    h.soonCalls.push(days);
+    if (h.soonFailDays === days) return Promise.reject(h.toThrow);
+    return Promise.resolve(h.soonRows[days] ?? []);
+  },
+}));
+
+const SAVED_LISTENERS = process.listeners('unhandledRejection');
+const onUnhandled = () => {
+  h.unhandled += 1;
+};
+const SAVED_INTERVAL_ENV = process.env.ISSUER_CERT_SWEEP_INTERVAL_MS;
+
+let mod: typeof import('../services/issuerCertSweep');
+beforeAll(async () => {
+  process.removeAllListeners('unhandledRejection');
+  process.on('unhandledRejection', onUnhandled);
+  mod = await import('../services/issuerCertSweep');
+});
+afterAll(() => {
+  process.removeListener('unhandledRejection', onUnhandled);
+  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
+  if (SAVED_INTERVAL_ENV === undefined) delete process.env.ISSUER_CERT_SWEEP_INTERVAL_MS;
+  else process.env.ISSUER_CERT_SWEEP_INTERVAL_MS = SAVED_INTERVAL_ENV;
+});
+beforeEach(() => {
+  delete process.env.ISSUER_CERT_SWEEP_INTERVAL_MS;
+  h.toThrow = undefined;
+  h.expiredFail = false;
+  h.soonFailDays = 0;
+  h.expiredRows = [];
+  h.soonRows = {};
+  h.soonCalls.length = 0;
+  h.published.length = 0;
+  h.expiredPublishFails = false;
+  h.soonPublishFails = false;
+  h.scopeFails = false;
+  h.logged.length = 0;
+  h.unhandled = 0;
+});
+afterEach(() => {
+  mod.stopIssuerCertSweep();
+});
+
+const row = (id: string) => ({
+  id,
+  tenantId: 'ten-1868',
+  fingerprintSha256: 'fp-' + id,
+  name: 'name-' + id,
+  validUntil: new Date('2026-12-01T00:00:00.000Z'),
+});
+const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 30));
+async function run(): Promise<{ ok: boolean; value: unknown }> {
+  try {
+    return { ok: true, value: await mod.runIssuerCertSweep() };
+  } catch {
+    return { ok: false, value: undefined };
+  }
+}
+const LINES = (level: string, msg: string) => h.logged.filter((c) => c[0] === level && c[1] === msg);
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (c: unknown[] | undefined): string => {
+  const v = (c?.[2] as { error?: unknown } | undefined)?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+const revokedProxy = (): unknown => {
+  const rp = Proxy.revocable({}, {});
+  rp.revoke();
+  return rp.proxy;
+};
+/** An Error whose `message` getter succeeds and returns the value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+const SHAPES: Array<[string, () => unknown, string]> = [
+  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
+  ['an Error whose message getter throws', getterThrows, 'unreadable thrown value'],
+  ['an Error whose message is a null-prototype object', () => withMessage(Object.create(null)), 'unreadable thrown value'],
+  ['an Error whose message is a Symbol', () => withMessage(Symbol('ks1868')), 'Symbol(ks1868)'],
+];
+
+describe('KS-1868 the issuer cert sweep body catches log text for a hostile thrown value', () => {
+  it('control ks1868 C1 markExpiredCerts: an ordinary Error is logged with its message and the sweep still runs the expiring-soon pass', async () => {
+    h.expiredFail = true;
+    h.toThrow = new Error('db down');
+    h.soonRows = { 30: [row('c30')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 7: 0, 1: 0 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON']);
+    expect(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')[0])).toBe('db down');
+  });
+  it('control ks1868 C2 markExpiredCerts: a thrown plain string is logged as its own text and the sweep still runs the expiring-soon pass', async () => {
+    h.expiredFail = true;
+    h.toThrow = 'plain boom';
+    h.soonRows = { 30: [row('c30')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 7: 0, 1: 0 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON']);
+    expect(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')[0])).toBe('plain boom');
+  });
+  it('control ks1868 C3 findExpiringSoon(7): an ordinary Error is logged with its message and the other windows still run', async () => {
+    h.soonFailDays = 7;
+    h.toThrow = new Error('db down');
+    h.soonRows = { 30: [row('c30')], 1: [row('c1')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 1: 1 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON', 'SOON']);
+    expect(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')[0])).toBe('db down');
+  });
+  it('control ks1868 C4 the ISSUER_CERT_EXPIRED publish: an ordinary Error is logged as a warning with its message and nothing is unhandled', async () => {
+    h.expiredRows = [row('cert-exp')];
+    h.expiredPublishFails = true;
+    h.toThrow = new Error('bus down');
+    expect(await run()).toEqual({ ok: true, value: { expired: 1, expiringSoon: { 30: 0, 7: 0, 1: 0 } } });
+    await flush();
+    expect(h.unhandled).toBe(0);
+    expect(LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')).toHaveLength(1);
+    expect(reasonOf(LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')[0])).toBe('bus down');
+    expect((LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')[0]?.[2] as { certId?: string } | undefined)?.certId).toBe('cert-exp');
+  });
+  it('RED ks1868 R1 markExpiredCerts: a rejection that is a revoked Proxy is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.expiredFail = true;
+    h.toThrow = SHAPES[0][1]();
+    h.soonRows = { 30: [row('c30')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 7: 0, 1: 0 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON']);
+    expect(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')[0])).toBe(SHAPES[0][2]);
+  });
+  it('RED ks1868 R2 markExpiredCerts: a rejection that is an Error whose message getter throws is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.expiredFail = true;
+    h.toThrow = SHAPES[1][1]();
+    h.soonRows = { 30: [row('c30')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 7: 0, 1: 0 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON']);
+    expect(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')[0])).toBe(SHAPES[1][2]);
+  });
+  it('RED ks1868 R3 markExpiredCerts: a rejection that is an Error whose message is a null-prototype object is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.expiredFail = true;
+    h.toThrow = SHAPES[2][1]();
+    h.soonRows = { 30: [row('c30')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 7: 0, 1: 0 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON']);
+    expect(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')[0])).toBe(SHAPES[2][2]);
+  });
+  it('RED ks1868 R4 markExpiredCerts: a rejection that is an Error whose message is a Symbol is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.expiredFail = true;
+    h.toThrow = SHAPES[3][1]();
+    h.soonRows = { 30: [row('c30')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 7: 0, 1: 0 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON']);
+    expect(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: markExpiredCerts failed')[0])).toBe(SHAPES[3][2]);
+  });
+  it('RED ks1868 R5 findExpiringSoon(7): a rejection that is a revoked Proxy is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.soonFailDays = 7;
+    h.toThrow = SHAPES[0][1]();
+    h.soonRows = { 30: [row('c30')], 1: [row('c1')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 1: 1 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON', 'SOON']);
+    expect(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')[0])).toBe(SHAPES[0][2]);
+  });
+  it('RED ks1868 R6 findExpiringSoon(7): a rejection that is an Error whose message getter throws is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.soonFailDays = 7;
+    h.toThrow = SHAPES[1][1]();
+    h.soonRows = { 30: [row('c30')], 1: [row('c1')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 1: 1 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON', 'SOON']);
+    expect(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')[0])).toBe(SHAPES[1][2]);
+  });
+  it('RED ks1868 R7 findExpiringSoon(7): a rejection that is an Error whose message is a null-prototype object is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.soonFailDays = 7;
+    h.toThrow = SHAPES[2][1]();
+    h.soonRows = { 30: [row('c30')], 1: [row('c1')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 1: 1 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON', 'SOON']);
+    expect(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')[0])).toBe(SHAPES[2][2]);
+  });
+  it('RED ks1868 R8 findExpiringSoon(7): a rejection that is an Error whose message is a Symbol is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.soonFailDays = 7;
+    h.toThrow = SHAPES[3][1]();
+    h.soonRows = { 30: [row('c30')], 1: [row('c1')] };
+    expect(await run()).toEqual({ ok: true, value: { expired: 0, expiringSoon: { 30: 1, 1: 1 } } });
+    expect(h.soonCalls).toEqual([30, 7, 1]);
+    expect(h.published).toEqual(['SOON', 'SOON']);
+    expect(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')).toHaveLength(1);
+    expect(reasonOf(LINES('error', 'Issuer cert sweep: findExpiringSoon(7d) failed')[0])).toBe(SHAPES[3][2]);
+  });
+  it('RED ks1868 R9 ISSUER_CERT_EXPIRED publish: a rejection that is a revoked Proxy is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.expiredRows = [row('cert-exp')];
+    h.expiredPublishFails = true;
+    h.toThrow = SHAPES[0][1]();
+    expect(await run()).toEqual({ ok: true, value: { expired: 1, expiringSoon: { 30: 0, 7: 0, 1: 0 } } });
+    await flush();
+    expect(h.unhandled).toBe(0);
+    expect(LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')).toHaveLength(1);
+    expect(reasonOf(LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')[0])).toBe(SHAPES[0][2]);
+    expect((LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')[0]?.[2] as { certId?: string } | undefined)?.certId).toBe('cert-exp');
+  });
+  it('RED ks1868 R10 ISSUER_CERT_EXPIRED publish: a rejection that is an Error whose message is a Symbol is logged as text and the sweep goes on as it does for an ordinary Error', async () => {
+    h.expiredRows = [row('cert-exp')];
+    h.expiredPublishFails = true;
+    h.toThrow = SHAPES[3][1]();
+    expect(await run()).toEqual({ ok: true, value: { expired: 1, expiringSoon: { 30: 0, 7: 0, 1: 0 } } });
+    await flush();
+    expect(h.unhandled).toBe(0);
+    expect(LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')).toHaveLength(1);
+    expect(reasonOf(LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')[0])).toBe(SHAPES[3][2]);
+    expect((LINES('warn', 'publishEvent ISSUER_CERT_EXPIRED failed')[0]?.[2] as { certId?: string } | undefined)?.certId).toBe('cert-exp');
+  });
+});

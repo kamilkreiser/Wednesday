@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o85_p4_api_gateway_audit_write_failed_catch_guard_message
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts b/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
+@@ -330,8 +330,14 @@
+             ],
+           ));
+         } catch (err) {
++          let reason: string;
++          try {
++            reason = String(err instanceof Error ? err.message : err);
++          } catch {
++            reason = 'unreadable thrown value';
++          }
+           deps.log('warn', 'audit middleware: write failed', {
+-            error: err instanceof Error ? err.message : String(err),
++            error: reason,
+             path: auditPath, // KS-1457: was req.path, the trimmed remainder behind a responding gate
+           });
+         }
+

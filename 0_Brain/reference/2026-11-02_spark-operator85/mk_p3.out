@@ -1,0 +1,37 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o85_p3_auth_password_verify_hibp_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/password.ts b/Blockchain/Dev/services/auth/src/services/password.ts
+--- a/Blockchain/Dev/services/auth/src/services/password.ts
++++ b/Blockchain/Dev/services/auth/src/services/password.ts
+@@ -97,7 +97,14 @@
+     try {
+       return await argon2.verify(hash, password);
+     } catch (err: any) {
+-      logger.warn('argon2 verify failed', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('argon2 verify failed', { error: reason });
+       return false;
+     }
+   }
+@@ -142,7 +149,14 @@
+     }
+     return false;
+   } catch (err: any) {
+-    logger.warn('HIBP lookup failed — failing open', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('HIBP lookup failed — failing open', { error: reason });
+     return false;
+   }
+ }
+

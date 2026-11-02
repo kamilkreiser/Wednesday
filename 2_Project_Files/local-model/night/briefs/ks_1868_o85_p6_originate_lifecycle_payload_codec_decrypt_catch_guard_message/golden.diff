@@ -1,0 +1,154 @@
+diff --git a/Blockchain/Dev/services/originate/src/utils/lifecyclePayloadCodec.ts b/Blockchain/Dev/services/originate/src/utils/lifecyclePayloadCodec.ts
+--- a/Blockchain/Dev/services/originate/src/utils/lifecyclePayloadCodec.ts
++++ b/Blockchain/Dev/services/originate/src/utils/lifecyclePayloadCodec.ts
+@@ -53,9 +53,15 @@
+         const plain = decryptField(raw, context(eventId));
+         return plain ? (JSON.parse(plain) as Record<string, unknown>) : {};
+       } catch (err) {
++        let reason: string;
++        try {
++          reason = String(err instanceof Error ? err.message : err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.error('lifecycle payload decrypt failed', {
+           eventId,
+-          error: err instanceof Error ? err.message : String(err),
++          error: reason,
+         });
+         return { payloadUnavailable: true };
+       }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-lifecycle-payload-codec-decrypt-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-lifecycle-payload-codec-decrypt-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-lifecycle-payload-codec-decrypt-catch-unreadable-throw.test.ts
+@@ -0,0 +1,129 @@
++// KS-1868 (operator 85 screen, lifecycle payload codec): the decrypt-failed catch of decodeLifecyclePayload in
++// services/originate/src/utils/lifecyclePayloadCodec.ts logs `{ eventId, error: err instanceof Error ? err.message : String(err) }`
++// with the read INSIDE the logger call's arguments, unguarded. A thrown value whose read throws (a revoked Proxy: `instanceof`
++// throws; an Error whose message getter throws) makes the catch itself throw, so the function THROWS instead of returning its
++// `payloadUnavailable` marker (one unreadable row would fail a whole listing); an Error whose message is readable but not a
++// string is handed to the logger as is. The cells make decryptField throw such a value and assert the marker is returned and the
++// line is logged as text (the constant when the value cannot be turned into text). Harness: the real codec with the logger
++// replaced by a plain stand-in and @secuura/shared built through the service's makeSharedMock helper (KS-1061) with decryptField / isEncryptedPii overridden by plain functions (no keyring).
++import { decodeLifecyclePayload } from '../utils/lifecyclePayloadCodec';
++
++const mockH: { toThrow: unknown; logged: unknown[][] } = { toThrow: undefined, logged: [] };
++
++jest.mock('@secuura/shared', () => require('./helpers/sharedModuleMock').makeSharedMock({
++  isEncryptedPii: () => true,
++  decryptField: () => {
++    throw mockH.toThrow;
++  },
++}));
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    warn: () => undefined,
++    debug: () => undefined,
++    error: (...args: unknown[]) => {
++      mockH.logged.push(args);
++    },
++  },
++}));
++
++const EVENT_ID = '9f0d76a2-0000-4000-8000-000000000001';
++const FAILED = 'lifecycle payload decrypt failed';
++
++beforeEach(() => {
++  mockH.toThrow = undefined;
++  mockH.logged.length = 0;
++});
++
++function decode(): { ok: boolean; value: Record<string, unknown> | undefined } {
++  try {
++    return { ok: true, value: decodeLifecyclePayload('v1:iv:tag:ciphertext', EVENT_ID) };
++  } catch {
++    return { ok: false, value: undefined };
++  }
++}
++const LINES = () => mockH.logged.filter((c) => c[0] === FAILED);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (c: unknown[] | undefined): string => {
++  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++const eventOf = (c: unknown[] | undefined): unknown => (c?.[1] as { eventId?: unknown } | undefined)?.eventId;
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++const SHAPES: Array<[string, () => unknown, string]> = [
++  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
++  ['an Error whose message getter throws', getterThrows, 'unreadable thrown value'],
++  ['an Error whose message is a null-prototype object', () => withMessage(Object.create(null)), 'unreadable thrown value'],
++  ['an Error whose message is a Symbol', () => withMessage(Symbol('ks1868')), 'Symbol(ks1868)'],
++];
++
++describe('KS-1868 the lifecycle payload decrypt catch returns its marker and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error returns the payloadUnavailable marker and is logged with its message', () => {
++    mockH.toThrow = new Error('bad auth tag');
++    expect(decode()).toEqual({ ok: true, value: { payloadUnavailable: true } });
++    expect(LINES()).toHaveLength(1);
++    expect(eventOf(LINES()[0])).toBe(EVENT_ID);
++    expect(reasonOf(LINES()[0])).toBe('bad auth tag');
++  });
++  it('control ks1868 C2: a thrown plain string returns the marker and is logged as its own text', () => {
++    mockH.toThrow = 'plain boom';
++    expect(decode()).toEqual({ ok: true, value: { payloadUnavailable: true } });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('plain boom');
++  });
++  it('control ks1868 C3: a thrown number returns the marker and is logged as its text', () => {
++    mockH.toThrow = 42;
++    expect(decode()).toEqual({ ok: true, value: { payloadUnavailable: true } });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('42');
++  });
++  it('control ks1868 C4: an Error with an empty message returns the marker and is logged with the empty text', () => {
++    mockH.toThrow = new Error('');
++    expect(decode()).toEqual({ ok: true, value: { payloadUnavailable: true } });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('');
++  });
++  it('RED ks1868 R1: a decrypt failure that is a revoked Proxy returns the payloadUnavailable marker and is logged as text, as for an ordinary Error', () => {
++    mockH.toThrow = SHAPES[0][1]();
++    expect(decode()).toEqual({ ok: true, value: { payloadUnavailable: true } });
++    expect(LINES()).toHaveLength(1);
++    expect(eventOf(LINES()[0])).toBe(EVENT_ID);
++    expect(reasonOf(LINES()[0])).toBe(SHAPES[0][2]);
++  });
++  it('RED ks1868 R2: a decrypt failure that is an Error whose message getter throws returns the payloadUnavailable marker and is logged as text, as for an ordinary Error', () => {
++    mockH.toThrow = SHAPES[1][1]();
++    expect(decode()).toEqual({ ok: true, value: { payloadUnavailable: true } });
++    expect(LINES()).toHaveLength(1);
++    expect(eventOf(LINES()[0])).toBe(EVENT_ID);
++    expect(reasonOf(LINES()[0])).toBe(SHAPES[1][2]);
++  });
++  it('RED ks1868 R3: a decrypt failure that is an Error whose message is a null-prototype object returns the payloadUnavailable marker and is logged as text, as for an ordinary Error', () => {
++    mockH.toThrow = SHAPES[2][1]();
++    expect(decode()).toEqual({ ok: true, value: { payloadUnavailable: true } });
++    expect(LINES()).toHaveLength(1);
++    expect(eventOf(LINES()[0])).toBe(EVENT_ID);
++    expect(reasonOf(LINES()[0])).toBe(SHAPES[2][2]);
++  });
++  it('RED ks1868 R4: a decrypt failure that is an Error whose message is a Symbol returns the payloadUnavailable marker and is logged as text, as for an ordinary Error', () => {
++    mockH.toThrow = SHAPES[3][1]();
++    expect(decode()).toEqual({ ok: true, value: { payloadUnavailable: true } });
++    expect(LINES()).toHaveLength(1);
++    expect(eventOf(LINES()[0])).toBe(EVENT_ID);
++    expect(reasonOf(LINES()[0])).toBe(SHAPES[3][2]);
++  });
++});

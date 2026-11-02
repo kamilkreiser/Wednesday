@@ -1,0 +1,193 @@
+diff --git a/Blockchain/Dev/services/auth/src/services/password.ts b/Blockchain/Dev/services/auth/src/services/password.ts
+--- a/Blockchain/Dev/services/auth/src/services/password.ts
++++ b/Blockchain/Dev/services/auth/src/services/password.ts
+@@ -97,7 +97,14 @@
+     try {
+       return await argon2.verify(hash, password);
+     } catch (err: any) {
+-      logger.warn('argon2 verify failed', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('argon2 verify failed', { error: reason });
+       return false;
+     }
+   }
+@@ -142,7 +149,14 @@
+     }
+     return false;
+   } catch (err: any) {
+-    logger.warn('HIBP lookup failed — failing open', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('HIBP lookup failed — failing open', { error: reason });
+     return false;
+   }
+ }
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1868-password-verify-hibp-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1868-password-verify-hibp-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1868-password-verify-hibp-catches-unreadable-throw.test.ts
+@@ -0,0 +1,153 @@
++import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
++
++// KS-1868 (operator 85 screen, password service): the argon2-verify catch (line 100) and the HIBP catch (line 145) of
++// services/auth/src/services/password.ts log `{ error: err?.message }` with the read INSIDE the logger call's arguments,
++// unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the catch itself
++// throw, so verifyPassword and isPasswordBreached REJECT instead of answering false; an Error whose message is readable but
++// not a string is handed to the logger as is. The cells make argon2.verify / fetch reject with such a value and assert the
++// function resolves false (what an ordinary Error gets) and the line is logged as text (the constant when the value cannot be
++// turned into text). Harness: the real module with the logger and argon2 replaced by plain stand-ins and the global fetch a
++// plain function (no native binding, no network).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  logged: [] as unknown[][],
++}));
++
++const capture = vi.hoisted(() => ({
++  debug: () => undefined,
++  info: () => undefined,
++  warn: (...args: unknown[]) => {
++    h.logged.push(args);
++  },
++  error: () => undefined,
++  log: () => undefined,
++}));
++vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
++vi.mock('argon2', () => ({
++  default: {},
++  hash: () => Promise.resolve('$argon2id$stub'),
++  verify: () => Promise.reject(h.toThrow),
++  argon2id: 2,
++}));
++
++type Pw = typeof import('../services/password');
++let mod: Pw;
++const realFetch = globalThis.fetch;
++const savedHibp = process.env.HIBP_ENABLED;
++beforeAll(async () => {
++  mod = await import('../services/password');
++});
++afterAll(() => {
++  globalThis.fetch = realFetch;
++  if (savedHibp === undefined) delete process.env.HIBP_ENABLED;
++  else process.env.HIBP_ENABLED = savedHibp;
++});
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logged.length = 0;
++  delete process.env.HIBP_ENABLED;
++  globalThis.fetch = (() => Promise.reject(h.toThrow)) as unknown as typeof fetch;
++});
++
++async function settle<T>(p: () => Promise<T>): Promise<{ ok: boolean; value: T | undefined }> {
++  try {
++    return { ok: true, value: await p() };
++  } catch {
++    return { ok: false, value: undefined };
++  }
++}
++const verify = () => settle(() => mod.verifyPassword('correct horse battery staple', '$argon2id$v=19$m=65536,t=3,p=4$c2FsdA$aGFzaA'));
++const breached = () => settle(() => mod.isPasswordBreached('correct horse battery staple'));
++
++const VERIFY = 'argon2 verify failed';
++const HIBP = 'HIBP lookup failed — failing open';
++const LINES = (msg: string) => h.logged.filter((c) => c[0] === msg);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (c: unknown[] | undefined): string => {
++  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++const SHAPES: Array<[string, () => unknown, string]> = [
++  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
++  ['an Error whose message getter throws', getterThrows, 'unreadable thrown value'],
++  ['an Error whose message is a Symbol', () => withMessage(Symbol('ks1868')), 'Symbol(ks1868)'],
++];
++
++describe('KS-1868 the password verify and HIBP catches answer false and log text for a hostile thrown value', () => {
++  it('control ks1868 C1 verifyPassword: an ordinary Error from argon2.verify answers false and is logged with its message', async () => {
++    h.toThrow = new Error('argon2 internal');
++    expect(await verify()).toEqual({ ok: true, value: false });
++    expect(LINES(VERIFY)).toHaveLength(1);
++    expect(reasonOf(LINES(VERIFY)[0])).toBe('argon2 internal');
++  });
++  it('control ks1868 C2 verifyPassword: a thrown plain string has no message, answers false and is logged with no error, as before', async () => {
++    h.toThrow = 'plain boom';
++    expect(await verify()).toEqual({ ok: true, value: false });
++    expect(LINES(VERIFY)).toHaveLength(1);
++    expect(reasonOf(LINES(VERIFY)[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C3 isPasswordBreached: an ordinary Error from fetch fails open (false) and is logged with its message', async () => {
++    h.toThrow = new Error('fetch failed');
++    expect(await breached()).toEqual({ ok: true, value: false });
++    expect(LINES(HIBP)).toHaveLength(1);
++    expect(reasonOf(LINES(HIBP)[0])).toBe('fetch failed');
++  });
++  it('control ks1868 C4 isPasswordBreached: a thrown plain string fails open (false) and is logged with no error, as before', async () => {
++    h.toThrow = 'plain boom';
++    expect(await breached()).toEqual({ ok: true, value: false });
++    expect(LINES(HIBP)).toHaveLength(1);
++    expect(reasonOf(LINES(HIBP)[0])).toBe('<undefined>');
++  });
++  it('RED ks1868 R1 verifyPassword: a rejection that is a revoked Proxy answers false and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[0][1]();
++    expect(await verify()).toEqual({ ok: true, value: false });
++    expect(LINES(VERIFY)).toHaveLength(1);
++    expect(reasonOf(LINES(VERIFY)[0])).toBe(SHAPES[0][2]);
++  });
++  it('RED ks1868 R2 verifyPassword: a rejection that is an Error whose message getter throws answers false and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[1][1]();
++    expect(await verify()).toEqual({ ok: true, value: false });
++    expect(LINES(VERIFY)).toHaveLength(1);
++    expect(reasonOf(LINES(VERIFY)[0])).toBe(SHAPES[1][2]);
++  });
++  it('RED ks1868 R3 verifyPassword: a rejection that is an Error whose message is a Symbol answers false and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[2][1]();
++    expect(await verify()).toEqual({ ok: true, value: false });
++    expect(LINES(VERIFY)).toHaveLength(1);
++    expect(reasonOf(LINES(VERIFY)[0])).toBe(SHAPES[2][2]);
++  });
++  it('RED ks1868 R4 isPasswordBreached: a rejection that is a revoked Proxy fails open (false) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[0][1]();
++    expect(await breached()).toEqual({ ok: true, value: false });
++    expect(LINES(HIBP)).toHaveLength(1);
++    expect(reasonOf(LINES(HIBP)[0])).toBe(SHAPES[0][2]);
++  });
++  it('RED ks1868 R5 isPasswordBreached: a rejection that is an Error whose message getter throws fails open (false) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[1][1]();
++    expect(await breached()).toEqual({ ok: true, value: false });
++    expect(LINES(HIBP)).toHaveLength(1);
++    expect(reasonOf(LINES(HIBP)[0])).toBe(SHAPES[1][2]);
++  });
++  it('RED ks1868 R6 isPasswordBreached: a rejection that is an Error whose message is a Symbol fails open (false) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[2][1]();
++    expect(await breached()).toEqual({ ok: true, value: false });
++    expect(LINES(HIBP)).toHaveLength(1);
++    expect(reasonOf(LINES(HIBP)[0])).toBe(SHAPES[2][2]);
++  });
++});

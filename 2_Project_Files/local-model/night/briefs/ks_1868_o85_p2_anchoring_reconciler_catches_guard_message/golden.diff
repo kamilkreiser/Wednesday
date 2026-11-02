@@ -1,0 +1,222 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/reconciler.ts b/Blockchain/Dev/services/anchoring/src/reconciler.ts
+--- a/Blockchain/Dev/services/anchoring/src/reconciler.ts
++++ b/Blockchain/Dev/services/anchoring/src/reconciler.ts
+@@ -403,7 +403,14 @@
+           // the "could not ask" branch above decides it (never failed, KS-1810). A rejection
+           // here leaves the row for the next pass and is not counted. Never guess.
+           answeredMisses.delete(key);
+-          deps.log('warn', 'Reconciler: chain check errored; leaving row as-is', { anchorId: row.id, error: err?.message });
++          let reason: string | null | undefined;
++          try {
++            const m = err?.message;
++            reason = m === undefined || m === null ? m : String(m);
++          } catch {
++            reason = 'unreadable thrown value';
++          }
++          deps.log('warn', 'Reconciler: chain check errored; leaving row as-is', { anchorId: row.id, error: reason });
+         }
+       }
+       if (now() - startedAt >= SWEEP_BOOT_GRACE_MS) await sweepNullHashRows(out);
+@@ -411,7 +418,14 @@
+         deps.log('info', 'Reconciler pass complete (KS-584)', { ...out });
+       }
+     } catch (err: any) {
+-      deps.log('warn', 'Reconciler pass failed', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      deps.log('warn', 'Reconciler pass failed', { error: reason });
+     } finally {
+       running = false;
+     }
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-reconciler-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-reconciler-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-reconciler-catches-unreadable-throw.test.ts
+@@ -0,0 +1,182 @@
++import { describe, it, expect, vi } from 'vitest';
++import { createStuckAnchorReconciler, type ReconcilerDeps } from '../reconciler';
++
++// KS-1868 (operator 85 screen, anchoring reconciler): the per-row chain-check catch (line 406) and the whole-pass catch
++// (line 414) of services/anchoring/src/reconciler.ts log `{ error: err?.message }` with the read INSIDE the log call's
++// arguments, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose message getter throws) makes the
++// catch itself throw: the row loop is abandoned, the outer catch throws again, and reconcileStuckAnchors REJECTS although a
++// pass is meant never to throw; the rows after the failing one are skipped. An Error whose message is readable but not a
++// string is handed to the log as is. The cells make the chain check (row 1) or the row SELECT reject with such a value and
++// assert the pass resolves, the line is logged as text (the constant when the value cannot be turned into text) and, for the
++// chain check, row 2 is still confirmed exactly as after an ordinary Error. Harness: the real reconciler with plain-function
++// dependencies (no database, no chain, no module mocks).
++const TX1 = '84fe214bd00257443c81e240a074763d476f9096b7e3525065bad06ec51c38c3';
++const TX2 = '94fe214bd00257443c81e240a074763d476f9096b7e3525065bad06ec51c38c4';
++const HOUR = 3_600_000;
++const CONFIG = { minAgeMs: 10 * 60_000, giveUpMs: 24 * HOUR, batch: 25 };
++
++const row = (id: string, tx: string) => ({
++  id,
++  transaction_hash: tx,
++  created_at: '2026-08-11T09:00:00Z',
++  updated_at: '2026-08-11T09:00:00Z',
++});
++
++type Setup = { rows?: unknown[]; selectThrows?: unknown; checkThrows?: unknown };
++function build(s: Setup) {
++  const logged: unknown[][] = [];
++  const updates: Array<{ id: string; updates: Record<string, unknown> }> = [];
++  const deps: ReconcilerDeps = {
++    isDbAvailable: () => true,
++    isCardanoReady: () => true,
++    query: async () => {
++      if ('selectThrows' in s) return Promise.reject(s.selectThrows);
++      return { rows: s.rows ?? [] };
++    },
++    checkTx: async (tx: string) => {
++      if (tx === TX1 && 'checkThrows' in s) return Promise.reject(s.checkThrows);
++      return { confirmed: true, blockNumber: 4547897, blockHash: 'bh', slot: 123, confirmations: 1 };
++    },
++    updateStatus: async (id: string, u: Record<string, unknown>) => {
++      updates.push({ id, updates: u });
++      return 1;
++    },
++    log: (...args: unknown[]) => {
++      logged.push(args);
++    },
++    now: () => new Date('2026-08-11T12:00:00Z').getTime(),
++    isDriven: () => false,
++    scanWallet: async () => ({ outcome: 'complete' as const, scanned: 0, matches: [] }),
++  } as unknown as ReconcilerDeps;
++  return { deps, logged, updates };
++}
++
++async function runPass(s: Setup): Promise<{ ok: boolean; logged: unknown[][]; updates: Array<{ id: string; updates: Record<string, unknown> }> }> {
++  const { deps, logged, updates } = build(s);
++  try {
++    await createStuckAnchorReconciler(deps, CONFIG)();
++    return { ok: true, logged, updates };
++  } catch {
++    return { ok: false, logged, updates };
++  }
++}
++
++const CHECK = 'Reconciler: chain check errored; leaving row as-is';
++const PASS = 'Reconciler pass failed';
++const LINES = (logged: unknown[][], msg: string) => logged.filter((c) => c[1] === msg);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (c: unknown[] | undefined): string => {
++  const v = (c?.[2] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++const confirmedIds = (u: Array<{ id: string; updates: Record<string, unknown> }>) =>
++  u.filter((x) => x.updates.status === 'confirmed').map((x) => x.id);
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++const SHAPES: Array<[string, () => unknown, string]> = [
++  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
++  ['an Error whose message getter throws', getterThrows, 'unreadable thrown value'],
++  ['an Error whose message is a null-prototype object', () => withMessage(Object.create(null)), 'unreadable thrown value'],
++  ['an Error whose message is a Symbol', () => withMessage(Symbol('ks1868')), 'Symbol(ks1868)'],
++];
++const TWO = () => [row('anchor-1', TX1), row('anchor-2', TX2)];
++
++describe('KS-1868 the reconciler catches carry on and log text for a hostile thrown value', () => {
++  it('control ks1868 C1 chain check: an ordinary Error on row 1 is logged with its message and row 2 is still confirmed', async () => {
++    const r = await runPass({ rows: TWO(), checkThrows: new Error('blockfrost 429') });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, CHECK)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, CHECK)[0])).toBe('blockfrost 429');
++    expect(confirmedIds(r.updates)).toEqual(['anchor-2']);
++  });
++  it('control ks1868 C2 the SELECT: an ordinary Error is logged with its message and the pass resolves', async () => {
++    const r = await runPass({ selectThrows: new Error('connection terminated') });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, PASS)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, PASS)[0])).toBe('connection terminated');
++    expect(r.updates).toHaveLength(0);
++  });
++  it('control ks1868 C3 chain check: a thrown plain string has no message, is logged with no error, as before, and row 2 is confirmed', async () => {
++    const r = await runPass({ rows: TWO(), checkThrows: 'plain boom' });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, CHECK)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, CHECK)[0])).toBe('<undefined>');
++    expect(confirmedIds(r.updates)).toEqual(['anchor-2']);
++  });
++  it('control ks1868 C4 no failure: both rows are confirmed and nothing is logged as an error line', async () => {
++    const r = await runPass({ rows: TWO() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, CHECK)).toHaveLength(0);
++    expect(confirmedIds(r.updates)).toEqual(['anchor-1', 'anchor-2']);
++  });
++  it('RED ks1868 R1 chain check: a rejection that is a revoked Proxy is logged as text, as for an ordinary Error, and row 2 is still confirmed', async () => {
++    const r = await runPass({ rows: TWO(), checkThrows: SHAPES[0][1]() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, CHECK)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, CHECK)[0])).toBe(SHAPES[0][2]);
++    expect(confirmedIds(r.updates)).toEqual(['anchor-2']);
++  });
++  it('RED ks1868 R2 chain check: a rejection that is an Error whose message getter throws is logged as text, as for an ordinary Error, and row 2 is still confirmed', async () => {
++    const r = await runPass({ rows: TWO(), checkThrows: SHAPES[1][1]() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, CHECK)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, CHECK)[0])).toBe(SHAPES[1][2]);
++    expect(confirmedIds(r.updates)).toEqual(['anchor-2']);
++  });
++  it('RED ks1868 R3 chain check: a rejection that is an Error whose message is a null-prototype object is logged as text, as for an ordinary Error, and row 2 is still confirmed', async () => {
++    const r = await runPass({ rows: TWO(), checkThrows: SHAPES[2][1]() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, CHECK)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, CHECK)[0])).toBe(SHAPES[2][2]);
++    expect(confirmedIds(r.updates)).toEqual(['anchor-2']);
++  });
++  it('RED ks1868 R4 chain check: a rejection that is an Error whose message is a Symbol is logged as text, as for an ordinary Error, and row 2 is still confirmed', async () => {
++    const r = await runPass({ rows: TWO(), checkThrows: SHAPES[3][1]() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, CHECK)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, CHECK)[0])).toBe(SHAPES[3][2]);
++    expect(confirmedIds(r.updates)).toEqual(['anchor-2']);
++  });
++  it('RED ks1868 R5 the SELECT: a rejection that is a revoked Proxy is logged as text and the pass resolves, as for an ordinary Error', async () => {
++    const r = await runPass({ selectThrows: SHAPES[0][1]() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, PASS)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, PASS)[0])).toBe(SHAPES[0][2]);
++    expect(r.updates).toHaveLength(0);
++  });
++  it('RED ks1868 R6 the SELECT: a rejection that is an Error whose message is a Symbol is logged as text and the pass resolves, as for an ordinary Error', async () => {
++    const r = await runPass({ selectThrows: SHAPES[3][1]() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, PASS)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, PASS)[0])).toBe(SHAPES[3][2]);
++    expect(r.updates).toHaveLength(0);
++  });
++  it('RED ks1868 R7 the SELECT: a rejection that is an Error whose message getter throws is logged as text and the pass resolves, as for an ordinary Error', async () => {
++    const r = await runPass({ selectThrows: SHAPES[1][1]() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, PASS)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, PASS)[0])).toBe(SHAPES[1][2]);
++    expect(r.updates).toHaveLength(0);
++  });
++  it('RED ks1868 R8 the SELECT: a rejection that is an Error whose message is a null-prototype object is logged as text and the pass resolves, as for an ordinary Error', async () => {
++    const r = await runPass({ selectThrows: SHAPES[2][1]() });
++    expect(r.ok).toBe(true);
++    expect(LINES(r.logged, PASS)).toHaveLength(1);
++    expect(reasonOf(LINES(r.logged, PASS)[0])).toBe(SHAPES[2][2]);
++    expect(r.updates).toHaveLength(0);
++  });
++});

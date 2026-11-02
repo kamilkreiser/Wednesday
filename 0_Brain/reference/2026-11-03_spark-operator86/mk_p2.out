@@ -1,0 +1,35 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o86_p2_auth_email_acs_smtp_send_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/email.ts b/Blockchain/Dev/services/auth/src/services/email.ts
+--- a/Blockchain/Dev/services/auth/src/services/email.ts
++++ b/Blockchain/Dev/services/auth/src/services/email.ts
+@@ -164,7 +164,13 @@
+     console.error(`[Email/ACS] Send failed for ${options.to}: status=${result.status}`, result.error);
+     return false;
+   } catch (err: any) {
+-    console.error(`[Email/ACS] Send threw for ${options.to}: ${err?.message}`);
++    let reason: string;
++    try {
++      reason = String(err?.message);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email/ACS] Send threw for ${options.to}: ${reason}`);
+     return false;
+   }
+ }
+@@ -204,7 +210,13 @@
+     console.log(`[Email/SMTP] Sent to ${options.to}: ${options.subject} (messageId: ${info.messageId})`);
+     return true;
+   } catch (error: any) {
+-    console.error(`[Email/SMTP] Failed to send to ${options.to}: ${error.message}`);
++    let reason: string;
++    try {
++      reason = String(error.message);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email/SMTP] Failed to send to ${options.to}: ${reason}`);
+     return false;
+   }
+ }
+

@@ -1,0 +1,52 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o85_p1_auth_account_lockout_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/accountLockout.ts b/Blockchain/Dev/services/auth/src/services/accountLockout.ts
+--- a/Blockchain/Dev/services/auth/src/services/accountLockout.ts
++++ b/Blockchain/Dev/services/auth/src/services/accountLockout.ts
+@@ -89,7 +89,14 @@
+     const v = await redis.get(lockoutKey(email, ip));
+     return v !== null;
+   } catch (err: any) {
+-    logger.warn('lockout: redis error on isLockedOut — failing open', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('lockout: redis error on isLockedOut — failing open', { error: reason });
+     return false;
+   }
+ }
+@@ -119,7 +126,14 @@
+     }
+     return count;
+   } catch (err: any) {
+-    logger.warn('lockout: redis error on recordFailure — continuing', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('lockout: redis error on recordFailure — continuing', { error: reason });
+     return 0;
+   }
+ }
+@@ -130,6 +144,13 @@
+   try {
+     await redis.del(counterKey(email, ip), lockoutKey(email, ip));
+   } catch (err: any) {
+-    logger.warn('lockout: redis error on recordSuccess — non-fatal', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('lockout: redis error on recordSuccess — non-fatal', { error: reason });
+   }
+ }
+

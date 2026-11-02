@@ -1,0 +1,37 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o85_p2_anchoring_reconciler_catches_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/reconciler.ts b/Blockchain/Dev/services/anchoring/src/reconciler.ts
+--- a/Blockchain/Dev/services/anchoring/src/reconciler.ts
++++ b/Blockchain/Dev/services/anchoring/src/reconciler.ts
+@@ -403,7 +403,14 @@
+           // the "could not ask" branch above decides it (never failed, KS-1810). A rejection
+           // here leaves the row for the next pass and is not counted. Never guess.
+           answeredMisses.delete(key);
+-          deps.log('warn', 'Reconciler: chain check errored; leaving row as-is', { anchorId: row.id, error: err?.message });
++          let reason: string | null | undefined;
++          try {
++            const m = err?.message;
++            reason = m === undefined || m === null ? m : String(m);
++          } catch {
++            reason = 'unreadable thrown value';
++          }
++          deps.log('warn', 'Reconciler: chain check errored; leaving row as-is', { anchorId: row.id, error: reason });
+         }
+       }
+       if (now() - startedAt >= SWEEP_BOOT_GRACE_MS) await sweepNullHashRows(out);
+@@ -411,7 +418,14 @@
+         deps.log('info', 'Reconciler pass complete (KS-584)', { ...out });
+       }
+     } catch (err: any) {
+-      deps.log('warn', 'Reconciler pass failed', { error: err?.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      deps.log('warn', 'Reconciler pass failed', { error: reason });
+     } finally {
+       running = false;
+     }
+

@@ -1,0 +1,48 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o86_p3_kyc_user_erased_handler_failed_catch_guard_message
+diff --git a/Blockchain/Dev/services/kyc/src/userErasedSubscriber.ts b/Blockchain/Dev/services/kyc/src/userErasedSubscriber.ts
+--- a/Blockchain/Dev/services/kyc/src/userErasedSubscriber.ts
++++ b/Blockchain/Dev/services/kyc/src/userErasedSubscriber.ts
+@@ -36,10 +36,17 @@
+         const verificationsDeleted = await dbDeleteUserData(userId);
+         log('info', '[cascade] user.erased handled', { userId, dsrId, verificationsDeleted });
+       } catch (err: any) {
++        let reason: string | null | undefined;
++        try {
++          const m = err?.message;
++          reason = m === undefined || m === null ? m : String(m);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         log('error', '[cascade] user.erased handler failed', {
+           userId,
+           dsrId,
+-          error: err?.message,
++          error: reason,
+         });
+         throw err; // let bus retry + dead-letter
+       }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message
+diff --git a/Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts b/Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts
+--- a/Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts
++++ b/Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts
+@@ -47,10 +47,17 @@
+           sessionsDeleted: result.rowCount ?? 0,
+         });
+       } catch (err: any) {
++        let reason: string | null | undefined;
++        try {
++          const m = err?.message;
++          reason = m === undefined || m === null ? m : String(m);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         log('error', '[cascade] user.erased handler failed', {
+           userId,
+           dsrId,
+-          error: err?.message,
++          error: reason,
+         });
+         throw err;
+       }
+

@@ -1,0 +1,180 @@
+# READY — KS-1868-KS-1868-O86-P4 (spark-dsv4flash, briefed, code_patch2, vitest) — PASS 7/7 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message/out.md.checker/patch.diff`** (from `ls` at 00:40 2026-11-03; it is `cat` of the section files in order: `cmp` rc 0: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message/out.md.checker/section_1.diff`, `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message/out.md.checker/section_2.diff`). Checker A2 (verbatim from checker.out): `PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message-control/out.md.checker/patch.diff` rc 0, Wednesday).
+
+**Held 00:40 2026-11-03 by Wednesday after a source read (hold_ready.py, code_patch path — every clause below is COPIED from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message/out.md.checker`, not typed; the artefact each came from is named in brackets).** Tip `14fd8e54aefae355ec5e4bf57e4c6f3f1a710883`.
+- Touched-file set [checker.out A3, verbatim]: `PASS A3 (code_patch2) touched-file set == the declared set: { Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts } + { Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts }`
+- Declared set [input.json product_file + suggested_test_file]: `Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts` (product) and `Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts` (test) — equal to numstat.out's set (2 files).
+- numstat [out.md.checker/numstat.out, verbatim]:
+```
+8	1	Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts
+124	0	Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts
+```
+- Product hunk `+` count [checker.out A3c, verbatim]: `PASS A3c every '+' line the brief adds is in the declared sections (8 line(s), multiset), and no tip line is re-added as a '+' in any product (A3d)` — no expected_plus in the input; not re-measured here.
+- Byte-exactness [checker.out A3i, verbatim]: `A3i: brief '+' lines byte-exact incl. leading whitespace in: userErasedSubscriber.ts`
+- CODE_PATCH2 (rung 3, 1 product files + 1 test file(s)) — identity was PER-FILE A3x, not a single-file A3i. Product files (brief `File:` lines == input.json product_files): `Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts`; test(s): `Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts`. [checker.out PASS A3x, verbatim]: `PASS A3x every declared file's '+' lines are byte-identical to the brief's, in order (SUMMARY declared=2 measured=2 ok=2 diff=0 unmeasured=0)`. [brief_bytes.out, verbatim]: `OK Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts 8 '+' line(s) byte-identical to the brief, in order; OK Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts 124 '+' line(s) byte-identical to the brief, in order; SUMMARY declared=2 measured=2 ok=2 diff=0 unmeasured=0`
+- Hunk audit [out.md.checker/hunk_audit.out, first line verbatim]: `sections=2 miscounted_sections=0`
+- Sections [out.md.checker/sections.json + section_<k>.opts + apply_check_strict_<k>.out]:
+- section 1 `section_1.diff` → `Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts` (hunks=1, miscount=0; applied file per `section_1.opts`: `section_1.diff`, git-apply options: `(none — strict)`; `apply_check_strict_1.out`: EMPTY (strict apply --check clean))
+- section 2 `section_2.diff` → `Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts` (hunks=1, miscount=0; applied file per `section_2.opts`: `section_2.diff`, git-apply options: `(none — strict)`; `apply_check_strict_2.out`: EMPTY (strict apply --check clean))
+- RED-FIRST [checker.out A4, verbatim]: `PASS A4 RED-FIRST: the declared test(s) fail with every test section and no product section (3 failed / 6 run; controls green; assertion reds)` [red_first.json: failed=3 of total=6; red cell(s): ['KS-1868 the user.erased handler rethrows the original value and logs text for a hostile thrown value RED ks1868 R1: a delete failure that is a revoked Proxy is rethrown as is and logged as text, as for an ordinary Error', 'KS-1868 the user.erased handler rethrows the original value and logs text for a hostile thrown value RED ks1868 R2: a delete failure that is an Error whose message getter throws is rethrown as is and logged as text, as for an ordinary Error', 'KS-1868 the user.erased handler rethrows the original value and logs text for a hostile thrown value RED ks1868 R3: a delete failure that is an Error whose message is a Symbol is rethrown as is and logged as text, as for an ordinary Error']]
+- GREEN-AFTER [checker.out A5, verbatim]: `PASS A5 GREEN-AFTER: every declared test passes with all 1 product section(s) (6 passed / 6 run)` [green_after.json: failed=0 of total=6, success=True]
+- Whole suite [out.md.checker/suite_delta.out, verbatim]: `baseline: total=61 failed=0 | after: total=67 failed=0` · `NEW reds: []` [baseline_suite.json total=61 failed=0; after_suite.json total=67 failed=0]
+- A6 [verbatim]: `PASS A6 whole services/wallet-connector suite: no NEW red vs the untouched tip` · A7 [verbatim]: `PASS A7 tsc --noEmit for services/wallet-connector: rc 0 after the patch (baseline rc=0)`
+- SUMMARY [checker.out, verbatim]: `SUMMARY files=2 products=1 tests=1 red_first=yes apply_mode=strict`
+
+**PR NOTES for the raise seat:** CODE_PATCH — PRODUCT BYTES CHANGE: `Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts` (+8/-1 per numstat.out) and the test file `Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts` (+124/-0); 2 files in all (code_patch2: products Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts). Apply PER SECTION with the checker's apply mode — section 1 `section_1.diff`: `git apply -p1` (strict); section 2 `section_2.diff`: `git apply -p1` (strict) — at the tip `14fd8e54aefae355ec5e4bf57e4c6f3f1a710883` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product code changes) — the gate decides. Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message/input.json`. Brief (given by --brief; its `# ` heading names KS-1868): `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message/KS-1868.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-03_ks_1868_o86_p4_wallet_connector_user_erased_handler_failed_catch_guard_message/checker.out`.
+
+```diff
+diff --git a/Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts b/Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts
+--- a/Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts
++++ b/Blockchain/Dev/services/wallet-connector/src/userErasedSubscriber.ts
+@@ -47,10 +47,17 @@
+           sessionsDeleted: result.rowCount ?? 0,
+         });
+       } catch (err: any) {
++        let reason: string | null | undefined;
++        try {
++          const m = err?.message;
++          reason = m === undefined || m === null ? m : String(m);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         log('error', '[cascade] user.erased handler failed', {
+           userId,
+           dsrId,
+-          error: err?.message,
++          error: reason,
+         });
+         throw err;
+       }
+diff --git a/Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/wallet-connector/src/__tests__/ks1868-wallet-connector-user-erased-handler-failed-catch-unreadable-throw.test.ts
+@@ -0,0 +1,124 @@
++import { describe, it, expect, beforeEach, vi } from 'vitest';
++
++// KS-1868 (operator 86 screen, wallet-connector user.erased subscriber): the handler-failed catch of startUserErasedSubscriber in
++// services/wallet-connector/src/userErasedSubscriber.ts logs `{ error: err?.message }` with the read INSIDE the log call's arguments,
++// unguarded, and then rethrows the original value so the bus retries and dead-letters. A thrown value whose read throws (a
++// revoked Proxy, an Error whose message getter throws) makes the catch itself throw FIRST, so the bus receives a different
++// error (the one the read threw) and no failure line is logged; an Error whose message is readable but not a string is handed
++// to the log uncoerced. The cells make the delete step throw such a value, call the subscribed handler and assert the
++// ORIGINAL value is rethrown (what an ordinary Error gets) and the line is logged as text (the constant when the value cannot be
++// turned into text). Harness: the real subscriber with the event bus replaced by a plain stand-in that hands over the handler,
++// plain functions for the log and the delete step (no Redis, no database).
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  handler: undefined as undefined | ((event: unknown) => Promise<void>),
++  logged: [] as unknown[][],
++}));
++
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const actual = await importOriginal<Record<string, unknown>>();
++  return {
++    ...actual,
++    initEventBus: () => undefined,
++    getEventBus: () => ({
++      subscribe: (_types: unknown, _group: unknown, handler: (event: unknown) => Promise<void>) => {
++        h.handler = handler;
++        return new Promise<void>(() => undefined);
++      },
++    }),
++  };
++});
++
++import { startUserErasedSubscriber } from '../userErasedSubscriber';
++
++const FAILED = '[cascade] user.erased handler failed';
++
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.handler = undefined;
++  h.logged.length = 0;
++  process.env.REDIS_URL = 'redis://stub.invalid:6379';
++});
++
++async function run(): Promise<{ rejected: boolean; same: boolean }> {
++  await startUserErasedSubscriber(
++    (level: string, msg: string, ctx?: Record<string, unknown>) => {
++      h.logged.push([level, msg, ctx]);
++    },
++    async () => {
++      throw h.toThrow;
++    },
++  );
++  try {
++    await (h.handler as (event: unknown) => Promise<void>)({ payload: { userId: 'u1', dsrId: 'd1', walletAddress: '0xabc' } });
++    return { rejected: false, same: false };
++  } catch (e) {
++    return { rejected: true, same: Object.is(e, h.toThrow) };
++  }
++}
++const LINES = () => h.logged.filter((c) => c[1] === FAILED);
++/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
++const reasonOf = (c: unknown[] | undefined): string => {
++  const v = (c?.[2] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++const SHAPES: Array<[string, () => unknown, string]> = [
++  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
++  ['an Error whose message getter throws', getterThrows, 'unreadable thrown value'],
++  ['an Error whose message is a Symbol', () => withMessage(Symbol('ks1868')), 'Symbol(ks1868)'],
++];
++
++describe('KS-1868 the user.erased handler rethrows the original value and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error is rethrown as is and logged with its message', async () => {
++    h.toThrow = new Error('delete failed');
++    expect(await run()).toEqual({ rejected: true, same: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('delete failed');
++  });
++  it('control ks1868 C2: a thrown plain string is rethrown as is and logged without a message', async () => {
++    h.toThrow = 'plain boom';
++    expect(await run()).toEqual({ rejected: true, same: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('<undefined>');
++  });
++  it('control ks1868 C3: an Error with an empty message is rethrown as is and logged with the empty text', async () => {
++    h.toThrow = new Error('');
++    expect(await run()).toEqual({ rejected: true, same: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe('');
++  });
++  it('RED ks1868 R1: a delete failure that is a revoked Proxy is rethrown as is and logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[0][1]();
++    expect(await run()).toEqual({ rejected: true, same: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe(SHAPES[0][2]);
++  });
++  it('RED ks1868 R2: a delete failure that is an Error whose message getter throws is rethrown as is and logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[1][1]();
++    expect(await run()).toEqual({ rejected: true, same: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe(SHAPES[1][2]);
++  });
++  it('RED ks1868 R3: a delete failure that is an Error whose message is a Symbol is rethrown as is and logged as text, as for an ordinary Error', async () => {
++    h.toThrow = SHAPES[2][1]();
++    expect(await run()).toEqual({ rejected: true, same: true });
++    expect(LINES()).toHaveLength(1);
++    expect(reasonOf(LINES()[0])).toBe(SHAPES[2][2]);
++  });
++});
+```

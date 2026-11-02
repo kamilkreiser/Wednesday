@@ -1,0 +1,34 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o87_p7_auth_session_redis_listener_and_init_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/session.ts b/Blockchain/Dev/services/auth/src/services/session.ts
+--- a/Blockchain/Dev/services/auth/src/services/session.ts
++++ b/Blockchain/Dev/services/auth/src/services/session.ts
+@@ -58,4 +58,11 @@
+     redis.on('error', (err: Error) => {
+-      logger.error('Redis error', { error: err.message });
++      let reason: string | null | undefined;
++      try {
++        const m = err?.message;
++        reason = m === undefined || m === null ? m : String(m);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Redis error', { error: reason });
+       redisAvailable = false;
+     });
+@@ -69,7 +76,14 @@
+       logger.info('Redis ready');
+     });
+   } catch (err: any) {
+-    logger.warn('Redis unavailable — using in-memory session fallback', { error: err?.message });
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Redis unavailable — using in-memory session fallback', { error: reason });
+     redisAvailable = false;
+   }
+ }
+
