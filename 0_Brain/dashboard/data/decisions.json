@@ -55251,5 +55251,604 @@
    "2026-09-09 17:03",
    "2026-09-10 20:15"
   ]
+ },
+ {
+  "id": "secuura-ks1044-vm-liveness-signal-pager-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1044: Which independent liveness monitor for our VMs, and who gets paged?",
+  "bluf": "Kintsugi was dead for 53 h and Azure health read 'Available' the whole time; the first signal was Stuart's tooling, a person. The same missing control let KS-670 (demo verification down 6 days) go unseen. Azure live-migrates the box routinely and the guest did not survive, so a repeat is possible and nothing would tell us. Any monitor must make a request that traverses the app and alert on silence. Whether the demo VM has the same exposure is not measured. Cost and who is paged are unverified (not stated in the ticket); a monitor adds a resource in Secuura's Azure.",
+  "default_action": "After 48 h nothing is built or paid for (option c, status quo, reversible). The ticket stays in Backlog; the exposure remains.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Outside probe through the app for demo+kintsugi, alert on silence (new service, spend)",
+    "detail": "Detects a dead guest even when Azure says Available. Pages whoever you name (default: you). Cost unverified."
+   },
+   {
+    "key": "b",
+    "label": "Azure-side absence alert (no logs / no heartbeat) in Secuura's Azure; new Azure resource",
+    "detail": "Stays in our tenant but depends on log shipping surviving a dead guest. Cost unverified."
+   },
+   {
+    "key": "c",
+    "label": "No new monitor; keep finding outages by hand",
+    "detail": "Zero spend. Same 53 h blind spot can recur."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:32:25.647072+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks1516-unverified-timestamp-claims-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1516: What may an unverified opentimestamps/blockchain timestamp claim?",
+  "bluf": "Today, creating an opentimestamps or blockchain timestamp answers verified:true and stores verified=true, though both proofs are generated locally (placeholders). /api/timestamps/verify also returns verified:true for a forged opentimestamps proof with no stored row. KS-1404 closed this forgery path for rfc3161 only. It is a mock reported as verified on an evidentiary path, filed P2. Any choice changes the live API's answers (production change once built). Fixing already-stored rows is a separate approval of yours and not decided here.",
+  "default_action": "After 48 h nothing is built and nothing changes (the safest reversible state; the false claim stays live meanwhile). The ticket stays parked for your ruling.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Report verified:false for both types until a real check exists (changes live API)",
+    "detail": "Agent build. Honest and simplest. Existing clients see verified:false for these types."
+   },
+   {
+    "key": "b",
+    "label": "Require a stored row and honour its verified column (agent build; changes live API)",
+    "detail": "Rfc3161 shape. Closes the forgery path; creation still stores verified=true unless also changed."
+   },
+   {
+    "key": "c",
+    "label": "Stop advertising the two types in supportedTypes (changes live API)",
+    "detail": "Agent build. Removes the claim entirely; clients using the types would be affected."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:32:43.715462+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks624-prism-random-byte-proof-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-624: Make prism refuse to issue fake credentials, make it real, or leave it as a stub?",
+  "bluf": "services/prism issues credentials whose Ed25519 proof is 64 random bytes and its /verify returns passed:true without checking. PRISM_MODE is never branched on and /health reports mode 'basic' while forging. Reachability: the gateway routes only /api/did to prism and nothing in the repo calls it, so the risk is latent, not live (ticket measurement). The same pattern was fixed in vc-issuer (A-11) and in wallet-connector (PR #685, 501). The deciding question is whether prism has a real future. Also affects the sibling KS-625.",
+  "default_action": "After 48 h nothing changes (option c holding state, latent per the ticket). Reversible; the ticket stays parked for your ruling.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Prism refuses to issue (501), stops reporting 'basic' (agent build; small prod change)",
+    "detail": "Honest stub, the shape wallet-connector C-2 took. No internal consumers per ticket."
+   },
+   {
+    "key": "b",
+    "label": "Make prism a real DID/VC service using the A-11 vc-issuer fix as template (big build)",
+    "detail": "Larger Wave-2 build; not sized in the ticket. Production change."
+   },
+   {
+    "key": "c",
+    "label": "By design: leave prism unchanged (latent), record the reason",
+    "detail": "No change. A false 'basic' answer and forged proofs remain one route mapping from reachable."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:33:09.067653+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks1087-workflow-approve-credential-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1087: Item 2 (workflow-approve forwards a credential originate accepts): build it or wait for proof?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-1087 and none names this ticket.) Item 1 is merged (PR #1008): a refused forward now answers 502 and keeps the pending document. Item 2 remains: the gateway forwards only x-user-id, and originate answered 401 in the gate's replay, so a final approval in that state fails (502, document kept). Whether any environment has workflow-gated document types is NOT established (unverified), so real-user reach is unknown. Item 2 is called 'a design call' and sits beside KS-1184 (workflow stranded after a refused forward). Building item 2 touches the auth path of document creation in production.",
+  "default_action": "After 48 h option b applies: no build; item 2 stays open until reachability is measured. Safest and reversible (item 1 already protects the document).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build item 2: forward a credential originate accepts (auth-path production change)",
+    "detail": "Makes final workflow approval able to succeed. Needs a design and Opus-level gate; decide together with KS-1184."
+   },
+   {
+    "key": "b",
+    "label": "Wait: measure read-only whether workflow-gated document types exist; no build",
+    "detail": "No production change. Item 1 already stops silent loss."
+   },
+   {
+    "key": "c",
+    "label": "Rule workflow-approve out of scope; close item 2",
+    "detail": "Board-only. Approvals that need originate auth keep returning 502."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-02T12:34:07.781988+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 17:11",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD secuura-ks1116-presentation-credential-ownership-model",
+   "CARD wed-model-routing-v10-approve-1018",
+   "CARD secuura-m1b-test-write-credential-1028"
+  ]
+ },
+ {
+  "id": "secuura-ks1336-per-tenant-db-priority-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1336: Downgrade the per-tenant database parent from High, or keep it High?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-1336 and none names this ticket.) Every tenant shares one database today; isolation is a tenant_id column plus fail-closed RLS, and the per-tenant-DB path exists but is switched off. This ticket is a parent for five blocked tickets and builds nothing. You ruled option (c) on KS-1304 (2026-09-26 07:19): leave it until per-tenant databases are actually planned, with the note 'start planning the database'. The docs correction merged (#1286). The unresolved fork (build a dedicated-DB tier or delete the dormant path) turns on whether a named customer or contract needs physical separation, which the ticket does not say (unverified).",
+  "default_action": "After 48 h nothing changes (option c): priority stays High, ticket parked. Safest and reversible.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Downgrade to Medium and keep parked until per-tenant DBs are planned (board-only)",
+    "detail": "Matches your 09-26 ruling; priority then reflects that nothing is scheduled."
+   },
+   {
+    "key": "b",
+    "label": "Keep High, commission a planning note: dedicated tier vs delete path (no code)",
+    "detail": "Documents only; follows 'start planning the database'. Needs a named customer need to decide."
+   },
+   {
+    "key": "c",
+    "label": "Keep High and parked exactly as is",
+    "detail": "No change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:34:11.618375+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-797-peter-priority-2026-09-03",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-tenant-isolation-migration-ks1401-1005",
+   "CARD secuura-ks1240-tenant-create-key-fail-answer-1028",
+   "CARD secuura-ks1861-what-tenant-delete-means-1031",
+   "CARD secuura-ks1860-suspended-tenant-enforcement-1031"
+  ]
+ },
+ {
+  "id": "secuura-ks1389-slot-target-unslotted-export-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1389: Approve the coordinated slot-target.sh / preflight leg 13 / pre-push change?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-1389 and none names this ticket.) Nothing is broken today. Sourcing slot-target.sh with no slot silently exports slot 1's targets, and preflight leg 13 plus the pre-push hook rely on that on purpose, so it cannot simply be made to refuse (every push would be refused). Fixing it means changing three pieces together, including the pre-push hook and preflight, which affect every developer's push (Peter, Stuart, you). The ticket now also lists this as part of a five-ticket 'no silent slot-1 default' group. Peter raised it for you rather than touch your files.",
+  "default_action": "After 48 h nothing changes (option b): no edit to slot-target.sh, preflight or the pre-push hook. Safest and fully reversible; you can still approve later.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Approve the 3-part change (agent build; edits pre-push hook + preflight for all pushers)",
+    "detail": "slot-target.sh refuses unslotted; leg 13 measures with an explicit slot; pre-push reports SKIPPED not slot 1. Size M, needs a QA gate. Changes every dev's push flow."
+   },
+   {
+    "key": "b",
+    "label": "Accept as-is: leave slot-target.sh, leg 13 and the hook unchanged",
+    "detail": "No change. The TypeScript harnesses already refuse unslotted runs; the export remains the last silent slot-1 default."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:34:15.024897+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "CARD secuura-inreview-eight-merged-tickets-target-state"
+  ]
+ },
+ {
+  "id": "secuura-ks1561-duplicate-hash-certifier-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1561: When two orgs register the same hash, which one does verify show as the certifier?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-1561 and none names this ticket.) Measured by Seat J (2026-10-12) on real routes: org B registers hash H; org A registers the SAME hash H and certifies its own copy; verify(H) then answers 'certified by Org A', although B registered first. No forged field or lineage path is involved. Duplicate hashes across orgs are accepted because K never receives the bytes. So one org can make another org's bytes verify as certified by itself. The outcome is what every verifier sees, including Stuart's Platform S. Wednesday ruled it be filed as a product question, no build.",
+  "default_action": "After 48 h nothing changes (option c holding state, no build). Reversible; the exposure remains while it waits.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Certify only for the org holding the ORIGINAL registration (agent build; live verify)",
+    "detail": "Stops the later registrant outranking the original. Some legitimate re-registrations stop showing as certified."
+   },
+   {
+    "key": "b",
+    "label": "List every registrant's certification, labelled (agent build; changes verify contract)",
+    "detail": "Honest about multiplicity (the KS-584 P3 /v2 shape). Platform S must adapt."
+   },
+   {
+    "key": "c",
+    "label": "Keep today's behaviour and state it in the contract (docs only)",
+    "detail": "No code change; the spoofing path stays open and documented."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:34:18.519994+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-hash-population-count",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks1557-certify-hash-semantics-1013",
+   "CARD secuura-ks1557-readside-hides-own-hash-certificates-1013"
+  ]
+ },
+ {
+  "id": "secuura-ks1669-renovate-systemtest-pins-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1669: May Renovate stay for the systemTest k6 pins, given your 'Dependabot, not Renovate' ruling?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-1669 and none names this ticket.) A renovate.json sits at the repo root, last changed 2026-10-07 for the k6 pins (KS-1445/KS-1367). Your 2026-07-04 ruling (KS-352/353) was 'Dependabot, not Renovate', and the docs mention only Dependabot. The ticket proposes Renovate only for systemTest pins (everything outside Blockchain/Dev/**) with Dependabot kept for the platform. No change is proposed to the file yet; your answer decides KS-1446 too. Docs-only effect plus a keep/delete of one config file. Nobody outside the team sees the outcome.",
+  "default_action": "After 48 h nothing changes: renovate.json stays as is and the docs stay silent about it (the status quo, fully reversible; equivalent to option a without the docs note).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep Renovate for systemTest pins only; Dependabot stays for the platform; docs say so",
+    "detail": "Docs-only change recording the carve-out. renovate.json untouched. Also answers KS-1446 in principle (separate ticket decides base-image-watch.sh)."
+   },
+   {
+    "key": "b",
+    "label": "Delete renovate.json; Dependabot only (matches the 07-04 ruling literally)",
+    "detail": "One file removed; k6/systemTest pin bumps then need a manual or Dependabot route. Docs unchanged."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:34:22.391644+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks953-shared-pins-anchor-by-marker"
+  ]
+ },
+ {
+  "id": "secuura-ks229-assurance-tracker-close-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-229: Close the 2026-06-10 assurance umbrella tracker, or keep it open?",
+  "bluf": "(New question: Prior KS-229 rulings (secuura-ks229-securitymd-codeowners = A, secuura-ks229-disclosure-mailbox = later) were about SECURITY.md and CODEOWNERS, not about closing the tracker.) KS-229 is the umbrella tracker for the 2026-06-10 assurance review; its only PR (#785, encryptedField header fix) merged 2026-09-10 and the ticket says it has no deliverable of its own. Children KS-239, KS-263 and KS-760 sit in the backlog (per triage; the ticket text does not list them all). The GitHub integration repeatedly walked it to In Review, which is noise. Your earlier rulings on this ticket were about SECURITY.md and CODEOWNERS, not about closing it. Board-only effect.",
+  "default_action": "After 48 h nothing changes: the tracker stays open (option a). Safest and reversible.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep open as the umbrella (children stay in backlog)",
+    "detail": "No change. Tracker keeps showing the review's open set."
+   },
+   {
+    "key": "b",
+    "label": "Close the tracker; children stay as standalone backlog tickets (board-only)",
+    "detail": "Cleaner board; the review write-up remains in the vault. Reopenable."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-02T12:34:26.083134+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks229-securitymd-codeowners",
+   "CARD secuura-ks229-disclosure-mailbox"
+  ]
+ },
+ {
+  "id": "secuura-ks491-waf-captcha-product-spend-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-491: Commission a costed WAF and CAPTCHA options note, or defer both?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-491 and none names this ticket.) Ticket: there is no WAF anywhere (Cloudflare is DNS-only) and no CAPTCHA on signup, login or public verify; the Aug rows were marked 'needs Kam (product + spend), do not advance'. Other rows (rate limits, body caps, Postgres/Redis binding) were fixed and live. Peter also asks for a decision on the 'Server: nginx' header (KS-1397, LOW). No price, product choice or cost estimate is in the ticket (unverified). Only a research note is proposed; no spend and no production change without your later word.",
+  "default_action": "After 48 h nothing is bought or changed (no option chosen): the WAF/CAPTCHA rows stay open and parked, no spend.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Commission a read-only costed options note for WAF and CAPTCHA; no spend, no change",
+    "detail": "Where a WAF terminates, who runs it, price figures. Nothing deployed, nothing bought."
+   },
+   {
+    "key": "b",
+    "label": "Defer WAF and CAPTCHA explicitly (pre-funding); record as accepted risk; no work",
+    "detail": "Closes the ambiguity on the board. Risk stays: only IP/velocity limits stand against bots."
+   },
+   {
+    "key": "c",
+    "label": "Approve a WAF now (spend + production edge change); product choice to follow",
+    "detail": "Commits money and changes the live edge. Product and budget not stated in the ticket."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:34:29.630287+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 16:08",
+   "CARD secuura-tooling-tickets-off-product-board-1005"
+  ]
+ },
+ {
+  "id": "secuura-ks590-verify-disclosure-four-questions-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-590: Peter's four verify-by-hash disclosure questions: tighten or leave?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-590 and none names this ticket.) Peter (2026-10-06) asks you to rule four points, each changing what the cross-tenant test asserts: (1) certification.certifierOrganizationId survives scoping, so is an org UUID tenant-owned naming? (2) both chain-first branches skip scopeTenantFields; (3) rows with no tenancy info are never scrubbed; (4) the by-id path is never scoped. Anonymous verify stays a public 200 path (earlier ruling carried in the ticket). Tightening changes what verifiers, including Stuart's Platform S, see (production change once built); impact on S consumers unverified.",
+  "default_action": "After 48 h option c applies: no ruling, no code change; Peter proceeds with the unaffected test rows. Safest and reversible.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Strict: no tenant-owned naming incl. org UUID on all four paths (changes live verify)",
+    "detail": "Agent build. Closes all four gaps. Verifiers incl. Platform S stop seeing the org id; confirm with Stuart first."
+   },
+   {
+    "key": "b",
+    "label": "Fix gaps 2-4 (unscoped code paths) but allow the org UUID to be shown",
+    "detail": "Smaller change; keeps the org id in verify output."
+   },
+   {
+    "key": "c",
+    "label": "No ruling yet: Peter writes the test rows that do not depend on these; row 4 stays open",
+    "detail": "No production change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:34:33.050542+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-14 22:11",
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-ks229-disclosure-mailbox",
+   "CARD secuura-f5-disclosure-timing",
+   "CARD secuura-793-the-four-rows-you-authorised-are-already-expired",
+   "CARD secuura-four-advisories-in-shipped-code",
+   "CARD secuura-four-advisories-ruled-after-measurement",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1114-verify-title-strategy",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-l9-four-workflows-merges-kam",
+   "CARD secuura-ks1352-revoked-credentials-still-verify",
+   "CARD secuura-ks1628-retire-deprecated-verify-route-1019",
+   "CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022",
+   "CARD wed-deepseek-four-mac-comparisons-1026",
+   "CARD secuura-four-tickets-delivered-not-observable-1029"
+  ]
+ },
+ {
+  "id": "secuura-ks601-kintsugi-split-close-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-601: Is the Kintsugi dev / demo split done, so this ticket can close?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-601 and none names this ticket.) Kintsugi (dev) is up and takes develop deploys (latest recorded 2026-09-23); demo was 'unchanged' then. The runbook is merged (#943), the plan merged (#707). The original plan also said demo becomes demo+staging only, promoted to on your + Peter + Stuart go-ahead. You ruled on 2026-09-10 to deploy to both kintsugi and demo that week (grant expired 09-14), so the split was deliberately suspended once. Whether demo's role was flipped in docs/board and where deploys go today is unverified. Open children KS-1044/KS-1100 are in backlog (per triage).",
+  "default_action": "After 48 h nothing changes: KS-601 stays open (option b). Safest and reversible.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Confirm split restored, close KS-601; leftovers stay on KS-1044/KS-1100 (board-only)",
+    "detail": "Closes the parent. The promotion gate remains the working rule."
+   },
+   {
+    "key": "b",
+    "label": "Keep open and name what is left (e.g. demo-role flip in docs/board)",
+    "detail": "Board-only. Ticket stays In Progress."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:34:36.613989+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-kintsugi-whole-estate-rebuild",
+   "CARD secuura-kintsugi-build-cache-prune",
+   "CARD secuura-kintsugi-refresh-notice-release",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD secuura-kintsugi-deploy-for-31oct-1005",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-kintsugi-issuer-account-how",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-deploy-tip-kintsugi-and-post-1022",
+   "CARD secuura-kintsugi-ssh-rule-stale-ip-1022",
+   "CARD secuura-kintsugi-deploy-notice-1022",
+   "CARD secuura-kintsugi-admin-published-default-1027",
+   "CARD secuura-kintsugi-disk-15gb-builder-prune-1031",
+   "CARD secuura-kintsugi-second-prune-all-cache-1101",
+   "CARD secuura-kintsugi-third-prune-for-train-round-1101",
+   "CARD secuura-kintsugi-disk-train-round-rollback-images-1101"
+  ]
+ },
+ {
+  "id": "secuura-ks602-bm1-certification-model-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-602 (BM-1): Is the certification model final, and do we plan its build now?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-602 and none names this ticket.) The ticket records, from the 2026-08-11 technical weekly (Stuart, Phil, Kam): certification = attestation + signing + optional watermarking; ANY modification (including watermarking) creates a NEW document version and requires mandatory re-certification. It is likely an epic (data model, lineage enforcement, re-certification triggers, API/spec). 0 comments; no build exists. Ticket says it is split into sub-tickets 'when the build starts'. Whether you confirm it as the spec of record, and whether planning starts, is the ruling. Building it changes production data model and API.",
+  "default_action": "After 48 h option a applies: the ticket stays parked as the recorded definition, nothing is planned or built. Safest and reversible.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Confirm as spec of record only; keep parked, no planning or build",
+    "detail": "Board-only. Records the definition; nothing scheduled."
+   },
+   {
+    "key": "b",
+    "label": "Confirm and commission sub-ticket breakdown and sizing (planning only, no code)",
+    "detail": "Board and documents only; no production change. Lets you see the size before deciding to build."
+   },
+   {
+    "key": "c",
+    "label": "Confirm and start the build (production data-model and API changes)",
+    "detail": "Commissions production changes across services; not sized in the ticket."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-02T12:34:40.352954+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "2026-08-17 20:23",
+   "CARD secuura-ks1116-presentation-credential-ownership-model",
+   "CARD wed-model-routing-v10-approve-1018",
+   "CARD secuura-platform-admin-spelling-certification-reads-1020",
+   "CARD secuura-ks1709-keep-unanchored-certification-1023",
+   "CARD wed-model-switch-writes-global-settings-1027"
+  ]
+ },
+ {
+  "id": "secuura-ks603-bm2-verification-workflow-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-603 (BM-2): Is 'verification is a configurable workflow' final, and do we plan its build now?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-603 and none names this ticket.) The ticket records (2026-08-11 weekly): verification is a configurable workflow set by clients through smart contracts; Secuura does not prescribe compliance; the workflow path is verified and recorded, simple document viewing is not recorded on-chain. It carries your PS-556 ruling: a verification is a public, repeatable read outside canonical lineage, and K does not become a source of record for verification acts. 0 comments; no build; scope and effort unestimated (unverified). Building changes production and the smart-contract surface.",
+  "default_action": "After 48 h option a applies: ticket stays parked as the recorded definition. Safest and reversible.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Confirm as spec of record only; keep parked, no planning or build",
+    "detail": "Board-only. Nothing scheduled."
+   },
+   {
+    "key": "b",
+    "label": "Confirm and commission a planning note and sizing (planning only, no code)",
+    "detail": "Workflow shape and smart-contract touchpoints. Documents only; shows effort before committing."
+   },
+   {
+    "key": "c",
+    "label": "Confirm and start the build (production and smart-contract changes)",
+    "detail": "Commissions production changes; size not known."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-02T12:34:43.815432+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-891-workflow-scope-merge"
+  ]
+ },
+ {
+  "id": "secuura-ks655-drift-check-fleet-fix-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-655: Go-ahead to fix the KS-78 drift check in the launcher across all 16 copies?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-655 and none names this ticket.) The KS-78 drift check at the start of each session is wrong three ways: it counts HEAD but prints 'main'; it anchors on container start time, not image build time; and it anchors on a stock redis image. On the day it printed 7 commits of drift, 212 existed (ticket measurement). Two sessions ignored a true warning. Launch_Claude.command is boot-path for every session, is not under version control, and there are 16 copies across the workspace, so fixing one fixes one of sixteen. No edit made; the ticket says the fleet-wide fix is carried on the WED board gated on your go-ahead.",
+  "default_action": "After 48 h nothing changes (option c): no launcher is edited. Safest and reversible; the ticket stays waiting.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Go-ahead: fix the check in all 16 launcher copies (changes every project's boot)",
+    "detail": "One consistent fix; ticket acceptance: named branch, build-time baseline, infra images ignored. Each project's own seat applies the fix to its launcher on a brief from Wednesday (Wednesday edits no other project's files)."
+   },
+   {
+    "key": "b",
+    "label": "Fix only the Secuura Blockchain launcher copy",
+    "detail": "Smaller blast radius; the other 15 keep a misleading warning."
+   },
+   {
+    "key": "c",
+    "label": "Leave the check as it is",
+    "detail": "No change to any launcher; the warning stays misleading."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T12:34:47.137776+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD fleet-vault-note-attribution",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD fleet-comms-names-one-coordinator"
+  ]
+ },
+ {
+  "id": "secuura-ks762-db-password-rotation-confirm-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-762: Was the 2026-09-05 APP_DB_PASSWORD rotation done, and may ':?required' be released?",
+  "bluf": "(New question: Prior KS-762 rulings: rotate (09-03) and keep-defaults (the ':?required' switch re-raised only after rotation). This card asks whether that rotation happened, which the 09-03 ruling makes the precondition.) You ruled 2026-09-03 to keep the ':-' defaults and to rotate on 2026-09-05 09:00, with the ':?required' switch re-raised only after rotation and with notice to Peter and Stuart. The seat on 09-06 found the committed literal unchanged and the rotation date two days lapsed, and could not tell from any system whether it ran (unverified). The switch breaks every existing local stack and fresh clone until each person sets APP_DB_PASSWORD. Releasing it means telling Peter and Stuart (team communication). It is a local-dev compose password per the ticket.",
+  "default_action": "After 48 h option c applies: defaults stay, no switch, no notice, no rotation. Safest and reversible.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Rotation done: release ':?required' now, with notice to Peter and Stuart",
+    "detail": "Agent build + team message. Breaks existing local stacks until each .env gets the variable."
+   },
+   {
+    "key": "b",
+    "label": "Rotation was NOT done: schedule it first (your deploy step), then re-raise the switch",
+    "detail": "Nothing breaks now; the committed credential stays live until rotated."
+   },
+   {
+    "key": "c",
+    "label": "Tell me the rotation status later; keep defaults unchanged",
+    "detail": "No change, no notice."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-02T12:34:50.655392+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-03 09:54",
+   "2026-09-10 10:32",
+   "CARD secuura-ks762-db-password-rotation",
+   "CARD secuura-ks762-required-switch-2026-09-03",
+   "CARD secuura-appdb-rotation-vs-800-2026-09-04",
+   "CARD secuura-rotation-shell-inversion",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-ks968-rotation-three-worlds",
+   "CARD secuura-ks1695-gap2-sized-confirm-b-1020"
+  ]
+ },
+ {
+  "id": "secuura-ks889-platform-s-key-remint-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-889: Re-mint Platform S's API keys (Stuart's window) or accept without a backfill?",
+  "bluf": "(New question: The prior-rulings gate matched shared subject words only; Wednesday grep-checked every listed prior for KS-889 and none names this ticket.) Measured on the demo box 2026-09-06: no existing key row says which connector it belongs to. A backfill would recover 5 of 32 active keys (16%), leave 26 with no evidence and 1 ambiguous. So the KS-843 flip (SUBJECTS_ERASE_SCOPE_ENFORCED, after the log shows Platform S on the new key) cannot get its evidence from existing keys; re-mint is the only sound path. A re-mint changes production credentials and needs Stuart's window (client-facing, communication from you). The comment says it is not a request to anyone, no message has gone to Platform S.",
+  "default_action": "After 48 h option c applies: no re-mint, no message to Stuart, the KS-843 flip keeps waiting. Safest and reversible.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Re-mint Platform S keys in a window agreed with Stuart (prod credentials + message)",
+    "detail": "Gives clean KS-843 evidence. Stuart must plan the switchover; merges with the KS-577 rotation conversation. You message Stuart."
+   },
+   {
+    "key": "b",
+    "label": "Accept: no re-mint; decide the KS-843 flip on other evidence or keep logged grace",
+    "detail": "No credential change and no message to Stuart. Existing keys keep logging connectorId null."
+   },
+   {
+    "key": "c",
+    "label": "Defer the choice until you and Stuart next discuss the KS-577 rotation window",
+    "detail": "No action now; the KS-843 flip keeps waiting."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-11-02T12:34:54.275275+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-21 10:02",
+   "2026-08-21 20:06",
+   "2026-08-21 20:08",
+   "2026-09-02 16:32",
+   "2026-09-02 19:28",
+   "2026-09-09 17:52",
+   "2026-09-09 18:20",
+   "2026-09-14 14:53",
+   "CARD secuura-archive-fifteen-platform-s-tickets",
+   "CARD secuura-platform-s-count-was-wrong-when-you-ruled",
+   "CARD secuura-880-merge-kam-platform-s-cutover",
+   "CARD secuura-ks1359-platform-audit-log-bounds",
+   "CARD secuura-ks1688-ask-stuart-platform-s-version-1020",
+   "CARD secuura-platform-admin-spelling-certification-reads-1020"
+  ]
  }
 ]
