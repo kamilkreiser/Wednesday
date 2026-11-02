@@ -31,7 +31,7 @@ MEASURED-BY-DRAFTER = Mon 2 Nov 2026 12:40:01 to 12:44 AEDT (`date`), read-only.
 ## REFUSE AT ONCE (last line `STOPPED: NEEDS TUESDAY`; each count with a control that can fail)
 - A stamp slot unfilled: `/usr/bin/grep -c -E '_''_''_''_' <Step-0 copy>` must print 0 (control: the `.pre-stamp` copy reads **11**); last line not `READ-WHOLE-BY-TUESDAY: DONE ...`; no launch authority or hard stop in `## Stamp`.
 - The branch ref is not `dcc5ca03...` (`gh api -X GET repos/datasecau/HPSM-POC/git/ref/heads/b1097/hpsmpoc-home-words-focus-ring`), a PR is open for it, or `.tools/b1122` / `.tools/wt-b1122-*` exists (each `ls -d` alone; control `.tools/b1113`).
-- **Main moved:** STOP if `/usr/bin/grep -c -E '^web/(src/app/globals|e2e/shell-sidebar|src/components/shell/|src/components/partner/PartnerDashboard)|^\.github/workflows/ci|^web/package'` over `compare 4b3cefae...main`'s files is not 0 (control: a one-line file holding `web/src/app/globals.css` prints 1); else record the new main in every PIN.
+- **Main moved:** STOP if `/usr/bin/grep -c -E '^web/(src/app/globals|e2e/shell-sidebar|src/components/shell/|src/components/partner/PartnerDashboard)|^\.github/workflows/ci|^web/package'` over `compare 4b3cefae...main`'s files is not 0 (control: a one-line file holding `web/src/app/globals.css` prints 1); a match that is ONLY `web/src/components/shell/CustomerShell*` (branch `b1104`, may land while you run, none of your four paths) is not a stop. Else record the new main in every PIN.
 - Another `Datasec/HPSM-POC-H101` pane (H100, G280 are not a stop); `df -g /Volumes/Laptop-DEV` available under 25 GiB (now or at any heavy step); `gh auth status` under `GH_CONFIG_DIR='/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.gh-config'` not the project's Datasec account.
 
 ## THE ROWS (red-first against the OLD head; any other shape than this list: prove it meets the property or STOP)
@@ -39,7 +39,7 @@ MEASURED-BY-DRAFTER = Mon 2 Nov 2026 12:40:01 to 12:44 AEDT (`date`), read-only.
 |---|---|---|---|---|
 | S1 | -1 | e2e, 1280, short window (height from the Engagements band 420-441 or your census's first band cell): Partner, `tabTo` the current item; `paintedRing` reads 3 ring pixels and contrast >= 3 on all four edges | RED | PS1, PS2 |
 | S2 | -5 | e2e, 390 drawer: the same on a cell your census shows cut at the old head | RED | PS1, PS4 |
-| S3 | -5 | e2e, one customer-menu current item: the first `menu = customer` row of `c2-cells-head.tsv` with `missing` not empty | RED | PS1, PS3 |
+| S3 | -5 | e2e, one customer-menu current item: the first `menu = customer` row of `c2-cells-head.tsv` with a whole edge lost (`midL`, `midT`, `midR` or `midB` under 3; read by this seat at the stamp: partner, 1024x420, `/security/<id>/assessments`, Security assessments, dir up, `midT` 0). NOT merely `missing` not empty: the first such row is 390x800 `bl,br`, mid-edges all 3, the B1109-8 antialiased-corner Note, which `paintedRing` reads green | RED | PS1, PS3 |
 | T1 | -4 | unit, NEW `PartnerDashboard.text.test.tsx`: the partner Home text WHOLE (loaded and empty-customers states) via the helpers `PartnerDashboard.words.test.tsx` uses (re-derive, no test-file import), whitespace normalised, equals a literal read from the `dcc5ca03` tree; control: it holds `Self-assessment, not certification.` | green | PW1, PW2 |
 | R4' | -3 | unit, reshaped `:273`: on the comment-stripped, whitespace-normalised stylesheet the current-item selector exists once, after the link rule, at top level, and the link rule's declarations are unchanged as a SET (order, spacing free). **No value asserted in text**: S1-S3 and rows `:243`, `:258` carry offsets and radius | green | PR1 (rule deleted), PR4 (moved before the link rule) red; PE1, PE2 green |
 Read plants b5, b6, b11 in `c3-plants.md`: R4' is green on each (name them); b1-b4, b7, b8, b10 stay red under R4' or a browser row, by name. A required red that stays green: STOP `NEEDS TUESDAY <row> green under <plant>`.
@@ -69,18 +69,18 @@ No path outside the four; no word, link, accessible name or tab-order change; no
 
 ## Stamp
 Tuesday copies this file to `.pre-stamp` before filling a slot; the unstamped copy reads 11 such lines.
-- STAMP: ____
-- GATE-ROUND (default ROUND 2 OF 2 on class R, NO GO 1 before (B1109), tier 1 Opus): ____
-- KEYS (no key in a changed line or the message): ____
-- SCOPE-OUT (nothing outside the four paths; commit A byte-equal; no word): ____
-- LAUNCH WINDOW (until when; load1 below 7; live seats): ____
-- Stamped by (the seat that READ this brief with its drafter report): ____
-- Launch authority: ____
-- Hard stop and target READY (absolute AEDT clocks written by the seat at Step 0): ____
-- Head, main and open PRs at launch (expected dcc5ca039a55dad5ef75a0ca4134efa8a52b1e25, 4b3cefae71ca43f6f86d23c77dd75ae101a51fd3 or later, 0 PRs): ____
-- Model receipt line and `LC_ALL=C uptime` load1 at launch: ____
+- STAMP: s225, read whole 1-87 with the drafter report at 12:59. Corrections by this seat before the stamp: S3's cell (the first 'missing' row was a corner-only Note cell that paintedRing reads green; the row now names a lost edge); the main-moved REFUSE no longer stops on b1104's CustomerShell paths. Q-1 to Q-5 defaults taken.
+- GATE-ROUND (default ROUND 2 OF 2 on class R, NO GO 1 before (B1109), tier 1 Opus): ROUND 2 OF 2 on class R, NO GO 1 before (B1109), tier 1 Opus; class W not re-judged, commit A byte-equal.
+- KEYS (no key in a changed line or the message): none in a changed line or the message; HPSMPOC-399 and HPSMPOC-368 appear only in your STATUS FOR TUESDAY.
+- SCOPE-OUT (nothing outside the four paths; commit A byte-equal; no word): nothing outside the four paths; commit A byte-equal to dcc5ca03; no word.
+- LAUNCH WINDOW (until when; load1 below 7; live seats): until 20:00 AEDT today; load1 below 7 through the waiter; live beside you HPSM-POC-H100, HPSM-POC-G280, HPSM-POC-G285, MPS-M76, MPS-G283, MPS-G284, MPS-R134 (read from tmux before this stamp). G285 gates b1104; its ports are its kit's, never 9570-9579.
+- Stamped by (the seat that READ this brief with its drafter report): Tuesday seat s225, Mon 2 Nov 2026 12:59; the seat that READ this brief with its drafter report.
+- Launch authority: Kam, live board 2026-11-01 21:41:12 AEDT, as the brief's Authority line quotes, and his ruling hpsmpoc-menu-focus-ring-1101 = b, 2026-11-02 06:09. Merge and deploy not included.
+- Hard stop and target READY (absolute AEDT clocks written by the seat at Step 0): target READY within about 3 hours of your Step 0, hard stop 20:00 AEDT today; write both as absolute clocks at Step 0.
+- Head, main and open PRs at launch (expected dcc5ca039a55dad5ef75a0ca4134efa8a52b1e25, 4b3cefae71ca43f6f86d23c77dd75ae101a51fd3 or later, 0 PRs): read by this seat through gh api at the stamp: branch dcc5ca039a55dad5ef75a0ca4134efa8a52b1e25, main 4b3cefae71ca43f6f86d23c77dd75ae101a51fd3, open PRs 0. Re-read at your Step 0: yours is the reading.
+- Model receipt line and `LC_ALL=C uptime` load1 at launch: model: claude-sonnet-5-5 -- C2 -- P1-P4 pass -- 7d 38%; read LC_ALL=C uptime load1 at your Step 0.
 
 **Your commission is THIS file (read-only):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-02_B1122_SEAT-H101_hpsmpoc-focus-ring-fix-round.md`; Step 0 copies it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/`.
 **Launch (Tuesday), ONE waiter:** `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/HPSM-POC-H101 "WED_USAGE_STOP=100 BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-02_B1122_SEAT-H101_hpsmpoc-focus-ring-fix-round.md'"` (the level is inside the quotes; no nested `cockpit.sh add`). Nothing deploys.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s225, read whole 1-87 at 12:59; path check run alone first: MISSING-LOCAL 1 is .tools/b1122/lock.sh, which step 3 creates, not a defect; the 4 SHOW lines read equal to the kit.
