@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 18:5x ADD (ctx 70%; READ FIRST with the 18:4x block below)
+- **develop 466a0d6c4c55** (#1929 MERGED 07:52Z; 36 squashes since d7691f35). No GO of mine outstanding.
+- **B 77th queue: PR 1931** (W 16th auth, gate 113 GO WITH NOTES at bafab56a, notes PATCHED 07:46Z) -> at B's READY: pre-GO checks -> GO.
+- **GATES RUNNING (subagents of this seat; re-launch if no verdict.md):** 114 on PR 1932 (W 16th anchors, head 8bd1db36, workdir 0_Brain/reference/2026-11-02_gate114-ks1868-pr1932/); 115 on PR 1933 (S 13th KS-1725 msal dependency, head 750da509, workdir 0_Brain/reference/2026-11-02_gate115-ks1725-pr1933/: advisory gone from every lock, closure-only lock diffs, msal 3->7 callers, baseline one-row). Gate 113 DONE (GO WITH NOTES) and relayed; 1931 queued.
+- **W 16th:** after gate 114's answer it patches notes, then WRAPS -> score it (three PRs, all gated GO WITH NOTES so far; self-disclosed TMPDIR and wording slips).
+- **V 16th:** 0b DONE (1929 notes); building PR 1 (KS-1939). **F 23rd:** building KS-1940 (design answered 18:39); filing C1/C2 -> tell Kam about C2 (High) on the panel when its key exists.
+- **Spark:** operator 81 running (G112-F1 security coercing-String). O80-G1..G5 + G113-F1/F2 + G111-F1 follow-ups await a raise seat.
+- **O73-P1 RETIRE** at F 23rd's merge.
+
 ## 18:4x CHECKPOINT (the 17:4x successor seat, ctx 66%; READ FIRST, supersedes everything below where they differ)
 - **develop e2a2426d221d** (Wednesday's ls-remote 18:4x; 35 first-parent squashes since d7691f35). This seat GO'd + saw MERGED: #1927 (c2c2e03a), #1928 (c234c238), #1930 (e2a2426d). **No GO of mine outstanding.** Nothing deployed.
 - **LIVE SEATS (6):** B 77th %81 merge (queue EMPTY; next = PR 1929 after its notes). W 16th %78: PR 1931 auth at GATE 113 (Opus, running, subagent of this seat; workdir 0_Brain/reference/2026-11-02_gate113-ks1868-pr1931/), PR 1932 anchors at GATE 114 (Opus, running; workdir ..._gate114-ks1868-pr1932/); W wraps after the last gate answer. S 13th %79 (msal PR 1 + zod PR 2 queued to push; Opus gate PR 1, Sonnet PR 2; feasibility mail due Thu 11-05). E 28th %80 (4 PRs in the push queue: KS-1413 T2, KS-1938 T1, KS-1868 signatories/TPV T1, KS-1081 T2). **F 23rd %82 (Opus, launched 18:20 by waiter): KS-1940 governance fix, DESIGN ANSWERED 18:39 (503 via ServiceUnavailableError; Q3 SUPERSEDED the brief: build on c234c238, 1929 merge-in pre-ruled on 3 printed conditions); filing C1 (Medium, DELETE orphan) + C2 (High, POST /participants/register lets any caller set any wallet's stake/DRep) -> TELL KAM about C2 once on the panel when its key exists.** **V 16th %83 (Sonnet, launched 18:24): 13 held O78/O79 passes as 5 PRs; START confirmed 18:41; ITEM 0b = patch G111-F1..F7 into PR 1929 -> at its NOTES PATCHED: QUEUE 1929 to B 77th (gate 111 = GO WITH NOTES at 55cd79e1).**
