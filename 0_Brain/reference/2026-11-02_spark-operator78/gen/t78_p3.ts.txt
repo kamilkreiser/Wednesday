@@ -1,0 +1,166 @@
+// KS-1868 (originate routes/verificationV2.ts, fetchChainFact, the chain-first fallback of POST /api/v2/verification/verify): the catch logged
+// `{ error: err?.message }` and returned null. When the thrown value cannot be read (a revoked Proxy makes `?.message` throw; an Error whose `message` getter throws),
+// that read threw INSIDE the catch: fetchChainFact rejected instead of returning null, the route's catch answered the constant 500, and the caller got a server error where an ordinary Error
+// (a network failure, a timeout) gets the honest 200 { count: 0, matches: [] } with the stored state presented. The catch now reads the message inside its own try and logs the constant
+// `unreadable thrown value`. The anchoring service call is replaced by a plain function that rejects with the chosen value; the database stand-in answers no registered rows, so the
+// route takes the chain-first fallback. A real loopback listener; a request that gets no answer within the window is reported as the string NO ANSWER.
+process.env.NODE_ENV = 'development';
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+
+const mockLoggerError = jest.fn();
+const mockLoggerWarn = jest.fn();
+const mockExecuteRaw = jest.fn();
+let mockChainFetch: () => Promise<unknown> = async () => new Response(null, { status: 503 });
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: async () => [], $executeRaw: (...args: unknown[]) => mockExecuteRaw(...args) },
+  getTenantManager: () => null,
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    runWithTenantId: (_t: unknown, fn: () => unknown) => fn(),
+    queryWithTenantGuc: jest.fn(),
+  }),
+);
+
+jest.mock('../repositories/documentRepo', () => ({
+  walkAncestors: jest.fn().mockResolvedValue({ lineage: [], truncated: false }),
+  walkDescendants: jest.fn().mockResolvedValue({ descendants: [], truncated: false }),
+  updateDocument: jest.fn().mockResolvedValue(undefined),
+  MAX_LINEAGE_DEPTH: 10,
+}));
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: mockLoggerWarn, error: mockLoggerError, debug: jest.fn() },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { verificationV2Router } from '../routes/verificationV2';
+
+const UNREADABLE = 'unreadable thrown value';
+const HASH = 'f'.repeat(64);
+const WARN_CONTEXT = 'v2 verify: chain-fact read failed; matches present stored state';
+const NOT_REGISTERED = { hash: 'sha256:' + HASH, count: 0, matches: [] };
+
+const realFetch = globalThis.fetch;
+const app = express();
+app.use(express.json());
+app.use('/api/v2/verification', verificationV2Router);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+
+beforeAll(async () => {
+  // Only the anchoring service call is replaced; every other request (the test's own, to the loopback listener) goes to the real fetch.
+  (globalThis as any).fetch = (input: any, init?: any) =>
+    String(input).includes('/api/anchors/verify/') ? mockChainFetch() : realFetch(input, init);
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => {
+  (globalThis as any).fetch = realFetch;
+  server?.close();
+});
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockChainFetch = async () => new Response(null, { status: 503 });
+});
+
+function chainFetchRejectsWith(thrown: unknown): void {
+  mockChainFetch = async () => {
+    throw thrown;
+  };
+}
+
+async function verifyByHash(): Promise<{ status: number | 'NO ANSWER'; body: any }> {
+  try {
+    const res = await realFetch(baseUrl + '/api/v2/verification/verify', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ hash: HASH }),
+      signal: AbortSignal.timeout(1500),
+    });
+    return { status: res.status, body: await res.json() };
+  } catch {
+    return { status: 'NO ANSWER', body: null };
+  }
+}
+
+function revokedProxy(): object {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function throwingMessageError(): Error {
+  const e = new Error('ks1868 hidden');
+  Object.defineProperty(e, 'message', {
+    get() {
+      throw new Error('ks1868 message getter');
+    },
+  });
+  return e;
+}
+
+function getterThrowsProxyError(): Error {
+  const e = new Error('ks1868 hidden');
+  const p = revokedProxy();
+  Object.defineProperty(e, 'message', {
+    get() {
+      throw p;
+    },
+  });
+  return e;
+}
+
+const UNREADABLE_CASES: Array<{ label: string; make: () => unknown }> = [
+  { label: 'R1 a revoked Proxy', make: revokedProxy },
+  { label: 'R2 an Error whose message getter throws', make: throwingMessageError },
+  { label: 'R3 an Error whose message getter throws a revoked Proxy', make: getterThrowsProxyError },
+];
+
+describe('KS-1868 v2 chain-fact read catch reads the thrown value safely', () => {
+  it.each(UNREADABLE_CASES)('RED ks1868 $label: answered 200 not registered and logged with the constant reason', async (c) => {
+    chainFetchRejectsWith(c.make());
+    const reply = await verifyByHash();
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(expect.objectContaining(NOT_REGISTERED));
+    expect(mockLoggerWarn.mock.calls).toEqual([[WARN_CONTEXT, { error: UNREADABLE }]]);
+    expect(mockLoggerError).not.toHaveBeenCalled();
+    expect(mockExecuteRaw).not.toHaveBeenCalled();
+  });
+
+  it('control ks1868 C1: an ordinary Error logs its own message and is answered 200 not registered', async () => {
+    chainFetchRejectsWith(new Error('ks1868 ordinary'));
+    const reply = await verifyByHash();
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(expect.objectContaining(NOT_REGISTERED));
+    expect(mockLoggerWarn.mock.calls).toEqual([[WARN_CONTEXT, { error: 'ks1868 ordinary' }]]);
+    expect(mockLoggerError).not.toHaveBeenCalled();
+  });
+
+  it('control ks1868 C2: a thrown string is logged as before (no message) and answered 200 not registered', async () => {
+    chainFetchRejectsWith('ks1868 plain string');
+    const reply = await verifyByHash();
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(expect.objectContaining(NOT_REGISTERED));
+    expect(mockLoggerWarn.mock.calls).toEqual([[WARN_CONTEXT, { error: undefined }]]);
+    expect(mockLoggerError).not.toHaveBeenCalled();
+  });
+
+  it('control ks1868 C3: a non-2xx answer from the anchoring service is answered 200 not registered with its own warn line', async () => {
+    const reply = await verifyByHash();
+    expect(reply.status).toBe(200);
+    expect(reply.body).toEqual(expect.objectContaining(NOT_REGISTERED));
+    expect(mockLoggerWarn.mock.calls).toEqual([['v2 verify: chain-fact read returned non-2xx; matches present stored state', { status: 503 }]]);
+    expect(mockLoggerError).not.toHaveBeenCalled();
+  });
+});

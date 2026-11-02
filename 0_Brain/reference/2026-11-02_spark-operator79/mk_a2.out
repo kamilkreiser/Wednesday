@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o79_a2_originate_certifications_issue_anchoring_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -629,7 +629,13 @@
+           logger.warn('KS-1709: the anchoring service refused the certification anchor', { certId: id, status: upstream.status, body: errText.slice(0, 200) });
+         }
+       } catch (err: any) {
+-        logger.warn('Anchoring service unreachable for certification', { certId: id, error: err?.message });
++        let reason: string;
++        try {
++          reason = String(err instanceof Error ? err.message : err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.warn('Anchoring service unreachable for certification', { certId: id, error: reason });
+       }
+       if (anchoringStatus === 'failed' && process.env.NODE_ENV === 'production') {
+         // KS-1633: this refusal now sits AFTER the row was written, so the row is compensated away and the response
+

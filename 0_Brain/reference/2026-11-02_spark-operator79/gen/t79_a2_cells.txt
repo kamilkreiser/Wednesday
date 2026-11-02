@@ -1,0 +1,44 @@
+
+// POST /api/certifications/issue, gate 105 G105-F5 (same shape as G105-F2 on the recertify route): the anchoring inner catch logs `{ certId, error: <read of the thrown value> }`. An ORDINARY rejection
+// of the anchoring call is swallowed: the route continues, saves the certification with anchoringStatus failed, records the sign and anchor charges, writes the derived document and answers
+// 201 (outside production). An unreadable rejection used to throw INSIDE that catch, so the outer catch answered 500 BEFORE the save, the charges and the derived document: no certification was issued and none was charged.
+// After the fix an unreadable rejection gets exactly the ordinary outcome and the catch logs the constant reason.
+const CONTEXT = 'Anchoring service unreachable for certification';
+const ISSUED_STATE = { saved: 1, charges: ['certification_sign', 'blockchain_anchor'], derived: 1, deleted: 0 };
+const warnLines = (): unknown[][] => mockLog.warn.mock.calls.filter((c) => c[0] === CONTEXT);
+
+async function expectIssuedWithAnchoringFailed(thrown: unknown, logged: unknown, real = false): Promise<void> {
+  if (real) useRealLogger();
+  mockInject = { anchor: thrown };
+  const r = await issue();
+  expect(r.status).toBe(201);
+  expect(r.body).toMatchObject({ type: 'DOCUMENT', anchoringStatus: 'failed' });
+  expect({ saved: r.saved, charges: r.charges, derived: r.derived, deleted: r.deleted }).toEqual(ISSUED_STATE);
+  expect(warnLines()).toEqual([[CONTEXT, { certId: r.body.id, error: logged }]]);
+}
+
+describe('KS-1868 G105-F5 POST /issue: the anchoring inner catch reads the thrown value safely', () => {
+  it('control ks1868 C1: an ordinary anchoring rejection is swallowed, the certification is saved and charged and its own message is logged', async () => {
+    await expectIssuedWithAnchoringFailed(new Error('ks1868 anchoring down'), 'ks1868 anchoring down');
+  });
+
+  it('control ks1868 C2: an ordinary Error through the real logger gets the same outcome', async () => {
+    await expectIssuedWithAnchoringFailed(new Error('ks1868 anchoring down'), 'ks1868 anchoring down', true);
+  });
+
+  it('RED ks1868 R1: a revoked Proxy as the anchoring rejection gets the ordinary outcome and logs the constant reason', async () => {
+    await expectIssuedWithAnchoringFailed(revokedProxy(), UNREADABLE);
+  });
+
+  it('RED ks1868 R2: an Error whose message getter throws gets the ordinary outcome and logs the constant reason', async () => {
+    await expectIssuedWithAnchoringFailed(throwingMessageError(), UNREADABLE);
+  });
+
+  it('RED ks1868 R3: an Error whose message getter returns a revoked Proxy gets the ordinary outcome through the real logger', async () => {
+    await expectIssuedWithAnchoringFailed(messageGetterReturningRevokedProxy(), UNREADABLE, true);
+  });
+
+  it('RED ks1868 R4: a thrown string gets the ordinary outcome and is logged as itself', async () => {
+    await expectIssuedWithAnchoringFailed('ks1868 plain string', 'ks1868 plain string');
+  });
+});

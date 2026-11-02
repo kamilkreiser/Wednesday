@@ -1,0 +1,19 @@
+<h2>The IPFS providers' upload methods report a constant reason when the thrown value cannot be read &mdash; KS-1868</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>What to know.</strong></td><td> Three catches in <code>ipfs.service.ts</code> (Pinata, Infura, Web3.Storage <code>upload</code>) read <code>(error as Error).message</code> unguarded. An unreadable thrown value (a revoked Proxy, an Error whose message getter throws) now yields <code>{ success: false, error: '&lt;Provider&gt; upload error: unreadable thrown value' }</code> instead of making <code>upload</code> reject, the answer an ordinary Error already gets. 1 product file (+21/-3), 9 new cells.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> Node 24 (the host has v26.8.1), a real provider, the route and the mint path over HTTP, the four platform suites.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev && npm run test -w services/nft-certificate -- --run ks1868-ipfs-upload   # 9 cells
+cd Blockchain/Dev && npm run test -w services/nft-certificate -- --run   # 171 tests, 26 files
+node Blockchain/Dev/scripts/docs-fragments.mjs check</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new test file</td><td><strong>9</strong> cells; red first: 3 passed / 6 failed by assertion without the change, 9 / 0 with it</td></tr>
+<tr><td>nft-certificate suite</td><td>before <strong>162 passed, 0 failed</strong> (25 files); after <strong>171 passed, 0 failed</strong> (26 files); 0 skipped</td></tr>
+<tr><td>hunks undone one at a time</td><td><strong>3 of 3</strong> turn exactly their own 2 cells red</td></tr>
+<tr><td>hand edit</td><td>one line of the new test file (<code>encrypted: false</code> added to the request constant), approved by the coordinator; product bytes are the canonical patch's</td></tr>
+</table>

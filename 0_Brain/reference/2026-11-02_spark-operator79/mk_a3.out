@@ -1,0 +1,57 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o79_a3_originate_certifications_issue_reserve_save_charge_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -579,9 +579,15 @@
+         await reserveCertificationRow(buildCertification(null, 'failed'), tenantId, (req as any).db);
+         provisionalWritten = true;
+       } catch (reserveErr: any) {
++        let reason: string;
++        try {
++          reason = String(reserveErr instanceof Error ? reserveErr.message : reserveErr);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.warn('KS-1633: the pre-anchor reservation failed; the request continues and the authoritative save decides the response', {
+           certId: id,
+           tenantId,
+-          error: reserveErr instanceof Error ? reserveErr.message : String(reserveErr),
++          error: reason,
+         });
+       }
+@@ -745,10 +751,16 @@
+           await saveLineageDocument(derivedDoc, tenantId, (req as any).db);
+           derivedDocumentExternalId = derivedExternalId;
+         } catch (saveErr: any) {
++          let reason: string;
++          try {
++            reason = String(saveErr instanceof Error ? saveErr.message : saveErr);
++          } catch {
++            reason = 'unreadable thrown value';
++          }
+           logger.error('KS-70: failed to write derived document for cert lineage', {
+             certId: id,
+             parentDocumentId,
+-            error: saveErr instanceof Error ? saveErr.message : String(saveErr),
++            error: reason,
+           });
+           // Fall through — the certification row already landed; the
+           // derived doc can be back-filled later. We don't 500 the cert.
+@@ -814,9 +826,15 @@
+           metadata: { txHash: certification.blockchain?.txHash },
+         });
+       } catch (chargeErr: any) {
++        let reason: string;
++        try {
++          reason = String(chargeErr instanceof Error ? chargeErr.message : chargeErr);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.error('KS-216: failed to persist charge event(s) — continuing, certification already issued', {
+           certId: id,
+           tenantId,
+-          error: chargeErr instanceof Error ? chargeErr.message : String(chargeErr),
++          error: reason,
+         });
+       }
+

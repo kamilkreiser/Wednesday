@@ -1,0 +1,48 @@
+
+// POST /api/certifications/issue, gate 105 G105-F5: three inner catches of the issue route read the thrown value unguarded (`error: X instanceof Error ? X.message : String(X)`): the pre-anchor
+// reservation (reserveErr), the derived-document write (saveErr) and the charge write (chargeErr). Each is a best-effort step: an ORDINARY failure is logged and the route continues to the 201.
+// An unreadable value (a revoked Proxy makes `instanceof` throw; a message getter that throws; a message getter that returns a hostile non-string, which the real logger cannot print) threw INSIDE
+// the catch, so the outer catch answered 500 even though the certification was already saved. After the fix each unreadable value gets the ordinary outcome and the catch logs the constant reason.
+type Site = { name: string; key: string; level: 'warn' | 'error'; prefix: string; extraFields: Record<string, unknown>; state: { saved: number; charges: unknown[]; derived: number; deleted: number }; chargeEvents: number };
+const SITES: Site[] = [
+  { name: 'reserveErr (pre-anchor reservation)', key: 'reserve', level: 'warn', prefix: 'KS-1633: the pre-anchor reservation failed', extraFields: { tenantId: expect.any(String) },
+    state: { saved: 1, charges: ['certification_sign', 'blockchain_anchor'], derived: 1, deleted: 0 }, chargeEvents: 2 },
+  { name: 'saveErr (derived document write)', key: 'saveDoc', level: 'error', prefix: 'KS-70: failed to write derived document', extraFields: { parentDocumentId: SOURCE_ID },
+    state: { saved: 1, charges: ['certification_sign', 'blockchain_anchor'], derived: 0, deleted: 0 }, chargeEvents: 2 },
+  { name: 'chargeErr (charge event write)', key: 'charge', level: 'error', prefix: 'KS-216: failed to persist charge event', extraFields: { tenantId: expect.any(String) },
+    state: { saved: 1, charges: ['certification_sign'], derived: 1, deleted: 0 }, chargeEvents: 0 },
+];
+
+async function expectOrdinaryOutcome(s: Site, thrown: unknown, logged: unknown, real = false): Promise<void> {
+  if (real) useRealLogger();
+  mockInject = { [s.key]: thrown };
+  const r = await issue();
+  expect(r.status).toBe(201);
+  expect(r.body).toMatchObject({ type: 'DOCUMENT' });
+  expect(r.body.chargeEvents).toHaveLength(s.chargeEvents);
+  expect({ saved: r.saved, charges: r.charges, derived: r.derived, deleted: r.deleted }).toEqual(s.state);
+  const lines = mockLog[s.level].mock.calls.filter((c) => String(c[0]).startsWith(s.prefix));
+  expect(lines).toEqual([[expect.any(String), { certId: r.body.id, ...s.extraFields, error: logged }]]);
+}
+
+describe.each(SITES)('KS-1868 G105-F5 POST /issue $name: the inner catch reads the thrown value safely', (s) => {
+  it(`control ks1868 C1 ${s.key}: an ordinary Error is logged with its own message and the certification is issued as before`, async () => {
+    await expectOrdinaryOutcome(s, new Error('ks1868 ordinary'), 'ks1868 ordinary');
+  });
+
+  it(`control ks1868 C2 ${s.key}: a thrown string is logged as itself, as before`, async () => {
+    await expectOrdinaryOutcome(s, 'ks1868 plain string', 'ks1868 plain string');
+  });
+
+  it(`RED ks1868 R1 ${s.key}: a revoked Proxy gets the ordinary outcome and logs the constant reason`, async () => {
+    await expectOrdinaryOutcome(s, revokedProxy(), UNREADABLE);
+  });
+
+  it(`RED ks1868 R2 ${s.key}: an Error whose message getter throws gets the ordinary outcome and logs the constant reason`, async () => {
+    await expectOrdinaryOutcome(s, throwingMessageError(), UNREADABLE);
+  });
+
+  it(`RED ks1868 R3 ${s.key}: an Error whose message getter returns a revoked Proxy gets the ordinary outcome through the real logger`, async () => {
+    await expectOrdinaryOutcome(s, messageGetterReturningRevokedProxy(), UNREADABLE, true);
+  });
+});

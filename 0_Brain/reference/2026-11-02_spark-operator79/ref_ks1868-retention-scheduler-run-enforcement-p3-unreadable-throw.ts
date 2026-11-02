@@ -1,0 +1,94 @@
+// KS-1868 (originate services/retentionScheduler.ts, runEnforcement): the scheduled data-retention run catches a failure of `enforceRetention()` and logs it as `err instanceof Error ? err.message : String(err)`.
+// When the thrown value cannot be read (a revoked Proxy makes `instanceof` throw; an Error whose `message` getter throws) that read threw INSIDE the catch, so the run's promise rejected with nothing logged
+// by the scheduler: the timer callbacks call runEnforcement() without awaiting or catching it, so it surfaced as an unhandled rejection. The catch now reads the same expression into a local inside its own
+// try and logs the constant reason `unreadable thrown value`, exactly the line an ordinary Error already gets. Nothing about WHEN or WHETHER enforcement runs changes: the interval is set by setInterval
+// independently of the outcome. runEnforcement is module-private, so the cells start the scheduler with a 10 ms startup delay under fake timers (setImmediate stays real so a pending rejection surfaces inside
+// the cell that caused it) and let the first scheduled run fire.
+const mockEnforceRetention = jest.fn();
+const mockLoggerError = jest.fn();
+const mockLoggerInfo = jest.fn();
+
+jest.mock('../services/gdprService', () => ({
+  enforceRetention: mockEnforceRetention,
+}));
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: mockLoggerInfo, warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
+}));
+
+import { startRetentionScheduler, stopRetentionScheduler } from '../services/retentionScheduler';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick'] });
+  process.env.RETENTION_STARTUP_DELAY_MS = '10';
+});
+
+afterEach(() => {
+  stopRetentionScheduler();
+  jest.clearAllTimers();
+  jest.useRealTimers();
+  delete process.env.RETENTION_STARTUP_DELAY_MS;
+});
+
+async function firstRun(): Promise<void> {
+  startRetentionScheduler();
+  jest.advanceTimersByTime(10);
+  for (let i = 0; i < 20; i++) await Promise.resolve();
+  await new Promise<void>((resolve) => setImmediate(resolve));
+}
+
+async function runWithThrow(thrown: unknown): Promise<void> {
+  mockEnforceRetention.mockRejectedValueOnce(thrown);
+  await firstRun();
+}
+
+function revokedProxy(): object {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function throwingMessageError(): Error {
+  const e = new Error('ks1868 hidden');
+  Object.defineProperty(e, 'message', {
+    get() {
+      throw new Error('ks1868 message getter');
+    },
+  });
+  return e;
+}
+
+describe('KS-1868 retention scheduler reads the thrown value safely', () => {
+  it('RED ks1868 R1 runEnforcement: a revoked Proxy thrown by enforceRetention is logged as a constant reason', async () => {
+    await runWithThrow(revokedProxy());
+    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
+    expect(mockLoggerError.mock.calls).toEqual([['Scheduled enforcement failed', { error: 'unreadable thrown value' }]]);
+  });
+
+  it('RED ks1868 R2 runEnforcement: an Error whose message getter throws is logged as a constant reason', async () => {
+    await runWithThrow(throwingMessageError());
+    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
+    expect(mockLoggerError.mock.calls).toEqual([['Scheduled enforcement failed', { error: 'unreadable thrown value' }]]);
+  });
+
+  it('control ks1868 C1 runEnforcement: an ordinary Error logs its own message', async () => {
+    await runWithThrow(new Error('ks1868 ordinary'));
+    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
+    expect(mockLoggerError.mock.calls).toEqual([['Scheduled enforcement failed', { error: 'ks1868 ordinary' }]]);
+  });
+
+  it('control ks1868 C2 runEnforcement: a thrown string is logged as itself, as before', async () => {
+    await runWithThrow('ks1868 plain string');
+    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
+    expect(mockLoggerError.mock.calls).toEqual([['Scheduled enforcement failed', { error: 'ks1868 plain string' }]]);
+  });
+
+  it('control ks1868 C3 runEnforcement: a run that finds nothing logs completion and no error', async () => {
+    mockEnforceRetention.mockResolvedValueOnce([]);
+    await firstRun();
+    expect(mockEnforceRetention).toHaveBeenCalledTimes(1);
+    expect(mockLoggerInfo).toHaveBeenCalledWith(expect.stringContaining('Enforcement complete'));
+    expect(mockLoggerError).not.toHaveBeenCalled();
+  });
+});

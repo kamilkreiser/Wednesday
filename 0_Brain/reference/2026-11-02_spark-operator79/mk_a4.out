@@ -1,0 +1,37 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o79_a4_originate_certifications_issue_holder_check_and_legacy_update_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -404,7 +404,12 @@
+             return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — user does not exist' } });
+           }
+         } catch (err: any) {
+-          const errMsg = err instanceof Error ? err.message : String(err);
++          let errMsg: string;
++          try {
++            errMsg = String(err instanceof Error ? err.message : err);
++          } catch {
++            errMsg = 'unreadable thrown value';
++          }
+           if (errMsg.includes('invalid input syntax') || errMsg.includes('uuid')) {
+             return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — must be a valid UUID' } });
+           }
+@@ -781,10 +786,16 @@
+               AND status IN ('draft', 'pending_signature', 'anchored', 'signed')
+           `;
+         } catch (updateErr: unknown) {
++          let reason: string;
++          try {
++            reason = String(updateErr instanceof Error ? updateErr.message : updateErr);
++          } catch {
++            reason = 'unreadable thrown value';
++          }
+           // KS-1538: best-effort stays best-effort (the certification already exists and a 5xx here would be a contract change for
+           // callers), but it is no longer SILENT: ids and the error text only, never the certification data.
+           logger.error('KS-1538: legacy certify UPDATE failed - continuing, the certification was already issued', {
+-            certId: id, documentId: req.body.documentId, tenantId, error: updateErr instanceof Error ? updateErr.message : String(updateErr),
++            certId: id, documentId: req.body.documentId, tenantId, error: reason,
+           });
+         }
+       }
+

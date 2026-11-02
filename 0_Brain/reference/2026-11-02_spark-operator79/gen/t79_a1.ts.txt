@@ -1,0 +1,173 @@
+// KS-1868 (originate routes/certifications.ts, POST /api/certifications/:id/recertify, gate 105 G105-F2): the inner catch around the anchoring-service call logged `{ error: err?.message }`
+// unguarded. An ORDINARY rejection of that call (a network failure) is swallowed: the route continues, saves the verification certificate with anchoringStatus failed, records the charge and
+// answers 201 (outside production). When the thrown value cannot be read (a revoked Proxy; an Error whose `message` getter throws or returns a hostile non-string) the read threw INSIDE the
+// catch, the route's outer catch answered 500, and NO certificate was issued and NO charge was recorded. The catch now reads the value inside its own try and logs the constant reason
+// `unreadable thrown value`, so an unreadable rejection gets exactly the ordinary outcome: the certificate IS issued and the charge IS recorded. The anchoring call is replaced by a plain
+// function on the global fetch (the cell's own client passes through), and the cells that name the real logger run through the real winston logger, whose formats still run.
+const mockGetCertification = jest.fn();
+const mockSaveCertification = jest.fn(async (..._a: unknown[]) => undefined);
+const mockCreateChargeEvent = jest.fn(async (..._a: unknown[]) => ({ id: 'charge-new', eventType: 'verification_certificate' }));
+const mockLog = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
+
+jest.mock('../repositories/certificationRepo', () => ({
+  initRepo: jest.fn(async () => undefined),
+  getCertification: (...a: unknown[]) => mockGetCertification(...a),
+  saveCertification: (...a: unknown[]) => mockSaveCertification(...a),
+  listCertifications: jest.fn(),
+  saveShare: jest.fn(),
+  getSharesByCertification: jest.fn(async () => [] as unknown[]),
+  getLineageEvents: jest.fn(async () => [] as unknown[]),
+  deleteCertification: jest.fn(),
+  reserveCertificationRow: jest.fn(),
+}));
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: jest.fn(async () => []), $executeRaw: jest.fn(async () => 1), $executeRawUnsafe: jest.fn() },
+}));
+jest.mock('../services/chargeEvents', () => ({
+  createChargeEvent: (...a: unknown[]) => mockCreateChargeEvent(...a),
+  getChargeEventsByCertification: jest.fn(async () => [] as unknown[]),
+}));
+jest.mock('../utils/notificationClient', () => ({
+  notifyDocumentCertified: jest.fn(async () => undefined),
+  notifyDocumentRevoked: jest.fn(async () => undefined),
+  notifyDocumentShared: jest.fn(async () => undefined),
+}));
+jest.mock('../events', () => ({
+  publishEvent: jest.fn(async () => undefined),
+  EventTypes: { CERTIFICATION_ISSUED: 'certification.issued' },
+}));
+jest.mock('../repositories/documentRepo', () => ({
+  getDocument: jest.fn(),
+  saveDocument: jest.fn(async () => undefined),
+  assertNoCycle: jest.fn(async () => undefined),
+  generateContentHash: jest.fn(() => 'hash'),
+}));
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => { req.user = { userId: '11111111-2222-4333-8444-555555555555', email: 'ks1868@example.test' }; next(); },
+}));
+jest.mock('../utils/logger', () => ({ logger: mockLog }));
+
+import express from 'express';
+import { certificationsRouter } from '../routes/certifications';
+
+const TENANT = 'a0000000-0000-4000-8000-0000000000aa';
+const CERT_ID = 'aaaaaaaa-1111-4111-8111-111111111111';
+const ISSUER_ID = '11111111-2222-4333-8444-555555555555';
+const UNREADABLE = 'unreadable thrown value';
+const CONTEXT = 'Anchoring service unreachable for verification cert';
+
+const app = express();
+app.use((req: any, _res: unknown, next: () => void) => { req.tenantId = TENANT; next(); });
+app.use('/api/certifications', express.json(), certificationsRouter);
+
+let baseUrl = '';
+let server: ReturnType<typeof app.listen>;
+beforeAll(async () => {
+  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', () => resolve()); });
+  const address = server.address();
+  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
+});
+afterAll(() => { server?.close(); });
+beforeEach(() => { jest.clearAllMocks(); });
+afterEach(() => { mockLog.error.mockReset(); mockLog.warn.mockReset(); });
+
+const revokedProxy = (): object => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+const throwingMessageError = (): Error =>
+  Object.defineProperty(new Error('ks1868 hidden'), 'message', {
+    get(): string {
+      throw new Error('ks1868 message getter threw');
+    },
+  });
+const messageGetterReturningRevokedProxy = (): Error =>
+  Object.defineProperty(new Error('ks1868 hidden'), 'message', {
+    get(): unknown {
+      return revokedProxy();
+    },
+  });
+const messageGetterReturningThrowingToJson = (): Error =>
+  Object.defineProperty(new Error('ks1868 hidden'), 'message', {
+    get(): unknown {
+      return { toJSON(): never { throw new Error('ks1868 toJSON threw'); } };
+    },
+  });
+function useRealLogger(): void {
+  const real = jest.requireActual('../utils/logger').logger;
+  real.transports.forEach((t: { log?: (info: unknown, next: () => void) => void }) => {
+    t.log = (_info: unknown, next: () => void) => next();
+  });
+  mockLog.error.mockImplementation((...a: unknown[]) => (real.error as (...x: unknown[]) => unknown)(...a));
+  mockLog.warn.mockImplementation((...a: unknown[]) => (real.warn as (...x: unknown[]) => unknown)(...a));
+}
+
+// The anchoring call (the only fetch to a URL that does not start with the cell's own listener) is a PLAIN function that rejects with the chosen value.
+async function recertifyWithAnchoringRejecting(thrown: unknown): Promise<{ status: number | string; body?: any; savedTypes: unknown[]; charges: unknown[] }> {
+  const clientFetch = globalThis.fetch;
+  (globalThis as any).fetch = (url: unknown, init?: unknown) =>
+    String(url).startsWith(baseUrl) ? clientFetch(url as string, init as RequestInit) : Promise.reject(thrown);
+  mockGetCertification.mockResolvedValueOnce({ id: CERT_ID, type: 'professional_certification', status: 'certified', issuer: { id: ISSUER_ID }, holder: { id: 'ks1868-holder' }, data: { title: 'ks1868' } });
+  const state = () => ({
+    savedTypes: mockSaveCertification.mock.calls.map((c) => (c[0] as { type?: unknown }).type),
+    charges: mockCreateChargeEvent.mock.calls.map((c) => c[0]),
+  });
+  try {
+    const res = await clientFetch(`${baseUrl}/api/certifications/${CERT_ID}/recertify`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ note: 'ks1868' }),
+      signal: AbortSignal.timeout(2500),
+    });
+    return { status: res.status, body: await res.json(), ...state() };
+  } catch {
+    return { status: 'NO ANSWER', ...state() };
+  } finally {
+    (globalThis as any).fetch = clientFetch;
+  }
+}
+const warnLines = (): unknown[][] => mockLog.warn.mock.calls.filter((c) => c[0] === CONTEXT);
+
+// The ordinary outcome, and so the outcome every unreadable value must get: 201, a verification certificate saved with anchoringStatus failed, and the charge recorded.
+async function expectIssued(thrown: unknown, logged: unknown): Promise<void> {
+  const r = await recertifyWithAnchoringRejecting(thrown);
+  expect(r.status).toBe(201);
+  expect(r.body).toMatchObject({ type: 'verification_certificate', status: 'issued', anchoringStatus: 'failed' });
+  expect(r.savedTypes).toEqual(['verification_certificate']);
+  expect(r.charges).toEqual(['verification_certificate']);
+  expect(warnLines()).toEqual([[CONTEXT, { error: logged }]]);
+}
+
+describe('KS-1868 G105-F2 POST /:id/recertify: the anchoring inner catch reads the thrown value safely', () => {
+  it('control ks1868 C1: an ordinary anchoring rejection is swallowed, the certificate is issued and charged, and its own message is logged', async () => {
+    await expectIssued(new Error('ks1868 anchoring down'), 'ks1868 anchoring down');
+  });
+
+  it('control ks1868 C2: an ordinary Error through the real logger gets the same outcome', async () => {
+    useRealLogger();
+    await expectIssued(new Error('ks1868 anchoring down'), 'ks1868 anchoring down');
+  });
+
+  it('RED ks1868 R1: a revoked Proxy as the anchoring rejection gets the ordinary outcome (certificate issued and charged) and logs the constant reason', async () => {
+    await expectIssued(revokedProxy(), UNREADABLE);
+  });
+
+  it('RED ks1868 R2: an Error whose message getter throws gets the ordinary outcome and logs the constant reason', async () => {
+    await expectIssued(throwingMessageError(), UNREADABLE);
+  });
+
+  it('RED ks1868 R3: an Error whose message getter returns a revoked Proxy gets the ordinary outcome through the real logger', async () => {
+    useRealLogger();
+    await expectIssued(messageGetterReturningRevokedProxy(), UNREADABLE);
+  });
+
+  it('RED ks1868 R4: an Error whose message getter returns an object with a throwing toJSON gets the ordinary outcome through the real logger', async () => {
+    useRealLogger();
+    await expectIssued(messageGetterReturningThrowingToJson(), '[object Object]');
+  });
+
+  it('RED ks1868 R5: a thrown string gets the ordinary outcome and is logged as itself', async () => {
+    await expectIssued('ks1868 plain string', 'ks1868 plain string');
+  });
+});

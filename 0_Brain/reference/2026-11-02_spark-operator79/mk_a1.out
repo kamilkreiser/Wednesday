@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o79_a1_originate_certifications_recertify_anchoring_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -1443,7 +1443,13 @@
+           logger.warn('KS-1709: the anchoring service refused the recertification anchor', { certId: newCertId, originalCertificationId: id, status: upstream.status, body: errText.slice(0, 200) });
+         }
+       } catch (err: any) {
+-        logger.warn('Anchoring service unreachable for verification cert', { error: err?.message });
++        let reason: string;
++        try {
++          reason = String(err instanceof Error ? err.message : err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.warn('Anchoring service unreachable for verification cert', { error: reason });
+       }
+       if (anchoringStatus === 'failed' && process.env.NODE_ENV === 'production') {
+         return res.status(503).json({
+

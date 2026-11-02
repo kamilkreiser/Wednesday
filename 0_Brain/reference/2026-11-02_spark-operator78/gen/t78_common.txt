@@ -1,0 +1,151 @@
+process.env.NODE_ENV = 'development';
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+
+const mockLoggerError = jest.fn();
+const mockLoggerWarn = jest.fn();
+const mockExecuteRaw = jest.fn();
+let mockQueryRaw: () => Promise<unknown[]> = async () => [];
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: (..._args: unknown[]) => mockQueryRaw(), $executeRaw: (...args: unknown[]) => mockExecuteRaw(...args) },
+  getTenantManager: () => null,
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    runWithTenantId: (_t: unknown, fn: () => unknown) => fn(),
+    queryWithTenantGuc: jest.fn(),
+  }),
+);
+
+jest.mock('../repositories/documentRepo', () => ({
+  walkAncestors: jest.fn().mockResolvedValue({ lineage: [], truncated: false }),
+  walkDescendants: jest.fn().mockResolvedValue({ descendants: [], truncated: false }),
+  MAX_LINEAGE_DEPTH: 10,
+}));
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: mockLoggerWarn, error: mockLoggerError, debug: jest.fn() },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { verificationRouter } from '../routes/verification';
+
+const UNREADABLE = 'unreadable thrown value';
+const DOC = 'ks1939-doc';
+const HASH = 'f'.repeat(64);
+const LOOKUP_FAILED = { verified: false, error: 'Verification lookup failed' };
+
+function docRow(): Record<string, unknown> {
+  return {
+    id: '11111111-1111-4111-8111-111111111111',
+    external_id: DOC,
+    title: 'ks1939 title',
+    document_type: 'certificate',
+    content_hash: HASH,
+    status: 'certified',
+    certification_metadata: {},
+    metadata: {},
+    created_at: new Date(0),
+    certified_at: new Date(0),
+    organization_name: 'ks1939 org',
+  };
+}
+
+// The first query of the by-id strategy answers `first`; every later query answers no rows.
+function answerFirstQueryWith(first: unknown[]): void {
+  let n = 0;
+  mockQueryRaw = async () => (n++ === 0 ? first : []);
+}
+
+// The first query of the by-id strategy rejects with `thrown` (a plain function, not jest.fn(): a spy may inspect a revoked Proxy before the code under test sees it).
+function rejectFirstQueryWith(thrown: unknown): void {
+  mockQueryRaw = async () => {
+    throw thrown;
+  };
+}
+
+let armedJsonThrow: { thrown: unknown } | null = null;
+
+const app = express();
+app.use(express.json());
+app.use((_req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const hook = armedJsonThrow;
+  armedJsonThrow = null;
+  if (hook) {
+    const realJson = res.json.bind(res);
+    let first = true;
+    res.json = ((body: unknown) => {
+      if (first) {
+        first = false;
+        throw hook.thrown;
+      }
+      return realJson(body);
+    }) as typeof res.json;
+  }
+  next();
+});
+app.use('/api/verification', verificationRouter);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => server?.close());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockQueryRaw = async () => [];
+  armedJsonThrow = null;
+});
+
+// POST /api/verification/verify with a body carrying ONLY a documentId (strategy 2, by id). No answer within the window is reported as the string NO ANSWER.
+async function verifyById(): Promise<{ status: number | 'NO ANSWER'; body: any }> {
+  try {
+    const res = await fetch(baseUrl + '/api/verification/verify', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ documentId: DOC }),
+      signal: AbortSignal.timeout(1500),
+    });
+    return { status: res.status, body: await res.json() };
+  } catch {
+    return { status: 'NO ANSWER', body: null };
+  }
+}
+
+function revokedProxy(): object {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function throwingMessageError(): Error {
+  const e = new Error('ks1939 hidden');
+  Object.defineProperty(e, 'message', {
+    get() {
+      throw new Error('ks1939 message getter');
+    },
+  });
+  return e;
+}
+
+function getterThrowsProxyError(): Error {
+  const e = new Error('ks1939 hidden');
+  const p = revokedProxy();
+  Object.defineProperty(e, 'message', {
+    get() {
+      throw p;
+    },
+  });
+  return e;
+}

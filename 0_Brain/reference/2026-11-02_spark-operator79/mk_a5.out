@@ -1,0 +1,23 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o79_a5_originate_certifications_issue_compensating_delete_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -653,10 +653,16 @@
+             });
+           }
+         } catch (delErr: any) {
++          let reason: string;
++          try {
++            reason = String(delErr instanceof Error ? delErr.message : delErr);
++          } catch {
++            reason = 'unreadable thrown value';
++          }
+           logger.error('KS-1633: the compensating delete failed, so a certification remains with no anchor', {
+             certId: id,
+             tenantId,
+-            error: delErr instanceof Error ? delErr.message : String(delErr),
++            error: reason,
+           });
+         }
+         return res.status(503).json({
+

@@ -1,0 +1,19 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1939_o78_p2_originate_verification_lookup_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/verification.ts b/Blockchain/Dev/services/originate/src/routes/verification.ts
+--- a/Blockchain/Dev/services/originate/src/routes/verification.ts
++++ b/Blockchain/Dev/services/originate/src/routes/verification.ts
+@@ -1435,6 +1435,12 @@
+           return res.json({ verified: false, checks: { documentExists: true } });
+         }
+       } catch (dbErr: any) {
+-        logger.warn('Verification lookup failed', { documentId, error: dbErr?.message });
++        let reason: string | undefined;
++        try {
++          reason = dbErr?.message;
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.warn('Verification lookup failed', { documentId, error: reason });
+         return res.json({ verified: false, error: 'Verification lookup failed' });
+       }
+

@@ -1,0 +1,48 @@
+
+// POST /api/certifications/issue, gate 105 G105-F5: in PRODUCTION an anchoring failure compensates the pre-anchor reservation row (deleteCertification) and answers 503. The catch around that delete
+// (`delErr`) logs `error: delErr instanceof Error ? delErr.message : String(delErr)` unguarded. An ORDINARY failure of the delete is logged and the route still answers the 503. An unreadable value
+// (a revoked Proxy; a message getter that throws; one that returns a hostile non-string, which the real logger cannot print) threw INSIDE the catch, so the outer catch answered 500 instead.
+// After the fix an unreadable delete failure gets the ordinary 503 and the catch logs the constant reason. NODE_ENV is set to production for the duration of one cell only, AFTER the real
+// logger module is loaded (the logger reads NODE_ENV once, at load).
+const CONTEXT_PREFIX = 'KS-1633: the compensating delete failed';
+const REFUSED_STATE = { saved: 0, charges: [] as unknown[], derived: 0, deleted: 1 };
+const realNodeEnv = process.env.NODE_ENV;
+afterEach(() => { process.env.NODE_ENV = realNodeEnv; });
+
+async function expectCompensationFailureAnswered503(thrown: unknown, logged: unknown, real = false): Promise<void> {
+  useRealLogger();
+  if (!real) {
+    mockLog.error.mockReset();
+    mockLog.warn.mockReset();
+  }
+  mockInject = { anchor: new Error('ks1868 anchoring down'), del: thrown };
+  process.env.NODE_ENV = 'production';
+  const r = await issue();
+  expect(r.status).toBe(503);
+  expect(r.body).toMatchObject({ success: false, error: { code: 'SERVICE_UNAVAILABLE' } });
+  expect({ saved: r.saved, charges: r.charges, derived: r.derived, deleted: r.deleted }).toEqual(REFUSED_STATE);
+  const lines = mockLog.error.mock.calls.filter((c) => String(c[0]).startsWith(CONTEXT_PREFIX));
+  expect(lines).toEqual([[expect.any(String), { certId: expect.any(String), tenantId: expect.any(String), error: logged }]]);
+}
+
+describe('KS-1868 G105-F5 POST /issue (production): the compensating-delete catch reads the thrown value safely', () => {
+  it('control ks1868 C1 delErr: an ordinary delete failure is logged with its own message and the route answers 503', async () => {
+    await expectCompensationFailureAnswered503(new Error('ks1868 ordinary'), 'ks1868 ordinary');
+  });
+
+  it('control ks1868 C2 delErr: a thrown string is logged as itself, as before', async () => {
+    await expectCompensationFailureAnswered503('ks1868 plain string', 'ks1868 plain string');
+  });
+
+  it('RED ks1868 R1 delErr: a revoked Proxy gets the ordinary 503 and logs the constant reason', async () => {
+    await expectCompensationFailureAnswered503(revokedProxy(), UNREADABLE);
+  });
+
+  it('RED ks1868 R2 delErr: an Error whose message getter throws gets the ordinary 503 and logs the constant reason', async () => {
+    await expectCompensationFailureAnswered503(throwingMessageError(), UNREADABLE);
+  });
+
+  it('RED ks1868 R3 delErr: an Error whose message getter returns a revoked Proxy gets the ordinary 503 through the real logger', async () => {
+    await expectCompensationFailureAnswered503(messageGetterReturningRevokedProxy(), UNREADABLE, true);
+  });
+});

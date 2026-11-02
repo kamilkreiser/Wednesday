@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o78_p3_originate_verification_v2_chain_fact_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/verificationV2.ts b/Blockchain/Dev/services/originate/src/routes/verificationV2.ts
+--- a/Blockchain/Dev/services/originate/src/routes/verificationV2.ts
++++ b/Blockchain/Dev/services/originate/src/routes/verificationV2.ts
+@@ -108,7 +108,13 @@
+     const chain: any = await resp.json();
+     return chain?.verified === true ? chain : null;
+   } catch (err: any) {
+-    logger.warn('v2 verify: chain-fact read failed; matches present stored state', { error: err?.message });
++    let reason: string | undefined;
++    try {
++      reason = err?.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('v2 verify: chain-fact read failed; matches present stored state', { error: reason });
+     return null;
+   }
+ }
+
