@@ -56508,5 +56508,37 @@
    }
   ],
   "amended_ts": "2026-11-03T00:38:29.406512+11:00"
+ },
+ {
+  "id": "composer-pcomp23-footer-round-cap-1103",
+  "client_project": "Datasec/Security Composer",
+  "title": "Composer change-report footer: land the fix that keeps the fingerprint line, with one rare case still open?",
+  "bluf": "Tap one option. The fix for the change report's page footer (PCOMP-23) ended its second and last test round as NO GO, so a third round needs your word. Today the footer's fingerprint line ('manifest' and the policy hash) drops off the page in 1,999 of 9,397 test documents; with the fix it drops in 18, and those 18 also drop today, so the fix is never worse than main. The 18 need a policy name with an opening bracket followed by a space inside long runs of wide letters, which no realistic name tried did. The price: the grey footer line now ends in three dots when a long name would not fit (1,366 of 3,311 test reports print a shorter footer; 28 that print whole today are long runs of wide letters, no ordinary words). No word is added. Landing is not deploying: Composer deploys only on your card. Figures from the gate's own residue file (B1161).",
+  "default_action": "If you have not answered by 09:00 AEDT Tuesday 3 Nov, Tuesday does a: lands PR #113 at head 92d6b647 (not deployed) and tickets the 18-document case; a tap before then overrides.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Land it; ticket the open case",
+    "detail": "Tuesday lands PR #113 (squash, head pinned 92d6b647) with text that states the limit, and a Composer records seat tickets the 18-document case with its fix shape (split the line with the PDF writer's own line-breaking rules) and the 'size by real page count' idea, which the gate measured would print 11 of the 28 wide-letter names whole again. Nothing deploys; the three-dots look is yours to approve before any deploy."
+   },
+   {
+    "key": "b",
+    "label": "Third round on the footer model",
+    "detail": "Hold PR #113 and run one more build-and-gate round so the model breaks lines where the PDF writer does. Closes the 18 cases; costs about two seat sessions; the fix stays off main meanwhile."
+   },
+   {
+    "key": "c",
+    "label": "Structural footer instead",
+    "detail": "Hold PR #113 and move the name to its own line above a fixed fingerprint line. Needs the shared page-layout file that open PR #85 holds, so it waits for #85; not measured."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T01:57:14.017044+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD mpscalc-proposal-customer-footer-1010"
+  ]
  }
 ]
