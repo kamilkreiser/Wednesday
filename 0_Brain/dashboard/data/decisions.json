@@ -57047,5 +57047,80 @@
    "CARD hpsmpoc-services-menu-label-1101",
    "CARD hpsmpoc-focus-ring-page-nudge-1102"
   ]
+ },
+ {
+  "id": "secuura-pr1970-gateway-failopen-1103",
+  "client_project": "Secuura/Blockchain",
+  "title": "Before merge: PR 1970 makes two api-gateway checks let a request through on a rare error, where today they hang or answer 500. Merge, or fix them to fail closed first?",
+  "bluf": "For a decision before I merge PR 1970 (api-gateway middleware). The Opus QA gate (148) ran the real middleware and real logger, base against head, 28 of 28 mutants killed. For an ordinary error the PR changes nothing. For a rare unreadable error value, two checks change: the brute-force lockout lets the login attempt through (401 instead of a hung request), and the rate-limit header step lets the request through unlimited (200 instead of 500). Before this PR they only failed closed by accident (a hang or a crash). The gate found these values cannot reach either check in production today: nothing arms the gateway's lockout key (the real lockout lives in the auth service, untouched), and the real errors there are ordinary ones. The bigger finding is older: both checks already let requests through on ANY ordinary Redis error, and a connector whose rate-limit value contains a line break is unlimited for good (the gate measured that with a planted record; whether real connector records can hold such a value is NOT measured). That older gap is now ticket KS-1961 (High). Your KS-1256 ruling was fail closed. I recommend a: merge 1970 on its gate, and a fix seat makes both checks fail closed for every error next, under a ticket for the older finding. (Prior-rulings gate: it matched only the word 'gateway'. The two earlier gateway cards are different subjects, KS-1084 a missing tenant header and KS-1369 a proxy crash fix shape; your fail-closed rulings KS-1256 and KS-1194 are the ones this card applies.)",
+  "default_action": "If you do not answer, PR 1970 stays unmerged (b). A ticket for the older fail-open (any Redis error and the line-break rate limit) is filed either way, and the fail-closed fix is briefed for the next fix seat after the referral fix.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Merge PR 1970 on its gate; fix both checks to fail closed next",
+    "detail": "The PR makes the rare case behave like today's ordinary case, which the gate measured as unreachable in production. The real gap, ordinary Redis errors and the line-break rate limit, is fixed properly in its own PR, ahead of the raise queue."
+   },
+   {
+    "key": "b",
+    "label": "Hold PR 1970 until both checks fail closed",
+    "detail": "Nothing in 1970 merges until a fix seat rebuilds the two sites to refuse (503) on any error. Safest reading of KS-1256; delays the other two sites in the PR (audit and the limiter's Redis path, which the gate found 1970 IMPROVES)."
+   },
+   {
+    "key": "c",
+    "label": "Merge 1970 without the two fail-open sites",
+    "detail": "The author drops the brute-force and header-write changes; audit and the limiter's Redis-error fix merge now. Costs a rebuild and a second gate round."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T09:42:47.696746+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 19:53",
+   "2026-08-17 20:01",
+   "2026-08-17 20:23",
+   "2026-08-21 10:04",
+   "2026-08-21 20:06",
+   "2026-08-22 19:51",
+   "2026-09-01 17:25",
+   "2026-09-01 17:55",
+   "2026-09-02 16:32",
+   "2026-09-04 08:33",
+   "2026-09-05 15:01",
+   "2026-09-08 07:09",
+   "2026-09-08 08:09",
+   "2026-09-08 10:17",
+   "2026-09-09 07:54",
+   "2026-09-09 17:52",
+   "2026-09-10 09:00",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 17:01",
+   "2026-09-14 08:11",
+   "2026-09-14 21:52",
+   "2026-09-15 09:28",
+   "2026-09-15 19:42",
+   "2026-09-16 14:00",
+   "2026-09-16 20:37",
+   "2026-09-17 07:50",
+   "2026-09-21 14:05",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1369-gateway-proxy-crash-guard-shape"
+  ],
+  "amendments": [
+   {
+    "ts": "2026-11-03T09:50:49.492169+11:00",
+    "reason": "Corrected a premise: Wednesday wrote 'which data can reach' for the line-break rate limit; the gate measured it only with a planted record and did not test real records (caught by Seat R 77th, 22:50Z). Also names the filed ticket KS-1961.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "For a decision before I merge PR 1970 (api-gateway middleware). The Opus QA gate (148) ran the real middleware and real logger, base against head, 28 of 28 mutants killed. For an ordinary error the PR changes nothing. For a rare unreadable error value, two checks change: the brute-force lockout lets the login attempt through (401 instead of a hung request), and the rate-limit header step lets the request through unlimited (200 instead of 500). Before this PR they only failed closed by accident (a hang or a crash). The gate found these values cannot reach either check in production today: nothing arms the gateway's lockout key (the real lockout lives in the auth service, untouched), and the real errors there are ordinary ones. The bigger finding is older: both checks already let requests through on ANY ordinary Redis error, and a connector whose rate-limit value contains a line break is unlimited for good, which data can reach. Your KS-1256 ruling was fail closed. I recommend a: merge 1970 on its gate, and a fix seat makes both checks fail closed for every error next, under a ticket for the older finding. (Prior-rulings gate: it matched only the word 'gateway'. The two earlier gateway cards are different subjects, KS-1084 a missing tenant header and KS-1369 a proxy crash fix shape; your fail-closed rulings KS-1256 and KS-1194 are the ones this card applies.)"
+    }
+   }
+  ],
+  "amended_ts": "2026-11-03T09:50:49.492239+11:00"
  }
 ]
