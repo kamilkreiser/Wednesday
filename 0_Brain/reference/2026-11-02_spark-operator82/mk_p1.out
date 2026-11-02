@@ -1,0 +1,25 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o82_p1_auth_login_rehash_logout_denylist_catches_coerce_message
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -554,7 +554,8 @@
+       } catch (err: any) {
+         let reason: string;
+         try {
+-          reason = err?.message;
++          const m = err?.message;
++          reason = m === undefined || m === null ? m : String(m);
+         } catch {
+           reason = 'unreadable thrown value';
+         }
+@@ -789,7 +790,8 @@
+         await denylistRefreshJti(decoded.jti, remaining).catch((err) => {
+           let reason: string;
+           try {
+-            reason = err?.message;
++            const m = err?.message;
++            reason = m === undefined || m === null ? m : String(m);
+           } catch {
+             reason = 'unreadable thrown value';
+           }
+

@@ -1,0 +1,119 @@
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
+
+process.env.SECURITY_DISABLE_BOOT = '1';
+
+// KS-1868: the rotate transaction of `saveKeyAndRetirePriors` must still log its line and let the mint stand with `priorKeysRevoked` null (the KS-577/KS-1549 contract) when the thrown value itself cannot be
+// read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws, throws on `.message`).
+// The db stand-in rejects with a plain function, not a vi.fn(): a spy inspects what it rejects with and could
+// itself fail on a revoked Proxy before the code under test saw it. The outcome is captured with
+// `.then(onOk, onReject)` so the hostile value is never handed to an assertion message.
+// The service logs through console.log (JSON lines), so the log is read from a console.log spy.
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  sql: [] as string[],
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  initDb: async () => true,
+  query: async () => ({ rows: [], rowCount: 0 }),
+  transaction: async (fn: (client: unknown) => Promise<unknown>) =>
+    fn({
+      query: (sql: string) => {
+        h.sql.push(String(sql));
+        if (/^\s*UPDATE\s+svc_api_keys/i.test(String(sql))) return Promise.reject(h.toThrow);
+        return Promise.resolve({ rows: [], rowCount: 0 });
+      },
+    }),
+}));
+
+const TENANT = 'c0000000-0000-4000-8000-000000001868';
+const CONNECTOR = 'ks1868-connector';
+const LOGGED: string[] = [];
+const LINES = () =>
+  LOGGED.filter((s) => s.includes('KS-577: revoke-on-rotate FAILED')).map((s) => JSON.parse(s) as { error: unknown });
+
+let saveKeyAndRetirePriors: (k: unknown, connectorId: string) => Promise<number | null>;
+let memApiKeys: Map<string, unknown>;
+const KEY = {
+  id: 'key_ks1868',
+  tenantId: TENANT,
+  connectorId: CONNECTOR,
+  name: 'ks1868',
+  keyHash: 'ks1868-hash',
+  keyPrefix: 'ks1868',
+  scopes: [] as string[],
+  usageCount: 0,
+  isActive: true,
+  createdAt: new Date(),
+};
+
+beforeAll(async () => {
+  const mod = await import('../index');
+  saveKeyAndRetirePriors = mod.saveKeyAndRetirePriors as unknown as typeof saveKeyAndRetirePriors;
+  memApiKeys = mod.memApiKeys as unknown as Map<string, unknown>;
+});
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.sql.length = 0;
+  LOGGED.length = 0;
+  memApiKeys.clear();
+  delete process.env.API_KEY_ROTATION_GRACE_SECONDS;
+  vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+    LOGGED.push(String(args[0]));
+  });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('KS-1868 the rotate transaction of `saveKeyAndRetirePriors` reads the thrown value safely', () => {
+  it('control ks1868 C1 an ordinary Error still logs its message and the mint stands with a null retire count', async () => {
+    h.toThrow = new Error('db down');
+    const outcome = await saveKeyAndRetirePriors(KEY, CONNECTOR).then(
+      (value) => ({ rejected: false, value }),
+      () => ({ rejected: true, value: undefined }),
+    );
+    expect(outcome).toEqual({ rejected: false, value: null });
+    expect(h.sql).toContain('ROLLBACK TO SAVEPOINT ks1549_retire');
+    expect(memApiKeys.has(KEY.id)).toBe(true);
+    expect(LINES()).toHaveLength(1);
+    expect(LINES()[0].error).toBe('db down');
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and the mint stands with a null retire count', async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    h.toThrow = proxy;
+    const outcome = await saveKeyAndRetirePriors(KEY, CONNECTOR).then(
+      (value) => ({ rejected: false, value }),
+      () => ({ rejected: true, value: undefined }),
+    );
+    expect(outcome).toEqual({ rejected: false, value: null });
+    expect(h.sql).toContain('ROLLBACK TO SAVEPOINT ks1549_retire');
+    expect(memApiKeys.has(KEY.id)).toBe(true);
+    expect(LINES()).toHaveLength(1);
+    expect(LINES()[0].error).toBe('unreadable thrown value');
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and the mint stands with a null retire count', async () => {
+    h.toThrow = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    const outcome = await saveKeyAndRetirePriors(KEY, CONNECTOR).then(
+      (value) => ({ rejected: false, value }),
+      () => ({ rejected: true, value: undefined }),
+    );
+    expect(outcome).toEqual({ rejected: false, value: null });
+    expect(h.sql).toContain('ROLLBACK TO SAVEPOINT ks1549_retire');
+    expect(memApiKeys.has(KEY.id)).toBe(true);
+    expect(LINES()).toHaveLength(1);
+    expect(LINES()[0].error).toBe('unreadable thrown value');
+  });
+});

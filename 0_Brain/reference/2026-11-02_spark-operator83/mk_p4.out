@@ -1,0 +1,41 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o83_p4_apigateway_rate_limit_enforce_catches_coerce_message
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts b/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
+@@ -44,11 +44,17 @@
+   const now = Date.now();
+   if (now - lastDegradeLogAt < DEGRADE_LOG_INTERVAL_MS) return;
+   lastDegradeLogAt = now;
++  let errorText: string | undefined;
++  try {
++    errorText = err instanceof Error ? String(err.message) : err ? String(err) : undefined;
++  } catch {
++    errorText = 'unreadable thrown value';
++  }
+   logger.warn('[rateLimit] DEGRADED — per-client ceiling is no longer distributed', {
+     reason,
+     clientId,
+     effect: 'counting per-replica in memory; the effective ceiling inflates to limit × replicas',
+-    error: err instanceof Error ? err.message : err ? String(err) : undefined,
++    error: errorText,
+     throttledFor: `${DEGRADE_LOG_INTERVAL_MS / 1000}s`,
+   });
+ }
+@@ -297,9 +303,15 @@
+       } catch (writeErr) {
+         // e.g. the response is already committed. Same rule as above: a bookkeeping
+         // failure does not 500 the caller, and it is not silent.
++        let reason: string;
++        try {
++          reason = String(writeErr instanceof Error ? writeErr.message : writeErr);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.error('[rateLimit] could not write the rate-limit headers or the 429 — request allowed unlimited', {
+           clientId,
+-          error: writeErr instanceof Error ? writeErr.message : String(writeErr),
++          error: reason,
+         });
+         refused = false;
+       }
+

@@ -1,0 +1,173 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import type { AddressInfo } from 'node:net';
+import type { Server } from 'node:http';
+import express from 'express';
+
+// KS-1868 (QA gate 113, G113-F1 and F2): the POST /internal/connector-token catch in routes/internal.ts logs `{ error: reason }`
+// where `reason` is whatever `(err as Error).message` returned, then answers the constant 502 BAD_GATEWAY. PR 1931 guards the
+// READ; a message that is readable but not a string (a revoked Proxy, an object whose toString throws, a null-prototype object,
+// a Symbol) is passed to the logger as is, and the real winston throws while formatting it. The cells make the security call
+// reject with an Error whose `message` getter RETURNS such a value and assert the logged reason is text (the constant when it
+// cannot be turned into text), the 502, no token and no unhandled rejection (the outcome an ordinary Error gets). Controls pin
+// the two shapes no earlier cell pinned: a thrown `undefined` (reading `.message` throws, so the constant) and a thrown plain
+// string (no message: logged with no `error` field, not the text undefined). Harness: the ks1868 connector-token test.
+const realFetch = globalThis.fetch;
+
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  logged: [] as unknown[][],
+  unhandled: 0,
+}));
+
+const capture = vi.hoisted(() => ({
+  debug: () => undefined,
+  info: () => undefined,
+  warn: () => undefined,
+  error: (...args: unknown[]) => {
+    h.logged.push(args);
+  },
+  log: () => undefined,
+}));
+vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
+vi.mock('../services/jwt', () => ({
+  generateConnectorToken: () => ({ token: 'MINTED_1868_CONNECTOR', expiresIn: 300 }),
+}));
+
+const SAVED_LISTENERS = process.listeners('unhandledRejection');
+const onUnhandled = () => {
+  h.unhandled += 1;
+};
+
+let server: Server;
+let baseUrl = '';
+beforeAll(async () => {
+  process.removeAllListeners('unhandledRejection');
+  process.on('unhandledRejection', onUnhandled);
+  globalThis.fetch = ((_input: unknown) => Promise.reject(h.toThrow)) as unknown as typeof fetch;
+  const { internalRoutes } = await import('../routes/internal');
+  const app = express();
+  app.use(express.json());
+  app.use('/internal', internalRoutes);
+  server = app.listen(0, '127.0.0.1');
+  await new Promise<void>((resolve) => server.once('listening', () => resolve()));
+  baseUrl = 'http://127.0.0.1:' + String((server.address() as AddressInfo).port);
+});
+afterAll(async () => {
+  globalThis.fetch = realFetch;
+  server.closeAllConnections();
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  process.removeListener('unhandledRejection', onUnhandled);
+  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
+});
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.logged.length = 0;
+  h.unhandled = 0;
+});
+
+const LINES = () => h.logged.filter((c) => c[0] === 'connector-token exchange failed');
+
+async function exchange(): Promise<{ status: number; code: string | undefined; minted: boolean } | null> {
+  try {
+    const res = await realFetch(baseUrl + '/internal/connector-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: 'sk_ks1868_connector_key_000' }),
+      signal: AbortSignal.timeout(1500),
+    });
+    const text = await res.text();
+    let code: string | undefined;
+    try {
+      code = JSON.parse(text)?.error?.code;
+    } catch {
+      code = undefined;
+    }
+    return { status: res.status, code, minted: text.includes('MINTED_1868_CONNECTOR') };
+  } catch {
+    return null;
+  }
+}
+
+const revokedProxy = (): unknown => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+const toStringThrows = (): unknown => ({
+  toString() {
+    throw new Error('ts boom');
+  },
+});
+/** An Error whose `message` getter succeeds and returns the (non-string) value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+/** The logged `error` field as a string; the type name when it is not one (a hostile value never reaches an assertion). */
+const reasonOf = (c: unknown[] | undefined): string => {
+  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+const SHAPES: Array<[string, () => unknown, string]> = [
+  ['a revoked Proxy', revokedProxy, 'unreadable thrown value'],
+  ['an object whose toString throws', toStringThrows, 'unreadable thrown value'],
+  ['a null-prototype object', () => Object.create(null), 'unreadable thrown value'],
+  ['a Symbol', () => Symbol('ks1868'), 'Symbol(ks1868)'],
+];
+
+const BAD_GATEWAY = { status: 502, code: 'BAD_GATEWAY', minted: false };
+
+describe('KS-1868 the connector-token catch logs text for a hostile non-string message', () => {
+  it('control ks1868 C1: an ordinary Error is logged with its message and the route answers 502 BAD_GATEWAY with no token', async () => {
+    h.toThrow = new Error('security down');
+    expect(await exchange()).toEqual(BAD_GATEWAY);
+    expect(h.unhandled).toBe(0);
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('security down');
+  });
+
+  it('control ks1868 C2: a thrown undefined makes the message read throw and the constant reason is logged', async () => {
+    h.toThrow = undefined;
+    expect(await exchange()).toEqual(BAD_GATEWAY);
+    expect(h.unhandled).toBe(0);
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('unreadable thrown value');
+  });
+
+  it('control ks1868 C3: a thrown plain string has no message and is logged with no error field (not the text undefined)', async () => {
+    h.toThrow = 'plain boom';
+    expect(await exchange()).toEqual(BAD_GATEWAY);
+    expect(h.unhandled).toBe(0);
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe('<undefined>');
+  });
+
+  it('RED ks1868 R1 : a rejection whose message is a revoked Proxy logs the constant reason and the route answers 502 with no token', async () => {
+    h.toThrow = withMessage(SHAPES[0][1]());
+    expect(await exchange()).toEqual(BAD_GATEWAY);
+    expect(h.unhandled).toBe(0);
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[0][2]);
+  });
+
+  it('RED ks1868 R2 : a rejection whose message is an object whose toString throws logs the constant reason and the route answers 502 with no token', async () => {
+    h.toThrow = withMessage(SHAPES[1][1]());
+    expect(await exchange()).toEqual(BAD_GATEWAY);
+    expect(h.unhandled).toBe(0);
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[1][2]);
+  });
+
+  it('RED ks1868 R3 : a rejection whose message is a null-prototype object logs the constant reason and the route answers 502 with no token', async () => {
+    h.toThrow = withMessage(SHAPES[2][1]());
+    expect(await exchange()).toEqual(BAD_GATEWAY);
+    expect(h.unhandled).toBe(0);
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[2][2]);
+  });
+
+  it('RED ks1868 R4 : a rejection whose message is a Symbol logs the Symbol text and the route answers 502 with no token', async () => {
+    h.toThrow = withMessage(SHAPES[3][1]());
+    expect(await exchange()).toEqual(BAD_GATEWAY);
+    expect(h.unhandled).toBe(0);
+    expect(LINES()).toHaveLength(1);
+    expect(reasonOf(LINES()[0])).toBe(SHAPES[3][2]);
+  });
+});

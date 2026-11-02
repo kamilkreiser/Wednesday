@@ -1,0 +1,3 @@
+npm --prefix /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate119-ks1081-pr1937/head2_tree/Blockchain/Dev ci --ignore-scripts > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate119-ks1081-pr1937/logs/npm_ci_root.log 2>&1; echo "root ci rc=$?"
+npm --prefix /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate119-ks1081-pr1937/head2_tree/Blockchain/Dev/packages/shared run build > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate119-ks1081-pr1937/logs/build_shared.log 2>&1; echo "build shared rc=$?"
+ls /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate119-ks1081-pr1937/head2_tree/Blockchain/Dev/packages/shared/dist/utils/logger.js

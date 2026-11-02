@@ -1,0 +1,51 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o83_p2_originate_documents_lookup_routes_catches_coerce_message
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -1282,7 +1282,13 @@
+         documentId: id,
+       });
+     } catch (error) {
+-      logger.error('Failed to create signing request', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to create signing request', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create signing request' } });
+     }
+   },
+@@ -3193,7 +3199,13 @@
+       const events = await listLifecycleEvents(id, tenantId, (req as any).db);
+       return res.json({ documentId: id, count: events.length, events });
+     } catch (error) {
+-      logger.error('Failed to list lifecycle events', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to list lifecycle events', { error: reason });
+       return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list lifecycle events' } });
+     }
+   },
+@@ -3714,8 +3726,14 @@
+       res.setHeader('Content-Disposition', `inline; filename="${id}.sig.json"`);
+       return res.status(200).json(sigJson);
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Failed to get sig-json', {
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       return res.status(500).json({
+         success: false,
+

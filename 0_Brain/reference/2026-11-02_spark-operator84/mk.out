@@ -1,0 +1,126 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o84_p1_auth_issuer_cert_sweep_body_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts b/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
+--- a/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
++++ b/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
+@@ -62,8 +62,14 @@
+   try {
+     expiredRows = await markExpiredCerts();
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = String(err instanceof Error ? err.message : err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('Issuer cert sweep: markExpiredCerts failed', {
+-      error: err instanceof Error ? err.message : String(err),
++      error: reason,
+     });
+     // Continue to the expiring-soon checks even if the flip failed —
+     // they're independent and we don't want one DB blip to mask both.
+@@ -77,10 +83,16 @@
+       fingerprintSha256: row.fingerprintSha256,
+       name: row.name,
+       validUntil: row.validUntil.toISOString(),
+-    }).catch((err) =>
++    }).catch((err) => {
++      let reason: string;
++      try {
++        reason = String(err instanceof Error ? err.message : err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.warn('publishEvent ISSUER_CERT_EXPIRED failed', {
+         certId: row.id,
+-        error: err instanceof Error ? err.message : String(err),
+-      }),
+-    );
++        error: reason,
++      });
++    });
+   }
+@@ -91,8 +103,14 @@
+     try {
+       rows = await findExpiringSoon(days);
+     } catch (err) {
++      let reason: string;
++      try {
++        reason = String(err instanceof Error ? err.message : err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error(`Issuer cert sweep: findExpiringSoon(${days}d) failed`, {
+-        error: err instanceof Error ? err.message : String(err),
++        error: reason,
+       });
+       continue;
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o84_p2_auth_issuer_cert_sweep_fire_and_forget_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts b/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
+--- a/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
++++ b/Blockchain/Dev/services/auth/src/services/issuerCertSweep.ts
+@@ -106,12 +106,18 @@
+         name: row.name,
+         validUntil: row.validUntil.toISOString(),
+         daysRemaining: days,
+-      }).catch((err) =>
++      }).catch((err) => {
++        let reason: string;
++        try {
++          reason = String(err instanceof Error ? err.message : err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.warn('publishEvent ISSUER_CERT_EXPIRING_SOON failed', {
+           certId: row.id,
+           daysRemaining: days,
+-          error: err instanceof Error ? err.message : String(err),
+-        }),
+-      );
++          error: reason,
++        });
++      });
+     }
+   }
+@@ -151,7 +157,13 @@
+   // Run once at startup so any cert that expired while the service was
+   // down gets caught immediately. Errors are logged inside runIssuerCertSweep.
+-  runIssuerCertSweep().catch((err) =>
++  runIssuerCertSweep().catch((err) => {
++    let reason: string;
++    try {
++      reason = String(err instanceof Error ? err.message : err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('Initial issuer cert sweep failed', {
+-      error: err instanceof Error ? err.message : String(err),
+-    }),
+-  );
++      error: reason,
++    });
++  });
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o84_p3_auth_oauth_state_consume_catch_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/oauthState.ts b/Blockchain/Dev/services/auth/src/services/oauthState.ts
+--- a/Blockchain/Dev/services/auth/src/services/oauthState.ts
++++ b/Blockchain/Dev/services/auth/src/services/oauthState.ts
+@@ -131,9 +131,15 @@
+       stored = (first && (first[1] as string | null)) ?? null;
+     }
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = String(err instanceof Error ? err.message : err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('[OAuthState] Redis command failed — refusing social callback', {
+       provider,
+-      error: err instanceof Error ? err.message : String(err),
++      error: reason,
+     });
+     return false;
+   }
+

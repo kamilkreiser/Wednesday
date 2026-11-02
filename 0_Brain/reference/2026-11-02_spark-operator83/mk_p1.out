@@ -1,0 +1,23 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o83_p1_security_revoke_on_rotate_catches_coerce_message
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -303,7 +303,7 @@
+     // old credential is STILL LIVE.
+     let reason: string;
+     try {
+-      reason = err instanceof Error ? err.message : String(err);
++      reason = String(err instanceof Error ? err.message : err);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+@@ -416,7 +416,7 @@
+         await client.query('ROLLBACK TO SAVEPOINT ks1549_retire');
+         let reason: string;
+         try {
+-          reason = err instanceof Error ? err.message : String(err);
++          reason = String(err instanceof Error ? err.message : err);
+         } catch {
+           reason = 'unreadable thrown value';
+         }
+

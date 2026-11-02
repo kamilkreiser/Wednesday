@@ -1,0 +1,25 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o82_p4_auth_oauth_authorize_token_catches_coerce_message
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -805,7 +805,8 @@
+   } catch (error: any) {
+     let reason: string;
+     try {
+-      reason = error.message;
++      const m = error.message;
++      reason = m === undefined || m === null ? m : String(m);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+@@ -1115,7 +1116,8 @@
+   } catch (error: any) {
+     let reason: string;
+     try {
+-      reason = error.message;
++      const m = error.message;
++      reason = m === undefined || m === null ? m : String(m);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+

@@ -1,0 +1,290 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -1282,7 +1282,13 @@
+         documentId: id,
+       });
+     } catch (error) {
+-      logger.error('Failed to create signing request', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to create signing request', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create signing request' } });
+     }
+   },
+@@ -3193,7 +3199,13 @@
+       const events = await listLifecycleEvents(id, tenantId, (req as any).db);
+       return res.json({ documentId: id, count: events.length, events });
+     } catch (error) {
+-      logger.error('Failed to list lifecycle events', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to list lifecycle events', { error: reason });
+       return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list lifecycle events' } });
+     }
+   },
+@@ -3714,8 +3726,14 @@
+       res.setHeader('Content-Disposition', `inline; filename="${id}.sig.json"`);
+       return res.status(200).json(sigJson);
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Failed to get sig-json', {
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       return res.status(500).json({
+         success: false,
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-documents-lookup-routes-message-coercion-unreadable-throw.test.ts
+@@ -0,0 +1,236 @@
++// KS-1868: three document routes of originate (POST /:id/sign/request, GET /:id/lifecycle-events and the public GET /:id/sig-json) log
++// `error: <reading of the caught value>` in their outer catch as `error instanceof Error ? error.message : String(error)`, unguarded. A revoked Proxy
++// makes `instanceof` throw inside the catch, and an Error whose `message` getter returns a revoked Proxy, a null-prototype object or a Symbol hands the
++// logger a value it cannot format; the route then never answers. The cells make the first document read reject with such a value and assert the route
++// answers the constant 500 and the logged reason is text (the constant when it cannot be turned into text). The shapes the guard of the repo layer
++// swallows by accident are not used: the rejection is thrown by the document read itself, which has no inner catch on these three routes.
++// Controls pin an ordinary Error and a thrown plain string (a non-Error is logged as its own text). A hang is a null answer (abort signal), not a jest
++// timeout. Harness: the ks466 malformed-id suite (same module mocks). Nothing is written.
++const mockState: { toThrow: unknown; errored: unknown[][]; reads: number; writes: number } = {
++  toThrow: undefined,
++  errored: [],
++  reads: 0,
++  writes: 0,
++};
++
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
++process.env.SIMULATE_ANCHORING = 'true';
++
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: (..._args: unknown[]) => {
++    mockState.reads += 1;
++    return Promise.reject(mockState.toThrow);
++  },
++  listDocuments: jest.fn(),
++  saveDocument: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve({ dbId: '99999999-9999-4999-8999-999999999999', inserted: true });
++  },
++  updateDocument: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve(undefined);
++  },
++  getSigningRequest: jest.fn(),
++  saveSigningRequest: (..._args: unknown[]) => {
++    mockState.writes += 1;
++    return Promise.resolve(undefined);
++  },
++  deleteSigningRequest: jest.fn(),
++  generateContentHash: jest.fn(() => 'a'.repeat(64)),
++  seedDemoDocuments: jest.fn(async () => undefined),
++  assertNoCycle: jest.fn(async () => undefined),
++}));
++
++jest.mock('../repositories/shareRepo', () => ({
++  createShare: jest.fn(),
++}));
++
++jest.mock('../repositories/lifecycleEventRepo', () => ({
++  createLifecycleEvent: jest.fn(),
++  setLifecycleEventAnchor: jest.fn(),
++  listLifecycleEvents: (..._args: unknown[]) => {
++    mockState.reads += 1;
++    return Promise.reject(mockState.toThrow);
++  },
++}));
++
++jest.mock('../events', () => ({
++  publishEvent: jest.fn(async () => undefined),
++  EventTypes: {
++    DOCUMENT_CREATED: 'document.created',
++    DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred',
++    DOCUMENT_VERSIONED: 'document.versioned',
++  },
++}));
++
++jest.mock('../services/threadTokenClient', () => ({
++  mintAndRegisterThreadToken: jest.fn(async () => ({})),
++}));
++
++jest.mock('../routes/verification', () => ({
++  registerInPlatformRegistry: jest.fn(async () => undefined),
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
++    next();
++  },
++}));
++
++jest.mock('../middleware/rbac', () => ({
++  isAllowedByRoleOrScope: () => true,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    warn: () => undefined,
++    error: (...args: unknown[]) => {
++      mockState.errored.push(args);
++    },
++  },
++}));
++
++import express from 'express';
++import { documentsRouter, publicDocumentsRouter } from '../routes/documents';
++
++const app = express();
++// Same mount order as index.ts: public router first, then the auth-gated one.
++app.use('/api/documents', express.json(), publicDocumentsRouter);
++app.use('/api/documents', express.json(), documentsRouter);
++
++const DOC = 'doc-ks1868-lookup-target';
++let baseUrl = '';
++let server: ReturnType<typeof app.listen>;
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  const address = server.address();
++  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
++});
++
++afterAll(() => server?.close());
++
++beforeEach(() => {
++  mockState.toThrow = undefined;
++  mockState.errored.length = 0;
++  mockState.reads = 0;
++  mockState.writes = 0;
++});
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++/** An Error whose `message` getter succeeds and returns the (non-string) value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++/** The logged `error` field of the logger call that carries this first argument, as a string; the type name when it is not one. */
++const reasonOf = (first: string): string => {
++  const calls = mockState.errored.filter((c) => c[0] === first);
++  if (calls.length !== 1) return '<' + calls.length + ' calls>';
++  const v = (calls[0][1] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++let unhandled = 0;
++const onUnhandled = () => {
++  unhandled += 1;
++};
++beforeAll(() => {
++  process.on('unhandledRejection', onUnhandled);
++});
++afterAll(() => {
++  process.removeListener('unhandledRejection', onUnhandled);
++});
++beforeEach(() => {
++  unhandled = 0;
++});
++
++async function call(method: string, path: string, body?: unknown): Promise<{ status: number; code: string | undefined } | null> {
++  try {
++    const res = await fetch(`${baseUrl}${path}`, {
++      method,
++      headers: { 'content-type': 'application/json' },
++      body: body === undefined ? undefined : JSON.stringify(body),
++      signal: AbortSignal.timeout(1500),
++    });
++    const payload = (await res.json()) as { error?: { code?: string } };
++    return { status: res.status, code: payload.error?.code };
++  } catch {
++    return null;
++  }
++}
++
++const SIGN_REQUEST: [string, string, string, unknown] = ['POST', `/api/documents/${DOC}/sign/request`, 'Failed to create signing request', { walletAddress: 'addr_test1ks1868' }];
++const LIFECYCLE: [string, string, string, unknown] = ['GET', `/api/documents/${DOC}/lifecycle-events`, 'Failed to list lifecycle events', undefined];
++const SIG_JSON: [string, string, string, unknown] = ['GET', `/api/documents/${DOC}/sig-json`, 'Failed to get sig-json', undefined];
++
++async function route(r: [string, string, string, unknown], thrown: unknown, reason: string): Promise<void> {
++  mockState.toThrow = thrown;
++  expect(await call(r[0], r[1], r[3])).toEqual({ status: 500, code: 'INTERNAL_ERROR' });
++  expect(unhandled).toBe(0);
++  expect(mockState.errored).toHaveLength(1);
++  expect(reasonOf(r[2])).toBe(reason);
++  expect(mockState.reads).toBe(1);
++  expect(mockState.writes).toBe(0);
++}
++const CONSTANT = 'unreadable thrown value';
++
++describe('KS-1868 the originate document lookup routes log text for a hostile thrown value', () => {
++  it('control ks1868 C1 POST /:id/sign/request: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(SIGN_REQUEST, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C2 GET /:id/lifecycle-events: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(LIFECYCLE, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C3 GET /:id/sig-json: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await route(SIG_JSON, new Error('Connection terminated unexpectedly'), 'Connection terminated unexpectedly');
++  });
++
++  it('control ks1868 C4 POST /:id/sign/request: a thrown plain string is logged as its own text and the route answers 500', async () => {
++    await route(SIGN_REQUEST, 'plain boom', 'plain boom');
++  });
++
++  it('RED ks1868 R1 POST /:id/sign/request: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(SIGN_REQUEST, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R2 POST /:id/sign/request: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(SIGN_REQUEST, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R3 POST /:id/sign/request: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(SIGN_REQUEST, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++
++  it('RED ks1868 R4 GET /:id/lifecycle-events: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(LIFECYCLE, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R5 GET /:id/lifecycle-events: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(LIFECYCLE, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R6 GET /:id/lifecycle-events: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(LIFECYCLE, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++
++  it('RED ks1868 R7 GET /:id/sig-json: a revoked Proxy thrown value logs the constant reason and the route answers 500', async () => {
++    await route(SIG_JSON, revokedProxy(), CONSTANT);
++  });
++
++  it('RED ks1868 R8 GET /:id/sig-json: an Error whose message is a null-prototype object logs the constant reason and the route answers 500', async () => {
++    await route(SIG_JSON, withMessage(Object.create(null)), CONSTANT);
++  });
++
++  it('RED ks1868 R9 GET /:id/sig-json: an Error whose message is a Symbol logs the Symbol text and the route answers 500', async () => {
++    await route(SIG_JSON, withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
++  });
++});

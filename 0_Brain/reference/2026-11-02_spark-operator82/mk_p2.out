@@ -1,0 +1,15 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o82_p2_auth_internal_connector_token_catch_coerce_message
+diff --git a/Blockchain/Dev/services/auth/src/routes/internal.ts b/Blockchain/Dev/services/auth/src/routes/internal.ts
+--- a/Blockchain/Dev/services/auth/src/routes/internal.ts
++++ b/Blockchain/Dev/services/auth/src/routes/internal.ts
+@@ -79,7 +79,8 @@
+   } catch (err) {
+     let reason: string;
+     try {
+-      reason = (err as Error).message;
++      const m = (err as Error).message;
++      reason = m === undefined || m === null ? m : String(m);
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+

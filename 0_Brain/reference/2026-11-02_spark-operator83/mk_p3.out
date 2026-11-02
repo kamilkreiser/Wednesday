@@ -1,0 +1,52 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o83_p3_originate_documents_signing_routes_catches_coerce_message
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -1363,7 +1363,13 @@
+         signedAt: now,
+       });
+     } catch (error) {
+-      logger.error('Failed to sign document', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to sign document', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to sign document' } });
+     }
+   },
+@@ -3464,8 +3470,14 @@
+         sigJsonUrl: `/api/documents/${newExternalId}/sig-json`,
+       });
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Failed to sign document via issuer cert', {
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       return res.status(500).json({
+         success: false,
+@@ -3653,8 +3665,14 @@
+         sigWallet: sigWalletEnvelope,
+       });
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Failed to sign document via wallet', {
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       return res.status(500).json({
+         success: false,
+

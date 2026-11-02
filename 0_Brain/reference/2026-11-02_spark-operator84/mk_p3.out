@@ -1,0 +1,22 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o84_p3_auth_oauth_state_consume_catch_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/oauthState.ts b/Blockchain/Dev/services/auth/src/services/oauthState.ts
+--- a/Blockchain/Dev/services/auth/src/services/oauthState.ts
++++ b/Blockchain/Dev/services/auth/src/services/oauthState.ts
+@@ -131,9 +131,15 @@
+       stored = (first && (first[1] as string | null)) ?? null;
+     }
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = String(err instanceof Error ? err.message : err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('[OAuthState] Redis command failed — refusing social callback', {
+       provider,
+-      error: err instanceof Error ? err.message : String(err),
++      error: reason,
+     });
+     return false;
+   }
+

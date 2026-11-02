@@ -1,0 +1,164 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// KS-1868: two catches of the api-gateway per-client rate limiter read a caught value unguarded. (1) `logDegraded` reads the Redis error as
+// `err instanceof Error ? err.message : err ? String(err) : undefined` INSIDE the try whose catch is the in-memory fallback: a revoked Proxy (or
+// an Error whose message getter throws) makes that read throw, the catch reports "in-memory fallback ALSO failed" and the request is let through
+// UNCOUNTED; an Error whose message is a non-string is handed to the logger as is. (2) The `writeErr` catch reads `writeErr instanceof Error ? ... :
+// String(writeErr)` inline: a hostile value makes the middleware itself reject. The cells assert the ordinary-Error rows for hostile values: the
+// degraded in-memory ceiling still applies (the second request over a limit of 1 is refused 429), the line carries text (the constant when the value
+// cannot be turned into text), and a failed header write lets the request through. Controls pin an ordinary Error and a thrown plain string.
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  warned: [] as unknown[][],
+  errored: [] as unknown[][],
+}));
+
+vi.mock('../utils/logger', () => ({
+  logger: {
+    info: () => undefined,
+    debug: () => undefined,
+    warn: (...args: unknown[]) => {
+      h.warned.push(args);
+    },
+    error: (...args: unknown[]) => {
+      h.errored.push(args);
+    },
+  },
+}));
+
+import { enforceClientRateLimit } from '../middleware/rateLimitEnforce';
+
+const CONSTANT = 'unreadable thrown value';
+let when = Date.parse('2030-01-01T00:00:00Z');
+let n = 0;
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  h.warned.length = 0;
+  h.errored.length = 0;
+  // logDegraded throttles to one line per 30 s on a module-level clock: move the clock on for every cell.
+  when += 120_000;
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(when);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+const revokedProxy = (): unknown => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+/** An Error whose `message` getter succeeds and returns the (non-string) value m. */
+const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
+/** The logged `error` field of a logger call as a string; the type name when it is not one. */
+const reasonOf = (c: unknown[] | undefined): string => {
+  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
+  return typeof v === 'string' ? v : '<' + typeof v + '>';
+};
+
+function makeRes(setHeaderThrows: boolean) {
+  const res: any = {
+    statusCode: undefined as number | undefined,
+    setHeader: (..._args: unknown[]) => {
+      if (setHeaderThrows) throw h.toThrow;
+    },
+    status: (code: number) => {
+      res.statusCode = code;
+      return res;
+    },
+    json: () => res,
+  };
+  return res;
+}
+
+async function hit(connectorId: string, redis: unknown, setHeaderThrows: boolean) {
+  const mw = enforceClientRateLimit(redis as any);
+  const req = { user: { authMethod: 'api_key', connectorId, rateLimit: 1, rateLimitWindow: 60 } } as any;
+  const res = makeRes(setHeaderThrows);
+  let nextCalls = 0;
+  let rejected = false;
+  try {
+    await mw(req, res, () => {
+      nextCalls += 1;
+    });
+  } catch {
+    rejected = true;
+  }
+  return { rejected, nextCalls, status: res.statusCode as number | undefined };
+}
+
+const redisFailing = () => ({
+  status: 'ready',
+  incr: (..._args: unknown[]) => Promise.reject(h.toThrow),
+  pexpire: async () => 1,
+  pttl: async () => 60_000,
+});
+
+/** Two requests of one client over a limit of 1 while Redis rejects with `thrown`: the degraded ceiling must apply. */
+async function degraded(thrown: unknown, reason: string): Promise<void> {
+  h.toThrow = thrown;
+  const id = `ks1868-degraded-${(n += 1)}`;
+  const redis = redisFailing();
+  const first = await hit(id, redis, false);
+  const second = await hit(id, redis, false);
+  expect(first).toEqual({ rejected: false, nextCalls: 1, status: undefined });
+  expect(second).toEqual({ rejected: false, nextCalls: 0, status: 429 });
+  expect(h.warned).toHaveLength(1);
+  expect(reasonOf(h.warned[0])).toBe(reason);
+  expect(h.errored).toHaveLength(0);
+}
+
+/** One request whose header write throws `thrown`: the request is let through and the line carries text. */
+async function headerWrite(thrown: unknown, reason: string): Promise<void> {
+  h.toThrow = thrown;
+  const out = await hit(`ks1868-headers-${(n += 1)}`, null, true);
+  expect(out).toEqual({ rejected: false, nextCalls: 1, status: undefined });
+  expect(h.errored).toHaveLength(1);
+  expect(h.errored[0][0]).toBe('[rateLimit] could not write the rate-limit headers or the 429 — request allowed unlimited');
+  expect(reasonOf(h.errored[0])).toBe(reason);
+}
+
+describe('KS-1868 the per-client rate limiter logs text for a hostile thrown value', () => {
+  it('control ks1868 C1 a Redis error that is an ordinary Error is logged with its message and the degraded ceiling applies', async () => {
+    await degraded(new Error('redis down'), 'redis down');
+  });
+
+  it('control ks1868 C2 a Redis rejection that is a plain string is logged as its own text and the degraded ceiling applies', async () => {
+    await degraded('plain boom', 'plain boom');
+  });
+
+  it('control ks1868 C3 a header write that throws an ordinary Error is logged with its message and the request is let through', async () => {
+    await headerWrite(new Error('headers boom'), 'headers boom');
+  });
+
+  it('control ks1868 C4 a header write that throws a plain string is logged as its own text and the request is let through', async () => {
+    await headerWrite('plain boom', 'plain boom');
+  });
+
+  it('RED ks1868 R1 a Redis rejection that is a revoked Proxy logs the constant reason and the degraded ceiling applies', async () => {
+    await degraded(revokedProxy(), CONSTANT);
+  });
+
+  it('RED ks1868 R2 a Redis error whose message is a null-prototype object logs the constant reason and the degraded ceiling applies', async () => {
+    await degraded(withMessage(Object.create(null)), CONSTANT);
+  });
+
+  it('RED ks1868 R3 a Redis error whose message is a Symbol logs the Symbol text and the degraded ceiling applies', async () => {
+    await degraded(withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
+  });
+
+  it('RED ks1868 R4 a header write that throws a revoked Proxy logs the constant reason and the request is let through', async () => {
+    await headerWrite(revokedProxy(), CONSTANT);
+  });
+
+  it('RED ks1868 R5 a header write that throws an Error whose message is a null-prototype object logs the constant reason and the request is let through', async () => {
+    await headerWrite(withMessage(Object.create(null)), CONSTANT);
+  });
+
+  it('RED ks1868 R6 a header write that throws an Error whose message is a Symbol logs the Symbol text and the request is let through', async () => {
+    await headerWrite(withMessage(Symbol('ks1868')), 'Symbol(ks1868)');
+  });
+});

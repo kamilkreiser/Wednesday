@@ -1,0 +1,18 @@
+W=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate119-ks1081-pr1937
+A=$W/head2_tree/Blockchain/Dev/services/auth
+T=$A/src/__tests__/ks949-platform-admin-seed-identity.test.ts
+V=$A/src/__tests__/gate119-empty-admin-pw.test.ts
+U=$A/src/repositories/userRepo.ts
+sed "s/ADMIN_USER_PASSWORD: undefined/ADMIN_USER_PASSWORD: ''/g" $T > $V
+echo "empty-string substitutions: $(grep -c "ADMIN_USER_PASSWORD: ''" $V)"
+sha=$(shasum -a 256 $U | cut -d' ' -f1)
+run(){ npm --prefix $A exec -- vitest run --root /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate119-ks1081-pr1937/head2_tree/Blockchain/Dev/services/auth "$@" 2>&1 | grep -E 'Tests |Test Files|FAIL|✗|×' | head -12; }
+echo "== A. head: original ks949 (undefined)"; run src/__tests__/ks949-platform-admin-seed-identity.test.ts
+echo "== B. head: variant with '' instead of undefined for ADMIN_USER_PASSWORD"; run src/__tests__/gate119-empty-admin-pw.test.ts
+echo "== mutant: requiredSeedPw reads ?? null"
+sed -i.bak "s/process.env\[envVar\] || null;/process.env[envVar] ?? null;/" $U
+grep -c "envVar\] ?? null" $U
+echo "== C. mutant: original ks949 (undefined)"; run src/__tests__/ks949-platform-admin-seed-identity.test.ts
+echo "== D. mutant: '' variant"; run src/__tests__/gate119-empty-admin-pw.test.ts
+cp $U.bak $U
+[ "$(shasum -a 256 $U | cut -d' ' -f1)" = "$sha" ] && echo RESTORE_OK || echo RESTORE_BAD
