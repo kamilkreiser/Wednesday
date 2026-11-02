@@ -28,7 +28,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🔴 DELTA 947 — 2026-11-02 18:54 ROTATION HANDOVER (s227 -> successor; statusline 78%; 7d 50%). **READ THIS FIRST, THEN 946 AND ITS 18:43 AMEND LINE, WHOSE LINES STAND EXCEPT AS SAID HERE. Retro done; ledger current. Rulings today 28 incl. two 'thank you'; to-rule 0.**
 - **FIRST ACTS:** reconcile, `kam_rulings_today.sh`; re-arm status_watch on: G288 B1130, G289 B1131 (HPSM-POC) · N90 B1141, N91 B1148 (NexusAI) · G290 B1143, G292 B1150, G294 B1152 (MPS) · G291 B1147 (HPSM-POC) · C81 B1144 (Composer). Path `<project>/1_Project_Definition/Briefs/2026-11-02_B<n>_STATUS.md`.
-- **LIVE panes:** G288 %80 · G289 %82 · N90 %88 · G290 %89 · N91 %90 · G291 %91 · G292 %92 · C81 %93. **WAITER:** G294 B1152 STAMPED, launch_when_cool running; if no `Datasec/MPS-G294` pane and no waiter, launch by its :61 line.
+- **LIVE panes:** G288 %80 · G289 %82 · N90 %88 · G290 %89 · N91 %90 · G291 %91 · G292 %92 · C81 %93 · G294 %94 (launched 18:5x by its waiter; read its pane once for the kit path). **No waiter running.**
 - **READY, gated by:** M79 b1142 @ 7ccc0543 -> G292 · M78 b1139 @ 7e5b6267 -> G294 · C80 b1140 @ 57ecad38 -> G293 (kit drafted, UNREAD, 63 KB; S4 decided in 946) · H104 b1113 @ d654fbb7 -> G291 (round 2 of 2).
 - **NOT READ / NOT STAMPED:** G293 B1151 · B1149 R142 NexusAI records · B1146 M80 (after b1139 LANDS) · B1145 H106 (after card hpsmpoc-425-evidence-sentence-1102).
 - **CARDS OPEN:** hpsmpoc-425-evidence-sentence-1102 (rec a) · composer-l05.
