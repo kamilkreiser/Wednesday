@@ -1,0 +1,47 @@
+{
+  "id": "secuura-ks1561-duplicate-hash-certifier-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1561: When two orgs register the same hash, which one does verify show as the certifier?",
+  "bluf": "Measured by Seat J (2026-10-12) on real routes: org B registers hash H; org A registers the SAME hash H and certifies its own copy; verify(H) then answers 'certified by Org A', although B registered first. No forged field or lineage path is involved. Duplicate hashes across orgs are accepted because K never receives the bytes. So one org can make another org's bytes verify as certified by itself. The outcome is what every verifier sees, including Stuart's Platform S. Wednesday ruled it be filed as a product question, no build.",
+  "sources": [
+    {
+      "ticket": "KS-1561",
+      "comment_date": "description",
+      "quote": "verify(H) says certified by A"
+    },
+    {
+      "ticket": "KS-1561",
+      "comment_date": "description",
+      "quote": "selectVerifiableRow (verification.ts) prefers a certified row, so the later registrant outranks the original"
+    },
+    {
+      "ticket": "KS-1561",
+      "comment_date": "description",
+      "quote": "K never receives the bytes, so there is no proof of possession"
+    },
+    {
+      "ticket": "KS-1561",
+      "comment_date": "description",
+      "quote": "PRODUCT RULING PENDING - NO BUILD"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Certify only for the org holding the ORIGINAL registration (agent build; live verify)",
+      "detail": "Stops the later registrant outranking the original. Some legitimate re-registrations stop showing as certified."
+    },
+    {
+      "key": "b",
+      "label": "List every registrant's certification, labelled (agent build; changes verify contract)",
+      "detail": "Honest about multiplicity (the KS-584 P3 /v2 shape). Platform S must adapt."
+    },
+    {
+      "key": "c",
+      "label": "Keep today's behaviour and state it in the contract (docs only)",
+      "detail": "No code change; the spoofing path stays open and documented."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h nothing changes (option c holding state, no build). Reversible; the exposure remains while it waits."
+}

@@ -1,0 +1,47 @@
+{
+ "id": "secuura-ks655-drift-check-fleet-fix-1102",
+ "client_project": "Secuura/Blockchain",
+ "title": "KS-655: Go-ahead to fix the KS-78 drift check in the launcher across all 16 copies?",
+ "bluf": "The KS-78 drift check at the start of each session is wrong three ways: it counts HEAD but prints 'main'; it anchors on container start time, not image build time; and it anchors on a stock redis image. On the day it printed 7 commits of drift, 212 existed (ticket measurement). Two sessions ignored a true warning. Launch_Claude.command is boot-path for every session, is not under version control, and there are 16 copies across the workspace, so fixing one fixes one of sixteen. No edit made; the ticket says the fleet-wide fix is carried on the WED board gated on your go-ahead.",
+ "sources": [
+  {
+   "ticket": "KS-655",
+   "comment_date": "description",
+   "quote": "reports 7 commits of drift where 212 exist"
+  },
+  {
+   "ticket": "KS-655",
+   "comment_date": "description",
+   "quote": "there are 16 copies of the template across the workspace"
+  },
+  {
+   "ticket": "KS-655",
+   "comment_date": "description",
+   "quote": "Changing it is Kam's call, and Wednesday is carrying the fleet-wide fix on the WED board gated on his go-ahead"
+  },
+  {
+   "ticket": "KS-655",
+   "comment_date": "2026-09-02",
+   "quote": "a workspace decision, not a Platform K one"
+  }
+ ],
+ "options": [
+  {
+   "key": "a",
+   "label": "Go-ahead: fix the check in all 16 launcher copies (changes every project's boot)",
+   "detail": "One consistent fix; ticket acceptance: named branch, build-time baseline, infra images ignored. Each project's own seat applies the fix to its launcher on a brief from Wednesday (Wednesday edits no other project's files)."
+  },
+  {
+   "key": "b",
+   "label": "Fix only the Secuura Blockchain launcher copy",
+   "detail": "Smaller blast radius; the other 15 keep a misleading warning."
+  },
+  {
+   "key": "c",
+   "label": "Leave the check as it is",
+   "detail": "No change to any launcher; the warning stays misleading."
+  }
+ ],
+ "recommended": "a",
+ "default_action": "After 48 h nothing changes (option c): no launcher is edited. Safest and reversible; the ticket stays waiting."
+}

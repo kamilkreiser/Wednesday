@@ -1,0 +1,47 @@
+{
+  "id": "secuura-ks1336-per-tenant-db-priority-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1336: Downgrade the per-tenant database parent from High, or keep it High?",
+  "bluf": "Every tenant shares one database today; isolation is a tenant_id column plus fail-closed RLS, and the per-tenant-DB path exists but is switched off. This ticket is a parent for five blocked tickets and builds nothing. You ruled option (c) on KS-1304 (2026-09-26 07:19): leave it until per-tenant databases are actually planned, with the note 'start planning the database'. The docs correction merged (#1286). The unresolved fork (build a dedicated-DB tier or delete the dormant path) turns on whether a named customer or contract needs physical separation, which the ticket does not say (unverified).",
+  "sources": [
+    {
+      "ticket": "KS-1336",
+      "comment_date": "description",
+      "quote": "Every tenant shares one database today"
+    },
+    {
+      "ticket": "KS-1336",
+      "comment_date": "description",
+      "quote": "Leave it until per-tenant databases are actually planned"
+    },
+    {
+      "ticket": "KS-1336",
+      "comment_date": "description",
+      "quote": "It does not choose between building the opt-in dedicated-database tier and deleting the dormant path"
+    },
+    {
+      "ticket": "KS-1336",
+      "comment_date": "description",
+      "quote": "Nothing is built by this ticket"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Downgrade to Medium and keep parked until per-tenant DBs are planned (board-only)",
+      "detail": "Matches your 09-26 ruling; priority then reflects that nothing is scheduled."
+    },
+    {
+      "key": "b",
+      "label": "Keep High, commission a planning note: dedicated tier vs delete path (no code)",
+      "detail": "Documents only; follows 'start planning the database'. Needs a named customer need to decide."
+    },
+    {
+      "key": "c",
+      "label": "Keep High and parked exactly as is",
+      "detail": "No change."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h nothing changes (option c): priority stays High, ticket parked. Safest and reversible."
+}

@@ -1,0 +1,47 @@
+{
+  "id": "secuura-ks624-prism-random-byte-proof-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-624: Make prism refuse to issue fake credentials, make it real, or leave it as a stub?",
+  "bluf": "services/prism issues credentials whose Ed25519 proof is 64 random bytes and its /verify returns passed:true without checking. PRISM_MODE is never branched on and /health reports mode 'basic' while forging. Reachability: the gateway routes only /api/did to prism and nothing in the repo calls it, so the risk is latent, not live (ticket measurement). The same pattern was fixed in vc-issuer (A-11) and in wallet-connector (PR #685, 501). The deciding question is whether prism has a real future. Also affects the sibling KS-625.",
+  "sources": [
+    {
+      "ticket": "KS-624",
+      "comment_date": "description",
+      "quote": "proofValue: crypto.randomBytes(64).toString('base64')"
+    },
+    {
+      "ticket": "KS-624",
+      "comment_date": "description",
+      "quote": "PRISM_MODE is decorative. It is never branched on"
+    },
+    {
+      "ticket": "KS-624",
+      "comment_date": "description",
+      "quote": "The gateway does not route to prism's credential path"
+    },
+    {
+      "ticket": "KS-624",
+      "comment_date": "2026-08-13",
+      "quote": "KS-624 and KS-625 remain by-design-or-remediate"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Prism refuses to issue (501), stops reporting 'basic' (agent build; small prod change)",
+      "detail": "Honest stub, the shape wallet-connector C-2 took. No internal consumers per ticket."
+    },
+    {
+      "key": "b",
+      "label": "Make prism a real DID/VC service using the A-11 vc-issuer fix as template (big build)",
+      "detail": "Larger Wave-2 build; not sized in the ticket. Production change."
+    },
+    {
+      "key": "c",
+      "label": "By design: leave prism unchanged (latent), record the reason",
+      "detail": "No change. A false 'basic' answer and forged proofs remain one route mapping from reachable."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h nothing changes (option c holding state, latent per the ticket). Reversible; the ticket stays parked for your ruling."
+}

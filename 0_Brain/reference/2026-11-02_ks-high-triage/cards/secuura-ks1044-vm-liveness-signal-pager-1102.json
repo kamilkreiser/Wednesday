@@ -1,0 +1,47 @@
+{
+  "id": "secuura-ks1044-vm-liveness-signal-pager-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1044: Which independent liveness monitor for our VMs, and who gets paged?",
+  "bluf": "Kintsugi was dead for 53 h and Azure health read 'Available' the whole time; the first signal was Stuart's tooling, a person. The same missing control let KS-670 (demo verification down 6 days) go unseen. Azure live-migrates the box routinely and the guest did not survive, so a repeat is possible and nothing would tell us. Any monitor must make a request that traverses the app and alert on silence. Whether the demo VM has the same exposure is not measured. Cost and who is paged are unverified (not stated in the ticket); a monitor adds a resource in Secuura's Azure.",
+  "sources": [
+    {
+      "ticket": "KS-1044",
+      "comment_date": "description",
+      "quote": "was down for 53 hours and nothing told us"
+    },
+    {
+      "ticket": "KS-1044",
+      "comment_date": "description",
+      "quote": "Azure marked the box Available at 03:59:30Z"
+    },
+    {
+      "ticket": "KS-1044",
+      "comment_date": "description",
+      "quote": "Whether the demo VM has the same exposure"
+    },
+    {
+      "ticket": "KS-1044",
+      "comment_date": "description",
+      "quote": "alert on silence"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Outside probe through the app for demo+kintsugi, alert on silence (new service, spend)",
+      "detail": "Detects a dead guest even when Azure says Available. Pages whoever you name (default: you). Cost unverified."
+    },
+    {
+      "key": "b",
+      "label": "Azure-side absence alert (no logs / no heartbeat) in Secuura's Azure; new Azure resource",
+      "detail": "Stays in our tenant but depends on log shipping surviving a dead guest. Cost unverified."
+    },
+    {
+      "key": "c",
+      "label": "No new monitor; keep finding outages by hand",
+      "detail": "Zero spend. Same 53 h blind spot can recur."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h nothing is built or paid for (option c, status quo, reversible). The ticket stays in Backlog; the exposure remains."
+}

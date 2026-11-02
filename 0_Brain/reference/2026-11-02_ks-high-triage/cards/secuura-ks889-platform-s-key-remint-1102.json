@@ -1,0 +1,47 @@
+{
+  "id": "secuura-ks889-platform-s-key-remint-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-889: Re-mint Platform S's API keys (Stuart's window) or accept without a backfill?",
+  "bluf": "Measured on the demo box 2026-09-06: no existing key row says which connector it belongs to. A backfill would recover 5 of 32 active keys (16%), leave 26 with no evidence and 1 ambiguous. So the KS-843 flip (SUBJECTS_ERASE_SCOPE_ENFORCED, after the log shows Platform S on the new key) cannot get its evidence from existing keys; re-mint is the only sound path. A re-mint changes production credentials and needs Stuart's window (client-facing, communication from you). The comment says it is not a request to anyone, no message has gone to Platform S.",
+  "sources": [
+    {
+      "ticket": "KS-889",
+      "comment_date": "2026-09-06",
+      "quote": "a backfill is NOT possible; re-mint is the only path"
+    },
+    {
+      "ticket": "KS-889",
+      "comment_date": "2026-09-06",
+      "quote": "recover 5 of 32 active keys (16%)"
+    },
+    {
+      "ticket": "KS-889",
+      "comment_date": "2026-09-06",
+      "quote": "The re-mint is Stuart's window and Kam's call"
+    },
+    {
+      "ticket": "KS-889",
+      "comment_date": "2026-09-06",
+      "quote": "no message has gone to Platform S from here"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Re-mint Platform S keys in a window agreed with Stuart (prod credentials + message)",
+      "detail": "Gives clean KS-843 evidence. Stuart must plan the switchover; merges with the KS-577 rotation conversation. You message Stuart."
+    },
+    {
+      "key": "b",
+      "label": "Accept: no re-mint; decide the KS-843 flip on other evidence or keep logged grace",
+      "detail": "No credential change and no message to Stuart. Existing keys keep logging connectorId null."
+    },
+    {
+      "key": "c",
+      "label": "Defer the choice until you and Stuart next discuss the KS-577 rotation window",
+      "detail": "No action now; the KS-843 flip keeps waiting."
+    }
+  ],
+  "recommended": "c",
+  "default_action": "After 48 h option c applies: no re-mint, no message to Stuart, the KS-843 flip keeps waiting. Safest and reversible."
+}

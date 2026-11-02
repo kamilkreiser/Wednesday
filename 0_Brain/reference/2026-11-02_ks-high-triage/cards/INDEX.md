@@ -1,0 +1,21 @@
+KS-1669 | secuura-ks1669-renovate-systemtest-pins-1102 | a (keep Renovate for systemTest pins only, docs say so) | status quo already equals this; one config-file question, no client impact
+KS-1389 | secuura-ks1389-slot-target-unslotted-export-1102 | a (approve 3-part change) | nothing broken today, but the shared slot-group acceptance already requires it; touches every dev's push flow
+KS-1044 | secuura-ks1044-vm-liveness-signal-pager-1102 | a (outside probe through the app, alert on silence) | 53 h outage went unseen; Azure health lied; cost and pager target unverified
+KS-869 | ALREADY RULED: card secuura-880-merge-kam-platform-s-cutover => merge (2026-09-14, by Kam's own act: he merged #880 as 7d7f6bd5) | n/a | Option 1 accepted by the merge; only KS-889 (re-mint) is left open, so close KS-869 or fold into KS-889
+KS-968 | secuura-ks968-admin-seed-first-boot-outcome-1102 | a (accept suspension of email-row account, read-only check first) | first boot suspends the admin@secuura.com account; env states unknown, demo probing forbidden
+KS-1012 | ALREADY RULED (parts 1-2): cards secuura-develop-merge-frozen-branch-protection (Kam unticked status checks 2026-09-10 09:23) and secuura-required-approvals-zero-after-the-untick => raise-to-1 (2026-09-10 10:38) | n/a | Part 3 (admin ALWAYS bypass) was never ruled; delivery of raise-to-1 and current ruleset state unverified. Wednesday may raise one small bypass card.
+KS-1516 | secuura-ks1516-unverified-timestamp-claims-1102 | a (report verified:false until a real check exists) | live API reports mock timestamps verified and accepts a forged proof; backfill of stored rows is a separate approval
+KS-491 | secuura-ks491-waf-captcha-product-spend-1102 | a (commission costed options note, no spend) | no WAF, no CAPTCHA; marked Kam-gated product+spend; no prices in ticket
+KS-590 | secuura-ks590-verify-disclosure-four-questions-1102 | a (strict: no tenant-owned naming incl. org UUID) | Peter blocked on four disclosure rulings; changes what verifiers (incl. Platform S) see
+KS-602 | secuura-ks602-bm1-certification-model-1102 | b (confirm spec, commission planning/sizing only) | definition recorded at 08-11 weekly; likely an epic; default keeps it parked
+KS-603 | secuura-ks603-bm2-verification-workflow-1102 | b (confirm spec, commission planning note only) | definition + your PS-556 ruling recorded; size unknown; default keeps it parked
+KS-624 | secuura-ks624-prism-random-byte-proof-1102 | a (prism refuses to issue, stops saying 'basic') | forged-proof stub, latent not live; /health misreports its mode
+KS-655 | secuura-ks655-drift-check-fleet-fix-1102 | a (fix all 16 launcher copies) | drift warning understated 212 as 7; boot-path change across every project
+KS-889 | secuura-ks889-platform-s-key-remint-1102 | c (defer until the KS-577 rotation window talk with Stuart) | backfill recovers 5 of 32 keys; re-mint is Stuart-facing production credential change
+KS-1087 | secuura-ks1087-workflow-approve-credential-1102 | b (measure reachability read-only first, no build) | item 1 merged; item 2 reach unproven; auth-path change
+KS-1336 | secuura-ks1336-per-tenant-db-priority-1102 | a (downgrade to Medium, stay parked) | matches your 09-26 KS-1304 ruling (c); nothing scheduled
+KS-1561 | secuura-ks1561-duplicate-hash-certifier-1102 | a (certify only for the org holding the original registration) | later registrant can make another org's bytes verify as certified by itself; verifiers see it
+KS-229 | secuura-ks229-assurance-tracker-close-1102 | b (close tracker, children stay) | no deliverable of its own; earlier rulings were SECURITY.md/CODEOWNERS only, not closing
+KS-256 | ALREADY RULED: card secuura-ks304-ks256-bounces => A (2026-09-02 19:37; ticket comment "RULED — Kam's action": "do your sign-off pass and close it") | n/a | It is your own act, not a decision; Peter's LoginRequest-lockout example is a separate fix
+KS-601 | secuura-ks601-kintsugi-split-close-1102 | a (close; leftovers on KS-1044/KS-1100) | kintsugi live and receiving deploys; demo-role flip and today's deploy routing unverified
+KS-762 | secuura-ks762-db-password-rotation-confirm-1102 | b (if rotation not done, schedule it first) | you ruled rotate+keep defaults; rotation status never recorded; switch breaks local stacks

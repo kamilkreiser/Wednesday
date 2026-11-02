@@ -1,0 +1,47 @@
+{
+  "id": "secuura-ks590-verify-disclosure-four-questions-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-590: Peter's four verify-by-hash disclosure questions: tighten or leave?",
+  "bluf": "Peter (2026-10-06) asks you to rule four points, each changing what the cross-tenant test asserts: (1) certification.certifierOrganizationId survives scoping, so is an org UUID tenant-owned naming? (2) both chain-first branches skip scopeTenantFields; (3) rows with no tenancy info are never scrubbed; (4) the by-id path is never scoped. Anonymous verify stays a public 200 path (earlier ruling carried in the ticket). Tightening changes what verifiers, including Stuart's Platform S, see (production change once built); impact on S consumers unverified.",
+  "sources": [
+    {
+      "ticket": "KS-590",
+      "comment_date": "2026-10-06",
+      "quote": "What's still missing is an answer to the four disclosure questions"
+    },
+    {
+      "ticket": "KS-590",
+      "comment_date": "2026-10-06",
+      "quote": "Does an org UUID count as tenant-owned naming?"
+    },
+    {
+      "ticket": "KS-590",
+      "comment_date": "2026-10-06",
+      "quote": "The by-id path selects no tenant_id, so it is never scoped"
+    },
+    {
+      "ticket": "KS-590",
+      "comment_date": "2026-10-06",
+      "quote": "a test shouldn't settle them on its own"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Strict: no tenant-owned naming incl. org UUID on all four paths (changes live verify)",
+      "detail": "Agent build. Closes all four gaps. Verifiers incl. Platform S stop seeing the org id; confirm with Stuart first."
+    },
+    {
+      "key": "b",
+      "label": "Fix gaps 2-4 (unscoped code paths) but allow the org UUID to be shown",
+      "detail": "Smaller change; keeps the org id in verify output."
+    },
+    {
+      "key": "c",
+      "label": "No ruling yet: Peter writes the test rows that do not depend on these; row 4 stays open",
+      "detail": "No production change."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h option c applies: no ruling, no code change; Peter proceeds with the unaffected test rows. Safest and reversible."
+}

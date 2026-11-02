@@ -1,0 +1,47 @@
+{
+  "id": "secuura-ks1516-unverified-timestamp-claims-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1516: What may an unverified opentimestamps/blockchain timestamp claim?",
+  "bluf": "Today, creating an opentimestamps or blockchain timestamp answers verified:true and stores verified=true, though both proofs are generated locally (placeholders). /api/timestamps/verify also returns verified:true for a forged opentimestamps proof with no stored row. KS-1404 closed this forgery path for rfc3161 only. It is a mock reported as verified on an evidentiary path, filed P2. Any choice changes the live API's answers (production change once built). Fixing already-stored rows is a separate approval of yours and not decided here.",
+  "sources": [
+    {
+      "ticket": "KS-1516",
+      "comment_date": "description",
+      "quote": "creating an opentimestamps or blockchain timestamp answers verified: true and persists verified = true"
+    },
+    {
+      "ticket": "KS-1516",
+      "comment_date": "description",
+      "quote": "with no stored row returns verified: true from /verify"
+    },
+    {
+      "ticket": "KS-1516",
+      "comment_date": "description",
+      "quote": "KS-1404 closed this same forgery path for rfc3161 only"
+    },
+    {
+      "ticket": "KS-1516",
+      "comment_date": "description",
+      "quote": "A backfill is approval-class (Kam)"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Report verified:false for both types until a real check exists (changes live API)",
+      "detail": "Agent build. Honest and simplest. Existing clients see verified:false for these types."
+    },
+    {
+      "key": "b",
+      "label": "Require a stored row and honour its verified column (agent build; changes live API)",
+      "detail": "Rfc3161 shape. Closes the forgery path; creation still stores verified=true unless also changed."
+    },
+    {
+      "key": "c",
+      "label": "Stop advertising the two types in supportedTypes (changes live API)",
+      "detail": "Agent build. Removes the claim entirely; clients using the types would be affected."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h nothing is built and nothing changes (the safest reversible state; the false claim stays live meanwhile). The ticket stays parked for your ruling."
+}

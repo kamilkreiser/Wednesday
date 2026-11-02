@@ -1,0 +1,42 @@
+{
+  "id": "secuura-ks1389-slot-target-unslotted-export-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1389: Approve the coordinated slot-target.sh / preflight leg 13 / pre-push change?",
+  "bluf": "Nothing is broken today. Sourcing slot-target.sh with no slot silently exports slot 1's targets, and preflight leg 13 plus the pre-push hook rely on that on purpose, so it cannot simply be made to refuse (every push would be refused). Fixing it means changing three pieces together, including the pre-push hook and preflight, which affect every developer's push (Peter, Stuart, you). The ticket now also lists this as part of a five-ticket 'no silent slot-1 default' group. Peter raised it for you rather than touch your files.",
+  "sources": [
+    {
+      "ticket": "KS-1389",
+      "comment_date": "description",
+      "quote": "No action is needed today, and nothing is broken on the trunk"
+    },
+    {
+      "ticket": "KS-1389",
+      "comment_date": "description",
+      "quote": "leg 13's positive control would then refuse every push"
+    },
+    {
+      "ticket": "KS-1389",
+      "comment_date": "description",
+      "quote": "the three pieces have to move together, and the hook and preflight are yours"
+    },
+    {
+      "ticket": "KS-1389",
+      "comment_date": "description",
+      "quote": "Peter's ruling (2026-09-29): raise it for you rather than change your files"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Approve the 3-part change (agent build; edits pre-push hook + preflight for all pushers)",
+      "detail": "slot-target.sh refuses unslotted; leg 13 measures with an explicit slot; pre-push reports SKIPPED not slot 1. Size M, needs a QA gate. Changes every dev's push flow."
+    },
+    {
+      "key": "b",
+      "label": "Accept as-is: leave slot-target.sh, leg 13 and the hook unchanged",
+      "detail": "No change. The TypeScript harnesses already refuse unslotted runs; the export remains the last silent slot-1 default."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h nothing changes (option b): no edit to slot-target.sh, preflight or the pre-push hook. Safest and fully reversible; you can still approve later."
+}

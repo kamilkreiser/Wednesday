@@ -1,0 +1,47 @@
+{
+  "id": "secuura-ks968-admin-seed-first-boot-outcome-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-968: Per environment, what should happen to the account holding admin@secuura.com on first boot?",
+  "bluf": "PR #1485 is merged. In the 'both rows present, no ADMIN_USER_PASSWORD' state its first boot SUSPENDS the account holding admin@secuura.com (locks out anyone logging in as that address). Setting ADMIN_USER_PASSWORD instead re-activates the email row as system_admin, even if it was an OWNER. Which environment is in which state is unknown; the ticket forbids probing demo. The triage reports the fix is deployed to kintsugi; the ticket text does not say so (unverified). Credentials and login access at stake; no client sees it.",
+  "sources": [
+    {
+      "ticket": "KS-968",
+      "comment_date": "2026-10-12",
+      "quote": "the first boot of this code suspends the account that holds admin@secuura.com"
+    },
+    {
+      "ticket": "KS-968",
+      "comment_date": "2026-10-12",
+      "quote": "RE-ACTIVATES the EMAIL row as system_admin"
+    },
+    {
+      "ticket": "KS-968",
+      "comment_date": "2026-10-12",
+      "quote": "Which outcome each environment gets is Kam's choice"
+    },
+    {
+      "ticket": "KS-968",
+      "comment_date": "2026-10-12",
+      "quote": "this ticket forbids probing demo"
+    }
+  ],
+  "options": [
+    {
+      "key": "a",
+      "label": "Accept suspension of the email-row account; use the id row (read-only check first)",
+      "detail": "Matches the fix's intent (KS-966 F3). Deploy seat checks each environment read-only first; kintsugi first, demo only on your word. No production change yet."
+    },
+    {
+      "key": "b",
+      "label": "Set ADMIN_USER_PASSWORD per environment (production credential change)",
+      "detail": "Keeps that login active but the gate flagged it re-activates the email row as system_admin, even if it was an OWNER."
+    },
+    {
+      "key": "c",
+      "label": "Hold: no demo deploy of #1485, no password change; read-only look at kintsugi only",
+      "detail": "Nothing changes in production. Per-environment decision waits for the read-only state."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h option c applies: no ADMIN_USER_PASSWORD change and no demo deploy of #1485; only a read-only look at kintsugi. Safest and reversible."
+}
