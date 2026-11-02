@@ -15266,5 +15266,12 @@
   "project": "Secuura",
   "ts": "2026-11-02T15:15:04.284815+11:00",
   "text": "Board cleanup, first pass done. These counts come straight from the board, just now. In Review went from 52 to 24. Open High went from 206 to 167, and open Urgent from 18 to 13. The two close-out seats checked 123 tickets against the code deployed on kintsugi. 56 were done and are now closed and archived, each with an evidence comment. 65 stay open with a comment saying exactly what's left. Your five board rulings are done too.\n\nMost of what's left open is one of three things. First, a live check the author still owes, which needs a test write on kintsugi. You already approved test logins for those, so a sweep seat comes next. Second, a deploy step. Third, real work still to build. Five also need a decision from you; those will come as cards.\n\nMeanwhile merges continue. 29 PRs since last night, all gated. Nothing deployed."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T16:04:01.429931+11:00",
+  "text": "Secuura / Blockchain — FYI, no action needed.\n\nA raise seat found a governance defect that predates today. When the lookup of a proposer fails, the service treats them as unregistered. createProposal then re-registers them at the minimum stake, which overwrites their real record: a DRep with 100,000 vote power came out at 1,000 and no longer a DRep. registerParticipant creates a duplicate record for the same wallet, and one participant route sends no answer at all.\n\nThis happens today for ordinary database errors. One of today's held fixes would have extended it to more errors, so I held that pass and shipped only the safe one.\n\nFiled as KS-1940, High, linked to KS-1732. The limit: this was measured on a stateful fake database, not real PostgreSQL. Next, a seat fixes it so a failed lookup answers 503 and writes nothing; it goes through an Opus gate before any merge."
  }
 ]
