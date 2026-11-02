@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 19:4x STATE (the 19:2x successor seat, ctx ~25%; READ FIRST, supersedes below where they differ)
+- **develop b4d5f56d1ce6** (#1933 MERGED 08:36:12Z, B 77th; msal row gone, ZOD row still expires 2026-11-09 = S 13th's PR 2). No GO of mine outstanding.
+- **B 77th queue: PR 1934** (KS-1413, tier 2, QUEUED 08:29:59Z; E 28th's <MASKED> literals ACCEPTED). At B's READY (on develop b4d5f56d; B predicts tree 05a01ef8): pre-GO checks -> GO. KS-1413 stays open.
+- **GATE 117 (Opus, TIER 1) RUNNING on PR 1935** (E 28th, KS-1938 GDPR retention sweep, head 9af830dae73a; workdir 0_Brain/reference/2026-11-02_gate117-ks1938-pr1935/; subagent of this seat — RE-LAUNCH if no verdict.md and this seat died; headline Q: any path deleting/anonymising MORE than an ordinary Error). STATUS mailed to E 28th. E 28th PRs 3-4 in the push queue.
+- **SPARK OPERATOR 82 (Sonnet) RUNNING:** G113-F1 auth + G114-F1 anchors coercing-String follow-ups (O81's fix form), governance excluded (F 23rd live); report 0_Brain/reference/2026-11-02_spark-operator82/. Re-commission from spark_operator_common.md + this line if it died.
+- **KS-1724 'Measure first' (Kam 19:15:02 = a):** REPO FIRST (the demo edge conf is bind-mounted from the box checkout, docker-compose.yml:2298; a box edit is drift + the single-file mount pins the old inode). ADDENDUM sent to S 13th: PR 5 = `$request_length` appended to `log_format secuura_edge` (nginx-demo.conf:111), tier 2 Sonnet gate. AFTER it merges: brief a lane D seat (Opus, D 49th; ordinal grep 0 at 19:3x) to rsync exactly that merged file to DEMO, recreate/reload nginx-gateway so the new inode is seen, verify one logged line, keep rollback; then --delivered on the card; read sizes ~2026-11-09; card Kam a lower-limit proposal.
+- **V 16th:** PR 1 (KS-1939) + PR 2 (verify surface) BUILT AND PROVEN, push queued -> Opus gate each at READY (T1).
+- Boot digest NOT read whole by this seat (664 KB; the 17:4x seat's whole read cost ~35 ctx points and it rotated <2 h later). Consolidation (ruling b) still owed.
+
 ## 19:2x LAST LINES (newest; read with the 19:1x block)
 - **PR 1933 is NOT yet READY:** B 77th's tool refused its title "KS-1725: ..." (no "Refs" prefix; my S 13th brief's fault, ledger row). ASK sent to S 13th 19:2x: retitle to "Refs KS-1725: ..." (title only) and mail RETITLED. Then B 77th re-pins and sends READY TO MERGE -> pre-GO checks -> GO (tree was 83d354e7 on 66a36e3f; lock-path check clean; baseline diff = exactly the msal row). **fleet_ack of B 77th's 08:20Z title QUESTION returned rc 3 (collector): re-ack.**
 - **GATE 116 DONE = GO WITH NOTES on PR 1934** (E 28th, KS-1413 banners, tier 2): relayed 19:2x; E 28th PATCHes G116-F1..F6 + one KS-1413 comment listing the remainder (start-secuura.sh :614, repro.sh :143, deploy.sh, smoke-test.sh, auth-matrix-smoke.sh, start-local.sh) -> at its NOTES PATCHED: QUEUE 1934 to B 77th. KS-1413 stays open.
