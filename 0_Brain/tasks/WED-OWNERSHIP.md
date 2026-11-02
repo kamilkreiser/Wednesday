@@ -205,3 +205,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-01 07:46 | Kamils-MBP | pane_close.sh: exempt the pane's own claude seat process listener (Claude Code 2.1.316 listens on 127.0.0.1) | CLOSED |  2026-11-01 07:48 fixed + armed, commit pushed |
 | 2026-11-02 06:07 | Kamils-Mac-mini | Launch_Wednesday.command boot step 3: seat-scope the scoreboard head read (Datasec seat reads Datasec rows only) | CLOSED |  2026-11-02 06:07 done 6b2134ff7; next boot is the test |
 | 2026-11-02 14:09 | Kamils-Mac-mini | store_guard refusal prints shas only, no commit subjects (client isolation) | CLOSED |  2026-11-02 14:09 done, hashes only; fired on a scratch repo, arms 9 6 21 pass |
+| 2026-11-03 05:45 | Kamils-MBP | spark round.sh deps store: node_modules from tip lockfiles, not the Secuura checkout (zod 4 drift break 2026-11-03) | OPEN | |
