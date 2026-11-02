@@ -1,0 +1,159 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// KS-1868 (QA gate 109, G109-F1/F2): `BlockchainVerifierService` guards the READ of the thrown value's `message`
+// in its two catch blocks, but does not coerce it. When the `message` getter SUCCEEDS and returns a hostile
+// NON-string (a revoked Proxy, an object whose `toString` throws, a null-prototype object), the hostile value is
+// logged and returned as is: the real winston logger throws while formatting it, so the route answers 500 and
+// stores nothing. Two catch blocks: the Blockfrost client construction in `getClient` (answers "verification
+// disabled", i.e. a pending verification) and the transaction lookup in `verifyTransaction` (answers an
+// unverified 'error' status). The Blockfrost stand-in is a plain class, not vi.fn(): a spy inspects what it
+// rejects with and could itself fail on a revoked Proxy before the code under test saw it.
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  initThrows: false,
+  warn: vi.fn(),
+  error: vi.fn(),
+}));
+
+vi.mock('../utils/logger', () => ({
+  logger: { info: vi.fn(), warn: h.warn, error: h.error, debug: vi.fn() },
+}));
+
+vi.mock('@blockfrost/blockfrost-js', () => ({
+  BlockFrostAPI: class {
+    constructor() {
+      if (h.initThrows) throw h.toThrow;
+    }
+    txs() {
+      return Promise.reject(h.toThrow);
+    }
+  },
+}));
+
+import { BlockchainVerifierService } from '../services/blockchain-verifier.service';
+
+const HASH = 'ks1868txhash';
+
+const revoked = () => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+
+const toStringThrows = () => ({
+  toString() {
+    throw new Error('toString boom');
+  },
+});
+
+// An Error whose `message` getter succeeds but returns the given value.
+const withMessage = (value: () => unknown) =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        return value();
+      },
+    },
+  });
+
+// Compare strings, never a hostile value: `toEqual` on a revoked Proxy would throw inside the assertion itself.
+const plain = (v: unknown): unknown => (typeof v === 'string' ? v : '<non-string>');
+
+const answer = async (): Promise<unknown> => {
+  try {
+    const r = (await new BlockchainVerifierService().verifyTransaction(HASH)) as unknown as Record<string, unknown>;
+    const out: Record<string, unknown> = { verified: r.verified, status: r.status };
+    if ('error' in r) out.error = plain(r.error);
+    return { resolved: out };
+  } catch (e) {
+    return { rejected: true };
+  }
+};
+
+const logged = (fn: { mock: { calls: unknown[][] } }, text: string): unknown[] =>
+  fn.mock.calls.filter((c) => String(c[0]).includes(text)).map((c) => plain((c[1] as { error?: unknown }).error));
+
+const UNREADABLE = ['unreadable thrown value'];
+const LOOKUP_UNREADABLE = { resolved: { verified: false, status: 'error', error: 'unreadable thrown value' } };
+
+describe('KS-1868 `BlockchainVerifierService` coerces a non-string message safely', () => {
+  const saved = process.env.BLOCKFROST_API_KEY;
+
+  beforeEach(() => {
+    h.toThrow = undefined;
+    h.initThrows = false;
+    h.warn.mockReset();
+    h.error.mockReset();
+    process.env.BLOCKFROST_API_KEY = 'ks1868-real-looking-key';
+  });
+
+  afterEach(() => {
+    if (saved === undefined) delete process.env.BLOCKFROST_API_KEY;
+    else process.env.BLOCKFROST_API_KEY = saved;
+  });
+
+  it('control ks1868 C1 init: an ordinary Error from the client constructor logs its message and verification stays pending', async () => {
+    h.initThrows = true;
+    h.toThrow = new Error('bad project id');
+    expect(await answer()).toEqual({ resolved: { verified: false, status: 'pending' } });
+    expect(logged(h.warn, 'Blockfrost client init failed')).toEqual(['bad project id']);
+  });
+
+  it('control ks1868 C2 init: a thrown plain string is logged as itself and verification stays pending', async () => {
+    h.initThrows = true;
+    h.toThrow = 'plain string';
+    expect(await answer()).toEqual({ resolved: { verified: false, status: 'pending' } });
+    expect(logged(h.warn, 'Blockfrost client init failed')).toEqual(['plain string']);
+  });
+
+  it('control ks1868 C3 lookup: an ordinary Error logs its message and answers an unverified error status', async () => {
+    h.toThrow = new Error('upstream 500');
+    expect(await answer()).toEqual({ resolved: { verified: false, status: 'error', error: 'upstream 500' } });
+    expect(logged(h.error, 'Error verifying transaction')).toEqual(['upstream 500']);
+  });
+
+  it('RED ks1868 R1 init: a message that is a revoked Proxy logs a constant reason and verification stays pending', async () => {
+    h.initThrows = true;
+    h.toThrow = withMessage(revoked);
+    expect(await answer()).toEqual({ resolved: { verified: false, status: 'pending' } });
+    expect(logged(h.warn, 'Blockfrost client init failed')).toEqual(UNREADABLE);
+  });
+
+  it('RED ks1868 R2 init: a message whose toString throws logs a constant reason and verification stays pending', async () => {
+    h.initThrows = true;
+    h.toThrow = withMessage(toStringThrows);
+    expect(await answer()).toEqual({ resolved: { verified: false, status: 'pending' } });
+    expect(logged(h.warn, 'Blockfrost client init failed')).toEqual(UNREADABLE);
+  });
+
+  it('RED ks1868 R3 init: a null-prototype message logs a constant reason and verification stays pending', async () => {
+    h.initThrows = true;
+    h.toThrow = withMessage(() => Object.create(null));
+    expect(await answer()).toEqual({ resolved: { verified: false, status: 'pending' } });
+    expect(logged(h.warn, 'Blockfrost client init failed')).toEqual(UNREADABLE);
+  });
+
+  it('RED ks1868 R4 lookup: an Error whose message is a revoked Proxy answers an unverified error status with a constant reason', async () => {
+    h.toThrow = withMessage(revoked);
+    expect(await answer()).toEqual(LOOKUP_UNREADABLE);
+    expect(logged(h.error, 'Error verifying transaction')).toEqual(UNREADABLE);
+  });
+
+  it('RED ks1868 R5 lookup: an Error whose message toString throws answers an unverified error status with a constant reason', async () => {
+    h.toThrow = withMessage(toStringThrows);
+    expect(await answer()).toEqual(LOOKUP_UNREADABLE);
+    expect(logged(h.error, 'Error verifying transaction')).toEqual(UNREADABLE);
+  });
+
+  it('RED ks1868 R6 lookup: an Error with a null-prototype message answers an unverified error status with a constant reason', async () => {
+    h.toThrow = withMessage(() => Object.create(null));
+    expect(await answer()).toEqual(LOOKUP_UNREADABLE);
+    expect(logged(h.error, 'Error verifying transaction')).toEqual(UNREADABLE);
+  });
+
+  it('RED ks1868 R7 lookup: a non-Error object whose message is a revoked Proxy answers an unverified error status with a constant reason', async () => {
+    h.toThrow = { message: revoked() };
+    expect(await answer()).toEqual(LOOKUP_UNREADABLE);
+    expect(logged(h.error, 'Error verifying transaction')).toEqual(UNREADABLE);
+  });
+});

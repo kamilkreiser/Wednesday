@@ -1,0 +1,25 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o80_g2_nftcertificate_blockchain_verifier_catches_coerce_message
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/blockchain-verifier.service.ts
+@@ -67,7 +67,7 @@
+       // "verification disabled", never escape as a 500.
+       let reason: string;
+       try {
+-        reason = err instanceof Error ? err.message : String(err);
++        reason = String(err instanceof Error ? err.message : err);
+       } catch {
+         reason = 'unreadable thrown value';
+       }
+@@ -108,8 +108,8 @@
+       // Blockfrost returns 404 for transactions not yet on-chain
+       try {
+         void (err as { status_code?: number }).status_code;
+-        void (err instanceof Error ? err.message : String(err));
+-        void (err as Error).message;
++        void String(err instanceof Error ? err.message : err);
++        void String((err as Error).message);
+       } catch {
+         logger.error('Error verifying transaction', { error: 'unreadable thrown value' });
+         return { verified: false, status: 'error', error: 'unreadable thrown value' };
+

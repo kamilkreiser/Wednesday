@@ -1,0 +1,141 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// KS-1868 (QA gate 108, G108-F1): the three provider `upload` methods of `IPFSService` read the thrown value's
+// `message` inside a guard, but then use it in a template string OUTSIDE that read. When the `message` getter
+// SUCCEEDS and returns a hostile NON-string (a revoked Proxy, an object whose `toString` throws, a null-prototype
+// object, a Symbol), the template throws inside the catch block and `upload()` rejects instead of answering
+// `{ success: false, error }`. The `fetch` stand-in is a plain function, not vi.fn(): a spy inspects what it
+// rejects with and could itself fail on a revoked Proxy before the code under test saw it.
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+}));
+
+vi.mock('../utils/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+
+import { IPFSService } from '../services/ipfs.service';
+
+const REQUEST = { data: Buffer.from('ks1868'), filename: 'ks1868.bin', mimeType: 'application/octet-stream', encrypted: false };
+
+const KEYS = { apiKey: 'k', secretKey: 's' };
+
+const pinata = () => new IPFSService('pinata', KEYS);
+const infura = () => new IPFSService('infura', KEYS);
+const web3 = () => new IPFSService('web3storage', { apiKey: 'token-ks1868' });
+
+const answer = async (make: () => IPFSService): Promise<unknown> => {
+  try {
+    return { resolved: await make().upload(REQUEST) };
+  } catch (e) {
+    return { rejected: true };
+  }
+};
+
+const requestRejects = () => vi.stubGlobal('fetch', () => Promise.reject(h.toThrow));
+
+// An Error whose `message` getter succeeds but returns the given value.
+const withMessage = (value: () => unknown) =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        return value();
+      },
+    },
+  });
+
+const revoked = () => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+
+const toStringThrows = () => ({
+  toString() {
+    throw new Error('toString boom');
+  },
+});
+
+const failed = (text: string) => ({ resolved: { success: false, error: text } });
+
+describe('KS-1868 `IPFSService.upload` coerces a non-string message safely', () => {
+  beforeEach(() => {
+    h.toThrow = undefined;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('control ks1868 C1 pinata: an ordinary Error is reported with its own message', async () => {
+    h.toThrow = new Error('connect refused');
+    requestRejects();
+    expect(await answer(pinata)).toEqual(failed('Pinata upload error: connect refused'));
+  });
+
+  it('control ks1868 C2 infura: an ordinary Error is reported with its own message', async () => {
+    h.toThrow = new Error('connect refused');
+    requestRejects();
+    expect(await answer(infura)).toEqual(failed('Infura upload error: connect refused'));
+  });
+
+  it('control ks1868 C3 web3storage: an ordinary Error is reported with its own message', async () => {
+    h.toThrow = new Error('connect refused');
+    requestRejects();
+    expect(await answer(web3)).toEqual(failed('Web3.Storage upload error: connect refused'));
+  });
+
+  it('control ks1868 C4 pinata: a thrown plain string has no message and is reported as before', async () => {
+    h.toThrow = 'plain string';
+    requestRejects();
+    expect(await answer(pinata)).toEqual(failed('Pinata upload error: undefined'));
+  });
+
+  it('RED ks1868 R1 pinata: a message that is a revoked Proxy is reported with a constant reason', async () => {
+    h.toThrow = withMessage(revoked);
+    requestRejects();
+    expect(await answer(pinata)).toEqual(failed('Pinata upload error: unreadable thrown value'));
+  });
+
+  it('RED ks1868 R2 pinata: a message whose toString throws is reported with a constant reason', async () => {
+    h.toThrow = withMessage(toStringThrows);
+    requestRejects();
+    expect(await answer(pinata)).toEqual(failed('Pinata upload error: unreadable thrown value'));
+  });
+
+  it('RED ks1868 R3 pinata: a null-prototype message is reported with a constant reason', async () => {
+    h.toThrow = withMessage(() => Object.create(null));
+    requestRejects();
+    expect(await answer(pinata)).toEqual(failed('Pinata upload error: unreadable thrown value'));
+  });
+
+  it('RED ks1868 R4 pinata: a Symbol message is reported as its description text', async () => {
+    h.toThrow = withMessage(() => Symbol('ks1868'));
+    requestRejects();
+    expect(await answer(pinata)).toEqual(failed('Pinata upload error: Symbol(ks1868)'));
+  });
+
+  it('RED ks1868 R5 infura: a message that is a revoked Proxy is reported with a constant reason', async () => {
+    h.toThrow = withMessage(revoked);
+    requestRejects();
+    expect(await answer(infura)).toEqual(failed('Infura upload error: unreadable thrown value'));
+  });
+
+  it('RED ks1868 R6 infura: a message whose toString throws is reported with a constant reason', async () => {
+    h.toThrow = withMessage(toStringThrows);
+    requestRejects();
+    expect(await answer(infura)).toEqual(failed('Infura upload error: unreadable thrown value'));
+  });
+
+  it('RED ks1868 R7 web3storage: a message that is a revoked Proxy is reported with a constant reason', async () => {
+    h.toThrow = withMessage(revoked);
+    requestRejects();
+    expect(await answer(web3)).toEqual(failed('Web3.Storage upload error: unreadable thrown value'));
+  });
+
+  it('RED ks1868 R8 web3storage: a message whose toString throws is reported with a constant reason', async () => {
+    h.toThrow = withMessage(toStringThrows);
+    requestRejects();
+    expect(await answer(web3)).toEqual(failed('Web3.Storage upload error: unreadable thrown value'));
+  });
+});

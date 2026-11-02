@@ -1,0 +1,163 @@
+/**
+ * KS-1868: three catches in routes/admin.ts read the thrown value with a bare `.message` before answering:
+ * the Blockfrost connectivity test (POST /api/admin/integrations/:id/test, "Network error: <message>"), the user-update forward
+ * (PATCH /api/users/admin/:id, 502 with `details: { details: <message> }`) and the audit-log export (GET /api/security/audit/export,
+ * logs `{ error: <message> }` and answers a constant 500). That read can itself throw (a revoked Proxy throws on any property read; an
+ * Error whose `message` getter throws throws on `.message`), and then the catch escapes. Each read now sits in its own try and falls
+ * back to the constant `unreadable thrown value`.
+ *
+ * The handler under test is the LAST function of the route (the one after requireAdmin / the body parser), taken from the route table
+ * and called directly with a fake request and response. The stand-ins (`query`, the global `fetch`) are plain functions that reject
+ * with the thrown value (a vi.fn() could inspect a revoked Proxy before the code under test does).
+ */
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { Router } from 'express';
+import { createAdminRoutes, type AdminRouteDeps } from '../routes/admin';
+
+type Logged = { level: string; message: string; meta: { error?: unknown } | undefined };
+type ResX = { statusCode: number; body: unknown; status(c: number): ResX; json(b: unknown): ResX };
+
+const ks = {
+  thrown: undefined as { value: unknown } | undefined,
+  logs: [] as Logged[],
+};
+
+function mkRes(): ResX {
+  const r: ResX = {
+    statusCode: 200,
+    body: undefined,
+    status(c) {
+      r.statusCode = c;
+      return r;
+    },
+    json(b) {
+      r.body = b;
+      return r;
+    },
+  };
+  return r;
+}
+
+function buildRouter(): Router {
+  return createAdminRoutes({
+    authenticateToken: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+    query: () => (ks.thrown ? Promise.reject(ks.thrown.value) : Promise.resolve({ rows: [], rowCount: 0 })),
+    isDbAvailable: () => true,
+    redisService: {
+      getIntegration: () =>
+        Promise.resolve({ id: 'int-1', integrationType: 'blockchain', provider: 'blockfrost', config: { projectId: 'proj', network: 'preprod' } }),
+      setIntegration: () => Promise.resolve(undefined),
+    },
+    services: { auth: { url: 'http://auth.invalid' } },
+    log: (level: string, message: string, meta?: { error?: unknown }) => {
+      ks.logs.push({ level, message, meta });
+    },
+  } as unknown as AdminRouteDeps);
+}
+
+function handlerFor(rt: Router, method: string, path: string): (req: unknown, res: unknown) => Promise<void> {
+  const layers = (rt as unknown as { stack: Array<{ route?: { path: string; methods: Record<string, boolean>; stack: Array<{ handle: (req: unknown, res: unknown) => Promise<void> }> } }> }).stack;
+  const layer = layers.find((l) => l.route && l.route.path === path && l.route.methods[method]);
+  if (!layer || !layer.route) throw new Error('route not found: ' + method + ' ' + path);
+  const stack = layer.route.stack;
+  return stack[stack.length - 1].handle;
+}
+
+/** Run a route handler. A handler that rejects (the defect) leaves the response untouched at 200. */
+async function invoke(method: string, path: string): Promise<ResX> {
+  const res = mkRes();
+  const req = {
+    params: { id: 'int-1' },
+    body: { role: 'USER' },
+    query: {},
+    headers: { authorization: 'Bearer ks1868' },
+    user: { userId: 'admin-72', role: 'SYSTEM_ADMIN', email: 'admin-72@test.io', verificationLevel: 'HIGH' },
+  };
+  await handlerFor(buildRouter(), method, path)(req, res).catch(() => undefined);
+  return res;
+}
+
+function revoked(): unknown {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function getterError(): unknown {
+  return Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+}
+
+const fetchRejects = () => vi.stubGlobal('fetch', () => Promise.reject(ks.thrown?.value));
+
+type CaseX = { name: string; method: string; path: string; setup: () => void; expected: (reason: string) => unknown; logged?: string };
+
+const CASES: CaseX[] = [
+  {
+    name: 'POST integration test',
+    method: 'post',
+    path: '/api/admin/integrations/:id/test',
+    setup: fetchRejects,
+    expected: (reason) => expect.objectContaining({ success: false, message: `Network error: ${reason}` }),
+  },
+  {
+    name: 'PATCH user forward',
+    method: 'patch',
+    path: '/api/users/admin/:id',
+    setup: fetchRejects,
+    expected: (reason) => ({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable', details: { details: reason } } }),
+  },
+  {
+    name: 'GET audit export',
+    method: 'get',
+    path: '/api/security/audit/export',
+    setup: () => undefined,
+    expected: () => ({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to export audit logs' } }),
+    logged: '[AuditExport] Failed',
+  },
+];
+
+const status = (c: CaseX) => (c.method === 'patch' ? 502 : c.method === 'get' ? 500 : 200);
+
+beforeEach(() => {
+  ks.thrown = undefined;
+  ks.logs.length = 0;
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+describe.each(CASES)('KS-1868 admin $name catch reads the thrown value safely', (c) => {
+  it(`RED ks1868 R1 ${c.name}: a revoked Proxy thrown value is answered with a constant reason`, async () => {
+    ks.thrown = { value: revoked() };
+    c.setup();
+    const res = await invoke(c.method, c.path);
+    expect(res.statusCode).toBe(status(c));
+    expect(res.body).toEqual(c.expected('unreadable thrown value'));
+    if (c.logged) expect(ks.logs.find((l) => l.message === c.logged)?.meta).toEqual({ error: 'unreadable thrown value' });
+  });
+
+  it(`RED ks1868 R2 ${c.name}: an Error whose message getter throws is answered with a constant reason`, async () => {
+    ks.thrown = { value: getterError() };
+    c.setup();
+    const res = await invoke(c.method, c.path);
+    expect(res.statusCode).toBe(status(c));
+    expect(res.body).toEqual(c.expected('unreadable thrown value'));
+    if (c.logged) expect(ks.logs.find((l) => l.message === c.logged)?.meta).toEqual({ error: 'unreadable thrown value' });
+  });
+
+  it(`control ks1868 C1 ${c.name}: an ordinary Error is answered with its own message, as before`, async () => {
+    ks.thrown = { value: new Error('boom 10.0.0.7') };
+    c.setup();
+    const res = await invoke(c.method, c.path);
+    expect(res.statusCode).toBe(status(c));
+    expect(res.body).toEqual(c.expected('boom 10.0.0.7'));
+    if (c.logged) expect(ks.logs.find((l) => l.message === c.logged)?.meta).toEqual({ error: 'boom 10.0.0.7' });
+  });
+});
