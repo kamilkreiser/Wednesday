@@ -284,6 +284,26 @@ case "$MIGRATED" in
   *)   echo "BRIEF REFUSED — routing entry for '$TO' has a bad migrated flag: '$MIGRATED' (want yes|no)" >&2; exit 1 ;;
 esac
 
+# ── LANE-TAG GATE (ledger w=3 regression, 2026-11-02) ─────────────────────
+# Generated briefs carried ANOTHER lane's outbound tag three times in one day
+# (F 21st / S 11th partition names, B 75th header, then E 27th's and V 15th's
+# WRAP line printed "[Secuura/Blockchain-F -> Wednesday]"). A brief sent to a
+# lane '<Client/Project>-<L>' may only print outbound tags for lane <L>.
+if [ "$KIND" = "brief" ]; then
+  case "$TO" in
+    *-[A-Z])
+      LT_LANE="${TO##*-}"; LT_BASE="${TO%-*}"
+      LT_WRONG="$(printf '%s' "$BODY" | grep -o -E "\[${LT_BASE//\//\\/}-[A-Z] -> Wednesday\]" | grep -v -F "[$LT_BASE-$LT_LANE -> Wednesday]" | sort -u)"
+      if [ -n "$LT_WRONG" ]; then
+        echo "BRIEF REFUSED — the brief goes to lane $LT_LANE but prints another lane's outbound tag:" >&2
+        printf '%s\n' "$LT_WRONG" | sed 's/^/  /' >&2
+        echo "Re-key that line to [$LT_BASE-$LT_LANE -> Wednesday] (outbound tags are copied from the target lane, never from a template)." >&2
+        exit 1
+      fi
+      ;;
+  esac
+fi
+
 # ── THE GATE ──────────────────────────────────────────────────────────────
 # A brief must carry a PROVENANCE block. Each entry states a fact, WHERE it was
 # read (a path, URL, ticket id, or command), and WHEN it was read. The check is

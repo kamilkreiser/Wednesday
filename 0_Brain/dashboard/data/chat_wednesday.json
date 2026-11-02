@@ -15175,5 +15175,19 @@
   "project": "WED",
   "ts": "2026-11-02T11:06:14.299995+11:00",
   "text": "MiMo through AirLLM on a 128 GB Mac: no, and it wouldn't be usable even if it ran.\n\nAirLLM on a Mac only loads Llama and Mistral models. I re-read its source this morning: every MiMo model is refused before it downloads anything. Even if someone ported it, AirLLM reloads every layer from disk for every word. For MiMo-V2.6-Flash that works out to roughly 13 seconds per token at best and about 95 seconds at AirLLM's measured pace. Those are estimates.\n\nWhat would work is keeping the model in memory. Flash is a 310-billion-parameter mixture-of-experts model, and only about 15 billion parameters work per token, which suits llama.cpp, the Metal runtime that already supports MiMo. At about 2.5 bits it's roughly 97 GB. You'd raise the Mac's GPU memory limit to about 110 GB, which leaves 14 to 18 GB for macOS and me: tight but workable. The estimate is 50 to 75 tokens a second, and the quality cost of 2.5 bits is untested. The 4-bit and 3-bit versions don't fit, and Pro is far too big at about 550 GB.\n\nThe comfortable option is the 9-billion-parameter MiMo distill at 4-bit. It's 7 GB, runs at an estimated 45 to 55 tokens a second, and leaves over 100 GB free.\n\nMy recommendation: if you want MiMo locally on 128 GB, try Flash at 2.5 bits on llama.cpp. Skip AirLLM entirely. Every speed figure here is arithmetic, not measured on an M5. The full report with sources is attached.\n📎 file in the live drawer: report.md (id f-d3ff80fef4)"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T11:36:15.763854+11:00",
+  "text": "Got it: the Spark now covers governance and the remaining auth catches. Every fix it holds is tier 1 and goes through an Opus gate. Two exceptions. Governance catches that feed vote counts or quorum are skipped, because changing those would alter voting outcomes. The KYC and verification files wait for today's two raise seats: those files already have held fixes, and they open up once those land. Money stays out while the billing seat works on its fix. Your condition for anchoring is met now that billing is ruled; I'll put it on the next operator once these two have finished."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T11:42:01.520325+11:00",
+  "text": "Billing double credit, your ruling a: the ticket is filed as KS-1933, at High. I've approved the seat's design, and it's building now. Nothing deploys without your tap.\n\nHow it works: each Stripe payment gets one record in our database, claimed before the credit goes to Stripe. A second event, a retry or a replay for the same payment finds that record and adds nothing. It needs one new database table, which won't run anywhere until a deploy.\n\nOne gap remains, narrower than today's. If Stripe applies the credit and the connection drops before we hear back, a retry can still credit again. Closing that means writing the payment ID onto the Stripe customer record, which is a new field in Stripe. I've kept that out; it's yours if you want it.\n\nThe seat also found two more money bugs, both getting tickets, neither being fixed yet. First, a checkout session is credited even when it isn't paid yet, which matters only if delayed payment methods are on. Second, the credit routine can add twice when two updates race.\n\nYour one Stripe check is now three questions. Is the endpoint subscribed to checkout.session.completed, to payment_intent.succeeded, or both? And are delayed payment methods enabled?"
  }
 ]
