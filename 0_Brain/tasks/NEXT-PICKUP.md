@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE ~05:00 AEDT 2026-11-03 by the 03:2x successor seat
 
 # NEXT PICKUP — Tue 3 Nov 2026, ~05:00 AEDT (03:2x successor seat, ctx 66%)
 
+## UPDATE 05:15 (70% checkpoint; READ FIRST — supersedes STATE/GATES below where they differ)
+- **Merge chain:** PR 1956 GO sent 05:09 to **B 79th** (head a85e03f6 / develop 2d3b3bb3 / tree 4eee067f) — await MERGED, verify by ls-remote. **PR 1953 QUEUED to B 79th after 1956** (gate 140 GO WITH NOTES, notes patched by W 19th 18:10Z; chain-with-tail + audit-baseline + LOCK-PATH checks asked). At its READY: pre-GO checks -> GO `GO: merge PR 1953 at 928ee20c84dc on develop <pin12> (Seat B 79th)`.
+- **Gates:** 140 DONE (1953 GO WITH NOTES); 141 DONE (1957 GO WITH NOTES -> ANSWER to W 19th: patch notes + correct its '3 ipfs tsc errors' (gate measured 0)); **142 RUNNING** (Sonnet T2, PR 1958 = R 75th's PR 2, workdir `0_Brain/reference/2026-11-03_gate142-ks1868-pr1958/`). **143** = R 75th's PR 3 (Opus T1; erasure crypto-shred question first); **144** = W 19th's PR 3 redis (Opus T1).
+- **Seats:** R 75th WRAPPED 18:12Z, SCORED 0.93, pane closed; its PR 3 push = detached driver pid 49174 (alive). **Seat R 76th**: a Sonnet drafter is writing `2_Project_Files/fleet/briefs_staged/2026-11-03_seatR76_raise_continue.md` -> READ WHOLE, dry-run, launch at capacity ROOM (waiter pattern). W 19th %93 (ctx ~61% at 04:5x): PR 1957 notes owed, PR 2 + PR 3 in the push queue (drivers 14860, 92363). B 79th %94 merging.
+- **Spark:** operator 90 RUNNING (queue 9, round live 05:15). Held unraised: O89 x10 (+ O90 when it reports) -> a raise seat after R 76th / W 19th.
+- Kam: nothing since 21:15. reconcile to rule 0. Open flag: only Tuesday's Datasec one.
+
 ## STATE (measured 04:4x-04:5x)
 - develop **2d3b3bb3d3865689e3cad843f9ebb90a2f606960** (PR 1955 squash; Wednesday's ls-remote 04:50:32). Merged tonight by this seat's GOs: 1952 (157a41fb), 1954 (8151e756), 1955 (2d3b3bb3); 1951 by the predecessor (9d7e871f).
 - **Live seats:** R 75th %92 (Sonnet, raise O83-O87: 11 PRs; PR 1956 raised, PR 2 pushing, PR 3 built; ctx ~72% at 04:4x -> WRAP due soon -> brief **R 76th** from its HANDOVER `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-03_seatR-75th/HANDOVER.md`). W 19th %93 (Sonnet, raise O88: PR 1957 at gate 141; PR 2 auth events + PR 3 api-gateway redis T1 queued to push). **B 79th %94** (Sonnet, MERGE seat, launched 04:49; plan confirmed 04:5x; QUEUE 1956 sent 04:50).
