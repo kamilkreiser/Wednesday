@@ -14,6 +14,15 @@ supersede: REPLACED WHOLESALE ~08:18 AEDT 2026-11-03 by the morning seat (respaw
 - ~~W 21st brief drafter~~ DONE: brief read whole, **Seat W 21st LAUNCHED 08:26** by the waiter at the first ROOM (pane %100, Sonnet 5.5). Its plan confirmation is owed; gate 151's ANSWER goes to it.
 - **Rotation note (08:2x):** this seat rotated at ~78% ctx at a clean boundary. Live: R 77th %98, B 81st %99, W 21st %100. PR 1965 head fb0a2bee is up (probably R 77th's PR 7; READY not yet received -> gate 148 Opus -> Kam card).
 
+## 🔴 UPDATE 09:0x (READ FIRST — supersedes below where it differs)
+- develop **ddd770cab4aa** (PR 1967). Merged by this seat's GOs today: 1957-1963, 1966, 1967 (9).
+- **PR 1969 (referral, T1, head 15c17034): gate 153 GO WITH NOTES. KAM CARD `secuura-pr1969-referral-rewards-reaward-1103` POSTED ~08:58 (rec a; default a after 4 h = not before ~13:00).** Pre-existing HIGH: progress save always fails (BigInt) -> milestones re-awarded even with a healthy DB; failed read -> duplicate awards; /milestones/check/:userId no owner check. W 21st asked to FILE 2 High tickets + PATCH notes. QUEUE to B 81st only at NOTES PATCHED; GO only after Kam rules or the default fires.
+- **PR 1968 (vc-issuer, head 6e58db56): gate 152 GO WITH NOTES + FIX-BEFORE-MERGE wording (G152-F2). HELD BY WEDNESDAY (decided inside Kam's KS-1352 = a "a revoked credential fails"): a revoked credential verifies TRUE on a stale memory copy + failed DB read, and this PR extends it to hostile values. Do NOT queue 1968 until a fix makes the verify path refuse to answer from memory on a failed read (a fix seat; ticket being filed by W 21st). Kam told by FYI 09:0x (no card).** W 21st also files revoke()-swallows-failed-UPDATE (High) and patches notes incl. the F2 wording.
+- **Next QUEUE to B 81st: PR 1964** at R 77th's NOTES PATCHED (gate 149; G149-F1/F2 ticket owed from R 77th).
+- Subagents of this seat at rotation: Spark operator 92 only (gates 151/152/153 DONE). If no report.md after rotation: check spark/done.md + night/ READY_*O92*.
+- Kam cards still owed after their Opus gates: R 77th PR 7 (fail-open), R 77th PR 10 (isPasswordBreached fail-open). Fix-seat candidates now: KS-1953/KS-1955 (erasure), the referral re-award + owner-check tickets, the vc-issuer revocation tickets (blocks 1968).
+- W 21st %100 at ctx ~50% (items 5-8 drivers pushing; item 9 to re-verify + push). B 81st %99 idle (queue empty). R 77th %98.
+
 ## OWED FIRST (merge chain; every GO after: no un-MERGED GO outstanding, push_queue list, gate_stray_check rc 0, ls-remote pin + head; subject `GO: merge PR <n> at <head12> on develop <pin12> (Seat B 81st)`)
 1. **PR 1964** (originate documents routes, T1, head 25c437f4): gate 149 GO WITH NOTES. R 77th asked to FILE a High ticket (G149-F1/F2 sign retry duplicates; F7 = existing KS-1831) + PATCH notes. QUEUE to B 81st at its NOTES PATCHED.
 2. **PR 1967**: at gate 151's verdict -> ANSWER W 21st (notes) -> QUEUE.

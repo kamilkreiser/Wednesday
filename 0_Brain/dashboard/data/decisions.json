@@ -56984,5 +56984,34 @@
    "CARD hpsmpoc-demo-switch-template-pin-1027",
    "CARD mps-269-template-store-round-cap-1102"
   ]
+ },
+ {
+  "id": "secuura-pr1969-referral-rewards-reaward-1103",
+  "client_project": "Secuura/Blockchain",
+  "title": "Before merge: referral milestone rewards are being re-awarded today, even with a healthy database (PR 1969 adds one rare path to it)",
+  "bluf": "For a decision before I merge PR 1969. The Opus QA gate (153) booted the real referral service 89 times with only the database driver replaced. It found that saving a user's milestone progress ALWAYS fails today (a BigInt cannot be serialised), so every milestone check awards the same milestones again: one user got FIRST_REFERRAL twice, 200 SECURA in two claimable rows, with a healthy database. A failed progress read does the same, at scale (5 duplicate claimable rewards per check). Separately, the milestone check endpoint has no owner check, so one user can trigger awards for another. Limits: no money moves inside this service, the claim route reads a different table, and the rewards table has no definition in the repo, so the real-world effect is untested. PR 1969 itself only makes one rare error (an unreadable value) behave like an ordinary error; for the progress read, that means it now joins the duplicate-award path instead of failing with a 500. Two High tickets are being filed for the live bugs. I recommend a: merge 1969 on its gate and fix the re-award and the missing owner check next, ahead of the rest of the queue.",
+  "default_action": "a after 4 hours without a ruling: merge PR 1969 on its gate; the two High tickets go first in the next fix seat's queue",
+  "options": [
+   {
+    "key": "a",
+    "label": "Merge PR 1969 on its gate; fix the re-award bug and the owner check next, ahead of the queue",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Hold PR 1969 until the re-award bug is fixed",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Merge, and also disable milestone awarding until the fix lands (a code change for a fix seat)",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T09:00:46.761154+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
