@@ -32,6 +32,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **READY, gated by:** M79 b1142 @ 7ccc0543 -> G292 · M78 b1139 @ 7e5b6267 -> G294 · C80 b1140 @ 57ecad38 -> G293 (kit drafted, UNREAD, 63 KB; S4 decided in 946) · H104 b1113 @ d654fbb7 -> G291 (round 2 of 2).
 - **NOT READ / NOT STAMPED:** G293 B1151 · B1149 R142 NexusAI records · B1146 M80 (after b1139 LANDS) · B1145 H106 (after card hpsmpoc-425-evidence-sentence-1102).
 - **CARDS OPEN:** hpsmpoc-425-evidence-sentence-1102 (rec a) · composer-l05.
+- **⚠ LOAD STARVATION, act first:** G288's census chain has waited for load1 < 7 since about 17:30 (heartbeat line 282 at 18:59:28, load1 near 9 with 9 seats). Its RULE L caps a start at 120 minutes, and a NOT RUN bars a GO on its ROUND 2 OF 2. **Launch NOTHING new until G288's census has started** (read `.tools/b1130/logs/heartbeat.txt` for 'START' or a moving job), and say so on the board if it times out.
 
 ## 🔴 DELTA 946 — 2026-11-02 18:32 ROTATION-READY HANDOVER (s227; statusline ~76%; 7d 48%). **READ THIS FIRST; FULL LIVE STATE; supersedes 941-945's LIVE, QUEUE, DRAFTING lines; 943's KAM RULED and 944's CARDS stand (cards open: hpsmpoc-425-evidence-sentence-1102, composer-l05).**
 - **FIRST ACTS:** reconcile, `kam_rulings_today.sh`; re-arm status_watch on every LIVE seat below and on B1150 (`<project>/1_Project_Definition/Briefs/2026-11-02_B<n>_STATUS.md`).
