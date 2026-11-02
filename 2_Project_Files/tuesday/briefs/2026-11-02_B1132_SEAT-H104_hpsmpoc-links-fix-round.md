@@ -72,18 +72,18 @@ No path outside the property; no text, name, role, href, order, element-type or 
 
 ## Stamp
 The unstamped copy reads 11 such lines.
-- STAMP: ____
-- GATE-ROUND (default ROUND 2 OF 2 on the links class, NO GO 1 before, tier 1 Opus): ____
-- KEYS (none in a changed line or the message): ____
-- SCOPE-OUT (three paths; no word; commit 2 untouched): ____
-- LAUNCH WINDOW (until; load1; live seats): ____
-- Stamped by (the seat that READ this brief and its drafter report): ____
-- Launch authority: ____
-- Hard stop and target READY (AEDT clocks written at Step 0): ____
-- Head, main and open PRs at launch (expected `d8a9456...`, `5f128fb...` or later, 0 PRs): ____
-- Model receipt line and load1 at launch: ____
+- STAMP: STAMPED 16:40 AEDT 2026-11-02 by Tuesday s226, kit read whole with its report; path check run alone in an earlier message (rc 0, 18 OK), SHOW lines true at d8a9456. Q-1 accept; Q-2 no e2e row; Q-3 as written; Q-4 as written; Q-5 yes. D-1 to D-6 accepted, D-2's order a proposal the browser decides. The kit's disk margin is stale: about 136 GiB free.
+- GATE-ROUND (default ROUND 2 OF 2 on the links class, NO GO 1 before, tier 1 Opus): ROUND 2 OF 2 on the links class, NO GO 1 of 2 before (B1127), tier 1 Opus; a NO GO there is a card.
+- KEYS (none in a changed line or the message): None in a changed line or the message.
+- SCOPE-OUT (three paths; no word; commit 2 untouched): Three paths; no word; commit 2 untouched; ServiceReport.tsx only if your census lists a link there.
+- LAUNCH WINDOW (until; load1; live seats): Launch_when_cool, load1 under 7. Live beside you may be: Datasec/HPSM-POC-G288, -G289 (gates), -R136 (removal; .tools/b1113, wt-b1113-*, b198 are its fixed exclusions), Datasec/MPS-M77, -R139, -R141. The kit's pane list is older; none stops you. Re-read at Step 0.
+- Stamped by (the seat that READ this brief and its drafter report): Tuesday s226, who read this brief and its drafter report.
+- Launch authority: Tuesday, on the product owner's 2026-11-01 21:41:12 instruction and the 2026-10-24 every-boot rule.
+- Hard stop and target READY (AEDT clocks written at Step 0): Target READY 120, HARD STOP 210 minutes after your Step-0 date, written absolute in STATUS; outer bound 21:30 AEDT.
+- Head, main and open PRs at launch (expected `d8a9456...`, `5f128fb...` or later, 0 PRs): Head d8a9456fa0fe, main 5f128fb89034, open PRs 0, read by this seat just before the stamp.
+- Model receipt line and load1 at launch: model: claude-sonnet-5-5 -- C2 -- gauge 44%; the launcher's own load read decides.
 
 **Your commission is THIS file (read-only);** Step 0 copies it unchanged into `.../HPSM-POC/1_Project_Definition/Briefs/`.
 **Launch (Tuesday), ONE waiter:** `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/HPSM-POC-H104 "WED_USAGE_STOP=100 BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-02_B1132_SEAT-H104_hpsmpoc-links-fix-round.md'"` (level inside the quotes).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 16:40 by Tuesday s226, whole file.
