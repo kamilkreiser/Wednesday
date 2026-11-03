@@ -207,3 +207,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-02 14:09 | Kamils-Mac-mini | store_guard refusal prints shas only, no commit subjects (client isolation) | CLOSED |  2026-11-02 14:09 done, hashes only; fired on a scratch repo, arms 9 6 21 pass |
 | 2026-11-03 05:45 | Kamils-MBP | spark round.sh deps store: node_modules from tip lockfiles, not the Secuura checkout (zod 4 drift break 2026-11-03) | CLOSED |  2026-11-03 09:22 done 06:03: deps store + LOCK KEY check in round.sh; 6 re-runs PASS |
 | 2026-11-03 13:38 | Kamils-MBP | fleet/qa-agent/gate_common.md: tracked common section for gate commissions | OPEN | |
+| 2026-11-03 19:23 | Kamils-MBP | Launch_Wednesday.command MODEL CHOICE line: set seat model at launch (SEAT_MODEL_ENV), never /model a pane | OPEN | |
