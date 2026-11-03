@@ -1,0 +1,140 @@
+diff --git a/Blockchain/Dev/services/shared/src/cache/cache-middleware.ts b/Blockchain/Dev/services/shared/src/cache/cache-middleware.ts
+--- a/Blockchain/Dev/services/shared/src/cache/cache-middleware.ts
++++ b/Blockchain/Dev/services/shared/src/cache/cache-middleware.ts
+@@ -134,6 +134,12 @@
+       next();
+     } catch (error) {
+-      logger.error('Cache middleware error', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Cache middleware error', { error: reason });
+       next();
+     }
+   };
+diff --git a/Blockchain/Dev/services/shared/src/__tests__/ks1868-cache-middleware-lookup-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/shared/src/__tests__/ks1868-cache-middleware-lookup-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/shared/src/__tests__/ks1868-cache-middleware-lookup-catch-unreadable-throw.test.ts
+@@ -0,0 +1,118 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: cacheMiddleware (src/cache/cache-middleware.ts) wraps the cache lookup in a try; its catch logs
++// `{ error: String(error) }` and calls next() so a cache failure never fails the request. The `String(error)` read is
++// unguarded. When the value cannot be read (a revoked Proxy throws on String(); an Error whose `message` getter throws,
++// throws in Error.prototype.toString) the catch itself throws, so the middleware REJECTS and next() is never called.
++// The Redis client is a plain object of plain functions (not vi.fn(): a spy inspects what it rejects with); the logger is a
++// plain recorder; no network.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  errors: [] as unknown[][],
++  warns: [] as unknown[][],
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: {
++    debug: () => undefined,
++    info: () => undefined,
++    warn: (...args: unknown[]) => {
++      h.warns.push(args);
++    },
++    error: (...args: unknown[]) => {
++      h.errors.push(args);
++    },
++  },
++}));
++
++vi.mock('../cache/redis-client', () => ({
++  CACHE_TTL: { MEDIUM: 900 },
++  CACHE_PREFIX: {},
++  redisClient: {
++    isReady: () => true,
++    get: () => Promise.reject(h.toThrow),
++    set: () => Promise.resolve(),
++    deletePattern: () => Promise.resolve(0),
++  },
++}));
++
++import { cacheMiddleware } from '../cache/cache-middleware';
++
++type Outcome = { threw: boolean; nextCalls: number };
++
++async function run(): Promise<Outcome> {
++  const out: Outcome = { threw: false, nextCalls: 0 };
++  const req = { method: 'GET', path: '/ks1868', query: {} };
++  const res = {
++    statusCode: 200,
++    json: () => res,
++    setHeader: () => undefined,
++    getHeader: () => undefined,
++  };
++  const next = () => {
++    out.nextCalls++;
++  };
++  try {
++    await cacheMiddleware()(req as never, res as never, next as never);
++  } catch {
++    out.threw = true;
++  }
++  return out;
++}
++
++const logged = (): unknown[][] => h.errors.filter((a) => String(a[0]).includes('Cache middleware error'));
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 cacheMiddleware reads a cache failure safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.errors = [];
++    h.warns = [];
++  });
++
++  it('control ks1868 C1 an ordinary Error logs its text and falls through to next()', async () => {
++    h.toThrow = new Error('redis down');
++    const out = await run();
++    expect(out.threw).toBe(false);
++    expect(out.nextCalls).toBe(1);
++    expect(logged()[0][1]).toEqual({ error: 'Error: redis down' });
++  });
++
++  it('control ks1868 C2 a thrown plain string logs that text and falls through to next()', async () => {
++    h.toThrow = 'plain text failure';
++    const out = await run();
++    expect(out.threw).toBe(false);
++    expect(out.nextCalls).toBe(1);
++    expect(logged()[0][1]).toEqual({ error: 'plain text failure' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy logs a constant reason and falls through to next()', async () => {
++    h.toThrow = revokedProxy();
++    const out = await run();
++    expect(out.threw).toBe(false);
++    expect(out.nextCalls).toBe(1);
++    expect(logged()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and falls through to next()', async () => {
++    h.toThrow = getterThrows();
++    const out = await run();
++    expect(out.threw).toBe(false);
++    expect(out.nextCalls).toBe(1);
++    expect(logged()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});

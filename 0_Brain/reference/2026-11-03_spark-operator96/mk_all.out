@@ -1,0 +1,238 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p1_shared_redis_rate_limit_store_get_increment_catches_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+--- a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
++++ b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+@@ -57,6 +57,12 @@
+       return record;
+     } catch (error) {
+-      logger.error('RedisRateLimitStore error getting record', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisRateLimitStore error getting record', { error: reason });
+       return null;
+     }
+   }
+@@ -91,6 +97,12 @@
+       return { count, resetAt };
+     } catch (error) {
+-      logger.error('RedisRateLimitStore error incrementing', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisRateLimitStore error incrementing', { error: reason });
+       // Fallback: allow request but don't track
+       return { count: 1, resetAt: Date.now() + windowMs };
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p2_shared_redis_brute_force_store_get_set_catches_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+--- a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
++++ b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+@@ -135,7 +135,13 @@
+     try {
+       return await redisClient.get<BruteForceRecord>(`${this.prefix}${key}`);
+     } catch (error) {
+-      logger.error('RedisBruteForceStore error getting record', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisBruteForceStore error getting record', { error: reason });
+       return null;
+     }
+   }
+@@ -148,6 +154,12 @@
+       const ttl = Math.ceil((lifetimeMs || this.defaultLifetime * 1000) / 1000);
+       await redisClient.set(`${this.prefix}${key}`, record, ttl);
+     } catch (error) {
+-      logger.error('RedisBruteForceStore error setting record', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisBruteForceStore error setting record', { error: reason });
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p3_shared_redis_csrf_store_generate_validate_catches_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+--- a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
++++ b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+@@ -271,6 +271,12 @@
+       return token;
+     } catch (error) {
+-      logger.error('RedisCSRFStore error generating token', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisCSRFStore error generating token', { error: reason });
+       throw error;
+     }
+   }
+@@ -299,7 +305,13 @@
+         Buffer.from(token)
+       );
+     } catch (error) {
+-      logger.error('RedisCSRFStore error validating token', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisCSRFStore error validating token', { error: reason });
+       return false;
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p4_shared_cache_middleware_lookup_catch_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/cache/cache-middleware.ts b/Blockchain/Dev/services/shared/src/cache/cache-middleware.ts
+--- a/Blockchain/Dev/services/shared/src/cache/cache-middleware.ts
++++ b/Blockchain/Dev/services/shared/src/cache/cache-middleware.ts
+@@ -134,6 +134,12 @@
+       next();
+     } catch (error) {
+-      logger.error('Cache middleware error', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Cache middleware error', { error: reason });
+       next();
+     }
+   };
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p5_shared_redis_client_connect_catch_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/cache/redis-client.ts b/Blockchain/Dev/services/shared/src/cache/redis-client.ts
+--- a/Blockchain/Dev/services/shared/src/cache/redis-client.ts
++++ b/Blockchain/Dev/services/shared/src/cache/redis-client.ts
+@@ -135,6 +135,12 @@
+       await this.client.connect();
+     } catch (error) {
+-      logger.error('Redis failed to connect', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Redis failed to connect', { error: reason });
+       throw error;
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p6_shared_connection_pool_create_and_remove_catches_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/cache/connection-pool.ts b/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
+--- a/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
++++ b/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
+@@ -113,4 +113,10 @@
+         return conn;
+       } catch (error) {
+         lastError = error as Error;
+-        logger.error('Pool create attempt failed', { attempt: attempt + 1, error: String(error) });
++        let reason: string;
++        try {
++          reason = String(error);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.error('Pool create attempt failed', { attempt: attempt + 1, error: reason });
+@@ -219,5 +225,11 @@
+     try {
+       await conn.close();
+     } catch (error) {
+-      logger.error('Pool error closing connection', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Pool error closing connection', { error: reason });
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p7_shared_secrets_manager_get_secret_vault_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/security/secrets-manager.ts b/Blockchain/Dev/packages/shared/src/security/secrets-manager.ts
+--- a/Blockchain/Dev/packages/shared/src/security/secrets-manager.ts
++++ b/Blockchain/Dev/packages/shared/src/security/secrets-manager.ts
+@@ -268,6 +268,12 @@
+           return value;
+         }
+       } catch (error) {
+-        logger.warn('Vault read failed', { key, error: error instanceof Error ? error.message : String(error) });
++        let reason: string;
++        try {
++          reason = error instanceof Error ? error.message : String(error);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.warn('Vault read failed', { key, error: reason });
+       }
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p8_shared_event_indexer_handle_error_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts b/Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts
+--- a/Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts
++++ b/Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts
+@@ -343,5 +343,10 @@
+   private handleError(err: any): void {
+-    const error = err instanceof Error ? err : new Error(String(err));
++    let error: Error;
++    try {
++      error = err instanceof Error ? err : new Error(String(err));
++    } catch {
++      error = new Error('unreadable thrown value');
++    }
+     if (this.options.onError) {
+       this.options.onError(error);
+     } else {
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p9_auth_health_ready_checks_catches_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/routes/health.ts b/Blockchain/Dev/services/auth/src/routes/health.ts
+--- a/Blockchain/Dev/services/auth/src/routes/health.ts
++++ b/Blockchain/Dev/services/auth/src/routes/health.ts
+@@ -38,6 +38,12 @@
+     ]);
+     return { status: 'healthy', latency: Date.now() - start };
+   } catch (error) {
+-    return { status: 'unhealthy', message: String(error) };
++    let message: string;
++    try {
++      message = String(error);
++    } catch {
++      message = 'unreadable thrown value';
++    }
++    return { status: 'unhealthy', message };
+   }
+ }
+@@ -58,6 +64,12 @@
+     ]);
+     return { status: 'healthy', latency: Date.now() - start };
+   } catch (error) {
+-    return { status: 'unhealthy', message: String(error) };
++    let message: string;
++    try {
++      message = String(error);
++    } catch {
++      message = 'unreadable thrown value';
++    }
++    return { status: 'unhealthy', message };
+   }
+ }
+

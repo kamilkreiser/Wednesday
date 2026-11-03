@@ -1,0 +1,83 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p3_shared_redis_csrf_store_generate_validate_catches_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+--- a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
++++ b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+@@ -271,6 +271,12 @@
+       return token;
+     } catch (error) {
+-      logger.error('RedisCSRFStore error generating token', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisCSRFStore error generating token', { error: reason });
+       throw error;
+     }
+   }
+@@ -299,7 +305,13 @@
+         Buffer.from(token)
+       );
+     } catch (error) {
+-      logger.error('RedisCSRFStore error validating token', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisCSRFStore error validating token', { error: reason });
+       return false;
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p5_shared_redis_client_connect_catch_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/cache/redis-client.ts b/Blockchain/Dev/services/shared/src/cache/redis-client.ts
+--- a/Blockchain/Dev/services/shared/src/cache/redis-client.ts
++++ b/Blockchain/Dev/services/shared/src/cache/redis-client.ts
+@@ -135,6 +135,12 @@
+       await this.client.connect();
+     } catch (error) {
+-      logger.error('Redis failed to connect', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Redis failed to connect', { error: reason });
+       throw error;
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o96_p6_shared_connection_pool_create_and_remove_catches_guard_message
+diff --git a/Blockchain/Dev/services/shared/src/cache/connection-pool.ts b/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
+--- a/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
++++ b/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
+@@ -113,4 +113,10 @@
+         return conn;
+       } catch (error) {
+         lastError = error as Error;
+-        logger.error('Pool create attempt failed', { attempt: attempt + 1, error: String(error) });
++        let reason: string;
++        try {
++          reason = String(error);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.error('Pool create attempt failed', { attempt: attempt + 1, error: reason });
+@@ -219,5 +225,11 @@
+     try {
+       await conn.close();
+     } catch (error) {
+-      logger.error('Pool error closing connection', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Pool error closing connection', { error: reason });
+     }
+

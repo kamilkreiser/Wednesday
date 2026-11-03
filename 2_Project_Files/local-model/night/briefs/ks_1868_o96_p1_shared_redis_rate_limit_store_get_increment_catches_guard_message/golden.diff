@@ -1,0 +1,155 @@
+diff --git a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+--- a/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
++++ b/Blockchain/Dev/services/shared/src/security/redis-security-store.ts
+@@ -57,6 +57,12 @@
+       return record;
+     } catch (error) {
+-      logger.error('RedisRateLimitStore error getting record', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisRateLimitStore error getting record', { error: reason });
+       return null;
+     }
+   }
+@@ -91,6 +97,12 @@
+       return { count, resetAt };
+     } catch (error) {
+-      logger.error('RedisRateLimitStore error incrementing', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('RedisRateLimitStore error incrementing', { error: reason });
+       // Fallback: allow request but don't track
+       return { count: 1, resetAt: Date.now() + windowMs };
+     }
+diff --git a/Blockchain/Dev/services/shared/src/__tests__/ks1868-redis-rate-limit-store-get-increment-unreadable-throw.test.ts b/Blockchain/Dev/services/shared/src/__tests__/ks1868-redis-rate-limit-store-get-increment-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/shared/src/__tests__/ks1868-redis-rate-limit-store-get-increment-unreadable-throw.test.ts
+@@ -0,0 +1,119 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: RedisRateLimitStore.get and RedisRateLimitStore.increment (src/security/redis-security-store.ts) catch a
++// Redis failure, log it as `{ error: String(error) }` and answer a fallback (get: null; increment: a count of 1) so a
++// cache failure never fails the request. The `String(error)` read is unguarded. When the value cannot be read (a revoked
++// Proxy throws on String(); an Error whose `message` getter throws, throws in Error.prototype.toString) the catch itself
++// throws, so the call REJECTS where an ordinary Error gives the fallback. The Redis client is a plain object of plain
++// functions rejecting with the cell's value (not vi.fn(): a spy inspects what it rejects with); the logger is a plain
++// recorder; no network.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  errors: [] as unknown[][],
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: {
++    debug: () => undefined,
++    info: () => undefined,
++    warn: () => undefined,
++    error: (...args: unknown[]) => {
++      h.errors.push(args);
++    },
++  },
++}));
++
++vi.mock('../cache/redis-client', () => ({
++  CACHE_TTL: { SESSION: 300 },
++  redisClient: {
++    get: () => Promise.reject(h.toThrow),
++    incrWithExpiry: () => Promise.reject(h.toThrow),
++    ttl: () => Promise.resolve(10),
++    set: () => Promise.resolve(),
++    delete: () => Promise.resolve(true),
++    exists: () => Promise.resolve(false),
++  },
++}));
++
++import { RedisRateLimitStore } from '../security/redis-security-store';
++
++type Settled = { threw: boolean; value: unknown };
++
++/** The call's result, or threw:true when it rejects (an assertion can then fail on it). */
++async function settle(call: () => Promise<unknown>): Promise<Settled> {
++  try {
++    return { threw: false, value: await call() };
++  } catch {
++    return { threw: true, value: undefined };
++  }
++}
++
++const logged = (needle: string): unknown[][] => h.errors.filter((a) => String(a[0]).includes(needle));
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++const getAnswer = async (): Promise<Settled> => settle(() => new RedisRateLimitStore().get('k'));
++const incAnswer = async (): Promise<Settled> => settle(() => new RedisRateLimitStore().increment('k', 60000));
++const countOf = (s: Settled): unknown => (s.value as { count?: number } | undefined)?.count;
++
++describe('KS-1868 RedisRateLimitStore reads a Redis failure safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.errors = [];
++  });
++
++  it('control ks1868 C1 get: an ordinary Error gives null and logs its text', async () => {
++    h.toThrow = new Error('redis down');
++    expect(await getAnswer()).toEqual({ threw: false, value: null });
++    expect(logged('error getting record')[0][1]).toEqual({ error: 'Error: redis down' });
++  });
++
++  it('control ks1868 C2 increment: a thrown plain string gives the fallback count and logs that text', async () => {
++    h.toThrow = 'plain text failure';
++    const out = await incAnswer();
++    expect(out.threw).toBe(false);
++    expect(countOf(out)).toBe(1);
++    expect(logged('error incrementing')[0][1]).toEqual({ error: 'plain text failure' });
++  });
++
++  it('RED ks1868 R1 get: a revoked Proxy gives null and logs a constant reason', async () => {
++    h.toThrow = revokedProxy();
++    expect(await getAnswer()).toEqual({ threw: false, value: null });
++    expect(logged('error getting record')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 get: an Error whose message getter throws gives null and logs a constant reason', async () => {
++    h.toThrow = getterThrows();
++    expect(await getAnswer()).toEqual({ threw: false, value: null });
++    expect(logged('error getting record')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R3 increment: a revoked Proxy gives the fallback count and logs a constant reason', async () => {
++    h.toThrow = revokedProxy();
++    const out = await incAnswer();
++    expect(out.threw).toBe(false);
++    expect(countOf(out)).toBe(1);
++    expect(logged('error incrementing')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R4 increment: an Error whose message getter throws gives the fallback count and logs a constant reason', async () => {
++    h.toThrow = getterThrows();
++    const out = await incAnswer();
++    expect(out.threw).toBe(false);
++    expect(countOf(out)).toBe(1);
++    expect(logged('error incrementing')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});
