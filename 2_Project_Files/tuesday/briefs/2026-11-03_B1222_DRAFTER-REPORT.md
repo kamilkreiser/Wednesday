@@ -1,0 +1,28 @@
+STARTABLE: YES
+
+BLUF: kit B1222 for seat G322 (Sonnet, `BRIEF_SEAT_LEVEL=sonnet` inside the quotes, G2 `model-routing.md:109`, cap `:111`), 51 lines (target 50; the lines are dense). Round 2 of 2 on "Composer DEPLOY.md pin-paragraph words" at head 3c62b959. The kit states plainly that B1217-2 alone is a Major under G-2 and, if Y1 still turns 38 of 54 red, makes the verdict NO GO (final); I expect NO GO because the owner did not ask to change B1217-2. The kit therefore carries the NO GO output (residue.md, card-input.txt with three options) as the primary path and the landing files as the conditional path.
+
+Facts re-measured (17:08-17:10 AEDT, `date` printed 17:08:41 and 17:09:50):
+- origin (git ls-remote): main 2f63b2f6..., branch 3c62b959ba869de24e23b916f57c75b200d77e3b, `refs/heads/b1222*` none (control `b1170*` printed 1). `compare/2f63b2f6...3c62b959`: ahead 2, behind 0, one file DEPLOY.md +1 -1 (gh -X GET).
+- Raw files at 3c62b959 saved to scratch; `awk NR==n`: DEPLOY.md 652 lines, line 255 = 396 bytes, first sentence 355 bytes and equals the sentence in the kit (grep -F -f, count 1); check line = line 203 (the only `PostgreSQL database dump` line). b778 blob `2348719a...` (git trees API), 1786 lines, 54 `it(` (control: count matches the kit). Pointers printed: `:1292` CHECK_EDITS, `:1398` split(was), `:1405` accept assertion, `:1660/:1661`, `:666`, `:444`, `:1778`; `expectEditAccepts` starts `:1395`.
+- The `now:` values were read in full from `:1292-1347`: 8 entries, not 9 (B1220's report is right; its commission was wrong). 4 pure removals; 4 stand-ins; the footer one keeps the piece inside `(1||b==...)`.
+- Open PRs 91 86 85: DEPLOY.md count 0, 0, 0 (control: package-lock.json in #91 = 1). Panes: tuesday, fleet-monitor, MPS-G318, HPSM-POC-H111, NexusAI-G320, HPSM-POC-G321; no Composer. `.tools/b1222`, `wt-b1222-*`, `composer-heavy.lock` absent. Seat-kit scan for G322/b1222/B1222: 0 hits; control `G319` matched 3 files (the first scan loop printed nothing before the control, so the control was run separately).
+- Round count: loop over project `*_STATUS.md` (first 3 lines hold GATE VERDICT, `pin-paragraph words`, NO GO) = 1 (B1217 only). Instrument: shell loop; positive control: the matched file is B1217's itself.
+- CLARIFICATIONS.md:1799 and :1885 both contain `PR #88` and the landing rule (awk NR filter on a grep -n). model-routing.md:109 starts `| G2`, :111 `| G-cap`; models_latest.json:23 `claude-sonnet-5-5`.
+- Stamp slots: 7 four-underscore runs in the kit (grep -c = 7, as the template).
+
+D-decisions:
+- D1 B1217-2: graded as round 1 graded it (Major, `majors+: B1217-1, B1217-2`). The round-1 residue says "arguably Minor, Tuesday may rule it Minor because line 227 half-lists it"; the kit lets the gate NOT downgrade and puts that argument into card-input for the owner.
+- D2 Clause 3: the kit makes the gate run both the test's own edit (control, green) and the LITERAL deletion of each of the 8 pieces, then grade per entry TRUE / SHORT / FALSE using the round-1 rules (FALSE Major, looser-than-test Minor, ambiguity Note). I did not pre-decide the grade for the 4 stand-ins; my expectation is SHORT (Minor) for the footer entry and likely for the other three.
+- D3 Plumbing is copied from `.tools/b1217/scripts/` (it already holds plants.py, run_plant.sh, equiv.py, prettier3.sh); that directory exists now (ls).
+- D4 Added: at least two NEW duplicate-guard plants of the gate's own that are NOT among the 8 pieces, because X1-X3 are now explained by clause 3, so they no longer test "Nothing else".
+- D5 HARD STOP "never after 21:00 AEDT" (round 1 used 19:30; the launch time is later). Change if you want.
+
+Q for Tuesday:
+- Q1: for the 4 stand-in entries, should the gate hold "taking out" at SHORT (Minor) if it is TRUE in the test's sense? Default: yes, as written (round-1 rule "TRUE but narrower than the test = Minor"). A FALSE (Major) would need the sentence to promise something the test does not do.
+- Q2: B1217-2 as Major alone makes the cap verdict NO GO; do you want the gate to be told in advance the outcome is expected? Default: no, it is stated as a conditional on Y1 (the gate must measure).
+- Q3: the squash body says "the test"; the builder's message already does. Default: reuse.
+
+UNMEASURED: no test, container, prettier or plant was run by me; the tree hash `2451984c...` is RELAYED from B1220 (not re-derived); the literal-deletion results; whether Y1 still turns 38 rows red at 3c62b959 (the tests are unchanged and line 203 unchanged, so expected yes, but not run); hosted CodeQL (no PR); apps/api half.
+
+Outside the fences: none. Read-only: gh api -X GET (compare, contents, trees, pulls files, pulls list) under the project GH_CONFIG_DIR, git ls-remote, tmux list-panes, ls, awk/grep over project briefs and scratch copies in the session scratchpad. No decision_queue, no Jira, no ref write. One tool call returned a hook error (zsh `====` separator) and was redone; no side effect.
