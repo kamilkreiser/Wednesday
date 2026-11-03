@@ -36,18 +36,18 @@ model: claude-sonnet-5-5 -- row C8 (`/Volumes/Laptop-DEV/TUESDAY/2_Project_Files
 
 ## Stamp
 The unstamped copy reads 13 such lines (12 slots and the last line). Tuesday stamps; leave every slot as it stands.
-- STAMP (time, what was read whole, Q-answers, D-answers): ____
-- DONE-412 (exactly `MOVE` or `COMMENT-ONLY`; default MOVE; the coordinator's reading under C-263, open to the product owner's veto): ____
-- TEXT-412 (exactly `APPROVED` or `HOLD`; the variant DONE-412 selects, byte for byte as in the FIXED PARTS, or the edited text pasted here): ____
-- TICKET-1228-3 (exactly `CREATE` or `SKIP`; default CREATE; SKIP drops J1 and `<<B1228-3-STATE>>` becomes `recorded in row B1256-3, not ticketed`): ____
-- COMMENTS-OTHER (exactly `ALL` or `NONE`; default ALL = one comment each on HPSMPOC-406, HPSMPOC-399 and HPSMPOC-368, no move; NONE drops J3 to J5): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default WRITE; HOLD drops the branch, the PR and C-291, and the comments may then still post but cite no entry: Tuesday edits the texts): ____
-- LAND (exactly `SEAT` or `TUESDAY`; default SEAT; the records PR is opened and landed by head-pinned merge commit by that party): ____
-- Hard stop (JIRA DONE 60, RECORDS COMMITTED 90, HARD STOP 150 minutes after your own Step-0 date, written absolute by you at Step 0, and not after the clock Tuesday writes here): ____
-- LAUNCH WINDOW (until; load1; live seats beside you): ____
-- Stamped by: ____
-- Launch authority (who confirmed each slot; the 2026-10-24 every-boot rule; the 2026-11-04 ruling; the 2026-11-01 Done ruling C-263): ____
-- Model receipt line and load1 at launch: ____
+- STAMP (time, what was read whole, Q-answers, D-answers): STAMPED 09:31 AEDT 2026-11-04 by Tuesday s241. Read in this seat: this kit whole (181 lines by wc -l), its drafter report's Q-1 to Q-11, and ADDENDUM-1 `tuesday/briefs/2026-11-04_B1256_ADDENDUM-1_after-uat-deploy.md` (25 lines; written by s241 after the UAT deploy B1258; it AMENDS REFUSE 8 and every not-deployed sentence, and adds the product owner's 07:51:42 and 09:23:09 words and the 136 px question to C-291: read it at Step 0 before REFUSE). Every Q-item takes its stated default (Q-4 MOVE; Q-5 row only; Q-7 ALL; Q-9 as written). The drafter's own reads (07:46 to 08:07 AEDT, not re-read by Tuesday): records main 8c973589; code main a8497578; PR 282 merged_at 2026-11-03T20:44:56Z; C-290 the newest heading; HPSMPOC-443 the highest key; squash check-runs 18 success, 1 skipped, 0 failure at 08:06. Re-measure each.
+- DONE-412 (exactly `MOVE` or `COMMENT-ONLY`; default MOVE; the coordinator's reading under C-263, open to the product owner's veto): MOVE
+- TEXT-412 (exactly `APPROVED` or `HOLD`; the variant DONE-412 selects, byte for byte as in the FIXED PARTS, or the edited text pasted here): APPROVED
+- TICKET-1228-3 (exactly `CREATE` or `SKIP`; default CREATE; SKIP drops J1 and `<<B1228-3-STATE>>` becomes `recorded in row B1256-3, not ticketed`): CREATE
+- COMMENTS-OTHER (exactly `ALL` or `NONE`; default ALL = one comment each on HPSMPOC-406, HPSMPOC-399 and HPSMPOC-368, no move; NONE drops J3 to J5): ALL
+- RECORDS (exactly `WRITE` or `HOLD`; default WRITE; HOLD drops the branch, the PR and C-291, and the comments may then still post but cite no entry: Tuesday edits the texts): WRITE
+- LAND (exactly `SEAT` or `TUESDAY`; default SEAT; the records PR is opened and landed by head-pinned merge commit by that party): SEAT
+- Hard stop (JIRA DONE 60, RECORDS COMMITTED 90, HARD STOP 150 minutes after your own Step-0 date, written absolute by you at Step 0, and not after the clock Tuesday writes here): JIRA DONE 60, RECORDS COMMITTED 90, HARD STOP 150 minutes after your own Step-0 date, written absolute by you; and not after 14:30 AEDT 2026-11-04.
+- LAUNCH WINDOW (until; load1; live seats beside you): From 09:31 until your hard stop; launch_when_cool, one waiter, load1 below 7 on two reads. Tuesday's read at 09:31:37 (date printed in the same command): load1 8.96; panes tuesday, fleet-monitor, Datasec/HPSM-POC-H109 (shell builder, as in the kit), Datasec/NexusAI-G333 and Datasec/MPS-G335 (other repositories). No other HPSM-POC pane: H114, D46, G332, G334 are closed.
+- Stamped by: Tuesday s241 (the Datasec coordinator seat).
+- Launch authority (who confirmed each slot; the 2026-10-24 every-boot rule; the 2026-11-04 ruling; the 2026-11-01 Done ruling C-263): Tuesday s241 at 09:31 under the product owner's 2026-11-04 07:15 ruling on the focus-ring card (option a, landing and recording PR 282), his 2026-11-01 Done ruling as the kit relays it (C-263; you read it at source), and the 2026-10-24 every-boot rule. The move of HPSMPOC-412 is the coordinator's reading under C-263, open to the product owner's veto. Tuesday did not re-read C-263 at source for this stamp.
+- Model receipt line and load1 at launch: model: claude-sonnet-5-5 -- C8 (model-routing.md:98) -- gauge 7d 4 of 100 at Tuesday's boot; load1 8.96 at Tuesday's 09:31:37 read; read your own at Step 0.
 
 ## STANDING LINES
 PRIOR-WORK CHECK: before Step 4 list `1_Project_Definition/Briefs/*B1228*`, `*B1198*`, `*B1256*`, read HPSMPOC-412, -406, -399 and -368 whole (`desc1014.py`, `read.py`), the entries C-263, C-267, C-270, C-271, C-272, C-285 and C-290 as they stand at records main, and grep BACKLOG raw for B1228, B1198, B1188-1 and `Firefox`; a READY without a `PRIOR WORK` section (one part per job J1 to J5 and R) is returned unread. No message to any human (no mail, chat, board post; the records PR only). Jira writes only where this kit's scope says. Never delete (quarantine to `.tools/b1256/_quarantine/`); never type `cd`, `rm` or `sed -i`; absolute single-quoted paths (`!` in the project path); `/usr/bin/grep -i` with a positive control for every count; `python3 -I -B`; never print a token, key or login. This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM); next-phase items are stored and architected only, never shown to HP as done (in no Jira or record text). Word pack: no customer-visible word is proposed or written.
@@ -178,4 +178,4 @@ Transitions: only HPSMPOC-412 to Done, only by `move1256.py`, only if the slot s
 ## UNMEASURED by the drafter
 No write of any kind; the helper re-point edits (not run); the fixed Jira texts (self-scanned only, not by `scan1256.py`); the Done count and the contiguous census (search is capped at 100 hits; `snap1007.py` is yours); the squash's post-merge checks after 08:06 (a later job could still fail or be re-run); whether a duplicate ticket exists beyond the titles read; the gate's cells (found on their lines, not re-run); the e2e jobs' printed counts; the records PR's own checks; the C-scan over all refs; the card's tap time 07:15:50 (relayed by the coordinator, not in the store); Firefox, Safari and WebKit behaviour (nobody ran them).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 09:31 AEDT by Tuesday s241 (kit 181 lines by wc -l; ADDENDUM-1 25 lines)

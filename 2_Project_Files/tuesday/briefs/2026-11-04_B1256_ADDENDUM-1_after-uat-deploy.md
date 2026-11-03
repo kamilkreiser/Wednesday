@@ -1,0 +1,25 @@
+B1256 ADDENDUM-1 (read at Step 0, before REFUSE; it AMENDS the kit; where the two differ, this file wins) -- from Tuesday s241
+
+**What changed after the kit was drafted (08:09):** the squash of pull request 282, `a8497578d318f086276fc4c168984b42ca33e7fd`, was DEPLOYED TO UAT (web and API) on 2026-11-04 from 08:47:03 to 08:49:11 AEDT by deploy seat B1258. Its record: `1_Project_Definition/Briefs/2026-11-04_B1258_STATUS.md` (304 lines at 09:30, sha256 prefix `ad64f3341a46ba07`; re-print both). Its first line begins `DEPLOY B1258: DONE, UAT @ a8497578 (WEB + API), healthy, NO rollback`. Its last line (:304) begins `DEPLOYED: UAT @ a8497578 (WEB + API), healthy`. The deploy start is at :143 and the deploy itself at :147 (re-print by `grep -n`). The DEMO is NOT deployed: it stays at `c00e2828`. Every sentence of the kit that says this merge is NOT deployed is therefore FALSE for UAT and must not be written.
+
+**1. REFUSE 8 is replaced by:** "Hosted state: list the first lines of `Briefs/2026-11-0[345]_B*_STATUS.md`. B1258 is EXPECTED: its first line begins `DEPLOY B1258: DONE, UAT @ a8497578`, and its last line begins `DEPLOYED: UAT @ a8497578`. STOP if any OTHER first line begins DEPLOYED, PARTIAL or ROLLED BACK, if any deploy STATUS names the demo as deployed at or after 2026-11-04, or if B1258's last line no longer begins `DEPLOYED: UAT @ a8497578`. Control: the prefix DEPLOY lists B1234 and B1258."
+
+**2. Replace every not-deployed sentence, by program, with the measured fact.** In the four Jira comment texts (`<DONE-412>`, `<STAY-412>`, `<LAND-406>`, `<LAND-399>`, `<LAND-368>`) and in `<NEW-1228-3>` paragraph (1):
+- each `NOT DEPLOYED` sentence becomes `Deployed to UAT (web and API) on 2026-11-04, 08:47 to 08:49 AEDT; not deployed to the demo.`
+- in `<DONE-412>`, `Merged only: NOT DEPLOYED, and this move deploys nothing.` becomes `Deployed to UAT (web and API) on 2026-11-04, 08:47 to 08:49 AEDT; not deployed to the demo; this move deploys nothing.`
+- in `<NEW-1228-3>` (1), `Nothing here is deployed.` becomes `The change is deployed to UAT (2026-11-04, 08:47 to 08:49 AEDT), not to the demo.`
+The Jira B-number allow-list stays exactly B1228 and B1256; these sentences carry no B-number.
+
+In the records (C-291, BACKLOG, history):
+- C-291 line 01: `merged and NOT deployed` becomes `merged and deployed to UAT on 2026-11-04 (not the demo)`.
+- **C-291 line 09 is REPLACED whole** by one bullet: `- **Deployed to UAT, not the demo (MEASURED from the deploy record B1258, RELAYED).**` Then: the record path, its line count and sha256 prefix as you print them, its first line and its line 304 by prefix, and the window 08:47:03 to 08:49:11 AEDT from its line 143. Then its live check as that record states it, quoted with line numbers: web 2114 of 2114 files, API 121 of 121, 8 of 8 sign-ins, no schema step. Then that the demo stays at `c00e2828`, from `compare c00e2828...a8497578`, which you re-read. Then that this seat ran no deploy and made no request to any app host.
+- C-291 line 12 and the BACKLOG rows' `not deployed` become `deployed to UAT, not the demo`.
+- The history entry's `no deploy` stays true for THIS seat; add `the merge was deployed to UAT by the deploy record B1258 (not by this seat)`.
+- The B-numbers allowed in the records text are B1228, B1198, B1256 and **B1258**; update the closing check's allow-list and say so.
+
+**3. Add to C-291, after line 03 (the ruling), ONE new bullet (RELAYED), verbatim from the live board as the coordinator relays it; your closing check's quote mask covers them:**
+`- **The deploy request and the site ruling (RELAYED).** The product owner's live-board words, 2026-11-04 07:51:42 AEDT, verbatim: "can you please deploy to live all changes made and change the column and menu items as per the feedback given." Asked which site, he ruled at 2026-11-04 09:23:09 AEDT "UAT, then the demo". UAT is deployed (bullet below). The demo is held at this record because the deploy record measured a page-height difference that went to the product owner as a question (next bullet).`
+
+**4. Add to C-291's accepted limit (1), as its last sentence:** `On UAT, the deploy record B1258 measured short pages ending 136 px sooner than on the site before this merge (69338b64), in 22 of 56 views, every Engagements view at 1024 to 1440 px wide, with the menu open or closed. The 64 px was the gate's figure against the round-3 draft. Whether 136 px is accepted was put to the product owner on 2026-11-04 and is OPEN at this record.` Add the same item to the C-291 "Not settled" bullet.
+
+**5. Unchanged:** every other part of the kit, all its slots and STOPs. You still write no deploy, no Jira beyond the kit's scope, no card id, and no word `Tuesday` in the records (write "the coordinator"). The pane list at this addendum: `Datasec/HPSM-POC-H109` (shell builder, as in the kit), `Datasec/NexusAI-G333`, `Datasec/MPS-G335` (other repositories). D46, H114, G332 and G334 are closed. A later `Datasec/HPSM-POC-H116` (a builder on the feedback-page branch, kit B1263) may appear: run REFUSE 7 on it as written. Record this addendum by name under Corrections.
