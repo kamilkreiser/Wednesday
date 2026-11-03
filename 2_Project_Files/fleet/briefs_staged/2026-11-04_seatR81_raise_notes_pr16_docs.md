@@ -74,10 +74,11 @@ Mail `NOTES PATCHED: PR 1993 (Seat R 81st)` as for ITEM 1.
 - No base-against-head recorder (ruling below): "no base-against-head recorder run by the raise seat" in NOT covered, the KS-1868 comment and the READY.
 
 ### ITEM 4: the three held Spark doc_only passes (operator 100) — TIER 2 (docs)
-Held files (Wednesday's `ls` of `night/` filtered for `O100`, 3 lines):
+Held files (Wednesday's `ls` of `night/` filtered for `O100`, 3 lines; plus operator 101's one, filtered for `O101`, added below):
 - `READY_KS-1320-KS-1320-O100-P1B_spark-dsv4flash_BRIEFED-DOCONLY-CONTRIBUTING-SQUASH-SUBJECT-LIMIT-DOC-PASS-9of9_2026-11-03.diff.md`
 - `READY_KS-1343-KS-1343-O100-P2B_spark-dsv4flash_BRIEFED-DOCONLY-MULTI-TENANCY-FLAG-WORDING-DOC-PASS-9of9_2026-11-03.diff.md`
 - `READY_KS-1343-KS-1343-O100-P3B_spark-dsv4flash_BRIEFED-DOCONLY-RLS-PLAN-ONLY-ISOLATION-WORDING-DOC-PASS-9of9_2026-11-03.diff.md`
+- **ADDED 02:1x by Wednesday (operator 101, held 02:13:43):** `READY_KS-902-O101-P1_spark-dsv4flash_BRIEFED-DOCONLY-NO-TRACKED-CREDENTIALS-COMMENT-PASS-9of9_2026-11-04.diff.md` — a comment-only doc_only pass in `Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh` (KS-902), TREE-IDENTICAL, CONTROL-PASS 02:13:00, PASS 02:13:43, at tip `79145a312f01`. Its own PR `Refs KS-902: ` unless the title rule allows one PR for several keys; same tier-2 batch.
 Operator 100 reports each as TREE-IDENTICAL to its golden and strict at `1cbf260548e7` (its report line 2). Re-measure strictness at YOUR base. **KS-1343 is PARTIAL:** these passes cover notes N-1286-4, -7 and -8 only; the PR body and the KS-1343 comment say so in the first line (never "closes"; the remaining notes stay on the ticket).
 - **One PR or two — UNMEASURED by Wednesday:** whether the merge seat's title assertion accepts a title naming two keys. Read the title regex in B 86th's merge tooling (`/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-03_seatB-86th/tools/`, `merge.py` lines 68 and 71 are named in its HANDOVER) at ITEM 0. If it accepts only `Refs KS-NNNN: `, raise TWO PRs (KS-1320 alone; KS-1343 P2B + P3B), and Wednesday gates them as one tier-2 batch. Say which in the plan confirmation.
 - Docs-only PRs still carry Test Evidence: `docs-fragments.mjs check` if a fragment is touched (likely not: these are repo docs), the strict-apply proof, the three-dot file list, and "no tests changed".
@@ -187,6 +188,7 @@ PROVENANCE:
 - R 80th's wrap state, processes, worktrees, tools, traps, PR 16 procedure and facts (strict 8/8 at 1cbf2605, tree bb4dbe5018b5), ITEM 4a/4b reads, board candidates | /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-03_seatR-80th/HANDOVER.md lines 1-39 (FINAL block), read whole by Wednesday | read 2026-11-04
 - O98-P2..P9 patch files: 8 | `ls .../2026-11-03_seatR-80th/drafts/patches/ | /usr/bin/grep -i -c 'O98-P'`, Wednesday (control: O95-P6.diff listed) | read 2026-11-04
 - The three O100 held READY names | `ls /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night | /usr/bin/grep -i 'O100'`, Wednesday (control: 'O99-P1' count 1) | read 2026-11-04
+- KS-902 O101-P1 held file name and done.md rows 02:13:00 CONTROL-PASS / 02:13:43 PASS | `ls night | /usr/bin/grep -i O101` and `/usr/bin/grep -i o101 spark/done.md`, Wednesday | read 2026-11-04 02:1x
 - O100 passes TREE-IDENTICAL, strict at 1cbf260548e7; KS-1343 notes N-1286-4/-7/-8 | /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_spark-operator100/report.md lines 2-6 | read 2026-11-04
 - DevMASTER 24 GiB available (99%) | `df -g /Volumes/DevMASTER`, Wednesday, 15:05Z | read 2026-11-04
 - Live seats: none at 02:0x | `tmux list-panes -a` (panes %0 wednesday, %1 fleet-monitor), Wednesday | read 2026-11-04

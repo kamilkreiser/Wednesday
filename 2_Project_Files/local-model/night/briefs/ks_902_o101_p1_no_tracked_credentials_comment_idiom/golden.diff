@@ -1,0 +1,16 @@
+diff --git a/Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh b/Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh
+--- a/Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh
++++ b/Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh
+@@ -78,8 +78,10 @@
+ # `git ls-files` output is index paths), which is why the output looked
+ # identical until something was planted.
+ #
+-# `bare-path-scripts-executable.sh` and `action-pins-labelled.sh` already derive
+-# their root this way and are structurally immune; this is the same idiom.
++# The root is derived from this script's own location, not from the caller's
++# working directory, so it does not depend on where the preflight runs. Do not
++# copy `REPO_ROOT="$(cd ../.. && pwd)"` from `bare-path-scripts-executable.sh`
++# or `action-pins-labelled.sh`: that form is cwd-relative (KS-902).
+ DEV_DIR="$(cd "$(dirname "$0")/../.." && pwd)"   # Blockchain/Dev
+ 
+ # Scrub the inherited git environment FIRST. Git exports GIT_DIR to a WORKTREE's

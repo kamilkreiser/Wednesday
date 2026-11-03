@@ -1,0 +1,65 @@
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash-verify-route.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash-verify-route.test.ts
+@@ -112,6 +112,18 @@ describe('KS-1628 L1 and L6 - the verify chain-first fallback', () => {
+     expect(body.checks.isAnchored).toBe(false);
+   });
+ 
++  it('KS-1783 L6 verify: a simulated reply with its own real-shaped hash is not on-chain', async () => {
++    // KS-1783: the hash this cell sends is its own, real-shaped, and asserted so; it does not come from chainReply's default.
++    const REAL_TX_SHAPE = /^[0-9a-f]{64}$/;
++    const reply = chainReply({ simulated: true, txHash: '5'.repeat(64) });
++    expect(reply.txHash).toMatch(REAL_TX_SHAPE);
++    const body = await callSite(reply);
++    expect(body.blockchain.simulated).toBe(true);
++    expect(body.blockchain.anchored).toBe(false);
++    expect(body.blockchain.txHash).toBeNull();
++    expect(body.checks.isAnchored).toBe(false);
++  });
++
+   it('RED KS-1628 L6 verify: the shape anchoring really sends (simulated true, txHash null) is not on-chain', async () => {
+     const body = await callSite(
+       chainReply({ simulated: true, txHash: null, simulatedTxRef: 'mock_tx_' + 'c'.repeat(64), cardanoScanUrl: null }),
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash.test.ts
+@@ -107,6 +107,18 @@ describe('KS-1628 L1 and L6 - the verify-file chain-first fallback', () => {
+     expect(body.checks.isAnchored).toBe(false);
+   });
+ 
++  it('KS-1783 L6 verify-file: a simulated reply with its own real-shaped hash is not on-chain', async () => {
++    // KS-1783: the hash this cell sends is its own, real-shaped, and asserted so; it does not come from chainReply's default.
++    const REAL_TX_SHAPE = /^[0-9a-f]{64}$/;
++    const reply = chainReply({ simulated: true, txHash: '5'.repeat(64) });
++    expect(reply.txHash).toMatch(REAL_TX_SHAPE);
++    const body = await callSite(reply);
++    expect(body.blockchain.simulated).toBe(true);
++    expect(body.blockchain.anchored).toBe(false);
++    expect(body.blockchain.txHash).toBeNull();
++    expect(body.checks.isAnchored).toBe(false);
++  });
++
+   it('RED KS-1628 L6 verify-file: the shape anchoring really sends (simulated true, txHash null) is not on-chain', async () => {
+     const body = await callSite(
+       chainReply({ simulated: true, txHash: null, simulatedTxRef: 'mock_tx_' + 'c'.repeat(64), cardanoScanUrl: null }),
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1634-v2-chain-only-match-carries-simulated.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1634-v2-chain-only-match-carries-simulated.test.ts
+@@ -125,6 +125,20 @@ describe('KS-1634 L6 - the v2 chain-only fallback carries simulated', () => {
+     expect(m.checks.isAnchored).toBe(false);
+   });
+ 
++  it('KS-1783 L6 v2: a simulated reply with its own real-shaped hash reads NOT on-chain', async () => {
++    // KS-1783: the hash this cell sends is its own, real-shaped, and asserted so; it does not come from chainReply's default.
++    const reply = chainReply({ simulated: true, txHash: '5'.repeat(64) });
++    expect(reply.txHash).toMatch(REAL_TX_SHAPE);
++    const body = await callV2(reply);
++    expect(body.count).toBe(1);
++    const m = body.matches[0];
++    expect(m.blockchain.simulated).toBe(true);
++    expect(m.blockchain.anchored).toBe(false);
++    expect(m.blockchain.txHash).toBeNull();
++    expect(m.simulated).toBe(true);
++    expect(m.checks.isAnchored).toBe(false);
++  });
++
+   it('CONTROL KS-1634 v2: a real confirmed anchor stays on-chain', async () => {
+     const body = await callV2(chainReply());
+     expect(body.count).toBe(1);
