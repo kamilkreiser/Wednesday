@@ -1,0 +1,42 @@
+STARTABLE: YES
+
+# B1214 drafter report (Security Composer seat C84, DEPLOY.md line 255 one-sentence change)
+
+Clocks are the `date` lines of each action (15:13 to 15:16 AEDT 2026-11-03); the kit types none.
+
+## BLUF
+- Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-03_B1214_SEAT-C84_composer-deploy-md-255-sentence.md`, 87 lines. Stamp slots: 7 four-underscore runs (6 slots + the last line); control `/usr/bin/grep -o -E '_''_''_''_' | wc -l` = 7 and the only runs are in the Stamp block and the last line. 0 non-ASCII lines.
+- Sonnet, `BRIEF_SEAT_LEVEL=sonnet` inside the launch quotes, cockpit name `Datasec/Security-Composer-C84` (same pattern as B1193's `...-C83` launch line), launched via `launch_when_cool.sh`. No ports. Branch `b1214/composer-deploy-md-255-sentence` (new ref), footprint `.tools/b1214`, one commit, one plain push, no PR.
+- Main is still `2f63b2f677b030799cf7f507016fd0d0df59dbaf` (`git ls-remote`, 15:13:48). Open PRs #91, #86, #85, none lists `DEPLOY.md`.
+
+## Facts re-measured (instrument, control)
+- Remote: `git remote -v` = `git@github.com:datasecau/Datasec-Security-Composer.git` (fetch and push); `gh api -X GET repos/datasecau/Datasec-Security-Composer/...` under the project's `GH_CONFIG_DIR` answered.
+- DEPLOY.md at `2f63b2f6` (`gh api -X GET contents/DEPLOY.md?ref=` raw, to scratch): 652 lines (`wc -l`), sha256 begins `bf446a79` (equals B1193's value), 0 carriage returns, last byte newline, line 255 has 0 non-ASCII bytes.
+- Old sentence: `grep -c -F 'Nothing else in the command is pinned.'` = 1 (control: `zzqxnope` = 0). `grep -n` prints 255; `awk NR==255` prints `Nothing else in the command is pinned. Measured with a throwaway \`postgres:16\`` (79 bytes with newline). Line 254 is the end of the previous sentence ("... is not caught)."), 264 blank, 265 the `### Proven on` heading, section heading at 153, next `## ` at 286 (`grep -n`).
+- New sentence: 250 bytes (`printf | wc -c`), `grep -c -F '!'` = 0 and `grep -c -F '\'` = 0 (control: `printf 'a!b\c'` gives 1 for `!`), all printable ASCII. Applied with `awk` to a scratch copy: `diff` shows one hunk `255c255`, 652 lines, the files with line 255 deleted are `cmp`-equal, new line 255 = 291 bytes. Line 255 old: 0 backslashes, 0 `!`; line 256 has a backslash (count 1, control).
+- Pinned phrases not in the new sentence: `PostgreSQL database dump`, `restrict`, `Route B as written here`, `completeness check`, `tail -n 6`, `was run on a local stack`: 0 each (`grep -c -i -F`). The old sentence is in neither test file: `grep -c -i -F 'Nothing else in the command'` over the b616 test = 0, over the b778 test = 0, over DEPLOY.md = 1 (control).
+- Tests that read DEPLOY.md (raw files at `2f63b2f6`): b616 (2717 lines, 92 `it(` lines; ~109 rows is RELAYED from the B1193 kit) scans only between `## Rolling back a deploy that applied 0026` (DEPLOY.md:477) and `## A later migration` (:585) (`:12`, `:14` of the test, `grep -n`); line 255 is outside. b778 (1786 lines, 54 `it(` lines) reads the 0021 section (SECTION `:15`), the fenced block holding the check line (the one line naming `PostgreSQL database dump`, `:95`), and the `### Proven on` sub-section (from DEPLOY.md:265); the prose around 255 is in none of those spans. I found no position or line-break pin; this is a reading, not a run (UNMEASURED).
+- CI predicate: `scripts/ci.sh:117` runs the node chain, `package.json` `ci:node` = lint && format:check && typecheck && build && test; `format:check` = `prettier --check .`; `.prettierrc.json` `{"printWidth":100}`, `.prettierignore` does not list DEPLOY.md (so a long prose line is judged by prettier; proseWrap default preserve: UNMEASURED, the kit makes the builder measure it). `scripts/ci.sh:118` runs `scripts/test-db.sh`; its `:58` is `sh -c 'npx vitest run --config packages/db/vitest.config.ts && npx vitest run --config apps/api/vitest.db.config.ts'`; `packages/db/vitest.config.ts` includes `packages/db/test/**/*.db.test.ts` (b616 and b778 both match). Pass predicate in the kit: rc 0 of both runs; for this change: prettier rc 0 + b616 and b778 whole, 0 failed.
+- Landing rule: the project `CLAUDE.md` holds none (`grep -n -i -E 'land|squash|merge'` printed nothing). Quoted from `1_Project_Definition/CLARIFICATIONS.md:1799` (checked by `sed -n 1799p`; control: it begins "- **The question** (RELAYED): PR #88"), restated as the landing rule at `:1885`. The kit quotes it with "[the coordinator]" as the file does.
+- Panes: `tmux list-panes -a -F '#{pane_id} #{@cockpit_name}'` filtered `Composer|tuesday` = `%0 tuesday` only. `.tools/b1214` absent (`ls` rc 1), `.tools/composer-heavy.lock` absent (`ls` rc 1), `.tools/b1193` present (control). `ls-remote refs/heads/b1214*` empty (control: `b1170*` prints the b1170 branch). Prior DEPLOY.md-words branches `b888/...` and `b917/...` exist and are not this change.
+- Model: `model-routing.md:92` C2 (Sonnet 1st, but "multi-file build or feature": wider than this job; no row names a one-sentence docs edit), `:98` C8, `:91` C1; gates `:108` G1 (tier 1, Opus), `:109` G2 (tier 2: "tests-only, spec-only, docs, config/CI, tooling", Sonnet first), `:110` G3 (tier 3: "backlog or citation fixes, ticket hygiene, comment corrections", "No gate: the builder's own red-proof plus Wednesday's completion check"). Id: `models_latest.json:23` `claude-sonnet-5-5`; `brief_seat.sh:24` defaults to opus.
+- Plumbing: `dbtest.sh` exists in `.tools/b1177/scripts/` and NOT in `.tools/b1193/scripts/` (`ls`), so the kit copies from b1177 (as the B1193 kit did) and renames/ re-holders (`heavy.sh:24`, `:51` carry `B1177 C82`).
+
+## Gate tier recommendation (Tuesday decides)
+A one-sentence prose change in an operator guide that two tests read is a "docs" change, so the table puts it at G2 (tier 2, Sonnet) at most; it touches no security surface and does not deploy (not G1). My recommendation: NO separate gate, treat it as G3-like (the builder's own red-proof in Step 3: prettier rc 0, b616 and b778 equal to the base, a control plant that goes red), then Tuesday's own check of the PR diff (`1 1 DEPLOY.md`, one hunk) and CodeQL before the head-pinned squash. If Tuesday wants an independent read anyway, a tier-2 Sonnet gate is the cheap one.
+
+## D-decisions (mine)
+- D-1: Prefix replace by the Edit tool with a unique `old_string` that includes the following ` Measured with a throwaway`, so the rest of line 255 stays byte-identical; no re-wrap.
+- D-2: Only b616 and b778 run (db route, `dbone.sh`), plus `prettier --check DEPLOY.md`; the whole `test-db.sh` and the apps/api suite are skipped and the kit says so. The seat also runs both at the unedited tree as a base and a control plant, because a green-only run on a prose change cannot show it can fail.
+- D-3: New ref branch, pushed `HEAD:refs/heads/b1214/composer-deploy-md-255-sentence`; hard stop 120, target 60 minutes.
+- D-4: Commit message uses no ticket key, card id or person name; the kit text names no card id (the report may; the card is `composer-deploy-md-255-pinned-sentence-1103` per B1209's report).
+
+## Q-questions for Tuesday (each with a default)
+- Q-1: Gate or no gate? Default: no gate (G3-like), see above.
+- Q-2: Should the PR also be gated by the hosted CI only (default yes: CodeQL and the checks are read before the squash)?
+
+## UNMEASURED
+Whether prettier accepts the 291-byte line 255 (config and ignore file read, not run); whether b616/b778 are green with the edit (not run; readings only); the b616 "about 109 rows" count (RELAYED, only `it(` lines counted: 92); the control plant in Step 3 (named, not run); main or the PR list moving after 15:16 AEDT; whether line 255's paragraph still reads right to the product owner after the change (his sentence, verbatim).
+
+## Outside the fences
+None. Reads: `DRAFTER_RULES.md`, the B1209 report, the B1193 kit, `model-routing.md`, `models_latest.json`, `brief_seat.sh` lines 20-28, the Composer `CLARIFICATIONS.md` (grep, `sed -n`), `.tools/b1177/scripts/*.sh` and `.tools/b1193/scripts/fmtcheck.sh` (read only), `git ls-remote`, `gh api -X GET` (contents, trees, pulls, pulls/files) under the project's `GH_CONFIG_DIR`, `tmux list-panes`, `ls`. Fetched copies (DEPLOY.md, two test files, ci.sh, package.json, test-db.sh, the tree list) and the awk-built `deploy.new` live only in the session scratchpad. No decision_queue, no Jira, no vault, no ledger, no WEDNESDAY tree. The advisory hook text on case-sensitive greps fired on several of my greps; every zero used a control that fired.
