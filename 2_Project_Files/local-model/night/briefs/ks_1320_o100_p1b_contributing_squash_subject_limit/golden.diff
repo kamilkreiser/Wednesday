@@ -1,0 +1,14 @@
+diff --git a/Blockchain/Dev/CONTRIBUTING.md b/Blockchain/Dev/CONTRIBUTING.md
+--- a/Blockchain/Dev/CONTRIBUTING.md
++++ b/Blockchain/Dev/CONTRIBUTING.md
+@@ -104,7 +104,9 @@
+   `.github/**` file) gets twin-green without the real suite — same-name/latest-report semantics only
+   self-correct where the real workflow exists. Hotfix review must eyeball the diff for this shape.
+ - **Merge method:** `hotfix/*` and `release/*` PRs use **merge commits** (not squash) — the
+-  fold-back/tombstone mechanics below depend on shared history. Feature PRs into `develop` stay squash.
++  fold-back/tombstone mechanics below depend on shared history. Feature PRs into `develop` stay squash, and the squash
++  subject must be 92 characters or fewer and ASCII only, so keep the PR title within that limit (KS-1320: nothing
++  rejects a longer title when the PR is opened; the merge gate finds it, and a replacement subject then has to be written).
+ - **No force push (KS-1037):** `.githooks/pre-push` REFUSES any non-fast-forward push to a branch that
+   already exists at origin — a rebase becomes a NEW branch. Why: a force push rewrites history another
+   process may depend on — an open PR's head, or a gate running against the SHA being replaced.

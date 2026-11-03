@@ -1,0 +1,17 @@
+diff --git a/Blockchain/Dev/docs/MULTI-TENANCY.md b/Blockchain/Dev/docs/MULTI-TENANCY.md
+--- a/Blockchain/Dev/docs/MULTI-TENANCY.md
++++ b/Blockchain/Dev/docs/MULTI-TENANCY.md
+@@ -50,10 +50,11 @@
+   `migrations/050_documents_id_namespaces_disjoint.sql` adds a SECURITY DEFINER function that reads `documents`
+   across tenants.
+ - **A per-tenant-database path exists in the code and is dormant.** It is gated by **two** flags, and
+-  they are in **different** states — a distinction the first version of this correction got wrong:
++  they are in **different** states:
+   - `PROVISION_PER_TENANT_DB` (`tenant-pool-manager.ts:152`,
+     `tenant-provisioning/src/index.ts:245`) is set in **no** configuration file in the repository.
+-    **This is the flag that actually gates per-tenant databases**, and it is off everywhere.
++    **This is the flag that actually gates per-tenant databases**, and in the repository it is off everywhere; live app
++    settings were not checked.
+   - `MULTI_TENANCY_ENABLED` (`tenant-pool-manager.ts:151`) is **ON in dev and demo**:
+     `deployment/azure/env.dev.json:7` and `deployment/azure/env.demo.json:7` both set it to `"true"`,
+     as does `deployment/azure/services.bicep:798`. It enables tenant *routing*; with

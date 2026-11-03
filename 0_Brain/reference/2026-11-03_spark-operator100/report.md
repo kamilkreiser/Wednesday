@@ -1,0 +1,10 @@
+# Spark operator 100 — report (relayed by Wednesday 2026-11-03 ~22:5x: the subagent could not write files; text condensed from its final message)
+Held: 3 (target 6; class nearly exhausted, nothing padded). All doc_only tier, markdown only, strict apply, TREE-IDENTICAL to golden, passed hold_ready's strict-apply leg.
+- READY_KS-1320-KS-1320-O100-P1B_spark-dsv4flash_BRIEFED-DOCONLY-CONTRIBUTING-SQUASH-SUBJECT-LIMIT-DOC-PASS-9of9_2026-11-03.diff.md (Blockchain/Dev/CONTRIBUTING.md: squash subject <= 92 chars, ASCII)
+- READY_KS-1343-KS-1343-O100-P2B_spark-dsv4flash_BRIEFED-DOCONLY-MULTI-TENANCY-FLAG-WORDING-DOC-PASS-9of9_2026-11-03.diff.md (MULTI-TENANCY.md, notes N-1286-7/-8)
+- READY_KS-1343-KS-1343-O100-P3B_spark-dsv4flash_BRIEFED-DOCONLY-RLS-PLAN-ONLY-ISOLATION-WORDING-DOC-PASS-9of9_2026-11-03.diff.md (RLS-FAIL-CLOSED-PLAN.md, note N-1286-4)
+Base develop 1cbf260548e7 throughout. Exclusions re-derived: 869 held READYs / 553 paths; 24 open PRs / 143 files (planted control services/originate 5); R 80th's 19 queue paths + s-r79-pr14's 9 files. Candidates: 451 KS Backlog/Todo (first:100 paginated).
+Rounds: round 1 p1 PASS but golden DIFFERS + bad header (refused by strict leg, final); p2 FAIL (needed --recount); p3 FAIL at A2 (no context). Round 2 (one rebrief each, golden in the brief): p1b/p2b/p3b PASS 22:40:39 / 22:41:10 / 22:41:30. Controls CONTROL-PASS 22:35:36-22:40:00. 6 model rounds.
+TOOL CHANGE: night/hold_ready.py gained hold_doc_only() + ticket-id fallback (backup hold_ready.py.pre-1103-op100-doconly); proofs: O99-P1 dry-runs OK, non-strict p1 refused, false expect_present refused. Owed: no hold kind for test_only_input (IMPROVEMENTS row, backup .pre-1103-op100).
+Skipped with reasons: KS-1783/1812/1815/1644 (held/anchoring), 1593/1761 (no fix shape), 1587/1793/1712 (real Postgres), 1145/1415n2/1764/1759/1325 (bash suites), 1415n1/1412/1770/1418 (HTML), 1727, 1864, 1501, 1947/1775 (auth), 1141/807/1681/1473/1322/1669 (decision first), 1847/1853 (docs-vs-code undecided), 1048, 1646; ~330 by title only.
+End: disk 22 GiB; drainers 65224/81668 exited; nothing running. No push/PR/merge/comment/mail; nothing under !CODING.
