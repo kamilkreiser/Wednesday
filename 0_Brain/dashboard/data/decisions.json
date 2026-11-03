@@ -57073,9 +57073,9 @@
   ],
   "recommended": "a",
   "ts": "2026-11-03T09:42:47.696746+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-03T10:58:28.950219+11:00",
   "prior_rulings_overridden": [
    "2026-08-17 19:53",
    "2026-08-17 20:01",
@@ -57174,6 +57174,55 @@
    "CARD hpsmpoc-266-head-read-round-cap-1031",
    "CARD composer-demo-pgrestore-version-read-1101",
    "CARD hpsmpoc-409-region-read-aloud-1102"
+  ]
+ },
+ {
+  "id": "secuura-pr1976-anchor-trust-failopen-1103",
+  "client_project": "Secuura/Blockchain",
+  "title": "Before merge: PR 1976 makes the anchor trust check say 'trusted' on a rare error, where today it rejects. Same shape as PR 1970: merge and fix to fail closed next?",
+  "bluf": "For a decision before I merge PR 1976 (anchoring reconciler and trust registry). The Opus QA gate (159) ran the real modules, 264 cells per side, 22 of 22 mutants killed. For a rare unreadable error the trust check now answers 'trusted', exactly as it already does for an ordinary database error; today it rejects. Nothing in production calls this check (measured: no caller of the registry index, and strict mode is set nowhere), and the reconciler never confirms a row it would not confirm on an ordinary error. The bigger finding is older: on ANY ordinary database error (a timeout, a refused connection) the registry treats every UTxO as trusted, even when it is populated; harmless today only because nothing calls it. This is the same shape you ruled on PR 1970 at 10:57 (merge, then fix to fail closed). I recommend a, the same: merge PR 1976 on its gate, and a fix makes the trust check fail closed on any error, under a new ticket.",
+  "default_action": "a after 4 hours without a ruling: merge PR 1976 on its gate (nothing in production calls the check), and the fail-closed fix is ticketed and briefed after the api-gateway fix.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Merge PR 1976 on its gate; fix the trust check to fail closed next",
+    "detail": "Same as your PR 1970 ruling. The PR changes nothing reachable in production; the older any-error-means-trusted gap gets its own ticket and fix seat."
+   },
+   {
+    "key": "b",
+    "label": "Hold PR 1976 until the trust check fails closed",
+    "detail": "Nothing in 1976 merges until a fix seat makes the registry refuse on any error. Safest reading; delays the other two catches, which the gate passed."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T11:08:40.467926+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-05 15:55",
+   "2026-08-17 19:53",
+   "2026-08-21 20:06",
+   "2026-09-05 15:01",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:32",
+   "2026-09-14 08:11",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secuura-ks953-shared-pins-anchor-by-marker",
+   "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD secuura-ks1171-when-is-an-anchor-absent",
+   "CARD secuura-ks1124-f4-failed-anchor-shows-pending",
+   "CARD secuura-ks1404-tsa-trust-and-library-1004",
+   "CARD secuura-ks1384-anchor-per-event-1009",
+   "CARD secuura-ks1385-anchor-identity-needs-ps895-ruling-1013",
+   "CARD secuura-ks1385-custodian-may-update-anchor-identity-1013",
+   "CARD secuura-ks1557-tell-stuart-and-peter-about-the-swallowed-anchor-1021",
+   "CARD secuura-ks1657-anchor-404-on-db-error-1028",
+   "CARD secuura-stuart-ks772-anchor-row-question-1029",
+   "CARD secuura-pr1970-gateway-failopen-1103"
   ]
  }
 ]
