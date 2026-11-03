@@ -1,0 +1,75 @@
+── KS-915: restore-local-secrets.sh ──
+ok   the script exists in the tree and is executable
+ok   (i) fresh clone: exits 0
+ok   (i) fresh clone: Blockchain/Dev/.env exists
+ok   (i) .env mode is 0600
+ok   (i) .env.local mode is 0600
+ok   (i) ADMIN_USER_PASSWORD is generated: 32+ chars of [A-Za-z0-9_-]
+ok   (i) ADMIN_USER_PASSWORD is not a placeholder or a published default
+ok   (i) ALLOW_DEFAULT_SEED_PASSWORDS=true (the seeder runs)
+ok   (i) bootstrap-env.sh ran: POSTGRES_PASSWORD is non-empty
+ok   (i) bootstrap-env.sh ran: REDIS_PASSWORD is non-empty
+ok   (i) bootstrap-env.sh ran: PII_ENCRYPTION_KEY is non-empty
+ok   (i) bootstrap-env.sh ran: PII_LOOKUP_HMAC_KEY is non-empty
+ok   (i) bootstrap-env.sh ran: GATEWAY_VOUCH_SECRET is non-empty
+ok   (i) bootstrap-env.sh ran: JWT_PRIVATE_KEY is non-empty
+ok   (i) the output names ADMIN_USER_PASSWORD
+ok   (ii) second run: exits 0
+ok   (ii) second run: .env is byte-identical (sha256)
+ok   (ii) second run: .env.local is byte-identical (sha256)
+ok   (ii) second run: .env mode is still 0600
+ok   (ii-b) control: the test opened .env to 0644
+ok   (ii-b) third run on a complete .env at 0644: exits 0
+ok   (ii-b) third run: .env is back to 0600
+ok   (ii-b) third run: .env.local is back to 0600
+ok   (ii-b) third run: .env content unchanged (sha256)
+ok   (iii) the leak instrument has values to look for (>= 8)
+ok   (iii) runs 1, 2 and 3: generated values found in the output
+ok   (iii) control: a value planted in a copy of the output IS found
+ok   (iii) no xtrace lines in the output
+ok   (iv) git check-ignore covers Blockchain/Dev/.env
+ok   (iv) control: git check-ignore does NOT cover Blockchain/Dev/env.example
+ok   (iv) git status --porcelain lists no .env or .env.local
+ok   (v) hosted DATABASE_URL in the shell: refused (exit 3)
+ok   (v) hosted DATABASE_URL in the shell: no .env written
+ok   (v) the refusal names DATABASE_URL
+ok   (v) the refusal does not print the URL's host
+ok   (v) hosted DATABASE_URL in .env: refused (exit 3)
+ok   (v) hosted DATABASE_URL in .env: .env unchanged (sha256)
+ok   (v) .env refusal names DATABASE_URL and the file
+ok   (v) hosted DATABASE_URL in .env: no ADMIN_USER_PASSWORD written
+FAIL (v) a ?host= naming a remote server is refused too
+       want "3", got "0"
+ok   (v) ?host= refusal names DATABASE_URL
+FAIL (v) ?host= refusal: no .env written
+       want "no", got "yes"
+ok   (v) control: DATABASE_URL on localhost is accepted
+ok   (v) control: DATABASE_URL on the compose service 'postgres' is accepted
+ok   (v-b) NODE_ENV=production in the shell: refused (exit 3)
+ok   (v-b) NODE_ENV=production in the shell: no .env written
+ok   (v-b) the refusal names NODE_ENV
+ok   (v-b) NODE_ENV=production in .env: refused (exit 3)
+ok   (v-b) NODE_ENV=production in .env: .env unchanged (sha256)
+ok   (v-b) .env refusal names NODE_ENV and the file
+ok   (v-b) control: NODE_ENV=development is accepted
+ok   (vi) a second clone: exits 0
+ok   (vi) two clones get different ADMIN_USER_PASSWORD values
+ok   (vii) compose forwards ADMIN_USER_PASSWORD from .env to a service
+ok   (vii) compose forwards ALLOW_DEFAULT_SEED_PASSWORDS from .env to a service
+ok   (vii) the auth seeder reads ADMIN_USER_PASSWORD
+ok   (vii) the auth seeder is gated on ALLOW_DEFAULT_SEED_PASSWORDS === 'true'
+ok   (rot) existing values: exits 0
+ok   (rot) an existing ADMIN_USER_PASSWORD is kept
+ok   (rot) an explicit ALLOW_DEFAULT_SEED_PASSWORDS=false is kept
+ok   (rot) a pre-existing .env is brought to mode 0600
+ok   (rot) --rotate: exits 0
+ok   (rot) --rotate replaces ADMIN_USER_PASSWORD with a generated value
+ok   (rot) --rotate does not print the new value
+ok   (rot) --rotate keeps the mode at 0600
+ok   (use) --help exits 0
+ok   (use) --help says it generates and restores nothing from a store
+ok   (use) --help writes no .env
+ok   (use) an unknown flag: refused (exit 64)
+ok   (use) an unknown flag: no .env written
+
+Results: 68 passed, 2 failed

@@ -1,0 +1,482 @@
++ set -euo pipefail
++ set +x
+restore-local-secrets: generates local development credentials on this machine; it restores nothing from a store.
++ set -e
++++ dirname /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/scripts/bootstrap-env.sh
+++ cd /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/scripts
+++ pwd
++ SCRIPT_DIR=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/scripts
+++ cd /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/scripts/..
+++ pwd
++ DEV_DIR=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev
++ ENV_FILE=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ ENV_EXAMPLE_CANONICAL=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/env.example
++ ENV_EXAMPLE_LEGACY=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.example
++ ENV_EXAMPLE=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/env.example
++ [[ -f /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/env.example ]]
++ ENV_LOCAL_FILE=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local
++ ENV_LOCAL_EXAMPLE=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local.example
++ RED='\033[0;31m'
++ GREEN='\033[0;32m'
++ YELLOW='\033[1;33m'
++ BLUE='\033[0;34m'
++ NC='\033[0m'
++ print_header 'SECUURA ENV BOOTSTRAP'
++ echo -e '\n\033[0;34m==============================================================================\033[0m'
+
+[0;34m==============================================================================[0m
++ echo -e '\033[0;34mSECUURA ENV BOOTSTRAP\033[0m'
+[0;34mSECUURA ENV BOOTSTRAP[0m
++ echo -e '\033[0;34m==============================================================================\033[0m\n'
+[0;34m==============================================================================[0m
+
++ command -v openssl
++ [[ ! -f /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/env.example ]]
++ [[ -f /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env ]]
++ cp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/env.example /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ basename /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/env.example
++ print_success 'Created .env from env.example (KS-1081: env.example is canonical)'
++ echo -e '\033[0;32m✓ Created .env from env.example (KS-1081: env.example is canonical)\033[0m'
+[0;32m✓ Created .env from env.example (KS-1081: env.example is canonical)[0m
++ [[ -f /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local.example ]]
++ [[ -f /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local ]]
++ cp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local.example /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local
++ print_success 'Created .env.local from .env.local.example (edit later for OAuth/IdP credentials)'
++ echo -e '\033[0;32m✓ Created .env.local from .env.local.example (edit later for OAuth/IdP credentials)\033[0m'
+[0;32m✓ Created .env.local from .env.local.example (edit later for OAuth/IdP credentials)[0m
++ [[ -n '' ]]
++ print_info 'Checking per-clone datastore credentials in .env (KS-731)...'
++ echo -e '\033[0;34mℹ Checking per-clone datastore credentials in .env (KS-731)...\033[0m'
+[0;34mℹ Checking per-clone datastore credentials in .env (KS-731)...[0m
+++ get_value POSTGRES_PASSWORD
+++ local key=POSTGRES_PASSWORD
+++ grep -E '^POSTGRES_PASSWORD=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^POSTGRES_PASSWORD=//; s/[[:space:]]*$//; s/\r$//'
++ [[ -z '' ]]
+++ openssl rand -hex 24
++ pg_pw=172510a9b4672e924dc3733f6b902919351ab9740372657c
+++ get_value POSTGRES_USER
+++ local key=POSTGRES_USER
+++ grep -E '^POSTGRES_USER=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^POSTGRES_USER=//; s/[[:space:]]*$//; s/\r$//'
++ pg_user=secuura
++ [[ -z secuura ]]
+++ get_value POSTGRES_DB
+++ local key=POSTGRES_DB
+++ grep -E '^POSTGRES_DB=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^POSTGRES_DB=//; s/[[:space:]]*$//; s/\r$//'
++ pg_db=secuura
++ [[ -z secuura ]]
+++ resolve_port POSTGRES_EXTERNAL_PORT 6432
+++ local key=POSTGRES_EXTERNAL_PORT literal=6432 v
+++ v=
+++ [[ -z '' ]]
++++ get_value POSTGRES_EXTERNAL_PORT
++++ local key=POSTGRES_EXTERNAL_PORT
++++ grep -E '^POSTGRES_EXTERNAL_PORT=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++++ head -n1
++++ sed -E 's/^POSTGRES_EXTERNAL_PORT=//; s/[[:space:]]*$//; s/\r$//'
+++ v=6432
+++ [[ -z 6432 ]]
+++ printf %s 6432
++ pg_port=6432
++ set_value POSTGRES_PASSWORD 172510a9b4672e924dc3733f6b902919351ab9740372657c
++ local key=POSTGRES_PASSWORD
++ local value=172510a9b4672e924dc3733f6b902919351ab9740372657c
++ grep -qE '^POSTGRES_PASSWORD=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ awk -v k=POSTGRES_PASSWORD -v v=172510a9b4672e924dc3733f6b902919351ab9740372657c '
+      BEGIN { FS=OFS="=" }
+      $1 == k { print k "=" v; next }
+      { print }
+    ' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ mv /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.tmp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ set_value DATABASE_URL postgresql://secuura:172510a9b4672e924dc3733f6b902919351ab9740372657c@localhost:6432/secuura
++ local key=DATABASE_URL
++ local value=postgresql://secuura:172510a9b4672e924dc3733f6b902919351ab9740372657c@localhost:6432/secuura
++ grep -qE '^DATABASE_URL=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ awk -v k=DATABASE_URL -v v=postgresql://secuura:172510a9b4672e924dc3733f6b902919351ab9740372657c@localhost:6432/secuura '
+      BEGIN { FS=OFS="=" }
+      $1 == k { print k "=" v; next }
+      { print }
+    ' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ mv /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.tmp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ print_success 'Generated POSTGRES_PASSWORD and rebuilt DATABASE_URL to match'
++ echo -e '\033[0;32m✓ Generated POSTGRES_PASSWORD and rebuilt DATABASE_URL to match\033[0m'
+[0;32m✓ Generated POSTGRES_PASSWORD and rebuilt DATABASE_URL to match[0m
+++ get_value REDIS_PASSWORD
+++ local key=REDIS_PASSWORD
+++ grep -E '^REDIS_PASSWORD=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^REDIS_PASSWORD=//; s/[[:space:]]*$//; s/\r$//'
++ [[ -z '' ]]
+++ openssl rand -hex 24
++ redis_pw=ba676c07647a91c48a8c60a9fb32853785a78a8435d4ea58
+++ resolve_port REDIS_EXTERNAL_PORT 6379
+++ local key=REDIS_EXTERNAL_PORT literal=6379 v
+++ v=
+++ [[ -z '' ]]
++++ get_value REDIS_EXTERNAL_PORT
++++ local key=REDIS_EXTERNAL_PORT
++++ grep -E '^REDIS_EXTERNAL_PORT=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++++ head -n1
++++ sed -E 's/^REDIS_EXTERNAL_PORT=//; s/[[:space:]]*$//; s/\r$//'
+++ v=6379
+++ [[ -z 6379 ]]
+++ printf %s 6379
++ redis_port=6379
++ set_value REDIS_PASSWORD ba676c07647a91c48a8c60a9fb32853785a78a8435d4ea58
++ local key=REDIS_PASSWORD
++ local value=ba676c07647a91c48a8c60a9fb32853785a78a8435d4ea58
++ grep -qE '^REDIS_PASSWORD=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ awk -v k=REDIS_PASSWORD -v v=ba676c07647a91c48a8c60a9fb32853785a78a8435d4ea58 '
+      BEGIN { FS=OFS="=" }
+      $1 == k { print k "=" v; next }
+      { print }
+    ' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ mv /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.tmp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ set_value REDIS_URL redis://:ba676c07647a91c48a8c60a9fb32853785a78a8435d4ea58@localhost:6379
++ local key=REDIS_URL
++ local value=redis://:ba676c07647a91c48a8c60a9fb32853785a78a8435d4ea58@localhost:6379
++ grep -qE '^REDIS_URL=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ awk -v k=REDIS_URL -v v=redis://:ba676c07647a91c48a8c60a9fb32853785a78a8435d4ea58@localhost:6379 '
+      BEGIN { FS=OFS="=" }
+      $1 == k { print k "=" v; next }
+      { print }
+    ' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ mv /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.tmp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ print_success 'Generated REDIS_PASSWORD and rebuilt REDIS_URL to match'
++ echo -e '\033[0;32m✓ Generated REDIS_PASSWORD and rebuilt REDIS_URL to match\033[0m'
+[0;32m✓ Generated REDIS_PASSWORD and rebuilt REDIS_URL to match[0m
++ print_info 'Checking PII encryption keys in .env...'
++ echo -e '\033[0;34mℹ Checking PII encryption keys in .env...\033[0m'
+[0;34mℹ Checking PII encryption keys in .env...[0m
++ fill_if_blank PII_ENCRYPTION_KEY 'openssl rand -hex 32'
++ local key=PII_ENCRYPTION_KEY
++ local 'generator=openssl rand -hex 32'
++ local current
+++ get_value PII_ENCRYPTION_KEY
+++ local key=PII_ENCRYPTION_KEY
+++ grep -E '^PII_ENCRYPTION_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^PII_ENCRYPTION_KEY=//; s/[[:space:]]*$//; s/\r$//'
++ current=
++ [[ -z '' ]]
++ local generated
+++ eval 'openssl rand -hex 32'
++++ openssl rand -hex 32
++ generated=fbf0a63c2fb23866c595018faeb9e392c95942a73ee2775d5575ea710ecf0d65
++ set_value PII_ENCRYPTION_KEY fbf0a63c2fb23866c595018faeb9e392c95942a73ee2775d5575ea710ecf0d65
++ local key=PII_ENCRYPTION_KEY
++ local value=fbf0a63c2fb23866c595018faeb9e392c95942a73ee2775d5575ea710ecf0d65
++ grep -qE '^PII_ENCRYPTION_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ tail -c1 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ [[ -n '' ]]
++ echo PII_ENCRYPTION_KEY=fbf0a63c2fb23866c595018faeb9e392c95942a73ee2775d5575ea710ecf0d65
++ print_success 'Generated PII_ENCRYPTION_KEY (32-byte hex)'
++ echo -e '\033[0;32m✓ Generated PII_ENCRYPTION_KEY (32-byte hex)\033[0m'
+[0;32m✓ Generated PII_ENCRYPTION_KEY (32-byte hex)[0m
++ fill_default PII_ENCRYPTION_KEY_VERSION 1
++ local key=PII_ENCRYPTION_KEY_VERSION
++ local default=1
++ local current
+++ get_value PII_ENCRYPTION_KEY_VERSION
+++ local key=PII_ENCRYPTION_KEY_VERSION
+++ grep -E '^PII_ENCRYPTION_KEY_VERSION=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^PII_ENCRYPTION_KEY_VERSION=//; s/[[:space:]]*$//; s/\r$//'
++ current=
++ [[ -z '' ]]
++ set_value PII_ENCRYPTION_KEY_VERSION 1
++ local key=PII_ENCRYPTION_KEY_VERSION
++ local value=1
++ grep -qE '^PII_ENCRYPTION_KEY_VERSION=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ tail -c1 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ [[ -n '' ]]
++ echo PII_ENCRYPTION_KEY_VERSION=1
++ print_success 'Set PII_ENCRYPTION_KEY_VERSION=1'
++ echo -e '\033[0;32m✓ Set PII_ENCRYPTION_KEY_VERSION=1\033[0m'
+[0;32m✓ Set PII_ENCRYPTION_KEY_VERSION=1[0m
++ fill_if_blank PII_LOOKUP_HMAC_KEY 'openssl rand -hex 32'
++ local key=PII_LOOKUP_HMAC_KEY
++ local 'generator=openssl rand -hex 32'
++ local current
+++ get_value PII_LOOKUP_HMAC_KEY
+++ local key=PII_LOOKUP_HMAC_KEY
+++ grep -E '^PII_LOOKUP_HMAC_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^PII_LOOKUP_HMAC_KEY=//; s/[[:space:]]*$//; s/\r$//'
++ current=
++ [[ -z '' ]]
++ local generated
+++ eval 'openssl rand -hex 32'
++++ openssl rand -hex 32
++ generated=d871aba75bde5752c9514b4cfa7274dccb6aad1c46f36050ebd99ef85a09bd55
++ set_value PII_LOOKUP_HMAC_KEY d871aba75bde5752c9514b4cfa7274dccb6aad1c46f36050ebd99ef85a09bd55
++ local key=PII_LOOKUP_HMAC_KEY
++ local value=d871aba75bde5752c9514b4cfa7274dccb6aad1c46f36050ebd99ef85a09bd55
++ grep -qE '^PII_LOOKUP_HMAC_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ tail -c1 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ [[ -n '' ]]
++ echo PII_LOOKUP_HMAC_KEY=d871aba75bde5752c9514b4cfa7274dccb6aad1c46f36050ebd99ef85a09bd55
++ print_success 'Generated PII_LOOKUP_HMAC_KEY (32-byte hex)'
++ echo -e '\033[0;32m✓ Generated PII_LOOKUP_HMAC_KEY (32-byte hex)\033[0m'
+[0;32m✓ Generated PII_LOOKUP_HMAC_KEY (32-byte hex)[0m
++ print_info 'Checking demo-service opt-in in .env...'
++ echo -e '\033[0;34mℹ Checking demo-service opt-in in .env...\033[0m'
+[0;34mℹ Checking demo-service opt-in in .env...[0m
++ fill_default DEMO_SERVICE_ENABLED true
++ local key=DEMO_SERVICE_ENABLED
++ local default=true
++ local current
+++ get_value DEMO_SERVICE_ENABLED
+++ local key=DEMO_SERVICE_ENABLED
+++ grep -E '^DEMO_SERVICE_ENABLED=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^DEMO_SERVICE_ENABLED=//; s/[[:space:]]*$//; s/\r$//'
++ current=true
++ [[ -z true ]]
++ print_info 'DEMO_SERVICE_ENABLED already set — leaving it'
++ echo -e '\033[0;34mℹ DEMO_SERVICE_ENABLED already set — leaving it\033[0m'
+[0;34mℹ DEMO_SERVICE_ENABLED already set — leaving it[0m
++ fill_if_blank DEMO_SERVICE_KEY 'openssl rand -hex 32'
++ local key=DEMO_SERVICE_KEY
++ local 'generator=openssl rand -hex 32'
++ local current
+++ get_value DEMO_SERVICE_KEY
+++ local key=DEMO_SERVICE_KEY
+++ grep -E '^DEMO_SERVICE_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^DEMO_SERVICE_KEY=//; s/[[:space:]]*$//; s/\r$//'
++ current=local-dev-demo-key-change-me
++ [[ -z local-dev-demo-key-change-me ]]
++ print_info 'DEMO_SERVICE_KEY already set — leaving it'
++ echo -e '\033[0;34mℹ DEMO_SERVICE_KEY already set — leaving it\033[0m'
+[0;34mℹ DEMO_SERVICE_KEY already set — leaving it[0m
++ print_info 'Checking gateway provenance secret in .env (KS-955)...'
++ echo -e '\033[0;34mℹ Checking gateway provenance secret in .env (KS-955)...\033[0m'
+[0;34mℹ Checking gateway provenance secret in .env (KS-955)...[0m
++ fill_if_blank GATEWAY_VOUCH_SECRET 'openssl rand -hex 32'
++ local key=GATEWAY_VOUCH_SECRET
++ local 'generator=openssl rand -hex 32'
++ local current
+++ get_value GATEWAY_VOUCH_SECRET
+++ local key=GATEWAY_VOUCH_SECRET
+++ grep -E '^GATEWAY_VOUCH_SECRET=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^GATEWAY_VOUCH_SECRET=//; s/[[:space:]]*$//; s/\r$//'
++ current=
++ [[ -z '' ]]
++ local generated
+++ eval 'openssl rand -hex 32'
++++ openssl rand -hex 32
++ generated=254c66afca4625d4a801052bfd0bdb85dd52c8a75d463af2d90621d7cf86ed1a
++ set_value GATEWAY_VOUCH_SECRET 254c66afca4625d4a801052bfd0bdb85dd52c8a75d463af2d90621d7cf86ed1a
++ local key=GATEWAY_VOUCH_SECRET
++ local value=254c66afca4625d4a801052bfd0bdb85dd52c8a75d463af2d90621d7cf86ed1a
++ grep -qE '^GATEWAY_VOUCH_SECRET=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ awk -v k=GATEWAY_VOUCH_SECRET -v v=254c66afca4625d4a801052bfd0bdb85dd52c8a75d463af2d90621d7cf86ed1a '
+      BEGIN { FS=OFS="=" }
+      $1 == k { print k "=" v; next }
+      { print }
+    ' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ mv /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.tmp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ print_success 'Generated GATEWAY_VOUCH_SECRET (32-byte hex)'
++ echo -e '\033[0;32m✓ Generated GATEWAY_VOUCH_SECRET (32-byte hex)\033[0m'
+[0;32m✓ Generated GATEWAY_VOUCH_SECRET (32-byte hex)[0m
++ print_info 'Checking RS256 JWT signing keypair in .env...'
++ echo -e '\033[0;34mℹ Checking RS256 JWT signing keypair in .env...\033[0m'
+[0;34mℹ Checking RS256 JWT signing keypair in .env...[0m
+++ get_value JWT_PRIVATE_KEY
+++ local key=JWT_PRIVATE_KEY
+++ grep -E '^JWT_PRIVATE_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ head -n1
+++ sed -E 's/^JWT_PRIVATE_KEY=//; s/[[:space:]]*$//; s/\r$//'
++ [[ -z '' ]]
+++ openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048
++ jwt_priv_pem='-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCRTsubYl2ZH+FC
+vOQep0crSlpJFIlNKaYhPEI5jMG4EC2rjQkqggewkWdxb+SimRFfc73inZJhHCAO
+mGjG7bYWlZ5GnDcBhJFOCZRZK+x2l9+f4+6eTe84xNJ0LaQPV2wVU1MYmQEDT7ow
+cvQ/na+knP0mAOx0OrKEF0ZpTGjtvUbUVISK/IbeuYgyI9yjLKFvlPJ+6QaVXBE+
+VP9p1t3hfkVVrZ6bf1uTOw0kChvlmzGdFKmw+3yn5VZY1lQSzk/Hg3mhTC1JHCEn
+vMMu9X+s8xFCWGL9XdCWKjcO2Enr+Cv6eKLbnQDmS8miywZ6zNVRZ0umClh0H5x9
+Qj78Ha5ZAgMBAAECggEAE+3fLgoRNUmyjwEyNmQR9kWF2YUYCb2/G8rUeGkuPoz1
+fpRi3/IilNx0eBH1JTniMJnCvtyGsYv2d5n+sN30fed6ZEvTnYEtnqrgrlRAY8mT
+sa3E0fB1cW9JQAbse/AtEkWx3WtKwMYEDtYNWtZJO0YO0FILHCvaxRQeI54HvCdn
+K+GT74oMCvQjg5IU1tXzJwbaRpjMLbWytdct69KOr1DsfvPnk0SulJG19hBoDA+o
+7Gya2wAi+271zJuA5/LkX2JcJQfvntKHVnOyRaxar9EF4zcwV41WmTMOs8TLdUAf
+L9mM6PBcmnk4gzQrzBREGzDm762iRkRziVvgsX/wqQKBgQDG1yKLiExowYYZchNz
+u0EDUYZyYp/iT7AdLTR/VsxFaS+3C3P7owXLV70ArYoJ8Nr4PzxiJareXGWfDzQU
+6ACTZxUuJb0ADWRwS5OGcFsk25IkDUv+cCyPEAcHJTn5GUeZEZ6yyncYTNNyH74F
+qy2q1nMoQ7aUgqBKd4MZnLOd7QKBgQC7FCTG7HHmHueTKDOZtdB5ym/Pks5+0AGy
+fRnXshQ4znGtlGRfDZmuC2/ZoYng7V5SV4VzAMGArD/7xJOxUdtMPWDodThR8A3P
+9i1nQYLyjxVgF5Uy5w79PXbS7XairPbwA6UgfBX8kbpyPkr2lEtbFYTYgXRrhwPr
+JA1+yrKknQKBgANNDwXB/YK/s7o4appBQZMMh27etEjNid7yISz8A+gjFuezCPnk
+evQlQL4CI4iGtxvn8NiwR2XposZBOlwefeP0kiVx+vFFR6WVm51fwCOcgZCXp+tR
+cWvumC9GLvAzuzyPTlMpiVCd9eSvIjh13ww3AzJn7WAJyx9xXHvQXisBAoGBAJPv
+5PlNZvB0BepPwyZNKXP2Cp8Z16Ned8ketn3kO6uETU7XZtvn1FxWfPebj33IF2uD
+/Gqp8VsAW4SLucNiGMncS7LnZ0ccTr/iS5s4qgWH8n5Ph9N99lN59GnuEH+pyYiZ
+SU478eMNlmPbMMp3EHQRu0C+dkLFvOqIUwet4MDdAoGBAI8VwQq8KhCDFcw1Nyx8
+5AEfoTcd7iO99E+eYCunpuscPxEr3AtOBx7LJfUFZ0YQkEo1wR+fRLiti36BVR+R
+djZgL/l1rJM20XYaIg2yY6nQsABjegXunkNCIwmmOvkmpu72Gt1baxvYO3upyh0/
+ag09csmHYF2kFDogeAlSJ5T+
+-----END PRIVATE KEY-----'
+++ printf %s '-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCRTsubYl2ZH+FC
+vOQep0crSlpJFIlNKaYhPEI5jMG4EC2rjQkqggewkWdxb+SimRFfc73inZJhHCAO
+mGjG7bYWlZ5GnDcBhJFOCZRZK+x2l9+f4+6eTe84xNJ0LaQPV2wVU1MYmQEDT7ow
+cvQ/na+knP0mAOx0OrKEF0ZpTGjtvUbUVISK/IbeuYgyI9yjLKFvlPJ+6QaVXBE+
+VP9p1t3hfkVVrZ6bf1uTOw0kChvlmzGdFKmw+3yn5VZY1lQSzk/Hg3mhTC1JHCEn
+vMMu9X+s8xFCWGL9XdCWKjcO2Enr+Cv6eKLbnQDmS8miywZ6zNVRZ0umClh0H5x9
+Qj78Ha5ZAgMBAAECggEAE+3fLgoRNUmyjwEyNmQR9kWF2YUYCb2/G8rUeGkuPoz1
+fpRi3/IilNx0eBH1JTniMJnCvtyGsYv2d5n+sN30fed6ZEvTnYEtnqrgrlRAY8mT
+sa3E0fB1cW9JQAbse/AtEkWx3WtKwMYEDtYNWtZJO0YO0FILHCvaxRQeI54HvCdn
+K+GT74oMCvQjg5IU1tXzJwbaRpjMLbWytdct69KOr1DsfvPnk0SulJG19hBoDA+o
+7Gya2wAi+271zJuA5/LkX2JcJQfvntKHVnOyRaxar9EF4zcwV41WmTMOs8TLdUAf
+L9mM6PBcmnk4gzQrzBREGzDm762iRkRziVvgsX/wqQKBgQDG1yKLiExowYYZchNz
+u0EDUYZyYp/iT7AdLTR/VsxFaS+3C3P7owXLV70ArYoJ8Nr4PzxiJareXGWfDzQU
+6ACTZxUuJb0ADWRwS5OGcFsk25IkDUv+cCyPEAcHJTn5GUeZEZ6yyncYTNNyH74F
+qy2q1nMoQ7aUgqBKd4MZnLOd7QKBgQC7FCTG7HHmHueTKDOZtdB5ym/Pks5+0AGy
+fRnXshQ4znGtlGRfDZmuC2/ZoYng7V5SV4VzAMGArD/7xJOxUdtMPWDodThR8A3P
+9i1nQYLyjxVgF5Uy5w79PXbS7XairPbwA6UgfBX8kbpyPkr2lEtbFYTYgXRrhwPr
+JA1+yrKknQKBgANNDwXB/YK/s7o4appBQZMMh27etEjNid7yISz8A+gjFuezCPnk
+evQlQL4CI4iGtxvn8NiwR2XposZBOlwefeP0kiVx+vFFR6WVm51fwCOcgZCXp+tR
+cWvumC9GLvAzuzyPTlMpiVCd9eSvIjh13ww3AzJn7WAJyx9xXHvQXisBAoGBAJPv
+5PlNZvB0BepPwyZNKXP2Cp8Z16Ned8ketn3kO6uETU7XZtvn1FxWfPebj33IF2uD
+/Gqp8VsAW4SLucNiGMncS7LnZ0ccTr/iS5s4qgWH8n5Ph9N99lN59GnuEH+pyYiZ
+SU478eMNlmPbMMp3EHQRu0C+dkLFvOqIUwet4MDdAoGBAI8VwQq8KhCDFcw1Nyx8
+5AEfoTcd7iO99E+eYCunpuscPxEr3AtOBx7LJfUFZ0YQkEo1wR+fRLiti36BVR+R
+djZgL/l1rJM20XYaIg2yY6nQsABjegXunkNCIwmmOvkmpu72Gt1baxvYO3upyh0/
+ag09csmHYF2kFDogeAlSJ5T+
+-----END PRIVATE KEY-----'
+++ openssl pkey -pubout
++ jwt_pub_pem='-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkU7Lm2JdmR/hQrzkHqdH
+K0paSRSJTSmmITxCOYzBuBAtq40JKoIHsJFncW/kopkRX3O94p2SYRwgDphoxu22
+FpWeRpw3AYSRTgmUWSvsdpffn+Punk3vOMTSdC2kD1dsFVNTGJkBA0+6MHL0P52v
+pJz9JgDsdDqyhBdGaUxo7b1G1FSEivyG3rmIMiPcoyyhb5TyfukGlVwRPlT/adbd
+4X5FVa2em39bkzsNJAob5ZsxnRSpsPt8p+VWWNZUEs5Px4N5oUwtSRwhJ7zDLvV/
+rPMRQlhi/V3Qlio3DthJ6/gr+nii250A5kvJossGeszVUWdLpgpYdB+cfUI+/B2u
+WQIDAQAB
+-----END PUBLIC KEY-----'
+++ printf %s '-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCRTsubYl2ZH+FC
+vOQep0crSlpJFIlNKaYhPEI5jMG4EC2rjQkqggewkWdxb+SimRFfc73inZJhHCAO
+mGjG7bYWlZ5GnDcBhJFOCZRZK+x2l9+f4+6eTe84xNJ0LaQPV2wVU1MYmQEDT7ow
+cvQ/na+knP0mAOx0OrKEF0ZpTGjtvUbUVISK/IbeuYgyI9yjLKFvlPJ+6QaVXBE+
+VP9p1t3hfkVVrZ6bf1uTOw0kChvlmzGdFKmw+3yn5VZY1lQSzk/Hg3mhTC1JHCEn
+vMMu9X+s8xFCWGL9XdCWKjcO2Enr+Cv6eKLbnQDmS8miywZ6zNVRZ0umClh0H5x9
+Qj78Ha5ZAgMBAAECggEAE+3fLgoRNUmyjwEyNmQR9kWF2YUYCb2/G8rUeGkuPoz1
+fpRi3/IilNx0eBH1JTniMJnCvtyGsYv2d5n+sN30fed6ZEvTnYEtnqrgrlRAY8mT
+sa3E0fB1cW9JQAbse/AtEkWx3WtKwMYEDtYNWtZJO0YO0FILHCvaxRQeI54HvCdn
+K+GT74oMCvQjg5IU1tXzJwbaRpjMLbWytdct69KOr1DsfvPnk0SulJG19hBoDA+o
+7Gya2wAi+271zJuA5/LkX2JcJQfvntKHVnOyRaxar9EF4zcwV41WmTMOs8TLdUAf
+L9mM6PBcmnk4gzQrzBREGzDm762iRkRziVvgsX/wqQKBgQDG1yKLiExowYYZchNz
+u0EDUYZyYp/iT7AdLTR/VsxFaS+3C3P7owXLV70ArYoJ8Nr4PzxiJareXGWfDzQU
+6ACTZxUuJb0ADWRwS5OGcFsk25IkDUv+cCyPEAcHJTn5GUeZEZ6yyncYTNNyH74F
+qy2q1nMoQ7aUgqBKd4MZnLOd7QKBgQC7FCTG7HHmHueTKDOZtdB5ym/Pks5+0AGy
+fRnXshQ4znGtlGRfDZmuC2/ZoYng7V5SV4VzAMGArD/7xJOxUdtMPWDodThR8A3P
+9i1nQYLyjxVgF5Uy5w79PXbS7XairPbwA6UgfBX8kbpyPkr2lEtbFYTYgXRrhwPr
+JA1+yrKknQKBgANNDwXB/YK/s7o4appBQZMMh27etEjNid7yISz8A+gjFuezCPnk
+evQlQL4CI4iGtxvn8NiwR2XposZBOlwefeP0kiVx+vFFR6WVm51fwCOcgZCXp+tR
+cWvumC9GLvAzuzyPTlMpiVCd9eSvIjh13ww3AzJn7WAJyx9xXHvQXisBAoGBAJPv
+5PlNZvB0BepPwyZNKXP2Cp8Z16Ned8ketn3kO6uETU7XZtvn1FxWfPebj33IF2uD
+/Gqp8VsAW4SLucNiGMncS7LnZ0ccTr/iS5s4qgWH8n5Ph9N99lN59GnuEH+pyYiZ
+SU478eMNlmPbMMp3EHQRu0C+dkLFvOqIUwet4MDdAoGBAI8VwQq8KhCDFcw1Nyx8
+5AEfoTcd7iO99E+eYCunpuscPxEr3AtOBx7LJfUFZ0YQkEo1wR+fRLiti36BVR+R
+djZgL/l1rJM20XYaIg2yY6nQsABjegXunkNCIwmmOvkmpu72Gt1baxvYO3upyh0/
+ag09csmHYF2kFDogeAlSJ5T+
+-----END PRIVATE KEY-----'
+++ base64
+++ tr -d '\n'
++ set_value JWT_PRIVATE_KEY LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRQ1JUc3ViWWwyWkgrRkMKdk9RZXAwY3JTbHBKRklsTkthWWhQRUk1ak1HNEVDMnJqUWtxZ2dld2tXZHhiK1NpbVJGZmM3M2luWkpoSENBTwptR2pHN2JZV2xaNUduRGNCaEpGT0NaUlpLK3gybDkrZjQrNmVUZTg0eE5KMExhUVBWMndWVTFNWW1RRURUN293CmN2US9uYStrblAwbUFPeDBPcktFRjBacFRHanR2VWJVVklTSy9JYmV1WWd5STl5akxLRnZsUEorNlFhVlhCRSsKVlA5cDF0M2hma1ZWclo2YmYxdVRPdzBrQ2h2bG16R2RGS213KzN5bjVWWlkxbFFTemsvSGczbWhUQzFKSENFbgp2TU11OVgrczh4RkNXR0w5WGRDV0tqY08yRW5yK0N2NmVLTGJuUURtUzhtaXl3WjZ6TlZSWjB1bUNsaDBINXg5ClFqNzhIYTVaQWdNQkFBRUNnZ0VBRSszZkxnb1JOVW15andFeU5tUVI5a1dGMllVWUNiMi9HOHJVZUdrdVBvejEKZnBSaTMvSWlsTngwZUJIMUpUbmlNSm5DdnR5R3NZdjJkNW4rc04zMGZlZDZaRXZUbllFdG5xcmdybFJBWThtVApzYTNFMGZCMWNXOUpRQWJzZS9BdEVrV3gzV3RLd01ZRUR0WU5XdFpKTzBZTzBGSUxIQ3ZheFJRZUk1NEh2Q2RuCksrR1Q3NG9NQ3ZRamc1SVUxdFh6SndiYVJwak1MYld5dGRjdDY5S09yMURzZnZQbmswU3VsSkcxOWhCb0RBK28KN0d5YTJ3QWkrMjcxekp1QTUvTGtYMkpjSlFmdm50S0hWbk95UmF4YXI5RUY0emN3VjQxV21UTU9zOFRMZFVBZgpMOW1NNlBCY21uazRnelFyekJSRUd6RG03NjJpUmtSemlWdmdzWC93cVFLQmdRREcxeUtMaUV4b3dZWVpjaE56CnUwRURVWVp5WXAvaVQ3QWRMVFIvVnN4RmFTKzNDM1A3b3dYTFY3MEFyWW9KOE5yNFB6eGlKYXJlWEdXZkR6UVUKNkFDVFp4VXVKYjBBRFdSd1M1T0djRnNrMjVJa0RVditjQ3lQRUFjSEpUbjVHVWVaRVo2eXluY1lUTk55SDc0RgpxeTJxMW5Nb1E3YVVncUJLZDRNWm5MT2Q3UUtCZ1FDN0ZDVEc3SEhtSHVlVEtET1p0ZEI1eW0vUGtzNSswQUd5CmZSblhzaFE0em5HdGxHUmZEWm11QzIvWm9Zbmc3VjVTVjRWekFNR0FyRC83eEpPeFVkdE1QV0RvZFRoUjhBM1AKOWkxblFZTHlqeFZnRjVVeTV3NzlQWGJTN1hhaXJQYndBNlVnZkJYOGticHlQa3IybEV0YkZZVFlnWFJyaHdQcgpKQTEreXJLa25RS0JnQU5ORHdYQi9ZSy9zN280YXBwQlFaTU1oMjdldEVqTmlkN3lJU3o4QStnakZ1ZXpDUG5rCmV2UWxRTDRDSTRpR3R4dm44Tml3UjJYcG9zWkJPbHdlZmVQMGtpVngrdkZGUjZXVm01MWZ3Q09jZ1pDWHArdFIKY1d2dW1DOUdMdkF6dXp5UFRsTXBpVkNkOWVTdklqaDEzd3czQXpKbjdXQUp5eDl4WEh2UVhpc0JBb0dCQUpQdgo1UGxOWnZCMEJlcFB3eVpOS1hQMkNwOFoxNk5lZDhrZXRuM2tPNnVFVFU3WFp0dm4xRnhXZlBlYmozM0lGMnVECi9HcXA4VnNBVzRTTHVjTmlHTW5jUzdMblowY2NUci9pUzVzNHFnV0g4bjVQaDlOOTlsTjU5R251RUgrcHlZaVoKU1U0NzhlTU5sbVBiTU1wM0VIUVJ1MEMrZGtMRnZPcUlVd2V0NE1EZEFvR0JBSThWd1FxOEtoQ0RGY3cxTnl4OAo1QUVmb1RjZDdpTzk5RStlWUN1bnB1c2NQeEVyM0F0T0J4N0xKZlVGWjBZUWtFbzF3UitmUkxpdGkzNkJWUitSCmRqWmdML2wxckpNMjBYWWFJZzJ5WTZuUXNBQmplZ1h1bmtOQ0l3bW1PdmttcHU3Mkd0MWJheHZZTzN1cHloMC8KYWcwOWNzbUhZRjJrRkRvZ2VBbFNKNVQrCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0=
++ local key=JWT_PRIVATE_KEY
++ local value=LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRQ1JUc3ViWWwyWkgrRkMKdk9RZXAwY3JTbHBKRklsTkthWWhQRUk1ak1HNEVDMnJqUWtxZ2dld2tXZHhiK1NpbVJGZmM3M2luWkpoSENBTwptR2pHN2JZV2xaNUduRGNCaEpGT0NaUlpLK3gybDkrZjQrNmVUZTg0eE5KMExhUVBWMndWVTFNWW1RRURUN293CmN2US9uYStrblAwbUFPeDBPcktFRjBacFRHanR2VWJVVklTSy9JYmV1WWd5STl5akxLRnZsUEorNlFhVlhCRSsKVlA5cDF0M2hma1ZWclo2YmYxdVRPdzBrQ2h2bG16R2RGS213KzN5bjVWWlkxbFFTemsvSGczbWhUQzFKSENFbgp2TU11OVgrczh4RkNXR0w5WGRDV0tqY08yRW5yK0N2NmVLTGJuUURtUzhtaXl3WjZ6TlZSWjB1bUNsaDBINXg5ClFqNzhIYTVaQWdNQkFBRUNnZ0VBRSszZkxnb1JOVW15andFeU5tUVI5a1dGMllVWUNiMi9HOHJVZUdrdVBvejEKZnBSaTMvSWlsTngwZUJIMUpUbmlNSm5DdnR5R3NZdjJkNW4rc04zMGZlZDZaRXZUbllFdG5xcmdybFJBWThtVApzYTNFMGZCMWNXOUpRQWJzZS9BdEVrV3gzV3RLd01ZRUR0WU5XdFpKTzBZTzBGSUxIQ3ZheFJRZUk1NEh2Q2RuCksrR1Q3NG9NQ3ZRamc1SVUxdFh6SndiYVJwak1MYld5dGRjdDY5S09yMURzZnZQbmswU3VsSkcxOWhCb0RBK28KN0d5YTJ3QWkrMjcxekp1QTUvTGtYMkpjSlFmdm50S0hWbk95UmF4YXI5RUY0emN3VjQxV21UTU9zOFRMZFVBZgpMOW1NNlBCY21uazRnelFyekJSRUd6RG03NjJpUmtSemlWdmdzWC93cVFLQmdRREcxeUtMaUV4b3dZWVpjaE56CnUwRURVWVp5WXAvaVQ3QWRMVFIvVnN4RmFTKzNDM1A3b3dYTFY3MEFyWW9KOE5yNFB6eGlKYXJlWEdXZkR6UVUKNkFDVFp4VXVKYjBBRFdSd1M1T0djRnNrMjVJa0RVditjQ3lQRUFjSEpUbjVHVWVaRVo2eXluY1lUTk55SDc0RgpxeTJxMW5Nb1E3YVVncUJLZDRNWm5MT2Q3UUtCZ1FDN0ZDVEc3SEhtSHVlVEtET1p0ZEI1eW0vUGtzNSswQUd5CmZSblhzaFE0em5HdGxHUmZEWm11QzIvWm9Zbmc3VjVTVjRWekFNR0FyRC83eEpPeFVkdE1QV0RvZFRoUjhBM1AKOWkxblFZTHlqeFZnRjVVeTV3NzlQWGJTN1hhaXJQYndBNlVnZkJYOGticHlQa3IybEV0YkZZVFlnWFJyaHdQcgpKQTEreXJLa25RS0JnQU5ORHdYQi9ZSy9zN280YXBwQlFaTU1oMjdldEVqTmlkN3lJU3o4QStnakZ1ZXpDUG5rCmV2UWxRTDRDSTRpR3R4dm44Tml3UjJYcG9zWkJPbHdlZmVQMGtpVngrdkZGUjZXVm01MWZ3Q09jZ1pDWHArdFIKY1d2dW1DOUdMdkF6dXp5UFRsTXBpVkNkOWVTdklqaDEzd3czQXpKbjdXQUp5eDl4WEh2UVhpc0JBb0dCQUpQdgo1UGxOWnZCMEJlcFB3eVpOS1hQMkNwOFoxNk5lZDhrZXRuM2tPNnVFVFU3WFp0dm4xRnhXZlBlYmozM0lGMnVECi9HcXA4VnNBVzRTTHVjTmlHTW5jUzdMblowY2NUci9pUzVzNHFnV0g4bjVQaDlOOTlsTjU5R251RUgrcHlZaVoKU1U0NzhlTU5sbVBiTU1wM0VIUVJ1MEMrZGtMRnZPcUlVd2V0NE1EZEFvR0JBSThWd1FxOEtoQ0RGY3cxTnl4OAo1QUVmb1RjZDdpTzk5RStlWUN1bnB1c2NQeEVyM0F0T0J4N0xKZlVGWjBZUWtFbzF3UitmUkxpdGkzNkJWUitSCmRqWmdML2wxckpNMjBYWWFJZzJ5WTZuUXNBQmplZ1h1bmtOQ0l3bW1PdmttcHU3Mkd0MWJheHZZTzN1cHloMC8KYWcwOWNzbUhZRjJrRkRvZ2VBbFNKNVQrCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0=
++ grep -qE '^JWT_PRIVATE_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ awk -v k=JWT_PRIVATE_KEY -v v=LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRQ1JUc3ViWWwyWkgrRkMKdk9RZXAwY3JTbHBKRklsTkthWWhQRUk1ak1HNEVDMnJqUWtxZ2dld2tXZHhiK1NpbVJGZmM3M2luWkpoSENBTwptR2pHN2JZV2xaNUduRGNCaEpGT0NaUlpLK3gybDkrZjQrNmVUZTg0eE5KMExhUVBWMndWVTFNWW1RRURUN293CmN2US9uYStrblAwbUFPeDBPcktFRjBacFRHanR2VWJVVklTSy9JYmV1WWd5STl5akxLRnZsUEorNlFhVlhCRSsKVlA5cDF0M2hma1ZWclo2YmYxdVRPdzBrQ2h2bG16R2RGS213KzN5bjVWWlkxbFFTemsvSGczbWhUQzFKSENFbgp2TU11OVgrczh4RkNXR0w5WGRDV0tqY08yRW5yK0N2NmVLTGJuUURtUzhtaXl3WjZ6TlZSWjB1bUNsaDBINXg5ClFqNzhIYTVaQWdNQkFBRUNnZ0VBRSszZkxnb1JOVW15andFeU5tUVI5a1dGMllVWUNiMi9HOHJVZUdrdVBvejEKZnBSaTMvSWlsTngwZUJIMUpUbmlNSm5DdnR5R3NZdjJkNW4rc04zMGZlZDZaRXZUbllFdG5xcmdybFJBWThtVApzYTNFMGZCMWNXOUpRQWJzZS9BdEVrV3gzV3RLd01ZRUR0WU5XdFpKTzBZTzBGSUxIQ3ZheFJRZUk1NEh2Q2RuCksrR1Q3NG9NQ3ZRamc1SVUxdFh6SndiYVJwak1MYld5dGRjdDY5S09yMURzZnZQbmswU3VsSkcxOWhCb0RBK28KN0d5YTJ3QWkrMjcxekp1QTUvTGtYMkpjSlFmdm50S0hWbk95UmF4YXI5RUY0emN3VjQxV21UTU9zOFRMZFVBZgpMOW1NNlBCY21uazRnelFyekJSRUd6RG03NjJpUmtSemlWdmdzWC93cVFLQmdRREcxeUtMaUV4b3dZWVpjaE56CnUwRURVWVp5WXAvaVQ3QWRMVFIvVnN4RmFTKzNDM1A3b3dYTFY3MEFyWW9KOE5yNFB6eGlKYXJlWEdXZkR6UVUKNkFDVFp4VXVKYjBBRFdSd1M1T0djRnNrMjVJa0RVditjQ3lQRUFjSEpUbjVHVWVaRVo2eXluY1lUTk55SDc0RgpxeTJxMW5Nb1E3YVVncUJLZDRNWm5MT2Q3UUtCZ1FDN0ZDVEc3SEhtSHVlVEtET1p0ZEI1eW0vUGtzNSswQUd5CmZSblhzaFE0em5HdGxHUmZEWm11QzIvWm9Zbmc3VjVTVjRWekFNR0FyRC83eEpPeFVkdE1QV0RvZFRoUjhBM1AKOWkxblFZTHlqeFZnRjVVeTV3NzlQWGJTN1hhaXJQYndBNlVnZkJYOGticHlQa3IybEV0YkZZVFlnWFJyaHdQcgpKQTEreXJLa25RS0JnQU5ORHdYQi9ZSy9zN280YXBwQlFaTU1oMjdldEVqTmlkN3lJU3o4QStnakZ1ZXpDUG5rCmV2UWxRTDRDSTRpR3R4dm44Tml3UjJYcG9zWkJPbHdlZmVQMGtpVngrdkZGUjZXVm01MWZ3Q09jZ1pDWHArdFIKY1d2dW1DOUdMdkF6dXp5UFRsTXBpVkNkOWVTdklqaDEzd3czQXpKbjdXQUp5eDl4WEh2UVhpc0JBb0dCQUpQdgo1UGxOWnZCMEJlcFB3eVpOS1hQMkNwOFoxNk5lZDhrZXRuM2tPNnVFVFU3WFp0dm4xRnhXZlBlYmozM0lGMnVECi9HcXA4VnNBVzRTTHVjTmlHTW5jUzdMblowY2NUci9pUzVzNHFnV0g4bjVQaDlOOTlsTjU5R251RUgrcHlZaVoKU1U0NzhlTU5sbVBiTU1wM0VIUVJ1MEMrZGtMRnZPcUlVd2V0NE1EZEFvR0JBSThWd1FxOEtoQ0RGY3cxTnl4OAo1QUVmb1RjZDdpTzk5RStlWUN1bnB1c2NQeEVyM0F0T0J4N0xKZlVGWjBZUWtFbzF3UitmUkxpdGkzNkJWUitSCmRqWmdML2wxckpNMjBYWWFJZzJ5WTZuUXNBQmplZ1h1bmtOQ0l3bW1PdmttcHU3Mkd0MWJheHZZTzN1cHloMC8KYWcwOWNzbUhZRjJrRkRvZ2VBbFNKNVQrCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0= '
+      BEGIN { FS=OFS="=" }
+      $1 == k { print k "=" v; next }
+      { print }
+    ' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ mv /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.tmp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ printf %s '-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkU7Lm2JdmR/hQrzkHqdH
+K0paSRSJTSmmITxCOYzBuBAtq40JKoIHsJFncW/kopkRX3O94p2SYRwgDphoxu22
+FpWeRpw3AYSRTgmUWSvsdpffn+Punk3vOMTSdC2kD1dsFVNTGJkBA0+6MHL0P52v
+pJz9JgDsdDqyhBdGaUxo7b1G1FSEivyG3rmIMiPcoyyhb5TyfukGlVwRPlT/adbd
+4X5FVa2em39bkzsNJAob5ZsxnRSpsPt8p+VWWNZUEs5Px4N5oUwtSRwhJ7zDLvV/
+rPMRQlhi/V3Qlio3DthJ6/gr+nii250A5kvJossGeszVUWdLpgpYdB+cfUI+/B2u
+WQIDAQAB
+-----END PUBLIC KEY-----'
+++ base64
+++ tr -d '\n'
++ set_value JWT_PUBLIC_KEY LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFrVTdMbTJKZG1SL2hRcnprSHFkSApLMHBhU1JTSlRTbW1JVHhDT1l6QnVCQXRxNDBKS29JSHNKRm5jVy9rb3BrUlgzTzk0cDJTWVJ3Z0RwaG94dTIyCkZwV2VScHczQVlTUlRnbVVXU3ZzZHBmZm4rUHVuazN2T01UU2RDMmtEMWRzRlZOVEdKa0JBMCs2TUhMMFA1MnYKcEp6OUpnRHNkRHF5aEJkR2FVeG83YjFHMUZTRWl2eUczcm1JTWlQY295eWhiNVR5ZnVrR2xWd1JQbFQvYWRiZAo0WDVGVmEyZW0zOWJrenNOSkFvYjVac3huUlNwc1B0OHArVldXTlpVRXM1UHg0TjVvVXd0U1J3aEo3ekRMdlYvCnJQTVJRbGhpL1YzUWxpbzNEdGhKNi9ncituaWkyNTBBNWt2Sm9zc0dlc3pWVVdkTHBncFlkQitjZlVJKy9CMnUKV1FJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
++ local key=JWT_PUBLIC_KEY
++ local value=LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFrVTdMbTJKZG1SL2hRcnprSHFkSApLMHBhU1JTSlRTbW1JVHhDT1l6QnVCQXRxNDBKS29JSHNKRm5jVy9rb3BrUlgzTzk0cDJTWVJ3Z0RwaG94dTIyCkZwV2VScHczQVlTUlRnbVVXU3ZzZHBmZm4rUHVuazN2T01UU2RDMmtEMWRzRlZOVEdKa0JBMCs2TUhMMFA1MnYKcEp6OUpnRHNkRHF5aEJkR2FVeG83YjFHMUZTRWl2eUczcm1JTWlQY295eWhiNVR5ZnVrR2xWd1JQbFQvYWRiZAo0WDVGVmEyZW0zOWJrenNOSkFvYjVac3huUlNwc1B0OHArVldXTlpVRXM1UHg0TjVvVXd0U1J3aEo3ekRMdlYvCnJQTVJRbGhpL1YzUWxpbzNEdGhKNi9ncituaWkyNTBBNWt2Sm9zc0dlc3pWVVdkTHBncFlkQitjZlVJKy9CMnUKV1FJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
++ grep -qE '^JWT_PUBLIC_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ awk -v k=JWT_PUBLIC_KEY -v v=LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFrVTdMbTJKZG1SL2hRcnprSHFkSApLMHBhU1JTSlRTbW1JVHhDT1l6QnVCQXRxNDBKS29JSHNKRm5jVy9rb3BrUlgzTzk0cDJTWVJ3Z0RwaG94dTIyCkZwV2VScHczQVlTUlRnbVVXU3ZzZHBmZm4rUHVuazN2T01UU2RDMmtEMWRzRlZOVEdKa0JBMCs2TUhMMFA1MnYKcEp6OUpnRHNkRHF5aEJkR2FVeG83YjFHMUZTRWl2eUczcm1JTWlQY295eWhiNVR5ZnVrR2xWd1JQbFQvYWRiZAo0WDVGVmEyZW0zOWJrenNOSkFvYjVac3huUlNwc1B0OHArVldXTlpVRXM1UHg0TjVvVXd0U1J3aEo3ekRMdlYvCnJQTVJRbGhpL1YzUWxpbzNEdGhKNi9ncituaWkyNTBBNWt2Sm9zc0dlc3pWVVdkTHBncFlkQitjZlVJKy9CMnUKV1FJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t '
+      BEGIN { FS=OFS="=" }
+      $1 == k { print k "=" v; next }
+      { print }
+    ' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ mv /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.tmp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
+++ openssl rand -hex 4
++ set_value JWT_KEY_ID local-70f7a7a5
++ local key=JWT_KEY_ID
++ local value=local-70f7a7a5
++ grep -qE '^JWT_KEY_ID=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ awk -v k=JWT_KEY_ID -v v=local-70f7a7a5 '
+      BEGIN { FS=OFS="=" }
+      $1 == k { print k "=" v; next }
+      { print }
+    ' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ mv /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.tmp /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env
++ print_success 'Generated RS256 JWT signing keypair (JWT_PRIVATE_KEY / JWT_PUBLIC_KEY / JWT_KEY_ID)'
++ echo -e '\033[0;32m✓ Generated RS256 JWT signing keypair (JWT_PRIVATE_KEY / JWT_PUBLIC_KEY / JWT_KEY_ID)\033[0m'
+[0;32m✓ Generated RS256 JWT signing keypair (JWT_PRIVATE_KEY / JWT_PUBLIC_KEY / JWT_KEY_ID)[0m
++ [[ -f /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local ]]
+++ grep -E '^KYC_CALLBACK_API_KEY=' /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local
+++ head -n1
+++ sed -E 's/^KYC_CALLBACK_API_KEY=//; s/[[:space:]]*$//; s/\r$//'
++ kyc_local=secuura-kyc-callback-dev
++ [[ -z secuura-kyc-callback-dev ]]
++ print_info 'KYC_CALLBACK_API_KEY already set in .env.local — leaving it'
++ echo -e '\033[0;34mℹ KYC_CALLBACK_API_KEY already set in .env.local — leaving it\033[0m'
+[0;34mℹ KYC_CALLBACK_API_KEY already set in .env.local — leaving it[0m
+++ git rev-parse --show-toplevel
++ repo_root=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV
++ [[ -n /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV ]]
++ [[ -d /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/.githooks ]]
++ print_header 'BOOTSTRAP COMPLETE'
++ echo -e '\n\033[0;34m==============================================================================\033[0m'
+
+[0;34m==============================================================================[0m
++ echo -e '\033[0;34mBOOTSTRAP COMPLETE\033[0m'
+[0;34mBOOTSTRAP COMPLETE[0m
++ echo -e '\033[0;34m==============================================================================\033[0m\n'
+[0;34m==============================================================================[0m
+
+++ [[ -f /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local ]]
+++ echo 'and /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local'
++ print_info 'Files: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env and /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local'
++ echo -e '\033[0;34mℹ Files: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env and /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local\033[0m'
+[0;34mℹ Files: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env and /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/scratch/q4b-x-BASH_ENV/Blockchain/Dev/.env.local[0m
++ print_info 'Both files are gitignored. Don'\''t commit them.'
++ echo -e '\033[0;34mℹ Both files are gitignored. Don'\''t commit them.\033[0m'
+[0;34mℹ Both files are gitignored. Don't commit them.[0m
++ echo ''
+
++ print_info 'Next: docker compose -f docker-compose.local.yml up -d'
++ echo -e '\033[0;34mℹ Next: docker compose -f docker-compose.local.yml up -d\033[0m'
+[0;34mℹ Next: docker compose -f docker-compose.local.yml up -d[0m
++ echo ''
+
+restore-local-secrets: generated ADMIN_USER_PASSWORD (48 characters) in Blockchain/Dev/.env
+restore-local-secrets: set ALLOW_DEFAULT_SEED_PASSWORDS=true (the auth seeder creates the local test users)
+restore-local-secrets: mode 0600: Blockchain/Dev/.env
+restore-local-secrets: mode 0600: Blockchain/Dev/.env.local
+restore-local-secrets: next: from Blockchain/Dev run 'docker compose up -d' (recreates auth, whose seeder reads these values).
+restore-local-secrets: systemTest reads the admin password as BOOTSTRAP_ADMIN_PASSWORD: export it from Blockchain/Dev/.env without printing it (QA Cheat Sheet, KS-915).

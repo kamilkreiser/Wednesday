@@ -1,0 +1,127 @@
+── KS-915: restore-local-secrets.sh ──
+FAIL the script exists in the tree and is executable
+       want "yes", got "no"
+FAIL (i) fresh clone: exits 0
+       want "0", got "127"
+FAIL (i) fresh clone: Blockchain/Dev/.env exists
+       want "yes", got "no"
+FAIL (i) .env mode is 0600
+       want "600", got ""
+FAIL (i) .env.local mode is 0600
+       want "600", got ""
+FAIL (i) ADMIN_USER_PASSWORD is generated: 32+ chars of [A-Za-z0-9_-]
+       want "yes", got "no"
+FAIL (i) ADMIN_USER_PASSWORD is not a placeholder or a published default
+       want "yes", got "no"
+FAIL (i) ALLOW_DEFAULT_SEED_PASSWORDS=true (the seeder runs)
+       want "true", got ""
+FAIL (i) bootstrap-env.sh ran: POSTGRES_PASSWORD is non-empty
+       want "yes", got "no"
+FAIL (i) bootstrap-env.sh ran: REDIS_PASSWORD is non-empty
+       want "yes", got "no"
+FAIL (i) bootstrap-env.sh ran: PII_ENCRYPTION_KEY is non-empty
+       want "yes", got "no"
+FAIL (i) bootstrap-env.sh ran: PII_LOOKUP_HMAC_KEY is non-empty
+       want "yes", got "no"
+FAIL (i) bootstrap-env.sh ran: GATEWAY_VOUCH_SECRET is non-empty
+       want "yes", got "no"
+FAIL (i) bootstrap-env.sh ran: JWT_PRIVATE_KEY is non-empty
+       want "yes", got "no"
+FAIL (i) the output names ADMIN_USER_PASSWORD
+       want "yes", got "no"
+sha256sum: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/tmp/ks915.mr29fb/fresh/Blockchain/Dev/.env: No such file or directory
+FAIL (ii) second run: exits 0
+       want "0", got "127"
+FAIL (ii) second run: .env is byte-identical (sha256)
+       want "yes", got "no"
+FAIL (ii) second run: .env.local is byte-identical (sha256)
+       want "yes", got "no"
+FAIL (ii) second run: .env mode is still 0600
+       want "600", got ""
+chmod: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/tmp/ks915.mr29fb/fresh/Blockchain/Dev/.env: No such file or directory
+FAIL (ii-b) control: the test opened .env to 0644
+       want "644", got ""
+FAIL (ii-b) third run on a complete .env at 0644: exits 0
+       want "0", got "127"
+FAIL (ii-b) third run: .env is back to 0600
+       want "600", got ""
+FAIL (ii-b) third run: .env.local is back to 0600
+       want "600", got ""
+FAIL (ii-b) third run: .env content unchanged (sha256)
+       want "yes", got "no"
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/mut/redfirst/Blockchain/Dev/scripts/__tests__/restore_local_secrets.test.sh: line 97: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/tmp/ks915.mr29fb/fresh/Blockchain/Dev/.env: No such file or directory
+FAIL (iii) the leak instrument has values to look for (>= 8)
+       want "yes", got "no"
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/mut/redfirst/Blockchain/Dev/scripts/__tests__/restore_local_secrets.test.sh: line 97: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/tmp/ks915.mr29fb/fresh/Blockchain/Dev/.env: No such file or directory
+ok   (iii) runs 1, 2 and 3: generated values found in the output
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/mut/redfirst/Blockchain/Dev/scripts/__tests__/restore_local_secrets.test.sh: line 97: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate165-ks915-pr1982/tmp/ks915.mr29fb/fresh/Blockchain/Dev/.env: No such file or directory
+FAIL (iii) control: a value planted in a copy of the output IS found
+       want "1", got "0"
+ok   (iii) no xtrace lines in the output
+ok   (iv) git check-ignore covers Blockchain/Dev/.env
+ok   (iv) control: git check-ignore does NOT cover Blockchain/Dev/env.example
+ok   (iv) git status --porcelain lists no .env or .env.local
+FAIL (v) hosted DATABASE_URL in the shell: refused (exit 3)
+       want "3", got "127"
+ok   (v) hosted DATABASE_URL in the shell: no .env written
+FAIL (v) the refusal names DATABASE_URL
+       want "yes", got "no"
+ok   (v) the refusal does not print the URL's host
+FAIL (v) hosted DATABASE_URL in .env: refused (exit 3)
+       want "3", got "127"
+ok   (v) hosted DATABASE_URL in .env: .env unchanged (sha256)
+FAIL (v) .env refusal names DATABASE_URL and the file
+       want "yes", got "no"
+ok   (v) hosted DATABASE_URL in .env: no ADMIN_USER_PASSWORD written
+FAIL (v) a ?host= naming a remote server is refused too
+       want "3", got "127"
+FAIL (v) ?host= refusal names DATABASE_URL
+       want "yes", got "no"
+ok   (v) ?host= refusal: no .env written
+FAIL (v) control: DATABASE_URL on localhost is accepted
+       want "0", got "127"
+FAIL (v) control: DATABASE_URL on the compose service 'postgres' is accepted
+       want "0", got "127"
+FAIL (v-b) NODE_ENV=production in the shell: refused (exit 3)
+       want "3", got "127"
+ok   (v-b) NODE_ENV=production in the shell: no .env written
+FAIL (v-b) the refusal names NODE_ENV
+       want "yes", got "no"
+FAIL (v-b) NODE_ENV=production in .env: refused (exit 3)
+       want "3", got "127"
+ok   (v-b) NODE_ENV=production in .env: .env unchanged (sha256)
+FAIL (v-b) .env refusal names NODE_ENV and the file
+       want "yes", got "no"
+FAIL (v-b) control: NODE_ENV=development is accepted
+       want "0", got "127"
+FAIL (vi) a second clone: exits 0
+       want "0", got "127"
+FAIL (vi) two clones get different ADMIN_USER_PASSWORD values
+       want "yes", got "no"
+ok   (vii) compose forwards ADMIN_USER_PASSWORD from .env to a service
+ok   (vii) compose forwards ALLOW_DEFAULT_SEED_PASSWORDS from .env to a service
+ok   (vii) the auth seeder reads ADMIN_USER_PASSWORD
+ok   (vii) the auth seeder is gated on ALLOW_DEFAULT_SEED_PASSWORDS === 'true'
+FAIL (rot) existing values: exits 0
+       want "0", got "127"
+ok   (rot) an existing ADMIN_USER_PASSWORD is kept
+ok   (rot) an explicit ALLOW_DEFAULT_SEED_PASSWORDS=false is kept
+FAIL (rot) a pre-existing .env is brought to mode 0600
+       want "600", got "644"
+FAIL (rot) --rotate: exits 0
+       want "0", got "127"
+FAIL (rot) --rotate replaces ADMIN_USER_PASSWORD with a generated value
+       want "yes", got "no"
+ok   (rot) --rotate does not print the new value
+FAIL (rot) --rotate keeps the mode at 0600
+       want "600", got "644"
+FAIL (use) --help exits 0
+       want "0", got "127"
+FAIL (use) --help says it generates and restores nothing from a store
+       want "yes", got "no"
+ok   (use) --help writes no .env
+FAIL (use) an unknown flag: refused (exit 64)
+       want "64", got "127"
+ok   (use) an unknown flag: no .env written
+
+Results: 21 passed, 49 failed

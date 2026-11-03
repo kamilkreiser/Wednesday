@@ -1,0 +1,32 @@
+script sha256 at head: 25de2fd6ebe7
+== suite at PR head, in the clone ==
+head: rc=0 ok=70 FAIL=0 Results: 70 passed, 0 failed
+== red-first: same suite, script absent ==
+redfirst: rc=1 ok=21 FAIL=49 FATAL=0
+== mutants ==
+mA_contains_localhost: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mB_contains_postgres: killed (rc=1 ok=64 FAIL=6 FATAL=0) first-fail: FAIL (v) hosted DATABASE_URL in the shell: refused (exit 3)
+mC_no_hostaddr: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mD_no_lower_host: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mE_schemeless_ok: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mF_no_lower_nodeenv_shell: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mG_no_lower_nodeenv_file: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mH_no_quote_strip: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mI_no_query_check: killed (rc=1 ok=68 FAIL=2 FATAL=0) first-fail: FAIL (v) a ?host= naming a remote server is refused too
+mJ_no_bracket_close_check: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mK_no_shell_db_refuse: killed (rc=1 ok=66 FAIL=4 FATAL=0) first-fail: FAIL (v) hosted DATABASE_URL in the shell: refused (exit 3)
+mL_no_file_db_refuse: killed (rc=1 ok=66 FAIL=4 FATAL=0) first-fail: FAIL (v) hosted DATABASE_URL in .env: refused (exit 3)
+mM_no_shell_nodeenv_refuse: killed (rc=1 ok=67 FAIL=3 FATAL=0) first-fail: FAIL (v-b) NODE_ENV=production in the shell: refused (exit 3)
+mN_no_file_nodeenv_refuse: killed (rc=1 ok=67 FAIL=3 FATAL=0) first-fail: FAIL (v-b) NODE_ENV=production in .env: refused (exit 3)
+mO_bootstrap_before_refuse: killed (rc=1 ok=62 FAIL=8 FATAL=0) first-fail: FAIL (v) hosted DATABASE_URL in the shell: no .env written
+mP_empty_url_refused: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mQ_no_socket_dir: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mR_no_postgres_service: killed (rc=1 ok=69 FAIL=1 FATAL=0) first-fail: FAIL (v) control: DATABASE_URL on the compose service 'postgres' is accepted
+mS_no_ipv6_loopback: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mT_no_ipv4_loopback: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mU_read_key_last: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mV_no_empty_host: SURVIVED (rc=0 ok=70 FAIL=0 FATAL=0) first-fail: 
+mW_refuse_exit_1: killed (rc=1 ok=65 FAIL=5 FATAL=0) first-fail: FAIL (v) hosted DATABASE_URL in the shell: refused (exit 3)
+mX_no_chmod_local: killed (rc=1 ok=69 FAIL=1 FATAL=0) first-fail: FAIL (ii-b) third run: .env.local is back to 0600
+mY_set_x: killed (rc=1 ok=66 FAIL=4 FATAL=0) first-fail: FAIL (iii) runs 1, 2 and 3: generated values found in the output
+mZ_print_value: killed (rc=1 ok=68 FAIL=2 FATAL=0) first-fail: FAIL (iii) runs 1, 2 and 3: generated values found in the output

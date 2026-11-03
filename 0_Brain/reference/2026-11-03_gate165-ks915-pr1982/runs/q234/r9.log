@@ -1,0 +1,16 @@
+restore-local-secrets.sh: generate local development credentials for platform-k.
+
+It GENERATES the values on this machine and restores nothing from a store:
+platform-k has no secrets store, and nobody needs to send anybody a password.
+
+  Blockchain/Dev/scripts/restore-local-secrets.sh            fill what is blank, keep the rest
+  Blockchain/Dev/scripts/restore-local-secrets.sh --rotate   also replace ADMIN_USER_PASSWORD
+  Blockchain/Dev/scripts/restore-local-secrets.sh --help     this text
+
+It runs bootstrap-env.sh, then fills ADMIN_USER_PASSWORD (generated) and
+ALLOW_DEFAULT_SEED_PASSWORDS=true in Blockchain/Dev/.env when they are blank,
+and sets .env and .env.local to mode 0600. It refuses, writing nothing, when
+DATABASE_URL names a host that is not this machine or NODE_ENV is production.
+It never prints a value.
+
+Then, from Blockchain/Dev: docker compose up -d

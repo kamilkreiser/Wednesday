@@ -1,0 +1,15 @@
+golden run rc=0
+301 shell-fresh   rc=3  tree_same=y names_var=y env_exists=n | production
+302 shell-present rc=3  tree_same=y names_var=y env_exists=y | production
+303 shell-fresh   rc=3  tree_same=y names_var=y env_exists=n | PRODUCTION
+304 shell-fresh   rc=0  tree_same=N names_var=n env_exists=y | production\ 
+305 envfile       rc=3  tree_same=y names_var=y env_exists=y | NODE_ENV=production
+306 envfile       rc=3  tree_same=y names_var=y env_exists=y | NODE_ENV=\"production\"
+307 envfile       rc=3  tree_same=y names_var=y env_exists=y | NODE_ENV=Production
+308 envfile       rc=0  tree_same=N names_var=n env_exists=y | NODE_ENV=production\ #\ live
+309 envfile       rc=0  tree_same=N names_var=n env_exists=y | export\ NODE_ENV=production
+310 envfile       rc=0  tree_same=N names_var=n env_exists=y | NODE_ENV=\ production
+311 envfile       rc=0  tree_same=N names_var=n env_exists=y | $'NODE_ENV=development\nNODE_ENV=production'
+312 envfile       rc=0  tree_same=N names_var=n env_exists=y | \ \ NODE_ENV=production
+313 shell-fresh   rc=0  tree_same=N names_var=n env_exists=y | development
+314 envfile       rc=0  tree_same=N names_var=n env_exists=y | NODE_ENV=demo

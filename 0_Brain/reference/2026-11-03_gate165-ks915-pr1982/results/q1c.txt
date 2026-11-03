@@ -1,0 +1,18 @@
+id   dotenv-16.6.1          bash-set-a             compose-v5-config      | case
+c1   DB=remote              DB=remote              DB=remote              | export\ DATABASE_URL=postgres://u:p@gate165rmt.host/x
+c2   DB=remote              DB=remote              DB=remote              | \ \ DATABASE_URL=postgres://u:p@gate165rmt.host/x
+c3   DB=remote              unset-or-error         DB=remote              | DATABASE_URL\ =\ postgres://u:p@gate165rmt.host/x
+c4   DB=remote              unset-or-error         DB=remote              | DATABASE_URL:\ postgres://u:p@gate165rmt.host/x
+c5   DB=remote              DB=remote              DB=remote              | $'DATABASE_URL=postgres://u:p@localhost:6432/x\nDATABASE_URL=postgres://u:p@gate165rmt.host/x'
+c6   NODE_ENV="production"  NODE_ENV="production"  NODE_ENV=production    | NODE_ENV=production\ #\ live
+c7   NODE_ENV="production"  NODE_ENV="production"  NODE_ENV=production    | export\ NODE_ENV=production
+c8   NODE_ENV="production"  unset-or-error         NODE_ENV=production    | NODE_ENV=\ production
+c9   NODE_ENV="production"  NODE_ENV="production"  NODE_ENV=production    | $'NODE_ENV=development\nNODE_ENV=production'
+c10  NODE_ENV="production"  NODE_ENV="production"  NODE_ENV=production    | \ \ NODE_ENV=production
+
+== pg-connection-string 2.12.0 / pg 8.20.0 on the URL forms the script accepted ==
+THROWS ERR_INVALID_URL Invalid URL                           | postgres://u:p@localhost:5432,gate165rmt.host:5432/x
+THROWS ERR_INVALID_URL Invalid URL                           | postgres://u:p@[::1],gate165rmt.host/x
+THROWS ERR_INVALID_URL Invalid URL                           | postgres://u:p@[::1]gate165rmt.com/x
+host="gate165rmt.host" remote=true                           | postgres://u:p@localhost/x?h%6Fst=gate165rmt.host
+host="localhost" remote=true                                 | postgres://u:p@localhost/x?host%3Dgate165rmt.host
