@@ -97,13 +97,13 @@ Step, lock state (holder text or "mine"), load1, the last command, the next one,
 
 ## Stamp
 Tuesday fills each slot at launch; one word or clock each. The unstamped copy reads nine such runs (eight slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Main head at launch (full sha; `d424af7f503f1abe8ae24fe3acbc54aa963e6c25` at drafting): ____
-- Branch head at launch (the new branch must NOT exist; `git ls-remote` prints nothing at drafting): ____
-- Open PRs at launch (#91, #86, #85 at drafting): ____
-- Launch authority and hard stop (READY 120, HARD STOP 180 minutes after your Step 0): ____
-- SLOTS (HEAVYLOCK `free` or `held`): ____
-- Q-answers (Q-1 cap on the old class; Q-2 three PCOMP-124 fixtures; Q-3 one PCOMP-126 fixture; Q-4 retitle of the completeness row): ____
+- STAMP: STAMPED 21:18 AEDT 2026-11-03 by Tuesday s237. Read whole: this kit lines 1-109 (wc -l) and the drafter's report summary.
+- LAUNCH WINDOW: From 21:18 until 23:00 AEDT today; one waiter, load1 below 7. Live beside you: Datasec/HPSM-POC-G325, Datasec/HPSM-POC-D45, Datasec/NexusAI-R161, Datasec/MPS-G326 (other projects); no Composer seat.
+- Main head at launch (full sha; `d424af7f503f1abe8ae24fe3acbc54aa963e6c25` at drafting): d424af7f503f1abe8ae24fe3acbc54aa963e6c25 (gh api at 21:18)
+- Branch head at launch (the new branch must NOT exist; `git ls-remote` prints nothing at drafting): absent (matching-refs heads/b1233 length 0 at 21:18)
+- Open PRs at launch (#91, #86, #85 at drafting): 91, 86, 85 (gh pr list at 21:18)
+- Launch authority and hard stop (READY 120, HARD STOP 180 minutes after your Step 0): The product owner's ruling on card composer-pcomp124-126-build-now-1103 = a 'Build them now, one test-only lane' (live board 21:16:34 AEDT, view=tuesday, read by Tuesday's kam_msgs.sh), after his 10:57 'Land it as it is; ticket the four shapes'. Tuesday s237 launches. READY 120 and HARD STOP 180 minutes after your Step 0; never after 00:30 AEDT.
+- SLOTS (HEAVYLOCK `free` or `held`): HEAVYLOCK free (ls at 21:18: absent)
+- Q-answers (Q-1 cap on the old class; Q-2 three PCOMP-124 fixtures; Q-3 one PCOMP-126 fixture; Q-4 retitle of the completeness row): Q-1 SETTLED by the product owner's 21:16 ruling (build now; this lane counts as round 1 of 2 on a new class); Q-2 three PCOMP-124 fixtures, accepted; Q-3 one PCOMP-126 fixture, accepted; Q-4 retitle the completeness row to sixteen, accepted.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 21:18 by Tuesday s237: kit lines 1-109 (wc -l) and the drafter's report summary
