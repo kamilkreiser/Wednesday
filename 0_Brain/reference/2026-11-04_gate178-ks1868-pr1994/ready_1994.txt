@@ -1,0 +1,37 @@
+=========== [INBOUND] 2026-11-03T16:27 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: PR 1994 (KS-1868 PR 16, tier 1; eight 
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: PR 1994 (KS-1868 PR 16, tier 1; eight routes now answer 500 where the request was left open) (Seat R 81st)
+Seat R 81st
+
+# READY FOR GATE: PR 1994 (KS-1868 PR 16, TIER 1, Opus gate requested)
+
+## FLAG, first
+- Each of the eight routes now answers 500 where, for an unreadable thrown value, the request was left open at develop. Read from the source and from the 16 red cells; no request was sent to a running service. In services/nft-certificate/src/routes/nft.routes.ts, base catch line -> head catch / log / reply lines: POST /estimate 216 -> 216 / 223 / 224; GET /certificates 261 -> 267 / 274 / 275; GET /certificates/:id 292 -> 304 / 311 / 312; GET /tiers 320 -> 338 / 345 / 346; POST /verify/transaction 425 -> 449 / 456 / 457; POST /verify/asset 461 -> 491 / 498 / 499; POST /ipfs/pin 549 -> 585 / 592 / 593; POST /ipfs/unpin 574 -> 616 / 623 / 624. At base the read of the thrown value sat in the logger.error argument, so a hostile value made the catch throw, the async handler rejected and sent no reply; Express 4.22.3 in the tree does not handle that.
+- The three-dot diff of the file is exactly eight hunks (git diff -U0 79145a312f01...HEAD counts 8; controls: an untouched file of the service gives 0, a new test file gives 1). The other nft.routes.ts catches (mint, record, privacy-options, supported-chains, IPFS upload, metadata size, platform-fee) are not touched.
+- The two verify routes are public: app.ts line 48 lists them as publicOps.
+- Callers by string grep at 79145a312f01 (non-test source; negative control 0, positive control found the mint path): none except the gateway's endpoint-description map (api-gateway index.ts:834) and an e2e fixture list (tests/e2e .../recruitment-data.ts:333). Read, not driven.
+- No base-against-head recorder run by the raise seat (Wednesday's ruling). The test-types ratchet has no services/nft-certificate baseline (baselines exist only for auth, api-gateway, vc-issuer, security, m365-integration).
+
+## The five things, by identifier
+1. PR: 1994, https://github.com/Secuura/Distributed_Secuura/pull/1994, open, not draft, base develop, 1 commit, 11 files, +957/-8. Created and read back by the tool: "read-back problems: none", one PR for this head.
+2. Head sha read from origin in this action (ls-remote of the branch): 74dc459edbb6cdef368f0bc74a54b081cc4b3835. The PR API head: 74dc459edbb6cdef368f0bc74a54b081cc4b3835. Develop read in this action: ea5134d6b98c470615c59fca5d3ec30356adfbd7.
+3. Ticket comment naming the PR: KS-1868 comment 6eeccf12-79f6-4159-930f-ed64bc347246 (16:26:11Z; BLUF; read back equal, 0 mention nodes, state In Progress / priority / assignee unchanged).
+4. Test Evidence block in the PR body: Touched / Ran / NOT run / Migrations + config all present. Live body sha256 f3a64bb70d396f01a9e02360574582ca0e7d6bbf6c2f318ed6564352863a48e7. check_body_ks (KS-1868, --tier1) rc 0; close-word scan 0 hits (control finds a planted word); no at-sign outside code spans.
+5. Not done / not covered: no base-against-head recorder; no request to a running service; the four platform suites (Schemathesis, Akto, Playwright, Performance/k6) UNMEASURED; Node v26.8.1 is not an LTS line; the ratchet has no baseline for this service; O97-P7 and O98-P1 (anchoring) stay held; the other KS-1868 sites and the other catches of this file; no deploy.
+
+## Pre-push hook, verbatim
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / legs 3 4 8 — local stack not up; you can clear this by starting it. / This is NOT a pass. Do not quote it as one — say which legs ran. The hook ran 876 s, rc 0 (driver pid 56169, joined 16:09:51Z with 0 places ahead; the driver's overlap gate: 24 open PRs, none touches any of the 11 paths). Shell suites (leg 14): 113 passed, 0 failed, 1 skipped (of 114).
+
+## Measured by me at develop 79145a312f01 (all in BUILT AND PROVEN and the body)
+Strict apply 8 of 8 (corrupted-content controls rc 1; forward and reversed trees equal b5fc093e9bc3); blobcheck 9 of 9 (leave-one-out control 7 of 9); red first 16 of 32 by AssertionError, green 32 of 32; whole services/nft-certificate suite 30 files / 209 tests -> 38 files / 241 tests, all pass; tsc with tests 0 and 0 errors (planted control fires); eslint 0 errors, 0 warnings on 9 files (planted control fires); docs-fragments check OK (pristine scratch OK, planted typed number rc 1 naming the fragment).
+
+## For the merge seat
+Shared code path with PRs 1992 and 1993 (packages/shared, services/api-gateway): none; fragment file names are unique. PR 1994's only code path is services/nft-certificate/src/routes/nft.routes.ts: if develop moves, measure git diff --numstat <base> <new develop> -- that path with a repo-wide positive control.
+
+## Suggested gate questions
+(1) For each of the eight handlers, does an unreadable value now produce any reply other than the same 500 body an ordinary Error produces? (2) Do the eight red cells fail at base for the stated reason (the handler rejects, no reply), not by a harness artefact? (3) Which mutants of the eight guards survive the PR's own 32 cells?
+
+## Faults of mine since the last mail
+None new. (Earlier faults are in the plan, NOTES PATCHED and STATUS mails.)
+
+=========== [INBOUND] 2026-11-03T16:27 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] BUILT AND PROVEN: PR 1994 (KS-1868 PR 16, tier 1) (Sea
+READY FOR GATE: PR 1994 (next mail). Then the two doc PRs (KS-1320; KS-1343 P2B + P3B), then the two Low tickets and the gate follow-up tickets.
