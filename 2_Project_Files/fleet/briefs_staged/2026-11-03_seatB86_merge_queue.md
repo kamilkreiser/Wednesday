@@ -41,8 +41,8 @@ model: claude-sonnet-5-5 -- C5 -- P1-P4 -- gauge 90% (Wednesday's statusline 22:
   - QUEUE: `QUEUE: PR <n> at <head12> (Seat B 86th)`
   - GO: `GO: merge PR <n> at <head12> on develop <pin12> (Seat B 86th)`, body labels `Head pin:`, `develop pin:`, `Expected merge tree on the pin:`.
   A merge happens only on a GO naming this seat, the head and the pin; never on a QUEUE alone.
-- **NOT in your queue, prepare NOTHING for any of them:** PR 1982 (KS-915; stays OPEN and untouched; Wednesday disposes of it), PR 1989 (KS-915 rebuild; Seat E 32nd's fix round, gate 174 later), PR 1968 (HELD under Kam's KS-1352 = a), Seat R 80th's PRs 14-16 (not raised yet), and anything not QUEUED to you by Wednesday.
-- **Live seats on the shared inbox `secuura-blockchain@`:** Seat R 80th (lane -R, raise seat), Seat E 32nd (lane -E, PR 1989 fix round) and you (B 86th). Seats B 85th, R 79th, E 31st, F 28th and earlier have WRAPPED. **You act only on a mail whose subject ends `(Seat B 86th)` and whose body line 1 names Seat B 86th.**
+- **NOT in your queue, prepare NOTHING for any of them:** PR 1982 (KS-915; stays OPEN and untouched; Wednesday disposes of it), PR 1989 (KS-915 rebuild; Seat E 32nd's fix round, gate 174 later), PR 1968 (HELD under Kam's KS-1352 = a), and anything not QUEUED to you by Wednesday. **Later in your session Wednesday may QUEUE two more, each by its own QUEUE mail after the previous MERGED:** PR 1992 (KS-1868 PR 14, head `651f25b0d0e2`, gate 176 GO WITH NOTES; expected tree on develop+1990+1991 = `70bbceb1bf16…`) and PR 1993 (KS-1868 PR 15, head `8712cb115e0a`, gate 177 GO WITH NOTES; expected 4-PR tree = `ce7a5d0d1a99…`). Their notes patches are still owed by a raise seat, so do not prepare a READY for either until its QUEUE arrives.
+- **Live seats on the shared inbox `secuura-blockchain@`:** Seat E 32nd (lane -E, PR 1989 fix round) and you (B 86th); a raise seat R 81st may join. Seats R 80th (WRAPPED 12:58Z), B 85th, R 79th, E 31st, F 28th and earlier have WRAPPED. **You act only on a mail whose subject ends `(Seat B 86th)` and whose body line 1 names Seat B 86th.**
 - **After the queue is empty:** hold with the inbox watcher armed; wrap at ~80-85% context by the statusline, or when Wednesday says so.
 - Known (from B 85th and earlier): GitHub's `mergeable` reads UNKNOWN briefly after develop moves (poll to non-null in the same action as the dry run). Check runs answer 403 to the project PAT (expected; say it, do not chase it). Your PR-title check REFUSES a title without the "Refs KS-NNNN: " house form: keep that refusal.
 
@@ -61,7 +61,7 @@ READY names: head (ls-remote in the same action), merge tree on today's develop,
 
 ## PARTITION
 - Seats share one inbox (`secuura-blockchain@`): every mail names `Seat B 86th` on body line 1, row tag `[Secuura/Blockchain-B -> Wednesday]` ONLY. **Act only on mail whose subject ends "(Seat B 86th)".**
-- OTHER_SEATS for the matcher (never act on a mail naming them): r 80th, e 32nd, b 85th, r 79th, e 31st, f 28th, b 84th, b 83rd, s 15th, f 27th, r 78th.
+- OTHER_SEATS for the matcher (never act on a mail naming them): r 81st, r 80th, e 32nd, b 85th, r 79th, e 31st, f 28th, b 84th, b 83rd, s 15th, f 27th, r 78th.
 - **Yours:** the merges Wednesday GOs. Every worktree of every other seat is read-only (R 80th's `worktrees/s-r79-pr14` and its PR 15-16 worktrees; E 32nd's `worktrees/s-e32-*`). Copy anything you need into `P/5_Project_History/2026-11-03_seatB-86th/` first.
 
 RULED BY KAM, NOT YET IN AN ARTEFACT
@@ -108,4 +108,4 @@ PROVENANCE: (value | source | read time)
 - Disk 24 GiB free | `df -g /Volumes/DevMASTER` | read 2026-11-03 22:26
 - Model row C5 / gauge 90% | model-routing.md v1.0 row C5 (as cited by B 85th's brief) + Wednesday's statusline 22:24 | read 2026-11-03
 - TESTED grant and 11-02 quotes | carried from B 85th's brief (quotes not re-read from their source transcripts by Wednesday this seat) | read 2026-11-03
-SELF-CHECK: re-read end-to-end for contradictions | 2026-11-03 22:34
+SELF-CHECK: re-read end-to-end for contradictions | 2026-11-04 00:20
