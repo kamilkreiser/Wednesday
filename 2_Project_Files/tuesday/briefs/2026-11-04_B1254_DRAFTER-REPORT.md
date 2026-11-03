@@ -1,0 +1,53 @@
+STARTABLE: YES (after Tuesday fills the 14 stamp slots; no blocker found; one timing note: pull request 282 is open and will move main when it lands, which the kit's REFUSE already handles)
+
+# B1254 drafter report (SEAT-H114, HPSMPOC-443). Drafted Wed 4 Nov 2026 07:31:02 to 07:40:47 AEDT (`date` at the first read and at the closing `wc -l`; the files were written between them).
+
+## BLUF
+- Kit: `2026-11-04_B1254_SEAT-H114_hpsmpoc-443-remediation-mixed-invisible.md` (+ identical `.pre-stamp`, `cmp` equal) and `2026-11-04_B1254_slots.json`. One file (`web/src/components/customer/remediation-store.test.ts`), 2 inserted lines (one line per state in `CASES`, evidence `"\u{2060}\u{200B}"`, a word joiner then a zero-width space, label "a word joiner then a zero-width space"), 15 rows become 19. No product edit, no port, no PR. Branch `b1254/hpsmpoc-443-remediation-mixed-invisible` from main `b76c0a979a99ffea65fa456a369f5c2707f0bcce`.
+- Template: the stamped -440 builder kit `2026-11-03_B1245_SEAT-H113_...md` (landed as #281). Shape copied; slots left as four underscores (14 by `grep -c -E '_{4}'`).
+- Tuesday's BUILD call carried as slot SCOPE-443 with `record as accepted` and `decline` branches (ticket allows all three) and a widened option (direction mark and braille blank, B1247-1).
+- Plants (10): P0, PC, PM (reversal limited to the mixed string: the scope sentence's "a reversal limited to it turns a row red"), PMV, PMS, PJ (the -440 shape; the new rows must stay GREEN under it, which proves a new class), PW (gate's qW), PA, PX, PU.
+
+## Contradictions with the facts you gave (FIRST)
+None that change the kit. Notes:
+1. The sweep (`SWEEP-0725:31`) says "swap `:47` and `:49` order, or limit a reversal to the mixed shape" as the plant; a swap is the full reversal (PA), not limited to the shape. The kit uses PM for the limited one and PA for the swap.
+2. Your brief says "Done-when" quoted from the ticket; the ticket also allows "recorded as accepted or declined", so the kit adds those two DONE branches. Build stays the default.
+3. The sweep's own caveat "whether the mixed shape is one string or two cases: the seat decides" is closed in the kit: one string per state (U+2060 U+200B, the gate's survivor qM2, `B1247_STATUS.md:74`); other mixes are not added unless SCOPE-443 widens.
+4. Main: `b76c0a97` confirmed (`git/ref/heads/main` 07:31:03). Pull request 282 open (1 open PR at 07:31 and 07:37), head `58ac1077`. All other sweep line numbers (`:218-:225`, `:221`, `:224`, `:227`, `:231`, `:235`, `:239`, product `:47`, `:49`) matched the raw file at b76c0a97.
+
+## Facts re-measured (instrument; control)
+1. Main sha, 07:31:03: `gh api -X GET git/ref/heads/main` = `b76c0a979a99ffea65fa456a369f5c2707f0bcce`. Open PRs: `pulls?state=open` printed #282 `b1097/hpsmpoc-home-words-focus-ring` `58ac1077`; `pulls/282/files` 10 paths. Control: `pulls state=all per_page=3` printed 282 open, 281 closed, 280 closed.
+2. Raw files at b76c0a97 (`contents/...?ref=`, Accept raw): test file 450 lines, blob `077df018...` = `contents` sha = `git hash-object`; product 105 lines, blob `0c53005e...` equal both ways (same blob as at `69338b64`, so #281 did not touch it). `ci.yml` 679 lines, `vitest.config.mts` 18, `web/package.json` 52.
+3. `grep -n`/`awk NR` over those raw copies: test `:15` NEEDS_EVIDENCE, `:16` NEEDS_EVIDENCE_SUBMITTED, `:215` describe, `:217` DATE_REFUSAL, `:218` CASES, `:219-:224` six lines, `:225` `];`, tests `:227`, `:231`, `:235`, `:239`; `:94`, `:151` mixed word-joiner strings, `:190` bad-date list; product `:8`, `:24`, `:28`, `:44`, `:47`, `:48-:49`. Count guards: `CASES` on `:218`, `:227`, `:231`; `CalledTimes` only `:311` (cookieWrites). Control: `Enter a real date.` found at `:190` and `:217`; `grep -c 'zzz-b1254'` printed 0.
+4. Shape facts by `node` over the regex copied from `:24` (07:31:59; control `a` length 1 false): U+2060 length 1 true; U+2060 U+200B length 2 true; U+200B U+2060 length 2 true; U+2060 U+200E length 2 true. `grep -c -F '\u{2060}\u{200B}'` = 0 and `'\u{200B}\u{2060}'` = 0 over the raw test file; control `'\u{2060}'` = 4 lines.
+5. Ticket `HPSMPOC-443` by `.tools/b1007/jira.py` (key form; 07:31:16; output file lines 1-9): Backlog, labels `b1247-gate`, `b1251-2026-11-04`, 0 comments; summary, finding, fix shape and Done-when quoted verbatim in the kit.
+6. Gate record `B1247_STATUS.md` (169 lines): verdict `:1`, frame `:50`, qM `:71`, qN2 `:73`, qM2 `:74`, survivor proofs `:77`, findings `:152` (B1247-1) and `:153` (B1247-2), `:143` plants beside the builder's. `B1178_STATUS.md:1` also GO WITH FINDINGS, round 1 of 2, NO GO 0 before. Builder record `B1245_STATUS.md` last line: READY FOR QA @ `1db146df`, plants PJ 2, PJV 1, PJS 1, PW 2, PA 8, PX 66, PU 55 red (the kit's expectations scale from these; the new counts are UNMEASURED).
+7. Partition: `branches --paginate` 296 branches, 0 duplicates; `compare b76c0a97...<sha>` for the 295 non-main branches: 295 read, 0 failed, all `diverged`, longest file list 135 (none near the 300 cut). Branches naming `remediation-store`: 6 (b955, b984, b1002, b1145, b1175, b1245 @ `1db146df`, ahead 1 behind 1, landed as #281). Controls fired (b1145, b1175, b1245 listed). `b1097` ahead 5, behind 8, 10 files = `pulls/282/files`. `matching-refs/heads/b1254` 0 rows (control `b1145` 1 row). B1204 (H109) paths read from its "Your paths" row `:21`.
+8. Landing: `CLARIFICATIONS.md:3617` of `datasecau/HPSM-POC-analysis` main `8c973589ee6bf067ad197b3c93549dcdaf85551d` (5536 lines, raw): head-pinned squash. Quoted in the kit.
+9. CI (`ci.yml` at b76c0a97): `web-unit` `:450`, name `:451`, `working-directory` `:456`, `npm ci` `:466`, step `:476`, `npm test` `:478`; `web-build` `:371`, `npm ci` `:387`, audit-dev `:395`, lint `:396`, typecheck `:409`, build `:413`, check-shards `:426`; `api-sqlserver-shard` `:165` (name `:166`), `api-sqlserver` `:353` (name `:354`). Not a SQL Server row (vitest in jsdom: `vitest.config.mts:10`, `:11`; `web/package.json:12`).
+10. Tree at b76c0a97: 1745 paths, `truncated: false`; `expected|counts` paths outside `api/tests`: 0; `remediation-store` paths: 2 (control).
+11. Model: C2 `model-routing.md:92`, G1 `:108`, G2 `:109`, G-cap `:111`; id `claude-sonnet-5-5` at `models_latest.json:23`; `brief_seat.sh:24` `LEVEL="${BRIEF_SEAT_LEVEL:-opus}"`; `status_watch.sh:56` includes `READY FOR QA:`, `STOPPED:`, `BLOCKED:`, `DONE:`.
+12. Environment: panes at 07:35 `%0 tuesday`, `%195 Datasec/NexusAI-N97`, `%1 fleet-monitor`; B1252 (N97) kit counts 0 for `remediation-store`, B1175 (H107) kit counts 22 (the REFUSE control). No H114 kit or pane. `lsof -nP -iTCP:9600-9699 -sTCP:LISTEN` 0 rows at 07:35 (control: `lsof -nP -iTCP -sTCP:LISTEN` shows `*:7000`). `uptime` 2.92 2.70 2.45 at 07:35; `df -k` available 197665804 KiB. `ls -d` : `.tools/b1175`, `.tools/b1245`, `.tools/node24`, `.tools/wt-b1113-fix/web/node_modules` exist; `.tools/b1254` and `.tools/wt-b1254-*` absent (0 rows); `.tools/.git-lock` absent now (made by `lock.sh:6` mkdir).
+13. Slot count: the `.pre-stamp` copy reads 14 lines with four underscores (13 stamp lines + last line); the kit's REFUSE says 14. Kit ASCII check `LC_ALL=C grep -c -v -x -E '[ -~]*'` printed 0; kit is 115 lines.
+
+## D-decisions (mine)
+- D-1: mixed string = U+2060 then U+200B, the gate's qM2 and the ticket's exact example; one string per state.
+- D-2: PJ added as a required-GREEN row for the new rows (R1x): proves the new rows are a class the -440 rows do not hold, and that PM is a different mutant from PJ.
+- D-3: widened scope (direction mark, braille blank) offered only as a SCOPE-443 option with its own numstat (`6 0`), 27 rows, plant budget 12; default not built (the ticket calls B1247-1 optional).
+- D-4: no port; jsdom.
+- D-5: HELD paths stated from both sides: all 10 files of #282 listed in the lane table, and the B1204 path set by reference to its row; REFUSE adds a STOP if the head lists any of them.
+- D-6: kept the author/committer host check (`users.noreply.github.com`) from the -440 kit; the project's configured email ends `@users.noreply.github.com` (read by `git config --get`, domain only).
+- D-7: helpers copied from `.tools/b1175` (the original source the -440 kit used, `grep -n` pointers verified), not `.tools/b1245`.
+
+## Q-questions for Tuesday (each with a default)
+- Q-1: SCOPE-443: mixed string only, or also the direction mark and braille blank? Default: mixed only (+4 rows, 15 to 19).
+- Q-2: Gate round and tier: ROUND 1 OF 2 on class "remediation register tests and titles", tier 2 G2? Default: yes (two earlier gates GO WITH FINDINGS, NO GO 0).
+- Q-3: Record as accepted or decline instead? Default: build (your named call).
+- Q-4: Launch now beside open PR #282? Default: yes; the paths are disjoint (sweep partition program: 0 intersections; drafter re-read both lists) and the kit's "main moved" REFUSE passes when #282 lands (its files are not on the STOP pattern). Only the READY line's "behind main" count changes.
+- Q-5: Launch window and hard stop: default READY 90 / HARD STOP 150 minutes after Step 0, as the -440 kit.
+
+## UNMEASURED
+Every test outcome and count at main (unit total; the 3907 of the B1247 record predates #281's landing); the plant red counts (kit states expectations only: PM 2, PMV 1, PMS 1, PJ 2 with the 2 new rows green, PW 4, PA 10); hosted CI; CodeQL; `gh auth status` for the Datasec account (left to Step 0); `node_modules` size under `.tools/wt-b1113-fix`; whether any decision card cites HPSMPOC-443 (no card read); whether `git log -S'a word joiner then'` is empty at the seat's clone (left to Step 2; the raw test file has no such text by `grep -c`, 0 for the two escape orders); the partition is a point-in-time read at 07:32 to 07:36 (the PR 282 landing moves main afterwards).
+
+## Outside-the-fences disclosure
+Read-only: `gh api -X GET` under the HPSM-POC `GH_CONFIG_DIR` (main ref, commits, contents raw, tree, branches paged, 295 compares, pulls, pulls/282/files, analysis repo contents); Jira GET by `.tools/b1007/jira.py HPSMPOC-443`; reads of B1245/B1247/B1178 STATUS files, kits B1175/B1204/B1252, the sweep, model-routing.md, models_latest.json, status_watch.sh, brief_seat.sh; `tmux list-panes`, `lsof`, `uptime`, `df`, `ls -d`; `node` over a scratchpad file. No git command in any project repo (the local checkout was not read), no `decision_queue.sh`, no az, ssh or docker, no HTTP to any hosted host. One background compare loop ended with exit 2 from a `grep -P` that this grep does not support (after all 295 reads had completed; the result file was verified separately). Scratch copies are in the session scratchpad. Written: the kit, its `.pre-stamp`, the slots file and this report; nothing else.

@@ -74,22 +74,22 @@ No path outside the property; no word other than the stamped ones; no change to 
 
 ## Stamp
 The unstamped copy reads 15 such lines. Tuesday stamps; leave every slot as it stands.
-- STAMP (read whole with the drafter's report; D-n and Q-n answers): ____
-- LANDED (the focus-ring squash sha on main, the landing time, the 'Sidebar.tsx' check printed): ____
-- BASE-MAIN (sha40 of main at stamp, containing the squash): ____
-- WORD-COLLAPSE (accessible name while the rail is expanded; proposed "Collapse menu"; the product owner's approval recorded where): ____
-- WORD-EXPAND (accessible name while collapsed; proposed "Expand menu"): ____
-- WORD-TOOLTIP (default none: no tooltip, no title): ____
-- GATE-ROUND (class S "shell header and rail collapse", round 1 of 2 expected, tier 1 Opus): ____
-- KEYS (none in a changed line or the message): ____
-- SCOPE-OUT (paths; items 1-3 only; no word beyond the stamped; no drawer change): ____
-- LAUNCH WINDOW (until; load1; live seats): ____
-- Stamped by: ____
-- Launch authority: ____
-- Hard stop and target READY (default target 150, hard stop 240 minutes after your Step-0 date): ____
-- Port block, model receipt line and load1 at launch (9670-9679; claude-sonnet-5-5, row C2 `model-routing.md:92`, BRIEF_SEAT_LEVEL=sonnet): ____
+- STAMP (read whole with the drafter's report; D-n and Q-n answers): STAMPED 07:57 AEDT 2026-11-04 by Tuesday s240. Read whole: this kit lines 1-95 (wc -l) and ADDENDUM-1 lines 1-75 (/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-04_B1204_ADDENDUM-1_after-pr282.md), which GOVERNS this kit where the two differ, item by item; Step 0 copies it too. The addendum's drafter report read by summary only. Tuesday's own reads before this stamp: HPSM-POC main a8497578 (gh api, also after the landing Tuesday verified at 07:45: one parent b76c0a97, 10 files with blobs equal to PR 282); matching-refs heads/b1204 0; card hpsmpoc-kam-rail-words-1103 read by decision_queue show today: ruled a. Q-2 ACCEPTED as Tuesday's design call inside the product owner's ruling: the footer follows the rail, 252 px expanded, 88 px collapsed. Other Q defaults accepted.
+- LANDED (the focus-ring squash sha on main, the landing time, the 'Sidebar.tsx' check printed): The drafter read (gh api -X GET, 2026-11-04 07:52 AEDT): HPSM-POC pull request 282 merged, squash a8497578d318f086276fc4c168984b42ca33e7fd, parent b76c0a979a99ffea65fa456a369f5c2707f0bcce, committed 2026-11-04 07:44:55 AEDT (commit date 2026-11-03T20:44:55Z converted by date), 10 files; compare a8497578...main = identical, behind_by 0 (control: compare f39ac80e...main = diverged). Sidebar.tsx check by the drafter on main: lg:-mb-16 count 1, calc string count 1 (it is also 1 on the old branch head, so it is not the guard).
+- BASE-MAIN (sha40 of main at stamp, containing the squash): a8497578d318f086276fc4c168984b42ca33e7fd (HPSM-POC main read by Tuesday by gh api just before this stamp; the PR 282 squash).
+- WORD-COLLAPSE (accessible name while the rail is expanded; proposed "Collapse menu"; the product owner's approval recorded where): Collapse menu. The product owner's ruling: card hpsmpoc-kam-rail-words-1103, option a 'Approve Collapse menu and Expand menu', ruled 2026-11-03 11:18:55 AEDT (read by Tuesday with decision_queue show on 2026-11-04).
+- WORD-EXPAND (accessible name while collapsed; proposed "Expand menu"): Expand menu. Same card and ruling as WORD-COLLAPSE.
+- WORD-TOOLTIP (default none: no tooltip, no title): none: no tooltip, no title, no visible text (the same ruling).
+- GATE-ROUND (class S "shell header and rail collapse", round 1 of 2 expected, tier 1 Opus): ROUND 1 OF 2 on class 'shell header and rail collapse', tier 1 Opus (G1, model-routing.md:108). The drafter's grep over the 604 *_STATUS.md files for the exact class phrase prints 0 (control: 'sidebar keyboard focus ring' prints 2); no GATE VERDICT first line among 151 names this item or branch b1204. Class R (the ring) is a different class.
+- KEYS (none in a changed line or the message): none in a changed line or the message
+- SCOPE-OUT (paths; items 1-3 only; no word beyond the stamped; no drawer change): the section 4 property of ADDENDUM-1 (shell, its two menus, the footer class string in web/src/app/layout.tsx); items 1-3 of the feedback only; no word beyond the stamped; no drawer change below 1024 px; no change to globals.css lines 73-99, to the panel height calc or to lg:-mb-16; no path of the H114 builder or of the analysis repository.
+- LAUNCH WINDOW (until; load1; live seats): From 07:57; launch_when_cool, one waiter, load1 below 7. Live panes at the stamp: Datasec/NexusAI-N97, Datasec/MPS-M92, Datasec/HPSM-POC-H114 (writes only web/src/components/customer/remediation-store.test.ts on b1254/...; disjoint); the Composer records seat R168 has closed. An HPSM-POC records seat (R169, kit B1256) may launch: analysis repository and Jira only. Neither stops this seat.
+- Stamped by: Tuesday s240 (read the kit and ADDENDUM-1 whole)
+- Launch authority: Tuesday s240 under the standing order to work actionable tickets at every boot (2026-10-24), the product owner's signed shell feedback, his words ruling (card above), and his live-board instruction 2026-11-04 07:51:42 AEDT (view=tuesday), verbatim: 'can you please deploy to live all changes made and change the column and menu items as per the feedback given.' After your READY: a tier-1 Opus gate, then Tuesday lands it and deploys to hosted UAT under the push-to-demo grant; you deploy nothing.
+- Hard stop and target READY (default target 150, hard stop 240 minutes after your Step-0 date): Target READY 180, HARD STOP 270 minutes after your Step-0 date (ADDENDUM-1 section 9), written as absolute AEDT clocks at Step 0.
+- Port block, model receipt line and load1 at launch (9670-9679; claude-sonnet-5-5, row C2 `model-routing.md:92`, BRIEF_SEAT_LEVEL=sonnet): 9670-9679; model: claude-sonnet-5-5 -- C2 (model-routing.md:92), BRIEF_SEAT_LEVEL=sonnet inside the quotes; load1 read by launch_when_cool at launch.
 
 **Your commission is THIS file (read-only);** Step 0 copies it unchanged into `.../HPSM-POC/1_Project_Definition/Briefs/`.
 **Launch (Tuesday), ONE waiter, only after the focus-ring landing:** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/HPSM-POC-H109 "WED_USAGE_STOP=100 BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-03_B1204_SEAT-H109_hpsmpoc-kam-header-and-collapsible-rail.md'"` (level inside the quotes).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 07:57 AEDT by Tuesday s240: kit lines 1-95 and ADDENDUM-1 lines 1-75 (wc -l)
