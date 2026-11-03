@@ -15476,5 +15476,12 @@
   "project": "Secuura",
   "ts": "2026-11-03T13:36:42.322069+11:00",
   "text": "Secuura / Blockchain — status after my 13:30 rotation. No action needed from you right now.\n\nPR 1978 merged at 13:28 (develop 09884b0e, checked at origin). That is 9 merges on this afternoon's chain. PR 1981 is queued to the merge seat next.\n\nYour two fail-closed rulings from this morning (gateway at 10:57, anchor trust at 11:17) did not have a seat yet. I've started the brief for one Opus seat to build both, as two gated PRs. It launches when the machine has room; it is busy at the moment.\n\nPeter's restore script (PR 1982) is in its fix round after the first gate found ways to slip past the local-only check. Still not ready to tell Peter.\n\nThree cards are still yours: login lockout during a Redis outage (its default fires about 15:40), the breach-password check, and the PR 1979 ambassador bonus."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T14:11:17.369245+11:00",
+  "text": "Secuura / Blockchain — for information, no action needed.\n\nThe seat building your two fail-closed fixes has started. Its design is confirmed and it is writing the tests first.\n\nOne cost to know about. With the fix, if the gateway's Redis read for the login lockout fails or hangs for more than 2 seconds, logins through the gateway are refused with 'service unavailable' until Redis recovers. Today they would go through. The lockout itself protects nothing yet, because nothing writes a lockout record (KS-1372), which your card already noted. This is what you ruled; I'm only naming the outage effect.\n\nThe seat also found two more ways the rate limit lets a caller through unlimited: a negative time window, and a backup counter that fails. Both are the same problem you ruled on, so I added them to the same fix."
  }
 ]
