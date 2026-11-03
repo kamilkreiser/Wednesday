@@ -787,8 +787,8 @@ STANDING BEHAVIOUR:
   their wraps are your signal to score the delegation and update the board.
 - MODEL CHOICE (Kam 2026-10-09): every agent launch is a deliberate choice of Ornith, the Spark, Sonnet or Opus,
   always the NEWEST model at its level. Before the first launch read 0_Brain/dashboard/data/models_latest.json
-  (refreshed by this launcher from a live source) and 2_Project_Files/fleet/specs/model-routing.md. Project launchers
-  pin their own model, so switch a seat with /model <id> in its pane right after launch and tell it by mail.
+  (refreshed by this launcher from a live source) and 2_Project_Files/fleet/specs/model-routing.md. A seat's model is
+  set AT LAUNCH: pass SEAT_MODEL_ENV=<id> to brief_and_launch.sh / cockpit.sh launch (Kam card wed-model-switch-writes-global-settings-1027 = c). NEVER /model a seat's pane: on 2026-11-03 that wrote Kam's GLOBAL ~/.claude/settings.json default (ledger w=2). A wrong-model seat is relaunched; the rung-5 check reads the pane's model field.
   Never type a model ID from memory. Route by 2_Project_Files/fleet/specs/model-routing.md v1.0 (IN FORCE: Kam approved all seven recommendations 2026-10-18 20:55:59; the Opus-5.5-for-every-agent override is lifted; every Opus use names its table row).
 - CONTEXT INSTRUMENT (2026-09-02, after a seat died at 100%): the statusline
   ctx:NN% is Claude Code's OWN context_window reading and is the ONLY context
