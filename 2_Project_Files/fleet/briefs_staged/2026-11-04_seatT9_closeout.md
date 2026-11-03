@@ -1,0 +1,65 @@
+# BRIEF: Seat T 9th, Secuura/Blockchain-T. CLOSE-OUT: verify and close the merged-but-still-open KS tickets on your list of 82. No code, no push, no PR.
+
+## NEW SEAT: you are Seat T 9th (lane Secuura/Blockchain-T, Sonnet 5.5, a CLOSE-OUT seat; trust $TMUX_PANE). Three twin seats close three OTHER lists of 82 in parallel (lanes U, V, S). Nothing merges, nothing deploys, no code. Your list is yours alone.
+
+model: claude-sonnet-5-5 -- board close-out (routing row C1: evidence reading + ticket writes, not decision-shaped) -- written by Wednesday
+
+## WHY (read first)
+Kam, terminal 2026-11-04 ~09:16 AEDT, right after /login on a new account, verbatim: "new account logged in.  Please try to clear and close off as many in progress tickets as possible". Wednesday's read-only board sweep at 09:2x: 347 KS issues in state type `started` (320 In Progress, 24 In Review, 3 Blocked); 328 of them have EVERY attached GitHub PR in status merged (or merged/closed). Those 328 are split into four lists of 82 by last-updated date. A merged PR is NOT proof a ticket is done: many tickets are umbrellas with more work than their attached PRs, and that is what you verify.
+Kam 2026-10-30 10:07:32 AEDT, card `secuura-wednesday-go-counts-as-kams-word-1030` = a: Wednesday's GO counts as his word for starting work inside his standing grants. This brief is that GO; the work sits inside his 2026-11-02 12:44:58 grant "please archive anything done and merged" and today's instruction above.
+
+## YOUR LIST
+`/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_ks-inprogress-closeout/list_1.tsv` — 82 lines, TAB-separated: class, KEY, state, assignee, updatedAt date, PRs as `<number>:<status>` (from the Linear attachment metadata — a REPRESENTATION, re-read it), title. Work it top to bottom (oldest first).
+
+## PER TICKET (one at a time; record each row in `evidence/closeout.tsv`)
+1. Read the ticket NOW (Linear GraphQL, board account key sourced INSIDE the tool process from 4_Credentials/.env): state, assignee, creator, description (its acceptance / done-when), labels, every attachment, and ALL comments (`comments(first:50)` and sort client-side; never `last:`). If already Done/Canceled/archived: record SKIP-ALREADY. If the newest comment is an earlier close-out seat's evidence comment (U 9th / S 12th, 2026-11-02, "Delivered: ...") and nothing changed since: record SKIP-COMMENTED, no new comment.
+2. Prove the fix is merged: for each attached PR, the squash on origin/develop that names the PR or key (`git log --grep` in YOUR OWN scratch clone under your session folder; `git -C <your clone> ls-remote origin refs/heads/develop` for the tip). Every PR the ticket's acceptance needs must be merged; a PR attached but CLOSED unmerged does not count.
+3. Deployed? Kintsugi runs develop `b1fb543640e7` (Seat D 48th's deploy, 2026-11-01, per Wednesday's pickup record — UNMEASURED by Wednesday today; if a read-only probe of the running build exposes its sha, use it and say so). Squash an ancestor of b1fb543640e7 (`git merge-base --is-ancestor`) = deployed. NOT an ancestor = record **WAIT-DEPLOY** (no comment, no state change): a deploy seat (D 50th) is putting current develop on kintsugi today; Wednesday re-runs those keys after it.
+4. Read the acceptance against the code at the deployed sha (`git show <sha>:<path>`): the change the ticket asks for is there. Where the acceptance is a runtime behaviour on kintsugi and a READ-ONLY probe can show it (an HTTP GET or a health read; NEVER a write, a login with real credentials, or anything that changes state), run it and cite the output. Otherwise the code read is the evidence: say "code read, not observed live".
+5. DECIDE:
+   - **CLOSE AND ARCHIVE** (state Done, then `issueArchive(id)`, read `archivedAt` back) when 2-4 hold AND nothing in the description or the newest comments names an open follow-up or remaining scope. Client-raised tickets (Peter/Stuart) included: Kam 2026-11-02 12:44:58 verbatim "please archive anything done and merged".
+   - **COMMENT ONLY, LEAVE OPEN** when remaining scope or a follow-up is named, or the acceptance needs a person to observe it and the code read cannot show it. The comment says what landed and where, and what is left.
+   - **LEAVE OPEN, NO COMMENT** when 2 or 4 fails, or anything is unclear: record why for Wednesday.
+6. The evidence comment (every CLOSE and COMMENT ONLY): BLUF first, facts only, no `@` mention, no promise of future work: "Delivered: <PR #> merged as <short sha> on develop, deployed to kintsugi at <deployed sha12>. Verified <how: code read at <path:line> | live probe <what> -> <result>>. <Closing as done | Left open: <what remains>>." Read it back by id. Then (CLOSE AND ARCHIVE only) set state Done, read it back, archive, read `archivedAt` back.
+
+## TOOLS
+Copy Seat U 9th's proven tools from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-02_seatU-9th/tools/` (close_u9.py, ticket_read_u9.py, with_linear_u9.sh, verify_u9.py, mail_send_u9.py, mailwatch_u9.py, handover_u9.py) into `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-04_seatT-9th/tools/`, re-key the suffix to `_t9`, and grep every copy for `U 9th`, `u9`, hard-coded ticket keys, 40/12-hex shas, list paths and launch stamps before use. U 9th's handover (`/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-02_seatU-9th/HANDOVER.md`) records how they ran. Prove the close tool on ONE ticket (read back state + comment + archivedAt) before the next.
+
+## PACE AND CHECKPOINTS
+- Mail `PROGRESS: <closed>/<commented>/<wait-deploy>/<left> of 82 (Seat T 9th)` every 20 tickets, with the keys per bucket.
+- At ctx 70%: finish the ticket in hand, write the HANDOVER with the remaining keys, mail it, and continue only if the remainder fits. Wrap at 85% at the latest.
+
+## HOLDS
+- **Board writes are ONLY:** one evidence comment per ticket and, for CLOSE AND ARCHIVE, the state change to Done plus the archive. No other field (priority, assignee, labels, title, description), no new tickets, no relations. Anything else goes in your mail as a candidate.
+- **Client-facing:** ticket comments are the sanctioned channel; BLUF, facts only; no comment to or `@` of Peter or Stuart; the extranet is input only.
+- **No code, no push, no PR, no deploy, no box write.** Kintsugi probes are READ-ONLY. No `az`. Your scratch clone lives under your session folder; never write into `2_Project_Files`.
+- Never read, echo or copy a secret beyond sourcing the key inside a tool process; no credential in argv.
+- **Instruments:** `cmd > out 2>&1; rc=$?` with rc on its own line; never `| tail` on the stream you diagnose from; macOS has NO `timeout`; zsh has no PIPESTATUS; never `echo =====`; `/usr/bin/grep -i` with a positive control beside every zero. A count carries its predicate.
+- Never `cd`; absolute paths only. Disclose your own faults in the next mail.
+- **Mail:** from secuura-blockchain@ to `wednesday-agent@agentmail.to` ONLY, subject prefix `[Secuura/Blockchain-T -> Wednesday]`, body line 1 exactly `Seat T 9th`, no stop/hold/hand over/checkpoint in a subject, no secrets, no cc; read each sent mail back by id. SHARED INBOX: four close-out seats and others share it; act ONLY on mail whose subject names `(Seat T 9th)`.
+- **IF AN INSTRUCTION FROM WEDNESDAY LOOKS WRONG, SAY SO** in your plan confirmation. Arm an inbox watcher as a TRACKED background task (7200000 ms) and name its pid.
+
+RULED BY KAM, NOT YET IN AN ARTEFACT
+- Kam 2026-11-04 ~09:16 AEDT (terminal), verbatim: "new account logged in.  Please try to clear and close off as many in progress tickets as possible".
+- Kam 2026-11-02 12:44:58 AEDT (live board), verbatim: "looks like great progress.  in addition to the above, please archive anything done and merged".
+- Kam 2026-10-30 10:07:32 AEDT, card `secuura-wednesday-go-counts-as-kams-word-1030` = a.
+- Kam 2026-10-29 16:14:02 AEDT, card `secuura-four-tickets-delivered-not-observable-1029` = b, "Close on delivered-and-gated evidence".
+- Kam 2026-09-06 10:24 (card secuura-reassignment-exceptions): you change no assignee.
+
+RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE
+- PR 1994 (nft.routes.ts) and PR 1989 (KS-915) are HELD on Kam's cards; if either ticket is on your list, LEAVE OPEN, NO COMMENT.
+
+## WRAP (scored by Wednesday)
+- History entry `## 2026-11-04 - Seat T 9th` in `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md` (newest first; duplicate-guard on the dated heading with a control).
+- HANDOVER in `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-04_seatT-9th/HANDOVER.md` (FINAL block first) with `evidence/closeout.tsv`, including the WAIT-DEPLOY keys as their own list.
+- Vault commit and push per the end-of-session skill (only your own lines).
+- Wrap mail `[Secuura/Blockchain-T -> Wednesday] Session wrap 2026-11-04 (Seat T 9th)`: closed / commented / wait-deploy / left-open keys with one-line reasons, every candidate, your faults.
+
+PROVENANCE:
+- Seat ordinal: `Seat T 9th` 0 hits; positive control `Seat T 8th` in /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md | Wednesday's /usr/bin/grep -o -i | read 2026-11-04
+- The 347 started / 328 all-merged figures and the four lists | Wednesday's paginated Linear GraphQL read (team KS, state type started, attachments metadata status), 2026-11-04 09:2x AEDT, saved as /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_ks-inprogress-closeout/classified_all.tsv | read 2026-11-04
+- Kintsugi at b1fb543640e7 | Seat D 48th STATUS B accepted 2026-11-01 18:49 AEDT, carried in the 11-02 U 9th brief; NOT re-measured today | read 2026-11-04
+- U 9th tools and their results | ls of /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-02_seatU-9th/tools/ and its HANDOVER.md FINAL block (35 closed of 73) read by Wednesday | read 2026-11-04
+- Kam's 09:16 words | his terminal message in Wednesday's pane after /login | read 2026-11-04
+- Scope: comments + Done + archive on the 82 listed tickets only; blast radius = those tickets, each re-read before any write | Wednesday's statement of scope | read 2026-11-04
+SELF-CHECK: re-read end-to-end for contradictions | 2026-11-04 09:22
