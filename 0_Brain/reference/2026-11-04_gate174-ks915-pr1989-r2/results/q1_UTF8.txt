@@ -1,0 +1,155 @@
+golden rc=0
+== locale=en_US.UTF-8; gate 166 forms appended to / prepended before a completed .env ==
+c01  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose=ERR(no json)]  | $'﻿DATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c01  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'﻿DATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c02  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose=ERR(no json)]  | $'﻿NODE_ENV=production\n'
+      why: refused by dotenv 16
+c02  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'﻿NODE_ENV=production\n'
+      why: refused by dotenv 16
+c03  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=${GATE_UNSET:-production}\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c03  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=${GATE_UNSET:-production}\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c04  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'GATE_ENVX=production\nNODE_ENV=${GATE_ENVX}\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c04  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'GATE_ENVX=production\nNODE_ENV=${GATE_ENVX}\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c05  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'GATE_ENVX=production\nNODE_ENV=$GATE_ENVX\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c05  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'GATE_ENVX=production\nNODE_ENV=$GATE_ENVX\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c06  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=GATE_Q] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'GATE_Q=?host=gate174rmt.host\nDATABASE_URL=postgres://u:p@localhost/x${GATE_Q}\n'
+      why: refused by bash set -a: DATABASE_URL does not name a local host in Blockchain/Dev/
+c06  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=GATE_Q] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'GATE_Q=?host=gate174rmt.host\nDATABASE_URL=postgres://u:p@localhost/x${GATE_Q}\n'
+      why: refused by bash set -a: DATABASE_URL does not name a local host in Blockchain/Dev/
+c07  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=GATE_Q] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'GATE_Q=?host=gate174rmt.host\nDATABASE_URL=postgres://u:p@localhost/x$GATE_Q\n'
+      why: refused by bash set -a: DATABASE_URL does not name a local host in Blockchain/Dev/
+c07  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=GATE_Q] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'GATE_Q=?host=gate174rmt.host\nDATABASE_URL=postgres://u:p@localhost/x$GATE_Q\n'
+      why: refused by bash set -a: DATABASE_URL does not name a local host in Blockchain/Dev/
+c08  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost/x\rDATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c08  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost/x\rDATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c09  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'NODE_ENV=development\rNODE_ENV=production\n'
+      why: refused by dotenv 16
+c09  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'NODE_ENV=development\rNODE_ENV=production\n'
+      why: refused by dotenv 16
+c10  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'A=1\rDATABASE_URL=postgres://u:p@gate174rmt.host/x\r'
+      why: refused by dotenv 16
+c10  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'A=1\rDATABASE_URL=postgres://u:p@gate174rmt.host/x\r'
+      why: refused by dotenv 16
+c11  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $' NODE_ENV=production\n'
+      why: refused by dotenv 16
+c11  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $' NODE_ENV=production\n'
+      why: refused by dotenv 16
+c12  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV =production\n'
+      why: refused by dotenv 16
+c12  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV =production\n'
+      why: refused by dotenv 16
+c13  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV= production\n'
+      why: refused by dotenv 16
+c13  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV= production\n'
+      why: refused by dotenv 16
+c14  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=production \n'
+      why: refused by dotenv 16
+c14  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=production \n'
+      why: refused by dotenv 16
+c15  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $' DATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c15  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $' DATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c16  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'export\tNODE_ENV=production\n'
+      why: refused by dotenv 16
+c16  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'export\tNODE_ENV=production\n'
+      why: refused by dotenv 16
+c17  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'export\tDATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c17  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'export\tDATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c18  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV="${GATE_UNSET:-production}"\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c18  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV="${GATE_UNSET:-production}"\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c19  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=${GATE_UNSET-production}\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c19  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=${GATE_UNSET-production}\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+c20  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL="postgres://u:p@gate174rmt.host/x#frag"\n'
+      why: refused by dotenv 16
+c20  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL="postgres://u:p@gate174rmt.host/x#frag"\n'
+      why: refused by dotenv 16
+c21  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=\'postgres://u:p@gate174rmt.host/x # c\'\n'
+      why: refused by dotenv 16
+c21  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=\'postgres://u:p@gate174rmt.host/x # c\'\n'
+      why: refused by dotenv 16
+c22  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost/x\r\nDATABASE_URL=postgres://u:p@gate174rmt.host/x\r\n'
+      why: refused by dotenv 16
+c22  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost/x\r\nDATABASE_URL=postgres://u:p@gate174rmt.host/x\r\n'
+      why: refused by dotenv 16
+c23  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=production\r\n'
+      why: refused by dotenv 16
+c23  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=production\r\n'
+      why: refused by dotenv 16
+c24  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose=ERR(no json)]  | $'DATABASE_URL=postgres://u:p@localhost/x\n﻿DATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c24  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose=ERR(no json)]  | $'DATABASE_URL=postgres://u:p@localhost/x\n﻿DATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+c25  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV="development"\rNODE_ENV=production\n'
+      why: refused by dotenv 16
+c25  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV="development"\rNODE_ENV=production\n'
+      why: refused by dotenv 16
+c26  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=\tproduction\n'
+      why: refused by dotenv 16
+c26  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=\tproduction\n'
+      why: refused by dotenv 16
+c27  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost/x\vDATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by the canonical-line check: line 525 of Blockchain/Dev/
+c27  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost/x\vDATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by the canonical-line check: line 1 of Blockchain/Dev/
+c28  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'NODE_ENV=development\fNODE_ENV=production\n'
+      why: refused by the canonical-line check: line 525 of Blockchain/Dev/
+c28  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'NODE_ENV=development\fNODE_ENV=production\n'
+      why: refused by the canonical-line check: line 1 of Blockchain/Dev/
+e11  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL="postgres://u:p@localhost/x?ho\\nst=gate174rmt.host"\n'
+      why: refused by dotenv 16
+e11  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL="postgres://u:p@localhost/x?ho\\nst=gate174rmt.host"\n'
+      why: refused by dotenv 16
+e12  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL="postgres://u:p@localhost/x?ho\\tst=gate174rmt.host"\n'
+      why: refused by the canonical-line check: line 525 of Blockchain/Dev/
+e12  prepend rc=3  tree_same=y outside_same=N admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL="postgres://u:p@localhost/x?ho\\tst=gate174rmt.host"\n'
+      why: refused by the canonical-line check: line 1 of Blockchain/Dev/
+e13  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost/x?ho\tst=gate174rmt.host\n'
+      why: refused by dotenv 16
+e13  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost/x?ho\tst=gate174rmt.host\n'
+      why: refused by dotenv 16
+e14  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL="postgres://u:p@localhost/x?ho\\rst=gate174rmt.host"\n'
+      why: refused by dotenv 16
+e14  prepend rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL="postgres://u:p@localhost/x?ho\\rst=gate174rmt.host"\n'
+      why: refused by dotenv 16
+== gate 166 shell-side forms ==
+s01  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway] GATE_SHELLX=production | $'NODE_ENV=${GATE_SHELLX}\n'
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+s02  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local] GATE_SQ=?host=gate174rmt.host | $'DATABASE_URL=postgres://u:p@localhost/x${GATE_SQ}\n'
+      why: refused by bash set -a: DATABASE_URL does not name a local host in Blockchain/Dev/
+e01  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local] DATABASE_URL=postgres://u:p@localhost/x?ho	st=gate174rmt.host | ''
+      why: refused by pg-connection-string (node pg's URL reader): DATABASE_URL does not name a local host in the shell environment
+e02  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local] DATABASE_URL=postgres://u:p@localhost/x?host	=gate174rmt.host | ''
+      why: refused by pg-connection-string (node pg's URL reader): DATABASE_URL does not name a local host in the shell environment
+e03  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local] DATABASE_URL=postgres://u:p@localhost/x?host=gate174rmt.host | ''
+      why: refused by pg-connection-string (node pg's URL reader): DATABASE_URL does not name a local host in the shell environment
+== controls: canonical remote/production must be refused AND read remote/production by the consumers ==
+k91  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@gate174rmt.host/x\n'
+      why: refused by dotenv 16
+k92  append  rc=3  tree_same=y outside_same=y admin_now_set=n mode=644 marker_in_log=0 | dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] compose-dev[compose:NE@api-gateway]  | $'NODE_ENV=production\n'
+      why: refused by dotenv 16
+== controls: local spellings that must be ACCEPTED ==
+k01  append  rc=0  tree_same=N outside_same=y admin_now_set=y mode=600 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'NODE_ENV=development\n'
+      why: 
+k02  append  rc=0  tree_same=N outside_same=y admin_now_set=y mode=600 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@localhost:6432/x\n'
+      why: 
+k03  append  rc=0  tree_same=N outside_same=y admin_now_set=y mode=600 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres:///x\n'
+      why: 
+k05  append  rc=0  tree_same=N outside_same=y admin_now_set=y mode=600 marker_in_log=0 | dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] compose-dev[compose:all-local]  | $'DATABASE_URL=postgres://u:p@pgbouncer:6432/x # pooled\n'
+      why: 

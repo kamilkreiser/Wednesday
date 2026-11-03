@@ -1,0 +1,141 @@
+== A. gate 173 n01-n05 ==
+n01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=gate174rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+n02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'POSTGRES_HOST=gate174rmt.host\n' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:POSTGRES_HOST@pgbouncer]
+n03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | POSTGRES_HOST=gate174rmt.host | args= | dev='' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): POSTGRES_HOST does not name a local host (it is pgbouncer's upstream) in the shell environment
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+n04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_DB="secuura host=gate174rmt.host"\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=POSTGRES_DB] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+n05   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=5432\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== B. POSTGRES_HOST spellings ==
+h01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=postgres.\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+h02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=localhost.\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+h03   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=::1\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+h04   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=[::1]\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+h05   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=2001:db8::1\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+h06   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=postgres.gate174rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+h07   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=POSTGRES\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+h08   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=127.0.0.2\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+h09   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST="postgres host=gate174rmt.host"\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+h10   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=postgres port=5432 host=gate174rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+h11   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=$'POSTGRES_HOST=gate174rmt.host\n'
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@api-gateway,POSTGRES_HOST@auth,POSTGRES_HOST@kyc,POSTGRES_HOST@m365-integration] root[compose:POSTGRES_HOST@api-gateway,POSTGRES_HOST@auth,POSTGRES_HOST@kyc,POSTGRES_HOST@m365-integration]
+== C. POSTGRES_PORT spellings ==
+p01   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=05432\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=+5432\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=" 5432"\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p04   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=65536\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p05   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=99999\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p06   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=123456\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p07   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | POSTGRES_PORT=5432  | args= | dev='' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): POSTGRES_PORT is not a port number in the shell environment
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== D. POSTGRES_DB spellings ==
+d01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_DB=sécuura\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+d02   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_DB=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+d03   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_DB=\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+d04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | POSTGRES_DB=sécuura | args= | dev='' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): POSTGRES_DB is not a plain database name in the shell environment
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== E. the remote host in .env AND the shell, different values ==
+x01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | POSTGRES_HOST=gate174rmt.host | args= | dev=$'POSTGRES_HOST=localhost\n' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): POSTGRES_HOST does not name a local host (it is pgbouncer's upstream) in the shell environment
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+x02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | POSTGRES_HOST=localhost | args= | dev=$'POSTGRES_HOST=gate174rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:all-local] root[compose:all-local]
+x03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=localhost\n' root=$'POSTGRES_HOST=gate174rmt.host\n' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:POSTGRES_HOST@pgbouncer]
+x04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=gate174rmt.host\n' root=$'POSTGRES_HOST=localhost\n' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:all-local]
+== F. override / extra file / COMPOSE_FILE / COMPOSE_ENV_FILES ==
+o01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): POSTGRES_HOST does not name a local host (it is pgbouncer's upstream) for the pgbouncer service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:all-local]
+o02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'GATE_UP=gate174rmt.host\n' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): POSTGRES_HOST does not name a local host (it is pgbouncer's upstream) for the pgbouncer service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=GATE_UP] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:all-local]
+o03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'COMPOSE_FILE=docker-compose.yml:gate-extra.yml\n' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): POSTGRES_HOST does not name a local host (it is pgbouncer's upstream) for the pgbouncer service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:all-local]
+o04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | COMPOSE_FILE=docker-compose.yml:gate-extra.yml | args= | dev='' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): POSTGRES_HOST does not name a local host (it is pgbouncer's upstream) for the pgbouncer service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:all-local]
+o05   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | COMPOSE_ENV_FILES=../../gate-extra.env | args= | dev='' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): POSTGRES_HOST does not name a local host (it is pgbouncer's upstream) for the pgbouncer service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@pgbouncer] root[compose=ERR(no json)]
+o06   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+   o06 = the extra file exists but nothing names it (the user would pass -f); the script cannot see it, by design
+== G. pgbouncer pool keys compose passes and entrypoint.sh renders by sed (not judged) ==
+g01   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGBOUNCER_MAX_CLIENT_CONN=\'10000\\n[databases]\\nsecuura = host=gate174rmt.host port=5432 dbname=secuura\'\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=PGBOUNCER_MAX_CLIENT_CONN] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+g02   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGBOUNCER_DEFAULT_POOL_SIZE=1000\\n[databases]\\nsecuura = host=gate174rmt.host port=5432 dbname=secuura\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=PGBOUNCER_DEFAULT_POOL_SIZE] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+g03   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'PGBOUNCER_RESERVE_POOL_SIZE=\'100\\n[databases]\\nsecuura = host=gate174rmt.host port=5432 dbname=secuura\'\n' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+g04   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 | PGBOUNCER_MAX_DB_CONNECTIONS=0\n[databases]\nsecuura = host=gate174rmt.host port=5432 dbname=secuura | args= | dev='' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== controls in the same run ==
+k01   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'NODE_ENV=development\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+k92   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'NODE_ENV=production\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] dev[compose:NE@api-gateway] root[compose:NE@api-gateway]
+k93   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=postgres\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]

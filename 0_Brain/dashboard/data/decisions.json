@@ -58232,5 +58232,40 @@
    "CARD datasec-weekly-usage-98pct-switch-1025",
    "CARD datasec-weekly-usage-99pct-switch-1030"
   ]
+ },
+ {
+  "id": "secuura-pr1989-gate174-cap-nogo-pgbouncer-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "PR 1989 (KS-915 restore script): round 2 NO GO at the cap, one HIGH left: allow a third round?",
+  "bluf": "OVERRIDE OF THE PRIOR-RULINGS GATE, with its reason: your 1103 card (secuura-pr1982-restore-script-round2-nogo-1103 = a, 'Rebuild the check using the real tools' reading') authorised the rebuild that became PR 1989, and that rebuild's two rounds (gates 173 and 174) are now spent. It does not rule a third. Your three earlier cap cards on other PRs (#892, KS-1612, KS-1557) each allowed another round, which is why (a) is recommended. THE FINDING: gate 174 says NO GO for ONE item, G174-F1 (HIGH): five pgbouncer pool settings (PGBOUNCER_MAX_CLIENT_CONN and four more) are judged by no reader, and pgbouncer's entrypoint copies them unescaped into pgbouncer.ini. A crafted value with an embedded newline adds a second 'secuura = host=<remote>' line, and the script then writes ADMIN and ALLOW (4 of 4 placements). It needs a deliberately crafted value (0 accidental forms); whether pgbouncer obeys the second line was NOT measured. Everything round 1 found is closed: 0 of 54 credential-route cells wrote, 0 secret leaks in 499 places, gate 173's six mutants killed. Nothing is merged; the default holds it.",
+  "default_action": "HOLD: PR 1989 stays OPEN and unmerged; Seat E 32nd wraps with the F1 fix design as its successor's first action, built only after your tap. Nothing merges or ships without your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Allow one more round for F1 only (recommended)",
+    "detail": "E 32nd's successor judges the five PGBOUNCER_* keys as plain integers in every reader (and refuses any newline), plus the one-line PATH lock for G174-F2; a narrow round-3 gate on just those; then merge on its GO"
+   },
+   {
+    "key": "b",
+    "label": "Merge PR 1989 as it is",
+    "detail": "F1 is ticketed as a HIGH follow-up and named as a known limit, like the hostile-.env limit (G173-F2) already is"
+   },
+   {
+    "key": "c",
+    "label": "Close PR 1989",
+    "detail": "KS-915 stays open; the restore script is not shipped"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T01:50:31.769883+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD secuura-ks1612-round3-nogo-1019",
+   "CARD secuura-ks1557-055-second-nogo-round3-1020",
+   "CARD secuura-pr1982-restore-script-round2-nogo-1103"
+  ]
  }
 ]
