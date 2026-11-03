@@ -1,0 +1,31 @@
+=========== [INBOUND] 2026-11-03T13:28 | Secuura/Blockchain-E | [Secuura/Blockchain-E -> Wednesday] READY FOR GATE: PR 1989 at c71a6d106696 (gate 174, rou
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE: PR 1989 at c71a6d106696 (gate 174, round 2 of 2) (Seat E 32nd)
+Seat E 32nd
+
+READY FOR GATE: PR 1989 (KS-915, TIER 1), gate 174 = round 2 of 2 under Kam's rebuild card
+
+THE FIVE THINGS
+1. PR: 1989, OPEN (GitHub API).
+2. Head: c71a6d106696706309efbd4ece7952fc5dacbd2c, read from origin by git ls-remote (refs/pull/1989/head and the branch) and by the PR API in the same action, 13:2xZ. develop 1cbf260548e7fd534603725f9fc6b05c5cdd9907 (unmoved). PR 1982 untouched at 87c9e7488fd7.
+3. Ticket comment: KS-915 comment 1c9cdfdf-0069-407c-9abc-b36a18a9778f (13:27:36Z), names pull request 1989 and head c71a6d106696; read back equal, 0 mention nodes, state/priority/assignee unchanged.
+4. Test Evidence block: in the PR body (patched, read back byte-identical, 22421 chars; body checker passes, its three planted controls refuse): "Ran" for this round, the raw mutant table, BEFORE/AFTER shell suites, the round-1 figures kept, "NOT run", the hook block.
+5. NOT done / NOT covered: in the PR body ("NOT run" and "Known limits (NOT covered)"): G173-F2 (a hostile .env can forge the bash reader's verdict), the looping .env hang (G173-F3's rest), the single-guard credential route, pgbouncer itself and a later host=, libpq PGSERVICEFILE, bash 4/5, Linux, Node 24, --env-file / COMPOSE_FILE / override entries / profiles, host-side readers beyond compose, SIGINT/SIGHUP, shellcheck, the four platform suites, a booted stack; plus E 31st's limits (services/*/.env, a shared box, lowercase hex, compose lines 473-474).
+Hook, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4, 8 skipped (local stack not up).
+
+(a) F4: REPORTED TRUTHFULLY, not refused. After the write the script re-reads the repo-root entry (never refusing, exit unchanged) and prints a note naming the repo-root .env when auth there would not get the written ADMIN_USER_PASSWORD or ALLOW_DEFAULT_SEED_PASSWORDS=true. Cells ra0 (no note), ra1, ra2 (root file left as it was), ra3.
+
+(b) Address-key census, per entry (real compose config, clean clone): Blockchain/Dev entry 34 services, repo-root entry 35; the database-address-shaped keys are the same 20 names in both: DATABASE_URL, DIRECT_DATABASE_URL, MIGRATION_DATABASE_URL, MIGRATION_PLATFORM_DATABASE_URL, PLATFORM_DATABASE_URL (47 values, all local), POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB (judged by every reader); APP_DB_USER, APP_DB_PASSWORD, POSTGRES_USER, POSTGRES_PASSWORD (credentials, judged through the composed URL); POSTGRES_INITDB_ARGS and seven PGBOUNCER_* (not addresses). NODE_ENV: 25 services, all development, both entries. The pin cell asserts the 20 names per entry.
+
+(c) Raw mutant table (counted by me, evidence/mutants_r1/raw_table.tsv, one output file per mutant): 84 mutants + head control (331/331). E 31st's 25: 23 killed / 2 survived. Gate 173's 50: 34 / 16. Mine (9, the new code): 8 / 1. Total 65 killed / 19 survived; 0 not applied (2 re-keyed to the moved sandbox line, same mutation; E 31st's planted no-op refused). m06, m11, m12, m13, m16, m36 KILLED (1, 2, 2, 2, 2, 1 cells). Survivors: m07, m08, m09, m10, m14, m27, m28, m29, m47 (layered-equivalent, driven by gate 173), m22, m23, m25, m30, m31, m33, m35 (equivalent or unreachable by reading, gate 173), e31_js_ne_case_sensitive (= m07), e31_js_pghost_ignored (= m10), e32_canon_shell_no_postgres (equivalent by reading: judge() runs first on the shell and accepts a subset). 85 outputs, 0 48-hex.
+
+(d) The gate questions
+- Can the script write while compose or dotenv reads production or a non-local database? Not in any form I measured: gate 166's 28 forms (their cells pass, unchanged), gate 173's n01-n04 (refused; n05 is the accepted control), the new forms (port siblings, export, a host list, a quoted value, a declare only bash runs, pgbouncer remote per compose entry). THE CREDENTIAL ROUTE DEPENDS ON THE COMPOSE READER ALONE: a hostaddr/service/host change interpolated through APP_DB_PASSWORD (or the other three credentials) is refused only by compose's judge; when that reader cannot run (config exit 2, docker absent) the script refuses (exit 3, .env byte-identical).
+- Does a reader that cannot run fail closed? Yes: the round-1 fail-closed cells plus the two condition cells.
+- Can any path print or commit a generated value? None measured: 0 48-hex in the bare suite, the runner, the red runs and all 85 mutant outputs; the F4 report prints notes only; the expected hash goes to node through its environment and is not printed.
+- Does a second run change a working set? No: the round-1 second-run cell (byte-identical) passes.
+- Does the output file escape the gitignore? No: the round-1 ignore cells pass.
+
+Red first: round-1 script 29 of 331 fail (all new cells); script absent 292 of 331, 0 fatal. Shell suites: BEFORE 114/0/1 of 115 (merge commit, 1167 s), AFTER 114/0/1 of 115 (984 s); bare 331/331 (188 s). Host Node v26.8.1 (not LTS), bash 3.2.57, Compose 5.5.0.
+
+The round ends here; I wait.
+
