@@ -57629,5 +57629,52 @@
    "CARD hpsmpoc-focus-ring-menu-strip-1103",
    "CARD composer-pcomp116-round3-cap-1103"
   ]
+ },
+ {
+  "id": "wed-gate-clones-fill-devmaster-1103",
+  "client_project": "WED",
+  "title": "DevMASTER is 99% full (26 GiB free). Remove a QA gate's throwaway repo clone as soon as its PR merges, instead of after 14 days?",
+  "bluf": "On 19 Oct you ruled b on card wed-devmaster-drive-cleanup-1019, which removed old QA clones and gate runs OLDER THAN 14 DAYS. This asks only about the timing: DevMASTER is back to 99% (26 GiB free, read by S 15th's df at 14:08). Each QA gate copies the Secuura repo plus installed packages so it never touches the real checkout; today's gate folders are 2.2 to 4.1 GB each, almost all of it those throwaway copies (git-ignored; the verdicts, results and scripts are small and kept). At about two gates an hour the drive fills in roughly a working day, long before 14 days. G-DRIVE is not mounted on this Mac. I recommend a: remove a gate's throwaway clone and scratch folders once its PR has merged (verdict, results, harness and scripts kept, tracked in git), and from now on each gate removes its own clone when it reports. Prior-rulings gate: the other matches share only the words 'gate' or 'devmaster' (a usage card, a Datasec leftovers card, KS-1822).",
+  "default_action": "If no answer: b. Nothing is removed. Wednesday re-measures free space at each checkpoint and re-raises this card at 15 GiB free.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Remove a gate's clones once its PR has merged",
+    "detail": "Only the git-ignored repo/, scratch/, home/, tmp/, mut/ and node_modules/ trees inside 0_Brain/reference/*_gate*/ whose PR has merged; every tracked file stays; a list with sizes is written first and free space re-measured after."
+   },
+   {
+    "key": "b",
+    "label": "Keep the 14-day rule",
+    "detail": "Nothing is removed now; Wednesday re-raises this card when DevMASTER drops below 15 GiB free."
+   },
+   {
+    "key": "c",
+    "label": "Move them to G-DRIVE when it is mounted",
+    "detail": "Nothing is removed now; the clones are moved to G-DRIVE with a manifest the next time it is plugged in, and cleared there after about a month."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T14:20:28.593971+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 10:29",
+   "CARD devmaster-nas-deletions",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks788-gate-fails-open-2026-09-04",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD studio-spotlight-indexing-devmaster-load",
+   "CARD secuura-ks998-format-gate-fails-open-on-missing-deps",
+   "CARD secuura-ks998-formatting-gate-fails-open-on-missing-prettier",
+   "CARD secuura-ks789-ci-is-the-hard-gate-with-no-ci",
+   "CARD secuura-gate-stack-slots-full-of-kept-volumes",
+   "CARD wed-devmaster-full-secuura-worktree-node-modules",
+   "CARD secuura-gate-at-99pct-two-spark-prs-1016",
+   "CARD wed-devmaster-drive-cleanup-1019",
+   "CARD wed-devmaster-datasec-leftovers-1019",
+   "CARD secuura-ks1822-read-gate-probe-fault-fail-open-1030"
+  ]
  }
 ]
