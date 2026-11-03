@@ -57676,5 +57676,53 @@
    "CARD wed-devmaster-datasec-leftovers-1019",
    "CARD secuura-ks1822-read-gate-probe-fault-fail-open-1030"
   ]
+ },
+ {
+  "id": "secuura-pr1982-restore-script-round2-nogo-1103",
+  "client_project": "Secuura/Blockchain",
+  "title": "Peter's restore-local-secrets script (PR 1982) failed its second and last gate round. Rebuild the safety check a different way, or stop?",
+  "bluf": "PR 1982 is the script you asked for at 11:05 so Peter can fill in his local test passwords himself. It must refuse to write anything when the settings file points at production or a remote database. Gate 166 (Opus, round 2 of 2) found every hole from round 1 closed and nothing broken, but 28 NEW ways of writing the settings file still get past it: one setting pointing at another (e.g. 'use production if nothing else is set'), a hidden tab or line break inside the address, old-Mac line endings, a hidden byte at the start of the file, and an unusual space character. In each, the script writes the passwords while the real tools read production or a remote database. Measured reach: only the 'points at another setting' trick reaches a running service (api-gateway gets NODE_ENV=production); the database-address tricks reach no container (each service has its own fixed address), only host tools the gate did not measure. Nothing is ever printed or committed. Two rounds is our cap, so nothing merges without your word, and Peter has not been told. I recommend a: rebuild the check so it asks the real tools what they read (docker compose's own resolved config, and dotenv itself) instead of reading the file our own way, which is why each round finds new spellings; a new seat builds it as a fresh PR with one tier-1 gate. (Prior-rulings gate: its matches are other PRs' round cards, KS-1612, KS-1557 and a kintsugi deploy, sharing only the words round2/nogo.)",
+  "default_action": "If no answer: nothing merges. Seat E 30th records the verdict and wraps; PR 1982 stays open and unmerged; Peter is not told; the card stays on your board.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Rebuild the check using the real tools' reading",
+    "detail": "A fresh seat replaces the script's own file parsing with what docker compose and dotenv actually resolve, refusing if either reads production or a non-local database. One new tier-1 gate. Peter is told only after it merges."
+   },
+   {
+    "key": "b",
+    "label": "Merge as is, with the limits written down",
+    "detail": "PR 1982 merges with the 28 forms listed as known limits in the PR and the script's help text. Peter gets it today. Risk: a settings file written in one of those ways gets local test passwords written into it."
+   },
+   {
+    "key": "c",
+    "label": "Stop; no script",
+    "detail": "PR 1982 closes unmerged. Peter fills the four passwords by hand from the existing instructions, sent through a channel you choose (never chat)."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T14:43:22.339930+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-17 20:10",
+   "2026-08-21 09:47",
+   "2026-08-26 10:45",
+   "2026-09-02 19:29",
+   "2026-09-08 11:41",
+   "2026-09-08 11:50",
+   "2026-09-10 09:01",
+   "2026-09-12 11:58",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD secuura-ks1011-stack-marker-unknown-on-restore",
+   "CARD secuura-ks1194-1032-round2-merge-tap",
+   "CARD secuura-ks1163-start-script-never-waits-for-five-services",
+   "CARD secuura-round2-deploy-vs-ks695-hold",
+   "CARD secuura-ks1612-round3-nogo-1019",
+   "CARD secuura-ks1557-055-second-nogo-round3-1020"
+  ]
  }
 ]

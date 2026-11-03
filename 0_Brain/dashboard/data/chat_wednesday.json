@@ -15483,5 +15483,12 @@
   "project": "Secuura",
   "ts": "2026-11-03T14:11:17.369245+11:00",
   "text": "Secuura / Blockchain — for information, no action needed.\n\nThe seat building your two fail-closed fixes has started. Its design is confirmed and it is writing the tests first.\n\nOne cost to know about. With the fix, if the gateway's Redis read for the login lockout fails or hangs for more than 2 seconds, logins through the gateway are refused with 'service unavailable' until Redis recovers. Today they would go through. The lockout itself protects nothing yet, because nothing writes a lockout record (KS-1372), which your card already noted. This is what you ruled; I'm only naming the outage effect.\n\nThe seat also found two more ways the rate limit lets a caller through unlimited: a negative time window, and a backup counter that fails. Both are the same problem you ruled on, so I added them to the same fix."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T14:44:57.452574+11:00",
+  "text": "Secuura / Blockchain — one card for you: Peter's restore script.\n\nPeter's script (PR 1982) failed its second and last test round. Every hole from round one is closed. But 28 new ways of writing the settings file still slip past its safety check. Only one of them reaches a running service: a setting that points at another setting can make the gateway think it's in production. Nothing is ever shown or committed.\n\nMy recommendation is on the card: rebuild the check so it asks the real tools how they read the file, instead of reading it our own way. Each round has found new spellings because we keep guessing how those tools read it.\n\nIf you don't answer, nothing merges and Peter isn't told. The card is secuura-pr1982-restore-script-round2-nogo-1103."
  }
 ]
