@@ -15588,5 +15588,19 @@
   "project": "Secuura",
   "ts": "2026-11-03T19:49:02.757563+11:00",
   "text": "Thanks Kam, the G-DRIVE mounted at 19:48 with 3.2 TB free. I'll move the 13 merged gates' clones onto it as soon as gate 173 finishes. That gate may still be using one of those clones, so moving now could break it. Nothing more needed from you."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T19:55:57.463837+11:00",
+  "text": "FYI, no action needed: I've sent the merge GO for the login lockout fail-closed fix, PR 1987.\n\nOne honest gap. You ruled that with the session store down, a right and a wrong password should answer the same. The fix does that in every outage state the gate measured but one: when Redis still serves reads and refuses writes, which is rarer. In that state the two still answer differently, exactly as they do today, so it's no worse than now.\n\nThe gate passed it as a known, pre-existing gap. Closing it is a small follow-up in the session-creation code, inside your same ruling, and I'll have a seat ticket and build it."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T20:10:28.937587+11:00",
+  "text": "Both of this afternoon's auth fixes are now merged to develop. I checked each one myself against GitHub.\n\nThe login lockout now refuses sign-in while the session store is down. The breached-password check now runs at sign-up and password reset. Change-password is the next piece.\n\nNothing is deployed. Before the breach check goes to kintsugi or demo, I'll have the deploy seat confirm two things: the boxes can reach the breach service, and none of our seed or test passwords is a breached one. Otherwise those sign-ups would start failing."
  }
 ]
