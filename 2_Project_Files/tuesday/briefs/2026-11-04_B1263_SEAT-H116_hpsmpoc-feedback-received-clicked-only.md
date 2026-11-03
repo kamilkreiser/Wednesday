@@ -94,27 +94,27 @@ No path outside the closed list; no migration; no change to Approve, Delete, the
 
 ## Stamp
 The unstamped copy reads its slot count in the drafter report. Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- GATE-ROUND: ____
-- GATE-TIER: ____
-- WHICH-PAGE: ____
-- FILTER-MODE: ____
-- STATE-RULE: ____
-- WORD-LEAD: ____
-- WORD-EMPTY: ____
-- CONTRACT-BUMP: ____
-- TICKET: ____
-- KEYS: ____
-- SCOPE-OUT: ____
-- LAUNCH WINDOW: ____
-- Stamped by: ____
-- Launch authority: ____
-- Hard stop and target READY: ____
-- Head, main and open PRs at launch: ____
-- Model receipt line and load1 at launch: ____
-- Port block: ____
+- STAMP: STAMPED 09:36 AEDT 2026-11-04 by Tuesday s241. Read in this seat: this kit whole (120 lines by wc -l), its drafter's Q-a to Q-f (Tuesday's call on each is in the slots below), the slots file. Tuesday did not read the product source; every pointer in the kit is the drafter's and yours to re-print.
+- GATE-ROUND: A NEW class 'feedback received clicked-only filter', ROUND 1 OF 2 (the B1261 class 'review page title and link' was GO WITH FINDINGS and is not re-opened).
+- GATE-TIER: Tier 1 Opus (G1: an API parameter, a contract change and a list rule a client tester sees).
+- WHICH-PAGE: c
+- FILTER-MODE: api parameter
+- STATE-RULE: YES
+- WORD-LEAD: keep
+- WORD-EMPTY: keep
+- CONTRACT-BUMP: bump to 0.19.0-draft
+- TICKET: none: no Jira key (the product owner's live-board instruction is the authority; records are Tuesday's after the landing)
+- KEYS: none in a changed line or the message
+- SCOPE-OUT: Exactly the kit's DESIGN 5 closed list with WORD keep: FeedbackEndpoints.cs, AdminFeedback.tsx, both openapi.yaml copies, openapi.merged.json, schema.gen.ts, web/contract/SOURCES.md, contract-drift.test.ts, AdminFeedback.test.tsx, playbook-feedback-b241.spec.ts, the new FeedbackListCategoryTests.cs; NOT feedback/page.tsx (WORD keep). The two sentences that become false (feedback/page.tsx:11 lead, AdminFeedback.tsx:91 empty body) are recorded in STATUS and FOR TUESDAY as known false; their wording goes to the product owner on a card.
+- LAUNCH WINDOW: From 09:36 until your hard stop; launch_when_cool, one waiter, load1 below 7 on two reads; load1 9.44 at Tuesday's 09:35:53 read (date printed in the same command), so the waiter will hold. Live panes then: Datasec/HPSM-POC-H109 (shell builder; it now also fixes the page-end height in Sidebar.tsx by ADDENDUM-2, still no path of yours), Datasec/HPSM-POC-R169 (records seat: analysis repository and Jira only, no code path), Datasec/NexusAI-G333 and Datasec/MPS-G335 (other repositories). D46 is closed.
+- Stamped by: Tuesday s241 (the Datasec coordinator seat).
+- Launch authority: The product owner's 2026-11-04 07:47:59 AEDT live-board instruction (verbatim in the kit) and his 2026-11-04 09:23:53 AEDT ruling c 'Both pages', read by Tuesday on the board through kam_rulings_today.sh and recorded on the card store at that tap; the 2026-10-24 every-boot rule. YES: the clone, one fetch, worktrees, the node_modules clone, local API tests on SQLite, the web and e2e runs on 9860-9869, plants, one plain push. NO: PR, Jira, deploy, az, docker, any hosted call, any word change.
+- Hard stop and target READY: READY 120 and HARD STOP 180 minutes after your Step-0 date, written absolute by you; and not after 14:30 AEDT 2026-11-04.
+- Head, main and open PRs at launch: Tuesday's gh api -X GET reads at 09:35:53: branch head 0e0f42f1a545e8d55f2c74979602de14191c778c; main f873653fa08c995f0a49e7f6a4cb116573a5886e (moved past a8497578 by PR #283, one file web/src/components/customer/remediation-store.test.ts: not on your main-move STOP list; record it); open PRs 0; refs/heads/b1263* 0.
+- Model receipt line and load1 at launch: model: claude-sonnet-5-5 -- C2 (model-routing.md:92) -- gauge 7d 4 of 100 at Tuesday's boot; load1 9.44 at Tuesday's 09:35:53 read.
+- Port block: 9860-9869 (lsof 0 listeners at Tuesday's 09:35:53 read): 9861 WEB_PORT, 9862 E2E_STUB_PORT, 9863 E2E_HOSTED_PORT, 9864 E2E_CHOOSER_PORT.
 
 **Your commission is THIS file (read-only);** Step 0 copies it unchanged into `.../HPSM-POC/1_Project_Definition/Briefs/`.
 **Launch (Tuesday), ONE waiter:** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/HPSM-POC-H116 "WED_USAGE_STOP=100 BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-04_B1263_SEAT-H116_hpsmpoc-feedback-received-clicked-only.md'"` (level inside the quotes).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 09:36 AEDT by Tuesday s241 (kit 120 lines by wc -l)
