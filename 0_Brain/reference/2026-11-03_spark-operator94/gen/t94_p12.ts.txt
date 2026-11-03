@@ -1,0 +1,47 @@
+import { describe, it, expect } from 'vitest';
+
+// KS-1868: isInsufficientInputError (src/cardano/transaction.ts) recognises the two texts the transaction builder throws when the offered
+// coins cannot pay the fee. It reads `String((err as { message?: unknown })?.message ?? err)` unguarded. When the thrown value cannot be read
+// (a revoked Proxy throws on the message read and again on `String(err)`; an Error whose `message` getter throws, throws on the first read) the
+// predicate THROWS from inside the caller's catch, where an ordinary error gets true or false. An unreadable value is not that failure: false.
+import { isInsufficientInputError } from '../cardano/transaction';
+
+/** The predicate's answer, or the string 'rejected' when it throws (an assertion can then fail on it). */
+function check(value: unknown): unknown {
+  try {
+    return isInsufficientInputError(value);
+  } catch {
+    return 'rejected';
+  }
+}
+
+describe('KS-1868 isInsufficientInputError reads the thrown value safely', () => {
+  it('control ks1868 C1 an Error carrying the coin-selection text is recognised', () => {
+    expect(check(new Error('UTxO Balance Insufficient'))).toBe(true);
+  });
+
+  it('control ks1868 C2 a thrown plain string carrying the forced-outpoint text is recognised', () => {
+    expect(check('Insufficient input in transaction')).toBe(true);
+  });
+
+  it('control ks1868 C3 an unrelated Error is not recognised', () => {
+    expect(check(new Error('something else'))).toBe(false);
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value is not recognised, and does not throw', () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    expect(check(proxy)).toBe(false);
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws is not recognised, and does not throw', () => {
+    const hostile = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    expect(check(hostile)).toBe(false);
+  });
+});

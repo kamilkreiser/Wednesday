@@ -1,0 +1,15 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p15_auth_db_errors_is_infrastructure_db_error_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/repositories/dbErrors.ts b/Blockchain/Dev/services/auth/src/repositories/dbErrors.ts
+--- a/Blockchain/Dev/services/auth/src/repositories/dbErrors.ts
++++ b/Blockchain/Dev/services/auth/src/repositories/dbErrors.ts
+@@ -55,3 +55,9 @@
++  try {
++    void e.code;
++    void e.message;
++  } catch {
++    return false;
++  }
+   if (typeof e.code === 'string') {
+     if (INFRA_SYSCALL_CODES.has(e.code)) return true;
+     if (INFRA_PG_CODE_PREFIXES.some((p) => (e.code as string).startsWith(p))) return true;
+

@@ -1,0 +1,19 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p7_originate_own_create_client_ask_catch_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/services/ownCreateClient.ts b/Blockchain/Dev/services/originate/src/services/ownCreateClient.ts
+--- a/Blockchain/Dev/services/originate/src/services/ownCreateClient.ts
++++ b/Blockchain/Dev/services/originate/src/services/ownCreateClient.ts
+@@ -85,6 +85,12 @@
+     return readOwnCreateBody(body);
+   } catch (err: unknown) {
+     if (isTimeoutError(err)) return notAnswered('deadline', `own-create did not answer within ${OWN_CREATE_CALL_TIMEOUT_MS} ms`);
+-    return notAnswered('unanswered', `own-create could not be reached: ${err instanceof Error ? err.message : String(err)}`);
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    return notAnswered('unanswered', `own-create could not be reached: ${reason}`);
+   }
+ }
+

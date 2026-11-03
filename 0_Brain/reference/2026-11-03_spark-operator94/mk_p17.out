@@ -1,0 +1,28 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p17_originate_provenance_resolve_on_behalf_of_catch_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/services/provenance.ts b/Blockchain/Dev/services/originate/src/services/provenance.ts
+--- a/Blockchain/Dev/services/originate/src/services/provenance.ts
++++ b/Blockchain/Dev/services/originate/src/services/provenance.ts
+@@ -154,10 +154,20 @@
+     // (and no 403: they are not in a *different* org).
+     return subjectOrg !== null && subjectOrg === callerOrg ? user.id : null;
+   } catch (err) {
+-    if (err instanceof OnBehalfOfError) throw err;
++    let isOnBehalfOfError: boolean;
++    let reason: string | null | undefined;
++    try {
++      isOnBehalfOfError = err instanceof OnBehalfOfError;
++      const m = (err as Error).message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      isOnBehalfOfError = false;
++      reason = 'unreadable thrown value';
++    }
++    if (isOnBehalfOfError) throw err;
+     // Lookup infrastructure failure → attribute verbatim rather than fail the
+     // write; the provenance row still records who acted.
+-    logger.warn('onBehalfOf resolution failed — storing verbatim provenance', { error: (err as Error).message });
++    logger.warn('onBehalfOf resolution failed — storing verbatim provenance', { error: reason });
+     return null;
+   }
+ }
+

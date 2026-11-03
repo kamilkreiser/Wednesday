@@ -1,0 +1,44 @@
+import { describe, it, expect } from 'vitest';
+
+// KS-1868: threadMintUnavailable (src/threadMintSpend.ts) maps the three refusals that happen BEFORE anything is signed to a 503 answer, and
+// returns null for anything else (the route then classifies or answers 500). It tests the thrown value with `instanceof` three times, unguarded.
+// A revoked Proxy makes `instanceof` throw, so the function THROWS from inside the route's catch where an ordinary error gets a 503 or null. An
+// unreadable value is not one of the three refusals: null.
+import { threadMintUnavailable, ThreadMintNoCoin, ThreadMintCallerGone } from '../threadMintSpend';
+
+/** The mapping, or the string 'rejected' when the function throws (an assertion can then fail on it). */
+function map(value: unknown): unknown {
+  try {
+    return threadMintUnavailable(value);
+  } catch {
+    return 'rejected';
+  }
+}
+
+describe('KS-1868 threadMintUnavailable tests the thrown value safely', () => {
+  it('control ks1868 C1 ThreadMintNoCoin still maps to its 503', () => {
+    expect(map(new ThreadMintNoCoin(3))).toEqual({
+      status: 503,
+      code: 'SERVICE_UNAVAILABLE',
+      message: 'No spendable coin in the platform wallet; nothing was signed. Retry later.',
+    });
+  });
+
+  it('control ks1868 C2 ThreadMintCallerGone still maps to its 503', () => {
+    expect(map(new ThreadMintCallerGone())).toEqual({
+      status: 503,
+      code: 'SERVICE_UNAVAILABLE',
+      message: 'The request ended before signing; nothing was signed.',
+    });
+  });
+
+  it('control ks1868 C3 an unrelated Error still maps to null', () => {
+    expect(map(new Error('something else'))).toBeNull();
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value maps to null, and does not throw', () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    expect(map(proxy)).toBeNull();
+  });
+});

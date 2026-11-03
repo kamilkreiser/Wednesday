@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p5_billing_email_send_email_catch_guard_message
+diff --git a/Blockchain/Dev/services/billing/src/utils/email.ts b/Blockchain/Dev/services/billing/src/utils/email.ts
+--- a/Blockchain/Dev/services/billing/src/utils/email.ts
++++ b/Blockchain/Dev/services/billing/src/utils/email.ts
+@@ -41,7 +41,13 @@
+       return false;
+     }
+   } catch (error) {
+-    logger.error('[Email] Send failed', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('[Email] Send failed', { error: reason });
+     return false;
+   }
+ }
+

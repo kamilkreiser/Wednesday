@@ -1,0 +1,15 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p9_nft_certificate_mint_error_classify_mint_error_guard_message
+diff --git a/Blockchain/Dev/services/nft-certificate/src/utils/mintError.ts b/Blockchain/Dev/services/nft-certificate/src/utils/mintError.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/utils/mintError.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/utils/mintError.ts
+@@ -34,4 +34,9 @@
+   message: string;
+   errorCode: MintFailureCode;
+ } {
++  try {
++    void (error instanceof Error ? error.message : String(error));
++  } catch {
++    return { message: 'unreadable thrown value', errorCode: 'MINT_FAILED' };
++  }
+   const message = error instanceof Error ? error.message : String(error);
+

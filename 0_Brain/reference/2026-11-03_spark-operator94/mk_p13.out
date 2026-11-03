@@ -1,0 +1,18 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p13_anchoring_anchor_submission_is_already_submitted_error_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts b/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts
+--- a/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts
+@@ -181,6 +181,11 @@
+ /** True when a submission error is the node telling us the tx is already in the ledger. */
+ export function isAlreadySubmittedError(err: unknown): boolean {
+-  const message = (err as { message?: unknown })?.message;
++  let message: unknown;
++  try {
++    message = (err as { message?: unknown })?.message;
++  } catch {
++    return false;
++  }
+   if (typeof message !== 'string' || message.length === 0) return false;
+   return ALREADY_SUBMITTED_REPLIES.some(pattern => pattern.test(message));
+ }
+

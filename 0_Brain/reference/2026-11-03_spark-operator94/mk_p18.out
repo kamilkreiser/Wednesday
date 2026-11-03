@@ -1,0 +1,19 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p18_billing_routes_send_classified_billing_error_guard_message
+diff --git a/Blockchain/Dev/services/billing/src/routes/billing.ts b/Blockchain/Dev/services/billing/src/routes/billing.ts
+--- a/Blockchain/Dev/services/billing/src/routes/billing.ts
++++ b/Blockchain/Dev/services/billing/src/routes/billing.ts
+@@ -54,7 +54,12 @@
+   notFoundMessage: string,
+   invalidRequestMessage?: string,
+ ): boolean {
+-  const msg = error instanceof Error ? error.message : String(error);
++  let msg: string;
++  try {
++    msg = error instanceof Error ? error.message : String(error);
++  } catch {
++    return false;
++  }
+   // KS-144: Stripe-config (invalid/missing key) is a provider-unconfigured outage, not a server fault.
+   // KS-445: `Neither apiKey` is stripe-node's constructor throw when the key env var is set but empty.
+   if (/Invalid API Key|No API key provided|Neither apiKey|not configured/i.test(msg)) {
+

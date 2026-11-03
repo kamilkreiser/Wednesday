@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p16_m365_token_manager_classify_msal_token_error_guard_message
+diff --git a/Blockchain/Dev/services/m365-integration/src/auth/token-manager.ts b/Blockchain/Dev/services/m365-integration/src/auth/token-manager.ts
+--- a/Blockchain/Dev/services/m365-integration/src/auth/token-manager.ts
++++ b/Blockchain/Dev/services/m365-integration/src/auth/token-manager.ts
+@@ -208,6 +208,14 @@
+  */
+ export function classifyMsalTokenError(error: unknown): ClassifiedMsalError | null {
+   const err = error as { name?: unknown; errorCode?: unknown; message?: unknown; code?: unknown };
++  try {
++    void err?.name;
++    void err?.errorCode;
++    void err?.code;
++    void (typeof err?.message === 'string' ? err.message : String(error));
++  } catch {
++    return null;
++  }
+   const name = typeof err?.name === 'string' ? err.name : '';
+   const errorCode = typeof err?.errorCode === 'string' ? err.errorCode : '';
+   const nodeCode = typeof err?.code === 'string' ? err.code : '';
+

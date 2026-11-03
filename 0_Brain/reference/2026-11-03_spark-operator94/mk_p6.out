@@ -1,0 +1,23 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p6_originate_health_ready_timed_check_catch_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/routes/health.ts b/Blockchain/Dev/services/originate/src/routes/health.ts
+--- a/Blockchain/Dev/services/originate/src/routes/health.ts
++++ b/Blockchain/Dev/services/originate/src/routes/health.ts
+@@ -56,10 +56,16 @@
+       ]);
+       checks[name] = { status: 'up', latencyMs: Date.now() - start };
+     } catch (err: any) {
++      let reason: string;
++      try {
++        reason = String(err?.message || 'Unknown error');
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       checks[name] = {
+         status: 'down',
+         latencyMs: Date.now() - start,
+-        error: err?.message || 'Unknown error',
++        error: reason,
+       };
+     }
+   }
+

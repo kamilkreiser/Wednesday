@@ -1,0 +1,48 @@
+import { describe, it, expect } from 'vitest';
+
+// KS-1868: isInfrastructureDbError (src/repositories/dbErrors.ts) tells the callers' catches whether a database failure is infrastructure
+// (pool starvation, connection loss: answer 503) or a query-level error. It reads `e.code` and `e.message` of the thrown value unguarded. A
+// revoked Proxy throws on both reads (it passes the `typeof err === 'object'` test), and an object whose `code` or `message` getter throws, throws on
+// its read: the predicate THROWS from inside the caller's catch, where an ordinary error gets true or false. An unreadable value is not known to be an
+// infrastructure failure: false.
+import { isInfrastructureDbError } from '../repositories/dbErrors';
+
+/** The predicate's answer, or the string 'rejected' when it throws (an assertion can then fail on it). */
+function check(value: unknown): unknown {
+  try {
+    return isInfrastructureDbError(value);
+  } catch {
+    return 'rejected';
+  }
+}
+
+describe('KS-1868 isInfrastructureDbError reads the thrown value safely', () => {
+  it('control ks1868 C1 an Error with a connection-loss message is infrastructure', () => {
+    expect(check(new Error('Connection terminated unexpectedly'))).toBe(true);
+  });
+
+  it('control ks1868 C2 a unique-violation error is not infrastructure', () => {
+    expect(check(Object.assign(new Error('duplicate key'), { code: '23505' }))).toBe(false);
+  });
+
+  it('control ks1868 C3 a thrown plain string is not infrastructure', () => {
+    expect(check('Connection terminated')).toBe(false);
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value is not infrastructure, and does not throw', () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    expect(check(proxy)).toBe(false);
+  });
+
+  it('RED ks1868 R2 an object whose code getter throws is not infrastructure, and does not throw', () => {
+    const hostile = Object.create(Error.prototype, {
+      code: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    expect(check(hostile)).toBe(false);
+  });
+});

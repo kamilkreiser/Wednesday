@@ -1,0 +1,86 @@
+// KS-1868: resolveOnBehalfOf (src/services/provenance.ts) resolves a connector's onBehalfOf email to a same-org user id, and in its catch
+// stores verbatim provenance (resolves null) when the lookup fails ("attribute verbatim rather than fail the write"). The catch tests the thrown
+// value with `err instanceof OnBehalfOfError` and reads `(err as Error).message` into the warn line, both unguarded. A revoked Proxy makes `instanceof`
+// throw, and an Error whose `message` getter throws makes the read throw: the catch throws, so resolveOnBehalfOf REJECTS and the whole write fails,
+// where an ordinary Error is logged and null is returned. An OnBehalfOfError is still rethrown.
+// The database and logger stand-ins are plain functions, not jest.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy first.
+const mockState: { toThrow: unknown; warned: unknown[][] } = { toThrow: undefined, warned: [] };
+
+jest.mock('../db', () => ({
+  prisma: {
+    $queryRaw: (..._args: unknown[]) => Promise.reject(mockState.toThrow),
+  },
+}));
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    encryptField: async (v: string) => v,
+    decryptField: async (v: string) => v,
+    lookupHash: (v: string) => `hash:${v}`,
+  }),
+);
+
+jest.mock('../utils/logger', () => ({
+  logger: {
+    debug: () => undefined,
+    info: () => undefined,
+    error: () => undefined,
+    warn: (...args: unknown[]) => {
+      mockState.warned.push(args);
+    },
+  },
+}));
+
+import { resolveOnBehalfOf, OnBehalfOfError } from '../services/provenance';
+
+const ORG = '11111111-2222-4333-8444-555555555555';
+
+/** The resolved id, or the string 'rejected' when it rejects (an assertion can then fail on it). */
+async function resolve(value: unknown): Promise<unknown> {
+  mockState.toThrow = value;
+  try {
+    return await resolveOnBehalfOf({ email: 'someone@example.com' }, ORG);
+  } catch {
+    return 'rejected';
+  }
+}
+
+function loggedError(): unknown {
+  const hit = mockState.warned.find((a) => typeof a[0] === 'string' && (a[0] as string).startsWith('onBehalfOf resolution failed'));
+  return (hit?.[1] as { error?: unknown } | undefined)?.error;
+}
+
+describe('KS-1868 resolveOnBehalfOf reads the thrown value safely', () => {
+  beforeEach(() => {
+    mockState.toThrow = undefined;
+    mockState.warned = [];
+  });
+
+  it('control ks1868 C1 an ordinary Error stores verbatim provenance (null) and logs its message', async () => {
+    expect(await resolve(new Error('db down'))).toBeNull();
+    expect(loggedError()).toBe('db down');
+  });
+
+  it('control ks1868 C2 an OnBehalfOfError is still rethrown', async () => {
+    expect(await resolve(new OnBehalfOfError(403, 'FORBIDDEN', 'different organisation'))).toBe('rejected');
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value stores verbatim provenance (null) and logs a constant reason', async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    expect(await resolve(proxy)).toBeNull();
+    expect(loggedError()).toBe('unreadable thrown value');
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws stores verbatim provenance (null) and logs a constant reason', async () => {
+    const hostile = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    expect(await resolve(hostile)).toBeNull();
+    expect(loggedError()).toBe('unreadable thrown value');
+  });
+});

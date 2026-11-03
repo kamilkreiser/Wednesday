@@ -1,0 +1,19 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p8_demo_service_auth_client_authenticate_persona_catch_guard_message
+diff --git a/Blockchain/Dev/services/demo-service/src/services/authClient.ts b/Blockchain/Dev/services/demo-service/src/services/authClient.ts
+--- a/Blockchain/Dev/services/demo-service/src/services/authClient.ts
++++ b/Blockchain/Dev/services/demo-service/src/services/authClient.ts
+@@ -59,7 +59,12 @@
+       setCookieHeader,
+     };
+   } catch (err) {
+-    const message = err instanceof Error ? err.message : 'Unknown error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Auth service request failed', { error: message, email });
+     return {
+       success: false,
+

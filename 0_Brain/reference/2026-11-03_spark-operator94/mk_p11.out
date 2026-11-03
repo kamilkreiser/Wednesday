@@ -1,0 +1,41 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p11_anchoring_provider_chain_health_record_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/cardano/provider.ts b/Blockchain/Dev/services/anchoring/src/cardano/provider.ts
+--- a/Blockchain/Dev/services/anchoring/src/cardano/provider.ts
++++ b/Blockchain/Dev/services/anchoring/src/cardano/provider.ts
+@@ -126,7 +126,12 @@
+  * Answered:    every other 4xx.
+  */
+ export function isChainReachableError(err: any): boolean {
+-  const status = typeof err?.status_code === 'number' ? err.status_code : null;
++  let status: number | null;
++  try {
++    status = typeof err?.status_code === 'number' ? err.status_code : null;
++  } catch {
++    return false;
++  }
+   if (status === null) return false;
+   if (status === 402 || status === 408 || status === 429) return false;
+   if (status >= 500) return false;
+@@ -142,7 +147,19 @@
+ function recordChainFailure(err: any): void {
+   chainHealth.reachability = 'failing';
+   chainHealth.lastFailureAt = new Date().toISOString();
+-  chainHealth.lastFailureStatus = typeof err?.status_code === 'number' ? err.status_code : null;
+-  chainHealth.lastFailureMessage = String(err?.message ?? 'unknown error').slice(0, 200);
++  let status: number | null;
++  let message: string;
++  try {
++    status = typeof err?.status_code === 'number' ? err.status_code : null;
++  } catch {
++    status = null;
++  }
++  try {
++    message = String(err?.message ?? 'unknown error').slice(0, 200);
++  } catch {
++    message = 'unreadable thrown value';
++  }
++  chainHealth.lastFailureStatus = status;
++  chainHealth.lastFailureMessage = message;
+   chainHealth.consecutiveFailures += 1;
+ }
+

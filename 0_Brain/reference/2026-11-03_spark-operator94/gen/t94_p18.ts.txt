@@ -1,0 +1,75 @@
+import { describe, it, expect } from 'vitest';
+import type { Response } from 'express';
+
+// KS-1868: sendClassifiedBillingError (src/routes/billing.ts) classifies a Stripe/provider error into a 503/404/400 and answers true, or answers
+// false for an unclassified error so the route's own catch sends its 500. Its first statement reads
+// `error instanceof Error ? error.message : String(error)` unguarded. When the thrown value cannot be read (a revoked Proxy throws on `instanceof`;
+// an Error whose `message` getter throws, throws on `.message`) the classifier THROWS from inside the route's catch, so the route's 500 is never
+// sent. An unreadable value is unclassified: false, nothing written. Harness: the ks431 classifier suite (the same Response double).
+import { sendClassifiedBillingError } from '../routes/billing';
+
+type Captured = Response & { statusCode?: number; body?: unknown };
+
+function mockRes(): Captured {
+  const res: Partial<Response> & { statusCode?: number; body?: unknown } = {};
+  res.status = ((code: number) => {
+    res.statusCode = code;
+    return res as Response;
+  }) as Response['status'];
+  res.json = ((payload: unknown) => {
+    res.body = payload;
+    return res as Response;
+  }) as Response['json'];
+  return res as Captured;
+}
+
+/** The classifier's answer and the response it wrote; the string 'rejected' as the answer when it throws (an assertion can then fail on it). */
+function classify(value: unknown): { answer: unknown; res: Captured } {
+  const res = mockRes();
+  try {
+    return { answer: sendClassifiedBillingError(value, res, 'Customer not found'), res };
+  } catch {
+    return { answer: 'rejected', res };
+  }
+}
+
+describe('KS-1868 sendClassifiedBillingError reads the thrown value safely', () => {
+  it('control ks1868 C1 an unconfigured-provider message is still a 503', () => {
+    const { answer, res } = classify(new Error('Invalid API Key provided'));
+    expect(answer).toBe(true);
+    expect(res.statusCode).toBe(503);
+  });
+
+  it('control ks1868 C2 a "No such" message is still a 404', () => {
+    const { answer, res } = classify(new Error('No such customer: cus_x'));
+    expect(answer).toBe(true);
+    expect(res.statusCode).toBe(404);
+  });
+
+  it('control ks1868 C3 a provider 500 is still unclassified (false, nothing written)', () => {
+    const { answer, res } = classify(Object.assign(new Error('boom'), { statusCode: 500 }));
+    expect(answer).toBe(false);
+    expect(res.statusCode).toBeUndefined();
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value is unclassified (false, nothing written)', () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    const { answer, res } = classify(proxy);
+    expect(answer).toBe(false);
+    expect(res.statusCode).toBeUndefined();
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws is unclassified (false, nothing written)', () => {
+    const hostile = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    const { answer, res } = classify(hostile);
+    expect(answer).toBe(false);
+    expect(res.statusCode).toBeUndefined();
+  });
+});

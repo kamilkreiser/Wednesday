@@ -1,0 +1,56 @@
+// KS-1868: askOwnCreate (src/services/ownCreateClient.ts) is documented "Never throws": every way the call can fail is a `not-answered` answer,
+// which the resolver turns into "write nothing" and the retry route into a 503 with no POST. Its catch reads
+// `err instanceof Error ? err.message : String(err)` inside a template literal, unguarded. An Error whose `message` getter throws makes the catch
+// throw, so askOwnCreate REJECTS where an ordinary Error gives `not-answered` with the reason. (A revoked Proxy is not a cell here: it already throws
+// one call earlier, in `isTimeoutError`, which another pass guards.)
+// The fetch stand-in is a plain function, not jest.fn(): a spy inspects what it rejects with and could itself fail on a throwing value first.
+import { askOwnCreate } from '../services/ownCreateClient';
+
+const question = { documentId: 'doc-1', contentHash: 'sha256:' + 'a'.repeat(64), timestamps: ['2026-01-01T00:00:00.000Z'] };
+
+const rejecting = (value: unknown): typeof fetch => ((..._args: unknown[]) => Promise.reject(value)) as unknown as typeof fetch;
+
+/** The answer, or the string 'rejected' when askOwnCreate rejects (an assertion can then fail on it). */
+async function ask(value: unknown): Promise<unknown> {
+  try {
+    return await askOwnCreate(rejecting(value), 'http://anchoring.test', 'Bearer t', question);
+  } catch {
+    return 'rejected';
+  }
+}
+
+describe('KS-1868 askOwnCreate reads the thrown value safely', () => {
+  it('control ks1868 C1 an ordinary Error is not-answered with its message', async () => {
+    expect(await ask(new Error('connection reset'))).toEqual({
+      outcome: 'not-answered',
+      kind: 'unanswered',
+      reason: 'own-create could not be reached: connection reset',
+      loose: [],
+    });
+  });
+
+  it('control ks1868 C2 a thrown plain string is not-answered with the text', async () => {
+    expect(await ask('plain text failure')).toEqual({
+      outcome: 'not-answered',
+      kind: 'unanswered',
+      reason: 'own-create could not be reached: plain text failure',
+      loose: [],
+    });
+  });
+
+  it('RED ks1868 R1 an Error whose message getter throws is not-answered with a constant reason', async () => {
+    const hostile = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    expect(await ask(hostile)).toEqual({
+      outcome: 'not-answered',
+      kind: 'unanswered',
+      reason: 'own-create could not be reached: unreadable thrown value',
+      loose: [],
+    });
+  });
+});

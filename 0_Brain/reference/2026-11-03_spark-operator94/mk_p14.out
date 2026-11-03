@@ -1,0 +1,31 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p14_anchoring_thread_mint_spend_thread_mint_unavailable_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/threadMintSpend.ts b/Blockchain/Dev/services/anchoring/src/threadMintSpend.ts
+--- a/Blockchain/Dev/services/anchoring/src/threadMintSpend.ts
++++ b/Blockchain/Dev/services/anchoring/src/threadMintSpend.ts
+@@ -51,12 +51,22 @@
+ /** The three refusals that answer 503 BEFORE anything is signed; null for anything else. */
+ export function threadMintUnavailable(err: unknown): { status: 503; code: 'SERVICE_UNAVAILABLE'; message: string } | null {
+-  if (err instanceof WalletLockTimeout) {
++  let busy: boolean;
++  let noCoin: boolean;
++  let gone: boolean;
++  try {
++    busy = err instanceof WalletLockTimeout;
++    noCoin = err instanceof ThreadMintNoCoin;
++    gone = err instanceof ThreadMintCallerGone;
++  } catch {
++    return null;
++  }
++  if (busy) {
+     return { status: 503, code: 'SERVICE_UNAVAILABLE', message: 'The platform wallet is busy; nothing was signed. Retry later.' };
+   }
+-  if (err instanceof ThreadMintNoCoin) {
++  if (noCoin) {
+     return { status: 503, code: 'SERVICE_UNAVAILABLE', message: 'No spendable coin in the platform wallet; nothing was signed. Retry later.' };
+   }
+-  if (err instanceof ThreadMintCallerGone) {
++  if (gone) {
+     return { status: 503, code: 'SERVICE_UNAVAILABLE', message: 'The request ended before signing; nothing was signed.' };
+   }
+   return null;
+

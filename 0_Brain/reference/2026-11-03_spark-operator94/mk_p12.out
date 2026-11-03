@@ -1,0 +1,18 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p12_anchoring_transaction_is_insufficient_input_error_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/cardano/transaction.ts b/Blockchain/Dev/services/anchoring/src/cardano/transaction.ts
+--- a/Blockchain/Dev/services/anchoring/src/cardano/transaction.ts
++++ b/Blockchain/Dev/services/anchoring/src/cardano/transaction.ts
+@@ -57,5 +57,11 @@
+  * nothing left to select, says "Insufficient input in transaction".
+  */
+ export function isInsufficientInputError(err: unknown): boolean {
+-  return /UTxO Balance Insufficient|Insufficient input in transaction/i.test(String((err as { message?: unknown })?.message ?? err));
++  let text: string;
++  try {
++    text = String((err as { message?: unknown })?.message ?? err);
++  } catch {
++    return false;
++  }
++  return /UTxO Balance Insufficient|Insufficient input in transaction/i.test(text);
+ }
+

@@ -1,0 +1,32 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p4_originate_reanchor_in_flight_rejection_reads_guard_message
+diff --git a/Blockchain/Dev/services/originate/src/services/reanchorInFlight.ts b/Blockchain/Dev/services/originate/src/services/reanchorInFlight.ts
+--- a/Blockchain/Dev/services/originate/src/services/reanchorInFlight.ts
++++ b/Blockchain/Dev/services/originate/src/services/reanchorInFlight.ts
+@@ -51,5 +51,10 @@
+ /** True for the rejection a fetch gives when its AbortSignal.timeout fires (a DOMException named TimeoutError, or AbortError). */
+ export function isTimeoutError(err: unknown): boolean {
+-  const name = (err as { name?: unknown } | null)?.name;
++  let name: unknown;
++  try {
++    name = (err as { name?: unknown } | null)?.name;
++  } catch {
++    return false;
++  }
+   return name === 'TimeoutError' || name === 'AbortError';
+ }
+@@ -190,7 +195,13 @@
+     try { body = await resp.json(); } catch { body = undefined; }
+     answer = { httpStatus: resp.status, body };
+   } catch (err: unknown) {
+-    answer = { httpStatus: null, fetchError: err instanceof Error ? err.message : String(err) };
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    answer = { httpStatus: null, fetchError: reason };
+   }
+   return decideInFlight(answer, ctx);
+ }
+

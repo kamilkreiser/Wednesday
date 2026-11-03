@@ -1,0 +1,67 @@
+import { describe, it, expect, vi, afterEach } from 'vitest';
+
+// KS-1868: submitTimestampRequest (src/tsa/rfc3161-client.ts) must still answer { success: false } when the value the TSA call threw
+// cannot be read. Its catch reads `err?.name` and then `${err?.message}` unguarded: a revoked Proxy throws on both reads, an Error whose
+// `message` getter throws throws on the second, and an Error whose `message` is a Symbol makes the template literal throw a TypeError.
+// In each case the function REJECTS (and with it the batch route's per-item result) where an ordinary Error gives a failed result.
+// The fetch stand-in is a plain function, not vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy first.
+import { submitTimestampRequest } from '../tsa/rfc3161-client';
+
+function failFetchWith(value: unknown): void {
+  vi.stubGlobal('fetch', () => Promise.reject(value));
+}
+
+async function run(): Promise<{ success: boolean; error?: string } | undefined> {
+  return submitTimestampRequest('http://tsa.test/tsr', Buffer.from('request')).catch(() => undefined);
+}
+
+describe('KS-1868 submitTimestampRequest reads the thrown value safely', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('control ks1868 C1 an ordinary Error still gives a failed result with its message', async () => {
+    failFetchWith(new Error('connection reset'));
+    const r = await run();
+    expect(r).toEqual({ success: false, error: 'TSA request failed: connection reset' });
+  });
+
+  it('control ks1868 C2 a TimeoutError still gives the timed-out result', async () => {
+    const e = new Error('slow');
+    e.name = 'TimeoutError';
+    failFetchWith(e);
+    const r = await run();
+    expect(r?.success).toBe(false);
+    expect(r?.error).toMatch(/^TSA request timed out after \d+ms \(http:\/\/tsa\.test\/tsr\)$/);
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value gives a failed result with a constant reason', async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    failFetchWith(proxy);
+    const r = await run();
+    expect(r).toEqual({ success: false, error: 'TSA request failed: unreadable thrown value' });
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws gives a failed result with a constant reason', async () => {
+    failFetchWith(
+      Object.create(Error.prototype, {
+        message: {
+          get() {
+            throw new Error('getter boom');
+          },
+        },
+      }),
+    );
+    const r = await run();
+    expect(r).toEqual({ success: false, error: 'TSA request failed: unreadable thrown value' });
+  });
+
+  it('RED ks1868 R3 an Error whose message is a Symbol gives a failed result carrying its text', async () => {
+    const e = new Error('x');
+    Object.defineProperty(e, 'message', { value: Symbol('sym') });
+    failFetchWith(e);
+    const r = await run();
+    expect(r).toEqual({ success: false, error: 'TSA request failed: Symbol(sym)' });
+  });
+});

@@ -1,0 +1,17 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p10_anchoring_thread_mint_request_classify_thread_mint_error_guard_message
+diff --git a/Blockchain/Dev/services/anchoring/src/threadMintRequest.ts b/Blockchain/Dev/services/anchoring/src/threadMintRequest.ts
+--- a/Blockchain/Dev/services/anchoring/src/threadMintRequest.ts
++++ b/Blockchain/Dev/services/anchoring/src/threadMintRequest.ts
+@@ -74,5 +74,11 @@
+  */
+ export function classifyThreadMintError(error: unknown): ClassifiedMintError | null {
+   const err = error as { message?: unknown; code?: unknown };
++  try {
++    void (typeof err?.message === 'string' ? err.message : String(error));
++    void err?.code;
++  } catch {
++    return null;
++  }
+   const msg = typeof err?.message === 'string' ? err.message : String(error);
+   const errCode = typeof err?.code === 'string' ? err.code : '';
+

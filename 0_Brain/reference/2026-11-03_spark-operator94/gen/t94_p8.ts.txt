@@ -1,0 +1,58 @@
+import { describe, it, expect, vi, afterEach } from 'vitest';
+
+// KS-1868: authenticatePersona (src/services/authClient.ts) is documented "does NOT throw on failure": a failed call is a
+// { success: false, error } result. Its catch reads `err instanceof Error ? err.message : 'Unknown error'` unguarded. When the value fetch
+// rejected with cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws, throws on `.message`) the catch
+// throws, so authenticatePersona REJECTS where an ordinary Error gives the failed result.
+// The fetch and logger stand-ins are plain functions, not vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy first.
+vi.mock('../utils/logger', () => ({
+  logger: {
+    debug: () => undefined,
+    info: () => undefined,
+    warn: () => undefined,
+    error: () => undefined,
+  },
+}));
+
+import { authenticatePersona } from '../services/authClient';
+
+/** The result, or the string 'rejected' when authenticatePersona rejects (an assertion can then fail on it). */
+async function login(value: unknown): Promise<unknown> {
+  vi.stubGlobal('fetch', () => Promise.reject(value));
+  try {
+    return await authenticatePersona('demo@example.com', 'pw');
+  } catch {
+    return 'rejected';
+  }
+}
+
+describe('KS-1868 authenticatePersona reads the thrown value safely', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('control ks1868 C1 an ordinary Error gives the failed result with its message', async () => {
+    expect(await login(new Error('connection refused'))).toEqual({ success: false, error: 'connection refused' });
+  });
+
+  it('control ks1868 C2 a thrown plain string gives the failed result with the default reason', async () => {
+    expect(await login('plain text failure')).toEqual({ success: false, error: 'Unknown error' });
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value gives the failed result with a constant reason', async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    expect(await login(proxy)).toEqual({ success: false, error: 'unreadable thrown value' });
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws gives the failed result with a constant reason', async () => {
+    const hostile = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    expect(await login(hostile)).toEqual({ success: false, error: 'unreadable thrown value' });
+  });
+});

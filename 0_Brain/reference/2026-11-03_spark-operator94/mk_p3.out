@@ -1,0 +1,33 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o94_p3_timestamping_tsa_submit_request_catch_guard_message
+diff --git a/Blockchain/Dev/services/timestamping/src/tsa/rfc3161-client.ts b/Blockchain/Dev/services/timestamping/src/tsa/rfc3161-client.ts
+--- a/Blockchain/Dev/services/timestamping/src/tsa/rfc3161-client.ts
++++ b/Blockchain/Dev/services/timestamping/src/tsa/rfc3161-client.ts
+@@ -167,7 +167,17 @@
+     // A timeout arrives here as a TimeoutError/AbortError. Naming it explicitly
+     // matters operationally: "TSA request failed: The operation was aborted"
+     // reads like a bug in our code, when it is the deadline doing its job.
+-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
++    let timedOut = false;
++    let reason: string | null | undefined;
++    try {
++      timedOut = err?.name === 'TimeoutError' || err?.name === 'AbortError';
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      timedOut = false;
++      reason = 'unreadable thrown value';
++    }
++    if (timedOut) {
+       return {
+         success: false,
+         error: `TSA request timed out after ${TSA_REQUEST_TIMEOUT_MS}ms (${tsaUrl})`,
+@@ -175,7 +185,7 @@
+     }
+     return {
+       success: false,
+-      error: `TSA request failed: ${err?.message}`,
++      error: `TSA request failed: ${reason}`,
+     };
+   }
+ }
+
