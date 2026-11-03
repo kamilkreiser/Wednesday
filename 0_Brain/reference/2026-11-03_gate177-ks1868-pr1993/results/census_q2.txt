@@ -1,0 +1,40 @@
+## census at refs/gate/1993 (8712cb115e0a), git grep over the whole tree (not the sparse worktree)
+### -w VerifiableCredentialVerifier: all hits 8 in 4 files
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:87:export class VerifiableCredentialVerifier {
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:605:export function createVCVerifier(config?: VCVerifierConfig): VerifiableCredentialVerifier {
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:606:  return new VerifiableCredentialVerifier(config);
+### -w createVCVerifier: all hits 2 in 1 files
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:605:export function createVCVerifier(config?: VCVerifierConfig): VerifiableCredentialVerifier {
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:616:  const verifier = createVCVerifier(config);
+### -w verifyCredential: all hits 13 in 6 files
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:612:export async function verifyCredential(
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts:20:  verifyCredential,
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts:360:    const verificationResult = await verifyCredential(credential as unknown as SecuuraCredential, {
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/presentations.ts:16:  verifyCredential,
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/presentations.ts:330:        return verifyCredential(credential as unknown as SecuuraCredential, {
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/services/revocationResolvers.ts:32: * The revocation half of a verifier config, for spreading into a `verifyCredential` call.
+### subpath/relative imports of the vc module
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts:20:import { SecuuraCredential } from '@secuura/shared/vc';
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts:22:} from '@secuura/shared/vc';
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts:340: * packages/shared/src/vc/verifier.ts and still matter: presentations/verify
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/presentations.ts:17:} from '@secuura/shared/vc';
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/status.ts:14:} from '@secuura/shared/vc';
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/services/revocationResolvers.ts:27:import type { VCVerifierConfig } from '@secuura/shared/vc';
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/vc-issuer.openapi.ts:48:import { SecuuraCredentialType, VerificationLevel } from '@secuura/shared/vc';
+refs/gate/1993:systemTest/schemathesis/tests/test_status_list_authz.py:21:``packages/shared/src/vc/verifier.ts``), which KS-1352 (Kamil, In Progress) tracks.
+### POSITIVE control: same grep form finds @secuura/shared/security/scopes importers
+       6
+### POSITIVE control 2: -w signCredential (same vc module) non-test hits
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/builder.ts:268:export async function signCredential(
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:298:   * Supports three proof value prefixes produced by signCredential():
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:342:    // Reconstruct canonical payload (must match signCredential in builder.ts)
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts:19:  signCredential,
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts:184:    // gate below removes that fallback entirely. signCredential() in the
+refs/gate/1993:Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts:203:    const signedCredential = await signCredential(
+### NEGATIVE control: -w VerifiableCredentialVerifierGate177Nope
+rc=1
+### didResolver non-test hits under services/ (any config passing one)
+rc=1
+### POSITIVE control: same grep over packages/shared/src/vc finds the field
+refs/gate/1993:Blockchain/Dev/packages/shared/src/vc/verifier.ts:10
+### didResolver anywhere non-test outside vc/verifier.ts
