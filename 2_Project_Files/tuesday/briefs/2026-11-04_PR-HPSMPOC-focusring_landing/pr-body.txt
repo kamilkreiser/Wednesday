@@ -1,0 +1,54 @@
+BLUF: a keyboard user who has scrolled down a page and then walks up the menu no longer sees the page jump. The focused menu item for the current page keeps a clear outline on all four edges and its round corners, and the menu is no longer scrolled by 1 px when its outline already fits. At the end of a page the menu stays in the window, and from 1024 px wide the footer text sits to the right of the open menu. Two Home sentences are reworded. Two limits are accepted by the product owner (2026-11-04) and stated below: some short pages end 64 px sooner, and the POC's browser floor is Firefox 121 or newer.
+
+What changes for a user
+
+1. Menu, page jump: with the page scrolled down, Shift+Tab up the menu no longer scrolls the page. The menu panel now hangs 4rem (64 px) past the end of its row at 1024 px wide and up, so at the page's end it keeps its place instead of being pushed up by the footer.
+2. Menu, footer: while the menu is open at 1024 px wide and up, the footer has 252 px of left padding, so its text sits right of the menu and is not covered. With the menu collapsed, or below 1024 px, the footer is as before.
+3. Menu, focus outline: the current item's outline is drawn outside the item, 2 px away, keeps the item's rounded corners, and sits above a hovered neighbour. The focused item asks the browser for 5 px of room when it scrolls into view, which is exactly how far the outline reaches (2 px offset plus 3 px width).
+4. Home: the readiness tile's note now reads "Self-assessment, not certification." (the sentence about the four readiness bands is removed). The third next-action reads "Compare the delivery phases, phase by phase." where it read "Compare the service offers, phase by phase."
+
+What the browser check measured (Chromium only; real key presses; "the earlier build" below is the previous revision of this branch, with 6 px scroll room and no overhang, which is the control)
+
+- Page jump: 0 page moves in 11,808 key presses across 504 walks up the menu from scrolled-down positions (the earlier build: 266 in 154 walks). In a wider sweep of 5,376 walks and 125,952 presses, page moves 0.
+- 1 px menu nudge: 0 of 25 cells, three runs each (the earlier build: 25 of 25).
+- Footer text under the menu: 0 of 256 cells (the control, with the footer padding forced back to 24 px, reads covered in 60 of 256, so the instrument sees it).
+- Band of page background under the menu at the page's end: 69 to 72 px (it was 133 to 133.5 px); never larger.
+- Outline: 4 clear edges with 3 rows of pixels on each, in 504 of 504 ring-grid cells and in 236 of 236 hovered and plain cells; lowest contrast 9.525:1; equal to the earlier build in all 740 cells read.
+- Words: page text, link and button names, link targets, tab order and elements unchanged by the menu change, in 82 of 82 pages and 64 of 64 Home states.
+- Header: the menu panel's bottom equals the window and its top the top bar's bottom, 2,628 of 2,628 cells, also at 20 px and 24 px root font sizes.
+- Tests: unit 3,911 passed, 0 failed, 0 skipped; browser spec 61 passed in each of the desktop and tablet projects; lint, typecheck, build and both audits pass; accessibility scan 0 violations in 8 of 8 pages. Eight of the nine new browser rows fail on the earlier build.
+
+Accepted limits (the product owner's decision of 2026-11-04)
+
+1. Short pages end 64 px sooner. On a page whose content is no taller than the menu, the page now ends 64 px earlier than in the earlier build, because the menu hangs 64 px past its row. Measured at 1280 px wide and 800 px high: 13 of 41 page views, and 22 of 128 views of Engagements at 700 and 900 px high from 1024 to 1440 px wide. A further 5 views end 57 or 61 px sooner. At 390 px wide no page changes (0 of 41), and no page is taller. The end of the content, the feedback button and the footer text stay inside the window in every view measured. The allowance becomes 64 px.
+2. Firefox 121 or newer is the POC's browser floor. The footer rule uses the CSS :has() selector, which Firefox supports from version 121. On Firefox 111 to 120 the rule is ignored and the footer text can sit under the open menu at the page's end at 1024 px wide and up. Chrome, Edge and Safari in the supported range have the selector. Firefox 111 to 127 is also below Tailwind 4's own floor (Firefox 128). The product owner's decision is that this floor will be recorded in the project in the records step after this lands; this change adds no browser list.
+
+What is NOT in this change
+
+- Not deployed. Merging is not a deploy; a separate step follows.
+- No Firefox or Safari run: the browser check was Chromium only.
+- One test row is weaker than asked: a footer-padding test passes when the padding is changed from 252 px to 240 px, which still clears the 228 px menu, so no user-visible defect sits behind it. It will be ticketed separately after this lands and does not hold this change.
+- Customer-menu walks, the phone-width drawer sweep and forced-colours checks were not run; the menu outline grid ran 504 of 1,752 cells (all equal to the earlier build).
+- HPSMPOC-399 and HPSMPOC-368 are closed only for the focus-ring part: the ring clause of 399 and criterion 10 of 368.
+
+Files changed (10 files, +618 -7)
+
+Product (5):
+- web/src/app/globals.css (+14 -0): the current item's focus rule
+- web/src/app/layout.tsx (+1 -1): footer left padding while the menu is open
+- web/src/components/partner/PartnerDashboard.tsx (+1 -1): readiness note
+- web/src/components/partner/home-next-actions.ts (+1 -1): next-action sentence
+- web/src/components/shell/Sidebar.tsx (+1 -1): menu panel height and overhang
+
+Tests (4):
+- web/src/components/partner/PartnerDashboard.text.test.tsx (added, +139)
+- web/src/components/partner/PartnerDashboard.words.test.tsx (added, +100)
+- web/src/components/partner/PartnerDashboard.tiles.test.tsx (+2 -2)
+- web/src/components/shell/AppShell.sidebar.test.tsx (+17 -0)
+
+Browser spec (1):
+- web/e2e/shell-sidebar.spec.ts (+342 -1): nine new rows, and the menu's scroll bound for the Tab onto Engagements reads 5 instead of 6
+
+Landing is a head-pinned squash through the hosted checks and CodeQL.
+
+Generated with [Claude Code](https://claude.com/claude-code)
