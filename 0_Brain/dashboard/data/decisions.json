@@ -57456,5 +57456,38 @@
    "CARD hpsmpoc-kam-rail-words-1103",
    "CARD hpsmpoc-steve-review-page-1103"
   ]
+ },
+ {
+  "id": "secuura-auth-lockout-failopen-redis-down-1103",
+  "client_project": "Secuura/Blockchain",
+  "title": "The auth login lockout switches OFF whenever Redis is down, and a right password then ends differently from a wrong one. Keep it, or make login fail closed during an outage?",
+  "bluf": "Found by gate 160 on PR 1977 (which merges regardless: it changes nothing here). PRE-EXISTING, same at base and head, MEDIUM. When the session store (Redis) is unavailable, accountLockout returns 'not locked' for an account that IS locked (measured: accountLockout.ts:87/:92, recorder column lockoutLockedVictim), and failures during the outage are not counted. The file's header calls this a deliberate availability choice, with the per-IP rate limiter as the first line. Read, not run by the gate: during the outage a wrong password answers InvalidCredentials while a right one reaches createSession, which throws, so the two can be told apart (a guessing oracle), and a correct password cannot finish a login anyway. Your recent rulings on the same shape went fail-closed (KS-1256, KS-1194, PR 1970, PR 1976 today). Override of the prior-rulings gate: its 7 matches are 3 terminal pastes (sysctl/tmutil, unrelated) and 4 cards on other surfaces (KS-1256 connector creates, KS-1358 405 order, PR 1970 api-gateway guards, PR 1976 anchor trust); none rules the auth login lockout.",
+  "default_action": "If no answer in 4 hours (~15:40), a: Wednesday has a Secuura seat file the ticket and queues the fail-closed fix after KS-1961 and KS-1962, gated at tier 1. Nothing merges or deploys from this card alone.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fail closed: refuse logins while the session store is down; fix next under a new High ticket",
+    "detail": "A Secuura seat files the ticket, makes the lockout check refuse (503) when Redis is unavailable so right and wrong passwords answer the same, with an Opus tier-1 gate. Cost: logins fail during an outage, but per the gate's read they already cannot complete then."
+   },
+   {
+    "key": "b",
+    "label": "Keep it as designed (availability first)",
+    "detail": "Nothing changes; the finding is recorded on a ticket as an accepted design choice."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T11:34:37.487825+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-15 10:52",
+   "2026-09-15 10:53",
+   "2026-09-16 18:52",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-ks1358-405-before-auth-posture-1027",
+   "CARD secuura-pr1970-gateway-failopen-1103",
+   "CARD secuura-pr1976-anchor-trust-failopen-1103"
+  ]
  }
 ]
