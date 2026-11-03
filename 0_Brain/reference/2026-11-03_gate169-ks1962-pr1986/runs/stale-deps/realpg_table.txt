@@ -1,0 +1,21 @@
+nonstr populated                            | base tF=false tG=true f=[1:doc-1] load=[1:doc-1] | head tF=false tG=true f=[1:doc-1] load=[1:doc-1]
+nonstr empty-readable                       | base tF=true tG=true f=[2:,] load=[0] | head tF=true tG=true f=[2:,] load=[0]
+nonstr missing-table-42P01                  | base tF=true tG=true f=[2:,] load=[0] | head tF=false tG=false f=[0] load=REJ(DatabaseError 42P01)
+nonstr unknown-db-planted-3D000             | base tF=true tG=true f=[2:,] load=[0] | head tF=false tG=false f=[0] load=REJ(DatabaseError 3D000)
+nonstr bad-password-28P01                   | base tF=true tG=true f=[2:,] load=[0] | head tF=false tG=false f=[0] load=REJ(DatabaseError 28P01)
+nonstr refused-ECONNREFUSED                 | base tF=true tG=true f=[2:,] load=[0] | head tF=false tG=false f=[0] load=REJ(Error ECONNREFUSED)
+nonstr database-url-unset                   | base tF=true tG=true f=[2:,] load=[0] | head tF=false tG=false f=[0] load=REJ(Error)
+nonstr connect-timeout-silent-server        | base tF=true tG=true f=[2:,] load=[0] | head tF=false tG=false f=[0] load=REJ(Error)
+nonstr statement-timeout-57014-under-lock   | base tF=true tG=true f=[2:,] load=[0] | head tF=false tG=false f=[0] load=REJ(DatabaseError 57014) | afterRelease b=true h=false (313ms)
+nonstr hang-under-lock                      | base tF=PENDING tG=PENDING f=PENDING load=PENDING | head tF=PENDING tG=PENDING f=PENDING load=PENDING | afterRelease b=false h=false (18ms)
+STRICT populated                            | base tF=false tG=true f=[1:doc-1] load=[1:doc-1] | head tF=false tG=true f=[1:doc-1] load=[1:doc-1]
+STRICT empty-readable                       | base tF=false tG=false f=[0] load=[0] | head tF=false tG=false f=[0] load=[0]
+STRICT missing-table-42P01                  | base tF=REJ(DatabaseError 42P01) tG=REJ(DatabaseError 42P01) f=REJ(DatabaseError 42P01) load=REJ(DatabaseError 42P01) | head tF=REJ(DatabaseError 42P01) tG=REJ(DatabaseError 42P01) f=REJ(DatabaseError 42P01) load=REJ(DatabaseError 42P01)
+STRICT unknown-db-planted-3D000             | base tF=REJ(DatabaseError 3D000) tG=REJ(DatabaseError 3D000) f=REJ(DatabaseError 3D000) load=REJ(DatabaseError 3D000) | head tF=REJ(DatabaseError 3D000) tG=REJ(DatabaseError 3D000) f=REJ(DatabaseError 3D000) load=REJ(DatabaseError 3D000)
+STRICT bad-password-28P01                   | base tF=REJ(DatabaseError 28P01) tG=REJ(DatabaseError 28P01) f=REJ(DatabaseError 28P01) load=REJ(DatabaseError 28P01) | head tF=REJ(DatabaseError 28P01) tG=REJ(DatabaseError 28P01) f=REJ(DatabaseError 28P01) load=REJ(DatabaseError 28P01)
+STRICT refused-ECONNREFUSED                 | base tF=REJ(Error ECONNREFUSED) tG=REJ(Error ECONNREFUSED) f=REJ(Error ECONNREFUSED) load=REJ(Error ECONNREFUSED) | head tF=REJ(Error ECONNREFUSED) tG=REJ(Error ECONNREFUSED) f=REJ(Error ECONNREFUSED) load=REJ(Error ECONNREFUSED)
+STRICT database-url-unset                   | base tF=REJ(Error) tG=REJ(Error) f=REJ(Error) load=REJ(Error) | head tF=REJ(Error) tG=REJ(Error) f=REJ(Error) load=REJ(Error)
+STRICT connect-timeout-silent-server        | base tF=REJ(Error) tG=REJ(Error) f=REJ(Error) load=REJ(Error) | head tF=REJ(Error) tG=REJ(Error) f=REJ(Error) load=REJ(Error)
+STRICT statement-timeout-57014-under-lock   | base tF=REJ(DatabaseError 57014) tG=REJ(DatabaseError 57014) f=REJ(DatabaseError 57014) load=REJ(DatabaseError 57014) | head tF=REJ(DatabaseError 57014) tG=REJ(DatabaseError 57014) f=REJ(DatabaseError 57014) load=REJ(DatabaseError 57014) | afterRelease b=REJ(DatabaseError 57014) h=REJ(DatabaseError 57014) (318ms)
+STRICT hang-under-lock                      | base tF=PENDING tG=PENDING f=PENDING load=PENDING | head tF=PENDING tG=PENDING f=PENDING load=PENDING | afterRelease b=false h=false (20ms)
+cells 80, head more permissive than base: 0

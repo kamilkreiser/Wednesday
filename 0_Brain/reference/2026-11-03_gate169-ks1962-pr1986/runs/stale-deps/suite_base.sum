@@ -1,0 +1,64 @@
+rc=1 files 61 passed 411/474 failed 63
+  FAIL ks1384-r2a-by-document-read-fails-closed.test.ts | RED (f3a) the by-document SELECT throws while an attempt is submitted: 503 with the fixed  | 
+  FAIL ks1384-r2a-by-document-read-fails-closed.test.ts | RED (f3b) the database is not available: 503 with the fixed envelope, not 404 | 
+  FAIL ks1384-r2a-by-document-read-fails-closed.test.ts | CONTROL (f3c) a read that succeeded with no rows: the 404 "No anchors found", unchanged | 
+  FAIL ks1384-r2a-by-document-read-fails-closed.test.ts | CONTROL (f3d) another tenant's rows: the KS-1822 404, byte-identical to no rows, unchanged | 
+  FAIL ks1384-r2a-by-document-read-fails-closed.test.ts | CONTROL (f3e) an ownership-probe fault still allows the read (KS-1822 fail-open kept): 200 | 
+  FAIL ks1384-r2a-by-document-read-fails-closed.test.ts | (f3g) the 503 carries no database error text | 
+  FAIL ks1384-r2b-own-create-route.test.ts | (r1) another tenant's document and an absent one answer the SAME 404, byte for byte | 
+  FAIL ks1384-r2b-own-create-route.test.ts | (r2) the caller's document with no platform wallet: 200 none, and no chain read | 
+  FAIL ks1384-r2b-own-create-route.test.ts | (r3) the caller's document, a bound create on chain: 200 found with the tx and block | 
+  FAIL ks1384-r2b-own-create-route.test.ts | (r4) a page read fails: not-answered, kind unanswered, retryAfter 60, and one warn line ca | 
+  FAIL ks1384-r2b-own-create-route.test.ts | (r5) the cache holds across requests: a repeat within the TTL reads no chain | 
+  FAIL ks1384-r2b-own-create-route.test.ts | (r6) an ownership-probe fault fails open (KS-1603), as on the write path: the lookup runs | 
+  FAIL ks1384-r2b-own-create-route.test.ts | (r7) a malformed body: 400, and no chain read | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R1 a connector caller that sets the BARE marker itself still gets its provenance row (the  | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R2 CONTROL + REACHED: originate's genuine signed hop is still skipped (a plain strip, or a | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R3 a captured signature REPLAYED onto a different body is refused, and that body gets its  | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R4 a signature whose timestamp has EXPIRED (120 s old) is refused | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R5 a signature made with any OTHER secret is refused | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R6 CONTROL: Platform-S's genuine flat fallback (no marker) still records its row | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R7 CONTROL: an interactive (non-connector) caller still records none, signed or not | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R9 a hop captured from one connector and REPLAYED under ANOTHER connector's bearer is refu | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R8 an unset secret honours NOTHING: even a hop signed correctly under a real key records i | 
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R10 configured with a 31-character secret, anchoring refuses a hop MAC'd correctly under t | Error: Missing "./zod3-compat" specifier in "@secuura/shared" package
+  FAIL ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts | R11 CONTROL: exactly 32 characters is enough — the same hand-MAC'd hop is honoured | Error: Missing "./zod3-compat" specifier in "@secuura/shared" package
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | RED R1 GET /api/anchors/:id — another tenant's anchor answers 404, byte-identical to the s | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | RED R2 GET /api/anchors/:id through the DOCUMENT-ID fallback — refused, byte-identical to  | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | RED R3 GET /api/anchors/document/:documentId — another tenant's document answers 404, byte | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | CONTROL R4 the owner's tenant reads its anchor with the body unchanged — own row for tenan | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | CONTROL R5 own tenant through the document-id fallback and through /document — 200, bodies | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | CONTROL R6 residual (i): a flat anchor (no document holds its id) stays readable by a call | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | RED R7 residual (ii): a caller with no usable tenant claim still reads the foreign anchor  | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | RED R8 residual (iii): a probe fault ALLOWS the read (fail-open) and logs exactly one warn | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | RED R9 the refusal response names no tenant and no organisation; the server log line names | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | CONTROL R10 a tenant claim that differs from the owner's only in letter case is the SAME t | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | RED R11 the comparison is tenant to tenant: a caller whose ORGANISATION id equals the owne | 
+  FAIL ks1822-a-foreign-tenants-anchor-reads-as-absent.test.ts | CONTROL R12 a read that found NO rows answers the route's own 404 with no probe and no KS- | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | control ks1868 C1 tx lookup: an ordinary Error is logged with its own message and the rout | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | control ks1868 C2 verify-by-hash: an ordinary Error is logged with its own message and the | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | control ks1868 C3 content-hash verify: an ordinary Error is logged with its own message an | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | control ks1868 C4 tx lookup: a thrown plain string has no message and is logged with no er | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | control ks1868 C5 verify-by-hash: a thrown plain string has no message and is logged with  | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R1 tx lookup: a rejection whose message is a revoked Proxy logs the constant re | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R2 tx lookup: a rejection whose message is an object whose toString throws logs | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R3 tx lookup: a rejection whose message is a null-prototype object logs the con | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R4 tx lookup: a rejection whose message is a Symbol logs the Symbol text and th | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R5 verify-by-hash: a rejection whose message is a revoked Proxy logs the consta | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R6 verify-by-hash: a rejection whose message is an object whose toString throws | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R7 verify-by-hash: a rejection whose message is a null-prototype object logs th | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R8 verify-by-hash: a rejection whose message is a Symbol logs the Symbol text a | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R9 content-hash verify: a rejection whose message is a revoked Proxy logs the c | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R10 content-hash verify: a rejection whose message is an object whose toString  | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R11 content-hash verify: a rejection whose message is a null-prototype object l | 
+  FAIL ks1868-anchoring-message-coercion-unreadable-throw.test.ts | RED ks1868 R12 content-hash verify: a rejection whose message is a Symbol logs the Symbol  | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | control ks1868 C1 tx lookup: an ordinary Error is logged with its own message and the rout | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | control ks1868 C2 verify-by-hash: an ordinary Error is logged with its own message and the | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | control ks1868 C3 content-hash verify: an ordinary Error is logged with its own message an | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | RED ks1868 R1 tx lookup: a revoked Proxy rejection logs a constant reason and the route an | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | RED ks1868 R2 tx lookup: an Error whose message getter throws logs a constant reason and t | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | RED ks1868 R3 verify-by-hash: a revoked Proxy rejection logs a constant reason and the cha | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | RED ks1868 R4 verify-by-hash: an Error whose message getter throws logs a constant reason  | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | RED ks1868 R5 content-hash verify: a revoked Proxy rejection logs a constant reason and th | 
+  FAIL ks1868-anchoring-read-route-catches-unreadable-throw.test.ts | RED ks1868 R6 content-hash verify: an Error whose message getter throws logs a constant re | 
+  FAIL threadTokenMint.test.ts | parameterises mint + spend with a deterministic per-seed policyId | Error: STACK_TRACE_ERROR
