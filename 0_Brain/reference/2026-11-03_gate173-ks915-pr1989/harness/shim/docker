@@ -1,0 +1,20 @@
+#!/bin/bash
+# Gate 173 docker shim. GATE_SHIM selects the misbehaviour; anything else passes through to the real docker.
+REAL=/Users/kamilkreiser/.docker/bin/docker
+case "${GATE_SHIM:-}" in
+  nocompose) echo "docker: unknown command: docker compose" >&2; exit 1 ;;
+esac
+if [[ " $* " == *" version "* ]]; then exec $REAL "$@"; fi
+if [[ " $* " == *" config "* ]]; then
+  case "${GATE_SHIM:-}" in
+    garbage) echo "this is not json"; exit 0 ;;
+    emptyobj) echo '{}'; exit 0 ;;
+    emptyarr) echo '[]'; exit 0 ;;
+    envlist) echo '{"services":{"x":{"environment":["NODE_ENV=production"]}}}'; exit 0 ;;
+    noenv) echo '{"services":{"auth":{"image":"x"}}}'; exit 0 ;;
+    emptyout) exit 0 ;;
+    failrc) echo '{"services":{}}'; exit 2 ;;
+    sleepreread) if [[ " $* " == *" --env-file "* ]]; then sleep 30; fi ;;
+  esac
+fi
+exec $REAL "$@"

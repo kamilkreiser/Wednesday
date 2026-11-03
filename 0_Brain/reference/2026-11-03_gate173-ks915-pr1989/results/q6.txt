@@ -1,0 +1,165 @@
+== A. pgbouncer upstream / database name (keys the canonical check and judge() do not name) ==
+n01   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=gate173rmt.host\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+n02   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'POSTGRES_HOST=gate173rmt.host\n' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:POSTGRES_HOST@pgbouncer]
+n03   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 | POSTGRES_HOST=gate173rmt.host | args= | dev='' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+n04   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_DB="secuura host=gate173rmt.host"\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+n05   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=5432\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== B. PGHOST / PGHOSTADDR / PGSERVICE ==
+p01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGHOST=gate173rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] bash[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGHOSTADDR=10.9.9.9\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGSERVICE=gate173rmt\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] bash[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | PGHOST=gate173rmt.host | args= | dev='' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): PGHOST does not name a local host in the shell environment
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p05   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | PGHOSTADDR=10.9.9.9 | args= | dev='' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): PGHOSTADDR is set (it overrides the host) in the shell environment
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p06   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | PGSERVICE=gate173rmt | args= | dev='' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): PGSERVICE is set (a service file can name any host) in the shell environment
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p07   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGHOST=localhost,gate173rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] bash[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p08   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=$'PGHOST=gate173rmt.host\n'
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:PG*@api-gateway,PG*@auth,PG*@kyc,PG*@m365-integration] root[compose:PG*@api-gateway,PG*@auth,PG*@kyc,PG*@m365-integration]
+p09   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'PGHOST=gate173rmt.host\n' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p10   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'export PGHOST=gate173rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] bash[DB=local NE=other PG*=REMOTE POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p11   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGHOST=localhost\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p12   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'DATABASE_URL=postgres://u:p@localhost/x?service=gate173rmt\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] bash[DB=REMOTE NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p13   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'DATABASE_URL=postgres://u:p@localhost/x?options=-c%20x\n' root='' local=''
+      why: refused by the canonical-line check: line 525 of Blockchain/Dev/
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+p14   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 | PGSERVICEFILE=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/harness/prodword.txt | args= | dev='' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== C. repo-root .env and the root compose entry; .env.local ==
+r01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'NODE_ENV=production\n' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:NE@api-gateway]
+r02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'DATABASE_URL=postgres://u:p@gate173rmt.host/x\n' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+r03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'NODE_ENV=${X:-production}\n' local=''
+      why: refused by bash set -a: NODE_ENV is production in the repo-root 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:NE@api-gateway]
+r04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'export NODE_ENV=production\n' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:NE@api-gateway]
+r05   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=$'NODE_ENV=production\n'
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+r06   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=$'DATABASE_URL=postgres://u:p@gate173rmt.host/x\n'
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+r07   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'POSTGRES_DB="secuura?host=gate173rmt.host"\n' local=''
+      why: refused by docker compose config (repo-root entry, docker-compose
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@migrations,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector]
+r08   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_DB=secuura?host=gate173rmt.host\n' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): DATABASE_URL does not name a local host for the analytics service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@migrations,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector] root[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@migrations,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector]
+r09   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'APP_DB_PASSWORD=x@gate173rmt.host:5432/y#\n' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): DATABASE_URL does not name a local host for the analytics service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector] root[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector]
+r10   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'STACK_PREFIX=x\n' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== D. the sandboxed bash reader ==
+b01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'declare -x NODE_""ENV=production\n' root='' local=''
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'declare -x NODE_""ENV=production\nprintf() { builtin printf \'%s\\0\' @@RLS-KS915@@ 0 \'\' \'\' \'\' \'\' \'\'; }\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'declare -x NODE_""ENV=production\nbuiltin printf \'%s\\0\' @@RLS-KS915@@ 0 \'\' \'\' \'\' \'\' \'\'; exit 0\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'read -r NODE_E""NV < /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/harness/prodword.txt\n' root='' local=''
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b05   rc=3   tree_same=y outside_same=N admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'history -s gate173; history -w /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/tmp/q6/b05_hist_created\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b06   rc=0   tree_same=N outside_same=N admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'HISTFILE=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/tmp/q6/b06_histfile_created; history -s gate173; history -w\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+b07   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'command -p touch /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/tmp/q6/b07_cmdp_created\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b08   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'hash -p /usr/bin/touch tt; tt /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/tmp/q6/b08_hashp_created\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b09   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'X="unclosed\n' root='' local=''
+      why: cannot check safely: bash set -a cannot parse Blockchain/Dev/
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b10   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'exit 0\n' root='' local=''
+      why: cannot check safely: bash set -a gave no reading of Blockchain/Dev/
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b11   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'echo hi > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/tmp/q6/b11_redirect_created\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+b12   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'cd /; PATH=/usr/bin\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose=ERR(no json)] root[compose=ERR(no json)]
+   file b05_hist_created       CREATED
+   file b06_histfile_created   CREATED
+   file b07_cmdp_created       CREATED
+   file b08_hashp_created      CREATED
+   file b11_redirect_created   CREATED
+   (bash sandbox leftovers in RUNTMP: 0)
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/harness/cells.sh: line 11: 79700 Alarm clock: 14         ( cd "$c" && exec perl -e 'alarm shift; exec @ARGV' "$TIMEOUT" env -i HOME="$W/home" PATH="$RUNPATH" TMPDIR="${RUNTMP:-$W/tmp}" ${envs[@]+"${envs[@]}"} bash "$c/Blockchain/Dev/scripts/restore-local-secrets.sh" ${args[@]+"${args[@]}"} ) > "$L/$id.log" 2>&1
+b13   rc=142 tree_same=y outside_same=N admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'while :; do :; done\n' root='' local=''
+      why: 
+   b13 orphans still looping: 79836 
+   killed pid 79836
+== E. the re-read of the temp copy before the rename ==
+t01   rc=1   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | ADMIN_USER_PASSWORD= | args= | dev='' root='' local=''
+      why: after the write, docker compose would not pass the new ADMIN_USER_PASSWORD to auth (a shell variable or another line overrides it)
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+t02   rc=1   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | ALLOW_DEFAULT_SEED_PASSWORDS= | args= | dev='' root='' local=''
+      why: after the write, docker compose would not pass ALLOW_DEFAULT_SEED_PASSWORDS=true to auth (a shell variable or another line overrides it)
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+t03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=y mode=644 tmpcopies=0 marker_in_log=0 |  | args=--rotate | dev=$'ADMIN_USER_PASSWORD=\'gate173-not-secret-ml\ndeclare -x NODE_""ENV=production\n\'\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+t04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=y mode=644 tmpcopies=0 marker_in_log=0 |  | args=--rotate | dev=$'ADMIN_USER_PASSWORD=\'gate173-not-secret-ml\nPOSTGRES_HOST=gate173rmt.host\n\'\n' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+t05   rc=0   tree_same=N outside_same=y admin_changed=n admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'ADMIN_USER_PASSWORD=\n' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+t06   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args=--rotate | dev='' root=$'ADMIN_USER_PASSWORD=gate173-not-secret-root\n' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== controls in the same run ==
+k01   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'NODE_ENV=development\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+k92   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'NODE_ENV=production\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] dev[compose:NE@api-gateway] root[compose:NE@api-gateway]
+secs=166

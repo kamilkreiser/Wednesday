@@ -1,0 +1,79 @@
+== Q2: a reader that cannot run ==
+f01_no_node rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: cannot check safely: node is not on PATH, so dotenv cannot be asked; install Node
+f02_no_node_modules rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: cannot check safely: the dotenv library this repo loads is not installed; run npm ci in Blockchain/Dev, then run this again
+f03_no_docker rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: cannot check safely: docker is not on PATH, so docker compose cannot be asked; start Docker Desktop or put docker on PATH
+f04_shim_nocompose rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | GATE_SHIM=nocompose | args= | dev='' root='' local=''
+      why: cannot check safely: docker is on PATH but docker compose did not answer; check the Docker installation
+f04_shim_garbage rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | GATE_SHIM=garbage | args= | dev='' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) gave no verdict
+f04_shim_emptyobj rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | GATE_SHIM=emptyobj | args= | dev='' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) gave no verdict
+f04_shim_emptyarr rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | GATE_SHIM=emptyarr | args= | dev='' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) gave no verdict
+f04_shim_envlist rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | GATE_SHIM=envlist | args= | dev='' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) gave no verdict
+f04_shim_noenv rc=1   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | GATE_SHIM=noenv | args= | dev='' root='' local=''
+      why: docker compose config shows no auth service carrying ADMIN_USER_PASSWORD and ALLOW_DEFAULT_SEED_PASSWORDS; nothing more was written
+f04_shim_emptyout rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | GATE_SHIM=emptyout | args= | dev='' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) gave no verdict
+f04_shim_failrc rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | GATE_SHIM=failrc | args= | dev='' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 2 without a readable configuration; run docker compose config yourself in that directory to see w
+f05_dev_compose_broken rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: cannot check safely: docker compose config (Blockchain/Dev entry) exited 1 without a readable configuration; run docker compose config yourself in that directory to see w
+f06_root_compose_broken rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: cannot check safely: docker compose config (repo-root entry, docker-compose
+f07_root_compose_absent rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: 
+   f07 message: repo-root entry (absent (no docker-compose.local.yml at the repo root)
+f08_env_symlink rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=755 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: refused: Blockchain/Dev/
+f09_env_hardlink rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root='' local=''
+      why: refused: Blockchain/Dev/
+== spoofing the bash reader with a line compose and dotenv accept ==
+sp0   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'X=1; declare -x NODE_""ENV=production\n' root='' local=''
+      why: refused by bash set -a: NODE_ENV is production in Blockchain/Dev/
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=PRODUCTION PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+sp1   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'X=1; declare -x NODE_""ENV=production; printf() { builtin printf \'%s\\0\' @@RLS-KS915@@ 0 \'\' \'\' \'\' \'\' \'\'; }\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+sp2   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'X=1; declare -x NODE_""ENV=production; builtin printf \'%s\\0\' @@RLS-KS915@@ 0 \'\' \'\' \'\' \'\' \'\'; exit 0\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+sp3   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'X=1; declare -x DATABASE_""URL=postgres://u:p@gate173rmt.host/x; printf() { builtin printf \'%s\\0\' @@RLS-KS915@@ 0 \'\' \'\' \'\' \'\' \'\'; }\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+== root entry: which ADMIN does auth get under docker-compose.local.yml after the script writes? ==
+ra1   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'ADMIN_USER_PASSWORD=\n' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+   ra1: root-entry auth ADMIN blank; equals dev .env ADMIN: NO
+ra2   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'ADMIN_USER_PASSWORD=gate173-not-secret-root\n' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+   ra2: root-entry auth ADMIN set; equals dev .env ADMIN: NO
+== Q4: idempotence and --rotate ==
+   run1 rc=0 run2 rc=0 env_same=y envlocal_same=y kept_msg=1
+   rotate rc=0 admin_changed=Y difflines=2 changed_keys=ADMIN_USER_PASSWORD  lines=     526/     526 envlocal_same=y mode=600
+   old value anywhere in the clone (incl .git), RUNTMP, HOME: 0   control (pre-rotate copy in runs/): 1
+   after-rotate run rc=0 kept=1 admin_same=y
+== Q5: ignore status of everything the script writes ==
+   Blockchain/Dev/.env                  ignored
+   Blockchain/Dev/.env.local            ignored
+   Blockchain/Dev/.env-ks915.AbCdEf     ignored
+   Blockchain/Dev/.env.ks915.AbCdEf     NOT-IGNORED
+   Blockchain/Dev/env.example           NOT-IGNORED
+   git status --porcelain after 4 runs: 1 unexpected entries
+== Q5: SIGKILL while the temp copy is being re-read ==
+   killed script pid 37161 (descendants recorded before the kill: 38242 38243 38245 38247 38244 )
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate173-ks915-pr1989/harness/q2345.sh: line 52: 37161 Killed: 9               ( cd $c && exec env -i HOME=$W/home PATH=$SH:$GPATH TMPDIR=$RUNTMP GATE_SHIM=sleepreread bash $d/scripts/restore-local-secrets.sh ) > $L/kill.log 2>&1
+   killed leftover descendant pid 38242
+   killed leftover descendant pid 38243
+   killed leftover descendant pid 38245
+   killed leftover descendant pid 38247
+   killed leftover descendant pid 38244
+   leftover temp copies: 1 name_pattern=.env-ks915.… mode=600 ignored=y in_git_status=0 env_same=y tmp_holds_new_admin=y
+   bash-reader sandbox dirs left in RUNTMP: 0
+secs=48

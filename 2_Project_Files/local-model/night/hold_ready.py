@@ -134,6 +134,34 @@ chk = os.path.join(run, 'out.md.checker')
 if not os.path.isdir(chk): die(f"no checker dir at {chk}")
 
 inp = json.load(open(os.path.join(run, 'input.json')))
+
+# ------------------------------------------------------------------ STRICT-APPLY LEG (2026-11-03, operator 99; IMPROVEMENTS 2026-11-03)
+# Before ANY READY is written (every kind): the run's canonical patch.diff must pass `git apply --cached --check -p1` with NO
+# fuzz option (no -C, no --recount, no --ignore-whitespace) against a CLEAN temporary index of the run's tip. Cause: O96-P6 was held
+# PASS 7/7 although its first hunk (3 leading context lines, NONE trailing) makes git require a match at END OF FILE, so strict
+# apply failed ("patch failed ... :113"); the checker's A2 had applied it with an accommodation (--recount --ignore-whitespace -C1)
+# and this script only noted "NOT STRICT". A pass that does not apply strictly is REFUSED here, with the reason printed.
+def _strict_apply_leg():
+    import tempfile, shutil
+    pp = os.path.join(chk, 'patch.diff')
+    if not os.path.isfile(pp): die(f"STRICT-APPLY leg: no patch.diff at {pp}")
+    tip_ = str(inp.get('tip') or '')
+    if not re.match(r'^[0-9a-f]{7,40}$', tip_): die(f"STRICT-APPLY leg: input.json has no usable tip ({tip_!r})")
+    cands = [c for c in (inp.get('source_checkout'), '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/cache/src') if c and os.path.isdir(c)]
+    repo = next((c for c in cands if subprocess.run(['git', '-C', c, 'cat-file', '-e', tip_ + '^{commit}'], capture_output=True).returncode == 0), None)
+    if repo is None: die(f"STRICT-APPLY leg: tip {tip_} is in none of {cands} - cannot prove a strict apply")
+    td = tempfile.mkdtemp(prefix='hold_ready_strict_', dir=os.environ.get('CLAUDE_SCRATCHPAD') or None)
+    try:
+        env = dict(os.environ, GIT_INDEX_FILE=os.path.join(td, 'index'))
+        r = subprocess.run(['git', '-C', repo, 'read-tree', tip_], capture_output=True, text=True, env=env)
+        if r.returncode != 0: die(f"STRICT-APPLY leg: read-tree {tip_} failed: {r.stderr.strip()[:200]}")
+        r = subprocess.run(['git', '-C', repo, 'apply', '--cached', '--check', '-p1', pp], capture_output=True, text=True, env=env)
+        if r.returncode != 0:
+            die(f"STRICT-APPLY leg: `git apply --cached --check -p1 {pp}` (no fuzz option) against a clean index of tip {tip_[:12]} returned rc {r.returncode}: {r.stderr.strip()[:300]} - NOT HELD (regenerate the pass so its patch applies strictly)")
+        print(f"STRICT-APPLY leg: `git apply --cached --check -p1 patch.diff` (no -C/--recount/--ignore-whitespace) against a clean index of tip {tip_[:12]} rc 0 - ok", file=sys.stderr)
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+_strict_apply_leg()
 ticket = inp['ticket']['identifier'] if isinstance(inp.get('ticket'), dict) else str(inp.get('ticket'))
 NIGHT_DIR = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night'
 # 2026-10-15: round.sh briefs live in a DIRECTORY (night/briefs/<ks_N_pK>/KS-N.md) and the run dir carries that name; the flat-file scan

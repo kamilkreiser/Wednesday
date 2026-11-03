@@ -1,0 +1,164 @@
+diff --git a/Blockchain/Dev/services/shared/src/cache/connection-pool.ts b/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
+--- a/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
++++ b/Blockchain/Dev/services/shared/src/cache/connection-pool.ts
+@@ -112,5 +112,11 @@
+         this.emit('connectionCreated', conn);
+         return conn;
+-      } catch (error) {
+-        lastError = error as Error;
++      } catch (caught) {
++        lastError = caught as Error;
++        let error: string;
++        try {
++          error = String(caught);
++        } catch {
++          error = 'unreadable thrown value';
++        }
+         logger.error('Pool create attempt failed', { attempt: attempt + 1, error: String(error) });
+@@ -219,5 +225,11 @@
+     try {
+       await conn.close();
+     } catch (error) {
+-      logger.error('Pool error closing connection', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Pool error closing connection', { error: reason });
+     }
+diff --git a/Blockchain/Dev/services/shared/src/__tests__/ks1868-connection-pool-create-remove-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/shared/src/__tests__/ks1868-connection-pool-create-remove-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/shared/src/__tests__/ks1868-connection-pool-create-remove-catches-unreadable-throw.test.ts
+@@ -0,0 +1,129 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: ConnectionPool (src/cache/connection-pool.ts) has two catches that log `{ error: String(error) }`:
++// createConnection (a factory failure; after the attempts it rethrows the last ORIGINAL value) and removeConnection
++// (a failed close(); the pool goes on and emits 'connectionRemoved'). The `String(error)` read is unguarded. When the value
++// cannot be read (a revoked Proxy throws on String(); an Error whose `message` getter throws, throws in
++// Error.prototype.toString) the catch itself throws a TypeError, so createConnection rejects with that TypeError instead of
++// the original value and removeConnection rejects without emitting. The factory and close() are plain functions rejecting
++// with the cell's value; the logger is a plain recorder; no network.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  errors: [] as unknown[][],
++  warns: [] as unknown[][],
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: {
++    debug: () => undefined,
++    info: () => undefined,
++    warn: (...args: unknown[]) => {
++      h.warns.push(args);
++    },
++    error: (...args: unknown[]) => {
++      h.errors.push(args);
++    },
++  },
++}));
++
++import { ConnectionPool } from '../cache/connection-pool';
++
++const mkPool = () =>
++  new ConnectionPool<never>(() => Promise.reject(h.toThrow), undefined, {
++    min: 0,
++    max: 1,
++    maxRetries: 1,
++    createRetryMs: 1,
++  });
++
++/** What createConnection rejected with, or 'resolved'. */
++// Boxed on purpose: a promise that resolves with a revoked Proxy throws when it reads `.then` on it.
++async function createOutcome(): Promise<{ caught: unknown }> {
++  try {
++    await (mkPool() as unknown as { createConnection(): Promise<unknown> }).createConnection();
++    return { caught: 'resolved' };
++  } catch (e) {
++    return { caught: e };
++  }
++}
++
++/** Whether removeConnection settled, and how many 'connectionRemoved' events it emitted. */
++async function removeOutcome(): Promise<{ threw: boolean; removed: number }> {
++  const pool = mkPool();
++  let removed = 0;
++  pool.on('connectionRemoved', () => {
++    removed++;
++  });
++  const conn = { id: 'c', close: () => Promise.reject(h.toThrow) };
++  let threw = false;
++  try {
++    await (pool as unknown as { removeConnection(c: unknown): Promise<void> }).removeConnection(conn);
++  } catch {
++    threw = true;
++  }
++  return { threw, removed };
++}
++
++const logged = (needle: string): unknown[][] => h.errors.filter((a) => String(a[0]).includes(needle));
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 ConnectionPool reads a connection failure safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.errors = [];
++    h.warns = [];
++  });
++
++  it('control ks1868 C1 createConnection: an ordinary Error is rethrown as is and its text logged', async () => {
++    const value = new Error('factory down');
++    h.toThrow = value;
++    expect((await createOutcome()).caught === value).toBe(true);
++    expect(logged('Pool create attempt failed')[0][1]).toEqual({ attempt: 1, error: 'Error: factory down' });
++  });
++
++  it('control ks1868 C2 removeConnection: a thrown plain string still emits connectionRemoved and logs that text', async () => {
++    h.toThrow = 'plain text failure';
++    expect(await removeOutcome()).toEqual({ threw: false, removed: 1 });
++    expect(logged('Pool error closing connection')[0][1]).toEqual({ error: 'plain text failure' });
++  });
++
++  it('RED ks1868 R1 createConnection: a revoked Proxy is rethrown as is and a constant reason logged', async () => {
++    const value = revokedProxy();
++    h.toThrow = value;
++    expect((await createOutcome()).caught === value).toBe(true);
++    expect(logged('Pool create attempt failed')[0][1]).toEqual({ attempt: 1, error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 createConnection: an Error whose message getter throws is rethrown as is and a constant reason logged', async () => {
++    const value = getterThrows();
++    h.toThrow = value;
++    expect((await createOutcome()).caught === value).toBe(true);
++    expect(logged('Pool create attempt failed')[0][1]).toEqual({ attempt: 1, error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R3 removeConnection: a revoked Proxy still emits connectionRemoved and logs a constant reason', async () => {
++    h.toThrow = revokedProxy();
++    expect(await removeOutcome()).toEqual({ threw: false, removed: 1 });
++    expect(logged('Pool error closing connection')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R4 removeConnection: an Error whose message getter throws still emits connectionRemoved and logs a constant reason', async () => {
++    h.toThrow = getterThrows();
++    expect(await removeOutcome()).toEqual({ threw: false, removed: 1 });
++    expect(logged('Pool error closing connection')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});
