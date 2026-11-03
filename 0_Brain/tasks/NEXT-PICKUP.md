@@ -8,6 +8,13 @@ supersede: UPDATE BLOCK ADDED 10:24 (backup .pre-1103-1024); REPLACED WHOLESALE 
 
 # NEXT PICKUP — Tue 3 Nov 2026, 09:41 AEDT (successor seat, 50% checkpoint)
 
+## 🔴 UPDATE 11:10 (73% checkpoint — READ FIRST)
+- **Kam asked 11:05:07: action Peter's request** (K test passwords USER_ADMIN/ACCOUNT_ADMIN/ISSUER/BASIC_PASSWORD over WhatsApp; wants platform-S's restore-local-secrets.sh). Names NOT in K develop (measured). **Drafter (Sonnet, this seat's subagent) writing `fleet/briefs_staged/2026-11-03_seat<L><N>_local_secrets_restore.md`** for an Opus C3 seat (measure the source; build K's script only for local-stack dev seeds; STOP on shared-box creds). If the drafter output is missing after rotation, re-commission from today's note 11:09 line. Then: read whole, dry run, CAPACITY, launch; tell Kam the plan + a WhatsApp line he can send Peter (no passwords over chat).
+- **Gate 160** (Opus T1, PR 1977 auth db pool + Redis listener flips the flag, head ccbca31c): this seat's subagent; workdir `0_Brain/reference/2026-11-03_gate160-ks1868-pr1977/`; RESUME if no verdict.md. Kam card if any outcome is more permissive than base-ordinary.
+- **Gate 159 DONE** (PR 1976): **Kam card `secuura-pr1976-anchor-trust-failopen-1103` (rec a, DEFAULT a after 4 h from ~11:08 = ~15:08)**; R 77th patching notes + filing the F3 ticket. QUEUE 1976 to B 82nd after the ruling/default.
+- **Merge queue for B 82nd** (%102, plan CONFIRMED, PR 1972 QUEUED 11:01): 1972 -> 1973 -> 1974 -> 1975 -> 1970 (Kam = a 10:57) -> 1976 (card). One QUEUE per MERGED.
+- **Fix seats owed after F 25th**: api-gateway fail-closed (KS-1961, Kam = a on 1970); anchor trust fail-closed (G159-F3, if Kam = a). Seat W 22nd (raise O91/O92/O93 passes) when capacity allows.
+
 ## 🔴 UPDATE 10:24 (65% checkpoint — READ FIRST, supersedes below where it differs)
 - develop **66cbe4e52d5a** (PR 1971). Merged on Wednesday GOs today: 12 (1957-1963, 1966, 1967, 1969, 1964, 1971).
 - **READY TO QUEUE (all gated GO WITH NOTES, notes PATCHED, no cards), in order: PR 1972 (head 8c255e05), PR 1973 (e16104be), PR 1974 (35f1842f).** QUEUE each to **Seat B 82nd AFTER its plan confirmation** (never to an unbooted seat). Template: this seat's scratchpad queue_1971.md / go_1971.md shapes (subject `QUEUE: PR <n> at <head12> (Seat B 82nd)`; GO subject `GO: merge PR <n> at <head12> on develop <pin12> (Seat B 82nd)`).
