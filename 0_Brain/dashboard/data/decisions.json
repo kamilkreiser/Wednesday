@@ -58766,5 +58766,40 @@
    "CARD hpsmpoc-kam-rail-words-1103",
    "CARD hpsmpoc-steve-review-words-1103"
   ]
+ },
+ {
+  "id": "nexusai-rd902-round2-cap-1104",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI RD-902: last check passed all four gaps from round 1 and found one new test gap. Land it and ticket the gap?",
+  "bluf": "Tap a to land it and ticket the one gap. RD-902 stops a viewer's read of the risk conditions from writing to the store; only an administrator's read syncs. The change itself is correct: it agrees with the save-side check in all 1008 combinations tested, and a refused reader sees exactly what they see today. The second and last check (the cap) confirmed the four test gaps from round 1 are closed, and the full suite passes (5,311 tests). It found one new gap: no test covers a site where users and sign-in exist but first-time setup is not marked complete (24 of 1,008 combinations). If that code broke, such a site would sync LESS, never give anyone more access. The fix is one more test, with no product change. Whether real setups ever reach that state was not measured. Nothing deploys on a merge (the demo deploy switch is off). (Override reason: the four earlier round-2 cap cards, RD-686, Composer #85, HPSM-POC 148/310 and MPS-359, were other classes; you chose a on each, which is why a is recommended here.)",
+  "default_action": "Until you tap, nothing lands (option c); the gap is ticketed either way.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Land it and ticket the gap",
+    "detail": "Merge as checked (merge commit, pinned to the checked version); one ticket asks for the missing test with the gate's test text attached; then the next queued change (RD-916)"
+   },
+   {
+    "key": "b",
+    "label": "A third round",
+    "detail": "A builder adds the one test, then a fresh check of an hour or two; your word is needed because this was the last allowed round"
+   },
+   {
+    "key": "c",
+    "label": "Hold",
+    "detail": "Nothing lands while the gap is open"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T10:41:52.506674+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd686-round2-cap-ship-words-or-round3",
+   "CARD composer-pr85-round2-nogo-one-line-1021",
+   "CARD hpsmpoc-148-310-round2-test-gap-merge-1023",
+   "CARD mps-359-persite-round2-cap-1103"
+  ]
  }
 ]
