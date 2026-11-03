@@ -1,0 +1,73 @@
+Refs KS-915 · https://linear.app/secuura/issue/KS-915
+
+**TIER 1 (credential handling). Behaviour change first:** a developer can now get working local platform-k credentials from one command, `Blockchain/Dev/scripts/restore-local-secrets.sh`, generated on their own machine, instead of asking someone to send a password. **Nothing in any deployed environment changes:** no product code, seeder, compose file, env template or `bootstrap-env.sh` line is edited, and nothing deploys from this PR.
+
+**Gate questions:** (1) can any path print or commit a generated value? (2) does a second run ever change a working set? (3) can the script run against a hosted target (a non-local `DATABASE_URL`, or `NODE_ENV=production`), and do both refusals happen before any write? (4) does the output file escape the gitignore, and is its mode 0600?
+
+## Why
+
+`Blockchain/Dev/env.example` (the canonical template) ships `ADMIN_USER_PASSWORD=` and `ALLOW_DEFAULT_SEED_PASSWORDS=` empty, and `bootstrap-env.sh` fills only the infrastructure keys. The auth seeder (`seedDemoUsers`, `services/auth/src/repositories/userRepo.ts`) skips everything unless `ALLOW_DEFAULT_SEED_PASSWORDS === 'true'` (L1332) and seeds the platform admin only from `requiredSeedPw('ADMIN_USER_PASSWORD')` (L1407). So a clone that follows the docs seeds no users, and the admin password systemTest asks for (`BOOTSTRAP_ADMIN_PASSWORD`, systemTest/README.md L84) exists nowhere. The ticket's own words: "A clean stack has no supported way to obtain its first privileged account." This PR is the "one-shot bootstrap command" the ticket names, scoped to a developer's local stack.
+
+The name matches platform-s's script so a developer finds it. The mechanism is deliberately different: platform-s's `restore-local-secrets.sh` copies files from a store the developer already holds (a transfer); this one generates the values locally, so nobody sends anybody a password.
+
+## What the script does, in order
+
+1. **Refuses first, writing nothing (exit 3):** when `.env` or `.env.local` is a symbolic link; when `DATABASE_URL` names a host other than `localhost`, `127.0.0.1`, `::1` or the compose service `postgres`, names more than one host (a comma, or anything after `]` but a port), carries a `host` or `hostaddr` query parameter or a percent-encoded parameter name, or cannot be read as a URL; when `NODE_ENV` is `production` in any case. Both keys are read **the way their consumers read them**: the shell, and every line of `Blockchain/Dev/.env` (or of the template a fresh `.env` is copied from) that dotenv 16 or `docker compose` would read as that key, in any spelling (`export KEY=`, leading spaces, `KEY = v`, `KEY: v`, quotes, an inline `# comment`), each read three ways (as the consumer would, cut at any `#`, and whole); **one reading that is not local is enough to refuse**. `ALLOW_DEFAULT_SEED_PASSWORDS=true` turns on the published demo accounts, which must never happen on a shared box. The message names the variable and where it was read, never the value.
+2. Runs `bootstrap-env.sh` unchanged.
+3. Fills **only when blank in every spelling**: `ADMIN_USER_PASSWORD` (`openssl rand -hex 24`) and `ALLOW_DEFAULT_SEED_PASSWORDS=true`. A set value, in any spelling, is kept; `--rotate` replaces `ADMIN_USER_PASSWORD` (every spelling becomes one `KEY=value` line), and nothing else replaces anything. `ALLOW_DEFAULT_SEED_PASSWORDS` that is `true` in another case (`TRUE`) is rewritten to `true` and the output says so, because the seeder compares exactly; any other explicit value is kept. The value reaches `awk` through its environment, not its argument list; the file is replaced by one rename from a `mktemp` copy named `.env-ks915.XXXXXX`, which the root `.gitignore` (`.env-*`) covers, so a copy left by a SIGKILL cannot be committed.
+4. Sets `.env` and `.env.local` to mode 0600 (a complete `.env` left at 0644 is brought back without a rewrite).
+
+It prints names, paths and lengths only. Compose already forwards both names from `.env` to auth (`docker-compose.yml` L791 and L821), so `docker compose up -d` recreates auth and its seeder (which re-hashes an existing row on every boot) picks the values up.
+
+**Out of scope, on purpose:** `DEMO_SECUURA_PASSWORD` (auth's only `env_file` is `.env.local`, so a value in `.env` never reaches it) and the published `*123` demo defaults, both `KS-668`'s question.
+
+## Round 2: QA gate 165 round 1 (NO GO) and what changed
+
+Gate 165 held the core (33 of 39 shell forms refused before any write; no value printed in 9 runs; idempotence; `--rotate`; 0600; neighbours untouched) and found forms the round-1 refusal did not see. Each fix has red cells built from the gate's own forms (its `harness/q1`, `q1b`, `q234` and `q4b`); against the round-1 script `411f8e1e`, **40 of the 67 new cells fail by assertion**, 0 FATAL, and the other 27 are forms that already held, now pinned.
+
+| Gate item | What changed | Red cells (fail on `411f8e1e`) |
+|---|---|---|
+| F1 (HIGH) | `DATABASE_URL` and `NODE_ENV` read in every consumer spelling, every line; one non-local or production reading refuses | `.env` `export`, leading spaces, `KEY = v`, `KEY: v`, local-then-remote; `NODE_ENV` comment, `export`, `= production`, development-then-production, leading spaces |
+| F2 (HIGH) | any `host`/`hostaddr` query parameter, and any percent-encoded parameter name, refuses | `?h%6Fst=` in the shell and in `.env`; `?host=/tmp` |
+| F3 | a host list, or anything after `]` but a port, refuses | `localhost:5432,remote:5432` (shell and `.env`), `[::1],remote`, `[::1]remote`, `localhost:54x32` |
+| F4 | temp copy named `.env-ks915.XXXXXX` (ignored) | a shim `mv` SIGKILLs the script at the rename: the leftover exists, `git check-ignore` ignores it, `status --untracked-files=all` does not list it; control: the round-1 name is NOT ignored |
+| F5 | an existing `ADMIN_USER_PASSWORD` in any spelling is kept | `export` and `KEY = v` forms: one line, same value, "kept" |
+| F6 | `TRUE` rewritten to `true`, said in the output | `ALLOW_DEFAULT_SEED_PASSWORDS=TRUE` |
+| F9 | a symlinked `.env` or `.env.local` refuses before any write or chmod | both, with a COMPLETE target outside the tree: refused, target content and 0644 unchanged |
+| F11 | cells that kill the gate's permissive survivors | uppercase and quoted `NODE_ENV`, `hostaddr`, a host containing `localhost`, schemeless and keyword values, an unclosed `[`, first- and last-line reads |
+
+**One gate control flips, as ruled:** `postgres:///x?host=/tmp` (a socket directory through `?host=`) was accepted in round 1 and is now refused, because the F2 ruling refuses any `host` parameter. A socket through an empty host (`postgres:///x`) is still accepted.
+
+**Known limits, ruled out of this PR (recorded, not changed):** the generated value is lowercase hex: the seeder and login accept it, but the platform's own strength rule (register, reset, change-password) needs three character classes (F7); `pgbouncer` is not on the local list, so a `.env` from the legacy template is refused, the safe side (F8); a hostile `BASH_ENV` makes the unchanged `bootstrap-env.sh` trace its own keys (F10); a shared box running compose has local-looking hosts, and only `NODE_ENV=production` refuses there (F12, the approved design).
+
+## Test plan / Test Evidence
+
+**Touched:** four new files, nothing else (`git diff --name-only <develop>...HEAD` = exactly these four). Commits: `411f8e1ea760` (round 1), `0a984b6489af` (round 2), and `87c9e7488fd7`, a merge of develop `09884b0e6382` (forward move: 44 files moved since the base, none shared with these four).
+- `Blockchain/Dev/scripts/restore-local-secrets.sh` (new, 0755)
+- `Blockchain/Dev/scripts/__tests__/restore_local_secrets.test.sh` (new, 0755, 137 cells; picked up by `run-shell-suites.sh`'s glob)
+- `Projects Documents/fragments/flow/KS-915-restore-local-secrets.html`, `Projects Documents/fragments/cheat/KS-915-restore-local-secrets.html`
+
+**Ran** (host: Apple Silicon arm64, macOS 27.0.1, `/bin/bash` 3.2.57, OpenSSL 4.1.0; Node v26.8.1 is on the host, NOT an LTS line, and no cell here runs Node; 2026-11-03 UTC)
+- **Red first:** with the script absent, **97 of 137 cells fail by assertion**, 0 FATAL (the 40 that pass are absence, premise and control cells, each paired with a failing positive cell). Round 2's 67 cells against the round-1 script: 40 fail, 27 pass (above).
+- **Green:** `bash Blockchain/Dev/scripts/__tests__/restore_local_secrets.test.sh` = **137 passed, 0 failed**, on the merged head. Each cell runs the script in a scratch git clone under `$TMPDIR` through `env -i`; a cell that looks at a credential compares it inside the test process and prints only yes or no.
+- **Leak check:** every value the run generated (non-empty, 8+ characters, not carried verbatim by the template; at least 8 of them) is searched for in the stdout+stderr of three runs: 0 found; planted control found (1). `--rotate`'s new value: 0.
+- **Mutants, 22 of 22 killed by assertion** (scratch copies that parse and differ from the script; the worktree script's sha256 unchanged after): the round-1 ten re-anchored (a value printed; the final chmods, and the umask, dropped; regenerate every run; a hosted URL accepted; the `NODE_ENV` refusal dropped; a write before the refusal; the `host` parameter ignored; the refusal printing the URL) and twelve for round 2 (first line only; last line only; plain spelling only; an encoded parameter name allowed; the round-1 temp name; a symlink allowed; `TRUE` taken as true; a host containing `localhost`; a schemeless value; `NODE_ENV` without case; quotes kept; an optional closing bracket). Not used: a comma-check mutant, because it is equivalent (no allowed host contains a comma, and the host patterns reject one after a port); the check stays as defence in depth.
+- **QA gate 165's own shell forms, replayed** (`harness/q1_refusals.sh` lines 19-57 and 60-65, the gate's marker substituted): **39 of 39** should-refuse forms refused (rc 3, no `.env` written, marker never printed), including the four round-1 slips, `host%3D` and `pgbouncer`; local controls 5 of 6 accepted (the sixth is the ruled `?host=/tmp` flip).
+- **Every shell suite** (`run-shell-suites.sh`): develop `2a827aac1923` (my run on a pristine detached worktree, unchanged tree, 00:59:27Z-01:15:49Z): **113 passed, 0 failed, 1 skipped of 114** (`ks949_main_seed_idempotence.test.sh`, skipped for no PostgreSQL on this host, counted as a skip by the runner); round 1 at `411f8e1ea760` (the pre-push hook's leg 14, which is `run-shell-suites.sh` on the pushed commit `411f8e1ea760`, 01:41:46Z-01:59:22Z): **114 passed, 0 failed, 1 skipped of 115** (the same `ks949` skip; the one extra suite is `restore_local_secrets.test.sh`). Read these as the same runner on different trees, not as a change in any other suite. Round 2 at the merged head: (the pre-push hook's leg 14 on `87c9e7488fd7`): **114 passed, 0 failed, 1 skipped of 115**, the same `ks949` skip.
+- **Docs:** `node Blockchain/Dev/scripts/docs-fragments.mjs check` rc 0, ends `OK`; planted control (a typed section number in a scratch copy of the flow fragment) rc 1, naming the fragment.
+
+**NOT run:** `shellcheck` (not installed on this host; nothing was installed); a booted stack (no `docker compose up`, no seeded row, no login with a generated password; that compose and the seeder read the same names is shown by reading them, cells (vii)); the GNU `stat -c` branch of the mode check (Linux); the four platform suites (Schemathesis, Akto, Playwright, k6), since no service, spec or harness changes; Node 24.
+
+**Migrations + config:** none. No migration, no compose change, no env template change. The script WRITES only the developer's gitignored `Blockchain/Dev/.env` (and sets the mode of `.env.local`); the root `.gitignore`'s `.env` line already covers it (cell iv, with a control).
+
+**Pre-push hook:** round 2 pushed by a detached FORWARD driver through the push queue and lock (origin had to hold `411f8e1ea760`, an ancestor of the tip); verified by `ls-remote`: `87c9e7488fd7ef407bd80b06dba2374d969ee019`. Verdict, verbatim: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 skipped (`SKIP — local stack not up on http://localhost:6882`); this PR touches no service or spec. Legs 14 and 15 passed. Round 1's second push (`411f8e1ea760`) printed the same verdict. Round 1's FIRST push (`b286d6798ff3`, never on origin) was refused: leg 15's launcher census read the `--help` heredoc's compose advice as a script that runs compose; that line is printed by `echo` since then.
+
+## Before this deploys
+
+Nothing deploys from this PR: it adds a developer script, its tests and two docs fragments. No image, service, migration or environment changes. After merge a developer runs `Blockchain/Dev/scripts/restore-local-secrets.sh` once in their own clone, then `docker compose up -d` from `Blockchain/Dev`.
+
+## What this PR does not do
+
+platform-s (its script and the four `USER_*` names a reviewer was prompted for belong to platform-s, not platform-k); any shared box, vault or key store; rotating any existing credential; the other secrets in the repo (`DEMO_SECUURA_PASSWORD`, the `*123` defaults); CI; the pre-push hook beyond what ran; Node 24; any message to anyone.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

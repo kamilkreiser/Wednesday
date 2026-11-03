@@ -1,0 +1,142 @@
+── KS-915: restore-local-secrets.sh ──
+ok   the script exists in the tree and is executable
+ok   (i) fresh clone: exits 0
+ok   (i) fresh clone: Blockchain/Dev/.env exists
+ok   (i) .env mode is 0600
+ok   (i) .env.local mode is 0600
+ok   (i) ADMIN_USER_PASSWORD is generated: 32+ chars of [A-Za-z0-9_-]
+ok   (i) ADMIN_USER_PASSWORD is not a placeholder or a published default
+ok   (i) ALLOW_DEFAULT_SEED_PASSWORDS=true (the seeder runs)
+ok   (i) bootstrap-env.sh ran: POSTGRES_PASSWORD is non-empty
+ok   (i) bootstrap-env.sh ran: REDIS_PASSWORD is non-empty
+ok   (i) bootstrap-env.sh ran: PII_ENCRYPTION_KEY is non-empty
+ok   (i) bootstrap-env.sh ran: PII_LOOKUP_HMAC_KEY is non-empty
+ok   (i) bootstrap-env.sh ran: GATEWAY_VOUCH_SECRET is non-empty
+ok   (i) bootstrap-env.sh ran: JWT_PRIVATE_KEY is non-empty
+ok   (i) the output names ADMIN_USER_PASSWORD
+ok   (ii) second run: exits 0
+ok   (ii) second run: .env is byte-identical (sha256)
+ok   (ii) second run: .env.local is byte-identical (sha256)
+ok   (ii) second run: .env mode is still 0600
+ok   (ii-b) control: the test opened .env to 0644
+ok   (ii-b) third run on a complete .env at 0644: exits 0
+ok   (ii-b) third run: .env is back to 0600
+ok   (ii-b) third run: .env.local is back to 0600
+ok   (ii-b) third run: .env content unchanged (sha256)
+ok   (iii) the leak instrument has values to look for (>= 8)
+ok   (iii) runs 1, 2 and 3: generated values found in the output
+ok   (iii) control: a value planted in a copy of the output IS found
+ok   (iii) no xtrace lines in the output
+ok   (iv) git check-ignore covers Blockchain/Dev/.env
+ok   (iv) control: git check-ignore does NOT cover Blockchain/Dev/env.example
+ok   (iv) git status --porcelain lists no .env or .env.local
+ok   (v) hosted DATABASE_URL in the shell: refused (exit 3)
+ok   (v) hosted DATABASE_URL in the shell: no .env written
+ok   (v) the refusal names DATABASE_URL
+ok   (v) the refusal does not print the URL's host
+ok   (v) hosted DATABASE_URL in .env: refused (exit 3)
+ok   (v) hosted DATABASE_URL in .env: .env unchanged (sha256)
+ok   (v) .env refusal names DATABASE_URL and the file
+ok   (v) hosted DATABASE_URL in .env: no ADMIN_USER_PASSWORD written
+ok   (v) a ?host= naming a remote server is refused too
+ok   (v) ?host= refusal names DATABASE_URL
+ok   (v) ?host= refusal: no .env written
+ok   (v) control: DATABASE_URL on localhost is accepted
+ok   (v) control: DATABASE_URL on the compose service 'postgres' is accepted
+ok   (v-b) NODE_ENV=production in the shell: refused (exit 3)
+ok   (v-b) NODE_ENV=production in the shell: no .env written
+ok   (v-b) the refusal names NODE_ENV
+ok   (v-b) NODE_ENV=production in .env: refused (exit 3)
+ok   (v-b) NODE_ENV=production in .env: .env unchanged (sha256)
+ok   (v-b) .env refusal names NODE_ENV and the file
+ok   (v-b) control: NODE_ENV=development is accepted
+ok   (vi) a second clone: exits 0
+ok   (vi) two clones get different ADMIN_USER_PASSWORD values
+ok   (vii) compose forwards ADMIN_USER_PASSWORD from .env to a service
+ok   (vii) compose forwards ALLOW_DEFAULT_SEED_PASSWORDS from .env to a service
+ok   (vii) the auth seeder reads ADMIN_USER_PASSWORD
+ok   (vii) the auth seeder is gated on ALLOW_DEFAULT_SEED_PASSWORDS === 'true'
+ok   (rot) existing values: exits 0
+ok   (rot) an existing ADMIN_USER_PASSWORD is kept
+ok   (rot) an explicit ALLOW_DEFAULT_SEED_PASSWORDS=false is kept
+ok   (rot) a pre-existing .env is brought to mode 0600
+ok   (rot) --rotate: exits 0
+ok   (rot) --rotate replaces ADMIN_USER_PASSWORD with a generated value
+ok   (rot) --rotate does not print the new value
+ok   (rot) --rotate keeps the mode at 0600
+ok   (G165) .env db-export: refused (exit 3)
+ok   (G165) .env db-export: .env byte-identical and still 0644
+ok   (G165) .env db-leading-space: refused (exit 3)
+ok   (G165) .env db-leading-space: .env byte-identical and still 0644
+ok   (G165) .env db-spaced-equals: refused (exit 3)
+ok   (G165) .env db-spaced-equals: .env byte-identical and still 0644
+FAIL (G165) .env db-colon: refused (exit 3)
+       want "3", got "0"
+FAIL (G165) .env db-colon: .env byte-identical and still 0644
+       want "yes", got "no"
+ok   (G165) .env db-local-then-remote: refused (exit 3)
+ok   (G165) .env db-local-then-remote: .env byte-identical and still 0644
+ok   (G165) .env db-remote-then-local: refused (exit 3)
+ok   (G165) .env db-remote-then-local: .env byte-identical and still 0644
+ok   (G165) .env db-comment: refused (exit 3)
+ok   (G165) .env db-comment: .env byte-identical and still 0644
+ok   (G165) .env ne-comment: refused (exit 3)
+ok   (G165) .env ne-comment: .env byte-identical and still 0644
+ok   (G165) .env ne-export: refused (exit 3)
+ok   (G165) .env ne-export: .env byte-identical and still 0644
+ok   (G165) .env ne-space-value: refused (exit 3)
+ok   (G165) .env ne-space-value: .env byte-identical and still 0644
+ok   (G165) .env ne-dev-then-prod: refused (exit 3)
+ok   (G165) .env ne-dev-then-prod: .env byte-identical and still 0644
+ok   (G165) .env ne-leading-space: refused (exit 3)
+ok   (G165) .env ne-leading-space: .env byte-identical and still 0644
+ok   (G165) .env ne-quoted: refused (exit 3)
+ok   (G165) .env ne-quoted: .env byte-identical and still 0644
+ok   (G165) .env ne-upper: refused (exit 3)
+ok   (G165) .env ne-upper: .env byte-identical and still 0644
+ok   (G165) shell NODE_ENV=PRODUCTION: refused (exit 3)
+ok   (G165) shell DATABASE_URL q-encoded-host: refused (exit 3), no .env written
+ok   (G165) .env q-encoded-host: refused (exit 3)
+ok   (G165) .env q-encoded-host: .env byte-identical and still 0644
+ok   (G165) shell DATABASE_URL q-hostaddr: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL q-mixed-case: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL q-socket-dir: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL multi-host: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL bracket-list: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL bracket-junk: refused (exit 3), no .env written
+ok   (G165) .env multi-host: refused (exit 3)
+ok   (G165) .env multi-host: .env byte-identical and still 0644
+ok   (G165) shell DATABASE_URL contains-localhost: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL localhost-prefix: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL schemeless: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL keyword-string: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL unclosed-bracket: refused (exit 3), no .env written
+ok   (G165) shell DATABASE_URL port-junk: refused (exit 3), no .env written
+ok   (G165) control: shell DATABASE_URL localhost-upper is accepted
+ok   (G165) control: shell DATABASE_URL loopback-v4 is accepted
+ok   (G165) control: shell DATABASE_URL loopback-v6 is accepted
+ok   (G165) control: shell DATABASE_URL socket-default is accepted
+ok   (G165) control: shell DATABASE_URL plain-query is accepted
+ok   (G165-F4) a SIGKILL during the rename leaves a temp copy (the case exists)
+ok   (G165-F4) that leftover is ignored by git
+ok   (G165-F4) git status --porcelain --untracked-files=all does not list it
+ok   (G165-F4) control: the same status lists an untracked non-ignored file in Blockchain/Dev
+ok   (G165-F4) control: the round-1 name .env.ks915.X is NOT ignored
+ok   (G165-F5) export form: exits 0
+ok   (G165-F5) export form: kept (one ADMIN line, the same value, output says kept)
+ok   (G165-F5) spaced form: exits 0
+ok   (G165-F5) spaced form: kept (one ADMIN line, the same value, output says kept)
+ok   (G165-F6) ALLOW_DEFAULT_SEED_PASSWORDS=TRUE: exits 0
+ok   (G165-F6) it is rewritten to exactly true
+ok   (G165-F6) the output says it was rewritten
+ok   (G165-F9) a symlinked .env: refused (exit 3)
+ok   (G165-F9) a symlinked .env: the target is unchanged (content and 0644)
+ok   (G165-F9) a symlinked .env.local: refused (exit 3)
+ok   (G165-F9) a symlinked .env.local: the target is unchanged (content and 0644)
+ok   (use) --help exits 0
+ok   (use) --help says it generates and restores nothing from a store
+ok   (use) --help writes no .env
+ok   (use) an unknown flag: refused (exit 64)
+ok   (use) an unknown flag: no .env written
+
+Results: 135 passed, 2 failed

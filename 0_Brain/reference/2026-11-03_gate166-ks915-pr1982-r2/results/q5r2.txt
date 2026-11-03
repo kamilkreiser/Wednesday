@@ -1,0 +1,46 @@
+script sha256 at head: 8dff35f7f199
+== suite at PR head, in the clone ==
+head: rc=0 ok=137 FAIL=0 Results: 137 passed, 0 failed
+== red-first: same suite, script absent ==
+redfirst: rc=1 ok=40 FAIL=97 FATAL=0
+== red on round 1: same head suite, script from 411f8e1e ==
+red411: rc=1 ok=96 FAIL=41 FATAL=0
+== mutants (harness/mutants_r2.py) ==
+g165_mA_contains_localhost: killed (rc=1 ok=135 FAIL=2 FATAL=0) first-fail: FAIL (G165) shell DATABASE_URL contains-localhost: refused (exit 3), no .env written
+g165_mC_no_hostaddr: killed (rc=1 ok=136 FAIL=1 FATAL=0) first-fail: FAIL (G165) shell DATABASE_URL q-hostaddr: refused (exit 3), no .env written
+g165_mE_schemeless_ok: killed (rc=1 ok=135 FAIL=2 FATAL=0) first-fail: FAIL (G165) shell DATABASE_URL schemeless: refused (exit 3), no .env written
+g165_mF_no_lower_nodeenv: killed (rc=1 ok=134 FAIL=3 FATAL=0) first-fail: FAIL (G165) .env ne-upper: refused (exit 3)
+g165_mH_no_quote_strip_candidates: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+g165_mH2_no_dquote_effective: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+g165_mJ_junk_after_bracket: killed (rc=1 ok=136 FAIL=1 FATAL=0) first-fail: FAIL (G165) shell DATABASE_URL bracket-junk: refused (exit 3), no .env written
+g165_mU_first_line_only_db: killed (rc=1 ok=135 FAIL=2 FATAL=0) first-fail: FAIL (G165) .env db-local-then-remote: refused (exit 3)
+g165_mU_first_line_only_node: killed (rc=1 ok=135 FAIL=2 FATAL=0) first-fail: FAIL (G165) .env ne-dev-then-prod: refused (exit 3)
+g165_mY_set_x: killed (rc=1 ok=133 FAIL=4 FATAL=0) first-fail: FAIL (iii) runs 1, 2 and 3: generated values found in the output
+g165_mZ_print_value: killed (rc=1 ok=135 FAIL=2 FATAL=0) first-fail: FAIL (iii) runs 1, 2 and 3: generated values found in the output
+r2_admin_set_first_only: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+r2_cand_no_anyhash: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+r2_eff_no_inline_comment: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+r2_empty_url_refused: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+r2_no_case_rewrite: killed (rc=1 ok=135 FAIL=2 FATAL=0) first-fail: FAIL (G165-F6) it is rewritten to exactly true
+r2_no_comma_check: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+r2_no_cr_strip: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+r2_no_file_db: killed (rc=1 ok=115 FAIL=22 FATAL=0) first-fail: FAIL (v) hosted DATABASE_URL in .env: refused (exit 3)
+r2_no_file_node: killed (rc=1 ok=120 FAIL=17 FATAL=0) first-fail: FAIL (v-b) NODE_ENV=production in .env: refused (exit 3)
+r2_no_lower_host: killed (rc=1 ok=136 FAIL=1 FATAL=0) first-fail: FAIL (G165) control: shell DATABASE_URL localhost-upper is accepted
+r2_no_pct_name_check: killed (rc=1 ok=134 FAIL=3 FATAL=0) first-fail: FAIL (G165) shell DATABASE_URL q-encoded-host: refused (exit 3), no .env written
+r2_no_postgres_service: killed (rc=1 ok=136 FAIL=1 FATAL=0) first-fail: FAIL (v) control: DATABASE_URL on the compose service 'postgres' is accepted
+r2_no_shell_db: killed (rc=1 ok=120 FAIL=17 FATAL=0) first-fail: FAIL (v) hosted DATABASE_URL in the shell: refused (exit 3)
+r2_no_shell_node: killed (rc=1 ok=133 FAIL=4 FATAL=0) first-fail: FAIL (v-b) NODE_ENV=production in the shell: refused (exit 3)
+r2_no_symlink_env: killed (rc=1 ok=136 FAIL=1 FATAL=0) first-fail: FAIL (G165-F9) a symlinked .env: refused (exit 3)
+r2_no_symlink_envlocal: killed (rc=1 ok=136 FAIL=1 FATAL=0) first-fail: FAIL (G165-F9) a symlinked .env.local: refused (exit 3)
+r2_plain_unanchored: killed (rc=1 ok=136 FAIL=1 FATAL=0) first-fail: FAIL (G165) shell DATABASE_URL port-junk: refused (exit 3), no .env written
+r2_query_name_case_sensitive: killed (rc=1 ok=136 FAIL=1 FATAL=0) first-fail: FAIL (G165) shell DATABASE_URL q-mixed-case: refused (exit 3), no .env written
+r2_raw_no_colon: killed (rc=1 ok=135 FAIL=2 FATAL=0) first-fail: FAIL (G165) .env db-colon: refused (exit 3)
+r2_raw_no_export: killed (rc=1 ok=132 FAIL=5 FATAL=0) first-fail: FAIL (G165) .env db-export: refused (exit 3)
+r2_raw_no_leading_space: killed (rc=1 ok=133 FAIL=4 FATAL=0) first-fail: FAIL (G165) .env db-leading-space: refused (exit 3)
+r2_raw_no_space_before_eq: killed (rc=1 ok=134 FAIL=3 FATAL=0) first-fail: FAIL (G165) .env db-spaced-equals: refused (exit 3)
+r2_refuse_exit_1: killed (rc=1 ok=102 FAIL=35 FATAL=0) first-fail: FAIL (v) hosted DATABASE_URL in the shell: refused (exit 3)
+r2_seed_first_wins: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+r2_setkey_canonical_only: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 
+r2_tmpname_round1: killed (rc=1 ok=135 FAIL=2 FATAL=0) first-fail: FAIL (G165-F4) that leftover is ignored by git
+r2_trap_removed: SURVIVED (rc=0 ok=137 FAIL=0 FATAL=0) first-fail: 

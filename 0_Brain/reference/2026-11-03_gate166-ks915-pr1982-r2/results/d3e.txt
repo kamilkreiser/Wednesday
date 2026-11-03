@@ -1,0 +1,16 @@
+== query names with whitespace / escapes (WHATWG strips TAB, LF, CR) ==
+e01  shell rc=0 tree_same=N admin_now_set=y pg_host_contains_marker=y | $'postgres://u:p@localhost/x?ho\tst=gate166rmt.host'
+e02  shell rc=0 tree_same=N admin_now_set=y pg_host_contains_marker=y | $'postgres://u:p@localhost/x?host\t=gate166rmt.host'
+e03  shell rc=0 tree_same=N admin_now_set=y pg_host_contains_marker=y | $'postgres://u:p@localhost/x?ho\rst=gate166rmt.host'
+e11  .env  rc=0 tree_same=N admin_now_set=y consumers: dotenv=REMOTE bash=local compose=REMOTE | DATABASE_URL=\"postgres://u:p@localhost/x\?ho\\nst=gate166rmt.host\"
+e12  .env  rc=0 tree_same=N admin_now_set=y consumers: dotenv=local bash=local compose=REMOTE | DATABASE_URL=\"postgres://u:p@localhost/x\?ho\\tst=gate166rmt.host\"
+e13  .env  rc=0 tree_same=N admin_now_set=y consumers: dotenv=REMOTE bash=local compose=REMOTE | $'DATABASE_URL=postgres://u:p@localhost/x?ho\tst=gate166rmt.host'
+e14  .env  rc=0 tree_same=N admin_now_set=y consumers: dotenv=REMOTE bash=local compose=REMOTE | DATABASE_URL=\"postgres://u:p@localhost/x\?ho\\rst=gate166rmt.host\"
+== control: plain ?host= in .env (instrument fires) ==
+e19  .env  rc=3 tree_same=y admin_now_set=n consumers: dotenv=REMOTE bash=REMOTE compose=REMOTE | DATABASE_URL=postgres://u:p@localhost/x\?host=gate166rmt.host
+== F9: .env.local symlinked to a file outside Blockchain/Dev ==
+f9l rc=3 env_same=y env_mode=644 target_same=y target_mode=644 still_link=y names_link=1
+== hardlinked .env (same inode as a file outside Blockchain/Dev), complete ==
+hardlink rc=0 outside_target_mode=600 links=2
+== ADMIN set then blank (last wins in every consumer) ==
+admin-last-blank rc=0 file_same=y msg=kept_ADMIN_USER_PASSWORD dotenv_reads_admin=blank
