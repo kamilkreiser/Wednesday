@@ -1,0 +1,44 @@
+     ✓ (ix) control: the harness injects the principal the cells set 15ms
+     × (i) another user id in the body: 403, nothing read, nothing applied 11ms
+     × (ii) no principal: 403, nothing read, nothing applied 1ms
+     × (ii) no principal is refused BEFORE the body is parsed: a bad body still gets 403, not 400 3ms
+     × (iii) a principal whose userId is an empty string: 403, nothing read, nothing applied 2ms
+     × (iii) a principal whose userId is a number: 403, nothing read, nothing applied 2ms
+     × (iii) a principal whose userId is an object: 403, nothing read, nothing applied 2ms
+     × (iii) a principal whose userId is null: 403, nothing read, nothing applied 2ms
+     × (iii) a principal whose userId is an empty string is refused BEFORE the body is parsed: a bad body still gets 403 2ms
+     × (iii) a principal whose userId is a number is refused BEFORE the body is parsed: a bad body still gets 403 2ms
+     × (iii) a principal whose userId is an object is refused BEFORE the body is parsed: a bad body still gets 403 2ms
+     × (iii) a principal whose userId is null is refused BEFORE the body is parsed: a bad body still gets 403 2ms
+     × (iv) a platform role (SYSTEM_ADMIN) naming another user: 403, no platform path 2ms
+     × (iv) a platform role (SUPER_ADMIN) naming another user: 403, no platform path 2ms
+     × (viii) the caller id upper-cased passes the schema and is refused by the exact owner check: 403 2ms
+     ✓ (viii) the caller id padded with a space (" cafe1572-aaaa-4572-8572-00000000abcd") fails KS-444 parse first: 400, nothing applied 2ms
+     ✓ (viii) the caller id padded with a space ("cafe1572-aaaa-4572-8572-00000000abcd ") fails KS-444 parse first: 400, nothing applied 2ms
+     ✓ order: an authenticated caller with a bad body AND another user id gets KS-444 400, not 403 2ms
+     × (v) own id: 201, applyCode gets the caller id, the token email, the linked wallet, and no ip or device 2ms
+     × (v) no linked wallet: applyCode gets no wallet, never the body wallet 2ms
+     × (v) a token with no email claim: applyCode gets no email, never the body email 2ms
+     ✓ (vi) KS-444 kept: a bad body from an authenticated caller is 400 BAD_REQUEST and nothing is applied 2ms
+     × (vii) the linked-wallet read fails: 500, nothing applied 2ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 18 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (i) another user id in the body: 403, nothing read, nothing applied
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (ii) no principal: 403, nothing read, nothing applied
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (ii) no principal is refused BEFORE the body is parsed: a bad body still gets 403, not 400
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iii) a principal whose userId is an empty string: 403, nothing read, nothing applied
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iii) a principal whose userId is a number: 403, nothing read, nothing applied
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iii) a principal whose userId is an object: 403, nothing read, nothing applied
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iii) a principal whose userId is null: 403, nothing read, nothing applied
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iii) a principal whose userId is an empty string is refused BEFORE the body is parsed: a bad body still gets 403
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iii) a principal whose userId is a number is refused BEFORE the body is parsed: a bad body still gets 403
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iii) a principal whose userId is an object is refused BEFORE the body is parsed: a bad body still gets 403
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iii) a principal whose userId is null is refused BEFORE the body is parsed: a bad body still gets 403
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iv) a platform role (SYSTEM_ADMIN) naming another user: 403, no platform path
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (iv) a platform role (SUPER_ADMIN) naming another user: 403, no platform path
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: /referrals/apply refuses every referee that is not the caller > (viii) the caller id upper-cased passes the schema and is refused by the exact owner check: 403
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: the caller applying for themselves > (v) own id: 201, applyCode gets the caller id, the token email, the linked wallet, and no ip or device
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: the caller applying for themselves > (v) no linked wallet: applyCode gets no wallet, never the body wallet
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: the caller applying for themselves > (v) a token with no email claim: applyCode gets no email, never the body email
+ FAIL  src/__tests__/ks1572-apply-referee-is-the-caller.test.ts > KS-1572: the caller applying for themselves > (vii) the linked-wallet read fails: 500, nothing applied
+ Test Files  1 failed (1)
+      Tests  18 failed | 5 passed (23)

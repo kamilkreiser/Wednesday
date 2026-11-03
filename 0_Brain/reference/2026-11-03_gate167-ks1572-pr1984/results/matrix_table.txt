@@ -1,0 +1,82 @@
+base boot: Database initialization {"available":true} | head boot: Database initialization {"available":true} | errs: None None
+[ 0] Q1 USER X, body userId = victim V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 1] Q1 no Authorization header, body userId = V
+     BASE 401 UNAUTHORIZED bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+     HEAD 401 UNAUTHORIZED bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 2] Q1 token with NO userId claim (sub = X), body userId = X
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=addr_from_body/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 3] Q1 token userId "" , body userId = V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 4] Q1 token userId numeric 1672, body userId = V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 5] Q1 token userId [X] (array), body userId = X
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=addr_from_body/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 6] Q1 SYSTEM_ADMIN X naming V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 7] Q1 SUPER_ADMIN X naming V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 8] Q1 body userId = X upper-cased
+     BASE 201  bonus=25 SECURA | ref=X_UPPER/PENDING/w=addr_from_body/ok=True/[] | rew=X_UPPER:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[ 9] Q1 token userId = X upper-cased, body userId = X
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=addr_from_body/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[10] Q1 body userId = " " + X (space-padded)
+     BASE 400 BAD_REQUEST bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+     HEAD 400 BAD_REQUEST bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[11] Q1 body userId = X + " " (space-padded)
+     BASE 400 BAD_REQUEST bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+     HEAD 400 BAD_REQUEST bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[12] Q1 bad body (no code) + body userId = V
+     BASE 400 BAD_REQUEST bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+     HEAD 400 BAD_REQUEST bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[13] Q1 path /API/Referrals/Apply (case) naming V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[14] Q1 path trailing slash naming V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[15] Q1 forged x-user-id header = V on X token, body V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[16] Q1 X token, tenant claim missing, body V
+     BASE 201  bonus=25 SECURA | ref=V/PENDING/w=addr_from_body/ok=True/[] | rew=V:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 403 FORBIDDEN bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=0
+[17] Q4 OWN id X (control, 201)
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=addr_from_body/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 201  bonus=25 SECURA | ref=X/PENDING/w=addr_X/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=10
+[18] Q4 OWN id X, body with NO wallet/ip/device/email
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=None/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 201  bonus=25 SECURA | ref=X/PENDING/w=addr_X/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=10
+[19] Q4 OWN id X, body walletAddress = referrer wallet addr_A
+     BASE 201  bonus=0 SECURA | ref=X/INVALID/w=addr_A/ok=False/["WALLET_COLLISION"] | rew=- | uses=1 | flog=WALLET_COLLISION/ip=203.0.113.7/dev=dev-from-body | writes=3 stmts=5
+     HEAD 201  bonus=25 SECURA | ref=X/PENDING/w=addr_X/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=10
+[20] Q4 OWN id Y (LINKED wallet = referrer wallet addr_A), body omits wallet
+     BASE 201  bonus=25 SECURA | ref=Y/PENDING/w=None/ok=True/[] | rew=Y:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 201  bonus=0 SECURA | ref=Y/INVALID/w=addr_A/ok=False/["WALLET_COLLISION"] | rew=- | uses=1 | flog=WALLET_COLLISION/ip=None/dev=None | writes=3 stmts=10
+[21] Q4 OWN id N (no linked wallet)
+     BASE 201  bonus=25 SECURA | ref=N/PENDING/w=addr_from_body/ok=True/[] | rew=N:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 201  bonus=25 SECURA | ref=N/PENDING/w=None/ok=True/[] | rew=N:25000000 | uses=1 | flog=- | writes=3 stmts=10
+[22] Q4 OWN id X, token email disposable (mailinator)
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=addr_from_body/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 201  bonus=25 SECURA | ref=X/PENDING/w=addr_X/ok=True/["DISPOSABLE_EMAIL"] | rew=X:25000000 | uses=1 | flog=DISPOSABLE_EMAIL/ip=None/dev=None | writes=4 stmts=11
+[23] Q4 OWN id X, body email disposable, token email normal
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=addr_from_body/ok=True/["DISPOSABLE_EMAIL"] | rew=X:25000000 | uses=1 | flog=DISPOSABLE_EMAIL/ip=203.0.113.7/dev=dev-from-body | writes=4 stmts=6
+     HEAD 201  bonus=25 SECURA | ref=X/PENDING/w=addr_X/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=10
+[24] Q4 OWN id X, token without tenantId
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=addr_from_body/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 201  bonus=25 SECURA | ref=X/PENDING/w=None/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+[25] Q1 OWN id X, users table UNREADABLE (wallet read fails)
+     BASE 201  bonus=25 SECURA | ref=X/PENDING/w=addr_from_body/ok=True/[] | rew=X:25000000 | uses=1 | flog=- | writes=3 stmts=5
+     HEAD 500 INTERNAL_ERROR bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=4
+[26] Q1 OWN id A (self-referral, own code)
+     BASE 400 BAD_REQUEST bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=1
+     HEAD 400 BAD_REQUEST bonus=None | ref=- | rew=- | uses=0 | flog=- | writes=0 stmts=6
