@@ -58801,5 +58801,54 @@
    "CARD hpsmpoc-148-310-round2-test-gap-merge-1023",
    "CARD mps-359-persite-round2-cap-1103"
   ]
+ },
+ {
+  "id": "wed-docker-vm-cpu-spin-1104",
+  "client_project": "WED",
+  "title": "Docker Desktop's VM is using about 4 cores with nothing running: please Quit and reopen Docker Desktop",
+  "bluf": "Kam, I need you to restart Docker Desktop on this laptop: 1) click the Docker whale in the menu bar, 2) choose Quit Docker Desktop, 3) reopen Docker from Applications and wait for it to say Running. Why: the Docker VM process has been at ~374% CPU (top, 10:56) with no busy container (docker stats: two idle Postgres scratch DBs from old seats) and zero Docker events in 30 minutes, holding load1 at 14-19 since ~10:45 (capacity log). The fleet's launch and push rule is load1 < 7, so Seat E 33rd's PR 1989 push and the R 83rd launch for PR 1995 are both waiting on it. Same shape as your 3 Sep ruling on secuura-studio-docker-wedge (restart). The two idle containers stop with the restart; their data stays in their volumes. D 50th's kintsugi build runs on kintsugi, not here, and is unaffected. Why a card despite the earlier ruling: your 3 Sep restart was for that day's wedge on the Studio; it is not a standing rule, so restarting your Docker stays your call.",
+  "default_action": "If you do not answer: both pushes keep waiting for load1 < 7; nothing is restarted or killed by Wednesday.",
+  "options": [
+   {
+    "key": "a",
+    "label": "I'll Quit and reopen Docker Desktop (recommended)",
+    "detail": "Load should drop; the two waiting pushes go ahead."
+   },
+   {
+    "key": "b",
+    "label": "Let the pushes run at the current load",
+    "detail": "Wednesday lifts the load rule for these two pushes only; the pre-push hook will run slower and may time out."
+   },
+   {
+    "key": "c",
+    "label": "Leave it",
+    "detail": "Both pushes wait until load falls by itself."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T10:57:40.289307+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-21 09:47",
+   "2026-08-21 14:00",
+   "2026-08-24 11:27",
+   "2026-09-02 17:42",
+   "2026-09-03 09:49",
+   "2026-09-03 10:27",
+   "2026-09-05 13:55",
+   "2026-09-07 09:50",
+   "2026-09-08 11:50",
+   "2026-09-09 11:15",
+   "2026-09-09 16:08",
+   "2026-09-10 09:01",
+   "2026-09-16 13:43",
+   "2026-09-16 13:50",
+   "2026-09-21 12:50",
+   "CARD secuura-studio-docker-wedge",
+   "CARD secuura-studio-docker-wedge-2"
+  ]
  }
 ]
