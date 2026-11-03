@@ -15735,5 +15735,12 @@
   "project": "Secuura",
   "ts": "2026-11-04T09:44:40.680350+11:00",
   "text": "FYI, no action needed. The kintsugi deploy agent asked about two things in this round, and I decided both inside your standing deploy grant.\n\nFirst, breached-password checking (KS-1968) goes live on kintsugi at its default of on. That means sign-up and password reset there will refuse passwords known from data breaches, which could affect Stuart's team if they register or reset on kintsugi. Before switching anything over, the agent checks two things: whether kintsugi can reach the breach-check service at all, and how many of our test accounts use breached passwords. You'll get both results.\n\nSecond, the billing fix KS-1933 ships too. It stops one Stripe purchase from being credited twice. It's already merged, kintsugi isn't production, and I haven't checked whether kintsugi's Stripe is in test or live mode.\n\nDemo isn't touched in this round."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Secuura",
+  "ts": "2026-11-04T09:52:01.689642+11:00",
+  "text": "FYI, no action needed. On PR 1989 I changed how the PATH lock you allowed is built. The agent measured that the one-line version would open a new gap: a crafted line in the settings file could slip a remote database address past the check, which the script refuses today. It's now built as the PATH lock plus a refusal when the lock trips. Same outcome you ruled, without the gap."
  }
 ]
