@@ -1,0 +1,76 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/auth/token-manager.ts b/Blockchain/Dev/services/m365-integration/src/auth/token-manager.ts
+--- a/Blockchain/Dev/services/m365-integration/src/auth/token-manager.ts
++++ b/Blockchain/Dev/services/m365-integration/src/auth/token-manager.ts
+@@ -208,6 +208,14 @@
+  */
+ export function classifyMsalTokenError(error: unknown): ClassifiedMsalError | null {
+   const err = error as { name?: unknown; errorCode?: unknown; message?: unknown; code?: unknown };
++  try {
++    void err?.name;
++    void err?.errorCode;
++    void err?.code;
++    void (typeof err?.message === 'string' ? err.message : String(error));
++  } catch {
++    return null;
++  }
+   const name = typeof err?.name === 'string' ? err.name : '';
+   const errorCode = typeof err?.errorCode === 'string' ? err.errorCode : '';
+   const nodeCode = typeof err?.code === 'string' ? err.code : '';
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-classify-msal-token-error-unreadable-throw.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-classify-msal-token-error-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1868-m365-classify-msal-token-error-unreadable-throw.test.ts
+@@ -0,0 +1,53 @@
++import { describe, it, expect } from 'vitest';
++
++// KS-1868: classifyMsalTokenError (src/auth/token-manager.ts) maps what an MSAL token call threw to an honest 400/401/503, or null when it is
++// unclassified (the route then keeps its 500). It reads `name`, `errorCode`, `code` and `message` of the thrown value unguarded. A revoked Proxy
++// throws on every read and an Error whose `message` getter throws throws on the last: the function THROWS from inside the route's catch, where an
++// ordinary error is classified. An unreadable value is an unclassified failure: null, the route's 500.
++import { classifyMsalTokenError } from '../auth/token-manager';
++
++/** The classification, or the string 'rejected' when the function throws (an assertion can then fail on it). */
++function classify(value: unknown): unknown {
++  try {
++    return classifyMsalTokenError(value);
++  } catch {
++    return 'rejected';
++  }
++}
++
++describe('KS-1868 classifyMsalTokenError reads the thrown value safely', () => {
++  it('control ks1868 C1 a network_error is still a 503', () => {
++    expect(classify(Object.assign(new Error('x'), { errorCode: 'network_error' }))).toEqual({
++      status: 503,
++      code: 'SERVICE_UNAVAILABLE',
++      message: 'Microsoft identity platform unreachable',
++    });
++  });
++
++  it('control ks1868 C2 an InteractionRequiredAuthError is still a 401', () => {
++    const e = new Error('consent required');
++    e.name = 'InteractionRequiredAuthError';
++    expect(classify(e)).toEqual({ status: 401, code: 'UNAUTHORIZED', message: 'SSO token was rejected by the identity platform' });
++  });
++
++  it('control ks1868 C3 an unclassified thrown plain string is still null', () => {
++    expect(classify('something odd happened')).toBeNull();
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value is unclassified (null)', () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    expect(classify(proxy)).toBeNull();
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws is unclassified (null)', () => {
++    const hostile = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    expect(classify(hostile)).toBeNull();
++  });
++});

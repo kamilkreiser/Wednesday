@@ -1,0 +1,123 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/health.ts b/Blockchain/Dev/services/originate/src/routes/health.ts
+--- a/Blockchain/Dev/services/originate/src/routes/health.ts
++++ b/Blockchain/Dev/services/originate/src/routes/health.ts
+@@ -56,10 +56,16 @@
+       ]);
+       checks[name] = { status: 'up', latencyMs: Date.now() - start };
+     } catch (err: any) {
++      let reason: string;
++      try {
++        reason = String(err?.message || 'Unknown error');
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       checks[name] = {
+         status: 'down',
+         latencyMs: Date.now() - start,
+-        error: err?.message || 'Unknown error',
++        error: reason,
+       };
+     }
+   }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-health-ready-timed-check-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-health-ready-timed-check-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-health-ready-timed-check-catch-unreadable-throw.test.ts
+@@ -0,0 +1,97 @@
++// KS-1868: GET /ready (src/routes/health.ts) answers 200/503 with one entry per dependency check. Its `timedCheck` catch reads
++// `err?.message || 'Unknown error'` unguarded: a thrown value whose read throws (a revoked Proxy; an Error whose `message` getter throws) makes the
++// catch throw, so the check never records 'down', `Promise.all` rejects, the handler REJECTS and the request gets no 503 answer (Express 4 does not
++// catch a rejected async handler). An ordinary Error gets { status: 'down', error: <message> } and a 503.
++// The handler is taken from the router stack and called with plain stand-ins, so a rejection is caught here and never becomes an unhandled
++// rejection; the database stand-in is a plain function, not jest.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy first.
++const mockState: { toThrow: unknown } = { toThrow: undefined };
++
++jest.mock('../db', () => ({
++  prisma: {
++    $queryRawUnsafe: (..._args: unknown[]) => Promise.reject(mockState.toThrow),
++  },
++}));
++
++jest.mock('../config', () => ({ config: { redisUrl: 'redis://stand-in' } }));
++
++jest.mock('ioredis', () => ({
++  __esModule: true,
++  default: class {
++    connect(): Promise<void> {
++      return Promise.resolve();
++    }
++    ping(): Promise<string> {
++      return Promise.resolve('PONG');
++    }
++    disconnect(): void {}
++  },
++}));
++
++import { healthRouter } from '../routes/health';
++
++type Captured = { statusCode: number; body: any };
++
++async function getReady(): Promise<Captured | undefined> {
++  const layer = (healthRouter as any).stack.find((l: any) => l.route && l.route.path === '/ready');
++  const handler = layer.route.stack[0].handle;
++  const captured: Captured = { statusCode: 0, body: undefined };
++  const res = {
++    status(code: number) {
++      captured.statusCode = code;
++      return res;
++    },
++    json(body: unknown) {
++      captured.body = body;
++      return res;
++    },
++  };
++  try {
++    await handler({}, res);
++  } catch {
++    return undefined;
++  }
++  return captured;
++}
++
++describe('KS-1868 GET /ready reads the thrown value safely', () => {
++  beforeEach(() => {
++    mockState.toThrow = undefined;
++  });
++
++  it('control ks1868 C1 an ordinary Error gives a 503 with its message', async () => {
++    mockState.toThrow = new Error('db gone');
++    const r = await getReady();
++    expect(r?.statusCode).toBe(503);
++    expect(r?.body.checks.postgres).toMatchObject({ status: 'down', error: 'db gone' });
++    expect(r?.body.checks.redis.status).toBe('up');
++  });
++
++  it('control ks1868 C2 a thrown plain string gives a 503 with the default reason', async () => {
++    mockState.toThrow = 'plain text failure';
++    const r = await getReady();
++    expect(r?.statusCode).toBe(503);
++    expect(r?.body.checks.postgres).toMatchObject({ status: 'down', error: 'Unknown error' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value still gives a 503 with a constant reason', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    mockState.toThrow = proxy;
++    const r = await getReady();
++    expect(r?.statusCode).toBe(503);
++    expect(r?.body.checks.postgres).toMatchObject({ status: 'down', error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws still gives a 503 with a constant reason', async () => {
++    mockState.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const r = await getReady();
++    expect(r?.statusCode).toBe(503);
++    expect(r?.body.checks.postgres).toMatchObject({ status: 'down', error: 'unreadable thrown value' });
++  });
++});

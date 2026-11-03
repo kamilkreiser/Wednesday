@@ -1,0 +1,68 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts b/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts
+--- a/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts
+@@ -181,6 +181,11 @@
+ /** True when a submission error is the node telling us the tx is already in the ledger. */
+ export function isAlreadySubmittedError(err: unknown): boolean {
+-  const message = (err as { message?: unknown })?.message;
++  let message: unknown;
++  try {
++    message = (err as { message?: unknown })?.message;
++  } catch {
++    return false;
++  }
+   if (typeof message !== 'string' || message.length === 0) return false;
+   return ALREADY_SUBMITTED_REPLIES.some(pattern => pattern.test(message));
+ }
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-is-already-submitted-error-unreadable-throw.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-is-already-submitted-error-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-is-already-submitted-error-unreadable-throw.test.ts
+@@ -0,0 +1,47 @@
++import { describe, it, expect } from 'vitest';
++
++// KS-1868: isAlreadySubmittedError (src/anchorSubmission.ts) tells the submitter's catch whether the node's reply means "our transaction is
++// already in the ledger" (a re-poll condition, KS-705) or a real failure. It reads `(err as { message?: unknown })?.message` unguarded. When the
++// thrown value cannot be read (a revoked Proxy throws on the read; an Error whose `message` getter throws) the predicate THROWS from inside the
++// submitter's catch, where an ordinary error gets true or false. An unreadable value is not the node's already-included reply: false.
++import { isAlreadySubmittedError } from '../anchorSubmission';
++
++/** The predicate's answer, or the string 'rejected' when it throws (an assertion can then fail on it). */
++function check(value: unknown): unknown {
++  try {
++    return isAlreadySubmittedError(value);
++  } catch {
++    return 'rejected';
++  }
++}
++
++describe('KS-1868 isAlreadySubmittedError reads the thrown value safely', () => {
++  it('control ks1868 C1 an Error carrying the node reply is recognised', () => {
++    expect(check(new Error('All inputs are spent. Transaction has probably already been included'))).toBe(true);
++  });
++
++  it('control ks1868 C2 an unrelated Error is not recognised', () => {
++    expect(check(new Error('something else'))).toBe(false);
++  });
++
++  it('control ks1868 C3 a thrown plain string is not recognised', () => {
++    expect(check('All inputs are spent')).toBe(false);
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value is not recognised, and does not throw', () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    expect(check(proxy)).toBe(false);
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws is not recognised, and does not throw', () => {
++    const hostile = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    expect(check(hostile)).toBe(false);
++  });
++});

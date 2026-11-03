@@ -1,0 +1,108 @@
+diff --git a/Blockchain/Dev/services/billing/src/utils/email.ts b/Blockchain/Dev/services/billing/src/utils/email.ts
+--- a/Blockchain/Dev/services/billing/src/utils/email.ts
++++ b/Blockchain/Dev/services/billing/src/utils/email.ts
+@@ -41,7 +41,13 @@
+       return false;
+     }
+   } catch (error) {
+-    logger.error('[Email] Send failed', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('[Email] Send failed', { error: reason });
+     return false;
+   }
+ }
+diff --git a/Blockchain/Dev/services/billing/src/__tests__/ks1868-billing-email-send-email-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/billing/src/__tests__/ks1868-billing-email-send-email-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/billing/src/__tests__/ks1868-billing-email-send-email-catch-unreadable-throw.test.ts
+@@ -0,0 +1,85 @@
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++
++// KS-1868: sendEmail (src/utils/email.ts) is best-effort and answers false when the send fails. Its catch reads
++// `error instanceof Error ? error.message : String(error)` unguarded, inside the logger call's arguments. When the value fetch rejected with
++// cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws, throws on `.message`) the catch throws, so
++// sendEmail REJECTS into its caller where an ordinary Error is logged and false is returned.
++// The fetch and logger stand-ins are plain functions, not vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy first.
++const h = vi.hoisted(() => ({
++  logged: [] as Array<{ msg: string; meta: unknown }>,
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: {
++    debug: () => undefined,
++    info: () => undefined,
++    warn: () => undefined,
++    error: (msg: string, meta: unknown) => {
++      h.logged.push({ msg, meta });
++    },
++  },
++}));
++
++import { sendEmail } from '../utils/email';
++
++const options = { to: 'a@example.com', subject: 'S', html: '<p>x</p>' };
++
++function failFetchWith(value: unknown): void {
++  vi.stubGlobal('fetch', () => Promise.reject(value));
++}
++
++/** sendEmail's answer, or the string 'rejected' when it rejects (an assertion can then fail on it). */
++async function send(): Promise<boolean | string> {
++  return sendEmail(options).catch(() => 'rejected');
++}
++
++function sentError(): unknown {
++  const hit = h.logged.find((l) => l.msg === '[Email] Send failed');
++  return (hit?.meta as { error?: unknown } | undefined)?.error;
++}
++
++describe('KS-1868 sendEmail reads the thrown value safely', () => {
++  beforeEach(() => {
++    h.logged.length = 0;
++    process.env.SENDGRID_API_KEY = 'test-key';
++  });
++
++  afterEach(() => {
++    vi.unstubAllGlobals();
++    delete process.env.SENDGRID_API_KEY;
++  });
++
++  it('control ks1868 C1 an ordinary Error is logged with its message and sendEmail answers false', async () => {
++    failFetchWith(new Error('network down'));
++    expect(await send()).toBe(false);
++    expect(sentError()).toBe('network down');
++  });
++
++  it('control ks1868 C2 a thrown plain string is logged as itself and sendEmail answers false', async () => {
++    failFetchWith('plain text failure');
++    expect(await send()).toBe(false);
++    expect(sentError()).toBe('plain text failure');
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value still answers false and logs a constant reason', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    failFetchWith(proxy);
++    expect(await send()).toBe(false);
++    expect(sentError()).toBe('unreadable thrown value');
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws still answers false and logs a constant reason', async () => {
++    failFetchWith(
++      Object.create(Error.prototype, {
++        message: {
++          get() {
++            throw new Error('getter boom');
++          },
++        },
++      }),
++    );
++    expect(await send()).toBe(false);
++    expect(sentError()).toBe('unreadable thrown value');
++  });
++});

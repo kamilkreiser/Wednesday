@@ -1,0 +1,112 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/cardano/provider.ts b/Blockchain/Dev/services/anchoring/src/cardano/provider.ts
+--- a/Blockchain/Dev/services/anchoring/src/cardano/provider.ts
++++ b/Blockchain/Dev/services/anchoring/src/cardano/provider.ts
+@@ -126,7 +126,12 @@
+  * Answered:    every other 4xx.
+  */
+ export function isChainReachableError(err: any): boolean {
+-  const status = typeof err?.status_code === 'number' ? err.status_code : null;
++  let status: number | null;
++  try {
++    status = typeof err?.status_code === 'number' ? err.status_code : null;
++  } catch {
++    return false;
++  }
+   if (status === null) return false;
+   if (status === 402 || status === 408 || status === 429) return false;
+   if (status >= 500) return false;
+@@ -142,7 +147,19 @@
+ function recordChainFailure(err: any): void {
+   chainHealth.reachability = 'failing';
+   chainHealth.lastFailureAt = new Date().toISOString();
+-  chainHealth.lastFailureStatus = typeof err?.status_code === 'number' ? err.status_code : null;
+-  chainHealth.lastFailureMessage = String(err?.message ?? 'unknown error').slice(0, 200);
++  let status: number | null;
++  let message: string;
++  try {
++    status = typeof err?.status_code === 'number' ? err.status_code : null;
++  } catch {
++    status = null;
++  }
++  try {
++    message = String(err?.message ?? 'unknown error').slice(0, 200);
++  } catch {
++    message = 'unreadable thrown value';
++  }
++  chainHealth.lastFailureStatus = status;
++  chainHealth.lastFailureMessage = message;
+   chainHealth.consecutiveFailures += 1;
+ }
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-provider-chain-health-record-unreadable-throw.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-provider-chain-health-record-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-provider-chain-health-record-unreadable-throw.test.ts
+@@ -0,0 +1,68 @@
++import { describe, it, expect, beforeEach, vi } from 'vitest';
++
++// KS-1868: the chain-health record of src/cardano/provider.ts. `recordChainOutcome(err)` is called for every failed Blockfrost call (the
++// instrumentation wrapper of the provider handle calls it before the call's own catch runs). It classifies the error with
++// `isChainReachableError` (reads `err?.status_code`) and, for an unreachable chain, `recordChainFailure` (reads `err?.status_code` and
++// `String(err?.message ?? ...)`). All unguarded: when the thrown value cannot be read (a revoked Proxy throws on every read; an Error whose
++// `message` getter throws, throws on the message read) recordChainOutcome THROWS, so the wrapper rejects with a TypeError in place of the provider's
++// error and the record is left half-written. An unreadable value is an unreachable chain with no status and a constant message.
++vi.mock('../utils/logger', () => ({ logger: { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined } }));
++
++import { recordChainOutcome, getChainHealth, __resetChainHealth } from '../cardano/provider';
++
++/** Record the outcome; the string 'rejected' when recordChainOutcome throws (an assertion can then fail on it). */
++function record(value: unknown): string {
++  try {
++    recordChainOutcome(value);
++    return 'recorded';
++  } catch {
++    return 'rejected';
++  }
++}
++
++describe('KS-1868 the chain-health record reads the thrown value safely', () => {
++  beforeEach(() => {
++    __resetChainHealth();
++  });
++
++  it('control ks1868 C1 a 402 quota error is recorded as failing with its status and message', () => {
++    expect(record(Object.assign(new Error('quota'), { status_code: 402 }))).toBe('recorded');
++    const h = getChainHealth();
++    expect(h.reachability).toBe('failing');
++    expect(h.lastFailureStatus).toBe(402);
++    expect(h.lastFailureMessage).toBe('quota');
++    expect(h.consecutiveFailures).toBe(1);
++  });
++
++  it('control ks1868 C2 a 404 answer is recorded as the chain being reachable', () => {
++    expect(record(Object.assign(new Error('Not found'), { status_code: 404 }))).toBe('recorded');
++    expect(getChainHealth().reachability).toBe('ok');
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value is recorded as failing with no status and a constant message', () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    expect(record(proxy)).toBe('recorded');
++    const h = getChainHealth();
++    expect(h.reachability).toBe('failing');
++    expect(h.lastFailureStatus).toBeNull();
++    expect(h.lastFailureMessage).toBe('unreadable thrown value');
++    expect(h.consecutiveFailures).toBe(1);
++  });
++
++  it('RED ks1868 R2 an Error with a 503 status whose message getter throws keeps its status and gets a constant message', () => {
++    const hostile = Object.create(Error.prototype, {
++      status_code: { value: 503 },
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    expect(record(hostile)).toBe('recorded');
++    const h = getChainHealth();
++    expect(h.reachability).toBe('failing');
++    expect(h.lastFailureStatus).toBe(503);
++    expect(h.lastFailureMessage).toBe('unreadable thrown value');
++  });
++});

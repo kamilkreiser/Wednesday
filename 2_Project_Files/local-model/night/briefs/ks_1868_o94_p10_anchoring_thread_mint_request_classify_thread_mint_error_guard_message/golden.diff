@@ -1,0 +1,67 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/threadMintRequest.ts b/Blockchain/Dev/services/anchoring/src/threadMintRequest.ts
+--- a/Blockchain/Dev/services/anchoring/src/threadMintRequest.ts
++++ b/Blockchain/Dev/services/anchoring/src/threadMintRequest.ts
+@@ -74,5 +74,11 @@
+  */
+ export function classifyThreadMintError(error: unknown): ClassifiedMintError | null {
+   const err = error as { message?: unknown; code?: unknown };
++  try {
++    void (typeof err?.message === 'string' ? err.message : String(error));
++    void err?.code;
++  } catch {
++    return null;
++  }
+   const msg = typeof err?.message === 'string' ? err.message : String(error);
+   const errCode = typeof err?.code === 'string' ? err.code : '';
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-classify-thread-mint-error-unreadable-throw.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-classify-thread-mint-error-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1868-anchoring-classify-thread-mint-error-unreadable-throw.test.ts
+@@ -0,0 +1,47 @@
++import { describe, it, expect } from 'vitest';
++
++// KS-1868: classifyThreadMintError (src/threadMintRequest.ts) maps what mintAndLock threw to an honest 400/503, or null when the failure is
++// unclassified (the route then keeps its 500). It reads `err?.message` and `err?.code` unguarded. When the thrown value cannot be read (a revoked
++// Proxy throws on both reads; an Error whose `message` getter throws, throws on the first) classifyThreadMintError THROWS from inside the
++// route's catch, where an ordinary Error is classified. An unreadable value is an unclassified failure: null, the route's 500.
++import { classifyThreadMintError } from '../threadMintRequest';
++
++/** The classification, or the string 'rejected' when the function throws (an assertion can then fail on it). */
++function classify(value: unknown): unknown {
++  try {
++    return classifyThreadMintError(value);
++  } catch {
++    return 'rejected';
++  }
++}
++
++describe('KS-1868 classifyThreadMintError reads the thrown value safely', () => {
++  it('control ks1868 C1 an ordinary Error naming a refused connection is still a 503', () => {
++    expect(classify(new Error('connect ECONNREFUSED 127.0.0.1:443'))).toEqual({
++      status: 503,
++      code: 'SERVICE_UNAVAILABLE',
++      message: 'Cardano network provider unreachable',
++    });
++  });
++
++  it('control ks1868 C2 an unclassified thrown plain string is still null', () => {
++    expect(classify('something odd happened')).toBeNull();
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value is unclassified (null)', () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    expect(classify(proxy)).toBeNull();
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws is unclassified (null)', () => {
++    const hostile = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    expect(classify(hostile)).toBeNull();
++  });
++});
