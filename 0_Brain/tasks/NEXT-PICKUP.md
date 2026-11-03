@@ -35,6 +35,8 @@ supersede: REPLACED WHOLESALE 16:11 AEDT 2026-11-03 by the 15:4x rotation-succes
 
 15. **18:52 GATE 172 RUNNING** (Opus subagent of THIS seat — a rotation kills it, so this seat rotates only AFTER its verdict) on **PR 1988** (KS-1968 B1, F 28th; head ba973c53ecc3, develop de8d208a8426). Commission + verdict: `0_Brain/reference/2026-11-03_gate172-ks1968-pr1988/` (verdict.md when done). On verdict: rule any hold, ANSWER F 28th (notes patch), then QUEUE PR 1988 to the merge seat AFTER PR 1987. The clone move to G-DRIVE also waits for gate 172 to finish.
 
+16. **19:0x PR 1989 (KS-915 rebuild, E 31st) READY FOR GATE** (head ea41c34668dd; suite 267/267; PR 1982's script 110/267 red). **Gate 173 commission is WRITTEN, NOT LAUNCHED:** `0_Brain/reference/2026-11-03_gate173-ks915-pr1989/commission.md` (gate_common pasted). Launch it (Opus Agent subagent, background, prompt = "read the commission whole and execute it") AFTER gate 172 finishes (disk ~16 GiB). E 31st told and holding.
+
 ## KAM
 - Ruled 15:52:48-15:53:05 (all a): pr1982 rebuild, gate clones, pr1979, hibp, auth-lockout — all in the store, receipts on the panel (bf-548face34fdb). auth-lockout delivered -> KS-1967. Others' artefacts: PR 1979 merge, E 31st PR, F 27th PRs + HIBP ticket, the clone removal.
 - Open cards in this seat's scope: 0 Secuura/WED after his rulings (re-check `decision_queue.sh list open`).
