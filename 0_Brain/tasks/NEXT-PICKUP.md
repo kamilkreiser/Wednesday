@@ -8,11 +8,11 @@ supersede: REPLACED WHOLESALE 03:19 AEDT 2026-11-04 by the 01:5x seat at its 65%
 
 # NEXT PICKUP — Wed 4 Nov 2026 (the 01:5x seat's checkpoint handover)
 
-## STATE
-- **develop = 79145a312f0150ca9adaf5a36bb3dea93d108cff** (ls-remote 03:18). Unmoved since PR 1991 merged 01:20.
-- **Live floor (both Sonnet 5.5, Secuura/Blockchain):**
-  - **Seat R 81st** (lane R, pane %117) — brief `2_Project_Files/fleet/briefs_staged/2026-11-04_seatR81_raise_notes_pr16_docs.md`. DONE: NOTES PATCHED PR 1992 (twice; the 15:47Z correction is the live body, sha256 bbe4b5c1) and PR 1993 (sha256 f03ab92a); KS-902 comment cce55d45 (premise false as measured; O101-P1 NOT raised by Wednesday's 16:14Z ruling). IN FLIGHT: PR 16 (nft.routes.ts, O98-P2..P9) push, driver pid 56169 since 16:10:02Z. NEXT for it: PR 16 READY FOR GATE -> two doc PRs (KS-1320; KS-1343 P2B+P3B, single-key titles) -> ITEM 5 tickets 4a/4b -> ITEM 6 gate ticket candidates -> ITEM 7 QUESTION. It wraps at 80-85% (watcher read 66% ~03:1x).
-  - **Seat B 87th** (lane B, pane %118) — brief `.../2026-11-04_seatB87_merge_queue.md`. Plan CONFIRMED 16:02Z, QUEUE PR 1992 sent 16:03Z (head 651f25b0d0e2, develop pin 79145a312f01, expected merge tree 70bbceb1bf16: its early look reproduced it). All 37 tools re-keyed + checked, merged-PR controls 7/7. NEXT: its READY TO MERGE for 1992.
+## STATE (REFRESHED 03:4x at the 71% checkpoint — this block supersedes FIRST WORK items 1-3 below where they differ)
+- **develop = ea5134d6b98c470615c59fca5d3ec30356adfbd7** (ls-remote 16:41:39Z) = **PR 1992 MERGED** by B 87th 16:27:08Z (squash tree 70bbceb1bf16 = the GO's; verified at source). **PR 1993 GO SENT 16:41:39Z** (head 8712cb115e0a, pin ea5134d6b98c, expected tree ce7a5d0d1a99a2f734011df3799b0d597ff4df11): on its MERGED mail verify at source (develop = squash, its tree = ce7a5d0d1a99, refs/pull/1993/merge gone + a control), then B 87th WRAPS (no further queue) -> score it, pane_close.
+- **PR 1994** (= R 81st's PR 16, nft.routes.ts, head 74dc459edbb6, 1 commit on 79145a312f01, 11 files) is under **GATE 178** (Opus Agent subagent, background, tier 1; commission `0_Brain/reference/2026-11-04_gate178-ks1868-pr1994/commission.md`; verdict.md will land there). Two interim notices so far, no verdict. **A rotation KILLS it**: if this seat must rotate before the verdict, re-commission from the same file (round 1 restarts). On its verdict: GO (WITH NOTES) -> notes patch by an R seat, then QUEUE to a NEW merge seat B 88th (B 87th will have wrapped); HOLD-FOR-KAM -> card him with the cells.
+- **Seat R 81st** (lane R, %117): after PR 1994 READY it is on the two doc PRs (KS-1320; KS-1343 P2B+P3B; single-key titles; ONE tier-2 Sonnet gate as a batch when both READYs land), then tickets 4a/4b, then ITEM 6 gate ticket candidates (G176-F2/F3, G177-F2/F3/F5/F7), ITEM 7 QUESTION. It wraps at 80-85% (watcher read 70% at ~03:3x): its successor R 82nd is briefed from its HANDOVER.
+- **Seat B 87th** (lane B, %118): ctx 67% at 16:41Z; wraps after 1993.
 - Gauge 7d 94% (renews ~4d 11h from 01:59). Usage is a guide (Kam 10-22, 10-29: "minimal but used when necessary"): raise / gate / merge seats only.
 - Disk DevMASTER 23-24 GiB free (99%); seats STOP under 15.
 
