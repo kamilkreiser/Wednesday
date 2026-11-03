@@ -1,0 +1,54 @@
+/**
+ * =============================================================================
+ * API-KEY REVOKE — this service's half (KS-643 / KS-764 / KS-578)
+ * =============================================================================
+ * The DECISION moved to `@secuura/shared` (KS-764, QA F-764-01) so that
+ * `originate`'s sibling revoke route can be bound to the same rule instead of
+ * carrying a second copy of it. It is re-exported here unchanged, so every
+ * existing import of this module — including this service's own routes and the
+ * KS-764 test suite — keeps working and there is exactly one implementation.
+ *
+ * What stays: `lookupKeyForRevoke`, which needs this service's pool and the
+ * platform-scope wrapper. That is the half that cannot be shared.
+ * =============================================================================
+ */
+
+import { runWithPlatformScope } from '@secuura/shared';
+import { query } from './db';
+
+export {
+  isOrgBoundedRole,
+  isScopedAdminRole,
+  isPlatformRole,
+  decideTenantAccess,
+  decideKeyRevoke,
+} from '@secuura/shared';
+export type { RevokeDecision } from '@secuura/shared';
+
+/**
+ * KS-578: resolve the key for a revoke regardless of the caller's tenant GUC.
+ *
+ * Under migration 039 (FORCE RLS) the `tenant_isolation` policy needs either a
+ * matching `app.current_tenant_id` or `app.tenant_scope_bypass='platform_admin'`,
+ * and services connect as `secuura_app`, which holds neither BYPASSRLS nor
+ * superuser. So a foreign-tenant row read under the caller's GUC returns zero
+ * rows and the handler 404s on a key that exists.
+ *
+ * The wrap is on this ONE lookup and nothing else — same shape as the
+ * admin-authorised organisation lookup already in this service (index.ts:826),
+ * not a widening of the bypass surface. It is safe only because every caller
+ * routes the result through `decideKeyRevoke` above.
+ *
+ * NOTE on the ticket's stated repro: it says the miss happens "straight after a
+ * restart". It does not — `loadFromDb` warms the in-memory cache with an
+ * unbounded cross-tenant `SELECT * FROM svc_api_keys` (boot log: `apiKeys: 821`,
+ * the whole table), so the cache is at its FULLEST after a restart. The real
+ * window is a key written by ANOTHER service after this one booted, which the
+ * cache has never seen.
+ */
+export async function lookupKeyForRevoke(id: string): Promise<Record<string, unknown> | undefined> {
+  const result = await runWithPlatformScope(() =>
+    query('SELECT * FROM svc_api_keys WHERE id = $1', [id]),
+  );
+  return result.rows.length > 0 ? (result.rows[0] as Record<string, unknown>) : undefined;
+}
