@@ -72,25 +72,25 @@ No path outside the property; no word other than the stamped ones; no rail/nav c
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. Words: proposed text is in the drafter's report word pack; the product owner approves each (the C-39, C-40, C-99, C-120 practice) and the approval is recorded where.
-- STAMP (read whole with the drafter's report; D-n and Q-n answers): ____
-- BASE-MAIN (sha40 of main at stamp): ____
-- WORD-CATEGORY (the product owner's own label, verbatim, in the dialog list): ____
-- WORD-HINT (default none): ____
-- WORD-SUBMITTER (title and body shown to the person after a held submit): ____
-- WORD-HELD-STATE (Admin list state word and filter option): ____
-- WORD-PAGE (page title, lead, admin index link text, loading label): ____
-- WORD-ACTIONS (Approve; Delete; the confirm sentence; Keep it): ____
-- WORD-RESULTS (after Approve with delivery on and off; after Delete): ____
-- WORD-EMPTY-ERR (empty state; 403; 409; service error; API invalid-category message): ____
-- GATE-ROUND (class "held review page and erase", round 1 of 2 expected, tier 1 Opus): ____
-- KEYS (none in a changed line or the message): ____
-- LAUNCH WINDOW (until; load1; live seats): ____
-- Stamped by: ____
-- Launch authority: ____
-- Hard stop and target READY (default target 180, hard stop 300 minutes after your Step-0 date): ____
-- Main at launch, port block, model receipt line and load1 (9680-9689; claude-opus-5-5, row C4 `model-routing.md:94`, BRIEF_SEAT_LEVEL=opus): ____
+- STAMP (read whole with the drafter's report; D-n and Q-n answers): STAMPED 15:54 AEDT 2026-11-03 by Tuesday s236. Read whole: this kit lines 1-96 (counted) and the drafter's report; s235's pre-stamp edit (admin page.test.tsx:75-82) kept. stamp_paths_check run ALONE at f464376b: OK 27, rc 0. Q-1 one card (done, ruled a); Q-2 the seat confirms the Admin role on the picker (default); Q-3 no wait for the focus-ring lane (partition holds: shell files are not yours); Q-4 target 180 / hard stop 300. Every WORD-* slot below is copied by program from the approved card.
+- BASE-MAIN (sha40 of main at stamp): f464376b1f7b62e4a5bf0c73af6c14a8c29993ea
+- WORD-CATEGORY (the product owner's own label, verbatim, in the dialog list): Category (yours): 'Run idea / feedback past Steve', first in the list. (the product owner's 2026-11-03 15:52:44 AEDT live-board ruling: 'a - Approve all as proposed'; verbatim from the card's fact 1)
+- WORD-HINT (default none): none
+- WORD-SUBMITTER (title and body shown to the person after a held submit): To the sender after a held submit: title 'Saved, held for review'; body 'Thank you. Your feedback is saved in the Playbook and held for review. It goes on to Datasec's Jira board only if it is approved.' (the product owner's 2026-11-03 15:52:44 AEDT live-board ruling: 'a - Approve all as proposed'; verbatim from the card's fact 2)
+- WORD-HELD-STATE (Admin list state word and filter option): State word and filter, for Admins: 'Held for review'. (the product owner's 2026-11-03 15:52:44 AEDT live-board ruling: 'a - Approve all as proposed'; verbatim from the card's fact 3)
+- WORD-PAGE (page title, lead, admin index link text, loading label): Page: title 'Feedback for review'; lead 'Items sent with Run idea / feedback past Steve wait here. Approve sends one on to Datasec's Jira board. Delete removes its text for good.'; admin index link 'See the feedback waiting for review'; loading 'Loading the feedback for review...'. (the product owner's 2026-11-03 15:52:44 AEDT live-board ruling: 'a - Approve all as proposed'; verbatim from the card's fact 4)
+- WORD-ACTIONS (Approve; Delete; the confirm sentence; Keep it): Buttons: 'Approve', 'Delete'; confirm 'Delete this feedback? Its text is removed for good.' with 'Delete' and the existing 'Keep it'; busy 'Approving...', 'Deleting...'. (the product owner's 2026-11-03 15:52:44 AEDT live-board ruling: 'a - Approve all as proposed'; verbatim from the card's fact 5)
+- WORD-RESULTS (after Approve with delivery on and off; after Delete): Results: 'Approved. It will go to Datasec's Jira board in the next few minutes.' (sending on); 'Approved. Saved, not yet sent.' (sending off, as on the review site today); 'Deleted. The text is gone for good.' (the product owner's 2026-11-03 15:52:44 AEDT live-board ruling: 'a - Approve all as proposed'; verbatim from the card's fact 6)
+- WORD-EMPTY-ERR (empty state; 403; 409; service error; API invalid-category message): Empty and errors: 'Nothing is waiting for review.'; 'Only the Admin role can review feedback.'; 'This item is no longer waiting for review.'; 'The service answered with an error (n).'; 'Choose review, bug, idea, content or question.' Reused unchanged: Reused, already on screen: 'Keep it', 'Saved, not yet sent', 'From the <role> role on <page>'. (the product owner's 2026-11-03 15:52:44 AEDT live-board ruling: 'a - Approve all as proposed'; verbatim from the card's fact 7)
+- GATE-ROUND (class "held review page and erase", round 1 of 2 expected, tier 1 Opus): Class 'held review page and erase', round 1 of 2, tier 1 Opus (G1 model-routing.md:108).
+- KEYS (none in a changed line or the message): none in a changed line or the message
+- LAUNCH WINDOW (until; load1; live seats): From 15:54 until 18:30 AEDT today; load1 below 7 by launch_when_cool; live beside you: Datasec/MPS-G318, Datasec/NexusAI-N95, Datasec/Security-Composer-G319 (none on HPSM-POC).
+- Stamped by: Tuesday s236 (the Datasec coordinator seat)
+- Launch authority: Tuesday s236; the product owner's signed feedback item, his 11:18 ruling 'Admin opens the page for now', his 15:52:44 approval of the words, and his 15:52 instruction to deploy the feedback tickets (a deploy is Tuesday's later step after the gate and the landing, never yours).
+- Hard stop and target READY (default target 180, hard stop 300 minutes after your Step-0 date): Target READY 180 and HARD STOP 300 minutes after your Step-0 date, written absolute by you.
+- Main at launch, port block, model receipt line and load1 (9680-9689; claude-opus-5-5, row C4 `model-routing.md:94`, BRIEF_SEAT_LEVEL=opus): f464376b1f7b62e4a5bf0c73af6c14a8c29993ea; ports 9680-9689 (lsof 0 listeners at the stamp); claude-opus-5-5, row C4 model-routing.md:94, BRIEF_SEAT_LEVEL=opus; load1 printed by the waiter at launch.
 
 **Your commission is THIS file (read-only);** Step 0 copies it unchanged into `.../HPSM-POC/1_Project_Definition/Briefs/`.
 **Launch (Tuesday), ONE waiter, only after every WORD-* slot is stamped:** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/HPSM-POC-H110 "WED_USAGE_STOP=100 BRIEF_SEAT_LEVEL=opus bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-03_B1206_SEAT-H110_hpsmpoc-steve-feedback-review.md'"`
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 15:54 by Tuesday s236: kit lines 1-96 (counted) and the drafter's report
