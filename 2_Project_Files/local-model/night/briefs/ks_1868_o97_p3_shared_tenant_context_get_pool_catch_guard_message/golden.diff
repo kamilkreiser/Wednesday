@@ -1,0 +1,110 @@
+diff --git a/Blockchain/Dev/packages/shared/src/db/tenant-context.ts b/Blockchain/Dev/packages/shared/src/db/tenant-context.ts
+--- a/Blockchain/Dev/packages/shared/src/db/tenant-context.ts
++++ b/Blockchain/Dev/packages/shared/src/db/tenant-context.ts
+@@ -93,9 +93,15 @@
+       req.tenantPool = manager.getPool(tenantId);
+       next();
+     } catch (err: any) {
++      let reason: string;
++      try {
++        reason = err.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       res.status(503).json({
+         error: 'Tenant database unavailable',
+-        message: err.message,
++        message: reason,
+       });
+     }
+   };
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1868-tenant-context-get-pool-catch-unreadable-throw.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1868-tenant-context-get-pool-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1868-tenant-context-get-pool-catch-unreadable-throw.test.ts
+@@ -0,0 +1,85 @@
++import { describe, it, expect } from 'vitest';
++import { extractTenantContext } from '../db/tenant-context';
++
++// KS-1868: the tenant-context middleware (src/db/tenant-context.ts) attaches a tenant pool to the request; when
++// manager.getPool throws, its catch answers 503 `{ error: 'Tenant database unavailable', message: err.message }`. The
++// `err.message` read is unguarded. When the value cannot be read (a revoked Proxy throws on any property read; an Error whose
++// `message` getter throws) the catch itself throws, so the middleware throws out of the request and no 503 is sent. The
++// manager is a plain stand-in whose getPool throws the cell's value (multi-tenancy off, so no status lookup); the response is
++// a plain recorder; no database.
++type Outcome = { threw: boolean; code: number | undefined; body: unknown; nextCalls: number };
++
++function run(value: unknown): Outcome {
++  const manager = {
++    isEnabled: () => false,
++    getPool: () => {
++      throw value;
++    },
++  };
++  const out: Outcome = { threw: false, code: undefined, body: undefined, nextCalls: 0 };
++  const res = {
++    status(c: number) {
++      out.code = c;
++      return res;
++    },
++    json(b: unknown) {
++      out.body = b;
++      return res;
++    },
++  };
++  const handler = extractTenantContext(manager as never);
++  try {
++    handler({ headers: { 'x-tenant-id': 'b1868000-0000-4000-8000-00000000000a' } } as never, res as never, () => {
++      out.nextCalls += 1;
++    });
++  } catch {
++    out.threw = true;
++  }
++  return out;
++}
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 extractTenantContext reads a thrown value safely', () => {
++  it('control ks1868 C1 an ordinary Error answers 503 with its message', () => {
++    const out = run(new Error('pool gone'));
++    expect(out.threw).toBe(false);
++    expect(out.code).toBe(503);
++    expect(out.body).toEqual({ error: 'Tenant database unavailable', message: 'pool gone' });
++    expect(out.nextCalls).toBe(0);
++  });
++
++  it('control ks1868 C2 a thrown plain string answers 503 without a message', () => {
++    const out = run('plain text failure');
++    expect(out.threw).toBe(false);
++    expect(out.code).toBe(503);
++    expect(out.body).toEqual({ error: 'Tenant database unavailable', message: undefined });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy answers 503 with a constant reason', () => {
++    const out = run(revokedProxy());
++    expect(out.threw).toBe(false);
++    expect(out.code).toBe(503);
++    expect(out.body).toEqual({ error: 'Tenant database unavailable', message: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws answers 503 with a constant reason', () => {
++    const out = run(getterThrows());
++    expect(out.threw).toBe(false);
++    expect(out.code).toBe(503);
++    expect(out.body).toEqual({ error: 'Tenant database unavailable', message: 'unreadable thrown value' });
++  });
++});

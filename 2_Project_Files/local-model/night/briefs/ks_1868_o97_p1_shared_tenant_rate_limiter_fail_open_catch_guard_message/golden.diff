@@ -1,0 +1,113 @@
+diff --git a/Blockchain/Dev/packages/shared/src/middleware/tenant-rate-limiter.ts b/Blockchain/Dev/packages/shared/src/middleware/tenant-rate-limiter.ts
+--- a/Blockchain/Dev/packages/shared/src/middleware/tenant-rate-limiter.ts
++++ b/Blockchain/Dev/packages/shared/src/middleware/tenant-rate-limiter.ts
+@@ -197,8 +197,14 @@
+       next();
+     } catch (err: any) {
+       // On error, allow the request through (fail-open)
++      let reason: string;
++      try {
++        reason = err.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       console.warn(
+-        `[tenant-rate-limiter] Rate limit check failed, allowing request: ${err.message}`,
++        `[tenant-rate-limiter] Rate limit check failed, allowing request: ${reason}`,
+       );
+       next();
+     }
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1868-tenant-rate-limiter-fail-open-catch-unreadable-throw.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1868-tenant-rate-limiter-fail-open-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1868-tenant-rate-limiter-fail-open-catch-unreadable-throw.test.ts
+@@ -0,0 +1,89 @@
++import { describe, it, expect, vi, afterEach } from 'vitest';
++import { createTenantRateLimiter } from '../middleware/tenant-rate-limiter';
++
++// KS-1868: the per-tenant rate limiter (src/middleware/tenant-rate-limiter.ts) is fail-open: when the limit check throws, its
++// catch logs `Rate limit check failed, allowing request: ${err.message}` and calls next(). The `err.message` read is
++// unguarded. When the value cannot be read (a revoked Proxy throws on any property read; an Error whose `message` getter
++// throws) the catch itself throws, so the middleware REJECTS and next() is never called: the request is neither limited nor
++// let through. The failure is provoked by a response stand-in whose setHeader throws the cell's value; console.warn is
++// recorded; no Redis, no network.
++type Outcome = { rejected: boolean; nextCalls: number; lines: string[] };
++
++async function run(value: unknown): Promise<Outcome> {
++  const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
++  const limiter = createTenantRateLimiter({ defaultLimits: { windowMs: 60_000, maxRequests: 5 } });
++  const res: Record<string, unknown> = {
++    setHeader() {
++      throw value;
++    },
++    status() {
++      return res;
++    },
++    json() {
++      return res;
++    },
++  };
++  let nextCalls = 0;
++  let rejected = false;
++  try {
++    await limiter({ headers: { 'x-tenant-id': 'tenant-ks1868' } } as never, res as never, () => {
++      nextCalls += 1;
++    });
++  } catch {
++    rejected = true;
++  }
++  const lines = warn.mock.calls.map((a) => String(a[0]));
++  warn.mockRestore();
++  return { rejected, nextCalls, lines };
++}
++
++const failLine = (o: Outcome): string | undefined => o.lines.find((l) => l.includes('Rate limit check failed'));
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 tenant rate limiter reads a thrown value safely', () => {
++  afterEach(() => {
++    vi.restoreAllMocks();
++  });
++
++  it('control ks1868 C1 an ordinary Error is logged with its message and the request is let through', async () => {
++    const out = await run(new Error('limiter boom'));
++    expect(out.rejected).toBe(false);
++    expect(out.nextCalls).toBe(1);
++    expect(failLine(out)).toBe('[tenant-rate-limiter] Rate limit check failed, allowing request: limiter boom');
++  });
++
++  it('control ks1868 C2 a thrown plain string is logged without a message and the request is let through', async () => {
++    const out = await run('plain text failure');
++    expect(out.rejected).toBe(false);
++    expect(out.nextCalls).toBe(1);
++    expect(failLine(out)).toBe('[tenant-rate-limiter] Rate limit check failed, allowing request: undefined');
++  });
++
++  it('RED ks1868 R1 a revoked Proxy is logged with a constant reason and the request is let through', async () => {
++    const out = await run(revokedProxy());
++    expect(out.rejected).toBe(false);
++    expect(out.nextCalls).toBe(1);
++    expect(failLine(out)).toBe('[tenant-rate-limiter] Rate limit check failed, allowing request: unreadable thrown value');
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws is logged with a constant reason and the request is let through', async () => {
++    const out = await run(getterThrows());
++    expect(out.rejected).toBe(false);
++    expect(out.nextCalls).toBe(1);
++    expect(failLine(out)).toBe('[tenant-rate-limiter] Rate limit check failed, allowing request: unreadable thrown value');
++  });
++});
