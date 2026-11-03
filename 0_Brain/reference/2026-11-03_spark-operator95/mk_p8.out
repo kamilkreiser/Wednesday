@@ -1,0 +1,18 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o95_p8_shared_vc_verifier_verify_signature_outer_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/vc/verifier.ts b/Blockchain/Dev/packages/shared/src/vc/verifier.ts
+--- a/Blockchain/Dev/packages/shared/src/vc/verifier.ts
++++ b/Blockchain/Dev/packages/shared/src/vc/verifier.ts
+@@ -415,6 +415,11 @@
+         errors.push(`Unknown proof value format: ${proofValue.substring(0, 10)}...`);
+       }
+     } catch (err: unknown) {
+-      const msg = err instanceof Error ? err.message : String(err);
++      let msg: string;
++      try {
++        msg = err instanceof Error ? err.message : String(err);
++      } catch {
++        msg = 'unreadable thrown value';
++      }
+       errors.push(`Signature verification error: ${msg}`);
+     }
+

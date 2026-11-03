@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o95_p5_auth_email_get_acs_client_init_catch_guard_message
+diff --git a/Blockchain/Dev/services/auth/src/services/email.ts b/Blockchain/Dev/services/auth/src/services/email.ts
+--- a/Blockchain/Dev/services/auth/src/services/email.ts
++++ b/Blockchain/Dev/services/auth/src/services/email.ts
+@@ -137,7 +137,13 @@
+     console.log(`[Email] ACS client initialised (sender=${ACS_SENDER_ADDRESS})`);
+     return acsClient;
+   } catch (err: any) {
+-    console.error(`[Email] Failed to init ACS client (will fall back to SMTP): ${err?.message}`);
++    let reason: string;
++    try {
++      reason = String(err?.message);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email] Failed to init ACS client (will fall back to SMTP): ${reason}`);
+     return null;
+   }
+ }
+

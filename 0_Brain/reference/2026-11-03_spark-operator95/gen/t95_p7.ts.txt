@@ -1,0 +1,73 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// KS-1868: ServiceClient.healthCheck (src/resilience/service-client.ts) is a probe: an unreachable service is the result
+// `{ healthy: false, latencyMs, error }`, never a throw. Its catch reads the failure into `error` as
+// `error instanceof Error ? error.message : 'Unknown error'`, unguarded. When the value cannot be read (a revoked Proxy throws on
+// `instanceof`; an Error whose `message` getter throws, throws on `.message`) the catch throws, so healthCheck REJECTS where an
+// ordinary Error gives the unhealthy result. The fetch stand-in is a plain function rejecting with the cell's value (stubbed with
+// `vi.stubGlobal`, removed after each cell); the logger is a plain no-op object; the timers are faked so the 5 s abort timer does not
+// outlive the cell; no network.
+vi.mock('../utils/logger', () => ({
+  createLogger: () => ({
+    debug: () => undefined,
+    info: () => undefined,
+    warn: () => undefined,
+    error: () => undefined,
+  }),
+}));
+
+import { ServiceClient } from '../resilience/service-client';
+
+/** The health result without its latency, or the string 'rejected' when healthCheck rejects (an assertion can then fail on it). */
+async function probe(value: unknown): Promise<unknown> {
+  vi.stubGlobal('fetch', () => Promise.reject(value));
+  const client = new ServiceClient({ baseUrl: 'http://service.invalid', serviceName: 'ks1868-probe', retries: 0 });
+  try {
+    const { healthy, error } = await client.healthCheck();
+    return { healthy, error };
+  } catch {
+    return 'rejected';
+  }
+}
+
+const revokedProxy = (): unknown => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 ServiceClient.healthCheck reads the thrown value safely', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('control ks1868 C1 an ordinary Error gives the unhealthy result with its message', async () => {
+    expect(await probe(new Error('connection refused'))).toEqual({ healthy: false, error: 'connection refused' });
+  });
+
+  it('control ks1868 C2 a thrown plain string gives the unhealthy result with the default reason', async () => {
+    expect(await probe('plain text failure')).toEqual({ healthy: false, error: 'Unknown error' });
+  });
+
+  it('RED ks1868 R1 a revoked Proxy gives the unhealthy result with a constant reason', async () => {
+    expect(await probe(revokedProxy())).toEqual({ healthy: false, error: 'unreadable thrown value' });
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws gives the unhealthy result with a constant reason', async () => {
+    expect(await probe(getterThrows())).toEqual({ healthy: false, error: 'unreadable thrown value' });
+  });
+});

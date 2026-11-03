@@ -1,0 +1,134 @@
+diff --git a/Blockchain/Dev/services/auth/src/services/email.ts b/Blockchain/Dev/services/auth/src/services/email.ts
+--- a/Blockchain/Dev/services/auth/src/services/email.ts
++++ b/Blockchain/Dev/services/auth/src/services/email.ts
+@@ -137,7 +137,13 @@
+     console.log(`[Email] ACS client initialised (sender=${ACS_SENDER_ADDRESS})`);
+     return acsClient;
+   } catch (err: any) {
+-    console.error(`[Email] Failed to init ACS client (will fall back to SMTP): ${err?.message}`);
++    let reason: string;
++    try {
++      reason = String(err?.message);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email] Failed to init ACS client (will fall back to SMTP): ${reason}`);
+     return null;
+   }
+ }
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1868-email-acs-client-init-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1868-email-acs-client-init-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1868-email-acs-client-init-catch-unreadable-throw.test.ts
+@@ -0,0 +1,111 @@
++import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
++
++// KS-1868: getAcsClient (src/services/email.ts) builds the lazy ACS client; when the SDK import or the client constructor throws it logs
++// `[Email] Failed to init ACS client (will fall back to SMTP): ${err?.message}` and answers null, so sendEmail falls through to SMTP.
++// The message is read INSIDE the template literal, unguarded. A thrown value whose read throws (a revoked Proxy, an Error whose
++// `message` getter throws) makes the template throw INSIDE the catch, so getAcsClient and with it sendEmail REJECT instead of
++// answering what an ordinary Error gets (true, through SMTP). The cells make the ACS client constructor throw such a value and assert
++// the answer and the logged text. Harness: the real module, with the ACS SDK and nodemailer replaced by plain stand-ins (no network),
++// the provider variables set before the module is loaded, and console.error replaced by a plain function that records its arguments.
++const h = vi.hoisted(() => {
++  process.env.ACS_CONNECTION_STRING = 'endpoint=https://acs.invalid/;accesskey=k';
++  process.env.ACS_SENDER_ADDRESS = 'noreply@secuura.invalid';
++  process.env.SMTP_ENABLED = 'true';
++  process.env.SMTP_HOST = 'smtp.invalid';
++  process.env.SMTP_FROM = 'noreply@secuura.invalid';
++  delete process.env.EMAIL_RECIPIENT_ALLOWLIST;
++  return {
++    toThrow: undefined as unknown,
++    logged: [] as unknown[][],
++  };
++});
++
++vi.mock('@azure/communication-email', () => ({
++  EmailClient: class {
++    constructor() {
++      throw h.toThrow;
++    }
++  },
++}));
++vi.mock('nodemailer', () => ({
++  default: {
++    createTransport: () => ({
++      sendMail: () => Promise.resolve({ messageId: 'm1' }),
++    }),
++  },
++}));
++
++type Email = typeof import('../services/email');
++let mod: Email;
++const realError = console.error;
++const realLog = console.log;
++const realWarn = console.warn;
++beforeAll(async () => {
++  mod = await import('../services/email');
++}, 60_000);
++afterAll(() => {
++  console.error = realError;
++  console.log = realLog;
++  console.warn = realWarn;
++});
++beforeEach(() => {
++  h.toThrow = undefined;
++  h.logged.length = 0;
++  console.log = () => undefined;
++  console.warn = () => undefined;
++  console.error = (...args: unknown[]) => {
++    h.logged.push(args);
++  };
++});
++
++async function send(): Promise<{ ok: boolean; value: boolean | undefined }> {
++  try {
++    return { ok: true, value: await mod.sendEmail({ to: 'user@example.test', subject: 's', text: 't' }) };
++  } catch {
++    return { ok: false, value: undefined };
++  }
++}
++const INIT_LINES = () => h.logged.filter((c) => typeof c[0] === 'string' && (c[0] as string).startsWith('[Email] Failed to init ACS client'));
++const INIT_PREFIX = '[Email] Failed to init ACS client (will fall back to SMTP): ';
++const textOf = (c: unknown[] | undefined): string => (typeof c?.[0] === 'string' ? (c[0] as string) : '<' + typeof c?.[0] + '>');
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the ACS client init catch answers as for an ordinary Error and logs text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the ACS client constructor falls through to SMTP (true) and is logged with its message', async () => {
++    h.toThrow = new Error('acs init down');
++    expect(await send()).toEqual({ ok: true, value: true });
++    expect(INIT_LINES()).toHaveLength(1);
++    expect(textOf(INIT_LINES()[0])).toBe(INIT_PREFIX + 'acs init down');
++  });
++  it('control ks1868 C2: a thrown plain string falls through to SMTP (true) and is logged as undefined', async () => {
++    h.toThrow = 'plain boom';
++    expect(await send()).toEqual({ ok: true, value: true });
++    expect(INIT_LINES()).toHaveLength(1);
++    expect(textOf(INIT_LINES()[0])).toBe(INIT_PREFIX + 'undefined');
++  });
++  it('RED ks1868 R1: a constructor failure that is a revoked Proxy falls through to SMTP (true) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = revokedProxy();
++    expect(await send()).toEqual({ ok: true, value: true });
++    expect(INIT_LINES()).toHaveLength(1);
++    expect(textOf(INIT_LINES()[0])).toBe(INIT_PREFIX + 'unreadable thrown value');
++  });
++  it('RED ks1868 R2: a constructor failure that is an Error whose message getter throws falls through to SMTP (true) and is logged as text, as for an ordinary Error', async () => {
++    h.toThrow = getterThrows();
++    expect(await send()).toEqual({ ok: true, value: true });
++    expect(INIT_LINES()).toHaveLength(1);
++    expect(textOf(INIT_LINES()[0])).toBe(INIT_PREFIX + 'unreadable thrown value');
++  });
++});

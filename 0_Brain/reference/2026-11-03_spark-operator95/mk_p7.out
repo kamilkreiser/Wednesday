@@ -1,0 +1,23 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o95_p7_shared_service_client_health_check_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/resilience/service-client.ts b/Blockchain/Dev/packages/shared/src/resilience/service-client.ts
+--- a/Blockchain/Dev/packages/shared/src/resilience/service-client.ts
++++ b/Blockchain/Dev/packages/shared/src/resilience/service-client.ts
+@@ -153,10 +153,16 @@
+         ...(!response.ok && { error: `HTTP ${response.status}` }),
+       };
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : 'Unknown error';
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       return {
+         healthy: false,
+         latencyMs: Date.now() - start,
+-        error: error instanceof Error ? error.message : 'Unknown error',
++        error: reason,
+       };
+     }
+   }
+

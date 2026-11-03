@@ -1,0 +1,17 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o95_p3_demo_service_reset_route_catch_guard_message
+diff --git a/Blockchain/Dev/services/demo-service/src/routes/reset.ts b/Blockchain/Dev/services/demo-service/src/routes/reset.ts
+--- a/Blockchain/Dev/services/demo-service/src/routes/reset.ts
++++ b/Blockchain/Dev/services/demo-service/src/routes/reset.ts
+@@ -61,5 +61,10 @@
+     });
+   } catch (err: unknown) {
+     const totalDurationMs = Date.now() - overallStart;
+-    const message = err instanceof Error ? err.message : 'Unknown error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     const failedStep = message.includes('pg_restore') ? 'database' : 'redis';
+

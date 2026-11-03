@@ -1,0 +1,121 @@
+diff --git a/Blockchain/Dev/services/originate/src/repositories/shareRepo.ts b/Blockchain/Dev/services/originate/src/repositories/shareRepo.ts
+--- a/Blockchain/Dev/services/originate/src/repositories/shareRepo.ts
++++ b/Blockchain/Dev/services/originate/src/repositories/shareRepo.ts
+@@ -137,7 +137,12 @@
+       `;
+     }
+   } catch (err: any) {
+-    const msg = err instanceof Error ? err.message : String(err);
++    let msg: string;
++    try {
++      msg = err instanceof Error ? err.message : String(err);
++    } catch {
++      msg = 'unreadable thrown value';
++    }
+     if (msg.includes('null value in column "target_id"')) {
+       // Subquery returned no row — document not in this tenant.
+       const friendlyErr: Error & { code?: string } = new Error(
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-share-repo-create-share-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-share-repo-create-share-catch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-share-repo-create-share-catch-unreadable-throw.test.ts
+@@ -0,0 +1,99 @@
++// KS-1868: createShare (src/repositories/shareRepo.ts) catches a failed INSERT, reads the thrown value as
++// `err instanceof Error ? err.message : String(err)` (unguarded), maps a NOT NULL violation to SHARE_TARGET_NOT_FOUND, and
++// otherwise logs the message and RETHROWS the original value. When the value cannot be read (a revoked Proxy throws on
++// `instanceof`; an Error whose `message` getter throws, throws on `.message`) the catch itself throws before it logs and before
++// the rethrow, so the caller gets a different error (a TypeError) than the one the database raised. The cells make the database
++// stand-in reject with such a value and assert that the SAME value is rethrown and the log line carries a reason. The database
++// and logger stand-ins are plain functions, not jest.fn(): a spy inspects what it rejects with and could itself fail on a
++// revoked Proxy before the code under test saw it. Nothing is written.
++const mockState: { toThrow: unknown; errored: unknown[][] } = {
++  toThrow: undefined,
++  errored: [],
++};
++
++jest.mock('../db', () => ({
++  prisma: {
++    $executeRaw: (..._args: unknown[]) => Promise.reject(mockState.toThrow),
++  },
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    warn: () => undefined,
++    error: (...args: unknown[]) => {
++      mockState.errored.push(args);
++    },
++  },
++}));
++
++import { createShare } from '../repositories/shareRepo';
++
++const TENANT = '11111111-2222-3333-4444-555555555555';
++
++beforeEach(() => {
++  mockState.toThrow = undefined;
++  mockState.errored.length = 0;
++});
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++/** Whether createShare rejected, and whether it rejected with the very value the database raised. */
++async function create(): Promise<{ rejected: boolean; same: boolean }> {
++  const raised = mockState.toThrow;
++  try {
++    await createShare({
++      tenantId: TENANT,
++      targetType: 'document',
++      targetId: 'doc-ks1868',
++      recipientEmail: 'recipient@example.test',
++      shareType: 'view',
++      sharedById: null,
++    });
++    return { rejected: false, same: false };
++  } catch (e) {
++    return { rejected: true, same: e === raised };
++  }
++}
++
++const logLine = (error: string): unknown[] => ['createShare failed', { targetType: 'document', error }];
++
++describe('KS-1868 createShare reads the rejection value safely', () => {
++  it('control ks1868 C1 an ordinary Error is rethrown as is and logged with its own message', async () => {
++    mockState.toThrow = new Error('connection refused');
++    expect(await create()).toEqual({ rejected: true, same: true });
++    expect(mockState.errored).toEqual([logLine('connection refused')]);
++  });
++
++  it('control ks1868 C2 a thrown plain string is rethrown as is and logged as text', async () => {
++    mockState.toThrow = 'plain boom';
++    expect(await create()).toEqual({ rejected: true, same: true });
++    expect(mockState.errored).toEqual([logLine('plain boom')]);
++  });
++
++  it('RED ks1868 R1 a revoked Proxy is rethrown as is and logged with a constant reason', async () => {
++    mockState.toThrow = revokedProxy();
++    expect(await create()).toEqual({ rejected: true, same: true });
++    expect(mockState.errored).toEqual([logLine('unreadable thrown value')]);
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws is rethrown as is and logged with a constant reason', async () => {
++    mockState.toThrow = getterThrows();
++    expect(await create()).toEqual({ rejected: true, same: true });
++    expect(mockState.errored).toEqual([logLine('unreadable thrown value')]);
++  });
++});

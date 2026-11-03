@@ -1,0 +1,32 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o95_p4_demo_service_reset_service_catches_guard_message
+diff --git a/Blockchain/Dev/services/demo-service/src/services/resetService.ts b/Blockchain/Dev/services/demo-service/src/services/resetService.ts
+--- a/Blockchain/Dev/services/demo-service/src/services/resetService.ts
++++ b/Blockchain/Dev/services/demo-service/src/services/resetService.ts
+@@ -68,7 +68,12 @@
+     return { success: true, durationMs };
+   } catch (err: unknown) {
+     const durationMs = Date.now() - startTime;
+-    const message = err instanceof Error ? err.message : 'Unknown pg_restore error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown pg_restore error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Database reset failed', { error: message, durationMs });
+     throw new Error(`pg_restore failed: ${message}`);
+   }
+@@ -110,6 +115,11 @@
+     return { success: true, keysCleared: dbSize };
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : 'Unknown Redis error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown Redis error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Redis flush failed', { error: message });
+     throw new Error(`Redis flush failed: ${message}`);
+   } finally {
+

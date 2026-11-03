@@ -1,0 +1,156 @@
+diff --git a/Blockchain/Dev/services/demo-service/src/services/resetService.ts b/Blockchain/Dev/services/demo-service/src/services/resetService.ts
+--- a/Blockchain/Dev/services/demo-service/src/services/resetService.ts
++++ b/Blockchain/Dev/services/demo-service/src/services/resetService.ts
+@@ -68,7 +68,12 @@
+     return { success: true, durationMs };
+   } catch (err: unknown) {
+     const durationMs = Date.now() - startTime;
+-    const message = err instanceof Error ? err.message : 'Unknown pg_restore error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown pg_restore error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Database reset failed', { error: message, durationMs });
+     throw new Error(`pg_restore failed: ${message}`);
+   }
+@@ -110,6 +115,11 @@
+     return { success: true, keysCleared: dbSize };
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : 'Unknown Redis error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown Redis error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Redis flush failed', { error: message });
+     throw new Error(`Redis flush failed: ${message}`);
+   } finally {
+diff --git a/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-demo-service-reset-service-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-demo-service-reset-service-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-demo-service-reset-service-catches-unreadable-throw.test.ts
+@@ -0,0 +1,121 @@
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++
++// KS-1868: resetDatabase and resetRedis (src/services/resetService.ts) each catch a failure, read the thrown value as
++// `err instanceof Error ? err.message : '<default>'` unguarded, log it, and rethrow a descriptive Error (`pg_restore failed: <message>`,
++// `Redis flush failed: <message>`). When the value cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message`
++// getter throws, throws on `.message`) the catch throws a bare TypeError first, so the caller gets neither the descriptive Error nor
++// the reason. The cells make pg_restore's callback and the Redis client reject with such a value and assert the message of what the
++// service rejects with. The child_process, ioredis and logger stand-ins are plain functions, not vi.fn(): a spy inspects what it
++// rejects with and could itself fail on a revoked Proxy before the code under test saw it.
++const state = vi.hoisted(() => ({ toThrow: undefined as unknown }));
++
++vi.mock('../utils/logger', () => ({
++  logger: {
++    debug: () => undefined,
++    info: () => undefined,
++    warn: () => undefined,
++    error: () => undefined,
++  },
++}));
++
++vi.mock('child_process', () => ({
++  execFile: (_cmd: unknown, _args: unknown, callback: (err: unknown, result: unknown) => void) => {
++    callback(state.toThrow, { stdout: '', stderr: '' });
++  },
++}));
++
++vi.mock('ioredis', () => {
++  class StandInRedis {
++    dbsize() {
++      return Promise.reject(state.toThrow);
++    }
++    flushall() {
++      return Promise.resolve('OK');
++    }
++    quit() {
++      return Promise.resolve('OK');
++    }
++  }
++  return { default: StandInRedis };
++});
++
++import fs from 'fs';
++import { resetDatabase, resetRedis } from '../services/resetService';
++
++/** The message of what the call rejected with, or the string 'resolved' when it did not reject. */
++async function rejection(call: () => Promise<unknown>): Promise<string> {
++  try {
++    await call();
++  } catch (e) {
++    return e instanceof Error ? e.message : 'non-error';
++  }
++  return 'resolved';
++}
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the reset service reads the thrown value safely', () => {
++  beforeEach(() => {
++    state.toThrow = undefined;
++    process.env.DATABASE_URL = 'postgres://reset.invalid/db';
++    process.env.REDIS_URL = 'redis://reset.invalid:6379';
++    vi.spyOn(fs, 'accessSync').mockReturnValue(undefined);
++  });
++
++  afterEach(() => {
++    vi.restoreAllMocks();
++  });
++
++  it('control ks1868 C1 an ordinary Error from pg_restore is rethrown with its message', async () => {
++    state.toThrow = new Error('could not connect');
++    expect(await rejection(() => resetDatabase('/seed/demo-snapshot.dump'))).toBe('pg_restore failed: could not connect');
++  });
++
++  it('control ks1868 C2 a thrown plain string from pg_restore gets the default reason', async () => {
++    state.toThrow = 'plain text failure';
++    expect(await rejection(() => resetDatabase('/seed/demo-snapshot.dump'))).toBe('pg_restore failed: Unknown pg_restore error');
++  });
++
++  it('control ks1868 C3 an ordinary Error from Redis is rethrown with its message', async () => {
++    state.toThrow = new Error('connection closed');
++    expect(await rejection(() => resetRedis())).toBe('Redis flush failed: connection closed');
++  });
++
++  it('control ks1868 C4 a thrown plain string from Redis gets the default reason', async () => {
++    state.toThrow = 'plain text failure';
++    expect(await rejection(() => resetRedis())).toBe('Redis flush failed: Unknown Redis error');
++  });
++
++  it('RED ks1868 R1 a revoked Proxy from pg_restore is rethrown with a constant reason', async () => {
++    state.toThrow = revokedProxy();
++    expect(await rejection(() => resetDatabase('/seed/demo-snapshot.dump'))).toBe('pg_restore failed: unreadable thrown value');
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws from pg_restore is rethrown with a constant reason', async () => {
++    state.toThrow = getterThrows();
++    expect(await rejection(() => resetDatabase('/seed/demo-snapshot.dump'))).toBe('pg_restore failed: unreadable thrown value');
++  });
++
++  it('RED ks1868 R3 a revoked Proxy from Redis is rethrown with a constant reason', async () => {
++    state.toThrow = revokedProxy();
++    expect(await rejection(() => resetRedis())).toBe('Redis flush failed: unreadable thrown value');
++  });
++
++  it('RED ks1868 R4 an Error whose message getter throws from Redis is rethrown with a constant reason', async () => {
++    state.toThrow = getterThrows();
++    expect(await rejection(() => resetRedis())).toBe('Redis flush failed: unreadable thrown value');
++  });
++});

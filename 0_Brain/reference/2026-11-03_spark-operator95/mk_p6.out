@@ -1,0 +1,24 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o95_p6_shared_identus_client_resolve_did_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/prism/identus-client.ts b/Blockchain/Dev/packages/shared/src/prism/identus-client.ts
+--- a/Blockchain/Dev/packages/shared/src/prism/identus-client.ts
++++ b/Blockchain/Dev/packages/shared/src/prism/identus-client.ts
+@@ -129,11 +129,17 @@
+         didDocumentMetadata: {},
+       };
+     } catch (err) {
++      let errorMessage: string;
++      try {
++        errorMessage = err instanceof Error ? err.message : String(err);
++      } catch {
++        errorMessage = 'unreadable thrown value';
++      }
+       return {
+         didDocument: null,
+         didResolutionMetadata: {
+           error: 'notFound',
+-          errorMessage: err instanceof Error ? err.message : String(err),
++          errorMessage,
+         },
+         didDocumentMetadata: {},
+       };
+
