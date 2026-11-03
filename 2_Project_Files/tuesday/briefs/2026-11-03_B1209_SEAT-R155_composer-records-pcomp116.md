@@ -26,11 +26,11 @@ model: claude-sonnet-5-5 -- C8 records (`/Volumes/Laptop-DEV/TUESDAY/2_Project_F
 
 ## Stamp
 Tuesday fills each slot at launch; the drafter fills none. Unstamped, 6 lines read with the pattern (five slot lines and the last line). Slot words, drafter default in brackets: `NEW-A` [FILE], `NEW-B` [FILE], `NEW-C` [FILE], `NEW-D` [FILE] (FILE or NONE: the Jira Task for the indent and x--y; for the VT, FF and NBSP lines; for the carriage-return line; for gawk, demo VM and line 259 together; NONE keeps its BACKLOG row, the comment says "recorded, not ticketed"); `COMMENT-116` [FILE]; `C-123` [FILE] (NONE writes no entry); `REMOVAL` [NONE]; `JIRA-OTHER` [NONE]. Rows #457 to #462 and the State append are written in every case.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Launch authority and hard stop: ____
-- Heads at launch: ____
-- SLOTS: ____
+- STAMP: STAMPED 13:33 AEDT 2026-11-03 by Tuesday s235. Read whole: this kit lines 1-91 and the drafter's report summary. stamp_paths_check run ALONE at 2f63b2f6 rc 0 (OK 10); SHOW DEPLOY.md:255 still the old sentence and :259 as the kit says. Tuesday landed #114 itself and verified it at source (main 2f63b2f6, one parent f5f33e18, blobs equal ce523783). .tools/b1209 absent; root main 628dfbf4.
+- LAUNCH WINDOW: From 13:33 until 16:00 AEDT today; launch_when_cool, one waiter, load1 below 7. No Composer pane is live.
+- Launch authority and hard stop: The product owner's 2026-11-03 ruling 'Land it as it is; ticket the four shapes' (he decided this one). Tuesday s235 launches. READY 120 and HARD STOP 180 minutes after your Step-0 date, never after 17:00 AEDT today.
+- Heads at launch: Code main 2f63b2f677b030799cf7f507016fd0d0df59dbaf; root records main 628dfbf4 (Tuesday's reads at the stamp); re-read at Step 0.
+- SLOTS: NEW-A FILE; NEW-B FILE; NEW-C FILE; NEW-D FILE (Q-1: one ticket for gawk, the demo VM and line 259); COMMENT-116 FILE (Q-2: comment only, no move); C-123 FILE; REMOVAL NONE; JIRA-OTHER NONE. Q-3 baseline 628dfbf4 yes; Q-4 the DEPLOY.md:255 one-liner is Tuesday's separate code PR first, with the b616 scanner test run; Q-5 yes.
 
 ## THE WORK (the order is the order; each step carries its severity or STOP)
 **Steps 0 to 2, as the B1189 kit:** copy this file unchanged into `.../Datasec Security Composer/1_Project_Definition/Briefs/`, `cmp`, sha256, slot count with control, REFUSE; STATUS-NOW (first line `RECORDS B1209: PENDING`, no `READY FOR REVIEW:`, `STOPPED:` or `BLOCKED:` until you mean it); READY 120 and HARD STOP 180 minutes after your Step-0 `date`, absolute, never past the launch window; `refs-before.txt`, `status-all-before.txt`, `jira-before.txt` ONCE before STATUS or the evidence folder (`runs/`); read whole the three gate STATUS files, `residue.md`, C-111, C-112, C-116, C-120 to C-122, BACKLOG #434 and #456 and #449 to #453, `JIRA.md`, PCOMP-116; `git worktree add -b records/b1209 .tools/wt-b1209-rec main`, four tracked paths only, added lines holding no card slug, person's name, client name, "Tuesday", "Wednesday" or "Friday". STOP on a REFUSE hit or a pointer/figure inside Jira text that disagrees (that text HOLDS).
@@ -87,4 +87,4 @@ Each write logged to `scratch/writes.jsonl` BEFORE the call, one per command, th
 ## UNMEASURED by the drafter
 The hosted site; every gate cell (RELAYED); whether main or Jira moved after the drafter's last read; who merged; whether the coordinator re-read CodeQL beyond the check-run times; gawk; the demo VM; the clocks inside the gates' cells.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 13:33 by Tuesday s235: kit lines 1-91 and the drafter's report summary
