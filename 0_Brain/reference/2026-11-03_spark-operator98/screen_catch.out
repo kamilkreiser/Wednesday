@@ -1,0 +1,87 @@
+packages/shared/src/cardano/wallet.ts 2
+     178 throw new Error(`Failed to enable wallet ${name}: ${error instanceof Error ? error.message : 'User rejected'}`
+     421 error: err instanceof Error ? err.message : String(err),
+packages/shared/src/events/index.ts 2
+     150 if (!err.message?.includes('BUSYGROUP')) throw err;
+     225 if (err?.message?.includes('NOGROUP')) {
+packages/shared/src/prism/resolver.ts 1
+     230 errorMessage: `Failed to resolve did:web: ${error}`,
+packages/shared/src/telemetry/tracing.ts 3
+     124 `to enable. Error: ${err.message}`,
+     187 span.setStatus({ code: 2, message: err.message }); // SpanStatusCode.ERROR = 2
+     210 console.warn(`[tracing] Error shutting down OTel SDK: ${err.message}`);
+services/api-gateway/src/routes/system-status.ts 1
+     347 error: error instanceof Error ? error.message : 'Unknown error',
+services/api-gateway/src/startup-migrations.ts 12
+     163 error: err?.message?.substring(0, 200),
+     879 if (!err?.message?.includes('already exists')) {
+     943 log('warn', 'secuura_app role provisioning failed', { error: err?.message });
+     968 log('warn', `secuura_app grants failed on ${dbName}`, { error: err?.message });
+     1035 log('warn', 'File-based main DB migrations failed', { error: err?.message });
+     1052 log('warn', 'File-based platform DB migrations failed', { error: err?.message });
+     1117 log('warn', 'Per-client user tenant re-sync FAILED (main DB)', { error: seedErr?.message?.substring(0, 200) })
+     1122 log('warn', 'Main DB migrations failed', { error: err?.message });
+     1223 log('warn', 'Platform tenant seed FAILED (platform DB)', { error: seedErr?.message?.substring(0, 200) });
+     1228 log('warn', 'Platform DB migrations failed', { error: err?.message });
+     1280 log('debug', `Tenant ${tenant.slug} migration skipped`, { error: err?.message?.substring(0, 60) });
+     1295 log('warn', 'Tenant DB migration scan failed', { error: err?.message });
+services/billing/src/index.ts 3
+     84 stripeError = err?.message || 'Stripe configuration error';
+     194 logger.warn('Error closing database during shutdown', { error: err?.message });
+     241 logger.error('Configuration error', { error: error?.message });
+services/kyc/src/providers/microsoft-entra-client.ts 2
+     100 error: error.response?.data || (error instanceof Error ? error.message : String(error))
+     129 error: error.response?.data || (error instanceof Error ? error.message : String(error)),
+services/kyc/src/routes/microsoft-verification.ts 1
+     225 logger.error('KYC callback rejected: KYC_CALLBACK_API_KEY is not configured', { error: err.message });
+services/nft-certificate/src/routes/nft.routes.ts 15
+     118 logger.error('Error minting NFT', { error: error instanceof Error ? error.message : String(error) });
+     177 logger.error('Error recording NFT mint', { error: error instanceof Error ? error.message : String(error) });
+     217 logger.error('Error estimating cost', { error: error instanceof Error ? error.message : String(error) });
+     262 logger.error('Error fetching certificates', { error: error instanceof Error ? error.message : String(error) })
+     293 logger.error('Error fetching certificate', { error: error instanceof Error ? error.message : String(error) });
+     321 logger.error('Error fetching tiers', { error: error instanceof Error ? error.message : String(error) });
+     342 logger.error('Error fetching privacy options', { error: error instanceof Error ? error.message : String(error)
+     388 logger.error('Error fetching supported chains', { error: error instanceof Error ? error.message : String(error
+     426 logger.error('Error verifying transaction', { error: error instanceof Error ? error.message : String(error) })
+     462 logger.error('Error verifying asset', { error: error instanceof Error ? error.message : String(error) });
+     522 logger.error('Error uploading to IPFS', { error: error instanceof Error ? error.message : String(error) });
+     550 logger.error('Error pinning CID', { error: error instanceof Error ? error.message : String(error) });
+     575 logger.error('Error unpinning CID', { error: error instanceof Error ? error.message : String(error) });
+     693 logger.error('Error estimating metadata size', { error: error instanceof Error ? error.message : String(error)
+     739 logger.error('Error updating platform fee', { error: error instanceof Error ? error.message : String(error) })
+services/originate/src/index.ts 2
+     391 logger.warn('PII encryption init failed (consent/DSR will store plaintext)', { error: err?.message });
+     517 logger.warn('Startup migration issue (non-fatal)', { error: err?.message });
+services/originate/src/routes/platformOrganizations.ts 2
+     112 logger.error('erase-connector: resolving the erasure target failed', { tenantId: ctx.tenantId, error: err inst
+     168 logger.error('erase-connector: the status read failed', { tenantId: ctx.tenantId, error: err instanceof Error 
+services/prism/src/index.ts 3
+     163 logger.error('DB save DID failed', { error: err?.message });
+     233 logger.error('DB save credential failed', { error: err?.message });
+     292 logger.warn('Failed to load credentials from DB', { error: err?.message });
+services/referral/src/routes/referrals.ts 3
+     100 return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: error.message } });
+     196 return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: error.message } });
+     384 return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: error.message } });
+services/timestamping/src/tsa/rfc3161-verify.ts 4
+     135 return { reason: `rsassaPss parameters did not parse: ${(e as Error)?.message ?? e}` };
+     191 return { reason: `ESSCertIDv2 hashAlgorithm did not parse: ${(e as Error)?.message ?? e}` };
+     458 } catch (e) { return refuse(`signature verification failed: ${(e as Error)?.message ?? e}`); }
+     478 return refuse(`certificate chain did not validate: ${(e as Error)?.message ?? e}`);
+services/tokenisation/src/index.ts 6
+     81 const message = err instanceof Error ? err.message : String(err);
+     113 const message = err instanceof Error ? err.message : String(err);
+     271 const message = err instanceof Error ? err.message : String(err);
+     362 const message = err instanceof Error ? err.message : String(err);
+     386 const message = err instanceof Error ? err.message : String(err);
+     401 const message = err instanceof Error ? err.message : String(err);
+services/transfer/src/routes/delegations.ts 3
+     89 return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: error.message } });
+     211 if (error.message === 'Delegation not found') {
+     293 // KS-1410: this 500 returned `message: error.message` before - the thrown text reached the client unguarded; 
+services/transfer/src/routes/workflows.ts 1
+     185 return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: error.message } });
+services/vc-issuer/src/routes/identity-credentials.ts 1
+     88 return next(new AppError(`Validation error: ${zod3Issues(error.issues).map(e => e.message).join(', ')}`, 400))
+TOTAL 67

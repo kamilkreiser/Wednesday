@@ -1,0 +1,105 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// KS-1868: SecretsManager.getSecret (src/vault/key-vault.ts) reads a secret from Azure Key Vault and, when that fails, logs a
+// warning `{ secret, error: err.message }` and falls back to the environment variable. The `err.message` read is unguarded.
+// When the value cannot be read (a revoked Proxy throws on any property read; an Error whose `message` getter throws) the
+// catch itself throws, so getSecret REJECTS and the environment fallback is never tried. The vault client is a plain
+// stand-in whose getSecret rejects with the cell's value (installed through the instance, so no Azure package is loaded);
+// the logger is a plain recorder; no network.
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  warns: [] as unknown[][],
+}));
+
+vi.mock('../logger', () => ({
+  logger: {
+    debug: () => undefined,
+    info: () => undefined,
+    warn: (...args: unknown[]) => {
+      h.warns.push(args);
+    },
+    error: () => undefined,
+  },
+}));
+
+import { SecretsManager } from '../vault/key-vault';
+
+type Outcome = { rejected: boolean; value: unknown; logged: unknown[][] };
+
+async function run(value: unknown): Promise<Outcome> {
+  h.toThrow = value;
+  const mgr = new SecretsManager({ vaultUrl: 'https://ks1868.vault.example.test', fallbackToEnv: true, cacheTimeMs: 1 });
+  const inner = mgr as unknown as { vaultInitAttempted: boolean; vaultClient: unknown };
+  inner.vaultInitAttempted = true;
+  inner.vaultClient = {
+    getSecret: () => Promise.reject(h.toThrow),
+  };
+  let rejected = false;
+  let got: unknown;
+  try {
+    got = await mgr.getSecret('ks1868-secret');
+  } catch {
+    rejected = true;
+  }
+  const logged = h.warns.filter((a) => String(a[0]).includes('Failed to retrieve secret from vault'));
+  return { rejected, value: got, logged };
+}
+
+const revokedProxy = (): unknown => {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+};
+
+const getterThrows = (): unknown =>
+  Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+
+describe('KS-1868 SecretsManager.getSecret reads a vault failure safely', () => {
+  beforeEach(() => {
+    h.toThrow = undefined;
+    h.warns = [];
+    process.env.KS1868_SECRET = 'from-env';
+  });
+
+  afterEach(() => {
+    delete process.env.KS1868_SECRET;
+  });
+
+  it('control ks1868 C1 an ordinary Error is logged with its message and the environment value is returned', async () => {
+    const out = await run(new Error('vault down'));
+    expect(out.rejected).toBe(false);
+    expect(out.value).toBe('from-env');
+    expect(out.logged.length).toBe(1);
+    expect(out.logged[0][1]).toEqual({ secret: 'ks1868-secret', error: 'vault down' });
+  });
+
+  it('control ks1868 C2 a thrown plain string is logged without a message and the environment value is returned', async () => {
+    const out = await run('plain text failure');
+    expect(out.rejected).toBe(false);
+    expect(out.value).toBe('from-env');
+    expect(out.logged.length).toBe(1);
+    expect(out.logged[0][1]).toEqual({ secret: 'ks1868-secret', error: undefined });
+  });
+
+  it('RED ks1868 R1 a revoked Proxy is logged with a constant reason and the environment value is returned', async () => {
+    const out = await run(revokedProxy());
+    expect(out.rejected).toBe(false);
+    expect(out.value).toBe('from-env');
+    expect(out.logged.length).toBe(1);
+    expect(out.logged[0][1]).toEqual({ secret: 'ks1868-secret', error: 'unreadable thrown value' });
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws is logged with a constant reason and the environment value is returned', async () => {
+    const out = await run(getterThrows());
+    expect(out.rejected).toBe(false);
+    expect(out.value).toBe('from-env');
+    expect(out.logged.length).toBe(1);
+    expect(out.logged[0][1]).toEqual({ secret: 'ks1868-secret', error: 'unreadable thrown value' });
+  });
+});

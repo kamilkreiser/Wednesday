@@ -1,0 +1,179 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p1_shared_cardano_wallet_enable_wallet_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/cardano/wallet.ts b/Blockchain/Dev/packages/shared/src/cardano/wallet.ts
+--- a/Blockchain/Dev/packages/shared/src/cardano/wallet.ts
++++ b/Blockchain/Dev/packages/shared/src/cardano/wallet.ts
+@@ -175,6 +175,12 @@
+     const api = await cardano[name].enable();
+     return api;
+   } catch (error) {
+-    throw new Error(`Failed to enable wallet ${name}: ${error instanceof Error ? error.message : 'User rejected'}`);
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : 'User rejected';
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    throw new Error(`Failed to enable wallet ${name}: ${reason}`);
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p2_nft_get_certificate_catch_guard
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -290,7 +290,13 @@
+       data: certificate,
+     });
+   } catch (error) {
+-    logger.error('Error fetching certificate', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error fetching certificate', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch NFT certificate' },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p3_nft_list_certificates_catch_guard
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -259,7 +259,13 @@
+       },
+     });
+   } catch (error) {
+-    logger.error('Error fetching certificates', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error fetching certificates', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch NFT certificates' },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p4_nft_tiers_catch_guard
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -318,7 +318,13 @@
+       data: tiers,
+     });
+   } catch (error) {
+-    logger.error('Error fetching tiers', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error fetching tiers', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch storage tiers' },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p5_nft_estimate_cost_catch_guard
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -214,7 +214,13 @@
+       },
+     });
+   } catch (error) {
+-    logger.error('Error estimating cost', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error estimating cost', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to estimate cost' },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p6_nft_verify_transaction_catch_guard
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -423,7 +423,13 @@
+       data: verification,
+     });
+   } catch (error) {
+-    logger.error('Error verifying transaction', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error verifying transaction', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to verify transaction' },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p7_nft_verify_asset_catch_guard
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -459,7 +459,13 @@
+       data: result,
+     });
+   } catch (error) {
+-    logger.error('Error verifying asset', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error verifying asset', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to verify asset' },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p8_nft_ipfs_pin_catch_guard
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -547,7 +547,13 @@
+       data: { cid: validationResult.data.cid, pinned },
+     });
+   } catch (error) {
+-    logger.error('Error pinning CID', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error pinning CID', { error: reason });
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to pin CID' } });
+   }
+ });
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o98_p9_nft_ipfs_unpin_catch_guard
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -572,7 +572,13 @@
+       data: { cid: validationResult.data.cid, unpinned },
+     });
+   } catch (error) {
+-    logger.error('Error unpinning CID', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error unpinning CID', { error: reason });
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to unpin CID' } });
+   }
+ });
+

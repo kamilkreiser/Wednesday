@@ -1,0 +1,184 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p1_shared_tenant_rate_limiter_fail_open_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/middleware/tenant-rate-limiter.ts b/Blockchain/Dev/packages/shared/src/middleware/tenant-rate-limiter.ts
+--- a/Blockchain/Dev/packages/shared/src/middleware/tenant-rate-limiter.ts
++++ b/Blockchain/Dev/packages/shared/src/middleware/tenant-rate-limiter.ts
+@@ -197,8 +197,14 @@
+       next();
+     } catch (err: any) {
+       // On error, allow the request through (fail-open)
++      let reason: string;
++      try {
++        reason = err.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       console.warn(
+-        `[tenant-rate-limiter] Rate limit check failed, allowing request: ${err.message}`,
++        `[tenant-rate-limiter] Rate limit check failed, allowing request: ${reason}`,
+       );
+       next();
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p2_shared_tenant_pool_manager_refresh_configs_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/db/tenant-pool-manager.ts b/Blockchain/Dev/packages/shared/src/db/tenant-pool-manager.ts
+--- a/Blockchain/Dev/packages/shared/src/db/tenant-pool-manager.ts
++++ b/Blockchain/Dev/packages/shared/src/db/tenant-pool-manager.ts
+@@ -332,5 +332,11 @@
+       console.log(`[TenantPoolManager] Loaded ${this.tenantConfigs.size} tenant configs (${this.tenantStatuses.size} tenant statuses)`);
+     } catch (err: any) {
+-      console.error('[TenantPoolManager] Failed to load tenant configs:', err.message);
++      let reason: string;
++      try {
++        reason = err.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      console.error('[TenantPoolManager] Failed to load tenant configs:', reason);
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p3_shared_tenant_context_get_pool_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/db/tenant-context.ts b/Blockchain/Dev/packages/shared/src/db/tenant-context.ts
+--- a/Blockchain/Dev/packages/shared/src/db/tenant-context.ts
++++ b/Blockchain/Dev/packages/shared/src/db/tenant-context.ts
+@@ -93,9 +93,15 @@
+       req.tenantPool = manager.getPool(tenantId);
+       next();
+     } catch (err: any) {
++      let reason: string;
++      try {
++        reason = err.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       res.status(503).json({
+         error: 'Tenant database unavailable',
+-        message: err.message,
++        message: reason,
+       });
+     }
+   };
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p4_shared_key_vault_get_secret_vault_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/vault/key-vault.ts b/Blockchain/Dev/packages/shared/src/vault/key-vault.ts
+--- a/Blockchain/Dev/packages/shared/src/vault/key-vault.ts
++++ b/Blockchain/Dev/packages/shared/src/vault/key-vault.ts
+@@ -105,9 +105,15 @@
+           return value;
+         }
+       } catch (err: any) {
++        let reason: string;
++        try {
++          reason = err.message;
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         logger.warn('[SecretsManager] Failed to retrieve secret from vault', {
+           secret: name,
+-          error: err.message,
++          error: reason,
+         });
+       }
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p5_shared_auto_migrate_run_migrations_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/db/auto-migrate.ts b/Blockchain/Dev/packages/shared/src/db/auto-migrate.ts
+--- a/Blockchain/Dev/packages/shared/src/db/auto-migrate.ts
++++ b/Blockchain/Dev/packages/shared/src/db/auto-migrate.ts
+@@ -161,7 +161,13 @@
+         result.applied.push(filename);
+       } catch (err: any) {
+         await client.query('ROLLBACK').catch(() => {});
+-        const message = `Failed to apply ${filename}: ${err.message || err}`;
++        let detail: string;
++        try {
++          detail = `${err.message || err}`;
++        } catch {
++          detail = 'unreadable thrown value';
++        }
++        const message = `Failed to apply ${filename}: ${detail}`;
+         console.error(`[auto-migrate] ${message}`);
+         result.errors.push(message);
+         // Stop on first error — later migrations may depend on this one
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p6_shared_ssrf_guard_resolve_public_addresses_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts b/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
+--- a/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
++++ b/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
+@@ -322,8 +322,14 @@
+   try {
+     addresses = await lookup(bare, { all: true, verbatim: true });
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = (err as Error).message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     return {
+       ok: false,
+-      error: `host "${bare}" could not be resolved (${(err as Error).message}) — refusing to contact an unverifiable destination`,
++      error: `host "${bare}" could not be resolved (${reason}) — refusing to contact an unverifiable destination`,
+     };
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p7_shared_cardano_verify_document_anchor_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/cardano/transaction.ts b/Blockchain/Dev/packages/shared/src/cardano/transaction.ts
+--- a/Blockchain/Dev/packages/shared/src/cardano/transaction.ts
++++ b/Blockchain/Dev/packages/shared/src/cardano/transaction.ts
+@@ -222,9 +222,15 @@
+       metadata: parsedMetadata,
+     };
+   } catch (error) {
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : 'Unknown error';
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     return {
+       verified: false,
+-      error: error instanceof Error ? error.message : 'Unknown error',
++      error: reason,
+     };
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p8_gateway_health_dashboard_check_service_catch_guard_message
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/health-dashboard.ts b/Blockchain/Dev/services/api-gateway/src/routes/health-dashboard.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/health-dashboard.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/health-dashboard.ts
+@@ -83,5 +83,9 @@
+-    if (error instanceof DOMException && error.name === 'AbortError') {
+-      errorMessage = 'timeout';
+-    } else if (error instanceof Error) {
+-      errorMessage = error.message;
++    try {
++      if (error instanceof DOMException && error.name === 'AbortError') {
++        errorMessage = 'timeout';
++      } else if (error instanceof Error) {
++        errorMessage = error.message;
++      }
++    } catch {
++      errorMessage = 'unreadable thrown value';
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o97_p9_shared_ssrf_guard_safe_outbound_request_catch_guard_message
+diff --git a/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts b/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
+--- a/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
++++ b/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
+@@ -580,6 +580,12 @@
+       },
+       );
+     } catch (err) {
+-      done({ ok: false, reason: 'request_failed', error: (err as Error).message });
++      let reason: string;
++      try {
++        reason = (err as Error).message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      done({ ok: false, reason: 'request_failed', error: reason });
+       return;
+     }
+
