@@ -57489,5 +57489,79 @@
    "CARD secuura-pr1970-gateway-failopen-1103",
    "CARD secuura-pr1976-anchor-trust-failopen-1103"
   ]
+ },
+ {
+  "id": "secuura-hibp-breach-check-never-runs-1103",
+  "client_project": "Secuura/Blockchain",
+  "title": "The breached-password check (pen-test F-12 fix, item 3) never runs: nothing calls it. Wire it into sign-up, reset and change-password, or retire it?",
+  "bluf": "Found by gate 161 on PR 1978 (which merges regardless: it changes nothing here). PRE-EXISTING. auth's password.ts header lists the HaveIBeenPwned breach check as item 3 of the pen-test F-12 fixes, but git grep over the whole repository finds only its definition (password.ts:130) and that comment; control: verifyPassword finds its 4 call sites. So breached passwords are accepted at register, reset and change-password, and the HIBP_ENABLED switch does nothing. The gate did not read the pen-test report: if item 3 was accepted as a residual, this is Medium, not High. Wiring it in sends the first 5 characters of a password's SHA-1 hash to HaveIBeenPwned (k-anonymity), and when that service is unreachable the function lets the password through (fail-open by design, measured at base and head). Override of the prior-rulings gate: its 9 matches are the demo-box admin identity ruling (09-07, the public demo's default admin), a note about pairing two Macs (09-08), and 7 cards sharing only the word 'never' (rate limiter, NAS backup, start script, preflight leg, status history, workspace suites, ticket moves); none rules the password breach check.",
+  "default_action": "If no answer in 24 hours, nothing is built: a Secuura seat files the High ticket with this finding and option a as the proposed fix, and the card stays on your board. (Longer default than usual because a user-facing password rule and a third-party call are your decision.)",
+  "options": [
+   {
+    "key": "a",
+    "label": "Wire it in: refuse a breached password at sign-up, reset and change-password; if the breach service is down, allow it (as written)",
+    "detail": "A Secuura seat files the High ticket and builds it behind the existing HIBP_ENABLED switch, tier 1 Opus gate. The user sees 'this password has appeared in a data breach, choose another'. Outage = allowed, so sign-ups never depend on a third party."
+   },
+   {
+    "key": "b",
+    "label": "Wire it in, but refuse the password when the breach service cannot be reached (fail closed)",
+    "detail": "Stricter, matches your other fail-closed rulings, but sign-up, reset and change-password stop working whenever HaveIBeenPwned is down."
+   },
+   {
+    "key": "c",
+    "label": "Retire it: remove the dead code and correct the header so it no longer claims a fix that is not there",
+    "detail": "No user-facing change. The F-12 item is recorded as not implemented."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T12:02:55.650841+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-07 06:42",
+   "2026-09-08 11:41",
+   "CARD secuura-workspace-suites-never-run-on-a-pr",
+   "CARD wed-nas-nightly-leg-has-never-completed",
+   "CARD secuura-fourteen-merged-own-pr-tickets-never-moved",
+   "CARD secuura-ks910-preflight-leg12-runs-nothing",
+   "CARD secuura-apikey-rate-limiter-never-fires",
+   "CARD secuura-ks1163-start-script-never-waits-for-five-services",
+   "CARD secuura-uuid-revokes-never-wrote-status-history-1006"
+  ]
+ },
+ {
+  "id": "secuura-pr1979-ambassador-bonus-starts-paying-1103",
+  "client_project": "Secuura/Blockchain",
+  "title": "Before merge: PR 1979 (the re-award fix you asked for) also switches ON the designed 5% AMBASSADOR referral bonus, which has never paid before. Merge as is?",
+  "bluf": "PR 1979 (KS-1956) fixes the referral re-award bug, measured by gate 162 on a real PostgreSQL: at most 1 reward row per user + milestone at head in all 18 cells, against 2 to 4 at base. Side effect, measured, not declared in the PR: the progress save now works, so a referrer with 1,000+ referrals is recorded as AMBASSADOR for the first time, and their next qualified referral pays 52.5 SECURA (50 + 5%) where base pays 50. That 5% is the designed rule (ongoingBonus: 5 on the AMBASSADOR milestone); it was dead code until now. No other amount, status or recipient changes. Whether any production referrer is at 1,000+ is UNMEASURED. Separately, gate 162 notes that duplicate milestone reward rows already stored stay stored; Seat F 25th will file that as its own ticket for a later cleanup decision. Override of the prior-rulings gate: its 3 matches are the 09-14 ticket-closing rule, the 09-17 API rate-limiter fix and the 09-18 away note; none rules a referral payout.",
+  "default_action": "If no answer, nothing merges: PR 1979 waits on your word (a payout change is yours), while Seat F 25th patches the notes and declares the bonus in the PR body so it is ready either way.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Merge PR 1979 as is: the re-award fix plus the 5% AMBASSADOR bonus working as designed",
+    "detail": "Wednesday GOs the merge after Seat F 25th patches the gate notes and the PR body declares the bonus. Nothing deploys from this card."
+   },
+   {
+    "key": "b",
+    "label": "Merge the fix, but keep the AMBASSADOR bonus off until you decide separately",
+    "detail": "Seat F 25th adds a small change that leaves the 5% bonus unpaid, re-gated before merge; costs about one more round."
+   },
+   {
+    "key": "c",
+    "label": "Hold PR 1979",
+    "detail": "Nothing merges; the re-award bug stays live meanwhile (base re-awards on every check)."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-03T12:12:35.205333+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-14 08:11",
+   "2026-09-17 07:40",
+   "2026-09-18 14:14"
+  ]
  }
 ]
