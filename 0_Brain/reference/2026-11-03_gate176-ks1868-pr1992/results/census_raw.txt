@@ -1,0 +1,143 @@
+refs/gate/1992:BACKLOG.md:411:  - Closed: the mock factory omitted `assertSafeOutboundUrl` (#683, 2026-08-13); restored on #720
+refs/gate/1992:Blockchain/Dev/CONNECTORS.md:98:| `WEBHOOK_URL_ALLOWLIST` enforcement | originate | env-var-driven; the guard is `packages/shared/src/security/ssrf-guard.ts`, used by originate's webhook routes through `assertSafeOutboundUrl` | ✅ enforced | 2026-04-28 | none | per-PR test for SSRF regression |
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:4: * `safeOutboundRequest` arms a `setTimeout` as the losing arm of a
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:5: * `Promise.race` against `resolvePublicAddresses`. The `clearTimeout` used to
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:13: *   `resolvePublicAddresses` CATCHES every `lookup` failure and returns
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:19: *   to right, so `resolvePublicAddresses(...)` is invoked first and runs
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:47:const SEAM = 'KS-1179 F-6 seam: isIP throws inside resolvePublicAddresses';
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:68:const { safeOutboundRequest } = await import('../security/ssrf-guard');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:97:    await safeOutboundRequest(`https://${seam.host}/x`, {}, {});
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:104:    seam.throwOnNth = 2; // let the literal check through; throw inside resolvePublicAddresses
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:114:      await safeOutboundRequest(`https://${seam.host}/x`, {}, {});
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:142:    let result: Awaited<ReturnType<typeof safeOutboundRequest>> | undefined;
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:144:      result = await safeOutboundRequest('https://ks1179-contract.example/x', {}, {});
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-dns-timer-cleared.test.ts:170:    const r = await safeOutboundRequest('https://ks1179-settle.example/x', {}, {});
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:2: * KS-1179 (KS-932 gate F-1) - safeOutboundRequest classifies every DNS answer
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:25:import { safeOutboundRequest } from '../security/ssrf-guard';
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:39:describe('KS-1179 - safeOutboundRequest refuses a private DNS answer before the transport', () => {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:43:    const result = await safeOutboundRequest('https://rebind.example.com/x', { timeoutMs: TIMEOUT_MS });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:52:    const result = await safeOutboundRequest('https://imds.example.com/x', { timeoutMs: TIMEOUT_MS });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:60:    const result = await safeOutboundRequest('https://loop6.example.com/x', { timeoutMs: TIMEOUT_MS });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:68:    const result = await safeOutboundRequest('https://mixed.example.com/x', { timeoutMs: TIMEOUT_MS });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:77:    const result = await safeOutboundRequest('https://public.example.com/x', { timeoutMs: TIMEOUT_MS });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1179-safeoutboundrequest-tests-no-cell-pins-dns.test.ts:89:    const result = await safeOutboundRequest('https://10.0.0.5/x', { timeoutMs: TIMEOUT_MS });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1868-ssrf-guard-resolve-public-addresses-catch-unreadable-throw.test.ts:3:// KS-1868: resolvePublicAddresses (src/security/ssrf-guard.ts) resolves a host and refuses it when the lookup fails: its catch
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1868-ssrf-guard-resolve-public-addresses-catch-unreadable-throw.test.ts:14:import { resolvePublicAddresses } from '../security/ssrf-guard';
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1868-ssrf-guard-resolve-public-addresses-catch-unreadable-throw.test.ts:21:    const result = await resolvePublicAddresses('ks1868.example.test');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1868-ssrf-guard-resolve-public-addresses-catch-unreadable-throw.test.ts:43:describe('KS-1868 resolvePublicAddresses reads a lookup failure safely', () => {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1868-ssrf-guard-safe-outbound-request-catch-unreadable-throw.test.ts:3:// KS-1868: safeOutboundRequest (src/security/ssrf-guard.ts) promises to RETURN the guard's error rather than throw it; when
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1868-ssrf-guard-safe-outbound-request-catch-unreadable-throw.test.ts:22:const { safeOutboundRequest } = await import('../security/ssrf-guard');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1868-ssrf-guard-safe-outbound-request-catch-unreadable-throw.test.ts:29:    const result = await safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 2000 });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks1868-ssrf-guard-safe-outbound-request-catch-unreadable-throw.test.ts:51:describe('KS-1868 safeOutboundRequest reads a request construction failure safely', () => {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-pinned-address.test.ts:4: * The defect these cells exist for: `assertSafeOutboundUrl(url)` followed by
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-pinned-address.test.ts:14: * `lookup:` from BOTH agents inside `safeOutboundRequest`, leaving
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-pinned-address.test.ts:17: * `safeOutboundRequest` block below closes that — it asserts the agent actually
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-pinned-address.test.ts:21: * WHAT THESE CELLS DO NOT DO: they do not drive `safeOutboundRequest` end to
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-pinned-address.test.ts:33:import { pinnedLookup, safeOutboundRequest } from '../security/ssrf-guard';
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-pinned-address.test.ts:57: * `safeOutboundRequest` itself (A-1) — the identical shape shipped in both
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:5: * from BOTH agents inside `safeOutboundRequest`, left `pinnedLookup` untouched,
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:13: * plaintext HTTP`), so every URL reaching `safeOutboundRequest` is https and
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:21: * TEST-NET-3 (203.0.113.0/24, RFC 5737), which `resolvePublicAddresses` returns
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:42:const { safeOutboundRequest } = await import('../security/ssrf-guard');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:48:describe('KS-914 safeOutboundRequest — the shipped path', () => {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:60:    const pending = safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 200 });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:62:    // `safeOutboundRequest` awaits `resolvePublicAddresses` before it calls
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:85:    const result = await safeOutboundRequest('https://10.0.0.1/');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:96:    const result = await safeOutboundRequest('http://203.0.113.7/');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:108:    const result = await safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 200 });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:137:    const result = await safeOutboundRequest('https://203.0.113.7/', {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:150:    const result = await safeOutboundRequest('https://203.0.113.7/', {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:180:   * function under test is the shipped `safeOutboundRequest` — its deadline,
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:199:    const result = await safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 400 });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts:216:    const result = await safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 400 });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks932-timeout-bounds-dns.test.ts:20:const { safeOutboundRequest } = await import('../security/ssrf-guard');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks932-timeout-bounds-dns.test.ts:42:    const resultPromise = safeOutboundRequest('https://hang.example/', { timeoutMs: 300 });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks932-timeout-bounds-dns.test.ts:64:    const result = await safeOutboundRequest('https://slow.example/', { timeoutMs: 400 });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ks932-timeout-bounds-dns.test.ts:80:    const result = await safeOutboundRequest('https://fast.example/', { timeoutMs: 300 });
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:22:  assertSafeOutboundUrl,
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:23:  assertResolvedHostPublic,
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:165:describe('assertResolvedHostPublic — B-2, the check that did not exist', () => {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:168:    const reason = await assertResolvedHostPublic('totally-legit.example.com');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:175:    expect(await assertResolvedHostPublic('metadata.example.com')).toMatch(/metadata service/);
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:183:    expect(await assertResolvedHostPublic('multi.example.com')).toMatch(/192\.168\.10\.10/);
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:188:    expect(await assertResolvedHostPublic('v6.example.com')).toMatch(/unique-local/);
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:193:    expect(await assertResolvedHostPublic('nope.example.com')).toMatch(/refusing to contact/);
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:198:    expect(await assertResolvedHostPublic('empty.example.com')).toMatch(/no addresses/);
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:202:    expect(await assertResolvedHostPublic('hooks.example.com')).toBeNull();
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:206:    expect(await assertResolvedHostPublic('93.184.216.34')).toBeNull();
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:207:    expect(await assertResolvedHostPublic('[::1]')).toMatch(/loopback/);
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:212:describe('assertSafeOutboundUrl — both layers', () => {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:214:    const r = await assertSafeOutboundUrl('https://hooks.example.com/services/abc');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:219:    const r = await assertSafeOutboundUrl('http://169.254.169.254/latest/meta-data/');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:226:    const r = await assertSafeOutboundUrl('https://rebind.example.com/x');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/__tests__/ssrf-guard.test.ts:232:    const r = await assertSafeOutboundUrl('  https://hooks.example.com/a?b=1  ');
+refs/gate/1992:Blockchain/Dev/packages/shared/src/index.ts:54:// call assertSafeOutboundUrl at registration *and* immediately before the
+refs/gate/1992:Blockchain/Dev/packages/shared/src/index.ts:58:  assertSafeOutboundUrl,
+refs/gate/1992:Blockchain/Dev/packages/shared/src/index.ts:59:  safeOutboundRequest,
+refs/gate/1992:Blockchain/Dev/packages/shared/src/index.ts:60:  resolvePublicAddresses,
+refs/gate/1992:Blockchain/Dev/packages/shared/src/index.ts:62:  assertResolvedHostPublic,
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:17: *   2. `assertResolvedHostPublic` — every address the host actually resolves to
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:21: * Call `assertSafeOutboundUrl` at BOTH registration and immediately before the
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:26: * `safeOutboundRequest` connects to an address this module validated: it
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:35: *  - A caller that runs `assertSafeOutboundUrl` and then `fetch` has the old
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:46: * does not, so `safeOutboundRequest` returns the 3xx to the caller.
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:306: * instead of discarding them. `assertResolvedHostPublic` kept its old contract
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:310:export async function resolvePublicAddresses(
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:351:export async function assertResolvedHostPublic(host: string): Promise<string | null> {
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:352:  const r = await resolvePublicAddresses(host);
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:364:export async function assertSafeOutboundUrl(
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:372:  const reason = await assertResolvedHostPublic(host);
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:385: * This is the whole of the rebind fix. `assertSafeOutboundUrl` resolves and
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:458: * Callers previously did `assertSafeOutboundUrl(url)` and then `fetch(url)`.
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:483:export async function safeOutboundRequest(
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:506:  // is not. The first half was right: `resolvePublicAddresses` catches every
+refs/gate/1992:Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts:520:      resolvePublicAddresses(url.hostname),
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks1673-teams-statements-on-a-real-engine.test.ts:32: * warm-load tables answer empty), `authenticate` / `assertSafeOutboundUrl` / `safeOutboundRequest`
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks1673-teams-statements-on-a-real-engine.test.ts:85:    assertSafeOutboundUrl: async (url: string) => ({ ok: true, url }),
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks1673-teams-statements-on-a-real-engine.test.ts:86:    safeOutboundRequest: async (url: string) => { outbound.urls.push(url); return { ok: true, response: { ok: true } }; },
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks1673-teams-webhooks-are-bound-to-the-callers-organisation.test.ts:31: * Mocked: `../db`, `authenticate` / `assertSafeOutboundUrl` / `safeOutboundRequest` out of
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks1673-teams-webhooks-are-bound-to-the-callers-organisation.test.ts:153:    assertSafeOutboundUrl: async (url: string) => ({ ok: true, url }),
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks1673-teams-webhooks-are-bound-to-the-callers-organisation.test.ts:154:    safeOutboundRequest: async (url: string) => { outbound.urls.push(url); return { ok: true, response: { ok: true } }; },
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks934-teams-notify-request-path-bound.test.ts:6: * `safeOutboundRequest`'s 10 s default and the worst case was rows x 10 s with the
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks934-teams-notify-request-path-bound.test.ts:28: * WHAT IT DOES NOT PIN, and why `safeOutboundRequest` is stubbed here.
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks934-teams-notify-request-path-bound.test.ts:38: * Mocked: `../db`, `authenticate` and `safeOutboundRequest` out of `@secuura/shared`,
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks934-teams-notify-request-path-bound.test.ts:151:    safeOutboundRequest: async (url: string, init: any = {}) => {
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/__tests__/ks934-teams-notify-request-path-bound.test.ts:378:    // skipped was never attempted - the loop continues before `safeOutboundRequest`.
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/index.ts:33:import { authenticate as jwtAuthenticate, enforceProductionConfig, errorHandler, rejectNulBytes, assertSafeOutboundUrl, safeOutboundRequest } from '@secuura/shared';
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/index.ts:62:// had no LIMIT on the query and no aggregate deadline, while safeOutboundRequest's
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/index.ts:1265:  // assertSafeOutboundUrl in the handler below, and again before the fetch.
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/index.ts:1286:    const urlCheck = await assertSafeOutboundUrl(data.webhookUrl);
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/index.ts:1393:    // the request handler. safeOutboundRequest's own deadline defaults to 10 s and
+refs/gate/1992:Blockchain/Dev/services/m365-integration/src/index.ts:1495:        const result = await safeOutboundRequest(wh.webhook_url, {
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/helpers/sharedModuleMock.ts:10: * three keys and no `safeOutboundRequest`; the sibling suite covering the same
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1061-shared-mock-completeness.test.ts:9: * `safeOutboundRequest` while the sibling suite covering the same routes
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1061-shared-mock-completeness.test.ts:89:    expect(mocked).toHaveProperty('safeOutboundRequest');
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1061-shared-mock-completeness.test.ts:94:    expect(makeSharedMock({ safeOutboundRequest: marker }).safeOutboundRequest).toBe(marker);
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1061-shared-mock-completeness.test.ts:116:const PARTIAL = '() => ({ safeOutboundRequest: jest.fn() })';
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1160-webhooks-post-persists-normalised-url.test.ts:5:// @secuura/shared mock: assertSafeOutboundUrl NORMALISES (trims), so the defect is observable.
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1160-webhooks-post-persists-normalised-url.test.ts:29:    assertSafeOutboundUrl: jest.fn(async (raw: unknown) => ({ ok: true as const, url: String(raw).trim() })),
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1160-webhooks-post-persists-normalised-url.test.ts:41:const shared = jest.requireMock('@secuura/shared') as { assertSafeOutboundUrl: jest.Mock };
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1160-webhooks-post-persists-normalised-url.test.ts:59:  shared.assertSafeOutboundUrl.mockClear();
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1160-webhooks-post-persists-normalised-url.test.ts:94:    expect(shared.assertSafeOutboundUrl).toHaveBeenCalledTimes(1);
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1160-webhooks-post-persists-normalised-url.test.ts:95:    expect(shared.assertSafeOutboundUrl).toHaveBeenCalledWith(RAW);
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts:36:    assertSafeOutboundUrl: jest.fn(async (raw: unknown) => ({ ok: true as const, url: String(raw) })),
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts:33:    assertSafeOutboundUrl: jest.fn(async (raw: unknown) => ({ ok: true as const, url: String(raw) })),
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts:34:    assertSafeOutboundUrl: jest.fn(async (raw: unknown) => ({ ok: true as const, url: String(raw) })),
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks1346d-webhooks-fail500-logs-type-and-field-names.test.ts:37:    assertSafeOutboundUrl: jest.fn(async (raw: unknown) => ({ ok: true as const, url: String(raw) })),
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts:36:// KS-927: `assertSafeOutboundUrl` MUST be in this factory. `webhooks.ts:170`
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts:57:    assertSafeOutboundUrl: jest.fn(async (raw: unknown) => ({ ok: true as const, url: String(raw) })),
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts:69:// 201 case can assert it was CONSULTED. Without this, deleting `assertSafeOutboundUrl` from
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts:73:const shared = jest.requireMock('@secuura/shared') as { assertSafeOutboundUrl: jest.Mock };
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts:134:    expect(shared.assertSafeOutboundUrl).toHaveBeenCalledTimes(1);
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts:135:    expect(shared.assertSafeOutboundUrl).toHaveBeenCalledWith(VALID_BASE.url);
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts:144:    expect(shared.assertSafeOutboundUrl).toHaveBeenCalledTimes(1);
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks914-deliver-webhook-blocked-vs-failed.test.ts:35:    assertSafeOutboundUrl: jest.fn(),
+refs/gate/1992:Blockchain/Dev/services/originate/src/__tests__/ks914-deliver-webhook-blocked-vs-failed.test.ts:36:    safeOutboundRequest: (...args: unknown[]) => mockSafeOutboundRequest(...args),
+refs/gate/1992:Blockchain/Dev/services/originate/src/routes/webhooks.ts:19:import { encryptField, decryptField, runWithTenantId, assertSafeOutboundUrl, safeOutboundRequest } from '@secuura/shared';
+refs/gate/1992:Blockchain/Dev/services/originate/src/routes/webhooks.ts:172:  return assertSafeOutboundUrl(raw);
+refs/gate/1992:Blockchain/Dev/services/originate/src/routes/webhooks.ts:452:  // The previous shape — assertSafeOutboundUrl(url) then fetch(url) — resolved
+refs/gate/1992:Blockchain/Dev/services/originate/src/routes/webhooks.ts:459:  const result = await safeOutboundRequest(
+refs/gate/1992:Projects Documents/fragments/cheat/KS-1868-shared-ssrf-secrets-indexer.html:2:<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Four catch sites in <code>packages/shared</code> (the SSRF guard's <code>resolvePublicAddresses</code> and <code>safeOutboundRequest</code> request catch, the security <code>SecretsManager.getSecret</code> vault catch, the event indexer's <code>handleError</code>) now use the constant <code>unreadable thrown value</code> when reading the thrown value throws. The SSRF guard refuses (never allows) such a value; <code>getSecret</code> falls through to the environment lookup instead of rejecting; <code>safeOutboundRequest</code> returns <code>request_failed</code> instead of rejecting.
+refs/gate/1992:Projects Documents/fragments/flow/KS-1868-shared-ssrf-secrets-indexer.html:2:<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this changes.</strong></td><td> Four catch sites in three files of <code>Blockchain/Dev/packages/shared/src</code> now read the thrown value inside a <code>try</code> and use the constant <code>unreadable thrown value</code> when that read throws (a revoked Proxy, an Error whose <code>message</code> getter throws). Four held Spark passes, applied byte for byte. (1) <code>security/ssrf-guard.ts</code>, <code>resolvePublicAddresses</code> (O97-P6): a failed DNS lookup returns <code>{ ok: false, error: ... refusing to contact an unverifiable destination }</code>; before, an unreadable value made the function reject, now it returns that refusal. <code>assertResolvedHostPublic</code> returns <code>null</code> (allowed) only for <code>ok: true</code>, and <code>safeOutboundRequest</code> answers <code>blocked</code> for <code>ok: false</code>, so an unreadable value is refused, never allowed, at base (it rejected, so nothing was sent) and at head. (2) <code>security/ssrf-guard.ts</code>, the catch around the request in <code>safeOutboundRequest</code> (O97-P9): now returns <code>{ ok: false, reason: 'request_failed', error }</code>; before, it rejected. (3) <code>security/secrets-manager.ts</code>, <code>SecretsManager.getSecret</code> vault catch (O96-P7): now logs and falls through to the environment lookup, which returns the environment value or <code>null</code>; before, an unreadable vault error made it reject. No non-test importer of this class was found. (4) <code>blockchain/event-indexer.ts</code>, <code>handleError</code> (O96-P8): an unreadable value becomes <code>new Error('unreadable thrown value')</code> and goes to <code>onError</code> or the default path; before, the conversion threw inside <code>handleError</code>, called from five catch sites of the indexer.
+refs/gate/1992:Projects Documents/fragments/flow/KS-1868-shared-ssrf-secrets-indexer.html:9:    </td></tr><tr><td><strong>tsc with the tests in the program</strong>: 25 errors against 24 at base. The one extra is <code>TS1378</code> (top-level <code>await</code> under <code>module: commonjs</code>) at line 22 of the new <code>ks1868-ssrf-guard-safe-outbound-request-catch-unreadable-throw.test.ts</code>, a <code>const { safeOutboundRequest } = await import(...)</code> after a <code>vi.mock</code>; the base already has five older test files with the same error class, vitest runs it as ESM and the production build excludes <code>src/__tests__</code>. It is left as it is here, because a held pass is never hand-edited. <strong>eslint</strong> on the seven changed files: 0 errors and 2 warnings, the same two at base (<code>event-indexer.ts</code> line 102, <code>ssrf-guard.ts</code> line 541, which was 535).
+refs/gate/1992:systemTest/schemathesis/tests/test_webhook_ssrf.py:4:sites, **both now guarded by one shared implementation** — ``assertSafeOutboundUrl`` in
