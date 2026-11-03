@@ -1,0 +1,39 @@
+PR-BODY sentence (first six words) | source it rests on
+Deploy guide and test change. One | gh api compare f5f33e18...ce523783 files: DEPLOY.md +1 -1 and packages/db/test/b778-route-b-script-complete.db.test.ts +345 -4, 2 files (printed 2026-11-03); B1197_STATUS.md:53 (D1)
+What was wrong: an older-minor | commit 63fe0b9e message paragraph 1 (gh api commits/63fe0b9e..., .commit.message)
+A script with no restrict | commit 63fe0b9e message paragraph 1, last sentence
+What the check line does now: | commit 63fe0b9e message paragraph 2 ("the key counts only when ... not empty. No prose is changed.")
+PCOMP-115 (the typecheck of packages/db/test) | commit 63fe0b9e message paragraph 2 ("PCOMP-115 (the typecheck of packages/db/test) is not in this commit"); B1197_STATUS.md:121
+DEPLOY.md: the only change is | B1197_STATUS.md:53 ("diff main/head 1 hunk 203c203"); compare patch of DEPLOY.md: one hunk @@ -200,7 +200,7 @@, one - line and one + line (line 203); B1197_STATUS.md:1 header "DEPLOY.md equals 643c389 y"
+Every other byte of the file equals main | same compare patch (one hunk, 1 addition, 1 deletion)
+Tests: the Route B file goes from 37 to 54 rows | B1197_STATUS.md:67 (D2 iv: main 37, head 54)
+no row is removed or retitled | B1197_STATUS.md:67 ("lost 0 each"; control: one dropped name reads lost 1)
+It adds scripts the check must refuse (...) | fixture names from commit messages: 63fe0b9e (planted trio, empty key, restrict line after a statement), 643c389e (-x, trailing comment, "  -- x", \connect), ce523783 (byte-order mark, CR-only line); B1197_STATUS.md:79 (Part B)
+and one it must accept | commit ce523783 message, completeWithDashShapesAndBlankInHeader (--x, ---, -- and a tab, space-tab-space line); B1197_STATUS.md:79 (accepted on 3 engines)
+What an independent review measured | B1197_STATUS.md:75 (frame 1,032 cells, 3 engines) and :74 (engine versions: mawk 1.3.4 20200120, /usr/bin/awk 20200816, BusyBox v1.37.0)
+The new line never accepts a script that main's line refuses | B1197_STATUS.md:77 ("FAIL 1: 0"), :1 header "refused-to-accepted 0"
+never errors | B1197_STATUS.md:77 ("FAIL 4: 0 error cells")
+the engines agree on every cell | B1197_STATUS.md:77 ("FAIL 3 on the new line: 0"); residue.md:6 ("0 engine disagreements on the real line")
+it accepts every whole and complete real script | B1197_STATUS.md:78 ("Whole/complete real scripts accepted on 3 engines (5 of 5)")
+Of 83 single edits tried: 20 change no verdict, 57 red, 6 survive | B1197_STATUS.md:101 (50 mutants: 13 equivalent, 0 survivors) and :102 (33 mutants: 7 equivalent, 20 killed, 6 survivors). 20 = 13+7; 57 = (50-13)+20; 6 = 0+6 (my sums, not printed as one cell)
+gawk was not run | B1197_STATUS.md:74 ("gawk NOT TESTED"), :158
+At the merge result ... lint, format check, typecheck and build exit 0 | B1197_STATUS.md:120 (lint 0, format:check 0, typecheck 0, build 0)
+test run (311 files, 3,116 passed, 2 failed, 1 skipped) equals main's own run | B1197_STATUS.md:120 ("Main twin: identical counts"; failed and skipped sets equal)
+Limit, stated plainly: the tests do not pin four hand-made shapes | B1197_STATUS.md:8 (BLUF 3) and :136; residue.md:10-11
+If a later edit made the check line tolerate any ... | B1197_STATUS.md:8 ("each leaves all 54 rows green ... a later edit that the tests would not catch")
+They are a comment indented by one space or one tab ... vertical tab, form feed, no-break space | residue.md:10 (Y5-10 tab, Y5-11 one space) and :11 (Y6-05 VT, Y6-06 FF, Y6-08 NBSP)
+(the same test also lets a line such as x--y through) | residue.md:10 (Y5-09-x-dashdash-y), B1197_STATUS.md:105
+The check line as it stands refuses each of them, on all three engines | residue.md:10-11 ("real line R ... on all 3 engines"); B1197_STATUS.md:8
+None appears in the three real 16.15 scripts checked | B1197_STATUS.md:135 (D9.2: whole-file counts BOM, CR, VT, FF, NBSP, indented -- , x--y all 0 in all three)
+The limit is in the tests, not in the shipped line | B1197_STATUS.md:8 ("They are not defects of the shipped line") and :136
+The other two of the six edits ... fails safe | B1197_STATUS.md:109-110 (N11, N12 mutant-refuses), :136 ("fail-safe"); residue.md:12
+All of these are to be ticketed by a records step after this merge | the ruling text "A Composer records seat tickets the residue" (task message); form of Composer PR #113 body. Whether the two fail-safe items are ticketed is MY EXTENSION (see REPORT.md)
+This lands under the product owner's 2026-11-03 decision | task message: live board 2026-11-03 10:57:21 "a - Land it as it is; ticket the four shapes"
+Before landing, CodeQL and the hosted checks ... are read | task message option a text ("opens the PR, waits for CodeQL"); Composer PR #113 body (same sentence form)
+Not deployed. This is a merge, not a deploy; Composer deploys only on the product owner's card | CLARIFICATIONS.md:1799 ("Nothing is deployed (Composer deploys only on your card)"); PR #113 body
+SQUASH-BODY: sentences shared with the PR body use the same sources above. Additional or different:
+Pinned to the checked commit ce523783 | gh api git/matching-refs/heads/b1170 printed sha ce523783bc2f9e2be99083a5bb34ef02becdf0db; task message
+A records step tickets all four after this merge | as the PR body line above
+Landed under the product owner's 2026-11-03 decision | as the PR body line above
+Co-Authored-By: Claude Opus 5.5 | the task message (exactly one line, last)
+TITLE/SUBJECT: PCOMP-116 | commit 63fe0b9e subject; B1197_STATUS.md:56

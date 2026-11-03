@@ -1,0 +1,19 @@
+Deploy guide and test change. One line of DEPLOY.md changes (line 203, the awk check that a restore script is complete) and one test file changes (the Route B completeness test under packages/db/test). No other path changes.
+
+What was wrong: an older-minor script with no restrict line in its header, cut just after a restrict line, the footer block and an unrestrict line planted in a function body or a data row, was accepted, because the key came from the first restrict line anywhere in the file. A script with no restrict line whose last line was an unrestrict line and a space (an empty key) was accepted the same way.
+
+What the check line does now: the key counts only when the first restrict line comes before any line that is neither a comment nor blank, and only when it is not empty. No prose in DEPLOY.md changes. PCOMP-115 (the typecheck of packages/db/test) is not in this change.
+
+DEPLOY.md: the only change is that one line, line 203, in one hunk. Every other byte of the file equals main.
+
+Tests: the Route B file goes from 37 to 54 rows; no row is removed or retitled (checked by name against main). It adds scripts the check must refuse (the older-minor planted trio, an empty key, a restrict line after a statement, a one-dash line, a trailing comment after a statement, a two-space indented comment, a connect command, a byte-order mark, a carriage-return-only line) and one it must accept (header lines --x, ---, -- and a tab, and a line of space, tab, space).
+
+What an independent review measured: the new line and main's line over 1,032 script cells on three awk engines (mawk 1.3.4, macOS awk 20200816, BusyBox 1.37). The new line never accepts a script that main's line refuses, never errors, the engines agree on every cell, and it accepts every whole and complete real script. Of 83 single edits tried on the check line, 20 change no verdict, 57 turn a test row red and 6 leave every row green. gawk was not run. At the merge result with main, lint, format check, typecheck and build exit 0, and the test run (311 files, 3,116 passed, 2 failed, 1 skipped) equals main's own run.
+
+Limit, stated plainly: the tests do not pin four hand-made shapes. If a later edit made the check line tolerate any of them, every test row would still pass. They are a comment indented by one space or one tab before the first restrict line (the same test also lets a line such as x--y through), and a line holding only a vertical tab, only a form feed or only a no-break space. The check line as it stands refuses each of them, on all three engines. None appears in the three real 16.15 scripts checked (counted by program). The limit is in the tests, not in the shipped line. The other two of the six edits would make the check refuse a script it accepts today (a -- line ending in a carriage return), which fails safe. All of these are to be ticketed by a records step after this merge.
+
+This lands under the product owner's 2026-11-03 decision to land the change as it is and ticket the four shapes. Before landing, CodeQL and the hosted checks on this head are read.
+
+Not deployed. This is a merge, not a deploy; Composer deploys only on the product owner's card.
+
+Generated with [Claude Code](https://claude.com/claude-code)
