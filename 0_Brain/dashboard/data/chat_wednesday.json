@@ -15602,5 +15602,19 @@
   "project": "Secuura",
   "ts": "2026-11-03T20:10:28.937587+11:00",
   "text": "Both of this afternoon's auth fixes are now merged to develop. I checked each one myself against GitHub.\n\nThe login lockout now refuses sign-in while the session store is down. The breached-password check now runs at sign-up and password reset. Change-password is the next piece.\n\nNothing is deployed. Before the breach check goes to kintsugi or demo, I'll have the deploy seat confirm two things: the boxes can reach the breach service, and none of our seed or test passwords is a breached one. Otherwise those sign-ups would start failing."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T20:18:42.624787+11:00",
+  "text": "FYI, no action needed: the rebuilt restore-local-secrets script (Peter's request, PR 1989) did not pass its gate.\n\nWhat's fixed: it refuses all 28 dangerous forms the last gate found, never prints a secret, and fails safe when a tool is missing.\n\nWhat's left: it doesn't check the database pooler's host setting. So a .env pointing that one variable at a remote database would still get the admin password and seed switch written.\n\nThat's one focused fix round, within your rebuild ruling. The current seat is near its context limit, so it hands over and a fresh seat builds the fix. Peter's script waits for that, so it's tomorrow at the earliest."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-03T20:18:52.154406+11:00",
+  "text": "Correction to the last line: I shouldn't have said tomorrow at the earliest. That was a guess. The fix and its gate could finish tonight, but I won't promise a time. I'll tell you when it merges."
  }
 ]
