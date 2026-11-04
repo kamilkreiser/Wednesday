@@ -1,0 +1,448 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate189-ks1256-pr2001/repo/Blockchain/Dev/services/api-gateway[39m
+
+ [31m❯[39m src/__tests__/ks1256-settings-store-statements-on-a-real-engine.test.ts [2m([22m[2m0 test[22m[2m)[22m
+[90mstdout[2m | src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22m[2mKS-1256 GET /api/connector/info: a missing key reports the stored allow-list[2m > [22m[2mP - key present: the restricted list
+[22m[39m2026-11-04 23:18:24.058 [api-gateway] [33mwarn[39m: [rateLimit] DEGRADED — per-client ceiling is no longer distributed {"reason":"redis-not-ready","clientId":"api_key:a067e37ae9f28be140b9d182b479a95211cfe9fc4cc57d23d5dd95f1c0fd162d","effect":"counting per-replica in memory; the effective ceiling inflates to limit × replicas","throttledFor":"30s"}
+
+ [31m❯[39m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts [2m([22m[2m23 tests[22m[2m | [22m[31m14 failed[39m[2m)[22m[32m 165[2mms[22m[39m
+     [32m✓[39m P - key present, restricted connector, an allowed type passes the allow-list[32m 22[2mms[22m[39m
+     [32m✓[39m key present, restricted connector, a disallowed type is refused 403 (unchanged)[32m 2[2mms[22m[39m
+[31m     [31m×[31m DEFECT (W 24th's case) - key EVICTED with Redis up, restrictive stored row: diploma is refused 403, not let through[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m RED - key evicted: the stored row refills Redis, and the allowed type still passes[39m[32m 3[2mms[22m[39m
+     [32m✓[39m P - key evicted on a fresh env (the seeded row, no integrations): an unrestricted connector still passes[32m 2[2mms[22m[39m
+     [32m✓[39m Redis DOWN keeps its 503 and never reads the database (unchanged)[32m 2[2mms[22m[39m
+     [32m✓[39m a THROWN Redis read keeps its 503 (unchanged)[32m 2[2mms[22m[39m
+[31m     [31m×[31m RED - key AND stored row both missing: 503 with the Redis-down body[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m RED - key missing and the database unavailable: 503 with the Redis-down body[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m RED - key missing and the stored-row read throws: 503 with the Redis-down body[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m RED - an existing env: a Redis hit copies the cached settings over the SEEDED row, and the answer is unchanged[39m[32m 3[2mms[22m[39m
+     [32m✓[39m P - a failed backfill never changes the answer[32m 2[2mms[22m[39m
+     [32m✓[39m P - key present: the restricted list[32m 2[2mms[22m[39m
+[31m     [31m×[31m DEFECT - key evicted, restrictive stored row: the restricted list, not [] ("all types")[39m[32m 0[2mms[22m[39m
+     [32m✓[39m P - key evicted on a fresh env (the seeded row): [] as today[32m 0[2mms[22m[39m
+     [32m✓[39m Redis DOWN keeps its 503 (unchanged)[32m 0[2mms[22m[39m
+[31m     [31m×[31m RED - key AND stored row both missing: 503 with the Redis-down body[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m RED - key missing and the database unavailable: 503 with the Redis-down body[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m RED - a PUT after an eviction keeps the stored allow-list (it used to merge over {})[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m RED - the database row is written BEFORE Redis[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m RED - the database unavailable: 503 and Redis is NOT written[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m RED - the database write throws: 503 and Redis is NOT written[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m RED - key AND stored row both missing: the PUT refuses rather than merge over {}[39m[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-settings-store-statements-on-a-real-engine.test.ts[2m [ src/__tests__/ks1256-settings-store-statements-on-a-real-engine.test.ts ][22m
+[31m[1mError[22m: Cannot find module '../services/settingsStore' imported from /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate189-ks1256-pr2001/repo/Blockchain/Dev/services/api-gateway/src/__tests__/ks1256-settings-store-statements-on-a-real-engine.test.ts[39m
+[36m [2m❯[22m src/__tests__/ks1256-settings-store-statements-on-a-real-engine.test.ts:[2m16:1[22m[39m
+    [90m 14|[39m [35mimport[39m path [35mfrom[39m [32m'path'[39m[33m;[39m
+    [90m 15|[39m [35mimport[39m { [33mPGlite[39m } [35mfrom[39m [32m'@electric-sql/pglite'[39m[33m;[39m
+    [90m 16|[39m import { PLATFORM_SETTINGS_DEFAULTS, PLATFORM_SETTINGS_KEY, SETTINGS_S…
+    [90m   |[39m [31m^[39m
+    [90m 17|[39m
+    [90m 18|[39m [35mconst[39m [33mMIGRATIONS[39m [33m=[39m path[33m.[39m[34mresolve[39m(__dirname[33m,[39m [32m'../../../../migrations'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 14 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 create path: a missing key reads the stored record, never "no restriction"[2m > [22mDEFECT (W 24th's case) - key EVICTED with Redis up, restrictive stored row: diploma is refused 403, not let through
+[31m[1mAssertionError[22m: expected [ 201, undefined ] to deeply equal [ 403, 'FORBIDDEN' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   403,[39m
+[32m-   "FORBIDDEN",[39m
+[31m+   201,[39m
+[31m+   undefined,[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m187:50[22m[39m
+    [90m185|[39m     db[33m.[39mrow [33m=[39m { settings[33m:[39m [33mRESTRICTED[39m[33m,[39m origin[33m:[39m [32m'put'[39m }[33m;[39m
+    [90m186|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mcreate[39m([32m'diploma'[39m)[33m;[39m
+    [90m187|[39m     expect([r.status, (r.outcome as any)?.code]).toEqual([403, 'FORBID…
+    [90m   |[39m                                                  [31m^[39m
+    [90m188|[39m   })[33m;[39m
+    [90m189|[39m   it('RED - key evicted: the stored row refills Redis, and the allowed…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 create path: a missing key reads the stored record, never "no restriction"[2m > [22mRED - key evicted: the stored row refills Redis, and the allowed type still passes
+[31m[1mAssertionError[22m: expected [] to deeply equal [ { integrations: [ { …(2) } ] } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   {[39m
+[32m-     "integrations": [[39m
+[32m-       {[39m
+[32m-         "config": {[39m
+[32m-           "allowedDocumentTypes": [[39m
+[32m-             "SSD_DOCUMENT",[39m
+[32m-           ],[39m
+[32m-         },[39m
+[32m-         "id": "ks1256-e35-c1",[39m
+[32m-       },[39m
+[32m-     ],[39m
+[32m-   },[39m
+[32m- ][39m
+[31m+ [][39m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m192:24[22m[39m
+    [90m190|[39m     db[33m.[39mrow [33m=[39m { settings[33m:[39m [33mRESTRICTED[39m[33m,[39m origin[33m:[39m [32m'put'[39m }[33m;[39m
+    [90m191|[39m     expect(await create('SSD_DOCUMENT')).toEqual({ status: 201, outcom…
+    [90m192|[39m     [34mexpect[39m(redis[33m.[39msets)[33m.[39m[34mtoEqual[39m([[33mRESTRICTED[39m])[33m;[39m
+    [90m   |[39m                        [31m^[39m
+    [90m193|[39m   })[33m;[39m
+    [90m194|[39m   it('P - key evicted on a fresh env (the seeded row, no integrations)…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 create path: a missing key reads the stored record, never "no restriction"[2m > [22mRED - key AND stored row both missing: 503 with the Redis-down body
+[31m[1mAssertionError[22m: expected [ 201, 'past-allow-list' ] to deeply equal [ 503, { …(2) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   503,[39m
+[32m-   {[39m
+[32m-     "code": "SERVICE_UNAVAILABLE",[39m
+[32m-     "message": "Connector allow-list configuration is currently unreadable; refusing until it can be read",[39m
+[32m-   },[39m
+[31m+   201,[39m
+[31m+   "past-allow-list",[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m211:35[22m[39m
+    [90m209|[39m   it('RED - key AND stored row both missing: 503 with the Redis-down b…
+    [90m210|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mcreate[39m([32m'SSD_DOCUMENT'[39m)[33m;[39m
+    [90m211|[39m     [34mexpect[39m([r[33m.[39mstatus[33m,[39m r[33m.[39moutcome])[33m.[39m[34mtoEqual[39m([[34m503[39m[33m,[39m [33mUNREADABLE[39m])[33m;[39m
+    [90m   |[39m                                   [31m^[39m
+    [90m212|[39m   })[33m;[39m
+    [90m213|[39m   it('RED - key missing and the database unavailable: 503 with the Red…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 create path: a missing key reads the stored record, never "no restriction"[2m > [22mRED - key missing and the database unavailable: 503 with the Redis-down body
+[31m[1mAssertionError[22m: expected [ 201, 'past-allow-list' ] to deeply equal [ 503, { …(2) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   503,[39m
+[32m-   {[39m
+[32m-     "code": "SERVICE_UNAVAILABLE",[39m
+[32m-     "message": "Connector allow-list configuration is currently unreadable; refusing until it can be read",[39m
+[32m-   },[39m
+[31m+   201,[39m
+[31m+   "past-allow-list",[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m217:35[22m[39m
+    [90m215|[39m     db[33m.[39mrow [33m=[39m { settings[33m:[39m [33mSEED[39m[33m,[39m origin[33m:[39m [32m'seed'[39m }[33m;[39m
+    [90m216|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mcreate[39m([32m'SSD_DOCUMENT'[39m)[33m;[39m
+    [90m217|[39m     [34mexpect[39m([r[33m.[39mstatus[33m,[39m r[33m.[39moutcome])[33m.[39m[34mtoEqual[39m([[34m503[39m[33m,[39m [33mUNREADABLE[39m])[33m;[39m
+    [90m   |[39m                                   [31m^[39m
+    [90m218|[39m   })[33m;[39m
+    [90m219|[39m   it('RED - key missing and the stored-row read throws: 503 with the R…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 create path: a missing key reads the stored record, never "no restriction"[2m > [22mRED - key missing and the stored-row read throws: 503 with the Redis-down body
+[31m[1mAssertionError[22m: expected [ 201, 'past-allow-list' ] to deeply equal [ 503, { …(2) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   503,[39m
+[32m-   {[39m
+[32m-     "code": "SERVICE_UNAVAILABLE",[39m
+[32m-     "message": "Connector allow-list configuration is currently unreadable; refusing until it can be read",[39m
+[32m-   },[39m
+[31m+   201,[39m
+[31m+   "past-allow-list",[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m223:35[22m[39m
+    [90m221|[39m     db[33m.[39mfailVerb [33m=[39m [32m'SELECT'[39m[33m;[39m
+    [90m222|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mcreate[39m([32m'SSD_DOCUMENT'[39m)[33m;[39m
+    [90m223|[39m     [34mexpect[39m([r[33m.[39mstatus[33m,[39m r[33m.[39moutcome])[33m.[39m[34mtoEqual[39m([[34m503[39m[33m,[39m [33mUNREADABLE[39m])[33m;[39m
+    [90m   |[39m                                   [31m^[39m
+    [90m224|[39m   })[33m;[39m
+    [90m225|[39m   it('RED - an existing env: a Redis hit copies the cached settings ov…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 create path: a missing key reads the stored record, never "no restriction"[2m > [22mRED - an existing env: a Redis hit copies the cached settings over the SEEDED row, and the answer is unchanged
+[31m[1mAssertionError[22m: expected [ 403, 'FORBIDDEN', …(1) ] to deeply equal [ 403, 'FORBIDDEN', …(1) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    403,[22m
+[2m    "FORBIDDEN",[22m
+[2m    {[22m
+[32m-     "origin": "backfill",[39m
+[31m+     "origin": "seed",[39m
+[2m      "settings": {[22m
+[32m-       "integrations": [[39m
+[32m-         {[39m
+[32m-           "config": {[39m
+[32m-             "allowedDocumentTypes": [[39m
+[32m-               "SSD_DOCUMENT",[39m
+[32m-             ],[39m
+[31m+       "general": {[39m
+[31m+         "defaultLanguage": "en",[39m
+[31m+         "maintenanceMode": false,[39m
+[31m+         "platformName": "Secuura",[39m
+[2m        },[22m
+[32m-           "id": "ks1256-e35-c1",[39m
+[32m-         },[39m
+[32m-       ],[39m
+[2m      },[22m
+[2m    },[22m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m229:58[22m[39m
+    [90m227|[39m     db[33m.[39mrow [33m=[39m { settings[33m:[39m [33mSEED[39m[33m,[39m origin[33m:[39m [32m'seed'[39m }[33m;[39m
+    [90m228|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mcreate[39m([32m'diploma'[39m)[33m;[39m
+    [90m229|[39m     expect([r.status, (r.outcome as any)?.code, db.row]).toEqual([403,…
+    [90m   |[39m                                                          [31m^[39m
+    [90m230|[39m   })[33m;[39m
+    [90m231|[39m   [34mit[39m([32m'P - a failed backfill never changes the answer'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 GET /api/connector/info: a missing key reports the stored allow-list[2m > [22mDEFECT - key evicted, restrictive stored row: the restricted list, not [] ("all types")
+[31m[1mAssertionError[22m: expected [ 200, [] ] to deeply equal [ 200, [ 'SSD_DOCUMENT' ] ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    200,[22m
+[32m-   [[39m
+[32m-     "SSD_DOCUMENT",[39m
+[32m-   ],[39m
+[31m+   [],[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m249:54[22m[39m
+    [90m247|[39m     db[33m.[39mrow [33m=[39m { settings[33m:[39m [33mRESTRICTED[39m[33m,[39m origin[33m:[39m [32m'put'[39m }[33m;[39m
+    [90m248|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34minfo[39m()[33m;[39m
+    [90m249|[39m     expect([r.status, r.body?.allowedDocumentTypes]).toEqual([200, ['S…
+    [90m   |[39m                                                      [31m^[39m
+    [90m250|[39m   })[33m;[39m
+    [90m251|[39m   it('P - key evicted on a fresh env (the seeded row): [] as today', a…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 GET /api/connector/info: a missing key reports the stored allow-list[2m > [22mRED - key AND stored row both missing: 503 with the Redis-down body
+[31m[1mAssertionError[22m: expected [ 200, undefined ] to deeply equal [ 503, { …(2) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   503,[39m
+[32m-   {[39m
+[32m-     "code": "SERVICE_UNAVAILABLE",[39m
+[32m-     "message": "Connector allow-list configuration is currently unreadable; refusing until it can be read",[39m
+[32m-   },[39m
+[31m+   200,[39m
+[31m+   undefined,[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m263:39[22m[39m
+    [90m261|[39m   it('RED - key AND stored row both missing: 503 with the Redis-down b…
+    [90m262|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34minfo[39m()[33m;[39m
+    [90m263|[39m     [34mexpect[39m([r[33m.[39mstatus[33m,[39m r[33m.[39mbody[33m?.[39merror])[33m.[39m[34mtoEqual[39m([[34m503[39m[33m,[39m [33mUNREADABLE[39m])[33m;[39m
+    [90m   |[39m                                       [31m^[39m
+    [90m264|[39m   })[33m;[39m
+    [90m265|[39m   it('RED - key missing and the database unavailable: 503 with the Red…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 GET /api/connector/info: a missing key reports the stored allow-list[2m > [22mRED - key missing and the database unavailable: 503 with the Redis-down body
+[31m[1mAssertionError[22m: expected [ 200, undefined ] to deeply equal [ 503, { …(2) } ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   503,[39m
+[32m-   {[39m
+[32m-     "code": "SERVICE_UNAVAILABLE",[39m
+[32m-     "message": "Connector allow-list configuration is currently unreadable; refusing until it can be read",[39m
+[32m-   },[39m
+[31m+   200,[39m
+[31m+   undefined,[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m269:39[22m[39m
+    [90m267|[39m     db[33m.[39mrow [33m=[39m { settings[33m:[39m [33mSEED[39m[33m,[39m origin[33m:[39m [32m'seed'[39m }[33m;[39m
+    [90m268|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34minfo[39m()[33m;[39m
+    [90m269|[39m     [34mexpect[39m([r[33m.[39mstatus[33m,[39m r[33m.[39mbody[33m?.[39merror])[33m.[39m[34mtoEqual[39m([[34m503[39m[33m,[39m [33mUNREADABLE[39m])[33m;[39m
+    [90m   |[39m                                       [31m^[39m
+    [90m270|[39m   })[33m;[39m
+    [90m271|[39m })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 PUT /api/admin/settings: the stored record is written first and an eviction loses nothing[2m > [22mRED - a PUT after an eviction keeps the stored allow-list (it used to merge over {})
+[31m[1mAssertionError[22m: expected [ 200, undefined, 'Renamed' ] to deeply equal [ 200, …(2) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    200,[22m
+[32m-   [[39m
+[32m-     {[39m
+[32m-       "config": {[39m
+[32m-         "allowedDocumentTypes": [[39m
+[32m-           "SSD_DOCUMENT",[39m
+[32m-         ],[39m
+[32m-       },[39m
+[32m-       "id": "ks1256-e35-c1",[39m
+[32m-     },[39m
+[32m-   ],[39m
+[31m+   undefined,[39m
+[2m    "Renamed",[22m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m278:73[22m[39m
+    [90m276|[39m     const r = await put({ general: { platformName: 'Renamed', defaultL…
+    [90m277|[39m     [35mconst[39m last [33m=[39m redis[33m.[39msets[redis[33m.[39msets[33m.[39mlength [33m-[39m [34m1[39m] [35mas[39m any[33m;[39m
+    [90m278|[39m     expect([r.status, last?.integrations, last?.general?.platformName]…
+    [90m   |[39m                                                                         [31m^[39m
+    [90m279|[39m     expect([(db.row?.settings as any)?.integrations, (db.row?.settings…
+    [90m280|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 PUT /api/admin/settings: the stored record is written first and an eviction loses nothing[2m > [22mRED - the database row is written BEFORE Redis
+[31m[1mAssertionError[22m: expected [ 200, [ 'redis-first' ], 'put', …(1) ] to deeply equal [ 200, [ 'db-then-redis' ], …(2) ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    200,[22m
+[2m    [[22m
+[32m-     "db-then-redis",[39m
+[31m+     "redis-first",[39m
+[2m    ],[22m
+[2m    "put",[22m
+[32m-   [[39m
+[32m-     {[39m
+[32m-       "config": {[39m
+[32m-         "allowedDocumentTypes": [[39m
+[32m-           "SSD_DOCUMENT",[39m
+[32m-         ],[39m
+[32m-       },[39m
+[32m-       "id": "ks1256-e35-c1",[39m
+[32m-     },[39m
+[32m-   ],[39m
+[31m+   undefined,[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m288:88[22m[39m
+    [90m286|[39m     redisDouble.setNotificationSettings.mockImplementationOnce(async (…
+    [90m287|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mput[39m({ integrations[33m:[39m [33mRESTRICTED[39m[33m.[39mintegrations })[33m;[39m
+    [90m288|[39m     expect([r.status, order, db.row?.origin, (db.row?.settings as any)…
+    [90m   |[39m                                                                                        [31m^[39m
+    [90m289|[39m   })[33m;[39m
+    [90m290|[39m   it('RED - the database unavailable: 503 and Redis is NOT written', a…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 PUT /api/admin/settings: the stored record is written first and an eviction loses nothing[2m > [22mRED - the database unavailable: 503 and Redis is NOT written
+[31m[1mAssertionError[22m: expected [ 200, undefined, 1 ] to deeply equal [ 503, 'SERVICE_UNAVAILABLE', +0 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   503,[39m
+[32m-   "SERVICE_UNAVAILABLE",[39m
+[32m-   0,[39m
+[31m+   200,[39m
+[31m+   undefined,[39m
+[31m+   1,[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m294:64[22m[39m
+    [90m292|[39m     db[33m.[39mavailable [33m=[39m [35mfalse[39m[33m;[39m
+    [90m293|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mput[39m({ integrations[33m:[39m [33mRESTRICTED[39m[33m.[39mintegrations })[33m;[39m
+    [90m294|[39m     expect([r.status, r.body?.error?.code, redis.sets.length]).toEqual…
+    [90m   |[39m                                                                [31m^[39m
+    [90m295|[39m   })[33m;[39m
+    [90m296|[39m   it('RED - the database write throws: 503 and Redis is NOT written', …
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 PUT /api/admin/settings: the stored record is written first and an eviction loses nothing[2m > [22mRED - the database write throws: 503 and Redis is NOT written
+[31m[1mAssertionError[22m: expected [ 200, undefined, 1 ] to deeply equal [ 503, 'SERVICE_UNAVAILABLE', +0 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   503,[39m
+[32m-   "SERVICE_UNAVAILABLE",[39m
+[32m-   0,[39m
+[31m+   200,[39m
+[31m+   undefined,[39m
+[31m+   1,[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m301:64[22m[39m
+    [90m299|[39m     db[33m.[39mfailVerb [33m=[39m [32m'INSERT'[39m[33m;[39m
+    [90m300|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mput[39m({ integrations[33m:[39m [33mRESTRICTED[39m[33m.[39mintegrations })[33m;[39m
+    [90m301|[39m     expect([r.status, r.body?.error?.code, redis.sets.length]).toEqual…
+    [90m   |[39m                                                                [31m^[39m
+    [90m302|[39m   })[33m;[39m
+    [90m303|[39m   it('RED - key AND stored row both missing: the PUT refuses rather th…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts[2m > [22mKS-1256 PUT /api/admin/settings: the stored record is written first and an eviction loses nothing[2m > [22mRED - key AND stored row both missing: the PUT refuses rather than merge over {}
+[31m[1mAssertionError[22m: expected [ 200, undefined, 1 ] to deeply equal [ 503, 'SERVICE_UNAVAILABLE', +0 ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   503,[39m
+[32m-   "SERVICE_UNAVAILABLE",[39m
+[32m-   0,[39m
+[31m+   200,[39m
+[31m+   undefined,[39m
+[31m+   1,[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1256-a-missing-settings-key-reads-the-stored-record.test.ts:[2m305:64[22m[39m
+    [90m303|[39m   it('RED - key AND stored row both missing: the PUT refuses rather th…
+    [90m304|[39m     const r = await put({ general: { platformName: 'X', defaultLanguag…
+    [90m305|[39m     expect([r.status, r.body?.error?.code, redis.sets.length]).toEqual…
+    [90m   |[39m                                                                [31m^[39m
+    [90m306|[39m   })[33m;[39m
+    [90m307|[39m })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/15]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m14 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (23)[39m
+[2m   Start at [22m 23:18:22
+[2m   Duration [22m 2.04s[2m (transform 273ms, setup 159ms, import 1.55s, tests 165ms, environment 0ms)[22m
+
