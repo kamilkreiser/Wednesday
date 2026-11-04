@@ -1,0 +1,203 @@
+FAIL ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts
+  ● G188-F1 DEFECT cells: 23, 24 and 25 later certified copies, every path the gate named › chain-first (/verify, a race: the local read misses, the chain answers; B's draft original is outside the second read's 24)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-g188-B-original"
+    Received: undefined
+
+      267 |     const body = await verifyByHash();
+      268 |     expect(body.verified).toBe(false);
+    > 269 |     expect(body.documentId).toBe(B_EXT);
+          |                             ^
+      270 |     expect(body.checks.isCertified).toBe(false);
+      271 |   });
+      272 | });
+
+      at Object.<anonymous> (src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts:269:29)
+
+FAIL ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts
+  ● KS-1986 G192-F2: a failed cross-tenant read answers not found and does not ask the chain › F2 REGISTRY DOWN, CHAIN UP (/verify): every local row certified -> the not-found body, chain not asked
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      359 | function answersNotFoundWithoutTheChain(name: string, body: any, f: jest.Mock): void {
+      360 |   const text = JSON.stringify(body);
+    > 361 |   expect(chainCalls(f)).toBe(0);
+          |                         ^
+      362 |   expect(body.verified).toBe(false);
+      363 |   expect(body.error).toBe(NOT_FOUND_ERROR[name]);
+      364 |   expect(body.checks).toEqual({ documentExists: false, hashValid: false, integrityVerified: false });
+
+      at answersNotFoundWithoutTheChain (src/__tests__/ks1986-v1-original-across-tenants.test.ts:361:25)
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:377:7)
+
+  ● KS-1986 G192-F2: a failed cross-tenant read answers not found and does not ask the chain › F2 ONE TENANT POOL DOWN, CHAIN UP (/verify): every local row certified -> the not-found body, chain not asked
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      359 | function answersNotFoundWithoutTheChain(name: string, body: any, f: jest.Mock): void {
+      360 |   const text = JSON.stringify(body);
+    > 361 |   expect(chainCalls(f)).toBe(0);
+          |                         ^
+      362 |   expect(body.verified).toBe(false);
+      363 |   expect(body.error).toBe(NOT_FOUND_ERROR[name]);
+      364 |   expect(body.checks).toEqual({ documentExists: false, hashValid: false, integrityVerified: false });
+
+      at answersNotFoundWithoutTheChain (src/__tests__/ks1986-v1-original-across-tenants.test.ts:361:25)
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:383:7)
+
+  ● KS-1986 G192-F2: a failed cross-tenant read answers not found and does not ask the chain › F2 CONTROL NO LOCAL ROW, CHAIN UP (/verify): the chain branch still answers (unchanged, pre-existing exposure)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      388 |       install([], []);
+      389 |       const body = await v1();
+    > 390 |       expect(chainCalls(f)).toBe(1);
+          |                             ^
+      391 |       expect(body.verified).toBe(true);
+      392 |       expect(body.source).toBe('blockchain');
+      393 |       expect(body.certification?.certificationId).toBe(CHAIN_CERT_ID);
+
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:390:29)
+
+  ● KS-1986 G192-F2: a failed cross-tenant read answers not found and does not ask the chain › F2 REGISTRY DOWN, CHAIN UP (verify-file): every local row certified -> the not-found body, chain not asked
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      359 | function answersNotFoundWithoutTheChain(name: string, body: any, f: jest.Mock): void {
+      360 |   const text = JSON.stringify(body);
+    > 361 |   expect(chainCalls(f)).toBe(0);
+          |                         ^
+      362 |   expect(body.verified).toBe(false);
+      363 |   expect(body.error).toBe(NOT_FOUND_ERROR[name]);
+      364 |   expect(body.checks).toEqual({ documentExists: false, hashValid: false, integrityVerified: false });
+
+      at answersNotFoundWithoutTheChain (src/__tests__/ks1986-v1-original-across-tenants.test.ts:361:25)
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:377:7)
+
+  ● KS-1986 G192-F2: a failed cross-tenant read answers not found and does not ask the chain › F2 ONE TENANT POOL DOWN, CHAIN UP (verify-file): every local row certified -> the not-found body, chain not asked
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      359 | function answersNotFoundWithoutTheChain(name: string, body: any, f: jest.Mock): void {
+      360 |   const text = JSON.stringify(body);
+    > 361 |   expect(chainCalls(f)).toBe(0);
+          |                         ^
+      362 |   expect(body.verified).toBe(false);
+      363 |   expect(body.error).toBe(NOT_FOUND_ERROR[name]);
+      364 |   expect(body.checks).toEqual({ documentExists: false, hashValid: false, integrityVerified: false });
+
+      at answersNotFoundWithoutTheChain (src/__tests__/ks1986-v1-original-across-tenants.test.ts:361:25)
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:383:7)
+
+  ● KS-1986 G192-F2: a failed cross-tenant read answers not found and does not ask the chain › F2 CONTROL NO LOCAL ROW, CHAIN UP (verify-file): the chain branch still answers (unchanged, pre-existing exposure)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      388 |       install([], []);
+      389 |       const body = await v1();
+    > 390 |       expect(chainCalls(f)).toBe(1);
+          |                             ^
+      391 |       expect(body.verified).toBe(true);
+      392 |       expect(body.source).toBe('blockchain');
+      393 |       expect(body.certification?.certificationId).toBe(CHAIN_CERT_ID);
+
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:390:29)
+
+FAIL ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-verify-original-registrant-certifier.test.ts
+  ● Console
+
+    console.log
+      2026-11-05 09:26:27.092 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 09:26:27.117 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 09:26:27.120 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 09:26:27.123 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 09:26:27.125 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 09:26:27.139 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 09:26:27.140 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+  ● KS-1561 verify-file and the cross-tenant lookup apply the same rule › D1 DEFECT: the chain-first downgrade check judges the row the rule selects (B's draft), not A's certified copy
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1561-B-original"
+    Received: undefined
+
+      421 |     const body = await verifyByHash();
+      422 |     expect(body.verified).toBe(false);
+    > 423 |     expect(body.documentId).toBe('doc-ks1561-B-original');
+          |                             ^
+      424 |     expect(body.checks.isCertified).toBe(false);
+      425 |   });
+      426 | });
+
+      at Object.<anonymous> (src/__tests__/ks1561-verify-original-registrant-certifier.test.ts:423:29)
+
+  ● KS-1561 the row-set SELECTs carry the identity columns the rule reads › S4 DEFECT: the chain-first local row-set selects owner_user_id, parent_document_id and issuer_organization_id
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      458 |     await verifyByHash();
+      459 |     const local = mockQueryRaw.mock.calls.map(sqlOf).filter((s) => /FROM documents\s+WHERE content_hash = \?/.test(s));
+    > 460 |     expect(local).toHaveLength(1);
+          |                   ^
+      461 |     for (const col of ['owner_user_id', 'parent_document_id', 'issuer_organization_id', 'created_at']) expect(selectListOf(local[0])).toContain(col);
+      462 |   });
+      463 | });
+
+      at Object.<anonymous> (src/__tests__/ks1561-verify-original-registrant-certifier.test.ts:460:19)
+
+Test Suites: 3 failed, 3 total
+Tests:       9 failed, 86 passed, 95 total
+Snapshots:   0 total
+Time:        3.056 s
+Ran all test suites within paths "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate193-ks1986-pr2004-r2/repo/Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts", "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate193-ks1986-pr2004-r2/repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts", "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate193-ks1986-pr2004-r2/repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-verify-original-registrant-certifier.test.ts".

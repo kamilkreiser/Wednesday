@@ -1,0 +1,38 @@
+merge-tree develop=e899463d2a0b1b30f2cff46b23d001622620029a rc=0 tree=4048c96cbe5164205355207de0f2cc840c41b780
+base ancestor of develop: yes
+develop range files:        9; pr range:        5
+shared(dev range, pr range):        0
+control pr vs pr:        5
+planted control (dev list + verification.ts) vs pr:        1
+-- develop range:
+Blockchain/Dev/migrations/058_ks1401_tenant_isolation_after_039.sql
+Blockchain/Dev/scripts/__tests__/ks1401_058_tenant_isolation_after_039.test.sh
+Blockchain/Dev/services/vc-issuer/src/__tests__/ks1958-revocation-read-fails-closed.test.ts
+Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+Blockchain/Dev/services/vc-issuer/src/services/revocationResolvers.ts
+Projects Documents/fragments/cheat/KS-1401-tenant-isolation-058.html
+Projects Documents/fragments/cheat/KS-1958-revocation-read-fails-closed.html
+Projects Documents/fragments/flow/KS-1401-tenant-isolation-058.html
+Projects Documents/fragments/flow/KS-1958-revocation-read-fails-closed.html
+-- per-path blob, merge tree vs head
+EQUAL 7e8d99b9aced Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts
+EQUAL 9e298bd2db3b Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts
+EQUAL c639b532be39 Blockchain/Dev/services/originate/src/routes/verification.ts
+EQUAL 5e5e44f2329e Projects Documents/fragments/cheat/KS-1986-v1-original-across-tenants.html
+EQUAL efb33dd512f2 Projects Documents/fragments/flow/KS-1986-v1-original-across-tenants.html
+-- diff develop..mergetree numstat
+2	2	Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts
+412	0	Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts
+171	12	Blockchain/Dev/services/originate/src/routes/verification.ts
+16	0	Projects Documents/fragments/cheat/KS-1986-v1-original-across-tenants.html
+8	0	Projects Documents/fragments/flow/KS-1986-v1-original-across-tenants.html
+-- full range: api-gateway/migration/verificationV2 paths: 0
+-- ks1561-g188-f1 existing-test changed lines (base..head):
+-describe('G188-F2 is NOT changed this round (v1 judges the caller\'s tenant, v2 every tenant)', () => {
++describe('G188-F2 CHANGED by KS-1986: v1 now judges the original across tenants and presents B (the cell title states the base behaviour)', () => {
+-    expect(v1.certification?.certificationId).toBe('cert-a-split');
++    expect([v1.documentId, v1.certification, v1.title, v1.issuer]).toEqual([B_EXT, undefined, null, null]); // KS-1986 (ruled 2026-11-05)
+ks1561-g188-f1 blob 577f / head: 7e8d99b9aced 7e8d99b9aced
+cheat blob 577f / head: 5e5e44f2329e 5e5e44f2329e
+verificationV2 blob base / head: 41750ecf1b91 41750ecf1b91
+verification.ts blob base / develop: 484c0a65d8a9 484c0a65d8a9

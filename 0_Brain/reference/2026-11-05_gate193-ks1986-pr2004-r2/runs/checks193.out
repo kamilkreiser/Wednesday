@@ -1,0 +1,35 @@
+== 1. red proof: 577f verification.ts under head's KS-1986 test file
+red-at-577f jest rc=1
+restored blob equal head: yes
+Tests:       4 failed, 30 passed, 34 total
+TS diagnostics: 0  TypeError: 0  suite-failed-to-run: 0
+    ✕ F2 REGISTRY DOWN, CHAIN UP (/verify): every local row certified -> the not-found body, chain not asked (3 ms)
+    ✕ F2 ONE TENANT POOL DOWN, CHAIN UP (/verify): every local row certified -> the not-found body, chain not asked (2 ms)
+    ✕ F2 REGISTRY DOWN, CHAIN UP (verify-file): every local row certified -> the not-found body, chain not asked (2 ms)
+    ✕ F2 ONE TENANT POOL DOWN, CHAIN UP (verify-file): every local row certified -> the not-found body, chain not asked (2 ms)
+-- control: the same file at head
+head jest rc=0
+Tests:       34 passed, 34 total
+-- control for the TS counter: a planted type error in a copy of the test file, same counter
+planted jest rc=1 TS diagnostics: 1
+== 2. the three unit files at head
+rc=0
+Test Suites: 3 passed, 3 total
+Tests:       95 passed, 95 total
+== 3. whole originate suite at head
+verification.ts blob equal head: yes
+jest rc=0
+tests 2485 of 2485 failed 0 pending 0 | suites 210 of 210 failed 0
+== 4. tsc
+tsc -p originate rc=0 errors=0
+tsc tests rc=0 errors=0
+tsc planted control rc=2 errors=1
+== 5. eslint on the touched TS files (round 2: verification.ts + the KS-1986 test) and the full range's third TS file
+eslint rc=0 problem-lines=0
+eslint planted control rc=1 problem-lines=2
+== 6. docs-fragments
+docs clean rc=0
+docs planted (dangling ref) rc=1
+restored: git diff clean
+docs restored rc=0
+== git status of the clone (expect clean)

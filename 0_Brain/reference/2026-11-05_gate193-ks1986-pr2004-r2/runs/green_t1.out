@@ -1,0 +1,45 @@
+PASS ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts
+  KS-1986 DEFECT cells: the original is in another tenant
+    ✓ N-SPLIT (/verify): A later and certified in the caller's tenant, B the original in another: v1 presents B, as v2 does (27 ms)
+    ✓ LEAK CANARY (/verify): nothing tenant-owned of the foreign original appears anywhere in the v1 body (3 ms)
+    ✓ FOREIGN ORIGINAL CERTIFIED (/verify): B's own certification answers, with no certifier org UUID and no naming (3 ms)
+    ✓ 24 LATER COPIES in the original's tenant (/verify): its original is found over that tenant's FULL set, not a LIMIT-ed fetch (3 ms)
+    ✓ N-SPLIT (verify-file): A later and certified in the caller's tenant, B the original in another: v1 presents B, as v2 does (5 ms)
+    ✓ LEAK CANARY (verify-file): nothing tenant-owned of the foreign original appears anywhere in the v1 body (3 ms)
+    ✓ FOREIGN ORIGINAL CERTIFIED (verify-file): B's own certification answers, with no certifier org UUID and no naming (2 ms)
+    ✓ 24 LATER COPIES in the original's tenant (verify-file): its original is found over that tenant's FULL set, not a LIMIT-ed fetch (3 ms)
+  KS-1986 unchanged where the original is local, tied, or nothing is local
+    ✓ ORIGINAL LOCAL (/verify): the holder's own later certified copy still answers, unscoped (3 ms)
+    ✓ TIED ACROSS TENANTS (/verify): a local original keeps presenting; a latecomer sharing the FOREIGN original's owner is refused (v2 accepts it) (4 ms)
+    ✓ NO LOCAL ROW (/verify): crossTenantLookup still answers as before (2 ms)
+    ✓ SINGLE-TENANT (/verify): no tenant manager, no extra query, the local judgment stands (2 ms)
+    ✓ DEDUPE (/verify): the caller's own tenant listed in the registry is not read back as foreign (2 ms)
+    ✓ ORIGINAL LOCAL (verify-file): the holder's own later certified copy still answers, unscoped (2 ms)
+    ✓ TIED ACROSS TENANTS (verify-file): a local original keeps presenting; a latecomer sharing the FOREIGN original's owner is refused (v2 accepts it) (3 ms)
+    ✓ NO LOCAL ROW (verify-file): crossTenantLookup still answers as before (2 ms)
+    ✓ SINGLE-TENANT (verify-file): no tenant manager, no extra query, the local judgment stands (1 ms)
+    ✓ DEDUPE (verify-file): the caller's own tenant listed in the registry is not read back as foreign (2 ms)
+  KS-1986 fail closed (D-B4) and the cost bound
+    ✓ REGISTRY DOWN (/verify): no local certification is presented; every local row certified -> not found, crossTenantLookup not tried (2 ms)
+    ✓ ONE TENANT POOL DOWN (/verify): a local UNcertified row is presented, without any certification (2 ms)
+    ✓ COST (/verify): one registry enumeration and one originals read per tenant listed, each bounded at ORIGINAL_ROWS_LIMIT + 1 (2 ms)
+    ✓ REGISTRY DOWN (verify-file): no local certification is presented; every local row certified -> not found, crossTenantLookup not tried (2 ms)
+    ✓ ONE TENANT POOL DOWN (verify-file): a local UNcertified row is presented, without any certification (2 ms)
+    ✓ COST (verify-file): one registry enumeration and one originals read per tenant listed, each bounded at ORIGINAL_ROWS_LIMIT + 1 (2 ms)
+  KS-1986 G192-F2: a failed cross-tenant read answers not found and does not ask the chain
+    ✓ F2 REGISTRY DOWN, CHAIN UP (/verify): every local row certified -> the not-found body, chain not asked (2 ms)
+    ✓ F2 ONE TENANT POOL DOWN, CHAIN UP (/verify): every local row certified -> the not-found body, chain not asked (2 ms)
+    ✓ F2 CONTROL NO LOCAL ROW, CHAIN UP (/verify): the chain branch still answers (unchanged, pre-existing exposure) (2 ms)
+    ✓ F2 CONTROL READ SUCCEEDS, D-B2 (/verify): the foreign original answers and the chain is not asked, as before (2 ms)
+    ✓ F2 LINE-682 ATTEMPT (/verify): read succeeds, no foreign row, every local row certified -> the local original answers (2 ms)
+    ✓ F2 REGISTRY DOWN, CHAIN UP (verify-file): every local row certified -> the not-found body, chain not asked (2 ms)
+    ✓ F2 ONE TENANT POOL DOWN, CHAIN UP (verify-file): every local row certified -> the not-found body, chain not asked (2 ms)
+    ✓ F2 CONTROL NO LOCAL ROW, CHAIN UP (verify-file): the chain branch still answers (unchanged, pre-existing exposure) (1 ms)
+    ✓ F2 CONTROL READ SUCCEEDS, D-B2 (verify-file): the foreign original answers and the chain is not asked, as before (1 ms)
+    ✓ F2 LINE-682 ATTEMPT (verify-file): read succeeds, no foreign row, every local row certified -> the local original answers (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+Time:        2.51 s, estimated 3 s
+Ran all test suites within paths "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate193-ks1986-pr2004-r2/repo/Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts".

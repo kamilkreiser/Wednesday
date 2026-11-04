@@ -1,0 +1,40 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261104T221708Z.txt)
+     1	[INBOUND] 2026-11-04T22:16 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2004 (KS-1986) round 2 at 4432db224
+=========== [INBOUND] 2026-11-04T22:16 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2004 (KS-1986) round 2 at 4432db224
+[Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2004 (KS-1986) round 2 at 4432db224a58, TIER 1 (Seat F 33rd)
+Seat F 33rd
+
+READY FOR GATE: PR 2004 (KS-1986), round 2 (gate 192 G192-F2 only), tier 1, for gate 193.
+
+- PR 2004: https://github.com/Secuura/Distributed_Secuura/pull/2004. Title unchanged ("Refs KS-1986: v1 verify judges the original registration across tenants, as v2 does", 83 chars). Body: lines 1 and 2 untouched; "## Round 2 (gate 192 G192-F2)" APPENDED (PATCHed 22:15:31Z, read back by number: body equal to my file, title unchanged, head 4432db224a58, open, not draft; 10,023 -> 20,999 chars).
+- Head 4432db224a58 (4432db224a5867fdb6afaabf56df08cdf640d067), read from origin in ONE ls-remote, the branch and refs/pull/2004/head together: 22:15:12Z origin feature branch = 4432db224a5867fdb6afaabf56df08cdf640d067, refs/pull/2004/head = 4432db224a5867fdb6afaabf56df08cdf640d067, develop = e899463d2a0b1b30f2cff46b23d001622620029a. New commit 4432db224a58 (4432db224a5867fdb6afaabf56df08cdf640d067), parent 577f668f4786; subject "Refs KS-1986: v1 verify answers not found, no chain, when the cross-tenant read fails" (85 chars); body line 1 "fixes G192-F2 of gate 192: cross-tenant read failure answers not certified, no chain fallback"; no HOLD line; 0 close words before a key. The FIRST commit's body still carries the stale HOLD line (superseded; the merge seat strips it from the squash message).
+- Files (round 2): verification.ts +17 -6; ks1986-v1-original-across-tenants.test.ts +78; flow fragment 3 lines. The PR is still 5 files. CHEAT fragment untouched.
+- Forward move: pushed on the built base 035685291b9d, no merge commit. Measurement: ls-remote develop e899463d2a0b; base is an ancestor of it; objects present after the push gate's fetch; develop's range 9 files, shared with the 5 paths 0 of 9 (control: my range 5 of 5); the driver's develop gate agreed (overlap 0, planted control fired).
+- Push: existing-branch driver (lane-F 30th lineage, re-keyed, its diff against F 32nd's read: the origin-at-OLD_ORIGIN_HEAD check + ancestor check, label, OVL_IGNORE_PRS=2004); dryrun and gatetest on scratch lock and queue passed first. Real: detached driver pid 90335 from 21:43:15Z, queued behind Seat K 14th, gates ok 21:58:09Z (develop e899463d2a0b, overlap 0, planted control fired, 0 of 13 other open PRs on the 5 paths), PUSH 21:58:09Z to 22:14:50Z rc 0 in 1,001 s, fast-forward 577f668f4..4432db224, driver VERIFIED, lock released (holder removed, rmdir rc 0), queue left rc 0. Pre-push ls-remote 21:43:12Z: develop e899463d2a0b, refs/pull/2004/head 577f668f4786.
+- Hook verdict, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran." (leg 14: "shell suites: 115 passed, 0 failed, 0 skipped (of 115)")
+- KS-1986 comment b99314fa (b99314fa-e281-45b3-a143-6d2a1c747e29, 22:15:45Z) (BLUF "PR 2004, head 4432db224a58..., ready for gate (round 2: G192-F2)"): read back by id, body equal, 0 mention nodes, state, priority and assignee unchanged.
+- G192-F1 filed as KS-1991 (Backlog, Medium, our board account), the "(1) becomes a ticket" half of the ruling, read back by id; board searches in my STATUS 21:48:31Z.
+- df -h /Volumes/DevMASTER: 131Gi available, 93 percent used at boot; 127Gi available, 94 percent used after the push.
+
+PROOF (all at 4432db224a58 unless named)
+- Red first, a direct run at 577f668f4786 before the fix edit: 4 of 34 red, exactly the 4 F2 cells, by assertion (chain calls expected 0, received 1); TS diagnostics 0 (counted with TS[0-9]{4}; control 3), TypeError 0. Green: 95 of 95 over the three KS-1561 and KS-1986 unit files.
+- Direction, real PostgreSQL 15 (gate 192's harness copied + 3 cells of mine, 30 cells, 60 v1 + 18 v2 rows per subject):
+  HEAD 577f668f4786 -> FIXED: NEW 0 of 60, DIFFERENT 0 of 60, LESS 6 of 60 (G-CHAIN-UP-REGISTRY-DOWN, F33-CHAIN-UP-TENANT-POOL-THROWS-ALL-CERTIFIED, F33-CHAIN-UP-TENANT-DB-DOWN-ALL-CERTIFIED, both paths: cert-chain-x with 2 canary hits -> not found, 0 chain calls, 0 canary hits), SAME 54 of 60; v2 equal 18 of 18.
+  BASE 035685291b9d -> FIXED: NEW 0 of 60, DIFFERENT 8 of 60 (4 the original holder's own, 4 G192-F1 latecomers), LESS 36 of 60, SAME 16 of 60; v2 equal 18 of 18.
+  develop e899463d2a0b: verification.ts blob 484c0a65d8a9 = base's (GitHub contents API, control at 577f668f4786 equal to the local blob 8c594fdb794a; and git after the push gate's fetch), so develop = BASE's column.
+  G-TENANT-POOL-THROWS-ALL-CERTIFIED and S-LOOKUP-FAILURE-REGISTRY (chain down): head called the chain once (not found), FIXED calls it 0 times (not found).
+  Canaries: 0 of 54 DB-sourced FIXED v1 rows; control G-CONTROL-LOCAL-CANARY 3 and 3. HTTP non-200 0 of 60; logger.error 0.
+  LESS than base, stated in the PR body: the read-failure rows, base cert-a-1, FIXED none (the D-B4 outage cost, now without a chain answer).
+- Line 682: probe counter 0 of 95 unit cells, 0 of 78 PG rows; control on line 677 fired 6 and 10. Not widened.
+- Mutants, raw: 9 valid, 8 killed (m-a1 2 and 3, m-a2 2 and 3, m-b1 1 and 1, m-b2 4 and 1, m-f1 2 and 2, m-f2 2 and 2, m-c1 4 and 10, m-c2 4 and 6: unit cells of 95 and PG rows of 78). m-d (flag also set on line 682) SURVIVES, equivalent (unreachable, the probe). m4 and m7 not re-litigated. First m-a/m-b form invalid (TS6133), quarantined.
+- Suites: whole originate 2,485 of 2,485 tests, 210 of 210 suites, rc 0 (+10 over 2,475). tsc -p services/originate rc 0. tsc over verification.ts + 3 test files with jest types rc 0, 0 errors (planted rc 2, 1). eslint on the 2 touched TS files rc 0, 0 problems (planted rc 1, 3). docs-fragments: clean rc 0, planted rc 1 (2 findings), restored sha256-equal rc 0.
+
+PR-BODY NOTES: "For Kam (card secuura-pr2004-ks1986-gate192-hold-1105)" with your sentence verbatim; G192-F4 (pre-existing, both hash forms in the registry, each no-local-row path misses the other) one line; G192-F5 (stale cheat line) one line, plus that the flow fragment's "Not measured here" line names real PostgreSQL the same way; neither edited.
+
+STATE: card secuura-pr2004-ks1986-gate192-hold-1105 is RULED a (Kam, 2026-11-05 09:05:06 AEDT, "Decision secuura-pr2004-ks1986-gate192-hold-1105: a — Fix (2) first, ticket (1)"); the PR body's Round 2 section carries that line verbatim with its timestamp. KS-1991 is the "(1) becomes a ticket" half. Nothing is merged by me; nothing deployed; no box, no az. The merge follows gate 193 and your head-pinned GO to a merge seat.
+
+NOT TESTED: Node 24 (ran on Node v26.8.1); kintsugi or demo; real Platform S traffic; the real anchoring service (chain stubbed by global fetch); production data volume and index behaviour; the four platform suites (Schemathesis, Akto, Playwright, k6); hook legs 3, 4 and 8 (local stack not up).
+
+FILING CANDIDATES (carried, NOT filed): (a) vc-issuer credentialRepo.ts memory fallbacks (F 31st's); (b) scopeTenantFields keeps certification.certifierOrganizationId on the existing cross-tenant answers (verification.ts scopeTenantFields, v1 crossTenantLookup and v2; F 32nd's READY lines 43-44).
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 47  SEEN:     1649  BATCH: /private/tmp/wed_newmail/batch_20261104T221708Z.txt
