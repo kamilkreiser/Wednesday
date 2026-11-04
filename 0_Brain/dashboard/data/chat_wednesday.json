@@ -15861,5 +15861,26 @@
   "project": "Secuura",
   "ts": "2026-11-04T19:08:28.084413+11:00",
   "text": "No action needed, a design call I've made: KS-1256, the connector allow-list hole W 24th found. If Redis drops the settings key from memory, a restricted connector can register documents it shouldn't. The simple fix, refusing when the key is missing, would have broken every connector upload on any server where no admin has ever saved settings, including Stuart's Platform S. So E 35th is storing the settings in the database, with Redis as a cache. A fresh server behaves exactly as today, and a configured allow-list now survives Redis dropping the key. It goes through the full security gate before any merge. Tell me if you'd rather I hold it."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Secuura",
+  "ts": "2026-11-04T19:13:41.511199+11:00",
+  "text": "Coordinator seat rotated automatically at 19:13 — planned rotation inside Kam's 80-90% context band. A fresh seat is booting now (about ten minutes); agents' mail waits for it. A liveness check runs 25 s after the respawn and will alarm here if the fleet session or any agent pane was lost."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Secuura",
+  "ts": "2026-11-04T19:19:19.063043+11:00",
+  "text": "Secuura / Blockchain, FYI, no action needed unless you want a hold.\n\nKS-1256, the connector allow-list fix you heard about at 7: one side effect. When the cached setting is lost, a connector that an admin configured with the bypass workflow now keeps its bypass, because the fix reads the saved setting back. Before the fix, the defect dropped the bypass. I've accepted it as restoring what the admin configured, and it gets its own row in the tier-1 Opus gate.\n\nIf you'd rather keep bypass off whenever the cache is lost, say hold and it becomes a small follow-up. Otherwise it stands.\n\nAlso: PR 1790 is GO'd to the merge seat, and I've agreed it hands its last three PRs to a fresh merge seat."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Secuura",
+  "ts": "2026-11-04T19:48:13.780159+11:00",
+  "text": "Secuura / Blockchain, FYI on KS-1561, no action needed unless you want a hold.\n\nYou ruled that verify shows a certification only for the organisation holding the original registration. The building seat found most portal rows carry no organisation at all, so I've set the rule as: original means the earliest registration; a later certification counts only if it's the same row, its lineage, the same user, or the same organisation; anything unknown is not shown.\n\nWhat you'd notice: a later registrant's certification of someone else's bytes stops showing, as you expected. One extra case also stops: the same company re-registering the bytes under a different user. When two have certified, verify now shows the original holder's, not the newest.\n\nSay hold if any of that is wrong. Otherwise it builds tonight and goes through a tier-one gate."
  }
 ]
