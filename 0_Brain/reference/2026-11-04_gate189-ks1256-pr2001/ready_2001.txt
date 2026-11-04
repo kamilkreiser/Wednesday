@@ -1,0 +1,37 @@
+=========== [INBOUND] 2026-11-04T11:55 | Secuura/Blockchain-E | [Secuura/Blockchain-E -> Wednesday] READY FOR GATE: PR 2001 KS-1256 at 74ccf8666dc2, TIER 
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE: PR 2001 KS-1256 at 74ccf8666dc2, TIER 1 (Seat E 36th)
+Seat E 36th
+
+READY FOR GATE, TIER 1: PR 2001 (KS-1256), head 74ccf8666dc2673ed863451bb8eadc9dcd299098, base develop. Not merged, not deployed. Ticket state unchanged; one KS-1256 comment posted (id 71a0ba80, 11:54:48Z, read back: body equal, 0 mention nodes, state/priority/assignee unchanged (In Progress, 2, Kam)).
+
+PR: https://github.com/Secuura/Distributed_Secuura/pull/2001 (created and read back: open, not draft, base develop, head 74ccf8666dc2, 1 commit, 19 files, +709/-28)
+Branch: feature/ks-1256-connector-allow-list-still-fails-open-when-redis-closes-or. One commit on develop d92b849ece73. 19 files, +709/-28.
+Push: pushed 11:34:46Z to 11:53:46Z, rc 0, by the detached driver (E 34th's, re-keyed _e36) through the lock. VERIFIED: origin's branch reads 74ccf8666dc2. Gate at the push, verbatim: "DOCSRULE: move d92b849e..fe3f1371 changed 11 files, branch changes 19, overlap 0 (all in the two shared docs), planted control 1 = 0 + 1; no overlap: 16 open PRs, none touches any of 19 paths". Hook, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." Leg 14: "shell suites: 115 passed, 0 failed, 0 skipped (of 115)" (ks949 27 of 27). Leg 16: "OK — 5 service(s) type-check against their baseline." The 09:29Z attempt was refused (commit_refs) in GitHub's incident; this is the one re-run your 11:33:39Z ANSWER allowed, after one passing ls-remote at 11:34:10Z.
+
+GATE QUESTION (also in the PR): for every combination of Redis up/down/throwing, key present/missing and stored row present/missing/unreadable, is any reader (create path, GET /api/connector/info, PUT /api/admin/settings) more permissive than develop, apart from the accepted bypass row?
+
+PRIOR WORK
+- Seat W 24th measured the defect on stack w24 at ee1e1b832115: key deleted with Redis up, 201 for a restricted connector's `diploma`. It is in the KS-1256 comment of 07:40Z.
+- Seat E 35th built option C on your 08:08:12Z ANSWER; items 4 and 6 were accepted at 08:18:55Z. Uncommitted, green, HANDOVER at 08:30Z.
+- Seat E 36th (this seat): base runs, matrix, mutants, lint/tsc/test-types, develop fast-forward, fragments, commit, push, PR. The committed code is byte-identical to E 35th's patch (cmp rc 0, sha256 98f116d71868); the two extra files are the fragment pair.
+
+EVIDENCE (5_Project_History/2026-11-04_seatE-36th/evidence/)
+- Red first on develop c7abf98e5103: the route file 14 failed / 9 passed; the engine file fails on import.
+- With the change: 23/23 and 8/8. api-gateway suite 1592/1592 (152 files) on develop, 1623/1623 (154 files) with the change.
+- Matrix: 420/420 in the ratio (47 stricter, 373 the same, 0 looser). Plants: data 1 violation, code 26 violations, rc 1 each.
+- ITEM 6 ROW, outside the ratio: 2 of the 180 bypass cells differ. Create, Redis up, key missing, bypass row: develop goes through the workflow gate; head skips it.
+- Mutants: 11 of 11 killed, each with its predicted cell red. Four first forms did not compile and were rewritten; none of those first forms counted.
+- tsc rc 0; check:test-types 0 new; eslint 0 errors and 30 warnings on both sides, an identical multiset; docs-fragments check OK, and a planted defect gives rc 1; 0 of the 39 changed lines in the 10 edited tests contain expect(.
+- Not run: the four platform suites (no Docker object, your ruling), a real eviction, a real Postgres, Node 24.
+
+MIGRATION 057, re-checked at READY: still free. On develop fe3f13712448 the highest is 056 (057: 0 hits). Of 16 open PRs (97 files) none claims 057; control: PR 1383's 049 found. Measured 11:3xZ, before PR 2001 existed (evidence/pr_migrations_ready.out). R 85th's 058 was not yet a PR.
+
+CANDIDATES FOR FILING (E 35th's; I filed nothing)
+1. After an eviction the admin GET still serves the defaults, so a UI round trip that re-sends integrations: [] would wipe them (item 7).
+2. Stale cache: if the row write succeeds and the Redis write then fails, the save answers 503 and Redis keeps the old value until the next save or eviction (item 5).
+3. An integrations entry with no id matches a key with no connector id (verification.ts, health.ts); today's semantics are kept.
+4. allkeys-lru in docker-compose.yml and docker-compose.production.yml: a config change, not this one.
+5. The first-hit window: an eviction before the first Redis hit after a deploy reads the seed. The PR's "Before this deploys" step 3 closes it.
+
+FAULTS OF MINE: the boot `cd`s, `timeout` and `echo ======`, and the __pycache__ (all disclosed at 08:47Z and quarantined). A rehearsal redirected into a missing folder, so it never ran; I re-ran it. A shell waiter matched the wrong line; I stopped it with TaskStop. My first expect( count included the two intent-to-add files (34); I re-measured over the 10 edited files (0).
+
