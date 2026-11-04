@@ -1,0 +1,59 @@
+[Secuura/Blockchain-T -> Wednesday] READY FOR GATE: PR 1998 (KS-1234) at 6bbe967acdda on develop 5c1ca287ed74, tier 2 (Seat T 10th)
+Seat T 10th
+
+READY FOR GATE. PR 1998 (KS-1234), tier 2 suggested (tests and documentation fragments only, zero product bytes). I do NOT merge.
+
+== The pull request ==
+- PR 1998, open, not a draft, base develop: https://github.com/Secuura/Distributed_Secuura/pull/1998
+- Title (89 chars, ASCII, equal to the commit subject): "Refs KS-1234: pin the production 307 on POST /api/documents and the /api/v1 hop behind it"
+- Head 6bbe967acdda (full 6bbe967acdda4273470abfe08af55b48fb678ff7), branch feature/ks-1234-post-apiv1documents-with-applicationjson-never-answers-and, 1 commit, author and committer Kam Kreiser <kamil.kreiser@secuura.ai> (read back from the commit). origin's branch equals the head (the driver's ls-remote at 05:38:37Z, and the PR creator's own ls-remote a few minutes later).
+- develop 5c1ca287ed74 (full 5c1ca287ed74b6353423a8c09e253abf3129233a): the branch is BASED on it and develop has not moved since (read at the push gate 05:20:44Z and again just now). Nothing was merged in, nothing rebased. The pins the gate needs: head 6bbe967acdda, develop 5c1ca287ed74.
+- The PR body passed the fleet's body guard (check_body_ks_t10.py: 12,030 chars, KS-1234 the only key, no close-word, no at-sign, attribution last); the same guard returned rc 1 with four findings on a planted copy. It says the cell covers BOTH hops (your condition 4) and quotes Kam's card id, the ruled_ts and the option text verbatim.
+- KS-1234 comment b41c328b posted (BLUF, no at-sign, 0 mention nodes read back, one copy). Ticket state read before and after: In Progress, Medium, assignee the board account, unchanged by the comment. Nothing else on the board was written.
+
+== Files, git diff --name-only 5c1ca287ed74 6bbe967acdda (3, all added, +178/-0) ==
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1234-production-mode-307.test.ts
+Projects Documents/fragments/cheat/KS-1234-production-mode-307-then-the-v1-alias-reaches-originate.html
+Projects Documents/fragments/flow/KS-1234-production-mode-307-then-the-v1-alias-reaches-originate.html
+Product files changed: 0. Neither Projects Documents page is edited (fragment scheme; the pages lag until the merger's refresh).
+
+== File-disjoint claim, with positive controls (same tool, overlap_gate.sh, my own PR 1998 ignored by name) ==
+- My 3 paths against the 21 other open PRs: no overlap (rc 0), measured at the push gate (21 open PRs) and again after the PR existed (21 others, PR 1998 ignored).
+- Positive control 1: the same gate pointed at Blockchain/Dev/services/auth/src/routes/users.ts reports PRs 1798 and 1796 (rc 1), the files Seat R 84th refreshes.
+- Positive control 2: pointed at the shared Flow page it reports PRs 1794, 1792, 1790 and others (rc 1): R 84th's PRs hand-edit the pages, mine adds fragment files only, so we share no path.
+- Open PRs touching services/api-gateway/ right now: mine, and two dependabot PRs (649, 575) with one file each. Seat E 34th has NO PR yet, so its file list does not exist and I cannot measure disjointness with it; UNMEASURED, not claimed. What I can say: my file edits no product file and no shared helper, and sends exactly one x-api-key header, so a repeated-header rejection should not touch it. The gate may want to re-run the cell once E 34th's PR is in.
+
+== Results, all on the committed bytes (blob sha256 a5a6d8391fbee8b7 for the test file) ==
+- New file: 3 of 3. Both KS-1234 files together: 2 files / 10 of 10, rc 0. The old file alone at the pin: 7 of 7.
+- api-gateway package suite: 151 files / 1573 cells, 0 failed, 0 skipped, rc 0, 36.6 s (--maxWorkers=3, load average 5.1).
+- Package lint: rc 0, 0 errors, 30 warnings, none in my file (a planted file raised 3).
+- Test-file type-check ratchet, api-gateway: 187 files, 151 under __tests__, 25 errors, 25 in the baseline, 0 new, 0 stale. The hook's own leg 16 printed the identical line.
+- docs-fragments.mjs check: OK (the two ADVISORY lines are identical on the untouched shared checkout); planted defective fragment: FAIL, 3 findings, rc 1.
+- Red-proof (committed bytes, third run), each anchor once, each mutant PARSED first, each restored by git checkout with sha256 equal to HEAD (versioning.ts badf9acf9b8d7547, index.ts bd66c980e691626e):
+  M1 307->302: 1/3 | M2 query dropped: 2/3 (query cell only) | M3 production check removed: 0/3 | M4 Location /api/v2/: 0/3
+  M5 rewrite switched off: 2/3, ONLY hop 2 red (status 404) | M6 the original KS-1234 parser order restored: 2/3, ONLY hop 2 red (no answer in 3 s)
+  T1 a copy booted with NODE_ENV=test (the contrast): 0/3 | T2 a copy without CSRF_SECRET: the suite fails "process.exit unexpectedly called with 1".
+- Environment: Apple Silicon Mac, macOS 27.0.1, shared; Node v26.8.1 (NOT an LTS line, so none of this is an LTS measurement), vitest 4.1.12, TypeScript 5.9.3, eslint 10.7.0, zod 4.6.7.
+
+== The pre-push hook, verbatim (push.out, git push rc 0 after 1070 s) ==
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+Which legs: 3 (spec-auth conformance), 4 (path resolvability) and 8 (served-spec consistency) printed "SKIP — local stack not up on http://localhost:6882". Legs 1, 2, 5, 6, 7 and 9 to 16 ran and nothing failed. This change touches no spec, route or image, so the three skipped legs examine nothing it changes, but they did NOT run and I do not claim them. The PR body says the same.
+Not run at all: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), any other service's suite, a running stack, Node 24, any deploy.
+
+== What you should weigh at the gate ==
+1. Cell 1 duplicates, for status and Location, what ks1461-case-variants-keep-the-gateway-checks.test.ts:171-173 already pins in a production boot. New in this PR: the connector-keyed body, forwarded: [] on hop 1, the upstream count and body on hop 2 (the "hangs" half), and the query string. Said plainly in the PR body. If the gate wants cell 1 out, it is one cell and the other two stand alone (cell 2 reads its own Location).
+2. ks1054-startup-migration-failure-on-health.test.ts failed in 2 of 2 full-suite runs with an EARLIER version of my file at load ~7-12; the suite without my file passed once at similar load; the final bytes passed 151/151 at load 5.1; the file passes alone and as a pair with mine (13/13). Cause not established; in the PR body under "Known".
+3. The production boot needs four guard values (all throwaway, per run, no env file); a stray .env cannot reach it because the boot runs from a temp cwd, which also keeps the production logger's relative logs/ out of the package.
+
+== Candidates for you to route (I filed nothing, per the brief) ==
+a) ks1054's 5000/10000 ms limits are marginal on a loaded host (dynamic import of services/health).
+b) mk_wt/clone_deps (r72 and r81 lineage) clone node_modules by comparing LOCKFILES, not the installed tree: 2_Project_Files has zod 3.25.76 installed against a lock that wants 4.6.7, so a tree cloned from it fails the shared build with rc 2 and the tool goes on to print "shared dist present". Details in PROGRESS 1.
+c) The ticket text and the card draft say no test pins the production 307; ks1461 does (for Location). Worth a line on the ticket if it is closed on this PR.
+
+== Faults of mine since PROGRESS 1 (disclosed) ==
+- I wrote `set -- $pair` in zsh to split a row; zsh does not word-split, so the five re-keyed tool copies were not created, and my residue scan printed false zeros because grep errored on missing files. Nothing ran from them; I redid it with while-read and a positive-control scan. (This is a known trap already in the seat memory.)
+== Pending on my side ==
+Wrap, as the brief orders: history entry in 5_Project_History/history.md (duplicate-guarded), HANDOVER.md (FINAL block first), vault commit and push of my own daily lines, wrap mail. KS-1234 closes only after the PR merges and the cell is green on develop: yours, later. If the gate returns findings on PR 1998, the fix round needs a seat: my worktree worktrees/s-t10-ks1234 and base clone worktrees/s-t10-base stay as they are, the red-proof script and the re-keyed push tools are in 5_Project_History/2026-11-04_seatT-10th/tools/. Inbox watcher is armed (task bmytwy1yh) until I wrap.
+
