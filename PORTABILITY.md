@@ -518,3 +518,9 @@ Kam's e-ink view (design `1_Project_Definition/Architecture/2026-10-09_trmnl-vie
 - **On-drive:** `TRMNL_WEBHOOK_URL` in `4_Credentials/.env` (0600, gitignored; Kam accepted the URL's exposure on the panel 14:32:47). `push.sh` never prints it and posts at most every 300 s.
 - **New Mac:** run `install_all_jobs.sh` from the WEDNESDAY tree with `WED_AGENT` unset; `doctor.sh` warns on the job if it is missing (via `install_all_jobs.sh --check`). Verify one push lands: `push.log` shows `OK: HTTP 200`, then GET the plugin's `merge_variables` (URL via `curl -K -` from stdin) and check `updated`.
 - **Not needed:** the `_preview/` render tooling (liquidjs under `_preview/node_modules`, gitignored) is design-time only.
+
+## 25. PostgreSQL 15 keg (Homebrew, keg-only) — Secuura pre-push leg 14 (2026-11-04)
+Installed 2026-11-04 ~20:0x AEDT by Secuura Seat R 85th on Wednesday's ruling (`brew install postgresql@15`, keg-only, HOMEBREW_NO_* set), so the keg-gated shell suites in the Secuura pre-push hook's leg 14 (ks949, the KS-1401 058 suite) run for real instead of skipping. Gates 189/190 also use it with their own throwaway data dirs.
+- **Machine-local:** `/opt/homebrew/opt/postgresql@15` (15.19_1). It pulled `icu4c@79` and `krb5`, and UPGRADED `libunistring` 1.4.2 -> 1.5 (old keg kept). Brew also created a non-started default cluster dir `/opt/homebrew/var/postgresql@15` (~38 MB): nothing uses it; never start a service on it.
+- **No service:** no `brew services` job, no launchd plist; every suite/gate starts its own cluster on a private data dir + 127.0.0.1 port and stops it by pid.
+- **New Mac:** `brew install postgresql@15`. `doctor.sh` warns if the keg is missing; absence degrades those suites to SKIP, not FAIL.

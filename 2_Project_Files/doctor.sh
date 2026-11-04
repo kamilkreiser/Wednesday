@@ -446,6 +446,12 @@ for t in node npm gh az unison docker; do
   command -v "$t" >/dev/null 2>&1 && ok "$t" || warn "$t missing" "brew install $( [ "$t" = az ] && echo azure-cli || echo "$t" )"
 done
 
+# postgresql@15 (keg-only) — added 2026-11-04 by the 22:0x seat: installed that night by Secuura Seat R 85th
+# (brew install postgresql@15, on Wednesday's ruling) so pre-push leg 14 runs the keg-gated shell suites
+# (ks949, KS-1401) for real. Machine-local; PORTABILITY item 25. Absence degrades those suites to SKIP, not FAIL.
+if [ -x /opt/homebrew/opt/postgresql@15/bin/postgres ]; then ok "postgresql@15 keg ($(/opt/homebrew/opt/postgresql@15/bin/postgres --version 2>&1 | awk '{print $3}'))"
+else warn "postgresql@15 keg missing" "brew install postgresql@15 (keg-only) — Secuura leg-14 PG suites skip without it (PORTABILITY 25)"; fi
+
 # WED-16 scheduler TCC health (added 2026-08-05; relocated same day — was
 # unreachable below the exit): launchd jobs must execute from this drive.
 # Exit code 126 on kickstart = TCC ungranted (PORTABILITY 15: Full Disk
