@@ -1,0 +1,54 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate186-ks1459-pr1798/repo/Blockchain/Dev/services/auth[39m
+
+ [32m✓[39m src/__tests__/ks1193-review-read-query-error-is-not-503.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+ [31m❯[39m src/__tests__/ks1236-approve-never-lowers-a-subjects-verification-level.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 74[2mms[22m[39m
+     [32m✓[39m RED KS-1236: HIGH over a PENDING ENHANCED request - platform-admin approve is refused 400, nothing is saved, the level is untouched, the request stays PENDING[32m 38[2mms[22m[39m
+[31m     [31m×[31m RED KS-1236: GOVERNMENT over a PENDING HIGH request - platform-admin approve is refused 400, nothing is saved, the level is untouched, the request stays PENDING[39m[32m 7[2mms[22m[39m
+     [32m✓[39m RED KS-1236: a lowercase stored level over a PENDING ENHANCED request - platform-admin approve is refused 400, nothing is saved, the level is untouched, the request stays PENDING[32m 4[2mms[22m[39m
+     [32m✓[39m RED KS-1236: a tenant-scoped admin is refused the same way - the check does not depend on the caller being a platform admin[32m 4[2mms[22m[39m
+     [32m✓[39m KS-1236: if the level pre-check read itself fails, nothing is saved or raised and the request stays PENDING (the pre-check runs before any write)[32m 1[2mms[22m[39m
+     [32m✓[39m CONTROL KS-1236: the escape hatch works - a stale request can still be REJECTED[32m 2[2mms[22m[39m
+     [32m✓[39m POSITIVE KS-1236: a genuine upgrade still approves - BASIC over a PENDING ENHANCED request saves APPROVED, then raises[32m 4[2mms[22m[39m
+     [32m✓[39m CONTROL KS-1236: an EQUAL level is not a downgrade - ENHANCED over a PENDING ENHANCED request still approves (the refusal is for lowering only)[32m 2[2mms[22m[39m
+     [32m✓[39m CONTROL KS-1236: a level outside the known order (SOCIAL) cannot be compared and approves as it did before[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/ks1018-item3-a-configured-database-never-answers-from-memory.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 79[2mms[22m[39m
+ [32m✓[39m src/__tests__/ks1194-approve-never-restores-pending-over-a-raised-level.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+ [32m✓[39m src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 100[2mms[22m[39m
+ [32m✓[39m src/__tests__/ks1194-part2-mfa-auto-approve-never-acknowledges-an-unpersisted-level.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 90[2mms[22m[39m
+ [32m✓[39m src/__tests__/ks1193-verification-reads-codeless-pool-timeout.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 109[2mms[22m[39m
+ [32m✓[39m src/__tests__/ks1194-a-failed-verification-request-save-is-never-acknowledged.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 117[2mms[22m[39m
+ [32m✓[39m src/__tests__/ks1477-the-verification-store-is-memory-only-only-when-no-database-is-configured.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 123[2mms[22m[39m
+ [32m✓[39m src/__tests__/ks467-user-admin-isolation.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 193[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/ks1236-approve-never-lowers-a-subjects-verification-level.test.ts[2m > [22mKS-1236 - approving a stale PENDING request never lowers the subject level[2m > [22mRED KS-1236: GOVERNMENT over a PENDING HIGH request - platform-admin approve is refused 400, nothing is saved, the level is untouched, the request stays PENDING
+[31m[1mAssertionError[22m: expected [ 200, undefined ] to deeply equal [ 400, 'BAD_REQUEST' ][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   400,[39m
+[32m-   "BAD_REQUEST",[39m
+[31m+   200,[39m
+[31m+   undefined,[39m
+[2m  ][22m
+
+[36m [2m❯[22m src/__tests__/ks1236-approve-never-lowers-a-subjects-verification-level.test.ts:[2m133:38[22m[39m
+    [90m131|[39m     asPlatformAdmin(); subject('u-1236-p', current); pending('vr-1236-…
+    [90m132|[39m     [35mconst[39m r [33m=[39m [35mawait[39m [34mreview[39m([32m'vr-1236-p'[39m[33m,[39m [32m'approve'[39m)[33m;[39m
+    [90m133|[39m     [34mexpect[39m([r[33m.[39mstatus[33m,[39m [34mcode[39m(r[33m.[39mjson)])[33m.[39m[34mtoEqual[39m([[34m400[39m[33m,[39m [32m'BAD_REQUEST'[39m])[33m;[39m
+    [90m   |[39m                                      [31m^[39m
+    [90m134|[39m     [34mexpect[39m([34mmessage[39m(r[33m.[39mjson))[33m.[39m[34mtoContain[39m([32m'Cannot approve '[39m [33m+[39m target)[33m;[39m
+    [90m135|[39m     expect([state.calls, state.rows.get('vr-1236-p')?.status, state.us…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m106 passed[39m[22m[90m (107)[39m
+[2m   Start at [22m 19:04:42
+[2m   Duration [22m 993ms[2m (transform 1.29s, setup 564ms, import 5.85s, tests 1.01s, environment 1ms)[22m
+

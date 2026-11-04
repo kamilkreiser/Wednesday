@@ -1,0 +1,25 @@
+  const AUTH = 'postgres://u:p@127.0.0.1:55412/db';
+  const SHARED_5432 = /port 5432, which is a shared-stack port/;
+  const NOT_LOOPBACK = (host: string) => new RegExp(`host "${host}", which is not loopback`);
+
+  const REFUSED: Array<[string, string, RegExp]> = [
+    ['a host named only in the query string', `${AUTH}?host=203.0.113.7`, NOT_LOOPBACK('203\\.0\\.113\\.7')],
+    ['port 5432 named only in the query string', `${AUTH}?port=5432`, SHARED_5432],
+    ['port 6432 named only in the query string', `${AUTH}?port=6432`, /port 6432, which is a shared-stack port/],
+    ['a host AND a shared port both named only in the query string', `${AUTH}?host=203.0.113.7&port=5432`, NOT_LOOPBACK('203\\.0\\.113\\.7')],
+    ['a DSN that names no port (the client dials 5432)', 'postgres://u:p@127.0.0.1/db', SHARED_5432],
+    ['a DSN whose port is empty (the client dials 5432)', 'postgres://u:p@127.0.0.1:/db', SHARED_5432],
+    ['a unix-socket host named in the query string', 'postgres://u:p@/db?host=/var/run/postgresql', NOT_LOOPBACK('/var/run/postgresql')],
+    ['a hostaddr named in the query string', `${AUTH}?hostaddr=203.0.113.7`, /names a hostaddr/],
+    ['a remote host in the authority (the original KS-1306 refusal)', 'postgres://u:p@203.0.113.7:55412/db', NOT_LOOPBACK('203\\.0\\.113\\.7')],
+    ['a shared port in the authority (the original KS-1306 refusal)', 'postgres://u:p@127.0.0.1:5432/db', SHARED_5432],
+    ['a DSN the pg client cannot parse', 'postgres://u:p@h1:1,h2:2/db', /not a DSN the pg client can parse/],
+  ];
+
+  const ACCEPTED: Array<[string, string, string]> = [
+    ['a clean loopback DSN on a free port', AUTH, '127.0.0.1:55412'],
+    ['an IPv6 loopback DSN on a free port', 'postgres://u:p@[::1]:55412/db', '[::1]:55412'],
+    ['a localhost DSN on a free port', 'postgres://u:p@localhost:55412/db', 'localhost:55412'],
+    ['a query string that names the SAME loopback host', `${AUTH}?host=127.0.0.1`, '127.0.0.1:55412'],
+    ['a query string that names a free loopback port (and is judged on THAT port)', `${AUTH}?port=55413`, '127.0.0.1:55413'],
+  ];

@@ -1,0 +1,39 @@
+function disposableDsnTarget(label: string, dsn: string): string {
+  if (/[?&]hostaddr(=|&|$)/.test(dsn)) {
+    throw new Error(
+      `KS-1340: ${label} names a hostaddr in its query string. pg ignores it and libpq honours it, so the host this ` +
+        'suite is judged on is not the host every client would dial. Remove it.',
+    );
+  }
+  let host: string;
+  let port: string;
+  try {
+    const client = new Client({ connectionString: dsn });
+    host = client.host;
+    port = String(client.port);
+  } catch {
+    throw new Error(
+      `KS-1340: ${label} is not a DSN the pg client can parse, so the host and port it would dial cannot be judged. ` +
+        'This suite refuses what it cannot judge.',
+    );
+  }
+  if (!['127.0.0.1', 'localhost', '::1', '[::1]'].includes(host)) {
+    throw new Error(
+      `KS-1306: ${label} points at host "${host}", which is not loopback. This suite INSERTs ` +
+        'rows; it refuses any database it could share with something else. Point it at a disposable ' +
+        'Postgres on 127.0.0.1 built from docker/init + scripts/run-migrations.sh. ' +
+        '(KS-1340: this is the host the pg client will dial; a ?host= in the query string overrides the authority.)',
+    );
+  }
+  if (SHARED_STACK_PORTS.includes(port)) {
+    throw new Error(
+      `KS-1306: ${label} points at port ${port}, which is a shared-stack port ` +
+        `(${SHARED_STACK_PORTS.join(', ')} - read from docker-compose.yml). This suite INSERTs rows ` +
+        'and refuses the shared dev stack, whose schema drifts. Use a disposable instance on its own port. ' +
+        '(KS-1340: this is the port the pg client will dial; a ?port= overrides the authority, and a DSN naming no port dials 5432.)',
+    );
+  }
+  return `${host}:${port}`;
+}
+
+/** KS-1340: the host:port beforeAll's guard judged for each DSN this run uses, so a cell can prove the guard was wired in. */
