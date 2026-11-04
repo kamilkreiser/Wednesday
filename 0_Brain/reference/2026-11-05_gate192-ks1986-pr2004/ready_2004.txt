@@ -1,0 +1,46 @@
+=========== [INBOUND] 2026-11-04T20:48 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2004 (KS-1986) at 577f668f4786, TIE
+[Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2004 (KS-1986) at 577f668f4786, TIER 1 (Seat F 32nd)
+Seat F 32nd
+
+READY FOR GATE: PR 2004 (KS-1986), tier 1.
+
+- PR 2004: https://github.com/Secuura/Distributed_Secuura/pull/2004. Title "Refs KS-1986: v1 verify judges the original registration across tenants, as v2 does" (83 chars). Read back by number: title, body, base develop, head, open, not draft: 0 problems (pr/create_b.out).
+- Head 577f668f4786 (577f668f478679a3e4965a28fba6b96a9e2212d6), read from origin by ls-remote at 20:47:36Z in one call with develop: origin feature branch = 577f668f478679a3e4965a28fba6b96a9e2212d6, origin develop = 035685291b9d58ae6ea8ba5f05adf9379f9c2944. Base 035685291b9d. Pushed on the built base per your ruling (a); develop at push time 035685291b9d (driver gate 20:28:20Z: "develop has not moved").
+- THE COMMIT BODY still carries the stale line "HOLD: do not merge until Kam taps 'a' on wed-morning-fleet-activity-1105 (this changes what Platform S sees)." (body line 1 after the subject). Kam released it at 07:07:25 AEDT. PR body line 1 is your exact release line, line 2 says the commit body's HOLD line is superseded (both byte-checked). The squash message must not carry that line (your merge seat's QUEUE).
+- Branch feature/ks-1986-verify-by-hash-v1-judges-the-original-registration-over-the, 1 commit, 5 files (name-only): Blockchain/Dev/services/originate/src/routes/verification.ts; Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts; Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts; Projects Documents/fragments/cheat/KS-1986-v1-original-across-tenants.html; Projects Documents/fragments/flow/KS-1986-v1-original-across-tenants.html.
+- File-disjoint from PR 2003 (merge-base 035685291b9d for both): 0 shared paths of 5 and 5; controls PR-B x PR-B 5, PR-B x develop~30..develop 2. Open-PR overlap: 0 of 16 open PRs touch the five paths (the driver's overlap gate at 20:28:20Z, against the merge-base; prscan at boot: 0 exact, control PR 2000 = 2).
+- Hook verdict, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran." (leg 14: "shell suites: 115 passed, 0 failed, 0 skipped (of 115)")
+- Push: rc 0, 1,062 s (20:28:20Z to 20:46:02Z), detached driver pid 30094, lock released (holder removed, rmdir rc 0), queue left rc 0.
+- KS-1986 comment 49d97913 (BLUF "PR 2004, head 577f668f4786..., ready for gate"): read back by id, body equal, 0 mention nodes. KS-1986 read Backlog at ~20:2xZ and In Progress at my comment (20:47Z), after the PR opened on its branch (Linear's integration, as KS-1958 did for PR 2003). I changed no state, label or description.
+- df -h /Volumes/DevMASTER: 132Gi available, 93 percent used (boot and now).
+
+PROOF, UNIT (mocked DB; Seat F 31st's measurements, evidence in 2026-11-05_seatF-31st/evidence/)
+- Red at base by base-file overlay (the fix was written before its red cell ran; said in the PR body): 15 of 85 red, all by assertion (14 of the 24 new cells + the ruled N-SPLIT cell; 0 error TS, 0 TypeError, 45 Expected/Received markers). Green at head: 85 of 85.
+- Mutants: 5 of 5 valid, 4 of 5 killed (m1 red 9, m2 red 9 incl. both LEAK CANARY cells, m3 red 4, m5 red 4), all restored sha256-equal. m4 SURVIVED (dedupe by object identity): Seat F 31st's equivalent-mutant argument, in the PR body for the gate to judge.
+- N-SPLIT ruled change: 1 changed expect line plus its describe rename, in 1 existing file, 0 other lines touched; numstat 2 2; hunk count 2, each 1 line (lines 351 and 355).
+
+PROOF, REAL POSTGRESQL 15 (mine; evidence 2026-11-05_seatF-32nd/evidence/pg/, harness pgcell/, recipe pgcell/README.md)
+- Own cluster /private/tmp/f32t (socket only, listen_addresses empty), postmaster PID 7342 recorded and stopped; real verificationRouter and verificationV2Router over HTTP; two tenant DBs + registry, every tenant registered incl. the caller's own.
+- Head 10 of 10 green. Base overlay: 6 of 10 red by assertion, exactly N-SPLIT, LEAK CANARY, FOREIGN ORIGINAL CERTIFIED, 24 LATER COPIES, LOOKUP FAILURE registry down, LOOKUP FAILURE one tenant pool down. m3 at PG: 1 of 10 red (24 LATER COPIES presents cert-a-1 again).
+- Direction over v1 /verify and verify-file, "head presents a certification base did not": 0 of 20 (swapped control 10 of 20). Different certification: 2 of 20 (FOREIGN ORIGINAL CERTIFIED: base cert-a-1, head cert-b-own with certifierOrganizationId null, certifiedBy null). Less permissive: 10 of 20 (N-SPLIT base row = the old behaviour: base cert-a-1, head B with no certification). Same: 8 of 20. v2 equal base vs head: 7 of 7.
+- Leak canary: title, org name, owner UUID and org UUID of the foreign original appear in 0 of 20 head v1 bodies.
+- Cost at PG: 1 registry enumeration + 1 originals read per registered tenant (2 here; the caller's own tenant is one of them and counts toward the cap of 8); single-tenant 0 and 0. Lookup-failure cells log one KS-1986 warn line each.
+
+SUITES AT HEAD (mine)
+- Whole originate suite: 2,475 of 2,475 tests, 210 of 210 suites, rc 0 (F 31st measured the same).
+- tsc --noEmit -p services/originate rc 0. tsc over verification.ts + both test files with jest types: 0 errors (2 earlier instrument runs without jest types quarantined).
+- eslint src: rc 0, 0 errors; 0 warnings in the three files (29 elsewhere in src).
+- docs-fragments.mjs check: clean rc 0; planted literal section number rc 1 (2 findings); restored sha256-equal rc 0.
+
+DESIGN, AS ACCEPTED (in the PR body)
+- CORRECTION: base verification.ts 886 and 1433 are the hash-flow selection sites of verify-file and /verify and now take the cross-tenant judgment (`judged`); the prior brief and F 31st's plan confirmation called them by-id paths, wrongly. crossTenantLookup and the chain-first re-read (base 1309-1324) are unchanged.
+- D-B1 edge: a local latecomer whose org or owner id equals a FOREIGN original's is accepted by v2 and refused by v1 (TIED ACROSS TENANTS pins both sides; at PG too: v2 carries cert-collide, v1 does not). The KS-584 parity sweep named in KS-1986 would still report that hash group.
+- D-B3: certifierOrganizationId nulled on the NEW path only. D-B4 outage cost: while the registry or a tenant's originals read fails, v1 presents the not-certified outcome. Cost bound: 1 registry query + 1 originals query per tenant holding the hash, max 8; 0 single-tenant.
+
+NOT TESTED: Node 24 (Node v26.8.1 here); kintsugi or demo; the live verify after deploy; real Platform S traffic; production data volume and index behaviour; the four platform suites (Schemathesis, Akto, Playwright, k6); hook legs 3, 4, 8 (local stack not up).
+
+FILING CANDIDATES (not filed)
+(a) vc-issuer credentialRepo.ts getRecordById, getByHash, getReadableByHash read catches still fall back to memory (KS-1958 boundary 3; F 31st's).
+(b) originate verification.ts:463-473 scopeTenantFields nulls title, issuer and certification.certifiedBy but keeps certification.certifierOrganizationId (set at :173 from certMeta.issuerId); it scopes the EXISTING cross-tenant answers at verification.ts:1043 (verify-file) and :1334 (/verify) and verificationV2.ts:195 (v2). Against card ks590 = a (lines at head 577f668f4786).
+(c) NEW: verify-file with no local row answers not found where /verify finds the foreign original (measured at PG, base and head alike): verification.ts:900 builds fileHash as `sha256:<hex>` and :934 hands it to crossTenantLookup, whose registry read (:783) is `content_hash = $1` and missed the registry row holding the bare hex. NOT measured: which form production registry rows hold (documents.ts:794 passes the create path's hash as given).
+
