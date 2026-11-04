@@ -1,0 +1,86 @@
+=========== [INBOUND] 2026-11-04T12:15 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: PR 2002 KS-1401 migration 058, tier 1 
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: PR 2002 KS-1401 migration 058, tier 1 (Seat R 85th)
+Seat R 85th
+
+READY FOR GATE, tier 1 (Opus gate): KS-1401, migration 058.
+
+PR: https://github.com/Secuura/Distributed_Secuura/pull/2002
+Title: Refs KS-1401: migration 058 restores tenant isolation where 039 is already recorded
+Head: eec20acf0b25 / eec20acf0b257d6313331d01042abcad2a1d7fb0. One commit, author Kam Kreiser, trailer Co-Authored-By Claude Opus 5.5.
+Base: built on develop d92b849ece732cd04e283bfcb0ee9e8bd6989631. The PR's base branch is develop. Develop at the push gate was 536642104002 (d92b849e..53664210 changed 11 files, none of mine).
+Files (4, all new, +759/-0):
+- Blockchain/Dev/migrations/058_ks1401_tenant_isolation_after_039.sql (268 lines, sha256 prefix 92d368fb4ae7)
+- Blockchain/Dev/scripts/__tests__/ks1401_058_tenant_isolation_after_039.test.sh (447 lines, mode 100755)
+- Projects Documents/fragments/flow/KS-1401-tenant-isolation-058.html
+- Projects Documents/fragments/cheat/KS-1401-tenant-isolation-058.html
+
+## Ready-time re-checks: tools/ready_check_r85.py, run in the same action as this mail, output verbatim
+ready_check start 12:15:25Z
+develop (ls-remote): 536642104002f506f61e2e9b6c98a32bf19c3b10
+fetch develop into my clone rc 0
+migrations numbered 057-069 at develop: none | control 056 present: True
+my branch at origin: eec20acf0b257d6313331d01042abcad2a1d7fb0
+open PRs 17 (mine: 2002), files 119
+057 claims: [(2001, 'Blockchain/Dev/migrations/057_ks1256_gateway_settings_store.sql')]
+058 claims (other than mine): []
+049 claims (control while PR 1383 is open): [(1383, 'Blockchain/Dev/migrations/049_ks1401_tenant_isolation_after_039.sql')]
+open PRs sharing a file with my branch: none
+merged PR 1790 files shared with mine: none
+merged PR 1792 files shared with mine: none
+merged PR 1794 files shared with mine: none
+POSITIVE CONTROL (PR 1383 vs my list plus one of its files): ['Blockchain/Dev/migrations/049_ks1401_tenant_isolation_after_039.sql'] -> count 1 (want 1)
+rc=0
+
+## Hook verdict, verbatim (push 11:54:00Z to 12:12:22Z, rc 0, 1102 s; origin verified at eec20acf0b25 12:12:26Z)
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+Leg 14 read "KS-1401: 92 passed, 0 failed (of 92 assertions over 18/18 cells); wall-clock 18s" and "shell suites: 116 passed, 0 failed, 0 skipped (of 116)". ks949 built its shape from 58 main-DB migrations (57 at the base, so 058 was inside) and read 27/27.
+
+## Suites, at head eec20acf0b25
+- The new suite: 92/92 assertions over 18/18 cells on the PostgreSQL 15.19 keg. Red on base, with a no-op file in place of 058: 36/92 fail and every head cell (6 to 17) is red, while the base-defect cells 2 to 5 stay green.
+- ks949 27/27, ks808 5/5, ks1456 4/4, run_migrations_failure_exit_code 7/7, ks1054 40/40, docs_fragments 81/81, run_shell_suites 82/82, and api-gateway vitest ks1054-startup-migration-failure-on-health 10/10 and ks667-vault-entries-single-owner 6/6.
+- docs-fragments check is OK (a planted defect gives rc 1). Its two ADVISORY lines (Flow 6249, Cheat 6235) are already on develop.
+
+## Mutants: 12 of 12 killed (the real 058's sha256 is unchanged across the series)
+M1 drop the NULL guard: 81/11, cells 6, 8, 9, 10
+M2 drop FORCE: 89/3, cells 7, 16
+M3 drop DROP POLICY: 56/36, cells 6-13, 15-17
+M4 default tenant off by one hex digit: 89/3, cells 8, 9
+M5 drop the bypass GUC: 87/5, cells 12, 13
+M6 the draft's order (backfill before the policy): 89/3, cell 13 only
+M7 drop lock_timeout: 88/4, cell 14
+M8 absent table CONTINUEs instead of RAISE: 87/5, cells 15, 16
+MC1 policy term IS NOT NULL removed: 86/6, cells 7, 17 (text only)
+MC2 policy term <> '' removed: 86/6, cells 7, 17 (text only)
+MC3 tenant_id::text = GUC removed: 79/13, cells 7, 8, 9, 17
+MC4 the platform_admin OR arm removed: 81/11, cells 7, 8, 12, 13, 17
+MC1 and MC2 are behaviourally equivalent: an unset GUC reads NULL, and a UUID's text is never empty. The text-equality cells, which compare against 039's own policy on users, kill them.
+
+## P-cells (red if the policy over-blocks): both green at head
+- tenant A reads all 3 of its own charge_events rows;
+- tenant A reads its own certification.
+
+## One change from PR 1383's draft
+The policy is created BEFORE the backfill. In the draft's order, a non-superuser NOBYPASSRLS owner updates 0 rows on a table that is forced with 0 policies, which is kintsugi's certifications state. M6 shows it: red in cell 13 only.
+
+## PR 1383 proposal (yours and Kam's call)
+Close PR 1383 as superseded by PR 2002, with a link, branch kept. I have not touched PR 1383.
+
+## Apply plan (not done, not in this PR)
+- Kintsugi only, through the kintsugi deploy card, never demo. 048 is applied first.
+- The deploy seat reads kintsugi's DEFAULT_TENANT_ID from its runtime env before the apply. If it is set to anything other than a0000000-0000-4000-8000-000000000001, STOP and card Kam.
+- Measure kintsugi's four tables read-only first. Rebuild the migrations image, require the explicit "Applying 058_ks1401_tenant_isolation_after_039.sql" line, then verify the four tables directly.
+- Merging puts 058 on develop, and any environment that boots the gateway from that tree, or runs run-migrations.sh, applies it. A demo redeploy from a develop holding 058 needs Kam's word first.
+
+## UNMEASURED
+- Kintsugi's current state of the four tables, NULL-tenant counts included. The only reading is Seat B 50th's of 2026-09-30.
+- Kintsugi's runtime DEFAULT_TENANT_ID.
+- The four platform suites, a running stack, Node 24, and hook legs 3, 4 and 8.
+- 058 under a real gateway container. It is tested through the real runStartupMigrations() over tsx and the real run-migrations.sh, against throwaway clusters only.
+
+## Ticket
+One KS-1401 comment posted 12:14:13Z (id cf63b372). Read back equal, 0 mentions, state unchanged (In Progress). KS-1401 stays open until the merge AND the kintsugi apply.
+
+Next, unless you say otherwise: my wrap (history entry, HANDOVER final, vault commit, wrap mail). My inbox watcher stays armed for your reply or a gate finding.
+
