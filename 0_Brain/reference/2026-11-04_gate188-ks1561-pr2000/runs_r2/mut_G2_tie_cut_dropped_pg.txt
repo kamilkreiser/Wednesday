@@ -1,0 +1,47 @@
+FAIL ../../harness_r2/g188r2-pg15.harness.test.ts
+  G188r2 F1 matrix (cur)
+    ✓ local paths, B + 22 later certified copies (23 rows) (72 ms)
+    ✓ cross-tenant paths, B + 22 later certified copies in tenant 2 (18 ms)
+    ✓ local paths, B + 23 later certified copies (24 rows) (17 ms)
+    ✓ cross-tenant paths, B + 23 later certified copies in tenant 2 (12 ms)
+    ✓ local paths, B + 24 later certified copies (25 rows) (13 ms)
+    ✓ cross-tenant paths, B + 24 later certified copies in tenant 2 (10 ms)
+    ✓ local paths, B + 25 later certified copies (26 rows) (13 ms)
+    ✓ cross-tenant paths, B + 25 later certified copies in tenant 2 (10 ms)
+  G188r2 bounds and edges (cur)
+    ✓ 24 tied uncertified originals (distinct owners) + 24 later certified A copies (14 ms)
+    ✕ 25 tied uncertified originals (distinct owners) + 24 later certified A copies (14 ms)
+    ✓ TIE25-OWNER-LAST: 25 tied originals, the 25th by id held by A; 24 later A copies certified (cut narrows) (16 ms)
+    ✓ TIE25-OWNER-FIRST: 25 tied originals, the 1st by id held by A; 24 later A copies certified (same owner: P side) (9 ms)
+    ✓ OLDCERT: the original certified its own row before every later copy, 25 later copies (13 ms)
+    ✓ INSIDE: B + 3 later copies, no originals read (4 ms)
+  G188r2 v2 tenant cap (cur)
+    ✓ CAP-8 control (16 ms)
+    ✓ CAP-9 (B 9th by id) (23 ms)
+    ✓ CAP-10 (B 9th of 10 by id) (12 ms)
+    ✓ CAP-LATE (B 9th by id, registry row written last): stated residual (13 ms)
+    ✓ CAP-LATE-LOWID (B 1st by id, registry row written last): does the new rank drop what tenant_id order kept? (11 ms)
+    ✓ CAP-ORIGCERT (B 9th by id, certified its own row, the 8 others UNCERTIFIED later rows) (12 ms)
+
+  ● G188r2 bounds and edges (cur) › 25 tied uncertified originals (distinct owners) + 24 later certified A copies
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 24
+    Received: 25
+
+      178 |       if (EXPECT === 'r2') {
+      179 |         expect([a.isCertified, a.certId]).toEqual([false, null]);
+    > 180 |         expect(c.count).toBe(24);
+          |                         ^
+      181 |         expect(c.winner.every((w: string) => w.startsWith('g-tie-'))).toBe(true);
+      182 |         if (k === 25) expect(c.winner).not.toContain('g-tie-25'); // first 24 by id
+      183 |       }
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:180:25)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 19 passed, 20 total
+Snapshots:   0 total
+Time:        0.884 s, estimated 1 s
+Ran all test suites.

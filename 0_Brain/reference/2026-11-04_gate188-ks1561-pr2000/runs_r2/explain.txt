@@ -1,0 +1,132 @@
+ total_rows | hot_rows | hashes 
+------------+----------+--------
+     305000 |     5000 | 100001
+(1 row)
+
+=== A. row-set read (unchanged since base), hot hash
+                                                                                                                                                                       QUERY PLAN                                                                                                                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=24 loops=1)
+   Buffers: shared hit=135
+   ->  Sort (actual rows=24 loops=1)
+         Sort Key: d.certified_at DESC NULLS LAST
+         Sort Method: top-N heapsort  Memory: 28kB
+         Buffers: shared hit=135
+         ->  Hash Left Join (actual rows=5000 loops=1)
+               Hash Cond: (d.issuer_organization_id = o.id)
+               Buffers: shared hit=135
+               ->  Bitmap Heap Scan on documents d (actual rows=5000 loops=1)
+                     Recheck Cond: (((content_hash)::text = 'aaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'xaaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'sha256:aaaa000000000000000000000000000000000000000000000000000000000hot'::text))
+                     Heap Blocks: exact=122
+                     Buffers: shared hit=135
+                     ->  BitmapOr (actual rows=0 loops=1)
+                           Buffers: shared hit=13
+                           ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=5000 loops=1)
+                                 Index Cond: ((content_hash)::text = 'aaaa000000000000000000000000000000000000000000000000000000000hot'::text)
+                                 Buffers: shared hit=7
+                           ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=0 loops=1)
+                                 Index Cond: ((content_hash)::text = 'xaaaa000000000000000000000000000000000000000000000000000000000hot'::text)
+                                 Buffers: shared hit=3
+                           ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=0 loops=1)
+                                 Index Cond: ((content_hash)::text = 'sha256:aaaa000000000000000000000000000000000000000000000000000000000hot'::text)
+                                 Buffers: shared hit=3
+               ->  Hash (actual rows=0 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 8kB
+                     ->  Seq Scan on organizations o (actual rows=0 loops=1)
+ Planning:
+   Buffers: shared hit=186 read=5
+ Planning Time: 1.024 ms
+ Execution Time: 1.383 ms
+(31 rows)
+
+=== B. ORIGINAL_ROWS_POOL_SQL (round 2, verbatim shape), hot hash
+                                                                                                                                                                       QUERY PLAN                                                                                                                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=1 loops=1)
+   Buffers: shared hit=8
+   InitPlan 2 (returns $1)
+     ->  Result (actual rows=1 loops=1)
+           Buffers: shared hit=4
+           InitPlan 1 (returns $0)
+             ->  Limit (actual rows=1 loops=1)
+                   Buffers: shared hit=4
+                   ->  Index Scan Backward using idx_documents_created on documents e (actual rows=1 loops=1)
+                         Index Cond: (created_at IS NOT NULL)
+                         Filter: (((content_hash)::text = 'aaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'xaaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'sha256:aaaa000000000000000000000000000000000000000000000000000000000hot'::text))
+                         Buffers: shared hit=4
+   ->  Sort (actual rows=1 loops=1)
+         Sort Key: d.id
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=8
+         ->  Hash Right Join (actual rows=1 loops=1)
+               Hash Cond: (o.id = d.issuer_organization_id)
+               Buffers: shared hit=8
+               ->  Seq Scan on organizations o (actual rows=0 loops=1)
+               ->  Hash (actual rows=1 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=8
+                     ->  Index Scan using idx_documents_created on documents d (actual rows=1 loops=1)
+                           Index Cond: (created_at = $1)
+                           Filter: (((content_hash)::text = 'aaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'xaaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'sha256:aaaa000000000000000000000000000000000000000000000000000000000hot'::text))
+                           Buffers: shared hit=8
+ Planning:
+   Buffers: shared hit=35
+ Planning Time: 0.118 ms
+ Execution Time: 0.033 ms
+(31 rows)
+
+=== B2. the same with $n parameters, generic plan forced (what a prepared/pg-driver statement can run)
+                                                        QUERY PLAN                                                         
+---------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=1 loops=1)
+   Buffers: shared hit=139
+   InitPlan 1 (returns $1)
+     ->  Aggregate (actual rows=1 loops=1)
+           Buffers: shared hit=135
+           ->  Bitmap Heap Scan on documents e (actual rows=5000 loops=1)
+                 Recheck Cond: (((content_hash)::text = $1) OR ((content_hash)::text = $2) OR ((content_hash)::text = $3))
+                 Heap Blocks: exact=122
+                 Buffers: shared hit=135
+                 ->  BitmapOr (actual rows=0 loops=1)
+                       Buffers: shared hit=13
+                       ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=5000 loops=1)
+                             Index Cond: ((content_hash)::text = $1)
+                             Buffers: shared hit=7
+                       ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=0 loops=1)
+                             Index Cond: ((content_hash)::text = $2)
+                             Buffers: shared hit=3
+                       ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=0 loops=1)
+                             Index Cond: ((content_hash)::text = $3)
+                             Buffers: shared hit=3
+   ->  Sort (actual rows=1 loops=1)
+         Sort Key: d.id
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=139
+         ->  Index Scan using idx_documents_created on documents d (actual rows=1 loops=1)
+               Index Cond: (created_at = $1)
+               Filter: (((content_hash)::text = $1) OR ((content_hash)::text = $2) OR ((content_hash)::text = $3))
+               Buffers: shared hit=139
+ Planning:
+   Buffers: shared hit=5
+ Planning Time: 0.080 ms
+ Execution Time: 0.524 ms
+(32 rows)
+
+=== C. CONTROL: the same read with idx_documents_content_hash dropped (in a rolled-back transaction): the instrument shows a Seq Scan
+                                                                                                                                                                      QUERY PLAN                                                                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit
+   InitPlan 2 (returns $1)
+     ->  Result
+           InitPlan 1 (returns $0)
+             ->  Limit
+                   ->  Index Scan Backward using idx_documents_created on documents e
+                         Index Cond: (created_at IS NOT NULL)
+                         Filter: (((content_hash)::text = 'aaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'xaaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'sha256:aaaa000000000000000000000000000000000000000000000000000000000hot'::text))
+   ->  Sort
+         Sort Key: d.id
+         ->  Index Scan using idx_documents_created on documents d
+               Index Cond: (created_at = $1)
+               Filter: (((content_hash)::text = 'aaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'xaaaa000000000000000000000000000000000000000000000000000000000hot'::text) OR ((content_hash)::text = 'sha256:aaaa000000000000000000000000000000000000000000000000000000000hot'::text))
+(13 rows)
+

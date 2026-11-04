@@ -1,0 +1,147 @@
+      table_oldest      |          bulk_newest          |       n30_first        | total  
+------------------------+-------------------------------+------------------------+--------
+ 2026-01-01 00:01:00+11 | 2026-11-04 23:42:43.804931+11 | 2026-11-03 00:01:00+11 | 310030
+(1 row)
+
+=== D. ORIGINAL_ROWS_POOL_SQL, 30-row hash whose rows are the newest (literal values = custom plan)
+                                                                                                                                                                       QUERY PLAN                                                                                                                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=1 loops=1)
+   Buffers: shared hit=16
+   InitPlan 1 (returns $1)
+     ->  Aggregate (actual rows=1 loops=1)
+           Buffers: shared hit=11
+           ->  Bitmap Heap Scan on documents e (actual rows=30 loops=1)
+                 Recheck Cond: (((content_hash)::text = 'bbbb0000000000000000000000000000000000000000000000000000000new30'::text) OR ((content_hash)::text = 'xbbbb0000000000000000000000000000000000000000000000000000000new30'::text) OR ((content_hash)::text = 'sha256:bbbb0000000000000000000000000000000000000000000000000000000new30'::text))
+                 Heap Blocks: exact=2
+                 Buffers: shared hit=11
+                 ->  BitmapOr (actual rows=0 loops=1)
+                       Buffers: shared hit=9
+                       ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=30 loops=1)
+                             Index Cond: ((content_hash)::text = 'bbbb0000000000000000000000000000000000000000000000000000000new30'::text)
+                             Buffers: shared hit=3
+                       ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=0 loops=1)
+                             Index Cond: ((content_hash)::text = 'xbbbb0000000000000000000000000000000000000000000000000000000new30'::text)
+                             Buffers: shared hit=3
+                       ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=0 loops=1)
+                             Index Cond: ((content_hash)::text = 'sha256:bbbb0000000000000000000000000000000000000000000000000000000new30'::text)
+                             Buffers: shared hit=3
+   ->  Sort (actual rows=1 loops=1)
+         Sort Key: d.id
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=16
+         ->  Hash Right Join (actual rows=1 loops=1)
+               Hash Cond: (o.id = d.issuer_organization_id)
+               Buffers: shared hit=16
+               ->  Seq Scan on organizations o (actual rows=0 loops=1)
+               ->  Hash (actual rows=1 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=16
+                     ->  Index Scan using idx_documents_created on documents d (actual rows=1 loops=1)
+                           Index Cond: (created_at = $1)
+                           Filter: (((content_hash)::text = 'bbbb0000000000000000000000000000000000000000000000000000000new30'::text) OR ((content_hash)::text = 'xbbbb0000000000000000000000000000000000000000000000000000000new30'::text) OR ((content_hash)::text = 'sha256:bbbb0000000000000000000000000000000000000000000000000000000new30'::text))
+                           Rows Removed by Filter: 1
+                           Buffers: shared hit=16
+ Planning:
+   Buffers: shared hit=143
+ Planning Time: 0.878 ms
+ Execution Time: 0.064 ms
+(40 rows)
+
+=== E. ORIGINAL_ROWS_POOL_SQL, 5,000-row hash whose rows are the newest
+                                                                                                                                                                       QUERY PLAN                                                                                                                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=1 loops=1)
+   Buffers: shared hit=3936
+   InitPlan 2 (returns $1)
+     ->  Result (actual rows=1 loops=1)
+           Buffers: shared hit=3932
+           InitPlan 1 (returns $0)
+             ->  Limit (actual rows=1 loops=1)
+                   Buffers: shared hit=3932
+                   ->  Index Scan Backward using idx_documents_created on documents e (actual rows=1 loops=1)
+                         Index Cond: (created_at IS NOT NULL)
+                         Filter: (((content_hash)::text = 'cccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'xcccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'sha256:cccc0000000000000000000000000000000000000000000000000000000new5k'::text))
+                         Rows Removed by Filter: 133237
+                         Buffers: shared hit=3932
+   ->  Sort (actual rows=1 loops=1)
+         Sort Key: d.id
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=3936
+         ->  Hash Right Join (actual rows=1 loops=1)
+               Hash Cond: (o.id = d.issuer_organization_id)
+               Buffers: shared hit=3936
+               ->  Seq Scan on organizations o (actual rows=0 loops=1)
+               ->  Hash (actual rows=1 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=3936
+                     ->  Index Scan using idx_documents_created on documents d (actual rows=1 loops=1)
+                           Index Cond: (created_at = $1)
+                           Filter: (((content_hash)::text = 'cccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'xcccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'sha256:cccc0000000000000000000000000000000000000000000000000000000new5k'::text))
+                           Buffers: shared hit=3936
+ Planning:
+   Buffers: shared hit=5
+ Planning Time: 0.091 ms
+ Execution Time: 13.638 ms
+(32 rows)
+
+=== F. via node-pg-style parameters ($1..$3, unnamed statement = custom plan), 5,000-row newest hash
+                                                                                                                                                                      QUERY PLAN                                                                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=1 loops=1)
+   Buffers: shared hit=3936
+   InitPlan 2 (returns $1)
+     ->  Result (actual rows=1 loops=1)
+           Buffers: shared hit=3932
+           InitPlan 1 (returns $0)
+             ->  Limit (actual rows=1 loops=1)
+                   Buffers: shared hit=3932
+                   ->  Index Scan Backward using idx_documents_created on documents e (actual rows=1 loops=1)
+                         Index Cond: (created_at IS NOT NULL)
+                         Filter: (((content_hash)::text = 'cccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'xcccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'sha256:cccc0000000000000000000000000000000000000000000000000000000new5k'::text))
+                         Rows Removed by Filter: 133237
+                         Buffers: shared hit=3932
+   ->  Sort (actual rows=1 loops=1)
+         Sort Key: d.id
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=3936
+         ->  Index Scan using idx_documents_created on documents d (actual rows=1 loops=1)
+               Index Cond: (created_at = $1)
+               Filter: (((content_hash)::text = 'cccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'xcccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'sha256:cccc0000000000000000000000000000000000000000000000000000000new5k'::text))
+               Buffers: shared hit=3936
+ Planning:
+   Buffers: shared hit=5
+ Planning Time: 0.143 ms
+ Execution Time: 14.500 ms
+(25 rows)
+
+=== G. CONTROL: the row-set read (unchanged since base) on the same 5,000-row newest hash
+                                                                                                                                                                    QUERY PLAN                                                                                                                                                                     
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=24 loops=1)
+   Buffers: shared hit=136
+   ->  Sort (actual rows=24 loops=1)
+         Sort Key: d.certified_at DESC NULLS LAST
+         Sort Method: top-N heapsort  Memory: 28kB
+         Buffers: shared hit=136
+         ->  Bitmap Heap Scan on documents d (actual rows=5000 loops=1)
+               Recheck Cond: (((content_hash)::text = 'cccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'xcccc0000000000000000000000000000000000000000000000000000000new5k'::text) OR ((content_hash)::text = 'sha256:cccc0000000000000000000000000000000000000000000000000000000new5k'::text))
+               Heap Blocks: exact=123
+               Buffers: shared hit=136
+               ->  BitmapOr (actual rows=0 loops=1)
+                     Buffers: shared hit=13
+                     ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=5000 loops=1)
+                           Index Cond: ((content_hash)::text = 'cccc0000000000000000000000000000000000000000000000000000000new5k'::text)
+                           Buffers: shared hit=7
+                     ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=0 loops=1)
+                           Index Cond: ((content_hash)::text = 'xcccc0000000000000000000000000000000000000000000000000000000new5k'::text)
+                           Buffers: shared hit=3
+                     ->  Bitmap Index Scan on idx_documents_content_hash (actual rows=0 loops=1)
+                           Index Cond: ((content_hash)::text = 'sha256:cccc0000000000000000000000000000000000000000000000000000000new5k'::text)
+                           Buffers: shared hit=3
+ Planning:
+   Buffers: shared hit=15
+ Planning Time: 0.066 ms
+ Execution Time: 0.956 ms
+(25 rows)
+

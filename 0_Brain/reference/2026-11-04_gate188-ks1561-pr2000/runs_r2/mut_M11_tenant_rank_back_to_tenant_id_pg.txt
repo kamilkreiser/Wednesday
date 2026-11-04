@@ -1,0 +1,96 @@
+FAIL ../../harness_r2/g188r2-pg15.harness.test.ts
+  G188r2 F1 matrix (cur)
+    ✓ local paths, B + 22 later certified copies (23 rows) (74 ms)
+    ✓ cross-tenant paths, B + 22 later certified copies in tenant 2 (20 ms)
+    ✓ local paths, B + 23 later certified copies (24 rows) (17 ms)
+    ✓ cross-tenant paths, B + 23 later certified copies in tenant 2 (13 ms)
+    ✓ local paths, B + 24 later certified copies (25 rows) (14 ms)
+    ✓ cross-tenant paths, B + 24 later certified copies in tenant 2 (13 ms)
+    ✓ local paths, B + 25 later certified copies (26 rows) (14 ms)
+    ✓ cross-tenant paths, B + 25 later certified copies in tenant 2 (12 ms)
+  G188r2 bounds and edges (cur)
+    ✓ 24 tied uncertified originals (distinct owners) + 24 later certified A copies (14 ms)
+    ✓ 25 tied uncertified originals (distinct owners) + 24 later certified A copies (16 ms)
+    ✓ TIE25-OWNER-LAST: 25 tied originals, the 25th by id held by A; 24 later A copies certified (cut narrows) (15 ms)
+    ✓ TIE25-OWNER-FIRST: 25 tied originals, the 1st by id held by A; 24 later A copies certified (same owner: P side) (11 ms)
+    ✓ OLDCERT: the original certified its own row before every later copy, 25 later copies (12 ms)
+    ✓ INSIDE: B + 3 later copies, no originals read (4 ms)
+  G188r2 v2 tenant cap (cur)
+    ✓ CAP-8 control (15 ms)
+    ✕ CAP-9 (B 9th by id) (25 ms)
+    ✕ CAP-10 (B 9th of 10 by id) (14 ms)
+    ✓ CAP-LATE (B 9th by id, registry row written last): stated residual (13 ms)
+    ✓ CAP-LATE-LOWID (B 1st by id, registry row written last): does the new rank drop what tenant_id order kept? (10 ms)
+    ✓ CAP-ORIGCERT (B 9th by id, certified its own row, the 8 others UNCERTIFIED later rows) (10 ms)
+
+  ● G188r2 v2 tenant cap (cur) › CAP-9 (B 9th by id)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 9
+
+      Array [
+        Array [
+    -     "g-B-original",
+    +     "g-a-8",
+    +     "g-a-7",
+    +     "g-a-6",
+    +     "g-a-5",
+    +     "g-a-4",
+    +     "g-a-3",
+    +     "g-a-2",
+    +     "g-a-1",
+        ],
+    -   1,
+    +   8,
+      ]
+
+      222 |   };
+      223 |   it('CAP-8 control', async () => { const { c } = await cap('CAP-8', 8, 8, 0); if (EXPECT === 'r2') expect([c.winner, c.count]).toEqual([['g-B-original'], 1]); });
+    > 224 |   it('CAP-9 (B 9th by id)', async () => { const { c } = await cap('CAP-9', 9, 9, 0); if (EXPECT === 'r2') expect([c.winner, c.count]).toEqual([['g-B-original'], 1]); });
+          |                                                                                                                                       ^
+      225 |   it('CAP-10 (B 9th of 10 by id)', async () => { const { c } = await cap('CAP-10', 10, 9, 0); if (EXPECT === 'r2') expect([c.winner, c.count]).toEqual([['g-B-original'], 1]); });
+      226 |   it('CAP-LATE (B 9th by id, registry row written last): stated residual', async () => { await cap('CAP-LATE', 9, 9, 500); });
+      227 |   it('CAP-LATE-LOWID (B 1st by id, registry row written last): does the new rank drop what tenant_id order kept?', async () => { await cap('CAP-LATE-LOWID', 9, 1, 500); });
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:224:135)
+
+  ● G188r2 v2 tenant cap (cur) › CAP-10 (B 9th of 10 by id)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 9
+
+      Array [
+        Array [
+    -     "g-B-original",
+    +     "g-a-8",
+    +     "g-a-7",
+    +     "g-a-6",
+    +     "g-a-5",
+    +     "g-a-4",
+    +     "g-a-3",
+    +     "g-a-2",
+    +     "g-a-1",
+        ],
+    -   1,
+    +   8,
+      ]
+
+      223 |   it('CAP-8 control', async () => { const { c } = await cap('CAP-8', 8, 8, 0); if (EXPECT === 'r2') expect([c.winner, c.count]).toEqual([['g-B-original'], 1]); });
+      224 |   it('CAP-9 (B 9th by id)', async () => { const { c } = await cap('CAP-9', 9, 9, 0); if (EXPECT === 'r2') expect([c.winner, c.count]).toEqual([['g-B-original'], 1]); });
+    > 225 |   it('CAP-10 (B 9th of 10 by id)', async () => { const { c } = await cap('CAP-10', 10, 9, 0); if (EXPECT === 'r2') expect([c.winner, c.count]).toEqual([['g-B-original'], 1]); });
+          |                                                                                                                                                ^
+      226 |   it('CAP-LATE (B 9th by id, registry row written last): stated residual', async () => { await cap('CAP-LATE', 9, 9, 500); });
+      227 |   it('CAP-LATE-LOWID (B 1st by id, registry row written last): does the new rank drop what tenant_id order kept?', async () => { await cap('CAP-LATE-LOWID', 9, 1, 500); });
+      228 |   it('CAP-ORIGCERT (B 9th by id, certified its own row, the 8 others UNCERTIFIED later rows)', async () => {
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:225:144)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 18 passed, 20 total
+Snapshots:   0 total
+Time:        0.888 s, estimated 1 s
+Ran all test suites.

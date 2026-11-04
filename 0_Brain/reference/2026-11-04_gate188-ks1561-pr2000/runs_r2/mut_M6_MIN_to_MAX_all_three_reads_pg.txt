@@ -1,0 +1,225 @@
+FAIL ../../harness_r2/g188r2-pg15.harness.test.ts
+  G188r2 F1 matrix (cur)
+    ✓ local paths, B + 22 later certified copies (23 rows) (76 ms)
+    ✓ cross-tenant paths, B + 22 later certified copies in tenant 2 (19 ms)
+    ✕ local paths, B + 23 later certified copies (24 rows) (19 ms)
+    ✓ cross-tenant paths, B + 23 later certified copies in tenant 2 (15 ms)
+    ✕ local paths, B + 24 later certified copies (25 rows) (16 ms)
+    ✕ cross-tenant paths, B + 24 later certified copies in tenant 2 (49 ms)
+    ✕ local paths, B + 25 later certified copies (26 rows) (14 ms)
+    ✕ cross-tenant paths, B + 25 later certified copies in tenant 2 (12 ms)
+  G188r2 bounds and edges (cur)
+    ✕ 24 tied uncertified originals (distinct owners) + 24 later certified A copies (14 ms)
+    ✕ 25 tied uncertified originals (distinct owners) + 24 later certified A copies (14 ms)
+    ✓ TIE25-OWNER-LAST: 25 tied originals, the 25th by id held by A; 24 later A copies certified (cut narrows) (14 ms)
+    ✓ TIE25-OWNER-FIRST: 25 tied originals, the 1st by id held by A; 24 later A copies certified (same owner: P side) (12 ms)
+    ✕ OLDCERT: the original certified its own row before every later copy, 25 later copies (14 ms)
+    ✓ INSIDE: B + 3 later copies, no originals read (4 ms)
+  G188r2 v2 tenant cap (cur)
+    ✓ CAP-8 control (14 ms)
+    ✓ CAP-9 (B 9th by id) (26 ms)
+    ✓ CAP-10 (B 9th of 10 by id) (13 ms)
+    ✓ CAP-LATE (B 9th by id, registry row written last): stated residual (13 ms)
+    ✓ CAP-LATE-LOWID (B 1st by id, registry row written last): does the new rank drop what tenant_id order kept? (11 ms)
+    ✓ CAP-ORIGCERT (B 9th by id, certified its own row, the 8 others UNCERTIFIED later rows) (10 ms)
+
+  ● G188r2 F1 matrix (cur) › local paths, B + 23 later certified copies (24 rows)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Array [
+    -   1,
+    -   1,
+    -   1,
+    +   0,
+    +   0,
+    +   0,
+      ]
+
+      154 |         expect([c.winner, c.count]).toEqual([['g-B-original'], 1]);
+      155 |         const want = n + 1 >= 24 ? 1 : 0; // trigger only when a read returned 24 rows
+    > 156 |         expect([a.originalsReads, b.originalsReads, c.originalsReads]).toEqual([want, want, want]);
+          |                                                                        ^
+      157 |       }
+      158 |     });
+      159 |     it(`cross-tenant paths, B + ${n} later certified copies in tenant 2`, async () => {
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:156:72)
+
+  ● G188r2 F1 matrix (cur) › local paths, B + 24 later certified copies (25 rows)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Array [
+    -   "g-B-original",
+    -   false,
+    -   null,
+    +   "g-a-24",
+    +   true,
+    +   "gcert-a-24",
+      ]
+
+      150 |       const c = rec('F1', 'v2-local', n, await v2(), true);
+      151 |       if (EXPECT === 'r2') {
+    > 152 |         expect([a.winner, a.isCertified, a.certId]).toEqual(['g-B-original', false, null]);
+          |                                                     ^
+      153 |         expect([b.winner, b.isCertified, b.certId]).toEqual(['g-B-original', false, null]);
+      154 |         expect([c.winner, c.count]).toEqual([['g-B-original'], 1]);
+      155 |         const want = n + 1 >= 24 ? 1 : 0; // trigger only when a read returned 24 rows
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:152:53)
+
+  ● G188r2 F1 matrix (cur) › cross-tenant paths, B + 24 later certified copies in tenant 2
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Array [
+    -   "g-B-original",
+    -   false,
+    -   null,
+    +   "g-a-24",
+    +   true,
+    +   "gcert-a-24",
+      ]
+
+      163 |       const c = rec('F1', 'v2-cross', n, await v2(), true);
+      164 |       if (EXPECT === 'r2') {
+    > 165 |         expect([a.winner, a.isCertified, a.certId]).toEqual(['g-B-original', false, null]);
+          |                                                     ^
+      166 |         expect([c.winner, c.count]).toEqual([['g-B-original'], 1]);
+      167 |       }
+      168 |     });
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:165:53)
+
+  ● G188r2 F1 matrix (cur) › local paths, B + 25 later certified copies (26 rows)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Array [
+    -   "g-B-original",
+    -   false,
+    -   null,
+    +   "g-a-25",
+    +   true,
+    +   "gcert-a-25",
+      ]
+
+      150 |       const c = rec('F1', 'v2-local', n, await v2(), true);
+      151 |       if (EXPECT === 'r2') {
+    > 152 |         expect([a.winner, a.isCertified, a.certId]).toEqual(['g-B-original', false, null]);
+          |                                                     ^
+      153 |         expect([b.winner, b.isCertified, b.certId]).toEqual(['g-B-original', false, null]);
+      154 |         expect([c.winner, c.count]).toEqual([['g-B-original'], 1]);
+      155 |         const want = n + 1 >= 24 ? 1 : 0; // trigger only when a read returned 24 rows
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:152:53)
+
+  ● G188r2 F1 matrix (cur) › cross-tenant paths, B + 25 later certified copies in tenant 2
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Array [
+    -   "g-B-original",
+    -   false,
+    -   null,
+    +   "g-a-25",
+    +   true,
+    +   "gcert-a-25",
+      ]
+
+      163 |       const c = rec('F1', 'v2-cross', n, await v2(), true);
+      164 |       if (EXPECT === 'r2') {
+    > 165 |         expect([a.winner, a.isCertified, a.certId]).toEqual(['g-B-original', false, null]);
+          |                                                     ^
+      166 |         expect([c.winner, c.count]).toEqual([['g-B-original'], 1]);
+      167 |       }
+      168 |     });
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:165:53)
+
+  ● G188r2 bounds and edges (cur) › 24 tied uncertified originals (distinct owners) + 24 later certified A copies
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   false,
+    -   null,
+    +   true,
+    +   "gcert-a-24",
+      ]
+
+      177 |       const c = rec(`TIE${k}`, 'v2-local', k, await v2(), true);
+      178 |       if (EXPECT === 'r2') {
+    > 179 |         expect([a.isCertified, a.certId]).toEqual([false, null]);
+          |                                           ^
+      180 |         expect(c.count).toBe(24);
+      181 |         expect(c.winner.every((w: string) => w.startsWith('g-tie-'))).toBe(true);
+      182 |         if (k === 25) expect(c.winner).not.toContain('g-tie-25'); // first 24 by id
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:179:43)
+
+  ● G188r2 bounds and edges (cur) › 25 tied uncertified originals (distinct owners) + 24 later certified A copies
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   false,
+    -   null,
+    +   true,
+    +   "gcert-a-24",
+      ]
+
+      177 |       const c = rec(`TIE${k}`, 'v2-local', k, await v2(), true);
+      178 |       if (EXPECT === 'r2') {
+    > 179 |         expect([a.isCertified, a.certId]).toEqual([false, null]);
+          |                                           ^
+      180 |         expect(c.count).toBe(24);
+      181 |         expect(c.winner.every((w: string) => w.startsWith('g-tie-'))).toBe(true);
+      182 |         if (k === 25) expect(c.winner).not.toContain('g-tie-25'); // first 24 by id
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:179:43)
+
+  ● G188r2 bounds and edges (cur) › OLDCERT: the original certified its own row before every later copy, 25 later copies
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "gcert-b-old"
+    Received: "gcert-a-25"
+
+      199 |     const b = rec('OLDCERT', 'verify-file', 25, await vfile(), false);
+      200 |     const c = rec('OLDCERT', 'v2-local', 25, await v2(), true);
+    > 201 |     if (EXPECT === 'r2') { expect(a.certId).toBe('gcert-b-old'); expect(b.certId).toBe('gcert-b-old'); expect(c.certIds).toEqual(['gcert-b-old']); }
+          |                                             ^
+      202 |   });
+      203 |   it('INSIDE: B + 3 later copies, no originals read', async () => {
+      204 |     await seed('g_ten', CALLER, [bOrig(), ...aCopies(3)]);
+
+      at Object.<anonymous> (../../../../../harness_r2/g188r2-pg15.harness.test.ts:201:45)
+
+Test Suites: 1 failed, 1 total
+Tests:       8 failed, 12 passed, 20 total
+Snapshots:   0 total
+Time:        1.002 s
+Ran all test suites.

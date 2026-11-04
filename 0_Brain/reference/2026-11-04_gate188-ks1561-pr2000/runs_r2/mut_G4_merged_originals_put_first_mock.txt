@@ -1,0 +1,43 @@
+PASS ../../repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts
+  M0: the model cuts where the real query cuts (so these cells can reach G188-F1)
+    ✓ 23 later certified copies: the original is in the fetched row set: true (24 ms)
+    ✓ 24 later certified copies: the original is in the fetched row set: false (3 ms)
+    ✓ 25 later certified copies: the original is in the fetched row set: false (3 ms)
+  G188-F1 DEFECT cells: 23, 24 and 25 later certified copies, every path the gate named
+    ✓ /verify: B (the original) answers, not certified, with 23 later certified copies by A (3 ms)
+    ✓ /verify: B (the original) answers, not certified, with 24 later certified copies by A (3 ms)
+    ✓ /verify: B (the original) answers, not certified, with 25 later certified copies by A (3 ms)
+    ✓ verify-file: B (the original) answers, not certified, with 23 later certified copies by A (3 ms)
+    ✓ verify-file: B (the original) answers, not certified, with 24 later certified copies by A (2 ms)
+    ✓ verify-file: B (the original) answers, not certified, with 25 later certified copies by A (3 ms)
+    ✓ cross-tenant (/verify via crossTenantLookup): B (the original) answers, not certified, with 23 later certified copies by A (3 ms)
+    ✓ cross-tenant (/verify via crossTenantLookup): B (the original) answers, not certified, with 24 later certified copies by A (2 ms)
+    ✓ cross-tenant (/verify via crossTenantLookup): B (the original) answers, not certified, with 25 later certified copies by A (3 ms)
+    ✓ v2 local: B (the original) answers, not certified, with 23 later certified copies by A (3 ms)
+    ✓ v2 local: B (the original) answers, not certified, with 24 later certified copies by A (2 ms)
+    ✓ v2 local: B (the original) answers, not certified, with 25 later certified copies by A (2 ms)
+    ✓ v2 cross-tenant: B (the original) answers, not certified, with 23 later certified copies by A (3 ms)
+    ✓ v2 cross-tenant: B (the original) answers, not certified, with 24 later certified copies by A (2 ms)
+    ✓ v2 cross-tenant: B (the original) answers, not certified, with 25 later certified copies by A (2 ms)
+    ✓ chain-first (/verify, a race: the local read misses, the chain answers; B's draft original is outside the second read's 24) (1 ms)
+  the originals read: when it runs, and the id merge
+    ✓ P: a fetch under the limit (22 later copies, 23 rows) sends NO originals read: the whole set was fetched (3 ms)
+    ✓ a full fetch with the original INSIDE it (23 later copies, 24 rows): one originals read, and B listed once (merged by id) (2 ms)
+    ✓ a full fetch with the original OUTSIDE it (24 later copies): one originals read per fetch, at the bound 24 + 1 (2 ms)
+  ties and a certified original, with the original outside the fetched set
+    ✓ two originals tied at the earliest instant, two owners; B2 certified its own row before every later copy: B2's certification answers (4 ms)
+    ✓ the original certified its own row before every later copy (it sorts below them): its own certification answers (3 ms)
+    ✓ 25 rows tie at the earliest instant (bound 24): the warn names KS-1561 and the cut only NARROWS (no row more eligible than with all 25) (4 ms)
+  G188-F2 is NOT changed this round (v1 judges the caller's tenant, v2 every tenant)
+    ✓ N-SPLIT: A (later, certified) in the caller's tenant, B (the original) in another: v1 presents A, v2 lists B only (4 ms)
+  G188-F1, v2 tenant cap (Wednesday's ruling (b)): the tenants enumerated are the ones that registered EARLIEST
+    ✓ CAP-8 (control): 8 tenants, the original in the 8th by tenant id: v2 lists B only (3 ms)
+    ✓ CAP-9: the original in tenant 9 by tenant id, past the cap of 8 by id: v2 lists B only (2 ms)
+    ✓ CAP-10: the original in tenant 9 by tenant id, past the cap of 8 by id: v2 lists B only (2 ms)
+    ✓ RESIDUAL, stated (the one D4 already carries): B's registry row landed LATE (after every other tenant's) though its documents.created_at is the earliest: v2 leaves B's tenant out and lists the 8 later certified copies (3 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       30 passed, 30 total
+Snapshots:   0 total
+Time:        2.112 s, estimated 3 s
+Ran all test suites matching /ks1561-g188-f1/i.
