@@ -1,0 +1,83 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-04T01:30:56.000Z
+Subject: [Secuura/Blockchain-E -> Wednesday] READY FOR GATE: PR 1989 (KS-915, tier 1, round 3 of 3 by Kam's 09:33:42 ruling) at df71e6b7c625 (Seat E 33rd)
+---
+Seat E 33rd
+
+READY FOR GATE: PR 1989 (KS-915), TIER 1, round 3 of 3 by Kam's 09:33:42 ruling (live board 2026-11-04 09:33:42 AEDT, verbatim: "Decision secuura-pr1989-gate174-cap-nogo-pgbouncer-1104: a — Allow one more round for F1 only (recommended)"; card ruled_ts 2026-11-04T09:34:23.509602+11:00). Scope = the card's option (a): G174-F1 plus the G174-F2 PATH lock. Nothing else.
+
+HEAD: df71e6b7c6258c6b01202d8fabedcdeafc445c95 (fix commit), branch fix/ks-915-restore-local-secrets-readers, ls-remote 2026-11-04T01:30:06Z (VERIFIED by the driver at 00:55:06Z).
+BASE: develop ee1e1b83211504f96ebccba325d1ef7139bc83cc, merged in as 84e706ae89cc. Its tree a6b49e65ea16 equals the merge-tree prediction; 43 moved files, 0 shared with the branch, 0 in the script's read set. Previous head (round 2): c71a6d106696. Push: a fast-forward (c71a6d106696 -> 84e706ae89cc -> df71e6b7c625). Three-dot vs develop = the same 4 files.
+develop now: a01e579ca47b (ls-remote 01:30:06Z), one KS-1343 docs commit on top of the base, 0 shared paths; the driver's develop gate accepted it (DOCSRULE). Three-dot vs a01e579ca47b = the same 4 files.
+PR 1982: untouched at 87c9e7488fd7.
+
+THE CELLS THAT PROVE F1 (restore_local_secrets.test.sh; every REFUSAL cell below fails at round 2's script, the controls pass at both; round 2's script gives Results: 368 passed, 53 failed):
+- q01 (gate g01) .env single-quoted PGBOUNCER_MAX_CLIENT_CONN='10000\n[databases]\nsecuura = host=<M>' (append + prepend): refused exit 3, .env byte-identical 0644, marker 0, refused by dotenv naming the key.
+- q02 (g02) unquoted PGBOUNCER_DEFAULT_POOL_SIZE; q03 (g03) repo-root .env PGBOUNCER_RESERVE_POOL_SIZE; q04 (g04) shell PGBOUNCER_MAX_DB_CONNECTIONS; q05 hex PGBOUNCER_MAX_USER_CONNECTIONS. Each is refused and the refusal names the key; q03 also names the repo-root .env, q04 the shell environment.
+- Layers: q06 (a declare only bash runs) is refused by bash set -a alone. q07 (a quoted "1000") is refused by the canonical-line check alone.
+- Compose itself (fake docker, per entry, dev and root): the pgbouncer service's PGBOUNCER_MAX_CLIENT_CONN carrying a [databases] line is refused, naming the key and the pgbouncer service.
+- Line-break rule (Wednesday's scope, every value judge() reads): shell NODE_ENV with a LF, shell DATABASE_URL with a trailing LF, .env NODE_ENV="development\nstaging" (dotenv). Each is named "carries a line break". Control: a LF in an unjudged key (E33_NOTE) is accepted.
+- Renderer pin: (rendered by entrypoint.sh sed -i) AND (passed to pgbouncer by real compose) = exactly the 8 judged names, per entry. Each of the 8 is in the bash record, the canonical-line list and canonical_shell. Controls: a planted sed line is seen, and a planted passed key is seen.
+- f17: a forged reader record of the OLD length (8 values) followed by exit is no reading. That kills e33_bash_guard_old, which a driven run showed reachable: with the guard put back the script wrote, rc 0. A forged FULL 13-value record still passes head; that is G173-F2 as named.
+- Line-break rule, sole refuser: a NODE_ENV carrying a LF that only compose passes (fake docker) is refused by the Blockchain/Dev entry, named.
+- Controls: q08 (five plain numbers, one blank) accepted; shell PGBOUNCER_DEFAULT_POOL_SIZE=20 accepted.
+- Render oracle, evidence/render_oracle.out: entrypoint.sh lines 42-56 run under busybox sed (redis:7-alpine, --network none) on a copy of pgbouncer.ini. Each of q01-q04's values gives 2 [databases] headers, and the last secuura line names the marker host. The control and q05 give 1.
+
+THE CELLS THAT PROVE F2:
+- pf0..pf15: 16 PATH-escape forms appended to a golden .env. pf0 is gate 174's e1 (X=1; PATH=/usr/bin:/bin; touch <abs>); the others are export, declare, typeset, a prefix assignment, for, read, local, printf -v, eval, +=, a subshell, an EXIT trap, readonly, declare +r and export -n. Each is refused (exit 3), makes no file, leaves .env byte-identical and names PATH. For each, an unsandboxed set -a on the same file DOES make the file (16/16).
+- pt-*: unset PATH, PATH[0]=, and the bare word PATH. Each is refused, naming PATH.
+- The two same-line forms that the one-line lock alone would accept: PATH=/usr/bin:/bin; declare -x POSTGRES_""HOST=<M>.host, and the PATH+=:/x variant. Each is refused, .env byte-identical, PATH named, marker 0. Control: an unsandboxed set -a reads POSTGRES_HOST as the marker host (1/1 each).
+- sr0/sr1: command -p and hash -p (set -r already stops them). No file, exit 0. The unsandboxed control makes the file.
+- Benign control: ENV=, SHELL=, NODE_ENV= and MY_PATH= lines are accepted.
+
+F2 DESIGN, measured (Wednesday ruled (B) at 22:51:49Z): bash -r refuses the reader's own cd "$1", so it was not used. The one-line readonly lock alone leaves the same-line under-read above. (B) = `readonly PATH` before set -r, plus a refusal when the reader's stderr names PATH; the stderr goes only through grep -c ': PATH: ', never stored or printed.
+
+RED FIRST, PIECE BY PIECE (each of my 14 mutants reverts one piece):
+- e33_bash_guard_old: KILLED (2/421 cells failed)
+- e33_bash_record_keys_old: KILLED (2/418 cells failed)
+- e33_canon_no_pool_lines: KILLED (2/418 cells failed)
+- e33_canon_shell_no_pool: KILLED (5/418 cells failed)
+- e33_canon_value_pool_any: SURVIVED (0/421 cells failed)
+- e33_lock_pattern_wrong: KILLED (23/418 cells failed)
+- e33_newline_rule_every_key: KILLED (1/418 cells failed)
+- e33_newline_rule_urls_only: KILLED (2/418 cells failed)
+- e33_no_lock_check: KILLED (23/418 cells failed)
+- e33_no_newline_rule: KILLED (3/418 cells failed)
+- e33_no_pool_judge: KILLED (11/418 cells failed)
+- e33_no_readonly_path: KILLED (21/418 cells failed)
+- e33_pool_regex_unanchored: KILLED (11/418 cells failed)
+- e33_stderr_dropped: KILLED (23/418 cells failed)
+
+MUTANTS (98 = E 31st's 25 (its planted no-op control is refused by the tool, as it must be), gate 173's 50, E 32nd's 9, my 14; 6 inherited re-keyed onto moved anchors, same mutation): 79 KILLED, 19 SURVIVED of 98 (E 31st 23/2; gate 173 34/16; E 32nd 9/0; E 33rd 13/1); 0 of the 122 outputs carry a 48-hex string; every survivor ran on the final 421-cell suite. Two kills come only from the renderer pin's text check (e32_canon_shell_no_postgres, e33_canon_shell_no_pool): by behaviour both are layered-equivalent. Survivors, every one classified:
+- e31_js_ne_case_sensitive (E 31st): carried from round 2 (E 32nd's table, survived there too): layered-equivalent: same mutation as gate m07; driven by gate 173 (q7b dev_Production: head 3, mutant 3, another reader refuses)
+- e31_js_pghost_ignored (E 31st): carried from round 2 (E 32nd's table, survived there too): layered-equivalent: same mutation as gate m10; driven by gate 173 (q7b local_pghost: head 3, mutant 3)
+- m07_nodeenv_no_trim_lower (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b dev_Production head 3 / mutant 3)
+- m08_judge_no_pghostaddr (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b local_pghostaddr head 3 / mutant 3)
+- m09_judge_no_pgservice (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b local_pgservice head 3 / mutant 3)
+- m10_judge_no_pghost (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b local_pghost head 3 / mutant 3)
+- m14_dotenv_first_file_only (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b local_nodeenv_prod head 3 / mutant 3)
+- m22_compose_rc_ignored (gate 173): carried from round 2 (E 32nd's table, survived there too): equivalent by reading (gate 173): empty or garbage output still gives no verdict -> cannot, exit 3
+- m23_compose_noservices_ok (gate 173): carried from round 2 (E 32nd's table, survived there too): unreachable by reading (gate 173): no services -> no AUTH facts -> exit 1 before any seed write
+- m25_dotenv_missing_ok (gate 173): carried from round 2 (E 32nd's table, survived there too): unreachable by reading (gate 173): MISSING cannot follow check_tools
+- m27_reline_allows_dollar (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b dollar_unset head 3 / mutant 3)
+- m28_canon_nodeenv_any_case (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b dev_PRODUCTION head 3 / mutant 3)
+- m29_canon_no_query_check (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b dev_hostaddr_param head 3 / mutant 3)
+- m30_canon_no_cr_split (gate 173): carried from round 2 (E 32nd's table, survived there too): equivalent by reading (gate 173): a CR-joined line naming a key is never canonical
+- m31_canon_no_nul_check (gate 173): carried from round 2 (E 32nd's table, survived there too): equivalent by reading (gate 173): no reader reads production from a NUL form; not driven
+- m33_no_canon_on_tmp (gate 173): carried from round 2 (E 32nd's table, survived there too): equivalent by reading (gate 173): the rewrite emits only canonical ADMIN/ALLOW lines
+- m35_no_admin_match_dotenv (gate 173): carried from round 2 (E 32nd's table, survived there too): equivalent by reading (gate 173): correctness of systemTest's read only
+- m47_no_locale_c (gate 173): carried from round 2 (E 32nd's table, survived there too): layered-equivalent (gate 173, driven: q7b nbsp_utf8 head 3 / mutant 3)
+- e33_canon_value_pool_any (E 33rd): layered-equivalent, driven (evidence/driven_survivors.out): PGBOUNCER_MAX_CLIENT_CONN=1x and =1;X=2, head rc 3 / mutant rc 3, dotenv refuses first; by reading, every value the canonical line admits that is not digits is refused earlier by dotenv, bash or compose
+
+THE THREE EXTRA KEYS (brief item 1): PGBOUNCER_MIN_POOL_SIZE, _RESERVE_POOL_TIMEOUT, _SERVER_TLS_SSLMODE. They are NOT added. docker compose config through both entries, default and --profile '*' (34/35, 39/40 services), passes none of them to pgbouncer (no env_file), so no .env or shell value reaches the container. The renderer pin fails if that ever changes.
+
+SUITE AND RUNS: bare suite at head Results: 421 passed, 0 failed (round 2: 331). run-shell-suites.sh BEFORE (84e706ae89cc): shell suites: 114 passed, 0 failed, 1 skipped (of 115) (a first run read 112/2/1; both causes measured, evidence/suites_before_failures.md; the format-gate cell at systemTest/__tests__/package_format_gate.test.sh:1121-1124 is a candidate for you); AFTER (head): shell suites: 114 passed, 0 failed, 1 skipped (of 115). docs-fragments check OK (141 new entries per page; a planted second h2 is refused, rc 1; restored byte-identical). check-stack-safety: 110 invariants hold. Pre-push hook: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. (legs 3, 4, 8 need a running stack; NOT a pass of those legs; leg 16 green on a rebuilt packages/shared). Push rc 0, 1316 s, fast-forward c71a6d106..df71e6b7c.
+Host: macOS 27 arm64, /bin/bash 3.2.57, Node v26.8.1 (NOT LTS), dotenv 16.6.1, Compose v5.5.0. NOT run: shellcheck (not installed), bash 4/5, Linux/GNU, Node 24, pgbouncer itself, a booted stack, the four platform suites.
+
+RESIDUAL (measured, G173-F2 class, not built): a file that runs exec 2<&- or exec 2>&- on an EARLIER line shuts the reader's stderr (set -r does not stop either on bash 3.2), so the PATH count reads 0 and the same-line form reads as local. Saving fd 2 and restoring it does NOT hide the count (measured). I did not add a sentinel line. By reading only (NOT measured), a hostile file can print the same text such a line prints; my STATUS of 23:1xZ stated that as fact, which it was not.
+
+TICKET CANDIDATES (not built, outside the round): G174-F3 (census pin 4/8 planted names), G174-F4 (compose reader has no time limit; its child outlives the script), G174-F5 (F4 note's ADMIN asymmetry), G173-F2 (hostile .env forges the bash reader; now also the stderr-closing form above), the looping .env, and entrypoint.sh:26-30 (userlist credentials echoed unescaped into userlist.txt; a line break adds an auth entry; LOW, needs a crafted credential value; credentials stay judged only through the composed DATABASE_URLs per your 11:30:27Z ruling).
+
+BOARD: one KS-915 comment 820f9aff (verified: body equal, 0 mention nodes, state/priority/assignee unchanged) (BLUF, no @, no state change). PR body patched (round-3 section, Test Evidence, hook block), body checker ok.
+
