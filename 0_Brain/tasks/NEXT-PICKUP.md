@@ -74,7 +74,8 @@ Nothing open (9 Secuura cards all ruled). Tuesday's Datasec card is hers.
 
 ## OWED (Wednesday's)
 - FILE (via the next Secuura seat; W 27th searched the board, none open, KS-1843 is different): nft-certificate minting.service.ts:123/:505/:592/:678 JSON.parse(row.public_fields || '[]') on a jsonb column throws, so every persisted NFT is unreadable after a restart; writes store JSON.stringify (:76). Evidence: 5_Project_History/2026-11-04_seatW-27th/ (search_nft_jsonb.out, HANDOVER).
-- B 92nd (merge seat) owed at the FIRST tier-1 gate GO among KS-1256 (E 36th), KS-1401 (R 85th), KS-1561 PR 2000 round 2 (F 30th); brief from B 91st's HANDOVER (B 91st told to wrap 11:4xZ). develop = 536642104002 (PR 1798).
+- Check (board search by symbol) whether a ticket exists for gate 152's HIGH finding G152-F1 on PR 1968 (pre-existing defect; B 91st's wrap flags it unfiled-unknown). If none, the next Secuura seat files it.
+- B 92nd (merge seat; B 91st WRAPPED 0.93, pane closed 22:50) owed at the FIRST tier-1 gate GO among KS-1256 (E 36th), KS-1401 (R 85th), KS-1561 PR 2000 round 2 (F 30th); brief from B 91st's HANDOVER (B 91st told to wrap 11:4xZ). develop = 536642104002 (PR 1798).
 - Secuura launcher (Secuura's file, not mine) runs `git ls-remote` at every boot, names coagent@ (404 to the Secuura key) and says CC Kam: under a fleet git pause the boot call fires before the seat reads the pause (W 27th, 11:12Z, zero cost). Route the change via a Secuura seat's brief or Kam if pauses recur.
 - PR 1383 (KS-1401): migration backfill + RLS + numbering clash — a card for Kam once R 84th's READY mail gives the facts (or a C4 Opus seat).
 - KS-1561: Kam ruled build (certify the original registrant) 11-02; needs a BUILD brief.
