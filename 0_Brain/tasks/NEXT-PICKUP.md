@@ -3,43 +3,35 @@ date: 2026-11-04
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's (Mac mini).
 status: live
-supersede: REPLACED WHOLESALE 10:58 AEDT 2026-11-04 by the 04:1x seat (checkpoint at 65%). Previous kept as NEXT-PICKUP.md.pre-1104-1058. Replace wholesale; never stack.
+supersede: REPLACED WHOLESALE 13:29 AEDT 2026-11-04 by the 04:1x seat before its rotation (~78%). Previous kept as NEXT-PICKUP.md.pre-1104-1329. Replace wholesale; never stack.
 ---
 
-# NEXT PICKUP — Wed 4 Nov 2026, 10:58 (the 04:1x seat's checkpoint)
+# NEXT PICKUP — Wed 4 Nov 2026, 13:29 (the 04:1x seat's rotation handover)
 
-## KAM'S INSTRUCTION IN FORCE (09:16, after /login on a new account; gauge 7d ~13%)
-"new account logged in.  Please try to clear and close off as many in progress tickets as possible" — grant row in EXPIRING-GRANTS (no expiry; re-read at 90% or an account switch).
+## KAM'S INSTRUCTION IN FORCE
+09:16, after /login on a new account (gauge 7d ~13% at 12:00): "new account logged in.  Please try to clear and close off as many in progress tickets as possible". Grant row in EXPIRING-GRANTS.
 
-## STATE (10:58)
-- develop = a01e579ca47be1ca60828537316823051730edf6 (PR 1996 squash, ls-remote 10:28). Kintsugi still runs b1fb543640e7 until D 50th's round lands.
-- CLOSE-OUT: 328 merged-but-open KS tickets (lists in 0_Brain/reference/2026-11-04_ks-inprogress-closeout/). DONE: U 10th 21 closed (wrapped 0.94), T 9th 18 (wrapped 0.93), V 18th 26 (standby), S 16th 0 (standby). TOTAL 65 closed. WAIT-DEPLOY 23 (V 6: KS-1841, 1885, 1893, 1901, 1929, 1081; S 17: KS-1413, 1724, 1725, 1933, 1938, 1939, 1940, 1942, 1943, 1950, 1572, 1956, 1957, 1961, 1962, 1967, 1968).
+## STATE (13:29)
+- develop = 5c1ca287ed74b6353423a8c09e253abf3129233a (PR 1995). Today merged: 1996 a01e579ca47b, 1994 8f4e74522739, 1989 26d8314e4f77, 1995 5c1ca287ed74 (all on head-pinned GOs after gates 179/178/180/181).
+- KINTSUGI runs ee1e1b832115 (D 50th, STATUS B accepted 01:51Z). The four merges above are NOT on kintsugi yet: next deploy round (October grant, extended "until further notice"); demo untouched today.
+- CLOSE-OUT: 82 KS tickets closed today (U 10th 21, V 18th 26, T 9th 18, S 16th 0, U 11th PART 1 15 + PART 2 2 so far). Lists: 0_Brain/reference/2026-11-04_ks-inprogress-closeout/.
 
 ## LIVE SEATS
-- **D 50th** (%121, Opus): kintsugi deploy round GO'd at ee1e1b832115 (pinned; no re-pin). Building (batch 1/14 at 10:36; heartbeat evidence/heartbeat.kintsugi.k16.d50.txt in its folder). Next from it: STATUS B. **ON STATUS B: accept it, then mail the new kintsugi sha to V 18th and S 16th (one mail each, subject naming the seat) so they re-test their WAIT-DEPLOY keys and wrap.** Then relay to Kam: HIBP results (reachable 200/365 ms; 44 of 148 test literals breached, ~21 near register/reset) + KS-1933 billing shipped (Stripe mode UNMEASURED).
-- **V 18th** (%123) and **S 16th** (%124): standby for that sha (watchers armed). Idle wakes are by design: wake_ack.
-- **B 88th** (%126, merge seat): merged PR 1996 (a01e579ca47b, tree f4418c5659bb). Waits for PR 1995 round 2.
-- **E 33rd** (%125, Opus): PR 1989 round 3 (card 1104 = a; F2 built as shape B by Wednesday's 10-27-grant design call): committed LOCALLY df71e6b7c625, suite 421/421, PUSH WAITING ON LOAD. Then READY -> narrow tier-1 gate (round 3 of 3) -> GO to B 88th.
-- **R 83rd**: NOT launched; scratchpad r83_waiter.sh (bgskb908s) waits for ROOM. Brief 2_Project_Files/fleet/briefs_staged/2026-11-04_seatR83_pr1995_round2_push.md (push eb2cef57d279 on PR 1995's branch, title ruled, KS-1320 comment, READY round 2 of 2). If the waiter died with the session, relaunch it from that brief.
-- **LOAD BLOCKER:** Docker Desktop VM ~374% CPU with nothing running; card wed-docker-vm-cpu-spin-1104 (Kam: Quit + reopen). Default: pushes wait.
+- **U 11th** (%128, Opus): PART 2 = the 53-key live-check sweep (Kam card secuura-observation-owed-closeout-1104 = a). At 02:25Z 28/53: closed 2, finding 1 (KS-962), obs-partial 5, cannot-run-safely 5, needs-a-disposable-stack 15; 25 remaining (write probes, then one seed-admin login per Kam's 2026-10-12 card secuura-kintsugi-issuer-account-how = a). Rulings in its ANSWERs (no induced failures; Kam's own account never; QA_GATE_OWNER for GETs). Score at its wrap; read its ctx from its transcript (~/.claude/projects/-Volumes-DevMASTER--CODING-Secuura-Blockchain/*.jsonl, last usage input+cache), the 4-row pane hides the statusline.
+- **B 88th** (%126): merged 1996, 1994, 1989, 1995; told to WRAP (queue empty). Verify its wrap at source (history + HANDOVER), score, pane_close.
 
-## WAITING ON KAM (cards)
-1. secuura-pr1994-nft-routes-money-line-1104 (PR 1994 money line; rec a merge; default HOLD).
-2. secuura-observation-owed-closeout-1104: 53 tickets owe only a live check (S 24, U 22, V 2, T 5); rec (a) one live-check sweep seat on kintsugi after D 50th; default leave open. Card text says 36+; panel told 53.
-3. wed-docker-vm-cpu-spin-1104 (restart Docker).
-RULED today: wed-secuura-usage-98pct (a, login done), secuura-pr1989 cap (a), wed-morning-fleet-activity (a).
+## WAITING ON KAM
+Nothing open from today's Secuura cards (all ruled: usage login a, PR 1989 cap a, PR 1994 merge, observation sweep a, Docker restart a + done, PR 1989 hold a). Stuart/Kam monthly meeting list unchanged.
 
 ## OWED (Wednesday's)
-- Ticket candidates to route to a Secuura seat: KS-1968 follow-up (e2e/systemTest register/reset fixtures with breached passwords will 422); entrypoint.sh:26-30 userlist.txt credential echo (E 33rd); G174-F3/F4/F5; KS-1906 G66-F3; CONTRIBUTING.md:637 'N/13' vs 15 legs; the seats' wrap candidate lists.
-- Secuura launcher: the shared .launch_preflight_last.txt is last-writer-wins (seats launched seconds apart never see their own warnings) — their file, a brief item.
-- Seat ctx instrument: cockpit panes are 4-5 rows; read seat ctx from ~/.claude/projects/-Volumes-DevMASTER--CODING-Secuura-Blockchain/*.jsonl last usage (input+cache), not the pane.
-- Spark + DEVNAS unreachable from this laptop's network (zgx-15d5.local / DEVNAS.local do not resolve).
-- Carried: docs-page refresh after KS-1868; @azure/msal-node baseline dies MON 2026-11-09 (check its ticket); WED-155; boot-prompt MODEL CHOICE line; INDEX.md refresh; stash@{0} never drop.
+- TICKETS to route to the next Secuura seat that may file (one brief, filing only): (1) G180-F1 LOW (Kam ruled "ticket G180-F1": hostile two-line .env closing stderr steers the bash reader in restore-local-secrets.sh; verdict 0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/verdict.md); (2) KS-1968 follow-up: e2e/systemTest register/reset fixtures with breached passwords will 422 (D 50th's corpus: 44/148 literals; evidence in its record folder); (3) ENABLE_DEMO_SEED=true on kintsugi (U 11th); (4) KS-962 F-973-3 shape live on kintsugi (U 11th); (5) entrypoint.sh:26-30 userlist echo (E 33rd); G174-F3/F4/F5; KS-1906 G66-F3; CONTRIBUTING.md:637 'N/13' vs 15; the wrap candidate lists of U 10th/T 9th/V 18th/S 16th/U 11th. Search the board by symbol before filing.
+- NEXT DEPLOY ROUND to kintsugi carrying 1996/1994/1989/1995 (D 51st from D 50th's HANDOVER), when Kam's queue allows; PR 1989's script and PR 1995/1996 are docs/dev-only, so it can wait for more merges.
+- Secuura launcher: shared .launch_preflight_last.txt is last-writer-wins (brief item, their file).
+- Spark + DEVNAS unreachable from this laptop's network (zgx-15d5.local / DEVNAS.local do not resolve); Spark idle with that reason.
+- Carried: docs-page refresh after KS-1868; @azure/msal-node baseline dies MON 2026-11-09 (check its ticket); WED-155 (inbox_digest key in argv); boot-prompt MODEL CHOICE line; INDEX.md refresh; stash@{0} never drop.
 
-## UPDATE 12:44 (70% checkpoint; supersedes the lines above where they differ)
-- KAM RULED 12:41: Docker restart (a, done: VM gone, load ~9); secuura-observation-owed-closeout-1104 = a (ONE live-check sweep seat on kintsugi AFTER D 50th's STATUS B, Opus, then close what passes); secuura-pr1994-nft-routes-money-line-1104 = a (merge; G178-F1 NOT released).
-- PR 1994 QUEUED to B 88th (01:42:33Z pins: head 74dc459edbb6, develop a01e579ca47b; seat recomputes the tree). Next: its READY -> re-pin -> GO "GO: merge PR 1994 at 74dc459edbb6 on develop <pin12> (Seat B 88th)".
-- PR 1989: E 33rd WRAPPED (0.95 provisional); GATE 180 (Opus subagent, narrow, round 3 of 3) RUNNING, workdir 0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/. GO -> QUEUE to B 88th; NO GO -> nothing ships, card Kam.
-- PR 1995: R 83rd (%127) real push of eb2cef57d279 started 01:41:31Z; READY round 2 of 2 next -> one tier-2 gate (Sonnet) -> B 88th.
-- D 50th: migration 056 applied 01:34Z; swap run A in progress (12/21 at 01:40Z) with the added verifier-frontend probe + single-service rollback rule. ON STATUS B: (1) accept; (2) brief TWO seats: (a) WAIT-DEPLOY re-test of 23 keys (S 16th HANDOVER 17 + V 18th HANDOVER 6), Sonnet, close-out template 2_Project_Files/fleet/briefs_staged/2026-11-04_closeout_TEMPLATE.md re-pointed to the new sha; (b) the observation-owed SWEEP of 53 keys (S 24, U 22, V 2, T 5, named in the four HANDOVERs), Opus, read-only probes first, writes only to test data and named before each; (3) FYI to Kam: HIBP results + KS-1933 billing shipped.
-- U 10th, T 9th, V 18th, S 16th, E 33rd, R 82nd all WRAPPED and scored; panes closed. Live: D 50th %121, B 88th %126, R 83rd %127.
+## RULES LEARNED TODAY (this seat)
+- Seat ordinals: max over every 'Seat <L> <n>' mention in history.md (sort -n), never head -1.
+- Gates predict a merge tree onto the develop of their moment; the merge seat recomputes onto the GO's pin and the GO names that tree.
+- No-deploy-surface rule (docs/tests/CI-only squashes close on merge, proven by git show --stat) is in force for close-out seats.
+- Three NEW SEAT mails seconds apart into the shared inbox confused one seat (R 82nd read D 50th's brief first): stagger launches or name the lane in line 1 of every brief.
