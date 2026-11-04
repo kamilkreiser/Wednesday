@@ -1,0 +1,60 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261104T215949Z.txt)
+     1	[INBOUND] 2026-11-04T21:58 | Secuura/Blockchain-K | [Secuura/Blockchain-K -> Wednesday] READY FOR GATE: PR 2005 (KS-1959) at a968818a0038, TIE
+=========== [INBOUND] 2026-11-04T21:58 | Secuura/Blockchain-K | [Secuura/Blockchain-K -> Wednesday] READY FOR GATE: PR 2005 (KS-1959) at a968818a0038, TIE
+[Secuura/Blockchain-K -> Wednesday] READY FOR GATE: PR 2005 (KS-1959) at a968818a0038, TIER 1 (Seat K 14th)
+Seat K 14th
+
+READY FOR GATE: PR 2005 (KS-1959), tier 1.
+
+- PR 2005: https://github.com/Secuura/Distributed_Secuura/pull/2005. Title "Refs KS-1959: a revoke whose database write does not take effect answers 503, not success" (89 chars).
+- Head a968818a0038 (a968818a0038727399663775722017c130d4cb08), read from origin by ls-remote in the same action as the push check. Base e899463d2a0b (develop measured at push time: e899463d2a0b1b30f2cff46b23d001622620029a (unmoved)).
+- Branch feature/ks-1959-vc-issuer-revoke-swallows-a-failed-db-update-the-route, 1 commit, 5 files (name-only):
+  - services/vc-issuer/src/repositories/credentialRepo.ts
+  - services/vc-issuer/src/routes/credentials.ts
+  - services/vc-issuer/src/__tests__/ks1959-revoke-write-fails-closed.test.ts (new)
+  - Projects Documents/fragments/flow/KS-1959-revoke-write-fails-closed.html (new)
+  - Projects Documents/fragments/cheat/KS-1959-revoke-write-fails-closed.html (new)
+  revocationResolvers.ts is untouched.
+- File-disjoint from PR 2004 (KS-1986), three-dot from merge-base 035685291b9d: 0 of 5 shared; control (my set + originate routes/verification.ts) prints that path. Open-PR overlap: 0 of 14 at ITEM 0 (controls 2003 hit, 1968 hit, 2002 none), and 0 of 14 again under the real lock (the driver's overlap gate).
+- Hook verdict, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran." (leg 14 shell suites: 116 passed, 0 failed, 0 skipped (of 116))
+- Push: rc 0, 937 s.
+
+DECISION: option (a), ruled by you (ANSWER 21:33:01Z). Memory is written first, as before; a write that throws or matches 0 rows answers 503 "The revocation could not be saved. Retry the revoke."; verify moves in no cell. The rowCount tolerance line is in the PR body (your condition ii). The Z cell is a real-shaped { rowCount: 0 } that must refuse (your condition i).
+
+PROOF
+- Red first at e899463d: 5 of 8 red, 5 of 5 by assertion (C ordinary 200, C Proxy 500, C getter 500, Z 200, retry R 200, each against an expected 503). The one TypeError in the base log is the product's G152-F4 throw, logged by the error handler; it is not a harness error. Controls 3 of 3 green at both base and head. Green at head: 8 of 8.
+- Direction, 54 cells, base = the 2 product files overlaid from e899463d and restored sha256-equal:
+  - MORE PERMISSIVE at head (verify true where base false, or revoke 2xx where base non-2xx): 0 of 54.
+  - STRICTER on verify: 0 of 54. Verify equal: 54 of 54.
+  - Revoke status: C and C-then-read 200->503 x4 and 500->503 x8; Z 200->503 x2. Healthy 200->200, no-DB 200->200.
+  - UPDATEs per revoke 1 on both sides (no-DB 0); SELECTs per verify 1 on both sides.
+- Leak: 0 hits in every revoke and verify body and header, at head and at base. Positive controls: the same search finds the planted token in the warn log (ordinary shape, asserted in the PR cells), and under m4b the revoke body carried PLANTED-K14-MSG.
+- Mutants: 7 of 7 valid, 7 of 7 killed, restored sha256-equal, clean re-run 8 of 8.
+  - m1 swallow restored: red 4.
+  - m2 rowCount check dropped: red 1.
+  - m3 readable value only: red 2.
+  - m4 raw rethrown: red 4.
+  - m4b rethrown and echoed: red 4.
+  - m5 typed error mapped to 2xx: red 5.
+  - m6 memory written after the DB: red 1 (Z verify true).
+- Guards: the five keep gate 191's sha12 at head (68bcdbb5, af4f679e x3, a37a6ec8); mine is the sixth (e1b09425).
+- Suites:
+  - vc-issuer before 758 of 758 in 26 files, rc 0; after 766 of 766 in 27 files, rc 0.
+  - Named: credentialRepo.test 11 of 11, ks1116 140 of 140, ks1352 6 of 6, ks1375 9 of 9, ks1851 36 of 36, ks1868 loadfromdb 5 of 5, ks1868 read-catches 9 of 9, ks1906 245 of 245, ks1958 26 of 26, ks1959 8 of 8.
+  - tsc service rc 0; tsconfig.test.json rc 0, planted rc 2. Ratchet rc 0 (27 test files, 0 errors). eslint on the 3 touched files rc 0, planted rc 1.
+  - docs-fragments: clean 0, planted flow 1, planted cheat 1, after restore 0.
+- Disk: 131Gi at boot, 130Gi before the push, 130Gi now.
+
+AVAILABILITY COST: a revoke made while the store's write fails answers 503 instead of 200, and the caller must retry. A credential held only in one process's memory can no longer be revoked with a 2xx. Verify is unchanged.
+
+NOT TESTED: a real PostgreSQL (rowCount read from pg 8.20.0, not produced by it); a restart after a failed revoke; a real second replica; Node 24 (Node v26.8.1 here); kintsugi or demo; the live verify after a deploy; production data volume; the four platform suites; index.ts booted (middleware reproduced, auth replaced by a fake user); the api-gateway in front.
+
+FILING CANDIDATES (not filed; the board search comes with the wrap):
+- Durable revocation under a write failure ("accept and retry").
+- getRecordById, getByHash and getReadableByHash memory fallbacks after a read failure.
+- G191-F3: by-hash answers 500 on a hostile read value.
+- store and selectList unguarded err?.message.
+
+Ticket comment: KS-1959 comment 4574393b posted 21:58:35Z, read back equal, 0 mention nodes. KS-1959 read In Progress before my comment (Backlog at boot, most likely moved by the branch push); I changed no state, label or description. PR read back: open, not draft, base develop, head = origin, 1 commit, 5 files, +381/-3, title and body equal.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 48  SEEN:     1646  BATCH: /private/tmp/wed_newmail/batch_20261104T215949Z.txt
