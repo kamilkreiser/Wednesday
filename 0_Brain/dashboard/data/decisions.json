@@ -59209,5 +59209,314 @@
    "CARD hpsmpoc-feedback-received-words-1104",
    "CARD hpsmpoc-visual-words-1104"
   ]
+ },
+ {
+  "id": "secuura-ks1624-url-interior-slashes-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1624: if SECUURA_API_URL is badly formed, should the WhatsApp bot refuse to start, or carry on?",
+  "bluf": "Kam, the WhatsApp bot builds its API address by gluing strings, so a base with a double slash inside (or a \"?\" query) makes an odd address; nothing changes the host and the gate found no security issue (KS-1624 description). F1 (banner) is merged (comment ceba48f7). F2 and F3 are marked \"needs a ruling\" (description). The proposed fix is to parse the address and refuse to start if it is malformed. Wednesday's recommendation: b — operator misconfiguration only, no new host reachable, and a startup refusal can break a live deploy.",
+  "default_action": "After 48 h nothing changes; ticket stays open with F2/F3 unruled.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Normalise: parse with new URL and refuse at startup on a bad value",
+    "detail": "a seat builds it; a misconfigured deploy now fails loudly."
+   },
+   {
+    "key": "b",
+    "label": "Accept as configured",
+    "detail": "Wednesday posts the acceptance on the ticket and closes F2/F3."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-04T14:42:30.608516+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-11-04T15:01:50.561140+11:00"
+ },
+ {
+  "id": "secuura-ks1639-api-key-text-forms-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1639: should the API-key reader refuse a non-boolean \"active\" value loudly, or keep accepting text?",
+  "bluf": "Kam, the bug (the text 'f' read as an active key) is fixed and merged as #1631; strings now read active only for 't' or 'true' (KS-1639 comment 6138fb4a). It cannot happen today because the column is a true/false type (description). What remains is the design call: keep accepting text forms, or refuse any non-boolean with an error (comment 6138fb4a; description calls refusal the safer contract). No live check is possible, so this ticket needs your call to close (6138fb4a). Wednesday's recommendation: a — the merged rule already fails safe (anything unclear reads inactive), and the bad input cannot arrive.",
+  "default_action": "After 48 h nothing changes (c); Wednesday lists it again.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep accepting text, as merged, and close",
+    "detail": "no further build."
+   },
+   {
+    "key": "b",
+    "label": "Refuse any non-boolean loudly",
+    "detail": "a seat builds it with cells; a bad row stops the request instead of reading inactive."
+   },
+   {
+    "key": "c",
+    "label": "Leave open.",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T14:42:34.263113+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-04T15:01:47.026047+11:00"
+ },
+ {
+  "id": "secuura-ks1202-live-leg-issuer-login-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1202: the last live check needs an issuer login on the shared kintsugi box. Create one, or close without it?",
+  "bluf": "Kam, the fix (a mismatched document type is refused with 400) is merged and in the 2026-11-01 deploy (KS-1202 comment 48bf06fd). The one check not run is a live try on kintsugi, because the only login held there is role OWNER, which cannot create documents (comment b5983ec5). The code and the deployed build were checked equal (b5983ec5, sha256 match). History: on 2026-10-12 you chose one seeded account for refusal-only probes (card secuura-kintsugi-issuer-account-how = a); today that seeded login answers 401 (Seat U 11th, 02:30Z), so no route to an issuer login exists without an admin credential. Kintsugi is a shared dev box Stuart's team also uses. Wednesday's recommendation: b — the guard is read at documents.ts:613-618, tests are red without it, and the deployed file matches byte for byte; a shared-box account adds little. Override reason (measured): 18 shared-word hits read; the one naming KS-1202 (secuura-ks1202-build-refuse-mismatched-type = build-and-merge) ruled whether to BUILD the refusal, which is now merged and deployed; this card asks whether to close without the live leg. The issuer-account card of 10-12 is quoted in the BLUF.",
+  "default_action": "After 48 h nothing changes (c); Wednesday re-raises it in the morning receipt. No seat touches kintsugi.",
+  "options": [
+   {
+    "key": "a",
+    "label": "You give a seat a one-off kintsugi admin login",
+    "detail": "Your 10-12 option b: the seat creates one issuer test user, keeps only that credential, discards the admin one, runs the live try. Needs your hands; shared box."
+   },
+   {
+    "key": "b",
+    "label": "Accept in-process and deployed-build evidence and close",
+    "detail": "Wednesday posts your acceptance on the ticket and moves it to Done."
+   },
+   {
+    "key": "c",
+    "label": "Leave open",
+    "detail": "nothing runs, the ticket stays In Progress."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-04T14:43:27.525894+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-11-04T15:01:43.382692+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-08-21 09:59",
+   "2026-08-24 11:27",
+   "2026-09-02 16:32",
+   "2026-09-02 19:28",
+   "2026-09-08 11:50",
+   "2026-09-12 11:34",
+   "CARD secuura-f5-login-limiter-bypass",
+   "CARD secuura-889-issuer-org-caller-asserted",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-ks1202-build-refuse-mismatched-type",
+   "CARD wed-allowance-99pct-three-seats-live-1007",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-kintsugi-issuer-account-how",
+   "CARD secuura-done-rule-unit-pinned-deployed-no-live-check",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-ks1385-null-issuer-certifications-1015",
+   "CARD secuura-ks1385-cert-holder-can-rewrite-issuer-fields-1018",
+   "CARD wed-fresh-login-99pct-1023",
+   "CARD secuura-ks1717-live-row-check-key-1026"
+  ]
+ },
+ {
+  "id": "secuura-ks1215-live-connector-key-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1215: close without the last live check, or supply a throwaway connector key on kintsugi?",
+  "bluf": "Kam, the fix (the caller's login token is dropped when a connector key is used) is merged and deployed (KS-1215 comment 4dd630e2, auth.ts:455-463). The remaining check needs a valid connector key on kintsugi; the author's key was refused there with 401 (comment 7ce03e19). The case \"valid key whose token exchange fails\" cannot be made to happen live (7ce03e19). Four real post-deploy mints all succeeded (7ce03e19). A key on kintsugi touches the shared box Stuart's team also uses. Wednesday's recommendation: b — the live key would not even reach the failing case; the in-process cells (41/41, red when reversed) cover it. Override reason (measured): 11 shared-word hits read, 0 name KS-1215; none rules on closing it without the live connector check.",
+  "default_action": "After 48 h nothing changes (c); Wednesday re-raises it. No key is requested.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Supply a throwaway kintsugi connector key",
+    "detail": "a seat sends one request; still cannot induce the failing exchange; shared box."
+   },
+   {
+    "key": "b",
+    "label": "Accept in-process evidence plus the four post-deploy mints and close",
+    "detail": "Wednesday posts your acceptance and moves it to Done."
+   },
+   {
+    "key": "c",
+    "label": "Leave open.",
+    "detail": ""
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-04T14:43:31.124430+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-11-04T15:01:39.959466+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-02 16:32",
+   "2026-09-02 19:28",
+   "CARD secuura-ks1402-lookup-refuses-connector-tokens",
+   "CARD secuura-connector-allowlist-missing-setting-ks1256-1005",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD wed-allowance-99pct-three-seats-live-1007",
+   "CARD secuura-ks695-connector-may-revoke-own-key-1009",
+   "CARD secuura-ks695-erase-connector-retry-semantics",
+   "CARD secuura-done-rule-unit-pinned-deployed-no-live-check",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-ks1717-live-row-check-key-1026"
+  ]
+ },
+ {
+  "id": "secuura-ks769-close-keep-owner-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-769: close it and move the 2027-01-01 expiry to a dated review ticket, or keep it open?",
+  "bluf": "Kam, you ruled the mobile app tree \"dormant but kept\" on 2026-09-17 (queue card secuura-ks769-mobile-tree-fuse-lapsed-blocks-pushes = dormant; KS-769 comment bb69813e). The exclusion is in lock-discovery.mjs as owned by KS-769 and lapses 2027-01-01 (comment 8cd04443). If KS-769 closes, nobody owns that expiry; if it stays open, it sits In Progress for two months doing nothing. Wednesday's recommendation: a — your ruling is implemented; a dated ticket is an honest owner, an open one is noise. Override reason (measured): 9 hits read; the KS-769 card (mobile-tree-fuse = dormant, 09-17) ruled the tree dormant-but-kept, not who owns the 2027-01-01 expiry once the ticket closes.",
+  "default_action": "After 48 h nothing changes (b); Wednesday re-raises it before December.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Close KS-769 and open a new review ticket dated before 2027-01-01; the exclusion row points to it",
+    "detail": "a Secuura seat edits one row."
+   },
+   {
+    "key": "b",
+    "label": "Keep KS-769 open as owner until January.",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T14:43:34.724938+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-04T15:01:36.446855+11:00",
+  "prior_rulings_overridden": [
+   "CARD secuura-780-owner-merge",
+   "CARD secuura-ps-759-760-merge-owner",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD nas-shared-folders-owner",
+   "CARD secuura-ks769-mobile-tree-fuse-lapsed-blocks-pushes",
+   "CARD secuura-ks1116-null-owner-who-reads-1020",
+   "CARD secuura-ks1709-keep-unanchored-certification-1023",
+   "CARD secuura-ks229-assurance-tracker-close-1102",
+   "CARD secuura-ks601-kintsugi-split-close-1102"
+  ]
+ },
+ {
+  "id": "secuura-ks1233-redis-ttl-read-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1233: who reads the Redis key's remaining life on kintsugi, which answers NOAUTH?",
+  "bluf": "Kam, the fix (platform settings are saved with no expiry in Redis) is merged and deployed (KS-1233 comment c1ab228a, redis.ts:683-684). The merge comment (31f1cd26) owes a one-line read of that key's TTL on each environment's Redis, to be sure the old 24 h expiry is gone. No seat holds the Redis password, so the read cannot run (c1ab228a). Giving seats a Redis credential touches the shared kintsugi box Stuart's team also uses. Wednesday's recommendation: b — the owner of the deploy already holds access, and the code read shows no TTL is set. Override reason (measured): 6 hits read, 0 name KS-1233; they share only the words 'read' and 'redis' (KS-1256, KS-1370, KS-1402, auth lockout, boot read).",
+  "default_action": "After 48 h nothing changes (c); Wednesday adds the read to the next deploy brief anyway.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Read-only Redis credential for seats",
+    "detail": "one-off read now; adds a standing credential on the shared box."
+   },
+   {
+    "key": "b",
+    "label": "The next deploy seat runs the read",
+    "detail": "no new credential; waits for the next kintsugi deploy."
+   },
+   {
+    "key": "c",
+    "label": "Leave open.",
+    "detail": ""
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-04T14:43:38.240146+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-11-04T15:01:32.875311+11:00",
+  "prior_rulings_overridden": [
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD secuura-ks1370-validate-when-the-revoke-check-cannot-read",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-ks1822-read-gate-probe-fault-fail-open-1030",
+   "CARD secuura-auth-lockout-failopen-redis-down-1103"
+  ]
+ },
+ {
+  "id": "secuura-ks1244-repeated-api-key-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1244: reject a repeated x-api-key outright, or accept the fall-through to anonymous?",
+  "bluf": "Kam, sending two x-api-key headers makes the key fail and the request fall through to the anonymous login principal, which a public (optional) route answers 200 (KS-1244 description). Merged work only added tests pinning today's behaviour; no product file changed (comment 000af088). On required routes it already answers 401, checked live on kintsugi with junk keys (000af088). The ticket was filed High as an authentication-bypass shape; nobody has ruled on the fall-through. Wednesday's recommendation: a — the description asks for it and a refused request is clearer than a silent downgrade. Override reason (measured): 2 hits read (09-09 'systematically work through the platform', 09-15 'action all backlog'), general instructions; none rules on the repeated x-api-key fall-through.",
+  "default_action": "After 48 h nothing changes; ticket stays open, Wednesday re-raises it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build outright rejection",
+    "detail": "a seat makes a repeated x-api-key a 400/401 on every route; touches the KS-1207 design."
+   },
+   {
+    "key": "b",
+    "label": "Accept the fall-through in writing and close",
+    "detail": "it only reaches routes already open to anonymous callers; Wednesday posts your acceptance."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T14:43:41.698025+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-04T15:01:29.279283+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-09 17:52",
+   "2026-09-15 18:19"
+  ]
+ },
+ {
+  "id": "secuura-ks1234-production-307-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1234: pin the production-mode 307 with a test, or accept it in writing?",
+  "bluf": "Kam, the hanging JSON create is fixed and checked live on kintsugi (KS-1234 comment 1781f579, 401 in 0.55 s). The second symptom, a 307 on /api/documents when NODE_ENV=production, cannot be checked on kintsugi because it runs non-production (1781f579). No test pins it in production mode; the existing test boots only the test mode (1781f579, f0fb93b8). Wednesday's recommendation: a — it is a cheap cell, and \"no test pins production\" is exactly how this ticket stayed open. Override reason (measured): 1 hit read (09-13 KS-965 hash-precedence split), a different subject sharing a generic word.",
+  "default_action": "After 48 h nothing changes; ticket stays open and Wednesday re-raises it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build a production-mode regression test",
+    "detail": "a Secuura seat adds one cell on the real gateway app under NODE_ENV=production; small build."
+   },
+   {
+    "key": "b",
+    "label": "Accept the by-design 307 in writing and close",
+    "detail": "Wednesday posts your sentence on the ticket and moves it to Done."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T14:43:45.210115+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-04T15:01:25.794317+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-13 16:55"
+  ]
+ },
+ {
+  "id": "secuura-ks-residue-disposable-stack-1104",
+  "client_project": "Secuura/Blockchain",
+  "title": "Many KS tickets wait on live checks that cannot run safely on kintsugi. Build a disposable copy of the stack to run them?",
+  "bluf": "Kam, 32 In-Progress KS tickets stay open only because the owed live check needs a fault switch, writes, real mail, or credentials seats do not hold: 27 are NEEDS-DISPOSABLE-STACK and 5 CANNOT-RUN-SAFELY (residue.tsv, grep count 32). The classes come from keywords, so about 10-15% are probably misfiled. Your 2026-10-12 rule is Done = fully tested + works + deployed. Today these sit open or get closed on code evidence alone. Wednesday's recommendation: a — it honours your rule without touching the shared box; cost is one build. UNMEASURED: how long the build takes; it runs on this laptop's Docker. Kintsugi's commit ee1e1b832115 was read independently today by Seats D 50th, U 11th and V 19th. Override reason (measured): 4 hits read: PR 729 stack (08-21), Docker restart (09-03), build-cache prune (09-12), QA gate stack slots (ruled a) and KS-1011 stack marker; none rules on running owed live checks on a disposable stack instead of kintsugi.",
+  "default_action": "After 48 h nothing changes (c); Wednesday re-raises it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Wednesday commissions a disposable local copy of the stack at kintsugi's deployed commit ee1e1b832115 (seeded test logins, a connector key, a fault switch); owed checks run there; tickets that pass close with that evidence stated.",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Close those tickets on code evidence, with a comment saying the live check was not run.",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Leave them open.",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T14:43:48.976386+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-04T15:00:17.258749+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-09-03 09:49",
+   "2026-09-12 08:50",
+   "CARD secuura-ks1011-stack-marker-unknown-on-restore",
+   "CARD secuura-gate-stack-slots-full-of-kept-volumes"
+  ]
  }
 ]
