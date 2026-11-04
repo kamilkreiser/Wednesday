@@ -76,6 +76,8 @@ Verbatim: "ignore the spark until further notice.  I cannot connect it while I a
 Nothing open (9 Secuura cards all ruled). Tuesday's Datasec card is hers.
 
 ## OWED (Wednesday's)
+- NEXT DEPLOY BRIEF (D 51st, kintsugi first) now carries: KS-1233 Redis TTL read; G189-F1 (does any env run the gateway without a usable DB? measure before kintsugi takes PR 2001); G189-F2 (replace PR 2001 body step 3's seed/backfill check with the gate's method); 058 apply plan from R 85th's READY (DEFAULT_TENANT_ID read first, STOP if not a0000000-...0001; kintsugi only); x-api-key-twice measurement for KS-1244.
+- FILE (via the next Secuura seat): G189-F3 (stale Redis after a failed second settings write), G189-F5 (declare @electric-sql/pglite in api-gateway), E 35th's five candidates (in 0_Brain/reference/2026-11-04_gate189-ks1256-pr2001/ready_2001.txt).
 - FILE (via the next Secuura seat; W 27th searched the board, none open, KS-1843 is different): nft-certificate minting.service.ts:123/:505/:592/:678 JSON.parse(row.public_fields || '[]') on a jsonb column throws, so every persisted NFT is unreadable after a restart; writes store JSON.stringify (:76). Evidence: 5_Project_History/2026-11-04_seatW-27th/ (search_nft_jsonb.out, HANDOVER).
 - Check (board search by symbol) whether a ticket exists for gate 152's HIGH finding G152-F1 on PR 1968 (pre-existing defect; B 91st's wrap flags it unfiled-unknown). If none, the next Secuura seat files it.
 - B 92nd (merge seat; B 91st WRAPPED 0.93, pane closed 22:50) owed at the FIRST tier-1 gate GO among KS-1256 (E 36th), KS-1401 (R 85th), KS-1561 PR 2000 round 2 (F 30th); brief from B 91st's HANDOVER (B 91st told to wrap 11:4xZ). develop = 536642104002 (PR 1798).
