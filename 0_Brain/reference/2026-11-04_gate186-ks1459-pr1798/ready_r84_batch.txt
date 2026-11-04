@@ -1,0 +1,124 @@
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: six refreshed PRs (1968, 1796, 1798, 1790, 1792, 1794), PR 1982 closed, PR 1383 stopped (Seat R 84th)
+Seat R 84th
+
+READY FOR GATE. BLUF: six PRs refreshed, pushed and verified (1968, 1796, 1798, 1790, 1792, 1794); PR 1982 closed unmerged; PR 1383 stopped (rows C3/C4); KS-1511 recorded and skipped. Nothing merged, deployed, deleted or force-pushed. Docker Desktop is running, as you ordered.
+
+GATE SUGGESTION
+- One tier-2 batch, file-disjoint: PRs 1790, 1792, 1794 and 1796.
+- Tier 1, each on its own: PR 1798 (security surface: verification-level ranking) and PR 1968 (deploys vc-issuer; log-reason strings only).
+- PARTITION, recomputed from the six refreshed heads (git diff --name-only against develop 5c1ca287ed74): 1 of 15 pairs shares a file, PR 1796 and PR 1798 on services/auth/src/routes/users.ts. Their hunks are disjoint (1796 edits comment lines near line 1175; 1798 edits the import at line 13 and LEVEL_ORDER from line 1375 on) and git merge-tree auto-merges the pair, rc 0. The old collision of five PRs on the two Projects Documents pages is gone: the entries now live in uniquely named fragments. A planted-overlap control reports exactly the file planted (PASS). This replaces the ITEM 0 table, which was measured on the old heads.
+- DEVELOP HAS MOVED since my merges: 5c1ca287ed74 -> 307d9b4c762a (Seat B 89th merged PRs 1997 and 1998; the driver gates for 1790, 1792 and 1794 judged that move by the forward-move rule at 06:51Z), and origin develop now reads c7abf98e5103. All six heads are built on 5c1ca287ed74. The range from 5c1ca287ed74 to the CURRENT develop, measured against each PR's files (objects fetched just now):
+  origin develop now c7abf98e5103; the range 5c1ca287ed74..c7abf98e5103 changes 10 file(s)
+  PR 1968: files shared with that range: 0
+  PR 1796: files shared with that range: 0
+  PR 1798: files shared with that range: 0
+  PR 1790: files shared with that range: 0
+  PR 1792: files shared with that range: 0
+  PR 1794: files shared with that range: 0
+  (control: the same query run on PR 1790's file set against itself reports 3 shared paths, so it can report a shared path)
+
+PR 1968 (KS-1868), tier 1 (deploys: product code in vc-issuer; the changes are log-reason strings only)
+  new head 9a3f028be706 (full 9a3f028be706722c5cf6b7b18e7b67827c8ec145); old head 6e58db5676fb; develop merged 5c1ca287ed74 (full 5c1ca287ed74b6353423a8c09e253abf3129233a)
+  files vs that develop (6): services/vc-issuer/src/__tests__/ks1868-credentialrepo-read-catches-unreadable-throw.test.ts; services/vc-issuer/src/__tests__/ks1868-vc-issuer-db-pool-error-and-ready-hook-unreadable-throw.test.ts; services/vc-issuer/src/db.ts; services/vc-issuer/src/repositories/credentialRepo.ts; fragments/cheat/KS-1868-vc-issuer-db-and-credential-repo.html; fragments/flow/KS-1868-vc-issuer-db-and-credential-repo.html
+  suites: vc-issuer whole suite 25 files / 732 tests rc 0 (the author's own count); tsc -p rc 0; test-inclusive ratchet 39 files, 0 errors; lint rc 0; docs-fragments check rc 0, rc 1 with a planted literal number
+  PUSH 04:09:19Z to 04:28:38Z, elapsed 1159 s, push rc 0, origin = 9a3f028be706 (VERIFIED against my local tip)
+  hook verdict VERBATIM: push.out line 3480: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / push.out line 3481: legs 3 4 8 — local stack not up; you can clear this by starting it. / push.out line 3482: This is NOT a pass. Do not quote it as one — say which legs ran.
+  PR body line: n/a (no doc change); ticket comment: none: KS-1868 has 83 comments and the newest, 6eeccf12 of 2026-11-03T16:26, does not say 'ready for gate' (read with full pagination)
+
+PR 1796 (KS-1458), tier 2 (users.ts diff is 3 comment lines; baseline, a test header and docs)
+  new head 759fd6fb19aa (full 759fd6fb19aaa22df4bd86dd61dcb6d4a9832fa8); old head 8f022984aa74; develop merged 5c1ca287ed74 (full 5c1ca287ed74b6353423a8c09e253abf3129233a)
+  files vs that develop (5): scripts/typecheck-tests/baseline-auth.txt; services/auth/src/__tests__/ks1006-mfa-disable-refuses-when-no-secret-is-stored.test.ts; services/auth/src/routes/users.ts; fragments/cheat/KS-1458-the-ks1006-test-header-states-the-decrypt-fault-path-and.html; fragments/flow/KS-1458-the-ks1006-test-header-states-the-decrypt-fault-path-and.html
+  suites: ks1006 file 5/5 and ks1000 file 99/99 (the author's counts); tsc -p rc 0; test-inclusive ratchet 41 errors = 41 in the baseline, 0 new, 0 stale; lint rc 0 (warnings only in files the PR does not touch); docs-fragments check 0 / planted 1 / 0
+  PUSH 05:02:29Z to 05:20:28Z, elapsed 1079 s, push rc 0, origin = 759fd6fb19aa (VERIFIED against my local tip)
+  hook verdict VERBATIM: push.out line 3497: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / push.out line 3498: legs 3 4 8 — local stack not up; you can clear this by starting it. / push.out line 3499: This is NOT a pass. Do not quote it as one — say which legs ran.
+  PR body line: yes: one line appended, old body an untouched prefix, read back; ticket comment: KS comment 162891b1
+
+PR 1798 (KS-1459), TIER 1 (security surface: verification-level ranking)
+  new head 3db8f8c07e7d (full 3db8f8c07e7d7693778bc90c155d16cd6a273405); old head acdb4822304f; develop merged 5c1ca287ed74 (full 5c1ca287ed74b6353423a8c09e253abf3129233a)
+  files vs that develop (1): services/auth/src/routes/users.ts
+  suites: whole auth suite 141 files / 1687 tests pass at default timeouts and at --testTimeout=60000; the FIRST run failed 3 cells (see RED RUNS); tsc rc 0; ratchet 42 = 42, 0 new, 0 stale; lint rc 0
+  PUSH 05:39:01Z to 06:11:16Z, elapsed 1935 s, push rc 0, origin = 3db8f8c07e7d (VERIFIED against my local tip)
+  hook verdict VERBATIM: push.out line 3496: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / push.out line 3497: legs 3 4 8 — local stack not up; you can clear this by starting it. / push.out line 3498: This is NOT a pass. Do not quote it as one — say which legs ran.
+  PR body line: n/a (no doc change); ticket comment: KS comment 0e8ef7ad
+
+PR 1790 (KS-1340), tier 2 (test-only)
+  new head aa1f6b773991 (full aa1f6b7739918ed76194970ed810e57f831099d0); old head 3a9b1c121f6d; develop merged 5c1ca287ed74 (full 5c1ca287ed74b6353423a8c09e253abf3129233a)
+  files vs that develop (3): services/originate/src/__tests__/ks597-issuer-organization-id.integration.test.ts; fragments/cheat/KS-1340-the-ks597-integration-guard-judges-what-the-pg-client-wi.html; fragments/flow/KS-1340-the-ks597-integration-guard-now-judges-the-host-and-port.html
+  suites: ks597 integration 24/24 on PostgreSQL 15.19 (the author's count); test-inclusive tsc: file in the program, 0 diagnostics on PR and base tree, planted control fires; lint 29 warnings = base's 29; docs-fragments check 0 / planted 1 / 0
+  PUSH 06:53:19Z to 07:13:13Z, elapsed 1194 s, push rc 0, origin = aa1f6b773991 (VERIFIED against my local tip)
+  hook verdict VERBATIM: push.out line 3496: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / push.out line 3497: legs 3 4 8 — local stack not up; you can clear this by starting it. / push.out line 3498: This is NOT a pass. Do not quote it as one — say which legs ran.
+  PR body line: yes: one line appended, old body an untouched prefix, read back; ticket comment: KS comment cbe697e3
+
+PR 1792 (KS-1499), tier 2 (test-only)
+  new head f364327e266c (full f364327e266ce321bfeb6e3a52b045904d8d8527); old head 00711fe18f08; develop merged 5c1ca287ed74 (full 5c1ca287ed74b6353423a8c09e253abf3129233a)
+  files vs that develop (3): services/originate/src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts; fragments/cheat/KS-1263-the-rollback-suite-asserts-rls-on-all-three-tables-it-wr.html; fragments/flow/KS-1263-the-rollback-suite-now-asserts-row-level-security-on-sha.html
+  suites: ks1263 integration 12/12 with MULTI_TENANCY_ENABLED=false and 12/12 with true (the author's counts) on PostgreSQL 15.19; test-inclusive tsc 0 diagnostics, control fires; lint 29 = base's 29; docs-fragments check 0 / planted 1 / 0
+  PUSH 07:13:42Z to 07:33:02Z, elapsed 1160 s, push rc 0, origin = f364327e266c (VERIFIED against my local tip)
+  hook verdict VERBATIM: push.out line 3496: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / push.out line 3497: legs 3 4 8 — local stack not up; you can clear this by starting it. / push.out line 3498: This is NOT a pass. Do not quote it as one — say which legs ran.
+  PR body line: yes: one line appended, old body an untouched prefix, read back; ticket comment: KS comment d97db963
+
+PR 1794 (KS-1600), tier 2 (test-only)
+  new head 06fe8557ec43 (full 06fe8557ec43be6879a854c345b3829b9417b2e0); old head ae7d9da67a6d; develop merged 5c1ca287ed74 (full 5c1ca287ed74b6353423a8c09e253abf3129233a)
+  files vs that develop (3): services/originate/src/__tests__/ks1594-admin-mint-provisioning-and-org-bound.integration.test.ts; fragments/cheat/KS-1600-the-admin-mint-s-non-string-and-null-organizationid-rule.html; fragments/flow/KS-1600-the-admin-mint-s-non-string-and-null-organizationid-rule.html
+  suites: ks1594 integration 26/26 with MULTI_TENANCY_ENABLED=false and 26/26 with true (the author's counts) on PostgreSQL 15.19; test-inclusive tsc 0 diagnostics, control fires; lint 29 = base's 29; docs-fragments check 0 / planted 1 / 0
+  PUSH 07:33:35Z to 07:51:58Z, elapsed 1103 s, push rc 0, origin = 06fe8557ec43 (VERIFIED against my local tip)
+  hook verdict VERBATIM: push.out line 3496: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / push.out line 3497: legs 3 4 8 — local stack not up; you can clear this by starting it. / push.out line 3498: This is NOT a pass. Do not quote it as one — say which legs ran.
+  PR body line: yes: one line appended, old body an untouched prefix, read back; ticket comment: KS comment 3a25ab56
+
+HOOK WITH DOCKER UP (your ANSWER 04:57:40Z: push 1790, 1792 and 1794 with Docker up, quote each verdict). Measured by comparing each Docker-up push's output with the Docker-down push of PR 1798, not asserted:
+  PR 1790: leg 2 block identical to the Docker-down push: True; verdict lines identical: True; leg headers printed: 16; verdict: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / legs 3 4 8 — local stack not up; you can clear this by starting it. / This is NOT a pass. Do not quote it as one — say which legs ran.
+  PR 1792: leg 2 block identical to the Docker-down push: True; verdict lines identical: True; leg headers printed: 16; verdict: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / legs 3 4 8 — local stack not up; you can clear this by starting it. / This is NOT a pass. Do not quote it as one — say which legs ran.
+  PR 1794: leg 2 block identical to the Docker-down push: True; verdict lines identical: True; leg headers printed: 16; verdict: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / legs 3 4 8 — local stack not up; you can clear this by starting it. / This is NOT a pass. Do not quote it as one — say which legs ran.
+  (control: the same comparison of the Docker-down push with itself gives leg-2 identical True; with one character changed it gives False)
+
+PR 1798 TIER-1 FACTS (verification-level ranking, services/auth/src/routes/users.ts)
+- The local five-level LEVEL_ORDER (BASIC, STANDARD, ENHANCED, HIGH, GOVERNMENT) becomes the canonical seven-level VERIFICATION_LEVEL_ORDER (NONE, BASIC, SOCIAL, STANDARD, ENHANCED, HIGH, GOVERNMENT). Two ranks move: NONE from index -1 ("cannot be compared") to 0, and SOCIAL from -1 to 2. The other five shift uniformly, so their relative order is unchanged.
+- Call sites of LEVEL_ORDER at the new head: users.ts 1382 (the constant), 1391-1392 (submit route: refuse when targetIndex <= currentIndex) and 1496-1497 (review route: refuse when targetIndex !== -1 and currentIndex > targetIndex). Other readers of the canonical constant, untouched by this PR: middleware/authenticate.ts 206-207; services/account-recovery.ts 63 keeps its own identical seven-level array.
+- Reachability, measured in code: the submit schema admits only STANDARD, ENHANCED, HIGH and GOVERNMENT as a target (users.ts 160), and the stored targetLevel is written only by that route. So the change applies only to a stored request for NONE, BASIC or SOCIAL. I did NOT query any database, so I cannot say none exists.
+- The merge was clean (tree equals git merge-tree's prediction) and I edited no line of users.ts.
+
+PR 1982 (KS-915): CLOSED UNMERGED at 03:55:39Z. One comment, id 6622108469, author kksecura, facts only, no @. 26d8314e4f77 (full 26d8314e4f7724ceb4439022a0e54891e1a1a426) is an ancestor of develop (rc 0, control rc 1); PR 1989 is MERGED (02:14:47Z). No workflow lists a closed trigger; Linear's git automation has no close event; KS-915 unchanged (In Progress, same updatedAt). Branch fix/ks-915-restore-local-secrets kept.
+
+PR 1383 (KS-1401): ITEM 3 STOP, three independent reasons. (1) 049 is not only a filename: the test script and the SQL name it in about 15 lines. (2) The migration backfills existing rows (UPDATE ... SET tenant_id WHERE tenant_id IS NULL) and changes RLS: data and security surface, row C4. (3) The PR also conflicts (both pages, 1 deleted line in each) and is 716 commits behind. develop's 049 is 049_admin_organisation_scopes.sql; the highest on develop is 056, so the next free number is 057. Not touched, not pushed.
+
+KS-1511 (branch feature/ks-1511-retire-audit-log-baseline-entry, e181bf6db): one commit, author "t <t@e.com>", not kksecura; Peter's comment 24193381 hands it over, says no live sweep was run and no PR is open. 345 behind develop; changes 4 systemTest/schemathesis files. Not ours by the author gate; recorded, untouched.
+
+DRIVER VARIANT (your condition 1): pushlock_r84_fwd_v2.sh = v1 plus ONE optional env, R84_LOCAL_BR. v1 -> v2 diff, verbatim:
+  1a2
+  > # LINEAGE (Seat R 84th, 2026-11-04): v2 of pushlock_r84_fwd_v1.sh. ONE declared change: the optional env R84_LOCAL_BR names a LOCAL branch different from the remote (PR) branch (LBR); the local tip read and the push source use LBR, the origin reads and the push target keep BR. Unset, v2 is v1. Needed because the PR branch names are checked out in other seats' worktrees. Every gate is otherwise unchanged.
+  33a35
+  > LBR="${R84_LOCAL_BR:-$BR}"   # v2: LOCAL branch name; $BR stays the REMOTE (PR) branch name. Unset = identical to v1.
+  76c78
+  <   tip=$(git -C "$WT" rev-parse "refs/heads/$BR" 2>&1)
+  ---
+  >   tip=$(git -C "$WT" rev-parse "refs/heads/$LBR" 2>&1)
+  114c116
+  < say "driver start pid=$$ mode=$MODE wt=$WT branch=$BR expect=$EXPECT base=$BASED lock=$LOCK queue=$QDIR"
+  ---
+  > say "driver start pid=$$ mode=$MODE wt=$WT branch=$BR local-branch=$LBR expect=$EXPECT base=$BASED lock=$LOCK queue=$QDIR"
+  205c207
+  < gitnet push origin "refs/heads/$BR:refs/heads/$BR" > "$OUT/push.out" 2>&1
+  ---
+  > gitnet push origin "refs/heads/$LBR:refs/heads/$BR" > "$OUT/push.out" 2>&1
+  -- launcher v1 -> v2 --
+  0a1
+  > # LINEAGE (Seat R 84th, 2026-11-04): v2 of launch_driver_fwd_r84.py; the only change is that it launches pushlock_r84_fwd_v2.sh. R84_LOCAL_BR reaches the driver through the inherited environment (dict(os.environ, ...)).
+  17c18
+  < DRIVER = f"{P}/5_Project_History/2026-11-04_seatR-84th/tools/pushlock_r84_fwd_v1.sh"
+  ---
+  > DRIVER = f"{P}/5_Project_History/2026-11-04_seatR-84th/tools/pushlock_r84_fwd_v2.sh"
+dryrun and gatetest exited 0 for all five v2 pushes before their real run. After each push, git ls-remote of the PR branch equals my local r84/<ticket> tip (read from each status file's VERIFIED line).
+
+DOCS (your ANSWER 04:13:39Z): for 1796, 1790, 1792 and 1794 both pages are develop's blobs and the PR's appended entries are now fragments by docs-fragments.mjs adopt. Each adopted entry is EXACTLY equal to the PR's original block once the heading number is put back (flow 22 / 16 / 16 / 17 lines, cheat 18 lines each, 0 lines removed; one-character controls fail). New fragment files, per PR: 1796 fragments/{flow,cheat}/KS-1458-the-ks1006-test-header-states-the-decrypt-fault-path-and.html; 1790 fragments/flow/KS-1340-the-ks597-integration-guard-now-judges-the-host-and-port.html and fragments/cheat/KS-1340-the-ks597-integration-guard-judges-what-the-pg-client-wi.html; 1794 fragments/{flow,cheat}/KS-1600-the-admin-mint-s-non-string-and-null-organizationid-rule.html; 1792 fragments/flow/KS-1263-the-rollback-suite-now-asserts-row-level-security-on-sha.html and fragments/cheat/KS-1263-the-rollback-suite-asserts-rls-on-all-three-tables-it-wr.html. adopt names a fragment after the ticket key in the entry's OWN heading, so 1792's are KS-1263-..., not KS-1499-.... I left the tool's output unedited. PR 1968 is a new-model PR (its two fragments KS-1868-vc-issuer-db-and-credential-repo.html were already the PR's own).
+
+RED RUNS AND THEIR CAUSES (all recorded, none hidden)
+- PR 1798, whole auth suite, run 1: 140 files pass, 1 fails: ks949-platform-admin-seed-identity.test.ts, 3 cells, every one "Test timed out in 5000ms". That file passes alone on the PR tree (31/31 in 3.6 s) and FAILS on a base tree with no 1798 change (PR 1968's pushed head; its auth service differs from develop in 0 files): 3 timeouts cold, 1 warm. The whole suite on the PR tree then passed twice, default timeouts (141 files / 1687 tests) and --testTimeout=60000 (same). Two of the cells walk the repository tree and one loads the seed module cold. Your ANSWER 04:57:40Z confirmed pushing.
+- DB phase first runs: 1792 had 12 of 12 failing, 1794 had 12 of 26. Causes, all my environment: no generated Prisma client in my cloned node_modules (npm ci runs with ignore-scripts; the repo's own 'npm run generate' fixed it); ks1263's KS-1310 block refuses any database outside 127.0.0.1 ports 55410-55419 (a random port tripped it; container 2 is on 55411); ks1263 needs a SINGLE-database build, because run-migrations.sh sends *platform*.sql to the platform DB only when PLATFORM_DATABASE_URL differs from DATABASE_URL (lines 141-158), so my two-database build had no tenants table in the main DB. Final: 1790 24/24; 1792 12/12 in both modes; 1794 26/26 in both modes. Outputs kept as push/<pr>/jest_mt_*.run1.out and .run2.out.
+- The shared checkout's node_modules is OLDER than develop's lock: installed zod 3.25.76, locked 4.6.7. clone_deps compares lockfiles between worktrees, not an install against its own lock, so a clone from 2_Project_Files gave me a worktree whose packages/shared would not build and whose vc-issuer suite went 22 files red. I moved my 44 stale clones (renamed, not deleted) to worktrees/_r84_stale_node_modules/s-r84-1968 and re-cloned from s-e33-before (zod 4.6.7, lock equal to develop's).
+
+OUTSIDE MY SCOPE, NOT TOUCHED: KS-911 and KS-912 (the launcher by-hash change). NOTICED, NOT MINE (for the HANDOVER and a possible ticket): ks949's three tree-walk and cold-load cells have the default 5 s budget; 5 lint warnings in untouched auth test files; the shared checkout's node_modules is stale as above; five stale local PR-named branches (see HANDOVER); Docker held 294 GB of exited-container layers from earlier seats when I read it at 06:35Z (I removed nothing). DEVMASTER FREE SPACE is falling: 9 GiB at 06:13Z, 8 at 06:45Z, 7 at 07:08Z, 5 GiB now; your stop line is 2 GiB. My suites are finished, so this is not me going on writing; my six worktrees are apparent 2.2 to 2.9 GB each but their node_modules are APFS clones, and 44 parked stale trees (2.5 GB apparent) sit under worktrees/_r84_stale_node_modules; a human may delete those, I did not.
+
+FAULTS OF MINE (all but two were disclosed in a mail when they happened; the comments(last:N) misreading and the builder bug in this mail are FIRST DISCLOSED HERE): 13 boot Bash calls began with cd before I read the brief; fetch and pull streams piped through tail; the ff-only pull wrote to the shared checkout before ITEM 0; zsh word-splitting traps (three times); an rm -rf on my own empty scratch-lock path; reading Linear comments with comments(last:N), which returns the wrong end (Seat B 89th's note; confirmed by me on KS-1868, 83 comments): it did NOT change any of my five ticket-comment decisions (each of those tickets has only 1 to 3 comments, rechecked with full pagination), but it made my boot report wrong in two places, corrected here and in the daily note: the 90 Done-in-24h tickets all have the board account as newest commenter (I had said 89 plus one by Stuart), and 22 comments on active tickets in the last 48 hours name Kam, not only KS-1724 (all written by the board account); a vitest launched from the project root (npm exec ignores --prefix) that tried to collect one test file from about 270 worktrees for about ten minutes before I stopped it, with nothing written (mtimes checked); three a builder bug of my own in this very mail (it split file names on spaces and reported a false overlap with 'Projects'; caught by reading the draft, fixed, the corrected measurement is below); status mails whose body time was my estimate and not the clock (the mails sent at 04:19:54Z, 04:46:17Z and 04:56:50Z, each one to two minutes ahead; I corrected only the first, here is the rest).
+
+STATE I LEAVE: Docker Desktop running. Containers s-r84-pg and s-r84-pg2 (mine) are STOPPED, not removed, as of 07:53Z, after all three DB-phase pushes were verified; no other container was touched. Worktrees s-r84-* and branches r84/* kept. Record folder: 5_Project_History/2026-11-04_seatR-84th/ (HANDOVER.md inside).
+
