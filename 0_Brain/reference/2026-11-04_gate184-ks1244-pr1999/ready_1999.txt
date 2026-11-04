@@ -1,0 +1,78 @@
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE: PR 1999 (KS-1244) at defe782aaf61 on develop 5c1ca287ed74, tier 1 (Seat E 34th)
+Seat E 34th
+
+READY FOR GATE: PR 1999 (KS-1244), TIER 1 (security surface, model-routing G1). I do NOT merge.
+
+PR: https://github.com/Secuura/Distributed_Secuura/pull/1999
+- Title (= commit subject, 65 chars): "Refs KS-1244: refuse a repeated x-api-key with 400 on every route"
+- Branch feature/ks-1244-a-duplicated-x-api-key-header-defeats-key-authentication-via (Linear's branchName).
+- Head defe782aaf61 / defe782aaf61222b0eaab414091ef36373e4a046. ls-remote at 06:36:50Z equals the head; the PR read back with base develop, 1 commit, 6 files, +743/-5, no read-back problems. The body passed check_body_ks (15,676 chars, KS-1244 the only bare key, TIER 1 in the first 2,600).
+- Built on develop 5c1ca287ed74b6353423a8c09e253abf3129233a, one commit, no merge-in.
+- DEVELOP MOVED after my push: ls-remote 06:36:50Z reads ed170905fddc94f027d58cbe316585523beb723e. That is one first-parent commit, ed170905f "Refs KS-1981: the mobile-tree exclusion names the new review ticket as its owner", and it changes 1 file, Blockchain/Dev/scripts/audit/lock-discovery.mjs.
+  - Shared with my 6 paths: 0 (control: the same comm with that file planted into my list reports 1).
+  - git merge-tree --write-tree ed170905fddc defe782aaf61: rc 0, clean, tree 3a89b8cdb6c6.
+  - 5c1ca287ed74 is an ancestor of ed170905fddc.
+  - So by the forward-move rule I have not merged it in. Say if the gate wants a merge-in commit first.
+
+FILES (git diff --name-only 5c1ca287ed74 defe782aaf61):
+  Blockchain/Dev/services/api-gateway/src/__tests__/auth.test.ts
+  Blockchain/Dev/services/api-gateway/src/__tests__/ks1244-a-repeated-x-api-key-is-refused-on-every-route.test.ts
+  Blockchain/Dev/services/api-gateway/src/index.ts
+  Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+  Projects Documents/fragments/cheat/KS-1244-repeated-api-key-refused.html
+  Projects Documents/fragments/flow/KS-1244-repeated-api-key-refused.html
+
+FILE-DISJOINT (current heads read with gh at 06:35:59Z; evidence/disjoint_3.*):
+- 0 shared with R 84th's PRs 1790 3a9b1c121f6d, 1792 00711fe18f08, 1794 ae7d9da67a6d, 1796 759fd6fb19aa, 1798 3db8f8c07e7d and 1968 9a3f028be706, and 0 with T 10th's commit 6bbe967ac.
+- services/auth/src/routes/users.ts is NOT in my set.
+- POSITIVE CONTROL: the same query on 1796 vs 1798 reports services/auth/src/routes/users.ts.
+- PLANTED CONTROL: my paths plus baseline-auth.txt, taken from 1796, report exactly that one path.
+- The driver's own overlap gate under the lock (verbatim): "no overlap: 22 open PRs, none touches any of 6 paths".
+
+WHAT IT DOES (your rulings 04:36:56Z and 04:40:21Z):
+- A request carrying x-api-key on more than one line (any case), or one line with a comma (an empty segment included), is refused 400 {"success":false,"error":{"code":"BAD_REQUEST","message":"The x-api-key header must be sent once"}} on every route, before any key is checked.
+- 0 /api/keys/validate calls are made; no value is logged. One warning, REPEATED_API_KEY_REFUSED, carries headerLines, commaInValue, method, path and requestId.
+- Mounted immediately before rejectConnectorBearer. Order: csrf :376 -> versioning :515 -> audit :581 -> refusal -> connector check -> spec gate -> routes. That order is named in the PR body, with why the CSRF skip grants nothing.
+- The same check runs first in authenticateToken.
+- Zero or one key is unchanged; the production 307 is unchanged.
+
+SUITES (Node v26.8.1 on this laptop; Node 24 NOT measured and said so in the body; TMPDIR /private/tmp/e34t):
+- Red first at develop: the new file 16 of 19 red, the 3 green are controls. With the change: 19/19.
+- auth.test.ts: 19/19. The two merged pins went red on exactly the predicted rows before I updated them, with a why-comment.
+- api-gateway vitest: before 150 files / 1570 tests rc 0; after 151 / 1589 rc 0.
+- tsc --noEmit (service) rc 0. Test-types ratchet api-gateway: 25 in the baseline, 0 new, 0 stale.
+- eslint on the 4 code files: 0 errors and 3 warnings, all 3 present at develop. Mine: 0.
+- docs-fragments.mjs check: OK; a planted second <h2> gives rc 1. Two ADVISORY lines are pre-existing (they print without my fragments too).
+- T 10th's ks1234-production-mode-307.test.ts (its local commit 6bbe967ac, copied by blob into a scratch worktree at my head): 3/3.
+
+RED-PROOFS: 8 of 8 mutants killed, 0 failed to compile in run 2. Each was compiled with tsc first, kept outside the repo, and restored by git checkout with a sha256 equal to HEAD; the clean run after was 38/38.
+- M1 front door unmounted: 4 red (62 of 356 operations unrefused).
+- M2 inner check dropped: 2 (the pins).
+- M3 line count dropped: 1 (U1). M4 raw comma dropped: 1 (U2).
+- M5 req.headers clause dropped: 3.
+- M6 status 401: 13.
+- M7 value logged: 1.
+- M8 front door above versioning: 1 (P3).
+- On Node 26.8.1, M3 and M4 die only in the pure cells. In the assembled app the joined value already has a comma, so those two clauses are runtime insurance.
+Your two production cells:
+- P1: a POST with a repeated key, a cookie and no CSRF token -> 400, 0 hits, 0 validations. Controls: no key -> 403 CSRF; one valid key -> 200 forwarded.
+- P2: a bearerAuth GET with a repeated key and no Bearer -> 400, 0 hits, 0 validations. Controls: no credential -> 401; one junk key -> 200 forwarded.
+
+PRE-PUSH HOOK (one push; detached driver pid 72813; joined 05:02:47Z with 3 places ahead; turn 06:11:20Z; hook 1427 s, 06:11:32Z to 06:35:19Z, rc 0). It printed, verbatim:
+  PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+- So 13 of 16 legs ran.
+- Shell suites: 114 passed, 0 failed, 1 skipped (of 115). The skip was ks949_main_seed_idempotence.test.sh.
+- Test-types ratchet, 0 new in each of the 5 services it covers: auth 42 in the baseline; api-gateway 25; vc-issuer 0; security 0; m365-integration 0.
+- After the push: VERIFIED by ls-remote; lock released (rmdir rc 0); queue left rc 0.
+
+KS-1244: ONE comment, adf23052 (BLUF, no @). Read back equal, 0 mention nodes; state, priority and assignee unchanged (In Progress, 2, Kam). No other board write.
+
+NOT RUN: Node 24 / an LTS Node; the edge; any running gateway; the four platform suites; real-client traffic (Platform S, the WhatsApp bot); any deploy.
+
+PENDING (yours): the gate; a merge by the merge seat; KS-1244 stays open until a deploy-check after that.
+
+My faults since PROGRESS 2: the disjoint tool's first run split paths on whitespace ("Projects Documents") and refused itself with NOT PROVEN. I fixed it to split on newlines and re-ran. No other.
+
+NEW-ROWS: 2  ROWS-IN-DIGEST: 50  SEEN:     1494  BATCH: /private/tmp/wed_newmail/batch_20261104T063931Z.txt

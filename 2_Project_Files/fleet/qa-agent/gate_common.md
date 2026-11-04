@@ -24,6 +24,10 @@ so gates 161-165 were briefed by copying gate 160's verdict. A mechanism is reco
   (gate 119, 2026-11-02, wrote `node_modules/.vite/...` into Wednesday's root). So:
   - anchor every runner: `vitest --root <dir>`, `npm --prefix <dir>`, `jest --rootDir <dir>`,
     `npx --prefix <dir>`; or `cd` inside a `bash -c '…'` whose path is in your workdir;
+  - **AND start every test or app process with its CWD inside your workdir** (`bash -c 'cd <workdir>/cwd && …'`):
+    `--root` does NOT stop code under test writing RELATIVE paths into the process cwd. Gates 183 and 184
+    (2026-11-04) both appended production-logger lines to Wednesday's `logs/combined.log` this way, with
+    `--root` set correctly;
   - run untrusted or stateful steps under `env -i` with `HOME=<workdir>/home` and
     `TMPDIR=<workdir>/tmp` (keep TMPDIR short: socket paths over ~104 bytes break tsx IPC).
 - STOP every background process you started before you report (list them; kill by pid; never by
