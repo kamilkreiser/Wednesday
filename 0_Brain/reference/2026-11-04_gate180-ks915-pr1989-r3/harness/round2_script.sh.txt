@@ -1,0 +1,523 @@
+#!/bin/bash
+# =============================================================================
+# SECUURA LOCAL DEV CREDENTIALS (KS-915)
+# =============================================================================
+# Gives a fresh clone a working set of LOCAL development credentials,
+# GENERATED on this machine for this developer. It restores nothing from a
+# store: platform-k has no secrets store, and nobody has to send anybody a
+# password. (The name matches platform-s's script so it is easy to find; the
+# mechanism is different on purpose.)
+#
+# THE SAFETY CHECK ASKS THE REAL READERS. ALLOW_DEFAULT_SEED_PASSWORDS=true
+# turns on the published demo accounts, which must never happen against a
+# shared database or a production stack. So before writing anything this
+# script refuses (exit 3) when ANY of these reads NODE_ENV as production, or a
+# DATABASE_URL (or PGHOST / PGHOSTADDR / PGSERVICE) that is not this machine, or
+# a pgbouncer upstream (POSTGRES_HOST / POSTGRES_PORT / POSTGRES_DB, which
+# docker/pgbouncer/entrypoint.sh renders into its [databases] line) that is not
+# a local host, a port number and a plain database name (QA gate 173 F1):
+#   1. dotenv: the copy node resolves from Blockchain/Dev (the library the
+#      repo's host tools load; its version is printed), on Blockchain/Dev/.env,
+#      Blockchain/Dev/.env.local and the repo-root .env;
+#   2. bash `set -a; .` on the same files, sandboxed: an empty PATH, a fresh
+#      HOME and cwd, `set -r` (no output redirection, no command with a slash);
+#   3. `docker compose config` through the two documented ways the stack is
+#      brought up: from Blockchain/Dev (README), and the repo-root
+#      docker-compose.local.yml (Start_Up/start-secuura.sh). The root entry
+#      reads the repo-root .env, and there it overrides Blockchain/Dev/.env;
+#   4. the canonical-line check: any line naming DATABASE_URL, NODE_ENV,
+#      PGHOST, PGSERVICE, POSTGRES_HOST, POSTGRES_PORT or POSTGRES_DB must be
+#      exactly KEY=value (an optional whitespace-led # comment after it) with a
+#      local value. No hand parsing decides "safe": this check only refuses.
+# The database credentials (POSTGRES_USER/PASSWORD, APP_DB_USER/PASSWORD) are
+# not addresses; compose interpolates them into every DATABASE_URL it passes,
+# and reader 3 judges those URLs as composed.
+# A reader that cannot run refuses too (fail closed), and says what to run.
+# "Local" means localhost, 127.0.0.1, ::1, or the compose services postgres
+# and pgbouncer, with no host, hostaddr or service parameter.
+#
+# Then it runs bootstrap-env.sh unchanged, checks again, and fills, ONLY when
+# the auth service would see them blank (read from `docker compose config`,
+# which is what auth's seeder receives):
+#   ADMIN_USER_PASSWORD           openssl rand (systemTest reads it as
+#                                 BOOTSTRAP_ADMIN_PASSWORD)
+#   ALLOW_DEFAULT_SEED_PASSWORDS  true (a `true` in another case is rewritten
+#                                 to `true`: the seeder compares exactly)
+# --rotate replaces ADMIN_USER_PASSWORD. The write goes to a temp copy named
+# .env-ks915.XXXXXX (the root .gitignore covers .env-*), the readers re-read
+# that copy, and only then does it replace .env. Last, .env and .env.local
+# are set to mode 0600. It prints names, paths and lengths, never a value.
+#
+# Usage:  Blockchain/Dev/scripts/restore-local-secrets.sh [--rotate] [--help]
+# =============================================================================
+
+set -euo pipefail
+set +x
+umask 077
+# This script's own matching runs in the C locale (a no-break space or a byte-order mark is never
+# "space", a range is ASCII). bootstrap-env.sh and the bash reader get the caller's locale back.
+CALLER_LOCALE=(-u LC_ALL)
+if [[ -n "${LC_ALL+x}" ]]; then CALLER_LOCALE=("LC_ALL=$LC_ALL"); fi
+export LC_ALL=C
+
+usage() {
+  cat <<'USAGE'
+restore-local-secrets.sh: generate local development credentials for platform-k.
+
+It GENERATES the values on this machine and restores nothing from a store:
+platform-k has no secrets store, and nobody needs to send anybody a password.
+
+  Blockchain/Dev/scripts/restore-local-secrets.sh            fill what is blank, keep the rest
+  Blockchain/Dev/scripts/restore-local-secrets.sh --rotate   also replace ADMIN_USER_PASSWORD
+  Blockchain/Dev/scripts/restore-local-secrets.sh --help     this text
+
+Before writing anything it asks the tools that read these files - dotenv,
+bash `set -a`, and docker compose (from Blockchain/Dev and from the repo-root
+docker-compose.local.yml) - and refuses if any of them reads NODE_ENV as
+production or a database that is not on this machine. It needs node, this
+repo's node_modules (run `npm ci` in Blockchain/Dev first) and docker on PATH.
+It never prints a value.
+
+USAGE
+  # Advice to the operator, printed by echo: this script never starts the stack itself
+  # (check-stack-safety.sh's KS-1355 census reads such a line elsewhere as a launcher).
+  echo "Then, from Blockchain/Dev: docker compose up -d"
+}
+
+ROTATE=0
+for arg in "$@"; do
+  case "$arg" in
+    --rotate) ROTATE=1 ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "restore-local-secrets: unknown option (see --help); nothing was written" >&2; exit 64 ;;
+  esac
+done
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEV_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$DEV_DIR/../.." && pwd)"
+ENV_FILE="$DEV_DIR/.env"
+ENV_LOCAL_FILE="$DEV_DIR/.env.local"
+ROOT_ENV_FILE="$REPO_ROOT/.env"
+ROOT_COMPOSE="docker-compose.local.yml"
+# Same template order as bootstrap-env.sh (KS-1081: env.example is canonical).
+TEMPLATE="$DEV_DIR/env.example"
+[[ -f "$TEMPLATE" ]] || TEMPLATE="$DEV_DIR/.env.example"
+
+say()  { printf 'restore-local-secrets: %s\n' "$1"; }
+die()  { printf 'restore-local-secrets: %s\n' "$1" >&2; exit "${2:-1}"; }
+WROTE_NOTE="Nothing was written."
+refuse() { die "refused by $1: $2. This script only sets up a local development stack. $WROTE_NOTE" 3; }
+cannot() { die "cannot check safely: $1. $WROTE_NOTE" 3; }
+
+label_of() {   # label_of FILE → how the file is named in messages (a path, never content)
+  case "$1" in
+    "$ENV_FILE") echo "Blockchain/Dev/.env" ;;
+    "$ENV_LOCAL_FILE") echo "Blockchain/Dev/.env.local" ;;
+    "$ROOT_ENV_FILE") echo "the repo-root .env" ;;
+    "$TEMPLATE") echo "Blockchain/Dev/$(basename "$TEMPLATE") (the template a fresh .env is copied from)" ;;
+    *) echo "the temporary copy of Blockchain/Dev/.env" ;;
+  esac
+}
+
+# ── The node half of the readers. Every value stays inside node; it prints verdicts only. ──
+# argv: MODE DEV_DIR [FILE...]. MODE dotenv: parse each FILE with the dotenv node resolves from
+# DEV_DIR. MODE bash: stdin is the sandboxed bash reader's NUL-separated fields. MODE shell: this
+# process's own environment. MODE compose: stdin is `docker compose config --format json`.
+# MODE versions: the two library versions. Output lines: OK | REFUSE <key> <why> | facts.
+# read -d '' (not $(cat <<...)): bash 3.2 mis-parses a quote inside a here-document nested in $(...).
+IFS= read -r -d '' READERS_JS <<'JS' || true
+const fs = require("fs"), path = require("path"), crypto = require("crypto");
+const [mode, dev, ...files] = process.argv.slice(1);
+function pkgDir(m) {
+  let d = path.dirname(require.resolve(m, { paths: [dev] }));
+  for (let i = 0; i < 12; i++) {
+    const pj = path.join(d, "package.json");
+    if (fs.existsSync(pj) && JSON.parse(fs.readFileSync(pj, "utf8")).name === m) return d;
+    d = path.dirname(d);
+  }
+  throw new Error("no package.json for " + m);
+}
+let dotenv, pg;
+try { dotenv = require(pkgDir("dotenv")); pg = require(pkgDir("pg-connection-string")); }
+catch (e) { console.log("MISSING"); process.exit(0); }
+if (mode === "versions") {
+  for (const m of ["dotenv", "pg-connection-string"]) console.log(m + " " + JSON.parse(fs.readFileSync(path.join(pkgDir(m), "package.json"), "utf8")).version);
+  process.exit(0);
+}
+const LOCAL = new Set(["localhost", "127.0.0.1", "::1", "[::1]", "postgres", "pgbouncer"]);
+const hostLocal = (h) => h == null || String(h) === "" || LOCAL.has(String(h).toLowerCase());
+const set = (v) => v != null && String(v) !== "";
+// One environment as a reader sees it → the first reason it is not local, or "".
+function judge(env) {
+  if (set(env.NODE_ENV) && String(env.NODE_ENV).trim().toLowerCase() === "production") return "NODE_ENV is production";
+  if (set(env.PGHOSTADDR)) return "PGHOSTADDR is set (it overrides the host)";
+  if (set(env.PGSERVICE)) return "PGSERVICE is set (a service file can name any host)";
+  if (set(env.PGHOST) && !hostLocal(env.PGHOST)) return "PGHOST does not name a local host";
+  // pgbouncer's upstream (QA gate 173 F1): entrypoint.sh writes these three into one [databases] line.
+  if (set(env.POSTGRES_HOST) && !hostLocal(env.POSTGRES_HOST)) return "POSTGRES_HOST does not name a local host (it is pgbouncer's upstream)";
+  if (set(env.POSTGRES_PORT) && !/^[0-9]{1,5}$/.test(String(env.POSTGRES_PORT))) return "POSTGRES_PORT is not a port number";
+  if (set(env.POSTGRES_DB) && !/^[A-Za-z0-9_]+$/.test(String(env.POSTGRES_DB))) return "POSTGRES_DB is not a plain database name";
+  for (const [k, v] of Object.entries(env)) {
+    if (!/DATABASE_URL$/.test(k) || !set(v)) continue;
+    const u = String(v);
+    if (!/^postgres(ql)?:\/\//i.test(u)) return k + " is not a postgres:// URL";
+    let c; try { c = pg.parse(u); } catch (e) { return k + " cannot be read as one URL"; }
+    if (set(c.hostaddr)) return k + " carries a hostaddr parameter";
+    if (set(c.service)) return k + " carries a service parameter";
+    if (!hostLocal(c.host)) return k + " does not name a local host";
+  }
+  return "";
+}
+function emit(why) { console.log(why ? "REFUSE " + why : "OK"); }
+if (mode === "dotenv") {
+  for (const f of files) {
+    const why = judge(dotenv.parse(fs.readFileSync(f)));
+    if (why) { console.log("REFUSE " + why + " in FILE " + f); process.exit(0); }
+  }
+  console.log("OK"); process.exit(0);
+}
+if (mode === "shell") { emit(judge(process.env)); process.exit(0); }
+if (mode === "verify") {   // what dotenv (the reader systemTest uses) sees in ONE file, for the re-read before the rename
+  const o = dotenv.parse(fs.readFileSync(files[0]));
+  const adm = o.ADMIN_USER_PASSWORD == null ? "" : String(o.ADMIN_USER_PASSWORD);
+  const want = process.env.RLS_EXPECT_ADMIN_SHA256 || "";
+  if (want) console.log("ADMIN_MATCH " + (crypto.createHash("sha256").update(adm).digest("hex") === want ? "yes" : "no"));
+  console.log("ALLOW " + (o.ALLOW_DEFAULT_SEED_PASSWORDS === "true" ? "exact-true" : "other"));
+  process.exit(0);
+}
+const chunks = []; process.stdin.on("data", (d) => chunks.push(d)).on("end", () => {
+  const buf = Buffer.concat(chunks);
+  if (mode === "bash") {
+    const f = buf.toString("utf8").split("\0"); const i = f.lastIndexOf("@@RLS-KS915@@");
+    if (i < 0 || f.length < i + 11) { console.log("ERROR no-result"); return; }
+    const env = {}; ["DATABASE_URL", "NODE_ENV", "PGHOST", "PGHOSTADDR", "PGSERVICE", "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB"].forEach((k, n) => { env[k] = f[i + 2 + n]; });
+    emit(judge(env)); return;
+  }
+  if (mode === "compose") {
+    let j; try { j = JSON.parse(buf.toString("utf8")); } catch (e) { console.log("ERROR json"); return; }
+    const svcs = j.services || {};
+    if (!Object.keys(svcs).length) { console.log("ERROR no-services"); return; }
+    for (const [name, s] of Object.entries(svcs)) {
+      const e = s.environment || {};
+      if (typeof e !== "object" || Array.isArray(e)) { console.log("ERROR environment-not-a-map " + name); return; }
+      const why = judge(e);
+      if (why) { console.log("REFUSE " + why + " for the " + name + " service"); return; }
+    }
+    console.log("OK");
+    const a = (svcs.auth || {}).environment;
+    if (!a || !("ADMIN_USER_PASSWORD" in a) || !("ALLOW_DEFAULT_SEED_PASSWORDS" in a)) { console.log("AUTH missing"); return; }
+    const adm = a.ADMIN_USER_PASSWORD == null ? "" : String(a.ADMIN_USER_PASSWORD);
+    const allow = a.ALLOW_DEFAULT_SEED_PASSWORDS == null ? "" : String(a.ALLOW_DEFAULT_SEED_PASSWORDS);
+    console.log("ADMIN " + (adm === "" ? "blank" : "set"));
+    console.log("ALLOW " + (allow === "true" ? "exact-true" : allow === "" ? "blank" : allow.trim().toLowerCase() === "true" ? "case-true" : "other"));
+    const want = process.env.RLS_EXPECT_ADMIN_SHA256 || "";
+    if (want) console.log("ADMIN_MATCH " + (crypto.createHash("sha256").update(adm).digest("hex") === want ? "yes" : "no"));
+  }
+});
+JS
+
+# ── 0. Links: never chmod or replace through a link (QA gates 165 F9, 166 F8) ─────────────────
+links_of() { stat -c '%h' "$1" 2>/dev/null || stat -f '%l' "$1" 2>/dev/null; }
+check_links() {
+  local f
+  for f in "$ENV_FILE" "$ENV_LOCAL_FILE"; do
+    if [[ -L "$f" ]]; then
+      die "refused: $(label_of "$f") is a symbolic link; this script only writes and chmods a regular file. $WROTE_NOTE" 3
+    fi
+    if [[ -f "$f" && "$(links_of "$f")" != 1 ]]; then
+      die "refused: $(label_of "$f") is a hard link (link count $(links_of "$f")); a chmod would change the other name too. $WROTE_NOTE" 3
+    fi
+  done
+}
+
+# ── The tools the readers need. Missing → refuse, naming the one thing to do. ─────────────────
+check_tools() {
+  command -v node >/dev/null 2>&1 || cannot "node is not on PATH, so dotenv cannot be asked; install Node.js, then run npm ci in Blockchain/Dev"
+  [[ "$(node -e "$READERS_JS" versions "$DEV_DIR" 2>/dev/null | head -n1)" != MISSING ]] \
+    || cannot "the dotenv library this repo loads is not installed; run npm ci in Blockchain/Dev, then run this again"
+  READER_VERSIONS="$(node -e "$READERS_JS" versions "$DEV_DIR" 2>/dev/null | tr '\n' ' ')"
+  [[ "$READER_VERSIONS" == dotenv\ * ]] || cannot "node could not load dotenv from Blockchain/Dev; run npm ci in Blockchain/Dev"
+  command -v docker >/dev/null 2>&1 || cannot "docker is not on PATH, so docker compose cannot be asked; start Docker Desktop or put docker on PATH"
+  COMPOSE_VERSION="$(docker compose version --short 2>/dev/null)" || cannot "docker is on PATH but docker compose did not answer; check the Docker installation"
+}
+
+# ── Reader 1: dotenv ──────────────────────────────────────────────────────────────────────────
+read_dotenv() {   # read_dotenv FILE... (existing files only)
+  local out why f
+  out="$(node -e "$READERS_JS" dotenv "$DEV_DIR" "$@" 2>/dev/null)" || cannot "dotenv could not read the env files (node exited non-zero)"
+  case "$out" in
+    OK) return 0 ;;
+    "REFUSE "*) why="${out#REFUSE }"; f="${why##* in FILE }"; why="${why% in FILE *}"
+                refuse "${READER_VERSIONS%% pg-*}" "$why in $(label_of "$f")" ;;
+    MISSING) cannot "the dotenv library this repo loads is not installed; run npm ci in Blockchain/Dev" ;;
+    *) cannot "dotenv gave no verdict for the env files" ;;
+  esac
+}
+
+# ── Reader 2: bash `set -a; .`, sandboxed ───────────────────────────────────────────────────
+# It EXECUTES the file, as every `set -a; .` user does. Here: PATH is an empty directory (no
+# external command can run), HOME and cwd are a fresh temp directory holding only a link to the
+# file, BASH_ENV/ENV/SHELLOPTS/PS4 are unset, `history` and `kill` are disabled (on bash 3.2
+# `history -w` writes a file even under `set -r`; QA gate 173 F3) and `set -r`, which also
+# stops them being enabled again, stops output redirection and any command named with a slash. The caller's other variables pass through, as they would for a
+# real `set -a` user (a ${VAR} in the file reads the shell's VAR). The verdict needs the reader's
+# own result line; a file that ends the shell (an `exit`) leaves none, which is a refusal.
+read_bash() {   # read_bash FILE
+  local f="$1" sb out
+  sb="$(mktemp -d "${TMPDIR:-/tmp}/rls-ks915.XXXXXX")" || cannot "could not make a temp directory for the bash reader"
+  mkdir "$sb/empty" && ln -s "$f" "$sb/e" || cannot "could not prepare the bash reader"
+  # A syntax error stops bash reading the rest of the file, so it is a reader that cannot run.
+  # `bash -n` parses without executing anything. A runtime error on one line (a word bash takes
+  # for a command) is what every `set -a` user also gets, and bash reads on, so it is not one.
+  if ! env -u BASH_ENV -u ENV -u SHELLOPTS -u BASHOPTS -u PS4 "${CALLER_LOCALE[@]}" "$BASH" --norc --noprofile -n "$sb/e" </dev/null >/dev/null 2>&1; then
+    rm -f "$sb/e"; rmdir "$sb/empty" "$sb" 2>/dev/null || true
+    cannot "bash set -a cannot parse $(label_of "$f") (a shell syntax error, often an unmatched quote); fix that line"
+  fi
+  out="$(env -u BASH_ENV -u ENV -u SHELLOPTS -u BASHOPTS -u PS4 -u CDPATH -u GLOBIGNORE "${CALLER_LOCALE[@]}" PATH="$sb/empty" HOME="$sb" \
+      "$BASH" --norc --noprofile -c 'cd "$1" || exit 90; enable -n history kill; HISTFILE=/dev/null; set -r; set -a; . e; s=$?; printf "%s\0%s\0%s\0%s\0%s\0%s\0%s\0%s\0%s\0%s\0" "@@RLS-KS915@@" "$s" "${DATABASE_URL-}" "${NODE_ENV-}" "${PGHOST-}" "${PGHOSTADDR-}" "${PGSERVICE-}" "${POSTGRES_HOST-}" "${POSTGRES_PORT-}" "${POSTGRES_DB-}"' \
+      rls "$sb" </dev/null 2>/dev/null | node -e "$READERS_JS" bash "$DEV_DIR" 2>/dev/null)" || true
+  rm -f "$sb/e"; rmdir "$sb/empty" "$sb" 2>/dev/null || true
+  case "$out" in
+    OK) return 0 ;;
+    "REFUSE "*) refuse "bash set -a" "${out#REFUSE } in $(label_of "$f")" ;;
+    *) cannot "bash set -a gave no reading of $(label_of "$f")" ;;
+  esac
+}
+
+# ── Reader 3: docker compose config, through each documented entry ───────────────────────────
+# Its output holds every resolved value, so it goes straight into node and is never stored.
+COMPOSE_FACTS=""
+read_compose() {   # read_compose dev|root [--env-file FILE]
+  local entry="$1" name out rc; shift
+  if [[ "$entry" == dev ]]; then
+    name="docker compose config (Blockchain/Dev entry)"
+    out="$( ( cd "$DEV_DIR" && docker compose "$@" config --format json ) 2>/dev/null | node -e "$READERS_JS" compose "$DEV_DIR" 2>/dev/null; exit "${PIPESTATUS[0]}" )" && rc=0 || rc=$?
+  else
+    name="docker compose config (repo-root entry, $ROOT_COMPOSE)"
+    out="$( ( cd "$REPO_ROOT" && docker compose -f "$ROOT_COMPOSE" config --format json ) 2>/dev/null | node -e "$READERS_JS" compose "$DEV_DIR" 2>/dev/null; exit "${PIPESTATUS[0]}" )" && rc=0 || rc=$?
+  fi
+  [[ "$rc" -eq 0 ]] || cannot "$name exited $rc without a readable configuration; run docker compose config yourself in that directory to see why (it prints resolved secrets to your own terminal)"
+  case "$(printf '%s\n' "$out" | head -n1)" in
+    OK) if [[ "$entry" == dev ]]; then COMPOSE_FACTS="$(printf '%s\n' "$out" | tail -n +2)"; fi; return 0 ;;
+    "REFUSE "*) refuse "$name" "$(printf '%s\n' "$out" | head -n1 | cut -c8-)" ;;
+    *) cannot "$name gave no verdict" ;;
+  esac
+}
+
+# ── Reader 4: the canonical-line check (refuses only) ─────────────────────────────────────────
+# Lines are split the way dotenv splits them (CR, CRLF and LF all end a line). A blank line and
+# a line whose FIRST byte is # are comments to every reader. Any other line that names
+# DATABASE_URL, NODE_ENV, PGHOST, PGSERVICE, POSTGRES_HOST, POSTGRES_PORT or POSTGRES_DB must be KEY=value, the value with no whitespace,
+# quote, $, backslash or #, optionally followed by whitespace and a # comment; and the value must
+# be local. Runs in the C locale, so a no-break space or a byte-order mark is never "space".
+RE_LINE='^([A-Za-z_][A-Za-z0-9_]*)=([^[:space:]#$"`'"'"'\\]*)([[:space:]]+#.*)?$'
+RE_URL='^postgres(ql)?://(([A-Za-z0-9._~%+=-]+)(:[A-Za-z0-9._~%+=-]*)?@)?(\[::1\]|[A-Za-z0-9.-]*)(:[0-9]{1,5})?(/[A-Za-z0-9_.-]*)?(\?([a-z_]+=[A-Za-z0-9_.-]*(&[a-z_]+=[A-Za-z0-9_.-]*)*))?$'
+local_host_name() { case "$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" in localhost|127.0.0.1|::1|\[::1\]|postgres|pgbouncer) return 0 ;; esac; return 1; }
+canonical_value() {   # canonical_value KEY VALUE → 0 when canonical AND local
+  local k="$1" v="$2" q p
+  case "$k" in
+    *DATABASE_URL*)
+      [[ -z "$v" ]] && return 0
+      [[ "$v" =~ $RE_URL ]] || return 1
+      local userinfo="${BASH_REMATCH[2]}" host="${BASH_REMATCH[5]}" port="${BASH_REMATCH[6]}"; q="${BASH_REMATCH[9]}"
+      if [[ -z "$host" ]]; then [[ -z "$userinfo" && -z "$port" ]] || return 1; else local_host_name "$host" || return 1; fi
+      if [[ -n "$q" ]]; then
+        local params=(); IFS='&' read -r -a params <<< "$q"
+        for p in "${params[@]}"; do case "${p%%=*}" in host|hostaddr|service) return 1 ;; esac; done
+      fi
+      return 0 ;;
+    *NODE_ENV*) [[ "$v" =~ ^[a-z]*$ && "$v" != production ]] ;;
+    *PGHOSTADDR*|*PGSERVICE*) [[ -z "$v" ]] ;;
+    *PGHOST*) [[ -z "$v" ]] || local_host_name "$v" ;;
+    *POSTGRES_HOST*) [[ -z "$v" ]] || local_host_name "$v" ;;
+    *POSTGRES_PORT*) [[ "$v" =~ ^[0-9]{0,5}$ ]] ;;
+    *POSTGRES_DB*) [[ "$v" =~ ^[A-Za-z0-9_]*$ ]] ;;
+    *) return 0 ;;
+  esac
+}
+canonical_file() {   # canonical_file FILE
+  local f="$1" n=0 line
+  [[ "$(tr -d '\000' < "$f" | wc -c | tr -d ' ')" -eq "$(wc -c < "$f" | tr -d ' ')" ]] \
+    || refuse "the canonical-line check" "$(label_of "$f") contains a NUL byte"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    n=$((n + 1))
+    [[ -z "$line" || "${line:0:1}" == "#" ]] && continue
+    case "$line" in *DATABASE_URL*|*NODE_ENV*|*PGHOST*|*PGSERVICE*|*POSTGRES_HOST*|*POSTGRES_PORT*|*POSTGRES_DB*) ;; *) continue ;; esac
+    if ! canonical_line "$line"; then
+      refuse "the canonical-line check" "line $n of $(label_of "$f") (counting CR as a line break) names DATABASE_URL, NODE_ENV, PGHOST, PGSERVICE or POSTGRES_HOST/PORT/DB and is not exactly KEY=value with a local value; write it that way"
+    fi
+  done < <(tr '\r' '\n' < "$f")
+}
+canonical_line() { [[ "$1" =~ $RE_LINE ]] || return 1; canonical_value "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"; }
+canonical_shell() {
+  local k
+  for k in DATABASE_URL NODE_ENV PGHOST PGHOSTADDR PGSERVICE POSTGRES_HOST POSTGRES_PORT POSTGRES_DB; do
+    [[ -n "${!k+x}" ]] || continue
+    canonical_line "$k=${!k}" \
+      || refuse "the canonical-line check" "$k in the shell environment is not exactly a plain local value"
+  done
+}
+
+# ── All four, over every file a reader of this stack reads ────────────────────────────────────
+env_files() {   # the existing files, in reading order (.env, or the template while .env is absent)
+  if [[ -f "$ENV_FILE" ]]; then echo "$ENV_FILE"; elif [[ -f "$TEMPLATE" ]]; then echo "$TEMPLATE"; fi
+  [[ -f "$ENV_LOCAL_FILE" ]] && echo "$ENV_LOCAL_FILE"
+  [[ -f "$ROOT_ENV_FILE" ]] && echo "$ROOT_ENV_FILE"
+  return 0
+}
+check_all() {
+  local files=() f
+  while IFS= read -r f; do files+=("$f"); done < <(env_files)
+  [[ ${#files[@]} -gt 0 ]] && read_dotenv "${files[@]}"
+  local shell_out; shell_out="$(node -e "$READERS_JS" shell "$DEV_DIR" 2>/dev/null)" || cannot "node could not judge the shell environment"
+  case "$shell_out" in OK) ;; "REFUSE "*) refuse "pg-connection-string (node pg's URL reader)" "${shell_out#REFUSE } in the shell environment" ;; *) cannot "no verdict for the shell environment" ;; esac
+  for f in ${files[@]+"${files[@]}"}; do read_bash "$f"; done
+  read_compose dev
+  if [[ -f "$REPO_ROOT/$ROOT_COMPOSE" ]]; then read_compose root; ROOT_READ="read"; else ROOT_READ="absent (no $ROOT_COMPOSE at the repo root)"; fi
+  for f in ${files[@]+"${files[@]}"}; do canonical_file "$f"; done
+  canonical_shell
+}
+
+# ── 1. Refuse first, before any write ─────────────────────────────────────────────────────────
+check_links
+[[ -f "$ENV_FILE" || -f "$TEMPLATE" ]] || die "no Blockchain/Dev/.env and no env template; nothing was written" 2
+check_tools
+check_all
+command -v openssl >/dev/null 2>&1 || die "openssl is required to generate values; nothing was written" 2
+say "generates local development credentials on this machine; it restores nothing from a store."
+say "readers: ${READER_VERSIONS}docker compose $COMPOSE_VERSION; compose read through the Blockchain/Dev entry and the repo-root entry ($ROOT_READ)."
+
+# ── 2. The infrastructure keys: bootstrap-env.sh, unchanged (run without a hostile BASH_ENV) ──
+env -u BASH_ENV -u ENV -u SHELLOPTS -u BASHOPTS -u PS4 "${CALLER_LOCALE[@]}" "$BASH" "$SCRIPT_DIR/bootstrap-env.sh" \
+  || die "bootstrap-env.sh failed (exit $?); stopped before filling the seed credentials" 1
+[[ -f "$ENV_FILE" && ! -L "$ENV_FILE" ]] || die "bootstrap-env.sh did not leave a regular Blockchain/Dev/.env; stopped" 1
+
+# ── 3. Check again: bootstrap-env.sh has written .env. Then decide from what auth would see. ──
+WROTE_NOTE="bootstrap-env.sh had already filled the infrastructure keys in Blockchain/Dev/.env; no seed credential was written."
+check_links
+check_all
+case "$COMPOSE_FACTS" in *"AUTH missing"*) die "docker compose config shows no auth service carrying ADMIN_USER_PASSWORD and ALLOW_DEFAULT_SEED_PASSWORDS; nothing more was written" 1 ;; esac
+ADMIN_STATE="$(printf '%s\n' "$COMPOSE_FACTS" | sed -n 's/^ADMIN //p')"
+ALLOW_STATE="$(printf '%s\n' "$COMPOSE_FACTS" | sed -n 's/^ALLOW //p')"
+case "$ADMIN_STATE:$ALLOW_STATE" in
+  blank:blank|blank:exact-true|blank:case-true|blank:other|set:blank|set:exact-true|set:case-true|set:other) ;;
+  *) die "docker compose config gave no clear reading of auth's ADMIN_USER_PASSWORD and ALLOW_DEFAULT_SEED_PASSWORDS; nothing more was written" 1 ;;
+esac
+
+TMP_FILE=""
+trap 'if [[ -n "$TMP_FILE" ]]; then rm -f "$TMP_FILE"; fi' EXIT
+
+# rewrite_env SRC DST: one awk pass. For each key being set (RLS_SET_ADMIN / RLS_SET_ALLOW = 1), the
+# FIRST line a consumer reads as that key (any spelling) becomes one canonical KEY=value and every
+# later such line is dropped; a key with no line is appended. Values reach awk through its
+# environment, never its argument list. Writes DST only (no intermediate file).
+rewrite_env() {
+  awk '
+    BEGIN {
+      n = 0
+      if (ENVIRON["RLS_SET_ADMIN"] == "1") { k[++n] = "ADMIN_USER_PASSWORD"; v[n] = ENVIRON["RLS_ADMIN_VALUE"] }
+      if (ENVIRON["RLS_SET_ALLOW"] == "1") { k[++n] = "ALLOW_DEFAULT_SEED_PASSWORDS"; v[n] = "true" }
+      for (i = 1; i <= n; i++) { re[i] = "^[ \t]*(export[ \t]+)?" k[i] "[ \t]*[=:]"; done[i] = 0 }
+    }
+    {
+      for (i = 1; i <= n; i++) if ($0 ~ re[i]) { if (!done[i]) { print k[i] "=" v[i]; done[i] = 1 }; next }
+      print
+    }
+    END { for (i = 1; i <= n; i++) if (!done[i]) print k[i] "=" v[i] }' "$1" > "$2"
+}
+generate() {
+  local v
+  v="$(openssl rand -hex 24)" || return 1
+  [[ "$v" =~ ^[0-9a-f]{48}$ ]] || return 1
+  printf '%s' "$v"
+}
+
+# QA gate 173 F4: Start_Up/start-secuura.sh brings the stack up through the repo-root entry, where the
+# repo-root .env wins over Blockchain/Dev/.env. After the write, ask that entry what auth would receive
+# and say so when it is not what was written. A report only: it never refuses and never changes the exit.
+root_entry_report() {   # root_entry_report EXPECTED_ADMIN_SHA256_OR_EMPTY
+  [[ -f "$REPO_ROOT/$ROOT_COMPOSE" ]] || return 0
+  local out
+  out="$( ( cd "$REPO_ROOT" && docker compose -f "$ROOT_COMPOSE" config --format json ) 2>/dev/null \
+    | RLS_EXPECT_ADMIN_SHA256="$1" node -e "$READERS_JS" compose "$DEV_DIR" 2>/dev/null )" || true
+  if [[ "$(printf '%s\n' "$out" | head -n1)" != OK ]]; then
+    say "note: could not re-read the repo-root entry ($ROOT_COMPOSE) after the write; check what auth receives there before using Start_Up/start-secuura.sh."
+    return 0
+  fi
+  if [[ -n "$1" && "$out" != *"ADMIN_MATCH yes"* ]]; then
+    say "note: the repo-root entry will NOT pass the ADMIN_USER_PASSWORD written here to auth: the repo-root .env sets ADMIN_USER_PASSWORD (or $ROOT_COMPOSE overrides it), and that wins under $ROOT_COMPOSE (Start_Up/start-secuura.sh). Remove that line from the repo-root .env to use this value there."
+  fi
+  case "$ALLOW_STATE" in blank|case-true|exact-true)
+    if [[ "$out" != *"ALLOW exact-true"* ]]; then
+      say "note: the repo-root entry will NOT pass ALLOW_DEFAULT_SEED_PASSWORDS=true to auth: the repo-root .env sets ALLOW_DEFAULT_SEED_PASSWORDS (or $ROOT_COMPOSE overrides it), and that wins under $ROOT_COMPOSE (Start_Up/start-secuura.sh)."
+    fi ;;
+  esac
+  return 0
+}
+
+WRITE_ADMIN=0; WRITE_ALLOW=0; value=""
+if [[ "$ADMIN_STATE" == blank || "$ROTATE" -eq 1 ]]; then WRITE_ADMIN=1; fi
+case "$ALLOW_STATE" in blank|case-true) WRITE_ALLOW=1 ;; esac
+
+if [[ "$WRITE_ADMIN" -eq 1 || "$WRITE_ALLOW" -eq 1 ]]; then
+  TMP_FILE="$(mktemp "$DEV_DIR/.env-ks915.XXXXXX")"
+  chmod 600 "$TMP_FILE"
+  if [[ "$WRITE_ADMIN" -eq 1 ]]; then
+    value="$(generate)" || die "openssl rand did not produce a value; ADMIN_USER_PASSWORD left as it was" 1
+  fi
+  RLS_SET_ADMIN="$WRITE_ADMIN" RLS_SET_ALLOW="$WRITE_ALLOW" RLS_ADMIN_VALUE="$value" rewrite_env "$ENV_FILE" "$TMP_FILE" \
+    || die "could not write the temporary copy of Blockchain/Dev/.env; .env was left as it was" 1
+  # Re-read the COPY with the readers before it replaces .env: the seeder must see exactly what was written.
+  WROTE_NOTE="Blockchain/Dev/.env was left as it was."
+  canonical_file "$TMP_FILE"
+  if [[ "$WRITE_ADMIN" -eq 1 ]]; then
+    RLS_EXPECT_ADMIN_SHA256="$(printf '%s' "$value" | openssl dgst -sha256 -r | cut -d' ' -f1)"; export RLS_EXPECT_ADMIN_SHA256
+  fi
+  read_compose dev --env-file "$TMP_FILE"
+  DOTENV_FACTS="$(node -e "$READERS_JS" verify "$DEV_DIR" "$TMP_FILE" 2>/dev/null)" || DOTENV_FACTS=""
+  unset RLS_EXPECT_ADMIN_SHA256
+  if [[ "$WRITE_ADMIN" -eq 1 && "$COMPOSE_FACTS" != *"ADMIN_MATCH yes"* ]]; then
+    die "after the write, docker compose would not pass the new ADMIN_USER_PASSWORD to auth (a shell variable or another line overrides it). $WROTE_NOTE" 1
+  fi
+  if [[ "$WRITE_ADMIN" -eq 1 && "$DOTENV_FACTS" != *"ADMIN_MATCH yes"* ]]; then
+    die "after the write, dotenv would not read the new ADMIN_USER_PASSWORD from the copy (systemTest reads it that way). $WROTE_NOTE" 1
+  fi
+  if [[ "$WRITE_ALLOW" -eq 1 && "$COMPOSE_FACTS" != *"ALLOW exact-true"* ]]; then
+    die "after the write, docker compose would not pass ALLOW_DEFAULT_SEED_PASSWORDS=true to auth (a shell variable or another line overrides it). $WROTE_NOTE" 1
+  fi
+  mv "$TMP_FILE" "$ENV_FILE"
+  TMP_FILE=""
+fi
+
+if [[ "$WRITE_ADMIN" -eq 1 ]]; then
+  if [[ "$ADMIN_STATE" == blank ]]; then
+    say "generated ADMIN_USER_PASSWORD (${#value} characters) in Blockchain/Dev/.env"
+  else
+    say "rotated ADMIN_USER_PASSWORD (--rotate; ${#value} characters) in Blockchain/Dev/.env"
+  fi
+else
+  say "kept ADMIN_USER_PASSWORD (already set; --rotate replaces it)"
+fi
+ROOT_EXPECT=""
+if [[ "$WRITE_ADMIN" -eq 1 ]]; then ROOT_EXPECT="$(printf '%s' "$value" | openssl dgst -sha256 -r | cut -d' ' -f1)"; fi
+unset value
+case "$ALLOW_STATE" in
+  blank) say "set ALLOW_DEFAULT_SEED_PASSWORDS=true (the auth seeder creates the local test users)" ;;
+  exact-true) say "kept ALLOW_DEFAULT_SEED_PASSWORDS (already true)" ;;
+  case-true) say "rewrote ALLOW_DEFAULT_SEED_PASSWORDS to true: it was true in another case, and the auth seeder compares exactly 'true'" ;;
+  *) say "kept ALLOW_DEFAULT_SEED_PASSWORDS (set, and not true: the auth seeder will skip the local test users)" ;;
+esac
+root_entry_report "$ROOT_EXPECT"
+unset ROOT_EXPECT
+
+# ── 4. Mode 0600 ──────────────────────────────────────────────────────────────────────────────
+chmod 600 "$ENV_FILE"
+say "mode 0600: Blockchain/Dev/.env"
+if [[ -f "$ENV_LOCAL_FILE" && ! -L "$ENV_LOCAL_FILE" ]]; then
+  chmod 600 "$ENV_LOCAL_FILE"
+  say "mode 0600: Blockchain/Dev/.env.local"
+fi
+
+say "next: from Blockchain/Dev run 'docker compose up -d' (recreates auth, whose seeder reads these values)."
+say "systemTest reads the admin password as BOOTSTRAP_ADMIN_PASSWORD: export it from Blockchain/Dev/.env without printing it (QA Cheat Sheet, KS-915)."

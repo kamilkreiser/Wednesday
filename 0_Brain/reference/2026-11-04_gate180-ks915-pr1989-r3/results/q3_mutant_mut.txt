@@ -1,0 +1,17 @@
+u1    rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGBOUNCER_MAX_CLIENT_CONN=1x\n' root='' local=''
+      why: refused by dotenv 16
+      reads of PGBOUNCER_MAX_CLIENT_CONN: dotenv=NONDIGIT bash=NONDIGIT compose-dev=NONDIGIT compose-root=NONDIGIT
+u2    rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGBOUNCER_MAX_CLIENT_CONN=abc\nPGBOUNCER_MAX_CLIENT_CONN=10\n' root='' local=''
+      why: 
+      reads of PGBOUNCER_MAX_CLIENT_CONN: dotenv=digits bash=digits compose-dev=digits compose-root=digits
+u3    rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGBOUNCER_MAX_CLIENT_CONN=10\nPGBOUNCER_MAX_CLIENT_CONN=abc\n' root='' local=''
+      why: refused by dotenv 16
+      reads of PGBOUNCER_MAX_CLIENT_CONN: dotenv=NONDIGIT bash=NONDIGIT compose-dev=NONDIGIT compose-root=NONDIGIT
+u4    rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'GATE_NOTE="first\nPGBOUNCER_MAX_CLIENT_CONN=abc\nlast"\n' root='' local=''
+      why: 
+      reads of PGBOUNCER_MAX_CLIENT_CONN: dotenv=unset bash=unset compose-dev=digits compose-root=digits
+u5    rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | PGBOUNCER_MAX_CLIENT_CONN=abc | args= | dev='' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): PGBOUNCER_MAX_CLIENT_CONN is not a plain number (pgbouncer's entrypoint writes it into pgbouncer
+u6    rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'PGBOUNCER_MAX_CLIENT_CONN=10\n' root='' local=''
+      why: 
+      reads of PGBOUNCER_MAX_CLIENT_CONN: dotenv=digits bash=digits compose-dev=digits compose-root=digits

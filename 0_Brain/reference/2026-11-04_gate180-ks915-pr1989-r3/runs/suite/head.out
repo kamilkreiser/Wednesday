@@ -1,0 +1,433 @@
+── KS-915: restore-local-secrets.sh asks the real readers ──
+ok   the script exists in the tree and is executable
+ok   (i) fresh clone: exits 0
+ok   (i) fresh clone: Blockchain/Dev/.env exists
+ok   (i) .env mode is 0600
+ok   (i) .env.local mode is 0600
+ok   (i) ADMIN_USER_PASSWORD is generated: 48 lowercase hex characters
+ok   (i) ALLOW_DEFAULT_SEED_PASSWORDS=true (the seeder runs)
+ok   (i) bootstrap-env.sh ran: POSTGRES_PASSWORD is non-empty
+ok   (i) bootstrap-env.sh ran: REDIS_PASSWORD is non-empty
+ok   (i) bootstrap-env.sh ran: PII_ENCRYPTION_KEY is non-empty
+ok   (i) bootstrap-env.sh ran: PII_LOOKUP_HMAC_KEY is non-empty
+ok   (i) bootstrap-env.sh ran: GATEWAY_VOUCH_SECRET is non-empty
+ok   (i) bootstrap-env.sh ran: JWT_PRIVATE_KEY is non-empty
+ok   (i) the output names ADMIN_USER_PASSWORD
+ok   (i) the output names the dotenv version it loaded
+ok   (i) the output says it read both compose entries
+ok   (i) no temp copy of .env is left in Blockchain/Dev
+ok   (ii) second run: exits 0
+ok   (ii) second run: .env is byte-identical (sha256)
+ok   (ii) second run: .env.local is byte-identical (sha256)
+ok   (ii) second run: says it kept ADMIN_USER_PASSWORD
+ok   (ii-b) control: the test opened .env to 0644
+ok   (ii-b) third run on a complete .env at 0644: exits 0
+ok   (ii-b) third run: .env is back to 0600
+ok   (ii-b) third run: .env.local is back to 0600
+ok   (ii-b) third run: .env content unchanged (sha256)
+ok   (iv) git check-ignore covers Blockchain/Dev/.env
+ok   (iv) control: git check-ignore does NOT cover Blockchain/Dev/env.example
+ok   (iv) git status --porcelain lists no .env or .env.local
+ok   (v) shell DATABASE_URL=postgresql://u:p@e31rmt.postgres.database.azure.com:5432/secuura: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgresql://u:p@localhost:6432/secuura?host=e31rmt.example.com: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost/x?hostaddr=10.9.9.9: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost/x?h%6Fst=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost/x?HoSt=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres:///x?host=/tmp: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost:5432,e31rmt.host:5432/x: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@[::1],e31rmt.host/x: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@[::1]e31rmt.host/x: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@notlocalhost.e31rmt/x: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost.e31rmt.host/x: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=localhost:5432/secuura: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=host=e31rmt.host dbname=secuura: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@[::1/x: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost:54x32/x: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell NODE_ENV=production: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell NODE_ENV=PRODUCTION: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell NODE_ENV=production#x: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost/x?ho	st=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost/x?host	=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost/x?host=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres:///x PGHOST=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell PGHOSTADDR=10.9.9.9: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell PGSERVICE=e31svc: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell DATABASE_URL=postgres://u:p@localhost/x?service=e31svc: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) control: shell DATABASE_URL=postgres:///x PGHOST=localhost is accepted
+ok   (v) control: shell DATABASE_URL=postgresql://u:p@localhost:6432/secuura is accepted
+ok   (v) control: shell DATABASE_URL=postgres://u:p@LOCALHOST/x is accepted
+ok   (v) control: shell DATABASE_URL=postgres://u:p@127.0.0.1/x is accepted
+ok   (v) control: shell DATABASE_URL=postgres://u:p@[::1]:5432/x is accepted
+ok   (v) control: shell DATABASE_URL=postgres:///x is accepted
+ok   (v) control: shell DATABASE_URL=postgresql://u:p@postgres:5432/secuura is accepted
+ok   (v) control: shell DATABASE_URL=postgresql://u:p@pgbouncer:6432/secuura is accepted
+ok   (v) control: shell DATABASE_URL=postgres://u:p@localhost:6432/x?sslmode=disable is accepted
+ok   (v) control: shell DATABASE_URL= is accepted
+ok   (v) control: shell NODE_ENV=development is accepted
+ok   golden: bootstrap-env.sh wrote a .env with ADMIN_USER_PASSWORD blank
+ok   golden: the stripped copy names neither DATABASE_URL= nor NODE_ENV= at line start
+ok   (G166) c01 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c01 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c02 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c02 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c03 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c03 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c04 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c04 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c05 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c05 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c06 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c06 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c07 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c07 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c08 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c08 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c09 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c09 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c10 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c10 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c11 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c11 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c12 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c12 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c13 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c13 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c14 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c14 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c15 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c15 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c16 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c16 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c17 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c17 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c18 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c18 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c19 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c19 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c20 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c20 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c21 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c21 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c22 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c22 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c23 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c23 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c24 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c24 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c25 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c25 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c26 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c26 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c27 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c27 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c28 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) c28 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) e11 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) e11 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) e12 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) e12 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) e13 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) e13 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) e14 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) e14 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) d41 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) d41 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) d42 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) d42 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g01 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g01 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g02 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g02 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g03 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g03 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g04 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g04 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g05 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g05 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g06 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g06 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g07 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g07 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g08 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g08 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g09 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g09 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g10 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g10 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g11 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g11 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g12 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g12 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g13 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g13 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g14 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) g14 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) p01 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) p02 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) p03 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) s01 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) s02 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ln: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/tmp/sh/ks915r.fMiFm0/f-d41-append/Blockchain/Dev/node_modules/node_modules: File exists
+ok   (G166) d41 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (layer) NODE_ENV=production#x is refused by dotenv (only dotenv reads production)
+ln: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/tmp/sh/ks915r.fMiFm0/f-c06-append/Blockchain/Dev/node_modules/node_modules: File exists
+ok   (G166) c06 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (layer) an interpolated ?host= is refused by bash set -a (only bash expands it)
+ln: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/tmp/sh/ks915r.fMiFm0/f-e12-append/Blockchain/Dev/node_modules/node_modules: File exists
+ok   (G166) e12 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (layer) e12 is refused by the canonical-line check (no real reader reads it as remote)
+ln: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/tmp/sh/ks915r.fMiFm0/f-c27-append/Blockchain/Dev/node_modules/node_modules: File exists
+ok   (G166) c27 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (layer) a vertical tab between two keys is refused by the canonical-line check
+ok   (layer) e12's form in .env.local: refused (exit 3), .env.local unchanged
+ok   (layer) ... by the canonical-line check, naming .env.local
+ok   (layer) a form feed between two NODE_ENV keys in the repo-root .env: refused (exit 3), Blockchain/Dev/.env unchanged
+ok   (layer) ... by the canonical-line check, naming the repo-root .env
+ok   (layer) an untracked docker-compose.override.yml setting NODE_ENV=production: refused, .env unchanged
+ok   (layer) ... by the Blockchain/Dev compose entry (no .env line names it)
+ok   (layer) a docker-compose.local.yml service with NODE_ENV=production: refused, .env unchanged
+ok   (layer) ... by the repo-root compose entry (only that entry loads the file)
+ok   (root) a repo-root .env with NODE_ENV=production: refused, Blockchain/Dev/.env unchanged
+ok   (root) the refusal names the repo-root .env
+ok   (root) control: a repo-root .env with NODE_ENV=development is accepted
+ok   (phase B) a .env.local template with NODE_ENV=production: refused (exit 3) after bootstrap-env.sh
+ok   (phase B) ... no seed credential written (ADMIN blank, ALLOW not true)
+ok   (phase B) ... the message says bootstrap-env.sh had filled the infrastructure keys
+ok   (fail-closed) control: docker is not found on the docker-less PATH
+ok   (fail-closed) control: node is still found on the docker-less PATH
+ok   (fail-closed) docker absent: refused (exit 3), no .env written
+ok   (fail-closed) docker absent: the message says docker must be on PATH
+ok   (fail-closed) control: node is not found on the node-less PATH
+ok   (fail-closed) control: docker is still found on the node-less PATH
+ok   (fail-closed) node absent: refused (exit 3), no .env written
+ok   (fail-closed) node absent: the message names node and npm ci
+ok   (fail-closed) dotenv not installed (no node_modules): refused (exit 3), no .env written
+ok   (fail-closed) dotenv not installed: the message names npm ci in Blockchain/Dev
+ok   (fail-closed) docker compose config fails: refused (exit 3), no .env written
+ok   (fail-closed) ... the message names the Blockchain/Dev compose entry
+ok   (fail-closed) a .env bash cannot source: refused (exit 3), .env unchanged
+ok   (fail-closed) ... the message names the bash set -a reader
+ok   (fail-closed) a .env that ends the reading shell (exit): refused (exit 3), .env unchanged
+ok   (fail-closed) ... the message names the bash set -a reader
+ok   (compose shape) an environment given as a list: refused (exit 3), no .env written
+ok   (compose shape) output that is not JSON: refused (exit 3), no .env written
+ok   (compose shape) no auth service: stops (exit 1) with no seed credential written
+ok   (compose shape) ... and says there is no auth service
+ok   (sandbox) a .env line that runs touch through $(...): no file created
+ok   (sandbox) a .env line that redirects output: no file created
+ok   (sandbox) control: an unsandboxed set -a on the same file DOES create both
+ok   (links) a symlinked .env: refused (exit 3), its target unchanged (content and 0644)
+ok   (links) a symlinked .env.local: refused (exit 3), its target unchanged (content and 0644)
+ok   (links) control: the hard link is in place (link count 2)
+ok   (links) a hard-linked .env: refused (exit 3), the other name's mode still 0644
+ok   (links) ... the message says hard link
+ok   (vi) a second clone: exits 0
+ok   (vi) two clones get different ADMIN_USER_PASSWORD values
+ok   (vii) compose forwards ADMIN_USER_PASSWORD from .env to a service
+ok   (vii) compose forwards ALLOW_DEFAULT_SEED_PASSWORDS from .env to a service
+ok   (vii) the auth seeder reads ADMIN_USER_PASSWORD
+ok   (vii) the auth seeder is gated on ALLOW_DEFAULT_SEED_PASSWORDS === 'true'
+ok   (rot) existing values: exits 0
+ok   (rot) an existing ADMIN_USER_PASSWORD is kept
+ok   (rot) an explicit ALLOW_DEFAULT_SEED_PASSWORDS=false is kept
+ok   (rot) a pre-existing .env is brought to mode 0600
+ok   (rot) --rotate: exits 0
+ok   (rot) --rotate replaces ADMIN_USER_PASSWORD with a generated value
+ok   (rot) --rotate does not print the new value (instrument: the value is non-empty)
+ok   (rot) --rotate keeps the mode at 0600
+ok   (verify) --rotate while the shell sets ADMIN_USER_PASSWORD: exit 1, .env byte-identical
+ok   (verify) ... the message says compose would not pass the new value
+ok   (verify) ... no temp copy is left
+ok   (rot-nc) --rotate over a canonical line and a later export line: exits 0
+ok   (rot-nc) neither old value is left anywhere in .env
+ok   (rot-nc) exactly one ADMIN_USER_PASSWORD line remains, and it is canonical
+ok   (F9) ADMIN set then blank: exits 0
+ok   (F9) it says generated, not kept
+ok   (F9) one canonical, generated ADMIN line remains
+ok   (qe) ADMIN_USER_PASSWORD="": exits 0 and says generated
+ok   (G165-F5) export form: exits 0
+ok   (G165-F5) export form: kept (one ADMIN line, the same value, output says kept)
+ok   (G165-F5) spaced form: exits 0
+ok   (G165-F5) spaced form: kept (one ADMIN line, the same value, output says kept)
+ok   (G165-F6) ALLOW_DEFAULT_SEED_PASSWORDS=TRUE: exits 0
+ok   (G165-F6) it is rewritten to exactly true
+ok   (G165-F6) the output says it was rewritten
+ok   (ok) .env with pgbouncer DATABASE_URL: accepted
+ok   (ok) .env with empty DATABASE_URL: accepted
+ok   (SIGKILL) the shim fired and a SIGKILL at the rename leaves a temp copy (the case exists)
+ok   (SIGKILL) that leftover is ignored by git
+ok   (SIGKILL) control: the round-1 name .env.ks915.X is NOT ignored
+ok   (SIGTERM) the shim fired (the script reached its rename) and NO temp copy is left (the trap removed it)
+ok   (F10) BASH_ENV=a file that turns on xtrace: exits 0
+ok   (F10) the instrument has values to look for (>= 8)
+ok   (F10) no generated value reaches the output
+ok   (G166) n01 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173) n01 POSTGRES_HOST in .env is refused by dotenv, naming the key
+ok   (G166) n01 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) n04 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173) n04 a host= inside POSTGRES_DB is refused, naming the key
+ok   (G166) n04u append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) n06 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173) n06 a host= inside POSTGRES_PORT is refused, naming the key
+ok   (G166) n07 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) n08 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) n09 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ln: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/tmp/sh/ks915r.fMiFm0/f-g11-append/Blockchain/Dev/node_modules/node_modules: File exists
+ok   (G166) g11 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ln: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/tmp/sh/ks915r.fMiFm0/f-g12-append/Blockchain/Dev/node_modules/node_modules: File exists
+ok   (G166) g12 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ln: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/tmp/sh/ks915r.fMiFm0/f-g13-append/Blockchain/Dev/node_modules/node_modules: File exists
+ok   (G166) g13 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) n10 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173 layer) a quoted POSTGRES_DB is refused by the canonical-line check
+ok   (G166) n11 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173 layer) POSTGRES_HOST set by a declare only bash runs is refused by bash set -a
+ok   (G173) n02 POSTGRES_HOST in the repo-root .env: refused (exit 3), Blockchain/Dev/.env unchanged, host never printed
+ok   (G173) n02 ... the refusal names the repo-root .env
+ok   (v) shell POSTGRES_HOST=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell POSTGRES_DB=secuura host=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) shell POSTGRES_PORT=5432 host=e31rmt.host: refused (exit 3), no .env written, nothing of the host printed
+ok   (v) control: shell POSTGRES_HOST=postgres is accepted
+ok   (v) control: shell POSTGRES_HOST=localhost is accepted
+ok   (v) control: shell POSTGRES_HOST= is accepted
+ok   (v) control: shell POSTGRES_DB=secuura is accepted
+ok   (G173) control n05: POSTGRES_PORT=5432 and POSTGRES_HOST=postgres in .env are accepted
+ok   (G173 compose) pgbouncer's POSTGRES_HOST resolved remote by the dev entry: refused (exit 3), no .env written, host never printed
+ok   (G173 compose) ... by the dev entry, naming the pgbouncer service
+ok   (G173 compose) pgbouncer's POSTGRES_HOST resolved remote by the root entry: refused (exit 3), no .env written, host never printed
+ok   (G173 compose) ... by the root entry, naming the pgbouncer service
+ok   (G173 census) the database-address keys compose passes (Blockchain/Dev entry) are exactly the judged set
+ok   (G173 census) the database-address keys compose passes (repo-root entry) are exactly the judged set
+ok   (G173 census) control: a key compose does not pass is not in the census
+ok   (v) shell TEST_DATABASE_URL=postgresql://u:p@e31rmt.host/x: refused (exit 3), no .env written, nothing of the host printed
+ok   (G166) a11 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173 F5) a hostaddr parameter interpolated through APP_DB_PASSWORD is refused by compose
+ok   (G166) a12 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173 F5) a service parameter interpolated through APP_DB_PASSWORD is refused by compose
+ok   (G166) a13 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173 F5) a host that only starts with localhost, through APP_DB_PASSWORD, is refused by compose
+ok   (G173 cond) the credential route with compose's reader failing: refused (exit 3), .env byte-identical and 0644
+ok   (G173 cond) ... the message says the check cannot run
+ok   (G173 cond) the credential route with compose's reader absent: refused (exit 3), .env byte-identical and 0644
+ok   (G173 cond) ... the message says the check cannot run
+ok   (G173 cond) control: the absent arm's PATH really has no docker
+ok   (G166) f16 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G173 F5) a fake reader record printed first is not taken: refused by bash set -a
+ok   (G173 F5) a blank ALLOW_DEFAULT_SEED_PASSWORDS in the shell: stops (exit 1), says compose would not pass true
+ok   (G173 F4) ra0 control, no repo-root .env: exits 0
+ok   (G173 F4) ra0 ... no repo-root note
+ok   (G173 F4) ra1 repo-root .env with ADMIN_USER_PASSWORD blank: exits 0
+ok   (G173 F4) ra1 ... Blockchain/Dev/.env got a generated value
+ok   (G173 F4) ra1 ... and the output says the repo-root entry will NOT pass it, naming the repo-root .env
+ok   (G173 F4) ra2 repo-root .env with another ADMIN_USER_PASSWORD: exits 0
+ok   (G173 F4) ra2 ... the output says the repo-root entry will NOT pass it
+ok   (G173 F4) ra2 ... the repo-root .env is left as it was
+ok   (G173 F4) ra3 repo-root .env with ALLOW_DEFAULT_SEED_PASSWORDS=false: exits 0
+ok   (G173 F4) ra3 ... the output says the repo-root entry will NOT pass ALLOW_DEFAULT_SEED_PASSWORDS=true
+ok   (G173 F3) x1: a .env line using history -w writes no file outside the sandbox
+ok   (G173 F3) x1 control: an unsandboxed set -a on the same file DOES write it
+ok   (G173 F3) x2: a .env line using history -w writes no file outside the sandbox
+ok   (G173 F3) x2 control: an unsandboxed set -a on the same file DOES write it
+ok   (G166) q01 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 F1) q01 (gate g01) single-quoted in .env: refused by dotenv, naming PGBOUNCER_MAX_CLIENT_CONN
+ok   (G166) q01 prepend: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G166) q02 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 F1) q02 (gate g02) unquoted in .env: refused by dotenv, naming PGBOUNCER_DEFAULT_POOL_SIZE
+ok   (G166) q05 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 F1) q05 a hex PGBOUNCER_MAX_USER_CONNECTIONS in .env: refused, naming the key
+ok   (G174 F1) q03 (gate g03) PGBOUNCER_RESERVE_POOL_SIZE in the repo-root .env: refused (exit 3), Blockchain/Dev/.env unchanged, host never printed
+ok   (G174 F1) q03 ... the refusal names the key and the repo-root .env
+ok   (v) shell PGBOUNCER_MAX_DB_CONNECTIONS=10000\n[databases]\nsecuura = host=e31rmt.host port=5432 dbname=secuura: refused (exit 3), no .env written, nothing of the host printed
+ok   (G174 F1) q04 (gate g04) ... the refusal names PGBOUNCER_MAX_DB_CONNECTIONS in the shell environment
+ok   (G166) q06 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 layer) a pool size set by a declare only bash runs is refused by bash set -a
+ok   (G166) q07 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 layer) a quoted pool size is refused by the canonical-line check
+ok   (G174 compose) pgbouncer's PGBOUNCER_MAX_CLIENT_CONN carrying a [databases] line, by the dev entry: refused (exit 3), no .env written, host never printed
+ok   (G174 compose) ... by the dev entry, naming the key and the pgbouncer service
+ok   (G174 compose) pgbouncer's PGBOUNCER_MAX_CLIENT_CONN carrying a [databases] line, by the root entry: refused (exit 3), no .env written, host never printed
+ok   (G174 compose) ... by the root entry, naming the key and the pgbouncer service
+ok   (v) control: shell PGBOUNCER_DEFAULT_POOL_SIZE=20 is accepted
+ok   (G174 F1) control q08: the five pool sizes as plain numbers (one blank) in .env are accepted
+ok   (v) shell NODE_ENV=development
+staging: refused (exit 3), no .env written, nothing of the host printed
+ok   (G174 F1 nl) ... a line break inside the shell's NODE_ENV is named as one
+ok   (v) shell DATABASE_URL=postgresql://u:p@localhost:6432/secuura
+: refused (exit 3), no .env written, nothing of the host printed
+ok   (G174 F1 nl) ... a line break after a local shell DATABASE_URL is named as one
+ok   (G166) nl1 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 F1 nl) a double-quoted \n in NODE_ENV (dotenv makes it a line break): refused by dotenv, named
+ok   (G174 F1 nl) control: a line break in a value no reader judges (E33_NOTE) is accepted
+ok   (G174 F1 nl) a line break inside a NODE_ENV only compose passes: refused (exit 3), no .env written, named by the Blockchain/Dev entry
+ok   (G166) f17 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 F1) a forged 8-value reader record followed by exit is no reading (the record now carries 13 values)
+ok   (G174 pin) rendered by entrypoint.sh AND passed to pgbouncer (Blockchain/Dev entry) = the set the readers judge
+ok   (G174 pin) rendered by entrypoint.sh AND passed to pgbouncer (repo-root entry) = the set the readers judge
+ok   (G174 pin) PGBOUNCER_DEFAULT_POOL_SIZE is in the bash reader's record, the canonical-line list and canonical_shell
+ok   (G174 pin) PGBOUNCER_MAX_CLIENT_CONN is in the bash reader's record, the canonical-line list and canonical_shell
+ok   (G174 pin) PGBOUNCER_MAX_DB_CONNECTIONS is in the bash reader's record, the canonical-line list and canonical_shell
+ok   (G174 pin) PGBOUNCER_MAX_USER_CONNECTIONS is in the bash reader's record, the canonical-line list and canonical_shell
+ok   (G174 pin) PGBOUNCER_RESERVE_POOL_SIZE is in the bash reader's record, the canonical-line list and canonical_shell
+ok   (G174 pin) POSTGRES_DB is in the bash reader's record, the canonical-line list and canonical_shell
+ok   (G174 pin) POSTGRES_HOST is in the bash reader's record, the canonical-line list and canonical_shell
+ok   (G174 pin) POSTGRES_PORT is in the bash reader's record, the canonical-line list and canonical_shell
+ok   (G174 pin) control: a sed line planted in a copy of entrypoint.sh is seen by the renderer instrument
+ok   (G174 pin) control: a rendered key that compose passes to pgbouncer is seen by the compose instrument
+ok   (G174 F2) pf0 X=1...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf0 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf1 export PATH=/usr/bin:/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf1 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf2 declare PATH=/usr/bin:/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf2 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf3 typeset PATH=/usr/bin:/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf3 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf4 PATH=/usr/bin:/bin touch @F@...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf4 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf5 for PATH in /usr/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf5 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf6 read PATH <<< /usr/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf6 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf7 f(){ local PATH=/usr/bin:/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf7 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf8 printf -v PATH %s /usr/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf8 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf9 eval 'PATH=/usr/bin:/bin'...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf9 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf10 PATH+=:/usr/bin:/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf10 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf11 ( PATH=/usr/bin:/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf11 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf12 trap 'PATH=/usr/bin:/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf12 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf13 readonly PATH=/usr/bin:/bin...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf13 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf14 declare +r PATH...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf14 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) pf15 export -n PATH...: refused (exit 3), no file made, .env byte-identical, PATH named
+ok   (G174 F2) pf15 control: an unsandboxed set -a on the same file DOES make it
+ok   (G166) pt-10 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 F2) the line 'unset PATH' is refused, naming PATH
+ok   (G166) pt-21 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 F2) the line 'PATH[0]=/usr/bin:/bin' is refused, naming PATH
+ok   (G166) pt-4 append: refused (exit 3), .env byte-identical and 0644, host never printed
+ok   (G174 F2) the line 'PATH' is refused, naming PATH
+ok   (G174 F2) same line 'PATH=/usr/bin:/bin; declare ...': refused (exit 3), .env byte-identical, PATH named, host never printed
+ok   (G174 F2) ... control: an unsandboxed set -a on the same file reads POSTGRES_HOST as the remote host
+ok   (G174 F2) same line 'PATH+=:/x; declare ...': refused (exit 3), .env byte-identical, PATH named, host never printed
+ok   (G174 F2) ... control: an unsandboxed set -a on the same file reads POSTGRES_HOST as the remote host
+ok   (G174 F2) sr0 'command -p touch @F@': no file made (set -r), exit 0
+ok   (G174 F2) sr0 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) sr1 'hash -p /usr/bin/touch touch; touch @F@': no file made (set -r), exit 0
+ok   (G174 F2) sr1 control: an unsandboxed set -a on the same file DOES make it
+ok   (G174 F2) control: ENV=, SHELL=, NODE_ENV= and MY_PATH= lines (none touches PATH) are accepted
+ok   (leak) the instrument has values to look for (>= 8)
+ok   (leak) fresh clone's values in any log of this suite
+ok   (leak) golden values in any log of this suite
+ok   (leak) control: a value planted in a copy of the output IS found
+ok   (leak) no xtrace lines in the fresh run's output
+ok   (use) --help exits 0
+ok   (use) --help says it generates and restores nothing from a store
+ok   (use) --help writes no .env
+ok   (use) an unknown flag: refused (exit 64), no .env written
+
+Results: 421 passed, 0 failed

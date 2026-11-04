@@ -1,0 +1,39 @@
+n01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=gate180rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+n02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'POSTGRES_HOST=gate180rmt.host\n' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:POSTGRES_HOST@pgbouncer]
+n03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | POSTGRES_HOST=gate180rmt.host | args= | dev='' root='' local=''
+      why: refused by pg-connection-string (node pg's URL reader): POSTGRES_HOST does not name a local host (it is pgbouncer's upstream) in the shell environment
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+n04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_DB="secuura host=gate180rmt.host"\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=POSTGRES_DB] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+n05   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=5432\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+h10   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_HOST=postgres port=5432 host=gate180rmt.host\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=REMOTE] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:POSTGRES_HOST@pgbouncer] root[compose:POSTGRES_HOST@pgbouncer]
+p02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_PORT=+5432\n' root='' local=''
+      why: refused by dotenv 16
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
+w01   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'APP_DB_PASSWORD=\'x@gate180rmt.host:5432/secuura?hostaddr=1.2.3.4&a=\'\n' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): DATABASE_URL carries a hostaddr parameter for the analytics service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=APP_DB_PASSWORD] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector] root[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector]
+w02   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'APP_DB_PASSWORD=x@gate180rmt.host/secuura?x=\n' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): DATABASE_URL does not name a local host for the analytics service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=APP_DB_PASSWORD] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector] root[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector]
+w03   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev='' root=$'POSTGRES_PASSWORD=x@gate180rmt.host/secuura?x=\n' local=''
+      why: refused by docker compose config (repo-root entry, docker-compose
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:DB@api-gateway,DB@migrations]
+w04   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 | APP_DB_USER=u@gate180rmt.host/secuura?x= | args= | dev='' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): DATABASE_URL does not name a local host for the analytics service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector] root[compose:DB@analytics,DB@anchoring,DB@api-gateway,DB@auth,DB@billing,DB@demo-service,DB@governance,DB@kyc,DB@m365-integration,DB@nft-certificate,DB@originate,DB@prism,DB@referral,DB@security,DB@staking,DB@tenant-provisioning,DB@timestamping,DB@tokenisation,DB@transfer,DB@vc-issuer,DB@wallet-connector]
+w05   rc=3   tree_same=y outside_same=y admin_changed=n admin_now_set=n mode=644 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'POSTGRES_USER=u?host=gate180rmt.host&x=\n' root='' local=''
+      why: refused by docker compose config (Blockchain/Dev entry): MIGRATION_DATABASE_URL does not name a local host for the api-gateway service
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local MARKER_IN=POSTGRES_USER] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:DB@api-gateway,DB@migrations] root[compose:DB@api-gateway,DB@migrations]
+c01   rc=0   tree_same=N outside_same=y admin_changed=Y admin_now_set=y mode=600 tmpcopies=0 marker_in_log=0 |  | args= | dev=$'APP_DB_PASSWORD=plainLocalPw123\n' root='' local=''
+      why: 
+      AFTER: dotenv[DB=local NE=other PG*=local POSTGRES_HOST=local] bash[DB=local NE=other PG*=local POSTGRES_HOST=local] dev[compose:all-local] root[compose:all-local]
