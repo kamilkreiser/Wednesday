@@ -59901,5 +59901,69 @@
    "CARD secuura-billing-possible-double-credit-two-stripe-events-1102",
    "CARD secuura-pr1989-round3-go-hold-demo-accounts-1104"
   ]
+ },
+ {
+  "id": "hpsmpoc-visual-round-cap-1105",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Visual round: the test gate's last round failed on one test file. Land it without that test change?",
+  "bluf": "I need one tap. The visual round (white menu, status colours, wider content, your three header changes, the mock rows) is built and measured sound on screen, but it is NOT on UAT yet. The second and last allowed gate round said NO GO for one reason only: a test-file tidy-up (removing two half-second pauses) made one test file fail at random on a busy machine (2 of 38 in the full run). Nothing on screen is wrong. Everything else is closed: the printed report now matches the site colours (25 of 25), the API suite is green (3933 passed, 0 failed), the two corrected figures are measured, and the site itself is byte-for-byte what the first gate measured. The cap rule means nothing lands without your word. My recommendation: put that one test file back to its round-one version (it passed all five test groups then, and 0 of 80 under load tonight), keep the report-colour fix, run a short check, then land and deploy to UAT and the demo. The half-second pauses become a ticket. (Override of the prior-rulings check: its four matches are a 1 Sep NexusAI message and your 4 Nov header, words and colours rulings on this round, all kept; none is about landing after the gate cap.)",
+  "default_action": "Nothing lands and nothing deploys (UAT and the demo stay on the header fix of 4 Nov). The residue is ticketed. I re-raise this on the morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Land it without the test change (recommended)",
+    "detail": "put mock-rows.spec.ts back to its round-1 version (measured green in all five shards), keep BrandTokens, a short check run (that shard twice, the brand test), then land, UAT, then the demo; the pauses are ticketed"
+   },
+   {
+    "key": "b",
+    "label": "A third test-only round",
+    "detail": "fix the wait properly in that test file (wait for the element), a short gate, then land and deploy; about two to three hours"
+   },
+   {
+    "key": "c",
+    "label": "Hold",
+    "detail": "nothing lands; UAT and the demo stay on the header fix; I ticket the residue"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T01:07:41.902085+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-01 17:25",
+   "CARD hpsmpoc-visual-mock-vs-header-1104",
+   "CARD hpsmpoc-visual-words-1104",
+   "CARD hpsmpoc-visual-colours-1104"
+  ]
+ },
+ {
+  "id": "hpsmpoc-pdf-follows-palette-1105",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Printed report: I made it follow the new site colours. Keep that?",
+  "bluf": "Your call, no rush: I decided this for you overnight and it can be reversed. The site's new colours broke a check that the printed PDF report uses the same colours as the site, so I made the report follow the new colours (one small file). Every text colour in the report still passes the accessibility floor (lowest 4.56 against 4.5), but the High and Medium severity cells and the notices in the PDF are now lighter than before (they were about 7.3 to 8 to 1). It is part of the visual round, so it only goes live if that round lands (see the other card). Keeping it is my recommendation: one palette for site and report, and it is what your 13:02 'keep my hues' ruling points to. (Override of the prior-rulings check: its three matches are NexusAI energy and dark-palette rulings, another project.)",
+  "default_action": "The report follows the new site colours (it ships with the visual round, if that lands).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it (recommended)",
+    "detail": "the report follows the site colours"
+   },
+   {
+    "key": "b",
+    "label": "Revert the report colours",
+    "detail": "the report keeps its darker colours; the check that ties report and site together has to be changed, or the site palette changed, in a separate small round"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T01:08:03.334812+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 16:08",
+   "CARD nexusai-dark-palette-approval",
+   "CARD nexusai-palette-approval"
+  ]
  }
 ]
