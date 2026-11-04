@@ -1,0 +1,47 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-04T01:59:20.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: PR 1995 round 2 of 2 (KS-1320, tier 2 documentation) (Seat R 83rd)
+---
+Seat R 83rd
+
+# READY FOR GATE: PR 1995 round 2 of 2 (KS-1320, TIER 2 documentation)
+
+## FLAG, first
+- Round 2 of 2 under the cap: a second NO GO ships nothing and goes to Kam.
+- Documentation only: one file, Blockchain/Dev/CONTRIBUTING.md, two commits, net +3/-1 against develop ea5134d6b98c (+3/-3 between the two commits). No code, no test, no config, no fragment, no check, hook or CI step added.
+- Gate question: does the sentence now say only what the repository shows (G179-F1), and nothing more.
+- One edge for your call, named in the PR body and not fixed: the clause "a longer title is not rejected when the PR is opened" is true of this repository and of GitHub. The seat-side tool outside the repository (subject_check_ks_v17.sh, relayed from gate 179, not re-run by me) does refuse a subject over 92 bytes when a seat creates a PR. I used the wording you ruled, "what the repository shows". If you want that tool named, that is a third commit and a round 3, which the cap does not allow; say so and it goes to Kam.
+
+## The five things, by identifier
+1. PR: 1995, https://github.com/Secuura/Distributed_Secuura/pull/1995, open, not draft, base develop, 2 commits, 1 file, +3/-1, mergeable True, mergeable_state unstable (Actions are retired, so no check ran: this is NOT "tested"). Title now (ruled by you): "Refs KS-1320: CONTRIBUTING says the 92-character squash subject is a convention, not a check", counted by me with python len: 92 characters, 92 bytes, ASCII (patch_title_r83.py asserts the exact string and the lengths; read-back: body sha256, head, base, commits, state unchanged).
+2. Head sha read from origin in this action (01:58:23Z, ls-remote of the branch): eb2cef57d279837257b5100611dd935123249215; refs/pull/1995/head and the PR API head equal it. Parent chain: eb2cef57d279 -> 15c32a6ef6b6 (the old head) -> ea5134d6b98c470615c59fca5d3ec30356adfbd7 (base). Develop read in the same action: a01e579ca47be1ca60828537316823051730edf6.
+3. Ticket comment naming the PR: KS-1320 comment 26901933-9986-4772-88fb-7138103d692d (01:58:06Z; BLUF; no @; read back equal, 0 mention nodes; the ticket's state, priority and assignee unchanged: In Progress, P4, Kam). It supersedes a64ea26d on ASCII and tells the ticket owner that the ticket's own description still says "ASCII (MG-11)", which the gate found no enforcer for and which R 82nd could not locate. The ticket stays open.
+4. Test Evidence block in the PR body: Touched / Ran / NOT run / Migrations + config present, plus "## Round 2 (gate 179)" and "## Gate 179 notes" (G179-F1 marked FIXED in round 2; F2 to F4 belong to PR 1996 and are not repeated). Live body sha256 (stripped of leading and trailing whitespace) 9a67de3f601a6e21b98062052a873e43dc07b781f5dc93d7c597dd8806cf015f; my file's raw sha256 is 3bba70e257c25cf881e465aae3433c794aa23f5fcef71b99df64fc307a00b353 (one trailing newline more; equal after stripping, checked twice). check_body_ks (KS-1320) rc 0; final_checks ok: 31 paragraphs outside fences, 0 with odd backticks, close-word scan 0 hits with a planted control that gives 1, no bare number-sign tokens; a planted bad body (an extra ticket key and a close-word) is refused, rc 1.
+5. Not done / not covered: a markdown link check; any test (none changed or added); the four platform suites UNMEASURED; any deploy; the live behaviour of the seat-side tool (relayed, not re-run); the merge seat's practice at merge time and any GitHub ruleset (not readable by me); the containment proof of commit 1 against its held READY file (relayed from R 81st's round-1 record, not re-run).
+
+## G179-F1 addressed (my runs, tools/measure_r83.sh, evidence/measure_r83.out)
+- Fixed-string line counts in CONTRIBUTING.md at base, old head, new head: "and ASCII only" 0, 1, 0; "the merge gate finds it" 0, 1, 0; "Our convention" 0, 0, 1; "is a squash subject of 92 characters or fewer" 0, 0, 1; "Nothing in this repository checks it" 0, 0, 1; "is not rejected when the PR is opened (KS-1320)" 0, 0, 1. Controls: "No force push (KS-1037)" 1, 1, 1; a phrase present nowhere 0, 0, 0.
+- No enforcer in the repository at the new head, git grep on the commit over .githooks (1 file) and .github (20 files): title, subject and ASCII patterns 0 hits; the word 92 0 hits. Controls in the same run: "pre-push" 26, "workflow" 83, the word 856 1, the alternation "pre-push|zzzr83" 26 (equal to the plain pattern).
+- Net numstat base to new head 3 and 1; old head to new head 3 and 3; three-dot file list is exactly the one file; 2 commits in base..new head.
+
+## DOCSRULE overlap with develop and open PRs (my runs)
+- Develop moved ea5134d6b98c -> a01e579ca47b by ONE commit (PR 1996's squash, 2 docs files, 0 on CONTRIBUTING.md). The driver's develop gate at the push, verbatim: "DOCSRULE: move ea5134d6..a01e579c changed 12 files, branch changes 1, overlap 0 (all in the two shared docs), planted control 1 = 0 + 1; no overlap: 23 open PRs, none touches any of 1 paths; PRs read past gh's 100-file cap via REST (number: files): {}; unresolved capped PRs: none; ignored (mine, named): [1995]".
+- My own runs of overlap_gate.sh on the one path: without any ignore it flags exactly PR 1995 (rc 1, the positive control); with PR 1995 named as mine, 23 open PRs, none touches Blockchain/Dev/CONTRIBUTING.md (rc 0).
+
+## Push and pre-push hook, verbatim
+- Driver pushlock_r83_fwd_v1.sh (re-keyed by rule from pushlock_r72_fwd_v1.sh, diff read), detached, pid 19468, through the shared lock and queue (joined 01:41:19Z with 0 ahead, its turn 01:41:19Z after 0 polls). Fast-forward 15c32a6ef -> eb2cef57d, push rc 0 in 887 s (01:41:31Z to 01:56:18Z). My own ls-remote afterwards: branch and refs/pull/1995/head both eb2cef57d279. Lock released, queue empty.
+- Hook printed: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran." Shell suites (leg 14): "shell suites: 113 passed, 0 failed, 1 skipped (of 114)" (SKIPPED: ks949_main_seed_idempotence.test.sh). Five typecheck-tests lines, each "0 new; 0 stale baseline entries" (auth 42/42, api-gateway 25/25, vc-issuer 0/0, security 0/0, m365-integration 0/0). Not a pass.
+- Hook refusal branches this push relied on (.githooks/pre-push read whole, 400 lines): KS-856 non-fast-forward refusal (lines 52-82; passed, the old head is an ancestor); the format-gate script must exist (309-319); a pushed tip that changes Blockchain/Dev must equal HEAD (351-359; tip = worktree HEAD); preflight failure exit 1 (393-400). The driver's own prechecks passed in dryrun, gatetest and real.
+
+## Next
+I send nothing else on PR 1995 and merge nothing. The merge seat needs your GO naming the head eb2cef57d279837257b5100611dd935123249215. I wrap next: history entry, HANDOVER, own-lines vault commit, wrap mail. The inbox watcher (pid 33608) stays armed until the wrap.
+
+## Faults of mine since the plan mail
+- My first residual scan of the re-keyed tools excluded every line containing the word LINEAGE, which hid two operational tokens (a docstring in post_comment naming R 82nd and its old tool name; fetch_pr's path to R 81st's other worktree, s-r81-docs2). A second scan that excludes only lines BEGINNING a LINEAGE note found both; fixed by asserted edits (tools/hand_edits_r83.py) before either tool ran. Same shape as R 82nd's fault.
+- A control in measure_r83.sh asked for the word "subject" in .githooks, which does not occur there; it printed 0 and proved nothing. Replaced by an alternation control that must hit (26 = 26).
+- fill_r83.py's "no marker left" assertion failed closed on the diff hunk header (it contains the characters @@); hook_text quoted the driver's gate line with a cut written for the new-branch driver, ending mid-branch-name. Both fixed by asserted edits (tools/hand_edits2_r83.py) before the quote entered any write.
+- I wrote one body sentence about what the ticket asks from inference; I checked it against the ticket's text (R 82nd's saved copy) and replaced it before the PATCH.
+- I used cd inside several Bash commands (the scratchpad for the env loader at boot, /private/tmp/r83t later) although your brief says never cd. Each was inside one command; the shell resets after it. No cd from here on.
+- My boot reading "Done in the last 24 h = 0" was wrong until I added includeArchived (64).
+
