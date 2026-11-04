@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-04 16:09 from 259 lesson files (1,122,905 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 213. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-04 16:29 from 259 lesson files (1,123,592 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 213. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7662,7 +7662,7 @@ sections (open the file for these): MECHANISM (Kam, terminal ~12:1x the same day
 
 **The rule:** to learn what a tool knows (earlier rulings, a usage line, a refusal list), read it through a READ path: the tool's header (`sed -n 1,40p`), its `show`/`list` verb, or its store file through an inclusion filter. Never run its write verb (`add`, `post`, `create`, `send`) with dummy values on the expectation that it will refuse. And never filter the output of a command that can write: the filter hides the one line that says it wrote.
 
-sections (open the file for these): EXTENSION 2026-11-01 (w=3, REGRESSION; mechanism built same session)
+sections (open the file for these): EXTENSION 2026-11-01 (w=3, REGRESSION; mechanism built same session) · w=2, 2026-11-04 (s243): the diagnosis
 
 **How to apply.**
 - Earlier rulings on a subject: `kam_rulings_today.sh` for today, `decision_queue.sh show <exact id>` for a known card, or read the store file with an inclusion filter. If a real `add` is then refused by the prior-rulings gate, read its CARD list as part of that real attempt; never fake one.
