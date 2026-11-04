@@ -1,0 +1,53 @@
+=========== [INBOUND] 2026-11-04T20:00 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS: d14 build running, rsync 726 + 1 declared unse
+[Secuura/Blockchain-D -> Wednesday] STATUS: d14 build running, rsync 726 + 1 declared unsent, Phase 0 d14 33 (Seat D 52nd)
+Seat D 52nd
+
+GO DEMO received 19:52:00Z (SPF/DKIM/DMARC pass). B-phase so far, every step as predicted in STATUS A:
+
+- Develop re-read at B-start (19:52:47Z): 035685291b9d, unmoved.
+- Upload: 17 tools to .rebuild-seatD52, 17 of 17 hash-equal.
+- Driver controls (validate-only): 5 orders accepted (the full 27 order and four subsets), 7 refused as wanted: api-gateway not last, status-frontend outside the set, postgres, migrations, demo-overlay, demo-service, nginx-gateway.
+- Env copy: mode 600, 12,434 B, sha16 e61aa0987f017f17 (= the stack's). Compose config 7dd48832296d1d95.
+- Point (i): served yaml 1,383,376 B, e5c450a67c4def10, every marker as predicted.
+- rsync --checksum, real (19:55:04Z): 726 sent, 0 deletes. One delta path unsent, exactly the predicted one: docker/nginx-gateway/nginx-demo.conf, which already holds the target's bytes. Wrong-range control fired (6).
+  - Slip: the inherited verdict wanted 0/0/N and printed MISMATCH on the dry run. I declared that one path in the verdict by hand (copy kept as .pre-handedit) and re-ran the dry run (OK) before the real one.
+- Binds after the rsync, as predicted:
+  - yaml host inode 1311739 / b76638b170964480; the running api-gateway still sees 1311710 / e5c450a67c4def10 (DIFFERENT until its recreate).
+  - nginx conf SAME on inode 1311685, c3905a1ef162c82a.
+- Postrsync: 180 rows, 0 mismatches (155 sync probes). .env and REVISION unchanged; compose config SAME.
+  - I added one probe row for 057 to the generator by hand (declared; copy kept).
+- Phase 0 pre-20261104d14 (box date 20261104 at 19:56:48Z): ok 33, FAIL 0, idfp 033d216ef0891309. All 17 older demo sets INTACT (pre-20261006 ... pre-20261029d13).
+- KS-535 BEFORE the build: 12ea1a07174c3f50 on anchoring and nft-certificate, stops 0.
+- Build d14: launched 19:59:09Z, 14 batches of 2, free 51,510 MB at batch 1, floor 12,000 MB. Tracked waiter running; it logs FREE every 30 s.
+
+Next: the build window (wall time unmeasured on demo), then the post-build checks, migrations 056 + 057, gates, the split swap. I'll mail if a batch fails, the floor trips or OOM shows; otherwise the next mail is after the build.
+
+=========== [INBOUND] 2026-11-04T19:59 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2003 (KS-1958) at 8b1401782764, TIE
+[Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2003 (KS-1958) at 8b1401782764, TIER 1 (Seat F 31st)
+Seat F 31st
+
+READY FOR GATE: PR 2003 (KS-1958), tier 1.
+
+- PR 2003: https://github.com/Secuura/Distributed_Secuura/pull/2003. Title "Refs KS-1958: a revoked credential fails verify when the credential store read fails" (84 chars).
+- Head 8b1401782764 (8b140178276457116714892fe0cf73b9f1e92c8c), read from origin by ls-remote in the same action as the push check: origin feature branch = 8b140178276457116714892fe0cf73b9f1e92c8c. Base 035685291b9d (develop measured at push time: 035685291b9d58ae6ea8ba5f05adf9379f9c2944, unmoved).
+- Branch feature/ks-1958-vc-issuer-a-revoked-credential-verifies-as-valid-when-the, 1 commit, 5 files (name-only): services/vc-issuer/src/repositories/credentialRepo.ts, services/vc-issuer/src/services/revocationResolvers.ts, services/vc-issuer/src/__tests__/ks1958-revocation-read-fails-closed.test.ts (new), Projects Documents/fragments/flow/KS-1958-revocation-read-fails-closed.html and fragments/cheat/ (new).
+- File-disjoint from PR-B (KS-1986, committed locally as 577f668f478, not pushed): 0 shared paths, control 5 of 5. Open-PR overlap at push time: 0 of 15 open PRs touch my 5 paths (the driver's overlap gate, against the merge-base). B's floor: no merge since the base (develop unmoved), so no merged PR overlaps.
+- Hook verdict, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran." (leg 14 shell suites: 115 passed, 0 failed, 0 skipped (of 115))
+- Push: rc 0, 971 s.
+
+PROOF
+- Red first at the base: 10 of 26 red, 10 of 10 by assertion (0 TypeError, 0 compile errors). Green: 26 of 26.
+- Base vs head, gate 152's own Q2 fixture (verbatim except its output sink): head more permissive than base 0 of 15; head stricter 3 of 15 (B, all three shapes); same 12 of 15. C (KS-1959) unchanged.
+- Mutants 4 of 4 valid, 4 of 4 killed, restored sha256-equal: m1 swallow restored red 10 of 26 (the red cells); m2 fail closed on a healthy empty result red 1; m3 one thrown shape only red 6; m4 revoke inherits red 3.
+- Guards: the five "unreadable thrown value" blocks byte-equal to the base, 5 of 5.
+- Suites: whole vc-issuer 758 of 758 in 26 files, rc 0. Named: credentialRepo.test 11 of 11, ks1352 6 of 6, ks1375 9 of 9, ks1868 loadfromdb 5 of 5, ks1868 read catches 9 of 9. Test-types ratchet: 26 test files, 0 errors. tsc rc 0. eslint 0 errors 0 warnings. docs-fragments check rc 0; planted defect rc 1.
+- The PR body carries the authority line, the CONFLICT (G152-F1 "needs Kam" against your reading of the 1103 rulings), the availability cost, the fresh-error design choice and the boundary-2 reasoning.
+
+AVAILABILITY COST: while the DB read fails on the verifying instance, every credential verified there reads verified false, unrevoked ones included.
+
+NOT TESTED: Node 24 (Node v26.8.1 here); kintsugi or demo; the live verify after a deploy; a real second replica (the fixture edits the row); a real PostgreSQL; production data volume; the four platform suites.
+
+FILING CANDIDATES (not filed): credentialRepo.ts getRecordById, getByHash and getReadableByHash read catches still fall back to memory (not the verify path). G152-F3 is KS-1959, not refiled. Boundary 2 (healthy empty result) is outside KS-1958 on the 0-DELETE reading; no writer that removes a row was found.
+
+Ticket comment: KS-1958 comment 45da3299 posted 19:59:06Z, read back equal, 0 mention nodes; the ticket read In Progress before my comment (Backlog at boot): I changed no state, label or description.
+
