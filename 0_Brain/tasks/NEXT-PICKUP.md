@@ -74,7 +74,8 @@ disposable-stack = a · ks1234 = a (build prod-mode test) · ks1244 = a (build o
 Verbatim: "ignore the spark until further notice.  I cannot connect it while I am backing things up from G drive to Synology". So no tunnel retries, no Spark briefs, no idle reports; spark_status/doctor IDLE warnings are expected and are NOT acted on. Ends only on his word. Work routes to Claude seats (usage 31% at 16:42).
 
 ## WAITING ON KAM
-Nothing open (9 Secuura cards all ruled). Tuesday's Datasec card is hers.
+- **secuura-ks1401-058-merge-demo-billing-1104** (posted 23:39 4 Nov; rec a; default = PR 2002 stays UNMERGED). Gate 190 = GO WITH NOTES — HOLD-FOR-KAM (F1 demo auto-apply on any later redeploy; F2 metering totals of the default tenant). On a: QUEUE PR 2002 to the merge seat (tree 1c8e329f1233 on 536642104002, recompute after 2001; NO merge-order rule needed vs 057), AND write a hard STOP into every Secuura deploy brief (no demo redeploy from a develop containing 058 without Kam's word), AND the kintsugi deploy seat reports the tenant-less charge_events count to Kam BEFORE applying. On b: merge, no demo stop. On c: hold. Then `decision_queue.sh --delivered`.
+- Tuesday's Datasec card is hers.
 
 ## OWED (Wednesday's)
 - NEXT DEPLOY BRIEF (D 51st, kintsugi first) now carries: KS-1233 Redis TTL read; G189-F1 (does any env run the gateway without a usable DB? measure before kintsugi takes PR 2001); G189-F2 (replace PR 2001 body step 3's seed/backfill check with the gate's method); 058 apply plan from R 85th's READY (DEFAULT_TENANT_ID read first, STOP if not a0000000-...0001; kintsugi only); x-api-key-twice measurement for KS-1244.

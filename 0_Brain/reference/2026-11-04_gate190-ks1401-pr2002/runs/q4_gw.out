@@ -1,0 +1,39 @@
+=== GW-shape (Q3 gateway path): docker/init, then real runStartupMigrations over <=056 (base), then over <=056+058 (head)
+  base boot SUMMARY {"ran":true,"applied":98,"failed":0,"lastRunAt":"2026-11-04T12:27:36.443Z"}
+   base charge_events:rls=true,force=true,pol=1,tid=true
+   base certifications:rls=true,force=true,pol=0,tid=true
+   base oauth_apps:rls=true,force=true,pol=2,tid=true
+   base svc_webhooks:rls=true,force=true,pol=1,tid=true
+ERROR:  null value in column "tenant_id" of relation "certifications" violates not-null constraint
+DETAIL:  Failing row contains (30000000-0000-4000-8000-0000000000f1, null, fx, null, null, null, null, null, active, {}, {}, 2026-11-04 23:27:36.623338+11, null, null, null, {}, null).
+   base matrix:
+    M charge_events none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+    M certifications none=0 EMPTY=0 A=0 B=0 DEF=0 BYP=0
+    M oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+    M svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+  head boot SUMMARY {"ran":true,"applied":42,"failed":0,"lastRunAt":"2026-11-04T12:27:37.370Z"}
+  applied 058_ks1401_tenant_isolation_after_039.sql {
+   head charge_events:rls=true,force=true,pol=1,tid=true
+   head certifications:rls=true,force=true,pol=1,tid=true
+   head oauth_apps:rls=true,force=true,pol=2,tid=true
+   head svc_webhooks:rls=true,force=true,pol=1,tid=true
+   head NULLs=0/0/0/0 DEF=1/0/1/1 058rec=1
+   head matrix:
+    M charge_events none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+    M certifications none=0 EMPTY=0 A=0 B=0 DEF=0 BYP=0
+    M oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+    M svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+   second boot (CORE runs again after 058 recorded):
+    SUMMARY {"ran":true,"applied":41,"failed":0,"lastRunAt":"2026-11-04T12:27:38.242Z"}
+   boot2 charge_events:rls=true,force=true,pol=1,tid=true pol=3356c6ad2226
+   boot2 certifications:rls=true,force=true,pol=1,tid=true pol=3356c6ad2226
+   boot2 oauth_apps:rls=true,force=true,pol=2,tid=true pol=3356c6ad2226
+   boot2 svc_webhooks:rls=true,force=true,pol=1,tid=true pol=3356c6ad2226
+=== Q4-GW-A: 058 first, then 057 added (gateway runner)
+  step1 SUMMARY {"ran":true,"applied":42,"failed":0,"lastRunAt":"2026-11-04T12:27:39.117Z"} :: 057rec=0 058rec=1 settings_tbl=f
+  step2 SUMMARY {"ran":true,"applied":42,"failed":0,"lastRunAt":"2026-11-04T12:27:39.434Z"} :: 057rec=1 058rec=1 settings_tbl=t
+  applied lines step2: applied 057_ks1256_gateway_settings_store 
+=== Q4-GW-B: 057 first, then 058
+  step1 SUMMARY {"ran":true,"applied":42,"failed":0,"lastRunAt":"2026-11-04T12:27:40.034Z"} :: 057rec=1 058rec=0 settings_tbl=t
+  step2 SUMMARY {"ran":true,"applied":42,"failed":0,"lastRunAt":"2026-11-04T12:27:40.330Z"} :: 057rec=1 058rec=1 settings_tbl=t
+  applied lines step2: applied 058_ks1401_tenant_isolation_after_039 

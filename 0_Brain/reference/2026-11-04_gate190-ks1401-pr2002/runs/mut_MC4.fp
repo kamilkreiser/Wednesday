@@ -1,0 +1,53 @@
+## K rc=RC=0 applied=applied=1 failed=0 
+K rec=1 nulls=0/0/0/0 defs=1/1/1/1 nn=7c92b5d0
+K charge_events:rls=true,force=true,pol=1,tid=true
+K certifications:rls=true,force=true,pol=1,tid=true
+K oauth_apps:rls=true,force=true,pol=2,tid=true
+K svc_webhooks:rls=true,force=true,pol=1,tid=true
+K charge_events none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=0
+K certifications none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=0
+K oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=0
+K svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=0
+K W1(A->B insert ce): ERROR
+K W7(A own cert): 
+T pol charge_events cd15d4ad4458607fcd9d5d51754a3662/cd15d4ad4458607fcd9d5d51754a3662/PERMISSIVE/public
+T pol certifications cd15d4ad4458607fcd9d5d51754a3662/cd15d4ad4458607fcd9d5d51754a3662/PERMISSIVE/public
+T pol oauth_apps cd15d4ad4458607fcd9d5d51754a3662/cd15d4ad4458607fcd9d5d51754a3662/PERMISSIVE/public
+T pol svc_webhooks cd15d4ad4458607fcd9d5d51754a3662/cd15d4ad4458607fcd9d5d51754a3662/PERMISSIVE/public
+## O rc=RC=0 applied=applied=1 failed=0 
+O rec=1 nulls=1/1/1/1 defs=0/0/0/0 nn=7c92b5d0
+O charge_events:rls=true,force=true,pol=1,tid=true
+O certifications:rls=true,force=true,pol=1,tid=true
+O oauth_apps:rls=true,force=true,pol=2,tid=true
+O svc_webhooks:rls=true,force=true,pol=1,tid=true
+O charge_events none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=0
+O certifications none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=0
+O oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=0
+O svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=0
+O owner-noGUC: charge_events=0 certifications=0 oauth_apps=0 svc_webhooks=0 
+O W1(A->B insert ce): ERROR
+O W7(A own cert): 
+## D rc=RC=0 applied=applied=1 failed=0 
+D rec=1 nulls=0/0/0/0 defs=1/2/1/1 nn=bd12564d
+D charge_events:rls=true,force=true,pol=1,tid=true
+D certifications:rls=true,force=true,pol=1,tid=true
+D oauth_apps:rls=true,force=true,pol=2,tid=true
+D svc_webhooks:rls=true,force=true,pol=1,tid=true
+D charge_events none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=0
+D certifications none=0 EMPTY=0 A=0 B=0 DEF=2 BYP=0
+D oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=0
+D svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=0
+D W1(A->B insert ce): ERROR
+D W7(A own cert): 
+## X rc=RC=3 applied=applied=0 failed=1 
+X rec=0 nulls=                                                             ^ defs=                                                             ^ nn=        
+X charge_events:rls=false,force=false,pol=0,tid=true
+X certifications:rls=true,force=true,pol=0,tid=true
+X oauth_apps:rls=true,force=true,pol=2,tid=true
+X 
+X charge_events none=4 EMPTY=4 A=4 B=4 DEF=4 BYP=4
+X certifications none=0 EMPTY=0 A=0 B=0 DEF=0 BYP=0
+X oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+X svc_webhooks none=                             ^ EMPTY=                             ^ A=                             ^ B=                             ^ DEF=                             ^ BYP=                             ^
+X W1(A->B insert ce): 
+X W7(A own cert): ERROR

@@ -1,0 +1,74 @@
+=== Q4-A: 058 merges first (dir = <=056 + 058), then PR 2001 merges (dir gains 057)
+NOTICE:  policy "tenant_isolation" for relation "certifications" does not exist, skipping
+  step1 [main] Applying 058_ks1401_tenant_isolation_after_039.sql...
+  step1 Summary: applied=1 failed=0 skipped=58
+  step1 RC=0
+  after step1: 057rec=0 058rec=1 settings_tbl=f settings_rows=absent ce=charge_events:rls=true,force=true,pol=1,tid=true order=058_ks1401_tenant_isolation_after_039.sql
+  step2 [main] Applying 057_ks1256_gateway_settings_store.sql...
+  step2 Summary: applied=1 failed=0 skipped=59
+  step2 RC=0
+  after step2: 057rec=1 058rec=1 settings_tbl=t settings_rows=1 ce=charge_events:rls=true,force=true,pol=1,tid=true order=058_ks1401_tenant_isolation_after_039.sql<057_ks1256_gateway_settings_store.sql
+=== Q4-B: 057 merges first, then 058
+NOTICE:  policy "tenant_isolation" for relation "certifications" does not exist, skipping
+  step1 [main] Applying 057_ks1256_gateway_settings_store.sql...
+  step1 Summary: applied=1 failed=0 skipped=58
+  step1 RC=0
+  after step1: 057rec=1 058rec=0 settings_tbl=t settings_rows=1 ce=charge_events:rls=false,force=false,pol=0,tid=true order=057_ks1256_gateway_settings_store.sql
+  step2 [main] Applying 058_ks1401_tenant_isolation_after_039.sql...
+  step2 Summary: applied=1 failed=0 skipped=59
+  step2 RC=0
+  after step2: 057rec=1 058rec=1 settings_tbl=t settings_rows=1 ce=charge_events:rls=true,force=true,pol=1,tid=true order=057_ks1256_gateway_settings_store.sql<058_ks1401_tenant_isolation_after_039.sql
+=== Q4-C: fresh database, both present (docker/init then the runner over <=056+057+058)
+  [main] Applying 057_ks1256_gateway_settings_store.sql...
+  [main] Applying 058_ks1401_tenant_isolation_after_039.sql...
+  Summary: applied=60 failed=0 skipped=0
+  RC=0
+  after: 057rec=1 058rec=1 settings_tbl=t settings_rows=1 ce=charge_events:rls=true,force=true,pol=1,tid=true order=057_ks1256_gateway_settings_store.sql<058_ks1401_tenant_isolation_after_039.sql
+   charge_events:rls=true,force=true,pol=1,tid=true
+   certifications:rls=true,force=true,pol=1,tid=true
+   oauth_apps:rls=true,force=true,pol=2,tid=true
+   svc_webhooks:rls=true,force=true,pol=1,tid=true
+  CONTROL the runner does skip a recorded file: rerun on o_c -> Summary: applied=0 failed=0 skipped=60
+=== Q5-1: re-run 058 on a database where it is already applied (tracker row deleted so the runner re-applies it)
+  [main] Applying 058_ks1401_tenant_isolation_after_039.sql...
+  Summary: applied=1 failed=0 skipped=58
+  RC=0
+  rows md5 before/after: 2c43c9f5bfbc/2c43c9f5bfbc  policies md5 before/after: 39a35d9f475a/39a35d9f475a  058rec=1
+  direct psql re-apply NOTICEs:
+       1 KS-1401: certifications.tenant_id had 0 NULL rows
+       1 KS-1401: charge_events.tenant_id had 0 NULL rows
+       1 KS-1401: oauth_apps.tenant_id had 0 NULL rows
+       1 KS-1401: svc_webhooks.tenant_id had 0 NULL rows
+       4 REPLACED
+=== Q5-2: failure mid-way, planted absent table (svc_webhooks is LAST in the loop, so 3 tables were already altered in-transaction)
+NOTICE:  policy "tenant_isolation" for relation "certifications" does not exist, skipping
+  before: charge_events:rls=false,force=false,pol=0,tid=true | certifications:rls=true,force=true,pol=0,tid=true nulls ce/cert=1/1
+  [main] Applying 058_ks1401_tenant_isolation_after_039.sql...
+  [main] FAILED 058_ks1401_tenant_isolation_after_039.sql:
+  psql:migrations/058_ks1401_tenant_isolation_after_039.sql:253: NOTICE:  KS-1401: charge_events.tenant_id was NULL on 1 row(s); set to the platform default tenan
+  psql:migrations/058_ks1401_tenant_isolation_after_039.sql:253: NOTICE:  KS-1401: tenant_isolation on charge_events CREATED (there was none: this is the defect)
+  psql:migrations/058_ks1401_tenant_isolation_after_039.sql:253: NOTICE:  KS-1401: certifications.tenant_id was NULL on 1 row(s); set to the platform default tena
+  psql:migrations/058_ks1401_tenant_isolation_after_039.sql:253: NOTICE:  KS-1401: tenant_isolation on certifications CREATED (there was none: this is the defect)
+  psql:migrations/058_ks1401_tenant_isolation_after_039.sql:253: NOTICE:  KS-1401: oauth_apps.tenant_id was NULL on 1 row(s); set to the platform default tenant
+  psql:migrations/058_ks1401_tenant_isolation_after_039.sql:253: NOTICE:  KS-1401: tenant_isolation on oauth_apps REPLACED with 039 fail-closed text
+  psql:migrations/058_ks1401_tenant_isolation_after_039.sql:253: ERROR:  KS-1401: table public.svc_webhooks is absent; refusing to record a skip (039 recorded one
+  Summary: applied=0 failed=1 skipped=58
+  by a run in which migrations FAILED, and originate could roll against a
+  RC=3
+  after:  charge_events:rls=false,force=false,pol=0,tid=true | certifications:rls=true,force=true,pol=0,tid=true nulls ce/cert=1/1  058rec=0
+=== Q5-3: lock_timeout path: another session holds ACCESS SHARE on certifications (2nd table) for 20s
+NOTICE:  policy "tenant_isolation" for relation "certifications" does not exist, skipping
+  locker psql pid 48696; lock held: 1
+  [main] Applying 058_ks1401_tenant_isolation_after_039.sql...
+  [main] FAILED 058_ks1401_tenant_isolation_after_039.sql:
+  psql:migrations/058_ks1401_tenant_isolation_after_039.sql:253: ERROR:  canceling statement due to lock timeout
+  PL/pgSQL function inline_code_block line 59 at EXECUTE
+  Summary: applied=0 failed=1 skipped=58
+  by a run in which migrations FAILED, and originate could roll against a
+  RC=3
+  runner wall 1793795198-1793795191=7s (lock held 20s)
+  after: charge_events:rls=false,force=false,pol=0,tid=true nulls ce=1 058rec=0
+  locker finished; retry after release:
+  Summary: applied=1 failed=0 skipped=58
+  RC=0
+  after retry: charge_events:rls=true,force=true,pol=1,tid=true 058rec=1

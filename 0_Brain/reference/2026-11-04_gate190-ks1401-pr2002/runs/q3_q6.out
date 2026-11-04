@@ -1,0 +1,109 @@
+NOTICE:  policy "tenant_isolation" for relation "certifications" does not exist, skipping
+=== SHAPE K BASE (develop 536642104002, 039 recorded, 058 absent)
+  charge_events:rls=false,force=false,pol=0,tid=true  pol=
+  certifications:rls=true,force=true,pol=0,tid=true  pol=
+  oauth_apps:rls=true,force=true,pol=2,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  svc_webhooks:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  NULLs(ce/cert/oa/wh)=1/1/1/1  DEF-rows=0/0/0/0  nonnull_md5=7c92b5d0a5b3
+  M charge_events none=4 EMPTY=4 A=4 B=4 DEF=4 BYP=4
+  M certifications none=0 EMPTY=0 A=0 B=0 DEF=0 BYP=0
+  M oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+  M svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+  W1 app A inserts a B-tenant charge_event: 
+  W2 app A inserts its own charge_event:     
+  W3 app no-GUC inserts DEF charge_event:    
+  W4 app BYP inserts NULL-tenant charge_event:
+  W5 app A updates B's charge_event (rows):  1
+  W6 app A moves own row to tenant B:        
+  W7 app A inserts own certification:        ERROR:  new row violates row-level security policy for table "certifications"
+  W8 app A inserts B certification:          ERROR:  new row violates row-level security policy for table "certifications"
+  W9 app A inserts B svc_webhook:            ERROR:  new row violates row-level security policy for table "svc_webhooks"
+  P1 app A reads ids of own charge_events:   g-a1,g-a2,g-b1,g-n1
+  P2 app A reads ids of own certifications:  
+  P3 app B reads A's charge_event g-a1:      1
+  P4 app DEF reads ex-NULL charge_event g-n1:1
+  P5 app DEF explicit WHERE tenant_id=DEF (chargeEvents.ts:205 shape) on g-n1: 0
+=== SHAPE K APPLY 058 via real run-migrations.sh
+  [main] Applying 058_ks1401_tenant_isolation_after_039.sql...
+  Summary: applied=1 failed=0 skipped=58
+  RC=0
+  058 recorded: 1
+=== SHAPE K HEAD
+  charge_events:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  certifications:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  oauth_apps:rls=true,force=true,pol=2,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  svc_webhooks:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  039 users-policy md5 (control text): 3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  NULLs(ce/cert/oa/wh)=0/0/0/0  DEF-rows=1/1/1/1  nonnull_md5=7c92b5d0a5b3
+  M charge_events none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+  M certifications none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+  M oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+  M svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+  W1 app A inserts a B-tenant charge_event: ERROR:  new row violates row-level security policy for table "charge_events"
+  W2 app A inserts its own charge_event:     
+  W3 app no-GUC inserts DEF charge_event:    ERROR:  new row violates row-level security policy for table "charge_events"
+  W4 app BYP inserts NULL-tenant charge_event:
+  W5 app A updates B's charge_event (rows):  0
+  W6 app A moves own row to tenant B:        ERROR:  new row violates row-level security policy for table "charge_events"
+  W7 app A inserts own certification:        
+  W8 app A inserts B certification:          ERROR:  new row violates row-level security policy for table "certifications"
+  W9 app A inserts B svc_webhook:            ERROR:  new row violates row-level security policy for table "svc_webhooks"
+  P1 app A reads ids of own charge_events:   g-a1,g-a2
+  P2 app A reads ids of own certifications:  a1,a2,19
+  P3 app B reads A's charge_event g-a1:      0
+  P4 app DEF reads ex-NULL charge_event g-n1:1
+  P5 app DEF explicit WHERE tenant_id=DEF (chargeEvents.ts:205 shape) on g-n1: 1
+=== SHAPE D BASE (develop 536642104002, 039 recorded, 058 absent)
+  charge_events:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  certifications:rls=false,force=false,pol=0,tid=false  pol=
+  oauth_apps:rls=true,force=true,pol=2,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  svc_webhooks:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  NULLs(ce/cert/oa/wh)=                                                             ^  DEF-rows=                                                             ^  nonnull_md5=            
+  M charge_events none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+  M certifications none=2 EMPTY=2 A=2 B=2 DEF=2 BYP=2
+  M oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+  M svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=0 BYP=4
+  W1 app A inserts a B-tenant charge_event: ERROR:  new row violates row-level security policy for table "charge_events"
+  W2 app A inserts its own charge_event:     
+  W3 app no-GUC inserts DEF charge_event:    ERROR:  new row violates row-level security policy for table "charge_events"
+  W4 app BYP inserts NULL-tenant charge_event:
+  W5 app A updates B's charge_event (rows):  0
+  W6 app A moves own row to tenant B:        ERROR:  new row violates row-level security policy for table "charge_events"
+  W7 app A inserts own certification:                                                                  ^
+  W8 app A inserts B certification:                                                                    ^
+  W9 app A inserts B svc_webhook:            ERROR:  new row violates row-level security policy for table "svc_webhooks"
+  P1 app A reads ids of own charge_events:   g-a1,g-a2
+  P2 app A reads ids of own certifications:  f1,f2
+  P3 app B reads A's charge_event g-a1:      0
+  P4 app DEF reads ex-NULL charge_event g-n1:0
+  P5 app DEF explicit WHERE tenant_id=DEF (chargeEvents.ts:205 shape) on g-n1: 0
+=== SHAPE D APPLY 058 via real run-migrations.sh
+  [main] Applying 058_ks1401_tenant_isolation_after_039.sql...
+  Summary: applied=1 failed=0 skipped=58
+  RC=0
+  058 recorded: 1
+=== SHAPE D HEAD
+  charge_events:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  certifications:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  oauth_apps:rls=true,force=true,pol=2,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  svc_webhooks:rls=true,force=true,pol=1,tid=true  pol=3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  039 users-policy md5 (control text): 3356c6ad22269047fe05300e46cb8441/3356c6ad22269047fe05300e46cb8441/PERMISSIVE/public
+  NULLs(ce/cert/oa/wh)=0/0/0/0  DEF-rows=1/2/1/1  nonnull_md5=bd12564dfcc4
+  M charge_events none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+  M certifications none=0 EMPTY=0 A=0 B=0 DEF=2 BYP=2
+  M oauth_apps none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+  M svc_webhooks none=0 EMPTY=0 A=2 B=1 DEF=1 BYP=4
+  W1 app A inserts a B-tenant charge_event: ERROR:  new row violates row-level security policy for table "charge_events"
+  W2 app A inserts its own charge_event:     
+  W3 app no-GUC inserts DEF charge_event:    ERROR:  new row violates row-level security policy for table "charge_events"
+  W4 app BYP inserts NULL-tenant charge_event:
+  W5 app A updates B's charge_event (rows):  0
+  W6 app A moves own row to tenant B:        ERROR:  new row violates row-level security policy for table "charge_events"
+  W7 app A inserts own certification:        
+  W8 app A inserts B certification:          ERROR:  new row violates row-level security policy for table "certifications"
+  W9 app A inserts B svc_webhook:            ERROR:  new row violates row-level security policy for table "svc_webhooks"
+  P1 app A reads ids of own charge_events:   g-a1,g-a2
+  P2 app A reads ids of own certifications:  88
+  P3 app B reads A's charge_event g-a1:      0
+  P4 app DEF reads ex-NULL charge_event g-n1:1
+  P5 app DEF explicit WHERE tenant_id=DEF (chargeEvents.ts:205 shape) on g-n1: 1
