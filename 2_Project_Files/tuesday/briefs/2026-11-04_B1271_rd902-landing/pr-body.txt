@@ -1,0 +1,39 @@
+BLUF: Reading the risk-conditions list (GET /api/risk-conditions) no longer rewrites the stored risk conditions for a reader who is not an administrator. The read now runs the sync only when the same administrator check that guards the write routes passes for the request. Everyone else is answered from the stored conditions, silently. Where the check passes for everyone (the open first-run window, sign-in not configured) the read still syncs, as the write routes do. The save route's own sync and the manual sync route are unchanged.
+
+This branch was gated NO GO at round 2 of 2, the review cap. One item is left open: a missing test cell (see "What the gate found"). The product owner ruled on 2026-11-04 to land the branch as gated and ticket that gap. Not deployed.
+
+## What changes
+
+- backend/server.js (+14 -2): a non-answering twin of the administrator check, riskConditionAdminPasses, and the read route calls the sync only when it returns true. A throw from the check lands in the existing non-blocking warning, as a throwing sync does today.
+- The new check is a ninth adminGateRefuses call site, so the funnel guard in the rd436 test now expects nine (its count and the words that state it only).
+- New test file __tests__/rd902-risk-conditions-get-sync-admin-only.test.js (ten cells: six from the first commit, four added in the second).
+- The expected-counts file moves from 5301 tests / 316 suites to 5311 / 317.
+- Two commits on main efcf86c5: 77f44c23 (change plus six cells) and bcdf835f (four cells, test-only).
+
+One behaviour difference is disclosed in the first commit message: a non-administrator on an instance whose store is empty but whose settings are not now gets [] where main would have synced and answered the synced row.
+
+## What the gate found (round 2 of 2, the cap: NO GO)
+
+- Round 1 found four missing test cells. All four are closed: each of the four mutants of the decision turns exactly its own new cell red and nothing else, each new cell fails when its premise is planted wrong, and the two flakiness-prone cells were green on 5 of 5 repeats each.
+- The product change was measured correct: the twin agreed with the writers' check on 1008 of 1008 census cells (0 divergences), and a refused reader got the same status, headers and body bytes as at main.
+- The gate's NO GO rests on ONE open item, graded Major: a test cell is missing. A twin that treats the first run as always complete (one input changed) survives every committed test that reaches risk conditions: 399 of 399 tests in 17 files stayed green with that mutant. With it, a non-administrator read on an instance where users exist and sign-in is configured but the first run is not complete stops syncing, while the writers still admit that reader. That is a restrictive divergence on 24 of 1008 census cells. The fix is one test cell and no product change.
+- Not measured: whether the real setup flow produces that state. The gate planted it directly in the store.
+- The product owner chose to land with this gap ticketed. The missing cell is tracked as a separate ticket.
+
+## Tested (measured by the gate on the head bcdf835f, local)
+
+- Whole suite at the merge result: 5311 passed of 5311, 317 suites, equal to the committed counts, jest exit 0 (macOS arm64, node v26.8.1).
+- The 10 cells green on three runs at the head; 5 neighbour test files plus the funnel guard unchanged (13 of 13 files equal, 307 of 307 tests).
+- Open code-scanning alerts on main: 123; none on the changed paths or near the changed region (read before any PR existed).
+
+## Not tested
+
+- Hosted Build, Gitleaks and CodeQL on this commit: no pull request had existed when the gate read. This PR is where they run.
+- Node 24 and Linux x64.
+- Whether a real restore, a real sign-in or the real setup flow produces the states the cells plant.
+- Concurrent syncs.
+- How the dashboard renders the empty list a non-administrator can now see in the empty-store case.
+
+## Not deployed
+
+Nothing is deployed by this change. A merge to main starts the Deploy demo workflow, but its build and deploy jobs skip while the repository variable CI_DEPLOY_ENABLED is unset (read: 0 repository variables, 0 organization variables, environment list [dev]).
