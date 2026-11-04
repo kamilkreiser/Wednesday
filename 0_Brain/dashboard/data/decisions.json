@@ -59627,5 +59627,81 @@
    "CARD hpsmpoc-deploy-live-which-site-1104",
    "CARD hpsmpoc-demo-deploy-words-schema-1104"
   ]
+ },
+ {
+  "id": "mps-bot-prs-no-scan-route-1104",
+  "client_project": "Datasec/MPS",
+  "title": "MPS: Dependabot's own pull requests never get the security scan. Keep re-pushing them as our own, or change the setup?",
+  "bluf": "No action needed unless you want option b. GitHub's security scan (CodeQL) never runs on the dependency bot's own pull requests. Our rule lets nothing onto main without that scan, so today I had our agent push the bot's two updates as our own pull request (#158). The scan ran clean, it landed, and all eight alerts closed. That works, at the cost of one small extra agent run per bot update. Ticketed as MPSCALC-383. I recommend a: keep that as the standing route, because it needs no change to GitHub settings. (Your 1 October ruling chose GitHub's standard scan setup for MPS, which is the setup that skips the bot's pull requests. It didn't cover them, and none of your earlier messages or cards on 'scan' or 'route' does.)",
+  "default_action": "Route a stays in use; MPSCALC-383 stays open until you choose.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep re-pushing bot updates as our own pull requests",
+    "detail": "the standing route; one small agent run per bot update; no settings change"
+   },
+   {
+    "key": "b",
+    "label": "Look into making the scan run on the bot's pull requests",
+    "detail": "a GitHub settings or workflow change, investigated first and brought back to you before anything changes"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T16:11:18.106487+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-11-04T16:14:13.515820+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-10 11:25",
+   "CARD nexusai-rd135-scim-route",
+   "CARD hpsmpoc-c30-feedback-route",
+   "CARD mpscalc-codeql-scan-csharp",
+   "CARD hpsmpoc-feedback-files-route-1006",
+   "CARD hpsmpoc-runtime-10013-route-1018",
+   "CARD composer-demo-image-offbox-route-1019",
+   "CARD composer-94-heredoc-scan-round-cap-1026",
+   "CARD nexusai-rd913-archiver-route-1101",
+   "CARD mps-375-template-scan-round-cap-1103"
+  ]
+ },
+ {
+  "id": "datasec-bot-pr-scan-findings-1104",
+  "client_project": "Datasec/MPS",
+  "title": "Bot pull-request scan: it's the same on all four Datasec projects. Keep re-pushing, or trial a custom scan setup on MPS?",
+  "bluf": "No action needed if you agree with a. You asked me to look into making the security scan run on Dependabot's pull requests (your 16:13 b). Findings (read-only, checked on GitHub): it isn't an MPS quirk. On all four Datasec projects, MPS, HPSM-POC, NexusAI and Composer, the scan has never run on a bot pull request: 0 of 8 checked. Our own pull requests get it every time. All four use GitHub's standard scan setup, so there is no project that already does better to copy, and GitHub's documentation doesn't say why the bot is skipped. The only durable fix is switching a project to a custom scan setup. That's untested for bot pull requests, could fail on the bot's read-only permissions, and gives up the standard setup. Re-pushing works and was proven today. I recommend a. The full report is in my reference folder. Composer has two open bot pull requests (#86, #91) that are blocked the same way. Under a, I'd send them through the same route. (The earlier messages and cards that share the word 'findings' are about other subjects. This card answers your 16:13 ruling.)",
+  "default_action": "Nothing on GitHub changes; bot updates keep using the re-push route.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep re-pushing as the standing route on all four projects",
+    "detail": "MPSCALC-383 recorded as decided; Composer's two open bot updates go the same way"
+   },
+   {
+    "key": "b",
+    "label": "Trial a custom scan setup on MPS",
+    "detail": "an MPS agent switches MPS to a custom CodeQL workflow, proven on the next real bot pull request; reversible by deleting the file; a GitHub setting change on your word"
+   },
+   {
+    "key": "c",
+    "label": "Leave it open for now",
+    "detail": "no change; bot updates keep using the re-push route case by case"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T16:17:15.023960+11:00",
+  "status": "ruled",
+  "ruled_choice": "c",
+  "ruled_ts": "2026-11-04T16:23:32.572358+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-09-09 15:51",
+   "2026-09-17 08:34",
+   "CARD hpsmpoc-showcase-draft-findings",
+   "CARD hpsmpoc-findings-order",
+   "CARD mpscalc-codeql-scan-csharp",
+   "CARD composer-94-heredoc-scan-round-cap-1026",
+   "CARD mps-375-template-scan-round-cap-1103",
+   "CARD mps-bot-prs-no-scan-route-1104"
+  ]
  }
 ]
