@@ -1,0 +1,40 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-04T05:04:55.000Z
+Subject: [Secuura/Blockchain-S -> Wednesday] READY FOR GATE: PR 1997 (KS-1981), tier 2, two lines (Seat S 17th)
+---
+Seat S 17th
+
+READY FOR GATE: PR 1997 (KS-1981), tier 2, config/tooling (row G2). Tier 2 means no deploy surface: no Dockerfile or compose file names lock-discovery (control hit). No question in this mail.
+
+PR: https://github.com/Secuura/Distributed_Secuura/pull/1997 , open, not draft, base develop. Title: Refs KS-1981: the mobile-tree exclusion names the new review ticket as its owner
+HEAD: f2c5865754ed / f2c5865754ed54f4007dce64c0eea14a10095d3d . One commit, author Kam Kreiser <kamil.kreiser@secuura.ai> read from the commit. origin holds it (my ls-remote and the driver's agree).
+DEVELOP: 5c1ca287ed74 / 5c1ca287ed74b6353423a8c09e253abf3129233a , read with ls-remote just now and equal to the pin the branch was cut on. Nothing merged in; the head's parent IS that develop, so a squash on it has the head's tree: d06376c19fe6737f16ac926719381caa7c4052a6. Overlap: the driver's gate read 20 open PRs at 04:41:33Z and none touches the file.
+FILES (git diff --name-only 5c1ca287ed74..f2c5865754ed): Blockchain/Dev/scripts/audit/lock-discovery.mjs . Two lines: 182 (owner sentence) and 201 (ticket key), KS-769 -> KS-1981. Lines 202 and 207 byte-equal to develop. Expiry line 235 unchanged.
+
+YOUR N4 RULING, APPLIED: two lines, line 182 in the same words with the key swapped. Nothing pins line 182 (suite and tree search), so your STOP did not fire. The PR body says why there are two lines.
+
+SUITES, quoted with counts and rc (host macOS arm64, Node v26.8.1; this host has no other Node)
+- npm run audit:contract from Blockchain/Dev of the worktree: 59 tests, 59 pass, 0 fail, 0 skipped, rc 0. The pinned expected-case-count is 59.
+- Red proof, same command, ticket key blanked: 59 tests, 49 pass, 10 fail, rc 1. Restored by copying the saved file back; sha256 equal; 59 of 59 again.
+- node --check rc 0. eslint (Blockchain/Dev/eslint.config.mjs) on the file rc 0, no output. No tsc: scripts/audit has no tsconfig.
+- Pre-push hook, run from my worktree through the queue and lock, push rc 0, 1238 s. Legs that ran: 1, 2, 5, 6, 7, 9 to 16. Leg 5: 59 audit-contract cases pass (expected 59). Leg 7, the real standalone-lock advisory gate with the edited entry, printed "out of scope: Blockchain/Dev/mobile/secuura-app (KS-1981, expires 2027-01-01 ..." and OK. Leg 14: shell suites 114 passed, 0 failed, 1 skipped of 115 (ks949_main_seed_idempotence.test.sh: no PostgreSQL binaries on this host). Leg 15: 13 code guards passed. Leg 16: 5 services type-check against their baseline, 0 new.
+- THE HOOK'S VERDICT, VERBATIM. It is NOT a pass and I have not quoted it as one:
+  PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+    legs 3 4 8 — local stack not up; you can clear this by starting it.
+    This is NOT a pass. Do not quote it as one — say which legs ran.
+  Legs 3, 4 and 8 (spec-auth conformance, path resolvability, served-spec consistency) exercise the gateway and the OpenAPI spec, which this change does not touch. I did not start the local stack.
+
+NOT RUN (the PR says the same): Schemathesis pre-merge, Akto pre-merge, Playwright, k6, every service unit suite. The two acknowledgment boxes in the PR are unticked on purpose. The two Projects Documents pages do not apply (not a test change; skill section 4).
+
+TWO POINTS FOR YOU
+1. The repo skill's 5d asks every changed line to carry a why-and-ticket comment. I did not add one: your ruling is two lines with the key swapped and the history already sits in the notes that stay byte-identical. A trailing comment on line 201 is a one-line change if you want it.
+2. Node: this host has only v26.8.1 and the repo names 24 as its LTS line. I did not check Node's schedule; the PR says 26 is unverified either way.
+
+PUSH QUEUE: I released the lock at 05:02:15Z (holder removed, then rmdir, both rc 0) and left the queue. R 84th took it the next second.
+
+BOARD STATE: KS-1981 Backlog (Low, due 2026-12-15). KS-769 In Progress with two comments from me (53216f5a naming KS-1981, 7a6061a7 naming PR 1997). PENDING: close KS-769 after this PR merges; the close comment and the state change are drafted in my record folder (drafts/).
+NOT MINE: no merge, no deploy, no mail to a human. I wrote nothing in 2_Project_Files.
+
+NEXT: I write my history entry, HANDOVER and wrap mail now, and commit only my own lines of the vault. If you mail (Seat S 17th) a change request before then, I act on it first.
+
