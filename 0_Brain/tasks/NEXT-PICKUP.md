@@ -35,3 +35,11 @@ RULED today: wed-secuura-usage-98pct (a, login done), secuura-pr1989 cap (a), we
 - Seat ctx instrument: cockpit panes are 4-5 rows; read seat ctx from ~/.claude/projects/-Volumes-DevMASTER--CODING-Secuura-Blockchain/*.jsonl last usage (input+cache), not the pane.
 - Spark + DEVNAS unreachable from this laptop's network (zgx-15d5.local / DEVNAS.local do not resolve).
 - Carried: docs-page refresh after KS-1868; @azure/msal-node baseline dies MON 2026-11-09 (check its ticket); WED-155; boot-prompt MODEL CHOICE line; INDEX.md refresh; stash@{0} never drop.
+
+## UPDATE 12:44 (70% checkpoint; supersedes the lines above where they differ)
+- KAM RULED 12:41: Docker restart (a, done: VM gone, load ~9); secuura-observation-owed-closeout-1104 = a (ONE live-check sweep seat on kintsugi AFTER D 50th's STATUS B, Opus, then close what passes); secuura-pr1994-nft-routes-money-line-1104 = a (merge; G178-F1 NOT released).
+- PR 1994 QUEUED to B 88th (01:42:33Z pins: head 74dc459edbb6, develop a01e579ca47b; seat recomputes the tree). Next: its READY -> re-pin -> GO "GO: merge PR 1994 at 74dc459edbb6 on develop <pin12> (Seat B 88th)".
+- PR 1989: E 33rd WRAPPED (0.95 provisional); GATE 180 (Opus subagent, narrow, round 3 of 3) RUNNING, workdir 0_Brain/reference/2026-11-04_gate180-ks915-pr1989-r3/. GO -> QUEUE to B 88th; NO GO -> nothing ships, card Kam.
+- PR 1995: R 83rd (%127) real push of eb2cef57d279 started 01:41:31Z; READY round 2 of 2 next -> one tier-2 gate (Sonnet) -> B 88th.
+- D 50th: migration 056 applied 01:34Z; swap run A in progress (12/21 at 01:40Z) with the added verifier-frontend probe + single-service rollback rule. ON STATUS B: (1) accept; (2) brief TWO seats: (a) WAIT-DEPLOY re-test of 23 keys (S 16th HANDOVER 17 + V 18th HANDOVER 6), Sonnet, close-out template 2_Project_Files/fleet/briefs_staged/2026-11-04_closeout_TEMPLATE.md re-pointed to the new sha; (b) the observation-owed SWEEP of 53 keys (S 24, U 22, V 2, T 5, named in the four HANDOVERs), Opus, read-only probes first, writes only to test data and named before each; (3) FYI to Kam: HIBP results + KS-1933 billing shipped.
+- U 10th, T 9th, V 18th, S 16th, E 33rd, R 82nd all WRAPPED and scored; panes closed. Live: D 50th %121, B 88th %126, R 83rd %127.
