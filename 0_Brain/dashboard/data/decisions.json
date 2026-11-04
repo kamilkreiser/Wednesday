@@ -60057,5 +60057,43 @@
    "CARD wed-morning-plan-1103",
    "CARD wed-morning-fleet-activity-1104"
   ]
+ },
+ {
+  "id": "hpsmpoc-visual-round-ci-timeout-1105",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Visual round: GitHub's test run times out, so it cannot land yet",
+  "bluf": "The visual round is NOT landed and NOT on UAT. Your 07:06 'land it' was being carried out, but GitHub's own test run failed. One test group now holds 684 tests where main has 350, because the round's new test files land in it, and it hit its 20-minute limit at test 468. Two tests in it also failed on GitHub's machines twice each: the stat-tile padding row (mock-rows.spec.ts:64) and the rail walk at 1280 x 390 (shell-sidebar.spec.ts:808). Everything else passed: CodeQL, the API, both SQL Server groups and the other four web groups. Our gates ran these tests on the Mac only, so neither problem showed. No product file needs to change. (Override of the prior-rulings gate: your 07:06 cap ruling stands. This is a new fact that blocks carrying it out, not the same question again. The round already passed its two-round cap, so going further needs your word.)",
+  "default_action": "At 08:45 AEDT with no tap: option a is drafted and launched. A fix-kit drafter starts now either way; drafting is read-only.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix the tests and land",
+    "detail": "A third round changing tests only: split that test group so each part finishes well under 20 minutes, and fix the two tests that fail on GitHub's machines. No product change. Then a short gate, land, UAT, then demo. Roughly 2 to 3 hours to UAT."
+   },
+   {
+    "key": "b",
+    "label": "Re-run GitHub's tests once",
+    "detail": "Shows whether the two failures repeat, but the group still runs out of time, so this alone cannot make it land."
+   },
+   {
+    "key": "c",
+    "label": "Hold",
+    "detail": "Nothing lands; UAT and demo stay on yesterday's header fix."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T07:51:43.050782+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD vision-prod-postgres-idle-transaction-timeout",
+   "CARD hpsmpoc-narrative-timeout-221-1006",
+   "CARD hpsmpoc-hosted-connect-timeout-start-limit-1007",
+   "CARD hpsmpoc-visual-mock-vs-header-1104",
+   "CARD hpsmpoc-visual-words-1104",
+   "CARD hpsmpoc-visual-colours-1104",
+   "CARD hpsmpoc-visual-round-cap-1105"
+  ]
  }
 ]
