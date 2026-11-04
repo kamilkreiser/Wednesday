@@ -1,0 +1,36 @@
+verification.ts sha256 828f0c780b18a326
+PASS ../pgcell/g192-pg15.harness.test.ts
+  gate 192 PG15 (m6)
+    ✓ S N-SPLIT (72 ms)
+    ✓ S LEAK-CANARY (17 ms)
+    ✓ S FOREIGN-ORIGINAL-CERTIFIED (17 ms)
+    ✓ S 24-LATER-COPIES (16 ms)
+    ✓ S ORIGINAL-LOCAL (11 ms)
+    ✓ S TIED-ACROSS-TENANTS (11 ms)
+    ✓ S NO-LOCAL-ROW (9 ms)
+    ✓ S LOOKUP-FAILURE-REGISTRY (10 ms)
+    ✓ S LOOKUP-FAILURE-TENANT (11 ms)
+    ✓ S SINGLE-TENANT (6 ms)
+    ✓ G THREE-TENANTS-TIED: originals tied in T2 (uncertified) and T3 (certified by Y); A later certified in the caller (12 ms)
+    ✓ G CERTIFIED-AND-UNCERTIFIED-LOCAL: caller holds certified latecomer A AND an uncertified later copy Z; B original in T2 (13 ms)
+    ✓ G REVOKED-FOREIGN-ORIGINAL: B original in T2 has status revoked; A later certified in the caller (10 ms)
+    ✓ G ORIGINAL-UNREGISTERED: B original in T2 has NO registry row; Y (T3) certified at t20 registered; A (caller) certified at t31 (10 ms)
+    ✓ G CAP-9-NATURAL: B original in T10 registered first; T2..T9 later certified copies; A in the caller (10 tenants hold the hash) (20 ms)
+    ✓ G CAP-9-SKEWED: as above but B's registry row is the LATEST (created_at t100) and T2..T9 are certified copies at t2..t9 (28 ms)
+    ✓ G CAP-9-SKEWED-NOCERT: B original in T10 (registry latest); T2..T9 hold UNCERTIFIED copies at t2..t9; A in the caller (14 ms)
+    ✓ G CHAIN-UP-REGISTRY-DOWN: registry down, A certified alone in the caller; the chain answers verified with metadata naming an org (9 ms)
+    ✓ G CHAIN-UP-FOREIGN-ORIGINAL (registry up): A certified in caller, B original in T2; the chain answers verified (7 ms)
+    ✓ G TENANT-POOL-THROWS: getPool throws for T2 (no pool configured); local uncertified original-in-tenant + certified A (6 ms)
+    ✓ G TENANT-POOL-THROWS-ALL-CERTIFIED: getPool throws for T2; A certified alone in the caller (D-B4 all-certified branch) (5 ms)
+    ✓ G REGISTRY-PREFIXED-FORM: B original in T2 registered as sha256:<hex>; A certified in caller (9 ms)
+    ✓ G NO-LOCAL-ROW-PREFIXED-REGISTRY (candidate c, other form): B in T2 only, registered as sha256:<hex> (8 ms)
+    ✓ G CONTROL-LOCAL-CANARY: the canaries planted on the CALLER's own row (same tenant: not scoped) must be found by the search (6 ms)
+    ✓ G CONTROL-NO-LOCAL-CHAIN-UP: no rows anywhere; the chain answers (base behaviour of the chain branch, for the leak search) (5 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        0.957 s, estimated 1 s
+Ran all test suites.
+rc=0
+rows       66

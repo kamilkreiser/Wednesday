@@ -1,0 +1,107 @@
+[
+ {
+  "mutant": "m1",
+  "what": "restore tenant-local-first: the foreign originals are read but left out of the judgment",
+  "anchor_count": 1,
+  "line": 672,
+  "unit": {
+   "rc": 1,
+   "red": 9,
+   "green": 76,
+   "total": 85,
+   "tsErrors": 0,
+   "expectedReceivedMarkers": 18
+  },
+  "restored_blob_equal": true
+ },
+ {
+  "mutant": "m2",
+  "what": "drop the scrub: the foreign original carries no tenant marker",
+  "anchor_count": 1,
+  "line": 627,
+  "unit": {
+   "rc": 1,
+   "red": 9,
+   "green": 76,
+   "total": 85,
+   "tsErrors": 0,
+   "expectedReceivedMarkers": 12
+  },
+  "restored_blob_equal": true
+ },
+ {
+  "mutant": "m3",
+  "what": "take each foreign tenant's rows as a LIMIT-ed row-set fetch instead of its originals read",
+  "anchor_count": 1,
+  "line": 616,
+  "unit": {
+   "rc": 1,
+   "red": 4,
+   "green": 81,
+   "total": 85,
+   "tsErrors": 0,
+   "expectedReceivedMarkers": 8
+  },
+  "restored_blob_equal": true
+ },
+ {
+  "mutant": "m4",
+  "what": "dedupe the caller's own rows by object identity instead of row id",
+  "anchor_count": 1,
+  "line": 626,
+  "unit": {
+   "rc": 0,
+   "red": 0,
+   "green": 85,
+   "total": 85,
+   "tsErrors": 0,
+   "expectedReceivedMarkers": 0
+  },
+  "restored_blob_equal": true
+ },
+ {
+  "mutant": "m5",
+  "what": "swallow the lookup failure: judge as if no other tenant held the bytes",
+  "anchor_count": 1,
+  "line": 639,
+  "unit": {
+   "rc": 1,
+   "red": 4,
+   "green": 81,
+   "total": 85,
+   "tsErrors": 0,
+   "expectedReceivedMarkers": 8
+  },
+  "restored_blob_equal": true
+ },
+ {
+  "mutant": "m6",
+  "what": "GATE: drop D-B3 on the selected foreign row (keep issuerId, so certifierOrganizationId is the foreign issuer's)",
+  "anchor_count": 1,
+  "line": 690,
+  "unit": {
+   "rc": 1,
+   "red": 2,
+   "green": 83,
+   "total": 85,
+   "tsErrors": 0,
+   "expectedReceivedMarkers": 2
+  },
+  "restored_blob_equal": true
+ },
+ {
+  "mutant": "m7",
+  "what": "GATE: present the foreign original's certification under the LOCAL rule only (selectVerifiableRow without crossRule)",
+  "anchor_count": 1,
+  "line": 684,
+  "unit": {
+   "rc": 0,
+   "red": 0,
+   "green": 85,
+   "total": 85,
+   "tsErrors": 0,
+   "expectedReceivedMarkers": 0
+  },
+  "restored_blob_equal": true
+ }
+]

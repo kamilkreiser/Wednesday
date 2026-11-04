@@ -1,0 +1,224 @@
+FAIL ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts
+  ● KS-1986 DEFECT cells: the original is in another tenant › N-SPLIT (/verify): A later and certified in the caller's tenant, B the original in another: v1 presents B, as v2 does
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1986-B-original"
+    Received: "doc-cert-a-1"
+
+      201 | function presentsForeignOriginal(body: any): void {
+      202 |   const text = JSON.stringify(body);
+    > 203 |   expect(body.documentId).toBe(B_EXT);
+          |                           ^
+      204 |   expect(body.certification).toBeUndefined();
+      205 |   expect(body.checks.isCertified).toBe(false);
+      206 |   expect(body.title).toBeNull();
+
+      at presentsForeignOriginal (src/__tests__/ks1986-v1-original-across-tenants.test.ts:203:27)
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:217:7)
+
+  ● KS-1986 DEFECT cells: the original is in another tenant › LEAK CANARY (/verify): nothing tenant-owned of the foreign original appears anywhere in the v1 body
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1986-B-original"
+    Received: "doc-cert-a-1"
+
+      227 |       })] }]);
+      228 |       const body = await v1();
+    > 229 |       expect(body.documentId).toBe(B_EXT); // input check: the foreign original is the row presented
+          |                               ^
+      230 |       const text = JSON.stringify(body);
+      231 |       for (const c of [CANARY_TITLE, CANARY_ORG_NAME, CANARY_OWNER, CANARY_ORG_UUID]) expect(text).not.toContain(c);
+      232 |     });
+
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:229:31)
+
+  ● KS-1986 DEFECT cells: the original is in another tenant › FOREIGN ORIGINAL CERTIFIED (/verify): B's own certification answers, with no certifier org UUID and no naming
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1986-B-original"
+    Received: "doc-cert-a-1"
+
+      238 |       })] }]);
+      239 |       const body = await v1();
+    > 240 |       expect(body.documentId).toBe(B_EXT);
+          |                               ^
+      241 |       expect(body.certification?.certificationId).toBe('cert-b-own');
+      242 |       expect(body.certification?.certifierOrganizationId).toBeNull();
+      243 |       expect(body.certification?.certifiedBy).toBeNull();
+
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:240:31)
+
+  ● KS-1986 DEFECT cells: the original is in another tenant › 24 LATER COPIES in the original's tenant (/verify): its original is found over that tenant's FULL set, not a LIMIT-ed fetch
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1986-B-original"
+    Received: "doc-cert-a-1"
+
+      201 | function presentsForeignOriginal(body: any): void {
+      202 |   const text = JSON.stringify(body);
+    > 203 |   expect(body.documentId).toBe(B_EXT);
+          |                           ^
+      204 |   expect(body.certification).toBeUndefined();
+      205 |   expect(body.checks.isCertified).toBe(false);
+      206 |   expect(body.title).toBeNull();
+
+      at presentsForeignOriginal (src/__tests__/ks1986-v1-original-across-tenants.test.ts:203:27)
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:254:7)
+
+  ● KS-1986 DEFECT cells: the original is in another tenant › N-SPLIT (verify-file): A later and certified in the caller's tenant, B the original in another: v1 presents B, as v2 does
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1986-B-original"
+    Received: "doc-cert-a-1"
+
+      201 | function presentsForeignOriginal(body: any): void {
+      202 |   const text = JSON.stringify(body);
+    > 203 |   expect(body.documentId).toBe(B_EXT);
+          |                           ^
+      204 |   expect(body.certification).toBeUndefined();
+      205 |   expect(body.checks.isCertified).toBe(false);
+      206 |   expect(body.title).toBeNull();
+
+      at presentsForeignOriginal (src/__tests__/ks1986-v1-original-across-tenants.test.ts:203:27)
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:217:7)
+
+  ● KS-1986 DEFECT cells: the original is in another tenant › LEAK CANARY (verify-file): nothing tenant-owned of the foreign original appears anywhere in the v1 body
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1986-B-original"
+    Received: "doc-cert-a-1"
+
+      227 |       })] }]);
+      228 |       const body = await v1();
+    > 229 |       expect(body.documentId).toBe(B_EXT); // input check: the foreign original is the row presented
+          |                               ^
+      230 |       const text = JSON.stringify(body);
+      231 |       for (const c of [CANARY_TITLE, CANARY_ORG_NAME, CANARY_OWNER, CANARY_ORG_UUID]) expect(text).not.toContain(c);
+      232 |     });
+
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:229:31)
+
+  ● KS-1986 DEFECT cells: the original is in another tenant › FOREIGN ORIGINAL CERTIFIED (verify-file): B's own certification answers, with no certifier org UUID and no naming
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1986-B-original"
+    Received: "doc-cert-a-1"
+
+      238 |       })] }]);
+      239 |       const body = await v1();
+    > 240 |       expect(body.documentId).toBe(B_EXT);
+          |                               ^
+      241 |       expect(body.certification?.certificationId).toBe('cert-b-own');
+      242 |       expect(body.certification?.certifierOrganizationId).toBeNull();
+      243 |       expect(body.certification?.certifiedBy).toBeNull();
+
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:240:31)
+
+  ● KS-1986 DEFECT cells: the original is in another tenant › 24 LATER COPIES in the original's tenant (verify-file): its original is found over that tenant's FULL set, not a LIMIT-ed fetch
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-ks1986-B-original"
+    Received: "doc-cert-a-1"
+
+      201 | function presentsForeignOriginal(body: any): void {
+      202 |   const text = JSON.stringify(body);
+    > 203 |   expect(body.documentId).toBe(B_EXT);
+          |                           ^
+      204 |   expect(body.certification).toBeUndefined();
+      205 |   expect(body.checks.isCertified).toBe(false);
+      206 |   expect(body.title).toBeNull();
+
+      at presentsForeignOriginal (src/__tests__/ks1986-v1-original-across-tenants.test.ts:203:27)
+      at Object.<anonymous> (src/__tests__/ks1986-v1-original-across-tenants.test.ts:254:7)
+
+PASS ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-verify-original-registrant-certifier.test.ts
+  ● Console
+
+    console.log
+      2026-11-05 07:59:17.268 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 07:59:17.288 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 07:59:17.290 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 07:59:17.293 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 07:59:17.295 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 07:59:17.302 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 07:59:17.305 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+    console.log
+      2026-11-05 07:59:17.307 [originate] [32minfo[39m: Hash verified via chain-first lookup {"hash":"eeeeeeeeeeeeeeee","source":"chain"}
+
+      at Console.log (../../node_modules/winston/lib/winston/transports/console.js:87:23)
+
+FAIL ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts
+  ● G188-F2 CHANGED by KS-1986: v1 now judges the original across tenants and presents B (the cell title states the base behaviour) › N-SPLIT: A (later, certified) in the caller's tenant, B (the original) in another: v1 presents A, v2 lists B only
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  4
+    + Received  + 10
+
+      Array [
+    -   "doc-g188-B-original",
+    -   undefined,
+    -   null,
+    -   null,
+    +   "doc-cert-a-split",
+    +   Object {
+    +     "certificationId": "cert-a-split",
+    +     "certificationType": "verification_certificate",
+    +     "certifiedAt": "2026-08-01T02:00:00.000Z",
+    +     "certifiedBy": "ZQX-PLANTED-ISSUER",
+    +     "certifierOrganizationId": "aaaaaaaa-0000-4000-8000-00000000000a",
+    +   },
+    +   "same bytes",
+    +   "ZQX-PLANTED-ISSUER",
+      ]
+
+      353 |     install([certified('a1561000-0000-4000-8000-0000000000a0', U_A, 30, 120, 'cert-a-split')], [bOriginal({ tenant_id: OTHER_TENANT })]);
+      354 |     const v1 = await verifyByHash();
+    > 355 |     expect([v1.documentId, v1.certification, v1.title, v1.issuer]).toEqual([B_EXT, undefined, null, null]); // KS-1986 (ruled 2026-11-05)
+          |                                                                    ^
+      356 |     const v2 = await verifyV2();
+      357 |     expect(v2.count).toBe(1);
+      358 |     expect(v2.matches[0].documentId).toBe(B_EXT);
+
+      at Object.<anonymous> (src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts:355:68)
+
+Test Suites: 2 failed, 1 passed, 3 total
+Tests:       9 failed, 76 passed, 85 total
+Snapshots:   0 total
+Time:        2.41 s, estimated 4 s
+Ran all test suites within paths "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate192-ks1986-pr2004/repo/Blockchain/Dev/services/originate/src/__tests__/ks1986-v1-original-across-tenants.test.ts", "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate192-ks1986-pr2004/repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts", "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate192-ks1986-pr2004/repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-verify-original-registrant-certifier.test.ts".
