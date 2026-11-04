@@ -21,3 +21,7 @@ Related: [[2026-08-07_a-check-that-cannot-fail]], DRAFTER_RULES fence 5, `_ledge
 
 ## EXTENSION 2026-11-01 (w=3, REGRESSION; mechanism built same session)
 s214 ran `decision_queue.sh add` with placeholder text (`--bluf "x" --option a:x --option b:y`) to list a real card's prior-ruling matches after a `tail -4` hid half of them. It refused, so nothing was stored, but the 10-31 junk card reached Kam's board by exactly this shape. **Mechanism (built and tested against a sandbox `DQ_FILE` copy, real store byte-equal):** `decision_queue.sh add` now REFUSES any title, bluf, default or option label under 4 characters. **Rule:** to see a refusal whole, re-run the SAME call with `2>&1 | head -40`; to read prior rulings, `decision_queue.sh show <id>`.
+
+## w=2, 2026-11-04 (s243): the diagnosis
+**What happened.** `decision_queue.sh add` refused, and my `| tail -3` had cut the refusal down to its last two lines. To see the whole message I re-ran an `add` with placeholder fields. The guard refused it again, and nothing was written.
+**The root cause is the tail, not the curiosity.** A write verb's output was piped through `tail`, so the one read that mattered was truncated, and the cheapest way back felt like "run it again". **Rule:** a write command's output is never cut with `tail` or `head` on its first run. Read it whole (or `2>&1 | head -40`, which keeps the top, where refusals print), so there is never a second run to want.
