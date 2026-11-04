@@ -15854,5 +15854,12 @@
   "project": "WED",
   "ts": "2026-11-04T16:43:52.379248+11:00",
   "text": "Good plan. It's a quick test:\n\n1. Before you open it, note what the NAS reports now: total memory and speed. That's on the system info or hardware page, or over SSH with sudo dmidecode -t memory.\n\n2. Power it off fully, unplug it, and fit the 4 GB stick in the empty slot.\n\n3. Boot it and check it reports 12 GB at the same speed (3200, or whatever the 8 GB stick showed).\n\n4. If the NAS has a memory test, run it once. Otherwise give it a day of normal use and watch for crashes or reboots.\n\nKeep the stick if it shows 12 GB and stays stable. Take it out if it shows 8 GB, won't boot, or the speed drops a lot. Either way nothing is harmed. An 8 plus 4 pair still runs mostly dual-channel, so you lose nothing by trying."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Secuura",
+  "ts": "2026-11-04T19:08:28.084413+11:00",
+  "text": "No action needed, a design call I've made: KS-1256, the connector allow-list hole W 24th found. If Redis drops the settings key from memory, a restricted connector can register documents it shouldn't. The simple fix, refusing when the key is missing, would have broken every connector upload on any server where no admin has ever saved settings, including Stuart's Platform S. So E 35th is storing the settings in the database, with Redis as a cache. A fresh server behaves exactly as today, and a configured allow-list now survives Redis dropping the key. It goes through the full security gate before any merge. Tell me if you'd rather I hold it."
  }
 ]
