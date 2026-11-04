@@ -1,0 +1,79 @@
+=========== [INBOUND] 2026-11-04T12:34 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2000 (KS-1561) round 2 at f702d4da4
+[Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2000 (KS-1561) round 2 at f702d4da4b69, TIER 1 (Seat F 30th)
+Seat F 30th
+
+READY FOR GATE: PR 2000 (KS-1561), gate 188 ROUND 2, TIER 1 (Opus). Fixes G188-F1 only, plus the v2 tenant cap you ruled part of it ((b), 10:18:24Z).
+
+SUBJECT
+- PR 2000, branch feature/ks-1561-verify-presents-a-later-hash-only-registrant-as-the. NEW head f702d4da4b69 = f702d4da4b69478e82d3d79ea4e8746fae47f2eb (ls-remote in the same action as the push: 12:32:37Z, 'f702d4da4b69478e82d3d79ea4e8746fae47f2eb refs/heads/feature/ks-1561-verify-presents-a-later-hash-only-registrant-as-the', driver VERIFIED). Parent: the round-1 head d03b03046d76591aec3e5a3aa4176fb4e5b78e04 (one new commit, fast-forward, no force, no amend).
+- Develop measured against: 536642104002f506f61e2e9b6c98a32bf19c3b10 (PR 1798's squash; the driver's develop gate under the lock at 12:12:38Z, move d92b849e..53664210 changed 11 files, branch changes 7, overlap 0 outside the two shared docs, planted control fired). Merge-base of the head with develop: d92b849ece732cd04e283bfcb0ee9e8bd6989631 (the branch base; not merged in).
+- git show --name-only of the new commit (5 files):
+  Blockchain/Dev/services/originate/src/__tests__/ks1561-g188-f1-original-outside-the-fetched-row-set.test.ts (new, 30 cells)
+  Blockchain/Dev/services/originate/src/routes/verification.ts
+  Blockchain/Dev/services/originate/src/routes/verificationV2.ts
+  Projects Documents/fragments/cheat/KS-1561-original-registrant-certifier.html
+  Projects Documents/fragments/flow/KS-1561-original-registrant-certifier.html
+- File-disjoint: the overlap gate under the lock read the open PRs and found none touching these 5 paths, PR 2000 excluded by name (under the lock at 12:12:38Z: 15 open PRs, none touches any of the 5 paths, PR 2000 ignored by name); positive control without the exclusion rc 1, every hit on PR 2000. Develop's move d92b849e..fe3f1371 changed 11 files, overlap 0 with the branch (planted control fired). No api-gateway file (E 36th), no migration (R 85th), no PR of B 91st's floor touched.
+- Hook verdict, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran." Legs run: 13 of 16, legs 3, 4 and 8 skipped (local stack not up), the same set as F 29th's push; leg 14 'shell suites: 115 passed, 0 failed, 0 skipped (of 115)'; leg 16 'OK — 5 service(s) type-check against their baseline.'
+- Push: detached driver pid 4147 (tools/pushlock_f30_existing.sh via tools/launch_driver_f30.py), queued third behind E 36th and R 85th from 11:35:35Z; lock taken by my own mkdir; PUSH 12:12:38Z to 12:32:33Z, rc 0, 1195 s, 'd03b03046..f702d4da4' fast-forward (no force); lock released (holder removed, rmdir rc 0), queue left rc 0. Status: evidence/push_real/status.txt, push.out.
+
+THE FIX (inside your F1 ruling; design confirmed 10:04:05Z)
+- verification.ts: rowSetMayBeCut (a row-set read returned VERIFY_ROWSET_LIMIT = 24 rows), readOriginalRows and ORIGINAL_ROWS_POOL_SQL (same columns and join as the read they supplement; WHERE the same three hash forms AND d.created_at = (SELECT MIN(e.created_at) ... same three forms) ORDER BY d.id LIMIT 25), readOriginalRowsNarrow (chain-first's narrower column list), withOriginalRows (merge by row id, the fetched object kept; over 24 tied: warn naming KS-1561, first 24 by id). Wired at all 6 sites: crossTenantLookup, verify-file, /verify, chain-first, v2 local, v2 per tenant. certificationEligibility, selection, sibling lending, D1-D4, v2 (A), response shape, cap values, v1 tenant scope: unchanged.
+- verificationV2.ts tenant enumeration: GROUP BY tenant_id, tenant_slug ORDER BY MIN(created_at) ASC, tenant_id LIMIT 8 (was SELECT DISTINCT ... ORDER BY tenant_id LIMIT 8).
+- Stated bound (PR body): at most 24 tied originals read; a cut only narrows. Residual (PR body, the one D4 carries): a tenant whose registry row was written late ranks late; cell CAP-LATE.
+- PR 2000 body: round-2 section appended above the attribution line (PATCH by the REST API at 12:33Z with the head check (GitHub's head = f702d4da4b69), 15 of 15 pre-checks with controls, read back equal, 12064 to 16531 bytes; ack boxes still unticked). Title unchanged.
+- KS-1561: ONE comment 819d43e7-0ede-4817-b71d-a36f592cb8e5 at 12:33:37Z, read back equal, 0 mention nodes, state In Progress, priority and assignee unchanged (BLUF, no @, no state, label or description change).
+
+REAL POSTGRESQL 15 (15.19 keg; routes driven over HTTP, their own SQL on the engine via a $queryRaw seam; one database per tenant; real platform_document_registry; schema docker/init/01-schema.sql and docker/init-platform/01-platform-schema.sql at d03b03046d76, plus documents.tenant_id and parent_document_id added by ALTER as the gate did). Harness for gate 188 round 2 to re-run: 5_Project_History/2026-11-04_seatF-30th/pgcell/ (jest.pg.config.js, ks1561-pg15.harness.test.ts), runner tools/pg_harness_f30.py VERSION OUT LOG [r2]; route blobs overlaid by tools/overlay_f30.py (git show, never checkout; restored by sha256). Records evidence/pg_base2.jsonl, pg_r1b.jsonl, pg_r2cap.jsonl; table evidence/pg_table.txt.
+Winner at 23 | 24 | 25 later certified copies (B = the original, earlier, uncertified):
+- base d92b849ece73: latecomer A certified at 23, 24 and 25 on /verify, verify-file, cross-tenant, v2 local, v2 cross (v2 count 24).
+- round-1 d03b03046d76: B uncertified at 23; A certified (cert-a-24, cert-a-25) at 24 and 25 on all 5 paths (v2 count 24).
+- round-2: B uncertified at 23, 24 and 25 on all 5 paths (v2 count 1).
+Your expected table, exactly. Extras (round-2): tied originals at the boundary, 24 later copies: cert-b2 (v2 lists B1 and B2); the original certified before every later copy, 25 later copies: cert-b-old; original inside a 3-copy set: B, 0 originals reads. Base and round-1 present cert-a-24 or cert-a-25 in both tie and older-cert cells.
+v2 cap (B in tenant k by tenant id; registry created_at follows registration): CAP-8 (control) base 8 matches, 7 certified latecomers; round-1 and round-2 B only. CAP-9 and CAP-10: base and round-1 8 certified latecomers, B absent; round-2 B only. CAP-LATE (B's registry row written after every other tenant's): 8 certified latecomers, B absent, on all three: the stated residual.
+EXPLAIN on a 25-row table: one aggregate over the hash's rows and a filtered read of the same rows; migration 001's idx_documents_content_hash serves both on a migrated database. No new index, no migration.
+PG cluster: /private/tmp/f30t/pgdata, unix socket /private/tmp/f30t/sock only (listen_addresses empty), started by pg_ctl at 10:03:09Z, postmaster PID 54506; stopped by pg_ctl -D /private/tmp/f30t/pgdata stop at 12:34:07Z (rc 0), PID 54506 confirmed gone. Data dir kept; re-run recipe pgcell/README.md.
+
+MOCK CELLS (the new file, G188-F3)
+- The mock models each statement: row-set reads apply ORDER BY certified_at DESC NULLS LAST and LIMIT; the originals read applies MIN or MAX, ORDER BY id direction and LIMIT; the registry applies ORDER BY MIN(created_at), created_at or tenant_id and LIMIT; fresh row objects per statement. Mock control M0: the model's answer to the route's row-set read excludes B at 24 and 25 and keeps it at 23, where a naive mock (the fixture as handed) always holds B.
+- Red first on d03b03046d76 (routes overlaid, sha256-restored): 18 of 30 RED by assertion, 0 compile errors; 12 of 30 green are the cells that hold on both (M0 x3, the five 23-copy cells, the under-limit P cell, N-SPLIT, CAP-8, the residual). Round-2: 30 of 30.
+
+MUTANTS (final code; each anchor count 1, ts.transpileModule diagnostics 0, tests ran, restored with sha256 equal; evidence/mutants.json): 11 of 11 valid, 11 of 11 killed.
+- M1 trigger off = the round-1 fetched-set MIN restored: cells 16 of 30 RED, PG 6 of 13 RED (the real-PG cells at 24 and 25, local and cross).
+- M2 threshold 23: 1 of 30 (under-limit P cell). M3 threshold 25: 16 of 30, PG 6 of 13.
+- M4 id dedupe dropped: 3 of 30. M5 tie bound 1: 2 of 30, PG 1 of 13 (tie cell).
+- M6 MIN to MAX, caller read: 10 of 30, PG 4 of 13. M7 MIN to MAX, tenant pool read: 4 of 30, PG 2 of 13.
+- M8 tie order id DESC: 1 of 30 (25-tied narrowing cell). M9 chain-first not wired: 1 of 30.
+- M10 v2 per-tenant not wired: 2 of 30, PG 2 of 13. M11 tenant rank restored to ORDER BY tenant_id: CAP-9 and CAP-10, 2 of 30, PG 2 of 13.
+- Invalid first attempts, not counted: M1 as 'false &&' (TS18049), M4 leaving 'have' unread (TS6133): 0 tests ran; redone type-clean.
+
+SUITES (final code, Node v26.8.1, TMPDIR /private/tmp/f30t/tmp)
+- Whole originate suite: 2451 of 2451 tests, 209 of 209 suites, rc 0.
+- Neighbours (the gate's 7 plus F 29th's 12-file set plus the new file): 204 of 204 in 13 files, rc 0. F 29th's ks1561 file byte-unchanged (31 cells).
+- tsc over originate src including __tests__ (config outside the repo): 82 errors, the identical set on d03b03046d76; 4 files, none mine (ks1943 33, three ks1868 global-script files 49). 0 in my files.
+- Lint: 0 errors, 29 warnings (F 29th's count), none in my files.
+- Docs: docs-fragments check OK; planted literal section number FAIL rc 1; restored OK.
+- Direction (PG records, base vs round-2): head MORE permissive than base in 0 of 23 cells; 19 of 23 present no certification where base did; 4 of 23 equal. Control with flags swapped: 19 of 23.
+
+NOT TESTED
+- Node 24 (host v26.8.1); kintsugi or demo; the live verify after deploy; real Platform S traffic; the four platform suites.
+- Whether 24 certified copies, or 9 or more tenants holding one hash, is reachable through the real register and certify APIs.
+- Production data volume or index behaviour: EXPLAIN only on a 25-row table.
+- The registry-time residual in real data (how often a tenant's registry row is late).
+- The lineage re-fetch at verification.ts (the external_id, tenant_id LIMIT 1 read after selection): read, not driven; it feeds no eligibility call.
+
+G188-F2, FILING CANDIDATE (not changed; gate 188's text): v1 judges "original" over the caller's own tenant whenever any local row exists (crossTenantLookup and D4 run only when the local set is EMPTY), while v2 judges it over local plus cross-tenant rows, so they disagree when the original is in another tenant. Cell N-SPLIT: v1 presents A (cert-a-split), v2 lists B only, count 1; at base both presented A. The parity sweep (scripts/verify/ks584-p3-parity-sweep.mjs) would report a mismatch for such groups. Unmeasured: which tenant an anonymous Platform S verifier's req.db binds to in pool mode, and whether one hash is spread across tenants in real data. My N-SPLIT cell reads exactly the gate's round-1 reading.
+G188-F4 note: the by-id strategy (respondExistenceOnly, v2 documentId) presents the named row's own certification; pre-existing, unchanged.
+Other candidates: KS-1561's description and its 'product ruling pending' label are stale (F 29th's candidate, still open).
+
+PRIOR WORK
+- Gate 188 round 1 verdict (NO GO G188-F1; F2 MINOR; F3, F4 INFO) and commission, read whole: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate188-ks1561-pr2000/.
+- Seat F 29th: PR 2000 at d03b03046d76 (option a, D1-D4, v2 (A), the :195 and :213 fixture edits), its 31-cell file, its fragment pair, its tools (v3 push driver, launcher, comment tool, PR scan), HANDOVER read whole.
+- Lane-E 24th seat's existing-branch driver delta (pushlock_e24_existing.sh against its newbranch_v3) and its body-patch tool, read whole and adapted.
+
+DISK AND MACHINE
+- df -h /Volumes/DevMASTER: 2.0 GiB at boot (09:5xZ), 2.0 GiB at 10:23Z, 144 GiB at 11:12Z (after Seat C 34th's cleanup); my worktree's install was untouched.
+- Doctor check (PORTABILITY): I relied on the PostgreSQL 15 keg /opt/homebrew/opt/postgresql@15 (15.19, installed earlier today by another seat); I installed nothing.
+
+FAULTS: about 6 boot commands used cd before I read the no-cd hold; zsh did not word-split a psql command held in a variable (rerun via a wrapper); my first chain-first cell used an anchored original and could not show F1 (rewritten with a draft original); two invalid mutants; PROGRESS 2 carried a '-?' placeholder and a self-correcting sentence (corrected in STATUS 10:29:01Z); my inbox watcher re-fired once on an already-read mail (string bound without the .000Z suffix; fixed).
+
