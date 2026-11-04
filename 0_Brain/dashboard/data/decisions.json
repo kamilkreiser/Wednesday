@@ -59768,9 +59768,9 @@
   ],
   "recommended": "c",
   "ts": "2026-11-04T17:28:34.329606+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-04T20:56:36.747149+11:00",
   "prior_rulings_overridden": [
    "2026-08-26 10:51",
    "2026-09-05 10:52",
@@ -59781,6 +59781,42 @@
    "CARD wed-devmaster-drive-cleanup-1019",
    "CARD wed-devmaster-datasec-leftovers-1019",
    "CARD wed-gate-clones-fill-devmaster-1103"
+  ]
+ },
+ {
+  "id": "wed-github-ssh-refused-all-keys-1104",
+  "client_project": "Secuura/Blockchain + WED",
+  "title": "GitHub refuses every SSH key since about 8:45 pm: all pushes and my rotation are stuck",
+  "bluf": "(Override: the prior matches share only the word GitHub; secuura-agent-github-identity is about who may APPROVE a PR, this is SSH access refused for every key tonight.) Since about 20:45 GitHub answers Permission denied (publickey) to BOTH the Secuura deploy key and Wednesday's own repo key (two accounts); ssh -vT reaches GitHub's real host key, offers the key, and is refused; GitHub over HTTPS answers 200. Three Secuura PRs wait to push (KS-1256, KS-1401, the KS-1561 fix), one merge waits, and Wednesday cannot rotate because its handover commits cannot reach origin. No seat has used another credential.",
+  "default_action": "Nothing changes: seats keep local work, Wednesday re-probes every 15 minutes, and stays in this seat past the 80-90 band until SSH returns or the 90% ceiling, where it writes a local handover and asks again.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Kam checks the GitHub accounts",
+    "detail": "Open github.com settings for kamilkreiser (Wednesday repo deploy key) and the Secuura org repo Distributed_Secuura (Deploy keys); tell me if a key, SSO or an org policy changed tonight"
+   },
+   {
+    "key": "b",
+    "label": "Wait for GitHub",
+    "detail": "Seats keep building and testing locally; Wednesday re-probes every 15 minutes and lifts the pause when SSH passes"
+   },
+   {
+    "key": "c",
+    "label": "HTTPS for Wednesday's own repo only",
+    "detail": "Wednesday pushes its brain over HTTPS with Kam's gh login so it can rotate; Secuura stays paused (its credentials are not touched)"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-04T21:13:02.402620+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-agent-github-identity"
   ]
  }
 ]
