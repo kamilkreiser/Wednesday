@@ -1,0 +1,14 @@
++// KS-1561: one registrant owning every row of a fixture whose certified rows must stay matches (see the cells that use it).
++const P3_OWNER = 'c0000000-0000-4000-8000-0000000000cc';
++      // KS-1561 (fixture only, ruled by Wednesday 2026-11-04 08:54:47Z): the certified row now has the SAME owner as the
++      // original, so it is a certification the original's holder may present and stays a match. Before KS-1561 no owner
++      // was needed, because any certified row was presented; an unowned later certified row is now left out (the case
++      // ks1561-verify-original-registrant-certifier.test.ts pins). No expect line changed.
++      owner_user_id: P3_OWNER,
+-    mockRows([signedCertRow(), anchoredRow(), certified]);
++    mockRows([signedCertRow(), anchoredRow({ owner_user_id: P3_OWNER }), certified]); // KS-1561: owner added (fixture only)
++      // KS-1561 (fixture only, ruled by Wednesday 2026-11-04 09:02:48Z): both rows have ONE owner, so both are certifications
++      // the original's holder may present and this cell stays about millisecond ordering between them. Before KS-1561 no
++      // owner was needed; an unowned certified row created later than the original is now left out. No expect line changed.
++      owner_user_id: P3_OWNER,
++      owner_user_id: P3_OWNER, // KS-1561: same owner as `older` (fixture only, see above)

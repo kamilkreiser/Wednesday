@@ -1,0 +1,35 @@
+M1-tie-rule-dropped (one original: the LAST tied row) | KILLED | 2 | restored True
+      ✕ C11 P: rows tied at the earliest created_at are all originals -> the certified one is presented (4 ms)
+      ✕ P5-tie-earliest: certification cert-a-tie presented on every v1 path and as v2 matches[0] (8 ms)
+M2-same-owner-clause-dropped | KILLED | 3 | restored True
+      ✕ C8 P: the SAME owner re-registers and certifies the later row -> certified (4 ms)
+      ✕ V6 P: the same owner re-registers and certifies the later row -> that certified match is listed first (2 ms)
+      ✕ P2-same-owner-rereg: certification cert-b1 presented on every v1 path and as v2 matches[0] (9 ms)
+M3-MIN-inverted-to-MAX | KILLED | 21 | restored True
+      ✕ C1 DEFECT (Seat J's case): B registers H, A registers H and certifies -> B's original answers, not certified
+      ✕ C1b DEFECT: the same when each row carries its own (different) issuer_organization_id (2 ms)
+      ✕ C2 DEFECT: both certified, A more recently -> the ORIGINAL holder's certification, not the newest (3 ms)
+      ✕ C7 DEFECT: a KS-1557-trusted lineage certification whose parent is the LATER registration is not lent to the
+      ✕ C10 DEFECT (the ruled cost): two rows with NO owner and NO organisation, the later certified -> not presente
+      ✕ C3 P: A holds the ORIGINAL and certifies it, B registers later -> still certified by A (2 ms)
+M4-identity-case-sensitive | KILLED | 1 | restored True
+      ✕ P2-same-owner-rereg: certification cert-b1 presented on every v1 path and as v2 matches[0] (10 ms)
+M5-same-org-clause-dropped | KILLED | 2 | restored True
+      ✕ C9 P: the SAME organisation (a different user) re-registers and certifies -> certified (4 ms)
+      ✕ P3-same-org: certification cert-b2 presented on every v1 path and as v2 matches[0] (9 ms)
+M6-sibling-evidence-gate-dropped | KILLED | 2 | restored True
+      ✕ C7 DEFECT: a KS-1557-trusted lineage certification whose parent is the LATER registration is not lent to the
+      ✕ N-lineage-child-of-LATER (A certifies its own later copy via lineage): not presented anywhere (6 ms)
+M7-v2-presentable-filter-dropped | KILLED | 4 | restored True
+      ✕ V1 DEFECT: Seat J's case -> A's certified copy is not a match; B's original is matches[0], nothing certified
+      ✕ J: every path presents B, not certified; v2 omits A entirely (count, ids, planted issuer) (35 ms)
+      ✕ P7-both-certified-original-wins: certification cert-b-old presented on every v1 path and as v2 matches[0] (9
+      ✕ N-TRUNC-23 (control): the same with 23 copies (B still inside the fetched 24) -> not certified (8 ms)
+M8-selection-candidates-ungated | KILLED | 10 | restored True
+      ✕ C1 DEFECT (Seat J's case): B registers H, A registers H and certifies -> B's original answers, not certified
+      ✕ C1b DEFECT: the same when each row carries its own (different) issuer_organization_id (3 ms)
+      ✕ C2 DEFECT: both certified, A more recently -> the ORIGINAL holder's certification, not the newest (3 ms)
+      ✕ C10 DEFECT (the ruled cost): two rows with NO owner and NO organisation, the later certified -> not presente
+      ✕ F1 DEFECT: verify-file on Seat J's case -> not certified (4 ms)
+      ✕ X1 DEFECT: the cross-tenant rowset on Seat J's case -> not certified (3 ms)
+pristine {'verification.ts': 'd38281800e37daf6', 'verificationV2.ts': 'b74625744a688d43'}

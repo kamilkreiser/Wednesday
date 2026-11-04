@@ -1,0 +1,142 @@
+2026-11-04 20:44:18.826 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.833 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.839 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.843 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.849 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.852 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.856 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.861 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.874 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+2026-11-04 20:44:18.876 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.877 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+2026-11-04 20:44:18.878 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+2026-11-04 20:44:18.880 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+2026-11-04 20:44:18.881 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.882 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+2026-11-04 20:44:18.885 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.889 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+2026-11-04 20:44:18.889 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.891 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+2026-11-04 20:44:18.893 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.894 [originate] [32minfo[39m: Hash verified via chain-first lookup {"hash":"eeeeeeeeeeeeeeee","source":"chain"}
+2026-11-04 20:44:18.898 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.902 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.906 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.910 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+PASS ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-verify-original-registrant-certifier.test.ts
+  KS-1561 /verify: a later registrant's certification is not presented for the original's bytes
+    ✓ C1 DEFECT (Seat J's case): B registers H, A registers H and certifies -> B's original answers, not certified (22 ms)
+    ✓ C1b DEFECT: the same when each row carries its own (different) issuer_organization_id (2 ms)
+    ✓ C2 DEFECT: both certified, A more recently -> the ORIGINAL holder's certification, not the newest (3 ms)
+    ✓ C7 DEFECT: a KS-1557-trusted lineage certification whose parent is the LATER registration is not lent to the original (3 ms)
+    ✓ C10 DEFECT (the ruled cost): two rows with NO owner and NO organisation, the later certified -> not presented (3 ms)
+    ✓ C3 P: A holds the ORIGINAL and certifies it, B registers later -> still certified by A (1 ms)
+    ✓ C4 P: B holds the original and certifies it, A registers later without certifying -> certified by B (3 ms)
+    ✓ C5 P: two registrants, neither certified -> unchanged (the oldest confirmed registration answers) (2 ms)
+    ✓ C6 P: a KS-1557-trusted lineage certification whose parent IS the original is still presented (3 ms)
+    ✓ C8 P: the SAME owner re-registers and certifies the later row -> certified (3 ms)
+    ✓ C9 P: the SAME organisation (a different user) re-registers and certifies -> certified (2 ms)
+    ✓ C11 P: rows tied at the earliest created_at are all originals -> the certified one is presented (2 ms)
+    ✓ C12 P: a single certified registrant -> certified (2 ms)
+  KS-1561 verify-file and the cross-tenant lookup apply the same rule
+    ✓ F1 DEFECT: verify-file on Seat J's case -> not certified (4 ms)
+    ✓ F3 P: verify-file where A holds the original -> certified by A (2 ms)
+    ✓ X1 DEFECT: the cross-tenant rowset on Seat J's case -> not certified (1 ms)
+    ✓ X3 P: the cross-tenant rowset where A holds the original -> certified (2 ms)
+    ✓ X-REG DEFECT (D4): the registry hash lookup picks the tenant holding the EARLIEST registration (3 ms)
+    ✓ D1 DEFECT: the chain-first downgrade check judges the row the rule selects (B's draft), not A's certified copy (2 ms)
+  KS-1561 the row-set SELECTs carry the identity columns the rule reads
+    ✓ S1 DEFECT: /verify's row-set selects issuer_organization_id (2 ms)
+    ✓ S2 DEFECT: verify-file's row-set selects issuer_organization_id (2 ms)
+    ✓ S3 DEFECT: the cross-tenant row-set selects issuer_organization_id (3 ms)
+    ✓ S4 DEFECT: the chain-first local row-set selects owner_user_id, parent_document_id and issuer_organization_id (2 ms)
+  KS-1561 v2 lists only what the original registration's holder may present
+    ✓ V1 DEFECT: Seat J's case -> A's certified copy is not a match; B's original is matches[0], nothing certified (3 ms)
+    ✓ V4 DEFECT: lineage evidence whose parent is the LATER registration is not presented on any match (2 ms)
+    ✓ V2 P: A holds the original and certifies it -> A's match is first and certified, B is still listed (3 ms)
+    ✓ V3 P: an UNCERTIFIED later registration stays listed (only certified non-original rows are left out) (2 ms)
+    ✓ V5 P: lineage evidence whose parent IS the original is presented on the derived row's own match (2 ms)
+    ✓ V6 P: the same owner re-registers and certifies the later row -> that certified match is listed first (2 ms)
+  KS-1561 v2's row-set SELECTs carry the identity column the rule reads
+    ✓ V7 DEFECT: v2's local row-set selects issuer_organization_id (2 ms)
+    ✓ V8 DEFECT: v2's cross-tenant row-set selects issuer_organization_id (2 ms)
+
+2026-11-04 20:44:18.917 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.924 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.928 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:44:18.933 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:44:18.937 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+FAIL ../repo/Blockchain/Dev/services/originate/src/__tests__/gate188-matrix.test.ts
+  G188 Q2 the ruled outcome (Seat J shape: B first, A later certifies, both org NULL, owners differ)
+    ✓ J: every path presents B, not certified; v2 omits A entirely (count, ids, planted issuer) (33 ms)
+    ✓ J-CONTROL: the planted issuer IS visible when A holds the original (the grep instrument can fire) (8 ms)
+  G188 Q3 over-blocking: each must still present a certification on head
+    ✓ P1-original-certifies-own: certification cert-b presented on every v1 path and as v2 matches[0] (9 ms)
+    ✕ P2-same-owner-rereg: certification cert-b1 presented on every v1 path and as v2 matches[0] (10 ms)
+    ✓ P3-same-org: certification cert-b2 presented on every v1 path and as v2 matches[0] (9 ms)
+    ✓ P5-tie-earliest: certification cert-a-tie presented on every v1 path and as v2 matches[0] (9 ms)
+    ✓ P6-single: certification cert-single presented on every v1 path and as v2 matches[0] (8 ms)
+    ✓ P7-both-certified-original-wins: certification cert-b-old presented on every v1 path and as v2 matches[0] (8 ms)
+    ✓ P4-lineage-child-of-original (certified by B's colleague via the KS-1557 path): presented on /verify, verify-file, v2 (7 ms)
+    ✓ N-lineage-child-of-LATER (A certifies its own later copy via lineage): not presented anywhere (7 ms)
+  G188 probes beyond the seat's table
+    ✕ N-TRUNC: B registers first; A registers and certifies the same bytes 24 times -> the ruled outcome is still "not certified" (9 ms)
+    ✓ N-TRUNC-23 (control): the same with 23 copies (B still inside the fetched 24) -> not certified (8 ms)
+    ✕ N-SPLIT: B (original) lives in tenant 2, A (later, certified) in the caller's tenant -> v1 and v2 agree on matches[0] (12 ms)
+
+  ● G188 Q3 over-blocking: each must still present a certification on head › P2-same-owner-rereg: certification cert-b1 presented on every v1 path and as v2 matches[0]
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      266 |       const r = await allPaths(name, rows);
+      267 |       for (const o of [r.verify, r.file, r.xt, r.list]) {
+    > 268 |         expect(o.certified).toBe(true);
+          |                             ^
+      269 |         expect(o.certId).toBe(want);
+      270 |       }
+      271 |     });
+
+      at Object.<anonymous> (src/__tests__/gate188-matrix.test.ts:268:29)
+
+  ● G188 probes beyond the seat's table › N-TRUNC: B registers first; A registers and certifies the same bytes 24 times -> the ruled outcome is still "not certified"
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      301 |     const r = await allPaths('N-TRUNC', rows);
+      302 |     for (const o of [r.verify, r.file, r.xt, r.list]) {
+    > 303 |       expect(o.raw.includes(PLANT)).toBe(false);
+          |                                     ^
+      304 |       expect(o.certified).toBe(false);
+      305 |     }
+      306 |   });
+
+      at Object.<anonymous> (src/__tests__/gate188-matrix.test.ts:303:37)
+
+  ● G188 probes beyond the seat's table › N-SPLIT: B (original) lives in tenant 2, A (later, certified) in the caller's tenant -> v1 and v2 agree on matches[0]
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "gate188-a0"
+    Received: "gate188-b0"
+
+      320 |     installTenants(aRows, { [TEN_2]: bRows }, [{ tenant_id: TEN_2, created_at: at(0) }, { tenant_id: TEN_1, created_at: at(30) }]);
+      321 |     const two = await v2('N-SPLIT');
+    > 322 |     expect(two.documentId).toBe(one.documentId);
+          |                            ^
+      323 |   });
+      324 | });
+      325 |
+
+      at Object.<anonymous> (src/__tests__/gate188-matrix.test.ts:322:28)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       3 failed, 41 passed, 44 total
+Snapshots:   0 total
+Time:        2.583 s, estimated 3 s
+Ran all test suites matching /src\/__tests__\/(gate188|ks1561)/i.

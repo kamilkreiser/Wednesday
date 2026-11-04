@@ -1,0 +1,142 @@
+=========== [QUESTION] 2026-11-04T08:46 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] QUESTION: plan confirmation (Seat F 29th)
+[Secuura/Blockchain-F -> Wednesday] QUESTION: plan confirmation (Seat F 29th)
+Seat F 29th
+
+QUESTION: plan confirmation. Meanwhile: BLOCKED. The build waits on my other QUESTION, "ks1561 original-registrant definition". The plan below is written for its leans (D1a, D2a, D3a, D4a). A different answer changes only the eligibility predicate and the cells that encode it.
+
+Identity: Seat F 29th, lane Secuura/Blockchain-F, pane %141, claude pid 58437, claude-opus-5-5. Process start 2026-11-04T08:32:13Z, 6 s after your NEW SEAT F 29th mail (08:32:07Z). History max F ordinal = 28 (Seat F 29: 0 hits; control Seat F 28: 2 hits); no F 29th heading yet. Record folder 5_Project_History/2026-11-04_seatF-29th/. Inbox watcher: pid 99341, a tracked background task, since 08:45:58Z, matching only a closing "(Seat F 29th)" from wednesday-agent@ (dry run: it matched the NEW SEAT mail and neither FLOOR UPDATE).
+
+LAUNCHER PREFLIGHT. Read in my first tool call from 4_Credentials/.launch_preflight_last.txt, launch stamp 2026-11-04T08:32:14Z. My copy is evidence/preflight_bootread.txt; its sha256 prefix 5bc643f5731f equalled the live file at ~08:34Z. VERBATIM:
+# launch 2026-11-04T08:32:14Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 3 other live session(s) on this project: PID 83675 (up since Wed  4 Nov 18:05:15 2026), PID 39934 (up since Wed  4 Nov 18:56:14 2026), PID 45110 (up since Wed  4 Nov 18:58:07 2026).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+
+BASE: develop d92b849ece732cd04e283bfcb0ee9e8bd6989631 (ls-remote ~08:45Z).
+- The shared checkout holds neither it nor 9b38173ffa45, so I read from my own clone, worktrees/s-f29-base: clone --shared, fetched into the clone only, shared-checkout fingerprint equal before and after.
+- c7abf98e5103..d92b849ece73 is 3 commits (KS-1340, KS-1499, KS-1600) with 0 files on the KS-1561 surface.
+- I re-read ls-remote and branch from develop at your ANSWER.
+
+KS-1561: In Progress, not archived, team KS (read by identifier; PS-1561 not read). Creator and assignee kamil.kreiser@secuura.ai (the board account, not Peter or Stuart). Label "product ruling pending", stale per 1a3c3dbe. 1 comment, 1a3c3dbe at 04:22:33Z (Seat S 17th). No attachment.
+
+OPEN PRs: 17 open; 0 touch routes/verification.ts, verificationV2.ts, certifications.ts, a verify or certification test, or a patch naming selectVerifiableRow (GitHub API, files per PR). Control: merged PR 1941 (KS-1868), which touched the verification routes, hit 6 files through the same matcher. evidence/prscan.out.
+
+OVERLAP WITH E 35th: its 17 files (its evidence/wip_files.txt) are 16 under services/api-gateway plus migration 057, and 0 under services/originate (control: api-gateway 16). All my files are under services/originate, plus my own docs fragment pair. I edit no api-gateway file and no migration.
+
+MIGRATION: none. D2a reads issuer_organization_id and owner_user_id, which both exist; the change only adds issuer_organization_id to the row-set SELECT lists.
+
+WHERE THE CHANGE GOES (lines at d92b849ece73; the brief's 716 is verify-file, not /verify)
+- ONE eligibility helper beside selectVerifiableRow (verification.ts:222). Original rows = those tied at MIN(created_at); eligible(row) as D2a.
+- selectVerifiableRow: rule 1 considers only ELIGIBLE certified rows. An ineligible certified row is left out of selection entirely, because its status 'certified' would otherwise reach the answer through buildCertification (:159) and isCertifiedStatus (:728, :946). O is always eligible, so the set never empties.
+- siblingCertification (:356) skips an ineligible certified sibling and ineligible trusted evidence.
+- Call sites, all through those two functions: crossTenantLookup :543/:554; verify-file :716/:722-724; the /verify hash path :1257/:1262-1264 and buildResponse :943; the chain-first downgrade check :1148, whose SELECT (:1139) gains owner_user_id, parent_document_id and issuer_organization_id.
+- SELECT lists gain d.issuer_organization_id at :514, :614 and :1072.
+- D4a: the registry hash lookup (:492-495) gains ORDER BY created_at ASC, id.
+- D3a: verificationV2.ts. SELECT_COLUMNS (:73) and localRowsByHash (:280) gain the column; buildMatch (:144) and ownRowCertification (:130) take eligibility from the same helper; matchRank (:245) ranks an ineligible certified row as non-certified.
+- Unchanged, stated:
+  - the by-id strategy (respondExistenceOnly :987): it presents the NAMED row's own certification, with verified:false and no hash claim;
+  - the title strategy (no certification);
+  - the chain-only fallbacks (chain metadata, no rowset);
+  - certifierOrganizationId (a user id; the write side, not needed by (a));
+  - the KS-1557 trust checks and the KS-1538 access rule;
+  - the response shape (no field added or removed).
+
+CASE TABLE (base -> intended head)
+(i) B original anchored, A later certified: certified by A -> B's row, anchored, isCertified false, no certification. (Seat J's case.)
+(i-b) B original certified, A later certified more recently: certified by A (certified_at DESC) -> certified by B.
+(ii) A original certified, B later: certified by A -> unchanged.
+(iii) B original certified, A later uncertified: certified by B -> unchanged.
+(iv) two registrants, neither certified: unchanged.
+(v) cross-tenant rowset and verify-file: (i)-(iv) on those paths; the registry pick per D4.
+(vi) lineage: a trusted derived row whose parent is O -> unchanged (certified); a trusted derived row whose parent is the LATER registrant's row -> not presented.
+(vii) the same owner re-registers and certifies the later row -> unchanged (certified). The same non-null issuer_organization_id -> unchanged. Both identities NULL on different rows -> not presented (the D2a cost).
+(viii) rows tied at the earliest created_at (the fixture shape of ks584-verify-row-selection.test.ts:167) -> unchanged.
+(ix) a single registrant, certified -> unchanged.
+
+TESTS (red-first on base, then the fix)
+- New file __tests__/ks1561-verify-original-registrant-certifier.test.ts: route cells in the neighbours' style (express plus a mocked prisma.$queryRaw, as ks584-verify-row-selection.test.ts does) for every case above, on /verify, verify-file, crossTenantLookup (tenant manager mocked) and v2. Seat J's exact case is cell C1. P-cells: (ii), (iii), (vi) first half, (vii) same owner, (viii), (ix).
+- Existing cells I expect to stay green unchanged: all of ks584-verify-row-selection, ks584-p3-verify-list :195 (single-owner fixtures), ks1557 unit and integration, ks1628. If any goes red, I stop and report it rather than edit it.
+- Real engine: the integration suites are DB-gated (Seat J ran real Postgres), and I start no Docker object. I propose a PGlite cell (in-process, as E 35th used) that runs the changed SELECT texts against documents and organizations built from docker/init, to prove the column lists parse and return the column. If PGlite cannot load that schema, I say NOT run.
+- Base-vs-head matrix: registrant order {B first, A first, tie} x certifier {none, original, later, both} x identity {distinct owners, same owner, same org, unknown} x path {verify, verify-file, cross-tenant, v2}. Predicate: head differs from base only where base presents a certification from an ineligible row, and there head presents the original holder's certification or none. Printed as N/N, with a planted wrong head that must flag.
+- Mutants:
+  - eligibility removed from selection;
+  - eligibility removed from siblingCertification;
+  - tie handling dropped;
+  - MIN inverted to MAX;
+  - the same-owner clause removed;
+  - the same-org clause removed;
+  - the lineage-parent clause removed;
+  - the v2 rank change removed;
+  - the registry ORDER BY removed (where a cell can see it).
+- Runs:
+  - the originate full suite and the new file;
+  - lint;
+  - tsc including tests (check:test-types);
+  - TMPDIR /private/tmp/f29t.
+  The four platform suites are NOT run (no stack), and Test Evidence will say so.
+
+DOCS: my own fragment pair under the current scheme (docs-fragments.mjs check, with a planted defect that must fail).
+PUSH AND PR: pushlock_r81_newbranch_v3.sh, launch_driver_r81.py and create_pr_r81.py, each read whole and re-keyed _f29. The branch is Linear's gitBranchName for KS-1561.
+
+INSTRUCTIONS THAT LOOK WRONG, OR CLASH
+1. Call sites: the brief's 716, "the verify handler", is verify-file. The /verify hash path is 1257, 1148 is the chain-first downgrade check, and 1292 is the lineage tenant lookup, not a selection input.
+2. The launcher prompt says "CC Kam on every email you send"; your brief says no cc. I follow the brief (no cc). Tell me if Kam's line should win.
+3. The launcher prompt says to mark extranet items seen; the project CLAUDE.md (Kam, 2026-09-05) forbids POST /api/seen. I read the extranet summary (6 open tasks for Kam, 0 replies, 1 new document) and marked nothing.
+4. The launcher asks for the boot plan from Kam; the workspace rule sends a Wednesday-briefed plan confirmation to you. I send it to you and show the same plan to Kam in the terminal, without waiting on him.
+
+=========== [QUESTION] 2026-11-04T08:46 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] QUESTION: ks1561 original-registrant definition (Seat 
+[Secuura/Blockchain-F -> Wednesday] QUESTION: ks1561 original-registrant definition (Seat F 29th)
+Seat F 29th
+
+QUESTION: ks1561 original-registrant definition. Meanwhile: BLOCKED on the build (ITEM 0 step 4 says a definition boundary always waits). Needed-by: before ITEM 1. My plan confirmation follows in a separate mail, written for my leans below.
+
+BLUF: "earliest registered" is measurable and safe, and I lean to it. The harder boundary is "organisation". A portal registration carries NO organisation on its row, so "the org holding the original" cannot be read off the data for most rows. I propose a rule that needs no migration and fails closed when identity is unknown. It has a client-visible cost you should rule on. Third: v2 verify already lists every registrant with its own certification, so either v2 changes too or it keeps the exposure.
+
+Context: develop d92b849ece732cd04e283bfcb0ee9e8bd6989631 (my ls-remote ~08:45Z, read in my own clone). routes/verification.ts, verificationV2.ts and certifications.ts are unchanged since c7abf98e5103 (3 commits in the range, 0 files on this surface). Paths are under Blockchain/Dev/services/originate/src/ unless named.
+
+WHAT I MEASURED (read at the sha with git show, not run)
+1. Ordering.
+   - created_at is server-set on every write that puts a row in a hash's set. saveDocument inserts NOW() in both conflict tails, and the upsert tail never updates created_at (repositories/documentRepo.ts:438-497). The certification row uses new Date() (repositories/certificationRepo.ts:269). A caller cannot set it.
+   - The certification row's content_hash is generateContentHash(data) (routes/certifications.ts:465), so it is NOT in the document's same-hash set. The set holds registrations plus lineage-derived rows.
+2. "Earliest anchored" differs from "earliest registered" exactly when the original's anchor failed, is pending or is simulated, and a later registration's anchor confirmed first.
+   - That is the KS-535 class (295 local and 2 demo "All inputs are spent" failures).
+   - Under it, a later registrant BECOMES the original by having its anchor land first, and the answer changes over time as anchors settle.
+   - The legacy certify UPDATE also overwrites the certified row's chain blob with the certification's own anchor (certifications.ts:792-811), so a certified row's anchored time is not its registration's.
+3. Organisation on a row.
+   - documents.issuer_organization_id is written ONLY when the caller sends an organizationUuid claim bound to its own organisation (routes/documents.ts:552-557, KS-597). Case 3, "no claim -> unchanged", leaves it NULL. Platform S sends the claim; the portal does not.
+   - Seat J's probe rows (2026-10-12) read org NULL on BOTH rows. The two organisations sat in ONE tenant and were told apart only by owner_user_id.
+   - The repo's erasure selector says the same: "a document created with NO organizationUuid claim and NO onBehalfOf carries no organisation, connector or owner in K's data" (services/connectorOrganisationErasure.ts:195-197).
+   - tenant_id is not the organisation (Seat J: one tenant, two orgs).
+4. v2.
+   - routes/verificationV2.ts lists every same-hash registration, each with its OWN certification (ownRowCertification :130), sorted certified first (matchRank :245). For Seat J's case, matches[0] is A's row, certified by A.
+   - scripts/verify/ks584-p3-parity-sweep.mjs asserts that v2 matches[0] equals v1's answer, and asserts isCertified parity at set level. ks584-p3-verify-list.test.ts:195 asserts the order.
+5. Cross-tenant.
+   - crossTenantLookup picks the registry row by hash with LIMIT 1 and NO ORDER BY (routes/verification.ts:492-495). In pool mode, with A and B in different tenants, the answering tenant is arbitrary.
+   - platform_document_registry has created_at (docker/init-platform/01-platform-schema.sql:219).
+
+OPTIONS (none needs a migration)
+D1 ordering:
+ (a) [lean] earliest registered = MIN(created_at) over the hash's rowset; rows tied at that instant all count as the original.
+ (b) earliest anchored.
+D2 who "holds the original" (O = the original row or rows). A certification is presented only when its row is eligible:
+ (a) [lean] eligible = O itself; OR a KS-1557-trusted lineage row whose parent_document_id is O; OR a row with the SAME non-null issuer_organization_id as O; OR the SAME non-null owner_user_id as O. Unknown identity is not a match (fail closed).
+ (b) (a), plus the organisation resolved through the owner: COALESCE(issuer_organization_id, users.organization_id via owner_user_id). It keeps same-org re-registrations by a DIFFERENT user, but adds a users join to five row-set queries. How well users.organization_id is populated is UNMEASURED.
+ (c) row-only: O itself or its lineage child. It drops same-user re-registrations too.
+D3 v2:
+ (a) [lean] the same eligibility. An ineligible match keeps its row, but carries no certification and isCertified false, and is ranked by the same rule. matches[0] stays v1's answer and the parity sweep holds. No field is added to or removed from the shape.
+ (b) v2 unchanged. v2 keeps presenting A's certification (labelled as A's registration), and the parity sweep reports every multi-registrant group as a mismatch.
+D4 cross-tenant:
+ (a) [lean] ORDER BY created_at ASC, id on the registry hash lookup, so the tenant holding the earliest registration answers.
+ (b) unchanged: the tenant choice stays arbitrary.
+
+WHAT EACH COSTS (client-visible; Kam's card: "Some legitimate re-registrations stop showing as certified")
+- Under every option, a later registrant's certification of bytes someone else registered first stops showing. Two examples: a customer certifying a template or statutory form a content provider registered first; a Platform S organisation certifying bytes a portal user registered first.
+- When both certified, verify switches from the NEWEST certification (today's certified_at DESC) to the original holder's.
+- D2(a): a portal organisation that re-registers the same bytes under a DIFFERENT user, and certifies the later row, stops showing (both rows carry org NULL). D2(b) keeps that case where users.organization_id is set. D2(c) also loses the same-user re-registration.
+- D1(b) would let a later registrant outrank an original whose anchor failed. D1(a) does not.
+
+Question: please rule D1, D2, D3 and D4, or name a different shape. If any answer is not one of my leans, say whether it is yours to rule or goes to Kam.
+

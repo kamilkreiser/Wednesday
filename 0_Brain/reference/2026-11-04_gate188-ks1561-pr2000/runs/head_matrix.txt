@@ -1,0 +1,79 @@
+2026-11-04 20:40:53.414 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.421 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.428 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.431 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.437 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.441 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.446 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.450 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.454 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.458 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.463 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.467 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.472 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.475 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.480 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.484 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.489 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.497 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.503 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.508 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+2026-11-04 20:40:53.524 [originate] [32minfo[39m: File verification request {"size":13,"hash":"sha256:50a1f287eb50e874158c9f5..."}
+2026-11-04 20:40:53.529 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"7c7c7c7c7c7c7c7c"}
+FAIL ../repo/Blockchain/Dev/services/originate/src/__tests__/gate188-matrix.test.ts
+  G188 Q2 the ruled outcome (Seat J shape: B first, A later certifies, both org NULL, owners differ)
+    ✓ J: every path presents B, not certified; v2 omits A entirely (count, ids, planted issuer) (35 ms)
+    ✓ J-CONTROL: the planted issuer IS visible when A holds the original (the grep instrument can fire) (9 ms)
+  G188 Q3 over-blocking: each must still present a certification on head
+    ✓ P1-original-certifies-own: certification cert-b presented on every v1 path and as v2 matches[0] (10 ms)
+    ✓ P2-same-owner-rereg: certification cert-b1 presented on every v1 path and as v2 matches[0] (8 ms)
+    ✓ P3-same-org: certification cert-b2 presented on every v1 path and as v2 matches[0] (9 ms)
+    ✓ P5-tie-earliest: certification cert-a-tie presented on every v1 path and as v2 matches[0] (9 ms)
+    ✓ P6-single: certification cert-single presented on every v1 path and as v2 matches[0] (8 ms)
+    ✓ P7-both-certified-original-wins: certification cert-b-old presented on every v1 path and as v2 matches[0] (9 ms)
+    ✓ P4-lineage-child-of-original (certified by B's colleague via the KS-1557 path): presented on /verify, verify-file, v2 (8 ms)
+    ✓ N-lineage-child-of-LATER (A certifies its own later copy via lineage): not presented anywhere (7 ms)
+  G188 probes beyond the seat's table
+    ✕ N-TRUNC: B registers first; A registers and certifies the same bytes 24 times -> the ruled outcome is still "not certified" (9 ms)
+    ✓ N-TRUNC-23 (control): the same with 23 copies (B still inside the fetched 24) -> not certified (9 ms)
+    ✕ N-SPLIT: B (original) lives in tenant 2, A (later, certified) in the caller's tenant -> v1 and v2 agree on matches[0] (15 ms)
+
+  ● G188 probes beyond the seat's table › N-TRUNC: B registers first; A registers and certifies the same bytes 24 times -> the ruled outcome is still "not certified"
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      301 |     const r = await allPaths('N-TRUNC', rows);
+      302 |     for (const o of [r.verify, r.file, r.xt, r.list]) {
+    > 303 |       expect(o.raw.includes(PLANT)).toBe(false);
+          |                                     ^
+      304 |       expect(o.certified).toBe(false);
+      305 |     }
+      306 |   });
+
+      at Object.<anonymous> (src/__tests__/gate188-matrix.test.ts:303:37)
+
+  ● G188 probes beyond the seat's table › N-SPLIT: B (original) lives in tenant 2, A (later, certified) in the caller's tenant -> v1 and v2 agree on matches[0]
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "gate188-a0"
+    Received: "gate188-b0"
+
+      320 |     installTenants(aRows, { [TEN_2]: bRows }, [{ tenant_id: TEN_2, created_at: at(0) }, { tenant_id: TEN_1, created_at: at(30) }]);
+      321 |     const two = await v2('N-SPLIT');
+    > 322 |     expect(two.documentId).toBe(one.documentId);
+          |                            ^
+      323 |   });
+      324 | });
+      325 |
+
+      at Object.<anonymous> (src/__tests__/gate188-matrix.test.ts:322:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 11 passed, 13 total
+Snapshots:   0 total
+Time:        2.167 s
+Ran all test suites matching /src\/__tests__\/gate188/i.

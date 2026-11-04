@@ -1,0 +1,111 @@
+[
+ {
+  "mutant": "M1-tie-rule-dropped (one original: the LAST tied row)",
+  "status": "KILLED",
+  "red_cells": 2,
+  "red": [
+   "\u2715 C11 P: rows tied at the earliest created_at are all originals -> the certified one is presented (4 ms)",
+   "\u2715 P5-tie-earliest: certification cert-a-tie presented on every v1 path and as v2 matches[0] (8 ms)"
+  ],
+  "restored_sha_ok": true
+ },
+ {
+  "mutant": "M2-same-owner-clause-dropped",
+  "status": "KILLED",
+  "red_cells": 3,
+  "red": [
+   "\u2715 C8 P: the SAME owner re-registers and certifies the later row -> certified (4 ms)",
+   "\u2715 V6 P: the same owner re-registers and certifies the later row -> that certified match is listed first (2 ms)",
+   "\u2715 P2-same-owner-rereg: certification cert-b1 presented on every v1 path and as v2 matches[0] (9 ms)"
+  ],
+  "restored_sha_ok": true
+ },
+ {
+  "mutant": "M3-MIN-inverted-to-MAX",
+  "status": "KILLED",
+  "red_cells": 21,
+  "red": [
+   "\u2715 C1 DEFECT (Seat J's case): B registers H, A registers H and certifies -> B's original answers, not certified",
+   "\u2715 C1b DEFECT: the same when each row carries its own (different) issuer_organization_id (2 ms)",
+   "\u2715 C2 DEFECT: both certified, A more recently -> the ORIGINAL holder's certification, not the newest (3 ms)",
+   "\u2715 C7 DEFECT: a KS-1557-trusted lineage certification whose parent is the LATER registration is not lent to the",
+   "\u2715 C10 DEFECT (the ruled cost): two rows with NO owner and NO organisation, the later certified -> not presente",
+   "\u2715 C3 P: A holds the ORIGINAL and certifies it, B registers later -> still certified by A (2 ms)",
+   "\u2715 C4 P: B holds the original and certifies it, A registers later without certifying -> certified by B (5 ms)",
+   "\u2715 F1 DEFECT: verify-file on Seat J's case -> not certified (4 ms)",
+   "\u2715 F3 P: verify-file where A holds the original -> certified by A (2 ms)",
+   "\u2715 X1 DEFECT: the cross-tenant rowset on Seat J's case -> not certified (3 ms)",
+   "\u2715 X3 P: the cross-tenant rowset where A holds the original -> certified (2 ms)",
+   "\u2715 D1 DEFECT: the chain-first downgrade check judges the row the rule selects (B's draft), not A's certified co",
+   "\u2715 V1 DEFECT: Seat J's case -> A's certified copy is not a match; B's original is matches[0], nothing certified",
+   "\u2715 V4 DEFECT: lineage evidence whose parent is the LATER registration is not presented on any match (3 ms)",
+   "\u2715 V2 P: A holds the original and certifies it -> A's match is first and certified, B is still listed (2 ms)",
+   "\u2715 J: every path presents B, not certified; v2 omits A entirely (count, ids, planted issuer) (35 ms)",
+   "\u2715 J-CONTROL: the planted issuer IS visible when A holds the original (the grep instrument can fire) (12 ms)",
+   "\u2715 P1-original-certifies-own: certification cert-b presented on every v1 path and as v2 matches[0] (8 ms)",
+   "\u2715 P7-both-certified-original-wins: certification cert-b-old presented on every v1 path and as v2 matches[0] (9",
+   "\u2715 N-lineage-child-of-LATER (A certifies its own later copy via lineage): not presented anywhere (6 ms)",
+   "\u2715 N-TRUNC-23 (control): the same with 23 copies (B still inside the fetched 24) -> not certified (9 ms)"
+  ],
+  "restored_sha_ok": true
+ },
+ {
+  "mutant": "M4-identity-case-sensitive",
+  "status": "KILLED",
+  "red_cells": 1,
+  "red": [
+   "\u2715 P2-same-owner-rereg: certification cert-b1 presented on every v1 path and as v2 matches[0] (10 ms)"
+  ],
+  "restored_sha_ok": true
+ },
+ {
+  "mutant": "M5-same-org-clause-dropped",
+  "status": "KILLED",
+  "red_cells": 2,
+  "red": [
+   "\u2715 C9 P: the SAME organisation (a different user) re-registers and certifies -> certified (4 ms)",
+   "\u2715 P3-same-org: certification cert-b2 presented on every v1 path and as v2 matches[0] (9 ms)"
+  ],
+  "restored_sha_ok": true
+ },
+ {
+  "mutant": "M6-sibling-evidence-gate-dropped",
+  "status": "KILLED",
+  "red_cells": 2,
+  "red": [
+   "\u2715 C7 DEFECT: a KS-1557-trusted lineage certification whose parent is the LATER registration is not lent to the",
+   "\u2715 N-lineage-child-of-LATER (A certifies its own later copy via lineage): not presented anywhere (6 ms)"
+  ],
+  "restored_sha_ok": true
+ },
+ {
+  "mutant": "M7-v2-presentable-filter-dropped",
+  "status": "KILLED",
+  "red_cells": 4,
+  "red": [
+   "\u2715 V1 DEFECT: Seat J's case -> A's certified copy is not a match; B's original is matches[0], nothing certified",
+   "\u2715 J: every path presents B, not certified; v2 omits A entirely (count, ids, planted issuer) (35 ms)",
+   "\u2715 P7-both-certified-original-wins: certification cert-b-old presented on every v1 path and as v2 matches[0] (9",
+   "\u2715 N-TRUNC-23 (control): the same with 23 copies (B still inside the fetched 24) -> not certified (8 ms)"
+  ],
+  "restored_sha_ok": true
+ },
+ {
+  "mutant": "M8-selection-candidates-ungated",
+  "status": "KILLED",
+  "red_cells": 10,
+  "red": [
+   "\u2715 C1 DEFECT (Seat J's case): B registers H, A registers H and certifies -> B's original answers, not certified",
+   "\u2715 C1b DEFECT: the same when each row carries its own (different) issuer_organization_id (3 ms)",
+   "\u2715 C2 DEFECT: both certified, A more recently -> the ORIGINAL holder's certification, not the newest (3 ms)",
+   "\u2715 C10 DEFECT (the ruled cost): two rows with NO owner and NO organisation, the later certified -> not presente",
+   "\u2715 F1 DEFECT: verify-file on Seat J's case -> not certified (4 ms)",
+   "\u2715 X1 DEFECT: the cross-tenant rowset on Seat J's case -> not certified (3 ms)",
+   "\u2715 D1 DEFECT: the chain-first downgrade check judges the row the rule selects (B's draft), not A's certified co",
+   "\u2715 J: every path presents B, not certified; v2 omits A entirely (count, ids, planted issuer) (33 ms)",
+   "\u2715 P7-both-certified-original-wins: certification cert-b-old presented on every v1 path and as v2 matches[0] (9",
+   "\u2715 N-TRUNC-23 (control): the same with 23 copies (B still inside the fetched 24) -> not certified (8 ms)"
+  ],
+  "restored_sha_ok": true
+ }
+]

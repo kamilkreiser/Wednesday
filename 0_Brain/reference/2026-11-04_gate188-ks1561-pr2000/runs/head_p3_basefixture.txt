@@ -1,0 +1,67 @@
+2026-11-04 20:43:02.468 [originate] [33mwarn[39m: v2 verify: chain-fact read failed; matches present stored state {"error":"chain lookup disabled in test"}
+FAIL ../repo/Blockchain/Dev/services/originate/src/__tests__/ks584-p3-verify-list.test.ts
+  KS-584 P3 — multiplicity (the list contract)
+    ✓ returns EVERY same-hash registration, each standing on its own evidence (26 ms)
+    ✓ does NOT smear the sibling certification onto the anchored original — the cert-act row carries it (3 ms)
+    ✕ orders matches certified → confirmed-tx → oldest, so matches[0] is v1’s answer (5 ms)
+    ✕ orders certified rows by MILLISECOND-precise certified_at (Prisma Dates — the 576-row sweep catch) (3 ms)
+    ✓ reports the KS-596 dual identifiers on every match (3 ms)
+  KS-584 P3 — caller-independent anchor truth
+    ✓ (inverted by KS-1384 R2b) a stale pending row makes NO anchoring call, forwards no bearer, and is presented as stored (3 ms)
+    ✓ (inverted by KS-1384 R2b) does NOT heal via same-registration attribution (sameDoc) on a LATER re-anchor tx (3 ms)
+    ✓ does NOT heal from a confirmed tx that belongs to a DIFFERENT registration (2 ms)
+    ✓ makes NO chain call when every anchor is settled (KS-252 chain economy) (2 ms)
+    ✓ fails CLOSED and still answers 200 when the chain index is down mid-heal (2 ms)
+  KS-584 P3 — honesty rules carry over per match
+    ✓ KS-522: a simulated anchor makes no on-chain claim in any match (2 ms)
+    ✓ KS-584 scoping: a cross-tenant match withholds tenant-owned naming and says so (3 ms)
+    ✓ a revoked registration reports itself honestly in the list (2 ms)
+  KS-584 P3 — fallbacks and inputs
+    ✓ chain-only fallback: a hash known only to the chain index answers as one honest match (2 ms)
+    ✓ count:0 with empty matches is the honest "never registered" answer (still 200) (3 ms)
+    ✓ documentId-only lookup answers existence, not integrity (2 ms)
+    ✓ no verifiable input → 400 in the canonical error envelope (not v1’s legacy shape) (2 ms)
+    ✓ wrong-typed hash → 400 (2 ms)
+    ✓ verify-file hashes the raw bytes server-side and answers the list (2 ms)
+  KS-584 P3 — auth wiring
+    ✓ mounts authenticate({required:false}): absent token → anonymous, present-but-invalid → 401 by the middleware contract (1 ms)
+
+  ● KS-584 P3 — multiplicity (the list contract) › orders matches certified → confirmed-tx → oldest, so matches[0] is v1’s answer
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-1754000050000-certified"
+    Received: "doc-1754000000000-original"
+
+      206 |     mockRows([signedCertRow(), anchoredRow(), certified]);
+      207 |     const { body } = await verifyV2({ contentHash: HASH });
+    > 208 |     expect(body.matches[0].documentId).toBe('doc-1754000050000-certified');
+          |                                        ^
+      209 |     expect(body.matches[1].documentId).toBe('doc-1754000000000-original');
+      210 |     expect(body.matches[2].documentId).toBe('doc-1754000099999-aaaa1111');
+      211 |   });
+
+      at Object.<anonymous> (src/__tests__/ks584-p3-verify-list.test.ts:208:40)
+
+  ● KS-584 P3 — multiplicity (the list contract) › orders certified rows by MILLISECOND-precise certified_at (Prisma Dates — the 576-row sweep catch)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "doc-cert-newer-ms"
+    Received: "doc-cert-older-ms"
+
+      233 |     mockQueryRaw.mockResolvedValue([older, newer]);
+      234 |     const { body } = await verifyV2({ contentHash: HASH });
+    > 235 |     expect(body.matches[0].documentId).toBe('doc-cert-newer-ms');
+          |                                        ^
+      236 |   });
+      237 |
+      238 |   it('reports the KS-596 dual identifiers on every match', async () => {
+
+      at Object.<anonymous> (src/__tests__/ks584-p3-verify-list.test.ts:235:40)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 18 passed, 20 total
+Snapshots:   0 total
+Time:        2.119 s, estimated 3 s
+Ran all test suites matching /src\/__tests__\/ks584-p3-verify-list/i.

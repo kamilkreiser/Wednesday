@@ -1,0 +1,53 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261104T093100Z.txt)
+     1	[INBOUND] 2026-11-04T09:30 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2000 (KS-1561), TIER 1 (Seat F 29th
+=========== [INBOUND] 2026-11-04T09:30 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2000 (KS-1561), TIER 1 (Seat F 29th
+[Secuura/Blockchain-F -> Wednesday] READY FOR GATE: PR 2000 (KS-1561), TIER 1 (Seat F 29th)
+Seat F 29th
+
+READY FOR GATE: PR 2000 (KS-1561), TIER 1 (a verify/certification surface; model-routing G1). I merge nothing and deploy nothing.
+
+- PR: 2000, https://github.com/Secuura/Distributed_Secuura/pull/2000
+- Head (read from origin in this action): d03b03046d76 / d03b03046d76591aec3e5a3aa4176fb4e5b78e04. Branch feature/ks-1561-verify-presents-a-later-hash-only-registrant-as-the.
+- Develop merged against: d92b849ece732cd04e283bfcb0ee9e8bd6989631 (= the merge-base; ls-remote 09:30:23Z reads 17c559555f31386fe4ec7a816677a2903db9cd76).
+- KS-1561 comment naming the PR: 4915fc7b-2e55-49a7-923e-445b1e44a6d3 (2026-11-04T09:29:44Z) (BLUF, no @, state/assignee/priority unchanged on read-back).
+- Test Evidence block: in the PR body (touched / ran / NOT run / migrations+config), written by me, who ran every line of it.
+- Hook verdict, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "  legs 3 4 8 — local stack not up; you can clear this by starting it." / "  This is NOT a pass. Do not quote it as one — say which legs ran." Leg 14 ran ks949 for real: "27 passed, 0 failed (of 27 cells); wall-clock 7s". Push rc 0, 918 s, ls-remote equal to the head (driver status 09:28:53Z).
+
+FILES (git diff --name-only merge-base..head, 6):
+Blockchain/Dev/services/originate/src/__tests__/ks1561-verify-original-registrant-certifier.test.ts
+Blockchain/Dev/services/originate/src/__tests__/ks584-p3-verify-list.test.ts
+Blockchain/Dev/services/originate/src/routes/verification.ts
+Blockchain/Dev/services/originate/src/routes/verificationV2.ts
+Projects Documents/fragments/cheat/KS-1561-original-registrant-certifier.html
+Projects Documents/fragments/flow/KS-1561-original-registrant-certifier.html
+File-disjoint: an open-PR overlap check over these 6 paths, run by the push driver under the lock, read "no overlap: 17 open PRs, none touches any of 6 paths". That covers PRs 1796, 1798 and 1968 while they are open; 1790, 1792 and 1794 are merged. E 35th's worktree files are 16 api-gateway files plus migration 057, and 0 of them are mine. Control: the same driver's planted-overlap control fired (develop gate).
+CASE TABLE, P-CELLS, BASE vs HEAD, MUTANTS, SUITES: as in the PR body and my PROGRESS 1. In short:
+- New file: 31 cells. On develop's routes, 17 of 17 DEFECT red and 14 of 14 P green; with the change 31 of 31.
+- Mutants: 17 of 17 valid mutants killed, plus 4 invalid first attempts (TS6133) that I disclose.
+- Neighbours 172 of 172. Originate 2,390 then 2,416 tests.
+- tsc 0 errors. Lint 0 errors (29 pre-existing warnings, none in my files). Docs check OK, with a failing plant.
+NOT DONE OR NOT COVERED:
+- the four platform suites;
+- a real Postgres run of the changed SELECTs;
+- Node 24;
+- kintsugi or demo;
+- the live verify (after merge and deploy: the PR body lists the steps);
+- the cross-product matrix beyond the 31 designed cells (verify-file and cross-tenant carry cases (i) and (ii) only).
+PRIOR WORK (how I read each):
+- KS-584: selectVerifiableRow interim and siblingCertification. Read in code at d92b849ece73 and its tests ks584-verify-row-selection / ks584-p3-verify-list. Inherited: the rule order (certified, then confirmed tx, then oldest) and the v2 list contract. This PR narrows rule 1 and the sibling path.
+- KS-590: parked regression of KS-584. Read via the KS-1561 description; not touched.
+- KS-1557: lineage forgery fixes. Read in code (resolveTrustedCertificationEvidence, claimedCertificationId) and tests ks1557-*. Inherited unchanged; eligibility adds "parent is an original" on top of its trust checks.
+- KS-1538 / PR 1525: the certify access rule. Read via the KS-1561 description and certifications.ts:787-825; unchanged.
+- KS-1628: successor verify tests. Read and run (ks1628-* green, 3 files).
+- Seat J 5th's evidence: 5_Project_History/2026-10-13_seatJ-5th/evidence/ks1557/probe.integration.test.ts.txt and probe1557_true.json, cell PB. Read: org NULL on both rows, one tenant, owners differ.
+- Seat S 17th's comment 1a3c3dbe: read in full.
+- Prior cells moved or deleted: none deleted. Two fixture-only edits (ks584-p3-verify-list :195 and :213), ruled by you; 0 expect lines changed.
+CANDIDATES (not filed):
+- the ks1868 TS2451 pair (cold-cache compile; reproduced on develop's routes);
+- certifierOrganizationId carries a user id;
+- measure users.organization_id population (D2 b);
+- KS-1561's stale description and label;
+- option b as a later product question.
+Gate: TIER 1, Opus.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 45  SEEN:     1542  BATCH: /private/tmp/wed_newmail/batch_20261104T093100Z.txt

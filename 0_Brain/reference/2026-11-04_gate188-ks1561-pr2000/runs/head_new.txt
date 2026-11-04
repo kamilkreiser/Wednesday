@@ -1,0 +1,51 @@
+2026-11-04 20:37:03.283 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+2026-11-04 20:37:03.286 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+2026-11-04 20:37:03.287 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+2026-11-04 20:37:03.289 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+2026-11-04 20:37:03.292 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+2026-11-04 20:37:03.300 [originate] [32minfo[39m: File verification request {"size":17,"hash":"sha256:c82df6e628bf70577f9056e..."}
+2026-11-04 20:37:03.302 [originate] [32minfo[39m: Hash found via cross-tenant lookup {"hash":"eeeeeeeeeeeeeeee"}
+2026-11-04 20:37:03.304 [originate] [32minfo[39m: Hash verified via chain-first lookup {"hash":"eeeeeeeeeeeeeeee","source":"chain"}
+PASS ../repo/Blockchain/Dev/services/originate/src/__tests__/ks1561-verify-original-registrant-certifier.test.ts
+  KS-1561 /verify: a later registrant's certification is not presented for the original's bytes
+    ✓ C1 DEFECT (Seat J's case): B registers H, A registers H and certifies -> B's original answers, not certified (23 ms)
+    ✓ C1b DEFECT: the same when each row carries its own (different) issuer_organization_id (3 ms)
+    ✓ C2 DEFECT: both certified, A more recently -> the ORIGINAL holder's certification, not the newest (2 ms)
+    ✓ C7 DEFECT: a KS-1557-trusted lineage certification whose parent is the LATER registration is not lent to the original (2 ms)
+    ✓ C10 DEFECT (the ruled cost): two rows with NO owner and NO organisation, the later certified -> not presented (2 ms)
+    ✓ C3 P: A holds the ORIGINAL and certifies it, B registers later -> still certified by A (3 ms)
+    ✓ C4 P: B holds the original and certifies it, A registers later without certifying -> certified by B (3 ms)
+    ✓ C5 P: two registrants, neither certified -> unchanged (the oldest confirmed registration answers) (2 ms)
+    ✓ C6 P: a KS-1557-trusted lineage certification whose parent IS the original is still presented (2 ms)
+    ✓ C8 P: the SAME owner re-registers and certifies the later row -> certified (10 ms)
+    ✓ C9 P: the SAME organisation (a different user) re-registers and certifies -> certified (2 ms)
+    ✓ C11 P: rows tied at the earliest created_at are all originals -> the certified one is presented (2 ms)
+    ✓ C12 P: a single certified registrant -> certified (1 ms)
+  KS-1561 verify-file and the cross-tenant lookup apply the same rule
+    ✓ F1 DEFECT: verify-file on Seat J's case -> not certified (3 ms)
+    ✓ F3 P: verify-file where A holds the original -> certified by A (1 ms)
+    ✓ X1 DEFECT: the cross-tenant rowset on Seat J's case -> not certified (1 ms)
+    ✓ X3 P: the cross-tenant rowset where A holds the original -> certified (3 ms)
+    ✓ X-REG DEFECT (D4): the registry hash lookup picks the tenant holding the EARLIEST registration (3 ms)
+    ✓ D1 DEFECT: the chain-first downgrade check judges the row the rule selects (B's draft), not A's certified copy (2 ms)
+  KS-1561 the row-set SELECTs carry the identity columns the rule reads
+    ✓ S1 DEFECT: /verify's row-set selects issuer_organization_id (2 ms)
+    ✓ S2 DEFECT: verify-file's row-set selects issuer_organization_id (2 ms)
+    ✓ S3 DEFECT: the cross-tenant row-set selects issuer_organization_id (2 ms)
+    ✓ S4 DEFECT: the chain-first local row-set selects owner_user_id, parent_document_id and issuer_organization_id (2 ms)
+  KS-1561 v2 lists only what the original registration's holder may present
+    ✓ V1 DEFECT: Seat J's case -> A's certified copy is not a match; B's original is matches[0], nothing certified (2 ms)
+    ✓ V4 DEFECT: lineage evidence whose parent is the LATER registration is not presented on any match (2 ms)
+    ✓ V2 P: A holds the original and certifies it -> A's match is first and certified, B is still listed (1 ms)
+    ✓ V3 P: an UNCERTIFIED later registration stays listed (only certified non-original rows are left out) (1 ms)
+    ✓ V5 P: lineage evidence whose parent IS the original is presented on the derived row's own match (2 ms)
+    ✓ V6 P: the same owner re-registers and certifies the later row -> that certified match is listed first (3 ms)
+  KS-1561 v2's row-set SELECTs carry the identity column the rule reads
+    ✓ V7 DEFECT: v2's local row-set selects issuer_organization_id (2 ms)
+    ✓ V8 DEFECT: v2's cross-tenant row-set selects issuer_organization_id (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+Time:        1.499 s, estimated 24 s
+Ran all test suites matching /src\/__tests__\/ks1561/i.
