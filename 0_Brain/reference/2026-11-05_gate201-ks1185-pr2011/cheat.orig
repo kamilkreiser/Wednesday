@@ -1,0 +1,13 @@
+<h2>The approve forward's bound is an idle timer, and a stalled reply body is a warn line &mdash; KS-1185 F2 + F3, api-gateway</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The workflow-approve forward to originate waits at most <code>ORIGINATE_FORWARD_TIMEOUT_MS</code> (15 s) of <strong>silence</strong>, not 15 s in total: any byte from originate, a 1xx included, restarts the bound. This is documented in the source and pinned by a test. The real originate sends no 1xx.
+    </td></tr><tr><td>If originate's status line has already decided the forward (for example a 201) and its body then stalls, the gateway logs a <strong>warn</strong> line, <em>originate's reply body did not finish after its status line had decided the forward</em>, with the <code>status</code>. Before, it logged <code>Failed to forward approved document to originate</code> at error level, after it had already answered 200. That error line now means no status line arrived: originate was silent or unreachable.
+    </td></tr><tr><td class="pm-topic"><strong>Not measured here.</strong></td><td> Node 24, a real originate, nginx in front, kintsugi or demo after a deploy.
+    </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>npm --prefix Blockchain/Dev/services/api-gateway test -- run src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts   # 7 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>7</strong> in 1 file; red first on develop <code>5fc5569ed96a</code>: the 3 F3 cells, all by assertion; the F2 PIN and 3 controls green on both sides</td></tr>
+<tr><td>mutants</td><td>6 of 6 killed (incl. a wall-clock bound, which reddens the F2 PIN)</td></tr>
+</table>

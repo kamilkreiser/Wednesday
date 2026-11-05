@@ -1,0 +1,32 @@
+=========== [INBOUND] 2026-11-05T08:05 | Secuura/Blockchain-E | [Secuura/Blockchain-E -> Wednesday] READY FOR GATE KS-1645 (Seat E 37th)
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE KS-1645 (Seat E 37th)
+Seat E 37th
+
+First, what you asked for on KS-1504: closing comment f57c0ba7, read back (body equal, 0 mention nodes), posted 08:03:50Z; then Done and archived 08:04:02Z, read back by a second query (priority and assignee unchanged, children none, state named exactly Done). Before commenting I verified the squash myself: c9cb07738cf6 is origin/develop; it touches exactly 3 files (+76/-1); my test file's blob equals the gated head e6ace3f0d06f's; the product file blob cc5a35e68114 equals the base's; its parent is cb1cadfa2ee4 (PR 2007).
+
+READY FOR GATE KS-1645. Tier proposal: 1 (it changes what an audit export returns; you decide).
+
+1. PR: 2012, https://github.com/Secuura/Distributed_Secuura/pull/2012. Open, base develop, one commit, 8 files, +391/-154. Title: "Refs KS-1645: page the audit export, include its last day, drop type, write real CSV columns".
+2. Head SHA, read from origin and from the PR API in the same action (create_pr_e37.py, equal: True): dd474bb17a9c773301f76308c4312eae7df864c0, built on develop 5fc5569ed96ac61f64823cc9e1fa841899aa1f62. Branch feature/ks-1645-page-the-audit-export-and-report-the-real-rows (Linear's own name is taken at origin by the merged PR 1616 head 09e67d9c).
+3. Ticket: BLUF comment 8be7d331 on KS-1645 naming the PR, read back (body equal, 0 mention nodes). KS-1645 read In Progress before and after, assignee untouched (None): no integration walk to report.
+4. Test evidence (mine; Node v26.8.1, Apple Silicon Mac; evidence/ in my record folder):
+   - New file ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts, 12 cells, against a stub upstream that behaves like the real security service (default limit 50, no clamp, createdAt <= to, type ignored) with a control that proves it. Against develop's audit-export.ts 10 of 12 are RED (P1 P2 P2b P3 P4 B1 T1 T2 C1 C2); on the change 12 of 12.
+   - Seven mutants of the changed file, each caught by exactly the intended cells; the file restored byte for byte after each run (sha256 checked, tools/mutants_ks1645_e37.py): no loop (P1 P2 P2b P4), bound 10,001 (P2 P2b), to as the bare date (B1), CSV timestamp on the old key (C1), type forwarded again (T1 T2), truncated always false (P2 P2b), a failing later page swallowed (P4).
+   - api-gateway whole suite: before 1623 passed (154 files), after 1630 passed (154 files), 0 failed (5 retired cells out, 12 in). tsc --noEmit on the product clean. Test-type ratchet 25 errors, 25 in the baseline, 0 new, 0 stale. eslint clean on the four changed source and test files. docs-fragments check OK, and FAIL (2 findings) on a planted defect.
+   - Spec: generated with npm run generate-openapi; the yaml diff is +59/-10 in seven hunks, all inside /api/admin/audit/export (checked by mapping each hunk to its enclosing path). check:openapi passes: generator check, and the spec-examples check (422 example blocks, none added). The X-Audit-Export-Truncated header and meta.total/meta.truncated are declared.
+   - Push hook, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 need a local stack on :6882 and were skipped. That is NOT a pass; legs 1, 14 and 16 ran.
+5. What the PR did NOT do: it does not change the security service, so the 10,000-row in-memory window (services/security/src/index.ts :156, :161, :599) still bounds every export; the spec says so in plain words ("at most the newest 10,000 platform audit rows are visible to this export"). It does not touch routes/admin.ts (the admin portal's export route, lane B; not read). The four platform suites, a live export against a running stack and Node 24 were not run.
+
+Your three carry-ins:
+- The window: stated in the spec description and in the PR body; the security-side change is a CANDIDATE, nothing filed.
+- Tests: multi-page fully paged (P1: 2,300 rows, offsets 0/1000/2000); the bound sets truncated=true (JSON, P2) and the header (CSV, P2b); one short page sets truncated=false (P3). Each red on develop. A failing later page is a 503 BAD_GATEWAY and not a short 200 (P4).
+- Clients: a grep of frontend, services and systemTest at the base found no caller of /api/admin/audit/export (positive control hit). The admin portal uses /api/security/audit/export in routes/admin.ts, which this PR neither reads nor touches. The new meta fields and the header are additive, so nothing was found that they affect.
+
+Retired behaviour, said plainly in the PR: PR 1616's 400 for an unknown or repeated type is gone, because the upstream never applied the filter.
+Sequencing: this PR merges first; Seat T's KS-1534 spec phrase comes second (merge develop in, re-run npm run generate-openapi). I did not anticipate T's phrase.
+Deploy owed after a merge: rebuild api-gateway (the image bundles docs/openapi/secuura-api.yaml). No migrations, no config. Ticket stays In Progress until deployed.
+Develop moved twice while this queued (5fc5569ed96a to cb1cadfa2ee4 to c9cb07738cf6, 12 files). The moved range and this branch's 8 paths share none (comm -12 reads 0 with a control list that overlaps reading 1), so no merge-in.
+
+Candidates, nothing filed: (1) the 10,000-row window in services/security; (2) routes/admin.ts:1657 may carry the same faults (not read); (3) ks1868 db-pool cell C1 times out at vitest's 5000 ms under load, failed once on UNTOUCHED product and once in a batch on mine, passes alone (evidence/candidates_e37.txt); (4) the shared checkout's node_modules is stale against the lock (your gate's N1 is the same fact).
+Faults this round: my first overlap check read 0 because the path list for my branch came out EMPTY (that object was not in the clone I ran it in); my positive control only tested the other list. I caught it, redid it with the driver's own paths.txt (8 paths) and a control that reads 1, and the answer is still 0.
+

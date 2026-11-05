@@ -1,0 +1,672 @@
+FAIL 0_Brain/reference/2026-11-05_gate199r2-ks1938-pr2009/clone/Blockchain/Dev/services/originate/src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts
+  KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error
+    ✓ the table covers fourteen sites with distinct ids and distinct lines (2 ms)
+    ks1938b S01 line 227 recordConsent, INSERT consent_records rejects
+      ✓ control S01: an ordinary Error is logged with its own message and the function answers as designed (1 ms)
+      ✕ RED S01 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error (2 ms)
+      ✕ RED S01 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S02 line 242 withdrawConsent, UPDATE consent_records rejects
+      ✓ control S02: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S02 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+      ✕ RED S02 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error (1 ms)
+    ks1938b S03 line 314 createDSR, INSERT data_subject_requests rejects
+      ✓ control S03: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S03 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error (1 ms)
+      ✕ RED S03 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S04 line 377 updateDSRStatus, UPDATE data_subject_requests rejects (the log line also reads err.code)
+      ✓ control S04: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S04 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error (1 ms)
+      ✕ RED S04 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S05 line 934 executeErasure step 13, the USER_ERASED publish rejects (the log line reads err?.message)
+      ✓ control S05: an ordinary Error is logged with its own message and the function answers as designed (1 ms)
+      ✕ RED S05 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+      ✕ RED S05 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S06 line 940 executeErasure outer catch, the first erasure write rejects
+      ✓ control S06: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S06 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+      ✕ RED S06 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S07 line 1001 exportUserData, profile section
+      ✓ control S07: an ordinary Error is logged with its own message and the function answers as designed (1 ms)
+      ✕ RED S07 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+      ✕ RED S07 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S08 line 1011 exportUserData, consents section
+      ✓ control S08: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S08 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error (1 ms)
+      ✕ RED S08 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S09 line 1021 exportUserData, documents section
+      ✓ control S09: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S09 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error (1 ms)
+      ✕ RED S09 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S10 line 1031 exportUserData, shares section
+      ✓ control S10: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S10 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+      ✕ RED S10 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error (1 ms)
+    ks1938b S11 line 1041 exportUserData, chargeEvents section
+      ✓ control S11: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S11 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+      ✕ RED S11 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S12 line 1051 exportUserData, dataSubjectRequests section
+      ✓ control S12: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S12 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error (1 ms)
+      ✕ RED S12 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S13 line 1611 executeErasureByExternalRef, the lookup-hash key lookup throws
+      ✓ control S13: an ordinary Error is logged with its own message and the function answers as designed (2 ms)
+      ✕ RED S13 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error (1 ms)
+      ✕ RED S13 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+    ks1938b S14 line 1626 executeErasureByExternalRef, the deletion-log INSERT rejects
+      ✓ control S14: an ordinary Error is logged with its own message and the function answers as designed
+      ✕ RED S14 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+      ✕ RED S14 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+  KS-1938 gate 199 F1: a step-12 rejection never skips the step-13 fan-out, whatever the thrown value is
+    ✓ control step12 rejects with an ordinary Error: wallet lookup and publish both run, the key is destroyed, the answer is success=false (1 ms)
+    ✕ RED step12 rejects with a revoked Proxy: wallet lookup and publish both run, the key is destroyed, the answer is success=false (1 ms)
+    ✕ control step12 rejects with an Error whose message getter throws: wallet lookup and publish both run, the key is destroyed, the answer is success=false
+    ✕ RED step12 rejects with a thenable that settles with undefined: wallet lookup and publish both run, the key is destroyed, the answer is success=false
+    ✓ control step12 rejects with undefined (the KS-1028 fallback Error is raised): wallet lookup and publish both run, the key is destroyed, the answer is success=false (1 ms)
+    ✕ RED step12 rejects with a falsy value (0): wallet lookup and publish both run, the key is destroyed, the answer is success=false
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S01 line 227 recordConsent, INSERT consent_records rejects › RED S01 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "rejects Failed to record consent"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S01 line 227 recordConsent, INSERT consent_records rejects › RED S01 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "rejects Failed to record consent"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S02 line 242 withdrawConsent, UPDATE consent_records rejects › RED S02 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves false"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S02 line 242 withdrawConsent, UPDATE consent_records rejects › RED S02 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves false"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S03 line 314 createDSR, INSERT data_subject_requests rejects › RED S03 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "rejects Failed to create data subject request"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S03 line 314 createDSR, INSERT data_subject_requests rejects › RED S03 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "rejects Failed to create data subject request"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S04 line 377 updateDSRStatus, UPDATE data_subject_requests rejects (the log line also reads err.code) › RED S04 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "rejects with the thrown value itself"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S04 line 377 updateDSRStatus, UPDATE data_subject_requests rejects (the log line also reads err.code) › RED S04 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "rejects with the thrown value itself"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S05 line 934 executeErasure step 13, the USER_ERASED publish rejects (the log line reads err?.message) › RED S05 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves success=true"
+    Received: "resolves success=false but \"Erasure failed\" was logged"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S05 line 934 executeErasure step 13, the USER_ERASED publish rejects (the log line reads err?.message) › RED S05 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves success=true"
+    Received: "resolves success=false but \"Erasure failed\" was logged"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S06 line 940 executeErasure outer catch, the first erasure write rejects › RED S06 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves success=false"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S06 line 940 executeErasure outer catch, the first erasure write rejects › RED S06 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves success=false"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S07 line 1001 exportUserData, profile section › RED S07 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,consents,dataSubjectRequests,documents,shares"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S07 line 1001 exportUserData, profile section › RED S07 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,consents,dataSubjectRequests,documents,shares"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S08 line 1011 exportUserData, consents section › RED S08 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,dataSubjectRequests,documents,profile,shares"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S08 line 1011 exportUserData, consents section › RED S08 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,dataSubjectRequests,documents,profile,shares"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S09 line 1021 exportUserData, documents section › RED S09 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,consents,dataSubjectRequests,profile,shares"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S09 line 1021 exportUserData, documents section › RED S09 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,consents,dataSubjectRequests,profile,shares"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S10 line 1031 exportUserData, shares section › RED S10 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,consents,dataSubjectRequests,documents,profile"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S10 line 1031 exportUserData, shares section › RED S10 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,consents,dataSubjectRequests,documents,profile"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S11 line 1041 exportUserData, chargeEvents section › RED S11 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=consents,dataSubjectRequests,documents,profile,shares"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S11 line 1041 exportUserData, chargeEvents section › RED S11 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=consents,dataSubjectRequests,documents,profile,shares"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S12 line 1051 exportUserData, dataSubjectRequests section › RED S12 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,consents,documents,profile,shares"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S12 line 1051 exportUserData, dataSubjectRequests section › RED S12 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves sections=chargeEvents,consents,documents,profile,shares"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S13 line 1611 executeErasureByExternalRef, the lookup-hash key lookup throws › RED S13 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves {\"status\":\"completed\",\"alreadyErased\":false}"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S13 line 1611 executeErasureByExternalRef, the lookup-hash key lookup throws › RED S13 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves {\"status\":\"completed\",\"alreadyErased\":false}"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S14 line 1626 executeErasureByExternalRef, the deletion-log INSERT rejects › RED S14 revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves {\"status\":\"completed\",\"alreadyErased\":false}"
+    Received: "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked"
+
+      355 |     it(`RED ${site.id} revoked Proxy: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      356 |       const ran = await site.run(revokedProxy());
+    > 357 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      358 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      359 |     });
+      360 |
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:357:27)
+
+  ● KS-1938 round 2: the remaining gdprService catches read a thrown value safely and answer as they do for an ordinary Error › ks1938b S14 line 1626 executeErasureByExternalRef, the deletion-log INSERT rejects › RED S14 message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "resolves {\"status\":\"completed\",\"alreadyErased\":false}"
+    Received: "rejects getter boom"
+
+      361 |     it(`RED ${site.id} message getter throws: logged as a constant reason and the function answers exactly as for an ordinary Error`, async () => {
+      362 |       const ran = await site.run(getterThrows());
+    > 363 |       expect(ran.outcome).toBe(site.outcome);
+          |                           ^
+      364 |       expect(ran.log?.fields).toEqual(site.fieldsFor(UNREADABLE, false));
+      365 |     });
+      366 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:363:27)
+
+  ● KS-1938 gate 199 F1: a step-12 rejection never skips the step-13 fan-out, whatever the thrown value is › RED step12 rejects with a revoked Proxy: wallet lookup and publish both run, the key is destroyed, the answer is success=false
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -1,10 +1,10 @@
+      Object {
+        "completedLogged": false,
+        "dekDestroyed": 1,
+        "erasureFailedReasons": Array [
+    -     "unreadable thrown value",
+    +     "Cannot perform 'getPrototypeOf' on a proxy that has been revoked",
+        ],
+        "outcome": "resolves success=false",
+        "publishes": 1,
+        "step12Writes": 1,
+        "walletLookups": 1,
+
+      443 |   it.each(STEP12_VALUES)('%s step12 rejects with %s: wallet lookup and publish both run, the key is destroyed, the answer is success=false', async (_kind, _label, make, reason) => {
+      444 |     const ran = await runWithStep12Rejecting(make());
+    > 445 |     expect(ran).toEqual(step12Expected(reason));
+          |                 ^
+      446 |   });
+      447 | });
+      448 |
+
+      at src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:445:17
+
+  ● KS-1938 gate 199 F1: a step-12 rejection never skips the step-13 fan-out, whatever the thrown value is › control step12 rejects with an Error whose message getter throws: wallet lookup and publish both run, the key is destroyed, the answer is success=false
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -1,10 +1,10 @@
+      Object {
+        "completedLogged": false,
+        "dekDestroyed": 1,
+        "erasureFailedReasons": Array [
+    -     "unreadable thrown value",
+    +     "getter boom",
+        ],
+        "outcome": "resolves success=false",
+        "publishes": 1,
+        "step12Writes": 1,
+        "walletLookups": 1,
+
+      443 |   it.each(STEP12_VALUES)('%s step12 rejects with %s: wallet lookup and publish both run, the key is destroyed, the answer is success=false', async (_kind, _label, make, reason) => {
+      444 |     const ran = await runWithStep12Rejecting(make());
+    > 445 |     expect(ran).toEqual(step12Expected(reason));
+          |                 ^
+      446 |   });
+      447 | });
+      448 |
+
+      at src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:445:17
+
+  ● KS-1938 gate 199 F1: a step-12 rejection never skips the step-13 fan-out, whatever the thrown value is › RED step12 rejects with a thenable that settles with undefined: wallet lookup and publish both run, the key is destroyed, the answer is success=false
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 5
+    + Received  + 3
+
+      Object {
+    -   "completedLogged": false,
+    +   "completedLogged": true,
+        "dekDestroyed": 1,
+    -   "erasureFailedReasons": Array [
+    -     "[object Object]",
+    -   ],
+    -   "outcome": "resolves success=false",
+    +   "erasureFailedReasons": Array [],
+    +   "outcome": "resolves success=true",
+        "publishes": 1,
+        "step12Writes": 1,
+        "walletLookups": 1,
+      }
+
+      443 |   it.each(STEP12_VALUES)('%s step12 rejects with %s: wallet lookup and publish both run, the key is destroyed, the answer is success=false', async (_kind, _label, make, reason) => {
+      444 |     const ran = await runWithStep12Rejecting(make());
+    > 445 |     expect(ran).toEqual(step12Expected(reason));
+          |                 ^
+      446 |   });
+      447 | });
+      448 |
+
+      at src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:445:17
+
+  ● KS-1938 gate 199 F1: a step-12 rejection never skips the step-13 fan-out, whatever the thrown value is › RED step12 rejects with a falsy value (0): wallet lookup and publish both run, the key is destroyed, the answer is success=false
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 5
+    + Received  + 3
+
+      Object {
+    -   "completedLogged": false,
+    +   "completedLogged": true,
+        "dekDestroyed": 1,
+    -   "erasureFailedReasons": Array [
+    -     "0",
+    -   ],
+    -   "outcome": "resolves success=false",
+    +   "erasureFailedReasons": Array [],
+    +   "outcome": "resolves success=true",
+        "publishes": 1,
+        "step12Writes": 1,
+        "walletLookups": 1,
+      }
+
+      443 |   it.each(STEP12_VALUES)('%s step12 rejects with %s: wallet lookup and publish both run, the key is destroyed, the answer is success=false', async (_kind, _label, make, reason) => {
+      444 |     const ran = await runWithStep12Rejecting(make());
+    > 445 |     expect(ran).toEqual(step12Expected(reason));
+          |                 ^
+      446 |   });
+      447 | });
+      448 |
+
+      at src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts:445:17
+
+Test Suites: 1 failed, 1 total
+Tests:       32 failed, 17 passed, 49 total
+Snapshots:   0 total
+Time:        2.398 s, estimated 3 s
+Ran all test suites matching /src\/__tests__\/ks1938b/i.

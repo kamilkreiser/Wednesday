@@ -1,0 +1,29 @@
+clean: base resolves success=true logs=16 38 | r1 resolves success=true logs=16 38 | r2 resolves success=true logs=16 38
+clean call sequences identical base/r1/r2: true
+points 38 kinds ordinary,proxy,getter,thenable,thenableReject,undef,nul,zero,emptystr,falsebool cells per rev 380 | step-12 point(s): 35 X:UPDATE data_subject_requests SET status = ? , processed_by = ? , compl
+instrument control: my base == round-1 gate's base json on 114 of 114 cells 
+instrument control: my r1 == round-1 gate's r1 json on 114 of 114 cells 
+r2 vs r1: 374 of 380 cells identical; differ: ["k=35:proxy","k=35:thenable","k=35:thenableReject","k=35:zero","k=35:emptystr","k=35:falsebool"]
+r2 vs base: 305 of 380 cells identical; differ: ["k=0:proxy","k=0:getter","k=1:proxy","k=1:getter","k=2:proxy","k=2:getter","k=3:proxy","k=3:getter","k=4:proxy","k=4:getter","k=5:proxy","k=5:getter","k=6:proxy","k=6:getter","k=7:proxy","k=7:getter","k=8:proxy","k=8:getter","k=9:proxy","k=9:getter","k=10:proxy","k=10:getter","k=11:proxy","k=11:getter","k=13:proxy","k=13:getter","k=14:proxy","k=14:getter","k=15:proxy","k=15:getter","k=16:proxy","k=16:getter","k=17:proxy","k=17:getter","k=18:proxy","k=18:getter","k=19:proxy","k=19:getter","k=20:proxy","k=20:getter","k=21:proxy","k=21:getter","k=22:proxy","k=22:getter","k=23:proxy","k=23:getter","k=24:proxy","k=24:getter","k=25:proxy","k=25:getter","k=26:proxy","k=26:getter","k=27:proxy","k=27:getter","k=28:proxy","k=28:getter","k=29:proxy","k=29:getter","k=30:proxy","k=30:getter","k=31:proxy","k=31:getter","k=32:proxy","k=32:getter","k=33:proxy","k=33:getter","k=34:proxy","k=34:getter","k=35:thenable","k=35:thenableReject","k=35:zero","k=35:emptystr","k=35:falsebool","k=37:proxy","k=37:getter"]
+r1 vs base: 309 of 380 cells identical; differ: ["k=0:proxy","k=0:getter","k=1:proxy","k=1:getter","k=2:proxy","k=2:getter","k=3:proxy","k=3:getter","k=4:proxy","k=4:getter","k=5:proxy","k=5:getter","k=6:proxy","k=6:getter","k=7:proxy","k=7:getter","k=8:proxy","k=8:getter","k=9:proxy","k=9:getter","k=10:proxy","k=10:getter","k=11:proxy","k=11:getter","k=13:proxy","k=13:getter","k=14:proxy","k=14:getter","k=15:proxy","k=15:getter","k=16:proxy","k=16:getter","k=17:proxy","k=17:getter","k=18:proxy","k=18:getter","k=19:proxy","k=19:getter","k=20:proxy","k=20:getter","k=21:proxy","k=21:getter","k=22:proxy","k=22:getter","k=23:proxy","k=23:getter","k=24:proxy","k=24:getter","k=25:proxy","k=25:getter","k=26:proxy","k=26:getter","k=27:proxy","k=27:getter","k=28:proxy","k=28:getter","k=29:proxy","k=29:getter","k=30:proxy","k=30:getter","k=31:proxy","k=31:getter","k=32:proxy","k=32:getter","k=33:proxy","k=33:getter","k=34:proxy","k=34:getter","k=35:proxy","k=37:proxy","k=37:getter"]
+Q3 r2 vs base (same thrown value): cells where r2 completes MORE or answers success where base failed: 3 of 380
+   k=35:thenableReject: published where base did not; more calls 36->38
+   k=37:proxy: success where base failed
+   k=37:getter: success where base failed
+r2 answers failure where base answered success: 4: ["k=35:thenable","k=35:zero","k=35:emptystr","k=35:falsebool"]
+r2-nonordinary == base-ordinary: 340 of 342; differ ["k=12:proxy","k=12:getter"]; of those MORE than base-ordinary: []
+
+Step-12 fault table (k=35): steps run + answer
+kind | base | r1 (86eb3152af46) | r2 (2f10e7e060cc)
+ordinary | n=38 wal pub dek success=false | n=38 wal pub dek success=false | n=38 wal pub dek success=false
+proxy | n=38 wal pub dek success=false | n=36 dek success=false | n=38 wal pub dek success=false
+getter | n=38 wal pub dek success=false | n=38 wal pub dek success=false | n=38 wal pub dek success=false
+thenable | n=38 wal pub dek success=true +completedLog | n=38 wal pub dek success=true +completedLog | n=38 wal pub dek success=false
+thenableReject | n=36 dek success=false | n=36 dek success=false | n=38 wal pub dek success=false
+undef | n=38 wal pub dek success=false | n=38 wal pub dek success=false | n=38 wal pub dek success=false
+nul | n=38 wal pub dek success=false | n=38 wal pub dek success=false | n=38 wal pub dek success=false
+zero | n=38 wal pub dek success=true +completedLog | n=38 wal pub dek success=true +completedLog | n=38 wal pub dek success=false
+emptystr | n=38 wal pub dek success=true +completedLog | n=38 wal pub dek success=true +completedLog | n=38 wal pub dek success=false
+falsebool | n=38 wal pub dek success=true +completedLog | n=38 wal pub dek success=true +completedLog | n=38 wal pub dek success=false
+
+log scan r2: marker/PII hits for non-ordinary kinds: ["k=12:getter:1"]; ordinary control hits: 38

@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate201-ks1185-pr2011/clone/Blockchain/Dev/services/api-gateway
+
+ ❯ src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts (7 tests | 1 failed) 8152ms
+     × PIN KS-1185 F2: an originate that keeps sending 102 Processing holds the approve PAST the bound, then its 201 approves 1022ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts > KS-1185 F2 - the forward bound is an idle timer (pinned, documented) > PIN KS-1185 F2: an originate that keeps sending 102 Processing holds the approve PAST the bound, then its 201 approves
+AssertionError: answered after 1016 ms: expected 502 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 502
+
+ ❯ src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts:160:55
+    158|     const log = vi.fn<Log>();
+    159|     const out = await approve(await startGateway(store, log));
+    160|     expect(out.status, `answered after ${out.ms} ms`).toBe(200);
+       |                                                       ^
+    161|     expect(out.ms, 'held past the bound: the bound is idle-based, not …
+    162|     expect(store.deletes).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  18:49:47
+   Duration  8.53s (transform 65ms, setup 34ms, import 244ms, tests 8.15s, environment 0ms)
+

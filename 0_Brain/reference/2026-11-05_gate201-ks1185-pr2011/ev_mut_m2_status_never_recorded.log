@@ -1,0 +1,89 @@
+
+ RUN  v4.1.10 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate201-ks1185-pr2011/clone/Blockchain/Dev/services/api-gateway
+
+ ❯ src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts (7 tests | 3 failed) 9572ms
+     × RED KS-1185 F3: a 201 whose body never ends is approved, and one bound later NO error-level "Failed to forward" line is logged 1708ms
+     × RED KS-1185 F3: ...and the late event is logged once at warn level, naming the status line that decided the forward 1706ms
+     × RED KS-1185 F3: a 401 whose body never ends is answered 502 at once, and its late event is the same warn line with status 401 1705ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts > KS-1185 F3 - a reply body that does not finish after the status line decided the forward is not a failed forward > RED KS-1185 F3: a 201 whose body never ends is approved, and one bound later NO error-level "Failed to forward" line is logged
+AssertionError: the 200 is not contradicted by a failed-forward error: expected [ [ 'error', …(2) ] ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   [
++     "error",
++     "Failed to forward approved document to originate",
++     {
++       "error": "originate did not answer within 1000 ms",
++     },
++   ],
++ ]
+
+ ❯ src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts:184:116
+    182|     expect(store.deletes).toBe(1);
+    183|     await sleep(FORWARD_TIMEOUT_MS + 700);
+    184|     expect(calls(log, 'error', (m) => m === FAILED_LINE), 'the 200 is …
+       |                                                                                                                    ^
+    185|   });
+    186|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts > KS-1185 F3 - a reply body that does not finish after the status line decided the forward is not a failed forward > RED KS-1185 F3: ...and the late event is logged once at warn level, naming the status line that decided the forward
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts:193:18
+    191|     await sleep(FORWARD_TIMEOUT_MS + 700);
+    192|     const late = calls(log, 'warn', (m) => m.includes('reply body did …
+    193|     expect(late).toHaveLength(1);
+       |                  ^
+    194|     expect(late[0][2]).toMatchObject({ status: 201 });
+    195|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts > KS-1185 F3 - a reply body that does not finish after the status line decided the forward is not a failed forward > RED KS-1185 F3: a 401 whose body never ends is answered 502 at once, and its late event is the same warn line with status 401
+AssertionError: expected [ [ 'error', …(2) ] ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   [
++     "error",
++     "Failed to forward approved document to originate",
++     {
++       "error": "originate did not answer within 1000 ms",
++     },
++   ],
++ ]
+
+ ❯ src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts:206:59
+    204|     expect(store.deletes).toBe(0);
+    205|     await sleep(FORWARD_TIMEOUT_MS + 700);
+    206|     expect(calls(log, 'error', (m) => m === FAILED_LINE)).toEqual([]);
+       |                                                           ^
+    207|     const late = calls(log, 'warn', (m) => m.includes('reply body did …
+    208|     expect(late).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 4 passed (7)
+   Start at  18:49:36
+   Duration  9.95s (transform 63ms, setup 63ms, import 201ms, tests 9.57s, environment 0ms)
+

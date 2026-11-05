@@ -1,0 +1,10 @@
+base line 669 | r1 line 705 | r2 line 705
+catch block (8 lines around the log call) byte-equal base==r1: True  base==r2: True
+        SELECT email FROM users WHERE id = ${userId}::uuid
+      `;
+      subjectEmail = await readPii(uRows?.[0]?.email, `users.email.${userId}`, userId);
+    } catch (err) {
+      logger.warn('Erasure: subject email resolution failed — email-matched steps will be uuid-only', {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }

@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/gdprService.ts b/Blockchain/Dev/services/originate/src/services/gdprService.ts
+index c8f6cd58f..950e312b0 100644
+--- a/Blockchain/Dev/services/originate/src/services/gdprService.ts
++++ b/Blockchain/Dev/services/originate/src/services/gdprService.ts
+@@ -932,8 +932,10 @@ async function executeErasureImpl(
+ 
+     // 12. Mark DSR as completed
+     // KS-1028: a step-12 throw must not skip the step-13 fan-out below - captured here, re-raised after it.
+-    const step12Error: unknown = await updateDSRStatus(dsrId, 'completed', performedBy, 'Erasure completed. ' + logs.length + ' data types processed.')
+-      .then(() => undefined, (err: unknown) => err ?? new Error('KS-1028: step 12 rejected'));
++    // KS-1938 (gate 199, F1): the thrown value is BOXED. A rejection handler that returned the raw value made the promise resolve WITH it, and promise resolution reads `.then` on that value: a revoked Proxy throws on that
++    // read (the await rejected and the step-13 fan-out never ran), and a thenable can settle the promise as undefined (a failed step 12 read as success). What resolves is now a plain object, whatever was thrown.
++    const step12Failure: { err: unknown } | undefined = await updateDSRStatus(dsrId, 'completed', performedBy, 'Erasure completed. ' + logs.length + ' data types processed.')
++      .then(() => undefined, (err: unknown) => ({ err: err ?? new Error('KS-1028: step 12 rejected') }));
+     // KS-1028: the fan-out (step 13) runs next; the captured error is thrown after it, before the completed log.
+     // 13. Audit 2.2: fan out to other services. Originate's executeErasure
+     // only touches originate's own DB; downstream services (auth, kyc, m365,
+@@ -977,7 +979,7 @@ async function executeErasureImpl(
+       }
+       logger.warn('Failed to publish user.erased event (cascade may be incomplete)', { userId, error: reason });
+     }
+-    if (step12Error) throw step12Error; // KS-1028: re-raised only AFTER the fan-out; the outer catch below still answers success false
++    if (step12Failure) throw step12Failure.err; // KS-1028: re-raised only AFTER the fan-out; the outer catch below still answers success false. KS-1938: this tests that a failure was CAPTURED (the box), not that the thrown value is truthy, so a falsy value (0, '', false) is re-raised too; before, it was dropped and a failed step 12 read as success
+     logger.info('Erasure completed', { userId, dataTypesProcessed: logs.length, totalRecordsAffected: logs.reduce((sum, l) => sum + l.recordsAffected, 0) });
+     return { success: true, deletionLog: logs };
+   } catch (err: any) {
