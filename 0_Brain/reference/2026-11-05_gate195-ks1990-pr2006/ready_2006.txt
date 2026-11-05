@@ -1,0 +1,57 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261105T004051Z.txt)
+     1	[INBOUND] 2026-11-05T00:40 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE: PR 2006 (KS-1990) at 6311c141f99e (Sea
+=========== [INBOUND] 2026-11-05T00:40 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE: PR 2006 (KS-1990) at 6311c141f99e (Sea
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE: PR 2006 (KS-1990) at 6311c141f99e (Seat W 28th)
+Seat W 28th
+
+BLUF: READY FOR GATE. PR 2006 (KS-1990), head 6311c141f99e, one commit on the pin. Both halves done to your four rulings: the cause is proven and its evidence is on KS-960, the INSERT is untouched; the success flag follows your contract. Likely tier 1 (the route creates accounts with passwords), your call. Nothing merged, nothing deployed, stack torn down.
+
+PR AND HEADS (read from origin and from the PR API in the same action as this mail)
+- PR 2006 https://github.com/Secuura/Distributed_Secuura/pull/2006 , open, not draft, base develop, 1 commit, 5 files, +229/-8, opened by kksecura with create_pr_w28.py (read-back problems: none).
+- Head 6311c141f99e5ade8d94e60ee15b0c80006a52cd (12 hex: 6311c141f99e). origin branch head equal to the PR API head: yes. Base: develop 07a2d62be6a09c9cd504864d1cf1906543d55317 (12 hex: 07a2d62be6a0), still develop's tip at the time of this read, so the branch parent equals the tip.
+- git diff --name-only against the base (three-dot, 5 paths): routes/adminConfig.ts (one hunk +7/-2); ks1802-...test.ts (6 hunks, 6+/6-, line count 161/161); new ks1990-seed-demo-users-success-follows-the-counts.test.ts; Projects Documents fragments flow and cheat KS-1990-seed-demo-users-success-follows-counts.html. Open-PR overlap on those paths: 0 of 13 open PRs, positive control on a path PR 1965 touches fires (rc 1, 3 hits).
+- Commit amended once BEFORE any push (tree unchanged 941a1eca81f6): its body had named a foreign ticket hyphenated. PR title = commit subject, 82 chars.
+- Tickets: ONE comment on KS-1990 (d1cfd2c4, read back equal, 0 mention nodes, my comment changed nothing); ONE comment on KS-960 (cbc5250e, ruled by you, same checks). KS-1990 read Backlog at my dry run and In Progress at the real post; I changed no state, so I read that as Linear's link to the PR or branch.
+
+CAUSE (half one; stack w28 at develop 07a2d62be6a0, not kintsugi or demo)
+- Reproduced: 200 {"success":true,"seededUsers":0,"created":0,"alreadyPresent":0,"failed":14}; controls non-admin 403, no token 401; log 0 then 14 "Demo user seed failed".
+- 42P10 on 14 of 14. adminConfig.ts:2111 ON CONFLICT (email); users has 14 unique indexes, 0 on email. Changed input, each in a rolled-back transaction as secuura_app with the platform-scope GUC: route statement -> ERROR 42P10; no ON CONFLICT -> INSERT 0 1; ON CONFLICT (id) -> INSERT 0 1; all 14 rows without it -> INSERT 0 1 on 14 of 14 (no second cause). Seed rows 0 before and 0 after. Not fixed here (your ruling).
+
+RED / GREEN AND DIRECTION
+- Cells red at base, green at head: 12 of 20 across the new file (11 cells) and ks1802 (9): the 6 new RED cells R1 to R5 and L1, and the 6 moved ks1802 cells (R1, R2, R3, R4, R5, C1), every one by assertion (200 / success true). Controls C1 to C5 green at base and head. C2, C3 and R6 of ks1802 byte-equal to base (checked, with a control that reads unequal on an edited cell).
+- Direction table, 14 scenarios on the real router: 9 changed, all stricter, 5 unchanged; head more permissive than base 0 of 14.
+- Head check on the stack, originate rebuilt from the pushed head and only it recreated (compiled route holds the new identifier on 2 lines, a base-built image on 0): through nginx and the api-gateway as SYSTEM_ADMIN 500 {"success":false,"seededUsers":0,"created":0,"alreadyPresent":0,"failed":14}, report body intact; controls 403 and 401 unchanged; log 14 failures 42P10 on 14 of 14; seed rows 0.
+
+MUTANTS (anchor occurs once, mutant parses, restore sha256-equal; cells = new file 11 + ks1802 9)
+- m1 success true unconditionally: 11 of 20 red. m2 partial reads true: 4. m3 drop the nothing-created check: 8. m4 raw error in the body: 19. m5 status mapped to 2xx: 8. m6 one failure not enough (boundary): 1 (R5). m7 already-present counted as created: 2. m8 any failure answers 500: 4. Killed 8 of 8, survivors none, green after every restore 20 of 20. My first m5 and m8 did not compile (an unused local) and were rebuilt and re-run; they are not counted.
+
+SUITES (host: Apple Silicon Mac, Docker Desktop aarch64; Node v26.8.1, NOT Node 24, LTS status not verified)
+- Whole originate suite, default workers: base 210 of 210 files, 2485 of 2485 cells, rc 0; head 211 of 211, 2496 of 2496, rc 0 (+11 = the new file; no other file's count changed). With --maxWorkers=4 two ks1868 suites fail to compile at BASE (TS2451 mockH): that is KS-1989, Backlog, not mine.
+- Route-related files at head: 78 of 78 (new 11, ks1802 9, ks928 4, ks487 24, ks730c 31).
+- tsc: service config 0 errors; touched files including tests 0 errors (planted type error rc 2). eslint src: 0 errors, 29 warnings, none in my files (planted defect rc 1). docs-fragments check: OK (planted defect rc 1).
+- Leak check with a planted DB error (token, SQLSTATE, source path and line, package path, table and column names, a seed e-mail, the hash prefix): 0 hits in body and all headers; positive control in the same cell that the token reaches the log; mutant m4 turns it red.
+
+HOOK VERDICT, VERBATIM from the push output (push took 1108 s, rc 0, ls-remote 6311c141f99e read in the same action)
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+Leg 14: "shell suites: 116 passed, 0 failed, 0 skipped (of 116)". Leg 16 held: 0 new errors on all 5 services.
+
+DISK AND LOAD
+- DevMASTER free (KiB): 129,747,640 boot; 129,746,756 after the base clone; 129,737,836 before the worktree; 127,416,968 before the builds; 127,416,552 before up; 127,405,308 before the push; 128053908 now. Six images cost about 2.2 GiB; load1 peaked 12.9 during the hook itself. The two worktrees (s-w28-base, s-w28-ks1990, with node_modules) are kept for the gate; they are the remaining disk.
+
+TEARDOWN READ-BACK (ITEM D)
+- docker compose down -v of project w28 only, then docker rmi of my six w28-* images by name; no prune. By label 0 containers, by name 0, networks 0, volumes 0 (by label and by name), w28 images 0, nothing listening on 7828. Other containers: 236 of 236 identical (id, name, image, status class), control with one entry perturbed reads 235 of 236; networks 3 and 3; volumes 779 and 779; the 13 w23-* images kept. Docker left running. The three credential files (env, rendered config, principals) moved, not deleted, into quarantine_2026-11-05/secrets (mode 700) with before and after listings; none was opened.
+
+NOT TESTED
+- The four platform suites (Schemathesis, Akto, Playwright, k6); Node 24; kintsugi or demo; the live route after a deploy; hook legs 3, 4 and 8; the Schemathesis seed-gate leg itself; a restart; a production-sized seed; a real database for the new unit cells (the stack run covers the old behaviour, the cause and the fixed route's answer).
+
+FILING CANDIDATES (none filed; board searches run)
+- Schemathesis leg B (demo_seed_gate.py parse_seed_counts and rerun_overwrote_nothing): the real helper reads an all-14-failed body as a pass today and goes red after this change; named in the PR as the availability cost. Searched seed-demo-users and demo_seed_gate: no open ticket for the leg.
+- The org-link empty catch at adminConfig.ts:2145 (ruled out of this PR). Searched adminConfig.ts: 17 open hits, none about this block.
+- KS-1989 (TS2451 mockH under --maxWorkers=4) is already on the board; I only reproduced it.
+
+FAULTS (mine; none reached the repo, a ticket or a box except as stated)
+- More than a dozen cd calls at boot; one git status in the shared checkout without GIT_OPTIONAL_LOCKS=0 (the launcher's instruction); zsh read $SHA:systemTest as a modifier; a loop that dropped a last line; a Done-in-24h count of 0 from an instrument blind to archived issues; a first OpenAPI control path that was not in the spec; a zsh glob refusal; my own expected count 5 against 6 in a re-key (the guard caught it); a busybox grep with no --include that read 0 in an image check (redone with a control); two non-compiling mutants; the foreign key in the first commit message (caught before the push).
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 49  SEEN:     1673  BATCH: /private/tmp/wed_newmail/batch_20261105T004051Z.txt

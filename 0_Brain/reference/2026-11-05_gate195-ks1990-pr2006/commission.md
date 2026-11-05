@@ -1,0 +1,155 @@
+# Gate 195 commission — Secuura / Blockchain, PR 2006 (KS-1990: POST /api/admin/seed-demo-users answered 200 success true when every insert failed), TIER 2, ROUND 1 of 2
+
+Written by Wednesday 2026-11-05 ~11:4x AEDT. Model: Sonnet (routing v1.0 row G2).
+**TIER 2, reason:** the change alters only the RESPONSE (HTTP status and the `success` flag) of an admin-only route, plus moved test cells. The demo-seed gate, the authorisation check and the INSERT are unchanged by design. **Your first job is to PROVE that.** If any of the three changed, stop and write `NO GO (TIER WRONG: <what changed>)`: Wednesday re-gates at tier 1.
+**Round count:** round 1 of 2.
+**A rotation KILLS it:** you run as a subagent of Wednesday's seat. Write `verdict.md` EARLY as a stub (line 1 `NO GO (INCOMPLETE: killed before the verdict)`), then overwrite it at the end.
+
+## What was ruled, so what this PR must be
+Wednesday ruled this contract in her ANSWER to Seat W 28th, 23:49:40Z 2026-11-04 (Kam's 2026-10-27 design grant). The PR body should state it; check it.
+1. `success = (failed === 0)` in every case.
+2. `created === 0 AND failed > 0` gives HTTP **500** with the SAME report body fields as before: `success`, `seededUsers`, `created`, `alreadyPresent`, `failed`. No new field, no new message text.
+3. Partial (`created > 0 AND failed > 0`) gives 200 with `success: false` and the counts unchanged.
+4. Healthy, and alreadyPresent-only, give 200 with `success: true`, unchanged from base.
+5. The org-link `catch { /* skip */ }` (~adminConfig.ts:2145) is OUT of scope and must be untouched.
+6. The INSERT (`ON CONFLICT (email)`, ~:2111) is untouched. Its 42P10 cause is recorded on KS-960, not fixed here.
+7. Six existing cells in `Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts` (R1, R2, R3, R4, R5, C1) were moved IN PLACE to the new contract by Wednesday's ruling. C2, C3 and R6 must be byte-equal to base, and no other line in that file changes.
+
+- **Commit `6311c141f99e5ade8d94e60ee15b0c80006a52cd`** = refs/pull/2006/head; **base/develop `07a2d62be6a09c9cd504864d1cf1906543d55317`** (both from Wednesday's own git ls-remote 11:4x AEDT 2026-11-05). One commit, 5 files, by Seat W 28th (Sonnet).
+- **The seat's figures, to RE-MEASURE, not trust:** red at base 12 of 20 by assertion; direction 14 scenarios, 0 more permissive; mutants 8 of 8; originate 2,496 of 2,496 (base 2,485); leak 0 with a control. Full READY: `ready_2006.txt` in this folder.
+
+## Questions (measure; do not take the READY's word)
+1. **Scope.** `git diff --name-only 07a2d62be6a0...6311c141f99e` must be exactly the five paths the READY names (adminConfig.ts, the ks1802 test, the new ks1990 test, the two docs fragments). Read the adminConfig.ts hunk whole. **Prove** that the demo-seed gate call (demoSeedGate), the authorisation middleware on the route, the users array and the INSERT statement are byte-equal base vs head. Show the lines, with sha.
+2. **ks1802 in-place edit.** Show a hunk count; show that only R1/R2/R3/R4/R5/C1 changed; show C2/C3/R6 byte-equal, with a control that reads unequal on an edited cell.
+3. **Contract table, base vs head, real router.** Use the KS-1802 harness shape: a real express router with the real handler, only the DB faked. Cells:
+   - all 14 inserts fail;
+   - all succeed;
+   - all already present;
+   - partial 13/1;
+   - partial 1/13;
+   - gate closed (each flag false in turn);
+   - non-admin;
+   - no token (if reachable in the harness);
+   - a throw outside the loop (the outer catch at ~2156).
+   For each: status, `success`, the counts. Predicate: **head never MORE permissive than base**: no 2xx or `success: true` at head where base had a non-2xx or false. Report "N of M" and every changed cell.
+4. **Leak check.** Plant a distinctive token in the thrown DB error's message, detail, hint and where, plus a SQLSTATE, a table name, a seed e-mail and a file path. Search the WHOLE serialized body and ALL headers at head on the 500 and partial cells. Expect 0 hits. Include a positive control in the same run that CAN fail (the token in the captured log; a mutant returning the raw error).
+5. **Mutants.** Reproduce at least 4 of the seat's 8 from its table, plus one of your own on the 500 boundary (`created === 0` vs `created <= 0` or similar). Each anchor count must be 1, the mutant must parse, and the restore must be sha-equal. Count the RAW table yourself.
+6. **Consumers.** `git grep -n 'seed-demo-users'` across the whole tree at head, with a positive control. Name every reader of the response. Confirm the seat's claim that the only one is systemTest/schemathesis `tests/support/demo_seed_gate.py` (`parse_seed_counts`, `rerun_overwrote_nothing`), and that the PR body names its availability cost.
+7. **Merge tree.** In YOUR clone, `git merge-tree --write-tree 07a2d62be6a09c9cd504864d1cf1906543d55317 6311c141f99e5ade8d94e60ee15b0c80006a52cd`. Report rc and the tree id; expect rc 0 and a tree equal to the head tree (the branch sits on the tip).
+8. **Suites and static checks at head:** the whole originate workspace (files and tests, base vs head), tsc on the service config, and eslint on the touched files, each with a planted-defect control. KS-1989 (TS2451 under `--maxWorkers=4`) is pre-existing; do not count it against the PR.
+9. **PR body.** Read it whole. It should state: the contract and who ruled it; the cause with the proof and the KS-960 pointer; the availability cost; Node v26 not 24; a NOT-tested list. Report each as present or absent, and flag any sentence the body makes that your measurement contradicts.
+
+## HOLD-FOR-KAM conditions
+Beyond gate_common section 6: any new user-facing words (a new message string, a field rename, a UI string) is HOLD-FOR-KAM. So is any change reaching the seeded accounts themselves (their passwords, roles or tenant). The 200-to-500 change on the all-failed cell is the INTENDED change and is NOT by itself HOLD-FOR-KAM.
+
+## Mechanics
+- **Workdir:** `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate195-ks1990-pr2006/`. Start with `.gitignore` (gate_common section 2). Every process cwd is inside the workdir, under `env -i`, with HOME and TMPDIR inside it.
+- **Clone:** clone by SHA from origin into the workdir (read-only transport via the Secuura deploy key, as gate 194 did; see that gate's `scripts/` for the exact clone and install commands). `npm ci --ignore-scripts` at the head lock; build shared. Never link from the shared checkout's node_modules.
+- No PostgreSQL or Docker stack is needed: the DB seam is faked, as KS-1802's harness does. The seat's own stack run of the cause is in the READY and is NOT re-run.
+- **Never post:** the gate does not push, merge, comment on the PR or any ticket, send mail, or write to any board. It only READS.
+
+## Output
+`verdict.md` in the workdir. Line 1 per gate_common section 6, for PR 2006, naming the merge tree on develop 07a2d62be6a0 for the merge seat. Then the findings, F1..Fn, each with severity and its evidence path.
+
+
+---
+
+# gate_common.md: the common section of every QA gate commission
+
+Paste this file WHOLE into every gate commission (Agent-tool subagent or cockpit seat), after the
+gate-specific part (subject, questions, cells). It is client-neutral: the client, repo, PR, head and
+the questions live in the gate-specific part, never here.
+
+Why this file exists (2026-11-03): the common section lived in a session scratchpad and died with it,
+so gates 161-165 were briefed by copying gate 160's verdict. A mechanism is recorded by its PATH
+(lesson 2026-09-07). Edit this file, never a copy.
+
+## 1. Role
+- You are a QA GATE. Findings only. You never fix, commit, push, open or edit a PR, post a comment,
+  write a ticket, send mail, deploy, or tell any human anything. Your output is one verdict file.
+- You report to Wednesday only, as your final message (section 7).
+
+## 2. Where you may write (the workdir)
+- Your workdir is the folder the gate-specific part names, under
+  `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/<YYYY-MM-DD>_gate<N>-<ticket>-pr<n>/`.
+  Write NOTHING outside it.
+- At creation, before anything else, write `<workdir>/.gitignore` with at least:
+  `repo/`, `scratch/`, `home/`, `tmp/`, `mut/`, `runs/**/*.bin`. Clones, throwaway trees and any
+  generated credential stay ignored. The verdict, harness and results are tracked.
+- YOUR SHELL'S CWD IS WEDNESDAY'S TREE, not your workdir. A relative runner scans and writes into it
+  (gate 119, 2026-11-02, wrote `node_modules/.vite/...` into Wednesday's root). So:
+  - anchor every runner: `vitest --root <dir>`, `npm --prefix <dir>`, `jest --rootDir <dir>`,
+    `npx --prefix <dir>`; or `cd` inside a `bash -c '…'` whose path is in your workdir;
+  - **AND start every test or app process with its CWD inside your workdir** (`bash -c 'cd <workdir>/cwd && …'`):
+    `--root` does NOT stop code under test writing RELATIVE paths into the process cwd. Gates 183 and 184
+    (2026-11-04) both appended production-logger lines to Wednesday's `logs/combined.log` this way, with
+    `--root` set correctly;
+  - run untrusted or stateful steps under `env -i` with `HOME=<workdir>/home` and
+    `TMPDIR=<workdir>/tmp` (keep TMPDIR short: socket paths over ~104 bytes break tsx IPC).
+- STOP every background process you started before you report (list them; kill by pid; never by
+  basename; never pid 1). Wednesday runs `gate_stray_check.sh` before the next GO and it refuses on
+  any stray file.
+
+## 3. The client checkout is READ-ONLY to you
+- READ git verbs only on the project's checkout: `ls-remote`, `show`, `log`, `diff`, `cat-file`,
+  `ls-tree`, `merge-base`, `rev-parse`, `grep`. NEVER `fetch`, `pull`, `worktree`, `checkout`,
+  `merge-tree --write-tree`, `commit`, `stash`, `gc` there: those write its `.git`.
+- For anything that writes: `git clone --shared <checkout> <workdir>/repo`, then
+  `git -C <workdir>/repo fetch origin refs/pull/<n>/head` (a PR ref cannot be truncated, a branch
+  name can) and run write verbs only inside `<workdir>/repo`.
+- Never print, copy or write a secret value. Results show counts, truncated hashes, modes and key
+  names only. If a harness must hold a generated value, it stays in an ignored folder.
+
+## 4. Subject: pin it, at the start AND the end
+- `git ls-remote origin refs/pull/<n>/head refs/heads/develop` at the start and again at the end;
+  write both into the verdict. If the head moved, say so first and stop.
+- `git merge-tree --write-tree <develop> <head>` (in your clone) on the CURRENT develop: rc and tree.
+- State host versions you ran on (Node, TypeScript, the test runner) and what you did NOT run on.
+
+## 5. Method: what makes a measurement count
+- **The class bar (fix-a-thrown-value / error-path PRs):** head must end in exactly the state base
+  reaches with an ORDINARY Error, at every changed site. Count cells; name any head cell MORE
+  permissive than base-ordinary. That count decides HOLD-FOR-KAM (section 6).
+- **Red first:** the PR's new tests (and your own cells) fail at base by ASSERTION, pass at head.
+  A cell that passes at base is not proving the fix; say which.
+- **Drive the real thing** where you can: the real module by blob, the real route over HTTP, a real
+  database. Say plainly what was read and not driven.
+- **Every zero needs a control that would have produced a non-zero, run in the same action**, from a
+  source independent of the thing you are testing (a different file or syntax you did not write).
+  A zero from an instrument that could not fire is not a zero.
+- **Mutants:** run them, then COUNT THE RAW TABLE yourself; headline = table, or say it differs.
+  Name each survivor and whether it is equivalent.
+- **Never re-implement a tool to check the tool**: read its lines, or make it print what it computed.
+- Never `grep -r` / `find` over `/Volumes/DevMASTER/WEDNESDAY` or any local-model `runs/` or `night/`
+  tree. Open named files. If a call runs past ~2 minutes, it is stopped or its reason is written.
+
+## 6. The verdict file: `<workdir>/verdict.md`
+Line 1, exactly one of:
+- `GO — MERGE` · `GO WITH NOTES — MERGE (no HOLD-FOR-KAM)` · `GO WITH NOTES — HOLD-FOR-KAM (<reason>)`
+  · `NO GO (<FIX-BEFORE-MERGE ids>)`
+
+Then:
+- `# QA Gate <N> (Tier <t>, round <r>): PR <n> / <ticket> <subject>`
+- Subject block (section 4), method in one paragraph.
+- `## Findings`: one `### G<N>-F<k> — <SEVERITY>[ — FIX-BEFORE-MERGE]: <one line>` each, with three
+  fields: **FOUND** (the claim), **TESTED** (scope: what was and was not exercised), **HOW** (the
+  instrument, the command, the controls). Pre-existing findings say PRE-EXISTING (base = head).
+- `## What passed (measured)`: per question, the counts.
+- `## NOT tested`: everything a reader might assume you covered and you did not. A reachability or
+  exposure word ("reachable", "in production", "any caller") appears in a finding only if it was
+  measured; otherwise it is listed here.
+- `## Plain answer for Kam`: 3-6 plain sentences, no jargon, what a merge would change for users.
+
+HOLD-FOR-KAM is WRITTEN when: any head outcome is more permissive than base-ordinary; or the change
+touches a signature class (production, money or payouts, a message to a human, anything
+irreversible). Wednesday RULES whether it holds; you only state the condition and the evidence.
+
+## 7. Report back to Wednesday (your final message, short)
+- The verdict's first line, the verdict path, findings by severity (ids), mutant counts, the head
+  and develop you measured at start and end, every background process stopped (pids), and any stray
+  file you know you wrote outside the workdir (there should be none).
+
+## 8. Rounds
+- Tier 1 / tier 2 per `0_Brain/learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md`. Round 2 is
+  a DELTA: it re-tests the round-1 FIX-BEFORE-MERGE items and the forms that held, not the whole PR,
+  unless the gate-specific part says otherwise. Two NO GO rounds on one class is the cap.
