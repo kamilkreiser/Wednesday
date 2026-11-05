@@ -26,6 +26,14 @@ develop = 1e4bdcb899c44023404bcd33c511de6f7dde2f6e (PR 2015 squash). Eight merge
 
 Detached push drivers of WRAPPED seats (alive at 20:55, tty ??): V 21st 5891 (PR 2009 r2 at EXACTLY 2f10e7e060cc) and 11176 (KS-1666 at EXACTLY 4d1c96b495bd); V 22nd 8312 (KS-1462 605942b23ce2) and 52840 (KS-1989 c0b427a2ff76); T 12th 73804 (KS-1539 a56b949c56f0), 71556 (KS-1542 52a781a3e493), 31179 (KS-1614 8d4f6fca8388), 27026 (KS-1493 8e0070f193ba). Push queue ~12 deep at ~20 min each.
 
+## UPDATE 22:0x (65% checkpoint) — newest; supersedes rows above where they differ
+- develop = 1b1b65c7415f (PR 2016 KS-1407 merged 10:25:38Z; NINE merges today). KINTSUGI DEPLOYED at 1e4bdcb899c4 by D 55th (auth 21:38, gateway 21:39-21:40 AEDT; verified; 7 comments posted; D 55th WRAPPED 0.97, pane closed). Demo frozen (lacks PR 2006 + 2007, 2010, 2011, 2012, 2008, 2013, 2014, 2015).
+- GAUGE 97% (22:03). Kam 21:17:22 plan = new account tomorrow morning; prior 98% card ruled a. NO new seat launches tonight; in-flight continue; panel told (bf-fd24f6e968d0).
+- FLOOR: B 96th %176 (queue item 10 = PR 2009 r2 KS-1938, gate 199r2 GO WITH NOTES: expect NOTES PATCHED -> READY -> send its head-pinned GO); V 23rd %184 (PR 2009 appended; KS-1666 / KS-1462 / KS-1989 pushes pending via drivers 11176 / 8312 / 52840; building KS-1509); J 17th %182 (KS-1858 driver 45397 + KS-1797 driver 67814 queued ~10th/11th; ITEM 3 KS-1494 comments-only PR ruled 21:57); K 16th %180 (KS-1534 driver 79923 queued 12th, OVL_IGNORE_HEADS ruled); F 34th %174 (KS-692 driver 56138 at the head of the queue); S 23rd %183 (filings: 11 of 21 filed at 10:56Z; refresh race = one ticket, ruled).
+- NEXT ARRIVALS: each READY FOR GATE -> gate (tier by touch: KS-1858/1797/692/1534 tier 1 Opus; KS-1462/1989/1509/1494 tier 2 Sonnet); KS-1666 READY FOR MERGE (gate 203 done) -> queue to B with its N-status lines (N1 follow-up test owed after merge; N2/N3 in body).
+- T 13th NOT launched (gauge): T 12th's four pushes (73804, 71556, 31179, 27026) will land unraised; the next account's seat raises them per T 12th's HANDOVER.
+- Routed later: KS-1968 detail (HIBP_ENABLED FALSE/0/off leave the check ON) as a comment after the deploy round (S 23rd's wrap names it).
+
 ## UPDATE 21:2x (50% checkpoint) — supersedes the rows it names
 - KAM 21:17:22 verbatim: "keep going with the secuura tickets and I will log into a new account tomorrow morning" (receipt bf-03a5af49eb26; EXPIRING-GRANTS row, ends at his login).
 - D 55th: GO KINTSUGI at 1e4bdcb899c4 SENT 21:18 (re-pin in writing; auth + api-gateway; demo frozen). NEXT: its STATUS B -> approve its seven drafted comments (KS-1150, 1460, 1968, 1645, 1185, 1262, 1804) by ANSWER naming the seat.
