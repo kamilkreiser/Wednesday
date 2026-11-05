@@ -28,7 +28,8 @@ supersede: REPLACED WHOLESALE 13:1x AEDT 2026-11-05 by the 13:0x seat. Previous 
 5. KS-960 (users.email schema authority, 'DO NOT RECONCILE'): card for Kam when the merged evidence shows it blocks first-run seeding.
 6. **NAS evaluation FRIDAY 2026-11-06** (Kam 13:21:06 live: "The device comes tomorrow.  We can evaluate then"; receipt bf-1efdfc9d3103f370). Owed then: measure the fitted RAM + slots on the device, read UGREEN's UGOS Pro Docker docs (rate-limited 11-05), and propose the supervised pilot (one Secuura disposable test stack via an SSH docker context) as a CARD with a default of HOLD. Nothing moves before his word.
 7. **w=3 REGRESSION, mechanism owed (ledger 2026-11-05 13:3x):** a PreToolUse ADVISORY (claim first; hooks are shared) on `grep -r` / `find` over 0_Brain/reference, any 5_Project_History, local-model/spark/runs or night/ trees: 'scope it with --include + a named dir, or stop it by pid if the harness backgrounds it'. Arms: a bare recursive grep there fires; a scoped one does not.
-8. Carried: WED-155 (inbox_digest key in argv); INDEX.md refresh (last 10-27); stash@{0} never drop.
+8. From S 20th's STATUS: KS-1384 (Stuart's ticket) shows 'fix strings live 16 of 17' on demo (D 52nd table): one fix string is not live there and nobody has chased it. Measure which string (read-only, a seat), then card or file. KS-1841 owns the api-gateway docs allowlist.
+9. Carried: WED-155 (inbox_digest key in argv); INDEX.md refresh (last 10-27); stash@{0} never drop.
 
 ## OPEN FAULT
 - Two Wednesday ACK mails to D 52nd never arrived (cause UNMEASURED). send_brief --kind answer does NOT verify at destination: after every answer, the cockpit say --mail tap IS the delivery check.
