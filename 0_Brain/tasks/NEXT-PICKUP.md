@@ -22,6 +22,11 @@ supersede: REPLACED WHOLESALE 13:1x AEDT 2026-11-05 by the 13:0x seat. Previous 
 - Mechanism (a) BUILT: note_entry.sh RECEIPT-VERB GUARD. Any note saying answered / closed %N / acked %N / ruled: / delivered needs --receipt <file written in the last 120 s>: `cmd > f 2>&1`, read it, then `note_entry.sh --receipt f --stdin`. Override NOTE_ALLOW_RECEIPT_VERB=1 with the reason. Arms tests/note_entry_receiptverb_arms.sh 12/12. Quote sends in DOUBLE quotes inside a note (the sent-log guard's regex ends a quote at " only).
 - NAS answer (bf-0f2f069fdbdd693f); Kam 13:21 'The device comes tomorrow.  We can evaluate then' (item 6 below).
 
+## 🔴 KAM 15:42:14 (live, view=wednesday), verbatim: "good work on the above. what about secuura tickets.  I would like you to get through all the in progress and all in review tickets"
+- Receipt posted (bf-ed2476f0eedb): build lanes in parallel, his 17 decisions as cards with defaults, Peter/Stuart tickets stay theirs unless he says, In Review census first.
+- **A lane-plan drafter (Sonnet) is running** -> 0_Brain/reference/2026-11-05_ks-lane-plan/ (inreview.tsv, lanes.md = SCOPE-REMAINS grouped into FILE-DISJOINT build lanes, kam_decisions.md = the KAM-DECISION tickets as card drafts, human_owned.md, SUMMARY.md). SUCCESSOR'S FIRST WORK: read SUMMARY + lanes.md + kam_decisions.md WHOLE; post the decision cards (decision_queue.sh add, read each card text at source first); launch build lanes as the machine allows (capacity_status, load1 < 7), each brief naming the partition from both sides; In Review: GATE-OWED -> gates (batched), MERGE-READY -> a merge seat, STALE-STATE -> a close-out seat.
+- **Launching while K 15th works is SAFE:** K 15th never edits the live Launch_Claude.command (it works on a copy; the swap is approval-class after the gate). My 15:35 ANSWER told K 15th "I launch none while you work"; the first new launch must mail K 15th a FLOOR UPDATE that names and SUPERSEDES that line.
+
 ## THEN (owed, in order)
 1. KS-911/912 launcher seat (see FLOOR); then its gate.
 2. **KS-911/912** (KS-907 launcher + suite residues): launch ONLY when no Secuura seat is live (it edits the project launcher). Next window = after D 54th wraps (it is launched from the project launcher).
