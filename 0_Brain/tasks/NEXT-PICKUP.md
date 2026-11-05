@@ -14,20 +14,18 @@ supersede: REPLACED WHOLESALE 11:47 AEDT 2026-11-05 by the 10:27 rotation seat (
 - Standing: Spark IGNORED until he says (11-04 16:42); October deploy grant extended until further notice; 11-04 09:16 'clear and close as many in progress tickets as possible'.
 - Personal errand done 11:12: ~/Downloads/winmail.dat unpacked into ~/Downloads/winmail_extracted (contents not read).
 
-## FLOOR at 12:30 (handover written by the 10:27 seat at ~78%, rotating inside 80-90)
-- **D 53rd** %161 (Opus): KINTSUGI deploy at PIN 07a2d62be6a0 (058 + PR 2003 + PR 2005 + PR 2004; NOT PR 2006). GO KINTSUGI sent 01:11:52Z naming the 058 window. Building k18 (2 batches) since 01:15:19Z. Then: post-build checks -> ls-remote -> migrate058_d53 CHECK -> APPLY -> b-post + cescope (predicted 0/14/0/14, certifications 1) -> part a (vc-issuer, originate) -> vprobe MID -> part b api-gateway -> +15 min error counter (ANSI-aware, controls proven) -> STATUS B. STOP list: any guard, >1 Applying line, error naming charge_events/metering/RLS, KS-535 equality, OOM. Never alter the policy (a new decision for Kam).
-  - On STATUS B: verify REVISION/claims, ACK + wrap, score, pane_close; REPORT TO KAM on the panel: kintsugi carries everything merged before PR 2006; his kintsugi count tenant-less 0 of 14; 058 changed behaviour on kintsugi (unscoped charge_events reads 14 -> 0, certifications opened) per his card 1005 a; Platform S / bot impact UNMEASURED; the swap windows AEDT.
-- **B 95th** WRAPPED 01:32Z, scored 0.95, pane %162 closed. PR 2006 merged as 5fc5569ed96a.
-- develop now = 5fc5569ed96ac61f64823cc9e1fa841899aa1f62 (PR 2006). KS-1990 needs a LATER kintsugi deploy (demo frozen).
-- Wrapped + scored this seat: S 19th 0.94, D 52nd 0.97, W 28th 0.95 (gate 195 GO WITH NOTES -> merged). Gate 195 done.
+## FLOOR at 12:58 (handover from the 10:27 seat, rotating)
+- **D 53rd** %161: KINTSUGI DEPLOYED 07a2d62be6a0 (STATUS B 01:57Z), verified; 058 applied in a 7 s window; Kam TOLD on the panel 12:5x (bf-462d6704bc5e). WRAPPING on Wednesday's ACK. On its wrap mail: verify history '^## .*Seat D 53' = 1 (control D 52 = 1), HANDOVER FINAL, score (~0.97), pane_close %161 (alone, then the note in the NEXT message).
+- BOTH BOXES now run 07a2d62be6a0. develop = 5fc5569ed96ac61f64823cc9e1fa841899aa1f62 (PR 2006, KS-1990) is NOT on either box. DEMO IS FROZEN (Kam 07:08); kintsugi gets PR 2006 in a later round under the October grant.
+- No other seat live. Capacity ROOM.
 
 ## FIRST TASK OF THE NEXT SEAT (ledger w=4 regression, 2026-11-05)
 - Build mechanism (a): tools/note_entry.sh refuses a body carrying a receipt verb (answered, closed %, acked, ruled:, delivered) unless --receipt <file> names a tool output written in the last 120 s. note_entry is SHARED with Tuesday: mail her a coordination FYI (done for the ACK-HASH GUARD at 12:0x). Arms both ways, copy+mv install, backup .pre-*.
 
 ## THEN (owed, in order)
-1. D 53rd STATUS B -> verify, ACK, score, close, report to Kam (see floor).
+1. D 53rd wrap -> verify, score, close.
 2. B 95th wrap -> score, close. A later kintsugi round for PR 2006 (5fc5569ed96a) + anything merged after.
-3. CLOSE-OUT seat after D 53rd STATUS B: tickets deployed to BOTH boxes (D 52nd's evidence/F6_ticket_table.tsv + D 53rd's table): KS-1823, KS-1401 first; KS-1256/1561/1459/1458/1868 slices; KS-1958/1959/1986. Board writes only, per-ticket evidence.
+3. CLOSE-OUT seat NOW (both boxes at 07a2d62be6a0): KS-1401 CLOSE-READY (D 53rd + D 52nd evidence), KS-1823 CLOSE-READY (D 52nd); tickets deployed to BOTH boxes (D 52nd's evidence/F6_ticket_table.tsv + D 53rd's table): KS-1823, KS-1401 first; KS-1256/1561/1459/1458/1868 slices; KS-1958/1959/1986. Board writes only, per-ticket evidence.
 4. **KS-911/912** (KS-907 launcher + suite residues): launch ONLY with no Secuura seat live (the fix edits the project launcher; live seats' launcher bash still runs from it — never edit a running script).
 5. Filing seat (small): G191-F3 by-hash 500 + store/selectList err?.message (named in KS-1959 text); Schemathesis leg B (demo_seed_gate.py) red after PR 2006; org-link empty catch adminConfig.ts:2145; KS-1990 W 28th candidates.
 6. KS-960 (users.email schema authority, 'DO NOT RECONCILE'): now carries the KS-1990 42P10 proof — a card for Kam when the merged evidence shows it blocks first-run seeding (KS-915 relies on it).
