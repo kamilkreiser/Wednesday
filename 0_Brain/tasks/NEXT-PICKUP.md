@@ -13,17 +13,17 @@ supersede: REPLACED WHOLESALE 13:1x AEDT 2026-11-05 by the 13:0x seat. Previous 
 - **DEMO IS FROZEN** (no demo redeploy without Kam's word). Both boxes run 07a2d62be6a0. develop = 5fc5569ed96a (PR 2006, KS-1990) is on NEITHER box.
 - Standing: Spark IGNORED until he says (11-04 16:42); October deploy grant extended until further notice; 11-04 09:16 'clear and close as many in progress tickets as possible'.
 
-## FLOOR (14:19, refreshed at the 65% checkpoint)
-- **D 54th %166 (Opus): KINTSUGI deploy of develop 5fc5569ed96a (PR 2006, KS-1990).** It stops at STATUS A. Owed next: read its PLAN CONFIRMATION + STATUS A WHOLE; GO by mail with the subject 'GO KINTSUGI at 5fc5569ed96a (Seat D 54th)' (add 'incl anchoring m365-integration tenant-provisioning' ONLY if its contentfp shows real older code AND you decide the window is worth it; default = no). Demo is frozen; nothing goes there.
-- Closed and scored this seat: S 20th 0.94 (KS-1401, KS-1823 Done), U 13th 0.96 (KS-1584, 1612, 1860, 1230 Done), S 21st 0.94 (KS-2003/2004/2005 filed, comment on KS-1959). All verified on Linear by Wednesday.
-- Census of the KS In Progress set: 0_Brain/reference/2026-11-05_ks-inprogress-postdeploy/ (205 tickets; most of the rest are SCOPE-REMAINS / HUMAN-OWNED / KAM-DECISION).
+## FLOOR (15:2x)
+- No seat live. D 54th CLOSED (0.96): KINTSUGI now at develop 5fc5569ed96a (PR 2006); REVISION 475104a1f2cb3d81; rollback pre-20261105k19; originate swap 15:01:50-15:02:03 AEDT; Kam told (bf-8e5d64c00c26). DEMO still frozen at 07a2d62be6a0 (one squash behind; bringing it level is Kam's word).
+- Today since 13:00: 7 KS tickets to Done + archive (1401, 1823, 1584, 1612, 1860, 1230, 1990), KS-2003/2004/2005 filed, ~18 facts comments. Scores: S 20th 0.94, U 13th 0.96, S 21st 0.94, D 54th 0.96.
+- **KS-911/912 brief being drafted (Sonnet) -> briefs_staged/2026-11-05_seatK_ks911_ks912_launcher.md.** Read it WHOLE, re-check the floor (it must be launched with NO Secuura seat live), dry run, launch. It ends at READY FOR GATE (a tier-1 gate, since it touches the boot path).
 
 ## DONE THIS SEAT (also)
 - Mechanism (a) BUILT: note_entry.sh RECEIPT-VERB GUARD. Any note saying answered / closed %N / acked %N / ruled: / delivered needs --receipt <file written in the last 120 s>: `cmd > f 2>&1`, read it, then `note_entry.sh --receipt f --stdin`. Override NOTE_ALLOW_RECEIPT_VERB=1 with the reason. Arms tests/note_entry_receiptverb_arms.sh 12/12. Quote sends in DOUBLE quotes inside a note (the sent-log guard's regex ends a quote at " only).
 - NAS answer (bf-0f2f069fdbdd693f); Kam 13:21 'The device comes tomorrow.  We can evaluate then' (item 6 below).
 
 ## THEN (owed, in order)
-1. D 54th: plan, STATUS A, GO, STATUS B, wrap, score, close (see FLOOR).
+1. KS-911/912 launcher seat (see FLOOR); then its gate.
 2. **KS-911/912** (KS-907 launcher + suite residues): launch ONLY when no Secuura seat is live (it edits the project launcher). Next window = after D 54th wraps (it is launched from the project launcher).
 3. Filing seat (small): G191-F3 by-hash 500 + store/selectList err?.message (KS-1959 text); Schemathesis leg B (demo_seed_gate.py) red after PR 2006; org-link empty catch adminConfig.ts:2145; KS-1990 W 28th candidates.
 4. A kintsugi round for PR 2006 (5fc5569ed96a) + anything merged after, under the October grant (kintsugi only; demo frozen).
