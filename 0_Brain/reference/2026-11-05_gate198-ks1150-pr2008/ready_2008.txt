@@ -1,0 +1,49 @@
+=========== [INBOUND] 2026-11-05T06:38 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1150 PR 2008 (Seat J 16th)
+[Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1150 PR 2008 (Seat J 16th)
+Seat J 16th
+
+READY FOR GATE: KS-1150 (R-2 + R-3), PR 2008. Tier 1 proposed.
+
+- PR: 2008, https://github.com/Secuura/Distributed_Secuura/pull/2008, base develop.
+- Branch: feature/ks-1150-oauth-refresh-replay-denylist-and-503.
+- Head, read from origin by ls-remote in this action: 65142195fca6a01a1ded43dd59d5ae527b3e3b33. One commit on develop 5fc5569ed96a.
+- Files (6, +380/-3):
+  - services/auth/src/routes/oauth.ts (+49/-1);
+  - new __tests__/ks1150-refresh-grant-replay-and-lookup-503.test.ts (308);
+  - __tests__/ks823-refresh-grant-client-auth-and-binding.test.ts and __tests__/ks835-oauth-mint-carries-granted-scope.test.ts: the mock line only, +3/-1 each; denylistRefreshJti added as a no-op; no assertion changed;
+  - the fragment pair Projects Documents/fragments/{flow,cheat}/KS-1150-oauth-refresh-replay-denylist-and-503.html.
+- Ticket comment: KS-1150 4838fc72, read back (body equal, 0 mention nodes, state In Progress unchanged). Census after the PR: KS-1150 In Progress with PR 2008 attached; KS-1690 and KS-1868 untouched (no attachment). The PR title, body and commit carry KS-1150 only.
+
+WHAT IT DOES
+- R-2: a successful refresh grant denylists the presented jti for its remaining lifetime (the POST /api/auth/refresh shape).
+  - Only on success, so a refused presentation burns nothing.
+  - Before createSession and the mint, so a failed write delivers no pair (500) and the old token stays the only live one.
+  - Per your D1 ruling: no session rotation and no burn-the-session.
+- R-3: a ServiceUnavailableError answers 503 SERVICE_UNAVAILABLE / temporarily_unavailable, with a fixed description that does not echo the thrown message. Every other throw keeps the 500.
+  - Mechanism: an inline map in the route's own catch, because the route answers in its OAuth shape and has no . It maps by class, so the class from any step of the route answers 503; on this path only the user repository throws it today.
+  - The instanceof is guarded with a try: on a revoked Proxy it throws. My first version left that request unanswered, and the existing KS-1868 revoked-Proxy cell caught it before the commit.
+
+TESTS (local Mac, unit level, vitest 4.1.12, Node v26.8.1, not LTS; load 6 to 12)
+- Red first on develop's oauth.ts: 6 of 11 failed, every one by assertion, 0 . The 5 controls passed.
+- Green: 11 of 11. OAuth harnesses (ks1150 x2, ks790, ks820-821, ks823, ks835, ks1151, ks1157, ks1868-oauth x3, ks466, ks781, ks722, ks819): 19 of 19 files, 168 of 168 tests.
+- Mutants: 10 written, 9 admissible, 9 of 9 killed by assertion. M1 as first written was inadmissible (TS6133) and is not counted.
+- Whole services/auth suite:
+  - develop: 1,628 passed, 3 failed, 56 skipped of 1,687;
+  - branch: 1,696 of 1,698.
+  - Every failure on both sides is a timeout (the ks949 cells; on develop also the auth.integration hook, whose 56 cells were then skipped). ks949 and auth.integration each passed alone on develop.
+- tsc --noEmit rc 0. eslint clean on the four files (clean on develop too). Test-type ratchet: 0 new (41 baselined).
+- docs-fragments check OK; a planted defect fails (rc 1); restored sha256-equal. Its 2 ADVISORY lines exist on develop too.
+- Pre-push hook, quoted: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." and "This is NOT a pass."
+  - The 3 skips: "local stack not up".
+  - Leg 14: shell suites 116 of 116. Leg 16: 0 new in all five services.
+  - Push rc 0, 1,211 s, VERIFIED by ls-remote 06:35:46Z.
+
+NOT DONE / NOT COVERED
+- Schemathesis, Akto, Playwright and k6 (no stack).
+- A real Redis: the denylist double has the real setex/exists TTL semantics.
+- A booted service and a live refresh on any environment.
+- KS-1690's session half.
+- The concurrent-replay race. It is a read-then-write in both the OAuth grant and the session path; candidate only, per your D1. I did not file it: the board search is still owed and goes in my wrap.
+- A refresh token with no jti or no exp is not denylisted. The same is true on the session path; jwt.ts always mints both.
+- No deploy, no merge; the ticket stays In Progress.
+
