@@ -1,0 +1,24 @@
+M1_no_loop ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts rc=1 ['Tests  4 failed | 8 passed (12)', '⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯']
+   × RED KS-1645 P1: 2,300 upstream rows are ALL exported, in pages of 1000 at offsets 0, 1000 and 2000; meta says 2,300 of 2,300 and not truncated 15ms
+   × RED KS-1645 P2: 10,500 upstream rows stop at the 10,000 bound; JSON meta says truncated: true with total 10,500 19ms
+   × RED KS-1645 P2b: the same 10,500 rows as CSV: 10,000 data rows under the header, and the X-Audit-Export-Truncated: true response header 19ms
+   × RED KS-1645 P4: a page that fails after the first is the upstream's status as a 503 BAD_GATEWAY, never a short 200 5ms
+M1_no_loop gate202-own.test.ts rc=1 ['Tests  2 failed | 5 passed (7)', '⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯']
+   × G-TEN: ORG_ADMIN of tenant A over 2,500 A rows + 2,500 B rows: every page carries the caller Authorization, only A rows, all 2,500 11ms
+   × G-THROW: a network throw on page 3 is a 502, not a short 200 7ms
+M2_to_bare ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts rc=1 ['Tests  1 failed | 11 passed (12)', '⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯']
+   × RED KS-1645 B1: rows on the `to` day (10:00Z and the last millisecond) are exported, the day after is not; the upstream is sent the end of that day; filename and meta keep the plain date 5ms
+M2_to_bare gate202-own.test.ts rc=1 ['Tests  1 failed | 6 passed (7)', '⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯']
+   × G-DATE: from/to boundary milliseconds (UTC days) 4ms
+M3_trunc_false ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts rc=1 ['Tests  2 failed | 10 passed (12)', '⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯']
+   × RED KS-1645 P2: 10,500 upstream rows stop at the 10,000 bound; JSON meta says truncated: true with total 10,500 114ms
+   × RED KS-1645 P2b: the same 10,500 rows as CSV: 10,000 data rows under the header, and the X-Audit-Export-Truncated: true response header 111ms
+M3_trunc_false gate202-own.test.ts rc=0 ['Tests  7 passed (7)']
+
+M4_auth_dropped_page2 ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts rc=0 ['Tests  12 passed (12)']
+
+M4_auth_dropped_page2 gate202-own.test.ts rc=1 ['Tests  3 failed | 4 passed (7)', '⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯']
+   × G-TEN: ORG_ADMIN of tenant A over 2,500 A rows + 2,500 B rows: every page carries the caller Authorization, only A rows, all 2,500 10ms
+   × G-THROW: a network throw on page 3 is a 502, not a short 200 7ms
+   × G-NOTOTAL (probe): page 2 answers 200 with no total and no rows -> what does the export say? 6ms
+restored sha256 def8be915ba8b75d23007ed1a4d4109ba5d22f24d7a5f4013851b569cd60ef36

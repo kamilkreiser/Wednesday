@@ -1,0 +1,31 @@
+- (b) and (c): 12 new cells in two files, listed below. (e): the KS-1633 integration suite's header and one cell title, per gate AK1 note N6's three bullets plus the ORPHAN cell's "closes" comment (comments and one title string only). (f): not built. The KS-1887 fragment pair.
+- One line added to the manifest in ks1293-originate-suite-is-hermetic.test.ts. That file is NOT in your named list. The suite itself requires every test file that sets the anchoring base to be listed (KS-1384 and KS-1814 did the same); without the line it fails. Say if you want it handled differently.
+
+Measured (evidence/ks1666/)
+- Red-proof against the unchanged route (develop 5fc5569ed96a): A1, A2, A3 fail, each by an expect() mismatch (the delete is never called) after the original-answer assertion passes. The other 9 pass: R1, C1 to C3, W1, W2 and A4 to A6 pin behaviour that must not change, so they are not claimed red on develop.
+- 13 planted tampers, each failing exactly the cells I declared before the run, 12 cells executed each time, 0 TS codes, sources restored byte-identical (route sha256 starts cad800ff; db.ts starts 1d006875 and is never in the commit): the unchanged route put back (A1 to A3); the ticket's MN4 (no pool passed: R1, A1) and MN4d (withTenant ignores the pool: W1); MOWN2 (guard defeated: C1, A4); the request db in place of the pool (R1, A1); the guard inverted (8 cells); never armed (6); the count check neutered (C2, A3); the 503 path not deleting (R1, C2, C3); and on the new branch: call removed (A1 to A3), no-anchor condition dropped (A5 only), inverted (A1 to A3, A5), original failure swallowed (A1 to A5).
+- Whole originate suite (jest): 213 files / 2508 cells, 0 failed (develop 211 / 2496, plus 2 files and 12 cells). tsc --noEmit -p services/originate: 0 errors. eslint on all five changed or new .ts files: no output. docs-fragments check: rc 0 clean, rc 1 on a planted second heading, fragment restored.
+- (e) check: comment-stripped transpile of the integration test before and after differs in exactly 2 lines, the B1 title; a control with one code token changed differs in 6.
+
+Two things from the first full run (it failed 2 suites; both recorded)
+1. ks1293: my new file was not yet in its manifest. Mine, fixed.
+2. ks1868-originate-events-init-catch-unreadable-throw: TS2451 "Cannot redeclare block-scoped variable 'mockH'". NOT mine and not touched. That file and ks1943-platform-scope-transaction-helper are both global scripts (0 import or export lines each) declaring a top-level `const mockH`; one tsc program of just those two reports TS2451 in each, and a control pair prints none. It depends on which jest worker compiles both, so it surfaced when my two extra files shifted the schedule, and it did not recur on the re-run once jest's timing cache changed the order. A one-line `export {};` in one of them fixes it; both are on develop and in other lanes, so it is yours to route.
+
+(f) and the class ticket
+- Filed KS-2008 as you ordered: Low, Backlog, unassigned, no project (KS-1666 has none). Searched, archived included: "invalid input syntax", "database driver message text", "driver message row values", "reserveErr", "error text can carry row values", "ids only warn line", "certifications.ts warn error message database", "log database error message PII certification routes". Nothing covers log lines carrying driver text; nearest are KS-1410 (the same text in 500 response bodies, six services) and KS-1868 (a different defect). It lists the six warn lines and the catch-all at certifications.ts:379, 418, 593-597, 649, 710, 880 and 919-928, with gate AK1 note N7 as evidence. Read back: identical apart from Linear turning "-" bullets into "*".
+- One extra observation, in the ticket and not checked against KS-1410's 28: certifications.ts:935 returns `msg` to the caller as `detail` on a foreign-key 400.
+- I wrote no comment on KS-1666 or KS-2008. The post-merge KS-1666 comment will carry (f) = A, your reason, KS-2008, and the inherited 10 s window.
+
+The PR text will say (your rulings)
+- RED ORPHAN is untouched and why (the accepted-anchor case is kept, A5). The inherited window is named and not widened. The two Kam cards (ks1709, ks1124) are about a certification the client is told exists; here the client is told the request failed, so they do not apply. Test Evidence block with the NOT-run lines. Git text names only KS-1666.
+
+Faults this round (own)
+- The first MOWN2 tamper did not compile (TS6133, a variable left unread); rebuilt to keep the read, and the 13th-of-13 table is from the rebuilt run. My request helper first returned the response body too and broke four older cells on its first run; fixed before anything else. My re-key of the new-branch driver first rewrote a docstring LINEAGE line to my name; caught reading the diff, rule fixed, regenerated. My commit message named a second ticket key (twice); caught by my own census before the commit. I armed the watcher once with a plain & (untracked); stopped it by its recorded pid and re-armed it as a tracked task.
+
+NOT run
+- A real Postgres or second tenant database; the integration cells of the KS-1633 suite (including RED ORPHAN, which I read but could not run); the four platform suites; any LTS Node (v26.8.1 only); the pre-push hook legs (they run at the push); any deploy.
+
+Meanwhile
+- Both pushes wait in the queue. When either verifies by ls-remote I create or update its PR and mail READY FOR GATE with the pushed head. I am not touching either worktree while its driver waits (the prechecks need a clean tree).
+
+NEW-ROWS: 2  ROWS-IN-DIGEST: 51  SEEN:     1807  BATCH: /private/tmp/wed_newmail/batch_20261105T082408Z.txt

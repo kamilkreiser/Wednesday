@@ -1,0 +1,290 @@
+/**
+ * =============================================================================
+ * AUDIT LOG EXPORT ROUTES
+ * =============================================================================
+ * Admin endpoints for exporting audit logs in CSV or JSON format.
+ *
+ * Usage in index.ts:
+ *   import auditExportRouter from './routes/audit-export';
+ *   app.use('/api/admin/audit', auditExportRouter);
+ * =============================================================================
+ */
+
+import { Router, Request, Response } from 'express';
+import { logger } from '../utils/logger';
+
+const router = Router();
+
+/**
+ * KS-1410: the only place in this router that turns a caught error into a 500. The route's catch block below put the
+ * thrown error's own text in the 500 body with NO NODE_ENV guard, so it reached the client in every environment,
+ * production included. Same shape as originate's fail500 (KS-1334, KS-730): log the thrown text server-side with
+ * the route named, answer the constant body.
+ */
+function fail500(res: Response, context: string, err: unknown): void {
+  // KS-1346: was `String(err)`, which rendered a thrown non-Error object as "[object Object]" and lost
+  // its content. Kam ruled 2026-09-27 that such a throw logs its TYPE and FIELD NAMES only. A thrown
+  // Error still logs `.message`, and thrown text is still logged verbatim: neither is in this ticket.
+  // KS-1771: describing the thrown value (a message getter, a Proxy trap, a revoked Proxy) and writing the log line (a logger that fails) can themselves throw. This line did both with no try of its
+  // own, so such a throw escaped fail500 and the constant 500 below was never sent: this handler is async, Express 4 does not catch its rejection, and the request got no answer at all. Describe the
+  // value in its own try and log in another (the shape PR 1754 gave platform.ts, KS-1524 a). The line is unchanged for every value that could be described before.
+  let described: string;
+  try {
+    described = err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err;
+  } catch {
+    described = 'thrown value that could not be described';
+  }
+  try {
+    logger.error(context, { error: described });
+  } catch {
+    // Nothing more can be said if the logger itself fails; the caller still gets the 500 below.
+  }
+  res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+}
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+/**
+ * KS-1645: the row the security service ACTUALLY lists (services/security/src/converters.ts:21-36, serialised by JSON). This interface used to name
+ * the keys the CSV wanted (timestamp, type, email, resource, outcome), which the upstream does not have, so five CSV columns came out empty on every
+ * row and `details` came out as "[object Object]". The ks745 stub row used the same assumed shape, which is why no cell saw it.
+ */
+interface AuditEntry {
+  id: string;
+  tenantId?: string;
+  userId?: string;
+  organizationId?: string;
+  action: string;
+  resourceType: string;
+  resourceId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  details?: Record<string, unknown>;
+  previousState?: Record<string, unknown>;
+  newState?: Record<string, unknown>;
+  success: boolean;
+  errorMessage?: string;
+  createdAt: string;
+}
+
+// KS-1645 item 1: the export asked the upstream once, with no limit, and got its default page of 50. It now pages with this limit and stops at this
+// bound. The bound is the size of the security service's in-memory window (services/security/src/index.ts:156, :161, :599: the newest 10,000 audit
+// rows platform-wide), so a larger bound could not return more rows anyway. `total` from the upstream counts only that window.
+const UPSTREAM_PAGE_LIMIT = 1000;
+const EXPORT_ROW_BOUND = 10_000;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const SECURITY_SERVICE_URL = process.env.SECURITY_SERVICE_URL || 'http://localhost:4005';
+
+// KS-1240: the fetch of the audit list carried no timeout, so a security service that never answered (or stalled its
+// body) held the export open with no bound. 60 s: the bound the generic proxy gives every other route to the security
+// service (`proxyTimeout` in routes/proxy.ts createServiceProxy). The signal also bounds the `response.json()` read that
+// follows it, which sits in the same try, so a stalled body is answered by the constant 502 like an unreachable service.
+const AUDIT_LIST_TIMEOUT_MS = 60_000;
+
+function escapeCSVField(value: string | undefined | null): string {
+  if (value == null) return '';
+  const str = String(value);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function formatDate(dateStr: string): string {
+  // Validate and normalize date input
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid date: ${dateStr}`);
+  }
+  return date.toISOString().split('T')[0];
+}
+
+// KS-1645: each column reads a key the upstream row really has. Before: timestamp, type, email, resource and outcome read keys that do not exist
+// (empty on every row) and details was String(object). `type` and `email` are dropped: the upstream has no source for them.
+const CSV_COLUMNS: Array<[string, (e: AuditEntry) => unknown]> = [
+  ['id', (e) => e.id],
+  ['timestamp', (e) => e.createdAt],
+  ['action', (e) => e.action],
+  ['userId', (e) => e.userId],
+  ['ipAddress', (e) => e.ipAddress],
+  ['userAgent', (e) => e.userAgent],
+  ['resource', (e) => e.resourceType],
+  ['resourceId', (e) => e.resourceId],
+  ['details', (e) => (e.details == null ? '' : JSON.stringify(e.details))],
+  ['outcome', (e) => (e.success === true ? 'success' : e.success === false ? 'failure' : '')],
+];
+
+function auditEntriesToCSV(entries: AuditEntry[]): string {
+  const headerRow = CSV_COLUMNS.map(([name]) => name).join(',');
+  const dataRows = entries.map((entry) => CSV_COLUMNS.map(([, read]) => escapeCSVField(read(entry) as string | undefined | null)).join(','));
+  return [headerRow, ...dataRows].join('\n');
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/admin/audit/export
+// ---------------------------------------------------------------------------
+
+router.get('/export', async (req: Request, res: Response) => {
+  try {
+    // Auth check — admin only
+    const user = (req as any).user;
+    if (!user) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+      return;
+    }
+
+    const adminRoles = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN', 'ORG_ADMIN'];
+    if (!adminRoles.includes(user.role)) {
+      res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
+      return;
+    }
+
+    // Parse query parameters
+    const format = (req.query.format as string) || 'json';
+    const fromDate = req.query.from as string;
+    const toDate = req.query.to as string;
+    // KS-1645 item 3b: `type` is no longer read. The security service never applied it (GET /api/audit does not destructure it and its rows carry no
+    // type field), so the 400 for an unknown type that PR 1616 added validated a filter that did not exist. An extra `type` query parameter is ignored like any other.
+
+    if (!['csv', 'json'].includes(format)) {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Format must be "csv" or "json"' } });
+      return;
+    }
+
+    if (!fromDate || !toDate) {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Both "from" and "to" date parameters are required' } });
+      return;
+    }
+
+    let formattedFrom: string;
+    let formattedTo: string;
+
+    try {
+      formattedFrom = formatDate(fromDate);
+      formattedTo = formatDate(toDate);
+    } catch {
+      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid date format. Use YYYY-MM-DD.' } });
+      return;
+    }
+
+    // Fetch audit logs from security service
+    // KS-1645 item 2: the upstream compares `createdAt <= new Date(to)` (services/security/src/index.ts:912) and a bare YYYY-MM-DD parses as UTC midnight,
+    // so sending `to` as the plain date dropped every row of the `to` day after 00:00:00.000Z. The last millisecond of that UTC day is sent instead; the
+    // filename and meta still carry the plain date the caller named.
+    const upstreamTo = `${formattedTo}T23:59:59.999Z`;
+
+    const authHeader = req.headers.authorization;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (authHeader) headers['Authorization'] = authHeader;
+
+    let entries: AuditEntry[] = [];
+    let upstreamTotal = 0;
+
+    try {
+      // KS-1645 item 1: page the upstream (it was asked once, with no limit, and answered its default 50). Each pass is bounded by the same 60 s signal
+      // as before; the loop ends at the upstream's total, at an empty page, or at EXPORT_ROW_BOUND rows.
+      for (;;) {
+        const queryParams = new URLSearchParams({ from: formattedFrom, to: upstreamTo, limit: String(UPSTREAM_PAGE_LIMIT), offset: String(entries.length) });
+        const response = await fetch(
+          // KS-745: the security service lists at /api/audit (no /logs route — that hit /api/audit/:id with id "logs" → 404)
+          `${SECURITY_SERVICE_URL}/api/audit?${queryParams.toString()}`,
+          { method: 'GET', headers, signal: AbortSignal.timeout(AUDIT_LIST_TIMEOUT_MS) },
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          res.status(response.status).json({
+            success: false,
+            error: {
+              code: 'BAD_GATEWAY',
+              message: (errorData as any)?.error || `Security service returned ${response.status}`,
+            },
+          });
+          return;
+        }
+        const data = await response.json();
+        // KS-745: the list answers { success, data: { logs, total, limit, offset } } — the array is data.data.logs
+        const page: AuditEntry[] = (data as any)?.data?.logs ?? (data as any)?.logs ?? [];
+        const reported = Number((data as any)?.data?.total ?? (data as any)?.total);
+        entries = entries.concat(page);
+        // KS-1645: an upstream that reports no total is taken to have sent everything it has (the real one always reports it).
+        upstreamTotal = Number.isFinite(reported) ? reported : entries.length;
+        if (page.length === 0 || entries.length >= upstreamTotal || entries.length >= EXPORT_ROW_BOUND) break;
+      }
+    } catch (err: any) {
+      // KS-1410: log the failed fetch server-side, naming the route. Before this the catch logged nothing and sent the
+      // thrown text to the client in the 502 body instead (see `message` below).
+      // WHY this expression: Kam's ruling of 2026-09-27 (card secuura-ks1346-logging-thrown-objects-leaks-secrets => a): log a thrown object's TYPE and FIELD NAMES only.
+      // KS-1771: describing the thrown value and writing the log line can themselves throw (a message getter, a Proxy trap, a revoked Proxy, a logger that fails). Here that throw left this catch for the
+      // outer one at the foot of the handler, so the request was answered by fail500's 500 under a different log context, not by the 502 below. Describe the value in its own try and log in another, so the
+      // constant 502 is always sent (the shape PR 1754 gave platform.ts, KS-1524 a). The line is unchanged for every value that could be described before.
+      let described: string;
+      try {
+        described = err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err;
+      } catch {
+        described = 'thrown value that could not be described';
+      }
+      try {
+        logger.error('Audit export could not reach the security service (GET /api/admin/audit/export)', { error: described });
+      } catch {
+        // Nothing more can be said if the logger itself fails; the caller still gets the 502 below.
+      }
+      res.status(502).json({
+        success: false,
+        error: {
+          code: 'BAD_GATEWAY',
+          // KS-1410: a constant message. It was `Failed to reach security service: ${err.message}`, which put the thrown
+          // text (a driver message, an internal host:port) in the 502 body in every environment.
+          message: 'Failed to reach security service',
+        },
+      });
+      return;
+    }
+
+    // KS-1645 item 1: a page may overshoot the bound (an upstream that ignores the limit); cut to it, and say so below.
+    if (entries.length > EXPORT_ROW_BOUND) entries = entries.slice(0, EXPORT_ROW_BOUND);
+    // KS-1645 item 1: true when the file holds fewer rows than the upstream reported, so a short export says it is short (JSON meta, CSV response header).
+    const truncated = entries.length < upstreamTotal;
+
+    // Generate filename (KS-1645 item 3b: no `type` in it any more; it named a filter nobody applied)
+    const filename = `audit-logs_${formattedFrom}_${formattedTo}`;
+
+    if (format === 'csv') {
+      const csv = auditEntriesToCSV(entries);
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      // KS-1645 item 1: a CSV has no meta, so a truncated file says so in a header.
+      if (truncated) res.setHeader('X-Audit-Export-Truncated', 'true');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
+      res.send(csv);
+      return;
+    }
+
+    // JSON format
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}.json"`);
+    res.json({
+      success: true,
+      meta: {
+        from: formattedFrom,
+        to: formattedTo,
+        totalEntries: entries.length,
+        // KS-1645 item 1: the upstream's reported total and whether this file holds fewer rows than that. Additive fields; `type` is gone (item 3b).
+        total: upstreamTotal,
+        truncated,
+        exportedAt: new Date().toISOString(),
+      },
+      data: entries,
+    });
+  } catch (err: any) {
+    fail500(res, 'Audit export failed (GET /api/admin/audit/export)', err);
+  }
+});
+
+export default router;

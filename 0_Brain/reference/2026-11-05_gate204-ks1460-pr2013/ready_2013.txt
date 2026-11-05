@@ -1,0 +1,40 @@
+=========== [INBOUND] 2026-11-05T08:25 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1460 PR 2013 (Seat J 16th)
+[Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1460 PR 2013 (Seat J 16th)
+Seat J 16th
+
+READY FOR GATE: KS-1460 (rows 4 and 6 + the row-1 log), PR 2013. Tier 1 proposed.
+
+- PR: 2013, https://github.com/Secuura/Distributed_Secuura/pull/2013, base develop.
+- Branch: feature/ks-1460-social-level-raise-and-rehash-log-confirm-the-write.
+- Head, read from origin by ls-remote in this action: ea1952fa00d7f942edb298af98728d20497e53a4. One commit on develop 5fc5569ed96a.
+  - At the push develop was c9cb07738cf6. The driver's develop gate measured 12 files moved, 0 shared with my 6 paths, planted control fired.
+- Files (6, +436/-4):
+  - routes/auth.ts (+21/-4);
+  - new __tests__/ks1460-social-level-raise-confirms-the-write.test.ts (229);
+  - new __tests__/ks1460-rehash-log-is-truthful.test.ts (163);
+  - __tests__/ks795-social-link-verified-email.test.ts (+6, the mock only; no assertion changed);
+  - fragment pair KS-1460-social-level-raise-and-rehash-log-confirm-the-write.html.
+- Ticket comment: KS-1460 a82797b0, read back (body equal, 0 mention nodes, In Progress unchanged). Census: PR 2013 attached to KS-1460; KS-1672 untouched. The PR title, body and commit carry KS-1460 only.
+
+WHAT IT DOES (your 06:05:32Z table)
+- Row 4 (social callback) and row 6 (POST /social/link): the SOCIAL raise goes through updateUserOrThrow. A write that did not land answers 503 before any session, token or success answer.
+- Row 1: the "rehashed" info line only when the write landed, and a warn otherwise. Log only; the login is unchanged.
+- Rows 2, 3 and 5 are left, with reasons in the PR. Rows 3 and 5 are KS-1672's, named in the PR as plain text.
+
+TESTS (local Mac, unit level, vitest 4.1.12, Node v26.8.1, not LTS)
+- Red first on develop's auth.ts: 2 of 6 and 1 of 2 failed, every one by assertion, 0 TS errors. All controls passed.
+- Green: 6 of 6 and 2 of 2.
+- Mutants: 7 of 7 admissible, all killed by assertion.
+- Social and login harnesses: 33 files, 423 of 423 tests.
+- Whole auth suite:
+  - develop: 1,628 passed, 3 failed, 56 skipped of 1,687;
+  - branch: 1,693 of 1,695;
+  - every failure is a load timeout (ks949; on develop also the auth.integration hook).
+- tsc rc 0; eslint clean; test-type ratchet 0 new; docs check OK, with a planted defect failing and a restore.
+- Pre-push hook, quoted: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." and "This is NOT a pass."
+  - The 3 skips: no local stack. Leg 14: 116 of 116. Leg 16: 0 new.
+  - Push rc 0, 1,179 s, VERIFIED by ls-remote 08:23:50Z.
+
+NOT DONE / NOT COVERED: a real database 0-row UPDATE, a real social provider, a booted service, the four platform suites, KS-1672's persistence. No merge, no deploy; the ticket stays In Progress.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 50  SEEN:     1808  BATCH: /private/tmp/wed_newmail/batch_20261105T082611Z.txt

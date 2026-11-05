@@ -1,0 +1,255 @@
+
+ RUN  v4.1.12 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate202-ks1645-pr2012/clone_ci/Blockchain/Dev/services/api-gateway
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts (12 tests | 10 failed) 115ms
+     × RED KS-1645 P1: 2,300 upstream rows are ALL exported, in pages of 1000 at offsets 0, 1000 and 2000; meta says 2,300 of 2,300 and not truncated 14ms
+     × RED KS-1645 P2: 10,500 upstream rows stop at the 10,000 bound; JSON meta says truncated: true with total 10,500 17ms
+     × RED KS-1645 P2b: the same 10,500 rows as CSV: 10,000 data rows under the header, and the X-Audit-Export-Truncated: true response header 17ms
+     × RED KS-1645 P3: one short page says truncated: false in JSON and sets NO truncation header in CSV 1ms
+     × RED KS-1645 P4: a page that fails after the first is the upstream's status as a 503 BAD_GATEWAY, never a short 200 4ms
+     × RED KS-1645 B1: rows on the `to` day (10:00Z and the last millisecond) are exported, the day after is not; the upstream is sent the end of that day; filename and meta keep the plain date 1ms
+     × RED KS-1645 T1: any `type` value, known or not, is answered 200 and never forwarded, named in the filename, or put in meta 1ms
+     × RED KS-1645 T2: with no `type` at all the request is the same: nothing about a type is sent or named 1ms
+     × RED KS-1645 C1: the header is exactly the ten real columns and a real-shaped row fills every one; a failed row says failure 1ms
+     × RED KS-1645 C2: a details value holding a comma and a quote stays ONE escaped field, not "[object Object]" 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 item 1 - the export pages the upstream and says when it is short > RED KS-1645 P1: 2,300 upstream rows are ALL exported, in pages of 1000 at offsets 0, 1000 and 2000; meta says 2,300 of 2,300 and not truncated
+AssertionError: expected [ 200, 50, 50, undefined, undefined ] to deeply equal [ 200, 2300, 2300, 2300, false ]
+
+- Expected
++ Received
+
+  [
+    200,
+-   2300,
+-   2300,
+-   2300,
+-   false,
++   50,
++   50,
++   undefined,
++   undefined,
+  ]
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:96:106
+     94|     const res = await getText(`/api/admin/audit/export?${RANGE}&format…
+     95|     const body = JSON.parse(res.text) as Body;
+     96|     expect([res.status, body.data.length, body.meta.totalEntries, body…
+       |                                                                                                          ^
+     97|     expect(urls.map((u) => [param(u, 'limit'), param(u, 'offset')])).t…
+     98|     expect(new Set(body.data.map((e) => e.id)).size, 'no row twice, no…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 item 1 - the export pages the upstream and says when it is short > RED KS-1645 P2: 10,500 upstream rows stop at the 10,000 bound; JSON meta says truncated: true with total 10,500
+AssertionError: expected [ 200, 50, 50, undefined, undefined ] to deeply equal [ 200, 10000, 10000, 10500, true ]
+
+- Expected
++ Received
+
+  [
+    200,
+-   10000,
+-   10000,
+-   10500,
+-   true,
++   50,
++   50,
++   undefined,
++   undefined,
+  ]
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:105:106
+    103|     const res = await getText(`/api/admin/audit/export?${RANGE}&format…
+    104|     const body = JSON.parse(res.text) as Body;
+    105|     expect([res.status, body.data.length, body.meta.totalEntries, body…
+       |                                                                                                          ^
+    106|     expect(urls.length, 'ten pages, then the bound stops the loop').to…
+    107|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 item 1 - the export pages the upstream and says when it is short > RED KS-1645 P2b: the same 10,500 rows as CSV: 10,000 data rows under the header, and the X-Audit-Export-Truncated: true response header
+AssertionError: expected [ 200, undefined, 50 ] to deeply equal [ 200, 'true', 10000 ]
+
+- Expected
++ Received
+
+  [
+    200,
+-   "true",
+-   10000,
++   undefined,
++   50,
+  ]
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:112:80
+    110|     upstreamRows = manyRows(10_500);
+    111|     const res = await getText(`/api/admin/audit/export?${RANGE}&format…
+    112|     expect([res.status, res.truncatedHeader, res.text.split('\n').leng…
+       |                                                                                ^
+    113|   });
+    114|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 item 1 - the export pages the upstream and says when it is short > RED KS-1645 P3: one short page says truncated: false in JSON and sets NO truncation header in CSV
+AssertionError: expected [ 3, undefined, undefined ] to deeply equal [ 3, 3, false ]
+
+- Expected
++ Received
+
+  [
+    3,
+-   3,
+-   false,
++   undefined,
++   undefined,
+  ]
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:118:70
+    116|     upstreamRows = manyRows(3);
+    117|     const json = JSON.parse((await getText(`/api/admin/audit/export?${…
+    118|     expect([json.data.length, json.meta.total, json.meta.truncated]).t…
+       |                                                                      ^
+    119|     const csv = await getText(`/api/admin/audit/export?${RANGE}&format…
+    120|     expect([csv.status, csv.truncatedHeader]).toEqual([200, undefined]…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 item 1 - the export pages the upstream and says when it is short > RED KS-1645 P4: a page that fails after the first is the upstream's status as a 503 BAD_GATEWAY, never a short 200
+AssertionError: expected [ 200, undefined ] to deeply equal [ 503, 'BAD_GATEWAY' ]
+
+- Expected
++ Received
+
+  [
+-   503,
+-   "BAD_GATEWAY",
++   200,
++   undefined,
+  ]
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:127:61
+    125|     failOffset = 1000;
+    126|     const res = await getText(`/api/admin/audit/export?${RANGE}&format…
+    127|     expect([res.status, JSON.parse(res.text)?.error?.code]).toEqual([5…
+       |                                                             ^
+    128|   });
+    129| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 item 2 - `to` includes its whole UTC day > RED KS-1645 B1: rows on the `to` day (10:00Z and the last millisecond) are exported, the day after is not; the upstream is sent the end of that day; filename and meta keep the plain date
+AssertionError: CONTROL inside the cell: the row at 2026-09-03T00:00:00.000Z stays out: expected [ 'audit-ks1645-1' ] to deeply equal [ 'audit-ks1645-1', …(2) ]
+
+- Expected
++ Received
+
+  [
+    "audit-ks1645-1",
+-   "audit-ks1645-2",
+-   "audit-ks1645-3",
+  ]
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:136:114
+    134|     const res = await getText(`/api/admin/audit/export?${RANGE}&format…
+    135|     const body = JSON.parse(res.text) as Body;
+    136|     expect(body.data.map((e) => e.id), 'CONTROL inside the cell: the r…
+       |                                                                                                                  ^
+    137|     expect(param(urls[0], 'to')).toBe('2026-09-02T23:59:59.999Z');
+    138|     expect(param(urls[0], 'from')).toBe('2026-09-01');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 item 3 - the export claims no `type` filter it cannot apply (retires PR 1616's 400, which validated a filter that did not exist) > RED KS-1645 T1: any `type` value, known or not, is answered 200 and never forwarded, named in the filename, or put in meta
+AssertionError: type=auth: expected [ 200, 'auth', true, true ] to deeply equal [ 200, null, false, false ]
+
+- Expected
++ Received
+
+  [
+    200,
+-   null,
+-   false,
+-   false,
++   "auth",
++   true,
++   true,
+  ]
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:150:123
+    148|       const res = await getText(`/api/admin/audit/export?${RANGE}&form…
+    149|       const body = JSON.parse(res.text) as Body;
+    150|       expect([res.status, param(urls[0], 'type'), 'type' in body.meta,…
+       |                                                                                                                           ^
+    151|     }
+    152|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 item 3 - the export claims no `type` filter it cannot apply (retires PR 1616's 400, which validated a filter that did not exist) > RED KS-1645 T2: with no `type` at all the request is the same: nothing about a type is sent or named
+AssertionError: expected [ 200, 'all', true ] to deeply equal [ 200, null, false ]
+
+- Expected
++ Received
+
+  [
+    200,
+-   null,
+-   false,
++   "all",
++   true,
+  ]
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:157:97
+    155|     upstreamRows = manyRows(2);
+    156|     const res = await getText(`/api/admin/audit/export?${RANGE}&format…
+    157|     expect([res.status, param(urls[0], 'type'), 'type' in (JSON.parse(…
+       |                                                                                                 ^
+    158|   });
+    159| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 CSV - every column reads a key the upstream row really has > RED KS-1645 C1: the header is exactly the ten real columns and a real-shaped row fills every one; a failed row says failure
+AssertionError: expected 'id,timestamp,type,action,userId,email…' to be 'id,timestamp,action,userId,ipAddress,…' // Object.is equality
+
+Expected: "id,timestamp,action,userId,ipAddress,userAgent,resource,resourceId,details,outcome"
+Received: "id,timestamp,type,action,userId,email,ipAddress,userAgent,resource,resourceId,details,outcome"
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:166:22
+    164|     upstreamRows = [row(1, '2026-09-01T10:00:00.000Z'), row(2, '2026-0…
+    165|     const lines = (await getText(`/api/admin/audit/export?${RANGE}&for…
+    166|     expect(lines[0]).toBe(HEADER);
+       |                      ^
+    167|     expect(lines[1]).toBe('audit-ks1645-1,2026-09-01T10:00:00.000Z,log…
+    168|     expect(lines[2].endsWith(',failure'), 'success: false is written a…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts > KS-1645 CSV - every column reads a key the upstream row really has > RED KS-1645 C2: a details value holding a comma and a quote stays ONE escaped field, not "[object Object]"
+AssertionError: expected 'audit-ks1645-1,,,login,u1,,203.0.113.…' not to contain '[object Object]'
+
+Expected: "[object Object]"
+Received: "audit-ks1645-1,,,login,u1,,203.0.113.9,agent,,r1,[object Object],"
+
+ ❯ src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:174:22
+    172|     upstreamRows = [row(1, '2026-09-01T10:00:00.000Z', { details: { no…
+    173|     const line = (await getText(`/api/admin/audit/export?${RANGE}&form…
+    174|     expect(line).not.toContain('[object Object]');
+       |                      ^
+    175|     expect(line).toContain('"{""note"":""a,\\""b\\""""}"');
+    176|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 2 passed (12)
+   Start at  19:21:23
+   Duration  352ms (transform 40ms, setup 53ms, import 83ms, tests 115ms, environment 0ms)
+
+rc=1
