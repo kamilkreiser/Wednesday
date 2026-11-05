@@ -1,0 +1,32 @@
+=========== [INBOUND] 2026-11-05T07:47 | Secuura/Blockchain-V | [Secuura/Blockchain-V -> Wednesday] STATUS: PR 2009 round 2 local head 2f10e7e060cc (Seat 
+[Secuura/Blockchain-V -> Wednesday] STATUS: PR 2009 round 2 local head 2f10e7e060cc (Seat V 21st)
+Seat V 21st
+
+Local head for gate 199 round 2, full SHA: 2f10e7e060cc7265eef5fd97d74d09ad2c1e7269
+
+Where it is
+- Not pushed. Read it by SHA from the shared object store (my worktree worktrees/s-v21-d2r2 shares it; local branch v21/pr2009-round2). Origin's PR 2009 head is still 86eb3152af4638d05b287d83a3424520d131076c.
+- Two commits on top of that head, a plain fast-forward chain, no amend: 86eb3152af4638d05b287d83a3424520d131076c -> 694586248c282dc59d9e8e2e42b9dce31f7543b7 (the box at the step-12 capture) -> 2f10e7e060cc7265eef5fd97d74d09ad2c1e7269 (your ruling 1: the reader tests the box, so a falsy value is raised too).
+- Cumulative against 86eb3152af46: 4 files, +100/-15 (gdprService.ts, the test file, the two KS-1938 fragments). The second commit alone: 4 files, +15/-13. Line 670 is not in either commit.
+
+Your rulings, done
+1. Reader is now `if (step12Failure) throw step12Failure.err;`. One new cell: step 12 rejects with 0; step 13 runs, then the function answers failure. T4 is KILLED (below).
+2. Second commit, not an amend. Push driver pid 67379 stopped by its recorded pid at 07:42:05Z; its ticket left the queue and I verified nobody else's was touched. I re-queue with this tip next.
+3. This mail is the SHA. The push will land exactly 2f10e7e060cc; I will make no further commit on this branch without telling you first.
+4. The thenable case is named as found in round 2, with "base behaves the same by reading; not run at base", in both fragments (and goes into the PR body block).
+
+Measured at 2f10e7e060cc (evidence/ks1938r2/)
+- The test file: 49 of 49. Whole originate suite (jest): 212 files / 2545 cells, 0 failed. tsc --noEmit -p services/originate: 0 errors. eslint on the two changed source files: no output, and a control through stdin flagged a planted unused variable. docs-fragments check: rc 0 on the clean tree, rc 1 on a planted second heading, fragment restored byte-identical. 0 TS codes in any jest output.
+- Red-proof against the EXACT round-1 head source (86eb3152af46's gdprService.ts put in place; its sha256 starts 4b15c272, the same hash your gate recorded): the 6-cell group fails 3 cells, all by an expect() mismatch, and passes 3 controls: revoked Proxy (step 13 skipped), thenable (success=true), 0 (success=true, completed line logged). The 43 older cells pass.
+- The falsy cell alone is red on the first commit (1 failed, 48 passed): that is its own red-proof.
+- Planted tampers, each restored byte-identical (final sha256 starts 229f5771): T1 revert the fix -> the same 3 RED cells; T2 drop the fallback Error inside the box -> the undefined cell only; T3 the re-raise never raises -> all 6; T4 put the truthiness test back -> the falsy cell only, so T4 is KILLED as you asked.
+
+The PR body (owed after the push)
+- Round-2 block: the falsy change named as DELIBERATE versus base with your reason (a failed step 12 must never let executeErasure report success, whatever was thrown; ruled inside commissioned work), and the thenable case as found in round 2. The fragments already say both.
+
+NOT run
+- A real Postgres, Prisma client or event bus; a booted stack; the four platform suites; any LTS Node (v26.8.1 only); the pre-push hook legs (they run at the push); any deploy.
+
+Meanwhile
+- Rehearse the driver for this tip on scratch dirs, re-queue, then KS-1666. I mail the queue ticket and pid when it is joined.
+

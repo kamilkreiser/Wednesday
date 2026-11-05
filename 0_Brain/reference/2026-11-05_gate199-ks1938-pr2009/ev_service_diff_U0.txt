@@ -1,0 +1,162 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/gdprService.ts b/Blockchain/Dev/services/originate/src/services/gdprService.ts
+index 860bd0015..c8f6cd58f 100644
+--- a/Blockchain/Dev/services/originate/src/services/gdprService.ts
++++ b/Blockchain/Dev/services/originate/src/services/gdprService.ts
+@@ -227 +227,9 @@ export async function recordConsent(
+-    logger.error('Failed to record consent', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: the thrown value is read inside its own try. Before, an unreadable one (a revoked Proxy, an Error whose message getter throws) threw HERE, and
++    // recordConsent rejected with that TypeError instead of the wrapped error below.
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Failed to record consent', { error: reason });
+@@ -242 +250,8 @@ export async function withdrawConsent(userId: string, purpose: string): Promise<
+-    logger.error('Failed to withdraw consent', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: read inside its own try. Before, an unreadable thrown value threw HERE and withdrawConsent rejected with that TypeError instead of answering false.
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Failed to withdraw consent', { error: reason });
+@@ -314 +329,8 @@ export async function createDSR(
+-    logger.error('Failed to create DSR', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: read inside its own try. Before, an unreadable thrown value threw HERE and createDSR rejected with that TypeError instead of the wrapped error below.
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Failed to create DSR', { error: reason });
+@@ -373,0 +396,14 @@ export async function updateDSRStatus(
++    // KS-1938: message and code are each read inside their own try. Before, an unreadable thrown value (a revoked Proxy throws on `instanceof` AND on `.code`)
++    // threw HERE, so updateDSRStatus rejected with that TypeError instead of rethrowing the original value below, and the log line was never written.
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    let code: unknown;
++    try {
++      code = err?.code;
++    } catch {
++      code = undefined;
++    }
+@@ -377,2 +413,2 @@ export async function updateDSRStatus(
+-      error: err instanceof Error ? err.message : String(err),
+-      code: err?.code,
++      error: reason,
++      code,
+@@ -934 +970,9 @@ async function executeErasureImpl(
+-      logger.warn('Failed to publish user.erased event (cascade may be incomplete)', { userId, error: err?.message });
++      // KS-1938: `err?.message` is read inside its own try (same read as before, so an ordinary value logs exactly what it logged). Before, an unreadable thrown value threw HERE,
++      // left the publish catch for the outer catch, and an erasure whose data steps had all run (and whose key was already destroyed) answered success false.
++      let reason: unknown;
++      try {
++        reason = err?.message;
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.warn('Failed to publish user.erased event (cascade may be incomplete)', { userId, error: reason });
+@@ -940 +984,9 @@ async function executeErasureImpl(
+-    logger.error('Erasure failed', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: read inside its own try. Before, an unreadable thrown value threw HERE and executeErasure rejected with that TypeError (the route answered 500 through fail500)
++    // instead of answering success false (the route's 200 "Erasure partially failed") as it does for an ordinary Error.
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Erasure failed', { error: reason });
+@@ -1001 +1053,9 @@ async function exportUserDataImpl(userId: string): Promise<Record<string, unknow
+-    logger.warn('User profile export failed', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938 (this and the five export catches below): read inside its own try. Before, an unreadable thrown value threw HERE and exportUserData rejected with that
++    // TypeError (the whole export answered 500) instead of leaving this section out and going on, as it does for an ordinary Error.
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('User profile export failed', { error: reason });
+@@ -1011 +1071,8 @@ async function exportUserDataImpl(userId: string): Promise<Record<string, unknow
+-    logger.warn('Consent export failed', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: read inside its own try (see the profile section above for the prior behaviour).
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Consent export failed', { error: reason });
+@@ -1021 +1088,8 @@ async function exportUserDataImpl(userId: string): Promise<Record<string, unknow
+-    logger.warn('Documents export failed', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: read inside its own try (see the profile section above for the prior behaviour).
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Documents export failed', { error: reason });
+@@ -1031 +1105,8 @@ async function exportUserDataImpl(userId: string): Promise<Record<string, unknow
+-    logger.warn('Shares export failed', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: read inside its own try (see the profile section above for the prior behaviour).
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Shares export failed', { error: reason });
+@@ -1041 +1122,8 @@ async function exportUserDataImpl(userId: string): Promise<Record<string, unknow
+-    logger.warn('Charge events export failed', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: read inside its own try (see the profile section above for the prior behaviour).
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Charge events export failed', { error: reason });
+@@ -1051 +1139,8 @@ async function exportUserDataImpl(userId: string): Promise<Record<string, unknow
+-    logger.warn('DSR export failed', { error: err instanceof Error ? err.message : String(err) });
++    // KS-1938: read inside its own try (see the profile section above for the prior behaviour).
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('DSR export failed', { error: reason });
+@@ -1609,0 +1705,8 @@ export async function executeErasureByExternalRef(
++      // KS-1938: the thrown value is read inside its own try (the guard is below the comment above on purpose: that comment describes the warn). Before, an unreadable one threw
++      // HERE, AFTER the irreversible blanking, and executeErasureByExternalRef rejected instead of completing without the hash, so the caller retried without bound.
++      let reason: string;
++      try {
++        reason = keyErr instanceof Error ? keyErr.message : String(keyErr);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+@@ -1611 +1714 @@ export async function executeErasureByExternalRef(
+-        connectorId, error: keyErr instanceof Error ? keyErr.message : String(keyErr),
++        connectorId, error: reason,
+@@ -1623,0 +1727,8 @@ export async function executeErasureByExternalRef(
++      // KS-1938: read inside its own try. Before, an unreadable thrown value threw HERE, after the irreversible blanking, and the function rejected where the FAIL-SOFT note
++      // above says it must report completed (the caller retries without bound against a 5xx for an erasure that DID complete).
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+@@ -1626 +1737 @@ export async function executeErasureByExternalRef(
+-        error: err instanceof Error ? err.message : String(err),
++        error: reason,

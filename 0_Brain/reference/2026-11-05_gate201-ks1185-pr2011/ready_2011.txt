@@ -1,0 +1,44 @@
+=========== [INBOUND] 2026-11-05T07:43 | Secuura/Blockchain-T | [Secuura/Blockchain-T -> Wednesday] READY FOR GATE KS-1185 (Seat T 11th)
+[Secuura/Blockchain-T -> Wednesday] READY FOR GATE KS-1185 (Seat T 11th)
+Seat T 11th
+
+READY FOR GATE: KS-1185 (F2 + F3, the workflow-approve forward)
+
+- PR: 2011, https://github.com/Secuura/Distributed_Secuura/pull/2011
+- Branch: feature/ks-1185-ks-1183-gate-follow-ups-validate-the-approve-forward-timeout
+- Head, read from origin by ls-remote in this action (07:43:06Z): 40d3f2470d4a7d4e148c55e7fdc8c6c211015bab
+- Base: develop 5fc5569ed96ac61f64823cc9e1fa841899aa1f62. Develop now: cb1cadfa2ee4698b41445e9a6aa3c4ec5b73e028.
+- Ticket comment naming the PR: df2b93ba. KS-1185 stays In Progress. Census after the create: PR 2011 is attached to KS-1185 only; KS-1183 (Done), KS-256 and KS-441 are unchanged.
+- Tier proposal: 2 (a doc comment, a log-line level and text; no auth or response change).
+
+FILES (4)
+- services/api-gateway/src/routes/verification.ts (+23/-1): the doc comment on ORIGINATE_FORWARD_TIMEOUT_MS; decidedByStatus; the branch in the request's 'error' listener.
+- New src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts (7 cells).
+- 2 docs fragments.
+
+PICKS, AS YOU ACCEPTED THEM
+- F2: a doc comment plus the 1xx-drip PIN cell; no wall-clock bound.
+- F3: the late error is worded for what happened (a warn line with the status that decided the forward); the response is unchanged.
+
+TESTS (2026-11-05, macOS host, Node v26.8.1, not LTS 24)
+- On develop 5fc5569ed96a, the new file: 3 failed / 4 passed. The 3 F3 cells are red by assertion. The F2 PIN is green, because it pins today's behaviour. The 3 controls are green.
+- Branch: the four approve-forward files (ks1185-f2-f3, ks1087, ks1185-f1, ks1185 default bound) 47/47, run before and after the symlink quarantine.
+- Whole api-gateway suite (--maxWorkers=2, vitest JSON): 155 files / 1630, 0 failed. Develop is 154 / 1623. That run had the stray node_modules symlink present (byte-identical root lock).
+- Mutants 6/6 killed: the F3 branch disabled; the F3 branch inverted; a wall-clock bound (it reddens the PIN); the warn line without its status; the warn line at error level; the status never recorded. Each product file was restored and checked by sha256.
+- tsc --noEmit rc 0. check:test-types (api-gateway): 0 new, 155 test files.
+- eslint 0 messages before and after.
+- docs-fragments check: OK, and a planted number token in the cheat fragment FAILs it.
+- Pre-push hook: push rc 0 in 1226 s. "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 need a stack. Not a pass.
+- Develop gate at the push: develop unmoved; 16 open PRs, none touches the 4 paths.
+
+WHAT IT DID NOT DO
+- No Schemathesis, Akto, Playwright or k6.
+- No real originate, no nginx in front.
+- No box.
+- No wall-clock bound.
+- No change to the 'end' listener's info line. It still says "document forwarded" on a non-2xx that ends normally; that line is outside F3.
+- No merge, no deploy.
+
+CANDIDATE (not filed): the approve forward's 'end' listener logs "Workflow approved — document forwarded to originate" whatever the status. A 401 whose body ends normally logs that line, then the route answers 502. Same class as F3, different line. Yours to route.
+
+Next: I wrap per your 06:35:46Z completion check.

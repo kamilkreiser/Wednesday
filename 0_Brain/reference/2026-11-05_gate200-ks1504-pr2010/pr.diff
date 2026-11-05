@@ -1,0 +1,107 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1480-no-allowance-warning-fields-are-escaped.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1480-no-allowance-warning-fields-are-escaped.test.ts
+index 24333da0d..435a1a02b 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1480-no-allowance-warning-fields-are-escaped.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1480-no-allowance-warning-fields-are-escaped.test.ts
+@@ -36,7 +36,7 @@ import { resolve } from 'node:path';
+ import ts from 'typescript';
+ import { enforceClientRateLimit } from '../middleware/rateLimitEnforce';
+ 
+-const EXPECTED_CELLS = 13;
++const EXPECTED_CELLS = 15; // KS-1504: was 13; +O5 (edge whitespace) and +O6 (lone backslash), so the completeness cell below still counts every graded cell
+ let CELLS_RUN = 0;
+ 
+ function makeRes() {
+@@ -120,6 +120,51 @@ describe('KS-1480 O — ordinary values are written exactly as before', () => {
+     const again = await warnFor({ tenantId: 'ks1480-tenant-8', connectorId: 'ks1480-c8\nx' });
+     expect([a.length, b.length, again.length]).toEqual([1, 1, 0]);
+   });
++
++  // KS-1504 n2 (the KS-1496 gate's note on #1487): "ordinary ids are written byte for byte" was pinned for the characters the escape class
++  // touches but not for edge whitespace, so a final `.trim()` on logField (the gate's X5) or a trim before the JSON step (E1) stayed green
++  // and silently dropped a trailing space from an id. Prior behaviour: no cell had a leading or trailing space in a principal or tenant.
++  // Each variant uses its own tenant so no two share a throttle slot (the warning is once per bucket per 30 s).
++  it('PIN KS-1504 O5 — a leading or trailing space in a principal or a tenant is written as typed (the line keeps the space; a trim would drop it)', async () => {
++    CELLS_RUN += 1;
++    const trailingPrincipal = await warnFor({ tenantId: 'ks1504-o5-t1', connectorId: 'ks1504-o5-c1 ' });
++    const leadingPrincipal = await warnFor({ tenantId: 'ks1504-o5-t2', connectorId: ' ks1504-o5-c2' });
++    const leadingTenant = await warnFor({ tenantId: ' ks1504-o5-t3', connectorId: 'ks1504-o5-c3' });
++    const trailingTenant = await warnFor({ tenantId: 'ks1504-o5-t4 ', connectorId: 'ks1504-o5-c4' });
++    for (const out of [trailingPrincipal, leadingPrincipal, leadingTenant, trailingTenant]) expect(out, 'one request, one warning').toHaveLength(1);
++    expect(trailingPrincipal[0], 'trailing space on the principal').toContain('machine caller ks1504-o5-c1  (api_key, tenant ks1504-o5-t1)');
++    expect(leadingPrincipal[0], 'leading space on the principal').toContain('machine caller  ks1504-o5-c2 (api_key, tenant ks1504-o5-t2)');
++    expect(leadingTenant[0], 'leading space on the tenant').toContain('machine caller ks1504-o5-c3 (api_key, tenant  ks1504-o5-t3)');
++    expect(trailingTenant[0], 'trailing space on the tenant').toContain('machine caller ks1504-o5-c4 (api_key, tenant ks1504-o5-t4 )');
++    // CONTROL: the same fragments with the space trimmed away are NOT in the lines, so the assertions above can tell a trimmed line from a typed one.
++    expect(trailingPrincipal[0], 'CONTROL: the trimmed principal fragment is absent').not.toContain('machine caller ks1504-o5-c1 (api_key');
++    expect(leadingTenant[0], 'CONTROL: the trimmed tenant fragment is absent').not.toContain('(api_key, tenant ks1504-o5-t3)');
++  });
++
++  // KS-1504 n3 (same gate note): P3 pins the double quote and "typed differs from real", not the backslash on its own, so leaving the backslash
++  // unescaped while the quote stayed escaped (the gate's Q4) kept P3 green. Prior behaviour: no cell asserted a LONE backslash is written doubled.
++  it('PIN KS-1504 O6 — a lone backslash is written as a double backslash, and two typed backslashes as four (so the two never read alike)', async () => {
++    CELLS_RUN += 1;
++    /** How many consecutive backslash characters follow `prefix` in `line`; -1 when the prefix is absent. */
++    const backslashRunAfter = (line: string, prefix: string): number => {
++      const at = line.indexOf(prefix);
++      if (at < 0) return -1;
++      let n = 0;
++      while (line[at + prefix.length + n] === '\\') n += 1;
++      return n;
++    };
++    // CONTROLS first: the reader must be able to see one, two and no backslash, or a green below means nothing.
++    expect(backslashRunAfter('p\\x', 'p'), 'CONTROL: the reader sees one backslash').toBe(1);
++    expect(backslashRunAfter('p\\\\x', 'p'), 'CONTROL: and two').toBe(2);
++    expect(backslashRunAfter('q', 'p'), 'CONTROL: and an absent prefix').toBe(-1);
++    const lonePrincipal = await warnFor({ tenantId: 'ks1504-o6-t1', connectorId: 'ks1504-o6-c1\\x' });
++    const loneTenant = await warnFor({ tenantId: 'ks1504-o6-t2\\', connectorId: 'ks1504-o6-c2' });
++    const typedPair = await warnFor({ tenantId: 'ks1504-o6-t3', connectorId: 'ks1504-o6-c3\\\\x' });
++    for (const out of [lonePrincipal, loneTenant, typedPair]) expect(out, 'one request, one warning').toHaveLength(1);
++    expect(backslashRunAfter(lonePrincipal[0], 'machine caller ks1504-o6-c1'), 'one typed backslash in a principal is written as two').toBe(2);
++    expect(backslashRunAfter(loneTenant[0], 'tenant ks1504-o6-t2'), 'one typed backslash at the end of a tenant is written as two').toBe(2);
++    expect(backslashRunAfter(typedPair[0], 'machine caller ks1504-o6-c3'), 'two typed backslashes are written as four, so they cannot read as the lone one').toBe(4);
++  });
+ });
+ 
+ // -----------------------------------------------------------------------------
+diff --git a/Projects Documents/fragments/cheat/KS-1504-pin-edge-whitespace-and-lone-backslash-in-the-no-allowance-warning.html b/Projects Documents/fragments/cheat/KS-1504-pin-edge-whitespace-and-lone-backslash-in-the-no-allowance-warning.html
+new file mode 100644
+index 000000000..6443582ae
+--- /dev/null
++++ b/Projects Documents/fragments/cheat/KS-1504-pin-edge-whitespace-and-lone-backslash-in-the-no-allowance-warning.html	
+@@ -0,0 +1,20 @@
++<h2>The no-allowance warning's edge whitespace and lone backslash are pinned &mdash; KS-1504</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>What to know.</strong></td><td> Two new cells in <code>ks1480-no-allowance-warning-fields-are-escaped.test.ts</code> (<code>O5</code>, <code>O6</code>) pin that a leading or trailing space in a principal or tenant is written as typed, and that a lone backslash is written as two. Tests only: <code>rateLimitEnforce.ts</code> is unchanged, so nothing deploys. A final <code>.trim()</code> on <code>logField</code>, a trim before the JSON step, or a single (unescaped) backslash now turns a cell red.
++    </td></tr></table>
++</div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> Node 24 (these runs were on v26.8.1), the four platform suites, the push hook's Docker legs. The optional item 2 of the ticket (export a frozen set or predicate) is not built.
++    </td></tr></table>
++</div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks1480-no-allowance-warning-fields-are-escaped.test.ts   # 16 tests, 15 graded cells
++cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run   # 1625 tests, 154 files
++node Blockchain/Dev/scripts/docs-fragments.mjs check</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>2</strong> (O5, O6); each green on develop's product, red under its mutant (X5/E1 for O5, Q4 for O6)</td></tr>
++<tr><td>old ks1480 suite under the mutants</td><td>X5: 14 of 14 green; E1: 14 of 14 green; Q4: red on O3 only</td></tr>
++<tr><td>api-gateway suite</td><td>before <strong>1623 passed, 0 failed</strong> (154 files); after <strong>1625 passed, 0 failed</strong> (154 files)</td></tr>
++<tr><td>test-type ratchet</td><td>25 errors, 25 in the baseline, 0 new, 0 stale</td></tr>
++<tr><td>host and tools</td><td>Apple Silicon (arm64) Mac, Darwin 27.0.0; Node v26.8.1; vitest 4.1.12</td></tr>
++</table>
+diff --git a/Projects Documents/fragments/flow/KS-1504-pin-edge-whitespace-and-lone-backslash-in-the-no-allowance-warning.html b/Projects Documents/fragments/flow/KS-1504-pin-edge-whitespace-and-lone-backslash-in-the-no-allowance-warning.html
+new file mode 100644
+index 000000000..ec1cff810
+--- /dev/null
++++ b/Projects Documents/fragments/flow/KS-1504-pin-edge-whitespace-and-lone-backslash-in-the-no-allowance-warning.html	
+@@ -0,0 +1,10 @@
++<h2><!--n-->. The no-allowance warning's edge whitespace and lone backslash are pinned: cells O5 and O6 in the KS-1480 suite (KS-1504)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this changes.</strong></td><td> Tests only. <code>Blockchain/Dev/services/api-gateway/src/__tests__/ks1480-no-allowance-warning-fields-are-escaped.test.ts</code> gains two cells in its <code>O</code> group, items 3 and 4 of KS-1504 (the KS-1496 gate's notes n2 and n3). <strong>O5:</strong> a leading or trailing space in a principal or a tenant is written to the warning as typed (four variants, each with its own tenant so no two share a throttle slot), with controls that the trimmed fragment is absent. <strong>O6:</strong> a lone backslash is written as two (in a principal, and at the end of a tenant), and two typed backslashes as four, read by a helper that is itself checked against one, two and no backslash. The completeness count <code>EXPECTED_CELLS</code> moves from 13 to 15.
++    </td></tr><tr><td><strong>What does not change:</strong> <code>src/middleware/rateLimitEnforce.ts</code> is untouched (blob <code>cc5a35e68114</code>, equal to develop's), so there is no deploy surface. Item 1 of the ticket (the product change, <code>logField(user.authMethod)</code>) landed earlier in PR 1584. <strong>Not built:</strong> item 2, exporting a frozen set or a predicate so a test can read runtime membership; the ticket marks it optional.
++    </td></tr><tr><td><strong>Why these two.</strong> Before this change no cell had a leading or trailing space in a principal or tenant, so a final <code>.trim()</code> on <code>logField</code> (gate mutant X5) or a trim before the JSON step (E1) stayed green and silently dropped a trailing space from an id. P3 pins the double quote and the typed-versus-real difference, not the backslash on its own, so leaving the backslash single while the quote stayed escaped (Q4) kept P3 green.
++    </td></tr></table>
++<h3><!--n-->.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Each cell is green on the product and red under its own mutant; the old suite does not see X5 or E1.</strong></td><td> <strong>Mutants applied to the product file in a scratch clone, restored to develop's blob after each run (the script prints the hash check):</strong> X5 gives O5 red and the old ks1480 suite 14 of 14 green; E1 the same; Q4 gives O6 red and O3 red, and the old suite red only on O3 (the indirect catch the ticket names). P3 stays green under Q4, as the ticket says. The unmutated run is 16 of 16 (new file), 14 of 14 (old file), 6 of 6 (ks1504 file).
++    </td></tr><tr><td><strong>Whole suite:</strong> api-gateway before <strong>1623 passed, 0 failed</strong> (154 files); after <strong>1625 passed, 0 failed</strong> (154 files): +2 cells, +0 files. The test-type ratchet (leg 16) for api-gateway reads 25 errors, all 25 in the baseline, 0 new, 0 stale, 154 test files examined. eslint on the changed file is clean, and a planted <code>debugger</code> statement makes the same command fail (control).
++    </td></tr><tr><td><strong>Host and versions:</strong> an Apple Silicon (arm64) Mac, Darwin 27.0.0, shared with other seats; Node v26.8.1 (the repo's stated LTS line is 24, so these figures were NOT measured on Node 24); vitest 4.1.12. Not run: the four platform suites and the push hook's Docker legs.
++    </td></tr></table>

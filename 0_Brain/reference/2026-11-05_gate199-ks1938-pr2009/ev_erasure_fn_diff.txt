@@ -1,0 +1,24 @@
+351c351,359
+<       logger.warn('Failed to publish user.erased event (cascade may be incomplete)', { userId, error: err?.message });
+---
+>       // KS-1938: `err?.message` is read inside its own try (same read as before, so an ordinary value logs exactly what it logged). Before, an unreadable thrown value threw HERE,
+>       // left the publish catch for the outer catch, and an erasure whose data steps had all run (and whose key was already destroyed) answered success false.
+>       let reason: unknown;
+>       try {
+>         reason = err?.message;
+>       } catch {
+>         reason = 'unreadable thrown value';
+>       }
+>       logger.warn('Failed to publish user.erased event (cascade may be incomplete)', { userId, error: reason });
+357c365,373
+<     logger.error('Erasure failed', { error: err instanceof Error ? err.message : String(err) });
+---
+>     // KS-1938: read inside its own try. Before, an unreadable thrown value threw HERE and executeErasure rejected with that TypeError (the route answered 500 through fail500)
+>     // instead of answering success false (the route's 200 "Erasure partially failed") as it does for an ordinary Error.
+>     let reason: string;
+>     try {
+>       reason = err instanceof Error ? err.message : String(err);
+>     } catch {
+>       reason = 'unreadable thrown value';
+>     }
+>     logger.error('Erasure failed', { error: reason });

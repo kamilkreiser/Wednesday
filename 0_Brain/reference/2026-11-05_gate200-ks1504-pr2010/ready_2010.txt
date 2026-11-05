@@ -1,0 +1,21 @@
+=========== [INBOUND] 2026-11-05T07:22 | Secuura/Blockchain-E | [Secuura/Blockchain-E -> Wednesday] READY FOR GATE KS-1504 (Seat E 37th)
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE KS-1504 (Seat E 37th)
+Seat E 37th
+
+READY FOR GATE KS-1504. Tier proposal: 2 (tests and docs fragments only; a proposal, you decide).
+
+1. PR: 2010, https://github.com/Secuura/Distributed_Secuura/pull/2010. Open, base develop, one commit, 3 files, +76/-1. Title: "Refs KS-1504: pin edge whitespace and a lone backslash in the no-allowance warning".
+2. Head SHA, read from origin and from the PR API in the same action (create_pr_e37.py, equal: True): e6ace3f0d06ff4e397847e60653d084c0fd0f1df, on develop 5fc5569ed96ac61f64823cc9e1fa841899aa1f62 (develop had not moved when I pushed). Branch feature/ks-1504-pin-edge-whitespace-and-lone-backslash-cells (Linear's own name is taken at origin by the merged PR 1584 head).
+3. Ticket: BLUF comment 6b96bf3b on KS-1504 naming the PR, read back (body equal, 0 mention nodes). KS-1504 read In Progress before and after the comment and after the PR was opened: no integration walk to report.
+4. Test evidence (mine, on Node v26.8.1, an Apple Silicon Mac; evidence/ in my record folder):
+   - Cells: O5 and O6 in the ks1480 file's O group; EXPECTED_CELLS 13 to 15. rateLimitEnforce.ts untouched (blob cc5a35e68114, equal to develop's).
+   - Red-proof, mutants applied to the product file in a scratch clone and restored to develop's blob after each run (hash checked, tools/mutants_e37.py): X5 and E1: O5 red, the OLD ks1480 file 14/14 green. Q4: O6 and O3 red, the old file red on O3 only (the indirect catch the ticket names), P3 stays green. Unmutated: new file 16/16, old file 14/14, ks1504 file 6/6.
+   - api-gateway whole suite: before 1623 passed (154 files), after 1625 passed (154 files), 0 failed. Test-type ratchet 25 errors, 25 in the baseline, 0 new, 0 stale. eslint clean; a planted debugger makes it fail (rc 1). docs-fragments check OK, and FAIL (2 findings) on a planted defect. check:openapi PASS before the push.
+   - Push hook, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 need a local stack on :6882 and were skipped. That is NOT a pass; leg 16 and leg 14 ran.
+5. What the PR did NOT do: no product line (item 1 of the ticket landed earlier in PR 1584); the ticket's OPTIONAL item 2 (export a frozen set or a predicate so a test can read runtime membership) is NOT built, and you decide whether that blocks Done; the four platform suites and the hook's three Docker legs were not run; nothing was measured on Node 24.
+Deploy: none owed after a merge (git show --stat: tests and docs fragments only), per the no-deploy-surface addendum.
+
+KS-1645 is pushed next in the queue (driver pid 74715, behind the lock); its READY mail follows when the push lands.
+
+Candidates, nothing filed: the ks1868 db-pool cell C1 times out at vitest's 5000 ms under load (it failed once on UNTOUCHED product; evidence/candidates_e37.txt); the stale shared-checkout node_modules; the 10,000-row audit window in services/security.
+Faults: none new in this round.

@@ -1,0 +1,102 @@
+
+ RUN  v4.1.10 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate200-ks1504-pr2010/clone/Blockchain/Dev/services/api-gateway
+
+ ❯ src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts (41 tests | 3 failed | 38 skipped) 81ms
+     × 🔴 STRUCTURAL (no runtime path makes this helper reject today; guards a future helper change): authenticateToken(false), the caller's Bearer is already gone when the helper rejects 24ms
+     × 🔴 STRUCTURAL (no runtime path makes this helper reject today; guards a future helper change): authenticateToken(true), the caller's Bearer is already gone when the helper rejects 0ms
+     × every graded cell above actually ran 4ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts > KS-1215 real app, NODE_ENV=test — a failed connector-token exchange forwards no caller Bearer
+ FAIL  src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts > KS-1215 real app, NODE_ENV=production — /api/v1
+ FAIL  src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts > KS-1215 real app, NODE_ENV=test — register-connector forwards no caller Bearer upstream
+TypeError: zod_1.z.config is not a function
+ ❯ installZod3IssueCompat ../../packages/shared/src/validation/zod3-compat.ts:213:5
+ ❯ ../../packages/shared/src/validation/zod3-compat.ts:406:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts > KS-1215 STRUCTURAL — the caller Bearer is gone before the exchange is awaited > 🔴 STRUCTURAL (no runtime path makes this helper reject today; guards a future helper change): authenticateToken(false), the caller's Bearer is already gone when the helper rejects
+ FAIL  src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts > KS-1215 STRUCTURAL — the caller Bearer is gone before the exchange is awaited > 🔴 STRUCTURAL (no runtime path makes this helper reject today; guards a future helper change): authenticateToken(true), the caller's Bearer is already gone when the helper rejects
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ src/middleware/auth.ts:14:1
+     12| import { createHash } from 'crypto';
+     13| import { Request, Response, NextFunction, RequestHandler } from 'expre…
+     14| import { isSessionActive, runWithTenantId } from '@secuura/shared';
+       | ^
+     15| import { verifyJwtRs256 } from '@secuura/shared/crypto/jwks';
+     16| import { getRedisClient } from '../services/redis';
+
+Caused by: TypeError: zod_1.z.config is not a function
+ ❯ installZod3IssueCompat ../../packages/shared/src/validation/zod3-compat.ts:213:5
+ ❯ Object.<anonymous> ../../packages/shared/src/validation/zod3-compat.ts:406:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts > KS-1215 COMPLETENESS > every graded cell above actually ran
+AssertionError: expected [ 'structural required=false', …(1) ] to deeply equal [ …(38) ]
+
+- Expected
++ Received
+
+  [
+-   "KS-1238 (i) bearer scheme case",
+-   "KS-1238 (iii) super-admin tenants",
+-   "KS-1238 (iii) tenants refuses a connector",
+-   "admin create shadow",
+-   "admin patch shadow",
+-   "optional /api/credentials N-1",
+-   "optional /api/credentials control key + live",
+-   "optional /api/credentials control key alone",
+-   "optional /api/credentials control live alone",
+-   "optional /api/credentials split",
+-   "optional /api/credentials unreachable",
+-   "platform DELETE /api/platform/tenant-key/:tenantId refuses a connector",
+-   "platform DELETE /api/platform/tenants/:id refuses a connector",
+-   "platform GET /api/platform/audit-log refuses a connector",
+-   "platform GET /api/platform/templates/document-types refuses a connector",
+-   "platform GET /api/platform/templates/workflows refuses a connector",
+-   "platform GET /api/platform/tenant-key/:tenantId/status refuses a connector",
+-   "platform GET /api/platform/tenants/:id refuses a connector",
+-   "platform PATCH /api/platform/tenants/:id refuses a connector",
+-   "platform PATCH /api/platform/tenants/:id/status refuses a connector",
+-   "platform POST /api/platform/templates/clone-to-tenant refuses a connector",
+-   "platform POST /api/platform/tenant-key refuses a connector",
+-   "platform tenants GET refuses a connector",
+-   "platform tenants GET refuses a tenant ADMIN",
+-   "production N-1",
+-   "register admin control",
+-   "register key-only control",
+-   "register live",
+-   "register live refused",
+-   "register revoked",
+-   "required /api/documents N-1",
+-   "required /api/documents control key + live",
+-   "required /api/documents control key alone",
+-   "required /api/documents control live alone",
+-   "required /api/documents split",
+-   "required /api/documents unreachable",
+    "structural required=false",
+    "structural required=true",
+  ]
+
+ ❯ src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts:561:29
+    559|       'KS-1238 (iii) super-admin tenants',
+    560|     ];
+    561|     expect([...RAN].sort()).toEqual(expected.sort());
+       |                             ^
+    562|   });
+    563| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  3 failed | 16 passed | 38 skipped (57)
+   Start at  18:30:47
+   Duration  490ms (transform 220ms, setup 95ms, import 475ms, tests 101ms, environment 0ms)
+
