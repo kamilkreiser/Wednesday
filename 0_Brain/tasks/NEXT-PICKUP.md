@@ -13,16 +13,18 @@ supersede: REPLACED WHOLESALE 13:1x AEDT 2026-11-05 by the 13:0x seat. Previous 
 - **DEMO IS FROZEN** (no demo redeploy without Kam's word). Both boxes run 07a2d62be6a0. develop = 5fc5569ed96a (PR 2006, KS-1990) is on NEITHER box.
 - Standing: Spark IGNORED until he says (11-04 16:42); October deploy grant extended until further notice; 11-04 09:16 'clear and close as many in progress tickets as possible'.
 
-## FLOOR (13:1x)
-- No seat live. D 53rd CLOSED (13:03, score ~0.97). B 95th CLOSED (12:33, 0.95).
-- S 20th close-out brief: Sonnet drafter commissioned 13:1x -> briefs_staged/2026-11-05_seatS20_closeout.md. Wednesday reads it WHOLE, re-checks OTHER_SEATS, dry run, launch with SEAT_MODEL_ENV=claude-sonnet-5-5.
+## FLOOR (14:19, refreshed at the 65% checkpoint)
+- **D 54th %166 (Opus): KINTSUGI deploy of develop 5fc5569ed96a (PR 2006, KS-1990).** It stops at STATUS A. Owed next: read its PLAN CONFIRMATION + STATUS A WHOLE; GO by mail with the subject 'GO KINTSUGI at 5fc5569ed96a (Seat D 54th)' (add 'incl anchoring m365-integration tenant-provisioning' ONLY if its contentfp shows real older code AND you decide the window is worth it; default = no). Demo is frozen; nothing goes there.
+- Closed and scored this seat: S 20th 0.94 (KS-1401, KS-1823 Done), U 13th 0.96 (KS-1584, 1612, 1860, 1230 Done), S 21st 0.94 (KS-2003/2004/2005 filed, comment on KS-1959). All verified on Linear by Wednesday.
+- Census of the KS In Progress set: 0_Brain/reference/2026-11-05_ks-inprogress-postdeploy/ (205 tickets; most of the rest are SCOPE-REMAINS / HUMAN-OWNED / KAM-DECISION).
 
-## DONE THIS SEAT
-- Mechanism (a) BUILT: note_entry.sh RECEIPT-VERB GUARD (answered / closed %N / acked %N / ruled: / delivered need a --receipt file written in the last 120 s; override NOTE_ALLOW_RECEIPT_VERB=1). Arms tests/note_entry_receiptverb_arms.sh 12/12. Tuesday FYI sent. **Every note that reports a step's outcome now needs the step's output in a file: `cmd > f 2>&1`, read it, then note_entry.sh --receipt f --stdin.**
+## DONE THIS SEAT (also)
+- Mechanism (a) BUILT: note_entry.sh RECEIPT-VERB GUARD. Any note saying answered / closed %N / acked %N / ruled: / delivered needs --receipt <file written in the last 120 s>: `cmd > f 2>&1`, read it, then `note_entry.sh --receipt f --stdin`. Override NOTE_ALLOW_RECEIPT_VERB=1 with the reason. Arms tests/note_entry_receiptverb_arms.sh 12/12. Quote sends in DOUBLE quotes inside a note (the sent-log guard's regex ends a quote at " only).
+- NAS answer (bf-0f2f069fdbdd693f); Kam 13:21 'The device comes tomorrow.  We can evaluate then' (item 6 below).
 
 ## THEN (owed, in order)
-1. S 20th close-out: launch, rung 5/6, its STATUS -> verify per ticket on the board, score, close.
-2. **KS-911/912** (KS-907 launcher + suite residues): launch ONLY when no Secuura seat is live (it edits the project launcher). Next window = after S 20th wraps.
+1. D 54th: plan, STATUS A, GO, STATUS B, wrap, score, close (see FLOOR).
+2. **KS-911/912** (KS-907 launcher + suite residues): launch ONLY when no Secuura seat is live (it edits the project launcher). Next window = after D 54th wraps (it is launched from the project launcher).
 3. Filing seat (small): G191-F3 by-hash 500 + store/selectList err?.message (KS-1959 text); Schemathesis leg B (demo_seed_gate.py) red after PR 2006; org-link empty catch adminConfig.ts:2145; KS-1990 W 28th candidates.
 4. A kintsugi round for PR 2006 (5fc5569ed96a) + anything merged after, under the October grant (kintsugi only; demo frozen).
 5. KS-960 (users.email schema authority, 'DO NOT RECONCILE'): card for Kam when the merged evidence shows it blocks first-run seeding.
