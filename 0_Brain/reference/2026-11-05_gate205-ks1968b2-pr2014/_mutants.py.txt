@@ -1,0 +1,43 @@
+import sys, subprocess, os
+D = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate205-ks1968b2-pr2014'
+REPO = D + '/repo'; A = REPO + '/Blockchain/Dev/services/auth'
+U = A + '/src/routes/users.ts'; P = A + '/src/services/password.ts'
+VT = REPO + '/Blockchain/Dev/node_modules/.bin/vitest'
+CHK = "    if (await isPasswordBreached(data.newPassword)) {\n      throw new ValidationError(BREACHED_PASSWORD_MESSAGE, weakPasswordIssues([BREACHED_PASSWORD_MESSAGE], 'newPassword'));\n    }\n"
+WRITE = "    await userRepo.updateUserOrThrow(user.id, { passwordHash: newHash }, 'Password change');\n"
+PRE = "    if (!isRedisAvailable()) {\n      throw new ServiceUnavailableError(\n        'Your password was NOT changed"
+def m_disabled(u, p): return u.replace(CHK, CHK.replace('if (await', 'if (false && await'), 1), p
+def m_after_write(u, p):
+    assert u.count(CHK) == 1 and u.count(WRITE) == 1
+    return u.replace(CHK, '', 1).replace(WRITE, WRITE + CHK, 1), p
+def m_current(u, p): return u.replace(CHK, CHK.replace('data.newPassword', 'data.currentPassword'), 1), p
+def m_fullhash(u, p): return u, p.replace('range/${prefix}', 'range/${sha1}', 1)
+def m_failclosed(u, p):
+    s = "logger.warn('HIBP lookup failed — failing open', { thrownType: thrownTypeOf(err) });\n    return false;"
+    assert s in p; return u, p.replace(s, s.replace('return false;', 'return true;'), 1)
+def m_after_storecheck(u, p):
+    i = u.index(PRE, u.index(CHK)); j = u.index(WRITE, i)
+    return u.replace(CHK, '', 1).replace(WRITE, CHK + WRITE, 1), p
+MUTS = [('S1 check disabled (seat)', m_disabled), ('S2 after the write (seat)', m_after_write), ('S3 current password checked (seat)', m_current),
+        ('G1 full SHA-1 sent (own)', m_fullhash), ('G2 outage fails CLOSED (own)', m_failclosed), ('G3 after the store pre-check, before write (own)', m_after_storecheck)]
+u0, p0 = open(U).read(), open(P).read()
+out = open(D + '/evidence/mutants.txt', 'w')
+try:
+    for name, f in MUTS:
+        u, p = f(u0, p0)
+        assert (u, p) != (u0, p0), name
+        open(U, 'w').write(u); open(P, 'w').write(p)
+        tsc = subprocess.run([REPO + '/Blockchain/Dev/node_modules/.bin/tsc', '--noEmit', '-p', A + '/tsconfig.json'], capture_output=True, text=True)
+        res = {}
+        for t in ['ks1968-b2-breached-password-refused-at-change-password.test.ts', 'gate205-own-change-password.test.ts']:
+            r = subprocess.run([VT, 'run', '--root', A, '--config', A + '/vitest.gate205.config.ts', 'src/__tests__/' + t], capture_output=True, text=True, env={**os.environ, 'GATE205_SIDE': 'head', 'GATE205_OUT': ''})
+            line = [l for l in r.stdout.splitlines() if 'Tests ' in l]
+            fails = [l.strip() for l in r.stdout.splitlines() if l.strip().startswith('×')]
+            res[t[:12]] = (r.returncode, line[-1].strip() if line else '?', fails[:4])
+        out.write(f"== {name}\n tsc rc={tsc.returncode}\n")
+        for k, v in res.items(): out.write(f" {k}: rc={v[0]} {v[1]}\n" + ''.join(f"   {x}\n" for x in v[2]))
+        out.flush()
+finally:
+    open(U, 'w').write(u0); open(P, 'w').write(p0)
+r = subprocess.run(['git', '-C', REPO, 'status', '--porcelain', '--', 'Blockchain/Dev/services/auth/src/routes/users.ts', 'Blockchain/Dev/services/auth/src/services/password.ts'], capture_output=True, text=True)
+out.write(f"restore check (empty = restored): [{r.stdout.strip()}]\n")

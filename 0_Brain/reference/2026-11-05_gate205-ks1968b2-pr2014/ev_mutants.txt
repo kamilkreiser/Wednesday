@@ -1,0 +1,55 @@
+== S1 check disabled (seat)
+ tsc rc=0
+ ks1968-b2-br: rc=1 Tests  3 failed | 5 passed (8)
+   × RED a breached new password is refused with 422 and Kam's sentence on newPassword, and nothing is hashed, written or revoked 29ms
+   × RED only the 5-character SHA-1 prefix of the new password leaves the process 3ms
+   × control a clean new password is accepted after one lookup and written once 3ms
+ gate205-own-: rc=1 Tests  3 failed | 34 passed (37)
+   × breached: refusal, and NO hash, NO store check, NO write, NO revoke (head) / sequence recorded 72ms
+   × clean: the lookup sits between verify and hash; write and revoke follow 67ms
+   × only the 5-char prefix leaves; no marker, full hash or suffix in any url, init, body, log line or thrown text 645ms
+== S2 after the write (seat)
+ tsc rc=0
+ ks1968-b2-br: rc=1 Tests  1 failed | 7 passed (8)
+   × RED a breached new password is refused with 422 and Kam's sentence on newPassword, and nothing is hashed, written or revoked 31ms
+ gate205-own-: rc=1 Tests  2 failed | 35 passed (37)
+   × breached: refusal, and NO hash, NO store check, NO write, NO revoke (head) / sequence recorded 66ms
+   × clean: the lookup sits between verify and hash; write and revoke follow 66ms
+== S3 current password checked (seat)
+ tsc rc=0
+ ks1968-b2-br: rc=1 Tests  2 failed | 6 passed (8)
+   × RED a breached new password is refused with 422 and Kam's sentence on newPassword, and nothing is hashed, written or revoked 29ms
+   × RED only the 5-character SHA-1 prefix of the new password leaves the process 3ms
+ gate205-own-: rc=1 Tests  2 failed | 35 passed (37)
+   × breached: refusal, and NO hash, NO store check, NO write, NO revoke (head) / sequence recorded 66ms
+   × only the 5-char prefix leaves; no marker, full hash or suffix in any url, init, body, log line or thrown text 65ms
+== G1 full SHA-1 sent (own)
+ tsc rc=2
+ ks1968-b2-br: rc=1 Tests  2 failed | 6 passed (8)
+   × RED a breached new password is refused with 422 and Kam's sentence on newPassword, and nothing is hashed, written or revoked 32ms
+   × RED only the 5-character SHA-1 prefix of the new password leaves the process 3ms
+ gate205-own-: rc=1 Tests  2 failed | 35 passed (37)
+   × breached: refusal, and NO hash, NO store check, NO write, NO revoke (head) / sequence recorded 65ms
+   × only the 5-char prefix leaves; no marker, full hash or suffix in any url, init, body, log line or thrown text 64ms
+== G2 outage fails CLOSED (own)
+ tsc rc=0
+ ks1968-b2-br: rc=1 Tests  1 failed | 7 passed (8)
+   × control the breach service throwing ALLOWS the password (as Kam ruled), and its text is not logged 4ms
+ gate205-own-: rc=0 Tests  37 passed (37)
+== G3 after the store pre-check, before write (own)
+ tsc rc=0
+ ks1968-b2-br: rc=1 Tests  1 failed | 7 passed (8)
+   × RED a breached new password is refused with 422 and Kam's sentence on newPassword, and nothing is hashed, written or revoked 30ms
+ gate205-own-: rc=1 Tests  2 failed | 35 passed (37)
+   × breached: refusal, and NO hash, NO store check, NO write, NO revoke (head) / sequence recorded 67ms
+   × clean: the lookup sits between verify and hash; write and revoke follow 66ms
+restore check (empty = restored): []
+== G1 full SHA-1 sent (own)
+ tsc rc=0
+ ks1968-b2-br: rc=1 Tests  2 failed | 6 passed (8)
+   × RED a breached new password is refused with 422 and Kam's sentence on newPassword, and nothing is hashed, written or revoked 29ms
+   × RED only the 5-character SHA-1 prefix of the new password leaves the process 3ms
+ gate205-own-: rc=1 Tests  2 failed | 35 passed (37)
+   × breached: refusal, and NO hash, NO store check, NO write, NO revoke (head) / sequence recorded 66ms
+   × only the 5-char prefix leaves; no marker, full hash or suffix in any url, init, body, log line or thrown text 64ms
+restore check (empty = restored): []

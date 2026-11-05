@@ -1,0 +1,28 @@
+import subprocess, hashlib
+D = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate205-ks1968b2-pr2014'
+R = D + '/repo'; NB = R + '/Blockchain/Dev/node_modules/.bin'; A = R + '/Blockchain/Dev/services/auth'
+F = A + '/src/routes/users.ts'; FR = R + '/Projects Documents/fragments/flow/KS-1968-b2-hibp-change-password.html'
+out = []
+def run(cmd, cwd):
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True); return r.returncode, r.stdout + r.stderr
+sha = lambda p: hashlib.sha256(open(p, 'rb').read()).hexdigest()
+h0, hf0 = sha(F), sha(FR)
+orig = open(F).read(); anchor = "    const newHash = await hashPassword(data.newPassword);\n"; assert orig.count(anchor) == 1
+try:
+    open(F, 'w').write(orig.replace(anchor, "    const g205Unused = 1;\n" + anchor))
+    rc, o = run([NB + '/eslint', 'src/routes/users.ts'], A); out.append(f"ESLINT planted rc={rc} {[l for l in o.splitlines() if 'g205' in l]}")
+    open(F, 'w').write(orig.replace(anchor, "    const g205Num: number = 'x' as unknown as string;\n" + anchor))
+    rc, o = run([NB + '/tsc', '--noEmit', '-p', 'tsconfig.json'], A); out.append(f"TSC planted rc={rc} {[l for l in o.splitlines() if 'TS' in l][:2]}")
+finally:
+    open(F, 'w').write(orig)
+fo = open(FR).read()
+try:
+    open(FR, 'w').write(fo.replace('</table>', '', 1)); assert open(FR).read() != fo
+    rc, o = run(['node', 'Blockchain/Dev/scripts/docs-fragments.mjs', 'check'], R); out.append(f"DOCS planted rc={rc} {o.strip().splitlines()[-2:]}")
+finally:
+    open(FR, 'w').write(fo)
+rc, o = run(['node', 'Blockchain/Dev/scripts/docs-fragments.mjs', 'check'], R); out.append(f"DOCS restored rc={rc} {o.strip().splitlines()[-1:]}")
+out.append(f"restored users.ts={sha(F) == h0} fragment={sha(FR) == hf0}")
+st = subprocess.run(['git', '-C', R, 'status', '--porcelain', '--untracked-files=no'], capture_output=True, text=True).stdout.strip()
+out.append(f"tracked-file status (empty = clean): [{st}]")
+open(D + '/evidence/plants.txt', 'w').write('\n'.join(out) + '\n'); print('\n'.join(out))

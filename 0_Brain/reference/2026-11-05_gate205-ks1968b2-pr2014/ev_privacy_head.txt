@@ -1,0 +1,81 @@
+--- mode=ok pw=BREACHED status=422
+SENT https://api.pwnedpasswords.com/range/95CA1 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":false,"error":{"code":"VALIDATION_ERROR","message":"This password has appeared in a data breach, choose another","details":[{"code":"custom","path":["newPassword"],"message":"This password has appeared in a data breach, choose another"}]}}
+LOGS {"error":"This password has appeared in a data breach, choose another","level":"error","message":"Error occurred","method":"POST","path":"/api/users/me/change-password","service":"auth","stack":"Error: This password has appeared in a data breach, choose another\n    at /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate205-ks1968b2-pr2014/repo/Blockchain/Dev/services/auth/src/routes/users.ts:1004:13","timestamp":"2026-11-05 20:19:14.130"}
+
+--- mode=ok pw=CLEAN status=200
+SENT https://api.pwnedpasswords.com/range/29536 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:14.195","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:14.195","userId":"gate205-user"}
+
+--- mode=throw pw=BREACHED status=200
+SENT https://api.pwnedpasswords.com/range/95CA1 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"warn","message":"HIBP lookup failed — failing open","service":"auth","thrownType":"Error","timestamp":"2026-11-05 20:19:14.229"}
+
+{"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:14.259","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:14.259","userId":"gate205-user"}
+
+--- mode=throw pw=CLEAN status=200
+SENT https://api.pwnedpasswords.com/range/29536 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"warn","message":"HIBP lookup failed — failing open","service":"auth","thrownType":"Error","timestamp":"2026-11-05 20:19:14.292"}
+
+{"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:14.321","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:14.322","userId":"gate205-user"}
+
+--- mode=non200 pw=BREACHED status=200
+SENT https://api.pwnedpasswords.com/range/95CA1 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"warn","message":"HIBP lookup non-200 — failing open","service":"auth","status":503,"timestamp":"2026-11-05 20:19:14.355"}
+
+{"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:14.385","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:14.386","userId":"gate205-user"}
+
+--- mode=non200 pw=CLEAN status=200
+SENT https://api.pwnedpasswords.com/range/29536 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"warn","message":"HIBP lookup non-200 — failing open","service":"auth","status":503,"timestamp":"2026-11-05 20:19:14.419"}
+
+{"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:14.449","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:14.449","userId":"gate205-user"}
+
+--- mode=timeout pw=BREACHED status=200
+SENT https://api.pwnedpasswords.com/range/95CA1 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"warn","message":"HIBP lookup failed — failing open","service":"auth","thrownType":"DOMException","timestamp":"2026-11-05 20:19:16.508"}
+
+{"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:16.609","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:16.610","userId":"gate205-user"}
+
+--- mode=timeout pw=CLEAN status=200
+SENT https://api.pwnedpasswords.com/range/29536 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"warn","message":"HIBP lookup failed — failing open","service":"auth","thrownType":"DOMException","timestamp":"2026-11-05 20:19:18.706"}
+
+{"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:18.737","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:18.737","userId":"gate205-user"}
+
+--- mode=badbody pw=BREACHED status=200
+SENT https://api.pwnedpasswords.com/range/95CA1 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:18.800","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:18.800","userId":"gate205-user"}
+
+--- mode=badbody pw=CLEAN status=200
+SENT https://api.pwnedpasswords.com/range/29536 {"headers":{"Add-Padding":"true"},"signal":"[signal]"}
+BODY {"success":true,"message":"Password changed successfully"}
+LOGS {"level":"info","message":"Password changed","service":"auth","timestamp":"2026-11-05 20:19:18.863","userId":"gate205-user"}
+
+{"level":"info","message":"Password change revoked the account sessions","service":"auth","sessionsRevoked":2,"timestamp":"2026-11-05 20:19:18.863","userId":"gate205-user"}
+
+THROWN_PLANTED 6

@@ -1,0 +1,31 @@
+=========== [INBOUND] 2026-11-05T09:33 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1804 PR 2015 (Seat J 16th)
+[Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1804 PR 2015 (Seat J 16th)
+Seat J 16th
+
+READY FOR GATE: KS-1804 note 1, PR 2015. Tier 1 proposed (an auth login-gate file); you commission the tier.
+
+- PR: 2015, https://github.com/Secuura/Distributed_Secuura/pull/2015, base develop.
+- Branch: feature/ks-1804-passwordlogingate-const-below-the-imports.
+- Head, read from origin by ls-remote in this action: 1757384396c3da7ec246546a6f90784d09c5681a. One commit on develop 5fc5569ed96a.
+  - At the push develop was 688c5cc177f8. The develop gate measured 24 files moved, 0 shared with my 3 paths.
+- Files (3, +10/-1):
+  - services/auth/src/services/passwordLoginGate.ts (+3/-1: the move plus a two-line KS-1804 comment);
+  - fragment pair KS-1804-passwordlogingate-const-below-the-imports.html.
+- Ticket comment: KS-1804 ecc891da, read back (body equal, 0 mention nodes, In Progress unchanged). Census: PR 2015 attached to KS-1804; KS-1188 gained nothing.
+  - The PR title, body and commit carry KS-1804 only. The body's two KS-1188 mentions were rewritten as the file-name form "ks1188" before the create, so it does not attach.
+
+PROOF OF NO BEHAVIOUR CHANGE (your brief's requirement)
+- Emitted-code comparison (tools/emit_compare_ks1804_j16.cjs; output evidence/ks1804/emit_compare.out).
+  - Method: the auth service's own tsconfig compilerOptions (CommonJS), comments removed, run on develop's file and the branch's.
+  - Result: 23 statements each, the same multiset. Only positions 14 and 15 differ: the constant and require("../types") swap.
+  - The constant is an unexported string-literal concatenation, so its order relative to the require cannot be observed.
+- KS-1188 cells:
+  - F3 (the cells about this constant) passed in every run.
+  - F2 timed out 2 cells at 5 s in two runs under load. Then the F2 file passed 5 of 5 twice on the branch, and 5 of 5 with develop's file swapped into the same worktree (restored sha256-equal).
+- Whole auth suite on the branch: 1,685 of 1,687 (the ks949 load timeouts).
+- tsc rc 0; eslint clean; test-type ratchet 0 new; docs check OK, with a planted defect failing and a restore.
+- No red-first and no mutants: there is no new guard. The proof is the emit comparison.
+- Pre-push hook, quoted: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." and "This is NOT a pass." Leg 14: 116 of 116. Leg 16: 0 new. Push rc 0, 1,347 s, VERIFIED 09:31:36Z.
+
+NOT DONE: the four platform suites; a booted service. It is a product file, so the deploy owed is your call. No merge, no deploy; the ticket stays In Progress.
+
