@@ -16043,5 +16043,19 @@
   "project": "Secuura",
   "ts": "2026-11-05T12:58:42.128185+11:00",
   "text": "Secuura kintsugi deploy is done, no action needed. Kintsugi now matches demo, everything merged up to this morning, including migration 058. Your number: on kintsugi, 0 of 14 charge events had no tenant, read just before 058. Unlike demo, 058 did change behaviour here, which is what your KS-1401 card asked for. A charge-events query with no tenant scope now sees 0 rows instead of 14; scoped to the default tenant it still sees all 14. Kintsugi's access rules now match demo's exactly. No errors in the 15 minutes after the swap. Swap window for Platform S and the bot was 12:40 to 12:42. One thing not measured: whether Platform S or the bot read charge events without a tenant. Checking would need a logged-in call. The seat's reading of the code is that a token without a tenant gets the default one, so they should still see the data. The KS-1990 fix merged meanwhile and will reach kintsugi in a later round."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Secuura",
+  "ts": "2026-11-05T13:00:20.338561+11:00",
+  "text": "Coordinator seat rotated automatically at 13:00 — planned rotation inside Kam's 80-90% context band. A fresh seat is booting now (about ten minutes); agents' mail waits for it. A liveness check runs 25 s after the respawn and will alarm here if the fleet session or any agent pane was lost."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "WED",
+  "ts": "2026-11-05T13:05:40.431192+11:00",
+  "text": "Short answer: not for Tuesday and me ourselves, not yet. But it's worth it for the agents' Docker test stacks, once you add RAM.\n\nWhat it is: the listing is the UGREEN DXP4800 GT. It has a 4-core AMD Ryzen R2514 (an older Zen+ chip, 12 to 25 watts), 8 gig of DDR4 across two slots with room for 64, two 10 gig ports and two NVMe slots. UGOS Pro supports Docker and virtual machines. UGREEN's own site rate-limited me, so the specs come from reviews and retailers, and I haven't read UGREEN's Docker manual itself.\n\nWhy not us: Tuesday and I are mostly Mac-shaped, not compute-shaped. Each Claude session is only about 400 meg (two on this laptop right now are 846 meg in total), and it spends its time waiting on the API. What ties us to a Mac is the plumbing: seven scheduled jobs on this laptop, the tmux cockpit you watch, voice, the Chrome extension, the keychain, and the dashboard on this machine. Moving all that into Linux containers is a real project, and it would give you a second master copy, which breaks your one-drive rule. The 256 gig Studio you've ordered is the natural always-on home for us anyway.\n\nWhere it does pay: the seats' disposable Docker stacks. That's the Postgres, Redis and API containers they spin up to test, and that's the heavy part. The laptop could send those to the NAS over SSH, which keeps the agents here and moves only the containers. Separate networks per client also give Secuura and Datasec cleaner separation than one Docker on one laptop.\n\nBefore that: 8 gig is too small. One full test stack plus the NAS's own services would fill it. Two 32 gig DDR4 SO-DIMMs gets you to 64. Your 4 gig Apacer stick adds little. And it's also the backup box. If test stacks run there, keep them on the NVMe pool and away from the backup volumes, and put no client secrets on it beyond what a test stack needs.\n\nMy recommendation: upgrade the RAM, then let me run one supervised pilot of a single Secuura test stack on the NAS before anything else moves."
  }
 ]
