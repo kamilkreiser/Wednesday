@@ -1,0 +1,65 @@
+import subprocess, sys, hashlib, re
+G='/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate204-ks1460-pr2013'
+A=G+'/own/Blockchain/Dev/services/auth/src/routes/auth.ts'
+CWD=G+'/own/Blockchain/Dev/services/auth'
+V=G+'/repo/Blockchain/Dev/node_modules/.bin/vitest'
+orig=open(A).read(); H0=hashlib.sha256(orig.encode()).hexdigest()
+R4="await userRepo.updateUserOrThrow(user.id, { verificationLevel: 'SOCIAL' }, 'Social sign-in');"
+R6="await userRepo.updateUserOrThrow(user.id, { verificationLevel: 'SOCIAL' }, 'Linking the social account');"
+INFO="""        if (rehashed) {
+          logger.info('UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id', { userId: user.id });
+        } else {
+          logger.warn('UPGRADE-ON-VERIFY: the rehash write did not take effect (non-fatal); the old hash stays', { userId: user.id });
+        }"""
+SWAP="""        if (!rehashed) {
+          logger.info('UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id', { userId: user.id });
+        } else {
+          logger.warn('UPGRADE-ON-VERIFY: the rehash write did not take effect (non-fatal); the old hash stays', { userId: user.id });
+        }"""
+MINT_OLD="""      await userRepo.updateUserOrThrow(user.id, { verificationLevel: 'SOCIAL' }, 'Social sign-in');
+      user.verificationLevel = 'SOCIAL';
+    }
+
+    const session = await createSession(
+      user,
+      req.ip || '0.0.0.0',
+      req.headers['user-agent'] || '',
+      undefined,
+      'browser',
+    );
+    const tokens = generateTokenPair(user, session.id);
+"""
+MINT_NEW="""      user.verificationLevel = 'SOCIAL';
+    }
+
+    const session = await createSession(
+      user,
+      req.ip || '0.0.0.0',
+      req.headers['user-agent'] || '',
+      undefined,
+      'browser',
+    );
+    const tokens = generateTokenPair(user, session.id);
+    if (true) await userRepo.updateUserOrThrow(user.id, { verificationLevel: 'SOCIAL' }, 'Social sign-in'); // G204 MUTANT M8
+"""
+muts={
+ 'S1_row4_back_to_updateUser': (R4, "await userRepo.updateUser(user.id, { verificationLevel: 'SOCIAL' });"),
+ 'S4_row6_catch_null': (R6, R6[:-1]+".catch(() => null);"),
+ 'S6_row1_branches_swapped': (INFO, SWAP),
+ 'M8_own_503_after_session_and_mint': (MINT_OLD, MINT_NEW),
+}
+files=['src/__tests__/ks1460-social-level-raise-confirms-the-write.test.ts','src/__tests__/ks1460-rehash-log-is-truthful.test.ts','src/__tests__/gate204-own-social.test.ts']
+for name,(a,b) in muts.items():
+    assert orig.count(a)==1, name
+    s=orig.replace(a,b); open(A,'w').write(s)
+    assert open(A).read()!=orig and b in open(A).read(), 'mutant did not land '+name
+    tsc=subprocess.run([G+'/repo/Blockchain/Dev/node_modules/.bin/tsc','--noEmit','-p',CWD],cwd=CWD,capture_output=True,text=True)
+    r=subprocess.run([V,'run','--hookTimeout=180000',*files],cwd=CWD,capture_output=True,text=True,env={**__import__('os').environ,'G204_OUT':'/dev/null'})
+    out=r.stdout+r.stderr
+    fails=sorted(set(re.findall(r' FAIL  (src/__tests__/[^ ]+) > (.*)',out)))
+    summ=[l for l in out.splitlines() if 'Tests ' in l]
+    print(f'== {name}: tsc rc={tsc.returncode} vitest rc={r.returncode} {summ}')
+    for f in fails: print('   killed by:', f[0].split('/')[-1], '>', f[1][:150])
+    open(A,'w').write(orig)
+assert hashlib.sha256(open(A).read().encode()).hexdigest()==H0
+print('restored sha256', H0)

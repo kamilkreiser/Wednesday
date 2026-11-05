@@ -1,0 +1,168 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import type { AddressInfo } from 'node:net';
+import type { Server } from 'node:http';
+import express from 'express';
+
+// KS-1460 row 1 (Wednesday's ruling of 2026-11-05: "make the 'rehashed' info line truthful in the same PR, log only,
+// no behaviour change, one cell"). POST /api/auth/login's UPGRADE-ON-VERIFY step rehashes a bcrypt hash to Argon2id
+// with `userRepo.updateUser`, which answers `null` when its UPDATE matched no row. The route discarded that answer
+// and logged "UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id" whether or not the write landed, so the log recorded a
+// rehash that may not have happened. It now logs the info line only when the write landed, and a warn naming the
+// write that did not land otherwise. The step stays non-fatal: the login answers 200 with tokens either way.
+// Harness: the ks1868 rehash test's (real router and error handler; repository, password, session, jwt, lockout,
+// mail and event bus mocked), with the logger's info AND warn captured.
+
+const h = vi.hoisted(() => ({
+  rehashLands: true,
+  mode: 'lands' as 'lands' | 'zero' | 'throw' | 'throwToken',
+  writes: [] as unknown[],
+  sessions: 0,
+  info: [] as unknown[][],
+  warn: [] as unknown[][],
+}));
+
+const capture = vi.hoisted(() => ({
+  debug: (...args: unknown[]) => { h.info.push(['DEBUG', ...args]); },
+  info: (...args: unknown[]) => { h.info.push(args); },
+  warn: (...args: unknown[]) => { h.warn.push(args); },
+  error: (...args: unknown[]) => { h.warn.push(['ERROR', ...args]); },
+  log: () => undefined,
+}));
+vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
+vi.mock('@secuura/shared/utils/logger', () => ({ logger: capture, createLogger: () => capture }));
+
+const LOGIN_EMAIL = 'ks1460-login@secuura.local';
+const ACTIVE_USER = {
+  id: 'user-1460-login', email: LOGIN_EMAIL, status: 'ACTIVE', role: 'OWNER',
+  verificationLevel: 'BASIC', mfaEnabled: false, mfaSecret: null, mfaBackupCodes: null,
+  passwordHash: '$2b$10$PLANT_OLDHASH_G204', tenantId: 'ten-1', organizationId: 'org-1',
+};
+
+vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }));
+
+vi.mock('../repositories/userRepo', () => ({
+  getPlatformAdmin: vi.fn(async () => null),
+  getUserByEmail: vi.fn(async (email: string) =>
+    email.toLowerCase().trim() === LOGIN_EMAIL ? { ...ACTIVE_USER } : null),
+  getUserById: vi.fn(async () => null),
+  getUserByIdPreAuth: vi.fn(async () => ({ ...ACTIVE_USER })),
+  getUserBySocialId: vi.fn(async () => null),
+  createUser: vi.fn(async () => null),
+  // the real contract: null when the UPDATE matched no row (repositories/userRepo.ts)
+  updateUser: async (_id: string, patch: Record<string, unknown>) => {
+    h.writes.push(Object.fromEntries(Object.entries(patch).map(([k, v]) => [k, v instanceof Date ? 'DATE' : v])));
+    if (patch && 'passwordHash' in patch) {
+      if (h.mode === 'zero') return null;
+      if (h.mode === 'throw') throw new Error('PLANT_ERRMSG_G204');
+      if (h.mode === 'throwToken') throw new Error('Bearer PLANT_TOKEN_G204 ' + String(patch.passwordHash));
+    }
+    return { ...ACTIVE_USER, ...patch };
+  },
+  updateUserOrThrow: vi.fn(async () => ({ ...ACTIVE_USER })),
+  updateUserPlatformScope: vi.fn(async () => null),
+  updatePlatformAdminPassword: vi.fn(async () => undefined),
+  reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
+  reencryptPlatformAdminMfaSecretIfLegacy: vi.fn(async () => undefined),
+}));
+
+vi.mock('../services/password', () => ({
+  verifyPassword: vi.fn(async () => true),
+  hashPassword: vi.fn(async () => '$argon2id$PLANT_NEWHASH_G204'),
+  checkPasswordStrength: vi.fn(() => ({ ok: true })),
+  generateResetToken: vi.fn(() => 'tok'),
+  shouldRehashAfterVerify: vi.fn(() => true),
+}));
+
+vi.mock('../services/session', () => ({
+  createSession: vi.fn(async () => { h.sessions += 1; return { id: 'sess-1460-login' }; }),
+  revokeSession: vi.fn(async () => undefined),
+  revokeAllUserSessions: vi.fn(async () => 0),
+  getSession: vi.fn(async () => null),
+  rotateSessionRefreshToken: vi.fn(async () => undefined),
+  getRedisClient: vi.fn(() => null),
+  validateSession: vi.fn(async () => true),
+  updateSessionActivity: vi.fn(async () => undefined),
+  isRedisAvailable: vi.fn(() => true),
+}));
+
+vi.mock('../services/jwt', () => ({
+  generateTokenPair: vi.fn(() => ({ accessToken: 'MINTED_1460_LOGIN', refreshToken: 'MINTED_1460_LOGIN_R', expiresIn: 900 })),
+  verifyRefreshToken: vi.fn(() => ({})),
+  decodeToken: vi.fn(() => ({ jti: 'jti-1460', exp: Math.floor(Date.now() / 1000) + 3600 })),
+}));
+
+vi.mock('../services/refreshDenylist', () => ({
+  isRefreshJtiDenylisted: vi.fn(async () => false),
+  denylistRefreshJti: vi.fn(async () => undefined),
+}));
+vi.mock('../services/accountLockout', () => ({
+  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => 1),
+  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
+}));
+vi.mock('../services/email', () => ({
+  sendVerificationEmail: vi.fn(async () => undefined),
+  sendPasswordResetEmail: vi.fn(async () => undefined),
+}));
+
+const passThrough = (...args: unknown[]) => {
+  if (args.length >= 3 && typeof args[2] === 'function') return (args[2] as () => void)();
+  return (_r: unknown, _s: unknown, n: () => void) => n();
+};
+vi.mock('../middleware/authenticate', () => ({
+  authenticate: passThrough, authenticateToken: passThrough,
+  authenticateAccessOrConnector: passThrough, optionalAuthenticate: passThrough,
+  requireRole: passThrough,
+}));
+vi.mock('../middleware/tenantGuc', () => ({ seedTenantGuc: (_r: unknown, _s: unknown, n: () => void) => n() }));
+vi.mock('../events', () => ({
+  publishEvent: () => Promise.resolve(undefined),
+  EventTypes: { USER_LOGIN: 'user.login' },
+}));
+
+
+const urls: Record<string, string> = {};
+const servers: Server[] = [];
+beforeAll(async () => {
+  const { errorHandler } = await import('../middleware/errorHandler');
+  for (const [k, p] of [['base', '../routes/auth.gatebase'], ['head', '../routes/auth']] as const) {
+    const mod = await import(p);
+    const app = express(); app.use(express.json()); app.use('/api/auth', mod.authRoutes); app.use(errorHandler);
+    const s = app.listen(0, '127.0.0.1'); await new Promise<void>((r) => s.once('listening', () => r())); servers.push(s);
+    urls[k] = 'http://127.0.0.1:' + String((s.address() as AddressInfo).port);
+  }
+}, 120000);
+afterAll(async () => { for (const s of servers) await new Promise<void>((r) => s.close(() => r())); });
+
+const PW = 'PLANT_PASSWORD_G204';
+async function run(side: 'base' | 'head', mode: typeof h.mode) {
+  h.mode = mode; h.info = []; h.warn = []; h.writes = []; h.sessions = 0;
+  const res = await fetch(urls[side] + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: LOGIN_EMAIL, password: PW }) });
+  const body = (await res.text()).replace(/"requestId":"[^"]*"|"timestamp":"[^"]*"/g, '');
+  const hdr = [...res.headers.entries()].filter(([k]) => !['date', 'keep-alive', 'connection'].includes(k));
+  return { status: res.status, body, hdr, writes: JSON.stringify(h.writes), sessions: h.sessions,
+    rehashLog: [...h.info, ...h.warn].filter((c) => String(c[0]).includes('UPGRADE-ON-VERIFY') || String(c[1]).includes('UPGRADE-ON-VERIFY')),
+    allLogs: JSON.stringify([...h.info, ...h.warn]) };
+}
+const out: string[] = [];
+afterAll(async () => { const fs = await import('node:fs'); fs.writeFileSync(process.env.G204_LOGIN_OUT || '/dev/null', out.join('\n') + '\n'); });
+for (const mode of ['lands', 'zero', 'throw', 'throwToken'] as const) {
+  it('login base vs head, rehash ' + mode, async () => {
+    const b = await run('base', mode);
+    const hd = await run('head', mode);
+    out.push(mode + '\tBASE ' + b.status + ' ' + JSON.stringify(b.rehashLog) + '\n\tHEAD ' + hd.status + ' ' + JSON.stringify(hd.rehashLog)
+      + '\n\tbody-equal=' + (b.body === hd.body) + ' hdr-equal=' + (JSON.stringify(b.hdr) === JSON.stringify(hd.hdr))
+      + ' writes-equal=' + (b.writes === hd.writes) + ' sessions ' + b.sessions + '/' + hd.sessions
+      + '\n\thead-log-plants: ' + ['PLANT_PASSWORD', 'PLANT_OLDHASH', 'PLANT_NEWHASH', 'PLANT_TOKEN', 'MINTED_1460_LOGIN'].map((m) => m + '=' + hd.allLogs.includes(m)).join(' ')
+      + '\n\tbase-log-plants: ' + ['PLANT_PASSWORD', 'PLANT_OLDHASH', 'PLANT_NEWHASH', 'PLANT_TOKEN', 'MINTED_1460_LOGIN'].map((m) => m + '=' + b.allLogs.includes(m)).join(' '));
+    expect(hd.status).toBe(b.status);
+    expect(hd.body).toBe(b.body);
+    expect(hd.hdr).toEqual(b.hdr);
+    expect(hd.writes).toBe(b.writes);
+    expect(hd.sessions).toBe(b.sessions);
+    if (mode === 'zero') {
+      const warnLine = h.warn.find((c) => String(c[0]).includes('did not take effect'));
+      expect(JSON.stringify(warnLine)).not.toMatch(/PLANT_|MINTED/);
+    }
+  });
+}

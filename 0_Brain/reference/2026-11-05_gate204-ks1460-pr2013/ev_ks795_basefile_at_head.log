@@ -1,0 +1,112 @@
+
+ RUN  v4.1.12 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate204-ks1460-pr2013/own/Blockchain/Dev/services/auth
+
+ ❯ src/__tests__/ks795-social-link-verified-email.test.ts (41 tests | 5 failed) 687ms
+     × CONTROL — google with a verified email links the existing account and mints 33ms
+     × CONTROL — apple, a second sound provider, behaves the same 2ms
+     × CONTROL — linkedin, the third sound provider, behaves the same 3ms
+     × CONTROL — an ACTIVE account through the EMAIL-LINK branch DOES write 2ms
+     × CONTROL KS-806 - the same shape with an ORDINARY address links as before (the harness can express a link) 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks795-social-link-verified-email.test.ts > KS-795: auto-linking by email requires a SOUNDLY derived, true emailVerified > CONTROL — google with a verified email links the existing account and mints
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ ❯ src/__tests__/ks795-social-link-verified-email.test.ts:267:24
+    265|   it('CONTROL — google with a verified email links the existing accoun…
+    266|     const res = await callback('google');
+    267|     expect(res.status).toBe(200);
+       |                        ^
+    268|     expect(res.body).toContain('MINTED_SOCIAL_ACCESS_TOKEN');
+    269|     expect(socialIdWrites()).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/__tests__/ks795-social-link-verified-email.test.ts > KS-795: auto-linking by email requires a SOUNDLY derived, true emailVerified > CONTROL — apple, a second sound provider, behaves the same
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ ❯ src/__tests__/ks795-social-link-verified-email.test.ts:275:24
+    273|   it('CONTROL — apple, a second sound provider, behaves the same', asy…
+    274|     const res = await callback('apple');
+    275|     expect(res.status).toBe(200);
+       |                        ^
+    276|     expect(socialIdWrites()[0]?.updates).toMatchObject({ appleId: 'app…
+    277|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/__tests__/ks795-social-link-verified-email.test.ts > KS-795: auto-linking by email requires a SOUNDLY derived, true emailVerified > CONTROL — linkedin, the third sound provider, behaves the same
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ ❯ src/__tests__/ks795-social-link-verified-email.test.ts:281:24
+    279|   it('CONTROL — linkedin, the third sound provider, behaves the same',…
+    280|     const res = await callback('linkedin');
+    281|     expect(res.status).toBe(200);
+       |                        ^
+    282|     expect(socialIdWrites()[0]?.updates).toMatchObject({ linkedinId: '…
+    283|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/__tests__/ks795-social-link-verified-email.test.ts > KS-795 F-5: the gate precedes both writes > CONTROL — an ACTIVE account through the EMAIL-LINK branch DOES write
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ ❯ src/__tests__/ks795-social-link-verified-email.test.ts:614:24
+    612|     state.accountStatus = 'ACTIVE';
+    613|     const res = await callback('google');
+    614|     expect(res.status).toBe(200);
+       |                        ^
+    615|     expect(socialIdWrites()).toHaveLength(1);
+    616|     expect(linkWrites.length).toBeGreaterThan(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/__tests__/ks795-social-link-verified-email.test.ts > KS-806 - the social callback refuses a profile in the reserved wallet.local domain > CONTROL KS-806 - the same shape with an ORDINARY address links as before (the harness can express a link)
+AssertionError: expected '{"success":false,"error":{"code":"INT…' to contain 'MINTED_SOCIAL_ACCESS_TOKEN'
+
+Expected: "MINTED_SOCIAL_ACCESS_TOKEN"
+Received: "{"success":false,"error":{"code":"INTERNAL_ERROR","message":"An unexpected error occurred"}}"
+
+ ❯ src/__tests__/ks795-social-link-verified-email.test.ts:738:22
+    736|     state.existingEmail = 'linkable-806@example.com';
+    737|     const res = await callback('google');
+    738|     expect(res.body).toContain('MINTED_SOCIAL_ACCESS_TOKEN');
+       |                      ^
+    739|     expect(socialIdWrites().length, 'a verified, sound-provider email …
+    740|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 36 passed (41)
+   Start at  19:45:50
+   Duration  913ms (transform 170ms, setup 37ms, import 85ms, tests 687ms, environment 0ms)
+
+
+rc=1

@@ -1,0 +1,26 @@
+import subprocess, hashlib
+G='/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate204-ks1460-pr2013'
+O=G+'/own'; NB=G+'/repo/Blockchain/Dev/node_modules/.bin'; A=O+'/Blockchain/Dev/services/auth'
+F=A+'/src/routes/auth.ts'
+FR=O+'/Projects Documents/fragments/flow/KS-1460-social-level-raise-and-rehash-log-confirm-the-write.html'
+def run(cmd,cwd):
+    r=subprocess.run(cmd,cwd=cwd,capture_output=True,text=True); return r.returncode,(r.stdout+r.stderr)
+orig=open(F).read(); h=hashlib.sha256(orig.encode()).hexdigest()
+anchor="      await userRepo.updateUserOrThrow(user.id, { verificationLevel: 'SOCIAL' }, 'Social sign-in');\n"
+assert orig.count(anchor)==1
+# eslint plant: unused var
+open(F,'w').write(orig.replace(anchor, anchor+"      const g204Unused = 1;\n")); assert 'g204Unused' in open(F).read()
+rc,out=run([NB+'/eslint','src/routes/auth.ts'],A); print('ESLINT planted rc',rc, [l for l in out.splitlines() if 'g204' in l.lower() or 'error' in l.lower()][:3])
+# tsc plant
+open(F,'w').write(orig.replace(anchor, anchor+"      const g204Num: number = 'x';\n")); assert 'g204Num' in open(F).read()
+rc,out=run([NB+'/tsc','--noEmit'],A); print('TSC planted rc',rc,[l for l in out.splitlines() if 'TS' in l][:2])
+open(F,'w').write(orig); assert hashlib.sha256(open(F).read().encode()).hexdigest()==h
+# unplanted eslint on own for parity
+rc,out=run([NB+'/eslint','src/routes/auth.ts'],A); print('ESLINT clean own rc',rc)
+# docs plant
+fo=open(FR).read()
+open(FR,'w').write(fo.replace('</table>','',1)); assert open(FR).read()!=fo
+rc,out=run(['node','Blockchain/Dev/scripts/docs-fragments.mjs','check'],O); print('DOCS planted rc',rc,out.strip().splitlines()[-3:])
+open(FR,'w').write(fo); assert open(FR).read()==fo
+rc,out=run(['node','Blockchain/Dev/scripts/docs-fragments.mjs','check'],O); print('DOCS restored rc',rc,out.strip().splitlines()[-1:])
+print('restored', hashlib.sha256(open(F).read().encode()).hexdigest()==h)

@@ -1,0 +1,20 @@
+lands	BASE 200 [["UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id",{"userId":"user-1460-login"}]]
+	HEAD 200 [["UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id",{"userId":"user-1460-login"}]]
+	body-equal=true hdr-equal=true writes-equal=true sessions 1/1
+	head-log-plants: PLANT_PASSWORD=false PLANT_OLDHASH=false PLANT_NEWHASH=false PLANT_TOKEN=false MINTED_1460_LOGIN=false
+	base-log-plants: PLANT_PASSWORD=false PLANT_OLDHASH=false PLANT_NEWHASH=false PLANT_TOKEN=false MINTED_1460_LOGIN=false
+zero	BASE 200 [["UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id",{"userId":"user-1460-login"}]]
+	HEAD 200 [["UPGRADE-ON-VERIFY: the rehash write did not take effect (non-fatal); the old hash stays",{"userId":"user-1460-login"}]]
+	body-equal=true hdr-equal=true writes-equal=true sessions 1/1
+	head-log-plants: PLANT_PASSWORD=false PLANT_OLDHASH=false PLANT_NEWHASH=false PLANT_TOKEN=false MINTED_1460_LOGIN=false
+	base-log-plants: PLANT_PASSWORD=false PLANT_OLDHASH=false PLANT_NEWHASH=false PLANT_TOKEN=false MINTED_1460_LOGIN=false
+throw	BASE 200 [["UPGRADE-ON-VERIFY rehash failed (non-fatal)",{"userId":"user-1460-login","error":"PLANT_ERRMSG_G204"}]]
+	HEAD 200 [["UPGRADE-ON-VERIFY rehash failed (non-fatal)",{"userId":"user-1460-login","error":"PLANT_ERRMSG_G204"}]]
+	body-equal=true hdr-equal=true writes-equal=true sessions 1/1
+	head-log-plants: PLANT_PASSWORD=false PLANT_OLDHASH=false PLANT_NEWHASH=false PLANT_TOKEN=false MINTED_1460_LOGIN=false
+	base-log-plants: PLANT_PASSWORD=false PLANT_OLDHASH=false PLANT_NEWHASH=false PLANT_TOKEN=false MINTED_1460_LOGIN=false
+throwToken	BASE 200 [["UPGRADE-ON-VERIFY rehash failed (non-fatal)",{"userId":"user-1460-login","error":"Bearer PLANT_TOKEN_G204 $argon2id$PLANT_NEWHASH_G204"}]]
+	HEAD 200 [["UPGRADE-ON-VERIFY rehash failed (non-fatal)",{"userId":"user-1460-login","error":"Bearer PLANT_TOKEN_G204 $argon2id$PLANT_NEWHASH_G204"}]]
+	body-equal=true hdr-equal=true writes-equal=true sessions 1/1
+	head-log-plants: PLANT_PASSWORD=false PLANT_OLDHASH=false PLANT_NEWHASH=true PLANT_TOKEN=true MINTED_1460_LOGIN=false
+	base-log-plants: PLANT_PASSWORD=false PLANT_OLDHASH=false PLANT_NEWHASH=true PLANT_TOKEN=true MINTED_1460_LOGIN=false

@@ -1,0 +1,159 @@
+// GATE 204 (QA, findings only) — rows 4 and 6, base vs head, REAL userRepo (updateUser + updateUserOrThrow),
+// only the db `query`, the providers, session, jwt and lockout doubled. Not a project file; lives in the gate clone.
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import express from 'express';
+import { randomUUID } from 'node:crypto';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+
+const st = vi.hoisted(() => ({
+  level: 'basic',
+  mode: 'lands' as 'lands' | 'zero' | 'throw' | 'infra' | 'blind',
+  updates: [] as Array<{ sql: string; params: unknown[] }>,
+  sessions: 0,
+  minted: 0,
+  logs: [] as Array<[string, string, unknown]>,
+}));
+const lg = vi.hoisted(() => {
+  const mk = (lvl: string) => (m: string, meta?: unknown) => { st.logs.push([lvl, String(m), meta]); };
+  return { debug: mk('debug'), info: mk('info'), warn: mk('warn'), error: mk('error'), log: mk('log') };
+});
+vi.mock('../utils/logger', () => ({ logger: lg, createLogger: () => lg, validateEnv: vi.fn() }));
+vi.mock('@secuura/shared/utils/logger', () => ({ logger: lg, createLogger: () => lg }));
+
+vi.mock('../providers/social', async (importOriginal) => {
+  const real = await importOriginal<Record<string, unknown>>();
+  const NAMES = ['google', 'github'];
+  class StubFactory {
+    get(name: string) {
+      if (!NAMES.includes(name)) return undefined;
+      return {
+        name, getAuthUrl: () => 'https://provider.test/auth',
+        exchangeCode: async () => ({ providerId: `${name}-pid-g204`, provider: name, email: 'erased_g204@anonymized.local',
+          emailVerified: true, displayName: 'U', firstName: 'U', lastName: 'S', rawProfile: {} }),
+      };
+    }
+    getEnabled() { return NAMES; }
+    has(n: string) { return NAMES.includes(n); }
+    isValidProvider(n: string) { return NAMES.includes(n); }
+  }
+  return { ...real, SocialProviderFactory: StubFactory };
+});
+
+const row = () => ({
+  id: 'user-g204', email: 'erased_g204@anonymized.local', first_name: null, last_name: null, display_name: null,
+  role: 'owner', status: 'active', email_verified: true, phone_number: null, phone_verified: false, mfa_enabled: false,
+  mfa_secret: null, mfa_backup_codes: null, verification_level: st.level, organization_id: 'org-1', tenant_id: 'ten-1',
+  tenant_slug: 't1', wallet_address: null, auth_method: 'social', external_provider: null, external_id: null,
+  google_id: 'google-pid-g204', linkedin_id: null, facebook_id: null, apple_id: null, github_id: null,
+  microsoft_personal_id: null, metadata: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+  last_login_at: null,
+});
+
+vi.mock('../db', () => ({
+  query: vi.fn(async (sql: string, params: unknown[] = []) => {
+    const s = sql.replace(/\s+/g, ' ').trim();
+    if (s.startsWith('UPDATE users')) {
+      st.updates.push({ sql: s, params });
+      if (st.mode === 'throw') throw new Error('g204 plain failure');
+      if (st.mode === 'infra') { const e: any = new Error('connect ECONNREFUSED'); e.code = 'ECONNREFUSED'; throw e; }
+      if (st.mode === 'lands' || st.mode === 'blind') st.level = String(params[0]).includes('social') ? 'social' : st.level;
+      return { rows: [], rowCount: st.mode === 'zero' ? 0 : 1 };
+    }
+    if (s.includes('auth_find_user_by_social') || s.includes('auth_find_user_by_id')) return { rows: [row()], rowCount: 1 };
+    if (s.includes('FROM users WHERE id')) {
+      if (st.mode === 'blind' && st.updates.length > 0) return { rows: [], rowCount: 0 };
+      return { rows: [row()], rowCount: 1 };
+    }
+    return { rows: [], rowCount: 0 };
+  }),
+  getPool: vi.fn(), transaction: vi.fn(),
+}));
+
+const redisStore = new Map<string, string>();
+vi.mock('../services/session', () => ({
+  createSession: vi.fn(async () => { st.sessions += 1; return { id: 'sess-g204' }; }),
+  getRedisClient: vi.fn(() => ({
+    setex: async (k: string, _t: number, v: string) => { redisStore.set(k, v); return 'OK'; },
+    get: async () => null, incr: async () => 1, expire: async () => 1, set: async () => 'OK', del: async () => 1,
+    getdel: async (k: string) => { const v = redisStore.get(k) ?? null; redisStore.delete(k); return v; },
+  })),
+  validateSession: vi.fn(async () => true),
+  updateSessionActivity: vi.fn(async () => undefined),
+}));
+vi.mock('../services/jwt', () => ({
+  generateTokenPair: vi.fn(() => { st.minted += 1; return { accessToken: 'G204_ACCESS', refreshToken: 'G204_REFRESH', expiresIn: 900 }; }),
+  verifyAccessToken: vi.fn(() => ({})),
+}));
+vi.mock('../services/accountLockout', () => ({
+  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => 1),
+  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
+}));
+const withUser = () => (req: Record<string, unknown>, _s: unknown, n: () => void) => {
+  (req as { user?: unknown }).user = { userId: 'user-g204', organizationId: 'org-1', tenantId: 'ten-1' }; n();
+};
+const pass = () => (_r: unknown, _s: unknown, n: () => void) => n();
+vi.mock('../middleware/authenticate', () => ({
+  authenticate: withUser, authenticateAccessOrConnector: pass, requireRole: pass, requireVerificationLevel: pass,
+  requireOwnership: pass, requireSameOrganization: pass,
+}));
+vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
+
+const urls: Record<string, string> = {};
+const servers: Server[] = [];
+beforeAll(async () => {
+  const { errorHandler } = await import('../middleware/errorHandler');
+  for (const [k, p] of [['base', '../routes/auth.gatebase'], ['head', '../routes/auth']] as const) {
+    const mod = await import(p);
+    const app = express(); app.use(express.json()); app.use('/api/auth', mod.authRoutes); app.use(errorHandler);
+    const s = app.listen(0, '127.0.0.1'); await new Promise<void>((r) => s.once('listening', () => r())); servers.push(s);
+    urls[k] = `http://127.0.0.1:${(s.address() as AddressInfo).port}`;
+  }
+}, 120000);
+afterAll(async () => { for (const s of servers) await new Promise<void>((r) => s.close(() => r())); });
+
+type Obs = { status: number; body: string; cookie: string | null; sessions: number; minted: number; levelUpdates: number; levelAfter: string };
+async function run(side: 'base' | 'head', route: 'callback' | 'link', mode: typeof st.mode, level = 'basic'): Promise<Obs> {
+  st.level = level; st.mode = mode; st.updates = []; st.sessions = 0; st.minted = 0; st.logs = [];
+  let res: Response;
+  if (route === 'callback') {
+    const { storeOAuthState } = await import('../services/oauthState');
+    const s = `g204-${randomUUID()}`; await storeOAuthState(s, 'google');
+    res = await fetch(`${urls[side]}/api/auth/social/google/callback?code=c&state=${encodeURIComponent(s)}`, { redirect: 'manual' });
+  } else {
+    res = await fetch(`${urls[side]}/api/auth/social/link`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: 'google', code: 'c' }) });
+  }
+  const body = await res.text();
+  return { status: res.status, body: body.replace(/"requestId":"[^"]*"|"timestamp":"[^"]*"/g, ''), cookie: res.headers.get('set-cookie'),
+    sessions: st.sessions, minted: st.minted, levelUpdates: st.updates.filter((u) => u.sql.includes('verification_level')).length, levelAfter: st.level };
+}
+
+const table: string[] = [];
+afterAll(async () => { const fs = await import('node:fs'); fs.writeFileSync(process.env.G204_OUT || '/dev/null', table.join('\n') + '\n'); });
+
+for (const route of ['callback', 'link'] as const) {
+  for (const level of ['basic', 'none', 'social', 'standard', 'high']) {
+    for (const mode of ['lands', 'zero', 'throw', 'infra', 'blind'] as const) {
+      it(`${route} level=${level} mode=${mode}`, async () => {
+        const b = await run('base', route, mode, level);
+        const h = await run('head', route, mode, level);
+        table.push(`${route}\t${level}\t${mode}\tBASE ${b.status} sess=${b.sessions} mint=${b.minted} cookie=${b.cookie ? 'Y' : 'N'} upd=${b.levelUpdates} body=${b.body.slice(0, 90)}\tHEAD ${h.status} sess=${h.sessions} mint=${h.minted} cookie=${h.cookie ? 'Y' : 'N'} upd=${h.levelUpdates} body=${h.body.slice(0, 140)}`);
+        const raises = level === 'basic' || level === 'none';
+        // Q3 direction: head never issues what base did not
+        expect(h.sessions).toBeLessThanOrEqual(b.sessions);
+        expect(h.minted).toBeLessThanOrEqual(b.minted);
+        if (!raises || mode === 'lands') {
+          expect(h).toEqual(b); // identical to base
+        } else if (mode === 'zero') {
+          expect(h.status).toBe(503);
+          expect(h.body).toContain('SERVICE_UNAVAILABLE');
+          expect(h.body).not.toContain('"success":true');
+          expect(h.body).not.toContain('G204_');
+          expect(h.cookie).toBeNull();
+          expect(h.sessions).toBe(0); expect(h.minted).toBe(0);
+        }
+      });
+    }
+  }
+}

@@ -1,0 +1,37 @@
+6	0	Blockchain/Dev/services/auth/src/__tests__/ks795-social-link-verified-email.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks795-social-link-verified-email.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks795-social-link-verified-email.test.ts
+@@ -123,0 +124,6 @@ vi.mock('../repositories/userRepo', () => ({
++  // KS-1460 (rows 4 and 6): the SOCIAL raise now goes through updateUserOrThrow. It is recorded in the
++  // same list and lands (a row comes back), so every assertion in this file reads exactly as before.
++  updateUserOrThrow: vi.fn(async (id: string, updates: Record<string, unknown>) => {
++    linkWrites.push({ id, updates });
++    return { id, ...updates };
++  }),
+added lines with expect/it(/describe: 0
+    has(n: string) { return NAMES.includes(n); }
+    isValidProvider(n: string) { return NAMES.includes(n); }
+  }
+  return { ...real, SocialProviderFactory: StubFactory };
+});
+
+const createdUsers: unknown[] = [];
+const linkWrites: Array<{ id: string; updates: Record<string, unknown> }> = [];
+
+vi.mock('../repositories/userRepo', () => ({
+  getUserBySocialId: vi.fn(async () =>
+    state.alreadyLinked
+      ? { id: 'user-linked', email: VICTIM_EMAIL, status: state.accountStatus, mfaEnabled: state.accountMfaEnabled, mfaSecret: 'JBSWY3DPEHPK3PXP', verificationLevel: 'SOCIAL' }
+      : null,
+  ),
+  getUserByEmail: vi.fn(async (email: string) =>
+    state.emailAccountExists && email === (state.existingEmail || VICTIM_EMAIL)
+      ? { id: 'user-victim', email: state.existingEmail || VICTIM_EMAIL, status: state.accountStatus, mfaEnabled: state.accountMfaEnabled, mfaSecret: 'JBSWY3DPEHPK3PXP', verificationLevel: 'BASIC' }
+      : null,
+  ),
+  updateUser: vi.fn(async (id: string, updates: Record<string, unknown>) => {
+    linkWrites.push({ id, updates });
+    return null;
+  }),
+  // KS-1460 (rows 4 and 6): the SOCIAL raise now goes through updateUserOrThrow. It is recorded in the
+  // same list and lands (a row comes back), so every assertion in this file reads exactly as before.

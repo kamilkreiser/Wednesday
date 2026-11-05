@@ -1,0 +1,500 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1460-rehash-log-is-truthful.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1460-rehash-log-is-truthful.test.ts
+new file mode 100644
+index 000000000..5649628b3
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1460-rehash-log-is-truthful.test.ts
+@@ -0,0 +1,163 @@
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { AddressInfo } from 'node:net';
++import type { Server } from 'node:http';
++import express from 'express';
++
++// KS-1460 row 1 (Wednesday's ruling of 2026-11-05: "make the 'rehashed' info line truthful in the same PR, log only,
++// no behaviour change, one cell"). POST /api/auth/login's UPGRADE-ON-VERIFY step rehashes a bcrypt hash to Argon2id
++// with `userRepo.updateUser`, which answers `null` when its UPDATE matched no row. The route discarded that answer
++// and logged "UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id" whether or not the write landed, so the log recorded a
++// rehash that may not have happened. It now logs the info line only when the write landed, and a warn naming the
++// write that did not land otherwise. The step stays non-fatal: the login answers 200 with tokens either way.
++// Harness: the ks1868 rehash test's (real router and error handler; repository, password, session, jwt, lockout,
++// mail and event bus mocked), with the logger's info AND warn captured.
++
++const h = vi.hoisted(() => ({
++  rehashLands: true,
++  info: [] as unknown[][],
++  warn: [] as unknown[][],
++}));
++
++const capture = vi.hoisted(() => ({
++  debug: () => undefined,
++  info: (...args: unknown[]) => { h.info.push(args); },
++  warn: (...args: unknown[]) => { h.warn.push(args); },
++  error: () => undefined,
++  log: () => undefined,
++}));
++vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: capture, createLogger: () => capture }));
++
++const LOGIN_EMAIL = 'ks1460-login@secuura.local';
++const ACTIVE_USER = {
++  id: 'user-1460-login', email: LOGIN_EMAIL, status: 'ACTIVE', role: 'OWNER',
++  verificationLevel: 'BASIC', mfaEnabled: false, mfaSecret: null, mfaBackupCodes: null,
++  passwordHash: '$2b$10$bcryptstub', tenantId: 'ten-1', organizationId: 'org-1',
++};
++
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }));
++
++vi.mock('../repositories/userRepo', () => ({
++  getPlatformAdmin: vi.fn(async () => null),
++  getUserByEmail: vi.fn(async (email: string) =>
++    email.toLowerCase().trim() === LOGIN_EMAIL ? { ...ACTIVE_USER } : null),
++  getUserById: vi.fn(async () => null),
++  getUserByIdPreAuth: vi.fn(async () => ({ ...ACTIVE_USER })),
++  getUserBySocialId: vi.fn(async () => null),
++  createUser: vi.fn(async () => null),
++  // the real contract: null when the UPDATE matched no row (repositories/userRepo.ts)
++  updateUser: (_id: string, patch: Record<string, unknown>) =>
++    Promise.resolve(patch && 'passwordHash' in patch && !h.rehashLands ? null : { ...ACTIVE_USER, ...patch }),
++  updateUserOrThrow: vi.fn(async () => ({ ...ACTIVE_USER })),
++  updateUserPlatformScope: vi.fn(async () => null),
++  updatePlatformAdminPassword: vi.fn(async () => undefined),
++  reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++  reencryptPlatformAdminMfaSecretIfLegacy: vi.fn(async () => undefined),
++}));
++
++vi.mock('../services/password', () => ({
++  verifyPassword: vi.fn(async () => true),
++  hashPassword: vi.fn(async () => '$argon2id$stub'),
++  checkPasswordStrength: vi.fn(() => ({ ok: true })),
++  generateResetToken: vi.fn(() => 'tok'),
++  shouldRehashAfterVerify: vi.fn(() => true),
++}));
++
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => ({ id: 'sess-1460-login' })),
++  revokeSession: vi.fn(async () => undefined),
++  revokeAllUserSessions: vi.fn(async () => 0),
++  getSession: vi.fn(async () => null),
++  rotateSessionRefreshToken: vi.fn(async () => undefined),
++  getRedisClient: vi.fn(() => null),
++  validateSession: vi.fn(async () => true),
++  updateSessionActivity: vi.fn(async () => undefined),
++  isRedisAvailable: vi.fn(() => true),
++}));
++
++vi.mock('../services/jwt', () => ({
++  generateTokenPair: vi.fn(() => ({ accessToken: 'MINTED_1460_LOGIN', refreshToken: 'MINTED_1460_LOGIN_R', expiresIn: 900 })),
++  verifyRefreshToken: vi.fn(() => ({})),
++  decodeToken: vi.fn(() => ({ jti: 'jti-1460', exp: Math.floor(Date.now() / 1000) + 3600 })),
++}));
++
++vi.mock('../services/refreshDenylist', () => ({
++  isRefreshJtiDenylisted: vi.fn(async () => false),
++  denylistRefreshJti: vi.fn(async () => undefined),
++}));
++vi.mock('../services/accountLockout', () => ({
++  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => 1),
++  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
++}));
++vi.mock('../services/email', () => ({
++  sendVerificationEmail: vi.fn(async () => undefined),
++  sendPasswordResetEmail: vi.fn(async () => undefined),
++}));
++
++const passThrough = (...args: unknown[]) => {
++  if (args.length >= 3 && typeof args[2] === 'function') return (args[2] as () => void)();
++  return (_r: unknown, _s: unknown, n: () => void) => n();
++};
++vi.mock('../middleware/authenticate', () => ({
++  authenticate: passThrough, authenticateToken: passThrough,
++  authenticateAccessOrConnector: passThrough, optionalAuthenticate: passThrough,
++  requireRole: passThrough,
++}));
++vi.mock('../middleware/tenantGuc', () => ({ seedTenantGuc: (_r: unknown, _s: unknown, n: () => void) => n() }));
++vi.mock('../events', () => ({
++  publishEvent: () => Promise.resolve(undefined),
++  EventTypes: { USER_LOGIN: 'user.login' },
++}));
++
++let server: Server;
++let baseUrl = '';
++beforeAll(async () => {
++  const { authRoutes } = await import('../routes/auth');
++  const { errorHandler } = await import('../middleware/errorHandler');
++  const app = express();
++  app.use(express.json());
++  app.use('/api/auth', authRoutes);
++  app.use(errorHandler);
++  server = app.listen(0, '127.0.0.1');
++  await new Promise<void>((resolve) => server.once('listening', () => resolve()));
++  baseUrl = 'http://127.0.0.1:' + String((server.address() as AddressInfo).port);
++});
++afterAll(async () => {
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++beforeEach(() => {
++  h.rehashLands = true;
++  h.info = [];
++  h.warn = [];
++});
++
++const REHASHED = 'UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id';
++const NOT_LANDED = 'UPGRADE-ON-VERIFY: the rehash write did not take effect (non-fatal); the old hash stays';
++const infoLines = (msg: string) => h.info.filter((c) => c[0] === msg);
++const warnLines = (msg: string) => h.warn.filter((c) => c[0] === msg);
++
++async function login(): Promise<{ status: number; minted: boolean }> {
++  const res = await fetch(baseUrl + '/api/auth/login', {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({ email: LOGIN_EMAIL, password: 'pw-correct-horse' }),
++    signal: AbortSignal.timeout(5000),
++  });
++  const text = await res.text();
++  return { status: res.status, minted: text.includes('MINTED_1460_LOGIN') };
++}
++
++describe('KS-1460 row 1 — the UPGRADE-ON-VERIFY log line says whether the rehash landed', () => {
++  it('RED — a rehash write that does not land logs the warn, never "rehashed", and the login still answers 200 with tokens', async () => {
++    h.rehashLands = false;
++    expect(await login()).toEqual({ status: 200, minted: true });
++    expect(infoLines(REHASHED), 'the log must not record a rehash that did not land').toHaveLength(0);
++    expect(warnLines(NOT_LANDED)).toEqual([[NOT_LANDED, { userId: ACTIVE_USER.id }]]);
++  });
++
++  it('CONTROL — a rehash write that lands logs "rehashed" once and no warn; the login answers 200 with tokens', async () => {
++    expect(await login()).toEqual({ status: 200, minted: true });
++    expect(infoLines(REHASHED)).toEqual([[REHASHED, { userId: ACTIVE_USER.id }]]);
++    expect(warnLines(NOT_LANDED)).toHaveLength(0);
++  });
++});
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1460-social-level-raise-confirms-the-write.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1460-social-level-raise-confirms-the-write.test.ts
+new file mode 100644
+index 000000000..b707acb55
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1460-social-level-raise-confirms-the-write.test.ts
+@@ -0,0 +1,229 @@
++// =============================================================================
++// KS-1460 rows 4 and 6 — the `verificationLevel: 'SOCIAL'` raise is confirmed
++// =============================================================================
++//
++// Two routes raise a BASIC account to SOCIAL after a social sign-in:
++//   - GET  /api/auth/social/:provider/callback  (row 4): it then set
++//     `user.verificationLevel = 'SOCIAL'` in memory and minted a token pair;
++//   - POST /api/auth/social/link               (row 6): it then answered
++//     `success: true, linked: true`.
++// Both called `userRepo.updateUser`, which answers `null` when its UPDATE matched
++// no row (repositories/userRepo.ts), and both discarded that answer. So a token
++// claiming SOCIAL, or a success answer, went out over a write that did not land.
++// Both now call `updateUserOrThrow`: a write that did not land is a 503
++// (ServiceUnavailableError) before any session, token or success answer.
++//
++// The repository double below models the REAL contract: `updateUser` answers
++// null for a write that did not land, and `updateUserOrThrow` is `updateUser`
++// plus a ServiceUnavailableError on null, as the real one is. That is what lets
++// the same cells red on the unfixed routes (which read `updateUser` and ignore
++// the null) and pass on the fixed ones.
++//
++// Not covered here, by Wednesday's ruling of 2026-11-05: the social-id link
++// writes (rows 3 and 5) belong to KS-1672 (updateUser drops social-id fields,
++// so there is no failure for updateUserOrThrow to catch).
++// The harness is ks795's (the callback through a real OAuth `state` store on an
++// in-memory Redis double).
++// =============================================================================
++
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import express from 'express';
++import { randomUUID } from 'node:crypto';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++
++const state = vi.hoisted(() => ({
++  /** the account the callback resolves by its social id, and the link route reads back */
++  level: 'BASIC' as string,
++  /** when true, the SOCIAL write does not land: updateUser answers null for it */
++  levelWriteLands: true,
++  levelWrites: [] as Array<{ id: string; updates: Record<string, unknown> }>,
++  sessions: 0,
++}));
++
++const silentLogger = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
++vi.mock('../utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger }));
++
++vi.mock('../providers/social', async (importOriginal) => {
++  const real = await importOriginal<Record<string, unknown>>();
++  const NAMES = ['google', 'linkedin', 'facebook', 'apple', 'github', 'microsoft_personal'];
++  class StubFactory {
++    get(name: string) {
++      if (!NAMES.includes(name)) return undefined;
++      return {
++        name,
++        getAuthUrl: () => 'https://provider.test/auth',
++        exchangeCode: async () => ({
++          providerId: `${name}-provider-id-1460`, provider: name, email: 'u1460@secuura.local',
++          emailVerified: true, displayName: 'U', firstName: 'U', lastName: 'Ser', rawProfile: {},
++        }),
++      };
++    }
++    getEnabled() { return NAMES; }
++    has(n: string) { return NAMES.includes(n); }
++    isValidProvider(n: string) { return NAMES.includes(n); }
++  }
++  return { ...real, SocialProviderFactory: StubFactory };
++});
++
++const account = () => ({
++  id: 'user-1460', email: 'u1460@secuura.local', status: 'ACTIVE', role: 'OWNER',
++  mfaEnabled: false, mfaSecret: null, verificationLevel: state.level, tenantId: 'ten-1', organizationId: 'org-1',
++});
++
++vi.mock('../repositories/userRepo', async () => {
++  const { ServiceUnavailableError } = await import('../middleware/errorHandler');
++  const updateUser = async (id: string, updates: Record<string, unknown>) => {
++    if ('verificationLevel' in updates) {
++      state.levelWrites.push({ id, updates });
++      return state.levelWriteLands ? { ...account(), ...updates } : null;
++    }
++    return { ...account() }; // any other write (the social-id link is KS-1672's and is not the subject)
++  };
++  return {
++    getUserBySocialId: vi.fn(async () => ({ ...account() })),
++    getUserByEmail: vi.fn(async () => null),
++    getUserById: vi.fn(async () => ({ ...account() })),
++    updateUser: vi.fn(updateUser),
++    // the real contract (repositories/userRepo.ts updateUserOrThrow): updateUser, then a 503 on null
++    updateUserOrThrow: vi.fn(async (id: string, updates: Record<string, unknown>, operation: string) => {
++      const updated = await updateUser(id, updates);
++      if (!updated) throw new ServiceUnavailableError(`${operation} could not be confirmed. Please retry — if you already succeeded, you may not need to.`);
++      return updated;
++    }),
++    createUser: vi.fn(async () => null),
++    getPlatformAdmin: vi.fn(async () => null),
++    reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++  };
++});
++
++const redisStore = new Map<string, string>();
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => { state.sessions += 1; return { id: 'sess-1460' }; }),
++  getRedisClient: vi.fn(() => ({
++    setex: async (k: string, _ttl: number, v: string) => { redisStore.set(k, v); return 'OK'; },
++    get: async () => null,
++    incr: async () => 1,
++    expire: async () => 1,
++    set: async () => 'OK',
++    del: async () => 1,
++    getdel: async (k: string) => { const v = redisStore.get(k) ?? null; redisStore.delete(k); return v; },
++  })),
++  validateSession: vi.fn(async () => true),
++  updateSessionActivity: vi.fn(async () => undefined),
++}));
++vi.mock('../services/jwt', () => ({
++  generateTokenPair: vi.fn(() => ({ accessToken: 'MINTED_1460_ACCESS', refreshToken: 'MINTED_1460_REFRESH', expiresIn: 900 })),
++  verifyAccessToken: vi.fn(() => ({})),
++}));
++// POST /social/link reads req.user; every other factory the route tree registers passes through.
++const withUser = () => (req: Record<string, unknown>, _s: unknown, n: () => void) => {
++  (req as { user?: unknown }).user = { userId: 'user-1460', organizationId: 'org-1', tenantId: 'ten-1' };
++  n();
++};
++const passthrough = () => (_r: unknown, _s: unknown, n: () => void) => n();
++vi.mock('../middleware/authenticate', () => ({
++  authenticate: withUser,
++  authenticateAccessOrConnector: passthrough,
++  requireRole: passthrough,
++  requireVerificationLevel: passthrough,
++  requireOwnership: passthrough,
++  requireSameOrganization: passthrough,
++}));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++
++let server: Server;
++let base: string;
++
++beforeAll(async () => {
++  const { authRoutes } = await import('../routes/auth');
++  const { errorHandler } = await import('../middleware/errorHandler');
++  const app = express();
++  app.use(express.json());
++  app.use('/api/auth', authRoutes);
++  app.use(errorHandler);
++  server = app.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => server.once('listening', () => r()));
++  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
++});
++afterAll(async () => { await new Promise<void>((r) => server.close(() => r())); });
++
++beforeEach(() => {
++  state.level = 'BASIC';
++  state.levelWriteLands = true;
++  state.levelWrites = [];
++  state.sessions = 0;
++});
++
++async function callback(): Promise<{ status: number; body: string }> {
++  const { storeOAuthState } = await import('../services/oauthState');
++  const oauthState = `test-state-${randomUUID()}`;
++  await storeOAuthState(oauthState, 'google');
++  const res = await fetch(`${base}/api/auth/social/google/callback?code=stub-code&state=${encodeURIComponent(oauthState)}`, { redirect: 'manual' });
++  return { status: res.status, body: await res.text() };
++}
++async function link(): Promise<{ status: number; body: string }> {
++  const res = await fetch(`${base}/api/auth/social/link`, {
++    method: 'POST', headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({ provider: 'google', code: 'stub-code' }),
++  });
++  return { status: res.status, body: await res.text() };
++}
++const show = (r: { status: number; body: string }) => `status ${r.status}, body: ${r.body.slice(0, 200)}`;
++
++describe('KS-1460 row 4 — the social callback confirms the SOCIAL raise before it mints', () => {
++  it('RED — a SOCIAL write that does not land answers 503, mints no token and creates no session', async () => {
++    state.levelWriteLands = false;
++    const r = await callback();
++    expect(r.status, show(r)).toBe(503);
++    expect(r.body).toContain('SERVICE_UNAVAILABLE');
++    expect(r.body).not.toContain('MINTED_1460');
++    expect(state.sessions).toBe(0);
++    expect(state.levelWrites).toEqual([{ id: 'user-1460', updates: { verificationLevel: 'SOCIAL' } }]);
++  });
++
++  it('CONTROL — a SOCIAL write that lands still mints (the success path is unchanged)', async () => {
++    const r = await callback();
++    expect(r.status, show(r)).toBe(200);
++    expect(r.body).toContain('MINTED_1460_ACCESS');
++    expect(state.sessions).toBe(1);
++    expect(state.levelWrites).toHaveLength(1);
++  });
++
++  it('CONTROL — an account already SOCIAL issues no level write and mints', async () => {
++    state.level = 'SOCIAL';
++    state.levelWriteLands = false; // would 503 if the route wrote; it must not write at all
++    const r = await callback();
++    expect(r.status, show(r)).toBe(200);
++    expect(r.body).toContain('MINTED_1460_ACCESS');
++    expect(state.levelWrites).toEqual([]);
++  });
++});
++
++describe('KS-1460 row 6 — POST /social/link confirms the SOCIAL raise before it answers success', () => {
++  it('RED — a SOCIAL write that does not land answers 503, not success', async () => {
++    state.levelWriteLands = false;
++    const r = await link();
++    expect(r.status, show(r)).toBe(503);
++    expect(r.body).toContain('SERVICE_UNAVAILABLE');
++    expect(r.body).not.toContain('"success":true');
++    expect(state.levelWrites).toEqual([{ id: 'user-1460', updates: { verificationLevel: 'SOCIAL' } }]);
++  });
++
++  it('CONTROL — a SOCIAL write that lands answers success, linked (the success path is unchanged)', async () => {
++    const r = await link();
++    expect(r.status, show(r)).toBe(200);
++    expect(r.body).toContain('"linked":true');
++    expect(state.levelWrites).toHaveLength(1);
++  });
++
++  it('CONTROL — an account already SOCIAL issues no level write and answers success', async () => {
++    state.level = 'SOCIAL';
++    state.levelWriteLands = false;
++    const r = await link();
++    expect(r.status, show(r)).toBe(200);
++    expect(state.levelWrites).toEqual([]);
++  });
++});
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks795-social-link-verified-email.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks795-social-link-verified-email.test.ts
+index e5e2d605d..c4da15b49 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks795-social-link-verified-email.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks795-social-link-verified-email.test.ts
+@@ -121,6 +121,12 @@ vi.mock('../repositories/userRepo', () => ({
+     linkWrites.push({ id, updates });
+     return null;
+   }),
++  // KS-1460 (rows 4 and 6): the SOCIAL raise now goes through updateUserOrThrow. It is recorded in the
++  // same list and lands (a row comes back), so every assertion in this file reads exactly as before.
++  updateUserOrThrow: vi.fn(async (id: string, updates: Record<string, unknown>) => {
++    linkWrites.push({ id, updates });
++    return { id, ...updates };
++  }),
+   createUser: vi.fn(async (u: unknown) => { createdUsers.push(u); return u; }),
+   getPlatformAdmin: vi.fn(async () => null),
+   reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+index 9240c1f80..5a2a8a59e 100644
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -558,8 +558,16 @@ authRoutes.post('/login', async (req: AuthenticatedRequest, res: Response, next)
+     if (user.passwordHash && shouldRehashAfterVerify(user.passwordHash)) {
+       try {
+         const newHash = await hashPassword(data.password);
+-        await userRepo.updateUser(user.id, { passwordHash: newHash });
+-        logger.info('UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id', { userId: user.id });
++        // KS-1460 (row 1): the log line now follows the write's answer. `updateUser`
++        // answers null when its UPDATE matched no row; before, this logged "rehashed"
++        // either way, so the log recorded a rehash that may not have happened. Still
++        // non-fatal (the login goes on, the next one retries), as documented above.
++        const rehashed = await userRepo.updateUser(user.id, { passwordHash: newHash });
++        if (rehashed) {
++          logger.info('UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id', { userId: user.id });
++        } else {
++          logger.warn('UPGRADE-ON-VERIFY: the rehash write did not take effect (non-fatal); the old hash stays', { userId: user.id });
++        }
+       } catch (err: any) {
+         let reason: string;
+         try {
+@@ -1386,7 +1394,12 @@ authRoutes.get('/social/:provider/callback', async (req: AuthenticatedRequest, r
+     }
+ 
+     if (user.verificationLevel === 'NONE' || user.verificationLevel === 'BASIC') {
+-      await userRepo.updateUser(user.id, { verificationLevel: 'SOCIAL' });
++      // KS-1460 (row 4): confirm the raise before the in-memory copy says SOCIAL and a
++      // token is minted from it. Before, `updateUser`'s null (a write that matched no
++      // row) was discarded, so a token could claim SOCIAL over a level the database
++      // never recorded. A write that did not land is now a 503 (ServiceUnavailableError)
++      // and no session or token is created.
++      await userRepo.updateUserOrThrow(user.id, { verificationLevel: 'SOCIAL' }, 'Social sign-in');
+       user.verificationLevel = 'SOCIAL';
+     }
+ 
+@@ -1472,7 +1485,11 @@ authRoutes.post('/social/link', authenticate(), async (req: AuthenticatedRequest
+ 
+     const user = await userRepo.getUserById(req.user!.userId);
+     if (user && (user.verificationLevel === 'NONE' || user.verificationLevel === 'BASIC')) {
+-      await userRepo.updateUser(user.id, { verificationLevel: 'SOCIAL' });
++      // KS-1460 (row 6): confirm the raise before answering success. Before, a write that
++      // matched no row was discarded and the route still answered `success: true`. A
++      // write that did not land is now a 503 (ServiceUnavailableError). The social-id
++      // write above is KS-1672's (updateUser drops social-id fields) and is unchanged.
++      await userRepo.updateUserOrThrow(user.id, { verificationLevel: 'SOCIAL' }, 'Linking the social account');
+     }
+ 
+     logger.info('Social account linked', { userId: req.user!.userId, provider: providerName });
+diff --git a/Projects Documents/fragments/cheat/KS-1460-social-level-raise-and-rehash-log-confirm-the-write.html b/Projects Documents/fragments/cheat/KS-1460-social-level-raise-and-rehash-log-confirm-the-write.html
+new file mode 100644
+index 000000000..fcf1bb5e5
+--- /dev/null
++++ b/Projects Documents/fragments/cheat/KS-1460-social-level-raise-and-rehash-log-confirm-the-write.html	
+@@ -0,0 +1,4 @@
++<h2>The SOCIAL level raise is confirmed before a token or a success answer, and the rehash log says whether it landed &mdash; KS-1460, auth, TIER 1</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> A social sign-in (<code>GET /api/auth/social/:provider/callback</code>) or <code>POST /api/auth/social/link</code> that raises a BASIC account to SOCIAL and cannot confirm the database write now answers <strong>503</strong> <code>{"success":false,"error":{"code":"SERVICE_UNAVAILABLE","message":"Social sign-in could not be confirmed. Please retry — if you already succeeded, you may not need to."}}</code> (the link says "Linking the social account ..."): retry. No token or session is issued in that case. On the password login, the log line "UPGRADE-ON-VERIFY: rehashed bcrypt -&gt; argon2id" now appears only when the rehash was stored; otherwise you see the warn "the rehash write did not take effect (non-fatal); the old hash stays", and the login still succeeds.
++    </td></tr><tr><td><strong>Behaviour change:</strong> before, both social routes answered success (and the callback minted a SOCIAL token) even when the level was never stored. Still open: <code>POST /social/link</code>'s social-id write is not persisted at all (KS-1672), so its "linked" answer is not yet true. Test files: <code>services/auth/src/__tests__/ks1460-social-level-raise-confirms-the-write.test.ts</code> and <code>ks1460-rehash-log-is-truthful.test.ts</code>.
++    </td></tr></table></div>
+diff --git a/Projects Documents/fragments/flow/KS-1460-social-level-raise-and-rehash-log-confirm-the-write.html b/Projects Documents/fragments/flow/KS-1460-social-level-raise-and-rehash-log-confirm-the-write.html
+new file mode 100644
+index 000000000..3da17f515
+--- /dev/null
++++ b/Projects Documents/fragments/flow/KS-1460-social-level-raise-and-rehash-log-confirm-the-write.html	
+@@ -0,0 +1,13 @@
++<h2><!--n-->. The SOCIAL level raise is confirmed before a token or a success answer, and the rehash log says whether it landed (KS-1460, auth, TIER 1)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this changes.</strong></td><td> Before, three login-path writes in <code>services/auth/src/routes/auth.ts</code> discarded <code>userRepo.updateUser</code>'s answer, which is <code>null</code> when the UPDATE matched no row. The social sign-in callback (<code>GET /api/auth/social/:provider/callback</code>) raised a BASIC account to <code>verificationLevel: 'SOCIAL'</code>, set the in-memory copy to SOCIAL and minted a token pair over that unconfirmed write. <code>POST /api/auth/social/link</code> did the same raise and answered <code>success: true</code>. The password login's UPGRADE-ON-VERIFY rehash logged "rehashed bcrypt -&gt; argon2id" whether or not the write landed.
++    </td></tr><tr><td>Now both SOCIAL raises call <code>updateUserOrThrow</code>: a write that did not land answers <strong>503</strong> <code>SERVICE_UNAVAILABLE</code> ("Social sign-in could not be confirmed. Please retry" / "Linking the social account could not be confirmed. Please retry"), with no session, no token and no success answer. The rehash logs its info line only when the write landed, and a warn "the rehash write did not take effect (non-fatal); the old hash stays" otherwise. The login is unchanged either way.
++    </td></tr><tr><td>Unchanged, by Wednesday's ruling of 2026-11-05: the <code>lastLoginAt</code> write (best effort; <code>updateUser</code> already warns on 0 rows) and the two social-id link writes. Those belong to KS-1672: <code>updateUser</code> drops social-id fields, so there is no failure for <code>updateUserOrThrow</code> to catch, and <code>POST /social/link</code>'s "linked" answer stays false until that ticket lands.
++    </td></tr></table>
++<h3><!--n-->.1 Evidence</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>How it was tested.</strong></td><td> Two new files in <code>services/auth/src/__tests__/</code>. <code>ks1460-social-level-raise-confirms-the-write.test.ts</code> has 6 cells on the ks795 harness. Its repository double models the real contract: <code>updateUser</code> answers null for a write that did not land, and <code>updateUserOrThrow</code> is <code>updateUser</code> plus a 503 on null. <code>ks1460-rehash-log-is-truthful.test.ts</code> has 2 cells on the ks1868 login harness. On develop <code>5fc5569ed96a</code>: 2 of 6 and 1 of 2 failed, every one by assertion (200 with a minted token, 200 <code>linked: true</code>, and the "rehashed" line logged over a write that did not land); every control passed. With the change: 6 of 6 and 2 of 2.
++    </td></tr><tr><td>Seven mutants, all admissible (tsc rc 0), all killed by assertion: either route back to the discarding <code>updateUser</code>; either throw swallowed with <code>.catch(() =&gt; null)</code>; the info line logged always; the branches swapped; the warn dropped.
++    </td></tr><tr><td>The social and login harnesses (ks795, ks728, ks722, ks1240b, ks1858, ks1885, ks1868-auth, ks781, ks1157, ks1967 and others): 33 of 33 files, 423 of 423 tests. ks795 needed <code>updateUserOrThrow</code> added to its repository mock; it records into the same list and lands, and no assertion changed. Whole auth suite: 1,693 of 1,695 with the change. The 2 are <code>ks949-platform-admin-seed-identity</code> timeouts under load, the same cells that timed out on develop. <code>tsc --noEmit</code> rc 0; eslint clean; test-file type ratchet 0 new (41 in the baseline).
++    </td></tr></table>
++<h3><!--n-->.2 What it does not cover</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A real database 0-row UPDATE (fail-closed RLS with an unresolved tenant GUC is the case that produces one), a booted auth service, a real social provider, the four platform suites, KS-1672's social-id persistence, Node 24 (host Node v26.8.1, not an LTS line).
++    </td></tr></table>
