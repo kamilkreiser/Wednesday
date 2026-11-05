@@ -60249,5 +60249,286 @@
    "CARD hpsmpoc-deploy-live-which-site-1104",
    "CARD hpsmpoc-demo-deploy-words-schema-1104"
   ]
+ },
+ {
+  "id": "secuura-ks692-status-revoke-bind-creator-1105",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-692: build the creator-bound check on the status revoke routes now, or keep the platform-only interim?",
+  "bluf": "Override reason: your 16 Sep card secuura-ks692-status-revoke-interim-posture ruled narrow now and bind-creator LATER with no date; this asks only whether later is now. You already ruled the model (bind-creator, 13 Sep; narrow interim, 16 Sep). Today only platform roles can revoke or un-revoke through /api/status/:id/revoke, while credential revoke (KS-1851) is already creator-bound, so the two revoke doors admit different callers. This asks only WHEN to build it. Source: KS-692 re-read 2026-11-05.",
+  "default_action": "b: no behaviour change; the ticket stays open and is re-asked at the next triage",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build it now (an Opus seat, same pattern as KS-1851, gated)",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Keep the platform-only interim until a tenant admin or Platform S needs it",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T16:02:22.710307+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-21 20:06",
+   "2026-09-03 09:50",
+   "2026-09-16 15:03",
+   "2026-09-17 15:10",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-ks597-bind-compares-two-id-spaces-now-deployed",
+   "CARD secuura-ks1102-public-status-what-may-show",
+   "CARD secuura-ks692-status-revoke-interim-posture",
+   "CARD secuura-ks888-revoke-validate-on-failed-save",
+   "CARD secuura-ks1370-revoke-undone-by-stale-process",
+   "CARD secuura-ks1370-validate-when-the-revoke-check-cannot-read",
+   "CARD secuura-uuid-revokes-never-wrote-status-history-1006",
+   "CARD secuura-ks695-connector-may-revoke-own-key-1009",
+   "CARD wed-openrouter-key-revoke-after-replay-1009",
+   "CARD secuura-ks1114-deleted-status-found-by-title-1018",
+   "CARD secuura-demo-smoke-key-revoke-after-measure-1020",
+   "CARD secuura-ks1689-m365-failed-signin-status-1020",
+   "CARD secuura-ks1861-archive-from-which-status-1101",
+   "CARD secuura-ks1860-status-refresh-fails-at-startup-1101"
+  ]
+ },
+ {
+  "id": "secuura-ks843-erasure-flip-trigger-1105",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-843: what evidence flips SUBJECTS_ERASE_SCOPE_ENFORCED, given you ruled no re-mint?",
+  "bluf": "Override reason: your rulings set the shape (logged grace, 6 Sep), the cutover timing (12 Oct) and no key re-mint (2 Nov, secuura-ks889-platform-s-key-remint-1102); none names the evidence that flips enforcement, the only open point. The erasure scope gate is built and deployed in logged-grace mode. You ruled no key re-mint (2 Nov), and existing Platform S keys carry no connector link (a backfill recovers 5 of 32), so the log cannot prove Platform S moved to the new scope by itself. Without a trigger the ticket waits forever.",
+  "default_action": "a: keep logged grace and flip on 30 clean days",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep logged grace; flip after 30 days of zero un-scoped Platform S erasure calls",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Pick a hard flip date and give Stuart written notice",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Park to Backlog; revisit with the KS-577 rotation window",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T16:02:26.864185+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-03 09:54",
+   "2026-09-05 10:52",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks843-cutover-stuart",
+   "CARD secuura-ks843-half2-round3",
+   "CARD wed-ledger-archive-has-no-trigger",
+   "CARD secuura-erasure-door-absolute-form-bypass",
+   "CARD secuura-ks1187-erasure-door-reads-back",
+   "CARD secuura-ks843-cutover-timing",
+   "CARD secuura-ks695-erasure-merge-timing-1013",
+   "CARD secuura-ks1580-erasure-revoked-key-code-1019",
+   "CARD secuura-ks758-erasure-log-subject-ref-1020",
+   "CARD secuura-pr1961-erasure-skip-not-shredded-1103"
+  ]
+ },
+ {
+  "id": "secuura-ks1493-unversioned-307-limiter-1105",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1493: is an unthrottled flood of the unversioned /api/verification 307 redirects acceptable?",
+  "bluf": "Override reason: the matching cards are the login-limiter double-slash bypass and the per-key limiter that never fired; neither covers the unversioned 307 redirect. In production the redirect is counted by no rate limiter (305 of 305 passed in the gate test). A 307 reaches no handler, so a flood costs only the redirect itself, and counting it would double-count clients that legitimately follow it.",
+  "default_action": "a: accept and pin it with a test",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept; write the reasoning beside the limiter and pin it with a test",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Count the unversioned redirect in the global limiter",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T16:02:30.907530+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-f5-login-limiter-bypass",
+   "CARD secuura-apikey-rate-limiter-never-fires"
+  ]
+ },
+ {
+  "id": "secuura-ks1494-seed-legacy-email-row-1105",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1494: keep the new seed behaviour that leaves the admin id row active for a legacy plaintext email row?",
+  "bluf": "Override reason: the only match is the September audit-fuse card, an unrelated subject. The PR 1485 rewrite (deployed 1 Nov) changed one case: for a legacy plaintext email row the old code suspended both rows and the new code keeps the id row active. Suspending both is what locked the admin out originally (KS-968). Nothing is broken today.",
+  "default_action": "a: no behaviour change; the wording is corrected",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept the new behaviour; correct the PR and doc wording",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Restore suspend-both for that case",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Migrate legacy rows to lookup hashes, then drop the special case",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T16:02:35.159851+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "CARD secuura-audit-fuse-0930-needs-your-email"
+  ]
+ },
+ {
+  "id": "secuura-ks1534-allow-list-array-of-non-strings-1105",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1534: should both allow-list read routes refuse a stored array that contains non-strings?",
+  "bluf": "Override reason: the only match is the 33-ticket UAT archive card; your 5 Oct allow-list ruling covered a MISSING setting, and this is a MALFORMED stored value. The connector-info reader echoes a stored [1,2] or [null] raw, while the create path refuses every create with the wrong message, so the two disagree for the same stored value. Since KS-1230 (closed today) the write side validates elements, so such a value should not be storable any more.",
+  "default_action": "b: no contract change without your word",
+  "options": [
+   {
+    "key": "a",
+    "label": "Refuse in both reads with one shared message (fail closed)",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Leave the reads; rely on write-side validation",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T16:02:39.036616+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-21 11:45",
+   "CARD secuura-archive-uat-tickets-vs-peters-test-list"
+  ]
+ },
+ {
+  "id": "secuura-ks1548-late-final-window-1105",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1548: when the last audit-log window arrives after the time budget, serve its complete rows late, or drop them?",
+  "bluf": "Override reason: the matches share only the word window (OAuth refresh window, VM resize, a WED card); none concerns the audit-log time budget. Measured: a last window that took 1.5 times the budget was served after 3021 ms against a 2000 ms budget, with complete rows. Dropping them would make the response silently incomplete (what KS-1545 complained about), and a deadline check would not bound the time anyway.",
+  "default_action": "a: no change to the request path",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep serving the complete late rows; record the rule with a test",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Add a post-body deadline check and drop the platform half",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T16:02:42.657474+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 17:10",
+   "2026-09-17 16:37",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD secuura-oauth-refresh-launder-forward-only-window",
+   "CARD secuura-oauth-refresh-window-iat-cutoff-or-marker",
+   "CARD tuesday-boot-digest-outgrew-the-window",
+   "CARD secuura-vm-resize-window"
+  ]
+ },
+ {
+  "id": "secuura-ks1585-scope-rows-on-admin-change-1105",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1585: when an admin with organisation-scope rows is deleted or loses ADMIN, delete the rows or keep and ignore them?",
+  "bluf": "Override reason: your 13 Oct card secuura-ks1570-admin-role-bound-shape-1013 ruled the SHAPE (b) of the organisation bound; what happens to the scope rows when an admin is deleted or demoted is not in it. The new organisation-scope table has no foreign keys. Rows left behind are harmless today (they only narrow access) but they outlive the user and are personal data keyed on user_id. The writer (PR B) must decide before it is built.",
+  "default_action": "b: non-destructive; nothing is deleted without your word",
+  "options": [
+   {
+    "key": "a",
+    "label": "Delete them with the user delete or demotion, plus an audit row",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Keep them; readers apply a row only while the user is still ADMIN",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Refuse to delete or demote an admin who still has scope rows",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-05T16:02:46.165801+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-25 09:17",
+   "2026-09-03 21:20",
+   "2026-09-07 06:42",
+   "2026-09-16 18:52",
+   "CARD secuura-ks662-scope",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD secuura-793-the-four-rows-you-authorised-are-already-expired",
+   "CARD secuura-ks839-oauth-wildcard-scope-grants-everything",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD secuura-audit-rows-react-router-v7-migration",
+   "CARD spark-studio-client-scope",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013",
+   "CARD secuura-provisioning-scope-escapes-the-org-bound",
+   "CARD secuura-m365-admin-setup-for-customer-org-1020",
+   "CARD secuura-platform-admin-spelling-certification-reads-1020",
+   "CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022",
+   "CARD secuura-kintsugi-admin-published-default-1027",
+   "CARD secuura-ks772-stuart-provenance-rows-1028",
+   "CARD secuura-ks1814-company-admin-reanchor-1030"
+  ]
  }
 ]
