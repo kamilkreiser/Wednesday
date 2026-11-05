@@ -14,15 +14,16 @@ supersede: REPLACED WHOLESALE 11:47 AEDT 2026-11-05 by the 10:27 rotation seat (
 - Standing: Spark IGNORED until he says (11-04 16:42); October deploy grant extended until further notice; 11-04 09:16 'clear and close as many in progress tickets as possible'.
 - Personal errand done 11:12: ~/Downloads/winmail.dat unpacked into ~/Downloads/winmail_extracted (contents not read).
 
-## FLOOR at 11:47
-- **D 53rd** %161 (Opus): KINTSUGI deploy of develop 07a2d62be6a0 (058 + PR 2003 + PR 2005 + PR 2004). Brief: 2_Project_Files/fleet/briefs_staged/2026-11-05_seatD53_deploy_kintsugi.md. Stops at STATUS A for 'GO KINTSUGI at <pin12> (Seat D 53rd)'. **Expect QUESTION 'ks1401 058 window'** if 058's tenant_isolation policy is missing on any kintsugi table (D 52nd's warning: the migration would change OLD code's reads before the swap). Plan confirmation = rung 6 owed. Before GO: ls-remote develop, kam_rulings, no other GO outstanding.
-- **GATE 195 DONE**: 'GO WITH NOTES — MERGE (no HOLD-FOR-KAM)', merge tree 941a1eca81f6 on develop 07a2d62be6a0 (verdict 0_Brain/reference/2026-11-05_gate195-ks1990-pr2006/verdict.md). Completion check passed. F1 LOW (no test pins partial created=1) -> next filing seat.
-- **B 95th** %162 (Sonnet, merge seat): PR 2006 notes insert -> READY TO MERGE -> Wednesday's GO subject EXACTLY 'GO: merge PR 2006 at 6311c141f99e on develop <pin12> (Seat B 95th)', body with full head 6311c141f99e5ade8d94e60ee15b0c80006a52cd, pin and 'Expected result tree 941a1eca81f6ef0182775f918dfd7a6e828ad9b8' (if develop unmoved). Before GO: ls-remote, kam_rulings, no other GO outstanding to that seat. KS-1990 stays In Progress (kintsugi deploy later; demo frozen). Brief: 2_Project_Files/fleet/briefs_staged/2026-11-05_seatB95_merge_pr2006.md.
-- Seats wrapped + scored this seat: S 19th 0.94 (11 tickets KS-1992..2002 + 2 comments), D 52nd 0.97 (demo), W 28th 0.95 gate pending (PR 2006). All panes closed.
+## FLOOR at 12:30 (handover written by the 10:27 seat at ~78%, rotating inside 80-90)
+- **D 53rd** %161 (Opus): KINTSUGI deploy at PIN 07a2d62be6a0 (058 + PR 2003 + PR 2005 + PR 2004; NOT PR 2006). GO KINTSUGI sent 01:11:52Z naming the 058 window. Building k18 (2 batches) since 01:15:19Z. Then: post-build checks -> ls-remote -> migrate058_d53 CHECK -> APPLY -> b-post + cescope (predicted 0/14/0/14, certifications 1) -> part a (vc-issuer, originate) -> vprobe MID -> part b api-gateway -> +15 min error counter (ANSI-aware, controls proven) -> STATUS B. STOP list: any guard, >1 Applying line, error naming charge_events/metering/RLS, KS-535 equality, OOM. Never alter the policy (a new decision for Kam).
+  - On STATUS B: verify REVISION/claims, ACK + wrap, score, pane_close; REPORT TO KAM on the panel: kintsugi carries everything merged before PR 2006; his kintsugi count tenant-less 0 of 14; 058 changed behaviour on kintsugi (unscoped charge_events reads 14 -> 0, certifications opened) per his card 1005 a; Platform S / bot impact UNMEASURED; the swap windows AEDT.
+- **B 95th** %162 (Sonnet): PR 2006 MERGED 01:26:04Z as 5fc5569ed96a (verified at origin by Wednesday). WRAPPING on Wednesday's ACK. On its wrap mail: verify history '^## .*Seat B 95' = 1 (control B 94 = 1), HANDOVER FINAL, score (~0.95), pane_close %162.
+- develop now = 5fc5569ed96ac61f64823cc9e1fa841899aa1f62 (PR 2006). KS-1990 needs a LATER kintsugi deploy (demo frozen).
+- Wrapped + scored this seat: S 19th 0.94, D 52nd 0.97, W 28th 0.95 (gate 195 GO WITH NOTES -> merged). Gate 195 done.
 
 ## THEN (owed, in order)
-1. D 53rd plan confirmation -> STATUS A -> (058 window ruling) -> GO KINTSUGI -> STATUS B -> report Kam his kintsugi tenant-less charge count with the deploy.
-2. B 95th READY -> GO -> MERGED (PR 2006); then a kintsugi deploy of it in a LATER round (D 53rd is pinned to 07a2d62be6a0 without it).
+1. D 53rd STATUS B -> verify, ACK, score, close, report to Kam (see floor).
+2. B 95th wrap -> score, close. A later kintsugi round for PR 2006 (5fc5569ed96a) + anything merged after.
 3. CLOSE-OUT seat after D 53rd STATUS B: tickets deployed to BOTH boxes (D 52nd's evidence/F6_ticket_table.tsv + D 53rd's table): KS-1823, KS-1401 first; KS-1256/1561/1459/1458/1868 slices; KS-1958/1959/1986. Board writes only, per-ticket evidence.
 4. **KS-911/912** (KS-907 launcher + suite residues): launch ONLY with no Secuura seat live (the fix edits the project launcher; live seats' launcher bash still runs from it — never edit a running script).
 5. Filing seat (small): G191-F3 by-hash 500 + store/selectList err?.message (named in KS-1959 text); Schemathesis leg B (demo_seed_gate.py) red after PR 2006; org-link empty catch adminConfig.ts:2145; KS-1990 W 28th candidates.
