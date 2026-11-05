@@ -1,0 +1,57 @@
+READY FOR GATE: KS-1262 (N3 + N4, the separate key space)
+
+- PR: 2007, https://github.com/Secuura/Distributed_Secuura/pull/2007
+- Branch: feature/ks-1262-security-put-apisettingsnotifications-writes-the-same-key
+- Head, read from origin by ls-remote in this action (06:17:43Z): 052695ec28d9dd0bbb59ce475335eeb754a06b51
+- Base: develop 5fc5569ed96ac61f64823cc9e1fa841899aa1f62. Develop now: 5fc5569ed96ac61f64823cc9e1fa841899aa1f62.
+- Ticket comment naming the PR: 561f9719. KS-1262 stays In Progress. Census after the create: PR 2007 is attached to KS-1262 only. KS-256, KS-441 and KS-719 (named by the template and the body) are unchanged.
+- Tier proposal: 1 (security surface, row G1).
+
+FILES (9)
+- Product: services/api-gateway/src/services/redis.ts (+29), routes/admin.ts (+16/-4).
+- New tests:
+  - ks1262-n3-n4-per-user-notification-settings-own-key-space.test.ts (10 cells, Redis mode, a fake ioredis recording every verb and key);
+  - ks1262-n3-n4-in-memory-fallback-keeps-the-key-spaces-apart.test.ts (5 cells).
+- Moved:
+  - ks1262-notification-put-cannot-write-platform-settings.test.ts (PR 1635's, my ticket's): stand-in + C1/C2; R1/R2/C3 also assert the per-user store is empty;
+  - the two foreign files below.
+- 2 docs fragments.
+
+YOUR THREE ITEMS
+1. The user-visible effect is in the PR body, verbatim: "existing per-user notification settings stop being read, so those users see the documented defaults until they save again. The old values expire on their own within 24 h (TTL.privacy 86400, services/redis.ts:27). Nothing is migrated or deleted, and no live store is read."
+2. The cells:
+   - Platform record untouched by any per-user write: "ids crafted to look like shared or platform keys never write under notif: and leave the platform record as seeded" (default, :platform-settings, notif:platform-settings, user:platform-settings, two look-alikes), plus the fallback control.
+   - N3: "a principal whose userId is platform-settings GETs its own settings" (Redis and fallback), plus "a signed-in per-user GET reads exactly one key, the caller's own".
+   - N4: "a principal whose userId is default cannot plant what an anonymous reader gets back" (Redis and fallback), plus "an anonymous GET answers the documented defaults without reading any key" (0 Redis ops).
+   - All red on develop.
+3. Foreign test files, before -> after cell counts:
+   - ks719-settings-write-auth.test.ts: 9 -> 9 (its stand-in plus one expected write: {store:'notif'} -> {store:'notif-user'});
+   - ks570-proxy-mount-auth.test.ts: 9 -> 9 (one rationale string only).
+
+TESTS (2026-11-05, macOS host, Node v26.8.1, not LTS 24)
+- Red-proof on develop 5fc5569ed96a: 9 of 15 new cells fail, all by assertion (every RED cell); the 6 controls pass.
+- Branch, 5 touched test files: 39/39.
+- Whole api-gateway suite, vitest JSON totals: develop 154 files / 1623 -> branch 156 / 1638, 0 failed, 0 pending.
+- Mutants 8/8 killed (evidence/ks1262/mutants.out), each product file restored and checked by sha256. They cover: the GET reading the shared namespace; an anonymous read of default; the PUT writing the shared namespace; the set or get prefix set to notif:; a shared fallback Map; a lost TTL; the PR 1635 guard removed.
+- tsc --noEmit rc 0. check:test-types (api-gateway): 0 new, 156 test files examined.
+- eslint: 0 errors; 18 warnings before and 18 after, no difference by file and rule; 0 in the new files.
+- docs-fragments check: OK, and a planted second h2 FAILs it.
+- Pre-push hook: push rc 0 in 1155 s. "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 need a stack. Not a pass.
+
+WHAT IT DID NOT DO
+- No Schemathesis, Akto, Playwright or k6 (no local stack).
+- No real Redis server.
+- No box read: what kintsugi or demo hold under notif:* today is UNMEASURED.
+- No real JWT with either reserved id (test tokens, as the gate that found N3/N4 used).
+- No index.ts edit (not needed). No spec edit (the published GET description already says an anonymous caller gets the documented defaults, which is now true).
+- No merge, no deploy.
+
+ALSO
+- KS-1185: committed 40d3f2470d4a. Its push is queued now (driver pid 70159). Its READY follows.
+- KS-1237: comment 9c57bdfc. Its open row X-INFO-ALWAYS-EMPTY is already pinned: the row's own tamper reddens 6 cells in 6 files added after the ticket was filed (KS-1231/1232/1532/1539/1540/1627). No cell was written, because one would duplicate them. Every KS-1237 change is test-only. Close candidate: may I move it to Done and archive it, like KS-1180?
+- Trap for KS-1505 and KS-1493 (both edit index.ts): systemTest/playwright/config/limiter-catalogue.ts pins index.ts rateLimit( line numbers (sourceLine 560 ... 1027, tests-unit/limiter-catalogue.test.ts). Shifting lines above them needs that systemTest file resynced. It is outside lane B's family, so I will QUESTION before either ticket.
+
+FAULTS
+- My first watcher used an & inside a background task, so it detached untracked. I stopped it by its pid (91574) and re-armed it as a tracked task.
+- One pgrep printed unrelated pids (a "-l" after the pattern was read as a second pattern). No action was taken on that output.
+
