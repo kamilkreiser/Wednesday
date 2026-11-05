@@ -26,6 +26,19 @@ develop = 1e4bdcb899c44023404bcd33c511de6f7dde2f6e (PR 2015 squash). Eight merge
 
 Detached push drivers of WRAPPED seats (alive at 20:55, tty ??): V 21st 5891 (PR 2009 r2 at EXACTLY 2f10e7e060cc) and 11176 (KS-1666 at EXACTLY 4d1c96b495bd); V 22nd 8312 (KS-1462 605942b23ce2) and 52840 (KS-1989 c0b427a2ff76); T 12th 73804 (KS-1539 a56b949c56f0), 71556 (KS-1542 52a781a3e493), 31179 (KS-1614 8d4f6fca8388), 27026 (KS-1493 8e0070f193ba). Push queue ~12 deep at ~20 min each.
 
+## UPDATE 22:2x — FOR TOMORROW'S NEW-ACCOUNT SEAT (read this block FIRST; it supersedes everything below)
+State: develop 1b1b65c7415f. NINE merges today (2007, 2010, 2011, 2012, 2008, 2013, 2014, 2015, 2016). Kintsugi runs 1e4bdcb899c4 (auth + api-gateway, verified by D 55th). Demo FROZEN at 07a2d62be6a0 (lacks PR 2006 + this round's 8). Gauge 98% at 22:13; Kam logs a new account in the morning (his 21:17:22 words).
+WRAPPED tonight (all scored, panes closed): T 12th 0.94, V 22nd 0.95, J 16th 0.96, D 55th 0.97, F 34th 0.93, S 23rd 0.94 (KS-2011..KS-2029 filed), B 96th 0.97.
+LIVE, holding for pushes (no new work given): K 16th %180 (KS-1534 driver 79923), J 17th %182 (KS-1858 45397, KS-1797 67814, KS-1494 71811; HANDOVER written), V 23rd %184 (KS-1666 11176, KS-1462 8312, KS-1989 52840, KS-1509 46679). Each raises its PR + READY as its push lands, else wraps with a HANDOVER naming the unlanded driver.
+Detached drivers of wrapped seats: T 12th 73804 (KS-1539), 71556 (KS-1542), 31179 (KS-1614), 27026 (KS-1493): they land UNRAISED; a T 13th raises them per T 12th's HANDOVER.
+FIRST WORK TOMORROW, in order:
+1. Launch B 97th (merge, Sonnet) from B 96th's HANDOVER: PR 2009 r2 READY (11:15Z, recompute onto current develop), then PR 2017 KS-692 (gate 208 GO WITH NOTES; decide N1: the fragments say systemTest :136 reads 404, it reads 400 -> fix wording with a light re-gate, or ship + ticket), then each arriving READY FOR MERGE.
+2. Gate each READY FOR GATE as it lands: tier 1 Opus for KS-1534, KS-1858, KS-1797; tier 2 Sonnet for KS-1462, KS-1989, KS-1509, KS-1494 and T's four. KS-1666 is already gated (203) -> READY FOR MERGE.
+3. Launch T 13th (Sonnet) to raise T 12th's four landed pushes.
+4. Next kintsugi deploy (D 56th) once originate (PR 2009, KS-1666, KS-1462, KS-1509) and vc-issuer (PR 2017) merge.
+5. Route: KS-1968 detail comment (HIBP_ENABLED FALSE/0/off leave the check ON; gate 205 ev_decision_table.txt); F 34th's two filing candidates (ks1868 C1 vc-issuer timeout; clone_deps symlink guard).
+6. NAS evaluation is due Friday 6 Nov (device arrives; card, default HOLD).
+
 ## UPDATE 22:0x (65% checkpoint) — newest; supersedes rows above where they differ
 - develop = 1b1b65c7415f (PR 2016 KS-1407 merged 10:25:38Z; NINE merges today). KINTSUGI DEPLOYED at 1e4bdcb899c4 by D 55th (auth 21:38, gateway 21:39-21:40 AEDT; verified; 7 comments posted; D 55th WRAPPED 0.97, pane closed). Demo frozen (lacks PR 2006 + 2007, 2010, 2011, 2012, 2008, 2013, 2014, 2015).
 - GAUGE 97% (22:03). Kam 21:17:22 plan = new account tomorrow morning; prior 98% card ruled a. NO new seat launches tonight; in-flight continue; panel told (bf-fd24f6e968d0).

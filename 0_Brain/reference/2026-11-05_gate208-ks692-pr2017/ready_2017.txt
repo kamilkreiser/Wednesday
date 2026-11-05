@@ -1,0 +1,47 @@
+=========== [INBOUND] 2026-11-05T11:07 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] READY FOR GATE KS-692 PR 2017 at 536bca3aa475, TIER 1 
+[Secuura/Blockchain-F -> Wednesday] READY FOR GATE KS-692 PR 2017 at 536bca3aa475, TIER 1 (Seat F 34th)
+Seat F 34th
+
+READY FOR GATE, TIER 1: KS-692, PR 2017 https://github.com/Secuura/Distributed_Secuura/pull/2017
+
+IDENTIFIERS (ls-remote read 11:07:49Z, the same action as this mail):
+1b1b65c7415ff02b9e3b44e83b62d9a609adfe8b	refs/heads/develop
+536bca3aa4754b46639ffc4df2e55ed368633dd8	refs/heads/feature/ks-692-security-apistatus-revokeunrevoke-has-no-tenant-ownership
+536bca3aa4754b46639ffc4df2e55ed368633dd8	refs/pull/2017/head
+- Branch feature/ks-692-security-apistatus-revokeunrevoke-has-no-tenant-ownership (Linear's branchName; new at origin). Head 536bca3aa475 = 536bca3aa4754b46639ffc4df2e55ed368633dd8. Commits: 71c3abf6be5b (the change, built on develop 5fc5569ed96a) and 536bca3aa475 (merge of develop c9cb07738cf6, the forward-move rule: 2 commits and 12 files moved, 0 shared, 0 under vc-issuer or packages/shared). Develop moved again during the queue to 1b1b65c7415f: 34 files, 0 shared (the driver's gate, planted control 1 = 0 + 1). NOT merged in, and the suites are not re-run against it.
+- PR read back: open, not draft, base develop, 2 commits, 8 files, +649/-24, one PR for this head. Title (77 bytes): Refs KS-692: status revoke and unrevoke are bound to the credential's creator
+- KS-692 comment 01f3033c-74f8-4e13-b3e3-e51bbcd33545 ("PR 2017, head 536bca3aa475, ready for gate"; names card secuura-ks692-status-revoke-bind-creator-1105). Read back equal, 0 mention nodes, state/priority/assignee unchanged (In Progress). Census after the PR and the comment: KS-692 In Progress with PR 2017 attached; KS-256, KS-441 (the template's keys), KS-1851 and KS-1429 unchanged, none carries 2017.
+
+FILES (git diff --name-only c9cb07738cf6..HEAD, 8):
+Blockchain/Dev/services/vc-issuer/src/__tests__/ks1269-status-revoke-refuses-a-non-integer-index.test.ts
+Blockchain/Dev/services/vc-issuer/src/__tests__/ks1269-status-unrevoke-refuses-a-non-integer-index.test.ts
+Blockchain/Dev/services/vc-issuer/src/__tests__/ks586-status-write-authorization.test.ts
+Blockchain/Dev/services/vc-issuer/src/__tests__/ks692-status-revoke-and-unrevoke-bound-to-the-creator.test.ts
+Blockchain/Dev/services/vc-issuer/src/__tests__/ks692-status-write-platform-only.test.ts
+Blockchain/Dev/services/vc-issuer/src/routes/status.ts
+Projects Documents/fragments/cheat/KS-692-status-revoke-and-unrevoke-bound-to-the-creator.html
+Projects Documents/fragments/flow/KS-692-status-revoke-and-unrevoke-bound-to-the-creator.html
+File-disjoint: every path is under services/vc-issuer or my own fragment pair; no live seat's family names either (T, J, E, K 16th: api-gateway/auth; V 21st/22nd: originate; B 96th: none). Control: my list compared with itself reads 8 shared.
+Open-PR overlap on the 8 plus the inventory doc: 0 of 17 open PRs at 08:09Z, and 0 of 14 under the lock at 10:47Z. Control: the list plus secuura-api.yaml reads PR 2012, rc 1.
+
+ANSWERS: Q-A, the credential's stored owner via getRecordById(body.credentialId), no list owner, no migration (mine; confirmed by you 06:18:04Z). Q-B, (i) KS-1851 exactly (yours, 06:20:54Z). Q-C, the gate stays default-deny; the exemption is exactly a signed-in POST /<id>/revoke or /<id>/unrevoke; anonymous still 401 (mine; confirmed 06:18:04Z, with your path-trick cells and widen-to-any-POST mutant added). Q-D, the existing 404 "Credential not found in status list", byte-identical; order: shape, list, owner, entry, KS-1371 lines untouched, write (mine; confirmed 06:18:04Z; GET /api/status cited in the PR).
+
+RED / GREEN (new file, 75 cells): RED at develop 5fc5569ed96a 60 of 75 by assertion, 0 error TS. 15 PASS at develop and prove nothing: the 10 gate/path cells, G7 anonymous revoke, S1, O1 and 3 D3 owner-less admits. Of the 60: 2 creator controls (develop 403); 13 platform cells develop admitted (200); 17 non-platform refusals develop already refused with 403 (red on the answer shape only); 27 at setup; 1 G4b. GREEN at head: 75 of 75 in every run.
+FLIPS (declared): ks692 A2 and C2's OWNER half; the ks586 route-table cell split (revoke/unrevoke rows to 404, plus a non-vacuous pin); ks1269 fixtures (5 allocate calls issue the credential first, assertions unchanged; 13 cells read 404 without it).
+
+DIRECTION, 56 cells: head more permissive than develop for a non-creator, non-platform caller = 0 of 38. Gains: 2 (the creator's revoke and unrevoke on her own credential). NARROWED, 14 of 56, all platform (200 -> 404): SYSTEM_ADMIN t1 on owned, not-stored and owner-less-without-tenant; SYSTEM_ADMIN t2 on owned, owner-less-with-tenant, owner-less-without-tenant and not-stored; each for revoke and unrevoke. (evidence/direction/direction_table.txt)
+
+MUTANTS, 11 of 11 killed (red of 113): M1 check removed on revoke 42; M2 on unrevoke 26; M3 role-only 52; M4 tenant-only 44; M5 check after the write 27; M6 403 refusal 59; M7 different body 55; M8 owner-less admitted to anyone 12; M9 platform bypass any tenant 21; M10 exemption to every POST 12; M11 exemption without a principal 4. M3, M4 and M10 first read INVALID (TS6133) and were re-run keeping a read. Each anchor count was 1; each restore sha256-equal.
+
+SUITES (vitest run, the package script): develop 27 files 765 of 766 rc 1; head before the merge 28 files 842 of 842 rc 0; merged head 841 of 842 rc 1. The one failure, both times, is ks1868 C1, an existing timeout (16.0 to 18.8 s, vitest STACK_TRACE_ERROR; 3 of 5 whole-suite runs; alone 9 of 9, 4 runs). tsc service and test configs 0; ratchet rc 0 (42 files, 28 tests); eslint 6 files rc 0, planted rc 1; docs-fragments OK at both heads, planted rc 1, sha256-equal restores.
+
+HOOK, VERBATIM (push rc 0, 1,096 s, 10:47:13Z -> 11:05:29Z):
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+(Leg 16 vc-issuer: tsc examined 42 files, 28 of them under __tests__; 0 errors. Shell suites: 116 passed, 0 failed, 0 skipped (of 116).)
+
+DF /Volumes/DevMASTER: 115 GiB at boot, 109 GiB after the base worktree, now 84Gi avail (96% used).
+
+NOT DONE / NOT COVERED: Node 24 (all runs Node v26.8.1, not LTS); a real PostgreSQL; kintsugi and demo (not contacted); the live behaviour after a deploy (needs two tenants' principals); a second replica (lists are process-local); the four platform suites; hook legs 3, 4 and 8 (no local stack); develop 1b1b65c7415f not merged or re-tested. KS-1429 / systemTest: unblocked by this build, not run. test_status_list_authz.py:136 will read 404, not 403, on its revoke and unrevoke rows (named in the PR). Owed after a merge: the vc-issuer image deploy and a live check (D seat and close-out seat). KS-692 stays In Progress.
+
