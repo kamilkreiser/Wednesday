@@ -27,7 +27,7 @@ supersede: REPLACED WHOLESALE 16:3x AEDT 2026-11-05 by the 16:1x seat. Previous 
 Briefs: 2_Project_Files/fleet/briefs_staged/2026-11-05_seat{T,V,S,J,E,U,F}_*.md (each read whole by Wednesday, amended, dry-run). Every READY FOR GATE -> commission a QA gate (tier by touch; T/J security PRs tier 1 Opus), then a head-pinned GO to a merge seat (B), then a D seat for kintsugi (October grant; demo frozen).
 
 ## GATED, MERGE OWED (17:36)
-- PR 2007 (KS-1262, T 11th): GATE 197 = GO WITH NOTES, completion check done by Wednesday. T fixes F1 (one PR-body line) and mails 'F1 done' with the body sha1. THEN a head-pinned GO `GO: merge PR 2007 at 052695ec28d9 on develop 5fc5569ed96a (Seat B <N>th)` to a B merge seat (none live: draft one, batch with the next gated PRs; capacity was FULL at load1 8.4, launch only under 7). After merge: KS-1262 stays In Progress, deploy owed (kintsugi under the October grant; demo frozen).
+- PR 2007 (KS-1262, T 11th): GATE 197 = GO WITH NOTES, completion check done by Wednesday. F1 DONE 17:37 (body sha1 594aefe19f26; head unchanged 052695ec28d9). NEXT: a head-pinned GO `GO: merge PR 2007 at 052695ec28d9 on develop 5fc5569ed96a (Seat B <N>th)` to a B merge seat (none live: draft one, batch with the next gated PRs; capacity was FULL at load1 8.4, launch only under 7). After merge: KS-1262 stays In Progress, deploy owed (kintsugi under the October grant; demo frozen).
 - Candidates: one ticket 'ks1868 first-cell import cost times out under fleet load' (vc-issuer and api-gateway ks1868 C1, pass alone); T 11th quarantines a stray absolute node_modules symlink in worktrees/s-t11-dev at its wrap.
 
 ## IN FLIGHT
