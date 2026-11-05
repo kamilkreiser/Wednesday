@@ -81,6 +81,30 @@ PYSENT
     exit 3
   fi
 fi
+# ACK-HASH GUARD (2026-11-05, ledger: note batched with its wake_ack, w=2 in one session, a TYPED hash entered
+# the note). A body quoting "acked %N at content hash <12 hex>" must quote the hash wake_ack.sh actually stored
+# for that pane (fleet/cockpit/state/idle_ack_<key>). Tool calls in one message run in order, so a note sent beside
+# its ack sees the REAL hash on disk and refuses a typed one. Quoting an older ack (a correction, a later re-ack):
+# NOTE_ALLOW_STALE_ACK=1, with the reason in the body.
+if [ "${NOTE_ALLOW_STALE_ACK:-0}" != 1 ]; then
+  ACK_STATE="${WAKE_ACK_STATE_DIR:-$PROJECT_DIR/2_Project_Files/fleet/cockpit/state}"
+  BADACK="$(python3 - "$TEXT" "$ACK_STATE" <<'PYACK'
+import re, sys, os
+text, d = sys.argv[1], sys.argv[2]
+for pane, h in re.findall(r'acked (%\d+) at content hash ([0-9a-f]{12})', text):
+    key = re.sub(r'[^A-Za-z0-9]', '_', pane)
+    f = os.path.join(d, 'idle_ack_' + key)
+    cur = open(f).read().strip() if os.path.exists(f) else ''
+    if not cur.startswith(h): print(f"{pane} quoted {h}, stored {cur[:12] or 'NONE'}")
+PYACK
+)"
+  if [ -n "$BADACK" ]; then
+    echo "note_entry: REFUSED — the body quotes a wake_ack hash that is not the one stored:" >&2
+    printf '  %s\n' "$BADACK" >&2
+    echo "  Read the ack's output, then write the note in a NEW message (ledger 2026-11-05). Quoting an older ack: NOTE_ALLOW_STALE_ACK=1." >&2
+    exit 3
+  fi
+fi
 STAMP="${NOTE_ENTRY_TEST_STAMP:-$(date +%H:%M)}"   # the test seam exists only for the arms below
 # TYPED-CLOCK ADVISORY (2026-09-21; ledger w>=3 on 2026-09-19 — three typed clocks in one day, all
 # "felt near-future" times for acts already done, written into bodies this script stamps but does
