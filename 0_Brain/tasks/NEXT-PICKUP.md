@@ -26,6 +26,13 @@ develop = 1e4bdcb899c44023404bcd33c511de6f7dde2f6e (PR 2015 squash). Eight merge
 
 Detached push drivers of WRAPPED seats (alive at 20:55, tty ??): V 21st 5891 (PR 2009 r2 at EXACTLY 2f10e7e060cc) and 11176 (KS-1666 at EXACTLY 4d1c96b495bd); V 22nd 8312 (KS-1462 605942b23ce2) and 52840 (KS-1989 c0b427a2ff76); T 12th 73804 (KS-1539 a56b949c56f0), 71556 (KS-1542 52a781a3e493), 31179 (KS-1614 8d4f6fca8388), 27026 (KS-1493 8e0070f193ba). Push queue ~12 deep at ~20 min each.
 
+## UPDATE 21:2x (50% checkpoint) — supersedes the rows it names
+- KAM 21:17:22 verbatim: "keep going with the secuura tickets and I will log into a new account tomorrow morning" (receipt bf-03a5af49eb26; EXPIRING-GRANTS row, ends at his login).
+- D 55th: GO KINTSUGI at 1e4bdcb899c4 SENT 21:18 (re-pin in writing; auth + api-gateway; demo frozen). NEXT: its STATUS B -> approve its seven drafted comments (KS-1150, 1460, 1968, 1645, 1185, 1262, 1804) by ANSWER naming the seat.
+- J 16th WRAPPED (0.96, pane %171 closed). PR 2016 (KS-1407) gate 207 tier 2 = GO WITH NOTES; queued to B 96th as item 9 (NOTES PATCHED 10:18Z; READY next -> its own GO; test-only, no deploy).
+- IN FLIGHT: a Sonnet drafter writing briefs_staged/2026-11-05_seatJ17_laneA_auth.md (KS-1858 then KS-1797, Opus) and 2026-11-05_seatS22f_filings.md (the OWED item 4 list). Read both WHOLE, stamp, dry-run, launch when capacity is ROOM (>= 3 min apart).
+- Floor now: K 16th %180, B 96th %176, F 34th %174, D 55th %181.
+
 ## OWED (in order)
 1. GO KINTSUGI to D 55th on its STATUS A (pin 1e4bdcb899c4), then its STATUS B comments.
 2. LAUNCH V 23rd (Sonnet, originate) when the first V push nears the head of the queue: per V 22nd's HANDOVER (5_Project_History/2026-11-05_seatV-22nd/HANDOVER.md): PR 2009 r2 READY FOR MERGE (merge seat adds gate 199r2 notes), KS-1666 PR + READY FOR MERGE (gate 203 GO WITH NOTES; N2/N3 into the PR body; no re-push), KS-1462 + KS-1989 PRs + READY FOR GATE (tier 2), then KS-1509 (documents.ts 964/1019/1054/1780, null stays null), then the KS-1666 N1 follow-up test PR after KS-1666 merges. Template: briefs_staged/2026-11-05_seatV22_laneD_originate.md.

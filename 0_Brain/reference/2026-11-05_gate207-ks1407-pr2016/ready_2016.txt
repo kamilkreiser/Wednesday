@@ -1,0 +1,37 @@
+[Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1407 PR 2016 (Seat J 16th)
+Seat J 16th
+
+READY FOR GATE: KS-1407 N-1382-2 (e2e case 12.5.3, shape B), PR 2016. Tier 2, as you ruled. The e2e case is NOT RUN: it needs a stack.
+
+- PR: 2016, https://github.com/Secuura/Distributed_Secuura/pull/2016, base develop.
+- Branch: feature/ks-1407-e2e-change-password-case-calls-the-real-route.
+- Head, read from origin by ls-remote in this action: d91821a99dbbdadf83854b78dc5cebaeec1cbc99. One commit on develop 5fc5569ed96a.
+  - At the push develop was 3f9f9a081fbd. The develop gate measured 40 files moved, 0 shared with my 3 paths.
+- Files (3, +65/-43):
+  - Blockchain/Dev/tests/e2e/tests/security-bad-actor.prelaunch.spec.ts (+44/-43: case 12.5.3 and one node:crypto import);
+  - fragment pair KS-1407-e2e-change-password-case-calls-the-real-route.html.
+- Ticket comment: KS-1407 df6cad17, read back (body equal, 0 mention nodes, In Progress, assignee none, unchanged). Census: PR 2016 attached.
+  - My first post was refused by my own guard: the throwaway address's "@example.com" looks like a mention. I reworded it; nothing was posted twice.
+  - The PR title, body and commit carry KS-1407 only.
+
+WHAT IT DOES (your 06:05:32Z and 06:11:19Z rulings)
+- The real route, POST /api/users/me/change-password. The assertions are no longer conditional on 200, so a non-200 fails the case.
+- Its own throwaway account e2e-ks1407-<uuid> at example.com, with random strong passwords and no restore step.
+- Session A is probed with GET /api/users/me, which needs only authenticate(). It must answer 401 after the change.
+- Each run leaves one labelled account on its stack (the 31 existing register callers are the precedent). The PR says so.
+
+CHECKED WITHOUT A STACK
+- Greps under tests/e2e, each with its develop control:
+  - the dead route /api/auth/change-password: 0 (develop 2);
+  - the real route: 2;
+  - the code-form `if (changePwRes.status === 200) {`: 0 (develop 1).
+- Type check (hoisted TypeScript and @playwright/test types, temp tsconfig outside the tree):
+  - 0 errors in the spec on branch and develop;
+  - a planted TS2322 in the spec is reported;
+  - 2 pre-existing TS2339 in fixtures/test-helpers.ts, identical on develop.
+- eslint: no config covers tests/e2e (the file is reported ignored on both sides), so lint did NOT run.
+- docs check OK, with a planted defect failing and a restore.
+- Pre-push hook, quoted: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." and "This is NOT a pass." Leg 14: 116 of 116. Push rc 0, 1,002 s, VERIFIED 10:09:52Z.
+
+NOT RUN: case 12.5.3 and the rest of the file on any stack; the gateway's register and login rate limits during a full run. No merge, no deploy; the ticket stays In Progress.
+
