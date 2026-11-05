@@ -105,6 +105,34 @@ PYACK
     exit 3
   fi
 fi
+# RECEIPT-VERB GUARD (2026-11-05, ledger: note batched with its step, w=4 in ONE session — a note said 'answered',
+# 'closed %N' or 'ruled' for steps that had REFUSED, because the note was composed before the step's output existed).
+# A body carrying a receipt verb must carry a FRESH --receipt file: the step's own output, redirected to a file and
+# written in the last NOTE_RECEIPT_MAX_AGE seconds (default 120). The receipt line is then copied from that file,
+# never typed. Verbs (case-insensitive): "answered", "closed %N", "acked %N", "ruled:", "delivered".
+# Override for prose that is not a receipt (state why in the body): NOTE_ALLOW_RECEIPT_VERB=1.
+if [ "${NOTE_ALLOW_RECEIPT_VERB:-0}" != 1 ]; then
+  VERBS="$(python3 - "$TEXT" <<'PYVERB'
+import re, sys
+t = sys.argv[1]
+pat = r'\banswered\b|\bclosed %\d+|\backed %\d+|\bruled:|\bdelivered\b'
+print(", ".join(sorted(set(m.group(0).lower() for m in re.finditer(pat, t, re.I)))))
+PYVERB
+)"
+  if [ -n "$VERBS" ]; then
+    MAXAGE="${NOTE_RECEIPT_MAX_AGE:-120}"; NOW="$(date +%s)"; FRESH=0
+    for RF in ${RECEIPTS[@]+"${RECEIPTS[@]}"}; do
+      M="$(stat -f %m "$RF" 2>/dev/null || stat -c %Y "$RF" 2>/dev/null || echo 0)"
+      [ $((NOW - M)) -le "$MAXAGE" ] && FRESH=1
+    done
+    if [ "$FRESH" != 1 ]; then
+      echo "note_entry: REFUSED — the body carries receipt verb(s) [$VERBS] but no --receipt file written in the last ${MAXAGE}s." >&2
+      echo "  Run the step with its output to a file (cmd > f 2>&1), read it, then: note_entry.sh --receipt f --stdin (ledger 2026-11-05 w=4)." >&2
+      echo "  Prose that is not a receipt: NOTE_ALLOW_RECEIPT_VERB=1, with the reason in the body." >&2
+      exit 3
+    fi
+  fi
+fi
 STAMP="${NOTE_ENTRY_TEST_STAMP:-$(date +%H:%M)}"   # the test seam exists only for the arms below
 # TYPED-CLOCK ADVISORY (2026-09-21; ledger w>=3 on 2026-09-19 — three typed clocks in one day, all
 # "felt near-future" times for acts already done, written into bodies this script stamps but does
