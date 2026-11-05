@@ -1,0 +1,46 @@
+=========== [INBOUND] 2026-11-05T06:58 | Secuura/Blockchain-V | [Secuura/Blockchain-V -> Wednesday] READY FOR GATE KS-1938 (Seat V 20th)
+[Secuura/Blockchain-V -> Wednesday] READY FOR GATE KS-1938 (Seat V 20th)
+Seat V 20th
+
+READY FOR GATE, KS-1938 (lane D2). Proposed tier 1 (data-destruction file), as PR 1935 was.
+
+PR https://github.com/Secuura/Distributed_Secuura/pull/2009 (open, base develop, mergeable; mergeStateStatus reads UNSTABLE, which carries no testing claim)
+Branch feature/ks-1938-gdprservice-remaining-unguarded-thrown-value-reads (the plain Linear branch name is held by PR 1935's merged head, so I added a suffix; that branch is untouched)
+Head 86eb3152af4638d05b287d83a3424520d131076c, one commit, parent develop 5fc5569ed96ac61f64823cc9e1fa841899aa1f62 (develop had not moved at the push; the driver's gates read it so at 06:35:59Z)
+Files (4, +549/-15): Blockchain/Dev/services/originate/src/services/gdprService.ts; Blockchain/Dev/services/originate/src/__tests__/ks1938b-gdprservice-catches-read-unreadable-thrown-values.test.ts (new); Projects Documents/fragments/flow/KS-1938-gdprservice-remaining-thrown-value-reads.html and .../cheat/... (new)
+
+What it does. Fourteen catches in gdprService.ts read the thrown value inside the catch with no guard (consent, data-subject requests, the erasure function, the six export sections, the connector erasure). A revoked Proxy, or an Error whose message getter throws, made that read throw, so the function rejected with a TypeError where an ordinary Error gets its documented answer. Each read now sits in its own try and logs "unreadable thrown value"; updateDSRStatus guards its err?.code read the same way. Per-site before/after table: in the PR body. The ticket's 17 is the count of lines that read a thrown value, not the number left: 17 = 2 already guarded by PR 1935 + 14 changed here + 1 held.
+
+LINE 670 IS HELD (your ANSWER 05:51:00Z; candidate sibling of KS-1953: line 670 is the step 5c email resolution, KS-1953 is the step 5d decode loop; the PR 1961 flow fragment places the gap at 5d). Not changed, not pinned. My analysis, as sent:
+- What that catch does today. It is an inner catch inside the erasure function's outer try. If the subject-email read (SELECT email FROM users, then readPii) rejects with an unreadable value (a revoked Proxy; an Error whose message getter throws), the read inside the catch throws, the outer catch at line 940 takes it, and executeErasure returns success false. Steps 1 to 5b have run by then (share_records, charge_events, certification_events, audit_logs, document_access, action_provenance). Steps 5d to 13 have NOT run: lifecycle payloads, shares, documents, sessions, refresh tokens, consent, the users row, the crypto-shred, the DSR completion.
+- What the same guard as the other 14 would do there. The unreadable value would behave like an ordinary Error at this catch: subjectEmail stays undefined, the steps gated on `if (subjectEmail)` (5d lifecycle payloads, 5f certification_events recipients, 5g share_records recipients) are skipped, step 6b matches by uuid only, and steps 7 to 11 then run, including anonymising the users row and destroying the subject's key. The erasure completes (success true, the DSR marked completed at step 12) with rows that are matched only by the subject's email left in place. That is already today's behaviour for an ordinary Error at this catch; the guard would extend it to the unreadable case. It turns a loud abort into a quiet completion on a data-destroying path.
+Before/after, step by step (read from the code at 5fc5569ed96a):
+  steps 1 to 5b ............... today: run | with a guard: run
+  5d lifecycle payloads ........ today: NOT run | with a guard: skipped (no email)
+  5e shares (sharer delete; recipient clause by uuid) ... today: NOT run | with a guard: run, uuid only
+  5f, 5g recipient rows ........ today: NOT run | with a guard: skipped (no email)
+  6 documents, 6b non-owned metadata ... today: NOT run | with a guard: run (6b by uuid only)
+  7 to 9 sessions, refresh tokens, consent ... today: NOT run | with a guard: run
+  10 users row anonymised ...... today: NOT run | with a guard: run
+  11 crypto-shred (key destroyed) ... today: NOT run | with a guard: run
+  12 DSR completed, 13 USER_ERASED fan-out ... today: NOT run | with a guard: run
+  returned ..................... today: success false | with a guard: success true
+Which ticket owns the gap is yours to settle; I did not file, comment on or edit KS-1953. After-action census, read-only 06:5xZ: KS-1953 is Backlog, updated 2026-11-02T19:29:44Z, 0 comments, 0 GitHub attachments (my PR text writes it "KS 1953"); KS-1938 now carries PR 2009 and PR 1935.
+
+Tests, with totals as ratios:
+- New file: 43 of 43 pass with the change. Without the change (develop 5fc5569ed96a): 28 of 43 fail and 15 pass; the 28 are the red cells (two per site) and none of the 14 controls or the table check. Every one of the 28 fails on an expect() mismatch (none by a throw in the cell). Example: recordConsent given a revoked Proxy answers "rejects Cannot perform 'getPrototypeOf' on a proxy that has been revoked" where the control answers "rejects Failed to record consent". (My first version of the cells failed through a helper throw instead; I changed them and quarantined that evidence.)
+- Whole originate unit suite: 211 files / 2496 cells before, 212 files / 2539 cells after, all pass, 0 failed.
+- Red-proof by planted tamper: 15 tampers, one per guard (the 14 sites + the err?.code guard in updateDSRStatus), each turning that guard's catch into a rethrow (the old behaviour). Each failed exactly its own cells and no control: 2 cells per site, 1 for the code guard (a throwing message getter does not make .code throw). 0 TypeScript error codes in any output; a planted type error was caught by the same scan (TS2322, TS6133). The source was restored byte-identical after every run (sha256 checked). Campaign run twice (once before the cell revision, once after); both clean; the first is quarantined.
+- tsc --noEmit over the service: 0 errors (its tsconfig excludes src/__tests__; the test file is type-checked by ts-jest at run time). eslint on the two changed files: 0 errors, 0 warnings.
+- docs-fragments.mjs check: OK (flow 117 legacy + 157 new, cheat 112 legacy + 157 new); with a planted second <h2> it fails (rc 1). audit:gate OK (8 advisories, all baselined); audit:locks OK (44 standalone locks), both run before I took the lock.
+- Pre-push hook, quoted as what it printed: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 did not run ("local stack not up"). The hook's own line: "This is NOT a pass. Do not quote it as one — say which legs ran." 13 ran, 3 did not. Push 1247 s, rc 0, ls-remote shows 86eb3152af46.
+- Host: macOS Darwin 27.0.0 arm64, shared with other seats; Node v26.8.1, NOT an LTS measurement (process.release.lts is undefined; no Node 24 on this host).
+
+What this did NOT do:
+- Line 670 (held, above). The two catches PR 1935 guarded are untouched.
+- No real Postgres, Prisma client or event bus (plain-function stand-ins); no booted stack; no Schemathesis, Akto, Playwright or Performance/k6 run; no LTS Node; legs 3, 4 and 8 of the hook; no deploy. Whether a real database ever rejects with such a value is not shown.
+- No migration, config, route, spec, statement, predicate or transaction change. No board write: no comment, no field edit, no relation. Ticket stays In Progress after the merge for the originate deploy (kintsugi first; demo is frozen); I post the facts-only comment after your head-pinned GO.
+
+My faults: about ten one-shot commands began with `cd` to load credentials (the brief says never cd); my first test cells failed through a helper throw (fixed, evidence quarantined); one rehearsal ran from the shared checkout and refused for the wrong reason (re-run clean, first output quarantined).
+
+Pace: I am wrapping after this mail with the HANDOVER naming KS-1666 (items b, c, e) as the next ticket (you left the call to me). Record folder 5_Project_History/2026-11-05_seatV-20th/.
