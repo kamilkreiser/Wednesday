@@ -1,3 +1,13 @@
+## 2026-11-05 20:00 -> 2026-11-06 05:3x - Wednesday, the 20:00 seat (Secuura, Opus 5.5), successor of the 18:00 seat -> wrap at the 05:30 shift change (floor empty since 01:11; gauge 99%)
+- Landed (each verified at source by ls-remote before its head-pinned GO): PR 2008 KS-1150 (7d2d6dc366e5), PR 2013 KS-1460 (85881fde5a48), PR 2014 KS-1968 B2 (3f9f9a081fbd), PR 2015 KS-1804 (1e4bdcb899c4), PR 2016 KS-1407 (1b1b65c7415f) by Seat B 96th; with the 18:00 seat's four, NINE merges on 2026-11-05.
+- Deployed: kintsugi auth + api-gateway at 1e4bdcb899c4 (Seat D 55th; swaps 21:38 / 21:39-21:40 AEDT, 12 s / 13 s; KS-1262 notification-settings census 0 before and after; +15 min watch 0 errors; seven ticket comments). Demo frozen.
+- Gates: 203 (KS-1666, re-run after the rotation killed it), 205 (PR 2014), 206 (PR 2015), 207 (PR 2016), 208 (PR 2017 KS-692): all GO WITH NOTES. Deferred to the new account at 99%: PR 2019, 2020, 2021, 2022, 2023, 2024.
+- Filed: KS-2011..KS-2029 (Seat S 23rd, 19 tickets from gates 197-207 and handovers).
+- Seats scored: T 12th 0.94, V 22nd 0.95, J 16th 0.96, D 55th 0.97, F 34th 0.93, S 23rd 0.94, B 96th 0.97, K 16th 0.96, V 23rd 0.95, J 17th 0.96.
+- Rulings by Wednesday (told to Kam where design): KS-1858 includes github; KS-1797 POST array -> 400; KS-1534 D1-D3; KS-1494 comments-only PR, no edit to merged PR 1485; KS-1509 waits on PR 2018 (shared manifest); refresh race = one ticket.
+- Slips (ledger rows): 78 s wave spacing; 'B1 still open' from memory into a mail a seat copied onto a PR body; gate 208 commission paraphrased 'KS-1851 exactly'; one typed clock. Ledger 3c: 11-03 rows archived (19 moved, 1716 == 1716). Digests regenerated (check OK).
+- Handover: NEXT-PICKUP.md block 'UPDATE 22:2x — FOR TOMORROW'S NEW-ACCOUNT SEAT' + later lines; mail [Wednesday-overnight -> Wednesday-morning].
+
 ## 2026-11-04 19:55 -> 2026-11-05 05:3x - Tuesday s244 (Datasec seat, Opus 5.5), successor of s243 -> checkpoint wrap at the 05:30 shift change (queue dry for new heavy work at ctx 70%; seat kept up for Kam's tap)
 - Landed (each verified at source): NexusAI #167 RD-924 (head-pinned MERGE commit 54000972; gate G342 B1287 GO WITH FINDINGS r2 of 2; post-merge Build 5312/317; Deploy demo skipped) and its records PR #168 (merge 4da06e8e). HPSM-POC records PR #180 (merge b58e7def by the R174 seat; C-293/294/295; HPSMPOC-441 Done).
 - Deployed: HPSM-POC header fix fc2bc2fc to the DEMO (D51 B1286, 21:28; Tuesday GET: new BUILD_ID x1). UAT had it since 19:43 (s243).
