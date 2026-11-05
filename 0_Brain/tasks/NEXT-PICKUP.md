@@ -17,9 +17,12 @@ supersede: REPLACED WHOLESALE 11:47 AEDT 2026-11-05 by the 10:27 rotation seat (
 ## FLOOR at 12:30 (handover written by the 10:27 seat at ~78%, rotating inside 80-90)
 - **D 53rd** %161 (Opus): KINTSUGI deploy at PIN 07a2d62be6a0 (058 + PR 2003 + PR 2005 + PR 2004; NOT PR 2006). GO KINTSUGI sent 01:11:52Z naming the 058 window. Building k18 (2 batches) since 01:15:19Z. Then: post-build checks -> ls-remote -> migrate058_d53 CHECK -> APPLY -> b-post + cescope (predicted 0/14/0/14, certifications 1) -> part a (vc-issuer, originate) -> vprobe MID -> part b api-gateway -> +15 min error counter (ANSI-aware, controls proven) -> STATUS B. STOP list: any guard, >1 Applying line, error naming charge_events/metering/RLS, KS-535 equality, OOM. Never alter the policy (a new decision for Kam).
   - On STATUS B: verify REVISION/claims, ACK + wrap, score, pane_close; REPORT TO KAM on the panel: kintsugi carries everything merged before PR 2006; his kintsugi count tenant-less 0 of 14; 058 changed behaviour on kintsugi (unscoped charge_events reads 14 -> 0, certifications opened) per his card 1005 a; Platform S / bot impact UNMEASURED; the swap windows AEDT.
-- **B 95th** %162 (Sonnet): PR 2006 MERGED 01:26:04Z as 5fc5569ed96a (verified at origin by Wednesday). WRAPPING on Wednesday's ACK. On its wrap mail: verify history '^## .*Seat B 95' = 1 (control B 94 = 1), HANDOVER FINAL, score (~0.95), pane_close %162.
+- **B 95th** WRAPPED 01:32Z, scored 0.95, pane %162 closed. PR 2006 merged as 5fc5569ed96a.
 - develop now = 5fc5569ed96ac61f64823cc9e1fa841899aa1f62 (PR 2006). KS-1990 needs a LATER kintsugi deploy (demo frozen).
 - Wrapped + scored this seat: S 19th 0.94, D 52nd 0.97, W 28th 0.95 (gate 195 GO WITH NOTES -> merged). Gate 195 done.
+
+## FIRST TASK OF THE NEXT SEAT (ledger w=4 regression, 2026-11-05)
+- Build mechanism (a): tools/note_entry.sh refuses a body carrying a receipt verb (answered, closed %, acked, ruled:, delivered) unless --receipt <file> names a tool output written in the last 120 s. note_entry is SHARED with Tuesday: mail her a coordination FYI (done for the ACK-HASH GUARD at 12:0x). Arms both ways, copy+mv install, backup .pre-*.
 
 ## THEN (owed, in order)
 1. D 53rd STATUS B -> verify, ACK, score, close, report to Kam (see floor).
