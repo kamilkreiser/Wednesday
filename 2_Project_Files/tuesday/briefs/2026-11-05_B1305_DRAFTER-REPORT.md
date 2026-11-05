@@ -1,0 +1,34 @@
+STARTABLE: YES once Tuesday stamps (builder READY is on file: STATUS last line begins `READY FOR QA: B1302 b1302/hpsmpoc-open-feedback-review @ 333ab581`, `## PRIOR WORK` present, head pushed, main unmoved at 73adb50c, 0 open PRs, pane G347 free)
+Kit: `2026-11-05_B1305_SEAT-G347_hpsmpoc-open-review-gate.md`, 53 long lines, 8 four-underscore lines (7 slots + last line), 0 non-ASCII lines, 0 person names; slots in `2026-11-05_B1305_slots.json`.
+
+**BLUF.** Tier-1 Opus gate (G1, `model-routing.md:108`, cap `:111`), class NEW "HPSM-POC open feedback review door", round 1 of 2, NO GO 0 before (census of first lines of 699 `Briefs/*STATUS.md`: the four gates of this page, B1221 / B1227 / B1261 / B1266, carry other classes). It judges `git diff 73adb50c 333ab581` (12 paths, +425 -37). The gate builds its OWN recording upstream and a 5-visitor x adversarial matrix (cases, encodings, `//`, `..`, query keys, HEAD/PUT/PATCH/OPTIONS, attachments, admin routes, odd ids) and requires "admin only for exactly three operations, upstream log zero calls on every refusal", diffs the same rows against the base, plants on the matcher and proxy exemption, a CSRF matrix on the recording upstream, and a hosted wall-time projection alone AND combined with the layout branch.
+
+## Facts re-measured (instrument; control)
+- Clock 14:11:59 to 14:16:10 AEDT (`date` in the same actions). Refs by `gh api -X GET` (14:12:09): main 73adb50c; `matching-refs/heads/b1302` ONE row 333ab581; open PRs 0; one parent 73adb50c; ahead 1 behind 0; 12 files +425 -37. Layout branch head 9d34ad68, 35 files; path overlap with this branch **0** (`grep -c -x -F -f` printed 0; control: a planted shared path printed 1) at 14:14:27.
+- Model: `model-routing.md:108` G1, `:111` G-cap (`grep -n`), `models_latest.json:17` `claude-opus-5-5`.
+- Round count: `head -1` of each STATUS grepped for `GATE VERDICT` and `feedback|review door|open feedback`: 4 feedback-review gate lines (B1221, B1227, B1261, B1266) plus older unrelated hits; control `visual round` printed B1280, B1289 (+B1299 via a different match), so the loop fires.
+- Door code read at the head from raw blobs (pointers in the kit, printed by `grep -n`): `reviewDoor.ts:7-33`, `bff.ts:437-444`, `proxy.ts:86`, `AppShell.tsx:81,83,103`, `FeedbackModule.cs:166-172`, `guard.ts:49-54`, `config.ts:79-87`, `ci.yml:426,487,494,518`. Diff has 0 non-ASCII lines (`LC_ALL=C grep -c -v -x -E '[ -~]*'` over 666 lines; no positive control run on this file, the kit asks the gate for one).
+- Ports: 9330-9339 `lsof` 0 (host-wide listeners 16); `-w` scan of 55 non-`.pre-` SEAT kits dated 11-04/11-05 hit 0 for `933[0-9]` (control `927[0-9]` 1). Rejected blocks: 9290-9299 (B1299 kit names it), 9320-9329 (1 kit hit), 9280-9289 (pane H126's kit). Panes: tuesday, `Datasec/HPSM-POC-H126` (round-2 layout fix builder), fleet-monitor.
+- Hosted baseline: from B1301 STATUS Step 9 (RELAYED, read lines 57-70): worst projected job prototype-tablet-1 951 s (worst setup), prototype-desktop-2 936, journey 877; this branch adds test cells to the same four prototype shards (builder: 187/170/171/170 vs base 184/167/168/167, RELAYED), so the combined load is the gate's step 9(d).
+
+## D-decisions
+- D-1: the gate does not reuse the builder's matrix: it builds its own recording upstream (9337) and logs method, path, query and the decoded assertion level of every request; "zero upstream calls on every 401/403 row" is the sharp control (the builder's stand-in reported only the level).
+- D-2: the routed-vs-forwarded gap is a named step: the matcher reads `routedPath(path)` but the BFF forwards the raw path; a row where the door matches a route the API serves differently is a Blocker.
+- D-3: the closed-surface proof is the SAME rows run on the base and diffed by program, plus the API suites, instead of reading the builder's 150 rows.
+- D-4: plants are the gate's own on both matchers and the proxy exemption (9 listed), a plant green in both the builder's cells and the gate's matrix is a Major; plants capped at 10.
+- D-5: step 9 adds a COMBINED projection (this branch plus the layout branch both land) because B1301 left the nearest job at 951 s of the 960 s line and Tuesday lands both.
+- D-6: the PR body must say in plain words that a request carrying neither `Sec-Fetch-Site` nor `Origin` passes `guard` (`guard.ts:49-54`), so a script with no browser can read, approve and delete on a review copy; the ruling opens that, the text must not hide it.
+- D-7: SQL Server shards are a landing condition here (this branch touches `api/`), unlike the layout gate.
+
+## Q for Tuesday (each with a default)
+- Q-1: latest Step 0 (S4)? Default in the slot 15:30 AEDT, hard stop Step 0 + 120 (the kit has no extension line; the builder's work is smaller than the layout gate's, three builds are not needed: head and base only). Change it if you want +150.
+- Q-2: should HEAD/PATCH/OPTIONS reaching the door as admin be a Blocker or a Major? Default in the kit: Major, because it needs Next to turn HEAD into a GET with `req.method === "HEAD"` mapped differently; if it measures as reaching admin on the list it is escalated under "any request outside the three ... reaches admin" (Blocker).
+- Q-3: do you want the audit-actor sentence to name the fixed Admin identity as the builder describes (`FeedbackReviewEndpoints.cs`)? Default yes: the gate reads the file and states what it finds.
+- Q-4: the layout fix builder (H126) may move `b1295`; default: the gate re-reads the partition at Step 0 and at the end and treats a new overlap as a finding.
+- Q-5: launch ordering: after the stamp; no dependency on the layout gate (G346 is finished with NO GO). Default accepted.
+
+## UNMEASURED (by me)
+HEAD/PATCH/OPTIONS handling by Next for `/api/v1/[...path]` (`route.ts:7-10` exports GET, POST, PUT, DELETE only); whether Next 308-redirects `/admin/feedback/review/` before the proxy (no `trailingSlash` setting found by grep on `next.config.ts`); whether the API's id generator is exactly `FB-<uuid>` (the builder says so, the kit has the gate read it); the quality of the builder's browser cells (a 404 replaced AFTER the real BFF); any production configuration that could reach auth mode `uat` (the gate reads `config.ts:79-87` whole); nothing was built or run.
+
+## Outside the fences
+None crossed. Read: the DRAFTER_RULES, the builder kit and STATUS, the B1301 kit and STATUS, model-routing.md, models_latest.json, Tuesday's `briefs/` (SEAT kits for the port scan), `gh api -X GET` of datasecau/HPSM-POC (refs, commits, compare, raw blobs at 333ab581, pulls) and datasecau/HPSM-POC-analysis CLARIFICATIONS.md (raw, `grep -n` for the landing entries). Scratch copies of blobs in the session scratchpad only. No card read, no Jira, no `decision_queue.sh`, no write outside the three files. One tool-limit note: the scratch `grep -P` probe errored on macOS grep and was replaced by the `LC_ALL=C` form.
