@@ -8,6 +8,13 @@
 - Slips (ledger rows): 78 s wave spacing; 'B1 still open' from memory into a mail a seat copied onto a PR body; gate 208 commission paraphrased 'KS-1851 exactly'; one typed clock. Ledger 3c: 11-03 rows archived (19 moved, 1716 == 1716). Digests regenerated (check OK).
 - Handover: NEXT-PICKUP.md block 'UPDATE 22:2x — FOR TOMORROW'S NEW-ACCOUNT SEAT' + later lines; mail [Wednesday-overnight -> Wednesday-morning].
 
+## 2026-11-05 15:53 -> 2026-11-06 05:30 - Tuesday s246 (Datasec seat, Opus 5.5), successor of s245 -> wrap at the 05:30 shift change (queue dry)
+- Deployed: HPSM-POC main 13ac7d7e (PR #287 layout round 2 + PR #288 open feedback review door) to UAT by D55 B1307 (16:36-16:38; no schema step; IL-proved API change; no rollback). Tuesday's own curl check: new BUILD_ID live, logo -> review page with no sign-in, other admin pages still gated, held list 0 items (0 before too). Kam told READY to pass to Steve (bf-18671e8ae0d3).
+- Records: NexusAI RD-916 (R176 B1308: comment 40759, To Do -> Testing, C-238; PR #170 merge commit ffb67152). HPSM-POC day records (R177 B1309: C-296..C-299, BACKLOG B1309-1..-7/-C1/-C2/-V1, history; PR #181 -> records main 37715f3b). Every landing verified at origin.
+- Kam: 21:13 HP is very excited, Phase 2+3 SOW sent; 21:16 thanks. No open card.
+- Slips: B1308 stamped with two unverified drafter pointers (caught by the seat; ledger row). Wrap: ledger 3c archive (67 rows, conserved), digests regenerated.
+- Open: B1309-6 (open-door rate limit / audit identity) for Kam; B1309-1..-3 small fixes wait for Kam; 11-12 Dependabot card; weekly allowance 99%.
+
 ## 2026-11-04 19:55 -> 2026-11-05 05:3x - Tuesday s244 (Datasec seat, Opus 5.5), successor of s243 -> checkpoint wrap at the 05:30 shift change (queue dry for new heavy work at ctx 70%; seat kept up for Kam's tap)
 - Landed (each verified at source): NexusAI #167 RD-924 (head-pinned MERGE commit 54000972; gate G342 B1287 GO WITH FINDINGS r2 of 2; post-merge Build 5312/317; Deploy demo skipped) and its records PR #168 (merge 4da06e8e). HPSM-POC records PR #180 (merge b58e7def by the R174 seat; C-293/294/295; HPSMPOC-441 Done).
 - Deployed: HPSM-POC header fix fc2bc2fc to the DEMO (D51 B1286, 21:28; Tuesday GET: new BUILD_ID x1). UAT had it since 19:43 (s243).
