@@ -8,6 +8,16 @@ supersede: REPLACED WHOLESALE by the 10:1x seat at its 65% checkpoint. Previous 
 
 # NEXT PICKUP — Fri 6 Nov 2026
 
+## ROTATING 14:5x, READ THIS FIRST (the 13:49 seat)
+GO OUT: PR 2032 GO sent 14:54 at 375084cf53d4 on pin 7d4637ff3c0e: NO MAIL TO LANE B until its MERGED (read newmail unpiped to a file). Then READY and GO for PR 2036 (gate 217, KS-1841 F2, head 3f5df055343e), PR 2037 (gate 218, head 119935b28e3a), PR 2038 (gate 218, head 2b1be426c5c3). Send with SP=<your scratchpad> SEAT='Seat B 97th' fleet/send_go_merge_seat.sh; note file per the 13:49 seat's shape: gate verdict line read, status lines, deploy owed, READY read how. B wraps at 75%: its pane is one row, unreadable; then B 98th from its HANDOVER.
+GATE 219 tier 1 on PR 2039 (F 35th, Opus): if verdict.md in reference/2026-11-06_gate219-ks1951-pr2039 still reads the INCOMPLETE stub, RE-LAUNCH same round from commission.md as a background Opus subagent, round 1 of 2. F 35th waits with its worktree; next ticket or wrap after. PR 2040 KS-1613 tier 1 (J 18th, head 3e118ba3200f): gate owed, batch with W 29th's KS-2038 PR if it has landed. KS-2038 never merges without Kam's tap.
+D 56th %52 building at pin e174f5eb488a, GO KINTSUGI sent: next mail swap windows, STATUS B with per-ticket table, or a STOP. A count above 0 on the allow-list reads goes to Kam before part b. Next deploy round owes api-gateway (2033, 2032, 2028 is in? check by its table), staking (2035), governance after 2039; after STATUS B launch S 28th to close from the table.
+OWED FIRST: Seat S 28th: KS-1544 comment (see 14:53 block), item 4 from KS-256, item 5 leftovers. Seat V 25th when V's refs land: v25_refs_wait.sh dies with this seat; ls-remote the shas at each checkpoint. T 14th unread and held. X 5th measuring baseline, tier 1 at the end. Open cards today include wed-gdrive-plug-in-gate-clones-1106 (Kam's hands); disk 52 GiB by X's read.
+
+## STATE AT 14:53 (the 13:49 seat; newest, read first)
+S 27th WRAPPED, 0.93, closed; KS-2048 to KS-2057 filed. OWED: Seat S 28th (HANDOVER 2026-11-06_seatS-27th; brief = briefs_staged/2026-11-06_seatS27_closeout.md re-keyed): FIRST the KS-1544 comment (PR 2035 squash 7d4637ff3c0e, 03:46:14Z, staking deploy owed, real two-window cell owed, stays open: my mail reached no one); item 4 from KS-256, KS-972 QUESTION; item 5 leftovers; then D 56th's table closes. PR 2035 merged, nineteen by B's reports; no GO out; B's READY for PR 2032 is next (status lines inside the 2028 GO).
+GATE QUEUE adds: PR 2040 KS-1613 tier 1 (J 18th, head 3e118ba3200f, touches preflight.sh X 5th also edits; its READY mail 03:48Z): batch with W 29th's KS-2038 PR when that lands, or alone at the next boundary. X 5th: serial baseline running from 14:46.
+
 ## STATE AT 14:38 (the 13:49 seat; newest, read first)
 GOs: PR 2034 GO sent 14:3x at 07924892fa5f on pin 45d2edc73aa9, MERGED not yet read: NO MAIL TO LANE B until it. Then B queue: 2035, 2032, 2036, 2037, 2038 (gates 216, 217, 218; 2037 and 2038 queued inside the 2034 GO with status lines). PRs since D's pin ride a following deploy round.
 D 56th %52 GO KINTSUGI at pin e174f5eb488a; build k21 from 03:33Z by its mail; Redis and Postgres counts 0 by its report, recounted before each swap part; STATUS B with the table is next, S 27th closes from it. Above 0 is a STOP and QUESTION, may go to Kam.
