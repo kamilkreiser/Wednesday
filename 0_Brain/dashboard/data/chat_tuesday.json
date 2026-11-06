@@ -9021,5 +9021,19 @@
   "project": "Datasec",
   "ts": "2026-11-07T03:41:21.118597+11:00",
   "text": "NexusAI: the layout recorder, RD-928 part B, is on main at fab4fa41, not deployed, so the roles foundation, parts A and B, is now in. One correction: I said the allowance would run out around 2 am. It did not; it was at 88% at 03:24, because burn slowed once the seats were mostly waiting. A separate finding for a ticket: the sqlite code can roll back without waiting, so a read straight after a failed write can see the old state. It showed up once in 800 tries under load, and the gate found no server code using that path."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-11-07T05:14:58.767615+11:00",
+  "text": "NexusAI, two things. First, the log-sink gate said NO GO, round 1 of 2, and it was right. The builder's new test only passes at certain hours, because some frozen answers carry a boot-time stamp: green at 03:33, red from 04:25, same bytes. Landing it would have turned every Build red for much of each day. The wraps held on all 44 lines and the product is not at fault; a small fix round is being drafted, and nothing landed. Second, a security finding I read at source on main, not yet ticketed: when an admin's role, active flag or password changes, the code that revokes that user's sessions does nothing, because the two storage methods it looks for do not exist and it skips silently. I have not measured whether a demoted admin actually keeps rights, because that depends on whether each request re-reads the role. A seat will measure it before I ask you anything. Also a correction to my last line: the sqlite race shows a read seeing the uncommitted delete, before the rollback restores it, not old data."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-11-07T05:30:30.102368+11:00",
+  "text": "NexusAI, session finding narrowed, from reading the code on main, not yet run. A demoted admin loses rights at once, because every request re-reads the role. The gap is deactivation and password changes. The active flag is checked only at sign-in, so a deactivated user's open session looks to keep working until it expires, and a password change leaves old sessions alive. The cause looks like a naming slip: the revoke code calls deleteSessionsForUser, and the store's method is deleteUserSessions. I will ticket it and have a seat prove it red first, then fix it through a gate. Nothing deploys. No action needed from you unless you want it moved up."
  }
 ]
