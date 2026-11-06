@@ -143,6 +143,21 @@ resolve_derived_or_abort(){
               continue
             fi
             ;;
+          */chat_log.json)
+            # untracked and derived from the streams; if it ever conflicts, it is rebuilt at the end.
+            git checkout --ours -- "$f" >/dev/null 2>&1 || git checkout --theirs -- "$f" >/dev/null 2>&1
+            ;;
+          */chat_*.json|*/ack_state.json)
+            # Records too: chat_kam.json holds Kam's words. Same shape as decisions.json above.
+            _g=$(git rev-parse --git-dir)
+            if git show ":2:$f" > "$_g/panel_union_up.json" 2>/dev/null && git show ":3:$f" > "$_g/panel_union_lo.json" 2>/dev/null \
+               && _r=$(python3 "$(git rev-parse --show-toplevel)/2_Project_Files/tools/records_union.py" "$_g/panel_union_up.json" "$_g/panel_union_lo.json" "$f" 2>&1); then
+              say "RECOVER: $_r"
+            else
+              say "RECOVER: $f union FAILED, left unresolved so the rebase aborts: $_r"
+              continue
+            fi
+            ;;
           *)
             git checkout --ours -- "$f" >/dev/null 2>&1 || git checkout --theirs -- "$f" >/dev/null 2>&1
             ;;
