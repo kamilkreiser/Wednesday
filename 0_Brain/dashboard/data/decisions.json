@@ -63396,5 +63396,44 @@
    "CARD secuura-ks1084-measure-now-spark-off-1106",
    "CARD wed-gdrive-plug-in-gate-clones-1106"
   ]
+ },
+ {
+  "id": "secuura-ks657-redis-security-store-delete-1107",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-657: the dead-code deletion also removes a written but never wired Redis security store. Delete it, or keep it?",
+  "bluf": "Tap one, please. PR 2079 removes the cache section you ruled on, plus redis-security-store.ts: 417 lines of Redis-backed rate limiting, brute-force and CSRF stores. Your card never named it. Gate 241 found no importers and passed the code, but ruled this outside your words. I told you at 16:41 yesterday it would go, without saying what it does or these two things: .planning/codebase/CONCERNS.md says to wire it into all services, and part of the problem it was written for looks live. The gateway's 10 rate limits, including login, set no shared store, with up to 20 replicas in the bicep, so each replica may count alone. That is read from code, not driven. The prior-ruling search over your messages found no reply on this. Prior matches read: other Redis and delete tickets, none about this store.",
+  "default_action": "If Kam does not answer: PR 2079 stays unmerged, nothing is deleted, and a board seat files the gateway rate-limit finding as a ticket. Wednesday re-raises at the 48-hour mail.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Delete it, and ticket the gateway rate limits (recommended)",
+    "detail": "Nothing uses it and git keeps it. A fresh ticket measures the rate limits and picks a store, assigned to the board account. PR 2079 proceeds; a seat also corrects CONCERNS.md and BACKLOG.md."
+   },
+   {
+    "key": "b",
+    "label": "Keep the store, delete only the rest",
+    "detail": "Round 2 of 2 on PR 2079 keeps the store and whatever cache code it imports, so the ticket's dead code partly stays. The rate-limit ticket is filed either way."
+   },
+   {
+    "key": "c",
+    "label": "Hold KS-657 until the rate limits are measured",
+    "detail": "Nothing merges on this ticket until a seat has measured them; then it comes back to you."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-07T05:45:46.459252+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-26 10:45",
+   "CARD secuura-793-security-expiry-two-triages-disagree",
+   "CARD secuura-actions-alive-but-security-gates-red",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-ks1861-what-tenant-delete-means-1031",
+   "CARD secuura-auth-lockout-failopen-redis-down-1103",
+   "CARD secuura-ks1233-redis-ttl-read-1104"
+  ]
  }
 ]
