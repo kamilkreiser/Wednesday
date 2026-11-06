@@ -1,0 +1,19 @@
+# Gate 214 commission — Secuura / Blockchain, BATCH: PR 2029 (KS-1585 m2, tier 2), PR 2030 (KS-1585 reader, tier 1), PR 2031 (KS-1377, tier 1), ROUND 1 of 2
+
+Written by Wednesday 2026-11-06. Model: Opus (row G1; security service). QA GATE: findings only; fix nothing; write nothing outside this folder; no box; post nothing to Linear or GitHub; network only for git fetch into your own clone. verdict.md holds the stub; overwrite at the end: line 1 is the batch line (the WORST, naming each PR), then one labelled verdict per PR, each exactly GO, GO WITH NOTES or NO GO (<reason>).
+Read first, whole: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/BRIEF_TEMPLATE.md; for shape only, /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate208-ks692-pr2017/commission.md; the READY mails in ready_batch_*.txt here (Seat G 28th's; other mails in those files are not your subject); pins.txt here. The figures in the READYs are Seat G 27th's: say which you reproduced. Seat G 27th's HANDOVER: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-05_seatG-27th/HANDOVER.md. Clone: git clone --shared /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files to a subfolder and fetch the three pull refs into YOUR clone only; deps from a finished worktree by copy, never npm install into a shared tree. Absolute paths, no cd, not even builtin cd; vitest cache inside your folder; never a recursive grep/find over 0_Brain/reference, local-model/ or 5_Project_History. Suites one at a time; the machine is shared; stop every process you started.
+
+## Rulings (binding; quote from source, do not paraphrase who is admitted)
+- Kam, card secuura-ks1585-scope-rows-on-admin-change-1105 = b: read with decision_queue.sh show (READ verb only).
+- Wednesday's ANSWERs to Seat G 27th, in its mail folder (06:42:22Z item 2; 07:31:21Z condition 1, condition 2): /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-05_seatG-27th/mail/ (read these two only).
+
+## Questions, per PR
+1. Scope from your own diff; PR 2030 and PR 2031 share services/security/src/index.ts: name the hunks, trial merge both orders with a planted conflict control.
+2. PR 2030: run the shared predicate against a real PostgreSQL if you can stand one up from the repo's own test harness; a before/after table of who has scope rows applied, on the real reader and writer; revoke and mint with a live ADMIN, a demoted user, another tenant; an outage answers 503 without minting or revoking. Reproduce 3 of the seat's mutants and one of your own. Is survivor MR5 truly equivalent? Measure it, do not take the reading. Does secuura_app need a new GRANT for users, and does any migration or deploy note say so?
+3. PR 2031: the upsert keeps usage_count and last_used_at under concurrency; the miss answers 503 only while the database is unavailable, and never in memory-only mode; the nine KS 1868 cells: read the old and new expectation, is the change what the ruling allowed. Who else calls the validate route and treats a 200 'Key not found' as data? Name them.
+4. PR 2029: the script token and the test; run the script if you can; the empty-users finding is known and out of scope.
+5. Suites: security unit and integration, tsc including tests, eslint, docs-fragments with a planted defect; classify failures same-on-base or new.
+6. Merge trees onto develop per pins.txt with a planted control; shared paths with everything merged since 5fc5569ed96a = 0. PR 2031 is also attached to KS-1370 through its branch name: anything known about what a merge does to that ticket, or UNMEASURED.
+
+## Output
+verdict.md (batch line, per-PR verdicts, BLUF, findings with severity, file:line, evidence path, what was NOT tested, your own conduct). Final message: verdict lines plus one line per finding.

@@ -13,18 +13,25 @@ Clear the Secuura board over the next 1-2 weeks: In Review and In Progress first
 
 ## CARDS
 secuura-peter-created-on-our-account-1106 = a (11:11): the 31 are ours; only ASSIGNED to Peter or Stuart stays theirs. All briefs carry this.
-Ruling pack: drafter writing 0_Brain/projects_index/secuura_kam_rulings_draft_2026-11-06.jsonl (max 20 cards incl KS-1205 audit row, KS-1752 default, KS-1545 step 2, KS-1733 query keys, KS-749). READ IT, then post each via decision_queue.sh add (plain add first; on a refusal read the matches, then --override-prior-rulings). Nothing posted yet.
+Ruling pack posted, see OWED 0.
 
-## FLOOR at ~11:25 (all Sonnet unless named; read cockpit.sh status)
-- B 97th %5 merge. MERGED PR 2009 85046e8707a0. QUEUE: 2018 (READY pending; body left as is, ruled A), 2017, 2020, 2022, 2021, 2019, 2024, 2023, 2027, 2028, 2025, 2026. Send each GO with scratchpad send_go.sh's shape: re-read head and develop in the same action, tree from its READY; body line 1 'Seat B 97th'; subject 'GO: merge PR n at head12 on develop pin12 (Seat B 97th)'. NEVER mail lane B between a GO and MERGED. B wraps at ctx 75%: then launch B 98th from its HANDOVER (kit in 5_Project_History/2026-11-06_seatB-97th/tools).
-- T 13th %8 plan lane 1: checking platform.ts residual under KS-1622, reading KS-1346, then next. Waits KS-1493 merge SHA for KS-1505 part 2, KS 2009 comment. Plan rows are stale often; it reads first.
-- G 28th %11: PR 2029 (tier 2, head 33c4b9a0d24a), PR 2030 (tier 1, head f107b9688445) READY FOR GATE; KS-1377 push running, READY to follow. Gate all three as one batch or 2029 alone + two tier 1: not commissioned yet. COPY the shape of 0_Brain/reference/2026-11-06_gate213-tier2-pr2025-2028/commission.md; Opus for tier 1.
-- E 38th %14: KS-864 (tier 1), KS-1128, KS-1841 F2 (A; Docker daemon DOWN, rule when asked).
-- S 25th (lane S), U 15th (lane U) launched ~11:15-11:22: plan confirmations due; answer with GO. S 25th: B rows then the 31. U 15th: Kintsugi per-service shas table, then 44 A-CHECK rows; forward its table to S 25th.
-- WAITER scratchpad/lanes_waiter.sh launches R 86th (lane 4, KS-1707 fuse 11-30), F 35th (Opus, KS-1942), J 18th (lane 5 batch 1), spaced + load < 7. Log scratchpad/lanes_waiter.log. Each sends a plan confirmation: GO.
-- Lane plan: 0_Brain/projects_index/secuura_lane_plan_2026-11-06.md (remaining lanes 2, 6, 7, 8, 9, 10 unlaunched; it is a census representation).
+## FLOOR at 11:45 (read cockpit.sh status; all Sonnet except F 35th Opus)
+- B 97th %5 merge. MERGED 2009, 2018; GO for 2017 mailed 11:41. REMAINING QUEUE: 2020, 2022, 2021, 2019, 2024, 2023, 2027, 2028, 2025, 2026, in order, each READY then GO. Tool: 2_Project_Files/fleet/send_go_merge_seat.sh <PR> <fullhead> <fullpin> <fulltree> "<gate verdict>" <KS-n> <notefile> with SP=<your scratchpad> SEAT='Seat B 97th'; tree and pin from the READY's 'On the GO it expects' line. Then cockpit.sh say 'Secuura/Blockchain-B' 'GO mailed: read your inbox.' --mail 'GO: merge PR n at head12'. NEVER mail lane B between a GO and MERGED (ruled A). B wraps when its statusline reads 75% (it cannot read it; the wake says so): tell it; then B 98th from its HANDOVER (kit in 5_Project_History/2026-11-06_seatB-97th/tools). After PR 2025 merges name its SHA to T.
+- T 13th %8: KS-1622 PR pending (driver 64253), KS-1544 building; KS-1788 after 2026 + 2028; KS-1505 + KS 2009 comment after KS-1493 merges.
+- G 28th %11: PRs 2029, 2030, 2031 READY FOR GATE; holding for gate 214 (0_Brain/reference/2026-11-06_gate214-ks1585-ks1377-pr2029-2031/verdict.md; background Opus subagent). Verdict -> queue to merge seat; findings -> G 28th. 2030 and 2031 share index.ts (second needs recompute). Then wrap G or name next.
+- E 38th %14: KS-864 (tier 1), KS-1128 (tier 2) pushes queued; KS-1841 with Docker allowed once (start, prove, quit). READYs -> gate.
+- S 25th %17: B rows, then the 31, then counts mail. Rulings given: fix-string read; old PRs with Test Evidence count except auth/credential/token/tenant/money/destroying; KS-749, 1752, 1314 close; KS-2009 Done+archive when KS-1493 merge SHA is named; KS-1800 close with a note (NOT yet told S 25th).
+- U 15th: Kintsugi sha table then 44 A-CHECK rows; forward its table to S 25th. Standing OK given for grep -c -F of a fix string on Kintsugi.
+- R 86th %25: KS-1707 table first (fuse 11-30; re-date card by 11-20), KS-1209, 1136, 1231, 528.
+- F 35th (Opus) KS-1942; J 18th lane 5 batch 1: plan confirmations due, answer GO quoting card go-counts-as-kams-word.
+- V 24th: waiter scratchpad/v24_waiter.sh launches it; brief briefs_staged/2026-11-06_seatV24_originate.md. On failure launch by hand.
+- FINDING to tell Kam with a count at the next report: lane-plan 'buildable' rows are mostly stale or decisions when read whole: T 13th's 8 read, 2 buildable. The census D 86 is an over-estimate. Decision list beyond the 10 cards: KS-1670 sites 2-3 + KS-1641, KS-1410 + KS-1214, KS-1171 8k (money path). Draft cards next.
+
+## FIRST FOR THE SUCCESSOR
+Read mail (newmail.sh unpiped to a file); answer plan confirmations; send GOs; card the decision list above; a D 56th kintsugi deploy brief once originate/vc-issuer/auth PRs are in (9 + merged), October grant, demo frozen; NAS evaluation card.
 
 ## OWED
+0. Ruling cards: ten posted 11:27 (KS-1152, 736, 1536, 1194, 946, 1205, 365, 1545, 1733, 657); as he taps, reconcile and route each. Wednesday's own decisions, told to Kam: KS-749, 1752, 1314 close via S 25th (told); KS-1226 raise limit to 30 s, KS-1098 widen masking as drafted, KS-1316 retry once: put in a test/tooling seat; KS-174 an agent compares with the later isolation work then close or revive. Drafts: projects_index/secuura_kam_rulings_draft_2026-11-06.jsonl.
 1. D 56th kintsugi deploy once the originate, vc-issuer, auth PRs merge (October grant extended until further notice); demo frozen.
 2. V seat: KS-1509 rebase (eb384c8902a8) + KS-1666 N1 test after PR 2018 merges; comment on KS-1666 after merge.
 3. Follow-up test/doc seat: G208-N1 fragments (404 vs 400), G210-F1 + N-1 cells, G211-F1 cell, G212-F1 cells and N2 fragment, G209-N1 comment, G209-N4 evidence for the KS-968 reason.
