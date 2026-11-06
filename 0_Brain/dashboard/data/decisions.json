@@ -63001,5 +63001,252 @@
    "CARD quickquote-v239-custom-price-fix-publish-1017",
    "CARD nexusai-banner-guard-stylesheet-stub-1025"
   ]
+ },
+ {
+  "id": "secuura-ks1231-nine-fields-share-integrations-key-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1231: saving one of nine admin settings can make every connector answer 403. Lock those fields until KS-2035 gives them a home?",
+  "bluf": "Tap a, b or c. The admin Settings page keeps nine plain fields under the same stored key, integrations, as the connector allow-list. On a fresh instance, editing one of them stores a non-array there, and the page says saved. By QA gate 236's read of the code, connectors then answer 403 for every create and info call; the save was measured in a real browser, the 403 was read and not run. This is old behaviour, not new. PR 2058 claimed to stop it and does not, so the claim is being corrected. Seat R 87th recommends a; I agree. Unmeasured: whether any box has hit this, and I have not read the reader myself. Gate 236 counts seven of the nine names as read nowhere else. Override reason: a search of 478 ruled Secuura rows for KS-1231 and KS-2035 reads 0; the matches share only generic words.",
+  "default_action": "If no answer: a. Seat R 87th or its successor builds the read-only fields in PR 2058's round 2, which is gated and not deployed by this card; a later tap of b or c changes it before a deploy.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Show the nine fields read-only for now, with a note (recommended)",
+    "detail": "The page cannot write them while the key is shared. An admin cannot edit those nine from this page until KS-2035 decides their home. No gateway change."
+   },
+   {
+    "key": "b",
+    "label": "Move the nine to their own category now",
+    "detail": "Needs a gateway and reader change and a read fallback, so it is bigger than this PR and goes through its own tier 1 gate."
+   },
+   {
+    "key": "c",
+    "label": "Leave it and say so in the PR",
+    "detail": "Nothing changes. The path that makes every connector answer 403 stays open and is stated plainly."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T22:48:58.696853+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-08-21 19:49",
+   "2026-08-27 19:42",
+   "2026-08-28 09:33",
+   "2026-09-01 17:25",
+   "2026-09-07 06:42",
+   "2026-09-08 07:08",
+   "2026-09-10 08:59",
+   "2026-09-10 09:17",
+   "2026-09-10 17:10",
+   "2026-09-18 09:15",
+   "CARD secuura-archive-peters-nine-done-tickets",
+   "CARD secuura-ks1385-cert-holder-can-rewrite-issuer-fields-1018",
+   "CARD secuura-ks1384-share-pays-second-tx-before-stage2-1106"
+  ]
+ },
+ {
+  "id": "secuura-ks2060-clear-wallet-null-migration-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2060: 'clear the wallet' needs a one-line migration. Approve it, or use a marker value instead?",
+  "bluf": "Tap a or b. You ruled that an erased user's row keeps its counters and has its wallet cleared. That column is NOT NULL, so a true clear needs migration 059: one statement dropping NOT NULL. Seat U 17th ran both options on the real compiled service and real PostgreSQL; I read its mail and the schema line, and did not re-run them. With NULL, a second cleared row is allowed, no one can name the row by wallet, and the API returns null where the spec says string, so the spec changes too; delegating to or from it needs a refusal (500 today). With a marker such as erased:<id> there is no migration, but an admin naming that value landed 5000 stake on the cleared row in its run, and every door must know the marker. Merging a migration is close to applying it, by migration 058's own header; the demo stays frozen and this deploys nothing by itself. I recommend a: it means what you said. Override reason: KS-2060's card a ruled the clear and said a migration returns to him; this is that return. The other matches share only generic words; KS-1942 sets where stake comes from, not this column.",
+  "default_action": "If no answer: no migration is built. U 17th builds the rest of KS-2060, and the row keeps its wallet with stake and flags cleared, stated as a limit in its READY. Wednesday raises this at the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "NULL, with migration 059 (recommended)",
+    "detail": "U 17th builds it under the tier 1 gate, spec line and refusals included; goes through Kintsugi first."
+   },
+   {
+    "key": "b",
+    "label": "A per-row marker, no migration",
+    "detail": "No schema change. U 17th adds a refusal for the marker at each door. Your word was clear; this is replace."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T22:59:36.210860+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:29",
+   "2026-09-15 09:30",
+   "2026-09-16 20:42",
+   "CARD secuura-audit-rows-react-router-v7-migration",
+   "CARD secuura-ks1054-f9282-migration-failure-visibility",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-tenant-isolation-migration-ks1401-1005",
+   "CARD secuura-ks1223-referrer-wallet-source-1013",
+   "CARD secuura-ks1385-null-issuer-certifications-1015",
+   "CARD secuura-ks1116-null-owner-who-reads-1020",
+   "CARD secuura-ks1819-ks1820-wallet-routes-off-by-default-1030",
+   "CARD secuura-ks1942-register-sets-any-wallet-stake-1102",
+   "CARD secuura-ks2060-erased-user-wallet-vote-power-1106"
+  ]
+ },
+ {
+  "id": "secuura-ks2060-address-in-history-dpia-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2060: an erased user's wallet address stays in old votes and delegations, against your DPIA. Remove it, or disclose it?",
+  "bluf": "Tap a or b. Clearing the participant row leaves the address in governance: in the votes on each proposal, as proposer_address, and on both ends of delegations (those columns are NOT NULL). Your DPIA, decided 2026-06-22, says all off-chain personal data is destroyed or anonymised on erasure, and lists two residuals; this would be a third. I read those DPIA lines and the delegation columns at develop; the rest is Seat U 17th's read, none of it run. Removing it keeps tallies, ids and stored power, like the KS-480 pattern of blanking identity and keeping attribution, but rewrites proposal rows on the erasure path, a larger build than your card implied, and the delegation columns need the same migration or a marker. Keeping it leaves a stable pseudonym that can be matched to a public chain. U 17th also lists twelve other tables with a wallet column, none walked, which the same DPIA line reaches: a wider question. I recommend a, because it keeps your document true. Override reason: KS-2060's card a says votes already cast are history and does not rule the address inside them; the other matches share only generic words.",
+  "default_action": "If no answer: history is left as it is, KS-2060's READY states the address stays, and Wednesday raises this at the next morning card. The DPIA is not edited.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Remove it from governance history (recommended)",
+    "detail": "Votes, proposer and delegation addresses blanked on erasure; tallies kept. Data-destroying path, tier 1 gate. The DPIA's tables updated after you rule."
+   },
+   {
+    "key": "b",
+    "label": "Keep it and disclose it",
+    "detail": "History reads as now. The DPIA's residuals section gains a third line, for you to approve."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T22:59:40.655425+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-audit-row-ip-address-high-override",
+   "CARD secuura-uuid-revokes-never-wrote-status-history-1006",
+   "CARD wed-nas-address-and-memory-1106",
+   "CARD secuura-ks2060-erased-user-wallet-vote-power-1106"
+  ]
+ },
+ {
+  "id": "secuura-ks2059-design-tenant-scope-named-route-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2059 design, as you asked before any migration: take the recommended package, or make governance per-tenant?",
+  "bluf": "Tap a, b or c. Seat U 17th walked the real service; I read its mail, not the runs. It is wider than your card: a caller in one tenant can also read every tenant's wallets, delegate, vote and, on the committee, cancel across tenants, and total vote power shows with no token. Proposals and delegations have no tenant column, so a tenant column on participants alone only scopes who may write stake. Row-level security with the code unchanged read empty totals and refused a real voter, with no error logged, so every governance read and write moves in the same PR. The package in a: tenant admins means a platform role whose token tenant equals the row's, no new power for anyone until KS-2063 lands; a named stake route, platform role only, naming a user and never a wallet, with an audit row; lists scoped to the caller's tenant, which widens the ticket from writes to reads; one global DAO, so totals and votes stay global; wallets stay unique across tenants; the new column stays nullable, because rows that belong to no user have no tenant until your re-key decision. The product question is global DAO or per-tenant, and it may be one for your next meeting with Stuart. I recommend a. Override reason: KS-2059's card a says the design returns to him before the migration; this is that return. KS-2032 is about key minting, and it bears only on who counts as a live admin.",
+  "default_action": "If no answer: nothing of KS-2059 is built. It stays open at High, only its failing test is written, and Wednesday raises this at the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Take the package, one global DAO (recommended)",
+    "detail": "U 17th builds it after KS-2060, migration included, under a tier 1 gate."
+   },
+   {
+    "key": "b",
+    "label": "Per-tenant governance",
+    "detail": "Tenant columns on proposals and delegations too, per-tenant totals and quorum, and a data question for every existing proposal. Much larger; the design returns to you."
+   },
+   {
+    "key": "c",
+    "label": "Carry global or per-tenant to your Stuart meeting",
+    "detail": "Nothing of KS-2059 is built until then. The holes stay open at High. On the monthly agenda."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T22:59:44.173145+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-17 18:31",
+   "CARD secuura-ks662-scope",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-ks764-org-arm-design-2026-09-03",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
+   "CARD secuura-ks839-oauth-wildcard-scope-grants-everything",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD spark-studio-client-scope",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-ks888-failed-key-save-design",
+   "CARD secuura-tenant-isolation-migration-ks1401-1005",
+   "CARD secuura-provisioning-scope-escapes-the-org-bound",
+   "CARD secuura-ks1628-retire-deprecated-verify-route-1019",
+   "CARD secuura-ks1240-tenant-create-key-fail-answer-1028",
+   "CARD secuura-ks1861-what-tenant-delete-means-1031",
+   "CARD secuura-ks1860-suspended-tenant-enforcement-1031",
+   "CARD secuura-ks1336-per-tenant-db-priority-1102",
+   "CARD secuura-ks1585-scope-rows-on-admin-change-1105",
+   "CARD secuura-ks2032-non-live-admin-token-mints-tenant-keys-1106",
+   "CARD secuura-ks2059-cross-tenant-stake-1106"
+  ]
+ },
+ {
+  "id": "secuura-prerun-push-third-round-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "Pre-run pushes failed their last gate. Allow one narrow third round, or stop and keep every push on the hook?",
+  "bluf": "Tap a or b. You ruled the pre-run on 6 Nov: test side by side, then pre-run if it holds. Gate 237, round 2 of 2, says NO GO, so by your two-round cap the mechanism stops unless you say otherwise. Nothing was pushed and no seat uses it. The one blocker, measured with real git and a stub preflight: a failing git status reads as clean, so a red commit can reach --no-verify. It needs a malformed git setting plus an uncommitted edit, so it is rare, but it breaks the rule that an instrument error never skips the hook. The fix is about five reads and moves every pin. The three round 1 blockers are closed by the gate's own check. Also Major: the side-by-side's MATCH can mislead, and 'launch first' is not safe to tell seats, so the benefit is smaller than planned. Why it still matters: the queue is 20 pushes at about 20 minutes each, by seats' reports, and every queued driver gives up after about 6 hours, which one did tonight; I have told every seat how to recover. The real 16 legs and a real push remain untested either way. I recommend a, narrowly, because the queue is what bounds how fast the board clears. Override reason: Your push-queue card ruled the mechanism, not a third round; the 18 Oct KS-1612 third-round ruling is another ticket and the others share only the word push.",
+  "default_action": "If no answer: b for now. Nothing is built, pushes stay on the hook, and Wednesday raises this at the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "One narrow third round (recommended)",
+    "detail": "One seat fixes the blocker and the Majors only, one tier 1 gate on the changes, then the side-by-side and one real push. A NO GO ends it for good."
+   },
+   {
+    "key": "b",
+    "label": "Stop here",
+    "detail": "Pushes stay on the hook. X 7th's work stays in its record. Queue length is handled by relaunches and fewer queued pushes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T23:02:58.010422+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-21 20:06",
+   "2026-09-07 18:03",
+   "CARD secuura-806-force-push-2026-09-04",
+   "CARD secuura-force-push-own-branch-standing",
+   "CARD secuura-934-blocks-every-push-needs-one-approval",
+   "CARD secuura-five-new-advisories-block-every-push-0929",
+   "CARD secuura-five-new-advisories-freeze-every-push-1006",
+   "CARD secuura-ks1612-third-round-after-cap-1018",
+   "CARD secuura-hono-advisory-blocks-every-push-1029",
+   "CARD secuura-kintsugi-third-prune-for-train-round-1101",
+   "CARD secuura-push-queue-prerun-preflight-1106",
+   "CARD wed-network-change-1534-1602-push-deaths-1106"
+  ]
+ },
+ {
+  "id": "wed-agentmail-daily-limit-upgrade-1106",
+  "client_project": "WED",
+  "title": "Agent Mail hit its daily limit, so the whole fleet can't mail until about 11:00. Upgrade now for $200 a month?",
+  "bluf": "Tap a or b; a needs your hands. Open https://console.agentmail.to/dashboard/upgrade and take Startup. Agent Mail refuses every send with 'Daily send limit exceeded': the limit is 1000, it resets in 40674 s by its own reply at 23:42, and Startup raises it to 15000 for $200.00 a month, by the same reply. No mail from any Secuura seat since 23:14. Seats keep building and queued pushes keep running, but no GO, ruling, READY or merge can move, and new seats cannot launch because a brief goes by mail. I do not know which login holds that plan, or whether Tuesday's seat is stopped too; she has not been asked, because I cannot mail her. Your 48-hour stale mails cannot send either. We sent over 1000 today by volume, so this returns on any day this busy. I recommend a: you have said productivity is the constraint, not money. It is yours because it is money. Override reason: the only match is KS-1205's gateway limiter, a product feature sharing the words rate limit.",
+  "default_action": "If no answer: b. Nothing is bought. Wednesday holds every mail in briefs_staged and sends in order after the reset, about 11:00 on Saturday, and cuts fleet mail volume from then.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Upgrade to Startup now (recommended)",
+    "detail": "Your click at the link above, under the Agent Mail login. Tell me here and I re-send the held mail in order, first the merges."
+   },
+   {
+    "key": "b",
+    "label": "Wait for the reset",
+    "detail": "About 11:00 tomorrow. Seats finish what they hold; no merges or new seats overnight. I also cut mail volume where I can."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T23:42:43.258227+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-08 15:36",
+   "CARD secuura-ks-1205-rate-limit-refusal-audit-row-1106"
+  ]
  }
 ]
