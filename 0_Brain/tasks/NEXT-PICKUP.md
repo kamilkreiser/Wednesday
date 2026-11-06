@@ -28,6 +28,7 @@ Ruling pack posted, see OWED 0.
 - FINDING to tell Kam with a count at the next report: lane-plan 'buildable' rows are mostly stale or decisions when read whole: T 13th read 10 whole, 1 buildable plus one residual. The census D 86 is an over-estimate. Decision list beyond the 10 cards: KS-1670 sites 2-3 + KS-1641, KS-1410 + KS-1214, KS-1171 8k (money path). Draft cards next.
 
 ## FIRST FOR THE SUCCESSOR
+B 97th: PR 2020 option A ruled (accept the In Review move on KS 1232; S 25th puts it back). U 15th's table: 0 of 32 containers carry a source commit (labels 'unknown'); filing candidate: stamp images with the build commit. T 13th: KS-1544 queued to push. Told S 25th KS-1800 close with a note: DONE. Gate 214 may still be writing to its folder, which is excluded from status locally in .git/info/exclude: commit its records after its verdict.
 PR 2017 MERGED bd92121e0228; B 97th's READY for PR 2020 next (N-5: KS 1232 attachment). R 86th: row 5 re-date card owed by you once trial results arrive by 11-13, owner KS-1707 proposed. J 18th GO sent; two QUESTIONs to come (KS-1745 b, KS-1613 item 3). KS-1800 close-with-a-note still to tell S 25th. F 35th plan confirmation due. Answer with a tap after each mail.
 Read mail (newmail.sh unpiped to a file); answer plan confirmations; send GOs; card the decision list above; a D 56th kintsugi deploy brief once originate/vc-issuer/auth PRs are in (9 + merged), October grant, demo frozen; NAS evaluation card.
 
