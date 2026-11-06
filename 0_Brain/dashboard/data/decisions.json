@@ -61667,7 +61667,9 @@
    "CARD secuura-pr1497-round6-past-the-cap-1013",
    "CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022",
    "CARD secuura-deepmerge-advisory-baseline-1028"
-  ]
+  ],
+  "delivered_artefact": "KS-1707 comment d53191cf (read by Wednesday at source 2026-11-06)",
+  "delivered_ts": "2026-11-06T15:17:18.544294+11:00"
  },
  {
   "id": "secuura-ks1600-originate-malformed-permissions-1106",
@@ -61824,7 +61826,9 @@
   "prior_rulings_overridden": [
    "CARD vault-ssh-pointer-heal",
    "CARD secuura-ks1081-two-env-templates-which-is-canonical"
-  ]
+  ],
+  "delivered_artefact": "KS-1081 comment 6ea34fe1 (read by Wednesday at source 2026-11-06)",
+  "delivered_ts": "2026-11-06T15:17:14.993273+11:00"
  },
  {
   "id": "secuura-ks2038-who-may-approve-transfers-1106",
@@ -61960,5 +61964,137 @@
    "CARD hpsmpoc-docker-finished-seat-stacks-1013",
    "CARD hpsmpoc-docker-stacks-remove-not-compose-1013"
   ]
+ },
+ {
+  "id": "wed-nas-address-and-memory-1106",
+  "client_project": "WED",
+  "title": "NAS pilot: send me its network address once it is on the network, and say whether you will buy the memory",
+  "bluf": "Kam, I need you to do one thing when the NAS is on your network: type its IP address in the note on this card, and tap whether you will buy two 32 GB memory sticks. You ruled the pilot (card wed-nas-evaluation-pilot-1106 = a) and that option says you give me both. Whether the NAS has arrived is unmeasured; I cannot reach it without the address. Nothing else waits on this. Override reason, read before this card: the four matches share only the word address (a September PR triage and an audit row on ip-address); neither is about the NAS.",
+  "default_action": "Nothing runs on the NAS and nothing is bought. Wednesday does not try to reach it, and asks once more at the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Here is the address, and I will buy the memory",
+    "detail": "Wednesday measures the device, reports, then one seat runs one disposable test stack, one client only."
+   },
+   {
+    "key": "b",
+    "label": "Here is the address, no memory for now",
+    "detail": "Wednesday measures and reports what the stock 8 GB can hold; the pilot's size comes back to Kam."
+   },
+   {
+    "key": "c",
+    "label": "It has not arrived yet",
+    "detail": "Nothing moves. Wednesday asks again at the next morning card."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T15:11:44.515390+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-06T15:29:08.927974+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-audit-row-ip-address-high-override"
+  ]
+ },
+ {
+  "id": "secuura-ks2059-cross-tenant-stake-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2059: an admin in one tenant can change vote power on another tenant's row. Close it, knowing the seeded admin loses its only way to stake those users?",
+  "bluf": "Tap a, b or c. QA gate 219 measured this on a real service and real PostgreSQL, at PR 2039 and on the develop before it, so it is old behaviour: an admin in tenant T1 changed the stake, DRep and committee flags on a row owned by a T2 user (201). Nothing is fixed. By the ticket, the participants table has no tenant column, and the seeded SYSTEM_ADMIN sits in the default tenant, so this path is its only way to stake a user in a provisioned tenant. Seat F 35th filed this at proposed High. Your KS-1906 ruling keeps vc-issuer's owner-less credentials with platform administrators of their tenant; whether that reaches governance is not ruled. Unmeasured: the other governance routes, and whether any box holds such a row. I have read the ticket, not the code. Override reason: your closest ruling, KS-1942 = a on 2 Nov, sets where wallet and stake values come from and does not say whether an admin may cross tenants; the other matches share only the word tenant.",
+  "default_action": "Nothing is built and nothing changes. KS-2059 stays open at High, and Wednesday raises it at the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Close it, tenant admins only, and give stake a named route (recommended)",
+    "detail": "A seat designs a tenant column with row-level security plus a named way to stake users in provisioned tenants; the design returns to you before the migration. Opus, tier 1."
+   },
+   {
+    "key": "b",
+    "label": "Measure first",
+    "detail": "A seat walks the other governance routes and reads counts on Kintsugi, then this returns with figures. Nothing is built."
+   },
+   {
+    "key": "c",
+    "label": "Accept it",
+    "detail": "A platform admin may stake across tenants on purpose. The ticket records the decision and closes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T15:15:59.899181+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-06T15:29:05.569561+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-21 19:49",
+   "2026-09-01 13:45",
+   "2026-09-04 08:33",
+   "2026-09-07 06:42",
+   "2026-09-08 11:41",
+   "2026-09-08 12:53",
+   "2026-09-09 12:15",
+   "2026-09-10 09:00",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 09:17",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-tenant-isolation-migration-ks1401-1005",
+   "CARD secuura-ks1240-tenant-create-key-fail-answer-1028",
+   "CARD secuura-ks1861-what-tenant-delete-means-1031",
+   "CARD secuura-ks1860-suspended-tenant-enforcement-1031",
+   "CARD secuura-ks1336-per-tenant-db-priority-1102",
+   "CARD secuura-ks1942-register-sets-any-wallet-stake-1102",
+   "CARD secuura-ks2032-non-live-admin-token-mints-tenant-keys-1106"
+  ],
+  "delivered_artefact": "KS-2059 comment a28d1286 (read by Wednesday at source 2026-11-06)",
+  "delivered_ts": "2026-11-06T15:32:31.703109+11:00"
+ },
+ {
+  "id": "secuura-ks2060-erased-user-wallet-vote-power-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2060: when a user is erased, their wallet and vote power stay. What should happen to their governance row?",
+  "bluf": "Tap a, b or c. By KS-2060: neither erasure step clears the user's wallet address, and governance does not listen for erasure, so an erased user's participant row keeps its wallet and stake. QA gate 219 measured one such row adding 200000 to total DRep vote power, for an account that can never log in or vote. Seat F 35th's follow-up only stops new binds. The originate erasure step was read from source, not run. Unmeasured: how many erased users hold a wallet or a row on any box. Your position on on-chain immutability (KS-234) bears on it. I have read the ticket, not the code. I recommend a because votes already cast are history, and the effect on future votes is what should stop. Override reason: the five matches share only the words wallet or user, and none rules what erasure does to a governance row.",
+  "default_action": "Nothing is built and nothing changes. KS-2060 stays open at Medium, and Wednesday raises it at the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep the row for audit, clear its wallet and vote power, and clear the wallet on the users row (recommended)",
+    "detail": "A seat builds it for new erasures and proposes a backfill for existing rows on its own card. Data-destroying path: Opus, tier 1."
+   },
+   {
+    "key": "b",
+    "label": "Delete the row where no votes or proposals exist, otherwise keep it cleared",
+    "detail": "Smaller record, more cases to test."
+   },
+   {
+    "key": "c",
+    "label": "Leave it for now",
+    "detail": "KS-2060 stays open. Erased users keep counting in total vote power."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T15:16:03.468858+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-06T15:29:02.105476+11:00",
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-ks1223-referrer-wallet-source-1013",
+   "CARD secuura-demo-kam-user-published-default-1027",
+   "CARD secuura-ks1819-ks1820-wallet-routes-off-by-default-1030",
+   "CARD secuura-ks1942-register-sets-any-wallet-stake-1102"
+  ],
+  "delivered_artefact": "KS-2060 comment 0c4295c2 (read by Wednesday at source 2026-11-06)",
+  "delivered_ts": "2026-11-06T15:32:35.220158+11:00"
  }
 ]
