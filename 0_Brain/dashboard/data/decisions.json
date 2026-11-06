@@ -63248,5 +63248,153 @@
    "2026-09-08 15:36",
    "CARD secuura-ks-1205-rate-limit-refusal-audit-row-1106"
   ]
+ },
+ {
+  "id": "wed-secuura-usage-89pct-login-by-morning-1107",
+  "client_project": "Secuura/Blockchain",
+  "title": "Weekly usage reached 89%: type /login in Wednesday's pane this morning, before it reaches 100% at about 09:00",
+  "bluf": "Kam, please type /login in Wednesday's pane (tmux pane %0) this morning and sign in with an account that has allowance left. Why: the statusline read 7d 77% at 22:31 last night and 89% at 04:02 today, 6d 4h before it renews. That is about 2.2 points an hour, so by a straight line it reaches 100% at about 09:00; the rate depends on the floor and is an estimate. At 100% the platform stops every Claude seat and Wednesday until you log in. Separately, seats cannot send mail until the 11:00 reset (your open card on that). Why ask again: your 4 Nov ruling on card wed-secuura-usage-98pct-new-account-1104 was about the previous account; this one started at 0% on 6 Nov at about 10:19.",
+  "default_action": "If Kam does not answer: Wednesday keeps the floor working (the 22 Oct rule: usage is a guide, leaning to Sonnet). At 100% all seats stop by the platform, their work stays on disk, and they resume after Kam's login.",
+  "options": [
+   {
+    "key": "a",
+    "label": "I will /login with another account this morning (recommended)",
+    "detail": "Wednesday then re-reads the board grant against the new account and the floor carries on."
+   },
+   {
+    "key": "b",
+    "label": "No new account: run this one until it stops",
+    "detail": "Seats work until 100%, then everything stops until the renewal in about 6 days, including Wednesday. Queued pushes already running keep going; nothing can read them."
+   },
+   {
+    "key": "c",
+    "label": "Slow the floor to stretch it",
+    "detail": "Wednesday launches no new Claude seats and lets running seats finish. It buys hours, not days, at about 2 points an hour now."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-07T04:07:46.399478+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-07 11:25",
+   "2026-09-14 19:14",
+   "CARD secuura-f5-login-limiter-bypass",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-ks888-validate-usage-write-failure",
+   "CARD secuura-usage-89pct-raise-backlog-1008",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD wed-fresh-login-99pct-1023",
+   "CARD wed-morning-plan-1026",
+   "CARD wed-morning-plan-1027",
+   "CARD wed-morning-plan-1028",
+   "CARD wed-morning-plan-1029",
+   "CARD wed-morning-plan-1030",
+   "CARD wed-morning-plan-1031",
+   "CARD wed-morning-plan-1101",
+   "CARD wed-morning-plan-1102",
+   "CARD wed-morning-plan-1103",
+   "CARD wed-secuura-usage-98pct-new-account-1104",
+   "CARD wed-morning-fleet-activity-1104",
+   "CARD secuura-ks1202-live-leg-issuer-login-1104",
+   "CARD wed-morning-fleet-activity-1105",
+   "CARD wed-morning-plan-1106",
+   "CARD secuura-ks-736-which-six-mounts-need-login-1106"
+  ]
+ },
+ {
+  "id": "secuura-ks1410-issued-packages-keep-hole-1107",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1410: customer packages already issued keep the server-file hash hole. Who, if anyone, should be told?",
+  "bluf": "Tap one, please. PR 2059 removes file-path reads from the mcp-server web interface, but gate 239 read that the package generator ships the same server files in customer packages (package-generator.ts:38). So any package already issued keeps the hole until it is regenerated, and our deploy does not reach it. On the old code the gate measured a caller getting the sha256 of a server file such as /etc/hosts and that hash being sent upstream: a hash, not the file's contents. How many packages exist is unknown to me; nothing I have read measures it. The PR is still in fix round 2 and is not merged. Prior matches read: they share only generic words (the word keep, and old PR triage text), none is about issued packages.",
+  "default_action": "If Kam does not answer: the finding stays stated in PR 2059's body and a board seat files the ticket when the PR merges. Nothing is sent to any customer, Stuart or Peter.",
+  "options": [
+   {
+    "key": "a",
+    "label": "File a ticket, count issued packages, then decide (recommended)",
+    "detail": "A board seat files a ticket with this finding, assigned to the board account, and a seat measures what can be measured about issued packages. If any exist, it comes back to Kam with a short text for Stuart or Peter. Nothing goes to a customer without Kam."
+   },
+   {
+    "key": "b",
+    "label": "Tell Stuart and Peter now",
+    "detail": "Wednesday writes a two-line WhatsApp text pointing at KS-1410 and Kam sends it. Quicker, before we know whether any package exists."
+   },
+   {
+    "key": "c",
+    "label": "Leave it in the PR body only",
+    "detail": "No ticket. The PR body states it; regenerating is left to whoever next issues a package."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-07T04:17:13.095350+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD secuura-ks1709-keep-unanchored-certification-1023",
+   "CARD secuura-ks769-close-keep-owner-1104"
+  ]
+ },
+ {
+  "id": "wed-disk-spark-work-clones-prune-1107",
+  "client_project": "WED",
+  "title": "Disk: may I run Spark's own prune tool on its old per-round clones, while the Spark is off?",
+  "bluf": "Tap a and I run the existing tool local-model/spark/prune_work.py on Spark's old per-round clones. Why: DevMASTER has 25 GiB free, the same as at 21:54, so my 'about 4 GiB an hour, empty about 04:00' on the other disk card did not hold overnight. The biggest single item I measured in my own folders is Spark's cache at about 336 GiB (du logical), with the Ornith and Qwen model weights next at about 198 GiB. The cache's work folder holds 598 entries; one sampled clone is about 352 MB, so the clones may be well under the whole cache, split unmeasured. The newest I read is dated 3 Nov. The Spark is off by your 4 Nov word, so queue.sh, which normally calls this tool, has not been running. Records stay: the tool removes a clone only when its round has a verdict row and is not live. G-DRIVE is not mounted here. Prior rulings read: your 6 Nov 'not today' was about plugging in the G-DRIVE for gate clones, and the other matches are boxes or gate clones; none covers Spark's work clones.",
+  "default_action": "If Kam does not answer: b. Nothing is deleted; Wednesday watches df and re-raises at 15 GiB free.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Run the prune tool once (recommended)",
+    "detail": "Wednesday runs it with --older-than-hours 72, reports df before and after, and reports anything it refused. The 53 other folders in there (drafters, quarantine) lack its marker, so it refuses them and they stay. Clones regenerate if the Spark returns."
+   },
+   {
+    "key": "b",
+    "label": "Leave it",
+    "detail": "Nothing is deleted. The re-raise at 15 GiB and the stop at 8 GiB on the other disk card stand."
+   },
+   {
+    "key": "c",
+    "label": "Move it to G-DRIVE first",
+    "detail": "Waits until you plug the G-DRIVE in here; your archive-first rule, slower, for clones that are regenerable anyway."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-07T04:36:55.392726+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-demo-vm-prune",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD secuura-kintsugi-build-cache-prune",
+   "CARD spark-studio-client-scope",
+   "CARD spark-recreate-serving-container",
+   "CARD wed-laptop-dev-copy-disk-full",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006",
+   "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
+   "CARD secuura-followup-deploy-disk-archive-1007",
+   "CARD secuura-standing-build-cache-prune-1007",
+   "CARD secuura-demo-disk-too-small-to-rebuild-1007",
+   "CARD secuura-vm-disk-grow-figures",
+   "CARD secuura-92pct-stop-ready-work-waits-1014",
+   "CARD secuura-gate-at-99pct-two-spark-prs-1016",
+   "CARD wed-ornith-122b-test-on-spark-1026",
+   "CARD wed-spark-drafting-cost-1028",
+   "CARD secuura-kintsugi-disk-15gb-builder-prune-1031",
+   "CARD secuura-kintsugi-second-prune-all-cache-1101",
+   "CARD secuura-kintsugi-third-prune-for-train-round-1101",
+   "CARD secuura-kintsugi-disk-train-round-rollback-images-1101",
+   "CARD secuura-spark-ks1868-safe-sites-exhausted-1102",
+   "CARD wed-gate-clones-fill-devmaster-1103",
+   "CARD wed-gate-clones-hook-blocks-removal-1103",
+   "CARD wed-spark-unreachable-from-laptop-1104",
+   "CARD secuura-ks1084-measure-now-spark-off-1106",
+   "CARD wed-gdrive-plug-in-gate-clones-1106"
+  ]
  }
 ]
