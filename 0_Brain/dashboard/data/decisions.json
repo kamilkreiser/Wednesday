@@ -63693,5 +63693,52 @@
    "CARD secuura-ks-1152-rotate-says-rotated-when-old-key-lives-1106",
    "CARD secuura-ks2073-stranded-rows-count-then-rekey-1106"
   ]
+ },
+ {
+  "id": "secuura-anchoring-second-fee-on-empty-reply-1107",
+  "client_project": "Secuura/Blockchain",
+  "title": "Anchoring: gate 248 found an empty reply from the chain client can read as 'absent' and pay a second fee. Fix before anchoring next deploys?",
+  "bluf": "Tap one, please. PR 2081 (KS-1171) itself passed gate 248 and cannot add a second transaction: 1,364 attempt sequences, 0 widened. But the gate found an older hole beside it. With a configured client, a 2xx reply with an empty or null body counts as answered and reads ABSENT, which can lead to a second fee-paying transaction, and that can't be undone. {} reads confirmed with no block hash. Measured with the real client and poller; the retry itself was not driven, and how often a provider sends this is unknown. Separately, a known red test has a measured cause, two copies of plutus, so the real thread token mint may throw before signing: no image was measured. Anchoring already needs your word to deploy, so nothing moves until you say. Prior matches read: your KS-1384 card is a different second transaction, from a share; the others share only words like second and reply.",
+  "default_action": "If Kam does not answer: PR 2081 goes on to merge after its queue, both findings are ticketed, nothing is built, and anchoring is not deployed.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Merge PR 2081, and fix the empty reply before anchoring next deploys (recommended)",
+    "detail": "Two tickets by a board seat, High for the empty reply and Medium to measure the mint on an image. A build seat fixes the empty reply next, tier 1 gate. Anchoring's deploy stays held for your word."
+   },
+   {
+    "key": "b",
+    "label": "Merge PR 2081 and ticket both, no build yet",
+    "detail": "The hole stays until the ticket comes up. The deploy hold still stands."
+   },
+   {
+    "key": "c",
+    "label": "Hold PR 2081 too",
+    "detail": "Nothing on anchoring merges until the empty reply is fixed."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-07T08:00:30.310226+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-17 20:10",
+   "2026-08-17 20:23",
+   "2026-09-06 09:42",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-ks695-second-question-403",
+   "CARD secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015",
+   "CARD secuura-ks1557-055-second-nogo-round3-1020",
+   "CARD secuura-v41-trial-before-second-256-1027",
+   "CARD secuura-stuart-ks1402-custody-reply-1029",
+   "CARD secuura-kintsugi-second-prune-all-cache-1101",
+   "CARD secuura-ks1384-share-pays-second-tx-before-stage2-1106"
+  ]
  }
 ]
