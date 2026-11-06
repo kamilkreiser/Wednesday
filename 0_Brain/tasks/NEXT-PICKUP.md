@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE by the 10:1x seat at its 65% checkpoint. Previous 
 
 # NEXT PICKUP — Fri 6 Nov 2026
 
+## STATE AT 14:38 (the 13:49 seat; newest, read first)
+GOs: PR 2034 GO sent 14:3x at 07924892fa5f on pin 45d2edc73aa9, MERGED not yet read: NO MAIL TO LANE B until it. Then B queue: 2035, 2032, 2036, 2037, 2038 (gates 216, 217, 218; 2037 and 2038 queued inside the 2034 GO with status lines). PRs since D's pin ride a following deploy round.
+D 56th %52 GO KINTSUGI at pin e174f5eb488a; build k21 from 03:33Z by its mail; Redis and Postgres counts 0 by its report, recounted before each swap part; STATUS B with the table is next, S 27th closes from it. Above 0 is a STOP and QUESTION, may go to Kam.
+S 27th %55 working; KS-1622 sha sent; KS-1544 on PR 2035's merge; KS-1539 and KS-1614 commented. X 5th %58 GO on plan, KS-2047, one PR, tier 1 at the end. F 35th %28 idle for gate 219, next ticket or wrap after it. Gate 219 (tier 1, Opus, background, PR 2039 head 37b79013b629) RUNNING: re-launch from reference/2026-11-06_gate219-ks1951-pr2039/commission.md if this seat rotates first. U 16th closed 0.97.
+DISK: DevMASTER 54 GiB free at 14:37. Card wed-gdrive-plug-in-gate-clones-1106 posted, default nothing moves, re-raise at 15 GiB. Move on tap: tools/archive_gate_clones_20261103.sh is the shape (count both sides). F 35th, X 5th told to install small.
+
 ## STATE AT 14:2x (the 13:49 seat; read this first, it overrides the blocks below where they differ)
 FLOOR by cockpit.sh status: B 97th %5 merge, D 56th %52 (Opus, Kintsugi deploy, plan confirmation due, GO KINTSUGI is Wednesday's naming the pin; round does not wait for queued merges), S 27th %55 (Sonnet board close-out, brief briefs_staged/2026-11-06_seatS27_closeout.md, plan confirmation due), W 29th %49, U 16th %43 (wrapping after teardown), K 17th %40, J 18th %31, F 35th %28, R 86th %25, G 28th %11. V 24th closed, 0.88.
 MERGED today per B 97th's reports: sixteen, newest PR 2028 0b3cc409de24, PR 2026 e174f5eb488a. B's next READY is PR 2033, needs a GO: then 2034, 2035, then 2032, 2036 (already queued inside the 2028 GO with gate 217's status lines; state F-3's tile move; heads 375084cf53d4, 3f5df055343e). Tool: fleet/send_go_merge_seat.sh with SP and a note file; gate 216 verdict for 2033-2035. planted_conflict_file extended to later PRs when every modified path is shared. No mail to lane B between a GO and MERGED.
