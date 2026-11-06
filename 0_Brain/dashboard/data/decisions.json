@@ -60847,7 +60847,9 @@
    "CARD secuura-ks1516-unverified-timestamp-claims-1102",
    "CARD secuura-pr1989-round3-go-hold-demo-accounts-1104",
    "CARD secuura-ks1401-058-merge-demo-billing-1104"
-  ]
+  ],
+  "delivered_artefact": "KS-2031 comment 942e3611, Done, archived 06:53:59Z, read at source",
+  "delivered_ts": "2026-11-06T17:57:42.511429+11:00"
  },
  {
   "id": "secuura-ks-1670-ks-1641-m365-error-text-in-responses-1106",
@@ -62464,6 +62466,133 @@
    "CARD secuura-ks1352-revoked-credentials-still-verify",
    "CARD secuura-ks1380-peter-reverting-1358",
    "CARD secuura-ks1822-read-gate-probe-fault-fail-open-1030"
+  ]
+ },
+ {
+  "id": "secuura-ks736-made-up-token-result-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-736: a made-up token was refused by all six sections too. Pick: fix the check only, or add login at the gateway",
+  "bluf": "Kam tapping one option is the action. Override reason: this reports the probe you ruled c at 17:12 and asks the decision that probe was for. D 57th, one GET each on Kintsugi with an invented token: all six answered 401. Five were refused by their own backend, certifications by the gateway. No durable write found, Redis not counted before it, by D's report. With no credential, the gateway's spec check refuses first. So for these six GETs both layers hold today, by D's read; the other 66 operations, a valid token, an expired one and a wrong tenant were not tried, and certifications' backend check has still not been exercised. Option a would reject earlier; it would not close a hole D has found.",
+  "default_action": "If Kam does not tap: nothing changes, KS-736 stays open, and Wednesday raises it on the next morning card.",
+  "options": [
+   {
+    "key": "b",
+    "label": "Record the guards and fix the check (recommended)",
+    "detail": "No behaviour change. The mount check learns about the spec gate, KS-736 records why these six pass, and the ticket can close."
+   },
+   {
+    "key": "a",
+    "label": "Also require login at the gateway on all six",
+    "detail": "A seat changes the six mounts, keeping the 3 public verify POSTs open, tier-1 gate, Kintsugi only. Defence in depth, at a risk of breaking anything public in those sections."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-06T17:51:50.254384+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks329-refresh-token-size",
+   "CARD secuura-ks2032-non-live-admin-token-mints-tenant-keys-1106",
+   "CARD secuura-ks736-six-sections-probe-result-1106"
+  ]
+ },
+ {
+  "id": "secuura-ks2063-add-session-end-on-role-change-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2063: also end sessions when someone's role changes? Y 6th found a walk-around in the check you ruled",
+  "bluf": "Kam tapping one option is the action. Override reason: your 17:12 ruling asked the seat to report whether ending sessions is simpler; this is that report. Y 6th, by two separate probes, no real stack: a role-only demotion leaves the session alive, and through the gateway the old token still works until it expires (1 hour by code, 1 day by compose, real value unread). A demoted org admin can use that old token to raise a second account to org admin; that account then passes your live-row check. Ending sessions on a role change stopped this in its probe, adds no database read, and covers every route. It does not cover: a Redis outage (gateway forwards by design), a row edited by hand, keys minted before the demotion. Its cost: anyone whose role changes, promotions included, is logged out at once. I have not read Y's code or probes; the gate will. Y builds your live-row check meanwhile, as you ruled.",
+  "default_action": "If Kam does not tap: Y 6th builds the live-row check as ruled, no session end is built, and the walk-around is recorded on KS-2063.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Both",
+    "detail": "live-row check as ruled, plus session end as its own small PR (recommended):Y's recommendation and mine. A new ticket, red-first cells, tier-1 gate, Kintsugi only."
+   },
+   {
+    "key": "b",
+    "label": "Only the live-row check, as ruled",
+    "detail": "The walk-around stays open until the token expires; recorded on KS-2063."
+   },
+   {
+    "key": "c",
+    "label": "Only the session end",
+    "detail": "Drops the live-row build; hand edits and store outages stay uncovered."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T17:51:53.697676+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-10 08:45",
+   "2026-08-21 09:47",
+   "2026-08-21 10:36",
+   "2026-08-27 11:24",
+   "2026-08-28 10:17",
+   "2026-09-01 17:25",
+   "2026-09-01 17:55",
+   "2026-09-03 09:57",
+   "2026-09-03 11:59",
+   "2026-09-03 13:39",
+   "2026-09-04 07:05",
+   "2026-09-04 08:30",
+   "2026-09-07 12:07",
+   "2026-09-08 11:41",
+   "2026-09-08 12:53",
+   "2026-09-08 15:16",
+   "2026-09-08 15:17",
+   "2026-09-14 11:09",
+   "2026-09-16 07:01",
+   "2026-09-16 18:49",
+   "2026-09-16 19:41",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-ks1207-revoked-session-plus-junk-key-bypass",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013",
+   "CARD secuura-ks1585-scope-rows-on-admin-change-1105",
+   "CARD secuura-ks-1536-platform-admin-role-one-list-1106",
+   "CARD secuura-ks2063-demoted-org-issuer-admin-keeps-keys-1106",
+   "CARD wed-network-change-1534-1602-push-deaths-1106"
+  ]
+ },
+ {
+  "id": "secuura-ks365-gosu-read-result-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-365: your read says the flagged gosu looks unreachable on both boxes. Accept until the upstream rebuild?",
+  "bluf": "Kam tapping one option is the action. Override reason: this reports the read you ruled c at 17:11, and it corrects my card's two wrong facts. By D 57th's read: Kintsugi and demo both run postgres:15-alpine in a container, with gosu built on Go 1.24.6, below the 1.24.13 fix, so a scanner is right to flag it; nothing on either box points at a managed server (variable names it chose). The flaw is in certificate validation. gosu runs once at container start, is replaced by postgres, takes no network input, and its binary shows no TLS client or dial functions. That is a read, not a test; a symbol search is a strong sign, not proof. Not read: any other Go binary in the image, and the 13 HIGH the ticket records. No weekly image watch runs today: S 28th filed KS-2064 for it; its state is unread by me today. The two boxes hold different builds of one floating tag, the same class as KS-2070.",
+  "default_action": "If Kam does not tap: KS-365 stays Blocked, the comment stays held, and nothing is built.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept until the upstream rebuild, with the corrected facts (recommended)",
+    "detail": "S 29th posts the held comment with these facts; KS-365 stays Blocked on the rebuild; KS-2064 carries the watch."
+   },
+   {
+    "key": "b",
+    "label": "Replace gosu in our own image",
+    "detail": "Works now, but we then maintain our own database image. A seat builds it with a gate; deploy under the usual rules, demo still frozen."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T17:53:38.439173+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-09-09 18:20",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD secuura-ks1370-validate-when-the-revoke-check-cannot-read",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1822-read-gate-probe-fault-fail-open-1030",
+   "CARD secuura-ks1233-redis-ttl-read-1104",
+   "CARD secuura-ks-365-postgres-image-gosu-vulnerability-1106",
+   "CARD secuura-ks736-six-sections-probe-result-1106",
+   "CARD secuura-ks365-your-ruling-rested-on-two-wrong-facts-1106"
   ]
  }
 ]
