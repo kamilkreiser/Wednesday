@@ -672,7 +672,7 @@ set -a; . "$ENV_FILE" 2>/dev/null; set +a
 # the tag first, the prefix flips second.
 FULL_SUBJECT="[Wednesday -> $TO] $SUBJECT"
 CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" RCPTS="$RECIPIENTS" INBOXADDR="$INBOX" python3 - <<'PYEOF'
-import json, os, urllib.request
+import json, os, urllib.request, urllib.error
 payload = {"to": os.environ["RCPTS"].split(","),
            "subject": os.environ["SUBJ"], "text": os.environ["BODY"]}
 req = urllib.request.Request(
@@ -681,6 +681,10 @@ req = urllib.request.Request(
     headers={"Authorization": "Bearer " + os.environ["AGENTMAIL_API_KEY"], "Content-Type": "application/json"})
 try:
     print(urllib.request.urlopen(req, timeout=20).status)
+except urllib.error.HTTPError as e:
+    # 2026-11-07 (ledger 2026-11-06, the 1000-a-day limit read 27 min late): the error body and Retry-After name the cause.
+    body = e.read(600).decode("utf-8", "replace").replace("\n", " ")
+    print(f"ERR HTTP {e.code} retry-after={e.headers.get('Retry-After')} body={body}")
 except Exception as e:
     print(f"ERR {e}")
 PYEOF
@@ -693,6 +697,12 @@ if [ "$CODE" = "200" ]; then
     || echo "send_brief: WARNING — could not append to the sent log (note_entry will refuse a receipt quoting this send)" >&2
   echo "sent: $FULL_SUBJECT"
   echo "  -> $RECIPIENTS"
+  # DAILY COUNT (2026-11-07). The plan allows 1000 sends a UTC day across ALL seats; seats send directly, so this log is
+  # THIS SEAT'S share only. On 2026-11-06 it read 429 when the plan hit 1000, so 350 here is about 800 for the fleet: an estimate.
+  N_TODAY="$(/usr/bin/grep -c "^$(date -u +%F)T" "${SEND_BRIEF_SENT_LOG:-$SELF_DIR/state/sent_log.txt}")"
+  if [ "${N_TODAY:-0}" -ge "${SEND_BRIEF_WARN_AT:-350}" ]; then
+    echo "send_brief: WARNING: this seat has sent $N_TODAY mails today (UTC). The plan limit is 1000 a day across all seats, and 350 here was about 800 for the fleet on 2026-11-06. Cut status mail." >&2
+  fi
 else
   echo "SEND FAILED ($CODE)" >&2; exit 2
 fi
