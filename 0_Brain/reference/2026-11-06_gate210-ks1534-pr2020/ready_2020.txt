@@ -1,0 +1,45 @@
+=========== [INBOUND] 2026-11-05T13:05 | Secuura/Blockchain-K | [Secuura/Blockchain-K -> Wednesday] READY FOR GATE KS-1534 (Seat K 16th)
+[Secuura/Blockchain-K -> Wednesday] READY FOR GATE KS-1534 (Seat K 16th)
+Seat K 16th
+READY FOR GATE KS-1534 (tier 1, row G1)
+
+## PR
+- PR 2020 https://github.com/Secuura/Distributed_Secuura/pull/2020 , title "Refs KS-1534: a stored allow-list that holds a non-string is refused by both reads with one shared message".
+- Branch feature/ks-1534-ks-1232-gate-follow-ups-share-the-allow-list-predicate-b. Head read from origin in this action (2026-11-05T13:05:15Z): ae8e8c78f91f75568706fac14ac382d140f7ad71. Base develop 85881fde5a48f50f02c879f4030632962d332b92; develop now 1b1b65c7415ff02b9e3b44e83b62d9a609adfe8b.
+- One commit, 9 files, +438/-5. PR read back: open, not draft, base develop, head equals origin, one PR for this head.
+- Ticket comment on KS-1534 naming the PR: 1693d6b0-ae8b-45af-a705-26898ccbe6e9 (read back: body equal, 0 mention nodes, 1 copy; state, priority and assignee unchanged).
+
+## Behaviour (the mixed-list change first, as you asked)
+1. A mixed list ['SSD_DOCUMENT', 1], a hole after a string, or an explicit undefined after a string used to ADMIT an SSD_DOCUMENT create (measured on develop: 201, enforcement reached). Now refused (fail closed).
+2. Both reads, GET /api/connector/info (services/health.ts) and the create path of POST /api/documents (routes/verification.ts), answer 403 FORBIDDEN with the shared message, exactly:
+   Connector document-type allow-list is not a list of strings; refusing until it is corrected
+   It is one constant, CONNECTOR_ALLOW_LIST_NOT_ALL_STRINGS_MESSAGE, beside the predicate allowListHoldsANonString (index walk, so a hole counts), in the new pure file services/api-gateway/src/services/connectorAllowList.ts. Each read calls it once, straight after its existing non-array guard.
+3. Unchanged: absent, null and [] mean no restriction; a non-array keeps the older "is not a list" text; a list of strings is echoed and enforced as before.
+4. Spec: the connector-info description and 403 text say "not a list of strings"; the yaml changes 2 lines, both under /api/connector/info. The item (a) pin file gains G6 (red) and G7 (control); G1-G5 are unchanged.
+
+## Files (9)
+services/api-gateway/src/services/connectorAllowList.ts (new), services/health.ts, routes/verification.ts (import after :19, guard after :873, develop numbering; nothing else), api-gateway.openapi.ts, docs/openapi/secuura-api.yaml, __tests__/ks1534-an-allow-list-of-non-strings-is-refused-by-both-reads.test.ts (new), __tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts, Projects Documents/fragments/{cheat,flow}/KS-1534-a-list-of-non-strings-is-refused-by-both-reads.html.
+
+## Tests, with totals
+- Red-proof: the new file against develop's product: R1-R5 fail (5 of 5, all AssertionError, 0 TypeError/ReferenceError); C1-C4 and completeness pass.
+- Tampers (declared first; each restored by content, sha256 equal; final clean run 17 of 17): both callers reverted -> G6 R1 R2 R3 R4; guard off in health.ts -> G6 R1 R4; guard off in verification.ts -> G6 R2 R3 R4; health.ts answers the older text -> G6 R1 R4; health.ts carries a literal copy of the text -> G6 only; predicate checks list[0] only -> R1-R5; predicate uses some() -> R1-R5. 7 of 7 matched.
+- api-gateway suite (plain vitest): develop 7d2d6dc 157 files / 1654 passed / 0 failed; at the commit 158 / 1666 / 0 (+1 file, +12 cells).
+- tsc --noEmit -p . 0 errors; eslint on the 6 changed .ts files clean, planted debugger control fails it; check:test-types api-gateway 25 errors all in the baseline, 0 new, 0 stale, 158 test files examined; check:openapi OK (422 examples); docs-fragments check OK, two planted defects each caught.
+- Pre-push hook, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran." Push 1084 s, VERIFIED by ls-remote, lock released.
+
+## The OVL_IGNORE_HEADS knob (please have the gate re-check)
+- The driver's overlap gate ran with OVL_IGNORE_HEADS = exactly: feature/ks-1539-a-thrown-allow-list-read-answers-503-but-logs-nothing-the-create-path and feature/ks-1614-ks-1542-follow-up-pr-1554-gate-mapsetregexperror-print (your ANSWER 09:44:28Z). At launch: 16 open PRs, none on my 9 paths, both names printed in the verdict.
+- My own merge-tree check, in my clone, with no ref written: mine vs KS-1539 head a56b949c56f0 clean (rc 0); mine vs KS-1614 head 8d4f6fca8388 clean (rc 0); mine vs the two merged together clean (rc 0). Control: a planted commit editing my exact insertion point conflicts (rc 1, names verification.ts). Neither T 12th branch has a PR yet.
+
+## Census after the PR action
+PR 2020 is attached to KS-1534 and KS-1232. KS-1232 rides in through Linear's suggested branch name; PR 1842 attached to the same pair. Neither ticket's state moved: KS-1534 In Progress, KS-1232 In Progress, with only an attachment entry at 13:03:06Z. A merge may walk both tickets, so the merge seat should census them.
+
+## Did NOT do
+- The four platform suites, a running stack, the hook's legs 3, 4 and 8, Node 24 (every figure is Node v26.8.1).
+- Any stored config read (whether such a list exists today is unknown). No deploy: owed after merge, api-gateway to kintsugi (code and baked spec). Demo stays frozen.
+- POST /api/documents' spec does not describe allow-list refusals, before or after; out of this ticket.
+- No merge, no ticket field change, no @mention.
+
+## Own faults since my 09:47Z STATUS
+My first merge-tree attempt used "$B1:refs/..." in zsh; the :r modifier ate the refspec, the fetch failed (rc 128), and the four rc=1 lines it printed meant nothing. I discarded them, re-ran with ${B1} braces and added the planted control. Nothing was written from that bad run.
+

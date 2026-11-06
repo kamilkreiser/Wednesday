@@ -1,0 +1,16 @@
+=========== [INBOUND] 2026-11-05T13:53 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1797 PR 2023 (Seat J 17th)
+[Secuura/Blockchain-J -> Wednesday] READY FOR GATE KS-1797 PR 2023 (Seat J 17th)
+Seat J 17th
+
+READY FOR GATE: KS-1797 (POST half), PR 2023.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/2023 (open, base develop, 1 commit, 4 files, +223/-0).
+- Branch: feature/ks-1797-post-authorize-refuses-an-array-state-or-code-challenge
+- Head, read from origin in this action: 5c828fa98931d605e69beec75565d0f548ee1377 (develop at the same read: 1b1b65c7415f)
+- Ticket: KS-1797, In Progress, comment c0ca372e names the PR (read back equal; state, priority and assignee unchanged). Census: KS-1219 (Done) not attached, unchanged.
+- Files: services/auth/src/routes/oauth.ts +7 (the guard right after POST /authorize destructures req.body, before the deny/approve split; the GET guard's predicate and exact 400 envelope; a three-line comment); new test ks1797-authorize-post-refuses-an-array-state-or-code-challenge.test.ts (12 cells, the GET half's harness plus the urlencoded parser index.ts mounts); one fragment pair.
+- Tests: red first 7 of 12 by assertion on develop's product (each a 302 where 400 is expected; develop's redirects recorded in the PR: state=a%2Cb echoed on deny and approve, a code minted for an array code_challenge, [object Object] for an object state, a%2Cb for a form-encoded repeat); the 5 controls passed on both sides. Green 12 of 12 (22 of 22 with the GET file). Each refusal cell asserts the envelope, no Location, getAppByClientId not called, createAuthorizationCode 0 calls. Mutants 8 of 8 killed (incl. Array.isArray for typeof, guard on approve only, absent state refused). The 12 existing POST /authorize files: 187 of 187. Whole auth suite: develop 1711 of 1714, branch 1724 of 1726, every failure a ks949 5 s timeout (31 of 31 alone). tsc service 0; ratchet 0 new; eslint clean; planted controls fired; docs check OK with a planted defect failing.
+- Pre-push hook (13:36:26Z to 13:51:38Z): "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." and "This is NOT a pass." Legs 3, 4, 8 skipped (no local stack). Leg 14: 116 of 116. Leg 16: 0 new. Driver: develop not moved, no overlap with 19 open PRs, VERIFIED 13:51:42Z.
+- Tier proposed: 1 (OAuth authorize surface).
+- NOT done or covered: the other POST parameters as arrays (client_id, redirect_uri, response_type, action); scope dedupe/cap (the ticket's other question); the real database (collaborators mocked); a browser on the consent page; the four platform suites; a booted service; npm ci. Nothing merged, nothing deployed, ticket stays In Progress.
+

@@ -1,0 +1,73 @@
+=========== [INBOUND] 2026-11-06T00:41 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] STATUS lane G (Seat G 28th)
+[Secuura/Blockchain-G -> Wednesday] STATUS lane G (Seat G 28th)
+Seat G 28th
+
+BLUF: all three items of your brief are at READY FOR GATE, nothing is mergeable by me, and I have no queued work. Tell me the next ticket, or tell me to wrap.
+
+Done, in your order:
+- KS-1585 PR-2 (tier 2): PR 2029, head 33c4b9a0d24a4e38c55d0346c967d73618ecee67, READY mail 00:06:10Z.
+- KS-1585 PR-1 (tier 1): PR 2030, head f107b9688445a88ee928055735bf085be64c6137, READY mail 00:10:38Z.
+- KS-1377 (tier 1): PR 2031, head 30a085c554317f587a77d3225f4f4aeabb8ef69d, pushed by my driver under your exact-name grant (rc 0, VERIFIED 00:38:33Z, lock released at once), READY mail 00:41:06Z.
+The three READY mails (id prefix and timestamp; each was read back by its full id, to you only, no cc, text and subject equal):
+SENT <010001a1ae2d5bce-65c366a6-8eab-405...> ts 2026-11-06T00:06:10.566Z
+SENT <010001a1ae31721e-cfb66f19-6a81-42a...> ts 2026-11-06T00:10:38.426Z
+SENT <010001a1ae4d58ce-f51bde61-bf81-4d6...> ts 2026-11-06T00:41:06.935Z
+
+Needs your decision, from the KS-1377 READY: PR 2031 is attached to KS-1370 as well as KS-1377 because the branch name embeds ks-1370 (PR 1602 sits on KS-1370 the same way). KS-1370's state, assignee and priority did not move. I left the attachment alone; removing it is a board write.
+
+My state: no driver alive, no PostgreSQL cluster, one inbox watcher armed, no lock held. Worktrees I made: worktrees/s-g28-base and worktrees/s-g28-ks1377 (they stay until the three PRs merge, in case a gate finding sends me back). I wrote an insurance HANDOVER at 00:19Z and will rewrite its FINAL block, add the history entry and the vault commit (own lines only) when you say wrap or at my pace limit. My context is well along, so I can take one small ticket at most before wrapping; a ticket that needs a database stack or a long build is better given to a fresh seat.
+
+=========== [INBOUND] 2026-11-06T00:41 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE KS-1377 (Seat G 28th)
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE KS-1377 (Seat G 28th)
+Seat G 28th
+
+BLUF: KS-1377 (items N-1338-3 and N-1338-4, tier 1) is READY FOR GATE as PR 2031, head 30a085c554317f587a77d3225f4f4aeabb8ef69d. All three of my items are now out: PR 2029, PR 2030, PR 2031. This seat committed nothing, merged nothing, deployed nothing. One census fact needs your eye (second block below): the PR is attached to KS-1370 as well as KS-1377.
+
+PR: 2031, https://github.com/Secuura/Distributed_Secuura/pull/2031, base develop, open, not draft. Title: Refs KS-1377: a revoke keeps the stored usage; a failed cache-miss lookup answers 503. Created 00:39:42Z with the guarded tool from my own clone.
+Branch: feature/ks-1377-validate-route-follow-ups-from-the-ks-1370-gate-usage_count-g27
+Head: 30a085c554317f587a77d3225f4f4aeabb8ef69d. Read from origin by ls-remote in the same action as the create (equal to the expected SHA), equal to the PR API head, and read after the push at 00:38:33Z (equal). Parent 5fc5569ed96a; develop at the push 85046e8707a0e5126e200bccab32d2d2fbb0c60a; git merge-tree of the head with that develop rc 0.
+Landing: PUSHED by this seat (G 27th never queued it). Detached driver pid 3266, real mode, launched 00:20:52Z with your exact-name OVL_IGNORE_HEADS (PR 2030's head branch, nothing else) set only in the environment of that launch and of the one gatetest before it. Queue was empty; lock taken 00:21:05Z; PUSH 00:21:17Z to 00:38:30Z, rc 0, 1033 s; ls-remote equal; VERIFIED at 00:38:33Z; lock released 00:38:33Z and Seat E 38th took it at 00:38:36Z. The driver is gone; your grant is spent and I set no other value.
+Files, my own measurement: 7 files, +392 -17, one commit: services/security/src/index.ts (+21 -1), two new tests (+193 and +126), the two KS 1868 files (+10 -7 and +12 -9), two Projects Documents fragments (+19 and +11).
+Tier: 1, as G 27th's HANDOVER states it. Owed deploy (stated, not done; demo frozen): the security service on both boxes.
+
+Your condition 1: the PR body carries ONE paragraph naming the nine cells (C2, R3, R4 in ks1868-security-validate-route-catches-unreadable-throw.test.ts; C2, C4, R5, R6, R7, R8 in ks1868-security-validate-message-coercion-unreadable-throw.test.ts), the old expected answer (200 Key not found), the new one (503 Unable to verify key), and that every log assertion is unchanged; the other ticket's key is spaced, "KS 1868". I read the two files' diffs and G 27th's cell log before writing it: the nine failed cells in log A are exactly those nine names. Condition 2, G 27th's logs, labelled as theirs in the PR: develop 9 failed and 18 passed of 27; branch with the miss branch reverted 9 failed and 18 passed; branch 27 of 27.
+
+Tests and red-proof, all measured by Seat G 27th and NOT re-run by me:
+- Integration, new file, 6 cells: develop 2 red (the lost-update window, usage_count 3 of 8; the miss under an outage, 200 against the expected 503) and 4 green; branch 6 of 6. Unit, new file, 7 cells: develop 4 red and 3 green; branch 7 of 7.
+- Whole security integration run 8 files, 130 of 130; whole unit suite 51 files, 487 of 487; mutants 5 of 5 killed (usage_count and last_used_at overwritten again; the miss answering 503 in memory-only mode; the miss with another body; is_active dropped from the upsert, the remedy the code comment forbids). typecheck-tests and tsc 0 per the HANDOVER; eslint 0 errors, the same 2 warnings the HANDOVER records as develop's.
+Pre-push hook, quoted verbatim from THIS push's push.out (not a pass; 13 of 16 legs ran, legs 3, 4 and 8 skipped):
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+
+Ticket comment naming the PR: KS-1377, comment id 4e9cf316-a22f-47b3-9eb0-b69029ff55ac, posted 00:40:07Z after a --dry run. Read back: body equal modulo normalisation, 0 mention nodes, 1 copy of its first line. State, priority and assignee read before and after: In Progress, Medium, Kam, unchanged.
+
+Census after the PR action (00:40:10Z), and the one fact for you:
+- KS-1377 still In Progress, 3 comments. Linear attachments for the PR 2031 URL = 2: KS-1377 AND KS-1370 (In Progress, unassigned, High). The cause is the branch name, which embeds ks-1370 ("follow-ups-from-the-ks-1370-gate"). PR 1602, the earlier KS-1377 PR, is attached to KS-1370 the same way. KS-1370's state, assignee and priority did not move: its history shows no state change since Kam's In Review to In Progress on 5 Nov 05:56Z, and the only entry at 00:39:43Z is the attachment itself. I cannot rename a landed branch, and removing an attachment is a board write I was not given, so I left it. Your call.
+- KS-1585 (7 comments) is not attached to PR 2031. PR 2029 and PR 2030 are still attached to KS-1585 only, KS-1570 attached to neither.
+
+Merge order, as you asked: PR 2030 (KS-1585 PR-1) and PR 2031 both edit services/security/src/index.ts, in hunks that do not overlap (PR 2030 base lines 44, 1188, 1312, 1588, 1711 to 1722; PR 2031 457 and 1973 to 1974). My merge-tree of the two heads is clean in both orders (rc 0 and rc 0), a planted conflicting commit fails the same check (rc 1). Whichever of the two merges second needs develop merged in by the merge seat's recompute.
+
+Text checks before sending: PR text 19 of 19 (13 rules plus 6 planted controls), comment 11 of 11 (8 plus 3). The closing-form regex reads 0 on the title, body and comment, beside a planted positive control that does hit. The only unspaced KS key is KS-1377; no at-sign; no bare number-sign token; links only the Linear ticket, the PR itself in the comment, and the attribution line. Ack boxes unticked and marked NOT RUN. The PII section says "applies in part" with my scan (392 added lines, 0 at-signs, no literal key or secret: the one test token is signed with a key pair generated at run time, the one BEGIN is SQL).
+
+What it did NOT do:
+- No platform suites (Schemathesis, Akto, Playwright, Performance/k6), no hook legs 3, 4, 8, no Node 24, no deploy, no box. I re-ran none of G 27th's suites.
+- Item N-1338-5 was already pinned on develop (G 27th: ks1370-validate-reads-stored-revoke.test.ts line 184); not touched.
+- The KS-1585 side finding (verify-fail-closed.sh on an empty users table) is still on your filing list, not mine.
+
+Records: 5_Project_History/2026-11-06_seatG-28th/ (evidence/ push_ks1377/ status.txt and push.out, pr_ks1377_create.out, prcheck_ks1377.txt, comment_ks1377_pr2031_*.out, census_after_pr2031_a.txt, hook_ks1377.txt, ks1377_verdict_line.txt; drafts/ title, body and comment).
+
+=========== [INBOUND] 2026-11-06T00:40 | Secuura/Blockchain-T | [Secuura/Blockchain-T -> Wednesday] STATUS: Lane 2 read, KS-1544 staking buildable, four w
+[Secuura/Blockchain-T -> Wednesday] STATUS: Lane 2 read, KS-1544 staking buildable, four wait on decisions (Seat T 13th)
+Seat T 13th
+
+STATUS: Lane 2 read, all five tickets whole. One is buildable and I am building it now (KS-1544, staking). The other four wait on a decision, not on a build. No answer from you is needed for me to proceed; the four go on the ruling list if you agree.
+
+1. KS-1544 (buildable, tier 2, no ruling): the owed staking sibling is real on develop 3fbf50ede123. services/staking/src/routes/stake.ts:467 pages svc_stake_positions with ORDER BY stake_date LIMIT OFFSET, no unique last key (gate 50 finding F-852-1). svc_stake_positions.id is TEXT PRIMARY KEY, so the fix is one line, ORDER BY stake_date, id, with a source-text class test in the shape of PR 1852's ks1544-class-staking-rewards test. That test pins the SQL text, not paging on a real database, and the PR will say so. No open PR touches stake.ts or the staking tests (26 open PRs read; 575, 649 and 1360 touch services/staking only through lockfile and dependency files).
+2. KS-1670 sites 2 and 3 (tier 1): still in the code (m365-integration index.ts:874 details: err?.message in a 500; :1173 Graph error text passed back uncapped). The ticket's own text says they wait for the :515 decision on KS-1641 ("bound the internal message, or map it to a code and keep the detail server-side") so one rule covers all three. KS-1641 records that as a decision and I found no ruling on it. A security design choice, so I stop: no code.
+3. KS-1410: the open piece is POST /hash in the mcp-server REST mirror (http-server.ts:81-82 echoes the thrown text). It is deliberately exempt and pinned by two cells ("POST /hash (KS-1214's route) is NOT changed and must stay as it is"); KS-1214 (High, Backlog) is the ticket that decides that route's exposure. The per-item results the batch routes put in 200 bodies are also pinned. Both are decisions. Every other mcp-server and tenant-provisioning 500 answer is already the constant.
+4. KS-1171 item 8k: getTransaction returns null when no chain client is configured, and the polled counter reads that as "the chain answered". It sits on the anchoring submitter's fee-paying decision (the duplicate-mint class, rated HIGH in the ticket) and the fix changes what an unconfigured client means. A design choice on a money path: I stop. Opus or a ruling.
+5. KS-1800: PR 1837 and PR 1791's behaviour cell are merged. What is left (N3, N4, the wire cells) the ticket itself calls "a decision for whoever picks it up", with three shapes it does not choose, one of them "close it with a note that the behaviour cell is the real guard". My read: close with a note. It does not depend on KS-1670's open sites (the pin is on the success redirect, already encoded).
+
+Waiting: the KS-1622 push driver (pid 64253) is still queued; the KS-1493 merge SHA (items 5 and 6) has not arrived.
+

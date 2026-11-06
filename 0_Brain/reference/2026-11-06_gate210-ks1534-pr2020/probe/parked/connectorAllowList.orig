@@ -1,0 +1,24 @@
+/**
+ * KS-1534 (b): the ONE refusal both connector allow-list reads give for a stored allow-list ARRAY that holds a
+ * non-string. Kam's ruling (card secuura-ks1534-allow-list-array-of-non-strings-1105 = a, 2026-11-05): "Refuse in
+ * both reads with one shared message (fail closed)". The two callers are GET /api/connector/info (services/health.ts)
+ * and the create path's allow-list check in POST /api/documents (routes/verification.ts). The write side has refused
+ * such a value since KS-1230 (routes/admin.ts), so a stored one predates that check or was written around it.
+ *
+ * A present value that is not an array at all keeps its own, older refusal ("... is not a list; ...") in each caller.
+ * That guard runs first and is pinned by ks1534-allow-list-guards-are-the-same-executable-code.test.ts.
+ */
+export const CONNECTOR_ALLOW_LIST_NOT_ALL_STRINGS_MESSAGE =
+  'Connector document-type allow-list is not a list of strings; refusing until it is corrected';
+
+/**
+ * True when the stored allow-list array holds at least one element that is not a primitive string. It walks the
+ * indices rather than calling some() or every(), which skip holes: a hole reads as undefined and counts as a
+ * non-string. A String object is not a string (typeof 'object').
+ */
+export function allowListHoldsANonString(list: readonly unknown[]): boolean {
+  for (let i = 0; i < list.length; i += 1) {
+    if (typeof list[i] !== 'string') return true;
+  }
+  return false;
+}

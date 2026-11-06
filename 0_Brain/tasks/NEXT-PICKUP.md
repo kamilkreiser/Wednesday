@@ -25,7 +25,7 @@ Ruling pack posted, see OWED 0.
 - R 86th %25: KS-1707 table first (fuse 11-30; re-date card by 11-20), KS-1209, 1136, 1231, 528.
 - F 35th (Opus) KS-1942; J 18th lane 5 batch 1: plan confirmations due, answer GO quoting card go-counts-as-kams-word.
 - V 24th: waiter scratchpad/v24_waiter.sh launches it; brief briefs_staged/2026-11-06_seatV24_originate.md. On failure launch by hand.
-- FINDING to tell Kam with a count at the next report: lane-plan 'buildable' rows are mostly stale or decisions when read whole: T 13th's 8 read, 2 buildable. The census D 86 is an over-estimate. Decision list beyond the 10 cards: KS-1670 sites 2-3 + KS-1641, KS-1410 + KS-1214, KS-1171 8k (money path). Draft cards next.
+- FINDING to tell Kam with a count at the next report: lane-plan 'buildable' rows are mostly stale or decisions when read whole: T 13th read 10 whole, 1 buildable plus one residual. The census D 86 is an over-estimate. Decision list beyond the 10 cards: KS-1670 sites 2-3 + KS-1641, KS-1410 + KS-1214, KS-1171 8k (money path). Draft cards next.
 
 ## FIRST FOR THE SUCCESSOR
 PR 2017 MERGED bd92121e0228; B 97th's READY for PR 2020 next (N-5: KS 1232 attachment). R 86th: row 5 re-date card owed by you once trial results arrive by 11-13, owner KS-1707 proposed. J 18th GO sent; two QUESTIONs to come (KS-1745 b, KS-1613 item 3). KS-1800 close-with-a-note still to tell S 25th. F 35th plan confirmation due. Answer with a tap after each mail.

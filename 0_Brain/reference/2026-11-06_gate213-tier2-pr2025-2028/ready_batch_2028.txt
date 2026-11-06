@@ -1,0 +1,110 @@
+=========== [QUESTION] 2026-11-05T23:57 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] QUESTION: plan confirmation (Seat G 28th)
+[Secuura/Blockchain-G -> Wednesday] QUESTION: plan confirmation (Seat G 28th)
+Seat G 28th
+
+Context: Seat G 28th, lane Secuura/Blockchain-G, pane %11 (cockpit name Secuura/Blockchain-G), claude pid 97982, model claude-sonnet-5-5, process start 10:48:42 AEDT 6 Nov = 23:48:42Z 5 Nov. Identity: your BRIEF mail of 23:48:35Z, 7 s before the start, plus the pane check. Ordinal check before my first write: '^## .*Seat G 28' = 0, control '^## .*Seat G 27' = 1, '^## ' control 903. Record folder: 5_Project_History/2026-11-06_seatG-28th/ (created after that check). I read G 27th's HANDOVER whole.
+
+Question: Do you confirm this plan and give GO to start ITEM 1 (KS-1585 PR-2)?
+
+Plan, your order, one ticket at a time, each ending at READY FOR GATE, no merge, no deploy, no new commit on the three branches:
+1. KS-1585 PR-2 (tier 2), head 33c4b9a0d24a: confirm landing, re-read the ticket whole, read evidence/push_ks1585m2/push.out and quote its hook line verbatim, PR (Refs, never a closing keyword), one BLUF ticket comment naming the PR (--dry then --real, read back, 0 mention nodes), census, READY FOR GATE.
+2. KS-1585 PR-1 (tier 1), head f107b9688445: same six steps, hook line from evidence/push_ks1585r/push.out.
+3. KS-1377 (tier 1), head 30a085c55431, NOT on origin: PR body carries your condition 1 (the 9 cells, 200 "Key not found" to 503 "Unable to verify key", every log assertion unchanged, "KS 1868" spaced). Push through the re-keyed driver only after both KS-1585 PRs are open, gatetest rehearsal first. The HANDOVER says to launch it with OVL_IGNORE_HEADS naming the two KS-1585 branches; your brief says not to set it myself. I follow the brief: when the status line shows the overlap refusal I send you a QUESTION for the exact-name grant. No --no-verify, no force push.
+Then STATUS to you and I take the next ticket you name.
+Figures in every PR are G 27th's and are labelled "measured by Seat G 27th, not re-run by Seat G 28th". Stop rule: if an item turns into a security design choice I stop that item and QUESTION you.
+
+Meanwhile: set-up inside my own record folder only (re-key the other tools by reading, own clone for create_pr, PR template read). No board write, no push, no PR, no deploy until your GO. Watcher already armed (below).
+Needed-by: your GO before I create PR 1 (ITEM 1). Nothing else blocks me.
+
+Launcher preflight warnings, VERBATIM, as my boot read them (~23:49Z). The file is a single slot: Seat E's launch overwrote it at 23:52:10Z (its copy and mine are in evidence/preflight_overwritten_by_launch_2352Z.txt and evidence/preflight_boot_g28.txt). Not clean.
+# launch 2026-11-05T23:48:42Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 3 other live session(s) on this project: PID 30622 (up since Fri  6 Nov 10:27:22 2026), PID 38022 (up since Fri  6 Nov 10:31:50 2026), PID 48472 (up since Fri  6 Nov 10:35:36 2026).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+
+Instructions that look wrong or cannot be done as written (drafter flags first):
+- FLAG 1, landing: my own ls-remote agrees with the table. KS-1585 PR-2 branch head 33c4b9a0d24a4e38c55d0346c967d73618ecee67 = table, LANDED. KS-1585 PR-1 branch head f107b9688445a88ee928055735bf085be64c6137 = table, LANDED. KS-1377: the exact -g27 branch is ABSENT from origin; the glob returns only the old PR 1602 branch at 70dc59643b5aaa089606e51a43d2948ab5c671b2 (closed PR). Develop is still 1b1b65c7415ff02b9e3b44e83b62d9a609adfe8b. Origin now has 1,945 pull refs (1,942 at drafting; highest PR 2027): 0 equal any of the three SHAs, control PR 2020's head hits 1. GitHub API: no PR for any of the three head branches, control PR 1602 found as closed. Not read yet: the two push.out hook lines (item step 1).
+- FLAG 2, tier: carried as the HANDOVER states it (PR-2 tier 2, PR-1 tier 1, KS-1377 tier 1); I did not re-assess.
+- FLAG 3, deploy line: carried. PR-1 owes the security service on both boxes plus SELECT on admin_organisation_scopes AND users for secuura_app; KS-1377 owes the security service on both boxes; PR-2 owes none. I state them and perform none. Demo frozen; no box, no ssh, no az.
+- gh: `gh auth status` under the launcher's GH_CONFIG_DIR says not logged in (rc 1), so the brief's identity step cannot pass as written. PR creation goes through the REST API with GH_TOKEN read in-process (create_pr_g28.py): GET /user = kksecura, permissions.push true on Secuura/Distributed_Secuura. I will not run `gh auth login`. Tell me if you want it.
+- Mail cc: the launcher text says to CC Kam on every email; your brief says no cc. I followed the brief. This mail has no cc.
+- The PR-2 finding from G 27th (verify-fail-closed.sh prints `FAIL definer could not find user COMMIT` on an EMPTY users table): a board search by that string found 0 hits in titles or descriptions (verify-fail-closed: 3 hits, KS-1585, KS-627, KS-484, none about this). It is on no ticket. I create no ticket; the READY mail will list it under what the PR did NOT do. Your call whether it gets one.
+- Overlap, measured: my 19 distinct paths (4 + 9 + 7 by head, index.ts shared by PR-1 and KS-1377) against all 25 open PRs by GitHub file lists: 0 shared, including PR 2020 (9 files, UNMEASURED in the brief) and PRs 2025, 2026, 2027 (new since the brief). The tool's own positive control passed first. The KS-1377 push will still meet the overlap gate on PR-1's index.ts once PR-1 is open, as the brief expects.
+- The shared checkout does not hold my three commits (origin only); I read G 27th's worktrees with commit-to-commit diffs only (no index, no write). Own clone comes with the set-up.
+
+Board and boot reads (read-only):
+- Linear Secuura-PK: 720 open, archived excluded = Backlog 472, In Progress 203, Todo 32, In Review 10, Blocked 3; identical to S 24th's and T 13th's boots. My first pull read 782 because includeArchived:true counted 62 archived tickets still carrying open states (55 Backlog, 3 Todo, 3 In Review, 1 Blocked). The tool is fixed; both reads are in evidence/. Those 62 are board hygiene for S 24th's lane, not mine.
+- Assigned to the key owner and active: 201 (In Progress 161, Todo 28, In Review 10, Blocked 2). Overdue 0. Backlog by priority Urgent 3 / High 75 / Medium 233 / Low 139 / None 22 (33 created in 24 h). Done or Canceled in 24 h: 18, latest KS-1676 08:47Z 5 Nov, none since. 72 comments in 24 h, all from the key owner's account; 23 bodies contain "kam", 0 at-sign mentions.
+- KS-1585 and KS-1377 re-read whole: both In Progress, assignee Kam, no re-scope or move. KS-1585's last comment is Kam's card (b) ruling, 05:40Z 5 Nov; KS-1377's last is 03:12Z 19 Oct. Nothing contradicts the brief.
+- Extranet: 6 open tasks for Kam (KS-721, KS-662, GitHub Actions billing, KYC image disposal, and two from Peter: "[Dev] Update your local" and the OpenAPI examples task), 0 replies, 1 document (develop 2d864ae92, 2026-09-11). /api/seen NOT called.
+- Git, read-only, no pull, no fetch, no ref write: shared checkout 2_Project_Files on develop 1b1b65c7415f = ls-remote develop (0 ahead, 0 behind); 0 tracked changes; 18 untracked (systemTest docs, two conflict_on_2026-07-03 snapshots, a file named --full).
+
+Live seats (ps + tmux at ~23:56Z): S 24th pane %2 pid 30622; B 97th pane %5 pid 38022; T 13th pane %8 pid 48472; me, G 28th, pane %11 pid 97982; Seat E (new, lane Secuura/Blockchain-E) pane %14 pid 10088, started 10:52:10 AEDT, brief 23:52:03Z. Your pane %0. No other claude process. QA gates 209 to 212 are not visible to me.
+
+Watcher: harness-tracked background task bf48yg92z, python pid 7837, armed 23:51:21Z, SINCE 2026-11-05T23:48:36Z, 3300 s window (I re-arm before about 00:46Z). Selftest 9 of 9 ok; a planted mutant exits 1 with 6 of 9 ok. mail.py and watch.py re-keyed to Seat G 28th by named edits; predecessor-token scan reads only the lineage comments and the deliberate G 27th negative case, positive control hits 2 on the pristine copy; originals plus sha256 in tools/_source_copies/.
+
+Own slips (before I had read the brief's rules): printed six env var NAMES from 4_Credentials/.env in my first command (no values); nine compound `cd <abs> &&` calls; one `git status` in the shared checkout without GIT_OPTIONAL_LOCKS=0 (everything else there was ls-remote, rev-list, rev-parse, config); read the inbox before the watcher existed; one foreground `sleep 2`; a first Linear pull with includeArchived:true (corrected above). No key in argv at any point: every tool reads the key inside its own process.
+
+=========== [INBOUND] 2026-11-05T23:57 | Secuura/Blockchain-T | [Secuura/Blockchain-T -> Wednesday] READY FOR GATE KS-1614 (Seat T 13th)
+[Secuura/Blockchain-T -> Wednesday] READY FOR GATE KS-1614 (Seat T 13th)
+Seat T 13th
+
+READY FOR GATE KS-1614, tier 2 (items 1 to 3: the text of a construction-time refusal for a bound no production caller passes).
+
+PR: 2028, https://github.com/Secuura/Distributed_Secuura/pull/2028 (open, not draft, base develop, 1 commit, 4 files, +109/-10)
+Title: Refs KS-1614: a refused object bound prints its type, and an object is never handed to String()
+Branch: feature/ks-1614-ks-1542-follow-up-pr-1554-gate-mapsetregexperror-print
+Head: 8d4f6fca83888208b184e999bb8ef704968141f1. create_pr read origin with ls-remote in the same action: equal to the brief's SHA, and the PR API head equal to origin. Base: develop 688c5cc177f8 (the head is one commit; its parent equals that base; the base is an ancestor of develop 1b1b65c7415f).
+Ticket comment naming the PR: id 01851a3b-7ad6-427e-b988-2eaaa74011a0 (read back: body equal, 0 mention nodes; state, priority and assignee unchanged).
+Hook line (from the push driver's push.out, verbatim; not a pass): PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+
+CENSUS ANOMALY (needs your eyes): PR 2028 is attached to TWO tickets, KS-1614 and KS-1542. Cause: the branch name embeds ks-1542 (Linear's own suggested name for KS-1614, whose title starts "KS-1542 follow-up"). The branch is pushed and I may not rename it, so it cannot be avoided; the PR title, body and comment name KS 1542 spaced only. Both tickets are still In Progress, assignees unchanged. The other three PRs (2025, 2026, 2027) each attach to their own ticket only (read with attachmentsForURL). Risk: if the workspace's merge automation moves a branch-linked ticket on merge, merging PR 2028 could move KS-1542 before its own PR 2027 (the title fix) has merged. I did not touch the attachment or the ticket (not in my brief). Suggest the merge seat reads KS-1542's state right after PR 2028 merges and tells you if it moved.
+
+WHAT IT TOUCHES (my own measurement, read-only, from my clone at the pushed head)
+- services/api-gateway/src/routes/verification.ts +31/-10, two hunks (lines 153 and 165 of the base): the describeRefusedObject helper and the shown expression.
+- Test file ks1185-f1-workflow-approve-forward-bound-is-validated.test.ts +51 in one hunk after line 172 of the base (14 new cells).
+- Two docs fragments (flow +10, cheat +17).
+- Shared paths: 22 files changed between 688c5cc177f8 and develop 1b1b65c7415f; none is one of the four (exact path match). The stop-and-mail rule does not fire.
+- Same-file notes (read-only git merge-tree; a planted same-line control gives rc 1, a clean control rc 0): clean against KS-1542's head (PR 2027; same test file, line 111 versus this hunk after line 172) and clean against PR 2020's head ae8e8c78f91f (KS 1534, still open; same route file, lines 20 and 873 of its base). Whichever of PR 2027 and PR 2028 merges second needs develop merged in; the PR body says so.
+- Files naming the property at the base: the route and four test files (ks1087, three ks1185); all four pass unchanged per T 12th. I re-listed them with git grep at the head.
+- "Refs", no closing keyword: the regex reads 0 on title, body and comment; the planted control reads 1. Only KS-1614 is unspaced in the title and body.
+
+TESTS: all measured by Seat T 12th and NOT re-run by Seat T 13th; the PR body says so
+- Reported by T 12th: on develop the f1 file fails 13 of 40, all by assertion; on the branch 40/40; nine planted tampers, 9 killed, unmutated control 49 cells green; api-gateway suite 157 files, 1668/1668; tsc rc 0; eslint 0; check:test-types 0 new; docs-fragments OK.
+- I cross-read T 12th's logs: 13 failed 27 passed with 13 AssertionError and 0 other error types, branch 40/40, M1 to M9 each killed plus the 49-cell control, suite 157/1668, check:test-types 0 new, eslint empty, docs-fragments OK with the planted defect failing: all match. I recounted the 18-row probe table: 12 rows print differently, 6 are equal, and no row prints the text of an accepted bound (1, 800, 2147483647) after the change. NOT matched, because I did not see them: the tsc rc (its log is empty) and "18 of 18 still refused" (the table shows text, not refusal).
+- One commit in T 12th's worktree reflog; nothing was amended after it.
+
+WHAT THIS DID NOT KEEP (both accepted by you)
+- A class instance printed its JSON fields before; it now prints [object Object], because it is not a plain object.
+- A value that cannot even be inspected (a revoked Proxy also throws on Array.isArray and on the tag read) prints the fixed text [unprintable object]; T 12th's own addition.
+
+WHAT IT DID NOT DO
+Not covered: Node 24, a live gateway (no production caller passes the bound), values beyond the 18, the unbounded message length for a very large array (before and after), any box. No deploy.
+
+OWED AFTER THE MERGE
+The api-gateway deploy (both boxes; demo frozen); no running gateway's behaviour changes because nothing passes the bound. I post the KS-1614 post-merge comment once the merge SHA is named; the ticket stays In Progress until then.
+
+STATUS: all four raises are out (PR 2025 KS-1493, 2026 KS-1539, 2027 KS-1542, 2028 KS-1614). I now hold for the KS-1493 merge SHA (items 5 and 6), or the next ticket you name.
+
+=========== [QUESTION] 2026-11-05T23:55 | Secuura/Blockchain-B | [Secuura/Blockchain-B -> Wednesday] QUESTION: go_gate refuses on a later ADDENDUM (Seat B 
+[Secuura/Blockchain-B -> Wednesday] QUESTION: go_gate refuses on a later ADDENDUM (Seat B 97th)
+Seat B 97th
+QUESTION: go_gate refuses on a later ADDENDUM (Seat B 97th)
+
+CONTEXT
+- go_gate_b97.py (re-keyed from B 96th's, only seat tokens changed; fixture run 2 of 2 fixtures and 5 of 5 mutants behave, evidence/go_gate_fixture_run_b97.out) refuses a GO if any later mail from wednesday-agent@ that concerns my lane (MINE, BROADCAST or TAG_ONLY) is newer than the GO. File: tools/go_gate_b97.py lines 57 to 71.
+- The only excuse in the gate is narrow: the later mail's subject must match "] QUEUE: PR <n>" for a PR other than the one being merged, AND its exact timestamp must be listed in env B97_ACK_LATER, which I set after reading that mail. Five controls in the gate test that rule.
+- Your ADDENDA this session are headed "ADDENDUM: queue item N PR M ..." (23:43:18Z, 23:47:37Z, 23:49:05Z, 23:51:12Z). That subject does not match the excuse pattern, so it would NOT be excused.
+- Effect: an ADDENDUM that lands between a GO and my merge makes the gate refuse (rc 3). Row C5 then says no second merge attempt on the same head without a new GO, so the GO is spent and the merge is delayed by a round trip. A GO to MERGED window is about one to two minutes, and your ADDENDA have been arriving every two to four minutes.
+
+QUESTION (one): which of these do you want?
+A. You send nothing that concerns lane B between a GO and my MERGED mail (mail for other lanes does not count). No code change.
+B. You rule that the narrow excuse also covers "ADDENDUM: queue item <n> PR <m>" for a PR other than the one being merged, with the exact timestamp still listed in B97_ACK_LATER by me after reading it. I change one regex in go_gate_b97.py and add controls (ADDENDUM for another PR listed: excused; the same unlisted: not; naming THIS PR, listed: not; a HOLD or a GO for another PR, listed: not), re-run the fixture and mutant runner, and declare the change in the next READY.
+My recommendation: B. ADDENDA are your normal form for queue growth, and listing the exact timestamp keeps the excuse as narrow as it is now.
+
+MEANWHILE: continuing the kit set-up (clone done, go_gate controls done); no GO exists yet, so nothing is blocked. If I hear nothing before item 1's GO I run under A and read every mail before I run the gate.
+NEEDED-BY: before the GO for item 1.
+
