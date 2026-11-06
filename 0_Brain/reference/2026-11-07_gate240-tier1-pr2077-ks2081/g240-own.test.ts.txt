@@ -1,0 +1,295 @@
+// KS-2081 (gate 229 F1): a non-user principal is never a party at the transfer write doors. Kam ruled it: card
+// secuura-ks2038-connector-principals-on-transfer-doors-1106 = a, "Keys are never a party on these doors (recommended)".
+// Nothing about the caller is stubbed here: tokens come from auth's real generateConnectorToken and generateAccessToken, or are signed
+// by hand with the same key where a cell needs one claim alone, and the real authenticate() verifies them. The database is stubbed only
+// so a key-opened row can be warmed through loadFromDb, because under this rule no key can open one through POST.
+// Labels: a name starting RED fails at the branch's base by assertion; a name starting control passes there too, so it proves only by
+// the planted mutants named in the PR.
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import crypto from 'crypto';
+import http from 'http';
+import type { AddressInfo } from 'net';
+import jwt from 'jsonwebtoken';
+
+const store = vi.hoisted(() => ({ available: false, rows: [] as Record<string, unknown>[] }));
+
+vi.mock('../db', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../db')>();
+  return {
+    ...actual,
+    initDb: async () => false,
+    isDbAvailable: () => store.available,
+    query: async (sql: string) => ({ rows: store.available && sql.includes('FROM svc_transfers') ? store.rows : [], rowCount: 0 }),
+  };
+});
+
+const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
+process.env.JWT_PRIVATE_KEY = Buffer.from(PRIVATE_PEM).toString('base64');
+process.env.JWT_PUBLIC_KEY = Buffer.from(publicKey.export({ type: 'spki', format: 'pem' }) as string).toString('base64');
+delete process.env.DATABASE_URL;
+delete process.env.JWT_JWKS_URL;
+delete process.env.AUTH_SERVICE_URL;
+process.env.PORT = '0';
+
+const OWNER = '00000000-0000-4000-8000-00000000a001';
+const RECIPIENT = '00000000-0000-4000-8000-00000000a002';
+const INITIATOR = '00000000-0000-4000-8000-00000000a003';
+const EXECUTOR = '00000000-0000-4000-8000-00000000a004';
+const STRANGER = '00000000-0000-4000-8000-00000000f001';
+const UPPER_INITIATOR = '00000000-0000-4000-8000-00000000ABCD';
+const UNKNOWN_ID = '00000000-0000-4000-8000-0000000000ff';
+const TENANT_A = 'a0000000-0000-4000-8000-000000000001';
+const TENANT_B = 'b0000000-0000-4000-8000-000000000002';
+
+// The refusal, byte for byte. Written out here and not imported, so a change to the product's text reds these cells.
+const REFUSAL = '{"success":false,"error":{"code":"FORBIDDEN","message":"An API key cannot open or act on a transfer."}}';
+
+type Reply = { status: number; data: any; raw: string; headers: http.IncomingHttpHeaders };
+type Mint = typeof import('../../../auth/src/services/jwt');
+
+let baseUrl = '';
+let server: http.Server;
+let mint: Mint;
+let app: { default: http.RequestListener; loadFromDb: () => Promise<void> };
+
+function call(token: string, method: string, path: string, body?: unknown): Promise<Reply> {
+  return new Promise((resolve, reject) => {
+    const url = new URL(path, baseUrl);
+    const r = http.request(
+      { hostname: url.hostname, port: url.port, path: url.pathname, method, agent: false, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } },
+      (res) => {
+        let raw = '';
+        res.on('data', (c) => (raw += c));
+        res.on('end', () => {
+          let data: any;
+          try {
+            data = raw ? JSON.parse(raw) : undefined;
+          } catch {
+            data = raw;
+          }
+          resolve({ status: res.statusCode || 0, data, raw, headers: res.headers });
+        });
+      },
+    );
+    r.on('error', reject);
+    if (body !== undefined) r.write(typeof body === 'string' ? body : JSON.stringify(body));
+    r.end();
+  });
+}
+
+const person = (id: string, oauth?: { clientId: string; scopes: string[] }): string =>
+  mint.generateAccessToken(
+    { id, email: 'person@example.test', role: 'OWNER', verificationLevel: 'BASIC', tenantId: TENANT_A, tenantSlug: 'tenant-a' } as Parameters<Mint['generateAccessToken']>[0],
+    'session-ks2081',
+    oauth,
+  );
+const refreshTokenOf = (id: string): string =>
+  mint.generateRefreshToken(
+    { id, email: 'person@example.test', role: 'OWNER', verificationLevel: 'BASIC', tenantId: TENANT_A } as Parameters<Mint['generateRefreshToken']>[0],
+    'session-ks2081',
+  );
+const key = (connectorId: string | null, tenantId: string): string => mint.generateConnectorToken({ connectorId, tenantId, scopes: [] }).token;
+// A token only a test can make, for a shape no minter writes today: one signal alone on an otherwise ordinary person.
+const handMade = (claims: object, options: jwt.SignOptions = {}): string => jwt.sign(claims, PRIVATE_PEM, { algorithm: 'RS256', expiresIn: 600, ...options });
+const personClaims = (over: object = {}): object => ({ userId: INITIATOR, email: 'person@example.test', role: 'OWNER', verificationLevel: 'BASIC', type: 'access', tenantId: TENANT_A, ...over });
+
+const docId = (): string => `doc-1700000000000-${crypto.randomBytes(4).toString('hex')}`;
+const openBody = (over: object = {}): object => ({
+  documentId: docId(),
+  transferType: 'simple',
+  currentOwnerId: OWNER,
+  newOwnerId: RECIPIENT,
+  documentHash: 'a'.repeat(64),
+  documentTitle: 'ks2081',
+  documentType: 'certificate',
+  ...over,
+});
+const TYPE_FIELDS: Record<string, object> = {
+  simple: {},
+  sale: { saleAmount: 100, saleCurrency: 'USD' },
+  inheritance: { executorId: EXECUTOR, deceasedId: OWNER, probateReference: 'P' },
+  corporate: { corporateResolutionRef: 'R', boardApprovalRef: 'B' },
+};
+const open = async (type = 'simple', over: object = {}, token = person(INITIATOR)): Promise<string> => {
+  const res = await call(token, 'POST', '/api/transfers', openBody({ transferType: type, ...TYPE_FIELDS[type], ...over }));
+  if (res.status !== 201) throw new Error(`open ${type}: ${res.status} ${res.raw}`);
+  return res.data.data.id as string;
+};
+const approveBody = (id: string): object => ({ approverId: id, approverRole: 'body-role' });
+const rejectBody = (id: string): object => ({ rejectorId: id, rejectorRole: 'body-role', reason: 'ks2081' });
+
+// A row as a key opened it before this rule: the stored form loadFromDb reads back at boot. Doors read the Map, so the row is warmed and the db goes away again.
+const seedRow = async (initiatedBy: string, over: Record<string, unknown> = {}): Promise<string> => {
+  const id = crypto.randomUUID();
+  store.rows = [
+    {
+      id,
+      document_id: docId(),
+      document_hash: 'a'.repeat(64),
+      document_title: 'ks2081',
+      document_type: 'certificate',
+      transfer_type: 'simple',
+      current_owner_id: OWNER,
+      new_owner_id: RECIPIENT,
+      initiated_by: initiatedBy,
+      required_approvals: 1,
+      payment_verified: false,
+      status: 'pending_approval',
+      status_history: [],
+      approvals: [],
+      rejections: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      ...over,
+    },
+  ];
+  store.available = true;
+  await app.loadFromDb();
+  store.available = false;
+  store.rows = [];
+  return id;
+};
+const statusOf = async (id: string): Promise<string> => (await call(person(STRANGER), 'GET', `/api/transfers/${id}`)).data.data.status as string;
+
+type Door = { name: string; path: (id: string) => string; body: () => object; bad: unknown };
+const OPEN_DOORS: Door[] = [
+  { name: 'open', path: () => '/api/transfers', body: openBody, bad: {} },
+  { name: 'open alias', path: () => '/api/transfers/initiate', body: openBody, bad: {} },
+];
+const ID_DOORS: Door[] = [
+  { name: 'approve', path: (id) => `/api/transfers/${id}/approve`, body: () => approveBody(RECIPIENT), bad: {} },
+  { name: 'reject', path: (id) => `/api/transfers/${id}/reject`, body: () => rejectBody(RECIPIENT), bad: {} },
+  { name: 'execute', path: (id) => `/api/transfers/${id}/execute`, body: () => ({}), bad: { reason: 7 } },
+  { name: 'cancel', path: (id) => `/api/transfers/${id}/cancel`, body: () => ({ reason: 'ks2081' }), bad: { reason: 7 } },
+];
+const DOORS = [...OPEN_DOORS, ...ID_DOORS];
+
+const KEYS: { name: string; token: () => string }[] = [
+  { name: 'a key with no connector id', token: () => key(null, TENANT_A) },
+  { name: 'a connector key', token: () => key('c-one', TENANT_A) },
+  { name: 'a connector key of another tenant differing only in case', token: () => key('C-ONE', TENANT_B) },
+];
+
+// Everything a reply carries except the clock.
+const fingerprint = (r: Reply): string => {
+  const { date: _date, ...headers } = r.headers;
+  return JSON.stringify({ status: r.status, raw: r.raw, headers: Object.entries(headers).sort() });
+};
+
+beforeAll(async () => {
+  mint = await import('../../../auth/src/services/jwt');
+  await mint.initJwtKeys();
+  app = (await import('../index')) as unknown as typeof app;
+  await new Promise<void>((resolve) => {
+    server = (app.default as unknown as { listen: (p: number, h: string, cb: () => void) => http.Server }).listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+}, 60_000);
+
+afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
+
+
+// GATE 240 OWN PROBES. Each cell states its FAIL condition. Scratch only, never committed.
+describe('G240 own probes', () => {
+  // FAIL: any path spelling of a write door lets a real minted key past the refusal.
+  it.each([
+    ['/api/transfers/'], ['/API/TRANSFERS'], ['/api/transfers/initiate/'], ['/api/Transfers/Initiate'],
+    ['/api/transfers/X/cancel/'], ['/API/TRANSFERS/X/CANCEL'], ['/api/transfers/X/EXECUTE'], ['/api/transfers/X/Approve/'], ['/api/transfers/initiate/cancel'],
+  ])('O1 key at %s reads the refusal', async (p) => {
+    const id = await seedRow('connector:api-key');
+    const res = await call(key(null, TENANT_A), 'POST', p.replace('X', id), {});
+    expect([res.status, res.raw]).toEqual([403, REFUSAL]);
+    expect(await statusOf(id)).toBe('pending_approval');
+  });
+
+  // FAIL: the six doors differ in any byte or header, for a key.
+  it('O2 all six doors give one fingerprint to a key, on valid and refused bodies', async () => {
+    const id = await open();
+    const token = key('c-one', TENANT_A);
+    const seen = new Set<string>();
+    for (const d of DOORS) {
+      seen.add(fingerprint(await call(token, 'POST', d.path(id), d.body())));
+      seen.add(fingerprint(await call(token, 'POST', d.path(id), d.bad)));
+    }
+    expect(seen.size).toBe(1);
+  });
+
+  // FAIL: a connector id shaped as a GUID, or empty, lets the mint produce an id that passes. Real mint.
+  it.each([['00000000-0000-4000-8000-00000000a003'], [''], [' '], ['A'.repeat(4096)]])('O3 mint with connectorId %j is refused at cancel of a row it could name', async (cid) => {
+    const id = await open();
+    const res = await call(key(cid, TENANT_A), 'POST', `/api/transfers/${id}/cancel`, {});
+    expect([res.status, res.raw]).toEqual([403, REFUSAL]);
+  });
+
+  // MAP, not pass/fail on the product: what a hand-signed variant gets. Each needs auth's private key, which only auth holds. Printed for the report.
+  it('O4 map of hand-signed variants at cancel and open', async () => {
+    const rows: Record<string, [number, number]> = {};
+    const V: Record<string, object> = {
+      'role CONNECTOR': { role: 'CONNECTOR' }, 'role " connector"': { role: ' connector' }, 'role connector+space': { role: 'connector ' },
+      'type Connector': { type: 'Connector' }, 'type [connector]': { type: ['connector'] }, 'role [connector]': { role: ['connector'] },
+      'level API_KEY': { verificationLevel: 'API_KEY' }, 'level [api_key]': { verificationLevel: ['api_key'] },
+      'authMethod api_key alone': { authMethod: 'api_key' }, 'scopes+connectorId alone': { connectorId: 'c', scopes: ['*'] }, 'email connector': { email: 'connector@secuura.io' },
+      'type refresh': { type: 'refresh' }, 'no type': { type: undefined },
+      'id upper': { userId: INITIATOR.toUpperCase() }, 'id trailing space': { userId: INITIATOR + ' ' }, 'id newline': { userId: INITIATOR + '\n' },
+      'id object': { userId: { id: INITIATOR } }, 'id array connector': { userId: ['connector:x'] }, 'id null': { userId: null }, 'id zero': { userId: 0 }, 'id false': { userId: false },
+    };
+    for (const [name, over] of Object.entries(V)) {
+      const clean = JSON.parse(JSON.stringify(personClaims(over)));
+      const id = await open();
+      const c = await call(handMade(clean), 'POST', `/api/transfers/${id}/cancel`, {});
+      const o = await call(handMade(clean), 'POST', '/api/transfers', openBody());
+      rows[name] = [c.status, o.status];
+    }
+    const { userId: _u, ...noId } = personClaims() as Record<string, unknown>;
+    { const id = await open(); rows['no userId, sub=GUID'] = [(await call(handMade({ ...noId, sub: INITIATOR }), 'POST', `/api/transfers/${id}/cancel`, {})).status, (await call(handMade({ ...noId, sub: INITIATOR }), 'POST', '/api/transfers', openBody())).status]; }
+    console.log('G240MAP ' + JSON.stringify(rows));
+    expect(Object.keys(rows).length).toBeGreaterThan(20);
+  });
+
+  // FAIL: a no-id token records someone it did not authenticate. Pinned by P5 as status only; this reads who was recorded.
+  it('O5 who a no-id token is recorded as at open', async () => {
+    const { userId: _u, ...noId } = personClaims() as Record<string, unknown>;
+    const res = await call(handMade(noId), 'POST', '/api/transfers', openBody());
+    const h = await call(person(STRANGER), 'GET', `/api/transfers/${res.data.data.id}/history`);
+    console.log('G240O5 ' + JSON.stringify([res.status, h.data.data.history[0].changedBy]));
+    expect(res.status).toBe(201);
+  });
+
+  // FAIL (N5's "its parties can still reject" is not the whole of it): a key-opened row whose named parties are GUIDs of nobody has any exit.
+  it('O6 key-opened row naming phantom parties: every person, admin included, at every door', async () => {
+    const id = await seedRow('connector:api-key', { current_owner_id: crypto.randomUUID(), new_owner_id: crypto.randomUUID() });
+    const admin = mint.generateAccessToken({ id: STRANGER, email: 'a@example.test', role: 'SYSTEM_ADMIN', verificationLevel: 'HIGH', tenantId: TENANT_A, tenantSlug: 't' } as Parameters<Mint['generateAccessToken']>[0], 's');
+    const out: number[] = [];
+    out.push((await call(admin, 'POST', `/api/transfers/${id}/approve`, approveBody(STRANGER))).status);
+    out.push((await call(admin, 'POST', `/api/transfers/${id}/reject`, rejectBody(STRANGER))).status);
+    out.push((await call(admin, 'POST', `/api/transfers/${id}/execute`, {})).status);
+    out.push((await call(admin, 'POST', `/api/transfers/${id}/cancel`, {})).status);
+    out.push((await call(key(null, TENANT_A), 'POST', `/api/transfers/${id}/cancel`, {})).status);
+    console.log('G240O6 ' + JSON.stringify([out, await statusOf(id)]));
+    expect(await statusOf(id)).toBe('pending_approval');
+  });
+
+  // FAIL: a rejection of a no-id key's row is readable by a no-id key of another tenant.
+  it('O7 cross-tenant read of the reject notification on a key-opened row', async () => {
+    const id = await seedRow('connector:api-key', { document_title: 'G240-SECRET-TITLE' });
+    const r = await call(person(OWNER), 'POST', `/api/transfers/${id}/reject`, { rejectorId: OWNER, rejectorRole: 'x', reason: 'G240-SECRET-REASON' });
+    expect(r.status).toBe(200);
+    const b = await call(key(null, TENANT_B), 'GET', '/api/notifications');
+    const hit = (b.data.data.notifications as { message: string }[]).filter((n) => n.message.includes('G240-SECRET'));
+    console.log('G240O7 ' + JSON.stringify([b.status, hit.map((n) => n.message)]));
+    expect(b.status).toBe(200);
+  });
+
+  // FAIL: a key can still mutate a transfer-linked row at an un-refused route at this service.
+  it('O8 what a key reads at the transfer service\'s other POST routes', async () => {
+    const token = key(null, TENANT_A);
+    const rows: Record<string, number> = {};
+    rows['POST /api/workflows/steps/x/approve'] = (await call(token, 'POST', '/api/workflows/steps/00000000-0000-4000-8000-000000000001/approve', { approverId: OWNER, decision: 'approved' })).status;
+    rows['POST /api/workflows'] = (await call(token, 'POST', '/api/workflows', { name: 'g240', workflowType: 'single', steps: [{ name: 's', approverType: 'user' }] })).status;
+    rows['POST /api/workflows/escalate'] = (await call(token, 'POST', '/api/workflows/escalate', {})).status;
+    rows['POST /api/delegations/validate'] = (await call(token, 'POST', '/api/delegations/validate', {})).status;
+    console.log('G240O8 ' + JSON.stringify(rows));
+    expect(Object.keys(rows).length).toBe(4);
+  });
+});

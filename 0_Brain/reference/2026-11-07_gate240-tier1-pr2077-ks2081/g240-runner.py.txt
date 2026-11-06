@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+# Gate 240. Load-gated vitest runner; asserts every tamper anchor and restores by sha256.
+import hashlib,json,os,subprocess,sys,time
+R="/private/tmp/g240"; DEV=R+"/Blockchain/Dev"; SVC=DEV+"/services/transfer"; O=R+"/.out"
+os.makedirs(O,exist_ok=True)
+IDX=SVC+"/src/index.ts"; ACC=SVC+"/src/services/transferAccess.ts"; MINT=DEV+"/services/auth/src/services/jwt.ts"
+BASE="631ccfb8266a7d044e6577f45f598ccebe4e1773"
+DOOR="src/__tests__/ks2081-transfer-doors-refuse-non-user-principals.test.ts"; UNIT="src/__tests__/ks2081-non-user-principal-unit.test.ts"
+def wait():
+    for _ in range(120):
+        if os.getloadavg()[0]<7.5: return
+        time.sleep(5)
+    raise SystemExit("load stayed high")
+def vt(tag,*files):
+    wait()
+    env=dict(os.environ,TZ="UTC"); env.pop("DATABASE_URL",None)
+    p=f"{O}/{tag}.json"
+    if os.path.exists(p): os.rename(p,p+f".{int(time.time())}")
+    r=subprocess.run(["nice","-n","5",DEV+"/node_modules/.bin/vitest","run","--root",SVC,"--reporter=json","--outputFile="+p,*files],env=env,capture_output=True,text=True,timeout=280)
+    open(f"{O}/{tag}.log","w").write(r.stdout+r.stderr)
+    return json.load(open(p)),r
+def cells(j): return [(a["fullName"],a["status"]) for f in j["testResults"] for a in f["assertionResults"]]
+def sha(p): return hashlib.sha256(open(p,"rb").read()).hexdigest()
+FILES=[IDX,ACC,MINT]; S={p:sha(p) for p in FILES}
+def tamper(tag,path,old,new,must_red,must_green=()):
+    b=open(path,"rb").read(); s=b.decode()
+    assert s.count(old)>=1, f"ANCHOR MISSING {tag}"
+    n=s.replace(old,new,1) if s.count(old)==1 else s.replace(old,new)
+    assert n!=s
+    open(path,"wb").write(n.encode())
+    assert new=="" or new in open(path).read(), "tamper did not land"
+    try: j,_=vt(tag,DOOR,UNIT)
+    finally: open(path,"wb").write(b)
+    assert sha(path)==S[path]
+    c=cells(j); red=[x for x,st in c if st=="failed"]
+    miss=[m for m in must_red if not any(m in x for x in red)]
+    wrong=[m for m in must_green if any(m in x for x in red)]
+    print(f"{tag}: {len(red)} of {len(c)} red | required red missing {miss} | required green but red {wrong} | loaded {len(c)>0}")
+    return red
+mode=sys.argv[1]
+if mode=="own":
+    j,r=vt("own","src/__tests__/g240-own.test.ts"); c=cells(j)
+    print(sum(s=="passed" for _,s in c),"of",len(c),"passed")
+    for x,s in c:
+        if s!="passed": print("FAILED",x)
+    for f in j["testResults"]:
+        for a in f["assertionResults"]:
+            if a["status"]=="failed": print((a.get("failureMessages") or [""])[0][:400])
+    for l in (r.stdout+r.stderr).splitlines():
+        if "G240" in l: print(l[:1500])
+if mode=="base":
+    FB=[IDX,ACC,SVC+"/src/transfer.openapi.ts"]; orig={f:open(f,"rb").read() for f in FB}
+    rel=lambda f:f.replace(R+"/","")
+    for f in FB:
+        b=subprocess.run(["git","-C",R,"show",f"{BASE}:{rel(f)}"],capture_output=True,check=True).stdout; assert b!=orig[f]; open(f,"wb").write(b)
+    try: j,_=vt("base_door",DOOR)
+    finally:
+        for f,b in orig.items(): open(f,"wb").write(b)
+    c=cells(j)
+    rl=[(x,s) for x,s in c if "RED " in x]; ct=[(x,s) for x,s in c if "control " in x]
+    print("RED-labelled:",sum(s=="failed" for _,s in rl),"failed of",len(rl),"| controls:",sum(s=="passed" for _,s in ct),"passed of",len(ct),"| total",len(c))
+    msgs=[(a["fullName"],(a.get("failureMessages") or [""])[0][:110]) for f in j["testResults"] for a in f["assertionResults"] if a["status"]=="failed"]
+    assertion=sum("AssertionError" in m for _,m in msgs); print("failures by AssertionError:",assertion,"of",len(msgs))
+    for n,m in msgs[:3]+[x for x in msgs if "Assertion" not in x[1]][:5]: print(" ",n[:90],"=>",m.replace("\n"," ")[:110])
+    print("restored",all(open(f,"rb").read()==b for f,b in orig.items()))
+if mode=="tampers":
+    R1C="RED R1 a key with no connector id at cancel"; R1O="RED R1 a key with no connector id at open reads"; P1A="control P1 simple by owner"
+    # seat's own, anchors copied from tampers_w30.py
+    tamper("seat-drop-role",ACC,"|| claims?.role === 'connector' ","",["RED C1 role connector alone","RED C2 role connector alone","role connector alone is non-user"],[R1C,"RED C1 type connector alone"])
+    tamper("seat-m8c",IDX,"    const caller = requireCaller(req, res);\n    if (!caller) return;\n    const data = approveTransferSchema.parse(req.body);\n","    const data = approveTransferSchema.parse(req.body);\n    const caller = requireCaller(req, res);\n    if (!caller) return;\n",["RED R2 a key sending a body the door would refuse at approve"],[R1C,P1A])
+    tamper("seat-p6-no-authenticator",IDX,"app.use('/api', jwtAuthenticate());","",["control P6 a connector-shaped token with a bad signature","control P6 an expired connector-shaped token"])
+    tamper("seat-m13-mint-type",MINT,"    verificationLevel: 'api_key',\n    type: 'connector',\n","    verificationLevel: 'api_key',\n    type: 'robot',\n",["control D1"],[R1C,R1O])
+    # own 1: the cancel door looks the row up first and refuses only after, the read-before-refusal shape the card forbids
+    tamper("own1-cancel-reads-first",IDX,"  const caller = requireCaller(req, res);\n  if (!caller) return;\n  const transfer = memTransfers.get(req.params.id);\n  const { reason } = req.body;\n  \n  if (!transfer) {\n    return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Transfer not found' } });\n  }\n",
+      "  const transfer = memTransfers.get(req.params.id);\n  const { reason } = req.body;\n  \n  if (!transfer) {\n    return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Transfer not found' } });\n  }\n  const caller = requireCaller(req, res);\n  if (!caller) return;\n",["RED R3 cancel"],[P1A,R1C])
+    # own 2: the alias alone escapes the guard; a door-specific hole
+    tamper("own2-alias-escapes",IDX,"    if (refuseNonUserPrincipal(req, res)) return;\n    const data = initiateTransferSchema","    if (!req.path.endsWith('/initiate') && refuseNonUserPrincipal(req, res)) return;\n    const data = initiateTransferSchema",["RED R1 a key with no connector id at open alias","RED R5 a key at open alias"],[R1O,P1A])
+    # own 3: the refusal becomes door-dependent in a HEADER, body constant: does anything see it? R3 fingerprints within a door only.
+    tamper("own3-door-header",IDX,"  res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'An API key cannot open","  res.setHeader('x-g240-door', req.path.split('/').pop() || '');\n  res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'An API key cannot open",["RED R3 cancel"])
+    # own 4: the refusal leaks whether the id exists through a HEADER, body constant
+    tamper("own4-exists-header",IDX,"  res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'An API key cannot open","  res.setHeader('x-g240-known', String(memTransfers.has(req.params.id)));\n  res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'An API key cannot open",["RED R3 cancel"])
+    # own 5: the GUID test folds whitespace, i.e. trims before testing
+    tamper("own5-guid-trims",ACC,"!GUID_SHAPE.test(claims.userId)","!GUID_SHAPE.test(claims.userId.trim())",["agrees with z.string().guid() on"])
+    j,_=vt("clean_after",DOOR,UNIT); c=cells(j); print("clean after:",sum(s=="failed" for _,s in c),"of",len(c),"red; sha restored",all(sha(p)==S[p] for p in FILES))
+if mode=="suite":
+    j,_=vt("suite_rerun"); print("rerun total",j["numTotalTests"],"passed",j["numPassedTests"],"failed",j["numFailedTests"])
