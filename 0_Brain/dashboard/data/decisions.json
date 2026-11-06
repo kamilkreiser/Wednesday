@@ -60570,9 +60570,9 @@
   ],
   "recommended": "b",
   "ts": "2026-11-06T06:00:36.070318+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-11-06T10:06:12.288512+11:00",
   "prior_rulings_overridden": [
    "CARD composer-demo-internal-text-plan",
    "CARD hpsmpoc-plan-no-delete",
@@ -60590,6 +60590,173 @@
    "CARD datasec-morning-plan-1103",
    "CARD datasec-morning-plan-1104",
    "CARD datasec-morning-plan-1105"
+  ]
+ },
+ {
+  "id": "hpsmpoc-demo-removal-followups-1106",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Demo removal: the deleted AI account becomes unrecoverable tomorrow 13:45. Finish the tidy-up?",
+  "bluf": "The deleted demo's Azure OpenAI account purges itself tomorrow, Saturday 13:45 AEDT, and its key vault on Thursday 12 Nov 13:45; after those times neither can be recovered. Doing nothing lets that happen, which fits your ruling to remove the demo. Still left over: a budget of 800 a month with no group under it (an alert rule, not a charge), a federated credential on the demo's web app registration that should now point at nothing (not read yet), and in the repository the demo parameter file, README wording, a CI check and code paths that name the demo. UAT uses some of the same app registrations, so those stay. Nothing here touches UAT. (Override of the prior-rulings gate: hpsmpoc-demo-site-remove-1105 ruled only the resource group's removal, read by show; the other matches share the word demo or removal and are about deploys, logins and sample names.)",
+  "default_action": "The purges run on their dates, because nothing stops them. Nothing else is removed or changed until you tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Let the purges run and clear the rest",
+    "detail": "One seat reads then removes the orphan budget and the dangling credential, only that credential and only if UAT does not use it; a builder retires the parameter file, wording, CI check and demo code paths. Merged, not deployed."
+   },
+   {
+    "key": "b",
+    "label": "Same, but keep the parameter file",
+    "detail": "As a, but the demo parameter file stays as a recipe for rebuilding the demo later."
+   },
+   {
+    "key": "c",
+    "label": "Let the purges run, change nothing else",
+    "detail": "The leftovers stay as they are and stay listed."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T10:26:22.476960+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-06T10:28:10.801987+11:00",
+  "prior_rulings_overridden": [
+   "CARD hpsm-composer-synthetic-demo-content-for-monday",
+   "CARD hpsm-composer-demo-release-unreachable-c12",
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD composer-hp-sow-name-on-demo",
+   "CARD composer-demo-internal-text-plan",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD hpsmpoc-k14-demo-scenarios-1003",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD composer-expert-66-demo-deploy-1007",
+   "CARD hpsmpoc-attribution-demo-tuesday-1011",
+   "CARD composer-4e00d57-words-look-demo-deploy-1011",
+   "CARD hpsmpoc-page-frame-names-for-demo-1011",
+   "CARD hpsmpoc-demo-names-beyond-the-frame-1011",
+   "CARD composer-new-words-look-demo-deploy-1012",
+   "CARD hpsmpoc-demo-name-check-residue-1012",
+   "CARD composer-b134-new-look-demo-1012",
+   "CARD composer-b144-words-demo-1013",
+   "CARD nexusai-rd846-build-broken-demo-deploy-1013",
+   "CARD composer-demo-minio-overlay-1019",
+   "CARD tuesday-laptop-secuura-removal-b-1019",
+   "CARD composer-demo-objects-image-pin-1019",
+   "CARD composer-demo-image-offbox-route-1019",
+   "CARD composer-demo-vm-write-role-after-copy-1019",
+   "CARD composer-demo-deploy-eaff2b7-words-1020",
+   "CARD hpsmpoc-demo-telemetry-review-week-1021",
+   "CARD hpsmpoc-hosted-demo-data-cleanup-1021",
+   "CARD hpsmpoc-uat-api-accepts-demo-audience-token-1021",
+   "CARD nexusai-demo-workflow-pin-landing-1025",
+   "CARD hpsmpoc-demo-site-for-0805-1026",
+   "CARD hpsmpoc-demo-chooser-code-change-1027",
+   "CARD hpsmpoc-232-chooser-demo-deploy-1027",
+   "CARD hpsmpoc-demo-switch-template-pin-1027",
+   "CARD hpsmpoc-demo-sample-names-services-1029",
+   "CARD hpsmpoc-demo-prewarm-before-presenting-1029",
+   "CARD composer-demo-deploy-87-105-1031",
+   "CARD composer-demo-pgrestore-version-read-1101",
+   "CARD hpsmpoc-demo-deploy-words-schema-1104",
+   "CARD hpsmpoc-demo-site-remove-1105"
+  ]
+ },
+ {
+  "id": "hpsmpoc-review-door-limits-1106",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "UAT review page: anyone with the address can approve or delete by script. Add a limit?",
+  "bluf": "The review page you asked to open on 5 Nov does what you asked. The gate also measured what comes with it: anyone who can reach the address can list, approve and delete feedback with a script, there is no rate limit, and the audit trail records every action as one fixed Admin name. UAT still runs this now and HP is reviewing on it. Any change would stay off UAT until you lift the hold. (Override of the prior-rulings gate: the two matches, mpscalc-showcase-known-limits-1010 and nexusai-risk-query-odd-limits-1027, share only the word limits and are other projects.)",
+  "default_action": "Nothing is built and UAT stays exactly as it is. It stays listed as an open question.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build a limit, deploy when you lift the hold",
+    "detail": "A rate limit on the three calls, built, gated and merged now; UAT unchanged until your word. People reviewing see no difference."
+   },
+   {
+    "key": "b",
+    "label": "Also record who did what",
+    "detail": "As a, plus a per-visitor identity in the audit trail instead of one Admin name. Larger change; may need words on the page."
+   },
+   {
+    "key": "c",
+    "label": "Leave it open as it is",
+    "detail": "Nothing is built. It stays recorded as a known property of the review copy."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T10:26:26.330571+11:00",
+  "status": "ruled",
+  "ruled_choice": "c",
+  "ruled_ts": "2026-11-06T10:27:48.045671+11:00",
+  "prior_rulings_overridden": [
+   "CARD mpscalc-showcase-known-limits-1010",
+   "CARD nexusai-risk-query-odd-limits-1027"
+  ]
+ },
+ {
+  "id": "mps-384-withdrawn-alert-close-1106",
+  "client_project": "Datasec/MPS-Commercial-Calculator",
+  "title": "MPS ticket 384: GitHub withdrew the alert it was filed for. Close the ticket?",
+  "bluf": "MPSCALC-384 was filed for one Dependabot alert on minimatch. GitHub now answers that alert 9 has been withdrawn, and MPS shows 0 open Dependabot alerts (control: the same reader lists 8 fixed). The package copies are unchanged and I have not measured why GitHub withdrew it. Closing moves the ticket only; no code changes. (Override of the prior-rulings gate: the one match, hpsmpoc-uat-budget-alert-1021, shares only the word alert and is a UAT budget.)",
+  "default_action": "The ticket stays open and unchanged, and MPS work carries on around it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Close it with the reason",
+    "detail": "A records seat comments what was read, with the date, and closes the ticket."
+   },
+   {
+    "key": "b",
+    "label": "Keep it open",
+    "detail": "A records seat adds the same comment and leaves it in the backlog in case the alert returns."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T10:26:30.142471+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-06T10:27:44.739593+11:00",
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-uat-budget-alert-1021"
+  ]
+ },
+ {
+  "id": "datasec-seats-need-login-1106",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "I need you to run /login in one pane: the agents are still on the old account, at 100%",
+  "bluf": "I need you to do this:\n\n1. Go to the tmux pane named Datasec/HPSM-POC-H127.\n\n2. Type /login and sign in with the same fresh account you used on my pane.\n\n3. Tap a below.\n\nWhy: your 10:04 login reached only my seat, which has its own settings. Worker seats share the machine's default login, and that one reads 7d 100%, resetting 10 Nov at 6pm. H127 launched and stopped at once on 'You've hit your weekly limit'. I pressed Esc on its dialog and did not take the usage-credits option, which is yours to choose because it costs money. My launch check read my own gauge (1%), so it let the launch through; from now on I read a seat's gauge before relying on it. Kits keep drafting meanwhile, and they run under my login. (Override of the prior-rulings gate: the matches are GitHub, Azure, Jira, HP-tester and demo sign-ins, a seats-network clean-up and a 09-08 toggle message; none is this Claude account.)",
+  "default_action": "Kits keep drafting and I check the pane's gauge at each checkpoint. No worker seat starts until that gauge reads below 100%. I will not use usage credits.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Done, I have logged in",
+    "detail": "I read the pane's gauge, restart H127's commission, and launch the rest in your order."
+   },
+   {
+    "key": "b",
+    "label": "Not today",
+    "detail": "Kits are finished and stamped but no worker seat starts before the reset on 10 Nov at 6pm."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T10:32:52.573756+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-06T10:40:27.512671+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-08 11:50",
+   "CARD vision-gh-login-for-ci",
+   "CARD hpsm-jira-login-on-laptop",
+   "CARD hpsmpoc-d9-d10-under-kams-login-1002",
+   "CARD composer-docker-networks-closed-seats-1003",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD mpscalc-azure-login-for-hosting-1010",
+   "CARD quickquote-v234-gh-login-for-pr-1012",
+   "CARD hpsmpoc-uat-login-window-1014",
+   "CARD tuesday-dashboard-clock-deploy-az-login-1016"
   ]
  }
 ]
