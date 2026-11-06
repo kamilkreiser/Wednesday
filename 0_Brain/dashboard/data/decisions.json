@@ -61754,5 +61754,72 @@
    "CARD secuura-ks1724-edge-request-size-measure-1102",
    "CARD wed-spark-unreachable-from-laptop-1104"
   ]
+ },
+ {
+  "id": "secuura-push-queue-prerun-preflight-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "Kam: may seats run the slow push checks before taking the push lock? It could cut about 4.5 hours of queue, but needs a rule change",
+  "bluf": "Tap a or b. Each Secuura push takes about 19 minutes and only one can run at a time, so the 14 built branches now queued need about 4.5 hours before they can reach a gate. About 91% of each push is one check, the 116 shell suites, which run whole whatever changed (948 of 1033 s and 990 of 1096 s; Wednesday read those two logs). Option a runs the same checks first, in parallel, then pushes under the lock with --no-verify only if the commit is unchanged. No check is removed, and the estimate is about 66 minutes. The cost is real: the hook no longer fires at push time, so only the seats' push tool enforces that the checks passed, and our standing line says no --no-verify, which is why this is yours. Not measured: whether suites collide when run in parallel, and whether the laptop can carry it (load1 read 16 just before this card, on 12 cores). A seat would test two runs side by side before any real push.",
+  "default_action": "b: the hook stays as it is and the queue drains at its current pace. Wednesday adds timing per check and has a seat look at speeding up the suites, by a normal PR, because neither weakens a check.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Test side by side, then pre-run if it holds (recommended)",
+    "detail": "Two pre-runs in scratch copies must match a normal run. If they do, at most 3-4 run at once and each PR states --no-verify and which checks ran. If they do not, nothing changes and I report back."
+   },
+   {
+    "key": "b",
+    "label": "Keep the checks inside the push",
+    "detail": "Nothing changes for queued branches: about 4.5 hours for these 14. A seat would still speed up the suites for later branches, by a normal PR through the gate."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T13:12:26.481469+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-806-force-push-2026-09-04",
+   "CARD secuura-force-push-own-branch-standing",
+   "CARD secuura-934-blocks-every-push-needs-one-approval",
+   "CARD secuura-ks910-preflight-leg12-runs-nothing",
+   "CARD secuura-five-new-advisories-block-every-push-0929",
+   "CARD secuura-allowance-85-narrow-queue-1001",
+   "CARD secuura-five-new-advisories-freeze-every-push-1006",
+   "CARD secuura-hono-advisory-blocks-every-push-1029"
+  ]
+ },
+ {
+  "id": "secuura-ks1081-pointer-would-drop-26-variables-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1081: your September ruling turns .env.example into a one-line pointer, but that would drop 26 variables' documentation. Move them first?",
+  "bluf": "Tap a or b. On 16 Sep you ruled env.example canonical, with .env.example becoming a one-line pointer. Seat J 18th measured what that now does (its counts, not re-derived by Wednesday): 26 variables exist only in .env.example, including PII_ENCRYPTION_KEY, VC_SIGNING_KEY and ENTRA_CLIENT_SECRET names, plus 20 REQUIRED markers; 18 shared variables carry different values, such as CARDANO_NETWORK preview against devnet. Four places still tell people to copy .env.example. The card you ruled did not mention this. Seat J 18th is meanwhile building a guard that stops the gap growing, and neither template changes until you rule.",
+  "default_action": "c: the guard merges through the gate, both templates stay as they are, and KS-1081 stays open until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Move the 26 into env.example with secrets blank, then make the pointer (recommended)",
+    "detail": "Your ruling's outcome, with nothing lost. On the 18 differing values env.example wins, since you ruled it canonical. A seat also updates the four copy instructions. Normal gate."
+   },
+   {
+    "key": "b",
+    "label": "Make the pointer exactly as first ruled",
+    "detail": "The documentation for the 26 variables is gone from the templates. Quicker, and the four copy instructions still need fixing."
+   },
+   {
+    "key": "c",
+    "label": "Leave both files, guard only",
+    "detail": "The two templates stay different; the guard only stops the gap growing. KS-1081 stays open."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T13:21:01.487695+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD vault-ssh-pointer-heal",
+   "CARD secuura-ks1081-two-env-templates-which-is-canonical"
+  ]
  }
 ]
