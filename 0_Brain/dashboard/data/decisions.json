@@ -62760,5 +62760,44 @@
    "CARD secuura-ks1384-stuart-reanchor-1d322cb1-1031",
    "CARD secuura-kintsugi-second-prune-all-cache-1101"
   ]
+ },
+ {
+  "id": "secuura-ks2038-connector-principals-on-transfer-doors-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2038: a key of another tenant can cancel a connector-opened transfer. May connector keys be a party to a transfer at all?",
+  "bluf": "One tap, please. Your KS-2038 rule holds for signed-in users: gate 229 measured all 40 person-by-type rows through the real authenticator. It found one gap, for machine keys: a no-id key of tenant A opens a transfer and a no-id key of tenant B cancels it, 200; a connector id differing only in case does too. It also tells that caller the transfer exists. It is not a regression, as today anyone can cancel anything, and the gate found no in-repo caller or Platform S snapshot using connectors on these doors. A connector can never approve, reject or execute. PR 2048 merges regardless, on its gate; this asks about the follow-up. Prior rulings read: your KS-2038 card ruled the rule for people and did not cover machine keys; other connector cards are on different doors.",
+  "default_action": "Nothing is built. The finding is filed as a ticket by board seat S 31st at Medium, and PR 2048 merges either way. After 48 h the stale-card mail reaches Kam.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keys are never a party on these doors (recommended)",
+    "detail": "A follow-up refuses a non-user principal at the transfer doors, no migration. If an integration ever needs to open transfers, it comes back to you. Tier 1 gate."
+   },
+   {
+    "key": "b",
+    "label": "Record the tenant with the initiator",
+    "detail": "Keys may keep opening and cancelling their own; needs a migration, as the transfer table has no tenant column."
+   },
+   {
+    "key": "c",
+    "label": "Leave it, filed Low",
+    "detail": "No build. The gap stays while nothing uses it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T20:19:43.539985+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 12:15",
+   "CARD secuura-ks1402-lookup-refuses-connector-tokens",
+   "CARD secuura-connector-allowlist-missing-setting-ks1256-1005",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-ks695-connector-may-revoke-own-key-1009",
+   "CARD secuura-ks695-erase-connector-retry-semantics",
+   "CARD secuura-ks1215-live-connector-key-1104",
+   "CARD secuura-ks2038-who-may-approve-transfers-1106"
+  ]
  }
 ]
