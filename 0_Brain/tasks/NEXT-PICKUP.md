@@ -15,7 +15,7 @@ Clear the Secuura board over the next 1-2 weeks: In Review and In Progress first
 secuura-peter-created-on-our-account-1106 = a (11:11): the 31 are ours; only ASSIGNED to Peter or Stuart stays theirs. All briefs carry this.
 Ruling pack posted, see OWED 0.
 
-## FLOOR at 11:45 (read cockpit.sh status; all Sonnet except F 35th Opus)
+## FLOOR at 11:46 (read cockpit.sh status; all Sonnet except F 35th Opus)
 - B 97th %5 merge. MERGED 2009, 2018; GO for 2017 mailed 11:41. REMAINING QUEUE: 2020, 2022, 2021, 2019, 2024, 2023, 2027, 2028, 2025, 2026, in order, each READY then GO. Tool: 2_Project_Files/fleet/send_go_merge_seat.sh <PR> <fullhead> <fullpin> <fulltree> "<gate verdict>" <KS-n> <notefile> with SP=<your scratchpad> SEAT='Seat B 97th'; tree and pin from the READY's 'On the GO it expects' line. Then cockpit.sh say 'Secuura/Blockchain-B' 'GO mailed: read your inbox.' --mail 'GO: merge PR n at head12'. NEVER mail lane B between a GO and MERGED (ruled A). B wraps when its statusline reads 75% (it cannot read it; the wake says so): tell it; then B 98th from its HANDOVER (kit in 5_Project_History/2026-11-06_seatB-97th/tools). After PR 2025 merges name its SHA to T.
 - T 13th %8: KS-1622 PR pending (driver 64253), KS-1544 building; KS-1788 after 2026 + 2028; KS-1505 + KS 2009 comment after KS-1493 merges.
 - G 28th %11: PRs 2029, 2030, 2031 READY FOR GATE; holding for gate 214 (0_Brain/reference/2026-11-06_gate214-ks1585-ks1377-pr2029-2031/verdict.md; background Opus subagent). Verdict -> queue to merge seat; findings -> G 28th. 2030 and 2031 share index.ts (second needs recompute). Then wrap G or name next.
@@ -28,6 +28,7 @@ Ruling pack posted, see OWED 0.
 - FINDING to tell Kam with a count at the next report: lane-plan 'buildable' rows are mostly stale or decisions when read whole: T 13th's 8 read, 2 buildable. The census D 86 is an over-estimate. Decision list beyond the 10 cards: KS-1670 sites 2-3 + KS-1641, KS-1410 + KS-1214, KS-1171 8k (money path). Draft cards next.
 
 ## FIRST FOR THE SUCCESSOR
+PR 2017 MERGED bd92121e0228; B 97th's READY for PR 2020 next (N-5: KS 1232 attachment). R 86th: row 5 re-date card owed by you once trial results arrive by 11-13, owner KS-1707 proposed. J 18th GO sent; two QUESTIONs to come (KS-1745 b, KS-1613 item 3). KS-1800 close-with-a-note still to tell S 25th. F 35th plan confirmation due. Answer with a tap after each mail.
 Read mail (newmail.sh unpiped to a file); answer plan confirmations; send GOs; card the decision list above; a D 56th kintsugi deploy brief once originate/vc-issuer/auth PRs are in (9 + merged), October grant, demo frozen; NAS evaluation card.
 
 ## OWED

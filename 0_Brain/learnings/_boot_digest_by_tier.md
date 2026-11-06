@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-06 05:32 from 259 lesson files (1,123,592 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 213. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-06 11:45 from 260 lesson files (1,127,513 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 214. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7695,4 +7695,19 @@ Related: [[2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say]] (
 1. When an idle wake's pane shows `API Error` (connection lost, overloaded, 5xx), it is a fleet event, not a seat event: in the same action, read every live pane's tail for the same line (`tmux capture-pane` per pane, grep `API Error`), and tap each stalled seat.
 2. The tap is a BARE FACTUAL pointer (what happened, when, where its STATUS stands). `cockpit.sh say` refuses "carry on"/"resume"-shaped wording without a mail, and projects with no mail channel have none: the seat's own brief already says what to do next. Keep it under 200 characters.
 3. Verify at rung 5 (the pane shows a running command), and note the slip in the seat's target time.
+
+
+## Grant: clear the Secuura board over the next one to two weeks — In Review and In Progress first; complete, merge, archive, and keep going until the board is clear
+`2026-11-06_clear-the-secuura-board-over-one-to-two-weeks.md` · grant · 2026-11-06 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is choosing what the Secuura floor does next, on any day through about 20 November. **The answer is the board.** In Review and In Progress first, then Todo and Backlog. A ticket leaves the board by being completed, merged and archived, or by being sorted (duplicate, already done, stale with evidence, or carded to Kam). No day is a quiet day while the board holds actionable work.
+
+**How to apply:**
+1. Every morning card carries the count against this baseline, by state, from a paginated read.
+2. Every checkpoint asks how many disjoint lanes exist and launches them (2026-09-13 rule); the machine and the partition are the limit, the gauge is a guide (2026-10-22).
+3. Close-out seats classify at source, never from a title (2026-09-07 classification rule), and archive leaves before parents (2026-09-18 cascade rule).
+
+**What does NOT change:** the signature classes (production, money, external comms to humans, anything irreversible); the QA gate before every merge; demo stays FROZEN until Kam says otherwise (card `secuura-ks1401-058-merge-demo-billing-1104` = a); tickets on Peter or Stuart stay theirs; the Spark stays off until he lifts his 2026-11-04 16:42 "ignore the spark until further notice".
+
+**Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-10-12_secuura-done-when-tested-works-deployed-and-never-idle]] · [[2026-10-10_merge-and-archive-when-done-and-ready]] · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
