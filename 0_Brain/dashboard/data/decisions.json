@@ -62874,5 +62874,46 @@
    "2026-09-17 08:04",
    "CARD nexusai-ai-screenshot-local-model"
   ]
+ },
+ {
+  "id": "secuura-ks1081-template-flips-secrets-production-path-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1081: your 'env.example wins' also puts sample secrets on the documented production path. Tap how to handle it",
+  "bluf": "One tap, no hurry. Override reason: your two KS-1081 rulings chose env.example and moved the 26 variables; neither card showed these seven names, so this is new; the other matches share a word only. Production does not exist today, so nothing is exposed now. Gate 233, a tier 1 gate, found this on PR 2052; I read its finding, and it did not boot the gateway. Your ruling said secrets stay blank and env.example wins on the 18 differing values. Those two collide on seven names, and my card to you did not show that. On the production path that DEPLOYMENT.md documents, CSRF_SECRET and DEMO_SERVICE_KEY go from blank to a sample value published in the repo. So a forgotten CSRF_SECRET no longer stops the gateway by the code's read, and demo-service, which mints Platform Admin tokens, starts on a published key, inside the stack only, by the gate's render and guard test. The same template raises the rate limit to 10000 and sets LOG_LEVEL debug and CARDANO_NETWORK preview there, with hand checks on only some of them. PR 2052 is NOT merged: the gate said NO GO, also on a separate credential check that J 19th is fixing either way.",
+  "default_action": "If Kam does not tap: PR 2052 stays unmerged at its gate, J 19th fixes the credential check and the docs, and Wednesday raises this again at the Friday 20 Nov read. After 48 h the stale-card mail reaches Kam.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep the template's values, and make production refuse them (recommended)",
+    "detail": "Local stacks stay as they are. The production guard refuses the published values, demo-service is refused or left out on the production overlay, the rate limit, log level and network become must-set rows, and a test proves none reaches production unedited. A little more build, tier 1 gate."
+   },
+   {
+    "key": "b",
+    "label": "Blank the seven names in env.example",
+    "detail": "Simplest to state, and it fixes the demo key on local stacks too. It changes local renders, so it must be measured, and it does not cover the rate limit, log level or network."
+   },
+   {
+    "key": "c",
+    "label": "Accept for now, since production does not exist",
+    "detail": "PR 2052 merges once the credential check is fixed. The risk is written on the ticket as a condition for any future production launch."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T21:40:15.090774+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-16 09:53",
+   "CARD secuura-ks708-template",
+   "CARD secuura-738-approval-path",
+   "CARD secuura-ks1081-two-env-templates-which-is-canonical",
+   "CARD secuura-ks1346-logging-thrown-objects-leaks-secrets",
+   "CARD secuura-ks1348-log-files-persist-secrets",
+   "CARD secuura-ks724-locked-account-template-exclusion-1015",
+   "CARD secuura-ks1234-production-307-1104",
+   "CARD secuura-ks-946-path-spellings-limiter-accept-p3-1106",
+   "CARD secuura-ks1081-pointer-would-drop-26-variables-1106"
+  ]
  }
 ]
