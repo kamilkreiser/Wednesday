@@ -11,6 +11,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🔴 OWED, KAM'S INSTRUCTION (live board 2026-11-06 16:18:44 view=tuesday, verbatim: *"attached is the next iteration of Nexus AI with roles added.  Please review this carefully.  Its a big change to the layout.  Functionality is similar but very different UI.  Review carefully itemise all the changes and implement all the changes once ticketed."*)
 - Attachments: `2_Project_Files/fleet/state/kam_attachments_1106/f-45c9ea6f6517_*.html` (the mock), `f-b3d689d27b69_*.pdf` (9 guides); gitignored. Receipted bf-0a7288ad6de7, which told him the itemised list reaches him before the build starts.
+- **KAM TAPPED a 17:16:56 on card nexusai-roles-ui-seven-1106: section 8's seven recommendations accepted, verbatim 'Accept all seven recommendations'. B1341's RULINGS slot = that. The word pack goes to him before L3. Deliver the ruling into the C-entry (B1341 carries it), then `decision_queue.sh --delivered`.**
 - Sequence: Opus analyst (in-session, dies with this seat; re-commission if `fleet/state/kam_docs_1106/nexusai_roles_ui/ITEMISED-CHANGES.md` is absent or incomplete) -> read at source -> list to Kam as a document -> NexusAI seat tickets every row -> lanes, gated, merged. Reading: build and merge; NOT deployed (C-224 demo hold, no word on deploy). Permission rows are C3 Opus and a G1 gate.
 
 ## ⏰ DATED FOLLOW-UPS (keep at the top across every rewrite; act ON the date, then move the line to DONE with the receipt)
