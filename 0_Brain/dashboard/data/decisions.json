@@ -62096,5 +62096,195 @@
   ],
   "delivered_artefact": "KS-2060 comment 0c4295c2 (read by Wednesday at source 2026-11-06)",
   "delivered_ts": "2026-11-06T15:32:35.220158+11:00"
+ },
+ {
+  "id": "secuura-ks2063-demoted-org-issuer-admin-keeps-keys-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "A demoted or deleted organisation admin or issuer admin can still mint and revoke API keys. Require a live admin for these two roles too?",
+  "bluf": "Secuura/Blockchain. Your ruling is needed because this changes who may mint and revoke keys. Seat Y 6th measured it on the real key routes and a real PostgreSQL, on its stand-up, not on a deployed box: with a token saying ORG_ADMIN or ISSUER_ADMIN and a users row demoted to user or verifier, deleted or suspended, 8 of 8 shapes minted (201) and revoked (200) keys, both tenant-level and for the caller's own organisation. Controls: 2 live rows passed, and a token for another tenant got 403. Your KS-2032 ruling covers the ADMIN role only, and by Y's reading of the login code these two are the roles real logins carry, so KS-2032 alone does not reach them. Y also read, not ran, that through the gateway a deleted or suspended user should die at 401 while the session store is up, and that a role-only demotion should get through. Unmeasured: anything through the gateway, a real demotion through the admin route, token lifetimes on the boxes, whether any such user exists today, and what a tenant-level key reaches. Ticket: https://linear.app/secuura/issue/KS-2063 (High, Backlog, board account). I read the ticket; I did not read the code or re-run the probe. I recommend (a), because a key outlives the token that minted it. Override reason: The matches share the word admin. The nearest, secuura-ks2032-non-live-admin-token-mints-tenant-keys-1106 = a, rules the ADMIN role; its option text says tenant-level mint and revoke, and KS-2063's probe measured ORG_ADMIN and ISSUER_ADMIN including the own-organisation path, which that card does not name. secuura-ks1533 and secuura-ks1570 rule how far an ADMIN reaches, not whether a row is live.",
+  "default_action": "If Kam does not answer: nothing is built and nothing changes; KS-2063 stays open at High, and Wednesday raises it again on the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Require a live admin for these two roles too (recommended)",
+    "detail": "A seat builds it after KS-2032 merges: a live users row holding that role, at mint and revoke, red-first cells, a tier-1 Opus gate. The seat first reads whether ending sessions on a role change would do the job more simply, and tells me. Cost: a database read on each mint and revoke, and a database outage then refuses them. Deploy to Kintsugi only."
+   },
+   {
+    "key": "b",
+    "label": "Measure through the gateway first",
+    "detail": "A seat runs a real demotion through the admin route and the gateway, and reads token lifetimes on Kintsugi read-only, then this comes back to Kam with figures. Nothing is built meanwhile."
+   },
+   {
+    "key": "c",
+    "label": "Leave it",
+    "detail": "Accept that these tokens stay valid for their lifetime. KS-2063 records the decision and closes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T16:21:27.768077+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-21 20:06",
+   "2026-09-03 16:21",
+   "2026-09-03 21:20",
+   "2026-09-11 16:55",
+   "2026-09-16 07:01",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-889-issuer-org-caller-asserted",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-kintsugi-issuer-account-how",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013",
+   "CARD secuura-ks1385-null-issuer-certifications-1015",
+   "CARD secuura-ks1385-cert-holder-can-rewrite-issuer-fields-1018",
+   "CARD secuura-m365-admin-setup-for-customer-org-1020",
+   "CARD secuura-platform-admin-spelling-certification-reads-1020",
+   "CARD secuura-kintsugi-admin-published-default-1027",
+   "CARD secuura-ks1814-company-admin-reanchor-1030",
+   "CARD secuura-ks1202-live-leg-issuer-login-1104",
+   "CARD secuura-ks1585-scope-rows-on-admin-change-1105",
+   "CARD secuura-ks2032-non-live-admin-token-mints-tenant-keys-1106",
+   "CARD secuura-ks-1536-platform-admin-role-one-list-1106",
+   "CARD secuura-ks-1733-proposals-list-unknown-query-keys-1106"
+  ]
+ },
+ {
+  "id": "secuura-ks736-six-sections-probe-result-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-736: all six sections refused an anonymous caller, but at a different guard than we told you. What next?",
+  "bluf": "Secuura/Blockchain. Your ruling is needed because options a and c change or test who can reach these sections. Seat D 57th sent your one anonymous read to each section on Kintsugi at 05:29Z: certifications, credentials, referrals, governance, nft and billing all answered 401; the two controls held. My earlier card said four of them go straight to the backend. That was wrong, and so was D's own first explanation: by D's read of the source and the logs, the gateway refuses them itself, at a check driven by the published API spec. That check only looks for a header starting 'Bearer ' or a key starting 'sk_', so by D's read a made-up token passes it and only the backend's own login check then refuses. That second layer exists by source in all six services and has NOT been run. Nor have the other 67 operations in these sections; by the spec, 69 of 72 are gated and the other 3 are the public verify POSTs. A path missing from the spec falls through to the backend check too. I read D's report, not the code. I recommend (c) before deciding, because the second layer is what a bad token actually meets. Override reason: The prior card secuura-ks-736-which-six-mounts-need-login-1106 = b ruled only the probe, and its own text says the choice comes afterwards; this is that choice, with the result. The other matches share generic words.",
+  "default_action": "If Kam does not answer: nothing changes and no further probe runs. KS-736 stays open, and Wednesday raises it again on the next morning card.",
+  "options": [
+   {
+    "key": "c",
+    "label": "One more probe: a made-up token, one read per section (recommended)",
+    "detail": "D 57th sends one GET per section on Kintsugi with an invalid Bearer token, status codes only, the same read-only paths. No change. It comes back to Kam with the result."
+   },
+   {
+    "key": "a",
+    "label": "Require login at the gateway on all six now",
+    "detail": "A seat changes the six mounts so the gateway rejects a bad token itself, keeping the 3 public verify POSTs open, with a tier-1 gate. Deploy to Kintsugi only."
+   },
+   {
+    "key": "b",
+    "label": "Leave the behaviour; record the guards and fix the check",
+    "detail": "No behaviour change. The check learns about the spec gate, KS-736 records why these six pass, and the second layer stays unmeasured."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-11-06T16:33:32.208756+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-probe-control-query",
+   "CARD secuura-ks1822-read-gate-probe-fault-fail-open-1030"
+  ]
+ },
+ {
+  "id": "secuura-ks365-your-ruling-rested-on-two-wrong-facts-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-365: my card gave you two wrong facts. The demo may run the flawed image, and no weekly watch exists. Still accept?",
+  "bluf": "Secuura/Blockchain. Your ruling is needed again because my card misled you; this is my error. You accepted the database image's critical flaw (CVE-2025-68121, in gosu) on two statements of mine. (1) 'Nothing we run on the demo uses this image: the demo database is the managed Azure one.' The ticket's own comment 11767bef of 2026-08-12 says that server was deleted on 2026-07-10 and the demo runs Postgres in a container on the VM, and the compose files name postgres:15-alpine. (2) 'The weekly image watch tells us when it clears.' Nothing runs it weekly: by Seat S 28th's read the old cron is retired and its replacement script is run by hand, described as monthly; the ticket records no re-scan since 2026-09-08. I read S 28th's report and my own card; I did not read the ticket comment or any box. What each box actually runs is UNMEASURED, and so is whether the flaw is reachable there. I recommend (c), one read-only look at the running images first. A ticket to schedule the watch is being filed either way, because you ruled weekly. Override reason: This re-asks my own ruled card secuura-ks-365-postgres-image-gosu-vulnerability-1106 because two of its premises were wrong, per Seat S 28th's read of the ticket and the repo; a ruling on a false premise is not settled by the prior-ruling gate.",
+  "default_action": "If Kam does not answer: his earlier acceptance stands on the record with this correction beside it, the ticket stays Blocked, nothing is read on demo, the comment on the ticket stays held, and Wednesday raises it again on the next morning card.",
+  "options": [
+   {
+    "key": "c",
+    "label": "Measure first: one read of the running images (recommended)",
+    "detail": "A seat lists the database container's image on Kintsugi, and on demo as a read only, exempt from the redeploy freeze for this one read. It returns with the result and the flaw's reachability as far as it can be read. Nothing is built meanwhile."
+   },
+   {
+    "key": "a",
+    "label": "Keep accepting it until the upstream rebuild",
+    "detail": "Your ruling stands with the corrected facts. The watch gets scheduled weekly under the new ticket."
+   },
+   {
+    "key": "b",
+    "label": "Replace gosu in our own image",
+    "detail": "Works now, but we then maintain our own database image. A seat builds it with a gate; deploy under the usual rules, demo still frozen."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-11-06T16:45:15.845844+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "2026-09-13 18:17",
+   "2026-09-16 13:43",
+   "CARD secuura-ci-dead-19-days-blocks-your-own-ruling",
+   "CARD secuura-platform-s-count-was-wrong-when-you-ruled",
+   "CARD secuura-audit-fuse-0930-needs-your-email",
+   "CARD secuura-ks1385-anchor-identity-needs-ps895-ruling-1013"
+  ]
+ },
+ {
+  "id": "secuura-ks1194-who-can-recover-the-failed-approval-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1194: my card said an admin can re-approve. The ticket says only the user's own resubmit recovers. Still close it?",
+  "bluf": "Secuura/Blockchain. Your ruling is needed again on one line; this is my error. You accepted the leftover case (two database connection failures in a row during an approval leave the request approved but the level not raised, and the user sees a 503) on my card's words 'an admin can re-approve'. The ticket's comment 0317b42e of 2026-09-17, as Seat S 28th quotes it, says a reviewer's retry and reject answer 400 'Request already APPROVED', and only the user's own resubmit recovers. No level is granted either way, so it still fails safe. I read S 28th's quotation, not the comment or the code. The other half is done: D 57th read the fix's string in the running auth container on Kintsugi; a live HTTP call and a real Postgres leg were not run. I recommend (a): the failure is safe, it needs two faults in a row, and the user has a way out. Override reason: This re-asks my own ruled card secuura-ks-1194-failed-approval-save-residual-1106 because its detail line conflicts with the ticket, per Seat S 28th's read; the prior-ruling gate does not settle a premise that may be false.",
+  "default_action": "If Kam does not answer: KS-1194 stays open and is not closed, nothing is built, and Wednesday raises it again on the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Close it anyway; the user's resubmit is the recovery (recommended)",
+    "detail": "The closing comment quotes both statements. Nothing is built."
+   },
+   {
+    "key": "b",
+    "label": "Build the fix so a reviewer can recover it",
+    "detail": "A seat changes the approval path, with red-first cells and a tier-1 gate."
+   },
+   {
+    "key": "c",
+    "label": "Leave the ticket open",
+    "detail": "No change for now."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T16:45:19.457124+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "2026-08-21 20:06",
+   "2026-09-02 16:08",
+   "2026-09-02 16:32",
+   "2026-09-05 14:56",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:29",
+   "2026-09-16 20:40",
+   "2026-09-17 07:50",
+   "CARD secuura-738-approval-path",
+   "CARD secuura-merge-914-without-reviewer-approval",
+   "CARD secuura-934-blocks-every-push-needs-one-approval",
+   "CARD secuura-ks1194-failed-save-answers-200",
+   "CARD secuura-ks1194-1032-round2-merge-tap",
+   "CARD secuura-pr1245-round3-failed-at-cap",
+   "CARD secuura-ks888-failed-key-save-design",
+   "CARD secuura-ks888-revoke-validate-on-failed-save",
+   "CARD secuura-ks1124-f4-failed-anchor-shows-pending",
+   "CARD secuura-ks1689-m365-failed-signin-status-1020",
+   "CARD secuura-ks1384-f0-build-approval-1029",
+   "CARD secuura-ks-1194-failed-approval-save-residual-1106"
+  ]
  }
 ]
