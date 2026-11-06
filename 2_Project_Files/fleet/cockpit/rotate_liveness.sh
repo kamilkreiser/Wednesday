@@ -133,6 +133,18 @@ clear_pending() {
     log "WARNING: could not clear the pending marker $PENDING — doctor.sh will warn on it although a verdict WAS logged"
   fi
 }
+is_holder_pane() {  # $1 = pane id. True only when the pane's shell has children and every one is `sleep`.
+  local pp kids k comm
+  pp="$("$TMUX_BIN" display-message -p -t "$1" '#{pane_pid}' 2>>"$LOG")" || return 1
+  [ -n "$pp" ] || return 1
+  kids="$(pgrep -P "$pp" 2>>"$LOG")" || return 1
+  [ -n "$kids" ] || return 1
+  for k in $kids; do
+    comm="$(ps -o comm= -p "$k" 2>>"$LOG")"
+    [ "$(basename "$comm")" = sleep ] || return 1
+  done
+  return 0
+}
 is_shell_role() {  # $1 = @cockpit_name
   for _r in $SHELL_ROLES; do [ "$1" = "$_r" ] && return 0; done
   return 1
@@ -177,6 +189,8 @@ while read -r pid_ name_ rest_; do
     _nm="$(printf '%s' "${name_:-}" | tr -d '[]')"
     if is_shell_role "${_nm:-?}"; then
       :   # a declared shell role (fleet-monitor): present is all that is asked of it
+    elif [ -z "$_nm" ] && is_holder_pane "${pid_:?}"; then
+      :   # no cockpit name, only a sleep loop inside: a keepalive shell, never a seat (2026-11-06: three false alarms to Kam in one day)
     elif [ -x "$AGENTLIVE" ]; then
       # </dev/null so the helper can never swallow this loop's stdin (the before-file).
       if TMUX_BIN="$TMUX_BIN" bash "$AGENTLIVE" "${pid_:?}" </dev/null 2>>"$LOG"; then
