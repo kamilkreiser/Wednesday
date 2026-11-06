@@ -11,17 +11,18 @@ supersede: REPLACED WHOLESALE by the 10:1x seat at its 65% checkpoint. Previous 
 ## KAM (live board 10:18:02 + 10:19:24, verbatim in learnings/2026-11-06_clear-the-secuura-board-over-one-to-two-weeks.md)
 Clear the Secuura board over the next 1-2 weeks: In Review and In Progress first; complete, merge, archive. Grant row in EXPIRING-GRANTS (outer read Fri 20 Nov). Morning card ruled a. New account: 7d low (5% at 11:03). Demo FROZEN; Spark OFF (11-04 16:42). Done rule: card secuura-done-rule-unit-pinned-deployed-no-live-check = a: unit tests on develop + fix in the running Kintsugi build closes; demo does not hold Done.
 
-## OPEN CARD
-secuura-peter-created-on-our-account-1106: 31 tickets Peter/Stuart FILED but on our account. Default fires end of today: treat as ours from tomorrow morning; then tell S and U lanes and read them into buckets. Run reconcile_rulings.py / kam_rulings_today.sh first.
+## CARDS
+secuura-peter-created-on-our-account-1106 = a (11:11): the 31 are ours; only ASSIGNED to Peter or Stuart stays theirs. All briefs carry this.
+Ruling pack: drafter writing 0_Brain/projects_index/secuura_kam_rulings_draft_2026-11-06.jsonl (max 20 cards incl KS-1205 audit row, KS-1752 default, KS-1545 step 2, KS-1733 query keys, KS-749). READ IT, then post each via decision_queue.sh add (plain add first; on a refusal read the matches, then --override-prior-rulings). Nothing posted yet.
 
-## FLOOR at ~11:10 (panes via cockpit.sh status; all Sonnet)
-- S 24th %2: census DONE (5_Project_History/2026-11-06_seatS-24th/evidence/board_census.tsv: A 9, B 11, C 17, D 130 incl 44 A-CHECK, E 16, F 33). Closing the 9 A rows, then B rows a fix-string read moves. Next owed to it: mail naming which keys the U seat takes.
-- B 97th %5: merge seat, kit set-up. QUEUE: 2009, 2018, 2017, 2020, 2022, 2021, 2019, 2024, 2023, each READY then Wednesday's head-pinned GO. NEVER mail lane B between a GO and its MERGED (ruled A). Next items go inside a GO or after a MERGED: gate 213 PRs (2027 before 2028).
-- T 13th %8: PRs 2025 KS-1493, 2026 KS-1539, 2027 KS-1542, 2028 KS-1614 READY FOR GATE. IDLE waiting: KS-1493 merge SHA (then KS-1505 part 2, KS 2009 comment + the S lane Done/archive) and next tickets from the lane plan.
-- G 28th %11: PR 2029 KS-1585 PR-2 READY FOR GATE tier 2 (head 33c4b9a0d24a); PR-1 (tier 1) then KS-1377 (tier 1, push: exact-name OVL_IGNORE_HEADS grant when it asks). Gate them as a batch when up.
-- E 38th %14: KS-864 (tier 1; item 2 A, item 4 A with reader census, STOP condition), KS-1128, KS-1841 F2 (A). Docker daemon DOWN: rule when it asks.
-- Gate 213 running (background Opus subagent; PRs 2025-2028): 0_Brain/reference/2026-11-06_gate213-tier2-pr2025-2028/verdict.md. Gates 209, 210, 211, 212 DONE, all GO or GO WITH NOTES, queued.
-- Drafter running: briefs_staged/2026-11-06_seatU_boxreads_acheck.md + projects_index/secuura_lane_plan_2026-11-06.md. Read both; launch U; launch lanes while CAPACITY says ROOM, >= 3 min apart.
+## FLOOR at ~11:25 (all Sonnet unless named; read cockpit.sh status)
+- B 97th %5 merge. MERGED PR 2009 85046e8707a0. QUEUE: 2018 (READY pending; body left as is, ruled A), 2017, 2020, 2022, 2021, 2019, 2024, 2023, 2027, 2028, 2025, 2026. Send each GO with scratchpad send_go.sh's shape: re-read head and develop in the same action, tree from its READY; body line 1 'Seat B 97th'; subject 'GO: merge PR n at head12 on develop pin12 (Seat B 97th)'. NEVER mail lane B between a GO and MERGED. B wraps at ctx 75%: then launch B 98th from its HANDOVER (kit in 5_Project_History/2026-11-06_seatB-97th/tools).
+- T 13th %8 plan lane 1: checking platform.ts residual under KS-1622, reading KS-1346, then next. Waits KS-1493 merge SHA for KS-1505 part 2, KS 2009 comment. Plan rows are stale often; it reads first.
+- G 28th %11: PR 2029 (tier 2, head 33c4b9a0d24a), PR 2030 (tier 1, head f107b9688445) READY FOR GATE; KS-1377 push running, READY to follow. Gate all three as one batch or 2029 alone + two tier 1: not commissioned yet. COPY the shape of 0_Brain/reference/2026-11-06_gate213-tier2-pr2025-2028/commission.md; Opus for tier 1.
+- E 38th %14: KS-864 (tier 1), KS-1128, KS-1841 F2 (A; Docker daemon DOWN, rule when asked).
+- S 25th (lane S), U 15th (lane U) launched ~11:15-11:22: plan confirmations due; answer with GO. S 25th: B rows then the 31. U 15th: Kintsugi per-service shas table, then 44 A-CHECK rows; forward its table to S 25th.
+- WAITER scratchpad/lanes_waiter.sh launches R 86th (lane 4, KS-1707 fuse 11-30), F 35th (Opus, KS-1942), J 18th (lane 5 batch 1), spaced + load < 7. Log scratchpad/lanes_waiter.log. Each sends a plan confirmation: GO.
+- Lane plan: 0_Brain/projects_index/secuura_lane_plan_2026-11-06.md (remaining lanes 2, 6, 7, 8, 9, 10 unlaunched; it is a census representation).
 
 ## OWED
 1. D 56th kintsugi deploy once the originate, vc-issuer, auth PRs merge (October grant extended until further notice); demo frozen.
