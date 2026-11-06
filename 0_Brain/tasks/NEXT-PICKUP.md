@@ -17,10 +17,12 @@ Done: PR 2047 merged d00221c38e12, B 97th holds, queue empty. D 58th, K 17th, W 
 LIVE, what each owes me:
 - S 31st %106 Sonnet board seat: In Review 8, In Progress 156 in batches of 25, tables by STATUS; item A closes per my 08:54Z ADDENDUM (no-deploy-surface rule; KS-1503 and KS-1377 stay open). GO sent. Its D list adds W's candidates, the fourth held for gate 229.
 - K 18th %109 Sonnet: plan confirmation due. Batch 2 of KS-1728, and finishing K 17th's KS-1503 follow-up, driver 25362, about 5 h off. Read its flags: canary half of F1 may not survive the wrapper; 4 of 8 scripts are push gates.
-- Gate 229 background Opus on PR 2048 (KS-2038), commission 0_Brain/reference/2026-11-06_gate229-tier1-pr2048-ks2038/commission.md; dies if this seat rotates, re-launch from it. GO or GO WITH NOTES: queue to B 97th. NO GO: a W successor from W 29th's HANDOVER FINAL block. W's score 0.85 is provisional. Deploy owed after merge: transfer image, api-gateway, Kintsugi only.
-- G 29th %100 Opus: KS-2074 queued 26th. Told GO on one test-only integration file, Refs KS-1370; READY FOR GATE and a tier to me. Red on develop = a product finding: it stops.
+- Gate 229 returned GO WITH NOTES on PR 2048 (KS-2038); queued to B 97th; its READY comes to this seat, GO with send_go_merge_seat.sh naming gate 229. Kam's card secuura-ks2038-connector-principals-on-transfer-doors-1106 open, rec a. W's 0.85 provisional until the merge. Deploy owed after merge: transfer image, api-gateway, Kintsugi only.
+- Gate 230 background Sonnet on PR 2049 (KS-1209), commission 0_Brain/reference/2026-11-06_gate230-tier2-pr2049-ks1209/commission.md; dies if this seat rotates, re-launch from it. Then B 97th; no mail to B between a GO and its MERGED. A NO GO at tier 2 only means re-commission tier 1 narrowly.
+- G 29th %100 Opus: KS-2074 and the KS-1370 pin queued, 25th and 26th by its read. READYs come when each push lands: tier 1 gate on KS-2074, its tier 2 reason on the pin is mine to read. Idle on waiters; no new ticket given, the queue is the bound.
 - R 86th %25: asked for FINDINGS on the two react-router rows, or to decline if near its wrap line. Then card Kam: react-router GHSA-337j and GHSA-wrjc lapse by a drafter's reading 00:00Z 11-30, 11:00 AEDT. Gcqx re-date built, driver 35519. No new seat. Draft 2_Project_Files/fleet/briefs_staged/2026-11-06_seat_auditbaseline_1130.md is NOT sent.
 - X 7th %103: DRIVER BUILT then a tier 1 gate. X's brief line 90 on AA's preflight lines looks wrong by a drafter's diff: put it in that commission.
+OWED, MINE: KS-1233 stays open for connector re-entry and any lost allow-list, S 31st's read of comment 7d53cadb 'on Wednesday's list'; demo read TTL -2 and is frozen. Read the ticket, then card Kam or rule.
 Next deploy round k24: base list in D 58th's STATUS B. Owed mine: routing spec /model line if it says so; subject guard in send_brief.
 
 ## FIRST WORK
