@@ -211,4 +211,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-05 13:08 | Kamils-MacBook-Pro | note_entry.sh RECEIPT-VERB GUARD (mechanism (a), ledger 2026-11-05 w=4 note-batching): refuse receipt verbs without a fresh --receipt file | CLOSED |  2026-11-05 13:09 built + installed 13:09, arms 12/12, Tuesday FYI sent |
 | 2026-11-05 16:18 | Kamils-MacBook-Pro | advisory hook: scope-or-stop for recursive grep/find over 0_Brain/reference, 5_Project_History, local-model runs/night (ledger 11-05 w=3) | CLOSED |  2026-11-05 16:19 built 0a87209652: refuses (exit 2), override '# scope-ok:'; arms 15/15; wired in .claude/settings.local.json (gitignored, travels by drive sync) |
 | 2026-11-06 12:45 | Kamils-MacBook-Pro | panel_sync: decisions.json conflict drops local cards; union by id | OPEN | |
-| 2026-11-06 13:54 | Kamils-MacBook-Pro | panel_sync.sh recovery: union chat streams and ack_state instead of --ours (the 12:47 audit item) | OPEN | |
+| 2026-11-06 13:54 | Kamils-MacBook-Pro | panel_sync.sh recovery: union chat streams and ack_state instead of --ours (the 12:47 audit item) | CLOSED |  2026-11-06 13:57 done |
