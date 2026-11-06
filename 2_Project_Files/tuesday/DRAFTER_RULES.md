@@ -65,7 +65,7 @@ names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned
   **`brief_seat.sh` defaults to Opus** (line 24): a launch line without the level runs a Sonnet-routed seat on Opus.
   (Corrected 2026-10-25 10:3x: this line first said "add the level only when Opus", and B651/B652 launched on Opus.)
 - **The STAMP and READ-WHOLE slot values in `slots.json` attest what TUESDAY read; never write a read Tuesday has not done.**
-  Write only the facts YOU measured, marked as yours ("the drafter read ..."), plus `@NOW@` and `@SEAT@`. Never "Tuesday re-checked
+  Write only the facts YOU measured, marked as yours ("the drafter read ..."), plus `@NOW@` (stamp_brief fills no `@SEAT@`: never write it; corrected 2026-11-06 by s250 after two kits carried it). Never "Tuesday re-checked
   X", "Tuesday printed at source Y" or "the drafter's report lines 1-N" as Tuesday's read: Tuesday writes those after doing them.
   No `<clock>`, `<session>` or other angle-bracket placeholder in a value. (Added 2026-11-04 by s240: B1253's and B1255's
   drafters both pre-wrote attestations of reads Tuesday had not done; caught at the stamp and rewritten.)
