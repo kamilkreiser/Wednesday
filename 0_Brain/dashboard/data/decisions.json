@@ -63606,5 +63606,92 @@
    "CARD datasec-morning-plan-1105",
    "CARD datasec-morning-plan-1106"
   ]
+ },
+ {
+  "id": "secuura-ks2083-session-end-race-in-flight-1107",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2083: gate 245 found a request in flight can undo the session end you ruled. Merge with honest wording and a ticket, or fix the race first?",
+  "bluf": "Tap one, please. You ruled 'Both' on KS-2063: end sessions on a role change, to close the walk-around where a demoted org admin raises a second account. PR 2075 builds it, but gate 245 measured a gap: a request in flight during the revoke brings the session back after the 200, because session.ts:286 reads then writes non-atomically. The old token can then raise that second account, and a later suspend does not end it. Measured on a stand-in store with the real session code; there is no Redis on this host, so how often it happens is unknown. The race is on develop too. So 'closes the walk-around' is true only for serial requests, and the PR body, a doc fragment and the ticket comment must stop saying it. The gate's verdict is GO WITH NOTES. Separately, if the store flag drops mid-request the PATCH can answer 200 with nothing revoked. Prior matches read: the ruling named above, the rest other tickets.",
+  "default_action": "If Kam does not answer: PR 2075 stays unmerged, and Wednesday tells a seat to correct the wording and file the race ticket. Y 6th's KS-2063 waits on KS-2032, not on this.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Merge with the wording corrected, and ticket the race High (recommended)",
+    "detail": "It closes the serial case now, and a seat fixes the atomic write and the store-down case next on a new ticket. A fix round on the wording only moves the head, so a compare follows."
+   },
+   {
+    "key": "b",
+    "label": "Fix the race in this PR first",
+    "detail": "Round 2 of 2 on PR 2075 makes the write atomic. Slower, and the serial case stays open until then. It may need a real Redis to prove."
+   },
+   {
+    "key": "c",
+    "label": "Hold PR 2075 until you have looked",
+    "detail": "Nothing merges on this ticket; the walk-around stays open."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-07T06:37:06.071375+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 10:04",
+   "2026-08-21 20:06",
+   "2026-08-21 21:07",
+   "2026-09-04 08:33",
+   "2026-09-08 07:09",
+   "2026-09-08 08:09",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-14 21:52",
+   "2026-09-15 19:42",
+   "CARD secuura-ks1207-revoked-session-plus-junk-key-bypass",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-ks2063-add-session-end-on-role-change-1106"
+  ]
+ },
+ {
+  "id": "secuura-ks1152-rotated-true-on-count-zero-1107",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1152: your fix covers a failed switch-off, but a count of 0 still answers 'rotated: true' while the old key works. Include it?",
+  "bluf": "Tap one, please. You ruled option b on KS-1152: answer rotated false when the switch-off fails. PR 2073 builds exactly that. Gate 245 measured a neighbouring case on the real gateway over real security and PostgreSQL: when the switch-off succeeds but reports 0 rows on an existing organisation, the answer is still rotated true with no warning, and the prior key still validates. That is old behaviour, not added by this PR, and how many such rows exist is unmeasured. The PR's spec line 'True only when ... retired' is untrue for that case. On a new organisation the warning also wrongly mentions a previous key. Prior matches read: the ruling named above, the rest other tickets.",
+  "default_action": "If Kam does not answer: PR 2073 stays unmerged and a ticket records the count-0 case.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Include it: round 2 of 2 on PR 2073 (recommended)",
+    "detail": "A count of 0 on an existing organisation answers rotated false, as your ruling meant, and the spec line becomes true. The new-organisation wording is fixed in the same round."
+   },
+   {
+    "key": "b",
+    "label": "Merge as it is and ticket the count-0 case",
+    "detail": "The failed switch-off is fixed now; the spec line is reworded to say what is true."
+   },
+   {
+    "key": "c",
+    "label": "Hold PR 2073",
+    "detail": "Nothing merges on this ticket until you have looked."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-07T06:37:09.415968+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-03 16:21",
+   "2026-09-08 11:50",
+   "2026-09-11 16:55",
+   "2026-09-16 13:35",
+   "2026-09-17 07:50",
+   "CARD secuura-ks968-hash-population-count",
+   "CARD secuura-platform-s-count-was-wrong-when-you-ruled",
+   "CARD secuura-required-approvals-zero-after-the-untick",
+   "CARD secuura-ks-1152-rotate-says-rotated-when-old-key-lives-1106",
+   "CARD secuura-ks2073-stranded-rows-count-then-rekey-1106"
+  ]
  }
 ]
