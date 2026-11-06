@@ -29,3 +29,4 @@ Every line is his tap by kam_rulings_today.sh. NOT DELIVERED means no seat has i
 | secuura-ks1084-measure-now-spark-off | b hold until the Spark is back | nothing; KS-1084 waits |
 
 NAS follow-up: card wed-nas-address-and-memory-1106 posted 15:1x. Drafter writing S 28th, auth, build, anchoring briefs and T 14th v2 in briefs_staged.
+Added 15:28: secuura-ks2059-cross-tenant-stake-1106 = a, secuura-ks2060-erased-user-wallet-vote-power-1106 = a: F 35th comments both on the tickets, NOT DELIVERED until read; an Opus seat after KS-2058 lands, design back to Kam before the KS-2059 migration. wed-nas-address-and-memory-1106 = a: tapped with no address in the message; asked on the panel.
