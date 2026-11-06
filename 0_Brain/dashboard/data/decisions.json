@@ -61632,5 +61632,127 @@
    "CARD hpsmpoc-demo-site-remove-1105",
    "CARD hpsmpoc-demo-removal-followups-1106"
   ]
+ },
+ {
+  "id": "secuura-deepmerge-row5-redate-past-1130-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "Kam: pick a new date for the deepmerge exception before it stops every Secuura push on 30 Nov",
+  "bluf": "Tap a date. The exception you accepted on 28 Oct for the low-severity deepmerge advisory (GHSA-gcqx-w48m-w2h4) expires on 30 Nov, and there is still no fixed version: the npm registry reads latest 4.3.1, 46 versions, last changed 2023 (read by Wednesday just before this card). When it lapses, the audit gate refuses every Secuura push (Seat R 86th's frozen-clock runs: rc 1). The 28 Oct reach reading was at lockfile level, not an image read, and was not re-measured: test-only in the four services, and a production dependency in the mobile app, whose lockfile sits outside this gate. The row's ticket KS-1784 is Done, so Seat R 86th proposes KS-1707 as its owner. A board tap is enough for a re-date (your 5 Oct rule); a seat still builds it and it still goes through the QA gate.",
+  "default_action": "Nothing is re-dated without your tap, because the date is yours. Wednesday re-raises this card on Fri 20 Nov, ten days before the fuse.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Re-date to Sun 28 Feb 2027 (recommended)",
+    "detail": "About three months, with KS-1707 as owner and the reason 'no patched version exists; re-checked 2026-11-06'. Re-triaged sooner if a patch is published."
+   },
+   {
+    "key": "b",
+    "label": "Re-date to Sun 31 Jan 2027",
+    "detail": "A shorter window, otherwise the same."
+   },
+   {
+    "key": "c",
+    "label": "Do not re-date",
+    "detail": "Pushes stop on 30 Nov until a fix exists or you rule again."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T12:55:31.639904+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-pr1497-round6-past-the-cap-1013",
+   "CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022",
+   "CARD secuura-deepmerge-advisory-baseline-1028"
+  ]
+ },
+ {
+  "id": "secuura-ks1600-originate-malformed-permissions-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1600: if an API key request sends a malformed permissions value, should originate refuse it like the security service does?",
+  "bluf": "Your ruling is needed on one line of behaviour. By KS-1600's own words, a malformed permissions value gets a 400 at the security service, while originate falls back to read-only or stores it inertly, and the ticket leaves that choice open. Its gate found 0 escapes: no non-platform row holds provisioning-capable stored scopes. So nothing is exposed today, and this is about the two services agreeing. Not measured: which callers, if any, send a malformed value now. Wednesday has not read the originate code; this comes from the ticket and Seat V 24th's mail.",
+  "default_action": "No behaviour change and nothing is built for this item. KS-1600 stays open; Seat V 24th finishes its other measurement item meanwhile.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Refuse with 400, matching the security service (recommended)",
+    "detail": "One small tier-1 PR with a test first. A caller sending a malformed value would start getting an error instead of a silent read-only key, so the PR measures its callers first."
+   },
+   {
+    "key": "b",
+    "label": "Keep the fall-back as intended",
+    "detail": "Record it on the ticket as a deliberate difference and pin it with a test. No behaviour change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T12:55:36.387419+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-08-22 08:00",
+   "2026-08-22 19:49",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-17 15:09",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-originate-internal-ingress-widened",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0"
+  ]
+ },
+ {
+  "id": "secuura-ks1084-measure-now-spark-off-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1084: your September ruling sent this to the local model, which is switched off. Measure it with a Claude seat instead?",
+  "bluf": "Your 22 Sep ruling on this card's predecessor was c, let the local model attempt a fix unmeasured, and on 4 Nov you said to ignore the Spark until further notice, so that ruling cannot run. The ticket's open question: when the gateway calls originate with only an Authorization header, does a caller in another tenant read or write in the default tenant? PR 1211 made two gateway reads forward the tenant. By its 25 Sep comment the effect itself is unmeasured in both directions, and other sites remain unchanged. Seat V 24th read it and handed it back as outside its lane. Measuring needs a two-tenant local stack, not a live box.",
+  "default_action": "a: Wednesday briefs the report-only measurement at the next free slot. No fix and nothing on a box without a further ruling.",
+  "options": [
+   {
+    "key": "a",
+    "label": "One Claude seat measures it on a disposable stack, report only (recommended)",
+    "detail": "One read site and one write site. Any fix is a second ruling on the report. It runs when an api-gateway lane has room and uses Docker one stack at a time."
+   },
+   {
+    "key": "b",
+    "label": "Hold until the Spark is back",
+    "detail": "Your September ruling stands. The ticket stays In Progress and unmeasured."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T12:55:40.607122+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-17 20:15",
+   "2026-09-09 10:29",
+   "2026-09-14 11:12",
+   "2026-09-14 14:46",
+   "2026-09-14 19:14",
+   "2026-09-15 06:51",
+   "2026-09-15 16:36",
+   "2026-09-15 21:05",
+   "2026-09-16 20:40",
+   "2026-09-18 06:37",
+   "2026-09-18 09:12",
+   "2026-09-20 15:25",
+   "2026-09-21 14:05",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1084-part-b-api-batch-surface-unauthenticated-dead",
+   "CARD spark-studio-client-scope",
+   "CARD spark-recreate-serving-container",
+   "CARD wed-studio-256-measure-before-buying-1009",
+   "CARD secuura-gate-at-99pct-two-spark-prs-1016",
+   "CARD secuura-demo-smoke-key-revoke-after-measure-1020",
+   "CARD wed-ornith-122b-test-on-spark-1026",
+   "CARD wed-spark-drafting-cost-1028",
+   "CARD secuura-spark-ks1868-safe-sites-exhausted-1102",
+   "CARD secuura-ks1724-edge-request-size-measure-1102",
+   "CARD wed-spark-unreachable-from-laptop-1104"
+  ]
  }
 ]
