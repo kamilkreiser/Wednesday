@@ -20,6 +20,8 @@ UPDATE 21:3x, read before the items below; where they differ this wins.
 - W 30th: GO on plan, (a) (b) (c) all A, building. It QUESTIONs for OVL names at its head. V 25th: GO; ALSO raises V 24th's four pushed branches, KS-1509, KS-1666 N1, KS-1937, KS-1600 item 2, one READY each: gates follow; KS-1090 report only.
 - F 35th: G1 = stated limit, my call on its table, line for KS-2060. Kam told bf-f886909164c with the case against; if he overrules, option 2 of F's mail.
 - S 32nd: KS-256 closed by its report; next FRONTEND_URL filing, then KS-1380 and KS-365 bodies to me for byte approval: read each against its card, then approve by sha.
+- S 32nd at its context line by its mail, WRAPPING after KS-2088: read the wrap, score, close, then S 33rd owed: KS-1380 and KS-365 bodies for byte approval, B, C batch 1 (its 25 keys in its plan mail, 09:51Z), the KS-736 record comment after V's merge, D's item 4 table. Draft from S 32nd's HANDOVER, Sonnet, row C7. S's note: D 59th's compose read answers KS-1355 comment a65f302b's question; goes in S 33rd's brief.
+- F 35th: follow-up committed 17352c6fa1b6, queues on PR 2051's merge, its watch armed; READY tier 2 follows.
 - Commit before rotating: rotation refuses a dirty tree or a stray tmp.
 
 0. KAM 21:03:31, verbatim: 'Sorry. What I meant. Work on them, but go with your recommendation action. Keep going through the tickets and close and archive as many as you can'; 21:04:45 'Thank you'. He is away from home tonight. ALL TEN CARDS RULED to my recommended option (KS-736 = b, the rest a), rc 0 each. His 20:42 'I cannot see any cards': cause still UNMEASURED; ask the line under the feed when he is back at the page; /api/cards limit 1000 per client does not explain it by my local count (477 Secuura).
