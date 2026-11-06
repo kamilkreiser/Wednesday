@@ -213,3 +213,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-06 12:45 | Kamils-MacBook-Pro | panel_sync: decisions.json conflict drops local cards; union by id | OPEN | |
 | 2026-11-06 13:54 | Kamils-MacBook-Pro | panel_sync.sh recovery: union chat streams and ack_state instead of --ours (the 12:47 audit item) | CLOSED |  2026-11-06 13:57 done |
 | 2026-11-06 20:05 | Kamils-MBP | model-routing.md line 136: replace the /model instruction with launch-time SEAT_MODEL_ENV, Kam's card wed-model-switch-writes-global-settings-1027 = c | CLOSED |  2026-11-06 20:06 section 7 corrected and committed |
+| 2026-11-07 08:06 | Kamils-MBP | send_brief prints the full error body; daily send counter warns near 800 | OPEN | |
