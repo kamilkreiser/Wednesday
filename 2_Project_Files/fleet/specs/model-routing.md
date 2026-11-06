@@ -133,8 +133,8 @@ A receipt with no model line, an ID not in the JSON, or no row id is incomplete.
 
 ## 7. Switching a seat (v0.1 section 3, carried)
 
-Project launchers pin their own model, and a coordinator does not edit them. Send `/model <id>` into the pane right after launch, confirm the pane reports it, and tell the seat by mail. A fixed pin is a request to that project's own agent.
-**Confound carried from v0.1:** every Sonnet seat in the evidence ran ITEM 0 and its plan on Opus 5 before the switch. Switch before ITEM 0 where the pane allows it.
+A seat's model is set AT LAUNCH: pass `SEAT_MODEL_ENV=<id>` to `brief_and_launch.sh` or `cockpit.sh launch` (Kam's card `wed-model-switch-writes-global-settings-1027` = c). **Never send `/model` into a seat's pane:** it writes Kam's global `~/.claude/settings.json` default (ledger, 2026-11-03). A seat on the wrong model is relaunched. The 2026-09-30 lesson on a QA gate parked at the safeguard dialog still names `/model`; it predates this finding and has not been re-measured against it, so read it as open and ask before using it. Corrected 2026-11-06: this section still said to send `/model` into the pane, and a drafter copied it into a brief.
+**Confound carried from v0.1:** every Sonnet seat in the evidence before the launch-time setting ran ITEM 0 and its plan on Opus 5 before its switch.
 
 ## 8. Open items (each unmeasured)
 
