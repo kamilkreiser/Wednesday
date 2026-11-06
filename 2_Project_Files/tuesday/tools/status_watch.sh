@@ -53,7 +53,7 @@ while :; do
   if [ -f "$F" ]; then
     L=$(tail -n 1 "$F")
     case "$L" in
-      VERDICT:*|STOPPED:*|"READY FOR QA:"*|READY:*|BLOCKED:*|"RECORDS DONE:"*|"RECORDS COMMITTED:"*|DONE:*|LANDED:*|FOLDED:*|"LANDING CHECKLIST:"*|PARKED:*|DEPLOYED:*|PARTIAL:*|"READY FOR REVIEW:"*|"ROLLED BACK:"*|DIAGNOSED:*|"RECORDS PUSHED:"*|"COMMENT POSTED:"*)
+      VERDICT:*|STOPPED:*|"READY FOR QA:"*|READY:*|BLOCKED:*|"RECORDS DONE:"*|"RECORDS COMMITTED:"*|DONE:*|LANDED:*|FOLDED:*|"LANDING CHECKLIST:"*|PARKED:*|DEPLOYED:*|DECOMMISSIONED:*|"GATE DONE:"*|PARTIAL:*|"READY FOR REVIEW:"*|"ROLLED BACK:"*|DIAGNOSED:*|"RECORDS PUSHED:"*|"COMMENT POSTED:"*)
         [ "$CHANGED" = 1 ] && [ "$L" = "$START" ] && { sleep "$I"; continue; }
         echo "FINAL $(date '+%H:%M:%S') :: $F :: $L"
         records_check "$L"
