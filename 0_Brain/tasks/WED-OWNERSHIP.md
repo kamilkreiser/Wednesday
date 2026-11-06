@@ -212,4 +212,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-05 16:18 | Kamils-MacBook-Pro | advisory hook: scope-or-stop for recursive grep/find over 0_Brain/reference, 5_Project_History, local-model runs/night (ledger 11-05 w=3) | CLOSED |  2026-11-05 16:19 built 0a87209652: refuses (exit 2), override '# scope-ok:'; arms 15/15; wired in .claude/settings.local.json (gitignored, travels by drive sync) |
 | 2026-11-06 12:45 | Kamils-MacBook-Pro | panel_sync: decisions.json conflict drops local cards; union by id | OPEN | |
 | 2026-11-06 13:54 | Kamils-MacBook-Pro | panel_sync.sh recovery: union chat streams and ack_state instead of --ours (the 12:47 audit item) | CLOSED |  2026-11-06 13:57 done |
-| 2026-11-06 20:05 | Kamils-MBP | model-routing.md line 136: replace the /model instruction with launch-time SEAT_MODEL_ENV, Kam's card wed-model-switch-writes-global-settings-1027 = c | OPEN | |
+| 2026-11-06 20:05 | Kamils-MBP | model-routing.md line 136: replace the /model instruction with launch-time SEAT_MODEL_ENV, Kam's card wed-model-switch-writes-global-settings-1027 = c | CLOSED |  2026-11-06 20:06 section 7 corrected and committed |
