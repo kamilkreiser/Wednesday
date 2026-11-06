@@ -60968,5 +60968,72 @@
    "2026-09-10 09:08",
    "CARD secuura-wednesday-go-counts-as-kams-word-1030"
   ]
+ },
+ {
+  "id": "secuura-ks2032-non-live-admin-token-mints-tenant-keys-1106",
+  "client_project": "Secuura/Blockchain",
+  "title": "A demoted or deleted admin whose token is still live can mint and revoke tenant-wide API keys. Require a live admin?",
+  "bluf": "Secuura/Blockchain. Your ruling is needed because this changes who may mint and revoke keys. Our quality check measured it on stand-up databases, not on a deployed box: a user who is no longer a live admin of a tenant (demoted, deleted, suspended, or their row gone) but whose token still says ADMIN can create a tenant-level API key and revoke one. This is old behaviour. PR 2030, queued to merge, closes only the case that names an organisation, and its refusal text even says to omit the organisation. Ticket KS-2032 holds the detail. Unmeasured: real token lifetimes, whether any such user exists today, whether the gateway checks liveness first, and whether a tenant-level key reaches more than an organisation key. I recommend applying the same live-admin test to the tenant-level paths, because a key outlives the token that minted it. Override reason: the prior matches are other subjects; your KS-1585 card b rules rows, not these paths.",
+  "default_action": "If Kam does not answer: nothing is built and nothing changes; KS-2032 stays open at High, and Wednesday does not raise it again until the next morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Require a live admin here too (recommended)",
+    "detail": "A seat applies the live-admin test PR 2030 adds to tenant-level mint and revoke, after PR 2030 merges, with red-first cells and an Opus gate. Cost: a database read on each mint and revoke, and a database outage then refuses them. Deploy to Kintsugi only."
+   },
+   {
+    "key": "b",
+    "label": "Measure first",
+    "detail": "A seat measures read-only on Kintsugi token lifetime and what a tenant-level key reaches, then this comes back to Kam with figures. Nothing is built meanwhile."
+   },
+   {
+    "key": "c",
+    "label": "Leave it",
+    "detail": "Accept that a token stays valid for its lifetime. KS-2032 records the decision and closes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-06T12:27:26.890369+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-01 13:45",
+   "2026-09-03 16:21",
+   "2026-09-03 21:20",
+   "2026-09-11 16:55",
+   "2026-09-16 07:01",
+   "2026-09-21 09:52",
+   "CARD secuura-ks329-refresh-token-size",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-tenant-isolation-migration-ks1401-1005",
+   "CARD wed-allowance-99pct-three-seats-live-1007",
+   "CARD secuura-done-rule-unit-pinned-deployed-no-live-check",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013",
+   "CARD secuura-m365-admin-setup-for-customer-org-1020",
+   "CARD secuura-platform-admin-spelling-certification-reads-1020",
+   "CARD secuura-ks1717-live-row-check-key-1026",
+   "CARD secuura-kintsugi-admin-published-default-1027",
+   "CARD secuura-ks1240-tenant-create-key-fail-answer-1028",
+   "CARD secuura-ks1814-company-admin-reanchor-1030",
+   "CARD secuura-ks1861-what-tenant-delete-means-1031",
+   "CARD secuura-ks1860-suspended-tenant-enforcement-1031",
+   "CARD secuura-ks1336-per-tenant-db-priority-1102",
+   "CARD secuura-ks1202-live-leg-issuer-login-1104",
+   "CARD secuura-ks1215-live-connector-key-1104",
+   "CARD secuura-ks1585-scope-rows-on-admin-change-1105"
+  ]
  }
 ]
