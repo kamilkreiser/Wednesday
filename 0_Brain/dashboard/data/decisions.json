@@ -61915,5 +61915,44 @@
    "CARD wed-gate-clones-fill-devmaster-1103",
    "CARD wed-gate-clones-hook-blocks-removal-1103"
   ]
+ },
+ {
+  "id": "hpsmpoc-308-docker-desktop-1106",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Please start Docker Desktop on the Mac mini for one HPSM-POC test lane, or leave that lane parked?",
+  "bluf": "I need you to open Docker Desktop on the Mac mini. HPSMPOC-308 needs a test that starts two hosts together on a real SQL Server, and that seat can only prove it with a local SQL Server container. The docker daemon is not running (docker info rc 1 at 13:19; Docker.app is installed). I have not started it myself because the app may need your sign-in or a prompt answered. The lane fixes a recurring red on a CI check that is not required, so it is low in the queue, and it runs an emulated SQL Server on this machine. Nothing else waits on this. UAT is not involved. (Override of the prior-rulings gate: the four matched cards, read by title and two by show, are about taking down finished seats' stopped Docker stacks, not about starting Docker; the four matched messages share only generic words.)",
+  "default_action": "The lane stays parked with its kit on disk, and every other lane carries on.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Docker is on, run the lane",
+    "detail": "The seat pulls the pinned SQL Server image and runs one named container on port 9340, leaves it stopped, and builds the test. A gate follows, then a head-pinned squash, not deployed."
+   },
+   {
+    "key": "b",
+    "label": "Leave it parked for now",
+    "detail": "The kit stays on disk unstamped and the ticket stays open. Other lanes carry on."
+   },
+   {
+    "key": "c",
+    "label": "Start Docker yourself when needed",
+    "detail": "Tuesday may open Docker Desktop on this machine for lanes like this, and comes back to you only if it stops on a prompt."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-11-06T13:19:36.699455+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-09-01 17:25",
+   "2026-09-09 17:03",
+   "2026-09-10 18:42",
+   "CARD composer-docker-networks-closed-seats-1003",
+   "CARD composer-docker-prune-stale-seat-stacks-1013",
+   "CARD hpsmpoc-docker-finished-seat-stacks-1013",
+   "CARD hpsmpoc-docker-stacks-remove-not-compose-1013"
+  ]
  }
 ]
