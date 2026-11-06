@@ -130,7 +130,23 @@ resolve_derived_or_abort(){
       fi
       printf '%s\n' "$conflicted" | while IFS= read -r f; do
         [ -n "$f" ] || continue
-        git checkout --ours -- "$f" >/dev/null 2>&1 || git checkout --theirs -- "$f" >/dev/null 2>&1
+        # decisions.json is a RECORD, not derived: in a rebase --ours is UPSTREAM, so taking it dropped
+        # 12 of Kam's cards on 2026-11-06 12:26. Union by card id; if that fails it stays unresolved and the rebase aborts.
+        case "$f" in
+          */decisions.json)
+            _g=$(git rev-parse --git-dir)
+            if git show ":2:$f" > "$_g/panel_union_up.json" 2>/dev/null && git show ":3:$f" > "$_g/panel_union_lo.json" 2>/dev/null \
+               && _r=$(python3 "$(git rev-parse --show-toplevel)/2_Project_Files/tools/decisions_union.py" "$_g/panel_union_up.json" "$_g/panel_union_lo.json" "$f" 2>&1); then
+              say "RECOVER: $_r"
+            else
+              say "RECOVER: decisions.json union FAILED, left unresolved so the rebase aborts: $_r"
+              continue
+            fi
+            ;;
+          *)
+            git checkout --ours -- "$f" >/dev/null 2>&1 || git checkout --theirs -- "$f" >/dev/null 2>&1
+            ;;
+        esac
         git add -- "$f" >/dev/null 2>&1
       done
     fi
