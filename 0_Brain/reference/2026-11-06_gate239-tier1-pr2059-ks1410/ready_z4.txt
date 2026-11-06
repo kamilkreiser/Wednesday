@@ -1,0 +1,23 @@
+=========== [INBOUND] 2026-11-06T12:11 | Secuura/Blockchain-Z | [Secuura/Blockchain-Z -> Wednesday] READY FOR GATE KS-1410 (Seat Z 4th)
+[Secuura/Blockchain-Z -> Wednesday] READY FOR GATE KS-1410 (Seat Z 4th)
+Seat Z 4th
+
+READY FOR GATE: KS-1410 (with KS 1214), tier 1.
+PR 2059  https://github.com/Secuura/Distributed_Secuura/pull/2059   branch feature/ks-1410-mcp-web-interface-reads-no-server-paths   head 7a644a2dd246055ed5c725a3da8be88639dd04bf   base develop (built on c5c26b2835df; the push gates accepted the move to 44ee04cba478 with overlap 0)
+Title: Refs KS-1410: the mcp-server web interface reads no server file path
+Pushed by driver 69761 at 11:13:35Z (PUSH end rc=0, 1418 s), VERIFIED by ls-remote. PR read back: open, not draft, 1 commit, 13 files, +391/-76, one PR for this head. Census: attached to exactly KS-1410 (the branch carries one key). PR-naming comments: KS-1410 comment defd1091, KS-1214 comment 3441cfdc, each read back with 0 mention nodes and state, priority and assignee unchanged (In Progress / Backlog).
+
+What it does (Kam's card ... = a, your option A): no route of the mcp-server web interface reads a server path; a truthy filePath is refused with one fixed sentence (400 on /hash and /verify, a failed item in the batch's 200); the /hash 500 answers the constant and logs the real error; content branch untouched; spec, its byte copy and three guides no longer offer filePath.
+
+Where I would look hardest
+1. A behaviour change beyond the card's words: the refusal also applies when content, documentId or contentHash is sent beside filePath (the field was ignored then). A falsy filePath passes as before. Both are pinned by cells and stated in the PR body.
+2. Six existing cells were inverted, not deleted: mcp-500a and mcp-500b C2 and C4, ks1901 A6 on both batch routes. The PR body names each and why.
+3. The pre-push hook said "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." (legs 3, 4, 8: no local stack). It is not a pass; leg 14 ran 117 of 117 shell suites, leg 16 reported 0 new type errors. Quoted verbatim in the PR body.
+4. The four MCP Deployment files are outside the brief's original partition; your ANSWER 05:11:18Z added them. The spec copy is byte-identical (cell D2).
+
+Evidence: 19 new cells (13 RED, all AssertionError at develop; 6 controls); mcp-server suite 14 files / 131 cells at develop, 15 / 150 with the change, three runs; 14 of 14 planted defects killed, restores sha256-equal; tsc with tests 0 errors; eslint --max-warnings 0 clean; docs-fragments check OK; every control fires. Node v26.8.1, not LTS.
+
+NOT covered, as in the PR body: Schemathesis, Akto, Playwright, k6 (the two boxes in the PR are unticked); Node 24; any client or running server or box; out-of-repository clients that send filePath (a CI job built from the old guides now gets the 400 sentence); 14 of the 21 files outside the service that name filePath were not opened one by one; check:test-types does not enrol mcp-server (my tsc-with-tests run is the stand-in); the stdio MCP tools still take filePath (different surface).
+Deploy owed after merge: mcp-server on both boxes. Demo frozen; nothing deployed. I do not merge, deploy or move a ticket's state.
+
+Queue state: item 3 relaunched (pid 92019, MAXTURN 20000), item 2 relaunched (pid 68210, MAXTURN 20000, your ANSWER 12:08:36Z). Item 4 still waits for KS-2058.
