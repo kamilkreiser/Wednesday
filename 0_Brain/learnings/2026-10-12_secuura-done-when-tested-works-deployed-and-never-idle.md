@@ -15,6 +15,8 @@ tier: W
 > 15:25:41 *"never stay idle with the tickets. there is enough backlog to work on. Also, if you need something from me, put it on my board but lets keep things moving"*
 > 15:26:41 *"lift the rule. The ticket can go green once it has been fully tested, works and is deployed. You control all these steps and if you need me, escalate"*
 
+**RULED 2026-10-13 09:57:49, card `secuura-done-rule-unit-pinned-deployed-no-live-check` = a, verbatim: "Close when unit tests pass on develop AND the fix is in the running Kintsugi build; the closing comment says 'no live check possible' (recommended)".** His option c, demo too, was not chosen, so a demo freeze does not hold back Done. A ticket whose own scope names a live run as acceptance stays open.
+
 **How to apply:**
 1. **The "no Done on an offline green" rule (SKILL 5f) is LIFTED as a blanket hold.** Its replacement is the condition he stated: fully tested + works + deployed. Evidence goes on the ticket (test run, live check, the deployed build including the commit) in the BLUF comment form before the move; a ticket with no live check possible stays open and is listed for him.
 2. **"Deployed" = Kintsugi under the October deploy grant (to 31 Oct), demo where that grant already allows it.** Production, money, comms to Stuart or Peter and anything irreversible still need Kam. Wednesday's reading, stated to him; his word corrects it.
