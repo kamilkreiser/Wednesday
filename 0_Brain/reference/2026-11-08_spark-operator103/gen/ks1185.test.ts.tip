@@ -1,0 +1,227 @@
+// KS-1185 F2 + F3 - the workflow-approve forward to originate (POST /api/workflow-instances/:id/approve, routes/verification.ts).
+//
+// F2 (a decision, pinned here): the forward's bound is an IDLE timer, not a total one. http.ClientRequest#setTimeout is a
+// socket-inactivity timeout, so every byte originate sends restarts it, an informational 1xx included. The doc comment on
+// ORIGINATE_FORWARD_TIMEOUT_MS now says so; the PIN cell below holds that behaviour, so a later change to a wall-clock bound has
+// to change this cell on purpose. It is green before and after this change (it pins, it does not fix); a wall-clock tamper reddens it.
+//
+// F3 (a fix): a 2xx status line settles the forward (originate persists before it writes a 2xx), so a body that then never ends used to
+// log "Failed to forward approved document to originate" at error level one bound later, contradicting the 200 the caller got. When a
+// status line has already decided the forward, the late error is now logged at warn level as what it is (the reply body did not
+// finish) with that status; a forward that never got a status line still logs the original error line.
+//
+// Harness: the same shape as ks1087-workflow-approve-deletes-the-pending-document.test.ts (a stateful Redis stub per cell, one
+// originate stub whose behaviour each cell sets, the real createVerificationRoutes with a short bound and a recording log).
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
+import express from 'express';
+import http from 'node:http';
+import type { AddressInfo } from 'node:net';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import type { RequestHandler } from 'express';
+import * as verification from '../routes/verification';
+
+const DOC_ID = 'doc-ks1185';
+const WFI_ID = 'wfi-ks1185';
+/** The forward bound these cells run the route with (the production default is ORIGINATE_FORWARD_TIMEOUT_MS). */
+const FORWARD_TIMEOUT_MS = 1_000;
+const CLIENT_WAIT_MS = 6_000;
+const FAILED_LINE = 'Failed to forward approved document to originate';
+
+type Behaviour = (req: IncomingMessage, res: ServerResponse) => void;
+type Log = (level: 'info' | 'warn' | 'error', message: string, meta?: object) => void;
+
+interface Store {
+  instance: Record<string, unknown>;
+  pendingDocs: Map<string, Record<string, unknown>>;
+  deletes: number;
+}
+
+function freshStore(): Store {
+  return {
+    instance: { status: 'pending_approval', documentId: DOC_ID, steps: [{ name: 'Approve' }], currentStepIndex: 0 },
+    pendingDocs: new Map([[DOC_ID, { title: 't', contentHash: 'h', createdBy: 'u' }]]),
+    deletes: 0,
+  };
+}
+
+let originate: http.Server | undefined;
+let originatePort = 0;
+let behave: Behaviour = (_req, res) => res.end();
+const timers: Array<ReturnType<typeof setTimeout>> = [];
+
+beforeAll(async () => {
+  const server = http.createServer((req, res) => {
+    req.resume();
+    behave(req, res);
+  });
+  server.listen(0, '127.0.0.1');
+  await new Promise<void>((r) => server.once('listening', () => r()));
+  originatePort = (server.address() as AddressInfo).port;
+  originate = server;
+});
+
+afterAll(async () => {
+  const server = originate;
+  if (!server) return;
+  server.closeAllConnections();
+  await new Promise<void>((r) => server.close(() => r()));
+});
+
+const openGateways: Array<ReturnType<ReturnType<typeof express>['listen']>> = [];
+
+afterEach(async () => {
+  for (const t of timers.splice(0)) clearTimeout(t);
+  for (const server of openGateways.splice(0)) {
+    server.closeAllConnections();
+    await new Promise<void>((r) => server.close(() => r()));
+  }
+  originate?.closeAllConnections();
+});
+
+async function startGateway(store: Store, log: Log, originateUrl = `http://127.0.0.1:${originatePort}`): Promise<number> {
+  const mockBodyParser: RequestHandler = express.json({ limit: '1mb' });
+  const app = express();
+  app.use(
+    verification.createVerificationRoutes({
+      authenticateToken: () => (_req, _res, next) => next(),
+      mockBodyParser,
+      query: vi.fn(async () => ({ rows: [] })) as never,
+      isDbAvailable: () => false,
+      redisService: {
+        getWorkflowInstance: vi.fn(async (id: string) => (id === WFI_ID ? structuredClone(store.instance) : null)),
+        getAllWorkflowInstances: vi.fn(async () => [structuredClone(store.instance)]),
+        setWorkflowInstance: vi.fn(async (id: string, value: Record<string, unknown>) => {
+          if (id === WFI_ID) store.instance = structuredClone(value);
+        }),
+        getPendingDocument: vi.fn(async (id: string) => store.pendingDocs.get(id) ?? null),
+        deletePendingDocument: vi.fn(async (id: string) => {
+          store.deletes++;
+          store.pendingDocs.delete(id);
+        }),
+      } as never,
+      services: { originate: { url: originateUrl }, anchoring: { url: '' } } as never,
+      log,
+      memWorkflowToDocumentMap: new Map(),
+      memRejectedDocuments: new Map(),
+      dbSaveRejection: vi.fn(async () => undefined),
+      ADMIN_ROLES: ['ADMIN'],
+      enforceDocumentTypeRules: vi.fn(async () => ({ ok: true, docType: {} })) as never,
+      createWorkflowInstanceIfRequired: vi.fn(async () => ({ gated: false })) as never,
+      originateForwardTimeoutMs: FORWARD_TIMEOUT_MS,
+    }),
+  );
+  const server = app.listen(0, '127.0.0.1');
+  openGateways.push(server);
+  await new Promise<void>((r) => server.once('listening', () => r()));
+  return (server.address() as AddressInfo).port;
+}
+
+async function approve(gatewayPort: number): Promise<{ status: number | 'NO RESPONSE'; ms: number }> {
+  const started = Date.now();
+  try {
+    const res = await fetch(`http://127.0.0.1:${gatewayPort}/api/workflow-instances/${WFI_ID}/approve`, { method: 'POST', signal: AbortSignal.timeout(CLIENT_WAIT_MS) });
+    await res.text();
+    return { status: res.status, ms: Date.now() - started };
+  } catch {
+    return { status: 'NO RESPONSE', ms: Date.now() - started };
+  }
+}
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+const calls = (log: ReturnType<typeof vi.fn<Log>>, level: string, pred: (message: string) => boolean) =>
+  log.mock.calls.filter(([l, m]) => l === level && pred(String(m)));
+
+/** A status line, then a body that never ends: originate writes the headers and one partial chunk and goes silent. */
+const statusThenSilence = (status: number): Behaviour => (_req, res) => {
+  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.write('{"id":');
+};
+
+describe('KS-1185 F2 - the forward bound is an idle timer (pinned, documented)', () => {
+  it('PIN KS-1185 F2: an originate that keeps sending 102 Processing holds the approve PAST the bound, then its 201 approves', { timeout: 15_000 }, async () => {
+    // 102 every 300 ms for 2,400 ms (2.4x the 1,000 ms bound), then 201. Each 1xx is socket activity, so the idle bound never fires.
+    behave = (_req, res) => {
+      let sent = 0;
+      const tick = (): void => {
+        if (sent * 300 >= 2_400) {
+          res.writeHead(201, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ id: DOC_ID }));
+          return;
+        }
+        sent++;
+        res.writeProcessing();
+        timers.push(setTimeout(tick, 300));
+      };
+      tick();
+    };
+    const store = freshStore();
+    const log = vi.fn<Log>();
+    const out = await approve(await startGateway(store, log));
+    expect(out.status, `answered after ${out.ms} ms`).toBe(200);
+    expect(out.ms, 'held past the bound: the bound is idle-based, not a total').toBeGreaterThan(FORWARD_TIMEOUT_MS + 1_000);
+    expect(store.deletes).toBe(1);
+  });
+
+  it('CONTROL KS-1185 F2: a silent originate still meets the bound (502 at about the bound)', { timeout: 15_000 }, async () => {
+    behave = () => undefined;
+    const store = freshStore();
+    const out = await approve(await startGateway(store, vi.fn<Log>()));
+    expect(out.status).toBe(502);
+    expect(out.ms).toBeLessThan(FORWARD_TIMEOUT_MS + 1_500);
+    expect(store.deletes).toBe(0);
+  });
+});
+
+describe('KS-1185 F3 - a reply body that does not finish after the status line decided the forward is not a failed forward', () => {
+  it('RED KS-1185 F3: a 201 whose body never ends is approved, and one bound later NO error-level "Failed to forward" line is logged', { timeout: 15_000 }, async () => {
+    behave = statusThenSilence(201);
+    const store = freshStore();
+    const log = vi.fn<Log>();
+    const out = await approve(await startGateway(store, log));
+    expect(out.status).toBe(200);
+    expect(store.deletes).toBe(1);
+    await sleep(FORWARD_TIMEOUT_MS + 700);
+    expect(calls(log, 'error', (m) => m === FAILED_LINE), 'the 200 is not contradicted by a failed-forward error').toEqual([]);
+  });
+
+  it('RED KS-1185 F3: ...and the late event is logged once at warn level, naming the status line that decided the forward', { timeout: 15_000 }, async () => {
+    behave = statusThenSilence(201);
+    const log = vi.fn<Log>();
+    await approve(await startGateway(freshStore(), log));
+    await sleep(FORWARD_TIMEOUT_MS + 700);
+    const late = calls(log, 'warn', (m) => m.includes('reply body did not finish'));
+    expect(late).toHaveLength(1);
+    expect(late[0][2]).toMatchObject({ status: 201 });
+  });
+
+  it('RED KS-1185 F3: a 401 whose body never ends is answered 502 at once, and its late event is the same warn line with status 401', { timeout: 15_000 }, async () => {
+    behave = statusThenSilence(401);
+    const store = freshStore();
+    const log = vi.fn<Log>();
+    const out = await approve(await startGateway(store, log));
+    expect(out.status).toBe(502);
+    expect(out.ms).toBeLessThan(FORWARD_TIMEOUT_MS);
+    expect(store.deletes).toBe(0);
+    await sleep(FORWARD_TIMEOUT_MS + 700);
+    expect(calls(log, 'error', (m) => m === FAILED_LINE)).toEqual([]);
+    const late = calls(log, 'warn', (m) => m.includes('reply body did not finish'));
+    expect(late).toHaveLength(1);
+    expect(late[0][2]).toMatchObject({ status: 401 });
+  });
+
+  it('CONTROL KS-1185 F3: an originate that never sends a status line still logs the error-level "Failed to forward" line', { timeout: 15_000 }, async () => {
+    behave = () => undefined;
+    const log = vi.fn<Log>();
+    const out = await approve(await startGateway(freshStore(), log));
+    expect(out.status).toBe(502);
+    expect(calls(log, 'error', (m) => m === FAILED_LINE)).toHaveLength(1);
+    expect(calls(log, 'warn', (m) => m.includes('reply body did not finish'))).toEqual([]);
+  });
+
+  it('CONTROL KS-1185 F3: an unreachable originate (closed port) still logs the error-level "Failed to forward" line', async () => {
+    const log = vi.fn<Log>();
+    const out = await approve(await startGateway(freshStore(), log, 'http://127.0.0.1:1'));
+    expect(out.status).toBe(502);
+    expect(calls(log, 'error', (m) => m === FAILED_LINE)).toHaveLength(1);
+  });
+});

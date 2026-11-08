@@ -1,0 +1,22 @@
+1,21d0
+< --- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts
+< +++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts
+< @@ -181,3 +181,18 @@
+<      expect([noTo.status, badFormat.status, fetchMock.mock.calls.length]).toEqual([400, 400, 0]);
+<    });
+<  });
+< +
+< +describe('KS-2016 - the caller\'s Authorization header goes upstream on every page, not only the first', () => {
+< +  it('RED KS-2016 A1: three upstream pages (2,300 rows) each carry the caller\'s Authorization header', async () => {
+< +    upstreamRows = manyRows(2300);
+< +    const status = await new Promise<number>((resolve, reject) => {
+< +      http.get({ hostname: '127.0.0.1', port, path: `/api/admin/audit/export?${RANGE}&format=json`, headers: { authorization: 'Bearer ks2016-caller' } }, (res) => {
+< +        res.resume();
+< +        res.on('end', () => resolve(res.statusCode ?? 0));
+< +      }).on('error', reject);
+< +    });
+< +    const sent = fetchMock.mock.calls.map((call) => ((call as unknown[])[1] as { headers?: Record<string, string> } | undefined)?.headers?.Authorization);
+< +    expect(status).toBe(200);
+< +    expect(sent).toEqual(['Bearer ks2016-caller', 'Bearer ks2016-caller', 'Bearer ks2016-caller']);
+< +  });
+< +});

@@ -1,0 +1,188 @@
+// KS-1990 (originate routes/adminConfig.ts, POST /seed-demo-users): the route answered `success: true` whatever the outcome. On a fresh stack every insert failed (created 0, failed 14: the
+// users table has no unique index on email, so each `ON CONFLICT (email)` raised 42P10, measured and filed on KS-960) and the operator was still told 200 `success: true`. The report body already
+// carried the truth in its counts; the flag and the status ignored them. Ruled contract (Wednesday, inside commissioned work): `success` is `failed === 0` in every case; nothing created and something
+// failed answers 500 carrying the SAME report fields as before (KS-1802 deliberately pinned a report body over a bare 500); created > 0 with failures answers 200 with `success: false`; a healthy run and an
+// already-present-only run are unchanged (200, `success: true`). No new field and no new message text. The database is faked (the same mocks as the KS-1802 cells), both seed flags are set, and the route is
+// driven over a real loopback listener, so the real handler produces the status and the body.
+process.env.NODE_ENV = 'development';
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+process.env.ALLOW_DEFAULT_SEED_PASSWORDS = 'true';
+process.env.ENABLE_DEMO_SEED = 'true';
+
+const mockQueryRaw = jest.fn();
+const mockExecuteRaw = jest.fn();
+const mockLogError = jest.fn();
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw },
+  refreshTenantConfigs: jest.fn(),
+  withTenant: (_t: unknown, fn: (tx: unknown) => unknown) => fn({ $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw }),
+  getTenantManager: () => null,
+}));
+
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const principal = { id: 'u-ks1990', role: 'SYSTEM_ADMIN', tenantId: 't-ks1990' };
+      req._secuuraUser = principal; req.user = principal; req.tenantId = principal.tenantId;
+      next();
+    },
+    requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  };
+});
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    ...(jest.requireActual('@secuura/shared') as Record<string, unknown>),
+    runWithPlatformScope: (fn: () => unknown) => fn(),
+    queryWithTenantGuc: jest.fn(),
+  }),
+);
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: mockLogError, debug: jest.fn() },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { adminConfigRouter } from '../routes/adminConfig';
+
+const USERS = 14;
+const app = express();
+app.use('/api/admin', express.json(), adminConfigRouter);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => {
+  (server as unknown as { closeAllConnections?: () => void })?.closeAllConnections?.();
+  server?.close();
+});
+beforeEach(() => {
+  mockQueryRaw.mockReset();
+  mockExecuteRaw.mockReset();
+  mockLogError.mockReset();
+  mockQueryRaw.mockResolvedValue([]);
+});
+
+type Reply = { status: number | 'NO ANSWER'; body: any; text: string; headers: Record<string, string> };
+
+async function seed(): Promise<Reply> {
+  try {
+    const res = await fetch(baseUrl + '/api/admin/seed-demo-users', { method: 'POST', signal: AbortSignal.timeout(3000) });
+    const text = await res.text();
+    const headers: Record<string, string> = {};
+    res.headers.forEach((value, name) => {
+      headers[name] = value;
+    });
+    let body: any = null;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = null;
+    }
+    return { status: res.status, body, text, headers };
+  } catch {
+    return { status: 'NO ANSWER', body: null, text: '', headers: {} };
+  }
+}
+
+const outcome = (r: Reply) => ({ status: r.status, body: r.body });
+
+describe('KS-1990: seed-demo-users success follows the counts', () => {
+  it('RED KS-1990 R1: every insert failing answers 500 with success false and the same report fields', async () => {
+    mockExecuteRaw.mockRejectedValue(new Error('ks1990 insert failed'));
+    expect(outcome(await seed())).toEqual({ status: 500, body: { success: false, seededUsers: 0, created: 0, alreadyPresent: 0, failed: USERS } });
+  });
+
+  it('RED KS-1990 R2: a partial run (13 created, 1 failed) answers 200 with success false and the counts unchanged', async () => {
+    mockExecuteRaw.mockRejectedValueOnce(new Error('ks1990 insert failed')).mockResolvedValue(1);
+    expect(outcome(await seed())).toEqual({ status: 200, body: { success: false, seededUsers: 13, created: 13, alreadyPresent: 0, failed: 1 } });
+  });
+
+  it('RED KS-1990 R3: nothing created, 10 already present and 4 failed answers 500 (created is 0 and failed is above 0)', async () => {
+    let calls = 0;
+    mockExecuteRaw.mockImplementation(async () => {
+      calls++;
+      if (calls <= 10) return 0;
+      throw new Error('ks1990 insert failed');
+    });
+    expect(outcome(await seed())).toEqual({ status: 500, body: { success: false, seededUsers: 0, created: 0, alreadyPresent: 10, failed: 4 } });
+  });
+
+  it('RED KS-1990 R4: a partial run whose only failures come last (10 created, 4 failed) answers 200 with success false', async () => {
+    let calls = 0;
+    mockExecuteRaw.mockImplementation(async () => {
+      calls++;
+      if (calls <= 10) return 1;
+      throw new Error('ks1990 insert failed');
+    });
+    expect(outcome(await seed())).toEqual({ status: 200, body: { success: false, seededUsers: 10, created: 10, alreadyPresent: 0, failed: 4 } });
+  });
+
+  it('RED KS-1990 R5: nothing created, 13 already present and ONE failed answers 500 (the boundary: a single failure is enough)', async () => {
+    let calls = 0;
+    mockExecuteRaw.mockImplementation(async () => {
+      calls++;
+      if (calls <= 13) return 0;
+      throw new Error('ks1990 insert failed');
+    });
+    expect(outcome(await seed())).toEqual({ status: 500, body: { success: false, seededUsers: 0, created: 0, alreadyPresent: 13, failed: 1 } });
+  });
+
+  it('control KS-1990 C1: every insert creating a row stays 200 with success true (14 created)', async () => {
+    mockExecuteRaw.mockResolvedValue(1);
+    expect(outcome(await seed())).toEqual({ status: 200, body: { success: true, seededUsers: USERS, created: USERS, alreadyPresent: 0, failed: 0 } });
+  });
+
+  it('control KS-1990 C2: every insert hitting a conflict stays 200 with success true (14 already present)', async () => {
+    mockExecuteRaw.mockResolvedValue(0);
+    expect(outcome(await seed())).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: USERS, failed: 0 } });
+  });
+
+  it('control KS-1990 C3: created and already-present rows with no failure stay 200 with success true (6 created, 8 already present)', async () => {
+    let calls = 0;
+    mockExecuteRaw.mockImplementation(async () => (++calls <= 6 ? 1 : 0));
+    expect(outcome(await seed())).toEqual({ status: 200, body: { success: true, seededUsers: 6, created: 6, alreadyPresent: 8, failed: 0 } });
+  });
+
+  it('control KS-1990 C4: the gate closed answers the unchanged 403 DEMO_SEED_DISABLED and touches no insert', async () => {
+    const before = process.env.ENABLE_DEMO_SEED;
+    process.env.ENABLE_DEMO_SEED = 'false';
+    try {
+      const reply = await seed();
+      expect([reply.status, reply.body?.success, reply.body?.error?.code, mockExecuteRaw.mock.calls.length]).toEqual([403, false, 'DEMO_SEED_DISABLED', 0]);
+    } finally {
+      process.env.ENABLE_DEMO_SEED = before;
+    }
+  });
+
+  it('control KS-1990 C5 (behaviour NOT changed by this ticket): an organisation lookup that throws leaves a healthy run at 200 with success true', async () => {
+    mockExecuteRaw.mockResolvedValue(1);
+    mockQueryRaw.mockRejectedValue(new Error('ks1990 org lookup failed'));
+    expect(outcome(await seed())).toEqual({ status: 200, body: { success: true, seededUsers: USERS, created: USERS, alreadyPresent: 0, failed: 0 } });
+  });
+
+  // The leak check. A database error that carries a planted token, a SQLSTATE, a source path with a line, a package path and column and table names must reach the LOG (the positive control
+  // below can fail: it reads the captured log calls) and must not reach the response body or any response header. Green at base and at head: it guards the new 500 path, which is the first
+  // time this route answers a non-2xx for a database failure.
+  it('LEAK KS-1990 L1: the planted database error text is in the log and in neither the response body nor any header; no per-user e-mail or hash is in the response', async () => {
+    const planted = 'PLANTED-W28-1 SQLSTATE 57P01 at services/originate/src/routes/adminConfig.ts:2108 in node_modules/@prisma/client relation "users" column "password_hash"';
+    mockExecuteRaw.mockRejectedValue(new Error(planted));
+    const reply = await seed();
+    expect(reply.status).toBe(500); // the new path: the 500 branch is the one under test here
+    const logged = JSON.stringify(mockLogError.mock.calls);
+    expect(logged).toContain('PLANTED-W28-1'); // positive control: the token reached the logger, so a 0 below is a real 0
+    expect(mockLogError.mock.calls.filter((call) => call[0] === 'Demo user seed failed')).toHaveLength(USERS);
+    const everything = reply.text + '\n' + Object.entries(reply.headers).map(([k, v]) => k + ': ' + v).join('\n');
+    const needles = ['PLANTED-W28-1', '57P01', 'SQLSTATE', 'adminConfig.ts', ':2108', 'node_modules', '@prisma', '"users"', 'password_hash', 'james.wilson@ox.ac.uk', '$2a$10$'];
+    expect(needles.filter((n) => everything.includes(n))).toEqual([]);
+  });
+});

@@ -1,0 +1,183 @@
+/**
+ * KS-1645 - GET /api/admin/audit/export was "quietly wrong": the file looked complete and was not. This file pins the repairs (items 1, 2, 3 and 4's
+ * body shape, plus the CSV columns), against a stub upstream that behaves like the real security service (services/security/src/index.ts:880-929):
+ * `from`/`to` compare createdAt, limit defaults to 50 with NO clamp, offset slices, `type` is never read, and the answer carries total/limit/offset.
+ *   Item 1: the export asks the upstream once, with no limit, and got its default 50 rows. It now pages (limit 1000) up to a 10,000-row bound and
+ *           says when it is short: meta.total and meta.truncated in JSON, the X-Audit-Export-Truncated header in CSV.
+ *   Item 2: `to` was sent as a bare date, which the upstream reads as 00:00:00.000Z, so the whole `to` day was dropped. The last millisecond of that
+ *           UTC day is sent instead.
+ *   Item 3: this file REPLACES the cells T1 to T3 and C1, C2 of PR 1616 (renamed from ...refuses-an-unknown-type). That PR made an unknown or repeated
+ *           `type` a 400; the upstream never applied the filter, so the 400 validated a filter that did not exist. `type` is now not read at all.
+ *   CSV:    five columns were empty on every row and details printed "[object Object]" because the mapping read keys the upstream row does not have.
+ * Harness: the ks745 pattern - the router mounted on a bare express app behind a stub admin, the security service replaced by a recording `fetch`.
+ */
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
+import http from 'node:http';
+import type { AddressInfo } from 'node:net';
+import express from 'express';
+
+const savedEnv = { ...process.env };
+process.env.SECURITY_SERVICE_URL = 'http://security.test:1';
+
+/** One audit row in the shape the security service really lists (services/security/src/converters.ts:21-36). */
+type Row = { id: string; tenantId: string; userId: string; action: string; resourceType: string; resourceId: string; ipAddress: string; userAgent: string; details: Record<string, unknown>; success: boolean; createdAt: string };
+const row = (n: number, createdAt: string, over: Partial<Row> = {}): Row => ({
+  id: `audit-ks1645-${n}`, tenantId: 'a0000000-0000-4000-8000-000000000001', userId: 'u1', action: 'login', resourceType: 'user', resourceId: `r${n}`,
+  ipAddress: '203.0.113.9', userAgent: 'agent', details: { reason: 'password' }, success: true, createdAt, ...over,
+});
+/** n rows inside 2026-09-01 (one millisecond apart, so every createdAt is distinct and inside the range). */
+const manyRows = (n: number): Row[] => Array.from({ length: n }, (_, i) => row(i + 1, new Date(Date.UTC(2026, 8, 1, 10, 0, 0, i)).toISOString()));
+
+let upstreamRows: Row[] = [];
+let failOffset: number | undefined;
+const urls: string[] = [];
+/** The security service's GET /api/audit as it really behaves; `type` is deliberately never read. */
+function upstream(url: string): Response {
+  urls.push(url);
+  const q = new URL(url).searchParams;
+  const limit = parseInt(q.get('limit') ?? '50', 10); const offset = parseInt(q.get('offset') ?? '0', 10);
+  if (failOffset !== undefined && offset === failOffset) return { ok: false, status: 503, json: async () => ({ error: 'upstream stalled' }) } as unknown as Response;
+  let f = upstreamRows;
+  if (q.get('from')) f = f.filter((r) => new Date(r.createdAt) >= new Date(q.get('from') as string));
+  if (q.get('to')) f = f.filter((r) => new Date(r.createdAt) <= new Date(q.get('to') as string));
+  return { ok: true, status: 200, json: async () => ({ success: true, data: { logs: f.slice(offset, offset + limit), total: f.length, limit, offset } }) } as unknown as Response;
+}
+const fetchMock = vi.fn(async (input: unknown) => upstream(String(input)));
+vi.stubGlobal('fetch', fetchMock);
+
+let server: ReturnType<ReturnType<typeof express>['listen']> | undefined; let port = 0;
+beforeAll(async () => {
+  const { default: router } = await import('../routes/audit-export');
+  const app = express();
+  app.use((req, _res, next) => { (req as any).user = { id: 'admin-ks1645', role: 'super_admin' }; next(); });
+  app.use('/api/admin/audit', router);
+  await new Promise<void>((r) => {
+    const s = app.listen(0, '127.0.0.1', () => { port = (s.address() as AddressInfo).port; r(); });
+    server = s;
+  });
+}, 10_000);
+afterAll(async () => {
+  const s = server;
+  if (s) await new Promise<void>((r) => s.close(() => r()));
+  for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];
+  Object.assign(process.env, savedEnv);
+  vi.unstubAllGlobals();
+});
+beforeEach(() => { fetchMock.mockClear(); urls.length = 0; upstreamRows = []; failOffset = undefined; });
+type Got = { status: number; text: string; disposition: string | undefined; truncatedHeader: string | undefined };
+function getText(path: string): Promise<Got> {
+  return new Promise((resolve, reject) => {
+    http.get({ hostname: '127.0.0.1', port, path }, (res) => {
+      let data = ''; res.on('data', (c) => (data += c));
+      res.on('end', () => resolve({ status: res.statusCode ?? 0, text: data, disposition: res.headers['content-disposition'], truncatedHeader: res.headers['x-audit-export-truncated'] as string | undefined }));
+    }).on('error', reject);
+  });
+}
+const RANGE = 'from=2026-09-01&to=2026-09-02';
+const param = (url: string, name: string): string | null => new URL(url).searchParams.get(name);
+type Body = { meta: { from: string; to: string; totalEntries: number; total?: number; truncated?: boolean; type?: unknown }; data: Array<{ id: string }> };
+
+describe('KS-1645 stub - the upstream double behaves like the real service (so a green cell below is not the stub\'s doing)', () => {
+  it('CONTROL KS-1645 S1: default limit 50 with no limit given, no clamp when asked for more, a bare-date `to` excludes that day, `type` is ignored', () => {
+    upstreamRows = manyRows(1200);
+    const j = (url: string) => (upstream(url).json() as Promise<{ data: { logs: unknown[]; total: number } }>);
+    return Promise.all([j('http://x/api/audit?from=2026-09-01'), j('http://x/api/audit?from=2026-09-01&limit=5000'), j('http://x/api/audit?from=2026-09-01&to=2026-09-01'), j('http://x/api/audit?from=2026-09-01&type=auth')])
+      .then(([dflt, big, bareTo, typed]) => {
+        expect([dflt.data.logs.length, big.data.logs.length, bareTo.data.logs.length, typed.data.total]).toEqual([50, 1200, 0, 1200]);
+      });
+  });
+});
+
+describe('KS-1645 item 1 - the export pages the upstream and says when it is short', () => {
+  it('RED KS-1645 P1: 2,300 upstream rows are ALL exported, in pages of 1000 at offsets 0, 1000 and 2000; meta says 2,300 of 2,300 and not truncated', async () => {
+    upstreamRows = manyRows(2300);
+    const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+    const body = JSON.parse(res.text) as Body;
+    expect([res.status, body.data.length, body.meta.totalEntries, body.meta.total, body.meta.truncated]).toEqual([200, 2300, 2300, 2300, false]);
+    expect(urls.map((u) => [param(u, 'limit'), param(u, 'offset')])).toEqual([['1000', '0'], ['1000', '1000'], ['1000', '2000']]);
+    expect(new Set(body.data.map((e) => e.id)).size, 'no row twice, none missing').toBe(2300);
+  });
+
+  it('RED KS-1645 P2: 10,500 upstream rows stop at the 10,000 bound; JSON meta says truncated: true with total 10,500', async () => {
+    upstreamRows = manyRows(10_500);
+    const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+    const body = JSON.parse(res.text) as Body;
+    expect([res.status, body.data.length, body.meta.totalEntries, body.meta.total, body.meta.truncated]).toEqual([200, 10_000, 10_000, 10_500, true]);
+    expect(urls.length, 'ten pages, then the bound stops the loop').toBe(10);
+  });
+
+  it('RED KS-1645 P2b: the same 10,500 rows as CSV: 10,000 data rows under the header, and the X-Audit-Export-Truncated: true response header', async () => {
+    upstreamRows = manyRows(10_500);
+    const res = await getText(`/api/admin/audit/export?${RANGE}&format=csv`);
+    expect([res.status, res.truncatedHeader, res.text.split('\n').length - 1]).toEqual([200, 'true', 10_000]);
+  });
+
+  it('RED KS-1645 P3: one short page says truncated: false in JSON and sets NO truncation header in CSV', async () => {
+    upstreamRows = manyRows(3);
+    const json = JSON.parse((await getText(`/api/admin/audit/export?${RANGE}&format=json`)).text) as Body;
+    expect([json.data.length, json.meta.total, json.meta.truncated]).toEqual([3, 3, false]);
+    const csv = await getText(`/api/admin/audit/export?${RANGE}&format=csv`);
+    expect([csv.status, csv.truncatedHeader]).toEqual([200, undefined]);
+  });
+
+  it('RED KS-1645 P4: a page that fails after the first is the upstream\'s status as a 503 BAD_GATEWAY, never a short 200', async () => {
+    upstreamRows = manyRows(2300);
+    failOffset = 1000;
+    const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+    expect([res.status, JSON.parse(res.text)?.error?.code]).toEqual([503, 'BAD_GATEWAY']);
+  });
+});
+
+describe('KS-1645 item 2 - `to` includes its whole UTC day', () => {
+  it('RED KS-1645 B1: rows on the `to` day (10:00Z and the last millisecond) are exported, the day after is not; the upstream is sent the end of that day; filename and meta keep the plain date', async () => {
+    upstreamRows = [row(1, '2026-09-01T10:00:00.000Z'), row(2, '2026-09-02T10:00:00.000Z'), row(3, '2026-09-02T23:59:59.999Z'), row(4, '2026-09-03T00:00:00.000Z')];
+    const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+    const body = JSON.parse(res.text) as Body;
+    expect(body.data.map((e) => e.id), 'CONTROL inside the cell: the row at 2026-09-03T00:00:00.000Z stays out').toEqual(['audit-ks1645-1', 'audit-ks1645-2', 'audit-ks1645-3']);
+    expect(param(urls[0], 'to')).toBe('2026-09-02T23:59:59.999Z');
+    expect(param(urls[0], 'from')).toBe('2026-09-01');
+    expect([body.meta.from, body.meta.to, res.disposition]).toEqual(['2026-09-01', '2026-09-02', 'attachment; filename="audit-logs_2026-09-01_2026-09-02.json"']);
+  });
+});
+
+describe('KS-1645 item 3 - the export claims no `type` filter it cannot apply (retires PR 1616\'s 400, which validated a filter that did not exist)', () => {
+  it('RED KS-1645 T1: any `type` value, known or not, is answered 200 and never forwarded, named in the filename, or put in meta', async () => {
+    upstreamRows = manyRows(2);
+    for (const t of ['auth', 'bogus']) {
+      urls.length = 0;
+      const res = await getText(`/api/admin/audit/export?${RANGE}&format=json&type=${t}`);
+      const body = JSON.parse(res.text) as Body;
+      expect([res.status, param(urls[0], 'type'), 'type' in body.meta, (res.disposition ?? '').includes(t)], `type=${t}`).toEqual([200, null, false, false]);
+    }
+  });
+
+  it('RED KS-1645 T2: with no `type` at all the request is the same: nothing about a type is sent or named', async () => {
+    upstreamRows = manyRows(2);
+    const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+    expect([res.status, param(urls[0], 'type'), 'type' in (JSON.parse(res.text) as Body).meta]).toEqual([200, null, false]);
+  });
+});
+
+describe('KS-1645 CSV - every column reads a key the upstream row really has', () => {
+  const HEADER = 'id,timestamp,action,userId,ipAddress,userAgent,resource,resourceId,details,outcome';
+  it('RED KS-1645 C1: the header is exactly the ten real columns and a real-shaped row fills every one; a failed row says failure', async () => {
+    upstreamRows = [row(1, '2026-09-01T10:00:00.000Z'), row(2, '2026-09-01T11:00:00.000Z', { success: false })];
+    const lines = (await getText(`/api/admin/audit/export?${RANGE}&format=csv`)).text.split('\n');
+    expect(lines[0]).toBe(HEADER);
+    expect(lines[1]).toBe('audit-ks1645-1,2026-09-01T10:00:00.000Z,login,u1,203.0.113.9,agent,user,r1,"{""reason"":""password""}",success');
+    expect(lines[2].endsWith(',failure'), 'success: false is written as failure').toBe(true);
+  });
+
+  it('RED KS-1645 C2: a details value holding a comma and a quote stays ONE escaped field, not "[object Object]"', async () => {
+    upstreamRows = [row(1, '2026-09-01T10:00:00.000Z', { details: { note: 'a,"b"' } })];
+    const line = (await getText(`/api/admin/audit/export?${RANGE}&format=csv`)).text.split('\n')[1];
+    expect(line).not.toContain('[object Object]');
+    expect(line).toContain('"{""note"":""a,\\""b\\""""}"');
+  });
+
+  it('CONTROL KS-1645 C3: the checks that were already there still hold - a missing `to` and a bad format are 400s and the upstream is not asked', async () => {
+    const noTo = await getText('/api/admin/audit/export?from=2026-09-01');
+    const badFormat = await getText(`/api/admin/audit/export?${RANGE}&format=xml`);
+    expect([noTo.status, badFormat.status, fetchMock.mock.calls.length]).toEqual([400, 400, 0]);
+  });
+});

@@ -1,0 +1,142 @@
+// KS-1937 (originate services/email.ts): the notification client's SMTP fallback calls sendEmail, and sendEmail wrote the recipient's email address (`options.to`) to the console in seven
+// places: the ACS sent line, the ACS send-failed and send-threw lines, the allow-list refusal, the no-provider line, and the SMTP sent and failed lines. So ONE notification wrote the address
+// in the client's INFO line and again here. The ruling, quoted: Kam's card secuura-ks1346-logging-thrown-objects-leaks-secrets = a, "Log what kind of thing was thrown and the NAMES of its
+// fields, never their values", and Wednesday's ANSWER of 2026-11-06 on this ticket, "A. Log the template only, never the address ... the client's 3 lines and email.ts's 7, test first".
+// Each cell loads the REAL email module (it reads its configuration once at import, so each cell sets the environment and re-requires it through jest.isolateModules, as ks488-smtp-opt-in
+// does), with only the two providers' libraries replaced, records EVERY argument of EVERY console call, and requires (1) the line the cell is about really was written, and (2) the address
+// appears in none of the recorded output. The subject is still logged: it is not the recipient.
+// NOT covered, stated because it matters: error text a provider returns is still forwarded (`error.message`, `err?.message`, and the raw `result.error` object of a failed ACS send); whether a
+// real SMTP or ACS error text can echo the address depends on that server's reply and is not measured here.
+const mockLogged: string[] = [];
+const mockRecord = (source: string, args: unknown[]): void => {
+  mockLogged.push(
+    source +
+      ' ' +
+      args
+        .map((a) => {
+          if (typeof a === 'string') return a;
+          try {
+            return JSON.stringify(a) ?? String(a);
+          } catch {
+            return '[unserialisable]';
+          }
+        })
+        .join(' '),
+  );
+};
+const mockSendMail = jest.fn();
+const mockBeginSend = jest.fn();
+
+type EmailModule = typeof import('../services/email');
+
+// A synthetic address that cannot belong to a person, and that no other string in this file contains.
+const ADDRESS = 'ks1937.recipient@example.test';
+const ENV_KEYS = [
+  'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM', 'SMTP_ENABLED', 'EMAIL_FROM',
+  'ACS_CONNECTION_STRING', 'ACS_SENDER_ADDRESS', 'EMAIL_RECIPIENT_ALLOWLIST',
+] as const;
+const ACS_ENV = { ACS_CONNECTION_STRING: 'endpoint=https://acs.example.test/;accesskey=ks1937-not-a-key', ACS_SENDER_ADDRESS: 'donotreply@example.test' };
+const SMTP_ENV = { SMTP_ENABLED: 'true', SMTP_HOST: 'smtp.example.test', SMTP_FROM: 'noreply@example.test' };
+
+const saved: Record<string, string | undefined> = {};
+const spies: jest.SpyInstance[] = [];
+
+function loadEmail(env: Record<string, string>): EmailModule {
+  for (const key of ENV_KEYS) delete process.env[key];
+  Object.assign(process.env, env);
+  let mod!: EmailModule;
+  jest.isolateModules(() => {
+    mod = require('../services/email') as EmailModule;
+  });
+  return mod;
+}
+
+const send = (email: EmailModule): Promise<boolean> => email.sendEmail({ to: ADDRESS, subject: 'ks1937 subject', text: 'ks1937 body' });
+const leaks = (): string[] => mockLogged.filter((l) => l.toLowerCase().includes(ADDRESS.toLowerCase()));
+const lines = (needle: string): string[] => mockLogged.filter((l) => l.includes(needle));
+
+beforeEach(() => {
+  mockLogged.length = 0;
+  for (const key of ENV_KEYS) saved[key] = process.env[key];
+  mockSendMail.mockReset();
+  mockBeginSend.mockReset();
+  jest.doMock('nodemailer', () => ({ __esModule: true, default: { createTransport: () => ({ sendMail: mockSendMail }) } }));
+  jest.doMock('@azure/communication-email', () => ({ EmailClient: class { beginSend = mockBeginSend; } }));
+  for (const level of ['log', 'info', 'warn', 'error'] as const) {
+    spies.push(jest.spyOn(console, level).mockImplementation((...a: unknown[]) => mockRecord('console.' + level, a)));
+  }
+});
+
+afterEach(() => {
+  while (spies.length) spies.pop()!.mockRestore();
+  for (const key of ENV_KEYS) {
+    if (saved[key] === undefined) delete process.env[key];
+    else process.env[key] = saved[key] as string;
+  }
+  jest.dontMock('nodemailer');
+  jest.dontMock('@azure/communication-email');
+});
+
+describe('KS-1937: the email service logs never carry the recipient address', () => {
+  it('CONTROL the capture sees the address on the console channel, so a zero below is a measurement: a planted console line is flagged', () => {
+    console.error('planted line for ' + ADDRESS);
+    expect(leaks()).toHaveLength(1);
+  });
+
+  it('E1 ACS accepts the send: the sent line is written, with the subject and the message id, and the address is in no recorded output', async () => {
+    mockBeginSend.mockResolvedValue({ pollUntilDone: async () => ({ status: 'Succeeded', id: 'acs-msg-1937' }) });
+    await expect(send(loadEmail(ACS_ENV))).resolves.toBe(true);
+    expect(lines('[Email/ACS] Sent')).toHaveLength(1);
+    expect(lines('[Email/ACS] Sent')[0]).toContain('ks1937 subject'); // KS-1937: the subject and the id are kept; only the recipient went
+    expect(lines('[Email/ACS] Sent')[0]).toContain('acs-msg-1937');
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E2 ACS reports a failed status: the send-failed line is written, and the address is in no recorded output', async () => {
+    mockBeginSend.mockResolvedValue({ pollUntilDone: async () => ({ status: 'Failed', error: { code: 'ks1937-code' } }) });
+    await expect(send(loadEmail(ACS_ENV))).resolves.toBe(false);
+    expect(lines('[Email/ACS] Send failed')).toHaveLength(1);
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E3 the ACS call throws: the send-threw line is written with the error text, and the address is in no recorded output', async () => {
+    mockBeginSend.mockRejectedValue(new Error('ks1937 acs boom'));
+    await expect(send(loadEmail(ACS_ENV))).resolves.toBe(false);
+    expect(lines('[Email/ACS] Send threw')).toHaveLength(1);
+    expect(lines('[Email/ACS] Send threw')[0]).toContain('ks1937 acs boom'); // the error text is still forwarded (named under NOT covered above)
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E4 the recipient is not on the allow-list: the refusal line is written and nothing is sent, and the address is in no recorded output', async () => {
+    const email = loadEmail({ ...SMTP_ENV, EMAIL_RECIPIENT_ALLOWLIST: 'someone.else@example.test' });
+    await expect(send(email)).resolves.toBe(false);
+    expect(lines('refusing to send')).toHaveLength(1);
+    expect(mockSendMail).not.toHaveBeenCalled(); // the refusal really refused
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E5 no provider is configured: the would-send line is written with the subject, and the address is in no recorded output', async () => {
+    await expect(send(loadEmail({}))).resolves.toBe(false);
+    expect(lines('No provider configured')).toHaveLength(1);
+    expect(lines('No provider configured')[0]).toContain('ks1937 subject');
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E6 SMTP accepts the send: the sent line is written, with the subject and the message id, and the address is in no recorded output', async () => {
+    mockSendMail.mockResolvedValue({ messageId: 'smtp-msg-1937' });
+    await expect(send(loadEmail(SMTP_ENV))).resolves.toBe(true);
+    expect(mockSendMail).toHaveBeenCalledTimes(1);
+    expect(mockSendMail.mock.calls[0][0].to).toBe(ADDRESS); // the address still reaches the transport: only the LOG changed
+    expect(lines('[Email/SMTP] Sent')).toHaveLength(1);
+    expect(lines('[Email/SMTP] Sent')[0]).toContain('smtp-msg-1937');
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E7 SMTP rejects the send: the failed line is written with the error text, and the address is in no recorded output', async () => {
+    mockSendMail.mockRejectedValue(new Error('ks1937 smtp boom'));
+    await expect(send(loadEmail(SMTP_ENV))).resolves.toBe(false);
+    expect(lines('[Email/SMTP] Failed to send')).toHaveLength(1);
+    expect(lines('[Email/SMTP] Failed to send')[0]).toContain('ks1937 smtp boom'); // the error text is still forwarded (named under NOT covered above)
+    expect(leaks()).toEqual([]);
+  });
+});
