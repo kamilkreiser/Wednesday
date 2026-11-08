@@ -1,0 +1,339 @@
+/**
+ * =============================================================================
+ * KS-741 — `x-emitter-internal` is stripped at originate's OWN inbound, on every
+ * request, so the marker's non-spoofability no longer rests on an unstated
+ * header-construction convention in one route file.
+ * =============================================================================
+ *
+ * The marker is what originate SETS on its outbound hops to anchoring
+ * (`routes/documents.ts` — `originate-create`, `originate-lifecycle`) so that
+ * anchoring does not write a second provenance row for one user action
+ * (`isInternalEmit`, services/anchoring/src/index.ts). If a client could get
+ * a value of it through originate and onto that hop, it would be a
+ * client-settable switch that suppresses provenance recording.
+ *
+ * Today nothing forwards it — `routes/anchors.ts` builds its outbound headers
+ * explicitly and spreads `req.headers` nowhere. That is a convention, and the
+ * hazard KS-741 names is the ordinary refactor `headers: { ...req.headers, … }`
+ * that would silently turn the convention into the hole. So:
+ *
+ *   C1 (unit)     the strip deletes the marker and nothing else;
+ *   C2 (unit)     it is UNCONDITIONAL — a gateway-VOUCHED request keeps its
+ *                 trust headers (the vouch middleware's contract) and still
+ *                 loses the marker: the discriminator between this strip and
+ *                 the vouch-gated one;
+ *   C3 (route)    the negative — a client-supplied marker on POST /api/anchors
+ *                 never reaches the anchoring hop;
+ *   C4 (route)    the CONTROL the ticket demands — the GENUINE hop's marker
+ *                 (`originate-create`) DOES reach anchoring. A suite that only
+ *                 asserts C3 passes just as well against a service that has
+ *                 stopped talking to anchoring at all;
+ *   C5 (route)    the hazard itself — a forwarder that DOES spread
+ *                 `req.headers`, mounted behind the strip, still forwards no
+ *                 marker;
+ *   C6 (wiring)   index.ts mounts the strip ahead of the anchors router.
+ *
+ * Harness: the ks520 shape — repos, auth, rbac, logger and db mocked; the
+ * routers mounted on a real listener; anchoring replaced by a RECORDER on
+ * 127.0.0.1:0 that stores every request's headers. `ANCHORING_SERVICE_URL`
+ * is read at call time by both routers, so it is pointed at the recorder in
+ * beforeAll. No `jest.mock('@secuura/shared')` here — nothing in these routes
+ * needs one under this harness, and a root shared mock must go through
+ * `helpers/sharedModuleMock` (the F-926-2 completeness guard).
+ */
+
+delete process.env.SIMULATE_ANCHORING;
+// KS-1293: a unit test that mentions ANCHORING_SERVICE_URL is a SUBJECT of the hermetic manifest and must pin an
+// import-scope base on a closed loopback port. beforeAll below points it at the recorder for the cells that need it.
+process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
+
+// KS-596: saveDocument returns { dbId, inserted } — the create route reads dbId.
+const mockSaveDocument = jest.fn(async (..._args: any[]) => ({ dbId: '99999999-9999-4999-8999-999999999999', inserted: true }));
+const mockUpdateDocument = jest.fn(async () => undefined);
+
+jest.mock('../repositories/documentRepo', () => ({
+  getDocument: jest.fn(),
+  listDocuments: jest.fn(),
+  saveDocument: mockSaveDocument,
+  updateDocument: mockUpdateDocument,
+  getSigningRequest: jest.fn(),
+  saveSigningRequest: jest.fn(),
+  deleteSigningRequest: jest.fn(),
+  generateContentHash: jest.fn(() => 'a'.repeat(64)),
+  seedDemoDocuments: jest.fn(async () => undefined),
+  assertNoCycle: jest.fn(async () => undefined),
+}));
+
+jest.mock('../repositories/shareRepo', () => ({ createShare: jest.fn() }));
+
+jest.mock('../repositories/lifecycleEventRepo', () => ({
+  createLifecycleEvent: jest.fn(),
+  setLifecycleEventAnchor: jest.fn(),
+  listLifecycleEvents: jest.fn(),
+}));
+
+jest.mock('../events', () => ({
+  publishEvent: jest.fn(async () => undefined),
+  EventTypes: {
+    DOCUMENT_CREATED: 'document.created',
+    DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred',
+    DOCUMENT_VERSIONED: 'document.versioned',
+  },
+}));
+
+jest.mock('../services/threadTokenClient', () => ({
+  mintAndRegisterThreadToken: jest.fn(async () => ({})),
+}));
+
+jest.mock('../routes/verification', () => ({
+  registerInPlatformRegistry: jest.fn(async () => undefined),
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
+    next();
+  },
+}));
+
+jest.mock('../middleware/rbac', () => ({
+  isAllowedByRoleOrScope: () => true,
+}));
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+}));
+
+// The anchors router reads/writes anchor rows through prisma directly.
+const mockQueryRaw = jest.fn();
+const mockExecuteRaw = jest.fn();
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw },
+  getTenantManager: jest.fn(() => null),
+}));
+
+import * as fs from 'fs';
+import * as http from 'http';
+import * as path from 'path';
+import express, { Request, Response } from 'express';
+import { documentsRouter } from '../routes/documents';
+import { anchorsRouter } from '../routes/anchors';
+import {
+  createEmitterMarkerStrip,
+  createGatewayProvenanceMiddleware,
+  EMITTER_MARKER_HEADER,
+  VOUCH_HEADER,
+} from '../utils/gatewayProvenance';
+
+// ---------------------------------------------------------------------------
+// The recorder standing in for anchoring: every request's method, path and
+// headers are kept; POST /api/anchors answers a minimal 201 the routers accept
+// (documents.ts reads `data.id`/`data.status`; anchors.ts reads `data.id`).
+// No `id` is returned, so documents.ts's confirmation poller never starts.
+// ---------------------------------------------------------------------------
+type Captured = { method: string; url: string; headers: http.IncomingHttpHeaders };
+const captured: Captured[] = [];
+let recorder: http.Server;
+let recorderUrl = '';
+
+/** Bounded wait for the recorder to see a request matching `pred`. */
+async function waitForCaptured(pred: (c: Captured) => boolean, timeoutMs = 3000): Promise<Captured | undefined> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const hit = captured.find(pred);
+    if (hit) return hit;
+    await new Promise((r) => setTimeout(r, 25));
+  }
+  return captured.find(pred);
+}
+
+// ---------------------------------------------------------------------------
+// The originate harness: the strip mounted ahead of every router, exactly as
+// index.ts mounts it, plus C5's synthetic forwarder — the refactor the ticket
+// warns of — mounted BEHIND the strip.
+// ---------------------------------------------------------------------------
+const app = express();
+app.use(createEmitterMarkerStrip());
+app.use('/api/documents', express.json(), documentsRouter);
+app.use('/api/anchors', express.json(), anchorsRouter);
+app.post('/probe/forward-spread', express.json(), async (req: Request, res: Response) => {
+  // The hazard: forward the whole inbound header set. Host/content-length are
+  // dropped only so the request is well-formed; everything else rides along.
+  const { host: _h, 'content-length': _cl, ...rest } = req.headers as Record<string, string>;
+  const upstream = await fetch(`${process.env.ANCHORING_SERVICE_URL}/api/anchors`, {
+    method: 'POST',
+    headers: { ...rest, 'content-type': 'application/json' },
+    body: JSON.stringify({ probe: true }),
+  });
+  res.status(upstream.status).json({ forwarded: true });
+});
+
+let baseUrl = '';
+let server: ReturnType<typeof app.listen>;
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    recorder = http.createServer((req, res) => {
+      captured.push({ method: req.method || '', url: req.url || '', headers: req.headers });
+      req.resume();
+      req.on('end', () => {
+        res.writeHead(201, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ success: true, data: { status: 'pending' } }));
+      });
+    });
+    recorder.listen(0, '127.0.0.1', () => resolve());
+  });
+  const ra = recorder.address();
+  recorderUrl = `http://127.0.0.1:${typeof ra === 'object' && ra ? ra.port : 0}`;
+  process.env.ANCHORING_SERVICE_URL = recorderUrl;
+
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  const sa = server.address();
+  baseUrl = `http://127.0.0.1:${typeof sa === 'object' && sa ? sa.port : 0}`;
+});
+
+afterAll(() => {
+  server?.close();
+  recorder?.close();
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  captured.length = 0;
+  delete process.env.SIMULATE_ANCHORING;
+  mockQueryRaw.mockResolvedValue([]); // no existing anchor row
+  mockExecuteRaw.mockResolvedValue(undefined);
+});
+
+// ---------------------------------------------------------------------------
+// C1 / C2 — unit
+// ---------------------------------------------------------------------------
+describe('KS-741 C1 — createEmitterMarkerStrip deletes the marker and nothing else', () => {
+  it('removes x-emitter-internal and leaves authorization, content-type and x-tenant-id in place', () => {
+    const req: any = {
+      headers: {
+        [EMITTER_MARKER_HEADER]: 'forged-by-client',
+        authorization: 'Bearer t',
+        'content-type': 'application/json',
+        'x-tenant-id': 'a0000000-0000-4000-8000-000000000001',
+      },
+    };
+    const next = jest.fn();
+    createEmitterMarkerStrip()(req, {} as any, next);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(req.headers[EMITTER_MARKER_HEADER]).toBeUndefined();
+    expect(req.headers.authorization).toBe('Bearer t');
+    expect(req.headers['content-type']).toBe('application/json');
+    expect(req.headers['x-tenant-id']).toBe('a0000000-0000-4000-8000-000000000001');
+  });
+});
+
+describe('KS-741 C2 — the strip is UNCONDITIONAL: a gateway-vouched request keeps its trust headers and still loses the marker', () => {
+  it('after the vouch middleware AND the strip, x-tenant-id survives (vouched) but x-emitter-internal is gone', () => {
+    // A synthetic secret generated here — never any environment's value.
+    const secret = 'k'.repeat(64);
+    const req: any = {
+      headers: {
+        [VOUCH_HEADER]: secret,
+        'x-tenant-id': 'a0000000-0000-4000-8000-000000000001',
+        [EMITTER_MARKER_HEADER]: 'forged-by-client',
+      },
+    };
+    const calls: string[] = [];
+    createGatewayProvenanceMiddleware(secret)(req, {} as any, () => calls.push('vouch'));
+    createEmitterMarkerStrip()(req, {} as any, () => calls.push('strip'));
+    expect(calls).toEqual(['vouch', 'strip']);
+    // The vouch middleware's own contract held: vouched → trust headers kept, vouch dropped.
+    expect(req.headers['x-tenant-id']).toBe('a0000000-0000-4000-8000-000000000001');
+    expect(req.headers[VOUCH_HEADER]).toBeUndefined();
+    // And the marker went regardless — this is what the vouch-gated set cannot do.
+    expect(req.headers[EMITTER_MARKER_HEADER]).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// C3 / C4 / C5 — route, through the real routers and the recorder
+// ---------------------------------------------------------------------------
+describe('KS-741 C3 — a client-supplied marker on POST /api/anchors never reaches the anchoring hop', () => {
+  it('the recorded hop carries content-type application/json (the hop happened) and NO x-emitter-internal', async () => {
+    const res = await fetch(`${baseUrl}/api/anchors`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer client-token',
+        [EMITTER_MARKER_HEADER]: 'forged-by-client',
+      },
+      body: JSON.stringify({ documentId: 'doc-ks741', contentHash: 'a'.repeat(64), network: 'preview' }),
+    });
+    expect(res.status).toBe(202);
+    const hop = await waitForCaptured((c) => c.method === 'POST' && c.url === '/api/anchors');
+    expect(hop).toBeDefined();
+    expect(hop!.headers['content-type']).toBe('application/json');
+    expect(hop!.headers[EMITTER_MARKER_HEADER]).toBeUndefined();
+  });
+});
+
+describe('KS-741 C4 — the CONTROL: the genuine originate -> anchoring hop DOES carry the marker', () => {
+  it('POST /api/documents auto-anchor reaches the recorder with x-emitter-internal: originate-create', async () => {
+    const res = await fetch(`${baseUrl}/api/documents`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer client-token' },
+      body: JSON.stringify({ title: 'ks741 genuine hop', type: 'general', data: { note: 'x' } }),
+    });
+    expect(res.status).toBe(201);
+    const hop = await waitForCaptured((c) => c.method === 'POST' && c.url === '/api/anchors');
+    expect(hop).toBeDefined();
+    expect(hop!.headers[EMITTER_MARKER_HEADER]).toBe('originate-create');
+  });
+});
+
+describe('KS-741 C5 — the hazard the ticket exists for: a forwarder that spreads req.headers, mounted behind the strip', () => {
+  it('forwards everything it received — and what it received no longer holds the marker', async () => {
+    const res = await fetch(`${baseUrl}/probe/forward-spread`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-request-id': 'ks741-probe',
+        [EMITTER_MARKER_HEADER]: 'forged-by-client',
+      },
+      body: JSON.stringify({ probe: true }),
+    });
+    expect(res.status).toBe(201);
+    const hop = await waitForCaptured((c) => c.method === 'POST' && c.url === '/api/anchors');
+    expect(hop).toBeDefined();
+    // The spread DID forward (the control that the probe is a real spread) …
+    expect(hop!.headers['x-request-id']).toBe('ks741-probe');
+    // … and the marker was already gone by the time it ran.
+    expect(hop!.headers[EMITTER_MARKER_HEADER]).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// C6 — wiring: index.ts mounts the strip ahead of the anchors router
+// ---------------------------------------------------------------------------
+describe('KS-741 C6 — index.ts mounts createEmitterMarkerStrip() before the anchors router', () => {
+  const indexPath = process.env.KS741_INDEX_PATH || path.resolve(__dirname, '../index.ts');
+
+  function mountLine(source: string, needle: string): number {
+    const idx = source.indexOf(needle);
+    return idx < 0 ? -1 : source.slice(0, idx).split('\n').length;
+  }
+
+  it('the strip mount line exists and sits above the /api/anchors mount', () => {
+    const source = fs.readFileSync(indexPath, 'utf8');
+    const strip = mountLine(source, 'app.use(createEmitterMarkerStrip());');
+    const anchors = mountLine(source, "app.use('/api/anchors', anchorsRouter);");
+    expect(strip).toBeGreaterThan(0);
+    expect(anchors).toBeGreaterThan(0);
+    expect(strip).toBeLessThan(anchors);
+  });
+
+  it('CONTROL — the reader can fail: a copy of index.ts with the mount line removed is refused', () => {
+    const source = fs.readFileSync(indexPath, 'utf8');
+    const without = source.replace('app.use(createEmitterMarkerStrip());', '');
+    expect(without).not.toBe(source); // the line was there to remove
+    expect(mountLine(without, 'app.use(createEmitterMarkerStrip());')).toBe(-1);
+  });
+});

@@ -135,6 +135,8 @@ if not os.path.isdir(chk): die(f"no checker dir at {chk}")
 
 inp = json.load(open(os.path.join(run, 'input.json')))
 
+# 2026-11-08 (Wednesday, Spark operator 102 finding 1): the three `+++` header parses read to the tab/end of line, not \S+ —
+# a path with a space ('Projects Documents/...') was read as its first word and every doc pass there was refused.
 # ------------------------------------------------------------------ STRICT-APPLY LEG (2026-11-03, operator 99; IMPROVEMENTS 2026-11-03)
 # Before ANY READY is written (every kind): the run's canonical patch.diff must pass `git apply --cached --check -p1` with NO
 # fuzz option (no -C, no --recount, no --ignore-whitespace) against a CLEAN temporary index of the run's tip. Cause: O96-P6 was held
@@ -1595,7 +1597,7 @@ def hold_doc_only():
     blocks = re.findall(r"```diff\n(.*?)\n```", out_md, re.S)
     if len(blocks) != 1: die(f"out.md holds {len(blocks)} ```diff block(s) - contradicts PASS A1")
     if blocks[0].rstrip('\n') + '\n' != patch_text: die("patch.diff is not byte-equal to the out.md fence")
-    paths = [p[2:] if p.startswith('b/') else p for p in re.findall(r'^\+\+\+ (\S+)', patch_text, re.M)]
+    paths = [p[2:] if p.startswith('b/') else p for p in re.findall(r'^\+\+\+ ([^\t\n]+?)[ \t\r]*$', patch_text, re.M)]
     if sorted(paths) != sorted(decl): die(f"patch.diff's +++ headers {paths} != the declared doc_files {decl}")
     plus = [l[1:] for l in patch_text.splitlines() if l.startswith('+') and not l.startswith('+++')]
     minus = [l[1:] for l in patch_text.splitlines() if l.startswith('-') and not l.startswith('---')]
@@ -1687,10 +1689,10 @@ def hold_test_only_input():
     blocks = re.findall(r"```diff\n(.*?)\n```", out_md, re.S)
     if len(blocks) != 1: die(f"out.md holds {len(blocks)} ```diff block(s) - contradicts PASS A1")
     if blocks[0].rstrip('\n') + '\n' != patch_text: die("patch.diff is not byte-equal to the out.md fence")
-    paths = [p[2:] if p.startswith('b/') else p for p in re.findall(r'^\+\+\+ (\S+)', patch_text, re.M)]
+    paths = [p[2:] if p.startswith('b/') else p for p in re.findall(r'^\+\+\+ ([^\t\n]+?)[ \t\r]*$', patch_text, re.M)]
     apaths = [p[2:] if p.startswith('a/') else p for p in re.findall(r'^--- (\S+)', patch_text, re.M) if p != '/dev/null']
     plant_files = set(g.get('file') for g in (inp.get('plant') or []))
-    if inp.get('plant_diff'): plant_files |= set(p[2:] if p.startswith('b/') else p for p in re.findall(r'^\+\+\+ (\S+)', inp['plant_diff'], re.M))
+    if inp.get('plant_diff'): plant_files |= set(p[2:] if p.startswith('b/') else p for p in re.findall(r'^\+\+\+ ([^\t\n]+?)[ \t\r]*$', inp['plant_diff'], re.M))
     if sorted(set(paths)) != sorted(tests): die(f"patch.diff's +++ headers {paths} != the declared test_files {tests}")
     for p in paths + apaths:
         if p in prods: die(f"PRODUCT HUNK: patch.diff names the product {p} - test_only_input must leave product bytes unchanged")
