@@ -5,6 +5,7 @@
 - Launched (pinned store, rung 5): N112 (RD-959/960/961, READY 8f94d795), G368 (its tier-2 gate, running at wrap), N113 (RD-973 merge-main resume, running at wrap).
 - Slips (ledger 2026-11-09): the RD-798 '2 outside' sentence (w=2 on that ticket); a detached watcher; a misread grep; a typed clock in the retro (corrected); one parallel note; one piped rc.
 - Handover: NEXT-PICKUP-TUESDAY.md DELTA 1082.
+- 09:2x -> 10:33: on Kam's second word ("let me know once all agents finish. then wrap up again") stayed until the floor emptied: G368 B1377 GO WITH FINDINGS on b1376 (landing files ready, not landed); N113 B1378 READY on b1369 @ 083d2102 (verified at origin). Floor empty at 10:33; DELTA 1082 FINAL line names the next seat's three steps.
 
 ## 2026-11-05 20:00 -> 2026-11-06 05:3x - Wednesday, the 20:00 seat (Secuura, Opus 5.5), successor of the 18:00 seat -> wrap at the 05:30 shift change (floor empty since 01:11; gauge 99%)
 - Landed (each verified at source by ls-remote before its head-pinned GO): PR 2008 KS-1150 (7d2d6dc366e5), PR 2013 KS-1460 (85881fde5a48), PR 2014 KS-1968 B2 (3f9f9a081fbd), PR 2015 KS-1804 (1e4bdcb899c4), PR 2016 KS-1407 (1b1b65c7415f) by Seat B 96th; with the 18:00 seat's four, NINE merges on 2026-11-05.
