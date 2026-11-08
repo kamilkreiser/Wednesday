@@ -1,0 +1,12 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/index.ts b/Blockchain/Dev/services/api-gateway/src/index.ts
+--- a/Blockchain/Dev/services/api-gateway/src/index.ts
++++ b/Blockchain/Dev/services/api-gateway/src/index.ts
+@@ -678,7 +678,7 @@
+         const nextMap = buildSpecMethodMap(nextSpec);
+         // KS-1505 part 2: the watch fired but the text read is the text already loaded (a spec delivered by replacement can leave
+         // this container reading the dead inode's old bytes on node 24). Strings are compared: that is all that is observable from inside.
+-        const sameBytes = nextRaw === openApiSpecRaw;
++        const sameBytes = nextRaw.length === openApiSpecRaw.length || nextRaw.trim() === openApiSpecRaw.trim(); // PLANT: length compare or trim compare
+         // Assign only after all three succeed, so a half-written file can
+         // never leave raw and parsed disagreeing with each other.
+         openApiSpecRaw = nextRaw;

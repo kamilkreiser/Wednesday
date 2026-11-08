@@ -1,0 +1,13 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-an-allow-list-of-non-strings-is-refused-by-both-reads.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-an-allow-list-of-non-strings-is-refused-by-both-reads.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-an-allow-list-of-non-strings-is-refused-by-both-reads.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-an-allow-list-of-non-strings-is-refused-by-both-reads.test.ts
+@@ -64,6 +64,9 @@
+   // non-string where an ends-only (or first-few-only) check cannot see it. Both flow into R1 to R5. They are GREEN on develop by design.
+   ['a number in the MIDDLE of three strings', ['SSD_DOCUMENT', 1, 'X']],
+   ['a null at index 3 of five strings', ['SSD_DOCUMENT', 'X', 'Y', null, 'Z']],
++  // KS-2132 (gate 249 F-1): the non-string at the LAST index of a list of three or more. A loop that skipped the last element of such a list survived 11 of 11.
++  ['a number LAST of four strings', ['SSD_DOCUMENT', 'X', 'Y', 1]],
++  ['a null at index 4, the last, of five', ['SSD_DOCUMENT', 'X', 'Y', 'Z', null]],
+ ];
+ /** Present values that are not arrays: they keep the older refusal text. */
+ const NON_ARRAYS: Array<[string, unknown]> = [

@@ -1,0 +1,23 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1505-spec-reload-warns-when-it-re-read-the-same-bytes.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1505-spec-reload-warns-when-it-re-read-the-same-bytes.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1505-spec-reload-warns-when-it-re-read-the-same-bytes.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1505-spec-reload-warns-when-it-re-read-the-same-bytes.test.ts
+@@ -90,6 +90,19 @@
+     expect(g.lines()[0][1]).toBe(SUCCESS);
+   }, 60_000);
+ 
++  it('RED KS-2133 - a changed spec of the SAME LENGTH as the one last loaded is a reload, not the same-bytes warning (the comparison is of the text, not its length)', async () => {
++    const g = await boot();
++    g.fire(g.bootRaw + '\n# ks1505: aa\n');
++    g.fire(g.bootRaw + '\n# ks1505: bb\n');
++    expect(g.lines()).toEqual([['info', SUCCESS], ['info', SUCCESS]]);
++  }, 60_000);
++
++  it('RED KS-2133 - a whitespace-only change (one added trailing newline) is a reload, not the same-bytes warning (the comparison is not made after trim)', async () => {
++    const g = await boot();
++    g.fire(g.bootRaw + '\n');
++    expect(g.lines()).toEqual([['info', SUCCESS]]);
++  }, 60_000);
++
+   it('a reload that FAILS to parse keeps the previous text, logs the failure line, and the next same-bytes read of the previous text still warns', async () => {
+     const g = await boot();
+     g.fire('key: [unclosed');

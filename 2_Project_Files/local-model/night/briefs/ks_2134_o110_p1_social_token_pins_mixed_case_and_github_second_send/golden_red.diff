@@ -1,0 +1,24 @@
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/github.ts b/Blockchain/Dev/services/auth/src/providers/social/github.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/github.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/github.ts
+@@ -109,7 +109,7 @@
+ 
+     if (!email) {
+       const emailsRes = await fetch('https://api.github.com/user/emails', {
+-        headers: { Authorization: `Bearer ${access_token}`, Accept: 'application/json' },
++        headers: { Authorization: `Bearer ${access_token.trim()}`, Accept: 'application/json' }, // PLANT: trim the second send
+         signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+       });
+       if (emailsRes.ok) {
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/google.ts b/Blockchain/Dev/services/auth/src/providers/social/google.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/google.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/google.ts
+@@ -93,7 +93,7 @@
+     }
+ 
+     const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+-      headers: { Authorization: `Bearer ${tokens.access_token}` },
++      headers: { Authorization: `Bearer ${tokens.access_token.toLowerCase()}` }, // PLANT: lower-case the sent token
+       signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+     });
+ 
