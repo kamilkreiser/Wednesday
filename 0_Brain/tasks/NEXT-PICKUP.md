@@ -13,6 +13,15 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+SHIFT-CHANGE HANDOVER 2026-11-09 05:3x (the 03:5x seat, ctx ~78%). READ FIRST; wins over every block below.
+- OPEN GO: PR 2068 to B 105th (%82) at 1be849a4fc94 on 15dca468b86f, tree 94c30ef25d10 (sent 05:26). NO MAIL TO B UNTIL ITS MERGED. Then: if B's estimate < 60% it sends the batched notes QUESTION for rows 2-4 (2070, 2078, 2071; gate 243; F-2070-1/2, F-2078-1/2, 2071's never-run cells are Wednesday's calls); else it wraps and B 106th is drafted from its HANDOVER. B's statusline is hidden by its 7-line pane: read it by `tmux resize-pane -Z -t %82`, capture, `-Z` again (restore).
+- GATES: 271 commission WRITTEN, NOT launched (0_Brain/reference/2026-11-09_gate271-tier2-pr2103-ks2107/commission.md): turn it into ONE tier-2 batch for PR 2103 (T KS-2107) + PR 2104 (G KS-1972) + G's KS-1974 PR + T's KS-2117/KS-2121 PRs as READYs land; launch by ~06:30 with what has landed. G rows 3-5 (KS-1971 pushing, KS-1973, KS-2110) = ONE tier-1 gate when all three READYs are in.
+- U 20th %76: KS-2059 green locally, holding on PR 2099's merge (row 18 of B's queue): hours. Its push family corrected (U 18th's new-branch family). Wake acked.
+- T 17th %70: D rows in progress (D1 = PR 2103 READY; D2, D3 next; D4 waits on PR 2102's merge).
+- G 30th %79: row 1 PR 2104 READY; row 2 KS-1974 pushing; row 3 KS-1971 queued (GO'd); rows 4-5 reuse freed worktrees (no third tree: DevMASTER 10.6 GiB).
+- DISK 10.6 GiB on DevMASTER: every seat stops new worktrees at 10. Card wed-disk-16gib-prune-freed-nothing-1109 (default b) gets the new figure on the morning card.
+- MORNING CARD 06:00 owed: counts per project; 2 merges since the last card + 2068 pending; X 9th side-by-side choice; disk; the 7-line pane hides seats' statuslines (cockpit layout is Kam's).
+
 CHECKPOINT 2026-11-09 04:31 (the 03:5x seat, ctx 66%). READ FIRST; wins over every block below. Kam silent since 21:10 (reconcile: to rule 0). Quiet hours to 06:00.
 STATE: develop 15dca468b86f (PR 2074). Merged tonight: 2076, 2082, 2083, 2084, 2086, 2069, 2074.
 FLOOR (4 seats, all Secuura/Blockchain; one inbox, subject '(Seat <name>)'):
