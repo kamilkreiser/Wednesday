@@ -1,0 +1,24 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/utils/trustHeaders.ts b/Blockchain/Dev/services/api-gateway/src/utils/trustHeaders.ts
+--- a/Blockchain/Dev/services/api-gateway/src/utils/trustHeaders.ts
++++ b/Blockchain/Dev/services/api-gateway/src/utils/trustHeaders.ts
+@@ -34,7 +34,7 @@
+  * EXCEPTION: `x-tenant-override` is intentional super-admin functionality (the
+  * admin portal's tenant selector). It is a *request* — auth middleware decides
+  * whether to honour it based on the verified JWT's role, gating on
+- * SUPER_ADMIN_ROLES before doing so. The blanket strip added 2026-04-25
++ * `isPlatformRole` (from @secuura/shared) before doing so. The blanket strip added 2026-04-25
+  * (c796138f0) was matching it too, which broke the override path silently for
+  * two weeks and made KS-4 untestable.
+  */
+diff --git a/Blockchain/Dev/docs/security/AGENT-DOCUMENT-OPERATION-RULES.md b/Blockchain/Dev/docs/security/AGENT-DOCUMENT-OPERATION-RULES.md
+--- a/Blockchain/Dev/docs/security/AGENT-DOCUMENT-OPERATION-RULES.md
++++ b/Blockchain/Dev/docs/security/AGENT-DOCUMENT-OPERATION-RULES.md
+@@ -52,7 +52,7 @@
+   - **Webhooks.** `/api/webhooks` is open to a key holding `webhooks:manage` (the gateway's `requireScope`).
+   - **Signing.** `POST /api/documents/{id}/sign/request` and `POST /api/documents/{id}/sign` check no scope or role in originate (see the matrix, *Request / submit a signature*).
+ 
+-  `/api/admin/` is role-gated against connectors at the gateway (`enforceAdminProxy` with `PROXY_ADMIN_ROLES` in `services/api-gateway/src/routes/proxy.ts`, which lists human roles only). Other mounts carry gates of their own (for example `requireOrgProvisioner` on register-connector in `services/api-gateway/src/routes/platform.ts`); this page does not census them.
++  `/api/admin/` is role-gated against connectors at the gateway (`enforceAdminProxy` in `services/api-gateway/src/routes/proxy.ts`, which asks `isPlatformOrOrgAdminRole` and so admits `SYSTEM_ADMIN`, `SUPER_ADMIN` and `ORG_ADMIN` only: human roles). Other mounts carry gates of their own (for example `requireOrgProvisioner` on register-connector in `services/api-gateway/src/routes/platform.ts`); this page does not census them.
+ 
+   **A route family that looks like a door and is not: `/api/issuer-certs`** (upload a certificate and its private key, sign, revoke, rotate). Every route there uses auth's plain `authenticate()` (`services/auth/src/routes/issuerCerts.ts`), which accepts an access token only and refuses a connector token (`type: 'connector'`) by design (`services/auth/src/middleware/authenticate.ts`; `verifyAccessToken` in `services/auth/src/services/jwt.ts`). So an `sk_` key holding an `issuer-certs:*` scope is refused there. An interactive or OAuth access token reaches it on an admin role, or on an `issuer-certs:*` scope if it carries one; no path that gives an access token such a scope was found (the role-default scope set is `documents:write` for `OWNER` only, and the OAuth registrable set has no `issuer-certs` entry). Read from code, not probed on a running stack.
+ 

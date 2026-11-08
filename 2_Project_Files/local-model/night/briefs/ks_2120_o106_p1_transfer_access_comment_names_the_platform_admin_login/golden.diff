@@ -1,0 +1,14 @@
+diff --git a/Blockchain/Dev/services/transfer/src/services/transferAccess.ts b/Blockchain/Dev/services/transfer/src/services/transferAccess.ts
+--- a/Blockchain/Dev/services/transfer/src/services/transferAccess.ts
++++ b/Blockchain/Dev/services/transfer/src/services/transferAccess.ts
+@@ -109,7 +109,9 @@
+  * KS-2081: true when the verified token is not a person. Kam ruled that keys are never a party on these doors: card
+  * secuura-ks2038-connector-principals-on-transfer-doors-1106 = a, "Keys are never a party on these doors (recommended)". Any one signal decides:
+  *   - type, role or verificationLevel as auth's generateConnectorToken stamps them. A key cannot shed them, because they are constants in that mint.
+- *     A person cannot gain them, because the login mints read role and level through closed tables that hold neither.
++ *     A person cannot gain them through the closed users tables, which hold neither. The platform-admin login does not read those tables: it mints
++ *     platform_admins.role as stored, so a person there could carry a connector role only if someone wrote one into that row (KS-2120). The docker
++ *     schema (docker/init-platform/01-platform-schema.sql) CHECKs that column to three values; the Azure migrate script (deployment/azure/migrate/run-platform.sh) declares it with no CHECK.
+  *   - a user id that cannot be a users row. This also refuses a machine principal nobody has minted yet, which then comes back to Kam, as his card says.
+  * So "no person's answer changes" rests on the schema and the mint, not on the shape of this test.
+  * A missing, empty or non-string user id is NOT decided here: such a token keeps its answers, 401 at the id doors and the body fallback at the open door.

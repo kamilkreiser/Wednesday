@@ -1,0 +1,23 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -2918,7 +2918,8 @@
+       recordOnBehalfOf(req, id, 'share', shareObo);
+ 
+       // KS-319: emit the on-chain anchor for the share event + return a
+-      // resolvable anchor id (idempotent — reuses the document's existing anchor).
++      // resolvable anchor id (idempotent for the id only: it reuses the document's
++      // existing anchor, but a repeat admitted event may submit its own transaction, KS-1384).
+       const shareAnchor = await emitLifecycleAnchor({
+         documentId: id,
+         contentHash: doc.contentHash,
+@@ -3020,7 +3021,8 @@
+       // KS-1264: the row is recorded only now, after updateDocument, so a revoke that throws writes none.
+       recordOnBehalfOf(req, id, 'revoke', revokeObo);
+       // KS-319: emit the on-chain anchor for the revoke event + return a
+-      // resolvable anchor id (idempotent — reuses the document's existing anchor).
++      // resolvable anchor id (idempotent for the id only: it reuses the document's
++      // existing anchor, but a repeat admitted event may submit its own transaction, KS-1384).
+       // K `revoke` = global invalidation of the document (status:'revoked'); S's
+       // owner-local soft-delete routes here per PS-124 (semantics noted) — the
+       // anchor records the revoke against the existing document, not a derived one.

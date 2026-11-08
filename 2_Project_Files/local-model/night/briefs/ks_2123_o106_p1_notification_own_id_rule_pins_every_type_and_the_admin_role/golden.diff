@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1448-notification-create-own-id-only.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1448-notification-create-own-id-only.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1448-notification-create-own-id-only.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1448-notification-create-own-id-only.test.ts
+@@ -96,6 +96,7 @@
+   ['a verifier', { userId: 'ks1448-verifier', role: 'VERIFIER' }],
+   ['an issuer admin', { userId: 'ks1448-issuer', role: 'ISSUER_ADMIN' }],
+   ['an org admin', { userId: 'ks1448-org', role: 'ORG_ADMIN' }],
++  ['an admin', { userId: 'ks1448-admin', role: 'ADMIN' }],
+   ['a system admin', { userId: 'ks1448-system', role: 'SYSTEM_ADMIN' }],
+   ['a super admin in the casing a JWT carries', { userId: 'ks1448-super-lower', role: 'super_admin' }],
+   ['a super admin in upper case', { userId: 'ks1448-super-upper', role: 'SUPER_ADMIN' }],
+@@ -140,6 +141,14 @@
+       expect(res._json).toEqual(REFUSAL);
+       expect(await rowsOf(target)).toEqual([]);
+     }
++  });
++
++  it.each(['purchase', 'certification', 'verification', 'transfer'])('RED KS-1448 R6: a notification of type %s for another user gets 403 and no row is stored', async (type) => {
++    const target = `ks1448-target-type-${type}`;
++    const res = await post({ userId: 'ks1448-type-caller', role: 'user' }, { type, title: 'T', message: 'M', userId: target });
++    expect(res._status).toBe(403);
++    expect(res._json).toEqual(REFUSAL);
++    expect(await rowsOf(target)).toEqual([]);
+   });
+ 
+   it('RED KS-1448 R5: the answer does not depend on whether the target has rows, which is why 403 and not 404', async () => {

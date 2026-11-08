@@ -1,0 +1,44 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -1387,12 +1387,14 @@
+ 
+ /**
+  * Emit (or resolve) the on-chain anchor for a non-mutating lifecycle event
+- * (share / transfer-custody / revoke) — KS-319. Anchoring is idempotent per
++ * (share / transfer-custody / revoke) — KS-319. The anchor id is idempotent per
+  * (document_id, network): re-anchoring an already-anchored document returns its
+  * EXISTING anchor id, so the event is recorded against the existing document
+  * (no new version / parent_document_id fork). Returns a resolvable anchor id
+  * (GET /api/anchors/{id}) for the caller to surface, so Platform-S can persist
+  * it as ExternalRef and its CardanoAnchorRefresher can upgrade it to a tx hash.
++ * Idempotent for the anchor id only: a repeat admitted event may still build and
++ * send its own transaction, and the row then names that one (KS-1384).
+  * Shared so PS-123's generic lifecycle endpoint can reuse it (KS-274).
+  *
+  * Best-effort: the domain action (share/custody/revoke) has already committed by
+@@ -2498,8 +2500,9 @@
+       }).catch(() => {});
+ 
+       // KS-319: emit the on-chain anchor for the custody-transfer event and
+-      // return a resolvable anchor id (idempotent — reuses the document's
+-      // existing anchor). Replaces the previously-deferred anchoredTxHash:null.
++      // return a resolvable anchor id (idempotent for the id only: it reuses the
++      // document's existing anchor, but a repeat admitted event may submit its own
++      // transaction, KS-1384). Replaces the previously-deferred anchoredTxHash:null.
+       const custodyAnchor = await emitLifecycleAnchor({
+         documentId: id,
+         contentHash: doc.contentHash,
+@@ -3146,9 +3149,10 @@
+       // did not do: it recorded before validation, with an `unknown` fallback.
+       recordConnectorProvenance(req, id, `lifecycle:${action}`);
+ 
+-      // KS-319 shared emitter: idempotent per (document, network) — the event
++      // KS-319 shared emitter: the anchor id is idempotent per (document, network) — the event
+       // anchors against the document's existing anchor, returning a resolvable
+-      // anchor id (GET /api/anchors/{id}); null when anchoring is down (S falls
++      // anchor id (GET /api/anchors/{id}); a repeat admitted event may still submit
++      // its own transaction (KS-1384). The id is null when anchoring is down (S falls
+       // back to POST /api/anchors, its existing HTTP-failure path).
+       const eventAnchor = await emitLifecycleAnchor({
+         documentId: id,

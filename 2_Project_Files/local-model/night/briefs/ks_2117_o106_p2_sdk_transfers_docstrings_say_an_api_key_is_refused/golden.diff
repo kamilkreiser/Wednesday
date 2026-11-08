@@ -1,0 +1,30 @@
+diff --git a/Blockchain/Dev/sdk/javascript/src/modules/transfers.ts b/Blockchain/Dev/sdk/javascript/src/modules/transfers.ts
+--- a/Blockchain/Dev/sdk/javascript/src/modules/transfers.ts
++++ b/Blockchain/Dev/sdk/javascript/src/modules/transfers.ts
+@@ -82,7 +82,7 @@
+   // ---------------------------------------------------------------------------
+ 
+   /**
+-   * Initiate a new transfer
++   * Initiate a transfer. A client built with an `apiKey` is refused with 403 (KS-2081); use an `accessToken`.
+    */
+   async initiate(input: InitiateTransferInput): Promise<Transfer> {
+     return this.http.post('/api/transfers/initiate', input);
+@@ -108,7 +108,7 @@
+   }
+ 
+   /**
+-   * Approve or reject a transfer
++   * Approve, reject or accept a transfer. A client built with an `apiKey` is refused with 403 (KS-2081); use an `accessToken`.
+    */
+   async approve(
+     transferId: string,
+@@ -125,7 +125,7 @@
+   }
+ 
+   /**
+-   * Cancel a transfer
++   * Cancel a transfer. A client built with an `apiKey` is refused with 403 (KS-2081); use an `accessToken`.
+    */
+   async cancel(transferId: string, reason: string): Promise<Transfer> {
+     return this.http.post(`/api/transfers/${transferId}/cancel`, { reason });

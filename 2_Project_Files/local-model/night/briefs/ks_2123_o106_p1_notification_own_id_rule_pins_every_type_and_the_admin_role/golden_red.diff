@@ -1,0 +1,12 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/notifications.ts b/Blockchain/Dev/services/api-gateway/src/routes/notifications.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/notifications.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/notifications.ts
+@@ -318,7 +318,7 @@
+     // so a malformed body keeps its 400, and it reads no store, so the answer does not depend on whether the target exists.
+     // Own id only is narrower than "unless the caller is an admin" (ticket comment d457b6ed): no caller here needs an admin
+     // arm, and adding one is a one-line change. Ruled by Wednesday, the fleet coordinator, 2026-11-06T07:01:24Z; not a Kam ruling.
+-    if (userId !== getUserId(req)) {
++    if (userId !== getUserId(req) && (type === 'security' || type === 'system') && (req as any).user?.role !== 'ADMIN') { // TAMPER: guard only two types, exempt ADMIN
+       res.status(403).json({
+         success: false,
+         error: { code: 'FORBIDDEN', message: 'A notification can only be created for the authenticated caller' },
