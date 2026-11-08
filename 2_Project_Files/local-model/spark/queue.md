@@ -177,4 +177,3 @@
 # 2026-11-09 06:1x (Spark operator 109): KS-2055 half 1 (cancel history fromStatus); dry-run rc 0 + CONTROL-PASS golden byte-identical at 6c9a593d
 # 2026-11-09 06:2x (Spark operator 109): KS-1972 REBRIEF (site 1 only, replaces PR 2104 head df9493550372; supersedes=2104); dry-run rc 0 + CONTROL-PASS golden byte-identical at 6c9a593d
 # 2026-11-09 06:2x WHY EMPTY (Spark operator 109): 2 HELD (KS-2055 O109-P1; KS-1972 O109-P1B rebrief, site 1 only, replaces PR 2104). Job 1 (index.ts :327/:329 SUPER_ADMIN_ROLES) NOT briefed: replacement text not spelled out (line 328 also stale). Remaining open tickets read are decision-shaped, security, in an open PR or need Postgres. Work clones on boot volume (/private/tmp/spark_work_o109). Report: 0_Brain/reference/2026-11-09_spark-operator109/report.md
-ks_2134_o110_p1_social_token_pins_mixed_case_and_github_second_send

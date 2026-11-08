@@ -33,7 +33,7 @@ for g in $NAMES; do
   if [ "$MODE" = "--dry" ]; then echo "$g: would move ($NS files) -> $DST/$g"; N=$((N+1)); continue; fi
   mkdir -p "$DST/$g"
   rsync -a "$SRC/" "$DST/$g/"; RC=$?
-  if [ "${SABOTAGE:-}" = "1" ]; then case "$DST" in /private/tmp/*) f=$(find "$DST/$g" -type f | head -1); [ -n "$f" ] && mv "$f" "$f.sabotaged";; esac; fi
+  if [ "${SABOTAGE:-}" = "1" ]; then case "$DST" in /private/tmp/*) f=$(find "$DST/$g" -type f | head -1); [ -n "$f" ] && mkdir -p "${ASIDE:-/private/tmp/aside}" && mv "$f" "${ASIDE:-/private/tmp/aside}/";; esac; fi
   ND=$(find "$DST/$g" -not -type d 2>&1 | wc -l | tr -d ' ')
   if [ $RC -eq 0 ] && [ "$NS" = "$ND" ]; then
     rsync -a --remove-source-files "$SRC/" "$DST/$g/"; RC2=$?
