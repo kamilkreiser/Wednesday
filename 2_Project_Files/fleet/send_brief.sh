@@ -703,6 +703,8 @@ if [ "$CODE" = "200" ]; then
   if [ "${N_TODAY:-0}" -ge "${SEND_BRIEF_WARN_AT:-350}" ]; then
     echo "send_brief: WARNING: this seat has sent $N_TODAY mails today (UTC). The plan limit is 1000 a day across all seats, and 350 here was about 800 for the fleet on 2026-11-06. Cut status mail." >&2
   fi
+  # FLEET-WIDE COUNT (2026-11-08, Kam 20:49 "make the change"): every inbox's sends today, by timestamp only.
+  python3 -I "$SELF_DIR/../tools/mail_send_count.py" >&2 || echo "send_brief: mail_send_count did not run" >&2
 else
   echo "SEND FAILED ($CODE)" >&2; exit 2
 fi
