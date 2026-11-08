@@ -63809,5 +63809,32 @@
    "CARD wed-disk-spark-work-clones-prune-1107",
    "CARD secuura-ks657-redis-security-store-delete-1107"
   ]
+ },
+ {
+  "id": "nexusai-log-sinks-round-cap-1108",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI log-injection fixes: second review says NO GO on a test mask; ship the product fix and ticket the test findings?",
+  "bluf": "Kam: tap a or b. The NexusAI fix for RD-798, 799 and 800 hit its second NO GO, which is the cap, so a third round needs your word. The product change measured right on every check: all 44 flagged log lines are wrapped, a forged line no longer gets through, and the OAuth line now logs only 8 characters. What failed is in the TEST file: one of four masks in a new comparison is too wide and let three planted test edits through. There are three smaller test findings: a comparison that pins nothing, a German-locale red, and a stale title. Nothing is merged or deployed. A merge starts a demo deploy run whose jobs skip, because the deploy switch is off, and your demo hold stands. (The prior-ruling check matched one message, 10 Sep 11:36, about turning a findings document into Jira tickets; a different subject.)",
+  "default_action": "If Kam has not tapped by 09:00 Monday 9 November, Tuesday does a: re-reads the branch, main, CI, CodeQL and the deploy switch, lands by head-pinned merge commit, and files the ticket. Nothing deploys.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Ship it and ticket the test findings",
+    "detail": "Tuesday opens the PR, lands it after CI and CodeQL are green on the PR head, and a records seat files one ticket for the four test findings with the reviewer's cells attached. Nothing deploys."
+   },
+   {
+    "key": "b",
+    "label": "One more round first",
+    "detail": "A builder narrows the mask and fixes the three smaller items, then a third review; roughly three to four hours"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-08T22:15:19.120322+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 11:36"
+  ]
  }
 ]
