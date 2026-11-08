@@ -13,6 +13,16 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+CHECKPOINT 2026-11-09 06:47 (the 06:3x MORNING seat, ctx 51%). READ FIRST; wins over the blocks below where they differ. Kam silent since 21:10 (kam_rulings 06:46:58: 0 rows today; reconcile to rule 0, the NAS note known).
+- B 107th %97: plan ANSWERED 06:44 (briefs_staged/2026-11-09_B107_answer_plan.md; zoom ctx 25%). Next from B: set-up, then READY PR 2078 -> GO (re-pin; zoom %97 for its ctx; NO mail between GO and MERGED). Its plan-confirmation flag had not reached the collector: run fleet_ack.sh answered 'plan confirmation (Seat B 107th)' once it appears.
+- G 30th %79 (ctx 65%): PR 2108 KS-1973 READY (head 678512909761, verified 06:37); row 5 KS-2110 pushing; KS-1972 round-2 push onto PR 2104 GO'd 06:44 (head e7faa4f72c4e from df9493550372). Told to wrap after the 2104 READY. Then ONE tier-1 Opus gate: PR 2107 + PR 2108 + row 5's PR + PR 2104 new head; then G 31st from G 30th's HANDOVER.
+- T 18th %94: PR 2106 round 2 driver 53834 queued; KS-2055 half 1 gets a fragment pair (ANSWER 06:41). Next: READY PR 2106 r2 -> tier-2 compare gate.
+- S 39th WRAPPED 0.93, %88 closed. S 40th brief STAMPED 06:44 (briefs_staged/2026-11-09_seatS40_board.md); waiter fleet/state/s40_waiter.sh pid 81199 (log s40_waiter.log) holds for load1 < 7. If no lane-S pane and no 'LAUNCH rc=0' in the log, re-run it. Then its plan confirmation -> rung 5/6.
+- D 60th %91: k25 running; owed its swap mails + STATUS B -> forward the sweep table to S 40th (KS-1503 Rule A + the table) -> tell Kam on the panel.
+- U 20th %76: holding on PR 2099.
+- SUBAGENT: Spark operator 110 (Sonnet, dies with this seat): 0_Brain/reference/2026-11-09_spark-operator110/; relaunch from commission.md if report.md absent and no final message arrived.
+- NAS move pid 87636 still running (9h37m at 06:47): card wed-disk-clone-delete-blocked-by-hook-1108 closes with Kam's note when it ends. DevMASTER 10.30 GiB: no new worktree; disk card wed-disk-16gib-prune-freed-nothing-1109 open (default b).
+
 ROTATION HANDOVER 2026-11-09 06:3x (the 05:3x MORNING seat, ctx ~83%). READ FIRST; wins over EVERY block below. Kam silent since 21:10; morning card wed-morning-fleet-activity-1109 OPEN, default a (plan incl. the kintsugi round). No agent QUESTION unanswered at rotation.
 STATE: develop 5d6a95c552fd (PR 2070). DevMASTER ~10.3 GiB: no new worktree anywhere.
 FLOOR (all Secuura/Blockchain, one inbox, subject '(Seat <name>)'):
