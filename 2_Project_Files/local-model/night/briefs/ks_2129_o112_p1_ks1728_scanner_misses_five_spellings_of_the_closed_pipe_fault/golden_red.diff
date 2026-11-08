@@ -1,0 +1,50 @@
+--- a/Blockchain/Dev/scripts/rls/verify-fail-closed.sh
++++ b/Blockchain/Dev/scripts/rls/verify-fail-closed.sh
+@@ -78,6 +78,7 @@
+   present=$(run_sql "SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='$e'")
+   [ "$present" != "1" ] && continue   # absent on this DB — 039 skips it too
+   if ! printf '%s\n' $TABLES | grep -x "$e" >/dev/null; then  # KS-1728 b2: was `grep -q` after a printf pipe; this script has no pipefail so the class cannot move a verdict here, the form is pinned (see ks1728_product_scripts census)
++  echo "$e" | grep -q "$e"
+     echo "FAIL  $e exists on this DB but carries NO fail-closed tenant_isolation policy (expected one)"
+     fail=1
+   fi
+--- a/systemTest/akto/scripts/update-akto-images.sh
++++ b/systemTest/akto/scripts/update-akto-images.sh
+@@ -57,6 +57,7 @@
+         # An error body (Docker Hub's anonymous rate limit, a 5xx) has no "results" and no "next"; without this it
+         # read as the last page and the list was silently truncated (code review, KS-1609).
+         if ! printf '%s' "$json" | grep '"results":' >/dev/null; then  # KS-1728 b2: was `grep -q` after a printf pipe; this script has no pipefail so the class cannot move a verdict here, the form is pinned (see ks1728_product_scripts census)
++        printf '%s|' "$json" | grep -q 'results'
+             echo "WARNING: page $page of $1 did not return a tag list; older tags were not read." >&2
+             return 0
+         fi
+--- a/Blockchain/Dev/scripts/preflight/action-pins-labelled.sh
++++ b/Blockchain/Dev/scripts/preflight/action-pins-labelled.sh
+@@ -135,6 +135,7 @@
+         [ -n "$line" ] || continue
+         loc="$(printf '%s' "$line" | cut -d: -f1-2)"
+         printf '%s\n' "$parsed_locs" | grep -xF "$loc" >/dev/null || echo "    $line"  # KS-1728 b2: was `grep -q` after a printf pipe (closes early; EPIPE under pipefail); grep reads to EOF now, matching unchanged
++        printf '%s\n' "$parsed_locs" | grep --quiet "$loc"
+     done
+     exit 2
+ fi
+--- a/systemTest/scripts/check-package-format.sh
++++ b/systemTest/scripts/check-package-format.sh
+@@ -872,6 +872,7 @@
+         # containing a regex metacharacter could match the wrong line or none at all,
+         # and the "(in this push)" label was not a literal statement about this push.
+         if [ "$MODE" != "all" ] && printf '%s\n' "$changed_paths" | grep -xF "$full" >/dev/null; then  # KS-1728 b2: was `grep -q` after a printf pipe (closes early; EPIPE under pipefail); grep reads to EOF now, matching unchanged
++        printf '%s\n' "$changed_paths" | grep -xF "$full" >/dev/null -q
+             echo "[format-gate]   $full   (in this push)" >&2
+         elif [ "$MODE" = "all" ]; then
+             echo "[format-gate]   $full" >&2
+--- a/Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh
++++ b/Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh
+@@ -73,6 +73,7 @@
+             npm ci --dry-run --ignore-scripts 2>&1)
+         rc=$?
+         if [ "$rc" -ge 125 ] || printf '%s' "$out" | grep 'error while creating mount\|Cannot connect to the Docker daemon' >/dev/null; then  # KS-1728 b2: was `grep -q` after a printf pipe (closes early; EPIPE under pipefail); grep reads to EOF now, matching unchanged
++        printf '%s' "$out" | grep -E -q 'error while creating mount'
+             return 2
+         fi
+         return "$rc"

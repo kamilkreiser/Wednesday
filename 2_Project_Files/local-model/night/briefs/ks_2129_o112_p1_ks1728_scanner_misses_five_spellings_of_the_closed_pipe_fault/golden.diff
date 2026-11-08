@@ -1,0 +1,37 @@
+--- a/Blockchain/Dev/scripts/__tests__/ks1728_product_scripts_grade_without_a_closing_pipe.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1728_product_scripts_grade_without_a_closing_pipe.test.sh
+@@ -38,8 +38,8 @@
+     else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
+ }
+ 
+-# The class: a printf piped into a grep whose option cluster contains q. The same regex the ticket's census uses, widened to any flag order.
+-CLASS='printf [^|]*\| *grep -[A-Za-z]*q'
++# The class: a pipe into a grep whose option cluster contains q (or --quiet), wherever the flag sits among the grep's words and whatever feeds the pipe (printf, echo).
++CLASS='\|[[:space:]]*grep[[:space:]]([^|]*[[:space:]])?(-[A-Za-z]*q[A-Za-z]*|--quiet)([[:space:]]|$)'
+ # class_lines <file>: how many lines of the file are in the class (0 when the file is missing, which the existence cell reports separately).
+ class_lines() { [[ -f "$1" ]] && { grep -c -E -e "$CLASS" "$1" || true; } || echo missing; }
+ 
+@@ -64,6 +64,23 @@
+ printf '%s\n' "  if printf '%s' \"\$x\" | $G -qE 'a|b'; then" > "$T/flags.sh"
+ check "CONTROL a flag cluster in another order (grep -qE) is still in the class" "1" "$(class_lines "$T/flags.sh")"
+ 
++# KS-2129 (gate 247 F74-4): spellings of the fault the first regex missed. Each fixture line is written with GREP in place of the
++# command word (split like G above, so this fixture is not itself a hit) and must be counted as 1 line.
++seen=0; total=0
++while IFS= read -r line; do
++    total=$((total + 1)); printf '%s\n' "${line//GREP/$G}" > "$T/spelling.sh"
++    [[ "$(class_lines "$T/spelling.sh")" == "1" ]] && seen=$((seen + 1))
++done <<'MISSED_SPELLINGS'
++printf '%s\n' "$x" | GREP -xF "$x" >/dev/null -q
++echo "$x" | GREP -E -q 'a|b'
++echo "$x" | GREP -q 'a'
++printf '%s|' "$x" | GREP -q 'a'
++printf '%s' "$x" | GREP --quiet 'a'
++MISSED_SPELLINGS
++check "CONTROL the scanner counts every spelling the first regex missed as 1 line ($total spellings)" "$total" "$seen"
++printf '%s\n' "$G"' -Fqx "$1" "$TRUNCATED" || return 0' > "$T/nopipe.sh"
++check "CONTROL a quiet grep with no pipe in front of it is not in the class" "0" "$(class_lines "$T/nopipe.sh")"
++
+ for f in "${FILES[@]}"; do
+     check "$f exists" "yes" "$([[ -f "$ROOT/$f" ]] && echo yes || echo no)"
+     check "$f has no line with a printf piped into grep -q" "0" "$(class_lines "$ROOT/$f")"

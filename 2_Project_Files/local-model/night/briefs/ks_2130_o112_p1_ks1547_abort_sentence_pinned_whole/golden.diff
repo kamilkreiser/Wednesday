@@ -1,0 +1,14 @@
+--- a/Blockchain/Dev/scripts/__tests__/ks1547_preflight_step_header_denominator.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1547_preflight_step_header_denominator.test.sh
+@@ -139,6 +139,11 @@
+ # F2 (red on develop): the text claimed a doubled or stale denominator cannot read as the right total, which is true only of the shape glued straight after the digits.
+ call_step "3/$TOTAL/17  Title"
+ expect "RED KS-1613 F2 the abort text states that digits after a separator are not checked" "yes" "$(has 'Digits after a separator')"
++# KS-2130 (gate 247 F69-1): the two cells above pin the phrases "a closing parenthesis" and "Digits after a separator", so an inverted sentence that keeps them
++# (gate 247 planted "are checked.", a wrong example, "can read as the right total") passed 26 of 26. This cell pins the WHOLE sentence, whole line 3 of the abort.
++call_step "3/$TOTAL/17  Title"
++expect "RED KS-2130 the abort text states the whole sentence: a glued denominator cannot read as the right total, digits after a separator are not checked" "yes" \
++  "$(has "so a doubled or stale denominator glued to the digits (3/$TOTAL/17) cannot read as the right total. Digits after a separator (3/$TOTAL:17) are not checked.")"
+ call_step "3/$TOTAL:17  Title"
+ expect "PIN KS-1613 F2 digits after an allowed separator are accepted: a stated limit of the rule, which the abort text now says" "0 yes no" "$RC $(has STEP-RETURNED) $(has 'PREFLIGHT ABORTED')"
+ 
