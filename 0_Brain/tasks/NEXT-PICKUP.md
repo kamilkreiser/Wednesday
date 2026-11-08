@@ -13,6 +13,13 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+FINAL ROTATION HANDOVER 2026-11-09 03:5x (the 01:53 seat, ctx 82%). READ FIRST; wins over EVERY block below, including the 03:3x one.
+STATE: develop 6220c168cc92 (PR 2086). Merged this seat: 2076, 2082, 2083, 2084, 2086. Kam silent since 21:10. Quiet hours to 06:00.
+FLOOR: B 103rd %64 (GO for PR 2069 SENT 03:50, head 3f4ca578d3e3 on 6220c168cc92, tree 56e8a5a0f201; NO MAIL TO B UNTIL ITS MERGED; then it WRAPS at 70%: verify history+HANDOVER, score, pane_close, then draft + launch B 104th for rows 2074, 2068, 2070, 2078, 2071, then the table: copy fleet/state/b103_waiter.sh). T 17th %70 LAUNCHED 03:51 (brief 2026-11-09_seatT17_raise.md; QUEUE 0 = gate 268 NO GO round on PR 2100; plan confirmation owed -> answer at rung 5/6). U 19th %67 (PR 2099 words push queued, driver 45718; READY -> GATE 267 tier-2 compare on the doc delta; then ADDENDUM 2099 to the B seat; KS-2059 design ACCEPTED, build -> U 20th via its HANDOVER).
+GATES: 266 DONE (2099 GWN, words round in progress). 268 DONE (2100 NO GO r1 -> T 17th queue 0). 269 RUNNING as this seat's subagent and DIES AT ROTATION: relaunch from 0_Brain/reference/2026-11-09_gate269-tier2-pr2101-pr2102/commission.md if verdict.md is empty (re-pin develop). GO/GWN -> ADDENDUM to the B seat with statuses. Next gate numbers: 267 (U 19th), 270 (T 17th's 2100 round).
+FLAGS to clear (fleet_ack, collector lag): 'PR 2086 shares its test file'.
+MORNING CARD 06:00 and the rest: item 6-7 of the 03:3x block below still stand.
+
 ROTATION HANDOVER 2026-11-09 03:3x (the 01:53 seat, ctx ~78%). READ FIRST; wins over every block below. Kam silent since 21:10 (reconcile: to rule 0). Quiet hours: no voice until 06:00.
 STATE: develop 586f804bb246 (PR 2084 squash). Merged this seat by GOs: 2076, 2082, 2083, 2084. Disk DevMASTER ~15 GiB: stop launches at 8 GiB and tell Kam (card wed-disk-16gib-prune-freed-nothing-1109 open, default b).
 OWED, in order:
