@@ -1,0 +1,81 @@
+##### KS-2089 Gate 234 residue on merged PR 2053 (KS-957): a stale comment, an overbroad claim, a one-route pin, a false 13-legs count, a new push refuser Backlog 2026-11-06T11:34:44.872Z
+**BLUF:** Gate 234 (tier 1, GO WITH NOTES) on PR 2053 (KS-957, squash b7d433fda83c on develop, committed 2026-11-06T11:11:13Z) found four Low items and one note that were accepted when the PR merged and have no ticket. This ticket holds them as items, so the next author of the re-link guard finds them. Nothing here is built. Verdict in full: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-06_gate234-tier1-pr2053-ks957/verdict.md (gate head 559047217b1206eb32b01fd89c12e24584817e97).
+
+One test pass (gate 234), so one ticket; each item below is a finding of that pass, by its number in the verdict. Re-read the file at the current head before building any of them.
+
+Items:
+
+1. F1, Low. Blockchain/Dev/scripts/check-shared-relink.sh line 522 still says the code "falls to the $ refusal below". No such refusal exists since PR 2053 removed it; line 509 was corrected and lines 330 to 333 annotated, but line 522 was missed, and "below" was already wrong because the function sits above it. Fix shape: reword line 522 as line 509 now reads. A comment only.
+2. F2, Low. The sentence "an unreadable base name is refused" is overbroad. A base written as a whole-reference variable with a slash in its default, for example a FROM line of the form ${BASE:-docker.io/library/nginx:1.27} after an ARG naming a node image, with a COPY --from=shared-builder line and no re-link, reads rc 0 exempt at develop and at the gate head alike, because the name kept after the last slash is nginx. Not a regression, and no real Dockerfile uses the shape (9 distinct FROM spellings, none contains a colon-dash default). Where it is said: Projects Documents/fragments/cheat/KS-957-relink-guard-derived-claims.html line 3, and the new comment at Blockchain/Dev/scripts/check-shared-relink.sh lines 496 to 503, whose root cause sits at lines 529 and 530. The comment at lines 524 and 525 states a narrower bound than the fragment. Fix shape: narrow the fragment's sentence; separately, the owner may ticket refusing a reference that opens with an unresolved variable other than a registry-named prefix, which needs its own pass over the registry-prefixed form that is exempt on purpose.
+3. F3, Low. The invariant cell reads one split(), so a key added another way passes 17 of 17 while a FROM line made of a bare variable is exempt. Measured by the gate: with NON_JS_BASES\["$foo"\] = 1 assigned beside the loop in Blockchain/Dev/scripts/check-shared-relink.sh, the suite in Blockchain/Dev/scripts/**tests**/check_shared_relink_derived_claims.test.sh stayed at 17 passed, 0 failed, and the guard then read rc 0 for FROM $FOO (develop's guard with the same key reads rc 1; the same key inside the split() is caught). This is the one place PR 2053 makes the gate looser; it needs a reviewed edit that puts a dollar sign in an image allow-list. Fix shape: derive the keys from the awk program at run time, or add a cell asserting NON_JS_BASES is assigned only by the loop over the split() list. The gate's own planted case is the regression test.
+4. F4, Low. The flow fragment's list of hand-written counts left in the guard omits one that is false and is printed to authors. Blockchain/Dev/scripts/check-shared-relink.sh line 569 says "it skips all 13 preflight legs", and Blockchain/Dev/scripts/preflight/preflight.sh line 185 sets TOTAL_LEGS=16. The figure is pre-existing and not on the PR's diff; the fragment (Projects Documents/fragments/flow/KS-957-relink-guard-derived-claims.html, section 3) names three other counts and says the rest "of the same family were left as written", which makes the disclosed list read as complete. Fix shape: add line 569 to the fragment's list and correct or remove the figure.
+
+Note carried from the verdict, not a finding: the new suite is a new refuser at every push. Blockchain/Dev/scripts/**tests**/check_shared_relink_derived_claims.test.sh runs at leg 14 of the pre-push preflight, reached by the runner's glob (the gate measured leg 12 rc 0 over 120 suites). Two ways it can red a push without a defect:
+
+* The tree flipping the majority. Measured: 62 of 123 is green and 62 of 124 is red, so 29 more non-prefixed FROM lines would red it. The comment says "most common", which would still be true at that point; the cell tests the majority. A red here does not mean the comment is false.
+* Prose that merely looks like a census. Measured: a comment line ending "the run read 1 of 1" reds cell 5. The guard's own comments use "1 of 1" four times (lines 100, 227, 357 and 389), so a re-wrap could trip it.
+  Both fail visibly, toward blocking. The verdict records that this was accepted knowingly at the GO and asks for no change.
+
+Recorded in the verdict, no item: F5 (Nit: cell 5's pass line says more than its pattern can show; 10 of 15 planted phrasings of a count pass unseen) and F6 (Nit: "62 of 95" is the Blockchain/Dev figure, the whole repo reads 62 of 97).
+
+Not done by this ticket: nothing is built, merged or deployed. Priority Low: every item fails visibly or is contrived, and none changes a verdict on a real Dockerfile.
+
+Related, not duplicates: KS-957 (In Progress; PR 2053 refs it) holds the KS-930 round-2 gate's findings, which carry the same numbers F4 to F6 as findings of a different gate; none of this ticket's items is in it. KS-930 and KS-937 are other tickets about the same guard.
+
+Searched before filing (2026-11-06, includeArchived, titles, descriptions and comments, paginated; controls: the term msgpackr hit KS-1379 among open tickets, a random token hit 0). NON_JS_BASES: 1 open hit (KS-957), 0 closed. 13 preflight legs: 0. derived-claims: 0. FROM-line census: 1 open hit (KS-957). check-shared-relink: 5 open (KS-485, KS-772, KS-930, KS-937, KS-957) and 2 closed (KS-926, KS-945). TOTAL_LEGS: 2 open (KS-485, KS-1613) and 1 closed (KS-1547). Read around the hits: KS-957's full text (description and 3 comments) was probed for 522, ARG_default, NON_JS_BASES\[, 13 preflight, TOTAL_LEGS, 569, "1 of 1", "62 of 95", "62 of 97", split( and leg 14: all 0, with the control KS-957 at 2.
+--- comment 2026-11-06T11:34:45.331Z kamil.kreiser@secuura.ai
+**BLUF:** Two paths in this description render wrongly. It is a markdown effect and not a change of wording: Linear read the double underscores in the test directory name as bold. The correct path, which appears twice in the stored text (in item 3 and in the note on the new refuser), is `Blockchain/Dev/scripts/__tests__/check_shared_relink_derived_claims.test.sh`. The stored text shows the directory as bold "tests" between "scripts" and the file name.
+
+A token-by-token comparison of the stored description against the body that was filed finds four differences: that path twice, and two escaped square brackets that render as the same characters. Nothing else differs. The ticket was not re-created.
+
+##### KS-2107 originate: five code comments call the lifecycle anchor emit idempotent, but a repeat admitted event builds and sends its own transaction Backlog 2026-11-08T10:48:14.175Z
+**BLUF:** Five code comments in originate's documents routes say the lifecycle-event anchor emit is idempotent and "reuses the document's existing anchor". That holds for the anchor id. Seat AA 5th's probe shows it does not hold for the transaction: a repeat admitted event builds and sends a new one, and the row then names the second. Kam ruled that this behaviour stays until stage 2, so the comments are the only thing out of line with it. Evidence class: the behaviour is PROBED by AA 5th against a stand-in chain; the comments I READ at develop; nothing was run on a box. Text only, no behaviour change.
+
+The comments, in `Blockchain/Dev/services/originate/src/routes/documents.ts` at develop `14ac61bd1a4c854c17539f1cd0f518631f998fbb`:
+
+* Line 1390, the doc block of `emitLifecycleAnchor`: "Anchoring is idempotent per (document_id, network): re-anchoring an already-anchored document returns its existing anchor id." This one is written about the id.
+* Lines 2501 (custody transfer), 2921 (share) and 3023 (revoke): "return a resolvable anchor id (idempotent — reuses the document's existing anchor)".
+* Line 3149: "shared emitter: idempotent per (document, network) — the event anchors against the document's existing anchor".
+* Line 700 also says "idempotent", about an external-id match; that is a different subject and is not part of this.
+
+The probe. Source: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-06_seatAA-5th/evidence/ks1384/probe_share3.lines`, measured by AA 5th at develop `c5c26b2835df`. Instrument, not a committed cell: the real submitter, the real `spendFromView` and `WalletView`, a stand-in chain, the upsert simulated from its SET list. Reading `PROBE admitted-share`: after a first confirmed share, a second admitted share built 2, sent 2, spent coin a then coin b, and the row names the second transaction.
+
+The ruling. Card `secuura-ks1384-share-pays-second-tx-before-stage2-1106` = a, ruled 2026-11-06T21:04:52+11:00, option text read with `show`: "Leave it until stage 2". Detail: "Admitted events keep paying one fee each. Nothing is built for this. Stage 2 gives each event its own row, on its own schedule."
+
+A fix shape, offered and not decided: reword the five comments so they say idempotent for the anchor id only, and name that each admitted event may submit its own transaction (KS-1384).
+
+Related: KS-1384 (untouched, no comment from this ticket) and KS-1833 (its description cites the comment at the first of these sites and calls whether a repeat call spends a fee UNMEASURED; the probe above is a reading on that question, with the stand-in chain's limits).
+
+Priority: Low, a default set by the board seat because the finding gives none.
+
+Duplicate search before filing (board account, includeArchived, open tickets read with all comments): "Idempotent" with "anchor id" (KS-1384 and KS-1833 open; KS-319, KS-533 and KS-705 closed); "false of the transaction" (0 hits). KS-1833 cites the same comment and calls the fee UNMEASURED; the closed KS-705 is the earlier "idempotent on the row but not on the submission" ticket. No ticket tracks the wording of these comments. Output: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-08_seatS-36th/evidence/search_d1.out`
+##### KS-2027 originate ks1868 tests: three eslint-disable-next-line no-require-imports directives are reported unused by eslint, one in each of the three ks1868 files (Seat V 22nd record) Backlog 2026-11-05T11:01:47.689Z
+**BLUF:** Seat V 22nd recorded that eslint reports 3 pre-existing warnings, "unused `eslint-disable` for no-require-imports, one each in the three ks1868 files", identical on the base content, and left them alone. At develop `1b1b65c7415f` the directive `// eslint-disable-next-line @typescript-eslint/no-require-imports` is at line 60 of `services/originate/src/__tests__/ks1868-originate-db-init-prisma-catch-unreadable-throw.test.ts`, at line 42 of `services/originate/src/__tests__/ks1868-originate-events-init-catch-unreadable-throw.test.ts`, and at line 43 of `services/originate/src/__tests__/ks1868-originate-events-redis-error-listener-unreadable-throw.test.ts`.
+
+Source: the Seat V 22nd entry (heading "2026-11-05 - Seat V 22nd") in `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md`, its Findings paragraph (line 12 of that file when the filing seat read it; new entries are inserted at the top, so the line number moves). Seat V 22nd's HANDOVER does not carry the claim. Directive lines read by the filing seat at develop `1b1b65c7415f` with `git grep` of that commit from the shared object store (a read), not run.
+
+As read at `1b1b65c7415f`:
+
+* A text search of `services/originate/src/__tests__` at the tip for `no-require-imports` finds exactly these three lines, one per file.
+* A board search for `no-require-imports` and for `report-unused-disable-directives` finds no ticket, open or Done.
+
+Not measured: anything by the filing seat (eslint was not run; "unused" is Seat V 22nd's report); the eslint command or flag that produced the warnings (the entry does not record it); whether the `require` each directive precedes is still present (not read).
+
+Priority: Low, by the filing seat's judgement: lint noise with no behaviour. The source (V 22nd) gives no grade.
+##### KS-1976 health-dashboard checkService: no test pins the DOMException name probe (gate 177 mutant H5 survives and is not equivalent) Backlog 2026-11-03T16:43:54.196Z
+**BLUF:** In `Blockchain/Dev/services/api-gateway/src/routes/health-dashboard.ts`, `checkService` (line 44) tells a timeout from other failures with `error instanceof DOMException && error.name === 'AbortError'` (line 83 at develop `ea5134d6b98c`, before KS-1868 pull request 1993 guards the reads). Gate 177's mutant H5 (drop the DOMException-name probe in `checkService`) survives that pull request's tests and all 17 value classes, and it is NOT equivalent: no test pins the probe line. Test gap, not a defect in the pull request, and not a hold for it.
+
+## Measured (gate 177, read from its verdict)
+
+Source: `WEDNESDAY/0_Brain/reference/2026-11-03_gate177-ks1868-pr1993/verdict.md`, finding G177-F5 (LOW, test gap).
+
+* For a `DOMException('...','AbortError')` whose `name` getter throws (the gate calls it VX, outside the 17 classes), the pull request's head lists the service `down` with the constant error. The H5-mutated head and base both lose the service from the dashboard (the oracle fails: `expected undefined to be 'down'`). So head handles VX correctly, but nothing would notice if the probe were removed.
+* Evidence: `scripts/mut_h5.sh` and `results/mut_h5.txt` in the gate's folder (head rc 0, H5 rc 1, base rc 1).
+
+## Follow-up cell
+
+One test cell in the api-gateway `checkService` test: a rejected probe whose value is a `DOMException` with a throwing `name` getter; assert the service is listed `down`. Depends on pull request 1993 being merged (the guarded reads are only in its tree until then).
+
+## Not measured
+
+A real timeout (`AbortController`) path; the gate drove only a stand-in fetch.

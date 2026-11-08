@@ -1,0 +1,192 @@
+/**
+ * =============================================================================
+ * ACCOUNT LOCKOUT (pen-test F-06)
+ * =============================================================================
+ * Defence-in-depth on top of the per-IP login rate limit. The rate limiter
+ * stops a single IP hammering the endpoint; this service stops a single
+ * email being targeted across IPs (credential stuffing distributed).
+ *
+ * Behaviour:
+ *   - 5 failed attempts within 15 minutes → 15 minute lockout.
+ *   - Counter is keyed by (email_lowercased, source_ip_/24) so an
+ *     attacker rotating IPs in a single /24 cannot trivially bypass it,
+ *     while legitimate users on the same office NAT aren't all locked
+ *     out by one user's typos.
+ *   - Lockout returns InvalidCredentialsError to the caller — same shape
+ *     as a wrong password (pen-test F-11 — no user enumeration).
+ *
+ * Storage: Redis (uses the existing session.ts client). If Redis is down,
+ * lockout fails CLOSED (KS-1967): `isLockedOut` and `recordFailure` throw a
+ * 503 ServiceUnavailableError, so every password door refuses before any
+ * password is verified and a right and a wrong password answer the same.
+ * It used to fail OPEN ("requests proceed"): a LOCKED account got through,
+ * failures were not counted, and a right password answered differently from
+ * a wrong one. Kam ruled the change on 2026-11-03 (card
+ * secuura-auth-lockout-failopen-redis-down-1103 = a: "Fail closed: refuse
+ * logins while the session store is down"). `recordSuccess` stays non-fatal.
+ * Every catch here logs the thrown value's TYPE only, never its text (Kam's
+ * cards secuura-ks1346-logging-thrown-objects-leaks-secrets and
+ * secuura-ks1348-log-files-persist-secrets, both = a).
+ *
+ * Test surface: every public function takes the redis client + clock as
+ * arguments so tests don't need a real Redis or `Date.now()` mock.
+ * =============================================================================
+ */
+
+import { logger } from '../utils/logger';
+// KS-1967: the fail-closed refusal. Its default text ("Service temporarily
+// unavailable, please retry") already ships; this change adds no client text.
+import { ServiceUnavailableError } from '../middleware/errorHandler';
+
+const LOCKOUT_THRESHOLD = parseInt(process.env.LOGIN_LOCKOUT_THRESHOLD || '5', 10);
+const COUNTER_WINDOW_MS = parseInt(process.env.LOGIN_LOCKOUT_WINDOW_MS || `${15 * 60 * 1000}`, 10);
+const LOCKOUT_DURATION_MS = parseInt(process.env.LOGIN_LOCKOUT_DURATION_MS || `${15 * 60 * 1000}`, 10);
+
+/** Reduce an IPv4 to its /24 prefix string for keying. IPv6 keys on the address. */
+export function ipPrefix(ip: string): string {
+  if (!ip) return 'unknown';
+  // Strip IPv6-in-v4 prefix
+  const stripped = ip.replace(/^::ffff:/, '');
+  if (stripped.includes('.')) {
+    const parts = stripped.split('.');
+    if (parts.length === 4) return `${parts[0]}.${parts[1]}.${parts[2]}.0/24`;
+  }
+  return stripped;
+}
+
+/**
+ * KS-781 N-6 — NORMALISE HERE, IN THE PRIMITIVE, NOT IN EACH CALLER.
+ *
+ * These keys lowercased but did not trim, while `userRepo.getUserByEmail`
+ * lowercases AND trims. The two consumers of one address therefore disagreed:
+ * `" victim@example.com"` resolved the victim's row while producing a lockout
+ * key nothing had ever incremented. That was KS-781 F-1 — a lockout defeated by
+ * one space, measured at 30 of 30 attempts across six whitespace variants.
+ *
+ * F-1 was closed by normalising in the two callers. That is a convention, and a
+ * convention holds only while every future caller remembers it — doors 2 and 3
+ * (KS-795 / KS-796) add callers. Trimming in the derivation makes it structural.
+ * Idempotent for both current callers, which already pass a trimmed address:
+ * `routes/auth.ts:310` (via `loginSchema`'s `z.string().trim()`) and
+ * `services/passwordLoginGate.ts:119` (via the gate's own normalisation).
+ */
+function normaliseEmailForKey(email: string): string {
+  return String(email).toLowerCase().trim();
+}
+
+function counterKey(email: string, ip: string): string {
+  return `lockout:counter:${normaliseEmailForKey(email)}:${ipPrefix(ip)}`;
+}
+function lockoutKey(email: string, ip: string): string {
+  return `lockout:locked:${normaliseEmailForKey(email)}:${ipPrefix(ip)}`;
+}
+
+/**
+ * KS-1967: the TYPE of a thrown value, for a log line that must name types and
+ * never values. The same describer as the api-gateway's `thrownTypeOf`
+ * (KS-1961, middleware/security.ts): it reads only `typeof` and the prototype's
+ * constructor name, inside a try, so a revoked Proxy or a hostile prototype
+ * gives 'unreadable' instead of throwing out of the catch that called it.
+ */
+export function thrownTypeOf(value: unknown): string {
+  try {
+    if (value === null) return 'null';
+    if (typeof value !== 'object' && typeof value !== 'function') return typeof value;
+    const name: unknown = Object.getPrototypeOf(value)?.constructor?.name;
+    return typeof name === 'string' && name !== '' ? name : 'object';
+  } catch {
+    return 'unreadable';
+  }
+}
+
+export interface LockoutClient {
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string, mode?: string, ttl?: number): Promise<unknown>;
+  incr(key: string): Promise<number>;
+  expire(key: string, seconds: number): Promise<unknown>;
+  del(...keys: string[]): Promise<unknown>;
+}
+
+/**
+ * True iff the (email, ip) is currently locked out. Caller should treat
+ * lockout the same as a wrong-password attempt: throw
+ * InvalidCredentialsError, do not differentiate.
+ *
+ * KS-1967: when the store cannot answer (no client, or the read throws) this
+ * THROWS a 503 instead of answering "not locked". Every caller runs it before
+ * any password is verified, so the refusal is the same for a right and a wrong
+ * password. It used to `return false` on both paths (fail open).
+ */
+export async function isLockedOut(redis: LockoutClient | null, email: string, ip: string): Promise<boolean> {
+  if (!redis) {
+    // KS-1967: was `return false` ("not locked") with no client.
+    logger.warn('lockout: session store unavailable on isLockedOut — refusing the login', { cause: 'no-client' });
+    throw new ServiceUnavailableError();
+  }
+  let v: string | null;
+  try {
+    v = await redis.get(lockoutKey(email, ip));
+  } catch (err: unknown) {
+    // KS-1967: was "failing open" with `return false`, and logged `err?.message` (the thrown text).
+    logger.warn('lockout: session store error on isLockedOut — refusing the login', { cause: 'threw', thrownType: thrownTypeOf(err) });
+    throw new ServiceUnavailableError();
+  }
+  return v !== null;
+}
+
+/**
+ * Record a failed login attempt. If the counter crosses the threshold,
+ * set the lockout flag with TTL. Returns the new failure count so the
+ * caller can log it (do NOT surface to the client — that's enumeration).
+ */
+export async function recordFailure(redis: LockoutClient | null, email: string, ip: string): Promise<number> {
+  // KS-1967: a failure that cannot be counted is refused as unavailable (503),
+  // never answered as a plain wrong password. Was `return 0`: the attempt got
+  // its 401 and was silently not counted. The count itself is still lost.
+  if (!redis) {
+    logger.warn('lockout: session store unavailable on recordFailure — refusing; this failure cannot be counted', { cause: 'no-client' });
+    throw new ServiceUnavailableError();
+  }
+  try {
+    const ck = counterKey(email, ip);
+    const count = await redis.incr(ck);
+    if (count === 1) {
+      // First failure — start the rolling window.
+      await redis.expire(ck, Math.ceil(COUNTER_WINDOW_MS / 1000));
+    }
+    if (count >= LOCKOUT_THRESHOLD) {
+      await redis.set(lockoutKey(email, ip), '1', 'EX', Math.ceil(LOCKOUT_DURATION_MS / 1000));
+      logger.warn('lockout: threshold reached — account locked', {
+        emailHash: hashEmail(email),
+        ipPrefix: ipPrefix(ip),
+        count,
+        durationMs: LOCKOUT_DURATION_MS,
+      });
+    }
+    return count;
+  } catch (err: unknown) {
+    // KS-1967: was "continuing" with `return 0`, and logged `err?.message` (the thrown text).
+    logger.warn('lockout: session store error on recordFailure — refusing; this failure may not have been counted', { cause: 'threw', thrownType: thrownTypeOf(err) });
+    throw new ServiceUnavailableError();
+  }
+}
+
+/** Clear counter + lockout on successful authentication. */
+export async function recordSuccess(redis: LockoutClient | null, email: string, ip: string): Promise<void> {
+  if (!redis) return;
+  try {
+    await redis.del(counterKey(email, ip), lockoutKey(email, ip));
+  } catch (err: unknown) {
+    // KS-1967: still non-fatal (a counter left uncleared is stricter, never looser);
+    // the line now names the thrown value's type. It used to log `err?.message`.
+    logger.warn('lockout: session store error on recordSuccess — non-fatal', { cause: 'threw', thrownType: thrownTypeOf(err) });
+  }
+}
+
+function hashEmail(email: string): string {
+  // Truncated SHA-256 for log correlation without storing the email itself
+  const crypto = require('crypto') as typeof import('crypto');
+  // Same normalisation as the keys: a padded address must not produce a second
+  // identifier in the logs for the same account.
+  return crypto.createHash('sha256').update(normaliseEmailForKey(email)).digest('hex').slice(0, 12);
+}

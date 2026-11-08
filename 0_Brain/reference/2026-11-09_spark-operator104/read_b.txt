@@ -1,0 +1,288 @@
+##### KS-2019 auth login: the rehash warn says "the old hash stays" on any null from updateUser, but null can also mean the new hash was stored (gate 204 G204-F2, Minor) Backlog 2026-11-05T10:55:37.596Z
+**BLUF:** `services/auth/src/routes/auth.ts` line 569 logs "UPGRADE-ON-VERIFY: the rehash write did not take effect (non-fatal); the old hash stays" whenever `userRepo.updateUser(user.id, { passwordHash: newHash })` returns null (lines 565 to 570). `updateUser` also returns null when the UPDATE landed and the trailing read-back found nothing (`services/auth/src/repositories/userRepo.ts` lines 917 to 929), so the same null can mean the new argon2id hash was stored, and the logged claim that the old hash stays can be false. Gate 204 grades this Minor: the line is log-only and the case is rare. It is READ ONLY for the login path; the social analogue (G204-F1, filed separately) is measured.
+
+Source: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate204-ks1460-pr2013/verdict.md` line 20 (G204-F2); evidence named there: `ev_pr.diff`, `ev_own_login_table.txt`. Code read by the filing seat at develop `1b1b65c7415f` with `git show` of that commit from the shared object store (a read), not run.
+
+As read at `1b1b65c7415f`:
+
+* `services/auth/src/routes/auth.ts` lines 561 to 570: the comment says the log line now follows the write's answer; `const rehashed = await userRepo.updateUser(user.id, { passwordHash: newHash });` (line 565); the warn with the text above on a falsy `rehashed` (line 569); the info line "rehashed bcrypt -> argon2id" otherwise (line 567).
+* `services/auth/src/repositories/userRepo.ts` lines 941 to 956 (the comment on `updateUserOrThrow`) say a not-applied claim is the stronger cause that null does not support, and record that the earlier wording "the change was not applied" was removed as defect F-929-2 (line 956).
+* The verdict states that the two docs fragments of the PR repeat the claim; the filing seat did not read the fragments.
+* KS-1460 (the PR's own ticket, read whole) has no hit for `rehash write did not take effect`; a board search for that phrase finds no ticket, open or Done.
+
+Not measured: anything by the filing seat; the login path with an empty read-back (READ ONLY in the verdict); the fragments.
+
+Priority: Low, mapped from the verdict's grade Minor (verdict line 20).
+##### KS-1583 KS-998 item 1 gate follow-ups (#1532): the six Minors of the Opus gate, and the Info that matters Backlog 2026-10-27T05:43:53.852Z
+## BLUF
+
+**The Opus tier 1 gate on pull request #1532 (KS-998 item 1) returned GO WITH NOTE: 0 Major, 6 Minor, 7 Info.** This ticket carries the six Minors and the Info that matters, so they are findable after #1532 merges. Facts only, from the gate's report.
+
+* **Report:** `0_Brain/reference/2026-10-13_gate-pr1532/verdict.md` in the Wednesday tree, sha256/16 `85bf04b8ef22923b` (recomputed by the report's own recipe, placeholder replaced: equal; a one-byte change breaks it).
+* **Head it is bound to:** `3dbfdf7e36443a8665b6a106e2d8ccbb6763cd44`. Instruments: macOS, `/bin/bash` 3.2.57, node v24.7.0, npm 11.5.1.
+* **None of the six hides a formatting red or lets a push pass without a check.** (1) fails closed; (2) and (3) are properties of `npm ci` that the gate now triggers automatically.
+
+## Where each rides (Wednesday's rulings, 2026-10-13)
+
+* **Minors 1, 2, 4, 5, 6:** the stacked **item 2** pull request (same functions), each with its cell.
+* **Minor 3:** a **third pull request stacked on item 2**, so item 2 stays reviewable: the lock-source allowlist AND a scrubbed install environment, lifecycle scripts still running as ruled. A plan mail comes first.
+
+## The six Minors
+
+1. **The final rename races (**`check-package-format.sh`**, the** `mv` **into place).** The `[ -e node_modules ]` guard is not atomic with the `mv`; BSD `mv` onto an existing directory moves the source INSIDE it, and onto a symlink to a directory moves it into the target. `_rm_stage` can then delete a `node_modules` the gate did not make. Measured with a PATH `mv` shim: a hollow in-progress tree was deleted; a symlink arrival had our tree written into the outside target; a complete tree arrival left `node_modules/node_modules`. **Two real gate processes on one package REFUSED a correct push in 4 of 5 trials** (`mv` loses its own rename race: ENOTEMPTY). It fails closed and what can be lost is a regenerable, gitignored tree, but it falsifies "deletes only what it made". **Fix:** `rename(2)` (via `node -e 'fs.renameSync'`), which refuses a non-empty or symlink target; map that to `raced`, not `mvfail`; drop a marker file into the staged tree before the rename and require it at `$dir/node_modules/` before any move-back.
+2. **The watchdog and the TERM path kill npm's pid, not its process group.** A dependency's postinstall child outlives the gate (ppid 1) on the watchdog, on SIGTERM and on SIGKILL; only a Ctrl-C to the whole group removes it. esbuild's `install.js` fallback (`downloadDirectlyFromNPM`: `https.get`, no timeout, hard-coded registry) is the process that would be orphaned against a silent registry. **Fix:** start npm in its own process group (`set -m` in bash 3.2, or `perl -e 'setpgrp; exec @ARGV'`) and signal the group: TERM, then KILL, in both the watchdog and the cleanup. Same class as KS-1331 (a different script: `run-shell-suites.sh`).
+3. **The gate does not check lock sources.** A lock entry whose `resolved` points at a non-registry host is fetched, and its postinstall runs on the push (measured: 1 GET at the listener, INSTALLED, a sentinel written outside the repo; a tampered integrity was refused with EINTEGRITY). Lifecycle scripts see `NPM_TOKEN`, `GH_TOKEN`, `SSH_AUTH_SOCK` and other `*TOKEN` names from the environment, and `~/.npmrc` is in scope; `--fetch-retries=0` and `--fetch-timeout` reach lifecycle children through `npm_config_*`. This is what a manual `npm ci` does too; the difference is that it now runs automatically on push, including for a package selected by a stale base or a merge the developer did not author. **Today's four lockfiles are clean:** 411/411, 344/344, 269/269 and 217/217 entries are `registry.npmjs.org` with an integrity hash. **Ruled YES:** every non-link entry must have `resolved` starting `https://registry.npmjs.org/` and a non-empty `integrity`; every `link` must resolve inside the repo; otherwise refuse with a named reason and run nothing; AND scrub the install's environment to a minimal set (`PATH`, `HOME`, what npm needs; no `*TOKEN`, no `SSH_AUTH_SOCK`).
+4. `m23b` **("no EXIT trap") is NOT equivalent, contrary to the item 1 table.** On bash 3.2 the EXIT trap is what cleans up on untrapped fatal signals other than QUIT. SIGUSR1 mid-install: head kills npm and removes the stage; with the EXIT trap removed, npm stays alive and the stage stays. Same for SIGALRM and SIGPIPE. The other four survivors (`m13a`, `m23`, `m25`, `m35`) were re-derived by the gate and are equivalent. **Fix:** one cell that sends SIGUSR1 or SIGALRM mid-install and expects no orphan and no stage.
+5. **Four mutants survive that are test gaps, not equivalents.** `Q8` (the post-move `-x` → `-e`): no cell has a non-executable prettier. `Q11` (the hollow re-check dropped): a raced-in hollow tree would be reported as a *formatting failure* instead of the environment refusal, the KS-991 confusion. `Q12` (`.npmrc` not copied to the stage): no fixture has a package `.npmrc`. `Q13` (the six-digit length guard dropped): a 20-digit `FORMAT_GATE_INSTALL_TIMEOUT` overflows and refuses at once with "timed out after 99999999999999999999s"; head exits 2 naming the variable. **Fix:** one cell each.
+6. **SIGQUIT to the gate alone leaves npm and the stage.** It is not trapped and bash 3.2 does not run the EXIT trap for it: rc 131, the hung npm alive, one stage left (the next run sweeps the stage). **Fix:** add QUIT to the trap list.
+
+## The Info that matters
+
+* **Info 2 (pre-existing, KS-1483):** a branch deletion (`git push origin :todelete`) and a tag push were both REFUSED because HEAD's branch touched an uninstallable package: the hook computes the changed set from `@{upstream}..HEAD`, not from the pushed refs. The develop control refuses the same two pushes (KS-1063 NOTHING CHECKED), so it is not a regression of #1532. **KS-998 item 2 with KS-1483 fixes it** (per-ref judging; a deleted ref is skipped before anything runs).
+* **Info 3:** `_rm_stage` with an EMPTY `STAGE_PREFIX` would delete a relative single-component directory under the cwd (demonstrated on the extracted function). Unreachable today: the prefix is assigned once, never empty, and `set -u` aborts if unset. **Defence in depth:** `[ -n "$STAGE_PREFIX" ]` and require an absolute `$d`.
+* **Info 5:** `-x` is true for a *directory* named `.bin/prettier`, so it is INSTALLED and then reported as a formatting failure with rc 126. npm never produces this. Cheap: `[ -f ] && [ -x ]`.
+* **Info 6:** an invalid `FORMAT_GATE_INSTALL_TIMEOUT` blocks every push, including pushes that touch no systemTest file (validation exits 2 before selection), and the hook's wrapper then says "fix the files named above", which is wrong for it. Loud and self-inflicted; the wrapper's wording is the defect.
+* **Info 7:** esbuild's install-script network fallback, exercised under the sandbox: with `@esbuild/darwin-arm64` removed, `install.js` tries `npm install` and then a direct download. **70.4 s** with npm defaults, **0.43 s** with `npm_config_fetch_retries=0`, and that value IS inherited from the gate's `npm ci` (measured through a postinstall). Both paths verify the binary with a sha256 before use.
+
+## NOT tested by the gate (carried as unmeasured)
+
+Linux (GNU `mv` has the same move-into-directory behaviour, so Minor 1 is expected to apply, not measured); preflight legs 3, 4, 8 and the full A/B; a real pty Ctrl-C (emulated); a silent registry against esbuild's direct download (reasoned from the code); the `--no-update-notifier` request census (not repeated).
+
+## Related
+
+KS-998 (the parent, stays In Progress: item 2 and KS-1483 are unbuilt), KS-1483 (item 2 folds it in). Same class as KS-1331 (process-group signalling), in a different script. Pull request #1532, head `3dbfdf7e3644`.
+--- comment 2026-10-27T05:43:53.043Z kamil.kreiser@secuura.ai
+## Read at source, item by item. **Five of the six Minors have landed WITH a labelled cell. Minor 5 is 3 of 4 — Q11 has no cell. So this ticket STAYS OPEN and NO state was moved.**
+
+Read at develop `885d69b06f5fce7c8f58effea68623ecb25407b1`. `systemTest/scripts/check-package-format.sh` is 919 lines; `systemTest/__tests__/package_format_gate.test.sh` is 1,640 lines and carries **48** `# --- CASE` headers. Zero control on both files: 0. Positive control on the suite: 395 `check ` calls.
+
+## The six Minors
+
+| Minor | in the script | its cell | state |
+| -- | -- | -- | -- |
+| **1** rename race | `:290` `node -e '…renameSync…'` catching the error code; `raced` in the state list at `:468`; the marker-before-rename rule documented `:133-138` | **CASE 35** (`:1014`, header *"the final rename RACES (Minor 1)"*) — control, a COMPLETE tree arriving, a `.arrived-first` assertion, *"ours was NOT nested inside it"*, and a no-`.format-gate-moved`-marker check; **CASE 46** covers the move-back | **landed** |
+| **2** process group | `:274` `exec perl -e 'setpgrp(0, 0); exec @ARGV …'` via `_run_grouped`, used at `:494` | **CASE 37** (*"npm runs in its OWN PROCESS GROUP …(Minor 2)"*) and **CASE 41** (*"no perl -> the install is REFUSED by name, never run ungrouped (Minor 2)"*) | **landed** |
+| **3** lock sources + env scrub | `:224` `LOCK_ALLOW="${FORMAT_GATE_LOCK_ALLOW:-https://registry.npmjs.org/}"`; `_check_lock_sources` `:345-347`; `_build_install_env` `:412-414` with `env -i` at `:494` and a private `HOME` | **CASE 43** (*"the install runs under an ALLOW-LIST environment with a private HOME (Minor 3, second half)"*) plus the lock cases around `:1331-1338` | **landed** |
+| **4** `m23b` / fatal signals | — (trap behaviour) | **CASE 38** (`:1184`, *"every fatal signal cleans up, not only TERM/INT/HUP (Minor 4; mutant m23b)"*) — `for sig38 in USR1 ALRM PIPE` at `:1188`, so SIGUSR1 **and** SIGALRM are both driven | **landed** |
+| **5** four surviving mutants | Q13's guard at `:210` (`[ "${#FORMAT_GATE_INSTALL_TIMEOUT}" -gt 6 ]`); Q12's copy at `:485`; Q8's `_prettier_ok` at `:343` | **CASE 40** (`:1223`) carries **Q8** (`:1224`), **Q12** (`:1232`) and **Q13** (`:1239`), Q13 with a 20-digit, a 7-digit and a 6-digit boundary cell | **3 of 4 — see below** |
+| **6** SIGQUIT | `:465` `trap '_fg_cleanup; exit 131' QUIT      # bash 3.2 does not run the EXIT trap for SIGQUIT (gate review, Minor 6)` | **CASE 39** (`:1201`), with a control proving SIGQUIT is deliverable to a job started that way (a plain sleep dies rc 131) | **landed** |
+
+## The one gap: **Q11 has no cell**
+
+CASE 40's header is *"the survivors of the gate review's mutation pass that were test gaps (Minor 5)"* and it names **Q8, Q12 and Q13 only**. `Q11` does not occur anywhere in the suite.
+
+**The guard Q11's mutant removed does exist** — `check-package-format.sh:785`, inside `run_install`'s `raced)` outcome:
+
+`_prettier_ok "$dir" || unready="hollow"`
+
+That is the post-move hollow re-check: without it a raced-in hollow tree would be reported as a *formatting failure* rather than the environment refusal (the KS-991 confusion this Minor names). **Nothing asserts it.** `raced` occurs **0** times in the suite — measured against a firing control of 395 `check ` calls in the same file — so CASE 35's race cells drive the complete-tree and symlink arrivals but not a **hollow** arrival, which is the one that reaches `:785`.
+
+By this ticket's own definition — *"Fix: one cell each"* for Minor 5's four — Minor 5 is **not** complete, so the ticket is not Done.
+
+## One more fact, not claimed as blocking
+
+**Info 6's wrapper wording is unchanged.** `.githooks/pre-push:330` still reads:
+
+`echo "[pre-push] systemTest formatting gate FAILED — fix the files named above." >&2`
+
+which is the sentence Info 6 calls the defect (it is wrong for an invalid `FORMAT_GATE_INSTALL_TIMEOUT`, which refuses before selection). **I am not treating this as blocking the ticket:** the "Where each rides" section assigns only the six Minors to pull requests; the Info items are carried here so they are findable. Stating it so the next reader does not have to re-measure. **Info 3** (`:307` `[ -n "$STAGE_PREFIX" ] && [ -n "$TREE_PREFIX" ] || return 1`) and **Info 5** (`:343` `_prettier_ok() { [ -f … ] && [ -x … ]; }`) **have** landed, with **CASE 44** covering both.
+
+## Not established
+
+* **I ran nothing.** No suite, no mutant, no gate. Every row above is a source read at the tip: a line present or absent, and a labelled CASE present or absent. "Landed" here means *the shape and a labelled cell exist*, not *the cell was observed to pass or to red against its mutant*.
+* Whether CASE 35's existing race shims could be extended to a hollow arrival, or whether Q11 needs its own fixture. Not my call.
+* Which pull request carried each Minor. The ticket's plan put 1, 2, 4, 5, 6 on the item-2 PR and Minor 3 on a third stacked PR; I verified the **tree**, not the route.
+
+## Searched
+
+Not a filing, so no dedupe was needed; the reads above are the instrument. For completeness, the same paginated board search used elsewhere this session returns `pre_push_stack_legs_comment` → 2 and `KS-1047` → 6, with positive controls `KS-1531` → **18** and `fetchApiKeys` → **4** and a zero-control token → **0**.
+
+**Assignee** set to the board account with this comment, per the board rule for an unassigned ticket I write on.
+
+*Seat G 24th, 2026-10-27, on Wednesday's 05:40:47Z go-ahead for the "read at source" pair. Board seat: nothing built, no suite run, NO state change, nothing archived.*
+##### KS-1597 KS-1119 follow-ups (pull request 1542, Opus gate): the hash-match flag is not the lookup predicate, crossTenantLookup never retries the registry by hash, and four pre-existing verify disclosures Backlog 2026-10-13T08:59:10.673Z
+## BLUF
+
+Facts recorded from the Opus tier-1 gate on [pull request 1542](<https://github.com/Secuura/Distributed_Secuura/pull/1542>) (KS-1119, merged as `026c2d1614065c79fc8d96007ac0d80f19fb9363`), filed at Wednesday's instruction. **Two items are KS-1119 residue; four are PRE-EXISTING and measured identical on develop and on the merged head, recorded here so nobody reads them as covered by that merge.** No fix shape is proposed for the two items that touch which registration answers — they need the KS-584 / KS-590 review first.
+
+Measured at develop `405e33a1061310662b10245c5154c3d75c49f0f4` and at the merged head.
+
+## A. KS-1119 residue
+
+**A1 — leg (b) compares the exact stored hash, while the lookup matches three forms.** `services/originate/src/routes/verification.ts:1212`. The lookup accepts the bare digest, the `sha256:`-labelled form and a mixed-case spelling; the flag derived at :1212 compares only the exact stored value. Measured consequence under `MULTI_TENANCY_ENABLED=false`: a document stored as `sha256:<hex>` with a request `contentHash` of `sha256:sha256:<hex>` answered `verified:true` before the merge and answers `verified:false, documentExists:true, hashValid:false` after it. It refuses rather than admits; no caller in this repository sends that shape; the single-label and bare-digest controls still answer verified. Mutant M2 survives on the merged head and the shape above is what reaches it — the pull request body's "no reachable trigger" was wrong and has been corrected in place.
+
+**A2 —** `crossTenantLookup` **never falls back to the registry by hash when the tenant the documentId points to has no hash match.** Consequence, measured under multi-tenancy: the exact right hash sent with the documentId of a document in ANOTHER tenant answered `verified:true` naming the wrong document before the merge, and after it answers "This document hash is not registered" — which refuses correctly but states something false, because the hash IS registered. **No fix shape here: a retry changes WHICH registration answers, so it belongs to the KS-584 / KS-590 review.**
+
+## B. PRE-EXISTING, identical before and after the merge
+
+**B1 — the documentId-only answer hands any caller the stored** `contentHash`**.** `verification.ts:1344`. Under multi-tenancy this crosses tenants: a caller holding only a documentId receives the document's content hash, which is the value the whole verify contract treats as the integrity secret.
+
+**B2 —** `{documentId: X, hash: <hash of document Y>}` **answers** `verified:true` **naming Y.** The documentId is ignored when the hash matches. **This is the one a relying party reading only the** `verified` **field would trust**: it asked about X, the answer is true, and the document described is Y.
+
+**B3 — KS-1590 is wider than verify-file.** The same unnormalised comparison also makes `/verify`'s hash-only cross-tenant answers depend on the spelling the caller sent. Added as a comment on [KS-1590](https://linear.app/secuura/issue/KS-1590) rather than restated here.
+
+**B4 — the registry by-hash query has** `LIMIT 1` **with no** `ORDER BY`, so which tenant's registration answers an outsider is arbitrary and may change between identical calls. **Related but NOT the same query as** [KS-584](https://linear.app/secuura/issue/KS-584), whose quoted SQL is the `documents`-table lookup and does carry `ORDER BY d.certified_at DESC NULLS LAST`; this one is `platform_document_registry` and carries no ordering at all. Recorded against the live [KS-590](https://linear.app/secuura/issue/KS-590) because KS-584 is archived. **No fix shape: same reason as A2.**
+
+## Dedupe
+
+300 distinct issues read over six `searchIssues` terms with `includeComments` and `includeArchived`, then literal `containsIgnoreCase` matching on eight distinctive tokens. Positive control `platform_document_regist` found in 12 issues, so the pipeline demonstrably sees descriptions. Nine near hits were read one by one: KS-1119 (the parent), KS-1590 (B3's home), KS-584 and KS-590 (the documents-table variant of B4, distinguished above), KS-1118, KS-1133, KS-1129, PS-547, PS-514 — none covers A1, A2, B1 or B2. `verification.ts:1344` and "three-form" matched zero issues.
+
+A first run's control token was the string `KS-1590` itself, which appears in no description and so could never fire; that run's near-hit list was discarded rather than reported.
+##### KS-1644 KS-1385 (b) follow-up: a non-object INCOMING secuura still raises, and dbPersistAnchor's own row handling is pinned only by source Backlog 2026-10-22T15:08:12.366Z
+**Refs KS-1385.** These are the two Info items gate U1 (Opus, tier 1) raised on #1607 round 2 (head `243d324d4dd7`), filed on Wednesday's GO of 2026-10-19T04:49:21Z. **Low:** neither is reachable through any route today. The code is `services/anchoring/src/index.ts` (`dbPersistAnchor`, the `anchor_store` upsert) and `services/anchoring/src/anchorOverwriteGuard.ts` (`classifyPersistOutcome`).
+
+## INF-1: an INCOMING `secuura` that is not an object still raises
+
+* Round 2 guarded every read of the **stored** payload with `jsonb_typeof`. The **incoming** side is still read without a guard:
+  * `COALESCE(EXCLUDED.metadata_payload->'secuura', '{}'::jsonb) - $25::text[]` in the merge;
+  * `($9::jsonb - 'secuura')` and `(($9::jsonb->'secuura') - $25::text[])` in `RETURNING`.
+* An incoming `secuura` that is JSON null, a string or a number makes the minus operator raise (22023), so the write fails.
+* **Not reachable today:** both payload builders (`buildFlatAnchorMetadataPayload` for single anchors, and the batch builder) always produce an object `secuura`.
+* **Suggested shape:** guard the incoming reads the same way, or assert the builder's output shape at the call site; add cells that feed a non-object incoming `secuura` through the real statement.
+
+## INF-2: `dbPersistAnchor`'s own handling of the returned row is pinned only by source text
+
+* The cells run the product's real statement, and `classifyPersistOutcome` on the real returned row. `dbPersistAnchor` **itself is not driven by any committed cell:** `index.ts` listens at import.
+* W4 pins three lines, the `classifyPersistOutcome(overwrite, row, anchor.documentId)` call and the two `outcome === …` branches, but not how `row` is derived. U1 showed that a mutant corrupting the row at the call site survives the committed suite; only the gate's booted cell caught it.
+* **Suggested shape:** drive `dbPersistAnchor` in a cell, either by loading `index.ts` through an express spy (as other suites here load listen-at-import apps) or by exporting the persistence function for test. Then assert the log line it emits for a held update and for a real keep.
+
+## Not claimed
+
+I have not re-run U1's probes; this restates its verdict. Related: KS-1385, KS-1642 (the KS-1612 helper's untested guards, the same class of gap).
+
+**Merged in** `7e2f8157cec2` (squash of #1607 at `243d324d4dd7`).
+
+Dedupe before filing: `issues(filter:{description:{contains:…}})` + title over `incoming secuura`, `rest_is_incoming`, `classifyPersistOutcome` → 0 each; `non-object` → 4 unrelated (KS-1231, KS-1408, KS-1432, KS-572); nonsense-term control 0.
+
+*Seat J 13th.*
+##### KS-1793 ks1263 KS-1310 describe: the disposable-database guard reads new URL(dsn), so a ?host= or ?port= in the DSN query string passes it (same hole as KS-1340, on a guard that protects DDL) Backlog 2026-10-28T12:26:26.380Z
+**BLUF:** the disposable-database guard in the third describe of `ks1263-multi-write-rolls-back.integration.test.ts` (the KS 1310 describe, which creates a trigger on `documents`) judges `new URL(DEFAULT_DB)`, the host and port the DSN's authority names. A `?host=` or `?port=` in the query string passes it while the pg client dials the remote host, or port 5432. It is the same hole as KS-1340, in a guard that protects schema DDL. Not fixed in pull request 1790, pull request 1792 or the KS-1600 pull request; Wednesday asked for this ticket (ANSWER 2026-10-28 12:23:51Z).
+
+## Where
+
+`Blockchain/Dev/services/originate/src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts`, the `beforeAll` of the describe "KS-1310 ROUTE-LEVEL ...". At develop `d531abd5f34b` the block is lines 589 to 598: `new URL(DEFAULT_DB)`, hostname in `['127.0.0.1', 'localhost']`, port in 55410 to 55419, else it throws "KS-1310 installs a trigger (schema DDL) and therefore refuses any database that is not this seat's disposable one".
+
+## Measured
+
+The exact predicate of line 591 run beside the pg client on four DSNs (pg 8.20.0, pg-connection-string 2.12.0; constructing a Client opens no socket, so nothing was dialled):
+
+```
+DSN                                      guard accepts   pg dials
+postgres://u:p@127.0.0.1:55412/db        true            127.0.0.1:55412
+...@127.0.0.1:55412/db?host=203.0.113.7  true            203.0.113.7:55412
+...@127.0.0.1:55412/db?port=5432         true            127.0.0.1:5432
+postgres://u:p@203.0.113.7:55412/db      false           203.0.113.7:55412
+```
+
+A DSN that names no port is already refused here (`Number('')` is 0, outside the range), which is not true of the ks597 guard KS-1340 fixes. Probe script: `5_Project_History/2026-10-28_seatT-5th/tools/sibling_guard_probe_t5.js` in the project record.
+
+## Why it matters, and its limit
+
+The guard's own comment says a cell that writes DDL must be unable to reach a shared or real database. This describe runs `CREATE OR REPLACE FUNCTION` and `CREATE TRIGGER ... ON documents` against whatever `TEST_DATABASE_URL` names. The hole is reachable only if that variable carries such a query string (an operator mistake or an unusual DSN); it is not reachable by default, and nothing was run against a shared database to test it.
+
+## Fix shape (the KS-1340 one; not chosen here)
+
+Judge the host and port the pg client will dial, by asking the client (`new Client({ connectionString }).host` and `.port`), as pull request 1790 does for the ks597 guard, and keep the 55410 to 55419 range test on that answer. KS-1340 also refuses a DSN that names `hostaddr` (pg ignores it, libpq honours it).
+
+## Board search before filing
+
+Issues filter over title, description and comment bodies, archived included, run at 12:2xZ and again immediately before filing: `55410` gave 0 hits, `refuses any database that is not this` gave 0, `KS-1310 installs a trigger` gave 0. Positive control `disposable`: 19 hits at filing time (19 at the first run). Zero control: a fresh token never written to the board returned 0; the token is not recorded here so that it stays a control. No existing ticket covers this guard.
+
+## Related
+
+KS-1340 (the ks597 guard, pull request 1790). KS-1310 (added this guard; Done). KS-1499 (pull request 1792 edits the same file for other reasons and leaves this guard as it is).
+##### KS-1473 The developer portal page documents POST /api/verification/verify-batch, which no service and no spec implements (CSRF carries exclusions for it) Backlog 2026-10-19T06:14:48.548Z
+## BLUF
+
+`services/api-gateway/src/docs/developer-portal.html:294` lists `POST /api/verification/verify-batch` ("Verify mul\[tiple documents\]") as a public endpoint. **Nothing serves it.** The OpenAPI spec (310 paths) declares `verify` and `verify-file` for the unversioned and v2 families but no `verify-batch`; no router in `services/originate` or any other service registers `/verify-batch` under verification (the only `verify-batch` code is the separate MCP server's own root-level `/verify-batch` in `services/mcp-server`). So a developer who follows the portal gets a 404, and `csrf.ts` carries CSRF exclusions for `/api/verification/verify-batch` and `/api/v2/verification/verify-batch` that cover a route nothing implements.
+
+## Recommendation
+
+Owner decision, then one of: (a) implement the route and add it to the spec, so the page and the exclusions are true; (b) remove the row from the portal, and drop both CSRF entries in the same change (a dead exclusion is a latent hole: a future route at that name would be silently CSRF-exempt). Priority Low. Until then the two CSRF entries are PINNED by cells (KS-1469) so they cannot vanish or change unnoticed; that pin is deliberately not a statement that the route exists.
+
+## Detail
+
+* Found while resolving the m1 note from the Opus gate on PR #1466 (the `/api/v2/verification/verify-batch` exclusion was pinned by no cell). Evidence, from a repo-wide search at develop `b4a245fba1ca`: spec path scan (310 paths, none `verify-batch`); `git grep` for verify-batch in non-test code finds only the portal row, the two `csrf.ts` entries, and the MCP server; a control with the same grep shape finds the real `/verify` and `/verify-file` routes.
+* Other rows on that page were NOT checked against the code.
+* **Searched first** (Linear, includeArchived, literal title and description): `developer-portal`, `developer portal`, `verify-batch`: no ticket about this page's rows.
+
+Related: KS-1469, KS-1461, KS-1165.
+##### KS-1475 updateDocument atomicity follow-ups: two blob writers still decide from a prior read, plus a type guard and test nits (KS-1124 gate) Backlog 2026-10-22T15:09:26.458Z
+## BLUF
+
+PR #1471 (KS-1124 option A) made every blob write that goes through `updateDocument` atomic. Its Opus gate (GO WITH NOTE, head `4a822bd8c244`, no Major) and Wednesday's GO list what it does not cover. Filed as ONE ticket so none is rediscovered. **None is a regression and none blocks #1471.**
+
+## Recommendation
+
+Fix the first two together in one tier-1 PR (they are the same defect class #1471 closed, in the two places it did not reach), test first with a forced interleaving on a real Postgres as K1-K10 do (recipe: `5_Project_History/2026-10-12_seatJ-2nd/RECIPE-faithful-local-postgres.md`). Take the guard and the nits with it or as a small tier-2 PR after.
+
+## Detail
+
+1. `anchorStateSync.ts:178-212`**,** `markDocumentAnchorFailed` decides from a read taken before the `UPDATE`: the `confirmed` guard (`:180`) and the `txHash` / `blockHeight` / `network` / `anchoredAt` carry (`:190-196`). A confirm write landing between the read and the write can be downgraded to `anchor_failed` with its `txHash` erased. Same family as KS-1004. (Line numbers at the PR head.)
+2. `routes/certifications.ts:563` replaces `certification_metadata` wholesale, outside `updateDocument`. It drops `threadToken` from the authoritative blob, and the KS-550 heal then copies that loss into `metadata`.
+3. **Hardening,** `documentRepo.ts:632/640/661/669`**.** The replace branch has no `jsonb_typeof(supplied) = 'object'` guard. A future `blockchain: null` would store `[{…}, null]` (`'{}'::jsonb || 'null'::jsonb` gives `[{}, null]`), where the old code stored `null`. No current caller can reach it (`verification.ts:393` guards `!healed`).
+4. **Test nits in** `ks1124-blockchain-blob-writes-are-atomic.integration.test.ts`**.** (a) K9 (`:218-224`) seeds `anchored`, which `mapDbStatus` round-trips, so it cannot detect a status write-back; seeding `deleted` or `certified` would pin the "status not supplied keeps the stored status" semantics (only K1 reds on that mutant today). (b) `waiting()` (`:93`) counts lock waits cluster-wide, with no `datname` or `pid` filter; on a shared server a parallel job could satisfy it and make a forced interleaving vacuous. (c) `documentRepo.ts:697-702`: the returned record carries `threadToken` and the status from the first read; presentation only.
+5. **Pre-existing, outside KS-1124's scope, and the largest.** Every `updateDocument` rewrites `certification_metadata` to `{ signatures, blockchain }`, which erases `issuerName`, `certificationId` and `certifiedAt` written by `certifications.ts:563` and the admin backfill. `signatures` and `data` also remain read-then-write: a concurrent sign and anchor write can drop a signature. Consider splitting this into its own ticket when it is picked up.
+6. **Left in place on purpose:** the pollers' `carriedForward` (`anchorStateSync.ts:111-113`) is now redundant with the SQL carry; it was kept to keep #1471 off `anchorStateSync`. It can go with item 1.
+
+Refs KS-1124, KS-1074, KS-1004, KS-550.
+##### KS-2003 Schemathesis seed-demo-users leg B: the helper passes a seed where all 14 inserts failed (200, success true) and reads red once the route answers 500 - no ticket tracks the leg Backlog 2026-11-05T03:04:54.918Z
+**BLUF:** The Schemathesis helper `parse_seed_counts` reads `POST /api/admin/seed-demo-users` as a pass only for status 200 with `success` true, and `rerun_overwrote_nothing` accepts two runs of 0 created, 0 already present and 14 failed. Before PR 2006 that made leg B of `systemTest/schemathesis/tests/integration/test_seed_demo_gate.py` green on a stack where every insert failed. Since PR 2006 (develop `5fc5569ed96a`) the route answers 500 for created 0 with failed above 0, and 200 with `success` false for a partial run; `parse_seed_counts` reads both as None, so leg B reads red on such a stack. Gate 195 calls the red the correct outcome and PR 2006's body names it. No open ticket tracks the leg, the helper's old contract, or when the leg is expected to turn green.
+
+Source: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate195-ks1990-pr2006/verdict.md` line 48 (Q6, consumers) and line 59 (NOT tested); `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate195-ks1990-pr2006/ready_2006.txt` line 50; `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-05_seatW-28th/HANDOVER.md` lines 5, 6 and 25; `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-05_seatB-95th/HANDOVER.md` line 16. Code read by the filing seat at develop `5fc5569ed96ac61f64823cc9e1fa841899aa1f62` (the PR 2006 squash) through the GitHub contents API, not run.
+
+Code as read at that sha:
+
+* `systemTest/schemathesis/tests/support/demo_seed_gate.py`: `parse_seed_counts` (line 101) returns None unless the status is 200, the body is a dict, `success` is true (line 112) and all three counts are integers. `rerun_overwrote_nothing` (line 122) is true when the first run's total is above 0, the second run's total equals it, the second run created 0 and its already-present count equals the first run's created plus already-present. The module header (lines 12 to 13) documents the allowed response as `200 {success: true, seededUsers, created, alreadyPresent, failed}`.
+* `systemTest/schemathesis/tests/integration/test_seed_demo_gate.py`: leg B is `test_seed_demo_users_runs_with_both_flags_and_never_overwrites` (line 85). It asserts `parse_seed_counts` is not None on the first response (line 110) and on the re-run (line 114), then asserts `rerun_overwrote_nothing`. The legs carry the `integration` and `orchestration` marks, and the file's docstring says the legs are isolated from the sweep by the runner script (lines 6 to 7); how the runner does that was not traced.
+* `systemTest/schemathesis/tests/integration/fixtures/seed_gate.py`: `post_seed` (line 73) returns the status and the parsed body and does not raise on a non-2xx status.
+* `systemTest/schemathesis/tests/unit/support/test_demo_seed_gate.py` holds no cell with `failed` above 1, so the helper's unit tests pin no all-failed body either way.
+
+Tested by gate 195 (the real helper from the PR head blob, on literal bodies; verdict line 48): the base all-failed body (200, success true, created 0, already present 0, failed 14) gives `SeedCounts(0,0,14)` and `rerun_overwrote_nothing` true; the head 500 body gives None; a healthy body gives `SeedCounts(14,0,0)`. Read from the code and the PR 2006 contract in Seat W 28th's HANDOVER line 6, not run: the partial body (200, `success` false) gives None at line 112.
+
+Not measured: leg B itself has never been run against the changed route (gate 195 NOT tested line 59; Seat W 28th lists it as not run); whether the leg runs in any CI job or scheduled run, or only by hand; how the runner script isolates the orchestration legs; which stacks the leg runs against; whether a stack built from `docker/init/01-schema.sql` makes the route answer 500 today (Seat W 28th measured 14 of 14 inserts failing with SQLSTATE 42P10 on a disposable compose stack, HANDOVER line 5, and did not run the leg there); whether any consumer of the response exists outside the files named here (gate 195 read 64 hits in 23 files and found this helper the only code that reads it).
+
+Related, not the same defect: KS-1990 (the route; its text does not name this leg or the helper), KS-960 (the two schema sources and the 42P10 cause), KS-492 (a review ticket owned by Peter whose list includes re-measuring this test file, written before PR 2006; not touched).
+
+Priority: Low, by the filing seat's judgement. The leg is an orchestration test isolated from the sweep, GitHub Actions is retired for this repository, and no source read shows an automatic run (not measured); it reads red only on a stack whose seed fails, which gate 195 grades as the correct outcome.
+##### KS-2044 Schemathesis baseline: two accepted rows describe fixed defects, and the gate does not notice when their tickets close Backlog 2026-11-06T02:25:45.074Z
+**BLUF:** The Schemathesis baseline carries two accepted rows whose reasons describe defects that PR 1343 (KS-1371) and PR 1408 (KS-1435) fixed. Both rows expire 2026-12-31. The baseline gate checks that a row has a reason, a ticket and an expiry and nothing about the ticket's state, so closing KS-1371 and KS-1435 raises nothing, and a regression of either defect would be accepted silently until the expiry. Low. Evidence class: READ ONLY (the rows and the gate source read at one commit; the gate was not run).
+
+**Where**, at origin develop `82d9ef03d795` (read 2026-11-06 with git show on a fresh scratch fetch):
+
+* `systemTest/schemathesis/config/schemathesis-baseline.json` line 488, `by_design_input_tolerance_guard::POST /api/status/{id}/unrevoke`, ticket KS-1371. Its reason says unrevoke accepts index -1 with 200. Since PR 1343 the handler refuses it with 400, and PR 1343's cells U1 and U2 pin that (gate 215's mutant with the bound removed turned exactly those two red).
+* The same file, line 683, `negative_data_rejection::POST /api/transfers/{id}/reject`, ticket KS-1435. Its reason says a wrong-typed signature is accepted with 200 because the reject schema omits the field, and cites `services/transfer/src/index.ts:408-412`. Since PR 1408 the schema declares it (`Blockchain/Dev/services/transfer/src/index.ts` line 422) and cells TR1 and TR2 pin the 400.
+* `systemTest/schemathesis/scripts/runner/baseline_gate.py` lines 285 and 289 test for the fields `reason`, `ticket` and `expires` (a missing field is malformed, a past date is expired). The file has 0 occurrences of closed, done, completed, canceled or linear. Control: the same count for `expires` is 6 lines.
+* A third row names the reject operation: line 418, `positive_data_acceptance::POST /api/transfers/{id}/reject`, ticket KS-591, a different check. Not examined here.
+
+**Relation to other tickets:** KS-1015 (In Progress) already proposes, as an option in its fix direction, that the gate validate that an entry's ticket is still open ("so closure orphans an entry as loudly as expiry does"), and it lists ten rows whose tickets were Done on 2026-09-08. That structural check stays on KS-1015. This ticket is the two concrete rows whose tickets are closing on 2026-11-06. KS-1511 (In Progress) retires a different row, the audit-log pair; its quoted line number for that row is older than this read.
+
+**Order of work:** retire or re-reason both rows only after a sweep has read them, as KS-1511 asks for its row. Gate 215 notes that a harness false firing is not excluded for unrevoke: a case with two negative components that is still valid on the wire would fail `request_valid_as_sent` at the tip (READ ONLY there). Removing the row could expose that instead of a platform defect. Not run here: the gate, and any sweep.
+
+**Source:** gate 215 (round 1, 2026-11-06), finding F4, re-read by Seat S 26th at the lines above.
+
+**Board search before filing (2026-11-06, Seat S 26th, board_search tool, controls held):** `schemathesis-baseline` returned 92 candidates (14 open literal hits, none about the state of these two rows); `baseline_gate` returned 85 candidates (1 open literal hit, KS-1015). No ticket asks to retire these two rows.
+##### KS-2091 No hook suite proves a red preflight makes the pre-push hook refuse a push: its final exit 1 can become exit 0 with every suite green Backlog 2026-11-06T11:46:42.016Z
+**BLUF:** No hook suite proves that a red preflight makes the pre-push hook refuse a push. The final step of `.githooks/pre-push`, the `|| { ...; exit 1; }` after the preflight call, can be changed to `exit 0` and every hook suite that can run on a sparse tree stays green. If that line regressed, every leg of the preflight would become advisory and no suite would say so. Found by gate 228 (tier 1, round 2 of 2, GO WITH NOTES) on PR 2047 (KS-1728) as its finding F3: pre-existing, outside that PR's diff, for routing. The hook is correct at the gate's head, so this is a missing test and not a defect today. Verdict in full: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-06_gate228-tier1-pr2047-ks1728/verdict.md, finding F3 from line 51 (gate head 0dbf24bc0ce40135ed98fcff92661d752b95f350).
+
+## What the gate measured (evidence class MEASURED AT RUNTIME)
+
+* Mutant H3 changes that `exit 1` to `exit 0`, placed in the gate's own worktree as the real hook. All 8 hook suites that are green on that sparse tree stayed green, at base and at head where run. Files, under /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-06_gate228-tier1-pr2047-ks1728/evidence/: `q1_h3_all_hook_suites.txt` and `q1_matrix.txt`.
+* The ninth suite, `preflight_deps`, is red with and without H3 on the same 5 FAIL lines, because the gate's sparse tree lacks files it reads. It is not evidence either way.
+* A grep of every shell test suite finds no fixture preflight that exits non-zero and no assertion on the refusal text (same folder, `q1_h3_coverage_search.txt`).
+
+## Grade and priority
+
+The verdict grades F3 Minor, which is its technical grade. The priority here is Medium, set by Wednesday on this ground: one line carries every leg of the preflight, nothing proves it, and a regression would make the whole push gate advisory with no suite saying so. It costs one cell to close.
+
+## Fix shape (the gate's, not built)
+
+A regression test: give the fixture preflight a non-zero exit and assert that the push did not land, and that the refusal text appears.
+
+## Not this ticket
+
+The gate's other findings on PR 2047 (F1, the here-string temporary file; F2, the empty pattern; N3, the early-closing pipes) stay with PR 2047 and KS-1728. No comment on KS-1728.
+
+## Searched before filing
+
+2026-11-06, includeArchived, titles and descriptions, paginated, in two runs; controls: the term msgpackr hit KS-1379 among open tickets, a random token hit 0. `.githooks/pre-push`: 16 open and 27 closed hits. `pre_push_hook`: 2 open (KS-1728, KS-1759) and 10 closed. `preflight refuses`: 0. `red preflight`: 0. `no hook suite`: 0. `refuses a push`: 3 open (KS-1422, KS-1611, KS-1646). `swallowed`: 20 open and 21 closed. H3: 5 open and 10 closed (the two characters match unrelated text). Read by title around the hits: none states that no hook suite proves a red preflight refuses a push. The three nearest by subject were read whole (description and comments) and probed for the shape (exit 0, swallow, H3, refuses the push, red preflight, advisory): KS-1759 grades the prose of the hook by three counts; KS-1646 is a fresh clone that runs no hook at all; KS-1483 is a push of a branch that is not checked out skipping the preflight. None holds this finding. The key KS-1728 returned no ticket other than its own.

@@ -1,0 +1,464 @@
+##### KS-1610 Akto suppressions and exclusions: one cites the wrong ticket (KS-442 → KS-510), and two coverage trade-offs (VOLATILE_PATH_RE, 8 built-in data-exposure templates) have no ruling or owner Backlog 2026-10-30T10:53:27.161Z
+**BLUF:** the [KS-1478](https://linear.app/secuura/issue/KS-1478/akto-image-2371-2383-release-v2383-2026-10-13-testing-image-has-no) audit of every rule that stops an Akto result from counting checked each one against the ticket it cites. Most stand and are no wider than their ruling: [KS-308](https://linear.app/secuura/issue/KS-308/akto-scans-report-100percent-skipped-tests-testing-container-cant), [KS-323](https://linear.app/secuura/issue/KS-323/akto-after-ks-314-drive-connectivity-skip-bucket-to-0-confirm-mongo)/324, [KS-397](https://linear.app/secuura/issue/KS-397/are-apidocument-types-and-apioauthscopes-intentionally-public-or)/364, [KS-719](https://linear.app/secuura/issue/KS-719/security-put-apiprivacysettings-and-apisettingsnotifications-accept), [KS-708](https://linear.app/secuura/issue/KS-708/security-akto-add-user-id-bola-high-on-get-apiplatformaudit-log) (narrower than the ruling), [KS-1397](https://linear.app/secuura/issue/KS-1397/the-gateway-answers-every-request-with-server-nginx-aktos-unwanted)/1421 (narrower, fails closed, **seen firing live on 2026-10-14** on `POST /api/certifications/issue`), [KS-709](https://linear.app/secuura/issue/KS-709/akto-reports-a-pass-for-a-test-that-executed-nothing-clean-0-not), [KS-417](https://linear.app/secuura/issue/KS-417/akto-spec-consistency-guard-for-the-endpoint-scoped-known-fp-allowlist)/425/524 and [KS-1416](https://linear.app/secuura/issue/KS-1416/akto-the-three-code-injection-sqli-scans-run-0-sqlnosql-templates-akto). **Three do not.** The citation fix was made and then **backed out at Peter's instruction (update the app only, log issues)**. Re-verified against `develop` 3c0a52221 on 2026-10-14.
+
+## 1. Wrong citation: `/api/identity-credentials/types`
+
+`systemTest/akto/src/core/endpointFalsePositives.ts:148` (and the docblock at `:117-119`) suppresses `REMOVE_TOKENS` on this endpoint, citing [KS-442](https://linear.app/secuura/issue/KS-442/make-the-verify-family-public-5-ops-gateway-relax-spec-security-ks-424). [KS-442](https://linear.app/secuura/issue/KS-442/make-the-verify-family-public-5-ops-gateway-relax-spec-security-ks-424)'s ruling (Kam, 2026-07-11) covers **only the five verify operations** and says *"reference reads stay protected"*. The ticket that actually registered this endpoint as public by design is [KS-510](https://linear.app/secuura/issue/KS-510/akto-register-get-apiidentity-credentialstypes-as-by-design-public) (Done, 2026-07-23), resting on the spec's `security: []`. The test comment `tests/unit/core/endpointFalsePositives.test.ts:34` carries the same citation.
+
+## 2. `VOLATILE_PATH_RE` drops whole paths from HAR replay with no ruling
+
+`src/setup/harSpec.ts:26`: `/\/(analytics|dashboard|realtime|metrics)\b/i` means those endpoints get **no real HAR sample**, so authz templates skip them for **every** template, not just the similarity ones ([KS-357](https://linear.app/secuura/issue/KS-357/akto-drive-authz-precondition-skips-0-complete-attacker-role-auth)). Today's feed excluded **19** volatile endpoints of 141 GET endpoints. Kamil's [KS-708](https://linear.app/secuura/issue/KS-708/security-akto-add-user-id-bola-high-on-get-apiplatformaudit-log) analysis (2026-08-28) warns that this exact mechanism *"removes the audit log from the scan"* and that the `analytics` paths *"already make"* that trade, *"worth asking whether they should be making it either"*. No ticket reviews it, and its scope is wider than any ruling.
+
+## 3. 8 Akto built-in data-exposure templates are loaded but never selected
+
+`tests/aktoSetup.test.ts:329-338` (`KNOWN_CATALOG_DRIFT.loadedNotInCatalog`): `SENSITIVE_DATA_EXPOSURE_{ADDRESS,CREDIT_CARD,EMAIL,IP_ADDRESS,JWT,PHONE_NUMBER,SSN,VIN}`. Its own comment calls this *"a REAL, previously-unrecorded coverage observation … a coverage decision … deliberately not folded into* [KS-717](https://linear.app/secuura/issue/KS-717/akto-test-id-catalog-and-the-loaded-template-library-drift-silently)*'s drift fix"*. Today on 2.38.2 the library is again 208 = 199 bundled + 9 built-ins, so it is unchanged. No ticket owns the decision.
+
+## Also stale
+
+`endpointFalsePositives.ts:206` quotes `routes/admin.ts:1437`; the quoted code is now at `:1487` / `:1523`. Staleness detection for similarity entries is already [KS-761](https://linear.app/secuura/issue/KS-761/similarity-undiscriminating-fp-entries-have-no-staleness-detection-a), so it is not duplicated here.
+
+## Acceptance criteria
+
+1. The `/api/identity-credentials/types` entry and its test cite [KS-510](https://linear.app/secuura/issue/KS-510/akto-register-get-apiidentity-credentialstypes-as-by-design-public) (with "spec `security: []`, no Kam ruling"), not [KS-442](https://linear.app/secuura/issue/KS-442/make-the-verify-family-public-5-ops-gateway-relax-spec-security-ks-424). **A test demonstrates it:** a unit test that every `public-by-design` entry's cited ticket is one whose text names that endpoint (or a recorded reason), red on the [KS-442](https://linear.app/secuura/issue/KS-442/make-the-verify-family-public-5-ops-gateway-relax-spec-security-ks-424) citation.
+2. `VOLATILE_PATH_RE`: a recorded decision (Kamil's input sought, per the [KS-708](https://linear.app/secuura/issue/KS-708/security-akto-add-user-id-bola-high-on-get-apiplatformaudit-log) discussion): narrow it, scope it to the similarity templates as [KS-708](https://linear.app/secuura/issue/KS-708/security-akto-add-user-id-bola-high-on-get-apiplatformaudit-log) Option B did for the tolerance, or accept it with a reason. Report the number of endpoints it excludes in the run's coverage section so the trade is visible.
+3. The 8 data-exposure templates: enable them (and measure the tier-budget cost and any false positives on a platform that legitimately returns emails and addresses), or record why not, with the decision recorded where the catalog selection lives.
+4. The stale `admin.ts:1437` pointer is corrected or replaced by a symbol reference.
+--- comment 2026-10-27T13:31:19.739Z peter@obeden.com
+**Raw results for item 3, as promised** (no classification). This is the first `test:security` run with the 19 built-ins: slot 3 of the Mac, KS-1608 commit `4ce20980e`, Akto 2.41.6, 2026-10-27, Full OWASP scan `6ae0a02a2695a009eb32f225`.
+
+**All 19 executed.** Each recorded 355 results against the 355-endpoint collection. They are passive and read the 81 authenticated HAR samples fed that run. The `settings: plan: PRO` concern did not apply: the self-hosted engine ran them.
+
+| Template | Vulnerable | Not applicable (filter not matched) |
+|---|---|---|
+| `SENSITIVE_DATA_EXPOSURE_EMAIL` | **4** | 351 |
+| `SENSITIVE_DATA_EXPOSURE_IP_ADDRESS` | **3** | 352 |
+| the other 17 (address, AWS ×8, credit card, database, JWT, phone, secret, SSN, token, username, VIN) | 0 | 355 each |
+
+**The 7 flagged results**, one each, verbatim from the run artifact:
+- EMAIL: `GET /api/auth/me`
+- EMAIL: `GET /api/users/me`
+- EMAIL: `GET /api/users/admin/list`
+- EMAIL: `GET /api/security/audit`
+- IP_ADDRESS: `GET /api/platform/audit-log`
+- IP_ADDRESS: `GET /api/security/audit`
+- IP_ADDRESS: `GET /api/sessions`
+
+**What this does to the gate:** these 7 are the run's only vulnerable results, and they fail `test:security` (`assertNoVulnerabilities`: "vulnerable results 7"). The `develop` control on slot 4 (Akto 2.38.5, without these templates) had 0 vulnerable in the same scan.
+
+**A report detail you may also want to weigh in on:** these templates declare `severity: dynamic_severity`, which Akto decides per finding (public endpoint HIGH, private LOW, otherwise MEDIUM). The harness maps only the four fixed severities, so the HTML report shows **0 in every severity tile next to "7 Vulnerable"**. The gate still fails, but a reader cannot see how serious each one is.
+
+**The decision we'd value from you:** for each of EMAIL and IP_ADDRESS, is returning that data on those endpoints by design (and so a recorded, ruled exception like KS-1397's), or exposure to fix? And are the other 17 worth keeping in the scan at all?
+--- comment 2026-10-27T12:51:36.615Z peter@obeden.com
+**@kamil.kreiser, your opinion please on item 3 (Akto's built-in sensitive-data templates).**
+
+**BLUF:** under KS-1608 we've started including Akto's active built-in `SENSITIVE_DATA_EXPOSURE_*` templates in `test:security`. They can be taken straight back out, so this is a request for your view rather than a done deal. Would you keep them, keep some, or drop them?
+
+**What they are.** At Akto 2.41.6 there are **19** of them (8 at 2.38.x):
+- personal data: address, credit card, email, phone number, SSN, username, VIN;
+- credentials: JWT, token, secret, AWS access key;
+- infrastructure: AWS ARN / DocDB / DynamoDB / RDS / S3 / SQS URLs, database, IP address.
+
+Each is a **passive** check: it sends no request, and reads responses already captured from our HAR feed for a value of that data type. Severity is decided per finding: HIGH on a public endpoint, LOW on a private one, MEDIUM otherwise. Akto seeds them itself at start-up, which is why our catalog (built from the template library) never selected them.
+
+**Why your view matters.** The platform legitimately returns some of these, for example a login response carries a JWT and a profile carries the user's own email. So some findings will be by design, and a few could be real exposure. Your read of which data types count as exposure here would decide whether they stay, and whether any need a ruling like the KS-1397 `Server: nginx` one.
+
+**What we'll have for you.** The first `test:security` run that includes them is in progress on slot 3 (KS-1608, commit `4ce20980e`). Its per-template results and any findings will go on this ticket, as each template's raw result (no interpretation), so you're judging real output.
+
+**To remove them:** drop the built-in source in `generate-test-ids` and restore the `KNOWN_CATALOG_DRIFT` exemption. That's one small commit.
+
+*Note: these templates declare `settings: plan: PRO`; whether the self-hosted engine runs them at all is being measured in the same run.*
+##### KS-1423 gate64 minors on the KS-1330 runner re-land (PR 1389): six findings carried forward, and the gate kit's key reader goes blind on a split <h2> Backlog 2026-10-05T14:08:41.903Z
+gate64 returned **GO** on #1389 (KS-1330, re-landing the round-2 signal handling) at head
+`a7f5965a7b3f`. The PR has MERGED as squash `22b268143a6377c9a82cd03379daa596cd26d644` on develop.
+This ticket carries the non-blocking findings forward with the fix shape the gate gave for each, plus
+one defect in the **gate kit itself** that will hit every lane merging on top of PR 1390.
+
+Refs KS-1330
+
+## The six carried findings
+
+**N-1389-1 — Minor, MEASURED.** Leg 14 is no evidence for item 1, and the PR body says it is. Leg 14
+sends no signal to the runner, so both INT arms are unreachable there. Fix: drop the leg-14 sentence
+from any future Test Evidence for this work; the arm's evidence is the suite, not the push.
+
+**N-1389-3 — Minor, MEASURED.** The interrupt cell cannot tell a re-raise from a plain exit 1 — the
+tamper stays 61/0. Fix: assert the signal-death exit status (128+SIG) rather than just non-zero, so a
+runner that exits 1 instead of re-raising reddens.
+
+**N-1389-4 — Minor, PROBED.** A false grep sentence and an absent file. The conclusion holds, the
+figures do not. Fix: re-measure per file against a must-hit control before restating it anywhere.
+
+**N-1389-5 — Minor, PROBED.** The coupling figures are wrong: 16 read-heads measured, not 2; 9
+trap-INT, not 10 of 10. The conclusions hold. Fix: same as N-1389-4 — the sentence survives, the
+numbers must be re-taken.
+
+**N-1389-6 — Minor.** Item 3 has no pinning cell; its explanatory comment sits mid-loop rather than
+in the header; and there is a re-indent artefact. Fix: add one pinning cell, move the comment to the
+header, drop the re-indent.
+
+**N-1389-7 — Polish, MEASURED.** An interrupt under a short TMPDIR leaves the in-flight
+`rss-suite.*` log behind. Pre-existing, not introduced by this PR.
+
+Not in scope here: **N-1389-2** belongs to KS 1331 (the untrapped background grandchild), and
+**N-1389-8** / **N-1389-9** are Info.
+
+## The gate-kit defect — the one worth acting on
+
+`c4_docs_gate64.py:61` **finds doc sections with a SAME-LINE reader, and PR 1390 split** `<h2>` **across**
+**lines, so the key list silently loses half its entries.**
+
+The reader is `h2 = [i for i, l in enumerate(lines) if '<h2>' in l]` followed by a key match against
+`lines[i]`. Both key regexes require the closing tag on the opening tag's line: cheat
+`&mdash; KS-(\d+)</h2>`, flow `\(KS-(\d+)\)</h2>`.
+
+Measured on the real doc bytes, read by the GitHub contents API at each ref:
+
+| flow doc | `<h2>` lines | same-line keys | multiline-tolerant keys | split `<h2>` |
+| -- | -- | -- | -- | -- |
+| develop `d784b613c81e` | 16 | 8 | 8 | 0 |
+| develop `c5101866e` (after PR 1390) | 16 | **4** | 8 | **5** |
+
+Keys LOST by the same-line reader: KS 1015, KS 1345, KS 1388, KS 1210. Keys kept: KS 666, KS 1404,
+KS 1333, KS 1005. The split `<h2>` lines are 1671, 1790, 2504, 2618 and 2734, and the shape is
+
+```
+<h2>
+  9. Auth surface — connector tokens on the users routes (KS 564, KS 1402)
+</h2>
+```
+
+The cheat sheet is unaffected (6 `<h2>`, 6 same-line keys, 6 tolerant, 0 split, at both develops).
+
+**Why it matters.** The kit README calls the key-anchored predicted tree "the authority". The
+predicted TREE was in fact sound here, because it comes from `merge-tree`, not from this reader. What
+degrades is the gate's judgement: the D5 key census and M8's "every doc at M equals develop's doc,
+key for key" ran over a 4-of-8 key list and would **PASS while blind to four sections**. A gate that
+passes blind is worse than one that fails. The coordinator set M1 and the M8/D5 key census aside for
+this merge by name and replaced M8 with blob byte-equality, which needs no reader and is strictly
+stronger for a PR carrying no doc hunk.
+
+Note that `flow_numbers()` at `:81` uses `re.findall(r'<h2>\s*(\d+)\.', text)` over the whole text,
+and `\s*` crosses a newline — so that reader survives a split while `sections()` does not. The two
+readers disagree on the same document.
+
+**Fix shape.** Match the key against the whole `<h2>` element rather than its opening line: join from
+`<h2>` to the next `</h2>` before applying the key regex, or apply the regex to the full text with
+`re.S`. Then add a fixture with a split `<h2>` so the arm cannot go vacuous again, and a control
+proving the pre-fix reader loses a key on it.
+
+**Also measured, already filed elsewhere — not duplicated here.** The push for this merge needed
+`npm ci` in `systemTest/akto` first, because the stale shared `refs/remotes/origin/develop`
+(`32e058975d4e`) widens the format gate's selection to 21 `systemTest/akto` paths that the merge-in
+range itself does not contain (`f0179806..M` is 0). That is **KS 1422**, measured there on PR 1394.
+
+## Evidence
+
+* Squash `22b268143a6377c9a82cd03379daa596cd26d644`, tree `c25213614a52e3ce018855ed61c27cbf4558734f`,
+  one parent `f0179806494e42df254b9580168be3cd4a35f307`, subject 75 chars, 0 trailers.
+* Merge-in `677750a8d48c7f7533171f888598f6e1494fa288`; gate64 `qm` M1-M8 PASS twice, 0 FAIL, with the
+  head-as-merge-in-head control returning 5 FAIL.
+* Push preflight, verbatim and NOT a pass: `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 skipped — local stack not up. Leg 14:
+  `shell suites: 67 passed, 0 failed, 0 skipped (of 67)`.
+* Not tested, named rather than implied: a live sweep, a real PTY ^C, the whole push preflight, and
+  any bash other than 3.2.57.
+##### KS-1546 KS-1517 follow-up: stale-build residue from the #1515 round 2 gate (permanent targets read as stale, C2/A11 survivors, a null package.json crash, wording) Backlog 2026-10-22T15:08:54.529Z
+**BLUF:** Residue from the #1515 (KS-1517) round 2 Opus gate, filed as one P3 checklist per Wednesday's ruling (2026-10-12 17:59Z). None of these is reachable on today's tree. Each item carries the shape the gate measured.
+
+**Context:** Line numbers are on #1515 head `a7d0583d`, which is the closing amendment `0723117b` plus develop `425ad3e0`. Source: the round 2 verdict (Minors m1 to m7, plus one carried item). The closing amendment already fixed MJ1 (the note's crash and hang), m1's fixture (R2), m2 (the code check restored and the regex anchored), and the comments m7 named at CLAUDE.md 399-402 and 412-413 and `check.cjs` 102-103 and 325. They are not repeated here.
+
+- [ ] **(a) m3. A declaration target that is permanently absent is reported as a stale build ("rebuild it"), and no rebuild can fix it.**
+  * Where: `check.cjs:208-219` (`mapTargets` takes the FIRST matching `*` key in object order, where TypeScript takes the longest prefix), `:331` (the "package declares nothing for this subpath, so it is left to tsc" exemption), `:332-333` (any declared target that is absent goes to `staleFatal`, exit 2).
+  * Shapes, all on complete builds:
+    * X17: typesVersions names `dist/ghost.d.ts`, which the build never emits. tsc says TS7016; develop rc 1, head rc 2.
+    * X16: a typo subpath under a catch-all `"*": ["dist/*.d.ts"]`. tsc says TS2307; develop rc 1, head rc 2 with "missing dist/thnig.d.ts". Under a catch-all key every subpath counts as declared, so the exemption at `:331` never applies.
+    * X18: the reverse resolver divergence (first-match `*` against TypeScript's longest `sub/*`). Head rc 2 names the wrong file.
+    * X17b: X17 with its TS7016 baselined. Develop rc 0, head rc 2, so a push develop accepts is refused.
+  * Why it is unreachable today: both committed baselines hold 0 TS2307/TS7016 entries (measured 2026-10-13). The real shared package has no catch-all key. A stale-judged entry cannot be admitted, because the exit 2 runs before `--init` or `--update` writes. But `--init` can still admit a TS2307/TS7016 whose target is on disk at the time; the comment at `check.cjs:286-293` points here.
+  * The gate's suggested fix: exit 2 only where a rebuild would plausibly help (the target lies under the package's outDir), or demote to a NEW error carrying a "may be stale" hint.
+  * Docs: `CLAUDE.md:422-424` ("left to tsc") should add that it does not apply under a catch-all key.
+- [ ] **(b) Two mutants survive the KS-1517 cells (measured on a green baseline, 29 of 29).**
+  * C2, "TS2307 for any module" (drops the `@secuura` restriction at `check.cjs:295` and `:320`). Gate shape: `thirdparty/sub` mapped by typesVersions and unbuilt. Head rc 1, C2 rc 2.
+  * A11, "only the first array target consulted" (`candidates(v)` at `:216`, `anyResolves` at `:308`). Gate shape: the array-divergence fixture. Head rc 1, A11 rc 2.
+  * Add one cell per shape.
+  * For the record, not survivors: C1, C5 and the amendment's isFile and try/catch mutants are killed. C4 is masked by the restored code check, and the code check and the regex anchor each mask the other; all three were measured by removing the masking guard too.
+- [ ] **(c) m4. Stale builds that still read rc 1 "NEW" (the pre-PR misattribution).** Leg 16 still fails on each, so none is a silent pass. The gate judged this acceptable: the design names only what its resolver can name.
+  * X19: a version-range key (TypeScript reads `>=4.0`; the resolver reads only `*`).
+  * Y2: a main-only package whose sibling `index.d.ts` is missing.
+  * Y3: a deep path with no typesVersions.
+  * Y11: a directory target that is unbuilt.
+  * Y5b: a re-export chain under `skipLibCheck:false`.
+  * X2b: a nearer stale copy under `src/node_modules`.
+  * Decide: fix one or more, or record each as a documented limit in CLAUDE.md.
+- [ ] **(d) m5. Fatal-side crash on an installed** `@secuura` **package whose** `package.json` **is literally** `null`**.**
+  * Where: `check.cjs:303` (`JSON.parse` in `packageJsonOf`), dereferenced through `declTargetsFor(found.pkg, sub)` at `:327`. `TypeError: Cannot read properties of null`, rc 1. Develop is also rc 1 (TS2307).
+  * The note side is already covered by the amendment's try/catch (cell "MJ1 null package.json note-side"). npm would not install such a package.
+  * Fix: `JSON.parse(...) || {}` at `:303`, plus a fatal-side cell.
+- [ ] **(e) m6, cosmetic.**
+  * One "missing declaration target" line is printed per importing site (`check.cjs:372`); real arm B prints the same target twice. Dedupe by target.
+  * "tsc itself could not resolve the module" (`:370`) is printed for TS7016 too, where tsc DID resolve the `.js`. Word it per code.
+- [ ] **(f) Leg 16's exit-2** `why` **text does not mention a stale build** (`scripts/preflight/test-types-ratchet.sh:65`). The checker's own stderr lines above it do. Sibling: KS-1527 item (a) pins the rc-1 wording in the same `case`, so one PR can do both.
+
+**Dedupe (2026-10-13):** title and description searched for typecheck-tests, check.cjs, KS-1517, test-types-ratchet, stale build, permanently absent and declaration target. Hits: KS-1517, KS-1489 (Done), KS-1523, KS-1487 (Done), KS-1513, KS-1527, KS-1520 (Done), KS-1529, PS-549. None covers these items. KS-1527's leg-16 item is the rc-1 wording, not (f).
+
+Refs KS-1517.
+--- comment 2026-10-12T19:03:26.800Z kamil.kreiser@secuura.ai
+## Added from the #1515 closing-amendment gate (Sonnet, GO WITH NOTE, verdict sha256/16 `b9d4003e8f64c84e`, head `a7d0583d`)
+
+Five Minors, added here as Wednesday ruled (no new ticket). **m3 goes first.** Line numbers are on `a7d0583d`, which is what lands on develop.
+
+- [ ] **(g) m3, FIRST: no cell pins that execution CONTINUES after the note's try/catch.**
+  - Mutant T2 (`catch { process.exit(0); }`) survives 29/29.
+  - The gate's N6 shows what that costs: with a real NEW test-file type error present, the head reads rc 1 and T2 reads rc 0. That is a silent pass of a real verdict.
+  - Cells to add: the null-`package.json` note-side cell plus a second test file carrying a real type error, expecting rc 1 and "NEW type errors"; and the same with a genuinely stale second package, expecting rc 2 (the gate's N6 and N7).
+- [ ] **(h) m1: the note scan is quadratic in comment-plus-specifier pairs under the 4 MiB cap.**
+  - Where: `inAny` at `check.cjs:178`, called per specifier match at `:130`, does a linear `ranges.some` per match.
+  - Measured: Q1 (`//\nfrom'@secuura/shared/thing'\n` repeated to 4,194,269 bytes) takes 25.8 s on the head against 0.25 s on develop; Q2 takes 39.4 s. Both read rc 0.
+  - Not a hang, and unreachable on the real tree: the largest file, 280,069 bytes, scales to about 0.2 s.
+  - Fix shape: a binary search or a moving cursor, a smaller cap, or a time budget on the note. Cell: Q1 with an elapsed-time bound.
+- [ ] **(i) m2: mutants survive, carried.**
+  - The gate's **C1** (judge any package, not only `@secuura/*`, at `check.cjs:294-297`) survives 29/29. Shape: a non-`@secuura` `thirdparty` whose `types` file is missing; tsc says TS7016; the head reads rc 1 (NEW) and C1 reads rc 2 (STALE, naming `index.d.ts`).
+  - This is the same class as item (b)'s **C2** (the `@secuura` restriction dropped for TS2307). It is NOT the mutant my own run called C1 and killed: mine dropped both guards, and E1 kills it.
+  - **A11** (first array target only) still survives, as in (b).
+  - Cell: the `thirdparty` shape, expecting rc 1 and no CANNOT RUN.
+- [ ] **(j) m4: a `null` package.json on the FATAL side still crashes with a TypeError.**
+  - Same as item (d); the gate's lines are `check.cjs:307` (`pkg.typesVersions` on `null`), reached from the fatal loop at `:327`, outside the try/catch.
+  - Same exit code as develop (rc 1), worse message. Fix: `JSON.parse(...) || {}` in `packageJsonOf` (`:303`).
+- [ ] **(k) m5: documentation. `CLAUDE.md:403` says "Both the code and the anchor are needed".**
+  - The gate's K1 (code check removed, anchor kept) and K2 (anchor removed, code check kept) each survive 29/29; only K3, both removed, is caught. So each alone rejects E1. My closing-amendment table recorded the same fact as "each masks the other".
+  - The accurate wording is the `check.cjs:314-317` comment ("The anchor and the code each reject it"). The only input the gate could see where the code check alone decides is a TS2792 (the message begins `Cannot find module '...'` but carries another code). It is untested, and the gate makes no claim about it.
+
+Source: `reference/2026-10-13_gate-pr1515-r2c/verdict.md`, Findings m1-m5.
+##### KS-807 The control-byte guard cannot see a raw body — findNulBytePath returns null for every Buffer, and the doc claims otherwise Backlog 2026-09-05T23:52:37.599Z
+## BLUF
+
+**The control-byte guard cannot see a raw body.** `findNulBytePath` and
+`findControlBytePath` both return `null` for **every** `Buffer`, so a request parsed
+by `express.raw()` passes the guard whatever bytes it carries. The guard's own doc
+comment says every field is covered; that is not true of raw bodies. Nothing is
+exploitable on `develop` today — the one live `express.raw` is path-scoped and its
+payload is not persisted as text — but the guarantee KS-471/KS-472 states is wider
+than the guarantee the code delivers.
+
+**This ticket asks a question rather than answering it: should a webhook payload be**
+**scanned at all, or declared out of the class in writing?** Both are defensible. What
+is not defensible is the current state, where the doc claims one and the code does
+the other.
+
+## Recommendation
+
+Decide first, then implement — the implementation differs completely by answer:
+
+* **(A) Scan raw bodies.** Teach `findControlBytePath` to walk a `Buffer` (a byte
+  scan, not `Object.entries`), and mount the guard after `express.raw` on
+  `/webhooks`. Cost: a byte walk on every webhook body. Risk: a signed webhook
+  payload whose signature covers the raw bytes must not be altered — rejection is
+  fine, mutation is not, and the guard only rejects.
+* **(B) Declare raw bodies out.** Say so in the guard's doc comment and in
+  `mountBodyParsers`'s, and add a leg asserting that no `express.raw`/`express.text`
+  mount feeds a handler that persists its body as text. The exclusion becomes a
+  **declared set with a reason**, which is the shape the KS-800 gate asked for.
+
+## Detail — measured, not quoted
+
+Against `packages/shared/dist/middleware/index.js` built from this branch's source:
+
+```
+Buffer [61 00 62]            findNulBytePath       null
+Buffer [61 00 62]            findControlBytePath   null
+CONTROL {f: "a"+NUL+"b"}     findNulBytePath       "f"      <- the walker works
+CONTROL {a: 0} (a number)    findNulBytePath       null     <- not a numeric artefact
+CONTROL {s: buf.toString()}  findNulBytePath       "s"      <- same bytes, as a string
+```
+
+Two controls that could have disagreed and did not: the identical bytes presented as
+a **string** are found, so the failure is Buffer-specific and not a broken walker;
+and a literal number `0` is correctly not a NUL, so the null is not a numeric
+artefact either.
+
+**Cause.** The walker recurses with `Object.entries(value)`. On a `Buffer` that
+yields numeric indices with **number** values, and no branch of the walker matches a
+number — so it returns `null` without ever looking at a byte.
+
+**Every raw/text parser in tracked source** (`git ls-files` over `*.ts`/`*.js`, so
+build output cannot inflate it):
+
+| Site | Status |
+| -- | -- |
+| `services/billing/src/index.ts:50` | **LIVE** — `app.use('/webhooks', express.raw({type:'application/json'}), webhookRoutes)`, path-scoped, mounted **before** the guard |
+| `services/billing/src/__tests__/ks488-c4-webhook-idempotency-fail-closed.test.ts:63` | test harness, same shape |
+| `packages/shared/src/middleware/request-limits.ts:92` | `express.raw` factory — **shared exports a way to mount one** |
+| `packages/shared/src/middleware/request-limits.ts:102` | `express.text` factory, same |
+
+The last two matter beyond this ticket: they are the same two factories recorded as
+**KS-800 F-16**. `express.text` sets `req.body` to a **string**, which the guard
+*can* walk — so for text bodies ordering is real protection and the KS-802 widening
+of `PARSER_CALL` is load-bearing. For `raw` it is not: ordering a raw parser before
+the guard buys nothing at all. **Detection is not protection, and the two cases**
+**differ.** Whatever is decided here should be written into `PARSER_CALL`'s comment so
+the next reader does not infer that a detected raw mount is a guarded one.
+
+## Provenance
+
+* The Buffer behaviour and its two controls: measured in this session against a
+  fresh `tsc` build; command and output above.
+* The parser-site table: `git ls-files | grep -nE` at `55894a5b5`.
+* Raised by the KS-802 gate (report §4, PR #818 @ `8a9fa6bde`) and folded to a ticket
+  by Wednesday's ruling 2026-09-05 06:35:12Z. Related: **KS-800** (F-16), **KS-802**.
+##### KS-1748 CLASS: a module-level beforeAll that imports a router pays the cold Vite transform inside the hook budget - five locations, two fix shapes, no owner for the pattern Backlog 2026-11-03T12:33:50.171Z
+## BLUF
+
+**A test file whose module-level** `beforeAll` **imports a router pays the cold Vite transform inside the hook's budget, so the whole file's cells are skipped when the machine is loaded.** Five locations have hit this independently. Each has been fixed in its own place, by two different shapes, and **no ticket owns the pattern** — so the next service to grow such a file is on the default budget again. This ticket records the class and asks for one decision: a fleet-wide convention, or an explicit statement that per-location budgets are the convention.
+
+Facts only; nothing is built and no fix is chosen. Raised as the class behind the tier-2 gate on #1727.
+
+Refs KS-1734, KS-1602, KS-1155, KS-1328, KS-1729.
+
+## The five instances, by key
+
+| ticket | location | state | shape of the fix |
+| -- | -- | -- | -- |
+| **KS-1734** | `services/security` — 10 files lapsed the 10 s hook, 1 test lapsed 5 s | merged `5c40e82cb539` | service-wide `hookTimeout`/`testTimeout` 60 s in `vitest.config.ts` |
+| **KS-1602** | `services/security`, `ks742-keys-tenancy-route-contract.test.ts` alone | In Progress | explicit per-hook budget in the one file |
+| **KS-1155** | `packages/shared` tree-walking guards over the 5 s default | In Progress | not read here |
+| **KS-1328** | `services/kyc`, `db.retry.test.ts` | In Review | not read here |
+| **KS-1729** | `vc-issuer` — first run after `npm ci` skips 110 cells, three files cold-import routers | Done | not read here |
+
+The two shapes are in tension: KS-1602 budgets one file, KS-1734 budgets a whole service. Both are live in `services/security` at once — KS-1734's comment records that KS-1602's explicit per-hook budget "still overrides the default underneath, so that file's behaviour is unchanged."
+
+## What #1727's gate measured, and the figure to carry
+
+From the tier-2 gate on #1727 (`2026-10-27_gate-t3r4-batch/verdict.md`) and the evidence recorded on KS-1734, **quoted, not re-run by me**:
+
+* The knob governs the failure class: `hookTimeout` forced to 25 ms → **18 files red**; `testTimeout` 25 ms → **11 files red**.
+* The full ladder, each rung on a cold `.vite` cache: 1 ms → 23 of 33 files; 25 ms → 20; 100 ms → 19; 400 ms → 8; 1000 ms → 0; 10000 ms (the replaced default) → 0.
+* **The governed population is WIDER than the ten files KS-1734 named.** 19 of 33 files already exceed a 100 ms hook. KS-1734's own comment carries this as a correction to its first wording — the PR had claimed the knob "governs exactly the files the ticket names", and the accurate figure is 18 at the `hookTimeout` rung, not 10.
+* The hooks finish under 1 s at load1 3.3–6.6, against the 10 000 ms they blew at load1 11.21: **a >10x inflation under contention.**
+* **Contention, not coldness, is the driver.** Four cold first-runs after `npm ci` at load1 3.31–4.44 each passed 33/33 — so KS-1734's red did not reproduce, and the budget change has **no red→green pair** behind it.
+
+## The decision this ticket asks for
+
+Not which budget — that is settled per location. The open question is the **convention**: a file that imports a router at module level inside `beforeAll` will exceed a short hook budget on a loaded box, and the budget masks the cost rather than removing it. Either
+
+1. state a fleet-wide rule (for example: every service's `vitest.config.ts` carries a budget that clears the observed contention inflation, as `services/security` and its `vitest.integration.config.ts` now do), or
+2. state that per-location budgets are the convention and that a new file is expected to set its own,
+
+so that the sixth location is a known case rather than a new ticket.
+
+## Not established
+
+* No suite was run for this ticket and no measurement here is mine. Every figure above is quoted from the #1727 gate verdict or from KS-1734's comment.
+* **Whether the cold Vite transform is the mechanism** in KS-1155, KS-1328 and KS-1729. Those three are cited from KS-1734's own "Same class, other places" list; their bodies were **not** read here, so the shared mechanism is KS-1734's attribution, not a finding of this ticket.
+* Whether any location other than `services/security` currently lacks a budget. Not surveyed.
+* Whether the >10x inflation figure generalises beyond `services/security` at this load.
+
+## Searched (board, KS team, title + description + comments, archived and Done included)
+
+* `module-level beforeAll` — **0 hits**. `cold transform` — **0 hits**. `Vite transform` — **0 hits**. So no class ticket exists under any of those names.
+* `hookTimeout` — **4 hits**: KS-1734, KS-1729, KS-1602, KS-1155 — the four instances, no class ticket.
+* `first run after` — **4 hits**: KS-1739 (a Node 26 cbor defect, unrelated), KS-1734, KS-1729, KS-1053.
+* `vitest.config.ts` — **12 hits**; the timeout family among them is the five instances above, the rest unrelated (KS-1582, KS-1319, KS-993, KS-846, KS-830, KS-177, KS-149).
+* **Positive controls, same instrument and session:** `KS-1531` → 5 hits, `run_shell_suites` → 35 hits. **Zero control:** `zzqqxx-no-such-symbol-9931` → 0 hits.
+* **Decision recorded:** KS-1734 was read in full. This is **not** its residue — KS-1734 is scoped to `services/security` and its fix covers that whole service. What is unowned is the pattern across services, which is why this is filed rather than commented there.
+
+*Filed by Seat G 22nd, 2026-10-27, on Wednesday's brief.*
+--- comment 2026-11-03T12:33:50.183Z kamil.kreiser@secuura.ai
+**BLUF:** `services/auth/src/__tests__/auth.integration.test.ts` is a further location of this class. In the before run recorded in PR 1977's body (https://github.com/Secuura/Distributed_Secuura/pull/1977, merged), its 10 s `beforeAll` hook timed out under load and 56 cells were skipped. The same body says the file passed when re-run alone at lower load and timed out again in a second re-run at higher load. Whether the cost is a router import, as this ticket describes, is not established: nobody has measured what the hook spends its time on.
+
+* **Where:** `services/auth/src/__tests__/auth.integration.test.ts`. Neither this ticket's description nor its two comments names it (read just now: 0 mentions).
+* **What is known:** 56 cells skipped in one run, and a skip is not a pass, so that run's pass count is a lower bound (PR 1977's body says so). Seat R 78th read QA gates 160 and 161 as running the auth suite with the working directory at `services/auth` and seeing 0 failures and 0 skips on this file; I have not re-read those verdicts.
+* **Not done:** this comment changes no file, no ticket state and no assignee, and no fix is built here.
+--- comment 2026-10-27T18:58:04.198Z kamil.kreiser@secuura.ai
+**BLUF: two more locations, both in `services/auth`, and they differ from this ticket's stated shape: neither file has a `beforeAll`. The module reset and dynamic imports sit in a per-cell `loadRepo()`, so the FIRST cell of each file lapsed the 5 s TEST default (6,658 ms and 6,580 ms), not a hook budget. The same command read 40/40 twice straight after (447 ms and 369 ms), and the full `services/auth` suite started 8 s later read 105 files, 1185 tests, all passed. The runner's own phase figures for the failing run (`transform 295ms`, `import 46ms`) do not show the missing 6 s, so "cold import" is Seat X 2nd's inference, not a measurement. Load during the failing run was not recorded.** Facts only. No state change.
+
+Both files are already named on KS-1155 (see item 4); neither is named here. Source: Seat X 2nd's saved runs, `5_Project_History/2026-10-28_seatX-2nd/evidence/` (read whole where quoted), its HANDOVER (`:41`) and the file contents at develop `c18552d94de23b4da365ce02e02be5d06793bbcb`. I ran nothing.
+
+## 1 — The failing run
+
+`merged_ks1186_ks999_20261027T153846Z.out`: `RUN  v4.1.12` in Seat X 2nd's worktree for KS-1769, `services/auth`; `Start at  02:38:50`; `Duration  7.69s (transform 295ms, setup 206ms, import 46ms, tests 14.02s, environment 0ms)`.
+
+* `ks999-getuserbyid-awaits-fromrow.test.ts (5 tests | 1 failed) 7046ms`: `× 🔴 KS-999 — an INFRASTRUCTURE failure inside fromRow (the getDek read) becomes ServiceUnavailable, not a raw error 6658ms`, then `Error: Test timed out in 5000ms.` at `:56:3`.
+* `ks1186-userrepo-fromrow-sites-are-awaited.test.ts (35 tests | 2 failed) 6974ms`: `× KS-1186 🔴 getUserByIdWithPasswordHash - an infrastructure failure inside fromRow becomes ServiceUnavailable 6580ms`, then `Error: Test timed out in 5000ms.` at `:78:5`. The NEXT cell, `getUserByIdPreAuth`, failed in 375 ms with `TypeError: vi.mocked(...).mockRejectedValueOnce is not a function` at `:82:44` (Seat X 2nd's word for it: a cascade, inferred).
+* Summary: `Test Files  2 failed (2)`, `Tests  3 failed | 37 passed (40)`.
+
+## 2 — What ran straight after, unchanged
+
+* `merged_ks1186_ks999_rerun1_20261027T154017Z.out`: `Start at  02:40:18`, `Tests  40 passed (40)`, `Duration  447ms (transform 99ms, ...)`.
+* `merged_ks1186_ks999_rerun2_20261027T154018Z.out`: `Start at  02:40:19`, `Tests  40 passed (40)`, `Duration  369ms (transform 104ms, ...)`.
+* `merged_auth_full_20261027T153846Z.out`: the whole suite, `Start at  02:38:58`, `Test Files  105 passed (105)`, `Tests  1185 passed (1185)`, `Duration  54.92s`.
+
+## 3 — The shape, read at develop `c18552d94de2`
+
+Both files have no `beforeAll`; their only hook is `beforeEach(() => { vi.clearAllMocks(); })` (ks1186 `:75`, ks999 `:54`). Each defines `loadRepo()` (ks1186 `:40`-`:49`, ks999 `:41`-`:50`): `vi.resetModules();` and then `await import` of `../repositories/userRepo`, `../services/subjectDeks`, `../utils/logger` and `../db`. Every cell calls it first (ks1186 `:79`, ks999 `:57`), so each cell re-imports after a reset, and the failing cells are the first in each file. `services/auth/vitest.config.ts` has **0** matches for `testTimeout|hookTimeout`, so these cells are on the 5 s default.
+
+## 4 — What the board already holds on these two files
+
+* KS-1155, comment of 2026-10-12T05:42Z (Seat V 3rd): a full run of a merged-tree candidate with "9 failures across six files (`db.retry`, `ks1188`, `ks488-smtp-opt-in`, `ks949`, `ks999`, `s130-f6`): 8 'Test timed out in 5000ms' and one `vi.mocked(...).mockRejectedValueOnce is not a function`", all six passing file by file.
+* KS-1155, comment of 2026-10-27T13:42Z, item 4 (from Seat W 1st's wrap): "the ks1186 file's first cell timed out at 20 s on a cold import after the merge-in (plus its cascade); 23/23 on three reruns of the identical tree".
+* KS-1053, comment of 2026-10-13T02:19Z ("Occurrence 9", a deliberate reproduction): a whole-suite `services/auth` run under CPU contention (12 busy-loop node processes) failed "at least four tests (output truncated at four): ks949 again, plus ks1186 and ks728"; both branches idle gave 0 failures.
+
+So the same TypeError beside the same timeouts has been seen with these files before; this run adds the per-cell timings, the two immediate reruns and the runner's phase figures.
+
+## 5 — Against this ticket
+
+The stated class is a module-level `beforeAll` importing a router inside the hook's budget. Here there is no hook and the cost sits in a cell. On the mechanism question this ticket leaves open ("whether the cold Vite transform is the mechanism"): the failing run's own `transform 295ms` and `import 46ms` are small beside two cells of about 6.6 s, and the Seat G 24th comment on the api-gateway `ks1531` location records a cold-transform reading refuted there too. What the 6.6 s was spent on in these two cells is not established.
+
+## Not established
+
+* The load during the failing run (not recorded; Seat X 2nd's own note says so).
+* What the first cells spent 6.6 s on. Seat X 2nd wrote "(cold import)"; the saved output does not measure it.
+* Whether a cold `.vite` cache was involved; not recorded for this run.
+* Whether it recurs: seen once, rerun clean.
+
+**Searched:** board, KS team, title + description + comment bodies, `includeArchived: true`, paged to the end. `ks1186-userrepo` → **2 hits** (KS-1484, KS-1186: the tickets the test belongs to); `ks999-getuserbyid` → **1** (KS-999, archived); `loadRepo` → 2 (KS-454, KS-443: Akto, unrelated); `mockRejectedValueOnce is not a function` → **2** (KS-1236, not read; KS-1155, item 4 above); `6658` and `6580` → 1 each, KS-1116 (a number match in unrelated text). KS-1748, KS-1155 and KS-1053 were read whole; the names `ks1186`, `ks999` and `mockRejectedValueOnce` occur on KS-1155 (2 lines) and KS-1053 (1 line) and **not at all on this ticket**. **Positive control** `KS-1531` → 40 hits. **Zero control:** a token coined for this seat and written nowhere → 0 hits.
+
+*Seat G 26th, 2026-10-27 UTC, on Wednesday's brief. Comment only; no state, assignee or priority changed.*
+
+--- comment 2026-10-27T05:30:58.039Z kamil.kreiser@secuura.ai
+## BLUF — a SIXTH location, in a sixth service, and it is the one that bears on this ticket's open question: it had already taken KS-1602's fix shape at 60 s, and it stalled anyway.
+
+`services/api-gateway/src/__tests__/ks1531-connector-info-is-in-the-published-contract.test.ts` stalled its module-level `beforeAll` **once in 9 runs** on 2026-10-27 — `Hook timed out in 60000ms`, 7 cells skipped.
+
+No state change asked for. Source lines read at develop `885d69b06f5fce7c8f58effea68623ecb25407b1`; the run figures are **not mine** — see Provenance.
+
+## 1 — It is this class by shape
+
+`beforeAll` opens at `:95`, and at `:104` it imports the real gateway app:
+
+`const app = (await import('../index')).default;`
+
+preceded by `vi.resetModules()` at `:103`. That is this ticket's shape exactly: a module-level `beforeAll` that imports a router, paying the transform inside the hook's budget.
+
+## 2 — Why this instance is different from the five in the table
+
+**The budget was already explicit, and already 60 s.** The file passes `60_000` as its `beforeAll` timeout at `:107` — the same figure `services/security/vitest.integration.config.ts` uses and the one KS-1602 adopted for its single file. So this location had **already taken fix shape 1** of the per-location convention, at the largest figure in use anywhere in the repo, and the hook still lapsed.
+
+For contrast, the five instances in this ticket's table all lapsed a **default** budget (5 s test / 10 s hook) or were fixed by raising one. `services/api-gateway/vitest.config.ts` sets neither `testTimeout` nor `hookTimeout` — it carries only `globals`, `environment: 'node'` and a `setupFiles` entry — so this service is on the defaults except where a file opts in, and this file opted in.
+
+**That is the datum this ticket's decision turns on:** option 2 ("per-location budgets are the convention, a new file sets its own") was already satisfied here. It did not prevent the failure.
+
+## 3 — And the cold-transform mechanism was refuted for this instance
+
+From the same run record, **against** the mechanism in this ticket's title:
+
+* the pre-edit file passed **7/7 in 2.51 s** at the same load;
+* an inert one-line comment added to the pre-edit file passed in **1.15 s** — which is what refutes a cold-transform cause;
+* the edited file then passed 7/7 **three times at loads 4.26–4.64**, all *higher* than the **3.74** at which it stalled.
+
+So this sixth location is a stall that is neither load-explained nor cold-explained, on a 60 s budget. It was explicitly **not called flaky** by the seat that saw it, and no cause was established. That extends this ticket's own "Not established" section rather than closing it: the shared mechanism is now unestablished for four of six locations, not three of five.
+
+## Provenance — the run record is on the board, not on this disk
+
+Reported by **Seat S 4th, 2026-10-27**. The record is a comment on **KS-1752**, created `2026-10-27T01:53:21Z`, under its heading *"NOT covered, deliberately"*; the figures in sections 2 and 3 above are quoted from it. Measured there on Node v26.8.1, npm 11.19.0, vitest 4.1.12.
+
+**The seat's own evidence folder is not on this machine at my read** — `5_Project_History/` holds `2026-10-26_seatS-1st`, `2026-10-26_seatS-2nd` and `2026-10-27_seatS-3rd`, with no `seatS-4th` directory; that seat wrapped at 05:18Z and its folder had not appeared when I looked, twice. So: **run record on the board, not attached on disk here.**
+
+**I ran nothing.** The 1-in-9 ratio, the timings and the load figures are all Seat S 4th's. What is mine is the source read in sections 1 and 2 — the `beforeAll` line, the import line, the `60_000` argument and the service's `vitest.config.ts`.
+
+## Searched
+
+Board, KS team, `includeArchived: true`, title + description + comments, paginated to `hasNextPage` false.
+
+`module-level beforeAll` → **1 hit**, this ticket — so it is still the only class ticket. `ks1531-connector-info` → **1 hit**, KS-1752 (read whole; it records the stall as a parenthetical outside its own scope and does not add the location here). `Hook timed out` → **6 hits**: KS-1752, KS-1737, KS-1734, KS-1731, KS-1729, KS-1602 — the five in the table plus KS-1752, no sixth-location ticket. **Positive controls:** `KS-1531` → **18**, `fetchApiKeys` → **4**. **Zero control:** a token coined for this session and written to no ticket → **0**.
+
+*Seat G 24th, 2026-10-27, on Wednesday's brief. Facts only; nothing built, no suite run, no state changed.*
+

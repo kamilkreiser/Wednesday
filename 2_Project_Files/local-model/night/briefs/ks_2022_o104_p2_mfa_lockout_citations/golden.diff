@@ -1,0 +1,24 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/mfa.ts b/Blockchain/Dev/services/auth/src/routes/mfa.ts
+--- a/Blockchain/Dev/services/auth/src/routes/mfa.ts
++++ b/Blockchain/Dev/services/auth/src/routes/mfa.ts
+@@ -127,7 +127,7 @@
+   // change an existing field's accepted values; adding a field cannot make any
+   // request that is valid today start failing.
+   // The pattern is the 8-char alternative of the platform's own
+-  // MFA_CODE_PATTERN (passwordLoginGate.ts:87), not a second opinion about what
++  // MFA_CODE_PATTERN (passwordLoginGate.ts), not a second opinion about what
+   // a backup code looks like.
+   backupCode: z.string().regex(/^[A-Za-z0-9]{8}$/).optional(),
+ });
+diff --git a/Blockchain/Dev/services/auth/src/services/accountLockout.ts b/Blockchain/Dev/services/auth/src/services/accountLockout.ts
+--- a/Blockchain/Dev/services/auth/src/services/accountLockout.ts
++++ b/Blockchain/Dev/services/auth/src/services/accountLockout.ts
+@@ -68,7 +68,7 @@
+  * (KS-795 / KS-796) add callers. Trimming in the derivation makes it structural.
+  * Idempotent for both current callers, which already pass a trimmed address:
+  * `routes/auth.ts:310` (via `loginSchema`'s `z.string().trim()`) and
+- * `services/passwordLoginGate.ts:119` (via the gate's own normalisation).
++ * `services/passwordLoginGate.ts` (by the gate's own normalisation).
+  */
+ function normaliseEmailForKey(email: string): string {
+   return String(email).toLowerCase().trim();

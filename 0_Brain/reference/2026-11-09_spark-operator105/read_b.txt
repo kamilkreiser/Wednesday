@@ -1,0 +1,435 @@
+##### KS-1233 In Redis mode platform-settings expires 24 h after the last admin write, which erases every connector allow-list In Progress 2026-11-06T04:27:30.220Z
+## BLUF
+
+**In Redis mode the gateway stores platform-settings with a 24 h TTL, and nothing refreshes it.** So, by reading the code: 24 h after the last admin settings write, every connector allow-list disappears and every restricted connector becomes unrestricted.
+
+* **Major, pending measurement.** This is READ ONLY: no Redis was run.
+* The same fail-open class as the container fail-open ticket filed alongside it.
+* Found by the #1035 tier-1 QA gate (finding N-A).
+
+## Recommendation
+
+An escalation candidate (the gate's grading). Not built here.
+
+1. **Measure first**, read-only, in a non-production gateway running in Redis mode: store an allow-list, `EXPIRE` the key (or wait out the TTL), then create as the restricted connector. The code reading predicts 201.
+2. **If confirmed**, the owner decides the fix. Either platform-settings must not expire (no TTL, or a refresh), or a missing platform-settings must not read as "no restriction" for a connector that had one. It may be sequenced with the container fail-open read-side fix.
+
+## Detail
+
+* **Read at develop** `34cdcfb26`**:**
+  * `services/api-gateway/src/services/redis.ts:27`: `privacy: 86400` (24 hours);
+  * `redis.ts:680-687`: `setNotificationSettings` writes `notif:<key>` with `setex(…, TTL.privacy, …)` when Redis is available;
+  * after expiry, `getNotificationSettings('platform-settings')` returns null, and `routes/verification.ts:1214-1216` turns that into `integrations []`, which means no restriction;
+  * the only `setNotificationSettings('platform-settings', …)` call is `routes/admin.ts:1127` (`PUT /api/admin/settings`), so nothing re-writes the key.
+* **Why local runs never show it:** the in-memory fallback (no Redis) is a Map with no TTL.
+* **It also affects KS-1204's migration-residual reading.** A key past its TTL reads as absent, which means "no restriction stored anywhere", not "no malformed list". So a reading must quote the key's TTL beside the shapes.
+* **Not measured:** Redis mode was not run (KS-535).
+* **Searched before filing:** Linear literal matches in titles, descriptions and comments, archived included, at most 6 pages of 50 fuzzy results per term (2026-09-17 \~16:00Z):
+  * `TTL.privacy`: 0 of 114 scanned.
+  * `setNotificationSettings`: 0, but the fuzzy search returned no results, so that zero is the search's reach, not the board.
+  * `platform-settings`: 3 (KS-1230, KS-1176, KS-37); none covers expiry.
+* **Evidence:** #1035 gate report, finding N-A: `Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1204-1035-4b1fb0621-tier1-r1/report.md`.
+* Refs KS-1204.
+--- comment 2026-11-06T04:27:30.231Z kamil.kreiser@secuura.ai
+**BLUF:** Facts only, this ticket stays open. Seat D 56th read the key on Kintsugi before and after the api-gateway swap: EXISTS 1, TTL -1 both times. Nothing was done.
+
+**Read:** key `secuura:gateway:notif:platform-settings`, through the gateway container's own Redis connection with the password guard. EXISTS and TTL only for these reads.
+
+| when | image | EXISTS | TTL |
+| -- | -- | -- | -- |
+| 2026-11-06 03:14:40Z, ITEM 0 | 17d3d6bfd864 | 1 | -1 |
+| 04:06:26Z, before the swap | 17d3d6bfd864 | 1 | -1 |
+| 04:08:25Z, after the swap | 762bac3512c3 | 1 | -1 |
+| 04:22:47Z, end of the watch | 762bac3512c3 | 1 | -1 |
+
+Controls: a connection with no password answers NOAUTH; an impossible key reads EXISTS 0, TTL -2.
+
+**Settings shape, counts only, on Wednesday's word:** the stored record `svc_gateway_settings` has 1 row and 0 connector integrations. The Redis copy also has 0 integrations. Allow-lists holding a non-string: 0 in both, at 04:02Z and 04:06Z. The same count on planted values reads non-zero. No value left the container.
+
+**What this does not show:** who wrote the key after it read absent on 5 Nov (UNMEASURED). No connector read or save was run on Kintsugi. Whether any allow-list was lost before KS-1256 deployed is still not measured.
+
+Demo is frozen at `07a2d62be6a0` and was not contacted.
+--- comment 2026-11-06T02:41:59.201Z kamil.kreiser@secuura.ai
+**BLUF:** Facts only, this ticket stays open. On a disposable stack the platform-settings key is written with no TTL: TTL -1 after a save, with a per-user key reading 86400 as the control. This comment also corrects the ticket: a save is not the only thing that writes the key.
+
+**Live check:** Seat U 16th, 2026-11-06 02:40Z, on throw-away stack `u16` built from develop `2fd6d529573c`. That is develop, not Kintsugi's build. It is internal-only, and everything written stayed on that stack. Key `secuura:gateway:notif:platform-settings`:
+
+| step | TTL read |
+| -- | -- |
+| key deleted (a control name that never existed also reads -2) | -2 |
+| after `GET /api/admin/settings` | -2 |
+| after `PUT /api/admin/settings` with a test body | **-1** |
+| control: a per-user settings key after `PUT /api/settings/notifications` | 86400 |
+| key deleted again, then `GET /api/admin/settings` | -2 |
+| then `GET /api/connector/info` with a connector key minted on this stack | **-1** |
+
+After the last step the value in Redis carried the saved test label.
+
+**Correction.** Comment 080a7c9a says TTL -1 "cannot be shown until a settings save writes the key". That is too narrow.
+
+- `GET /api/connector/info` refills the key from the stored record on a miss, with no TTL (measured above).
+- The connector create path at `Blockchain/Dev/services/api-gateway/src/routes/verification.ts:830` calls the same read (read at source, not run).
+- `GET /api/admin/settings` does not write the key (measured above), so comment 9dcead1e's "a settings read" holds for those connector paths and not for the admin read.
+- The refill arrived with commit `6a36d41b9` (KS-1256) and migration 057, which seeds `svc_gateway_settings`. That commit is an ancestor of Kintsugi's recorded gateway build `1e4bdcb899c4` and of demo's `07a2d62be6a0`.
+
+**What that does to the deploy action in comment 31f1cd26.** It reads -2 as "the allow-list has ALREADY failed open". Since `6a36d41b9` a miss reads the stored record, so with a stored row present, -2 on a box now means only that no connector read or save has happened since the key was last absent. It does not by itself show a failed-open allow-list. Whether any allow-list was lost before that commit deployed is not measured.
+
+**Fix string on Kintsugi, read 2026-11-06:** "KS-1233: platform-settings is CONFIGURATION" in `/app/dist/services/redis.js`, container `secuura-api-gateway`. Pre-fix source 0, post-fix source 1, running file 1, a nonce 0. The token sits in a comment, which the build keeps, so this shows the PR's source text was compiled in, not the code line itself. No source commit was measured.
+
+**NOT covered:**
+
+- The key on Kintsugi or demo after a write. A connector read or a save on those boxes was not run.
+- What Kintsugi's or demo's stored record holds, and whether connector integrations need re-entering. That is on Wednesday's list; this ticket stays open for it.
+- The four platform suites were not run.
+- Demo is frozen at `07a2d62be6a0`, whose history contains PR 1038. It was not contacted, and the behaviour was not run there.
+
+--- comment 2026-11-05T02:35:07.615Z kamil.kreiser@secuura.ai
+**BLUF:** Deployed, behaviour not run: PR 1038 (e51686beddf2) is contained in develop 07a2d62be6a0, which kintsugi and demo both run; no image fix-string row exists for it; not closed because the platform-settings key is absent in Redis on both boxes (TTL -2), so the TTL -1 the card expects cannot be shown until a settings save writes the key, which a deploy seat may not do.
+
+Source: Seat D 53rd (kintsugi) `5_Project_History/2026-11-05_seatD-53rd/evidence/F6_ticket_table.tsv` line 6 and `5_Project_History/2026-11-05_seatD-53rd/HANDOVER.md` line 4; Seat D 52nd (demo) `5_Project_History/2026-11-05_seatD-52nd/HANDOVER.md` lines 4 and 28, `5_Project_History/2026-11-05_seatD-52nd/evidence/demo/A26_gwredis_ITEM0.txt`, `5_Project_History/2026-11-05_seatD-52nd/evidence/demo/E18_gwredis_AFTER.txt`; PR facts read from GitHub.
+
+Rows as written. Seat D 53rd table, line 6: "KS-1233 | (earlier) | - | NOT-RUN | platform-settings key ABSENT: EXISTS 0, TTL -2 at 00:57:12Z and 01:44:23Z (through the gateway's own REDIS_URL, guarded); the card's -1 needs a settings save, which this seat may not do". Seat D 52nd HANDOVER line 28 lists "KS-1233 (key absent, TTL -2)" among the NOT-RUN items. Seat D 52nd's table has no KS-1233 row.
+
+* PR 1038 merged 2026-09-18T04:35:21Z, merge_commit_sha e51686beddf2d3680d0bf88b0ea2a0705e4af284, base develop. It is an ancestor of 07a2d62be6a0 (git merge-base --is-ancestor, rc 0).
+* Kintsugi: key `secuura:gateway:notif:platform-settings` EXISTS 0, TTL -2 at 2026-11-05 00:57:12Z (before the 07a2d62be6a0 swap) and 01:44:23Z (after it); earlier reads: 13:43:16Z and 14:57:58Z on 2026-11-04 (comment 9dcead1e).
+* Demo: EXISTS 0, TYPE none, TTL -2 at 2026-11-04 19:31:54Z (before the round) and again at 23:49:37Z (after the swap).
+
+Not measured:
+* The TTL of the key after a write: neither box has had the key written since the deploy.
+* Whether anyone re-entered the connector integrations, which the merge comment 31f1cd26 gives as the step when the key reads -2.
+
+--- comment 2026-11-04T15:02:57.050Z kamil.kreiser@secuura.ai
+Read after the kintsugi deploy 035685291b9d (2026-11-04), per card secuura-ks1233-redis-ttl-read-1104 = b: kintsugi's Redis holds no secuura:gateway:notif:platform-settings key (EXISTS 0, TTL -2) at 13:43:16Z and again at 14:57:58Z.
+- The expected TTL -1 (no expiry) cannot be confirmed until a settings read or an admin save writes the key. Nobody re-saved settings from the deploy seat.
+- The read was read-only, through the gateway's own Redis connection.
+--- comment 2026-11-02T03:20:03.945Z kamil.kreiser@secuura.ai
+Delivered: PR 1038 merged as e51686bed on develop (platform-settings is written without a TTL in Redis mode), in the kintsugi deploy b1fb543640e7 (2026-11-01). Verified by code read at b1fb543640e7, not observed live: services/api-gateway/src/services/redis.ts:683 to 684 writes the platform-settings key with a plain set and no expiry. Left open: the ticket's merge comment (2026-09-18) says it is NOT Done because a live sweep is owed and so is a deploy action, run by the deploy seat once the new gateway image is live: read the TTL of the platform-settings key in each environment's Redis, run PERSIST if it is above 0, and re-enter the connector integrations if it reads -2. The 2026-11-01 kintsugi deploy records that this check searched show no such step, and reading or changing a Redis key needs the box, so it is not confirmed for any environment.
+
+--- comment 2026-09-18T04:39:10.353Z kamil.kreiser@secuura.ai
+## BLUF
+**PR #1038 is merged to `develop`** on Wednesday's signed GO at `2122b4af7`, under Kam's TESTED grant (batch gate `2026-09-18-batch1038-1041-tier1-r1`: GO WITH FINDINGS, no Blocker).
+
+**Merged; offline gates green. NOT Done, per secuura-test-discipline §5f.** A live sweep is owed, and so is the deploy action below. Nothing is deployed: kintsugi runs `a105cd32b` and demo is older.
+
+## ⚠ DEPLOY ACTION: run it when this lands on any environment (verbatim from the gate's merge addendum; the deploy seat runs it, not a merge seat)
+**after the new api-gateway image is live on every replica, per Redis: `redis-cli -u $REDIS_URL TTL secuura:gateway:notif:platform-settings` — if > 0 run `PERSIST secuura:gateway:notif:platform-settings` and re-read -1; if -2 the allow-list has ALREADY failed open: re-enter the connector integrations in admin settings and confirm TTL -1; if -1 nothing to do**
+
+The gate CONFIRMED the lead (row R4b): **a re-save after the key has already expired now persists `{}` forever.** The `-2` branch above (re-enter the connector integrations) is what covers it. The next kintsugi rebuild lands this PR and must run this action.
+
+## Verified at origin
+- Pre-call: `refs/pull/1038/head` = the GO'd head, and develop = `570ea002d` (the then-current develop), both re-read in the same run as the merge. The squash was pinned to the head.
+- **Squash `e51686beddf2d3680d0bf88b0ea2a0705e4af284`**: parent `570ea002d`; tree `0c67581f1` = my re-prediction over that develop; files = the PR's 2; blob targets equal.
+- The gate's listed merged tree was computed over `570ea002d` alone, so after the first squash a different OID is expected (Wednesday's ORDER note).
+- **After all four:** develop `8b9c3f022` has tree **`dd54cab00edde17626a29b7470ebd25ca5ffc7cf`**, the gate's measured tree for all four together. All 7 blob targets are equal. **api-gateway 63 files / 604 tests, 0 failed**, and tsc rc 0, on that tree.
+
+## Merge addendum (the gate report, verbatim)
+**#1038 KS-1233** on WEDNESDAY'S signed GO naming `2122b4af748e3395b7e7b76fd6542c1988674de8`: squash onto develop `570ea002d7d3d171a4da2f95ad0d600a2fe5f55d` (merged tree `0c67581f166127812ba194d7ed104eded777071a`); attaches to KS-1233 only, linkKind contributes, no closes; KS-1233 stays In Progress on merge (a runtime change whose existing-key TTL is closed only by the deploy action, and the fail-open class remains on other triggers, N38-1); equality targets: redis.ts `fbb74be7c` / ks1233 test `a887e2c06`; suites api-gateway 60/596 at develop -> 61/599 at head -> 61/599 merged (63/604 all four), vitest 4.1.11; SHIPS-WITH: "after the new api-gateway image is live on every replica, per Redis: `redis-cli -u $REDIS_URL TTL secuura:gateway:notif:platform-settings` — if > 0 run `PERSIST secuura:gateway:notif:platform-settings` and re-read -1; if -2 the allow-list has ALREADY failed open: re-enter the connector integrations in admin settings and confirm TTL -1; if -1 nothing to do"; dispositions: F38-B SHIPS-WITH (deploy action), N38-2 SHIPS-WITH (TICKET), N38-3 SHIPS-WITH; NEW: N38-1 (Major, pre-existing, TICKET) the allow-list still fails open on a runtime Redis close/error, a read error, or LRU eviction; N38-2 a partial admin write after an expiry now persists (GET loses defaults).
+
+## Filed
+- **KS-1256**: N38-1 (Major, pre-existing). The allow-list still fails open on a Redis close or error, a read error, or LRU eviction.
+- **KS-1257**: N38-2. A partial admin write after an expiry persists forever.
+- SHIPS-WITH, recorded here: **N38-3**. The ks1233 test's fixture shape `{connectorId, allowedDocumentTypes}` differs from the reader's `{id, config:{allowedDocumentTypes}}`; it's a PR follow-up.
+
+##### KS-1087 workflow-approve deletes the pending document and answers 200 "Document has been created" without reading originate's response — a refused forward (401, measured) loses the document In Progress 2026-11-05T06:17:18.213Z
+## BLUF
+
+* **Approving the last step of a workflow can silently lose the document.** `POST /api/workflow-instances/:id/approve` forwards the pending document to originate, deletes it from Redis without reading originate's response, and answers **200** `approved`**, "All workflow steps approved. Document has been created."**
+* **Measured** by the QA agent's round-2 tier-1 gate on #951 (`02a22f4bb`, 2026-09-11):
+  * the recorded forward (`x-user-id` only, no bearer) replayed into the real originate app gets **401**, with the gateway vouch secret unset and set alike;
+  * with originate answering 401, the real gateway handler still returns **200** `approved` and **deletes the pending document**.
+* **Pre-existing, not #951.** The same code is on develop `2d864ae92`.
+* **NOT established: whether any environment has workflow-gated document types.** Reachability for real users is unknown. The gate assessed severity as Major; priority is left for the humans.
+
+## Recommendation
+
+1. Report approval and delete the pending document **only after originate returns 2xx**. On any other status, or a network error, keep the pending document and return an error to the caller.
+2. Forward a credential originate accepts. Today the forward carries `x-user-id` alone, and originate answers 401.
+3. Regression test: an originate stub returning 401 must not yield 200 `approved`, and the pending document must survive. Add the same cell for a network error.
+4. If `GATEWAY_VOUCH_SECRET` is ever provisioned, this forward is also on KS-1083's vouch precondition list.
+
+## Detail
+
+**Code on develop** `2d864ae92`**,** `Blockchain/Dev/services/api-gateway/src/routes/verification.ts` (at `02a22f4bb`: route `:700`, `x-user-id` `:783`, `http.request` `:785`):
+
+* `:781` `router.post('/api/workflow-instances/:id/approve', authenticateToken(true), …)`
+* `:860-864` forward headers: `Content-Type`, `Content-Length`, and `x-user-id` from `pendingDoc.createdBy`. No `Authorization`, no `x-tenant-id`.
+* `:866` `http.request` to originate `/api/documents`. The response callback only logs "Workflow approved — document forwarded to originate" on `end` (`:871`), whatever the status.
+* `:880` `proxyReq.end()`, then `:881` `await redisService.deletePendingDocument(documentId)`, before any response has been read.
+* `:889` the 200 body: `status: 'approved'`, `message: 'All workflow steps approved. Document has been created.'`
+
+**Consequence by case:**
+
+| originate outcome | pending document | caller is told | evidence |
+| -- | -- | -- | -- |
+| 401 | deleted | 200 approved, "created" | MEASURED (gate P2, F2b) |
+| other 4xx / 5xx | deleted | 200 approved, "created" | READ |
+| network error | deleted; "Failed to forward" logged | 200 approved, "created" | READ, not driven |
+
+**Correction carried here:** KS-1084's body says this forward sends `x-user-id` / `x-tenant-id`. It sends `x-user-id` only (`:864`). A dated correction comment is on KS-1084.
+
+**Board searched before filing** (team KS, archived included; titles, descriptions and comments):
+
+* `/api/workflow-instances/:id/approve` → 0 issues, 0 comments
+* `/api/workflows/:workflowId/approve` → 0, 0
+* `workflow-approve` → KS-1083 and KS-1084, which name only this forward's vouch/tenant shape, not the lost document
+* `workflow approve`, `workflowApprove`, `pending document`, `pendingDocument`, `approved and deletes` → 0 each
+* `verification.ts:8` → KS-1083 and KS-501 (Done, an unrelated crash)
+* controls: `verification.ts` → 33 issues; a nonsense term → 0
+
+**NOT tested:** a live stack; any environment's workflow configuration; the sibling route `POST /api/workflows/:workflowId/approve` (`:943`), which was not examined.
+
+**Source:** `Testing Agent MAIN/projects/secuura/reports/2026-09-11-ks1041-951-02a22f4bb-tier1-r2/report.md`, section "Open", O-1. Filed by Platform K seat s177 on Wednesday's brief; the QA agent cannot post.
+--- comment 2026-11-05T06:17:18.225Z kamil.kreiser@secuura.ai
+**BLUF:** Control added to my 06:11Z reach record (comment `f64a0a45`, not an edit): a count-only `SCAN MATCH *`, paged to the end, returns exactly the DBSIZE on both servers, so the scan enumerates on the real servers and the 0 keys under `secuura:gateway:*` (and the 0 doc-type and workflow keys) is a measured zero. It stays a zero at read time: keys under this prefix have a 3,600 s TTL, and the seed writes them only when `GET /api/admin/document-types` runs with demo seeding on.
+
+- **kintsugi**, read 2026-11-05 06:16:55Z, `secuura-api-gateway` image `3466d93a4808` (REVISION head `5fc5569ed96ac61f64823cc9e1fa841899aa1f62`): DBSIZE 8, `SCAN MATCH *` distinct keys 8 (1 page, cursor finished), equal; keys under `secuura:gateway:*` were 0 at 06:10:31Z.
+- **demo**, read 2026-11-05 06:16:59Z, `secuura-api-gateway` image `0bea5f7cb66e` (REVISION head `07a2d62be6a09c9cd504864d1cf1906543d55317`): DBSIZE 7, `SCAN MATCH *` distinct keys 7 (1 page, cursor finished), equal; keys under `secuura:gateway:*` were 0 at 06:10:34Z.
+
+The no-password connection answered NOAUTH again on both. Only counts left the container: no key name, value or TTL was read. Reads only; nothing was written on either box. Everything under "Not measured" in `f64a0a45` still applies (stores other than the gateway's Redis, lapsed keys, whether the seed ever ran). Raw output: `5_Project_History/2026-11-05_seatU-14th/evidence/gwscanall_kintsugi_raw.txt` and `gwscanall_demo_raw.txt`.
+
+--- comment 2026-11-05T06:11:36.043Z kamil.kreiser@secuura.ai
+**BLUF:** The read-only measurement Kam's card `secuura-ks1087-workflow-approve-credential-1102` (option b) asks for is made: **0 workflow-gated document types on kintsugi and 0 on demo, at 2026-11-05 06:07 to 06:10Z.** The gateway's Redis held no `secuura:gateway:doctype:*` and no `secuura:gateway:wf:*` key on either box. The server is not empty (DBSIZE 8 on kintsugi, 7 on demo) but holds 0 keys under `secuura:gateway:*` on both, so this zero is "no keys at read time", not "no workflow-gated types ever": the catalogue is written only when `GET /api/admin/document-types` runs with demo seeding on, and each key lives 3,600 seconds. Nothing is built or ruled here; item 2 stays unbuilt, as the card says.
+
+**Reach in one line:** 0 gated types on kintsugi, 0 on demo, at 2026-11-05 06:07 to 06:10Z.
+
+| | kintsugi | demo |
+| -- | -- | -- |
+| REVISION head (the ref) | `5fc5569ed96ac61f64823cc9e1fa841899aa1f62` | `07a2d62be6a09c9cd504864d1cf1906543d55317` |
+| container, image id | `secuura-api-gateway`, `3466d93a4808` | `secuura-api-gateway`, `0bea5f7cb66e` |
+| StartedAt | `2026-11-05T01:41:24Z` | `2026-11-04T23:48:07Z` |
+| read at | 06:07:19Z, control 06:10:31Z | 06:07:33Z, control 06:10:34Z |
+| DBSIZE | 8 | 7 |
+| keys under `secuura:gateway:*` | 0 | 0 |
+| `secuura:gateway:doctype:*` keys | 0 | 0 |
+| `secuura:gateway:wf:*` keys | 0 | 0 |
+| gated types (`requiresApproval` true and a workflow id) | 0 | 0 |
+| approver roles named | none to read | none to read |
+| TTL min and max of the doc-type and workflow keys | n/a (no keys) | n/a (no keys) |
+
+**Where the store is (code read at develop `5fc5569ed96a`):**
+- Document types and workflows are Redis keys `secuura:gateway:doctype:<id>` and `secuura:gateway:wf:<id>` (`api-gateway/src/services/redis.ts`: prefix constant `secuura:gateway:` at line 18, key builders at 515 and 230), each set with a 3,600 s TTL.
+- A type counts as gated only when `requiresApproval === true` and `approvalWorkflowId` is truthy (`services/enforcement.ts:215-216`).
+- The three seed types with `requiresApproval: true` (workflows `wf-1`, `wf-2`, `wf-4`, in `routes/admin.ts`) are written by `seedDocumentTypesIfEmpty` only when the catalogue is empty and demo seeding is enabled, and only when `GET /api/admin/document-types` is called.
+- No SQL table holds document types in `api-gateway/src` or `Blockchain/Dev/migrations`: a case-sensitive grep for FROM, INTO or TABLE with `document_types` returned 0 lines; control: the Redis key builders above.
+
+**Method and controls:**
+- One `docker exec secuura-api-gateway node -e` per run, using the container's own `REDIS_URL` (never printed). Redis commands: SCAN, TTL, TYPE and GET on keys the scans returned (none were returned, so no value was read), plus DBSIZE and a count-only SCAN of `secuura:gateway:*`, as Wednesday approved. No key name, value or id is printed.
+- The no-password connection answered NOAUTH on both boxes in both runs, so the authenticated connection is the one counted.
+- The tool's logic was tested before the box runs against a fake Redis holding 7 doc-type keys (2 gated, 1 non-string, 1 unparsable): it counted them correctly, withheld a user-type approver's value, leaked none of the planted names, and issued only scan, ttl, type and get.
+- Not demonstrated: a SCAN that returns keys on a real server. Both real prefix scans returned 0 in one page with the cursor finished; DBSIZE above 0 shows the server holds keys, none under this prefix.
+
+**Not measured:**
+- document types held anywhere other than the gateway's Redis (another service, or the gateway's in-memory fallback if Redis was unavailable to it; fallback mode is not inferred: the gateway log has 0 lines containing `allback` and 6 containing `Redis` on both boxes, counts only);
+- types that existed before their 3,600 s TTL lapsed;
+- whether the seed has ever run on either box;
+- the approver roles of any type, since none exists to read.
+
+**Instrument:** `make_gwdoctypes_u14.py` and `make_gwcontrol_u14.py` generate the box tools and check mechanically that they use only the approved Redis verbs; raw output is in `5_Project_History/2026-11-05_seatU-14th/evidence/` (`gwdoctypes_kintsugi_raw.txt`, `gwdoctypes_demo_raw.txt`, `gwcontrol_kintsugi_raw.txt`, `gwcontrol_demo_raw.txt`). Reads only; nothing was written on either box and no request was sent to any service.
+
+--- comment 2026-11-05T05:39:44.636Z kamil.kreiser@secuura.ai
+**BLUF:** Item 2 stays unbuilt, per Kam's card `secuura-ks1087-workflow-approve-credential-1102`, option b (ruled 2026-11-02T12:44:48+11:00): "Wait: measure read-only whether workflow-gated document types exist; no build" ("No production change. Item 1 already stops silent loss."). This comment records the design measurements for when that read is done. Code read at develop `5fc5569ed96a`; no stack and no box. A separate gap that every option needs is filed as KS-2006.
+
+**What unblocks item 2:** whether any environment has a workflow-gated document type. That is a read-only box read, and it has not been made.
+
+## Measured (code read; paths under `Blockchain/Dev/services/`)
+
+* **M1.** originate accepts only an RS256 Bearer, checked against auth's JWKS or static public key (`originate/src/middleware/auth.ts:61`, `:87-89`). If the token carries a `sessionId`, that session must be active (`:105-107`). Nothing else authenticates `POST /api/documents` (`originate/src/routes/documents.ts:188`).
+* **M2.** The gateway cannot mint such a token. `api-gateway/src` has 0 non-test hits for `jwt.sign`, `PRIVATE_KEY`, `createSign` or `SignJWT`; control: `auth/src/services/jwt.ts` has 2 `jwt.sign`. auth has no service-token or client-credentials path: 0 hits for `client_credentials`, `serviceToken`, `service-token` or `SERVICE_TOKEN` in `auth/src` and `packages`.
+* **M3.** originate takes the document's owner from the token, not from `x-user-id` (`documents.ts:239-251`, F-04). The `x-user-id` this forward sends today does not set the owner. The issuer org also comes from the token (`req.user.organizationId`, `:530`).
+* **M4.** originate's create gate accepts the roles ISSUER_ADMIN, ORG_ADMIN, SYSTEM_ADMIN or SUPER_ADMIN (case-insensitive), or the scope `documents:write` (`documents.ts:400-403`, `originate/src/middleware/rbac.ts:47-64`). By default only role OWNER is granted that scope (`packages/shared/src/security/scopes.ts:287-292`).
+* **M5.** A workflow step's approver defaults to role `admin` (`api-gateway/src/services/enforcement.ts:232`). The approve route also admits ADMIN_ROLES (`api-gateway/src/index.ts:915`: admin, ADMIN, SYSTEM_ADMIN, system_admin, super_admin, SUPER_ADMIN). `ADMIN` is not in originate's write roles and gets no scope. So with the approver's own token, an approver on the default step would still be refused, with 403 instead of 401.
+* **M6.** The pending document stores the request body plus `createdBy`, and no tenant, org or role (`enforcement.ts:251-258`). The creator did hold a write role or scope when the document was held: KS-1871 refuses anyone else before gating (`api-gateway/src/routes/verification.ts:897-903`).
+* **M7.** The approve forward also sends no `x-tenant-id` or `x-tenant-slug`; the direct-create forward does (`verification.ts:935-941`). Without them, originate answers 400 under production multi-tenancy, or uses `DEFAULT_TENANT_ID` (`packages/shared/src/db/tenant-context.ts:60-75`). Filed as KS-2006, to be built together with item 2.
+
+## Options for item 2, and what each changes
+
+* **A. Forward the approver's Bearer, plus the approver's tenant headers** (mirroring direct-create `verification.ts:933-941`). One file, about three lines.
+  * The document's owner becomes the approver, not the creator (M3). The on-chain issuer org and the tenant become the approver's.
+  * It works only when the approver holds a write role or OWNER (M4). The default `admin` step still fails (M5).
+  * It fails safe: 502, with the pending document kept. But every success writes approver attribution, and an anchored document's issuer is on chain.
+* **B. A service identity, with the creator attributed.** The gateway authenticates to originate as itself, and originate takes owner and tenant from vouched `x-user-id` / `x-tenant-id`.
+  * No such credential exists (M1, M2). Building one needs either an auth-minted service token, or a new originate auth mode keyed on the gateway vouch (provenance is already checked at `originate/src/index.ts:221-224`).
+  * The gateway must also store the creator's tenant and org when it holds the document (M6, M7), and someone must decide whose role counts at approve time.
+  * Three services; a security design on a new trust path.
+* **C. Store the creator's Bearer with the pending document and replay it.** Not recommended:
+  * it puts a credential at rest in Redis;
+  * tokens expire in about an hour (`originate/src/middleware/auth.ts:102`, comment);
+  * an ended session is refused (M1).
+* **D. No forward at approve.** Approve marks the document approved, and the creator's next call creates it with the creator's own token. A flow and product change.
+
+Seat T 11th's recommendation to Wednesday was B as the target, with no build until the reach question is answered. That matches the card. Nothing deployed, nothing built: the ticket stays In Progress.
+--- comment 2026-11-04T09:03:45.427Z kamil.kreiser@secuura.ai
+**BLUF:** Item 2 is still open and now measured live. The workflow-approve forward to originate carries no Authorization header, and originate refuses it with 401. Since PR 1008 the gateway reports that refusal as 502 `ORIGINATE_FORWARD_FAILED` and keeps the pending document. The forward code is unchanged on develop `d92b849ece73`. This ran on a disposable local stack at `ee1e1b832115`, not on kintsugi.
+
+**What ran (stack `w25`, 2026-11-04 08:21Z, throwaway data):**
+* A workflow instance and its pending document were seeded in the stack's own Redis. The approver sent `POST /api/workflow-instances/w25-ks1183-twin/approve` with its own Bearer token, and originate was running.
+* Result: 502 in 32 ms, body `{"success":false,"error":{"code":"ORIGINATE_FORWARD_FAILED","message":"Approved, but the document could not be created in originate; the pending document was kept","status":401}}`.
+* With originate paused, the same approve answered 502 with upstream `status: 0` in 15045 ms. That pair closed KS-1183. So the 401 above comes from originate itself, not from a timeout.
+
+**Why originate answers 401 (code at `ee1e1b832115`, all under `Blockchain/Dev/services/`):**
+* `api-gateway/src/routes/verification.ts:562-578` builds the approve forward to originate's `POST /api/documents`. It sends four headers: `Content-Type`, `Content-Length`, `x-user-id` (line 574, the pending document's `createdBy`) and the vouch header (`vouchHeaderFor('originate')`, line 578). It sends no `Authorization`. The source comment at lines 576-577 names this ticket.
+* `originate/src/routes/documents.ts:188` is `documentsRouter.use(authenticate());`. `originate/src/middleware/auth.ts:87-89` answers 401 `UNAUTHORIZED` when the Authorization header is missing or does not start with `Bearer `.
+* The direct-create forward in the same gateway file works differently. At lines 909-932 it copies the caller's `authorization` header (line 919). The approve forward copies nothing of the kind.
+
+**Develop:** the three files above are byte-identical at `d92b849ece73` and `ee1e1b832115`, read in a kept seat clone.
+
+**Not established here:** anything about kintsugi's configuration, data or env, and whether any deployed environment has a workflow-gated document type.
+
+**Evidence:** `5_Project_History/2026-11-04_seatW-25th/evidence/ks1183/` (`approve_twin.line`, `approve_twin.out`, `approve_paused.line`, `redis_seed.txt`).
+
+Comment only: the ticket stays In Progress for item 2.
+
+--- comment 2026-11-03T22:50:13.417Z kamil.kreiser@secuura.ai
+**BLUF:** Delivered: PR 1008 merged as f7c2f4acb288 on develop (item 1), deployed to kintsugi at b1fb543640e7 (carried deploy record of 2026-11-01, not re-measured today). Verified by code read, not observed live: `Blockchain/Dev/services/api-gateway/src/routes/verification.ts:583` awaits originate's answer to the forward before anything is deleted, and `:612` answers 502 ORIGINATE_FORWARD_FAILED while the pending document is kept. Left open: item 2 (forwarding a credential that originate accepts) is a design call; the 2026-09-16 comment on this ticket says PR 1008 does not touch it.
+
+--- comment 2026-09-16T17:21:37.414Z kamil.kreiser@secuura.ai
+## BLUF
+PR #1008 (item 1) **merged** as squash `f7c2f4acb28875e3665a61c8eaaad5c54bd3aa55` on develop (single parent `73d3fcb902d2a78fe68a4349903ff6c6bd24d4d5`), on Wednesday's GO naming head `dd7086d5aa574285beffc515f9371a438621f25d` after a tier-1 QA gate (round 1) returned GO WITH FINDINGS. This ticket stays **In Progress** for item 2 (forwarding a credential originate accepts). Two follow-ups are filed: **KS-1183** (the forward has no timeout; the next PR) and **KS-1184** (the instance is persisted `approved` before the forward, which strands it).
+
+## Recommendation
+No action on this ticket from the merge. Item 2 remains a design call. KS-1184 sits beside it, because both decide what a refused forward should leave behind.
+
+## Detail
+**Merge, verified at origin:** develop tip = `f7c2f4acb`; one parent = `73d3fcb90`; tree `4124c19c5` = the predicted merge tree; files base..merge = the PR's two (`services/api-gateway/src/routes/verification.ts` blob `d0585dc34`, `services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts` blob `7832724f3`), both equal to the gated head. The link to this ticket read `contributes` before the merge, with 0 closing phrases in the PR title, body, commit message and squash message.
+
+**What the gate measured** (report `Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1087-1008-dd7086d5a-tier1-r1/report.md`, real `createVerificationRoutes` against a counting originate stub, at head and on the merged tree). A 2xx from originate (200/201/204/299) answers 200 and deletes the pending document once. A 3xx, 4xx or 5xx, a socket destroyed before headers, a closed port, or 401 headers with a body that never ends each answer 502 `ORIGINATE_FORWARD_FAILED` with `status` set to originate's code (0 for transport) and keep the pending document. 201 headers followed by a mid-body reset, or a body that never ends, answer 200 and delete, with no crash. The earlier code answered 200 and deleted in every one of those rows, including the closed port with 0 hits. Auth is unchanged, by parser (677/677 and 44/44 nodes equal outside the forward span, with controls that fire) and at runtime (401 with no token, 403 on the wrong role or user, 200 on the positive control). The 502 body is a fixed literal plus an integer in test, production and development, and never carries originate's body, path or port. Tampers reddened as predicted. api-gateway 45 files / 391 tests on develop → 46 / 394 on the merged tree, all green; ks1087 alone 3/3 at head, and 1/3 when copied onto the base (2 red, as it should be).
+
+**Headers vs `'end'` (the gate's ruling): deleting on 2xx headers is right.** Originate persists at `services/originate/src/routes/documents.ts:667` (`saveDocument`) before its single `res.status(201).json(...)` at `:911`, so a 2xx status line means the document is committed. Moving the resolve into `'end'` would add a hang, because `proxyRes` has no `'error'`/`'aborted'`/`'close'` listener. That is covered in KS-1183. (Line numbers re-read on the merge commit, blob `c3a818ac8`.)
+
+**Records (no action from the merge):**
+- **R1:** the 502 echoes originate's status integer to the authenticated approver (401 = credential refused, 0 = transport). Mild topology disclosure, useful for diagnosis.
+- **R2:** `POST /api/workflow-instances/:id/approve` and its new 502 are absent from `docs/openapi/secuura-api.yaml` (`workflow-instances` 0 hits). Pre-existing; a docs ticket candidate.
+- **R3:** a final approve with NO pending document answers "All workflow steps approved. Document has been created." with 0 forwards, before and after #1008. A claim with nothing behind it; pre-existing; a ticket candidate.
+- **R4:** `db.retry.test.ts` "reports available immediately when the probe succeeds at boot" ran at 5,347 ms under the gate's parallel load (vitest's default is 5 s). Serial runs are green. Pre-existing.
+
+**Follow-ups filed** (board searches quoted in each ticket):
+- **KS-1183** (Medium): the forward has no timeout. An originate that accepts and never answers leaves the approve unanswered, and a late 201 creates the document after the caller got nothing. It is its own tier-1 PR and the next one raised, carrying the gate's test-quality items F3–F6 for the ks1087 file.
+- **KS-1184** (High, the gate's Major): `verification.ts:970-972` persists `approved` before the forward, so a refused forward strands the workflow (re-approve 400 with 0 forwards, reject 400, the kept document unusable until TTL). A design call; its reach depends on workflow-gated document types existing.
+
+**Not tested by the gate:** a live originate (its 401 today is relayed), whether any environment has workflow-gated document types, an HTTPS originate, the Redis TTL value, nginx's bound on the hang, out-of-repo callers, and the four platform suites. Schemathesis was ruled not required, because the route is not in the published spec.
+
+Nothing deployed.
+
+--- comment 2026-09-16T14:53:02.809Z kamil.kreiser@secuura.ai
+## BLUF
+PR #1008 raises **item 1** at head `dd7086d5aa574285beffc515f9371a438621f25d`, not yet merged. On approve, the gateway now reads originate's status:
+- a non-2xx or transport error answers **502 `ORIGINATE_FORWARD_FAILED`** and **keeps** the pending document;
+- only a 2xx deletes it and reports "created".
+**This ticket stays open for item 2** (forwarding a credential originate accepts), a design call not touched here.
+
+## Recommendation
+No action needed on the PR. Item 2 still needs its design decision.
+
+## Detail
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/1008 (branch `feature/ks-1087-ornith-workflow-approve-keeps-pending`, base develop `93629700c`).
+- Authored by the local model (Ornith) from a Wednesday-written brief; source-read by Wednesday; re-run by seat A at `dd7086d5aa574285beffc515f9371a438621f25d`.
+- The READY's 401 cell named "the pending document survives" but never asserted it. Seat A added that assertion, plus "deleted exactly once on 201" on the control. Each is proved able to fail: deleting before the status check reddens the 401 cell by survival alone; never deleting reddens the control by deletion alone.
+- Red before green: 2 of 3 red on the untouched product (both answered 200), 3/3 after.
+- api-gateway 44 files / 388 tests pass (baseline 43 / 385). `tsc` rc 0.
+- The route `/api/workflow-instances/:id/approve` is not in the published OpenAPI spec, so no contract documents the new 502.
+--- comment 2026-09-11T02:14:43.256Z kamil.kreiser@secuura.ai
+## BLUF
+
+**Priority set to High.** This is the coordinator's triage ruling, made under Kam's delegated scope; Kam may override it.
+
+The reason is this ticket's own measured defect: workflow-approve deletes the pending document and answers 200 "Document has been created" without reading originate's response, so a refused forward (401, measured by the #951 round-2 gate) loses the document.
+
+**Reachability through workflow-gated document types is NOT established.** No one has yet shown this path is reached by a document type that actually routes through workflow approval in a deployed configuration.
+
+## Recommendation
+
+No action needed on this comment. The priority is set, and the reachability question stays open on this ticket.
+
+## Detail
+
+- **Ruling:** coordinator brief to Platform K seat s178, 2026-09-11 01:50Z, item 0(c).
+- **Measured, as filed:** the #951 round-2 gate measured the refused forward (401) and the 200 "Document has been created" that follows it.
+- **Not measured:** whether any workflow-gated document type reaches this path on local, demo or any deployed configuration.
+- **Change made by this comment's author:** priority, No priority → High. Status, assignee and relations are unchanged.
+
+##### KS-745 api-gateway audit export calls /api/audit/logs — a route the security service does not have, so the export 404s every time In Progress 2026-10-12T11:17:28.104Z
+## BLUF
+
+**The platform audit export can never return an entry: it calls a route that does not exist. **`services/api-gateway/src/routes/audit-export.ts:138` fetches `GET ${SECURITY_SERVICE_URL}/api/audit/logs`, and the security service has **no **`/api/audit/logs` route.
+
+## The mechanism
+
+The security service publishes exactly three audit routes (`services/security/src/index.ts`):
+
+* `POST /api/audit` (:546)
+* `GET  /api/audit` (:594)
+* `GET  /api/audit/:id` (:637)
+
+So `/api/audit/logs` matches the `:id` handler with `id = "logs"`. No audit log has that id, so the handler returns **404** `{"code":"NOT_FOUND","message":"Audit log not found"}`. `audit-export.ts` then takes its `else` branch and answers the caller **404 carrying a** `BAD_GATEWAY` **code** — so the export surfaces as a gateway error rather than as an empty result.
+
+The path looks like a leftover: `GET /api/audit` returns `{ data: { logs, total, limit, offset } }`, and `audit-export` reads `data.data || data.logs` — i.e. it is written for the **list** endpoint shape. The fix is likely one word, `/api/audit/logs` to `/api/audit`, plus reading `data.data.logs`.
+
+## How it was found
+
+Not by testing the export — by sweeping internal callers of `/api/audit/:id` before adding an authorisation gate to it under KS-743. The sweep asked "will my gate break a caller"; the answer was "this caller is already broken."
+
+## Reachability — stated, not assumed
+
+**UNMEASURED.** I have not driven the export end to end. This is read at `develop` `a079e1f6b` plus the route list in the same file; I did not establish which published gateway path reaches `audit-export.ts`, nor whether that path is itself shadowed the way `GET /api/audit` turned out to be. **That should be measured before severity is set** — the code defect is certain, the user-visible impact is not.
+
+## Note for KS-743
+
+KS-743 adds a tenant-less 403 to `GET /api/audit/:id`. That does **not** regress this caller: it forwards the end user own `Authorization` header, so a tenant-scoped user still reaches the handler — and it 404s today either way.
+
+Filed from session 100 while working KS-743.
+--- comment 2026-09-16T19:01:08.629Z kamil.kreiser@secuura.ai
+## BLUF
+PR #1012 **merged** as squash `79432c797cfb6e647acdd8798dace000a0b35d75` on develop (single parent `1125607e978d6ad637720c985e43e3d79fecdf88`), on Wednesday's GO naming head `e225a49480e16bb77251a5d7cbd16afdf2929550` after a tier-1 QA gate (round 1) returned GO WITH FINDINGS. Merged 79432c797; offline gates green; **NOT Done** per `secuura-test-discipline` §5f — and **this ticket's goal is still unmet**. The gate proved the export **unreachable as shipped**: `api-gateway/src/index.ts:801` mounts it with no `authenticateToken`, so the router answers 401 to every caller with 0 upstream hits, on base, head and merged. The merge fixes the upstream URL the eventual reachable export needs, and changes no reachable behaviour. This ticket stays **In Progress** and carries the remaining work below.
+
+## Recommendation
+**Answer R-9 first, before building anything.** The admin UI exports through `/api/security/audit/export` (`admin.ts:1519`), not this route, and two docs name this route without `/export` (R-10). Census the consumers of `/api/admin/audit/export`. If there are none, the right fix may be to **retire the route rather than repair it**. That is a scope question that goes back to Wednesday, not a build decision.
+
+If the route is kept, the remaining scope is ONE block, proved by one test pass. **F-1 must not land before F-2 / F-3 / F-5.**
+- **F-1 (Major):** make the export reachable (`authenticateToken` at `index.ts:801`, or equivalent).
+- **F-2 (Major):** forward a `limit` / page to completion, so the export is not silently capped at 50 rows; `totalEntries` must equal what was exported.
+- **F-3 (Major):** make the `to` day inclusive (a date-only `to` currently excludes that day).
+- **F-5 (Major):** map the list's AuditLog to the export's AuditEntry (timestamp, type, outcome, resource, details serialised); CSV columns are blank today.
+- **F-4 (Minor):** honour and validate `type`.
+- **F-6 (Minor):** reconcile the spec with the route (`entries` vs `data`; from/to required).
+- **F-8 (Minor):** honour or refuse the super-admin `X-Tenant-Override`.
+- **F-7 (Minor), test work for that round:** the #1012 cells cannot see identity, authz or the query (six gate tampers 0 red), and the cell's principal is one the real list route refuses with 403.
+
+## Detail
+**Merge, verified at origin:** develop tip = `79432c797`; one parent = `1125607e9`; tree `37163225b` = the predicted merge tree; files base..merge = the PR's two, each equal to the gated head: `services/api-gateway/src/routes/audit-export.ts` `d87c04979` and `src/__tests__/ks745-audit-export-calls-the-list-route.test.ts` `fb6a33957`. Before the merge the PR linked only this ticket (`contributes`), with 0 closing phrases.
+
+**What the gate measured** (report `Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks745-1012-e225a4948-tier1-r1/report.md`): tenant isolation holds for a logged-in caller. No tenant-claimed caller received a cross-tenant row, and the export forwards the caller's own `Authorization` header.
+
+**Records (no action from the merge):**
+- **R-1:** tenantless platform roles see every tenant (per KS-743).
+- **R-2:** the gateway defaults `tenantId`, but the export forwards the raw token.
+- **R-3:** platform-actor rows land in tenant `a0…01`.
+- **R-4:** upstream error bodies, including a 500 JSON `stack`, echo through `message` (pre-existing).
+- **R-5:** no fetch timeout.
+- **R-6:** a parse error is labelled "Failed to reach".
+- **R-7:** shape drift yields a 200 with an empty export.
+- **R-11:** `EXCLUDED_PREFIXES` matches `/api/admin/audit` with `startsWith`, so `/api/admin/audit-logs` reads are not audited either (audit coverage on an admin read, separate from KS-871).
+
+Nothing deployed.
+
+--- comment 2026-09-16T18:10:41.845Z kamil.kreiser@secuura.ai
+## BLUF
+PR #1012 raises this ticket's fix at head `e225a49480e16bb77251a5d7cbd16afdf2929550`. It is **not merged**; it waits for a QA gate and Wednesday's GO. The audit export now fetches the security list route `/api/audit` (was `/api/audit/logs`, which matched `/api/audit/:id` and answered 404) and reads `data.data.logs`. **This ticket stays open after the merge** (`secuura-test-discipline` §5f), and end-to-end reachability stays **UNMEASURED**.
+
+## Recommendation
+Nothing to do here until the gate reports. The PR names three residuals the fix exposes. They were read at source, not measured, and not filed:
+- the list route ignores the export's `type`;
+- the list defaults `limit` to 50, so an export caps at 50 entries;
+- a date-only `to` looks like it drops that day.
+
+## Detail
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/1012 (base develop `d067725ff`).
+- The security service's audit routes at develop are `POST /api/audit` `:684`, `GET /api/audit` `:732` and `GET /api/audit/:id` `:787`. This ticket's `:546`/`:594`/`:637` have drifted; the routes are the same three.
+- The export router is mounted at `api-gateway/src/index.ts:801` (`/api/admin/audit`): read, not driven.
+- Authorship: the local-model (Ornith) READY file, plus seat edits declared in the PR. The cell now parses the exported body, because the READY's substring check could not see the `:144` read. The file also type-checks now.
+- Evidence:
+  - red before green at develop: 1 red (the URL), control green;
+  - tamper table: 6 rows over the whole api-gateway suite, every row tsc rc 0, all as predicted. The read reverted reddens the cell on "the exported data is the entries array";
+  - api-gateway 48 files / 402 tests pass; shared 44 / 851 pass;
+  - pre-push preflight 12/15 legs ran, 3 SKIPPED (no stack), nothing failed.
+- Nothing deployed.
+

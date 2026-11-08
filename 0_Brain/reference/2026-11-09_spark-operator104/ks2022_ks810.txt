@@ -1,0 +1,76 @@
+##### KS-2022 auth: four comments cite stale line numbers into services/auth/src/services/passwordLoginGate.ts, and two of them also describe a zod import the file no longer has (gate 206 N2, Info) Backlog 2026-11-05T11:00:11.767Z
+**BLUF:** Four source comments in the auth service cite lines of `services/auth/src/services/passwordLoginGate.ts` (the gate file) that no longer hold what they name. At develop `1b1b65c7415f`: (1) `services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts` line 118 and (2) `services/auth/src/auth.openapi.ts` line 12 cite line 55 of the gate file as the place that "imports `z` from 'zod'"; line 55 of the gate file is a comment about `z`, and the import, `import { z } from '@secuura/shared';`, is at line 61. (3) `services/auth/src/routes/mfa.ts` line 130 cites line 87 of the gate file for `MFA_CODE_PATTERN`, which is at line 95. (4) `services/auth/src/services/accountLockout.ts` line 71 cites line 119 of the gate file "(via the gate's own normalisation)"; line 119 is `export const MFA_CODE_ACCEPTED = ...`, and the `""` normalisation is described from line 122. Gate 206 grades this Info (its N2): pre-existing (already wrong on base; PR 2015 moved the drift by +2), comments only, no test asserts them.
+
+Source: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate206-ks1804-pr2015/verdict.md` line 23 (N2; the verdict's line 22 is a different note, N1, about the PR's own fragment and is not covered here). Code read by the filing seat at develop `1b1b65c7415f` with `git show` of that commit from the shared object store (a read), not run.
+
+As read at `1b1b65c7415f`:
+
+* A text search of `services/auth` at the tip for the gate file's name followed by a colon and a number finds exactly the four comments above.
+* The two comments that cite line 55 sit in text that explains why the module could not be imported from a test ("TypeError: MFA_CODE_ACCEPTED.optional(...).openapi is not a function"). At the tip the gate file imports `z` from `'@secuura/shared'` (line 61). KS-810 (Done) is titled as the problem those comments describe.
+* The verdict gives the `z` import as "now line 62" and `MFA_CODE_PATTERN` as "now line 95"; at the tip the import is at line 61 and the pattern at line 95.
+* KS-2010 (filed earlier today by another seat) names the same kind of defect for citations of lines in `services/api-gateway/src/index.ts`; different files. KS-1804 (the PR's own ticket, read whole) has no hit for these citations. A board search for `MFA_CODE_PATTERN` finds no ticket.
+
+Not measured: anything by the filing seat (nothing was run); whether other citation forms (a line range without the file name) point into the gate file; the order in which PR 2015 and earlier changes moved each line.
+
+Priority: Low, mapped from the verdict's grade Info (verdict line 23).
+##### KS-810 auth.openapi.ts cannot be imported by any test — passwordLoginGate imports z from zod directly, so a module-scope throw there leaves the suite green Done 2026-09-17T06:51:04.385Z
+## BLUF
+
+`services/auth/src/auth.openapi.ts` **cannot be imported from a test. It throws on load —** `TypeError: MFA_CODE_ACCEPTED.optional(...).openapi is not a function` **at** `:152` **— because** `services/passwordLoginGate.ts:55` **imports** `z` **from** `'zod'` **directly, which the shared registry explicitly forbids.**
+
+**Consequence, measured by the KS-796 re-gate: a module-scope** `throw` **in** `auth.openapi.ts` **leaves the auth suite fully GREEN.** The file is in no test's import graph, so nothing in it — 300+ schema registrations, the entire published auth contract — is covered by anything that runs.
+
+## Recommendation
+
+Change `passwordLoginGate.ts:55` to `import { z } from '@secuura/shared'`, which is the rule the registry states. **But not casually:** every schema built from `MFA_CODE_ACCEPTED` changes prototype, and `@secuura/shared`'s root barrel pulls a large runtime surface into a module on the auth hot path. Two things to check before merging it:
+
+1. that it does not create an import cycle (`passwordLoginGate` ← `routes/*` ← the service entrypoint, and `@secuura/shared` re-exports a lot);
+2. that it does not drag an ESM-only dependency into a CJS require path — this repo has been bitten by `ERR_REQUIRE_ESM` from exactly that shape, and it crash-loops at runtime while tsc and vitest both pass.
+
+**The regression test writes itself and should land in the same PR:** import `auth.openapi.ts` from any test and assert it loads. That single line is worth more than the change, because it converts a whole untested file into one that at least cannot be broken silently.
+
+## Detail
+
+**The rule, stated in the code** — `packages/shared/src/openapi/registry.ts:245`:
+
+> *"Re-export the SHARED zod instance — consumers MUST import* `z` *from '@secuura/shared' (not from 'zod' directly) so the* `.openapi()` *extension applied above by extendZodWithOpenApi is on the same Zod prototype the consumer is using. Otherwise the workspace's hoisted-zod / per-service-zod instances diverge and* `.openapi is not a function` *blows up at the first* `.openapi(...)` *call."*
+
+**The violation** — `services/auth/src/services/passwordLoginGate.ts:55`:
+
+```ts
+import { z } from 'zod';
+```
+
+`MFA_CODE_ACCEPTED` is built there, then consumed at `auth.openapi.ts:147`, `:449` and `:2474` as `MFA_CODE_ACCEPTED.optional().openapi({...})`. The first of those is line 152 in the compiled position, and it throws.
+
+**Why nobody noticed.** `auth.openapi.ts` is loaded by the spec generator, a single CJS process in which the module resolutions happen to unify, so `npm run generate-openapi` works and the published yaml is correct. It is only under vitest — different resolution, ESM — that the two zod prototypes separate. So the defect is invisible to every path that currently exercises the file, and visible the moment anyone tries to test it.
+
+**Why it matters beyond the inconvenience.** The KS-796 re-gate's canary is the finding: a module-scope `throw` in `auth.openapi.ts` left the auth suite at **441/441 green**. A file that publishes the platform's entire auth wire contract is not merely under-tested — it is un-importable, so it cannot be tested at all without this fix.
+
+## What was done instead, and why it is not a substitute
+
+KS-796's QA2-F4 guard asserts the three `mfaCode` sites against the **generated yaml** rather than the schema objects. That is defensible on its own terms — the yaml is what a client generates from, so it is the artefact that would ship wrong — but it is a text instrument over a build output, and it cannot see anything the generator does not emit. It does not close this.
+
+## Provenance
+
+* The `.openapi is not a function` failure reproduced in this session while writing the KS-796 QA2-F4 guard; the import-order workaround (`import '@secuura/shared'` first) was tried and does **not** fix it, which is what identified the cause as prototype divergence rather than evaluation order.
+* The canary (module-scope throw → suite stays green) is the KS-796 re-gate's measurement, not mine.
+* Related: **KS-796**, **KS-622** (whose lockstep guard reads the same yaml with occurrence-blind `spec.includes`).
+--- comment 2026-09-17T06:51:03.444Z kamil.kreiser@secuura.ai
+## BLUF
+
+**Closing as already fixed at develop `f8c7aaa39`.** `passwordLoginGate.ts` now imports `z` from the shared package (PR #822), a test imports `auth.openapi.ts`, and a module-scope throw in that file now turns the auth suite red. That throw is the canary this ticket reported as green.
+
+## Recommendation
+
+No further change is needed for the defect. Two explanatory comments still describe the old state and are stale: `auth.openapi.ts:1-21` ("NOTHING IMPORTS THEM YET … a module-scope throw in this file leaves the auth suite green") and `ks796-f6-mfa-schema-identity.test.ts:110-122`. Correct them the next time either file is touched.
+
+## Detail
+
+* **FOUND** (read at develop `f8c7aaa39`, 2026-09-17): `services/auth/src/services/passwordLoginGate.ts:61` imports `z` from the shared package (the workspace's `secuura/shared` scope), not from `zod` (it last changed in #822 and a later PR). `src/__tests__/s130-f6-openapi-module-in-the-import-graph.test.ts` imports `../auth.openapi`.
+* **TESTED** (node v24.7.0, `services/auth`, in a worktree detached at `f8c7aaa39`):
+  * whole suite `npx vitest run`: **62 files / 751 tests, 0 failed, 0 load failures**;
+  * the s130-f6 file alone: 2 / 2;
+  * **canary:** a module-scope `throw` appended to `src/auth.openapi.ts` makes the whole suite exit 1, with the s130-f6 file failing 2 tests. The file was then restored to its committed blob and the tree was clean after.
+* **HOW it was fixed:** PR #822 (S130 follow-ups F1-F6) changed the import and added the s130-f6 test as the regression import. This ticket was not linked to that PR, which is why it stayed in Backlog.
+

@@ -1,0 +1,216 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/email.ts b/Blockchain/Dev/services/originate/src/services/email.ts
+--- a/Blockchain/Dev/services/originate/src/services/email.ts
++++ b/Blockchain/Dev/services/originate/src/services/email.ts
+@@ -136,7 +136,14 @@
+     console.log(`[Email] ACS client initialised (sender=${ACS_SENDER_ADDRESS})`);
+     return acsClient;
+   } catch (err: any) {
+-    console.error(`[Email] Failed to init ACS client (will fall back to SMTP): ${err?.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email] Failed to init ACS client (will fall back to SMTP): ${reason}`);
+     return null;
+   }
+ }
+@@ -164,7 +171,14 @@
+     console.error(`[Email/ACS] Send failed: status=${result.status}`, result.error);
+     return false;
+   } catch (err: any) {
+-    console.error(`[Email/ACS] Send threw: ${err?.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = err?.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email/ACS] Send threw: ${reason}`);
+     return false;
+   }
+ }
+@@ -207,7 +221,14 @@
+     console.log(`[Email/SMTP] Sent: ${options.subject} (messageId: ${info.messageId})`);
+     return true;
+   } catch (error: any) {
+-    console.error(`[Email/SMTP] Failed to send: ${error.message}`);
++    let reason: string | null | undefined;
++    try {
++      const m = error.message;
++      reason = m === undefined || m === null ? m : String(m);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    console.error(`[Email/SMTP] Failed to send: ${reason}`);
+     return false;
+   }
+ }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-email-acs-and-smtp-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-email-acs-and-smtp-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-originate-email-acs-and-smtp-catches-unreadable-throw.test.ts
+@@ -0,0 +1,160 @@
++// KS-1868 (operator 91 screen, originate email service): the ACS-client init catch of getAcsClient (line 139), the ACS send catch
++// of sendViaAcs (line 167) and the SMTP send catch of sendEmail (line 210) of services/originate/src/services/email.ts interpolate
++// `err?.message` / `error.message` into a console.error template, unguarded. A thrown value whose read throws (a revoked Proxy, an
++// Error whose message getter throws) makes the catch itself throw: sendEmail REJECTS instead of logging and answering false (its
++// contract: "Returns true if delivered to a provider successfully"; every caller treats false as not sent); an Error whose
++// message is not a string (a Symbol) makes the template literal throw. The cells make the ACS client constructor, the ACS send or
++// the SMTP send throw such a value and assert sendEmail resolves false and the logged line carries text (the constant when the value
++// cannot be turned into text). Harness: the real module with nodemailer, @azure/communication-email and the shared package
++// replaced by plain stand-ins and console.error by a plain recording function (no network, no mail).
++const mockH: { mode: 'acsinit' | 'acssend' | 'smtp'; toThrow: unknown; errors: unknown[][] } = { mode: 'smtp', toThrow: undefined, errors: [] };
++
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    parseRecipientAllowlist: () => undefined,
++    isRecipientAllowed: () => true,
++    sanitizeHeaderText: (s: string) => s,
++    escapeHtmlText: (s: string) => s,
++  }),
++);
++jest.mock('nodemailer', () => ({
++  __esModule: true,
++  default: {
++    createTransport: () => ({
++      sendMail: async () => {
++        throw mockH.toThrow;
++      },
++    }),
++  },
++}));
++jest.mock(
++  '@azure/communication-email',
++  () => ({
++    EmailClient: function EmailClientMock() {
++      if (mockH.mode === 'acsinit') throw mockH.toThrow;
++      return {
++        beginSend: async () => {
++          throw mockH.toThrow;
++        },
++      };
++    },
++  }),
++  { virtual: true },
++);
++
++const TO = 'rcpt@example.test';
++const P_INIT = '[Email] Failed to init ACS client (will fall back to SMTP): ';
++const P_ACS = '[Email/ACS] Send threw: ';
++const P_SMTP = '[Email/SMTP] Failed to send: ';
++const ENV_KEYS = ['ACS_CONNECTION_STRING', 'ACS_SENDER_ADDRESS', 'SMTP_ENABLED', 'SMTP_HOST', 'SMTP_FROM', 'EMAIL_FROM', 'EMAIL_RECIPIENT_ALLOWLIST'];
++const savedEnv: Record<string, string | undefined> = {};
++const realError = console.error;
++const realLog = console.log;
++const realWarn = console.warn;
++
++beforeEach(() => {
++  mockH.toThrow = undefined;
++  mockH.errors.length = 0;
++  for (const k of ENV_KEYS) {
++    savedEnv[k] = process.env[k];
++    delete process.env[k];
++  }
++  console.error = (...args: unknown[]) => {
++    mockH.errors.push(args);
++  };
++  console.log = () => undefined;
++  console.warn = () => undefined;
++});
++afterEach(() => {
++  console.error = realError;
++  console.log = realLog;
++  console.warn = realWarn;
++  for (const k of ENV_KEYS) {
++    if (savedEnv[k] === undefined) delete process.env[k];
++    else process.env[k] = savedEnv[k];
++  }
++});
++
++type Mail = typeof import('../services/email');
++async function send(mode: 'acsinit' | 'acssend' | 'smtp', value: unknown): Promise<{ ok: boolean; sent: boolean }> {
++  mockH.mode = mode;
++  mockH.toThrow = value;
++  if (mode === 'smtp') {
++    process.env.SMTP_ENABLED = 'true';
++    process.env.SMTP_HOST = 'smtp.invalid';
++    process.env.SMTP_FROM = 'noreply@example.test';
++  } else {
++    process.env.ACS_CONNECTION_STRING = 'endpoint=https://acs.invalid/;accesskey=stub';
++    process.env.ACS_SENDER_ADDRESS = 'donotreply@example.test';
++  }
++  jest.resetModules();
++  // eslint-disable-next-line @typescript-eslint/no-require-imports
++  const mail = require('../services/email') as Mail;
++  try {
++    return { ok: true, sent: await mail.sendEmail({ to: TO, subject: 'subject', text: 'text' }) };
++  } catch {
++    return { ok: false, sent: false };
++  }
++}
++const LINES = (prefix: string) => mockH.errors.filter((a) => typeof a[0] === 'string' && (a[0] as string).startsWith(prefix));
++/** The text after the prefix of the logged line. */
++const reasonOf = (a: unknown[] | undefined, prefix: string): string => (a ? (a[0] as string).slice(prefix.length) : '<none>');
++
++const revokedProxy = (): unknown => {
++  const rp = Proxy.revocable({}, {});
++  rp.revoke();
++  return rp.proxy;
++};
++/** An Error whose `message` getter succeeds and returns the value m. */
++const withMessage = (m: unknown): unknown => Object.create(Error.prototype, { message: { get() { return m; } } });
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the email init and send catches answer false and log text for a hostile thrown value', () => {
++  it('control ks1868 C1: an ordinary Error from the ACS client constructor is logged with its message and sendEmail answers false', async () => {
++    expect(await send('acsinit', new Error('acs ctor boom'))).toEqual({ ok: true, sent: false });
++    expect(LINES(P_INIT)).toHaveLength(1);
++    expect(reasonOf(LINES(P_INIT)[0], P_INIT)).toBe('acs ctor boom');
++  });
++  it('control ks1868 C2: an ordinary Error from the ACS send is logged with its message and sendEmail answers false', async () => {
++    expect(await send('acssend', new Error('acs send boom'))).toEqual({ ok: true, sent: false });
++    expect(LINES(P_ACS)).toHaveLength(1);
++    expect(reasonOf(LINES(P_ACS)[0], P_ACS)).toBe('acs send boom');
++  });
++  it('control ks1868 C3: an ordinary Error from the SMTP send is logged with its message and sendEmail answers false', async () => {
++    expect(await send('smtp', new Error('smtp boom'))).toEqual({ ok: true, sent: false });
++    expect(LINES(P_SMTP)).toHaveLength(1);
++    expect(reasonOf(LINES(P_SMTP)[0], P_SMTP)).toBe('smtp boom');
++  });
++  it('RED ks1868 R1: an ACS client constructor failure that is a revoked Proxy is logged as text and sendEmail answers false, as for an ordinary Error', async () => {
++    expect(await send('acsinit', revokedProxy())).toEqual({ ok: true, sent: false });
++    expect(LINES(P_INIT)).toHaveLength(1);
++    expect(reasonOf(LINES(P_INIT)[0], P_INIT)).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R2: an ACS send failure that is a revoked Proxy is logged as text and sendEmail answers false, as for an ordinary Error', async () => {
++    expect(await send('acssend', revokedProxy())).toEqual({ ok: true, sent: false });
++    expect(LINES(P_ACS)).toHaveLength(1);
++    expect(reasonOf(LINES(P_ACS)[0], P_ACS)).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R3: an ACS send failure that is an Error whose message is a Symbol is logged as text and sendEmail answers false, as for an ordinary Error', async () => {
++    expect(await send('acssend', withMessage(Symbol('ks1868')))).toEqual({ ok: true, sent: false });
++    expect(LINES(P_ACS)).toHaveLength(1);
++    expect(reasonOf(LINES(P_ACS)[0], P_ACS)).toBe('Symbol(ks1868)');
++  });
++  it('RED ks1868 R4: an SMTP send failure that is a revoked Proxy is logged as text and sendEmail answers false, as for an ordinary Error', async () => {
++    expect(await send('smtp', revokedProxy())).toEqual({ ok: true, sent: false });
++    expect(LINES(P_SMTP)).toHaveLength(1);
++    expect(reasonOf(LINES(P_SMTP)[0], P_SMTP)).toBe('unreadable thrown value');
++  });
++  it('RED ks1868 R5: an SMTP send failure that is an Error whose message getter throws is logged as text and sendEmail answers false, as for an ordinary Error', async () => {
++    expect(await send('smtp', getterThrows())).toEqual({ ok: true, sent: false });
++    expect(LINES(P_SMTP)).toHaveLength(1);
++    expect(reasonOf(LINES(P_SMTP)[0], P_SMTP)).toBe('unreadable thrown value');
++  });
++});

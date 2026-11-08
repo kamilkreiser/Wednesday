@@ -1,0 +1,27 @@
+##### KS-629 kyc `livenessVideo` is accepted by spec and runtime, then silently discarded — no code path reads it In Progress 2026-11-03T22:55:09.475Z
+## BLUF
+
+`livenessVideo` is accepted by both the OpenAPI spec and the runtime Zod schema on `POST /api/kyc/{id}/selfie`, and **no code path anywhere reads, stores or processes it.** A caller who uploads liveness evidence gets `success: true` and the bytes are discarded.
+
+## Recommendation
+
+Decide which half is right, then make the other match — do not align one to the other by reflex. Either implement storage + liveness processing, or remove the field from the schema and the spec. Documenting it as inert (done in KS-487 B-4) is a stopgap, not the fix.
+
+## Detail
+
+* Declared: `services/kyc/src/index.ts` `submitSelfieSchema` (`livenessVideo: z.string().optional()`) and `services/kyc/src/kyc.openapi.ts` `KycSelfieUploadRequestSchema`.
+* Repo-wide grep for `livenessVideo` returns **only those two declarations plus a comment** — no reader, no writer, no persistence.
+* Meanwhile the handler sets `livenessCompleted: true` and `livenessScore: 0.95` in mock mode regardless of what was sent (and regardless of whether `livenessVideo` was sent at all).
+
+This is the KS-624/625/KS-488-C-2 family: a contract that advertises a capability the runtime does not have. Found while fixing KS-487 B-4 (magic-byte verification on the sibling image fields).
+
+Filed from session 30. Not fixed in the B-4 PR — that PR's scope is image content verification, and silently deleting or implementing a published field is a contract change that deserves its own decision.
+--- comment 2026-11-03T22:55:09.494Z kamil.kreiser@secuura.ai
+**BLUF:** Delivered: PR 1196 merged as f24dacfb698f on develop (Part A: livenessVideo removed from the runtime selfie schema in the kyc service), deployed to kintsugi at b1fb543640e7 (carried deploy record of 2026-11-01, not re-measured today). Verified by code read, not observed live: the squash changes `Blockchain/Dev/services/kyc/src/index.ts` and its test, and `Blockchain/Dev/services/kyc/src/__tests__/ks629-kyc-livenessvideo-is-accepted-by-spec.test.ts` is present at b1fb543640e7. Left open: the other half of the ticket's ask is not done. `Blockchain/Dev/docs/openapi/secuura-api.yaml:4599` still lists livenessVideo and `Blockchain/Dev/services/kyc/src/kyc.openapi.ts` names it on 2 lines, so the spec and the runtime schema disagree on the field. The 2026-09-22 comment says the ticket stays In Progress.
+
+--- comment 2026-09-22T09:32:31.608Z kamil.kreiser@secuura.ai
+**Gate19B round 1 finding on #1196 (merged as `f24dacfb6`; develop now `b70512ca8`) — record-class, ships-with; next-round cell proposed by the gate.** Verbatim from the gate report (`2026-09-22-batch1182-1201-r1/report.md`, the NOT-PINNED row):
+
+> LIVENESSRT-SOURCETEXTCELL (Minor) — the RED cell is a text guard over index.ts (the file boots a listener at import, hence the shape); LIVENESSRT-RUNTIMESTRIP (Minor) — `submitSelfieSchema.parse` is strip-mode: `{ verificationId, selfieImage, livenessVideo: 'x' }` still parses OK with the key dropped (the "silently discarded" half of the ticket is unchanged at runtime). Proposed: a cell that imports the schema (or a `.strict()` decision on the ticket) and asserts `safeParse({…, livenessVideo})` either refuses or yields no `livenessVideo` key — a product decision for the ticket, not this PR. LIVENESSRT-SPEC — Part B: `kyc.openapi.ts:195` and `docs/openapi/secuura-api.yaml:4495` still declare `livenessVideo` — CARRY-FORWARD row, deferred by the plan ANSWER, not a cell.
+
+The PR stands as merged; this ticket stays In Progress. Posted by the Platform K seat on Wednesday's ruling 2026-09-22 09:30:35Z.

@@ -1,0 +1,311 @@
+##### KS-1456 Correct the failed-run message in run-migrations.sh (:187-188): it still names the applied-counts-skips defect that PR #1436 fixed In Progress 2026-11-06T05:33:03.956Z
+**ACTION (owner): change the failure message at** `Blockchain/Dev/scripts/run-migrations.sh:187-188` **so it stops naming a defect the runner no longer has.**
+
+**What the code says.** Read at develop `4aa5cb38bd52449b08e08a77bc6bebca04751c2b`, which contains PR #1436 (the KS-808 fix, squash `ae9bf6828f88`):
+
+* Line 188 is printed on **every** failed-migration run. It sits inside the `failed_count > 0` branch that opens at `:180`, and reads: `applied=N-counts-skips defect is KS-808. Exit 3 - the code this`. With `:187`, the sentence says the applied=N-counts-skips defect is still open.
+* That counting was changed by PR #1436. `:121`, `:147` and `:173-174` now count a skip on its own (comments marked `KS-808 (2)`), and `:176` prints `Summary: applied=$applied_count failed=$failed_count skipped=$skipped_count`.
+* So at runtime the script tells an operator about an open defect that the code no longer has.
+
+**Scope.** Text only: the two `echo` lines at `:187-188`. No behaviour change; the exit code (3) and the counting stay as they are.
+
+**How it was found.** gate77 finding N-1436-1, graded Minor by the gate, recorded during the merge of PR #1436. Board search by symbol before filing, team-scoped, title or description: the filename returns 8 tickets (KS 808, KS 1296, KS 1443, KS 1305, KS 1401, KS 1376, KS 1054, KS 1031), none of which owns these two lines; the exact phrase `applied=N-counts-skips` returns 0; `:187-188` returns 0; a fabricated control term returns 0.
+
+**Related:** KS-808. It stays In Progress for its live sweep; this ticket does not move it.
+--- comment 2026-11-06T05:33:03.966Z kamil.kreiser@secuura.ai
+**BLUF:** PR 2038 is merged to develop as c3bb5bb5bb327aca47da3c960bc3d2d720a365d4, at 2026-11-06T04:22:03Z (read from the PR API). The failed-run WARN line in `run-migrations.sh` is now a whole sentence, the cut-off line that comment b70cfc97 recorded. The migrations image rebuild is owed, because the runner is baked into that image (comment b70cfc97 names `services/originate/Dockerfile`). This ticket STAYS In Progress; the PR links it as `contributes` (comment 09ead44c).
+
+- What merged (PR API, four files): `Blockchain/Dev/scripts/run-migrations.sh` (5 lines changed), `ks1456_run_migrations_failed_run_names_no_closed_defect.test.sh` (+41), and two Projects Documents fragments.
+- The line, read at source: `WARN: $failed_count migration(s) failed (see logs above). Pre-existing` before; `WARN: $failed_count migration(s) failed (see logs above). Pre-existing failures are not tolerated: this run exits 3.` after, with three comment lines above it. Not run.
+- Not on the Kintsugi pin Wednesday names (Seat D 56th's REVISION head e174f5eb488a): in my own shallow clone of develop that pin is an ancestor of this squash (rc 0) and this squash is not an ancestor of the pin (rc 1); the control, the KS-2009 squash 31ef48b54614, reads rc 0 the other way. What Kintsugi runs now, I did not read.
+- Deploy owed: the migrations image, Kintsugi and demo; demo is frozen.
+- NOT covered: I ran no test, and I read no box, Kintsugi or demo state. Demo is frozen (Kam's card secuura-ks1401-058-merge-demo-billing-1104); nothing is deployed by me or by this comment. Read by Seat S 28th at source in a read-only scratch clone.
+--- comment 2026-11-06T03:25:57.278Z kamil.kreiser@secuura.ai
+**BLUF:** PR 2038 raises KS-1456 (the migration runner's failed-run WARN line is a whole sentence), head `2b1be426c5c3` cut from develop `bd92121e0228`. It is READY FOR GATE at proposed tier 2; nothing is merged and nothing is deployed. The link is `contributes`; this ticket stays In Progress and I changed no state, assignee or field.
+
+* **PR:** https://github.com/Secuura/Distributed_Secuura/pull/2038
+* **What changed:** `Blockchain/Dev/scripts/run-migrations.sh` printed `WARN: N migration(s) failed (see logs above).
+* **Evidence:** the full Test Evidence block is in the PR body (red against develop, planted tampers, neighbour suites, full runner, docs check) with its NOT-run list.
+* **Owed after merge:** No migration or config change. The runner is baked into the `migrations` image (`services/originate/Dockerfile`), so a deploy is owed after merge; it is stated here and not done.
+
+— Seat J 18th
+--- comment 2026-11-03T23:14:46.666Z kamil.kreiser@secuura.ai
+**BLUF:** Delivered: PR 1447 merged as 8a7b7ece07dc on develop (the runner's failed-run message no longer names a defect it does not have), in the tree deployed to kintsugi at b1fb543640e7 (carried deploy record of 2026-11-01, not re-measured today). Verified by code read, not observed live: `Blockchain/Dev/scripts/run-migrations.sh:189` carries the corrected note that KS-808 (2) closed the applied=N defect. Left open: the 2026-10-12 comment records that a cut-off sentence is still printed before the corrected message. At b1fb543640e7 `run-migrations.sh:179` still prints 'WARN: $failed_count migration(s) failed (see logs above). Pre-existing' with no completion, and that comment says the ticket stays open and listed because the runner is baked into the migrations image.
+
+--- comment 2026-10-12T18:29:01.068Z kamil.kreiser@secuura.ai
+## Found while verifying lots L14/L15 (2026-10-12, develop `425ad3e00ae4`): a cut-off sentence is still printed before the corrected message
+
+The block this ticket corrected prints one more line ahead of the `ERROR:` line, and it is a sentence cut off mid-way. `Blockchain/Dev/scripts/run-migrations.sh:179` is `echo "WARN: $failed_count migration(s) failed (see logs above). Pre-existing"` and `:180` is `echo "ERROR: $failed_count migration(s) failed (see logs above)."`, so a failed run reads `WARN: 1 migration(s) failed (see logs above). Pre-existing` and then, on the next line, `ERROR: 1 migration(s) failed (see logs above).`
+
+* **Where it came from:** the WARN text dates from commit `49262522e` (2026-04-27, "idempotent migrations"); the KS-1031 edit that turned the exit into 3 left it behind, cut off, beside the new ERROR line.
+* **Not pinned:** `ks1456_run_migrations_failed_run_names_no_closed_defect.test.sh` (4 passed, 0 failed) checks that the output no longer names the closed counts-skips defect, that a failed run still exits 3 and explains it, and the counts; it does not look at the WARN line, so the fragment passes.
+* **Scope:** text only, the same block this ticket's fix touched. Comment only, per Wednesday (no separate ticket); this ticket stays open and LISTED (the runner is baked into the migrations image, `services/originate/Dockerfile:47`, deploy unmeasured).
+
+##### KS-1387 A clean image build of platform-k develop fails: services/governance does not compile (TS2742 on router's inferred type) — a new slot cannot start until the image exists from an older build In Progress 2026-10-19T08:45:41.498Z
+## Seen (2026-09-29, develop `0aa9b52c6`; origin/develop `b4461d1e2` is three commits ahead, none touching governance)
+
+Starting a fresh stack slot with no cached images (`Start_Up/start-secuura.sh` via platform-s's `up-slot.sh 4`) fails at the governance image:
+
+```
+docker compose -p secuura_slot4 build --progress=plain governance
+#19 1.611 src/routes/governance.ts(19,7): error TS2742: The inferred type of 'router' cannot be
+      named without a reference to '@secuura/shared/node_modules/@types/express-serve-static-core'.
+      This is likely not portable. A type annotation is necessary.
+#19 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+```
+
+Reproducible: the same `docker compose build governance` fails the same way on a second run. Slots 1–3 on this machine start only because they hold `secuura_slot{1,2,3}-governance` images built up to two weeks ago; slot 4 had no image and could not be built. A new developer machine, or a slot torn down with `--rmi all` (the test-discipline teardown), hits this.
+
+The first attempt on the same slot failed one image earlier — `nft-certificate` at `npm ci --ignore-scripts` — and that one built cleanly on retry, so it was transient; governance is not.
+
+## Suggested fix
+
+`services/governance/src/routes/governance.ts:19` — give `router` an explicit type (`const router: Router = express.Router()`), the usual TS2742 remedy when a workspace package (`@secuura/shared`) carries its own `@types/express-serve-static-core`. Worth a `tsc --noEmit` over every service in the PR gate so a non-portable inferred type cannot land again.
+
+## Impact on platform-s
+
+Blocks pairing an S slot with a fresh K slot for the gate run on platform-s PR #889 (the S↔K remediation branch); recorded there and on [PS-928](https://linear.app/secuura/issue/PS-928/k-live-goes-red-on-the-second-full-run-on-a-slot-the-anchor-refresher). Related: [KS-955](https://linear.app/secuura/issue/KS-955/a-fresh-clone-cannot-run-the-four-platform-suites-and-fails-in-a-way) (a fresh clone cannot run the suites).
+--- comment 2026-10-19T06:37:02.849Z stuart.jamieson@secuura.ai
+@kamil.kreiser — the rebuild evidence, as asked. Read it before deciding; on your own criterion it does **not** close this ticket.
+
+- **Command:** `./Start_Up/start-secuura.sh --rebuild` (Stuart, by hand, from his `~/obd-dev/platform-k` clone, clean on `develop` at **`78cb3c393`**), slot 1, 2026-10-18 22:45:40Z → 23:02:58Z. The script builds **serially**, one `docker compose --progress=plain -f docker-compose.local.yml build <service>` per service with `COMPOSE_BAKE=0`; it passes **no `--no-cache`**, so the layer cache was warm from the 15 Oct build — not a cold build. `governance` built 22:53:14Z → 22:54:38Z (image `2f87233cfc20`), then the script went on to `issuer-frontend`; all 33 services came up healthy, `/health/deep` 200, migrations `applied=0 skipped=51`.
+- **The variable you named:** inside `platform-k-governance:latest` there is exactly **one** copy of `@types/express-serve-static-core`, at `/shared/node_modules/…`, version **`4.19.9`** — no nested second copy. That is the repository-lockfile layout you describe as the one in which the pre-fix tip also builds clean.
+
+So this build shows that develop at `78cb3c393` (which carries `b45b69171`) builds under the single-copy layout; it cannot distinguish "the explicit `Router` type removed the error class" from "this layout never produces it". The sentence in our document is corrected accordingly: fixed on develop, proven only in the non-reproducing layout. Leave the ticket where you judge it; nothing on S waits on it.
+--- comment 2026-10-19T05:45:54.045Z kamil.kreiser@secuura.ai
+**BLUF: @stuart.jamieson — your document says this is fixed and proven by a clean rebuild of develop on 19 Oct across 33 services, and asks us to close it. I am not closing it on that, and I would rather tell you exactly why than close it quietly. Could you paste the rebuild evidence here? Then it closes on your measurement rather than on nobody's.**
+
+**Why your claim is not yet this ticket's evidence.** The ticket's acceptance is a clean *image* build of develop. The last work recorded here is explicit that the clean image build **was never run on our side** — the Docker daemon was down on the machine doing the work — and that is still true today: there is no Docker on the machine I am on, so I cannot reproduce your result or contradict it.
+
+**And there is a reason not to assume it.** When the TS2742 failure was examined, it only reproduced when the two nested `@types/express-serve-static-core` copies were pinned to **different** versions. With the repository's own lockfiles both resolve to `4.19.9`, and in that layout **the pre-fix tip builds clean too**. So a green build of develop is consistent with two different worlds: the fix removed the error class, or the lockfile state was never going to produce it. A green build alone does not distinguish them, which means closing on "it builds now" could close a ticket whose symptom is still live for anyone whose install hoists differently.
+
+**What would settle it,** and any one of these is enough:
+
+1. The **exact command** you ran (`docker compose build`, a specific Dockerfile target, or something else) and **which develop SHA**.
+2. Whether the 33 services were built **from a cold cache** — a warm layer cache can skip the compile step that fails.
+3. If you have it, the resolved `@types/express-serve-static-core` versions in the image that built, since that is the variable the failure turns on.
+
+Paste that and I will record it as the evidence and close the ticket against it. If you would rather not spend the time, say so and I will leave it In Progress with this comment as the reason — that is a better outcome than a ticket closed on an unverified claim.
+
+No date, and nothing else is blocked on this.
+
+--- comment 2026-10-18T17:04:26.832Z kamil.kreiser@secuura.ai
+**PR #1581 is merged to `develop` as `b45b69171b362da0233842cdd14c161c2f9266c2`.** `governance.ts:19` now reads `const router: Router = Router();`. Nothing deployed; the ticket stays In Progress.
+
+**What gate H2 showed about TS2742 — stated exactly, because it decides whether this ticket's symptom is closed.** H2 reproduced TS2742 **without Docker**, but **only by pinning the two nested `@types/express-serve-static-core` copies to DIFFERENT versions**: in that layout the tip fails and this head builds clean, so **the change removes that error class**. **With the repository's real lockfiles both copies are `4.19.9` and the tip builds clean too.** So whether the ticket's original image-build failure is closed stays **"not reproduced with the real lockfiles"**. The clean `docker compose build governance` was not run (no Docker daemon in my environment) — that remains the real check, e.g. at the next governance deploy.
+
+**Low note from H2:** the new `ks1387` suite goes red if a trailing comment is ever added to the declaration line (it matches the line literally).
+
+**Evidence on the tree that landed** (predicted commit `4a87bcb052fa`, tree `f33b620c79e8` — byte-identical to the PR head's own tree, develop having not moved since the gate), in two environments: the new suite **3/3**; governance in full **119/119**; `tsc` (TypeScript 5.9.3) rc 0. Five-point read 5/5 TRUE.
+
+--- comment 2026-10-18T16:49:39.494Z kamil.kreiser@secuura.ai
+**Raised as PR #1581**, head `6b4bcaec11fa4aea156a11bbaa23b56b09126b63`, on develop `385fc288fae8`. Not merged, not deployed.
+
+`services/governance/src/routes/governance.ts:19` — `const router: Router = Router();`. Byte-checked: the applied file differs from the tip **only on that line** (the Spark patch's blank-line churn around it is a no-op; lines 18 and 20 are byte-identical).
+
+**This ticket's own symptom is NOT reproduced, and I want that to be plain.** The clean image build was **not run** — the Docker daemon is down here. Governance's local `npm run build` is rc 0 **at the tip as well as with the change**, because this install hoists `@types/express-serve-static-core` to the root and has no copy nested under `packages/shared` — the layout that triggers TS2742. So a local pass is **not** evidence the image build is fixed. The real check is `docker compose build governance` from a clean cache; worth running at the next governance deploy.
+
+Evidence (mine): red-first **2/1** (the annotation cell); green **3/3**; governance in full **119/119**; `tsc` rc 0; push preflight 13/16, nothing failed.
+
+--- comment 2026-10-02T04:14:23.321Z stuart.jamieson@secuura.ai
+Clean build confirmed, 2 Oct. `SECUURA_STACK_SLOT=3 ./Start_Up/start-secuura.sh --rebuild` at develop `88e8877a2`: **35 of 35 services built, 0 failed**, including `governance`, `analytics` and `billing`; the stack came up with 33 containers running (32 with a healthcheck, all healthy) and the two one-shot jobs (`migrations`, `demo-overlay`) exited 0; gateway `/health` and `/health/deep` both 200. The first pass was cut off by my session's time limit at service 32 during a slow package download, so the last four were built on a second pass with the first 31 from cache — no service failed in either pass.
+
+The fault this ticket records is gone (fixed by KS-1380, `6cf5c3629`). Safe to close from the Platform-S side.
+
+One thing worth knowing for slot users: before the rebuild, slot 3 started in under a minute on images dated 15 Sep while its owner marker read `develop @ 88e8877a2`. The marker records the checkout, not what the images were built from.
+--- comment 2026-10-02T03:00:03.793Z stuart.jamieson@secuura.ai
+Re-read at develop `88e8877a2` (2 Oct): KS-1380's fix has merged (`6cf5c3629`), and `services/analytics`, `services/billing`, `services/governance` and `packages/shared` now all lock `@types/express-serve-static-core` 4.19.9 and `@types/pg` 8.23.1. That removes the cause recorded here. I have not re-run the clean image build, so this is from the lock files only; the ticket can close once one clean build of those three services is confirmed.
+--- comment 2026-09-29T10:48:31.553Z stuart.jamieson@secuura.ai
+Definitive list, every service built one at a time from `0aa9b52c6` with Docker's disk cleared: **three fail** — `governance` (TS2742), `analytics` (TS2742 ×4) and `billing` (`src/db.ts:45` TS2345, the `@types/pg` `Pool` from `/app` vs `/shared`); the other 20 images build cleanly. None of the three is on Platform-S's path, so for the PR #889 gate run I tagged the 28 Sep 08:43 slot-1 images as the slot-4 images for exactly those three and built everything else fresh — recorded on the run so the evidence says which K each service ran.
+--- comment 2026-09-29T10:31:50.691Z stuart.jamieson@secuura.ai
+It is wider than governance. Building every service for a fresh slot one at a time (2026-09-29, `0aa9b52c6`), so far:
+
+* `analytics` — `npm run build`: TS2742 on `app` (`src/index.ts:34`), `router` (`src/routes/analytics.ts:20`), `dashboardRouter` (`src/routes/dashboard.ts:12`), `healthRouter` (`src/routes/health.ts:7`) — all "cannot be named without a reference to `@secuura/shared/node_modules/@types/express-serve-static-core`".
+* another service in the same pass — `src/db.ts:45`: TS2345 `import("/app/node_modules/@types/pg").Pool` is not assignable to `import("/shared/node_modules/@types/pg").Pool` — the same shape: `/shared` (built from `packages/shared` inside the image) carries its own `@types/*` that no longer match the service's.
+* `nft-certificate` and `transfer` failed once each for a different reason (Docker's disk was full mid-build: `chmod: … No space left on device`); both build after reclaiming space, so they are not part of this.
+
+Two observations for whoever picks it up: (1) the images that exist on this machine from a 28 Sep 08:43 build are fine, and the only 29 Sep commit touching dependencies is KS-1378 (`2cb858335`, morgan / nodemailer / ip-address / undici bumps) — a duplicate-`@types` drift between `packages/shared` and the services is the shape a lockfile bump produces; (2) `Blockchain/Dev/.dockerignore` excludes `node_modules` and `services/*/node_modules` but not `packages/shared/node_modules`, so a host that has run `npm install` inside `packages/shared` would ship that directory into the `COPY packages/shared/ ./` layer — not the case on this machine, but it is a second way to get exactly this error. The full per-service list follows when the loop finishes.
+##### KS-1337 k6 runner: the pre-suite path is taken from URL.pathname, so a checkout directory containing a space fails ERR_MODULE_NOT_FOUND In Progress 2026-10-22T15:12:45.116Z
+## BLUF
+
+`systemTest/performance/runner/cli.ts:162` resolves the pre-suite step with
+`new URL('../../fixtures/pre-suite.ts', import.meta.url).pathname`. `URL.pathname` **is**
+**percent-encoded.** A checkout whose directory contains a space yields `.../Testing%20Agent%20MAIN/...`,
+which is passed to the spawn as a literal path, and the run dies with
+`ERR_MODULE_NOT_FOUND … %2520 …` (the `%25` is the second round of encoding).
+
+**This is not hypothetical on this fleet.** The QA gate's own checkout lives at
+`/Volumes/DevMASTER/!CODING/Testing Agent MAIN/` — a path with **two spaces**. Any performance run
+driven from a checkout like that cannot start its pre-suite step.
+
+Found as a develop-own finding during the tier-2 gate on #1268 (report lines 214-219). **Not built**
+**there**, and not built here: it is develop's, not that PR's.
+
+## Measured at `00de57baeb405d0081fe8b6f192bd40d35acef61`
+
+```
+$ node -e "const u=new URL('../../fixtures/pre-suite.ts','file:///Volumes/Dev/Testing%20Agent%20MAIN/x/runner/cli.ts');
+           console.log(u.pathname); console.log(require('url').fileURLToPath(u));"
+/Volumes/Dev/Testing%20Agent%20MAIN/fixtures/pre-suite.ts     <- .pathname, what the code uses
+/Volumes/Dev/Testing Agent MAIN/fixtures/pre-suite.ts         <- fileURLToPath, correct
+```
+
+`cli.ts:162` **is the only** `.pathname` **use of an** `import.meta.url` **URL in the package.** The fix-shape
+already has precedent **in the same directory**, so this is a consistency fix rather than a new idea:
+
+* `runner/actor_manifest.ts:60` — `dirname(fileURLToPath(import.meta.url))`
+* `runner/paths.ts:12` — `path.dirname(url.fileURLToPath(import.meta.url))`
+* `gate/cli.ts:31` — the same
+
+## Done means
+
+1. `cli.ts:162` uses `fileURLToPath(new URL('../../fixtures/pre-suite.ts', import.meta.url))`.
+2. **A regression cell in the gate's own shape: run the CLI from a copy of the tree whose path**
+   **contains a space**, and assert the pre-suite step resolves and spawns. A cell that only asserts
+   the string has no `%20` would pass for a path that is wrong in some other way.
+3. A sweep for any other `.pathname` on an `import.meta.url` URL across `systemTest/`, so the fix is
+   the class and not the one line. ~~Measured today: **1** occurrence, this one.~~ **CORRECTED 2026-09-26 (gate29, and the PR agrees): the count is 3, not 1.** Measured by `git grep` over the clone at develop: `systemTest/performance/runner/cli.ts:162` (**fixed** by PR #1291, squash `3f70224a069b`), `systemTest/akto/tests/preSuiteSetup.ts:36` and `systemTest/playwright/global-setup.ts:42` — the last two remain open on this ticket. The original figure came from a sweep scoped to the performance package, while this DoD names `systemTest/`. Two wider sweeps add nothing to the class. The same class ALSO exists in 2 files under `Blockchain/Dev`, outside this ticket's scope — filed as KS-1347.
+
+## Why it was not fixed in the round that found it
+
+It is **develop's own defect**, not #1268's. #1268 touches `packages/shared`; folding an unrelated
+`systemTest/performance` fix into it would widen a fix round past its declared scope and past the
+files its gate reviewed.
+
+## Search before filing
+
+`searchIssues`, KS team, `includeArchived: true`, every page literal-matched client-side:
+`preSuiteStep` **0**, `cli.ts:162` **0**, `%2520` **0**. `ERR_MODULE_NOT_FOUND` returns 3 (KS-691,
+KS-149, KS-1148 — all unrelated: worktree preflight, vc-issuer tooling, CI-runner gaps).
+`pre-suite.ts` returns 7, all about the step's own behaviour rather than path encoding.
+Controls: `performance` **37** literal hits and `runner` **44** (the matcher fires); a nonce token
+never written anywhere **0**.
+--- comment 2026-09-26T15:31:40.955Z kamil.kreiser@secuura.ai
+**The akto site MERGED as `9c15ca102aafa750ba149cfe58392b6b06cba7a8`** (PR [#1295](https://github.com/Secuura/Distributed_Secuura/pull/1295)), on Wednesday's signed gate30T2 GO, 2026-09-26 15:18:12Z naming that head. Verified base-invariantly, as that GO required: the squash touched only this PR's two paths and both equality targets matched; develop `aa3827c975dc` -> `9c15ca102aaf`.
+
+`systemTest/akto/tests/preSuiteSetup.ts` now takes the pre-suite path with `fileURLToPath` instead of `URL.pathname`.
+
+**This ticket stays In Progress** — site 3, `systemTest/playwright/global-setup.ts`, is untouched, as is the DoD 2 real-CLI cell.
+--- comment 2026-09-26T12:59:22.416Z kamil.kreiser@secuura.ai
+**The akto site raised as [#1295](https://github.com/Secuura/Distributed_Secuura/pull/1295), head `0faf41d63a75dfa348ed74ea328701646eea9c49`. READY FOR QA. Not merged; nothing merges without a signed GO naming that head.** Facts only.
+
+Site 2 of 3: `systemTest/akto/tests/preSuiteSetup.ts:36` now uses `fileURLToPath` instead of `URL.pathname`, which percent-encodes and so resolved to a non-existent path on a checkout containing a space. Two files, +81/-1: the product line plus its import, and a new unit cell with one red-first case and two controls.
+
+Provenance: byte-identical to the brief's golden AND the run's canonical patch (92 lines, 4,471 B, sha256 `0714d333dccdbedd...`, cmp rc 0 against both); strict apply at `3f70224a069b`; both tamper controls fire. Note for anyone re-checking: there are two goldens with similar names, and the matching one is `briefs/KS-1337/golden/KS-1337-akto.golden.diff` — `briefs/KS-1337.golden/KS-1337.golden.diff` is the k6 site's and does not match. The hold record's rung-4 caveat stands: the brief quoted the k6 product expression, so this measures adapting a quoted pattern rather than deriving the fix.
+
+Evidence (mine): RED 1 failed / 2 passed of 3 with the product reverted — the spaced-path case, with the no-spaces control staying green so the cell discriminates; GREEN 3/3; akto unit suite **bare 69 files/1233 tests, patched 70/1236**, 0 new reds; `npm run lint` (tsc + eslint + stylelint) rc 0 at both trees; `npm run format:check` rc 0 at both trees — run explicitly because prettier is where the k6 raise stopped.
+
+**On the push gate, stated precisely:** this branch touches no `Blockchain/Dev` path, so the platform preflight did NOT run. What ran was the format gate only (`systemTest/akto — format:check OK`, 1 package, 0 failed). No fleet STOP count is quoted because none was produced — measured, with a control: those log lines appear 0 times here and 4/1/4 times in a `Blockchain/Dev` push made the same night.
+
+**This ticket stays open.** The playwright site (`systemTest/playwright/global-setup.ts`) and the DoD 2 real-CLI cell are untouched.
+--- comment 2026-09-26T10:26:20.068Z kamil.kreiser@secuura.ai
+**MERGED as `3f70224a069b944334480478ad5d16a5ed33eeae`** (PR [#1291](https://github.com/Secuura/Distributed_Secuura/pull/1291)), on Wednesday's signed gate29 GO naming that head. develop `4857187addfc` -> `3f70224a069b`; the squash touched only this PR's two paths and both equality targets matched. The resulting tree equals the batch's declared END_TREE `0cc6669f3a6ed3ac2841e9cf17c6229e890e0250` exactly.
+
+**This ticket stays In Progress — one of three sites is fixed.**
+
+🔴 **A CORRECTION TO THIS TICKET'S OWN DoD 3.** It reads "Measured today: 1". **That is false; the count is 3**, and both the gate and the PR agree. The ticket's sweep was scoped to the performance package ("the only `.pathname` use ... in the package") while DoD 3 names `systemTest/`. Measured at develop by `git grep` over the clone:
+
+| site | state |
+|---|---|
+| `systemTest/performance/runner/cli.ts:162` | **FIXED** by #1291 |
+| `systemTest/akto/tests/preSuiteSetup.ts:36` | open, on this ticket |
+| `systemTest/playwright/global-setup.ts:42` | open, on this ticket |
+
+Two wider sweeps were run and add nothing to the class: a broader `.pathname` pattern adds only `playwright/helpers/api-report.ts:54` (`new URL(exchange.url).pathname`, a URL from the wire, not a file path) and the widest adds only an assertion in a test. The description above has been corrected in place, marked as a correction.
+
+**DoD 2, the gate's note:** the existing real-CLI cell **reds only on a spaced checkout**, so on a checkout without a space it cannot witness the defect. #1291's cell sidesteps that by building its own temp directory containing a space — which is why it red-proves from any checkout — but it reconstructs the resolution rather than crossing the CLI's own process boundary, so **DoD 2 is approximated, not met.**
+
+**One follow-up filed, searched first: KS-1347** — the same `import.meta.url).pathname` class exists in **2 files under `Blockchain/Dev`** (4 lines), outside this ticket's stated scope: `scripts/openapi-examples/proxy/server.ts:31` and `services/auth/src/__tests__/ks732-mfa-disable-proof.test.ts:293,296,316`. It also records that **neither `ks860` nor `ks879` walks `systemTest/`**, so that tree has no raw-control-byte or loopback-bind guard and nothing structural would have caught this class there.
+
+**One immaterial difference from this ticket's text:** it says the spawn dies with `%2520`; on this machine (node v24.7.0, the package's pinned tsx) both the unit run and the direct CLI show a single `%20`. The encoding count depends on the tsx/node pair and does not affect the fix.
+
+Facts only.
+--- comment 2026-09-26T09:07:24.127Z kamil.kreiser@secuura.ai
+**Raised at PR [#1291](https://github.com/Secuura/Distributed_Secuura/pull/1291)** — head `2c9022c519bd26e9b58acddeed817f4413d92449`, base `develop` `179a4f32ec0643689b55a8d7207e63f6ec3d3831`. **READY FOR QA.** Not merged. Facts only.
+
+**The fix.** `systemTest/performance/runner/cli.ts` built the pre-suite step path from `new URL(...).pathname`. A URL pathname is **percent-encoded**, so a checkout directory containing a space handed `tsx` a path with `%20` and the step died `ERR_MODULE_NOT_FOUND`. `fileURLToPath` decodes. `+4/-1`.
+
+**The red is the defect verbatim:** expected `…/Testing Agent MAIN/systemTest/fixtures/pre-suite.ts`, received `…/Testing%20Agent%20MAIN/systemTest/fixtures/pre-suite.ts`.
+
+**Measured** in a worktree detached at develop, `npm ci` in the package (standalone lockfile): strict apply rc 0; **RED 1 failed / 2 passed / 3** (the declared cell, on its assertion); **GREEN 3/3**; whole performance unit suite **BARE 64 files / 1114 tests** -> **PATCHED 65 / 1117**, 0 failed either side, **0 new reds**; **`npm run lint` rc 0** (`tsc` x2 + eslint).
+
+**The cell builds its own temp directory containing a space** rather than relying on the checkout's path — which is why it red-proves the defect even from a checkout without one. The corollary matters for anyone re-running it: **a green run on a space-free checkout is not evidence the defect is absent.**
+
+🔴 **Scope — this closes ONE of THREE occurrences.** The pattern was measured **3x** on develop. This PR converts `runner/cli.ts:162`. **Not in this PR:** `systemTest/akto/tests/preSuiteSetup.ts:36` and `systemTest/playwright/global-setup.ts:42`, in other packages with their own installs and suites. The PR body carries `Refs` with no closing keyword for that reason.
+
+🔴 **This ticket's "Done means 2" is approximated, not met.** That step asks for a cell that runs **the CLI itself** from a spaced copy. This cell reconstructs the resolution in a probe module, so it pins the defect and would catch its return, but it does not cross `runner/cli.ts`'s own process boundary. Stated rather than claimed closed.
+
+**Provenance.** `runner/cli.ts` is **byte-identical** to the local model's (Ornith) product hunk. The **test file is that output plus the package's own `eslint --fix`** — formatting only, one hunk, 15 lines, 3,481 -> 3,524 bytes. The model's diff was byte-identical to its reviewed golden, but the package's own `npm run lint` was **rc 1 on it: 6 prettier errors in the new cell**, while both `tsc` stages passed. That was raised as a STOP and the formatter applied on an explicit ruling, rather than shipping a package whose own `lint`/`quality` scripts are red. The push log bears that out: the pre-push **format-gate** for this package reads `format:check OK, 1 package(s) checked, 0 failed`.
+
+**One correction to my own artefact:** I first wrote the platform fleet-STOP figures into the PR body as boilerplate. **They do not apply** — the pre-push hook filters by path and this change touches no `Blockchain/Dev/` path, so the platform preflight did not run at all. The PR body has been corrected to state what actually ran. A missing gate is not a passing gate.
+##### KS-1490 102 tracked files still name a deleted Container Apps host: 22 shipped defaults and links, manifests, deploy JSON, test docs (KS-812 fixes only whatsapp-bot) In Progress 2026-11-06T06:50:53.726Z
+**BLUF.** On develop `6fa9bf7b`, 102 tracked files still name a host under `*.azurecontainerapps.io`. Every one of those hosts is dead: the live demo is the VM at `https://demo-pk.secuura.net` (ruled for KS-812). 22 of the 102 are shipped code that falls back to, or links, a dead host (the same shape as KS-812, which fixes only the 2 `whatsapp-bot` files among them); the rest are manifests, deploy config, tests and docs. Unassigned, P3, no build. Grouped below by artefact type so the owner can split it into one PR per group.
+
+**Recommendation.** Fix group A first (it is what a user or integrator runs into), then B to D (they are published or deployed artefacts), then E to H as a docs sweep. Per group: replace with the VM host `https://demo-pk.secuura.net`, or with the setting that carries it; change generated files at their source (`scripts/generate-openapi.ts` before `docs/openapi/secuura-api.yaml`); leave deliberate "this host is dead" notes (for example `deployment/DEPLOYMENT-ARCHITECTURE.md`'s "Old target (dead)" row) alone or say so. Group G is a different defect: Python bytecode is tracked in git.
+
+**Detail.** Measured 2026-10-12 by Seat F 17th with `git grep -a -l -F 'azurecontainerapps.io' origin/develop` (`-a` because `grep` skips files with binary bytes silently; the control `Blockchain/Dev/CLI-AGENT-INSTRUCTIONS.md` is hit 20 times). 5 dead suffixes appear: `kindtree-935b2ded` (166 occurrences, the deleted secuura02 estate, 47 files), `gentlebush-21213dc4` (83), `blackmoss-2a7eea0b` (65), `yellowground-ae96b9b1` (58), `ashypond-b460d1a1` (11). The full list with groups and per-file line counts is `5_Project_History/2026-10-12_seatF-17th/ks812_deadhost_files_on_develop_6fa9bf7b.txt`.
+
+| Group | Files | What |
+| -- | -- | -- |
+| A Shipped defaults and links | 22 (20 after KS-812) | Python SDK `sdk/python/secuura/client.py` (`DEFAULT_BASE_URL`) and `auth.py`; LibreOffice extension `auth.py` and `verifier.py`; Euro-Office `scripts/api.js`; Flutter verify app (3 `.dart`); Nextcloud app (3 `.php`); admin `M365SetupWizard.tsx` and issuer `ConnectorsPage.tsx` (manifest links); `package.json` `load-test:azure`; `scripts/generate-openapi.ts` and `docs/openapi/secuura-api.yaml` (a `servers:` entry); CSP allow-lists in the admin, issuer and verifier `nginx.conf`; `sdk/python/pyproject.toml`; and the 2 `whatsapp-bot` files KS-812 fixes |
+| B Outlook add-in | 2 manifests + 2 other | `frontend/outlook-addin/manifest-azure-demo.xml` and `manifest-azure-dev.xml` (9 each), `connectors/outlook-addin/README.md`, `frontend/outlook-addin/nginx.conf` |
+| C Gmail add-on | 3 | `frontend/gmail-addon/Code.gs` (6), `appsscript.json` (2), `USER_TESTING/gmail-addon-code.js` (5) |
+| D Deploy env JSON | 2 | `Blockchain/Dev/deployment/azure/env.dev.json` (14), `env.demo.json` (12) |
+| E Deploy scripts and deploy docs | 7 | `deployment/azure/` (`configure-domain.sh`, `deploy-all.sh`, `deploy.sh`, `env.staging.example`, `PENDING-DEPLOY.md`, `RUNBOOK.md`) and `deployment/DEPLOYMENT-ARCHITECTURE.md` |
+| F Test docs and test data | 30 | `USER_TESTING/BUGS-FOR-CLI-AGENT.md` (17), `docs/E2E-TESTING-PLAN.md` (12), session notes under `USER SIMULATED TEST/`, and the rest |
+| F2 Test code and test tooling | 18 | tests and test tooling that name the host |
+| G Tracked Python bytecode | 3 | `__pycache__/*.pyc` under `connectors/libreoffice-extension` and `sdk/python` (should not be tracked) |
+| H Other docs and rules | 12 + 1 | `Blockchain/Dev/CLI-AGENT-INSTRUCTIONS.md` (20), `CLAUDE.md` (8), `docs/AZURE-DEMO-ACCESS.md` (7), `.cursor/rules/environment-change-sync.mdc` and others |
+
+Related: KS-812 (the `whatsapp-bot` default; the host choice, the two resolution measurements and the connector-in-no-compose check are on that PR).
+--- comment 2026-11-06T06:50:53.741Z kamil.kreiser@secuura.ai
+**BLUF:** Seven files on the default branch (main) contain the text `az containerapp revision restart`, a command for the deleted Container Apps estate. This ticket's description names one of them by file name only; whether its 102-file count includes the other docs is not measured.
+
+* **How they were found:** a GitHub code search of the repository's default branch, main, on 2026-11-06. It is not a read at the develop pin c5c26b2835df, so the list is as of main. A nonsense string returned 0 results.
+* **The seven paths:**
+  * `Blockchain/Dev/docs/DEPLOYMENT.md`
+  * `Blockchain/Dev/docs/ADMINISTRATION-GUIDE.md`
+  * `Blockchain/Dev/docs/OPERATIONS-RUNBOOK.md`
+  * `Blockchain/Dev/ISSUER-PORTAL-TEST-REPORT.md`
+  * `Blockchain/Dev/deployment/azure/redeploy-fixes.sh`
+  * `Blockchain/Dev/.cursor/rules/environment-change-sync.mdc`, which this ticket's description names in its docs-and-rules group, and whose lines 120 and 121 KS-864's merge comment records as still open
+  * `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`, the runtime hint at line 527 that KS-864 carries as its record R-1
+* **What this ticket's description says:** its count is of files that name a deleted Container Apps host, and it lists the rule file's name without the other four docs or the script. The four docs and the script name a command, not necessarily the dead host, so whether they are among the 102 is unmeasured.
+
+**NOT covered:** this seat opened none of the seven files, ran no search at the develop pin, and changed no field.
+--- comment 2026-11-02T02:53:17.556Z kamil.kreiser@secuura.ai
+State corrected: In Review to In Progress. Half of this ticket is delivered; its main body is not.
+
+Done: KS-812 (aa9ca9de9) fixed the two whatsapp-bot files. PR 1573 (8a9970511) fixed the doubled slash before /api when SECUURA_API_URL ends in one. PR 1580 (b5742c3e1, under KS-1624 F1) made the banner print the base the bot actually calls. All three are on develop and are ancestors of the kintsugi deploy b1fb543640e7.
+
+Left: the sweep of tracked files that still name a dead azurecontainerapps.io host. 101 tracked files at b1fb543640e7 still contain it (git grep, with a control hit on CLI-AGENT-INSTRUCTIONS.md); the ticket's 2026-10-12 measurement was about 100 after KS-812. No commit names a group of that sweep as done.
+
+--- comment 2026-10-18T13:12:54.445Z kamil.kreiser@secuura.ai
+**PR #1573 is merged to `develop` as `8a9970511f22661d92f634058fae8c08c656124f`.** The ticket stays **In Progress** — this closes only one of its two halves, and nothing is deployed.
+
+**What landed.** When `SECUURA_API_URL` ends in a slash, the WhatsApp connector joined it to the verify path and produced a doubled separator: `https://h.test/` → `https://h.test//api/verification/verify`, `https://h.test/base//` → `https://h.test/base///api/...`. `connectors/whatsapp-bot/src/verify.ts` now strips every trailing slash from the base before the join (+2/-1), and the `ks812` shell suite gains cells for the one-, two- and three-slash shapes (+13).
+
+**What is still open on this ticket.** The other half — roughly 100 tracked files still naming the deleted Container Apps host — is **untouched** and remains the live work here. Nothing in #1573 went near it.
+
+**Host safety.** The gate tried 15 inputs that parse: the protocol, host and port are identical before and after in every one, and none produced a new host or a scheme change. No security-shaped finding.
+
+**Evidence, measured by me on the tree that actually landed:** predicted commit `cd6a21b1a9`, predicted tree `d753dcc43754b945a7eef45f1a90c610e6aad68c` — which is the same `d753dcc43754` that both gates and Seat R 47th independently predicted for all four of this batch landing in any order, and it is what landed. Overlap with develop's delta 0 files, planted control reading 1. Legs on that tree: `ks812` 7 passed / 0 failed; `connectors/whatsapp-bot` `tsc --noEmit` rc 0, 0 lines, after its own `npm ci`; the **full 90-suite shell runner 90 passed, 0 failed, 0 skipped, rc 0** in 507 s. Five-point read after the merge 5/5 TRUE.
+
+The shell runner was run for this PR and *not* for the other three in the batch, and that was a measurement rather than a habit: this is the only one of the four that edits `Blockchain/Dev/scripts/__tests__`, and the `scripts` subtree object id differs accordingly (`16189128e1f6` → `214ddb858e79`), where for the other three every shell-suite input subtree was byte-identical.
+
+**Two LOW notes from gate F2 are deliberately NOT addressed here** and have their own ticket, so they are visible rather than buried: the startup banner at `index.ts:26` still prints the raw `SECUURA_API_URL` (and the `ks812` suite greps that exact banner text, so changing it needs the test edited too), and a base carrying a query string was already mis-joined and still is.
+
+**Not tested by me:** docker, e2e, or any live request to the demo host.
+
+--- comment 2026-10-18T11:31:42.884Z kamil.kreiser@secuura.ai
+**BLUF: the trailing-slash note folded in from the KS-812 gate is raised as [PR 1573](https://github.com/Secuura/Distributed_Secuura/pull/1573), head `bd935f41d0b8fd8d142c11e199448c5c44433dfa` on develop `9251ae54d`. It waits for a gate. The ticket's main body (about 100 tracked files that still name a dead Container Apps host) is not in it, so the ticket stays open. Link `contributes`.**
+
+* The WhatsApp bot connector built `https://host//api/verification/verify` when `SECUURA_API_URL` ended in a slash; `verify.ts` now strips trailing slashes from the base once, where it is read. The default and an override without a slash are unchanged.
+* Patch authored by Spark (DeepSeek V4 Flash), applied unmodified. Red-first 2 FAIL (printing the `//api` URLs) -> 7/7; the connector's own `tsc` rc 0; the full shell-suite runner on the branch 90/90. Preflight at the head: 13/16 legs ran, 3 SKIPPED (3, 4, 8: local stack not up), nothing failed — not a pass. — Seat R 47th
+
+--- comment 2026-10-12T09:04:37.496Z kamil.kreiser@secuura.ai
+**Added after KS-812 merged (gate notes, folded in here as Wednesday ruled):**
+- KS-812 (PR #1488) is merged as `aa9ca9de9ebcfdcc9040bfc3881fda9983dd3050`; its two `whatsapp-bot` files are therefore fixed on develop, so group A is now **20** files, not 22, and the sweep total is **100**.
+- `Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts:17` does not strip a trailing slash from an env override: `SECUURA_API_URL=https://host/` builds `https://host//api/verification/verify`. Pre-existing, outside KS-812, found by the Sonnet gate; fix it with the shipped-defaults group or on its own.
+- The gate also noted the dead host remains in other connectors and docs (flutter-verify-app, nextcloud-app, libreoffice-extension, euro-office-plugin, outlook): that is groups A, B and H above, already listed.
+

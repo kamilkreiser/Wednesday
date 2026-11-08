@@ -1,0 +1,113 @@
+// KS-2099 item 1 (gate 235 F2, MEDIUM, measured at runtime with a loopback SMTP stub and nodemailer 10.2.1): the SMTP failure line of originate services/email.ts,
+// `[Email/SMTP] Failed to send: ${error.message}`, still prints the recipient's address when the SMTP server echoes it in its refusal, e.g.
+// `Can't send mail - all recipients were rejected: 550 5.1.1 <addr>: Recipient address rejected: User unknown`; nodemailer itself builds `'Invalid recipient ' + JSON.stringify(address)`.
+// PR 2056 (KS-1937) took the address out of ten log lines but its cells forward the text `ks1937 smtp boom`, which contains no address, so they cannot see this. The cells below make the
+// SMTP transport reject with the text a server echoes and require (1) the failed line was written, (2) the rest of the server text is kept, (3) the address is in no recorded console output.
+// Harness shape copied from ks1937-email-service-logs-never-carry-the-recipient-address.test.ts (the real email module re-required per cell through jest.isolateModules, only the two provider
+// libraries replaced, every argument of every console call recorded). This is a NEW file on purpose: PR 2094 adds cells E8 and E9 to the ks1937 file, and these cells are E10 and E11.
+// NOT covered: the ACS error object, `err?.message` of the ACS send, and the WARN lines (same class, not measured by the gate).
+const mockLogged: string[] = [];
+const mockRecord = (source: string, args: unknown[]): void => {
+  mockLogged.push(
+    source +
+      ' ' +
+      args
+        .map((a) => {
+          if (typeof a === 'string') return a;
+          try {
+            return JSON.stringify(a) ?? String(a);
+          } catch {
+            return '[unserialisable]';
+          }
+        })
+        .join(' '),
+  );
+};
+const mockSendMail = jest.fn();
+
+type EmailModule = typeof import('../services/email');
+
+const ADDRESS = 'ks2099.probe.recipient@example.test';
+const ENV_KEYS = [
+  'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM', 'SMTP_ENABLED', 'EMAIL_FROM',
+  'ACS_CONNECTION_STRING', 'ACS_SENDER_ADDRESS', 'EMAIL_RECIPIENT_ALLOWLIST',
+] as const;
+const SMTP_ENV = { SMTP_ENABLED: 'true', SMTP_HOST: 'smtp.example.test', SMTP_FROM: 'noreply@example.test' };
+
+const saved: Record<string, string | undefined> = {};
+const spies: jest.SpyInstance[] = [];
+
+function loadEmail(env: Record<string, string>): EmailModule {
+  for (const key of ENV_KEYS) delete process.env[key];
+  Object.assign(process.env, env);
+  let mod!: EmailModule;
+  jest.isolateModules(() => {
+    mod = require('../services/email') as EmailModule;
+  });
+  return mod;
+}
+
+const send = (email: EmailModule): Promise<boolean> => email.sendEmail({ to: ADDRESS, subject: 'ks2099 subject', text: 'ks2099 body' });
+const leaks = (): string[] => mockLogged.filter((l) => l.toLowerCase().includes(ADDRESS.toLowerCase()));
+const lines = (needle: string): string[] => mockLogged.filter((l) => l.includes(needle));
+
+beforeEach(() => {
+  mockLogged.length = 0;
+  for (const key of ENV_KEYS) saved[key] = process.env[key];
+  mockSendMail.mockReset();
+  jest.doMock('nodemailer', () => ({ __esModule: true, default: { createTransport: () => ({ sendMail: mockSendMail }) } }));
+  jest.doMock('@azure/communication-email', () => ({ EmailClient: class { beginSend = jest.fn(); } }));
+  for (const level of ['log', 'info', 'warn', 'error'] as const) {
+    spies.push(jest.spyOn(console, level).mockImplementation((...a: unknown[]) => mockRecord('console.' + level, a)));
+  }
+});
+
+afterEach(() => {
+  while (spies.length) spies.pop()!.mockRestore();
+  for (const key of ENV_KEYS) {
+    if (saved[key] === undefined) delete process.env[key];
+    else process.env[key] = saved[key] as string;
+  }
+  jest.dontMock('nodemailer');
+  jest.dontMock('@azure/communication-email');
+});
+
+describe('KS-2099 item 1: a failed SMTP send never logs the recipient address a server echoes', () => {
+  it('CONTROL C1 the capture sees the address on the console channel: a planted console line is flagged', () => {
+    console.error('planted line for ' + ADDRESS);
+    expect(leaks()).toHaveLength(1);
+  });
+
+  it('CONTROL C2 an SMTP failure whose text carries no address is logged with its text and the send answers false', async () => {
+    mockSendMail.mockRejectedValue(new Error('ks2099 smtp boom'));
+    await expect(send(loadEmail(SMTP_ENV))).resolves.toBe(false);
+    expect(lines('[Email/SMTP] Failed to send')).toHaveLength(1);
+    expect(lines('[Email/SMTP] Failed to send')[0]).toContain('ks2099 smtp boom');
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E10 RED the server refuses the recipient and echoes it in angle brackets: the failed line is written, keeps the server text, and the address is in no recorded output', async () => {
+    mockSendMail.mockRejectedValue(
+      new Error("Can't send mail - all recipients were rejected: 550 5.1.1 <" + ADDRESS + '>: Recipient address rejected: User unknown'),
+    );
+    await expect(send(loadEmail(SMTP_ENV))).resolves.toBe(false);
+    expect(lines('[Email/SMTP] Failed to send')).toHaveLength(1);
+    expect(lines('[Email/SMTP] Failed to send')[0]).toContain('Recipient address rejected: User unknown');
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E11 RED nodemailer-shaped text, the address as a JSON string (Invalid recipient "addr"): the failed line is written, keeps the text, and the address is in no recorded output', async () => {
+    mockSendMail.mockRejectedValue(new Error('Invalid recipient ' + JSON.stringify(ADDRESS)));
+    await expect(send(loadEmail(SMTP_ENV))).resolves.toBe(false);
+    expect(lines('[Email/SMTP] Failed to send')).toHaveLength(1);
+    expect(lines('[Email/SMTP] Failed to send')[0]).toContain('Invalid recipient');
+    expect(leaks()).toEqual([]);
+  });
+
+  it('E12 the address still reaches the transport: only the log changed', async () => {
+    mockSendMail.mockRejectedValue(new Error('ks2099 smtp boom'));
+    await send(loadEmail(SMTP_ENV));
+    expect(mockSendMail).toHaveBeenCalledTimes(1);
+    expect(mockSendMail.mock.calls[0][0].to).toBe(ADDRESS);
+  });
+});
