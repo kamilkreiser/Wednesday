@@ -1,0 +1,47 @@
+PR 2106: GO WITH NOTES
+
+# Gate 272, tier 2 COMPARE, round 2 of 2: PR 2106 (KS-2117, words only). Findings only; nothing posted, mailed, fixed or pushed.
+
+BLUF: no code byte; the three round-1 findings are closed; the new README note and docstrings are true against the source. Three Info notes, none blocks merge. Nothing needs Kam's ruling.
+
+## Pins (ls-remote at start 07:16 and end 07:19): NEITHER MOVED
+develop 93028c8151ecdd173c341fb7c23a4b89e381cc04; PR 2106 head 1881831e7d0411d00eb425d29daeb2b13b7d71d6. Both exactly as pinned.
+
+## FOUND / TESTED / HOW
+
+Q1 closure of round 1 (diff a8d19bf3918e..1881831e7d04, 4 files, +18 -20 as stated):
+- G271-2106-1 (Medium): CLOSED.
+  - transfers.ts approve docstring before: `Approve, reject or accept a transfer. A client built with an `apiKey` is refused with 403 (KS-2081); use an `accessToken`.`
+  - after: `Posts `{ action, comment, signature }` to the approve route. The service requires `approverId` and `approverRole` and reads no `action`, so this call is currently answered with a 400 (KS-2086). A client built with only an `apiKey` is refused with 403 (KS-2081).`
+  - README before: example `approve(transferId, 'approve', {comment})` plus "Build the client with an accessToken for these calls". After: the example is removed and replaced by a Note (README.md:140). The cheat fragment's "names all three of its actions ... which are the method's real options" is gone. A grep for "use an accessToken", "reject or accept", "approve, reject" at the head finds nothing in sdk/ or in the KS-2117 fragments (hits are only other tickets' fragments about the service routes).
+- G271-2106-2 (Low): CLOSED. "an `apiKey`" became "only an `apiKey`" in the README note, the initiate and cancel docstrings and both fragments; and the README, fragments and body now say an accessToken client sends Bearer even if an apiKey is also set. client.ts:83-86 (head) is `if (config.accessToken) Authorization Bearer ... else if (config.apiKey) X-Api-Key`: true.
+- G271-2106-3 (Info): NOT CONTRADICTED, NOT RE-CONFIRMED (see G272-3).
+
+Q2 truth against source (services/transfer/src/index.ts at develop 93028c8151ec, SDK at the head):
+- SDK `approve` (transfers.ts:113-126): `POST /api/transfers/${transferId}/approve` with body `{ action, ...options }`, options typed `{comment?, signature?}`. So "sends { action, comment, signature }" is true of the typed shape (see G272-1).
+- approveTransferSchema (index.ts:404-415): `approverId: z.string().guid()`, `approverRole: z.string()` both required; reason, signature, walletAddress, comment optional. No `action`. grep for `data.action` / `body.action` in the file: zero; `action` appears in the approve handler only inside the KS-2038 comment at :721, which says "a body that names nobody, such as the SDK's { action: 'reject' }, keeps its 400". So "requires approverId and approverRole and reads no action" is TRUE.
+- "answered with a 400": handler order is requireCaller (:709), then `approveTransferSchema.parse(req.body)` (:711) before the transfer lookup; the catch at :783-784 turns a ZodError into `400 BAD_REQUEST 'Validation failed'`. TRUE for a signed-in user caller (see G272-2 on the order against 403/401). Read, not run.
+- "Reject is a separate route with no SDK method": route `app.post('/api/transfers/:id/reject')` at :794 with its own rejectTransferSchema (:417, rejectorId, rejectorRole, reason). SDK grep for reject at the head: only status/type strings and the `action` union at transfers.ts:117; the only `/api/transfers/` calls are initiate, get, approve, cancel (list is `/api/transfers`). TRUE. 'accept' in the service: grep zero (positive control: the same grep for `accept` finds the KS-427 comment at :382, so the instrument sees the word).
+- 403: refuseNonUserPrincipal :522 -> 403 "An API key cannot open or act on a transfer."; used by initiate (:535) and by requireCaller (:682) that approve (:709) and cancel (:933) call. TRUE (as in round 1).
+- cancel docstring: `Cancel a transfer. ... only an apiKey ... 403` true; initiate docstring true.
+
+Q3 no code byte (my own re-derivation): ts.transpileModule (TypeScript 5.9.3, removeComments:true, ES2020/CommonJS) of transfers.ts at develop(15dca468 and 93028c81, byte-equal blob), round 1 head, and this head: all four emit 1,362 B, sha256 prefix a0f3f3f32410325c, IDENTICAL. (The seat's 1,372 B differs by my compiler options; the property is the same.) Controls, all run through the same script: code line appended at EOF -> 1,401 B, different hash; comment line appended at EOF -> identical; doc comment planted mid-file -> identical; a string literal changed mid-file (`'/api/transfers/initiate'` -> `...initiatx`) -> different hash. Also read the whole diff: every +/- line in transfers.ts is inside a `/** ... */` block. Not re-run: the seat's eslint/tsc/vitest figures.
+
+Q4 fragments and checker: cheat and flow fragments say the same as the README and docstrings (400 with KS 2086 spelled with a space as fragments do, "only an apiKey", reject separate with no SDK method, "Accept" gone); their figures "README +3 -4, transfers.ts +5 -3, fragments 18 and 11 lines" match `git diff --numstat 15dca468b86f 1881831e7d04`. docs-fragments check at the head: `OK` rc 0 (ADVISORY lines about the committed page vs render appear identically at develop 93028c81 without this PR, so they are not this PR's). Planted defect: appended `<div><table>` to the cheat fragment -> FAIL, 1 finding (tags not balanced), rc 1; same on the flow fragment earlier; restored from a saved copy, OK rc 0 again. (A first run FAILED only because my sparse clone lacked the committed page; fixed, not a finding.)
+
+Q5 PR body and ticket comment d90aa502 (live text NOT readable by me: gh is not logged in for this project's config and there is no Linear access): I read the seat's local final text. pr_body_q0_FINAL.md sha1 1889a8ebb35d... equals new_sha1 in pr_edit_record.json (verified at origin by the seat), so that file is the posted body by the seat's record. Every factual sentence checked above against the head is true: file figures (+3 -4, +5 -3, 18/11), client.ts lines 83-86, "accept occurs nowhere in the transfer service", "The type is not the behaviour", "docstring no longer lists the actions", round 2 words only. The comment draft (drafts/ticket_comment_ks2117_round2.md, 2,081 B) has sha1 c413a48b..., NOT equal to the record's new_sha1 0a005a70... (record says 2,080 chars): I cannot show the posted comment equals the draft; the draft's statements are all true at the head ("two commits on develop 15dca468b86f" true; figures as above).
+
+Q6 merge tree: `git merge-tree --write-tree origin/develop 1881831e7d04` rc 0 (tree deb326da414e). Control: `--merge-base=15dca468b86f 1881831e7d04 a8d19bf3918e` -> rc 1 with add/add conflicts in both fragments (instrument can see a conflict). Open PRs sharing a path: no GitHub API access, so I could not take the open list. Instead fetched the heads of PRs 1950..2109 (158 heads, blobless; every recent PR, open or merged) and ran `diff --name-only origin/develop...<head>` limited to the 4 paths: ZERO hits. Control: the same loop for a path PR 2105 adds -> hit 2105 (and only it). So no recent PR, open or not, shares a path; the seat's "none" stands for the recent range. PRs numbered under 1950 not scanned.
+
+## Findings
+- G272-1 (Info, new): the docstring/README say the method "posts `{ action, comment, signature }`". The code spreads `...options`, so the body is `{ action }` plus only the comment and signature the caller passes. True of the typed shape; the 400 does not depend on it. Not worth a round.
+- G272-2 (Info, new): "the call is answered with a 400" holds for a signed-in user caller. A key-only client is answered 403 first (requireCaller precedes the schema parse), a caller with no user id 401. The same README note states the 403 two sentences later, so a reader is not misled. No change needed.
+- G272-3 (Info, residue of G271-2106-3): I could not confirm "PR 2077" as the number: develop's squash 765701307eb3 body has no (#NNNN) and gh is unavailable. Consistent: it is an ancestor of develop, subject "Refs KS-2081: the transfer write doors refuse a non-user principal", committed 2026-11-08T12:27:12Z (seat says :13Z, merge time). "KS-2086" as the SDK-defect ticket is also not checkable from git (the service source does not mention it). Both are ticket/PR identifiers for Wednesday's board to confirm; the words around them are true.
+
+Per finding: G271-2106-1 closed; G271-2106-2 closed; G271-2106-3 unrefuted, number not re-confirmed by me (G272-3); G272-1/2/3 new, Info.
+
+## NOT TESTED
+SDK -> gateway -> transfer service at runtime (the 400 is read, not run; no box); the live PR body and live comment d90aa502 text (read local final text and records only); the seat's eslint/tsc/vitest figures; README rendering on GitHub; Node 24; PRs numbered below 1950 for path overlap; KS-2086 and PR 2077 identity in Linear/GitHub.
+
+## Conduct
+Clone /private/tmp/g272/repo (sparse, blobless) plus /private/tmp/g272/out and /private/tmp/g272/transfer_index.ts: 28 MB total, NOT deleted (QA no-rm). No git write verb in any !CODING checkout; read the remote and deploy-key command from the project's 2_Project_Files config and set it only on my clone. df DevMASTER avail: 9.99 GiB at start, 10 GiB (df -h) at end, never under 8. load1 3.6 to 4.3. Nothing posted, mailed, commented or written outside this folder and the clone.
