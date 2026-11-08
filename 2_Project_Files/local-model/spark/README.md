@@ -16,8 +16,9 @@ sequences `night/build_input.sh`, `tasks/bash_patch/build_bash_input.sh`, `tasks
 | `queue.md` / `done.md` | the queue (format in its header) / the results (`done.md` is created by the first drain) |
 | `tests/arms.sh` | refusal, endpoint-down, dry-run, busy, queue and ONE real round |
 | `tests/code_patch2_arms.sh` · `tests/bash_patch2_arms.sh` | the multi-file tiers (rung 3): red-proof arms, synthetic repos in scratch |
-| `tiers/` | tiers test_only_input + doc_only (2026-10-31): `tier_brief.py` (brief block parsers), `build_tier_input.py`, `tier_checker.py`, `task_<tier>.md` |
+| `tiers/` | tiers test_only_input + doc_only (2026-10-31) and test_only_bash (2026-11-09): `tier_brief.py` (brief block parsers), `build_tier_input.py`, `tier_checker.py`, `task_<tier>.md` |
 | `tests/new_tiers_arms.sh` | arms for those two tiers on a throwaway fixture repo under `/private/tmp/claude-501/` (`new_tiers_fixture.py` builds it) — 47 arms (14 lint refusals, 3 accepts, 13 control rounds, 10 direct-checker, 5 unit), no Secuura clone, no endpoint |
+| `../tests/test_only_bash_spark_arms.sh` | tier test_only_bash (2026-11-09): fixture repo under `/private/tmp/claude-501/` (`../tests/test_only_bash_spark_fixture.py`), no model/endpoint/Secuura clone — 35 arms (11 lint refusals, 2 accepts, 9 control rounds, 2 PASS legs check, 10 direct-checker, 1 wiring); NOT the night harness's `../tests/test_only_bash_arms.sh` (the older test_only tier's bash runner) |
 | `tests/test_only_arms.sh` | tier test_only (2026-10-18): ks_1614_p1 control PASS, tampered goldens FAIL, product-touching briefs REFUSED, old-vs-new lint + dry-run regression |
 | `cache/` (gitignored) | `src/` = the durable cache clone of the Secuura repo; `work/<run-id>/clone` = per-round clones |
 | `state/` (gitignored) | `round.lock`, `queue.lock`, `dry/` inputs, `last_round.json`, `queue.log`, `stale_locks/` |
@@ -57,7 +58,7 @@ endpoint is down (round.sh rc 4) or free space on the runs volume is under `SPAR
 
 - a brief dir without exactly one `KS-<n>.md`, or missing a required header line / heading;
 - a brief naming a client other than Secuura (`Client:` line, a `!CODING/<other>/` path, another client's name);
-- a tier other than code_patch / code_patch2 / bash_patch / bash_patch2 / test_only / test_only_input / doc_only (2026-10-18 / 2026-10-31; see Tiers — the
+- a tier other than code_patch / code_patch2 / bash_patch / bash_patch2 / test_only / test_only_input / test_only_bash / doc_only (2026-10-18 / 2026-10-31 / 2026-11-09; see Tiers — the
   separate tasks/test_only/ builder, `## Tampers` with `### <ID>` entries, is still NOT wired here);
 - a STALE brief: a file it names changed between its `Tip:` and today's develop (override `allow_drift=1`);
 - anything the builders refuse (rc 2), and a code_patch input that did not use the brief as the prompt;
@@ -131,6 +132,30 @@ before the disk fills.
   the plant's own validity is only "applies at the tip". A leg-A5 pass is only as good as the plant. Runners: vitest and jest
   are the real ones; `node-tap` (node:test via `--test-reporter=tap`) exists for the arms' fixture repo only. Select with
   `Tier:` or `tier=test_only_input`; never inferred.
+- `test_only_bash` (2026-11-09) — a test-hardening ticket whose file is a BASH TEST SUITE (`*.test.sh`). No existing tier edits a bash suite
+  alone: `bash_patch2` needs a product script in the diff, `test_only_input` is vitest/jest only (Spark op 111: KS-2129, KS-2130, KS-2141 and
+  KS-2138 items 2-4 failed on exactly this). Header: `Tier: \`test_only_bash\``, `Runner: bash`, `Tip:`, 1-3 `File:` (READ-ONLY context: the script
+  under test, or files the suite reads; never also a Test file), 1-3 `Test file:` (the ONLY files the diff may touch; each `*.test.sh`, or a
+  `.sh`/`.bash` under `__tests__`). Body: `## The test`, then EXACTLY ONE red proof:
+  - PLANT shape (the product is right, the suite is weak): `## Plant` (as test_only_input) or `golden_red.diff`, on a file that is NOT a declared suite
+    (a product script, a fixture), plus `## Red cells` (a substring of each cell's LABEL, i.e. the text after `ok `/`PASS `/`FAIL ` on the suite's output line).
+  - EXPECT shape (the defect is IN the suite: a wrong regex/sentence): `## Expect` with `expect_present:`/`expect_absent:` texts graded against the suite's
+    OUTPUT (`in \`<declared suite>\`` optional). They must all FAIL on the untouched tip's output and all HOLD on the patched output.
+  A "cell" is one output line `ok|PASS <label>` or `FAIL|not ok <label>`. Pin `siblings=none` skips the sibling leg.
+  Checker (tiers/tier_checker.py): A1 one fenced diff · A2 applies (strict; the one accommodation reported apart) · A2a hunk anchors · A3 touched set == the
+  declared suites exactly (a product, a plant file or another suite FAILS) · A3p (plant) the plant applies at the tip · A3s `bash -n` on every patched suite ·
+  A4 GREEN WITHOUT PLANT: named cells exist and pass, no new red, no new non-zero rc, no new load-error marker (syntax error / command not found /
+  unbound variable) vs the tip · A4b (expect) expectations FAIL on the tip's output · A4e (expect) they HOLD after the patch · A6 no declared cell lost (digits in
+  a label are normalised, so a changed count is not a loss) + sibling `*.test.sh` beside the suite that name a declared File/Test basename (max 12) no worse ·
+  A5 (plant) RED WITH PLANT: each named cell prints the suite's own FAIL line AND the suite exits non-zero (a crash, a vanished cell, a FAIL printed with rc 0
+  all FAIL) · A7 (expect) REVERSION: patch reverse-applied, suite re-run, every expectation fails again · A8 sha256 restore, stray untracked files moved
+  to `<run>/out.md.checker/quarantine/` with a WHY row in `quarantine.log` (never deleted). Suites run with `bash <suite>` from the clone root, 120 s each.
+  PROVES: (plant) each named cell passes on the correct code and prints a FAIL line when the brief's mutation is in; (expect) the new output lines exist after
+  the patch and not before, and nothing else got worse. DOES NOT PROVE: that the plant is the regression that matters; (expect shape) that the new cell would
+  fail against the OLD predicate (a cell that asserts nothing, `check ... "yes" "yes"`, passes; arm K-limit) — the brief author supplies the fixtures and reads
+  the diff; no shellcheck; no macOS-vs-Linux grep/sed difference (suites run under this machine's bash 3.2/BSD tools: KS-2128-style GNU measurements stay
+  Claude-seat work); sibling selection is by name, not by dependency. Select with `Tier:` or `tier=test_only_bash`; never inferred.
+  Arms: `../tests/test_only_bash_spark_arms.sh`. Real-tree proof: control PASS on KS-2141's suite at develop 425ea1d3df0f (see the tier's report).
 - `doc_only` (2026-10-31) — documentation and comment-only fixes. Header: `Tier: \`doc_only\``, `Runner:` any word, `Tip:`, 1-6
   `File:` lines, NO `Test file:`. Every File must be `*.md`, under `Projects Documents/fragments/`, or a code file (ts tsx js jsx
   mjs cjs; sh bash py yml yaml) whose changes are COMMENT-ONLY. Body: `## Expect` (instead of `## The test`):

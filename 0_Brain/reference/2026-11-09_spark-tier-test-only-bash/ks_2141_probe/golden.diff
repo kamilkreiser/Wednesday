@@ -1,0 +1,55 @@
+--- a/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh
+@@ -39,7 +39,14 @@
+ # KS-1560 M-2 (PR #1528 gate note, mutant B): this used to be `grep -qF 'bin/jq' "$f"`, a substring anywhere in the file, so
+ # deleting the real `ln -sf "$JQ_BIN" "$root/bin/jq"` line and leaving the words `bin/jq` in a comment, a string or an
+ # existence test kept the census green. A line that starts with `ln` cannot be a comment, an echo or a `[ -x ... ]` test.
+-links_jq() { grep -qE '^[[:space:]]*ln[[:space:]]+-[A-Za-z]*s[A-Za-z]*[[:space:]].*bin/jq["'"'"']?[[:space:]]*($|[;&|#])' "$1"; }
++# KS-2141 (F-2078-1, F-2078-2): the predicate reads the link STATEMENT. Backslash continuations are joined, a comment is dropped,
++# then `ln` must stand as a command (line start, after ; & | ( ! then do else, or after `command`), carry a symlink flag, and
++# name bin/jq as its LAST word before the end of the statement (end of line, ; & | ), or a redirection such as 2>/dev/null).
++links_jq() {
++    awk '{ if (sub(/\\$/, "")) { buf = buf $0 " "; next } print buf $0; buf = "" } END { if (buf != "") print buf }' "$1" \
++        | sed -E -e 's/^[[:space:]]*#.*$//' -e 's/[[:space:]]+#.*$//' \
++        | grep -qE '(^|[;&|(!]|[[:space:]](then|do|else))[[:space:]]*(command[[:space:]]+)?ln[[:space:]]+(-[A-Za-z]*s[A-Za-z]*|--symbolic)[[:space:]][^;&|#]*bin/jq["'"'"']?[[:space:]]*($|[;&|)]|[0-9]*>)'
++}
+ 
+ census=""      # suites with both a jq check and a private PATH
+ offenders=""   # of those, the ones with no bin/jq link
+@@ -92,6 +99,36 @@
+ printf '%s\n' 'ln -sf "$DOCKER_BIN" "$root/bin/docker"   # jq is checked on the outer PATH' > "$FX/other_binary.sh"
+ check "CONTROL linking some other binary is NOT a link of jq" "no" "$(verdict "$FX/other_binary.sh")"
+ 
++# KS-2141 F-2078-1: legitimate respellings of the same statement are judged a link (the suite no longer reds on them).
++accepted=0; total=0
++while IFS= read -r line; do
++    total=$((total + 1)); printf '%s\n' "$line" > "$FX/spelling.sh"
++    [[ "$(verdict "$FX/spelling.sh")" == "yes" ]] && accepted=$((accepted + 1))
++done <<'REDIR_SPELLINGS'
++ln -sf "$JQ_BIN" "$root/bin/jq" 2>/dev/null
++ln -sf "$JQ_BIN" "$root/bin/jq" >/dev/null
++mkdir -p "$root/bin" && ln -sf "$JQ_BIN" "$root/bin/jq"
++if ! ln -sf "$JQ_BIN" "$root/bin/jq"; then
++( ln -sf "$JQ_BIN" "$root/bin/jq" )
++command ln -sf "$JQ_BIN" "$root/bin/jq"
++ln --symbolic --force "$JQ_BIN" "$root/bin/jq"
++REDIR_SPELLINGS
++check "F-2078-1 every legitimate respelling of the link statement is judged a link ($total spellings)" "$total" "$accepted"
++printf '%s\n' 'ln -sf \' '    "$JQ_BIN" "$root/bin/jq"' > "$FX/continued.sh"
++check "F-2078-1 a backslash-continued ln -sf is judged a link" "yes" "$(verdict "$FX/continued.sh")"
++
++# KS-2141 F-2078-2: a trailing comment or a trailing word that names bin/jq on another statement is NOT a link.
++rejected=0; total=0
++while IFS= read -r line; do
++    total=$((total + 1)); printf '%s\n' "$line" > "$FX/spelling.sh"
++    [[ "$(verdict "$FX/spelling.sh")" == "no" ]] && rejected=$((rejected + 1))
++done <<'TRAILING_SPELLINGS'
++ln -sf "$DOCKER_BIN" "$root/bin/docker"  # jq is at $root/bin/jq
++ln -sf "$DOCKER_BIN" "$root/bin/docker"; echo "$root/bin/jq"
++ln -sf "$root/bin/jq" "$stub/elsewhere" # bin/jq
++TRAILING_SPELLINGS
++check "F-2078-2 a trailing comment or word naming bin/jq on another statement is NOT a link ($total spellings)" "$total" "$rejected"
++
+ # Respellings of the real statement that must still count, so the stricter predicate does not turn a fine suite red.
+ accepted=0; total=0
+ while IFS= read -r line; do

@@ -15,6 +15,7 @@ FIRST and the LAST backtick of its line):
 
   ## Expect           (doc_only)  expect_absent: `<text>` [in `<repo path>`]   (>= 1 required)
                                   expect_present: `<text>` [in `<repo path>`]
+  ## Expect           (test_only_bash, the no-plant shape) the same lines, graded against the declared bash suite's OUTPUT
   ## Doc checks       (doc_only, optional)  one bullet per extra command:   - `node path/to/check.mjs`
 """
 import re
@@ -131,6 +132,11 @@ def header_files(text):
     header = re.split(r"(?m)^##\s", text, maxsplit=1)[0]
     return (re.findall(r"(?m)^File:\s*`([^`]+)`", header),
             re.findall(r"(?im)^Test[^:\n`]*:\s*`([^`]+)`", header))
+
+
+def is_bash_suite_path(p):
+    """test_only_bash (2026-11-09): a declared test must be a bash suite — `*.test.sh`, or a `.sh`/`.bash` under a `__tests__` dir."""
+    return p.endswith(".test.sh") or ("/__tests__/" in p and p.endswith((".sh", ".bash")))
 
 
 def is_doc_path(p):

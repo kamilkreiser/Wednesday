@@ -15,7 +15,13 @@ REFUSES (rc 2, one `REFUSED <reason>` line per reason on stderr):
   - a required header line or heading is missing (kit 03_BRIEF_TEMPLATE; case-insensitive);
   - the brief names a client other than Secuura (a `Client:` line that is not Secuura, a `!CODING/<other>/` path,
     or another client's name) — the Spark takes Secuura work under Kam's 2026-09-25 ruling, one client per task;
-  - the tier is not one round.sh runs (code_patch, code_patch2, bash_patch, bash_patch2, test_only, test_only_input, doc_only);
+  - the tier is not one round.sh runs (code_patch, code_patch2, bash_patch, bash_patch2, test_only, test_only_input, test_only_bash, doc_only);
+  - test_only_bash (2026-11-09; a bash TEST SUITE is the only file the diff may touch): `Runner: bash`, header = 1-3 `File:`
+    (read-only context: the script under test, or files the suite reads) + 1-3 `Test file:` that are bash suites (*.test.sh, or
+    .sh/.bash under __tests__) and never also a `File:`; `## The test`; EXACTLY ONE red proof: the PLANT shape (`## Plant` block or
+    golden_red.diff, on a file that is not a declared suite; + `## Red cells` >= 1) or the EXPECT shape (`## Expect`, >= 1
+    expect_present/expect_absent, any `in` path a declared Test file); golden.diff and the exact-change fences may name only the
+    declared suites; golden_red.diff may not name them;
   - test_only_input (2026-10-31; product already correct, a test pin owed): header = 1 `File:` (the code under test, NOT
     modified) + 1-3 `Test file:`; `## The test`; `## Red cells` (>= 1 bullet); EXACTLY ONE of a complete `## Plant` block
     (file / line / from / to) or a `golden_red.diff` in the brief dir; the plant must not name a declared test; golden.diff and
@@ -74,6 +80,7 @@ TIER_CONTRACT = {
     "test_only": ((1, 1), (1, 1)),     # code_patch checker A3 (test-only): { ONE test }; the product is the tamper target only
     "test_only_input": ((1, 1), (1, 3)),   # 2026-10-31 tiers/tier_checker.py A3: { 1-3 tests }; the product is read-only
     "doc_only": ((1, 6), (0, 0)),          # 2026-10-31 tiers/tier_checker.py A3: { 1-6 doc/comment files }; no tests
+    "test_only_bash": ((1, 3), (1, 3)),    # 2026-11-09 tiers/tier_checker.py A3: { 1-3 bash suites }; the Files are read-only
 }
 
 
@@ -158,6 +165,57 @@ def lint_test_only_input(text, bdir, products, tests):
 
 def tb_paths(diff_text):
     return diff_paths(diff_text)
+
+
+def lint_test_only_bash(text, bdir, products, tests, runner):
+    """2026-11-09: the brief-side requirements of tier test_only_bash. -> [reason, ...]"""
+    r = []
+    if runner != "bash":
+        r.append(f"RUNNER: test_only_bash needs `Runner: bash` (got {runner or 'nothing'!r})")
+    for t in tests:
+        if not tb.is_bash_suite_path(t):
+            r.append(f"TEST PATH: {t} is not a bash suite (*.test.sh, or a .sh/.bash under a __tests__ dir)")
+        if t in products:
+            r.append(f"CONTRACT: {t} is both a `File:` (read-only) and a `Test file:` (editable) — name it once, as the Test file")
+    groups, perrs = tb.parse_plant(text)
+    red = os.path.join(bdir, "golden_red.diff")
+    has_diff = os.path.isfile(red)
+    items, eerrs = tb.parse_expect(text)
+    has_plant = bool(groups) or has_diff or bool(perrs)
+    if has_diff and groups:
+        r.append("PLANT: both a `## Plant` block and golden_red.diff — exactly one (the plant must be unambiguous)")
+    if has_plant and items is not None:
+        r.append("PROOF: both a plant and a `## Expect` block — exactly one red proof per brief (plant shape OR expect shape)")
+    if not has_plant and items is None:
+        r.append("PROOF: test_only_bash needs a red proof: a `## Plant` block / golden_red.diff (+ `## Red cells`) OR a `## Expect` block "
+                 "(expect_present / expect_absent on the suite's output)")
+    for e in perrs:
+        r.append(f"PLANT: {e}")
+    plant_files = [g.get("file") for g in groups if g.get("file")]
+    if has_diff:
+        plant_files += tb_paths(open(red, encoding="utf-8").read())
+    for pf in plant_files:
+        for t in tests:
+            if _same(pf, t):
+                r.append(f"PLANT: the plant names {pf}, a declared suite — the plant is applied beside the model's patch and must not overlap it")
+    if has_plant and not tb.parse_red_cells(text):
+        r.append("RED CELLS: the plant shape needs `## Red cells` with >= 1 bullet naming (in backticks) a substring of each cell's label (`ok  <label>` / `FAIL <label>`)")
+    if items is not None:
+        for e in eerrs:
+            r.append(f"EXPECT: {e}")
+        if not items:
+            r.append("EXPECT: `## Expect` has no expect_present:/expect_absent: line")
+        for i in items:
+            if i["path"] and not any(_same(i["path"], t) for t in tests):
+                r.append(f"EXPECT: `in` path {i['path']} is not a declared `Test file:`")
+    for where, body in _fence_and_golden_paths(text, bdir):
+        for p in diff_paths(body):
+            if any(_same(p, t) for t in tests):
+                continue
+            r.append(f"PRODUCT: test_only_bash, but {where} names {p} in a diff file header"
+                     + (" — A READ-ONLY File: a bash-suite diff never modifies it" if any(_same(p, x) for x in products)
+                        else f" — a test_only_bash diff touches only the declared suites {tests}"))
+    return r
 
 
 def lint_doc_only(text, bdir, products):
@@ -251,7 +309,7 @@ def main():
     runner = (m_run.group(1).lower() if m_run else "")
     tier = pins.get("tier")
     if not tier:
-        m_tier = re.search(r"(?i)\bTier:\s*\**`?(code_patch2|code_patch|bash_patch2|bash_patch|test_only_input|test_only|doc_only|doc_patch)\b", text)
+        m_tier = re.search(r"(?i)\bTier:\s*\**`?(code_patch2|code_patch|bash_patch2|bash_patch|test_only_input|test_only_bash|test_only|doc_only|doc_patch)\b", text)
         if m_tier:
             tier = m_tier.group(1).lower()
         elif re.search(r"^##+\s*Tampers?\b", text, re.M | re.I):
@@ -310,6 +368,8 @@ def main():
                                   else f" — a test_only diff touches the ONE test {test} and nothing else"))
     if tier == "test_only_input":
         reasons.extend(lint_test_only_input(text, bdir, products, tests))
+    if tier == "test_only_bash":
+        reasons.extend(lint_test_only_bash(text, bdir, products, tests, runner))
     if tier == "doc_only":
         reasons.extend(lint_doc_only(text, bdir, products))
     if tier in ("code_patch", "code_patch2") and len(tests) == 1:
@@ -330,9 +390,9 @@ def main():
                   f"(SCREEN_9: two briefs on one ticket got ONE colliding path)", file=sys.stderr)
         elif tfiles and not any(same(t, want) for t in tfiles):
             reasons.append(f"TEST PATH: `## The test` names {tfiles} but the header's test file is {want} — two names for one file")
-    if tier not in ("code_patch", "code_patch2", "bash_patch", "bash_patch2", "test_only", "test_only_input", "doc_only"):
+    if tier not in ("code_patch", "code_patch2", "bash_patch", "bash_patch2", "test_only", "test_only_input", "test_only_bash", "doc_only"):
         reasons.append(f"TIER: {tier or 'undetermined'} — round.sh runs code_patch, code_patch2, bash_patch, bash_patch2, test_only, "
-                       f"test_only_input and doc_only (test_only = code_patch's TEST-ONLY mode, a `## Tamper` block; "
+                       f"test_only_input, test_only_bash (a bash suite is the only file edited) and doc_only (test_only = code_patch's TEST-ONLY mode, a `## Tamper` block; "
                        f"test_only_input = a planted input/regression from the brief; doc_only = docs and comments). "
                        f"Pin tier= or add `Tier: \\`<tier>\\`` to the brief")
     selftest = bool(re.search(r"^##+\s*Self-testing\b", text, re.M | re.I))

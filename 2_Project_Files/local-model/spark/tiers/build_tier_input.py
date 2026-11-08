@@ -8,7 +8,7 @@ prompt), then one summary line. rc 0 ok · 2 REFUSED (a brief/pin fault, same co
 1 harness (no checkout, git failure).
 
 Pins consumed: subdir= (default Blockchain/Dev), service_dir= (default: services/<x>|packages/<x>|frontend/<x> read off the
-first test path), shared_pkg_dir= / shared_pkg_name= (defaults packages/shared, @secuura/shared; `none` = a package with no
+first test path), siblings=auto|none (test_only_bash: the sibling-suite no-worse leg), shared_pkg_dir= / shared_pkg_name= (defaults packages/shared, @secuura/shared; `none` = a package with no
 shared build, prepare_clone.sh's "tool mode"), runner= (default: the brief's `Runner:` line), doc_check_cwd=.
 """
 import json
@@ -106,8 +106,46 @@ def main():
         inp.update({"repo_subdir": "", "tool_subdir": subdir, "repo": {"tip": tip, "repo_subdir": "", "service_dir": "", "test_runner": "docs"},
                     "doc_files": products, "files": files, "new_doc_files": [p for p in products if files[p] is None],
                     "expect": items, "doc_checks": tb.parse_doc_checks(text), "doc_check_cwd": pins.get("doc_check_cwd", "")})
+    elif tier == "test_only_bash":
+        # 2026-11-09: a bash TEST SUITE hardening ticket. The suite is the model's file; every other file is read-only.
+        if not tests:
+            refuse("test_only_bash: no `Test file:` header line")
+        if not products:
+            refuse("test_only_bash: no `File:` header line (the read-only code the suite exercises or reads)")
+        for t in tests:
+            if not tb.is_bash_suite_path(t):
+                refuse(f"test_only_bash: test {t} is not a bash suite (*.test.sh, or a .sh/.bash under a __tests__ dir)")
+            if t in products:
+                refuse(f"test_only_bash: {t} is both a `File:` (read-only) and a `Test file:` (editable)")
+        if runner != "bash":
+            refuse(f"test_only_bash: the Runner: line must be `bash` (got {runner!r})")
+        groups, perrs = tb.parse_plant(text)
+        pdiff = os.path.join(bdir, "golden_red.diff")
+        plant_diff = open(pdiff, encoding="utf-8").read() if os.path.isfile(pdiff) else None
+        items, eerrs = tb.parse_expect(text)
+        has_plant = bool(groups) or plant_diff is not None
+        has_expect = items is not None
+        if perrs or eerrs or has_plant == has_expect or (has_plant and bool(groups) == bool(plant_diff)) or (has_expect and not items):
+            refuse("test_only_bash: need exactly one red proof: a complete `## Plant` block or golden_red.diff (plant shape), OR "
+                   "a `## Expect` block with >= 1 expect_present/expect_absent (expectations shape)"
+                   + (f" ({'; '.join(perrs + eerrs)})" if perrs or eerrs else ""))
+        cells = tb.parse_red_cells(text)
+        if has_plant and not cells:
+            refuse("test_only_bash: the plant shape needs `## Red cells` naming (in backticks) a substring of each cell's label")
+        for g in groups:
+            if show(g["file"]) is None:
+                refuse(f"test_only_bash: plant file {g['file']} is not at the tip {tip[:12]}")
+        files = {p: show(p) for p in tests + products}
+        for p in products:
+            if files[p] is None:
+                refuse(f"test_only_bash: File {p} is not at the tip {tip[:12]}")
+        inp.update({"repo_subdir": "", "service_dir": "", "repo": {"tip": tip, "repo_subdir": "", "service_dir": "", "test_runner": "bash"},
+                    "mode": "plant" if has_plant else "expect", "siblings": pins.get("siblings", "auto"),
+                    "product_files": products, "test_files": tests, "files": files,
+                    "new_test_files": [t for t in tests if files[t] is None],
+                    "red_cells": cells or [], "plant": groups, "plant_diff": plant_diff, "expect": items or []})
     else:
-        refuse(f"build_tier_input: tier {tier!r} is not one of test_only_input, doc_only")
+        refuse(f"build_tier_input: tier {tier!r} is not one of test_only_input, test_only_bash, doc_only")
     json.dump(inp, open(out, "w", encoding="utf-8"), indent=1)
     print("WEDNESDAY BRIEF: (the brief is carried whole in input.json `brief`)")
     print(f"built {tier} input for {ticket} at {tip[:12]}: {len(inp['files'])} file(s) shown")

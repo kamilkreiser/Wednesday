@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tier_checker.py <input.json> <out.md> <clone-dir> — the checker for tiers test_only_input and doc_only (2026-10-31).
+"""tier_checker.py <input.json> <out.md> <clone-dir> — the checker for tiers test_only_input and doc_only (2026-10-31) and test_only_bash (2026-11-09).
 
 Run by spark/round.sh in place of tasks/code_patch/spark_checker.sh for these two tiers. It is a sibling of
 tasks/code_patch/checker.sh, not a fork of round.sh: lint, lock, base, clone, golden compare and run-dir record are all
@@ -18,6 +18,12 @@ test_only_input legs
   A5 RED WITH PLANT: the plant applied (scratch only) -> every matched red cell FAILS BY ASSERTION (not a crash, not a load error)
   A6 whole-service suite after the patch (no plant) is no worse than at the tip: no new red, no cell lost, failed count not higher
   A7 restore: every touched/planted file back to its tip sha256, no stray file
+test_only_bash legs (2026-11-09; a bash suite is the only file the diff may touch; see the block above tier_test_only_bash)
+  A1 · A2 · A2a · A3 touched set == the declared suites · A3p (plant shape) the plant applies at the tip · A3s bash -n on every patched suite
+  A4 GREEN WITHOUT PLANT: named cells exist and pass, no new red, no load-error marker, no new non-zero rc · A4b/A4e (expect shape) the
+  expectations FAIL on the tip's output and HOLD on the patched output · A6 declared cells none lost + sibling suites no worse
+  A5 (plant shape) RED WITH PLANT: each named cell prints the suite's own FAIL line and the suite exits non-zero · A7 (expect shape) REVERSION:
+  patch reverse-applied, suite re-run, every expectation fails again · A8 restore (sha256; stray untracked files moved to quarantine/)
 doc_only legs
   A1 · A2 · A2a · A3 touched set == the header's File lines · A3d every path is *.md / Projects Documents/fragments/** or a
   code file whose changed lines are ALL whole-line comments (0 changed non-comment lines, computed per file, base vs patched)
@@ -622,6 +628,304 @@ def tier_doc_only(inp, inp_path, out_md, cl):
             passed(f"A8 RESTORE: {len(cl.snap)} watched file(s) back at their tip sha256; tracked tree clean")
 
 
+# ------------------------------------------------------------------ test_only_bash (2026-11-09)
+# A bash TEST SUITE hardening tier: the diff may touch ONLY the declared bash suite file(s); every product/read-only file is
+# untouched. Two red-proof shapes, exactly one per brief:
+#   PLANT   (`## Plant` / golden_red.diff on a NON-suite file, + `## Red cells`): the suite is green without the plant and the
+#           named cells print the suite's own FAIL line, and the suite exits non-zero, with the plant applied.
+#   EXPECT  (`## Expect`, for a defect in the suite itself — a wrong regex/sentence): expect_present/expect_absent texts graded
+#           against the suite's OUTPUT. They must all FAIL at the untouched tip (A4b), all HOLD after the patch (A4e), and all
+#           FAIL again with the patch reverse-applied and the suite re-run (A7, the doc_only reversion shape).
+# A "cell" is one output line `ok|PASS|pass <label>` or `FAIL|not ok <label>` (the Secuura suites print one of those per check).
+BASH_FAIL_RX = re.compile(r"^\s*(?:FAIL|FAILED|not ok)\b[:\s—–-]*(.*)$")
+BASH_PASS_RX = re.compile(r"^\s*(?:ok|OK|PASS|PASSED|pass)\b[:\s—–-]*(.*)$")
+BASH_LOAD_RX = re.compile(r"syntax error|command not found|unbound variable|bad substitution|unexpected EOF|No such file or directory: .*\.test\.sh")
+BASH_BUDGET_S = 120
+
+
+def _norm(x):
+    return re.sub(r"\s+", " ", x).strip()
+
+
+def _numkey(label):
+    """A cell identity that survives a legitimately changed count in a label ('... (5 spellings)' -> '(# spellings)')."""
+    return re.sub(r"\d+", "#", label)
+
+
+def parse_bash_out(text):
+    """-> ({label: 'passed'|'failed'}, [fail lines]). A label that FAILs anywhere is failed."""
+    cells, fails = {}, []
+    for ln in (text or "").split("\n"):
+        m = BASH_FAIL_RX.match(ln)
+        if m:
+            cells[_norm(m.group(1))] = "failed"
+            fails.append(ln.strip())
+            continue
+        m = BASH_PASS_RX.match(ln)
+        if m:
+            cells.setdefault(_norm(m.group(1)), "passed")
+    return cells, fails
+
+
+def _txt(x):
+    return x.decode("utf-8", "replace") if isinstance(x, bytes) else (x or "")
+
+
+def run_bash(cl, label, files, budget=BASH_BUDGET_S):
+    """Run each suite with bash from the clone root. -> {cells {'<file> :: <label>': status}, fails, rcs {file: rc}, out {file: text},
+    text (all output joined), load (count of load-error markers), timeout [files]}."""
+    res = {"cells": {}, "fails": [], "rcs": {}, "out": {}, "text": "", "load": 0, "timeout": []}
+    for f in files:
+        base = os.path.basename(f)
+        try:
+            r = subprocess.run(["bash", f], cwd=cl.p, capture_output=True, text=True, timeout=budget, stdin=subprocess.DEVNULL)
+            rc, out = r.returncode, _txt(r.stdout) + "\n" + _txt(r.stderr)
+        except subprocess.TimeoutExpired as e:
+            rc, out = 124, _txt(e.stdout) + "\n" + _txt(e.stderr)
+            res["timeout"].append(f)
+        open(os.path.join(cl.rep, f"{label}__{base}.out"), "w", encoding="utf-8").write(out)
+        cells, fails = parse_bash_out(out)
+        for k, v in cells.items():
+            res["cells"][f"{base} :: {k}"] = v
+        res["fails"] += [f"{base}: {x}" for x in fails]
+        res["rcs"][f], res["out"][f] = rc, out
+        res["text"] += out + "\n"
+        res["load"] += len(BASH_LOAD_RX.findall(out))
+    return res
+
+
+def sibling_suites(inp, cl):
+    """Other *.test.sh beside the first declared suite whose text names a declared File/Test basename (the checker.sh B6 idea). Max 12."""
+    if inp.get("siblings") == "none" or not inp["test_files"]:
+        return []
+    import glob
+    d = os.path.dirname(inp["test_files"][0])
+    names = {os.path.basename(p) for p in inp["product_files"] + inp["test_files"]}
+    out = []
+    for f in sorted(glob.glob(os.path.join(cl.p, d, "*.test.sh"))):
+        rel = os.path.relpath(f, cl.p)
+        if rel in inp["test_files"]:
+            continue
+        try:
+            txt = open(f, encoding="utf-8", errors="replace").read()
+        except OSError:
+            continue
+        if any(n in txt for n in names):
+            out.append(rel)
+    return out[:12]
+
+
+def untracked(cl):
+    return {l[3:] for l in cl.git("status", "--porcelain", "--untracked-files=all").stdout.split("\n") if l.startswith("?? ")}
+
+
+def bash_expectations(inp, outs):
+    """-> [(item, ok, detail)] ; outs = {declared test path: its output text}."""
+    res = []
+    tests = inp["test_files"]
+    for it in inp["expect"]:
+        if it["path"] and not any(it["path"] == t or t.endswith("/" + it["path"]) for t in tests):
+            res.append((it, False, f"`in` path {it['path']} is not a declared Test file"))
+            continue
+        scope = [t for t in tests if not it["path"] or it["path"] == t or t.endswith("/" + it["path"])]
+        hit = [t for t in scope if it["text"] in outs.get(t, "")]
+        if it["kind"] == "absent":
+            res.append((it, not hit, f"present in the output of {hit}" if hit else "absent from the output"))
+        else:
+            res.append((it, bool(hit), "present" if hit else "absent from the output of every suite in scope"))
+    return res
+
+
+def plant_applicable_at_tip(inp, cl):
+    groups, pdiff = inp.get("plant") or [], inp.get("plant_diff")
+    if pdiff:
+        pf = os.path.join(cl.rep, "golden_red.diff")
+        open(pf, "w", encoding="utf-8").write(pdiff if pdiff.endswith("\n") else pdiff + "\n")
+        return None if apply_check(cl, pf) is not None else "golden_red.diff does not `git apply --check` at the tip"
+    for g in groups:
+        ls = (cl.show(g["file"]) or "").split("\n")
+        n = g["line"]
+        if not (1 <= n <= len(ls)) or ls[n - 1].rstrip("\r") != g["from"]:
+            return f"line {n} of {g['file']} is {ls[n - 1] if 1 <= n <= len(ls) else '<outside>'!r}, not the brief's `from:` {g['from']!r}"
+    return None
+
+
+def tier_test_only_bash(inp, inp_path, out_md, cl):
+    tests = inp["test_files"]
+    mode = inp.get("mode") or ("plant" if (inp.get("plant") or inp.get("plant_diff")) else "expect")
+    ppaths = plant_paths(inp) if mode == "plant" else []
+    cl.watch(tests + ppaths)
+    pre_untracked = untracked(cl)
+    say(f"mode: test_only_bash/{mode} (declared suites {tests}; read-only {inp['product_files']}; "
+        + (f"plant on {ppaths}; red cells {inp['red_cells']})" if mode == "plant" else f"{len(inp['expect'])} expectation(s); red cells {inp['red_cells'] or 'none'})"))
+    overlap = sorted(set(ppaths) & set(tests))
+    if overlap:
+        failed(f"A3p the plant touches a declared suite {overlap} — the plant must not overlap the model's files")
+        finish("stopped at A3p (brief defect)")
+    diff, opts, secs = common_front(inp, inp_path, out_md, cl, tests, "test_only_bash")
+    if mode == "plant":
+        perr = plant_applicable_at_tip(inp, cl)
+        if perr:
+            failed(f"A3p the plant is not applicable at the tip: {perr} (a BRIEF defect, not a model one)")
+            finish("stopped at A3p")
+        passed(f"A3p the plant applies at the tip ({'golden_red.diff' if inp.get('plant_diff') else str(len(inp['plant'])) + ' pinned line(s)'})")
+    existing = [t for t in tests if cl.show(t) is not None]
+    sibs = sibling_suites(inp, cl)
+    base = run_bash(cl, "baseline_declared", existing)
+    base_sib = run_bash(cl, "baseline_siblings", sibs)
+    info(f"baseline at the tip: declared suites {len(base['cells'])} cell(s), {len(base['fails'])} FAIL line(s), rc {base['rcs']}; "
+         f"{len(sibs)} sibling suite(s) {len(base_sib['cells'])} cell(s), {len(base_sib['fails'])} FAIL line(s)")
+    if base["timeout"]:
+        failed(f"baseline: declared suite(s) {base['timeout']} did not finish in {BASH_BUDGET_S}s at the tip (a hang)")
+    base_exp = None
+    if mode == "expect":
+        base_exp = bash_expectations(inp, base["out"])
+        cannot = [(it, d) for it, ok, d in base_exp if ok]
+        if cannot:
+            failed("A4b RED AT BASE: the expectation(s) already hold on the untouched tip's output, so they cannot fail — "
+                   + "; ".join(f"{it['kind']} {it['text']!r}: {d}" for it, d in cannot[:3]) + " (a BRIEF defect)")
+        else:
+            passed(f"A4b RED AT BASE: all {len(base_exp)} expectation(s) fail on the untouched tip's suite output")
+    ok, err = apply_real(cl, diff, opts)
+    if not ok:
+        failed(f"A2 the real apply failed after --check passed: {err[:300]}")
+        return
+    try:
+        # A3s the patched suites parse
+        syn = []
+        for t in tests:
+            r = subprocess.run(["bash", "-n", cl.path(t)], capture_output=True, text=True)
+            if r.returncode:
+                syn.append(f"{t}: {(r.stderr or r.stdout).strip()[:120]}")
+        if syn:
+            failed("A3s a patched suite does not parse (bash -n): " + "; ".join(syn))
+        else:
+            passed("A3s every patched suite parses (bash -n)")
+        # A4 green without plant
+        gr = run_bash(cl, "green_after", tests)
+        bad = []
+        for s in inp["red_cells"]:
+            m = [n for n in gr["cells"] if s in n]
+            if not m:
+                bad.append(f"no cell label contains {s!r}")
+            for n in m:
+                if gr["cells"][n] != "passed":
+                    bad.append(f"{n!r} is {gr['cells'][n]} without the plant")
+        new_red = sorted(n for n, st in gr["cells"].items() if st == "failed" and base["cells"].get(n) != "failed")
+        if new_red:
+            bad.append(f"new red cell(s) in the declared suites without the plant: {new_red[:3]}")
+        if gr["timeout"]:
+            bad.append(f"timeout: {gr['timeout']}")
+        if gr["load"] > base["load"]:
+            bad.append(f"load-error marker(s) {base['load']} -> {gr['load']} (syntax error / command not found / unbound variable)")
+        for t in tests:
+            if gr["rcs"][t] != 0 and base["rcs"].get(t, 0) == 0:
+                bad.append(f"{os.path.basename(t)} exits rc {gr['rcs'][t]} without the plant (rc 0 at the tip)")
+        if not gr["cells"]:
+            bad.append("the suites printed no ok/PASS/FAIL cell line at all")
+        if bad:
+            failed("A4 GREEN WITHOUT PLANT: " + "; ".join(bad)[:600])
+        else:
+            matched = sorted({n for s in inp["red_cells"] for n in gr["cells"] if s in n})
+            passed(f"A4 GREEN WITHOUT PLANT: {len(matched)} named cell(s) exist and pass on the unmodified product; declared suites "
+                   f"{len(gr['cells'])} cells, {sum(1 for v in gr['cells'].values() if v == 'failed')} red, rc {sorted(set(gr['rcs'].values()))}")
+            pre = [n for n in matched if n in base["cells"]]
+            if pre:
+                info(f"named cell(s) already present at the tip (changed in place, or the gap is already pinned): {pre[:3]}")
+        # A4e expectations hold after the patch
+        if mode == "expect":
+            post = bash_expectations(inp, gr["out"])
+            notok = [(it, d) for it, ok2, d in post if not ok2]
+            if notok:
+                failed("A4e EXPECTATIONS AFTER: " + "; ".join(f"{it['kind']} {it['text']!r}: {d}" for it, d in notok[:3]))
+            else:
+                passed(f"A4e EXPECTATIONS AFTER: all {len(post)} expectation(s) hold on the patched suite's output")
+        # A6 whole: lost declared cells + siblings no worse
+        lost = sorted(k for k in {_numkey(n) for n, st in base["cells"].items() if st == "passed"} if k not in {_numkey(n) for n in gr["cells"]})
+        af = run_bash(cl, "after_siblings", sibs)
+        worse = []
+        if lost:
+            worse.append(f"declared cell(s) LOST vs the tip: {lost[:3]}")
+        nr = sorted(n for n, st in af["cells"].items() if st == "failed" and base_sib["cells"].get(n) != "failed")
+        if nr:
+            worse.append(f"sibling new red: {nr[:3]}")
+        lost_s = sorted(set(base_sib["cells"]) - set(af["cells"]))
+        if lost_s:
+            worse.append(f"sibling cell(s) lost: {lost_s[:3]}")
+        for s in sibs:
+            if af["rcs"].get(s, 0) != 0 and base_sib["rcs"].get(s, 0) == 0:
+                worse.append(f"sibling {os.path.basename(s)} rc 0 -> {af['rcs'][s]}")
+        if len(af["fails"]) > len(base_sib["fails"]):
+            worse.append(f"sibling FAIL lines {len(base_sib['fails'])} -> {len(af['fails'])}")
+        if worse:
+            failed("A6 WHOLE SUITE: worse after the patch — " + "; ".join(worse)[:500])
+        else:
+            passed(f"A6 WHOLE SUITE no worse: declared cells {len(base['cells'])} -> {len(gr['cells'])} (none lost); "
+                   f"{len(sibs)} sibling suite(s) {len(base_sib['cells'])} -> {len(af['cells'])} cells, FAIL lines {len(base_sib['fails'])} -> {len(af['fails'])}")
+        if mode == "plant":
+            # A5 red with plant (scratch only)
+            touched, perr = apply_plant(inp, cl)
+            if perr:
+                failed(f"A5 the plant could not be applied after the patch: {perr}")
+            else:
+                rr = run_bash(cl, "red_with_plant", tests)
+                bad, kinds, lines = [], [], []
+                if rr["load"] > gr["load"]:
+                    bad.append(f"the plant broke the LOAD of a suite (load-error markers {gr['load']} -> {rr['load']}); a crash is not red")
+                if rr["timeout"]:
+                    bad.append(f"timeout under the plant: {rr['timeout']}")
+                for s in inp["red_cells"]:
+                    m = [n for n in rr["cells"] if s in n]
+                    if not m:
+                        bad.append(f"no cell label contains {s!r} under the plant (the suite aborted before it, or it printed nothing)")
+                    for n in m:
+                        if rr["cells"][n] == "passed":
+                            bad.append(f"{n!r} stays GREEN with the plant applied (a check that cannot fail)")
+                        else:
+                            kinds.append(n)
+                            lines += [x for x in rr["fails"] if n.split(" :: ", 1)[-1] in x][:1]
+                if kinds and all(rr["rcs"][t] == 0 for t in tests):
+                    bad.append("the FAIL line printed but every suite exited rc 0 (the suite does not gate on its own failure)")
+                if bad:
+                    failed("A5 RED WITH PLANT: " + "; ".join(bad)[:600])
+                else:
+                    passed(f"A5 RED WITH PLANT: {len(kinds)} named cell(s) print the suite's own FAIL line under the plant ({', '.join(touched)}) "
+                           f"and pass without it; rc {sorted(set(rr['rcs'].values()))}; e.g. {lines[0][:110] if lines else ''}")
+                other = sorted(n for n, st in rr["cells"].items() if st == "failed" and n not in kinds)
+                if other:
+                    info(f"other cell(s) in the declared suites also red under the plant: {other[:3]}")
+        else:
+            # A7 reversion: the patch reverse-applied, the suites re-run, every expectation fails again
+            ropts = apply_check(cl, diff, reverse=True)
+            if ropts is None:
+                failed("A7 REVERSION: the patch cannot be reverse-applied to plant the reversion")
+            else:
+                okr, errr = apply_real(cl, diff, ropts, reverse=True)
+                rev_out = run_bash(cl, "reverted", [t for t in tests if os.path.isfile(cl.path(t))])["out"] if okr else {}
+                rev = bash_expectations(inp, rev_out)
+                still = [(it, d) for it, ok3, d in rev if ok3]
+                if okr and rev and not still:
+                    passed(f"A7 REVERSION: with the patch reverse-applied, {len(rev)}/{len(rev)} expectation(s) fail again (the check discriminates)")
+                elif okr:
+                    failed(f"A7 REVERSION: {len(still)} expectation(s) still hold with the patch reversed: {[it['text'] for it, _ in still][:2]} (cannot fail)")
+                else:
+                    failed(f"A7 REVERSION: reverse-apply failed ({errr[:100]})")
+    finally:
+        cl.restore()
+        bad, st = cl.verify()
+        stray = sorted(untracked(cl) - pre_untracked)
+        for rel in stray:   # a suite run may leave files in the clone; nothing is deleted — they are MOVED, with a WHY row
+            dst = os.path.join(cl.quar, rel)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.move(cl.path(rel), dst)
+            open(os.path.join(cl.rep, "quarantine.log"), "a").write(f"{rel}\tWHY: untracked file left in the clone by the patch/plant/suite run; moved out so the clone is back at the tip\n")
+        if bad or st:
+            failed(f"A8 RESTORE: not back to the tip — sha256 mismatch {bad[:3]} status {st[:120]!r}")
+        else:
+            passed(f"A8 RESTORE: {len(cl.snap)} watched file(s) back at their tip sha256; tracked tree clean"
+                   + (f"; {len(stray)} stray untracked file(s) quarantined ({stray[:2]})" if stray else ""))
+
+
 def main():
     if len(sys.argv) != 4:
         print("usage: tier_checker.py <input.json> <out.md> <clone-dir>", file=sys.stderr)
@@ -647,6 +951,8 @@ def main():
         tier_test_only_input(inp, inp_path, out_md, cl)
     elif t == "doc_only":
         tier_doc_only(inp, inp_path, out_md, cl)
+    elif t == "test_only_bash":
+        tier_test_only_bash(inp, inp_path, out_md, cl)
     else:
         print(f"tier_checker: unknown tier {t!r}", file=sys.stderr)
         return 1

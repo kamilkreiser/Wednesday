@@ -28,13 +28,15 @@
 #                        NIGHT_SOURCE_CHECKOUT=cache/src, NIGHT_BRIEFS_DIR=<brief_dir>; builder rc 2 -> rc 2 REFUSED
 #                        test_only_input / doc_only (2026-10-31): spark/tiers/build_tier_input.py (the brief's ## Plant / ## Red cells
 #                        or ## Expect parsed into input.json; builder rc 2 -> rc 2 REFUSED); task text spark/tiers/task_<tier>.md
+#                        test_only_bash (2026-11-09): the same builder; a bash TEST SUITE is the only file the model edits (plant or
+#                        expectations red proof, see README "Tiers"); no prepare_clone (a suite needs no node build)
 #   7. clone             `git clone --shared --no-checkout cache/src` + `checkout --detach <tip>` under
 #                        spark/cache/work/<run-id>/clone; code_patch: tasks/code_patch/prepare_clone.sh
 #   8. model             local_model_task.sh with LM_BACKEND=spark, SPARK_THINK=0 (thinking OFF, always), the
 #                        harness's own timeouts (10 s health, SPARK_HTTP_TIMEOUT 1800 s in lib/spark_call.py)
 #   9. checker           code_patch, test_only: tasks/code_patch/spark_checker.sh (checker.sh + A2a; test_only = its
 #                        MODE=test_only: A3 the ONE test only, A4 red under the planted tamper, A5 green at the tip)
-#                        test_only_input, doc_only (2026-10-31): spark/tiers/tier_checker.py — A1 extract, A2 apply, A2a (the same
+#                        test_only_input, doc_only, test_only_bash (2026-10-31 / 2026-11-09): spark/tiers/tier_checker.py — A1 extract, A2 apply, A2a (the same
 #                        tasks/code_patch/a2a_anchor.py), A3 exact touched set, then the tier's own legs (see README "Tiers"),
 #                        every write sha256-restored; prints RESULT: / SPARK RESULT: like the code_patch path
 #                        code_patch2: tasks/code_patch2/checker.sh, then A2a as for bash_patch (task.md DERIVED from
@@ -285,7 +287,7 @@ if [ "$B_TIER" = code_patch2 ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" NIGHT_BRIEFS_DIR="$BDIR" bash "$LM/tasks/code_patch2/build_input2.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
 elif [ "$B_TIER" = bash_patch2 ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" bash "$LM/tasks/bash_patch2/build_bash_input2.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
-elif [ "$B_TIER" = test_only_input ] || [ "$B_TIER" = doc_only ]; then
+elif [ "$B_TIER" = test_only_input ] || [ "$B_TIER" = doc_only ] || [ "$B_TIER" = test_only_bash ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" python3 "$HERE/tiers/build_tier_input.py" "$B_TIER" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" "$BDIR" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
 elif [ "$B_TIER" = code_patch ] || [ "$B_TIER" = test_only ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" NIGHT_BRIEFS_DIR="$BDIR" bash "$LM/night/build_input.sh" "$B_TICKET" "$RUN/input.json" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
@@ -310,7 +312,7 @@ IN_TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.g
 [ "$IN_TIP" = "$TIP" ] || finish 5 "HARNESS — VOID: the builder pinned ${IN_TIP:-nothing}, the round prepared $TIP (develop moved mid-round?)" "$RUN"
 SELFTEST="$(python3 -c 'import json,sys; print(1 if json.load(open(sys.argv[1])).get("self_testing") else 0)' "$RUN/input.json")"
 TASK_MD="$LM/tasks/$B_TIER/task.md"
-{ [ "$B_TIER" = test_only_input ] || [ "$B_TIER" = doc_only ]; } && TASK_MD="$HERE/tiers/task_$B_TIER.md"
+{ [ "$B_TIER" = test_only_input ] || [ "$B_TIER" = doc_only ] || [ "$B_TIER" = test_only_bash ]; } && TASK_MD="$HERE/tiers/task_$B_TIER.md"
 [ "$B_TIER" = test_only ] && TASK_MD="$LM/tasks/code_patch/task.md"   # code_patch's input shape (tasks/test_only/task.md is the unwired tier's)
 [ "$B_TIER" = bash_patch ] && [ "$SELFTEST" = 1 ] && TASK_MD="$LM/tasks/bash_patch/task_selftest.md"
 if [ "$B_TIER" = code_patch2 ] || [ "$B_TIER" = bash_patch2 ]; then
@@ -362,7 +364,7 @@ fi
 # ------------------------------------------------------------------ 9. checker
 if [ "$B_TIER" = code_patch ] || [ "$B_TIER" = test_only ]; then
   bash "$LM/tasks/code_patch/spark_checker.sh" "$RUN/input.json" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1; CRC=$?
-elif [ "$B_TIER" = test_only_input ] || [ "$B_TIER" = doc_only ]; then
+elif [ "$B_TIER" = test_only_input ] || [ "$B_TIER" = doc_only ] || [ "$B_TIER" = test_only_bash ]; then
   python3 "$HERE/tiers/tier_checker.py" "$RUN/input.json" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1; CRC=$?
 else
   bash "$LM/tasks/$B_TIER/checker.sh" "$RUN/input.json" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1; BCRC=$?
