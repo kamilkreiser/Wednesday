@@ -277,12 +277,29 @@ IS_BASH_PATCH2 = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and _detect_bash_pat
 IS_DOC_ONLY = (inp.get('tier') == 'doc_only') and (_round_tier() in (None, 'doc_only')) and (not IS_BASH_PATCH) and (not IS_DOC_PATCH)
 # 2026-11-04 (operator 101): the Spark tier test_only_input (spark/tiers) had NO hold kind. Detected from input.json tier AND round.json tier (must agree).
 IS_TEST_ONLY_INPUT = (inp.get('tier') == 'test_only_input') and (_round_tier() in (None, 'test_only_input')) and (not IS_BASH_PATCH) and (not IS_DOC_PATCH)
-IS_CODE_PATCH = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and (not IS_BASH_PATCH2) and (not IS_DOC_ONLY) and (not IS_TEST_ONLY_INPUT) and ('test_file' not in inp and 'product_file' in inp and 'suggested_test_file' in inp)
-if brief_given is not None and not (IS_CODE_PATCH or IS_BASH_PATCH2 or IS_DOC_ONLY or IS_TEST_ONLY_INPUT):
+# 2026-11-09 (Wednesday tooling subagent): the Spark tier test_only_bash (spark/tiers, commit f804b8eb95) had NO hold kind - both PASSes were refused
+# "--model-tag is supported on the code_patch and bash_patch paths only". Detected from THREE signals that must agree: input.json tier,
+# round.json tier (when present) and checker.out's FIRST line `mode: test_only_bash/<plant|expect>`. Any disagreement is a refusal.
+def _detect_test_only_bash():
+    co_p = os.path.join(run, 'checker.out')
+    first = ''
+    if os.path.exists(co_p):
+        ls_ = open(co_p, errors='replace').read().splitlines(); first = ls_[0] if ls_ else ''
+    sig_co = first.startswith('mode: test_only_bash')
+    sig_in = (inp.get('tier') == 'test_only_bash')
+    if not sig_co and not sig_in: return False
+    tier = _round_tier()
+    sigs = {'input.json tier == test_only_bash': sig_in, "checker.out first line is 'mode: test_only_bash...'": sig_co}
+    if tier is not None: sigs[f'round.json tier ({tier!r}) == test_only_bash'] = (tier == 'test_only_bash')
+    if len(set(sigs.values())) != 1: die(f"test_only_bash signals disagree: {sigs}")
+    return True
+IS_TEST_ONLY_BASH = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and (not IS_DOC_ONLY) and (not IS_TEST_ONLY_INPUT) and _detect_test_only_bash()
+IS_CODE_PATCH = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and (not IS_BASH_PATCH2) and (not IS_DOC_ONLY) and (not IS_TEST_ONLY_INPUT) and (not IS_TEST_ONLY_BASH) and ('test_file' not in inp and 'product_file' in inp and 'suggested_test_file' in inp)
+if brief_given is not None and not (IS_CODE_PATCH or IS_BASH_PATCH2 or IS_DOC_ONLY or IS_TEST_ONLY_INPUT or IS_TEST_ONLY_BASH):
     die("--brief is supported on the code_patch path only (2026-09-25); this run is not code_patch")  # (+ bash_patch2, 2026-10-18)
-if model_tag != 'ornith35b-q4' and not (IS_CODE_PATCH or IS_BASH_PATCH or IS_BASH_PATCH2 or IS_DOC_ONLY or IS_TEST_ONLY_INPUT):
+if model_tag != 'ornith35b-q4' and not (IS_CODE_PATCH or IS_BASH_PATCH or IS_BASH_PATCH2 or IS_DOC_ONLY or IS_TEST_ONLY_INPUT or IS_TEST_ONLY_BASH):
     die("--model-tag is supported on the code_patch and bash_patch paths only (2026-10-08); this run is neither")
-if not IS_BASH_PATCH and not IS_DOC_PATCH and not IS_CODE_PATCH and not IS_BASH_PATCH2 and not IS_DOC_ONLY and not IS_TEST_ONLY_INPUT and 'test_file' not in inp:
+if not IS_BASH_PATCH and not IS_DOC_PATCH and not IS_CODE_PATCH and not IS_BASH_PATCH2 and not IS_DOC_ONLY and not IS_TEST_ONLY_INPUT and not IS_TEST_ONLY_BASH and 'test_file' not in inp:
     die(f"input.json is neither test_only (test_file) nor code_patch (product_file + suggested_test_file), and the run's artefacts name neither bash_patch nor doc_patch: keys {sorted(inp)}")
 
 def _read(path, what):
@@ -1767,6 +1784,163 @@ def hold_test_only_input():
     sys.exit(0)
 
 if IS_TEST_ONLY_INPUT: hold_test_only_input()
+
+# ================================================================== test_only_bash (Spark tier, 2026-11-09)
+# Hardening tier for a BASH test suite (*.test.sh): the product is already correct; the diff changes ONLY the declared suite(s). Two red-proof
+# shapes, read from the checker's own first line: PLANT (golden_red.diff / input plant applied in the checker's clone; legs A3p, A4, A5) and
+# EXPECT (expect_present/expect_absent texts against the suite's output; legs A4b, A4, A4e, A7). Every clause is copied from checker.out;
+# product AND plant-file bytes are RE-MEASURED here (tip index blobs before/after a STRICT `git apply --cached -p1`). Non-strict REFUSES.
+def hold_test_only_bash():
+    import hashlib, tempfile, shutil, ast
+    tip = inp['tip']; tests = list(inp.get('test_files') or []); prods = list(inp.get('product_files') or [])
+    if not tests: die("test_only_bash input.json has no test_files")
+    if not prods: die("test_only_bash input.json has no product_files")
+    co = _read(os.path.join(run, 'checker.out'), 'checker.out'); co_lines = [l.rstrip() for l in co.splitlines()]
+    if not re.search(r'^RESULT: PASS \(', co, re.M): die(f"checker.out RESULT is not PASS: {next((l for l in co_lines if l.startswith('RESULT:')), 'absent')}; FAIL lines: {[l for l in co_lines if l.startswith('FAIL ')][:3]}")
+    if any(l.startswith('FAIL ') for l in co_lines): die(f"RESULT says PASS but checker.out carries FAIL line(s): {[l for l in co_lines if l.startswith('FAIL ')][:3]}")
+    mm = re.match(r'^mode: test_only_bash/(plant|expect) ', co_lines[0] if co_lines else '')
+    if not mm: die(f"checker.out first line is not 'mode: test_only_bash/<plant|expect> ...': {co_lines[:1]}")
+    shape = mm.group(1)
+    if (inp.get('mode') or ('plant' if (inp.get('plant') or inp.get('plant_diff')) else 'expect')) != shape:
+        die(f"test_only_bash signals disagree: checker.out says {shape} but input.json mode is {inp.get('mode')!r}")
+    legs = [l for l in co_lines if l.startswith('PASS A')]
+    infos = [l for l in co_lines if l.startswith('INFO ')]
+    byleg = {}
+    for l in legs: byleg.setdefault(l.split()[1], l)
+    need = ['A1', 'A2', 'A2a', 'A3', 'A3s', 'A4', 'A6', 'A8'] + (['A3p', 'A5'] if shape == 'plant' else ['A4b', 'A4e', 'A7'])
+    miss = [k for k in need if k not in byleg]
+    if miss: die(f"NO RED EVIDENCE / missing leg: checker.out lacks PASS line(s) for {miss} (a {shape}-shape test_only_bash needs {need})")
+    if '--recount' in byleg['A2'] or 'accommodation' in byleg['A2'].lower() or 'not strict' in byleg['A2'].lower() or '(strict)' not in byleg['A2']: die(f"A2 line is not strict: {byleg['A2']}")
+    if os.path.exists(os.path.join(chk, 'apply_strict.out')) and open(os.path.join(chk, 'apply_strict.out')).read().strip(): die("apply_strict.out is non-empty - the checker passed A2 only with an accommodation")
+    for t_ in tests:
+        if t_ not in byleg['A3']: die(f"the A3 line does not name the declared suite {t_}: {byleg['A3']}")
+    passed = len(legs)
+    patch_path = os.path.join(chk, 'patch.diff'); patch_text = _read(patch_path, 'patch.diff')
+    patch_sha = hashlib.sha256(open(patch_path, 'rb').read()).hexdigest()[:16]; patch_bytes = os.path.getsize(patch_path)
+    out_md = _read(os.path.join(run, 'out.md'), 'out.md')
+    blocks = re.findall(r"```diff\n(.*?)\n```", out_md, re.S)
+    if len(blocks) != 1: die(f"out.md holds {len(blocks)} ```diff block(s) - contradicts PASS A1")
+    if blocks[0].rstrip('\n') + '\n' != patch_text: die("patch.diff is not byte-equal to the out.md fence")
+    paths = [p[2:] if p.startswith('b/') else p for p in re.findall(r'^\+\+\+ ([^\t\n]+?)[ \t\r]*$', patch_text, re.M)]
+    apaths = [p[2:] if p.startswith('a/') else p for p in re.findall(r'^--- ([^\t\n]+?)[ \t\r]*$', patch_text, re.M) if p != '/dev/null']
+    plant_files = set(g.get('file') for g in (inp.get('plant') or []))
+    if inp.get('plant_diff'): plant_files |= set(p[2:] if p.startswith('b/') else p for p in re.findall(r'^\+\+\+ ([^\t\n]+?)[ \t\r]*$', inp['plant_diff'], re.M))
+    if shape == 'plant' and not plant_files: die("plant-shape test_only_bash but input.json names no plant file")
+    # touched set: patch.diff headers, the checker's sections.json, and `git apply --numstat` must ALL equal the declared suites
+    sj = json.load(open(os.path.join(chk, 'sections.json'))) if os.path.exists(os.path.join(chk, 'sections.json')) else die("sections.json is missing")
+    sec_paths = [s.get('path') for s in sj]
+    if sorted(set(paths)) != sorted(tests) or len(paths) != len(set(paths)): die(f"TOUCHED SET: patch.diff's +++ headers {paths} != the declared test_files {tests}")
+    if sorted(sec_paths) != sorted(tests): die(f"TOUCHED SET: sections.json paths {sec_paths} != the declared test_files {tests}")
+    for p in paths + apaths + sec_paths:
+        if p in prods: die(f"PRODUCT HUNK: patch.diff / sections name the product {p} - test_only_bash must leave product bytes unchanged")
+        if p in plant_files: die(f"patch.diff names the plant file {p}")
+        if p not in tests: die(f"TOUCHED SET: {p} is not a declared test file")
+    cands = [c for c in (inp.get('source_checkout'), '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/cache/src') if c and os.path.isdir(c)]
+    repo = next((c for c in cands if subprocess.run(['git', '-C', c, 'cat-file', '-e', tip + '^{commit}'], capture_output=True).returncode == 0), None)
+    if repo is None: die(f"tip {tip} is in none of {cands} - cannot assert product bytes")
+    td = tempfile.mkdtemp(prefix='hold_tob_', dir=os.environ.get('CLAUDE_SCRATCHPAD') or None)
+    try:
+        env = dict(os.environ, GIT_INDEX_FILE=os.path.join(td, 'index'))
+        r = subprocess.run(['git', '-C', repo, 'read-tree', tip], capture_output=True, text=True, env=env)
+        if r.returncode != 0: die(f"read-tree {tip} failed: {r.stderr.strip()[:200]}")
+        def blobs(ps):
+            out = {}
+            for p in ps:
+                r = subprocess.run(['git', '-C', repo, 'ls-files', '-s', '--', p], capture_output=True, text=True, env=env)
+                out[p] = r.stdout.split()[1] if r.stdout.split() else None
+            return out
+        b0 = blobs(prods + sorted(plant_files)); t0 = blobs(tests)
+        rn = subprocess.run(['git', '-C', repo, 'apply', '--numstat', '-p1', patch_path], capture_output=True, text=True, env=env)
+        ns_paths = sorted(l.split('\t')[2] for l in rn.stdout.splitlines() if l.count('\t') >= 2)
+        if rn.returncode != 0 or ns_paths != sorted(tests): die(f"TOUCHED SET: `git apply --numstat -p1` rc {rn.returncode} paths {ns_paths} != the declared test_files {sorted(tests)}: {rn.stderr.strip()[:150]}")
+        r = subprocess.run(['git', '-C', repo, 'apply', '--cached', '-p1', patch_path], capture_output=True, text=True, env=env)
+        if r.returncode != 0: die(f"STRICT `git apply --cached -p1` of patch.diff at tip {tip[:12]} failed: {r.stderr.strip()[:200]}")
+        b1 = blobs(prods + sorted(plant_files)); t1 = blobs(tests)
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+    for p in b0:
+        if b0[p] is None: die(f"product/plant file {p} is not in the tip index")
+        if b0[p] != b1[p]: die(f"PRODUCT BYTES CHANGED: {p} blob {b0[p][:12]} -> {b1[p][:12]}")
+    if all(t0[p] == t1[p] for p in tests): die("the patch changes no declared test file blob")
+    plus = [l[1:] for l in patch_text.splitlines() if l.startswith('+') and not l.startswith('+++')]
+    minus = [l[1:] for l in patch_text.splitlines() if l.startswith('-') and not l.startswith('---')]
+    nonascii = sum(1 for l in plus for c in l if ord(c) > 127)
+    # red evidence, cross-checked against the artefacts (not only the leg text)
+    rc_raw = inp.get('red_cells')
+    if isinstance(rc_raw, str):
+        try: rc_raw = ast.literal_eval(rc_raw)
+        except Exception: rc_raw = [rc_raw]
+    cells = list(rc_raw or [])
+    red_txt = ''
+    if shape == 'plant':
+        if not cells: die("NO RED EVIDENCE: plant-shape input.json has no red_cells")
+        for k in ('A4', 'A5'):
+            mn = re.search(r'(\d+) named cell\(s\)', byleg[k])
+            if not mn or int(mn.group(1)) != len(cells): die(f"{k} line names {mn.group(1) if mn else 'no count of'} cell(s) but input.json red_cells has {len(cells)}: {byleg[k]}")
+        rwp = sorted(f for f in os.listdir(chk) if f.startswith('red_with_plant__') and f.endswith('.out'))
+        if not rwp: die("NO RED EVIDENCE: no red_with_plant__*.out artefact")
+        fl = []
+        for f in rwp: fl += [l.rstrip() for l in open(os.path.join(chk, f), errors='replace').read().splitlines() if re.match(r'^\s*(FAIL|FAILED|not ok)\b', l)]
+        quoted = []
+        for c in cells:
+            hit = next((l for l in fl if c in l), None)
+            if hit is None: die(f"NO RED EVIDENCE: no FAIL line under the plant names the red cell {c!r} (red_with_plant__*.out)")
+            quoted.append(hit.strip())
+        red_txt = "- Red evidence under the plant [red_with_plant__*.out, the suite's own FAIL line per red cell, verbatim]:\n" + '\n'.join(f"  - `{q[:220]}`" for q in quoted)
+        red_txt += f"\n- Plant file(s) [input.json plant_diff / plant; applied in the checker's clone only]: {sorted(plant_files)}"
+    else:
+        exp = list(inp.get('expect') or [])
+        if not exp: die("NO RED EVIDENCE: expect-shape input.json has no expect list")
+        mn = re.search(r'all (\d+) expectation', byleg['A4b'])
+        if not mn or int(mn.group(1)) != len(exp): die(f"A4b line does not count the input's {len(exp)} expectation(s): {byleg['A4b']}")
+        mr = re.search(r'(\d+)/(\d+) expectation', byleg['A7'])
+        if not mr or mr.group(1) != mr.group(2) or int(mr.group(1)) != len(exp): die(f"A7 line is not {len(exp)}/{len(exp)}: {byleg['A7']}")
+        red_txt = "- Red evidence (expect shape) [checker.out, verbatim]: A4b (expectations FAIL at the untouched tip), A4e (hold after the patch), A7 (patch reverse-applied, every expectation fails again):\n" + '\n'.join(f"  - `{byleg[k]}`" for k in ('A4b', 'A4e', 'A7'))
+    rj = json.load(open(os.path.join(run, 'round.json'))) if os.path.exists(os.path.join(run, 'round.json')) else {}
+    gverdict = rj.get('golden', 'not recorded')
+    golden_clause = f"golden comparison [round.json, verbatim]: {gverdict}"
+    if gverdict not in ('BYTE-IDENTICAL', 'TREE-IDENTICAL'): golden_clause += ' - read the diff against the brief before raising'
+    bpath = brief_given or _brief_from_run_dir(run, ticket)
+    now = datetime.datetime.now(); stamp = now.strftime('%H:%M %Y-%m-%d'); day = now.strftime('%Y-%m-%d')
+    if title is None: die("test_only_bash needs a positional title (CAPS-DASHES) or --title-from-brief")
+    fname = f"READY_{ticket}-{rowid}_{model_tag}_BRIEFED-TESTONLYBASH-{title}-PASS-{passed}of{passed}_{day}.diff.md"
+    out = os.path.join(NIGHT_DIR, fname)
+    if os.path.exists(out) and not dry: die(f"READY already exists: {out}")
+    brief_clause = (f"Brief: `{bpath}`" + ('' if brief_given else ' (located from the run dir name)')) if bpath else 'Brief: not given (--brief) and not located'
+    legs_txt = '\n'.join(f"  - `{l}`" for l in legs)
+    info_txt = '\n'.join(f"  - `{l}`" for l in infos) or '  - (none)'
+    prod_txt = ', '.join(f"`{p}` blob {b0[p][:12]}" for p in prods)
+    cells_txt = '\n'.join(f"  - `{c}`" for c in cells) or '  - (expect shape: see the expectations below)'
+    body = f"""# READY - {ticket}-{rowid} ({model_label}, briefed, test_only_bash/{shape}) - PASS {passed}/{passed} - HELD for QA
+
+> CANONICAL PATCH = `{patch_path}` (from `ls` at {stamp}; sha256[:16] {patch_sha}, {patch_bytes} B; byte-equal to the out.md fence). Checker A2 (verbatim): `{byleg['A2']}`; {golden_clause}.
+
+**Held {stamp} by {seat} after a source read (hold_ready.py, test_only_bash path; STRICT-APPLY leg passed first). Every clause below is copied from the run's artefacts in `{chk}`; product and plant-file bytes were RE-MEASURED here.** Tip `{tip}`. {brief_clause}
+- Touched set [patch.diff `+++` headers == sections.json == `git apply --numstat` == input.json test_files; no product or plant file named]: {paths}; `+` lines {len(plus)} ({'ASCII' if nonascii == 0 else str(nonascii) + ' NON-ASCII chars'}), `-` lines {len(minus)}.
+- Product bytes UNCHANGED [re-measured: tip index blobs before and after a strict `git apply --cached -p1` of patch.diff]: {prod_txt}{'; plant file(s) also unchanged' if plant_files else ''}.
+- Red cells [input.json]:
+{cells_txt}
+{red_txt}
+- Checker legs [checker.out, verbatim]:
+{legs_txt}
+- Checker INFO lines [checker.out, verbatim]:
+{info_txt}
+- RESULT [checker.out]: `{next(l for l in co_lines if l.startswith('RESULT:'))}`
+
+**PR NOTES for the raise seat:** TEST_ONLY_BASH ({shape} shape) - bash suite bytes only, zero product bytes. Apply `patch.diff` strictly (`git apply -p1`; proven by the hold's STRICT-APPLY leg). The red proof is {'the brief plant (checker clone only), not a change in the PR' if shape == 'plant' else 'the expectation set against the suite output (A4b/A4e/A7)'}. DOES NOT PROVE the plant is the regression that matters, or that a cell catches a different fault; an INFO line above is the checker's own note and is not a leg. Wednesday read the cells against the brief before this hold.
+
+```diff
+{patch_text.rstrip()}
+```
+"""
+    if dry:
+        print(f"DRY-RUN OK -> {fname}\n  {golden_clause}\n  kind=test_only_bash/{shape} touched={paths} plus={len(plus)} minus={len(minus)} legs={passed} red_cells={len(cells)} products_unchanged={len(prods)} plant_unchanged={len(plant_files)}")
+        sys.exit(0)
+    open(out, 'w').write(body)
+    print(f"HELD -> {out}\n  golden: {gverdict}; kind=test_only_bash/{shape} touched={paths} plus={len(plus)} minus={len(minus)} legs={passed} red_cells={len(cells)} products_unchanged={len(prods)} plant_unchanged={len(plant_files)}")
+    sys.exit(0)
+
+if IS_TEST_ONLY_BASH: hold_test_only_bash()
 
 if IS_BASH_PATCH2: hold_bash_patch2()
 
