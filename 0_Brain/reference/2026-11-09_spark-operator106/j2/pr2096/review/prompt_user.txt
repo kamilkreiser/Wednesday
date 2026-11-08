@@ -1,0 +1,395 @@
+===== TICKET =====
+KS-2016 — api-gateway audit export: no PR 2012 cell asserts the caller's Authorization on every page - mutant M4 (dropped on pages 2 and later) survives all 12 cells (gate 202 G202-N6, Note) [In Progress]
+
+**BLUF:** None of PR 2012's 12 cells asserts that the caller's `Authorization` header is sent with every upstream page of `GET /api/admin/audit/export`: gate 202's mutant M4, which drops Authorization on pages 2 and later, survives all 12 seat cells and is caught only by the gate's own cells (G-TEN, with G-THROW and G-NOTOTAL). Gate 202 grades this a Note and records that the real effect would be fail-closed, because the upstream refuses a call with no JWT.
+
+Source: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate202-ks1645-pr2012/verdict.md` line 24 (G202-N6); `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate202-ks1645-pr2012/ev_mutants.log` (M4). Code read by the filing seat at develop `1b1b65c7415f` with `git show` of that commit from the shared object store (a read), not run.
+
+As read at `1b1b65c7415f`:
+
+* `services/api-gateway/src/routes/audit-export.ts` lines 192 to 219: the page loop passes `headers` to each page's `fetch` (line 197). Where `headers` is built was not read by the filing seat.
+* The verdict's statement that the upstream refuses a call with no JWT cites `services/security/src/index.ts` lines 897 to 903 (READ ONLY, taken at the PR head; not re-read at the tip).
+* KS-1645 (the PR's own ticket, read whole) does not name this.
+
+Not measured: anything by the filing seat (nothing was run, including M4); the cell count at the tip (the gate ran the PR head); the upstream's behaviour on a request with no JWT.
+
+Priority: Low, mapped from the verdict's grade Note (verdict line 24).
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts
+index 8dbd9315a..dbadae2c7 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts
+@@ -181,3 +181,18 @@ describe('KS-1645 CSV - every column reads a key the upstream row really has', (
+     expect([noTo.status, badFormat.status, fetchMock.mock.calls.length]).toEqual([400, 400, 0]);
+   });
+ });
++
++describe('KS-2016 - the caller\'s Authorization header goes upstream on every page, not only the first', () => {
++  it('RED KS-2016 A1: three upstream pages (2,300 rows) each carry the caller\'s Authorization header', async () => {
++    upstreamRows = manyRows(2300);
++    const status = await new Promise<number>((resolve, reject) => {
++      http.get({ hostname: '127.0.0.1', port, path: `/api/admin/audit/export?${RANGE}&format=json`, headers: { authorization: 'Bearer ks2016-caller' } }, (res) => {
++        res.resume();
++        res.on('end', () => resolve(res.statusCode ?? 0));
++      }).on('error', reject);
++    });
++    const sent = fetchMock.mock.calls.map((call) => ((call as unknown[])[1] as { headers?: Record<string, string> } | undefined)?.headers?.Authorization);
++    expect(status).toBe(200);
++    expect(sent).toEqual(['Bearer ks2016-caller', 'Bearer ks2016-caller', 'Bearer ks2016-caller']);
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts
+1: /**
+2:  * KS-1645 - GET /api/admin/audit/export was "quietly wrong": the file looked complete and was not. This file pins the repairs (items 1, 2, 3 and 4's
+3:  * body shape, plus the CSV columns), against a stub upstream that behaves like the real security service (services/security/src/index.ts:880-929):
+4:  * `from`/`to` compare createdAt, limit defaults to 50 with NO clamp, offset slices, `type` is never read, and the answer carries total/limit/offset.
+5:  *   Item 1: the export asks the upstream once, with no limit, and got its default 50 rows. It now pages (limit 1000) up to a 10,000-row bound and
+6:  *           says when it is short: meta.total and meta.truncated in JSON, the X-Audit-Export-Truncated header in CSV.
+7:  *   Item 2: `to` was sent as a bare date, which the upstream reads as 00:00:00.000Z, so the whole `to` day was dropped. The last millisecond of that
+8:  *           UTC day is sent instead.
+9:  *   Item 3: this file REPLACES the cells T1 to T3 and C1, C2 of PR 1616 (renamed from ...refuses-an-unknown-type). That PR made an unknown or repeated
+10:  *           `type` a 400; the upstream never applied the filter, so the 400 validated a filter that did not exist. `type` is now not read at all.
+11:  *   CSV:    five columns were empty on every row and details printed "[object Object]" because the mapping read keys the upstream row does not have.
+12:  * Harness: the ks745 pattern - the router mounted on a bare express app behind a stub admin, the security service replaced by a recording `fetch`.
+13:  */
+14: import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
+15: import http from 'node:http';
+16: import type { AddressInfo } from 'node:net';
+17: import express from 'express';
+18: 
+19: const savedEnv = { ...process.env };
+20: process.env.SECURITY_SERVICE_URL = 'http://security.test:1';
+21: 
+22: /** One audit row in the shape the security service really lists (services/security/src/converters.ts:21-36). */
+23: type Row = { id: string; tenantId: string; userId: string; action: string; resourceType: string; resourceId: string; ipAddress: string; userAgent: string; details: Record<string, unknown>; success: boolean; createdAt: string };
+24: const row = (n: number, createdAt: string, over: Partial<Row> = {}): Row => ({
+25:   id: `audit-ks1645-${n}`, tenantId: 'a0000000-0000-4000-8000-000000000001', userId: 'u1', action: 'login', resourceType: 'user', resourceId: `r${n}`,
+26:   ipAddress: '203.0.113.9', userAgent: 'agent', details: { reason: 'password' }, success: true, createdAt, ...over,
+27: });
+28: /** n rows inside 2026-09-01 (one millisecond apart, so every createdAt is distinct and inside the range). */
+29: const manyRows = (n: number): Row[] => Array.from({ length: n }, (_, i) => row(i + 1, new Date(Date.UTC(2026, 8, 1, 10, 0, 0, i)).toISOString()));
+30: 
+31: let upstreamRows: Row[] = [];
+32: let failOffset: number | undefined;
+33: const urls: string[] = [];
+34: /** The security service's GET /api/audit as it really behaves; `type` is deliberately never read. */
+35: function upstream(url: string): Response {
+36:   urls.push(url);
+37:   const q = new URL(url).searchParams;
+38:   const limit = parseInt(q.get('limit') ?? '50', 10); const offset = parseInt(q.get('offset') ?? '0', 10);
+39:   if (failOffset !== undefined && offset === failOffset) return { ok: false, status: 503, json: async () => ({ error: 'upstream stalled' }) } as unknown as Response;
+40:   let f = upstreamRows;
+41:   if (q.get('from')) f = f.filter((r) => new Date(r.createdAt) >= new Date(q.get('from') as string));
+42:   if (q.get('to')) f = f.filter((r) => new Date(r.createdAt) <= new Date(q.get('to') as string));
+43:   return { ok: true, status: 200, json: async () => ({ success: true, data: { logs: f.slice(offset, offset + limit), total: f.length, limit, offset } }) } as unknown as Response;
+44: }
+45: const fetchMock = vi.fn(async (input: unknown) => upstream(String(input)));
+46: vi.stubGlobal('fetch', fetchMock);
+47: 
+48: let server: ReturnType<ReturnType<typeof express>['listen']> | undefined; let port = 0;
+49: beforeAll(async () => {
+50:   const { default: router } = await import('../routes/audit-export');
+51:   const app = express();
+52:   app.use((req, _res, next) => { (req as any).user = { id: 'admin-ks1645', role: 'super_admin' }; next(); });
+53:   app.use('/api/admin/audit', router);
+54:   await new Promise<void>((r) => {
+55:     const s = app.listen(0, '127.0.0.1', () => { port = (s.address() as AddressInfo).port; r(); });
+56:     server = s;
+57:   });
+58: }, 10_000);
+59: afterAll(async () => {
+60:   const s = server;
+61:   if (s) await new Promise<void>((r) => s.close(() => r()));
+62:   for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];
+63:   Object.assign(process.env, savedEnv);
+64:   vi.unstubAllGlobals();
+65: });
+66: beforeEach(() => { fetchMock.mockClear(); urls.length = 0; upstreamRows = []; failOffset = undefined; });
+67: type Got = { status: number; text: string; disposition: string | undefined; truncatedHeader: string | undefined };
+68: function getText(path: string): Promise<Got> {
+69:   return new Promise((resolve, reject) => {
+70:     http.get({ hostname: '127.0.0.1', port, path }, (res) => {
+71:       let data = ''; res.on('data', (c) => (data += c));
+72:       res.on('end', () => resolve({ status: res.statusCode ?? 0, text: data, disposition: res.headers['content-disposition'], truncatedHeader: res.headers['x-audit-export-truncated'] as string | undefined }));
+73:     }).on('error', reject);
+74:   });
+75: }
+76: const RANGE = 'from=2026-09-01&to=2026-09-02';
+77: const param = (url: string, name: string): string | null => new URL(url).searchParams.get(name);
+78: type Body = { meta: { from: string; to: string; totalEntries: number; total?: number; truncated?: boolean; type?: unknown }; data: Array<{ id: string }> };
+79: 
+80: describe('KS-1645 stub - the upstream double behaves like the real service (so a green cell below is not the stub\'s doing)', () => {
+81:   it('CONTROL KS-1645 S1: default limit 50 with no limit given, no clamp when asked for more, a bare-date `to` excludes that day, `type` is ignored', () => {
+82:     upstreamRows = manyRows(1200);
+83:     const j = (url: string) => (upstream(url).json() as Promise<{ data: { logs: unknown[]; total: number } }>);
+84:     return Promise.all([j('http://x/api/audit?from=2026-09-01'), j('http://x/api/audit?from=2026-09-01&limit=5000'), j('http://x/api/audit?from=2026-09-01&to=2026-09-01'), j('http://x/api/audit?from=2026-09-01&type=auth')])
+85:       .then(([dflt, big, bareTo, typed]) => {
+86:         expect([dflt.data.logs.length, big.data.logs.length, bareTo.data.logs.length, typed.data.total]).toEqual([50, 1200, 0, 1200]);
+87:       });
+88:   });
+89: });
+90: 
+91: describe('KS-1645 item 1 - the export pages the upstream and says when it is short', () => {
+92:   it('RED KS-1645 P1: 2,300 upstream rows are ALL exported, in pages of 1000 at offsets 0, 1000 and 2000; meta says 2,300 of 2,300 and not truncated', async () => {
+93:     upstreamRows = manyRows(2300);
+94:     const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+95:     const body = JSON.parse(res.text) as Body;
+96:     expect([res.status, body.data.length, body.meta.totalEntries, body.meta.total, body.meta.truncated]).toEqual([200, 2300, 2300, 2300, false]);
+97:     expect(urls.map((u) => [param(u, 'limit'), param(u, 'offset')])).toEqual([['1000', '0'], ['1000', '1000'], ['1000', '2000']]);
+98:     expect(new Set(body.data.map((e) => e.id)).size, 'no row twice, none missing').toBe(2300);
+99:   });
+100: 
+101:   it('RED KS-1645 P2: 10,500 upstream rows stop at the 10,000 bound; JSON meta says truncated: true with total 10,500', async () => {
+102:     upstreamRows = manyRows(10_500);
+103:     const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+104:     const body = JSON.parse(res.text) as Body;
+105:     expect([res.status, body.data.length, body.meta.totalEntries, body.meta.total, body.meta.truncated]).toEqual([200, 10_000, 10_000, 10_500, true]);
+106:     expect(urls.length, 'ten pages, then the bound stops the loop').toBe(10);
+107:   });
+108: 
+109:   it('RED KS-1645 P2b: the same 10,500 rows as CSV: 10,000 data rows under the header, and the X-Audit-Export-Truncated: true response header', async () => {
+110:     upstreamRows = manyRows(10_500);
+111:     const res = await getText(`/api/admin/audit/export?${RANGE}&format=csv`);
+112:     expect([res.status, res.truncatedHeader, res.text.split('\n').length - 1]).toEqual([200, 'true', 10_000]);
+113:   });
+114: 
+115:   it('RED KS-1645 P3: one short page says truncated: false in JSON and sets NO truncation header in CSV', async () => {
+116:     upstreamRows = manyRows(3);
+117:     const json = JSON.parse((await getText(`/api/admin/audit/export?${RANGE}&format=json`)).text) as Body;
+118:     expect([json.data.length, json.meta.total, json.meta.truncated]).toEqual([3, 3, false]);
+119:     const csv = await getText(`/api/admin/audit/export?${RANGE}&format=csv`);
+120:     expect([csv.status, csv.truncatedHeader]).toEqual([200, undefined]);
+121:   });
+122: 
+123:   it('RED KS-1645 P4: a page that fails after the first is the upstream\'s status as a 503 BAD_GATEWAY, never a short 200', async () => {
+124:     upstreamRows = manyRows(2300);
+125:     failOffset = 1000;
+126:     const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+127:     expect([res.status, JSON.parse(res.text)?.error?.code]).toEqual([503, 'BAD_GATEWAY']);
+128:   });
+129: });
+130: 
+131: describe('KS-1645 item 2 - `to` includes its whole UTC day', () => {
+132:   it('RED KS-1645 B1: rows on the `to` day (10:00Z and the last millisecond) are exported, the day after is not; the upstream is sent the end of that day; filename and meta keep the plain date', async () => {
+133:     upstreamRows = [row(1, '2026-09-01T10:00:00.000Z'), row(2, '2026-09-02T10:00:00.000Z'), row(3, '2026-09-02T23:59:59.999Z'), row(4, '2026-09-03T00:00:00.000Z')];
+134:     const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+135:     const body = JSON.parse(res.text) as Body;
+136:     expect(body.data.map((e) => e.id), 'CONTROL inside the cell: the row at 2026-09-03T00:00:00.000Z stays out').toEqual(['audit-ks1645-1', 'audit-ks1645-2', 'audit-ks1645-3']);
+137:     expect(param(urls[0], 'to')).toBe('2026-09-02T23:59:59.999Z');
+138:     expect(param(urls[0], 'from')).toBe('2026-09-01');
+139:     expect([body.meta.from, body.meta.to, res.disposition]).toEqual(['2026-09-01', '2026-09-02', 'attachment; filename="audit-logs_2026-09-01_2026-09-02.json"']);
+140:   });
+141: });
+142: 
+143: describe('KS-1645 item 3 - the export claims no `type` filter it cannot apply (retires PR 1616\'s 400, which validated a filter that did not exist)', () => {
+144:   it('RED KS-1645 T1: any `type` value, known or not, is answered 200 and never forwarded, named in the filename, or put in meta', async () => {
+145:     upstreamRows = manyRows(2);
+146:     for (const t of ['auth', 'bogus']) {
+147:       urls.length = 0;
+148:       const res = await getText(`/api/admin/audit/export?${RANGE}&format=json&type=${t}`);
+149:       const body = JSON.parse(res.text) as Body;
+150:       expect([res.status, param(urls[0], 'type'), 'type' in body.meta, (res.disposition ?? '').includes(t)], `type=${t}`).toEqual([200, null, false, false]);
+151:     }
+152:   });
+153: 
+154:   it('RED KS-1645 T2: with no `type` at all the request is the same: nothing about a type is sent or named', async () => {
+155:     upstreamRows = manyRows(2);
+156:     const res = await getText(`/api/admin/audit/export?${RANGE}&format=json`);
+157:     expect([res.status, param(urls[0], 'type'), 'type' in (JSON.parse(res.text) as Body).meta]).toEqual([200, null, false]);
+158:   });
+159: });
+160: 
+161: describe('KS-1645 CSV - every column reads a key the upstream row really has', () => {
+162:   const HEADER = 'id,timestamp,action,userId,ipAddress,userAgent,resource,resourceId,details,outcome';
+163:   it('RED KS-1645 C1: the header is exactly the ten real columns and a real-shaped row fills every one; a failed row says failure', async () => {
+164:     upstreamRows = [row(1, '2026-09-01T10:00:00.000Z'), row(2, '2026-09-01T11:00:00.000Z', { success: false })];
+165:     const lines = (await getText(`/api/admin/audit/export?${RANGE}&format=csv`)).text.split('\n');
+166:     expect(lines[0]).toBe(HEADER);
+167:     expect(lines[1]).toBe('audit-ks1645-1,2026-09-01T10:00:00.000Z,login,u1,203.0.113.9,agent,user,r1,"{""reason"":""password""}",success');
+168:     expect(lines[2].endsWith(',failure'), 'success: false is written as failure').toBe(true);
+169:   });
+170: 
+171:   it('RED KS-1645 C2: a details value holding a comma and a quote stays ONE escaped field, not "[object Object]"', async () => {
+172:     upstreamRows = [row(1, '2026-09-01T10:00:00.000Z', { details: { note: 'a,"b"' } })];
+173:     const line = (await getText(`/api/admin/audit/export?${RANGE}&format=csv`)).text.split('\n')[1];
+174:     expect(line).not.toContain('[object Object]');
+175:     expect(line).toContain('"{""note"":""a,\\""b\\""""}"');
+176:   });
+177: 
+178:   it('CONTROL KS-1645 C3: the checks that were already there still hold - a missing `to` and a bad format are 400s and the upstream is not asked', async () => {
+179:     const noTo = await getText('/api/admin/audit/export?from=2026-09-01');
+180:     const badFormat = await getText(`/api/admin/audit/export?${RANGE}&format=xml`);
+181:     expect([noTo.status, badFormat.status, fetchMock.mock.calls.length]).toEqual([400, 400, 0]);
+182:   });
+183: });
+184: 
+185: describe('KS-2016 - the caller\'s Authorization header goes upstream on every page, not only the first', () => {
+186:   it('RED KS-2016 A1: three upstream pages (2,300 rows) each carry the caller\'s Authorization header', async () => {
+187:     upstreamRows = manyRows(2300);
+188:     const status = await new Promise<number>((resolve, reject) => {
+189:       http.get({ hostname: '127.0.0.1', port, path: `/api/admin/audit/export?${RANGE}&format=json`, headers: { authorization: 'Bearer ks2016-caller' } }, (res) => {
+190:         res.resume();
+191:         res.on('end', () => resolve(res.statusCode ?? 0));
+192:       }).on('error', reject);
+193:     });
+194:     const sent = fetchMock.mock.calls.map((call) => ((call as unknown[])[1] as { headers?: Record<string, string> } | undefined)?.headers?.Authorization);
+195:     expect(status).toBe(200);
+196:     expect(sent).toEqual(['Bearer ks2016-caller', 'Bearer ks2016-caller', 'Bearer ks2016-caller']);
+197:   });
+198: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS 441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`): **NOT run** (no local stack in this seat; see Test Evidence)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`): **NOT run** (no local stack in this seat)
+
+### PII review (KS 256 R15/R16)
+
+Not applicable: this PR adds one cell to an existing test file; the values are made up (a made-up bearer value and 2,300 generated rows). No product code, no published OpenAPI spec, example value, fixture or seed data.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-2016
+
+## Summary
+
+**TEST-ONLY. No product code is changed: one existing test file, 15 lines added.**
+
+Gate 202 found that none of the 12 cells added for `GET /api/admin/audit/export` asserts that the caller's `Authorization` header is sent with every upstream page: its mutant M4, which drops the header on page 2 and later, survived all 12 and was caught only by the gate's own cells. The gate records that the real effect would be fail-closed, because the upstream refuses a call with no JWT. This PR adds one cell to `ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts`: with 2,300 upstream rows (three pages) the export answers 200 and each of the three upstream calls carries `Bearer ks2016-caller`. The cell's title begins "RED": that is the held pass's label for the cell; it passes on develop.
+
+`Refs KS-2016`. This PR does not close the ticket. Nothing is deployed and nothing needs deploying: no running service changes.
+
+**Fragment pair:** none, because this is test-only and no rule requires one (the checkout at `a65ae7ed1` has 0 hits for "fragment" in the pre-push hook, the preflight directory, `CLAUDE.md`, `CONTRIBUTING.md`, `DEV-PROCESS.md` and `package.json`; the first PR of this set lists the search). Wednesday ruled no pair for the test-only PRs of this set.
+
+**Surface this cell reads:** `api-gateway/src/routes/audit-export.ts`, through the route's own fetch calls (a mocked upstream). The property is security-shaped (the caller's authorization reaches the upstream on every page); the PR changes no product byte.
+
+## Test Evidence
+
+**Touched (1 file):** `Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts` (+15 -0).
+
+**Ran by Seat T 15th** (2026-11-08 between 13:08Z and 13:15Z, on develop `7eda23b34d3b`, macOS host shared with other seats and a pre-push hook running, Node v26.8.1, **not the LTS 24 line**; vitest 4.1.12):
+- Cell file on the applied tree: 13 of 13, the new cell passes (10 ms in two runs).
+- **Red-proof (mine, using the held pass's plant, never committed):** the plant makes the page loop send only a `Content-Type` header once rows exist, so `Authorization` is dropped from page 2 on, in `audit-export.ts`. With it applied the new cell alone fails by assertion (`expected [ 'Bearer ks2016-caller', ... ] to deeply equal [ 'Bearer ks2016-caller', ... ]`) and the other 12 stay green. The plant was reversed: `audit-export.ts` sha256 equal to before, `git diff` of it empty.
+- Whole api-gateway suite (`vitest`, 4 workers, same instrument on both sides): unpatched develop `7eda23b34d3b` 1869 of 1869; with this change 1870 of 1870. Failed-cell names compared: both lists empty.
+- `npm run check:test-types` ratchet for api-gateway (the repo's checker, this service only): 205 files examined, 167 under `__tests__`, 25 errors, all in the baseline, 0 new, 0 stale; with a planted type error appended to the touched file it exits 1, and the file was restored byte-equal.
+- eslint on the touched file: no output; planted control exits 1.
+- `docs-fragments.mjs check`: OK; planted defect exits 1; OK again after it is moved away.
+- Pre-push preflight: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+
+**Re-measured by Seat T 15th after the push** (2026-11-08 14:14Z, from the push driver's record, `git ls-remote` and `git diff-tree`): origin holds the branch at `85785a9f3663`, one commit whose parent is `7eda23b34d3b`; one file changed (the one above, status M, +15 -0). Develop moved once while the branch waited: the driver's gate read develop `092d30706b95` at 13:57:02Z (one squash on top of my base, the KS 1536 PR 3b change to auth's platform lists) and found 8 files changed by the move, overlap with this branch's one path 0, and none of the 43 open PRs then open touching that path. My own intersection of those 8 files with this branch's path and with `audit-export.ts`, the product file the cell reads, is empty. The figures above were measured on the base `7eda23b34d3b` and were **not re-run on the newer develop**. The push took 1001 s. The hook ran 13 of 16 legs and nothing failed; legs 3, 4 and 8 were skipped because the local stack was not up. That is the hook's own wording ("PREFLIGHT INCOMPLETE"), and it is not a pass.
+
+**NOT run:** Schemathesis, Akto, Playwright e2e, k6 (no local stack in this seat), Node 24, any box or deploy.
+
+**Migrations / config:** none.
+
+## Held patch
+
+A held pass from the local model ("the Spark"), raised by Seat T 15th. READY file `READY_KS-2016-KS-2016-O103-P1_spark-dsv4flash_BRIEFED-TESTONLYINPUT-AUDIT-EXPORT-AUTH-EVERY-PAGE-CELL-PASS-9of9_2026-11-08.diff.md`; canonical patch sha256 prefix `003af42d382779ee` (1318 bytes, matched here before applying); run `spark_secuura_2026-11-08_ks_2016_o103_p1_audit_export_auth_every_page`. Strict `git apply -p1`, no offset line. The checker legs are **the checker's, measured at tip `abd044f63a9d`, not re-run by Seat T 15th**: strict apply; touched set equals the declared set; green without the plant; red with the plant by assertion; "whole suite no worse: cells 1840 -> 1841, red 0 -> 0"; restore clean; `RESULT: PASS (tier test_only_input)`.
+
+## What this did NOT do
+
+- It changes nothing in `audit-export.ts`.
+- It pins three pages only, not more, and the `Bearer` form only, not other forms of the header.
+- It does not test the upstream's behaviour on a request with no JWT (the gate cites `services/security/src/index.ts` lines 897 to 903 for that; not re-read here).
+
+## Test plan
+
+- [ ] `npm --prefix Blockchain/Dev/services/api-gateway test -- src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts` — 13 cells
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 2096,
+ "head_sha": "85785a9f3663ac2ac784ecb76cf896619e5f90e6",
+ "pr_tip_now": "85785a9f3663ac2ac784ecb76cf896619e5f90e6",
+ "head_mode": "tip",
+ "merge_base": "7eda23b34d3b7a413ca8f9c0945c7843708ce9f4",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts",
+   "added": "15",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts"
+ ],
+ "product_files": [],
+ "diff_stat": {
+  "files": 1,
+  "added": 15,
+  "deleted": 0
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 13,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "'native'`, which is planned to become the default in a future major version of Vite:\n  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `\"type\": \"module\"` in the closest package.json\nSet `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning."
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 13,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "'native'`, which is planned to become the default in a future major version of Vite:\n  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `\"type\": \"module\"` in the closest package.json\nSet `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning."
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 13,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 13,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 7
+}

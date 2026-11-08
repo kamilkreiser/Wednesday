@@ -1,0 +1,756 @@
+===== TICKET =====
+KS-2077 — Docs: the architecture reference sends /api/rewards to Staking, the gateway sends it to Referral; the dev-debug override has no staking port [In Progress]
+
+**BLUF:** Two statements from Seat C 36th, relayed by the coordinator and checked here in source at develop `35bcfa000b44`, show two places that disagree with the gateway and the compose file. The architecture reference sends `/api/rewards` to the Staking service, but the gateway sends it to the Referral service. And a comment in the compose file says a dev-debug override re-publishes the staking port, but that override has no staking lines. This seat read files through the GitHub API and ran nothing. Priority Low (4): documentation and comments only. Facts only, nothing is built.
+
+## Item 1: the routing table in the architecture reference
+
+* `Projects Documents/Secuura-Architecture-Reference.md` line 279, under the table headed "Path Pattern, Target Service, Auth Required": `/api/staking/*`, `/api/rewards/*`, `/api/pool/*` goes to "Staking (:4015)".
+* `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts` lines 1052 to 1055 say `/api/rewards` is intentionally not routed to staking: it is proxied to the referral service, and staking's own `/api/rewards` routes are gateway-shadowed by design. Lines 1090 to 1093 are the mount: `router.use('/api/rewards', authenticateToken(true), proxy('referral', ...))`.
+* The same comment (lines 1047 to 1050) says the staking service mounts its routers at `/api/stake`, `/api/rewards` and `/api/tiers`, not `/api/staking`; lines 1057 to 1059 keep `/api/staking` as a shim that strips the prefix to `/api/stake`.
+
+## Item 2: the compose comment and the dev-debug override
+
+* `Blockchain/Dev/docker-compose.yml` lines 1055 to 1057, on the staking service: "Pen-test F-04: backend ports no longer published on host. Use `docker compose -f docker-compose.yml -f docker-compose.dev-debug.override.yml up -d` to re-enable for local debugging. Was: - "6015:4015"".
+* `Blockchain/Dev/docker-compose.dev-debug.override.yml` has 44 lines and none names staking, 4015 or 6015. Control: the same read lists the override's nine service keys (`originate`, `prism`, `wallet-connector`, `auth`, `timestamping`, `anchoring`, `security`, `analytics`, `m365-integration`, lines 23 to 39); staking is not one of them. The override's own comment at line 18 says each host port is 6000 plus the service port minus 4000, which would be 6015 for staking. So the way the compose comment gives to re-enable staking's port does not do so.
+* The architecture reference, same file as item 1, line 192, still lists 6015 as staking's external port in the table headed "Port (External)".
+* The comment in `services/api-gateway/src/routes/proxy.ts` at lines 1054 and 1055, "Direct hits on the staking service port still work", holds on the compose network. From the host, by item 2, it does not, as read and not run.
+
+## Noted while reading (not part of Seat C 36th's statement; one grep, not conclusive)
+
+* The reference's row at line 280 reads `/api/referral/*` to Referral (:4016). `services/api-gateway/src/routes/proxy.ts` mounts `/api/referrals` at line 1080 (plural), and the grep for single-quoted `/api/referral` mounts found no singular one.
+* Row 279 also lists `/api/pool/*`. The same grep of `services/api-gateway/src/routes/proxy.ts` found no `/api/pool` mount. Another file may mount it; this seat did not look.
+* No other row of the table was checked.
+
+## Timing note
+
+The comment at `services/api-gateway/src/routes/proxy.ts` lines 1054 and 1055 goes stale if the change for KS-2071 lands (Seat C 36th's statement). It is not a defect on develop now.
+
+## Not known
+
+* Whether other rows of the routing table or the port tables drift. Nothing was run.
+
+## Adjacent, not duplicates
+
+* KS-296 (Done) fixed the dev-debug override's miswired ports for the port registry. KS-2071 is the staking routes ticket and belongs to another seat.
+
+## Searched before filing (board, includeArchived)
+
+Read-only, run 2026-11-06 with controls: a known term hit KS-1379 and a random token hit 0. Counts are candidates, open literal hits, closed or archived literal hits.
+
+* `Secuura-Architecture-Reference` 100, 0, 0. `dev-debug.override` 100, 0, 2 (closed: KS-296, KS-713). `api/rewards` 100, 2, 5 (open: KS-485 and KS-1963, neither about this routing).
+* This is "not found by these searches", not proof of absence.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Projects Documents/Secuura-Architecture-Reference.md b/Projects Documents/Secuura-Architecture-Reference.md
+index 19171e0e2..c7c3144bb 100644
+--- a/Projects Documents/Secuura-Architecture-Reference.md	
++++ b/Projects Documents/Secuura-Architecture-Reference.md	
+@@ -276,8 +276,8 @@ Routes forwarded to downstream microservices via `http-proxy-middleware`:
+ | `/api/midnight/*`, `/api/proofs/*`, `/api/circuits/*`, `/api/commitments/*`, `/api/disclosure/*`, `/api/private/*` | Midnight (:4012) | Mixed |
+ | `/api/credentials/*`, `/api/presentations/*`, `/api/status/*` | VC Issuer (:4014) | Yes |
+ | `/api/analytics/*` | Analytics (:4010) | Yes |
+-| `/api/staking/*`, `/api/rewards/*`, `/api/pool/*` | Staking (:4015) | Yes |
+-| `/api/referral/*` | Referral (:4016) | Yes |
++| `/api/staking/*`, `/api/pool/*` | Staking (:4015) | Yes |
++| `/api/referral/*`, `/api/rewards/*` | Referral (:4016) | Yes |
+ | `/api/governance/*` | Governance (:4017) | Yes |
+ | `/api/nft/*` | NFT Certificate (:4018) | Yes |
+ | `/api/billing/*` | Billing (:4019) | Yes |
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Projects Documents/Secuura-Architecture-Reference.md
+1: ---
+2: title: Secuura Architecture Reference
+3: created: 27-02-2026
+4: updated: 23-06-2026
+5: tags: [reference/architecture, reference/developer]
+6: status: active
+7: ---
+8: 
+9: # Secuura Architecture Reference
+10: 
+11: ## Summary
+12: 
+13: This document describes the complete system architecture of the Secuura Verification System (SVS) as it stands today. It covers all 20+ microservices, 5 frontend portals, the nginx gateway, the API gateway, data storage, authentication flows, and recent changes from the P1-P5 hardening work.
+14: 
+15: **Key Points:**
+16: - Monorepo with 20+ backend services behind a single API gateway
+17: - 5 frontend portals served through an nginx reverse proxy on port 6882
+18: - PostgreSQL for persistent storage, Redis for caching/sessions/settings
+19: - Cardano blockchain for anchoring, NFTs, DIDs, staking, and governance
+20: 
+21: ---
+22: 
+23: ## Table of Contents
+24: 
+25: - [System Architecture Diagram](#system-architecture-diagram)
+26: - [Service Inventory](#service-inventory)
+27: - [API Gateway Routing](#api-gateway-routing)
+28: - [Nginx Gateway](#nginx-gateway)
+29: - [Frontend Applications](#frontend-applications)
+30: - [Data Flow Diagrams](#data-flow-diagrams)
+31: - [Storage Architecture](#storage-architecture)
+32: - [Authentication Architecture](#authentication-architecture)
+33: - [Recent Changes (P1-P5 Fixes)](#recent-changes-p1-p5-fixes)
+34: 
+35: ---
+36: 
+37: ## System Architecture Diagram
+38: 
+39: ```mermaid
+40: graph TB
+41:     subgraph "Client Layer"
+42:         Browser["Browser / Mobile"]
+43:     end
+44: 
+45:     subgraph "Gateway Layer (Port 6882)"
+46:         NGINX["nginx-gateway<br/>(reverse proxy)"]
+47:     end
+48: 
+49:     subgraph "Frontend Applications"
+50:         IssuerFE["Issuer Portal<br/>React + MUI"]
+51:         VerifierFE["Verifier Portal<br/>React + MUI"]
+52:         AdminFE["Admin Portal<br/>React + MUI"]
+53:         StatusFE["Status Page<br/>React"]
+54:         WebsiteFE["Website<br/>Static"]
+55:     end
+56: 
+57:     subgraph "API Layer"
+58:         APIGW["API Gateway<br/>Express.js :8080"]
+59:     end
+60: 
+61:     subgraph "Core Services"
+62:         AUTH["Auth :4003"]
+63:         ORIG["Originate :4000"]
+64:         WALLET["Wallet Connector :4002"]
+65:         ANCHOR["Anchoring :4005"]
+66:         PRISM["PRISM/DID :4001"]
+67:         TS["Timestamping :4004"]
+68:         SEC["Security :4008"]
+69:     end
+70: 
+71:     subgraph "Integration Services"
+72:         KYC["KYC :4011"]
+73:         M365["M365 Integration :4013"]
+74:         MIDNIGHT["Midnight ZKP :4012"]
+75:         ANALYTICS["Analytics :4010"]
+76:         VC["VC Issuer :4014"]
+77:         NFT["NFT Certificate :4018"]
+78:     end
+79: 
+80:     subgraph "Business Services"
+81:         STAKING["Staking :4015"]
+82:         REFERRAL["Referral :4016"]
+83:         GOV["Governance :4017"]
+84:         BILLING["Billing :4019"]
+85:         TRANSFER["Transfer :4020"]
+86:     end
+87: 
+88:     subgraph "Phase 2 (Disabled)"
+89:         GUARDIAN["Guardian :4006"]
+90:         QUEUE["Queue :4007"]
+91:     end
+92: 
+93:     subgraph "Infrastructure"
+94:         PG["PostgreSQL :5432"]
+95:         REDIS["Redis :6379"]
+96:         PGBOUNCER["PgBouncer :6432"]
+97:     end
+98: 
+99:     subgraph "Blockchain"
+100:         CARDANO["Cardano Network<br/>(devnet/preprod/mainnet)"]
+101:         BLOCKFROST["Blockfrost API"]
+102:         KOIOS["Koios API"]
+103:     end
+104: 
+105:     Browser --> NGINX
+106:     NGINX --> IssuerFE
+107:     NGINX --> VerifierFE
+108:     NGINX --> AdminFE
+109:     NGINX --> StatusFE
+110:     NGINX --> WebsiteFE
+111:     NGINX --> APIGW
+112: 
+113:     APIGW --> AUTH
+114:     APIGW --> ORIG
+115:     APIGW --> WALLET
+116:     APIGW --> ANCHOR
+117:     APIGW --> PRISM
+118:     APIGW --> TS
+119:     APIGW --> SEC
+120:     APIGW --> KYC
+121:     APIGW --> M365
+122:     APIGW --> MIDNIGHT
+123:     APIGW --> ANALYTICS
+124:     APIGW --> VC
+125:     APIGW --> NFT
+126:     APIGW --> STAKING
+127:     APIGW --> REFERRAL
+128:     APIGW --> GOV
+129:     APIGW --> BILLING
+130:     APIGW --> TRANSFER
+131: 
+132:     AUTH --> PG
+133:     AUTH --> REDIS
+134:     ORIG --> PG
+135:     ORIG --> REDIS
+136:     APIGW --> PG
+137:     APIGW --> REDIS
+138:     ANCHOR --> BLOCKFROST
+139:     ANCHOR --> CARDANO
+140:     NFT --> BLOCKFROST
+141:     STAKING --> BLOCKFROST
+142:     PRISM --> CARDANO
+143:     GOV --> CARDANO
+144: 
+145:     PGBOUNCER --> PG
+146: ```
+147: 
+148: ---
+149: 
+150: ## Service Inventory
+151: 
+152: ### Infrastructure
+153: 
+154: | Service | Container | Internal Port | External Port | Database | Redis | Profile | Status |
+155: |---------|-----------|--------------|---------------|----------|-------|---------|--------|
+156: | PostgreSQL 15 | secuura-postgres | 5432 | 6432 | Primary DB | - | default | Active |
+157: | Redis 7 | secuura-redis | 6379 | 6379 | - | Primary cache | default | Active |
+158: | PgBouncer | secuura-pgbouncer | 6432 | 6433 | Connection pool | - | production | Staging/Prod |
+159: | Grafana (observability) | secuura-obs-grafana | 3000 | 3000 | - | - | observability (standalone) | Optional |
+160: | Prometheus (observability) | secuura-obs-prometheus | 9090 | 9090 | - | - | observability (standalone) | Optional |
+161: | Loki | secuura-obs-loki | 3100 | 3100 | - | - | systemTest/observability | Optional |
+162: | Grafana Alloy | secuura-obs-alloy | 12345 | 12345 | - | - | systemTest/observability | Optional |
+163: 
+164: ### Core Services (Phase 1)
+165: 
+166: | Service | Container | Port (Internal) | Port (External) | DB | Redis | Functionality |
+167: |---------|-----------|-----------------|-----------------|-----|-------|---------------|
+168: | API Gateway | secuura-api-gateway | 8080 | (via nginx) | Yes | Yes | Central routing, rate limiting, auth middleware, local CRUD handlers |
+169: | Originate | secuura-originate | 4000 | 6000 | Yes | Yes | Document creation and origination |
+170: | Auth | secuura-auth | 4003 | 6003 | Yes | Yes | Login, register, JWT, MFA, password reset, sessions |
+171: | Wallet Connector | secuura-wallet-connector | 4002 | 6002 | Yes | Yes | CIP-30 wallet connection, signing |
+172: | Anchoring | secuura-anchoring | 4005 | 6005 | Yes | Yes | Blockchain hash anchoring |
+173: | PRISM | secuura-prism | 4001 | 6001 | Yes | Yes | DID creation and resolution |
+174: | Timestamping | secuura-timestamping | 4004 | 6004 | Yes | Yes | RFC-3161, OTS, blockchain timestamps |
+175: | Security | secuura-security | 4008 | 6008 | Yes | Yes | Audit logging, security scanning |
+176: 
+177: ### Integration Services (Phase 2-4)
+178: 
+179: | Service | Container | Port (Internal) | Port (External) | DB | Redis | Functionality |
+180: |---------|-----------|-----------------|-----------------|-----|-------|---------------|
+181: | KYC | secuura-kyc | 4011 | 6011 | Yes | Yes | Identity verification (Microsoft, mock) |
+182: | M365 Integration | secuura-m365-integration | 4013 | 6013 | Yes | Yes | Microsoft 365 / SharePoint / Entra ID |
+183: | Midnight | secuura-midnight | 4012 | 6012 | Yes | Yes | Zero-knowledge proofs (mock mode) |
+184: | Analytics | secuura-analytics | 4010 | 6010 | Yes | Yes | Platform analytics (mock data) |
+185: | VC Issuer | secuura-vc-issuer | 4014 | 6014 | Yes | Yes | W3C Verifiable Credentials |
+186: | NFT Certificate | secuura-nft-certificate | 4018 | 6018 | Yes | Yes | NFT minting recording, verification |
+187: 
+188: ### Business Services (Phase 3-5)
+189: 
+190: | Service | Container | Port (Internal) | Port (External) | DB | Redis | Functionality |
+191: |---------|-----------|-----------------|-----------------|-----|-------|---------------|
+192: | Staking | secuura-staking | 4015 | 6015 | Yes | Yes | Token staking and rewards |
+193: | Referral | secuura-referral | 4016 | 6016 | Yes | Yes | Referral programme management |
+194: | Governance | secuura-governance | 4017 | 6017 | Yes | Yes | DAO proposal voting |
+195: | Billing | secuura-billing | 4019 | 6019 | Yes | Yes | Stripe integration, chargeable events |
+196: | Transfer | secuura-transfer | 4020 | 6020 | Yes | Yes | Document transfer and ownership |
+197: 
+198: ### Phase 2 (Disabled by Default)
+199: 
+200: | Service | Container | Port | Profile | Description |
+201: |---------|-----------|------|---------|-------------|
+202: | Guardian | secuura-guardian | 4006/6006 | phase2 | Guardian node management |
+203: | Queue | secuura-queue | 4007/6007 | phase2 | Job queue processing |
+204: 
+205: ### Blockchain (Optional Profiles)
+206: 
+207: | Service | Container | Ports | Profile | Description |
+208: |---------|-----------|-------|---------|-------------|
+209: | Cardano DevNet | secuura-cardano-devnet | 6091, 6092, 6093 | devnet | Yaci DevKit local network |
+210: | Cardano Mock | secuura-cardano-mock | 6090 | mock | Nginx-based mock API |
+211: 
+212: ---
+213: 
+214: ## API Gateway Routing
+215: 
+216: The API gateway (`services/api-gateway/src/index.ts`) serves as the central entry point for all API requests. It handles requests in two modes:
+217: 
+218: ### Local Handlers (Direct Responses)
+219: 
+220: Routes processed directly within the API gateway with PostgreSQL/Redis storage:
+221: 
+222: | Method | Path | Auth | Description |
+223: |--------|------|------|-------------|
+224: | `POST` | `/api/auth/login` | No | Login (proxied to auth service) |
+225: | `POST` | `/api/auth/register` | No | Registration (proxied to auth service) |
+226: | `POST` | `/api/auth/refresh` | No | Token refresh (proxied to auth service) |
+227: | `POST` | `/api/auth/password/forgot` | No | Password reset request |
+228: | `POST` | `/api/auth/password/reset-request` | No | Password reset alias |
+229: | `GET` | `/api/admin/document-types` | Admin | List document types (Redis) |
+230: | `POST` | `/api/admin/document-types` | Admin | Create document type (Redis) |
+231: | `GET` | `/api/admin/document-types/:id` | Admin | Get document type (Redis) |
+232: | `PUT` | `/api/admin/document-types/:id` | Admin | Update document type (Redis) |
+233: | `DELETE` | `/api/admin/document-types/:id` | Admin | Delete document type (Redis) |
+234: | `GET` | `/api/admin/workflows` | Admin | List workflows (Redis) |
+235: | `POST` | `/api/admin/workflows` | Admin | Create workflow (Redis) |
+236: | `PUT` | `/api/admin/workflows/:id` | Admin | Update workflow (Redis) |
+237: | `DELETE` | `/api/admin/workflows/:id` | Admin | Delete workflow (Redis) |
+238: | `GET` | `/api/admin/verification-queue` | Admin | List verification items |
+239: | `POST` | `/api/admin/verification-queue/:id/action` | Admin | Queue item action (approve/reject/escalate/assign) |
+240: | `GET` | `/api/admin/settings` | Admin | Get platform settings (Redis) |
+241: | `PUT` | `/api/admin/settings` | Admin | Update platform settings (Redis) |
+242: | `GET` | `/api/admin/audit-logs` | Admin | Audit log entries (PostgreSQL) |
+243: | `GET` | `/api/security/audit` | Admin | Alias for audit logs |
+244: | `GET` | `/api/admin/identity/users` | Admin | List identity users (PostgreSQL) |
+245: | `POST` | `/api/admin/identity/users` | Admin | Create identity user |
+246: | `GET` | `/api/admin/organizations` | Admin | List organisations (PostgreSQL) |
+247: | `POST` | `/api/admin/organizations` | Admin | Create organisation |
+248: | `GET` | `/api/admin/documents/by-type/:typeId` | Admin | Documents by type |
+249: | `GET` | `/api/admin/verification-policies` | Admin | List verification policies (Redis) |
+250: | `POST` | `/api/admin/verification-policies` | Admin | Create policy |
+251: | `GET` | `/api/admin/third-party-verifiers` | Admin | List providers |
+252: | `POST` | `/api/admin/third-party-verifiers` | Admin | Create provider |
+253: | `GET` | `/api/settings/notifications` | Optional | Notification settings (Redis) |
+254: | `PUT` | `/api/settings/notifications` | Optional | Update notification settings |
+255: | `GET` | `/api/privacy/settings` | Optional | Privacy settings (Redis) |
+256: | `PUT` | `/api/privacy/settings` | Optional | Update privacy settings |
+257: | `POST` | `/api/verification/verify` | No | Public document verification |
+258: 
+259: ### Proxied Routes
+260: 
+261: Routes forwarded to downstream microservices via `http-proxy-middleware`:
+262: 
+263: | Path Pattern | Target Service | Auth Required |
+264: |-------------|----------------|---------------|
+265: | `/api/auth/*` | Auth Service (:4003) | No |
+266: | `/api/users/*` | Auth Service (:4003) | Yes |
+267: | `/api/originate/*` | Originate Service (:4000) | Yes |
+268: | `/api/documents/*` | Originate Service (:4000) | Yes |
+269: | `/api/wallet/*` | Wallet Connector (:4002) | Yes |
+270: | `/api/anchors/*`, `/api/anchoring/*` | Anchoring Service (:4005) | Yes |
+271: | `/api/timestamps/*` | Timestamping Service (:4004) | Yes |
+272: | `/api/did/*` | PRISM Service (:4001) | Yes |
+273: | `/api/security/*` | Security Service (:4008) | Yes |
+274: | `/api/m365/*` | M365 Integration (:4013) | Yes |
+275: | `/api/kyc/*` | KYC Service (:4011) | Yes |
+276: | `/api/midnight/*`, `/api/proofs/*`, `/api/circuits/*`, `/api/commitments/*`, `/api/disclosure/*`, `/api/private/*` | Midnight (:4012) | Mixed |
+277: | `/api/credentials/*`, `/api/presentations/*`, `/api/status/*` | VC Issuer (:4014) | Yes |
+278: | `/api/analytics/*` | Analytics (:4010) | Yes |
+279: | `/api/staking/*`, `/api/pool/*` | Staking (:4015) | Yes |
+280: | `/api/referral/*`, `/api/rewards/*` | Referral (:4016) | Yes |
+281: | `/api/governance/*` | Governance (:4017) | Yes |
+282: | `/api/nft/*` | NFT Certificate (:4018) | Yes |
+283: | `/api/billing/*` | Billing (:4019) | Yes |
+284: | `/api/transfer/*` | Transfer (:4020) | Yes |
+285: 
+286: ---
+287: 
+288: ## Nginx Gateway
+289: 
+290: The nginx reverse proxy (`docker/nginx-gateway/nginx.conf`) provides a unified entry point on port 6882.
+291: 
+292: ### Routing Rules
+293: 
+294: | Path | Upstream | Description |
+295: |------|----------|-------------|
+296: | `/` | `issuer-frontend:80` | Issuer Portal (default/catch-all) |
+297: | `/verify/` | `verifier-frontend:80` | Verifier Portal |
+298: | `/admin/` | `admin-frontend:80` | Admin Dashboard |
+299: | `/status/` | `status-frontend:80` | System Status Page |
+300: | `/website/` | `website-frontend:80` | Marketing Website |
+301: | `/api/` | `api-gateway:8080` | API Gateway |
+302: | `/originate/` | `originate:4000` | Originate Service (direct) |
+303: | `/analytics/` | `analytics:4010` | Analytics Service (direct) |
+304: | `/system/` | `api-gateway:8080` | System status aggregation |
+305: | `/showcase/` | Static files | Demo recording title cards |
+306: | `/health` | Static JSON | Gateway health check |
+307: 
+308: ### Security Headers
+309: 
+310: All responses include:
+311: - `X-Frame-Options: SAMEORIGIN`
+312: - `X-Content-Type-Options: nosniff`
+313: - `X-XSS-Protection: 1; mode=block`
+314: - `Referrer-Policy: strict-origin-when-cross-origin`
+315: 
+316: ### HTTPS (Production)
+317: 
+318: HTTPS is configured but commented out. To enable:
+319: 1. Mount TLS certificates at `/etc/nginx/ssl/cert.pem` and `/etc/nginx/ssl/key.pem`
+320: 2. Set `ENABLE_HTTPS=true`
+321: 3. Uncomment the HTTPS server block in `nginx.conf`
+322: 4. Enables TLSv1.2/1.3, HSTS with 2-year max-age, and CSP headers
+323: 
+324: ---
+325: 
+326: ## Frontend Applications
+327: 
+328: | Portal | URL (via Gateway) | Direct URL | Framework | Build Tool | Key Environment Variables |
+329: |--------|-------------------|------------|-----------|------------|--------------------------|
+330: | **Issuer Portal** | `http://localhost:6882/` | N/A (nginx only) | React + MUI + TypeScript | Vite | `VITE_API_URL`, `VITE_CARDANO_NETWORK` |
+331: | **Verifier Portal** | `http://localhost:6882/verify/` | N/A | React + MUI + TypeScript | Vite | `VITE_API_URL` |
+332: | **Admin Portal** | `http://localhost:6882/admin/` | N/A | React + MUI + TypeScript | Vite | `VITE_API_URL`, `VITE_ORIGINATE_URL`, `VITE_ANALYTICS_URL` |
+333: | **Status Page** | `http://localhost:6882/status/` | N/A | React + TypeScript | Vite | None |
+334: | **Marketing Website** | `http://localhost:6882/website/` | `http://localhost:6881` | Static HTML/CSS/JS | None | None |
+335: | **Tokenomics Website** | N/A | `http://localhost:8881` | Static | Docker | None |
+336: 
+337: ---
+338: 
+339: ## Data Flow Diagrams
+340: 
+341: ### Document Certification Lifecycle
+342: 
+343: ```mermaid
+344: sequenceDiagram
+345:     participant Issuer as Issuer (Browser)
+346:     participant IssuerFE as Issuer Portal
+347:     participant APIGW as API Gateway
+348:     participant Originate as Originate Service
+349:     participant Anchoring as Anchoring Service
+350:     participant Cardano as Cardano Network
+351: 
+352:     Issuer->>IssuerFE: Select document
+353:     IssuerFE->>IssuerFE: Hash document (SHA-256, client-side)
+354:     IssuerFE->>APIGW: POST /api/documents {hash, metadata}
+355:     APIGW->>Originate: Forward request
+356:     Originate->>Originate: Store document record
+357:     Originate-->>APIGW: Document created
+358:     APIGW-->>IssuerFE: {documentId}
+359: 
+360:     IssuerFE->>APIGW: POST /api/anchors {documentId, hash}
+361:     APIGW->>Anchoring: Forward request
+362:     Anchoring->>Anchoring: Build Cardano transaction
+363:     Anchoring->>Cardano: Submit transaction (via Blockfrost)
+364:     Cardano-->>Anchoring: Transaction hash
+365:     Anchoring-->>APIGW: {txHash, blockHeight}
+366:     APIGW-->>IssuerFE: Anchor confirmed
+367: ```
+368: 
+369: ### Verification Flow
+370: 
+371: ```mermaid
+372: sequenceDiagram
+373:     participant Verifier as Verifier (Browser)
+374:     participant VerifierFE as Verifier Portal
+375:     participant APIGW as API Gateway
+376:     participant Cardano as Cardano Network
+377: 
+378:     Verifier->>VerifierFE: Upload document or enter ID
+379:     VerifierFE->>VerifierFE: Hash document (SHA-256, client-side)
+380:     VerifierFE->>APIGW: POST /api/verification/verify {documentHash or documentId}
+381:     APIGW->>APIGW: Lookup document by hash/ID
+382:     APIGW->>APIGW: Find anchor transaction
+383:     APIGW-->>VerifierFE: {verified, certifier, anchor, blockchain}
+384:     VerifierFE->>Verifier: Display verification result
+385: ```
+386: 
+387: ### NFT Minting Flow
+388: 
+389: ```mermaid
+390: sequenceDiagram
+391:     participant User as Issuer (Browser)
+392:     participant FE as Issuer Portal
+393:     participant Wallet as CIP-30 Wallet
+394:     participant APIGW as API Gateway
+395:     participant NFT as NFT Service
+396:     participant Cardano as Cardano
+397: 
+398:     User->>FE: Click "Mint NFT Certificate"
+399:     FE->>FE: Build transaction (MeshSDK)
+400:     FE->>Wallet: Request signature (CIP-30)
+401:     Wallet-->>FE: Signed transaction
+402:     FE->>Cardano: Submit transaction (via Blockfrost)
+403:     Cardano-->>FE: Transaction hash
+404:     FE->>APIGW: POST /api/nft/record {txHash, policyId, assetName}
+405:     APIGW->>NFT: Forward recording
+406:     NFT-->>APIGW: NFT certificate created
+407:     APIGW-->>FE: {certificateId}
+408: ```
+409: 
+410: ---
+411: 
+412: ## Storage Architecture
+413: 
+414: ### PostgreSQL
+415: 
+416: Primary relational database used by most services. Key tables (managed by each service's migrations):
+417: 
+418: | Owner Service | Table(s) | Purpose |
+419: |---------------|----------|---------|
+420: | Auth | `users`, `sessions`, `email_tokens`, `refresh_tokens`, `mfa_settings` | User accounts and authentication |
+421: | Originate | `documents`, `document_events`, `document_access` | Document records and provenance |
+422: | API Gateway | `organizations`, `svc_gateway_workflows`, `svc_gateway_rejections`, `svc_gateway_signatures`, `audit_logs` | Organisations, workflow state, audit trail |
+423: | Anchoring | `anchors`, `anchor_batches` | Blockchain anchor records |
+424: | Security | `security_events`, `audit_entries` | Security audit log |
+425: | VC Issuer | `credentials`, `status_lists`, `presentations` | Verifiable Credentials |
+426: | PRISM | `dids`, `did_documents` | Decentralised Identifiers |
+427: 
+428: **Connection:** `postgresql://secuura:secuura_dev_password@postgres:5432/secuura` (dev defaults)
+429: 
+430: ### Redis
+431: 
+432: Used for caching, session management, and key-value storage:
+433: 
+434: | Prefix/Pattern | Owner | Purpose |
+435: |----------------|-------|---------|
+436: | `doc_types:*` | API Gateway | Document type definitions |
+437: | `workflows:*` | API Gateway | Workflow definitions |
+438: | `workflow_instances:*` | API Gateway | Active workflow instances |
+439: | `pending_docs:*` | API Gateway | Pending document submissions |
+440: | `verification_policies:*` | API Gateway | Verification policy configs |
+441: | `settings:notifications:*` | API Gateway | User notification preferences |
+442: | `settings:privacy:*` | API Gateway | User privacy preferences |
+443: | `admin:settings` | API Gateway | Platform-wide admin settings |
+444: | `session:*` | Auth Service | Active user sessions |
+445: | `rate_limit:*` | API Gateway | Rate limiting counters |
+446: 
+447: **Connection:** `redis://:secuura_redis_dev@redis:6379` (dev defaults)
+448: 
+449: ### In-Memory Stores
+450: 
+451: Several services use in-memory Maps as primary storage (flagged for database migration):
+452: 
+453: | Service | Store | Purpose | Migration Priority |
+454: |---------|-------|---------|-------------------|
+455: | API Gateway | `memWorkflowToDocumentMap` | Workflow-document mapping | Medium (DB fallback exists) |
+456: | API Gateway | `memRejectedDocuments` | Rejected document state | Medium (DB fallback exists) |
+457: | API Gateway | `memDocumentSignatures` | Document signatures | Medium (DB fallback exists) |
+458: | KYC | `memVerifications`, `memConsents` | KYC verification state | High |
+459: | M365 | `memConnections`, `memSites` | SharePoint connections | High |
+460: | Timestamping | `timestamps`, `timestampsByDocument` | Timestamp records | High |
+461: | NFT Certificate | `memNftCertificates` | NFT mint records | High |
+462: | Referral | Multiple Maps | Referral programme data | High |
+463: | Billing | `chargeEvents` | Chargeable event log | High |
+464: 
+465: ---
+466: 
+467: ## Authentication Architecture
+468: 
+469: ### JWT Token Flow
+470: 
+471: ```mermaid
+472: sequenceDiagram
+473:     participant Client as Browser
+474:     participant APIGW as API Gateway
+475:     participant Auth as Auth Service
+476: 
+477:     Client->>APIGW: POST /api/auth/login {email, password}
+478:     APIGW->>Auth: Proxy login request
+479:     Auth->>Auth: Verify credentials (bcrypt)
+480:     Auth->>Auth: Check MFA requirement
+481:     Auth->>Auth: Generate JWT pair (access + refresh)
+482:     Auth-->>APIGW: {accessToken, refreshToken, user}
+483:     APIGW-->>Client: Set httpOnly refresh cookie + return access token
+484: 
+485:     Note over Client: Access token stored in memory (not localStorage)
+486:     Note over Client: Refresh token in httpOnly cookie
+487: 
+488:     Client->>APIGW: GET /api/documents (Authorization: Bearer <access>)
+489:     APIGW->>APIGW: authenticateToken middleware verifies JWT
+490:     APIGW->>APIGW: Attach user payload to request
+491:     APIGW->>Auth: Proxy to target service
+492: ```
+493: 
+494: ### Token Configuration
+495: 
+496: | Parameter | Value |
+497: |-----------|-------|
+498: | Access token lifetime | Configurable via `JWT_EXPIRES_IN` (default: `1d`) |
+499: | Refresh token | Stored in httpOnly cookie |
+500: | Algorithm | RS256 (RSA-SHA256, asymmetric) — RS256-only since KS-167/184/302; HS256 dropped |
+501: | Keys | `JWT_PRIVATE_KEY` (auth signs) + `JWT_PUBLIC_KEY` (verifiers, fail-closed if missing) + `JWT_KEY_ID`; no shared secret |
+502: 
+503: ### Authentication Middleware
+504: 
+505: Two middleware functions in the API gateway:
+506: 
+507: - **`authenticateToken(required = true)`** -- Verifies JWT from `Authorization: Bearer` header. When `required = false`, allows unauthenticated access with fallback to `x-user-id` header.
+508: - **`requireAdmin`** -- Checks that `req.user.role === 'SYSTEM_ADMIN'`. Must be chained after `authenticateToken`.
+509: 
+510: ### Roles
+511: 
+512: | Role | Description | Access Level |
+513: |------|-------------|--------------|
+514: | `SYSTEM_ADMIN` | Platform administrator | Full access, admin portal |
+515: | `OWNER` | Document/organisation owner | Issuer portal, own resources |
+516: | `VERIFIER` | Third-party verifier | Verifier portal, public verification |
+517: | `HOLDER` | Rights holder | Issuer portal, own documents |
+518: 
+519: ### Wallet Authentication
+520: 
+521: CIP-30 wallet connection for blockchain operations:
+522: 1. User connects wallet via CIP-30 browser extension
+523: 2. Server generates a nonce/challenge
+524: 3. Wallet signs the challenge (CIP-8 message signing)
+525: 4. Server verifies the signature against the wallet address
+526: 5. Session is created linking wallet address to user account
+527: 
+528: > **Note:** CIP-8 signature verification currently uses a development stub. Production requires the `@emurgo/cardano-message-signing` WASM library.
+529: 
+530: ---
+531: 
+532: ## Recent Changes (P1-P5 Fixes)
+533: 
+534: ### Priority 1 -- Critical Fixes
+535: - Verifier portal now performs client-side SHA-256 hashing (Web Crypto API) instead of uploading files
+536: - Added `POST /api/admin/verification-queue/:id/action` for queue item management
+537: - Added `GET/PUT /api/admin/settings` for platform settings (Redis-backed)
+538: - Added `GET /api/security/audit` as alias for audit logs
+539: - Added optional auth to notification and privacy settings endpoints
+540: 
+541: ### Priority 2 -- Functional Fixes
+542: - Admin profile page: error handling and change password flow
+543: - Users page: block/unblock functionality wired to API
+544: - Verification queue: verifier assignment dialog with dynamic user list
+545: - Privacy preferences: blocked entity removal
+546: - Report viewer: share button using Web Share API
+547: - Activity feed: "More" menu with refresh and clear options
+548: - Billing dashboard: pricing tier checkout flow
+549: - DocumentTypeDetail: activity tab fetches real audit logs
+550: 
+551: ### Priority 3 -- Mock Data Cleanup
+552: - Removed "Test NFT Flow" debug button from issuer dashboard
+553: - Gated dev simulation button behind `import.meta.env.DEV`
+554: - Replaced hardcoded mock signature with dynamic placeholder
+555: - Removed explicit mock context injection from approval queue
+556: 
+557: ### Priority 4 -- Auth and UX Hardening
+558: - Added auth headers to analytics dashboard, governance dashboard, and export dialog API calls
+559: - Added copy-to-clipboard confirmation in verifier result page
+560: - Fixed CardanoScan link conditional rendering (no "undefined" URLs)
+561: - Fixed error boundary home navigation to respect React Router basename
+562: 
+563: ### Priority 5 -- Polish
+564: - Audit logs endpoint now handles `resourceType` and `offset` parameters
+565: - Standardised API response format (`{ success: true, ...data }`) across 10+ endpoints
+566: - Improved WalletSelector EVM tab with roadmap messaging
+567: - LineageViewer demo data gated behind missing `certificationId`
+568: 
+569: ---
+570: 
+571: ## References
+572: 
+573: ### Internal Links
+574: - Secuura Crypto and Blockchain Developer Reference
+575: - Secuura Security Reference
+576: - Secuura Mock Data Audit
+577: 
+578: ### External Links
+579: - [Docker Compose Documentation](https://docs.docker.com/compose/)
+580: - [Express.js](https://expressjs.com/)
+581: - [Material-UI](https://mui.com/)
+582: - [Vite](https://vitejs.dev/)
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS 441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`): **NOT run** (no local stack in this seat; see Test Evidence)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`): **NOT run** (no local stack in this seat)
+
+### PII review (KS 256 R15/R16)
+
+Not applicable: this PR changes two table rows of one documentation file (route prefixes against service names). No code, no personal data, no published OpenAPI spec, example value, fixture or seed data.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-2077
+
+## Summary
+
+**DOCUMENTATION ONLY. No code is changed: one markdown file, 2 lines replaced by 2. This PR covers item 1 of KS-2077 only.**
+
+KS-2077 reports two places that disagree with the gateway and the compose file. **Item 1 (this PR):** `Projects Documents/Secuura-Architecture-Reference.md` lists `/api/rewards/*` under Staking (:4015) in the routing table, but `api-gateway/src/routes/proxy.ts` mounts `/api/rewards` with `proxy('referral', ...)` (lines 1090 to 1092 at develop `7eda23b34d3b`), and its comment at line 1052 says staking's own `/api/rewards` routes are gateway-shadowed by design. This PR moves `/api/rewards/*` from the Staking row to the Referral row (`/api/referral/*`, `/api/rewards/*`; Referral :4016).
+
+`Refs KS-2077`. This PR does not close the ticket and the ticket's state is not changed. Nothing is deployed and nothing needs deploying: documentation only.
+
+**Fragment pair:** none, because this is documentation-only and no rule requires one (search recorded in the first PR of this set). Wednesday ruled no pair for the doc PR of this set.
+
+## Test Evidence
+
+**Touched (1 file):** `Projects Documents/Secuura-Architecture-Reference.md` (+2 -2).
+
+**Ran by Seat T 15th** (2026-11-08 about 13:11Z, on develop `7eda23b34d3b`; no test suite applies to a documentation file):
+- The held pass's two expectations, measured on this tree by counting the exact row text: the old Staking row text (`/api/staking/*`, `/api/rewards/*`, `/api/pool/*`) is present before the patch (1) and absent after (0); the new Referral row text (`/api/referral/*`, `/api/rewards/*`) is absent before (0) and present after (1). Reverse-applying the patch restores the file byte-equal (sha256 equal), and re-applying it gives the same two changed lines.
+- The claim itself, read independently: `proxy.ts` at develop `7eda23b34d3b` mounts `router.use('/api/rewards', ..., proxy('referral', { '^/api/rewards': '/api/rewards' }))` at lines 1090 to 1092. This was a source read, not a running gateway.
+- `docs-fragments.mjs check`: OK; planted defect exits 1; OK again after it is moved away.
+- Pre-push: this push changes nothing under `Blockchain/Dev`, so the hook skips the preflight; its output is quoted here: no PREFLIGHT line was printed; the push took 5 s (the hook skips the preflight when nothing under Blockchain/Dev changes)
+- No markdown link check was run.
+
+**Re-measured by Seat T 15th after the push** (2026-11-08 14:15Z, from the push driver's record, `git ls-remote` and `git diff-tree`): origin holds the branch at `ebf1ed1d0869`, one commit whose parent is `7eda23b34d3b`; one file changed (the one above, status M, +2 -2). Develop moved once while the branch waited: the driver's gate read develop `092d30706b95` at 13:59Z (one squash on top of my base, the KS 1536 PR 3b change to auth's platform lists) and found 8 files changed by the move, overlap with this branch's one path 0, and none of the 44 open PRs then open touching that path. The push took 5 s.
+
+**NOT run:** every code test, Schemathesis, Akto, Playwright, k6, any box or deploy.
+
+**Migrations / config:** none.
+
+## Held patch
+
+A held pass from the local model ("the Spark"), raised by Seat T 15th. READY file `READY_KS-2077-KS-2077-O102-P3_spark-dsv4flash_BRIEFED-DOCONLY-SECUURA-ARCHITECTURE-REFERENCE-PASS-9of9_2026-11-08.diff.md`; canonical patch sha256 prefix `82b3258f84f9ad51` (830 bytes, matched here before applying); run `spark_secuura_2026-11-08_ks_2077_o102_p3_arch_ref_rewards_route`. Strict `git apply -p1`, no offset line. The checker legs are **the checker's, measured at tip `abd044f63a9d`, not re-run by Seat T 15th**: strict apply; touched set equals the declared set; red at base (both expectations fail at the untouched tip); doc-only (0 changed non-comment lines); green after; reversion (both fail again with the patch reversed); restore clean; `RESULT: PASS (tier doc_only)`.
+
+## What this did NOT do
+
+Left open on the ticket:
+- **Item 2:** the compose file's comment says a dev-debug override re-publishes staking's port, but the override has no staking lines; the reference's port table still lists 6015 for staking.
+- The `/api/referral/*` row against the gateway's plural `/api/referrals` mount (`proxy.ts` line 1080).
+- `/api/pool/*`: this PR leaves it in the Staking row; a search of `proxy.ts` found no mount for it, and another file may mount it. Not checked here.
+- The other rows of the routing table and the port tables were not checked.
+
+## Test plan
+
+- [ ] Read the Staking and Referral rows of the routing table in `Projects Documents/Secuura-Architecture-Reference.md` against `proxy.ts` lines 1090 to 1092.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 2097,
+ "head_sha": "ebf1ed1d0869e54ae91e4f36c53c4d501ba8187b",
+ "head_mode": "tip",
+ "merge_base": "7eda23b34d3b7a413ca8f9c0945c7843708ce9f4",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Projects Documents/Secuura-Architecture-Reference.md",
+   "added": "2",
+   "deleted": "2"
+  }
+ ],
+ "test_files": [],
+ "product_files": [
+  "Projects Documents/Secuura-Architecture-Reference.md"
+ ],
+ "diff_stat": {
+  "files": 1,
+  "added": 2,
+  "deleted": 2
+ },
+ "targeted_on_head": null,
+ "targeted_on_base_product_code": null,
+ "not_run": [
+  "no test file exists for a docs-only PR; spark_gate.sh refuses a run with no test file, so this facts.json was written by hand from git diff (operator 106); nothing was executed",
+  "live/integration runs"
+ ]
+}

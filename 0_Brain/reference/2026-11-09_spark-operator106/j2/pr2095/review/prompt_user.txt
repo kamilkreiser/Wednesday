@@ -1,0 +1,433 @@
+===== TICKET =====
+KS-2012 — api-gateway approve-forward warn line logs error: err.message and no cell asserts it - dropping it leaves all 7 PR 2011 cells green (gate 201 G201-N2, Low note) [In Progress]
+
+**BLUF:** The warn line written by the `proxyReq.on('error', ...)` handler at `services/api-gateway/src/routes/verification.ts` line 625 (the approve-forward case where originate's status line has already decided the forward) passes `{ status: decidedByStatus, error: err.message }` to the logger, and no PR 2011 cell asserts the `error` key: gate 201's own mutant own2, which drops `error: err.message` from that meta, leaves all 7 cells green (7 of 7). Gate 201 grades this Low, a note.
+
+Source: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate201-ks1185-pr2011/verdict.md` lines 21 and 38 (G201-N2); `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate201-ks1185-pr2011/ev_mut_own2_drop_err_message.log`. Code read by the filing seat at develop `1b1b65c7415f` with `git show` of that commit from the shared object store (a read), not run.
+
+As read at `1b1b65c7415f`:
+
+* `services/api-gateway/src/routes/verification.ts` lines 619 to 630: the `proxyReq.on('error', (err: Error) => { ... })` handler. When `decidedByStatus` is set it logs at warn level "Approved-document forward: originate's reply body did not finish after its status line had decided the forward" with `{ status: decidedByStatus, error: err.message }` (line 625); otherwise it logs at error level "Failed to forward approved document to originate" with `{ error: err.message }` (line 627).
+* The verdict records that the messages reaching this handler today are Node's own generic messages and this file's own timeout message (built at line 617), and that the leak path is not demonstrable.
+* KS-1185 (the PR's own ticket, read whole: description and 3 comments) does not name this line. A board search finds no ticket for `decidedByStatus`; the phrase "reply body did not finish" finds only KS-1185.
+
+Not measured: anything by the filing seat (nothing was run); whether any message that reaches this handler can carry upstream bytes; the mutant's result on the merged tree (gate 201 ran it on the PR head `40d3f2470d4a`).
+
+Priority: Low, mapped from the verdict's "Low, note" (verdict line 38).
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts
+index 4ab03175e..e8c882909 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts
+@@ -225,3 +225,15 @@ describe('KS-1185 F3 - a reply body that does not finish after the status line d
+     expect(calls(log, 'error', (m) => m === FAILED_LINE)).toHaveLength(1);
+   });
+ });
++
++describe('KS-2012 - the late-body warn line carries the error text', () => {
++  it('RED KS-2012 E1: a 201 whose body never ends logs the warn line with the status AND the idle-bound error text', { timeout: 15_000 }, async () => {
++    behave = statusThenSilence(201);
++    const log = vi.fn<Log>();
++    await approve(await startGateway(freshStore(), log));
++    await sleep(FORWARD_TIMEOUT_MS + 700);
++    const late = calls(log, 'warn', (m) => m.includes('reply body did not finish'));
++    expect(late).toHaveLength(1);
++    expect(late[0][2]).toMatchObject({ status: 201, error: `originate did not answer within ${FORWARD_TIMEOUT_MS} ms` });
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts
+1: // KS-1185 F2 + F3 - the workflow-approve forward to originate (POST /api/workflow-instances/:id/approve, routes/verification.ts).
+2: //
+3: // F2 (a decision, pinned here): the forward's bound is an IDLE timer, not a total one. http.ClientRequest#setTimeout is a
+4: // socket-inactivity timeout, so every byte originate sends restarts it, an informational 1xx included. The doc comment on
+5: // ORIGINATE_FORWARD_TIMEOUT_MS now says so; the PIN cell below holds that behaviour, so a later change to a wall-clock bound has
+6: // to change this cell on purpose. It is green before and after this change (it pins, it does not fix); a wall-clock tamper reddens it.
+7: //
+8: // F3 (a fix): a 2xx status line settles the forward (originate persists before it writes a 2xx), so a body that then never ends used to
+9: // log "Failed to forward approved document to originate" at error level one bound later, contradicting the 200 the caller got. When a
+10: // status line has already decided the forward, the late error is now logged at warn level as what it is (the reply body did not
+11: // finish) with that status; a forward that never got a status line still logs the original error line.
+12: //
+13: // Harness: the same shape as ks1087-workflow-approve-deletes-the-pending-document.test.ts (a stateful Redis stub per cell, one
+14: // originate stub whose behaviour each cell sets, the real createVerificationRoutes with a short bound and a recording log).
+15: import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
+16: import express from 'express';
+17: import http from 'node:http';
+18: import type { AddressInfo } from 'node:net';
+19: import type { IncomingMessage, ServerResponse } from 'node:http';
+20: import type { RequestHandler } from 'express';
+21: import * as verification from '../routes/verification';
+22: 
+23: const DOC_ID = 'doc-ks1185';
+24: const WFI_ID = 'wfi-ks1185';
+25: /** The forward bound these cells run the route with (the production default is ORIGINATE_FORWARD_TIMEOUT_MS). */
+26: const FORWARD_TIMEOUT_MS = 1_000;
+27: const CLIENT_WAIT_MS = 6_000;
+28: const FAILED_LINE = 'Failed to forward approved document to originate';
+29: 
+30: type Behaviour = (req: IncomingMessage, res: ServerResponse) => void;
+31: type Log = (level: 'info' | 'warn' | 'error', message: string, meta?: object) => void;
+32: 
+33: interface Store {
+34:   instance: Record<string, unknown>;
+35:   pendingDocs: Map<string, Record<string, unknown>>;
+36:   deletes: number;
+37: }
+38: 
+39: function freshStore(): Store {
+40:   return {
+41:     instance: { status: 'pending_approval', documentId: DOC_ID, steps: [{ name: 'Approve' }], currentStepIndex: 0 },
+42:     pendingDocs: new Map([[DOC_ID, { title: 't', contentHash: 'h', createdBy: 'u' }]]),
+43:     deletes: 0,
+44:   };
+45: }
+46: 
+47: let originate: http.Server | undefined;
+48: let originatePort = 0;
+49: let behave: Behaviour = (_req, res) => res.end();
+50: const timers: Array<ReturnType<typeof setTimeout>> = [];
+51: 
+52: beforeAll(async () => {
+53:   const server = http.createServer((req, res) => {
+54:     req.resume();
+55:     behave(req, res);
+56:   });
+57:   server.listen(0, '127.0.0.1');
+58:   await new Promise<void>((r) => server.once('listening', () => r()));
+59:   originatePort = (server.address() as AddressInfo).port;
+60:   originate = server;
+61: });
+62: 
+63: afterAll(async () => {
+64:   const server = originate;
+65:   if (!server) return;
+66:   server.closeAllConnections();
+67:   await new Promise<void>((r) => server.close(() => r()));
+68: });
+69: 
+70: const openGateways: Array<ReturnType<ReturnType<typeof express>['listen']>> = [];
+71: 
+72: afterEach(async () => {
+73:   for (const t of timers.splice(0)) clearTimeout(t);
+74:   for (const server of openGateways.splice(0)) {
+75:     server.closeAllConnections();
+76:     await new Promise<void>((r) => server.close(() => r()));
+77:   }
+78:   originate?.closeAllConnections();
+79: });
+80: 
+81: async function startGateway(store: Store, log: Log, originateUrl = `http://127.0.0.1:${originatePort}`): Promise<number> {
+82:   const mockBodyParser: RequestHandler = express.json({ limit: '1mb' });
+83:   const app = express();
+84:   app.use(
+85:     verification.createVerificationRoutes({
+86:       authenticateToken: () => (_req, _res, next) => next(),
+87:       mockBodyParser,
+88:       query: vi.fn(async () => ({ rows: [] })) as never,
+89:       isDbAvailable: () => false,
+90:       redisService: {
+91:         getWorkflowInstance: vi.fn(async (id: string) => (id === WFI_ID ? structuredClone(store.instance) : null)),
+92:         getAllWorkflowInstances: vi.fn(async () => [structuredClone(store.instance)]),
+93:         setWorkflowInstance: vi.fn(async (id: string, value: Record<string, unknown>) => {
+94:           if (id === WFI_ID) store.instance = structuredClone(value);
+95:         }),
+96:         getPendingDocument: vi.fn(async (id: string) => store.pendingDocs.get(id) ?? null),
+97:         deletePendingDocument: vi.fn(async (id: string) => {
+98:           store.deletes++;
+99:           store.pendingDocs.delete(id);
+100:         }),
+101:       } as never,
+102:       services: { originate: { url: originateUrl }, anchoring: { url: '' } } as never,
+103:       log,
+104:       memWorkflowToDocumentMap: new Map(),
+105:       memRejectedDocuments: new Map(),
+106:       dbSaveRejection: vi.fn(async () => undefined),
+107:       ADMIN_ROLES: ['ADMIN'],
+108:       enforceDocumentTypeRules: vi.fn(async () => ({ ok: true, docType: {} })) as never,
+109:       createWorkflowInstanceIfRequired: vi.fn(async () => ({ gated: false })) as never,
+110:       originateForwardTimeoutMs: FORWARD_TIMEOUT_MS,
+111:     }),
+112:   );
+113:   const server = app.listen(0, '127.0.0.1');
+114:   openGateways.push(server);
+115:   await new Promise<void>((r) => server.once('listening', () => r()));
+116:   return (server.address() as AddressInfo).port;
+117: }
+118: 
+119: async function approve(gatewayPort: number): Promise<{ status: number | 'NO RESPONSE'; ms: number }> {
+120:   const started = Date.now();
+121:   try {
+122:     const res = await fetch(`http://127.0.0.1:${gatewayPort}/api/workflow-instances/${WFI_ID}/approve`, { method: 'POST', signal: AbortSignal.timeout(CLIENT_WAIT_MS) });
+123:     await res.text();
+124:     return { status: res.status, ms: Date.now() - started };
+125:   } catch {
+126:     return { status: 'NO RESPONSE', ms: Date.now() - started };
+127:   }
+128: }
+129: 
+130: const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+131: const calls = (log: ReturnType<typeof vi.fn<Log>>, level: string, pred: (message: string) => boolean) =>
+132:   log.mock.calls.filter(([l, m]) => l === level && pred(String(m)));
+133: 
+134: /** A status line, then a body that never ends: originate writes the headers and one partial chunk and goes silent. */
+135: const statusThenSilence = (status: number): Behaviour => (_req, res) => {
+136:   res.writeHead(status, { 'Content-Type': 'application/json' });
+137:   res.write('{"id":');
+138: };
+139: 
+140: describe('KS-1185 F2 - the forward bound is an idle timer (pinned, documented)', () => {
+141:   it('PIN KS-1185 F2: an originate that keeps sending 102 Processing holds the approve PAST the bound, then its 201 approves', { timeout: 15_000 }, async () => {
+142:     // 102 every 300 ms for 2,400 ms (2.4x the 1,000 ms bound), then 201. Each 1xx is socket activity, so the idle bound never fires.
+143:     behave = (_req, res) => {
+144:       let sent = 0;
+145:       const tick = (): void => {
+146:         if (sent * 300 >= 2_400) {
+147:           res.writeHead(201, { 'Content-Type': 'application/json' });
+148:           res.end(JSON.stringify({ id: DOC_ID }));
+149:           return;
+150:         }
+151:         sent++;
+152:         res.writeProcessing();
+153:         timers.push(setTimeout(tick, 300));
+154:       };
+155:       tick();
+156:     };
+157:     const store = freshStore();
+158:     const log = vi.fn<Log>();
+159:     const out = await approve(await startGateway(store, log));
+160:     expect(out.status, `answered after ${out.ms} ms`).toBe(200);
+161:     expect(out.ms, 'held past the bound: the bound is idle-based, not a total').toBeGreaterThan(FORWARD_TIMEOUT_MS + 1_000);
+162:     expect(store.deletes).toBe(1);
+163:   });
+164: 
+165:   it('CONTROL KS-1185 F2: a silent originate still meets the bound (502 at about the bound)', { timeout: 15_000 }, async () => {
+166:     behave = () => undefined;
+167:     const store = freshStore();
+168:     const out = await approve(await startGateway(store, vi.fn<Log>()));
+169:     expect(out.status).toBe(502);
+170:     expect(out.ms).toBeLessThan(FORWARD_TIMEOUT_MS + 1_500);
+171:     expect(store.deletes).toBe(0);
+172:   });
+173: });
+174: 
+175: describe('KS-1185 F3 - a reply body that does not finish after the status line decided the forward is not a failed forward', () => {
+176:   it('RED KS-1185 F3: a 201 whose body never ends is approved, and one bound later NO error-level "Failed to forward" line is logged', { timeout: 15_000 }, async () => {
+177:     behave = statusThenSilence(201);
+178:     const store = freshStore();
+179:     const log = vi.fn<Log>();
+180:     const out = await approve(await startGateway(store, log));
+181:     expect(out.status).toBe(200);
+182:     expect(store.deletes).toBe(1);
+183:     await sleep(FORWARD_TIMEOUT_MS + 700);
+184:     expect(calls(log, 'error', (m) => m === FAILED_LINE), 'the 200 is not contradicted by a failed-forward error').toEqual([]);
+185:   });
+186: 
+187:   it('RED KS-1185 F3: ...and the late event is logged once at warn level, naming the status line that decided the forward', { timeout: 15_000 }, async () => {
+188:     behave = statusThenSilence(201);
+189:     const log = vi.fn<Log>();
+190:     await approve(await startGateway(freshStore(), log));
+191:     await sleep(FORWARD_TIMEOUT_MS + 700);
+192:     const late = calls(log, 'warn', (m) => m.includes('reply body did not finish'));
+193:     expect(late).toHaveLength(1);
+194:     expect(late[0][2]).toMatchObject({ status: 201 });
+195:   });
+196: 
+197:   it('RED KS-1185 F3: a 401 whose body never ends is answered 502 at once, and its late event is the same warn line with status 401', { timeout: 15_000 }, async () => {
+198:     behave = statusThenSilence(401);
+199:     const store = freshStore();
+200:     const log = vi.fn<Log>();
+201:     const out = await approve(await startGateway(store, log));
+202:     expect(out.status).toBe(502);
+203:     expect(out.ms).toBeLessThan(FORWARD_TIMEOUT_MS);
+204:     expect(store.deletes).toBe(0);
+205:     await sleep(FORWARD_TIMEOUT_MS + 700);
+206:     expect(calls(log, 'error', (m) => m === FAILED_LINE)).toEqual([]);
+207:     const late = calls(log, 'warn', (m) => m.includes('reply body did not finish'));
+208:     expect(late).toHaveLength(1);
+209:     expect(late[0][2]).toMatchObject({ status: 401 });
+210:   });
+211: 
+212:   it('CONTROL KS-1185 F3: an originate that never sends a status line still logs the error-level "Failed to forward" line', { timeout: 15_000 }, async () => {
+213:     behave = () => undefined;
+214:     const log = vi.fn<Log>();
+215:     const out = await approve(await startGateway(freshStore(), log));
+216:     expect(out.status).toBe(502);
+217:     expect(calls(log, 'error', (m) => m === FAILED_LINE)).toHaveLength(1);
+218:     expect(calls(log, 'warn', (m) => m.includes('reply body did not finish'))).toEqual([]);
+219:   });
+220: 
+221:   it('CONTROL KS-1185 F3: an unreachable originate (closed port) still logs the error-level "Failed to forward" line', async () => {
+222:     const log = vi.fn<Log>();
+223:     const out = await approve(await startGateway(freshStore(), log, 'http://127.0.0.1:1'));
+224:     expect(out.status).toBe(502);
+225:     expect(calls(log, 'error', (m) => m === FAILED_LINE)).toHaveLength(1);
+226:   });
+227: });
+228: 
+229: describe('KS-2012 - the late-body warn line carries the error text', () => {
+230:   it('RED KS-2012 E1: a 201 whose body never ends logs the warn line with the status AND the idle-bound error text', { timeout: 15_000 }, async () => {
+231:     behave = statusThenSilence(201);
+232:     const log = vi.fn<Log>();
+233:     await approve(await startGateway(freshStore(), log));
+234:     await sleep(FORWARD_TIMEOUT_MS + 700);
+235:     const late = calls(log, 'warn', (m) => m.includes('reply body did not finish'));
+236:     expect(late).toHaveLength(1);
+237:     expect(late[0][2]).toMatchObject({ status: 201, error: `originate did not answer within ${FORWARD_TIMEOUT_MS} ms` });
+238:   });
+239: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS 441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`): **NOT run** (no local stack in this seat; see Test Evidence)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`): **NOT run** (no local stack in this seat)
+
+### PII review (KS 256 R15/R16)
+
+Not applicable: this PR adds one cell to an existing test file; the values are made up (a status code and the gateway's own timeout text). No product code, no published OpenAPI spec, example value, fixture or seed data.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-2012
+
+## Summary
+
+**TEST-ONLY. No product code is changed: one existing test file, 12 lines added.**
+
+Gate 201 found that the warn line written when originate's reply body does not finish after its status line has already decided the approve-forward (the `proxyReq` error handler in `api-gateway/src/routes/verification.ts`) passes `{ status, error: err.message }` to the logger, and that no cell asserts the `error` key: its mutant that drops `error: err.message` left all 7 cells of the KS 1185 test green. This PR adds one cell to `ks1185-f2-f3-idle-bound-and-late-body-log.test.ts`: a 201 whose body never ends logs the warn line with the status **and** the idle-bound error text (`originate did not answer within <FORWARD_TIMEOUT_MS> ms`). The cell's title begins "RED": that is the held pass's label for the cell; it passes on develop.
+
+`Refs KS-2012`. This PR does not close the ticket. Nothing is deployed and nothing needs deploying: no running service changes.
+
+**Fragment pair:** none, because this is test-only and no rule requires one (the checkout at `a65ae7ed1` has 0 hits for "fragment" in the pre-push hook, the preflight directory, `CLAUDE.md`, `CONTRIBUTING.md`, `DEV-PROCESS.md` and `package.json`; the first PR of this set lists the search). Wednesday ruled no pair for the test-only PRs of this set.
+
+## Test Evidence
+
+**Touched (1 file):** `Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts` (+12 -0).
+
+**Ran by Seat T 15th** (2026-11-08 between 13:04Z and 13:15Z, on develop `7eda23b34d3b`, macOS host shared with other seats and a pre-push hook running, load average about 5 to 6, Node v26.8.1, **not the LTS 24 line**; vitest 4.1.12):
+- Cell file on the applied tree: 8 of 8, the new cell passes. **Timing:** the cell sleeps `FORWARD_TIMEOUT_MS + 700` (1,000 + 700 ms) and has a 15 s timeout; three separate runs measured the cell at 1704, 1705 and 1702 ms, all passes. A timing-sensitive cell: three passes under load are evidence, not a proof that it never flakes.
+- **Red-proof (mine, using the held pass's plant, never committed):** the plant drops `error: err.message` from the warn meta in `verification.ts`. With it applied the new cell alone fails by assertion (`expected { status: 201 } to match object { status: 201, error: ... }`) and the other 7 cells stay green. The plant was reversed: `verification.ts` sha256 equal to before, `git diff` of it empty.
+- Whole api-gateway suite (`vitest`, 4 workers, same instrument on both sides): unpatched develop `7eda23b34d3b` 1869 of 1869; with this change 1870 of 1870. Failed-cell names compared: both lists empty.
+- `npm run check:test-types` ratchet for api-gateway (the repo's checker, run for this service only): 205 files examined, 167 under `__tests__`, 25 errors, all 25 in the baseline, 0 new, 0 stale; with a planted type error appended to the touched file it exits 1, and the file was restored byte-equal.
+- eslint on the touched file: no output; planted control exits 1.
+- `docs-fragments.mjs check`: OK; planted defect exits 1; OK again after it is moved away.
+- Pre-push preflight: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+
+**Observed, cause not found:** in the failing run the stack frames for vitest's own runtime packages name another seat's old worktree path, although Node resolves those packages to this worktree and the two copies are byte-identical; the test file and the product file under test were this tree's (the plant changed the result). I looked for a cache or config that names it and found none.
+
+**Re-measured by Seat T 15th after the push** (2026-11-08 13:57Z, from the push driver's record, `git ls-remote` and `git diff-tree`): origin holds the branch at `90e8ee1d8f93`, one commit whose parent is `7eda23b34d3b`; one file changed (the one above, status M, +12 -0). Develop moved once while the branch waited: the driver's gate read develop `092d30706b95` at 13:39:40Z (one squash on top of my base, the KS 1536 PR 3b change to auth's platform lists) and found 8 files changed by the move, overlap with this branch's one path 0, and none of the 42 open PRs then open touching that path. My own intersection of those 8 files with this branch's path and with `verification.ts`, the product file the cell reads, is empty. The figures above were measured on the base `7eda23b34d3b` and were **not re-run on the newer develop**. The push took 1025 s. The hook ran 13 of 16 legs and nothing failed; legs 3, 4 and 8 were skipped because the local stack was not up. That is the hook's own wording ("PREFLIGHT INCOMPLETE"), and it is not a pass.
+
+**NOT run:** Schemathesis, Akto, Playwright e2e, k6 (no local stack in this seat), Node 24, any box or deploy.
+
+**Migrations / config:** none.
+
+## Held patch
+
+A held pass from the local model ("the Spark"), raised by Seat T 15th. READY file `READY_KS-2012-KS-2012-O103-P2_spark-dsv4flash_BRIEFED-TESTONLYINPUT-APPROVE-FORWARD-WARN-ERROR-KEY-CELL-PASS-9of9_2026-11-08.diff.md`; canonical patch sha256 prefix `32e4264d704c759b` (982 bytes, matched here before applying); run `spark_secuura_2026-11-08_ks_2012_o103_p2_approve_forward_warn_error_key`. Strict `git apply -p1`, no offset line. The checker legs are **the checker's, measured at tip `abd044f63a9d`, not re-run by Seat T 15th**: strict apply; touched set equals the declared set; green without the plant; red with the plant by assertion; "whole suite no worse: cells 1840 -> 1841, red 0 -> 0"; restore clean; `RESULT: PASS (tier test_only_input)`.
+
+## What this did NOT do
+
+- It changes nothing in `verification.ts`.
+- It does not answer the ticket's open question: whether any message that reaches this handler can carry upstream bytes.
+- It pins the error key for the status-201 late-body case only.
+
+## Test plan
+
+- [ ] `npm --prefix Blockchain/Dev/services/api-gateway test -- src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts` — 8 cells
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 2095,
+ "head_sha": "90e8ee1d8f93422d9a43f2984cec0b673a3f06f1",
+ "pr_tip_now": "90e8ee1d8f93422d9a43f2984cec0b673a3f06f1",
+ "head_mode": "tip",
+ "merge_base": "7eda23b34d3b7a413ca8f9c0945c7843708ce9f4",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts",
+   "added": "12",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts"
+ ],
+ "product_files": [],
+ "diff_stat": {
+  "files": 1,
+  "added": 12,
+  "deleted": 0
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 8,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "'native'`, which is planned to become the default in a future major version of Vite:\n  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `\"type\": \"module\"` in the closest package.json\nSet `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning."
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 8,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "'native'`, which is planned to become the default in a future major version of Vite:\n  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `\"type\": \"module\"` in the closest package.json\nSet `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning."
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 8,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 8,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 30
+}

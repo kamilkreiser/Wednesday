@@ -1,0 +1,35 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 8910, "total_tokens": 9573, "completion_tokens": 663, "prompt_tokens_details": {"cached_tokens": 0}}, "seconds": 26.6, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 8910, "completion_tokens": 663, "seconds": 26.6, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The PR is test-only and does not fix item 1 or item 2 of the ticket; the PR description explicitly states this, so it is not a defect.",
+   "evidence": "PR DESCRIPTION: 'TEST-ONLY. No product code is changed: one existing test file, 14 lines added. This PR covers item 3 of KS-2099 only. The leak in item 1 is NOT fixed.'",
+   "test_or_reason": "The PR claims to cover only item 3; the ticket's items 1 and 2 remain open, and the PR description says so.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The new test E8 only checks for the domain substring in the captured log lines, not for the full address or other parts; the PR description acknowledges this limitation.",
+   "evidence": "Test file line 147: `expect(mockLogged.filter((l) => l.toLowerCase().includes('ks2099-domain'))).toEqual([]);` and PR DESCRIPTION: 'The cell E8 asserts a lower-case substring of one made-up domain over the captured lines; it does not prove no other part of the address can appear in any other line.'",
+   "test_or_reason": "The test pins only that the domain does not appear; it does not pin the full address or other address parts, as the PR description admits.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The new test E9 pins that the ACS call receives the recipient address, but it does not verify that the log line omits the address; the PR description says it only pins the address still reaches the mailer.",
+   "evidence": "Test file lines 150-155: `it('E9 ACS accepts the send: the address still reaches the ACS call as the one recipient (only the LOG changed)', async () => { ... expect(mockBeginSend.mock.calls[0][0].recipients).toEqual({ to: [{ address: ADDRESS }] }); });`",
+   "test_or_reason": "E9 asserts the ACS call argument, not the log output; the PR description says it pins 'the address still reaches the mailer'.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test file's header comment states that error text from providers is not covered, which is consistent with the ticket's item 1 being unfixed.",
+   "evidence": "Test file lines 8-9: `// NOT covered, stated because it matters: error text a provider returns is still forwarded (`error.message`, `err?.message`, and the raw `result.error` object of a failed ACS send); whether a real SMTP or ACS error text can echo the address depends on that server's reply and is not measured here.`",
+   "test_or_reason": "The comment explicitly acknowledges the limitation, matching the ticket's item 1.",
+   "evidence_quote_found_in_input": true
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO"
+}

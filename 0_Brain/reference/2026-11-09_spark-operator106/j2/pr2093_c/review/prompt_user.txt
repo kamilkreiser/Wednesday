@@ -1,0 +1,543 @@
+===== TICKET =====
+KS-2053 — originate: the x-emitter-internal strip's mount-order test checks only the anchors router, so a move below documents still passes [In Progress]
+
+**BLUF:** In originate, the strip for the inbound `x-emitter-internal` header is mounted as `app.use(createEmitterMarkerStrip())` ahead of every router, but its wiring test (C6) asserts the order only against the anchors router, so moving the strip to between the documents mounts and the anchors mount would still pass C6 while the documents routes ran without it. Today the order is correct. Low, and worth one more cell when the order is next touched. Priority as ruled by Wednesday (ANSWER 2026-11-06T03:40:16Z). Evidence class: READ ONLY at origin develop; nothing was run.
+
+**Where**, at origin develop `45d2edc73aa9` (read 2026-11-06 by Seat S 27th with git show and git grep in a shallow scratch clone of origin develop `45d2edc73aa9`; nothing was run):
+
+* `Blockchain/Dev/services/originate/src/index.ts`: line 228 is `app.use(createEmitterMarkerStrip());` (comment lines 225 to 227: stripped on every request, ahead of every router). `/api/documents` is mounted at lines 280 and 281 (`publicDocumentsRouter`, `documentsRouter`) and `/api/anchors` at line 291. The documents routes build a marked hop themselves (`Blockchain/Dev/services/originate/src/routes/documents.ts`, comment at line 887).
+* `Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts`: the header comment at line 34 and the describe block at lines 314 to 316 say C6 pins that the strip is mounted ahead of the anchors router.
+
+**Source:** note N3 of the gate on PR 995 as recorded on KS-1717 (Done and archived, so a comment there is refused; this ticket carries the note forward). The note's own wording: "worth one more cell when the order is next touched".
+
+**NOT measured:** the cell was not written or run; whether a documents route today forwards a client's header value (KS-1717 closed the inbound side with a signed marker).
+
+**Board search before filing (2026-11-06, Seat S 27th, board_search tool, both controls held: 'msgpackr' hit KS-1379 among open tickets, a random token hit 0):** `createEmitterMarkerStrip` returned 1 candidate, 0 open and 0 closed literal hits; `ks741-emitter-marker-strip` 100 candidates, 0 and 0; `mount order` together with `x-emitter-internal` hit only KS-1717 (closed) and KS-485 (a plan ticket that names both phrases in passing).
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts
+index d278b9543..db1fa0a25 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts
+@@ -336,4 +336,16 @@ describe('KS-741 C6 — index.ts mounts createEmitterMarkerStrip() before the an
+     expect(without).not.toBe(source); // the line was there to remove
+     expect(mountLine(without, 'app.use(createEmitterMarkerStrip());')).toBe(-1);
+   });
++
++  it('the strip mount line sits above BOTH /api/documents mounts (KS-2053)', () => {
++    const source = fs.readFileSync(indexPath, 'utf8');
++    const strip = mountLine(source, 'app.use(createEmitterMarkerStrip());');
++    const publicDocuments = mountLine(source, "app.use('/api/documents', publicDocumentsRouter);");
++    const documents = mountLine(source, "app.use('/api/documents', documentsRouter);");
++    expect(strip).toBeGreaterThan(0);
++    expect(publicDocuments).toBeGreaterThan(0);
++    expect(documents).toBeGreaterThan(0);
++    expect(strip).toBeLessThan(publicDocuments);
++    expect(strip).toBeLessThan(documents);
++  });
+ });
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts
+1: /**
+2:  * =============================================================================
+3:  * KS-741 — `x-emitter-internal` is stripped at originate's OWN inbound, on every
+4:  * request, so the marker's non-spoofability no longer rests on an unstated
+5:  * header-construction convention in one route file.
+6:  * =============================================================================
+7:  *
+8:  * The marker is what originate SETS on its outbound hops to anchoring
+9:  * (`routes/documents.ts` — `originate-create`, `originate-lifecycle`) so that
+10:  * anchoring does not write a second provenance row for one user action
+11:  * (`isInternalEmit`, services/anchoring/src/index.ts). If a client could get
+12:  * a value of it through originate and onto that hop, it would be a
+13:  * client-settable switch that suppresses provenance recording.
+14:  *
+15:  * Today nothing forwards it — `routes/anchors.ts` builds its outbound headers
+16:  * explicitly and spreads `req.headers` nowhere. That is a convention, and the
+17:  * hazard KS-741 names is the ordinary refactor `headers: { ...req.headers, … }`
+18:  * that would silently turn the convention into the hole. So:
+19:  *
+20:  *   C1 (unit)     the strip deletes the marker and nothing else;
+21:  *   C2 (unit)     it is UNCONDITIONAL — a gateway-VOUCHED request keeps its
+22:  *                 trust headers (the vouch middleware's contract) and still
+23:  *                 loses the marker: the discriminator between this strip and
+24:  *                 the vouch-gated one;
+25:  *   C3 (route)    the negative — a client-supplied marker on POST /api/anchors
+26:  *                 never reaches the anchoring hop;
+27:  *   C4 (route)    the CONTROL the ticket demands — the GENUINE hop's marker
+28:  *                 (`originate-create`) DOES reach anchoring. A suite that only
+29:  *                 asserts C3 passes just as well against a service that has
+30:  *                 stopped talking to anchoring at all;
+31:  *   C5 (route)    the hazard itself — a forwarder that DOES spread
+32:  *                 `req.headers`, mounted behind the strip, still forwards no
+33:  *                 marker;
+34:  *   C6 (wiring)   index.ts mounts the strip ahead of the anchors router.
+35:  *
+36:  * Harness: the ks520 shape — repos, auth, rbac, logger and db mocked; the
+37:  * routers mounted on a real listener; anchoring replaced by a RECORDER on
+38:  * 127.0.0.1:0 that stores every request's headers. `ANCHORING_SERVICE_URL`
+39:  * is read at call time by both routers, so it is pointed at the recorder in
+40:  * beforeAll. No `jest.mock('@secuura/shared')` here — nothing in these routes
+41:  * needs one under this harness, and a root shared mock must go through
+42:  * `helpers/sharedModuleMock` (the F-926-2 completeness guard).
+43:  */
+44: 
+45: delete process.env.SIMULATE_ANCHORING;
+46: // KS-1293: a unit test that mentions ANCHORING_SERVICE_URL is a SUBJECT of the hermetic manifest and must pin an
+47: // import-scope base on a closed loopback port. beforeAll below points it at the recorder for the cells that need it.
+48: process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
+49: 
+50: // KS-596: saveDocument returns { dbId, inserted } — the create route reads dbId.
+51: const mockSaveDocument = jest.fn(async (..._args: any[]) => ({ dbId: '99999999-9999-4999-8999-999999999999', inserted: true }));
+52: const mockUpdateDocument = jest.fn(async () => undefined);
+53: 
+54: jest.mock('../repositories/documentRepo', () => ({
+55:   getDocument: jest.fn(),
+56:   listDocuments: jest.fn(),
+57:   saveDocument: mockSaveDocument,
+58:   updateDocument: mockUpdateDocument,
+59:   getSigningRequest: jest.fn(),
+60:   saveSigningRequest: jest.fn(),
+61:   deleteSigningRequest: jest.fn(),
+62:   generateContentHash: jest.fn(() => 'a'.repeat(64)),
+63:   seedDemoDocuments: jest.fn(async () => undefined),
+64:   assertNoCycle: jest.fn(async () => undefined),
+65: }));
+66: 
+67: jest.mock('../repositories/shareRepo', () => ({ createShare: jest.fn() }));
+68: 
+69: jest.mock('../repositories/lifecycleEventRepo', () => ({
+70:   createLifecycleEvent: jest.fn(),
+71:   setLifecycleEventAnchor: jest.fn(),
+72:   listLifecycleEvents: jest.fn(),
+73: }));
+74: 
+75: jest.mock('../events', () => ({
+76:   publishEvent: jest.fn(async () => undefined),
+77:   EventTypes: {
+78:     DOCUMENT_CREATED: 'document.created',
+79:     DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred',
+80:     DOCUMENT_VERSIONED: 'document.versioned',
+81:   },
+82: }));
+83: 
+84: jest.mock('../services/threadTokenClient', () => ({
+85:   mintAndRegisterThreadToken: jest.fn(async () => ({})),
+86: }));
+87: 
+88: jest.mock('../routes/verification', () => ({
+89:   registerInPlatformRegistry: jest.fn(async () => undefined),
+90: }));
+91: 
+92: jest.mock('../middleware/auth', () => ({
+93:   authenticate: () => (req: any, _res: unknown, next: () => void) => {
+94:     req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
+95:     next();
+96:   },
+97: }));
+98: 
+99: jest.mock('../middleware/rbac', () => ({
+100:   isAllowedByRoleOrScope: () => true,
+101: }));
+102: 
+103: jest.mock('../utils/logger', () => ({
+104:   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+105: }));
+106: 
+107: // The anchors router reads/writes anchor rows through prisma directly.
+108: const mockQueryRaw = jest.fn();
+109: const mockExecuteRaw = jest.fn();
+110: jest.mock('../db', () => ({
+111:   prisma: { $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw },
+112:   getTenantManager: jest.fn(() => null),
+113: }));
+114: 
+115: import * as fs from 'fs';
+116: import * as http from 'http';
+117: import * as path from 'path';
+118: import express, { Request, Response } from 'express';
+119: import { documentsRouter } from '../routes/documents';
+120: import { anchorsRouter } from '../routes/anchors';
+121: import {
+122:   createEmitterMarkerStrip,
+123:   createGatewayProvenanceMiddleware,
+124:   EMITTER_MARKER_HEADER,
+125:   VOUCH_HEADER,
+126: } from '../utils/gatewayProvenance';
+127: 
+128: // ---------------------------------------------------------------------------
+129: // The recorder standing in for anchoring: every request's method, path and
+130: // headers are kept; POST /api/anchors answers a minimal 201 the routers accept
+131: // (documents.ts reads `data.id`/`data.status`; anchors.ts reads `data.id`).
+132: // No `id` is returned, so documents.ts's confirmation poller never starts.
+133: // ---------------------------------------------------------------------------
+134: type Captured = { method: string; url: string; headers: http.IncomingHttpHeaders };
+135: const captured: Captured[] = [];
+136: let recorder: http.Server;
+137: let recorderUrl = '';
+138: 
+139: /** Bounded wait for the recorder to see a request matching `pred`. */
+140: async function waitForCaptured(pred: (c: Captured) => boolean, timeoutMs = 3000): Promise<Captured | undefined> {
+141:   const deadline = Date.now() + timeoutMs;
+142:   while (Date.now() < deadline) {
+143:     const hit = captured.find(pred);
+144:     if (hit) return hit;
+145:     await new Promise((r) => setTimeout(r, 25));
+146:   }
+147:   return captured.find(pred);
+148: }
+149: 
+150: // ---------------------------------------------------------------------------
+151: // The originate harness: the strip mounted ahead of every router, exactly as
+152: // index.ts mounts it, plus C5's synthetic forwarder — the refactor the ticket
+153: // warns of — mounted BEHIND the strip.
+154: // ---------------------------------------------------------------------------
+155: const app = express();
+156: app.use(createEmitterMarkerStrip());
+157: app.use('/api/documents', express.json(), documentsRouter);
+158: app.use('/api/anchors', express.json(), anchorsRouter);
+159: app.post('/probe/forward-spread', express.json(), async (req: Request, res: Response) => {
+160:   // The hazard: forward the whole inbound header set. Host/content-length are
+161:   // dropped only so the request is well-formed; everything else rides along.
+162:   const { host: _h, 'content-length': _cl, ...rest } = req.headers as Record<string, string>;
+163:   const upstream = await fetch(`${process.env.ANCHORING_SERVICE_URL}/api/anchors`, {
+164:     method: 'POST',
+165:     headers: { ...rest, 'content-type': 'application/json' },
+166:     body: JSON.stringify({ probe: true }),
+167:   });
+168:   res.status(upstream.status).json({ forwarded: true });
+169: });
+170: 
+171: let baseUrl = '';
+172: let server: ReturnType<typeof app.listen>;
+173: 
+174: beforeAll(async () => {
+175:   await new Promise<void>((resolve) => {
+176:     recorder = http.createServer((req, res) => {
+177:       captured.push({ method: req.method || '', url: req.url || '', headers: req.headers });
+178:       req.resume();
+179:       req.on('end', () => {
+180:         res.writeHead(201, { 'content-type': 'application/json' });
+181:         res.end(JSON.stringify({ success: true, data: { status: 'pending' } }));
+182:       });
+183:     });
+184:     recorder.listen(0, '127.0.0.1', () => resolve());
+185:   });
+186:   const ra = recorder.address();
+187:   recorderUrl = `http://127.0.0.1:${typeof ra === 'object' && ra ? ra.port : 0}`;
+188:   process.env.ANCHORING_SERVICE_URL = recorderUrl;
+189: 
+190:   await new Promise<void>((resolve) => {
+191:     server = app.listen(0, '127.0.0.1', () => resolve());
+192:   });
+193:   const sa = server.address();
+194:   baseUrl = `http://127.0.0.1:${typeof sa === 'object' && sa ? sa.port : 0}`;
+195: });
+196: 
+197: afterAll(() => {
+198:   server?.close();
+199:   recorder?.close();
+200: });
+201: 
+202: beforeEach(() => {
+203:   jest.clearAllMocks();
+204:   captured.length = 0;
+205:   delete process.env.SIMULATE_ANCHORING;
+206:   mockQueryRaw.mockResolvedValue([]); // no existing anchor row
+207:   mockExecuteRaw.mockResolvedValue(undefined);
+208: });
+209: 
+210: // ---------------------------------------------------------------------------
+211: // C1 / C2 — unit
+212: // ---------------------------------------------------------------------------
+213: describe('KS-741 C1 — createEmitterMarkerStrip deletes the marker and nothing else', () => {
+214:   it('removes x-emitter-internal and leaves authorization, content-type and x-tenant-id in place', () => {
+215:     const req: any = {
+216:       headers: {
+217:         [EMITTER_MARKER_HEADER]: 'forged-by-client',
+218:         authorization: 'Bearer t',
+219:         'content-type': 'application/json',
+220:         'x-tenant-id': 'a0000000-0000-4000-8000-000000000001',
+221:       },
+222:     };
+223:     const next = jest.fn();
+224:     createEmitterMarkerStrip()(req, {} as any, next);
+225:     expect(next).toHaveBeenCalledTimes(1);
+226:     expect(req.headers[EMITTER_MARKER_HEADER]).toBeUndefined();
+227:     expect(req.headers.authorization).toBe('Bearer t');
+228:     expect(req.headers['content-type']).toBe('application/json');
+229:     expect(req.headers['x-tenant-id']).toBe('a0000000-0000-4000-8000-000000000001');
+230:   });
+231: });
+232: 
+233: describe('KS-741 C2 — the strip is UNCONDITIONAL: a gateway-vouched request keeps its trust headers and still loses the marker', () => {
+234:   it('after the vouch middleware AND the strip, x-tenant-id survives (vouched) but x-emitter-internal is gone', () => {
+235:     // A synthetic secret generated here — never any environment's value.
+236:     const secret = 'k'.repeat(64);
+237:     const req: any = {
+238:       headers: {
+239:         [VOUCH_HEADER]: secret,
+240:         'x-tenant-id': 'a0000000-0000-4000-8000-000000000001',
+241:         [EMITTER_MARKER_HEADER]: 'forged-by-client',
+242:       },
+243:     };
+244:     const calls: string[] = [];
+245:     createGatewayProvenanceMiddleware(secret)(req, {} as any, () => calls.push('vouch'));
+246:     createEmitterMarkerStrip()(req, {} as any, () => calls.push('strip'));
+247:     expect(calls).toEqual(['vouch', 'strip']);
+248:     // The vouch middleware's own contract held: vouched → trust headers kept, vouch dropped.
+249:     expect(req.headers['x-tenant-id']).toBe('a0000000-0000-4000-8000-000000000001');
+250:     expect(req.headers[VOUCH_HEADER]).toBeUndefined();
+251:     // And the marker went regardless — this is what the vouch-gated set cannot do.
+252:     expect(req.headers[EMITTER_MARKER_HEADER]).toBeUndefined();
+253:   });
+254: });
+255: 
+256: // ---------------------------------------------------------------------------
+257: // C3 / C4 / C5 — route, through the real routers and the recorder
+258: // ---------------------------------------------------------------------------
+259: describe('KS-741 C3 — a client-supplied marker on POST /api/anchors never reaches the anchoring hop', () => {
+260:   it('the recorded hop carries content-type application/json (the hop happened) and NO x-emitter-internal', async () => {
+261:     const res = await fetch(`${baseUrl}/api/anchors`, {
+262:       method: 'POST',
+263:       headers: {
+264:         'content-type': 'application/json',
+265:         authorization: 'Bearer client-token',
+266:         [EMITTER_MARKER_HEADER]: 'forged-by-client',
+267:       },
+268:       body: JSON.stringify({ documentId: 'doc-ks741', contentHash: 'a'.repeat(64), network: 'preview' }),
+269:     });
+270:     expect(res.status).toBe(202);
+271:     const hop = await waitForCaptured((c) => c.method === 'POST' && c.url === '/api/anchors');
+272:     expect(hop).toBeDefined();
+273:     expect(hop!.headers['content-type']).toBe('application/json');
+274:     expect(hop!.headers[EMITTER_MARKER_HEADER]).toBeUndefined();
+275:   });
+276: });
+277: 
+278: describe('KS-741 C4 — the CONTROL: the genuine originate -> anchoring hop DOES carry the marker', () => {
+279:   it('POST /api/documents auto-anchor reaches the recorder with x-emitter-internal: originate-create', async () => {
+280:     const res = await fetch(`${baseUrl}/api/documents`, {
+281:       method: 'POST',
+282:       headers: { 'content-type': 'application/json', authorization: 'Bearer client-token' },
+283:       body: JSON.stringify({ title: 'ks741 genuine hop', type: 'general', data: { note: 'x' } }),
+284:     });
+285:     expect(res.status).toBe(201);
+286:     const hop = await waitForCaptured((c) => c.method === 'POST' && c.url === '/api/anchors');
+287:     expect(hop).toBeDefined();
+288:     expect(hop!.headers[EMITTER_MARKER_HEADER]).toBe('originate-create');
+289:   });
+290: });
+291: 
+292: describe('KS-741 C5 — the hazard the ticket exists for: a forwarder that spreads req.headers, mounted behind the strip', () => {
+293:   it('forwards everything it received — and what it received no longer holds the marker', async () => {
+294:     const res = await fetch(`${baseUrl}/probe/forward-spread`, {
+295:       method: 'POST',
+296:       headers: {
+297:         'content-type': 'application/json',
+298:         'x-request-id': 'ks741-probe',
+299:         [EMITTER_MARKER_HEADER]: 'forged-by-client',
+300:       },
+301:       body: JSON.stringify({ probe: true }),
+302:     });
+303:     expect(res.status).toBe(201);
+304:     const hop = await waitForCaptured((c) => c.method === 'POST' && c.url === '/api/anchors');
+305:     expect(hop).toBeDefined();
+306:     // The spread DID forward (the control that the probe is a real spread) …
+307:     expect(hop!.headers['x-request-id']).toBe('ks741-probe');
+308:     // … and the marker was already gone by the time it ran.
+309:     expect(hop!.headers[EMITTER_MARKER_HEADER]).toBeUndefined();
+310:   });
+311: });
+312: 
+313: // ---------------------------------------------------------------------------
+314: // C6 — wiring: index.ts mounts the strip ahead of the anchors router
+315: // ---------------------------------------------------------------------------
+316: describe('KS-741 C6 — index.ts mounts createEmitterMarkerStrip() before the anchors router', () => {
+317:   const indexPath = process.env.KS741_INDEX_PATH || path.resolve(__dirname, '../index.ts');
+318: 
+319:   function mountLine(source: string, needle: string): number {
+320:     const idx = source.indexOf(needle);
+321:     return idx < 0 ? -1 : source.slice(0, idx).split('\n').length;
+322:   }
+323: 
+324:   it('the strip mount line exists and sits above the /api/anchors mount', () => {
+325:     const source = fs.readFileSync(indexPath, 'utf8');
+326:     const strip = mountLine(source, 'app.use(createEmitterMarkerStrip());');
+327:     const anchors = mountLine(source, "app.use('/api/anchors', anchorsRouter);");
+328:     expect(strip).toBeGreaterThan(0);
+329:     expect(anchors).toBeGreaterThan(0);
+330:     expect(strip).toBeLessThan(anchors);
+331:   });
+332: 
+333:   it('CONTROL — the reader can fail: a copy of index.ts with the mount line removed is refused', () => {
+334:     const source = fs.readFileSync(indexPath, 'utf8');
+335:     const without = source.replace('app.use(createEmitterMarkerStrip());', '');
+336:     expect(without).not.toBe(source); // the line was there to remove
+337:     expect(mountLine(without, 'app.use(createEmitterMarkerStrip());')).toBe(-1);
+338:   });
+339: 
+340:   it('the strip mount line sits above BOTH /api/documents mounts (KS-2053)', () => {
+341:     const source = fs.readFileSync(indexPath, 'utf8');
+342:     const strip = mountLine(source, 'app.use(createEmitterMarkerStrip());');
+343:     const publicDocuments = mountLine(source, "app.use('/api/documents', publicDocumentsRouter);");
+344:     const documents = mountLine(source, "app.use('/api/documents', documentsRouter);");
+345:     expect(strip).toBeGreaterThan(0);
+346:     expect(publicDocuments).toBeGreaterThan(0);
+347:     expect(documents).toBeGreaterThan(0);
+348:     expect(strip).toBeLessThan(publicDocuments);
+349:     expect(strip).toBeLessThan(documents);
+350:   });
+351: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS 441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`): **NOT run** (no local stack in this seat; see Test Evidence)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`): **NOT run** (no local stack in this seat)
+
+### PII review (KS 256 R15/R16)
+
+Not applicable: this PR adds one cell to an existing test file; the cell reads the source text of one file. No product code, no published OpenAPI spec, example value, fixture or seed data.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-2053
+
+## Summary
+
+**TEST-ONLY. No product code is changed: one existing test file, 12 lines added.**
+
+KS-2053 notes that originate's wiring cell C6 in `ks741-emitter-marker-strip.test.ts` asserts the position of `app.use(createEmitterMarkerStrip())` only against the anchors router. Moving the strip to between the documents mounts and the anchors mount would still pass C6 while the documents routes ran without the strip. Today the order is correct. This PR adds one cell to the C6 block: `the strip mount line sits above BOTH /api/documents mounts`. It reads `originate/src/index.ts` as text with the file's own `mountLine` helper.
+
+`Refs KS-2053`. This PR does not close the ticket. Nothing is deployed and nothing needs deploying: no running service changes.
+
+**Fragment pair:** none, because this is test-only and no rule requires one. Searched (the checkout at `a65ae7ed1`, read-only): the pre-push hook, `Blockchain/Dev/scripts/preflight` (13 files), `CLAUDE.md`, `CONTRIBUTING.md`, `DEV-PROCESS.md` and `Blockchain/Dev/package.json` for "fragment" and "docs-fragments": 0 hits in all; `docs-fragments.mjs check` lints fragments that exist and has no mode that refuses a missing pair. Wednesday ruled no pair for the test-only PRs of this set.
+
+## Test Evidence
+
+**Touched (1 file):** `Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts` (+12 -0 by `git diff`; the patch re-emits the closing `});`).
+
+**Ran by Seat T 15th** (2026-11-08 between 12:53Z and 13:15Z, on develop `7eda23b34d3b`, macOS host shared with other seats, Node v26.8.1, **not the LTS 24 line**):
+- Cell file on the applied tree: 8 of 8, the new cell passes. It is green on develop by design.
+- **Red-proof (mine, using the held pass's plant, never committed):** the plant moves the strip mount line to just after the two documents mounts in `index.ts`. With it applied, the new cell alone fails by assertion (`expect(received).toBeLessThan(expected)`, expected `< 279`) and the other 7 cells in the file stay green, including the existing anchors cell C6, which is the gap the ticket describes. The plant was reversed: `index.ts` sha256 equal to before, `git diff` of it empty.
+- Whole originate suite, same instrument on both sides (`jest`, 5 workers): unpatched develop `7eda23b34d3b` 220 suites, 2592 of 2592; with this change 220 suites, 2593 of 2593. Failed-cell names compared: both lists empty.
+- `tsc` including the test file (a temporary config kept outside the repo, because originate's `tsconfig.json` excludes `src/__tests__` and originate is not in the `check:test-types` ratchet): 0 errors; the same config over a scratch file with a planted type error exits 2 and names it.
+- eslint on the touched file: no output; a planted `debugger` in a scratch file exits 1.
+- `docs-fragments.mjs check`: OK; with a planted unclosed-tag fragment it exits 1, and OK again once that file is moved away.
+- Pre-push preflight: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+
+**Re-measured by Seat T 15th after the push** (2026-11-08 13:22Z, from the push driver's record, `git ls-remote` and `git diff-tree`): origin holds the branch at `afb5f1ef4afe`, one commit whose parent is `7eda23b34d3b`; one file changed (the one above, status M, +12 -0). The driver's develop gate read develop `7eda23b34d3b` (unmoved since my cut) and found no overlap between this branch's one path and the 42 open PRs then open. The hook ran 13 of 16 legs and nothing failed; legs 3, 4 and 8 were skipped because the local stack was not up. That is the hook's own wording ("PREFLIGHT INCOMPLETE"), and it is not a pass.
+
+**NOT run:** Schemathesis, Akto, Playwright e2e, k6 (no local stack in this seat), Node 24, any box or deploy.
+
+**Migrations / config:** none.
+
+## Held patch
+
+This is a held pass from the local model ("the Spark"), raised by Seat T 15th. READY file `READY_KS-2053-KS-2053-O102-P2_spark-dsv4flash_BRIEFED-TESTONLYINPUT-STRIP-ABOVE-DOCUMENTS-MOUNTS-CELL-PASS-9of9_2026-11-08.diff.md`; canonical patch sha256 prefix `a00e62174fd964eb` (1013 bytes, matched here before applying); run `spark_secuura_2026-11-08_ks_2053_o102_p2_strip_above_documents_mounts`. Applied with a strict `git apply -p1`: no offset line. The checker legs below are **the checker's, measured at tip `abd044f63a9d`, not re-run by Seat T 15th**: strict apply at the tip; touched set equals the declared set; green without the plant; red with the plant by assertion; "whole suite no worse: cells 2563 -> 2564, red 11 -> 11" (the checker's own instrument; I did not reproduce any red cell, see my figures above); restore clean; `RESULT: PASS (tier test_only_input)`.
+
+## What this did NOT do
+
+- It changes nothing in `index.ts`. It does not decide whether mount order is the regression that matters most; it pins the one the ticket names.
+- It does not run the real service. The cell reads source text.
+- It does not touch the other ordering cells of the file.
+
+## Test plan
+
+- [ ] `npm --prefix Blockchain/Dev/services/originate test -- src/__tests__/ks741-emitter-marker-strip.test.ts` — 8 cells
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 2093,
+ "head_sha": "afb5f1ef4afe81f252835cd8dbae3c17be85a46f",
+ "pr_tip_now": "afb5f1ef4afe81f252835cd8dbae3c17be85a46f",
+ "head_mode": "tip",
+ "merge_base": "7eda23b34d3b7a413ca8f9c0945c7843708ce9f4",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts",
+   "added": "12",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts"
+ ],
+ "product_files": [],
+ "diff_stat": {
+  "files": 1,
+  "added": 12,
+  "deleted": 0
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 8,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "th the mount line removed is refused\n    \u2713 the strip mount line sits above BOTH /api/documents mounts (KS-2053)\n\nTest Suites: 1 passed, 1 total\nTests:       8 passed, 8 total\nSnapshots:   0 total\nTime:        6.419 s\nRan all test suites matching /src\\/__tests__\\/ks741-emitter-marker-strip.test.ts/i."
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 8,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "ved is refused\n    \u2713 the strip mount line sits above BOTH /api/documents mounts (KS-2053) (1 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       8 passed, 8 total\nSnapshots:   0 total\nTime:        1.655 s, estimated 7 s\nRan all test suites matching /src\\/__tests__\\/ks741-emitter-marker-strip.test.ts/i."
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 8,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 8,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 15
+}

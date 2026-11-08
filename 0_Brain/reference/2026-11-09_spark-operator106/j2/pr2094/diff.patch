@@ -1,0 +1,23 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts
+index cddcd7ef7..c2a810b68 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts
+@@ -139,4 +139,18 @@ describe('KS-1937: the email service logs never carry the recipient address', ()
+     expect(lines('[Email/SMTP] Failed to send')[0]).toContain('ks1937 smtp boom'); // the error text is still forwarded (named under NOT covered above)
+     expect(leaks()).toEqual([]);
+   });
++
++  it('E8 the allow-list refusal line carries no part of the recipient address either: not even its domain', async () => {
++    const email = loadEmail({ ...SMTP_ENV, EMAIL_RECIPIENT_ALLOWLIST: 'someone.else@example.test' });
++    await expect(email.sendEmail({ to: 'ks2099.person@ks2099-domain.invalid', subject: 'ks2099 subject', text: 'ks2099 body' })).resolves.toBe(false);
++    expect(lines('refusing to send')).toHaveLength(1);
++    expect(mockLogged.filter((l) => l.toLowerCase().includes('ks2099-domain'))).toEqual([]);
++  });
++
++  it('E9 ACS accepts the send: the address still reaches the ACS call as the one recipient (only the LOG changed)', async () => {
++    mockBeginSend.mockResolvedValue({ pollUntilDone: async () => ({ status: 'Succeeded', id: 'acs-msg-2099' }) });
++    await expect(send(loadEmail(ACS_ENV))).resolves.toBe(true);
++    expect(mockBeginSend).toHaveBeenCalledTimes(1);
++    expect(mockBeginSend.mock.calls[0][0].recipients).toEqual({ to: [{ address: ADDRESS }] });
++  });
+ });

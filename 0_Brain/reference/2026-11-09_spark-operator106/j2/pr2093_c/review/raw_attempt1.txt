@@ -1,0 +1,30 @@
+{
+  "findings": [
+    {
+      "severity": "Note",
+      "claim": "The new test reads index.ts as text and asserts line order, but the test file's own harness (lines 155-158) mounts the strip ahead of both routers, so the test does not exercise the real index.ts wiring at runtime.",
+      "evidence": "Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts:155-158 `const app = express(); app.use(createEmitterMarkerStrip()); app.use('/api/documents', express.json(), documentsRouter); app.use('/api/anchors', express.json(), anchorsRouter);`",
+      "test_or_reason": "The new cell (lines 340-350) only reads the source file; it does not run the actual index.ts. The harness mounts the strip correctly, so the test would pass even if index.ts had the strip after the documents mounts, as long as the source text still shows the strip before them."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test pins the strip mount line above both documents mounts, but it does not verify that the documents routes actually use the strip at runtime; it only checks source text order.",
+      "evidence": "Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts:340-350 `it('the strip mount line sits above BOTH /api/documents mounts (KS-2053)', () => { ... expect(strip).toBeLessThan(publicDocuments); expect(strip).toBeLessThan(documents); });`",
+      "test_or_reason": "The test is a wiring check on source text, not a behavioural test. It would pass even if the documents routes were mounted in a way that bypasses the strip (e.g., if the strip were mounted after the documents mounts in a different file or if the documents router were imported and used elsewhere)."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR description claims the new cell fails by assertion when the strip is moved after the documents mounts, but this red-proof is not in facts.json; facts.json only shows the test passing on head and base.",
+      "evidence": "facts.json targeted_on_head and targeted_on_base_product_code both show 8 passed, 0 failed; no red-proof run is recorded.",
+      "test_or_reason": "The PR description's red-proof is a manual claim not captured in the deterministic runner output. It is unmeasured by the facts, so it is a Note, not a Major."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test uses `mountLine` which returns the line number of the first occurrence of the needle; if the strip mount line appears multiple times, the test only checks the first occurrence, which may not be the one that actually runs.",
+      "evidence": "Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts:319-322 `function mountLine(source: string, needle: string): number { const idx = source.indexOf(needle); return idx < 0 ? -1 : source.slice(0, idx).split('\\n').length; }`",
+      "test_or_reason": "The helper uses `indexOf`, so it finds the first occurrence. If index.ts had multiple `app.use(createEmitterMarkerStrip())` calls, the test would only check the first, which might be before the documents mounts while a later one is after them."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+}

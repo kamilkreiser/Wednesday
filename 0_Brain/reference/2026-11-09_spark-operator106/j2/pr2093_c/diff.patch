@@ -1,0 +1,21 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts
+index d278b9543..db1fa0a25 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts
+@@ -336,4 +336,16 @@ describe('KS-741 C6 — index.ts mounts createEmitterMarkerStrip() before the an
+     expect(without).not.toBe(source); // the line was there to remove
+     expect(mountLine(without, 'app.use(createEmitterMarkerStrip());')).toBe(-1);
+   });
++
++  it('the strip mount line sits above BOTH /api/documents mounts (KS-2053)', () => {
++    const source = fs.readFileSync(indexPath, 'utf8');
++    const strip = mountLine(source, 'app.use(createEmitterMarkerStrip());');
++    const publicDocuments = mountLine(source, "app.use('/api/documents', publicDocumentsRouter);");
++    const documents = mountLine(source, "app.use('/api/documents', documentsRouter);");
++    expect(strip).toBeGreaterThan(0);
++    expect(publicDocuments).toBeGreaterThan(0);
++    expect(documents).toBeGreaterThan(0);
++    expect(strip).toBeLessThan(publicDocuments);
++    expect(strip).toBeLessThan(documents);
++  });
+ });

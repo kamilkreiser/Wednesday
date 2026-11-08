@@ -1,0 +1,353 @@
+===== TICKET =====
+KS-2099 — PR 2056 residues: a failed SMTP send still logs the recipient address, a contact email at INFO, cells blind to a partial leak [In Progress]
+
+**BLUF:** PR 2056 (KS-1937, merged 2026-11-06 11:51:28Z as `90b500e19883`) took the recipient address out of ten originate log lines, but a failed SMTP send can still log it, because the line prints the error text and an SMTP server echoes the address in its refusal. Two smaller residues from the same gate: a third-party verifier's contact email is logged at INFO, and the PR's 12 cells stay green when the log line carries the recipient's domain. Item 1 is MEDIUM (MEASURED AT RUNTIME); items 2 and 3 are MINOR. Found by QA gate 235 (round 1); no fix here.
+
+**Item 1, MEDIUM, MEASURED AT RUNTIME (gate 235, a loopback stub SMTP server with real nodemailer 10.2.1):** `Blockchain/Dev/services/originate/src/services/email.ts` line 210 (read again at develop `90b500e19883`) is `` console.error(`[Email/SMTP] Failed to send: ${error.message}`) ``. The stub made it print: `[Email/SMTP] Failed to send: Can't send mail - all recipients were rejected: 550 5.1.1 <ks1937.probe.recipient@example.test>: Recipient address rejected: User unknown`, address present. Gate 235 also read nodemailer's `smtp-connection/index.js` line 1221, which builds `'Invalid recipient ' + JSON.stringify(address)`. The PR's tests forward the text `ks1937 smtp boom` and so prove nothing about what a server echoes. Same class, not measured: the ACS error object (line 164 of the same file at the PR head), `err?.message` (line 167), `String(err)` in the WARN lines of `Blockchain/Dev/services/originate/src/utils/notificationClient.ts`, and its `body.substring(0,200)` of the notification service's reply. The ruling behind it is Kam's card `secuura-ks1346-logging-thrown-objects-leaks-secrets` (a: never their values) and Wednesday's KS-1937 answer (log the template, never the address). Fix shape (gate 235's): log the error's class and code (`error.code`, `error.responseCode`) instead of its message, or strip the recipient first; test with a stub server that echoes the address.
+
+**Item 2, MINOR, READ ONLY:** the PR's fragment says a scan of every log call flags the two sites in KS-2036 and nothing else. `Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts` line 87 (read again at `90b500e19883`) is `logger.info('Third-party verifier registered', { id, organizationName, contactEmail })`: a contact address, not a recipient, but an address in an INFO line, and not in KS-2036's list.
+
+**Item 3, MINOR, MEASURED AT RUNTIME (gate 235 tamper X):** with the allow-list refusal line changed to print the recipient's domain, `...refusing to send: ${options.to.split("@")[1]}`, all 12 cells stay green: they look only for the full address. The ACS path's "the address still reaches the mailer" is also unpinned (cells E1 to E3 never check the arguments of `beginSend`); only the SMTP path pins `mockSendMail.mock.calls[0][0].to` (cell E6). Tampers Y (full address on the SMTP Sent line), Z (address back on the client fallback INFO line) and W (blank SMTP `to`) were each caught by exactly one cell. Tests: `Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts` and `Blockchain/Dev/services/originate/src/__tests__/ks1937-notification-client-logs-the-template-never-the-recipient-address.test.ts`.
+
+**Source:** gate 235 verdict, findings F2, F4 and F5 on PR 2056, `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-06_gate235-tier2-pr2054-2057/verdict.md`. Items 1 and 2 were re-read by this seat at develop `90b500e19883` through the GitHub API; nothing was run by this seat.
+
+**Board search (2026-11-06, includeArchived, paginated):** `services/originate/src/services/email.ts` and `contactEmail`: 0 hits. `Failed to send` and `[Email/SMTP]`: 1 open hit each, KS-1964 (the auth service's own email sender, a different service). `thirdPartyVerifiers`: 3 open hits (KS-1868, KS-1945, KS-1946), none about the log line. `KS-1937`: 6 open hits (KS-1937, KS-1964, KS-1965, KS-1966, KS-2036, KS-2076). KS-2036 was read whole: it covers `routes/certifications.ts` line 1385 and `routes/adminConfig.ts` line 2123 and none of these three items.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts
+index cddcd7ef7..c2a810b68 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts
+@@ -139,4 +139,18 @@ describe('KS-1937: the email service logs never carry the recipient address', ()
+     expect(lines('[Email/SMTP] Failed to send')[0]).toContain('ks1937 smtp boom'); // the error text is still forwarded (named under NOT covered above)
+     expect(leaks()).toEqual([]);
+   });
++
++  it('E8 the allow-list refusal line carries no part of the recipient address either: not even its domain', async () => {
++    const email = loadEmail({ ...SMTP_ENV, EMAIL_RECIPIENT_ALLOWLIST: 'someone.else@example.test' });
++    await expect(email.sendEmail({ to: 'ks2099.person@ks2099-domain.invalid', subject: 'ks2099 subject', text: 'ks2099 body' })).resolves.toBe(false);
++    expect(lines('refusing to send')).toHaveLength(1);
++    expect(mockLogged.filter((l) => l.toLowerCase().includes('ks2099-domain'))).toEqual([]);
++  });
++
++  it('E9 ACS accepts the send: the address still reaches the ACS call as the one recipient (only the LOG changed)', async () => {
++    mockBeginSend.mockResolvedValue({ pollUntilDone: async () => ({ status: 'Succeeded', id: 'acs-msg-2099' }) });
++    await expect(send(loadEmail(ACS_ENV))).resolves.toBe(true);
++    expect(mockBeginSend).toHaveBeenCalledTimes(1);
++    expect(mockBeginSend.mock.calls[0][0].recipients).toEqual({ to: [{ address: ADDRESS }] });
++  });
+ });
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts
+1: // KS-1937 (originate services/email.ts): the notification client's SMTP fallback calls sendEmail, and sendEmail wrote the recipient's email address (`options.to`) to the console in seven
+2: // places: the ACS sent line, the ACS send-failed and send-threw lines, the allow-list refusal, the no-provider line, and the SMTP sent and failed lines. So ONE notification wrote the address
+3: // in the client's INFO line and again here. The ruling, quoted: Kam's card secuura-ks1346-logging-thrown-objects-leaks-secrets = a, "Log what kind of thing was thrown and the NAMES of its
+4: // fields, never their values", and Wednesday's ANSWER of 2026-11-06 on this ticket, "A. Log the template only, never the address ... the client's 3 lines and email.ts's 7, test first".
+5: // Each cell loads the REAL email module (it reads its configuration once at import, so each cell sets the environment and re-requires it through jest.isolateModules, as ks488-smtp-opt-in
+6: // does), with only the two providers' libraries replaced, records EVERY argument of EVERY console call, and requires (1) the line the cell is about really was written, and (2) the address
+7: // appears in none of the recorded output. The subject is still logged: it is not the recipient.
+8: // NOT covered, stated because it matters: error text a provider returns is still forwarded (`error.message`, `err?.message`, and the raw `result.error` object of a failed ACS send); whether a
+9: // real SMTP or ACS error text can echo the address depends on that server's reply and is not measured here.
+10: const mockLogged: string[] = [];
+11: const mockRecord = (source: string, args: unknown[]): void => {
+12:   mockLogged.push(
+13:     source +
+14:       ' ' +
+15:       args
+16:         .map((a) => {
+17:           if (typeof a === 'string') return a;
+18:           try {
+19:             return JSON.stringify(a) ?? String(a);
+20:           } catch {
+21:             return '[unserialisable]';
+22:           }
+23:         })
+24:         .join(' '),
+25:   );
+26: };
+27: const mockSendMail = jest.fn();
+28: const mockBeginSend = jest.fn();
+29: 
+30: type EmailModule = typeof import('../services/email');
+31: 
+32: // A synthetic address that cannot belong to a person, and that no other string in this file contains.
+33: const ADDRESS = 'ks1937.recipient@example.test';
+34: const ENV_KEYS = [
+35:   'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM', 'SMTP_ENABLED', 'EMAIL_FROM',
+36:   'ACS_CONNECTION_STRING', 'ACS_SENDER_ADDRESS', 'EMAIL_RECIPIENT_ALLOWLIST',
+37: ] as const;
+38: const ACS_ENV = { ACS_CONNECTION_STRING: 'endpoint=https://acs.example.test/;accesskey=ks1937-not-a-key', ACS_SENDER_ADDRESS: 'donotreply@example.test' };
+39: const SMTP_ENV = { SMTP_ENABLED: 'true', SMTP_HOST: 'smtp.example.test', SMTP_FROM: 'noreply@example.test' };
+40: 
+41: const saved: Record<string, string | undefined> = {};
+42: const spies: jest.SpyInstance[] = [];
+43: 
+44: function loadEmail(env: Record<string, string>): EmailModule {
+45:   for (const key of ENV_KEYS) delete process.env[key];
+46:   Object.assign(process.env, env);
+47:   let mod!: EmailModule;
+48:   jest.isolateModules(() => {
+49:     mod = require('../services/email') as EmailModule;
+50:   });
+51:   return mod;
+52: }
+53: 
+54: const send = (email: EmailModule): Promise<boolean> => email.sendEmail({ to: ADDRESS, subject: 'ks1937 subject', text: 'ks1937 body' });
+55: const leaks = (): string[] => mockLogged.filter((l) => l.toLowerCase().includes(ADDRESS.toLowerCase()));
+56: const lines = (needle: string): string[] => mockLogged.filter((l) => l.includes(needle));
+57: 
+58: beforeEach(() => {
+59:   mockLogged.length = 0;
+60:   for (const key of ENV_KEYS) saved[key] = process.env[key];
+61:   mockSendMail.mockReset();
+62:   mockBeginSend.mockReset();
+63:   jest.doMock('nodemailer', () => ({ __esModule: true, default: { createTransport: () => ({ sendMail: mockSendMail }) } }));
+64:   jest.doMock('@azure/communication-email', () => ({ EmailClient: class { beginSend = mockBeginSend; } }));
+65:   for (const level of ['log', 'info', 'warn', 'error'] as const) {
+66:     spies.push(jest.spyOn(console, level).mockImplementation((...a: unknown[]) => mockRecord('console.' + level, a)));
+67:   }
+68: });
+69: 
+70: afterEach(() => {
+71:   while (spies.length) spies.pop()!.mockRestore();
+72:   for (const key of ENV_KEYS) {
+73:     if (saved[key] === undefined) delete process.env[key];
+74:     else process.env[key] = saved[key] as string;
+75:   }
+76:   jest.dontMock('nodemailer');
+77:   jest.dontMock('@azure/communication-email');
+78: });
+79: 
+80: describe('KS-1937: the email service logs never carry the recipient address', () => {
+81:   it('CONTROL the capture sees the address on the console channel, so a zero below is a measurement: a planted console line is flagged', () => {
+82:     console.error('planted line for ' + ADDRESS);
+83:     expect(leaks()).toHaveLength(1);
+84:   });
+85: 
+86:   it('E1 ACS accepts the send: the sent line is written, with the subject and the message id, and the address is in no recorded output', async () => {
+87:     mockBeginSend.mockResolvedValue({ pollUntilDone: async () => ({ status: 'Succeeded', id: 'acs-msg-1937' }) });
+88:     await expect(send(loadEmail(ACS_ENV))).resolves.toBe(true);
+89:     expect(lines('[Email/ACS] Sent')).toHaveLength(1);
+90:     expect(lines('[Email/ACS] Sent')[0]).toContain('ks1937 subject'); // KS-1937: the subject and the id are kept; only the recipient went
+91:     expect(lines('[Email/ACS] Sent')[0]).toContain('acs-msg-1937');
+92:     expect(leaks()).toEqual([]);
+93:   });
+94: 
+95:   it('E2 ACS reports a failed status: the send-failed line is written, and the address is in no recorded output', async () => {
+96:     mockBeginSend.mockResolvedValue({ pollUntilDone: async () => ({ status: 'Failed', error: { code: 'ks1937-code' } }) });
+97:     await expect(send(loadEmail(ACS_ENV))).resolves.toBe(false);
+98:     expect(lines('[Email/ACS] Send failed')).toHaveLength(1);
+99:     expect(leaks()).toEqual([]);
+100:   });
+101: 
+102:   it('E3 the ACS call throws: the send-threw line is written with the error text, and the address is in no recorded output', async () => {
+103:     mockBeginSend.mockRejectedValue(new Error('ks1937 acs boom'));
+104:     await expect(send(loadEmail(ACS_ENV))).resolves.toBe(false);
+105:     expect(lines('[Email/ACS] Send threw')).toHaveLength(1);
+106:     expect(lines('[Email/ACS] Send threw')[0]).toContain('ks1937 acs boom'); // the error text is still forwarded (named under NOT covered above)
+107:     expect(leaks()).toEqual([]);
+108:   });
+109: 
+110:   it('E4 the recipient is not on the allow-list: the refusal line is written and nothing is sent, and the address is in no recorded output', async () => {
+111:     const email = loadEmail({ ...SMTP_ENV, EMAIL_RECIPIENT_ALLOWLIST: 'someone.else@example.test' });
+112:     await expect(send(email)).resolves.toBe(false);
+113:     expect(lines('refusing to send')).toHaveLength(1);
+114:     expect(mockSendMail).not.toHaveBeenCalled(); // the refusal really refused
+115:     expect(leaks()).toEqual([]);
+116:   });
+117: 
+118:   it('E5 no provider is configured: the would-send line is written with the subject, and the address is in no recorded output', async () => {
+119:     await expect(send(loadEmail({}))).resolves.toBe(false);
+120:     expect(lines('No provider configured')).toHaveLength(1);
+121:     expect(lines('No provider configured')[0]).toContain('ks1937 subject');
+122:     expect(leaks()).toEqual([]);
+123:   });
+124: 
+125:   it('E6 SMTP accepts the send: the sent line is written, with the subject and the message id, and the address is in no recorded output', async () => {
+126:     mockSendMail.mockResolvedValue({ messageId: 'smtp-msg-1937' });
+127:     await expect(send(loadEmail(SMTP_ENV))).resolves.toBe(true);
+128:     expect(mockSendMail).toHaveBeenCalledTimes(1);
+129:     expect(mockSendMail.mock.calls[0][0].to).toBe(ADDRESS); // the address still reaches the transport: only the LOG changed
+130:     expect(lines('[Email/SMTP] Sent')).toHaveLength(1);
+131:     expect(lines('[Email/SMTP] Sent')[0]).toContain('smtp-msg-1937');
+132:     expect(leaks()).toEqual([]);
+133:   });
+134: 
+135:   it('E7 SMTP rejects the send: the failed line is written with the error text, and the address is in no recorded output', async () => {
+136:     mockSendMail.mockRejectedValue(new Error('ks1937 smtp boom'));
+137:     await expect(send(loadEmail(SMTP_ENV))).resolves.toBe(false);
+138:     expect(lines('[Email/SMTP] Failed to send')).toHaveLength(1);
+139:     expect(lines('[Email/SMTP] Failed to send')[0]).toContain('ks1937 smtp boom'); // the error text is still forwarded (named under NOT covered above)
+140:     expect(leaks()).toEqual([]);
+141:   });
+142: 
+143:   it('E8 the allow-list refusal line carries no part of the recipient address either: not even its domain', async () => {
+144:     const email = loadEmail({ ...SMTP_ENV, EMAIL_RECIPIENT_ALLOWLIST: 'someone.else@example.test' });
+145:     await expect(email.sendEmail({ to: 'ks2099.person@ks2099-domain.invalid', subject: 'ks2099 subject', text: 'ks2099 body' })).resolves.toBe(false);
+146:     expect(lines('refusing to send')).toHaveLength(1);
+147:     expect(mockLogged.filter((l) => l.toLowerCase().includes('ks2099-domain'))).toEqual([]);
+148:   });
+149: 
+150:   it('E9 ACS accepts the send: the address still reaches the ACS call as the one recipient (only the LOG changed)', async () => {
+151:     mockBeginSend.mockResolvedValue({ pollUntilDone: async () => ({ status: 'Succeeded', id: 'acs-msg-2099' }) });
+152:     await expect(send(loadEmail(ACS_ENV))).resolves.toBe(true);
+153:     expect(mockBeginSend).toHaveBeenCalledTimes(1);
+154:     expect(mockBeginSend.mock.calls[0][0].recipients).toEqual({ to: [{ address: ADDRESS }] });
+155:   });
+156: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS 441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`): **NOT run** (no local stack in this seat; see Test Evidence)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`): **NOT run** (no local stack in this seat)
+
+### PII review (KS 256 R15/R16)
+
+Not applicable: this PR adds two cells to an existing test file; the values are made up (a fictitious person at an .invalid domain, a made-up message id). No product code, no published OpenAPI spec, example value, fixture or seed data.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-2099
+
+## Summary
+
+**TEST-ONLY. No product code is changed: one existing test file, 14 lines added. This PR covers item 3 of KS-2099 only. The leak in item 1 is NOT fixed.**
+
+KS-2099 collects three residues of PR 2056 (the KS 1937 change that took the recipient address out of originate's email logs):
+
+- **Item 1 (MEDIUM, NOT fixed here):** a failed SMTP send still logs the recipient address, because the error text is logged and an SMTP server echoes the address in its refusal (`email.ts` line 210 at `90b500e19883`, measured by gate 235).
+- **Item 2 (MINOR, NOT fixed here):** a third-party verifier's contact email is logged at INFO in `thirdPartyVerifiers.ts`.
+- **Item 3 (MINOR, this PR):** the 12 cells of the KS 1937 email-service test stay green when the allow-list refusal line is changed to print the recipient's domain, and the ACS path's "the address still reaches the mailer" is not pinned. This PR adds two cells to `ks1937-email-service-logs-never-carry-the-recipient-address.test.ts`: **E8** (the allow-list refusal line carries no part of the recipient address, not even its domain; it asserts a lower-case substring over the captured log lines) and **E9** (when ACS accepts the send, the address still reaches the ACS call as the one recipient; only the log changed).
+
+`Refs KS-2099`. This PR does not close the ticket and the ticket's state is not changed: items 1 and 2 stay open. Nothing is deployed and nothing needs deploying: no running service changes.
+
+**Fragment pair:** none, because this is test-only and no rule requires one (search: see the PR for KS 2053 in this set; the checkout at `a65ae7ed1` has 0 hits for "fragment" in the hook, the preflight directory, `CLAUDE.md`, `CONTRIBUTING.md`, `DEV-PROCESS.md` and `package.json`). Wednesday ruled no pair for the test-only PRs of this set.
+
+## Test Evidence
+
+**Touched (1 file):** `Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts` (+14 -0).
+
+**Ran by Seat T 15th** (2026-11-08 between 12:58Z and 13:15Z, on develop `7eda23b34d3b`, macOS host shared with other seats, Node v26.8.1, **not the LTS 24 line**):
+- Cell file on the applied tree: 10 of 10, E8 and E9 pass. They are green on develop by design.
+- **Red-proof (mine, using the held pass's plant, never committed).** The plant has two hunks in `email.ts`: the ACS recipient replaced by an empty string, and the allow-list refusal line printing the recipient's domain. With both applied, E8 and E9 fail (2 red, both by assertion, `expect(received).toEqual(expected)`). Applied one at a time: hunk 1 (empty ACS recipient) turns **only E9** red; hunk 2 (domain in the refusal line) turns **only E8** red. After each, `email.ts` was reversed: sha256 equal to before, `git diff` of it empty.
+- Whole originate suite (`jest`; the unpatched run used 5 workers, this one 6): unpatched develop `7eda23b34d3b` 220 suites, 2592 of 2592; with this change 220 suites, 2594 of 2594. Failed-cell names compared: both lists empty.
+- `tsc` including the test file (temporary config outside the repo; originate is not in the `check:test-types` ratchet): 0 errors; the planted-error control exits 2 and names its file.
+- eslint on the touched file: no output; planted control exits 1.
+- `docs-fragments.mjs check`: OK; planted defect exits 1; OK again after it is moved away.
+- Pre-push preflight: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+
+**Re-measured by Seat T 15th after the push** (2026-11-08 13:40Z, from the push driver's record, `git ls-remote` and `git diff-tree`): origin holds the branch at `a84acd840404`, one commit whose parent is `7eda23b34d3b`; one file changed (the one above, status M, +14 -0). The driver's develop gate read develop `7eda23b34d3b` (unmoved since my cut) at 13:21:58Z and found no overlap between this branch's one path and the 42 open PRs then open. The push took 1044 s. The hook ran 13 of 16 legs and nothing failed; legs 3, 4 and 8 were skipped because the local stack was not up. That is the hook's own wording ("PREFLIGHT INCOMPLETE"), and it is not a pass.
+
+**NOT run:** Schemathesis, Akto, Playwright e2e, k6 (no local stack in this seat), Node 24, any box or deploy.
+
+**Migrations / config:** none.
+
+## Held patch
+
+A held pass from the local model ("the Spark"), raised by Seat T 15th. READY file `READY_KS-2099-KS-2099-O103-P4_spark-dsv4flash_BRIEFED-TESTONLYINPUT-EMAIL-REFUSAL-DOMAIN-AND-ACS-RECIPIENT-CELLS-PASS-9of9_2026-11-08.diff.md`; canonical patch sha256 prefix `0b1002eaf3aeb037` (1471 bytes, matched here before applying); run `spark_secuura_2026-11-08_ks_2099_o103_p4_email_log_domain_and_acs_recipient`. Strict `git apply -p1`, no offset line. The checker legs are **the checker's, measured at tip `765701307eb3`, not re-run by Seat T 15th**: strict apply; touched set equals the declared set; green without the plant; red with the plant by assertion (2 cells); "whole suite no worse: cells 2563 -> 2565, red 11 -> 11" (its own instrument; I did not reproduce any red cell); restore clean; `RESULT: PASS (tier test_only_input)`.
+
+## What this did NOT do
+
+- **Items 1 and 2 of the ticket.** In particular a failed SMTP send can still log the recipient address; nothing here changes that or tests it.
+- It changes nothing in `email.ts` and does not touch the notification-client test that item 3 also names.
+- The cell E8 asserts a lower-case substring of one made-up domain over the captured lines; it does not prove no other part of the address can appear in any other line.
+
+## Test plan
+
+- [ ] `npm --prefix Blockchain/Dev/services/originate test -- src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts` — 10 cells
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 2094,
+ "head_sha": "a84acd8404040c5746b2b297dc333fdf7336b02d",
+ "pr_tip_now": "a84acd8404040c5746b2b297dc333fdf7336b02d",
+ "head_mode": "tip",
+ "merge_base": "7eda23b34d3b7a413ca8f9c0945c7843708ce9f4",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts",
+   "added": "14",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts"
+ ],
+ "product_files": [],
+ "diff_stat": {
+  "files": 1,
+  "added": 14,
+  "deleted": 0
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 10,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "ill reaches the ACS call as the one recipient (only the LOG changed) (26 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       10 passed, 10 total\nSnapshots:   0 total\nTime:        2.395 s\nRan all test suites matching /src\\/__tests__\\/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts/i."
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/originate/src/__tests__/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 10,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": " ACS call as the one recipient (only the LOG changed) (29 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       10 passed, 10 total\nSnapshots:   0 total\nTime:        1.497 s, estimated 3 s\nRan all test suites matching /src\\/__tests__\\/ks1937-email-service-logs-never-carry-the-recipient-address.test.ts/i."
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 10,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 10,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 9
+}

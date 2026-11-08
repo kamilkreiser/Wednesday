@@ -1,0 +1,23 @@
+
+##### Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts
+PASS src/__tests__/ks741-emitter-marker-strip.test.ts
+  KS-741 C1 — createEmitterMarkerStrip deletes the marker and nothing else
+    ✓ removes x-emitter-internal and leaves authorization, content-type and x-tenant-id in place (1 ms)
+  KS-741 C2 — the strip is UNCONDITIONAL: a gateway-vouched request keeps its trust headers and still loses the marker
+    ✓ after the vouch middleware AND the strip, x-tenant-id survives (vouched) but x-emitter-internal is gone
+  KS-741 C3 — a client-supplied marker on POST /api/anchors never reaches the anchoring hop
+    ✓ the recorded hop carries content-type application/json (the hop happened) and NO x-emitter-internal (21 ms)
+  KS-741 C4 — the CONTROL: the genuine originate -> anchoring hop DOES carry the marker
+    ✓ POST /api/documents auto-anchor reaches the recorder with x-emitter-internal: originate-create (29 ms)
+  KS-741 C5 — the hazard the ticket exists for: a forwarder that spreads req.headers, mounted behind the strip
+    ✓ forwards everything it received — and what it received no longer holds the marker (4 ms)
+  KS-741 C6 — index.ts mounts createEmitterMarkerStrip() before the anchors router
+    ✓ the strip mount line exists and sits above the /api/anchors mount (1 ms)
+    ✓ CONTROL — the reader can fail: a copy of index.ts with the mount line removed is refused
+    ✓ the strip mount line sits above BOTH /api/documents mounts (KS-2053) (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        1.655 s, estimated 7 s
+Ran all test suites matching /src\/__tests__\/ks741-emitter-marker-strip.test.ts/i.

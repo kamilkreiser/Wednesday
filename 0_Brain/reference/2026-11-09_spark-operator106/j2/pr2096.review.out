@@ -1,0 +1,28 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 10004, "total_tokens": 10571, "completion_tokens": 567, "prompt_tokens_details": {"cached_tokens": 1280}}, "seconds": 25.0, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 10004, "completion_tokens": 567, "seconds": 25.0, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The new test asserts the Authorization header is forwarded on every page, but the test double (fetchMock) does not model the real upstream's rejection of a missing JWT, so the test cannot verify the fail-closed behavior the ticket cites.",
+   "evidence": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:35 `function upstream(url: string): Response {` and line 43 `return { ok: true, status: 200, json: async () => ({ success: true, data: { logs: f.slice(offset, offset + limit), total: f.length, limit, offset } }) } as unknown as Response;`",
+   "test_or_reason": "The test only checks that the header is present on each call; it does not check that the upstream would reject a call without it, so the test pins forwarding but not the fail-closed consequence.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test only pins the 'Bearer' form of the Authorization header)Skip, not other forms, and only three pages, as the PR description itself acknowledges.",
+   "evidence": "PR DESCRIPTION: 'It pins three pages only, not more, and the `Bearer` form only, not other forms of the header.'",
+   "test_or_reason": "The PR description explicitly limits the scope; this is a limitation, not a defect.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test's assertion on the Authorization header is not verified against the real route's header construction; it only checks the mocked fetch calls, so it does not prove the route sends the header in production.",
+   "evidence": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-pages-its-rows-and-claims-no-type-filter.test.ts:194 `const sent = fetchMock.mock.calls.map((call) => ((call as unknown[])[1] as { headers?: Record<string, string> } | undefined)?.headers?.Authorization);`",
+   "test_or_reason": "The test inspects the mock's recorded calls, not the actual HTTP request the route would make; the mock is a stand-in for the real fetch, so the test pins the route's behavior only insofar as the mock faithfully represents it.",
+   "evidence_quote_found_in_input": true
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO"
+}

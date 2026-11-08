@@ -1,0 +1,20 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts
+index 4ab03175e..e8c882909 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts
+@@ -225,3 +225,15 @@ describe('KS-1185 F3 - a reply body that does not finish after the status line d
+     expect(calls(log, 'error', (m) => m === FAILED_LINE)).toHaveLength(1);
+   });
+ });
++
++describe('KS-2012 - the late-body warn line carries the error text', () => {
++  it('RED KS-2012 E1: a 201 whose body never ends logs the warn line with the status AND the idle-bound error text', { timeout: 15_000 }, async () => {
++    behave = statusThenSilence(201);
++    const log = vi.fn<Log>();
++    await approve(await startGateway(freshStore(), log));
++    await sleep(FORWARD_TIMEOUT_MS + 700);
++    const late = calls(log, 'warn', (m) => m.includes('reply body did not finish'));
++    expect(late).toHaveLength(1);
++    expect(late[0][2]).toMatchObject({ status: 201, error: `originate did not answer within ${FORWARD_TIMEOUT_MS} ms` });
++  });
++});

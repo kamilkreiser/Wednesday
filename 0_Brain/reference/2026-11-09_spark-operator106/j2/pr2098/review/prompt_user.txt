@@ -1,0 +1,1230 @@
+===== TICKET =====
+KS-2022 — auth: four comments cite stale line numbers into services/auth/src/services/passwordLoginGate.ts, and two of them also describe a zod import the file no longer has (gate 206 N2, Info) [In Progress]
+
+**BLUF:** Four source comments in the auth service cite lines of `services/auth/src/services/passwordLoginGate.ts` (the gate file) that no longer hold what they name. At develop `1b1b65c7415f`: (1) `services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts` line 118 and (2) `services/auth/src/auth.openapi.ts` line 12 cite line 55 of the gate file as the place that "imports `z` from 'zod'"; line 55 of the gate file is a comment about `z`, and the import, `import { z } from '@secuura/shared';`, is at line 61. (3) `services/auth/src/routes/mfa.ts` line 130 cites line 87 of the gate file for `MFA_CODE_PATTERN`, which is at line 95. (4) `services/auth/src/services/accountLockout.ts` line 71 cites line 119 of the gate file "(via the gate's own normalisation)"; line 119 is `export const MFA_CODE_ACCEPTED = ...`, and the `""` normalisation is described from line 122. Gate 206 grades this Info (its N2): pre-existing (already wrong on base; PR 2015 moved the drift by +2), comments only, no test asserts them.
+
+Source: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate206-ks1804-pr2015/verdict.md` line 23 (N2; the verdict's line 22 is a different note, N1, about the PR's own fragment and is not covered here). Code read by the filing seat at develop `1b1b65c7415f` with `git show` of that commit from the shared object store (a read), not run.
+
+As read at `1b1b65c7415f`:
+
+* A text search of `services/auth` at the tip for the gate file's name followed by a colon and a number finds exactly the four comments above.
+* The two comments that cite line 55 sit in text that explains why the module could not be imported from a test ("TypeError: MFA_CODE_ACCEPTED.optional(...).openapi is not a function"). At the tip the gate file imports `z` from `'@secuura/shared'` (line 61). KS-810 (Done) is titled as the problem those comments describe.
+* The verdict gives the `z` import as "now line 62" and `MFA_CODE_PATTERN` as "now line 95"; at the tip the import is at line 61 and the pattern at line 95.
+* KS-2010 (filed earlier today by another seat) names the same kind of defect for citations of lines in `services/api-gateway/src/index.ts`; different files. KS-1804 (the PR's own ticket, read whole) has no hit for these citations. A board search for `MFA_CODE_PATTERN` finds no ticket.
+
+Not measured: anything by the filing seat (nothing was run); whether other citation forms (a line range without the file name) point into the gate file; the order in which PR 2015 and earlier changes moved each line.
+
+Priority: Low, mapped from the verdict's grade Info (verdict line 23).
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts
+index 2ade30704..057a87be2 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts
+@@ -106,22 +106,17 @@ describe('KS-796 F-6 — the four mfaCode sites share ONE definition', () => {
+ // ---------------------------------------------------------------------------
+ // KS-796 QA2-F4 — the same agreement, asserted at the PUBLISHED contract.
+ //
+-// ⚠ WHY THIS READS THE GENERATED YAML AND NOT THE SCHEMA OBJECTS. The obvious
+-// version imports `LoginRequestSchema` etc. from `auth.openapi.ts` and compares
+-// them to the runtime schema. It cannot load:
++// ⚠ WHY THIS READS THE GENERATED YAML AND NOT THE SCHEMA OBJECTS. The yaml is the
++// artefact a client generates from. This guard was written when `auth.openapi.ts`
++// could not be loaded from a test:
+ //
+ //   TypeError: MFA_CODE_ACCEPTED.optional(...).openapi is not a function
+-//     at src/auth.openapi.ts:152
+ //
+-// `packages/shared/src/openapi/registry.ts:245` states the rule — consumers MUST
+-// import `z` from '@secuura/shared', so `extendZodWithOpenApi` lands on the same
+-// prototype — and `services/passwordLoginGate.ts:55` imports `z` from 'zod'
+-// directly, so `MFA_CODE_ACCEPTED` is built on an UNEXTENDED zod. The spec
+-// generator's single CJS resolution happens to unify them; a vitest run does not.
+-// That is a one-line change with a blast radius well past this PR, so it is FILED
+-// rather than slipped in here — and it is the real reason `auth.openapi.ts` sits
+-// in no test's import graph (the gate's canary: a module-scope throw there left
+-// the suite 441/441 green).
++// because `services/passwordLoginGate.ts` imported `z` from 'zod'; the shared
++// registry requires `z` from '@secuura/shared' so `extendZodWithOpenApi` lands on
++// the same prototype. KS-810 fixed that: the gate file now imports `z` from
++// '@secuura/shared', and `s130-f6-openapi-module-in-the-import-graph.test.ts`
++// imports `auth.openapi.ts`, so a module-scope throw there now turns the suite red.
+ //
+ // Reading the generated yaml is not a consolation prize: it is the artefact a
+ // client actually generates from, and it is what would ship wrong.
+diff --git a/Blockchain/Dev/services/auth/src/auth.openapi.ts b/Blockchain/Dev/services/auth/src/auth.openapi.ts
+index 55a087d63..42569daa4 100644
+--- a/Blockchain/Dev/services/auth/src/auth.openapi.ts
++++ b/Blockchain/Dev/services/auth/src/auth.openapi.ts
+@@ -2,23 +2,19 @@
+ // OAuthAuthorizeRequestSchema are EXPORTED so the published wire contract can be
+ // asserted rather than described.
+ //
+-// ⚠ NOTHING IMPORTS THEM YET, and the reason is a defect, not an oversight. This
+-// module CANNOT be imported from a test today:
++// The module is loaded by `src/__tests__/s130-f6-openapi-module-in-the-import-graph.test.ts`,
++// so a module-scope throw in this file turns the auth suite red (KS-810).
+ //
+-//   TypeError: MFA_CODE_ACCEPTED.optional(...).openapi is not a function   (:152)
++// It was once un-importable from a test:
+ //
+-// `packages/shared/src/openapi/registry.ts:245` states the rule — a consumer MUST
+-// import `z` from '@secuura/shared' so `extendZodWithOpenApi` lands on the same
+-// prototype — and `services/passwordLoginGate.ts:55` imports `z` from 'zod'
+-// directly, so `MFA_CODE_ACCEPTED` is built on an UNEXTENDED zod. The spec
+-// generator's single CJS resolution happens to unify the two; a vitest run does
+-// not. Filed separately; the fix is one import line with a blast radius across
+-// every schema that file publishes, so it is not being slipped into a follow-up.
++//   TypeError: MFA_CODE_ACCEPTED.optional(...).openapi is not a function
+ //
+-// Until then the QA2-F4 guard asserts the GENERATED yaml instead — which is the
+-// artefact a client generates from, so it is the thing that would ship wrong.
+-// This also means the gate's canary still stands: a module-scope throw in this
+-// file leaves the auth suite green, because it is in no test's import graph.
++// because `services/passwordLoginGate.ts` imported `z` from 'zod' directly. The
++// shared registry requires a consumer to import `z` from '@secuura/shared' so
++// `extendZodWithOpenApi` lands on the same prototype; the gate file now does.
++//
++// The QA2-F4 guard still asserts the GENERATED yaml, which is the artefact a
++// client generates from, so it is the thing that would ship wrong.
+ /**
+  * =============================================================================
+  * AUTH SERVICE — OpenAPI registrations (Track 2 stage 3)
+diff --git a/Blockchain/Dev/services/auth/src/routes/mfa.ts b/Blockchain/Dev/services/auth/src/routes/mfa.ts
+index 2be4ac075..108769b33 100644
+--- a/Blockchain/Dev/services/auth/src/routes/mfa.ts
++++ b/Blockchain/Dev/services/auth/src/routes/mfa.ts
+@@ -127,7 +127,7 @@ const disableSchema = z.object({
+   // change an existing field's accepted values; adding a field cannot make any
+   // request that is valid today start failing.
+   // The pattern is the 8-char alternative of the platform's own
+-  // MFA_CODE_PATTERN (passwordLoginGate.ts:87), not a second opinion about what
++  // MFA_CODE_PATTERN (passwordLoginGate.ts), not a second opinion about what
+   // a backup code looks like.
+   backupCode: z.string().regex(/^[A-Za-z0-9]{8}$/).optional(),
+ });
+diff --git a/Blockchain/Dev/services/auth/src/services/accountLockout.ts b/Blockchain/Dev/services/auth/src/services/accountLockout.ts
+index e4301ad2c..2db5b5100 100644
+--- a/Blockchain/Dev/services/auth/src/services/accountLockout.ts
++++ b/Blockchain/Dev/services/auth/src/services/accountLockout.ts
+@@ -67,8 +67,8 @@ export function ipPrefix(ip: string): string {
+  * convention holds only while every future caller remembers it — doors 2 and 3
+  * (KS-795 / KS-796) add callers. Trimming in the derivation makes it structural.
+  * Idempotent for both current callers, which already pass a trimmed address:
+- * `routes/auth.ts:310` (via `loginSchema`'s `z.string().trim()`) and
+- * `services/passwordLoginGate.ts:119` (via the gate's own normalisation).
++ * `routes/auth.ts` (via `loginSchema`'s `z.string().trim()`) and
++ * `services/passwordLoginGate.ts` (by the gate's own normalisation).
+  */
+ function normaliseEmailForKey(email: string): string {
+   return String(email).toLowerCase().trim();
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts
+1: /**
+2:  * KS-796 F-6 (QA PASS 1 on #819) — the "agreement test below" the previous
+3:  * commit message claimed exists.
+4:  *
+5:  * Q3's substance was right: all four mfaCode sites do use one definition, and no
+6:  * restatement of the union/optional/transform survives. What did not exist was
+7:  * the GUARD. The QA pass measured it: restating the union INLINE in wallet.ts,
+8:  * with the exact text the parent carried, left the auth suite 411/411 green
+9:  * across 4 of 4 tampered runs. Only a BEHAVIOURAL drift was catchable, and only
+10:  * by two rows a previous round happened to add — so a restatement that drifts in
+11:  * some other direction (a widened regex, a different `.optional()` placement)
+12:  * was undetected.
+13:  *
+14:  * Two legs, because they fail on different things:
+15:  *   IDENTITY   — the three runtime sites must be the SAME OBJECT. This reds on
+16:  *                any restatement, including a character-identical one, which is
+17:  *                exactly the tamper that stayed green.
+18:  *   AGREEMENT  — the wire contract (`MFA_CODE_ACCEPTED.optional()`, what
+19:  *                auth.openapi.ts publishes) and the runtime schema must accept
+20:  *                and reject the same inputs. That site cannot be asserted by
+21:  *                identity: `.optional()` builds a new object per call, so
+22:  *                identity there would assert a fact about zod, not about us.
+23:  */
+24: 
+25: import { describe, it, expect, beforeAll } from 'vitest';
+26: import { mfaCodeRuntimeSchema, MFA_CODE_ACCEPTED, MFA_CODE_PATTERN } from '../services/passwordLoginGate';
+27: import { loginSchema } from '../routes/auth';
+28: import { authorizeCredentialsSchema } from '../routes/oauth';
+29: import { verifySignatureSchema } from '../routes/wallet';
+30: import { ADMIN_WRITABLE_STATUSES, DB_USER_STATUSES } from '../types';
+31: import { readFileSync, existsSync } from 'node:fs';
+32: import { join, resolve } from 'node:path';
+33: 
+34: /**
+35:  * `verifySignatureSchema` is `.refine()`d, which wraps it in a ZodEffects — and a
+36:  * ZodEffects has no `.shape`. Reading `.shape.mfaCode` on it THREW, which is how
+37:  * this unwrapper came to exist; had the assertion been written with `?.` it would
+38:  * have compared `undefined` to the schema and reported a drift that is not there.
+39:  * `innerType()` is zod's own accessor for the wrapped schema, so this stays out of
+40:  * `_def`.
+41:  */
+42: function shapeOf(schema: unknown): Record<string, unknown> {
+43:   const s = schema as { innerType?: () => unknown; shape?: Record<string, unknown> };
+44:   const unwrapped = typeof s.innerType === 'function' ? (s.innerType() as typeof s) : s;
+45:   const shape = unwrapped.shape;
+46:   if (!shape) throw new Error('shapeOf: no .shape after unwrapping — the schema kind changed');
+47:   return shape;
+48: }
+49: 
+50: const RUNTIME_SITES: Array<[string, unknown]> = [
+51:   ['POST /api/auth/login (loginSchema)', loginSchema],
+52:   ['POST /api/oauth/authorize (authorizeCredentialsSchema)', authorizeCredentialsSchema],
+53:   ['POST /api/auth/wallet/verify (verifySignatureSchema)', verifySignatureSchema],
+54: ];
+55: 
+56: describe('KS-796 F-6 — the four mfaCode sites share ONE definition', () => {
+57:   it.each(RUNTIME_SITES)('%s uses the shared runtime schema object itself', (_name, schema) => {
+58:     expect(shapeOf(schema).mfaCode).toBe(mfaCodeRuntimeSchema);
+59:   });
+60: 
+61:   it('CONTROL — the assertion can fail: a restatement is NOT the shared object', () => {
+62:     // Without this, the leg above would pass just as well against an assertion
+63:     // that compares a thing to itself. This is the exact text the parent carried
+64:     // in wallet.ts, and the QA pass proved the suite stayed green with it.
+65:     const restated = MFA_CODE_ACCEPTED.optional().transform((v) => (v ? v : undefined));
+66:     expect(restated).not.toBe(mfaCodeRuntimeSchema);
+67:   });
+68: 
+69:   // The published wire contract vs the runtime schema. auth.openapi.ts spells the
+70:   // field `MFA_CODE_ACCEPTED.optional()` — no transform, because a transform
+71:   // describes runtime coercion and not the wire shape — so the two are related by
+72:   // AGREEMENT on what they accept, not by identity.
+73:   const CORPUS: Array<[string, unknown]> = [
+74:     ['a 6-digit TOTP', '123456'],
+75:     ['an 8-char backup code', 'ABCD2345'],
+76:     ['a lowercase backup code', 'abcd2345'],
+77:     ['the empty string (a form-backed client)', ''],
+78:     ['absent', undefined],
+79:     ['too short', 'abc'],
+80:     ['7 digits', '1234567'],
+81:     ['9 alphanumerics', 'ABCD23456'],
+82:     ['an astral char (KS-283)', '12345\u{1F600}'],
+83:     ['a non-string', 42],
+84:   ];
+85: 
+86:   it.each(CORPUS)('the published shape and the runtime shape agree on %s', (_label, value) => {
+87:     const wire = MFA_CODE_ACCEPTED.optional().safeParse(value);
+88:     const runtime = mfaCodeRuntimeSchema.safeParse(value);
+89:     expect(runtime.success, `runtime accepted=${runtime.success}, published accepted=${wire.success}`).toBe(wire.success);
+90:   });
+91: 
+92:   it('CONTROL — the corpus discriminates: it contains BOTH accepted and rejected inputs', () => {
+93:     // A corpus that is all-accepted (or all-rejected) makes the agreement leg
+94:     // above pass against two schemas that agree on nothing else.
+95:     const results = CORPUS.map(([, v]) => mfaCodeRuntimeSchema.safeParse(v).success);
+96:     expect(results.filter(Boolean).length).toBeGreaterThan(0);
+97:     expect(results.filter((r) => !r).length).toBeGreaterThan(0);
+98:   });
+99: 
+100:   it('the empty string normalises to ABSENT at runtime, and stays expressible on the wire', () => {
+101:     expect(mfaCodeRuntimeSchema.parse('')).toBeUndefined();
+102:     expect(MFA_CODE_ACCEPTED.optional().safeParse('').success).toBe(true);
+103:   });
+104: });
+105: 
+106: // ---------------------------------------------------------------------------
+107: // KS-796 QA2-F4 — the same agreement, asserted at the PUBLISHED contract.
+108: //
+109: // ⚠ WHY THIS READS THE GENERATED YAML AND NOT THE SCHEMA OBJECTS. The yaml is the
+110: // artefact a client generates from. This guard was written when `auth.openapi.ts`
+111: // could not be loaded from a test:
+112: //
+113: //   TypeError: MFA_CODE_ACCEPTED.optional(...).openapi is not a function
+114: //
+115: // because `services/passwordLoginGate.ts` imported `z` from 'zod'; the shared
+116: // registry requires `z` from '@secuura/shared' so `extendZodWithOpenApi` lands on
+117: // the same prototype. KS-810 fixed that: the gate file now imports `z` from
+118: // '@secuura/shared', and `s130-f6-openapi-module-in-the-import-graph.test.ts`
+119: // imports `auth.openapi.ts`, so a module-scope throw there now turns the suite red.
+120: //
+121: // Reading the generated yaml is not a consolation prize: it is the artefact a
+122: // client actually generates from, and it is what would ship wrong.
+123: // ---------------------------------------------------------------------------
+124: 
+125: function devRoot(start: string): string {
+126:   let dir = start;
+127:   for (let i = 0; i < 10; i++) {
+128:     if (existsSync(join(dir, 'services')) && existsSync(join(dir, 'packages'))) return dir;
+129:     dir = resolve(dir, '..');
+130:   }
+131:   throw new Error('devRoot: could not locate Blockchain/Dev');
+132: }
+133: 
+134: /**
+135:  * Pull ONE named schema's own block out of the generated spec.
+136:  *
+137:  * ⚠ This is a text instrument, deliberately, and it is NOT `spec.includes(...)`.
+138:  * The existing KS-622 lockstep guard uses `includes` over the whole 1.3 MB file,
+139:  * and `auth.openapi.ts:76` already records why that is weak: it is
+140:  * OCCURRENCE-BLIND, so one correct occurrence satisfies it while another drifts —
+141:  * which is precisely the per-site drift this leg exists to catch. Isolating the
+142:  * block first is what makes the assertions per-site.
+143:  *
+144:  * A real YAML parse would be better still, but `yaml` is not in this service's
+145:  * package.json OR its lockfile (checked both). `tsc` passes locally only because
+146:  * the workspace root hoists it, and this service's Docker build runs `npm ci` in
+147:  * its own directory and compiles `__tests__` — so importing it here would break
+148:  * the image while every local check stayed green. Adding the dep means touching
+149:  * the service lockfile, which is not this PR's scope.
+150:  *
+151:  * The generated file is machine-indented, so block boundaries are reliable: a
+152:  * schema starts at exactly 4 spaces and ends at the next line indented <= 4.
+153:  */
+154: function schemaBlock(spec: string, name: string): string | null {
+155:   const lines = spec.split('\n');
+156:   const start = lines.findIndex((l) => l === `    ${name}:`);
+157:   if (start === -1) return null;
+158:   const out: string[] = [];
+159:   for (let i = start + 1; i < lines.length; i++) {
+160:     const l = lines[i];
+161:     if (l.trim() !== '' && !/^\s{5,}/.test(l)) break;
+162:     out.push(l);
+163:   }
+164:   return out.join('\n');
+165: }
+166: 
+167: /** The mfaCode property's own sub-block, with descriptions stripped. */
+168: function mfaCodeShape(block: string): string {
+169:   const lines = block.split('\n');
+170:   const start = lines.findIndex((l) => /^\s{8}mfaCode:\s*$/.test(l));
+171:   if (start === -1) return '';
+172:   const indent = lines[start].search(/\S/);
+173:   const out: string[] = [];
+174:   for (let i = start + 1; i < lines.length; i++) {
+175:     const l = lines[i];
+176:     if (l.trim() !== '' && l.search(/\S/) <= indent) break;
+177:     out.push(l);
+178:   }
+179:   // description differs per site BY DESIGN; the shape must not.
+180:   return out.join('\n').replace(/^\s*description:[\s\S]*$/m, '').trimEnd();
+181: }
+182: 
+183: describe('KS-796 QA2-F4 — every PUBLISHED site carries the same mfaCode contract', () => {
+184:   const SITES = ['LoginRequest', 'WalletVerifyRequest', 'OAuthAuthorizeRequest'] as const;
+185:   let spec: string;
+186:   const blocks: Record<string, string> = {};
+187: 
+188:   beforeAll(() => {
+189:     const specPath = join(devRoot(__dirname), 'docs', 'openapi', 'secuura-api.yaml');
+190:     // A missing spec must FAIL, never skip — a skipped leg reads as a pass.
+191:     expect(existsSync(specPath), `generated spec not found at ${specPath}`).toBe(true);
+192:     spec = readFileSync(specPath, 'utf8');
+193:     for (const n of SITES) blocks[n] = schemaBlock(spec, n) ?? '';
+194:   });
+195: 
+196:   it('CONTROL — the extractor ISOLATES, which is the whole difference from spec.includes()', () => {
+197:     for (const n of SITES) expect(blocks[n], `${n} not found in components.schemas`).not.toBe('');
+198:     // Each block must NOT contain a sibling's distinctive field, or "per site"
+199:     // is a claim about a boundary that is not really there.
+200:     expect(blocks.LoginRequest).not.toContain('client_id');       // OAuthAuthorizeRequest's
+201:     expect(blocks.OAuthAuthorizeRequest).toContain('client_id');  // and it IS somewhere
+202:     expect(blocks.LoginRequest).not.toContain('signature');       // WalletVerifyRequest's
+203:     expect(blocks.WalletVerifyRequest).toContain('signature');
+204:   });
+205: 
+206:   it.each(SITES)('%s publishes an mfaCode field', (name) => {
+207:     expect(blocks[name]).toContain('mfaCode:');
+208:   });
+209: 
+210:   it.each(SITES)('%s publishes the SHARED union — the runtime pattern and the empty-string branch', (name) => {
+211:     const shape = mfaCodeShape(blocks[name]);
+212:     expect(shape, `${name} must publish the shared pattern`).toContain(MFA_CODE_PATTERN.source);
+213:     expect(shape, `${name} must publish the empty-string branch`).toMatch(/enum:\s*\n\s*- ""/);
+214:   });
+215: 
+216:   it('the three sites are IDENTICAL in shape — the whole point of one definition', () => {
+217:     const [a, b, c] = SITES.map((n) => mfaCodeShape(blocks[n]));
+218:     expect(a).not.toBe('');
+219:     expect(b).toBe(a);
+220:     expect(c).toBe(a);
+221:   });
+222: });
+223: 
+224: // ---------------------------------------------------------------------------
+225: // KS-796 QA2-F5 — the writable subset must be a SUBSET.
+226: //
+227: // `ADMIN_WRITABLE_STATUSES` is a hand-declared list (deliberately: F-3 proved
+228: // deriving it from the vocabulary is what opened the takeover). A hand-declared
+229: // list can drift the other way — a typo, or a value the column's CHECK will
+230: // refuse — and the endpoint would then advertise a status that cannot be stored.
+231: // Its sibling allow-list already has this guard; this one did not.
+232: // ---------------------------------------------------------------------------
+233: 
+234: describe('KS-796 QA2-F5 — ADMIN_WRITABLE_STATUSES is a subset of the column vocabulary', () => {
+235:   it.each(ADMIN_WRITABLE_STATUSES as readonly string[])('%s is a value the column may hold', (s) => {
+236:     expect(DB_USER_STATUSES as readonly string[]).toContain(s);
+237:   });
+238: 
+239:   it('and it is a PROPER subset — `invited` is deliberately excluded', () => {
+240:     // Without this the leg above passes just as well for a writable set that IS
+241:     // the vocabulary, which is exactly the defect F-3 was.
+242:     expect(ADMIN_WRITABLE_STATUSES).not.toContain('invited');
+243:     expect(DB_USER_STATUSES).toContain('invited');
+244:     expect(ADMIN_WRITABLE_STATUSES.length).toBeLessThan(DB_USER_STATUSES.length);
+245:   });
+246: });
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/auth.openapi.ts
+(OMITTED: 140959 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/routes/mfa.ts
+1: /**
+2:  * =============================================================================
+3:  * MFA ROUTES — Multi-Factor Authentication
+4:  * =============================================================================
+5:  * Uses the userRepo for persistence. MFA pending setup state is stored in
+6:  * the database with a 10-minute expiry.
+7:  * =============================================================================
+8:  */
+9: 
+10: import { Router, Response } from 'express';
+11: import { z } from 'zod';
+12: import { AuthenticatedRequest } from '../types';
+13: import { authenticate } from '../middleware/authenticate';
+14: import {
+15:   BadRequestError,
+16:   InvalidCredentialsError,
+17:   ConflictError,
+18: } from '../middleware/errorHandler';
+19: import { logger } from '../utils/logger';
+20: import {
+21:   generateTotpSecret,
+22:   generateOtpAuthUri,
+23:   verifyTotpCode,
+24:   verifyBackupCode,
+25:   generateBackupCodes,
+26:   hashBackupCode,
+27: } from '../services/totp';
+28: // KS-732: this file had NO password verification at all — `bcrypt|compare(|
+29: // verifyPassword` matched 0 times here against 6 in routes/auth.ts.
+30: import { verifyPassword } from '../services/password';
+31: import * as userRepo from '../repositories/userRepo';
+32: import { query } from '../db';
+33: import {
+34:   decryptField,
+35:   encryptFieldWithDek,
+36:   decryptFieldWithDek,
+37:   isSubjectDekCiphertext,
+38:   isEncryptedPii,
+39: } from '@secuura/shared';
+40: import { subjectDeks } from '../services/subjectDeks';
+41: 
+42: export const mfaRoutes = Router();
+43: 
+44: // --- Pending MFA setup helpers (DB-backed) ---
+45: // KS-158: the pending TOTP seed is encrypted at rest (AAD bound to the user).
+46: // A stolen mfa_pending_setups row must not yield a usable seed. Reads tolerate
+47: // a legacy-plaintext value (these rows expire in 10 minutes regardless).
+48: 
+49: const PENDING_AAD = (userId: string) => `mfa_pending.secret.${userId}`;
+50: 
+51: async function storePendingSetup(userId: string, secret: string, expiresAt: Date): Promise<void> {
+52:   // KS-291: the pending seed is per-subject data — encrypt under the user's
+53:   // own DEK so it is crypto-shredded with the rest of their PII on erasure.
+54:   const dek = await subjectDeks.getOrCreateDek(userId);
+55:   const stored = encryptFieldWithDek(secret, PENDING_AAD(userId), dek) ?? secret;
+56:   await query(
+57:     `INSERT INTO mfa_pending_setups (user_id, secret, expires_at)
+58:      VALUES ($1, $2, $3)
+59:      ON CONFLICT (user_id) DO UPDATE SET secret = $2, expires_at = $3`,
+60:     [userId, stored, expiresAt],
+61:   );
+62: }
+63: 
+64: async function getPendingSetup(userId: string): Promise<{ secret: string; expiresAt: Date } | null> {
+65:   const result = await query(
+66:     `SELECT secret, expires_at FROM mfa_pending_setups
+67:      WHERE user_id = $1 AND expires_at > NOW() LIMIT 1`,
+68:     [userId],
+69:   );
+70:   if (result.rows.length > 0) {
+71:     const stored = result.rows[0].secret as string;
+72:     // KS-291 dual-format read: d1: rows under the subject DEK, v<N>: rows
+73:     // under the master keyring (migration tail), else legacy plaintext
+74:     // (pre-KS-158). These rows expire within 10 minutes regardless.
+75:     let secret: string;
+76:     if (isSubjectDekCiphertext(stored)) {
+77:       const dek = await subjectDeks.getDek(userId);
+78:       secret = dek ? (decryptFieldWithDek(stored, PENDING_AAD(userId), dek) ?? '') : '';
+79:     } else if (isEncryptedPii(stored)) {
+80:       secret = decryptField(stored, PENDING_AAD(userId)) ?? '';
+81:     } else {
+82:       secret = stored;
+83:     }
+84:     return { secret, expiresAt: new Date(result.rows[0].expires_at) };
+85:   }
+86:   return null;
+87: }
+88: 
+89: async function deletePendingSetup(userId: string): Promise<void> {
+90:   await query(`DELETE FROM mfa_pending_setups WHERE user_id = $1`, [userId]);
+91: }
+92: 
+93: // Validation schemas
+94: const setupSchema = z.object({
+95:   totpCode: z.string().length(6).regex(/^\d+$/),
+96: });
+97: 
+98: // KS-622: the /verify request schema went with the retired endpoint — the
+99: // HANDLER answers 410 without reading a body. It is not the first thing to see
+100: // the body, though: `express.json()` is mounted at app level ahead of this
+101: // router, so a malformed payload is rejected there and errorHandler.ts returns
+102: // 400 INVALID_JSON without this handler ever running. (An earlier version of
+103: // this comment said the route "answers 410 before reading a body"; the
+104: // pre-merge sweep measured a 400 and disproved it — #745 ask 4.) The published
+105: // contract therefore declares 400 alongside 410; see auth.openapi.ts and
+106: // __tests__/ks622-retired-route-contract.test.ts.
+107: // Login's own schema validates `mfaCode` for the surviving path.
+108: 
+109: const disableSchema = z.object({
+110:   // KS-732 (#872 review, note 1): OPTIONAL. It was required, so a wallet or
+111:   // social account — the accounts the else-branch below exists for — had to post
+112:   // a dummy string that is never verified. That is the same "collect a credential
+113:   // and discard it" wart this ticket removes, surviving in the schema.
+114:   //
+115:   // ⚠ THIS RELAXES A STATUS CODE, and that is worth saying out loud rather than
+116:   // filing under "additive": a PASSWORD account that omits the field used to get
+117:   // 400 from Zod and now gets 401 from the branch below. Both are refusals, and
+118:   // 401 is the better one here — a 400-vs-401 split would tell an unauthenticated
+119:   // caller which accounts carry a password. No request that succeeds today
+120:   // starts failing.
+121:   password: z.string().min(1).optional(),
+122:   totpCode: z.string().length(6).regex(/^\d+$/).optional(),
+123:   // KS-732 — ADDITIVE, and it has to be a separate field. `totpCode` is
+124:   // `.length(6).regex(/^\d+$/)` while generateBackupCodes() emits 8-char
+125:   // base32, so a backup code can never reach the handler through it; code that
+126:   // read one from `totpCode` would be DEAD. Widening `totpCode` instead would
+127:   // change an existing field's accepted values; adding a field cannot make any
+128:   // request that is valid today start failing.
+129:   // The pattern is the 8-char alternative of the platform's own
+130:   // MFA_CODE_PATTERN (passwordLoginGate.ts), not a second opinion about what
+131:   // a backup code looks like.
+132:   backupCode: z.string().regex(/^[A-Za-z0-9]{8}$/).optional(),
+133: });
+134: 
+135: // =============================================================================
+136: // GET /api/auth/mfa/status
+137: // =============================================================================
+138: mfaRoutes.get('/status', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+139:   try {
+140:     const userId = req.user?.userId;
+141:     if (!userId) throw new InvalidCredentialsError();
+142: 
+143:     const user = await userRepo.getUserById(userId);
+144: 
+145:     res.json({
+146:       success: true,
+147:       data: {
+148:         mfaEnabled: user?.mfaEnabled || false,
+149:         mfaType: user?.mfaSecret ? 'totp' : null,
+150:         backupCodesRemaining: user?.mfaBackupCodes?.length || 0,
+151:       },
+152:     });
+153:   } catch (error) {
+154:     next(error);
+155:   }
+156: });
+157: 
+158: // =============================================================================
+159: // POST /api/auth/mfa/setup/start
+160: // =============================================================================
+161: mfaRoutes.post('/setup/start', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+162:   try {
+163:     const userId = req.user?.userId;
+164:     if (!userId) throw new InvalidCredentialsError();
+165: 
+166:     const user = await userRepo.getUserById(userId);
+167:     if (!user) throw new InvalidCredentialsError();
+168:     if (user.mfaEnabled) throw new ConflictError('MFA is already enabled');
+169: 
+170:     const secret = generateTotpSecret();
+171:     const otpAuthUri = generateOtpAuthUri(secret, user.email);
+172:     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+173: 
+174:     await storePendingSetup(userId, secret, expiresAt);
+175: 
+176:     logger.info('MFA setup started', { userId });
+177: 
+178:     res.json({
+179:       success: true,
+180:       data: {
+181:         secret,
+182:         otpAuthUri,
+183:         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+184:       },
+185:     });
+186:   } catch (error) {
+187:     next(error);
+188:   }
+189: });
+190: 
+191: // =============================================================================
+192: // POST /api/auth/mfa/setup/verify
+193: // =============================================================================
+194: mfaRoutes.post('/setup/verify', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+195:   try {
+196:     const userId = req.user?.userId;
+197:     if (!userId) throw new InvalidCredentialsError();
+198: 
+199:     const data = setupSchema.parse(req.body);
+200: 
+201:     const pending = await getPendingSetup(userId);
+202:     if (!pending) throw new BadRequestError('No pending MFA setup. Please start setup first.');
+203:     if (new Date() > pending.expiresAt) {
+204:       await deletePendingSetup(userId);
+205:       throw new BadRequestError('MFA setup has expired. Please start again.');
+206:     }
+207: 
+208:     if (!verifyTotpCode(pending.secret, data.totpCode)) {
+209:       throw new InvalidCredentialsError();
+210:     }
+211: 
+212:     const backupCodes = generateBackupCodes(10);
+213:     const hashedBackupCodes = await Promise.all(backupCodes.map(hashBackupCode));
+214: 
+215:     // Persist MFA state to DB via the repository — wrapped in error handling
+216:     // to ensure atomicity: if cleanup fails, revert the user update.
+217:     // KS-1052: checked — the backup codes are returned to the user below.
+218:     await userRepo.updateUserOrThrow(userId, {
+219:       mfaEnabled: true,
+220:       mfaSecret: pending.secret,
+221:       mfaBackupCodes: hashedBackupCodes,
+222:       verificationLevel: 'STANDARD',
+223:     }, 'MFA setup');
+224: 
+225:     try {
+226:       await deletePendingSetup(userId);
+227:     } catch (cleanupErr) {
+228:       // Revert the user update to maintain consistency
+229:       logger.error('Failed to delete pending MFA setup — reverting user update', { userId, error: cleanupErr });
+230:       // KS-1052: this is the ONE site that deliberately does NOT use
+231:       // updateUserOrThrow. It is a compensating revert inside a catch, and
+232:       // throwing here would replace the BadRequestError below with a 503,
+233:       // hiding the failure the user actually needs to see.
+234:       //
+235:       // But it must not be silent either: if the revert does not land, the
+236:       // account is left MFA-ENABLED with a pending setup that was never
+237:       // cleaned up — strictly worse than the state we were compensating for.
+238:       // So the return is checked and the inconsistency is named in the log.
+239:       const reverted = await userRepo.updateUser(userId, {
+240:         mfaEnabled: false,
+241:         // KS-938: null, NOT undefined. updateUser skips any field whose value is
+242:         // `undefined`, so `undefined` here emitted a PARTIAL update that never named
+243:         // mfa_secret or mfa_backup_codes — the revert left a live TOTP seed and unspent
+244:         // backup codes in the row. null passes the guard and writes SQL NULL.
+245:         mfaSecret: null,
+246:         // KS-938: as above. The encryption branch guards on `typeof val === 'string'`,
+247:         // so a null can never enter it.
+248:         mfaBackupCodes: null,
+249:         verificationLevel: 'BASIC',
+250:       } as any);
+251:       if (!reverted) {
+252:         logger.error(
+253:           'MFA revert could not be confirmed — account may be left MFA-enabled with an uncleaned pending setup',
+254:           { userId },
+255:         );
+256:       }
+257:       throw new BadRequestError('MFA setup failed — please try again.');
+258:     }
+259: 
+260:     logger.info('MFA setup completed', { userId });
+261: 
+262:     res.json({
+263:       success: true,
+264:       data: {
+265:         mfaEnabled: true,
+266:         backupCodes,
+267:         message: 'MFA enabled successfully. Please save your backup codes securely.',
+268:       },
+269:     });
+270:   } catch (error) {
+271:     next(error);
+272:   }
+273: });
+274: 
+275: // =============================================================================
+276: // POST /api/auth/mfa/verify — RETIRED (KS-622), always 410 Gone
+277: // =============================================================================
+278: // This endpoint redeemed a backup code with NO proof of factor one. It took
+279: // `userId` straight from the request body, it was the only one of the six
+280: // routes on mfaRoutes without authenticate() (deliberately, per KS-468 — it was
+281: // the pre-auth login MFA-challenge step), and the login account-lockout could
+282: // never engage on it because it never saw an email. It was also the ONLY path
+283: // that could redeem a backup code: login's `mfaCode` was `^[0-9]{6}$` while a
+284: // backup code is 8 characters, so login's own verifyBackupCode call could never
+285: // receive one.
+286: //
+287: // Kam's ruling 2026-08-26 (option B): widen login to accept backup codes and
+288: // retire this route. Login is the correct home — it verifies the password
+289: // BEFORE it looks at `mfaCode`, so redemption now requires factor one by
+290: // construction.
+291: //
+292: // Retired as 410 Gone rather than deleted so the retirement is discoverable:
+293: // the path still resolves (preflight leg 4 stays honest) and the published
+294: // contract says what happened instead of handing callers a bare 404.
+295: //
+296: // It performs NO lookup and NO redemption — asserted in the tests, because
+297: // "returns 410" and "does not touch the user" are different claims.
+298: mfaRoutes.post('/verify', (_req: AuthenticatedRequest, res: Response) => {
+299:   res.status(410).json({
+300:     success: false,
+301:     error: {
+302:       code: 'GONE',
+303:       message:
+304:         'POST /api/auth/mfa/verify is retired. Send the TOTP or backup code as ' +
+305:         '`mfaCode` on POST /api/auth/login, which verifies the password first.',
+306:     },
+307:   });
+308: });
+309: 
+310: // =============================================================================
+311: // POST /api/auth/mfa/disable
+312: // =============================================================================
+313: mfaRoutes.post('/disable', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+314:   try {
+315:     const userId = req.user?.userId;
+316:     if (!userId) throw new InvalidCredentialsError();
+317: 
+318:     const data = disableSchema.parse(req.body);
+319:     // KS-732 (#872 review): NOT getUserById. That selects USER_COLS, which
+320:     // omits password_hash, so `user.passwordHash` was undefined for every
+321:     // account and the password branch below never executed — the route silently
+322:     // required a code from password accounts too, and the description asserted
+323:     // a check that did not run. The unit suite could not see it because its
+324:     // `../db` stub returned the whole row whatever the column list; the stub now
+325:     // projects onto the selected columns, so this call is load-bearing.
+326:     const user = await userRepo.getUserByIdWithPasswordHash(userId);
+327:     if (!user) throw new InvalidCredentialsError();
+328:     if (!user.mfaEnabled) throw new BadRequestError('MFA is not enabled');
+329: 
+330:     // KS-732 — DISABLING MFA MUST COST A PROOF OF POSSESSION.
+331:     //
+332:     // What stood here read `password` off the schema and never used it, and
+333:     // gated the TOTP check on `data.totpCode` being PRESENT — so omitting the
+334:     // code skipped verification entirely and any holder of a bearer removed the
+335:     // second factor with `{"password":"anything"}`. Collecting a credential and
+336:     // discarding it is worse than not asking: it reads to a client author as a
+337:     // check.
+338:     //
+339:     // The ticket's first suggested remedy — "just verify the password" — is
+340:     // NOT safe as written. getOrCreateWalletUser() builds its User with no
+341:     // passwordHash at all (measured: 0 occurrences in routes/wallet.ts against
+342:     // 10 in routes/auth.ts), and `password_hash` is NULLABLE since migration
+343:     // 001. Requiring a password would make this route UNSATISFIABLE for a wallet
+344:     // account: MFA could be enabled and never removed.
+345:     //
+346:     // So: require the strongest proof the account can actually produce, and
+347:     // never nothing. The same "which proof can this account give" shape
+348:     // services/passwordLoginGate.ts already uses.
+349:     const totpOk =
+350:       !!user.mfaSecret && !!data.totpCode && verifyTotpCode(user.mfaSecret, data.totpCode);
+351: 
+352:     if (user.passwordHash) {
+353:       // A password account proves possession with the password it already
+354:       // sends. A supplied TOTP code is still verified below rather than
+355:       // ignored — a WRONG code must fail, not be skipped.
+356:       // `password` is optional on the schema now, so absence is a refusal here
+357:       // rather than a 400 — never a skipped check.
+358:       if (!data.password || !(await verifyPassword(data.password, user.passwordHash))) {
+359:         throw new InvalidCredentialsError();
+360:       }
+361:       if (data.totpCode && !totpOk) {
+362:         throw new InvalidCredentialsError();
+363:       }
+364:     } else {
+365:       // No password to verify (wallet / social). A valid TOTP code OR a valid
+366:       // backup code is the only remaining proof, and one of them is REQUIRED —
+367:       // so this branch can never be satisfied by a bearer alone, which is the
+368:       // whole defect.
+369:       const backupOk =
+370:         !!data.backupCode &&
+371:         Array.isArray(user.mfaBackupCodes) &&
+372:         user.mfaBackupCodes.length > 0 &&
+373:         (await verifyBackupCode(data.backupCode, user.mfaBackupCodes)).valid;
+374:       if (!totpOk && !backupOk) {
+375:         throw new InvalidCredentialsError();
+376:       }
+377:     }
+378: 
+379:     // KS-1052: a false "MFA disabled" locks the user out of their own account.
+380:     await userRepo.updateUserOrThrow(userId, {
+381:       mfaEnabled: false,
+382:       // KS-938: null, NOT undefined — see the revert site above. A user who disables MFA
+383:       // because the authenticator was compromised kept a re-armable seed in the row while
+384:       // this call answered 200 "MFA disabled successfully".
+385:       mfaSecret: null,
+386:       // KS-938: null, NOT undefined.
+387:       mfaBackupCodes: null,
+388:       verificationLevel: 'BASIC',
+389:     } as any, 'MFA disable');
+390: 
+391:     logger.info('MFA disabled', { userId });
+392:     res.json({ success: true, message: 'MFA disabled successfully' });
+393:   } catch (error) {
+394:     next(error);
+395:   }
+396: });
+397: 
+398: // =============================================================================
+399: // POST /api/auth/mfa/backup-codes/regenerate
+400: // =============================================================================
+401: mfaRoutes.post('/backup-codes/regenerate', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+402:   try {
+403:     const userId = req.user?.userId;
+404:     if (!userId) throw new InvalidCredentialsError();
+405: 
+406:     const { totpCode } = req.body;
+407:     const user = await userRepo.getUserById(userId);
+408:     if (!user || !user.mfaEnabled || !user.mfaSecret) {
+409:       throw new BadRequestError('MFA is not enabled');
+410:     }
+411: 
+412:     if (!totpCode || !verifyTotpCode(user.mfaSecret, totpCode)) {
+413:       throw new InvalidCredentialsError();
+414:     }
+415: 
+416:     const backupCodes = generateBackupCodes(10);
+417:     const hashedBackupCodes = await Promise.all(backupCodes.map(hashBackupCode));
+418: 
+419:     // KS-1052: the response below says "Previous codes are now invalid" and
+420:     // hands over new ones. On a write that did not land NEITHER is true — the
+421:     // new codes do not work and the old ones still do.
+422:     await userRepo.updateUserOrThrow(userId, { mfaBackupCodes: hashedBackupCodes }, 'Backup-code regeneration');
+423: 
+424:     logger.info('Backup codes regenerated', { userId });
+425: 
+426:     res.json({
+427:       success: true,
+428:       data: {
+429:         backupCodes,
+430:         message: 'New backup codes generated. Previous codes are now invalid.',
+431:       },
+432:     });
+433:   } catch (error) {
+434:     next(error);
+435:   }
+436: });
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/services/accountLockout.ts
+1: /**
+2:  * =============================================================================
+3:  * ACCOUNT LOCKOUT (pen-test F-06)
+4:  * =============================================================================
+5:  * Defence-in-depth on top of the per-IP login rate limit. The rate limiter
+6:  * stops a single IP hammering the endpoint; this service stops a single
+7:  * email being targeted across IPs (credential stuffing distributed).
+8:  *
+9:  * Behaviour:
+10:  *   - 5 failed attempts within 15 minutes → 15 minute lockout.
+11:  *   - Counter is keyed by (email_lowercased, source_ip_/24) so an
+12:  *     attacker rotating IPs in a single /24 cannot trivially bypass it,
+13:  *     while legitimate users on the same office NAT aren't all locked
+14:  *     out by one user's typos.
+15:  *   - Lockout returns InvalidCredentialsError to the caller — same shape
+16:  *     as a wrong password (pen-test F-11 — no user enumeration).
+17:  *
+18:  * Storage: Redis (uses the existing session.ts client). If Redis is down,
+19:  * lockout fails CLOSED (KS-1967): `isLockedOut` and `recordFailure` throw a
+20:  * 503 ServiceUnavailableError, so every password door refuses before any
+21:  * password is verified and a right and a wrong password answer the same.
+22:  * It used to fail OPEN ("requests proceed"): a LOCKED account got through,
+23:  * failures were not counted, and a right password answered differently from
+24:  * a wrong one. Kam ruled the change on 2026-11-03 (card
+25:  * secuura-auth-lockout-failopen-redis-down-1103 = a: "Fail closed: refuse
+26:  * logins while the session store is down"). `recordSuccess` stays non-fatal.
+27:  * Every catch here logs the thrown value's TYPE only, never its text (Kam's
+28:  * cards secuura-ks1346-logging-thrown-objects-leaks-secrets and
+29:  * secuura-ks1348-log-files-persist-secrets, both = a).
+30:  *
+31:  * Test surface: every public function takes the redis client + clock as
+32:  * arguments so tests don't need a real Redis or `Date.now()` mock.
+33:  * =============================================================================
+34:  */
+35: 
+36: import { logger } from '../utils/logger';
+37: // KS-1967: the fail-closed refusal. Its default text ("Service temporarily
+38: // unavailable, please retry") already ships; this change adds no client text.
+39: import { ServiceUnavailableError } from '../middleware/errorHandler';
+40: 
+41: const LOCKOUT_THRESHOLD = parseInt(process.env.LOGIN_LOCKOUT_THRESHOLD || '5', 10);
+42: const COUNTER_WINDOW_MS = parseInt(process.env.LOGIN_LOCKOUT_WINDOW_MS || `${15 * 60 * 1000}`, 10);
+43: const LOCKOUT_DURATION_MS = parseInt(process.env.LOGIN_LOCKOUT_DURATION_MS || `${15 * 60 * 1000}`, 10);
+44: 
+45: /** Reduce an IPv4 to its /24 prefix string for keying. IPv6 keys on the address. */
+46: export function ipPrefix(ip: string): string {
+47:   if (!ip) return 'unknown';
+48:   // Strip IPv6-in-v4 prefix
+49:   const stripped = ip.replace(/^::ffff:/, '');
+50:   if (stripped.includes('.')) {
+51:     const parts = stripped.split('.');
+52:     if (parts.length === 4) return `${parts[0]}.${parts[1]}.${parts[2]}.0/24`;
+53:   }
+54:   return stripped;
+55: }
+56: 
+57: /**
+58:  * KS-781 N-6 — NORMALISE HERE, IN THE PRIMITIVE, NOT IN EACH CALLER.
+59:  *
+60:  * These keys lowercased but did not trim, while `userRepo.getUserByEmail`
+61:  * lowercases AND trims. The two consumers of one address therefore disagreed:
+62:  * `" victim@example.com"` resolved the victim's row while producing a lockout
+63:  * key nothing had ever incremented. That was KS-781 F-1 — a lockout defeated by
+64:  * one space, measured at 30 of 30 attempts across six whitespace variants.
+65:  *
+66:  * F-1 was closed by normalising in the two callers. That is a convention, and a
+67:  * convention holds only while every future caller remembers it — doors 2 and 3
+68:  * (KS-795 / KS-796) add callers. Trimming in the derivation makes it structural.
+69:  * Idempotent for both current callers, which already pass a trimmed address:
+70:  * `routes/auth.ts` (via `loginSchema`'s `z.string().trim()`) and
+71:  * `services/passwordLoginGate.ts` (by the gate's own normalisation).
+72:  */
+73: function normaliseEmailForKey(email: string): string {
+74:   return String(email).toLowerCase().trim();
+75: }
+76: 
+77: function counterKey(email: string, ip: string): string {
+78:   return `lockout:counter:${normaliseEmailForKey(email)}:${ipPrefix(ip)}`;
+79: }
+80: function lockoutKey(email: string, ip: string): string {
+81:   return `lockout:locked:${normaliseEmailForKey(email)}:${ipPrefix(ip)}`;
+82: }
+83: 
+84: /**
+85:  * KS-1967: the TYPE of a thrown value, for a log line that must name types and
+86:  * never values. The same describer as the api-gateway's `thrownTypeOf`
+87:  * (KS-1961, middleware/security.ts): it reads only `typeof` and the prototype's
+88:  * constructor name, inside a try, so a revoked Proxy or a hostile prototype
+89:  * gives 'unreadable' instead of throwing out of the catch that called it.
+90:  */
+91: export function thrownTypeOf(value: unknown): string {
+92:   try {
+93:     if (value === null) return 'null';
+94:     if (typeof value !== 'object' && typeof value !== 'function') return typeof value;
+95:     const name: unknown = Object.getPrototypeOf(value)?.constructor?.name;
+96:     return typeof name === 'string' && name !== '' ? name : 'object';
+97:   } catch {
+98:     return 'unreadable';
+99:   }
+100: }
+101: 
+102: export interface LockoutClient {
+103:   get(key: string): Promise<string | null>;
+104:   set(key: string, value: string, mode?: string, ttl?: number): Promise<unknown>;
+105:   incr(key: string): Promise<number>;
+106:   expire(key: string, seconds: number): Promise<unknown>;
+107:   del(...keys: string[]): Promise<unknown>;
+108: }
+109: 
+110: /**
+111:  * True iff the (email, ip) is currently locked out. Caller should treat
+112:  * lockout the same as a wrong-password attempt: throw
+113:  * InvalidCredentialsError, do not differentiate.
+114:  *
+115:  * KS-1967: when the store cannot answer (no client, or the read throws) this
+116:  * THROWS a 503 instead of answering "not locked". Every caller runs it before
+117:  * any password is verified, so the refusal is the same for a right and a wrong
+118:  * password. It used to `return false` on both paths (fail open).
+119:  */
+120: export async function isLockedOut(redis: LockoutClient | null, email: string, ip: string): Promise<boolean> {
+121:   if (!redis) {
+122:     // KS-1967: was `return false` ("not locked") with no client.
+123:     logger.warn('lockout: session store unavailable on isLockedOut — refusing the login', { cause: 'no-client' });
+124:     throw new ServiceUnavailableError();
+125:   }
+126:   let v: string | null;
+127:   try {
+128:     v = await redis.get(lockoutKey(email, ip));
+129:   } catch (err: unknown) {
+130:     // KS-1967: was "failing open" with `return false`, and logged `err?.message` (the thrown text).
+131:     logger.warn('lockout: session store error on isLockedOut — refusing the login', { cause: 'threw', thrownType: thrownTypeOf(err) });
+132:     throw new ServiceUnavailableError();
+133:   }
+134:   return v !== null;
+135: }
+136: 
+137: /**
+138:  * Record a failed login attempt. If the counter crosses the threshold,
+139:  * set the lockout flag with TTL. Returns the new failure count so the
+140:  * caller can log it (do NOT surface to the client — that's enumeration).
+141:  */
+142: export async function recordFailure(redis: LockoutClient | null, email: string, ip: string): Promise<number> {
+143:   // KS-1967: a failure that cannot be counted is refused as unavailable (503),
+144:   // never answered as a plain wrong password. Was `return 0`: the attempt got
+145:   // its 401 and was silently not counted. The count itself is still lost.
+146:   if (!redis) {
+147:     logger.warn('lockout: session store unavailable on recordFailure — refusing; this failure cannot be counted', { cause: 'no-client' });
+148:     throw new ServiceUnavailableError();
+149:   }
+150:   try {
+151:     const ck = counterKey(email, ip);
+152:     const count = await redis.incr(ck);
+153:     if (count === 1) {
+154:       // First failure — start the rolling window.
+155:       await redis.expire(ck, Math.ceil(COUNTER_WINDOW_MS / 1000));
+156:     }
+157:     if (count >= LOCKOUT_THRESHOLD) {
+158:       await redis.set(lockoutKey(email, ip), '1', 'EX', Math.ceil(LOCKOUT_DURATION_MS / 1000));
+159:       logger.warn('lockout: threshold reached — account locked', {
+160:         emailHash: hashEmail(email),
+161:         ipPrefix: ipPrefix(ip),
+162:         count,
+163:         durationMs: LOCKOUT_DURATION_MS,
+164:       });
+165:     }
+166:     return count;
+167:   } catch (err: unknown) {
+168:     // KS-1967: was "continuing" with `return 0`, and logged `err?.message` (the thrown text).
+169:     logger.warn('lockout: session store error on recordFailure — refusing; this failure may not have been counted', { cause: 'threw', thrownType: thrownTypeOf(err) });
+170:     throw new ServiceUnavailableError();
+171:   }
+172: }
+173: 
+174: /** Clear counter + lockout on successful authentication. */
+175: export async function recordSuccess(redis: LockoutClient | null, email: string, ip: string): Promise<void> {
+176:   if (!redis) return;
+177:   try {
+178:     await redis.del(counterKey(email, ip), lockoutKey(email, ip));
+179:   } catch (err: unknown) {
+180:     // KS-1967: still non-fatal (a counter left uncleared is stricter, never looser);
+181:     // the line now names the thrown value's type. It used to log `err?.message`.
+182:     logger.warn('lockout: session store error on recordSuccess — non-fatal', { cause: 'threw', thrownType: thrownTypeOf(err) });
+183:   }
+184: }
+185: 
+186: function hashEmail(email: string): string {
+187:   // Truncated SHA-256 for log correlation without storing the email itself
+188:   const crypto = require('crypto') as typeof import('crypto');
+189:   // Same normalisation as the keys: a padded address must not produce a second
+190:   // identifier in the logs for the same account.
+191:   return crypto.createHash('sha256').update(normaliseEmailForKey(email)).digest('hex').slice(0, 12);
+192: }
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+### Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:55-55 (cited as passwordLoginGate.ts:55)
+54: 
+55: // S130-F6 / registry.ts:245 — `z` MUST come from '@secuura/shared', not 'zod'.
+56: // `extendZodWithOpenApi` is applied to the shared package's zod prototype; a
+
+### Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:87-87 (cited as passwordLoginGate.ts:87)
+86:  * preserves the KS-518 property that the spec's code-POINT count and this
+87:  * runtime code-UNIT check agree.
+88:  *
+
+### Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:119-119 (cited as passwordLoginGate.ts:119)
+118:  */
+119: export const MFA_CODE_ACCEPTED = z.union([z.string().regex(MFA_CODE_PATTERN), z.literal('')]);
+120: 
+
+### Blockchain/Dev/services/auth/src/routes/auth.ts:310-310 (cited as routes/auth.ts:310)
+309:     // Publish user.registered event (fire-and-forget)
+310:     publishEvent(EventTypes.USER_REGISTERED, {
+311:       userId,
+
+### Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:61-61 (cited as passwordLoginGate.ts:61)
+60: // imported by any test and its module-scope canary could never fire.
+61: import { z } from '@secuura/shared';
+62: import * as userRepo from '../repositories/userRepo';
+
+### Blockchain/Dev/services/auth/src/auth.openapi.ts:152-152 (cited as src/auth.openapi.ts:152)
+151:       // `browser` clients omit refreshToken from the response body (set as
+152:       // httpOnly cookie); `native` clients (mobile/desktop/CLI/automation)
+153:       // request the body field by setting clientType: 'native'. `api` is
+
+### Blockchain/Dev/packages/shared/src/openapi/registry.ts:245-245 (cited as packages/shared/src/openapi/registry.ts:245)
+244: // '@secuura/shared' (not from 'zod' directly) so the `.openapi()`
+245: // extension applied above by extendZodWithOpenApi is on the same Zod
+246: // prototype the consumer is using. Otherwise the workspace's
+
+### Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:55-55 (cited as services/passwordLoginGate.ts:55)
+54: 
+55: // S130-F6 / registry.ts:245 — `z` MUST come from '@secuura/shared', not 'zod'.
+56: // `extendZodWithOpenApi` is applied to the shared package's zod prototype; a
+
+### Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:119-119 (cited as services/passwordLoginGate.ts:119)
+118:  */
+119: export const MFA_CODE_ACCEPTED = z.union([z.string().regex(MFA_CODE_PATTERN), z.literal('')]);
+120: 
+
+===== PR DESCRIPTION =====
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS 441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`): **NOT run** (no local stack in this seat; see Test Evidence)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`): **NOT run** (no local stack in this seat)
+
+### PII review (KS 256 R15/R16)
+
+Not applicable: this PR changes comment text in four existing source files. No code, no personal data, no published OpenAPI spec, example value, fixture or seed data.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-2022
+
+## Summary
+
+**COMMENTS ONLY. No code line is changed: four files, 21 lines added and 30 removed, every one of them a comment line. This PR supersedes the earlier held pass for this ticket (O102-P1), which fixed two of the four citations and left the paragraphs around them saying the opposite.**
+
+KS-2022 names four comments in the auth service that cite lines of `passwordLoginGate.ts` that no longer hold what they name:
+
+- `auth.openapi.ts` and `ks796-f6-mfa-schema-identity.test.ts` cited `passwordLoginGate.ts:55` as the line that imports `z` from `zod`. The gate file now imports it from the shared package (line 61). The paragraphs around those citations also said that the module cannot be imported from a test and that a module-scope throw in it leaves the auth suite green. KS 810 closed that on 2026-09-17 (the gate imports `z` from the shared package, and `s130-f6-openapi-module-in-the-import-graph.test.ts` imports `auth.openapi.ts`); its closing comment named these two paragraphs as stale. Both are rewritten to say what is true now.
+- `routes/mfa.ts` line 130 cited `passwordLoginGate.ts:87` for `MFA_CODE_PATTERN`. The line number is removed (the pattern is at line 95 today).
+- `services/accountLockout.ts` line 71 cited `passwordLoginGate.ts:119` "via the gate's own normalisation". The line number is removed and "via" becomes "by". The gate does normalise the address (`String(user.email ?? '').toLowerCase().trim()`, line 229).
+- **A fifth stale citation, found at raise, same class, outside the ticket's four:** the same `accountLockout.ts` comment also named `routes/auth.ts:310` for `loginSchema`. My read of `routes/auth.ts` at this tree: `export const loginSchema = z.object({` is at line 97 and its `email: z.string().trim().email()` at line 98, so what the comment says holds and only the line number was stale. The line number is removed, on the coordinator's order. **This one edit is the raise seat's text, not the Spark's;** the two Spark passes are applied unchanged.
+
+`Refs KS-2022`. This PR does not close the ticket. The compiled output of all four files is unchanged (shown below), so no running behaviour changes; the comments ride along with the next deploy, and the demo is frozen.
+
+**Fragment pair:** none, because this PR changes comments only and no rule requires one (the checkout at `a65ae7ed1` has 0 hits for "fragment" in the pre-push hook, the preflight directory, `CLAUDE.md`, `CONTRIBUTING.md`, `DEV-PROCESS.md` and `package.json`; the first PR of this set lists the search).
+
+## Test Evidence
+
+**Touched (4 files):** `Blockchain/Dev/services/auth/src/auth.openapi.ts`, `Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts`, `Blockchain/Dev/services/auth/src/routes/mfa.ts`, `Blockchain/Dev/services/auth/src/services/accountLockout.ts` (+21 -30, one commit).
+
+**Ran by Seat T 15th** (2026-11-08 between 13:20Z and 13:26Z, on develop `7eda23b34d3b`, macOS host shared with other seats and pre-push hooks running, Node v26.8.1, **not the LTS 24 line**; vitest 4.1.12):
+- **Zero code lines changed, measured two ways.** (1) For each of the four files I emitted the JavaScript with TypeScript `transpileModule` (comments removed, ES2022, CommonJS) before and after: identical in all four (sha256 prefixes `a3dd30e8fa964f92`, `d13b71a0f28651b8`, `ab0fb387eebb8cc1`, `77566120a733bb65`). Each run carried two controls: the file plus one code line emits differently (the check sees code), and the file plus one comment line emits identically (the check ignores comments). (2) In `accountLockout.ts` exactly two adjacent lines changed (70 and 71), both inside the `/** */` block above `normaliseEmailForKey` (the block runs from line 57 to line 72); nothing near the catches in that file.
+- **The new comment's claim, measured and not carried over:** with the patch applied, `s130-f6-openapi-module-in-the-import-graph.test.ts` passes 2 of 2; with one planted line `throw new Error(...)` appended at module scope of `auth.openapi.ts` it fails 2 of 2; the file was then restored byte-equal (sha256) and the tree still holds only the four patched files.
+- Claims in the new text, read at this tree: `s130-f6-openapi-module-in-the-import-graph.test.ts` exists and its cell imports `auth.openapi.ts`; `passwordLoginGate.ts:61` imports `z` from the shared package; `MFA_CODE_PATTERN` is `/^(?:[0-9]{6}|[A-Za-z0-9]{8})$/` at line 95, so "the 8-char alternative" holds.
+- Whole auth suite (`vitest`, 4 workers, `--testTimeout=120000` on both sides because this service's default 5 s limit has timed out under load before; same instrument both sides): unpatched develop `7eda23b34d3b` 1736 of 1736; with this change 1736 of 1736 (no cell added), run before and again after the fifth edit. Failed-cell names compared: all lists empty.
+- `npm run check:test-types` ratchet for auth (the repo's checker, this service only): 197 files examined, 146 under `__tests__`, 41 errors, all in the baseline, 0 new, 0 stale; with a planted type error appended to the ks796 test file it exits 1, and the file was restored byte-equal.
+- eslint on the four files: no output; a planted `debugger` in a scratch file exits 1.
+- `docs-fragments.mjs check`: OK; planted defect exits 1; OK again after it is moved away.
+- Pre-push preflight: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+
+**Re-measured by Seat T 15th after the push** (2026-11-08 14:32Z, from the push driver's record, `git ls-remote` and `git diff-tree`): origin holds the branch at `943b69fdd988`, one commit whose parent is `7eda23b34d3b`; four files changed (the four above, status M, +21 -30 in total). Develop moved twice while the branch waited, by two squashes: `092d30706b95` (the KS 1536 PR 3b change to auth's platform lists) and `01b26bc772a7` (the KS 528 router change in the portals). The driver's gate read `092d30706b95` at 14:14:31Z and found 8 files changed by that move, overlap with this branch's four paths 0, and none of the 45 open PRs then open touching them. My own intersection of all 42 files changed by both moves with this branch's four paths and with `passwordLoginGate.ts`, the file the new comments cite, is empty (control: a planted path hits), so the line numbers I read in `passwordLoginGate.ts` still hold. The figures above were measured on the base `7eda23b34d3b` and were **not re-run on the newer develop**. The push took 1042 s. The hook ran 13 of 16 legs and nothing failed; legs 3, 4 and 8 were skipped because the local stack was not up. That is the hook's own wording ("PREFLIGHT INCOMPLETE"), and it is not a pass.
+
+**NOT run:** Schemathesis, Akto, Playwright e2e, k6 (no local stack in this seat), Node 24, any box or deploy.
+
+**Migrations / config:** none.
+
+## Held patches
+
+Two held passes from the local model ("the Spark"), raised by Seat T 15th, both strict `git apply -p1` with no offset line, canonical patch sha256 prefixes matched here before applying:
+- `READY_KS-2022-KS-2022-O104-P1_spark-dsv4flash_BRIEFED-DOCONLY-SUPERSEDES-O102-P1-GATE-CITATIONS-1-2-AND-KS810-STALE-PARAGRAPHS-PASS-9of9_2026-11-09.diff.md`: `d0772439d0f28449` (4531 bytes), run `spark_secuura_2026-11-09_ks_2022_o104_p1_stale_paragraphs_supersedes_o102_p1`; `auth.openapi.ts` and the ks796 test.
+- `READY_KS-2022-KS-2022-O104-P2_spark-dsv4flash_BRIEFED-DOCONLY-SUPERSEDES-O102-P1-MFA-AND-ACCOUNTLOCKOUT-LINE71-COMMENT-ONLY-PASS-9of9_2026-11-09.diff.md`: `7f62133f721003cd` (1221 bytes), run `spark_secuura_2026-11-09_ks_2022_o104_p2_mfa_lockout_citations`; `mfa.ts` and `accountLockout.ts`.
+
+The checker legs are **the checker's, measured at tip `7eda23b34d3b`, not re-run by Seat T 15th**: strict apply; touched sets equal the declared sets; red at base (5 of 5 and 4 of 4 expectations fail at the untouched tip); doc-only (0 changed non-comment lines; 45 and 4 comment lines changed); green after; reversion (all expectations fail again with the patches reversed); restore clean; `RESULT: PASS (tier doc_only)` for both. The earlier O102-P1 pass is not used. The fifth edit (above) was made by hand afterwards, on the coordinator's order, and is not part of either held patch.
+
+## What this did NOT do
+
+- **A search for further stale citations.** Beyond the five above, none was run.
+- It changes no code and no catch in `accountLockout.ts`.
+- No markdown link check was run (there is no markdown in this PR).
+
+## Test plan
+
+- [ ] `npm --prefix Blockchain/Dev/services/auth test -- src/__tests__/s130-f6-openapi-module-in-the-import-graph.test.ts src/__tests__/ks796-f6-mfa-schema-identity.test.ts`
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 2098,
+ "head_sha": "943b69fdd988ded41f0971de03880d016929bd51",
+ "pr_tip_now": "943b69fdd988ded41f0971de03880d016929bd51",
+ "head_mode": "tip",
+ "merge_base": "7eda23b34d3b7a413ca8f9c0945c7843708ce9f4",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts",
+   "added": "8",
+   "deleted": "13"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/auth.openapi.ts",
+   "added": "10",
+   "deleted": "14"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/routes/mfa.ts",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/services/accountLockout.ts",
+   "added": "2",
+   "deleted": "2"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts"
+ ],
+ "product_files": [
+  "Blockchain/Dev/services/auth/src/auth.openapi.ts",
+  "Blockchain/Dev/services/auth/src/routes/mfa.ts",
+  "Blockchain/Dev/services/auth/src/services/accountLockout.ts"
+ ],
+ "diff_stat": {
+  "files": 4,
+  "added": 21,
+  "deleted": 30
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 31,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "b3d/scratchpad/j2/work2098/head/Blockchain/Dev/services/auth\n\n \u2713 src/__tests__/ks796-f6-mfa-schema-identity.test.ts (31 tests) 24ms\n\n Test Files  1 passed (1)\n      Tests  31 passed (31)\n   Start at  02:27:36\n   Duration  5.37s (transform 381ms, setup 73ms, import 4.81s, tests 24ms, environment 0ms)"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 31,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "b3d/scratchpad/j2/work2098/head/Blockchain/Dev/services/auth\n\n \u2713 src/__tests__/ks796-f6-mfa-schema-identity.test.ts (31 tests) 13ms\n\n Test Files  1 passed (1)\n      Tests  31 passed (31)\n   Start at  02:27:42\n   Duration  803ms (transform 232ms, setup 64ms, import 631ms, tests 13ms, environment 0ms)"
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 31,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 31,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 13
+}

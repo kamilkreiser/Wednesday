@@ -1,0 +1,69 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 9086,
+     "total_tokens": 9790,
+     "completion_tokens": 704,
+     "prompt_tokens_details": {
+      "cached_tokens": 1280
+     }
+    },
+    "seconds": 27.7,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 9086,
+  "completion_tokens": 704,
+  "seconds": 27.7,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Note",
+    "claim": "The PR is test-only and does not change product code, so no blast radius applies.",
+    "evidence": "facts.json touched_files: only `Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f2-f3-idle-bound-and-late-body-log.test.ts` with +12 -0; product_files: []",
+    "test_or_reason": "No mutation or deletion operations are added or widened; the diff only adds a test cell.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The ticket's root-cause question (whether any message reaching the handler can carry upstream bytes) is not answered by this PR, and the PR explicitly disclaims it.",
+    "evidence": "PR description: 'It does not answer the ticket's open question: whether any message that reaches this handler can carry upstream bytes.'",
+    "test_or_reason": "The PR is a test-only pin; it does not claim to fix the root cause, so no cause-vs-evidence finding beyond noting the unmeasured claim.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The new test pins the error key for the 201 late-body case, but the ticket's mutant (dropping error) is not re-run on the merged tree; the PR's red-proof is on a held patch, not the merged head.",
+    "evidence": "facts.json targeted_on_head and targeted_on_base_product_code both show 8 passed, 0 failed; PR description: 'The figures above were measured on the base `7eda23b34d3b` and were **not re-run on the newer develop**.'",
+    "test_or_reason": "The new cell asserts `error: 'originate did not answer within 1000 ms'` (line 237), which would fail if the mutant were applied, but the mutant's effect on the merged tree is not measured in facts.json.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The new test is timing-sensitive and could flake under load, as the PR itself acknowledges.",
+    "evidence": "PR description: 'A timing-sensitive cell: three passes under load are evidence, not a proof that it never flakes.'",
+    "test_or_reason": "The test sleeps `FORWARD_TIMEOUT_MS + 700` (line 234) and has a 15s timeout; facts.json shows it passed 8/8 on head and base, but no stress evidence is in facts.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The PR description's claim that the cell is 'RED' is misleading because it passes on develop; the description clarifies it is a held-pass label.",
+    "evidence": "PR description: 'The cell's title begins \"RED\": that is the held pass's label for the cell; it passes on develop.'",
+    "test_or_reason": "The test name includes 'RED' (line 230) but facts.json shows it passes on both head and base, so the label is a convention, not a failing state.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO"
+ }
+}

@@ -1,0 +1,49 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 20930, "total_tokens": 21790, "completion_tokens": 860, "prompt_tokens_details": {"cached_tokens": 1280}}, "seconds": 42.8, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 20930, "completion_tokens": 860, "seconds": 42.8, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The PR description claims the fifth edit (removing routes/auth.ts:310) was made on the coordinator's order)Skip",
+   "evidence": "PR DESCRIPTION: \"The line number is removed, on the coordinator's order. **This one edit is the raise seat's text, not the Spark's;**\"",
+   "test_or_reason": "No evidence in facts.json or the diff confirms the coordinator's order; this is an unmeasured claim about process, not a defect.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The PR description claims the new comment's claim (s130-f6 test turns suite red on module-scope throw) was measured, but facts.json does not include that run",
+   "evidence": "PR DESCRIPTION: \"The new comment's claim, measured and not carried over: with the patch applied, `s130-f6-openapi-module-in-the-import-graph.test.ts` passes 2 of 2; with one planted line `throw new Error(...)` appended at module scope of `auth.openapi.ts` it fails 2 of 2\"",
+   "test_or_reason": "facts.json only shows ks796-f6-mfa-schema-identity.test.ts runs (31 passed on head and base); the s130-f6 run and the planted-throw run are not in the facts, so the claim is unmeasured by the deterministic runner.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The PR description claims the whole auth suite passed 1736/1736 on head and base, but facts.json does not include that run",
+   "evidence": "PR DESCRIPTION: \"Whole auth suite (`vitest`, 4 workers, `--testTimeout=120000` on both sides...): unpatched develop `7eda23b34d3b` 1736 of 1736; with this change 1736 of 1736\"",
+   "test_or_reason": "facts.json only reports targeted runs on the one test file; the whole-suite claim is not in the facts, so it is unmeasured by the deterministic runner.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The PR description claims the compiled output of all four files is unchanged, but this is not verified by facts.json",
+   "evidence": "PR DESCRIPTION: \"The compiled output of all four files is unchanged (shown below), so no running behaviour changes\"",
+   "test_or_reason": "facts.json does not include any transpileModule or byte-comparison output; the claim is unmeasured by the deterministic runner.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The PR description claims the line numbers read in passwordLoginGate.ts still hold after develop moved, but this was not re-run on the newer develop",
+   "evidence": "PR DESCRIPTION: \"The figures above were measured on the base `7eda23b34d3b` and were **not re-run on the newer develop**.\"",
+   "test_or_reason": "The PR itself acknowledges the line numbers were not re-verified on the current develop; this is a limitation, not a defect.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The PR description claims the pre-merge suites were not run, which is consistent with facts.json's not_run list",
+   "evidence": "PR DESCRIPTION: \"**NOT run:** Schemathesis, Akto, Playwright e2e, k6 (no local stack in this seat), Node 24, any box or deploy.\" and facts.json \"not_run\": [\"live/integration runs\", \"security scan\", \"network or deployed service\"]",
+   "test_or_reason": "The PR is honest about not running these; no finding beyond noting the limitation.",
+   "evidence_quote_found_in_input": true
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO WITH NOTES"
+}
