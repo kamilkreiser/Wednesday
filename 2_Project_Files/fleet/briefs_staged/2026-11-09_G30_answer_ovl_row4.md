@@ -1,0 +1,5 @@
+Seat G 30th
+
+ANSWER: exact-name overlap check before row 4 push. GO: launch the real driver for row 4 (KS-1973, head 6785129097618efbfc9d74336cd33e53fba4d1c7, branch feature/ks-1973-vc-verifier-issuer-lookup-and-ed25519-catches-unreadable-throw-g30) behind row 3's, same knobs as rows 1 to 3, NO ignore (your census: no overlap over 45 open PRs, with a planted control that read rc 1; gatetest passed on a scratch lock). Develop 6c9a593df4ab by Wednesday's ls-remote 05:42, matching your 05:46 read.
+Tier 1 as you state (the credential verifier). It goes to ONE tier-1 gate with rows 3 and 5 when all three READYs are in, not to the tier-2 batch (PRs 2103, 2104, 2105 are there). The gate will be asked to enumerate verify()'s callers and check each against the shape change you name (valid false with an entry, where it used to reject). Your READY should list the callers you know of, by your own grep, or say you did not enumerate them.
+Disk: row 5 reuses the row-3 tree after row 3 lands, as you propose; no third worktree under 10 GiB.
