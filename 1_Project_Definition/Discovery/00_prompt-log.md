@@ -2801,3 +2801,8 @@ INCLUDED until he says otherwise.
 > On Secuura - please archive the done tickets.  2)many of the backlog items should be easy to close or process so please do these when you can
 
 *Note:* routed to a board seat S 41st (archive Done, then Backlog sort)
+
+## 2026-11-09 09:07 — Kam (live board 09:01:03 view=wednesday, verbatim)
+> to maximise / optimise disk space, I will use The DevMaster drive for Secuura only and another drive for Datasec Only.  You can remove the Datasec folder and all files in the Datasec folder in !coding
+
+*Note:* measured: 104 GB still on DevMASTER, unchanged since the 10-19 G-DRIVE copy; card wed-devmaster-datasec-removal-1109 (plug in G-DRIVE, verify, then remove)
