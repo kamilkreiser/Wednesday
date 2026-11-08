@@ -1,0 +1,169 @@
+##### KS-1681 Five tracked files cite DEPLOY-BLOCKERS.md as a repo document, including two product-code comments deferring a correctness condition to it, but the file is not in the repo Backlog 2026-10-22T15:07:47.491Z
+## BLUF
+
+**Five tracked files at** `develop` **cite** `DEPLOY-BLOCKERS.md` **as though it were a repo document. It is not in the repo, has never been in the repo, and two of the five citations are product-code comments that defer a correctness condition to it.** The file is real, but it lives in the coordinator's own notes outside this repository, so nobody working from a clone can open the authority those comments point at.
+
+Measured at `develop` `292fe0b1642a`:
+
+* `git ls-tree -r --name-only` returns **4,604** entries, of which **0** match `blocker` in any case. Control on the same listing: `DEV-PROCESS` matches **1**, so the zero is a real absence and not a broken instrument.
+* `git log --all --diff-filter=ADR -- '*DEPLOY-BLOCKERS*'` is empty: it was never added and never deleted.
+* Not under `2_Project_Files`, not elsewhere in the project folder.
+
+## Recommendation
+
+Pick one of two, then make the five citations consistent with it:
+
+1. **Add an in-repo deploy-preconditions document** that the product-code comments can cite, leaving the coordinator's file as the working copy; or
+2. **Keep the authority outside the repo and change the five citations to say so** — name it as an external document rather than a path a reader will look for in the tree.
+
+**Do not copy the coordinator's file into the repo** as-is; which of the two above applies is a maintainer call, not an agent one. Nothing is blocked today: Seat D 22nd's deploy brief named the file by its absolute path and that seat worked from it.
+
+## Detail
+
+### The five citations at `develop` 292fe0b1642a
+
+| File | Line | What it defers to the missing document |
+| -- | -- | -- |
+| `Blockchain/Dev/services/originate/src/routes/metering.ts` | 73 | *"DEPLOY-BLOCKERS step (3) asserts* `data.tenantId` *equals Platform S's key tenant"* |
+| `Blockchain/Dev/services/originate/src/routes/metering.ts` | 77 | *"That is a DEPLOY gate, not a merge gate, and it is on DEPLOY-BLOCKERS.md"* |
+| `Blockchain/Dev/services/originate/src/__tests__/ks1032-unconfigured-vouch-fails-closed.test.ts` | 24 | *"deploy condition lives in DEPLOY-BLOCKERS.md; it is not a condition on this code"* |
+| `Blockchain/Dev/services/originate/src/__tests__/ks1041-gateway-provenance.test.ts` | 213 | *"the risk it named is real and is handled as a DEPLOY gate in DEPLOY-BLOCKERS.md"* |
+| `Blockchain/Dev/docs/ENVIRONMENT-VARIABLES.md` | 120 | *"DEPLOY-BLOCKERS step (3) asserts* `data.tenantId` *equals Platform S's key tenant"* |
+| `Blockchain/Dev/docs/DEV-PROCESS.md` | 255 | *"*`DEPLOY-BLOCKERS.md` *row 7 condition … is closed"* |
+
+### Pre-existing, not introduced by the docs refresh
+
+At the base of PR #1625 (`4a065fb7535`) **four** of those files already carried the citation (`ENVIRONMENT-VARIABLES.md`, both tests, `metering.ts`). PR #1625 added the fifth file (`DEV-PROCESS.md:255`). So this is a repo defect that the docs refresh widened by one, not a defect of that PR, and it is filed separately for that reason.
+
+### Why it is worth fixing rather than tolerating
+
+`metering.ts:73-77` is product code stating that a correctness property — the metering response's `data.tenantId` equalling Platform S's key tenant — is *not* checked at merge time because a deploy gate covers it. A reader auditing that code cannot reach the gate to confirm it says so, or that it is still current. Separately, that step-3 detector was independently measured **vacuous on kintsugi** during the 2026-10-19/20 deploy census (`DEFAULT_TENANT_ID` equals the tenant of all 14 `svc_api_keys` rows with `MULTI_TENANCY_ENABLED=false`, so the assertion passes whether the vouch works or not) — which is exactly the kind of thing an unreachable gate document lets persist.
+
+### Board search before filing
+
+`searchIssues` is fuzzy here and returns its 40-hit cap for every term, so absence was established with exact substring filters instead:
+
+* `title contains "DEPLOY-BLOCKERS"` → **0** issues.
+* `description contains "DEPLOY-BLOCKERS"` → **2** (KS-1594, KS-1582), both of which *cite* the file as the home of a deploy condition rather than owning this defect.
+* Positive control: `description contains "admin_organisation_scopes"` → **3** issues (KS-1601, KS-1592, KS-1585), so the filter does match when there is something to match.
+* Negative control: a freshly generated random token, deliberately not written into any ticket → **0** hits.
+
+*Filed by the Platform K agent (Seat C 29th) during the KS-1668 review of PR #1625. Facts only; no code or document was changed by this ticket.*
+##### KS-1418 Flow doc block 18.3 states a suite reading with no seat, date or host, beside a PR body reporting a different run at the same sha Backlog 2026-10-05T11:38:05.102Z
+## BLUF
+
+Flow-diagram block 18.3 states a `services/auth` suite reading as "at head" with no seat, no date
+and no host, while the PR body for the same sha reports a different run. A reader of the document
+cannot tell that more than one reading exists at that commit, or whose machine produced the one
+they are looking at.
+
+Raised from gate60's review of PR #1384 (KS 1210) as finding N-1384-2.
+**Pre-existing in that PR's documentation, not introduced by its merge-in.**
+Severity Minor (D9) / Polish (D8); it blocked
+nothing, and a documentation change at the time would have moved the head and forced a re-gate,
+which is why it was deferred to a follow-up rather than fixed in place.
+
+## What is actually wrong
+
+Three readings of the same suite exist at sha 852fc9276320, and the document presents one of them
+as if it were the only one:
+
+* Seat E 2nd measured 864 of 864 with zero ks949 timeouts.
+* The PR body reports a red run 1 at the same sha.
+* The gate's own run on its host, 2026-10-05 at 08:05:51Z under load 2.35 rising to 6.46, also
+  measured 864 of 864 with zero ks949 timeouts.
+
+The document's sentence is **not false** — it is true of Seat E 2nd's run. The defect is that it is
+unattributed, so a reader cannot reconcile it with the red run the body describes, and cannot tell
+which host or load the green figure came from.
+
+## What to do
+
+* Attribute block 18.3's figures: name the seat, the date and the host that produced them.
+* Add the run-1 reading alongside, or point the reader at the PR body where it is recorded.
+* The companion D8 note is weaker and can be closed with it: the "5000 ms" figure in that block is
+  a vitest timeout VALUE, not a stated suite timing, so the skill's stated-timings rule is barely
+  engaged there. Polish only.
+
+## Not covered
+
+No live sweep. This is a documentation-attribution defect, measured by reading the committed
+documents and the gate's report; nothing was exercised against a running service for it.
+
+Refs KS-1210
+##### KS-1338 entrypoint-corpus guard: a parenthesised return of a guarded call reads `guarded:false`, and the file's own rule-3 comment claims both return shapes are covered Backlog 2026-09-26T02:40:11.437Z
+**BLUF: the guard reads** `guarded:false` **for call shapes the file's own comment says it covers.** Its rule-3 comment states *"Both return shapes are covered: a concise arrow body, and an explicit* `return`*"* — yet `return (() => g())` and `() => (() => g())`, when called, both read `guarded:false`, while the truth and `develop` both read **true**. `(() => g()).call(null)` reads false as well, and is not named anywhere.
+
+This is the residue of a capped round. Nothing shipped for it; the pull request that attempted it stays open and its disposition sits with the repository owner.
+
+## What is wrong, precisely
+
+The defect is **parenthesisation**. A guarded call wrapped in parentheses — whether returned explicitly or as a concise arrow body — is not recognised, so a correctly-guarded call site is reported as unguarded. The reading is wrong in the **unsafe-looking** direction: it accuses safe code.
+
+Three shapes, measured at runtime:
+
+| shape | guard reads | truth / develop |
+| -- | -- | -- |
+| `return (() => g())` then called | `guarded:false` | true |
+| `() => (() => g())` then called | `guarded:false` | true |
+| `(() => g()).call(null)` | `guarded:false` | true |
+
+The third came from a call-shape table the round was commissioned to make **"read as the truth or be NAMED"**. It does neither: it reads false and is unnamed.
+
+**Evidence produced by the gate:** `evidence/1268/probe_readings_head.jsonl`, rows 23, 40 and 41.
+
+## Why this is its own ticket
+
+It is the same defect **class** as the round's first attempt, which is why the round capped. The fix is a reader change: recognise a parenthesised expression as transparent when deciding whether the inner call is guarded, and either read `.call`/`.apply` invocation forms as the truth or name them as unsupported. **A guard whose own comment claims coverage it does not have is worse than one with a stated limit**, because the comment is what the next reader trusts.
+
+## Not in this ticket
+
+The round's other work — the `entrypoint-corpus.test.ts` change at blob `8a4ce36a3a96` — is sound and is being re-raised separately by its author. This ticket is only the reader defect.
+
+## Board search before filing
+
+Searched over **486 open issues** on this team, matching literally against identifier + title + description: `guarded:false`, `parenthesised`, `rule-3`, `concise arrow` — **0 open hits each**. `entrypoint-corpus` returned 3 (KS-1155, KS-1142, KS-1140), none of them this reader defect. Controls: a fresh nonsense token **0**, `ssrf-guard` **2**, so the instrument discriminates in both directions.
+
+Refs KS-1316
+##### KS-1764 preflight.sh:731: the -z "$hook_controls" disjunct is implied by the second disjunct, so deleting it moves no cell and no outcome; delete it or keep it as a documented refusal is undecided Backlog 2026-10-27T13:22:57.239Z
+## BLUF
+
+**At** `Blockchain/Dev/scripts/preflight/preflight.sh:731` **the** `-z "$hook_controls"` **disjunct is implied by the second disjunct, so deleting it changes no outcome and no test cell can go red on its deletion (an equivalent mutant).** Whether to delete the dead disjunct, or keep it as a documented refusal, is **not decided**. Until now the question was recorded only inside KS-1756's comment (2026-10-27T06:19:35Z: "Whether to delete the dead disjunct is a `preflight.sh` question and is not made here"), and KS-1756 is a ticket about to be closed, so this ticket is the question's home.
+
+Facts only. **No fix is proposed.**
+
+Refs KS-1756, KS-1746, KS-1638.
+
+All line numbers were read at develop `061c3a4f62d563e723b8cee5fe792b4c27dc3014`. The finding is Seat Z 1st's (STATUS 2026-10-27T05:54Z, and KS-1756's comment), relayed through Wednesday; the truth table in section 2 is re-measured here.
+
+## 1 — The line
+
+`Blockchain/Dev/scripts/preflight/preflight.sh:731`, verbatim:
+
+`if [ -z "$hook_controls" ] || ! printf '%s\n' "$hook_controls" | grep -qx 'ALLOW_FORCE'; then`
+
+The comment above it (`:725-730`) says an empty derivation "would mean the hook moved or the pattern stopped matching", and that `ALLOW_FORCE` is named "because it is the one control known to exist today". The refusal text starts at `:732`: `FAIL - could not derive the pre-push hook's own control variables from $hook_src.`
+
+## 2 — The truth table, measured here
+
+`/bin/bash` 3.2.57 with `set -o pipefail`. I ran the full condition and the second disjunct alone over seven derived sets: empty; `ALLOW_FORCE`; `NAME`; `FOO BAR`; `ALLOW_FORCE` then `NAME` on two lines; `NAME` then `ALLOW_FORCE` on two lines; `ALLOW_FORCE_X`.
+
+Result: **7 of 7 identical** (refuse, pass, refuse, refuse, pass, pass, refuse). For the empty set, `printf '%s\n' ""` writes one empty line, `grep -qx 'ALLOW_FORCE'` exits 1, and `!` makes that true, so the second disjunct refuses on its own.
+
+Control on the same harness: with the second disjunct replaced by `false`, the empty set **does** differ (refuse with the `-z` disjunct, pass without it), so the harness can tell the two forms apart.
+
+## 3 — What the suites measured (relayed, not re-run here)
+
+From KS-1756's comment, which is Seat Z 1st's: the mutant that deletes the disjunct reads `preflight_deps.test.sh` 82/0 with zero cells moving, so no cell can fail on it. The mutants the cells do kill are `M_accept` (an empty set is accepted: 75/0 and surviving at base, 76/6 after) and `M_2nd` (only `-z` remains: 71/4 before, 79/3 after).
+
+## Not established
+
+* **Whether to delete the dead disjunct or keep it.** Not decided, and not chosen here.
+* **I ran no suite.** The 82/0, 76/6 and 79/3 figures are KS-1756's, not reproduced.
+* Whether any other `if` in `preflight.sh` has the same implied-disjunct shape. Not searched.
+
+## Searched
+
+Board, KS team, title + description + comment bodies, `includeArchived: true`, paged to the end. `preflight.sh:731` → **1 hit**, KS-1756. `hook_controls` → **3 hits**: KS-1756, KS-1755 (the derivation reads `${NAME:-` only, a different defect), KS-1746. `equivalent mutant` → **1 hit**, KS-1687 (m365, unrelated). `disjunct` → **4 hits**: KS-1756, KS-1640, KS-1078 (archived), KS-1017; none of the other three contains `preflight.sh:731`, and I read their titles only. **Positive control** `KS-1531` → 24 hits. **Zero control:** a token coined for this read and written nowhere → 0 hits.
+
+*Filed by Seat G 25th, 2026-10-27 UTC, on Wednesday's brief.*

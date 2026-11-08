@@ -1,0 +1,88 @@
+diff --git a/Blockchain/Dev/packages/shared/src/prism/identus-client.ts b/Blockchain/Dev/packages/shared/src/prism/identus-client.ts
+--- a/Blockchain/Dev/packages/shared/src/prism/identus-client.ts
++++ b/Blockchain/Dev/packages/shared/src/prism/identus-client.ts
+@@ -131,7 +131,7 @@
+     } catch (err) {
+       let errorMessage: string;
+       try {
+-        errorMessage = err instanceof Error ? err.message : String(err);
++        errorMessage = String(err instanceof Error ? err.message : err);
+       } catch {
+         errorMessage = 'unreadable thrown value';
+       }
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1974-identus-client-resolve-did-non-string-message-is-text.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1974-identus-client-resolve-did-non-string-message-is-text.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1974-identus-client-resolve-did-non-string-message-is-text.test.ts
+@@ -0,0 +1,71 @@
++import { describe, it, expect, vi, afterEach } from 'vitest';
++
++// KS-1974 (identus client only): IdentusClient.resolveDID (src/prism/identus-client.ts) is a resolver: a failed lookup is a result
++// with `didDocument: null` and `didResolutionMetadata.error: 'notFound'` plus an `errorMessage` TEXT. Its catch reads the failure
++// into `errorMessage` inside a try (KS-1868) as `err instanceof Error ? err.message : String(err)`, which guards a read that
++// THROWS but not a read that RETURNS a non-string: an Error whose `message` is a Symbol, an object whose toString throws comes back as that value itself, so `errorMessage` is not text. The fetch stand-in is a plain function rejecting
++// with the cell's value (stubbed with `vi.stubGlobal`, removed after each cell); the logger is a plain no-op object; no network.
++vi.mock('../logger', () => ({
++  logger: {
++    debug: () => undefined,
++    info: () => undefined,
++    warn: () => undefined,
++    error: () => undefined,
++  },
++}));
++
++import { IdentusClient } from '../prism/identus-client';
++
++/** The resolution result, or the string 'rejected' when resolveDID rejects (an assertion can then fail on it). */
++async function resolve(value: unknown): Promise<unknown> {
++  vi.stubGlobal('fetch', () => Promise.reject(value));
++  const client = new IdentusClient({ cloudAgentUrl: 'http://agent.invalid' });
++  try {
++    return await client.resolveDID('did:prism:ks1974');
++  } catch {
++    return 'rejected';
++  }
++}
++
++const notFound = (errorMessage: string): unknown => ({
++  didDocument: null,
++  didResolutionMetadata: { error: 'notFound', errorMessage },
++  didDocumentMetadata: {},
++});
++
++const withMessage = (m: unknown): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        return m;
++      },
++    },
++  });
++
++const toStringThrows = (): unknown => ({
++  toString() {
++    throw new Error('toString boom');
++  },
++});
++
++describe('KS-1974 IdentusClient.resolveDID answers text for a non-string message', () => {
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  it('control ks1974 C1 an ordinary Error gives the notFound result with its message', async () => {
++    expect(await resolve(new Error('connection refused'))).toEqual(notFound('connection refused'));
++  });
++
++  it('control ks1974 C2 a thrown plain string gives the notFound result with that text', async () => {
++    expect(await resolve('plain text failure')).toEqual(notFound('plain text failure'));
++  });
++
++  it('RED ks1974 R1 an Error whose message is a Symbol gives the notFound result with the symbol as text', async () => {
++    expect(await resolve(withMessage(Symbol('ks1974')))).toEqual(notFound('Symbol(ks1974)'));
++  });
++
++  it('RED ks1974 R2 an Error whose message is an object whose toString throws gives the notFound result with a constant reason', async () => {
++    expect(await resolve(withMessage(toStringThrows()))).toEqual(notFound('unreadable thrown value'));
++  });
++});

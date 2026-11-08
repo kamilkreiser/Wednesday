@@ -1,0 +1,120 @@
+diff --git a/Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts b/Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts
+--- a/Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts
++++ b/Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts
+@@ -334,2 +334,11 @@
+   private isRateLimited(err: any): boolean {
++    try {
++      return this.readsAsRateLimited(err);
++    } catch {
++      // KS-1972: a thrown value whose read throws is not a rate limit; answer false so the caller reaches handleError.
++      return false;
++    }
++  }
++
++  private readsAsRateLimited(err: any): boolean {
+     return (
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1972-event-indexer-is-rate-limited-unreadable-throw.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1972-event-indexer-is-rate-limited-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1972-event-indexer-is-rate-limited-unreadable-throw.test.ts
+@@ -0,0 +1,100 @@
++import { describe, it, expect } from 'vitest';
++
++// KS-1972: ContractEventIndexer.isRateLimited (src/blockchain/event-indexer.ts) reads `err?.status_code`, `err?.statusCode`,
++// `err?.response?.status` and `err?.message` of a thrown value with no guard, and poll() calls it BEFORE handleError. When the
++// read throws (a revoked Proxy, a Proxy whose get trap throws, an Error whose message getter throws) the throw leaves poll()'s
++// catch, so poll() rejects and handleError (which already survives such values) is never reached. The cells make the Blockfrost
++// stand-in reject with such a value and assert poll() resolves and onError is called, as for an ordinary Error. The api object
++// is a plain stand-in, the indexer is reached through a type cast, no network, no timers.
++import { ContractEventIndexer } from '../blockchain/event-indexer';
++
++type Outcome = { rejected: boolean; received: unknown[]; backoffMs: unknown };
++
++async function pollWith(value: unknown): Promise<Outcome> {
++  const received: unknown[] = [];
++  const indexer = new ContractEventIndexer({
++    onError: (e: Error) => {
++      received.push(e);
++    },
++  } as never);
++  const inner = indexer as unknown as { running: boolean; api: unknown; backoffMs: number; poll(): Promise<void> };
++  inner.running = true;
++  inner.api = {
++    blocksLatest: async () => {
++      throw value;
++    },
++  };
++  let rejected = false;
++  try {
++    await inner.poll();
++  } catch {
++    rejected = true;
++  }
++  return { rejected, received, backoffMs: inner.backoffMs };
++}
++
++const messageOf = (o: Outcome): unknown => (o.received[0] as { message?: unknown } | undefined)?.message;
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getTrapThrows = (): unknown =>
++  new Proxy(
++    {},
++    {
++      get() {
++        throw new Error('get trap boom');
++      },
++    },
++  );
++
++const messageGetterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1972 ContractEventIndexer.poll survives a thrown value whose read throws', () => {
++  it('control ks1972 C1 an ordinary Error reaches onError as is and poll resolves', async () => {
++    const err = new Error('rpc down');
++    const out = await pollWith(err);
++    expect(out.rejected).toBe(false);
++    expect(out.received.length).toBe(1);
++    expect(out.received[0] === err).toBe(true);
++  });
++
++  it('control ks1972 C2 a 429 Error backs off and does not reach onError', async () => {
++    const out = await pollWith(new Error('429 Too Many Requests'));
++    expect(out.rejected).toBe(false);
++    expect(out.received.length).toBe(0);
++    expect(out.backoffMs).toBe(2000);
++  });
++
++  it('RED ks1972 R1 a revoked Proxy reaches onError as an Error with a constant reason and poll resolves', async () => {
++    const out = await pollWith(revokedProxy());
++    expect(out.rejected).toBe(false);
++    expect(out.received.length).toBe(1);
++    expect(messageOf(out)).toBe('unreadable thrown value');
++  });
++
++  it('RED ks1972 R2 a Proxy whose get trap throws reaches onError as an Error with a constant reason and poll resolves', async () => {
++    const out = await pollWith(getTrapThrows());
++    expect(out.rejected).toBe(false);
++    expect(out.received.length).toBe(1);
++    expect(messageOf(out)).toBe('unreadable thrown value');
++  });
++
++  it('RED ks1972 R3 an Error whose message getter throws reaches onError as is and poll resolves', async () => {
++    const err = messageGetterThrows();
++    const out = await pollWith(err);
++    expect(out.rejected).toBe(false);
++    expect(out.received.length).toBe(1);
++    expect(out.received[0] === err).toBe(true);
++  });
++});

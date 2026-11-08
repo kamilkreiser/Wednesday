@@ -1,0 +1,24 @@
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1536-one-role-vocabulary.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1536-one-role-vocabulary.test.ts
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks1536-one-role-vocabulary.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1536-one-role-vocabulary.test.ts
+@@ -82,6 +82,7 @@
+     expect(await run({ role })).toBe('ForbiddenError');
+   });
+   it('RED ks1536 M3 no user is UnauthorizedError', async () => { expect(await run(undefined)).toBe('UnauthorizedError'); });
++  it('RED ks1536 M4 a user with no role is ForbiddenError', async () => { expect(await run({})).toBe('ForbiddenError'); });
+ });
+ 
+ // ---- the guard
+@@ -172,6 +173,12 @@
+     expect(t).not.toContain('PLATFORM_ADMIN_ROLES');
+   });
+ 
++  it('RED ks1536 G5b tokenisation puts requirePlatformRole on each key route itself, not only twice somewhere', () => {
++    const t = readFileSync(join(DEV, 'services/tokenisation/src/index.ts'), 'utf8');
++    expect(t).toContain("app.post('/api/generate-key', requirePlatformRole(),");
++    expect(t).toContain("app.post('/api/rotate-key', requirePlatformRole(),");
++  });
++
+   it('RED ks1536 G6 originate adminConfig resolves tenants by the shared predicate and keeps no list of its own', () => {
+     const t = readFileSync(join(DEV, 'services/originate/src/routes/adminConfig.ts'), 'utf8');
+     expect(t).not.toContain('SUPER_ADMIN_ROLES');

@@ -1,0 +1,69 @@
+##### KS-2029 tests/e2e fixtures: Blockchain/Dev/tests/e2e/tests/fixtures/test-helpers.ts line 113 reads msg.created_at and msg.timestamp, which AgentMailMessage does not declare (2 TS2339 per Seat J 16th) Backlog 2026-11-05T11:02:02.772Z
+**BLUF:** `Blockchain/Dev/tests/e2e/tests/fixtures/test-helpers.ts` line 113 reads `msg.received_at || msg.created_at || msg.timestamp` from a value typed `AgentMailMessage`, and `export interface AgentMailMessage` (lines 66 to 75 of the same file) declares only `message_id`, `from`, `to`, `subject`, `text?`, `html?`, `extracted_text?` and `received_at`; `created_at` and `timestamp` are not members of the type. Seat J 16th's HANDOVER records 2 TS2339 errors there (`created_at` and `timestamp` on `AgentMailMessage`), present on develop.
+
+Source: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-05_seatJ-16th/HANDOVER.md` line 37. Code read by the filing seat at develop `1b1b65c7415f` with `git show` of that commit from the shared object store (a read), not run.
+
+As read at `1b1b65c7415f`:
+
+* The file exists at the path above (the path in the instruction list for this filing, without the inner `tests/` directory, does not). Line 110 types the list as `const messages: AgentMailMessage[] = data.messages || [];`; lines 112 and 113 are the loop and the read above.
+* Board searches for `AgentMailMessage`, `received_at` and the file path find no open ticket; `TS2339` finds three open tickets about other files (KS-1090, KS-1152, KS-1593).
+
+Not measured: anything by the filing seat (tsc was not run; the two errors are Seat J 16th's report); the tsconfig or command that produced them (the HANDOVER line does not record it); what the mail API returns at runtime for these fields.
+
+Priority: Low, by the filing seat's judgement: a type error in a test fixture. The source (J 16th) gives no grade.
+##### KS-2028 tests/e2e has no eslint coverage: Blockchain/Dev/eslint.config.mjs lists no files pattern that matches Blockchain/Dev/tests/e2e, and the directory has no config of its own Backlog 2026-11-05T11:01:55.710Z
+**BLUF:** `Blockchain/Dev/tests/e2e` has no eslint configuration file of its own, and no `files` pattern of the root `Blockchain/Dev/eslint.config.mjs` matches it, so its specs and fixtures get no lint configuration. At develop `1b1b65c7415f`: a `git ls-tree -r` of `Blockchain/Dev/tests/e2e` lists no file with eslint or oxlint in its name (control: the same listing includes the directory's `package.json`). `Blockchain/Dev/eslint.config.mjs` has `files` patterns for `services/**/*.ts`, `packages/**/*.ts`, `sdk/**/*.ts` and `scripts/**/*.ts` (line 78), for `**/*.test.ts` and `**/__tests__/**/*.ts` (line 99), and for `frontend/**/*.ts` and `frontend/**/*.tsx` (line 121); its global ignores (lines 54 to 70) do not name `tests/e2e`. The e2e files are `*.spec.ts` specs and `.ts` fixtures under `Blockchain/Dev/tests/e2e/tests/`, which none of those patterns matches. Seat J 16th's HANDOVER records that linting an e2e file reports the file as ignored.
+
+Source: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-05_seatJ-16th/HANDOVER.md` line 38 ("No eslint configuration covers `tests/e2e` (the file is reported as ignored)"). Config and tree read by the filing seat at develop `1b1b65c7415f` with `git show` and `git ls-tree` of that commit from the shared object store (reads), not run.
+
+As read at `1b1b65c7415f`:
+
+* KS-1390 (Todo), lines 95 and 96, states the same for the `e2e-v2` package ("no tsconfig, Prettier config or ESLint config"; the repo-level config "only targets services/, packages/, sdk/, scripts/ and frontend/"); a different directory. Board searches for `eslint.config` find KS-1000 (the auth tsconfig excludes its tests) and KS-1390, and for `.eslintrc` no open ticket; none names `tests/e2e`.
+
+Not measured: anything by the filing seat (eslint was not run; the ignored-file report is Seat J 16th's); which rule set would apply to the e2e files; other lint configuration reachable from that directory (only file names in the tree listing were searched).
+
+Priority: Low, by the filing seat's judgement: tooling coverage with no runtime effect. The source (J 16th) gives no grade.
+##### KS-2017 originate issue-certification handler: the outer catch computes String(error) unguarded, so an unreadable thrown value gets no response (gate 203 G203-N4, Note, pre-existing) Backlog 2026-11-05T10:55:15.493Z
+**BLUF:** The outer catch of the issue handler in `services/originate/src/routes/certifications.ts` computes `const msg = error instanceof Error ? error.message : String(error);` (line 920 at develop `1b1b65c7415f`) outside any try. A thrown value that cannot be converted to a string makes `String(error)` throw a TypeError inside the catch, and the request gets no response (the client times out). Gate 203 measured this in 56 cells on base and the same 56 on head ("Cannot convert object to primitive value" traces) and grades it a Note, pre-existing, not part of KS-1666.
+
+Source: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate203-ks1666-local/verdict.md` line 32 (G203-N4); `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate203-ks1666-local/evidence/r2/table_repo.log`. Code read by the filing seat at develop `1b1b65c7415f` with `git show` of that commit from the shared object store (a read), not run.
+
+As read at `1b1b65c7415f`:
+
+* `services/originate/src/routes/certifications.ts` lines 919 to 928: `} catch (error: any) {`, then line 920 `const msg = ...` as above, then `logger.error('Failed to issue certification', { error: msg, ... code: error?.code, stack: error instanceof Error ? error.stack : undefined })`. The verdict cites the statement at line 935 (taken in the gate's local checkout); it is at line 920 at the tip.
+* The catch of the GET handler in the same file (lines 1133 to 1141) was hardened by KS-1844 (Done): its comment cites gate 36 F1, and the read sits inside a try with the fallback text "unreadable thrown value".
+* KS-1868 (the class ticket) records PR 1942 as guarding eight catches in this file ("the holder check, reservation, anchoring, compensating delete, derived-document write, legacy UPDATE and charge-event catches on issue, and the anchoring catch on recertify"); this outer catch is not in that list as read.
+* KS-1666 (the gate's ticket, read whole) has no hit for `String(error)` or this finding. A board search for `String(error)` finds no open ticket (Done: KS-1167, KS-1844); `unreadable thrown value` finds 12 open tickets, none naming this site.
+
+Not measured: anything by the filing seat (nothing was run); whether KS-1868's census counted this site; the other reads in the same catch (`error?.code` at line 926, `error.stack` at line 927) on a hostile value, since the verdict names `String(error)`; behaviour on a live stack.
+
+Priority: Low, mapped from the verdict's grade Note (verdict line 32).
+##### KS-2036 originate still logs two email addresses after KS-1937: a share recipient's at INFO (certifications.ts:1385) and a demo-seed user's at ERROR (adminConfig.ts:2123) Todo 2026-11-06T01:37:14.248Z
+**BLUF:** Two log calls in `services/originate` still write an email address once the KS-1937 fix lands: `routes/certifications.ts:1385` (INFO, `recipientEmail: recipient.email`, written on every share) and `routes/adminConfig.ts:2123` (ERROR, `email: u.email`, written for each demo-seed user whose insert fails). They were found by the KS-1937 census and left out of that change by Wednesday's ruling, which asked for ONE ticket for both; the adminConfig line also waits for PR 2019, which edits the same file. Both are pre-existing and neither is a thrown-object leak. **Nothing here is a fix; no code change is proposed or made.**
+
+## What is read (develop `7ad5a8b4bdf7`, `Blockchain/Dev/services/originate/src`)
+
+* `routes/certifications.ts:1385`: `logger.info('Certification shared', { certificationId: id, recipientEmail: recipient.email, shareType: recipient.shareType });`. It sits in the share loop right after the share notification is sent, so the person a document is shared with has their address written on every share. That is a third party's address.
+* `routes/adminConfig.ts:2123`: `try { logger.error('Demo user seed failed', { email: u.email, error: readableErrorMessage(err) }); } catch {...}`. `u` is an entry of the hard-coded demo-seed account list in the same route; each entry also carries an `id`. KS-913 (archived) records that a real person's email once sat in that list. Whether any address there is personal today is **not measured here**.
+
+## The ruling it follows
+
+Kam's card `secuura-ks1346-logging-thrown-objects-leaks-secrets` = a: "Log what kind of thing was thrown and the NAMES of its fields, never their values." Wednesday's ANSWER of 2026-11-06 on KS-1937 applied it to a recipient address: "A. Log the template only, never the address", for `utils/notificationClient.ts` and `services/email.ts`. This ticket carries the two remaining lines of the same class. Related: KS-1937 (originate's client and email service), KS-1964 (the same pattern in the auth service's `email.ts`).
+
+## How these two were found (the census)
+
+A balanced-parenthesis scan of every log call in `services/originate/src`, tests excluded: 60 files, 303 calls, 12 flagged. Ten are in `notificationClient.ts` (3) and `services/email.ts` (7), covered by the KS-1937 change; these two are the rest. Controls: the 3 known client lines, and the 7 `email.ts` lines that a plain grep found independently (the scanner's first version missed those 7 because it blanked template-literal text, interpolations included; fixed, and both controls now pass). **Limits:** it flags the identifiers `to`, `toEmail`, `email`, `emails`, `recipient*` and `address*` inside a log call's arguments. It does not follow a value held under another name, and it does not read error text that a library forwards, so an SMTP or notification-service error that echoes an address is **not** covered.
+
+## Board search (so nobody files this twice)
+
+Run 2026-11-06 over this team's titles, descriptions and comment bodies, archived included: `Certification shared` 0; `recipient.email` 0; `logs the recipient` 0; `email in the log` 0; `u.email` 2 (KS-1802 and KS-1817, both about how the thrown value is read in that catch, not the address); `Demo user seed failed` 6 (KS-1802, KS-1817, KS-1818, KS-1990, KS-2004, KS-960, all seed-demo-users catches or counts, read by title; none is about the address). Positive control: `notificationClient` returns KS-1937 and KS-1964.
+
+## What is not known, and what would settle it
+
+1. Whether either log reaches a persisted destination, and for how long. Settled by reading the deployment's log configuration.
+2. Whether any address in the demo-seed list is a real person's today (KS-913).
+3. The shape of the fix is not decided here. KS-1937's shape is the model: log the identifiers, not the address. For the share line `certificationId` and `shareType` already identify the event; for the seed line the entry's `id` identifies the failing row.
+
+## Priority
+
+Medium, as KS-1937 and KS-1964 read on the board.

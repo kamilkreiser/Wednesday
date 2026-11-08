@@ -1,0 +1,25 @@
+diff --git a/Blockchain/Dev/packages/shared/src/middleware/index.ts b/Blockchain/Dev/packages/shared/src/middleware/index.ts
+--- a/Blockchain/Dev/packages/shared/src/middleware/index.ts
++++ b/Blockchain/Dev/packages/shared/src/middleware/index.ts
+@@ -165,7 +165,7 @@
+       return next(new UnauthorizedError('Authentication required'));
+     }
+ 
+-    if (!isPlatformRole(req.user.role)) {
++    if (req.user.role !== undefined && !isPlatformRole(req.user.role)) { // TAMPER: a user with no role passes
+       return next(new ForbiddenError(`Role ${req.user.role} is not authorized for this action`));
+     }
+ 
+diff --git a/Blockchain/Dev/services/tokenisation/src/index.ts b/Blockchain/Dev/services/tokenisation/src/index.ts
+--- a/Blockchain/Dev/services/tokenisation/src/index.ts
++++ b/Blockchain/Dev/services/tokenisation/src/index.ts
+@@ -291,7 +291,8 @@
+   tenantId: z.string().min(1),
+ });
+ 
+-app.post('/api/rotate-key', requirePlatformRole(), async (req, res) => {
++void requirePlatformRole(); // TAMPER: stray call keeps the text count at 2
++app.post('/api/rotate-key', async (req, res) => {
+   try {
+     const body = rotateSchema.parse(req.body);
+     await ensureTenantKeysTable();

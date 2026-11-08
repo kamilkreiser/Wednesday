@@ -1,0 +1,121 @@
+##### KS-2072 ks1128b real-PostgreSQL describe skips with no message on a machine with no PostgreSQL keg: SEED-REALPG unpinned there (gate 216 F-4) Backlog 2026-11-06T07:06:20.025Z
+**BLUF:** The real-PostgreSQL half of KS-1128's test, the cells that pin the platform tenant seed's WARN and its 200-character cut on a real database, is declared with `describe.skipIf(!PGBIN)`. On a machine with no PostgreSQL keg it prints "skipped" and the file passes, so SEED-REALPG is unpinned there and only the four fake-pg SEED-CUT cells hold. Gate 216 recorded this as F-4 (Low) on PR 2034 at head 07924892fa5f. The cells ran 17 of 17 on the gate's machine, so this is about where the keg is absent, not about a failing cell.
+
+## What the gate said (gate 216 verdict, finding F-4)
+
+* The describe is `describe.skipIf(!PGBIN)` (the ks1128b test file, line 39). On a machine with no keg it prints "skipped" and passes.
+* The seat says this and cites the ks949 ruling of 2026-09-13. The gate could not read that ruling: no card named it and the `prior` lookups returned nothing.
+* The gate did not hide the keg, so the skip branch is read only.
+* The gate's headline for PR 2034: the WARN and the 200-character cut are pinned on a real PostgreSQL; tampers at 199, 201 and level debug redden both the fake-pg and the real-pg files.
+
+## What is NOT known
+
+* Which machines run the suite without a keg (a CI image, another seat's Mac). Not measured.
+* What the ks949 ruling of 2026-09-13 says. Neither the gate nor the seat filing this read it.
+* Whether a skipped describe is visible in any summary the suite or the preflight prints.
+
+## Owed
+
+A way to see the skip: a printed or counted line when the real-database cells are skipped, or a stated requirement that the keg exists wherever this file is gated. Which of the two is the owner's call.
+
+## Searched before filing (2026-11-06, includeArchived, titles, descriptions and comments)
+
+* "PGBIN": 0 issues, 0 comments. "SEED-REALPG": 0 issues, comments on KS-1128 only. "skipIf": 1 issue (KS-484, archived) and comments on KS-1042 and KS-708, which this seat did not open.
+* Controls: "KS-1539" hit, a nonsense symbol returned 0.
+
+Related: KS-1128 and KS-2057 (gate 216's F-5, filed earlier). Source: gate 216 verdict in Wednesday's reference folder (2026-11-06_gate216-tier2-pr2033-2035), F-4. Filed on Wednesday's ANSWER of 2026-11-06 07:03Z, priority Low.
+##### KS-2030 systemTest: two governance suites still use the register route as it worked before PR 1947 (the KS 1703 participant fixture and the KS 1762 cap suite) Todo 2026-11-06T00:54:20.908Z
+**BLUF:** Two systemTest suites still call `POST /api/governance/participants/register` the way it worked before PR 1947 merged on 2026-11-02. Both are read from source and NOT run. Neither file has changed since before that PR. No product code is wrong here: the tests are stale.
+
+## (a) The KS 1703 object-authorization module
+
+`systemTest/schemathesis/tests/test_get_by_id_object_authorization.py:151-156`: the `participant_id` fixture posts as the generated OWNER actor with a random wallet (`addr_test1ks1703` plus hex) and requires 201.
+
+Since PR 1947 a non-admin gets 403, because that wallet is not linked to their account: `walletAddress is not the wallet linked to your account`, or `Link a wallet to your account first` with no linked wallet (`services/governance/src/services/governanceService.ts:640-646`, develop `3fbf50ede123`). The module's docstring (line 25) says a fixture that fails errors the test, so this test should error rather than xfail.
+
+## (b) The KS 1762 live cap suite
+
+`systemTest/schemathesis/tests/governance_cap_live/cap_ops.py:244`, with `test_governance_cap_free_live.py:92` and `:141`: it registers the super-admin's user id as `walletAddress`, relying on an auto-registered row whose wallet was its id (`cap_ops.py:14-17` says so). PR 1947 removed that row shape.
+
+* **A database with no such row:** `create_draft` as the super-admin is refused first by createProposal: 403 with no linked wallet, 400 "Minimum stake of 1000 required" with one (`governanceService.ts:743-757`).
+* **The register call on that database:** at develop it creates a uuid row holding the user id as its wallet, which the voter never uses. After KS 1951 it answers 404 "Wallet owner not found", nothing written.
+* **A slot still holding such a row:** by-wallet finds it, so the call works as written, before and after KS 1951.
+
+## Not measured
+
+Neither suite was run: the Docker daemon is down on the host that found this. Whether the stale cells have failed in a run since 2026-11-02 is unknown. The cap suite is opt-in (`SECUURA_RUN_GOVERNANCE_CAP_LIVE=1`, per KS 1762).
+
+## Fix direction (not decided)
+
+Both need an actor with a real linked wallet. Linking takes a CIP-8 signature (`services/auth/src/routes/wallet.ts:463`), so the question is how a test actor gets one. Under KS 1951 the operating rule is "the user links the wallet first".
+
+## Searched first
+
+Literal-hit filter over title, description and comments. `make_dominant_drep` 0; `cap_ops.register` 0; `Link a wallet to your account first` 0; `addr_test1ks1703` 0; `participant_id` 0. `test_get_by_id_object_authorization` 1 (KS 1703); `governance_cap_live` 2 (KS 1762, KS 1763); `cap_ops` 1 (KS 1762). The comments on those three tickets (4, 8 and 0) were searched for the fixture, the suite, PR 1947 and KS 1942: none states these breaks. Control: `minProposalStake` 4.
+
+## Found by
+
+Seat F 35th while designing KS 1951. Filed on Wednesday's ruling of 2026-11-06 00:50:25Z, on our board account. Nothing in systemTest was touched.
+##### KS-2007 ks781 LEG F guard walk: indirect-invocation false negative — a guard inside a parser continuation passed by NAME reads guarded: false (under-reports) Backlog 2026-11-05T05:53:00.458Z
+**BLUF:** The ks781 LEG F guard walk misses a guard that is invoked indirectly. In `routerParserAnalysis`, a continuation passed to the parser by name is not followed, so a guard that is genuinely mounted there reads `guarded: false`. This under-reports, which is the safe direction. KS-1143 recorded it on 2026-09-25 as a disclosed limit that was "out of scope by ruling"; it has no ticket of its own.
+
+Carried from KS-1143, which recorded it as 'out of scope by ruling' with no ruler named (Wednesday 2026-11-05: no card or mail rules it; filed so it is tracked).
+
+## The limit, in KS-1143's own words (emphasis markup removed)
+
+KS-1143 comment of 2026-09-25 00:01Z:
+
+> The indirect-invocation false negative, disclosed in #1212's own body and not fixed there. The tightened predicate recognises only a direct call through an identifier, so a guard that is genuinely mounted but invoked indirectly now reads as not mounted. This one errs in the opposite direction to GF-1 — it under-reports rather than over-reports.
+
+KS-1143 comment of 2026-09-25 04:20Z:
+
+> Disclosed limit, in the safe direction: a continuation passed by NAME (raw(req, res, afterParse)) is not a function expression, so a guard inside it reads false. That under-reports, and it is the indirect-invocation class kept out of this ticket's scope.
+
+KS-1143 merge comment of 2026-09-25 15:35Z:
+
+> The indirect-invocation false negative — still open, disclosed, out of scope by ruling.
+
+KS-1143's own description covers GF-1, GF-2 and R-1 and does not describe this limit; its comments do.
+
+## Why it is not KS-1316's
+
+KS-1316's description (emphasis markup removed):
+
+> KS-1143 stays In Progress for the indirect-invocation false negative, which is the opposite direction (under-reports: a continuation passed by NAME is not followed, so a genuinely mounted guard reads unguarded). This one over-reports.
+
+## Where
+
+The guard walk in `routerParserAnalysis`, in `Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts`. KS-1143's comment of 2026-09-25 00:01Z gives the call-node predicate at line 2336 of that file after PR 1212 (squash `dd8f99cc75b9`); the line has moved since.
+
+## Related
+
+KS-1143 (carried from) and KS-1316 (the opposite direction: a guard defined but never called reads guarded, which over-reports).
+
+## Open
+
+Neither a named ruling that the limit is accepted nor a change that addresses it is recorded.
+
+## Board search before filing
+
+Literal match (title, description and comments of team KS, archived included) on 2026-11-05: `CONT-DEFERRED` 2 (KS-1143, KS-1316); `indirect-invocation` 2 (the same two); `invoked indirectly` 1 (KS-1143); `passed by NAME` 2 (the same two); `afterParse` 1 (KS-1143); `routerParserAnalysis`, `guardSyms`, `guardedWrappers` 1 each (KS-1143); `controlByteGuard` 3 (KS-815, KS-828, KS-1143); `indirect invocation` 0. Controls: `CONT-DEFERRED` returns the two known tickets, a random token returns 0. No other ticket names the limit.
+
+Source: KS-1143 comments b06ccf8f, 82ebd6d5 and e2e8e809, and KS-1316's description, read whole on 2026-11-05; Wednesday's answer of 2026-11-05 on KS-1143 (mail subject "ANSWER: STATUS rulings delivered, KS-1143 (Seat S 22nd)").
+
+Not measured: the walk's behaviour at the current develop (this ticket quotes what KS-1143 and KS-1316 recorded in September, at PRs 1212 and 1248); whether any route in the repo is affected today. No fixture or test was run for this ticket.
+##### KS-2087 OpenAPI examples after PR 782: five checks KS-256 left unchecked, and a LoginRequest example that locks its own account Backlog 2026-11-06T10:29:24.780Z
+**BLUF:** Kam has ruled that KS-256 closes and that its five unchecked items and one lockout finding move to one new ticket on the board account: his card `secuura-ks256-sign-off-or-split-1106` reads status ruled, choice a, "Close it; the five items and the lockout go to one new ticket on our account (recommended)", ruled_ts 2026-11-06T21:04:32+11:00. This is that ticket. PR 782 (squash `a9b63bbd71c8`, merged 2026-09-02T07:23:23Z) delivered the inline examples; the five boxes below were unchecked in KS-256's description when I read it on 2026-11-06, none was re-measured by me, and the lockout comes from a sweep comment of 2026-09-14. This ticket holds them and claims none of them done. Priority High, KS-256's own (priority 2, read at source), carried with the work. Evidence class: READ ONLY of KS-256's description and comments, and of the PRs through the GitHub API; nothing was run.
+
+**The six items**, as KS-256 states them (its description and comments, read 2026-11-06):
+
+1. **Every published example is runnable**: no volatile ids, no `null` standing in for a value. KS-256 says this is no longer gated, because KS-481 is Done and archived (2026-08-12, PR 603) and the branch carried the seeded canonical document it added; "remaining gap is the long tail, not the blocker".
+2. **Schemathesis and Akto pre-merge suites run and green.** The box is unchecked. I read nothing in KS-256 that records such a run for the merged tree.
+3. **api-gateway rebuilt on both targets.** Unchecked. KS-256's comment 8c499846 (2026-11-03T22:59:12Z) carries a deploy record from 2026-11-01 that the tree deployed to Kintsugi at `b1fb543640e7`, marked there as carried and not re-measured. Nothing here says either target carries the examples; the demo is frozen.
+4. **Triage the 26 x 400**, the API rejecting examples the spec publishes. The line, as corrected by the 2026-08-19 review §4: 5 strictly example-fixable (4 placeholders that violate a documented constraint, and 1 example that pins two mutually exclusive fields, `transfer-custody` sending both `newHolderId` and `newHolderEmail`), or 8 if parameter examples count; the rest are not example-fixable (6 `onBehalfOf` connector-only, 2 `TENANT_REQUIRED` persona config, 3 state-dependent). Separately unresolved: `POST /api/webhooks` publishes a URL the API refuses because the host cannot be resolved, and fixing it collides with rule E1's reserved-domain requirement. The five example-fixable 400s already have a home, section 1 of KS-665 (In Progress, board account); they are not re-filed here. The other parts of this item are not in KS-665.
+5. **The verify-spec-examples check is non-deterministic** (2/6/6/10 across four cassettes, as KS-256 states it) and ships ADVISORY. KS-256's line: it needs an accumulated evidence model before it can gate anything.
+6. **The LoginRequest example locks its own account on every sweep.** The spec's inline example for `POST /api/auth/login` (`demo.issuer@example.com` with a placeholder password) is sent about 34 times per run by the examples and coverage phase; the first five consecutive 401s trip the F-06 lockout (5 failures per email and /24, a 15-minute lock). The comment's evidence: auth log "lockout: threshold reached ... count 5", HAR entries 656 to 660 on the run `pre-merge-2026-09-14T12-56-17Z-slot3`, reproduced on every run since; slot 3, from-scratch stack, develop `64c386e04`. It calls the effect harmless (no such account) but five guaranteed failures charged to one key per sweep, and names two options: an RFC 2606 `.invalid` address in the example, or keep it and note it, since it is the one thing in the sweep that exercises the lockout. Source: KS-256's comment a4940bab (2026-09-14T15:33:46). KS-665's comment 9b21b836 points to it. Not re-measured by me.
+
+**NOT measured by me:** any of the six at runtime or on current develop; whether the five example-fixable 400s are still published (KS-665's counts were taken at an older head, and its comment 83cb4cf6 of 2026-09-21 reports the examples-phase 400 set unchanged by a Schemathesis upgrade); the lockout today.
+
+**Carried facts about KS-256:** its parent was KS-770 (Review stream: API contract and the four platform suites); this ticket has no parent, and whether it belongs under KS-770 is the owner's call. PR 568 was closed unmerged; PR 314 (the earlier report change) merged 2026-06-23. KS-256 has no children. Related: KS-256 (closing), KS-665, KS-481, KS-678, KS-188.
+
+**Board search before filing** (2026-11-06, Seat S 32nd, board_search tool, both controls held: the term msgpackr hit KS-1379 among open tickets and a random token hit 0; includeArchived; open candidates checked on title, description and all comments): `verify-spec-examples` 71 candidates, 1 open hit (KS-256); `LoginRequest` 5 candidates, 2 open hits (KS-256, KS-665) and 1 closed (KS-283); `demo.issuer@example.com` 100 candidates, 3 open hits (KS-256, KS-593, KS-665); `locks its own account` 100 candidates, 1 open hit (KS-256); `example-fixable` 88 candidates, 4 open hits (KS-256, KS-591, KS-664, KS-665) and 2 closed; `newHolderEmail` 14 candidates, 5 open hits (KS-256, KS-591, KS-665, KS-1175, KS-1402) and 5 closed; `26 x 400` 101 candidates, 1 open hit (KS-256); `runnable` 29 candidates, 8 open hits, none about example runnability. Read whole: KS-256 and KS-665. KS-665 holds item 4's five example-fixable 400s (and the tsx spec-gate trap and a `userAgent` example, which are not part of this ticket); no ticket holds items 1, 2, 3, 5 or 6.

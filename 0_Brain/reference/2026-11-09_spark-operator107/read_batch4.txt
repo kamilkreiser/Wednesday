@@ -1,0 +1,72 @@
+##### KS-1971 ssrf-guard: for three value classes the DNS-path guard rejects instead of returning its refusal, because the refusal string is built outside the guard Backlog 2026-11-03T16:43:05.263Z
+**BLUF:** In `Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts`, `resolvePublicAddresses` (line 310) reads a failed lookup's message inside a guarded block (lines 325 to 330) but builds the refusal text with the template literal on line 333 (`could not be resolved (${reason})`), outside any guard. For an Error-like value whose `message` is a Symbol, a revoked Proxy, or an object whose `toString` throws, the read succeeds and the template literal then throws, so the function REJECTS instead of returning `{ ok: false, error }`. The rejection reaches `assertResolvedHostPublic` (351), `assertSafeOutboundUrl` (364) and `safeOutboundRequest` (483): 3 classes x 4 functions = 12 cells. Pre-existing: base = head for these classes (before and after the merged KS-1868 pull request 1992, which guards the read but not the template literal). Low: every one of those cells is LESS permissive than the ordinary refusal (nothing allowed, 0 requests built), so this is a robustness gap, not a bypass.
+
+## Measured (gate 176, read from its verdict)
+
+Source: `WEDNESDAY/0_Brain/reference/2026-11-03_gate176-ks1868-pr1992/verdict.md`, finding G176-F2 (LOW, PRE-EXISTING).
+
+* Downstream in originate's `dispatchEvent`, the same 3 classes at DNS abort the dispatch loop (it returns 0 and the later subscribers are not sent): 3 cells. `{message: BigInt}` and a revoked-Proxy message at request construction do the same: 2 cells (the request catch returns a non-string `error`).
+* Line numbers above are mine, read at develop `ea5134d6b98c`.
+
+## Fix shape (not chosen here)
+
+Build the refusal text from a string produced inside the same `try` (coerce the message there), so the template literal cannot throw.
+
+## Not measured
+
+A real DNS lookup; whether any real resolver emits such a value. Related, same class: KS-1904 (six other sites).
+##### KS-1972 event-indexer: isRateLimited reads the thrown value before handleError, so for three value classes poll() rejects or the indexer re-reads one block forever Backlog 2026-11-03T16:43:10.297Z
+**BLUF:** In `Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts`, `isRateLimited(err)` (line 334) reads `err?.status_code` and `err.message` with no guard, and it is called before `handleError` at lines 200, 223 and 326 (the `handleError` calls follow at 210, 232 and 329). For an Error whose `message` getter throws, a revoked Proxy, or a throwing get trap, that read throws first, so the guard in `handleError` is never reached. Pre-existing: base = head for these classes (before and after the merged KS-1868 pull request 1992, which guards `handleError` but not this earlier read). Liveness bug for those classes: with a persistent bad value the indexer retries the same block forever.
+
+## Measured (gate 176, read from its verdict)
+
+Source: `WEDNESDAY/0_Brain/reference/2026-11-03_gate176-ks1868-pr1992/verdict.md`, finding G176-F3 (LOW, PRE-EXISTING; Wednesday called it a liveness bug).
+
+* Site 210: `poll()` REJECTS on every poll at both trees: 6 cells. The production caller is `setInterval(() => void this.poll())`, so this would be an unhandled rejection. That is read, not driven.
+* Sites 232 and 329: the throw reaches `poll`'s catch as a new, readable Error, so `lastProcessedBlock` is NOT advanced and block 11 is re-fetched on every poll: 3 of 3 polls, 12 cells.
+* Default path: `handleError`'s `console.error(error.message)` still throws for the getter class (it is an `instanceof Error`, so it passes through the guard unconverted): 2 more cells (sites 133 and 321, `onError` off).
+* Total: 20 cells where head differs from base-ordinary, all base = head. Line numbers above are mine, read at develop `ea5134d6b98c`.
+
+## Fix shape (not chosen here)
+
+Read the value inside the guard that `handleError` already has (or guard `isRateLimited` itself) so a throwing read counts as "not rate limited" and the block advances.
+
+## Not measured
+
+The real `setInterval` path and real Blockfrost; whether any real client emits such a value.
+##### KS-1973 vc verifier: when the resolver also throws an unreadable value at the issuer-DID lookup, verify() still rejects; the inner Ed25519 catch is unguarded Backlog 2026-11-03T16:43:13.682Z
+**BLUF:** In `Blockchain/Dev/packages/shared/src/vc/verifier.ts`, two catches near the one KS-1868 pull request 1993 guards are still unguarded: `verifyIssuerDID`'s catch builds `Failed to resolve DID ${issuerDID}: ${error}` (line 454 at develop `ea5134d6b98c`; lines 458 to 459 at that pull request's head), and the inner Ed25519 catch (lines 400 to 402) reads `verifyErr instanceof Error ? verifyErr.message : String(verifyErr)`. With one resolver that throws an unreadable value on every call, `verify()` still REJECTS, so the claim "verify() now answers instead of rejecting" holds only when the issuer-DID lookup does not also throw. Pre-existing: base = head. Low: every affected cell fails CLOSED (a rejection or `verified: false`, `signature: false`); none is more permissive than the ordinary-Error outcome.
+
+## Measured (gate 177, read from its verdict)
+
+Source: `WEDNESDAY/0_Brain/reference/2026-11-03_gate177-ks1868-pr1993/verdict.md`, finding G177-F2 (LOW, PRE-EXISTING).
+
+* Issuer-DID lookup (resolver throws on every call): for 7 of the 16 non-ordinary classes (message getter, revoked Proxy, `Object.create(null)`, throwing get trap, thrown Symbol, name getter, throwing toString) `verify()` rejects at both trees.
+* Inner Ed25519 catch: for 5 classes it throws; the outer (guarded) catch then receives the new readable error, and the entry reads `Signature verification error` instead of `Ed25519 verification error`. Same at both trees.
+* 12 cells in all, each failing closed.
+
+## Why one ticket
+
+Both sites are in `verifier.ts`, share the fix shape (coerce the message to a string inside a guard), and one recorder pass over the same value classes proves both. The related non-string-message gap across four files is a separate ticket.
+
+## Not measured
+
+A real resolver or credential stack; the vc-issuer routes were not driven. Related, same class: KS-1904 (six other sites).
+##### KS-1974 An Error instance with a non-string message passes the new guards in the credential verifier, the identus client, the service client and the health dashboard Backlog 2026-11-03T16:43:19.026Z
+**BLUF:** The catches that KS-1868 pull request 1993 guards protect a message read that THROWS. They do not protect a read that RETURNS a non-string. For an Error instance whose `message` is a Symbol, or an object whose `toString` throws, the read succeeds, the guard is passed, and the later use breaks. Pre-existing: base = head, and these classes were outside the 17 the pull request was commissioned for (the gate added them as V18 and V19). Low: every cell fails closed.
+
+## Measured (gate 177, read from its verdict)
+
+Source: `WEDNESDAY/0_Brain/reference/2026-11-03_gate177-ks1868-pr1993/verdict.md`, finding G177-F3 (LOW, PRE-EXISTING, extra classes).
+
+* Credential verifier: the template literal `Signature verification error: ${msg}` sits outside the guard, so `verify()` REJECTS at triggers T1, T2 and T3 (6 cells) and T5 (2 cells), at both trees.
+* `IdentusClient.resolveDID` returns an `errorMessage` of type symbol or object (6 cells); `ServiceClient.healthCheck` returns an `error` of type symbol or object (4 cells); the dashboard entry's `error` is dropped from the JSON (Symbol) or becomes `{}` (8 cells). In all of them `didDocument` stays null, `healthy` stays false and the status stays `down`.
+* It is the gate 175 and 176 F2 shape: the use of the value sits outside the guard. Not that pull request's regression.
+
+## Files
+
+`packages/shared/src/vc/verifier.ts`, `packages/shared/src/prism/identus-client.ts`, `packages/shared/src/resilience/service-client.ts` and `services/api-gateway/src/routes/health-dashboard.ts` (the last three sites are only in the pull request's tree until it merges). Four files, so one test pass does not prove all of it; that is why this is not folded into the verifier-only ticket.
+
+## Not measured
+
+Whether any real client emits such a value. Related, same class: KS-1904 (six other sites).
