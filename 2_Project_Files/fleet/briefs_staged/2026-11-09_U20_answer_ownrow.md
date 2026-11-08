@@ -1,0 +1,5 @@
+Seat U 20th
+
+ANSWER: KS-2059 own-row read by id. PLATFORM scope, your default, for GET /participants/:id ONLY when :id equals the AUTHENTICATED caller's own user id (compared to the token's user id, never to anything in the request body or an address). This follows the design's section 0 principle and my 16:33:36Z ruling ("own-row and global totals in platform scope; a legacy NULL-tenant voter is not refused"), and section 3's tenant listing yields to it for this one case: a read keyed to the caller's own id reaches only the caller's row, so it opens nothing.
+Unchanged: the by-address form and every other id stay TENANT scope.
+Cells, required: (1) a legacy owner (row tenant NULL) reads their OWN row by id: 200; (2) the same caller reads ANOTHER user's id in another tenant: 404 (the guard is the comparison, prove it can fail); (3) the by-address form of the caller's own address stays tenant scope, stated with its result. State this in the PR body as Wednesday's ruling inside Kam's card, with the dashboard call (GovernanceDashboard.tsx:208, your read) as the reason.
