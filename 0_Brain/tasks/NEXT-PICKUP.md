@@ -13,6 +13,15 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+CHECKPOINT 10:4x (the 10:01 successor seat, ctx 71%). READ FIRST with the HOLD below.
+STATE: develop 273de443c30c (PR 2106 squash, verified). FLOOR (all Secuura/Blockchain, one inbox, subject '(Seat <name>)'):
+- B 112th Sonnet merge LAUNCHED 10:39:50 (briefs_staged/2026-11-09_seatB112_merge.md): plan confirmation OWED -> rung 5/6, zoom its pane for ctx. Queue 2109, 2104, 2108, 2110, 2111, 2112, 2113, then 2092 on. GO subject copied from briefs_staged/2026-11-09_B111_go_2106.md.send.out (12-hex).
+- T 20th %127: E1 pushing; E4 RULED (one-clause G6 rewording, briefs_staged/2026-11-09_T20_answer_e4_g6.md); its READYs -> ONE tier-2 batch gate when E1-E4 (+E5-E9 if in) land. fleet_ack 'E4 KS-2138 G6 wording' owed (collector lag).
+- R 90th %124 Opus: GO'd (KS-2141 first; stale ks1560 paragraph fixed in the same commit); READYs -> KS-2141 tier 2, KS-2127/KS-2131/index.ts tier 1 (Opus gates).
+- S 42nd %121: filed KS-2144, KS-2145 (split from KS-1847, pointer posted); now Backlog continuation; post-merge filings as B merges (G273-2109-1, G273-2104-1, G273-2108-3, G274-1, G275-2111-1, G276-1, KS-1536 re-read after 2111).
+- U 20th %76: holding on PR 2099 (acked 10:1x).
+No QUESTION open. Subagents of this seat: none running. Ledger 1 row this seat: regenerate BOTH digests at rotation.
+
 🔴 HOLD (Kam 10:35:01 live board: "I need to take the spark and NAS offline for a little while. please tell me when its safe to do so"): told SAFE at 10:3x (bf-14143a3acac6509e). NO Spark round and NO NAS copy until Kam says they are back. The Spark-clone NAS move (tools/archive_spark_work_20261109_nas.sh, pid 38921) was STOPPED by Wednesday mid first-pass (source intact; resume = re-run --run with the same list; already-moved folders show 0 files at source). Card wed-disk-clone-delete-blocked-by-hook-1108 stays open until the move completes.
 B 111th WRAPPED 0.93 (%118 closed); B 112th brief drafted (briefs_staged/2026-11-09_seatB112_merge.md, UNSTAMPED): read whole, stamp, launch via a copy of fleet/state/b111_waiter.sh. KS-2144 + KS-2145 filed (split from KS-1847, pointer comment posted).
 
