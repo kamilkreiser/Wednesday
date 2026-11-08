@@ -1,0 +1,91 @@
+[
+ {
+  "identifier": "PS-1218",
+  "title": "An admin deleting a user does not end that user's open session \u2014 it still opens My Documents afterwards",
+  "description": "**BLUF.** After an org admin deleted a user, the deleted user's already-open session still reached `/MyDocuments` (`landingFor` returned `app`). The 12 Oct exploratory note said such a session \"can no longer write\"; this check shows it can still open the app.\n\n**Evidence.** Seen while writing `tier_change_session.spec.ts` ([Secuura/platform-s#991](https://linear.app/secuura/review/ps-1171-ps-1194-systemtest-sign-in-sign-up-and-session-admin-clear-two-9bf2f02f0ded)). The agent removed the sub-check from the spec rather than pin it, because proving a refused write needs a document the delete then blocks from cleanup. It is not a test failure on the PR; it is a finding. Not re-checked by hand.\n\n**Related.** [PS-1143](<https://linear.app/secuura/issue/PS-1143>) (a demoted user keeps the old role in a live session) and [PS-1037](<https://linear.app/secuura/issue/PS-1037>) (sign-out does not invalidate the session server-side). It may share a cause with both: the security stamp is only re-checked on Identity's default interval.\n\n**Environment.** develop `3e2ff5cf`, slot 4, 13 Oct 2026.",
+  "state": {
+   "name": "Done"
+  },
+  "labels": {
+   "nodes": [
+    {
+     "name": "Sign-in & session"
+    },
+    {
+     "name": "Security"
+    }
+   ]
+  },
+  "comments": {
+   "nodes": [
+    {
+     "body": "Done (16 Oct 2026 sweep): every PR linked to this ticket is merged into develop, checked against develop at `7cb1a4e`: #1019 (`9d0727e`). A full systemTest run of develop is in progress on slot 2; its results go on PS-1234.",
+     "createdAt": "2026-10-16T04:31:39.031Z"
+    },
+    {
+     "body": "**Round-4 systemTest evidence (slot 2, 14 Oct 2026).**\n- **Run 2** (`0933f89`): 2739 passed / 21 failed / 172 skipped; join-seam 11/11.\n- **No failure is attributed to round 4.** All 21 are accounted for on [#1030](https://github.com/Secuura/platform-s/pull/1030#issuecomment-6165443912).\n- **This ticket's test passed:** `tier_change_session.spec.ts` (a deleted user's open session is refused within the stamp interval).\n- Develop PR [#1030](https://github.com/Secuura/platform-s/pull/1030).",
+     "createdAt": "2026-10-14T09:50:49.315Z"
+    },
+    {
+     "body": "**Same corner on a second path, 13 Oct 2026, 18:13\u201318:15 UTC: self-serve Close organisation** (slot 3, develop `bb92be69`, UI only, throwaway sign-up `orgclose-<5 digits>@example.test` whose named organisation was closed by its sole member).\n\nThe close page promises *\"your own account is deactivated and erased as the last step \u2014 you will be signed out and cannot sign back in\"*, and the browser lands on `/OrganisationClosed`. The same browser then:\n\n| When | Request | Result |\n| -- | -- | -- |\n| +2 s | `/dashboard` | **HTTP 500**, \"An Error Occurred\", header still showing the erased account's email and *ACCOUNT ADMIN* |\n| +2 s | `/MyDocuments` | **HTTP 500** |\n| +2 s | `/register` | **HTTP 200**, the Register page opens for an erased account |\n| +70 s | `/dashboard` | Login \u2713 |\n\nSigning in again is refused (\"Invalid login attempt.\") \u2713. The recipient's link answers *Link Expired* \u2713.\n\nSo the window this ticket describes, inside the one-minute revocation latency of [session-revocation.md](<http://session-revocation.md>), applies to org close as well as an admin delete. On this path the session also reaches Register. I didn't try to upload in that window.\n\n**Suggested addition to the acceptance:** the close action (like the admin delete) ends the closer's session at once rather than at the next stamp check. In the window, any request answers Login or `/OrganisationClosed`, never a 500 and never a working page. **Playwright:** close a throwaway organisation, then immediately `page.goto('/dashboard')` and `page.goto('/register')` in the same context and assert neither renders (fails today). **Control:** at +70 s it is Login (passes today).\n\n**Test classification (systemTest):** `@area-sign-in` \u00b7 `@auth @org` \u00b7 `@regression @role-access` \u00b7 `@role-account-admin` \u00b7 not `@core-smoke`.",
+     "createdAt": "2026-10-13T18:16:17.105Z"
+    },
+    {
+     "body": "**Mostly fixed on `develop` bb92be69, with one corner left (slot 3, 13 Oct 2026 ~16:42 UTC, UI only).** `firstone@lhsg.com` added a User-tier member with a set password; the member signed in from a separate browser and stayed signed in. The admin then deleted them (the dialog requires typing the user's email, a good safeguard).\n\n| Member's open session | Result |\n| -- | -- |\n| +5 s after the delete | `/MyDocuments` \u2192 **HTTP 500** |\n| +70 s after the delete | redirected to `/Identity/Account/Login` \u2713 |\n\nSo the session is ended within the one-minute revalidation (PS-1037). In the window before that, though, the deleted user's requests hit a **server error** rather than a clean sign-out. Checked before posting: no open PR or branch mentions PS-1218.\n\n**Test classification (systemTest):** `@area-sign-in` \u00b7 `@person` \u00b7 `@regression`, `@role-access` \u00b7 actor `@role-account-admin`, target a member created per run \u00b7 not core-smoke. **Acceptance (remaining):** a request from a deleted user's live session is answered with a sign-out (redirect to sign-in, \"your account no longer exists\" or similar), never a 500, immediately and after the revalidation interval.",
+     "createdAt": "2026-10-13T16:44:56.171Z"
+    }
+   ]
+  }
+ },
+ {
+  "identifier": "KS-1218",
+  "title": "Schemathesis: constraints.txt's documented install line skips the pip upgrade setup does, so quality:static reds on the venv's own pip",
+  "description": "**BLUF:** `systemTest/schemathesis/constraints.txt` documents the venv install as `venv/bin/python3 -m pip install -c constraints.txt -e '.[dev]'`. That line never upgrades pip. The harness's own setup does upgrade it first (`scripts/runner/dependencies.py:50-55`). So a venv built by the documented line keeps the host Python's bundled pip, and `run.py quality:static` goes red on pip-audit, flagging the venv's own pip rather than any harness dependency. No fix is in PR-3b; this is filed so it isn't lost.\n\nRefs KS-1211. Found while running the systemTest rule-2 gates for PR-3b (vitest), which changes no Schemathesis file.\n\n## Measured (2026-09-17, throwaway copy of `systemTest/schemathesis` at develop `19f1e5475`, 0 files differing from develop; host Python 3.14.5)\n\n| run | venv built by | pip in venv | `quality:static` | pip-audit |\n| -- | -- | -- | -- | -- |\n| 1 | `pip3 install -c constraints.txt -e '.[dev]'` (the documented line) | 26.1.1 | **rc 1** | red: `pip 26.1.1` PYSEC-2026-196 (fix 26.1.2), PYSEC-2026-3721 (fix 26.2); 0 findings on the pinned harness dependencies |\n| 2 | the same venv after `pip3 install --upgrade pip` (what `dependencies.py:50-55` does) | 26.2.1 | **rc 0** | passed |\n\nIn both runs Ruff format, Ruff lint and MyPy (src, scripts, config) passed. `quality:static` skips both pytest suites by design.\n\n## The two paths, at source (read, not re-run)\n\n* `constraints.txt` \"HOW TO USE\", Install: `venv/bin/python3 -m pip install -c constraints.txt -e '.[dev]'`. No pip upgrade.\n* `scripts/runner/dependencies.py`, which `run.py setup` uses:\n  * Step 2 (`:50-55`) is `pip install --upgrade pip`, run with `check=False`, so a failure there is silent.\n  * Steps 3-4 (`:61`, `:73`) install with `--upgrade` and pass **no** `-c constraints.txt`. Whether setup therefore resolves outside the constraints was not measured here; KS-1002 notes `test_venv_pin_parity` catching a fresh setup that resolved 26 packages below them.\n\n## Fix shape (prose only, for the owner)\n\nEither add the pip upgrade to the documented install line, or pin pip in `constraints.txt` and have both paths install with `-c`. Either way, one path should build the venv the gate measures.\n\nA regression check could build a venv from the documented line in CI-equivalent conditions and assert `quality:static` rc 0.\n\n## Board search before filing (team Secuura-PK, archived issues included, literal match on title, description and comments)\n\n* `constraints.txt`: 4 issues (KS-1169, KS-1016, KS-1002, KS-687) and comments on KS-1169, KS-611, KS-662, KS-684. None is about the install line or pip.\n* `dependencies.py`: KS-672 (canceled, slot targeting) and a comment on KS-666.\n* `pip-audit`: 7 issues and comments on 10. Each mentions pip-audit as a passing gate; none is about the venv's own pip.\n* `upgrade pip`: 0 issues, 0 comments.\n* 1207 issues and 3441 comments were scanned.",
+  "state": {
+   "name": "Backlog"
+  },
+  "labels": {
+   "nodes": [
+    {
+     "name": "systemTest"
+    }
+   ]
+  },
+  "comments": {
+   "nodes": [
+    {
+     "body": "FYI: Schemathesis is updated to **4.30.1** (KS-1476, PR https://github.com/Secuura/Distributed_Secuura/pull/1492, not merged yet), and `constraints.txt` was regenerated by `update-deps` with it: schemathesis 4.30.1, hypothesis 6.169.0, ruff 0.17.0, filelock 4.1.1, platformdirs 4.13.0 (71 packages). The documented install line this ticket is about was not changed.",
+     "createdAt": "2026-10-12T10:01:33.053Z"
+    }
+   ]
+  }
+ },
+ {
+  "identifier": "KS-1982",
+  "title": "api-gateway image crash-loops under NODE_ENV=production: EACCES mkdir 'logs' (the production File transports write to relative logs/, and /app is not writable by USER nodejs)",
+  "description": "## BLUF\n\n* **The api-gateway image does not boot in production mode.** With `NODE_ENV=production` it exits at import with `Error: EACCES: permission denied, mkdir 'logs'` and restarts in a loop.\n* **Cause (code at** `ee1e1b832115`**, byte-identical at develop** `d92b849ece73`**):** in production the logger adds two winston File transports at the relative path `logs/`. The image runs as `USER nodejs` in `/app`, a directory that user cannot write to.\n* **Measured on a disposable local stack at** `ee1e1b832115`**, not on kintsugi.** `NODE_ENV=production` was set by an override on the base compose; the production compose file itself was not run. A writable tmpfs at `/app/logs` (a stack mount, no code change) let the same image boot and serve.\n* **Priority Medium (3).** It is a hard boot failure, but no deployed environment is shown to run this image in production mode. Raise it if one is.\n\n## What ran\n\nSeat W 25th ran this on stack `w25`, 2026-11-04 \\~08:34Z, with throwaway data. The api-gateway container was recreated with `NODE_ENV: production` set by a compose override. It crash-looped. Container output, verbatim (lines 1-5 and 11-16 of the saved file):\n\n```\nError: EACCES: permission denied, mkdir 'logs'\n    at Object.mkdirSync (node:fs:1410:26)\n    at File._createLogDirIfNotExist (/app/node_modules/winston/lib/winston/transports/file.js:791:10)\n    at new File (/app/node_modules/winston/lib/winston/transports/file.js:94:28)\n    at Object.<anonymous> (/app/dist/utils/logger.js:32:21)\n    at Module.require (node:internal/modules/cjs/loader:1674:12) {\n  errno: -13,\n  code: 'EACCES',\n  syscall: 'mkdir',\n  path: 'logs'\n}\n```\n\nThe container was then recreated with a tmpfs at `/app/logs` (mode 1777) added to that override. The production-mode gateway booted and answered 155 requests in the KS-1469/KS-1479 run (307 x31, 404 x122, 429 x2).\n\n## Code (`Blockchain/Dev/`, at `ee1e1b832115`)\n\n* `services/api-gateway/src/utils/logger.ts:30-35`: when `isProduction`, the logger pushes `new winston.transports.File({ filename: 'logs/error.log', ... })` and `new winston.transports.File({ filename: 'logs/combined.log', ... })`. Winston creates the directory at construction time, relative to the cwd.\n* `services/api-gateway/Dockerfile` (99 lines, read whole):\n  * the runtime stage sets `WORKDIR /app` (line 45);\n  * `RUN chmod -R a+rX /app /shared` (line 84) grants read and execute only;\n  * the user `nodejs` (uid 1001) is created at lines 87-88, and `USER nodejs` is set at line 89;\n  * no line makes a `logs` directory or chowns anything to `nodejs`.\n* `docker-compose.production.yml`: the `api-gateway:` block (lines 79-117) sets `NODE_ENV=production` (line 81) and mounts nothing. The whole file has 0 hits for `tmpfs`, `/logs`, `logs:` and `read_only`. The control `NODE_ENV=production` has 22 hits.\n* `docker-compose.yml` (the base the production file overlays): the `api-gateway:` block has one volume, the OpenAPI spec mounted read-only. Its comment says Container Apps production deploys do not use this compose file.\n* Develop: these four files are byte-identical at `d92b849ece73` and `ee1e1b832115`, read in a kept seat clone.\n\n## Why Medium\n\n* The failure is total for anyone who runs the image in production mode without a writable `/app/logs`.\n* No current deployment is shown to do that. Seat U 11th's live check on kintsugi (2026-11-04, at `ee1e1b832115`) read the api-gateway `NODE_ENV=development`; that reading is carried, not re-measured here. The Container Apps estate was deleted on 2026-07-31 (project CLAUDE.md).\n* `docker-compose.production.yml` exists to run the stack in production mode. Whoever first uses it will hit this.\n\n## Related\n\n* **KS-1526** (Done) fixed the *format* of these same File transports (a column of `undefined`). Its description listed as unmeasured whether winston's default `mkdir('logs')` throws EACCES for a non-root user, and whether the File transports write anywhere in the deployed containers. This ticket measures the first: it does throw, and the gateway does not boot.\n* KS-1348 (Done) is the originate half of the format defect. Whether originate's image has the same boot failure was not measured here.\n\n## Board search before filing (team KS, includeArchived)\n\n* Searched title or description, plus comment bodies, for: `EACCES`, `mkdir('logs')`, `/app/logs`, `tmpfs`, `USER nodejs`, `crash-loop`, `crashloop`, `logger.ts`, `not writable`, `read-only file`, `combined.log`.\n* No open ticket covers this.\n* The six open `EACCES` hits (KS-1025, 1152, 1402, 1571, 1686, 1776) are false positives: a case-insensitive `EACCES` matches inside `generateAccessToken` and `authenticateAccessOrConnector`.\n* The only mentions of the boot failure are Seat W 25th's closing comments on KS-1469 and KS-1479 (both Done), which used the tmpfs as a stack workaround.\n\n## Options (not decided here)\n\n1. Create `/app/logs` owned by `nodejs` in the Dockerfile's runtime stage, before `USER nodejs`.\n2. Drop the File transports in containers and keep Console (container logs already capture stdout).\n3. Mount a writable volume or tmpfs at `/app/logs` in `docker-compose.production.yml`.\n\n## Not established here\n\n* Anything about kintsugi's configuration, data, env or network beyond the carried `NODE_ENV` reading above.\n* Whether originate, or any other service image with production File transports, fails the same way.\n\n## Evidence\n\n`5_Project_History/2026-11-04_seatW-25th/evidence/ks1469/`: `prod_boot1_crash.out` (the crash), `o1469_prod.yml` (the override with the tmpfs), `recreate_prod.out`, `recreate_prod2.out`, `steps.jsonl` (the run after the tmpfs). Code extracts: `5_Project_History/2026-11-04_seatW-26th/evidence/item1/`.",
+  "state": {
+   "name": "Backlog"
+  },
+  "labels": {
+   "nodes": []
+  },
+  "comments": {
+   "nodes": []
+  }
+ },
+ {
+  "identifier": "KS-2040",
+  "title": "OpenAPI: connectorId is declared on ApiKeyCreateRequest but not on ApiKey or ApiKeyCreateResponse, which now return it",
+  "description": "**BLUF:** The published OpenAPI schemas `ApiKey` and `ApiKeyCreateResponse` do not declare `connectorId`, although `POST /api/keys` (the 201 body) and `GET /api/keys` (each list row) return it since PR 1319 (KS-908). An integrator reading the spec cannot learn the field exists. Spec only, Low. Evidence class: READ ONLY (parsed from the file at one commit; nothing was run).\n\n**Where (origin develop** `82d9ef03d795`**, read 2026-11-06 with git show on a fresh scratch fetch):**\n\n* `Blockchain/Dev/docs/openapi/secuura-api.yaml`: `ApiKeyCreateRequest` starts at line 9274 and names `connectorId` 3 times (lines 9274 to 9316); `ApiKeyCreateResponse` starts at 9317 and names it 0 times (lines 9317 to 9370); `ApiKey` starts at 9371 and names it 0 times (lines 9371 to 9422, where `ApiKeyListResponse` begins at 9423). The request side is the positive control: the same count over it reads 3, so the count can see the word.\n* The code that returns the field: `Blockchain/Dev/services/security/src/index.ts` line 1539 (the 201 body of POST /api/keys) and line 1613 (each row of GET /api/keys).\n\n**Why a ticket and not a note:** KS-908 closes on its read-back scope, which PR 1319 delivered. KS-908's merge comment already names \"declaring it is a separate follow-up\" and says the response schemas are `.passthrough()`, so the field is tolerated but undocumented. A comment left on KS-908 would go into the archive with it, and nothing else on the board tracks the response side.\n\n**Not covered:** whether the spec generator can emit the field (PR 1319 measured that no spec change was needed for `check:openapi` to pass; it did not try declaring one); the published list body `{keys}` against the handler's `{success,data}` (that drift is KS-1514, a different defect); the Platform S side of the contract.\n\n**Source:** gate 215 (round 1, 2026-11-06), finding F6, re-read at the lines above by Seat S 26th.\n\n**Board search before filing (2026-11-06, Seat S 26th, board_search tool, controls held: a term unique to KS-1379 hit KS-1379 among open tickets, a random token hit 0):** `ApiKeyCreateResponse` returned 1 candidate and 0 literal hits; `connectorId+openapi` returned 36 candidates, open literal hits KS-485, KS-577, KS-772, KS-908, KS-1579 and KS-1696, closed hit KS-1434. KS-1434 (Done) is about the `rotate` field on `ApiKeyCreateRequest`; its text shows the request schema already names `connectorId`. No ticket tracks the response schemas.",
+  "state": {
+   "name": "Backlog"
+  },
+  "labels": {
+   "nodes": []
+  },
+  "comments": {
+   "nodes": []
+  }
+ }
+]
