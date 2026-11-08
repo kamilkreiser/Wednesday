@@ -1,0 +1,38 @@
+## Summary
+
+Wraps all 44 flagged log lines in backend/server.js in logSafe, so a CR/LF value in a request can no longer forge a log line (RD-798, RD-799, RD-800). Nothing deploys from this merge: the deploy switch repository variables are 0. The new tests have four known weaknesses, set out under Known limits and being ticketed.
+
+## What the change does
+
+- backend/server.js differs from main in exactly 44 lines: 38 are a plain wrap and 6 are a design change.
+- The OAuth state-mismatch line (line 3169) now logs only the first 8 characters of the state and of the cookie, as its neighbour already did.
+- Lines 215 and 216 change log form: the array now prints as JSON instead of the console's own array format.
+- The branch adds 119 tests in 3 suites, a shared test helper (log-wrap-shape.js), and one added line in the sandbox of the existing rd477 test so the wrapped function can call logSafe.
+- The committed test counts move from 5369/322 to 5488/325.
+- The branch changes 7 paths.
+
+## What the gate measured right
+
+- All 44 lines are wrapped, and a CR/LF value forges no log line at the head.
+- Characters 9 to 40 of a 40-character state and cookie appear in none of the captured output or log files.
+- Compared base against head, the callback answers (11 of 11) and the chat answers (24 of 24) are equal, and the audit records are equal.
+- All eight findings from the first gate round are closed, among them the clock problem: 40 of 40 shifted clock states and 10 future dates are green.
+- The full verify passes at 5488/325 on the branch head and on the result of merging it with current main.
+
+## Known limits
+
+The second gate round said NO GO, and that round was the cap for this class. Those findings are in the test files, not the product code.
+
+- Major: one of the four masks in the new clock-safe comparison is too wide. The job-line mask (rd798 test, line 436) swallows text placed right before or right after a print job's time in the business-hours report. Three planted test edits (a marker before the time, a marker after it, and the time replaced by "Invalid Date") all passed unnoticed. A narrower date-time-shaped mask, checked offline, catches all three.
+- Minor: the two unusual-activity (190) comparisons pin nothing of the off-hours paragraph within a pinned state.
+- Minor: one comparison (rd798 C-BODY, 12 keys) goes red on a German-locale machine; it is green under the CI shape and on the gate's Mac.
+- Minor: the title of one test (rd799 test, line 272) says "the full state" while it now asserts eight characters.
+- These four findings are being ticketed with the reviewer's cells attached.
+- Hosted CI and CodeQL have not run on this head. Whether the 44 alerts close is read on main's analysis after the merge.
+- Left as they are, outside this change: two alerts in learningManager.js (152, 153), one cache line not driven by two seats (204), a route that answers 500 (POST /api/learning/confirm-clarification), and a session revocation that never runs.
+
+## Deploy
+
+A merge to main starts a Deploy demo run, but its build and deploy jobs skip while CI_DEPLOY_ENABLED is unset. At the gate's final read the repository variables and organization variables were both 0. A standing product-owner ruling also holds every demo deploy until a separate notice-and-button change lands.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
