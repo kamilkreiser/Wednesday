@@ -2796,3 +2796,8 @@ INCLUDED until he says otherwise.
 > yes .  override the limit and continue to 100%.  if you reach it, I will log in with a new account
 
 *Note:* 21:32 grant: 80-90% band lifted to 100% tonight; EXPIRING-GRANTS row added
+
+## 2026-11-09 08:21 — Kam (live board 08:20:54 view=wednesday, verbatim)
+> On Secuura - please archive the done tickets.  2)many of the backlog items should be easy to close or process so please do these when you can
+
+*Note:* routed to a board seat S 41st (archive Done, then Backlog sort)
