@@ -1,0 +1,12 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+@@ -195,7 +195,7 @@
+         const response = await fetch(
+           // KS-745: the security service lists at /api/audit (no /logs route — that hit /api/audit/:id with id "logs" → 404)
+           `${SECURITY_SERVICE_URL}/api/audit?${queryParams.toString()}`,
+-          { method: 'GET', headers, signal: AbortSignal.timeout(AUDIT_LIST_TIMEOUT_MS) },
++          { method: 'GET', headers: entries.length > 0 ? { 'Content-Type': 'application/json' } : headers, signal: AbortSignal.timeout(AUDIT_LIST_TIMEOUT_MS) },
+         );
+ 
+         if (!response.ok) {

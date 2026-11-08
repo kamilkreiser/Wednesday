@@ -1,0 +1,20 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1990-seed-demo-users-success-follows-the-counts.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1990-seed-demo-users-success-follows-the-counts.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1990-seed-demo-users-success-follows-the-counts.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1990-seed-demo-users-success-follows-the-counts.test.ts
+@@ -137,6 +137,16 @@
+     expect(outcome(await seed())).toEqual({ status: 500, body: { success: false, seededUsers: 0, created: 0, alreadyPresent: 13, failed: 1 } });
+   });
+ 
++  it('RED KS-1990 R6: ONE created and 13 failed answers 200 with success false (the boundary: any created row keeps the status at 200)', async () => {
++    let calls = 0;
++    mockExecuteRaw.mockImplementation(async () => {
++      calls++;
++      if (calls === 1) return 1;
++      throw new Error('ks1990 insert failed');
++    });
++    expect(outcome(await seed())).toEqual({ status: 200, body: { success: false, seededUsers: 1, created: 1, alreadyPresent: 0, failed: 13 } });
++  });
++
+   it('control KS-1990 C1: every insert creating a row stays 200 with success true (14 created)', async () => {
+     mockExecuteRaw.mockResolvedValue(1);
+     expect(outcome(await seed())).toEqual({ status: 200, body: { success: true, seededUsers: USERS, created: USERS, alreadyPresent: 0, failed: 0 } });

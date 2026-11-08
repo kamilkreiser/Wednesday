@@ -1,0 +1,12 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -2160,7 +2160,7 @@
+     // failed 14 on a fresh stack) told the operator the seed worked. Now `success` is `failed === 0`; nothing created while something
+     // failed answers 500 with the SAME report fields (KS-1802 pinned a report over a bare 500); a partial run stays 200 with
+     // `success: false`; a healthy run and an already-present-only run are unchanged (200, `success: true`).
+-    const nothingCreatedAndSomethingFailed = created === 0 && failed > 0;
++    const nothingCreatedAndSomethingFailed = created < 2 && failed > 0;
+     res.status(nothingCreatedAndSomethingFailed ? 500 : 200).json({
+       success: failed === 0,
+       seededUsers: created,

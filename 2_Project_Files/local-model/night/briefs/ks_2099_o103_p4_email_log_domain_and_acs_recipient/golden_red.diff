@@ -1,0 +1,21 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/email.ts b/Blockchain/Dev/services/originate/src/services/email.ts
+--- a/Blockchain/Dev/services/originate/src/services/email.ts
++++ b/Blockchain/Dev/services/originate/src/services/email.ts
+@@ -152,7 +152,7 @@
+         plainText: options.text,
+         ...(options.html ? { html: options.html } : {}),
+       },
+-      recipients: { to: [{ address: options.to }] },
++      recipients: { to: [{ address: '' }] },
+     };
+     const poller = await client.beginSend(message);
+     const result = await poller.pollUntilDone();
+@@ -178,7 +178,7 @@
+   // reaches a transport and never appears in a provider's logs.
+   if (!isRecipientAllowed(options.to, RECIPIENT_ALLOWLIST)) {
+     // KS-1937: was `... refusing to send: ${options.to}`; the refused recipient's address is no longer logged.
+-    console.warn(`[Email] Recipient not in EMAIL_RECIPIENT_ALLOWLIST — refusing to send`);
++    console.warn(`[Email] Recipient not in EMAIL_RECIPIENT_ALLOWLIST — refusing to send: ${options.to.split('@')[1]}`);
+     return false;
+   }
+ 

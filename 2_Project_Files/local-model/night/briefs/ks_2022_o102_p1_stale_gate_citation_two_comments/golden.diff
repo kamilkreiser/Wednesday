@@ -1,0 +1,30 @@
+diff --git a/Blockchain/Dev/services/auth/src/auth.openapi.ts b/Blockchain/Dev/services/auth/src/auth.openapi.ts
+--- a/Blockchain/Dev/services/auth/src/auth.openapi.ts
++++ b/Blockchain/Dev/services/auth/src/auth.openapi.ts
+@@ -9,8 +9,9 @@
+ //
+ // `packages/shared/src/openapi/registry.ts:245` states the rule — a consumer MUST
+ // import `z` from '@secuura/shared' so `extendZodWithOpenApi` lands on the same
+-// prototype — and `services/passwordLoginGate.ts:55` imports `z` from 'zod'
+-// directly, so `MFA_CODE_ACCEPTED` is built on an UNEXTENDED zod. The spec
++// prototype — and `services/passwordLoginGate.ts` imported `z` from 'zod'
++// directly (KS-810; it now imports it from '@secuura/shared'), so
++// `MFA_CODE_ACCEPTED` was built on an UNEXTENDED zod. The spec
+ // generator's single CJS resolution happens to unify the two; a vitest run does
+ // not. Filed separately; the fix is one import line with a blast radius across
+ // every schema that file publishes, so it is not being slipped into a follow-up.
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks796-f6-mfa-schema-identity.test.ts
+@@ -115,8 +115,9 @@
+ //
+ // `packages/shared/src/openapi/registry.ts:245` states the rule — consumers MUST
+ // import `z` from '@secuura/shared', so `extendZodWithOpenApi` lands on the same
+-// prototype — and `services/passwordLoginGate.ts:55` imports `z` from 'zod'
+-// directly, so `MFA_CODE_ACCEPTED` is built on an UNEXTENDED zod. The spec
++// prototype — and `services/passwordLoginGate.ts` imported `z` from 'zod'
++// directly (KS-810; it now imports it from '@secuura/shared'), so
++// `MFA_CODE_ACCEPTED` was built on an UNEXTENDED zod. The spec
+ // generator's single CJS resolution happens to unify them; a vitest run does not.
+ // That is a one-line change with a blast radius well past this PR, so it is FILED
+ // rather than slipped in here — and it is the real reason `auth.openapi.ts` sits

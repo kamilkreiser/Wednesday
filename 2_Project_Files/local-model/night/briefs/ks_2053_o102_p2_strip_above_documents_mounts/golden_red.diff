@@ -1,0 +1,19 @@
+diff --git a/Blockchain/Dev/services/originate/src/index.ts b/Blockchain/Dev/services/originate/src/index.ts
+--- a/Blockchain/Dev/services/originate/src/index.ts
++++ b/Blockchain/Dev/services/originate/src/index.ts
+@@ -225,7 +225,6 @@
+ // KS-741: `x-emitter-internal` is originate's OUTBOUND marker to anchoring, never a
+ // legitimate inbound header — stripped on every request, ahead of every router,
+ // so no future `...req.headers` spread can forward a client's value onto that hop.
+-app.use(createEmitterMarkerStrip());
+ 
+ // Multi-tenancy: attach tenant database pool + Prisma-compatible db to each request
+ if (process.env.MULTI_TENANCY_ENABLED === 'true') {
+@@ -279,6 +278,7 @@
+ // every other /api/documents/* route.
+ app.use('/api/documents', publicDocumentsRouter);
+ app.use('/api/documents', documentsRouter);
++app.use(createEmitterMarkerStrip());
+ 
+ // Verification routes
+ app.use('/api/verification', verificationRouter);
