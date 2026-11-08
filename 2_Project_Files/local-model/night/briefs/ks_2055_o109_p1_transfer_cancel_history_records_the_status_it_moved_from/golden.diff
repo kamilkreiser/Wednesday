@@ -1,0 +1,152 @@
+diff --git a/Blockchain/Dev/services/transfer/src/index.ts b/Blockchain/Dev/services/transfer/src/index.ts
+--- a/Blockchain/Dev/services/transfer/src/index.ts
++++ b/Blockchain/Dev/services/transfer/src/index.ts
+@@ -949,7 +949,8 @@
++  const previousStatus = transfer.status; // KS-2055: captured before the assignment below, so the history entry records the real from-status
+   transfer.status = 'cancelled';
+   transfer.updatedAt = new Date();
+   transfer.statusHistory.push({
+-    fromStatus: transfer.status,
++    fromStatus: previousStatus,
+     toStatus: 'cancelled',
+     changedBy: caller.userId, // KS-2038: requireCaller above means no fallback to 'unknown' is left
+     reason: reason || 'Cancelled by user',
+diff --git a/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-history-records-the-status-it-moved-from.test.ts b/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-history-records-the-status-it-moved-from.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-history-records-the-status-it-moved-from.test.ts
+@@ -0,0 +1,134 @@
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import http from 'http';
++import type { AddressInfo } from 'net';
++
++// KS-2055: POST /api/transfers/:id/cancel (src/index.ts) set transfer.status = 'cancelled' BEFORE it built the history entry
++// from transfer.status, so every cancel recorded fromStatus 'cancelled' and toStatus 'cancelled'. These cells cancel a pending
++// transfer through the real router and read the entry back from GET /api/transfers/:id/history. The caller is switched through
++// the stubbed authenticator (the real one is not what this pins). No DATABASE_URL: the in-memory Map is read.
++const who = vi.hoisted(() => ({
++  user: { userId: '', role: 'USER', tenantId: '', email: 'caller@example.test', verificationLevel: 'BASIC' } as Record<string, string>,
++}));
++
++vi.mock('@secuura/shared', async () => {
++  const actual = await vi.importActual<typeof import('@secuura/shared')>('@secuura/shared');
++  return {
++    ...actual,
++    authenticate: () => (req: { user?: unknown }, _res: unknown, next: () => void) => {
++      req.user = { ...who.user };
++      next();
++    },
++    enforceProductionConfig: () => undefined,
++  };
++});
++
++process.env.PORT = '0';
++delete process.env.DATABASE_URL;
++
++const OWNER = '00000000-0000-4000-8000-00000000a001';
++const RECIPIENT = '00000000-0000-4000-8000-00000000a002';
++const INITIATOR = '00000000-0000-4000-8000-00000000a003';
++const TENANT_A = 'a0000000-0000-4000-8000-000000000001';
++
++const asCaller = (userId: string) => {
++  who.user = { userId, tenantId: TENANT_A, role: 'USER', email: 'caller@example.test', verificationLevel: 'BASIC' };
++};
++
++type Entry = { fromStatus: string; toStatus: string; changedBy: string; reason: string };
++
++describe('KS-2055: the cancel door records the status it moved from', () => {
++  let server: http.Server;
++  let baseUrl = '';
++
++  function call(method: string, path: string, body?: unknown): Promise<{ status: number; data: any }> {
++    return new Promise((resolve, reject) => {
++      const url = new URL(path, baseUrl);
++      const r = http.request(
++        { hostname: url.hostname, port: url.port, path: url.pathname + url.search, method, headers: { 'Content-Type': 'application/json' } },
++        (res) => {
++          let raw = '';
++          res.on('data', (c) => (raw += c));
++          res.on('end', () => resolve({ status: res.statusCode || 0, data: raw ? JSON.parse(raw) : undefined }));
++        },
++      );
++      r.on('error', reject);
++      if (body) r.write(JSON.stringify(body));
++      r.end();
++    });
++  }
++
++  async function makeTransfer(over: object = {}): Promise<string> {
++    asCaller(INITIATOR);
++    const res = await call('POST', '/api/transfers', {
++      documentId: `doc-1700000000000-${Math.random().toString(16).slice(2, 10)}`,
++      transferType: 'simple',
++      currentOwnerId: OWNER,
++      newOwnerId: RECIPIENT,
++      documentHash: 'a'.repeat(64),
++      documentTitle: 'KS-2055 cell',
++      documentType: 'certificate',
++      ...over,
++    });
++    expect(res.status).toBe(201);
++    return res.data.data.id as string;
++  }
++
++  const lastEntry = async (id: string): Promise<Entry> => {
++    asCaller(INITIATOR);
++    const res = await call('GET', `/api/transfers/${id}/history`);
++    const history = res.data.data.history as Entry[];
++    return history[history.length - 1];
++  };
++
++  beforeAll(async () => {
++    const mod = await import('../index');
++    await new Promise<void>((resolve) => {
++      server = mod.default.listen(0, '127.0.0.1', () => resolve());
++    });
++    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
++  });
++  afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
++  beforeEach(() => asCaller(INITIATOR));
++
++  it('control ks2055 C1 the initiator cancels a pending transfer: 200, status cancelled, entry ends at cancelled', async () => {
++    const id = await makeTransfer();
++    asCaller(INITIATOR);
++    const res = await call('POST', `/api/transfers/${id}/cancel`, { reason: 'changed my mind' });
++    expect(res.status).toBe(200);
++    expect(res.data.data.status).toBe('cancelled');
++    expect((await lastEntry(id)).toStatus).toBe('cancelled');
++  });
++
++  it('control ks2055 C2 the entry records the signed-in actor and the reason sent', async () => {
++    const id = await makeTransfer();
++    asCaller(INITIATOR);
++    await call('POST', `/api/transfers/${id}/cancel`, { reason: 'changed my mind' });
++    const entry = await lastEntry(id);
++    expect(entry.changedBy).toBe(INITIATOR);
++    expect(entry.reason).toBe('changed my mind');
++  });
++
++  it('control ks2055 C3 a cancel with no reason records the default reason', async () => {
++    const id = await makeTransfer();
++    asCaller(INITIATOR);
++    await call('POST', `/api/transfers/${id}/cancel`, {});
++    expect((await lastEntry(id)).reason).toBe('Cancelled by user');
++  });
++
++  it('RED ks2055 R1 cancelling a pending simple transfer records fromStatus pending_approval', async () => {
++    const id = await makeTransfer();
++    asCaller(INITIATOR);
++    await call('POST', `/api/transfers/${id}/cancel`, { reason: 'R1' });
++    const entry = await lastEntry(id);
++    expect(entry.fromStatus).toBe('pending_approval');
++    expect(entry.toStatus).toBe('cancelled');
++  });
++
++  it('RED ks2055 R2 cancelling a pending sale transfer records fromStatus pending_approval', async () => {
++    const id = await makeTransfer({ transferType: 'sale', saleAmount: 100, saleCurrency: 'USD' });
++    asCaller(INITIATOR);
++    const res = await call('POST', `/api/transfers/${id}/cancel`, { reason: 'R2' });
++    expect(res.status).toBe(200);
++    expect((await lastEntry(id)).fromStatus).toBe('pending_approval');
++  });
++});
