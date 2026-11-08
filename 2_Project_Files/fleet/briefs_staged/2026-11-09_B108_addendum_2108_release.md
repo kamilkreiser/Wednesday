@@ -1,0 +1,3 @@
+Seat B 108th
+
+ADDENDUM: PR 2108 (KS-1973) is RELEASED. The superseding comment on KS-1973 is posted: comment 6db793ad (6db793ad-9e86-4f2e-85f0-c06760719103), 2026-11-08T20:51:59Z, by the board seat; it names 6c16f52b and says SUPERSEDES (G273-2108-1 closed by it). Wednesday read KS-1973 at Linear 07:5x: newest comment 20:51Z, board account. PR 2108 keeps its place in the gate 273 ADDENDUM (last of the four) and its statuses stand; your '## Gate 273 notes' section for it says G273-2108-1 was corrected on the ticket by comment 6db793ad. This supersedes only the 'waits for a Wednesday mail' clause of item 4 in that ADDENDUM.
