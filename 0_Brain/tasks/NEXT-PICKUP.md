@@ -26,7 +26,7 @@ UPDATE, 2026-11-08 20:4x, the 20:2x seat (new account, after the laptop rebooted
 - NEXT GOs: B 98th's READY for PR 2062 first, then 2065, 2063, then A2. Read each READY (first paragraph, heads, tree, rc) and GO with subject 'GO: merge PR N at <12hex head> on develop <12hex pin> (Seat B 98th)', body as 2026-11-07_B97_go_2054.md. Never mail B between a GO and its MERGED.
 - Ledger row written 2026-11-08 (learnings/_ledger.md): regenerate BOTH boot digests at wrap (CLAUDE.md 3b).
 - PR 2076 H2 decision (historic line): see above.
-- Disk: nine merged gate clones (~10 GiB) blocked by the no-rm hook; card wed-disk-clone-delete-blocked-by-hook-1108, default nothing moves. 25 GiB free.
+- DISK MOVE RUNNING (Kam mounted the NAS 21:08; his note 21:05 'create the right Secuura WIP folder and place things in sub folders there'): tools/archive_gate_clones_20261108_nas.sh --run, detached pid 87636, log fleet/state/archive_gate_clones_20261108_nas.log, nine merged-gate clone/ folders -> /Volumes/DEV-Working/Secuura/Blockchain/WIP/2026-11-08_merged-gate-clones/. When the log ends: read FAILS= and df after, tell Kam the GiB freed, rule card wed-disk-clone-delete-blocked-by-hook-1108 with his note (a = move to NAS, by his words) and mark both disk cards --delivered with the NAS manifest path. If FAILS>0 the source of that folder stays: report, do not retry blind. OWED at wrap: PORTABILITY + doctor item for the DEV-Working mount (new machine-local dependency, rule 3a).
 - Spark clone prune (wed-disk-spark-work-clones-prune-1107 = a): NOT run yet; owed.
 - Spark and Ornith idle by Kam's word. Weekend grant ends tonight; board-clearing grant continues (outer read Fri 20 Nov).
 
