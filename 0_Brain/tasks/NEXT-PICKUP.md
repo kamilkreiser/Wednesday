@@ -14,13 +14,13 @@ NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded
 
 ## FIRST WORK
 SHIFT-CHANGE HANDOVER 2026-11-09 05:3x (the 03:5x seat, ctx ~78%). READ FIRST; wins over every block below.
-- OPEN GO: PR 2068 to B 105th (%82) at 1be849a4fc94 on 15dca468b86f, tree 94c30ef25d10 (sent 05:26). NO MAIL TO B UNTIL ITS MERGED. Then: if B's estimate < 60% it sends the batched notes QUESTION for rows 2-4 (2070, 2078, 2071; gate 243; F-2070-1/2, F-2078-1/2, 2071's never-run cells are Wednesday's calls); else it wraps and B 106th is drafted from its HANDOVER. B's statusline is hidden by its 7-line pane: read it by `tmux resize-pane -Z -t %82`, capture, `-Z` again (restore).
+- PR 2068 MERGED 6c9a593df4ab (= develop, Wednesday's ls-remote 05:3x). B 105th at ~61% by its own token count: WRAPPING. On its wrap mail: verify history + HANDOVER, score, pane_close; then B 106th brief from its HANDOVER (Sonnet drafter; copy fleet/state/b105_waiter.sh), first item the batched notes QUESTION for rows 2-4 (2070, 2078, 2071; gate 243; F-2070-1/2, F-2078-1/2, 2071's never-run cells are Wednesday's calls). B's statusline is hidden by its 7-line pane: read it by `tmux resize-pane -Z -t %82`, capture, `-Z` again (restore).
 - GATES: 271 commission WRITTEN, NOT launched (0_Brain/reference/2026-11-09_gate271-tier2-pr2103-ks2107/commission.md): turn it into ONE tier-2 batch for PR 2103 (T KS-2107) + PR 2104 (G KS-1972) + G's KS-1974 PR + T's KS-2117/KS-2121 PRs as READYs land; launch by ~06:30 with what has landed. G rows 3-5 (KS-1971 pushing, KS-1973, KS-2110) = ONE tier-1 gate when all three READYs are in.
 - U 20th %76: KS-2059 green locally, holding on PR 2099's merge (row 18 of B's queue): hours. Its push family corrected (U 18th's new-branch family). Wake acked.
 - T 17th %70: D rows in progress (D1 = PR 2103 READY; D2, D3 next; D4 waits on PR 2102's merge).
 - G 30th %79: row 1 PR 2104 READY; row 2 KS-1974 pushing; row 3 KS-1971 queued (GO'd); rows 4-5 reuse freed worktrees (no third tree: DevMASTER 10.6 GiB).
 - DISK 10.6 GiB on DevMASTER: every seat stops new worktrees at 10. Card wed-disk-16gib-prune-freed-nothing-1109 (default b) gets the new figure on the morning card.
-- MORNING CARD 06:00 owed: counts per project; 2 merges since the last card + 2068 pending; X 9th side-by-side choice; disk; the 7-line pane hides seats' statuslines (cockpit layout is Kam's).
+- MORNING CARD 06:00 owed: counts per project; 3 merges in the overnight window (2069, 2074, 2068); X 9th side-by-side choice; disk; the 7-line pane hides seats' statuslines (cockpit layout is Kam's).
 
 CHECKPOINT 2026-11-09 04:31 (the 03:5x seat, ctx 66%). READ FIRST; wins over every block below. Kam silent since 21:10 (reconcile: to rule 0). Quiet hours to 06:00.
 STATE: develop 15dca468b86f (PR 2074). Merged tonight: 2076, 2082, 2083, 2084, 2086, 2069, 2074.
