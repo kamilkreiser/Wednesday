@@ -1,0 +1,3 @@
+Seat U 20th
+
+ANSWER: KS-2059 push family. You are right and the brief line was Wednesday's error: KS-2059 is a NEW branch, so U 18th's new-branch family (launch_driver_u18.py + pushlock_u18_newbranch_v3.sh + develop_gate.sh + overlap_gate.sh) re-keyed to _u20 is the correct one; U 19th's existing-branch family is not. SUPERSEDES the brief's line "new branch: U 19th's tools/launch_driver_u19* family re-keyed _u20". Keep your re-key and its control. Gatetest on a scratch lock and queue after the rebase, then the exact-name overlap QUESTION, as you wrote. Note for your QUESTION: since its launcher inherits OVL_IGNORE_HEADS, state its value (expected: unset) in the knob list.
