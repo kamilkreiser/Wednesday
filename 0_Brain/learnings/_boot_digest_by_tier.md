@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-09 01:52 from 260 lesson files (1,127,513 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 214. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-09 01:59 from 260 lesson files (1,127,757 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 214. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7707,7 +7707,7 @@ Related: [[2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say]] (
 2. Every checkpoint asks how many disjoint lanes exist and launches them (2026-09-13 rule); the machine and the partition are the limit, the gauge is a guide (2026-10-22).
 3. Close-out seats classify at source, never from a title (2026-09-07 classification rule), and archive leaves before parents (2026-09-18 cascade rule).
 
-**What does NOT change:** the signature classes (production, money, external comms to humans, anything irreversible); the QA gate before every merge; demo stays FROZEN until Kam says otherwise (card `secuura-ks1401-058-merge-demo-billing-1104` = a); tickets on Peter or Stuart stay theirs; the Spark stays off until he lifts his 2026-11-04 16:42 "ignore the spark until further notice".
+**What does NOT change:** the signature classes (production, money, external comms to humans, anything irreversible); the QA gate before every merge; demo stays FROZEN until Kam says otherwise (card `secuura-ks1401-058-merge-demo-billing-1104` = a); tickets on Peter or Stuart stay theirs. **The Spark is ON:** he lifted his 2026-11-04 16:42 "ignore the spark until further notice" on 2026-11-08 20:26 (live board, verbatim): *"please check that the spark is running flash 4 and keep it active as much as possible"* (this line said "stays off" until 2026-11-09 01:5x; corrected per the 11-08 ledger row on the missed instruction).
 
 **Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-10-12_secuura-done-when-tested-works-deployed-and-never-idle]] · [[2026-10-10_merge-and-archive-when-done-and-ready]] · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 

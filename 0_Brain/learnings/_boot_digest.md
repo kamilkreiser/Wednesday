@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-09 01:52 from 260 lesson files (1,127,303 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-09 01:59 from 260 lesson files (1,127,547 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7779,7 +7779,7 @@ Related: [[2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say]] (
 2. Every checkpoint asks how many disjoint lanes exist and launches them (2026-09-13 rule); the machine and the partition are the limit, the gauge is a guide (2026-10-22).
 3. Close-out seats classify at source, never from a title (2026-09-07 classification rule), and archive leaves before parents (2026-09-18 cascade rule).
 
-**What does NOT change:** the signature classes (production, money, external comms to humans, anything irreversible); the QA gate before every merge; demo stays FROZEN until Kam says otherwise (card `secuura-ks1401-058-merge-demo-billing-1104` = a); tickets on Peter or Stuart stay theirs; the Spark stays off until he lifts his 2026-11-04 16:42 "ignore the spark until further notice".
+**What does NOT change:** the signature classes (production, money, external comms to humans, anything irreversible); the QA gate before every merge; demo stays FROZEN until Kam says otherwise (card `secuura-ks1401-058-merge-demo-billing-1104` = a); tickets on Peter or Stuart stay theirs. **The Spark is ON:** he lifted his 2026-11-04 16:42 "ignore the spark until further notice" on 2026-11-08 20:26 (live board, verbatim): *"please check that the spark is running flash 4 and keep it active as much as possible"* (this line said "stays off" until 2026-11-09 01:5x; corrected per the 11-08 ledger row on the missed instruction).
 
 **Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-10-12_secuura-done-when-tested-works-deployed-and-never-idle]] · [[2026-10-10_merge-and-archive-when-done-and-ready]] · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
