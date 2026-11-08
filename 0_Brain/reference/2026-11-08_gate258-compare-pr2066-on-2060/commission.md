@@ -11,3 +11,5 @@ Build the union: squash PR 2066's head onto develop cfb6c1573ba9 in your clone (
 4. The inventory doc: both PRs' rows present and not contradicting each other.
 
 Verdict line 1: COMBINATION OK, COMBINATION OK WITH NOTES, or COMBINATION BROKEN, with the failing cell. Output: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-08_gate258-compare-pr2066-on-2060/verdict.md. Findings only; post nothing.
+
+RE-PIN at relaunch (the 22:4x Wednesday seat): the first run died with the rotation, no verdict written. develop has MOVED to abd044f63a9dd5673f1b9ff7a2b1e42e1c26de82 (PR 2058, KS-1231, merged 11:37Z; Wednesday's ls-remote at 22:43:31 AEDT). Build the union on THAT develop, not on cfb6c1573ba9: squash PR 2066's head baf577c78e7f876551e132e407d0982232622de9 onto abd044f63a9d. B 98th's expected tree c2940eebfc6d was computed on cfb6c1573ba9 and no longer applies: state the tree you get. Also say whether PR 2058's files intersect PR 2066's (one diff --name-only). Everything else above stands. If /private/tmp/g258 exists from the dead run, reuse it (fetch inside it is fine: it is your clone).
