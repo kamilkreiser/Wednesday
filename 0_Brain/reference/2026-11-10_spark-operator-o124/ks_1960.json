@@ -1,0 +1,18 @@
+[
+ {
+  "identifier": "KS-1960",
+  "title": "originate document signing: a sign, sign-cert or sign-wallet request can answer 500 after the signature or signed document is saved, and a retry duplicates it",
+  "description": "**BLUF:** In originate, `POST /api/documents/:id/sign`, `/:id/sign-cert` and `/:id/sign-wallet` can answer 500 after the signature, or the signed derived document, is already saved. A retry then saves a second one. This is pre-existing: it happens the same way for an ordinary Error at base, and pull request 1964 does not cause it. Found by QA gate 149 on PR 1964 (findings G149-F1 and G149-F2).\n\n**What happens** (measured by gate 149: the six real document routes in their own Node process, with an in-memory documents model that rejects AFTER it has applied the write; the identical request is then retried with no fault):\n\n* `POST /:id/sign` (`updateDocument` is the write): the signature is persisted and the status is `signed`, the caller gets 500, and the signing nonce is NOT consumed. A retry with the same body inside the 5-minute nonce window answers 200 and appends a SECOND signature entry (1 signature, then 2).\n* `POST /:id/sign-cert` and `POST /:id/sign-wallet` (`saveDocument` is the write): a derived document with status `signed` is persisted, carrying the sigJson or sigWallet envelope. The caller gets 500 and no `document.versioned` event is published. A retry mints a second derived signed document (derived 1, then 2, one event). For sign-cert the orphaned envelope can be fetched from the public `GET /:id/sig-json` route.\n* `POST /:id/sign/request`: not affected. Its only write is synchronous and nothing is awaited after it; an orphan nonce expires after 5 minutes.\n\n**Same at base:** with an ordinary `Error('Connection terminated unexpectedly')` at base, and with each of six unreadable thrown values at the head of PR 1964, the persisted state and the retry result were identical in all 288 compared cells. At base an unreadable value was worse: the caller got no answer, and so was just as likely to retry.\n\n**Suggested shapes (from the gate, not chosen here):**\n\n* sign: consume the nonce before the write (delete it, write, restore it on a definite pre-commit failure), or make the append idempotent on (signerId, nonce).\n* sign-cert and sign-wallet: an idempotency key, or a deterministic derived id with `conflictMode: 'skip'` keyed on (parent, signature).\n\n**Not tested:** a real PostgreSQL or Prisma client (the documents and lifecycle tables were an in-memory model); a real ambiguous commit (modelled as \"write applied, then reject\"); the real `authenticate()` and the gateway hop; a real Redis event bus; Node 24 (host Node v26.8.1).\n\nRelated: `KS-1831` (the sign route: authorization, revoked status and no signature verified), `KS-1693` (the same sign-cert and sign-wallet routes: no provenance recorded for the derived document).",
+  "priority": 2,
+  "url": "https://linear.app/secuura/issue/KS-1960/originate-document-signing-a-sign-sign-cert-or-sign-wallet-request-can",
+  "state": {
+   "name": "Backlog"
+  },
+  "labels": {
+   "nodes": []
+  },
+  "comments": {
+   "nodes": []
+  }
+ }
+]

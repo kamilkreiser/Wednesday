@@ -1,0 +1,22 @@
+[
+ {
+  "identifier": "KS-1712",
+  "title": "ks1557-verify-trusts-certification-evidence.integration.test.ts: 3 cells go red when TZ=Australia/Sydney (timezone-dependent test or code)",
+  "description": "## BLUF\n\nUnder `TZ=Australia/Sydney`, 3 cells of `Blockchain/Dev/services/originate/src/__tests__/ks1557-verify-trusts-certification-evidence.integration.test.ts` go red (reported by Peter, 2026-10-22). The cause is not yet established: it may be the test (a local-time assumption) or the code under test. Project rule [KS-201](https://linear.app/secuura/issue/KS-201/enforce-utc-for-all-datetime-handling-across-backend-services-and) requires every date to be UTC, so either answer is a defect to fix.\n\n## Related\n\n* [KS-1557](https://linear.app/secuura/issue/KS-1557/security-a-write-role-caller-can-make-another-organisations-bytes): the read-side change (PR 1531) this suite pins.\n* [KS-1474](https://linear.app/secuura/issue/KS-1474/no-gate-executes-the-db-backed-integration-suites-the-default-test-run): no gate runs the DB-backed `*.integration.test.ts` suites, which is why a timezone-dependent red could go unnoticed.\n\n## Not yet measured (filled in by the assignee or on request)\n\n* The names of the 3 red cells.\n* The pass/fail count for the same suite under `TZ=UTC`, to confirm the contrast.\n* Whether the failing assertion is on a date value, a day boundary, or something else.\n\nNo fix is proposed here. Needs a Postgres for the integration suite (`npm run test:integration`).",
+  "priority": 2,
+  "url": "https://linear.app/secuura/issue/KS-1712/ks1557-verify-trusts-certification-evidenceintegrationtestts-3-cells",
+  "state": {
+   "name": "Backlog"
+  },
+  "labels": {
+   "nodes": [
+    {
+     "name": "Bug"
+    }
+   ]
+  },
+  "comments": {
+   "nodes": []
+  }
+ }
+]

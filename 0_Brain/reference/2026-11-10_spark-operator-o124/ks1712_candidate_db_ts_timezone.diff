@@ -1,0 +1,13 @@
+diff --git a/Blockchain/Dev/services/originate/src/db.ts b/Blockchain/Dev/services/originate/src/db.ts
+index 8266b4c2f..20b05c291 100644
+--- a/Blockchain/Dev/services/originate/src/db.ts
++++ b/Blockchain/Dev/services/originate/src/db.ts
+@@ -139,7 +139,7 @@ function getPrismaClient() {
+     // goes through a driver adapter instead (rust-free client).
+     const { PrismaPg } = require('@prisma/adapter-pg');
+     prismaClient = new PrismaClient({
+-      adapter: new PrismaPg({ connectionString: config.databaseUrl }),
++      adapter: new PrismaPg({ connectionString: config.databaseUrl, options: '-c TimeZone=UTC' }),
+       log: config.nodeEnv === 'development'
+         ? [{ level: 'error', emit: 'stdout' }, { level: 'warn', emit: 'stdout' }]
+         : [{ level: 'error', emit: 'stdout' }],
