@@ -193,3 +193,5 @@
 # 2026-11-09 18:1x (Spark operator o118): KS-2153 fragments (doc_only) and KS-2138 items 3+4 (test_only_bash, rung up). Each lint rc 0, dry-run rc 0, CONTROL-PASS golden BYTE-IDENTICAL at develop e8d23ce366e2.
 # 2026-11-09 21:3x (operator o120, for the 18:46 Wednesday seat): KS-716 item 2 only, doc_only, dry-run rc 0, control CONTROL-PASS byte-identical at d0b4825cc244.
 # 2026-11-09 21:3x (operator o120): KS-1413 carve (start-local.sh lines 280/286 + 3 cells), bash_patch2, credential-print surface = fully spelled-out edit, tier-1 gate owed; dry-run rc 0, control CONTROL-PASS golden byte-identical at d0b4825cc244.
+# 2026-11-10 00:4x (Wednesday spark operator o123): KS-1516 option a (Kam 2026-11-02), rung 3 code_patch2, dry-run rc 0 + control PASS 7/7 golden byte-identical. TIER 1 gate owed.
+# 2026-11-10 03:4x (Wednesday spark operator o125): KS-1952 option a (route site, verification.ts), KS-1855 half one (admin.ts) and half two (verification.ts); each dry-run rc 0 + control PASS golden BYTE-IDENTICAL at d0b4825cc244. TIER 1 gates owed. KS-2103 NOT briefed: confirmation.ts, provider.ts and anchorSubmission.ts are all in open PR 2081.
