@@ -61,7 +61,7 @@ r = run("--pr-body-file", os.path.join(tmp, "body.md"), "--dry-run", out="dry")
 pu = open(os.path.join(tmp, "dry", "prompt_user.txt")).read()
 arm(5, r.returncode == 0 and "MARKER_9f3a" in pu and "(not provided)" not in pu.split("PR DESCRIPTION")[1][:40], "--pr-body-file text appears under PR DESCRIPTION")
 r = run("--dry-run", out="dry2"); pu2 = open(os.path.join(tmp, "dry2", "prompt_user.txt")).read()
-arm("5b", "MARKER_9f3a" not in pu2 and "PR DESCRIPTION =====\n(not provided)" in pu2, "without the flag the prompt says (not provided)")
+arm("5b", "MARKER_9f3a" not in pu2 and "PR DESCRIPTION =====\nMISSING: PR body" in pu2, "without the flag the prompt says MISSING: PR body (was '(not provided)' before 2026-11-09)")
 
 # 4: looping first reply
 r = run("--max-tokens", "8000", out="loop"); rj = json.load(open(os.path.join(tmp, "loop", "review.json")))

@@ -21,4 +21,10 @@ bash "$G" "$REPO" 1687 "$HEADOK" develop systemTest/schemathesis/tests/unit/supp
 printf '<testsuites><testsuite tests="0"></testsuite></testsuites>' > "$SCR/empty_$$.xml"
 python3 "$HERE/../gate_facts.py" junit "$SCR/empty_$$.xml" "$SCR/empty_$$.json" < /dev/null; rc=$?
 [ $rc -eq 4 ] && echo "ARM3 PASS: 0-test report refused (exit 4)" || { echo "ARM3 FAIL: exit $rc"; fail=1; }
+# Arms 4-5 (2026-11-09, PR 2127): a base that gives an empty merge-base or a 0-file diff REFUSES (exit 6); it never runs a base suite on nothing.
+H2127=190ffa868d7d9abac61401d84d654944c042cfc7; T2127=Blockchain/Dev/scripts/__tests__/check_slot_credentials.test.sh
+bash "$G" "$REPO" 2127 "$H2127" "$H2127" "$T2127" --work "$SCR/arm4_$$" < /dev/null; rc=$?
+[ $rc -eq 6 ] && echo "ARM4 PASS: base == head (0-file diff) refused (exit 6)" || { echo "ARM4 FAIL: exit $rc"; fail=1; }
+bash "$G" "$REPO" 2127 "$H2127" no-such-branch-1109 "$T2127" --work "$SCR/arm5_$$" < /dev/null; rc=$?
+[ $rc -eq 5 ] && echo "ARM5 PASS: unresolvable base refused (exit 5)" || { echo "ARM5 FAIL: exit $rc"; fail=1; }
 exit $fail

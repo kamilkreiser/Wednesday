@@ -2,7 +2,10 @@
 """spark_review.py — the LLM half of the Spark gate. ONE request to the local Spark, strict JSON back.
 
 usage: spark_review.py --repo CLONE --head-sha SHA --facts facts.json --diff diff.patch --ticket KS-1719 \
-                       [--comment draft.md] [--pr-body-file file] [--dry-run] --out DIR [--linear-env /path/.env]
+                       [--ticket-file file] [--comment draft.md] [--pr-body-file file] [--dry-run] --out DIR [--linear-env /path/.env]
+Inputs (2026-11-09): --ticket-file / --pr-body-file take PRE-FETCHED text so no real .env is read here. --linear-env is no
+longer defaulted: the tool reads a .env only when you pass one. A needed input that is absent/empty/"MISSING" is NEVER skipped
+silently: "MISSING: <input>" goes into the prompt section, facts["missing_inputs"], stderr, meta and review.json.
 Needs the deterministic half's outputs (facts.json, diff.patch). Python 3 stdlib only. SPARK_THINK=0 by default.
 
 Client: spark_call.py (lib/) is NOT reused: it is bound to the coding-task contract (it injects the kit's 'produce a diff'
@@ -28,7 +31,20 @@ def git(repo, *a):
     return subprocess.run(["git", "-C", repo, *a], capture_output=True, text=True).stdout
 
 
+def read_input(path, name):
+    """Text of a pre-fetched input file, or "MISSING: <name>" when absent, unreadable, empty or itself marked MISSING."""
+    if not path:
+        return f"MISSING: {name}"
+    try:
+        t = open(path).read()
+    except OSError:
+        return f"MISSING: {name}"
+    return t if t.strip() and not t.strip().upper().startswith("MISSING") else f"MISSING: {name}"
+
+
 def ticket_text(ident, envfile):
+    if not envfile:
+        return "MISSING: ticket text"
     key = None
     try:
         for l in open(envfile):
@@ -37,7 +53,7 @@ def ticket_text(ident, envfile):
     except OSError:
         pass
     if not key:
-        return f"(ticket {ident}: no LINEAR_API_KEY found; ticket text unavailable)"
+        return f"MISSING: ticket text ({ident}: no LINEAR_API_KEY found in the env file given)"
     team, num = ident.split("-")
     q = {"query": "query($t:String!,$n:Float!){issues(filter:{team:{key:{eq:$t}},number:{eq:$n}}){nodes{identifier title description state{name} comments{nodes{body user{name} createdAt}}}}}",
          "variables": {"t": team, "n": float(num)}}
@@ -47,7 +63,7 @@ def ticket_text(ident, envfile):
         d = json.load(urllib.request.urlopen(req, timeout=60))
         n = d["data"]["issues"]["nodes"][0]
     except Exception as e:  # never echo the key
-        return f"(ticket {ident}: fetch failed: {type(e).__name__})"
+        return f"MISSING: ticket text ({ident}: fetch failed: {type(e).__name__})"
     cm = "\n".join(f"- [{c['createdAt']}] {c['user']['name'] if c.get('user') else '?'}: {c['body']}" for c in n["comments"]["nodes"])
     # Ticket COMMENTS are excluded by default: in a calibration replay they include comments posted AFTER the round under test.
     return f"{n['identifier']} — {n['title']} [{n['state']['name']}]\n\n{n['description']}" + (f"\n\nCOMMENTS:\n{cm}" if os.environ.get("GATE_TICKET_COMMENTS") == "1" else "")
@@ -85,6 +101,21 @@ def wait_for_box():
 
 def _norm(x):
     return re.sub(r"\s+", " ", x.lower()).strip()
+
+
+def _qnorm(s, corpus=False):
+    """Evidence-quote comparison form (2026-11-09): line-number prefixes (corpus), comment/diff markers at line starts, HTML tags
+    and backticks removed, then ALL whitespace removed, so a quote that wraps across lines or crosses markup still matches."""
+    if corpus: s = re.sub(r"(?m)^\d+: ", "", s)
+    s = re.sub(r"(?m)^\s*[+-]?\s*(#|//|\*|<!--)\s?", "", s)
+    s = re.sub(r"<[^>]+>", "", s).replace("`", "")
+    return re.sub(r"\s+", "", s)
+
+
+def quote_found(x, corpus_norm):
+    """True iff every ellipsis-separated segment of the quote occurs in the normalised corpus. A paraphrase or fabrication stays False."""
+    segs = [_qnorm(p) for p in re.split(r"\.\.\.|\u2026", x)]
+    return all(sg == "" or sg in corpus_norm for sg in segs) and any(segs)
 
 
 def detect_repetition(text, claim_n=3, gram_n=4, gram_len=12):
@@ -182,17 +213,46 @@ def validate(o):
     return errs
 
 
+def salvage(raw_texts):
+    """Both attempts failed (looping / unparseable). Recover the complete finding objects that DID parse before the loop, de-duplicate,
+    validate, and derive the verdict from the severities (NO GO iff a Major, GO WITH NOTES iff any finding, else GO) per the checklist.
+    Returns a review dict or None. The caller marks it salvaged in meta; it is a partial result, never a clean one."""
+    best = None
+    for t in raw_texts:
+        i = t.find('"findings"')
+        j = t.find("[", i) if i >= 0 else -1
+        if j < 0: continue
+        dec, pos, items = json.JSONDecoder(), j + 1, []
+        while True:
+            m = re.compile(r"[\s,]*").match(t, pos); pos = m.end()
+            if pos >= len(t) or t[pos] != "{": break
+            try: obj, pos = dec.raw_decode(t, pos)
+            except ValueError: break
+            items.append(obj)
+        o = {"findings": items, "comment_sentences_overstated": [], "verdict": "GO"}
+        dedupe_findings(o)
+        o["findings"] = [f for f in o["findings"] if isinstance(f, dict) and f.get("severity") in SEV and all(isinstance(f.get(k), str) and f[k].strip() for k in ("claim", "evidence", "test_or_reason"))]
+        sev = {f["severity"] for f in o["findings"]}
+        o["verdict"] = "NO GO" if "Major" in sev else ("GO WITH NOTES" if sev else "GO")
+        if not validate(o) and o["findings"] and (best is None or len(o["findings"]) > len(best["findings"])): best = o
+    return best
+
+
 def main():
     ap = argparse.ArgumentParser()
-    for a in ("repo", "head-sha", "facts", "diff", "ticket", "out"): ap.add_argument("--" + a, required=True)
+    for a in ("repo", "head-sha", "facts", "diff", "out"): ap.add_argument("--" + a, required=True)
+    ap.add_argument("--ticket", default=""); ap.add_argument("--ticket-file")
     ap.add_argument("--comment"); ap.add_argument("--pr-body", "--pr-body-file", dest="pr_body"); ap.add_argument("--dry-run", action="store_true"); ap.add_argument("--max-tokens", type=int, default=8000)
-    ap.add_argument("--linear-env", default="/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env")
+    ap.add_argument("--linear-env", default=None)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     facts = json.load(open(a.facts)); diff = open(a.diff).read()
     comment = open(a.comment).read() if a.comment else ""
-    prbody = open(a.pr_body).read() if a.pr_body else ""
-    tk = ticket_text(a.ticket, a.linear_env)
+    prbody = read_input(a.pr_body, "PR body")
+    tk = read_input(a.ticket_file, "ticket text") if a.ticket_file else (ticket_text(a.ticket, a.linear_env) if a.ticket and a.linear_env else "MISSING: ticket text")
+    missing = [n for n, v in (("ticket text", tk), ("PR body", prbody)) if v.startswith("MISSING")]
+    facts["missing_inputs"] = missing
+    for n in missing: print(f"spark_review: MISSING: {n}", file=sys.stderr, flush=True)
     files = []
     for t in facts["touched_files"]:
         if t["status"].startswith("D"): continue
@@ -202,10 +262,16 @@ def main():
             files.append(f"### FILE AT HEAD: {t['path']}\n(OMITTED: {len(text)} chars is over the {MAX_FILE_CHARS} cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)")
             continue
         files.append(f"### FILE AT HEAD: {t['path']}\n" + "\n".join(f"{i}: {l}" for i, l in enumerate(text.splitlines(), 1)))
+    sib = []
+    for it in (facts.get("template_siblings") or {}).get("included", []):
+        tx = git(a.repo, "show", f"{a.head_sha}:{it['path']}").splitlines()
+        sib.append(f"### SHIPPED TEMPLATE: {it['path']} (the shipped form of `{it['template_of']}`, read by {it['read_by']}; {len(tx)} lines" + (", first 400 shown" if len(tx) > 400 else "") + ")\n"
+                   + "\n".join(f"{i}: {l}" for i, l in enumerate(tx[:400], 1)))
     cites = cited_lines(a.repo, a.head_sha, comment, prbody, diff)
     sections = [("TICKET", tk), ("DIFF (merge-base..head)", diff), ("TOUCHED FILES, FULL TEXT AT HEAD (line-numbered)", "\n\n".join(files)),
                 ("SOURCE LINES CITED BY THE PR / COMMENT (line-numbered)", cites),
-                ("PR DESCRIPTION", prbody or "(not provided)"), ("DRAFTED CLIENT COMMENT", comment or "(none)"),
+                ("SHIPPED TEMPLATE / EXAMPLE FILES OF FILES THE TOUCHED CODE READS OR SOURCES (not in the diff)", "\n\n".join(sib) or "(none found)"),
+                ("PR DESCRIPTION", prbody), ("DRAFTED CLIENT COMMENT", comment or "(none)"),
                 ("facts.json (deterministic runner output)", json.dumps(facts, indent=1))]
     user = "\n\n".join(f"===== {n} =====\n{b}" for n, b in sections)
     json.dump({n: len(b) for n, b in sections}, open(os.path.join(a.out, "prompt_sections_chars.json"), "w"), indent=1)
@@ -239,14 +305,19 @@ def main():
         hint = ANTI + (" Schema problems last time: " + "; ".join(e for e in errs if not e.startswith("repetition"))[:400] if any(not e.startswith("repetition") for e in errs) else "")
         msgs = base_msgs + [{"role": "user", "content": hint}]
         cap = min(cap, 4000)
+    salvaged = False
+    if not result:
+        result = salvage([open(os.path.join(a.out, f"raw_attempt{x['attempt']}.txt")).read() for x in attempts])
+        salvaged = result is not None
     if result:  # deterministic evidence check: does every backticked/quoted fragment appear in the material given?
-        corpus = user
+        corpus = _qnorm(user, True)
         for f in result["findings"]:
             q = re.findall(r"`([^`]{6,})`", f["evidence"]) or re.findall(r'"([^"]{6,})"', f["evidence"])
-            f["evidence_quote_found_in_input"] = bool(q) and all(x.strip() in corpus for x in q)
-    meta = {"attempts": attempts, "prompt_tokens": tot_pt, "completion_tokens": tot_ct, "seconds": round(tot_s, 1), "think": THINK, "valid": result is not None, "duplicate_findings_removed": dups}
+            f["evidence_quote_found_in_input"] = bool(q) and all(quote_found(x, corpus) for x in q)
+    meta = {"missing_inputs": missing, "attempts": attempts, "prompt_tokens": tot_pt, "completion_tokens": tot_ct, "seconds": round(tot_s, 1), "think": THINK, "valid": result is not None, "salvaged_partial": salvaged, "duplicate_findings_removed": dups}
     json.dump({"meta": meta, "review": result}, open(os.path.join(a.out, "review.json"), "w"), indent=1)
     print(json.dumps(meta)); print(json.dumps(result, indent=1) if result else "SCHEMA FAILURE x2")
+    if salvaged: print("spark_review: SALVAGED PARTIAL result (both attempts failed; findings recovered before the loop, verdict derived from severities)", file=sys.stderr)
     return 0 if result else 4
 
 

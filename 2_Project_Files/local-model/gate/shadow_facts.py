@@ -24,10 +24,18 @@ def sh(cmd, cwd=None, t=900):
 g = lambda *a: subprocess.run(["git", "-C", wt, *a], capture_output=True, text=True).stdout
 T0 = time.time()
 tip = subprocess.run(["git","-C",src,"ls-remote","origin",f"refs/pull/{pr}/head"],capture_output=True,text=True).stdout.split()[0]
-mb = g("merge-base", head, f"origin/{bref}").strip()
+# bref: a resolved sha (what spark_gate.sh passes since 2026-11-09), else origin/<name> (leading "origin/" tolerated), else <name>.
+_n = bref[7:] if bref.startswith("origin/") else bref
+_c = [bref] if re.fullmatch(r"[0-9a-f]{40}", bref) else [f"refs/remotes/origin/{_n}", _n]
+mb = ""
+for _r in _c:
+    mb = g("merge-base", head, _r).strip()
+    if mb: break
+if not mb: sys.exit(f"shadow_facts: REFUSE: empty merge-base for head {head} and base {bref} (tried {_c}) - not running a base suite on nothing")
 ns = [l.split("\t") for l in g("diff","--name-status",mb,head).splitlines()]
 nu = {l.split("\t")[2]:l.split("\t")[:2] for l in g("diff","--numstat",mb,head).splitlines()}
 open(f"{out}/diff.patch","w").write(g("diff",mb,head))
+if not ns: sys.exit(f"shadow_facts: REFUSE: 0-file diff between merge-base {mb} and head {head} (base {bref}) - not running a base suite on nothing")
 touched=[{"status":s[0],"path":s[-1],"added":nu.get(s[-1],["?","?"])[0],"deleted":nu.get(s[-1],["?","?"])[1]} for s in ns]
 is_test=lambda p: bool(re.search(r"(__tests__/|\.test\.(ts|tsx|sh)$|/tests?/)",p))
 tests=explicit_tests or [t["path"] for t in touched if is_test(t["path"]) and t["status"][0]!="D"]

@@ -28,11 +28,18 @@ C. TESTS
       ImportError / NameError for a symbol the PR introduces)? Absence-reds prove the symbol is new, not that old behaviour is wrong.
    8. Is the test double / fake faithful to the real service per the cited source lines? Name where it is more permissive or
       differently ordered than the real thing.
+   8b. If the change reads, sources or parses a file at runtime (a .env, a config, a template), find the SHIPPED template or example of
+      that file in the repo (the section "SHIPPED TEMPLATE / EXAMPLE FILES ..." and facts.json "template_siblings" name it; if it is
+      "(none found)" and the code reads such a file, say so as a Note) and check the new code can process it as shipped. Quote the
+      template line that the code would choke on, or say the template was processed cleanly. A test that feeds only minimal
+      hand-made fixtures cannot see this: name that gap.
    9. Compare facts.json unit_suite_before/after and unit_new_failures_vs_base. Any new failure, or a count that does not add up
       to the number of tests the PR adds, is a finding.
 
 D. TICKET ACCEPTANCE
    10. List each acceptance line in the ticket as MET / NOT MET / MET OFFLINE ONLY, with the file:line that shows it.
+      If the TICKET section starts with "MISSING:", do not guess acceptance lines: raise ONE Note saying acceptance was not assessed
+      because the ticket text was missing.
 
 E. DRAFT COMMENT AND PR DESCRIPTION (skip each that was not provided)
    11. Go sentence by sentence. A sentence is OVERSTATED if it states as fact something that is unmeasured, says "fixes"/"proves"
@@ -40,7 +47,7 @@ E. DRAFT COMMENT AND PR DESCRIPTION (skip each that was not provided)
       example a cause stated as fact next to a "not measured" paragraph). List each overstated sentence verbatim with why.
       If a PR DESCRIPTION is provided (not "(not provided)"), apply exactly the same test to ITS sentences and list the overstated
       ones in the same array, prefixing the "sentence" with "[PR body] ". A PR description that says "fixes"/"proves"/"all" without a
-      run in facts.json that shows it is overstated. If it is "(not provided)", say nothing about it.
+      run in facts.json that shows it is overstated. If it is "(not provided)", say nothing about it. If it starts with "MISSING:", raise ONE Note saying the PR description was missing and E was not applied to it.
    12. Is anything material MISSING from the comment that the reader needs (e.g. a behaviour change in what the code can now delete)?
 
 F. HYGIENE
