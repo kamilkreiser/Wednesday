@@ -13,6 +13,17 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+CHECKPOINT 13:0x (the 11:4x successor seat, ctx 65%). READ FIRST; wins over every block below. HOLD unchanged (Spark + NAS OFF until Kam says back; Kam silent since 10:35).
+- develop e028786a0921 (PR 2108 squash). Merged this seat: PR 2104, PR 2108.
+- B 115th Sonnet LAUNCHED 13:02:54 (pane %142, briefs_staged/2026-11-09_seatB115_merge.md): plan confirmation OWED -> rung 5/6, zoom %142, ANSWER (model briefs_staged/2026-11-09_B114_answer_plan.md). Queue 2110, 2111, 2112, 2113, 2114, 2115, then 2092 on. GO model briefs_staged/2026-11-09_B114_go_2108.md. B 113th 0.93 and B 114th 0.94 wrapped, panes closed.
+- S 43rd Sonnet %139: plan ANSWERED 13:03 (both wakes armed: merge waiter pid 80802 + mail watcher 81211). Filing G273-2108-3 now, then the rest as PRs merge; batch 5 then 6. S 42nd 0.92 wrapped, closed.
+- GATE 279 tier-2 batch RUNNING (Sonnet subagent, dies at rotation; relaunch from 0_Brain/reference/2026-11-09_gate279-tier2-pr2116-2117-2119/commission.md if verdict.md absent): PRs 2116, 2117, 2119 (T 20th E2-E4). GO/GWN -> ADDENDUM rows to B 115th; NO GO -> T's successor round 1 of 2.
+- GATE 278 DONE GWN on PR 2118 (KS-2127): R 90th fix round ruled (G278-1 refusal shows cause, G278-2 fragment text, G278-3 st_all cell), round 2 of 2 -> narrow tier-1 compare gate on the delta (gate 280).
+- R 90th %124 ctx 65%: told to finish KS-2131 push + READY (-> tier-1 gate), then the KS-2127 fix round + READY, then WRAP; item 4 (index.ts, branch feature/ks-2109-gateway-index-tenant-override-comment approved) goes to R 91st via its HANDOVER.
+- T 20th %127 ctx 67%: E5 KS-2129 pushing; WRAPS after E5's READY -> T 21st from its HANDOVER (E6-E9 held Spark READYs, D4 after PR 2102).
+- U 20th %76: holding on PR 2099.
+- Ledger this seat: 2 rows (R 90th 'test file only'; S 42nd wait-without-wake). Regenerate BOTH digests at rotation.
+
 CHECKPOINT 12:1x (the 11:4x successor seat, ctx 53%). READ FIRST; wins over every block below. HOLD unchanged (Spark + NAS OFF until Kam says back; Kam silent since 10:35).
 - develop b9fd80eee85b (PR 2104 squash, KS-1972; Wednesday's ls-remote). Merged this seat: PR 2104.
 - B 113th WRAPPED 0.93, %133 closed. B 114th Sonnet LAUNCHED 12:13:29 (pane %136, brief briefs_staged/2026-11-09_seatB114_merge.md): plan confirmation OWED -> rung 5/6, zoom %136 for ctx, ANSWER (model briefs_staged/2026-11-09_B113_answer_plan.md). Queue 2108, 2110, 2111, 2112, 2113, 2114, 2115, then 2092 on. GO model briefs_staged/2026-11-09_B113_go_2104.md (12-hex subject).
