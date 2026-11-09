@@ -64250,14 +64250,84 @@
   ],
   "recommended": "a",
   "ts": "2026-11-09T16:22:27.068244+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-09T17:21:17.685707+11:00",
   "prior_rulings_overridden": [
    "2026-09-10 09:01",
    "2026-09-10 09:08",
    "2026-09-10 09:08",
    "CARD secuura-ks1688-org-merge-edge-which-side-1020"
+  ]
+ },
+ {
+  "id": "secuura-ks619-platform-admin-login-no-marker-1109",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-619: refusing tenantless tokens would lock out platform-admin logins. Split the PR, or accept the narrowing?",
+  "bluf": "One tap. (Prior-rulings gate matched cards and messages on the words 'admin' and 'platform'; none is about this. It refines your 31-decision card row A4, 'refuse a token with no tenant except platform-admin roles'.) PR 2128 does KS-1208 and KS-619 together. The Opus gate passed it but found: the platform-admin login issues roles platform_admin, platform_viewer, and 'admin' on Azure, all with no tenant, so the PR would 401 them on every route (measured in-process). The seat then read the auth service at develop: that login sets no marker of its own (same claims, same key, no issuer), so the exception you ruled cannot be told apart from an ordinary tenantless token without changing how tokens are issued. How many such platform_admins rows exist on the boxes is unmeasured.",
+  "default_action": "After 48 h: PR 2128 stays held and nothing deploys; Wednesday re-raises it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Split",
+    "detail": "ship KS-1208 now, KS-619 waits for a marker:PR 2128 keeps only the user-id and role guard (no lockout). KS-619 becomes its own ticket: the platform-admin login stamps one claim and the gateway excepts it. Two services, tier 1; platform admins re-login once after it deploys."
+   },
+   {
+    "key": "b",
+    "label": "Ship both, narrowed, after a count",
+    "detail": "Merge as is (only super admin and system admin excepted), stated plainly. Before it deploys anywhere, a read-only count of platform_admins roles per box; if any other role exists, the deploy holds and the marker in (a) is built first."
+   },
+   {
+    "key": "c",
+    "label": "Ship both, narrowed, no count",
+    "detail": "Merge as is and accept that any other platform-admin role is locked out."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-09T16:44:31.040140+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-09T17:21:14.410656+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-26 17:11",
+   "2026-09-09 17:52",
+   "2026-09-13 16:55",
+   "2026-09-14 14:53",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-f5-login-limiter-bypass",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-archive-fifteen-platform-s-tickets",
+   "CARD secuura-platform-s-count-was-wrong-when-you-ruled",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-880-merge-kam-platform-s-cutover",
+   "CARD secuura-oauth-refresh-window-iat-cutoff-or-marker",
+   "CARD secuura-ks953-shared-pins-anchor-by-marker",
+   "CARD secuura-ks1011-stack-marker-unknown-on-restore",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-ks1359-platform-audit-log-bounds",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013",
+   "CARD secuura-m365-admin-setup-for-customer-org-1020",
+   "CARD secuura-ks1688-ask-stuart-platform-s-version-1020",
+   "CARD secuura-platform-admin-spelling-certification-reads-1020",
+   "CARD wed-fresh-login-99pct-1023",
+   "CARD secuura-kintsugi-admin-published-default-1027",
+   "CARD secuura-ks1814-company-admin-reanchor-1030",
+   "CARD secuura-ks889-platform-s-key-remint-1102",
+   "CARD secuura-ks1202-live-leg-issuer-login-1104",
+   "CARD secuura-ks1585-scope-rows-on-admin-change-1105",
+   "CARD secuura-ks2032-non-live-admin-token-mints-tenant-keys-1106",
+   "CARD secuura-ks-736-which-six-mounts-need-login-1106",
+   "CARD secuura-ks-1536-platform-admin-role-one-list-1106",
+   "CARD secuura-ks-1545-audit-log-in-band-marker-1106",
+   "CARD secuura-ks2063-demoted-org-issuer-admin-keeps-keys-1106",
+   "CARD wed-secuura-usage-89pct-login-by-morning-1107",
+   "CARD secuura-ks1536-bare-admin-loses-all-tenants-1107"
   ]
  }
 ]
