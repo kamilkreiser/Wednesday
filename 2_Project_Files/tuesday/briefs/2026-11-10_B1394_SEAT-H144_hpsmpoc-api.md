@@ -1,0 +1,120 @@
+From Tuesday (Datasec coordinator seat), Datasec / HPSM-POC. **Your STATUS file is the channel and the wrap** (no mail; a launch message that names a mailbox is overridden). A question is a last line `STOPPED: NEEDS TUESDAY <one question>`. Marks: **MEASURED** = printed by a named instrument; **DERIVED** = source reading, not run; **RELAYED** = read in another file; **UNMEASURED** = nobody has.
+
+# BRIEF B1394 | SEAT-H144: HPSM-POC, BUILDER (OPUS): L3 API. NEW BRANCH `b1394/hpsmpoc-api` FROM MAIN @MAIN@. COMMITS AS NEEDED, PLAIN PUSHES OF THAT REF ONLY, NO PR. NOT MERGED, NOT DEPLOYED.
+
+**BLUF:** lane L3 API; tickets HPSMPOC-99, HPSMPOC-315, HPSMPOC-226, HPSMPOC-436, HPSMPOC-428, HPSMPOC-322 plus the follow-up named below; branch `b1394/hpsmpoc-api` cut from main @MAIN@ (main was `fa401da9f7bdab21c46ad9717c964433a2d22650` at drafting, 2026-11-10 03:16 AEDT by `gh api -X GET repos/datasecau/HPSM-POC/branches/main`; PR 297 may land before launch, so Tuesday stamps the branch point). **Model: OPUS** (the level is written inside the launch line below). **Size: M-L.** Seat id H144. Ports **9720-9729** only. Your STATUS: `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1394_STATUS.md`. First step is to **re-read main and close as already-fixed (with evidence) every ticket or sub-item main already fixes**; then fix only what is still open.
+
+**Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/HPSM-POC-H144 "BRIEF_SEAT_LEVEL=opus WED_USAGE_STOP=100 bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC' '<this kit's path>'"`. `brief_seat.sh` defaults to Opus; the level is written inside the quotes.
+
+## READ WHOLE FIRST (read-only)
+1. The lane plan this kit was cut from: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_sweep_drafts/lanes.md` (read whole; it is the drafter's reading at fa401da9, MEASURED marks only for what it says it ran; **every file:line in it is a pointer you re-print with `grep -n` or `awk NR==n` at your own clone before you rely on it**).
+2. The project's `CLAUDE.md` and `JIRA.md` (`/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/CLAUDE.md`, `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/JIRA.md`; read-only), and the CI workflow of your clone, `.github/workflows/ci.yml` (print the predicate of each job in CHECKS).
+3. The template this kit follows: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-09_B1380_SEAT-H136_hpsmpoc-playbook-partner-readiness.md` (its holds, partition and housekeeping bind you as written below).
+
+## BINDING HOLD
+UAT is on hold (the product owner, 2026-11-06 10:12) and HPSM-POC deploys nothing. You touch no hosted host: no `az`, no docker push or registry login, no ssh, no HTTP to any hosted, demo, UAT or production host (not even a GET). **You open no PR; Tuesday opens, gates and lands it through CodeQL (never bypass, never dismiss an alert).** No Jira write (not a comment, not a transition, not a create); no message to any human. Never delete (quarantine to `.tools/b1394/_quarantine/`); no force-push, amend, reset or rebase. **Never type `cd`** (a hook refuses it). `.github/**` is touched only by lane L4 and only the files its tickets name (that is not you: never). This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM); next-phase items are stored and architected only. Nothing is built for the Phase 2 catalogue (tickets 448 to 460): it is not to be made now.
+
+## STEP 0: RE-READ MAIN, THEN CLOSE WHAT MAIN ALREADY FIXES (before any edit)
+1. Clone by URL into `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/.tools/b1394/repo` (see HOUSEKEEPING), check out `origin/main`, print `git rev-parse HEAD` and compare with the branch point @MAIN@ (if main has moved on from it, say so; your branch is cut from the stamped point or a later main, whichever Tuesday's stamp names; a commit between the two that touches your OWNED paths is named in STATUS).
+2. For EACH ticket below, read the ticket's cited lines **at your clone's main** and decide: `STILL OPEN` / `PART FIXED` (name which sub-items) / `FIXED AT MAIN`. Lanes.md already names **109, 228, 271, 318, 399, 323** as likely stale and says that 431, 405, 234, 235, 99 and 322 may be partly built (tickets 109, 271 and 318 are the records lane's). Do not trust that either way: read.
+3. A ticket (or sub-item) that main already fixes is **not re-built**. You write it in STATUS under `## CLOSED WITH EVIDENCE`, one line each, exactly `CLOSED-WITH-EVIDENCE HPSMPOC-<n> [<sub-item>]: <what main shows> | <file:line printed by grep -n at <sha8>> | <instrument> | <control that can fail>`. **You never write this to Jira**: the records lane (seat R197) reads your STATUS and posts the comment. A ticket the records lane cannot read from your line is not closed.
+4. Only tickets or sub-items still open proceed to THE WORK. If NOTHING is open, finish with the section, no branch push beyond an empty-change note, and the READY line naming the branch head = main (say so).
+
+## THE TICKETS (scope sentences are quoted from Jira at drafting 2026-11-10 by the project's Jira REST read, status Backlog for all; fix shapes are lanes.md's, RELAYED, to be re-verified)
+
+### HPSMPOC-99
+- Jira summary, quoted whole: "Feedback: the QA gate's open notes (N-4, N-7, N-8, N-9)"
+- Jira first paragraph, quoted: "BLUF: The four open notes from QA gate B52 (round 2, GO WITH NOTES) on the Feedback button (HPSMPOC-90, PR #52, main a6ae0b4). None blocked the merge, and none can happen while Feedback:Route=off (the shipped default)."
+- Files at fa401da9 (lanes.md): `api/src/HpsmPoc.Modules.Feedback/**`
+- State at main and why it is agent work (lanes.md): N-7 (lease-lost branch logged and audited) looks built: `FeedbackDispatcher.cs:201,256-259` log and audit it (lanes.md MEASURED); verify the fake-clock lease test exists. N-8 (invisible-only comment residue): verify at the comment endpoint, then fix. **N-4 needs the product owner's route ruling and N-9 needs a hosted scale-out: leave both.**
+
+### HPSMPOC-315
+- Jira summary, quoted whole: "[B462 deferred] Feedback: Hpsmpoc214Tests.N1(200, 400, "sent") read a lease-lost note "attempt 2 finished (sen..." instead of "nothing left" (1 in 60 shard runs, CI job 118945264153); product behaviour, not test-window code"
+- Jira first paragraph, quoted up to its first 330 characters: "BLUF: in one of 60 SQL Server shard runs a Feedback test asserted that the lease-lost audit note says "nothing left", and the note instead began "route automation; attempt 2 finished (sen". The failing assertion is on product text built by FeedbackDispatcher, so the build seat that found it left it alone as product behaviour;" [cut here by the drafter; read the rest in Jira]
+- Jira done-when line, quoted up to 330 characters: "Done when (a test): the cause of the differing note is measured and stated; then either the product's note or ordering is fixed with a regression row that is red before and green after, or the test's arrangement is proved to allow the other interleaving and is made deterministic; and the row run 60 times in a row on the SQL" [cut by the drafter]
+- Files at fa401da9 (lanes.md): `api/tests/HpsmPoc.Modules.Feedback.Tests/Hpsmpoc214Tests.cs:329`, `FeedbackDispatcher.cs:255-261`
+- State at main and why it is agent work (lanes.md): Cause unmeasured (RELAYED). Agent-actionable: reproduce under load on SQL Server, find whether the product text or the test's ordering is wrong, then fix with a test that fails first.
+
+### HPSMPOC-226
+- Jira summary, quoted whole: "[B174 gate notes on B169 L2] Feedback attachments follow-ups N-1..N-9: route A payload extras, reserved-name variants, Hangul filler names, BFF total check, dispatcher loads content, hosted upload timing, GDPR export bytes"
+- Jira first paragraph, quoted up to its first 330 characters: "Status refresh (records seat B293, 2026-10-19, from the B284 census at main befd45e and comment 39691): N-1 and N-2 closed in round 2. N-3 and N-9 confirmed as built (C-99). N-4, N-5 and N-7 built (PR #129). N-6 and B177 N-2 built (PR #152). N-8 (a retry after a timeout that happened after the save makes a second item) is" [cut here by the drafter; read the rest in Jira]
+- Files at fa401da9 (lanes.md): `api/tests/**` for the export test
+- State at main and why it is agent work (lanes.md): Per its own 2026-10-19 refresh only "the optional N-9 pin (the export test asserts file names only)" is agent work; B177 N-1 is words (not in this sweep).
+
+### HPSMPOC-436
+- Jira summary, quoted whole: "[B1071-8] Offline template: a finding explanation of zero findings is written with zero paragraphs and refused as schema-invalid (78 of 4105 sweep inputs, same before and after pull request 273; reach not measured) (Note, not deployed)"
+- Jira first paragraph, quoted up to its first 330 characters: "BLUF: gate B1071 (round 1 of 2, go with findings), on the work that became pull request 273 (squash c14573495e51c4ee6d656460f6940927a97e0007), swept 4105 inputs through the offline template and the validator and found 102 that are not accepted, identical before and after that pull request and none refused for a number. Of" [cut here by the drafter; read the rest in Jira]
+- Jira done-when line, quoted up to 330 characters: "Done when: it is measured whether any route can ask for a finding explanation with no finding; then either that request is refused with a plain reason, or the template writes a sentence, or the item is recorded as declined. Which is built is a scope call that is not made here. The other open item of that finding, the old title" [cut by the drafter]
+- Files at fa401da9 (lanes.md): `api/src/HpsmPoc.Modules.Reporting/Narrative/Providers.cs:53`
+- State at main and why it is agent work (lanes.md): Still true at main (`Select` over `input.Findings`, lanes.md MEASURED). First measure whether any endpoint can ask for zero findings (the gate did not), then fix the template or the validator rule.
+
+### HPSMPOC-428
+- Jira summary, quoted whole: "[B1031] Review site: during a database wake the API answered one customers read with HTTP 500 at about 29.5 s, which the browser ask-again does not retry (observation; moot on UAT while its database stays awake)"
+- Jira first paragraph, quoted up to its first 330 characters: "BLUF: the deployment report (B1031) walked the UAT review copy on 2026-11-01 at 11:47 AEDT after its database had paused (main 77c3132e, before the keep-awake change). A first visit to Engagements showed the loading words at 0.29 s and the list at 55.81 s with no error text, but of two concurrent GET /api/v1/customers reads one" [cut here by the drafter; read the rest in Jira]
+- Jira done-when line, quoted: "Done when: a database wake no longer loses a read to an API 500 in a measured visit on an environment that pauses, or the item is recorded as declined. Which fix is built is a scope call that is not made here."
+- Files at fa401da9 (lanes.md): `api/src/**` data-access configuration
+- State at main and why it is agent work (lanes.md): `EnableRetryOnFailure` count in the 6 API files lanes.md fetched = 0 (no positive control; a wider question than those files; UNMEASURED repo-wide). The fix shape (a transient-retry and connect budget longer than a wake) is code; prove it with a SQL Server fault-injection test, not a hosted wake. If you cannot prove it offline, **stop at the test**.
+
+### HPSMPOC-322 (likely stale or partly stale: read main first)
+- Jira summary, quoted whole: "[B477-5..8] Reporting grouped executive summary (branch b467 only): allowed-number set, ambiguous titles, reader order, wording (Minor and Note)"
+- Jira first paragraph, quoted up to its first 330 characters: "BLUF: gate B477 passed the grouped executive summary (branch b467/hpsmpoc-187-204-words, head d6eba5f681372d409748e2e5023962b4157e0c81) as GO WITH FINDINGS and left four lower findings, B477-5 to B477-8, rated as written below. They are on branch b467 only: that branch has no pull request (gh api GET on 2026-10-22: 0 pull" [cut here by the drafter; read the rest in Jira]
+- Jira done-when line, quoted: "Done when: the gate gives no fix shape for B477-5, -6 or -7, so each is either fixed with a test that fails first or recorded as kept by the product owner. B477-8 needs no change."
+- Files at fa401da9 (lanes.md): `api/src/HpsmPoc.Modules.Reporting/Narrative/Providers.cs`, `NarrativePipeline.cs`, `NarrativeOutputValidator.cs`
+- State at main and why it is agent work (lanes.md): The grouped summary IS on main (`SharedActions.Partition` at `Providers.cs:73-76`, lanes.md MEASURED), so the ticket's "branch b467 only" is stale. B477-5 to -7 are code or validator; **B477-8 is wording: leave it.**
+
+### FOLLOW-UP (b), no Jira key: `ShowcaseSummaryTests` answered 500 once under load
+- File: `api/tests/HpsmPoc.Api.Tests/Assessment/ShowcaseSummaryTests.cs` (4 `[Fact]` tests, the first at line 31, lanes.md MEASURED; re-print).
+- Cause UNMEASURED. Loop the class under CPU load on SQL Server and SQLite, capture the 500's problem body and log, then root-cause. **No fix without a failing reproduction**; if you cannot reproduce in the time given, the deliverable is the loop script's result and a STATUS line `NOT REPRODUCED <n> runs` (a script goes under `.tools/b1394/`, not into the repository). Overlaps nothing in lane L4.
+
+## PARTITION (from both sides; the property: you edit a path only if one OWNS line below names it as yours)
+**OWNED by you (L3 API):** api/** EXCEPT api/tests/HpsmPoc.Api.Tests/Assessment/Hpsmpoc178CustomerNameTests.cs (L4's, ticket 352).
+
+**NOT yours (every other lane's paths, lanes.md both sides):**
+- **L1 web UI (B1392, seat H142)** owns: web/src/components/**, web/src/app/**, web/src/content/**, web/src/server/mock/** (EXCEPT web/src/server/mock/customer-name.test.ts, which is L4's), web/src/styles/**, web/src/assets/**, web/e2e/shell-sidebar.spec.ts, web/e2e/playbook-feedback-pill.spec.ts.
+- **L2 web server and lib (B1393, seat H143)** owns: web/src/server/** EXCEPT web/src/server/mock/**, web/src/api/**, web/src/lib/**, web/src/data/**, web/src/design/**, web/src/instrumentation.ts, web/src/proxy*.
+- **L4 CI and tooling (B1395, seat H145)** owns: .github/** (only the files a ticket of this lane names), infra/**, scripts/**, web/scripts/**, web/e2e/** EXCEPT the two L1 specs, web/src/e2e-runner*.test.ts, web/src/audit-dev.test.ts, web/src/standalone.test.ts, web/src/web-settings.test.ts, web/src/productName.test.tsx, api/tests/HpsmPoc.Api.Tests/Assessment/Hpsmpoc178CustomerNameTests.cs, web/src/server/mock/customer-name.test.ts.
+- **L5 documents (B1396, seat H146)** owns: ANALYSIS repository (datasecau/HPSM-POC-analysis), under 1_Project_Definition/: Governance/stage-gates/**, Deliverables/**, Architecture/2026-11-10_* (new files only), Demo/**.
+- **L6 records (B1397, seat R197)** owns: ANALYSIS repository: 1_Project_Definition/CLARIFICATIONS.md; the on-disk Briefs/2026-11-09_B1387_STATUS.md (one inserted correction block); Jira project HPSMPOC comments and transitions on the listed keys only.
+- **Owned by no lane (nobody touches them in this sweep):** every path that appears in no OWNS line above, for example `web/package.json`, `web/package-lock.json`, `global.json`, config files at the repository root, `.tools/`. Lanes.md MEASURED 61 such tracked paths at fa401da9. If a ticket of yours needs one: do the rest, write `NEEDS-SHARED <path> <why>` in STATUS, and continue.
+- **Files the other lanes may be editing at this very moment:** the other builder lanes run in parallel on their own branches; the open pull request list (`gh api -X GET repos/datasecau/HPSM-POC/pulls?state=open`) is re-read at Step 0 and before every push; a file in an open PR that your ticket also needs is named in STATUS and left until that PR lands (the known one at drafting is PR 297, the Demo Walkthrough: 16 files, among them web/src/components/screens/SignInScreen.tsx, UatStartScreen.tsx, web/src/components/shell/AppShell.tsx, web/src/components/walkthrough/**, web/src/content/walkthrough/**, web/src/lib/walkthrough.ts, web/e2e/playbook-walkthrough.spec.ts, web/e2e/walkthrough-uat.spec.ts; read at 03:16 AEDT by `gh api -X GET .../pulls/297/files`).
+
+**Any other shape** (a path not named by any OWNS line): prove it is yours by one of the OWNS lines above or STOP that item with `NEEDS-SHARED <path> <why>`.
+
+## CHECKS (the CI predicates for your paths; read `.github/workflows/ci.yml` at your clone and print each job's pass predicate into STATUS; lanes.md read them at fa401da9)
+- `api`: `dotnet test HpsmPoc.slnx -c Release --no-build` plus "the 10 Azurite tests ran and passed, by name".
+- `api on SQL Server (<part>)` shards and the roll-up job `api on SQL Server`: the same tests on SQL Server. HPSM-POC API test rows ask "does it run on SQL Server as CI does?": **a change that passes SQLite and fails SQL Server is red.** Run the shards locally only through the project's own scripts; if they cannot run without a docker grant you do not have, say NOT RUN, name the tickets that lose their proof (315, 428, follow-up (b)), and do not claim them fixed.
+- Migrations are frozen unless a ticket says otherwise: **do not add one.**
+- Run each at **main** and at **your head**, compared **by program** (counts side by side: tests passed/failed/skipped, lint/typecheck rc, build rc). A red that is not yours is named with its cause **at main too** (same command, same counts). Run heavy jobs serially within your seat (load is noisy). In `ci.yml` a step printing "SKIPPED" (typecheck, unit tests, infra) is NOT a pass.
+- `secrets` (gitleaks, full history) and `dependency review` must stay green: you add no dependency and no secret.
+- **Every new test you add is proven RED with your fix removed (in a copy) and GREEN with it**, both shown in STATUS.
+- **PRIOR-WORK CHECK (standing line):** before you build anything, `git log --oneline -n 12 -- <each file you will touch>`, `grep -rn` the repository for the ticket's distinctive words, the open PRs (`gh api -X GET`, `GH_CONFIG_DIR=/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.gh-config`), and read-only Jira searches in the form `project = HPSMPOC AND ( text ~ "<term>" )` (with the parentheses) if the project has a reader (it has none for builders: write "Jira not searched" if you have none; never print a token). A READY without a `## PRIOR WORK` section is returned unread.
+
+## HOUSEKEEPING
+- Project dir: `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC` (the NEW drive; anything naming `/Volumes/Laptop-DEV` is stale and that drive is not mounted). Do not use or modify `2_Project_Files/` (a stale checkout).
+- **Your own clone `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/.tools/b1394/repo`** by URL `git@github.com:datasecau/HPSM-POC.git`, with the deploy key `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/3_Access_Keys/github_deploy_rw` set as repo-local `core.sshCommand` (`git -C <clone> config core.sshCommand "ssh -i '/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/3_Access_Keys/github_deploy_rw' -o IdentitiesOnly=yes"`). Never touch another seat's `.tools/b13NN/` or `.tools/b139N/` folder. `GH_CONFIG_DIR=/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.gh-config` for every `gh` call, `-X GET` only.
+- **Ports: your block is 9720-9729 and nothing else.** Before any listener: `lsof -nP -iTCP:9720-9729 -sTCP:LISTEN` must print 0 rows (at drafting, 03:2x AEDT, it printed 0 rows for 9700-9739; the drafter also scanned the non-`.pre-` SEAT kits of 9 and 10 Nov for these numbers, see the drafter's report line in the reply). Name the port in every start command; stop your servers before READY; a listener outside the block is a STOP.
+- STATUS: `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1394_STATUS.md`. FIRST line `PROGRESS B1394: b1394/hpsmpoc-api HOLD`; a `WORKING: <part>` last line after every part and at least every 20 minutes; sections `## PRIOR WORK`, `## CLOSED WITH EVIDENCE`, `## HELD`, `## NOT RUN`, then the change list (every file changed), each ticket's outcome, every check with its predicate and counts at main and head. **The LAST line of the file, when you finish, is exactly `READY B1394: <head sha40>` and nothing after it** (the sha is `git rev-parse HEAD` of your pushed branch, and `git ls-remote` of the branch equals it). If you cannot finish: the last line is `STOPPED: NEEDS TUESDAY <one question>`.
+- **HARD STOP: ____** (absolute AEDT, Tuesday writes it): push what is green, write what is not. The drive has dropped twice on 9 Nov: **commit and push as soon as a ticket is green.**
+- Commit messages: plain ASCII, no B-numbers, no person names, no seat ids; say what changed and why in plain words; end with the attribution line your session reminder gives (nothing else added). One logical change per commit; plain `git push origin <branch>` of YOUR branch only.
+- Shell: no `cd`; absolute single-quoted paths (`!CODING` contains `!`); `git -C`; `python3 -I -B`; `/usr/bin/grep -i` with a positive control from the same file for every count (a zero is a suspect until a control fires); a `file:line` is printed by `grep -n` or `awk NR==n` at the sha you cite, never remembered.
+
+## REFUSE AT ONCE (last line `STOPPED: NEEDS TUESDAY`, one question; each count with a control that fires; items 1 and 2 before the clone is created)
+1. `/usr/bin/grep -c -E '_''_''_''_'` of your copy of this kit prints 0 on the STAMPED copy (the unstamped copy reads 6 such lines: the HARD STOP, the four Stamp slots and the last line; control: a planted line adds 1); `/usr/bin/grep -o -E '@[A-Z_0-9]+@' <copy> | wc -l` prints 0; the last line is `READ-WHOLE-BY-TUESDAY: DONE ...` and not four underscores; the HARD STOP above reads a clock.
+2. `tmux display -p -t "$TMUX_PANE" '#{@cockpit_name}'` is not `Datasec/HPSM-POC-H144` (control `-t %1` prints a different name); `pwd -P` is not `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC`.
+3. `gh auth status` under `GH_CONFIG_DIR=/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.gh-config` fails (never print the handle), or `repos/datasecau/HPSM-POC/pulls/99999` is not 404 (control: `pulls?state=open` answers 200).
+4. `git ls-remote origin refs/heads/b1394/hpsmpoc-api` is not empty (the branch exists: someone ran this kit; STOP naming the sha), or your clone is dirty.
+5. `df -g /Volumes/Datasec_DEV` under 25 GiB, or you are about to start a listener outside 9720-9729, or `lsof` shows a listener in 9720-9729.
+6. A file your ticket must change is OWNED by another lane (PARTITION) or is changed by an open PR: not a stop for the whole kit, a STOP for that item (`NEEDS-SHARED`), the rest continues.
+7. Any password, token or cookie value visible in a tool result: say "a value was shown", put it first in STATUS and STOP.
+
+## STANDING LINES
+PRIOR-WORK CHECK (above). No message to any human. Jira writes: none (the records lane R197 does them). Never delete (quarantine). This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM); next-phase items are stored and architected only. Nothing hosted: the landing, CodeQL and any deploy are Tuesday's and the product owner's. Landing rule for the code repository, quoted from the project's CLARIFICATIONS (the gate seat re-printed it at `:3617`): "The landing form is a head-pinned squash" (Tuesday lands; you never merge).
+
+## Stamp
+Tuesday stamps; leave every slot as it stands. Branch point `@MAIN@` is replaced everywhere it appears.
+- STAMP: ____
+- LAUNCH WINDOW: ____
+- Hard stop (absolute AEDT, one clock): ____
+- Panes and live seats at the stamp: ____
+
+READ-WHOLE-BY-TUESDAY: ____
