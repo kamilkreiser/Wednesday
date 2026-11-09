@@ -1,0 +1,174 @@
+diff --git a/Blockchain/Dev/packages/shared/src/security/audit-logger.ts b/Blockchain/Dev/packages/shared/src/security/audit-logger.ts
+--- a/Blockchain/Dev/packages/shared/src/security/audit-logger.ts
++++ b/Blockchain/Dev/packages/shared/src/security/audit-logger.ts
+@@ -316,3 +316,5 @@ export class AuditLogger {
+     this.eventBuffer = [];
+-
++    // KS-1923 (G73-F1, G73-F3): failed events are collected in the order they were logged and put back in FRONT of the buffer once, after the loop, so a retry keeps delivery order
++    // and an event is kept before the failure is logged (a logger that throws can no longer drop it).
++    const failed: AuditEvent[] = [];
+     for (const event of events) {
+@@ -321,2 +323,3 @@ export class AuditLogger {
+       } catch (error) {
++        failed.push(event);
+         let reason: string;
+@@ -327,7 +330,8 @@ export class AuditLogger {
+         }
+-        logger.error('Failed to process audit event', { error: reason });
+-        // Re-add to buffer for retry
+-        this.eventBuffer.unshift(event);
++        // The event is already kept for retry above (failed.push), so a logger that throws cannot lose it.
++        try { logger.error('Failed to process audit event', { error: reason }); } catch { /* nothing more can be said if the logger itself fails */ }
+       }
+     }
++    // Re-add to buffer for retry, oldest first
++    this.eventBuffer.unshift(...failed);
+   }
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1923-audit-logger-flush-keeps-failed-events-in-order.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1923-audit-logger-flush-keeps-failed-events-in-order.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1923-audit-logger-flush-keeps-failed-events-in-order.test.ts
+@@ -0,0 +1,143 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1923 (G73-F1 and G73-F3; G73-F4, the unbounded buffer, is NOT in this piece): AuditLogger.flush put each failed event back with
++// `unshift` AFTER logging the failure, so (F1) a logger that throws skipped the unshift and the event was dropped, and (F3) two failures
++// A then B were put back as B, A, so they were retried in reverse order and the audit hash chain did not verify in delivery order.
++// Harness: the real AuditLogger, the logger module replaced by a stand-in, onEvent a plain function that fails for chosen actions.
++const h = vi.hoisted(() => ({
++  error: vi.fn(),
++}));
++
++vi.mock('../logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: h.error },
++}));
++
++import { AuditLogger, AuditEventCategory } from '../security/audit-logger';
++
++function make(failing: Set<string>, delivered: string[]) {
++  return new AuditLogger({
++    serviceName: 'svc',
++    version: '1',
++    environment: 'test',
++    hashIntegrity: false,
++    maxBatchSize: 1000,
++    flushIntervalMs: 3600000,
++    onEvent: (event) => {
++      if (failing.has(event.action)) return Promise.reject(new Error('sink down'));
++      delivered.push(event.action);
++      return Promise.resolve();
++    },
++  });
++}
++
++describe('KS-1923 AuditLogger.flush keeps every failed event, in delivery order', () => {
++  beforeEach(() => {
++    h.error.mockReset();
++  });
++
++  it('RED ks1923 R1 two failures in one flush are retried in the order they were logged', async () => {
++    const failing = new Set(['KS1923_A', 'KS1923_B']);
++    const delivered: string[] = [];
++    const audit = make(failing, delivered);
++    try {
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_A');
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_B');
++      await audit.flush();
++      expect(delivered).toEqual([]);
++      failing.clear();
++      await audit.flush();
++      expect(delivered).toEqual(['KS1923_A', 'KS1923_B']);
++    } finally {
++      audit.stopFlushTimer();
++    }
++  });
++
++  it('RED ks1923 R2 a success between two failures: the two failed events come back in logged order and the success is not repeated', async () => {
++    const failing = new Set(['KS1923_A', 'KS1923_C']);
++    const delivered: string[] = [];
++    const audit = make(failing, delivered);
++    try {
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_A');
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_B');
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_C');
++      await audit.flush();
++      expect(delivered).toEqual(['KS1923_B']);
++      failing.clear();
++      await audit.flush();
++      expect(delivered).toEqual(['KS1923_B', 'KS1923_A', 'KS1923_C']);
++    } finally {
++      audit.stopFlushTimer();
++    }
++  });
++
++  it('RED ks1923 R3 a logger that throws while the failure is logged does not make flush reject and does not drop the event', async () => {
++    h.error.mockImplementation(() => {
++      throw new Error('logger boom');
++    });
++    const failing = new Set(['KS1923_A']);
++    const delivered: string[] = [];
++    const audit = make(failing, delivered);
++    try {
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_A');
++      const outcome = await audit.flush().then(() => 'resolved', () => 'rejected');
++      expect(outcome).toBe('resolved');
++      failing.clear();
++      await audit.flush().catch(() => undefined);
++      expect(delivered).toEqual(['KS1923_A']);
++    } finally {
++      audit.stopFlushTimer();
++    }
++  });
++
++  it('RED ks1923 R4 a logger that throws on the first of two failures still processes the second event and keeps both', async () => {
++    h.error.mockImplementation(() => {
++      throw new Error('logger boom');
++    });
++    const failing = new Set(['KS1923_A', 'KS1923_B']);
++    const delivered: string[] = [];
++    const audit = make(failing, delivered);
++    try {
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_A');
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_B');
++      await audit.flush().catch(() => undefined);
++      failing.clear();
++      await audit.flush().catch(() => undefined);
++      expect(delivered).toEqual(['KS1923_A', 'KS1923_B']);
++    } finally {
++      audit.stopFlushTimer();
++    }
++  });
++
++  it('control ks1923 C1 events that all succeed are delivered once, in order, and leave nothing to retry', async () => {
++    const delivered: string[] = [];
++    const audit = make(new Set(), delivered);
++    try {
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_A');
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_B');
++      await audit.flush();
++      await audit.flush();
++      expect(delivered).toEqual(['KS1923_A', 'KS1923_B']);
++      expect(h.error).not.toHaveBeenCalled();
++    } finally {
++      audit.stopFlushTimer();
++    }
++  });
++
++  it('control ks1923 C2 one failure is logged once with its message and retried once', async () => {
++    const failing = new Set(['KS1923_A']);
++    const delivered: string[] = [];
++    const audit = make(failing, delivered);
++    try {
++      await audit.log(AuditEventCategory.SECURITY, 'KS1923_A');
++      await audit.flush();
++      const logged = h.error.mock.calls.filter((c) => String(c[0]).includes('Failed to process audit event'));
++      expect(logged).toHaveLength(1);
++      expect(logged[0][1]).toEqual({ error: 'sink down' });
++      failing.clear();
++      await audit.flush().catch(() => undefined);
++      expect(delivered).toEqual(['KS1923_A']);
++    } finally {
++      audit.stopFlushTimer();
++    }
++  });
++});

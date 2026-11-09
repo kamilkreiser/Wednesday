@@ -1,0 +1,111 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+@@ -100,5 +100,8 @@ function escapeCSVField(value: string | undefined | null): string {
+ function formatDate(dateStr: string): string {
+-  // Validate and normalize date input
++  // KS-2015: the spec declares plain YYYY-MM-DD; accept exactly that shape and only a day that exists (2026-02-30 matches the shape and would roll over to March).
++  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
++    throw new Error(`Invalid date: ${dateStr}`);
++  }
+   const date = new Date(dateStr);
+-  if (isNaN(date.getTime())) {
++  if (isNaN(date.getTime()) || date.toISOString().split('T')[0] !== dateStr) {
+     throw new Error(`Invalid date: ${dateStr}`);
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks2015-audit-export-accepts-only-real-yyyy-mm-dd-dates.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks2015-audit-export-accepts-only-real-yyyy-mm-dd-dates.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks2015-audit-export-accepts-only-real-yyyy-mm-dd-dates.test.ts
+@@ -0,0 +1,92 @@
++import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
++import http from 'node:http';
++import type { AddressInfo } from 'node:net';
++import express from 'express';
++
++// KS-2015 (gate 202 G202-N3): the spec declares `from` and `to` of GET /api/admin/audit/export as plain YYYY-MM-DD dates, but the route only
++// asked `new Date(x)` and rejected NaN, so `0`, `1`, `-1`, `2026-9-1`, `Sep 1 2026`, a full ISO timestamp and the calendar-impossible `2026-02-30`
++// (which matches the pattern and rolls over to March) all answered 200. The route now accepts exactly YYYY-MM-DD naming a real calendar day.
++// Harness: the real router behind a stub admin user, the security service replaced by a stubbed global fetch (the shape of ks745's test).
++const savedEnv = { ...process.env };
++process.env.SECURITY_SERVICE_URL = 'http://security.test:1';
++
++const ENTRY = { id: 'audit-ks2015-1', tenantId: 'a0000000-0000-4000-8000-000000000001', userId: 'u1', action: 'login', resourceType: 'user', details: {}, success: true, createdAt: '2026-09-01T10:00:00.000Z' };
++const fetchMock = vi.fn(async (_input: unknown) => ({ ok: true, status: 200, json: async () => ({ success: true, data: { logs: [ENTRY], total: 1, limit: 1000, offset: 0 } }) }) as unknown as Response);
++vi.stubGlobal('fetch', fetchMock);
++
++let server: ReturnType<ReturnType<typeof express>['listen']> | undefined;
++let port = 0;
++beforeAll(async () => {
++  const { default: router } = await import('../routes/audit-export');
++  const app = express();
++  app.use((req, _res, next) => { (req as any).user = { id: 'admin-ks2015', role: 'super_admin' }; next(); });
++  app.use('/api/admin/audit', router);
++  await new Promise<void>((r) => {
++    const s = app.listen(0, '127.0.0.1', () => { port = (s.address() as AddressInfo).port; r(); });
++    server = s;
++  });
++}, 10_000);
++afterAll(async () => {
++  const s = server;
++  if (s) await new Promise<void>((r) => s.close(() => r()));
++  for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];
++  Object.assign(process.env, savedEnv);
++  vi.unstubAllGlobals();
++});
++beforeEach(() => { fetchMock.mockClear(); });
++
++function getText(path: string): Promise<{ status: number; text: string }> {
++  return new Promise((resolve, reject) => {
++    http.get({ hostname: '127.0.0.1', port, path }, (res) => {
++      let data = '';
++      res.on('data', (c) => (data += c));
++      res.on('end', () => resolve({ status: res.statusCode ?? 0, text: data }));
++    }).on('error', reject);
++  });
++}
++
++const exportUrl = (from: string, to: string) => `/api/admin/audit/export?format=json&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
++
++describe('KS-2015 the audit export accepts only plain YYYY-MM-DD dates that exist', () => {
++  it.each(['0', '1', '-1', '2026-9-1', 'Sep 1 2026', '2026-09-01T00:00:00Z'])('RED ks2015 R1 from=%s answers 400 BAD_REQUEST and never asks the security service', async (bad) => {
++    const res = await getText(exportUrl(bad, '2026-09-02'));
++    expect(res.status).toBe(400);
++    expect(res.text).toContain('BAD_REQUEST');
++    expect(fetchMock).not.toHaveBeenCalled();
++  });
++
++  it('RED ks2015 R2 to=Sep 1 2026 answers 400 BAD_REQUEST and never asks the security service', async () => {
++    const res = await getText(exportUrl('2026-09-01', 'Sep 1 2026'));
++    expect(res.status).toBe(400);
++    expect(res.text).toContain('BAD_REQUEST');
++    expect(fetchMock).not.toHaveBeenCalled();
++  });
++
++  it('RED ks2015 R3 2026-02-30 (matches the pattern, is not a day) answers 400 on either side', async () => {
++    const asFrom = await getText(exportUrl('2026-02-30', '2026-03-05'));
++    const asTo = await getText(exportUrl('2026-02-01', '2026-02-30'));
++    expect(asFrom.status).toBe(400);
++    expect(asTo.status).toBe(400);
++    expect(fetchMock).not.toHaveBeenCalled();
++  });
++
++  it('control ks2015 C1 20260901 and x still answer 400', async () => {
++    expect((await getText(exportUrl('20260901', '2026-09-02'))).status).toBe(400);
++    expect((await getText(exportUrl('x', '2026-09-02'))).status).toBe(400);
++  });
++
++  it('control ks2015 C2 a plain YYYY-MM-DD range still answers 200 with the entry and asks the security service', async () => {
++    const res = await getText(exportUrl('2026-09-01', '2026-09-02'));
++    expect(res.status).toBe(200);
++    const body = JSON.parse(res.text) as { meta: { from: string; to: string }; data: Array<{ id: string }> };
++    expect(body.meta.from).toBe('2026-09-01');
++    expect(body.meta.to).toBe('2026-09-02');
++    expect(body.data.map((e) => e.id)).toEqual(['audit-ks2015-1']);
++    expect(fetchMock).toHaveBeenCalledTimes(1);
++  });
++
++  it('control ks2015 C3 a real leap day, 2024-02-29, is accepted', async () => {
++    const res = await getText(exportUrl('2024-02-29', '2024-03-01'));
++    expect(res.status).toBe(200);
++  });
++});
