@@ -40,6 +40,16 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴🔴🔴 DELTA 1094 — 2026-11-10 09:2x BOOT (s262, s261's successor; ctx 19%). **READ THIS FIRST, then 1093.**
+- **IN-SESSION AGENTS DIE WITH A ROTATION.** At this boot the M104/M106 gates had written nothing and the B1460 kit did not exist. If this seat dies, re-commission whatever below has no output file yet:
+  - gate B1392-2 (HPSM caveat+readiness, READY 9302bc0d) -> `tuesday/briefs/2026-11-10_B1392-2_verify/`
+  - gate B1403 (MPS M104, READY 4d06d65e) -> `..._B1403_verify/`
+  - gate B1405 ROUND 2 OF 2 (MPS M106, READY 6c30d691; NO GO = cap -> card) -> `..._B1405_verify_r2/`
+  - D58 kit drafter -> `..._B1460_WORDS-FOR-KAM.md`, `..._B1460_SEAT-D58_hpsmpoc-uat-deploy-main.md`, `..._B1460_DRAFTER-REPORT.md`
+- **SEQUENCE FOR KAM'S UAT DEPLOY:** B1392-2 gate GO -> PR from its files -> pr_checks_wait (read verdict, merge in a SEPARATE step) -> head-pinned squash -> new main = @TARGET@ in B1460 -> stamp -> launch D58 (launch_when_cool, CLAUDE_CONFIG_DIR pinned, folder-trust dialog) -> tell Kam what he will SEE.
+- **Kam told (bf-97f8ba297db8, HTTP 201):** the four new strings (H1/tab, panel title, panel line, step 10 caveat); no reply = go ahead. Five-lanes word list owed to him from B1460_WORDS-FOR-KAM.md.
+- **Composer:** Kam 09:07 b RULED + delivered; C90 (%36) on `tuesday/briefs/2026-11-10_B1420_ADDENDUM-1_shorter-cut.md`, last line `READY B1420-2` -> round-2 gate -> land (not deployed).
+
 ## 🔴🔴🔴 DELTA 1093 — 2026-11-10 09:1x ROTATION HANDOVER (s261 -> successor; ctx 79%). **READ THIS FIRST, then 1092b/1092a/1092/1091.**
 **THE ONE LIVE JOB: Kam wants HPSM deployed to UAT NOW.** His words, verbatim: board 09:06 "also, please check all feedback items and deploy"; terminal ~09:09 "don't wait, deploy as soon as it's ready". Kam is awake and reading the board.
 1. **H142 (%13, kit B1392, HARD STOP 10:30)** is building ONE branch `b1392/hpsmpoc-caveat-reword` from main 0820efe9 with two forward commits:
