@@ -64734,5 +64734,39 @@
    "CARD hpsmpoc-playbook-module2-readiness",
    "CARD mpscalc-readiness-no-device-line-words-1024"
   ]
+ },
+ {
+  "id": "wed-secuura-dev-skip-regenerable-1109",
+  "client_project": "WED/Migration",
+  "title": "Drive copy: skip rebuildable bulk (~900 GiB) so Secuura_DEV is ready in hours, not days",
+  "bluf": "(Override: the prior matches are about the T9 drive in September and an unrelated GDPR card; none rules what goes on Secuura_DEV.) The copy to Secuura_DEV runs at about 19 GiB an hour, and 2.2 TB would take days. Measured tonight (du): of WEDNESDAY's 1.0 TB, about 900 GiB is rebuildable. (1) Repo clones that gates left inside 0_Brain/reference/<gate>/repo/: 413 GiB is the whole folder; the largest gate, 214, is 11.2 of 12.1 GiB in repo/. Verdicts, commissions and run logs stay. (2) Spark working clones, local-model/spark/cache/work: 320 GiB. (3) Local model weights, tools/omlx/models: 198 GiB, downloadable again. Your 09-29 rule: 'there is no need to keep historical CI files ... limit storing what has been used and no longer needed'. Nothing is deleted: DevMASTER keeps it all, this only changes what is copied. Secuura's own 1.2 TB is not censused yet (next).",
+  "default_action": "Keep copying everything (option c) until you answer; nothing is skipped or deleted without your word",
+  "options": [
+   {
+    "key": "a",
+    "label": "Skip all three (recommended)",
+    "detail": "Restart the copy with those three excluded; the new drive holds every record, and model weights are re-downloaded where local models will run (the 256 GB Studio)"
+   },
+   {
+    "key": "b",
+    "label": "Skip the clones, keep the model weights",
+    "detail": "About 730 GiB skipped; the 198 GiB of weights are copied too"
+   },
+   {
+    "key": "c",
+    "label": "Copy everything",
+    "detail": "No change; the copy runs for days"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-09T23:11:48.541833+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 17:56",
+   "2026-09-16 18:42",
+   "CARD secuura-pr1961-erasure-skip-not-shredded-1103"
+  ]
  }
 ]
