@@ -28,7 +28,10 @@ STDIN=0; for a in "$@"; do [ "$a" = "--stdin" ] && STDIN=1; done
 [ "$STDIN" = 1 ] || { echo "note_alone.sh: REFUSED: pass the body with --stdin <<'EOF' (it must be in the transcript verbatim)" >&2; exit 2; }
 BODY="$(cat)"
 [ -n "$BODY" ] || { echo "note_alone.sh: REFUSED: empty body" >&2; exit 2; }
-TPDIR="${NOTE_ALONE_TRANSCRIPT_DIR:-${CLAUDE_CONFIG_DIR:-$DIR/../../../4_Credentials/.claude}/projects/-Volumes-Laptop-DEV-TUESDAY}"
+# 2026-11-09 s260: the project key was the literal -Volumes-Laptop-DEV-TUESDAY, so on the Datasec_DEV drive every
+# note refused (travel-pointer family). Derive it from this tree's own path, as Claude Code does (each / -> -).
+TREE="$(cd -P "$DIR/../../.." && pwd)"
+TPDIR="${NOTE_ALONE_TRANSCRIPT_DIR:-${CLAUDE_CONFIG_DIR:-$TREE/4_Credentials/.claude}/projects/$(printf '%s' "$TREE" | tr '/_' '--')}"
 ALLOW="${NOTE_ALONE_ALLOW_UNCHECKED:-0}"
 export BODY TPDIR ALLOW
 python3 -I - <<'PY'
