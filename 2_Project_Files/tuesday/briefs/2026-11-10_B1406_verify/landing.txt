@@ -1,0 +1,4 @@
+# Land only after the PR's hosted checks (dotnet, web, python, package) and CodeQL are green, and the PR head is still the gated sha.
+# Run from the verify folder, with GH_CONFIG_DIR set to the MPS project's 4_Credentials/.gh-config. <n> is the PR number.
+gh pr view <n> -R datasecau/MPS-Commercial-Calculator --json headRefOid --jq .headRefOid   # must print 514e5f9830a21d2cf80cad91cc3520207692db1d
+gh pr merge <n> -R datasecau/MPS-Commercial-Calculator --squash --match-head-commit 514e5f9830a21d2cf80cad91cc3520207692db1d --subject "$(cat squash-subject.txt)" --body-file squash-body.txt

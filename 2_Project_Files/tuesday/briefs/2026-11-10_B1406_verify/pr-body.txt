@@ -1,0 +1,18 @@
+## Summary
+- `docs/IMPORTER.md` listed the source lifecycle (stage, validate, activate, roll back) under "Not in this lane" with no pointer, so a reader could conclude it is built nowhere.
+- One paragraph is added after that list. It points at `docs/API.md`, section "Source lifecycle", says the lifecycle is off by default and runs on the development stub only, and lists what that section still lists as not built: per-type staging and raw spreadsheet upload (FR-ADM-013), the expire action (FR-ADM-010), a hosted switch-on and the admin console screens.
+- 5 lines added, 0 removed, one file. Docs only; no code, test or workflow change.
+
+## Checked against the source at the head
+- `src/MpsCalc.Api/Sources/SourceAdminEndpoints.cs` maps the stage, validate, activate and rollback routes.
+- `MpsCalc:SourceVersions:Path` (`SourceLifecycle.cs`) is absent from all three shipped appsettings files, and an empty value returns no lifecycle, so it is off by default.
+- A non-empty value outside DevStub mode refuses the start ("must be empty in Entra (hosted) mode").
+- No infra, script or workflow file sets the switch; the web app has no admin sources screen outside the generated client.
+
+## Scope
+- Part of MPSCALC-178. The DEMO.md footer sentence was already fixed on main. The API.md sentence on `lifecycleEvents` for the body-less routes is not in this change and stays open.
+- No CI test reads `docs/IMPORTER.md`. The only doc test in the `python` job, `tools/demo/test/test_demo_doc.py`, reads `docs/DEMO.md`, which this change does not touch.
+
+Nothing is deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

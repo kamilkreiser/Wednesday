@@ -41,6 +41,11 @@ names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned
    name joined a ban-list first name with underscores, and the `\b`-bounded scans of the builder AND the
    verifier's first pass both read 0, because `_` is a word character). Write the pattern as
    `(?<![A-Za-z])<name>(?![a-z])` (or split on `_` first), and its control plants `_by_<name>_` and must fire.
+8. **A gate runs every CI job whose TESTS READ the changed files, not only the jobs whose PATHS were touched**
+   (2026-11-10, HPSM #300: gate B1451 skipped `infra` because no infra path changed, graded two literal
+   U+202E in a web test file Minor "unless a CI step refuses it", and hosted CI's `infra` job then refused it via
+   `infra/tests/test_hidden_characters.py`, which scans EVERY tracked file). On HPSM-POC the infra job's repo-wide
+   scans (hidden characters, and any other test that walks `git ls-files`) run in every gate, whatever paths changed.
 
 ## Things every kit must get right
 - **Never make "the alert reads fixed or absent on `refs/pull/N/head`" a landing condition on NexusAI: that read cannot fail** (measured 2026-11-06: 40 of 40 closed PRs read js results 0 on their head analysis; main reads 122). The check that can fail is main's analysis at the merge commit, after landing: the ticket moves on that, and a fix that leaves the alert open is a new round. Added 2026-11-06 by s249.
