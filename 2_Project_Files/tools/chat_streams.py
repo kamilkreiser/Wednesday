@@ -158,10 +158,14 @@ def harvest(found):
         e = {k: v for k, v in e.items() if k not in ("agent", "agent_source")}
         if e.get("role") == "kam":
             tgt = "chat_kam.json"
-        elif derived_agent == "friday":
+        elif derived_agent in ("friday", "tuesday", "wednesday"):
             # 2026-09-23: the derived file named it friday's — it came from chat_friday.json.
-            tgt = "chat_friday.json"
-        elif "MBP" in (e.get("seat") or "") or e.get("project") == "Datasec":
+            # 2026-11-10: generalised. The derived file names the seat whose tab the entry
+            # was posted under; trust that BEFORE the hostname guess below. The MBP rule went
+            # stale when Wednesday moved to the MBP: four Wednesday replies (Secuura cards)
+            # were harvested into chat_tuesday.json at 06:09 and moved back by hand.
+            tgt = "chat_%s.json" % derived_agent
+        elif e.get("project") == "Datasec":
             tgt = "chat_tuesday.json"
         elif e.get("seat"):
             tgt = "chat_wednesday.json"
