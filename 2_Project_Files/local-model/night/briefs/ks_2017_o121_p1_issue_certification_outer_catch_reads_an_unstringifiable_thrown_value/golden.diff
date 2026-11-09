@@ -1,0 +1,194 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -933,5 +933,11 @@
+       });
+     } catch (error: any) {
+-      const msg = error instanceof Error ? error.message : String(error);
++      let msg: string;
++      try {
++        // KS-2017: String() coerces here, inside the try; a value it cannot read (no prototype, a throwing toString) lands in the fallback below.
++        msg = String(error instanceof Error ? error.message : error);
++      } catch {
++        msg = 'unreadable thrown value';
++      }
+       // KS-203: log name + code + stack so the next concurrent-load failure is
+       // diagnosable (the previous blanket 500 logged only the message).
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks2017-issue-outer-catch-reads-an-unstringifiable-thrown-value.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks2017-issue-outer-catch-reads-an-unstringifiable-thrown-value.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks2017-issue-outer-catch-reads-an-unstringifiable-thrown-value.test.ts
+@@ -0,0 +1,173 @@
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@127.0.0.1:1/test';
++process.env.SIMULATE_ANCHORING = 'true';
++
++// KS-2017: mockInject names the ONE failure a cell arms. Here only `getDoc` is used: the parent-document read at the top of the issue handler throws the chosen value into the handler's OUTER catch.
++let mockInject: Record<string, unknown> = {};
++const mockStore = new Map<string, any>();
++const mockLog = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
++const mockSaveCertification = jest.fn(async (..._a: unknown[]) => undefined);
++const mockCharge = jest.fn(async (..._a: unknown[]) => {
++  if ('charge' in mockInject) throw mockInject.charge;
++  return { id: 'charge-1' };
++});
++const mockDeleteCertification = jest.fn(async (..._a: unknown[]) => {
++  if ('del' in mockInject) throw mockInject.del;
++  return 1;
++});
++const mockReserve = jest.fn(async (..._a: unknown[]) => {
++  if ('reserve' in mockInject) throw mockInject.reserve;
++  return undefined;
++});
++const mockExecuteRaw = jest.fn(async (..._a: unknown[]) => {
++  if ('update' in mockInject) throw mockInject.update;
++  return 1;
++});
++const mockQueryRaw = jest.fn(async (..._a: unknown[]) => {
++  if ('holder' in mockInject) throw mockInject.holder;
++  return [{ id: 'holder-row' }];
++});
++
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: jest.fn(async (id: string) => {
++    if ('getDoc' in mockInject) throw mockInject.getDoc;
++    return mockStore.get(id) ?? null;
++  }),
++  listDocuments: jest.fn(async () => ({ items: [...mockStore.values()], total: mockStore.size })),
++  saveDocument: jest.fn(async (record: any) => {
++    if ('saveDoc' in mockInject) throw mockInject.saveDoc;
++    const copy = JSON.parse(JSON.stringify(record));
++    if (!Array.isArray(copy.signatures)) copy.signatures = [];
++    mockStore.set(copy.id, copy);
++    return { dbId: '99999999-9999-4999-8999-999999999999', inserted: true };
++  }),
++  updateDocument: jest.fn(async () => undefined),
++  generateContentHash: jest.fn(() => 'a'.repeat(64)),
++  assertNoCycle: jest.fn(async () => undefined),
++  getOrganizationExternalRef: jest.fn(async () => null),
++}));
++jest.mock('../repositories/certificationRepo', () => ({
++  initRepo: jest.fn(async () => undefined),
++  getCertification: jest.fn(),
++  saveCertification: (...a: unknown[]) => mockSaveCertification(...a),
++  listCertifications: jest.fn(),
++  saveShare: jest.fn(),
++  getSharesByCertification: jest.fn(),
++  getLineageEvents: jest.fn(),
++  deleteCertification: (...a: unknown[]) => mockDeleteCertification(...a),
++  reserveCertificationRow: (...a: unknown[]) => mockReserve(...a),
++}));
++jest.mock('../db', () => ({ prisma: { $queryRaw: (...a: unknown[]) => mockQueryRaw(...a), $executeRaw: (...a: unknown[]) => mockExecuteRaw(...a), $executeRawUnsafe: jest.fn() } }));
++jest.mock('../services/chargeEvents', () => ({ createChargeEvent: (...a: unknown[]) => mockCharge(...a), getChargeEventsByCertification: jest.fn() }));
++jest.mock('../utils/notificationClient', () => ({ notifyDocumentCertified: jest.fn(async () => undefined), notifyDocumentRevoked: jest.fn(async () => undefined), notifyDocumentShared: jest.fn(async () => undefined) }));
++jest.mock('../repositories/shareRepo', () => ({ createShare: jest.fn() }));
++jest.mock('../repositories/lifecycleEventRepo', () => ({ createLifecycleEvent: jest.fn(), setLifecycleEventAnchor: jest.fn(), listLifecycleEvents: jest.fn() }));
++jest.mock('../events', () => ({ publishEvent: jest.fn(async () => undefined), EventTypes: { DOCUMENT_CREATED: 'document.created', DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred', DOCUMENT_VERSIONED: 'document.versioned', CERTIFICATION_ISSUED: 'certification.issued' } }));
++jest.mock('../services/threadTokenClient', () => ({ mintAndRegisterThreadToken: jest.fn(async () => ({})) }));
++jest.mock('../routes/verification', () => ({ registerInPlatformRegistry: jest.fn(async () => undefined) }));
++jest.mock('../services/anchorStateSync', () => ({ pollAnchorUntilConfirmed: jest.fn(async () => undefined), reconcileDocumentAnchorState: jest.fn(async (d: any) => d) }));
++jest.mock('../services/provenance', () => {
++  const actual = jest.requireActual('../services/provenance');
++  return { ...actual, recordActionProvenance: jest.fn(async () => undefined), getCreationProvenance: jest.fn(async () => null), wasCreatedByConnector: jest.fn(async () => true) };
++});
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    hasNulByte: jest.requireActual('@secuura/shared').hasNulByte,
++    runWithTenantId: jest.requireActual('@secuura/shared').runWithTenantId,
++    encryptField: jest.requireActual('@secuura/shared').encryptField,
++    decryptField: jest.requireActual('@secuura/shared').decryptField,
++    lookupHash: jest.requireActual('@secuura/shared').lookupHash,
++    verifyMessageSignature: jest.fn(() => true),
++  }),
++);
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    req.user = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
++    next();
++  },
++}));
++jest.mock('../utils/logger', () => ({ logger: mockLog }));
++
++import express from 'express';
++import { certificationsRouter } from '../routes/certifications';
++
++const TENANT = 'a0000000-0000-4000-8000-000000000001';
++const ISSUER = { userId: '11111111-2222-4333-8444-555555552017', role: 'ISSUER_ADMIN', verificationLevel: 'none', tenantId: TENANT };
++const SOURCE_ID = 'doc-src-2017';
++const UNREADABLE = 'unreadable thrown value';
++
++const app = express();
++app.use((req: any, _res, next) => { req.tenantId = TENANT; next(); });
++app.use('/api/certifications', express.json(), certificationsRouter);
++let base = '';
++let server: ReturnType<typeof app.listen>;
++beforeAll(async () => {
++  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
++  const a = server.address(); base = 'http://127.0.0.1:' + String(typeof a === 'object' && a ? a.port : 0);
++});
++afterAll(() => { server?.close(); });
++
++beforeEach(() => {
++  mockInject = {};
++  mockStore.clear();
++  mockStore.set(SOURCE_ID, { id: SOURCE_ID, type: 'DOCUMENT', status: 'draft', owner: { id: ISSUER.userId }, data: { title: 'src' }, contentHash: 'sha256:' + 'a'.repeat(64), signatures: [], createdAt: '2026-10-01T00:00:00Z', updatedAt: '2026-10-01T00:00:00Z' });
++  mockSaveCertification.mockClear(); mockCharge.mockClear(); mockDeleteCertification.mockClear(); mockReserve.mockClear(); mockExecuteRaw.mockClear(); mockQueryRaw.mockClear();
++  mockLog.info.mockReset(); mockLog.warn.mockReset(); mockLog.error.mockReset();
++});
++
++// KS-2017 (gate 203 G203-N4): the OUTER catch of POST /api/certifications/issue computed `error instanceof Error ? error.message : String(error)`
++// outside any try. A thrown value that String() cannot convert (an object with no prototype, or one whose toString throws) made the catch itself
++// throw, so the request got no answer. The cells arm the parent-document read to throw such a value and read what the client gets and what is logged.
++// NOT covered here (still open): a revoked Proxy, which makes `instanceof` and the later `error?.name` / `error?.code` reads throw.
++const noPrototype = (): unknown => Object.create(null);
++const toStringThrows = (): unknown => ({ toString() { throw new Error('ks2017 toString threw'); } });
++
++async function issue(): Promise<{ status: number | string; body: any }> {
++  try {
++    const res = await fetch(base + '/api/certifications/issue', {
++      method: 'POST',
++      headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(ISSUER) },
++      body: JSON.stringify({ type: 'DOCUMENT', parentDocumentId: SOURCE_ID, data: { title: 'c' } }),
++      signal: AbortSignal.timeout(3000),
++    });
++    return { status: res.status, body: await res.json().catch(() => ({})) };
++  } catch {
++    return { status: 'NO ANSWER', body: {} };
++  }
++}
++const lines = () => mockLog.error.mock.calls.filter((c) => c[0] === 'Failed to issue certification');
++
++describe('KS-2017 POST /issue: the outer catch reads the thrown value safely', () => {
++  it('control ks2017 C1: an ordinary Error answers 500 and is logged with its own message', async () => {
++    mockInject = { getDoc: new Error('ks2017 ordinary') };
++    const r = await issue();
++    expect(r.status).toBe(500);
++    expect(r.body).toMatchObject({ success: false, error: { code: 'INTERNAL_ERROR' } });
++    expect(lines()).toHaveLength(1);
++    expect(lines()[0][1]).toMatchObject({ error: 'ks2017 ordinary' });
++  });
++
++  it('control ks2017 C2: a thrown string answers 500 and is logged as itself', async () => {
++    mockInject = { getDoc: 'ks2017 plain string' };
++    const r = await issue();
++    expect(r.status).toBe(500);
++    expect(lines()).toHaveLength(1);
++    expect(lines()[0][1]).toMatchObject({ error: 'ks2017 plain string' });
++  });
++
++  it('RED ks2017 R1: an object with no prototype answers 500 and is logged with the constant reason', async () => {
++    mockInject = { getDoc: noPrototype() };
++    const r = await issue();
++    expect(r.status).toBe(500);
++    expect(r.body).toMatchObject({ success: false, error: { code: 'INTERNAL_ERROR' } });
++    expect(lines()).toHaveLength(1);
++    expect(lines()[0][1]).toMatchObject({ error: UNREADABLE });
++  });
++
++  it('RED ks2017 R2: an object whose toString throws answers 500 and is logged with the constant reason', async () => {
++    mockInject = { getDoc: toStringThrows() };
++    const r = await issue();
++    expect(r.status).toBe(500);
++    expect(lines()).toHaveLength(1);
++    expect(lines()[0][1]).toMatchObject({ error: UNREADABLE });
++  });
++});

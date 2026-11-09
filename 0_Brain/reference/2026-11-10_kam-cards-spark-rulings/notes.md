@@ -1,0 +1,16 @@
+# Notes: spark-rulings card drafts, 2026-11-10 (nothing posted, nothing mailed, no decision_queue add/rule/amend run)
+Method: Linear read-only via API (key in-process); GitHub contents API at develop d0b4825cc24493213f82b609670a4a0fa521a4b9 (live tip read by the API /commits/develop; `git ls-remote` failed with "Repository not found" from this shell, so the API stood in). decision_queue.sh prior / show only.
+All four tickets have 0 comments at Linear (read 2026-11-10); the description is the whole record.
+
+## KS-2103: card drafted (secuura-ks2103-answered-chain-reply-shape-1110). Kam's call (fee-paying money path; ticket says build seat under tier 1 gate, deploy held for Kam). Partial prior ruling: secuura-anchoring-second-fee-on-empty-reply-1107 = a (fix it) is NOT reopened; card asks only the shape. Related: ...ks1171-when-is-an-anchor-absent = c; ...1106 = b.
+Code read at develop: confirmation.ts 79, 80, 86; provider.ts 451-461; anchorSubmission.ts 238-241.
+## KS-1516: ALREADY RULED: secuura-ks1516-unverified-timestamp-claims-1102 = a (ruled 2026-11-02T12:44:55+11:00): "Report verified:false for both types until a real check exists". No card.
+Note for Wednesday: the ruling is NOT on the ticket (0 comments), and NOT built at develop: timestamping/src/index.ts line 464 `let verified = true;`, lines 490-499 (opentimestamps and blockchain cases set no verified=false), lines 623-637 return verified: true. So the next step is a brief, not a ruling; no delivered_artefact is recorded on the card. The ruling's own text leaves the stored-rows backfill as a separate Kam approval (ticket "Data, handled separately").
+## KS-1952: card drafted (secuura-ks1952-redis-down-doctype-rules-1110). Kam's call: connector side already ruled (secuura-ks1256-redis-outage-stops-connector-creates-1006 = a); the new question is non-connector creates. Not a Stuart call on the evidence read (his S creates are connector creates, already ruled), though Stuart sees S-side effect.
+Code read: enforcement.ts 71-86, 116-138; verification.ts 840-843, 923. Ticket's own line numbers are stale (it said so itself: 72/126 vs 78/128 at gate; develop now 78/128).
+## KS-1855: card drafted (secuura-ks1855-gateway-standin-routes-1110). Kam's call: assignee Kam; ticket line "Kam decides which side moves" (KS-1668, Done, docs lead and code aligns). Peter's E2E harness may depend on certification verify: UNMEASURED, said in the card.
+Code read: index.ts 932-941; admin.ts 1050-1143; verification.ts 378-422, 446-447; originate adminConfig.ts 398, 427, 1225; gateway proxyPaths index.ts 390-397. Contradiction left open in the card: verification.ts 446-447 say originate does not expose the cert-verify flow; the ticket says originate's handler exists.
+
+## Spark-briefable summary (from reading only)
+KS-2103 a or b: provider.ts one file (+test), tier 1. KS-1952 a: enforcement.ts one file (+test). KS-1855 a or c: admin.ts one file for the audit and queue half (+test). KS-1516: no ruling needed; briefable now at timestamping/src/index.ts (option a). Open-PR overlap on those files was NOT checked (UNMEASURED); the o122 report's open-PR list does not name them.
+BLUF lengths 952 to 1007 characters (a little over the ~900 guide because each cites the develop sha and a quoted line).

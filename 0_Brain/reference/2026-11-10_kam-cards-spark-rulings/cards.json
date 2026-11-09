@@ -1,0 +1,77 @@
+[
+ {
+  "id": "secuura-ks2103-answered-chain-reply-shape-1110",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2103: which replies from the Cardano client count as the chain 'answering' (the shape of the empty-reply fix)?",
+  "bluf": "Your card secuura-anchoring-second-fee-on-empty-reply-1107 = a (fix the empty reply, tier 1 gate, deploy held for your word) stands and is not reopened. This card is only the shape the build seat needs. At develop d0b4825cc24493213f82b609670a4a0fa521a4b9 confirmation.ts line 79 `const tx = await getTransaction(txHash);` then line 80 `polled += 1;`: any non-throwing reply counts as an answer, and line 86 `if (tx) {` sends a falsy empty string to 'pending' (ticket description: gate 248 measured '' and null both give polled 30 and definitelyAbsent true, `{}` gives confirmed with no block hash; real blockfrost-js on a loopback listener). A false 'absent' lets guard 3 schedule a second fee-paying transaction (guard 3's retry end to end: not driven, per ticket). Likelihood low, none seen in service (ticket). Spark: option a or b is a one-file piece, provider.ts lines 451-461 (getTransaction, `return await blockfrost.txs(txHash);` at line 454), plus a test; open-PR overlap on provider.ts UNMEASURED.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Strict: only a 404 (null) or an object carrying a block hash counts as an answer; anything else counts as unreachable",
+    "detail": "Empty string, undefined and `{}` are thrown or counted in `errored`, never `polled`, so they cannot feed definitelyAbsent (anchorSubmission.ts line 238, export function definitelyAbsent) and `{}` cannot read confirmed with no block hash. Amends your 2026-09-25 definition of 'answered' (card secuura-ks1171-when-is-an-anchor-absent = c) only by excluding malformed replies. getTransaction also feeds two callers besides confirmation.ts (per card ...1106 text; I did not read them), so the build seat may instead narrow at confirmation.ts lines 79-86. Tier 1 gate; no deploy without your word."
+   },
+   {
+    "key": "b",
+    "label": "Narrow: empty string and undefined count as unreachable; `{}` still reads confirmed",
+    "detail": "Closes the second-fee path from an empty 2xx only. Leaves `{}` reading confirmed with no block hash (gate 248, measured). Same single file, same tier 1 gate."
+   },
+   {
+    "key": "c",
+    "label": "Leave the definition as is; rely on the deploy hold",
+    "detail": "No code change. Contradicts the effect of your 1107 = a ruling; the second-fee path stays open for an upstream or proxy that answers 2xx with no body (likelihood low, not seen in service)."
+   }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h: a. Wednesday tells the board seat to brief a build seat (Spark if the one-file piece fits) under a tier 1 gate; nothing deploys; anchoring's deploy stays held for Kam's word."
+ },
+ {
+  "id": "secuura-ks1952-redis-down-doctype-rules-1110",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1952: while Redis is down, should every document create be refused (503) instead of skipping the document-type rules?",
+  "bluf": "Today, while Redis is down, the gateway reads an empty document-type catalogue and lets every create through, including types registered with requireMFA: true. Measured by QA gate 144 on two replicas sharing one store with a stand-in for ioredis: ALLOWED ok:true, down=0 and down=1 (ticket description; gate 144 evidence probe_site3_table.log); no real Redis, no booted gateway (ticket 'Not tested'). Connector creates already refuse 503 in that state, which you ruled (card secuura-ks1256-redis-outage-stops-connector-creates-1006 = a): verification.ts line 840 `if (!redisService.isRedisAvailable()) {` at develop d0b4825cc24493213f82b609670a4a0fa521a4b9. The open question is the other callers: enforceDocumentTypeRules (verification.ts line 923) runs for every create, so option a also stops signed-in user creates that name a document type. Spark: option a is one file, enforcement.ts around lines 116-138, plus a test; open-PR overlap UNMEASURED.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Refuse every typed create with 503 while Redis is unavailable (same rule as connectors)",
+    "detail": "enforcement.ts line 126-127 comment says an empty catalogue means 'never seeded, or Redis TTL expiry'; the fix must key on isRedisAvailable() being false, not on emptiness, so a fresh boot with Redis up still passes (line 137 `return { ok: true, docType: {} };`). Untyped creates return at line 117 before any catalogue read and are unchanged (KS-1466 is a separate defect). Cost: typed user and connector creates stop for the length of every Redis outage. Effect on local or E2E runs with no Redis: UNMEASURED."
+   },
+   {
+    "key": "b",
+    "label": "Keep connectors refusing; leave user creates allowed during an outage",
+    "detail": "No change to user creates. MFA-required, inactive, verification-level, provider and schema rules stay skipped for them while Redis is down (MFA measured by gate 144; the others by reading only, per the ticket)."
+   },
+   {
+    "key": "c",
+    "label": "Hold for a design: keep a copy of the catalogue that survives a Redis outage",
+    "detail": "Enforcement keeps working during an outage. A larger build with no one-file piece; the fail-open stays live meanwhile (the 1256 card option b notes the same limit)."
+   }
+  ],
+  "recommended": "a",
+  "default_action": "After 48 h: nothing is built and nothing changes (the fail-open stays live); Wednesday re-asks Kam."
+ },
+ {
+  "id": "secuura-ks1855-gateway-standin-routes-1110",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1855: the gateway answers four admin and verify routes from fixed stand-ins; remove them, gate them, or split?",
+  "bluf": "Per the ticket, which assigns this to you, you decide which side moves. At develop d0b4825cc24493213f82b609670a4a0fa521a4b9 the api-gateway still answers from stand-ins registered before the proxy (index.ts lines 932-941 register createAdminRoutes and createVerificationRoutes with no environment guard): admin.ts line 1107 `router.get('/api/admin/audit-logs'` returns a literal 4-row array (actor admin@test.local) and line 1131 `/api/security/audit` the same; line 1054 `const mockVerificationQueue ... = [];` backs the verification-queue routes; verification.ts line 378 `/api/certifications/:id/verify` always answers `verified: false` with issuer `test-issuer` (line 407). Originate has real handlers for audit-logs (adminConfig.ts line 1225) and the queue (lines 398, 427); the real target of /api/security/audit is UNMEASURED. Not run on a stack. Spark: option a or c, audit-logs and queue half = one file, admin.ts lines 1050-1143, plus tests; open-PR overlap UNMEASURED.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Remove all four stand-ins so the proxy reaches the real service",
+    "detail": "verification.ts lines 397-401 say the certification verify stand-in stays 'until the originate->anchoring rewire lands', and lines 446-447 call it 'a test-only flow that originate doesn't expose'; the ticket says originate's own verify handler exists. Those two statements disagree and I did not resolve them. Peter's E2E harness calls (which tests use these routes): UNMEASURED."
+   },
+   {
+    "key": "b",
+    "label": "Keep all four, gate them behind an explicit test flag (off by default), document them as test doubles",
+    "detail": "Fabricated audit rows and an empty queue stop reaching real admins by default. Smallest behaviour change; four routes keep two code paths each."
+   },
+   {
+    "key": "c",
+    "label": "Split: remove the audit-log and verification-queue stand-ins now; gate certification verify behind the test flag until the rewire lands",
+    "detail": "Real handlers already exist for the first three (adminConfig.ts lines 398, 427, 1225). Whether originate's audit-logs reply has the {logs, events, total} shape the admin UI reads: UNMEASURED. Certification verify is untouched in behaviour for tests."
+   }
+  ],
+  "recommended": "c",
+  "default_action": "After 48 h: nothing is built and nothing changes; Wednesday re-asks Kam."
+ }
+]

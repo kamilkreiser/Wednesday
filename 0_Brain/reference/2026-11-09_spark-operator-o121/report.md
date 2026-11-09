@@ -1,0 +1,14 @@
+# Spark o121: report (condensed and saved by Wednesday 23:4x, because the operator's Write was refused; supporting files beside it are the operator's own)
+Spark rounds o121: 4 briefed, 3 PASS (3 held), 1 FAIL, 0 still queued. All code_patch2 (rung 3). develop d0b4825cc244 at both ends. Open PRs 66 -> 68 (2145, 2146 added; none lists these files; scan control PRs 2138/2099/2075 seen). Load1 sat 8-11 for most of the run (gate subagent beside it): the 'under 8' limit was NOT met.
+
+HELD (2_Project_Files/local-model/night/; three READY files confirmed present by ls at 23:42):
+- KS-1984 PASS 7/7, byte-identical to golden: four JSON.parse(row.public_fields || '[]') sites in nft-certificate minting.service.ts (123/505/592/678, re-verified at source) -> Array.isArray guard; new vitest, 7 cells, 5 red. FLAGS: row type still says public_fields: string (tsc rc 0); real-driver array return NOT measured (stand-in rows); ks1868 pool-listener control C1 red at baseline, green after (noise).
+- KS-2094 PASS 7/7, byte-identical: originate events.ts publishEvent empty catch -> one warn (event type + reason as text), still never throws; new jest, 5 cells, 3 red. Not carved: gdprService.ts 'published' line (PR 2099), throw-or-not, no-client branch. FLAGS: no rate limit on the warn; em dash in a kept comment (nonascii=1); originate baseline 11 reds on develop, none new.
+- KS-2017 PASS 7/7, byte-identical: certifications.ts:935 outer catch String(error) outside a try -> KS-1844 shape; new jest, 4 cells, 2 red. Not carved: revoked-Proxy thrown value (later error?.name/code reads). KS-2008 (same file) deferred until this is raised.
+Tier: all three tier 2 by the operator (no auth/credential/money file); the gate decides.
+
+FAIL: KS-1970 (re-spin of held O89-P6 + the scheduled-sweep handler, auth issuerCertSweep.ts, 18 cells). A1-A5, A7 pass; A6 whole-auth-suite: ks728-social-link-responds.test.ts newly red (3 -> 4 failed; 3 reproductions). Cause UNPROVEN: a 5000 ms timeout under load ~10 vs the six new real-setInterval cells; no clean baseline (cache/src has no built shared dist). Next: a golden re-run on a quiet box, or drop the six scheduled cells. Not held.
+
+Brief defects fixed by the operator before model rounds: a padded @@ count (macOS wc spaces); a '+' line equal to a '-' line; blank context lines (x2).
+Rejected with reasons: owner/design KS-1954, KS-1931, KS-1925, KS-2011, KS-1998; open-PR file KS-1821 (2081), KS-2004 (2087), KS-2101 (2099), KS-1647 (2138); harness/no red KS-1749, KS-951, KS-2154, KS-2075, KS-2029; needs measurement/Postgres KS-1960, KS-1739, KS-1712; deferred KS-2008.
+WHY EMPTY: 90 minutes spent (~23:50). 557 open KS -> 77 after the one-file/no-overlap/no-auth-word screen; past the four briefed, every one read failed on a named reason. The one honest piece left: KS-1970 after a quiet-box golden re-run.
