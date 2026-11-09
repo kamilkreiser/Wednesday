@@ -191,3 +191,5 @@
 # 2026-11-09 18:0x (Spark operator o117): KS-2123 items (types + ADMIN cells; test_only_input, two hunks, api-gateway), KS-2027 (three eslint-disable lines, doc_only), KS-2089 item 1 (one comment line, doc_only). Each lint rc 0, dry-run rc 0, CONTROL-PASS golden BYTE-IDENTICAL at develop e8d23ce366e2.
 # 2026-11-09 18:0x (Spark operator o117): KS-2150 (two KS-2109 fragment lines, doc_only). lint rc 0, dry-run rc 0, CONTROL-PASS golden BYTE-IDENTICAL at develop e8d23ce366e2.
 # 2026-11-09 18:1x (Spark operator o118): KS-2153 fragments (doc_only) and KS-2138 items 3+4 (test_only_bash, rung up). Each lint rc 0, dry-run rc 0, CONTROL-PASS golden BYTE-IDENTICAL at develop e8d23ce366e2.
+# 2026-11-09 21:3x (operator o120, for the 18:46 Wednesday seat): KS-716 item 2 only, doc_only, dry-run rc 0, control CONTROL-PASS byte-identical at d0b4825cc244.
+# 2026-11-09 21:3x (operator o120): KS-1413 carve (start-local.sh lines 280/286 + 3 cells), bash_patch2, credential-print surface = fully spelled-out edit, tier-1 gate owed; dry-run rc 0, control CONTROL-PASS golden byte-identical at d0b4825cc244.
