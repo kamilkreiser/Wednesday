@@ -20,7 +20,8 @@
 #   - has no fix shape (no "Fix shape" / "Recommendation" / "Fix:" / "Acceptance"
 #     section) — a ticket that asks a question is a ruling, not a task;
 #   - the service is neither vitest nor jest (2026-09-15 18:2x: jest services — originate, governance — are IN; see the
-#     runner_kind branch, `refuse(... runs vitest or jest only)`) — or is not a services/* | packages/shared path;
+#     runner_kind branch, `refuse(... runs vitest or jest only)`) — or is not a services/* | packages/shared path
+#     (2026-11-10 FRONTEND TIER, below: frontend/<pkg>/src/** is also IN, vitest + its own config only);
 #   - no in-process test under the service's src/__tests__ imports the product
 #     module (nothing to copy the mock shape from) — unless `ref=` pins one;
 #   - no defect line can be found (`<file>:NNN` in the ticket, or `line=`).
@@ -257,6 +258,7 @@ if bases and "product" not in pins:
 product = f"{subdir}/{product_rel}"
 tool_mode = "tool" in pins
 config_class = None
+frontend_mode = False    # 2026-11-10: product under frontend/<pkg>/src (see the FRONTEND TIER branch below)
 scripts_tamper = False   # 2026-10-29: a scripts/ product admitted ONLY as a test-only tamper target (see the branch below)
 def _config_class(rel):
     """The config allow-list. Returns 'package.json' | 'dockerignore' | None. No '..', no absolute path, nothing else."""
@@ -304,8 +306,16 @@ elif re.fullmatch(r"scripts/[A-Za-z0-9_\-./]+\.(?:cjs|mjs|js|ts|sh)", product_re
     scripts_tamper = True
     service_dir = _mt.group(1)
     print(f"SCRIPTS TAMPER TARGET: product {product_rel} is a script, NOT edited; test host (service_dir) = {service_dir} (from test_file=)")
+elif re.fullmatch(r"frontend/[A-Za-z0-9_\-]+/src/[A-Za-z0-9_\-./]+\.tsx?", product_rel) and ".." not in product_rel.split("/"):
+    # 2026-11-10 FRONTEND TIER (Wednesday, KS-2095 o130 piece 1: issuer BlockchainCard.tsx): a product under
+    # frontend/<pkg>/src/ is admitted with the PACKAGE'S OWN vitest (its vitest.config.* or the `test:` block of its
+    # vite.config.*, e.g. environment jsdom) run from frontend/<pkg>. Nothing else changes: every other gate runs as before.
+    # A package with no vitest config at the tip REFUSES below (section 4) naming why. jest frontends are not admitted.
+    frontend_mode = True
+    service_dir = "/".join(product_rel.split("/")[:2])
+    print(f"FRONTEND TIER: product {product_rel}; test host (service_dir) = {service_dir}")
 else:
-    refuse(f"product path is neither services/* nor packages/shared: {product_rel}")
+    refuse(f"product path is neither services/* nor packages/shared nor frontend/<pkg>/src: {product_rel}")
 
 # ---------------------------------------------------------------- 3. fix shape
 # 2026-09-15 12:3x (Kam 09:30 — Wednesday writes the model's task from the ticket; the ticket is never the
@@ -352,6 +362,20 @@ pkg = show(f"{svc_prefix}package.json")
 if pkg is None:
     refuse(f"{service_dir}/package.json is not at the tip")
 test_script = json.loads(pkg).get("scripts", {}).get("test", "")
+fe_env = ""
+if frontend_mode:
+    # FRONTEND TIER: the package must carry its OWN vitest config at the tip; read-only `git show`, never a guess.
+    _fe_cfgs = [f for f in ("vitest.config.ts", "vitest.config.mts", "vitest.config.js", "vitest.config.mjs", "vitest.config.cts", "vitest.config.cjs")
+                if show(f"{svc_prefix}{f}") is not None]
+    _fe_vite = [f for f in ("vite.config.ts", "vite.config.mts", "vite.config.js", "vite.config.mjs")
+                if re.search(r"(?m)^\s*test\s*:\s*\{", show(f"{svc_prefix}{f}") or "")]
+    if not (_fe_cfgs or _fe_vite):
+        refuse(f"frontend package {service_dir} has no vitest config at the tip {tip[:9]} (no vitest.config.* and no `test: {{` block in vite.config.*) — "
+               "the checker would have no runner settings (jsdom, globals, setup) for it; not admitted")
+    _cfg_text = show(f"{svc_prefix}{(_fe_cfgs or _fe_vite)[0]}") or ""
+    _em = re.search(r"environment\s*:\s*['\"]([A-Za-z\-]+)['\"]", _cfg_text)
+    fe_env = _em.group(1) if _em else ""
+    print(f"FRONTEND TIER: {service_dir} vitest config = {(_fe_cfgs or _fe_vite)[0]}" + (f" (environment {fe_env})" if fe_env else " (no environment key: vitest default node)"))
 # 2026-09-15 19:5x tool mode: `"test": "npm run test:unit"` is an indirection — resolve ONE level so the runner kind is read
 # from the script that actually runs (systemTest/performance).
 _m_indir = re.match(r"^npm run (\S+)$", test_script.strip())
@@ -363,6 +387,8 @@ if _m_indir:
 if "vitest" in test_script:
     runner_kind = "vitest"
 elif "jest" in test_script:
+    if frontend_mode:
+        refuse(f"frontend package {service_dir} test script is {test_script!r} — the frontend tier runs the package's own vitest only")
     runner_kind = "jest"
 elif config_class and any(k in {**json.loads(pkg).get("dependencies", {}), **json.loads(pkg).get("devDependencies", {})} for k in ("vitest", "jest")):
     _deps = {**json.loads(pkg).get("dependencies", {}), **json.loads(pkg).get("devDependencies", {})}
@@ -372,7 +398,7 @@ else:
     refuse(f"{service_dir} test script is {test_script!r} — the checker runs vitest or jest only")
 has_setup = show(f"{svc_prefix}vitest.setup.ts") is not None
 has_cfg = show(f"{svc_prefix}vitest.config.ts") is not None
-has_vite_cfg = bool(config_class) and show(f"{svc_prefix}vite.config.ts") is not None
+has_vite_cfg = (bool(config_class) or frontend_mode) and show(f"{svc_prefix}vite.config.ts") is not None
 has_jest_cfg = show(f"{svc_prefix}jest.config.js") is not None
 tsconfig_txt = show(f"{svc_prefix}tsconfig.json") or "{}"
 # tool packages name their unit config explicitly (performance: vitest.unit.config.ts); the checker reads `--config <x>`
@@ -444,16 +470,17 @@ imports = [ln for ln in lines if ln.startswith("import ")][:12]
 # ---------------------------------------------------------------- 6. reference test (imports the product module)
 test_dir_rel = (pins.get("test_dir") or "tests/unit") if tool_mode else f"{service_dir}/src/__tests__"
 r = git("ls-tree", "-r", "--name-only", tip, "--", f"{subdir}/{test_dir_rel}")
-tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts") or (config_class and p.endswith(".test.tsx"))]
+tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts") or ((config_class or frontend_mode) and p.endswith(".test.tsx"))]
 if not tests:
     refuse(f"no test files under {test_dir_rel} at the tip")
 mod_rel = product_rel if (tool_mode or config_class or scripts_tamper) else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
-mod_noext = re.sub(r"\.ts$", "", mod_rel)                          # middleware/audit
+mod_noext = re.sub(r"\.tsx?$" if frontend_mode else r"\.ts$", "", mod_rel)                          # middleware/audit
 mod_base = os.path.basename(mod_noext)                             # audit
 scored = []
 for t in ([] if (config_class or scripts_tamper) else tests):   # config tier: a config file is imported by no test; the reference is a style template only
     body = git("show", f"{tip}:{t}").stdout
-    imp = re.findall(r"from\s+['\"](\.{1,2}/[^'\"]+)['\"]", body) + re.findall(r"import\(\s*['\"](\.{1,2}/[^'\"]+)['\"]\s*\)", body)
+    _pfx = r"(?:\.{1,2}|@)/" if frontend_mode else r"\.{1,2}/"   # frontend: the package's `@/` alias (vite.config resolve.alias) is src/
+    imp = re.findall(r"from\s+['\"](" + _pfx + r"[^'\"]+)['\"]", body) + re.findall(r"import\(\s*['\"](" + _pfx + r"[^'\"]+)['\"]\s*\)", body)
     hits = [i for i in imp if i.rstrip("/").endswith("/" + mod_noext) or i.rstrip("/").endswith("/" + mod_base) or i.endswith(mod_noext)]
     if not hits: continue
     mocks = re.findall(r"vi\.mock\(\s*['\"]([^'\"]+)['\"]", body)
@@ -492,9 +519,10 @@ suggested = f"{subdir}/{test_dir_rel}/ks{number}-{slug}.test.ts"
 # 2026-09-15 20:0x (KS-1164, tool mode): the NEW test lives BESIDE the reference test, because the relative
 # imports the model copies from it (`../../../gate/report.ts`) resolve only from that directory. For the
 # services' flat src/__tests__ this is the same path; for a nested tests/unit/<area>/ it is the fix.
-suggested = f"{os.path.dirname(ref_path)}/ks{number}-{slug}.test.ts"
+suggested = f"{os.path.dirname(ref_path)}/ks{number}-{slug}.test.{'tsx' if frontend_mode else 'ts'}"
 if runner_kind == "vitest":
     runner = f"vitest (run one file with `npx vitest run{(' --config ' + vitest_cfg) if vitest_cfg else ''} <file>` from {subdir}/{service_dir}" + \
+             (f"; frontend package, environment {fe_env or 'node'}" if frontend_mode else "") + \
              ("; setupFiles ./vitest.setup.ts" if has_setup else "") + (")" if has_cfg else ("; vitest reads the `test:` block of vite.config.ts)" if has_vite_cfg else "; no vitest.config.ts at the tip)"))
 else:
     runner = (f"jest (ts-jest; run one file with `npx jest <file>` from {subdir}/{service_dir}"
