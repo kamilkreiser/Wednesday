@@ -531,3 +531,9 @@ Installed 2026-11-04 ~20:0x AEDT by Secuura Seat R 85th on Wednesday's ruling (`
 - **Machine-local:** `/opt/homebrew/opt/postgresql@15` (15.19_1). It pulled `icu4c@79` and `krb5`, and UPGRADED `libunistring` 1.4.2 -> 1.5 (old keg kept). Brew also created a non-started default cluster dir `/opt/homebrew/var/postgresql@15` (~38 MB): nothing uses it; never start a service on it.
 - **No service:** no `brew services` job, no launchd plist; every suite/gate starts its own cluster on a private data dir + 127.0.0.1 port and stops it by pid.
 - **New Mac:** `brew install postgresql@15`. `doctor.sh` warns if the keg is missing; absence degrades those suites to SKIP, not FAIL.
+
+## 26. Node 24 for Datasec builders — DRIVE-LOCAL, Tuesday seat (2026-11-10)
+- **What:** `2_Project_Files/tools/node-v24.22.2-darwin-arm64/` (official nodejs.org tarball, sha256 `aa9549349e47dffaa42dcf95d6e06ade8c4bdafc980979883b88767670df385a`, checked against SHASUMS256.txt). Gitignored (`2_Project_Files/tools/node-v24*/`), so a fresh clone does NOT have it.
+- **Why:** MPS CI pins Node 24 (`ci.yml:58`); the M5 Studio has only Homebrew Node 26. Three MPS builders correctly refused v26 and sat STOPPED ~3 h on 2026-11-10 before anyone noticed (ledger row 11-10 s262).
+- **Bring-up on a new machine:** `curl -fsS https://nodejs.org/dist/latest-v24.x/SHASUMS256.txt`, download the darwin-arm64 tarball, compare sha256, `tar -xzf` into `2_Project_Files/tools/`. Seats use it by prefixing `PATH=<that dir>/bin:$PATH` per command (addendum `tuesday/briefs/2026-11-10_MPS-NODE24_ADDENDUM_B1400-B1401-B1409.md`).
+- **Broader rule:** after any machine move, check every toolchain the Datasec CI files pin (node, dotnet) against the machine before launching builders.
