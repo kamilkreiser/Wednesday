@@ -64739,18 +64739,18 @@
   "id": "wed-secuura-dev-skip-regenerable-1109",
   "client_project": "WED/Migration",
   "title": "Drive copy: skip rebuildable bulk (~900 GiB) so Secuura_DEV is ready in hours, not days",
-  "bluf": "(Override: the prior matches are about the T9 drive in September and an unrelated GDPR card; none rules what goes on Secuura_DEV.) The copy to Secuura_DEV runs at about 19 GiB an hour, and 2.2 TB would take days. Measured tonight (du): of WEDNESDAY's 1.0 TB, about 900 GiB is rebuildable. (1) Repo clones that gates left inside 0_Brain/reference/<gate>/repo/: 413 GiB is the whole folder; the largest gate, 214, is 11.2 of 12.1 GiB in repo/. Verdicts, commissions and run logs stay. (2) Spark working clones, local-model/spark/cache/work: 320 GiB. (3) Local model weights, tools/omlx/models: 198 GiB, downloadable again. Your 09-29 rule: 'there is no need to keep historical CI files ... limit storing what has been used and no longer needed'. Nothing is deleted: DevMASTER keeps it all, this only changes what is copied. Secuura's own 1.2 TB is not censused yet (next).",
+  "bluf": "The copy to Secuura_DEV runs at about 19 GiB an hour, and 2.2 TB would take days. Measured (du, 11-09 22:4x to 11-10 00:3x). WEDNESDAY (1.0 TB): about 900 GiB rebuildable: gate repo clones inside 0_Brain/reference/<gate>/repo/ (the folder is 413 GiB; gate 214 is 11.2 of 12.1 GiB in repo/), Spark working clones (320 GiB) and local model weights (198 GiB). SECUURA (1.2 TB): 1,013 GiB is 853 seat worktrees under Blockchain/worktrees; only 42 have a top folder touched in the last 3 days (an mtime proxy). Committed work in a worktree lives in the main repo's .git, so skipping the folder loses only UNCOMMITTED changes; that dirty count is UNMEASURED and gets run before any skip. Your 09-29 rule: 'limit storing what has been used and no longer needed'. Nothing is deleted: DevMASTER keeps it all, and this only changes what is copied.",
   "default_action": "Keep copying everything (option c) until you answer; nothing is skipped or deleted without your word",
   "options": [
    {
     "key": "a",
     "label": "Skip all three (recommended)",
-    "detail": "Restart the copy with those three excluded; the new drive holds every record, and model weights are re-downloaded where local models will run (the 256 GB Studio)"
+    "detail": "Restart the copy excluding the three WEDNESDAY bulks AND the ~811 stale Secuura worktrees (after a dirty census; any worktree with uncommitted changes is copied). Records, history, the main repo and the 42 recent worktrees all go. Weights are re-downloaded where local models run"
    },
    {
     "key": "b",
     "label": "Skip the clones, keep the model weights",
-    "detail": "About 730 GiB skipped; the 198 GiB of weights are copied too"
+    "detail": "As a, but the 198 GiB of model weights are copied too"
    },
    {
     "key": "c",
@@ -64767,6 +64767,23 @@
    "2026-09-02 17:56",
    "2026-09-16 18:42",
    "CARD secuura-pr1961-erasure-skip-not-shredded-1103"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-11-10T00:23:11.902675+11:00",
+    "reason": "Secuura census finished 00:3x (du, read-only): it is the other 1.2 TB of the copy, so the card was incomplete without it.",
+    "changed": [
+     "bluf",
+     "option:a",
+     "option:b"
+    ],
+    "before": {
+     "bluf": "(Override: the prior matches are about the T9 drive in September and an unrelated GDPR card; none rules what goes on Secuura_DEV.) The copy to Secuura_DEV runs at about 19 GiB an hour, and 2.2 TB would take days. Measured tonight (du): of WEDNESDAY's 1.0 TB, about 900 GiB is rebuildable. (1) Repo clones that gates left inside 0_Brain/reference/<gate>/repo/: 413 GiB is the whole folder; the largest gate, 214, is 11.2 of 12.1 GiB in repo/. Verdicts, commissions and run logs stay. (2) Spark working clones, local-model/spark/cache/work: 320 GiB. (3) Local model weights, tools/omlx/models: 198 GiB, downloadable again. Your 09-29 rule: 'there is no need to keep historical CI files ... limit storing what has been used and no longer needed'. Nothing is deleted: DevMASTER keeps it all, this only changes what is copied. Secuura's own 1.2 TB is not censused yet (next).",
+     "option:a": "Restart the copy with those three excluded; the new drive holds every record, and model weights are re-downloaded where local models will run (the 256 GB Studio)",
+     "option:b": "About 730 GiB skipped; the 198 GiB of weights are copied too"
+    }
+   }
+  ],
+  "amended_ts": "2026-11-10T00:23:11.902697+11:00"
  }
 ]
