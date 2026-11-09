@@ -1,0 +1,22 @@
+diff --git a/systemTest/__tests__/no_hardcoded_slot_literals.test.sh b/systemTest/__tests__/no_hardcoded_slot_literals.test.sh
+index ee008e4c8..495aab601 100755
+--- a/systemTest/__tests__/no_hardcoded_slot_literals.test.sh
++++ b/systemTest/__tests__/no_hardcoded_slot_literals.test.sh
+@@ -155,6 +155,8 @@ echo "== POSITIVE CONTROL: a planted literal is found, in every family and shape
+ mkdir -p "$TMP/st"
+ # The scan lists files through git (KS-1386), so the control tree is a git work tree from the start.
+ git -C "$TMP/st" init -q 2>/dev/null
++if [[ "$(git -C "$TMP/st" rev-parse --is-inside-work-tree 2>/dev/null)" == "true" ]]; then ok "SETUP: the planted-control tree is a git work tree"
++else bad "SETUP: git init did not make the planted-control tree a git work tree, so the controls below would read as a scan that found nothing" "     $TMP/st"; fi
+ for r in "${CONTROL_ROOTS[@]}"; do [[ -d "$ST/$r" ]] && mkdir -p "$TMP/st/$(dirname "$r")" && cp -R "$ST/$r" "$TMP/st/$r"; done
+ rm -rf "$TMP/st/fixtures/generated" "$TMP/st/performance/tests/unit/fixtures/node_modules" 2>/dev/null
+ plant="$TMP/st/fixtures/planted.ts"
+@@ -226,6 +228,8 @@ else
+   # so ONLY the membership check can catch it.
+   ctl="$TMP/ctl"; mkdir -p "$ctl/$(dirname "$PROVENANCE_FILE")"
+   git -C "$ctl" init -q 2>/dev/null
++  if [[ "$(git -C "$ctl" rev-parse --is-inside-work-tree 2>/dev/null)" == "true" ]]; then ok "SETUP: the provenance-control tree is a git work tree"
++  else bad "SETUP: git init did not make the provenance-control tree a git work tree, so its control would read as a scan that found nothing" "     $ctl"; fi
+   # The planted id's slot token is COMPUTED, exactly as the other controls compute theirs, so
+   # this file never itself holds a slot 2..MAX literal (the guard scans __tests__).
+   ctl_id="pre-merge-ks-0000-2026-01-01T00-00-00Z-$(se_tag 2)"

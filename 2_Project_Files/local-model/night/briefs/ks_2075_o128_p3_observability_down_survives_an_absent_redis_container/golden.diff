@@ -1,0 +1,82 @@
+diff --git a/observability/scripts/observability.sh b/observability/scripts/observability.sh
+--- a/observability/scripts/observability.sh
++++ b/observability/scripts/observability.sh
+@@ -148,7 +148,7 @@
+         sys.stdout.write(cmd[i + 1])' 2>/dev/null
+ }
+ 
+-_redis_pw="$(resolve_redis_password)"
++_redis_pw="$(resolve_redis_password || true)"
+ if [[ -n "$_redis_pw" ]]; then
+     export SECUURA_REDIS_PASSWORD="$_redis_pw"
+ fi
+diff --git a/Blockchain/Dev/scripts/__tests__/observability_down_survives_an_absent_redis_container.test.sh b/Blockchain/Dev/scripts/__tests__/observability_down_survives_an_absent_redis_container.test.sh
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/observability_down_survives_an_absent_redis_container.test.sh
+@@ -0,0 +1,65 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for observability/scripts/observability.sh - KS-2075: `down` must still stop the stack
++# when the platform's redis container is absent.
++# =============================================================================
++# docker is a stub on a private PATH: it records every call, answers `inspect` with a failure
++# when STUB_INSPECT_RC is non-zero (the container is absent), and answers everything else with 0.
++# No Docker, no network. The cells read the exit code and the recorded calls.
++# Usage: bash Blockchain/Dev/scripts/__tests__/observability_down_survives_an_absent_redis_container.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUBJ="${OBSERVABILITY_SH:-$HERE/../../../../observability/scripts/observability.sh}"
++[[ -r "$SUBJ" ]] || { echo "FATAL: observability.sh not readable at $SUBJ" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks2075.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++
++check() {
++    local desc="$1" want="$2" got="$3"
++    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
++    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
++}
++
++mkdir -p "$WORK/bin"
++cat > "$WORK/bin/docker" <<'STUB'
++#!/bin/sh
++echo "docker $*" >> "$STUB_LOG"
++if [ "$1" = inspect ]; then
++    if [ "${STUB_INSPECT_RC:-0}" != 0 ]; then exit "$STUB_INSPECT_RC"; fi
++    echo '["redis-server"]'
++    exit 0
++fi
++if [ "$1" = exec ]; then exit 1; fi
++exit 0
++STUB
++chmod +x "$WORK/bin/docker"
++
++# run_down <inspect rc>: runs `observability.sh down` with the stub docker; prints "<exit code> <number of compose-down calls>"
++run_down() {
++    : > "$WORK/calls.log"
++    local rc
++    (
++        export PATH="$WORK/bin:/usr/bin:/bin" STUB_LOG="$WORK/calls.log" STUB_INSPECT_RC="$1"
++        unset SECUURA_REDIS_PASSWORD
++        bash "$SUBJ" down
++    ) >"$WORK/out.txt" 2>&1
++    rc=$?
++    printf '%s %s' "$rc" "$(grep -c 'docker compose .* down' "$WORK/calls.log")"
++}
++
++# CELL 1 (CONTROL, tip AND after): with the redis container present, down exits 0 and runs compose down once.
++check "CONTROL a present redis container: down exits 0 and runs compose down once" \
++    "0 1" "$(run_down 0)"
++
++# CELL 2 (RED at the tip): with the redis container absent, down exits 0 and runs compose down once.
++check "an absent redis container: down exits 0 and runs compose down once" \
++    "0 1" "$(run_down 1)"
++
++echo ""
++echo "observability_down_survives_an_absent_redis_container: ${PASS} passed, ${FAIL} failed"
++(( FAIL == 0 ))

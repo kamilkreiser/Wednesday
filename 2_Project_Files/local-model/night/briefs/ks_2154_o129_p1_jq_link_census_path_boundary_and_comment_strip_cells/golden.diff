@@ -1,0 +1,39 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh b/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh
+index a2325f34e..b9213c995 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh
+@@ -45,7 +45,7 @@ in_census() {
+ links_jq() {
+     awk '{ if (sub(/\\$/, "")) { buf = buf $0 " "; next } print buf $0; buf = "" } END { if (buf != "") print buf }' "$1" \
+         | sed -E -e 's/^[[:space:]]*#.*$//' -e 's/[[:space:]]+#.*$//' \
+-        | grep -qE '(^|[;&|(!]|[[:space:]](then|do|else))[[:space:]]*(command[[:space:]]+)?ln[[:space:]]+(-[A-Za-z]*s[A-Za-z]*|--symbolic)[[:space:]][^;&|#]*bin/jq["'"'"']?[[:space:]]*($|[;&|)]|[0-9]*>)'
++        | grep -qE '(^|[;&|(!]|[[:space:]](then|do|else))[[:space:]]*(command[[:space:]]+)?ln[[:space:]]+(-[A-Za-z]*s[A-Za-z]*|--symbolic)[[:space:]][^;&|#]*[/"'"'"'[:space:]]bin/jq["'"'"']?[[:space:]]*($|[;&|)]|[0-9]*>)'
+ }
+ 
+ census=""      # suites with both a jq check and a private PATH
+@@ -129,6 +129,25 @@ ln -sf "$root/bin/jq" "$stub/elsewhere" # bin/jq
+ TRAILING_SPELLINGS
+ check "F-2078-2 a trailing comment or word naming bin/jq on another statement is NOT a link ($total spellings)" "$total" "$rejected"
+ 
++# KS-2154 G277-2114-2: `bin/jq` must start a path component, so a name that merely ENDS in bin/jq (mybin/jq) is NOT the stub dir's jq link.
++rejected=0; total=0
++while IFS= read -r line; do
++    total=$((total + 1)); printf '%s\n' "$line" > "$FX/spelling.sh"
++    [[ "$(verdict "$FX/spelling.sh")" == "no" ]] && rejected=$((rejected + 1))
++done <<'BOUNDARY_SPELLINGS'
++ln -sf "$JQ_BIN" "$root/mybin/jq"
++ln -sf "$JQ_BIN" mybin/jq
++ln -sf "$JQ_BIN" "$root/xbin/jq" 2>/dev/null
++BOUNDARY_SPELLINGS
++check "G277-2114-2 a path that merely ends in bin/jq (mybin/jq) is NOT a link into the stub dir ($total spellings)" "$total" "$rejected"
++printf '%s\n' 'ln -sf "$JQ_BIN" bin/jq' > "$FX/relative.sh"
++check "CONTROL G277-2114-2 a relative bin/jq destination is still a link" "yes" "$(verdict "$FX/relative.sh")"
++
++# KS-2154 G277-2114-1: the comment strip has a cell of its own. The hidden second statement after a # is found only if the strip is removed
++# (the regex lets an `ln` follow a `;`), so this cell goes red when the strip is dropped.
++printf '%s\n' 'ln -sf "$DOCKER_BIN" "$root/bin/docker" # ; ln -sf "$JQ_BIN" "$root/bin/jq"' > "$FX/hidden_in_comment.sh"
++check "G277-2114-1 a link statement hidden after a # on another statement is NOT a link (the comment strip)" "no" "$(verdict "$FX/hidden_in_comment.sh")"
++
+ # Respellings of the real statement that must still count, so the stricter predicate does not turn a fine suite red.
+ accepted=0; total=0
+ while IFS= read -r line; do

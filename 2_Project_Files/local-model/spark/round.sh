@@ -343,6 +343,15 @@ if [ "$B_TIER" = code_patch ] || [ "$B_TIER" = code_patch2 ] || [ "$B_TIER" = te
     || finish 5 "HARNESS — prepare_clone.sh failed: $(tail -2 "$RUN/prepare_clone.out" | tr '\n' ' ' | cut -c1-240)" "$RUN"
   say "prepare: $(grep -m1 'shared built' "$RUN/prepare_clone.out" || tail -1 "$RUN/prepare_clone.out")"
 fi
+# 2026-11-10 (o128): OPT-IN node farm + packages/shared build for the BASH tiers. A brief dir holding a file named spark.farm
+# (optional line service_dir=services/<x>) asks for it; without that file nothing below runs and a bash round is unchanged.
+# Why: a bash suite that drives node (KS-1145 item 2, ks949) died on a bare clone: "packages/shared is not built" (IMPROVEMENTS 2026-11-10).
+if { [ "$B_TIER" = bash_patch2 ] || [ "$B_TIER" = test_only_bash ]; } && [ -f "$BDIR/spark.farm" ]; then
+  FARM_SVC="$(sed -n 's/^service_dir=//p' "$BDIR/spark.farm" | head -1)"
+  bash "$HERE/prepare_bash_farm.sh" "$CLONE" "$TIP" ${FARM_SVC:+"$FARM_SVC"} > "$RUN/prepare_bash_farm.out" 2>&1 \
+    || finish 5 "HARNESS — prepare_bash_farm.sh failed: $(tail -2 "$RUN/prepare_bash_farm.out" | tr '\n' ' ' | cut -c1-240)" "$RUN"
+  say "bash farm: $(tail -1 "$RUN/prepare_bash_farm.out" | cut -c1-160)"
+fi
 
 # ------------------------------------------------------------------ 8. model (thinking OFF) — or the golden (--control)
 if [ "$CONTROL" -eq 1 ]; then

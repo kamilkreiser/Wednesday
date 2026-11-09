@@ -193,3 +193,6 @@ agrees with it (the 09-29 / 10-01 stale-origin fault). Every first-level `node_m
 checkout is symlinked into the cache except `SPARK_NM_EXCLUDE` (default `services/billing`: its own lock's modules make
 tsc fail, IMPROVEMENTS 2026-10-01). Whether a service's own lock is right for a given tip is per-service and measured,
 not assumed (nft-certificate needed its own on 10-01).
+
+## Opt-in bash farm (2026-11-10, o128)
+A bash_patch2 / test_only_bash brief whose suite drives node (packages/shared dist, `node_modules/.bin/tsx`) puts a file named `spark.farm` in its brief dir (optional line `service_dir=services/<x>`, default services/auth). round.sh then runs `prepare_bash_farm.sh` after the clone: node_modules farm + `tsc` build of packages/shared in the clone via `tasks/code_patch/prepare_clone.sh`, and asserts dist + tsx. No file = nothing runs. First user: KS-1145 item 2 (ks949 real-Postgres suite, 0/27 bare, 27/27 farmed).

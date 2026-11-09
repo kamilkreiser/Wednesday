@@ -1,0 +1,24 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh b/Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh
+@@ -81,3 +81,3 @@
+ PGPORT_NAME=54329          # only ever a socket FILE name: no TCP is bound
+-TOTAL_CELLS=27   # KS-962 round 2: +ID3, the IS DISTINCT FROM guard's regression cell
++TOTAL_CELLS=28   # KS-962 round 2: +ID3, the IS DISTINCT FROM guard's regression cell; KS-1145: +ID4, the slug arm
+ 
+@@ -318,4 +318,15 @@
+ fi
+ 
++# KS-1145 (gate item 2): AG4 plants drift on BOTH columns, so either arm of the guard alone repairs its fixture.
++# ID4 plants drift on the SLUG only of a second id (its tenant_id is untouched): only the slug arm of the guard can see it,
++# and a guard without that arm reads UPDATE 0 and leaves the slug drifted.
++PSQL ag <<<"UPDATE users SET tenant_slug='slug-only-drift' WHERE id='c1000000-0000-4000-8000-000000000001';" >/dev/null
++OUT=$(PSQL ag <<<"$STMT"); SLUGAFTER=$(PSQL ag <<<"SELECT tenant_slug FROM users WHERE id='c1000000-0000-4000-8000-000000000001';")
++if [ "$OUT" = "UPDATE 1" ] && [ "$SLUGAFTER" = "oxford-university" ]; then
++  ok "ID4: slug-only drift on a second id is repaired, UPDATE 1 and the slug restored (the slug arm of the IS DISTINCT FROM guard)"
++else
++  bad "ID4: slug-only drift on a second id was not repaired, command tag '$(printf '%s' "$OUT" | one_line 40)', slug '$SLUGAFTER'"
++fi
++
+ # --- 10. Controls ------------------------------------------------------------------
+ echo "  -- controls"
