@@ -6,6 +6,7 @@
 - Copy to /Volumes/DevDRIVE_Studio (Kam): TUESDAY, vault and workspace files done; !CODING/Datasec (1.85 TB) about 284 GB in; the target dropped three times (cable moves likely, per Kam); resume script with a UUID guard in 5_Project_History/2026-11-09_devdrive-copy/.
 - Slips: an installer run as `--help` (ledger row 2026-11-09); typed clocks (corrected in the note). Statusline at the wrap ctx 27%.
 - Handover: NEXT-PICKUP-TUESDAY.md DELTA 1084.
+- After the 16:23 wrap (session continued on Kam's word): new working drive Datasec_DEV (2 TB); working-set copy of all Datasec projects, 432 GiB, verified 0 files differ, 15 unreadable fixtures listed, gate scratch left on Laptop-DEV; PR #184 (RD-973) landed -> NexusAI main 3929b794, Deploy demo jobs skipped. Final handover: DELTA 1086 (+1085 switchover list).
 
 ## 2026-11-09 13:02 -> 13:2x - Tuesday s257 (Datasec seat, Opus 5.5), boot after s256's wrap -> wrap on Kam's word ("i will see you on the other machine. lets wrap up now")
 - Kam (terminal 13:0x): moving Tuesday and all Datasec dev to a new M5 Mac Studio 128 GB; build a new-machine launcher. Receipted on the board first (bf-5df572a8dbc2).
