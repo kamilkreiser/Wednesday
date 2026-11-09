@@ -1,0 +1,190 @@
+From Tuesday (Datasec coordinator seat), Datasec / HPSM-POC. **Your STATUS file is the channel and the wrap** (no mail; a launch message that names a mailbox is overridden). A question is a last line `STOPPED: NEEDS TUESDAY <one question>`. Marks: **MEASURED** = printed by a named instrument; **DERIVED** = source reading, not run; **RELAYED** = read in another file; **UNMEASURED** = nobody has.
+
+**LAUNCH ONLY AFTER B1397 (seat R197, records) has finished and landed** (its STATUS last line begins `RECORDS COMMITTED:` and names a merged pull request, or `RECORDS DONE:`), **and while no pane runs a kit that writes Jira HPSMPOC or `CLARIFICATIONS.md`** (R197's own REFUSE 7 stops it if this seat is live beside it, and both write `CLARIFICATIONS.md`, whose next free numbers each seat reads at writing). **Key overlap with R197: none** (R197 Part 1 holds HPSMPOC-109, 318, 271, 368, 370, 372, 383; its Part 2 candidates are the builder lanes' tickets 439, 357, 405, 399, 431, 408, 323, 234, 235, 228, 343, 99, 315, 226, 436, 428, 322, 352, 356; none is below). The overlap is the FILE, so this seat runs after R197, never beside it, including any later R197 ADDENDUM run.
+
+# BRIEF B1444 | SEAT-R201 (records): HPSM-POC. **Records and Jira only, no code: deliver the product owner's nine 2026-11-10 board answers into the project's records: one CLARIFICATIONS entry per answer, quoting the ruling (and his note) verbatim with its time, and one Jira comment per named ticket that cites its entry.** MODEL SONNET (records form of B1397, B1374 and B1386). NO CODE BYTE, NO CODE-REPOSITORY WRITE, NOTHING DEPLOYED, NO MESSAGE TO ANY HUMAN.
+
+**BLUF:** nine entries E1 to E9 into `1_Project_Definition/CLARIFICATIONS.md` of the analysis repository (next free numbers, read at records main after R197 landed; at drafting the newest was `### C-311` at line 5762 and R197 expects C-312 to C-314, so yours are expected from C-315); 25 Jira comments on HPSMPOC-6, 31, 37, 44, 46, 51, 55, 87, 91, 100, 117, 180, 203, 257, 324, 390, 391, 392, 393, 394, 395, 401, 410, 417, 438, each citing its entry; at most four moves to Done (401, 203, 391, 392), only under the MOVE slot and only where every clause reads met. Seat id R201. Your STATUS: `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1444_STATUS.md`. Ports: **none**. **The HPSMPOC-438 comment carries the proposed sentence for review before it is built** (the ruled option says the sentence is posted on the ticket first): post it early (order below); Tuesday opens B1440's 438 slot on its read-back.
+
+**Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/HPSM-POC-R201 "BRIEF_SEAT_LEVEL=sonnet WED_USAGE_STOP=100 bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC' '<this kit's path>'"`. Model row: model-routing.md line 97, row C7 (client-board ticket comments: Sonnet drafts first, and posts only a body the coordinator approved: the dry run and the JIRA slot are that approval); model id `claude-sonnet-5-5`. `brief_seat.sh` defaults to Opus (line 24); the level is written inside the quotes. **No az.**
+
+## READ WHOLE FIRST (read-only; they are the form and the truth, this kit is a relay)
+1. The records form: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1397_SEAT-R197_hpsmpoc-records.md` (read whole: the closed list, the helpers, the text rules, the dry run, the read-back, the snapshot diff, the landing; **it binds you wherever this kit is silent**, with `b1397` read as `b1444`), and the two forms it names (B1374, B1386).
+2. B1397's STATUS `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1397_STATUS.md` (its last line; which C-numbers it wrote).
+3. The project's `CLAUDE.md` and `JIRA.md`, then records main's `CLARIFICATIONS.md` tail and the entry holding the project's Done rule (heading of C-263, "Done means merged to main (each ticket's done-when checked first; nothing deploys)", RELAYED by B1397; you print it).
+4. The builder and drafting kits this record points to (read-only, to name them right): B1440 (seat H150), B1441 (seat H151), B1442 (seat H152), B1443 (seat H153), all `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B144*`.
+
+## BINDING HOLD
+UAT is on hold and nothing deploys. **You write nothing in the CODE repository** (`datasecau/HPSM-POC`: `gh api -X GET` only). You write: (1) Jira project HPSMPOC through the CLOSED LIST below; (2) `1_Project_Definition/CLARIFICATIONS.md` of the ANALYSIS repository through one records branch `records/b1444` in your own clone `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/.tools/b1444/analysis`; (3) files under `.tools/b1444/` and your STATUS. No `az`, docker, ssh, or HTTP to any hosted, demo, UAT or production host (Jira's API host and GitHub are the only network targets). No message to any human. Never delete (quarantine to `.tools/b1444/_quarantine/`); no force-push, amend, reset or rebase; **never type `cd`**. This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM); next-phase items are stored and architected only. **Read no decision card**: every ruling below is RELAYED by this kit (the drafter read each card by `decision_queue.sh show <id>` at 03:3x AEDT on 2026-11-10; the times are that tool's `ruled_ts`, MEASURED by the drafter).
+
+## THE JIRA CLOSED LIST (property first, then at least these; any other shape: prove it meets the property or STOP)
+**Property:** HPSMPOC only; exactly the 25 keys named in the BLUF; one comment per key; a transition only to the transition named `Done`, only on 401, 203, 391, 392, only when the MOVE slot reads `CLOSE-IF-MET` and every clause of that ticket reads MET by your program; no create, no edit of a ticket, no link, no assignee, no label, no delete; nothing on any other key. **At least:** `POST /rest/api/3/issue/<KEY>/comment`; `GET .../transitions` then `POST .../transitions` with the id whose name is `Done`. **NEVER moved (comment only, whatever the evidence):** 6, 31, 37, 44, 46, 51, 55, 87, 91, 100, 117, 180, 257, 324, 390, 393, 394, 395, 410, 417, 438.
+**Helpers: written fresh** under `.tools/b1444/` as B1397 specifies its own (`jira1444.py`, `scan1444.py`, `snap1444.py`, `diff1444.py`, each with `--selftest`), from the forms B1397 names (`1_Project_Definition/Briefs/2026-11-06_B1343_evidence/jira_get.py`, whose `b60-jira.py` import is stale, and `1_Project_Definition/Briefs/B29-A_evidence/jira-poster.py`); credentials `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN` read in-process from `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.env`, never printed. The poster refuses any key outside the list, any text that fails the scan, any call while the JIRA slot is HOLD or `.tools/b1444/HOLD` exists, and a second comment carrying a marker already on the ticket.
+**Every JQL is `project = HPSMPOC AND ( ... )` with the parentheses**; GETs at no more than 5 per second.
+
+## THE JIRA TEXT RULES (B1397's, applied by `scan1444.py` to every payload before any post; a hit is a STOP for that text)
+As B1397 "THE JIRA TEXT RULES", with ONE exception this kit makes: **the citation `entry C-<n>`, where `<n>` is one of YOUR nine numbers, is allowed** (the commission asks each comment to cite its entry; earlier comments on these tickets cite entries the same way, for example comment 40288 on HPSMPOC-401 ends "Recorded as entry C-232", read by the drafter). Every other `\bC-[0-9]{1,4}[a-z]?\b` stays banned. Controls: a planted `entry C-9999` (not yours) is caught; your own `entry C-<n>` passes; a planted `Kam`, `B170`, `Tuesday`, `gate` are each caught. Every payload is ONE paragraph of ASCII, no newline, its marker once at the end.
+
+## PART 1: THE ENTRIES (E1 to E9, appended in this order after one blank line each; `<<...>>` filled by program from the reads named; a value you cannot print makes its sentence `NOT CONFIRMED: <what was read>` and is named in STATUS)
+Every entry's second line is: `Recorded by the B1444 seat (records) from the ruling as relayed by its brief (the board and the decision store were not read), the Jira reads and writes of <<READ-DATE>> and the brief B1444. No board card id is written. This seat built nothing, ran no test, sent nothing to any human and made no request to any app host or to Azure.` Every entry's last line is `Recorded by B1444 SEAT-R201 (records), <<WRITE-DATE>>.` Each `- **Per ticket.**` bullet names each ticket's comment id (`<<CMT-n>>`, read back byte-equal) and, for 401, 203, 391, 392, the move outcome. **The added lines carry neither `Tuesday` nor `FOR TUESDAY`** (B1397's closing check): where a card's option detail names the coordinator seat, the entry paraphrases it and says so.
+
+BEGIN <E1>
+### <<C1>> - HPSM-POC: the product owner's 2026-11-10 ruling on the Datasec expert content: option (b), "Agent drafts the missing content for your review"; HPSMPOC-31, 37, 44, 46, 55, 87, 393, 394 and 395 stay open
+<second line as above>
+- **The question (RELAYED).** Nine tickets wait on content only a Datasec expert can supply (the rules content, the expected-result reconciliation, the report language and disclaimers, the policy and configuration examples, the trial-run metrics, the customer question set, the framework alignment table, the five independent-assessment principles, and audience testing); the project rule is that nothing security-related is invented. The options offered: (a) "Keep DRAFT, leave unsupplied pieces out"; (b) "Agent drafts the missing content for your review"; (c) "Name the expert and a date". The card stated two earlier rulings that overlap, for the product owner to veto: HPSMPOC-87 (shown as DRAFT, 21 Oct) and HPSMPOC-37 (the scenarios approved as the DRAFT demo set, 4 Oct).
+- **The ruling (RELAYED; time MEASURED by the drafter).** The product owner chose option (b), "Agent drafts the missing content for your review", on 2026-11-10 at 03:25:53 AEDT. Its detail, verbatim: "Drafts are marked DRAFT-FOR-KAM and never loaded until you approve."
+- **What it settles.** Who drafts: an agent drafts each missing piece for the product owner's review. Nothing is loaded into the product and no expert approval is claimed; each ticket's acceptance still waits on approved content, so none moves.
+- **Per ticket.** HPSMPOC-31 comment <<CMT-31>>; HPSMPOC-37 comment <<CMT-37>>; HPSMPOC-44 comment <<CMT-44>>; HPSMPOC-46 comment <<CMT-46>>; HPSMPOC-55 comment <<CMT-55>>; HPSMPOC-87 comment <<CMT-87>>; HPSMPOC-393 comment <<CMT-393>>; HPSMPOC-394 comment <<CMT-394>>; HPSMPOC-395 comment <<CMT-395>>. None moved.
+- **Work queued, not done.** The drafts: brief B1443 (seat H153), in the analysis repository folder `1_Project_Definition/Architecture/content/2026-11-10_sme-drafts/`, state as read at <<READ-TIME>>: <<STATE-B1443>> (read from its STATUS last line; never assumed).
+<last line as above>
+END <E1>
+
+BEGIN <E2>
+### <<C2>> - HPSM-POC: the product owner's 2026-11-10 ruling on the action register's rule line: option (a), "Use the proposed sentence"; HPSMPOC-438 stays open until it is built
+<second line as above>
+- **The question (RELAYED).** The rule line above the action register reads "Verified complete needs an evidence reference. The reference is not checked independently." (`web/src/components/screens/RoadmapScreen.tsx:86` at code main `<<MAIN-SHA8>>`, printed by you with `grep -n`) although Evidence submitted is now refused without a reference too. The proposed sentence: "Verified complete and Evidence submitted need an evidence reference. The reference is not checked independently." The options offered: (a) "Use the proposed sentence"; (b) "I will word it myself".
+- **The ruling (RELAYED; time MEASURED by the drafter).** The product owner chose option (a), "Use the proposed sentence", on 2026-11-10 at 03:25:57 AEDT. Its detail, paraphrased because it names the coordinator seat: the sentence is posted on the ticket for review before it is built.
+- **Per ticket.** HPSMPOC-438 comment <<CMT-438>> carries the sentence for review. Not moved.
+- **Work queued, not done.** The build of that sentence, byte for byte: brief B1440 (seat H150), behind its 438 slot, which opens only on this comment's read-back. State at <<READ-TIME>>: <<STATE-B1440>>.
+<last line as above>
+END <E2>
+
+BEGIN <E3>
+### <<C3>> - HPSM-POC: the product owner's 2026-11-10 ruling on three display leftovers: option (a), "Accept the 4.5 px; 44 px logo link; use the alias"; HPSMPOC-401 accepted, HPSMPOC-417 and 410 to build
+<second line as above>
+- **The question (RELAYED).** (1) HPSMPOC-401: 8 cells (Customers and Workspace at 1024 px) sit 4.5 px right of the reference, inside the scroll region; accept or fix. (2) HPSMPOC-417: the header logo link is 28 to 40 px high, the only measured link left under 44 px; make it 44 or decline. (3) HPSMPOC-410: a Demo viewer sees the sample customer's name on Home Upcoming activity and the customer profile; use the alias as the security pages do, or keep it as a sample. The options offered: (a) "Accept the 4.5 px; 44 px logo link; use the alias"; (b) "Leave all three".
+- **The ruling (RELAYED; time MEASURED by the drafter).** The product owner chose option (a), "Accept the 4.5 px; 44 px logo link; use the alias", on 2026-11-10 at 03:29:22 AEDT. Its detail, verbatim: "Settles 401, 417, 410."
+- **Per ticket.** HPSMPOC-401: the 8 cells are recorded as accepted; the ticket's done-when ("... or the extra is recorded as accepted"), read by you from Jira and quoted in STATUS, is met by this record together with the cells re-measured at or left of the reference (comment 40581); comment <<CMT-401>>; <<MOVE-401>>. HPSMPOC-417: comment <<CMT-417>>, not moved. HPSMPOC-410: comment <<CMT-410>>, not moved; the separate observation that the customer page's data carries the full name (finding B953-10, RELAYED from the ticket) is not settled by this ruling.
+- **Work queued, not done.** HPSMPOC-417 and 410: brief B1440 (seat H150). State at <<READ-TIME>>: <<STATE-B1440>>.
+<last line as above>
+END <E3>
+
+BEGIN <E4>
+### <<C4>> - HPSM-POC: the product owner's 2026-11-10 ruling on hidden characters: option (a), "Refuse invisible-only names; file names fold width/space only"; HPSMPOC-324 and 257 to build
+<second line as above>
+- **The question (RELAYED).** The 22 Oct ruling that customer names refuse hidden and direction characters is built (HPSMPOC-178). Two leftovers were unruled: (1) HPSMPOC-324, a customer name of only U+200B is accepted; (2) HPSMPOC-257, the file-name check refuses some names Windows allows (LPT plus superscript 4, COM plus superscript 0). The options offered: (a) "Refuse invisible-only names; file names fold width/space only"; (b) "Refuse invisible-only names; leave file names as built"; (c) "Change nothing".
+- **The ruling (RELAYED; time MEASURED by the drafter).** The product owner chose option (a), "Refuse invisible-only names; file names fold width/space only", on 2026-11-10 at 03:29:29 AEDT. Its detail, verbatim: "Settles 324 and 257. Agent builds with tests that fail first."
+- **Per ticket.** HPSMPOC-324 comment <<CMT-324>>; HPSMPOC-257 comment <<CMT-257>> (its own option (a) reads "fold width and white space only"). Neither moved: each waits on its build.
+- **Work queued, not done.** The API: brief B1441 (seat H151); the web mock's mirror of the 324 refusal: brief B1440 (seat H150). States at <<READ-TIME>>: <<STATE-B1441>>; <<STATE-B1440>>.
+<last line as above>
+END <E4>
+
+BEGIN <E5>
+### <<C5>> - HPSM-POC: the product owner's 2026-11-10 ruling on the three Design v1.2 questions: option (a), "Accept all three as stated"; HPSMPOC-390, 391 and 392 settled as stated
+<second line as above>
+- **The question (RELAYED).** The 29 Oct ruling held the Good/Better/Best packages page (HPSMPOC-392) and did not decide roles (390), the top-bar picker (391) or the menu labels. The three calls as stated on the card, verbatim: "(1) Roles: write a Partner/Consultant/Admin/Demo definition and do NOT add a Customer role or in-session role switch. (2) Customer switching: keep the top-bar picker, Back link and Open buttons as drawn. (3) Good/Better/Best: no packages page; keep the recommendation tiers as groupings; hold the labels 'Revenue and proposals' and 'Customer engagements'." The options offered: (a) "Accept all three as stated"; (b) "Go through them one at a time".
+- **The ruling (RELAYED; time MEASURED by the drafter).** The product owner chose option (a), "Accept all three as stated", on 2026-11-10 at 03:29:32 AEDT. Its detail, verbatim: "Settles 390, 391, 392."
+- **Per ticket.** HPSMPOC-390: the definition is to be written; comment <<CMT-390>>, not moved. HPSMPOC-391: comment <<CMT-391>>; <<MOVE-391>>. HPSMPOC-392: comment <<CMT-392>>; <<MOVE-392>>; at code main `<<MAIN-SHA8>>` the two held labels read <<LABELS-392>> (your `git grep -n -F` of each over `web/src`, with the control that `label: "Revenue"` is found in `web/src/components/shell/GlobalNav.tsx`).
+- **Work queued, not done.** The role definitions as a draft for review: brief B1443 (seat H153), item 10. State at <<READ-TIME>>: <<STATE-B1443>>.
+<last line as above>
+END <E5>
+
+BEGIN <E6>
+### <<C6>> - HPSM-POC: the product owner's 2026-11-10 ruling on retention and the audit ledger: option (b), "Build retention and ledger audit now"; HPSMPOC-100 and 117 to build; HPSMPOC-180 not named by the ruling
+<second line as above>
+- **The question (RELAYED).** Whether to park three data-protection items until real customer data exists: retention of client follow-up contact data (12 months proposed), tamper-evident audit storage on Azure SQL (today the code rule plus DENY only), and a schema-version bump that would change every ruleset hash. The POC holds synthetic data only. The options offered: (a) "Defer all three until real data or ruleset re-issue"; (b) "Build retention and ledger audit now".
+- **The ruling (RELAYED; time MEASURED by the drafter).** The product owner chose option (b), "Build retention and ledger audit now", on 2026-11-10 at 03:29:35 AEDT. Its detail, verbatim: "Needs a migration; migrations are frozen."
+- **Per ticket.** HPSMPOC-100 comment <<CMT-100>>; HPSMPOC-117 comment <<CMT-117>>; neither moved. HPSMPOC-180: comment <<CMT-180>>; the chosen option names retention and the audit ledger only and does not name the schema-version bump, so this entry records HPSMPOC-180 as not settled by the ruling; nothing changes for it.
+- **Work queued, not done.** Brief B1442 (seat H152), behind its MIGRATION, RETENTION PERIOD and ERASE slots; nothing is applied to any hosted database. State at <<READ-TIME>>: <<STATE-B1442>>.
+<last line as above>
+END <E6>
+
+BEGIN <E7>
+### <<C7>> - HPSM-POC: the product owner's 2026-11-10 ruling on client packs: option (a), "Download and preview only for the POC"; HPSMPOC-91 stays open for the pack wording
+<second line as above>
+- **The question (RELAYED).** The product owner's 29 Sep words asked for the ability to send collateral to the client; the three packs are built as download and preview only. The options offered: (a) "Download and preview only for the POC"; (b) "Allow the product to send packs to clients".
+- **The ruling (RELAYED; time MEASURED by the drafter).** The product owner chose option (a), "Download and preview only for the POC", on 2026-11-10 at 03:29:16 AEDT. Its detail, verbatim: "Nothing emailed to a client by the product."
+- **Per ticket.** HPSMPOC-91 comment <<CMT-91>>; not moved: the ticket stays open for the owed pack wording (its comments 39440 and 39916). Nothing to build.
+<last line as above>
+END <E7>
+
+BEGIN <E8>
+### <<C8>> - HPSM-POC: the product owner's 2026-11-10 ruling on a renamed customer's report file name: option (a), "Keep as is"; HPSMPOC-203 settled
+<second line as above>
+- **The question (RELAYED).** An issued report downloads under the renamed customer's file name while its pages print the old name; keeping the issue-time name needs a database change. The options offered: (a) "Keep as is"; (b) "Keep the issue-time name".
+- **The ruling (RELAYED; time MEASURED by the drafter).** The product owner chose option (a), "Keep as is", on 2026-11-10 at 03:29:26 AEDT. Its detail, verbatim: "The file name follows the live customer record. Recorded as ruled."
+- **Per ticket.** HPSMPOC-203 comment <<CMT-203>>; <<MOVE-203>>. Nothing to build.
+<last line as above>
+END <E8>
+
+BEGIN <E9>
+### <<C9>> - HPSM-POC: the product owner's 2026-11-10 note naming the product owner and the deputy (HPSMPOC-6); the baseline hours (HPSMPOC-51) are still not supplied
+<second line as above>
+- **The note (RELAYED by the coordinator, verbatim).** "I am the product owner and Paul is the deputy". Time: 03:18 AEDT on 2026-11-10 (RELAYED from the card that cited it). The card that asked for these two facts was still open, not ruled, when this brief was drafted (03:3x AEDT); its default for the baseline only was to record it as not supplied.
+- **What it records.** HPSMPOC-6, "Name the Datasec Product Owner and Security SME": the product owner is named, and a deputy for absences is named. This supersedes the record of 2026-10-23 (the ticket's comment 39918) that there was no deputy; that comment is not edited. HPSMPOC-51: the baseline hours per manual assessment, with their source, are not supplied; no value is recorded and none is invented; the API's baseline stays null.
+- **Per ticket.** HPSMPOC-6 comment <<CMT-6>> (the names are in this entry, not in the comment); HPSMPOC-51 comment <<CMT-51>>. Neither moved.
+<last line as above>
+END <E9>
+
+## PART 2: THE JIRA COMMENTS (texts by program; `<<Cn>>` is the entry number of the card; each ends with its marker `[REC-RUL-<n>-10NOV]`)
+Common head, every comment: `Records note, <<READ-DATE>>, read at code main <<MAIN-SHA8>>.` Common tail before the marker: `Recorded as entry C-<<Cn>> in the project's clarifications record.` Bodies:
+- **31, 37, 44, 46, 55, 87, 393, 394, 395 (E1):** `On 2026-11-10 at 03:25 AEDT the product owner chose that an agent drafts the content this ticket waits on, for the product owner's review. The drafts are kept in the analysis repository, are marked as drafts for the product owner, and are never loaded into the product until the product owner approves them. Drafting is queued; this note drafts, loads and sends nothing, and claims no expert approval. The ticket stays open: its acceptance still needs approved content.`
+- **438 (E2):** `On 2026-11-10 at 03:25 AEDT the product owner chose the proposed sentence for the rule line above the action register, and it is posted here for review before it is built: "Verified complete and Evidence submitted need an evidence reference. The reference is not checked independently." The line in the product is unchanged by this note (it reads at web/src/components/screens/RoadmapScreen.tsx line <<L438>>). The ticket stays open until the sentence is built and merged.`
+- **401 (E3):** `On 2026-11-10 at 03:29 AEDT the product owner accepted the remaining 4.5 px: the 8 cells (the Customers and Workspace pages at 1024 px) that read 4.5 px right of the reference are recorded as accepted. With the other cells re-measured at or left of the reference (comment 40581), the done-when's second alternative, the extra recorded as accepted, is met. <<OUTCOME-401>>`
+- **417 (E3):** `On 2026-11-10 at 03:29 AEDT the product owner ruled that the header logo link is made at least 44 px high. The build is queued; nothing is built by this note. The ticket stays open until it is built and merged.`
+- **410 (E3):** `On 2026-11-10 at 03:29 AEDT the product owner ruled that a Demo viewer is shown the customer's alias, as the security pages do, on the partner dashboard's Upcoming activity and on the customer profile. The build is queued; nothing is built by this note. The separate observation that the customer page's data carries the full name is not settled by this note. The ticket stays open until the build is merged.`
+- **324 (E4):** `On 2026-11-10 at 03:29 AEDT the product owner ruled that a customer name in which no character is visible is refused, as a blank name is. The build, with tests that fail first, is queued; nothing is built by this note. The ticket stays open until it is built and merged.`
+- **257 (E4):** `On 2026-11-10 at 03:29 AEDT the product owner chose this ticket's option (a): the file-name device check folds width and white space only. The build, with tests that fail first, is queued; nothing is built by this note. The ticket stays open until it is built and merged.`
+- **390 (E5):** `On 2026-11-10 at 03:29 AEDT the product owner accepted, as stated, that a written definition is made for the Partner, Consultant, Admin and Demo roles, and that no Customer role and no in-session role switch are added. Drafting the definition for review is queued. The ticket stays open until the definition exists and is approved.`
+- **391 (E5):** `On 2026-11-10 at 03:29 AEDT the product owner accepted, as stated, that the top-bar customer picker, the Back to customers link and the Open buttons are kept as drawn. <<OUTCOME-391>>`
+- **392 (E5):** `On 2026-11-10 at 03:29 AEDT the product owner accepted, as stated: no packages page; the recommendation tiers stay as groupings; the labels Revenue and proposals and Customer engagements are held. At code main the two labels read <<LABELS-392>>. <<OUTCOME-392>>`
+- **100 (E6):** `On 2026-11-10 at 03:29 AEDT the product owner chose to build retention and the audit ledger now, rather than defer them until real data exists. For this ticket that is the retention of the client follow-up's contact fields. It needs a migration. The build is queued; nothing is built, migrated or deployed by this note, and the retention period is not set by it. The ticket stays open until it is built and merged.`
+- **117 (E6):** `On 2026-11-10 at 03:29 AEDT the product owner chose to build retention and the audit ledger now, rather than defer them until real data exists. For this ticket that is a tamper-evident append-only audit table on SQL Server. It needs a migration. The build is queued; nothing is built, migrated or deployed by this note. The ticket stays open until it is built and merged.`
+- **180 (E6):** `On 2026-11-10 at 03:29 AEDT the product owner chose to build retention and the audit ledger now. That choice does not name the schema-version bump this ticket tracks, so this ticket is not settled by it and nothing changes here.`
+- **91 (E7):** `On 2026-11-10 at 03:29 AEDT the product owner ruled that the packs stay download and preview only for this proof of concept: nothing is emailed to a client by the product. The ticket stays open for the pack wording, as comment 39440 records.`
+- **203 (E8):** `On 2026-11-10 at 03:29 AEDT the product owner chose to keep it as is: an issued report's file name follows the live customer record. That is option (a) of this ticket; nothing changes in the product. <<OUTCOME-203>>`
+- **6 (E9):** `On 2026-11-10 the product owner's note named the product owner and a deputy for absences. The names are in the project's clarifications record and are not written here. This records the ticket's second criterion, a deputy named for absences, as named, and supersedes the record of 2026-10-23 in comment 39918 that there was no deputy; that comment is not edited. This note moves nothing.`
+- **51 (E9):** `The baseline hours per manual assessment, with their source, are still not supplied as of this note. No value is recorded and none is invented; the baseline stays empty. The ticket stays open.`
+`<<OUTCOME-n>>` (401, 391, 392, 203): DONE = `This ticket's question is answered and recorded, so under the project's Done rule (each done-when checked first; nothing deploys) it moves to Done.`; OPEN = `This note moves nothing and the ticket stays open.` DONE only when MOVE reads `CLOSE-IF-MET` and every clause you printed from the ticket reads MET; else OPEN. `<<LABELS-392>>` = `absent from the web source (0 hits each)` or `NOT CONFIRMED: <hits>`.
+
+## THE WORK (B1397's steps, in this order)
+**Step 0.** `date`; `df -g`; copy this kit unchanged to `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1444_SEAT-R201_hpsmpoc-records-rulings-1110.md` (`cmp`, sha256); REFUSE 1 to 3; create `.tools/b1444/` (`_quarantine/ logs/ facts/ scratch/ base/ texts/ dry/ records/`). STATUS first line `RECORDS B1444: PENDING | JIRA pending`, rewritten after each step.
+**Step 1. Helpers** with `--selftest` (a planted bad key, banned word, foreign `entry C-9999`, duplicate marker, lost key and changed comment each make them refuse or report).
+**Step 2. Facts and PRIOR WORK:** read records main `CLARIFICATIONS.md` (`gh api -X GET repos/datasecau/HPSM-POC-analysis/contents/1_Project_Definition/CLARIFICATIONS.md?ref=main`, raw): highest heading by `/usr/bin/grep -n -i -E '^### C-[0-9]+'` (control `### C-263` once); `<<C1>>`..`<<C9>>` = highest + 1 .. + 9; any of them named on another ref (open analysis pull requests, `records/*` branches) is a STOP. Read every key's status, resolution, comment count and markers (snapshot `snap_before.json`); refuse 4 to 8. Re-print every code-main fact the texts carry (`RoadmapScreen.tsx` line, the 392 labels) at `<<MAIN-SHA8>>` by `gh api -X GET`. Read each queued kit's STATUS last line for `<<STATE-...>>` (`not launched` when the file is absent).
+**Step 3. Texts by program (dry run):** build every payload and every entry, print them, run the scan (0 problems), check each double-quoted fragment is a substring of its source (the ruling texts: of this kit; ticket text: of the Jira read), no `<<` or `@..@` left, the table (key, length, sha256, marker, MOVE yes/no). JIRA slot HOLD stops here (`RECORDS DRY RUN ONLY`).
+**Step 4. Jira writes** in this order: **438 first**, then 6, 51, 31, 37, 44, 46, 55, 87, 393, 394, 395, 401, 417, 410, 324, 257, 390, 391, 392, 100, 117, 180, 91, 203. Re-read before each post; POST; GET back and compare byte-equal (control: a one-character mutant compares unequal); a move only as the closed list allows, read back status `Done` and resolution exactly `Done`. Rewrite STATUS's first line the moment each read-back passes; **after 438's read-back write the line `438 POSTED: comment <id> read back equal` in STATUS at once** (B1440's slot waits on it). After the last: `snap_after.json` and the diff (new keys none, lost none, changed only your keys, comment total +1 each, status only where moved).
+**Step 5. Records:** branch `records/b1444` from `origin/main` of your clone (print its sha); E1 to E9 with the `<<CMT-n>>` ids and outcomes filled; old lines byte-equal (program); ONE commit (`git diff --name-only origin/main..HEAD` is exactly `1_Project_Definition/CLARIFICATIONS.md`, added lines only; the added lines carry neither `Tuesday` nor `FOR TUESDAY`).
+**Step 6. Landing** (LAND slot), as B1397 "Landing (LAND slot)" with your branch, your numbers and the same merge-form check (print both sources and the last three merged records pull requests; disagreement is a STOP). Read-back after the merge: each new heading once, old headings once each, the file byte-equal to your scratch copy.
+**Step 7. STATUS** sections: Questions, BLUF, Step 0, PRIOR WORK (Jira, records), Facts re-measured, Jira (each comment id, byte-equal; each move or non-move with every clause MET / UNMET / UNMEASURED), Records, Closing checks, Landing, HELD, NOT TESTED, hand-off items, Corrections.
+
+## CLOCK AND HARD STOP
+JIRA DONE by your Step-0 date plus 50 minutes, RECORDS COMMITTED plus 80, HARD STOP plus 110 (the Stamp slot gives the absolute outer limit). **Cut line:** Jira first (438 at its head); if the records are not committed by plus 80, commit what the closing checks pass and say what was dropped.
+
+## REFUSE AT ONCE (last line `STOPPED: NEEDS TUESDAY`, one question; each count with a control that fires; items 1 and 2 before `.tools/b1444` is created, items 3 to 8 before the first write)
+1. `/usr/bin/grep -c -E '_''_''_''_'` of your Step-0 copy prints 0 on the STAMPED copy (the unstamped copy reads 9 such lines: the eight Stamp slots and the last line; control: a planted line adds 1); `/usr/bin/grep -o -E '@[A-Z_0-9]+@' <copy> | wc -l` prints 0; the last line is `READ-WHOLE-BY-TUESDAY: DONE ...`; the JIRA, MOVE, RECORDS and LAND slots each read one of the words their line offers.
+2. `tmux display -p -t "$TMUX_PANE" '#{@cockpit_name}'` is not `Datasec/HPSM-POC-R201` (control `-t %1` differs); `pwd -P` is not `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC`.
+3. `gh auth status` fails under `GH_CONFIG_DIR=/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.gh-config`, or `repos/datasecau/HPSM-POC-analysis/pulls/99999` is not 404 (control: `pulls?state=open` 200); the reader cannot GET `HPSMPOC-1` with 200 or does not refuse `HPSMPOC-99999`; a token printed by any tool: "a value was shown", STOP.
+4. Prior Jira state differs from the drafter's reading in a way that matters: a key carries a resolution, or already carries a marker `REC-RUL-` with `-10NOV`; status at drafting (by the drafter's REST GET, 03:3x AEDT): Backlog for all except HPSMPOC-87 and HPSMPOC-91 (In Progress); a different status is named in STATUS, and a key already Done is a STOP for that key.
+5. B1397's STATUS last line is not `RECORDS COMMITTED: ...` with a merged pull request or `RECORDS DONE: ...`; an OPEN analysis pull request touches `CLARIFICATIONS.md`; `refs/heads/records/b1444` exists; a heading you would write is taken.
+6. The code main you read is not fa401da9f7bdab21c46ad9717c964433a2d22650 or a descendant (`gh api -X GET repos/datasecau/HPSM-POC/compare/fa401da9f7bdab21c46ad9717c964433a2d22650...main`, status identical or ahead).
+7. **Property: another pane whose own kit WRITES Jira HPSMPOC or `CLARIFICATIONS.md`** (B1397's REFUSE 7 test, with your own name dropped). A `Datasec/HPSM-POC-R197` pane is a hit. **The seat id R197 is also used by the MPS kit `2026-11-10_B1410_SEAT-R197_mps-records-pr-against-ticket.md`:** resolve a `-R197` pane's kit by the pane's project prefix (`Datasec/HPSM-POC-`) and the kit file name's `hpsmpoc` word, never by the newest `SEAT-R197` file alone. Re-read before the first Jira write, before the push and before the merge.
+8. `df -g /Volumes/Datasec_DEV` under 25 GiB, or you start a listener.
+
+## PARTITION (from both sides)
+**OWNED by you (records, after R197):** ANALYSIS repository `1_Project_Definition/CLARIFICATIONS.md` (appended entries only); Jira project HPSMPOC comments and transitions on the 25 listed keys only.
+
+**NOT yours:**
+- **B1397 (seat R197)**: the same file before you (it lands first) and its own keys (above). You never edit its entries.
+- **L1 to L4 builders (B1392 to B1395) and the follow-ons B1440 (H150), B1441 (H151), B1442 (H152)**: the whole code repository.
+- **L5 documents (B1396, seat H146)**: `Governance/stage-gates/**`, `Deliverables/**`, `Architecture/2026-11-10_*`, `Demo/**`.
+- **The drafting kit B1443 (seat H153)**: `1_Project_Definition/Architecture/content/2026-11-10_sme-drafts/**`.
+- You never edit any STATUS file but yours, `BACKLOG.md`, `5_Project_History/history.md`, `2_Project_Files/`, `*_evidence/`, the decision store, UAT, Azure.
+
+## HOLDS
+No Jira write outside the closed list; no statement that anyone has been told, that anything is built, deployed or loaded that is not; no claim a clause is met that your program read UNMET or UNMEASURED; no claim a ticket is closed unless the move read back `Done` / `Done`; no ruling put in the product owner's mouth beyond the option he chose and the words this kit quotes; no person's name in any Jira text (the deputy's name lives only in E9). If a post, move, push or merge fails or reads back unequal: stop that item, fix the root cause, re-verify; never retry a comment blindly. **PRIOR-WORK CHECK (standing line):** before Step 4, list `1_Project_Definition/Briefs/*B1397*` and `*B144*`, read the newest C-entries, grep records main for each of the 25 keys (`-c -i -w -F`, with controls) and run the Jira reads; a READY without a `## PRIOR WORK` section is returned unread. Commit messages: plain ASCII, no person names, no seat ids, no card ids; end with your session's attribution line. Shell: no `cd`; absolute single-quoted paths; `python3 -I -B`; `/usr/bin/grep -i` with a positive control for every count.
+
+## STATUS FILE AND LAST LINE
+`/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1444_STATUS.md`. First line `RECORDS B1444: PENDING | JIRA pending`, rewritten after every step. **Last line, exactly one of:** `RECORDS COMMITTED: records/b1444 @ <sha40> | PR #<n> merged as <sha40> | C-<n> to C-<n> | Jira: 25 commented; moved: <keys or none> | PRIOR WORK section present` | `RECORDS PUSHED: ... | PR not landed (<reason>) | ...` | `RECORDS DRY RUN ONLY: <n> payloads built, nothing posted` | `STOPPED: NEEDS TUESDAY <one question>`.
+
+## Stamp
+Tuesday stamps; leave every slot as it stands.
+- STAMP: ____
+- LAUNCH WINDOW: ____
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): ____
+- MOVE (exactly `CLOSE-IF-MET` or `COMMENT-ONLY`; default COMMENT-ONLY): ____
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entries; the Jira steps stand, and then the comments' `entry C-<n>` citation is dropped from every text): ____
+- LAND (exactly `SEAT` or `TUESDAY`; default SEAT): ____
+- Hard stop (the absolute outer limit AEDT; JIRA DONE 50, RECORDS COMMITTED 80, HARD STOP 110 minutes after your own Step-0 date, whichever is earlier): ____
+- Panes and live seats at the stamp: ____
+
+READ-WHOLE-BY-TUESDAY: ____

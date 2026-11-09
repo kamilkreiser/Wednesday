@@ -1,0 +1,99 @@
+From Tuesday (Datasec coordinator seat), Datasec / HPSM-POC. **Your STATUS file is the channel and the wrap** (no mail; a launch message that names a mailbox is overridden). A question is a last line `STOPPED: NEEDS TUESDAY <one question>`. Marks: **MEASURED** = printed by a named instrument; **DERIVED** = source reading, not run; **RELAYED** = read in another file; **UNMEASURED** = nobody has.
+
+**LAUNCH ONLY AFTER B1394 (seat H144, lane L3 API) AND B1395 (seat H145, lane L4 CI and tooling) are READY and landed** (each STATUS last line `READY B139N: <sha40>` AND each pull request merged to main): you change `api/**` (L3's) and `infra/sql/api-identity.sql` and `infra/README.md` (L4's). B1441 (seat H151) may run at the same time: your files and its files are disjoint by name.
+
+# BRIEF B1442 | SEAT-H152: HPSM-POC, BUILDER (OPUS): RETENTION AND LEDGER AUDIT, THE PRODUCT OWNER'S 10 NOV RULING. NEW BRANCH `b1442/hpsmpoc-retention-ledger-audit` FROM MAIN @MAIN@. COMMITS AS NEEDED, PLAIN PUSHES OF THAT REF ONLY, NO PR. NOT MERGED, NOT DEPLOYED, NO MIGRATION APPLIED TO ANY HOSTED DATABASE.
+
+**BLUF:** the product owner ruled on 2026-11-10, option (b) "Build retention and ledger audit now" (its detail, verbatim: "Needs a migration; migrations are frozen."; the option he did not take, (a), was to defer). Two tickets: **HPSMPOC-100** (retention of the client follow-up's contact data: a purge of closed follow-ups after a retention period; the Admin erase of one follow-up's contact fields is HELD by its slot unless Tuesday opens it) and **HPSMPOC-117** (the audit table becomes tamper-evident on SQL Server: an append-only LEDGER table). **HPSMPOC-180 (the ruleset schema-version bump) is NOT in this kit**: the chosen option names retention and ledger audit only. Branch `b1442/hpsmpoc-retention-ledger-audit` from main @MAIN@ (main was `fa401da9f7bdab21c46ad9717c964433a2d22650` at drafting, 2026-11-10 03:36 AEDT by `gh api -X GET repos/datasecau/HPSM-POC/branches/main`). **Model: OPUS** (model-routing.md line 94, row C4: a data-destroying path, a migration that moves rows and a purge; model id `claude-opus-5-5`; the level is written inside the launch line). **Size: L** (two migrations per provider at most, a purge service, SQL Server-only ledger tests). Seat id H152. Ports **9960-9969** only. Your STATUS: `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1442_STATUS.md`. First step: **re-read main and close with evidence anything main already does**; read-only measurement before any design.
+
+**Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/HPSM-POC-H152 "BRIEF_SEAT_LEVEL=opus WED_USAGE_STOP=100 bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC' '<this kit's path>'"`. The level is written inside the quotes.
+
+## READ WHOLE FIRST (read-only)
+1. The lane plan `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_sweep_drafts/lanes.md` (BLUF, rules, CI predicates, L3 and L4). **Every file:line here is a pointer you re-print at your clone.**
+2. The kits you follow: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1394_SEAT-H144_hpsmpoc-api.md` and `.../2026-11-10_B1395_SEAT-H145_hpsmpoc-ci-tooling.md`, and their STATUS files under `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/`.
+3. `infra/README.md` of your clone, section "The schema on Azure SQL: what is measured, and what is not" (named by HPSMPOC-117), and `infra/sql/api-identity.sql` (the DENY on `poc.audit_event` for the role `poc_app`, RELAYED from the ticket).
+4. The project's `CLAUDE.md` and `JIRA.md` (read-only); `.github/workflows/ci.yml` of your clone (print the `api`, `api on SQL Server` and `infra` predicates).
+
+## BINDING HOLD
+UAT is on hold and HPSM-POC deploys nothing: no `az`, no docker push or registry login, no ssh, no HTTP to any hosted, demo, UAT or production host, **no migration or efbundle run against any hosted database**. A local SQL Server container on your port block is the only database you run (for tests). **You open no PR; Tuesday lands through CodeQL (never bypass, never dismiss).** No Jira write; no message to any human. Never delete a file (quarantine to `.tools/b1442/_quarantine/`); no force-push, amend, reset or rebase. **Never type `cd`.** **Migrations:** allowed ONLY when the slot `MIGRATION` reads `ALLOWED`, and then at most ONE new migration per provider (SqlServer, Sqlite) in `api/src/HpsmPoc.Modules.Assessment/Persistence/Migrations/`; HOLD: build nothing that needs one, do the read-only Step 1 and the design note, and finish. **No migration drops a table or a column that holds rows**: the old audit table is kept (renamed) and its rows are kept. This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM); next-phase items are stored and architected only. **A product word not given verbatim here is a STOP for that item** (the purge and the ledger need none on screen; the erase value is the ERASE slot's).
+
+## STEP 0: RE-READ MAIN, CLOSE WHAT MAIN ALREADY DOES
+Clone, check out `origin/main`, compare with @MAIN@, check B1394's and B1395's squashes are ancestors (rc printed; missing: STOP). For each ticket: `STILL OPEN` / `PART DONE` / `DONE AT MAIN`; a done one is `CLOSED-WITH-EVIDENCE HPSMPOC-<n>: ... | <file:line> | <instrument> | <control>` in STATUS.
+
+## STEP 1: READ-ONLY MEASUREMENT (before any design; printed in STATUS)
+1. The audit table: its EF mapping (`AssessmentDbContext.cs`, the append-only rule the ticket names), its key type, every write path to it (`git grep -n` for the entity name; name each), and **every path that UPDATEs or DELETEs an audit row today, including the personal-data erasure** (`api/src/HpsmPoc.Modules.Assessment/Endpoints/PersonalDataEndpoints.cs`). An append-only ledger refuses UPDATE and DELETE: if any product path changes an audit row, STOP with `NEEDS TUESDAY <which path, and the choice: keep that path's behaviour or keep append-only>`.
+2. On your local SQL Server (the image and version CI uses, read from `ci.yml`; print `SELECT @@VERSION`): does it support ledger tables (`CREATE TABLE ... WITH (LEDGER = ON (APPEND_ONLY = ON))` on a scratch database; control: a plain table reads `ledger_type = 0` in `sys.tables`)? If CI's image cannot, STOP: the ledger cannot be proved as CI runs.
+3. The follow-up entities: `api/src/HpsmPoc.Modules.Assessment/Persistence/FollowUpEntities.cs` (fields named by HPSMPOC-100: `contact_name`, the partner's message, the client's notes, a return reason), where "closed" is recorded, and which clock the module uses (`TimeProvider`, as `CustomerEndpoints.cs` does).
+4. The newest migration of each provider (`git ls-files` of `Persistence/Migrations/SqlServer` and `/Sqlite`; at fa401da9 the module held 35 and 37 tracked files there, MEASURED by the drafter from the main tree) and the snapshot files; the drift test that compares them, if any (name it).
+
+## THE TICKETS (scope quoted from Jira at drafting 2026-11-10 03:3x AEDT by the drafter's read-only REST GET; both Backlog, 0 comments)
+
+### HPSMPOC-117: audit tamper-evidence (the LEDGER table) on SQL Server
+- Jira summary, quoted whole: "[B60 O-a] Audit tamper-EVIDENCE (the LEDGER table) is absent on Azure SQL; protection is the code rule + DENY only"
+- Jira recommendation, quoted: "Options then: a SQL Server migration that creates the audit table WITH (LEDGER = ON (APPEND_ONLY = ON)) (it must be new: an existing table cannot be converted) and moves the rows, or export audit to an append-only store."
+- The ruling takes the build now; the shape is the ticket's first option (DERIVED by the drafter: the second, an outside store, is a hosted resource and nothing is deployed). Do: on **SQL Server only**, one migration that renames the existing audit table (kept, with its rows), creates the audit table under its current name `WITH (LEDGER = ON (APPEND_ONLY = ON))`, copies every row (count and a per-row hash equal before and after, by a test), and leaves the EF model unchanged (the ledger's hidden columns are not mapped). **SQLite: no ledger exists there**; its migration (if EF needs a matching one for the model snapshot) is a no-op on the table, and you say so. `infra/sql/api-identity.sql`: the DENY UPDATE, DELETE stays on `poc.audit_event` and is added for the renamed old table; `infra/README.md` section named above gains the measured facts (rows, ledger type) as a short paragraph; both pass the `infra` job.
+- Tests (SQL Server, as CI runs): the table reads `ledger_type = 2` (append-only) in `sys.tables`; an UPDATE and a DELETE of an audit row as the app's role are refused; a new audit row written through the product still appears; the row copy is complete. Each red at main, green at head.
+
+### HPSMPOC-100: retention of the client follow-up's contact data
+- Jira summary, quoted whole: "[B55 deferred] Client follow-up: retention and subject requests for the client contact's name, message and notes (K10)"
+- Jira recommendation, quoted: "Recommendation: when Kam rules K10 (retention, proposed 12 months), add a purge of closed follow-ups after the period, and an Admin erase of one follow-up's contact fields (contact_name to 'client (erased)', notes and reason cleared, audited)."
+- **Purge (build):** closed follow-ups older than the retention period (closed time plus period, by the module's clock) have their contact fields removed by the purge, and each purge writes an audit row (which the ledger then holds). **The period is configuration, never a constant in code: the purge refuses to run when no period is configured** (a test). The value shipped in the default configuration is the slot `RETENTION PERIOD`: `12 months` writes that value (the card's own words, "retention of client follow-up contact data (12 months proposed)", RELAYED from the ruled card); `NONE` ships no value (the purge is built and idle). Whether the purge deletes the row or blanks the fields: read what the partner's GDPR export and erasure expect of follow-up rows (the ticket says the export lists `follow_up` and `follow_up_question` rows) and pick the shape that leaves no dangling reference; write the choice and why in STATUS before you commit it.
+- **Admin erase (slot `ERASE`):** `BUILD` builds the ticket's own shape verbatim (`contact_name` set to `client (erased)`, notes and reason cleared, audited, Admin role only, with the role test); `HOLD` (default): not built, `HELD 100 erase: slot HOLD` in STATUS. No web screen in either case (a button needs words this kit does not give): an API endpoint only, named in STATUS.
+- Tests on SQLite and on SQL Server: the purge removes exactly the rows past the period (a row one minute inside is kept; control), it audits each, it refuses without a period, an open follow-up is never touched.
+
+## PARTITION (from both sides; the property: you edit a path only if an OWNS line names it)
+**OWNED by you:** `api/src/HpsmPoc.Modules.Assessment/Persistence/**` (the new migrations, their designer and snapshot files, the context and entity files), `api/src/HpsmPoc.Modules.Assessment/Endpoints/PersonalDataEndpoints.cs`, new files you create under `api/src/HpsmPoc.Modules.Assessment/` (name each), new test files under `api/tests/**`, the API's default configuration file that holds the retention value (name it; one key), `infra/sql/api-identity.sql`, `infra/README.md`.
+
+**NOT yours:**
+- **B1441 (seat H151, running alongside you):** `api/src/HpsmPoc.Modules.Assessment/Endpoints/CustomerEndpoints.cs`, `api/src/HpsmPoc.Modules.Feedback/Endpoints/FeedbackFiles.cs`, `api/src/HpsmPoc.Modules.Feedback/Endpoints/FeedbackEndpoints.cs`.
+- **The rest of `api/**`** (L3, landed) and `api/tests/HpsmPoc.Api.Tests/Assessment/Hpsmpoc178CustomerNameTests.cs` (L4): untouched.
+- **The rest of `infra/**`, `.github/**`, `scripts/**`, `web/scripts/**`, `web/e2e/**`** (L4, landed): untouched. **No workflow line.**
+- **All `web/**`** (L1, L2 and B1440): untouched (no screen is built).
+- **ANALYSIS repository and Jira** (L5 B1396, drafting kit B1443, records B1397 R197 and B1444 R201): untouched.
+- **Owned by no lane:** `NEEDS-SHARED <path> <why>` and continue.
+- **Open PRs:** re-read `gh api -X GET repos/datasecau/HPSM-POC/pulls?state=open` at Step 0 and before every push.
+
+**Any other shape:** prove it by the OWNED line or STOP that item with `NEEDS-SHARED <path> <why>`.
+
+## CHECKS (print each predicate from your clone's `ci.yml`; lanes.md read them at fa401da9, RELAYED)
+- `api`: `dotnet test HpsmPoc.slnx -c Release --no-build` plus the 10 Azurite tests by name. `api on SQL Server (<part>)` and the roll-up: the same on SQL Server. **Does it run on SQL Server as CI does?** Every ledger test runs there; say how you ran it.
+- `infra`: `bash infra/scripts/validate.sh`; shellcheck and `bash -n` (no shell file changes expected); `infra/tests/test_*.py`.
+- The migration tests the repository already has (the SQLite crash sweep and any snapshot or drift test: name them) pass with your migrations.
+- Run at main and at head, by program, counts side by side. Every new test proven red without the change (in a copy) and green with it.
+- **PRIOR-WORK CHECK (standing line):** `git log --oneline -n 12 -- <each file>`, `git grep -n -i` for `LEDGER`, `retention`, `follow_up`, `contact_name`, the open PRs, and "Jira not searched". A READY without `## PRIOR WORK` is returned unread.
+
+## HOUSEKEEPING
+- Project dir `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC`; never `2_Project_Files/` or another seat's `.tools/b1NNN/`.
+- **Clone `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/.tools/b1442/repo`** by URL `git@github.com:datasecau/HPSM-POC.git`, key `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/3_Access_Keys/github_deploy_rw` as repo-local `core.sshCommand`. `GH_CONFIG_DIR=/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.gh-config`, `-X GET` only.
+- **Ports: 9960-9969 and nothing else** (the SQL Server container's host port included). `lsof -nP -iTCP:9960-9969 -sTCP:LISTEN` prints 0 rows before any listener. At drafting (03:39 AEDT): 0 rows for 9940-9969 (control: 15 listeners machine-wide); 0 of the 47 non-`.pre-` SEAT kits of 9 and 10 Nov name 9940-9969 (control: `9939` found in 2). The block Tuesday named, 9740-9799, is held by the MPS kits B1400 to B1405. Stop your container before READY (quarantine nothing; `docker stop` of your own container only, never `rm` of another's).
+- STATUS `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1442_STATUS.md`: FIRST line `PROGRESS B1442: b1442/hpsmpoc-retention-ledger-audit HOLD`; `WORKING: <part>` lines; sections `## PRIOR WORK`, `## STEP 1 MEASUREMENTS`, `## CLOSED WITH EVIDENCE`, `## HELD`, `## NOT RUN`, `## FOR THE RECORDS SEAT`, `## FOR THE DEPLOY` (what a later hosted deploy would apply, in order, with the row counts it must check: written, never run), the change list, each check with predicate and counts. **LAST line on finish exactly `READY B1442: <head sha40>`**, else `STOPPED: NEEDS TUESDAY <one question>`.
+- **HARD STOP: ____** (absolute AEDT, Tuesday writes it). Push as soon as a ticket is green.
+- Commits: plain ASCII, no B-numbers, no person names, no seat ids; end with your session's attribution line. `git push origin b1442/hpsmpoc-retention-ledger-audit` only.
+- Shell: no `cd`; absolute single-quoted paths; `git -C`; `python3 -I -B`; `/usr/bin/grep -i` with a positive control for every count.
+
+## REFUSE AT ONCE (last line `STOPPED: NEEDS TUESDAY`, one question; items 1 and 2 before the clone)
+1. `/usr/bin/grep -c -E '_''_''_''_'` of your copy prints 0 on the STAMPED copy (the unstamped copy reads 9: the HARD STOP, seven Stamp slots, the last line; control: a planted line adds 1); `/usr/bin/grep -o -E '@[A-Z_0-9]+@' <copy> | wc -l` prints 0; the last line is `READ-WHOLE-BY-TUESDAY: DONE ...`; the MIGRATION, RETENTION PERIOD and ERASE slots each read one of the words their line offers.
+2. `tmux display -p -t "$TMUX_PANE" '#{@cockpit_name}'` is not `Datasec/HPSM-POC-H152` (control `-t %1` differs); `pwd -P` is not `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC`.
+3. `gh auth status` fails under the project's `GH_CONFIG_DIR`, or `pulls/99999` is not 404 (control: `pulls?state=open` 200).
+4. The branch exists on origin, the clone is dirty, or B1394's or B1395's STATUS last line is not `READY ...` or its squash is not in your main.
+5. `df -g /Volumes/Datasec_DEV` under 25 GiB; a listener outside 9960-9969.
+6. Step 1.1 finds a product path that changes an audit row; Step 1.2 finds CI's SQL Server without ledger support.
+7. Any password, token or cookie value visible: "a value was shown", first in STATUS, STOP.
+
+## HOLDS
+No hosted database is touched; `## FOR THE DEPLOY` is written, never run (applying a migration to a hosted database is the product owner's step). No row is dropped by a migration. No claim that the audit is tamper-evident beyond what a SQL Server test read. No retention value in code. HPSMPOC-180 untouched. No Jira write.
+
+## STANDING LINES
+PRIOR-WORK CHECK (above). No message to any human. Jira writes: none. Never delete (quarantine). This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM); next-phase items are stored and architected only. Landing: "The landing form is a head-pinned squash" (CLARIFICATIONS at records main, line 3617, printed by the drafter's `grep -n -i` at 03:38 AEDT); Tuesday lands, you never merge; the PR goes to a tier-1 gate (model-routing.md row C4: data-destroying path).
+
+## Stamp
+Tuesday stamps; leave every slot as it stands. `@MAIN@` is replaced everywhere it appears.
+- STAMP: ____
+- LAUNCH WINDOW: ____
+- MIGRATION (exactly `ALLOWED` or `HOLD`; default HOLD; the ruled option's own detail reads "Needs a migration; migrations are frozen."): ____
+- RETENTION PERIOD (exactly `12 months` or `NONE`; default NONE: the purge is built and idle): ____
+- ERASE (exactly `BUILD` or `HOLD`; default HOLD; BUILD uses the ticket's own value `client (erased)`): ____
+- Hard stop (absolute AEDT, one clock): ____
+- Panes and live seats at the stamp: ____
+
+READ-WHOLE-BY-TUESDAY: ____
