@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-10 02:54 from 260 lesson files (1,127,757 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 214. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-10 03:06 from 262 lesson files (1,131,569 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 216. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7710,4 +7710,34 @@ Related: [[2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say]] (
 **What does NOT change:** the signature classes (production, money, external comms to humans, anything irreversible); the QA gate before every merge; demo stays FROZEN until Kam says otherwise (card `secuura-ks1401-058-merge-demo-billing-1104` = a); tickets on Peter or Stuart stay theirs. **The Spark is ON:** he lifted his 2026-11-04 16:42 "ignore the spark until further notice" on 2026-11-08 20:26 (live board, verbatim): *"please check that the spark is running flash 4 and keep it active as much as possible"* (this line said "stays off" until 2026-11-09 01:5x; corrected per the 11-08 ledger row on the missed instruction).
 
 **Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-10-12_secuura-done-when-tested-works-deployed-and-never-idle]] · [[2026-10-10_merge-and-archive-when-done-and-ready]] · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Never wait: a green item ships now, the spare capacity goes to the next lane, and any wait I do keep watches Kam's board
+`2026-11-10_never-wait-a-green-item-ships-and-every-wait-watches-the-board.md` · correction · 2026-11-10 · status: live · tier: W
+
+**His words, verbatim (2026-11-10 ~03:0x, terminal):** *"dont wait.  never wait.  when I said as many agents as possible to finish hpsm i really meant it"*
+
+sections (open the file for these): EXTENSION, same session (~03:1x): *"also, if you have room (processing power) always keep going with other backlog and projects"*
+
+**How to apply:**
+1. **A round-cap card on a product-green item carries a SHORT default** (minutes to an hour, not the morning) when Kam has asked for the result by a time; a merge he has effectively commissioned does not wait for his sleep.
+2. **An empty floor on a project Kam called a priority is a failure, not a pause.** At every verdict, before ending the turn: what else on this project can an agent do now without a ruling? Sweep the board and launch the disjoint lanes (2026-09-13 standing rule; 2026-10-24 boot order).
+3. **Every wait I keep has a board watcher beside it** (Kam's message count, `kam_msgs.sh` header total, not its 6-row tail). A timer alone is a wait with no ears.
+4. Never present a timer as diligence: say what the timer is waiting FOR, and whether anything else could be done meanwhile.
+
+**Family:** [[2026-09-16_if-something-blocks-move-on-to-the-next]] · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] · [[2026-09-07_an-instruction-to-wait-must-name-what-wakes]].
+
+## EXTENSION, same session (~03:1x): *"also, if you have room (processing power) always keep going with other backlog and projects"*
+The never-wait rule is not per-project. When the priority project's lanes are all launched and the MACHINE has room (load1 under the launch gate, memory free, usage gate open), the next free lane goes to the other Datasec projects' backlogs (NexusAI, MPS Calculator, Security Composer, then the rest), in priority order, partitioned by path. Measure the room (load1, memory_pressure, usage_gate.sh) at every checkpoint; spare capacity left idle is the failure.
+
+
+## No wind-down after work hours: the seat keeps working through the night unless it needs a break
+`2026-11-10_no-wind-down-after-hours-unless-a-break-is-needed.md` · preference · 2026-11-10 · status: live · tier: W
+
+**His words, verbatim (2026-11-10 ~03:0x, terminal):** *"new rule going forward, no need to wind down after work hours unless you need a break"*
+
+**How to apply:**
+1. Quiet hours govern SPEECH only (no voice 23:00-06:00, `speak.sh` enforces it); they never govern work, launches, merges or deploys Kam has authorised.
+2. "Unless you need a break" is real: the honest form of a break is a rotation at the context band or a stated reason, never an idle seat.
+3. Scope: standing, no expiry (he said "going forward"); it extends [[2026-08-28_overnight-is-working-time]] from the agents to this coordinator seat itself.
 
