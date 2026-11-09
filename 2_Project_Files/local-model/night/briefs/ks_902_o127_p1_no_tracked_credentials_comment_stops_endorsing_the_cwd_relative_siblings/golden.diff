@@ -1,0 +1,16 @@
+diff --git a/Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh b/Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh
+--- a/Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh
++++ b/Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh
+@@ -78,8 +78,10 @@ fi
+ # `git ls-files` output is index paths), which is why the output looked
+ # identical until something was planted.
+ #
+-# `bare-path-scripts-executable.sh` and `action-pins-labelled.sh` already derive
+-# their root this way and are structurally immune; this is the same idiom.
++# This is the idiom to copy: the root comes from the script's own path, not from the
++# caller's working directory. Do NOT copy the root derivation of
++# `bare-path-scripts-executable.sh` and `action-pins-labelled.sh`: they use
++# `$(cd ../.. && pwd)`, which depends on the caller's cwd (audited under KS-903).
+ DEV_DIR="$(cd "$(dirname "$0")/../.." && pwd)"   # Blockchain/Dev
+ 
+ # Scrub the inherited git environment FIRST. Git exports GIT_DIR to a WORKTREE's

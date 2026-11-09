@@ -1,0 +1,86 @@
+diff --git a/Blockchain/Dev/scripts/run-migrations.sh b/Blockchain/Dev/scripts/run-migrations.sh
+--- a/Blockchain/Dev/scripts/run-migrations.sh
++++ b/Blockchain/Dev/scripts/run-migrations.sh
+@@ -68,8 +68,8 @@ echo "Waiting for PostgreSQL to be ready..."
+ 
+ # Extract host and port from DATABASE_URL for pg_isready
+ # Format: postgresql://user:pass@host:port/db
+-PG_HOST=$(echo "$DATABASE_URL" | sed -E 's|.*@([^:/]+).*|\1|')
+-PG_PORT=$(echo "$DATABASE_URL" | sed -E 's|.*:([0-9]+)/.*|\1|')
++PG_HOST=$(echo "$DATABASE_URL" | sed -nE 's|.*@([^:/]+).*|\1|p')
++PG_PORT=$(echo "$DATABASE_URL" | sed -nE 's|.*:([0-9]+)/.*|\1|p')
+ PG_PORT=${PG_PORT:-5432}
+ 
+ while [ "$RETRIES" -lt "$MAX_RETRIES" ]; do
+diff --git a/Blockchain/Dev/scripts/__tests__/run_migrations_readiness_probe_parses_the_url.test.sh b/Blockchain/Dev/scripts/__tests__/run_migrations_readiness_probe_parses_the_url.test.sh
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/run_migrations_readiness_probe_parses_the_url.test.sh
+@@ -0,0 +1,67 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Dev/scripts/run-migrations.sh - KS-1988: the readiness probe must hand
++# pg_isready a HOST and a PORT, never the whole DATABASE_URL.
++# =============================================================================
++# pg_isready and psql are stubs on a private PATH: no database is needed, no migration runs.
++# The pg_isready stub records its arguments, one bracketed word each, and always answers ready,
++# so the runner finishes at once and the cells read what the probe was CALLED with.
++# Usage: bash Blockchain/Dev/scripts/__tests__/run_migrations_readiness_probe_parses_the_url.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUBJ="${RUN_MIGRATIONS_SH:-$HERE/../run-migrations.sh}"
++[[ -r "$SUBJ" ]] || { echo "FATAL: run-migrations.sh not readable at $SUBJ" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1988.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++
++check() {
++    local desc="$1" want="$2" got="$3"
++    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
++    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
++}
++
++mkdir -p "$WORK/bin" "$WORK/fx/scripts" "$WORK/fx/migrations"
++cat > "$WORK/bin/pg_isready" <<'STUB'
++#!/bin/sh
++for a in "$@"; do printf '[%s]' "$a"; done > "$PROBE_LOG"
++exit 0
++STUB
++cat > "$WORK/bin/psql" <<'STUB'
++#!/bin/sh
++exit 0
++STUB
++chmod +x "$WORK/bin/pg_isready" "$WORK/bin/psql"
++cp "$SUBJ" "$WORK/fx/scripts/run-migrations.sh"
++echo "SELECT 1;" > "$WORK/fx/migrations/047_ok.sql"
++
++# probe_args <database url>: runs the runner and prints what pg_isready was called with
++probe_args() {
++    rm -f "$WORK/probe.log"
++    (
++        export PATH="$WORK/bin:/usr/bin:/bin" PROBE_LOG="$WORK/probe.log" DATABASE_URL="$1"
++        unset PLATFORM_DATABASE_URL
++        cd "$WORK/fx" && sh scripts/run-migrations.sh
++    ) >"$WORK/out.txt" 2>&1
++    cat "$WORK/probe.log" 2>/dev/null
++}
++
++# CELL 1 (CONTROL, tip AND after): a URL that names user, password, host and port is split correctly.
++check "CONTROL a URL with host and port probes that host and port" \
++    "[-h][db.example][-p][6432][-q]" "$(probe_args 'postgresql://u:pw@db.example:6432/secuura')"
++
++# CELL 2 (RED at the tip): a URL with no port probes the host on the default port 5432.
++check "a URL with no port probes the host on the default port 5432" \
++    "[-h][db.example][-p][5432][-q]" "$(probe_args 'postgresql://u:pw@db.example/secuura')"
++
++# CELL 3 (RED at the tip): a URL with no host (a socket directory in the query) never hands the URL to pg_isready.
++check "a URL with no host and no port probes an empty host on the default port 5432" \
++    "[-h][][-p][5432][-q]" "$(probe_args 'postgresql:///secuura?host=/var/run/postgresql')"
++
++echo ""
++echo "run_migrations_readiness_probe_parses_the_url: ${PASS} passed, ${FAIL} failed"
++(( FAIL == 0 ))
