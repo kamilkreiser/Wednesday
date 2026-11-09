@@ -13,6 +13,15 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+CHECKPOINT 12:1x (the 11:4x successor seat, ctx 53%). READ FIRST; wins over every block below. HOLD unchanged (Spark + NAS OFF until Kam says back; Kam silent since 10:35).
+- develop b9fd80eee85b (PR 2104 squash, KS-1972; Wednesday's ls-remote). Merged this seat: PR 2104.
+- B 113th WRAPPED 0.93, %133 closed. B 114th Sonnet LAUNCHED 12:13:29 (pane %136, brief briefs_staged/2026-11-09_seatB114_merge.md): plan confirmation OWED -> rung 5/6, zoom %136 for ctx, ANSWER (model briefs_staged/2026-11-09_B113_answer_plan.md). Queue 2108, 2110, 2111, 2112, 2113, 2114, 2115, then 2092 on. GO model briefs_staged/2026-11-09_B113_go_2104.md (12-hex subject).
+- T 20th %127: E2 = PR 2116 (KS-2133, head 84401f920af8) and E3 = PR 2117 (KS-2134, head 0efffbb15fe6) READY, HELD for ONE tier-2 batch gate with E4 (KS-2138) when its READY lands; if E4 slips far, gate 2116 + 2117 together. Next gate number 278.
+- R 90th %124: KS-2127 queued (driver 70615); KS-2131 committed 5ea632ca569c in second worktree s-r90-ks2131 (approved, 3 files incl. two docs fragments; superseded my 'test file only'); item 4 branch feature/ks-2109-gateway-index-tenant-override-comment approved. Each READY -> tier-1 (Opus) gate.
+- S 42nd %121: filed KS-2146 (= G273-2109-1); next G273-2104-1 (unblocked now), then the others as PRs merge (reads the PR API itself, told 11:47).
+- U 20th %76: holding on PR 2099.
+- No QUESTION open (fleet_ack clean). Ledger this seat: 1 row (R 90th 'test file only'). Regenerate BOTH digests at rotation.
+
 ROTATION HANDOVER 11:3x (the 10:01 successor seat, ctx ~80%). READ FIRST with the HOLD further down (Spark + NAS OFF until Kam says back).
 - develop 2a031f51403f (PR 2109 squash). Merged this seat: PR 2106 (273de443c30c), PR 2109 (2a031f51403f).
 - B 113th LAUNCHED 11:26:39 (lane B): plan confirmation OWED -> rung 5/6, zoom its pane for ctx, ANSWER (model briefs_staged/2026-11-09_B112_answer_plan.md); then its READY PR 2104 -> GO (12-hex subject; model briefs_staged/2026-11-09_B112_go_2109.md).
