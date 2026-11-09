@@ -1,0 +1,25 @@
+# Gate 290, TIER 1 (Opus), ROUND 2 OF 2 (compare): PR 2128 (KS-1208 ONLY, after Kam's split), by Seat G 31st. Commissioned 2026-11-09 18:5x by the 18:46 Wednesday seat. Auth surface: full tier-1 depth on the DELTA, plus a check that round 1's GO-with-notes findings still stand.
+
+Common rules: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-07_gate_tier1_common.md, read whole, applied at full tier-1 depth.
+Round 1: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate285-tier1-pr2128-ks1208-ks619/commission.md and verdict.md (read both whole). Round 1 = GO WITH NOTES, findings G285-1 (Medium) to G285-5.
+
+The ruling that shaped this round: Kam's card secuura-ks619-platform-admin-login-no-marker-1109 = a ('Split', ruled 17:20:37 on 2026-11-09). PR 2128 ships KS-1208 only. KS-619's tenant refusal leaves this PR and waits for a login marker as its own ticket (KS-2152, filed 06:25Z by the board seat, by the 17:3x handover). Wednesday's fix-round mail to the seat: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_G31_answer_ks619_split.md (read whole).
+
+Pins (Wednesday's ls-remote at 18:54:12 AEDT; RE-READ at start and end, and say whether each moved):
+- develop f98afb113c2ddfb1e39c9f353a6ba4dd64069627 (the PR 2114 squash)
+- PR 2128 head c7e84537d2aeb6b1c11aeaebdff203a7aa6ff181 (parent aff0f43e4079 = round 1's head, a fast-forward). The round-2 delta is aff0f43e4079..c7e84537d2ae.
+- READY: the seat's mail 'READY FOR GATE PR 2128 round 2 of 2 (KS-1208 only) at c7e84537d2ae, tier 1 (Seat G 31st)', 07:52Z. Its saved copy should be in /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatG-31st/mail/ (find the newest READY there, and say which file you read). Evidence: the same seat folder's evidence/ and drafts/predictions.md (ROUND 2 section). Reproduce; do not trust.
+
+Questions:
+1. THE SPLIT, at the head: is every trace of the KS-619 tenant refusal gone (unforwardableClaim, comments, the test cells C11-C15, fragments, PR title and body), while develop's default-tenant line is untouched? Is auth.test.ts byte-identical to develop's (a diff against develop that prints nothing, with a planted control)? Is the net change 4 files +311/-0, as the seat says?
+2. THE KS-1208 GUARD IS UNCHANGED from round 1. Compare the guard's lines at aff0f43e4079 and at c7e84537d2ae, and name any byte that differs outside the removed tenant clause. Round 1's checks must still hold: userId and role are non-empty strings; every header copied from the token goes through validateHeaderValue; the refusal body is byte-identical to the existing invalid-token 401; the log line names the claim, never its value.
+3. THE NO-LOCKOUT CELLS T1-T3 (platform-admin-login tokens: no tenant, no organizationId, ENHANCED; roles platform_admin on a required mount, platform_viewer on an optional mount, and 'admin' on a required mount): are these the shapes that login really mints? Read the minting code at develop and quote its lines. Are they served at the head, and 401 against round 1's auth.ts? Does the seat's mutant MT redden exactly those three? Then add ONE mutant of your own on the KS-1208 half that reddens a named cell. Also re-run the 8/19 red on develop and 19/19 at the head.
+4. ROUND 1 FINDINGS, each one CLOSED, STILL OPEN or MOOT, with the line that shows it: G285-1 (should be moot with the split; prove it), G285-2, G285-3 (the second door in routes/admin.ts: still open, and is it a follow-up for the board seat?), G285-4, G285-5.
+5. THE WHOLE api-gateway SUITE at the head (the seat says 1,899 of 1,899), plus tsc and eslint compared with develop.
+6. THE MERGE TREE on develop f98afb113c2d. Name any open PR that shares a path with this one, with a planted control. Also check the KS-619 attachment: the seat says 267ec431 disappeared between two of its own reads and it made no delete. Read the PR's attachments and KS-619's state at Linear (read-only) and say what is there now. Do not infer who removed it.
+
+CAP: this is round 2 of 2 for this class. If any finding is NO GO-class, the instances that round 2 closed still ship, and the residue gets its own ticket. Say plainly which is which.
+
+Constraints: clone under /private/tmp/g290 (no rm; state its size at the end). Never cd. No git write verb in any /Volumes/DevMASTER/!CODING checkout: only ls-remote, show, log, diff, ls-tree, cat-file and grep there. Never push, and never run the hook against the real remote. No real .env or credential file (fixtures only). No box, no kintsugi, no demo. Keep load1 under 8. Read df for /Volumes/DevMASTER at start and end.
+
+Output: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate290-tier1-pr2128r2-ks1208/verdict.md. If your Write is refused, put the whole verdict in your final message. Line 1 exactly: 'PR 2128: <V>', with V one of GO, GO WITH NOTES or NO GO. Then FOUND / TESTED / HOW (instrument, controls), NOT TESTED, and findings with ids G290-<n>, each with a severity. Findings only. Post nothing and mail nothing.
