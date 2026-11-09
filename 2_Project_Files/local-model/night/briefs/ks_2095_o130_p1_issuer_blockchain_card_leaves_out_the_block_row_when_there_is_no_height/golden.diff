@@ -1,28 +1,17 @@
 diff --git a/Blockchain/Dev/frontend/issuer/src/components/blockchain/BlockchainCard.tsx b/Blockchain/Dev/frontend/issuer/src/components/blockchain/BlockchainCard.tsx
 --- a/Blockchain/Dev/frontend/issuer/src/components/blockchain/BlockchainCard.tsx
 +++ b/Blockchain/Dev/frontend/issuer/src/components/blockchain/BlockchainCard.tsx
-@@ -189,12 +189,15 @@ export function BlockchainCard({ proof, animate = true }: BlockchainCardProps) {
-               </button>
-             </div>
- 
--            <div className="flex items-center justify-between text-xs">
--              <span className="text-muted-foreground">Block</span>
--              <span className="font-mono text-[11px]" data-testid="block-number">
--                {proof.blockNumber.toLocaleString()}
--              </span>
--            </div>
+@@ -192,3 +192,5 @@ export function BlockchainCard({ proof, animate = true }: BlockchainCardProps) {
 +            {/* KS-2095: a proof with no known block height (0, or absent) must not print "Block 0"; the row is left out. */}
 +            {proof.blockNumber > 0 && (
-+              <div className="flex items-center justify-between text-xs">
-+                <span className="text-muted-foreground">Block</span>
-+                <span className="font-mono text-[11px]" data-testid="block-number">
-+                  {proof.blockNumber.toLocaleString()}
-+                </span>
-+              </div>
+             <div className="flex items-center justify-between text-xs">
+               <span className="text-muted-foreground">Block</span>
+               <span className="font-mono text-[11px]" data-testid="block-number">
+@@ -199,3 +201,4 @@ export function BlockchainCard({ proof, animate = true }: BlockchainCardProps) {
 +            )}
- 
              {proof.slot !== undefined && (
                <div className="flex items-center justify-between text-xs">
+                 <span className="text-muted-foreground">Slot</span>
 diff --git a/Blockchain/Dev/frontend/issuer/src/__tests__/blockchain-card.test.tsx b/Blockchain/Dev/frontend/issuer/src/__tests__/blockchain-card.test.tsx
 --- a/Blockchain/Dev/frontend/issuer/src/__tests__/blockchain-card.test.tsx
 +++ b/Blockchain/Dev/frontend/issuer/src/__tests__/blockchain-card.test.tsx
@@ -46,7 +35,7 @@ diff --git a/Blockchain/Dev/frontend/issuer/src/__tests__/blockchain-card.test.t
 +
 +  it('RED ks2095 R3 a proof whose blockNumber is absent (undefined at run time) renders no block-number element and does not throw', () => {
 +    const noHeight = { ...mockProof, blockNumber: undefined } as unknown as BlockchainProof;
-+    render(<BlockchainCard proof={noHeight} animate={false} />);
++    expect(() => render(<BlockchainCard proof={noHeight} animate={false} />)).not.toThrow();
 +    expect(screen.queryByTestId('block-number')).toBeNull();
 +  });
 +

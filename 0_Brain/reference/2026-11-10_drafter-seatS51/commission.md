@@ -1,0 +1,18 @@
+# Drafter commission: Seat S 51st brief (Secuura/Blockchain BOARD seat, lane S, Sonnet per routing). Wednesday, the 10:12 rotation successor seat, 2026-11-10 ~10:47 AEDT.
+Read first, whole: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_drafter-common-1355.md. Re-read develop yourself by ls-remote only.
+Output: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-10_seatS51_board.md
+Copy and change: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-10_seatS50_board.md (stamped). Keep every standing line ('(Seat S 51st)' in every subject, shared inbox, plan confirmation, board-write rules, HOLDS, no cd, GIT_OPTIONAL_LOCKS=0, never print a .env name or value, provenance shape, UNMEASURED, wake paths stated back, RULED BY KAM / RULED BY WEDNESDAY sections).
+Predecessor: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-10_seatS-50th/HANDOVER.md WHOLE (FINAL first) and its mail/ wrap. Wednesday's ANSWER to S 50th: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-10_S50_answer_plan.md.
+GIT RULE: never git fetch, pull, checkout, worktree or any write verb in /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files (ls-remote, show, log, diff, ls-tree, cat-file, grep only).
+QUEUE (RULED BY WEDNESDAY, 10:4x; write it so):
+1. The 13 owed post-merge filings (S 50th's items 1a, 1c-1j) on the 13 PRs as each reads MERGED at the API, exactly as S 50th's HANDOVER carries them. Nothing for KS-1952 until its PR exists.
+2. KS-1821: Kam's card secuura-done-rule-unit-pinned-deployed-no-live-check = a (ruled 2026-10-13 09:57:49; read it with decision_queue.sh show, read-only): close when unit tests pass on develop AND the fix is in the running Kintsugi build, closing comment saying 'no live check possible'. The seat may CLOSE KS-1821 ONLY with a RECORDED running-build fact (a deploy receipt naming a kintsugi build that contains PR 1854's squash a9563f6bd: search the deploy seats' records, never read a box); without one, ONE comment stating the source fix (PR 1854, cell q9-real) and that it awaits a running-build fact. AA 5th's restart residual stays open either way.
+3. KS-1819: the caller-check half is an AUTH DESIGN decision (who may call thread-mint; same family as KS 1820, KS-1837, the documents.ts group). The seat writes NO ticket change; it drafts a decision-card TEXT for Wednesday (BLUF, 2-3 options with the measured facts, a recommendation, a default) into its record folder and names the path in a mail. Wednesday posts the card.
+4. Batch 9 from S 50th's 'next' (KS-1727, KS-1581, KS-2078, KS-1644, KS-2092 ...), same rules as batch 8.
+5. S 50th's suggested BUILD-lane order (KS-2051, KS-1486, KS-1826, then KS-1838 with KS-1886) is Wednesday's to route: the seat does not file or reorder anything for it.
+NOT YOURS (name by path/lane from each live seat's stamped brief in the same folder): B 126th (merge lane), T 23rd, R 93rd, the coming U 22nd, Y 13th, G 34th.
+For each ticket: read at Linear (read-only, comments first:50 sorted client-side, a scope: clause).
+PACE: wrap at ~60%.
+Model: quote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/specs/model-routing.md for the board-seat row and the model id from /Volumes/DevMASTER/WEDNESDAY/0_Brain/dashboard/data/models_latest.json.
+Ticket provenance per key (key from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, in-process, never printed), each with a scope: clause; every path ABSOLUTE. No line begins 'SELF-CHECK:'.
+Do NOT stamp, send or launch. Never cd; no rm; write only the output file. Return: path, byte size, every fact you could not read, the merge state of the 13 PRs, whether any recorded kintsugi build contains a9563f6bd, any conflict.
