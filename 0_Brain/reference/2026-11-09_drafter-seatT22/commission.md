@@ -1,0 +1,13 @@
+# Drafter commission: Seat T 22nd brief (Secuura/Blockchain RAISE seat, Sonnet). Wednesday, the 13:5x successor seat, 2026-11-09 ~15:2x.
+Read first, whole: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_drafter-common-1355.md (mail rules still hold; PR heads there are older: re-read any you cite).
+Output: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_seatT22_raise.md
+Copy-and-change: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_seatT21_raise.md (stamped; passed the send gate).
+Predecessor: Seat T 21st, WRAPPED 15:24 at 70.5%. Its HANDOVER (FINAL block first, FIRST ITEM FOR T 22nd): /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatT-21st/HANDOVER.md; it wins where it differs. Rulings to it, read by name: every /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_T21_*.md (plan, gate282 fixround, push_2124r1).
+QUEUE:
+1. PR 2124 fix round 1 of 2 (KS-1794 item 3): commit 17f43f1be6849fc83af073e6ab1eebf373883bc7 is QUEUED to push by T 21st's DETACHED driver pid 97329 (Wednesday saw it alive at 15:2x, tty ??); the seat re-arms its own driver waiter on 97329 (it does NOT relaunch the push). After VERIFIED: the PR body correction and the in-place edit of comment 6d565175 exactly as the HANDOVER and /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_T21_answer_push_2124r1.md rule (raw @ covered; NOT covered: the 15 full-run skip warnings, a scheme-less URL, a secret in a query string; the .* mutant not caught; no fragment pair), then READY FOR GATE for the delta (round 2 of 2). Mind the tool trap the HANDOVER names (edit_pr_body baseline file name). Before any body edit: grep the new text for hyphenated KS keys other than the PR's own and write them spaced.
+2. Item 1 (KS-2134, PR 2117 wording): only after PR 2117 MERGES (read at the PR API); re-snapshot the live body first (the merge seat inserts its gate section).
+3. D4 KS-2123: only after PR 2102 MERGES.
+Between waits, the seat holds at its waiters (a driver waiter and a merge waiter, run_in_background, each EXITS on its event and prints a moving heartbeat) and its mail watcher; it does not build anything new.
+Worktrees: s-t17-d1 (PR 2124 branch; do not touch while 97329 is queued or running) and s-t20-d2 (PR 2126 branch, KEEP). No new worktree needed.
+Ticket provenance lines for KS-1794, KS-2134, KS-2123 from a read-only Linear read (key from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, in-process, never printed).
+Pace: this seat is mostly waiting; wrap at about 70% or when all three items are done or blocked, whichever first.
