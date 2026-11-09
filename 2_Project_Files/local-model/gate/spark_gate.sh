@@ -5,7 +5,9 @@
 #   <repo-clone>  an existing clone (scratch dir; this script fetches into it and adds worktrees under --work)
 #   <head-sha>    the 40-char sha the gate is FOR. Must equal the tip of refs/pull/<n>/head, or be a commit in that PR's
 #                 history (a superseded round) — anything else REFUSES (exit 3).
-#   <base-ref>    branch name or sha the PR targets (e.g. develop). The diff is against merge-base(head, base).
+#   <base-ref>    'develop', 'origin/develop' (the origin/ prefix is stripped) or a 40-hex sha. Resolved EXPLICITLY in the clone to a
+#                 sha (BASE_TIP), and that sha, never the raw ref, is what every later step uses. The diff is against merge-base(head, base).
+#                 An empty merge-base or a 0-file diff REFUSES (exit 6); it never runs a 'base' suite on nothing (2026-11-09, PR 2127).
 #   <test-file>   repo-relative test files to run on BASE product code and on HEAD. A missing file REFUSES (exit 4).
 #   --runner      command prefix that runs pytest, default "python3 -m pytest" (e.g. "/path/venv/bin/python -m pytest").
 #   --node-modules DIR   (non-pytest mode) symlinked as node_modules into the vitest package dir of the head worktree.
@@ -14,7 +16,7 @@
 #   assertion / missing-file refusal / diff, then HANDS OFF to shadow_facts.py (the one non-pytest harness; it was NOT forked)
 #   which runs the files on HEAD and on BASE product code and writes facts.json with per-file rc/passed/failed and totals.
 #   Mixing .py and non-.py files in one call REFUSES (exit 2).
-# Exit: 0 facts.json written · 2 usage · 3 head-sha mismatch · 4 test not found / 0 tests collected · 5 git failure.
+# Exit: 0 facts.json written · 2 usage · 3 head-sha mismatch · 4 test not found / 0 tests collected · 5 git failure · 6 empty merge-base / 0-file diff.
 # Writes <out>/facts.json, diff.patch, targeted_{base,head}.log, unit_{base,head}.log, lint.log.
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -57,11 +59,21 @@ if [ "$TIP" != "$HEAD_SHA" ]; then
     die 3 "REFUSE: head sha mismatch — asked for $HEAD_SHA but refs/pull/$PR/head is $TIP and the asked sha is not in its history"
   fi
 fi
-git -C "$REPO" fetch -q origin "$BASE_REF" 2>/dev/null || true
-if git -C "$REPO" rev-parse -q --verify "origin/$BASE_REF^{commit}" >/dev/null; then BASE_TIP="$(git -C "$REPO" rev-parse "origin/$BASE_REF")"
-elif git -C "$REPO" rev-parse -q --verify "$BASE_REF^{commit}" >/dev/null; then BASE_TIP="$(git -C "$REPO" rev-parse "$BASE_REF^{commit}")"
-else die 5 "cannot resolve base ref $BASE_REF"; fi
-MB="$(git -C "$REPO" merge-base "$HEAD_SHA" "$BASE_TIP")" || die 5 "no merge-base"
+# resolve the base explicitly: 40-hex sha | origin/<name> | <name>
+BASE_NAME="$BASE_REF"
+if [[ "$BASE_REF" =~ ^[0-9a-f]{40}$ ]]; then
+  git -C "$REPO" cat-file -e "$BASE_REF^{commit}" 2>/dev/null || git -C "$REPO" fetch -q origin "$BASE_REF" 2>/dev/null || true
+  git -C "$REPO" rev-parse -q --verify "$BASE_REF^{commit}" >/dev/null || die 5 "base sha $BASE_REF is not in the clone and could not be fetched"
+  BASE_TIP="$BASE_REF"
+else
+  BASE_NAME="${BASE_REF#origin/}"
+  git -C "$REPO" fetch -q origin "$BASE_NAME" 2>/dev/null || true
+  if git -C "$REPO" rev-parse -q --verify "refs/remotes/origin/$BASE_NAME^{commit}" >/dev/null; then BASE_TIP="$(git -C "$REPO" rev-parse "refs/remotes/origin/$BASE_NAME^{commit}")"
+  elif git -C "$REPO" rev-parse -q --verify "$BASE_NAME^{commit}" >/dev/null; then BASE_TIP="$(git -C "$REPO" rev-parse "$BASE_NAME^{commit}")"
+  else die 5 "cannot resolve base ref $BASE_REF (tried origin/$BASE_NAME and $BASE_NAME)"; fi
+fi
+MB="$(git -C "$REPO" merge-base "$HEAD_SHA" "$BASE_TIP" 2>/dev/null)"
+[ -n "$MB" ] || die 6 "REFUSE: empty merge-base between $HEAD_SHA and base $BASE_REF ($BASE_TIP) — not running a base suite on nothing"
 echo "spark_gate: head $HEAD_SHA ($MODE) · merge-base $MB · base tip $BASE_TIP"
 
 # ---- 2. test files must exist at head (a test that cannot be found REFUSES) -----------------------------------------
@@ -73,7 +85,7 @@ done
 git -C "$REPO" diff "$MB" "$HEAD_SHA" > "$OUT/diff.patch"
 git -C "$REPO" diff --numstat "$MB" "$HEAD_SHA" > "$OUT/numstat.txt"
 git -C "$REPO" diff --name-status "$MB" "$HEAD_SHA" > "$OUT/namestatus.txt"
-[ -s "$OUT/namestatus.txt" ] || die 5 "empty diff between merge-base and head"
+[ -s "$OUT/namestatus.txt" ] || die 6 "REFUSE: 0-file diff between merge-base $MB and head $HEAD_SHA (base $BASE_REF) — not running a base suite on nothing"
 for t in "${TESTS[@]}"; do
   grep -q "[[:space:]]$t\$" "$OUT/namestatus.txt" || echo "spark_gate: WARNING named test file $t is not in the diff (unchanged by the PR)" >&2
 done
@@ -81,7 +93,7 @@ done
 if [ $NPY -gt 0 ]; then
   git -C "$REPO" worktree add -q --detach "$WORK/head" "$HEAD_SHA" || die 5 "worktree head"
   NMARG=(); [ -z "$NODE_MODULES" ] || NMARG=(--node-modules "$NODE_MODULES")
-  python3 "$HERE/shadow_facts.py" "$WORK/head" "$REPO" "$PR" "$HEAD_SHA" "$BASE_REF" "$OUT" --tests "${TESTS[@]}" ${NMARG[@]+"${NMARG[@]}"} > "$OUT/shadow_facts.stdout" 2>&1; RC=$?
+  python3 "$HERE/shadow_facts.py" "$WORK/head" "$REPO" "$PR" "$HEAD_SHA" "$BASE_TIP" "$OUT" --tests "${TESTS[@]}" ${NMARG[@]+"${NMARG[@]}"} > "$OUT/shadow_facts.stdout" 2>&1; RC=$?
   [ -f "$OUT/facts.json" ] || { tail -20 "$OUT/shadow_facts.stdout" >&2; die 5 "shadow_facts.py produced no facts.json (rc=$RC)"; }
   python3 - "$OUT/facts.json" <<'PY2'
 import json, sys
@@ -89,6 +101,7 @@ f = json.load(open(sys.argv[1]))
 print("spark_gate: head", f["head_sha"], f["head_mode"], "· merge-base", f["merge_base"], "· diff", f["diff_stat"])
 print("spark_gate: targeted on HEAD:", f["targeted_head_totals"]); print("spark_gate: targeted on BASE product code:", f["targeted_base_totals"])
 PY2
+  python3 "$HERE/template_siblings.py" "$REPO" "$HEAD_SHA" "$OUT" || echo "spark_gate: WARNING template_siblings.py failed (facts unchanged)" >&2
   echo "spark_gate: non-pytest facts -> $OUT/facts.json ($(( $(date +%s) - T0 ))s)"; exit 0
 fi
 # package dir = nearest dir with pyproject.toml above the first test file
@@ -172,4 +185,6 @@ json.dump(facts, open(f"{out}/facts.json", "w"), indent=1)
 print(json.dumps({k: facts[k] for k in ("head_sha","merge_base","diff_stat","unit_suite_before","unit_suite_after","unit_new_failures_vs_base")}))
 print("targeted base:", {k: tb[k] for k in ("tests","passed","failed","errors")}, "head:", {k: th[k] for k in ("tests","passed","failed","errors")})
 PY
-RC=$?; echo "spark_gate: facts -> $OUT/facts.json (rc=$RC, $(( $(date +%s) - T0 ))s)"; exit $RC
+RC=$?
+python3 "$HERE/template_siblings.py" "$REPO" "$HEAD_SHA" "$OUT" || echo "spark_gate: WARNING template_siblings.py failed (facts unchanged)" >&2
+echo "spark_gate: facts -> $OUT/facts.json (rc=$RC, $(( $(date +%s) - T0 ))s)"; exit $RC
