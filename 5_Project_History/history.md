@@ -1,3 +1,10 @@
+## 2026-11-09 13:02 -> 13:2x - Tuesday s257 (Datasec seat, Opus 5.5), boot after s256's wrap -> wrap on Kam's word ("i will see you on the other machine. lets wrap up now")
+- Kam (terminal 13:0x): moving Tuesday and all Datasec dev to a new M5 Mac Studio 128 GB; build a new-machine launcher. Receipted on the board first (bf-5df572a8dbc2).
+- Built `Launch_New_Machine.command` (commit dec78afaa, pushed, HEAD=origin): Xcode CLT, Homebrew, 15 formulae, 9 apps (3 optional), Docker first launch, tree modes + hook, Playwright, com.tuesday.* jobs, no-sleep, Kam's manual list; --check / --dry-run modes. Inventory measured on Kamils-Mac-mini; names checked against the Homebrew API. --check on the mini rc 0 / 0 FAIL; install paths untested until the Studio. PORTABILITY.md points at it.
+- Boot reads interrupted (digest to line 7,399; ledger, pickup head, rulings, awaiting count, 48h dry run, Spark, inbox read). Nothing launched; floor empty.
+- Slip (ledger 2026-11-09): called the Mac mini 'this laptop' from the volume name; corrected on the board.
+- Handover: NEXT-PICKUP-TUESDAY.md DELTA 1083 (first act on the Studio: Launch_New_Machine.command --check, then 1082's FIRST WORK).
+
 ## 2026-11-09 07:47 -> 09:2x - Tuesday s256 (Datasec seat, Opus 5.5), successor of s255 -> wrap on Kam's word ("please wrap up when you can", Tuesday terminal)
 - Kam ruled at 07:51 (live board): nexusai-log-sinks-round-cap-1108 = a, datasec-morning-plan-1109 = a; reconciled, receipted; the NexusAI card DELIVERED.
 - Landed: NexusAI PR #182 (RD-798/799/800 log-injection wraps) -> main 9926903f by head-pinned merge commit; Deploy demo run skipped; 44 of 44 alerts read fixed on main (per number, controls).
