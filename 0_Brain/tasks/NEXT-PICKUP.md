@@ -13,6 +13,13 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+CHECKPOINT 07:1x 11-10 (the 07:00 successor seat, ctx ~50%). READ FIRST; wins over the 06:5x block below where they differ.
+FLOOR unchanged: B 123rd %205, U 21st %202, R 93rd %199, S 46th %196 (all plan-confirmed; fleet_ack flags for B/S/U cleared 07:0x).
+RUNNING SUBAGENTS (die at rotation; relaunch from the commission if the output is absent):
+- G 33rd DRAFTER (KS-1785 secret-guard hook, Kam card = a 02:57, tier 1, Opus build): 0_Brain/reference/2026-11-10_drafter-seatG33/commission.md -> 2_Project_Files/fleet/briefs_staged/2026-11-10_seatG33_build.md. On return: READ WHOLE, re-measure every figure/pin, STAMP LAST, dry-run, then launch with SEAT_MODEL_ENV=<newest Opus from models_latest.json> behind a waiter copied from fleet/state/s46_waiter.sh (lane G), load1 < 7.
+- SPARK o128 (harness: packages/shared dist; carve screen; reconcile KS-902's missing O101 READY): 0_Brain/reference/2026-11-10_spark-operator-o128/commission.md -> report in its message, save as report.md there.
+Drive copy: rsyncs 70431 + 78944 alive at 07:0x (04:06 / 04:00 elapsed); Secuura_DEV 97 Gi used.
+
 ROTATION HANDOVER 06:5x 11-10 (the 06:00 morning seat, ctx ~80%). READ FIRST; wins over every block below.
 develop d0b4825cc244. ALL FOUR SECUURA SEATS PLAN-CONFIRMED, no agent QUESTION open:
 - S 46th (board, Sonnet): item 1 DONE (ten cards delivered, Wednesday marked all ten --delivered). Spark comments KS-1712/1739/1960 APPROVED byte for byte + one narrow tool edit (briefs_staged/2026-11-10_S46_answer_spark_comments.md). Next: filings as its merge waiter reports merges; batch 7 filler. Answers: _S46_answer_plan.md, _answer_byteround.md.
