@@ -1,0 +1,56 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -377,3 +377,10 @@
+   // Certification verify endpoint (for test compatibility)
+-  router.post('/api/certifications/:id/verify', mockBodyParser, async (req: Request, res: Response) => {
++  // KS-1855 half two (Kam's card secuura-ks1855-gateway-standin-routes-1110 = c): this stand-in answers only when the gateway's own mock-endpoints
++  // flag is on (ENABLE_MOCK_ENDPOINTS=true and NODE_ENV not production, the gate of the mock wallet routes in index.ts). Otherwise the request goes on
++  // to the next router (the proxy) UNTOUCHED: the gate runs before mockBodyParser, which would consume the body the proxy needs.
++  const certificationVerifyStandInOn: RequestHandler = (_req, _res, next) => {
++    if (process.env.NODE_ENV !== 'production' && process.env.ENABLE_MOCK_ENDPOINTS === 'true') { next(); return; }
++    next('route');
++  };
++  router.post('/api/certifications/:id/verify', certificationVerifyStandInOn, mockBodyParser, async (req: Request, res: Response) => {
+     const { id } = req.params;
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1628-gateway-documents-verify-is-removed.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1628-gateway-documents-verify-is-removed.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1628-gateway-documents-verify-is-removed.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1628-gateway-documents-verify-is-removed.test.ts
+@@ -205,4 +205,7 @@
+     // Same status, different answerer: that is the discriminator G2 relies on.
++    // KS-1855 half two: the twin answers only with the gateway's mock-endpoints flag on, so this control turns it on.
++    vi.stubEnv('ENABLE_MOCK_ENDPOINTS', 'true');
+     const registered = pathsFor(verificationRouter, 'post');
+     const r = await postToRouter(`/api/certifications/${DOC_ID}/verify`);
++    vi.unstubAllEnvs();
+     expect([registered.includes('/api/certifications/:id/verify'), r.answeredByAHandler, r.status]).toEqual([true, true, 404]);
+@@ -240,2 +243,19 @@
+   });
++
++  // KS-1855 half two (Kam's card secuura-ks1855-gateway-standin-routes-1110 = c): "gate certification verify behind the test flag". With the
++  // flag unset, or set but NODE_ENV production, the twin does not answer: the request is left for the next router (here, express's HTML 404).
++  it('RED KS-1855 H1: with ENABLE_MOCK_ENDPOINTS unset the certifications twin is unanswered by the router', async () => {
++    vi.stubEnv('ENABLE_MOCK_ENDPOINTS', '');
++    const r = await postToRouter(`/api/certifications/${DOC_ID}/verify`);
++    vi.unstubAllEnvs();
++    expect([r.status, r.answeredByAHandler]).toEqual([404, false]);
++  });
++
++  it('RED KS-1855 H2: with ENABLE_MOCK_ENDPOINTS true but NODE_ENV production the certifications twin is unanswered by the router', async () => {
++    vi.stubEnv('ENABLE_MOCK_ENDPOINTS', 'true');
++    vi.stubEnv('NODE_ENV', 'production');
++    const r = await postToRouter(`/api/certifications/${DOC_ID}/verify`);
++    vi.unstubAllEnvs();
++    expect([r.status, r.answeredByAHandler]).toEqual([404, false]);
++  });
+ });
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks815-verification-router-guards-its-own-body.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks815-verification-router-guards-its-own-body.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks815-verification-router-guards-its-own-body.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks815-verification-router-guards-its-own-body.test.ts
+@@ -168,2 +168,6 @@
+ describe('KS-815 — the proxyPaths verify route rejects a control byte in the body', () => {
++  // KS-1855 half two: this stand-in route is registered to answer only with the gateway's mock-endpoints flag on.
++  beforeAll(() => { vi.stubEnv('ENABLE_MOCK_ENDPOINTS', 'true'); });
++  afterAll(() => { vi.unstubAllEnvs(); });
++
+   it('POST /api/certifications/:id/verify refuses a NUL', async () => {

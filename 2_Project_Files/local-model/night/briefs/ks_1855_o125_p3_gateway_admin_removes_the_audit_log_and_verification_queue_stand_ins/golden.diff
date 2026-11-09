@@ -1,0 +1,214 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -1048,98 +1048,7 @@
+   });
+-
+-  // =========================================================================
+-  // Verification Queue (in-memory, development only)
+-  // =========================================================================
+-
+-  const mockVerificationQueue: Array<Record<string, unknown>> = [];
+-
+-  router.get('/api/admin/verification-queue', requireAdmin, (req: Request, res: Response) => {
+-    const { documentType, status } = req.query;
+-    let items = [...mockVerificationQueue];
+-
+-    if (documentType) {
+-      items = items.filter(item => item.documentType === documentType);
+-    }
+-    if (status) {
+-      items = items.filter(item => (item.status as string) === status);
+-    }
+-
+-    res.json({
+-      items,
+-      queue: items, // Alias for backwards compatibility
+-      total: items.length,
+-      pending: items.filter(i => i.status === 'pending').length,
+-    });
+-  });
+-
+-  router.post('/api/admin/verification-queue/:id/action', requireAdmin, mockBodyParser, (req: Request, res: Response) => {
+-    const { id } = req.params;
+-    const { action, notes, assignedTo } = req.body || {};
+-    const validActions = ['approve', 'reject', 'escalate', 'assign'];
+-    if (!action || !validActions.includes(action)) {
+-      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `Invalid action. Must be one of: ${validActions.join(', ')}` } });
+-      return;
+-    }
+-    const idx = mockVerificationQueue.findIndex(item => item.id === id);
+-    if (idx !== -1) {
+-      if (action === 'approve') mockVerificationQueue[idx].status = 'approved';
+-      else if (action === 'reject') mockVerificationQueue[idx].status = 'rejected';
+-      else if (action === 'escalate') mockVerificationQueue[idx].status = 'escalated';
+-      else if (action === 'assign') mockVerificationQueue[idx].assignedTo = assignedTo;
+-      if (notes) mockVerificationQueue[idx].notes = notes;
+-      mockVerificationQueue[idx].updatedAt = new Date().toISOString();
+-      mockVerificationQueue[idx].updatedBy = req.user?.email || 'admin';
+-    }
+-    res.json({
+-      success: true,
+-      id,
+-      action,
+-      notes: notes || null,
+-      assignedTo: assignedTo || null,
+-      updatedAt: new Date().toISOString(),
+-    });
+-  });
+-
+-  // =========================================================================
+-  // Audit Logs
+-  // =========================================================================
+-
+-  router.get('/api/admin/audit-logs', requireAdmin, (req: Request, res: Response) => {
+-    const { action, resourceType, limit = 50, offset = 0 } = req.query;
+-    let logs = [
+-      { id: 'evt-1', action: 'admin.login', type: 'admin.login', resourceType: 'auth', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+-      { id: 'evt-2', action: 'document_type_created', type: 'workflow.created', resourceType: 'document_type', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+-      { id: 'evt-3', action: 'document_type_created', type: 'document.created', resourceType: 'document_type', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+-      { id: 'evt-4', action: 'verification_policy_created', type: 'policy.created', resourceType: 'verification_policy', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+-    ];
+-
+-    if (action) logs = logs.filter(log => log.action === action);
+-    if (resourceType) logs = logs.filter(log => log.resourceType === resourceType);
+-
+-    const total = logs.length;
+-    logs = logs.slice(Number(offset), Number(offset) + Number(limit));
+-
+-    res.json({
+-      success: true,
+-      logs,
+-      events: logs,
+-      total,
+-    });
+-  });
+-
+-  // Alias: the frontend calls /api/security/audit, map it to the same handler
+-  router.get('/api/security/audit', requireAdmin, (req: Request, res: Response) => {
+-    const { action, resourceType, limit = 50, offset = 0 } = req.query;
+-    let logs = [
+-      { id: 'evt-1', action: 'admin.login', type: 'admin.login', resourceType: 'auth', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+-      { id: 'evt-2', action: 'document_type_created', type: 'workflow.created', resourceType: 'document_type', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+-      { id: 'evt-3', action: 'verification_policy_created', type: 'policy.created', resourceType: 'verification_policy', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+-    ];
+-    if (action) logs = logs.filter(l => l.action === action);
+-    if (resourceType) logs = logs.filter(l => l.resourceType === resourceType);
+-    const total = logs.length;
+-    logs = logs.slice(Number(offset), Number(offset) + Number(limit));
+-    res.json({ success: true, logs, total });
+-  });
+-
++  // KS-1855 (Kam's card secuura-ks1855-gateway-standin-routes-1110 = c, half one): the stand-ins that answered fixed rows here are removed, so the
++  // proxy reaches the real handlers: GET /api/admin/audit-logs and the verification-queue routes go to originate (behind enforceAdminProxy), and
++  // GET /api/security/audit goes to the security service (GET /api/audit). That service has NO role gate (any caller with a tenant claim reads
++  // that tenant's audit rows), so this admin gate stays on /api/security/audit and the request is handed on to the proxy.
++  router.get('/api/security/audit', requireAdmin, (_req: Request, _res: Response, next: NextFunction) => { next(); });
+   // KS-1257 (#1038 / KS-1233 batch gate N38-2): the platform-settings defaults live in ONE place, frozen so no
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1855-the-gateway-no-longer-answers-audit-and-queue-routes-from-stand-ins.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1855-the-gateway-no-longer-answers-audit-and-queue-routes-from-stand-ins.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1855-the-gateway-no-longer-answers-audit-and-queue-routes-from-stand-ins.test.ts
+@@ -0,0 +1,102 @@
++import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
++import express from 'express';
++import http from 'http';
++import type { AddressInfo } from 'net';
++
++// KS-1855 half one (Kam's card secuura-ks1855-gateway-standin-routes-1110 = c, 2026-11-10 02:55:09): "remove the audit-log and
++// verification-queue stand-ins now". routes/admin.ts used to answer GET /api/admin/audit-logs and GET /api/security/audit with literal
++// rows (actor admin@test.local), and the verification-queue routes from an in-memory array, ahead of the proxy. They must now fall
++// through, so the proxy reaches the real handlers (originate adminConfig.ts, the security service). The one exception is the admin
++// gate on GET /api/security/audit: the security service's GET /api/audit has no role gate of its own, so the gateway keeps requireAdmin
++// there and hands an admin request on. Harness: the real createAdminRoutes alone on an express app with a terminal handler that stands
++// for "the next router" (the proxy), so a request that is not answered by this router answers { fellThrough: true } from that handler.
++const FELL = [404, true];
++
++import { configureAuth, authenticateToken, parseTestToken } from '../middleware/auth';
++import { createAdminRoutes } from '../routes/admin';
++
++let admin: { s: http.Server; base: string };
++
++const testToken = (role: string) => `test_token_${Buffer.from(JSON.stringify({ sub: 'u-ks1855', userId: 'u-ks1855', role })).toString('base64')}`;
++const as = (role: string) => ({ authorization: `Bearer ${testToken(role)}` });
++
++function call(method: string, path: string, headers: Record<string, string>, body?: unknown): Promise<{ status: number; json: any }> {
++  return new Promise((resolve, reject) => {
++    const t = new URL(admin.base + path);
++    const payload = body === undefined ? undefined : JSON.stringify(body);
++    const hdrs: Record<string, string> = { ...headers };
++    if (payload !== undefined) { hdrs['content-type'] = 'application/json'; hdrs['content-length'] = String(Buffer.byteLength(payload)); }
++    const req = http.request({ hostname: t.hostname, port: t.port, path: t.pathname + t.search, method, agent: false, headers: hdrs }, (res) => {
++      let raw = '';
++      res.on('data', (c) => { raw += c; });
++      res.on('end', () => { let json: any = null; try { json = JSON.parse(raw); } catch { /* not json */ } resolve({ status: res.statusCode ?? 0, json }); });
++    });
++    req.on('error', reject);
++    req.setTimeout(8000, () => req.destroy(new Error('timeout')));
++    if (payload !== undefined) req.write(payload);
++    req.end();
++  });
++}
++
++beforeAll(async () => {
++  vi.stubEnv('NODE_ENV', 'test');
++  configureAuth({ enableTestTokens: true, defaultTenantId: 'default', securityServiceUrl: 'http://127.0.0.1:1' });
++  const app = express();
++  app.use(createAdminRoutes({
++    authenticateToken,
++    parseTestToken,
++    verifyToken: async () => { throw new Error('no verified tokens in this test'); },
++    query: async () => ({ rows: [], rowCount: 0 }),
++    isDbAvailable: () => true,
++    redisService: new Proxy({}, { get: () => async () => null }),
++    services: {},
++    log: () => undefined,
++  } as unknown as Parameters<typeof createAdminRoutes>[0]));
++  app.use((_req, res) => { res.status(404).json({ fellThrough: true }); });
++  admin = await new Promise((r) => {
++    const s = http.createServer(app);
++    s.listen(0, '127.0.0.1', () => r({ s, base: `http://127.0.0.1:${(s.address() as AddressInfo).port}` }));
++  });
++});
++
++afterAll(async () => {
++  vi.unstubAllEnvs();
++  if (admin) { admin.s.closeAllConnections(); await new Promise<void>((r) => admin.s.close(() => r())); }
++});
++
++describe('KS-1855 half one: the audit-log and verification-queue stand-ins no longer answer', () => {
++  it('RED ks1855 R1: GET /api/admin/audit-logs (an admin) is not answered by the gateway', async () => {
++    const r = await call('GET', '/api/admin/audit-logs', as('SYSTEM_ADMIN'));
++    expect([r.status, r.json?.fellThrough]).toEqual(FELL);
++  });
++
++  it('RED ks1855 R2: GET /api/admin/verification-queue (an admin) is not answered by the gateway', async () => {
++    const r = await call('GET', '/api/admin/verification-queue', as('SYSTEM_ADMIN'));
++    expect([r.status, r.json?.fellThrough]).toEqual(FELL);
++  });
++
++  it('RED ks1855 R3: POST /api/admin/verification-queue/:id/action (an admin) is not answered by the gateway', async () => {
++    const r = await call('POST', '/api/admin/verification-queue/q-1/action', as('SYSTEM_ADMIN'), { action: 'approve' });
++    expect([r.status, r.json?.fellThrough]).toEqual(FELL);
++  });
++
++  it('RED ks1855 R4: GET /api/security/audit (an admin) is handed on, not answered with stand-in rows', async () => {
++    const r = await call('GET', '/api/security/audit', as('SYSTEM_ADMIN'));
++    expect([r.status, r.json?.fellThrough]).toEqual(FELL);
++  });
++
++  it('control ks1855 C1: GET /api/security/audit by a non-admin is still refused 403 at the gateway (the security service has no role gate)', async () => {
++    const r = await call('GET', '/api/security/audit', as('VERIFIER'));
++    expect(r.status).toBe(403);
++  });
++
++  it('control ks1855 C2: GET /api/security/audit with no Authorization header is still refused 401', async () => {
++    const r = await call('GET', '/api/security/audit', {});
++    expect(r.status).toBe(401);
++  });
++
++  it('control ks1855 C3: a gateway-local admin route (GET /api/admin/settings) is still answered here', async () => {
++    const r = await call('GET', '/api/admin/settings', as('SYSTEM_ADMIN'));
++    expect([r.status, typeof r.json?.settings]).toEqual([200, 'object']);
++  });
++});

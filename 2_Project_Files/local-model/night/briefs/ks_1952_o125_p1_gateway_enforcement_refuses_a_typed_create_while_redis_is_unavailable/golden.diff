@@ -1,0 +1,100 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts b/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
+--- a/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
+@@ -115,2 +115,14 @@
+   const typeRef = (typeRefRaw || '') as string;
++  // KS-1952 (Kam's card secuura-ks1952-redis-down-doctype-rules-1110 = a): with Redis unavailable the catalogue reads EMPTY, and an
++  // empty catalogue passes a typed create with none of its rules (MFA, level, provider, schema). Refuse it, as the connector allow-list
++  // read does (routes/verification.ts, KS-1256). Keyed on availability, NOT on emptiness: a fresh boot with Redis up and an empty
++  // catalogue still passes below. An untyped create does not read the catalogue and is unchanged.
++  if (typeRef && !redisService.isRedisAvailable()) {
++    return {
++      ok: false,
++      status: 503,
++      error: 'Document type configuration is currently unreadable; refusing until it can be read',
++      code: 'SERVICE_UNAVAILABLE',
++    };
++  }
+   if (!typeRef) {
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1952-typed-create-is-refused-while-redis-is-unavailable.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1952-typed-create-is-refused-while-redis-is-unavailable.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1952-typed-create-is-refused-while-redis-is-unavailable.test.ts
+@@ -0,0 +1,77 @@
++import { describe, expect, it, beforeEach, vi } from 'vitest';
++
++// KS-1952 (Kam's card secuura-ks1952-redis-down-doctype-rules-1110 = a, 2026-11-10 02:55:20): while Redis is unavailable the document-type
++// catalogue reads EMPTY, and enforceDocumentTypeRules treats an empty catalogue as "validation not configured", so every typed create
++// passed with none of its rules (an MFA-required type included, measured by gate 144). A typed create must now answer 503 SERVICE_UNAVAILABLE
++// (the code the connector allow-list refusal uses, routes/verification.ts line 841) while redisService.isRedisAvailable() is false.
++// The rule keys on availability, NOT on emptiness: Redis up with an empty catalogue still passes (a fresh boot), and an untyped create is unchanged.
++// Harness: the real enforcement module with ../services/redis replaced by a stand-in whose availability and catalogue the cells set.
++const h = vi.hoisted(() => ({ available: true, types: [] as object[], reads: 0 }));
++
++vi.mock('../services/redis', () => ({
++  isRedisAvailable: () => h.available,
++  getAllDocumentTypes: async () => { h.reads += 1; return h.types; },
++}));
++
++import { enforceDocumentTypeRules, type UserPayload } from '../services/enforcement';
++
++const user: UserPayload = { userId: 'u-ks1952', email: 'ks1952@secuura.io', role: 'user', verificationLevel: 'standard', mfaEnabled: false };
++const MFA_TYPE = { id: 'dt-secure', code: 'SECURE', name: 'Secure', isActive: true, requireMFA: true };
++const REFUSED = { ok: false, status: 503, error: 'Document type configuration is currently unreadable; refusing until it can be read', code: 'SERVICE_UNAVAILABLE' };
++
++beforeEach(() => {
++  h.available = true;
++  h.types = [];
++  h.reads = 0;
++});
++
++describe('KS-1952 a typed create is refused with 503 while Redis is unavailable', () => {
++  it('RED ks1952 R1: Redis down, empty catalogue, documentType named: refused 503 SERVICE_UNAVAILABLE', async () => {
++    h.available = false;
++    expect(await enforceDocumentTypeRules({ documentType: 'SECURE' }, user)).toEqual(REFUSED);
++  });
++
++  it('RED ks1952 R2: Redis down, the type named in the legacy `type` field: refused 503', async () => {
++    h.available = false;
++    expect(await enforceDocumentTypeRules({ type: 'SECURE' }, user)).toEqual(REFUSED);
++  });
++
++  it('RED ks1952 R3: Redis down, no signed-in user: refused 503', async () => {
++    h.available = false;
++    expect(await enforceDocumentTypeRules({ documentType: 'SECURE' }, undefined)).toEqual(REFUSED);
++  });
++
++  it('RED ks1952 R4: Redis down, an MFA-required type still in the catalogue copy, user without MFA: refused 503, not MFA_REQUIRED', async () => {
++    h.available = false;
++    h.types = [MFA_TYPE];
++    expect(await enforceDocumentTypeRules({ documentType: 'SECURE' }, user)).toEqual(REFUSED);
++  });
++
++  it('control ks1952 C1: Redis up, empty catalogue (a fresh boot), typed create: still passes with an empty docType', async () => {
++    expect(await enforceDocumentTypeRules({ documentType: 'ANYTHING' }, user)).toEqual({ ok: true, docType: {} });
++  });
++
++  it('control ks1952 C2: Redis down, untyped create: unchanged, passes and never reads the catalogue', async () => {
++    h.available = false;
++    expect(await enforceDocumentTypeRules({}, user)).toEqual({ ok: true, docType: {} });
++    expect(h.reads).toBe(0);
++  });
++
++  it('control ks1952 C3: Redis up, MFA-required type, user without MFA: refused 403 MFA_REQUIRED as before', async () => {
++    h.types = [MFA_TYPE];
++    const r = await enforceDocumentTypeRules({ documentType: 'SECURE' }, user);
++    expect([r.ok, (r as { status?: number }).status, (r as { code?: string }).code]).toEqual([false, 403, 'MFA_REQUIRED']);
++  });
++
++  it('control ks1952 C4: Redis up, unknown type against a registered catalogue: 400 UNKNOWN_DOCUMENT_TYPE as before', async () => {
++    h.types = [MFA_TYPE];
++    const r = await enforceDocumentTypeRules({ documentType: 'NOT_A_TYPE' }, user);
++    expect([r.ok, (r as { status?: number }).status, (r as { code?: string }).code]).toEqual([false, 400, 'UNKNOWN_DOCUMENT_TYPE']);
++  });
++
++  it('control ks1952 C5: Redis down, a non-string documentType: still 400 VALIDATION_ERROR (caller error first)', async () => {
++    h.available = false;
++    const r = await enforceDocumentTypeRules({ documentType: 123 } as unknown as Record<string, unknown>, user);
++    expect([r.ok, (r as { status?: number }).status, (r as { code?: string }).code]).toEqual([false, 400, 'VALIDATION_ERROR']);
++  });
++});

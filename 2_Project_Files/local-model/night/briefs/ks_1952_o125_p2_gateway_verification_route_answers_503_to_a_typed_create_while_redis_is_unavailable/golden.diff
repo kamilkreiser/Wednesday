@@ -1,0 +1,144 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -922,2 +922,9 @@
+       // --- Enforcement: validate document type rules ---
++      // KS-1952 (Kam's card secuura-ks1952-redis-down-doctype-rules-1110 = a): while Redis is unavailable the catalogue reads EMPTY, and
++      // enforcement passes a typed create with none of its rules. Refuse it with the connector allow-list's own 503 (line 840). Keyed on
++      // availability, NOT on an empty catalogue; an untyped create reads no catalogue and still goes on to enforcement.
++      if ((body.documentType || body.type) && !redisService.isRedisAvailable()) {
++        res.status(503).json({ success: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'Document type configuration is currently unreadable; refusing until it can be read' } });
++        return;
++      }
+       const enforcement = await enforceDocumentTypeRules(body, req.user);
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks466-documents-enforcement-envelope.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks466-documents-enforcement-envelope.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks466-documents-enforcement-envelope.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks466-documents-enforcement-envelope.test.ts
+@@ -57,3 +57,4 @@
+     isDbAvailable: () => false,
+-    redisService: {} as never,
++    // KS-1952: the route asks redisService.isRedisAvailable() before a typed create reaches enforcement; this fixture's Redis is up.
++    redisService: { isRedisAvailable: () => true } as never,
+     services: {},
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1952-a-typed-create-answers-503-while-redis-is-unavailable.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1952-a-typed-create-answers-503-while-redis-is-unavailable.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1952-a-typed-create-answers-503-while-redis-is-unavailable.test.ts
+@@ -0,0 +1,117 @@
++import { describe, expect, it, beforeAll, afterAll, afterEach, vi } from 'vitest';
++import express from 'express';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++
++// KS-1952 (Kam's card secuura-ks1952-redis-down-doctype-rules-1110 = a, 2026-11-10 02:55:20): while Redis is unavailable the document-type
++// catalogue reads EMPTY and enforcement passes a typed create with none of its rules. POST /api/documents naming a documentType (or the
++// legacy `type`) must answer 503 SERVICE_UNAVAILABLE, the code the connector allow-list refusal uses (routes/verification.ts line 841),
++// while redisService.isRedisAvailable() is false, and enforcement must not run. The rule keys on availability, NOT on emptiness: Redis up
++// still reaches enforcement (an empty catalogue passes there, line 137 of services/enforcement.ts), and an untyped create is unchanged.
++// Harness: the real verification router over loopback HTTP (the ks1256 pattern), a signed-in ISSUER_ADMIN (a document-write role, no connector), enforcement replaced by
++// a spy that answers ok, and ONE knob: what isRedisAvailable() reports.
++let available = true;
++const availableSpy = vi.fn(() => available);
++const enforceSpy = vi.fn(async () => ({ ok: true as const, docType: {} }));
++const workflowSpy = vi.fn(async () => ({ gated: true as const, response: { success: true, data: { ks1952: 'past-enforcement' } } }));
++
++let gateway: Server;
++let gatewayPort: number;
++const realFetch = globalThis.fetch;
++const originate = { url: 'http://127.0.0.1:1' };
++
++beforeAll(async () => {
++  globalThis.fetch = (async () => ({ ok: false, status: 404, json: async () => ({}), text: async () => '' })) as never;
++  const { createVerificationRoutes } = await import('../routes/verification');
++  const mockBodyParser: RequestHandler = express.json({ limit: '1mb' });
++  const app = express();
++  app.use(
++    createVerificationRoutes({
++      authenticateToken: () => (req, _res, next) => {
++        (req as { user?: unknown }).user = { userId: 'u-ks1952', email: 'ks1952@secuura.io', role: 'ISSUER_ADMIN', verificationLevel: 'standard', tenantId: 't1' };
++        next();
++      },
++      mockBodyParser,
++      query: vi.fn(async () => ({ rows: [] })) as never,
++      isDbAvailable: () => true,
++      redisService: {
++        getPendingDocument: vi.fn(async () => null),
++        deletePendingDocument: vi.fn(async () => undefined),
++        getAllDocumentTypes: vi.fn(async () => []),
++        getAllWorkflowInstances: vi.fn(async () => []),
++        isRedisAvailable: availableSpy,
++        getNotificationSettings: vi.fn(async () => null),
++        getRejectedDocument: vi.fn(async () => null),
++        setRejectedDocument: vi.fn(async () => undefined),
++        getWorkflowDocumentMapping: vi.fn(async () => null),
++        getWorkflowInstance: vi.fn(async () => null),
++        setWorkflowInstance: vi.fn(async () => undefined),
++      } as never,
++      services: { originate, anchoring: originate } as never,
++      log: () => undefined,
++      memWorkflowToDocumentMap: new Map(),
++      memRejectedDocuments: new Map(),
++      dbSaveRejection: vi.fn(async () => undefined),
++      ADMIN_ROLES: ['ADMIN', 'admin'],
++      enforceDocumentTypeRules: enforceSpy as never,
++      createWorkflowInstanceIfRequired: workflowSpy as never,
++    }),
++  );
++  gateway = app.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => gateway.once('listening', () => r()));
++  gatewayPort = (gateway.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  globalThis.fetch = realFetch;
++  await new Promise<void>((r) => gateway.close(() => r()));
++});
++
++afterEach(() => {
++  available = true;
++});
++
++/** POST /api/documents as a signed-in user; returns [status, error code or the past-enforcement marker, enforcement calls, error message]. */
++async function create(body: Record<string, unknown>): Promise<[number, unknown, number, unknown]> {
++  enforceSpy.mockClear();
++  workflowSpy.mockClear();
++  const r = await realFetch('http://127.0.0.1:' + gatewayPort + '/api/documents', {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer t' },
++    body: JSON.stringify({ title: 'KS-1952', contentHash: 'c'.repeat(64), ...body }),
++  });
++  const json = (await r.json()) as { error?: { code?: unknown; message?: unknown }; data?: { ks1952?: unknown } };
++  return [r.status, json.error?.code ?? json.data?.ks1952, enforceSpy.mock.calls.length, json.error?.message];
++}
++
++const REFUSED_MESSAGE = 'Document type configuration is currently unreadable; refusing until it can be read';
++
++describe('KS-1952 a typed create answers 503 while Redis is unavailable', () => {
++  it('RED ks1952 R1: Redis down, documentType named: 503 SERVICE_UNAVAILABLE, enforcement never runs, the connector shape', async () => {
++    available = false;
++    expect(await create({ documentType: 'SECURE' })).toEqual([503, 'SERVICE_UNAVAILABLE', 0, REFUSED_MESSAGE]);
++  });
++
++  it('RED ks1952 R2: Redis down, the type named in the legacy `type` field: 503, enforcement never runs', async () => {
++    available = false;
++    const [status, code, enforcementCalls] = await create({ type: 'SECURE' });
++    expect([status, code, enforcementCalls]).toEqual([503, 'SERVICE_UNAVAILABLE', 0]);
++  });
++
++  it('control ks1952 C1: Redis up, documentType named: reaches enforcement and is created (a fresh boot with an empty catalogue passes there)', async () => {
++    const [status, code, enforcementCalls] = await create({ documentType: 'SECURE' });
++    expect([status, code, enforcementCalls]).toEqual([201, 'past-enforcement', 1]);
++  });
++
++  it('control ks1952 C2: Redis down, UNTYPED create: unchanged, reaches enforcement and is created', async () => {
++    available = false;
++    const [status, code, enforcementCalls] = await create({});
++    expect([status, code, enforcementCalls]).toEqual([201, 'past-enforcement', 1]);
++  });
++
++  it('control ks1952 C3: Redis up, `type` named: reaches enforcement and is created', async () => {
++    const [status, code, enforcementCalls] = await create({ type: 'SECURE' });
++    expect([status, code, enforcementCalls]).toEqual([201, 'past-enforcement', 1]);
++  });
++});
