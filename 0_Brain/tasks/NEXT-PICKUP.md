@@ -13,6 +13,16 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+CHECKPOINT 13:1x (the 11:4x successor seat, ctx 71%). READ FIRST; wins over every block below. HOLD unchanged (Spark + NAS OFF until Kam says back; Kam silent since 10:35).
+- develop e028786a0921. Merged this seat: PR 2104, PR 2108.
+- B 115th %142: plan ANSWERED 13:13. Queue 2110 (body sha1 check first), 2111, 2112, 2113, 2114, 2115, 7b 2116, 7c 2117 (one Gate 279 notes insertion), 7d 2119, 7e 2120 (one Gate 280 notes insertion), then 2092 on. ALSO: close PR 1360 unmerged at its next safe point (ADDENDUM briefs_staged/2026-11-09_B115_addendum_close_pr1360.md); on its report, mark card secuura-ks1380-revert-pr1360-still-open-1106 --delivered. GO model briefs_staged/2026-11-09_B114_go_2108.md.
+- S 43rd %139: KS-2148 (G273-2108-3) filed; KS-1380 comment 7e377a37 posted (approved bytes); batch 5 classification STATUS next; owed filings as PRs merge (+ ONE G280 ticket after PR 2120). Both wakes alive.
+- T 21st %145 Sonnet LAUNCHED 13:15:41 (briefs_staged/2026-11-09_seatT21_raise.md): plan confirmation OWED -> rung 5/6. Row 1 (PR 2117 wording) AFTER PR 2117 merges; E6-E9; D4 after PR 2102. T 20th 0.93 wrapped, closed.
+- R 90th %124 (ctx 65% at 12:5x): KS-2131 push -> READY (tier 1 gate); then the KS-2127 fix round (G278-1/2/3) -> READY -> narrow tier-1 compare gate; then WRAP -> R 91st (item 4 index.ts on branch feature/ks-2109-gateway-index-tenant-override-comment).
+- U 20th %76: holding on PR 2099.
+- Gates done this seat: 278 (PR 2118 GWN, fix round), 279 (2116 GO, 2117 GWN, 2119 GO), 280 (2120 GWN). Next gate number 281.
+- No QUESTION open. Ledger this seat: 2 rows. Regenerate BOTH digests at rotation.
+
 CHECKPOINT 13:0x (the 11:4x successor seat, ctx 65%). READ FIRST; wins over every block below. HOLD unchanged (Spark + NAS OFF until Kam says back; Kam silent since 10:35).
 - develop e028786a0921 (PR 2108 squash). Merged this seat: PR 2104, PR 2108.
 - B 115th Sonnet LAUNCHED 13:02:54 (pane %142, briefs_staged/2026-11-09_seatB115_merge.md): plan confirmation OWED -> rung 5/6, zoom %142, ANSWER (model briefs_staged/2026-11-09_B114_answer_plan.md). Queue 2110, 2111, 2112, 2113, 2114, 2115, then 2092 on. GO model briefs_staged/2026-11-09_B114_go_2108.md. B 113th 0.93 and B 114th 0.94 wrapped, panes closed.

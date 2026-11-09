@@ -1,0 +1,32 @@
+PR 2120: GO WITH NOTES
+
+Gate 280, tier 2, PR 2120 (KS-2129). Findings only; nothing posted, mailed, pushed.
+
+## Pins
+- Start (13:09-13:10 AEDT) and end (13:15): develop e028786a0921 and PR head f5aec11944e8 BOTH UNMOVED. PR 2114 head 39be43e5cc63.
+- df DevMASTER 107 GiB at start and end (no write there). load1 3.8-6.7 start to end, never above 8. Clone /private/tmp/g280 = 533 MB, NOT removed (no rm, per commission).
+
+## FOUND / TESTED / HOW
+Q1 Suite only. `git diff b9fd80eee85b pr2120` = ONE path: Blockchain/Dev/scripts/__tests__/ks1728_product_scripts_grade_without_a_closing_pipe.test.sh (+19 -2: CLASS regex widened, one while-loop block of 5 fixture lines, one no-pipe control). No product byte, no script the hook runs (this is a suite the hook's leg 14 tests). One commit, parent b9fd80eee85b (develop has since moved to e028786a0921 by 4 unrelated files: vc/verifier.ts etc; none is the suite).
+Q2 Re-run (PRODUCT_ROOT=clone, /bin/bash): develop e028786a0921 = 29 passed, 0 failed; head = 31 passed, 0 failed. Matches the seat. The suite file is identical on b9fd and e028 trees (develop did not touch it).
+ Plants (appended to a product script in the clone, restored by `git checkout --` and sha256-16 compared equal each time):
+ - Seat's five spellings, one per script: unpatched 29/29 green for ALL FIVE (plus the --quiet one); head reddens the named "has no line with ..." cell for each (30 passed / 1 failed).
+ - All five spellings stacked in one file: unpatched green, head red.
+ - MY plants: `echo "$x" | grep -E -w -q zzz` into each of the seven FILES: unpatched 29/29 green in all seven, head exactly one named cell red in all seven. `cat f | grep -sq zzz`: same.
+ - Seat's redirect-after plant on check-package-format.sh/setup-env.sh with a different pattern: unpatched green (29/29). So "which single plants does the unpatched suite already catch": of the seat's five, only the check-package-format one, and only because the seat's plant duplicates the exact `grep -xF "$full"` text (existing "holds exactly one" cell). With a different pattern in that file the unpatched suite is 29/29 green. The PR body says this honestly ("the fifth reddens only that existing 'holds exactly one' cell, because the plant adds a second line there"). Note the READY's wording "q after a redirect ... caught on the unpatched suite only by an existing cell" is also true. Honest.
+ - Regex limits (direct matrix, not asked, relevant): NOT caught by the new CLASS, and cells stay green on head: `| /usr/bin/grep -q`, `| command grep -q`, `| $G -q`, `| egrep -q`, `| grep --silent`. I planted `cat f | /usr/bin/grep -q zzz` in fail-closed: head 31/31 green. Also false positive: `| grep 'x -q y'` counts 1 (harmless, errs red). PR body claims only the five spellings, so this is not a false claim.
+Q3 Cell names: the five per-script cells keep the name "<file> has no line with a printf piped into grep -q", which is now STALE (the class is any pipe into a quiet grep: echo-fed, --quiet). The red message of the echo and --quiet plants therefore says "printf piped into grep -q" for a line with neither printf nor -q. New cells: "CONTROL the scanner counts every spelling the first regex missed as 1 line (5 spellings)" true (total=5, seen=5; assertion is count-of-hits equals total, so a miss names no spelling); "CONTROL a quiet grep with no pipe in front of it is not in the class" true. The comment above CLASS is updated, the header comment (lines 5-10) and the file-description lines are not.
+ Also the new fixture is robust: the 5 spellings sit in a quoted heredoc with GREP placeholder so the suite file itself is not a hit (head suite scans only FILES, so moot).
+Q4 Merge tree (git merge-tree --write-tree e028786a0921 f5aec11944e8, in the clone): rc 0, tree e792851f74cb4fbb6f05b0a9aeac48a137c3bf99. PR 2114 (KS-2141, head 39be43e5cc63) changes ks1560_private_path_suites_link_jq.test.sh + two fragment html: does NOT share a file with 2120. Open-PR census: fetched heads of every PR numbered 2090 and up (31 refs from ls-remote) and compared the blob of the ks1728 suite to develop's (ce732945b1e8): only PR 2120 differs (positive control found); 2090-2102 lack the file (older base), 2103-2119 identical to develop. gh is not logged in here, so open vs closed was not read.
+Q5 Words. PR body (read from commit message of f5aec11944e8, which carries the same text; the PR page itself was NOT read): "29 to 31, 0 failed" true; plant counts (6 FAIL lines with the checker's five-file plant) NOT re-run with the checker's own plant, I ran single and stacked plants only. "No product byte changes" true. "Develop b9fd80eee85b" measured: the statement is true at that tree and I re-ran at e028786a0921, same result. Sibling-suite claim (five suites byte-identical, 151 cells): NOT re-run; I confirm only that the diff touches none of them. Ticket comment d1750fe1: NOT READ (no Linear access in this gate), NOT TESTED. The READY's "147 vs 151" is the seat's own unmeasured note.
+
+## NOT TESTED
+Ticket comment d1750fe1 and the PR page; the checker's own five-file plant script (my plants are equivalent in kind, not that script); sibling suites' byte-identity; open-vs-closed state of PRs and any open PR numbered under 2090; the hook run itself; shellcheck; bash versions other than /bin/bash 3.2.57 (the CLASS uses `[[:space:]]` and optional groups in ERE, portable).
+
+## Findings
+- G280-1 (low): five per-script cell names still say "a printf piped into grep -q"; they now fail on echo-fed and --quiet lines. A reader of a red run sees the wrong description. Also header comment lines 5-10 still describe the printf-only class. Cosmetic, no Kam ruling.
+- G280-2 (low, info): regex does not catch path-qualified or wrapped greps (/usr/bin/grep, command grep, $G, egrep) or --silent; head stays green on `| /usr/bin/grep -q` (planted, measured). PR claims only five spellings, so not a false claim; a future widen.
+- G280-3 (info): the "four of five singles green on unpatched" claim is plant-specific: it is in fact FIVE of five green on unpatched with a plant whose text differs from the shipped line; the seat's check-package-format plant is only red because it duplicated an exact pinned line. Stated honestly in the body.
+- G280-4 (info): the 5-spelling cell is an aggregate count; a single missed spelling reports "want 5 got 4" without naming it.
+
+No NO GO or NEEDS TIER 1 trigger found.
