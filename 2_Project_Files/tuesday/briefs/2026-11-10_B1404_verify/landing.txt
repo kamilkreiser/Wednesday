@@ -1,0 +1,8 @@
+# Head-pinned squash, after hosted CI (dotnet, web, python, package) and CodeQL are green on the PR.
+# Run with the MPS project's GH_CONFIG_DIR. Open the PR from head b1404/mps-source-lifecycle-validator into main,
+# using pr-title.txt and pr-body.txt, and put its number in place of <PR>. Run from this verify folder (the files are read by name).
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/4_Credentials/.gh-config' \
+gh pr merge <PR> --repo datasecau/MPS-Commercial-Calculator --squash \
+  --match-head-commit f827f2d7e5bc97e5a368c07c4cad8a477ccb83fd \
+  --subject "$(cat squash-subject.txt) (#<PR>)" \
+  --body-file squash-body.txt
