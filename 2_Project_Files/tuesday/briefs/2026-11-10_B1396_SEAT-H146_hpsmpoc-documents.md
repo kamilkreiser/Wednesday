@@ -84,7 +84,7 @@ None of the code CI jobs apply (no code path is yours; `git diff --name-only ori
 - **Your own clone `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/.tools/b1396/analysis`** by URL `git@github.com:datasecau/HPSM-POC-analysis.git`, with the analysis deploy key `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/3_Access_Keys/analysis_deploy_rw` set as repo-local `core.sshCommand` (`git -C <clone> config core.sshCommand "ssh -i '/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/3_Access_Keys/analysis_deploy_rw' -o IdentitiesOnly=yes"`); branch `b1396/hpsmpoc-documents` from `origin/main` (print its sha at Step 0). `GH_CONFIG_DIR=/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.gh-config`, `gh -X GET` only.
 - Untracked inputs (the gate STATUS files, `*_evidence` folders, the signed SOW) are read from the root working copy by absolute path, read-only; say in STATUS which ones you read and their `sha256`.
 - STATUS: `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1396_STATUS.md`. FIRST line `PROGRESS B1396: b1396/hpsmpoc-documents HOLD`; a `WORKING: <deliverable>` last line after each part and at least every 20 minutes; sections `## PRIOR WORK`, one section per ticket (what was drafted, sources, the open placeholders), `## HELD`, `## NOT RUN`, and the draft-rule checks with output and controls. **The LAST line, on finish, is exactly `READY B1396: <head sha40>` and nothing after it** (`git rev-parse HEAD` of the pushed branch = `git ls-remote` of it). Otherwise `STOPPED: NEEDS TUESDAY <one question>`.
-- **HARD STOP: ____** (absolute AEDT, Tuesday writes it): push what is checked, write what is not. Commit and push after each deliverable (the drive dropped twice on 9 Nov).
+- **HARD STOP: 10:30 AEDT 2026-11-10** (absolute AEDT, Tuesday writes it): push what is checked, write what is not. Commit and push after each deliverable (the drive dropped twice on 9 Nov).
 - Commit messages: plain ASCII, no B-numbers, no person names, no seat ids; end with the attribution line your session reminder gives. Plain `git push origin b1396/hpsmpoc-documents` only.
 - Shell: no `cd`; absolute single-quoted paths (`!CODING` contains `!`); `git -C`; `python3 -I -B`; `/usr/bin/grep -i` with a positive control from the same file for every count.
 
@@ -102,9 +102,9 @@ PRIOR-WORK CHECK (above). No message to any human. Jira writes: none. Never dele
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Hard stop (absolute AEDT, one clock): ____
-- Panes and live seats at the stamp: ____
+- STAMP:  main fa401da9f7bdab21c46ad9717c964433a2d22650 read by gh api at 03:32 AEDT 2026-11-10 by the Tuesday successor seat (after s260)
+- LAUNCH WINDOW:  from 03:32 AEDT 2026-11-10, through launch_when_cool
+- Hard stop (absolute AEDT, one clock):  10:30 AEDT 2026-11-10
+- Panes and live seats at the stamp:  %0 Tuesday, %1 shell, %11 H147 (B1398 #297 CI fix), %12 D56 (B1391 UAT deploy), H142 (B1392) launching
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 03:32 AEDT 2026-11-10 (Tuesday successor seat after s260)

@@ -182,7 +182,7 @@ def main():
     # Newest tap per card wins: Kam re-tapping is him correcting himself, and the
     # LAST thing he said is what he meant. Sorted by timestamp, not file order.
     # taps[cid] = (key, ts, note): a <key> tap has note=None, a note: tap has key=None.
-    taps = {}
+    taps, keytaps, notetaps = {}, {}, {}
     for m in msgs:
         if not isinstance(m, dict):
             continue
@@ -197,10 +197,35 @@ def main():
             key, note = None, " ".join(mt.group("note").split())
         ts = str(m.get("ts", ""))
         cid = mt.group("id")
-        if cid not in taps or ts >= taps[cid][1]:
-            taps[cid] = (key, ts, note)
+        # 2026-11-10 (Tuesday s261): a <key> tap and a note: tap on the SAME card are two
+        # things Kam said, not one correcting the other. Kept apart: the newest KEY tap
+        # rules the card, the newest NOTE is reported beside it. Before this, a note
+        # sent in the same minute as the key tap (list-to-paul-1110, 03:26) replaced
+        # the tap, the card stayed open and his 'a' was recorded nowhere.
+        slot = keytaps if note is None else notetaps
+        if cid not in slot or ts >= slot[cid][1]:
+            slot[cid] = (key, ts, note)
+    extra_notes = []
+    for cid, nt in notetaps.items():
+        if cid in keytaps:
+            extra_notes.append((cid, nt[1], nt[2]))
+        else:
+            taps[cid] = nt
+    taps.update(keytaps)
 
     todo, skipped, notes = [], [], []
+    # A note kept beside a key tap passes the SAME gates as any tap: never another seat's
+    # client (hard rule 2: the first cut of this fix printed a Secuura card id into the
+    # Datasec seat), and on a closed card only if it is NEWER than the close.
+    for cid, ts, note in extra_notes:
+        card = by_id.get(cid)
+        if card is None or (not widen and not in_scope(card)):
+            continue
+        if card.get("status") != "open":
+            closed_at = str(card.get("ruled_ts") or card.get("withdrawn_at") or "")
+            if not ts > closed_at:
+                continue
+        notes.append((cid, ts, note))
     for cid, (key, ts, note) in sorted(taps.items(), key=lambda kv: kv[1][1]):
         card = by_id.get(cid)
         if card is None:
