@@ -1,0 +1,8 @@
+Seat S 44th
+
+BLUF: Kam ruled card secuura-lawyer-pack-ready-to-send-1109 = a ("Fix then send (recommended)") on the live board at 2026-11-09 14:38:03 AEDT. Make TWO edits to PART 1 of REC/drafts/lawyer_pack_ks305_ks605.md, in a NEW file REC/drafts/lawyer_pack_ks305_ks605_v2.md (keep v1 untouched), then ONE STATUS with the new path and its sha256. Do this NEXT, before more of batch 7 (after the KS-784 post if it is in hand).
+
+1. A footnote in PART 1 (plain words, no ticket keys, no paths) saying that two statements describe intended design that is not yet built: "a new version must be certified again" (Certification and Watermarking) and "customers set up their own verification workflows using smart contracts" (Verification). Mark each sentence with the footnote number.
+2. A short paragraph in PART 1 under the DPA sentence, in plain words, on what Secuura does keep for the Microsoft 365 integration: no copy of document contents (they are hashed as a stream); it does keep the organisation's connection tokens, the site names and addresses it listed, and for each synced document its name, link, a drive item reference and its hash. Ask the lawyers whether the sentence should cover those records. Every claim in it must match your PART 2 section 2.4; anything 2.4 marks UNMEASURED (token encryption at rest, organisation-level deletion, anchoring of synced hashes) is NOT stated as fact: say "we are confirming" or leave it out.
+3. Keep the signing gap bracket exactly as is: Kam pastes Phil's text himself.
+Re-run your PART 1 grep (ticket keys, paths, at-signs, agent and seat names, Platform S/K, Phil): none. Nothing is sent or posted.
