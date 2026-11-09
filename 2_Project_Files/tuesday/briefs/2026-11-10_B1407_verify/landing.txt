@@ -1,0 +1,7 @@
+# Run with GH_CONFIG_DIR set to the MPS Calculator project's 4_Credentials/.gh-config. Land only after hosted CI and CodeQL are green on the PR.
+# 1. Open the PR (base main, head = the gated branch):
+gh pr create -R datasecau/MPS-Commercial-Calculator --base main --head b1407/mps-infra-scripts-followups --title "$(cat pr-title.txt)" --body-file pr-body.txt
+# 2. Confirm the PR head is still the gated sha before landing:
+gh pr view <PR> -R datasecau/MPS-Commercial-Calculator --json headRefOid --jq .headRefOid   # must print f1a52832216a10f1e45fcce6e9a8618e5216c119
+# 3. Head-pinned squash:
+gh pr merge <PR> -R datasecau/MPS-Commercial-Calculator --squash --match-head-commit f1a52832216a10f1e45fcce6e9a8618e5216c119 --subject "$(cat squash-subject.txt)" --body-file squash-body.txt

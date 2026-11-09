@@ -1,0 +1,19 @@
+## What
+Test only. One file: tests/MpsCalc.Api.Tests/TemplateIsolationTests.cs.
+
+The format-in-a-hole guard (guard shape three) used a pattern that cannot follow four forms: a string literal, a quote character literal or a nested interpolated string in an earlier hole, and a nested pair of braces before the colon. Each of these can hide later code from the name scan. A second reader now reuses the scan's own hole logic and records every colon it meets as code at the top level of a hole. The guard is the pattern and that reader together.
+
+## Tickets
+- MPSCALC-380: done here.
+- MPSCALC-221: already on main (the care key constant was renamed in #109; a gitleaks run over the file gives 0 findings, against 1 on the pre-rename file). No change.
+- MPSCALC-381: item 3 landed in #156. Items 1, 2 and 4 wait for the product owner. No change.
+
+## Tests
+- 15 new rows: 4 rows, one per form (red with the second reader removed); 10 clean rows; 1 fact over the template files.
+- Local dotnet job (build Release, then test) at main, at head and at the merge: build 0 warnings. Engine 743/743, Import 196/196, Api 3367/3367 at main and 3382/3382 at head and at the merge. Nothing lost; the 15 gained names are exactly the new rows.
+- Mutants: dropping the brace-depth check turns 1 clean row red. Dropping the hole check turns 1 clean row and the files fact red.
+
+## Not in this change
+No product code, no workflow, no deploy. The pattern still fires on a few shapes that the new reader skips (a doubled-brace literal, a colon char literal, a colon in a block comment inside a hole). This strictness was already there before this change and is left to MPSCALC-381 item 4.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

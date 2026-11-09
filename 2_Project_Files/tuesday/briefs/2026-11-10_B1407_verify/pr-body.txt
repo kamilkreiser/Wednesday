@@ -1,0 +1,25 @@
+Three independent follow-ups, one commit each, so each can be reverted alone.
+
+MPSCALC-119 - infra/tests/test_infra.py
+- The Bicep compiler is $BICEP, then `bicep` on PATH, and nothing else: the `az bicep build` fallback is removed.
+- With neither, every test still FAILS (never skips) with words that name BICEP.
+- CI is unchanged: the python job already exports BICEP.
+
+MPSCALC-201 - scripts/entra_apps.py
+- With --all-roles-group, the group is looked up (and a group that is not security-only stops the run) before the first write.
+- The summary prints allRolesGroup / approverOnly only when their flag is given; without the flags the keys are the six printed before those flags existed.
+- --help and the docstring say that once either flag is used, every later run must carry it (the read-back exits 1 without it).
+- Tested against the repo's fake az only; never run against Entra.
+
+MPSCALC-205 - scripts/package.sh
+- Before the publish, a tree holding a Release build with debug symbols (a .pdb under src/*/obj/Release) is refused, naming the fix: `dotnet clean src/MpsCalc.Api/MpsCalc.Api.csproj -c Release` or a fresh clone.
+- 5 added lines, 0 removed; on a fresh checkout (CI, and the runbook's clean checkout) the check is empty and the package is built exactly as before.
+
+Tests: 10 new rows (3 infra, 4 Entra, 3 packaging). The python CI job goes from 190 to 200 rows locally, 0 lost; each new red-first row fails with its fix removed.
+
+Not in this PR: MPSCALC-203 (its open half lives in scripts/deploy-from-ci.sh, which this change does not touch).
+Follow-up: infra/scripts/validate.sh and infra/README.md still describe an `az bicep` route; on a machine with only `az bicep`, validate.sh now fails at its test step and needs BICEP set.
+
+Nothing is deployed by this change.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,0 +1,28 @@
+The change report's footer model decides whether the first footer line fits above the manifest hash line, and clips it with dots when it does not. It disagreed with the PDF writer in two ways, and in both the hash line could fall off the page:
+
+1. Tabs. The writer turns each tab into four spaces before it measures, breaks or draws text (6.45 pt a tab at 6.5 pt). The model measured the font's tab glyph (2.88 pt), so it could count one row where the render took two.
+2. Line breaks. The writer breaks a line only where the Unicode line-breaking rules allow: never after an opening bracket and its spaces, never before a closing mark across a space. The model broke at every space, so it counted fewer rows than the render.
+
+Changes (packages/renderers/src/change-report.ts only):
+- Tabs are counted as four spaces.
+- The first line is split with the writer's own line breaker (linebreak, loaded through pdfmake's dependency resolution), and each piece is measured as pdfkit measures it.
+- The text column is sized by the writer's column rule beside the widest page label.
+- Rows are filled as the writer fills them: leading and trailing white-space cuts, and the hard wrap of white space that overflows a row.
+- A piece wider than the old fixed column is still clipped, as before.
+
+Tests (packages/renderers/test/change-report.test.ts): three new rows, R12, R13 and R14. Each expected row count is a typed integer measured from the render, and each row is red without its fix. No existing row is changed.
+
+Verification (host node, the CI image could not be built offline):
+- Renderers project: 263 tests on main, 266 here, lost 0, added 3. The merge with main is clean, with the same results.
+- Workspace project: unchanged.
+- eslint, prettier --check and the web typechecks: rc 0.
+- The render probe, main against head over 2,288 change-report renders (168 from the project's own tests, 2,120 adversarial names):
+  - hash line lost: 11 at main, 0 here;
+  - broken page label: 59 at main, 0 here;
+  - every render whose first line is unchanged is byte-equal.
+
+Visible change, waiting for the product owner's look decision: some names that were already clipped are cut shorter than before (19 to 42 characters). In some of these, the shorter cut also repairs a page label the writer had printed in fragments. Others were sound at main. Before and after PDFs are in the gate evidence.
+
+Not in this change: sizing the footer by the real page count (needs the page count in document-pdf.ts, which held PR #85 lists), and the policy PDF footer. Nothing is deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

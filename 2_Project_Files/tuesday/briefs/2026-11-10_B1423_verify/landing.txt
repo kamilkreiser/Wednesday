@@ -1,0 +1,22 @@
+Landing form (project landing rule C-101, CLARIFICATIONS.md:1799): the coordinator
+squash-merges the PR pinned to the gated head after re-reading CodeQL and the checks.
+Nothing is deployed (Composer deploys only on the product owner's card).
+
+Gated head:  f94e05d31402b0893989ae598e67a46890082269
+Gated main:  a54250f48f41b693ab73163531e7ca82425fce69
+
+Before merging:
+1. gh pr view <PR> --json headRefOid prints the gated head (and git ls-remote of the PR's branch agrees).
+2. Hosted CodeQL (Analyze javascript-typescript, Analyze csharp) and every check on the PR is green.
+3. If main has moved from the gated main: git diff --name-only <gated main> <new main> names neither
+   lane path, and merge-tree of the new main and the head is clean; otherwise re-gate.
+
+Merge (PR number filled in when the PR is opened; subject is squash-subject.txt plus " (#<PR>)"):
+
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/4_Credentials/.gh-config' \
+  gh pr merge <PR> --repo datasecau/Datasec-Security-Composer --squash \
+  --match-head-commit f94e05d31402b0893989ae598e67a46890082269 \
+  --subject "Answer a device-group typed discovery sub-answer per device group (#<PR>)" \
+  --body-file squash-body.txt
+
+No deploy follows this merge.

@@ -1,0 +1,27 @@
+The footer model that keeps the change report's manifest hash line on the
+page disagreed with the PDF writer in two ways:
+
+- It measured a tab as the font's tab glyph, where the writer draws four
+  spaces.
+- It broke the first line at every space, where the writer follows the
+  Unicode line-breaking rules (no break after an opening bracket and its
+  spaces, none before a closing mark across a space).
+
+In both cases it could count fewer rows than the render, and the hash line
+fell off the page.
+
+The model now does what the writer does:
+
+- It counts a tab as four spaces.
+- It splits the line with the writer's own line breaker.
+- It measures each piece as pdfkit does.
+- It sizes the text column beside the widest page label as pdfmake does.
+- It fills rows with the writer's leading and trailing white-space cuts
+  and its hard wrap.
+
+A piece wider than the fixed column is still clipped.
+
+Three test rows (R12 to R14) compare the model with row counts measured
+from the render.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

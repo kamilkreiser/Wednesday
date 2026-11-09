@@ -1,0 +1,30 @@
+## Summary
+
+The Expert Discovery screen's typed editor keyed every declared sub-answer at the engagement level, so a sub-answer whose scope is device_group could not be answered per group: its one box wrote a draft with no device group, which the API refuses with 400.
+
+- A typed sub-answer at device_group scope now has one box per in-scope device group, labelled "<label> (<group>)" in the form the untyped grid already uses. Its draft and saved answer carry the group's id (device_group_id), the key form the API contract names.
+- Engagement-level sub-answers take the same path as before. They are the only kind either shipped content release declares today, so no shipped screen changes.
+- One new test file builds the demo release's D-013 with its print.required_protocols sub-answer at device_group scope (test data only).
+
+## Changed paths
+
+- apps/web/src/screens/Discovery.tsx (+48 -33)
+- apps/web/src/screens/LaneC4-discovery-typed-subanswer.test.tsx (new, 5 rows)
+
+## Verification (independent gate, head f94e05d on main a54250f)
+
+- Merge with main is clean. The merge tree equals the head tree.
+- CI node chain at main and head, with --network none:
+  - lint, format:check, typecheck and build rc 0 at both;
+  - tests 3,117/2/1 at main and 3,122/2/1 at head (passed/failed/skipped), lost 0, added 5;
+  - the 2 red rows are the same at both: they need withheld source text.
+- New rows:
+  - with the fix removed, 3 of 5 go red for the stated reason;
+  - each of the 5 goes red under at least one mutation.
+- Unchanged render: the DOM and the writes, serialised for every shipped content shape and every section, are byte-identical at main and head. A one-character control plant changes them.
+- Repo-wide hidden-character and secret scans are unchanged and clean.
+- CodeQL runs on this PR (hosted).
+
+Nothing is deployed by this change.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
