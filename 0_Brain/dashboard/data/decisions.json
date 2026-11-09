@@ -64811,5 +64811,353 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "defer-until-real-data-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Park three data-protection items until real customer data exists?",
+  "bluf": "Override of the prior-ruling gate: the gate matched only the word 'data'. Card hpsmpoc-hosted-demo-data-cleanup-1021 ruled c (leave two live-entered rows on the hosted demo) and hpsmpoc-hosted-preview-shows-no-sample-data-1011 ruled a (reset the demo's sample data); the others (Attio, NexusAI) are other projects. This card asks whether to park retention, audit-ledger storage and a schema-version bump until real customer data exists; I read HPSMPOC-100 ('when Kam rules K10'), -117 ('decide before any real customer data') and -180 ('leave 0.1.0 until the next planned re-issue') and the analysis repo's CLARIFICATIONS at origin main, and found no ruling on any of the three. The POC holds synthetic data only. Three items matter only if real data arrives: retention of client follow-up contact data (12 months proposed), tamper-evident audit storage on Azure SQL (today code rule plus DENY only), and a schema version bump that would change every ruleset hash. Recommend: defer all three, record the 12-month proposal, and revisit before any real data or the next ruleset re-issue. Default if you do not tap: option A, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-100, HPSMPOC-117, HPSMPOC-180",
+  "default_action": "Option A: defer, record the reason.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Defer all three until real data or ruleset re-issue",
+    "detail": "Recorded with the reason."
+   },
+   {
+    "key": "b",
+    "label": "Build retention and ledger audit now",
+    "detail": "Needs a migration; migrations are frozen."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:18.314748+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-05 16:40",
+   "CARD attio-contact-data",
+   "CARD nexusai-home-data-mutated",
+   "CARD nexusai-rd296-sustainability-has-no-data-path-2026-09-04",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD hpsmpoc-real-ai-model-before-meetings",
+   "CARD hpsmpoc-hosted-preview-shows-no-sample-data-1011",
+   "CARD hpsmpoc-hosted-demo-data-cleanup-1021"
+  ]
+ },
+ {
+  "id": "design-v12-calls-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Settle three Design v1.2 questions the way the tickets already lean?",
+  "bluf": "Override of the prior-ruling gate: the gate matched only the word 'design'. Card composer-design-deploy is a different project (Composer) and hpsmpoc-telemetry-smaller-design-1022 is about telemetry. The nearest HPSM-POC ruling is your 29 Oct 10:43 option a, 'Build all except the three held pieces (gather those)': it held the Good/Better/Best packages page (HPSMPOC-392) and did not decide roles (390), the top-bar picker (391) or the menu labels; the analysis repo's design v1.2 record still lists 390, 391 and 392 as 'Not settled'. This card asks you to decide what that ruling left open. The design review left three product calls. (1) Roles: write a Partner/Consultant/Admin/Demo definition and do NOT add a Customer role or in-session role switch. (2) Customer switching: keep the top-bar picker, Back link and Open buttons as drawn. (3) Good/Better/Best: no packages page; keep the recommendation tiers as groupings; hold the labels 'Revenue and proposals' and 'Customer engagements'. Option A accepts all three. Default if you do not tap: option A, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-390, HPSMPOC-391, HPSMPOC-392",
+  "default_action": "Option A recorded as the product owner's ruling in the tickets' next records pass.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept all three as stated",
+    "detail": "Settles 390, 391, 392."
+   },
+   {
+    "key": "b",
+    "label": "Go through them one at a time",
+    "detail": "Tuesday sends them back as three cards."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:21.452039+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD composer-design-deploy",
+   "CARD hpsmpoc-telemetry-smaller-design-1022"
+  ]
+ },
+ {
+  "id": "hidden-characters-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Refuse a customer name made only of invisible characters, and fix the file-name over-refusals?",
+  "bluf": "Narrowed: you ruled on 22 Oct (option a) that customer names refuse hidden and direction characters; that is built and deployed (HPSMPOC-178, PRs 187 and 189). Two leftovers are unruled. (1) HPSMPOC-324: a customer name of only U+200B (a character the ruling keeps) is still accepted, so a customer can have an invisible name. (2) HPSMPOC-257: the file-name check refuses some names Windows allows (LPT plus superscript 4, COM plus superscript 0). Recommend: refuse names that hold nothing visible, and for file names fold width and white space only (stops the over-refusals). Default if you do not tap: option C (change nothing), at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-324, HPSMPOC-257",
+  "default_action": "Option C: nothing changes until you tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Refuse invisible-only names; file names fold width/space only",
+    "detail": "Settles 324 and 257. Agent builds with tests that fail first."
+   },
+   {
+    "key": "b",
+    "label": "Refuse invisible-only names; leave file names as built",
+    "detail": "Over-refusal of a few odd file names stays."
+   },
+   {
+    "key": "c",
+    "label": "Change nothing",
+    "detail": "Keep current behaviour."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:24.520821+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-refuse-more-invisible-characters",
+   "CARD mpscalc-restricted-save-hidden-rates-entry-1023"
+  ]
+ },
+ {
+  "id": "keep-as-built-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Keep the renamed-customer report file name as it is?",
+  "bluf": "Narrowed: of the three tickets, HPSMPOC-237 was ruled on 21 Oct (hpsmpoc-review-week-larger-plan-1021, option b, the larger plan; the UAT plan stands at P0v3 per CLARIFICATIONS C-135) and HPSMPOC-246's notes were ruled on 13 Oct and built, so neither needs a card. One question remains (HPSMPOC-203): an issued report downloads under the renamed customer's file name while its pages print the old name. Keeping it is low severity; making the file keep its issue-time name needs a database change. Default if you do not tap: option A, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-203",
+  "default_action": "Option A: keep as is; record ruling.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep as is",
+    "detail": "The file name follows the live customer record. Recorded as ruled."
+   },
+   {
+    "key": "b",
+    "label": "Keep the issue-time name",
+    "detail": "Needs the name stored on the report row, a database change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:27.613930+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-uat-db-keep-awake-1031"
+  ]
+ },
+ {
+  "id": "layout-notes-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Three small display leftovers: accept 4.5 px of table width, make the header logo link 44 px, alias a Demo viewer's sample name?",
+  "bluf": "Narrowed after reading the tickets: your earlier cards ruled the Demo page-frame alias, headings and PDF (11 Oct, b) and kept sample names on Service offers (29 Oct, a); PRs 244, 272 and 278 have since built most of the table-width and 44 px work. Three leftovers remain, each unruled. (1) HPSMPOC-401: 8 cells (Customers and Workspace at 1024 px) sit 4.5 px right of the reference, inside the scroll region; accept or fix. (2) HPSMPOC-417: the header logo link is 28 to 40 px high, the only measured link left under 44 px; make it 44 or decline. (3) HPSMPOC-410: a Demo viewer sees 'Quollridge Logistics (sample)' on Home Upcoming activity and the customer profile; use the alias as the security pages do, or keep it as a sample. Default if you do not tap: option A, Tuesday queues it for the build lanes, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-401, HPSMPOC-417, HPSMPOC-410",
+  "default_action": "Option A: queue for the web lane; nothing deployed.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept the 4.5 px; 44 px logo link; use the alias",
+    "detail": "Settles 401, 417, 410."
+   },
+   {
+    "key": "b",
+    "label": "Leave all three",
+    "detail": "Record as declined."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:30.712616+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 11:25",
+   "2026-09-17 07:38",
+   "2026-09-18 09:49",
+   "CARD quickquote-item12-layout",
+   "CARD composer-5a983f0-guided-layout-deploy",
+   "CARD hpsmpoc-showcase-notes-to-tickets-1021"
+  ]
+ },
+ {
+  "id": "list-to-paul-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Do you want one list of open questions sent to Paul?",
+  "bluf": "Override of the prior-ruling gate: the gate matched the words 'paul' and 'list'. Card mpscalc-words-for-paul-review-1024 (b) is a different project (MPS Calculator) and listed 6 items waiting on your words; the HPSM-POC cards naming Paul ruled sign-in emails, showcase feedback and a Security Manager access question. None asks for one list of the 23 HPSM-POC tickets that wait on HP, Paul or an HP tool. Note for the read: of the 23, three (92, 96, 259) are next-phase backlog and 242 is the showcase-notes placeholder you already ruled to send on 21 Oct (hpsmpoc-showcase-notes-to-tickets-1021, a). 23 tickets wait on HP, Paul, or an HP tool (answers, access, or HP-tool integration, which this phase does not build). Rather than 23 cards, Tuesday can prepare one list for Paul with a line per ticket. You send it; nobody else messages Paul. Default if you do not tap: option B, no list, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-82, HPSMPOC-83, HPSMPOC-84, HPSMPOC-85, HPSMPOC-86, HPSMPOC-92, HPSMPOC-94, HPSMPOC-96, HPSMPOC-97, HPSMPOC-162, HPSMPOC-163, HPSMPOC-164, HPSMPOC-165, HPSMPOC-166, HPSMPOC-167, HPSMPOC-168, HPSMPOC-181, HPSMPOC-191, HPSMPOC-220, HPSMPOC-240, HPSMPOC-241, HPSMPOC-242, HPSMPOC-259",
+  "default_action": "Option B: nothing prepared.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, prepare one list for me to send",
+    "detail": "Tuesday drafts it; you send it."
+   },
+   {
+    "key": "b",
+    "label": "No list",
+    "detail": "The 23 stay parked."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:33.737849+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD composer-guide-v13-to-paul",
+   "CARD composer-two-logins-deploy-for-paul-friday",
+   "CARD composer-paul-110-questions-source",
+   "CARD composer-wizard-follow-paul-e8-questionnaire",
+   "CARD composer-0412eb6-deploy-before-paul",
+   "CARD composer-771ce4a-deploy-before-paul",
+   "CARD composer-ux-sections-list-or-stepper",
+   "CARD hpsmpoc-paul-signin-emails-forward-1008",
+   "CARD hpsmpoc-paul-showcase-feedback-1009",
+   "CARD mpscalc-paul-calculator-access-1012",
+   "CARD mpscalc-paul-invite-email-1012",
+   "CARD mpscalc-paul-invite-send-1013",
+   "CARD mps-paul-review-roles-k01-k18-1016",
+   "CARD mps-paul-review-words-k02-k03-k14-k20-1016",
+   "CARD mps-paul-review-catalogue-k05-k06-k07-k10-k13-k16-1016",
+   "CARD mps-paul-review-pricing-k09-k11-k12-1016",
+   "CARD mps-paul-review-scope-k15-k17-k19-1016",
+   "CARD mpscalc-quote-list-deals-closed-title-1017",
+   "CARD hpsmpoc-sm-access-for-paul-1020",
+   "CARD mpscalc-words-for-paul-review-1024"
+  ]
+ },
+ {
+  "id": "plan-rows-close-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Sign off the stack decision record (HPSMPOC-16)?",
+  "bluf": "Narrowed: of the four early-plan tickets, HPSMPOC-19 (Figma flows) and -20 (prototype approval) are already ruled (hpsmpoc-m2-ux-format a: the coded prototype is the UX; hpsmpoc-m2-signoff-recorded-1023 a: approval recorded), and -35 still waits on the expert content of HPSMPOC-31, so it is not overtaken. One real question: HPSMPOC-16 records the stack against SOW 4.1; its decision record holds 36 ADRs (7 ruled, 29 decided within delegation, per the 24 Sep comment) but is not signed off and the deviations from 4.1 were not listed in one place on 27 Sep (UNMEASURED since). Option A: Tuesday gathers the deviations list from the records and brings it for your sign-off; nothing in Jira changes. Default if you do not tap: option A, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-16",
+  "default_action": "Option A: prepare the list; no Jira transition without your next tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Prepare the deviations list for my sign-off",
+    "detail": "You see the evidence before anything closes."
+   },
+   {
+    "key": "b",
+    "label": "Leave HPSMPOC-16 as it is",
+    "detail": "No change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:36.786834+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD composer-demo-internal-text-plan",
+   "CARD hpsmpoc-plan-no-delete",
+   "CARD hpsmpoc-hosted-plan-approve",
+   "CARD composer-771ce4a-deploy-3-rows-counted",
+   "CARD hpsmpoc-review-week-larger-plan-1021",
+   "CARD datasec-morning-plan-1024",
+   "CARD datasec-morning-plan-1025",
+   "CARD datasec-morning-plan-1026",
+   "CARD mps-null-class-three-rows-gate-nogo-1027",
+   "CARD datasec-morning-plan-1027",
+   "CARD datasec-morning-plan-1028",
+   "CARD datasec-morning-plan-1029",
+   "CARD datasec-morning-plan-1030",
+   "CARD datasec-morning-plan-1101",
+   "CARD datasec-morning-plan-1102",
+   "CARD datasec-morning-plan-1103",
+   "CARD datasec-morning-plan-1104",
+   "CARD datasec-morning-plan-1105",
+   "CARD datasec-morning-plan-1106",
+   "CARD mps-384-withdrawn-alert-close-1106",
+   "CARD datasec-morning-plan-1109"
+  ]
+ },
+ {
+  "id": "product-sends-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Packs for the client: download and preview only, or may the product send them?",
+  "bluf": "Narrowed: the feedback half is settled (your 29 Sep route-A ruling: submissions become a Jira issue and an email to you; the pre-engagement wording stays placeholder through HP's review, ruled 23 Oct, hpsmpoc-pre-engagement-pack-wording-1023 b). One question is unruled (HPSMPOC-91): your 29 Sep words asked for the ability to send collateral to the client; the three packs are built as download and preview only, with nothing sent unless you rule otherwise. Recommend: keep download and preview only for the POC. Default if you do not tap: option A, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-91",
+  "default_action": "Option A recorded.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Download and preview only for the POC",
+    "detail": "Nothing emailed to a client by the product."
+   },
+   {
+    "key": "b",
+    "label": "Allow the product to send packs to clients",
+    "detail": "Needs a separate decision and a design."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:39.856670+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 18:01",
+   "2026-09-17 07:52",
+   "CARD nexusai-marketplace-round4-gpt-only-product",
+   "CARD quickquote-email-sends-standard-not-custom-1016"
+  ]
+ },
+ {
+  "id": "small-wording-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Roadmap rule line: name 'Evidence submitted' as well?",
+  "bluf": "Narrowed: four of the five tickets are ruled or are not wording. HPSMPOC-420 was ruled and built ('N of M scored questions answered', 2 Nov); the HPSMPOC-406 phrases were approved on 2 Nov; HPSMPOC-409 and -432 follow your 2 Nov choice to name the scroll region by the table's own caption. One wording is open (HPSMPOC-438): the rule line above the action register reads 'Verified complete needs an evidence reference. The reference is not checked independently.' although 'Evidence submitted' is now refused without a reference too. The agent proposes: 'Verified complete and Evidence submitted need an evidence reference. The reference is not checked independently.' Nothing ships to HP before a review. Default if you do not tap: option A, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-438",
+  "default_action": "Option A: proposals drafted; each still goes through the normal gate.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Use the proposed sentence",
+    "detail": "Tuesday posts it on the ticket for review before building."
+   },
+   {
+    "key": "b",
+    "label": "I will word it myself",
+    "detail": "Tell us when."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:42.871666+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-182-wording",
+   "CARD hpsmpoc-four-wording-fixes-monday",
+   "CARD composer-guided-wording-draft-1003",
+   "CARD composer-wording-asd-fixes-1006",
+   "CARD nexusai-rd476-two-wording-fixes-1018",
+   "CARD hpsmpoc-class-c-wording-six-tickets-1022",
+   "CARD hpsmpoc-pre-engagement-pack-wording-1023",
+   "CARD mps-vanished-store-wording-1025",
+   "CARD composer-96-proof-wording-round-cap-1027"
+  ]
+ },
+ {
+  "id": "sme-content-1110",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "The Datasec expert content is not supplied: keep it DRAFT and leave gaps?",
+  "bluf": "Override of the prior-ruling gate: the gate matched only the word 'content'. Card hpsmpoc-hp-content-gaps-tell-hp-1021 (a) ruled whether to tell HP in the cover note that HPSMPOC-94, -47, -48 wait on HP's content; this card is about nine different tickets (31, 37, 44, 46, 87, 55, 393, 394, 395) that wait on a Datasec expert, and asks who supplies them. Card hpsmpoc-draft-content-show-or-hide-1021 (a) ruled that DRAFT content is shown to HP marked DRAFT, which option A below keeps. Your 29 Oct ruling 'gather those' covered 393 and 394 as held-out pieces but did not say who supplies them. Overlaps stated so you can veto: 87 (shown DRAFT, 21 Oct) and 37 (scenarios approved as the DRAFT demo set, 4 Oct). Nine tickets wait on content only a Datasec expert can supply: the rules content, expected-result reconciliation, report language and disclaimers, HP policy examples, trial-run metrics, the customer question set, the Framework alignment table, the five independent-assessment principles, and audience testing. The project rule is that nothing security-related is invented. Recommend: everything stays labelled DRAFT, the unsupplied views stay out, and no expert sign-off is claimed. Default if you do not tap: option A, at 10:00 AEDT today (2026-11-10). Tickets: HPSMPOC-31, HPSMPOC-37, HPSMPOC-44, HPSMPOC-46, HPSMPOC-87, HPSMPOC-55, HPSMPOC-393, HPSMPOC-394, HPSMPOC-395",
+  "default_action": "Option A: nothing is invented; items stay open and labelled.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep DRAFT, leave unsupplied pieces out",
+    "detail": "Labelled sample content only; no sign-off claimed. Content already shown stays marked DRAFT, as you ruled on 21 Oct."
+   },
+   {
+    "key": "b",
+    "label": "Agent drafts the missing content for your review",
+    "detail": "Drafts are marked DRAFT-FOR-KAM and never loaded until you approve."
+   },
+   {
+    "key": "c",
+    "label": "Name the expert and a date",
+    "detail": "Reply with who and when."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T03:23:45.931309+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsm-composer-synthetic-demo-content-for-monday",
+   "CARD hpsmpoc-report-content",
+   "CARD composer-content-release-deploy",
+   "CARD hpsmpoc-draft-content-show-or-hide-1021",
+   "CARD hpsmpoc-hp-content-gaps-tell-hp-1021"
+  ]
  }
 ]
