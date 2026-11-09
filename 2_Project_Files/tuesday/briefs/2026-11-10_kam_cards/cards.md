@@ -1,0 +1,18 @@
+# Kam cards 2026-11-10 (HPSM-POC)
+
+| Card | Decision | Tickets | Recommended / default | Why grouped |
+|---|---|---|---|---|
+| uat-pack-scope-1110 | Tell us what HP tests: the hosted site or the v2.1 HTML prototype? | none | A / Hold UAT, no message to anyone, no change to the build. Tuesday drafts the case-by-case deferral list for A so it is ready. | Item 1 of the 9 Nov summary. Not a ticket group. |
+| event-date-demo-1110 | Which date is the HP event, so the demo script and plan can be fixed? | 5, 12, 172 | D / Date stays open; nothing re-planned; script stays v0. | All three need the same event date: 5 pins it, 12 and 172 are the demo script and pack that depend on it. |
+| facts-only-kam-1110 | Give two facts only you hold, or let us record them as 'not supplied'? | 6, 51 | B / Option B: record both as not supplied, labelled placeholders. | Both are facts only Kam can supply (names; baseline hours). |
+| plan-rows-close-1110 | Close four early-plan tickets as overtaken by what was built? | 16, 19, 20, 35 | A / Option A: check and propose; no Jira transition without your next tap. | Original plan rows that the build may already have overtaken; one answer ('verify then close') settles all four. |
+| sme-content-1110 | The Datasec expert content is not supplied: keep it DRAFT and leave gaps? | 31, 37, 44, 46, 87, 55, 393, 394, 395 | A / Option A: nothing is invented; items stay open and labelled. | One answer ('who supplies expert content, and meanwhile what ships') settles all nine. |
+| branding-1110 | Whose brand goes on the app and the PDF? | 21, 396 | C / Option C: keep the neutral placeholder. | Both are the same question: whose brand and who owns the assets. |
+| design-v12-calls-1110 | Settle three Design v1.2 questions the way the tickets already lean? | 390, 391, 392 | A / Option A recorded as the product owner's ruling in the tickets' next records pass. | Three separate questions but each ticket already states its lean; one tap accepts them together. |
+| hidden-characters-1110 | Refuse invisible and text-direction characters in customer names and file names? | 178, 324, 257 | A / Option C: nothing changes until you tap. | All three decide what the API accepts as typed text; one policy settles each. |
+| defer-until-real-data-1110 | Park three data-protection items until real customer data exists? | 100, 117, 180 | A / Option A: defer, record the reason. | One answer ('only matters once real data exists') settles all three. |
+| keep-as-built-1110 | Keep three low-risk behaviours as they are, with no spend? | 203, 237, 246 | A / Option A: keep as is; record ruling. | Each is a keep-as-is call with no cost; one tap accepts all three. |
+| product-sends-1110 | Confirm: the product sends nothing to clients; feedback goes only to Jira and you? | 90, 91 | A / Option A recorded. | Both decide what leaves the product and to whom. |
+| layout-notes-1110 | Fix two layout notes and show a Demo viewer an alias instead of the sample name? | 401, 417, 410 | A / Option A: queue for the web lane; nothing deployed. | Layout and display calls with no new words. |
+| small-wording-1110 | Accept the agent's proposed wording for five small UI notes? | 420, 438, 406, 409, 432 | A / Option A: proposals drafted; each still goes through the normal gate. | These are all small product-owner wording asks; one accept covers the set. |
+| list-to-paul-1110 | Do you want one list of open questions sent to Paul? | 82, 83, 84, 85, 86, 92, 94, 96, 97, 162, 163, 164, 165, 166, 167, 168, 181, 191, 220, 240, 241, 242, 259 | A / Option B: nothing prepared. | The 23 HP/Paul-dependent tickets are not carded individually. |
