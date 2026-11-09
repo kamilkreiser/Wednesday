@@ -19,7 +19,8 @@ KAM 13:44:07 RULED secuura-backlog-31-decisions-1109 = a ('All recommendations (
 - B 115th %142 WRAPPING (told 13:4x): on its wrap mail verify history + HANDOVER, score, pane_close %142, then B 116th drafter (copy commission 0_Brain/reference/2026-11-09_drafter-seatB115/commission.md, re-keyed; queue from PR 2111 ... 2120, then 2092 on), read its new lines, stamp LAST, dry gate, copy fleet/state/b115_waiter.sh.
 - S 43rd %139 (~60%): the 31-decision rows (C5 first), then wrap -> S 44th continues from its HANDOVER. Owed filings after merges: G274-1 (PR 2110 merged now), G275-2111-1, G276-1, G277 x2, G280 one ticket. KS-1383 closed as dup of KS-1375 (KS-1375 stays High, Wednesday's call).
 - T 21st %145: GO'd on set-up; E6-E9 raising; row 1 (PR 2117 wording) AFTER PR 2117 merges; D4 after PR 2102.
-- R 90th %124: PR 2121 (KS-2131) READY at 5ea632ca569c, HELD for ONE tier-1 Opus batch gate (gate 281) with PR 2118's KS-2127 round-2 delta when R's fix-round READY lands; if that slips past ~14:15, gate PR 2121 alone (commission like 0_Brain/reference/2026-11-09_gate278-tier1-pr2118-ks2127/commission.md). Then R wraps -> R 91st (item 4 + KS-785 Urgent tier-1 buildable from S 43rd's batch 5).
+- R 90th %124: PR 2118 round 2 READY at cd8b80e38a4b (13:47) + PR 2121 READY at 5ea632ca569c -> GATE 281 TIER 1 BATCH RUNNING (Opus subagent, dies at rotation; relaunch from 0_Brain/reference/2026-11-09_gate281-tier1-pr2121-pr2118r2/commission.md if verdict.md absent). GO/GWN -> ADDENDUM rows to the B seat (after 7e PR 2120); NO GO on 2121 -> R's successor round 1; PR 2118 is at the cap (NO GO = ship closed instances, ticket residue). R 90th wraps now -> R 91st (item 4 index.ts + KS-785 Urgent tier-1 buildable from S 43rd's batch 5).
+- S 43rd: KS-2149 filed (G274-1); now working the 31-decision rows from C5.
 - U 20th %76: holding on PR 2099.
 - No agent QUESTION open. Ledger this seat: 3 rows. BOTH digests regenerated at this handover.
 
