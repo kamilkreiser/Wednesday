@@ -177,7 +177,8 @@ ver() {
 }
 for pair in $FORMULAE; do
   f="${pair%%:*}"; rest="${pair#*:}"; c="${rest%:*}"; req="${rest##*:}"
-  if [ -x "$BREW" ] && "$BREW" list --formula "$f" >/dev/null 2>&1; then have=1; else have=0; fi
+  # Homebrew 7 moved some of these to casks (azure-cli is a cask on the M5 Studio, 2026-11-09): accept either.
+  if [ -x "$BREW" ] && { "$BREW" list --formula "$f" >/dev/null 2>&1 || "$BREW" list --cask "$f" >/dev/null 2>&1; }; then have=1; else have=0; fi
   if [ $have = 0 ]; then
     case "$MODE" in
       check) [ "$req" = 1 ] && rec FAIL "$f not installed" || rec WARN "$f not installed (optional; macOS ships $(command -v "$(basename "$c")" 2>/dev/null || echo 'no copy'))"; continue ;;
