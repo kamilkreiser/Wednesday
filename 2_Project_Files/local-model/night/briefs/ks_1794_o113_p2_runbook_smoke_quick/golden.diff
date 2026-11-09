@@ -1,0 +1,17 @@
+--- a/Blockchain/Dev/deployment/azure/RUNBOOK.md
++++ b/Blockchain/Dev/deployment/azure/RUNBOOK.md
+@@ -140,12 +140,12 @@
+ 
+ ```bash
+ SMOKE_BASE_URL=https://<prod-gateway-fqdn> \
+-  ../../scripts/smoke-test.sh
++  ../../scripts/smoke-test.sh --quick
+ ```
+ 
+ (Until DNS is wired, `<prod-gateway-fqdn>` is the auto-generated container-app FQDN: `az containerapp show --name secuura02-demo-issuer --resource-group secuura-demo-rg --query properties.configuration.ingress.fqdn -o tsv`.)
+ 
+-Covers: issuer / verifier / admin / status portals respond, gateway `/health`, API `/api/` discovery, login flow.
++Covers (`--quick`): the gateway `/health/deep` per-service health, the issuer / verifier / admin / status / website / showcase portals respond, gateway `/health`, API `/api/` discovery. The run is `--quick` on purpose: the full run signs in as the demo user, posts a forgot-password request and creates and anchors a real document, and against a remote gateway it skips the twelve direct service-port checks (a skip is not a pass). The sign-in is covered by 2.3.
+ 
+ - [ ] All checks return ✅.
+ 

@@ -1,0 +1,17 @@
+--- a/systemTest/fixtures/provision.ts
++++ b/systemTest/fixtures/provision.ts
+@@ -259,7 +259,13 @@
+  * Where/when: applied to a server's error message before it is interpolated into a thrown Error
+  * (KS-973 item 6), because that Error's message becomes the pre-suite DEGRADED banner every suite
+  * prints. A plain split/join, not a regex: the secrets are generated passwords and may carry
+- * regex metacharacters.
++ * regex metacharacters, so they are matched only as exact substrings.
++ *
++ * COSMETIC, NOT SECRECY (KS-1718): this scrub hides the literal password from the banner, but it does not keep the
++ * password private. `buildPassword` in actors.ts makes it `Ks256-<key>-<seed>-Pw!`, and the Error built from this
++ * reason names the actor's key and email (`ks256-<key>-<seed>@secuura-test.invalid`), so a reader of the banner can
++ * rebuild the password. A server echo that JSON-, URL- or HTML-escapes the password is not matched either. These are
++ * test accounts on undeliverable addresses.
+  *
+  * @param text - the message to scrub, e.g. a server's `error.message`.
+  * @param secrets - the values that must not appear; an empty string is ignored, since it would

@@ -1,0 +1,33 @@
+--- a/Blockchain/Dev/scripts/smoke-test.sh
++++ b/Blockchain/Dev/scripts/smoke-test.sh
+@@ -14,7 +14,8 @@
+ 
+ # KS-1250: RUNBOOK 2.2 tells an operator to point this script at an environment with SMOKE_BASE_URL, but the script never read it, so a run could look like a check of kintsugi or demo while it checked localhost. An unset or empty value keeps the old default.
+ GATEWAY="${SMOKE_BASE_URL:-http://localhost:6882}"
+-echo "Smoke target: $GATEWAY"
++# KS-1794: the target is printed without any user:password@ part of the URL, so a token in SMOKE_BASE_URL is not written to a terminal or a CI log.
++echo "Smoke target: $(printf '%s' "$GATEWAY" | sed -E 's#^([A-Za-z][A-Za-z0-9+.-]*://)[^/@]*@#\1#')"
+ # KS-1250 (ruled by Wednesday 2026-11-06 01:45Z): twelve checks below call the services on their own ports, http://localhost:60xx. Those ports exist
+ # on the local stack only: the gateway routes none of timestamping, M365, VC issue, tokenisation, tenant provisioning or MCP, and a gateway URL such as
+ # RUNBOOK 2.2's https://<prod-gateway-fqdn> carries no service ports. Before this, a run with SMOKE_BASE_URL set printed its target and then tested
+--- a/Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh
+@@ -83,6 +83,18 @@
+ got="$(grep -c -F "Smoke target: http://localhost:6882" "$WORK/unset/out.txt")"
+ if [ "$got" = "1" ]; then ok "CONTROL - the default run prints 'Smoke target: http://localhost:6882' once"; else bad "CONTROL - the default run prints 'Smoke target: http://localhost:6882' once" "want 1, got $got"; fi
+ 
++# RED (KS-1794) - credentials embedded in the base URL are not printed: the target line shows the URL without the user:password@ part.
++CRED_BASE="https://alice:s3cr3t-token@smoke-target.invalid:9999"
++build_fixture "$WORK/cred"; run_smoke "$WORK/cred" "$CRED_BASE"
++got="$(grep -c -F "s3cr3t-token" "$WORK/cred/out.txt")"
++if [ "$got" = "0" ]; then ok "RED KS-1794 a base URL with credentials: the secret is not printed anywhere in the output"; else bad "RED KS-1794 a base URL with credentials: the secret is not printed anywhere in the output" "want 0, got $got"; fi
++got="$(grep -c -F "Smoke target: https://smoke-target.invalid:9999" "$WORK/cred/out.txt")"
++if [ "$got" = "1" ]; then ok "RED KS-1794 a base URL with credentials: the target line shows scheme, host and port only"; else bad "RED KS-1794 a base URL with credentials: the target line shows scheme, host and port only" "want 1, got $got"; fi
++
++# CONTROL (KS-1794) - the request still goes to the credentialed base: only the printed line is scrubbed, not the URL the script calls.
++got="$([ "$(total_urls "$WORK/cred")" -gt 0 ] && echo some || echo none) $(urls_not_under "$WORK/cred" "$CRED_BASE")"
++if [ "$got" = "some 0" ]; then ok "CONTROL KS-1794 a base URL with credentials: every request still goes under the full base"; else bad "CONTROL KS-1794 a base URL with credentials: every request still goes under the full base" "want 'some 0', got '$got'"; fi
++
+ printf '\n  %d passed, %d failed\n' "$pass" "$fail"
+ [ "$fail" -eq 0 ] || exit 1
+ exit 0
