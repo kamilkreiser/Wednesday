@@ -13,6 +13,16 @@ Clear the Secuura board over 1-2 weeks; In Review and In Progress first; complet
 NONE OPEN WITH HIM (ten ruled 21:04). Old list, for ids: secuura-ks2073-stranded-rows-count-then-rekey-1106; secuura-ks256-sign-off-or-split-1106; secuura-ks1380-revert-pr1360-still-open-1106; secuura-ks2063-add-session-end-on-role-change-1106; secuura-ks736-made-up-token-result-1106; secuura-ks365-gosu-read-result-1106; secuura-ks2071-is-a-staker-rewards-product-planned-1106; secuura-ks1384-share-pays-second-tx-before-stage2-1106; secuura-ks2038-connector-principals-on-transfer-doors-1106; secuura-react-router-rows-fallback-date-1106 (raise again Wed 25 Nov if KS-528 is unmerged). On a ruling: reconcile, act, mark --delivered after reading the artefact at source.
 
 ## FIRST WORK
+ROTATION HANDOVER 11:3x (the 10:01 successor seat, ctx ~80%). READ FIRST with the HOLD further down (Spark + NAS OFF until Kam says back).
+- develop 2a031f51403f (PR 2109 squash). Merged this seat: PR 2106 (273de443c30c), PR 2109 (2a031f51403f).
+- B 113th LAUNCHED 11:26:39 (lane B): plan confirmation OWED -> rung 5/6, zoom its pane for ctx, ANSWER (model briefs_staged/2026-11-09_B112_answer_plan.md); then its READY PR 2104 -> GO (12-hex subject; model briefs_staged/2026-11-09_B112_go_2109.md).
+- GATE 277 tier 2 RUNNING as this seat's subagent (DIES at rotation): PR 2114 (R 90th KS-2141) + PR 2115 (T 20th E1 KS-2132); relaunch from 0_Brain/reference/2026-11-09_gate277-tier2-pr2114-pr2115/commission.md if verdict.md is absent (re-pin develop). GO/GWN -> ADDENDUM rows to B 113th (after PR 2113, before PR 2092) with statuses; NO GO -> R 90th / T 20th round 1 of 2.
+- T 20th %127: E2 (KS-2133, head 84401f920af8) queued to push; E3, E4 next (E4 G6 clause ruled); then E5-E9; D4 after PR 2102. Its E2-E4 READYs = the NEXT tier-2 batch gate. Second worktree s-t20-d2 approved.
+- R 90th %124 Opus: KS-2141 done (PR 2114 at gate 277); now KS-2127 (tier 1), then KS-2131 (tier 1), then index.ts 327-329 (tier 1, Refs KS-2109, no wait for PR 2111).
+- S 42nd %121: Backlog continuation; post-merge filings as B merges (G273-2109-1 now; G273-2104-1, G273-2108-3, G274-1, G275-2111-1, G276-1, KS-1536 re-read after 2111). KS-2144, KS-2145 filed; push-drop = KS-1149 (commented).
+- U 20th %76: holding on PR 2099.
+- No agent QUESTION open. Ledger this seat: 2 rows (R 90th 'same file' claim; SSH keep-alive premise). BOTH digests regenerated at this handover.
+
 UPDATE 11:27: B 113th LAUNCHED 11:26:39 (briefs_staged/2026-11-09_seatB113_merge.md, stamped, dry gate PASS): plan confirmation OWED -> rung 5/6 (zoom its pane for ctx); GO model briefs_staged/2026-11-09_B112_go_2109.md. The 11:2x line below about the drafter is DONE.
 
 UPDATE 11:2x: PR 2109 MERGED 2a031f51403f (verified = develop). B 112th WRAPPED 0.94, %130 closed. B 113th drafter RUNNING (subagent, dies at rotation; relaunch from 0_Brain/reference/2026-11-09_drafter-seatB113/commission.md if briefs_staged/2026-11-09_seatB113_merge.md is absent): read it as its diff against the stamped B 112th brief, stamp LAST, dry gate, launch via a copy of fleet/state/b112_waiter.sh (3 substitutions: 112th->113th, 111th->112th, the brief name). Lane B empty until then.
