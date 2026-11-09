@@ -1,0 +1,31 @@
+From Tuesday (Datasec coordinator seat), Datasec / HPSM-POC. **Your STATUS file is the channel and the wrap** (no mail). A question is a last line `STOPPED: NEEDS TUESDAY <one question>`. Marks: **MEASURED** = printed by a named instrument; **DERIVED** = source reading, not run; **RELAYED** = read in another file; **UNMEASURED** = nobody has.
+
+# BRIEF B1388 | SEAT-H141: HPSM-POC, BUILDER (OPUS), FIX ROUND for the gate's NO GO (round 1 of 2) on branch `b1381/hpsmpoc-demo-walkthrough` @ `844f9e56141b1b6849097d2a042e560030e42ff6`. FORWARD COMMITS ON THAT BRANCH, PLAIN PUSHES OF THAT REF ONLY, NO PR. NOT MERGED, NOT DEPLOYED. Written 2026-11-09 22:49 AEDT.
+
+## READ WHOLE FIRST (read-only)
+1. The original builder brief `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-09_B1381_SEAT-H137_hpsmpoc-demo-walkthrough.md` and the addendum `.../2026-11-09_B1383a_ADDENDUM_H139.md`. Every hold, decision, partition, check and housekeeping line binds you (UAT hold, nothing hosted, no PR, no Jira, no message to any human, never delete, no force-push/amend/reset/rebase, no `cd`, never `.github/**`, never `web/src/app/api/**` or `web/src/server/auth/**`).
+2. The gate's verdict `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-09_B1385_STATUS.md` (first line; findings B1385-1 to -12 at about lines 155-166) and `.../2026-11-09_B1385_evidence/residue.md` (read whole). The previous builder's STATUS `.../2026-11-09_B1381_STATUS.md`.
+
+## THE FIX
+1. **B1385-1 (Major), the required secrets check:** rename `WALKTHROUGH_KEY` in `web/src/lib/walkthrough.ts:13` and every use so the generic-api-key rule no longer matches (the gate suggests `WALKTHROUGH_STORAGE_NAME`; the stored value `hpsm.walkthrough.v1` may stay if the rule then passes). Run CI's own gitleaks command with the project's ignore file (ci.yml ~:658-660; `/opt/homebrew/bin/gitleaks` if present) at your head: rc 0, 0 findings, with the `ghp_` canary rc 1 first as the control. Do NOT touch the ignore file (it is under `.github/`).
+2. **B1385-5 (Major), the laptop sign-in screen:** at 1440x900 the new block makes the card taller, so the right-hand panel's centred headline moves (about 18,000 px) and the option starts at 921 px, below the fold. Make the change local to the option: the card height and the right panel unchanged at 1440x900, and the option visible without scrolling at 1440x900 (keep the four-level order and every pinned test). Prove it with your own before/after screenshot compare of the sign-in screen at 1440x900 and 390x844 (base main vs your head; changed pixels outside the option's own box = 0 at 1440x900; print the option's top y). The UAT start page already changes only inside the option: keep it so.
+3. **Wording (Minors B1385-2, -3, -7, -8), all in `web/src/content/walkthrough/steps.ts`:** step 13 must not claim a separate "security software attach" figure (say implementation, including software attach, and managed-service revenue); step 10 must not say the report waits for an approved narrative on every customer (it holds for the laptop sample only); step 4 must not name fleet size and latest score as visible columns at 1440 px with the panel open (soften, or name what IS visible); step 11 must not promise owner, due date and status where the laptop copy has no plan (a caveat line or a softer sentence). List each before/after sentence in STATUS.
+4. **B1385-9 (Minor), only if it is small and inside your lane:** under the phone drawer the header row is covered but reachable by Tab. If the header can be made inert while the drawer is open with a change local to `AppShell.tsx`'s walkthrough mount, do it with a test; otherwise record why not.
+
+## RULINGS BY TUESDAY (do NOT change these; they answer the gate's two ruling points)
+- **B1385-4:** the on-screen direction (cue) and the accuracy note (caveat) stay OPEN; only the talk track is folded under Presenter notes. This is Tuesday's decision 2 to the first builder, and the gate kit was wrong to ask otherwise. No change.
+- **B1385-6:** the demo's own typographic punctuation (arrows, dashes, middle dots, curly quotes) is ALLOWED in the visible walkthrough text and in tests that compare against the demo; no invisible, zero-width or bidi character anywhere; commit messages stay plain ASCII. No change.
+
+## CHECKS
+At your final head, every web check the original brief lists, by the same predicates, compared by program with the previous head 844f9e5 (numbers in the B1381 STATUS) and main: lint + typecheck rc 0, vitest, build, the walkthrough e2e (4 projects), the shell/entry tests and the UAT layout pins, CI's gitleaks command rc 0. A red not yours: name it with its cause at main.
+
+## HOUSEKEEPING
+- Clone: reuse `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/.tools/b1381/repo`; confirm `git status` clean and HEAD = 844f9e5 first, else STOP. Never `2_Project_Files/`.
+- **Ports: 9670-9679 only** (the parallel readiness fix seat H140 uses 9640-9649 in `.tools/b1380/`: not yours). The walkthrough gate G371 has finished; `lsof` on 9670-9679 must be 0 before you start a server.
+- The parallel readiness lane changes `web/src/components/readiness/AssessmentsHub.tsx`, which your `useWalkSample.ts` imports `PARTNER_SELF_NAME` from. Do not change that import; it lands after readiness and Tuesday re-checks the merge.
+- STATUS `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-09_B1388_STATUS.md`. First line `PROGRESS B1388: fix round on b1381 HOLD`; `WORKING: <part>` last line after every part, at least every 20 min; a `## PRIOR WORK` section. **The LAST line of the file, when you finish, is exactly `READY B1388: <head sha40>` and nothing after it.** A final section lists every file changed, each finding closed and how, every check with predicate and counts, and anything not run.
+- Commit messages plain ASCII, no B-numbers, no person names, the attribution line your session reminder gives. Push as soon as each fix is green (the drive dropped twice today).
+- HARD STOP 01:30 AEDT 2026-11-10: push what is green, write what is not.
+- Shell: absolute single-quoted paths (the `!`); `git -C`; `python3 -I -B`; `/usr/bin/grep -i` with a control for every count.
+
+READ-WHOLE-BY-TUESDAY: DONE (written by Tuesday s260; read back whole before launch)
