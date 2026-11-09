@@ -15,6 +15,13 @@ through this list on a new machine.
 | 6 | Claude Code auto-memory | Lives in `~/.claude` per machine — NOT portable. Wednesday's real memory is `0_Brain/` (on-drive) by design; treat auto-memory as a cache | — |
 
 Keep this file updated whenever a new machine-local dependency appears.
+
+> **TUESDAY's machine (the Datasec seat): run `Launch_New_Machine.command` (added 2026-11-09, Kam's M5 Studio
+> move).** It installs everything below that Tuesday and the Datasec projects use — Xcode CLT, Homebrew,
+> the formulae and apps measured on Kamils-Mac-mini, Docker's first launch, the tree's modes and hook,
+> Playwright browsers, the `com.tuesday.*` jobs, no-sleep — and lists the steps only Kam can do.
+> `--check` measures without changing anything; `--dry-run` prints the plan. **When a new machine-local
+> dependency is added here for Tuesday, add it to that script in the same session.**
 | 7 | `claude` CLI for the coordination harness's claude seat | Install Claude Code on the new machine (`~/.local/bin/claude`); Max login is per-machine | claude seat fails; gpt seat still works |
 | 8 | Codex CLI (gpt seat) | ON-DRIVE: binary at `2_Project_Files/tools/codex-cli/`, auth at `4_Credentials/.codex/` (CODEX_HOME) — portable across Apple-Silicon Macs. npm package bundles per-platform binaries; on a different architecture re-run `npm install` in that folder | gpt seat fails until reinstall |
 | 9 | Python for the coordination venv | venv at `2_Project_Files/coordination/.venv` is machine-tied (symlinks to system python). Recreate on a new machine: `python3 -m venv .venv && .venv/bin/pip install treequest` (needs Python 3.11+) | harness won't run until recreated |
