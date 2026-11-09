@@ -1,0 +1,22 @@
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1370-two-replicas-and-a-real-boot-race.integration.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1370-two-replicas-and-a-real-boot-race.integration.test.ts
+--- a/Blockchain/Dev/services/security/src/__tests__/ks1370-two-replicas-and-a-real-boot-race.integration.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1370-two-replicas-and-a-real-boot-race.integration.test.ts
+@@ -272,7 +272,8 @@
+       seen.storedClosed = await validate(inst, K1);
+ 
+       // db.ts backs off 1 s, 2 s, 4 s. After the second failed retry the next probe is 4 s away: that is the window where the database
+-      // answers and the flag is still down.
++      // answers while the flag is still down. If the event loop stalls past that 4 s, the retry timer can fire first, flip the flag and
++      // fail pin B2 (F-2071-2): that is a load flake of the timing, not a regression of the boot probe.
+       const failedRetries = () => logs.mock.calls.filter((c) => String(c[0]).includes('Database still unavailable')).length;
+       await waitFor('two failed retries', () => failedRetries() >= 2, 20_000);
+       await relay.open();
+@@ -321,6 +322,8 @@
+     expect(seen.storedClosed).toMatchObject({ status: 503, message: 'Unable to verify key' });
+   });
+ 
++  // pin B2 (F-2071-1): pins what develop does today in that window. A later fix under KS-1370 or KS-1377 may change it; B2 going red
++  // then is that change being made, not a regression.
+   it('pin B2: the database answers, the flag is still down, and a validate reads the stored row and warms memory', () => {
+     expect(seen.flagAtWarm).toBe(false);
+     expect(seen.flagAfterWarm).toBe(false);

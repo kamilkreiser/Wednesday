@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/react_router_v7_portals.test.sh b/Blockchain/Dev/scripts/__tests__/react_router_v7_portals.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/react_router_v7_portals.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/react_router_v7_portals.test.sh
+@@ -70,7 +70,8 @@
+   // dependency map and every key of overrides at any depth. (The react-router floor check below keeps reading deps, as before.)
+   const okeys = (o, acc = []) => { for (const [k, v] of Object.entries(o || {})) { acc.push(k); if (v && typeof v === 'object') okeys(v, acc); } return acc; };
+   const domIn = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'].filter((m) => 'react-router-dom' in (pj[m] || {})).map((m) => `${m} ${pj[m]['react-router-dom']}`);
+-  if (okeys(pj.overrides).includes('react-router-dom')) domIn.push('overrides');
++  if (okeys(pj.overrides).some((k) => k === 'react-router-dom' || k.startsWith('react-router-dom@'))) domIn.push('overrides');   // KS-2138 item 3 (gate 260): npm accepts a name@range key
++  if ([].concat(pj.bundleDependencies || [], pj.bundledDependencies || []).includes('react-router-dom')) domIn.push('bundleDependencies');   // KS-2138 item 4 (gate 260): a bundled dependency is a dependency
+   if (domIn.length) out.push(`R2 ${a}: package.json still names react-router-dom in ${domIn.join(', ')}`);
+   if (!floorOk(parse(deps['react-router']))) out.push(`R2 ${a}: react-router spec ${JSON.stringify(deps['react-router'])} is not in [7.18.2, 8)`);
+ }
+@@ -199,6 +200,12 @@
+ mutant "R1 a .cjs file requires react-router-dom"           R1 m_cjs
+ mutant "R1 a .cts file imports react-router-dom"            R1 m_cts
+ 
++# KS-2138 items 3 and 4 (gate 260): two plants the checker above did not see. Each cell fails ("mutant left R2 green") until the checker reads them.
++m_bundle()    { jsonmut "$1/frontend/verifier/package.json" 'd.bundleDependencies=["react-router-dom"]'; }
++m_overat()    { jsonmut "$1/frontend/admin/package.json" 'd.overrides={"react-router-dom@6":"^6.30.4"}'; }
++mutant "R2 react-router-dom listed under bundleDependencies"   R2 m_bundle
++mutant "R2 react-router-dom as a name@range overrides key"     R2 m_overat
++
+ # ---- GREEN-before pins: proven only by a named mutant -------------------------------------------
+ g1() { textmut "$1/frontend/admin/src/App.tsx" ' basename="/admin"' ''; }
+ g2() { textmut "$1/frontend/verifier/src/App.tsx" ' basename="/verify"' ''; }

@@ -1,0 +1,22 @@
+diff --git a/Projects Documents/fragments/cheat/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html b/Projects Documents/fragments/cheat/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html
+--- a/Projects Documents/fragments/cheat/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html
++++ b/Projects Documents/fragments/cheat/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html
+@@ -13,7 +13,7 @@
+ <h3>Figures</h3>
+ <table>
+ <tr><th>Figure</th><th>Value</th></tr>
+-<tr><td>files, lines</td><td><strong>2</strong> files against develop, <strong>+2 -2</strong>: <code>trustHeaders.ts</code> (one comment line) and <code>AGENT-DOCUMENT-OPERATION-RULES.md</code> (one line)</td></tr>
++<tr><td>files, lines</td><td><strong>4</strong> files against develop, <strong>+32 -2</strong>: the two edited files, <strong>+2 -2</strong> (<code>trustHeaders.ts</code>, one comment line, and <code>AGENT-DOCUMENT-OPERATION-RULES.md</code>, one line), plus these two fragments</td></tr>
+ <tr><td>code changed</td><td><strong>0</strong>: the TypeScript emit of <code>trustHeaders.ts</code> with comments removed is identical to develop's (790 bytes each); a planted code line makes it differ and a planted comment line does not</td></tr>
+ <tr><td>suites, before then after</td><td>api-gateway 168 test files, 1880 tests, 0 failed on both sides; the 4 files that name <code>trustHeaders</code> 22 of 22; the shared <code>ks1536-one-role-vocabulary</code> guard 97 of 97; <code>eslint</code> 0 errors and 30 warnings and <code>tsc --noEmit</code> rc 0 with no output, both byte-identical before and after (measured 2026-11-09, Node v26.8.1)</td></tr>
+ </table>
+diff --git a/Projects Documents/fragments/flow/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html b/Projects Documents/fragments/flow/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html
+--- a/Projects Documents/fragments/flow/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html
++++ b/Projects Documents/fragments/flow/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html
+@@ -1,5 +1,5 @@
+ <h2><!--n-->. Two pointers name role lists that PR 2060 removed (KS-2109, api-gateway)</h2>
+-<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> Two lines of prose, in two files. PR 2060 (KS-1536 part 3a) removed the local role lists that the gateway checks used to carry, and two pointers still named them. In <code>services/api-gateway/src/utils/trustHeaders.ts</code>, a comment said the <code>x-tenant-override</code> header is gated on <code>SUPER_ADMIN_ROLES</code>; it now says the auth middleware gates on <code>isPlatformRole</code> (from <code>@secuura/shared</code>) before honouring it. In <code>docs/security/AGENT-DOCUMENT-OPERATION-RULES.md</code>, a line said <code>enforceAdminProxy</code> uses <code>PROXY_ADMIN_ROLES</code>, "which lists human roles only"; it now says <code>enforceAdminProxy</code> asks <code>isPlatformOrOrgAdminRole</code> and so admits <code>SYSTEM_ADMIN</code>, <code>SUPER_ADMIN</code> and <code>ORG_ADMIN</code> only: human roles.
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> Two lines of prose, in two files besides these fragments. PR 2060 (KS-1536 part 3a) removed the local role lists that the gateway checks used to carry, and two pointers still named them. In <code>services/api-gateway/src/utils/trustHeaders.ts</code>, a comment said the <code>x-tenant-override</code> header is gated on <code>SUPER_ADMIN_ROLES</code>; it now says the auth middleware gates on <code>isPlatformRole</code> (from <code>@secuura/shared</code>) before honouring it. In <code>docs/security/AGENT-DOCUMENT-OPERATION-RULES.md</code>, a line said <code>enforceAdminProxy</code> uses <code>PROXY_ADMIN_ROLES</code>, "which lists human roles only"; it now says <code>enforceAdminProxy</code> asks <code>isPlatformOrOrgAdminRole</code> and so admits <code>SYSTEM_ADMIN</code>, <code>SUPER_ADMIN</code> and <code>ORG_ADMIN</code> only: human roles.
+     </td></tr><tr><td>One held Spark pass, applied strictly. The two files are independent, so the order does not matter. Nothing here is a runtime defect: gate 244 found that every gate it drove behaved as PR 2060 says, and the pointers were stale.
+     </td></tr></table>
+ <h3><!--n-->.1 What proves it</h3>

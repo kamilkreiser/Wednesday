@@ -1,0 +1,32 @@
+diff --git a/Projects Documents/fragments/cheat/KS-2055-transfer-cancel-history-records-the-status-it-moved-from.html b/Projects Documents/fragments/cheat/KS-2055-transfer-cancel-history-records-the-status-it-moved-from.html
+--- a/Projects Documents/fragments/cheat/KS-2055-transfer-cancel-history-records-the-status-it-moved-from.html
++++ b/Projects Documents/fragments/cheat/KS-2055-transfer-cancel-history-records-the-status-it-moved-from.html
+@@ -1,6 +1,6 @@
+ <h2>The transfer cancel route records the status it moved from, not "cancelled" twice &mdash; KS-2055 (half), transfer</h2>
+ <div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> In <code>POST /api/transfers/:id/cancel</code> the status was set to <code>cancelled</code> before the history entry was built from <code>transfer.status</code>, so every cancel recorded <code>fromStatus: cancelled</code> and <code>toStatus: cancelled</code>. The handler now captures the previous status before the assignment and writes it as <code>fromStatus</code>. <code>GET /api/transfers/:id/history</code> serves those entries, so a cancelled transfer's history now names the status it was cancelled from. The approve and reject handlers already wrote literal values and are not touched.
+-    </td></tr><tr><td><strong>Product code changes, by one line.</strong> <code>services/transfer/src/index.ts</code> gains one <code>const previousStatus</code> and <code>fromStatus</code> reads it (+2 -1), and one new test file adds five cells (+134). <strong>This is HALF of KS-2055.</strong> The ticket's second part, that the <code>reason</code> from the request body is stored as sent with no type or length check, is the owner's decision and is not changed here.
++    </td></tr><tr><td><strong>Product code changes, by two lines (one added, one changed).</strong> <code>services/transfer/src/index.ts</code> gains one <code>const previousStatus</code> and <code>fromStatus</code> reads it (+2 -1), and one new test file adds five cells (+134). <strong>This is HALF of KS-2055.</strong> The ticket's second part, that the <code>reason</code> from the request body is stored as sent with no type or length check, is the owner's decision and is not changed here.
+     </td></tr></table>
+ </div>
+ <div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> No real database (the cells read the in-memory map), no request outside the test's in-process server, and what a history reader does with entries already written; this change does not touch stored entries. KS-2055 stays open: the <code>reason</code> bound is undecided.
+@@ -12,7 +12,7 @@
+ <h3>Figures</h3>
+ <table>
+ <tr><th>Figure</th><th>Value</th></tr>
+-<tr><td>files, lines</td><td><strong>2</strong> files against develop: <code>src/index.ts</code> +2 -1 and the new <code>ks2055-transfer-cancel-history-records-the-status-it-moved-from.test.ts</code> +134</td></tr>
++<tr><td>files, lines</td><td><strong>4</strong> files, <strong>+165 -1</strong>, as PR 2113 merged: <code>src/index.ts</code> +2 -1, the new <code>ks2055-transfer-cancel-history-records-the-status-it-moved-from.test.ts</code> +134, and these two fragments (+18 and +11)</td></tr>
+ <tr><td>red first</td><td>with the test file alone, <strong>2 of 5</strong> cells fail by assertion (R1 and R2, "expected 'cancelled' to be 'pending_approval'"); with the product hunk all <strong>5</strong> pass</td></tr>
+ <tr><td>suite, before then after</td><td><code>services/transfer</code> 16 test files and 460 tests, then 17 and 465, 0 failed on both sides; <code>tsc --noEmit</code> rc 0 with no output on both sides, and <code>tsc</code> including the new test file rc 0 with a planted-error control that fires (measured 2026-11-09, Node v26.8.1)</td></tr>
+ </table>
+diff --git a/Projects Documents/fragments/flow/KS-2055-transfer-cancel-history-records-the-status-it-moved-from.html b/Projects Documents/fragments/flow/KS-2055-transfer-cancel-history-records-the-status-it-moved-from.html
+--- a/Projects Documents/fragments/flow/KS-2055-transfer-cancel-history-records-the-status-it-moved-from.html
++++ b/Projects Documents/fragments/flow/KS-2055-transfer-cancel-history-records-the-status-it-moved-from.html
+@@ -4,7 +4,7 @@
+     </td></tr></table>
+ <h3><!--n-->.1 What proves it</h3>
+ <table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Red first, then green.</strong></td><td> With the test file alone, 2 of its 5 cells fail by assertion: R1 (a pending simple transfer) and R2 (a pending sale transfer), each "expected 'cancelled' to be 'pending_approval'". With the product hunk applied all 5 pass. <strong>Package checks, before then after:</strong> <code>services/transfer</code> 16 test files and 460 tests, then 17 and 465, 0 failed on both sides; <code>tsc --noEmit</code> rc 0 with no output on both sides; <code>tsc</code> including the new test file rc 0, with a planted type error that the same configuration reports.
+-    </td></tr><tr><td><strong>The product change is two lines.</strong> A <code>const previousStatus</code> placed before the assignment, and <code>fromStatus: previousStatus</code> in place of <code>fromStatus: transfer.status</code>. Nothing else in the handler moves.
++    </td></tr><tr><td><strong>The product change is two lines (one added, one changed; +2 -1).</strong> A <code>const previousStatus</code> placed before the assignment, and <code>fromStatus: previousStatus</code> in place of <code>fromStatus: transfer.status</code>. Nothing else in the handler moves.
+     </td></tr></table>
+ <h3><!--n-->.2 What it does not cover</h3>
+ <table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> No real database, no request outside the test's in-process server, and no look at entries already written (this change does not touch stored entries). The <code>reason</code> bound is not part of this change. KS-2055 stays open.

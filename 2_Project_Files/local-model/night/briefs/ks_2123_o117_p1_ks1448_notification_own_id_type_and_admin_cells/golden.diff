@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1448-notification-create-own-id-only.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1448-notification-create-own-id-only.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1448-notification-create-own-id-only.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1448-notification-create-own-id-only.test.ts
+@@ -100,6 +100,7 @@
+   ['a super admin in the casing a JWT carries', { userId: 'ks1448-super-lower', role: 'super_admin' }],
+   ['a super admin in upper case', { userId: 'ks1448-super-upper', role: 'SUPER_ADMIN' }],
+   ['a platform_admin role', { userId: 'ks1448-platform', role: 'platform_admin' }],
++  ['an ADMIN role', { userId: 'ks1448-admin', role: 'ADMIN' }],
+   // The shape authenticateToken attaches for a valid sk_ key (middleware/auth.ts).
+   ['a connector key', { userId: 'connector:ks1448-conn', role: 'connector', connectorId: 'ks1448-conn', authMethod: 'api_key' }],
+ ];
+@@ -115,6 +116,14 @@
+     expect(await rowsOf(target)).toEqual([]);
+     expect(mockLoggerError).not.toHaveBeenCalled();
+   });
++
++  // KS-2123 (gate 246 G246-F2): the refusal must hold for every notification type, not only security and system.
++  it.each(['purchase', 'certification', 'verification', 'transfer'])('RED KS-2123 R6: type %s posting for another user gets 403 and no row is stored', async (type) => {
++    const target = `ks1448-target-type-${type}`;
++    const res = await post({ userId: 'ks1448-typed', role: 'user' }, { ...BODY, type, userId: target });
++    expect(res._status).toBe(403);
++    expect(await rowsOf(target)).toEqual([]);
++  });
+ 
+   it('RED KS-1448 R2: the phishing shape, type security with an actionUrl, stores nothing for the target', async () => {
+     const target = 'ks1448-target-phish';

@@ -1,0 +1,19 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1539-create-path-logs-a-thrown-allow-list-read.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1539-create-path-logs-a-thrown-allow-list-read.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1539-create-path-logs-a-thrown-allow-list-read.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1539-create-path-logs-a-thrown-allow-list-read.test.ts
+@@ -187,4 +187,15 @@
+     ]);
+     expect(routeWarns()).toEqual([]);
+   });
++
++  // KS-2066 F3 (gate 213): "never the message" is pinned above for a SyntaxError only. A plain Error whose message quotes stored text must not reach a log line either.
++  it('CONTROL KS-2066 F3: a rejected plain Error whose message quotes stored text logs the class Error and none of that text', async () => {
++    readSpy.mockImplementationOnce(async () => {
++      throw new Error(`redis reply [x-${QUOTED}] was refused`);
++    });
++    const r = await create();
++    expect([r.status, r.code]).toEqual([503, 'SERVICE_UNAVAILABLE']);
++    expect(routeWarns().map(([, , errorClass]) => errorClass)).toEqual(['Error']);
++    expect(JSON.stringify(logs)).not.toContain(QUOTED);
++  });
+ });
