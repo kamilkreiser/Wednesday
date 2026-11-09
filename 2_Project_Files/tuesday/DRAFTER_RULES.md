@@ -37,6 +37,10 @@ names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned
 7. No person's name (client staff, reviewers) and no decision-card id in the KIT text the seat will copy into
    commits or comments; cite a ruling as "the product owner's <date> ruling" (10-16 / 10-20 naming rows).
    The report may name card ids.
+   **Every name scan a kit asks a seat to run is UNDERSCORE-AWARE** (2026-11-10, B1396 verifier: a test method
+   name joined a ban-list first name with underscores, and the `\b`-bounded scans of the builder AND the
+   verifier's first pass both read 0, because `_` is a word character). Write the pattern as
+   `(?<![A-Za-z])<name>(?![a-z])` (or split on `_` first), and its control plants `_by_<name>_` and must fire.
 
 ## Things every kit must get right
 - **Never make "the alert reads fixed or absent on `refs/pull/N/head`" a landing condition on NexusAI: that read cannot fail** (measured 2026-11-06: 40 of 40 closed PRs read js results 0 on their head analysis; main reads 122). The check that can fail is main's analysis at the merge commit, after landing: the ticket moves on that, and a fix that leaves the alert open is a new round. Added 2026-11-06 by s249.

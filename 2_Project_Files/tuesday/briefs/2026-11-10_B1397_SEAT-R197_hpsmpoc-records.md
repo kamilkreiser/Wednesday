@@ -117,11 +117,11 @@ Recorded by the B1397 seat from the GitHub API reads of <<READ-DATE>> (`gh api -
 Recorded by B1397 SEAT-R197 (records), <<WRITE-DATE>>.
 END <C2>
 
-**E3: pull request 297 landed (Demo Walkthrough).** Written ONLY if the stamped squash sha reads as 40 hex characters AND `gh api -X GET repos/datasecau/HPSM-POC/pulls/297` says merged with `merge_commit_sha` equal to it. At drafting (2026-11-10 03:16 AEDT) it was OPEN, head `60639d154623e3782d0ac81c96cd9d3accbafebf`, 16 files, title "Web: Demo Walkthrough option and right-hand guided demo panel" (MEASURED by the drafter). The stamp slot value is `@SQUASH297@` below; Tuesday replaces it with the squash sha (40 hex) or with the words NOT-LANDED, in which case E3 is HELD and not written.
+**E3: pull request 297 landed (Demo Walkthrough).** Written ONLY if the stamped squash sha reads as 40 hex characters AND `gh api -X GET repos/datasecau/HPSM-POC/pulls/297` says merged with `merge_commit_sha` equal to it. At drafting (2026-11-10 03:16 AEDT) it was OPEN, head `60639d154623e3782d0ac81c96cd9d3accbafebf`, 16 files, title "Web: Demo Walkthrough option and right-hand guided demo panel" (MEASURED by the drafter). The stamp slot value is `884fd72b238ec8dc0d566b0e9c18b5362f920a2b` below; Tuesday replaces it with the squash sha (40 hex) or with the words NOT-LANDED, in which case E3 is HELD and not written.
 BEGIN <C3>
 ### <<C3>> - HPSM-POC: pull request 297 (Demo Walkthrough) landed as the squash <<SQ297-8>>; the final gate said go with findings; one finding is carried
 Recorded by the B1397 seat from the GitHub API reads of <<READ-DATE>>, the gate record `Briefs/2026-11-09_B1390_STATUS.md` (its first line) and the brief of this seat. No board card id is written. This seat built nothing, ran no test, sent nothing to any human and made no request to any app host or to Azure.
-- **The landing (MEASURED <<READ-TIME>>).** Pull request 297, title "<<TITLE-297>>", merged <<MERGED-AEDT-297>> AEDT, squash commit `@SQUASH297@` (the GitHub field `merge_commit_sha` read equal: <<EQ297>>), <<NFILES-297>> files; main's push run <<RUN297>> read <<RUN297-STATE>>; open code-scanning alerts on main <<ALERTS-297>>.
+- **The landing (MEASURED <<READ-TIME>>).** Pull request 297, title "<<TITLE-297>>", merged <<MERGED-AEDT-297>> AEDT, squash commit `884fd72b238ec8dc0d566b0e9c18b5362f920a2b` (the GitHub field `merge_commit_sha` read equal: <<EQ297>>), <<NFILES-297>> files; main's push run <<RUN297>> read <<RUN297-STATE>>; open code-scanning alerts on main <<ALERTS-297>>.
 - **The gate (RELAYED from `Briefs/2026-11-09_B1390_STATUS.md` line 1, first 300 characters, quoted by program).** "<<GATE-297>>". At drafting its verdict reads go with findings in round 2 of 2.
 - **Carried, not settled.** The gate's finding B1390-1 (the caveat wording of walkthrough step 10) is queued for the web UI lane of 10 Nov after this landing, with no Jira ticket; whether it was fixed is read from that lane's record, not assumed. Nothing is deployed; the UAT hold stands.
 Recorded by B1397 SEAT-R197 (records), <<WRITE-DATE>>.
@@ -171,15 +171,15 @@ No Jira write outside the closed list; no statement that anyone has been told, t
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): ____
-- MOVE (exactly `CLOSE-IF-MET` or `COMMENT-ONLY`; default COMMENT-ONLY; COMMENT-ONLY posts the comments and never transitions): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request, the entries and the correction block; the Jira steps stand): ____
-- LAND (exactly `SEAT` or `TUESDAY`; default SEAT): ____
-- Squash sha of pull request 297 (40 hex or the words NOT-LANDED): @SQUASH297@
-- Hard stop (the absolute outer limit AEDT; JIRA DONE 40, RECORDS COMMITTED 70, HARD STOP 100 minutes after your own Step-0 date, whichever is earlier): ____
-- Panes and live seats at the stamp: ____
+- STAMP: STAMPED 03:54 AEDT 2026-11-10 by Tuesday s261; read WHOLE. NOTE FOR E3: pull request 297 landed at head e9a36f7ec658d13e453b8fea98d0ad5825719389, which is the gated head 60639d154623e3782d0ac81c96cd9d3accbafebf plus ONE forward CI-fix commit (SignInScreen lg/xl classes; full RegExp escaping in two e2e specs), all 23 hosted checks green on it including CodeQL and both SQL Server legs; E3 adds one bullet saying so, MEASURED by `gh api -X GET repos/datasecau/HPSM-POC/compare/60639d15...e9a36f7e` (3 files).
+- LAUNCH WINDOW: from 03:54 AEDT 2026-11-10, through launch_when_cool
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): WRITE
+- MOVE (exactly `CLOSE-IF-MET` or `COMMENT-ONLY`; default COMMENT-ONLY; COMMENT-ONLY posts the comments and never transitions): CLOSE-IF-MET
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request, the entries and the correction block; the Jira steps stand): WRITE
+- LAND (exactly `SEAT` or `TUESDAY`; default SEAT): SEAT
+- Squash sha of pull request 297 (40 hex or the words NOT-LANDED): 884fd72b238ec8dc0d566b0e9c18b5362f920a2b
+- Hard stop (the absolute outer limit AEDT; JIRA DONE 40, RECORDS COMMITTED 70, HARD STOP 100 minutes after your own Step-0 date, whichever is earlier): 10:30 AEDT 2026-11-10
+- Panes and live seats at the stamp: %0 Tuesday, %1 fleet-monitor, %11 H147 (done), %12 D56 (UAT deploy, writes neither Jira nor CLARIFICATIONS), %13 H142, %14 H143 (READY), %15 H144, %16 H145, %17 H146, %18 H153 (SME drafts, analysis repo, writes neither)
 - ADDENDUM-1 (Part 2: the keys and the lines to post, from the builders' STATUS files; Tuesday writes it later; four underscores means do Part 1 only): ____
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 03:54 AEDT 2026-11-10 (Tuesday s261)
