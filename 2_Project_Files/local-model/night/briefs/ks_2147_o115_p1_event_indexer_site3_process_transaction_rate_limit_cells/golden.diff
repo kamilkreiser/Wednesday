@@ -1,0 +1,46 @@
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1972-event-indexer-poll-survives-an-unreadable-throw-at-the-rate-limit-check.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1972-event-indexer-poll-survives-an-unreadable-throw-at-the-rate-limit-check.test.ts
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks1972-event-indexer-poll-survives-an-unreadable-throw-at-the-rate-limit-check.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1972-event-indexer-poll-survives-an-unreadable-throw-at-the-rate-limit-check.test.ts
+@@ -118,4 +118,42 @@
+     expect(inner.lastProcessedBlock).toBe(5);
+     expect(received.length).toBe(1);
+   });
++
++  // KS-2147 (gate 273 G273-2104-1): site 3, the catch in processTransaction, is driven by no cell above. One block, one transaction, txsUtxos throws.
++  async function pollSiteThree(value: unknown) {
++    const received: unknown[] = [];
++    const indexer = new ContractEventIndexer({
++      policyIds: ['ks2147-policy'],
++      onError: (e: Error) => {
++        received.push(e);
++      },
++    } as never);
++    const inner = indexer as unknown as { running: boolean; api: unknown; lastProcessedBlock: number; backoffMs: number; poll(): Promise<void> };
++    inner.running = true;
++    inner.lastProcessedBlock = 5;
++    inner.api = {
++      blocksLatest: async () => ({ height: 6 }),
++      blocksByNumber: async () => ({ tx_count: 1 }),
++      blocksByNumberTxs: async () => ['ks2147-tx'],
++      txsUtxos: async () => {
++        throw value;
++      },
++    };
++    await inner.poll();
++    return { received, backoffMs: inner.backoffMs, lastProcessedBlock: inner.lastProcessedBlock };
++  }
++
++  it('control ks2147 N1 site 3: a 429 thrown by txsUtxos backs off, does not reach onError and the block is marked processed', async () => {
++    const out = await pollSiteThree(new Error('429 Too Many Requests'));
++    expect(out.received.length).toBe(0);
++    expect(out.backoffMs).toBe(2000);
++    expect(out.lastProcessedBlock).toBe(6);
++  });
++
++  it('control ks2147 N2 site 3: an unreadable value thrown by txsUtxos reaches onError once as an Error and the block is left unprocessed', async () => {
++    const out = await pollSiteThree(revokedProxy());
++    expect(out.received.length).toBe(1);
++    expect(out.received[0] instanceof Error).toBe(true);
++    expect(out.lastProcessedBlock).toBe(5);
++  });
+ });

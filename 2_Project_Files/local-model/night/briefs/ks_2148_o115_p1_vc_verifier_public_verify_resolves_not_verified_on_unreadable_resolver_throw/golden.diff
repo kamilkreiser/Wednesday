@@ -1,0 +1,52 @@
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1973-vc-verifier-issuer-lookup-and-ed25519-catches-unreadable-throw.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1973-vc-verifier-issuer-lookup-and-ed25519-catches-unreadable-throw.test.ts
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks1973-vc-verifier-issuer-lookup-and-ed25519-catches-unreadable-throw.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1973-vc-verifier-issuer-lookup-and-ed25519-catches-unreadable-throw.test.ts
+@@ -110,4 +110,48 @@
+   it('RED ks1973 R5 an object whose toString throws, thrown by the key decode, gives the Ed25519 entry with a constant reason', async () => {
+     expect(await signatureWithKey(throwingKey(toStringThrows()))).toEqual({ valid: false, errors: [`${ED}unreadable thrown value`] });
+   });
++
++  // KS-2148 (gate 273 G273-2108-3): the public verify() is reached by no cell above; the eight cells call a private method through the cast.
++  type Verified = { verified: boolean; checks: { issuerDID: boolean }; errors?: string[] };
++  async function verifyWith(value: unknown): Promise<Verified | 'rejected'> {
++    const verifier = new VerifiableCredentialVerifier({ didResolver: () => Promise.reject(value) });
++    try {
++      return (await verifier.verify(credential('zAAAA') as never)) as unknown as Verified;
++    } catch {
++      return 'rejected';
++    }
++  }
++  const entry = (text: string): string => `Failed to resolve DID did:example:issuer: ${text}`;
++
++  it('control ks2148 N1 verify() with an ordinary Error from the DID resolver resolves not verified, with the lookup entry and its text', async () => {
++    const out = await verifyWith(new Error('resolver down'));
++    expect(out).not.toBe('rejected');
++    expect((out as Verified).verified).toBe(false);
++    expect((out as Verified).checks.issuerDID).toBe(false);
++    expect((out as Verified).errors).toContain(entry('Error: resolver down'));
++  });
++
++  it('control ks2148 N2 verify() with a revoked Proxy from the DID resolver resolves not verified, with the lookup entry and a constant reason', async () => {
++    const out = await verifyWith(revokedProxy());
++    expect(out).not.toBe('rejected');
++    expect((out as Verified).verified).toBe(false);
++    expect((out as Verified).checks.issuerDID).toBe(false);
++    expect((out as Verified).errors).toContain(entry('unreadable thrown value'));
++  });
++
++  it('control ks2148 N3 verify() with an object whose toString throws from the DID resolver resolves not verified, with a constant reason', async () => {
++    const out = await verifyWith(toStringThrows());
++    expect(out).not.toBe('rejected');
++    expect((out as Verified).verified).toBe(false);
++    expect((out as Verified).checks.issuerDID).toBe(false);
++    expect((out as Verified).errors).toContain(entry('unreadable thrown value'));
++  });
++
++  it('control ks2148 N4 verify() with a Symbol from the DID resolver resolves not verified, with the lookup entry and its text', async () => {
++    const out = await verifyWith(Symbol('ks2148'));
++    expect(out).not.toBe('rejected');
++    expect((out as Verified).verified).toBe(false);
++    expect((out as Verified).checks.issuerDID).toBe(false);
++    expect((out as Verified).errors).toContain(entry('Symbol(ks2148)'));
++  });
+ });

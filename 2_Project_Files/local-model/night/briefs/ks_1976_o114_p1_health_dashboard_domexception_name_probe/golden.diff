@@ -1,0 +1,21 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1868-health-dashboard-check-service-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1868-health-dashboard-check-service-catch-unreadable-throw.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1868-health-dashboard-check-service-catch-unreadable-throw.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1868-health-dashboard-check-service-catch-unreadable-throw.test.ts
+@@ -85,4 +85,17 @@
+     const out = await dashboard(getterThrows());
+     expect(out.body?.services?.svc).toEqual(down('unreadable thrown value'));
+   });
++
++  // KS-1976 (gate 177 mutant H5): the DOMException name probe in checkService is pinned by no cell.
++  it('ks1976 N1 a DOMException named AbortError reports the service down as a timeout with no latency', async () => {
++    const out = await dashboard(new DOMException('aborted', 'AbortError'));
++    expect(out.body?.services?.svc).toEqual({ status: 'down', latencyMs: null, url: 'https://svc.example.test', error: 'timeout' });
++  });
++
++  it('ks1976 N2 a DOMException whose name getter throws reports the service down with a constant reason', async () => {
++    const thrown = new DOMException('aborted', 'AbortError');
++    Object.defineProperty(thrown, 'name', { get: () => { throw new Error('name boom'); } });
++    const out = await dashboard(thrown);
++    expect(out.body?.services?.svc).toEqual(down('unreadable thrown value'));
++  });
+ });

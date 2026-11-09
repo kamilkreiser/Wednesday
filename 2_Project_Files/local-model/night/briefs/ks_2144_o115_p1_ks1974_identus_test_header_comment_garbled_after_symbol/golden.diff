@@ -1,0 +1,13 @@
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1974-identus-client-resolve-did-non-string-message-is-text.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1974-identus-client-resolve-did-non-string-message-is-text.test.ts
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks1974-identus-client-resolve-did-non-string-message-is-text.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1974-identus-client-resolve-did-non-string-message-is-text.test.ts
+@@ -3,7 +3,8 @@
+ // KS-1974 (identus client only): IdentusClient.resolveDID (src/prism/identus-client.ts) is a resolver: a failed lookup is a result
+ // with `didDocument: null` and `didResolutionMetadata.error: 'notFound'` plus an `errorMessage` TEXT. Its catch reads the failure
+ // into `errorMessage` inside a try (KS-1868) as `err instanceof Error ? err.message : String(err)`, which guards a read that
+-// THROWS but not a read that RETURNS a non-string: an Error whose `message` is a Symbol, an object whose toString throws comes back as that value itself, so `errorMessage` is not text. The fetch stand-in is a plain function rejecting
++// THROWS but not a read that RETURNS a non-string: an Error whose `message` is a Symbol, or is an object whose toString throws,
++// comes back as that value itself, so `errorMessage` is not text. The fetch stand-in is a plain function rejecting
+ // with the cell's value (stubbed with `vi.stubGlobal`, removed after each cell); the logger is a plain no-op object; no network.
+ vi.mock('../logger', () => ({
+   logger: {

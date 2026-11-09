@@ -1,0 +1,15 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh b/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
+@@ -120,4 +120,11 @@
+     "# SECUURA_NGINX_STATUS_URI=http://secuura-nginx-gateway:80/stub_status" \
+     "$(grep -m1 'SECUURA_NGINX_STATUS_URI=' "$DEV_ROOT/../../observability/.env.example")"
+ 
++# KS-1415 (gate62 minor 2): the two first-line pins above read only the FIRST SECUURA_NGINX_STATUS_URI line, so a later active line
++# that names the gateway's host port 6882 passes them. A count is blind to position: no line of either example may name the gateway on 6882.
++expect "observability/.env.example names the gateway host port 6882 on no line" "0" \
++    "$(grep -c 'secuura-nginx-gateway:6882' "$DEV_ROOT/../../observability/.env.example")"
++expect "observability/config/alerting.env.example names the gateway host port 6882 on no line" "0" \
++    "$(grep -c 'secuura-nginx-gateway:6882' "$DEV_ROOT/../../observability/config/alerting.env.example")"
++
+ echo "prometheus_targets: ${PASS} passed, ${FAIL} failed"
