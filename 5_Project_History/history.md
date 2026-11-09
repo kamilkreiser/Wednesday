@@ -1,3 +1,10 @@
+## 2026-11-09 22:20 -> 2026-11-10 05:3x - Wednesday overnight seat (Secuura + general, Opus 5.5) -> 05:30 shift-change wrap
+- Gates 295 (PRs 2141-2144: GO/GWN/GWN/GO; relaunched after it died at the 22:1x rotation) and 296 (PRs 2145-2147: GWN/GWN/GO): all ten R 92nd PRs gated. R 92nd wrapped and scored 0.92; pane closed clean.
+- Spark o121-o125: 8 passes held (KS-1984, KS-2094, KS-2017; KS-1970 after its cold-start cause was measured; KS-1516, KS-1952, KS-1855 halves 1+2, the last 4 tier 1). KS-1712 root cause (Prisma adapter-pg timezone shift, one-line fix measured); KS-1739 = the red wallet-signature cell. KS-2103 blocked by PR 2081.
+- Kam's 'no cards on fleet activity' (02:48; also 11-06) traced from his screenshot to a filter saved in his iPad browser. He then ruled 12 cards (02:55-02:58). Ledger w=2 + lesson extension + WED-159.
+- Drive migration (Secuura_DEV): census (WED: 931 GiB rebuildable; Secuura: 1,013 GiB worktrees, 541 clean stale); card ruled a; both rsyncs restarted with the ruled excludes; vault copied whole and verified (1044 = 1044, same HEAD). Not yet ready: final delta, counts, repoints, boot test.
+- Filed WED-157/158/159. Ledger: 2 rows; 19 rows dated 11-06 archived (1772 = 1772). Handover: NEXT-PICKUP SHIFT-CHANGE HANDOVER 05:3x + mail to wednesday-agent@.
+
 ## 2026-11-09 14:23 -> 16:23 - Tuesday s258 (Datasec seat, Opus 5.5), first seat on the M5 Mac Studio -> wrap on Kam's word before a reboot ("can you wrap up and I will reboot")
 - New machine: Launch_New_Machine.command --check rc 0 / 0 FAIL after two fixes (6 com.tuesday.* jobs installed and loaded; a cask-vs-formula bug in the check fixed, commit 131c6d432). Left to Kam: Full Disk Access for /bin/bash, NVIDIA Sync pairing, voice.
 - Logins proven by real reads: gh for all ten Datasec project configs (the project account); az tokens for the five active projects.

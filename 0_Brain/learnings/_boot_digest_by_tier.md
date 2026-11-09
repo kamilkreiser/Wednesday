@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-10 03:52 from 262 lesson files (1,131,569 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 216. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-10 05:31 from 262 lesson files (1,133,086 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 216. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -6693,6 +6693,8 @@ subagent, or herself). **Ask first: can the local model do this, under the kit's
 
 **His words, verbatim:** *"please place decisions you need from me on the chat dashboard under fleet activity.  now and going forward"*
 
+sections (open the file for these): EXTENSION 2026-11-10 (ledger w=2): a 201 proves STORAGE, not that Kam can SEE the card
+
 **How to apply:**
 1. **One decision per card.** Fields: `id` (project-prefixed), `client_project`, `title`, `bluf`, ≥2 `options` (key, label, detail),
    `recommended`, `default_action` (what happens if he never answers, and who acts). Cards follow the ask-format lessons: action first
@@ -6711,6 +6713,9 @@ subagent, or herself). **Ask first: can the local model do this, under the kit's
 **Family:** [[2026-08-21_decision-queue-and-rotation-rhythm]] (the queue was already his preferred surface; this names WHERE it is read)
 · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-08_ask-format-action-first]] ·
 [[2026-09-11_a-number-left-for-kam-in-a-handover-reaches-no-surface-he-reads]].
+
+## EXTENSION 2026-11-10 (ledger w=2): a 201 proves STORAGE, not that Kam can SEE the card
+**What happened.** Kam, live board 2026-11-10 02:48:13: *"I cannot see any cards on fleet activity"*. The same words came on 2026-11-06 20:42; that seat listed the cards in chat and left the cause "unmeasured". Thirteen cards were open and every post had returned HTTP 201. His screenshot (IMG_0044) showed the footer `0 need you · 0 ruled today · 915 cards synced · 30 synthetic hidden`, the key unlocked, and the `× clear` chip on screen. In index.html, `× clear` renders only when a filter is saved in the browser's localStorage, and "need you" counts only cards passing that filter and the active agent tab. He tapped clear and ruled twelve cards in four minutes.
 
 
 ## The Spark is calibrated the way Ornith was: start with HIGH oversight, measure what the model can and cannot do, adjust task complexity and how much the brief guides it, and reduce oversight only once the capability is known

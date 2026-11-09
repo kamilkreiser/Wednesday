@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-10 03:52 from 262 lesson files (1,131,359 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-10 05:31 from 262 lesson files (1,132,876 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6751,6 +6751,8 @@ subagent, or herself). **Ask first: can the local model do this, under the kit's
 
 **His words, verbatim:** *"please place decisions you need from me on the chat dashboard under fleet activity.  now and going forward"*
 
+sections (open the file for these): EXTENSION 2026-11-10 (ledger w=2): a 201 proves STORAGE, not that Kam can SEE the card
+
 **How to apply:**
 1. **One decision per card.** Fields: `id` (project-prefixed), `client_project`, `title`, `bluf`, ≥2 `options` (key, label, detail),
    `recommended`, `default_action` (what happens if he never answers, and who acts). Cards follow the ask-format lessons: action first
@@ -6769,6 +6771,9 @@ subagent, or herself). **Ask first: can the local model do this, under the kit's
 **Family:** [[2026-08-21_decision-queue-and-rotation-rhythm]] (the queue was already his preferred surface; this names WHERE it is read)
 · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-08_ask-format-action-first]] ·
 [[2026-09-11_a-number-left-for-kam-in-a-handover-reaches-no-surface-he-reads]].
+
+## EXTENSION 2026-11-10 (ledger w=2): a 201 proves STORAGE, not that Kam can SEE the card
+**What happened.** Kam, live board 2026-11-10 02:48:13: *"I cannot see any cards on fleet activity"*. The same words came on 2026-11-06 20:42; that seat listed the cards in chat and left the cause "unmeasured". Thirteen cards were open and every post had returned HTTP 201. His screenshot (IMG_0044) showed the footer `0 need you · 0 ruled today · 915 cards synced · 30 synthetic hidden`, the key unlocked, and the `× clear` chip on screen. In index.html, `× clear` renders only when a filter is saved in the browser's localStorage, and "need you" counts only cards passing that filter and the active agent tab. He tapped clear and ruled twelve cards in four minutes.
 
 
 ## The Spark is calibrated the way Ornith was: start with HIGH oversight, measure what the model can and cannot do, adjust task complexity and how much the brief guides it, and reduce oversight only once the capability is known

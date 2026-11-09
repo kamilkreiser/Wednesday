@@ -34,3 +34,13 @@ Chat and terminal replies may POINT at the cards; they are not where the decisio
 **Family:** [[2026-08-21_decision-queue-and-rotation-rhythm]] (the queue was already his preferred surface; this names WHERE it is read)
 · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-08_ask-format-action-first]] ·
 [[2026-09-11_a-number-left-for-kam-in-a-handover-reaches-no-surface-he-reads]].
+
+## EXTENSION 2026-11-10 (ledger w=2): a 201 proves STORAGE, not that Kam can SEE the card
+
+**What happened.** Kam, live board 2026-11-10 02:48:13: *"I cannot see any cards on fleet activity"*. The same words came on 2026-11-06 20:42; that seat listed the cards in chat and left the cause "unmeasured". Thirteen cards were open and every post had returned HTTP 201. His screenshot (IMG_0044) showed the footer `0 need you · 0 ruled today · 915 cards synced · 30 synthetic hidden`, the key unlocked, and the `× clear` chip on screen. In index.html, `× clear` renders only when a filter is saved in the browser's localStorage, and "need you" counts only cards passing that filter and the active agent tab. He tapped clear and ruled twelve cards in four minutes.
+
+**Rules.**
+1. When Kam says he cannot see something on the board, ask for the footer line (or a screenshot) FIRST. It separates three causes in one read: `cards synced 0` = API or auth; synced > 0 with `need you 0` = a filter, the agent tab or the key on his screen; `🔒` titles = the key is locked.
+2. A post's HTTP 201 is never evidence that a card "is on the board" in a sentence to Kam. It proves the server stored it, and nothing more.
+3. A "can't see" report gets its cause measured in the same session. Leaving it "unmeasured" is how the 11-06 recurrence happened.
+4. Mechanism owed (WED's own dashboard; deploying the live app needs Kam's word): the footer should say `N open hidden by your filter` whenever a saved filter hides open cards.
