@@ -1,0 +1,15 @@
+# Gate 294, TIER 1 (Opus), FIX ROUND 1 of 2 (COMPARE): PR 2138 (Refs KS-590), Seat G 32nd. Commissioned 2026-11-09 22:0x by the 18:46 Wednesday seat.
+Common rules: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-07_gate_tier1_common.md (read whole).
+Round 0: gate 292's commission and verdict, /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate292-tier1-pr2138-ks590/ (read both whole). Its findings were G292-1 to -5.
+What was asked of this round (read whole): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_G32_answer_gate292_fixround.md and its SUPERSEDE, 2026-11-09_G32_answer_g2924_settled.md. G292-4 is settled by Kam's card secuura-ks590-verify-disclosure-four-questions-1102 = a; it ships as built.
+Pins (Wednesday's ls-remote at 22:06:02 AEDT; re-read at start and end): develop d0b4825cc24493213f82b609670a4a0fa521a4b9; PR 2138 head fdf80425e9d5c4f99f0a7b5c5c7521b0f7a39ec1 (parent d769c05d0a9b4e47413ed7ec9d02024b3180edc0, round 0's head). The DELTA is d769c05d0a9b..fdf80425e9d5.
+READY (read whole): /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatG-32nd/mail/out_04_ready_r1.txt. Reproduce; do not trust.
+Questions:
+1. The delta changes no product behaviour: only tests, comments, the fragment and the PR text, as the seat says (4 files, +43/-13). Prove it, with a control.
+2. G292-2: the new cell G1-F reddens under gate 292's gap-1 mutant (keep certifierOrganizationId when no certifier name is present) and is green at the head. G292-3: cells G2-C2 and G1-V pin verify-file chain-first with a tenant, and v2's cross-tenant org id. Each is red under its named mutant or on develop. Use your OWN mutants, reproduced from the gate 292 verdict's X1, X2 and X2b.
+3. G292-1: the code comment, the flow fragment, the PR body and comment 845cb0df (edited in place) now name migration 011 (NOT NULL), and nothing still credits 039 RLS. G292-5: confirm it is left and named (originate.openapi.ts is outside the PR).
+4. The PR body names card secuura-ks590-verify-disclosure-four-questions-1102 = a and the line that a deploy needs Kam's word to Stuart first.
+5. The whole originate suite at the head (the seat: 2,618 of 2,618); tsc and eslint identical to develop; a merge tree onto d0b4825cc244 with a planted control; no open PR shares a path (planted control).
+CAP: round 1 of 2. A NO GO here means ONE more round (2 of 2); after it the closed instances ship and the residue is ticketed.
+Constraints: clone under the session scratchpad or /private/tmp/g294 (if the hook refuses writes there, use GIT_DIR inside the scratchpad, as gate 293 did). Never cd. In !CODING use only ls-remote, show, log, diff, ls-tree, cat-file and grep. Never push or post. No rm, no docker, no box. Keep load1 under 8.
+Output: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate294-tier1-pr2138r1-compare/verdict.md. Line 1 exactly 'PR 2138: <V>'. Then FOUND / TESTED / HOW, NOT TESTED, and findings G294-<n> with severities, plus each G292 finding marked CLOSED, OPEN or SETTLED. Findings only.
