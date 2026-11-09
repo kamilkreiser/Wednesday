@@ -1,3 +1,12 @@
+## 2026-11-09 14:23 -> 16:23 - Tuesday s258 (Datasec seat, Opus 5.5), first seat on the M5 Mac Studio -> wrap on Kam's word before a reboot ("can you wrap up and I will reboot")
+- New machine: Launch_New_Machine.command --check rc 0 / 0 FAIL after two fixes (6 com.tuesday.* jobs installed and loaded; a cask-vs-formula bug in the check fixed, commit 131c6d432). Left to Kam: Full Disk Access for /bin/bash, NVIDIA Sync pairing, voice.
+- Logins proven by real reads: gh for all ten Datasec project configs (the project account); az tokens for the five active projects.
+- Landed: NexusAI PR #183 (RD-959/960/961) -> main 763f0006 by head-pinned merge commit; Deploy demo jobs skipped. Not deployed.
+- Gate G369 (B1379, b1369 RD-973) stamped after a whole read and launched: both verifies PASS 5493/326 (head, and the landing tree on 763f0006); verdict pending at the wrap; it may die at the reboot.
+- Copy to /Volumes/DevDRIVE_Studio (Kam): TUESDAY, vault and workspace files done; !CODING/Datasec (1.85 TB) about 284 GB in; the target dropped three times (cable moves likely, per Kam); resume script with a UUID guard in 5_Project_History/2026-11-09_devdrive-copy/.
+- Slips: an installer run as `--help` (ledger row 2026-11-09); typed clocks (corrected in the note). Statusline at the wrap ctx 27%.
+- Handover: NEXT-PICKUP-TUESDAY.md DELTA 1084.
+
 ## 2026-11-09 13:02 -> 13:2x - Tuesday s257 (Datasec seat, Opus 5.5), boot after s256's wrap -> wrap on Kam's word ("i will see you on the other machine. lets wrap up now")
 - Kam (terminal 13:0x): moving Tuesday and all Datasec dev to a new M5 Mac Studio 128 GB; build a new-machine launcher. Receipted on the board first (bf-5df572a8dbc2).
 - Built `Launch_New_Machine.command` (commit dec78afaa, pushed, HEAD=origin): Xcode CLT, Homebrew, 15 formulae, 9 apps (3 optional), Docker first launch, tree modes + hook, Playwright, com.tuesday.* jobs, no-sleep, Kam's manual list; --check / --dry-run modes. Inventory measured on Kamils-Mac-mini; names checked against the Homebrew API. --check on the mini rc 0 / 0 FAIL; install paths untested until the Studio. PORTABILITY.md points at it.
