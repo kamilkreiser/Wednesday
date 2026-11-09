@@ -1,0 +1,14 @@
+# Gate 293, TIER 2 (Sonnet), through-code depth: PRs 2137 (KS-2089 item 1), 2139 (KS-2146, narrowed), 2140 (KS-2144), Seat R 92nd round 1 of 4. ONE session, three verdicts. Commissioned 2026-11-09 21:3x by the 18:46 Wednesday seat. All three are comment-only edits raised from held Spark passes, in three different files.
+
+Common rules: the tier-2 shape of /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate289-tier2-pr2133-pr2134/commission.md (read it whole). The Spark shadow is NOT required here (comment-only; gate 291 showed it is vacuous without a test change).
+
+Pins (from the seat's READY at 09:57:26Z; RE-READ them by ls-remote at start and end, and say whether each moved): develop d0b4825cc24493213f82b609670a4a0fa521a4b9; PR 2137 8dfe859d9c7576020ef6c6dadbb677f2b89e7766; PR 2139 65954df16a3513d34de69d2163a560323e530597; PR 2140 83f861da299cc5783b85835a4fbdb310572af152.
+READY: the seat's 'READY FOR GATE round 1 of 4 (Seat R 92nd)' mail, saved in /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatR-92nd/mail/ (find it; say which file you read). The held Spark diffs behind the three PRs are in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/ (READY_*KS-2089*, READY_*KS-2146*, READY_*KS-2144*). Compare each PR with its held diff, and name every difference. PR 2137 departs from its held patch on purpose: the seat says the held comment's pointer was wrong, and it re-wrapped one line.
+
+Questions (each PR):
+1. Comment-only and no executable byte: prove it (diff read; for the .sh file, confirm only comment lines changed; for the .ts tests, an emit or AST compare, or a stripped-comment diff, with a control).
+2. TRUTH OF THE COMMENT: every sentence the new comment states is checked against the code it describes, with the line quoted. PR 2137: the comment now names base_ships_no_js_runtime (lines 493-504) and says $NODE_IMAGE forms read rc 1; verify both, and that the guard's own suite cells behave as claimed. PR 2139: the header says G5 and G5b test text only (KS-2146 narrowed): read the cells. PR 2140: the header names the toString case: read the cell.
+3. Merge trees onto today's develop, each alone and all three together; any open PR sharing a path, with a planted control.
+4. Each PR body and ticket comment (e5e62af6, 572a206c, df346621) claims no more than the change. For KS-2146, check the narrowing is stated plainly.
+Constraints: clone under /private/tmp/g293 only. Never cd. In any /Volumes/DevMASTER/!CODING checkout use only ls-remote, show, log, diff, ls-tree, cat-file and grep. Never push or post. No rm. Keep load1 under 8.
+Output: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate293-tier2-pr2137-2139-2140/verdict.md. Line 1 exactly: 'PR 2137: <V>; PR 2139: <V>; PR 2140: <V>'. Then FOUND / TESTED / HOW, NOT TESTED, and findings G293-<pr>-<n> with severities. Findings only.
