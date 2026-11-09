@@ -1,0 +1,23 @@
+From Tuesday (Datasec coordinator seat), Datasec / HPSM-POC. **No mail channel.** Your STATUS file's last line is the channel; a question is a last line `STOPPED: NEEDS TUESDAY <one question>`. Marks as in the base kit (MEASURED / RELAYED / DERIVED / UNMEASURED).
+
+# BRIEF B1389 | SEAT-G372: HPSM-POC TIER-1 QA GATE (OPUS), ROUND 2 OF 2 on the class "data/content migration with stored assessments", of BRANCH `b1380/hpsmpoc-playbook-partner-readiness` @ `55d7d4eec33bc83a9bfdc7b69c076b6e35ef7a5f` on main `2075486b011057ea496b9ea1b6ae2974e3e2307b`.
+
+## YOUR KIT = THE ROUND-1 KIT, WITH THE OVERRIDES BELOW
+Read WHOLE, first: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-09_B1384_SEAT-G370_hpsmpoc-playbook-readiness-gate.md` (the stamped round-1 kit). Execute EVERY step of it (0 to 12, the severity table, NOT TESTED, the verdict files, the holds, REFUSE) against the new head, with these overrides; where an override and the base kit differ, the override wins:
+1. **Identity:** B-number `B1389`, pane `Datasec/HPSM-POC-G372`, tools `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/.tools/b1389/` (fresh clone; it must not exist), STATUS `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-09_B1389_STATUS.md`, evidence `.../Briefs/2026-11-09_B1389_evidence/`. Every `B1384` in the base kit's identity, paths, first line and last line reads `B1389`; every `G370` reads `G372`.
+2. **Head / main:** HEAD = `55d7d4eec33bc83a9bfdc7b69c076b6e35ef7a5f` (Tuesday's ls-remote at the stamp; it replaces the base kit's head everywhere); MAIN = `2075486b011057ea496b9ea1b6ae2974e3e2307b` (unmoved).
+3. **Round:** this is ROUND 2 OF 2; NO GO before = 1 (the round-1 verdict B1384, `Briefs/2026-11-09_B1384_STATUS.md`, @ e4bcb9b). Write "Class: NO GO 1 of 2 before; this is round 2 of 2." with your loop output. **A NO GO now is the cap:** write `residue.md` + `card-input.txt` only; Tuesday cards the product owner; no third round.
+4. **Builders and claims:** the branch has TWO builder records: `Briefs/2026-11-09_B1380_STATUS.md` (rounds up to e4bcb9b; its successor B1382) and the FIX ROUND `Briefs/2026-11-09_B1387_STATUS.md` (2 forward commits 62e53ca, 55d7d4e). The REFUSE line about the builder's READY becomes: B1387's STATUS LAST line is exactly `READY B1387: 55d7d4eec33bc83a9bfdc7b69c076b6e35ef7a5f` and it carries a `## PRIOR WORK` section. Predictions first (as the base kit), from the base kit, the round-1 residue `Briefs/2026-11-09_B1384_evidence/residue.md` and `git diff e4bcb9b 55d7d4e` alone; THEN read the two STATUS files.
+5. **Focus, in addition to the full kit:** (a) each round-1 finding (B1384-1 to -4, `Briefs/2026-11-09_B1384_STATUS.md` ~lines 136-139) graded CLOSED / NOT CLOSED with your own instrument; (b) the fix's regression surface: `git diff --name-only e4bcb9b 55d7d4e` (11 files per the builder) re-read whole, and the partition property re-run over `main..head` (the showcase card file `web/src/content/partner/partner-showcase.v0.1.0.json` and its client copy are inside the readiness title work: the builder argues the file is not a stamped package — verify that claim at source: no hash, no registry row, no API seed, no run stamp); (c) the caveat on the results page renders for a 0.7.0 run and NOT for a 0.3.0 run, in the browser (DOM text, screenshot), with a plant that removes it going red.
+6. **Tuesday's ruling on the builder's open note:** the My readiness hub keeps its caveat line even when the newest run shown is a 0.3.0 run (the line describes what a NEW self-assessment asks). Not a finding.
+7. **Round-1 evidence** in `.tools/b1384/` and `Briefs/2026-11-09_B1384_evidence/` is READ-ONLY reference; main-side numbers may be quoted from it as RELAYED with their file, but every head-side number is yours.
+8. **Ports 9640-9649** (`lsof` printed 0 listeners at the stamp). The walkthrough fix seat H141 runs on 9670-9679 in `.tools/b1381/`: not yours.
+9. **Clock:** latest Step 0 = 2026-11-10 00:15 AEDT; HARD STOP = your Step-0 date + 150 minutes, never later; target verdict Step 0 + 120.
+
+## Stamp
+- STAMP: STAMPED 23:03 AEDT 2026-11-09 by Tuesday s260; read whole: the base kit (round 1), the round-1 verdict line and residue, the fix builder's FINAL section (B1387 STATUS from `## FINAL`).
+- HEAD / ROUTE: as overrides 2 (ls-remote at the stamp: branch 55d7d4e, main 2075486 unmoved).
+- LAUNCH AUTHORITY: as the base kit's S5 (the product owner's 20:19 items 2 and 3 and his 21:3x priority).
+- MODEL: claude-opus-5-5, G1 (base kit S6); gauge 12% at 22:5x.
+- Panes at the stamp: %0=wednesday %8=Datasec/HPSM-POC-H141 %7=Datasec/HPSM-POC-H140 %1=fleet-monitor
+READ-WHOLE-BY-TUESDAY: DONE 23:03 AEDT 2026-11-09 (s260)
