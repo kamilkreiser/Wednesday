@@ -65616,5 +65616,46 @@
    "CARD secuura-fourteen-merged-own-pr-tickets-never-moved",
    "CARD secuura-ks1785-secret-guard-hook-platform-k-1109"
   ]
+ },
+ {
+  "id": "secuura-ks1991-verify-presents-later-copy-fix-1110",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1991: verify can present a LATER tenant's certification as the original's. Which fix?",
+  "bluf": "Tap a, b or c. On 11-05 you accepted this as a ticket (card gate192-hold = a, 'fix (2) first, ticket (1)'); how to fix it was never asked. Verified at source today by a read-only Opus verifier: with PR 2004 merged, verify by hash on v1 and v2 reads at most 8 tenants from the cross-tenant registry; when the original holder's tenant is missing there or ranked 9th or later, the earliest VISIBLE copy is treated as the original and its certification is shown (v1 nulls the names but shows the other tenant's document id, certification id, type and time). Multi-tenant setups only: not demo (one tenant, frozen); kintsugi and production unmeasured. It defeats your KS-1561 rule that only the original holder's certification counts.",
+  "default_action": "If there is no tap, nothing is built: the behaviour stays live on multi-tenant verify and KS-1991 stays in Backlog. A board seat posts a facts comment on KS-1991 that PR 2004 has merged.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix the registry (recommended)",
+    "detail": "Registration stops being fire-and-forget (KS-1647), a one-time backfill writes the missing registry rows, and the rank uses the document's own created_at. One Claude seat, tier 1 gate. Removes the cause on v1 and v2."
+   },
+   {
+    "key": "b",
+    "label": "Fail closed now",
+    "detail": "A certification found only on another tenant's row is never shown ('verified, not certified'). Simple; also hides a correct original's certification held in another tenant."
+   },
+   {
+    "key": "c",
+    "label": "Both: b now, then a",
+    "detail": "Stop-gap first, then the registry fix."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-10T08:09:26.193773+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-13 16:55",
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1114-verify-title-strategy",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD wed-laptop-dev-copy-disk-full",
+   "CARD secuura-ks1352-revoked-credentials-still-verify",
+   "CARD secuura-ks1628-retire-deprecated-verify-route-1019",
+   "CARD secuura-ks590-verify-disclosure-four-questions-1102",
+   "CARD wed-secuura-dev-copy-vault-whole-1109"
+  ]
  }
 ]
