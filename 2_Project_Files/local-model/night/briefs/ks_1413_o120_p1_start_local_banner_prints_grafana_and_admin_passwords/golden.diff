@@ -1,0 +1,40 @@
+diff --git a/Blockchain/Dev/scripts/start-local.sh b/Blockchain/Dev/scripts/start-local.sh
+--- a/Blockchain/Dev/scripts/start-local.sh
++++ b/Blockchain/Dev/scripts/start-local.sh
+@@ -277,13 +277,13 @@
+     echo "    Cardano Devnet:    http://localhost:6092"
+     echo ""
+     echo -e "  ${BLUE}Monitoring:${NC}"
+-    echo "    Grafana:           http://localhost:6300 (admin/secuura_grafana)"
++    echo "    Grafana:           http://localhost:6300 (login: the local default, not printed here)"
+     echo "    Prometheus:        http://localhost:6301"
+     echo ""
+     echo -e "  ${BLUE}Demo Credentials:${NC}"
+     # KS-1413: print the mechanism, not the demo password value.
+     echo "    Issuer:  demo@secuura.io  (password: the published demo default - see CLAUDE.md)"
+-    echo "    Admin:   admin@secuura.com / admin123"
++    echo "    Admin:   admin@secuura.com  (password: the local seed default, not printed here)"
+     echo ""
+ }
+ 
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1413_start_banners_print_no_demo_password.test.sh b/Blockchain/Dev/scripts/__tests__/ks1413_start_banners_print_no_demo_password.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/ks1413_start_banners_print_no_demo_password.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1413_start_banners_print_no_demo_password.test.sh
+@@ -44,6 +44,17 @@
+ # --- CELL 3 (RED at the tip): start-local.sh banner prints no password value ---
+ check "start-local.sh echoes no demo password value" "0" "$(echoed_secret "$START_LOCAL")"
+ 
++# --- CELL 4 (CONTROL): the Grafana and admin matchers see a planted banner line each ---
++PLANT_G="$(printf '%s\n' '    echo "    Grafana:  http://localhost:6300 (admin/secuura_grafana)"' | grep -cE '^[[:space:]]*echo.*secuura_grafana' || true)"
++PLANT_A="$(printf '%s\n' '    echo "    Admin:   admin@secuura.com / admin123"' | grep -cE '^[[:space:]]*echo.*admin@secuura\.com[[:space:]]*/' || true)"
++check "CONTROL the Grafana and admin matchers see a planted banner line each" "11" "${PLANT_G}${PLANT_A}"
++
++# --- CELL 5 (RED at the tip): start-local.sh banner prints no Grafana password value ---
++check "start-local.sh echoes no Grafana password value" "0" "$(grep -cE '^[[:space:]]*echo.*secuura_grafana' "$START_LOCAL" || true)"
++
++# --- CELL 6 (RED at the tip): start-local.sh banner prints no admin password value ---
++check "start-local.sh echoes no admin password value" "0" "$(grep -cE '^[[:space:]]*echo.*admin@secuura\.com[[:space:]]*/' "$START_LOCAL" || true)"
++
+ echo ""
+ echo "ks1413_start_banners_print_no_demo_password: ${PASS} passed, ${FAIL} failed"
+ (( FAIL == 0 ))

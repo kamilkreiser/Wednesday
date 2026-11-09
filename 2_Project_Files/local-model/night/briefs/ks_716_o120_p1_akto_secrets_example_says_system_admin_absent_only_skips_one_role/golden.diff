@@ -1,0 +1,18 @@
+diff --git a/systemTest/akto/config/secrets.example.yml b/systemTest/akto/config/secrets.example.yml
+--- a/systemTest/akto/config/secrets.example.yml
++++ b/systemTest/akto/config/secrets.example.yml
+@@ -32,8 +32,13 @@
+ #                the admin user-management API (which requires SYSTEM_ADMIN/ORG_ADMIN — the `admin`
+ #                block above is ISSUER_ADMIN locally and cannot). Absent ⇒ that one role is skipped
+ #                (best-effort), and AUTH_BYPASS_LOCKED_ACCOUNT_TOKEN_ROLE keeps skipping honestly.
++#                It is ALSO the HAR replay's admin fallback: harTraffic.ts sets adminToken to null unless both systemAdminEmail
++#                and systemAdminPassword are set. Absent ⇒ every endpoint the issuer token cannot get a 2xx from keeps no captured
++#                sample, stays a spec-imported placeholder that Akto's api_selection_filters exclude from the authz templates, and
++#                the scan reports green over it (KS-716 measured 0 of 16 super-admin-only endpoints scanned without this block).
+ #
+-# issuer/verifier/system_admin are optional — when absent, tests fall back to admin (KS-194) or skip (KS-357).
++# issuer/verifier are optional — when absent, tests fall back to admin (KS-194) or skip (KS-357). system_admin is optional for the setup
++# seed above but not for scan coverage (see the HAR replay note under system_admin).
+ #
+ # Default values below match the dev/local seed accounts created by
+ # ALLOW_DEFAULT_SEED_PASSWORDS=true in Blockchain/Dev/.env (KS-955: NOT .env.local —

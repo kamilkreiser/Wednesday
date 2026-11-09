@@ -1,0 +1,36 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/verification.ts b/Blockchain/Dev/services/originate/src/routes/verification.ts
+--- a/Blockchain/Dev/services/originate/src/routes/verification.ts
++++ b/Blockchain/Dev/services/originate/src/routes/verification.ts
+@@ -456,5 +456,5 @@
+ export function isCrossTenantResponse(req: Request, row: any): boolean {
+   const rowTenant = row?._tenantId ?? row?.tenant_id ?? null;
+-  if (!rowTenant) return false; // no tenancy info on the row — nothing to scope by
++  if (!rowTenant) return true; // KS-590 gap 3: a row with no tenancy info cannot be shown to be the caller's, so its tenant-owned naming is withheld
+   const caller = callerTenantOf(req);
+   return !caller || String(rowTenant).toLowerCase() !== caller;
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks584-verify-row-selection.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks584-verify-row-selection.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks584-verify-row-selection.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks584-verify-row-selection.test.ts
+@@ -301,9 +301,20 @@
+     expect(body.lineage).toBeUndefined();
+   });
+ 
+-  it('keeps tenant fields when the row carries no tenancy info (legacy rows)', async () => {
++  it('withholds title/issuer when the row carries no tenancy info (legacy rows; KS-590 gap 3, was: keeps them)', async () => {
+     mockQueryRaw.mockResolvedValue([anchoredRow()]);
+     const { body } = await verifyByHash();
+-    expect(body.title).toBe('Grad cert');
++    expect(body.title).toBeNull();
++    expect(body.issuer).toBeNull();
++    expect(body.verified).toBe(true);
++    expect(body.checks.isAnchored).toBe(true);
+   });
++
++  it('withholds title/issuer when the row names its tenant as null (KS-590 gap 3)', async () => {
++    mockQueryRaw.mockResolvedValue([anchoredRow({ tenant_id: null })]);
++    const { body } = await verifyByHash();
++    expect(body.title).toBeNull();
++    expect(body.issuer).toBeNull();
++    expect(body.verified).toBe(true);
++  });
+ });
