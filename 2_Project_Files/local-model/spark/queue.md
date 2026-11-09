@@ -196,4 +196,3 @@
 # 2026-11-10 00:4x (Wednesday spark operator o123): KS-1516 option a (Kam 2026-11-02), rung 3 code_patch2, dry-run rc 0 + control PASS 7/7 golden byte-identical. TIER 1 gate owed.
 # 2026-11-10 03:4x (Wednesday spark operator o125): KS-1952 option a (route site, verification.ts), KS-1855 half one (admin.ts) and half two (verification.ts); each dry-run rc 0 + control PASS golden BYTE-IDENTICAL at d0b4825cc244. TIER 1 gates owed. KS-2103 NOT briefed: confirmation.ts, provider.ts and anchorSubmission.ts are all in open PR 2081.
 # 2026-11-10 07:3x (Spark operator o128): KS-1145 item 2 (test_only_bash + spark.farm), KS-1922 catch only (code_patch2), KS-2075 one line (bash_patch2): each control PASS golden byte-identical (1145: tree-identical model patch), model round PASS, held. Queue left empty.
-ks_2095_o130_p1_issuer_blockchain_card_leaves_out_the_block_row_when_there_is_no_height
