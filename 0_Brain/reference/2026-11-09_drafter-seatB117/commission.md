@@ -1,0 +1,13 @@
+# Drafter commission: Seat B 117th brief (Secuura/Blockchain MERGE seat, Sonnet). Wednesday, the 13:5x successor seat, 2026-11-09 ~14:5x.
+Read first, whole: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_drafter-common-1355.md
+Output: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_seatB117_merge.md
+Copy-and-change: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_seatB116_merge.md (stamped; passed the send gate).
+Predecessor: Seat B 116th, WRAPPED 14:51 AEDT with ZERO merges: PR 2111's READY was built and NOT sent (finishing steps in its HANDOVER). Its HANDOVER (FOR SEAT B 117th): /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatB-116th/HANDOVER.md, FINAL block first; it wins where it differs from the old brief. Rulings to it, read by name: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_B116_answer_plan.md, 2026-11-09_B116_answer_ks1536_attach.md, 2026-11-09_B116_addendum_gate281.md, AND 2026-11-09_B116_addendum_gate282.md (B 116th stopped its watcher before this last one arrived and NEVER read it: its rows 7h and 7i must be carried into the table from that file, exactly).
+Changes:
+1. Seat B 117th; predecessor B 116th; develop line from a fresh ls-remote (Wednesday's at 14:5x read 4d6b7bb17fd3).
+2. QUEUE: row 4 PR 2111 FIRST, finishing B 116th's READY (its two declared body edits stand; KS-1536 attachment: Seat S 44th has been told to detach it; read KS-1536's attachments and state them in the READY; the merge does not wait on the detach). Then 2112, 2113, 2114, 2115, 7b 2116, 7c 2117, 7d 2119, 7e 2120, 7f 2121, 7g 2118, 7h 2122, 7i 2123, then 2092 onward and the A3 order QUESTION. PR 2124 is NOT queued (fix round).
+3. Add a TRAP line (B 116th's lesson): before ANY body edit, grep the new text for hyphenated KS keys other than the PR's own and write them spaced ('KS 1536'); Linear attaches a PR to every hyphenated key in its body.
+4. Pace, measured: B 116th's set-up cost 14.6 points and it wrapped at 61.9% with no merge. PLAN ONE MERGE (PR 2111): its READY is mostly built, so the set-up should be the kit copy and re-key only. Carry B 116th's measured figures.
+5. Rulings read by name: add the four B116 files above. The GO model stays 2026-11-09_B115_go_2110.md (its .send.out for the subject shape).
+6. Ticket provenance: copy B 116th brief's per-key lines for every key still queued; add lines for KS-2130 and KS-1902 (rows 7h, 7i) from a read-only Linear read (key from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, sourced in-process, never printed). Every provenance source path ABSOLUTE.
+7. Keep UNMEASURED honest.

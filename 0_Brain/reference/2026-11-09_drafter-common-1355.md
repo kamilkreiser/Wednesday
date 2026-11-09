@@ -1,0 +1,12 @@
+# Common rules for the three 13:5x drafters (Wednesday, the 13:5x successor seat, 2026-11-09)
+- Output ONE file each, UNSTAMPED (no SELF-CHECK line). Send, launch, mail and post nothing.
+- COPY-AND-CHANGE the predecessor's stamped brief named in your commission. Keep shape, standing lines and HEADINGS byte-for-byte where they do not change. The send gate needs the exact heading '## RULED BY KAM, NOT YET IN AN ARTEFACT' and every PROVENANCE line as '<fact> | <ABSOLUTE source path> | read YYYY-MM-DD'.
+- Read the predecessor seat's HANDOVER (FINAL block first) and the top entry of /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md for that seat; they win where they differ from the old brief.
+- Develop at origin read by Wednesday's ls-remote at 13:55:44 AEDT: 4d6b7bb17fd3be7b3fde8a3babc5d59c91c959b8 (PR 2110 squash). PR heads at the same read: 2111 4fff98cb12f2ae5e, 2120 f5aec11944e8ad6b, 2092 3d8423f71024af5b.
+- Any SHA you write is COPIED from a read output (ls-remote, the PR API, a HANDOVER line), never retyped; 12-hex by cut, never by hand.
+- Any 'X merged / not merged / overlaps PR N / same file' sentence is read from the PR API or ls-remote in the same action, or written 'from <HANDOVER>, not re-read'.
+- The Spark is offline on Kam's 10:35 temporary hold; do not mention it in a seat brief. Never copy a 'Spark OFF' line.
+- The shared inbox holds lanes B, R, S, T, U: every brief says act only on mail whose subject ends '(Seat <its name>)'.
+- Disk: DevMASTER 106 GiB free by Wednesday's df 13:55; hard stop 8 GiB.
+- Keep UNMEASURED honest: every fact you could not verify goes there with the instrument that would close it.
+- Final message: the output path, the queue in one line, and every fact you could NOT verify.

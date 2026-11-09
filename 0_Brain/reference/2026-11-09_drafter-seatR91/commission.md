@@ -1,0 +1,10 @@
+# Drafter commission: Seat R 91st brief (Secuura/Blockchain BUILD seat, OPUS, tier 1 work). Wednesday, the 13:5x successor seat, 2026-11-09.
+Read first, whole: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_drafter-common-1355.md
+Output: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_seatR91_build.md
+Copy-and-change: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_seatR90_build.md (stamped; passed the send gate).
+Predecessor: Seat R 90th, WRAPPED 0.93. Its HANDOVER: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatR-90th/HANDOVER.md . Rulings to it, read by name: every /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_R90_*.md (answer_plan, answer_item4_branch, answer_second_worktree, answer_ks2131_fragments, answer_gate278_fixround, addendum_pace).
+Changes:
+1. Seat R 91st; predecessor R 90th. R 90th's PR 2121 (KS-2131) and PR 2118 round 2 (KS-2127) are at GATE 281 (running): a NO GO on PR 2121 comes to R 91st by ADDENDUM as round 1 of 2; PR 2118 is at the two-NO-GO cap (a NO GO ships the closed instances, residue ticketed). One line, no work queued on them now.
+2. QUEUE item 1: ITEM 4 is BUILT and COMMITTED LOCALLY, NOT pushed: read the exact commit, branch and worktree from the HANDOVER (the pickup says c82020e44d36 on feature/ks-2109-gateway-index-tenant-override-comment in worktrees/s-r90-ks2141, base b9fd80eee85b, PR body drafts in its push/ folder): verify the commit exists and its diff, rebase decision only by a QUESTION if develop moved under it, then raise it -> READY FOR GATE (tier 1, Refs KS-2109).
+3. QUEUE item 2: KS-785 (Urgent, tier 1, buildable) from Seat S 43rd's batch 5. Read the buildable row: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatS-43rd/drafts/ (find buildable.md and the KS-785 row) and the ticket itself; premise-first; red-first prediction; READY -> tier-1 gate.
+4. Keep every standing HOLD line of the R 90th brief (prior-work check, push driver one retry after an ssh drop then QUESTION, never merge, 70% pace).

@@ -1,0 +1,10 @@
+# Drafter commission: Seat S 44th brief (Secuura/Blockchain BOARD seat, Sonnet). Wednesday, the 13:5x successor seat, 2026-11-09.
+Read first, whole: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_drafter-common-1355.md
+Output: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_seatS44_board.md
+Copy-and-change: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_seatS43_board.md (stamped; passed the send gate).
+Predecessor: Seat S 43rd, WRAPPED 0.92 at 67.4%. Its HANDOVER (FOR SEAT S 44th): /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatS-43rd/HANDOVER.md . Rulings to it, read by name: every /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-09_S43_*.md, ESPECIALLY 2026-11-09_S43_addendum_31_decisions_ruled.md (Kam ruled card secuura-backlog-31-decisions-1109 = a at 13:44:07; Wednesday ruled section C by the pack's recommendations).
+Changes:
+1. Seat S 44th; predecessor S 43rd.
+2. QUEUE item 1: the remaining 29 rows of Kam's card (row C5 done by S 43rd), from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-09_seatS-43rd/drafts/ruled_31.md: per ticket, the ruling comment + the implied move, each written after a same-action read of the ticket. NOT the KS-607 demo rows; NOT any send to a human (list them for Wednesday, who cards Kam); NOT builds (ruled_31_builds.md, 14 rows, routed by Wednesday). Assignee check per row: a ticket on Peter or Stuart STAYS theirs (Kam 2026-09-06 10:24); new or unassigned -> the board account. S 43rd says a Backlog->Todo move needs a small state tool that does not exist: the seat writes it in its own record folder with an undo, red-proofs it on one row, then uses it.
+3. QUEUE item 2: filings on merges: G275-2111-1 (after PR 2111) then the KS-1536 re-read, G276-1 (PR 2113), the gate 277 pair (PRs 2114, 2115): each after a board search and a same-action MERGED read at the PR API. All four PRs were OPEN at 13:55.
+4. The card is marked delivered by Wednesday only when every row is in its ticket: the seat's final STATUS lists each row with its comment id.
