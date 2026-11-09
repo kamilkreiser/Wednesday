@@ -1,0 +1,28 @@
+## What
+Two changes in src/MpsCalc.Api/Sources, each in its own commit, with red-first rows.
+
+- MPSCALC-99: the admin stage, validate, activate and rollback routes now await async twins of the lifecycle steps. A step waits
+  for this process's turn (a FIFO chain of tasks, the catalogue overlay's pattern) and for store.lock (Task.Delay poll)
+  asynchronously, with the bound still counted from the step's arrival. The public synchronous methods keep their signatures
+  and answers. The Busy words, SOURCE_STORE_WRITE_FAILED and the 5 s bound are unchanged.
+- MPSCALC-189 (the canonical-singleton half only): in source version ids, U+0340, U+0341 and U+0343 are read as their
+  canonical equals U+0300, U+0301 and U+0313 before composing. A letter with either spelling is one id and is refused as
+  DUPLICATE_SOURCE_VERSION_ID. The composition table is unchanged.
+
+## Tests
+- tests/MpsCalc.Api.Tests/LaneM5SourceLockWaitTests.cs: 4 rows (one per step). 64 waiting requests with store.lock held:
+  each answers Busy within bound + 500 ms, a read meanwhile is under 500 ms, and nothing changes. Red with the fix removed.
+- tests/MpsCalc.Api.Tests/LaneM5SourceIdSingletonMarkTests.cs: 6 red-first rows (3 marks x registry / one document, all 52
+  letters; 36/18/52 letters accepted as two ids without the fix) and 6 control rows (a different mark, or no mark, stays
+  another id).
+- Local dotnet job (build Release with 0 warnings, then test): Engine 743, Import 196, Api 3398 on the merge with main,
+  0 failed. Lost 0 against main, gained exactly these 16 rows.
+
+## Not in this PR
+- MPSCALC-331, -90 and -92 are already on main (the null guards in ReferenceDocumentValidator; PR #29). This PR does not
+  close them.
+- MPSCALC-189 stays open for its remaining parts: the API docs sentence and the undecided Unicode classes (U+0344,
+  compatibility forms).
+- Nothing is deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
