@@ -1,0 +1,19 @@
+## BLUF
+Partner readiness now asks the 16 statements of the v2.1 layout, in its four areas (Strategy and engagement, Assessment and expertise, Implementation and delivery, Managed service and growth), as a NEW content version (0.7.0). The module, pages, results page, dashboard tile, PDF cover and the partner showcase card are titled "Playbook Partner Readiness"; the sidebar label stays "My readiness". Old self-assessments keep their own statements and ticks. Scoring, bands and the customer Firmware checklist are unchanged. NOT deployed; UAT stays on hold.
+
+## What changed
+- New content version 0.7.0 (API seed, web package, client copy, registry and hash): the 16 statements and 4 area names equal the layout file byte for byte (16 of 16, 4 of 4, checked by program). Package files 0.1.0 and 0.3.0 to 0.6.1 are byte-identical to main (29 of 29).
+- Screens render the content version a run was ANSWERED against: an old run still shows its own statements and ticks (a test plants the old behaviour back and goes red).
+- The results page of a run on the new statements shows the layout's caveat: "These are draft working statements, not official HP accreditation criteria." beside the self-assessed note; results of an old run do not.
+- Demo seeder code moved to 0.7.0 with the first 11 statements ticked. Nothing was run against any hosted database.
+
+## Checks (independent QA gate at this head, local)
+- API: 3887 passed, 0 failed, 22 not executed (Azurite blob rows); main 3881/0/22. Build: 0 warnings.
+- Web: vitest 4094/0/0 (main 4072/0/0); lint and typecheck rc 0; build rc 0; playbook e2e 223 passed, 37 skipped, 0 failed.
+- Scoring: 8 of 8 boundary cases score and band identically, old set at main vs new set at head.
+- Rendered in a browser on a local server: new run, results page, hub, dashboard tile, an old-package run; local hosts only.
+- Not run locally: both SQL Server shards, hosted CI and CodeQL. These are landing conditions on this PR.
+
+## Known limits
+- The statements are the layout's illustrative draft working statements, not official HP criteria; the page says so.
+- The hosted demo's seeded run moves to 0.7.0 only if its data is reset; that is not done here.
