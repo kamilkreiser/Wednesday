@@ -18,7 +18,7 @@ set -u
 ONCE=0; [ "${1:-}" = "--once" ] && { ONCE=1; shift; }
 IV="${1:-60}"; MAXM="${2:-240}"
 ROOT='/Volumes/Datasec_DEV/!CODING/Datasec'
-TERM_RE='^(READY |STOPPED|CLOSED |DEPLOYED |RECORDS (COMMITTED|PUSHED|DRY RUN|DONE)|ROLLED BACK)'
+TERM_RE='^(READY |STOPPED|CLOSED |DEPLOYED |HANDOVER |RECORDS (COMMITTED|PUSHED|DRY RUN|DONE)|ROLLED BACK)'
 
 snapshot() {
   tmux list-panes -a -F '#{pane_id} #{pane_pid} #{@cockpit_name}' 2>/dev/null | while read -r pid_ ppid name; do
