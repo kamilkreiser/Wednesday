@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-10 17:37 from 262 lesson files (1,132,876 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-10 18:12 from 262 lesson files (1,134,148 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3985,7 +3985,7 @@ sentence, ask what the instrument would have printed if the thing WERE there, an
 print that.** A false absence and a true absence are byte-identical on screen. **The world cannot
 tell you which one you are holding; only a control can.**
 
-sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER · COSTUME 2026-09-08 22:4x — A REFUSED QUERY RENDERING AS AN EMPTY ONE (Secuura s153, self-caught by its control) · COSTUME 2026-09-08 23:2x — PARSING A FORMAT WITH REGEX WHEN ITS OWN RESOLVER IS ONE COMMAND AWAY (Secuura s153; the THIRD false zero it caught in one session) · THE RATE, observed at the 2026-09-09 overnight wrap — SEVEN instrument failures in one session, and SIX were Wednesday's own hand-composed checks · SHARPENED 2026-09-09 by the Secuura seat (s154) — A CONTROL THAT FIRES CAN STILL BE THE WRONG INSTRUMENT
+sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER · COSTUME 2026-09-08 22:4x — A REFUSED QUERY RENDERING AS AN EMPTY ONE (Secuura s153, self-caught by its control) · COSTUME 2026-09-08 23:2x — PARSING A FORMAT WITH REGEX WHEN ITS OWN RESOLVER IS ONE COMMAND AWAY (Secuura s153; the THIRD false zero it caught in one session) · THE RATE, observed at the 2026-09-09 overnight wrap — SEVEN instrument failures in one session, and SIX were Wednesday's own hand-composed checks · SHARPENED 2026-09-09 by the Secuura seat (s154) — A CONTROL THAT FIRES CAN STILL BE THE WRONG INSTRUMENT · EXTENSION 2026-11-10 (regression: the exact 11-03 costume, second time) — A RETURNED LINE IS PRESENCE; THE CUT ONLY HID IT. PROMOTED TO A HOOK.
 
 ## How to apply
 
@@ -4128,6 +4128,11 @@ does the instrument answer the question you are asking, or a neighbouring one?**
 (ask the resolver) · [[2026-08-14_i-read-representations-they-read-sources]] (a generated file is a
 representation of an authored one) · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the
 grep was complete over the yaml and silent about the schema).
+
+## EXTENSION 2026-11-10 (regression: the exact 11-03 costume, second time) — A RETURNED LINE IS PRESENCE; THE CUT ONLY HID IT. PROMOTED TO A HOOK.
+**The case.** Wednesday's GO to Seat B 129th said its KS-1785 two-card scope block was "NOT IN THE MAIL YOU SENT". The search `grep -i -E 'two-card|scope check' … | cut -c1-330` RETURNED the READY's lead line; the token sat at character 8,416 of that 8,976-character line, past the cut, and Wednesday read a hit as a miss. Seat-caught at the MERGED. Same costume as 2026-11-03 (B 83rd, "controls ABSENT", `cut -c1-300`), after that rule was written.
+**The rule, sharpened:** (1) a grep that returns a line has answered PRESENT, whatever the visible text shows; (2) an absence about an agent's mail is written only from `/usr/bin/grep -o -i -c` on the untruncated text, with a positive control from the same text; (3) mail bodies are long lines by construction — never read them through a column cut.
+**Enforcement (a rule that lost twice to a reflex goes in the path):** `2_Project_Files/fleet/hooks/pretooluse_grep_cut.sh` (+ `grepcut.py`), ADVISORY, fires on any `grep … | cut -c` pipeline; 8/8 arms (`hooks/tests/grep_cut_arms.sh`), live-fired 2026-11-10, wired in `.claude/settings.local.json` and the template.
 
 
 ## A ghost suggestion is dangerous in proportion to how little the receiving agent has ALREADY WRITTEN DOWN — the detector catches the line, a recorded decision makes it inert

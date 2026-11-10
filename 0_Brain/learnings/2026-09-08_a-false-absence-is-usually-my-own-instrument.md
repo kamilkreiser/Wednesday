@@ -306,3 +306,8 @@ perfectly independent control on the wrong instrument confirms the wrong instrum
 (ask the resolver) · [[2026-08-14_i-read-representations-they-read-sources]] (a generated file is a
 representation of an authored one) · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the
 grep was complete over the yaml and silent about the schema).
+
+## EXTENSION 2026-11-10 (regression: the exact 11-03 costume, second time) — A RETURNED LINE IS PRESENCE; THE CUT ONLY HID IT. PROMOTED TO A HOOK.
+**The case.** Wednesday's GO to Seat B 129th said its KS-1785 two-card scope block was "NOT IN THE MAIL YOU SENT". The search `grep -i -E 'two-card|scope check' … | cut -c1-330` RETURNED the READY's lead line; the token sat at character 8,416 of that 8,976-character line, past the cut, and Wednesday read a hit as a miss. Seat-caught at the MERGED. Same costume as 2026-11-03 (B 83rd, "controls ABSENT", `cut -c1-300`), after that rule was written.
+**The rule, sharpened:** (1) a grep that returns a line has answered PRESENT, whatever the visible text shows; (2) an absence about an agent's mail is written only from `/usr/bin/grep -o -i -c` on the untruncated text, with a positive control from the same text; (3) mail bodies are long lines by construction — never read them through a column cut.
+**Enforcement (a rule that lost twice to a reflex goes in the path):** `2_Project_Files/fleet/hooks/pretooluse_grep_cut.sh` (+ `grepcut.py`), ADVISORY, fires on any `grep … | cut -c` pipeline; 8/8 arms (`hooks/tests/grep_cut_arms.sh`), live-fired 2026-11-10, wired in `.claude/settings.local.json` and the template.

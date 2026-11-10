@@ -1,0 +1,28 @@
+# Gate 306, TIER 2 (Sonnet): R 94th round 2 batch: PR 2166 (KS-2091), PR 2168 (KS-1922), PR 2167 (KS-1875 piece 2 of 3), PR 2169 (KS-2015 piece 1 of 2). ONE session, four verdicts. Commissioned 2026-11-10 ~17:4x AEDT by the 15:46 Wednesday seat (batched under Kam's 2026-09-18 minimise-gate-duplication rule; all four are raised held Spark passes, file-disjoint by the seat's READY: prove it).
+
+Common rules: the tier-2 shape of /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate289-tier2-pr2133-pr2134/commission.md (read whole; its common-rules pointer applies) at tier-2 depth. The previous batch from this seat, for calibration of what a finding looks like: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-10_gate305-tier2-pr2163-2165/verdict.md.
+
+Pins (Wednesday's ls-remote at 17:43:42 AEDT; RE-READ at start and end, say whether each moved):
+- develop 0b55401ad5dcb748f9dc47189f9896209567eb75 (PR 2156 squash; all four PRs were built on b602c418296a: read what develop's one-commit move changed and whether it touches any PR's paths)
+- PR 2166 head a0ff676ebaae2233c6273be23c432e2b5e1ff25d (KS-2091: 1 NEW bash test file +80, test-only, by the READY)
+- PR 2168 head 2ea098978a4a64d28a23263108e546947f37d55b (KS-1922: analytics exportService.ts +3 -1 PRODUCT, test +93)
+- PR 2167 head 86b0dde15f9182065e6cdbb942e0320366bc96b7 (KS-1875 piece 2 of 3: originate routes/metering.ts +7 PRODUCT, test +101)
+- PR 2169 head 3521d7889c93f5993477c421f1e68231499cad86 (KS-2015 piece 1 of 2: api-gateway routes/audit-export.ts +5 -2 PRODUCT, test +92; a LIVE ADMIN API CONTRACT CHANGE: `from`/`to` values such as 0, 1, -1, 2026-9-1, 'Sep 1 2026', 2026-09-01T00:00:00Z, 2026-02-30 now answer 400)
+
+READY (read whole; reproduce, do not trust): /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-10_seatR-94th/mail/ready_round2.md. Wednesday's rulings to this seat (read whole): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-10_R94_answer_plan.md, _R94_answer_second_tree.md, _R94_addendum_o132.md, _R94_answer_gate305.md, and the stamped brief 2026-11-10_seatR94_raise.md (RULED sections, including the stamp wording on tier 2 for product rows). The held Spark READY files are in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/ (READY_KS-2091-*, READY_KS-1922-*, READY_KS-1875-*O131-P2*, READY_KS-2015-*): compare each PR's diff with its held diff, per file, and name any difference.
+
+Questions (each PR):
+1. File set exactly as stated; 2166 test-only with no product byte. Prove by the PR files API and a diff read.
+2. Red proof: the new cells fail on a plant (for product rows: the product reverted with the test kept) and pass at the head as the seat says. Your own mutant per PR reddens a NAMED cell. Cells are PINS and labelled honestly.
+3. Each change does what its ticket's scope sentence asks, and no more (read KS-2091, KS-1922, KS-1875, KS-2015 at Linear read-only). For the PIECE rows (KS-1875 piece 2 of 3, KS-2015 piece 1 of 2): name what the later pieces still owe, and confirm the PR body says the ticket stays open.
+4. PR 2169 is a live admin API contract change. Re-run the seat's caller search yourself with a control that hits (the route mounts as /export under admin/audit; the admin frontend's export button calls /api/security/audit/export, a different route: confirm). Say whether any valid date shape a real caller sends (a plain YYYY-MM-DD at least) still answers 200, and whether the OpenAPI declaration agrees with the new 400s. A caller that breaks is a NO GO for that PR.
+5. PR 2168 and PR 2167: what a caller sees before and after (status code, body field), and whether any existing caller's input now fails.
+6. Whole suites: analytics, originate, api-gateway (vitest) for their rows; the hook suite for 2166; counts before and after. Whole-suite legs only when load1 < 8 (a long drive copy is running; say if you could not).
+7. Merge trees onto today's develop, each alone and all together; any open PR sharing a path (planted control).
+8. No closing word in closing form in title, body, commit or comments.
+
+SPARK SHADOW (rule 2026-10-26): after your own verdicts are written, run /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/gate/spark_gate.sh on each PR exactly as /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_spark-shadow-pr2127/commission.md did (read it whole; check the tunnel with python3 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/spark_status.py first). KNOWN TOOL GAP from gate 305: a fresh spark_gate worktree has no built packages/shared/dist, so a suite needing it reads failed at HEAD; if you see that, record it as the tool gap (not a PR finding) and say which suites it hit. Append a calibration row per PR to this folder's calibration.md: the Spark's verdict and findings vs yours, recall, false positives checked at source. Tunnel DOWN or a refusal: say so with exit code and output; never skip silently.
+
+Constraints: never cd. In /Volumes/DevMASTER/!CODING/ only ls-remote, show, log, diff, ls-tree, cat-file, grep; never fetch, push, post, comment or mail there; tests and mutants in your OWN scratch clone. No rm outside your scratch. Never print a real secret or any .env value. When you search long text for a token, never read a `cut -c` view as the answer; count on the untruncated text.
+
+Verdict path: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-10_gate306-tier2-pr2166-2169/verdict.md. Line 1 per PR exactly: 'PR <n>: <GO | GO WITH NOTES | NO GO>'. Then FOUND / TESTED / HOW, NOT TESTED, findings G306-<pr>-<n> with severities. Return the whole verdict in your final message as well.
