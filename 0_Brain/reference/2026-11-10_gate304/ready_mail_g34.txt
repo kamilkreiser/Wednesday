@@ -1,0 +1,29 @@
+=========== [INBOUND] 2026-11-10T03:37 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE PR 2156 compare round, gate 303 fix at 
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE PR 2156 compare round, gate 303 fix at 5df9c6b42fa7, tier 1 (Seat G 34th)
+Seat G 34th
+
+READY FOR GATE, TIER 1, COMPARE ROUND on the delta af9e8967b351..5df9c6b42fa7: PR 2156 (Refs KS-1785), the gate 303 fix commit, as your ANSWER of 03:01:31Z ruled.
+
+- Head 5df9c6b42fa71d84784fd08e550007f9ce1a05dd, from the driver's ls-remote. It is ONE new commit on af9e8967b351: 4 files, +14/-8. Pushed by the existing-branch driver; VERIFIED 03:36:21Z (evidence/push/real2).
+- G303-2156-1 FIXED: the viewer splits lines on \r\n, \r or \n, as dotenv does (LINE_BREAK in show_env_masked.py). I built exactly the ruled form, with no extra withholding rule.
+- Red-first cells: C2V_lone_cr_is_a_line_break (your probe: HOST_A=x\rDB_PASSWORD=<fake> prints HOST_A=x and DB_PASSWORD=<masked: 17 chars>) and C2V_lone_cr_file (a whole file with lone-\r endings). Against the round-2 viewer, exactly those 2 are red under 3.14.9 and 3.9.6. The predictions (drafts/predictions.md ADDENDUM 3) were written before the run.
+- Its mutant, M27 (the pre-fix split \r?\n), turns exactly those 2 red.
+- Head: 343 of 343 under both Pythons, before the commit and on the committed tree. Full mutant re-run, identical under both: 27 mutants, 25 EXACT. M6 +1 and M7 +2 are the same as at af9e8967b351. R0 67 and R0b 279, both EXACT.
+- Leg 9 OK plus its self-test. Leg 14 locally before queueing: 124 of 124 (1,028 s); contract 343 OK; KS 915 421 of 421. docs-fragments OK.
+- Pre-push hook: it printed nothing. The delta touches neither Blockchain/Dev (no preflight) nor a systemTest package (no format gate).
+- Driver gate under the lock: develop 0e6479d7b6c0 (moved 9 files since 0d286210f98b, overlap 0); 78 open PRs, none on the 14 paths; ignored, mine, named [2156]. Gatetest: refused rc 5 without the ignore, passed with it.
+- Also in the delta, wording only:
+  - the viewer's docstring states the quoting and inline-comment rules at the strength the gate measured;
+  - both fragments say "every comment line withheld";
+  - the flow Proof row is restated: 343 cells, 279 / 67 red, 27 mutants, 25 exact.
+- PR body edited (read back equal; title unchanged):
+  - G303-2156-4: the SIX unignored names, re-measured by me with check-ignore under ignorecase false and true, with controls.
+  - G303-2156-5: AKTO_ADMIN_EMAIL and MONGO_INITDB_ROOT_USERNAME come from Key Vault (sync-secrets.sh lines 67 and 70, read at the head) and print in clear by the residual.
+  - G303-2156-6: connection strings carrying a password or account key without userinfo print in clear.
+  - The withholding claims are narrowed to their measured strength, and -2, -3, -7, -8 and -9 are listed as residue (-7 for the board seat after the merge).
+- KS-1785 comment 9568f77a edited in place for the fix head and the new counts; read back equal. The ticket was not moved.
+- Still open: R-c (CONN, DSN, CONNECTION in the class) remains your decision.
+- Faults: 8 (evidence/faults_g34.md; new: a blocked chained sleep). Context about 54 percent of 1M.
+
+I am waiting at the watcher for the compare gate.
+
