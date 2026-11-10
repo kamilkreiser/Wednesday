@@ -1,0 +1,75 @@
+'use strict';
+// Gate probe (verifier only, never committed): drives a signed-in viewer at path variants of the
+// gated writes and at neighbouring routes, and prints the statuses as JSON for comparison base vs head.
+const fs = require('fs');
+const inventory = require('../scripts/role-capability-inventory');
+const made = [];
+const OUT = process.env.GATE_PROBE_OUT;
+const S = inventory.SENTINEL;
+const CASES = [
+  // sustainability config write: canonical and variants
+  ['POST', '/api/sustainability/config'],
+  ['POST', '/api/sustainability/config/'],
+  ['POST', '/api/sustainability/CONFIG'],
+  ['POST', '/api/sustainability/Config'],
+  ['POST', '/API/SUSTAINABILITY/CONFIG'],
+  ['POST', '/api/sustainability//config'],
+  ['POST', '/api/sustainability/config?x=1'],
+  ['POST', '/api/sustainability/%63onfig'],
+  // feedback item writes: canonical and variants
+  ['PATCH', `/api/feedback/${S}`],
+  ['PATCH', `/api/feedback/${S}/`],
+  ['PATCH', `/API/FEEDBACK/${S}`],
+  ['PATCH', `/api/feedback//${S}`],
+  ['PATCH', `/api/feedback/a%2Fb`],
+  ['DELETE', `/api/feedback/${S}`],
+  ['DELETE', `/api/feedback/${S}/`],
+  ['DELETE', `/Api/Feedback/${S}`],
+  ['DELETE', `/api/feedback/a%2Fb`],
+  // handler-level gates under case and slash variants
+  ['POST', '/API/SETTINGS/COSTS'],
+  ['POST', '/api/settings/costs/'],
+  ['POST', '/api/Models/Switch'],
+  ['DELETE', `/api/DATA-SOURCES/${S}`],
+  ['POST', `/api/data-sources/${S}/tables/`],
+  // neighbours that must NOT change (viewer behaviour equal base vs head)
+  ['GET', '/api/feedback'],
+  ['GET', `/api/feedback/${S}`],
+  ['POST', `/api/feedback/${S}/triage`],
+  ['GET', '/api/sustainability/config'],
+  ['GET', '/api/settings/costs'],
+  ['GET', '/api/settings/cost-centers'],
+  ['GET', '/api/settings/business-hours'],
+  ['GET', '/api/printers'],
+  ['GET', '/api/models'],
+  ['GET', '/api/data-sources'],
+  ['POST', `/api/data-sources/${S}/test`],
+  ['POST', '/api/settings/user-assignments/batch'],
+  ['POST', '/api/settings/agent'],
+  ['GET', '/api/health'],
+];
+async function drive(h, session) {
+  const ctx = await h.as(session);
+  const out = {};
+  for (const [method, p] of CASES) {
+    let status, error;
+    try {
+      const res = await fetch(h.base + p, { method, redirect: 'manual', headers: ctx.json, body: method === 'GET' ? undefined : '{}' });
+      status = res.status;
+      try { const b = await res.json(); error = b && (b.error || null); } catch (_e) { error = null; }
+    } catch (e) { status = 'ERR ' + e.message; }
+    out[`${method} ${p}`] = { status, error: typeof error === 'string' ? error.slice(0, 60) : error };
+  }
+  return out;
+}
+let result = {};
+beforeAll(async () => {
+  const h = await inventory.bootShape({ shape: 'enforced', tag: 'gate-probe', made });
+  try {
+    result.viewer = await drive(h, h.seeded.viewerSession);
+    result.anonymous = await drive(h, undefined);
+  } finally { await h.stop(); }
+  if (OUT) fs.writeFileSync(OUT, JSON.stringify(result, null, 1));
+}, 300000);
+afterAll(() => { for (const d of made) fs.rmSync(d, { recursive: true, force: true }); });
+test('probe ran', () => { expect(Object.keys(result.viewer).length).toBe(CASES.length); });

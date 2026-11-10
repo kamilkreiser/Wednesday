@@ -1,0 +1,15 @@
+# B1466 ADDENDUM-2 (SEAT-D59): S16 stays `A: START PREV THEN DEPLOY`, with a replaced D-13 condition
+
+From Tuesday, 2026-11-10, answering your `STOPPED: NEEDS TUESDAY` of 21:35:05 (D-13 fired: at PREV, assessment submit (`AssessmentEndpoints.cs:407`+`:449`/`:466`, route `:218`) and follow-up answer review (`FollowUpEndpoints.cs:283`+`:286` / `:215`+`:221`, route `:276`) each add 2+ audit rows in one save and are not refused on UAT). Your stop was correct under the kit as written.
+
+**Ruling (Tuesday's, under the product owner's tapped option "Deploy all five to UAT now, with the database update ... a few minutes down"): S16 stays exactly `A: START PREV THEN DEPLOY`. D-13's sentence "Any reachable multi-row save that is not refused on UAT = STOP before M2 (then only `L` is possible)" is REPLACED by the condition below. `L` is NOT chosen:** no record shows a Kudu deploy succeeding on a stopped site, and its failure path leaves PREV's code on the migrated schema anyway, then RB-1 with a database restore. That is the larger risk.
+
+**The replacing condition (prove at PREV source, before M2; each line printed with `grep -n` at `PREV` in `.tools/b1466/repo-rb`):**
+1. For EACH of the two paths you named: the request writes through ONE `SaveChanges`/`SaveChangesAsync` call (or one explicit transaction) that holds every row of that save, and no earlier write in the same request is committed before it. Then a Msg 37359 fails that request as a whole and writes nothing. Name the call site and say how you know it is one transaction (EF Core's default per-`SaveChanges` transaction, or an explicit `BeginTransaction`). A path with an earlier committed write in the same request, or a second `SaveChanges`, is NOT proven.
+2. Your rehearsal (BUILD 7 (iv)) shows Msg 37359 on a two-row insert to the ledger table, and the table's row count unchanged after it. Use SA on the local container, not the app, if booting PREV's API locally is not possible. Say which.
+3. The window is kept as short as the kit allows: M5a `az webapp start`, then `deploy-from-ci.sh deploy` AT ONCE. Record in STATUS the seconds from M5a's start to the API leg's "Site started" on TARGET. Report that number in FOR TUESDAY as the exposure window.
+4. In STATUS and FOR TUESDAY 2 (the note for the product owner), say plainly: during that window an assessment submit or a follow-up answer review would have failed with an error and changed nothing. Also say whether the API's request log or the audit table shows any such attempt in the window. That is a SELECT on `audit_event` for rows with `audit_id` > S1's max between M5a and the API leg's start, counts only. Otherwise say "not measured".
+
+**Proven (1 and 2):** continue to M2 under S16 = A. **Not proven:** `STOPPED: NEEDS TUESDAY <which path and why>` before M2, UAT untouched.
+
+**Nothing else changes:** the site, the sha, S1 to S15, S17, the write classes, the way back. Read this addendum whole now and again before M2, as the kit says. The S16 slot text in the kit is unchanged.

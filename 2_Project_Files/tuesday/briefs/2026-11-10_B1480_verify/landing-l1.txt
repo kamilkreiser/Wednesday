@@ -1,0 +1,7 @@
+# Head-pinned MERGE COMMIT (never squash, never rebase). Head 70709c61d4f555cd6e28f3bb83ad75d811a32907, main at gate 849b808c567e4d31d78e2d50b582540ae1920c67.
+# Lands FIRST of its stack. Its stacked children (viewer-write-gates, setup-column-mapping) are NO GO and must not be opened or landed with it.
+# Precondition: scripts/verify-expected-counts.json set to 5507 tests / 329 suites (regenerate on the merged tree), else the PR Build reads VERDICT: FAIL on stale counts. If the session-revocation branch lands first, regenerate on that tree instead (main + both = 5513 tests / 331 suites by addition: +14/+3 and +6/+2; measure, do not assume).
+# Run with GH_CONFIG_DIR set to the project's 4_Credentials/.gh-config. <PR> is the number of the pull request opened from the gated head.
+# If the counts commit is added to the branch, pin THAT new head instead, after checking `git diff 70709c6 <new head> --stat` is exactly scripts/verify-expected-counts.json.
+gh pr merge <PR> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit 70709c61d4f555cd6e28f3bb83ad75d811a32907 --subject "$(cat merge-subject-l1.txt)" --body-file merge-body-l1.txt
+# After: the Deploy demo run this merge starts must read skipped on every job (CI_DEPLOY_ENABLED gate).

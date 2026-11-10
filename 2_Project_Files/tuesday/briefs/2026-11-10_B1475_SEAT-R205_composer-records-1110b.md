@@ -79,17 +79,17 @@ model: claude-sonnet-5-5 (`/Volumes/Datasec_DEV/TUESDAY/0_Brain/dashboard/data/m
 
 ## Stamp
 Tuesday fills each slot at launch; one word or clock each. The unstamped copy reads 13 such runs (twelve slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Heads at launch (root `main` `12f7d5e0...` and code main `61b3a0c2...` at drafting): ____
-- Branch and ref state (`records/b1475` must NOT exist; the `b142x` refs on origin): ____
-- Open PRs at launch (#91, #86, #85 at drafting): ____
-- Launch authority and hard stop (READY target 90 minutes after your Step 0; HARD STOP clock): ____
-- Q-answers (Q-1 whether PCOMP-12 and PCOMP-123, which have no Done-when, are ever moved by this seat: the drafter's default no; Q-2 whether PCOMP-120 and PCOMP-121 move to Done on the review's measurements: the drafter's default per slot MOVE-KEYS, none; Q-3 the transition id: read it from the ticket's `transitions`): ____
-- SLOT COMMENTS (FILE or HOLD; default HOLD): ____
-- SLOT MOVE-KEYS (a comma list among the base keys and any late keys, or NONE; default NONE): ____
-- SLOT C92-STATE (`READY <sha40>, not landed` or `LANDED #<n>` or `STOPPED`, from C92's STATUS last line as Tuesday reads it; default NOT-REPORTED): ____
-- SLOT C91-STATE (`READY <sha40>, not landed` or `LANDED #<n>` or `NO COMMIT` or `STOPPED`; default NOT-LANDED): ____
-- SLOT REC-MERGE (MERGE or HOLD; default HOLD): ____
+- STAMP: Tuesday s264, 20:02 AEDT 2026-11-10, after reading the whole kit; values measured 20:02:31 by date (gh api -X GET under the Composer GH_CONFIG_DIR, git --no-optional-locks).
+- LAUNCH WINDOW: now, 2026-11-10 evening; one waiter (launch_when_cool, load1 < 7 twice).
+- Heads at launch (root `main` `12f7d5e0...` and code main `61b3a0c2...` at drafting): root main 12f7d5e00fa3a835c9b7b63eddc0805211f1eeca (unchanged since drafting). Code main c684e808225ef04402b9e83f784831b2574ba633 = PR #121 squash (merged 2026-11-10T06:21:44Z = 17:21:44 AEDT, title 'Deploy guide: say the Route B refusal without a pg_restore version'); one commit newer than 61b3a0c2. Re-read DEPLOY.md and the two db test files at c684e808 for PCOMP-98/116/117.
+- Branch and ref state (`records/b1475` must NOT exist; the `b142x` refs on origin): records/b1475 absent (rev-parse rc 1); .tools/b1475 and .tools/wt-b1475-rec absent. Origin b142 refs: b1420/composer-footer-model 7b0f7f95, b1422/composer-deploy-md-guard-tests b399bbfb, b1423/composer-discovery-typed-subanswer f94e05d3. No b1421 ref (C91 made no commit).
+- Open PRs at launch (#91, #86, #85 at drafting): #91 (301991a8), #86 (fd24426d), #85 (85105729, HOLD K6): unchanged; none touched.
+- Launch authority and hard stop (READY target 90 minutes after your Step 0; HARD STOP clock): Kam's standing order at every boot (2026-10-24, work the actionable tickets unprompted) and the records duty for landed work; READY target 90 minutes after your Step 0; HARD STOP 23:00 AEDT (then STOPPED with what is done).
+- Q-answers (Q-1 whether PCOMP-12 and PCOMP-123, which have no Done-when, are ever moved by this seat: the drafter's default no; Q-2 whether PCOMP-120 and PCOMP-121 move to Done on the review's measurements: the drafter's default per slot MOVE-KEYS, none; Q-3 the transition id: read it from the ticket's `transitions`): Q-1: no, PCOMP-12 and PCOMP-123 are never moved. Q-2: PCOMP-120 and PCOMP-121 move to Done ONLY if every clause of their Done-when reads MET at your Step 2 (they are in MOVE-KEYS on that condition). Q-3: read the id from each ticket's transitions (the one whose target is Done). Q-4 (added by Tuesday): PCOMP-113 is ON THE LIST because #121 landed; the owner ruled on it 2026-11-10 at 15:51, verbatim 'Leave the paragraph as it is (recommended)': its comment states that the pin paragraph is kept as it is by that decision (approved on 2026-11-10 at 15:51; no card id, no 'product owner' in Jira) and what #121 changed; NOT moved. Q-5 (added by Tuesday): C91 made NO COMMIT because both premises are already fixed on main; PCOMP-114 and PCOMP-62 are ADDED to THE LIST as late keys under the MET rule (this is a deliberate extension of the late-key rule, which otherwise needs LANDED): you may read exactly '/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/1_Project_Definition/Briefs/2026-11-10_B1421_STATUS.md' lines 11 and 104 and its 'evidence/DECISION_P-c.txt', and must re-verify at main yourself (PCOMP-114: packages/engine/test/performance.test.ts:76 timeout 60_000, PR #110 f3cd568e; PCOMP-62: the untilVerdictBanner wait in b116-s10-verify-dom.test.tsx:80, PRs #90/#106); comment says what is already on main and by which PR; move only per MOVE-KEYS and only if every clause reads MET. The write budget becomes 7 base + 4 late = 11 comments (unchanged maximum).
+- SLOT COMMENTS (FILE or HOLD; default HOLD): FILE
+- SLOT MOVE-KEYS (a comma list among the base keys and any late keys, or NONE; default NONE): PCOMP-120, PCOMP-121, PCOMP-117, PCOMP-114, PCOMP-62, PCOMP-98 (each ONLY if every Done-when clause reads MET at your Step 2 with file:line evidence at main c684e808; any clause NOT MET = comment only). Never PCOMP-12, 23, 113, 116, 123.
+- SLOT C92-STATE (`READY <sha40>, not landed` or `LANDED #<n>` or `STOPPED`, from C92's STATUS last line as Tuesday reads it; default NOT-REPORTED): LANDED #121 (squash c684e808225ef04402b9e83f784831b2574ba633, from READY B1422 b399bbfbc00a958417ea1f2f6bc2ca9dfbe7661c; independent review GO WITH FINDINGS; not deployed). PCOMP-113 and PCOMP-117 are on the list.
+- SLOT C91-STATE (`READY <sha40>, not landed` or `LANDED #<n>` or `NO COMMIT` or `STOPPED`; default NOT-LANDED): NO COMMIT (C91 STATUS last line 'READY B1421: 61b3a0c21384b6c3cf755733e1b4d937a35e47a5' = main's own sha at the time); see Q-5 for PCOMP-114 and PCOMP-62.
+- SLOT REC-MERGE (MERGE or HOLD; default HOLD): MERGE
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 20:02 by Tuesday s264 (all 95 lines, via the Read tool)

@@ -1,0 +1,19 @@
+What changes (6 files):
+
+- backend/server.js, PUT /api/auth/users/:email: when role, active state or password changes, the user's sessions are now ended. It called two store methods that do not exist, each behind a typeof guard, so no session was ever ended (RD-972). It now calls the store's deleteUserSessions and reports how many were ended.
+- backend/jsonStorage.js: deleteUserSessions returns the number of sessions it removed (was true). Its only other caller ignores the value.
+- backend/server.js, POST /api/learning/confirm-clarification: read a variable declared nowhere, so every valid request answered 500 (RD-976). It now reads the chat's conversationContexts map.
+- __tests__/rd972-session-revocation-on-user-update.test.js and rd976-confirm-clarification-context.test.js (new).
+- __tests__/rd798-log-injection-chat-and-learning.test.js and rd799-log-injection-auth-and-storage.test.js: the two tripwire cells that pinned these defects are replaced by behaviour cells (an ordinary body, and a CR/LF body whose logged values must not start a forged line). No other cell in those files changes.
+
+Behaviour note: an administrator who changes their own role, active state or password through this route also ends their own session.
+
+Tests: every new cell is red on main and green at the head. Full suite on the merged tree: 5499 tests, 328 suites, all passing (2 cells removed, 8 added).
+
+Counts: scripts/verify-expected-counts.json is not changed on this branch; regenerate it on the merged tree at landing (5499 / 328 on today's main), or the Build reads VERDICT: FAIL on stale counts.
+
+Deploy: this merge starts a Deploy demo run on main (backend/ and __tests__/ are not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
+
+Hosted CodeQL is read on the PR and on main after landing.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

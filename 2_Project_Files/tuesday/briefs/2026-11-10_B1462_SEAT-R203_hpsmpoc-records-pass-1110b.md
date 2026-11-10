@@ -126,21 +126,21 @@ No Jira write outside the closed list; no statement that anything is deployed, a
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- MERGE-304 (the 40-hex squash of pull request 304 on code main): ____
-- PR-B1441 (the pull request number and its 40-hex squash on code main): ____
-- PR-B1442 (the pull request number and its 40-hex squash on code main): ____
-- VERDICT-B1440 (absolute path or paths of the VERDICT.md that cover pull request 304, and which names the landed head): ____
-- VERDICT-B1441 (absolute path of its VERDICT.md, or `none`): ____
-- VERDICT-B1442 (absolute path of its VERDICT.md, or `none`): ____
-- SIDEBAR (the state of B1463 at the stamp, one sentence, from its STATUS last line): ____
-- LAUNCH WINDOW: ____
-- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): ____
-- MOVE (exactly `CLOSE-IF-MET` or `COMMENT-ONLY`; default COMMENT-ONLY): ____
-- CREATE (exactly `CREATE` or `HOLD`; default HOLD; HOLD files NT-1 and says so): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entries; the Jira steps stand, and then the `entry C-<n>` citation is dropped from every text): ____
-- LAND (exactly `SEAT` or `TUESDAY`; default SEAT): ____
-- Hard stop (the absolute outer limit AEDT; JIRA DONE 40, RECORDS COMMITTED 70, HARD STOP 100 minutes after your own Step-0 date, whichever is earlier): ____
-- Panes and live seats at the stamp: ____
+- STAMP: Tuesday s264, 20:04 AEDT 2026-11-10, after reading the whole kit; GitHub values measured 20:03:30 by date (gh api -X GET under the HPSM-POC GH_CONFIG_DIR). Code main is 009421a28616c8b31dde86b59d4c4ca674c288fa (#308), a descendant of all three squashes (#306 7da797e8 and #308 also landed today; #306 and #308 are not yours to record beyond E4). ADDED BY TUESDAY, binding on the texts: the product owner approved on 2026-11-10 a UAT deploy of code main 009421a2 WITH the one migration in the same window; a separate deploy seat (not yours: do not read it, do not wait for it) may run while you work. So every sentence of yours that says a thing is not deployed or the migration is applied to no hosted database carries 'as read at <<READ-TIME>>', and E3 gets ONE added sentence: 'A UAT deploy of this code with the migration was approved on 2026-11-10; its outcome is not recorded in this entry.' The Jira texts for 100 and 117 get the same 'as read at' qualifier and no other change. Nothing else in the kit changes.
+- MERGE-304 (the 40-hex squash of pull request 304 on code main): 2211608276f4cada15b3192c9b8753a5d722a4ef
+- PR-B1441 (the pull request number and its 40-hex squash on code main): #305 78d4b3cefdb776d3b9173cef8ba7287806e43705
+- PR-B1442 (the pull request number and its 40-hex squash on code main): #307 eb2e49c798e939491c8184e96cf056cc8a67ce0d
+- VERDICT-B1440 (absolute path or paths of the VERDICT.md that cover pull request 304, and which names the landed head): /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1440_verify/VERDICT.md (round 1, NO GO @ 1cbd4cd, sha16 ce2c0ffab7ad560a) and /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1440_verify_r2/VERDICT.md (round 2, GO WITH FINDINGS @ fc90f07, sha16 12aff2f269a3a87d). NO verdict file names the landed head d49be881 (a grep for d49be88 over both verify folders printed nothing at the stamp): write exactly that, never 'gated'.
+- VERDICT-B1441 (absolute path of its VERDICT.md, or `none`): /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1441_verify/VERDICT.md (GO WITH FINDINGS @ 792c78f, sha16 b01808071badb7cb; #305 head 792c78f2 = the gated head)
+- VERDICT-B1442 (absolute path of its VERDICT.md, or `none`): /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1442_verify/VERDICT.md (GO WITH FINDINGS @ c16f422, sha16 1b69d5fb298293b3; #307 head c16f422e = the gated head; its finding M1 says the build record's FOR THE DEPLOY order is wrong: record that as a finding, quoted by program)
+- SIDEBAR (the state of B1463 at the stamp, one sentence, from its STATUS last line): B1463 STATUS last line 'READY B1463: aa9bac758b074e959c4e24cf17430076a0b8fd1d'; landed as pull request #308, squash 009421a28616c8b31dde86b59d4c4ca674c288fa (merged true at the stamp); you measure the merge time; not deployed as read at the stamp.
+- LAUNCH WINDOW: now, 2026-11-10 evening; one waiter (launch_when_cool).
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): WRITE
+- MOVE (exactly `CLOSE-IF-MET` or `COMMENT-ONLY`; default COMMENT-ONLY): CLOSE-IF-MET
+- CREATE (exactly `CREATE` or `HOLD`; default HOLD; HOLD files NT-1 and says so): CREATE
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entries; the Jira steps stand, and then the `entry C-<n>` citation is dropped from every text): WRITE
+- LAND (exactly `SEAT` or `TUESDAY`; default SEAT): SEAT
+- Hard stop (the absolute outer limit AEDT; JIRA DONE 40, RECORDS COMMITTED 70, HARD STOP 100 minutes after your own Step-0 date, whichever is earlier): 22:30 AEDT, or Step-0 plus 100 minutes, whichever is earlier.
+- Panes and live seats at the stamp: %0 the coordinator, %1 fleet-monitor, %2 Datasec/Security-Composer-R205 (Security Composer records: writes Jira PCOMP and the Composer root records, NOT HPSMPOC or the HPSM-POC CLARIFICATIONS.md: not a REFUSE 7 hit). No HPSM-POC pane.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 20:04 by Tuesday s264 (all 146 lines, via the Read tool)

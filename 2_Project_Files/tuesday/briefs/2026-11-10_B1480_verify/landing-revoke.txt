@@ -1,0 +1,7 @@
+# Head-pinned MERGE COMMIT (never squash, never rebase). Head 5fbad1ba3ff9a13f6ee86f069b1c732b3db7b3d2, main at gate 849b808c567e4d31d78e2d50b582540ae1920c67.
+# Independent of the l1 stack; either order merges clean (measured). Lane T's RD-980 waits for this landing.
+# Precondition: scripts/verify-expected-counts.json regenerated on the merged tree: 5499 tests / 328 suites on today's main; if l1 lands first, regenerate on main+l1+this (expected 5513 / 331 by addition; measure, do not assume).
+# If the counts commit is added to the branch, pin THAT new head instead, after checking `git diff 5fbad1b <new head> --stat` is exactly scripts/verify-expected-counts.json.
+# Run with GH_CONFIG_DIR set to the project's 4_Credentials/.gh-config. <PR> is the number of the pull request opened from the gated head.
+gh pr merge <PR> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit 5fbad1ba3ff9a13f6ee86f069b1c732b3db7b3d2 --subject "$(cat merge-subject-revoke.txt)" --body-file merge-body-revoke.txt
+# After: the Deploy demo run this merge starts must read skipped on every job (CI_DEPLOY_ENABLED gate).
