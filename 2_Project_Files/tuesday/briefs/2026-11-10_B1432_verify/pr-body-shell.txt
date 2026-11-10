@@ -1,0 +1,14 @@
+What changes (2 files):
+
+- tests/e2e/shell-layout.spec.js: the header paragraph no longer says two admin.html pins and that every served file is hash-checked. It now says the VENDOR table has 11 files, 7 hashed (4 from the integrity attributes in static/index.html, 3 admin.html pins recorded in VENDOR) and 4 icon font files with no hash, which are compared only with the vendor rows of the committed record at the end of the run.
+- __tests__/rd979-shell-layout-header-counts.test.js (new, 1 test): reads the spec as text, counts the VENDOR table, and requires every number in the header to equal the count. A built-in control feeds the old wording and requires the disagreement to be named.
+
+Tests: with the old header the new test is red (it names total, checked, indexPins, adminPins and unchecked); at the head it passes. Seven mutations of the header or the table all read red.
+
+Counts: the suite grows by 1 test and 1 suite (5493/326 to 5494/327). scripts/verify-expected-counts.json is not changed on this branch; it must be regenerated at landing or the Build reads VERDICT: FAIL on stale counts.
+
+Deploy: this merge starts a Deploy demo run on main (__tests__/ is not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
+
+Hosted CodeQL is read on the PR and on main after landing.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

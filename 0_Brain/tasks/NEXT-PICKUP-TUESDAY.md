@@ -46,6 +46,23 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴🔴🔴 DELTA 1098 — 2026-11-10 17:13 LIVE STATE, ROTATION-READY (s263; ctx:75%). **READ THIS FIRST; supersedes 1097's LIVE lines (its rules and paths stand).**
+**FLOOR (floor_watch --once, generated):**
+```
+%55|Datasec/HPSM-POC-H154|B1463|16:22|READY B1463: aa9bac758b074e959c4e24cf17430076a0b8fd1d
+%54|Datasec/NexusAI-N118|B1480|17:04|WORKING: chain b1480-build-chain holds the lock; step b1-plain since 16:56:30; 1 of 10 steps taken (17:04)
+%50|Datasec/Security-Composer-C92|B1422|17:11|READY B1422: b399bbfbc00a958417ea1f2f6bc2ca9dfbe7661c
+%46|Datasec/HPSM-POC-H152|B1442|14:00|READY B1442: c16f422e5b04f8a25f73ad5d8ae7dd7451aff945
+%42|Datasec/NexusAI-N117|B1433|13:36|WORKING: ADDENDUM-2 waiting in the jest FIFO, position 1 of 1 behind b1431-build-chain4 (ticket b1433-counts-a2, 13:37 AEDT)
+%41|Datasec/NexusAI-N116|B1432|12:24|HANDOVER B1432: next RD-144
+%40|Datasec/NexusAI-N115|B1431|14:22|HANDOVER B1431: next RD-730
+```
+**LANDED by s263 (none deployed):** HPSM #305 -> 78d4b3ce · #304 -> 22116082 · #306 -> 7da797e8 (= HPSM main) · MPS #175 (B1471 docs) -> 54ed7627 (= MPS main). Panes closed: H150, H151, H155, M111, R204, C91.
+**HPSM NEXT:** #307 (B1442): `pr_retrigger.sh` reopened it 16:56 (run 42765248766) with `pr_checks_wait` chained in s263's task output; if this seat is gone, re-run BOTH tools; land head-pinned `--match-head-commit c16f422e5b04f8a25f73ad5d8ae7dd7451aff945` with `..._B1442_verify/` squash text in a SEPARATE step; **🔴 then no API deploy from main without the migration in the same window (gate M1)**; close H152 %46. Then #308 (B1463 rename, gate GO WITH FINDINGS @ aa9bac7, `..._B1463_verify/`): retrigger on the new main, wait, land pinned `aa9bac758b074e959c4e24cf17430076a0b8fd1d`, close H154 %55, and TELL KAM on the board: 'Playbook Partner Readiness' is landed, not deployed; it wraps to two lines in the sidebar (rows below move 12 px; `..._B1463_verify/wrap-table.txt`); built as he worded it, no style change; deploy waits for his word, and the next UAT deploy needs the #307 migration in the same window. Then B1462 R203 HPSM records (stamp: verdict slots B1440_r2, B1441, B1442, B1463, B1464; landings #304-#308).
+**COMPOSER:** C91 = NO COMMIT (PCOMP-114/62 already fixed on main; evidence `.../Briefs/2026-11-10_B1421_STATUS.md:11,104`). C92 READY b399bbfb -> gate B1422 running (in-session, dies with this seat: re-commission if `..._B1422_verify/` has no VERDICT.md) -> PR, CodeQL, head-pinned squash, NOT deployed. **B1475 R205 Composer records is STARTABLE now (C92 reported):** read whole, stamp with Kam's PCOMP-113 ruling verbatim ('Decision composer-pcomp113-pin-paragraph-1110: c — Leave the paragraph as it is (recommended)', 15:51 live board) + PCOMP-114/62 close-with-evidence + #120/#121/C4/C92 landings; then `decision_queue.sh --delivered composer-pcomp113-pin-paragraph-1110 <comment id>`.
+**NEXUSAI:** gate B1432 = GO WITH FINDINGS both branches (shell 5cc88ab needs counts 5494/327 by a seat; overflow a1d7f46 none; both start a deploy-demo run that must read skipped). Gates B1431 (ORDER.md) and B1433b still running (in-session: re-commission if no VERDICT). Landing order from B1431's ORDER.md; counts commits only by a seat on a written ADDENDUM. N118 (%54) working; N115/N116 panes kept until their branches' counts commits are done, then close and stamp B1481/B1482.
+**MPS:** next records stamp owes MPSCALC-205 move, 221 row reading, 178 cl.2 + 195 item 6 now on main (#175), records/b1406. B1472 M112 undecided.
+
 ## 🔴🔴🔴 DELTA 1097 — 2026-11-10 16:02 FULL LIVE STATE, ROTATION-READY (s263; ctx:71%). **READ THIS FIRST; supersedes 1096's LIVE lines (its gate/kit paths stand).**
 **FIRST AT BOOT:** `kam_watch.sh --pending` and `floor_watch.sh --once`, then arm both as tracked tasks (1095's rules).
 **FLOOR (floor_watch --once, generated at this block, not typed):**

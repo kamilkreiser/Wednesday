@@ -1,0 +1,16 @@
+What changes (4 files):
+
+- RD-962: static/css/settings-styles.css adds .navbar-brand { white-space: normal }. Bootstrap's nowrap brand line is 423 px wide, which made settings.html 60 px wider than a 390 px viewport (light and dark). It now wraps; overflow is 0 from 320 to 414 px.
+- RD-963: static/index.html changes the 12 col-md-3 columns that wrap a stat tile (Overview user detail, Printing, Scanning) to col-md-6 col-lg-3 mb-md-3 mb-lg-0. At 820 px the tiles were 167 px wide, too narrow for icon, label and figure, so labels shrank to nothing and the cost figure left its tile. Tiles are now two per row from 768 to 991 px and unchanged at 992 px and above and below 768 px.
+- tests/e2e/rd962-rd963-page-overflow.spec.js (new, browser spec, not run by CI): 7 tests. With the fix removed 6 are red and the control stays green; at the head all 7 pass.
+- tests/e2e/shell-layout-today.json: the layout record, regenerated through its own recorder; only the 12 moved cells and the engine note changed.
+
+Counts: no jest test is added (tests/e2e is ignored by jest); scripts/verify-expected-counts.json is unchanged and equals the measured 5493/326.
+
+Not fixed here: tile labels are still clipped from 992 to about 1199 px (unchanged from main).
+
+Deploy: this merge starts a Deploy demo run on main (static/ is not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
+
+Hosted CodeQL is read on the PR and on main after landing.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

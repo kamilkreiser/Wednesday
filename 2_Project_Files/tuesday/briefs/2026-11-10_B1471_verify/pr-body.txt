@@ -1,0 +1,10 @@
+Docs and generated header only. Three paths: docs/API.md, web/src/api/generated/SOURCE.txt, web/src/api/generated/schema.ts. No code, no contract file, no test change. Not deployed.
+
+Commits
+1. docs/API.md lifecycle events (MPSCALC-178 clause 2): a body that sends lifecycleEvents is refused 400 BAD_REQUEST as an unknown member on every quote route that reads a body, including the optional bodies of duplicate and approve; POST .../new-version reads no body, so a body sent to it is ignored. The ticket's fix shape named duplicate as body-less too; the source does not support that (duplicate reads an optional body and refuses any other member), so the sentence follows the source. The ticket text should be corrected to match.
+2. docs/API.md feedback (no ticket): the hourly limit also counts the caller's other requests still being written; Retry-After is worked out from stored items only and can be shorter than the real wait while they are still being written; the order is idempotency check, rate limit and one place taken under the lock, attachments written outside the lock, item file last under the lock.
+3. Generated header (MPSCALC-195 item 6): SOURCE.txt and schema.ts line 2 named a temporary commit not on origin; regenerated with scripts/sync-contract.mjs against main dad902441014bda81d4eed39dc9a6bcea1439989. One line each; openapi.snapshot.json is byte-identical.
+
+Checked by an independent gate: each changed sentence read against the source (all true); web job at main and head under Node 24, 1492 of 1492 tests both, lost 0 gained 0, contract-sync tests green, lint, build and bundle check green; head tree equals the merge tree; the generator reproduces the committed files exactly. Not run locally: dotnet (hosted CI is the proof). Left: MPSCALC-195 item 3 (no verbatim text given) and the Retry-After number (a code question).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
