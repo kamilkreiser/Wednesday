@@ -1,7 +1,7 @@
 #!/bin/bash
 # launch_when_cool.sh <cockpit name> <command string for cockpit.sh add>
 #
-# Waits until the machine's 1-minute load is below LOAD_MAX (default 7) on TWO consecutive reads 20 s apart,
+# Waits until the machine's 1-minute load is below LOAD_MAX (default 4/3 of the CPU count, min 7; 24 on 18 CPUs) on TWO consecutive reads 20 s apart,
 # then runs `cockpit.sh add <name> "<command>"` ONCE, prints the result and exits. Run it as a tracked
 # background task (run_in_background), never disowned: its exit is the wake to verify the launch at rung 5.
 #
@@ -12,7 +12,12 @@
 # Bounded: gives up after MAX_WAIT seconds (default 3600) with rc 4 and launches nothing.
 NAME="$1"; CMD="$2"
 [ -n "$NAME" ] && [ -n "$CMD" ] || { echo "usage: launch_when_cool.sh <cockpit name> <command>" >&2; exit 2; }
-LOAD_MAX="${LOAD_MAX:-7}"; MAX_WAIT="${MAX_WAIT:-3600}"
+# LOAD_MAX default scales with the CPU count (Kam, live board 2026-11-11 09:19:32, card datasec-load-gate-cpu-count-1111 = a,
+# "Raise the limit to 24 and I will exclude the drive from Spotlight"): 4/3 of hw.ncpu, rounded, never below the old 7.
+# 18 CPUs (the M5 Studio) -> 24. The old fixed 7 was set on an 8-CPU Mac. An explicit LOAD_MAX still wins.
+NCPU="$(sysctl -n hw.ncpu 2>&1)"; case "$NCPU" in ""|*[!0-9]*) NCPU=6 ;; esac
+DEF_MAX=$(( (NCPU * 4 + 1) / 3 )); [ "$DEF_MAX" -lt 7 ] && DEF_MAX=7
+LOAD_MAX="${LOAD_MAX:-$DEF_MAX}"; MAX_WAIT="${MAX_WAIT:-3600}"
 COCKPIT="${LWC_COCKPIT:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../fleet/cockpit" && pwd)/cockpit.sh}"   # LWC_COCKPIT: test stub only
 [ -x "$COCKPIT" ] || [ -f "$COCKPIT" ] || { echo "REFUSED: cockpit.sh not found at $COCKPIT" >&2; exit 3; }
 load1() { sysctl -n vm.loadavg | awk '{print $2}'; }

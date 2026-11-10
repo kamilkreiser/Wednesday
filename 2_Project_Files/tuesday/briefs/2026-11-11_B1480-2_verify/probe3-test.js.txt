@@ -1,0 +1,170 @@
+'use strict';
+// Gate probe round 3 (verifier only, never committed; planted as __tests__/zzprobe3.test.js in a scratch
+// worktree and removed after). Covers:
+//  A  every one of the 20 gated routes (RD-958 16 + RD-793 4) x 11 routed path forms, as a viewer
+//  B  the same forms of the two router-level-gated routes as an administrator (routing control)
+//  C  forms Express does not route (viewer + administrator: 404 on both = not a bypass)
+//  D  raw-socket request lines (fragment, absolute form, dot segments, lower-case method, UTF-8)
+//  E  method variants on the sustainability config path, and an override header
+//  F  PERSISTENCE: did any viewer form actually change the sustainability config or a feedback item?
+//     Each viewer request carries a unique marker; afterwards the administrator reads the stored value.
+//     Control: the administrator's own canonical write is read back (the read instrument can fire).
+//  G  round 1's 36 cases verbatim (viewer).
+const fs = require('fs');
+const net = require('net');
+const inventory = require('../scripts/role-capability-inventory');
+const made = [];
+const OUT = process.env.GATE_PROBE_OUT;
+const S = inventory.SENTINEL;
+
+const ROUTES = [
+  ['POST', '/api/settings/costs'], ['POST', '/api/settings/cost-centers'], ['DELETE', '/api/settings/cost-centers/:id'],
+  ['POST', '/api/settings/user-assignments'], ['POST', '/api/settings/user-assignments/bulk'], ['POST', '/api/settings/business-hours'],
+  ['POST', '/api/settings/quick-questions'], ['POST', '/api/notifications/run-now'], ['POST', '/api/restart-services'],
+  ['POST', '/api/backup'], ['POST', '/api/models/switch'], ['POST', '/api/printers'], ['POST', '/api/sustainability/config'],
+  ['PATCH', '/api/feedback/:id'], ['DELETE', '/api/feedback/:id'],
+  ['POST', '/api/data-sources/:id/tables'], ['DELETE', '/api/data-sources/:id/tables/:tableName'], ['DELETE', '/api/data-sources/:id'],
+  ['DELETE', '/api/setup/data-sources/:id'], ['POST', '/api/setup/mail-config'],
+];
+const isP = (s) => s.startsWith(':');
+const fill = (p, id) => p.split('/').map((s) => (isP(s) ? (id || S) : s)).join('/');
+const mapLit = (p, f, id) => p.split('/').map((s) => (isP(s) ? (id || S) : f(s))).join('/');
+const alt = (s) => [...s].map((c, i) => (i % 2 ? c.toUpperCase() : c.toLowerCase())).join('');
+const alt2 = (s) => [...s].map((c, i) => (i % 2 ? c.toLowerCase() : c.toUpperCase())).join('');
+const lastUp = (p, id) => { const a = fill(p, id).split('/'); for (let i = a.length - 1; i > 0; i--) if (!isP(p.split('/')[i])) { a[i] = a[i].toUpperCase(); break; } return a.join('/'); };
+const mountUp = (p, id) => { const a = fill(p, id).split('/'); a[1] = a[1].toUpperCase(); a[2] = a[2].toUpperCase(); return a.join('/'); };
+function forms(p, id) {
+  const c = fill(p, id);
+  return [
+    ['canon', c], ['upper', mapLit(p, (s) => s.toUpperCase(), id)], ['title', mapLit(p, (s) => s.charAt(0).toUpperCase() + s.slice(1), id)],
+    ['alt', mapLit(p, alt, id)], ['alt2', mapLit(p, alt2, id)], ['lastseg-up', lastUp(p, id)], ['mount-up', mountUp(p, id)],
+    ['slash', c + '/'], ['upper-slash', mapLit(p, (s) => s.toUpperCase(), id) + '/'], ['query', c + '?x=1'],
+    ['upper-slash-query', mapLit(p, (s) => s.toUpperCase(), id) + '/?a=b&c'],
+  ];
+}
+const UNROUTED = [
+  ['POST', '/api/sustainability//config'], ['POST', '/api/sustainability/config//'], ['POST', '/api//sustainability/config'],
+  ['POST', '//api/sustainability/config'], ['POST', '/API/SUSTAINABILITY//CONFIG'], ['POST', '/api/sustainability/%43ONFIG'],
+  ['POST', '/api/sustainability/%63onfig'], ['POST', '/api/sustainability/con%66ig'], ['POST', '/api/%73ustainability/config'],
+  ['POST', '/api/sustainability/config;x'], ['POST', '/api/sustainability/config.json'], ['POST', '/api/sustainability/config%2F'],
+  ['POST', '/api/sustainability/config%20'], ['POST', '/api/sustainability/CONFIG%00'], ['POST', '/api/sustainability%2Fconfig'],
+  ['POST', '/api/sustainability/config/x'], ['POST', '/api/sustainability/CONFIG/x'],
+  ['PATCH', `/api/feedback//${S}`], ['PATCH', `/api//feedback/${S}`], ['DELETE', `/api/feedback/${S}//`], ['DELETE', `/api/%66eedback/${S}`],
+  ['PATCH', `/API/FEEDBACK/${S}/X`],
+];
+const METHODS = ['HEAD', 'OPTIONS', 'PUT', 'PATCH', 'DELETE', 'GET'];
+
+function rawSend(base, method, target, headers, body = '{}') {
+  const u = new URL(base);
+  return new Promise((resolve) => {
+    const sock = net.connect(Number(u.port), u.hostname);
+    let data = Buffer.alloc(0);
+    const b = Buffer.from(body);
+    const hdr = { ...headers, Host: u.host, 'Content-Length': String(b.length), Connection: 'close' };
+    sock.on('connect', () => {
+      sock.write(Buffer.concat([Buffer.from(`${method} `), Buffer.from(target, 'utf8'), Buffer.from(' HTTP/1.1\r\n' + Object.entries(hdr).map(([k, v]) => `${k}: ${v}`).join('\r\n') + '\r\n\r\n'), b]));
+    });
+    sock.setTimeout(10000, () => sock.destroy());
+    sock.on('data', (d) => { data = Buffer.concat([data, d]); });
+    sock.on('close', () => { const m = /^HTTP\/1\.[01] (\d{3})/.exec(data.toString('latin1')); resolve(m ? Number(m[1]) : 'NOSTATUS'); });
+    sock.on('error', (e) => resolve('ERR ' + e.code));
+  });
+}
+async function send(h, ctx, method, p, bodyObj, extra = {}) {
+  try {
+    const res = await fetch(h.base + p, { method, redirect: 'manual', headers: { ...ctx.json, ...extra }, body: (method === 'GET' || method === 'HEAD') ? undefined : JSON.stringify(bodyObj || {}) });
+    let error = null; let json = null;
+    try { json = await res.json(); error = json && typeof json.error === 'string' ? json.error.slice(0, 50) : null; } catch (_e) { /* non-JSON */ }
+    return { status: res.status, error, json };
+  } catch (e) { return { status: 'ERR ' + e.message, error: null }; }
+}
+async function readItem(h, A, fid) {
+  const r = await send(h, A, 'GET', '/api/feedback');
+  const items = (r.json && r.json.items) || [];
+  const it = items.find((i) => String(i.id) === String(fid));
+  return { listStatus: r.status, present: !!it, admin_notes: it ? it.admin_notes : null, itemStatus: it ? it.status : null };
+}
+const slim = (r) => ({ status: r.status, error: r.error });
+let marker = 0;
+const regionBody = () => ({ reportingRegion: `VIEWER-${++marker}` });
+
+const result = { A: {}, B: {}, C: {}, D: {}, E: {}, F: {}, G: {} };
+beforeAll(async () => {
+  const h = await inventory.bootShape({ shape: 'enforced', tag: 'gate-probe3', made });
+  try {
+    const V = await h.as(h.seeded.viewerSession);
+    const A = await h.as(h.seeded.adminSession);
+    const port = new URL(h.base).port;
+    // F setup: a real feedback item the viewer may create (viewer POST /api/feedback is allowed by design).
+    const created = await send(h, V, 'POST', '/api/feedback', { type: 'bug', title: 'probe3 item' });
+    const fid = created.json && (created.json.id || (created.json.item && created.json.item.id));
+    result.F.created = { status: created.status, id: fid };
+    const regionBefore = (await send(h, A, 'GET', '/api/sustainability/config')).json;
+    result.F.regionBefore = regionBefore && regionBefore.config && regionBefore.config.reportingRegion;
+    // A: viewer, 20 routes x 11 forms (sentinel ids), sustainability bodies carry markers
+    for (const [m, p] of ROUTES) {
+      if (p === '/api/backup' || p === '/api/restart-services' || p === '/api/setup/mail-config' || p === '/api/notifications/run-now') { /* still driven: the gate refuses before the handler */ }
+      for (const [form, sent] of forms(p)) {
+        const body = p === '/api/sustainability/config' ? regionBody() : {};
+        result.A[`${form} ${m} ${sent}`] = slim(await send(h, V, m, sent, body));
+      }
+    }
+    // F: feedback PATCH with the real id, all forms + id aliases, each carrying a marker in admin_notes
+    if (fid !== undefined && fid !== null) {
+      const ids = [String(fid), `0${fid}`, `${fid}.0`, `%2B${fid}`, `${fid}%20`, `%20${fid}`];
+      for (const id of ids) {
+        for (const [form, sent] of forms('/api/feedback/:id', id)) {
+          result.F[`viewer PATCH ${form} ${sent}`] = slim(await send(h, V, 'PATCH', sent, { admin_notes: `VIEWER-${++marker}`, status: 'dismissed' }));
+        }
+      }
+      result.F.itemAfterViewerPatch = await readItem(h, A, fid);
+      for (const id of ids) {
+        for (const [form, sent] of forms('/api/feedback/:id', id)) {
+          result.F[`viewer DELETE ${form} ${sent}`] = slim(await send(h, V, 'DELETE', sent));
+        }
+      }
+      result.F.itemAfterViewerDelete = await readItem(h, A, fid);
+      // control: the administrator's own write is visible to the same read
+      result.F.adminPatch = slim(await send(h, A, 'PATCH', `/API/FEEDBACK/${fid}`, { admin_notes: 'ADMIN-CONTROL' }));
+      result.F.itemAfterAdminPatch = await readItem(h, A, fid);
+    }
+    // C: unrouted forms, viewer then administrator
+    for (const who of ['viewer', 'administrator']) {
+      const ctx = who === 'viewer' ? V : A;
+      for (const [m, sent] of UNROUTED) result.C[`${who} ${m} ${sent}`] = slim(await send(h, ctx, m, sent, regionBody()));
+    }
+    // D: raw request lines (viewer); bodies carry a region marker
+    const rawCases = [
+      ['POST', '/api/sustainability/CONFIG#frag'], ['POST', `http://127.0.0.1:${port}/api/sustainability/CONFIG`],
+      ['POST', `http://127.0.0.1:${port}/API/SUSTAINABILITY/CONFIG/`], ['POST', `HTTP://127.0.0.1:${port}/Api/Sustainability/Config`],
+      ['POST', '/api/sustainability/./CONFIG'], ['POST', '/api/x/../sustainability/CONFIG'], ['POST', '/api/sustainability/config/.'],
+      ['POST', '/api/sustainability/CONFIG/..'], ['POST', '/api/ſustainability/config'], ['POST', '/api/sustainability/Kconfig'],
+      ['post', '/api/sustainability/config'], ['Post', '/api/sustainability/CONFIG'], ['POST', '/api/sustainability\\config'],
+      ['PATCH', `http://127.0.0.1:${port}/API/FEEDBACK/${S}`], ['DELETE', `/API/FEEDBACK/${S}#x`],
+    ];
+    for (const [m, t] of rawCases) {
+      result.D[`viewer RAW ${m} ${t.replace(port, 'PORT')}`] = await rawSend(h.base, m, t, V.json, JSON.stringify(regionBody()));
+    }
+    // E: method variants and an override header on the config path (viewer)
+    for (const m of METHODS) result.E[`viewer ${m} /api/sustainability/CONFIG`] = slim(await send(h, V, m, '/api/sustainability/CONFIG', regionBody()));
+    result.E['viewer GET+X-HTTP-Method-Override:POST /api/sustainability/CONFIG'] = slim(await send(h, V, 'GET', '/api/sustainability/CONFIG', null, { 'X-HTTP-Method-Override': 'POST' }));
+    result.E['viewer PUT+X-HTTP-Method-Override:POST /api/sustainability/config'] = slim(await send(h, V, 'PUT', '/api/sustainability/config', regionBody(), { 'X-HTTP-Method-Override': 'POST' }));
+    result.E['viewer POST /api/sustainability/config?_method=GET'] = slim(await send(h, V, 'POST', '/api/sustainability/config?_method=GET', regionBody()));
+    // F: what did the viewer leave in the store?
+    const regionAfter = (await send(h, A, 'GET', '/api/sustainability/config')).json;
+    result.F.regionAfterViewer = regionAfter && regionAfter.config && regionAfter.config.reportingRegion;
+    result.F.markersSent = marker;
+    // G: round 1's 36 cases verbatim, viewer
+    const R1 = [['POST', '/api/sustainability/config'], ['POST', '/api/sustainability/config/'], ['POST', '/api/sustainability/CONFIG'], ['POST', '/api/sustainability/Config'], ['POST', '/API/SUSTAINABILITY/CONFIG'], ['POST', '/api/sustainability//config'], ['POST', '/api/sustainability/config?x=1'], ['POST', '/api/sustainability/%63onfig'], ['PATCH', `/api/feedback/${S}`], ['PATCH', `/api/feedback/${S}/`], ['PATCH', `/API/FEEDBACK/${S}`], ['PATCH', `/api/feedback//${S}`], ['PATCH', '/api/feedback/a%2Fb'], ['DELETE', `/api/feedback/${S}`], ['DELETE', `/api/feedback/${S}/`], ['DELETE', `/Api/Feedback/${S}`], ['DELETE', '/api/feedback/a%2Fb'], ['POST', '/API/SETTINGS/COSTS'], ['POST', '/api/settings/costs/'], ['POST', '/api/Models/Switch'], ['DELETE', `/api/DATA-SOURCES/${S}`], ['POST', `/api/data-sources/${S}/tables/`], ['GET', '/api/feedback'], ['GET', `/api/feedback/${S}`], ['POST', `/api/feedback/${S}/triage`], ['GET', '/api/sustainability/config'], ['GET', '/api/settings/costs'], ['GET', '/api/settings/cost-centers'], ['GET', '/api/settings/business-hours'], ['GET', '/api/printers'], ['GET', '/api/models'], ['GET', '/api/data-sources'], ['POST', `/api/data-sources/${S}/test`], ['POST', '/api/settings/user-assignments/batch'], ['POST', '/api/settings/agent'], ['GET', '/api/health']];
+    for (const [m, p] of R1) result.G[`${m} ${p}`] = slim(await send(h, V, m, p, {}));
+    // B: administrator routing control on the two router-level-gated routes, every form (last: it writes)
+    for (const [m, p] of [['PATCH', '/api/feedback/:id'], ['DELETE', '/api/feedback/:id'], ['POST', '/api/sustainability/config']]) {
+      for (const [form, sent] of forms(p)) result.B[`${form} ${m} ${sent}`] = slim(await send(h, A, m, sent, p.includes('sustain') ? { reportingRegion: `ADMIN-${form}` } : {}));
+    }
+    const regionCtl = (await send(h, A, 'GET', '/api/sustainability/config')).json;
+    result.F.regionAfterAdminControl = regionCtl && regionCtl.config && regionCtl.config.reportingRegion;
+  } finally { await h.stop(); }
+  if (OUT) fs.writeFileSync(OUT, JSON.stringify(result, null, 1));
+}, 600000);
+afterAll(() => { for (const d of made) fs.rmSync(d, { recursive: true, force: true }); });
+test('probe3 ran', () => { expect(Object.keys(result.A).length).toBe(220); });

@@ -1,0 +1,131 @@
+'use strict';
+// Gate probe round 2 (verifier only, never committed). Round 1's 36 cases verbatim, plus more routed
+// case/slash forms, the forms Express does not route (double slash, percent-encoded letters), and
+// raw-socket request lines (fragment, absolute form) that fetch cannot send. Drives viewer,
+// anonymous and administrator (administrator last), prints JSON for base vs head comparison.
+const fs = require('fs');
+const net = require('net');
+const inventory = require('../scripts/role-capability-inventory');
+const made = [];
+const OUT = process.env.GATE_PROBE_OUT;
+const S = inventory.SENTINEL;
+const SU = S.toUpperCase();
+const ROUND1 = [
+  ['POST', '/api/sustainability/config'],
+  ['POST', '/api/sustainability/config/'],
+  ['POST', '/api/sustainability/CONFIG'],
+  ['POST', '/api/sustainability/Config'],
+  ['POST', '/API/SUSTAINABILITY/CONFIG'],
+  ['POST', '/api/sustainability//config'],
+  ['POST', '/api/sustainability/config?x=1'],
+  ['POST', '/api/sustainability/%63onfig'],
+  ['PATCH', `/api/feedback/${S}`],
+  ['PATCH', `/api/feedback/${S}/`],
+  ['PATCH', `/API/FEEDBACK/${S}`],
+  ['PATCH', `/api/feedback//${S}`],
+  ['PATCH', `/api/feedback/a%2Fb`],
+  ['DELETE', `/api/feedback/${S}`],
+  ['DELETE', `/api/feedback/${S}/`],
+  ['DELETE', `/Api/Feedback/${S}`],
+  ['DELETE', `/api/feedback/a%2Fb`],
+  ['POST', '/API/SETTINGS/COSTS'],
+  ['POST', '/api/settings/costs/'],
+  ['POST', '/api/Models/Switch'],
+  ['DELETE', `/api/DATA-SOURCES/${S}`],
+  ['POST', `/api/data-sources/${S}/tables/`],
+  ['GET', '/api/feedback'],
+  ['GET', `/api/feedback/${S}`],
+  ['POST', `/api/feedback/${S}/triage`],
+  ['GET', '/api/sustainability/config'],
+  ['GET', '/api/settings/costs'],
+  ['GET', '/api/settings/cost-centers'],
+  ['GET', '/api/settings/business-hours'],
+  ['GET', '/api/printers'],
+  ['GET', '/api/models'],
+  ['GET', '/api/data-sources'],
+  ['POST', `/api/data-sources/${S}/test`],
+  ['POST', '/api/settings/user-assignments/batch'],
+  ['POST', '/api/settings/agent'],
+  ['GET', '/api/health'],
+];
+const ROUTED_EXTRA = [
+  ['POST', '/api/sustainability/cOnFiG'],
+  ['POST', '/api/SUSTAINABILITY/config'],
+  ['POST', '/Api/Sustainability/config'],
+  ['POST', '/api/sustainability/CONFIG/'],
+  ['POST', '/API/SUSTAINABILITY/CONFIG/'],
+  ['POST', '/api/sustainability/CONFIG?x=1'],
+  ['PATCH', `/api/FEEDBACK/${S}/`],
+  ['PATCH', `/API/FEEDBACK/${SU}`],
+  ['DELETE', `/API/FEEDBACK/${SU}/`],
+  ['PATCH', '/api/feedback/%7a%7a'],
+  ['GET', '/api/sustainability/CONFIG'],
+  ['POST', `/API/FEEDBACK/${S}/TRIAGE`],
+];
+const UNROUTED = [
+  ['POST', '/api/sustainability/config//'],
+  ['POST', '/api//sustainability/config'],
+  ['POST', '/API/SUSTAINABILITY//CONFIG'],
+  ['POST', '/api/sustainability/%43ONFIG'],
+  ['POST', '/api/sustainability/con%66ig'],
+  ['POST', '/api/%73ustainability/config'],
+  ['POST', '/api/sustainability/%63onfig/'],
+  ['PATCH', `/api/feedback/${S}//`],
+  ['PATCH', `/api//feedback/${S}`],
+  ['DELETE', `/api/feedback//${S}`],
+  ['DELETE', `/API/FEEDBACK//${SU}`],
+  ['DELETE', `/api/%66eedback/${S}`],
+  ['PATCH', `/api/%46EEDBACK/${S}`],
+];
+const CASES = [...ROUND1, ...ROUTED_EXTRA, ...UNROUTED];
+const RAW = (port) => [
+  ['POST', '/api/sustainability/CONFIG#x'],
+  ['POST', `http://127.0.0.1:${port}/api/sustainability/CONFIG`],
+  ['POST', `http://127.0.0.1:${port}/API/SUSTAINABILITY/CONFIG/`],
+  ['PATCH', `http://127.0.0.1:${port}/API/FEEDBACK/${S}`],
+  ['POST', '//api/sustainability/config'],
+];
+function rawSend(base, method, target, headers) {
+  const u = new URL(base);
+  return new Promise((resolve) => {
+    const sock = net.connect(Number(u.port), u.hostname);
+    let data = '';
+    const hdr = { ...headers, Host: u.host, 'Content-Length': '2', Connection: 'close' };
+    sock.on('connect', () => {
+      sock.write(`${method} ${target} HTTP/1.1\r\n` + Object.entries(hdr).map(([k, v]) => `${k}: ${v}`).join('\r\n') + '\r\n\r\n{}');
+    });
+    sock.on('data', (d) => { data += d.toString('latin1'); });
+    sock.on('end', () => { const m = /^HTTP\/1\.1 (\d{3})/.exec(data); resolve(m ? Number(m[1]) : 'NOSTATUS'); });
+    sock.on('error', (e) => resolve('ERR ' + e.message));
+  });
+}
+async function drive(h, session) {
+  const ctx = await h.as(session);
+  const out = {};
+  for (const [method, p] of CASES) {
+    let status, error;
+    try {
+      const res = await fetch(h.base + p, { method, redirect: 'manual', headers: ctx.json, body: method === 'GET' ? undefined : '{}' });
+      status = res.status;
+      try { const b = await res.json(); error = b && (b.error || null); } catch (_e) { error = null; }
+    } catch (e) { status = 'ERR ' + e.message; }
+    out[`${method} ${p}`] = { status, error: typeof error === 'string' ? error.slice(0, 60) : error };
+  }
+  const port = new URL(h.base).port;
+  for (const [method, t] of RAW(port)) {
+    out[`RAW ${method} ${t.replace(port, 'PORT')}`] = { status: await rawSend(h.base, method, t, ctx.json), error: null };
+  }
+  return out;
+}
+let result = {};
+beforeAll(async () => {
+  const h = await inventory.bootShape({ shape: 'enforced', tag: 'gate-probe2', made });
+  try {
+    result.viewer = await drive(h, h.seeded.viewerSession);
+    result.anonymous = await drive(h, undefined);
+    result.administrator = await drive(h, h.seeded.adminSession);
+  } finally { await h.stop(); }
+  if (OUT) fs.writeFileSync(OUT, JSON.stringify(result, null, 1));
+}, 300000);
+afterAll(() => { for (const d of made) fs.rmSync(d, { recursive: true, force: true }); });
+test('probe ran', () => { expect(Object.keys(result.viewer).length).toBe(CASES.length + 5); });
