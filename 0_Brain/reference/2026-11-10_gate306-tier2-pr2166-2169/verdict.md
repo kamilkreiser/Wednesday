@@ -30,7 +30,7 @@ FOUND
 - It does what KS-2091 asks (the ticket's fix shape: fixture preflight with non-zero exit, assert the push did not land and the refusal text appears) and no more. Body claims the same and says the hook is correct today and the ticket stays open.
 
 TESTED / HOW (scratch clone, hook as on develop 0b55401ad5dc, which equals b602c418296a for this file)
-- `bash -n` rc 0. Suite at head: 4 passed, 0 failed. The 10 other pre-push hook suites at head: ks2127 12/0, ks884 10/0, ks998_judges 80/0, ks998_stale_base 21/0, base_fixture_guard 12/0, base_leg_comment 4/0, hook_base 36/0, current_develop 4/0, stack_legs_comment 4/0; `check_stack_safety_hook_env` 2 passed 3 failed, IDENTICAL on develop (it needs `Start_Up/` which my tree has... the failure text is `Start_Up/start-secuura.sh is missing`: an artefact of the scratch checkout, same on develop; not a PR finding). Shell-suite files on develop 101, with the PR 101 vs b602's 100 (+1).
+- `bash -n` rc 0. Suite at head: 4 passed, 0 failed. The 10 other pre-push hook suites at head: ks2127 12/0, ks884 10/0, ks998_judges 80/0, ks998_stale_base 21/0, base_fixture_guard 12/0, base_leg_comment 4/0, hook_base 36/0, current_develop 4/0, stack_legs_comment 4/0; `check_stack_safety_hook_env` 2 passed 3 failed, IDENTICAL on develop (that run was in my first, sparse checkout, which lacked `Start_Up/`: `Start_Up/start-secuura.sh is missing`; a scratch artefact, same on develop, not a PR finding; not re-run in the later full tree). Shell-suite files on develop 101, with the PR 101 vs b602's 100 (+1).
 - Seat's mutant reproduced with `HOOK_SH` on a scratch copy (final `exit 1` to `exit 0`, anchor found once): 3 passed, 1 failed, the failure is `a red preflight refuses the push`.
 - My own mutants (each a copy in scratch, the tree's hook untouched, `cmp` rc 0 after): M2 `|| true; false || {` (refuse every push) reddens exactly `CONTROL a green preflight ...lands` (3/1); M3 text changed to `PREFLIGHT FAILED` reddens exactly `a red preflight is announced` (3/1); M4 `exit 1` to `exit 7` (still refuses) stays 4/0, correct (the cell pins refusal, not the code).
 - Counts: suite 0 to 4 cells; hook leg-14 shell suites 124 to 125 per the seat's quote (not reproduced: the hook was not run).
@@ -39,7 +39,7 @@ NOT TESTED
 - The real preflight or any real push through the hook; the other shell suites of leg 14; a mutant that makes the hook skip the preflight entirely (the CONTROL ran-cell would catch it by construction, not run).
 
 Findings
-- G306-2166-1 (Note): the cell "a red preflight refuses the push" detects refusal by whether the branch ref exists on the remote after the push; a hook regression that still exits 0 but is bypassed some other way is covered, a hook that exits non-zero for a different reason is also covered by the refuse cell yet the announce cell then reads the text; M4 shows exit code value is not pinned. Fine; noted only so nobody reads the suite as a pin of exit status.
+- G306-2166-1 (Note): the suite pins that a red preflight REFUSES and is announced, not the exit-status value (my mutant `exit 7` stays 4/4). Correct for the ticket; noted only so nobody reads the suite as a pin of the exit code.
 
 ---
 ## PR 2168 (KS-1922): GO WITH NOTES (tier 2 stands, no raise)
@@ -119,5 +119,10 @@ Findings
 - `tsc` and eslint not re-run (carried from the seat).
 - Probes (BEFORE/AFTER tables) are my own test files in scratch, never in a PR.
 
-## SPARK SHADOW
-(see section appended below after the run; calibration rows in `calibration.md` in this folder)
+## SPARK SHADOW (rule 2026-10-26), run after this verdict was written (blind)
+Tunnel DOWN at my first two checks (18:03, 18:06: `spark_status.py` printed `tunnel DOWN (TimeoutError)`; I did not start it or touch the box), UP from 18:08. spark_gate.sh exit 0 on all four and spark_review.py valid JSON on all four. Full rows in `calibration.md` in this folder.
+- PR 2166: Spark GO WITH NOTES (mine GO). Recall 1/1 (exit code not pinned), FP 2 of 11 (padding Notes). Facts head 4/4.
+- PR 2168: Spark GO WITH NOTES (match). Recall 0/5, FP 3 of 4. Facts head 6/0, base 2 pass 4 fail (equals mine).
+- PR 2167: Spark GO WITH NOTES (match). Recall 1/3, FP 2 of 6. Facts head 6/0, base 3/3 (equals mine).
+- PR 2169: Spark GO WITH NOTES (match). Recall 0.5/4, FP 2 of 4, one of them a wrong fact (it says the spec and route remain inconsistent; the spec already declares the regex). Facts head 11/0, base 3 pass 8 fail (equals mine).
+- The gate 305 tool gap (no built packages/shared/dist) did NOT hit these four suites (none imports it; the Dev node_modules was passed).
