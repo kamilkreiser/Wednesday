@@ -1,0 +1,141 @@
+diff --git a/Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts b/Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts
+--- a/Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts
++++ b/Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts
+@@ -621,3 +621,5 @@
+         const instance = rowToStepInstance(row);
+         const workflow = await this.findWorkflowByStepId(instance.stepId);
++        // KS-1954: a step whose workflow cannot be found (the workflow reads failed) is left pending, never marked timed_out (terminal).
++        if (!workflow) continue;
+         const stepDef = workflow?.steps.find(s => s.id === instance.stepId);
+diff --git a/Blockchain/Dev/services/transfer/src/__tests__/ks1954-the-escalation-sweep-leaves-a-step-pending-when-its-workflow-cannot-be-read.test.ts b/Blockchain/Dev/services/transfer/src/__tests__/ks1954-the-escalation-sweep-leaves-a-step-pending-when-its-workflow-cannot-be-read.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/transfer/src/__tests__/ks1954-the-escalation-sweep-leaves-a-step-pending-when-its-workflow-cannot-be-read.test.ts
+@@ -0,0 +1,127 @@
++import { describe, it, expect, beforeEach, vi } from 'vitest';
++
++// KS-1954: the escalation sweep (processEscalations) looks up each overdue step's workflow. When the workflow reads fail, the workflow
++// is undefined, so the step is treated as "no escalation configured" and marked timed_out. timed_out is terminal (a later sweep selects
++// only pending steps), so an escalation the step was configured for is lost and running the sweep again cannot repair it. A step whose
++// workflow cannot be found must be left pending. Harness: the real module with ../db replaced by an in-memory model of the two tables
++// (a SELECT of pending step instances, the workflow reads, and the INSERT ... ON CONFLICT upsert that applies a step's new state) and
++// ./delegationService replaced by a plain stand-in. No database.
++const h = vi.hoisted(() => ({
++  workflowReads: 'ok' as 'ok' | 'fail',
++  rows: [] as any[],
++  inserts: [] as unknown[][],
++}));
++
++const WORKFLOW_ROW = {
++  id: 'wf-ks1954',
++  name: 'KS-1954 workflow',
++  workflow_type: 'single',
++  steps: [
++    { id: 'ks1954-esc', order: 0, name: 'Escalating step', approverType: 'user', approverId: 'u-first', requireSignature: false, requireComment: false, requireWalletVerification: false, isParallel: false, timeoutHours: 1, autoEscalate: true, escalateTo: 'boss-user' },
++    { id: 'ks1954-plain', order: 1, name: 'Plain step', approverType: 'user', approverId: 'u-second', requireSignature: false, requireComment: false, requireWalletVerification: false, isParallel: false, autoEscalate: false },
++  ],
++  created_by: 'tester',
++  created_at: new Date('2026-01-01T00:00:00Z'),
++  updated_at: new Date('2026-01-01T00:00:00Z'),
++  is_active: true,
++};
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: async (sql: string, params?: unknown[]) => {
++    const text = String(sql);
++    if (/FROM svc_approval_step_instances/.test(text)) {
++      const pending = h.rows.filter((r) => r.status === 'pending');
++      return { rows: pending, rowCount: pending.length };
++    }
++    if (/FROM svc_approval_workflows/.test(text)) {
++      if (h.workflowReads === 'fail') throw new Error('workflow read failed');
++      return { rows: [WORKFLOW_ROW], rowCount: 1 };
++    }
++    if (/INSERT INTO svc_approval_step_instances/.test(text)) {
++      const p = params || [];
++      h.inserts.push(p);
++      const row = h.rows.find((r) => r.id === p[0]);
++      if (row) {
++        row.status = p[3];
++        row.assigned_to = p[4];
++        row.escalated_to = p[15];
++      }
++      return { rows: [], rowCount: 1 };
++    }
++    return { rows: [], rowCount: 0 };
++  },
++}));
++vi.mock('../services/delegationService', () => ({ delegationService: {} }));
++
++type Mod = typeof import('../services/approvalWorkflowService');
++let mod: Mod;
++const realError = console.error;
++
++function overdue(id: string, stepId: string) {
++  return {
++    id,
++    step_id: stepId,
++    transfer_id: 'transfer-' + id,
++    status: 'pending',
++    assigned_to: 'u-first',
++    assigned_at: new Date('2026-01-01T00:00:00Z'),
++    due_at: new Date('2026-01-01T01:00:00Z'),
++  };
++}
++
++beforeEach(async () => {
++  mod = await import('../services/approvalWorkflowService');
++  h.workflowReads = 'ok';
++  h.rows = [];
++  h.inserts.length = 0;
++  console.error = () => undefined;
++});
++
++describe('KS-1954 the escalation sweep leaves a step pending when its workflow cannot be read', () => {
++  it('RED ks1954 R1 with the workflow reads failing, an overdue escalating step is not counted as timed out', async () => {
++    h.workflowReads = 'fail';
++    h.rows = [overdue('i1', 'ks1954-esc')];
++    const out = await mod.approvalWorkflowService.processEscalations();
++    console.error = realError;
++    expect(out).toEqual({ escalatedCount: 0, timedOutCount: 0 });
++  });
++
++  it('RED ks1954 R2 with the workflow reads failing, the step is not written as timed_out and stays pending', async () => {
++    h.workflowReads = 'fail';
++    h.rows = [overdue('i1', 'ks1954-esc'), overdue('i2', 'ks1954-plain')];
++    await mod.approvalWorkflowService.processEscalations();
++    console.error = realError;
++    expect(h.inserts.filter((p) => p[3] === 'timed_out')).toHaveLength(0);
++    expect(h.rows.map((r) => r.status)).toEqual(['pending', 'pending']);
++  });
++
++  it('RED ks1954 R3 a sweep that could not read the workflows can be repaired by the next sweep, which then escalates', async () => {
++    h.rows = [overdue('i1', 'ks1954-esc')];
++    h.workflowReads = 'fail';
++    await mod.approvalWorkflowService.processEscalations();
++    h.workflowReads = 'ok';
++    const second = await mod.approvalWorkflowService.processEscalations();
++    console.error = realError;
++    expect(second).toEqual({ escalatedCount: 1, timedOutCount: 0 });
++    expect(h.rows[0].assigned_to).toBe('boss-user');
++  });
++
++  it('control ks1954 C1 with the workflow readable, an overdue step set to escalate is escalated to the named user', async () => {
++    h.rows = [overdue('i1', 'ks1954-esc')];
++    const out = await mod.approvalWorkflowService.processEscalations();
++    console.error = realError;
++    expect(out).toEqual({ escalatedCount: 1, timedOutCount: 0 });
++    expect(h.rows[0].status).toBe('pending');
++    expect(h.rows[0].assigned_to).toBe('boss-user');
++    expect(h.rows[0].escalated_to).toBe('boss-user');
++  });
++
++  it('control ks1954 C2 with the workflow readable, an overdue step not set to escalate is marked timed_out', async () => {
++    h.rows = [overdue('i2', 'ks1954-plain')];
++    const out = await mod.approvalWorkflowService.processEscalations();
++    console.error = realError;
++    expect(out).toEqual({ escalatedCount: 0, timedOutCount: 1 });
++    expect(h.rows[0].status).toBe('timed_out');
++  });
++});

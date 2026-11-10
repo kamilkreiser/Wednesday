@@ -1,0 +1,120 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/metering.ts b/Blockchain/Dev/services/originate/src/routes/metering.ts
+--- a/Blockchain/Dev/services/originate/src/routes/metering.ts
++++ b/Blockchain/Dev/services/originate/src/routes/metering.ts
+@@ -117,3 +117,10 @@
+     const from = typeof req.query.from === 'string' ? req.query.from : undefined;
+     const to = typeof req.query.to === 'string' ? req.query.to : undefined;
++    // KS-1875: a repeated from or to (Express parses it as an array) is refused, not read as an open bound.
++    if (Array.isArray(req.query.from) || Array.isArray(req.query.to)) {
++      return res.status(400).json({
++        success: false,
++        error: { code: 'BAD_REQUEST', message: 'from and to may each be given once' },
++      });
++    }
+     if ((from && !ISO_DATE.test(from)) || (to && !ISO_DATE.test(to))) {
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1875-a-repeated-from-or-to-on-metering-usage-is-refused.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1875-a-repeated-from-or-to-on-metering-usage-is-refused.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1875-a-repeated-from-or-to-on-metering-usage-is-refused.test.ts
+@@ -0,0 +1,101 @@
++// KS-1875 (originate routes/metering.ts, GET /api/metering/usage): the handler read `req.query.from` / `req.query.to` only when they are strings, so a REPEATED
++// parameter (?from=a&from=b, which Express parses as an array) was dropped as if it had not been sent, and the call answered 200 with that bound OPEN: a wider read
++// than the caller asked for. A repeated from or to is now refused with the route's own 400 BAD_REQUEST shape and the usage query is never made. The route is read-only.
++// Harness: the real router on a loopback listener; the charge-event service, the authenticator, the gateway-provenance check and the logger are stand-ins (no database).
++const mockGetUsageSummary = jest.fn();
++
++jest.mock('../services/chargeEvents', () => ({
++  getUsageSummary: mockGetUsageSummary,
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    req.user = { userId: 'user-ks1875' };
++    next();
++  },
++}));
++
++jest.mock('../utils/gatewayProvenance', () => ({
++  isGatewayVouched: () => false,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { meteringRouter } from '../routes/metering';
++
++const DEFAULT_TENANT = 'a0000000-0000-4000-8000-000000000001';
++const SUMMARY = { tenantId: DEFAULT_TENANT, byEventType: [], totals: { count: 0, adaTotal: 0, usdTotal: 0 } };
++
++const app = express();
++app.use('/api/metering', meteringRouter);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => server?.close());
++beforeEach(() => {
++  jest.clearAllMocks();
++  mockGetUsageSummary.mockResolvedValue(SUMMARY);
++});
++
++async function getUsage(query: string): Promise<{ status: number | 'NO ANSWER'; body: any }> {
++  try {
++    const res = await fetch(baseUrl + '/api/metering/usage' + query, { signal: AbortSignal.timeout(1500) });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER', body: null };
++  }
++}
++
++describe('KS-1875 GET /api/metering/usage refuses a repeated from or to', () => {
++  it('RED ks1875 R1 a repeated from answers 400 BAD_REQUEST and the usage query is never made', async () => {
++    const r = await getUsage('?from=2026-01-01&from=2026-02-01');
++    expect(r.status).toBe(400);
++    expect(r.body.success).toBe(false);
++    expect(r.body.error.code).toBe('BAD_REQUEST');
++    expect(mockGetUsageSummary).not.toHaveBeenCalled();
++  });
++
++  it('RED ks1875 R2 a repeated to answers 400 BAD_REQUEST and the usage query is never made', async () => {
++    const r = await getUsage('?to=2026-01-01&to=2026-02-01');
++    expect(r.status).toBe(400);
++    expect(r.body.error.code).toBe('BAD_REQUEST');
++    expect(mockGetUsageSummary).not.toHaveBeenCalled();
++  });
++
++  it('RED ks1875 R3 a repeated from next to a single valid to is still refused, not read as an open lower bound', async () => {
++    const r = await getUsage('?from=2026-01-01&from=2026-01-15&to=2026-03-01');
++    expect(r.status).toBe(400);
++    expect(mockGetUsageSummary).not.toHaveBeenCalled();
++  });
++
++  it('control ks1875 C1 a single from and a single to are read and passed to the usage query', async () => {
++    const r = await getUsage('?from=2026-01-01&to=2026-02-01');
++    expect(r.status).toBe(200);
++    expect(r.body.success).toBe(true);
++    expect(mockGetUsageSummary).toHaveBeenCalledTimes(1);
++    expect(mockGetUsageSummary).toHaveBeenCalledWith(DEFAULT_TENANT, '2026-01-01', '2026-02-01');
++  });
++
++  it('control ks1875 C2 no from and no to is an open window and is answered 200', async () => {
++    const r = await getUsage('');
++    expect(r.status).toBe(200);
++    expect(mockGetUsageSummary).toHaveBeenCalledWith(DEFAULT_TENANT, undefined, undefined);
++  });
++
++  it('control ks1875 C3 a single value that is not a date is still refused by the existing guard', async () => {
++    const r = await getUsage('?from=notadate');
++    expect(r.status).toBe(400);
++    expect(r.body.error.code).toBe('BAD_REQUEST');
++    expect(mockGetUsageSummary).not.toHaveBeenCalled();
++  });
++});
