@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-11 10:12 from 264 lesson files (1,139,258 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 218. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-11 10:55 from 265 lesson files (1,141,617 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 219. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7779,4 +7779,18 @@ Related: [[2026-07-31_fully-portable-drive]] (the NAS is a machine/network depen
 1. At boot, `hostname` tells me which machine I am on; on the mini, Tuesday's seat is elsewhere (her chat lines carry seat KamilsMacStudio). Both coordinators still share this repo through git.
 2. A tool that names a host alias, a binary path or a volume is checked on the mini before it is trusted. A `rc 1` from a copy tool is first read as "wrong binary", not "nothing to copy".
 3. In zsh, `log` is a builtin: system logs are read with `/usr/bin/log`. Same family as the wrong-binary trap above.
+
+
+## Wednesday offloads to the DEV-Working NAS too: dated folders under Secuura/Wednesday or General/Wednesday, through the tool only
+`2026-11-11_wednesday-offloads-to-dev-working-nas.md` · preference · 2026-11-11 · status: live · tier: W
+
+**The lesson:** When I need to back up or offload anything (gate scratch, old evidence, a copy before a risky change, files crowding a drive), it goes to the new NAS share `/Volumes/DEV-Working` through `2_Project_Files/tools/nas_offload.sh --client <secuura|general> <topic-kebab> "<why>" <abs source...>`. That writes `Secuura/Wednesday/<YYYY-MM-DD>_<topic>/` or `General/Wednesday/<YYYY-MM-DD>_<topic>/`, verifies sha256 per file, and writes a MANIFEST with REVIEW-AFTER +30 days. Every other rule is Tuesday's lesson [[2026-11-11_nas-dev-working-dated-offload]], applied to my half.
+
+**How to apply:**
+1. **Copy, never move.** Removing a source after VERIFIED is a separate step, inside my own tree only, quarantine rules apply.
+2. **One client per offload; never Datasec.** `Datasec/` on the share is Tuesday's: never read, list or write it. The tool refuses Datasec and TUESDAY sources and secrets (4_Credentials, 3_Access_Keys, .env, keys).
+3. **Clean-up is Kam's word.** Folders past REVIEW-AFTER are listed for him at weekly consolidation; deleted only when he says.
+4. **Two NASes, do not confuse them.** DEV-Working is the NEW NAS (SMB //DotORG@192.168.20.154, mounted by Kam's login; also Backup and Seagate Hub shares). The OLD NAS (ssh alias `nas`, 192.168.8.190; the nightly `nas_push.sh` mirror to /Volumes/Development) did not answer from the Mac mini on 11-11 (ssh timeout; /Volumes/Development not mounted), so the naspush job refuses until Kam says whether to repoint it.
+
+**Built + tested 11-11:** one VERIFIED copy (`General/Wednesday/2026-11-11_workflow-selftest`, 2 files incl. a spaced name) and four refusals (bad --client, existing folder, 4_Credentials source, a Datasec source). The first manifest carried Tuesday's seat label (copied tool); the label was fixed in the tool and corrected in that manifest.
 
