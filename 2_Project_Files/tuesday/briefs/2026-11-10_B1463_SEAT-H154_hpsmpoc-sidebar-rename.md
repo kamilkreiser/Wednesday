@@ -81,10 +81,10 @@ PRIOR-WORK CHECK (above). No message to any human. Jira writes: none. Never dele
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- MAIN (the 40-hex code main that holds pull request 304's squash; the branch point and the value your Step 0 compares): ____
-- LAUNCH WINDOW: ____
-- Hard stop (absolute AEDT, one clock): ____
-- Panes and live seats at the stamp: ____
+- STAMP: Tuesday (s263), 2026-11-10 16:01 AEDT; kit read whole by Tuesday s263; PR 304 merged (squash 22116082, verified at source)
+- MAIN (the 40-hex code main that holds pull request 304's squash; the branch point and the value your Step 0 compares): 2211608276f4cada15b3192c9b8753a5d722a4ef
+- LAUNCH WINDOW: now, one launch_when_cool waiter
+- Hard stop (absolute AEDT, one clock): 18:31 AEDT
+- Panes and live seats at the stamp: Datasec/NexusAI-N118 Datasec/MPS-M111 Datasec/HPSM-POC-H155 Datasec/Security-Composer-C92 Datasec/Security-Composer-C91 Datasec/HPSM-POC-H150 Datasec/HPSM-POC-H152 Datasec/HPSM-POC-H151 Datasec/NexusAI-N117 Datasec/NexusAI-N116 Datasec/NexusAI-N115 (H155's PR #306 is open and owns web/src/content/walkthrough/steps.test.ts only)
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 16:01 by Tuesday s263
