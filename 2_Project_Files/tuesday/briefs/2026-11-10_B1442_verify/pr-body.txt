@@ -1,0 +1,51 @@
+Two tickets from the product owner's 2026-11-10 ruling (build retention and
+ledger audit now; the one migration allowed, gated, not deployed). Four
+commits on main 6b0c5f2c.
+
+1. HPSMPOC-117: the audit table becomes an append-only LEDGER table on
+   SQL Server.
+   - SQL Server migration 20261110003228_LedgerAuditAndFollowUpRetention:
+     renames poc.audit_event to poc.audit_event_pre_ledger (kept, every
+     row), creates poc.audit_event again with the same columns, key, CHECK
+     and indexes WITH (LEDGER = ON (APPEND_ONLY = ON)), copies every row
+     with its own audit_id, reseeds the identity, and THROWs 50117 (rolling
+     back) unless both tables hold the same rows. The EF model of
+     AuditEvent is unchanged. Down copies new rows back before dropping the
+     ledger table.
+   - SQL Server refuses MERGE on a ledger table (Msg 37359), and EF writes
+     two or more identity inserts as one MERGE. The new
+     Persistence/LedgerSafeSqlServerUpdateSqlGenerator.cs writes them as
+     single INSERT ... OUTPUT INTO a table variable, for poc.audit_event
+     only; the SQL Server Assessment and Feedback contexts install it.
+   - SQLite has no ledger: its migration only adds the purge mark column.
+   - infra/sql/api-identity.sql: DENY UPDATE, DELETE on the kept
+     poc.audit_event_pre_ledger (the DENY on poc.audit_event stays).
+     infra/README.md: the measured facts.
+
+2. HPSMPOC-100: retention of a closed client follow-up's contact data.
+   - FollowUp/FollowUpRetentionPurge.cs: closed follow-ups whose closed
+     time plus the configured period has passed have the contact name,
+     message, notes and non-rejected return reasons removed (rows kept,
+     never deleted), follow_up.contact_purged_at set, one audit row each.
+   - The period is configuration only (FollowUp:ContactRetentionMonths);
+     without one the purge refuses to run. No period is shipped and
+     nothing registers the purge to run: it is built and idle. The Admin
+     erase is not built.
+
+New tests: LedgerAuditTests (4, SQL Server; SQLite rows check the plain
+table), FollowUpRetentionPurgeTests (11), FeedbackLedgerInsertTests (1).
+
+Deploy note: nothing is applied to any hosted database by this PR. Once it
+is on main, an API build from main reads follow_up.contact_purged_at, so it
+needs this migration before it serves follow-ups; and the API build before
+this PR cannot write several audit rows in one save once the table is a
+ledger. The migration and the API deploy go together in one window with
+the API stopped, then infra/sql/api-identity.sql is re-run.
+
+Local verification (merge tree equals the head tree): SQLite main 3936 /
+head 3952 passed, 0 failed; SQL Server (CI's image, local container) at
+head: see the gate record; infra validate.sh rc 0 at main and head (317
+tests); idempotent migration script applied fresh, over a main-schema
+database with rows, and re-run: rc 0, rows equal, table APPEND_ONLY.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

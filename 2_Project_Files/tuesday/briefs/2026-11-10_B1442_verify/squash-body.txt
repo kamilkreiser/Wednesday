@@ -1,0 +1,29 @@
+HPSMPOC-117: on SQL Server, poc.audit_event becomes an append-only LEDGER
+table. One SQL Server migration, LedgerAuditAndFollowUpRetention, renames
+the old table to poc.audit_event_pre_ledger (kept, every row), creates
+poc.audit_event again with the same columns, key, CHECK and indexes
+WITH (LEDGER = ON (APPEND_ONLY = ON)), copies every row with its own
+audit_id, reseeds the identity, and THROWs (rolling back) unless both
+tables hold the same rows. The EF model of AuditEvent is unchanged.
+SQL Server refuses MERGE on a ledger table (Msg 37359), so the SQL Server
+Assessment and Feedback contexts write several audit rows of one save as
+single INSERTs (LedgerSafeSqlServerUpdateSqlGenerator).
+infra/sql/api-identity.sql adds DENY UPDATE, DELETE on the kept old table;
+infra/README.md records the measured facts. SQLite has no ledger: its
+migration only adds the purge mark column.
+
+HPSMPOC-100: FollowUpRetentionPurge blanks the contact data of closed
+follow-ups past a configured retention period (contact name, message,
+notes, non-rejected return reasons), marks follow_up.contact_purged_at
+and writes one audit row each. No period is shipped and nothing calls the
+purge yet, so it is idle; it refuses to run without a period. The Admin
+erase is not built.
+
+No migration is applied to any hosted database by this change. The API
+build that includes it needs the migration (follow_up.contact_purged_at)
+before it serves follow-ups.
+
+Tests: LedgerAuditTests (4), FollowUpRetentionPurgeTests (11),
+FeedbackLedgerInsertTests (1).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

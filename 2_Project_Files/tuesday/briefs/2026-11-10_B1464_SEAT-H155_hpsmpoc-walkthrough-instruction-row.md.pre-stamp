@@ -1,0 +1,84 @@
+From Tuesday (Datasec coordinator seat), Datasec / HPSM-POC. **Your STATUS file is the channel and the wrap** (no mail; a launch message that names a mailbox is overridden). A question is a last line `STOPPED: NEEDS TUESDAY <one question>`. Marks: **MEASURED** = printed by a named instrument; **DERIVED** = source reading, not run; **RELAYED** = read in another file; **UNMEASURED** = nobody has.
+
+**LAUNCH WHEN Tuesday stamps it; it needs no other lane to land first.** It runs beside B1463 (H154, the sidebar rename) and beside B1441, B1442 and B1440: the one file it edits is in none of their lists (PARTITION). Tuesday writes the main it branches from into the MAIN slot.
+
+# BRIEF B1464 | SEAT-H155: HPSM-POC, BUILDER (SONNET): TEST-ONLY, HPSMPOC-466, THE WALKTHROUGH PRESENTER-NOTE ROW CATCHES THE FORMS IT MISSES AND ITS EXEMPTION IS NARROWED. NEW BRANCH `b1464/hpsmpoc-walkthrough-instruction-row` FROM THE MAIN SLOT. COMMITS AS NEEDED, PLAIN PUSHES OF THAT REF ONLY, NO PR. NOT MERGED, NOT DEPLOYED.
+
+**BLUF:** one ticket, one test file. **HPSMPOC-466** (Backlog, 0 comments, labels `rec-2026-11-10` and `review-finding`; read by the drafter's REST GET, the sweep file written 14:53:53 AEDT) asks that the unit row in `web/src/content/walkthrough/steps.test.ts` (the `it(` at line 99 at main 6b0c5f2caefedf47c940c9c5287dd9e358ae7cbb, MEASURED by the drafter's `git grep -n`) catch the instruction forms it misses and use a narrower exemption. Jira summary, quoted whole: "Walkthrough presenter-note test: the instruction patterns miss some forms (approve it, score this, saving, submit) and the exemption is wider than needed (Minor, test-only)". Done-when, quoted: "Done when: the row catches those forms, each with a planted string that turns it red, and the exemption is narrowed or recorded as accepted, merged to main (nothing deploys), or the item is recorded as declined." The finding is the review of pull request 303 (finding F2, Minor), RELAYED from the ticket. **No product file changes, no word changes, no behaviour change: a test file.** Branch cut from the MAIN slot. **Model: SONNET** (model-routing.md line 92, row C2, the Claude row for a spelled-out edit; model id `claude-sonnet-5-5` from `0_Brain/dashboard/data/models_latest.json`; the level is written inside the launch line). **Size: XS, target 45 minutes.** Seat id H155. Ports: **none** (a vitest run opens no listener; a listener is a STOP). Your STATUS: `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-11-10_B1464_STATUS.md`. First step is to **re-read main and close with evidence anything main already fixes**; then fix only what is still open.
+
+**Launch (Tuesday), ONE waiter, after the Stamp, level inside the quotes:** `WED_USAGE_STOP=100 bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/launch_when_cool.sh Datasec/HPSM-POC-H155 "CLAUDE_CONFIG_DIR=/Volumes/Datasec_DEV/TUESDAY/4_Credentials/.claude BRIEF_SEAT_LEVEL=sonnet WED_USAGE_STOP=100 bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1464_SEAT-H155_hpsmpoc-walkthrough-instruction-row.md'"`. `brief_seat.sh` defaults to Opus (line 24); the level is written inside the quotes.
+
+## READ WHOLE FIRST (read-only)
+1. The ticket text is quoted above (Jira is not read by this seat). The project's `CLAUDE.md` and `JIRA.md`; `.github/workflows/ci.yml` of your clone (print the `web-unit` predicate and the `web-build` lint and typecheck steps into STATUS).
+2. `web/src/content/walkthrough/steps.test.ts` whole (148 lines at 6b0c5f2c) and `web/src/content/walkthrough/steps.ts` lines 20-47 (the `WalkStep` interface: `cue: string` at line 29, `caveat?: string` at line 33) and line 93 (step 6's cue).
+
+## BINDING HOLD
+HPSM-POC deploys nothing: no `az`, no docker push, no ssh, no HTTP to any hosted, demo, UAT or production host. **You open no PR; Tuesday lands it through CodeQL (never bypass, never dismiss).** **No Jira call at all (read or write).** No message to any human. Never delete (quarantine to `.tools/b1464/_quarantine/`); no force-push, amend, reset or rebase. **Never type `cd`.** No migration, no API change, no package change. This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM); next-phase items are stored and architected only. **No product word changes:** if the widened patterns read a hit in any shipped cue or caveat, that is a STOP (a change to a shipped word is not this lane's), not an edit of `steps.ts`.
+
+## STEP 0: RE-READ MAIN
+1. Clone by URL into `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/.tools/b1464/repo`, check out `origin/main`, print `git rev-parse HEAD`, compare with the MAIN slot (differ: STOP). `git log --oneline -n 12 -- web/src/content/walkthrough/steps.test.ts` printed (at drafting the newest three: 6b0c5f2, 90d30d5, 884fd72, MEASURED by `git log`).
+2. Re-print the row and its neighbours at your main with `awk NR`: at 6b0c5f2c the title is line 99, the three patterns line 100 (`/\bscore the\b/i, /\bapprove the\b/i, /\bsave\b/i`), the exemption line 101 (`text.replace(/\bdo not save\b/gi, "")`), the scan lines 102-106, the controls lines 107-110. Step 6's cue is pinned at `steps.test.ts:67` (`/View only: do not save an answer/`) and its source is `steps.ts:93`.
+3. Status of the ticket at main: `STILL OPEN` / `PART FIXED` / `FIXED AT MAIN`. A fixed item: `CLOSED-WITH-EVIDENCE HPSMPOC-466: <what main shows> | <file:line by grep -n at <sha8>> | <instrument> | <control>` in STATUS, never in Jira.
+
+## THE WORK
+**Property first:** after your change, the row (a) fails for each of these planted instruction forms, alone in a cue or a caveat: `approve it`, `approve your plan`, `score it`, `score this`, `saving`, `submit`, plus the three forms it caught before (`score the`, `approve the`, `save`); (b) exempts only the exact phrase of step 6 (`View only: do not save an answer`), so that `do not save the plan` elsewhere is no longer exempt; (c) reads 0 hits over every shipped cue and caveat. **At least these edits, all inside the one `it(` row (and its title, which says the exemption is "do not save"):**
+1. Widen the instruction patterns. A form that serves the property, for you to confirm or improve (write the final list in STATUS with the reason for each): `score` followed by `the|it|this|that|your|a|an`, `approve` followed by the same list, and `save|saves|saving|submit|submits|submitting` alone. Case-insensitive, `\b`-bounded.
+2. Replace the exemption `\bdo not save\b` by the exact step 6 phrase. The step 6 cue is then proven to pass because it holds exactly that phrase and nothing else that matches (the existing control at lines 109-110 stays in a form that still means this).
+3. **Planted strings that turn the row red, in the test itself:** an assertion that each planted form above gives at least one hit (`toHaveLength`/`toBeGreaterThan(0)` as the file's own style), and that `do not save the plan` gives a hit while the step 6 phrase gives none. Plus the prove-it-can-fail step below.
+**The drafter's measurement (MEASURED, python over `git show 6b0c5f2c:...steps.ts`, control: 14 `id:` steps, 14 string `cue` fields, 8 string `caveat` fields, 22 parsed in all):** with a form like the one in item 1 and the exact step 6 exemption, 0 shipped fields hit, and each planted form hits (control: the old three patterns read 0 on `approve it`, `score it`, `saving`, `submit the form`). You re-measure with your own program on your main; a hit in a shipped field is a STOP as above.
+
+**Prove the row can fail (copies only, never committed):** (i) a copy of `steps.ts` in which one caveat is changed to contain `approve it` makes the row RED, one copy per planted form (6 copies or one parametrised run, listed); (ii) with each new pattern alternative removed in turn, the planted-form assertion for it goes RED (a mutant table in STATUS); (iii) main's old row is the baseline: run it against each planted form in a copy (it reads GREEN on the new forms, which is the finding). Write the table: planted form, old row result, new row result, mutant result.
+
+**No other file.** If the test needs a helper, it lives inside `steps.test.ts`.
+
+## PARTITION (from both sides; the property: you edit a path only if an OWNS line names it)
+**OWNED by you:** `web/src/content/walkthrough/steps.test.ts` only.
+
+**NOT yours:**
+- **`web/src/content/walkthrough/steps.ts`** and every other file in `web/src/content/**`: words are not this lane's.
+- **B1463 (H154, sidebar rename)**: `GlobalNav.tsx`, `GlobalNav.test.ts`, `AppShell.sidebar.test.tsx`, `AssessmentsHub.myreadiness.test.tsx`, `web/e2e/shell-sidebar.spec.ts` and two comment lines. `steps.test.ts:146` pins the walkthrough group label (already the new string) and is not changed by either lane.
+- **B1440 / pull request 304 (H150)**: `web/src/components/**` (its 13 files named in its kit), `web/src/server/mock/**`. **B1441 (H151), B1442 (H152)**: `api/**`, `infra/sql/**`, `infra/README.md`. **R203 (B1462)**: ANALYSIS repository and Jira only.
+- **Owned by no lane:** every path in no OWNS line. A need for one: `NEEDS-SHARED <path> <why>` and continue.
+- **Open PRs:** re-read `gh api -X GET repos/datasecau/HPSM-POC/pulls?state=open` at Step 0 and before every push (at 14:58 AEDT: #304 only, whose 13 files do not include yours, MEASURED); a file of yours in one is named and left.
+
+**Any other shape:** prove it by an OWNS line or STOP that item with `NEEDS-SHARED <path> <why>`.
+
+## CHECKS (print each predicate from your clone's `ci.yml`)
+- `web-unit`: `npm test` (`vitest run`), whole, at main and at your head, compared by program (files / passed / failed / skipped; the expected difference is your new rows only, by name; 0 removed; 0 status changes).
+- `web-build` steps that read a test file: `npm run lint` (`eslint --max-warnings=0`) and typecheck (`next typegen && tsc --noEmit`) over your head; `npm run build` unchanged by a test file (say so, with `git diff --name-only`).
+- **A gate runs every CI job whose TESTS READ the changed files, not only the jobs whose paths were touched:** `infra/tests/test_hidden_characters.py` scans every tracked file; run the infra job's step that runs it, and print a scan of your added lines with a planted U+200B control that fires. Playwright shards: no e2e spec reads `steps.test.ts` (MEASURED by the drafter: `git grep -l -F 'steps.test'` over `web/e2e`, `web/scripts`, `.github` reads 0; the two `walkthrough/steps` hits in `web/e2e` import `steps.ts`, which this lane does not change); say so with your own count and control.
+- api jobs: not affected (a `web/` test file only); say so with `git diff --name-only`.
+- **New-words scan:** a test file adds no product word; the added string literals are test strings (planted forms). List them. Name scan over your added lines and commit messages: UNDERSCORE-AWARE, pattern `(?<![A-Za-z])<name>(?![a-z])` for each ban-list first name, control plants `_by_<name>_` and must fire.
+- **PRIOR-WORK CHECK (standing line):** `git log --oneline -n 12 -- web/src/content/walkthrough/steps.test.ts`, `git grep -n` for `score the`, `approve the` and `do not save` at main, the open PRs, and "Jira not searched". A READY without `## PRIOR WORK` is returned unread.
+
+## HOUSEKEEPING
+- Project dir `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC`; never `2_Project_Files/` or another seat's `.tools/b1NNN/`.
+- Clone by URL `git@github.com:datasecau/HPSM-POC.git`, key `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/3_Access_Keys/github_deploy_rw` as repo-local `core.sshCommand`. `GH_CONFIG_DIR=/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.gh-config`, `-X GET` only.
+- STATUS: FIRST line `PROGRESS B1464: b1464/hpsmpoc-walkthrough-instruction-row HOLD`; `WORKING: <part>` lines; sections `## PRIOR WORK`, `## CLOSED WITH EVIDENCE`, `## HELD`, `## NOT RUN`, `## FOR THE RECORDS SEAT`, the pattern list with reasons, the planted-form table, the mutant table, each check with predicate and counts. **LAST line on finish exactly `READY B1464: <head sha40>`** (equal to `git ls-remote` of the branch), else `STOPPED: NEEDS TUESDAY <one question>`.
+- HARD STOP: the Stamp's Hard stop slot (absolute AEDT, Tuesday writes it). Push as soon as the row is green.
+- Commits: plain ASCII, no B-numbers, no person names, no seat ids; end with your session's attribution line. `git push origin b1464/hpsmpoc-walkthrough-instruction-row` only.
+- Shell: no `cd`; absolute single-quoted paths; `git -C`; `python3 -I -B`; `/usr/bin/grep -i` with a positive control for every count.
+
+## REFUSE AT ONCE (last line `STOPPED: NEEDS TUESDAY`, one question; items 1 and 2 before the clone)
+1. `/usr/bin/grep -c -E '_''_''_''_'` of your copy prints 0 on the STAMPED copy (the unstamped copy reads 5: the four Stamp slots and the last line; control: a planted line adds 1); `/usr/bin/grep -o -E '@[A-Z_0-9]+@' <copy> | wc -l` prints 0; the MAIN slot holds 40 hex characters; the last line is `READ-WHOLE-BY-TUESDAY: DONE ...`.
+2. `tmux display -p -t "$TMUX_PANE" '#{@cockpit_name}'` is not `Datasec/HPSM-POC-H155` (control `-t %1` differs); `pwd -P` is not `/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC`.
+3. `gh auth status` fails under the project's `GH_CONFIG_DIR`, or `pulls/99999` is not 404 (control: `pulls?state=open` 200).
+4. The branch `b1464/hpsmpoc-walkthrough-instruction-row` exists on origin, your clone is dirty, or main differs from the MAIN slot.
+5. `df -g /Volumes/Datasec_DEV` under 25 GiB; you start a listener.
+6. A file you must change is owned by another seat or in an open PR: STOP that item (`NEEDS-SHARED`).
+7. Any password, token or cookie value visible: "a value was shown", first in STATUS, STOP.
+
+## HOLDS
+No change to `steps.ts` or any shipped word. No second file. No Jira write. No claim the walkthrough text is "safe" beyond the scan you ran (cue and caveat fields only, the `say`, `key` and `purpose` fields are outside the ticket). If the widened row turns a shipped field red: STOP with that field's id and text, do not weaken the pattern to hide it.
+
+## STANDING LINES
+PRIOR-WORK CHECK (above). No message to any human. Jira writes: none. Never delete (quarantine). This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM); next-phase items are stored and architected only. Landing: "The landing form is a head-pinned squash" (CLARIFICATIONS at the analysis clone's head, line 3617, printed by the drafter's `git grep -n -i -F` at 14:58 AEDT); Tuesday lands, you never merge.
+
+## Stamp
+Tuesday stamps; leave every slot as it stands.
+- STAMP: ____
+- MAIN (the 40-hex code main the branch is cut from and your Step 0 compares): ____
+- LAUNCH WINDOW: ____
+- Hard stop (absolute AEDT, one clock): ____
+
+READ-WHOLE-BY-TUESDAY: ____

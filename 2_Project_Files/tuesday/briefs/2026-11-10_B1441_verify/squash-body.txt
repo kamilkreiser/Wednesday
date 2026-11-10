@@ -1,0 +1,26 @@
+Customers (HPSMPOC-324): a customer name in which no character is visible
+(only U+200B, U+2060, the Braille blank, a Hangul filler, a lone combining
+mark and so on) was accepted and stored. Create and rename now refuse it
+with the code and words a blank name already gets: 422,
+customer.name-blank, field name, "name is blank." The shape check still
+runs first and answers 400 customer.name-invalid for the control and
+text-direction set, so each input meets one rule and one code.
+
+The list of characters that show nothing moves from the Feedback module
+to one public class in Assessment, VisibleText, because Feedback
+references Assessment and not the other way round.
+FeedbackEndpoints.IsInvisible forwards to it, so the comment, file-name
+and customer-name rules read one list; a test compares the two over every
+Unicode scalar value.
+
+Feedback files (HPSMPOC-257): the device-name check (CON, LPT1 and so on)
+reads the name through FoldWidthAndSpace instead of the full
+compatibility form (NFKC). Fullwidth forms U+FF01 to U+FF5E become ASCII,
+U+3000 and every other white-space character become a plain space, and
+nothing else changes. LPT or COM with a superscript 4 or 0 is now
+accepted; fullwidth CON, CON plus a no-break space, COM plus superscript
+one, and CON plus a fullwidth full stop stay refused.
+
+No migration, no new problem code, no new message text.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,36 @@
+Two API changes for the product owner's 2026-11-10 ruling on hidden
+characters (option a), two commits on main 6b0c5f2c.
+
+1. HPSMPOC-324: customer names with nothing visible are refused.
+   api/src/HpsmPoc.Modules.Assessment/Endpoints/CustomerEndpoints.cs,
+   create and rename: the blank check reads
+   VisibleText.HasNoVisibleCharacter(name) instead of
+   string.IsNullOrWhiteSpace(name). Same answer as a blank name: 422,
+   customer.name-blank, field name, "name is blank." The shape check
+   still answers 400 customer.name-invalid first for its control and
+   text-direction set, so no input gets two codes.
+   The classifier moves verbatim from FeedbackEndpoints.IsInvisible to the
+   new public class api/src/HpsmPoc.Modules.Assessment/Endpoints/VisibleText.cs
+   (Feedback references Assessment, so Assessment cannot read Feedback);
+   FeedbackEndpoints.IsInvisible is now a one-line forwarder.
+
+2. HPSMPOC-257: feedback file names fold width and white space only.
+   api/src/HpsmPoc.Modules.Feedback/Endpoints/FeedbackFiles.cs: the second
+   device stem is read through the new FoldWidthAndSpace (U+FF01-U+FF5E to
+   ASCII, U+3000 and other white space to a plain space) instead of NFKC.
+   LPT + U+2074 and COM + U+2070 are accepted; fullwidth CON, CON + U+00A0,
+   COM + U+00B9 and CON + U+FF0E + txt stay refused.
+
+New tests: Hpsmpoc324HiddenCustomerNameTests (78 cases),
+Hpsmpoc324SharedClassifierTests (15), Hpsmpoc257FileNameTests (21),
+Hpsmpoc257FoldWidthAndSpaceTests (27). No migration, no contract, web,
+infra or workflow change.
+
+Local verification (merge tree equals the head tree): Release build 0
+warnings; SQLite test run main 3914 passed / 0 failed / 22 not run (Azurite),
+head 4055 / 0 / 22; the endpoint rows fail with the fix removed (35 failed);
+infra hidden-character scan 14/14 OK at main and head; the touched classes
+and the feedback attachment and customer classes pass on SQL Server 2025
+(CI's pinned image). The whole SQL Server shards run here on CI.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
