@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-11 09:39 from 263 lesson files (1,137,454 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 217. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-11 10:12 from 264 lesson files (1,139,258 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 218. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7768,4 +7768,15 @@ The never-wait rule is not per-project. When the priority project's lanes are al
 **Measured at setup (2026-11-11 09:00):** mounted smbfs, 11 TiB, 1% used, writable (probe written and read back, filed at `Datasec/Tuesday/_probes/`). Tool exercised before use: one verified copy (`2026-11-11_workflow-selftest`, 4 files incl. nested and spaced names, manifest checked) and four refusals (existing folder, `.env` inside a source, a non-kebab topic, a `4_Credentials` path). Not exercised: the sha256-mismatch path (it would need a file changed mid-copy).
 
 Related: [[2026-07-31_fully-portable-drive]] (the NAS is a machine/network dependency: PORTABILITY + doctor), [[2026-08-13_shared-bus-tag-filter-or-leak]] (client isolation on shared things), [[2026-08-07_a-check-that-cannot-fail]] (the mount check).
+
+
+## Wednesday's seat is the always-on Mac mini — the laptop travels
+`2026-11-11_wednesday-lives-on-the-mac-mini.md` · preference · 2026-11-11 · status: live · tier: W
+
+**The lesson:** From 2026-11-11, Wednesday (Secuura + general) runs on Kam's always-on Mac mini, not the laptop, so she never goes dark when he takes the laptop away. Treat the mini as the home machine: its machine-local dependencies are what PORTABILITY.md and doctor.sh must cover, and its local aliases are what my tools must resolve.
+
+**How to apply:**
+1. At boot, `hostname` tells me which machine I am on; on the mini, Tuesday's seat is elsewhere (her chat lines carry seat KamilsMacStudio). Both coordinators still share this repo through git.
+2. A tool that names a host alias, a binary path or a volume is checked on the mini before it is trusted. A `rc 1` from a copy tool is first read as "wrong binary", not "nothing to copy".
+3. In zsh, `log` is a builtin: system logs are read with `/usr/bin/log`. Same family as the wrong-binary trap above.
 
