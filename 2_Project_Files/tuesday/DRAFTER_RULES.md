@@ -61,6 +61,7 @@ names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned
   kit (10-23 SQL Server rows). HPSM-POC Api test rows ask "does it run on SQL Server as CI does?".
 - **Landing:** the seat pushes its own branch only; Tuesday opens and lands PRs through CodeQL (Datasec org ruleset; never
   bypass, never dismiss an alert). Read the project's landing rule (squash vs merge commit) and quote it with its source.
+- **Git identity is never overridden.** Every kit that lets a seat commit, cherry-pick or merge says: the repo's own configured identity only; never `git -c user.name/user.email`, never `GIT_AUTHOR_*` / `GIT_COMMITTER_*`; and its READY section prints `git log --format='%h %ae | %ce'` for every new commit, each equal to the repo's configured email. (Added 2026-11-11 by s265: R208 overrode the identity on a cherry-pick in the MPS root records repo and commit 9e847dc4 carries Kam's personal address as committer in a Datasec repo; contained only because that repo has no remote.)
 - **Records seats** land their own records branch; a ref write in a project repo is never Tuesday's (10-23 self-land row).
 - **Model row** from `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/specs/model-routing.md` (Sonnet first on this seat
   unless the table says Opus), with the line number; the model id from
