@@ -1,8 +1,8 @@
-RD-605 and RD-544: four workflows, one new script and two new test files.
+- RD-605: actions/checkout and actions/setup-node move from v4 (Node 20) to v7 (Node 24) in build.yml, deploy.yml, npm-audit.yml and arm-ttk.yml. deploy-demo.yml is not changed.
+- RD-544: Build runs `node scripts/assert-browser.js` after Lint and before the verify gate. The script asks the browser guard's own launcher for a browser and fails as one setup error if none launches. It installs nothing.
+- Tests: rd544-assert-browser-in-ci (7 cells) and rd605-ci-action-node24 (7 cells). With the change removed, 11 of 14 fail.
+- Known residue: deploy-demo.yml still pins checkout@v4, and deploy.yml's upload-artifact@v4 is also a Node 20 action. Both are left for a later change.
 
-- actions/checkout and actions/setup-node pinned to v7 (Node 24) in build, deploy, npm-audit and arm-ttk; deploy-demo.yml untouched.
-- Build runs scripts/assert-browser.js before the verify gate, so a runner with no Chromium-family browser fails as one setup error.
-
-New cells: 14. Suite size after this merge: main plus 14 tests and 2 suites; the counts file is regenerated at landing.
+Suite: +14 tests, +2 suite(s); the counts file is regenerated in this branch before landing.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,5 +1,6 @@
-RD-720, test code only: rd412-smtp-route cells each save the mail config they need, and a new control runs every cell alone.
+- RD-720: four cells of __tests__/rd412-smtp-route.test.js (GET, send, wrong password, CR/LF sender) relied on the first cell having saved the mail config. Each now saves the config itself, so a `jest -t` run of any single cell is trustworthy.
+- New control __tests__/rd720-rd412-cells-pass-alone.test.js runs the real file once per cell with -t and requires exactly one passed and none failed. A count cell catches a cell added without being listed. With the old rd412 file, exactly cells 2, 3, 4 and 6 fail.
 
-New cells: 8. Suite size after this merge: main plus 8 tests and 1 suite; the counts file is regenerated at landing.
+Suite: +8 tests, +1 suite(s); the counts file is regenerated in this branch before landing.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

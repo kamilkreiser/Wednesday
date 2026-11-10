@@ -1,5 +1,8 @@
-RD-731, test code only: trackedFiles() in helpers/image-manifest answers git ls-files in a checkout and walks the tree in an extract; thirteen suites use it, and a new control file holds it.
+- RD-731: a trackedFiles() helper in __tests__/helpers/image-manifest.js answers with `git ls-files` in a checkout, unchanged. Only when git says "not a git repository" (exit 128) does it walk the tree; every other failure is thrown.
+- Thirteen suites that called `git ls-files` directly now use it, so they pass from a `git archive` extract. Measured from an extract: 179 failing cells at main, 0 in these suites at the head.
+- Not covered here: __tests__/rd503-r2-doc-claims-against-product.test.js (10 extract-only red cells) belongs to another change.
+- New control __tests__/rd731-tracked-files.test.js (4 cells).
 
-New cells: 4. Suite size after this merge: main plus 4 tests and 1 suite; the counts file is regenerated at landing.
+Suite: +4 tests, +1 suite(s); the counts file is regenerated in this branch before landing.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

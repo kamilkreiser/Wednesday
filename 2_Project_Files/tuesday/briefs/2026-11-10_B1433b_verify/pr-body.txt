@@ -1,0 +1,14 @@
+What changes (2 files, backend/learningManager.js and one new test file):
+
+- RD-798, the remainder: learnFromInteraction() printed the user's ambiguous query and the learned description raw in two console.log lines (CodeQL js/log-injection alerts 152 and 153, learningManager.js lines 125 and 153 at the base). Each user-derived slot now goes through logSafe (backend/logSafe.js): CR and LF are removed, the line and paragraph separators and other control characters become visible escapes, and values over 500 characters are cut with a marker. Ordinary text prints byte-identical; the stored entry keeps the raw values.
+- Of the 44 alerts RD-798 lists, 42 already read fixed on main (17 before and 25 at the earlier log-sinks landing). This change addresses the last 2 (152 and 153). Whether CodeQL closes them is read on main after landing.
+
+Tests: __tests__/rd798-learning-manager-log-lines.test.js adds 8 cells (5 behaviour/shape cells, 3 controls).
+
+Counts: the suite grows by 8 tests and 1 suite. scripts/verify-expected-counts.json is not changed on this branch; it is regenerated at landing on the tree that will be merged.
+
+Deploy: this merge starts a Deploy demo run on main (backend/ and __tests__/ are not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
+
+Hosted CodeQL is read on the PR and on main after landing.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

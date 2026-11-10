@@ -1,16 +1,12 @@
-What changes (2 files, test code only):
+What changes:
 
-- __tests__/rd412-smtp-route.test.js: the four cells that relied on the first cell having saved the mail config (GET read-back, test send, wrong password, CR/LF sender) now save it themselves through the same route.
-- New __tests__/rd720-rd412-cells-pass-alone.test.js (8 cells): runs the real file once per cell with jest -t set to that cell's exact title and requires exactly one passed and none failed, plus a count cell that fails when a cell is added to rd412 without being listed.
+- RD-720: four cells of __tests__/rd412-smtp-route.test.js (GET, send, wrong password, CR/LF sender) relied on the first cell having saved the mail config. Each now saves the config itself, so a `jest -t` run of any single cell is trustworthy.
+- New control __tests__/rd720-rd412-cells-pass-alone.test.js runs the real file once per cell with -t and requires exactly one passed and none failed. A count cell catches a cell added without being listed. With the old rd412 file, exactly cells 2, 3, 4 and 6 fail.
 
-With the rd412 change removed, exactly the alone-runs of cells 2, 3, 4 and 6 (0-based) are red; at the head all 8 pass. No product file changes.
+Suite size: +8 tests and +1 suite(s). Measured on the merge with main 849b808c: 5501 tests / 327 suites, 0 failed. scripts/verify-expected-counts.json is regenerated on this branch at landing.
 
-Note: the new file starts 7 nested jest processes, each booting the real server, so it adds wall-clock time to the gate.
+Deploy: this merge starts a Deploy demo run on main (__tests__/ are not in its paths-ignore). Both of its jobs are gated on CI_DEPLOY_ENABLED and should read skipped. Nothing is deployed.
 
-Counts: the suite grows by 8 tests and 1 suite. scripts/verify-expected-counts.json is not changed on this branch; it is regenerated at landing.
-
-Deploy: this merge starts a Deploy demo run on main (__tests__/ is not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
-
-Hosted CodeQL is read on the PR and on main after landing.
+Hosted CI and CodeQL are read on this pull request and on main after landing.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,16 +1,14 @@
-What changes (7 files):
+What changes:
 
-- RD-605: actions/checkout and actions/setup-node move from v4 (Node 20) to v7 (Node 24) in build.yml, deploy.yml, npm-audit.yml and arm-ttk.yml. deploy-demo.yml is NOT changed: its actions/checkout@v4 (line 58) stays open for a later change to that file.
-- RD-544: new scripts/assert-browser.js asks for a browser through the open-site banner guard's own launcher (tests/e2e/open-access-banner-guard.js launchBrowser) and fails with one setup error when none launches. build.yml runs it after Lint and before the verify gate, with no continue-on-error. It installs nothing, so the browser the guard's cells drive is unchanged.
+- RD-605: actions/checkout and actions/setup-node move from v4 (Node 20) to v7 (Node 24) in build.yml, deploy.yml, npm-audit.yml and arm-ttk.yml. deploy-demo.yml is not changed.
+- RD-544: Build runs `node scripts/assert-browser.js` after Lint and before the verify gate. The script asks the browser guard's own launcher for a browser and fails as one setup error if none launches. It installs nothing.
+- Tests: rd544-assert-browser-in-ci (7 cells) and rd605-ci-action-node24 (7 cells). With the change removed, 11 of 14 fail.
+- Known residue: deploy-demo.yml still pins checkout@v4, and deploy.yml's upload-artifact@v4 is also a Node 20 action. Both are left for a later change.
 
-Tests: __tests__/rd605-ci-action-node24.test.js (7 cells) holds the pins in every workflow except deploy-demo.yml; __tests__/rd544-assert-browser-in-ci.test.js (7 cells) holds the check, the command line with Playwright stubbed, and the step's place in build.yml. With the change removed, 4 of 7 and 7 of 7 cells are red.
+Suite size: +14 tests and +2 suite(s). Measured on the merge with main 849b808c: 5507 tests / 328 suites, 0 failed. scripts/verify-expected-counts.json is regenerated on this branch at landing.
 
-Not measured before this PR: the new action majors and the new step on a hosted runner. This PR's own Build, npm-audit, gitleaks and arm-ttk runs are that proof (arm-ttk runs because its workflow file changed).
+Deploy: this merge starts a Deploy demo run on main (.github/workflows/ (build, deploy, npm-audit, arm-ttk), scripts/ and __tests__/ are not in its paths-ignore). Both of its jobs are gated on CI_DEPLOY_ENABLED and should read skipped. Nothing is deployed.
 
-Counts: the suite grows by 14 tests and 2 suites. scripts/verify-expected-counts.json is not changed on this branch; it is regenerated at landing.
-
-Deploy: this merge starts a Deploy demo run on main (.github/workflows/, scripts/ and __tests__/ are not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. deploy.yml is workflow_dispatch only and is not started. Nothing is deployed.
-
-Hosted CodeQL is read on the PR and on main after landing.
+Hosted CI and CodeQL are read on this pull request and on main after landing.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

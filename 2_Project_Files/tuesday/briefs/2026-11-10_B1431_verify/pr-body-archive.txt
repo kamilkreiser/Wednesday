@@ -1,16 +1,14 @@
-What changes (15 files, test code only):
+What changes:
 
-- __tests__/helpers/image-manifest.js gains trackedFiles(root, pathspec): in a checkout it returns exactly git ls-files; only when git says "not a git repository" (exit 128) does it walk the tree (no top-level .git or node_modules, no zz-rd<N>-probe* plants the suites create). Every other failure is thrown.
-- Thirteen suites that called git ls-files directly now call it: auth-gate-fail-closed, image-content-exposure, rd385, rd403, rd411, rd418, rd429, rd442, rd447, rd503-shipped-docs, rd698, rd699, wizard-example-identifiers.
-- New __tests__/rd731-tracked-files.test.js (4 cells) holds the helper: equal to git in a checkout (pathspec too), the walk, the pathspec filter, and the failures that must throw.
-- __tests__/rd503-r2-doc-claims-against-product.test.js is NOT changed here (another change set owns it); it still fails from an extract.
+- RD-731: a trackedFiles() helper in __tests__/helpers/image-manifest.js answers with `git ls-files` in a checkout, unchanged. Only when git says "not a git repository" (exit 128) does it walk the tree; every other failure is thrown.
+- Thirteen suites that called `git ls-files` directly now use it, so they pass from a `git archive` extract. Measured from an extract: 179 failing cells at main, 0 in these suites at the head.
+- Not covered here: __tests__/rd503-r2-doc-claims-against-product.test.js (10 extract-only red cells) belongs to another change.
+- New control __tests__/rd731-tracked-files.test.js (4 cells).
 
-In a checkout the suites read the same list as before. From an extract of main the 14 named suites have many red cells; with this change only rd503-r2's remain.
+Suite size: +4 tests and +1 suite(s). Measured on the merge with main 849b808c: 5497 tests / 327 suites, 0 failed. scripts/verify-expected-counts.json is regenerated on this branch at landing.
 
-Counts: the suite grows by 4 tests and 1 suite. scripts/verify-expected-counts.json is not changed on this branch; it is regenerated at landing.
+Deploy: this merge starts a Deploy demo run on main (__tests__/ are not in its paths-ignore). Both of its jobs are gated on CI_DEPLOY_ENABLED and should read skipped. Nothing is deployed.
 
-Deploy: this merge starts a Deploy demo run on main (__tests__/ is not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
-
-Hosted CodeQL is read on the PR and on main after landing.
+Hosted CI and CodeQL are read on this pull request and on main after landing.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

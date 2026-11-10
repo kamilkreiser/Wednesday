@@ -1,0 +1,11 @@
+# Head-pinned MERGE COMMIT (never squash, never rebase). Gated head c79e2e88f950689f16d17c860616a89b5a3dd7b8, main at gate 849b808c567e4d31d78e2d50b582540ae1920c67.
+# Land in the order given in ORDER.md. Before landing, re-read main: if main moved onto any path this branch changes, re-gate.
+# 1. Counts commit on the branch (the coordinator's step; no lane writes it): in a non-dot tree of this branch merged with the current main,
+#    run npm run verify -- --maxWorkers=2 --update-counts, then plain verify, which must print VERDICT: PASS. Commit ONLY scripts/verify-expected-counts.json
+#    (measured here on main 849b808c: tests 5507 / suites 328) and push it plainly. Call the new head <COUNTS_SHA>.
+#    Read back: git diff --name-only c79e2e88f950689f16d17c860616a89b5a3dd7b8 <COUNTS_SHA> prints exactly scripts/verify-expected-counts.json.
+# 2. Open the PR (base main, head b1431/nexusai-t-ci-actions-browser-assert) with pr-title-ci.txt and pr-body-ci.txt; wait for hosted Build, gitleaks, npm-audit and CodeQL to be green.
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh pr create --repo datasecau/Reporting_Dashboard_Au --base main --head b1431/nexusai-t-ci-actions-browser-assert --title "$(cat '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1431_verify/pr-title-ci.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1431_verify/pr-body-ci.txt'
+# 3. Merge, pinned to the counts-commit head:
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh pr merge <PR> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit <COUNTS_SHA> --subject "$(cat '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1431_verify/merge-subject-ci.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-10_B1431_verify/merge-body-ci.txt'
+# After: the Deploy demo run this merge starts must read skipped on both jobs (CI_DEPLOY_ENABLED gate).
