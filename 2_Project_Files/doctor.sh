@@ -1273,6 +1273,15 @@ for s in json.load(open(sys.argv[1])).get('stale_pins',[]):
   fi
 fi
 echo
+# --- DEV-Working NAS (PORTABILITY 27; Kam 2026-11-11: backups/offloads go there, dated): optional, so a WARN only.
+# A plain path test cannot fail correctly (an unmounted /Volumes/DEV-Working may exist as an empty local dir),
+# so the check is the mount table: an smbfs entry on that exact mount point.
+if mount | /usr/bin/grep -q " on /Volumes/DEV-Working (smbfs"; then
+  ok "DEV-Working NAS mounted (offloads: tuesday/tools/nas_offload.sh -> Datasec/Tuesday/<date>_<topic>/)"
+else
+  warn "DEV-Working NAS not mounted" "offloads unavailable until Kam mounts it (Finder > Go > Connect to Server) — see PORTABILITY.md 27"
+fi
+
 if [ "$HARD_FAIL" = "1" ]; then
 
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."

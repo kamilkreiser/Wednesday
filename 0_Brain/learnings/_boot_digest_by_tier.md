@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-11 05:30 from 262 lesson files (1,134,358 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 216. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-11 09:02 from 263 lesson files (1,137,454 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 217. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7750,4 +7750,22 @@ The never-wait rule is not per-project. When the priority project's lanes are al
 1. Quiet hours govern SPEECH only (no voice 23:00-06:00, `speak.sh` enforces it); they never govern work, launches, merges or deploys Kam has authorised.
 2. "Unless you need a break" is real: the honest form of a break is a rotation at the context band or a stated reason, never an idle seat.
 3. Scope: standing, no expiry (he said "going forward"); it extends [[2026-08-28_overnight-is-working-time]] from the agents to this coordinator seat itself.
+
+
+## Backups and offloads go to the DEV-Working NAS, in a dated, named folder, so they can be cleaned up
+`2026-11-11_nas-dev-working-dated-offload.md` · preference · 2026-11-11 · status: live · tier: W
+
+**Kam's words, verbatim:** *"there is a new NAS on the network with a folder called DEV-Working. If you need to backup or offload anything there you can use that drive. Put it in a logical folder and with a date so we can periodically clean this up. please save this as an ongoing workflow"*
+
+**The rule:**
+1. Whenever this seat needs to back up or offload anything (large evidence, old worktrees, a copy before a risky change, files crowding a drive), it goes to `/Volumes/DEV-Working/Datasec/Tuesday/<YYYY-MM-DD>_<topic-kebab>/` through **`2_Project_Files/tuesday/tools/nas_offload.sh <topic> "<why>" <source...>`**. That tool makes the dated folder, copies with rsync, verifies every file by sha256, and writes `MANIFEST.txt` (date, why, sources, per-file hashes, **REVIEW-AFTER = +30 days**). Do not hand-copy: the manifest is what makes the clean-up possible.
+2. **Client isolation:** this seat writes only under `DEV-Working/Datasec/`. The share also holds `Secuura/` (the Wednesday seat's): never read, list or write it. A folder per client is hard rule #2 applied to a shared drive.
+3. **Copy, never move.** The tool never deletes the source. Removing a source after an offload is a separate step, done only after `VERIFIED`, and only where deletion is otherwise allowed (inside this seat's own tree; never in a project folder, which is read-only to this seat; quarantine rules still apply).
+4. **No secrets on the NAS:** nothing from `4_Credentials/` or `3_Access_Keys/`, no `.env`, keys or certificates (the tool refuses them).
+5. **Clean-up:** a folder past its REVIEW-AFTER date is listed for Kam at a weekly consolidation (or when he asks), and deleted only on his word. Kam's purpose is periodic clean-up, so the dates and manifests are the point, not decoration.
+6. **Mount is a floating pointer:** the share is SMB from the NAS (`//DotORG@192.168.20.154/DEV-Working`, mounted by Kam's login). Before an offload, the tool checks the share is really mounted (smbfs), because an unmounted `/Volumes/DEV-Working` path would quietly write onto the local disk. If it is absent, say so and ask Kam to mount it; never create the path by hand.
+
+**Measured at setup (2026-11-11 09:00):** mounted smbfs, 11 TiB, 1% used, writable (probe written and read back, filed at `Datasec/Tuesday/_probes/`). Tool exercised before use: one verified copy (`2026-11-11_workflow-selftest`, 4 files incl. nested and spaced names, manifest checked) and four refusals (existing folder, `.env` inside a source, a non-kebab topic, a `4_Credentials` path). Not exercised: the sha256-mismatch path (it would need a file changed mid-copy).
+
+Related: [[2026-07-31_fully-portable-drive]] (the NAS is a machine/network dependency: PORTABILITY + doctor), [[2026-08-13_shared-bus-tag-filter-or-leak]] (client isolation on shared things), [[2026-08-07_a-check-that-cannot-fail]] (the mount check).
 

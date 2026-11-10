@@ -537,3 +537,9 @@ Installed 2026-11-04 ~20:0x AEDT by Secuura Seat R 85th on Wednesday's ruling (`
 - **Why:** MPS CI pins Node 24 (`ci.yml:58`); the M5 Studio has only Homebrew Node 26. Three MPS builders correctly refused v26 and sat STOPPED ~3 h on 2026-11-10 before anyone noticed (ledger row 11-10 s262).
 - **Bring-up on a new machine:** `curl -fsS https://nodejs.org/dist/latest-v24.x/SHASUMS256.txt`, download the darwin-arm64 tarball, compare sha256, `tar -xzf` into `2_Project_Files/tools/`. Seats use it by prefixing `PATH=<that dir>/bin:$PATH` per command (addendum `tuesday/briefs/2026-11-10_MPS-NODE24_ADDENDUM_B1400-B1401-B1409.md`).
 - **Broader rule:** after any machine move, check every toolchain the Datasec CI files pin (node, dotnet) against the machine before launching builders.
+
+## 27. DEV-Working NAS share — NETWORK, Tuesday seat (2026-11-11)
+- **What:** SMB share `//DotORG@192.168.20.154/DEV-Working` mounted at `/Volumes/DEV-Working` by Kam's macOS login (Finder > Go > Connect to Server). Not on any drive; it lives on the home network.
+- **Why:** Kam, 2026-11-11: backups and offloads go there, in a logical, dated folder, so they can be cleaned up periodically. This seat writes only under `DEV-Working/Datasec/Tuesday/<YYYY-MM-DD>_<topic>/`, through `2_Project_Files/tuesday/tools/nas_offload.sh` (copy + sha256 verify + MANIFEST with a REVIEW-AFTER date). `Secuura/` on the same share is the Wednesday seat's: never touched from here.
+- **Bring-up on a new machine:** connect to the share as Kam's user; `doctor.sh` warns "DEV-Working NAS not mounted" until it is. Optional: nothing at boot depends on it.
+- **Lesson:** `0_Brain/learnings/2026-11-11_nas-dev-working-dated-offload.md`.
