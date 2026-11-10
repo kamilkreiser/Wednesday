@@ -1,0 +1,28 @@
+import json,sys,collections
+S=sys.argv[1]
+R={j["id"]:j for j in map(json.loads,open(f"{S}/sound-head.jsonl"))}
+M={j["id"]:j for j in map(json.loads,open(f"{S}/probe-w-main.jsonl"))}
+H={j["id"]:j for j in map(json.loads,open(f"{S}/probe-w-head.jsonl"))}
+sets=json.load(open(f"{S}/sets.json")); f1=sets["f1"]; s43=sets["ex"]["shorter (main sound)"]
+g2=json.load(open(f"{S}/g2sets.json"))
+print("rows",len(R))
+print("head first at 9999 sound:",sum(r["head_9999"] for r in R.values()),"of",len(R))
+bad=[i for i,r in R.items() if not r["head_9999"]]; print("  head not sound at 9999:",bad[:10])
+print("main 43 at 9999 sound:",sum(1 for i in s43 if R[i]["main_9999"]),"of 43")
+print("F1 100 head cut sound at 9999:",sum(1 for i in f1 if R[i]["head_9999"]))
+srch=[r for r in R.values() if "cut" in r]
+print("searched",len(srch),"prefix_ok",sum(r["prefix_ok"] for r in srch))
+print("head cut fails any of 10 labels (full row):",[r["id"] for r in srch if r["head_fail10"]][:10])
+for name,ids in (("F1",f1),("changed",g2["changed"]),("sample-unchanged",g2["sample"])):
+    rs=[R[i] for i in ids if "cut" in R[i]]
+    short=[r for r in rs if r["longest_both"] is not None]
+    gaps=collections.Counter(r["longest_both"]-r["cut"] for r in short)
+    print(f"{name}: searched {len(rs)}, at bar {len(rs)-len(short)}, short {len(short)} gaps {dict(sorted(gaps.items()))}")
+    # explanation: on full row some label fails for each between-prefix? and on 1pt narrower all between fail?
+    e_full=sum(1 for r in short if all(b["fail_full"]>0 for b in r["between"][:-1]))  # not needed
+    e1=sum(1 for r in short if all(b["fail_1pt"]>0 for b in r["between"]) and r["cut_fail_1pt"]==0)
+    allfull=sum(1 for r in short if r["between"][-1]["fail_full"]==0)
+    print(f"   1pt explanation holds (every longer prefix fails some label on a row 1 pt narrower, cut passes all): {e1} of {len(short)}; longest one sound at all 10 labels on full row: {allfull}")
+    nx=[ (r["id"],r["cut"],r["longest_both"],[(b['k'],b['fail_full'],b['fail_1pt']) for b in r['between']],r["cut_fail_1pt"]) for r in short if not (all(b["fail_1pt"]>0 for b in r["between"]) and r["cut_fail_1pt"]==0)]
+    for x in nx[:12]: print("   NOT EXPLAINED",x)
+json.dump({i:R[i] for i in R if "cut" in R[i] and R[i]["longest_both"] is not None},open(f"{S}/short.json","w"),indent=0)

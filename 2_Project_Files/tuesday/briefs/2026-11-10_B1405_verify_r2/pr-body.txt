@@ -1,0 +1,17 @@
+Feedback backend hardening, one commit per ticket (MPSCALC-124 has two: the change and its reserve-before-write fix).
+
+- MPSCALC-97: the feedback store's overlap guard follows the reference file's link, resolves .. as the kernel does, and compares directories by identity (device and inode), so an NFD spelling or a link cannot point into the feedback directory.
+- MPSCALC-102: an Administrator retry reads the ticket state and writes pending in one lock scope, so it can never write pending over a worker's created.
+- MPSCALC-122: the attachment download sets nosniff, Cache-Control no-store and the sandbox CSP before the role check, so every refusal (400, 401, 403, 404, 500, 503) carries them too. Status codes and bodies unchanged.
+- MPSCALC-124: attachment files are written outside the store's lock, so JSON submits and the Administrator's list no longer wait behind an upload. Before any byte is written, the (caller, key) pair and one hourly-limit slot are reserved under the lock; a replay, a reused key or an over-limit request is answered first and writes nothing. The reservation is released on every path.
+- MPSCALC-125: at start, two items with one caller and key both stay stored and listed; the earliest keeps the key and a Warning names both ids.
+
+Tests: 32 new rows (overlap 9, retry race 2, download headers 11, upload lock 7, duplicate keys 3), each red without its fix or a control. Local dotnet job: build 0 warnings; main 4337 passed, merge with main 4369 passed, lost 0.
+
+Client-visible: download refusals now carry the three protective headers; a 429 caused by the caller's own upload still being written carries Retry-After 1.
+
+Follow-ups (not in this change): docs/API.md lines on the attachment lock order and on what the hourly limit counts need updating; Retry-After for a 429 caused by an in-flight upload.
+
+Nothing is deployed by this change.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

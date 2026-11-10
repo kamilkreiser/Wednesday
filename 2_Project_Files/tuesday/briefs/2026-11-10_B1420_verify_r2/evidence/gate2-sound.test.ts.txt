@@ -1,0 +1,87 @@
+// Gate round-2 probe (scratch only, never committed). Independent of the builder's scripts.
+import { readFileSync, appendFileSync, writeFileSync } from "node:fs";
+import { it } from "vitest";
+import { changeReportSpec } from "../src/change-report.js";
+import { renderDocumentPdf } from "../src/document-pdf.js";
+import { renderPdf } from "../src/pdfmake-engine.js";
+import { readPdfTextLayer, type PdfPage } from "./support/pdf-text.js";
+
+const IN = process.env.G2_IN as string;
+const SETS = JSON.parse(readFileSync(process.env.G2_SETS as string, "utf8"));
+const MAINF = new Map<string, string>(
+  readFileSync(process.env.G2_MAIN as string, "utf8").split("\n").filter(Boolean).map((l) => { const j = JSON.parse(l); return [j.id, j.first]; }),
+);
+const OUT = process.env.G2_OUT as string;
+const SEARCH = new Set<string>([...SETS.changed, ...SETS.sample]);
+const LABELS = [1, 2, 3, 4].flatMap((m) => Array.from({ length: m }, (_, p) => `Page ${"9".repeat(p + 1)} of ${"9".repeat(m)}`));
+
+function sound(page: PdfPage, hash: string, label: string, right: number): boolean {
+  const band = page.runs.filter((r) => r.baseline > page.height - 56);
+  const isLabel = (r: { x: number; width: number }) => Math.abs(r.x + r.width - (page.width - right)) < 0.6;
+  const hashRun = band.find((r) => r.text === `manifest ${hash}`);
+  const text = band.filter((r) => !isLabel(r) && r !== hashRun);
+  const lab = band.filter(isLabel);
+  const labelX = lab.length ? Math.min(...lab.map((r) => r.x)) : Infinity;
+  const read = [...lab].sort((p, q) => p.baseline - q.baseline || p.x - q.x).map((r) => r.text).join(" ").replace(/\s+/g, " ").trim();
+  return hashRun !== undefined && hashRun.baseline < page.height && read === label && !text.some((r) => r.x + r.width > labelX + 0.01);
+}
+// The footer exactly as document-pdf.ts builds it, with a fixed label; `right` = right margin (41 = a row 1 pt narrower).
+async function direct(font: string, hash: string, first: string, label: string, right = 40): Promise<boolean> {
+  const bytes = await renderPdf({
+    pageSize: "A4", pageOrientation: "portrait", pageMargins: [40, 60, 40, 56],
+    defaultStyle: { font, fontSize: 9, lineHeight: 1.15 },
+    footer: () => ({ columns: [{ text: `${first}\nmanifest ${hash}`, width: "*" }, { text: label, width: "auto", alignment: "right" }], columnGap: 12, fontSize: 6.5, margin: [40, 22, right, 0] }),
+    content: [{ text: "x" }],
+  });
+  const page = (await readPdfTextLayer(bytes)).pages[0];
+  return page !== undefined && sound(page, hash, label, right);
+}
+async function product(input: any, options: any, first: string): Promise<boolean> {
+  const spec = changeReportSpec(input, options);
+  const layer = await readPdfTextLayer(await renderDocumentPdf({ ...spec, footer: `${first}\nmanifest ${input.manifest_hash}` }, input.brand));
+  return layer.pages.every((p, k) => sound(p, input.manifest_hash, `Page ${k + 1} of ${layer.page_count}`, 40));
+}
+async function failing(font: string, hash: string, first: string, right: number): Promise<string[]> {
+  const f: string[] = [];
+  for (const l of LABELS) if (!(await direct(font, hash, first, l, right))) f.push(l);
+  return f;
+}
+
+it("gate2 sound", async () => {
+  writeFileSync(OUT, "");
+  for (const line of readFileSync(IN, "utf8").split("\n")) {
+    if (!line) continue;
+    const { id, input, options } = JSON.parse(line);
+    const font = input.brand.fonts.body;
+    const hash = input.manifest_hash;
+    const spec = changeReportSpec(input, options);
+    const head = spec.footer.slice(0, spec.footer.lastIndexOf("\n"));
+    const main = MAINF.get(id)!;
+    const full = `${input.brand.company_name} ${input.brand.product_name} | ${spec.title}`;
+    const chars = Array.from(full);
+    const row: any = { id, head_9999: await direct(font, hash, head, "Page 9999 of 9999"), main_9999: main === head ? null : await direct(font, hash, main, "Page 9999 of 9999") };
+    if (SEARCH.has(id) && head !== full) {
+      const cut = Array.from(head).length - 3;
+      row.cut = cut;
+      row.prefix_ok = head === `${chars.slice(0, cut).join("")}...`;
+      row.head_fail10 = await failing(font, hash, head, 40);
+      const cands: Array<[number, string]> = [];
+      if (chars.length <= 122) cands.push([chars.length, full]);
+      for (let k = Math.min(chars.length - 1, 119); k > cut; k -= 1) cands.push([k, `${chars.slice(0, k).join("")}...`]);
+      row.longest_both = null;
+      for (const [k, t] of cands) {
+        if ((await direct(font, hash, t, "Page 9999 of 9999")) && (await product(input, options, t))) { row.longest_both = k; break; }
+      }
+      if (row.longest_both !== null) {
+        // the 1 pt explanation: every prefix between the cut and the longest sound one, beside all 10 labels, full row and 1 pt less
+        row.between = [];
+        for (let k = cut + 1; k <= row.longest_both; k += 1) {
+          const t = k === chars.length ? full : `${chars.slice(0, k).join("")}...`;
+          row.between.push({ k, fail_full: (await failing(font, hash, t, 40)).length, fail_1pt: (await failing(font, hash, t, 41)).length });
+        }
+        row.cut_fail_1pt = (await failing(font, hash, head, 41)).length;
+      }
+    }
+    appendFileSync(OUT, JSON.stringify(row) + "\n");
+  }
+}, 3_600_000);

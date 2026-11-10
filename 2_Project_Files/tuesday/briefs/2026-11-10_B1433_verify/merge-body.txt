@@ -1,0 +1,10 @@
+RD-759 (shapes 1 and 2) and RD-796, backend/services/cspReport.js plus one new test file.
+
+- The CSP intake trims ECMAScript white space beyond ASCII, the line and paragraph separators and the BOM at the edges of a reported URL, so a forged leading U+00A0, U+2028 or U+FEFF no longer keeps userinfo.
+- In an authority that new URL cannot parse, the userinfo ends at the last "@" or "%40".
+- violatedDirective is kept only as a non-empty string cut at 256 characters; lineNumber only as a positive safe integer; anything else is null.
+- The data: shape of RD-759 is unchanged and left for a ruling (control cell C-DATA).
+
+New cells: 20 (16 red with the source change removed, 4 controls green). Suite size 5513 tests / 327 suites; the counts file is regenerated on the merged tree at landing.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,11 @@
+The five rows named by the ticket, in PurchaseBomEditor.test.tsx and PriceReason.test.tsx, timed out at the
+five-second default in whole-suite runs on a loaded machine. They now follow the two layers the suite already
+uses for this (QuoteScreen.addSectionWait.test.tsx): the screen is driven through userEvent.setup({ delay: null }),
+the same events without a timer between keystrokes, and each row states a 15_000 ms budget.
+
+A sixth row in PurchaseBomEditor.test.tsx (a new draft switches to purchase ...) gets the same two layers: when it
+timed out, its keystrokes ran on into the next row and failed the named price-audit row on an assertion.
+
+Tests only: no assertion, title or product byte changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

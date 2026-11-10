@@ -1,0 +1,48 @@
+import json,sys,collections
+S=sys.argv[1]; G=sys.argv[2]
+M={j["id"]:j for j in map(json.loads,open(f"{S}/probe-w-main.jsonl"))}
+H={j["id"]:j for j in map(json.loads,open(f"{S}/probe-w-head.jsonl"))}
+D={j["id"]:j for j in map(json.loads,open(f"{G}/probe-head.jsonl"))}   # round-1 head de6e5615, host node
+GM={j["id"]:j for j in map(json.loads,open(f"{G}/probe-main.jsonl"))}  # round-1 main
+assert M.keys()==H.keys()==D.keys()
+def hashok(j): return all(p["hash_inside"] for p in j["pages"])
+def into(j): return any(p["into_label"] for p in j["pages"])
+def labelok(j): return all(p["label"]==f"Page {k+1} of {j['page_count']}" for k,p in enumerate(j["pages"]))
+def sound(j): return hashok(j) and labelok(j) and not into(j)
+def kept(f): return len(f)-3 if f.endswith("...") else None
+c=collections.Counter(); ex=collections.defaultdict(list)
+f1=[]  # round-1 F1 set: adv, both clipped, shorter at de6e than main
+for i in M:
+    m,h,d=M[i],H[i],D[i]; g="fx" if i.startswith("fx") else "adv"
+    c[g,"n"]+=1
+    c[g,"main_reproduces_round1_first"]+= m["first"]==GM[i]["first"]
+    c[g,"main_reproduces_round1_sha"]+= m["sha"]==GM[i]["sha"]
+    if not hashok(h): c[g,"HEAD hash lost"]+=1; ex["hashlost"].append(i)
+    if not hashok(m): c[g,"main hash lost"]+=1
+    if not labelok(h): c[g,"HEAD label broken"]+=1; ex["label"].append(i)
+    if not labelok(m): c[g,"main label broken"]+=1
+    if into(h): c[g,"HEAD into label"]+=1; ex["into"].append(i)
+    if into(m): c[g,"main into label"]+=1
+    if not sound(h): c[g,"HEAD not sound at real count"]+=1; ex["unsound"].append(i)
+    if m["first"]==h["first"]:
+        c[g,"first unchanged"]+=1
+        if m["sha"]==h["sha"]: c[g,"  byte-equal"]+=1
+        else: c[g,"  FIRST SAME PDF DIFFERS"]+=1; ex["pdfdiff"].append(i)
+    else:
+        c[g,"first changed"]+=1
+        mc,hc=m["first"].endswith("..."),h["first"].endswith("...")
+        if not mc and hc: k="whole->clipped"
+        elif mc and not hc: k="clipped->whole"
+        elif len(h["first"])<len(m["first"]): k="shorter"
+        elif len(h["first"])>len(m["first"]): k="longer"
+        else: k="same len"
+        k+=" (main sound)" if sound(m) else " (main unsound)"
+        c[g,"  "+k]+=1; ex[k].append(i)
+    if g=="adv" and m["first"].endswith("...") and d["first"].endswith("...") and len(d["first"])<len(m["first"]): f1.append(i)
+    if h["first"].endswith("..."): c[g,"head clipped"]+=1; ex["headclipped"].append(i)
+for k in sorted(c): print(k,c[k])
+print("F1 set (de6e shorter than main)",len(f1), "of which main sound:",sum(sound(M[i]) for i in f1))
+fl=[ (i,kept(M[i]["first"]),kept(D[i]["first"]),kept(H[i]["first"])) for i in f1]
+print("F1: head>=de6e",sum(1 for x in fl if x[3]>=x[2]),"head>de6e",sum(1 for x in fl if x[3]>x[2]),"head>=main",sum(1 for x in fl if x[3]>=x[1]))
+json.dump({"f1":f1,"ex":ex},open(f"{S}/sets.json","w"))
+for k,v in ex.items(): print(k,len(v),v[:5])

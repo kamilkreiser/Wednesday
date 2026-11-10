@@ -1,0 +1,14 @@
+What changes (4 files: scripts/refactor-inline-styles.js, scripts/csp-convert.py and two new test files):
+
+- RD-970: readIfPresent() in scripts/refactor-inline-styles.js returns null for ENOTDIR as well as ENOENT, so a run over a tree whose static/js is a file skips the JS inputs and exits 0, as the existsSync checks it replaced did. Every other read error (EISDIR, EACCES, a loop) still stops the run.
+- RD-971: the end tag of SCRIPT_BLOCK_RE in scripts/csp-convert.py accepts only tab, line feed, form feed, carriage return, space or "/" after </script (the HTML tokenizer's set) instead of Python's \s, so a vertical tab, the 0x1c-0x1f separators, NEL, no-break space or a Unicode space no longer closes a block the browser keeps open.
+
+Tests: __tests__/rd970-refactor-inline-styles-enotdir.test.js (5 cells) runs the real script over a throw-away tree; __tests__/rd971-csp-convert-end-tag-whitespace.test.js (22 cells) runs the real regex through python3 -I. With the two script changes removed, 2 of 5 and 10 of 22 cells are red; at the head all pass.
+
+Counts: the suite grows by 27 tests and 2 suites. scripts/verify-expected-counts.json is not changed on this branch; it is regenerated at landing.
+
+Deploy: this merge starts a Deploy demo run on main (scripts/ and __tests__/ are not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
+
+Hosted CodeQL is read on the PR and on main after landing.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

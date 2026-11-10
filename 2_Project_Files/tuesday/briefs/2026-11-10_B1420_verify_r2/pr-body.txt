@@ -1,0 +1,29 @@
+The change report's footer model decides whether the first footer line fits above the manifest hash line, and clips it with dots when it does not. It disagreed with the PDF writer in three ways. In the first two the hash line could fall off the page; in the third, names were cut shorter than needed and the page label could print in fragments.
+
+1. Tabs. The writer turns each tab into four spaces before it measures, breaks or draws text (6.45 pt a tab at 6.5 pt). The model measured the font's tab glyph (2.88 pt).
+2. Line breaks. The writer breaks a line only where the Unicode line-breaking rules allow (never after an opening bracket and its spaces, never before a closing mark across a space). The model broke at every space.
+3. Wide pieces and the page label. The writer gives the text column at least its widest piece and squeezes the "Page n of m" label beside it, down to one word a row. The model clipped any piece wider than a fixed column, and did not check that the label still fits the footer rows.
+
+Changes (packages/renderers/src/change-report.ts only):
+- Tabs are counted as four spaces.
+- The first line is split with the writer's own line breaker (linebreak, loaded through pdfmake's dependency resolution), and each piece is measured as pdfkit measures it.
+- Both columns are sized by the writer's column rule, from the first line plus the hash line, beside every label the product can print (page counts of one to four digits).
+- Rows are filled as the writer fills them, with its hard wrap of a piece that still overflows. The label is laid out the same way, and a first line that would push the label past the three footer rows is clipped.
+- One point of the row is still kept in hand.
+
+Tests (packages/renderers/test/change-report.test.ts): new rows R12 to R15. R10's boundary moves from 77/78 W to 83/84 W, and its 1000-page check renders the boundary word beside a four-digit label. Each expected value is typed, measured from the render, and each row is red without its fix.
+
+Verification (host node; the CI image could not be built offline):
+- Renderers project: 263 tests on main, 267 here, lost 0, added 4. The merge with main is clean, with the same results.
+- Workspace project: unchanged. eslint, prettier --check and the web typechecks: rc 0.
+- Render probe over 2,288 change-report renders (168 from the project's own tests, 2,120 adversarial names):
+  - hash line lost: 11 at main, 0 here;
+  - broken page label: 59 at main, 0 here;
+  - every cut is sound at its real page count and at "Page 9999 of 9999", except 2 right-to-left names that already overlap the label on main;
+  - every render whose first line is unchanged is byte-equal.
+
+Visible change (approved by the product owner): 100 unusual adversarial names are cut shorter than on main, so that the page label stays whole up to a four-digit page count. None of the project's own sample reports is cut shorter. Some cuts are 1 to 3 characters short of the longest sound prefix, because of the one point kept in hand.
+
+Not in this change: sizing the footer by the real page count (needs the page count in document-pdf.ts), and the policy PDF footer. Nothing is deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

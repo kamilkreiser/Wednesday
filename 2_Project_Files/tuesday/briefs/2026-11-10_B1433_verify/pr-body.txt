@@ -1,0 +1,15 @@
+What changes (2 files, backend/services/cspReport.js and one new test file):
+
+- RD-759, shapes 1 and 2: stripQueryAndFragment now trims the ECMAScript white space beyond ASCII, the line and paragraph separators and the BOM at the edges of a value (the same linear char-code scan as before), so a forged report with a leading U+00A0, U+2028 or U+FEFF no longer keeps its userinfo. In an authority that `new URL` cannot parse, the userinfo now ends at the last "@" or "%40".
+- RD-759, shape 3 (data: payloads holding an "@") is NOT changed: it needs a ruling. The control cell C-DATA records it as unchanged.
+- RD-796: violatedDirective is carried only as a non-empty string cut at 256 characters, and lineNumber only as a positive safe integer; any other value becomes null, so it no longer reaches the log line and the in-memory ring verbatim.
+
+Tests: __tests__/rd759-796-csp-intake-edges-and-typed-fields.test.js adds 20 cells. With the source change removed, 16 are red and the 4 controls stay green; at the head all 20 pass.
+
+Counts: the suite grows by 20 tests and 1 suite. scripts/verify-expected-counts.json is not changed on this branch; it is regenerated on the merged tree at landing.
+
+Deploy: this merge starts a Deploy demo run on main (backend/ and __tests__/ are not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
+
+Hosted CodeQL is read on the PR and on main after landing.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

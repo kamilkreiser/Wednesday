@@ -1,0 +1,32 @@
+Two changes on one branch, two commits on main 0820efe9.
+
+1. Walkthrough step 10 caveat (web/src/content/walkthrough/steps.ts):
+   the clause "score the assessment and approve the narrative before you
+   show it" is removed. New caveat, verbatim:
+   The report holds sample content; it is not HP-approved guidance. On the laptop sample this screen shows "No report yet" until the assessment is completed and scored, and then waits for the approved narrative; do not promise either wait for every customer.
+   steps.test.ts pins the new sentence and adds a row refusing
+   /\bscore the\b/i, /\bapprove the\b/i and /\bsave\b/i in any step's
+   caveat or cue ("do not save" is stripped first so step 6's
+   prohibition stays).
+
+2. Readiness hub (web/src/components/readiness/AssessmentsHub.tsx,
+   web/src/app/(app)/assessments/page.tsx): when the newest completed
+   run is on an earlier held readiness set, the hub leads with the
+   current statements (16 in 4 areas) and one Start action; the old run
+   stays listed. H1 and tab title: Playbook Partner Readiness (tab
+   renders with the site suffix). Sidebar label unchanged (My readiness).
+   No data write, API, contract or migration change.
+   Customer-facing words added:
+   - Playbook Partner Readiness
+   - Playbook Partner Readiness: current statements
+   - A new self-assessment asks these 16 statements in 4 areas. Your latest completed self-assessment used an earlier set of statements; its results are in the list below.
+
+Test pins of the old H1 updated: web/e2e/playbook.ts (startReadiness),
+web/e2e/playbook-event-states.spec.ts (assessments-hub ready).
+
+Local verification at the head (merge tree equals the head tree): lint
+and typecheck rc 0, vitest 4187 passed / 0 failed (main 4183), build
+rc 0, infra hidden-character scan 14/14 OK, e2e shards listed in the
+gate verdict.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

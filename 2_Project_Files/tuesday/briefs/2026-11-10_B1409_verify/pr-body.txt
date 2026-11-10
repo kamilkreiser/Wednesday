@@ -1,0 +1,15 @@
+## Summary
+- MPSCALC-368: `purchase.projection` returns the engine's purchase recurring projection (six measures: pages, clickCost, managedServiceCost, clickRevenue, serviceRevenue, recurringGrossProfit; each monthly, annual and contract) on the Api. The whole member is internal: absent without internal-metrics, removed by the restricted read of a stored snapshot, classified Internal in the proposal allow-list, and absent when the engine forms none. The contract (docs/api/openapi.json), docs/API.md and the generated web copies move with it. Additive only.
+- MPSCALC-378: `PurchaseLineResultDto.QuantityRule` carries the request member's ignore-when-null attribute, so any writer leaves it out when null. No wire change (the Api options already ignore nulls).
+- No other ticket of the lane changes code: MPSCALC-169 is held by a product-owner ruling (no contract change until the field name and words are approved); MPSCALC-325, -338 and -339 are already on main (the draft-validation walks stop at MaxWalkEntriesListed = 20 in src/MpsCalc.Api/Quotes/PurchaseValidation.cs); MPSCALC-358's remaining halves are outside this change.
+
+## Verification (independent gate, local)
+- dotnet build Release: 0 warnings, 0 errors at main, head and the merge. dotnet test: Engine 743, Import 196, Api 3452 at main and 3466 at the merge (lost 0; gained the 14 new test names, all passing).
+- web (node 24): npm ci, lint, test (144 files, 1492 passed), entra build plus bundle check: all exit 0 at main, head and the merge; the contract sync tests pass.
+- Every new test turns red under a planted fault with the fix removed; a re-sync of the generated copies from the head commit differs only in the header line naming the source commit.
+- Scans: added lines and commit messages carry no names, secrets or hidden characters; gitleaks over the range finds nothing.
+
+## Not deployed
+Nothing is deployed by this change. Hosted CI and CodeQL on this PR are the remaining proof.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

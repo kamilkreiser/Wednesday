@@ -1,0 +1,20 @@
+Test only. Pins the draft-save refusal order that MPSCALC-333's last clause left open. One file changed: tests/MpsCalc.Api.Tests/QuoteRefusalOrder.cs (+67 lines, 0 removed). No product code changes.
+
+What the new rows pin
+- A draft the body checks refuse (not valid, a tax rate other than the server's, an internal input the caller may not send) is refused for its body whether the quote is missing, another seller's, or the caller's own submitted one. The body checks run before the quote is looked up, so a body refusal never turns into 404, 403 NOT_QUOTE_OWNER or 409. (9 cases per host)
+- Another seller editing a submitted or approved version is told it is not their quote (403 NOT_QUOTE_OWNER), not the version's state. (2 cases per host)
+Each runs on the DevStub and Entra hosts: 22 new results.
+
+Red first
+Each row turns red under the product edit it guards, applied in a throw-away copy only: moving the internal-input check after the edit check (6 red), moving the tax-rate check (6 red), moving the whole body chain after the lookup (18 red), checking the state before the owner (4 red). Over the whole Api project at current main, without these rows, the last two edits stay green (3398 passed), so these rows are the only kill.
+
+Note: the body-checks-before-lookup order is today's behaviour; no doc line rules it. If that order is ever changed on purpose, these rows are the ones to update.
+
+Local checks
+dotnet build Release: 0 warnings. dotnet test at the merge with main: Engine 743, Import 196, Api 3420 passed, 0 failed; every main test still present; gained exactly the 22 new results.
+
+MPSCALC-340, -341 and -324 are already held by rows on main; MPSCALC-310 needs a product seam and is not in this change.
+
+Nothing is deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

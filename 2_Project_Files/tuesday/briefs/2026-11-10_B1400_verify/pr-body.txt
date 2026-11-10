@@ -1,0 +1,37 @@
+## What
+
+Tests only (MPSCALC-369). Two files: web/src/screens/bom/PurchaseBomEditor.test.tsx and
+web/src/screens/bom/PriceReason.test.tsx (+41 -35). No product file, no lock file, no workflow.
+
+The five rows the ticket names timed out at the five-second default in whole-suite runs on a loaded
+machine. They now follow the two layers the suite already uses (QuoteScreen.addSectionWait.test.tsx:12
+and :80, BomClassColumn.test.tsx:129):
+
+1. the screen is driven through userEvent.setup({ delay: null }): the same events, no timer between keystrokes;
+2. each row states a 15_000 ms budget.
+
+A sixth row in PurchaseBomEditor.test.tsx ("a new draft switches to purchase ...") gets the same two
+layers: when it timed out, its keystrokes ran on into the next row and failed the named price-audit row.
+That row is outside the ticket's list of five and is stated here.
+
+No assertion removed or changed, no test title changed (test name lists equal at main and head).
+
+## Evidence (local, Node v24.22.2, CI's pinned major)
+
+- CI job web at main, head and the local merge: npm ci, lint, test, build plus check-bundle all rc 0.
+  Tests: 144 files, 1492 passed, 0 failed, 0 skipped at each; lost 0, gained 0.
+  Bundle: 8 files, 1108407 bytes, markers 0/57 at each (no product byte changed).
+- Red without the change (both files, --testTimeout=50): main 6 of 6 rows time out; head 6 of 6 pass;
+  head with the six budgets removed 6 of 6 time out.
+- Whole-suite runs at head started at load1 14.3 to 46.6: 9 of 9 green, the six rows at most 850 ms.
+  The ticket's full acceptance (20 runs above load 7) is not complete: 9 runs here, and the original
+  timeout did not reproduce at main in 4 runs at the same load.
+
+## Not here
+
+- MPSCALC-198 and MPSCALC-334: their unit-test halves are already on main; the e2e halves are not in this change.
+- e2e, dotnet and python jobs: no path of theirs is touched.
+
+Hosted CI and CodeQL are the landing proof.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
