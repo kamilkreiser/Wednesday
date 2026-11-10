@@ -1,0 +1,14 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts
+@@ -674,7 +674,9 @@ describe('KS-2131 the real gate refuses a GET with no credential under billing,
+         res.on('end', () => {
+           let code: string | null = null; let message: string | null = null;
+           try { const e = JSON.parse(Buffer.concat(chunks).toString())?.error; code = typeof e === 'string' ? e : (e?.code ?? null); message = e?.message ?? null; } catch { /* not JSON: code and message stay null */ }
+-          resolve({ status: res.statusCode ?? 0, code, message, hits: seen.filter((s) => s === tag).length });
++          // KS-2158 (gate 281 G281-2121-1): read the upstream hit count 500 ms AFTER the response ends. A gate that answers 401 and then still
++          // forwards reaches the recorder after the response, so a count taken at 'end' would stay 0 and every cell would stay green.
++          setTimeout(() => resolve({ status: res.statusCode ?? 0, code, message, hits: seen.filter((s) => s === tag).length }), 500);
+         });
+       });
+       req.on('error', reject);

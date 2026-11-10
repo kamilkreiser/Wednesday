@@ -1,0 +1,23 @@
+diff --git a/Blockchain/Dev/services/transfer/src/__tests__/ks2038-transfer-access-rule-unit.test.ts b/Blockchain/Dev/services/transfer/src/__tests__/ks2038-transfer-access-rule-unit.test.ts
+--- a/Blockchain/Dev/services/transfer/src/__tests__/ks2038-transfer-access-rule-unit.test.ts
++++ b/Blockchain/Dev/services/transfer/src/__tests__/ks2038-transfer-access-rule-unit.test.ts
+@@ -72,3 +72,19 @@ describe('KS-2038: signedInCaller', () => {
+     expect(signedInCaller({ userId: OWNER, ...claims })).toEqual({ userId: OWNER, role: 'unknown' });
+   });
+ });
++
++// KS-2085 item 1 (gate 229 F6): the executor a transfer names may REFUSE it, whatever its kind. WHO_MAY.reject lists 'executorId' on all
++// four kinds and no cell pinned that, so taking it off the simple, sale or corporate row survived every cell.
++describe('KS-2085 F6: decideTransferAccess, the named executor on the reject door', () => {
++  const EXECUTOR = '00000000-0000-4000-8000-00000000e001';
++  it.each(['simple', 'sale', 'corporate'])('the executor named on a %s transfer may reject it', (transferType) => {
++    expect(decideTransferAccess(EXECUTOR, 'reject', { transferType, currentOwnerId: OWNER, executorId: EXECUTOR })).toEqual({ allow: true });
++  });
++  it('control: the executor named on an inheritance transfer may reject it', () => {
++    expect(decideTransferAccess(EXECUTOR, 'reject', { transferType: 'inheritance', currentOwnerId: OWNER, executorId: EXECUTOR })).toEqual({ allow: true });
++  });
++  it('control: a named executor is a party, so it reads 403 and never 404, where the rule gives it no verb', () => {
++    expect(decideTransferAccess(EXECUTOR, 'approve', { transferType: 'sale', currentOwnerId: OWNER, executorId: EXECUTOR })).toEqual({ allow: false, status: 403 });
++    expect(decideTransferAccess(EXECUTOR, 'execute', { transferType: 'simple', currentOwnerId: OWNER, executorId: EXECUTOR })).toEqual({ allow: false, status: 403 });
++  });
++});
