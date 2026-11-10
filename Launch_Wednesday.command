@@ -111,7 +111,16 @@ fi
 # DevMASTER workspace (read-only context) — may or may not be mounted.
 # WED_WORKSPACE (2026-09-23, Friday): the laptop's workspace is wherever Kam keeps it; Launch_Friday.command
 # exports the path chosen at first-run setup. Unset on the Studio and the mini -> the old literal, unchanged.
-DEVMASTER="${WED_WORKSPACE:-/Volumes/DevMASTER}"
+# 2026-11-11 (Kam: "fix the launcher on the new drive"): unset WED_WORKSPACE -> the workspace this launcher
+# SITS IN when its parent holds the vault (so a launch from /Volumes/Secuura_DEV/WEDNESDAY reads Secuura_DEV's vault
+# and projects, never the old drive's); else the old literal. Identical result on DevMASTER itself.
+if [ -n "${WED_WORKSPACE:-}" ]; then
+  DEVMASTER="$WED_WORKSPACE"
+elif [ -d "$(dirname "$PROJECT_DIR")/Notes (MASTER)" ]; then
+  DEVMASTER="$(dirname "$PROJECT_DIR")"
+else
+  DEVMASTER="/Volumes/DevMASTER"
+fi
 DEVMASTER_VAULT="$DEVMASTER/Notes (MASTER)"
 if [ -d "$DEVMASTER_VAULT" ]; then
   DEVMASTER_STATE="mounted"
@@ -549,7 +558,7 @@ esac
 # reason the boundary is a PATH test rather than a judgement call.
 if [ "$AGENT" = "tuesday" ]; then
   AGENT_SCOPE="YOUR CLIENT SCOPE: every DATASEC project — anything under
-'/Volumes/DevMASTER/!CODING/Datasec/'. Secuura and general work belong to WEDNESDAY on
+'${DEVMASTER}/!CODING/Datasec/'. Secuura and general work belong to WEDNESDAY on
 the Studio; you do not brief, launch, or answer for them. You are her sister seat, not a
 different person: same persona, same voice, same W and M lessons, your own ledger, daily
 notes, pickup, claims file and inbox. Cross-seat mail to her carries COORDINATION ONLY —

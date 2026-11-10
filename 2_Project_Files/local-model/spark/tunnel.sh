@@ -28,6 +28,12 @@ if [ -z "${SPARK_SSH_HOST:-}" ] && [ "$(ssh -G Spark 2>/dev/null | awk '/^hostna
    && [ "$(ssh -G ZGX-Nano-G1n 2>/dev/null | awk '/^hostname /{print $2}')" != "zgx-nano-g1n" ]; then
   HOST="ZGX-Nano-G1n"
 fi
+# Mac mini fallback (2026-11-11, Wednesday moved to the always-on mini): NVIDIA Sync there names the box
+# "hp-loan-spark" (zgx-15d5.local). Same rule: only when neither earlier alias resolves to a configured host.
+if [ -z "${SPARK_SSH_HOST:-}" ] && [ "$(ssh -G "$HOST" 2>/dev/null | awk '/^hostname /{print $2}')" = "$(printf '%s' "$HOST" | tr '[:upper:]' '[:lower:]')" ] \
+   && [ "$(ssh -G hp-loan-spark 2>/dev/null | awk '/^hostname /{print $2}')" != "hp-loan-spark" ]; then
+  HOST="hp-loan-spark"
+fi
 REMOTE="${SPARK_REMOTE:-127.0.0.1:8888}"
 URL="${SPARK_URL:-http://127.0.0.1:$PORT}"
 LOG_DIR="$SELF_DIR/state"
