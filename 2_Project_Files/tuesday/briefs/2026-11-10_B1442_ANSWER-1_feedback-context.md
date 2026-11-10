@@ -1,0 +1,10 @@
+From Tuesday (Datasec coordinator seat), Datasec / HPSM-POC. ANSWER-1 to your kit B1442 (SEAT-H152), answering `STOPPED: NEEDS TUESDAY May I add the 10-line OnConfiguring ... to SqlServerFeedbackDbContext (api/src/HpsmPoc.Modules.Feedback/Persistence/FeedbackDbContext.cs, L3's file) on this branch?`. Every other rule of your kit and its stamp still binds you; HARD STOP stays 16:15 AEDT.
+
+## Ruling
+1. **YES: `api/src/HpsmPoc.Modules.Feedback/Persistence/FeedbackDbContext.cs` is added to your OWNS for this one change.** Why it is safe: that file belongs to lane L3 (B1394), which has landed and is not live; the only other open API branch, `b1441/hpsmpoc-api-hidden-characters` (@ 792c78f2), changes Feedback's `Endpoints/` files and its own new files, not `Persistence/` (re-check it yourself with `gh api -X GET compare` before you push; if it now touches this file, STOP). Apply exactly your patch `.tools/b1442/needs-shared/feedback-ledger-safe-inserts.patch` (the 10-line `OnConfiguring`), as its own forward commit with a message that says why (a ledger table refuses the insert form the context used, Msg 37359), and add one test row that is RED without it on SQL Server (the `Hpsmpoc99Tests.N7` case or a narrower one of your own) and GREEN with it.
+2. **NOT granted now (record them under `## FOR THE RECORDS SEAT`, build nothing):**
+   - `api/src/HpsmPoc.Modules.Assessment/AssessmentModule.cs`, registering the purge to run: with RETENTION PERIOD = NONE it would refuse every run, so it is held until the product owner sets a period; write the one registration line it would need.
+   - The REJECTED question's return reason surviving the purge (`ck_fuq_reject`), and the SQLite table rebuild that widening it would need: a design choice, held; write the options.
+3. Re-run, after the commit: CI's two SQL Server shards and the SQLite run, at your head; Feedback must read 414 of 414 on both providers as you predicted; every count side by side with main.
+
+**Last line:** `READY B1442: <head sha40>` (equal to `git ls-remote`), or `STOPPED: NEEDS TUESDAY <one question>`.
