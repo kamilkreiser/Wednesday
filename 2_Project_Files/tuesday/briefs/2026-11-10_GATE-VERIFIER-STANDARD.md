@@ -28,7 +28,7 @@ The deploy key is under `<P>/3_Access_Keys/`, named by the kit.
 4. **Red without the fix.** Every new or changed test fails with the fix removed, run in a copy.
 5. **Closed lines.** Re-verify every ALREADY-ON-MAIN or closed-with-evidence line at main, by program.
 6. **Probes.** Probe the change adversarially at the boundaries the ticket names. Docs: check every code-fact sentence at source.
-7. **Scans.** Underscore-aware name scan `(?<![A-Za-z])<name>(?![a-z])` with a planted `_by_<name>_` control. Ban list: Kam, Kamil, Kreiser, Steve, Peter, Paul, Blanchard, Inch, Waite, plus any list in the kit. Scan added lines and commit messages. Also scan for secrets, tenant or subscription ids, hosts, and Cf characters.
+7. **Scans.** Underscore-aware name scan `(?<![A-Za-z])<name>(?![a-z])` with a planted `_by_<name>_` control. Ban list: Kam, Kamil, Kreiser, Steve, Peter, Paul, Blanchard, Inch, Waite, plus any list in the kit. Scan added lines and commit messages. Also scan for secrets, tenant or subscription ids, hosts, and Cf characters. **CodeQL pre-scan (added 2026-11-10 after HPSM #304 failed hosted CodeQL on test code the gate passed):** over every ADDED line, test files included, flag `new RegExp(` built from a variable, and any `.replace(/[...]/g, "\\$&")` hand-escape that does not escape the backslash (CodeQL `js/incomplete-sanitization`, high); also `innerHTML`/`dangerouslySetInnerHTML` with a variable and `child_process` with a template string. A hit is a Major (hosted CodeQL will block the merge); list each with file:line.
 8. **Claims.** Grade each measured claim in the builder's STATUS: true / false / not shown.
 9. **Tier.** Follow S8. If you find a security-shaped issue on a tier-2 lane, write it as a row and end `NO GO: needs tier 1`.
 
