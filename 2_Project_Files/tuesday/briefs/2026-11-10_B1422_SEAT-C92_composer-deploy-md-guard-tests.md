@@ -87,13 +87,13 @@ Step, lock state (holder text or "mine"), load1, the last command, the next one,
 
 ## Stamp
 Tuesday fills each slot at launch; one word or clock each. The unstamped copy reads nine such runs (eight slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Main head at launch (full sha; `a54250f48f41b693ab73163531e7ca82425fce69` at drafting): ____
-- Branch head at launch (the new branch must NOT exist): ____
-- Open PRs at launch (#91, #86, #85 at drafting): ____
-- Launch authority and hard stop (READY target 180 minutes after your Step 0; HARD STOP clock): ____
-- SLOTS (HEAVYLOCK `free` or `held`; which sibling panes of this sweep are live): ____
-- Q-answers (Q-1 whether PCOMP-117's sentence may be reworded or only shortened (the drafter's default: only the version removed, no new word); Q-2 PCOMP-113 if the four pins are not named in the ticket as the drafter reads it; Q-3 the order if R198 moves PCOMP-98 or PCOMP-116 while you run): ____
+- STAMP: Tuesday (s263), 2026-11-10 14:49 AEDT. Kit read whole by Tuesday s263. Main moved since drafting: a54250f4 -> 61b3a0c21384b6c3cf755733e1b4d937a35e47a5 (2 ahead, 0 behind; changed paths apps/web/src/screens/Discovery.tsx, its LaneC4 test, packages/renderers/src/change-report.ts and its test: none is in your PARTITION or your measured files, by gh compare at 14:49).
+- LAUNCH WINDOW: now, through one launch_when_cool waiter (load1 13 at 14:49; it waits for the gate).
+- Main head at launch (full sha; `a54250f48f41b693ab73163531e7ca82425fce69` at drafting): 61b3a0c21384b6c3cf755733e1b4d937a35e47a5
+- Branch head at launch (the new branch must NOT exist): absent (gh git/matching-refs heads/b142 lists only b1420/composer-footer-model and b1423/composer-discovery-typed-subanswer)
+- Open PRs at launch (#91, #86, #85 at drafting): #91, #86 (Dependabot) and #85 (draft HOLD), unchanged from drafting
+- Launch authority and hard stop (READY target 180 minutes after your Step 0; HARD STOP clock): Tuesday's standing boot order (Kam 2026-10-24) and Kam 2026-11-10 ~03:1x 'if you have room (processing power) always keep going with other backlog and projects'; READY target 180 min after your Step 0; HARD STOP 18:49 AEDT
+- SLOTS (HEAVYLOCK `free` or `held`; which sibling panes of this sweep are live): HEAVYLOCK free (ls -d rc 1 at the stamp); sibling panes of this sweep: C90 and C93 are closed (landed); C91 and C92 launch together now; R198 is NOT launched this round
+- Q-answers (Q-1 whether PCOMP-117's sentence may be reworded or only shortened (the drafter's default: only the version removed, no new word); Q-2 PCOMP-113 if the four pins are not named in the ticket as the drafter reads it; Q-3 the order if R198 moves PCOMP-98 or PCOMP-116 while you run): Q-1: only shortened: the version words removed and no new word; any rewording is a STOP with your proposed sentence as the question. Q-2: follow the ticket's own Done-when; if it names neither the four pins nor the 'names only the words' sentence as you read it, STOP with both candidate readings. Q-3: R198 is not running this round (its kit predates today's landings and will be redrafted), so no Jira state should move; if PCOMP-98 or PCOMP-116 moves anyway, record it in STATUS and change nothing.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 14:49 by Tuesday s263

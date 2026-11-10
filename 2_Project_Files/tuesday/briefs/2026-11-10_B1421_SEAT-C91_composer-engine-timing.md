@@ -85,13 +85,13 @@ Step, lock state (holder text or "mine"), load1, the last command, the next one,
 
 ## Stamp
 Tuesday fills each slot at launch; one word or clock each. The unstamped copy reads nine such runs (eight slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Main head at launch (full sha; `a54250f48f41b693ab73163531e7ca82425fce69` at drafting): ____
-- Branch head at launch (the new branch must NOT exist): ____
-- Open PRs at launch (#91, #86, #85 at drafting): ____
-- Launch authority and hard stop (READY target 180 minutes after your Step 0; HARD STOP clock): ____
-- SLOTS (HEAVYLOCK `free` or `held`; which sibling panes of this sweep are live): ____
-- Q-answers (Q-1 what to do when the premise is gone (the drafter's default: end with no commit and READY on main's sha, STATUS says NO COMMIT); Q-2 whether a CPU-cap measurement on this host counts as the ticket's cell): ____
+- STAMP: Tuesday (s263), 2026-11-10 14:49 AEDT. Kit read whole by Tuesday s263. Main moved since drafting: a54250f4 -> 61b3a0c21384b6c3cf755733e1b4d937a35e47a5 (2 ahead, 0 behind; changed paths apps/web/src/screens/Discovery.tsx, its LaneC4 test, packages/renderers/src/change-report.ts and its test: none is in your PARTITION or your measured files, by gh compare at 14:49).
+- LAUNCH WINDOW: now, through one launch_when_cool waiter (load1 13 at 14:49; it waits for the gate).
+- Main head at launch (full sha; `a54250f48f41b693ab73163531e7ca82425fce69` at drafting): 61b3a0c21384b6c3cf755733e1b4d937a35e47a5
+- Branch head at launch (the new branch must NOT exist): absent (gh git/matching-refs heads/b142 lists only b1420/composer-footer-model and b1423/composer-discovery-typed-subanswer)
+- Open PRs at launch (#91, #86, #85 at drafting): #91, #86 (Dependabot) and #85 (draft HOLD), unchanged from drafting
+- Launch authority and hard stop (READY target 180 minutes after your Step 0; HARD STOP clock): Tuesday's standing boot order (Kam 2026-10-24) and Kam 2026-11-10 ~03:1x 'if you have room (processing power) always keep going with other backlog and projects'; READY target 180 min after your Step 0; HARD STOP 18:49 AEDT
+- SLOTS (HEAVYLOCK `free` or `held`; which sibling panes of this sweep are live): HEAVYLOCK free (ls -d rc 1 at the stamp); sibling panes of this sweep: C90 and C93 are closed (landed); C91 and C92 launch together now; R198 is NOT launched this round
+- Q-answers (Q-1 what to do when the premise is gone (the drafter's default: end with no commit and READY on main's sha, STATUS says NO COMMIT); Q-2 whether a CPU-cap measurement on this host counts as the ticket's cell): Q-1: the drafter's default stands: premise gone -> no commit, READY on main's sha, STATUS says NO COMMIT. Q-2: YES, a --cpus=2 capped run of the project's own CI-stage image on this host IS the ticket's cell (the project has no hosted CI; scripts/ci.sh runs on a host; docker 29.9.2 is present, 18 CPUs); without docker P-c may NOT be claimed (UNMEASURED).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 14:49 by Tuesday s263
