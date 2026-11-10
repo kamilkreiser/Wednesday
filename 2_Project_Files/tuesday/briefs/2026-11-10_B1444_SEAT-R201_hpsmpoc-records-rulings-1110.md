@@ -178,13 +178,13 @@ No Jira write outside the closed list; no statement that anyone has been told, t
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): ____
-- MOVE (exactly `CLOSE-IF-MET` or `COMMENT-ONLY`; default COMMENT-ONLY): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entries; the Jira steps stand, and then the comments' `entry C-<n>` citation is dropped from every text): ____
-- LAND (exactly `SEAT` or `TUESDAY`; default SEAT): ____
-- Hard stop (the absolute outer limit AEDT; JIRA DONE 50, RECORDS COMMITTED 80, HARD STOP 110 minutes after your own Step-0 date, whichever is earlier): ____
-- Panes and live seats at the stamp: ____
+- STAMP: Tuesday (s262), 2026-11-10 11:1x AEDT. Kit read whole (190 lines). Changed since drafting, NOT this kit's to record (a later records kit, B1461, records them; do not add them): code main is now 6b0c5f2caefedf47c940c9c5287dd9e358ae7cbb (#298-#303 landed) and UAT runs it (deployed 10:48-10:50 by B1460: so the BINDING HOLD's "UAT is on hold" sentence is history; this seat still deploys nothing and touches no hosted host); the product owner's 09:03 ruling that the one retention migration is allowed (gated, not deployed) and his 09:07 HPSMPOC-16 sign-off; the facts-only card's 10:00 default fired as E9 already records it. Prerequisite read by Tuesday at source: B1397 STATUS last line `RECORDS COMMITTED: records/b1397 @ 984f6f36... | PR #187 merg...`, analysis PR #187 merged 2026-11-09T17:26:57Z; analysis open PRs 0 at 11:10. B1443 READY f5dcd986 and merged as analysis #189; B1396 merged as #188; B1440, B1441, B1442 not launched.
+- LAUNCH WINDOW: 11:12-11:45 AEDT 2026-11-10
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): WRITE
+- MOVE (exactly `CLOSE-IF-MET` or `COMMENT-ONLY`; default COMMENT-ONLY): CLOSE-IF-MET
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entries; the Jira steps stand, and then the comments' `entry C-<n>` citation is dropped from every text): WRITE
+- LAND (exactly `SEAT` or `TUESDAY`; default SEAT): SEAT
+- Hard stop (the absolute outer limit AEDT; JIRA DONE 50, RECORDS COMMITTED 80, HARD STOP 110 minutes after your own Step-0 date, whichever is earlier): 13:40 AEDT 2026-11-10
+- Panes and live seats at the stamp: %0 tuesday (coordinator); %1 fleet-monitor; NexusAI N114-N117 (%39-%42); Datasec/Security-Composer-C90 (%36); MPS M101, M102, M104, M106, M110 (%27, %28, %30, %32, %35). No HPSM-POC pane other than this one (H142, H146, H153, D58 closed 11:09-11:10, each verified merged or DEPLOYED). No pane runs a kit that writes Jira HPSMPOC or CLARIFICATIONS.md.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE (s262, 11:1x AEDT, 190 lines)
