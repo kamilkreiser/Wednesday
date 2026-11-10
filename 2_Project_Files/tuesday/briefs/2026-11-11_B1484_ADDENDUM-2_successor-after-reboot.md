@@ -1,0 +1,27 @@
+# B1484 ADDENDUM-2 (SEAT-N122 SUCCESSOR): the machine rebooted at 05:41; you take over the chain at row 4b `learning`
+
+From Tuesday, 2026-11-11, written 07:1x AEDT (values below measured 07:13 to 07:16 by `date` in the same runs).
+
+**Your commission is the B1484 kit** `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-11_B1484_SEAT-N122_nexusai-landing-counts.md` (read it WHOLE first), **as amended by ADDENDUM-1** (`.../2026-11-11_B1484_ADDENDUM-1_learning-row-4b.md`, read whole) **and by this file**. Where this file and the kit differ, this file wins. Everything not named here is unchanged: scope, holds, the per-branch cycle, invariants, handshake, stop rules, HARD STOP **18:00 AEDT 2026-11-11**, context band, final-line forms. Your pane name is `Datasec/NexusAI-N122` (the kit's REFUSE 2 applies as written).
+
+## WHAT HAPPENED (MEASURED by Tuesday)
+- The first N122 seat pushed row 4 `header` and wrote `READY B1484-4: COUNTS b1432/nexusai-f-shell-layout-header 43ceb5b31e3e36cee403ff8f2de11e017fa7c088 5514/328 ON MAIN 63b51381` at 05:23, then waited at W for `learning` (`.tools/b1484/logs/wait-learning.log`).
+- **The machine rebooted at 05:41** (`last reboot`). That seat died with no handover; it held no jest ticket (`locks-laptop-1017/queue-jest` empty at 07:15, `ls -la`).
+- Tuesday landed row 4 at ~07:0x: PR #188 merged `--merge --match-head-commit 43ceb5b3...`. Origin main is now **`1c6bd64488d7d89b366e61610162d66777a4add3`**, parents `63b51381fb96e9359a9f3225a94d9432ac4a53fa` and `43ceb5b31e3e36cee403ff8f2de11e017fa7c088`; main's tree `5774a71ebab60ac7b968e5389319a8c1e543c9dc` = K's tree (GitHub commits API, both); main's counts **5514/328**; Deploy demo `skipped`. You re-check all of this yourself at W.
+- Gate B1433b first line: `GATE B1433b: GO WITH FINDINGS @ 725dcf0 on main 849b808`. `b1433/nexusai-b-learning-manager-log-lines` at origin = `725dcf0ed76572af8773685769e5e5f1414745b2` (git ref API).
+
+## WHAT CHANGES FOR YOU (overrides)
+1. **REFUSE 3 is replaced.** `B1484_STATUS.md`, `.tools/b1484/` and `b1484-nodot/` exist BY DESIGN: they are your predecessor's and now yours. Instead: **before you write anything**, the STATUS file's last line must read exactly the `READY B1484-4: ...` line above; otherwise STOP and name what it reads. Read the STATUS **whole** before acting.
+2. **STATUS is APPEND-ONLY for you.** Never edit or delete a line your predecessor wrote. Append a section `## SUCCESSOR (ADDENDUM-2)` with your Step 0 (clocks, pane, model, files read with line counts and sha256 prefixes, this addendum named) and continue the chain log under it. Name this file and ADDENDUM-1 in ADDENDA READ (append there or in your section; say which).
+3. **Step 0:** do not create directories. The kit copy in the project Briefs folder exists: `cmp` it against the kit path above (must be equal; differ = STOP). Re-read whole every file the kit's Step 0 lists (do not rely on your predecessor's hashes: re-print them).
+4. **Step 1 replaced:** NO new clone, no new `npm ci` unless `node_modules` is absent or O's package check fails. Reuse `.tools/b1484/clone`: print its origin URL, `core.sshCommand` set (length only, never the value), `status --porcelain` empty, `rev-parse HEAD`; then fetch main and every remaining queue branch exactly as the kit's Step 1 says. **REFUSE 4 values become:** origin main = `1c6bd644...` (or, if Tuesday has landed nothing else, still that; any other value = STOP); rows 4b and 5 to 10 at their gated sha40s from THE QUEUE; `b1432/nexusai-f-shell-layout-header` = `43ceb5b3...` (landed, not yours any more). **REFUSE 5 becomes 5514/328.** REFUSE 6 and 7 as written.
+5. **Tools:** your predecessor's copies in `.tools/b1484/` (`chain.sh`, `jestwrap.sh`, `namescan.py`, `prepush.sh`, `compare.py`, and its own helpers `acquire.sh`, `go.sh`, `kstep.sh`, `mstep.sh`, `refresh.sh`, `wait.sh`) may be reused **only after you read each whole** and list in STATUS which you use. Its Corrections line names a bash-3.2 empty-array defect in `chain.sh`, fixed before row 4: confirm the fix is in the file you run.
+6. **Leftover trees** `wt-header`, `b1484-nodot/header-u36`, `header-p2` stay (never delete; you may leave them).
+7. **Port band 25120-25759:** the reboot ended every process; print the `lsof` band read before your first run as the kit says.
+
+## YOUR NEXT ROW: 4b `learning` (then 5 `ci` ... 10 `l1`, per ADDENDUM-1)
+- **W for `learning`:** `onmain` = `63b51381fb96e9359a9f3225a94d9432ac4a53fa`, `prev` = `43ceb5b31e3e36cee403ff8f2de11e017fa7c088`. Main has already moved, so check W at once against origin main; all four checks should hold (Tuesday's reads above). Write `LANDED-SEEN header main <sha40> <clock>`.
+- **G, O, M, chain, invariants, push** as the kit. PREDICTED pair = **5522/329** (5514/328 + 8/+1). `compare.py` previous plain JSON = `raw/jest-p-header.json` (exists; its tree is main's tree by W's tree check). Then `READY B1484-4b: COUNTS b1433/nexusai-b-learning-manager-log-lines <K sha40> <t>/<s> ON MAIN 1c6bd644` and go to W for `ci`.
+- Time: about 50 minutes of lock per row plus about 53 minutes of hosted Build at Tuesday's end; seven rows remain and the HARD STOP is 18:00, so you will very likely end with a `HANDOVER B1484: next <key> <step>` before row 10. That is the expected outcome, not a failure; push nothing unproven.
+
+Tuesday watches your STATUS with `status_watch.sh ... --changed`; `READY B1484-4b:`, `STOPPED:` and `HANDOVER B1484:` wake her.
