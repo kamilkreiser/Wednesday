@@ -1,0 +1,8 @@
+# Head-pinned MERGE COMMIT (never squash, never rebase). Gated head 725dcf0ed76572af8773685769e5e5f1414745b2, main at gate 849b808c567e4d31d78e2d50b582540ae1920c67.
+# PRECONDITION, counts: scripts/verify-expected-counts.json must be regenerated on the branch (npm run verify -- --maxWorkers=2 --update-counts, non-dot path, under the jest lock) before the PR, and the pinned head below becomes THAT commit's sha.
+#   - If this branch lands BEFORE the csp-intake branch: expected 5501 tests / 327 suites (main 5493/326 measured + 8 tests + 1 suite).
+#   - If the csp-intake branch (3a5d3444, counts 5513/327) lands FIRST: a counts commit cut on 725dcf0 CONFLICTS with main (merge-tree rc 1, measured). The branch must first take main by a forward merge commit (no rebase), then regenerate: expected 5521 / 328.
+#   Either value is predicted from measured parts, not measured by a full verify in this gate; the PR Build check (npm run verify) is the proof and must read VERDICT: PASS.
+# Run with GH_CONFIG_DIR set to the project's 4_Credentials/.gh-config. <PR> is the pull request opened from the counts commit; <HEAD> is that commit's full sha.
+gh pr merge <PR> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit <HEAD> --subject "$(cat merge-subject.txt)" --body-file merge-body.txt
+# After: the Deploy demo run this merge starts must read skipped on every job (CI_DEPLOY_ENABLED unset; repo variables 0).
