@@ -1,0 +1,24 @@
+## Summary
+Operator tooling lane: five tickets, eight commits (five feature commits and three test and comment follow-ups). Nothing is deployed by this merge; MPS hosted deploys happen only on the product owner's card. **The next real deploy behaves differently:** it ends exit 3 (deployed but not proven) when Azure does not report the start; it stops before deploying, rc 1, when the hosted overlay changed after PRE-1; and a failing `az webapp deploy` still ends the run with az's own exit code. MPSCALC-223 and MPSCALC-349 are held, with no change.
+
+- MPSCALC-126: `scripts/deploy-from-ci.sh deploy` now reads the answer of `az webapp deploy` (called with `-o json`; the answer is printed unchanged). The run is proven only when `properties.status` is RuntimeSuccessful and at least one instance is up. Anything else ends exit 3, after the byte and HSTS checks have run and printed; one stderr line names only the status word and the instance count. If az itself fails, the run ends with az's own exit code before any check. New rows pin that pass-through (codes 1, 7 and 130, with a rc 0 control) and pin exactly one `-o json` on the call. The header comment now also names an unreported start as an exit 3 cause (comment only). `probe` is not subject to the check.
+- MPSCALC-203: the folder for overlay copies and live downloads is made 0700 whatever the umask, and copies stay 0600. The overlay read makes one GET with no curl retry. Right before `az webapp deploy`, the overlay is read once more and compared by sha256 (or absent both times). Equal: the second copy is removed and the deploy goes on. Different or unreadable: the run stops with rc 1, deploys nothing, and keeps the second copy 0600 and named.
+- MPSCALC-119: `infra/scripts/validate.sh` uses `$BICEP`, else `bicep` on PATH, and nothing else. With neither, it stops before any step and calls no az. The README says the same.
+- MPSCALC-201: a just-created all-roles group is read back and must be security-only before any role is assigned to it. Otherwise the run stops, and the stop text does not claim that nothing changed.
+- MPSCALC-173: `tools/demo/seed.py --dry-run` makes GET requests only and writes nothing, and prints counts only. With `--client-credentials` it checks the settings and makes no request. A dry run in which every chosen scenario already exists now also ends with its dry-run line; a real run is unchanged.
+
+## Deploy notes
+- **Exit 3 on an unproven start.** If az's status poll fails, the run now ends exit 3 where it used to end 0. Confirm the start by hand, then record the deploy.
+- **Stop when the overlay changed.** If the hosted overlay changes between PRE-1 and the deploy call, the run stops with rc 1 and nothing deployed. A transient Kudu error on either overlay read also stops the run; a re-run is the remedy. A clean deploy now makes two overlay GETs where it used to make one.
+- **az's own failure code.** A failing `az webapp deploy` ends the run with az's own code before the live check, as before; it is now pinned by a test.
+
+## Held, not in this change
+Three operator-wording items are held for the product owner and are not built: a line of its own at the final exit 3, the wording of the stop when the overlay changed after PRE-1, and what a seed dry run says about `--out-dir` (a dry run does not check it; a real run may still refuse it).
+
+## Test plan
+- Local, python-job loop of ci.yml: 11 files, 241 tests, all pass on the branch and on its merge with current main. No test name lost; 41 rows added over the base, 5 of them in the follow-up commits.
+- Each new row was red without the code it pins, shown by mutants in a throw-away tree (including the exit-code pass-through removed, the exit code replaced by 1, and `-o json` dropped). A program check showed the seed dry run sends GET requests only and writes nothing.
+- All tests use a fake az. The real az was never reached.
+- Hosted CI and CodeQL on this PR.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,0 +1,15 @@
+## Summary
+BLUF: one new test row, test code only (one file, 26 lines added, none removed, nothing under src/), for MPSCALC-339. It sends the one-null and the 100,000-null supplies draft, prints both answer sizes, and asserts the large answer is no longer than the small answer plus the text of the capped entries. Nothing is deployed by this merge.
+
+- MPSCALC-339: new row `WalkCap_null_consumables_answer_stays_the_size_of_the_cap_not_of_the_input` in QuoteWalkCaps.cs (runs on the plain and the sign-in host, so 2 test instances). Today's sizes: one null 221 bytes, 100,000 nulls 1,396 bytes, bound 1,396. The bound is computed from the cap and the printed entry text; there is no byte constant and no list-equality assertion in the row. The printed line shows with detailed console verbosity and in the trx output; on a failure the message carries both sizes.
+- Red-first: with the cap on the null walk removed (PurchaseValidation.cs, the loop at line 309) the row fails by its size assertion (6,189,116 bytes against the bound); with the cap one too high (21 listed) it fails too (1,455 against 1,396). With the cap one too low (19 listed) the row stays green: it is an upper bound on size, and the existing list rows hold the count.
+
+## Checks
+- Build Release: 0 warnings. Tests: Engine 743, Import 196, Api 3483 passed, 0 failed, at the branch head and on the tree merged with current main. Test names: 0 lost, exactly 2 gained (the row on both hosts).
+- No existing test line changed. The row is the original builder's own, so its green is not an independent run for MPSCALC-339; an independent gate ran it as above.
+
+## What is NOT claimed
+- The evidence runs a builder made on MPSCALC-325, -338, -333, -324, -340, -341, -302 and -207 (mutants in a throw-away tree) are a builder's runs, are not in this change, and move nothing.
+- MPSCALC-331 and the lineage-note residue of MPSCALC-207 stay held.
+- Two guards (PurchaseValidation.cs lines 147 and 165) are equivalent in output to the trim helper behind them and are not pinned separately by any row; the same holds before and after this change.
+- Hosted CI and CodeQL are Tuesday's to read before the squash.

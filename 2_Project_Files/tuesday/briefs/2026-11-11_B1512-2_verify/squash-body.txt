@@ -1,0 +1,9 @@
+Nothing is deployed by this merge; MPS hosted deploys happen only on the product owner's card. The next real deploy behaves differently: exit 3 when the start is not proven, a stop (rc 1, nothing deployed) when the overlay changed after PRE-1, and az's own failure code passed through when az webapp deploy fails. MPSCALC-223 and MPSCALC-349 are held. Three operator-wording items (a line at the final exit 3, the overlay-changed stop wording, and the seed dry run's word on --out-dir) are held for the product owner.
+
+- MPSCALC-126: an app deploy is proven only when az webapp deploy (-o json) reports RuntimeSuccessful with at least one instance up; anything else ends exit 3 after the byte and HSTS checks. A failing az ends the run with its own exit code before any check; rows pin that and the -o json. The header comment names the new exit 3 cause.
+- MPSCALC-203: overlay copies folder 0700 and copies 0600; the overlay read is one GET with no retry; a sha256 re-read right before az webapp deploy stops the run (rc 1, nothing deployed, copy kept) if the overlay changed or cannot be read.
+- MPSCALC-119: validate.sh uses BICEP or bicep on PATH only and never calls az.
+- MPSCALC-201: a just-created all-roles group must read back security-only before any role goes to it.
+- MPSCALC-173: seed.py --dry-run makes GET requests only and writes nothing; a dry run with every chosen scenario present still ends with its dry-run line.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
