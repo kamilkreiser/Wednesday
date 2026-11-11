@@ -67050,5 +67050,90 @@
    "CARD hpsmpoc-424-saved-register-one-bad-entry-1102",
    "CARD hpsmpoc-phase-decisions-waiting-1111"
   ]
+ },
+ {
+  "id": "wed-morning-plan-1111",
+  "client_project": "WED",
+  "title": "Morning 11 Nov: Wednesday on the Mac mini; copy to the new drive done; cut-over after one merge",
+  "bluf": "Late card, sorry: the drive work took the morning and I missed posting it. Where things stand: I moved to the always-on Mac mini at 09:31 and set it up (rsync, Postgres tools, the dashboard link, all 7 of my scheduled jobs, the Spark tunnel, your two GitHub logins). Your Testing Agent MAIN Finder copy had stopped short; all three of my copies have now finished cleanly. The new TerraMaster + Samsung 990 PRO measured 3.2 GB/s sustained writes against the UGREEN + Crucial dropping to 100-300 MB/s, and it held about 700 GB of writes over 80 minutes with zero drops. Secuura: gate 307 passed PR 2170 with notes; the merge agent B 131st is setting up its first merge (PR 2163) with eight approved PRs queued; the Spark held KS-2021 (a password-check fix), and a harness change built today lets it take tickets that rename tests (KS-2149, KS-2155 being briefed now). Awaiting you: Secuura/Blockchain 1 (the lawyer pack), WED 2 (this card and the nightly NAS mirror card). Plan: verify the copy, cut over after B 131st's merge, then raise agent R 95th for the unraised rows. (Override of prior rulings: this is the daily morning card for 11 Nov; the earlier morning cards were other days.)",
+  "default_action": "After 2 h: a. I call you on this board when the floor is empty and the verification is clean, before renaming anything.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Cut over after B 131st's merge",
+    "detail": "B 131st finishes PR 2163 and wraps; final catch-up copy; verify (nothing left to copy, file counts per folder both sides); rename new drive to DevMASTER and old to DevMASTER_OLD; you relaunch me from the new drive. Probably within the hour."
+   },
+   {
+    "key": "b",
+    "label": "Cut over now",
+    "detail": "I tell B 131st to wrap at its next clean point, before its merge; PR 2163 waits for the next merge agent."
+   },
+   {
+    "key": "c",
+    "label": "Cut over tonight",
+    "detail": "Agents keep working on the old drive all day; I run the final pass and the rename tonight when you are free to relaunch me."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-11T11:49:27.782980+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-11T11:55:59.984600+11:00",
+  "prior_rulings_overridden": [
+   "CARD secuura-ks670-blockfrost-plan",
+   "CARD wed-morning-plan-1026",
+   "CARD wed-morning-plan-1027",
+   "CARD wed-morning-plan-1028",
+   "CARD wed-morning-plan-1029",
+   "CARD wed-morning-plan-1030",
+   "CARD wed-morning-plan-1031",
+   "CARD wed-morning-plan-1101",
+   "CARD wed-morning-plan-1102",
+   "CARD wed-morning-plan-1103",
+   "CARD wed-morning-fleet-activity-1104",
+   "CARD wed-morning-fleet-activity-1105",
+   "CARD wed-morning-plan-1106",
+   "CARD wed-secuura-usage-89pct-login-by-morning-1107",
+   "CARD wed-morning-fleet-activity-1107",
+   "CARD wed-morning-fleet-activity-1109",
+   "CARD wed-morning-plan-1110"
+  ]
+ },
+ {
+  "id": "wed-nightly-nas-mirror-old-nas-1111",
+  "client_project": "WED",
+  "title": "Nightly drive mirror still points at the old NAS: repoint it to the new one, or retire it?",
+  "bluf": "My nightly job mirrors DevMASTER to the OLD NAS (192.168.8.190, share Development). From the Mac mini that NAS does not answer (ssh timed out, share not mounted), so the job refuses every night: no backup is happening, and nothing is damaged. The new NAS (192.168.20.154) has a Backup share mounted on the Mac mini, 11 TB with 1% used. I recommend pointing the nightly mirror there, copy-only and never deleting, as before. (Override of prior rulings: the Sept card stopped and partitioned the old NAS leg; this asks about the new NAS address, a different question.)",
+  "default_action": "After 24 h: c. Nothing changes and the job keeps refusing until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Repoint to the new NAS's Backup share",
+    "detail": "Same job, same copy-only rules, target the Backup share on the new NAS; I test it once by hand, check the counts, and tell you."
+   },
+   {
+    "key": "b",
+    "label": "Retire the nightly mirror",
+    "detail": "Unload the job; backups happen only as dated offloads to DEV-Working when I need them."
+   },
+   {
+    "key": "c",
+    "label": "Leave it until the old NAS is back",
+    "detail": "Keep it pointed at the old NAS; it keeps refusing until that NAS is reachable from the Mac mini."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-11T11:49:31.131580+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-11T11:55:56.296381+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-08 11:50",
+   "2026-09-16 18:51",
+   "CARD wed-nas-nightly-leg-has-never-completed",
+   "CARD secuura-ks-1410-ks-1214-mcp-rest-mirror-file-reads-1106"
+  ],
+  "delivered_artefact": "2_Project_Files/scheduler/nas_push.sh (real-mode DST -> /Volumes/Backup/DevMASTER-mirror, mount check on /Volumes/Backup; backup .pre-1111-newnas); marker /Volumes/Backup/DevMASTER-mirror/.devnas-sync-state; arms 17/0; dry run passed preconditions 11:57",
+  "delivered_ts": "2026-11-11T11:59:28.493369+11:00"
  }
 ]
