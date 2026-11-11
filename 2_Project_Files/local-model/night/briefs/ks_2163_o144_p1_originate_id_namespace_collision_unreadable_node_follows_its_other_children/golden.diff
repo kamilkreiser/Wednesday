@@ -1,0 +1,114 @@
+diff --git a/Blockchain/Dev/services/originate/src/utils/idNamespaceCollision.ts b/Blockchain/Dev/services/originate/src/utils/idNamespaceCollision.ts
+--- a/Blockchain/Dev/services/originate/src/utils/idNamespaceCollision.ts
++++ b/Blockchain/Dev/services/originate/src/utils/idNamespaceCollision.ts
+@@ -69,3 +69,13 @@
+     // KS-1658: an unreadable node is skipped on its own, not with its subtree: a readable refusal in its `cause` is still found.
+-    try { void [o.originalCode, o.code, o.constraint, o.originalMessage, o.message, Object.keys(o)]; } catch { try { visit(o.cause, depth + 1); } catch { /* the cause cannot be read either */ } return; }
++    try { void [o.originalCode, o.code, o.constraint, o.originalMessage, o.message, Object.keys(o)]; } catch {
++      try { visit(o.cause, depth + 1); } catch { /* the cause cannot be read either */ }
++      // KS-2163: the node's OTHER own enumerable children are followed too, each read in its own try, so a readable refusal under any of them is still found.
++      let keys: string[] = [];
++      try { keys = Object.keys(o); } catch { /* the own keys cannot be listed */ }
++      for (const key of keys) {
++        if (key === 'cause') continue;
++        try { visit(o[key], depth + 1); } catch { /* this child cannot be read */ }
++      }
++      return;
++    }
+     const sqlstate = str(o.originalCode) ?? str(o.code);
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks2163-an-unreadable-node-still-yields-a-readable-refusal-under-its-other-children.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks2163-an-unreadable-node-still-yields-a-readable-refusal-under-its-other-children.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks2163-an-unreadable-node-still-yields-a-readable-refusal-under-its-other-children.test.ts
+@@ -0,0 +1,91 @@
++/**
++ * KS-2163 (gate AU1's N2 on #1634, KS-1658) - when the read probe in idNamespaceCollision.ts finds a node it cannot read (a throwing
++ * getter, a Proxy trap), it follows only that node's `cause`. A readable migration 050 or 051 refusal under any OTHER child of that
++ * node (`meta.driverAdapterError.cause` under a Prisma wrapper, an `errors` array on an AggregateError) is not recognised, and the
++ * caller answers 500 where 409 is correct. After the fix an unreadable node also contributes its other own enumerable children, each
++ * read in its own try, with the same depth bound and seen-set. The control cells keep what must not change.
++ */
++import {
++  isIdNamespaceCollision,
++  isLiveAnchorIdClaim,
++  ID_NAMESPACE_CONSTRAINT,
++  LIVE_ANCHOR_ID_CONSTRAINT,
++  MIGRATION_MESSAGES,
++} from '../utils/idNamespaceCollision';
++
++const boom = (): never => { throw new Error('ks2163 unreadable'); };
++const refusal = (constraint: keyof typeof MIGRATION_MESSAGES) => ({
++  code: '23505',
++  constraint,
++  message: MIGRATION_MESSAGES[constraint],
++});
++// An outer node whose `code` getter throws (so the up-front read fails), carrying the given children as own enumerable properties.
++const unreadableWith = (children: Record<string, unknown>) => {
++  const outer: Record<string, unknown> = { message: 'wrapper' };
++  Object.defineProperty(outer, 'code', { get: boom, enumerable: true });
++  for (const [key, value] of Object.entries(children)) {
++    Object.defineProperty(outer, key, { value, enumerable: true });
++  }
++  return outer;
++};
++
++describe('KS-2163 - an unreadable node still yields a readable refusal under any of its own children', () => {
++  it('RED ks2163 R1: a 050 refusal at meta.driverAdapterError.cause under an unreadable wrapper is found', () => {
++    const err = unreadableWith({ meta: { driverAdapterError: { name: 'DriverAdapterError', cause: refusal(ID_NAMESPACE_CONSTRAINT) } } });
++    expect(isIdNamespaceCollision(err)).toBe(true);
++    expect(isLiveAnchorIdClaim(err)).toBe(false);
++  });
++
++  it('RED ks2163 R2: a 050 refusal inside an errors array on an unreadable wrapper is found', () => {
++    const err = unreadableWith({ errors: [{ message: 'other' }, refusal(ID_NAMESPACE_CONSTRAINT)] });
++    expect(isIdNamespaceCollision(err)).toBe(true);
++  });
++
++  it('RED ks2163 R3: a 051 refusal under an unreadable wrapper child is found as the live-anchor claim', () => {
++    const err = unreadableWith({ inner: refusal(LIVE_ANCHOR_ID_CONSTRAINT) });
++    expect(isLiveAnchorIdClaim(err)).toBe(true);
++    expect(isIdNamespaceCollision(err)).toBe(false);
++  });
++
++  it('RED ks2163 R4: a sibling child whose getter throws does not hide the readable refusal beside it', () => {
++    const err = unreadableWith({ inner: refusal(ID_NAMESPACE_CONSTRAINT) });
++    Object.defineProperty(err, 'broken', { get: boom, enumerable: true });
++    expect(isIdNamespaceCollision(err)).toBe(true);
++  });
++
++  it('control ks2163 C1: an unreadable wrapper whose child holds some OTHER unique violation answers false', () => {
++    const err = unreadableWith({ inner: { code: '23505', constraint: 'documents_pkey', message: 'duplicate key' } });
++    expect(isIdNamespaceCollision(err)).toBe(false);
++    expect(isLiveAnchorIdClaim(err)).toBe(false);
++  });
++
++  it('control ks2163 C2: an unreadable wrapper with an unreadable child and no refusal answers false and does not throw', () => {
++    const err = unreadableWith({});
++    Object.defineProperty(err, 'broken', { get: boom, enumerable: true });
++    expect(() => isIdNamespaceCollision(err)).not.toThrow();
++    expect(isIdNamespaceCollision(err)).toBe(false);
++  });
++
++  it('control ks2163 C3: a Proxy whose ownKeys throws and which holds no refusal answers false and does not throw', () => {
++    const err = new Proxy({ code: '23505' }, { ownKeys: boom });
++    expect(() => isIdNamespaceCollision(err)).not.toThrow();
++    expect(isIdNamespaceCollision(err)).toBe(false);
++  });
++
++  it('control ks2163 C4: an ordinary node-postgres 050 refusal is still recognised as 050 and not as 051', () => {
++    expect(isIdNamespaceCollision(refusal(ID_NAMESPACE_CONSTRAINT))).toBe(true);
++    expect(isLiveAnchorIdClaim(refusal(ID_NAMESPACE_CONSTRAINT))).toBe(false);
++  });
++
++  it('control ks2163 C5: the depth bound still applies through the child path (a refusal behind five unreadable wrappers is NOT found)', () => {
++    let node: unknown = refusal(ID_NAMESPACE_CONSTRAINT);
++    for (let i = 0; i < 5; i += 1) node = unreadableWith({ inner: node });
++    expect(isIdNamespaceCollision(node)).toBe(false);
++  });
++
++  it('control ks2163 C6: a cyclic unreadable wrapper terminates and answers false', () => {
++    const err = unreadableWith({});
++    Object.defineProperty(err, 'self', { value: err, enumerable: true });
++    expect(isIdNamespaceCollision(err)).toBe(false);
++  });
++});
