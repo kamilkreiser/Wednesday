@@ -68609,5 +68609,45 @@
    "CARD mps-bot-prs-no-scan-route-1104",
    "CARD datasec-bot-pr-scan-findings-1104"
   ]
+ },
+ {
+  "id": "secuura-ks1466-document-rules-untyped-creates-1112",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1466: should an untyped document create be checked against the default DOCUMENT type's rules?",
+  "bluf": "Kam, one ruling, no hands needed. Today POST /api/documents with no documentType skips every rule the catalogue sets for the default DOCUMENT type (active flag, creator verification level, MFA, metadata schema, approval): enforcement.ts:101 resolves it to an empty type (KS-1466, read on Linear 10:2x). Closing the gap is an authorization change: callers who send untyped creates today could start getting 403s, the same lockout risk as KS-1190. A Spark round stopped on it at a pre-check because it needs this decision (operator o162). (Prior-rulings gate overridden: the five matched cards share only generic words; KS-1952 ruled refusing creates while Redis is down, KS-1019/1256/1402/1773 other subjects; none decided untyped creates against DOCUMENT rules.)",
+  "default_action": "If you have not ruled: (b) - Wednesday has a seat measure the stored DOCUMENT rules on kintsugi and demo and report; nothing is enforced and no code changes.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Close it, measure first",
+    "detail": "A build seat first reads (read-only) what the stored DOCUMENT entry requires on kintsugi and demo; if it would refuse any current caller, it stops and Wednesday re-cards with the numbers. Otherwise: test first, tier-1 Opus gate, merge to develop; no deploy without the October grant's order; operator doc note in the same PR."
+   },
+   {
+    "key": "b",
+    "label": "Measure only for now",
+    "detail": "The seat measures the stored DOCUMENT rules on both boxes and the callers that send untyped creates, reports, and changes nothing. You rule on enforcing later with the numbers."
+   },
+   {
+    "key": "c",
+    "label": "Leave the gap",
+    "detail": "Record on KS-1466 why untyped creates stay unchecked; no code change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-12T10:22:21.433629+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-09-01 17:55",
+   "2026-09-15 09:28",
+   "2026-09-17 08:47",
+   "CARD secuura-ks1019-blockchain-block-untyped",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-ks1402-who-creates-the-holder-1019",
+   "CARD secuura-ks1773-document-lookup-public-1028",
+   "CARD secuura-ks1952-redis-down-doctype-rules-1110"
+  ]
  }
 ]
