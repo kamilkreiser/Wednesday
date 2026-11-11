@@ -1,0 +1,16 @@
+# doc_only: two comment lines in 038a's header. Operator o149.
+tier=doc_only
+diff --git a/Blockchain/Dev/migrations/038a_ks1054_core_tables_before_039.sql b/Blockchain/Dev/migrations/038a_ks1054_core_tables_before_039.sql
+--- a/Blockchain/Dev/migrations/038a_ks1054_core_tables_before_039.sql
++++ b/Blockchain/Dev/migrations/038a_ks1054_core_tables_before_039.sql
+@@ -13,8 +13,8 @@
+ --     * `auth_find_oauth_app_by_client_id` — the only pre-auth OAuth client lookup;
+ --       every call answers 42883;
+ --     * the `oauth_apps_auth_lookup` policy;
+---     * tenant isolation on oauth_apps, svc_webhooks and charge_events (no RLS at
+---       all), and on certifications (RLS forced, no tenant_isolation policy).
++--     * tenant isolation on oauth_apps, svc_webhooks and charge_events: 038a creates them
++--       before 039, which then isolates them; NOT certifications (KS-1376: 058 does).
+ --
+ -- WHY THIS SHAPE, and not a re-run of the file stage after CORE:
+ --   `scripts/run-migrations.sh` — the compose `migrations` service's own runner, and

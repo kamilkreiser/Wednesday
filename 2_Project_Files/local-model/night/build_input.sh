@@ -259,6 +259,11 @@ product = f"{subdir}/{product_rel}"
 tool_mode = "tool" in pins
 config_class = None
 frontend_mode = False    # 2026-11-10: product under frontend/<pkg>/src (see the FRONTEND TIER branch below)
+def _brief_has_tamper():
+    """2026-11-12 (o148): does night/briefs/<ticket>.md carry a `## Tamper` heading? (read here: the early-brief read comes later, in section 3)"""
+    _bp = os.path.join(os.environ.get("NIGHT_BRIEFS_DIR", ""), f"{ticket}.md")
+    return bool(os.environ.get("NIGHT_BRIEFS_DIR")) and os.path.isfile(_bp) and re.search(r"(?im)^##+\s*Tamper\b", open(_bp, encoding="utf-8").read()) is not None
+scripts_check = False    # 2026-11-12 (o148): a spec-examples guard file scripts/spec-examples/check/*.mjs admitted as a PRODUCT (see the branch below)
 scripts_tamper = False   # 2026-10-29: a scripts/ product admitted ONLY as a test-only tamper target (see the branch below)
 def _config_class(rel):
     """The config allow-list. Returns 'package.json' | 'dockerignore' | None. No '..', no absolute path, nothing else."""
@@ -291,6 +296,20 @@ elif product_rel.startswith("services/"):
     service_dir = "services/" + product_rel.split("/")[1]
 elif product_rel.startswith("packages/shared/"):
     service_dir = "packages/shared"
+elif re.fullmatch(r"scripts/spec-examples/check/[A-Za-z0-9_\-]+\.mjs", product_rel) and not _brief_has_tamper():
+    # 2026-11-12 SPEC-EXAMPLES GUARD TIER (o148; KS-678): EXACTLY scripts/spec-examples/check/<name>.mjs is admitted as a PRODUCT the diff edits
+    # (code_patch2; the brief carries no `## Tamper` block). Nothing wider: every other scripts/ path still falls to the tamper-target branch
+    # below (test-only, needs `## Tamper`) and a path outside check/ is refused. The test host is the package of the pinned test_file=, the
+    # runner is that package's vitest, and the reference test must be pinned with ref= (no test imports a script).
+    _tf = pins.get("test_file", "").replace(subdir + "/", "", 1)
+    _mt = re.fullmatch(r"((?:services/[a-z0-9\-]+|packages/shared))/src/__tests__/[A-Za-z0-9_\-.]+\.test\.ts", _tf)
+    if not _mt:
+        refuse(f"scripts/ product {product_rel}: the spec-examples guard tier needs test_file=<services/<x>/src/__tests__/<name>.test.ts> naming the test host (got {_tf!r})")
+    if "ref" not in pins:
+        refuse(f"scripts/ product {product_rel}: pin the reference test with ref= (no test imports a script)")
+    scripts_check = True
+    service_dir = _mt.group(1)
+    print(f"SPEC-EXAMPLES GUARD TIER: product {product_rel} is a guard script the tests RUN and the diff EDITS; test host (service_dir) = {service_dir} (from test_file=)")
 elif re.fullmatch(r"scripts/[A-Za-z0-9_\-./]+\.(?:cjs|mjs|js|ts|sh)", product_rel) and ".." not in product_rel.split("/"):
     # 2026-10-29 SCRIPTS TAMPER TARGET (Wednesday; operator 7's finding, KS-1775 / KS-1546): a repo script under scripts/
     # is admitted ONLY as the product a TEST-ONLY brief plants its tamper into; the model never edits it (A3 refuses a
@@ -489,11 +508,11 @@ tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts") or ((config_c
 if not tests and not (_hcfg_ok and "ref" in pins):
     # 2026-11-11 o136: a package with NO test yet (frontend/admin) is admitted only with a harness-supplied vitest config AND a pinned ref= (a read-only style template from any package)
     refuse(f"no test files under {test_dir_rel} at the tip")
-mod_rel = product_rel if (tool_mode or config_class or scripts_tamper) else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
+mod_rel = product_rel if (tool_mode or config_class or scripts_tamper or scripts_check) else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
 mod_noext = re.sub(r"\.tsx?$" if frontend_mode else r"\.ts$", "", mod_rel)                          # middleware/audit
 mod_base = os.path.basename(mod_noext)                             # audit
 scored = []
-for t in ([] if (config_class or scripts_tamper) else tests):   # config tier: a config file is imported by no test; the reference is a style template only
+for t in ([] if (config_class or scripts_tamper or scripts_check) else tests):   # config tier: a config file is imported by no test; the reference is a style template only
     body = git("show", f"{tip}:{t}").stdout
     _pfx = r"(?:\.{1,2}|@)/" if frontend_mode else r"\.{1,2}/"   # frontend: the package's `@/` alias (vite.config resolve.alias) is src/
     imp = re.findall(r"from\s+['\"](" + _pfx + r"[^'\"]+)['\"]", body) + re.findall(r"import\(\s*['\"](" + _pfx + r"[^'\"]+)['\"]\s*\)", body)
@@ -550,10 +569,13 @@ note = (
      f"product module (`{mod_noext}`) and drives it in-process" +
      (f" with vi.mock stubs for: {', '.join(ref_mocks[:12])}" if ref_mocks else " (no vi.mock — it calls the module directly)") +
      ". Copy its app-building / import / mock shape; do NOT modify it. ")
-    if not (config_class or scripts_tamper) else
+    if not (config_class or scripts_tamper or scripts_check) else
     (f"READ-ONLY template: `{ref_path}` is an EXISTING test; copy its style only, do NOT modify it. The product `{product_rel}` "
      "is a SCRIPT that the tests RUN (it is not imported) and it is NOT edited: it is only where the checker plants the tamper. ")
     if scripts_tamper else
+    (f"READ-ONLY template: `{ref_path}` is an EXISTING test; copy its style only, do NOT modify it. The product `{product_rel}` "
+     "is a guard SCRIPT that the tests RUN as a child process (it is not imported); your diff edits it exactly as the brief dictates. ")
+    if scripts_check else
     (f"READ-ONLY template: `{ref_path}` is an EXISTING test in the same __tests__ directory; copy its import style only, "
      f"do NOT modify it. The product `{product_rel}` is a CONFIG file ({config_class}), not code: the new test READS it from disk "
      "and asserts on its text; it imports no module of the product. ")) +

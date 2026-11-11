@@ -8,13 +8,13 @@
 #
 # NO MODEL CALL and NO SPARK ENDPOINT: every round below is --control (golden in place of a model answer; round.sh skips
 # step 2) or --dry-run with SPARK_URL at a closed local port (the endpoint leg is reported DOWN, never contacted).
-#   T1  LINT ACCEPT     ks_1614_p1 (as on disk)                       -> brief_lint rc 0, B_TIER=test_only
-#   T2  CONTROL PASS    round.sh ks_1614_p1 --control                 -> rc 0, CONTROL-PASS, golden BYTE-IDENTICAL,
+#   T1  LINT ACCEPT     ks_1775_p1 (as on disk)                       -> brief_lint rc 0, B_TIER=test_only
+#   T2  CONTROL PASS    round.sh ks_1775_p1 --control                 -> rc 0, CONTROL-PASS, golden BYTE-IDENTICAL,
 #                       checker mode test_only, PASS A3 (test-only), tamper planted + reverted
-#   T2b DRY-RUN         round.sh ks_1614_p1 --dry-run (closed port)   -> rc 0, DRY-RUN OK on code_patch/task.md, tamper :157
+#   T2b DRY-RUN         round.sh ks_1775_p1 --dry-run (closed port)   -> rc 0, DRY-RUN OK on code_patch/task.md, tamper :535
 #   T3a TAMPERED GOLDEN golden's expected text changed (brief kept)   -> rc 1, CONTROL-FAIL
 #   T3b WEAK CELL       brief+golden both drop the shownIn([1n]) line -> rc 1, CONTROL-FAIL at A4 (green under the tamper)
-#   T4a REFUSE          golden.diff also carries a verification.ts hunk          -> rc 2, PRODUCT
+#   T4a REFUSE          golden.diff also carries a check.cjs hunk          -> rc 2, PRODUCT
 #   T4b REFUSE          the exact-change fence names the product in a file header -> rc 2, PRODUCT
 #   T4c REFUSE          the header declares two products                          -> rc 2, CONTRACT
 #   T4d REFUSE          `## Tampers` (tasks/test_only's shape) instead of `## Tamper` -> rc 2, names tasks/test_only
@@ -29,17 +29,17 @@
 # rc 0 all arms PASS · 1 any FAIL. bash 3.2; no cd; nothing deleted; read verbs only on the Secuura checkout.
 set -uo pipefail
 SPARK="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; LM="$(dirname "$SPARK")"
-BR="$LM/night/briefs"; KS="$BR/ks_1614_p1"
+BR="$LM/night/briefs"; KS="$BR/ks_1775_p1"   # 2026-11-12 (o149): re-pinned from ks_1614_p1 (its tamper file verification.ts was refactored, 675 lines moved; KS-1614 In Progress). ks_1775_p1 is the one test_only brief on disk that reaches DRY-RUN OK at develop dbde0ac76339 (scanned all 60); same shape: a scripts/ tamper target + ONE existing test modified in place.
 T="${SPARK_TEST_TMP:-$(mktemp -d "${TMPDIR:-/tmp}/to_arms.XXXXXX")}"; mkdir -p "$T"
 CLOSED="http://127.0.0.1:9"
-# TO_ARMS_ALLOW_DRIFT=1: add allow_drift=1 to every round on the ks_1614_p1 brief and its copies — ONLY after measuring
+# TO_ARMS_ALLOW_DRIFT=1: add allow_drift=1 to every round on the ks_1775_p1 brief and its copies — ONLY after measuring
 # that develop's changes to the brief's files miss the edit points (2026-10-18 19:5x: #1560 moved verification.ts at
 # :1068/:1187/:1579; :146-:163 and the test file unchanged). The arms print it when set.
 KSP=""; [ "${TO_ARMS_ALLOW_DRIFT:-0}" = 1 ] && KSP="allow_drift=1"
 P=0; F=0
 ok()  { echo "ARM PASS $*"; P=$((P+1)); }
 bad() { echo "ARM FAIL $*"; F=$((F+1)); }
-echo "test_only_arms: fixtures in $T${KSP:+ · ks_1614_p1 rounds pinned $KSP (TO_ARMS_ALLOW_DRIFT=1)}"
+echo "test_only_arms: fixtures in $T${KSP:+ · ks_1775_p1 rounds pinned $KSP (TO_ARMS_ALLOW_DRIFT=1)}"
 # rround <out> <cmd...>: run a round; on rc 3 BUSY (another seat holds the ONE-request lock) wait 10 s and retry, up to 30 min
 rround() {
   local out="$1"; shift; local i=0 rc
@@ -52,36 +52,38 @@ rround() {
 }
 lastrun() { sed -n 's/^SPARK ROUND [^:]*: .* · \(\/[^ ]*\)$/\1/p' "$1" | tail -1; }
 
-# ---------------------------------------------------------------- fixtures (copies of ks_1614_p1 in scratch)
+# ---------------------------------------------------------------- fixtures (copies of ks_1775_p1 in scratch)
 python3 - "$KS" "$T" "$SPARK/cache/src" <<'PY'
 import os, re, shutil, subprocess, sys
 ks, t, src = sys.argv[1:4]
-brief = open(os.path.join(ks, "KS-1614.md"), encoding="utf-8").read()
+brief = open(os.path.join(ks, "KS-1775.md"), encoding="utf-8").read()
 gold = open(os.path.join(ks, "golden.diff"), encoding="utf-8").read()
 pins = open(os.path.join(ks, "spark.pins"), encoding="utf-8").read()
-PROD = "Blockchain/Dev/services/api-gateway/src/routes/verification.ts"
-SHOWN = "+    expect(shownIn([1n])).toBe('[object Array]');\n"
+PROD = "Blockchain/Dev/scripts/typecheck-tests/check.cjs"
+NEWX = ", 0 new; 0 stale baseline entries"
 def mk(name, b=brief, g=gold, p=pins):
     d = os.path.join(t, name); os.makedirs(d, exist_ok=True)
-    open(os.path.join(d, "KS-1614.md"), "w", encoding="utf-8").write(b)
+    open(os.path.join(d, "KS-1775.md"), "w", encoding="utf-8").write(b)
     open(os.path.join(d, "golden.diff"), "w", encoding="utf-8").write(g)
     open(os.path.join(d, "spark.pins"), "w", encoding="utf-8").write(p)
-assert SHOWN in gold and SHOWN in brief and "@@ -163,7 +163,14 @@" in gold
+assert gold.count(NEWX) == 4 and brief.count(NEWX) >= 4 and "line=535" in pins
 # T3a: the golden's expected text changed; the brief is untouched
-mk("t3a_tampered_golden", g=gold.replace("toBe('[object Array]')", "toBe('1')"))
-# T3b: a cell that cannot red under the tamper (only the toThrow expect is left), consistent in brief AND golden
-mk("t3b_weak_cell", b=brief.replace(SHOWN, "").replace("@@ -163,7 +163,14 @@", "@@ -163,7 +163,13 @@"),
-   g=gold.replace(SHOWN, "").replace("@@ -163,7 +163,14 @@", "@@ -163,7 +163,13 @@"))
+mk("t3a_tampered_golden", g=gold.replace(NEWX, NEWX + "z"))
+# T3b: a cell that cannot red under the tamper (the new expectation is a suffix of the tampered "10 new; ..." text), consistent in brief AND golden
+WEAK = NEWX[2:]
+mk("t3b_weak_cell", b=brief.replace(NEWX, WEAK), g=gold.replace(NEWX, WEAK))
 # T4a: golden also edits the product (the tamper written as a product hunk)
 tip = re.search(r"^Tip:\s*`([0-9a-f]{40})`", brief, re.M).group(1)
 v = subprocess.run(["git", "-C", src, "show", f"{tip}:{PROD}"], capture_output=True, text=True, check=True).stdout.split("\n")
-assert v[156] == "      shown = Object.prototype.toString.call(value);", v[156]
-prod_hunk = (f"--- a/{PROD}\n+++ b/{PROD}\n@@ -156,3 +156,3 @@\n {v[155]}\n-{v[156]}\n+      shown = String(value);\n {v[157]}\n")
+assert "stale baseline entr" in v[534], v[534]
+prod_hunk = (f"--- a/{PROD}\n+++ b/{PROD}\n@@ -534,3 +534,3 @@\n {v[533]}\n-{v[534]}\n+{v[534]} \n {v[535]}\n")
 mk("t4a_golden_edits_product", g=gold + prod_hunk)
 # T4b: the brief's exact-change fence carries a file header naming the product
-mk("t4b_fence_names_product", b=brief.replace("```diff\n@@ -163,7", f"```diff\n--- a/{PROD}\n+++ b/{PROD}\n@@ -163,7", 1))
+assert "```diff\ndiff --git" in brief
+mk("t4b_fence_names_product", b=brief.replace("```diff\ndiff --git", f"```diff\n--- a/{PROD}\n+++ b/{PROD}\ndiff --git", 1))
 # T4c: two declared products
-mk("t4c_two_products", b=brief.replace("\nTest file: `", f"\nFile: `Blockchain/Dev/services/api-gateway/src/index.ts`  (second product)\nTest file: `", 1))
+assert "\nTest file: `" in brief
+mk("t4c_two_products", b=brief.replace("\nTest file: `", "\nFile: `Blockchain/Dev/scripts/typecheck-tests/other.cjs`  (second product)\nTest file: `", 1))
 # T4d: tasks/test_only's plural shape
 assert "\n## Tamper (" in brief
 mk("t4d_tampers_plural", b=brief.replace("\n## Tamper (", "\n## Tampers (", 1))
@@ -93,26 +95,26 @@ PY
 
 # ---------------------------------------------------------------- T1 lint accept
 python3 "$SPARK/brief_lint.py" "$KS" > "$T/T1.out" 2>&1; rc=$?
-if [ "$rc" -eq 0 ] && /usr/bin/grep -qx "B_TIER=test_only" "$T/T1.out"; then ok "T1 lint-accept ks_1614_p1: rc 0, B_TIER=test_only"
-else bad "T1 lint-accept ks_1614_p1: rc=$rc $(head -2 "$T/T1.out" | tr '\n' ' ' | cut -c1-200)"; fi
+if [ "$rc" -eq 0 ] && /usr/bin/grep -qx "B_TIER=test_only" "$T/T1.out"; then ok "T1 lint-accept ks_1775_p1: rc 0, B_TIER=test_only"
+else bad "T1 lint-accept ks_1775_p1: rc=$rc $(head -2 "$T/T1.out" | tr '\n' ' ' | cut -c1-200)"; fi
 
 # ---------------------------------------------------------------- T2 control PASS (the real brief dir, the real runs/)
 rround "$T/T2.out" bash "$SPARK/round.sh" "$KS" --control $KSP; rc=$?
 RUN2="$(lastrun "$T/T2.out")"; V2="$(tail -1 "$T/T2.out")"
 if [ "$rc" -eq 0 ] && echo "$V2" | /usr/bin/grep -q "CONTROL-PASS" && echo "$V2" | /usr/bin/grep -q "golden BYTE-IDENTICAL" \
-   && [ -n "$RUN2" ] && /usr/bin/grep -q "^mode: test_only (tamper at Blockchain/Dev/services/api-gateway/src/routes/verification.ts:157)" "$RUN2/checker.out" \
+   && [ -n "$RUN2" ] && /usr/bin/grep -q "^mode: test_only (tamper at Blockchain/Dev/scripts/typecheck-tests/check.cjs:535)" "$RUN2/checker.out" \
    && /usr/bin/grep -q "^PASS A3 (test-only)" "$RUN2/checker.out" && /usr/bin/grep -q "^A4 (test-only): tampered" "$RUN2/checker.out" \
    && /usr/bin/grep -q "^A4 (test-only): tamper reverted" "$RUN2/checker.out"; then
-  ok "T2 control ks_1614_p1: $V2"
-else bad "T2 control ks_1614_p1: rc=$rc $V2"; fi
+  ok "T2 control ks_1775_p1: $V2"
+else bad "T2 control ks_1775_p1: rc=$rc $V2"; fi
 
 # ---------------------------------------------------------------- T2b dry-run (closed port: the endpoint is never contacted)
 rround "$T/T2b.out" env SPARK_URL="$CLOSED" bash "$SPARK/round.sh" "$KS" --dry-run $KSP; rc=$?
 D2="$(sed -n 's/.* in \(\/[^;]*\/state\/dry\/[^;]*\);.*/\1/p' "$T/T2b.out" | tail -1)"
 TL="$( [ -n "$D2" ] && python3 -c 'import json,sys; print((json.load(open(sys.argv[1])).get("defect_line") or {}).get("tamper",{}).get("line",""))' "$D2/input.json" 2>&1)"
-if [ "$rc" -eq 0 ] && tail -1 "$T/T2b.out" | /usr/bin/grep -q "DRY-RUN OK.*code_patch/task.md" && [ "$TL" = "157" ]; then
-  ok "T2b dry-run ks_1614_p1: DRY-RUN OK, task code_patch/task.md, input tamper line $TL"
-else bad "T2b dry-run ks_1614_p1: rc=$rc tamper='$TL' $(tail -1 "$T/T2b.out" | cut -c1-220)"; fi
+if [ "$rc" -eq 0 ] && tail -1 "$T/T2b.out" | /usr/bin/grep -q "DRY-RUN OK.*code_patch/task.md" && [ "$TL" = "535" ]; then
+  ok "T2b dry-run ks_1775_p1: DRY-RUN OK, task code_patch/task.md, input tamper line $TL"
+else bad "T2b dry-run ks_1775_p1: rc=$rc tamper='$TL' $(tail -1 "$T/T2b.out" | cut -c1-220)"; fi
 
 # ---------------------------------------------------------------- T3 tampered goldens must FAIL (control, scratch runs)
 for arm in t3a_tampered_golden t3b_weak_cell; do
@@ -131,8 +133,8 @@ t4() { # t4 <arm> <grep for the reason>
   if [ "$rc" -eq 2 ] && /usr/bin/grep -q -- "$2" "$T/$1.out"; then ok "T4 $1: rc 2 — $(/usr/bin/grep -m1 -- "$2" "$T/$1.out" | cut -c1-200)"
   else bad "T4 $1: rc=$rc (want 2 + /$2/) $(tail -1 "$T/$1.out" | cut -c1-220)"; fi
 }
-t4 t4a_golden_edits_product "PRODUCT: .*golden.diff .*verification.ts"
-t4 t4b_fence_names_product "PRODUCT: .*exact change.*verification.ts"
+t4 t4a_golden_edits_product "PRODUCT: .*golden.diff .*check.cjs"
+t4 t4b_fence_names_product "PRODUCT: .*exact change.*check.cjs"
 t4 t4c_two_products "CONTRACT: the header declares 2 product"
 t4 t4d_tampers_plural "tasks/test_only/build_test_only_input.sh"
 t4 t4e_tamper_caps "REFUSED — tier test_only but the builder parsed no tamper"

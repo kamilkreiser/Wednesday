@@ -48,7 +48,10 @@ products = [full(p) for p in products]; tests = [full(t) for t in tests]
 if not (1 <= len(products) <= 3): refuse(f"{len(products)} product file(s) declared; code_patch2 takes 1-3")
 if not (1 <= len(tests) <= 2): refuse(f"{len(tests)} test file(s) declared; code_patch2 takes 1-2")
 svc_root = f"{subdir}/{service}/"
-outside = [p for p in products + tests if not p.startswith(svc_root)]
+# 2026-11-12 (o148): the spec-examples guard class <subdir>/scripts/spec-examples/check/<name>.mjs is admitted as a product OUTSIDE the one service
+# (build_input.sh admits it only with a test_file= naming the test host); nothing else outside svc_root is.
+_SPEC = re.compile(r"^" + re.escape(subdir) + r"/scripts/spec-examples/check/[A-Za-z0-9_\-]+\.mjs$")
+outside = [p for p in products + tests if not p.startswith(svc_root) and not (p in products and _SPEC.match(p))]
 if outside: refuse(f"not under the ONE service {svc_root} (A6/A7 measure one service): {outside}")
 bad_t = [t for t in tests if test_dir and not t.startswith(test_dir.rstrip("/") + "/")]
 if bad_t: refuse(f"test file(s) not under test_dir {test_dir}: {bad_t}")
