@@ -41,6 +41,16 @@ while :; do
   if [ "$s" != "$prev" ] || [ $((n % 6)) -eq 0 ]; then
     line="$(ts) $( [ "$s" != "$prev" ] && echo CHANGE || echo tick ) $s (was ${prev:-start}) load1=$(sysctl -n vm.loadavg | awk '{print $2}') $(nvme "$dev")"
     echo "$line" >> "$D/state.log"
+    # RE-ARM ON REMOUNT (2026-11-12 ledger: Kam's messages unread ~30 min after the 09:17 drop because
+    # every drop kills wake_watch_runner and wedges live_chat_poll, and nothing re-armed them).
+    case "$prev" in ABSENT*) if [ "$m" = MOUNTED ]; then
+      sleep 20
+      W=/Volumes/DevMASTER/WEDNESDAY; C="$W/2_Project_Files/fleet/cockpit"
+      for p in $(pgrep -f 'cockpit/live_chat_poll\.sh --seat wednesday'); do kill "$p"; done
+      python3 -I -c 'import subprocess,sys; log=open(sys.argv[2],"a"); p=subprocess.Popen(["bash",sys.argv[1],"--seat","wednesday"],stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True); print(p.pid)' "$C/live_chat_poll.sh" "$C/logs/live_chat_poll.log" > "$D/rearm_poll.out" 2>&1
+      WED_AGENT=wednesday bash "$C/arm_wake_watch.sh" > "$D/rearm_wake.out" 2>&1
+      echo "$(ts) REARMED after remount: poll pid $(cat "$D/rearm_poll.out") | $(tail -1 "$D/rearm_wake.out")" >> "$D/state.log"
+    fi ;; esac
     prev="$s"
   fi
   n=$((n + 1))
