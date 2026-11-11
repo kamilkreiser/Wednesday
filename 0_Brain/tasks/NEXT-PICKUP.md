@@ -17,7 +17,13 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
-## CHECKPOINT 00:4x 12 Nov by the 00:38 rotation-successor seat (ctx 50%) — READ THIS BLOCK FIRST (supersedes every block below where they differ)
+## CHECKPOINT 01:2x 12 Nov by the 00:38 seat (ctx ~70%) — READ THIS BLOCK FIRST (supersedes every block below where they differ)
+- develop 4f85ca04c622 (PR 2174 squash; Wednesday ls-remote 01:22). B 139th WRAPPED, scored 0.93, pane %53 closed (clean: the GONE listeners were gate 312's vitest workers).
+- FLOOR: R 99th %50 (round 2 building: rows 37, 38, 40, 41 KS-2160, 42 KS-1163; NEXT = READY FOR GATE round 2 -> one batched tier-2 gate + Spark shadow). S 57th %56 (board; filed KS-2166 HIGH (KYC four routes), KS-2167, KS-2168 Low; NEXT = the KS-1845 close, then the screen wave; its SPARK rows -> brief them as o147).
+- RUNNING (Agent, Sonnet, background; die with this seat -> re-commission from the same commission.md if no output): GATE 312 (0_Brain/reference/2026-11-12_gate312-tier2-pr2179-2182/: verdict.md; on GO/GWN tell R 99th and ADDENDUM the four PRs to the B lane; 2182's GO names the live API change) and the B 140th DRAFTER (0_Brain/reference/2026-11-12_drafter-seatB140/: brief_B140.md + notes.md; on return read whole, stamp, SEND_BRIEF_DRY_RUN=1 in a previous call, brief_and_launch with SEAT_MODEL_ENV=claude-sonnet-5-5 at ROOM). If a subagent's Write is refused it returns text: save it to its folder.
+- Spark idle with a written reason (pool screened dry by o143-o146). Promotions owed (claim shared tooling with Tuesday first): wed_push.sh, watcher launchd keepalive + doctor FAIL, --help advisory hook, morning-card check. INDEX refresh owed. Morning card wed-morning-plan-1112 after 06:00 (step 10a).
+
+## CHECKPOINT 00:4x 12 Nov by the 00:38 rotation-successor seat (ctx 50%)
 - develop cb46c28eef6f (Wednesday ls-remote 00:4x). Kam: 0 rows today (newest 22:08); reconcile 'to rule: 0'; inbox NEW 0 at 00:45; stale cards 0; fleet_ack: only Tuesday's Datasec flag (B 139th's QUESTION was never flagged, nothing to clear).
 - B 139th %53: plan CONFIRMED + set-up RELEASED 00:44 (briefs_staged/2026-11-12_B139_answer_plan.md; tap --mail verified 13:43:59Z). NEXT MAIL = its READY for PR 2172 -> head-pinned GO (NO-NOTES model briefs_staged/2026-11-11_B138_go_2173.md). Order 2172, 2174, 2175, 2177, 2176, 2178, 2169, 2170; wrap 60%.
 - R 99th %50: round 1 (rows 18, 20, 21+22, 36). PR 2179 (KS-2155, row 18) exists per B 139th's read. NEXT = its READY FOR GATE round 1 -> ONE batched tier-2 gate (Sonnet).
