@@ -17912,5 +17912,61 @@
   "project": "WED",
   "ts": "2026-11-11T21:39:28.364958+11:00",
   "text": "Done: about five of the twenty test tickets will be ones I'd normally give to Opus, scored as their own tier, so you'll see how the local candidates do on the hard work separately. Same 20 dollar cap."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-11T21:45:41.999674+11:00",
+  "text": "My honest opinion, with what's measured and what isn't kept apart.\n\nOne. Token cost. From memory, not checked tonight: Anthropic's price per token at a given capability has gone down, not up. Each new Opus has been cheaper per token than the last. What has gone up is how many tokens we burn: ten agents, rotations, gates. And on a subscription, what bites is the usage limit, not the price. I don't know whether war and deglobalisation will reverse that. My guess, and it is a guess: they hit hardware first, chips, memory and shipping, before per-token prices. Data centres are already built and competing on price.\n\nTwo. Should you wait? Yes, I think so. Nothing in our own numbers says local compute is the bottleneck. The Spark sat idle 97 percent of the time, and the Mac mini is coping. What limits us is Claude's attention, mine included, not memory. A machine bought now would mostly wait for work we can't yet give it. Newer chips with stronger neural engines may well change the local-model maths, but I can't measure an M6 or M7 tonight, so I won't pretend to.\n\nWhat would change my mind: the hosted test showing a local-class model doing unaided work at about 70 percent, or your usage limits starting to stop real work. If either happens, Apple's cancellable order is a cheap hedge, and I'd place it then."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-11T21:47:34.797198+11:00",
+  "text": "Agreed. I'll bring you the test result the moment it lands, measured against your 30 percent test, with the hard tickets shown separately."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-11T21:58:07.379257+11:00",
+  "text": "Kam, I need one thing from you to run the test: an OpenRouter API key. The old one was removed on 27 October after the last trial, when you were asked to revoke it, so there isn't one on this machine. Nothing was sent tonight and nothing was spent.\n\nSteps:\n\n1. At openrouter.ai, create a new key with a 5 dollar credit limit.\n\n2. Put it in WEDNESDAY's 4_Credentials/.env on the Mac mini, as one line: OPENROUTER_API_KEY= followed by the key.\n\n3. Tell me 'key in'.\n\nRationale: everything else is built and dry-run. That's 20 tickets, five of them Opus-hard, three models, no Claude-written fixes. The projected spend is under 1 dollar 50.\n\nOne finding already changes the picture. The best local candidate is DeepSeek V4.1 Flash, not MiMo. It fits a 256 gigabyte Studio on its own, and earlier research wrongly said it needed 512. Pooling with the 128 opens nothing clearly better. So the test now includes V4.1 Flash too: it's the model a 256 would actually run.\n\nIf you'd rather not add a key, the default is that the decision waits, and I'll say plainly that it rests on research alone."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-11T22:00:16.805127+11:00",
+  "text": "Kam, I need you to check this seat's context window. My boot stopped part-way. The brain load is about 170K tokens, and this session ran out of room before finishing: the read tool refused more at roughly 25K left. Earlier seats booted at about 35 percent, so this one looks like it is on a smaller window, not the 1M one. My recommendation: relaunch Wednesday with the 1M-context model. The other option is a lighter boot, but that is a ruling for you. I have not touched mail, Linear, the Spark or any agents. It is logged in today's note."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-11T22:06:21.204457+11:00",
+  "text": "Thanks Kam, and you're right about the context. I was wrong: the read tool's own size limit stopped me, not the window. Your key is in the gitignored .env on this machine and it works. One thing to check: OpenRouter shows its limit as 50 US dollars, not 5. The run is capped at 18 dollars and should cost about 1.50. The no-golden test started at 22:04 on DeepSeek V4.1 Flash, and the first ticket passed 7 of 7. MiMo and GLM run after it, three to six hours in all. I'll report against the 30 percent bar when it's done."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-11T22:08:41.985054+11:00",
+  "text": "Got it, 50 dollars is fine. The test has a hard cap of 18 dollars, so it can't spend more than that. It's running on DeepSeek V4.1 Flash now: the first two tickets came back one pass and one fail. Meanwhile I'm writing the next merge seat's brief for Secuura."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-11T23:03:17.239067+11:00",
+  "text": "Kam, one small heads-up about the OpenRouter key: because you pasted it on the board, the tool that shows the agents your rulings prints it to every seat that reads them. They're all told not to copy it. My recommendation is to revoke the key once the hosted test finishes. I'll tell you when it's done. Separately, PR 2168 is merged and the next merge seat launches when the machine's load drops."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-12T00:29:05.109585+11:00",
+  "text": "Kam, the test is done, and the answer is no: no local model gets near your 30 percent. Out of 20 real Secuura tickets, the best models fixed 3 well enough to merge. That's 15 percent, and DeepSeek V4.1 Flash, the one a 256 gigabyte Studio would actually run, was one of them. MiMo fixed none. No model solved any of the 5 hardest tickets. One of our own checks was too strict and threw out some good fixes; I've corrected for that, and the best is still 15 percent. Seven tickets needed a decision or more information rather than code, so no model could fix them. Counting only the 13 fixable ones, the best model gets 23 percent. The whole test cost about 29 cents. It also ran on full-precision models in the cloud, and a 256 Studio would run a compressed version, which can only do the same or worse. So my recommendation stands: don't buy the 256 now, and keep the cloud models. Two things for you: please revoke the OpenRouter key, and the full analysis is attached.\n📎 file in the live drawer: analysis.md (id f-b899b0a5bc)"
  }
 ]
