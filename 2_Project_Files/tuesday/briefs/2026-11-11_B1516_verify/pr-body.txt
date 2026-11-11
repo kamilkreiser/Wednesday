@@ -1,0 +1,23 @@
+BLUF: stylesheets only. The white that sat as the literal #ffffff in the shared and Expert stylesheets is now one named value, --pc-on-primary, with the same value (#ffffff); every shape (50% and 999px) and every other colour is unchanged. PCOMP-81: the setting key of the withdrawn list on the approval screen now uses the code-style font, so a long key takes one more line by design. Not deployed.
+
+What this changes
+
+- PCOMP-74: tokens.css gets one new custom property, --pc-on-primary: #ffffff (the text on the primary, danger and success fills, and the white surfaces). All 11 white literals of app.css read it.
+- PCOMP-80: the same value at the 9 white literals of screens-w1.css (3), screens-w2.css (4) and screens-w3.css (2). The rail's own --pc-nav-fg is untouched.
+- PCOMP-81: one rule in screens-w3.css, .w3-withdrawn-list .w3-register-key, sets font-family to the same stack .pc-mono has, and nothing else (not word-break, not the size, not a width); one stale comment sentence is corrected. No TSX changed. A long setting key can take one more line (and two cards at phone width grow by 18 px); that follows from the ruling and no width, size or break rule was changed.
+- A new test file in apps/web/src/styles pins all of it (30 rows). No existing test is edited.
+
+How it was checked
+
+- The white value: the diff of the five sheets is only #ffffff -> var(--pc-on-primary), one token line, one rule and one comment. A computed-style census of 20 probes (one per site) shows rgb(255, 255, 255) before and after.
+- The new rows are red against the sheets as they were and green with the change; each change removed alone turns its own rows red (a literal put back, the token removed or changed, the rule removed, the stack one character short, word-break or font-size added, the old sentence back).
+- The whole workspace test project: lost 0, changed 0, added 30; the same two rows that need the withheld SOW text are red before and after. Lint, format check, typecheck, build and the secret scan pass.
+- A computed-style comparison of the withdrawn list and register page at 1280 and 390 px shows the only difference is font-family, on the 5 key spans and their line-break hints; no sideways scroll.
+
+Not done here
+
+- Not deployed. Composer deploys only on the product owner's card.
+- The stack end-to-end specs that read these styles were not run (they need the compose stack); the host's monospace is not the deployed machine's.
+- CodeQL runs on this PR (hosted).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

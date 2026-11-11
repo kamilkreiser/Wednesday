@@ -1,0 +1,8 @@
+# Composer landing: head-pinned squash (CLARIFICATIONS.md C-101 (1), re-applied in every landing since).
+# Run only after reading CodeQL on the PR. Nothing is deployed (Composer deploys only on the product owner's card).
+# The --head value is the branch ref name, as pushed.
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/4_Credentials/.gh-config'
+O='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-11_B1516_verify'
+gh pr create -R datasecau/Datasec-Security-Composer --base main --head b1516/composer-w3b-css-ruled --title "$(cat "$O/pr-title.txt")" --body-file "$O/pr-body.txt"
+# then, with <PR> the number printed above, after CodeQL is green:
+gh -R datasecau/Datasec-Security-Composer pr merge <PR> --squash --match-head-commit 9853954af73e7ab585980464185f88ea93fb61a4 --subject "$(cat "$O/squash-subject.txt")" --body-file "$O/squash-body.txt"
