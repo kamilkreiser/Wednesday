@@ -263,6 +263,7 @@ def _brief_has_tamper():
     """2026-11-12 (o148): does night/briefs/<ticket>.md carry a `## Tamper` heading? (read here: the early-brief read comes later, in section 3)"""
     _bp = os.path.join(os.environ.get("NIGHT_BRIEFS_DIR", ""), f"{ticket}.md")
     return bool(os.environ.get("NIGHT_BRIEFS_DIR")) and os.path.isfile(_bp) and re.search(r"(?im)^##+\s*Tamper\b", open(_bp, encoding="utf-8").read()) is not None
+fe_scan = False          # 2026-11-12 (o151): a frontend/verifier/src/**/*.tsx product whose test is a SOURCE-SCAN hosted in packages/shared (see the branch below)
 scripts_check = False    # 2026-11-12 (o148): a spec-examples guard file scripts/spec-examples/check/*.mjs admitted as a PRODUCT (see the branch below)
 scripts_tamper = False   # 2026-10-29: a scripts/ product admitted ONLY as a test-only tamper target (see the branch below)
 def _config_class(rel):
@@ -325,6 +326,17 @@ elif re.fullmatch(r"scripts/[A-Za-z0-9_\-./]+\.(?:cjs|mjs|js|ts|sh)", product_re
     scripts_tamper = True
     service_dir = _mt.group(1)
     print(f"SCRIPTS TAMPER TARGET: product {product_rel} is a script, NOT edited; test host (service_dir) = {service_dir} (from test_file=)")
+elif re.fullmatch(r"frontend/verifier/src/[A-Za-z0-9_\-./]+\.tsx", product_rel) and ".." not in product_rel.split("/") and pins.get("scan_host", "") == "packages/shared":
+    # 2026-11-12 FRONTEND SOURCE-SCAN TIER (o151; KS-1104): EXACTLY frontend/verifier/src/**/*.tsx, and ONLY when the brief's pins name the host
+    # explicitly (scan_host=packages/shared). frontend/verifier has no test runner, so the test is a SOURCE-SCAN cell hosted in packages/shared
+    # (its vitest; precedent: ks1564 reads frontend/admin/src by a path relative to the Dev root). The diff edits the .tsx; the test READS it and is
+    # NOT importing it. Without scan_host= (or for any other frontend dir) this branch is skipped and the FRONTEND TIER below refuses exactly as before.
+    if "ref" not in pins:
+        refuse(f"frontend source-scan product {product_rel}: pin the reference test with ref= (no test imports a .tsx product)")
+    fe_scan = True
+    scripts_check = True
+    service_dir = "packages/shared"
+    print(f"FRONTEND SOURCE-SCAN TIER: product {product_rel} is a .tsx the test READS (source scan) and the diff EDITS; test host (service_dir) = {service_dir} (from scan_host=)")
 elif re.fullmatch(r"frontend/[A-Za-z0-9_\-]+/src/[A-Za-z0-9_\-./]+\.tsx?", product_rel) and ".." not in product_rel.split("/"):
     # 2026-11-10 FRONTEND TIER (Wednesday, KS-2095 o130 piece 1: issuer BlockchainCard.tsx): a product under
     # frontend/<pkg>/src/ is admitted with the PACKAGE'S OWN vitest (its vitest.config.* or the `test:` block of its
@@ -575,7 +587,10 @@ note = (
     if scripts_tamper else
     (f"READ-ONLY template: `{ref_path}` is an EXISTING test; copy its style only, do NOT modify it. The product `{product_rel}` "
      "is a guard SCRIPT that the tests RUN as a child process (it is not imported); your diff edits it exactly as the brief dictates. ")
-    if scripts_check else
+    if (scripts_check and not fe_scan) else
+    (f"READ-ONLY template: `{ref_path}` is an EXISTING test; copy its style only, do NOT modify it. The product `{product_rel}` "
+     "is a frontend .tsx SOURCE file that the test READS from disk by a path relative to the Dev root (a source scan; it is never imported or rendered); your diff edits it exactly as the brief dictates. ")
+    if fe_scan else
     (f"READ-ONLY template: `{ref_path}` is an EXISTING test in the same __tests__ directory; copy its import style only, "
      f"do NOT modify it. The product `{product_rel}` is a CONFIG file ({config_class}), not code: the new test READS it from disk "
      "and asserts on its text; it imports no module of the product. ")) +

@@ -1,0 +1,123 @@
+diff --git a/Blockchain/Dev/frontend/verifier/src/components/VerifyPage.tsx b/Blockchain/Dev/frontend/verifier/src/components/VerifyPage.tsx
+--- a/Blockchain/Dev/frontend/verifier/src/components/VerifyPage.tsx
++++ b/Blockchain/Dev/frontend/verifier/src/components/VerifyPage.tsx
+@@ -264,5 +264,5 @@
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+-                          <TabsTrigger value="upload" data-testid="tab-upload" className="gap-2">
++                          <TabsTrigger value="upload" data-testid="tab-upload" aria-label="Upload File" className="gap-2">
+                             <Upload className="w-4 h-4" />
+                             <span className="hidden sm:inline">Upload File</span>
+@@ -275,5 +275,5 @@
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+-                          <TabsTrigger value="id" data-testid="tab-id" className="gap-2">
++                          <TabsTrigger value="id" data-testid="tab-id" aria-label="Enter ID" className="gap-2">
+                             <Search className="w-4 h-4" />
+                             <span className="hidden sm:inline">Enter ID</span>
+@@ -286,5 +286,5 @@
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+-                          <TabsTrigger value="qr" data-testid="tab-qr" className="gap-2">
++                          <TabsTrigger value="qr" data-testid="tab-qr" aria-label="Scan QR" className="gap-2">
+                             <ScanLine className="w-4 h-4" />
+                             <span className="hidden sm:inline">Scan QR</span>
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1104-verifier-mode-tabs-carry-an-accessible-name.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1104-verifier-mode-tabs-carry-an-accessible-name.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1104-verifier-mode-tabs-carry-an-accessible-name.test.ts
+@@ -0,0 +1,94 @@
++import { describe, it, expect } from 'vitest';
++import { existsSync, readFileSync } from 'node:fs';
++import { dirname, join, resolve } from 'node:path';
++import { fileURLToPath } from 'node:url';
++import ts from 'typescript';
++
++// KS-1104: at phone width the verifier's three mode tabs (Upload File, Enter ID, Scan QR) render icon-only, because their text spans
++// are `hidden sm:inline`, and each tab has no aria-label, so a screen reader hears three unnamed tabs (WCAG 2.1 SC 4.1.2).
++// SOURCE GUARD, stated as such: frontend/verifier has no test runner, so this cell reads the page's source text (the TypeScript
++// syntax tree, so a commented-out attribute does not count) and pins the wiring, not the browser behaviour. It is hosted here
++// because this package has a runner and a test may read a file under frontend/ by a path relative to the Dev root (ks1564 does).
++
++function findDevRoot(start: string): string {
++  let dir = start;
++  for (let i = 0; i < 12; i++) {
++    if (existsSync(join(dir, 'services')) && existsSync(join(dir, 'packages')) && existsSync(join(dir, 'frontend'))) return dir;
++    const parent = resolve(dir, '..');
++    if (parent === dir) break;
++    dir = parent;
++  }
++  throw new Error(`[ks1104 guard] could not locate the Dev root from ${start}`);
++}
++
++const TREE_TOP = findDevRoot(dirname(fileURLToPath(import.meta.url)));
++const VERIFY_PAGE = join(TREE_TOP, 'frontend', 'verifier', 'src', 'components', 'VerifyPage.tsx');
++
++interface Trigger {
++  testId: string | null;
++  label: string | null;
++  labelled: boolean;
++}
++
++/** Every `<TabsTrigger ...>` element in the source, with its data-testid and its STATIC aria-label (a string literal), if any. */
++function scanTabTriggers(source: string): Trigger[] {
++  const sf = ts.createSourceFile('VerifyPage.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
++  const found: Trigger[] = [];
++  const visit = (node: ts.Node): void => {
++    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && node.tagName.getText(sf) === 'TabsTrigger') {
++      const literal = (name: string): string | null => {
++        for (const prop of node.attributes.properties) {
++          if (ts.isJsxAttribute(prop) && prop.name.getText(sf) === name) {
++            return prop.initializer && ts.isStringLiteral(prop.initializer) ? prop.initializer.text : null;
++          }
++        }
++        return null;
++      };
++      const label = literal('aria-label');
++      found.push({ testId: literal('data-testid'), label, labelled: label !== null && label.trim().length > 0 });
++    }
++    ts.forEachChild(node, visit);
++  };
++  visit(sf);
++  return found;
++}
++
++const source = readFileSync(VERIFY_PAGE, 'utf8');
++const triggers = scanTabTriggers(source);
++
++describe('KS-1104 the verifier mode tabs carry an accessible name', () => {
++  it('control ks1104 C0 the scan reaches the three mode tabs of the real page', () => {
++    expect(triggers.map((t) => t.testId)).toEqual(['tab-upload', 'tab-id', 'tab-qr']);
++  });
++
++  it('RED ks1104 R1 every mode tab carries a non-empty aria-label', () => {
++    expect(triggers.filter((t) => !t.labelled).map((t) => t.testId)).toEqual([]);
++  });
++
++  it('RED ks1104 R2 the labels are the three names the tabs show at desktop width', () => {
++    expect(Object.fromEntries(triggers.map((t) => [t.testId, t.label]))).toEqual({
++      'tab-upload': 'Upload File',
++      'tab-id': 'Enter ID',
++      'tab-qr': 'Scan QR',
++    });
++  });
++
++  it('control ks1104 C1 the scan tells a labelled tab from an unlabelled one', () => {
++    const labelled = scanTabTriggers('const a = <TabsTrigger value="x" data-testid="t" aria-label="Name" />;');
++    expect(labelled.map((t) => t.labelled)).toEqual([true]);
++    const bare = scanTabTriggers('const a = <TabsTrigger value="x" data-testid="t"><span>Name</span></TabsTrigger>;');
++    expect(bare.map((t) => t.labelled)).toEqual([false]);
++    const commented = scanTabTriggers('const a = <TabsTrigger value="x" /* aria-label="Name" */ data-testid="t" />;');
++    expect(commented.map((t) => t.labelled)).toEqual([false]);
++    const empty = scanTabTriggers('const a = <TabsTrigger value="x" aria-label="" data-testid="t" />;');
++    expect(empty.map((t) => t.labelled)).toEqual([false]);
++    const dynamic = scanTabTriggers('const a = <TabsTrigger value="x" aria-label={name} data-testid="t" />;');
++    expect(dynamic.map((t) => t.labelled)).toEqual([false]);
++  });
++
++  it('control ks1104 C2 the visible tab text is still there', () => {
++    for (const text of ['Upload File', 'Enter ID', 'Scan QR']) {
++      expect(source).toContain(`>${text}</span>`);
++    }
++  });
++});

@@ -51,7 +51,10 @@ svc_root = f"{subdir}/{service}/"
 # 2026-11-12 (o148): the spec-examples guard class <subdir>/scripts/spec-examples/check/<name>.mjs is admitted as a product OUTSIDE the one service
 # (build_input.sh admits it only with a test_file= naming the test host); nothing else outside svc_root is.
 _SPEC = re.compile(r"^" + re.escape(subdir) + r"/scripts/spec-examples/check/[A-Za-z0-9_\-]+\.mjs$")
-outside = [p for p in products + tests if not p.startswith(svc_root) and not (p in products and _SPEC.match(p))]
+# 2026-11-12 (o151): the frontend source-scan class <subdir>/frontend/verifier/src/**/*.tsx is admitted as a product ONLY when the ONE service is packages/shared (the host named by scan_host=).
+_FESCAN = re.compile(r"^" + re.escape(subdir) + r"/frontend/verifier/src/[A-Za-z0-9_\-./]+\.tsx$")
+def _fe_ok(p): return service == "packages/shared" and _FESCAN.match(p) is not None and ".." not in p.split("/")
+outside = [p for p in products + tests if not p.startswith(svc_root) and not (p in products and (_SPEC.match(p) or _fe_ok(p)))]
 if outside: refuse(f"not under the ONE service {svc_root} (A6/A7 measure one service): {outside}")
 bad_t = [t for t in tests if test_dir and not t.startswith(test_dir.rstrip("/") + "/")]
 if bad_t: refuse(f"test file(s) not under test_dir {test_dir}: {bad_t}")
