@@ -1,0 +1,185 @@
+diff --git a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts
+@@ -116,5 +116,11 @@
+     }
+   } catch (error) {
+-    logger.error('Error minting NFT', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error minting NFT', { error: reason });
+     res.status(500).json({
+       success: false,
+@@ -175,5 +181,11 @@
+     });
+   } catch (error) {
+-    logger.error('Error recording NFT mint', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error recording NFT mint', { error: reason });
+     res.status(500).json({
+       success: false,
+@@ -364,5 +376,11 @@
+     });
+   } catch (error) {
+-    logger.error('Error fetching privacy options', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error fetching privacy options', { error: reason });
+     res.status(500).json({
+       success: false,
+diff --git a/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-mint-record-privacy-options-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-mint-record-privacy-options-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-mint-record-privacy-options-catches-unreadable-throw.test.ts
+@@ -0,0 +1,138 @@
++import { describe, it, expect, vi } from 'vitest';
++
++// KS-1868: the nft-certificate router (src/routes/nft.routes.ts), handlers POST /mint, POST /record and GET /privacy-options, log a failure as
++// `logger.error('<message>', { error: error instanceof Error ? error.message : String(error) })` and answer 500. The read is
++// unguarded. When the thrown value cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws)
++// the catch itself throws, so the async handler REJECTS and no reply is sent. The services and the logger are plain stand-ins; the
++// handlers are read off the router stack; no server, no network. The value under test is raised from INSIDE each handler's try:
++// by a getter on the fake request (`body` or `user`, the first thing the handler reads) or, for the two handlers that read nothing
++// from the request, by the response's first `json` call (the success answer), after which the 500 answer is sent normally.
++const h = vi.hoisted(() => ({ toThrow: undefined as unknown, errors: [] as Array<[string, unknown]> }));
++
++vi.mock('../services/minting.service', () => ({ nftMintingService: {} }));
++vi.mock('../services/blockchain-verifier.service', () => ({ blockchainVerifier: {} }));
++vi.mock('../services/ipfs.service', () => ({ ipfsService: {} }));
++vi.mock('../services/cost-estimator.service', () => ({ costEstimatorService: {} }));
++vi.mock('../services/metadata-builder.service', () => ({ metadataBuilderService: {} }));
++vi.mock('../utils/logger', () => ({
++  logger: {
++    error: (m: string, meta: unknown) => {
++      h.errors.push([m, meta]);
++    },
++    info: () => undefined,
++    warn: () => undefined,
++    debug: () => undefined,
++  },
++}));
++
++import router from '../routes/nft.routes';
++
++type Out = { rejected: boolean; code: number | undefined; body: unknown; logged: Array<[string, unknown]> };
++type Raise = 'body' | 'user' | 'json';
++
++async function call(method: string, path: string, raise: Raise, value: unknown): Promise<Out> {
++  h.toThrow = value;
++  h.errors = [];
++  const layer = (router as unknown as { stack: Array<{ route?: { path: string; methods: Record<string, boolean>; stack: Array<{ handle: (...a: unknown[]) => unknown }> } }> }).stack.find(
++    (l) => l.route?.path === path && l.route.methods[method],
++  );
++  const handle = layer!.route!.stack[0].handle;
++  const out: Out = { rejected: false, code: undefined, body: undefined, logged: [] };
++  let jsonThrown = false;
++  const res = {
++    status(c: number) {
++      out.code = c;
++      return res;
++    },
++    json(b: unknown) {
++      if (raise === 'json' && !jsonThrown) {
++        jsonThrown = true;
++        throw h.toThrow;
++      }
++      out.body = b;
++      return res;
++    },
++  };
++  const req: Record<string, unknown> = { params: {}, query: {}, body: {}, user: { role: 'SYSTEM_ADMIN' } };
++  if (raise !== 'json') {
++    Object.defineProperty(req, raise, {
++      get() {
++        throw h.toThrow;
++      },
++    });
++  }
++  try {
++    await handle(req, res);
++  } catch {
++    out.rejected = true;
++  }
++  out.logged = h.errors;
++  return out;
++}
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++
++const getterThrows = (): unknown =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++const reply = (message: string) => ({ success: false, error: { code: 'INTERNAL_ERROR', message } });
++
++const SITES = [
++  { method: 'post', path: '/mint', raise: 'body' as Raise, logged: 'Error minting NFT', reply: 'Failed to mint NFT certificate' },
++  { method: 'post', path: '/record', raise: 'body' as Raise, logged: 'Error recording NFT mint', reply: 'Failed to record NFT mint' },
++  { method: 'get', path: '/privacy-options', raise: 'json' as Raise, logged: 'Error fetching privacy options', reply: 'Failed to fetch privacy options' },
++];
++
++describe('KS-1868 nft router catches read a thrown value safely', () => {
++  SITES.forEach((s, i) => {
++    it(`RED ks1868 R${2 * i + 1} ${s.method.toUpperCase()} ${s.path}: a revoked Proxy is logged with a constant reason and answered 500`, async () => {
++      const out = await call(s.method, s.path, s.raise, revokedProxy());
++      expect(out.rejected).toBe(false);
++      expect(out.code).toBe(500);
++      expect(out.body).toEqual(reply(s.reply));
++      expect(out.logged).toEqual([[s.logged, { error: 'unreadable thrown value' }]]);
++    });
++
++    it(`RED ks1868 R${2 * i + 2} ${s.method.toUpperCase()} ${s.path}: an Error whose message getter throws is logged with a constant reason and answered 500`, async () => {
++      const out = await call(s.method, s.path, s.raise, getterThrows());
++      expect(out.rejected).toBe(false);
++      expect(out.code).toBe(500);
++      expect(out.body).toEqual(reply(s.reply));
++      expect(out.logged).toEqual([[s.logged, { error: 'unreadable thrown value' }]]);
++    });
++  });
++
++  it(`control ks1868 C1 ${SITES[0].method.toUpperCase()} ${SITES[0].path}: an ordinary Error is logged with its message and answered 500`, async () => {
++    const out = await call(SITES[0].method, SITES[0].path, SITES[0].raise, new Error('service boom'));
++    expect(out.rejected).toBe(false);
++    expect(out.code).toBe(500);
++    expect(out.body).toEqual(reply(SITES[0].reply));
++    expect(out.logged).toEqual([[SITES[0].logged, { error: 'service boom' }]]);
++  });
++
++  it(`control ks1868 C2 ${SITES[1].method.toUpperCase()} ${SITES[1].path}: a thrown plain string is logged as text and answered 500`, async () => {
++    const out = await call(SITES[1].method, SITES[1].path, SITES[1].raise, 'plain text failure');
++    expect(out.rejected).toBe(false);
++    expect(out.code).toBe(500);
++    expect(out.body).toEqual(reply(SITES[1].reply));
++    expect(out.logged).toEqual([[SITES[1].logged, { error: 'plain text failure' }]]);
++  });
++
++  it(`control ks1868 C3 ${SITES[2].method.toUpperCase()} ${SITES[2].path}: an ordinary Error is logged with its message and answered 500`, async () => {
++    const out = await call(SITES[2].method, SITES[2].path, SITES[2].raise, new Error('service boom'));
++    expect(out.rejected).toBe(false);
++    expect(out.code).toBe(500);
++    expect(out.body).toEqual(reply(SITES[2].reply));
++    expect(out.logged).toEqual([[SITES[2].logged, { error: 'service boom' }]]);
++  });
++});

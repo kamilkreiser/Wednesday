@@ -1,0 +1,15 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh b/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1560_private_path_suites_link_jq.test.sh
+@@ -116,6 +116,11 @@
+ check "F-2078-1 every legitimate respelling of the link statement is judged a link ($total spellings)" "$total" "$accepted"
+ printf '%s\n' 'ln -sf \' '    "$JQ_BIN" "$root/bin/jq"' > "$FX/continued.sh"
+ check "F-2078-1 a backslash-continued ln -sf is judged a link" "yes" "$(verdict "$FX/continued.sh")"
++
++# KS-2141 (pin, not a fix): a link into the stub DIRECTORY (`ln -sf "$JQ_BIN" "$root/bin/"`, the destination names no jq) is judged NO link by
++# the predicate today. Whether links_jq should widen to read it is a design choice; this cell pins the current answer so a change is deliberate.
++printf '%s\n' 'ln -sf "$JQ_BIN" "$root/bin/"' > "$FX/dest_dir.sh"
++check "KS-2141 PIN the destination-directory spelling (the stub dir named, no jq in the destination) is judged no link, the current answer" "no" "$(verdict "$FX/dest_dir.sh")"
+ 
+ # KS-2141 F-2078-2: a trailing comment or a trailing word that names bin/jq on another statement is NOT a link.
+ rejected=0; total=0

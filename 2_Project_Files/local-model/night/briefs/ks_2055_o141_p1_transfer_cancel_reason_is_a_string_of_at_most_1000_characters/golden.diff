@@ -1,0 +1,196 @@
+diff --git a/Blockchain/Dev/services/transfer/src/index.ts b/Blockchain/Dev/services/transfer/src/index.ts
+--- a/Blockchain/Dev/services/transfer/src/index.ts
++++ b/Blockchain/Dev/services/transfer/src/index.ts
+@@ -424,4 +424,10 @@
+   signature: z.string().optional(),
+ });
+-
++
++// KS-2055 half 2: the cancel body. card secuura-ks2055-cancel-reason-length-bound-1111 = b (Kam, 2026-11-11 16:29: "1000 characters (recommended)").
++// `reason` is optional, a string, trimmed, at most 1000 characters; the route records 'Cancelled by user' when it is absent or empty.
++const cancelTransferSchema = z.object({
++  reason: z.string().trim().max(1000).optional(),
++});
++
+ // =============================================================================
+@@ -934,5 +940,8 @@
+   if (!caller) return;
+   const transfer = memTransfers.get(req.params.id);
+-  const { reason } = req.body;
+-  
++  const parsed = cancelTransferSchema.safeParse(req.body ?? {});
++  if (!parsed.success) {
++    return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: zod3Issues(parsed.error.issues) } });
++  }
++  const { reason } = parsed.data;
+   if (!transfer) {
+diff --git a/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-reason-is-a-string-of-at-most-1000-characters.test.ts b/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-reason-is-a-string-of-at-most-1000-characters.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-reason-is-a-string-of-at-most-1000-characters.test.ts
+@@ -0,0 +1,165 @@
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import http from 'http';
++import type { AddressInfo } from 'net';
++
++// KS-2055 (half 2, ruling card secuura-ks2055-cancel-reason-length-bound-1111 = b, 2026-11-11 16:29: "1000 characters (recommended)"):
++// POST /api/transfers/:id/cancel (src/index.ts) took `reason` from the body with no type or length check. These cells cancel a
++// pending transfer through the real router: a reason over 1000 characters or a non-string reason must answer 400 and write nothing,
++// a 1000-character reason is accepted, and an absent or blank reason still records 'Cancelled by user'. The caller is switched
++// through the stubbed authenticator. No DATABASE_URL: the in-memory Map is read.
++const who = vi.hoisted(() => ({
++  user: { userId: '', role: 'USER', tenantId: '', email: 'caller@example.test', verificationLevel: 'BASIC' } as Record<string, string>,
++}));
++
++vi.mock('@secuura/shared', async () => {
++  const actual = await vi.importActual<typeof import('@secuura/shared')>('@secuura/shared');
++  return {
++    ...actual,
++    authenticate: () => (req: { user?: unknown }, _res: unknown, next: () => void) => {
++      req.user = { ...who.user };
++      next();
++    },
++    enforceProductionConfig: () => undefined,
++  };
++});
++
++process.env.PORT = '0';
++delete process.env.DATABASE_URL;
++
++const OWNER = '00000000-0000-4000-8000-00000000a001';
++const RECIPIENT = '00000000-0000-4000-8000-00000000a002';
++const INITIATOR = '00000000-0000-4000-8000-00000000a003';
++const TENANT_A = 'a0000000-0000-4000-8000-000000000001';
++
++const asCaller = (userId: string) => {
++  who.user = { userId, tenantId: TENANT_A, role: 'USER', email: 'caller@example.test', verificationLevel: 'BASIC' };
++};
++
++type Entry = { fromStatus: string; toStatus: string; changedBy: string; reason: string };
++
++describe('KS-2055: the cancel door bounds and types the reason', () => {
++  let server: http.Server;
++  let baseUrl = '';
++
++  function call(method: string, path: string, body?: unknown): Promise<{ status: number; data: any }> {
++    return new Promise((resolve, reject) => {
++      const url = new URL(path, baseUrl);
++      const r = http.request(
++        { hostname: url.hostname, port: url.port, path: url.pathname + url.search, method, headers: { 'Content-Type': 'application/json' } },
++        (res) => {
++          let raw = '';
++          res.on('data', (c) => (raw += c));
++          res.on('end', () => resolve({ status: res.statusCode || 0, data: raw ? JSON.parse(raw) : undefined }));
++        },
++      );
++      r.on('error', reject);
++      if (body) r.write(JSON.stringify(body));
++      r.end();
++    });
++  }
++
++  async function makeTransfer(over: object = {}): Promise<string> {
++    asCaller(INITIATOR);
++    const res = await call('POST', '/api/transfers', {
++      documentId: `doc-1700000000000-${Math.random().toString(16).slice(2, 10)}`,
++      transferType: 'simple',
++      currentOwnerId: OWNER,
++      newOwnerId: RECIPIENT,
++      documentHash: 'a'.repeat(64),
++      documentTitle: 'KS-2055 reason cell',
++      documentType: 'certificate',
++      ...over,
++    });
++    expect(res.status).toBe(201);
++    return res.data.data.id as string;
++  }
++
++  const lastEntry = async (id: string): Promise<Entry> => {
++    asCaller(INITIATOR);
++    const res = await call('GET', `/api/transfers/${id}/history`);
++    const history = res.data.data.history as Entry[];
++    return history[history.length - 1];
++  };
++
++  beforeAll(async () => {
++    const mod = await import('../index');
++    await new Promise<void>((resolve) => {
++      server = mod.default.listen(0, '127.0.0.1', () => resolve());
++    });
++    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
++  });
++  afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
++  beforeEach(() => asCaller(INITIATOR));
++
++  const cancel = async (id: string, body: unknown) => {
++    asCaller(INITIATOR);
++    return call('POST', `/api/transfers/${id}/cancel`, body);
++  };
++
++  it('control ks2055 C1 a reason of exactly 1000 characters is accepted and recorded whole', async () => {
++    const id = await makeTransfer();
++    const reason = 'x'.repeat(1000);
++    const res = await cancel(id, { reason });
++    expect(res.status).toBe(200);
++    const entry = await lastEntry(id);
++    expect(entry.toStatus).toBe('cancelled');
++    expect(entry.reason).toBe(reason);
++  });
++
++  it('control ks2055 C2 a cancel with no reason records the default reason', async () => {
++    const id = await makeTransfer();
++    const res = await cancel(id, {});
++    expect(res.status).toBe(200);
++    expect((await lastEntry(id)).reason).toBe('Cancelled by user');
++  });
++
++  it('control ks2055 C3 an empty-string reason records the default reason', async () => {
++    const id = await makeTransfer();
++    const res = await cancel(id, { reason: '' });
++    expect(res.status).toBe(200);
++    expect((await lastEntry(id)).reason).toBe('Cancelled by user');
++  });
++
++  it('RED ks2055 R1 a reason of 1001 characters answers 400 BAD_REQUEST', async () => {
++    const id = await makeTransfer();
++    const res = await cancel(id, { reason: 'x'.repeat(1001) });
++    expect(res.status).toBe(400);
++    expect(res.data.error.code).toBe('BAD_REQUEST');
++  });
++
++  it('RED ks2055 R2 a number as the reason answers 400', async () => {
++    const id = await makeTransfer();
++    const res = await cancel(id, { reason: 123 });
++    expect(res.status).toBe(400);
++  });
++
++  it('RED ks2055 R3 an object as the reason answers 400', async () => {
++    const id = await makeTransfer();
++    const res = await cancel(id, { reason: { a: 'b' } });
++    expect(res.status).toBe(400);
++  });
++
++  it('RED ks2055 R4 a refused body writes nothing: the transfer is still pending and a valid cancel then succeeds', async () => {
++    const id = await makeTransfer();
++    const refused = await cancel(id, { reason: 'x'.repeat(1001) });
++    expect(refused.status).toBe(400);
++    expect((await lastEntry(id)).toStatus).not.toBe('cancelled');
++    const res = await cancel(id, { reason: 'second try' });
++    expect(res.status).toBe(200);
++    expect((await lastEntry(id)).reason).toBe('second try');
++  });
++
++  it('RED ks2055 R5 a reason with surrounding spaces is recorded trimmed', async () => {
++    const id = await makeTransfer();
++    const res = await cancel(id, { reason: '  spaced out  ' });
++    expect(res.status).toBe(200);
++    expect((await lastEntry(id)).reason).toBe('spaced out');
++  });
++
++  it('RED ks2055 R6 a whitespace-only reason records the default reason', async () => {
++    const id = await makeTransfer();
++    const res = await cancel(id, { reason: '   ' });
++    expect(res.status).toBe(200);
++    expect((await lastEntry(id)).reason).toBe('Cancelled by user');
++  });
++});
