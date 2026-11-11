@@ -1,0 +1,38 @@
+What this changes (PCOMP-77)
+
+1. A secret field marked "a local value will be required" no longer needs a written justification.
+   - API (putControl): a custom decision whose field is a secret and whose custom_value is a value
+     reference is accepted with no rationale (null, absent, empty or blank). Every other custom
+     decision still answers 422 DECISION_INCOMPLETE with the same message.
+   - Storage: no migration. The table refuses a NULL rationale on a custom row, so the empty string
+     is stored for this one case. No reader sees it: the decision bodies answer null, and the input
+     snapshot carries no justification, so the input hash is the same as for no rationale.
+   - Web: the control page raises no justification error for this case and drops "(required)" from
+     the label. The hint under the box is unchanged.
+
+2. A "Mark all secret fields local" action on the Controls screen, beside the screen's other actions.
+   - It marks each secret field that has no decision yet in the current resolution, one request at a
+     time, each with the ETag the previous answer returned.
+   - It never overwrites a recorded decision and skips fields of a switched-off item.
+   - It stops at the first refusal and says how far it got.
+   - It is shown only to a consultant on a draft, and only while something is left to mark.
+   - Words: "Mark all secret fields local", "Marked N secret fields as local.",
+     "Marked N of M secret fields; the rest were not changed."
+
+Tests
+- New: API db rows (13), web model rows (9), Controls DOM rows (9).
+- Full node suite, API db suite and db package suite at head equal main except the added rows
+  (lost 0, changed 0). lint, format:check, typecheck and build pass.
+- The only red rows are the two citation rows that need the withheld E8 source text; they are red on
+  main too.
+- An independent gate also checked, against the real API: whitespace-only rationales, a later edit
+  that adds then removes a rationale, the copy into the next draft after release, the input hash,
+  and a scan of every stored text column.
+
+Not in this PR
+- Nothing is deployed. The demo changes only on a separate deploy decision.
+- CodeQL is read on this PR before landing.
+- Not included: the Guided End page gap (held with the Guided work) and the controls-load
+  measurement (reported, no change).
+
+Generated with [Claude Code](https://claude.com/claude-code)

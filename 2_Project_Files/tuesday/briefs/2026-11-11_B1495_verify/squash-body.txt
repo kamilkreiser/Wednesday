@@ -1,0 +1,17 @@
+A custom decision on a secret field whose value is a value reference is now
+accepted with no rationale (null, absent, empty or blank). Every other custom
+decision still answers 422 DECISION_INCOMPLETE with the same message. The table
+refuses a NULL rationale on a custom row, so the empty string is stored for this
+case only; the decision bodies answer null for it and the input snapshot carries
+no justification for it. The control page raises no justification error for it
+and drops "(required)" from the label.
+
+The Controls screen gains "Mark all secret fields local". It marks every secret
+field in the current resolution that has no decision, one request at a time with
+the ETag the previous answer returned, never overwriting a recorded decision. It
+stops at the first refusal and says how many were marked. It is shown only to a
+consultant on a draft while something is left to mark.
+
+Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
