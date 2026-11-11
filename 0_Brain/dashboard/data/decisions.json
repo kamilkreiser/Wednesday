@@ -67534,7 +67534,9 @@
    "CARD composer-pcomp114-fix-shape-1111",
    "CARD composer-waiting-register-1111",
    "CARD composer-pcomp77-mark-all-local-words-1111"
-  ]
+  ],
+  "delivered_artefact": "Composer PR #124 squash-merged to main 879facda (tree = gated head 9d97328c; tier-1 gate GO WITH FINDINGS, tuesday/briefs/2026-11-11_B1506_verify/VERDICT.md); not deployed",
+  "delivered_ts": "2026-11-11T17:36:31.511710+11:00"
  },
  {
   "id": "secuura-ghsa-chp3-effect-platform-shipped-1111",
@@ -67834,6 +67836,42 @@
     }
    }
   ],
-  "amended_ts": "2026-11-11T16:11:42.235529+11:00"
+  "amended_ts": "2026-11-11T16:11:42.235529+11:00",
+  "delivered_artefact": "Composer PR #124 squash-merged to main 879facda (tree = gated head 9d97328c; tier-1 gate GO WITH FINDINGS, tuesday/briefs/2026-11-11_B1506_verify/VERDICT.md); not deployed",
+  "delivered_ts": "2026-11-11T17:36:28.438508+11:00"
+ },
+ {
+  "id": "hpsmpoc-mps-sdk-floats-pkcs-1111",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Correction: the .NET build tool still floats, so the security package pin needs raising every month (HPSM-POC and MPS)",
+  "bluf": "No action needed unless you want option b. (Prior-ruling gate: it matched three September messages on other subjects by shared words; the one ruling on THIS subject is your 14:15 tap on the HPSM waiting register, row HPSMPOC-271, which this card corrects, not re-asks.) At 14:15 you accepted 'the coordinator checks the .NET security-package pin on each servicing day'. The question told you the floating-version risk was gone. It is not: both repos let GitHub's build machine take the newest .NET build tool, and today it moved to 10.0.404, which turned every HPSM and MPS pull request red with no code change (measured by two seats; confirmed by an independent gate: global.json rollForward latestFeature, hosted log installs SDK 10.0.404). Your ruling still works and is what happened today: one-line pin raises for both repos are gated and in CI now (HPSM PR #310, MPS PR #177). The only new choice is whether to also stop the float.",
+  "default_action": "Nothing changes: the coordinator keeps raising the pin on each servicing day, and the HPSMPOC-271 record is corrected to say the float is real",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep the cadence you ruled",
+    "detail": "Each .NET servicing day the coordinator raises the pin (as today); a surprise red can still happen on that day, fixed within hours"
+   },
+   {
+    "key": "b",
+    "label": "Also pin the build tool exactly",
+    "detail": "A small change in both repos so CI installs one exact .NET build tool; reds stop arriving by surprise, but each .NET update then needs its own pull request"
+   },
+   {
+    "key": "c",
+    "label": "Something else",
+    "detail": "Tell me"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-11T17:59:06.504826+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-07 09:28",
+   "2026-09-09 15:37",
+   "2026-09-10 18:01"
+  ]
  }
 ]
