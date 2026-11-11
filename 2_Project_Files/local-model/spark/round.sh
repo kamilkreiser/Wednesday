@@ -308,6 +308,12 @@ if [ "$B_TIER" = test_only ]; then
   echo "$TO_LINE" | grep -qE '^[0-9]+$' || finish 2 "REFUSED — tier test_only but the builder parsed no tamper (input.json defect_line.tamper: '${TO_LINE:-none}'): the checker would run plain code_patch mode. The brief needs night/build_input.sh's \`## Tamper\` block (that exact heading; line: / from: / to:)" "$RUN"
   say "test-only: tamper at $B_FILE:$TO_LINE (checker MODE=test_only: A3 the test only, A4 red under the tamper, A5 green at the tip)"
 fi
+if [ -n "${B_RENAMES:-}" ]; then
+  # 2026-11-11 DECLARED RENAMES: the brief's `## Renames` pairs (validated by brief_lint) ride in input.json for the checkers' A6.
+  python3 -c 'import json,sys; p=sys.argv[1]; d=json.load(open(p)); d["declared_renames"]=json.loads(sys.argv[2]); json.dump(d,open(p,"w"),indent=2)' "$RUN/input.json" "$B_RENAMES" \
+    || finish 5 "HARNESS — could not inject declared_renames into input.json" "$RUN"
+  say "declared renames: $B_RENAMES"
+fi
 IN_TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("tip") or d.get("repo",{}).get("tip",""))' "$RUN/input.json")"
 [ "$IN_TIP" = "$TIP" ] || finish 5 "HARNESS — VOID: the builder pinned ${IN_TIP:-nothing}, the round prepared $TIP (develop moved mid-round?)" "$RUN"
 SELFTEST="$(python3 -c 'import json,sys; print(1 if json.load(open(sys.argv[1])).get("self_testing") else 0)' "$RUN/input.json")"

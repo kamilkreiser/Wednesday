@@ -293,7 +293,7 @@ echo "INFO control cells: $red_passed passed BEFORE the product sections, $g_pas
 rc_after="$(run_vitest after_suite)"
 AFTER="$(summ after_suite)"
 echo "after suite rc=$rc_after $AFTER"
-python3 "$EXT/suite_delta.py" "$REP/baseline_suite.json" "$REP/after_suite.json" > "$REP/suite_delta.out" 2>&1; rc=$?
+python3 "$EXT/suite_delta.py" "$REP/baseline_suite.json" "$REP/after_suite.json" "$INPUT" > "$REP/suite_delta.out" 2>&1; rc=$?
 cat "$REP/suite_delta.out"
 if [ "$rc" -eq 0 ]; then pass "A6 whole $SERVICE suite: no NEW red vs the untouched tip"; else fail "A6 whole $SERVICE suite: NEW red(s) vs the untouched tip (see suite_delta.out)"; fi
 

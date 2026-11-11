@@ -42,8 +42,12 @@ REFUSES (rc 2, one `REFUSED <reason>` line per reason on stderr):
     contract (code_patch / bash_patch: 1 product + at most 1 test; code_patch2: 1-3 products + 1-2 tests;
     bash_patch2 (2026-10-07): 1-3 products + 1-4 tests, each test line saying RED or SUPPORT);
   - bash_patch B-mode / bash_patch2 without a `ref=` pin (build_bash_input.sh requires one).
+  - `## Renames` (2026-11-11, opt-in): a bullet that is not exactly - `old` -> `new`, a wildcard (`*`, `...`), old == new, a name in
+    two pairs, or a bash_patch/bash_patch2 tier. On success B_RENAMES is the JSON pair list (line emitted only when declared); round.sh injects it
+    into input.json as declared_renames for the checkers' A6.
 rc 0 ok · 2 refused · 1 usage. Read-only. Python 3 stdlib.
 """
+import json
 import os
 import re
 import shlex
@@ -400,6 +404,13 @@ def main():
         reasons.append(f"PINS: {tier} B-mode needs ref=<existing *.test.sh whose shape the model copies> "
                        "(build_bash_input.sh requires it) — put it in <brief_dir>/spark.pins or on the queue line")
 
+    # --- 2026-11-11 DECLARED RENAMES (opt-in `## Renames`; round.sh injects the pairs into input.json, the checkers' A6 reads them) ---
+    renames, rn_errs = tb.parse_renames(text)
+    if renames is not None or rn_errs:
+        if tier in ("bash_patch", "bash_patch2"):
+            reasons.append(f"RENAMES: `## Renames` is not supported by tier {tier} (its checker has no A6 rename allowance)")
+        reasons.extend(rn_errs)
+
     if reasons:
         for r in reasons:
             print(f"REFUSED {r}", file=sys.stderr)
@@ -432,6 +443,8 @@ def main():
         "B_TESTS": " ".join(tests),
         "B_OVERRIDE_NOT_RUNNABLE": pins.get("override_not_runnable", ""),
     }
+    if renames:   # emitted ONLY when declared, so a brief without `## Renames` lints byte-identically to before
+        out["B_RENAMES"] = json.dumps(renames)
     for k, v in out.items():
         print(f"{k}={shlex.quote(v)}")
     print("B_PINS_ARR=(" + " ".join(shlex.quote(f"{k}={v}") for k, v in builder_pins.items()) + ")")

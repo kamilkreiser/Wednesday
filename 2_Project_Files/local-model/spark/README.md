@@ -196,3 +196,20 @@ not assumed (nft-certificate needed its own on 10-01).
 
 ## Opt-in bash farm (2026-11-10, o128)
 A bash_patch2 / test_only_bash brief whose suite drives node (packages/shared dist, `node_modules/.bin/tsx`) puts a file named `spark.farm` in its brief dir (optional line `service_dir=services/<x>`, default services/auth). round.sh then runs `prepare_bash_farm.sh` after the clone: node_modules farm + `tsc` build of packages/shared in the clone via `tasks/code_patch/prepare_clone.sh`, and asserts dist + tsx. No file = nothing runs. First user: KS-1145 item 2 (ks949 real-Postgres suite, 0/27 bare, 27/27 farmed).
+
+## Declared renames in A6 (2026-11-11, commission `0_Brain/reference/2026-11-11_harness-declared-rename/commission.md`)
+A task that RENAMES a test cell used to read as `declared cell(s) LOST` in A6 (tiers/tier_checker.py: test_only_input, doc_only,
+test_only_bash, incl. sibling suites) and could never pass. OPT-IN fix: the brief declares exact pairs in a `## Renames` block:
+
+    ## Renames
+    - `<old cell full name>` -> `<new cell full name>`
+
+A cell's full name is what the checker prints for it: vitest/jest `fullName`; bash `<suite basename> :: <label>`. One pair per
+bullet, one-to-one, no wildcard (`*`, `...`), old != new. brief_lint.py refuses a malformed block and any bash_patch/bash_patch2
+brief carrying one; on success it emits `B_RENAMES` (JSON) and round.sh writes it into input.json as `declared_renames`.
+A6 then grades each pair against the MEASURED cells: old in the baseline and gone after; new NOT in the baseline, present after and
+PASSING. Anything else FAILS (typo'd old name, new cell red or absent, old still present, new already existed). Every other cell
+that disappears stays LOST. No `## Renames` block = byte-identical to before. code_patch / code_patch2 / test_only
+(tasks/code_patch/checker.sh suite-delta script, read by code_patch2 at run time) accept the same declaration and grade the pairs
+the same way; that script never flagged a vanished passing cell, so there the allowance only adds the exact-pair checks.
+Arms: tests/a6_declared_rename_arms.sh.

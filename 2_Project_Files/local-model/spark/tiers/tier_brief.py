@@ -215,3 +215,63 @@ def comment_lines(src, kind):
             i += 1
         res.append(had_comment and not had_code)
     return res
+
+
+# ---------------------------------------------------------------- 2026-11-11 DECLARED-RENAME allowance (commission 2026-11-11_harness-declared-rename)
+#   ## Renames     (any tier whose A6 compares cells; OPT-IN — a brief without the block is graded exactly as before)
+#   - `<old cell full name>` -> `<new cell full name>`     one exact pair per bullet, one-to-one, no wildcard
+# A cell's full name is what the checker's report prints for it: vitest/jest fullName; bash `<suite basename> :: <label>`.
+def parse_renames(text):
+    """-> (pairs|None, errors). None = no `## Renames` block (the default; nothing changes). Pairs are [old, new] lists."""
+    body = section(text, "Renames")
+    if body is None:
+        return None, []
+    pairs, errs, olds, news = [], [], set(), set()
+    for raw in body.split("\n"):
+        m = re.match(r"^\s*[-*]\s*(.*)$", raw)
+        if not m:
+            continue
+        mm = re.match(r"^`(.+?)`\s*(?:->|→)\s*`(.+)`\s*$", m.group(1).strip())
+        if not mm:
+            errs.append(f"RENAMES: bullet {m.group(1).strip()[:80]!r} is not exactly - `old cell full name` -> `new cell full name`")
+            continue
+        old, new = mm.group(1), mm.group(2)
+        if any(w in x for x in (old, new) for w in ("*", "…", "...")):
+            errs.append(f"RENAMES: {old[:50]!r} -> {new[:50]!r} contains a wildcard (`*`, `...`); a declaration names exact cells")
+            continue
+        if old == new:
+            errs.append(f"RENAMES: {old[:60]!r} -> itself is not a rename")
+            continue
+        if old in olds or new in news or old in news or new in olds:
+            errs.append(f"RENAMES: {old[:50]!r} -> {new[:50]!r} is not one-to-one (a name appears in two pairs)")
+            continue
+        olds.add(old)
+        news.add(new)
+        pairs.append([old, new])
+    if not pairs and not errs:
+        errs.append("RENAMES: the `## Renames` block has no `- `old` -> `new`` bullet (delete the heading if nothing is renamed)")
+    return pairs, errs
+
+
+def check_renames(renames, base_status, after_status):
+    """Grade declared pairs against the measured cells. base_status/after_status: {full name: 'passed'|'failed'|...}.
+    -> (valid_pairs, error strings). A pair is valid only when the old cell WAS in the baseline and is GONE after, and the
+    new cell was NOT in the baseline and is PRESENT and PASSING after. Anything else is an error (FAIL)."""
+    valid, errs = [], []
+    for old, new in renames or []:
+        bad = []
+        if old not in base_status:
+            bad.append("old cell was never in the baseline (a declaration cannot launder a typo)")
+        elif old in after_status:
+            bad.append("old cell is still present after the patch (not a rename)")
+        if new in base_status:
+            bad.append("new cell already existed in the baseline (not a rename)")
+        if new not in after_status:
+            bad.append("new cell is absent after the patch")
+        elif after_status[new] != "passed":
+            bad.append(f"new cell is {after_status[new]}, it must pass")
+        if bad:
+            errs.append(f"declared rename {old[:70]!r} -> {new[:70]!r}: " + "; ".join(bad))
+        else:
+            valid.append([old, new])
+    return valid, errs

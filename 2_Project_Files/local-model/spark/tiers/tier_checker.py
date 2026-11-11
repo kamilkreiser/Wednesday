@@ -436,6 +436,13 @@ def tier_test_only_input(inp, inp_path, out_md, cl):
         lost = sorted(set(base_suite["cells"]) - set(af["cells"]))
         newr = sorted(n for n, (st, _) in af["cells"].items() if st == "failed" and base_suite["cells"].get(n, ("",))[0] != "failed")
         worse = []
+        if inp.get("declared_renames"):   # 2026-11-11 opt-in: exact declared pairs; absent key = the code above, unchanged
+            rn_ok, rn_err = tb.check_renames(inp["declared_renames"], {n: v[0] for n, v in base_suite["cells"].items()},
+                                             {n: v[0] for n, v in af["cells"].items()})
+            lost = [n for n in lost if n not in {o for o, _ in rn_ok}]
+            worse += rn_err
+            if rn_ok:
+                info(f"A6 declared rename(s) accepted (old gone, new present and passing): {rn_ok[:3]}")
         if lost:
             worse.append(f"cell(s) LOST vs the tip: {lost[:3]}")
         if newr:
@@ -844,12 +851,20 @@ def tier_test_only_bash(inp, inp_path, out_md, cl):
         lost = sorted(k for k in {_numkey(n) for n, st in base["cells"].items() if st == "passed"} if k not in {_numkey(n) for n in gr["cells"]})
         af = run_bash(cl, "after_siblings", sibs)
         worse = []
+        rn_valid = []
+        if inp.get("declared_renames"):   # 2026-11-11 opt-in: exact declared pairs; absent key = the code above, unchanged
+            rn_valid, rn_err = tb.check_renames(inp["declared_renames"], {**base_sib["cells"], **base["cells"]},
+                                                {**af["cells"], **gr["cells"]})
+            lost = [k for k in lost if k not in {_numkey(o) for o, _ in rn_valid}]
+            worse += rn_err
+            if rn_valid:
+                info(f"A6 declared rename(s) accepted (old gone, new present and passing): {rn_valid[:3]}")
         if lost:
             worse.append(f"declared cell(s) LOST vs the tip: {lost[:3]}")
         nr = sorted(n for n, st in af["cells"].items() if st == "failed" and base_sib["cells"].get(n) != "failed")
         if nr:
             worse.append(f"sibling new red: {nr[:3]}")
-        lost_s = sorted(set(base_sib["cells"]) - set(af["cells"]))
+        lost_s = sorted(set(base_sib["cells"]) - set(af["cells"]) - {o for o, _ in rn_valid})
         if lost_s:
             worse.append(f"sibling cell(s) lost: {lost_s[:3]}")
         for s in sibs:

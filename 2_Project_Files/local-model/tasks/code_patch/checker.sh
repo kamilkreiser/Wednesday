@@ -952,7 +952,7 @@ fi
 rc_after="$(run_vitest after_suite)"
 AFTER="$(summ after_suite)"
 echo "after suite rc=$rc_after $AFTER"
-python3 - "$REP/baseline_suite.json" "$REP/after_suite.json" > "$REP/suite_delta.out" 2>&1 <<'PYEOF'
+python3 - "$REP/baseline_suite.json" "$REP/after_suite.json" "$INPUT" > "$REP/suite_delta.out" 2>&1 <<'PYEOF'
 import json, sys
 def failed(p):
     j = json.load(open(p)); s = set()
@@ -969,7 +969,35 @@ print(f"NEW reds: {new}")
 print(f"reds fixed by the patch: {fixed}")
 print(f"tests added: {ja['numTotalTests'] - jb['numTotalTests']}")
 open(sys.argv[2].rsplit("/",1)[0] + "/a6_new_files.txt", "w").write("".join(sorted({f + "\n" for f, _ in new})))
-sys.exit(0 if not new else 1)
+# 2026-11-11 DECLARED RENAMES (opt-in; input.json `declared_renames` = [[old full name, new full name], ...] from the brief's `## Renames`).
+# Absent/empty = nothing below runs and the output above is byte-identical. A declared pair is graded exactly: the old cell was in the
+# baseline (exactly one file) and is gone after; the new cell was NOT in the baseline and is present after exactly once and PASSING.
+# Anything else is an error (rc 1). An undeclared disappearance is not detected here (it never was in this script).
+ren_bad = []
+try:
+    ren = (json.load(open(sys.argv[3])).get("declared_renames") or []) if len(sys.argv) > 3 else []
+except Exception as e:
+    ren, ren_bad = [], [f"cannot read declared_renames from {sys.argv[3]}: {e}"]
+if ren:
+    def cells(j):
+        d = {}
+        for r in j.get("testResults", []):
+            for a in r.get("assertionResults", []):
+                d.setdefault(a.get("fullName"), []).append((r["name"].split("/")[-1], a.get("status")))
+        return d
+    cb, ca = cells(jb), cells(ja)
+    for r_old, r_new in ren:
+        bad = []
+        if len(cb.get(r_old, [])) != 1: bad.append(f"old cell is in {len(cb.get(r_old, []))} baseline file(s), want exactly 1")
+        if r_old in ca: bad.append("old cell is still present after the patch")
+        if r_new in cb: bad.append("new cell already existed in the baseline")
+        if len(ca.get(r_new, [])) != 1: bad.append(f"new cell is in {len(ca.get(r_new, []))} file(s) after, want exactly 1")
+        elif ca[r_new][0][1] != "passed": bad.append(f"new cell is {ca[r_new][0][1]}, it must pass")
+        if bad: ren_bad.append(f"declared rename {r_old!r} -> {r_new!r}: " + "; ".join(bad))
+        else: print(f"declared rename accepted: {r_old!r} -> {r_new!r} (new cell passes)")
+if ren_bad:
+    for b_ in ren_bad: print("DECLARED RENAME FAIL: " + b_)
+sys.exit(0 if not new and not ren_bad else 1)
 PYEOF
 rc=$?
 cat "$REP/suite_delta.out"
