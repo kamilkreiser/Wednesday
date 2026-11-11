@@ -2806,3 +2806,8 @@ INCLUDED until he says otherwise.
 > to maximise / optimise disk space, I will use The DevMaster drive for Secuura only and another drive for Datasec Only.  You can remove the Datasec folder and all files in the Datasec folder in !coding
 
 *Note:* measured: 104 GB still on DevMASTER, unchanged since the 10-19 G-DRIVE copy; card wed-devmaster-datasec-removal-1109 (plug in G-DRIVE, verify, then remove)
+
+## 2026-11-11 14:09 — Kam (terminal, verbatim)
+> new drive and new seat.  please work your way through the In Progress and backlog tickets for Secuura.  Use the spark as much as you can and use as many agents as it takes to get through it.
+
+*Note:* Boot 14:0x on the new drive; receipt bf-e17e5e8031c9; first wave = merge seat B 132nd, raise seat R 95th, Spark operator, board triage.
