@@ -1,0 +1,21 @@
+## What changed
+- global.json now names SDK 10.0.404 with rollForward disable.
+- New guard test infra/tests/test_sdk_pin.py keeps global.json and ci.yml exact (runs in the required infra job).
+- Three README lines and one showcase.sh message name the new pin; the stale comment in PkcsInPackageTests.cs (comment lines only) no longer says global.json floats.
+- No workflow line, no package pin and no other test line changes.
+
+## Why
+The hosted runner's SDK moved from 10.0.403 to 10.0.404 between two green runs, with no commit of ours, and turned every pull request red until the Pkcs pin was raised. actions/setup-dotnet installs exactly what global.json names when rollForward is disable, and the dotnet host refuses any other SDK, so no runner image can roll the build tool forward.
+
+## The trade
+Each .NET update is now its own pull request: edit global.json, and the Pkcs pin only if its tripwire says so. Serves HPSMPOC-271 (its owner-and-cadence clause: one pull request per .NET update). Authority: the product owner's 2026-11-11 19:52 ruling (pin the build tool exactly).
+
+## Not fixed
+setup-dotnet always runs a first install with --runtime dotnet --channel LTS, so Microsoft.NETCore.App still floats.
+
+## Check on this run
+In the api and api-sqlserver-shard jobs the setup-dotnet install line should show --version 10.0.404 (not --channel 10.0) and dotnet --version should print 10.0.404, with the Pkcs tripwires green. Local machines need SDK 10.0.404 installed.
+
+Not run locally: SQL Server shards and CodeQL (hosted CI is the proof).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

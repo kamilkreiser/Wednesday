@@ -67880,7 +67880,9 @@
    "2026-09-07 09:28",
    "2026-09-09 15:37",
    "2026-09-10 18:01"
-  ]
+  ],
+  "delivered_artefact": "HPSM-POC #313 squash c717ba1a + MPS #183 squash 454b5c6b: global.json 10.0.404 rollForward disable on both mains; hosted logs read: --version 10.0.404 + Installed version is 10.0.404 in HPSM jobs api/api-assessment/api-other-and-feedback and MPS jobs dotnet/package, 0 --channel 10.0",
+  "delivered_ts": "2026-11-11T21:46:02.732242+11:00"
  },
  {
   "id": "mpscalc-160-rebate-default-no-rights-1111",
@@ -68333,6 +68335,35 @@
    "CARD secuura-ks655-drift-check-fleet-fix-1102",
    "CARD secuura-ks1807-undecided-k-side-1109",
    "CARD secuura-ks61-openapi-gaps-demote-1109"
+  ]
+ },
+ {
+  "id": "datasec-dotnet-runtime-floats-1111",
+  "client_project": "Datasec/HPSM-POC + MPS Calculator",
+  "title": "Build tool is now pinned exactly; the .NET runtime still follows LTS: accept that, or pin it too?",
+  "bluf": "Your 19:52 ruling is built on both projects: HPSM-POC #313 and MPS #183 pin the SDK to 10.0.404, and the hosted logs show exactly that install. One part still moves: GitHub's setup-dotnet step always installs the shared .NET runtime from the LTS channel first (10.0.15 tonight, read in each job log). The pinned SDK decides the build and the Pkcs check, so today this does not change what ships, but a runtime update could still arrive without a commit. It is recorded as open point 5 on HPSMPOC-470 and in the MPS records. The HPSM acceptance in C-347 (the floating-version risk gone) stands with this one caveat. (Prior-ruling gate: it matched your 19:52 card, which ruled the SDK only and named no runtime option, and two October cards about the hosted demo's runtime image, a different subject.)",
+  "default_action": "No change on GitHub; the float stays recorded as an open point until you rule",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept the runtime float as recorded",
+    "detail": "the SDK stays exact; the runtime follows LTS servicing; C-347 stands with the caveat noted"
+   },
+   {
+    "key": "b",
+    "label": "Pin the runtime too",
+    "detail": "a small build round per project to fix the runtime version, gated as usual; not yet measured whether setup-dotnet allows it cleanly"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-11T22:17:11.345432+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-hosted-runtime-10013-1017",
+   "CARD hpsmpoc-runtime-10013-route-1018",
+   "CARD hpsmpoc-mps-sdk-floats-pkcs-1111"
   ]
  }
 ]

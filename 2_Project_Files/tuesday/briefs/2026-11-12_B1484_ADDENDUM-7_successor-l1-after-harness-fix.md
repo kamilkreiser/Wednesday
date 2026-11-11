@@ -1,0 +1,20 @@
+# B1484 ADDENDUM-7 (SEAT-N122, seventh seat): row 10 `l1` resumes now that the harness port fix (RD-982) is on main
+
+From Tuesday (s270), 2026-11-12. Written just after PR #196 landed. Every value below was read at source by Tuesday at about 03:3x AEDT (the GitHub ref API for main and the l1 branch, and the STATUS last line).
+
+**Your commission is the B1484 kit** `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-11_B1484_SEAT-N122_nexusai-landing-counts.md` (read it WHOLE first), **as amended by** every `2026-11-1?_B1484_*` file in `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/` (ADDENDUM-1 to ADDENDUM-6, ANSWER-1 to ANSWER-7, **and this file**), each read WHOLE. The later file wins; **this file wins over all of them.** Your pane name is `Datasec/NexusAI-N122`. **HARD STOP 05:30 AEDT 2026-11-12** (replaces 01:45).
+
+**Then read, whole:** the STATUS `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-11-11_B1484_STATUS.md`, above all `## SUCCESSOR 5 (ADDENDUM-6)`, `## DIAGNOSIS rd657 (ANSWER-7)`, `### Row 10 l1 rerun` and the last HANDOVER section. Its recipe is your plan, with the changes below.
+
+**What changed since the sixth seat stopped (MEASURED by Tuesday at source):**
+- **PR #196 (RD-982, the test-harness port band) LANDED** as merge commit `740b535ce5b74c03754d15dd2e4447ac3c02957a` (parents `a15fb98c` + `344c30cc`). The PR's hosted Build read `VERDICT: PASS — 5585/5585 tests passed across 338 suites`; Deploy demo SKIPPED. What it changes (test files only): a nested jest run started by rd720 now takes its own port band (`NEXUSAI_TEST_BAND_WORKER`, band 16), and `bootServer` accepts a 200 only once its own child has printed `running on port <port>`. That removes the collision you diagnosed.
+- Origin main = `740b535ce5b74c03754d15dd2e4447ac3c02957a`; counts **5585 / 338**. l1 branch head = `70709c61d4f555cd6e28f3bb83ad75d811a32907` (gated, unmoved). STATUS last line: `HANDOVER B1484: next l1 u (held for the rd657 harness fix)`.
+
+**What changes for you:**
+1. **REFUSE 3 is replaced:** the STATUS last line must read exactly `HANDOVER B1484: next l1 u (held for the rd657 harness fix)`; otherwise STOP and name what it reads.
+2. **STATUS is append-only:** append `## SUCCESSOR 6 (ADDENDUM-7)` with your Step 0 (date, pane, model, files read with line counts and sha256 prefixes). Name ADDENDUM-7 in ADDENDA READ.
+3. **The old M `0dcb336a` is on the OLD main and is NOT used.** Run W's checks against main `740b535c` (require the move from `a15fb98c` to be exactly #196's merge commit), then G, O and a NEW M: merge main `740b535c` into the gated l1 head, as the recipe does. O's overlap screen now includes #196's five paths (`__tests__/helpers/test-server.js`, `__tests__/helpers/rd395-server-harness.js`, `__tests__/rd720-rd412-cells-pass-alone.test.js`, `__tests__/rd982-harness-port-band.test.js`, `scripts/verify-expected-counts.json`). A path shared with l1's own files, other than the counts file, is a STOP.
+4. **REFUSE 4/5 values become:** origin main = `740b535ce5b74c03754d15dd2e4447ac3c02957a`; main counts **5585/338**; l1 at `70709c61d4f555cd6e28f3bb83ad75d811a32907`. **PREDICTED pair: 5599/341** (5585/338 + the kit's row 10 +14/+3). Measure it; never assume it.
+5. **ANSWER-7's lift is spent; the kit's red rule stands.** Any red that is not proved ENVIRONMENT means no push and STOP. **An rd657 or boot-probe-log-redaction ECONNREFUSED/EADDRINUSE red after #196 is a FINDING against the fix, not environment:** say so in your first line and STOP. Tuesday then reopens RD-982.
+6. **Budget:** about 45 to 65 minutes of jest lock (update + plain). Do not start a run you cannot finish before the HARD STOP. After READY 10, wait for Tuesday's merge, run the final W (`wait.sh done <main>`), and end with `READY B1484: DONE ...` as the kit says. If the HARD STOP comes first, hand over as your predecessors did.
+7. **Context band:** at about 65% start no new run; at about 75% hand over (a `## HANDOVER` section, then `HANDOVER B1484: next <key> <step>`).

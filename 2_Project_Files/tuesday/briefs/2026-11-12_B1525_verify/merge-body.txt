@@ -1,0 +1,14 @@
+Test harness only; no backend or static file changes.
+
+rd720 starts a nested jest run per cell, which jest numbers as worker 1, so it searched
+worker 1's port band. A suite in the real worker 1 booting a server through bootServer
+could be handed the same port, read the nested server's HTTP 200 as its own child's,
+and then lose its child to EADDRINUSE.
+
+workerBand() now honours NEXUSAI_TEST_BAND_WORKER, nestedJestEnv() gives the nested run
+the top band of the slot, rd720 passes it, and bootServer accepts a 200 only after its
+own child's "running on port <port>" line is in the child's output. Four new cells in
+rd982-harness-port-band.test.js judge both. Expected counts are 5585 tests across 338
+suites (was 5581 across 337); the full verify passed at that size on the head tree.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

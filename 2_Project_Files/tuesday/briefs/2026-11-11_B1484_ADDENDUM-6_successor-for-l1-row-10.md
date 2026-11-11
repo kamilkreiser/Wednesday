@@ -1,0 +1,21 @@
+# B1484 ADDENDUM-6 (SEAT-N122, sixth seat): you resume the landing chain at row 10 `l1`, now that row 9 `revoke` has landed
+
+From Tuesday (s270), 2026-11-11. Written just after PR #195 landed. Every value below was read at source by Tuesday at 23:2x AEDT (the GitHub ref API for main and the l1 branch, the open-PR count, the gate file's first line, the STATUS last line).
+
+**Your commission is the B1484 kit** `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-11_B1484_SEAT-N122_nexusai-landing-counts.md` (read it WHOLE first), **as amended by** ADDENDUM-1 to ADDENDUM-5, ANSWER-1 to ANSWER-6 **and this file**: every `2026-11-11_B1484_*` file in `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/`, each read WHOLE. Where they differ, the later file wins; **this file wins over all of them.** Your pane name is `Datasec/NexusAI-N122` (the previous pane is closed). **HARD STOP 01:45 AEDT 2026-11-12** (replaces 23:30).
+
+**Then read, whole:** the STATUS `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-11-11_B1484_STATUS.md`, above all its newest section `## HANDOVER (successor 4, 23:21 AEDT)` (STATUS :780 at Tuesday's read). Its l1 recipe and its watch-outs are your plan. Use `## READY 9 revoke` as your model.
+
+**What changed since the fifth seat stopped (MEASURED by Tuesday at source):**
+- **PR #195 (row 9 revoke) LANDED** as merge commit `a15fb98cc2024087b06958068096ca830f50dbdb` (parents `ac39ab9f` + `016ed158`; hosted checks 7/7 success including CodeQL; the PR's hosted Build read `VERDICT: PASS — 5581/5581 tests passed across 337 suites`; 0 open alerts; Deploy demo SKIPPED). Not deployed. Its merge body states the first rd657 failure beside the rerun pass.
+- Origin main = `a15fb98cc2024087b06958068096ca830f50dbdb`. The l1 branch `b1480/nexusai-s-l1-design-inventory` head = `70709c61d4f555cd6e28f3bb83ad75d811a32907` (the gated head, unmoved; `compare a15fb98c...70709c61`: ahead 1, behind 39). Gate first line: `GATE B1480-l1: GO WITH FINDINGS @ 70709c6 on main 849b808`. Open PRs: 0. STATUS last line: `HANDOVER B1484: next l1 W`.
+
+**What changes for you:**
+1. **REFUSE 3 is replaced:** before you write anything, the STATUS last line must read exactly `HANDOVER B1484: next l1 W`; otherwise STOP and name what it reads.
+2. **STATUS is append-only:** append `## SUCCESSOR 5 (ADDENDUM-6)` with your Step 0 (date, pane, model, files read with line counts and sha256 prefixes) and continue the chain log under it. Name ADDENDUM-6 in ADDENDA READ.
+3. **No new clone and no new npm ci** unless the predecessor's package check fails. Reuse the `.tools/b1484/` tools after reading each one you run.
+4. **Step W is already satisfied:** main moved from `ac39ab9f` to `a15fb98c` by the revoke merge. Run W's own checks (re-read main at source, require that the move is exactly #195's merge commit), then go to G, O and M as the recipe says.
+5. **REFUSE 4/5 values become:** origin main = `a15fb98cc2024087b06958068096ca830f50dbdb` (any other value: STOP and name it); main counts **5581/337**; l1 at its gated sha40 `70709c61d4f555cd6e28f3bb83ad75d811a32907`. PREDICTED pair from the kit's row 10 (+14 tests, +3 suites): **5595/340**. Measure it; never assume it. A differing pair is a STOP, as the kit says.
+6. **l1 is tier 1 (an auth design inventory).** The kit's red rule stands with no change: any red that is not proved ENVIRONMENT means no push and STOP. **If rd657 shows ECONNREFUSED again, on any run,** STOP and say so in your first line. That would be the second sighting, and Tuesday tickets it as a harness issue. Do not take a second acquisition without Tuesday's answer (ANSWER-6's lift was for revoke only).
+7. **Budget:** about 45 to 65 minutes of jest lock per row (today's measured rows). Do not start a run you cannot finish (verify + push + READY) before the HARD STOP. After READY 10 the chain is complete: run `wait.sh done <main>` for the final W only after Tuesday's merge of l1 is on main, and end with `READY B1484: DONE ...` as the kit says. If the HARD STOP comes first, hand over as your predecessors did.
+8. **Context band:** at about 65% start no new run; at about 75% hand over exactly as the predecessors did (a `## HANDOVER` section with the state, the values for the next step and the recipe, then `HANDOVER B1484: next <key> <step>`).

@@ -1,0 +1,17 @@
+What changed: global.json (2 lines: sdk.version 10.0.404, sdk.rollForward disable), a new guard test scripts/tests/test_sdk_pin.py (it runs in the existing python job loop, so no workflow edit), and one doc line (docs/ENGINE.md:15). No workflow line, no package pin and no existing test is touched.
+
+Why: the hosted runner's SDK moved from 10.0.403 to 10.0.404 between two green runs, with no commit of ours, and turned every pull request red until the Pkcs pin was raised in #177. global.json allowed any SDK from 10.0.100 up (latestFeature), and actions/setup-dotnet widened that to `--channel 10.0`.
+
+How it is exact: with rollForward set to disable, actions/setup-dotnet (pinned sha a98b5685...) installs exactly the version in global.json (`--version 10.0.404`, no widening), and the dotnet host refuses any other SDK, including one the runner image already carries.
+
+The trade: each .NET update is now its own pull request: edit global.json, and raise the Pkcs pin (MpsCalc.Api.csproj) only if the publish-output tripwire says so.
+
+Not fixed: actions/setup-dotnet still runs a first install `--runtime dotnet --channel LTS`, so the shared Microsoft.NETCore.App runtime still floats; the ASP.NET Core framework and targeting pack that the Pkcs tripwires read come from the exact SDK. A different install route (env override, install script, nested global.json, a quoted step key) is outside what the guard reads.
+
+Local machines need SDK 10.0.404: with this global.json any local dotnet command refuses until it is installed. Use the official osx-arm64 tarball (sha512 1c9a13f625d0c08f08ef5a53597bababe3d2473527e98db2199210940c69dd5fc599a39a4d7c30ebf297ca2334a81b2f64b9bf05ff99585de9af4a5d85215e96) extracted into a side directory such as .tools/dotnet-10.0.404, put first on PATH with DOTNET_ROOT set.
+
+Ticket: MPSCALC-387, fix shape 2 (pin the SDK exactly); its acceptance check, a hosted runner SDK that moves past the pin cannot happen without a committed change, is met by this change. Fix shapes 1 (guard message names the framework version) and 3 (pin follows the SDK) are not done here. Authority: the product owner's 2026-11-11 19:52 ruling (pin the build tool exactly).
+
+Checked locally, not hosted: SDK 10.0.404 build with 0 warnings; publish-output tripwires 3 of 3; whole suite 743 + 196 + 3483 passed on the merge with main; package.sh rc 0; python loop green apart from the Bicep-dependent infra test, which the hosted python job runs.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

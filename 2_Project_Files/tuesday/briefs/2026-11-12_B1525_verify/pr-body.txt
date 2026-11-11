@@ -1,0 +1,27 @@
+## What
+
+Test harness only (RD-982). No backend or static file changes.
+
+rd720 runs rd412-smtp-route once per cell as a nested jest run. Jest sets JEST_WORKER_ID to 1 for an in-band run, so the nested run searched worker 1's port band whichever worker started it. A suite in the real worker 1 that boots a server through bootServer could be handed the same port while the nested server was still booting. The readiness loop accepted any HTTP 200, read the nested server's answer as its own child's, its own child then died on EADDRINUSE, and the next request was refused (seen in rd657 and boot-probe-log-redaction under --maxWorkers=2).
+
+## Changes
+
+- test-server.js: workerBand() honours NEXUSAI_TEST_BAND_WORKER before JEST_WORKER_ID; new nestedJestEnv() returns the top band of the slot (band 16, idle under --maxWorkers=2) and throws if the caller is already worker 16 or already a nested run.
+- rd720: passes nestedJestEnv() to the jest run it starts. Its 8 test titles are unchanged.
+- rd395-server-harness.js: bootServer accepts a 200 only after its own child's "running on port <port>" line is in the child's output; a foreign answer becomes a named failure ("did not come from this child") instead of a wrong success.
+- New rd982-harness-port-band.test.js (4 cells). Expected counts 5581/337 -> 5585/338.
+
+## Evidence
+
+- New cells: red on main (3 of 4 red, the control green), green on the branch.
+- Four mutation plants each turn the intended cell red; the tree is green before and after.
+- Full verify on the head tree: PASS, 5585 tests across 338 suites.
+- Main did not reproduce the original failure in repeated paired runs, so the red-first cells and the mutation plants are the proof; hosted Build is the deciding check.
+
+## Known residual
+
+On macOS a wildcard bind succeeds beside a loopback-only listener, so a foreign loopback-only server on the same port could coexist with the child's banner. The own-banner gate cannot see that; the separate band removes the one source seen.
+
+Merge with a merge commit pinned to the head sha. Do not squash or rebase.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

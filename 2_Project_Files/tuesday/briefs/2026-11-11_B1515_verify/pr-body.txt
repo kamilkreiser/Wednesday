@@ -1,0 +1,24 @@
+## What
+
+MPSCALC-189, clause 4 (the declared Unicode id classes). Two source version ids that Unicode treats as canonically equal over A-Z, a-z and the combining marks U+0300 to U+036F are now one id, and the later copy is refused as a duplicate (DATA-IMP-001, same code, location and message as before).
+
+Folded (one id): U+0344 against U+0308 U+0301; a precomposed letter that carries two marks against its letter and marks (114 letters); a precomposed letter followed by one more mark; marks of different combining class written in the other order.
+
+Not folded (still different ids): marks of the same combining class in the other order, a combining grapheme joiner between marks, compatibility forms (full-width letters, ligatures), letters outside A-Z and a-z, U+212A and U+212B (kept as before; not pinned either way).
+
+## Files (3)
+
+- src/MpsCalc.Api/Sources/SourceDocumentChecks.cs: IdKey reads an id through a new AccentOrder step first; two new generated tables (114 two-mark letters, 112 combining classes, Unicode 13.0.0 generator); the older 428-pair table is untouched.
+- tests/MpsCalc.Api.Tests/SourceVersionIdAccentForms.cs and SourceVersionIdAccentTable.cs: 93 new rows (68 twin cases, 18 control cases that stay two ids, 3 properties, 4 table rows).
+
+No contract change: issue code, location and refusal text are byte-identical; docs/API.md is not touched (the docs sentence is a separate item).
+
+## Checked
+
+- Solution build Release: 0 warnings. Tests at the merge result: Engine 743, Import 196, Api 3576, 0 failed (main: 743, 196, 3483; names lost 0, gained 93).
+- New twin and property rows red with the change removed (71 of 93; 73 at the old source); control rows green both ways.
+- A 1.2 million string differential against Unicode canonical ordering found 0 ids folded that should stay apart and 0 left apart that should fold.
+
+Hosted CI and CodeQL are the proof for what was not run locally (web, e2e, package, CodeQL).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
