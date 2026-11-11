@@ -1,0 +1,51 @@
+{
+ "identifier": "KS-1933",
+ "title": "Billing: one Stripe purchase can be credited more than once (two events, post-grant retry, finalise/release catches)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-02T00:34:01.432Z",
+ "updatedAt": "2026-11-04T02:09:45.452Z",
+ "description": "**BLUF:** One Stripe purchase can add certification credits to a customer's balance twice. QA gate 95 (Opus, 2026-11-02) ran the real billing webhooks router with only the database and the Stripe service replaced, and measured three ways it happens plus two catch blocks that either re-grant or strand a paid event. Kam ruled on 2026-11-02: the fix is designed and tested in code and goes through the QA gate; nothing is deployed without his tap. Whether the live Stripe endpoint sends both events (case 1) is Kam's own check; no agent has read it.\n\n**What gate 95 measured** (`services/billing/src/routes/webhooks.ts` at PR 1913's head `5d6bd74daa3e`; line numbers are that file's)\n\n1. **Two events, one purchase.** A `checkout.session.completed` and a `payment_intent.succeeded` for the same purchase, both carrying `certifications: '5'` and no `creditsAdded` flag, delivered clean: **2 grants**, with and without PR 1913. The `webhook_events` claim is keyed by the Stripe event id and the two events have different ids, so the claim does not dedupe them. `handlePaymentSucceeded` skips when `paymentIntent.metadata.creditsAdded` is set, but nothing in the code writes that key.\n2. **Ordinary Error thrown after the grant** (for example a logger call after `addCertificationCredits` has returned): the claim is released, Stripe redelivers, **2 grants**, with and without PR 1913.\n3. **Unreadable thrown value after the grant:** 1 grant today, only because the request crashes and the event is stranded; **2 grants with PR 1913**, the same as an ordinary Error.\n4. `finaliseEvent`**'s catch (:110-111)** reads `err?.message` unguarded and runs after the grant: an unreadable rejection gives **2 grants**, against 1 for an ordinary Error.\n5. `releaseClaim`**'s catch (:129-135)** reads `err?.message` unguarded: an unreadable rejection leaves the row `processing`, the redelivery is acknowledged as a duplicate, **0 grants** for a paid event.\n\n**Limits of the measurement:** a stand-in database (a model of the claim, release and finalise statements) and a stand-in Stripe service. No real PostgreSQL, no real Stripe, no booted service, no read of the live Stripe endpoint's event subscriptions. The unreadable thrown values in cases 3 to 5 are synthetic.\n\n**Where the credits live:** the balance is the Stripe customer's metadata field `certificationCredits`, written by `StripeService.addCertificationCredits` (`services/billing/src/services/stripeService.ts:226-247`). PostgreSQL holds only `webhook_events`.\n\n**Ruling:** Kam, 2026-11-02, decision `secuura-billing-possible-double-credit-two-stripe-events-1102`, option a: file a ticket; a Claude seat designs and tests a fix that makes one purchase credit exactly once, through the QA gate, nothing deployed; Kam checks the Stripe endpoint's event list once.\n\n**Related:** KS-1868 (the catch-site umbrella; the catches in cases 4 and 5 are KS-1868 sites). PR 1913 in Secuura/Distributed_Secuura (billing webhook catches; gate 95 = GO WITH NOTES; its merge is held until this fix is gated).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1918",
+    "title": "Refs KS-1933: billing credits one Stripe purchase once, keyed on its payment, not its event"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "e491db71-c54e-42c0-8ba4-a29d78c0474c",
+    "createdAt": "2026-11-04T02:09:45.463Z",
+    "body": "**BLUF:** Delivered: PR 1918 merged as c0f9af13f94b on develop, deployed to kintsugi at ee1e1b832115 (kintsugi's REVISION head, read 2026-11-04 01:59Z); migration 056 applied on kintsugi during that deploy. Verified by code read at ee1e1b832115, not observed live (it needs Stripe webhook deliveries). Left open: the two items below.\n\n- **Delivered:** `Blockchain/Dev/migrations/056_ks1933_billing_credit_grants.sql` and `Blockchain/Dev/services/billing/src/creditGrants.ts:3` claim a credit once per payment before Stripe is called; `ks1933-billing-one-purchase-credits-once.test.ts` pins it.\n- **Left open:** the ruling on decision secuura-billing-possible-double-credit-two-stripe-events-1102 includes a one-time read of the Stripe endpoint's event list, which this ticket does not record as done; the residual in comment 75d4fed8 (the payment key written into the same Stripe customer update) is a decision, not built. KS-1934 and KS-1935 are their own tickets.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "75d4fed8-a75f-407f-8656-386268e12007",
+    "createdAt": "2026-11-02T01:25:14.157Z",
+    "body": "**BLUF:** PR 1918 (Secuura/Distributed_Secuura, head `d411445fff31`, stacked on PR 1913) builds the fix: the billing webhook now credits a purchase once per PAYMENT, keyed on its PaymentIntent id and claimed in a new `billing_credit_grants` table before the Stripe credit call. Nothing merged, nothing deployed; the new migration has not run on any box. An Opus QA gate (tier 1) is next.\n\n**What it does:** `grantCreditsOnce` (`services/billing/src/creditGrants.ts`) claims the payment row before `addCertificationCredits`, marks it `granted` after it, or `failed` if the credit call threw, so the redelivery may claim it again. A claim that cannot be made refuses the delivery (500), so Stripe redelivers. The `finaliseEvent` and `releaseClaim` catches log type and field names only and never throw. Migration `056_ks1933_billing_credit_grants.sql`: `CREATE TABLE IF NOT EXISTS` only.\n\n**Measured (Node v26.8.1, not Node 24):** 22 new cells on the real router, 16 red at PR 1913's head (all by assertion: two events 2 grants, a throw after the grant 2, unreadable finalise 2, unreadable release no answer), 22/22 with the change. 10 of 10 mutants killed. The SQL passed 22 of 22 checks on a throwaway real PostgreSQL, including a claim race and a 20-way burst with one winner. Billing suite 343 to 365, 0 failed.\n\n**Residual, by design (not fixed):** a credit call that throws AFTER Stripe applied the update is marked `failed` and credited again on redelivery, as before. Closing that needs the payment key written into the same Stripe customer update, a new Stripe-side field: Kam's call, not built. A row left `granting` by a process that died mid-credit needs a manual check. Purchases credited before the migration have no row; an event retrying across the deploy can still credit twice in that window. No backfill.\n\n**Before it deploys:** the migration ships in the migrations image, so a deploy rebuilds `migrations` with `billing`, runs the migration first, and checks the table directly.\n\n**Related, filed with this work:** KS-1934 (a session that is not `paid` is credited), KS-1935 (one `addCertificationCredits` call can credit twice under a concurrent write). Neither is fixed in PR 1918.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

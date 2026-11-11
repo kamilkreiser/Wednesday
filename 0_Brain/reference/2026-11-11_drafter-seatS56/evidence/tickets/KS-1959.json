@@ -1,0 +1,57 @@
+{
+ "identifier": "KS-1959",
+ "title": "vc-issuer: revoke() swallows a failed DB UPDATE \u2014 the route answers 200, the row stays unrevoked, and a restart reloads it as valid",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": null,
+ "archivedAt": null,
+ "createdAt": "2026-11-02T22:08:16.381Z",
+ "updatedAt": "2026-11-05T03:01:51.624Z",
+ "description": "**BLUF:** In vc-issuer, `credentialRepo.revoke()` swallows a failed database UPDATE and keeps the revoke only in memory: the route `POST /api/credentials/:id/revoke` answers 200 \"revoked successfully\", the database row stays UNrevoked, and after a restart `loadFromDb` loads it unrevoked, so the credential verifies as valid. Measured by gate 152 for an ordinary Error (its scenario C); the restart is read, not run. Pre-existing, not introduced by pull request 1968 ([https://github.com/Secuura/Distributed_Secuura/pull/1968](<https://github.com/Secuura/Distributed_Secuura/pull/1968>)); found by gate 152. Same fail-open family as KS-1958.\n\n## What happens\n\n* `Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts`: when `revoke()`'s database UPDATE fails, the error is swallowed (\"kept in memory\"). The credential is revoked in this process's memory only.\n* The route answers 200 \"revoked successfully\" although the database row is unchanged.\n* After a restart, `loadFromDb` (the only place memory is filled from the database) loads the row unrevoked, and the credential verifies as valid (read, not run past the restart).\n\n## Measured (gate 152, scenario C)\n\nThe real route and repository were run; only `../db` (an in-memory fake table that can fail its UPDATE) and the logger were replaced. With an ordinary Error on the UPDATE: the route answers 200 \"revoked successfully\", memory is revoked, the database row is not. Base and head (pull request 1968) behave the same.\n\n## A hostile value at the same place (finding G152-F4, read from source and measured for revoke)\n\nFor a revoked Proxy or an Error with a throwing `message` getter on that UPDATE, the revoke answers 500 after memory is already revoked, because `revoke()`'s own catch (around line 502) still reads `err?.message` unguarded. Three sibling catches in the same file still do too: `store` (around line 98), `getReadableByHash` (around 324, the by-hash route's path) and `selectList` (around 413, the list route); `db.ts` `probeDb` as well. Those belong to the KS-1868 site list.\n\n## Fix class\n\nNot chosen by the gate. A revoke that cannot reach the database should not answer success; how it should behave (refuse and leave memory unrevoked, or accept and retry) is the same availability-against-fail-closed ruling as KS-1958.\n\n## Limits\n\nNot tested: a real restart, a real Postgres, the revoke route over HTTP beyond the route dispatch used by the sibling suites, Node 24. Related, not the same defect: KS-1295 (`store()` falls back to memory silently), KS-1684 (the creator refused on the memory fallback after a revoke), KS-1899 (`revoke()` has no ownership check of its own).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2005",
+    "title": "Refs KS-1959: a revoke whose database write does not take effect answers 503, not success"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "025868d1-2048-461f-a58a-5f70264a3591",
+    "createdAt": "2026-11-05T03:01:51.645Z",
+    "body": "**BLUF:** At develop `5fc5569ed96a`, four catch sites that this ticket's \"A hostile value at the same place\" section names still read `err?.message` unguarded: `store` (line 98), `getReadableByHash` (line 370), `selectList` (line 459) and `probeDb` (line 102 of the db file). The revoke catch is guarded since PR 2005. Gate 191 measured one of the four: `GET /api/credentials/by-hash/:hash` answers HTTP 500 when the database read throws a revoked Proxy or an Error whose `message` getter throws (3 cells, the same at base and head of PR 2003). The ticket's \"around 324 / 413 / 502\" are gate 152's numbers at PR 1968's base; the tip's are below.\n\nSource: gate 191 verdict `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate191-ks1958-pr2003/verdict.md` lines 27 to 29 (G191-F3, LOW, pre-existing); gate 152 verdict `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate152-ks1868-pr1968/verdict.md` line 71 (G152-F4, graded there \"recommended follow-up, read from source\", no severity letter); gate 194 verdict `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate194-ks1959/verdict.md` line 106 (the revoke catch rewritten with a guard). Product code read by the filing seat at develop `5fc5569ed96ac61f64823cc9e1fa841899aa1f62` (the PR 2006 squash) through the GitHub contents API, not run.\n\nLines as read at that sha:\n* `Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts`: the `store` catch opens at 95 and reads `error: err?.message` at 98 (log text \"DB write failed for credential \u2014 kept in memory\"); the `getReadableByHash` catch opens at 369 and reads at 370 (log text \"DB hash lookup failed \u2014 falling back to memory\"); the `selectList` catch opens at 458 and reads at 459 (log text \"DB list failed \u2014 falling back to memory\").\n* Routes into them, in `Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts`: the by-hash handler (`router.get('/by-hash/:hash'` at line 402) calls `getReadableByHash` at 409; the list handler (`router.get('/'` at 236) calls `listReadable` at 246, which reaches `selectList` at line 335 of the repository file (`list` reaches it at 280); issuance (`router.post('/'` at 146) calls `store` at 210.\n* `Blockchain/Dev/services/vc-issuer/src/db.ts`: `probeDb` (line 95) returns `error: err?.message` at line 102, in a catch that opens at 100.\n* Guarded at the same sha, for contrast: lines 49, 162, 215, 250 and 567 of the repository file each read the value inside an inner try; the `revoke` catch at 564 is the PR 2005 form.\n\nMeasured (gate 191, G191-F3): `getReadableByHash`'s catch reads `err?.message` unguarded; a revoked Proxy and a throwing getter give HTTP 500, an ordinary Error gives 200 from memory, and the 500 body carries no planted text. The same 3 of 3 outcomes at base and head. 3 cells, both sides, matrix harness Q4 cells.\n\nNot measured: anything by the filing seat (nothing was run). `store`, `selectList` and `probeDb` were read from source by gate 152 and have not been driven with a hostile value by any gate; whether `GET /api/credentials` answers 500 the way the by-hash route does; whether any running stack or box differs from the source read; what a restart changes.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "16f5cc24-a4cb-4730-8715-82a8057e836e",
+    "createdAt": "2026-11-05T02:34:54.824Z",
+    "body": "**BLUF:** Deployed, behaviour not run: PR 2005 (17abf8ee98a5) is live on kintsugi and demo at develop 07a2d62be6a0 (fix strings live: 2 of 2 on demo; F2 and F3 on kintsugi); not closed because the 503 path is POST /api/credentials/:id/revoke with a failing database write, which is authenticated, audited and needs fault injection.\n\nSource: Seat D 53rd (kintsugi) `5_Project_History/2026-11-05_seatD-53rd/evidence/F6_ticket_table.tsv` line 4 and `5_Project_History/2026-11-05_seatD-53rd/HANDOVER.md` line 4; Seat D 52nd (demo) `5_Project_History/2026-11-05_seatD-52nd/evidence/F6_ticket_table.tsv` line 42 and `5_Project_History/2026-11-05_seatD-52nd/HANDOVER.md` lines 4 and 28; PR facts read from GitHub.\n\nRows as written. Seat D 53rd, line 4: \"KS-1959 | 2005 | 17abf8ee98a5 | DEPLOYED; behaviour NOT-RUN | vc-issuer 1fc1b18f7b28; F2, F3 ADD 0->1 live. The 503 path is POST /api/credentials/:id/revoke with a failing DB write: authenticated, audited (middleware/audit.ts:25,58), and needs fault injection\". Seat D 52nd, line 42: \"KS-1959 In Progress fix strings live 2 of 2\" (demo).\n\n* PR 2005 merged 2026-11-04T22:55:11Z, merge_commit_sha 17abf8ee98a50c609de42d54d4f8c8d7aad156eb, base develop. It is an ancestor of 07a2d62be6a0 (git merge-base --is-ancestor, rc 0). Both boxes run 07a2d62be6a0 (Seat D 53rd HANDOVER line 4 for kintsugi, Seat D 52nd HANDOVER line 4 for demo).\n\nNot measured:\n* The 503 itself: no failing database write was induced and no authenticated revoke call was made, on either box.\n* Kintsugi's fix-string count beyond F2 and F3 as the row states them.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "4574393b-d35a-4182-9c8f-3641dc07f10c",
+    "createdAt": "2026-11-04T21:58:35.649Z",
+    "body": "**BLUF:** PR 2005, head a968818a0038, ready for gate.\n\nhttps://github.com/Secuura/Distributed_Secuura/pull/2005 (Refs KS-1959). A revoke whose database write does not take effect now answers 503 instead of 200; verify is unchanged. Tier-1 gate next; no state change made here.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

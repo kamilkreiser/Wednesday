@@ -1,0 +1,63 @@
+{
+ "identifier": "KS-1390",
+ "title": "The e2e-v2 harness is platform-k's only browser, portal and accessibility coverage \u2014 222 tests, runnable by hand, named in no gate and absent from the gate inventory",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-29T12:24:45.221Z",
+ "updatedAt": "2026-09-30T13:24:19.810Z",
+ "description": "## BLUF\n\n`Blockchain/Dev/tests/e2e-v2/` holds **24 spec files and 222 tests** across four tiers \u2014 including every browser journey and the only accessibility coverage platform-k has \u2014 and it is wired into nothing. It is not in `.githooks/pre-push`, it has no row in the \"Manual CI-gate equivalents\" table that `KS-685` commissioned, and the workflow its own README points at (`.github/workflows/e2e-tests.yml`) does not exist on `develop`. Meanwhile the suite people *are* pointed at, `systemTest/playwright`, is API-only: 3 spec files, 11 tests, no browser. So the documented estate says platform-k has a Playwright tier, and the thing that actually opens a browser is the one nobody is told to run. Counted on `develop` `8ba2da02d`, 29 Sep 2026. Nothing was executed \u2014 this is about wiring, not results.\n\n## What is there\n\nMeasured from the tree, not from the docs:\n\n| Tier | Specs | Tests | What it covers |\n| -- | -- | -- | -- |\n| `tier1-api` | 12 | 174 | API over HTTP |\n| `tier2-smoke` | 5 | 43 | Smoke journeys |\n| `tier3-e2e` | 4 | 40 | **Real browser journeys** \u2014 issuer, admin, verifier |\n| `tier4-a11y` | 3 | 6 | **axe on admin, issuer and verifier** |\n| **Total** | **24** | **222** |  |\n\nIt is runnable today. `Blockchain/Dev/tests/e2e-v2/package.json` declares `test`, `test:api`, `test:smoke`, `test:e2e`, `test:a11y`, `install:browsers` and `report`, and `playwright.config.ts` defines the four matching projects (`api`, `smoke`, `e2e`, `a11y`). `@axe-core/playwright` is a devDependency there.\n\n## What is missing\n\n1. **No gate names it.** `grep -rn \"e2e-v2\" .githooks/pre-push Blockchain/Dev/docs/DEV-PROCESS.md` returns nothing. The manual-gate table at `DEV-PROCESS.md:77-143` maps *former CI job \u2192 local command* for 13 rows and has no row for e2e-v2, and none for accessibility at all.\n2. **Its README cites a workflow that does not exist.** `Blockchain/Dev/tests/e2e/README.md:4` sends the reader to `.github/workflows/e2e-tests.yml`; `git ls-tree origin/develop .github/workflows/e2e-tests.yml` is empty.\n3. **The plan doc under-reports it.** `Blockchain/Dev/docs/E2E-TESTING-PLAN.md:324` still says *\"only the verifier portal has a tier-4 spec. Issuer + admin coverage is a follow-up.\"* That follow-up is `KS-44`, which is **Done** \u2014 there are three tier-4 specs in the tree today. The row understates the coverage that exists.\n\n## Why it matters\n\n* It is the whole UI answer. Without it the honest statement about platform-k is that no browser opens anywhere in the estate \u2014 `systemTest/playwright/playwright.config.ts:12-18` says so itself, and `DEV-PROCESS.md:141` spells it out: *\"Despite the name, this suite drives no browser\u2026 Read a green here as '12 API assertions passed', not as 'the portals work'.\"*\n* It is the whole accessibility answer. There is no `eslint-plugin-jsx-a11y` anywhere in the repo and no axe inside any frontend, so `tier4-a11y` is the only thing that would catch a regression against WCAG 2.2 / EN 301 549 \u2014 relevant to the same obligations the platform-s side tracks. WCAG 2.2: [https://www.w3.org/TR/WCAG22/](<https://www.w3.org/TR/WCAG22/>) \u00b7 EN 301 549 v3.2.1: [https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf](<https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf>) \u00b7 EAA Directive 2019/882: [https://eur-lex.europa.eu/eli/dir/2019/882/oj](<https://eur-lex.europa.eu/eli/dir/2019/882/oj>)\n* An ungated suite rots quietly. `KS-557` / `KS-560` are the precedent \u2014 the tier reported 126 failures, of which only 11 were real, and the cause was a harness defect that had gone unnoticed. `systemTest/CLAUDE.md:358` keeps that lesson as a standing rule.\n* Actions being retired makes this the *only* route to the coverage, not a redundant one.\n\n## Suggested shape\n\n1. Give e2e-v2 a row in the `DEV-PROCESS.md` manual-gate table: the exact command, the pass criterion, and a measured wall-clock \u2014 matching the 13 rows already there.\n2. Decide the tier split deliberately. `tier4-a11y` is 6 tests and needs only a running stack; it is the cheapest thing in the estate to make routine. `tier3-e2e` is slower and flakier (single-session collisions, `E2E-TESTING-PLAN.md` \u00a7 \"Worker-session collisions\") so it may belong in a nightly/manual tier rather than a per-push one.\n3. Fix the two stale pointers: the dead workflow reference in `tests/e2e/README.md:4`, and the tier-4 row in `E2E-TESTING-PLAN.md:324` that `KS-44` has already overtaken.\n4. Say in `systemTest/CLAUDE.md` where the browser tier actually lives, so \"Playwright\" stops meaning two different things in the same repo.\n\n## Acceptance\n\n* `DEV-PROCESS.md`'s gate table has an e2e-v2 row (or rows) with a command and a measured time.\n* A named person can run the a11y tier from the runbook without reading source.\n* No document points at `.github/workflows/e2e-tests.yml`, and the tier-4 row reflects the three specs that exist.\n\n## Decision needed before fixing \u2014 naming the three Playwright estates\n\nWorth settling the naming in the same pass: `systemTest/playwright` (API-only, 11 tests) and `Blockchain/Dev/tests/e2e-v2` (browser, 222 tests) are both \"Playwright\", and a third corpus sits at `Blockchain/Dev/tests/e2e` (`KS-734`, In Review \u2014 not a workspace member, cannot install from a clean checkout; `KS-1038`, Backlog \u2014 races its own lockout). Three Playwright estates with one name is the reason a reader can believe the portals are covered when the suite in the gate never opens a browser. One decision about which survives, which is gated, and what each is called would close this ticket and shrink two others.\n\n## References\n\n`Blockchain/Dev/tests/e2e-v2/package.json` \u00b7 `playwright.config.ts:29-73` \u00b7 `Blockchain/Dev/docs/DEV-PROCESS.md:77-143`, `:141` \u00b7 `Blockchain/Dev/docs/E2E-TESTING-PLAN.md:316-345` \u00b7 `Blockchain/Dev/tests/e2e/README.md:4` \u00b7 `systemTest/playwright/playwright.config.ts:12-18` \u00b7 `systemTest/CLAUDE.md:358` \u00b7 related: `KS-1076` (Urgent, Todo \u2014 no Playwright e2e on a PR since 7 Sep), `KS-734` (In Review), `KS-1038` (Backlog), `KS-44` (Done), `KS-637` (Backlog), `KS-685`.\n\n## Environment\n\nDistributed_Secuura `develop` **8ba2da02d**, 29 Sep 2026. Static review \u2014 no stack started, no suite executed; all counts measured from the tree at that commit. GitHub Actions executes nothing on this repo (billing), so no workflow is a live alternative to the local route.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-964"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1380"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-965"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1393"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "5fb57955-f2c3-4a25-836c-9efb7d47cbf0",
+    "createdAt": "2026-09-29T12:41:18.910Z",
+    "body": "**BLUF:** Hi Kamil, thanks for picking this up. While grounding a plan for this ticket I found six more things that bear on it. Each one was re-checked from source on `develop` **`8c810023f`** (29 Sep), not taken from memory. The most important is #1: once e2e-v2 is named in a gate, a bare local run of it hits slot 1's gateway without saying so. Nothing was edited or run. These are notes for you to take or leave as you see fit.\n\n**1. e2e-v2 has no slot awareness, so a local run naming no slot targets slot 1.**\n- `playwright.config.ts:3` defaults `GATEWAY_URL` to `http://localhost:6882`.\n- `fixtures/api-client.ts:17` and `:22` do the same for the API and issuer bases.\n- Nothing under `tests/e2e-v2` reads `SECUURA_STACK_SLOT` or `STACK_SLOT` (0 matches).\n\nOn a shared machine that means another ticket's stack. The systemTest harnesses refuse this case (KS-1016), and e2e-v2 would be the one browser suite that doesn't.\n\nThe good news is that `systemTest/slot-target.sh:99` already exports a slot-derived `GATEWAY_URL`, and that's the first variable e2e-v2 reads. So wrapping the gate command, e.g. `systemTest/run-in-slot.sh <N> npm --prefix Blockchain/Dev/tests/e2e-v2 run test:a11y`, would target the right stack and hold the per-slot lock with no typed port. A small refusal guard in the config would cover the bare `npm run` case. That's your call.\n\n**2. The runbook the acceptance line relies on is itself stale.** \"Run the a11y tier from the runbook without reading source\" needs these fixed first.\n- `RUNBOOK.md`:\n  - `:16` lists tier 4 as 2 tests; there are 6.\n  - `:189` says a11y is \"admin/verifier-only\"; issuer is covered too.\n  - `:63-72` give the decommissioned Container Apps demo URLs.\n  - `:48` hand-rolls `docker compose up -d` rather than `Start_Up/start-secuura.sh`.\n- `README.md`:\n  - 8 lines still carry the dead secuura01 `yellowground-ae96b9b1` URLs, which KS-333 repointed elsewhere.\n  - `:24` says \"3 Tiers\"; there are four.\n  - Its credentials table names the retired admin password, which may already fall under KS-965's documentary cleanup if it isn't one of its 55 files.\n- `tests/tier4-a11y/README.md`:\n  - `:11` says to install axe at `Blockchain/Dev`; it's in e2e-v2's own `package.json` and lock now.\n  - `:71-73` describe `button-name` / `color-contrast` as demoted under KS-45; no spec passes `knownIssueRules` any more.\n  - `:26` runs against `GATEWAY_URL=https://secuura.com`, a domain we don't own. That's the KS-669 class, in a README rather than the spec.\n\n**3. The admin a11y test needs `TEST_ADMIN_PASSWORD`, and no e2e-v2 doc says so.** `fixtures/api-client.ts:61` leaves it empty when unset. That's deliberate (KS-964, no published fallback), so this is a docs gap rather than a code bug. But anyone following the runbook will get a failed admin login and nothing telling them why. The variable is documented only in `systemTest/playwright`'s docs.\n\n**4. Stale suppression in `tests/tier4-a11y/_axe.ts:15`.** `// @ts-expect-error \u2014 package is not yet in the e2e-v2 lockfile`. It is in the lockfile now (`package-lock.json:16`). Nothing type-checks e2e-v2 (see #5), so this has never surfaced. Under a real `tsc` it would likely become an \"unused @ts-expect-error\" error.\n\n**5. e2e-v2 has no quality gates of its own.**\n- The package has no tsconfig, Prettier config or ESLint config.\n- The repo-level `Blockchain/Dev/eslint.config.mjs` only targets `services/`, `packages/`, `sdk/`, `scripts/` and `frontend/`.\n\nSo a gate row for e2e-v2 would run specs that nothing lints or type-checks. Worth deciding whether a minimal `typecheck` belongs in the same change.\n\n**6. A timing measurement can't use a current build yet (KS-1380).** The acceptance asks for a measured wall-clock, but `develop` still doesn't build: `packages/shared` locks `@types/express-serve-static-core` 4.19.9 and `@types/pg` 8.23.1, while analytics, billing and governance still lock 4.19.8 / 8.20.0. Until KS-1380 lands, a timing run would need a stack built at `8af6ab821`, as other slots have been, and the evidence should say so.\n\n**Smaller count notes:**\n- The gate table in `DEV-PROCESS.md` has 14 rows at this commit, not 13.\n- `.github/workflows/e2e-tests.yml` is also cited at `docs/REVIEW_NOTES.md:276` and `CHANGELOG.md:73`, as well as `tests/e2e/README.md:4`. The CHANGELOG line is history and probably wants to stay.\n\n**Related, already tracked:** KS-1393 row 1 (31 uncovered specs; its note already suggests doing it together with this ticket and KS-734), KS-965 (retired admin credential in docs), KS-669 (URLs on domains we don't own), KS-1380 (build).\n\nHappy to help with any of it if useful. Thank you!",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   }
+  ]
+ }
+}

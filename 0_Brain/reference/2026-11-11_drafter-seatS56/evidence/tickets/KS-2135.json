@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-2135",
+ "title": "smoke-test.sh: auth-token skips are not counted so a run ends All checks passed; 127.0.0.1:6882 reads as remote (gate 243 N-2068)",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-08T19:14:16.852Z",
+ "updatedAt": "2026-11-08T19:14:16.852Z",
+ "description": "**BLUF:** Two residues of the smoke script after PR 2068 (KS-2080), both outside what that PR claims. (1) The skips PR 2068 counts are the direct-port and local-stack ones; the older \"skipped (no auth token)\" and \"skipped (no admin token)\" warnings still only warn, so a run that skipped those still closes with `All checks passed.` and exit 0. (2) \"Local\" means the exact string `http://localhost:6882`, so `http://127.0.0.1:6882`, a trailing slash or a slot 2 URL count as remote and skip sections 10 and 11 and the twelve direct-port checks. Both are Minor, READ ONLY, and fail loud or visible rather than silent. Low for each is Wednesday's ruling (ANSWER to B 105th, PR 2068 notes); filed as one ticket with two items, as she agreed.\n\nSource: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-07_gate243-tier2-batch/verdict.md`, notes N-2068-1 and N-2068-2 on PR 2068 (KS-2080, merged as `6c9a593df4ab`). The fleet's shorthand is G243-N1 and G243-N2.\n\n## Item 1 (N-2068-1): other skip warnings do not increment the skip count\n\nREAD ONLY (the gate, and the board seat at develop `6c9a593df4ab`). In `Blockchain/Dev/scripts/smoke-test.sh`, line 275 warns `GDPR endpoints \u2014 skipped (no auth token)` and line 402 warns `Platform API \u2014 skipped (no admin token)`; neither touches `SKIP` (the counter is declared at line 34 and incremented at lines 45 and 54). With `SKIP` at 0 the script reaches the branch at line 464 that prints `All checks passed.` and exits 0. PR 2068's claim covers only the direct-port and local-stack skips, so this is outside its claim, but the new closing sentence is still reachable with a skip printed above it. Fix shape (the owner's call, READ ONLY): count those two skips in `SKIP` or word the closing line to mention skipped checks of any kind.\n\n## Item 2 (N-2068-2): \"local\" is one exact string\n\nREAD ONLY. Line 24 is `[ \"$GATEWAY\" = \"http://localhost:6882\" ] || DIRECT_PORTS=no`. Any other spelling of the same stack (`http://127.0.0.1:6882`, a trailing slash) sets `DIRECT_PORTS=no`, so sections 10 and 11 and the twelve direct-port checks are skipped on a genuinely local stack. The warning text says so and the exit stays 0, so it is visible. For a slot 2 URL the skip is arguably right (sections 10 and 11 name slot 1's containers). Fix shape (the owner's call, READ ONLY): normalise the host before the comparison, or state in the warning that only the exact default counts as local.\n\nThe gate found nothing that parses `All checks passed.`: `git grep` finds only the suite itself, and the Makefile and the package manifest call the script without parsing it (READ ONLY, the gate's read).\n\n## Not tested\n\nNo run against a box and no full green run of the script (the gate had no stack; PR 2068's READY says the same).\n\n## Related\n\nKS-2080 (In Progress, PR 2068's ticket; its F1 to F3 cover the twelve direct ports and sections 10 and 11, not these two items) and KS-1794 (Backlog, the smoke script is not remote-clean; neither the 127.0.0.1 spelling nor the auth-token skips appear in it).\n\n## Searched before filing\n\nBoard, includeArchived, title and description and every comment of each open candidate; controls pass. `N-2068` 0 hits; `local_skip` 0; the smoke script's own file name (searched bare; written here as the full path `Blockchain/Dev/scripts/smoke-test.sh`) 7 open and 3 closed hits (KS-2080, KS-1794 and the review streams among them; none holds either item); `gate 243` 1 open hit (KS-2106, the Akto re-measure on PR 2065).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

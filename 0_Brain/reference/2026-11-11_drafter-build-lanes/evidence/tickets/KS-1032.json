@@ -1,0 +1,35 @@
+{
+ "identifier": "KS-1032",
+ "title": "Security: 9 trust-header reads outside auth middleware (pen-test F-04) \u2014 surfaced by wiring check-no-trust-header-reads.sh in KS-926",
+ "state": {
+  "name": "In Progress"
+ },
+ "priority": 2,
+ "assignee": {
+  "name": "kamil.kreiser@secuura.ai"
+ },
+ "updatedAt": "2026-10-26T18:02:55.437Z",
+ "description": "**Found by RUNNING a guard that had never run.** KS-926 wired the `check-*.sh` guards; this one had no live entry point, so its findings had never been seen. Its default level is `fail`, so it is red the moment anything invokes it.\n\n## The 9, verbatim from the guard\n\n```\nservices/api-gateway/src/routes/verification.ts:1041  req.headers['x-tenant-id']\nservices/api-gateway/src/routes/verification.ts:1042  req.headers['x-tenant-slug']\nservices/security/src/index.ts:968                    req.headers['x-tenant-id']\nservices/prism/src/index.ts:111                       req.headers['x-tenant-id']\nservices/originate/src/index.ts:230                   req.headers['x-tenant-id']\nservices/originate/src/routes/metering.ts:42          req.headers['x-user-role'] === 'connector' && x-tenant-id\nservices/originate/src/routes/metering.ts:43          req.headers['x-user-id']  -> sets (req as any).user\nservices/originate/src/routes/metering.ts:45          req.headers['x-tenant-id'] -> sets (req as any).tenantId\npackages/shared/src/db/tenant-guc.ts:119              req.headers['x-tenant-id']\n```\n\n`metering.ts:42-45` **is the one to look at first:** it builds `req.user` and `req.tenantId` **from headers**, gated only on `x-user-role === 'connector'`. That is the trust-header vulnerability in its literal form if the header is reachable from outside.\n\n## The guard's own instruction\n\n> Use `req.user.*` (set by `authenticate()` middleware) instead of `req.headers['x-user-*']`. Direct header reads re-introduce the trust-header vulnerability.\n\nThe guard already excludes legitimate middleware paths (`/middleware/auth.ts`, `authenticate.ts`, `scopes.ts`, `tenant*`, `db/tenant-context.ts`, `security/gdpr-compliance.ts`) and lines marked `F-04-allowed`, so **these 9 are outside the sanctioned set by the guard's own definition.**\n\n## Triage needed per site\n\nSome may be legitimate **forwarding** (api-gateway 1041-42 sets `forwardHeaders`, which is a different act from trusting) and should carry `F-04-allowed` with a reason. Others look like real trust. **Do not bulk-annotate** \u2014 that converts a finding into a silence.\n\n## Blocks\n\n`check-no-trust-header-reads.sh` cannot be wired into the pre-push gate until this is 0 or the legitimate sites are annotated. Related: KS-619 (gateway tenant resolution falling through to the caller's `x-tenant-id`), and KS-926.",
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1546",
+    "title": "KS-1032: originate stops trusting a trust header it cannot attribute to the gateway"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "d20be9ca-8774-45fc-a6b9-714ea7904530",
+    "createdAt": "2026-10-13T10:58:15.181Z",
+    "body": "**KS-1600** carries an open question against this ticket's effect. The pull request 1547 round-2 gate (report `ccbe317fcbf769f3`) measured that a forged `x-tenant-id` sent **directly to originate's router** is honoured \u2014 `ORG_ADMIN(A1)` + `organizations:register` + `organizationId: A1` with `x-tenant-id: T2` returns 201 with the key stored in tenant T2. The gate's reading is that KS-1032, now on `develop` `92d1316ffe31cb13b3f7e843e7891225383b2f84`, shuts that path, because `gatewayProvenance` strips trust headers when `GATEWAY_VOUCH_SECRET` is unset and the KS-458 resolution reads `x-tenant-id` only on a vouched request. **That is a reading, not a measurement** \u2014 the gate's harness mounts the router without `index.ts`'s middleware, so it was never run end to end.\n\nThe instrument that would settle it, recorded on KS-1600: one end-to-end request through originate's real middleware stack on `develop` `92d1316f`, `GATEWAY_VOUCH_SECRET` unset, forged `x-tenant-id: T2`, expecting the key to land in the caller's own tenant rather than T2.\n\nFacts only; no state change asked for here.\n"
+   },
+   {
+    "id": "3364c5e7-1709-4747-9829-89cb6c413213",
+    "createdAt": "2026-09-11T09:38:50.130Z",
+    "body": "## BLUF\n\n- **Recorded from KS-1041, so this residual stays on a live ticket when KS-1041 closes.** KS-1041 wrote down that services other than originate also read trust headers, and that nobody had read their sites.\n- **This ticket is the live home for that class:** trust-header reads outside auth middleware, triaged per site.\n- **Not commissioned and not ruled.** KS-1041's two steps did not widen to these services.\n  - Step 1: #938 \u2192 `0f8fb33c3` closed nginx `/originate/`.\n  - Step 2: #951 is originate's gateway-provenance middleware. It stays inert while `GATEWAY_VOUCH_SECRET` is unset (KS-1083).\n\n## Recommendation\n\nNo action needed now. When this ticket's per-site triage runs, include the services KS-1041 named.\n\n## Detail\n\n- **KS-1041's wording, verbatim:**\n  - `923cfb00` (2026-09-10): *\"`api-gateway`, `auth`, `billing`, `prism`, `security` and `tokenisation` also read these headers. **I am not asserting they are safe \u2014 I have not read their sites.**\"*\n  - `116ed2d6`, and PR #951's *Not in scope*: *\"the seven other services that read trust headers\"*.\n  - Six are named and \"seven\" is counted. Both are quoted as written; neither was re-measured here.\n- **Overlap with this ticket's 9 sites:**\n  - api-gateway, security and prism appear in both.\n  - auth, billing and tokenisation do not appear here. This ticket's guard excludes middleware paths (`/middleware/auth.ts`, `authenticate.ts`, `tenant*`, and others), which may be why \u2014 not checked.\n  - `originate/src/index.ts:230` and `routes/metering.ts:42-45` are the originate sites that #951's middleware covers once the secret is provisioned. Until then they behave as before.\n- **Board searched before posting** (literal, live tickets only):\n  - `trust headers` \u2192 KS-1041 only;\n  - `x-user-role` \u2192 KS-1041 and KS-1032;\n  - `x-tenant-id` \u2192 8, of which KS-1032 is the only one about reads across services;\n  - `header-reading` 0 \u00b7 `seven other` 0.\n"
+   }
+  ]
+ }
+}

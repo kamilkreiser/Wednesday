@@ -1,0 +1,101 @@
+{
+ "identifier": "KS-915",
+ "title": "A clean stack has no supported way to obtain its first privileged account",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 3,
+ "assignee": null,
+ "archivedAt": null,
+ "createdAt": "2026-09-06T09:24:24.710Z",
+ "updatedAt": "2026-11-04T15:39:55.768Z",
+ "description": "## The gap\n\nOn a freshly built stack there is no supported path to a first privileged account:\n\n* `POST /api/admin/seed-demo-users` is now default-deny (B-3 hardening) and needs **both** `ALLOW_DEFAULT_SEED_PASSWORDS=true` and `ENABLE_DEMO_SEED=true`.\n* Registration cannot mint a privileged role \u2014 KS-82 deliberately refuses a client-supplied role.\n\nBoth of those are **correct** and neither is questioned here. The gap is that nothing owns the bootstrap step, because historically the seed accounts were simply always present, so no one had to.\n\n## Status of the original claim \u2014 corrected\n\nAn earlier KS-487 comment (2026-09-01 11:36Z) asserted a hard **deadlock**: that a clean stack could never call `seed-demo-users` at all. **That was retracted 21 minutes later by its own author** (11:57Z) \u2014 `services/auth/src/routes/auth.ts:47` fires `userRepo.seedDemoUsers()`, so there is no deadlock. This ticket carries the *remaining* gap only: not \"impossible\", but \"undocumented and unowned\".\n\n## What would close it\n\nOne of: a documented first-run procedure naming the two env vars and their intended lifetime; or a one-shot bootstrap command that creates a single named admin without the demo-persona list; or an explicit decision that operators set the env vars, written where an operator will find it (`DEV-PROCESS.md` or the deployment runbook).\n\n## Provenance\n\nRecorded on [KS-487](https://linear.app/secuura/issue/KS-487) as prose (2026-09-01, with its correction) rather than a ticket, because the Linear workspace was at its free issue cap. The cap was lifted 2026-09-06, so it is filed now. **This is the finding whose existence-only-in-prose was the reason the table was built.**\n\n*Filed by s140 (seat A), 2026-09-06, from the KS-487 stream-B table.*",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1989",
+    "title": "Refs KS-915: restore-local-secrets asks dotenv, bash and docker compose before it writes"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1982",
+    "title": "Refs KS-915: restore-local-secrets.sh generates local dev credentials, never printed"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "d8eac1d1-254b-4d2a-8997-80969ebded99",
+    "createdAt": "2026-11-04T15:39:55.787Z",
+    "body": "**BLUF:** Left open, with two updates to comment bdf21278: PR 1982 is now closed on GitHub without merging, and the two tickets that card secuura-pr1989-round3-go-hold-demo-accounts-1104 asked for are on the board. The close condition is still as comment bdf21278 records it: not shown met.\n\n- PR 1982 (the first attempt, NO GO at QA gate 166): state closed, merged false (GitHub API read 2026-11-05). Comment bdf21278 said it was still open. PR 1989, merged as 26d8314e4f77, is its rebuild.\n- Card secuura-pr1989-round3-go-hold-demo-accounts-1104, ruled a by Kam on 2026-11-04 12:52 AEDT (\"Merge it, and ticket G180-F1\"), says G180-F1 and the breached demo passwords become tickets. G180-F1 is item 1 of KS-1977 (filed 2026-11-04; it cites the card and the gate 180 verdict). The breached demo passwords are KS-1983 (filed 2026-11-04 15:36Z by this close-out, Medium, a finding that needs Kam's ruling).\n- This ticket's own scope is unchanged: the close condition asks for a documented first-run procedure naming ALLOW_DEFAULT_SEED_PASSWORDS and ENABLE_DEMO_SEED and their lifetime, or a one-shot command that creates one named admin, or a written operator decision. Comment bdf21278 read the merged script as setting only the first variable. This note did not re-read the script.\n- Files in the squash of PR 1989 (git diff-tree 26d8314e4f77, all added): Blockchain/Dev/scripts/restore-local-secrets.sh, Blockchain/Dev/scripts/__tests__/restore_local_secrets.test.sh and two pages under Projects Documents/fragments/.\n- Not measured by this note: the script against the close condition; whether any of the three options is met by a document outside the repository.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "bdf21278-2c7a-464c-8bc5-e9af74c42014",
+    "createdAt": "2026-11-04T03:17:30.526Z",
+    "body": "**BLUF:** Delivered: PR 1989 merged as 26d8314e4f77 on develop (2026-11-04); no deploy surface, `git show --stat` lists `Blockchain/Dev/scripts/restore-local-secrets.sh`, `Blockchain/Dev/scripts/__tests__/restore_local_secrets.test.sh` and two `Projects Documents/fragments` files, and no Dockerfile or compose file on develop names the script. Verified by code read at 26d8314e4f77. Left open: this ticket's own close condition is not shown met, and PR 1982 is still open.\n\n- **The close condition asks for one of:** a first-run procedure naming the two env vars (`ALLOW_DEFAULT_SEED_PASSWORDS` and `ENABLE_DEMO_SEED`) and their lifetime; a one-shot command that creates one named admin; or a written operator decision.\n- **What the merged script does:** it generates local development credentials and, after its safety checks, sets `ALLOW_DEFAULT_SEED_PASSWORDS` (named 14 times in the script). It names `ENABLE_DEMO_SEED` 0 times, and `Blockchain/Dev/docker-compose.yml:626` defaults that variable to empty.\n- **PR 1982,** the first attempt (NO GO at QA gate 166), is still open on GitHub; comment 304549e3 names PR 1989 as its rebuild.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "820f9aff-cbff-41d5-b04a-4b7ac7beadd8",
+    "createdAt": "2026-11-04T01:29:50.785Z",
+    "body": "**BLUF:** PR 1989 round 3 of 3 is pushed at head `df71e6b7c625`, by Kam's ruling on the live board (2026-11-04 09:33:42 AEDT, card `secuura-pr1989-gate174-cap-nogo-pgbouncer-1104`): \"a \u2014 Allow one more round for F1 only (recommended)\". The restore script now refuses pgbouncer's five pool sizes unless they are plain numbers, and refuses any value it judges that carries a line break. Its bash reader keeps `PATH` read-only and refuses a `.env` line that changes or names `PATH`. Not merged; awaiting the round-3 gate (TIER 1).\n\n* **G174-F1 (HIGH):** `docker/pgbouncer/entrypoint.sh` writes `PGBOUNCER_MAX_CLIENT_CONN` and four more pool sizes into the same `pgbouncer.ini` as its `[databases]` line. A crafted value could add a second, remote upstream (rendered with pgbouncer's own sed lines: 4 of 4 of gate 174's placements do). Every reader now refuses those values. The three other keys the entrypoint renders are passed to pgbouncer by no compose entry (measured, both entries, every profile), so they are not added.\n* **G174-F2 (LOW):** the bash reader's `PATH` is read-only. The one-line lock in the card was replaced, by Wednesday's ruling, with read-only `PATH` plus a refusal of any line that touches `PATH`. Reason: a refused `PATH` assignment makes bash skip the rest of its line, which let a crafted same-line form through.\n* **Evidence in the PR:** the suite passes 421 of 421 at head; the round-2 script fails 53 of them, all round-3 cells; 13 of 14 round-3 mutants are killed (the 14th is layered-equivalent), 79 of 98 overall, every survivor classified; shell suites 114/0/1 of 115 before and after; pre-push hook `PREFLIGHT INCOMPLETE \u2014 13/16 legs ran, 3 SKIPPED. Nothing failed.` (legs 3, 4 and 8 need a running local stack; not a pass of those legs).\n* **Named for tickets, not in this round:** the address census catches 4 of 8 planted names (G174-F3); `docker compose config` has no time limit (G174-F4); the F4 note's ADMIN asymmetry (G174-F5); a hostile `.env` forging the bash reader (G173-F2), including one that shuts the reader's stderr first; the looping `.env`; and `entrypoint.sh:26-30` echoing the userlist credentials unescaped into `userlist.txt`.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "1c9cdfdf-0069-407c-9abc-b36a18a9778f",
+    "createdAt": "2026-11-03T13:27:36.300Z",
+    "body": "**BLUF:** Pull request 1989 (branch `fix/ks-915-restore-local-secrets-readers`, head `c71a6d106696`) now carries the QA gate 173 fix round (round 2 of 2). Every reader also refuses a `POSTGRES_HOST` that is not a local host, a `POSTGRES_PORT` that is not digits and a `POSTGRES_DB` that is not a plain database name, so the script no longer writes the local credentials while pgbouncer would be pointed at another server. Not merged; it waits for its gate.\n\n* What else changed: after the write the script re-reads the repo-root compose entry (the one `Start_Up/start-secuura.sh` uses) and says so when the repo-root `.env` would override the written values there (exit code unchanged); the bash reader can no longer write a file through `history -w`.\n* Evidence in the pull request: 331 cells, all passing; 29 of them fail by assertion against the round-1 script and 292 with the script absent; mutants: 65 of 84 killed, every survivor named and classified; shell suites 114 passed, 0 failed, 1 skipped (of 115) after the change.\n* Still open and named in the pull request: a `.env` written by a hostile author can forge one reader's verdict, and a `.env` that loops forever hangs the script (it writes nothing).\n* Branch: the original commit, a merge of develop `1cbf260548e7` (no shared path) and the fix commit `c71a6d106696`; nothing deploys from it, and pull request 1982 is untouched.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "304549e3-0c30-4fc3-845a-bf40bddf2a7a",
+    "createdAt": "2026-11-03T08:02:43.682Z",
+    "body": "**BLUF:** The rebuild is pull request 1989 (branch `fix/ks-915-restore-local-secrets-readers`, head `ea41c34668dd`) rebuilds `restore-local-secrets.sh` so its safety check asks the tools that read the env files instead of parsing them itself, as ruled after QA gate 166. Before any write it refuses when dotenv, a sandboxed bash `set -a`, or `docker compose config` (through the Blockchain/Dev entry and the repo-root `docker-compose.local.yml` entry) reads `NODE_ENV` as production or a database that is not on this machine; a reader that cannot run is a refusal too. Nothing deploys from it. Awaiting its gate (TIER 1); not merged.\n\n* It replaces pull request 1982, which stays open and untouched until it is disposed of.\n* Measured before the build: no single reader sees more than 30 of gate 166's 36 slip forms; together the three real readers see 64 of 70 cells and a canonical-line check refuses the rest. The compose file never forwards the `.env` value of `DATABASE_URL` (every service hard-codes the host), and through the repo-root entry a repo-root `.env` overrides `Blockchain/Dev/.env` for api-gateway's `NODE_ENV`, so both entries and that file are read.\n* Evidence in the pull request: 267 cells, all passing; every one of gate 166's 28 slip forms fails by assertion against the 1982 script and is refused here; 21 of 25 mutants killed by assertion, and the other 4 (weaknesses inside one reader that the canonical-line check also refuses) each killed by the readers alone with that check removed; shell suites before and after in its Test Evidence block.\n* Not done: a booted stack or a real login, the four platform suites, Node 24, Linux. No value appears in the pull request, the tests' output or this comment.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "5e105b60-05e3-4471-aa0b-ec96af9f1325",
+    "createdAt": "2026-11-03T03:44:36.004Z",
+    "body": "**BLUF:** QA gate 166 (round 2 of 2) on PR 1982 at head `87c9e7488fd7` is NO GO. Every round-1 item is closed and nothing regressed, but five new classes of `.env` spelling still let the script write while a real reader (dotenv, `docker compose`) resolves production or a remote database. Nothing merges pending a decision; no round 3 has been started and nothing more is pushed.\n\n* The five classes: (1) variable interpolation in the value (for example `${X:-production}`, which compose resolves for api-gateway); (2) a TAB, CR or LF, or an escape that becomes one, inside the `host` query key; (3) a bare CR inside a line hiding a second key line; (4) a UTF-8 byte-order mark before the key; (5) a no-break space used as whitespace (C locale only).\n* Measured at the same head: 78 shell refusals held, no generated value printed (0 of 22), 137 of 137 cells pass; the gate's mutants: 27 of 38 killed.\n* No value appears in any finding; no credential was exposed.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "3d49c5a3-8fa9-47fe-94e3-4625da780c11",
+    "createdAt": "2026-11-03T03:06:05.991Z",
+    "body": "**BLUF:** PR 1982 round 2 is pushed at head `87c9e7488fd7` (QA gate 165 round 1 returned it for fixes). The script now refuses, writing nothing, when `DATABASE_URL` or `NODE_ENV` is set in any spelling dotenv or `docker compose` would read (every line counts), when `DATABASE_URL` carries a `host`/`hostaddr` parameter or a host list, and when `.env` or `.env.local` is a symbolic link. Not merged; awaiting the round-2 gate.\n\n* Also changed: an existing `ADMIN_USER_PASSWORD` in any spelling is kept; `ALLOW_DEFAULT_SEED_PASSWORDS=TRUE` is rewritten to `true` (the seeder compares exactly); the temporary copy of `.env` now has a gitignored name.\n* Evidence in the PR: 137 cells (67 new from the gate's own forms; 40 of them failed on the round-1 script); 22 of 22 mutants killed; the gate's 39 shell forms all refused; shell suites 114/0/1 of 115 on the pushed head.\n* Known limits recorded in the PR, unchanged here: the generated value is lowercase hex (the platform's own strength rule would score it low; the seeder and login accept it); `pgbouncer` is not on the local list.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "58f16b11-f4f9-4a05-b648-3a04920227f9",
+    "createdAt": "2026-11-03T02:00:52.624Z",
+    "body": "**BLUF:** PR 1982 (head `411f8e1ea760`, branch `fix/ks-915-restore-local-secrets`) adds `Blockchain/Dev/scripts/restore-local-secrets.sh`: one command that gives a fresh clone working LOCAL development credentials, generated on the developer's own machine, so nobody has to send a password. Nothing deploys from it; no product code, seeder, compose file or env template changes. Awaiting its gate (TIER 1); not merged.\n\n* What it does: refuses first, writing nothing, when `DATABASE_URL` does not name this machine or `NODE_ENV` is `production`; runs `bootstrap-env.sh` unchanged; fills `ADMIN_USER_PASSWORD` (generated with `openssl rand`) and `ALLOW_DEFAULT_SEED_PASSWORDS=true` only when blank (`--rotate` replaces the password); sets `.env` and `.env.local` to mode 0600; prints names, paths and lengths only.\n* Against this ticket: it is the \"one-shot bootstrap command\" option, for a developer's local stack only. It does not cover operators of a hosted stack (it refuses one). `DEMO_SECUURA_PASSWORD` and the published `*123` demo defaults are unchanged (KS-668).\n* Evidence in the PR: 70 shell cells (49 failed by assertion without the script); 10 of 10 mutants killed; every shell suite 113/0/1 of 114 before and 114/0/1 of 115 after; pre-push hook `PREFLIGHT INCOMPLETE \u2014 13/16 legs ran, 3 SKIPPED. Nothing failed.` (legs 3, 4, 8 need a running local stack).\n* Not run: shellcheck (not installed), a booted stack, the four platform suites, Node 24.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

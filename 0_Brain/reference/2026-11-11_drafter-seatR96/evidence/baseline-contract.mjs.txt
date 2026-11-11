@@ -1,0 +1,213 @@
+/**
+ * =============================================================================
+ * audit-baseline.json — the contract, in ONE place (KS-763)
+ * =============================================================================
+ * audit-gate.mjs and audit-locks.mjs both consume audit-baseline.json, and
+ * both used to decide "is this advisory suppressed?" on entry EXISTENCE alone:
+ *
+ *     const entry = baseline[id];
+ *     if (!entry) fresh.push(...);
+ *     else if (entry.expires && entry.expires < today) lapsed.push(...);
+ *
+ * `ticket` and `reason` were read only inside log interpolation — printed,
+ * never validated — so `"GHSA-xxxx": {}` suppressed an advisory FOREVER, with
+ * no ticket, no reason and no expiry, and both gates reported OK. audit-locks
+ * even printed `e.ticket ?? 'no ticket'`, so the absence was known and
+ * rendered rather than refused.
+ *
+ * A gate that reads a field only to print it does not validate it. This module
+ * is the validation, imported by all THREE gates that read a suppression list —
+ * audit-gate.mjs, audit-locks.mjs and check-npm-audit.mjs — so they cannot
+ * drift apart. A shared helper, not a convention that they should stay in step.
+ * (It said "BOTH" while three files imported it: KS-763 QA finding H.)
+ * =============================================================================
+ */
+
+/**
+ * "Present" for a field whose absence suppresses an advisory (KS-763, QA F-C).
+ *
+ * Exported because three call sites needed the same predicate and each wrote
+ * its own. `!entry[k]` — the shape check-npm-audit used — passes a
+ * whitespace-only string: `"   "` is truthy, so an exception entry with
+ * `reason: "  "` satisfied a required-fields check while recording nothing.
+ * `validateBaseline` cannot be reused there because the two files validate
+ * DIFFERENT schemas (audit-baseline entries carry package/reason/ticket;
+ * check-npm-audit exceptions carry cve/package/severity/reason/expires/owner),
+ * so what is shared is this predicate and `isIsoDate`, not the whole validator.
+ */
+export const nonEmpty = (v) => typeof v === 'string' && v.trim().length > 0;
+
+/** Fields every baseline entry must carry, no exceptions, no grandfathering. */
+export const REQUIRED_FIELDS = ['package', 'reason', 'ticket'];
+
+/**
+ * The entries that predate the `expires` requirement: 18 originally, 3 now (KS-1707 removed 15 of them with the stale
+ * baseline rows they named, once neither audit leg reported those advisories).
+ *
+ * Each is a PERMANENT acceptance (unreachable code path, build-tree-only), not
+ * a temporary exception — which is why they were written without a date. They
+ * are enumerated here rather than waved through by a missing-field check so
+ * that (a) the set is visible and countable, and (b) a new one cannot be added
+ * by omission: any NEW entry without `expires` fails the gate.
+ *
+ * Whether each of these SHOULD carry an expiry is a decision per entry, not a
+ * code change — tracked separately. Removing an id from this set is how one
+ * gets promoted to a dated exception.
+ *
+ * Predicate (unchanged): every key in `accepted` with no `expires`. Enumerated at develop e02e15811; 15 ids were removed since.
+ */
+export const GRANDFATHERED_NO_EXPIRY = new Set([
+  'GHSA-5qjj-4xww-7phc', // valibot       KS-493
+  'GHSA-848j-6mx2-7j84', // elliptic      KS-470
+  'GHSA-w5hq-g745-h8pq', // uuid          KS-470
+]);
+
+/**
+ * Today's date for the expiry compare, in UTC.
+ *
+ * Deliberately UTC and not the local calendar date. A gate whose verdict
+ * depends on WHERE it runs is worse than one that runs on a fixed clock: on
+ * local dates the same commit is lapsed on a Sydney laptop and live in a UTC
+ * CI runner, and neither answer is checkable against the other. UTC is
+ * machine-independent, so every reader of a run gets the same verdict.
+ *
+ * The cost of UTC — that a Sydney author sees a row die ~10 hours into their
+ * day — is paid off by `isLapsed` below expiring ON the named day rather than
+ * after it.
+ */
+export function utcToday() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * `expires` must be a real ISO calendar date, `YYYY-MM-DD` — validated, not
+ * merely present (KS-763, QA F1).
+ *
+ * The first cut of this contract checked `expires` with the same non-empty
+ * string test as `package`/`reason`/`ticket`. That is not enough for a field
+ * whose whole job is to be COMPARED. `expires: "soon"` is a non-empty string,
+ * so it passed validation; and every compare here is a lexicographic string
+ * compare, in which `"soon" <= "2026-09-06"` is FALSE. So `"soon"` passed the
+ * gate AND could never lapse — a permanent suppression wearing the costume of
+ * a fuse, which is the exact failure the `{}` entry used to cause, one field in.
+ *
+ * The regex alone is not sufficient either: `2026-13-45` matches it. The
+ * round-trip through `Date` rejects impossible calendar dates, so `2026-02-30`
+ * fails here rather than sorting somewhere plausible at compare time.
+ */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+export function isIsoDate(value) {
+  if (typeof value !== 'string' || !ISO_DATE.test(value)) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  // An impossible date still parses — `2026-02-30` becomes 2026-03-02 — so the
+  // only reliable check is that it round-trips to the same string.
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
+/**
+ * `expires: 2026-09-06` means DEAD ON THE 6th, not "alive through the 6th".
+ *
+ * The original compare was `entry.expires < today`, which kept a row alive for
+ * the whole of its named day and only lapsed it the day AFTER — so a
+ * three-day fuse ran four days, and in UTC-vs-AEST terms nearly five. A reader
+ * setting a security fuse writes the date they want it to stop working; this
+ * compares `<=` so that the date means what it reads.
+ */
+export function isLapsed(entry, today = utcToday()) {
+  const expires = entry?.expires;
+  if (expires === undefined || expires === null || expires === '') return false;
+  // A malformed `expires` is treated as LAPSED, not as never-lapsing. The
+  // string compare cannot decide it, and of the two available wrong answers,
+  // "this fuse has blown" surfaces the bad entry while "this fuse never blows"
+  // hides the advisory forever. `validateBaseline` refuses these before any
+  // gate reaches this line; this is the fail-closed answer for every other
+  // caller. Fail closed on an unreadable fuse.
+  if (!isIsoDate(expires)) return true;
+  return expires <= today;
+}
+
+/**
+ * Structural validation of the whole baseline.
+ *
+ * Returns [] when every entry satisfies the contract, otherwise one
+ * `{ id, missing[] }` per offending entry. Callers must FAIL on a non-empty
+ * result — a baseline that cannot be trusted to carry its own reasons is not a
+ * baseline, and continuing past it is how `{}` suppressed advisories silently.
+ */
+export function validateBaseline(baseline) {
+  const problems = [];
+  for (const [id, entry] of Object.entries(baseline ?? {})) {
+    if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) {
+      problems.push({ id, missing: ['<entry is not an object>'] });
+      continue;
+    }
+    const missing = REQUIRED_FIELDS.filter((f) => !nonEmpty(entry[f]));
+    if (!nonEmpty(entry.expires)) {
+      // Absent is only allowed for the enumerated permanent acceptances.
+      if (!GRANDFATHERED_NO_EXPIRY.has(id)) missing.push('expires');
+    } else if (!isIsoDate(entry.expires)) {
+      // Present but not a date. Reported distinctly from "missing" because the
+      // fix is different: a missing expiry needs a decision, a malformed one
+      // needs a correction — and a reader told "missing expires" about an entry
+      // that visibly HAS an expires will not believe the gate.
+      missing.push(`expires (not an ISO YYYY-MM-DD date: ${JSON.stringify(entry.expires)})`);
+    }
+    if (missing.length) problems.push({ id, missing });
+  }
+  return problems;
+}
+
+/**
+ * Print a validation failure the way both gates should, and tell the caller to
+ * die. Kept here so the two gates cannot word (or forget) it differently.
+ */
+export function printBaselineProblems(problems, gateName) {
+  console.error(
+    `\n${gateName}: FAIL — ${problems.length} baseline entr${problems.length === 1 ? 'y is' : 'ies are'} malformed. ` +
+      'An entry missing these fields suppresses its advisory with nothing recorded:',
+  );
+  for (const { id, missing } of problems) {
+    console.error(`  - ${id}: missing ${missing.join(', ')}`);
+  }
+  console.error(
+    '  Every entry needs `package`, `reason` and `ticket`; every NEW entry also needs `expires`.\n' +
+      '  A permanent acceptance is added to GRANDFATHERED_NO_EXPIRY in scripts/audit/baseline-contract.mjs,\n' +
+      '  which is a decision with a reviewer — not something a missing field does quietly.',
+  );
+}
+
+/**
+ * Is a parsed `npm audit --json` report READABLE? (KS-763, QA F5 + F2)
+ *
+ * A parseable report carrying none of the keys we know how to read is not
+ * "clean" — it is a report we do not understand. `vulnerabilities: {}` means
+ * npm found nothing; an ABSENT key means the shape changed, or the run failed
+ * in a way that still emitted JSON. Treating the two alike greens the gate on
+ * a broken audit, which is the worst possible direction for a security gate to
+ * be wrong in: it reports a pass it never established.
+ *
+ * This lived inline in audit-gate.mjs, where no test could reach it without
+ * running the whole gate (and therefore a real `npm audit`). Extracted so a
+ * case can reach the arm directly, and so the THIRD gate —
+ * scripts/check-npm-audit.mjs — stops greening on the same shape.
+ *
+ * `expectedKeys` differs by caller because the callers read different shapes:
+ * audit-gate reads npm >= 7's `vulnerabilities`; check-npm-audit also accepts
+ * npm < 7's `advisories`. Returns null when readable, else the message the
+ * caller should print before exiting 2.
+ */
+export function auditReportProblem(report, expectedKeys = ['vulnerabilities']) {
+  if (report === null || typeof report !== 'object' || Array.isArray(report)) {
+    return `expected a JSON object from \`npm audit --json\`, got ${Array.isArray(report) ? 'an array' : typeof report}`;
+  }
+  const present = expectedKeys.filter(
+    (k) => report[k] !== undefined && report[k] !== null,
+  );
+  if (present.length > 0) return null;
+  const names = expectedKeys.map((k) => `\`${k}\``).join(' or ');
+  return (
+    `\`npm audit --json\` returned a parseable report with NO ${names} key — ` +
+    'INDETERMINATE, not clean. Refusing to report a pass on a report shape we cannot read.'
+  );
+}

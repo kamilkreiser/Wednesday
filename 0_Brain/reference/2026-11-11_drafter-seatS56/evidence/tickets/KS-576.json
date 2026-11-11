@@ -1,0 +1,75 @@
+{
+ "identifier": "KS-576",
+ "title": "Bulk re-key: one admin-authorised rotate across a named set of externalRefs",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-08-07T01:22:45.210Z",
+ "updatedAt": "2026-11-09T19:51:18.307Z",
+ "description": "## BLUF\n\n@peter asked for **one** admin-authorised action that re-keys a named set of Organisations by `externalRef`, instead of N separate `register-connector` calls during an incident. The loop itself is **1\u20132 days**.\n\n**It must not ship before** [KS-577](https://linear.app/secuura/issue/KS-577) **(revoke-on-rotate).** Built on today's additive rotate, a bulk re-key would hand out N new credentials, leave N compromised ones live, and *look* like recovery.\n\n## Detail\n\nToday's single-org path is `POST /api/platform/organizations/register-connector` with `rotate: true` \u2014 `services/api-gateway/src/routes/platform.ts:476-729`:\n\n* platform-admin only; guardrail 1 refuses a connector-authorised rotate with 403 (`:499-509`)\n* resolves the org by `metadata->>'externalRef'` under platform scope (`:590-593`)\n* mints a fresh `sk_` key via the security service (`:674-686` \u2192 `services/security/src/index.ts:800`)\n* plaintext key returned exactly once (`:719-720`)\n\n`runWithPlatformScope` (`packages/shared/src/db/tenant-guc.ts:102`) already handles the cross-tenant access, so multi-tenancy is **not** the hard part here.\n\n**Scope**\n\n* Extract `platform.ts:476-729` into a reusable per-org function; add a bulk route taking a list of `externalRef`s.\n* Return a **per-ref result array** \u2014 partial success must be explicit. An incident operator has to know which refs failed and why.\n* OpenAPI entry + `generate-openapi` regen + api-gateway rebuild (the gateway bakes the spec) + KS-380 preflight.\n\n**Explicitly out of scope:** delivery of the key material for N keys. One response body carrying N live secrets is not the answer; that needs its own design and a security review (see the KS-480 sizing table).\n\n**Cheaper alternative on the record** (raised because @peter asked not to have the manual path assumed away): a scripted loop over the existing admin endpoint gives one *operator action* today at near-zero build cost. It does not give one *authorisation*, which is the part actually being asked for.\n\n**Done when:** an admin can re-key a named set of refs in one authorised call, each prior key is revoked per the [KS-577](https://linear.app/secuura/issue/KS-577) semantics, per-ref outcomes are explicit, and the [KS-583](https://linear.app/secuura/issue/KS-583) rehearsal passes all four steps.\n\n---\n\n*Split from* [KS-480](https://linear.app/secuura/issue/KS-480) *per @kamil.kreiser's ruling 2026-08-07.* [KS-579](https://linear.app/secuura/issue/KS-579)*\u2013*[KS-582](https://linear.app/secuura/issue/KS-582) *are @peter's own candidates carried over unchanged;* [KS-577](https://linear.app/secuura/issue/KS-577) *and* [KS-578](https://linear.app/secuura/issue/KS-578) *are additions from the 2026-08-06 verification. Findings checked against* `develop` `c8ce65dca`*; Finding B confirmed live on the demo VM read-only.*",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-579"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-582"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-583"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "c5fbb7d1-a3c0-4b94-800d-0171875f9140",
+    "createdAt": "2026-11-09T19:51:18.578Z",
+    "body": "**BLUF:** Kam ruled on 2026-11-10 that the bulk re-key takes the grant-driven shape: a platform admin mints a time-boxed grant and Platform S re-keys itself. Nothing is built from this comment.\n\n**What was ruled.** Card `secuura-ks576-bulk-rekey-shape-1109`, option a: \"Grant-driven: admin mints a time-boxed grant, S re-keys itself (Stuart's proposal)\". The proposal is comment 033cf92e on this ticket (2026-09-02). PS-740 is the Platform S half (comment eda75bbe).\n\n**The card's own limit.** \"No build before the design returns to you.\" The card also asks for the design to be sized for KS-576 and KS-582; that sizing is not started by this comment.\n\n**What this does not do.** It does not start a build, change this ticket's state or priority, or lift the ticket's own condition that it must not ship before KS-577 (revoke-on-rotate). KS-577 stays In Review.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "eda75bbe-2e0a-4ded-a8d1-578cae00ceec",
+    "createdAt": "2026-09-02T05:30:06.074Z",
+    "body": "Re-filed as its own issue now the cap has cleared: **[PS-740](https://linear.app/secuura/issue/PS-740/sk-key-recovery-a-keyinvalid-state-a-supported-inlet-for-a-rotated)** \u2014 the S-side half of the grant-driven re-key (KeyInvalid state, rotated-key inlet, grant drain, expiry visibility). Linked Related from here.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "033cf92e-633f-4e68-b626-e64a39186993",
+    "createdAt": "2026-09-02T03:51:42.518Z",
+    "body": "## Proposal from the S side: make the re-key **grant-driven**, with S as the executor\n\nContext: investigating key expiry/recovery after S's local provisioning key lapsed on 2026-08-31 (PS-319). Verified in code on both sides, S today has **no recovery path at all** \u2014 re-registration returns no key (\u00a74), `rotate: true` is 403'd for a provisioning-key caller by Guardrail 1 (`platform.ts:503`), and even an admin-run rotation dead-ends because S has no inlet to receive the key (`EncryptedApiKey` is written only by the registrar's first mint). The full S-side write-up is on PS-319 (pending re-file as its own ticket \u2014 the workspace issue cap is hit).\n\n**The shape.** Keep Guardrail 1's human-in-the-loop, but change *who executes*:\n\n1. A platform admin mints a **re-key grant** \u2014 one-time, time-boxed (hours), naming an explicit list of `externalRef`s (or all-for-tenant), recorded as its own audited object.\n2. `register-connector` accepts `rotate: true` from a **provisioning-scoped** caller **only when accompanied by a live grant** covering that `externalRef`; the grant is consumed per ref. Revoke-on-rotate (KS-577) folded in.\n3. S's registration sweep, given the grant via its secret store, drains every dead-key row itself and stores the returned keys exactly as first registration does.\n\n**Why this over the admin-executed bulk endpoint as currently scoped:** with the admin executing, N plaintext keys come back to a human who then has to get them into S \u2014 a path S does not even have today, and one that puts operational secrets through hands and clipboards. With S executing under a grant, plaintext never leaves the two systems, the *same* mechanism recovers a **greenfield S against a populated K** (the `AlreadyRegistered`-no-key terminal case from S's DR facts), and the grant *is* the approval artifact KS-582 is asking for.\n\n**It answers KS-582's open questions directly:** approver = whoever mints the grant (two-approver batch = a grant needing two mints/co-signs once KS-579 gives per-person admins; one for a single-ref grant); the flow is request \u2192 approve (grant minted) \u2192 execute (S drains), with the grant as the record between steps; the ref list is fixed at mint, so it cannot be edited after approval; break-glass is the existing S-side `UseConnectorKeyAuth=false` fallback, already alarmed three ways, so no new break-glass path is needed here.\n\n**Input for Stuart's KS-577 cutover question** (his decision, not mine): when S is the executor, the cutover window collapses \u2014 S holds the new key the instant the response lands and the old one is revoked in the same operation; anything in flight in that sub-second gap 401s once and is retried by the refresher, which already handles exactly that. No grace window needed.\n\n**Companion ask, small and independent:** a `whoami`-style read returning the *calling* key's id/scopes/`expiresAt`. Nothing today lets a key learn when it expires, so S cannot warn ahead \u2014 the 08-31 lapse was invisible until it bit.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   }
+  ]
+ }
+}

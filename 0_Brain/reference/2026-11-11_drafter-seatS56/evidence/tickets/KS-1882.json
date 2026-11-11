@@ -1,0 +1,36 @@
+{
+ "identifier": "KS-1882",
+ "title": "kyc and wallet-connector routes state no authorization rule: /api/kyc/:id/document, /selfie, /complete, /result, /api/kyc/microsoft/*, GET and DELETE /api/wallets/session/:id",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-30T08:39:53.605Z",
+ "updatedAt": "2026-10-30T08:39:53.605Z",
+ "description": "**BLUF:** The authorization rule for these kyc and wallet-connector routes is not stated anywhere, and the code carries no visible check. QA gate 42 (on KS-1845) listed them; KS-1845 did not cover them. This ticket asks for a stated rule for each route, then a check that matches it.\n\n## The routes (develop a41909b50b44)\n\n| Route | Where |\n| -- | -- |\n| `POST /api/kyc/:id/document` | `services/kyc/src/index.ts:801` |\n| `POST /api/kyc/:id/selfie` | `services/kyc/src/index.ts:924` |\n| `POST /api/kyc/:id/complete` | `services/kyc/src/index.ts:992` |\n| `GET /api/kyc/:id/result` | `services/kyc/src/index.ts:1115` |\n| `/api/kyc/microsoft/*` | mounted at `services/kyc/src/index.ts:571` |\n| `GET /api/wallets/session/:sessionId` | `services/wallet-connector/src/server.ts:154` |\n| `DELETE /api/wallets/session/:sessionId` | `services/wallet-connector/src/server.ts:195` |\n\n## How much was read (be exact about this)\n\n* **The gate** read the bodies of the first three kyc routes only.\n* **This ticket's author** grepped the first 25 lines of the four kyc handlers and the two wallet handlers for a read of the caller's user, a role check, an owner compare or a 403. There were 0 hits. That is a grep of the opening lines, not a reading of each whole body.\n* `/api/kyc/microsoft/*` **was not read at all.**\n* The gate notes that the mock auto-approve through `/complete` is not a production door IF `enforceProductionConfig` works as read (`index.ts:45`); that was not run.\n* Nothing here was run against a stack or the gateway. No exploit is claimed.\n\n## Board search before filing\n\nTeam KS issues, archived included, titles, descriptions and comments:\n\n* `api/kyc/:id/complete` 0 hits; `kyc/:id/result` 0 hits.\n* `kyc/:id/document` 2 hits, KS-849 (the mock timer) and KS-386 (image storage). `kyc/:id/selfie` 1 hit, KS-849. Neither is about authorization.\n* `kyc/microsoft` 24 hits, mostly spec sweeps; KS-626 is the Entra callback. Titles read; none is a rule for these routes.\n* `wallets/session/` 7 hits; KS-1360 is about a 200 body field. Titles read.\n* KS-1703 (seven GET-by-id routes) was read and does not list these.\n* Controls: `run-code-guards` gave hits (positive); a zero token generated at run time gave 0 (not recorded here).\n\n## Not in scope\n\n`GET /api/kyc/:id`, `GET /api/kyc/user/:userId`, `DELETE /api/kyc/user/:userId/data` and `POST /api/kyc/initiate` were reported separately from KS-1845 and are not listed here.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1845"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

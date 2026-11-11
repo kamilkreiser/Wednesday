@@ -1,0 +1,41 @@
+{
+ "identifier": "KS-1954",
+ "title": "transfer approval sweep: when the workflow reads fail, every overdue step is marked timed_out (terminal), including steps set to escalate, so escalations are silently lost",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": null,
+ "archivedAt": null,
+ "createdAt": "2026-11-02T19:48:19.800Z",
+ "updatedAt": "2026-11-10T07:13:30.381Z",
+ "description": "**BLUF:** In the transfer service's escalation sweep (`processEscalations` in `Blockchain/Dev/services/transfer/src/services/approvalWorkflowService.ts`), when the reads that look up a step's workflow fail, every overdue pending step is marked `timed_out`, including steps configured to auto-escalate. `timed_out` is terminal: a later sweep does not select it again and `processApproval` refuses a step that is not pending, so the escalation is silently lost and running the sweep again cannot repair it.\n\n**Cause:** `findWorkflowByStepId` (line 670) reads the workflows through `dbGetActiveWorkflows` (line 238, with a bare `catch { return []; }` at line 243) and then a second `SELECT * FROM svc_approval_workflows` whose failure is swallowed by a bare `catch { /* fall back to active-only */ }`. If both reads fail the workflow is `undefined`, so `stepDef` is `undefined`, the test `stepDef?.autoEscalate && stepDef.escalateTo && !instance.escalatedAt` (line 611) is false, and the `else` branch (lines 622 to 625) sets `status = 'timed_out'`. (The gate cites lines 235 to 243 and 695 to 698 at the PR head; the lines above are at develop `4d1ab2cb6574`, so cite by function name.)\n\n**Measured by QA gate 146** (the REAL transfer service booted as its own Node process for every cell, the real routes and authentication; only the `pg` module replaced, by an in-memory model of the two workflow tables with a unique-id upsert). Setup: 4 overdue pending steps; I1 and I3 on a custom step with `autoEscalate`, `escalateTo: boss-user` and `timeoutHours: 1`; I2 and I4 on the default `step-1`, which times out; `POST /api/workflows/escalate` as a platform administrator. Cell `sweep_wfread`, with the workflow reads failing: the answer is 200 with `{ escalatedCount: 0, timedOutCount: 4 }`. I1 and I3, which should escalate to boss-user, are marked `timed_out`, and a second POST cannot repair them. The result is the same at develop's base and at PR 1962's head, for every kind of failure value including an ordinary Error.\n\n**Effect on approval:** the state refuses rather than grants. The transfer's own execute path gates on the transfer record, not on step instances (`index.ts` lines 802 to 814, read, not run), so nothing this sweep writes can let a transfer proceed. What is lost is the escalation to the named escalation user.\n\n**Suggested fix shape (the gate's, not a decision):** when the step's workflow cannot be found, skip the row and leave it `pending` instead of marking it `timed_out`.\n\n**Related:** a sweep that fails part-way answers `200 success: true` with partial counts and no error indicator (gate finding G146-F4; pre-existing, true at base for an ordinary Error and now for an unreadable value too). The admin caller cannot tell the sweep was incomplete; only a log line says so. Also KS-1881 (the route's platform-admin check, Done) and KS-1868 (PR 1962, unrelated cause).\n\n**Not tested:** a real PostgreSQL (the store is a model; the real WHERE and ON CONFLICT semantics are emulated, not executed); pgbouncer or a mid-statement connection loss; the api-gateway hop to the escalate route (whether and how it is proxied is not traced); a production-mode boot; multi-tenancy pools; Node 24 (host Node v26.8.1).\n\n**Found by:** QA gate 146 on PR 1962, 2026-11-03 (verdict finding G146-F3: recommended follow-up, pre-existing, measured, base = head for every value including an ordinary Error). PR 1962 does not cause it.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2170",
+    "title": "Refs KS-1954: the escalation sweep leaves a step pending when its workflow cannot be read, instead of marking it timed_out"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "d18fd1c3-ba4e-4552-8d01-33f0f1a36fce",
+    "createdAt": "2026-11-10T07:13:30.607Z",
+    "body": "**BLUF:** PR 2170 (head `52f482a83436`, one commit on develop `0b55401ad5dc`) makes the transfer escalation sweep skip a step whose workflow cannot be found, so the step stays pending instead of being marked `timed_out` (terminal). Product bytes change (2 added lines in `approvalWorkflowService.ts`, plus a 5-cell test); tier 2 by Wednesday's stamp ruling, the gate may raise it. Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **A behaviour change beyond the failing-read case:** a step with NO workflow at all now also stays pending on every sweep, and nothing in this PR repairs it. How many such steps exist is UNMEASURED.\n- **Measured by this seat:** the transfer suite reads 466 of 466 on develop and 471 of 471 with the patch; with the product put back, 3 of the 5 new cells fail.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

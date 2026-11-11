@@ -1,0 +1,38 @@
+{
+ "identifier": "KS-579",
+ "title": "Per-person platform-admin identities \u2014 the shared seeded admin cannot carry attribution or approval",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-08-07T01:22:49.682Z",
+ "updatedAt": "2026-09-03T15:28:25.355Z",
+ "description": "## BLUF\n\nPlatform-admin is a **shared** seeded account today, so no rule that depends on *which person* acted can be made real \u2014 including the two-approver shape for bulk re-key ([KS-582](https://linear.app/secuura/issue/KS-582)) and any honest attribution on a recovery action.\n\nCarried over from @peter's own candidate list on KS-480, unchanged.\n\n## Detail\n\nEvery guardrail on the `register-connector` path is currently \"platform-admin or refuse\" (`services/api-gateway/src/routes/platform.ts:499-509`). That is a capability check, not an identity check. Consequences:\n\n* An approval rule (\"two approvers for a batch\") cannot be enforced \u2014 the same shared credential can satisfy both sides.\n* Recovery-action audit records the role, not the person.\n* Off-boarding a person does not remove their platform-admin access, because the access is not theirs.\n\n**Gates:** [KS-582](https://linear.app/secuura/issue/KS-582) (approval shape) cannot be implemented until this lands.\n\n**Done when:** platform-admin actions attribute to a named person, and the shared seeded account is no longer a route to platform-admin in any environment that matters.\n\n---\n\n*Split from* [KS-480](https://linear.app/secuura/issue/KS-480) *per @kamil.kreiser's ruling 2026-08-07.* [KS-579](https://linear.app/secuura/issue/KS-579)*\u2013*[KS-582](https://linear.app/secuura/issue/KS-582) *are @peter's own candidates carried over unchanged;* [KS-577](https://linear.app/secuura/issue/KS-577) *and* [KS-578](https://linear.app/secuura/issue/KS-578) *are additions from the 2026-08-06 verification. Findings checked against* `develop` `c8ce65dca`*; Finding B confirmed live on the demo VM read-only.*",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "blocks",
+    "relatedIssue": {
+     "identifier": "KS-582"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

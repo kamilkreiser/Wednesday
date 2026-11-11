@@ -1,0 +1,24 @@
+{
+ "identifier": "KS-1292",
+ "title": "Nothing runs `tsc -p packages/shared` \u2014 the push preflight has no project type-check leg, so a type error is invisible (KS-872 acceptance, second half)",
+ "state": {
+  "name": "In Progress"
+ },
+ "priority": 3,
+ "assignee": {
+  "name": "kamil.kreiser@secuura.ai"
+ },
+ "updatedAt": "2026-10-05T06:49:25.101Z",
+ "description": "## BLUF\n\n`npx tsc -p packages/shared --noEmit` is **not run by anything**. Not by the push preflight's fifteen legs, not by vitest (which does not type-check), not by any remaining CI. A type error in `packages/shared` is therefore red in `tsc` and **invisible everywhere the team actually looks**.\n\nKS-872 was filed when exactly that happened: `crypto.JsonWebKey` vanished in `@types/node` 26.1.0 and the project tsc went red on develop with nobody noticing. That ticket's acceptance has two halves. The fix is one; **this is the other** \u2014 *\"either the preflight gains a shared project type-check leg, or a ticket says explicitly why it should not.\"*\n\n## Measured today (2026-09-25, at develop `6ab9d5021e96`)\n\n`npx tsc -p packages/shared --noEmit` exits **rc 0**, zero output, on a clean `npm ci` at `Blockchain/Dev`. A planted `const x: number = 'not a number'` gives **rc 2 / TS2322**, and removing it returns rc 0 \u2014 so the check is live, and the original error genuinely does not reproduce.\n\n**Why it is green is the point, and it is fragile.** `npm ci` NESTS `packages/shared/node_modules/@types/node@20.19.43` (the package declares `^20.11.5`) beside the hoisted `@types/node@26.1.0`. The nested 20.x still carries `crypto.JsonWebKey` at `crypto.d.ts:513`; in 26.1.0 that interface moved to `webcrypto.JsonWebKey` (`crypto.d.ts:3630`). **Nothing pins that nesting.** A hoist change, a dedupe, or a lockfile refresh can remove it, and the error returns \u2014 to a check that still nobody runs.\n\n## Ask\n\nAdd a `packages/shared` project type-check leg to the push preflight (`.githooks/pre-push`), **or** record here why it should not exist. If it is added it needs a planted-error control, like every other leg \u2014 a type-check that cannot fail is the failure mode this ticket is about.\n\n## Searched before filing\n\nSix terms, `includeArchived: true`, every page literal-matched on the title: `type-check leg` (50 fuzzy / **0** literal), `tsc` (50 / **12**), `preflight leg` (50 / **8**), `project type-check` (50 / **0**), `packages/shared tsc` (50 / **0**), `noEmit` (50 / **1**). **KS-872 itself has zero relations, zero inverse relations and zero children.**\n\nNearest, and all a different class:\n\n* **KS-892** and **KS-933** \u2014 both *Duplicate/ARCHIVED* \u2014 say the project tsc is VACUOUS for `src/__tests__` because the tsconfig excludes it. That is *\"the tsc does not cover enough\"*, not *\"no leg runs the tsc\"*. Named rather than linked: archived issues refuse relations.\n* **KS-1000 / KS-1122 / KS-848 / KS-1090** \u2014 the same excludes-`__tests__` class in auth, vc-issuer, kyc and api-gateway.\n* **KS-910 / KS-1040** \u2014 preflight *leg* tickets, but legs 12 and 4.\n\n**No open home; filed new.**\n\n---\n\n*Filed by Seat L3, 2026-09-25, on Wednesday's ruling (ANSWER Q1b). Carries the second half of KS-872's acceptance;* `.githooks/` *is in no seat's lane this round.*",
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1226",
+    "title": "KS-872 JWKLOCAL: declare the JWK shape locally instead of crypto.JsonWebKey"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": []
+ }
+}

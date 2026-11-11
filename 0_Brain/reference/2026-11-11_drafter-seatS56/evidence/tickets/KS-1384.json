@@ -1,0 +1,346 @@
+{
+ "identifier": "KS-1384",
+ "title": "One anchor row per (document_id, network): a repeat POST /api/anchors resets the existing row to pending and nulls its transaction hash \u2014 so Platform-S's per-event anchoring collapses to one anchor per document (PS-895 companion)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-29T09:18:11.073Z",
+ "updatedAt": "2026-11-10T06:41:44.645Z",
+ "description": "## Found by\n\nThe S\u2194K compatibility review of 2026-09-29 (platform-s `477eb57`, platform-k `0aa9b52c6`; origin/develop `b4461d1e2` is three commits ahead, none touching this). Companion to [PS-895](https://linear.app/secuura/issue/PS-895/question-in-simulated-anchoring-six-distinct-lifecycle-events-on-one), which asked the question from the S side after seeing six lifecycle events on one document share one External Ref, and one on-chain transaction for register + declare on dev-ps.\n\n## What the code does\n\n`dbPersistAnchor` upserts on the composite key and rewrites the chain columns from the **new** request:\n\n```\nservices/anchoring/src/index.ts:1334-1372\n  INSERT INTO anchor_store (...)\n  ON CONFLICT (document_id, network) DO UPDATE SET\n    status = EXCLUDED.status, transaction_hash = EXCLUDED.transaction_hash,\n    block_hash/block_number/slot/fee/confirmations/confirmed_at = EXCLUDED.\u2026,\n    error_message, retry_count, simulated, updated_at = EXCLUDED.\u2026\n  RETURNING id\n```\n\n`metadata_payload` and `content_hash` are **not** in the update list, so the first event's label and hash stay on the row. Every `POST /api/anchors` builds the anchor with `status: 'pending'` and a null hash (`index.ts:463-560`), so on a conflict the existing row goes back to `pending` with `transaction_hash = NULL`, and `processAnchor(persistedId)` runs again (`:535`).\n\nK's own share, transfer-custody, revoke and lifecycle-event routes all go through `emitLifecycleAnchor`, which posts only `{documentId, contentHash, network}` to that same flat endpoint (`services/originate/src/routes/documents.ts:1275-1297`). So every non-mutating verb S records re-enters the same row for the document.\n\nMigration 031 records the one-row-per-(document, network) decision. `anchorSubmission.ts:383-386` (guard 1) reads the row's `transaction_hash` to avoid a second fee-paying transaction \u2014 the upsert has just nulled it.\n\n## What this means for the S\u2194K contract\n\n* Platform-S's user-facing promise (`docs/USER-MANUAL.md` \u00a71, \u00a77) is that every declare, sign and share event is anchored. K anchors **one row per document version per network**; later events reset and re-process it.\n* For every verb S routes through `/lifecycle-events`, `/share` or `/transfer-custody`, the chain record carries **no** `documentType` **and no** `identity` \u2014 `emitLifecycleAnchor` sends neither, and the lifecycle-events handler reads only `action` and `payload` (`documents.ts:2440-2545`). That is a [KS-1175](https://linear.app/secuura/issue/KS-1175/anchor-originate-lifecycle-event-schemas-accept-and-anchor-platform-ss) gap; filed separately.\n\n## Decisions needed (Kamil)\n\n1. Is one anchor per (document, network) the intended contract? If yes, S will label its External Ref column \"anchor for version X\" and group events ([PS-895](https://linear.app/secuura/issue/PS-895/question-in-simulated-anchoring-six-distinct-lifecycle-events-on-one) item 2), and the USER-MANUAL wording changes.\n2. If events should each anchor, the upsert key needs an event dimension and `emitLifecycleAnchor` needs the verb.\n3. Either way: **what happens on the reset.** Trace whether `processAnchor` after a conflict mints a second Cardano transaction for the same document (guard 1 cannot see the previous hash any more), or is caught by another guard. Not verified live in the review; [PS-895](https://linear.app/secuura/issue/PS-895/question-in-simulated-anchoring-six-distinct-lifecycle-events-on-one)'s dev-ps observation was one transaction for two events.\n\n## Verify\n\n* Unit: a second `POST /api/anchors` for the same `(documentId, network)` returns the existing id **and** either leaves a confirmed row's `transaction_hash` intact (per-document contract) or creates a distinct row (per-event contract) \u2014 whichever is ruled.\n* Live on a paired slot: originate \u2192 declare \u2192 share on one document; count anchor rows and Cardano transactions; quote both on this ticket.\n\nRelated: [PS-895](https://linear.app/secuura/issue/PS-895/question-in-simulated-anchoring-six-distinct-lifecycle-events-on-one) (the S-side question), [KS-1175](https://linear.app/secuura/issue/KS-1175/anchor-originate-lifecycle-event-schemas-accept-and-anchor-platform-ss) (identity block), [PS-870](https://linear.app/secuura/issue/PS-870/6-send-the-identity-record-to-platform-k-on-every-anchored-verb).",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1402"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1509"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1814"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-1357"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-577"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1175"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-895"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-870"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1884",
+    "title": "Refs KS-1384: R2b - one resolver decides every anchor reader; confirmed is terminal; the retry route asks own-create first"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1874",
+    "title": "Refs KS-1384: R2a - the anchor retry route never pays again for a landed anchor, anchoring's failed read is 503, and the route's 409s are declared"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1868",
+    "title": "Refs KS-1384: R1 - the document anchor retry route takes a claim, asks anchoring whether an attempt is in flight, and writes under its claim"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1858",
+    "title": "Refs KS-1384: F-b - the reconciler settles anchor rows with no transaction hash, never while this process drives them, and searches before any give-up"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1857",
+    "title": "Refs KS-1384: F0c - thread-mint waits at most 30 s for the wallet and answers 503 before signing; its coins come from the wallet view"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1854",
+    "title": "Refs KS-1384: F0b - a refused anchor is retried only when no attempt of its payload can still land; waits run outside the wallet lock"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1853",
+    "title": "Refs KS-1384: F0a - anchoring spends only the coins its wallet view offers, and a write-ahead that did not land stops the submit"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1838",
+    "title": "Refs KS-1384, KS-1808, KS-1810: F-a - status writes report their row count, payloadTimestamp on the flat anchor, originate stops writing anchor_store, and the reconciler gives up only after two answered passes"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "07551c91-5af8-4738-a721-354f56f342b0",
+    "createdAt": "2026-11-10T06:41:44.705Z",
+    "body": "**One S document through every route on kintsugi k25, 9\u201310 Nov 2026: what reached the chain.** Facts and two questions; no anchor-row count, which is yours to read.\n\ndev-ps document 26, K root `e0d2da10-e9fa-4871-baa9-72f3e8854eb2`. Actor: an Entra-verified `did:jwk`, organisation Obeden PTE Ltd. Transactions are from S's ledger, and from Koios (Kintsugi's wallet, label 674).\n\n| S row | Event | K | Transaction (block) | On chain |\n| -- | -- | -- | -- | -- |\n| 123 | upload, 9 Nov 09:11 UTC | originate | `4ec68662\u2026` (4839826) | the file's own hash `ec5d82c1\u2026` |\n| 124 | watermark, 09:14 | version `doc-1794215695264-dfb2cb45`, `anchor_cb2443da-\u2026` | `47bfcb06\u2026` (4839834) | the watermarked hash `c33e4bbd\u2026` |\n| 125 | declare, 10 Nov 06:31 | `certifications/issue`, `anchor_034a38ba-\u2026` | `1fa84ce4\u2026` (4842618) | `documentId` `af3f7528-\u2026` (the certification), `hash` `6455da02\u2026` |\n| 126 | rights-assign to a user in another organisation, 06:36 | `/transfer-custody`, 2xx, ref = the version's anchor | **none** | \u2014 |\n\n**Question 1: the custody transfer paid no transaction.** From block 4842600 to the next upload (4842632, 06:37 UTC), Kintsugi's wallet sent two transactions: the declare and an unrelated upload. None for the transfer. S read the document's anchor right after the transfer and found it confirmed on the watermark's `47bfcb06\u2026`, so S stores row 126 as `kdoc:47bfcb06\u2026`. Your 6 Nov answer said transfer-custody uses the same emitter as share, so by code it would pay a new transaction. Did `emitLifecycleAnchor` for this transfer post and fail, as the seven anchors in your KS-1402 reading did on 26 Oct (400)? Or does transfer-custody not emit? This is not checked again later; one document.\n\n**Question 2: the declare's on-chain hash.** S sends `certifications/issue` with `parentDocumentId` = the watermark version and the parent's own hash (`c33e4bbd\u2026`). On chain the transaction carries the certification document's id and a different hash, `6455da02\u2026`. So a verifier holding the declared file finds the watermark's transaction by its hash, not the declaration's. Is `6455da02\u2026` the hash of the certification `data` (`generateContentHash`), as intended?\n\n**Also seen (S side):** the upload showed \"anchor submitted \u2014 awaiting confirmation\" in Lineage, then \"anchored\" (PS-1429). Verify on a second, still-pending upload (row 127) read \"Not anchored (current state: Submitted)\" with no Block row, so K's null `blockHeight` (KS-1509) reads cleanly. The S log has no 4xx and no JSON error since 9 Nov 09:10 UTC.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "2126a1f7-9ea8-42a3-aa8b-03d410fdc4f0",
+    "createdAt": "2026-11-06T08:40:40.493Z",
+    "body": "**BLUF:** Question 2: one row, as S expects. On kintsugi, `anchor_store` holds 1 row for document `d7163cda-a6f8-40cb-bceb-28dc0d325dbb`, status `confirmed`, naming the share's transaction `2b6a4172\u2026`. The upload's `1a70dd41\u2026` is in 0 rows of the table.\n\n* **The read:** read-only, 2026-11-06 08:34:59Z. Transactions were matched on their first 8 hex characters. Content hash `4abd0a4d\u20267efb` is on that 1 row and on no other. Controls: 50 rows in the table; a document id that cannot exist reads 0; a content hash that cannot exist reads 0.\n* **Its limit:** this is one table at one moment, with no history and no chain read. It does not show how `1a70dd41\u2026` left the row. The account of that in the earlier comment on this ticket comes from the code and a stand-in run, and this read does not test it.\n* **Against the earlier comment:** that comment said, not read on the box, that K's row would no longer name `1a70dd41\u2026`. This read shows that for the transaction hash. It did not read the row's payload.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "e0731289-f970-4ded-828f-69154b67fc55",
+    "createdAt": "2026-11-06T08:36:03.432Z",
+    "body": "**BLUF:** Question 1: stage 1 leaves this in place. It did not add it and was not built to stop it, because its shared-coin rule covers repeat attempts of one payload and a share carries a new payload. So today an admitted share pays for its own transaction on the same row, and stage 2 is what gives each event its own row. Question 2 is a box read and comes separately; the unique key on `(document_id, network)`, migration 031, allows one row. This comment decides nothing about that spend.\n\n* **The path:** the share route calls `emitLifecycleAnchor`, which posts to `POST /api/anchors`. The upsert sets the row back to `pending` with a null hash, and `processAnchor` runs again. Read at `07a2d62be6a0` and originate `5fc5569ed96a`. The files on this path are unchanged at develop `35bcfa000b44`.\n* **Why it pays again:** every post stamps its own `timestamp`, so the payload differs and no earlier attempt counts as the same one. Measured on the real submitter and wallet view, with a stand-in chain and the upsert simulated from its SET list: a share whose payload replaces the stored one built a second transaction on a second coin, and the row ended naming the second hash. The same code path existed before stage 1, by read.\n* **Your two transactions fit that:** the emitter posts `documentId`, `contentHash`, `network` and your `identity` block, and not `environment` or `issuerOrgId`. A payload built from that body has exactly the differences you list. Stored issuer fields are kept on a later event only for a caller outside the issuer's organisation, so by inference this caller was in it.\n* **After the share:** by code the row holds the share's hash and payload, so K's row no longer names `1a70dd41\u2026`. Not read on the box.\n* **What K has said:** comment 616db2a5 describes stage 1 as stopping \"a refused or retried event\" from paying twice, for \"the same request\". It did not say a new event pays. The route's code comment says \"idempotent \u2014 reuses the document's existing anchor\", which holds for the anchor id and not for the transaction. On this reading, S's \"no separate on-chain record\" does not match what K does today.\n* **Other verbs:** transfer-custody, revoke and lifecycle events use the same emitter, so by code they behave the same. Not observed.\n* **Not measured:** the fee of either transaction; which route posted this share, since S's flat fallback reaches the same upsert; why the on-chain `timestamp` is 29 s after S's ledger time; any other document.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "68ce3297-853e-47d3-94e9-7d49a591e074",
+    "createdAt": "2026-11-06T03:08:06.238Z",
+    "body": "**Facts for the Verify step, from one real S document on kintsugi: a share wrote a second Cardano transaction for the same document.** No anchor-row count, which only K can read.\n\ndev-ps document 25, K document `d7163cda-a6f8-40cb-bceb-28dc0d325dbb`, content hash `4abd0a4d\u20267efb`, 6 Nov 2026 UTC. By K's deploy notes, kintsugi was on `07a2d62be6a0` with originate at `5fc5569ed96a`.\n\n| Event | S ledger | Transaction | On-chain `timestamp` (label 674) |\n| -- | -- | -- | -- |\n| upload, 01:28:06 | row 118 | `1a70dd416c735821f1dc6d07ca555154dcb5d952cc0e47ae403b0f0ca5173a9c`, block 4829159 | 01:28:07.980Z |\n| share, 01:30:09 | row 119, stored `kdoc:<tx>` | `2b6a41721e485cb8496be105cae89bf441836e7abfac582b81b1d683cb535688` | 01:30:38.225Z |\n\nBoth transactions carry `type: document`, the same `hash`, and the same `documentId` and `certId`. Neither names a verb, so on chain the share reads as the document being registered a second time. The second lacks `environment` and `issuerOrgId`; it keeps `orgDid`, `orgTrust` and `identityCommitment`.\n\n**Questions:**\n1. Is one paid transaction per share, on the same anchor row, what stage 1 intends until stage 2?\n2. Could you count the `anchor_store` rows for this document? S expects one.\n\nS credits neither surprise: row 118 keeps `1a70dd41\u2026` and row 119 holds no transaction hash. S's Lineage text for that row reads \"no separate on-chain record\", which this transaction contradicts, so we will review that wording with your answer.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "809603f5-3ebf-47d8-98a9-c9fff7074b8e",
+    "createdAt": "2026-11-03T08:41:28.804Z",
+    "body": "**Collected on dev-ps, thank you.** Read from dev-ps `ssddb` on 3 Nov 2026:\n\n* **Row 112 (upload, ref = document `1d322cb1-\u2026`):** confirmed at 2026-11-01 06:07:28 UTC on tx `7ff5255405e7471c\u2026`, block 4813127. That is the transaction from your 01:40Z comment, taken at the first slow-lane revisit after K read `confirmed`.\n* **Row 113 (share):** `kdoc:7ff5255405e7471c\u2026` with no transaction hash, block or confirmation time. It records that it shares the document's anchor and is not credited with the upload's transaction (PS-1426).\n\nThis completes S's second live proof of the shared-anchor fix. The retry request above is closed from S's side.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "9954ef62-6826-40e1-8942-21e3f1b2c614",
+    "createdAt": "2026-11-02T03:38:01.989Z",
+    "body": "**BLUF:** Delivered in part: the stage-1 train (PRs 1838, 1853, 1854, 1857, 1858, 1868, 1874 and 1884) is merged on develop and runs on kintsugi at b1fb543640e7 (deployed 2026-11-01). Verified by commit ancestry and the deploy record on this ticket, not observed live by this check. Left open: the live check under \"Verify\" in the description is not recorded on this ticket: live sweep owed (write).\n\n- **Merged, each an ancestor of b1fb543640e7:** F-a #1838 `bf6a43631df1`, F0a #1853 `f01c1eec86ed`, F0b #1854 `a9563f6bd49e`, F0c #1857 `f0c3156627ab`, F-b #1858 `77fac4727758`, R1 #1868 `60e59bd2270b`, R2a #1874 `3d036184d37f`, R2b #1884 `e21ca95cfba9`.\n- **Deployed:** the 2026-11-01 07:50Z comment records kintsugi running b1fb543640e7 with the train in; the 01:40Z comment records one stuck document re-anchored once and confirmed on Cardano preview.\n- **Owed (write):** the description's Verify step: originate, declare, share on one document on a paired slot, counting anchor rows and Cardano transactions and quoting both here.\n- **Follow-ups with their own tickets (Backlog):** KS-1896, KS-1907, KS-1908.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "af5e841a-7a64-4e0e-8881-442728802169",
+    "createdAt": "2026-11-01T07:50:35.933Z",
+    "body": "**BLUF:** Kintsugi now runs develop `b1fb543640e7` with the KS-1384 train in. The swap ran on 2026-11-01 from 18:36:21 to 18:43:33 AEDT (07:36:21Z to 07:43:33Z). Demo is not changed.\n\n- Train squashes on kintsugi, each an ancestor of `b1fb543640e7`: F-a #1838, F0a #1853, F0b #1854, F0c #1857, F-b #1858, R1 #1868, R2a #1874, R2b #1884.\n- Cardano network: originate and anchoring both read `preview`, equal in the running containers and in the compose config, before and after the swap.\n- 25 services were recreated, api-gateway last. Anchoring runs in REAL (Blockfrost) mode on preview with its own wallet. There were 0 non-final anchor rows at every read.\n- Rollback point: `pre-20261101k15` (33 images).\n- Not on kintsugi: develop's later KS-1868 merges. Demo stays at `e3d8456ec81d`.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "ca71ee31-bd2a-439c-93f4-e16f6862f673",
+    "createdAt": "2026-11-01T01:40:34.347Z",
+    "body": "**Re-anchor done: document `1d322cb1-38bc-4192-92de-821b0320c1bf` was anchored once more on kintsugi on 2026-11-01, and its transaction is confirmed on Cardano preview: `7ff5255405e7471c90f3878ab6c7ff0e2327dfbff61038d2704c8ee77eaab6a0` (block 4813127).**\n\n- **What ran:** one `POST /api/documents/1d322cb1-38bc-4192-92de-821b0320c1bf/anchor` at 01:36:35Z (12:36 AEDT), answered 202. This was after kintsugi's deploy of develop `b331ffb8e9ca` was verified. Nothing else was called: no second POST and no retry.\n- **Result:**\n  - The anchor is `anchor_a18cf3d2-e932-4a13-add4-b829b4116bdf`. It is the same anchor as the 2026-10-30 attempt, which had failed with \"transaction never appeared on chain within 24h\".\n  - Status confirmed at 01:38:55Z, not simulated, network preview.\n  - A public preview index shows the transaction with 6 confirmations at 01:39:53Z (metadata label 674).\n- **Who:** our deploy agent (Seat D 47th) made the call on Kam's ruling. The platform's audit records carry Kam's kintsugi admin identity, because that is the only platform-admin login on that box.\n- **Not changed:** no other document, anchor or account was touched. Demo is not part of this.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "9f386164-2565-4565-bafa-755bacc51c81",
+    "createdAt": "2026-10-31T22:31:04.853Z",
+    "body": "**BLUF:** Stage 1's last pull request is ready to merge: PR 1884, head `dc307970b295`. QA gate 70 gave GO WITH NOTES at `ecfe4f07fdce`; this head is that change with develop merged in after R2a landed, and every product file is byte-equal to the gated head. R2b is not merged yet, nothing is deployed, and no box was touched.\n\nWhat it does:\n* **This is a money path.** Every reader of a document's anchor state now takes one decision from one resolver. Before this, which reader ran first decided what a document said. On kintsugi (31 Oct) a document whose create had landed read `anchor_failed`, and the retry route then paid a second fee for it.\n* `confirmed` is terminal in the database: a conditional write never writes over it, and a failure is pinned to the anchor it fails.\n* The retry route (`POST /api/documents/{id}/anchor`) first asks the anchoring service whether this document's create already landed on chain (a new `POST /api/anchors/own-create`).\n  * If it did, the route answers 409 naming the transaction instead of paying again.\n  * If the service cannot answer, the route answers 503 (Retry-After 60).\n  * Only \"none\" goes on to submit.\n* The landed rule no longer compares networks (QA gate 68, G68-F1). Where originate and anchoring were configured with different `CARDANO_NETWORK` values, every landed anchor read as \"another network\" and was paid for again.\n\nKnown limits: a verify without a bearer shows the stored state until the GET reconcile or the poller heals it (KS 1918). Older documents with nothing to bind to wait for the operator path (KS 1907, KS 1908).\n\nIt deploys only with F0, F-b, R1 and R2a, after the census, box by box, each box Kam's own step. The deploy seat must also read `CARDANO_NETWORK` of originate and of anchoring on each box and find them equal.\n\nIts evidence is in the pull request's Test Evidence block. Each step merges only on its own gate GO, one at a time in stack order; merging is not deploying. QA gate 70's G70-F1 (KS 1920) keeps the CARDANO_NETWORK equality check in the train's deploy hold.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "5af88b1e-6a29-4942-8fba-a1284f4f1a96",
+    "createdAt": "2026-10-31T15:51:20.140Z",
+    "body": "**BLUF:** Stage 1's seventh pull request is ready to merge: PR 1874, head `38e8c0d3cadc`. That head is its gated change (`31d146678`) with gate 68's notes and develop merged in after R1 landed. Its product code is byte-equal to the gated head except one spec description (G68-F5), and its tests carry gate 68's five nits. Nothing is merged or deployed, and no box was touched.\n\nWith round 3 merged in, two of gate 65's measured double-pay cases now pay once at this head:\n* a retry holder that died between its submit and its record;\n* an intermediary's 502 after anchoring had already saved the submit.\nEach later retry is refused as \"already anchored\" once that anchor has confirmed.\n\nWhat it does:\n* The document anchor retry route answers 409 \"already anchored\" when anchoring already holds a confirmed anchor for the same content on the same network. It no longer submits, and pays, again.\n* When the anchoring service cannot read a document's anchors (its database is down, or the query fails), it answers 503. Before, it answered \"No anchors found\", so a database fault read as \"nothing there\".\n* The API spec now declares the route's 409 answers and that 503.\n\nIt deploys only with F0, F-b, R1 and R2b, after the census, box by box, each box Kam's own step.\n\nIts evidence is in the pull request's Test Evidence block. Each step merges only on its own gate GO, one at a time in stack order; merging is not deploying. The train deploys only after R1, R2a and R2b are merged.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "c79ebc1e-5d13-490f-aa72-15a6fd8cde31",
+    "createdAt": "2026-10-31T09:49:14.629Z",
+    "body": "**BLUF:** Stage 1's sixth pull request is ready to merge: PR 1868, head `48b328c9a3e3`. That head is its gated round 3 (`7ed460cc4258`) with gate 65's notes and develop merged in after F-b landed. Its code is byte-equal to the gated head, and one test file gains one comment line (G65-F3). Nothing is merged or deployed, and no box was touched.\n\nWhat it does:\n* The document anchor retry route (`POST /api/documents/{id}/anchor`) takes a claim on the document before it acts, so two retries at once cannot both submit.\n* Before it submits, it asks the anchoring service whether an attempt for that document is still in flight, and answers 409 instead of starting a second one. If anchoring cannot be read, it answers 503 and submits nothing.\n* Its outcome write lands only while its own claim still holds the document, so a retry that lost its claim changes nothing.\n* Round 2: a retry that stalled past its 10-minute claim can no longer pay alongside a newer retry. Immediately before it submits, the route checks that the claim is still its own and still live, and renews it; otherwise it answers 409 and submits nothing. Both calls to the anchoring service are now time-limited (5 s and 10 s). A submit that times out keeps the claim, because it may have been accepted: the route answers 503, and a retry is refused until the claim runs out.\n* Round 3: a submit whose outcome is unknown (no answer in time, or an accepted answer whose body was lost) is now recorded on the document. A later retry that finds any anchor for the document, confirmed or failed, answers 409 and does not submit again, so an anchor that landed late is never paid for twice. Only a retry that finds no anchor at all, after the claim has run out, may submit. A revoked or already-confirmed document is also refused at the last check before submitting.\n\nOne stated gap: the 409s this route answers are not yet declared in the API spec. The first part of R2 declares them, and this step does not deploy without R2.\n\nIt deploys only with F0, F-b and both parts of R2, after the census, box by box, each box Kam's own step.\n\nIts evidence is in the pull request's Test Evidence block. Each step merges only on its own gate GO, one at a time in stack order; merging is not deploying. The train deploys only after R1, R2a and R2b are merged.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "5fd78a72-f587-437f-a89f-5ab0fd98dc1a",
+    "createdAt": "2026-10-31T07:56:44.029Z",
+    "body": "**Update, 07:55 UTC: Kintsugi is landing anchors again.** A new dev-ps upload, document `9d7326ed-476c-47ef-b070-7f7308a78f11`, originated at 07:53 UTC and confirmed about 95 seconds later: tx `df7ad3e3\u2026`, preview block 4810795. That is the first dev-ps confirmation since 29 Oct 01:36 UTC. It also carries a `did:jwk` `actorDid` on chain, so KS-1175 is proven live end to end.\n\nSo questions 1 and 2 above are now only about the one transaction `a64da750\u2026` on document `1d322cb1-\u2026`. The retry request for that document stands.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "09ffd8fd-939b-404f-844b-21af24124dad",
+    "createdAt": "2026-10-31T06:55:06.378Z",
+    "body": "@kamil.kreiser: **Stuart has asked for a retry of this anchor.** Please re-anchor document `1d322cb1-38bc-4192-92de-821b0320c1bf` on Kintsugi: `POST /api/documents/1d322cb1-38bc-4192-92de-821b0320c1bf/anchor`, which KS-1814 allows a platform admin to call. S can't do it itself. Its only call to that route is the second leg of a new version, and it has no retry path for an upload.\n\n* **Safe for S now.** The share row on this anchor is stored as `kdoc:` (PS-1426), so the reset you warned about for document 19 can't attribute the upload's transaction to the share. Only the upload row (S row 112, ref = the document id) can take the transaction.\n* **It also answers question 3 above.** If the retry lands, Kintsugi's submitter is working again. If it sticks in `submitting` like the first attempt, that is the answer too.\n* **How S collects it:** rows 112 and 113 are parked in S's six-hourly slow lane since 06:06 UTC. At the next revisit after K reads `confirmed`, row 112 takes the transaction and row 113 becomes `kdoc:<tx>`. Neither row is credited before K confirms.\n\nCould you post the new transaction hash, or the reason it failed, here?",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "7571354b-b37f-422f-8985-cf2c04b482fb",
+    "createdAt": "2026-10-31T06:26:56.678Z",
+    "body": "**Follow-up to my 30 Oct 09:27 UTC note: the stuck anchor ended `failed` at the 24-hour give-up. S credited nothing.**\n\n* **Document:** `1d322cb1-38bc-4192-92de-821b0320c1bf`. **Anchor:** `anchor_a18cf3d2-e932-4a13-add4-b829b4116bdf`. It was originated by dev-ps on 30 Oct at 06:04 UTC and was still `submitting` with tx `a64da750\u2026` and no block.\n* **31 Oct, 06:06:21 UTC:** S's refresher read `failed` on both refs: the document id (S row 112, the upload) and the shared anchor id (S row 113, the share). It parked both. Neither row has a transaction hash or a confirmation. Row 113 is stored as `kdoc:anchor_a18cf3d2-\u2026` (PS-1426), so it is never credited and never corroborated.\n* **dev-ps has recorded no confirmation since 29 Oct 01:36 UTC.** This upload was S's only write to Kintsugi after Kintsugi's 29 Oct 11:07 UTC restart, so it was the first anchor after that restart, and it never landed.\n\nStill open from 30 Oct, for whoever owns Kintsugi's submitter:\n1. Was `a64da750\u2026` ever on the preview chain, or was it dropped? If it was dropped, why (TTL, UTxO conflict, wallet)?\n2. Or did the reconciler read a provider outage as absence? KS-1810's fix is in PR 1838, which is not on the box yet.\n3. Is Kintsugi's submitter landing anything now? The next S upload will show it either way.\n\nS will not retry this anchor by itself (PS-1357). A retry through `POST /api/documents/{id}/anchor` would reset the anchor row that S's share row names. That row is `kdoc:`, so a retry would not mis-credit it, but whether to retry is Stuart's call.\n\nAlso seen live (owed proof from 30 Oct): KS-1822's tenant check does not refuse S's own reads. For 24 hours, S's `GET /api/anchors/anchor_a18cf3d2-\u2026` under the owning organisation's connector key returned the anchor's status (`submitting`, then `failed`) on every tick, never a 404.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "a7e0ad4a-8790-45e5-94d2-44a6bfb2d9df",
+    "createdAt": "2026-10-31T00:10:58.590Z",
+    "body": "**BLUF:** Stage 1's fifth pull request is ready to merge: PR 1858, head `1eb6e64f8317`. That head is its gated change with develop merged in after F0c landed, and its docs entries are now fragments. The code is byte-equal to the gated `c39f61fe2def`, and one test file adds one cell (r4b, 19 lines, test only). Nothing is merged or deployed, and no box was touched.\n\nWhat it does:\n* The reconciler now settles anchor rows that have no transaction hash and that no running process is still working on: if the row's payload is on chain it confirms the row with that transaction, and if a search of the whole window finds nothing it marks the row failed (\"nothing was submitted\"). It never builds or submits.\n* It leaves alone any row inside its 2-hour wait, and does nothing in the first 2 h 10 min after a restart (the boot arm's window; round 1 had 10 minutes). A front-door re-POST during its search wins.\n* Its search for a row's payload starts 10 minutes before the row was created, not before its last write, so a transaction that landed long before a later wait marker is still found (round 2, gate 49).\n* Before giving up a row that has a hash, it first searches for the same payload under another hash and adopts it if found.\n* Rows carrying a placeholder hash are still never touched (KS-1870).\n\nIt deploys only with F0 and R, after the census, box by box, each box Kam's own step.\n\nIts evidence is in the pull request's Test Evidence block. Each step merges only on its own gate GO, one at a time in stack order; merging is not deploying.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "216dcfac-aa6a-435e-96a1-67202a108753",
+    "createdAt": "2026-10-30T23:41:42.397Z",
+    "body": "**BLUF:** Stage 1's fourth pull request is ready to merge: PR 1857, head `7d6604c64783`. That head is its gated change with develop merged in after F0b landed, and its docs entries are now fragments. The code is byte-equal to the gated `ab59f2903405`. Nothing is merged or deployed, and no box was touched.\n\nWhat it does:\n* Thread-mint waits at most 30 seconds for the platform wallet, and answers 503 before signing when the wallet stays busy, when nothing is spendable, or when the caller has gone. Before this, a queued mint could sign and pay after its caller had given up.\n* The mint's coins now come from the same wallet view as anchoring's, so an anchor and a mint never pick the same coin in one process.\n\nThis step is a money path. No F0 build goes to a box where state-thread minting is on unless this change is in, and F0 deploys only with F-b and R, after the census, box by box, each box Kam's own step.\n\nIts evidence is in the pull request's Test Evidence block. Each step merges only on its own gate GO, one at a time in stack order; merging is not deploying.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "5f52842e-cf86-43cd-b0ba-a927dca63565",
+    "createdAt": "2026-10-30T22:48:01.203Z",
+    "body": "**BLUF:** Stage 1's third pull request is ready to merge: PR 1854, head `9ac5d2c60dcc`. That head is its gated change with develop merged in after F0a landed, and its docs entries are now fragments. The code is byte-equal to the gated `da080d3fbe48`. Nothing is merged or deployed, and no box was touched.\n\nWhat it does:\n* Every transaction anchoring signs for one anchor and one payload now spends one shared coin, so at most one of them can land.\n* A refused anchor is retried only when no earlier attempt of the same payload can still land.\n* An anchor with nothing to spend waits up to 2 hours, outside the wallet lock, instead of failing in about 15 seconds.\n\nThis step is a money path: more refused events now land, one more fee each. For about 2 hours after each anchoring restart it keeps today's behaviour. It deploys only with F0c, F-b and R, after the census, box by box, each box Kam's own step.\n\nIts evidence is in the pull request's Test Evidence block. Each step merges only on its own gate GO, one at a time in stack order; merging is not deploying.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "42f2af91-499b-4315-b341-60e5d94e422c",
+    "createdAt": "2026-10-30T22:47:15.399Z",
+    "body": "**BLUF:** Stage 1's second pull request is ready to merge: PR 1853, head `9041d6e3905b`. That head is its gated change with develop merged in after F-a landed, and its docs entries are now fragments; the code is byte-equal to the gated `969df4571d45`. Nothing is merged or deployed, and no box was touched.\n\nWhat it does:\n* Anchoring now spends only the coins its in-process wallet view offers, so a transaction no longer picks a coin an earlier one is still spending.\n* A write-ahead that did not land now stops the submit. Before this, the submit went ahead anyway.\n* A batch is sent only when every row's write-ahead matched.\n\nThis step changes which coins anchoring may spend, so it is a money path. It deploys only with F0b, F0c, F-b, R1, R2a and R2b, after the census, box by box, each box Kam's own step.\n\nIts evidence is in the pull request's Test Evidence block. The next steps (F0b, F0c, F-b, R1, R2a, R2b) are pull requests of their own. Each merges only on its own pinned GO, one at a time in stack order; F0, F-b and R deploy together, after the census, box by box.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "b6366fc1-06d4-4c9a-b66b-c1e3a567378c",
+    "createdAt": "2026-10-30T09:27:45.900Z",
+    "body": "**Kintsugi: an anchor stuck in `submitting`, 30 Oct.** This is for whoever owns Kintsugi's submitter and confirmation watcher. It came up during the PS-1426 live proof on dev-ps.\n\n* **Document:** `1d322cb1-38bc-4192-92de-821b0320c1bf`, originated by dev-ps at 06:04 UTC.\n* **Anchor:** `anchor_a18cf3d2-e932-4a13-add4-b829b4116bdf`.\n* **What Kintsugi reports at 09:2x UTC:** status **submitting**, tx `a64da75063129432\u2026` (full hash on the anchor row), no block height. That is 3h20m after submission, where earlier dev-ps anchors confirmed in 0\u20132 minutes.\n* **dev-ps has recorded no confirmation since 29 Oct 01:36 UTC.** Kintsugi's `startupMigrations.lastRunAt` shows a restart at 29 Oct 11:07 UTC, and `/health/ready` is all up.\n\nWorth checking:\n1. Is `a64da750\u2026` on chain on preview at all, or was it dropped (TTL expired, or a UTxO conflict)?\n2. Is the confirmation watcher running since the restart?\n3. Is a dropped transaction ever moved out of `submitting`?\n\nS is behaving correctly while it waits: no row is credited until K reports `confirmed` with a hash.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "9172a71c-29d3-49c6-8250-25bec1adb993",
+    "createdAt": "2026-10-30T07:59:15.396Z",
+    "body": "**BLUF:** Stage 1's first pull request is ready to merge: PR 1838, head `987fb80c06b7` (its gated change with develop merged in, and its docs entries now fragments; the code is byte-equal to the gated `f27499dd9027`). Nothing is merged or deployed, and no box was touched.\n\nWhat it does:\n* **KS-1808:** the reconciler's 24 h give-up window now runs from a row's last write (`updated_at`), so a re-armed old row is not failed at its first pass.\n* **KS-1810:** a row is failed only after two consecutive passes in which the chain answered \"not found\". A pass the provider could not answer never fails a row.\n* Every reconciler write now expects the status and hash that pass read, so a row that moved meanwhile is left as it is.\n* The anchor 202 and `GET /api/anchors/:id` gain `payloadTimestamp`, an additive spec field.\n* originate no longer writes to `anchor_store`.\n\nAt anchoring this step changes no submit: it can only make a `failed` write later or never. Outside production, originate no longer blocks a retry after anchoring was down, so such a retry can now reach a first submit; the gate saw no double fee. The pending-window answer of the anchor read also changes. Both are named in the pull request.\n\nIts evidence is in the pull request's Test Evidence block. The next steps (F0a, F0b, F0c, F-b, R1, R2a, R2b) are pull requests of their own. Each merges only on its own pinned GO, one at a time in stack order; F0, F-b and R deploy together, after the census, box by box.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "616db2a5-06bf-42ce-9398-9ccae8f1b529",
+    "createdAt": "2026-10-30T02:05:38.231Z",
+    "body": "**Thanks, Stuart. Our approach for KS-1384, in two stages. No date yet: we will update this ticket as each stage makes progress.**\n\n**Stage 1: make today's one-anchor-per-document model safe (in build now).**\n- The reconciler stops giving up too early: it judges a row by its last update, not its creation time, and it no longer fails a row because the chain provider was unreachable (KS-1808, KS-1810).\n- Anchoring stops a refused or retried event from paying twice or getting stuck: every attempt anchoring makes for the same request spends the same wallet coin, so at most one of them can land on chain.\n- A sweep ends a stranded row honestly as `failed` instead of leaving it pending, and never mints.\n- The retry route checks anchoring's own row first: an attempt still in flight answers 409 and nothing new is posted.\n- The reconciler change can ship on its own; the other three deploy together on each box, after a wallet check.\n\n**Stage 2: one anchor per lifecycle event (the fix for what you describe above).**\n- Each event (upload, version, share, transfer, and so on) gets its own anchor row and its own transaction, so S can name the transaction for each event rather than the document's first one.\n- This needs a database migration and a backfill, and it follows stage 1.\n\n**On your verify observation** (verify-by-hash reporting an anchor id as confirmed while that id's own row reads failed with a different transaction): noted, and tracked as KS-1809.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "50294791-89a3-4bf7-994d-dd0e32f95be8",
+    "createdAt": "2026-10-30T01:18:36.801Z",
+    "body": "**Document `deb6d3c3-\u2026`'s outcome, seen from S: the two verify calls at 08:56:52 UTC on 29 Oct were S's own. They left S's share and transfer rows claiming the upload's transaction.**\n\nThis answers KS-772's \"who sent the calls is not measured\" (Kamil, 09:09 UTC).\n\n- **The calls.** At 08:56:14 UTC K marked `anchor_c09c1b1f-\u2026` failed. On its next tick S's refresher read \"failed\" for rows 108 (share) and 109 (rights-assign). For each row it ran its PS-577 corroboration: `VerifyByHashAsync(ContentHash)`, which is `POST /api/verification/verify` with the document's hash. Two rows gave two calls, 22 ms apart. S stamped the rows at 08:56:52.93 and 08:56:52.95 UTC (dev-ps `DocumentTransaction.AnchorConfirmedAt`).\n- **What K answered.** Your note says verify healed the document to `confirmed` against `b1cc72f9\u2026` and named the same anchor id, `anchor_c09c1b1f-\u2026`. S only overturns a \"failed\" when verify names *that* anchor id, says it is anchored and not simulated, and gives a real 64-hex transaction (`CardanoAnchorRefresher.CorroboratesAnchor`). All four held, so both rows now carry `b1cc72f9\u2026`, block 4801203.\n- **Why that is wrong.** On preview, `b1cc72f9\u2026`'s metadata (label 674) is the upload: type `document`, hash `00cf73f4\u2026`. Neither the share nor the transfer is on chain, yet S shows both as confirmed by the upload's transaction. Meanwhile the anchor row they point at reads `failed` with `e1df3f61\u2026`. Verify answered for the *document* and used the *anchor's* id, and under the one-row-per-(document, network) upsert those two are not the same thing.\n- **The same shape on demo-pk, by the ordinary poll.** uat-ps document 18, 29 Oct from 05:53 UTC: the sign-cert version, certified, share and share-attach-consent all got `anchor_50fa7aab-\u2026`, and all four S rows carry `77363baf\u2026`, block 4804071. On chain that transaction is the version alone: type `document`, hash `466fc0b5\u2026`, documentId `doc-1793253222231-45177f17`.\n\nBoth are what this ticket predicted: one anchor per document means S can't name a transaction for each event. Per-event anchors (option (a), ruled 9 Oct) remain the fix on K's side. On S's side we will stop crediting the shared transaction to the later rows; that is tracked under PS-895. Nothing is asked of K beyond a date for per-event anchors. One observation for the design review: verify-by-hash should not report an anchor id as confirmed when that id's own row reads failed with a different transaction.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "ea44c3ff-48d8-4997-8e10-f509f626bb22",
+    "createdAt": "2026-10-29T00:52:10.973Z",
+    "body": "**Follow-up, 29 Oct 00:40 UTC: document `deb6d3c3-1d79-4993-82a1-7a49a75aae00` has still not confirmed, 15\u00bd hours after the share and the transfer.**\n\ndev-ps rows 107 (upload), 108 (share) and 109 (rights-assign) are unchanged since my comment above:\n- no transaction hash;\n- no block;\n- not parked.\n\nRow 110, the control upload, confirmed within about 4 minutes.\n\nOn every tick, S's refresher logs `status poll made 2 platform-k read(s) for 3 row(s) \u2014 1 answered by a read already made this tick, 0 parked from a simulated verdict`. Kintsugi has answered both reads (the document id and `anchor_c09c1b1f-\u2026`) with a not-yet-confirmed status for 15\u00bd hours:\n- never confirmed;\n- never failed;\n- never simulated, which would let S park the rows.\n\nSo the reset has left this document's anchor without a confirmation for at least 15 hours, not minutes. Meanwhile S keeps paying two reads per tick on it.\n\nThe ask above now matters more. For that `anchor_store` row, what are `status`, `transaction_hash`, `retry_count` and `updated_at`? Is anchoring still processing it, or has it stalled in `pending`? Kintsugi's 28 Oct 06:08 UTC deploy recreated only api-gateway and originate, before this chain started. So I don't think a restart explains it, but anchoring's own logs for that id would settle it.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "9860e31d-6543-4f45-85a2-5a931f775cf9",
+    "createdAt": "2026-10-28T09:20:08.787Z",
+    "body": "**Live evidence, 28 Oct 2026: dev-ps S (develop `c07be07`, image built 27 Oct 08:23 UTC) \u2194 Kintsugi K `061c3a4f6`.**\n\nstuart@obeden.com (Entra-verified) uploaded one document, shared it, then assigned its rights. S sent each action to its own K route, and K returned **the same anchor id for the share and the transfer**.\n\n| S row | S doc | Action | Added (UTC) | K route | Ref K returned | Confirmed? (09:19 UTC) |\n| -- | -- | -- | -- | -- | -- | -- |\n| 107 | 19 | upload | 08:55:20 | `POST /api/documents` (originate, auto-anchor) | `deb6d3c3-1d79-4993-82a1-7a49a75aae00` (K document id) | **no** |\n| 108 | 19 | share \u2192 iss3@lhsg.com | 08:55:45 | `POST /{deb6d3c3\u2026}/share` | `anchor_c09c1b1f-c639-49e3-8afc-f1fb31906732` | **no** |\n| 109 | 19 | rights-assign \u2192 iss2@lhsg.com | 08:56:02 | `POST /{deb6d3c3\u2026}/transfer-custody` | `anchor_c09c1b1f-c639-49e3-8afc-f1fb31906732` (**same**) | **no** |\n| 110 | 20 | upload (control: no later action) | 08:56:47 | `POST /api/documents` | `4c3e74b0-5319-4746-885e-dcd82c2ef08d` | **yes**: tx `43549e9a3f0ba36ba4a91ddd6d80a03650d3373e4ee264d486fb7d96ed3018be`, preview block 4801208, within ~4 min |\n\nS app log, verbatim apart from trimming:\n- `tx 84c4d91e\u2026 'share' \u2192 share ref anchor_c09c1b1f-\u2026 (parent deb6d3c3-\u2026)`\n- `tx 20b5a812\u2026 'rights-assign' \u2192 transfer-custody ref anchor_c09c1b1f-\u2026 (parent deb6d3c3-\u2026)`\n- After that, every refresher tick logs `status poll made 2 platform-k read(s) for 3 row(s) \u2014 1 answered by a read already made this tick`. The two rows share one ref, so one read answers both.\n\n**What this shows**\n1. **One anchor per (document, network), confirmed live.** `/share` and `/transfer-custody` both go through `emitLifecycleAnchor` \u2192 `POST /api/anchors` \u2192 `dbPersistAnchor`'s `ON CONFLICT (document_id, network)` and return the existing row's id (`services/anchoring/src/index.ts`, the KS-281 upsert, at `061c3a4f6`). S therefore has no separate on-chain reference for the transfer.\n2. **The reset holds the document unconfirmed.** Document 20, with nothing after its upload, confirmed in about 4 minutes. All three rows on document 19 are still unconfirmed **23 minutes** after the last action. That fits the description: each repeat resets the row to `pending` with `transaction_hash` NULL and re-processes it. I have not verified from K's side whether the upload's own transaction was submitted and then overwritten, or never submitted.\n\n**Not verified (needs K data, Kamil):** for `anchor_store` where `document_id = 'deb6d3c3-1d79-4993-82a1-7a49a75aae00'` on preprod/preview, please give:\n- the row's current `status`, `transaction_hash` and `retry_count`;\n- how many Cardano transactions anchoring submitted for that document between 08:55 and 09:20 UTC (question 3 above: did the reset mint a second fee-paying transaction?).\n\n**For S, if one-anchor-per-document is the intended contract (decision 1):** S needs to change. Today it shows one tick per action and records the share and the transfer under one ref. When the row eventually confirms, both rows will be stamped with whatever transaction the row last carried, so the earlier action is attributed to the later action's transaction. That is the KS-1119 / KS-1561 false-attribution shape on the S side. It is PS-895's question, now answered live.\n\nWill add the final state when the rows confirm or park.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "df0cc242-12b9-4ed3-8173-c19e4ca32766",
+    "createdAt": "2026-10-19T08:06:00.897Z",
+    "body": "**Kam has ruled: design now, merge after the Kintsugi round lands.**\n\nKam's words, verbatim:\n\n> Design now, merge after the Kintsugi round lands\n\nCard `secuura-ks1384-schedule-per-event-anchors-1019`, option **(b)**. Ruled on the live board 2026-10-19 between 18:22 and 18:23 AEDT; recorded 18:28.\n\nWhat that means for this multi-PR project:\n\n- **Design work may start now.** No merge to `develop` until the Kintsugi round has landed.\n- Per the card, the small **interim ownership check** on the flat-anchor route goes ahead now, on its own, and is not held behind this project \u2014 that is **KS-1603**, already in flight on its own seat.\n\n**Nothing is built or merged by this comment.** This records the ruling and the sequencing.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "229550f9-196a-40bd-bc50-76f56fd074a2",
+    "createdAt": "2026-10-19T05:29:36.400Z",
+    "body": "**BLUF: @stuart.jamieson \u2014 Kam ruled the shape of this on 2026-10-09: option (a), one anchor per lifecycle event. That ruling never reached this ticket, which is why your document still records KS-1384 as unruled. That is our miss. The shape is settled and it is the one you prefer. WHEN the work starts is still with Kam \u2014 a card is on his panel today. No date.**\n\n## Kam's ruling, 2026-10-09 10:06:00 AEDT\n\nOption (a), verbatim:\n\n> One anchor per lifecycle event\n\nSo the structural answer is the one you have argued for on both this ticket and KS-1612 \u2014 a row per event rather than one row per `(document_id, network)` \u2014 and not a narrower guard on the existing single row.\n\n## What is ruled, and what is not\n\n**Ruled:** the target shape. One anchor row per lifecycle event, which is also what removes the overwrite you had to word around in PS-1285 and closes KS-1603's exposure for good rather than guarding it.\n\n**Not ruled:** when it starts. This is a multi-PR project, not a patch \u2014 a migration and backfill on the live anchor table with three source rules, five code writers to bind to the tenant, six SQL files and two services (the sizing is in `4384fa9a` on this ticket). Scheduling work of that size against a deploy round that is already queued is Kam's call, and it is in front of him now.\n\n**Deliberately not stated:** a start date or a landing date. Anything merged to `develop` rides the next deploy round, and that round has conditions outside our control.\n\n## Your measurement is recorded and it holds\n\nYour `750da63c` of 2026-10-18 answers the one residual the round-3 write-up left open \u2014 whether an id chosen outside K is predictable enough to be squatted. At S develop `7cb1a4e`: a fresh v4 GUID per ledger row from `Guid.NewGuid()` in `TransactionService.BuildBaseTransaction`, 122 bits from the platform CSPRNG, no counter and no time component, and never known outside S before the anchor exists. We are not treating that as an open risk.\n\n## Interim\n\nThe small ownership check on the flat-anchor route (KS-1603) is tracked separately and does not wait on this project. If Kam schedules KS-1384 to start now, that check is subsumed; if he holds the project, the check still protects your existing rows. Either way nothing is being asked of you here.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "750da63c-c48c-4cd0-8c08-8d0b3cd07cad",
+    "createdAt": "2026-10-18T22:42:46.534Z",
+    "body": "@kamil.kreiser \u2014 on the \"reverse order\" residual you record above (\"an id chosen outside K, such as S's hyphenated ledger chain id on a flat anchor, is only as unpredictable as its source, which K cannot measure\"): the S measurement, at S develop `7cb1a4e`.\n\n- **The id is a fresh v4 GUID per ledger row**: `Guid.NewGuid().ToString(\"N\")` in `TransactionService.BuildBaseTransaction`, hyphenated for the wire (`ToHyphenatedGuid`). 122 random bits from the platform CSPRNG, no counter, no time component, no derivation from the document or the organisation.\n- **It is never known outside S before the anchor exists.** S writes the row and dispatches the anchor in the same request (`TryAnchorAsync`) or on the refresher's next tick (\u2264 30 s locally); the id is visible only inside S, to signed-in members of the owning organisation, on pages that render after the row is written. It is not in any S email, share link or public URL.\n- So pre-registering a `documents` row under one of S's flat-anchor ids requires guessing a v4 GUID inside a window of seconds. For S's ids the \"reverse order\" residual is theoretical; migration 051's forward refusal covers the case that matters for S.\n\nThat does not change S's preference (this ticket's tenant column is still the answer that needs no reasoning about id entropy), but it lets you record the S source as measured rather than unmeasurable. The S flat-anchor write site is the one you list as unguarded, `originate/src/routes/anchors.ts:109` via `POST /api/anchors/` \u2014 S sends it only under the owner organisation's connector key, for its own rows, one id per event.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "4384fa9a-f8ae-4053-80cf-b761c6b32809",
+    "createdAt": "2026-10-18T20:31:14.657Z",
+    "body": "**BLUF: #1568 round 3 did NOT take this, and the reason is scope, not merit. Platform S prefers it, I agree it is the structural answer, and it should be planned as its own piece of work rather than squeezed into a review round.**\n\n**Stuart's position, from his KS-1612 comment of 2026-10-18T11:42:31Z, verbatim:** *\"S's preference is unchanged: (iii) KS-1384, one anchor row per event with a tenant column, which also removes the overwrite S had to word around in PS-1285.\"*\n\n**Why round 3 took the smaller option instead.** Kam allowed #1568 exactly one more round (card `secuura-ks1612-third-round-after-cap-1018` = (a); a further NO GO stops for him). Round 3 therefore closes the round-2 gate's MAJ-A with one predicate \u2014 migration 051, which refuses a `documents` row that claims an id an `anchor_store` row already holds and that no document owns. Ruled by Wednesday 2026-10-18T20:14:35Z.\n\n**What this ticket is, as sized against the writer census I ran at develop `83ed01af70fd5ed6cca9ac66f28ddcb8a1034105`:**\n\n* a hot-table migration on `anchor_store` plus a backfill with **three distinct source rules** \u2014 document anchors from `documents`, certification anchors from `documents.id`, and orphan/flat anchors that have **no recorded first caller at all** (\u2192 NULL \u2192 correctly frozen against cross-tenant updates);\n* **every writer must bind the tenant** \u2014 there are five: `anchoring/src/index.ts:1372` (the main upsert), `anchoring/src/index.ts:1755`, `anchoring/src/anchorStatusUpdate.ts:114`, `originate/src/routes/anchors.ts:109` (unguarded), `demo-service/src/seed/index.ts:162`; plus six migration/init writers (001, 003, 007, 031, `docker/init/06-consolidate-anchors.sql`, `deployment/azure/migrate/init.sql`);\n* a new refusal path in the upsert's `DO UPDATE` (`WHERE anchor_store.tenant_id = EXCLUDED.tenant_id`, NULL-tenant legacy rows refused \u2014 fail closed);\n* and the guard's per-organisation rule still needed **on top**, because a single-tenant box puts two organisations in one tenant.\n\nThat is multiple PRs across two services, a seed and six SQL files \u2014 not a round.\n\n**What it would close that 051 does not.** KS-1603 (the unconditional columns on both upserts). The **reverse order** residual 051 names: 051 refuses a document claiming an id an anchor already holds, but cannot stop a document being pre-registered under an id that can be *predicted* before the anchor exists \u2014 and an id chosen outside K, such as S's hyphenated ledger chain id on a flat anchor, is only as unpredictable as its source, which K cannot measure. With a tenant column the anchor row carries its own owner and none of this is inferred from `documents` at all.\n\n*Seat J 13th. Nothing deployed. Related: KS-1612, KS-1603, KS-1630.*\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "bc285b0d-9b93-4d4a-b3b6-3c697a8c2756",
+    "createdAt": "2026-10-02T03:00:02.128Z",
+    "body": "A live example from dev-ps against Kintsugi, for whoever rules on this.\n\ndev-ps app log, 30 Sep 2026 09:49:47 UTC (S build `277bd43`, Kintsugi on develop's 28 Sep spec):\n\n```\nCardanoAnchor: tx 31136770\u2026 'sign-cert' \u2192 K version doc-1790761787089-b7cbe588 anchored anchor_1199917f-ce48-498d-9f08-ace579037e1d\nCardanoAnchor: tx a8950073\u2026 'certified' \u2192 lifecycle-event ref anchor_1199917f-ce48-498d-9f08-ace579037e1d (parent doc-1790761787089-b7cbe588)\n```\n\nTwo distinct S ledger events, 27 ms apart, came back with the same anchor id. That is the upsert described above, unchanged at develop `88e8877a2` (`services/anchoring/src/index.ts:1359`, `services/originate/src/routes/anchors.ts:121`). I have not read the row's status or transaction hash back from Kintsugi, so what the second call did to the first anchor's chain record is still unmeasured.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   }
+  ]
+ }
+}

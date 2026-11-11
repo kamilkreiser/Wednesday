@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-2068",
+ "title": "Audit export CSV: values starting with = + - or @ go out unneutralised, so a spreadsheet can read them as formulas (gate 202 N4)",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T06:48:40.263Z",
+ "updatedAt": "2026-11-06T06:48:40.263Z",
+ "description": "**BLUF:** The admin audit export (`GET /api/admin/audit/export`) writes CSV through `escapeCSVField`, which quotes a value only when it contains a comma, a double quote or a newline. A value that starts with `=`, `+`, `-` or `@` therefore goes out raw, or quoted only by accident, and a spreadsheet can read it as a formula. Gate 202 measured this on PR 2012 (KS-1645) at base and at head and graded it a Note; no ticket carries it. Whether any consumer opens the export in a spreadsheet is not known.\n\n## What the gate measured (gate 202 on PR 2012, finding N4; its G-CSV cells, base and head)\n\n* `escapeCSVField` (`services/api-gateway/src/routes/audit-export.ts`, lines 90 to 97, unchanged by the PR) quotes only values containing a comma, a double quote or a newline.\n* `+1+1`, `-2` and `@SUM(A1)` go out raw.\n* `=HYPERLINK(...)` is quoted only because it contains a comma, and it still starts with `=`.\n* A bare carriage return is not quoted, at base or at head.\n* `userAgent` and `ipAddress` can be set by the caller and were populated at base too. PR 2012 newly fills `action`, `resource` and `timestamp`, which the service sets.\n* The gate's grading: a Note, not a hold, \"per the commission\".\n\n## What is NOT known\n\n* Whether any consumer opens the export in a spreadsheet.\n* Whether a caller-controlled value can reach the export with a leading formula character in practice. The rows above are the writer's outputs for the listed strings; the seat filing this read the verdict and ran nothing.\n\n## Owed\n\nDecide the writer's contract for values that start with a formula character, and add a cell that fails when one goes out unneutralised.\n\n## Searched before filing (2026-11-06, includeArchived, titles, descriptions and comments)\n\n* \"escapeCSVField\": 0 issues, 0 comments. \"CSV injection\": 0 and 0. \"formula injection\": 0 issues and 1 comment, which is KS-1645's own close comment saying it found no ticket for N4.\n* Controls in the same session: \"KS-1539\" hit, a nonsense symbol returned 0.\n\nRelated: KS-1645 (the export fix, Done) and KS-2013 to KS-2016 (gate 202's other findings, filed).\nSource: the gate 202 verdict in Wednesday's reference folder (2026-11-05_gate202-ks1645-pr2012), N4. Filed on Wednesday's ANSWER of 2026-11-06 06:43Z, priority Medium.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

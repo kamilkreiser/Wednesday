@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-1934",
+ "title": "Billing: checkout.session.completed credits a purchase without checking that payment_status is 'paid'",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-02T00:43:59.396Z",
+ "updatedAt": "2026-11-02T00:43:59.396Z",
+ "description": "**BLUF:** The billing webhook adds certification credits on every `checkout.session.completed` that carries a customer and a `certifications` count, without checking the session's `payment_status`. A Checkout Session paid by a delayed payment method completes with `payment_status: 'unpaid'`, so its credits would be granted before the money arrives, and granted even if the payment later fails. Read in code, not run. Whether it is live depends on whether delayed payment methods are enabled on the Stripe account and which events the live endpoint receives: that is Kam's own check under his 2026-11-02 ruling on KS-1933.\n\n**Where** (`services/billing/src/routes/webhooks.ts` at PR 1913's head `5d6bd74daa3e`)\n\n* `handleCheckoutComplete` (:466-502) credits at :483 when `customerId` is set and `certifications > 0`. `session.payment_status` is only logged, at :498, after the credit.\n* `handleWebhookEvent` (:365-453) has no case for `checkout.session.async_payment_succeeded` or `checkout.session.async_payment_failed` (no `async_payment` anywhere in billing).\n* Stripe's own type (stripe 14.25.0, `types/Checkout/Sessions.d.ts:208-212`): \"The payment status of the Checkout Session, one of `paid`, `unpaid`, or `no_payment_required`. You can use this value to decide when to fulfill your customer's order.\"\n\n**With KS-1933's fix:** the per-payment ledger keys a purchase on its PaymentIntent id, so if the checkout handler stopped crediting an unpaid session, a later `payment_intent.succeeded` for the same purchase would credit it exactly once.\n\n**Not in scope here:** no fix is designed or built in KS-1933's pull request; this ticket records the reading. Found by Seat F 22nd while tracing KS-1933 (Wednesday's ANSWER of 2026-11-02 commissioned this filing).\n\n**Related:** KS-1933.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

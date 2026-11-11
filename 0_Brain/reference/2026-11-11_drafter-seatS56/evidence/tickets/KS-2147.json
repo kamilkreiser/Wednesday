@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2147",
+ "title": "No cell pins the rate-limit check in the event indexer's processTransaction (site 3): a local guard there passes all six cells (G273-2104-1)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-09T01:34:46.998Z",
+ "updatedAt": "2026-11-09T12:01:07.415Z",
+ "description": "**BLUF:** After PR 2104 (KS-1972, merged 2026-11-09T00:59:00Z as `b9fd80eee85b`), the contract event indexer decides \"is this thrown value a rate limit?\" at three sites in three methods, and the new cells pin two of them. No cell drives site 3, the catch in `processTransaction`. Gate 273 reports that a guard local to site 3's catch would pass all six cells, so that site can change without a cell going red. Low, by Wednesday's ruling on gate 273 (residue, ticketed after the merge). A test-coverage gap; no behaviour defect was found, and the seat disclosed that site 3 is not driven. Read at develop `b9fd80eee85b`: still true.\n\nSource: finding G273-2104-1 (Low; RESIDUE), line 147 of `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate273-tier1-g30-batch/verdict.md`, on PR 2104 head `e7faa4f72c4e`, round 2 of 2, verdict GO WITH NOTES. The gate's words: \"No cell pins site 3 (processTransaction). A guard local to processTransaction's catch would pass all 6 cells; this follows from my Mb result plus the file's cells, READ ONLY for site 3.\"\n\n## The three sites at `b9fd80eee85b`\n\nIn `Blockchain/Dev/packages/shared/src/blockchain/event-indexer.ts` (363 lines):\n\n1. Site 1, `poll`: the catch at line 199 reads `isRateLimited(err)` inside its own try (lines 200 to 205, KS-1972: a thrown value whose read throws is not a rate limit) and falls to `handleError` at line 216. This is PR 2104's change.\n2. Site 2, `processBlock` (line 221): the catch at line 228 calls `isRateLimited(err)` at line 229 and `handleError` at line 238.\n3. Site 3, `processTransaction` (line 248): the catch at line 331 calls `isRateLimited(err)` at line 332 and `handleError` at line 335.\n   `isRateLimited` is at line 340.\n\n## What pins what\n\n`Blockchain/Dev/packages/shared/src/__tests__/ks1972-event-indexer-poll-survives-an-unreadable-throw-at-the-rate-limit-check.test.ts` (122 lines) has six cells. By their titles (I read the titles, not the cell bodies), C1, C2, R1, R2 and R3 drive `poll` (site 1); C3, \"an unreadable value thrown by blocksByNumber leaves lastProcessedBlock where it was\", pins site 2, which the gate's mutant Mb confirms (below). The file mentions `processTransaction` 0 times. The only other indexer test, `Blockchain/Dev/packages/shared/src/__tests__/ks1868-event-indexer-handle-error-unreadable-throw.test.ts`, drives `handleError` directly and also mentions `processTransaction` 0 times. So at the tip no test names site 3.\n\n## What the gate measured\n\nIts mutant Mb, a guard local to `processBlock`'s call at line 229 instead of the guard in `isRateLimited`, fails exactly C3 (\"expected 6 to be 5\"), which shows C3 pins site 2. For site 3 the gate's statement is an inference from Mb plus the file's cells and is READ ONLY: no mutant was run on site 3, by the gate or by me.\n\n## What I read\n\nREAD ONLY (the board seat): the three sites and `isRateLimited` in the indexer source at develop `b9fd80eee85b` through the contents API; the six cell titles and the `processTransaction` counts in both indexer test files at the same sha; PR 2104 at the GitHub API (closed, merged 2026-11-09T00:59:00Z, squash `b9fd80eee85b`, 4 files, +167 -1); the gate's finding and Wednesday's ruling (item 3 of the gate 273 addendum). I ran nothing.\n\n## Fix shape (my reading, not the gate's)\n\nOne cell that drives `processTransaction` with a thrown value whose read throws, as R1 does for `poll`, and asserts the outcome R1 asserts for site 1; plant a guard local to site 3's catch and see it go red. Size S, test only.\n\n## Related\n\nKS-1972 (In Progress, PR 2104's ticket; left as it is, this ticket refs it). After round 2 only `poll` changed: sites 2 and 3 keep develop's behaviour by Wednesday's ruling, which KS-1972's own comment of 2026-11-08 20:28 records, so what is open there is a behaviour decision about those two sites. This ticket is the other half: no cell would notice if site 3 changed. If a cell for site 3 is added under KS-1972, this ticket is done with it. The gate's other round 2 note, G273-2104-2 (the wording \"silently skipped block\"), is recorded in the PR's notes and has no ticket.\n\n## Searched before filing\n\nBoard, includeArchived, title and description and every comment of each open candidate; controls pass (the positive control hit its known ticket, a random token hit 0). `processTransaction`: 1 candidate, 1 open literal hit (KS-1972). `isRateLimited`: 1 open (KS-1972). `ks1972-event-indexer-poll-survives`: 0. `G273-2104-1`: 0. `site 3`: 2 open (KS-1337, a k6 runner path; KS-1670, m365 reflection sites; neither concerns the indexer). `no cell pins`: 9 open and 20 closed or archived literal hits, each another ticket's own test gap (open: KS-1205, KS-1493, KS-1589, KS-1733, KS-1770, KS-2005, KS-2058, KS-2066, KS-2085), judged by title and search context only. The indexer source file's name together with `processTransaction`: 1 open (KS-1972). Read whole: KS-1972, which holds the original bug and the round 2 narrowing but not a missing cell at site 3.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2146",
+    "title": "Refs KS-2147: two cells pin the rate-limit check at site 3 of the event indexer, processTransaction"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "6145fe6f-a8b6-4706-8600-0c3a37d28a9b",
+    "createdAt": "2026-11-09T12:01:07.700Z",
+    "body": "**BLUF:** PR 2146 (head `20a2e3b32aae`, one commit on develop `f98afb113c2d`) adds the two cells that pin the rate-limit check at site 3 (`processTransaction`) of the event indexer. Test only, +38 -0, product file untouched; it is ready for its gate (tier 2 proposed). Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **N1:** a 429 thrown by `txsUtxos` backs off, does not reach `onError`, block marked processed. **N2:** an unreadable thrown value reaches `onError` once as an `Error`, block left unprocessed. Both pin today's behaviour (green on develop); the behaviour decision on sites 2 and 3 stays with KS 1972.\n- **They can fail:** with scratch edits to the product (not in the PR) N1 and N2 go red for one edit and N2 for another. A third edit, swallowing `handleError` in the else branch, is NOT caught, because an unreadable value never reaches that branch.\n- **Suite:** the file 6 of 6 to 8 of 8; the whole shared suite 1623 to 1625 cells with the same 1 failed before and after (`wallet-signature.test.ts`, not from this change).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

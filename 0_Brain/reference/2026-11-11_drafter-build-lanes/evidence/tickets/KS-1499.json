@@ -1,0 +1,50 @@
+{
+ "identifier": "KS-1499",
+ "title": "KS-1311 test gaps: RLS asserted on documents only, setup guard bypassed by -t/.only, env shape differs from KS-597, no CI job runs the suite (gate notes)",
+ "state": {
+  "name": "In Progress"
+ },
+ "priority": 3,
+ "assignee": null,
+ "updatedAt": "2026-11-04T15:31:24.131Z",
+ "description": "## BLUF\n\nFour gaps from the Sonnet-tier gate on PR #1490 (KS-1311), left out of that PR because a change to the gated head voids the GO. Filed as ONE ticket (P3); one small test-only PR later. No product file is involved.\n\n## Recommendation\n\nOne small test-only PR, test first. Close F1 and F2 in the file itself; settle F5 by reading the KS-597 form too; make a decision on N1 (nothing in `.github` runs the originate integration config, so this suite and its predecessors are a manual instrument).\n\n## Detail (file: `Blockchain/Dev/services/originate/src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts`; gate verdict `0_Brain/reference/2026-10-12_gate-pr1490/verdict.md`, sha256/16 `6be6317b5c2cd58b`, head `90b45bb5c8ad`)\n\n1. **F1 (Minor), the RLS control asserts** `documents` **only.** The header says FORCE RLS is on `documents`, `shares` and `custody_events`, and the rollback cells write `shares` and `custody_events`, but `ALTER TABLE shares DISABLE ROW LEVEL SECURITY` plus the same on `custody_events` leaves all 11 cells green (gate mutant M5). Closing step: assert `relforcerowsecurity` for all three tables, or add an other-tenant INSERT/UPDATE refused on each of `shares` and `custody_events`.\n2. **F2 (Minor), the SETUP guard is an ordinary cell, not a** `beforeAll`**.** A run that excludes it (`-t ROLLBACK`, `it.only`, a single-cell watch run) executes the rollback cells as a superuser and exits 0 (gate run 11: 2 passed, 9 skipped, exit 0). Closing step: also assert the role inside the existing `beforeAll`, or document in the file header that it must be run whole.\n3. **F5 (Note), env-variable shape differs from KS-597.** KS-597's suite also accepts `APP_DB_USER` / `APP_DB_PASSWORD` to compose the app DSN; this suite needs `TEST_APP_DATABASE_URL` outright. Harmless, but someone with the KS-597 env set meets the refusal and has to read its message. Closing step: accept the KS-597 pair as a fallback, or name the difference in the refusal message.\n4. **N1 (Note), no CI job runs the originate integration config.** A grep of `origin/develop` for `jest.integration`, `test:integration` and `TEST_DATABASE_URL` finds nothing under `.github`, so this gate and its predecessors are a manual instrument (as before; GitHub Actions is retired for this repo). Closing step: a decision, not code: either record the manual run command in `docs/DEV-PROCESS.md` \u00a7Manual CI-gate equivalents, or accept and say so.\n\nAlso from the gate (F3, F4): the role probe names only `withTenant`'s connection (a future route opening a different pool would not be probed); the RLS control is positive-controlled and cleans up in `finally`. No action.\n\nRefs KS-1311.",
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1796",
+    "title": "Refs KS-1458: correct the ks1006 comment, repair the userRepo import, lower auth baseline"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1794",
+    "title": "Refs KS-1600: pin admin mint's non-string and null organizationId rules for tenant admins"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1790",
+    "title": "Refs KS-1340: the ks597 integration guard judges the host and port the pg client will dial"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1792",
+    "title": "Refs KS-1499: ks1263 rollback suite asserts RLS on all three tables, refuses a superuser"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "c692b933-b6fd-4128-a8ae-e430fedd1de4",
+    "createdAt": "2026-11-04T15:31:24.143Z",
+    "body": "**BLUF:** F1, F2 and F5 are delivered; N1 is not, so this ticket stays open. PR 1792 merged as 9b38173ffa45 (develop, 2026-11-04T08:31:12Z). No deploy surface: its three files are one test and two documentation fragments, in no image.\n\n- F1, F2, F5: PR 1792 takes the ks1263 rollback suite from 11/11 to 12/12 in both tenancy modes (the author's counts, comment 4b98f78d, refreshed at head f364327e266c in comment d97db963): row-level security asserted on all three tables it writes, the role assertion in each describe's beforeAll, and the refusal text naming the difference from the KS-597 suite.\n- N1 (a decision: record the manual run command in docs/DEV-PROCESS.md under Manual CI-gate equivalents, or accept and say so): not recorded on this ticket. The author's comment 4b98f78d says it stays here. The description marks F3 and F4 \"No action\".\n- Three other pull requests are attached to this ticket, none for its scope: PR 1790 (titled for KS-1340, merged 9bbac428683d), PR 1794 (titled for KS-1600, merged d92b849ece73) and PR 1796 (titled for KS-1458, merged 17c559555f31). The description names no auth file. PR 1796's squash changes Blockchain/Dev/services/auth/src/routes/users.ts, a service source file, so it has a deploy surface; it is not this ticket's change.\n- Files in the squash of PR 1792 (git diff-tree 9b38173ffa45): Blockchain/Dev/services/originate/src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts (modified) and two pages under Projects Documents/fragments/ (added). The squash is an ancestor of develop's tip 035685291b9d. Blockchain/Dev/.dockerignore line 14 is **/__tests__ at origin/develop.\n- Not measured by this note: a re-run of ks1263 on today's develop; each service Dockerfile's own build context.\n"
+   },
+   {
+    "id": "d97db963-fbbc-458f-8d02-89ca6f9146cd",
+    "createdAt": "2026-11-04T07:33:55.908Z",
+    "body": "**BLUF: PR 1792 is refreshed to head `f364327e266c` (full `f364327e266ce321bfeb6e3a52b045904d8d8527`). READY FOR GATE again. Nothing is merged or deployed.**\n\n- Since the 2026-10-28 head `00711fe18f08`: develop `5c1ca287ed74` is merged in (no rebase, forward push). The PR's appended page entries are now fragments by the KS-1887 transition (`docs-fragments.mjs adopt`); entry text unchanged, both pages are develop's. `adopt` names a fragment after the ticket key in the entry's own heading, so the two fragments are `KS-1263-...`, not `KS-1499-...`. Against develop the PR changes 3 files: the ks1263 integration test and the two fragments.\n- Local checks on the merge head, on PostgreSQL 15.19 built the single-database way and published on port 55411 (the suite's KS-1310 block refuses any port outside 55410-55419): ks1263 12/12 with `MULTI_TENANCY_ENABLED=false` and 12/12 with `true` (the author's counts); a test-inclusive `tsc` with the file confirmed in the program gives 0 diagnostics; package lint shows the same 29 warnings as develop; docs-fragments check rc 0 (rc 1 with a planted defect). My first run, on a two-database container with no generated Prisma client, was red; that was my environment, not this PR.\n- Pre-push hook, run with Docker up: \"PREFLIGHT INCOMPLETE \u2014 13/16 legs ran, 3 SKIPPED. Nothing failed.\" (legs 3, 4 and 8: local stack not up). This is not a pass. Push rc 0; origin branch equals `f364327e266c`.\n- Develop has since moved to `307d9b4c762a`; the 4 files it changed are not among this PR's 3."
+   },
+   {
+    "id": "4b98f78d-4b3d-4b2a-aa66-bdece84e64ad",
+    "createdAt": "2026-10-28T12:08:39.161Z",
+    "body": "PR 1792 is up (head 00711fe18f08, test-only, ready for gate): the ks1263 rollback suite now asserts row-level security on all three tables it writes, refuses a superuser from each describe's hook, and names its env difference from KS 597.\n\n- F1, with a correction to this ticket's first step: asserting relforcerowsecurity alone does not catch the gate's M5. Measured on PostgreSQL 15.19: ALTER TABLE ... DISABLE ROW LEVEL SECURITY clears relrowsecurity and leaves relforcerowsecurity true. A variant of the new cell that asserts only the force flag survives M5 and both single-table forms (0 red); the new cell asserts both flags and reds all of them.\n- F2: the same role assertion now also runs in the beforeAll of each of the file's three describes, so -t, it.only or a single-cell run as a superuser refuses instead of exiting 0. 30 predicted-versus-measured comparisons, 0 mismatches; each one-assertion mutant reopens only its own describe.\n- F5: took the smaller step. The refusal text names the difference from the KS 597 suite (this one ignores APP_DB_USER and APP_DB_PASSWORD). With TEST_APP_DATABASE_URL unset, all 12 cells now go red where 4 of 11 did.\n- The file goes from 11/11 to 12/12 in both tenancy modes. The unmodified file survives M5 in both modes (0 red); the new cell reds it. 25 comparisons over seven database states, each restored and snapshot-checked, 0 mismatches.\n- N1 (a manual run command in docs/DEV-PROCESS.md) is a decision, not code, and stays on this ticket.\n- Not run: the four platform suites, a running stack (pre-push legs 3, 4 and 8 skipped; 13 of 16 ran, nothing failed), Node 24 (host is Node 26.8.1). Not covered: by behaviour, that a shares or custody_events policy refuses another tenant's write (only the flags are asserted).\n- Both Projects Documents docs are appended; the section number is provisional, so the PR reads conflicting on those two docs only."
+   }
+  ]
+ }
+}

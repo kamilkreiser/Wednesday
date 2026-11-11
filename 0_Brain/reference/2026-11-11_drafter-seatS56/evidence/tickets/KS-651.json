@@ -1,0 +1,38 @@
+{
+ "identifier": "KS-651",
+ "title": "[Decision] @secuura/shared is imported by 24 services and declared by 2 \u2014 the symlink pattern is invisible to every lockfile and audit gate",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-08-17T01:08:44.879Z",
+ "updatedAt": "2026-11-09T03:33:08.213Z",
+ "description": "## BLUF\n\n**24 services import** `@secuura/shared`**. Only 2 declare it. The other 22 resolve it because a Dockerfile creates a symlink \u2014 which means the dependency is invisible to** `npm ls`**, to** `npm audit`**, to the lockfile gates, and to anyone reading a** `package.json` **to learn what a service depends on.**\n\nSpun out of [KS-647](https://linear.app/secuura/issue/KS-647) so that ticket can close on its actual scope (flipping mcp-server + vc-issuer to `npm ci`, which needs none of this). **This ticket is the design decision underneath it.**\n\n## The measurement \u2014 `develop 2129cdc8b`, 2026-08-17\n\n|  | Count | Detail |\n| -- | -- | -- |\n| Services importing `@secuura/shared` in source | **25** | incl. `services/shared` itself |\n| Service Dockerfiles creating `ln -s /shared node_modules/@secuura/shared` | **24** | the resolution mechanism |\n| Services **declaring** it in `package.json` | **2** | `mcp-server`, `vc-issuer` \u2014 both as `\"*\"` |\n| Services importing it with **no declaration** | **22** | analytics, anchoring, api-gateway, auth, billing, demo-service, governance, guardian, kyc, m365-integration, nft-certificate, originate, prism, queue, referral, security, staking, tenant-provisioning, timestamping, tokenisation, transfer, wallet-connector |\n\nThe root `package.json` declares `workspaces: [\"packages/*\",\"services/*\",\"frontend/*\"]`, so this resolves cleanly at dev time via the workspace hoist. **The Docker build does not use the workspace root** \u2014 each service builds from its own context with its own `package.json` and standalone lockfile \u2014 so the symlink is what makes it work in an image.\n\n## Why this is worth a ticket rather than a shrug\n\nIt works today, and the pattern is deliberate and consistent. The cost is in what it hides:\n\n1. **Audit blindness.** `@secuura/shared` and anything it depends on appear in no service lockfile. The KS-470 audit gate and the KS-531 standalone-lock audit both read manifests and lockfiles \u2014 neither can see this edge. A vulnerability reachable only through `@secuura/shared` would be invisible to both gates.\n2. **No version pinning.** Nothing records which version of the shared package a service was built against. `packages/shared` is at `0.3.0`; no consumer references that, so a breaking change in the shared package is discoverable only by rebuilding and booting each service.\n3. **It is not self-describing.** Reading `services/auth/package.json` does not tell you the service depends on `@secuura/shared`. Twenty-two services are in that position.\n4. **The two exceptions prove it is confusing.** `mcp-server` and `vc-issuer` declared the dependency \u2014 the intuitively correct thing \u2014 and that is precisely why they cannot use `npm ci`, and why they carry `sed -i` lines to undo their own manifests.\n\n## Options (not a recommendation \u2014 this is the decision to take)\n\n**A. Formalise the workspace.** Declare `\"@secuura/shared\": \"workspace:*\"` and build service images from the workspace root rather than per-service contexts. Correct and self-describing; the cost is a change to every service Dockerfile's build context and probably the CI image-build matrix.\n\n**B. Publish** `packages/shared` **to a private registry** (GitHub Packages on the existing org). Every service declares a real version, locks resolve normally, audit tooling sees the tree. The cost is a publish step in CI and a registry credential in every build.\n\n**C. Keep the symlink, make it visible.** Leave the mechanism alone but add `@secuura/shared` to a documented allowlist that the audit tooling explicitly accounts for, so the blind spot is recorded rather than accidental. Cheapest; does not fix pinning.\n\n**D. Do nothing, deliberately.** Defensible while the shared package is small and changes with its consumers. Should then be written down as a decision, because right now it reads as an accident.\n\n## Acceptance\n\nA decision recorded with its reasoning, and \u2014 whichever option \u2014 the audit blind spot either closed or explicitly documented in `scripts/audit/`, so a future reader does not assume the lockfile gates cover this edge when they do not.\n\n## Not urgent\n\nNo known vulnerability rides on this today. Filed so the design question stops being rediscovered every time someone touches a Dockerfile \u2014 it has now surfaced through KS-374, KS-384 and KS-647.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "35e62425-1489-4a72-bad2-0b4457912999",
+    "createdAt": "2026-11-09T03:33:06.825Z",
+    "body": "**BLUF:** Kam ruled the 31-decision card `secuura-backlog-31-decisions-1109` on 2026-11-09 at 13:44:07 (live board), in these words: \"Decision secuura-backlog-31-decisions-1109: a \u2014 All recommendations (A and B)\". Option a reads: \"Every row ruled as recommended; a board seat files and moves the tickets; the KS-607 demo rows still wait for a separate yes.\" This ticket is row B6 of the decision pack, ruled as recommended: option C now, with A as the target: keep the current link to the shared code library but document it and teach the audit about it, which is the cheapest way to close the audit blind spot; later formalise the workspace (A).\n\nThe ticket's counts (22 services use the shared library without listing it) come from 2026-08-17; today's count is not measured. A build seat does the work; nothing was changed in code by this comment.\n\nAlongside this comment the ticket moves from Backlog to Todo.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

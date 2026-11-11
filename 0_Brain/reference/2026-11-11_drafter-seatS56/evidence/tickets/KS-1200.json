@@ -1,0 +1,45 @@
+{
+ "identifier": "KS-1200",
+ "title": "anchor_store's (document_id, network) unique is declared only by migration 031 and anchoring's fresh-DB path; 9 other schema sources omit it (#1016 gate R-1016-5)",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-16T22:01:29.327Z",
+ "updatedAt": "2026-11-09T03:27:31.876Z",
+ "description": "## BLUF\n\n**Pre-existing; reported, NOT reconciled.** Ten places create `anchor_store`. Only migration 031, which replaced 007's `(document_id)` unique, and anchoring's own fresh-database path declare the `(document_id, network)` unique. The other **nine** `CREATE TABLE` sources carry none. Anchoring's `ensureTables` returns early when the table already exists, so on a database built from one of those nine sources the unique exists only if migrations 007/031 ran. Both upserts depend on it: `ON CONFLICT (document_id, network)` in anchoring and in originate. Which source a deployed database is built from was NOT determined.\n\n## Recommendation\n\nNot built. The owner decides **which schema source is authoritative** for `anchor_store`, then reconciles the others to it or retires them. Until then, the one-row-per-`(document_id, network)` assumption holds only where migration 031 ran. The KS-1072 selector's tie reachability rests on that assumption.\n\n## Detail\n\n* **Source:** tier-1 QA gate on PR #1016 (KS-1072), Record R-1016-5 and \u00a712. Report `Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1072-1016-a226d94fe-tier1-r1/report.md`. The gate's evidence class is READ ONLY.\n* **Re-read by Seat A at develop** `7e89318bcedbc9a35757d4298ace54a6a23020bd`**.** Instruments: `git grep -n -i 'CREATE TABLE.*anchor_store'` gave 10 hits; `git grep -n -i 'document_id, *network'` located the unique.\n  * **No unique (9):**\n    * `docker/init/01-schema.sql:188`\n    * `docker/init/03-service-tables.sql:89`\n    * `docker/init/06-consolidate-anchors.sql:26`\n    * `deployment/azure/migrate/init.sql:150`, `:733` and `:2045`\n    * `migrations/001_initial-schema.sql:704`\n    * `migrations/003_consolidate-anchors.sql:16`\n    * `services/api-gateway/src/startup-migrations.ts:316`\n  * **Unique:**\n    * `migrations/031_anchor_store_network_unique.sql:39-40`: `CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_network_uniq ON anchor_store (document_id, network)`.\n    * anchoring `services/anchoring/src/index.ts:209`, the same index. It is reached only when `ensureTables` does not return early.\n  * **The early return:** anchoring `index.ts:172-175` reads `to_regclass('public.anchor_store')` and `to_regclass('public.anchor_batches')`; when both exist it sets `tablesEnsured = true` and returns.\n  * **The upserts:** anchoring `index.ts:1400` and originate `routes/anchors.ts:121`, both `ON CONFLICT (document_id, network)`.\n* **The gateway source also diverges** (gate R-1016-5, compare R-1005-1 recorded on KS-1073): `network TEXT DEFAULT 'preprod'`, with columns `id, document_id, content_hash, tx_hash, block_hash, slot, network, status, metadata, created_at, confirmed_at`.\n* **Also READ by the gate:** originate defaults a row's network to `'preview'`, while anchoring writes `CARDANO_NETWORK || 'preprod'`. One database written by both could therefore hold two rows for one document.\n\n### Dedupe before filing\n\n`searchIssues` (includeArchived, includeComments), literal case-insensitive:\n\n* `(document_id, network)`: 118 fuzzy / 2 literal. KS-281 and KS-705, both archived: the 031 decision and submission idempotency, not the source disagreement.\n* `ensureTables`: 4 / 3. KS-110, KS-419 and KS-92, all archived: runtime DDL roles and boot order.\n* `startup-migrations.ts`: 88 / 36. None is about `anchor_store`. The nearest class is KS-960 (two schema sources disagree on `users.email` uniqueness), a different table.\n* `R-1005-1`: 117 / 1. KS-1073 comments: the gate record, not a ticket.\n* `R-1016-5`: 117 / 1. KS-1072: Seat A's own facts comment, posted minutes before this ticket.\n\nNone covers this. Related: KS-1072, KS-960.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-960"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "6ed93b73-28d5-41f3-834a-100691dbb7a5",
+    "createdAt": "2026-11-09T03:27:30.540Z",
+    "body": "**BLUF:** Kam ruled the 31-decision card `secuura-backlog-31-decisions-1109` on 2026-11-09 at 13:44:07 (live board), in these words: \"Decision secuura-backlog-31-decisions-1109: a \u2014 All recommendations (A and B)\". Option a reads: \"Every row ruled as recommended; a board seat files and moves the tickets; the KS-607 demo rows still wait for a separate yes.\" This ticket is row A1 of the decision pack, ruled as recommended: option 1. What runs is official: a build seat first reads each environment's schema (read-only), then aligns the other schema files to it and adds a check so they cannot drift apart again. That also fixes the demo-user seed that fails 14 of 14 times (KS-1990).\n\nKS-960 and KS-1200 are one question, and the same ruling is recorded on both. The read of each environment's schema also settles this ticket's open point: whether the anchor_store unique rule exists on the deployed databases, which has not been measured. A build seat does the work; nothing was changed in code by this comment.\n\nAlongside this comment the ticket moves from Backlog to Todo.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

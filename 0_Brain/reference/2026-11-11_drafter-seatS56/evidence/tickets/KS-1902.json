@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-1902",
+ "title": "check-akto-container-names.sh: a docker flag that takes a value (-u root, -e FOO=1) before an akto container name still passes the guard",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-31T11:52:00.241Z",
+ "updatedAt": "2026-11-09T03:25:00.857Z",
+ "description": "**BLUF:** `Blockchain/Dev/scripts/check-akto-container-names.sh` still passes a `docker exec` / `docker logs` line whose flag takes a separate value (`-u root`, `-e FOO=1`) before an `akto-` container name, although the line targets slot 1. Pull request 1851 (KS-1866) corrects the flags that carry no separate value; this is the remainder.\n\n* **Cause** (read at the pull request 1851 head `1c73d6ea5d39`): the pattern at `check-akto-container-names.sh:82` is `docker (exec|logs|...)( -[^ ]+)* akto-<name>`. Each `( -[^ ]+)` repeat is one dash-token, so a value token such as `root` or `FOO=1` breaks the chain between the verb and the name.\n* **Measured here** with the real script and a private fixture tree per case (the method of the pull request's own suite; `bash check-akto-container-names.sh <dir>`): `docker exec -it akto-mongo mongosh` rc 1 (flagged, the control); a line with no akto name rc 0 (control); `docker exec -u root akto-mongo mongosh` rc 0; `docker exec -e FOO=1 akto-mongo mongosh` rc 0; `docker exec -it -u root akto-mongo mongosh` rc 0. A pass with rc 0 means the line is NOT reported.\n* **Same class** as `docker logs --tail 5 akto-testing`, which KS-1866 names as not fixed; `-u` and `-e` are the commonly used members.\n* **Searched the board** for `check-akto-container-names`, `docker exec -u`, `akto-mongo`: the hits were KS-1866 (the pull request's own ticket), KS-1609, KS-696, KS-1080, KS-1098; none covers flag values.\n* **Not measured:** GNU/Linux behaviour of the script (macOS BSD grep was used); the real tree (only the fixtures above). Fix shape not chosen here (for example consume a value token after known value-taking flags, or match the container name anywhere on a `docker` line).\n* **Discovered:** 2026-10-31, Seat R 68th, during merge prep of pull request 1851 (gate 50 finding F-851-1); filed on Wednesday's word.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2123",
+    "title": "Refs KS-1902: the akto container-name guard now flags a docker flag that takes a separate value before the name"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "e96bc82f-b94c-4348-a860-f5376be217d4",
+    "createdAt": "2026-11-09T03:25:01.040Z",
+    "body": "**BLUF:** PR 2123 (head `3e8265bae0a1189e82b5e4826a206ace98e14727`, one commit on develop `4d6b7bb17fd3be7b3fde8a3babc5d59c91c959b8`) makes the Akto container-name guard flag a docker flag that takes a separate value before the container name (`-u root`, `-e FOO=1`, `--tail 5`), which it let through before, and adds six cells to its existing flags suite. It changes one tooling script by two lines (a comment and one pattern line); no service or frontend changes. It waits for its QA gate (tier 2, batched with other raise PRs). Nothing is merged or deployed, and this comment changes no state; the pull request says Refs, so it leaves this ticket open.\n\n- **The change** (2 files, +21 -0): `check-akto-container-names.sh` +2 and `check_akto_container_names_flags.test.sh` +19.\n- **Proof, measured by Seat T 21st on develop `4d6b7bb17fd3`:** the flags suite goes from 6 to 12 cells, 0 failed; with only the script change reversed it shows the 4 expected FAIL lines; the reference suite stays at 17 of 17 with identical output; the guard run over the real akto tree reads rc 0 with identical output before and after; two single-cause mutants of the new line turn 4 cells and 1 cell red.\n- **Not covered:** the new pattern also flags `docker exec -it other-container akto-x` (old script rc 0, new script rc 1) and no cell pins that; GNU grep was not run (macOS BSD grep only).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

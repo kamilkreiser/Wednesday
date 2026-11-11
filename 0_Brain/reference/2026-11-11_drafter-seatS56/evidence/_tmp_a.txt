@@ -1,0 +1,606 @@
+lines in file 605
+1 /**
+2  * =============================================================================
+3  * ANCHOR STATE SYNC (KS-535)
+4  * =============================================================================
+5  * Keeps a document's `blockchain` block truthful against the anchoring
+6  * service's `anchor_store` — the authoritative record of what actually
+7  * happened on chain.
+8  *
+9  * KS-520 closed the SYNCHRONOUS half of anchor honesty (the anchoring POST
+10  * itself failing → `blockchain.status: 'anchor_failed'`). This module closes
+11  * the ASYNCHRONOUS half: the POST was accepted (202) but the Cardano
+12  * submission later failed terminally. Before KS-535, that failure never
+13  * propagated — `pollAnchorUntilConfirmed` only wrote when it observed a
+14  * txHash, so the document kept `status: 'anchored'` forever (reproduced live
+15  * on demo: 2 of the 10 most recent anchors).
+16  *
+17  * Three pieces:
+18  *
+19  *  - `pollAnchorUntilConfirmed` — the confirmation poller (extracted from the
+20  *    create-route closure so the manual retry route POST /:id/anchor can use
+21  *    it too — that path previously never polled at all, so a retried anchor
+22  *    could neither gain its txHash nor report a failure). On a terminal
+23  *    `failed` anchor it now writes the KS-520 fail-closed shape.
+24  *
+25  *  - `markDocumentAnchorFailed` — the failure writer. Reverts the accept-time
+26  *    optimistic `status: 'anchored'` to the honest pre-anchor status and
+27  *    records the KS-520 `anchor_failed` blockchain block.
+28  *
+29  *  - `reconcileDocumentAnchorState` — read-time self-healing for documents
+30  *    whose poller died (service restart, or the failure landed after the
+31  *    poller's window — anchoring's retry/backoff chain can outlive it). Runs
+32  *    on GET /api/documents/:id for stale in-flight anchors, in BOTH
+33  *    directions: a terminally-failed anchor heals the doc to `anchor_failed`,
+34  *    and a confirmed anchor heals a stale `pending`/mis-marked
+35  *    `anchor_failed` doc to the truth.
+36  *
+37  * Anchoring-side invariant this relies on (changed together in KS-535):
+38  * `anchor_store.status = 'failed'` is TERMINAL. During a scheduled retry the
+39  * row is reset to 'pending' BEFORE the backoff timer starts, so an observed
+40  * 'failed' means no retry is coming. The poller still double-checks
+41  * (two consecutive observations) to be safe against the write-gap race.
+42  * =============================================================================
+43  */
+44 
+45 import { getDocument, writeAnchorBlobIf, DocumentRecord } from '../repositories/documentRepo';
+46 import { logger } from '../utils/logger';
+47 import { simulatedFieldsFromAnchor } from './anchorHonesty';
+48 import { toBlockHeight } from '../utils/blockHeight';
+49 import { authoritativeTxHash, type AnchorReadState } from './anchorRead';
+50 import { resolveAnchorState, createAttemptsOf, type AnchorRowRead, type OwnCreateAnswer } from './anchorResolution';
+51 import { askOwnCreate } from './ownCreateClient';
+52 
+53 export function anchoringBaseUrl(): string {
+54   return process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+55 }
+56 
+57 // KS-1384 R2b: AnchorReadState and authoritativeTxHash live in ./anchorRead (moved verbatim); re-exported here for existing importers.
+58 export { authoritativeTxHash, type AnchorReadState } from './anchorRead';
+59 
+60 /**
+61  * Read one anchor from the anchoring service. Returns null on any failure —
+62  * callers must treat "couldn't read" as "no new information", never as a
+63  * state change.
+64  */
+65 /**
+66  * KS-1074: the blob keys a REBUILD must carry forward, or they are destroyed.
+67  *
+68  * `updateDocument` replaces the `blockchain` column wholesale (`documentRepo.ts` builds
+69  * `{ ...doc, ...updates }`, a TOP-LEVEL spread), so every writer that hands it a fresh object
+70  * destroys every key it does not restate. KS-1058 fixed one writer — the failure path — and four
+71  * more rebuild the blob with no `threadToken`, two of them on the SUCCESS path. A document that
+72  * mints a token at create and then anchors NORMALLY lost the cache dashboards read.
+73  *
+74  * Carried EXPLICITLY rather than by spreading `prior`: a blanket spread would also carry
+75  * `anchoredAt`, which the blob's own contract says is "Absent in the KS-520 fail-closed state —
+76  * nothing was anchored". That reasoning is KS-1058's and is preserved here.
+77  *
+78  * `!= null`, NOT truthiness (the MINOR-2 item on this ticket): `threadToken` is typed `unknown`, so
+79  * an empty string or 0 would be silently discarded by the very write that exists to stop a value
+80  * being lost. Theoretical for a real hex token, and exactly what a rewrite reintroduces.
+81  *
+82  * `simulatedTxRef` is deliberately NOT carried — the decision this ticket asks for, per writer. The
+83  * two simulated writers already spread `...simFields`, reconstructed from the anchor being read, so
+84  * nothing is inherited; and carrying a simulated marker onto a write that has just recorded a REAL
+85  * confirmed txHash would assert something false.
+86  */
+87 function carriedForward(prior: Record<string, unknown> | null | undefined): Record<string, unknown> {
+88   return {
+89     ...(prior?.threadToken != null ? { threadToken: prior.threadToken } : {}),
+90     // KS-1384 R2b (D6): the create attempts are what the resolver binds a row to the create by (anchorResolution.ts
+91     // isBoundToCreate) and what own-create scans for. Every rebuild writer, the fail-closed one included, must keep them, or
+92     // the first anchor_failed write would leave the document unbindable for good (no anchoredAt in that state, by KS-1004's
+93     // contract, and no attempts).
+94     ...(Array.isArray(prior?.createAttempts) ? { createAttempts: prior.createAttempts } : {}),
+95   };
+96 }
+97 
+98 // =============================================================================
+99 // KS-1384 R2b part 3 (Wednesday's GO on D1-D3, 2026-10-31 13:20:11Z): the three readers below become CALLERS of the one
+100 // resolver (anchorResolution.ts) and write through the conditional blob write (documentRepo writeAnchorBlobIf), where
+101 // `confirmed` is terminal in SQL. Before R2b each decided by its own rule and wrote through updateDocument, which tests no
+102 // blob state: the poller wrote on every poll, markDocumentAnchorFailed relied on a JavaScript `confirmed` check, and the GET
+103 // reconcile failed a document on one `failed` observation of its row, without asking whether its create was on chain.
+104 // =============================================================================
+105 
+106 /** The ids an anchor row of THIS document may carry: its external id, and its documentUuid (the primary key when S sent none). */
+107 export function documentIdsOf(doc: DocumentRecord): string[] {
+108   return [doc.id, doc.documentUuid].filter((x): x is string => typeof x === 'string' && x.length > 0);
+109 }
+110 
+111 /**
+112  * The create attempts own-create binds to (D4, D6): the blob's createAttempts when it records them; for a legacy blob that
+113  * records none, its anchoredAt and the instants within +-2 ms of it (the resolver's legacy binding rule, anchorResolution.ts
+114  * isBoundToCreate); none when it has neither, in which case own-create is not asked (askOwnCreate answers not-answered).
+115  */
+116 export function ownCreateTimestampsOf(blob: Record<string, unknown> | null | undefined): string[] {
+117   const attempts = createAttemptsOf(blob);
+118   if (Array.isArray(blob?.createAttempts)) return attempts.map((ms) => new Date(ms).toISOString());
+119   const at = typeof blob?.anchoredAt === 'string' ? Date.parse(blob.anchoredAt) : NaN;
+120   if (!Number.isFinite(at)) return [];
+121   return [-2, -1, 0, 1, 2].map((d) => new Date(at + d).toISOString());
+122 }
+123 
+124 /** The lazy own-create question for this document, asked ONLY when the resolver's table needs it. */
+125 function ownCreateFor(doc: DocumentRecord, authHeader: string): () => Promise<OwnCreateAnswer> {
+126   return () => askOwnCreate(fetch, anchoringBaseUrl(), authHeader, {
+127     documentId: doc.id,
+128     contentHash: String(doc.contentHash || '').replace(/^sha256:/i, '').toLowerCase(),
+129     timestamps: ownCreateTimestampsOf(doc.blockchain as Record<string, unknown> | undefined),
+130   });
+131 }
+132 
+133 /** The blob a resolver `confirmed` decision writes (and the verify heals present): the same shape for every reader. */
+134 function confirmedBlobOf(
+135   prior: Record<string, unknown> | null | undefined,
+136   row: AnchorRowRead,
+137   decision: { tx: string; blockNumber: number | null },
+138   anchorId: string,
+139 ): Record<string, unknown> {
+140   return {
+141     ...carriedForward(prior),
+142     txHash: decision.tx,
+143     // KS-1509 / KS-1333: an unknown height stays null, never a fabricated 0.
+144     blockHeight: toBlockHeight(decision.blockNumber ?? row.blockNumber),
+145     anchoredAt: row.anchoredAt || row.createdAt || new Date().toISOString(),
+146     network: row.network,
+147     status: 'confirmed',
+148     anchorId,
+149   };
+150 }
+151 
+152 /** Write a resolver `confirmed` decision through D2. Returns the matched row count (0: the blob was already confirmed). */
+153 async function writeConfirmed(
+154   documentId: string,
+155   tenantId: string,
+156   prior: Record<string, unknown> | undefined,
+157   row: AnchorRowRead,
+158   decision: { tx: string; blockNumber: number | null },
+159   anchorId: string,
+160 ): Promise<number> {
+161   return writeAnchorBlobIf(documentId, tenantId, 'confirmed', confirmedBlobOf(prior, row, decision, anchorId), { rowStatus: 'anchored' });
+162 }
+163 
+164 export async function fetchAnchorState(
+165   anchorId: string,
+166   authHeader: string,
+167   timeoutMs = 3_000,
+168 ): Promise<AnchorReadState | null> {
+169   try {
+170     const controller = new AbortController();
+171     const timer = setTimeout(() => controller.abort(), timeoutMs);
+172     try {
+173       const resp = await fetch(`${anchoringBaseUrl()}/api/anchors/${encodeURIComponent(anchorId)}`, {
+174         headers: authHeader ? { Authorization: authHeader } : {},
+175         signal: controller.signal,
+176       });
+177       if (!resp.ok) return null;
+178       const payload: any = await resp.json();
+179       return (payload.data || payload) as AnchorReadState;
+180     } finally {
+181       clearTimeout(timer);
+182     }
+183   } catch {
+184     return null;
+185   }
+186 }
+187 
+188 /**
+189  * Record a terminal on-chain anchor failure on the document (the KS-520
+190  * fail-closed shape), reverting the accept-time optimistic `status:
+191  * 'anchored'` to the honest pre-anchor status.
+192  *
+193  * Revert target: `signed` when signatures exist, else `draft`. (A
+194  * `pending_signature` creation status cannot be reconstructed — the
+195  * accept-time write already destroyed it — but both revert targets are
+196  * honest "not anchored" states and the signing flow keys off signing
+197  * requests, not this field.)
+198  *
+199  * No-ops when the anchor is already `confirmed` — never downgrade a recorded
+200  * success on a late/raced failure signal. `preserveTerminalStatuses` keeps
+201  * revoked/deleted authoritative.
+202  *
+203  * KS-1004: this used to no-op on `txHash` TOO, which made the failure writer
+204  * unreachable for the population most likely to need it — a transaction that
+205  * reached the chain and then failed. The guard's stated intent was right
+206  * ("never downgrade recorded chain facts"), but it was enforced by refusing to
+207  * WRITE rather than by not DESTROYING: the write nulled `txHash` and zeroed
+208  * `blockHeight`, so admitting a hashed document would have erased the very
+209  * facts the guard protected.
+210  *
+211  * So the write is now non-destructive — an existing `txHash`, `blockHeight`,
+212  * `network` and `anchoredAt` are carried forward — and the guard narrows to
+213  * `confirmed` alone. A failed transaction KEEPS its hash: it is real, it is on
+214  * chain, and it is the forensic trail for why the anchor failed. Only the
+215  * status becomes honest.
+216  *
+217  * KS-1058: the write REPLACES the blockchain blob (updateDocument spreads
+218  * shallowly), so anything not restated here is destroyed. `threadToken` is
+219  * carried forward; `confidence` deliberately is NOT — see the call site.
+220  */
+221 export async function markDocumentAnchorFailed(
+222   documentId: string,
+223   tenantId: string,
+224   anchorId: string | undefined,
+225   errorMessage?: string | null,
+226 ): Promise<void> {
+227   const doc = await getDocument(documentId, tenantId);
+228   if (!doc) return;
+229   if (doc.blockchain?.status === 'confirmed') return;
+230   const prior = doc.blockchain as (typeof doc.blockchain & { threadToken?: unknown }) | undefined;
+231   const revertStatus: DocumentRecord['status'] = doc.signatures?.length ? 'signed' : 'draft';
+232   // KS-1384 R2b part 3 (D2): through the conditional blob write, not updateDocument. The SQL refuses a `confirmed` blob (the
+233   // JavaScript check above is only the fast path), and with an anchorId it writes only while the blob still names THAT anchor,
+234   // so a late failure signal for an older attempt cannot fail a blob a newer one owns. The row status is reverted under the
+235   // preserveTerminalStatuses CASE inside the write (a revoked or deleted row keeps its status), as before.
+236   const written = await writeAnchorBlobIf(documentId, tenantId, 'anchor_failed', {
+237     status: 'anchor_failed',
+238     // KS-1004: carry the chain facts forward rather than nulling them. A tx
+239     // that failed on chain still has a hash worth keeping; `?? null` keeps the
+240     // no-hash case's null. KS-1509: an unknown height stays null as well (the
+241     // KS-1333 direction), never a fabricated 0; a real prior height is kept.
+242     txHash: prior?.txHash ?? null,
+243     blockHeight: prior?.blockHeight ?? null,
+244     ...(prior?.network ? { network: prior.network } : {}),
+245     // KS-1004: an anchor time is retained only for a transaction that was
+246     // built and then failed — a no-hash fail-closed blob has none, which is
+247     // the blob type's own contract (`documentRepo.ts:60-61`).
+248     // KS-1158 R1: "has a hash" means an AUTHORITATIVE hash. A dev-mode
+249     // placeholder (`tx_sim_…`, `mock_tx_…`) is not a transaction
+250     // (`authoritativeTxHash`, KS-522), so it must not keep a time that
+251     // implies one was anchored.
+252     ...(authoritativeTxHash({ txHash: prior?.txHash }) && prior?.anchoredAt ? { anchoredAt: prior.anchoredAt } : {}),
+253     ...(anchorId ? { anchorId } : {}),
+254     // KS-1058: `updateDocument` shallow-spreads (`{...doc, ...updates}`),
+255     // so this object REPLACES the blockchain blob wholesale and every key
+256     // it does not restate is destroyed. `threadToken` is the one key that
+257     // matters: it is written at `routes/documents.ts:739` as a cache over
+258     // `state_thread_registry`, it is unrelated to whether the anchor
+259     // succeeded, and a mint that already happened is not undone by a failed
+260     // anchor. Carried explicitly rather than by spreading `prior`, because
+261     // a blanket spread would also carry `anchoredAt`, which the blob's own
+262     // contract (`documentRepo.ts:60-61`) says is "Absent in the KS-520
+263     // fail-closed state — nothing was anchored".
+264     ...carriedForward(prior as Record<string, unknown> | undefined),
+265     error: errorMessage || 'anchor failed on chain',
+266     failedAt: new Date().toISOString(),
+267   }, { rowStatus: revertStatus, ...(anchorId ? { expectAnchorId: anchorId } : {}) });
+268   if (written !== 1) {
+269     logger.warn('Document anchor failure NOT recorded: the blob was confirmed, already failed, or names another anchor (KS-1384 R2b)', { documentId, anchorId, written });
+270     return;
+271   }
+272   logger.warn('Document anchor failed on chain — fail-closed state recorded (KS-535)', {
+273     documentId,
+274     anchorId,
+275     error: errorMessage || undefined,
+276   });
+277 }
+278 
+279 export interface PollAnchorOptions {
+280   anchorId: string;
+281   documentId: string;
+282   tenantId: string;
+283   authHeader: string;
+284   /** Test seams — production callers use the defaults. */
+285   maxAttempts?: number;
+286   intervalMs?: number;
+287 }
+288 
+289 /**
+290  * Poll the anchor resource until it is confirmed on-chain (writing the real
+291  * txHash + blockHeight onto the document) OR terminally failed (writing the
+292  * KS-520 fail-closed shape — the KS-535 fix; previously a failed anchor
+293  * produced no write at all and the document claimed `anchored` forever).
+294  */
+295 export async function pollAnchorUntilConfirmed(opts: PollAnchorOptions): Promise<void> {
+296   const { anchorId, documentId, tenantId, authHeader } = opts;
+297   const maxAttempts = opts.maxAttempts ?? 60;
+298   const intervalMs = opts.intervalMs ?? 10_000;
+299   // KS-535: anchoring resets a retrying row to 'pending' BEFORE its backoff
+300   // timer starts, so 'failed' is terminal — but the two status writes are not
+301   // atomic, so require two consecutive observations before concluding.
+302   let consecutiveFailed = 0;
+303   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+304     await new Promise((r) => setTimeout(r, intervalMs));
+305     try {
+306       const anchor = await fetchAnchorState(anchorId, authHeader, Math.min(intervalMs, 5_000)) as AnchorRowRead | null;
+307       if (!anchor) continue;
+308       const txHash = authoritativeTxHash(anchor);
+309       const confirmed = anchor.verified === true || anchor.status === 'confirmed';
+310       // KS-1384 R2b part 3 (D1, D3): a confirmed row, or a failed one seen twice, is DECIDED by the one resolver, and its
+311       // decision is written through D2. Before R2b the poller wrote `confirmed` from any row that carried a tx, whatever
+312       // document or attempt the row's payload was (an event's payload, a reset row's new hash), and failed the document on two
+313       // `failed` reads without asking whether its create had landed (kintsugi's document, 2026-10-31).
+314       if ((confirmed && txHash) || anchor.status === 'failed') {
+315         if (anchor.status === 'failed') {
+316           consecutiveFailed += 1;
+317           if (consecutiveFailed < 2) continue;
+318         }
+319         const doc = await getDocument(documentId, tenantId);
+320         if (!doc) return;
+321         const prior = doc.blockchain as unknown as Record<string, unknown> | undefined;
+322         const d = await resolveAnchorState({
+323           blob: prior,
+324           documentIds: documentIdsOf(doc),
+325           row: anchor,
+326           inFlightStale: false, // the poller is the live holder of this attempt: an in-flight row is never stale to it
+327           ownCreate: ownCreateFor(doc, authHeader),
+328         });
+329         if (d.write === 'confirmed') {
+330           const written = await writeConfirmed(documentId, tenantId, prior, anchor, d, anchorId);
+331           logger.info('Document anchor confirmed on chain', { documentId, txHash: d.tx, via: d.via, written, blockHeight: anchor.blockNumber });
+332           return;
+333         }
+334         if (d.write === 'anchor_failed') {
+335           await markDocumentAnchorFailed(documentId, tenantId, anchorId, anchor.errorMessage ?? d.reason);
+336           return;
+337         }
+338         // none: the blob is confirmed already, the row is another document's, or own-create could not answer. Only the
+339         // last can change on a later poll (own-create caches a not-answered for 60 s, so this is not a scan per poll).
+340         logger.info('Anchor poll: the resolver wrote nothing (KS-1384 R2b)', { documentId, anchorId, reason: d.reason });
+341         if (prior?.status === 'confirmed') return;
+342         continue;
+343       }
+344       if (txHash) {
+345         // KS-1074: the prior blob is read HERE, per write, not once before the loop. The
+346         // thread-token mint is fire-and-forget at document create and can land mid-poll, so a
+347         // blob read earlier would not carry a token that exists by the time this writes.
+348         const priorBlob = (await getDocument(documentId, tenantId))?.blockchain as Record<string, unknown> | undefined;
+349         // KS-521: preserveTerminalStatuses — this poll can land minutes after
+350         // creation and must not stomp a `revoked` set by the owner in between (the CASE inside the write keeps it).
+351         // KS-1384 R2b part 3 (D2 `progress`): the row is in flight WITH a tx (a confirmed row went to the resolver above). The
+352         // write lands only while the blob is neither confirmed nor failed AND still names THIS anchor, so a slow poll can no
+353         // longer write a submitted state over a confirmed blob, or over a newer attempt's.
+354         await writeAnchorBlobIf(documentId, tenantId, 'progress', {
+355           ...carriedForward(priorBlob),
+356           txHash,
+357           blockHeight: toBlockHeight(anchor.blockNumber),
+358           anchoredAt: anchor.anchoredAt || anchor.createdAt || new Date().toISOString(),
+359           network: anchor.network,
+360           status: anchor.status || 'submitted',
+361           anchorId,
+362         }, { expectAnchorId: anchorId, rowStatus: 'anchored' });
+363         consecutiveFailed = 0;
+364         continue;
+365       }
+366 
+367       // KS-587 (document-blob leg): a SIMULATED anchor never yields an
+368       // authoritative txHash, so before this branch the poller wrote nothing
+369       // for it at all — the document blob stayed `pending` with no `simulated`
+370       // key, a caller reading only the document could not tell the anchor is
+371       // not on chain (KS-589 D1), and `presentBlockchainHonestly` had neither
+372       // of its inputs (KS-589 D4). Write the honest declaration instead:
+373       // txHash stays null, the placeholder rides in `simulatedTxRef`.
+374       const simFields = simulatedFieldsFromAnchor(anchor);
+375       if (simFields.simulated) {
+376         const priorSimBlob = (await getDocument(documentId, tenantId))?.blockchain as Record<string, unknown> | undefined;
+377         // KS-1384 R2b part 3 (D2): the declared-simulated blob goes through the conditional write too: `confirmed` never over
+378         // a confirmed blob; an in-flight declaration only while the blob still names this anchor.
+379         await writeAnchorBlobIf(documentId, tenantId, confirmed ? 'confirmed' : 'progress', {
+380           ...carriedForward(priorSimBlob),
+381           txHash: null,
+382           blockHeight: toBlockHeight(anchor.blockNumber),
+383           anchoredAt: anchor.anchoredAt || anchor.createdAt || new Date().toISOString(),
+384           network: anchor.network,
+385           status: confirmed ? 'confirmed' : (anchor.status || 'submitted'),
+386           anchorId,
+387           ...simFields,
+388         }, { rowStatus: 'anchored', ...(confirmed ? {} : { expectAnchorId: anchorId }) });
+389         if (confirmed) {
+390           logger.info('Document anchor settled as SIMULATED — declared on the document blob (KS-587)', { documentId, anchorId });
+391           return;
+392         }
+393         consecutiveFailed = 0;
+394         continue;
+395       }
+396       consecutiveFailed = 0;
+397     } catch (pollErr: any) {
+398       logger.warn('Anchor poll failed', { documentId, attempt, error: pollErr?.message });
+399     }
+400   }
+401   logger.warn('Anchor poll exhausted without confirmation', { documentId, anchorId });
+402 }
+403 
+404 /**
+405  * How long an in-flight anchor claim may sit untouched before a read
+406  * re-checks it against anchor_store. Longer than the poller's 10-minute
+407  * window, so the reconcile only fires where the poller is provably gone.
+408  */
+409 const RECONCILE_STALE_MS = parseInt(process.env.ANCHOR_RECONCILE_STALE_MS || `${15 * 60 * 1000}`, 10);
+410 
+411 /**
+412  * Read-time self-healing (KS-535): when serving a document whose anchor
+413  * outcome is stale/unresolved, re-check anchor_store and persist the truth.
+414  * Covers the poller-lifetime gap — a restart loses the in-process poller, and
+415  * anchoring's retry chain can land a terminal failure after the poller's
+416  * window — in both directions:
+417  *
+418  *  - stale in-flight (`pending`/`submitted`, no txHash) + anchor `failed`
+419  *    → heal to `anchor_failed` (this is the state the two stuck demo
+420  *    documents are in);
+421  *  - stale in-flight + anchor confirmed → heal forward to `confirmed`;
+422  *  - `anchor_failed` + anchor confirmed with a real txHash → heal forward
+423  *    (covers a mis-marked failure whose retry later succeeded).
+424  *
+425  * Returns the refreshed document, or the original when there is nothing to
+426  * do or the anchoring read fails (no new information ≠ a state change).
+427  */
+428 export async function reconcileDocumentAnchorState(
+429   document: DocumentRecord,
+430   tenantId: string,
+431   authHeader: string,
+432 ): Promise<DocumentRecord> {
+433   const bc = document.blockchain;
+434   if (!bc?.anchorId) return document;
+435   if (bc.simulated) return document;
+436   // KS-1004: "in flight" means NOT YET TERMINAL — it must not also require the
+437   // absence of a txHash. The poller writes the hash together with the
+438   // optimistic `status: 'anchored'` as soon as the node reports one, well
+439   // before confirmation, so keying off the hash excluded every `submitted`
+440   // document from the failure branch below: exactly the rows whose anchors are
+441   // most likely to end `failed`. `confirmed` and `anchor_failed` are the two
+442   // terminal states, and they are the whole condition.
+443   const inFlight = bc.status !== 'anchor_failed' && bc.status !== 'confirmed';
+444   const failed = bc.status === 'anchor_failed';
+445   if (!inFlight && !failed) return document;
+446 
+447   const updatedAtMs = Date.parse(document.updatedAt || '');
+448   if (Number.isFinite(updatedAtMs) && Date.now() - updatedAtMs < RECONCILE_STALE_MS) return document;
+449 
+450   const anchor = await fetchAnchorState(bc.anchorId, authHeader) as AnchorRowRead | null;
+451   if (!anchor) return document;
+452 
+453   const confirmed = anchor.verified === true || anchor.status === 'confirmed';
+454   const simFields = simulatedFieldsFromAnchor(anchor);
+455 
+456   // KS-1384 R2b part 3 (D1, D3): a real (not simulated) row is DECIDED by the one resolver, with an in-flight row counted as
+457   // STALE (this read runs only after RECONCILE_STALE_MS of silence). Before R2b this reconcile healed to `confirmed` from any
+458   // confirmed row with a tx (an event's payload included), and failed the document on ONE `failed` read without asking
+459   // whether its create was on chain: so whether kintsugi's document ended confirmed or failed depended on which reader ran
+460   // first. Now: a confirmed row bound to the create confirms; otherwise own-create decides (found confirms, none fails,
+461   // not answered changes nothing), and every write goes through D2. A SIMULATED row runs through the resolver too: a failed
+462   // one still takes the fail-closed path (as it did before R2b, ahead of the KS-587 leg), and one the table cannot decide (a
+463   // simulated confirmation has no authoritative tx) falls through to the KS-587 declaration below.
+464   const prior = bc as unknown as Record<string, unknown>;
+465   const d = await resolveAnchorState({
+466     blob: prior,
+467     documentIds: documentIdsOf(document),
+468     row: anchor,
+469     inFlightStale: true,
+470     ownCreate: ownCreateFor(document, authHeader),
+471   });
+472   if (d.write === 'confirmed') {
+473     const written = await writeConfirmed(document.id, tenantId, prior, anchor, d, bc.anchorId);
+474     logger.info('Stale anchor state healed to confirmed on read (KS-535, KS-1384 R2b)', { documentId: document.id, anchorId: bc.anchorId, txHash: d.tx, via: d.via, written });
+475     const refreshed = await getDocument(document.id, tenantId);
+476     return refreshed || document;
+477   }
+478   if (d.write === 'anchor_failed' && inFlight) {
+479     await markDocumentAnchorFailed(document.id, tenantId, bc.anchorId, anchor.errorMessage ?? d.reason);
+480     const refreshed = await getDocument(document.id, tenantId);
+481     return refreshed || document;
+482   }
+483 
+484   // KS-587 (document-blob leg): heal a stale in-flight blob whose anchor is
+485   // SIMULATED — the poller historically wrote nothing for those (no
+486   // authoritative txHash), so pre-fix documents sit `pending` forever with no
+487   // `simulated` key. Once healed, the `bc.simulated` early-return above stops
+488   // this document from re-reconciling on every read.
+489   //
+490   // KS-1004: `!bc.txHash` is stated explicitly here now. It used to be implied
+491   // by `inFlight`, and widening that condition would otherwise have exposed
+492   // this branch — which writes `txHash: null` — to documents carrying a real
+493   // hash. This leg is for blobs with NO authoritative txHash, exactly as the
+494   // comment above says, so the guard belongs in the condition rather than
+495   // inherited from one that no longer carries it. Behaviour is byte-identical
+496   // to before KS-1004 for every document this branch was ever meant to reach.
+497   if (inFlight && !bc.txHash && simFields.simulated) {
+498     // KS-1384 R2b part 3 (D2): written through the conditional blob write (never over a confirmed blob; an in-flight
+499     // declaration only while the blob still names this anchor), then re-read, since the write returns a row count.
+500     await writeAnchorBlobIf(document.id, tenantId, confirmed ? 'confirmed' : 'progress', {
+501       ...carriedForward(bc as unknown as Record<string, unknown>),
+502       txHash: null,
+503       blockHeight: toBlockHeight(anchor.blockNumber),
+504       anchoredAt: anchor.anchoredAt || anchor.createdAt || new Date().toISOString(),
+505       network: anchor.network,
+506       status: confirmed ? 'confirmed' : (anchor.status || 'submitted'),
+507       anchorId: bc.anchorId,
+508       ...simFields,
+509     }, { rowStatus: 'anchored', ...(confirmed ? {} : { expectAnchorId: bc.anchorId }) });
+510     logger.info('Stale anchor state healed to declared-simulated on read (KS-587)', { documentId: document.id, anchorId: bc.anchorId });
+511     const refreshed = await getDocument(document.id, tenantId);
+512     return refreshed || document;
+513   }
+514 
+515   return document;
+516 }
+517 
+518 // =============================================================================
+519 // KS-1384 R2b part 5 (D3; Wednesday's GO on R2b, 2026-10-31 13:20:11Z): the verify heals' ONE shared path.
+520 // =============================================================================
+521 
+522 /** A real Cardano transaction hash (verification.ts REAL_TXHASH_RE; not imported, to keep this service free of route modules). */
+523 const REAL_TX_RE = /^[0-9a-f]{64}$/i;
+524 
+525 /** What a verify heal knows about the row it is presenting. */
+526 export interface VerifyHealInput {
+527   /** The document's external id (what anchoring's rows carry as documentId when S sent one). */
+528   documentId: string;
+529   /** The primary key, which anchoring's rows carry when S sent no documentUuid. */
+530   documentPk?: string | null;
+531   /** The row's tenant; null or a cross-tenant row means present only, never write. */
+532   tenantId: string | null;
+533   blob: Record<string, unknown> | null;
+534   contentHash: string;
+535   updatedAt?: string | Date | null;
+536   /** The caller's bearer. Anchoring's anchor read and own-create are behind its JWT gate, so no bearer means no heal. */
+537   authHeader: string;
+538   /** False for a row from another tenant's pool: the default client here would write the wrong database. */
+539   write: boolean;
+540 }
+541 
+542 /**
+543  * The verify heals (v1 verification.ts, v2 verificationV2.ts) as CALLERS of the one resolver. Before R2b both healed a stale
+544  * in-flight blob to `confirmed` from verify-by-hash's chain answer when it was the same transaction OR the chain index named
+545  * this document (sameDoc), and wrote it through updateDocument. A confirmed transaction for this document's id is not
+546  * necessarily its CREATE (a share or lifecycle event carries the documentId too), so a verify could confirm a document with
+547  * another transaction's hash, and which reader ran first decided what the document said (kintsugi, 31 Oct).
+548  *
+549  * Now the heal reads the blob's OWN anchor row (its anchorId) and the resolver decides, exactly as the GET reconcile does: a
+550  * confirmed row bound to the create confirms; otherwise own-create decides. Only a `confirmed` decision is presented and
+551  * written, through D2 (`confirmed` is terminal in SQL). A verify never FAILS a document: an `anchor_failed` decision changes
+552  * nothing here (the reconcile and the poller write it). Returns the blob to PRESENT: the confirmed blob, or the blob unchanged.
+553  *
+554  * No bearer, no heal (Wednesday's ruling on part 5, 2026-10-31 19:55:30Z, D3 as written): anchoring's anchor read and
+555  * own-create are behind its JWT gate, so a v2 verify (caller-independent by design: it forwards no bearer) and an anonymous
+556  * v1 verify present the STORED state, fail closed, until the GET reconcile or the poller heals it. Before R2b both healed a
+557  * stale-pending blob from verify-by-hash's pre-auth chain answer; a bound, bearer-less variant is a separate follow-up.
+558  */
+559 export async function healAnchorForVerify(input: VerifyHealInput): Promise<Record<string, unknown> | null> {
+560   const blob = input.blob;
+561   // Which blobs a verify may heal is UNCHANGED from before R2b, as KS-1661 and KS-1676 pinned it: a real (not simulated) blob
+562   // with a real 64-hex txHash that is neither settled (`confirmed`, `anchored: true`) nor failed (`failed`, `anchor_failed`).
+563   // R2b changes only what DECIDES the heal. A failed blob is healed forward by the GET reconcile, never by a verify.
+564   if (!blob || blob.simulated === true) return blob;
+565   if (typeof blob.txHash !== 'string' || !REAL_TX_RE.test(blob.txHash)) return blob;
+566   if (blob.status === 'confirmed' || blob.anchored === true) return blob;
+567   if (blob.status === 'failed' || blob.status === 'anchor_failed') return blob;
+568   const anchorId = typeof blob.anchorId === 'string' && blob.anchorId.length > 0 ? blob.anchorId : null;
+569   if (!anchorId || !input.authHeader) return blob;
+570   const row = await fetchAnchorState(anchorId, input.authHeader) as AnchorRowRead | null;
+571   // KS-1661's rule, kept for the row: a simulated anchor never heals a document (a TRUTHY test, not === true).
+572   if (!row || (row as { simulated?: unknown }).simulated) return blob;
+573   const updatedAtMs = Date.parse(input.updatedAt instanceof Date ? input.updatedAt.toISOString() : String(input.updatedAt ?? ''));
+574   const d = await resolveAnchorState({
+575     blob,
+576     documentIds: [input.documentId, input.documentPk].filter((x): x is string => typeof x === 'string' && x.length > 0),
+577     row,
+578     // The reconcile's staleness rule: an in-flight row is asked about only after RECONCILE_STALE_MS of silence. An unknown
+579     // updatedAt is NOT stale, so a verify never spends a chain scan on a guess.
+580     inFlightStale: Number.isFinite(updatedAtMs) && Date.now() - updatedAtMs >= RECONCILE_STALE_MS,
+581     ownCreate: () => askOwnCreate(fetch, anchoringBaseUrl(), input.authHeader, {
+582       documentId: input.documentId,
+583       contentHash: String(input.contentHash || '').replace(/^sha256:/i, '').toLowerCase(),
+584       timestamps: ownCreateTimestampsOf(blob),
+585     }),
+586   });
+587   if (d.write !== 'confirmed') return blob;
+588   const healed = confirmedBlobOf(blob, row, d, anchorId);
+589   // KS-1129 (FALLTHROUGH): an unusable height falls through to the STORED height, never a fabricated 0; unknown stays null.
+590   if (healed.blockHeight == null) {
+591     const stored = toBlockHeight(blob.blockHeight as number | string | null | undefined);
+592     if (stored != null && stored > 0) healed.blockHeight = stored;
+593   }
+594   if (input.write && input.tenantId) {
+595     try {
+596       const written = await writeAnchorBlobIf(input.documentId, input.tenantId, 'confirmed', healed, { rowStatus: 'anchored' });
+597       logger.info('Verify heal: anchor state confirmed through the resolver (KS-584, KS-1384 R2b)', { documentId: input.documentId, anchorId, txHash: d.tx, via: d.via, written });
+598     } catch (err: unknown) {
+599       // Presentation already has the decision; the write is convergence, and the reconcile and the poller are the catch-all.
+600       logger.warn('Verify heal: the confirmed write failed (presentation unaffected)', { documentId: input.documentId, error: err instanceof Error ? err.message : String(err) });
+601     }
+602   }
+603   return healed;
+604 }
+605 

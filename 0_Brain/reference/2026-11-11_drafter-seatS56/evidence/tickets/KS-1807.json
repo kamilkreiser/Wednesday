@@ -1,0 +1,204 @@
+{
+ "identifier": "KS-1807",
+ "title": "Please bring the platform-k docs up to date with current behaviour, so systemTest can be written to the docs rather than to the source",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 1,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-29T10:28:20.000Z",
+ "updatedAt": "2026-11-09T08:12:09.065Z",
+ "description": "## BLUF\n\nKamil, when you have the capacity, could you please update the platform-k documentation so that it describes how the platform is meant to behave today? The systemTest suites take their expected results from the docs, not from the platform-k source code, so up-to-date docs are what let the tests check the platform against its intended behaviour.\n\n## Why this matters\n\n* **The tests are written to the docs, on purpose.** A test whose expectation comes from the source can only confirm that the code does what the code does. It cannot catch a bug. When the expectation comes from the docs, a difference between the two is a real finding.\n* **This follows the ruling already recorded under** [KS-1668](https://linear.app/secuura/issue/KS-1668/docs-record-kamils-linear-rulings-that-platform-k-docs-omit-or)**:** the docs lead and the code aligns to the docs. That ticket added your Linear rulings to the docs. This one asks for the wider pass that only you can do, because you know the intended behaviour best.\n* **Where the docs are silent or out of date**, the test has no source for its expectation. It then either goes unwritten, or it is written against the code, which is the habit we are trying to avoid.\n\n## What would help most\n\n* Endpoint behaviour as it is meant to be: status codes, error bodies, auth and role requirements, and tenancy and ownership rules.\n* Flows across services, such as originate, anchoring, certification, transfer and S\u2194K, including what happens when a step fails.\n* Removing or marking anything retired, so a test does not keep asserting behaviour that is gone.\n* Where the intended behaviour is not yet decided, a short line saying so is very useful. It tells us to wait rather than guess.\n\nThe order and the split into smaller pieces are entirely up to you. Child tickets per area are welcome if that suits you better.\n\n## Done when\n\nThe platform-k docs describe current intended behaviour for the areas above, and anything still undecided is marked as such.\n\nThank you very much, Kamil. It makes a real difference to how much we can trust the test results.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-616"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1384"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2135",
+    "title": "Refs KS-1807: record Stuart's four answers on the UNDECIDED K-side lines, with today's behaviour"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1873",
+    "title": "Refs KS-1807: correction, billing credits and the NFT fee admit platform admins only (PR-7)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1863",
+    "title": "Refs KS-1807: entry points and stale tail re-verified or marked historic (PR-6)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1862",
+    "title": "Refs KS-1807: connectors, connector pattern and M365 setup docs re-verified against the code (PR-5)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1856",
+    "title": "Refs KS-1807: architecture, tokenisation and metering docs re-verified against the code (PR-4)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1843",
+    "title": "Refs KS-1807: tenancy and ownership docs re-verified against the code (PR-3)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1836",
+    "title": "Refs KS-1807: workflows, quick-reference and vocabulary docs re-verified against the code (PR-2)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1829",
+    "title": "Refs KS-1807: auth, roles and scopes docs re-verified against the code (PR-1)"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "74bc4a3b-8655-43b2-aea3-8b0bd35e4506",
+    "createdAt": "2026-11-09T08:12:36.844Z",
+    "body": "**BLUF:** PR 2135 (head `e2ada9bf1ea9`, one commit on develop `e8d23ce366e2`) records Stuart's four answers on the UNDECIDED K-side lines, as Kam ruled on the card (option a). Docs only, no product source file changed. It is waiting for review; nothing is merged or deployed.\n\n- A connector revoking with `onBehalfOf`: settled as no (Stuart; S has never used the route). K today refuses a connector at the revoke route's owner check, before `onBehalfOf` is read.\n- `documents:revoke`, `anchors:read` and a provisioning key's direct mint: each keeps an UNDECIDED marker for the K-side choice, with Stuart's S-side answer beside it. Stuart answered S's cost, not a K ruling.\n- Pages: `SCOPES.md` (three rows), `AGENT-DOCUMENT-OPERATION-RULES.md` (rule R4) and `S-K-OWNERSHIP-CONTRACT.md` (one note). Every other line is byte-identical; `SCOPES.md` line 138 is unchanged.\n- Code read at develop `e8d23ce366e2`, not observed live. Checks: path and symbol existence 38 of 38, an untouched-lines proof with planted controls, the audit gates and the test-type check green, merge-tree against the open contract PR clean.\n- The card puts the three K-side choices on the agenda for the monthly meeting with Stuart, as one item; this PR schedules nothing.\n\nhttps://github.com/Secuura/Distributed_Secuura/pull/2135",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "f48cc72b-3489-43e4-9a80-40d50f0b37b4",
+    "createdAt": "2026-11-09T05:09:49.116Z",
+    "body": "**Platform S's answers on the four S-facing `UNDECIDED (KS-1807)` lines.** Read from S develop `a77652e`, which dev-ps runs.\n\n1. **A connector revoking with `onBehalfOf`** (`AGENT-DOCUMENT-OPERATION-RULES.md`; KS-566, PS-616). **Stuart's ruling: no.** S has never used the route. S's `delete`, `restore` and `share-revoke` go to `POST /{id}/lifecycle-events`, and nothing in S builds a `POST /api/documents/{id}/revoke` request. S's `SendsOnBehalfOf` lists `/revoke` among the paths that would carry it, but no caller uses it. This is the PS-616 reconciliation the 26 Aug ruling waited for.\n2. **`documents:revoke`** (`SCOPES.md`): it can stop being minted for S's keys without affecting S, for the reason in 1.\n3. **`anchors:read`** (`SCOPES.md`): S reads anchors only through `GET /api/anchors/{id}` and `GET /api/anchors/tx/{hash}` (`CardanoAnchorService.cs:347-348`), under the organisation's key. Every key minted through `register-connector` carries `anchors:read` (the nine-scope set), so gating anchor reads on it would not break S. S has no view on which you choose.\n4. **A provisioning key minting directly** (`SCOPES.md`, `S-K-OWNERSHIP-CONTRACT.md`): S uses its provisioning key only for `POST /api/platform/organizations/register-connector`. It never calls `/api/security/keys` or `/api/keys` (no such path in S). Limiting a provisioning key's direct mint to the nine-scope set, or refusing it, costs S nothing.\n\n**One gap for the S side:** the S-K contract's anchoring section is still marked on hold until the KS-1384 build lands. Stage 1 is on both boxes. Your 6 Nov answer on KS-1384 is not yet on any page systemTest can assert against: one row per document, and a new paid transaction for every share and lifecycle event until stage 2. Stuart has asked for a ticket for those pages.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "dc8fca5b-6b15-4b48-acef-8a11329b0665",
+    "createdAt": "2026-11-02T02:55:20.339Z",
+    "body": "Delivered: the KS-1807 docs pass is merged: PRs 1829, 1836, 1843, 1856, 1862, 1863 and the correction 1873, as squashes e43a289c1, 6c47e86e7, 12870d17c, 644452e4a, d03fb8cbf, 83092b74a and 62570bc2f on develop, all deployed to kintsugi at b1fb543640e7 (2026-11-01). Docs only, nothing to deploy. Verified by git log (all seven squashes name KS-1807 and are reachable from b1fb543640e7) and by git grep at that sha: 26 lines in 6 doc files still carry the phrase UNDECIDED (KS-1807. Code read, not observed live. Left open: the ticket's done-when (docs describe intended behaviour, undecided items marked) is met by the merged pages, but the ticket's last comment names open items: each UNDECIDED line needs a ruling and then a small docs PR, and the anchoring pages, the OpenAPI contract and about ten pages that still carry dead Container Apps addresses were not covered.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "86070b9e-b4a0-46a8-8e2f-e3c52bd933c6",
+    "createdAt": "2026-10-31T15:44:45.512Z",
+    "body": "**BLUF:** The KS-1807 docs pass is finished: all seven pull requests are merged into `develop`, docs only, nothing deployed. The platform-k docs I covered now describe what the code does, with the intended behaviour kept and each difference marked \"known deviation\" beside its ticket. Older pages are marked HISTORIC, not rewritten. Where nobody has ruled which side is right, the page carries a line starting `UNDECIDED (KS-1807, 2026-10-30)`; 21 of those are on `develop` now. The Cardano anchoring pages were not touched (held for KS-1384). I have left the state of KS-1807 as it is.\n\n**What landed (pull request, area, merge commit on `develop`):**\n- 1829, authentication, roles and scopes (`SCOPES.md`, the roles and authorization inventory, the agent document operation rules): `e43a289c1c7b`\n- 1836, document lifecycle, status codes and the error envelope (`WORKFLOWS.md`, `QUICK-REFERENCE.md`, `VOCABULARY.md`): `6c47e86e7521`\n- 1862, connectors and integrations (`CONNECTORS.md`, `docs/CONNECTORS_PATTERN.md`, the M365 setup page): `d03fb8cbf72a`\n- 1856, cross-service flows (`ARCHITECTURE.md`, `TOKENISATION.md`, `METERING-USAGE-API.md`): `644452e4af6d`\n- 1843, tenancy and ownership (`MULTI-TENANCY.md`, `S-K-OWNERSHIP-CONTRACT.md`): `12870d17cd0a`\n- 1863, entry points and the older documents (`README.md` and `SERVICES.md` corrected; `DEVELOPMENT.md`, `PROJECT_OVERVIEW.md` and `CHANGELOG.md` marked HISTORIC; the one root `BACKLOG.md` edit the plan allowed): `83092b74ad5b`\n- 1873, a seven-line correction after KS-1850 changed billing `POST /admin/credits` and the NFT `PUT /admin/platform-fee` to admit platform administrators only (PR 1855): the roles inventory and the quick reference now say so, and the two matching `UNDECIDED` lines were removed: `62570bc2f1a9`\n\n**How each one got in:** pull requests 1829 to 1863 each had a QA gate verdict (GO or GO WITH NOTES), and the coordinator checked the exact head before giving the merge GO; 1873 had that check alone. Every merge was on a GO naming the exact pull request head and the `develop` commit, and each merge commit was read back afterwards: one parent equal to that `develop`, the same files, and file contents identical to the pull request head. On 1873 the first GO's `develop` pin had just been overtaken by another pull request's merge; the merge tool refused, nothing was merged, and the coordinator re-pinned.\n\n**Findings, each filed as its own ticket (22):** KS-1845, KS-1846, KS-1847, KS-1850, KS-1851, KS-1853, KS-1854, KS-1855, KS-1856, KS-1859, KS-1860, KS-1861, KS-1862, KS-1863, KS-1871, KS-1872, KS-1873, KS-1874, KS-1875, KS-1876, KS-1877 and KS-1886. Some of these are code behaviour that differs from what a page states; KS-1850 has since been changed in code by PR 1855, which is why PR 1873 exists. Comments were also added on KS-1401, KS-1838 and KS-1853.\n\n**What is left for people to decide:** the 21 `UNDECIDED` lines are in `SCOPES.md` (13), `AGENT-DOCUMENT-OPERATION-RULES.md` (4), and one each in `MULTI-TENANCY.md`, `S-K-OWNERSHIP-CONTRACT.md`, `WORKFLOWS.md` and the roles inventory. Each needs a ruling on the board and then a small docs pull request to turn the line into plain text. The one in the roles inventory (credential revoke, KS-1851) will go stale if pull request 1869 merges.\n\n**Not covered:** the OpenAPI contract and `services/mcp-server/openapi.yaml` (findings only, no spec edits); the anchoring pages (held for KS-1384); `docs/DATABASE-SCHEMA.md`, `docs/ENVIRONMENT-VARIABLES.md`, most of the developer and stakeholder guides, and about ten other pages that still carry the dead Container Apps addresses (named in the PR 1863 body); Platform S's own behaviour. A comment in `services/auth/src/__tests__/usersAdminStatus.test.ts` near line 127 is stale; it is a test file, so it is reported here, not changed. Checks were docs-only: path, symbol, table and link checks against the code, plus the repo gates; no service suite or live stack was run, and every claim about behaviour is read from code, not probed on a running stack.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "2673a6a5-1824-46d8-aa05-a04247294812",
+    "createdAt": "2026-10-31T05:36:14.585Z",
+    "body": "**BLUF:** Pull request 1863 (https://github.com/Secuura/Distributed_Secuura/pull/1863, head `47ea7e41147d`) is open: it is the sixth and last of the six areas, the entry points and the older documents, docs only. It is at READY FOR GATE; it is not merged and not deployed. The anchoring pages stay on hold (KS-1384).\n\n**What it changes:** `README.md` and `SERVICES.md` under `Blockchain/Dev` are corrected against the compose files, the Dockerfiles, the manifests and the source (host ports are published only by the dev-debug override, there is no Midnight service, the devnet ports, Compose v2, migrations are SQL files, the test-document commands match the routes, test tokens are parsed only in dev and test, the Container Apps URLs are marked dead). `DEVELOPMENT.md`, `PROJECT_OVERVIEW.md` and `CHANGELOG.md` are marked HISTORIC and not rewritten. `docs/STAKEHOLDER-GUIDES.md` carries a \"not re-read\" note and `docs/DEVELOPER-GUIDE.md` has one dead URL marked. The root `BACKLOG.md` has the one edit the plan allows: the admin status-vocabulary entry is marked reconciled by KS-796 (pull requests 819 and 822, merged 2026-09-05). There are no `UNDECIDED` lines in this pull request.\n\n**Findings:** none new on this pass. Already filed and cited: KS-1886, KS-288, KS-1862 and KS-796.\n\n**Evidence:** docs only. Ran: path and symbol existence on the corrected pages (24 of 24 paths, 41 of 41 identifiers), table and link checks, `git diff --check`, `audit:gate`, `audit:locks`, `check:test-types`, and the repo's pre-push hook (13 of 16 legs ran, 3 skipped because the local stack was not up; legs 6 and 7 passed; not a pass). Not run: service suites, systemTest suites, a live stack, or any command the README shows.\n\n**Not covered:** `docs/DATABASE-SCHEMA.md`, `docs/ENVIRONMENT-VARIABLES.md`, most of the developer and stakeholder guides, and about ten other pages that still carry the dead Container Apps addresses were not read; the PR body lists them. A comment in `services/auth/src/__tests__/usersAdminStatus.test.ts` (near line 127) is stale; it is a test file, so it is reported, not changed.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "29145b26-008f-4205-8d1c-668939c37e35",
+    "createdAt": "2026-10-31T05:23:08.633Z",
+    "body": "**BLUF:** Pull request 1862 (https://github.com/Secuura/Distributed_Secuura/pull/1862, head `5961ec9c55ee`) is open: it is the fifth of the six, connectors and integrations, docs only. It is at READY FOR GATE; it is not merged and not deployed. The four Cardano anchoring rows in `CONNECTORS.md` stay on hold (KS-1384) and were not re-assessed.\n\n**What it changes:** `CONNECTORS.md`, `docs/CONNECTORS_PATTERN.md` and `services/m365-integration/SETUP.md` now describe how the connectors and the M365 integration work at `develop` `ddc644fb4869`. The code facts in the inventory (which service owns a connector, which client library, which variables, which routes) are corrected in place or followed by dated `[RE-VERIFIED 2026-10-30]` notes. The State, Last verified and Owner action columns are said not to be re-measured, because they record end-to-end checks against real upstreams. Row names are unchanged, because the connector coverage gate matches them by exact text. There are no `UNDECIDED` lines in this pull request.\n\n**Difference found between what the docs state and the code, filed as its own ticket:** KS-1886 (Low: the kyc production guard requires two Entra Verified ID variables that no code reads; `SHAREPOINT_SITE_URL` is read by no code; the Apple smoke test names variables no code reads). Already on the board and referenced: KS-1516, KS-753, KS-1838, KS-1673, KS-1677 and KS-523.\n\n**Evidence:** docs only. Ran: path and symbol existence (16 of 16 paths, 75 of 75 identifiers), 7 of 7 table checks, 2 of 2 links, the connector coverage gate before and after (with a negative control), `git diff --check`, `audit:gate`, `audit:locks`, `check:test-types`, and the repo's pre-push hook (13 of 16 legs ran, 3 skipped because the local stack was not up; legs 6 and 7 passed; not a pass). Not run: service suites, systemTest suites, a live stack, anything against Microsoft, Stripe, a TSA or any other upstream. I read these three documents against the code myself; no sub-agents were used for this one.\n\n**Not covered by this pull request:** the OpenAPI contract and `services/mcp-server/openapi.yaml` (findings only), `docs/ENVIRONMENT-VARIABLES.md`, the anchoring rows (held), Platform S's own behaviour, and the last area (entry points and the older docs), which follows.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "7fca90dc-147e-42b2-8f66-821ea5d81ca1",
+    "createdAt": "2026-10-30T22:49:33.400Z",
+    "body": "**BLUF:** Pull request 1856 (https://github.com/Secuura/Distributed_Secuura/pull/1856, head `b9836472639f`) is open: it is the fourth of the six, cross-service flows including what happens when a step fails, docs only. It is at READY FOR GATE; it is not merged and not deployed. Anchoring internals stay on hold (KS-1384) and were not edited.\n\n**What it changes:** `ARCHITECTURE.md`, `TOKENISATION.md` and `METERING-USAGE-API.md` now describe what the code does at `develop` `e43a289c1c7b`. `ARCHITECTURE.md` and `METERING-USAGE-API.md` are corrected in place, with \"known deviation\" and the ticket where the code departs from the stated intent. `TOKENISATION.md` is a design page and is kept as one, with dated `[RE-VERIFIED 2026-10-30]` notes. There are no `UNDECIDED` lines in this pull request.\n\n**Differences found between what the docs state and the code, filed as their own tickets:** KS-1872, KS-1873, KS-1874, KS-1875, KS-1876 and KS-1877, plus a comment on KS-1838. Already on the board and referenced: KS-1862, KS-1790, KS-288, KS-1433, KS-1846, KS-1758 and KS-1856.\n\n**Evidence:** docs only. Ran: path and symbol existence (17 of 17 paths, 87 of 89 identifiers; the two that do not resolve are placeholder token strings in the tokenisation guide), 20 of 20 table checks, 11 of 11 links, `git diff --check`, `audit:gate`, `audit:locks`, and the repo's pre-push hook (13 of 16 legs ran, 3 skipped because the local stack was not up; not a pass). Not run: service suites, systemTest suites, a live stack.\n\n**Not covered by this pull request:** the OpenAPI contract (findings only), the anchoring internals (held), Platform S's own behaviour, and the last two areas (connectors and integrations; entry points and the older docs).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "b98e15f8-21a0-4b43-97f8-e5c8f9545251",
+    "createdAt": "2026-10-30T10:59:23.314Z",
+    "body": "**BLUF:** Pull request 1836 (PR-2 of 6, document lifecycle, status codes and the error envelope) is merged into `develop` as `6c47e86e7521`. It changed three documentation files only, so there is nothing to deploy. KS-1807 stays open: four of the six areas are still to land (pull request 1843, tenancy and ownership, is open and waiting for its gate).\n\n**What landed:** `WORKFLOWS.md`, `QUICK-REFERENCE.md` and `VOCABULARY.md` now describe how the document lifecycle, status codes and error envelope work at `develop`. The merge is one squash commit on top of `develop` `4c14143b3426`; the three files in it are identical to the pull request head's (`ac386832ff29`), and nothing else changed in that commit. There are 2 `UNDECIDED (KS-1807, 2026-10-30)` lines (whether KYC approval should raise the user's verification level, and whether `OWNER` should be admitted to the billing admin credits route).\n\n**How it got here:** one QA gate round (GO WITH NOTES: two wording faults and follow-ups, all corrected in a second commit, checked by the coordinator who gave the merge clearance for that exact head). The behaviour the gate found on the create route is filed separately as KS-1871.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "f16db2d9-0832-4d46-ab58-bfa8a1efea4d",
+    "createdAt": "2026-10-30T10:55:42.378Z",
+    "body": "**BLUF:** Pull request 1836 (https://github.com/Secuura/Distributed_Secuura/pull/1836) has a second commit, head `ac386832ff29`, pushed as a fast-forward from `3974f364cbc8`. QA gate 39 round 1 found two wording faults; both are corrected, with the gate's follow-ups. Still docs only, not merged, not deployed. It waits for the coordinator's check of this change and the merge clearance.\n\n**The two faults.** The create step said the document-write role check applies to every create; that check is originate's, and the gateway answers an approval-gated type with 201 before it runs. The behaviour itself is filed as KS-1871 (High) and is not changed by the docs series. The admin-credits row called the `OWNER` admission a known deviation; it now carries the same UNDECIDED wording as the merged pull request 1829, so the pull request has 2 UNDECIDED lines.\n\n**Also in the commit:** the roles that count as \"an admin\" for anchoring are named; the two re-anchor sentences are marked as part of the on-hold step (KS-1384); the omitted error codes were added after reading each handler; the global rate limiter row says `/api/v2/verification` is not exempt. The pull request body is corrected to match, and the two gate follow-ups left out of this round are listed in it.\n\n**Evidence:** docs only, +15/-7 in two files. Ran: path and symbol existence (33 of 33 paths, 150 of 150 identifiers, planted control flagged), 13 of 13 table checks, `git diff --check`, `audit:gate`, `audit:locks`, and the repo's pre-push hook (13 of 16 legs ran, 3 skipped because the local stack was not up; not a pass). Not run: service suites, systemTest suites, a live stack.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "722e1d69-f286-4d8a-886f-db7aa8dc53a1",
+    "createdAt": "2026-10-30T10:37:39.404Z",
+    "body": "**BLUF:** Pull request 1843 (https://github.com/Secuura/Distributed_Secuura/pull/1843, head `263d83c909ea`) is open: it is the third of the six, tenancy and ownership, docs only. It is at READY FOR GATE; it is not merged and not deployed.\n\n**What it changes:** `MULTI-TENANCY.md` and `S-K-OWNERSHIP-CONTRACT.md` now describe what the code does at `develop` `85cd24d81`. `MULTI-TENANCY.md` keeps the intended behaviour and marks each difference \"known deviation\" with its ticket; `S-K-OWNERSHIP-CONTRACT.md` is a signed-off record, so its text is kept and a dated `[RE-VERIFIED 2026-10-30]` note follows each passage that no longer matches. Where nobody has ruled which side is right the doc carries a line starting `UNDECIDED (KS-1807, 2026-10-30)`; there are 2 (whether request-path PII tokenisation is still intended, and how broad the provisioning key's direct mint should be). Anchoring items stay on hold (KS-1384).\n\n**Differences found between what the docs state and the code, filed as their own tickets:** KS-1859, KS-1860, KS-1861, KS-1862 and KS-1863. Already on the board and referenced: KS-1790, KS-621, KS-1847, KS-1401, KS-288.\n\n**Evidence:** docs only. Ran: path and symbol existence (12 of 12 paths, 86 of 86 identifiers), 14 of 14 table checks, 6 of 6 citations and 8 of 8 links in range, `git diff --check`, `audit:gate`, `audit:locks`, and the repo's pre-push hook, which reported 13 of 16 legs ran and 3 skipped because the local stack was not up (not a pass). Not run: service suites, systemTest suites, a live stack.\n\n**Not covered by this pull request:** the OpenAPI contract (findings only), anchoring-lifecycle docs (held), Platform S's own behaviour, and the other three areas still to come.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "5e4acbb2-4beb-4c61-abc4-1fe900043427",
+    "createdAt": "2026-10-30T07:12:33.120Z",
+    "body": "**BLUF:** Pull request 1836 (https://github.com/Secuura/Distributed_Secuura/pull/1836, head `3974f364cbc8`) is open: it is the second of the six, document lifecycle, status codes and the error envelope, docs only. It is at READY FOR GATE; it is not merged and not deployed.\n\n**What it changes:** `WORKFLOWS.md`, `QUICK-REFERENCE.md` and `VOCABULARY.md` now describe what the code does at the base commit. Each step, status code, body and number was read against the handler and its test. Where the code departs from a contract the spec or an earlier page states clearly, the doc says \"known deviation\" and names the ticket. Where nobody has ruled which side is right, the doc carries a line starting `UNDECIDED (KS-1807, 2026-10-30)` and does not assert either behaviour; there is 1 such line (whether approving a KYC verification should raise the user's verification level). The anchoring passages that wait for the KS-1384 build are marked ON HOLD and were neither re-verified nor edited.\n\n**Differences found between what the docs or spec state and the code, filed as their own tickets:** KS-1853, KS-1854, KS-1855 and KS-1856. Already on the board and referenced: KS-1850, KS-1845, KS-1826, KS-1703, KS-1814.\n\n**Evidence:** docs only. Ran: path and symbol existence (32 of 32 paths, 137 of 137 identifiers), 13 of 13 table checks, `git diff --check`, `audit:gate`, `audit:locks`, and the repo's pre-push hook, which reported 13 of 16 legs ran and 3 skipped because the local stack was not up (not a pass). Not run: service suites, systemTest suites, a live stack.\n\n**Not covered by this pull request:** the OpenAPI contract (findings only), anchoring-lifecycle docs (held), and the other four areas (tenancy and ownership is committed and waits to be pushed; the other three are not started).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "53d300fb-03c4-4809-91ab-bf7c4149a047",
+    "createdAt": "2026-10-30T06:59:41.848Z",
+    "body": "**BLUF:** Pull request 1829 (PR-1 of 6, authentication, roles and scopes) is merged into `develop` as `e43a289c1c7b`. It changed three documentation files only, so there is nothing to deploy. KS-1807 stays open: five of the six areas are still to land.\n\n**What landed:** `SCOPES.md`, `ROLES-AND-AUTHORIZATION-INVENTORY.md` and `AGENT-DOCUMENT-OPERATION-RULES.md` now describe how authentication, roles and scopes work at `develop` `530f09112`, with 19 `UNDECIDED (KS-1807, 2026-10-30)` lines where nobody has ruled which side is right. The merge is one squash commit on top of `develop` `a8c554659cb3`; the three files in it are identical to the pull request head's (`143bcfebfb92`), and nothing else changed in that commit.\n\n**How it got here:** two QA gate rounds on the pull request (round 1: no-go on two statements that told a reader a connector key cannot reach admin routes or signing routes; round 2: no-go on one sentence about the issuer-certificates routes), then a check of the last change by the coordinator, who gave the merge clearance for that exact head.\n\n**Still open from this pass:** PR-2 (document lifecycle, status codes, error envelope) is being pushed now; PR-3 (tenancy and ownership) is committed and waits to be pushed; PR-4 to PR-6 are not started. Findings raised along the way are separate tickets (KS-1845 to KS-1863 where they came from this pass).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "e9ea9897-37ae-4a78-b447-6aa16a72453f",
+    "createdAt": "2026-10-30T06:53:06.263Z",
+    "body": "**BLUF:** Pull request 1829 (https://github.com/Secuura/Distributed_Secuura/pull/1829) has a third commit, head `143bcfebfb92`, pushed as a fast-forward from `4c9b4ee18f1c`. The second QA gate round found one false sentence; it is corrected. Still docs only, not merged, not deployed. It waits for the coordinator's check of this change and the merge clearance.\n\n**The sentence.** The agent-rules page listed `/api/issuer-certs` among the routes a connector (`sk_`) key can reach. It cannot: every route in auth's issuer-certificates router uses the plain access-token check, which refuses a connector token by design. I read that code before editing and found no path that gives an access token an `issuer-certs:*` scope. The page now says the route family is not a door for a connector key and why; the scope table and the certificate-signing row say the same where they mention it.\n\n**Two smaller corrections in the same commit:** \"none of which is in the operation matrix\" now says the signing routes are (they are); and \"the one route family the gateway role-gates against connectors\" no longer says \"the one\", because that was not checked across the other mounts.\n\n**Evidence:** docs only, +8/-7 in two files, 19 `UNDECIDED` lines unchanged. Ran: path and symbol existence (81 of 81 paths, 158 of 158 identifiers, planted control flagged), table checks, `git diff --check`, `audit:gate`, `audit:locks`, and the repo's pre-push hook, which reported 13 of 16 legs ran and 3 skipped because the local stack was not up (not a pass). Not run: service suites, systemTest suites, a live stack.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "018cbafd-edda-4041-b63d-ce6112da439c",
+    "createdAt": "2026-10-30T04:25:02.036Z",
+    "body": "**BLUF:** Pull request 1829 (https://github.com/Secuura/Distributed_Secuura/pull/1829) has a second round: head `4c9b4ee18f1c`, pushed as a fast-forward from `63c149736a26` after the QA gate returned no-go on the first round. Still docs only, still not merged and not deployed. It is at READY FOR GATE for the second and last gate round.\n\n**Why there is a second round.** The gate found two statements that told a reader a connector (agent) key cannot do something it can. (1) The agent-rules page said agents cannot reach admin, user-management, platform or key routes \"by construction\", with two exceptions. In fact a connector key can also reach the security service's key mint, `POST /api/users/stub`, `/api/issuer-certs`, `/api/webhooks` and two document-signing routes. (2) The same page said everything outside its operation table is not an agent operation, but `POST /api/documents/{id}/sign` and `/sign/request` check only authentication and the tenant. Both passages now say what the code does, list those routes, and carry an `UNDECIDED (KS-1807, 2026-10-30)` line where nobody has ruled which side is right. Four smaller corrections (the stub scopes, the OAuth create check, an organisation-less user in `onBehalfOf`, and a count that could not be reproduced) are in the same commit.\n\n**Tickets.** No new ticket this round. The signing routes are already tracked as KS-1831 and KS-1832, and I added what those did not record (a key holding only `documents:read` reaches them). The `users/stub` admissions are recorded in KS-1402 and KS-1653. Whether a provisioning key's direct key mint should be limited to the nine-scope set is a design question, not a defect, so it is marked UNDECIDED in the docs and has no ticket.\n\n**Evidence:** docs only; 19 `UNDECIDED` lines (15 + 4). Ran: path and symbol existence (78 of 78 paths, 153 of 153 identifiers, planted control flagged), 6 of 6 table checks, 5 of 5 links, `git diff --check`, `audit:gate`, `audit:locks`, `deps-present` and its self-test, and the repo's pre-push hook, which reported 13 of 16 legs ran and 3 skipped because the local stack was not up (not a pass). Not run: service suites, systemTest suites, a live stack.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "c1dab39a-6545-4570-b60c-29350ba41231",
+    "createdAt": "2026-10-30T03:03:32.180Z",
+    "body": "**BLUF:** Pull request 1829 (https://github.com/Secuura/Distributed_Secuura/pull/1829, head `63c149736a26`) is open: it is the first of the six, authentication, roles and scopes, docs only. It is at READY FOR GATE; it is not merged and not deployed.\n\n**What it changes:** `SCOPES.md`, `ROLES-AND-AUTHORIZATION-INVENTORY.md` and `AGENT-DOCUMENT-OPERATION-RULES.md` now describe what the code does at `develop` `530f09112`. Each rule was read against the code and the tests. Where the code does not follow a rule that a ruling or the spec makes clear, the doc says \"known deviation\" and names the ticket. Where nobody has ruled which side is right, the doc carries one line starting `UNDECIDED (KS-1807, 2026-10-30)` and does not assert either behaviour; there are 15 such lines. File:line citations were replaced by a file path plus the function or route that carries the claim.\n\n**Differences found between a rule the docs state and the code, filed as their own tickets:** KS-1845, KS-1846, KS-1847, KS-1850 and KS-1851. Already on the board and referenced: KS-1433, KS-1833, KS-1834.\n\n**Evidence:** docs only. Ran: path and symbol existence (77 of 77 paths, 145 of 145 identifiers), 6 of 6 table checks, 5 of 5 links, `git diff --check`, `audit:gate`, `audit:locks`, and the repo's pre-push hook, which reported 13 of 16 legs ran and 3 skipped because the local stack was not up (not a pass). Not run: service suites, systemTest suites, a live stack.\n\n**Not covered by this pull request:** the OpenAPI contract (findings only), anchoring-lifecycle docs (held), and the other five areas.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "3be38853-6c4f-47ba-b316-818b1c929ac8",
+    "createdAt": "2026-10-30T00:55:48.927Z",
+    "body": "**BLUF:** The plan for this ticket is agreed (2026-10-30): six docs-only pull requests, one area each, in the order below. Nothing is changed, merged or deployed yet; the first one is being started now.\n\n1. Authentication, roles and scopes: `ROLES-AND-AUTHORIZATION-INVENTORY.md`, `SCOPES.md`, `AGENT-DOCUMENT-OPERATION-RULES.md`.\n2. Document lifecycle, status codes and the error envelope: `WORKFLOWS.md`, `QUICK-REFERENCE.md`, `VOCABULARY.md`.\n3. Tenancy and ownership: `MULTI-TENANCY.md`, `S-K-OWNERSHIP-CONTRACT.md`.\n4. Cross-service flows, including what happens when a step fails: `ARCHITECTURE.md`, `TOKENISATION.md`, `METERING-USAGE-API.md`.\n5. Connectors and integrations.\n6. Entry points and the older docs. Anything no longer maintained is marked historic, not rewritten.\n\nHow each claim is checked: the route, its test and the OpenAPI operation are read. Where a recorded ruling, the code and the tests agree, the doc says that. Where they differ, the difference is filed as its own ticket and the doc line says so; the doc is not written to match a bug. Where intent is not decided, the doc gets one line starting `UNDECIDED (KS-1807`.\n\nLimits for this round: the OpenAPI contract (`secuura-api.yaml` and the `.openapi.ts` files it is generated from) is findings only, with no edit and no regeneration. The anchoring-lifecycle docs wait for the KS-1384 build to land. KS-604 stays separate. The two Projects Documents HTML files get no entry from a pull request that changes no test or harness file.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

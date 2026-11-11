@@ -1,0 +1,19 @@
+{
+ "identifier": "KS-1451",
+ "title": "A bare `slot-literal-ok:` marker DOES exempt a quoted value in all five slot guards \u2014 the closing quote satisfies the \"has a reason\" test, contradicting systemTest/CLAUDE.md:1169",
+ "state": {
+  "name": "In Progress"
+ },
+ "priority": 3,
+ "assignee": {
+  "name": "kamil.kreiser@secuura.ai"
+ },
+ "updatedAt": "2026-10-08T01:18:55.656Z",
+ "description": "**BLUF:** the platform rule says a bare `slot-literal-ok:` marker exempts nothing, but on a **quoted value** (JSON, or any line where the marker is not last) the value's own closing quote satisfies the \"has a reason\" test, so **a bare marker DOES exempt**. Measured in all five harness guards' shared regex shape. Found while fixing KS-1450; not introduced by it.\n\n## The rule it contradicts\n\n`systemTest/CLAUDE.md:1169`, verbatim:\n\n> A deliberate exception carries `slot-literal-ok: <reason>` on the same line; a bare marker exempts nothing.\n\n## The defect\n\nEvery implementation tests for \"marker, optional whitespace, then one non-whitespace character\":\n\n```\nno_hardcoded_slot_literals.test.sh   grep -vE 'slot-literal-ok:[[:space:]]*[^[:space:]]'\nplaywright/.../no-hardcoded-slot-literals.test.ts:79    const MARKER = /slot-literal-ok:\\s*\\S/\nperformance/.../noHardcodedSlotLiterals.test.ts:49      const MARKER = 'slot-literal-ok:'\nschemathesis/.../test_no_hardcoded_slot_numbers.py:50   _OPT_OUT = \"slot-literal-ok:\"\nakto/tests/unit/config/noTypedSlotValues.test.ts        (same shape)\n```\n\n`[^[:space:]]` / `\\S` is satisfied by **any** non-space character, including `\"`. So:\n\n```\n  \"reason\": \"x 6982 slot-literal-ok:\",      -> EXEMPTED   (wrong: the reason is empty)\nconst p = 6982; // slot-literal-ok:          -> reported   (right)\n```\n\nDriven both ways in one call against the same regex. The only reason this has never shown up is that every existing marker sits in a `#` or `//` comment at true end-of-line, where nothing follows the colon \u2014 which is also why the suites' own controls pass: each plants its bare-marker fixture into a comment, never into a quoted value. `test_no_hardcoded_slot_numbers.py:263` asserts \"the bare marker does not \\[exempt\\]\" and passes for exactly that reason.\n\n## Why it matters now\n\nKS-1450 is the first change to put `slot-literal-ok` markers inside JSON string values (the six `accepted.*.reason` entries of `systemTest/schemathesis/config/schemathesis-baseline.json`). Before it, that file carried **zero** markers, so the gap was latent. It is recorded as a named limitation in KS-1450's PR Test Evidence rather than fixed there, because a one-guard fix would make the five guards disagree about what a bare marker means.\n\n## Suggested fix\n\nRequire a reason character that is not structural, e.g. tighten the class to `[^[:space:]\",]` (and the JS/Python equivalents) in **all five** implementations in one change, so they stay in agreement.\n\n**Blast radius, measured before proposing it:** exactly **2** existing marker lines repo-wide would lose exemption, and **neither needs it** \u2014 `systemTest/schemathesis/tests/unit/test_no_hardcoded_slot_numbers.py:50` (`_OPT_OUT = \"slot-literal-ok:\"`, a constant; the line holds no slot literal) and the shell guard's own bare-marker control line (its port is computed, not typed). So nothing that passes today would go red.\n\nEach implementation should also gain a control that plants the bare marker into a **quoted value**, not only into a comment \u2014 the absence of that control is what hid this.\n\n## Provenance\n\n* Both-way measurement and the blast-radius count: Seat R 16th, 2026-10-08, during KS-1450.\n* The rule: `systemTest/CLAUDE.md:1169`.\n* The guard: KS-1386 (Done, Peter).",
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "identifier": "KS-583",
+ "title": "DR rehearsal: lose a key \u2192 re-key \u2192 read-back survives on pre-loss anchors \u2192 the old key is dead",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-08-07T01:22:52.135Z",
+ "updatedAt": "2026-10-06T09:00:40.839Z",
+ "description": "## BLUF\n\n@peter asked for this rehearsal on KS-532. **KS-532 is Done and was archived on 2026-08-04, so it rejects comments and nobody would see it** \u2014 @kamil.kreiser ruled 2026-08-07 that it gets a fresh ticket rather than a reopen. This is that ticket.\n\n**It needs four steps, not three.** As @peter wrote it, the rehearsal **would pass today while leaving the compromised credential live** \u2014 which is the clearest possible illustration of Finding A ([KS-577](https://linear.app/secuura/issue/KS-577)).\n\n## Detail\n\n**The rehearsal**\n\n1. Anchor a document; record the proof.\n2. Re-key the org \u2014 `register-connector` with `rotate: true`.\n3. Confirm read-back survives on the pre-loss anchor using the **new** key. *(@peter's assertion \u2014 expected to hold.)*\n4. **Confirm the OLD key no longer works.** *(Added. This is the step that fails today.)*\n\n**Why step 4 matters.** Rotation currently mints without revoking ([KS-577](https://linear.app/secuura/issue/KS-577)), so steps 1\u20133 would all pass on a credential that is still live and still valid with identical scopes. A rehearsal that stops at step 3 proves **read-back continuity only, not containment** \u2014 and would be reported as a successful DR rehearsal.\n\n**Sequencing.** Steps 1\u20133 can be run before [KS-577](https://linear.app/secuura/issue/KS-577) lands, but the result must be recorded as *continuity only*, explicitly not containment. Step 4 is blocked on [KS-577](https://linear.app/secuura/issue/KS-577).\n\n**Also worth folding in** (@peter's sequencing asks on KS-480): [PS-473](https://linear.app/secuura/issue/PS-473) first \u2014 a lost key is recoverable by rotation, a lost GUID mapping is not \u2014 and [PS-463](https://linear.app/secuura/issue/PS-463), which is the only detection a botched re-key would have under async anchoring.\n\n**Done when:** all four steps pass on demo and the run is recorded here with its evidence.\n\n---\n\n*Split from* [KS-480](https://linear.app/secuura/issue/KS-480) *per @kamil.kreiser's ruling 2026-08-07.* [KS-579](https://linear.app/secuura/issue/KS-579)*\u2013*[KS-582](https://linear.app/secuura/issue/KS-582) *are @peter's own candidates carried over unchanged;* [KS-577](https://linear.app/secuura/issue/KS-577) *and* [KS-578](https://linear.app/secuura/issue/KS-578) *are additions from the 2026-08-06 verification. Findings checked against* `develop` `c8ce65dca`*; Finding B confirmed live on the demo VM read-only.*",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-582"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-579"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

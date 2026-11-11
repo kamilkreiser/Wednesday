@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-1391",
+ "title": "No frontend declares a `test` script \u2014 six package.json files, none with one, so the issuer's vitest setup and its 12 component assertions are unreachable from any runner",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-29T12:25:19.032Z",
+ "updatedAt": "2026-11-11T05:30:20.435Z",
+ "description": "## BLUF\n\n`Blockchain/Dev/frontend/` has nine directories, six of them with a `package.json`, and **not one declares a** `test` **script**. The root workspace runner is `\"test\": \"npm run test --workspaces\"` (`Blockchain/Dev/package.json:17`), so it cannot reach them. The issuer went further than the others \u2014 it has `vitest` + `@testing-library/react` + `jsdom` in devDependencies, a `test:` block in `vite.config.ts:8-12`, and two real spec files carrying 12 assertions \u2014 and none of it can be run without typing a `vitest` invocation by hand. This is unit/component coverage only; the portals themselves are covered by the e2e-v2 browser tier, which has its own problem (`KS-1390`). Read from the tree on `develop` `8ba2da02d`, 29 Sep 2026.\n\n## What was seen\n\nEvery `scripts` block under `Blockchain/Dev/frontend/*/package.json`:\n\n| Frontend | `scripts` | Test files present |\n| -- | -- | -- |\n| `admin` | `dev`, `build`, `preview`, `lint` | 0 |\n| `issuer` | `dev`, `build`, `preview`, `lint`, `check:bundle` | **2** (`blockchain-card.test.tsx`, `provenance-timeline.test.tsx`) |\n| `verifier` | `dev`, `build`, `preview`, `lint` | 0 |\n| `website` | `dev`, `build`, `preview`, `lint` | 0 |\n| `outlook-addin` | `dev`, `build`, `preview`, `lint` | 0 |\n| `demo-overlay` | `build`, `dev` | 0 |\n| `status`, `gmail-addon`, `shared` | no `package.json` | 0 |\n\nSo the two issuer specs are dead weight: present, maintained-looking, and executed by nothing. `frontend/issuer/vite.config.ts:8-12` configures the vitest environment for them, which makes it look deliberate rather than abandoned \u2014 the missing piece is one line in `package.json`.\n\n## Why it matters\n\n* **It is a silent zero.** `npm run test --workspaces` at `Blockchain/Dev` looks like it covers the workspaces, and `frontend/*` is a workspace glob (`package.json:6-10`). A reader has no signal that the frontend leg of that command is empty.\n* **It is the same class already ticketed one layer down.** `KS-634` (Backlog) \u2014 *\"No CI gate runs the services' unit suites \u2014 a 73-test suite sat dead on develop and every PR stayed green\"* \u2014 and `KS-652` (Backlog) \u2014 *\"1219 tests across 23 services are ungated\"*. Those are about services having suites nothing runs; this is frontends having no suite to run, plus one that exists and cannot be reached. Same failure mode, opposite end.\n* **The precedent for cost is in the repo.** `KS-649` had 31 auth tests dead since 6 Aug because two suites failed at module load and reported \"no tests\"; `KS-718` had golden-master snapshots gitignored, so a fresh clone wrote its own expectations and passed. Tests that cannot fail are worse than absent \u2014 they read as coverage.\n* Four shipped admin pages import types from `frontend/admin/src/__mocks__/` (`DocumentTypes.tsx:20`, `DocumentTypeDetail.tsx:22`, `VerificationQueue.tsx:11`, `Workflows.tsx:12`) \u2014 a `__mocks__` directory on the production path, in an app with no test framework to justify the name. Worth a look in the same pass.\n\n## Suggested shape\n\n1. Add `\"test\": \"vitest run\"` to `frontend/issuer/package.json` so the 12 assertions that already exist can run and fail. One line; it is the whole fix for the unreachable half.\n2. Decide for the other five whether a unit tier is wanted at all. \"No unit tests for admin/verifier, the browser tier covers them\" is a legitimate answer \u2014 but it should be written down rather than inferred from an absence, because today the two states are indistinguishable.\n3. If the answer is none, make `npm run test --workspaces` honest: `--if-present`, or a note in `Blockchain/Dev/package.json` saying the frontend leg is intentionally empty.\n4. Rename or relocate `frontend/admin/src/__mocks__/` if it is production data, so the name stops implying a test fixture.\n\n## Acceptance\n\n* `npm test -w frontend/issuer` runs and reports 12 passing assertions.\n* A planted failure in one of those specs turns the command red (the `KS-718` lesson \u2014 prove the suite can fail before trusting it).\n* The intended unit-test posture for the other frontends is stated in the repo, whatever it is.\n\n## Note to Kamil \u2014 please scan before fixing\n\nSuggest checking the same shape across every workspace in one pass rather than ticket by ticket: which `package.json` files declare `test`, which declare it and are never invoked by a gate, and which have test files with no script. `KS-634` / `KS-652` already hold the services half, so a single audit would close the family. The `sdk/javascript` and `sdk/python` client SDKs are a third instance \u2014 no tests at all, and not workspace members, so nothing would reach them even if they had some.\n\n## References\n\n`Blockchain/Dev/package.json:6-10`, `:17` \u00b7 `Blockchain/Dev/frontend/*/package.json` \u00b7 `frontend/issuer/vite.config.ts:8-12` \u00b7 `frontend/issuer/src/__tests__/` \u00b7 `frontend/admin/src/__mocks__/` \u00b7 related: `KS-634` (Backlog), `KS-652` (Backlog), `KS-649` (Done), `KS-718` (Done), `KS-1390`.\n\n## Environment\n\nDistributed_Secuura `develop` **8ba2da02d**, 29 Sep 2026. Static review \u2014 the scripts blocks above were read from the tree at that commit; nothing was executed.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1693",
+    "title": "test(issuer): declare a vitest test script so the issuer's specs are reachable (KS-1391, item 1)"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "5ee65a66-34ce-40eb-b21c-0724687f21f5",
+    "createdAt": "2026-11-11T05:30:20.459Z",
+    "body": "**BLUF:** The admin frontend still has no test script, and Wednesday's Spark operator ran its vitest specs only through a harness-side configuration, never through a repository one. Facts only: this comment changes nothing in the repository.\n\n* At develop `249be7c8cd14`, the admin frontend's package manifest (`Blockchain/Dev/frontend/admin/package.json`) declares the scripts dev, build, preview and lint, no test script, and no vitest, jsdom or testing-library dependency. This ticket's table already lists it with 0 test files; PR 1693 declares a vitest script for the issuer only.\n* Wednesday's Spark operator reports o136 and o137 (2026-11-11; kept in Wednesday's own reference tree, not in this repository) ran vitest for the admin frontend through an external harness configuration plus a react dedupe and react symlinks. The o137 pass (KS-1912) proved a dropdown in jsdom under that harness configuration.\n* No script, configuration or dependency in the repository was changed by either pass.\n* Neighbours that touch the admin frontend: KS-1912, KS-1790, KS-1861.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

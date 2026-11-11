@@ -1,0 +1,36 @@
+{
+ "identifier": "KS-2030",
+ "title": "systemTest: two governance suites still use the register route as it worked before PR 1947 (the KS 1703 participant fixture and the KS 1762 cap suite)",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T00:54:20.908Z",
+ "updatedAt": "2026-11-06T00:54:20.908Z",
+ "description": "**BLUF:** Two systemTest suites still call `POST /api/governance/participants/register` the way it worked before PR 1947 merged on 2026-11-02. Both are read from source and NOT run. Neither file has changed since before that PR. No product code is wrong here: the tests are stale.\n\n## (a) The KS 1703 object-authorization module\n\n`systemTest/schemathesis/tests/test_get_by_id_object_authorization.py:151-156`: the `participant_id` fixture posts as the generated OWNER actor with a random wallet (`addr_test1ks1703` plus hex) and requires 201.\n\nSince PR 1947 a non-admin gets 403, because that wallet is not linked to their account: `walletAddress is not the wallet linked to your account`, or `Link a wallet to your account first` with no linked wallet (`services/governance/src/services/governanceService.ts:640-646`, develop `3fbf50ede123`). The module's docstring (line 25) says a fixture that fails errors the test, so this test should error rather than xfail.\n\n## (b) The KS 1762 live cap suite\n\n`systemTest/schemathesis/tests/governance_cap_live/cap_ops.py:244`, with `test_governance_cap_free_live.py:92` and `:141`: it registers the super-admin's user id as `walletAddress`, relying on an auto-registered row whose wallet was its id (`cap_ops.py:14-17` says so). PR 1947 removed that row shape.\n\n* **A database with no such row:** `create_draft` as the super-admin is refused first by createProposal: 403 with no linked wallet, 400 \"Minimum stake of 1000 required\" with one (`governanceService.ts:743-757`).\n* **The register call on that database:** at develop it creates a uuid row holding the user id as its wallet, which the voter never uses. After KS 1951 it answers 404 \"Wallet owner not found\", nothing written.\n* **A slot still holding such a row:** by-wallet finds it, so the call works as written, before and after KS 1951.\n\n## Not measured\n\nNeither suite was run: the Docker daemon is down on the host that found this. Whether the stale cells have failed in a run since 2026-11-02 is unknown. The cap suite is opt-in (`SECUURA_RUN_GOVERNANCE_CAP_LIVE=1`, per KS 1762).\n\n## Fix direction (not decided)\n\nBoth need an actor with a real linked wallet. Linking takes a CIP-8 signature (`services/auth/src/routes/wallet.ts:463`), so the question is how a test actor gets one. Under KS 1951 the operating rule is \"the user links the wallet first\".\n\n## Searched first\n\nLiteral-hit filter over title, description and comments. `make_dominant_drep` 0; `cap_ops.register` 0; `Link a wallet to your account first` 0; `addr_test1ks1703` 0; `participant_id` 0. `test_get_by_id_object_authorization` 1 (KS 1703); `governance_cap_live` 2 (KS 1762, KS 1763); `cap_ops` 1 (KS 1762). The comments on those three tickets (4, 8 and 0) were searched for the fixture, the suite, PR 1947 and KS 1942: none states these breaks. Control: `minProposalStake` 4.\n\n## Found by\n\nSeat F 35th while designing KS 1951. Filed on Wednesday's ruling of 2026-11-06 00:50:25Z, on our board account. Nothing in systemTest was touched.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1703"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

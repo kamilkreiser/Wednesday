@@ -1,0 +1,56 @@
+{
+ "identifier": "KS-2151",
+ "title": "Anchoring docs must say, after KS-1384 stage 1: one anchor row per document, a paid transaction per share and lifecycle event",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-09T05:25:32.702Z",
+ "updatedAt": "2026-11-09T08:29:36.212Z",
+ "description": "**BLUF:** The platform-k pages that describe anchoring do not yet record how anchoring behaves now that KS-1384 stage 1 is on both boxes (Stuart's words, 2026-11-09). They must state two facts, and nothing else new: (1) there is one anchor row per document and network; (2) until KS-1384 stage 2, every admitted share and lifecycle event pays its own Cardano transaction on that same row, and the row then names only the latest transaction. Stuart asked for this ticket before KS-1807 closes: it is the part of the S<->K contract that systemTest most needs written down. This is a DOCS build item: a build seat writes the pages. No code changes, and nothing is built for the paid-transaction behaviour (Kam's ruling below).\n\n## What the pages must state\n\n1. **One anchor row per document and network.** The unique key on `(document_id, network)` is migration 031. A repeat post upserts that row instead of adding one.\n2. **Until KS-1384 stage 2, each admitted share and lifecycle event pays its own transaction on the same row.** An admitted event carries a new payload, so no earlier attempt counts as the same one; it builds a new transaction, and the row then names only the latest transaction hash. Stage 1 did not add this and was not built to stop it: its shared-coin rule covers repeat attempts of one payload. Stage 2 gives each event its own row, on its own schedule.\n3. **Do not write** that stage 1 stops an event paying again, or that a share is \"idempotent\" at the transaction level. The route's code comment says \"idempotent: reuses the document's existing anchor\", which holds for the anchor id and not for the transaction.\n\n## The authority, quoted\n\nKam's card `secuura-ks1384-share-pays-second-tx-before-stage2-1106`, ruled option a at 2026-11-06 21:04:52 (AEDT): \"Leave it until stage 2\". The option's own words: \"Admitted events keep paying one fee each. Nothing is built for this. Stage 2 gives each event its own row, on its own schedule.\"\n\n## The measurement behind it (KS-1384, two comments of 2026-11-06, read whole)\n\n* Comment e0731289 (08:36:03Z): the share route calls `emitLifecycleAnchor`, which posts to `POST /api/anchors`; the upsert sets the row back to pending with a null hash and `processAnchor` runs again. Every post stamps its own `timestamp`, so the payload differs. Measured on the real submitter and wallet view with a stand-in chain and the upsert simulated from its SET list: a share whose payload replaces the stored one built a second transaction on a second coin and the row ended naming the second hash. Transfer-custody, revoke and lifecycle events use the same emitter, so by code they behave the same; not observed. Not measured: the fee of either transaction, which route posted the share, any other document.\n* Comment 2126a1f7 (08:40:40Z): a read-only box read on kintsugi at 2026-11-06 08:34:59Z found 1 row in the anchor table for the document, status confirmed, naming the share's transaction; the upload's transaction was in 0 rows. The comment's own limit: one table at one moment, no history, no chain read.\n\n## Where today's docs stand\n\n`Blockchain/Dev/docs/S-K-OWNERSHIP-CONTRACT.md` still marks the anchoring part ON HOLD until the KS-1384 build lands: line 17 (\"ON HOLD until the KS-1384 build lands and not assessed: flat-anchor `onBehalfOf`, `metadata.rowHash` ...\") and line 302 (\"The flat-anchor part is ON HOLD (KS-1384)\"), read at develop `204e62acdc35`. Stuart's comment of 2026-11-09 05:09Z on KS-1807 says the same: that section \"is still marked on hold until the KS-1384 build lands. Stage 1 is on both boxes.\" The builder finds any other page that describes anchoring; I read only the contract's lines above, not the other pages.\n\n## Not decided here\n\nWhen stage 2 lands, what it changes in the pages, and whether the flat-anchor `onBehalfOf` and `rowHash` parts can come off hold: those stay with KS-1384. This ticket records today's behaviour only.\n\n## Related\n\nKS-1807 (the docs-up-to-date ticket; it stays open until these pages land, by Stuart's request) and KS-1384 (the build; stage 2 is its next part). Both are linked as related.\n\n## Searched before filing\n\nBoard, includeArchived, title and description and every comment of each open candidate; controls pass (the positive control hit its known ticket KS-1379, a random token hit 0). `one anchor row`: 89 candidates, 4 open literal hits (KS-607, KS-1384, KS-1385, KS-1664): KS-1384 is the build this ticket documents; KS-607 (anchor and verify statuses disagree), KS-1385 (emitted anchors carry no documentType) and KS-1664 (recertify anchors before it writes its row) are different subjects, judged by title and search context. `anchoring pages`: 100 candidates, 1 open (KS-1807, the docs umbrella, which holds Stuart's request as a comment and is not a ticket for these pages). `one fee each`: 1 open, KS-2107, read whole: it rewords five code comments in originate (PR 2103), text only, no documentation page. `its own Cardano transaction`, `anchoring documentation` and `anchor row per document`: 0 open hits. `ON HOLD until the KS-1384`: 1 open (KS-1807). `stage 2`: 4 open (KS-1384, KS-1385, KS-1807, KS-2107). Read whole besides KS-2107: KS-1384's two comments of 2026-11-06 and KS-1807's newest comment. No open ticket tracks the anchoring documentation pages.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1384"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1807"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2136",
+    "title": "Refs KS-2151: record one anchor row per document and network, and a paid transaction per event until stage 2"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "cf010d51-d1de-43c4-8917-a27d8ee6646f",
+    "createdAt": "2026-11-09T08:30:02.513Z",
+    "body": "**BLUF:** PR 2136 (head `b907ba03bea2`, one commit on develop `e8d23ce366e2`) puts the two anchoring facts on the pages Stuart asked for. Docs only, no product source file changed. It is waiting for review; nothing is merged or deployed.\n\n- One anchor row per document and network: the unique key on `(document_id, network)` (migration 031), and a repeat post updates that row.\n- Until stage 2, each admitted share, transfer-custody, revoke and lifecycle event pays for its own Cardano transaction on that row, which then names only the latest transaction hash. The pages do not say stage 1 stops this, or that a share is idempotent at the transaction level.\n- Pages: `S-K-OWNERSHIP-CONTRACT.md` (a dated note; the hold wording stays), `VOCABULARY.md` (an \"As shipped\" entry) and `WORKFLOWS.md` (steps 4 and 5). `DATABASE-SCHEMA.md` is not covered.\n- Read from code at develop `e8d23ce366e2`, not observed live; the pages say nothing about what is deployed. One clause beyond the two facts cites KS 1200: the unique is declared only by migration 031 and anchoring's own table creation.\n- Checks: path and symbol existence 10 of 10, an untouched-lines proof with planted controls, the audit gates and the test-type check green, merge-tree against the open contract PR clean. What stage 2 changes in these pages stays with KS 1384.\n\nhttps://github.com/Secuura/Distributed_Secuura/pull/2136",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

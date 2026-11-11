@@ -1,0 +1,36 @@
+{
+ "identifier": "KS-1948",
+ "title": "staking: POST /api/stake takes address and amount from the caller, so any signed-in user can create or grow a stake position for any address",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-02T10:06:12.398Z",
+ "updatedAt": "2026-11-02T10:06:12.398Z",
+ "description": "**BLUF:** `POST /api/stake` (`services/staking/src/routes/stake.ts:189-245`) takes `address` and `amount` from the request body and saves a stake position for that address with no ownership or chain check. By the same shape, the unstake routes (`POST /api/stake/unstake` `:263`, `POST /api/stake/complete-unstake` `:317`) also take the address from the body; they were not read line by line. So any signed-in caller can create or grow a stake position for any address. `txHash` is optional and is logged but never verified. KS 1942's design treats `svc_stake_positions` as NOT a trusted stake source for this reason.\n\n## Where (develop `0e3a9b65cdd6`; read from source, NOT run)\n\n* Mount: `services/staking/src/index.ts:80` applies `jwtAuthenticate()` to `/api`, and `:82` mounts the stake routes at `/api/stake`. Any signed-in caller reaches them.\n* `routes/stake.ts:189-245`: the handler parses `StakeSchema` from `req.body` (`:191`), takes `{ address, amount, txHash }` (`:196`), loads the position for that address (`:199`), adds `amount` to it or creates it (`:213-228`), and saves it (`:230`). It also adds to the in-process pool stats (`:233-236`).\n* `req.user` is not read anywhere in `routes/stake.ts`. `txHash` is optional in the schema (`:33`), and its only other use is the log line (`:243`).\n\n## Why it matters\n\nKS 1942 (the governance register route takes stake from the caller) is being fixed by making stake and roles admin-set only. Its design rejected `svc_stake_positions` as a stake source because this route lets any caller assert any position.\n\n## Not checked\n\nThe unstake and complete-unstake handlers line by line. Whether the gateway restricts `/api/stake` to a role. Whether any client other than the tests calls these routes. Whether the Aiken staking validator is meant to be the source of truth (no service reads it).\n\n## Related\n\nKS 1942 (governance register route, same class). KS 1845 (covers only the admin listing `GET /api/stake/all`, not these routes).\n\n## Searched first\n\nBoard search over issue content and comment bodies:\n\n* \"svc_stake_positions\" and \"routes/stake.ts\" find KS 1845 (an issue covering only `GET /api/stake/all`) and a KS 1544 comment.\n* \"POST /api/stake\" finds comments on KS 188, KS 256 and KS 492, about business-rule refusals and OpenAPI examples on `/unstake` and `/complete-unstake`, not ownership.\n* \"StakeSchema\" and \"staking service\" find 0.\n* Control: \"minProposalStake\" finds KS 1940.\n\n## Found by\n\nSeat F 23rd while designing KS 1942; filed on the coordinator's ruling (D4). Not measured against a running service.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1845"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

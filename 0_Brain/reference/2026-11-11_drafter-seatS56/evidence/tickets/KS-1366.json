@@ -1,0 +1,56 @@
+{
+ "identifier": "KS-1366",
+ "title": "PR template still says to dispatch pre-merge-platform-suites.yml and has no Test Evidence block; CONTRIBUTING's Test Evidence template has drifted from DEV-PROCESS",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 0,
+ "assignee": {
+  "email": "stuart.jamieson@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-28T12:44:37.673Z",
+ "updatedAt": "2026-10-31T19:15:50.660Z",
+ "description": "## Summary\n\nFor when you have a moment, Stuart. Two small bits of drift in the merge-flow paperwork you own, spotted while preparing the [KS-1354](https://linear.app/secuura/issue/KS-1354/bump-systemtest-k6-210-230-grafanak6-v220-v230-released) PR. The PR template still suggests dispatching the retired `pre-merge-platform-suites.yml` and has no Test Evidence block. And the Test Evidence templates in `CONTRIBUTING.md` and `DEV-PROCESS.md` have drifted apart. Nothing has been changed. Thank you.\n\n+++ Evidence (develop `63db8a383`, 2026-09-28) and what \"done\" could look like\n\n**1.** `.github/pull_request_template.md` **and the adopted merge flow**\n\n* It asks authors to dispatch `pre-merge-platform-suites.yml`. Root `CLAUDE.md` (*Merge flow*), `Blockchain/Dev/docs/DEV-PROCESS.md` and [KS-441](https://linear.app/secuura/issue/KS-441/akto-ci-scan-throughput-21-s-local-vs-10-min-in-the-isolated-pr-akto) say not to: Actions is retired, and the gate is a local four-suite run.\n* It has no Test Evidence block (touched / ran / NOT run / migrations+config), which the merge flow relies on. `grep -ci 'Test Evidence' .github/pull_request_template.md` \u2192 **0**.\n\n**2. The two Test Evidence templates**\n\n`DEV-PROCESS.md` says it uses the same wording as `CONTRIBUTING.md`, but:\n\n* `grep -c 'Cross-cutting guards' Blockchain/Dev/docs/DEV-PROCESS.md` \u2192 **2**\n* `grep -c 'Cross-cutting guards' Blockchain/Dev/CONTRIBUTING.md` \u2192 **0**\n\n`CONTRIBUTING.md` also lacks DEV-PROCESS's Schemathesis \"failing SET + diff vs develop\" wording.\n\n**Why here:** it belongs to the process [KS-685](https://linear.app/secuura/issue/KS-685/define-the-work-test-commit-manual-merge-process-while-ci-is) set up (now Deployed to UAT), so there was no open ticket to add it to.\n\n**Related:** [KS-1049](https://linear.app/secuura/issue/KS-1049/a-prs-test-evidence-must-state-whether-the-preflight-ran-the-hook) (Kamil \u2014 Test Evidence should say whether the preflight ran; the template would be its home) \u00b7 [KS-1012](https://linear.app/secuura/issue/KS-1012/the-require-pr-gates-ruleset-survived-the-actions-retirement-7) (the `require-pr-gates` ruleset outlived Actions).\n\n**Done when**\n\n- [ ] The PR template no longer mentions dispatching the retired workflow.\n- [ ] The PR template seeds the Test Evidence block, including a preflight-ran line ([KS-1049](https://linear.app/secuura/issue/KS-1049/a-prs-test-evidence-must-state-whether-the-preflight-ran-the-hook)).\n- [ ] `CONTRIBUTING.md` and `DEV-PROCESS.md` share one Test Evidence template (one canonical copy; the other points at it).\n\n+++",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1012"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-441"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1881",
+    "title": "Refs KS-1366: PR template stops telling authors to dispatch the retired pre-merge workflow"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "c8a91d02-b72c-4ee0-968d-1142bdbc9f21",
+    "createdAt": "2026-10-31T19:15:49.392Z",
+    "body": "**BLUF:** pull request 1881 (https://github.com/Secuura/Distributed_Secuura/pull/1881, head `ba52d62e1cfe`) removes the instruction to dispatch the retired `pre-merge-platform-suites.yml` from the PR template, the first of this ticket's three done-when items. Documentation only; raised for Wednesday's delta check (no gate); not merged. This ticket stays open.\n\n**What changed:** three lines in `.github/pull_request_template.md`: the note now says to run each suite's pre-merge tier locally against the stack and not to dispatch the workflow (KS 441, Actions is retired). One held Spark pass, tree-identical to its golden, applied strictly; no hand edit.\n\n**Not done:** the template still has no Test Evidence block with a preflight-ran line, and `CONTRIBUTING.md` and `DEV-PROCESS.md` still carry two different Test Evidence templates (the ticket's second and third items). The root `CLAUDE.md` contradiction (lines 266 to 271 against line 321) is filed separately as KS 1915.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

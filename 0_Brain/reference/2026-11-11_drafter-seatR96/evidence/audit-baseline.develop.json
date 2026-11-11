@@ -1,0 +1,30 @@
+{
+  "$comment": "KS-470 — triaged npm-audit baseline. Every advisory reported by `npm audit` at the workspace root — and (KS-531) every advisory matched against a standalone lockfile by `scripts/audit/audit-locks.mjs` — must either be listed here (with the reason it is accepted and the ticket that recorded the decision) or the gate (scripts/audit/audit-gate.mjs) fails. Entries with `expires` are TEMPORARY exceptions pending a fix ticket — the gate treats them as new once the date passes (the KS-105 ticketed-exception model). Keyed by GHSA id.",
+  "accepted": {
+    "GHSA-848j-6mx2-7j84": {
+      "package": "elliptic",
+      "reason": "Bundled (vite-plugin-node-polyfills → crypto-browserify → browserify-sign → elliptic, pinned by crypto-browserify's side-effectful createECDH export) but UNREACHABLE: zero createSign/createVerify/createECDH invocations in issuer src, shared, or any @meshsdk/@cardano-sdk file (grep-verified with a positive control); Cardano signing is Ed25519 via libsodium WASM. Chunk is lazy (wallet-connect only). Full working on KS-470.",
+      "ticket": "KS-470",
+      "decidedAt": "2026-07-19"
+    },
+    "GHSA-w5hq-g745-h8pq": {
+      "package": "uuid",
+      "reason": "Path is @azure/msal-node (m365-integration) → uuid 8.3.2. Advisory covers v3/v5/v6-with-buffer bounds; msal-node's only uuid import is `{ v4 }` (dist/crypto/GuidGenerator.mjs — verified 2026-07-19). The v5.x msal-node copy under @azure/identity resolves uuid outside the vulnerable range.",
+      "ticket": "KS-470",
+      "decidedAt": "2026-07-19"
+    },
+    "GHSA-5qjj-4xww-7phc": {
+      "package": "valibot",
+      "reason": "KS-493 wave: valibot 1.2.0 is bundled by @prisma/dev (Prisma dev-server tooling, pulled transitively via @prisma/client) and is reached only through that path - not through any Secuura runtime code. The @prisma/dev bundle pins it, so a root override is inert; a @prisma/client major bump is the only real fix (out of scope here). Moderate, not runtime-reachable in Secuura code paths. Accepted as a dev/tooling-bundle path (KS-470 precedent).",
+      "ticket": "KS-493",
+      "decidedAt": "2026-07-29"
+    },
+    "GHSA-gcqx-w48m-w2h4": {
+      "package": "deepmerge",
+      "reason": "KS-1784: GHSA-gcqx-w48m-w2h4 is LOW (prototype poisoning via mergeObject()), vulnerable `>= 4.2.0, <= 4.3.1`, with NO patched version, so the pin cannot be bumped. deepmerge 4.3.1 is pinned as a DEV-only dependency (via jest-config) in the workspace root and in services/originate, services/governance, services/referral and services/vc-issuer, whose Dockerfiles install with --omit=dev / npm prune --omit=dev (lockfile-level measurement by Wednesday, 2026-10-28; not an image read). mobile/secuura-app carries it as a PRODUCTION dependency via @expo/config, but that lock is outside this gate (KS-769). Accepted by Kam on 2026-10-28 at 14:40 AEDT on card secuura-deepmerge-advisory-baseline-1028. Re-dated to 2027-02-28 (a Sunday) on Kam's ruling of 2026-11-06, card secuura-deepmerge-row5-redate-past-1130-1106 (tap a at 14:58:47 local): no patched version exists; re-checked 2026-11-06 (npm registry: latest 4.3.1, published 2023-03-16, 46 versions and none newer; the registry's advisory data still lists 4.3.1 as affected). Owner: KS-1707. Re-triaged sooner if a patch is published.",
+      "ticket": "KS-1707",
+      "decidedAt": "2026-10-28",
+      "expires": "2027-02-28"
+    }
+  }
+}

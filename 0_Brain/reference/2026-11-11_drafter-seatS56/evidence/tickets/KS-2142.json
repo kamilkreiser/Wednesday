@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2142",
+ "title": "ks1370 pin B2 carries no may-change mark, and its 4 s window can flake under load (F-2071-1, F-2071-2)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-08T21:52:18.994Z",
+ "updatedAt": "2026-11-09T10:40:09.303Z",
+ "description": "**BLUF:** PR 2071 (KS-1370, merged 2026-11-08T21:01:40Z as `425ea1d3df0f`) added one integration test file. Its cell B2 pins a window in the security service's boot probe, and the gate found two Minor notes on that one cell. F-2071-1: B2 pins today's behaviour (the database answers, the availability flag is still down, and a validate reads the stored row and warms memory), but the cell carries no mark that a later fix may change it, so a fixer who changes that window would see B2 go red and read it as a regression. F-2071-2: B2 depends on a 4 s window between the second failed retry and the third probe; if the event loop stalls, the retry timer could fire first, flip the flag, and fail the cell's `flagAtWarm` read. Both are Low by Wednesday's ruling (ANSWER to B 106th point 1, findings G243-F5 and G243-F6). One ticket, two items: one cell, one test file, one gate pass. Neither item is a product defect, and F-2071-2 is unmeasured.\n\nSource: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-07_gate243-tier2-batch/verdict.md`, the PR 2071 section, findings F-2071-1 and F-2071-2 on head `697226c8395d`, verdict GO WITH NOTES (the pin was not executed), accepted at merge.\n\n## Item 1: F-2071-1 (Minor, READ ONLY)\n\nThe cell is at line 324 of `Blockchain/Dev/services/security/src/__tests__/ks1370-two-replicas-and-a-real-boot-race.integration.test.ts` at develop `425ea1d3df0f`: \"pin B2: the database answers, the flag is still down, and a validate reads the stored row and warms memory\". The file header (line 2) says the whole file is \"A PIN OF BEHAVIOUR THAT DEVELOP ALREADY HAS, NOT A FIX\", which partly mitigates the note. The cell's own title and its asserts (lines 325 to 330) carry no mark that this particular behaviour is one the tickets (KS-1370, KS-1377) might change.\n\n## Item 2: F-2071-2 (Minor, READ ONLY, flakiness UNMEASURED)\n\nThe setup (lines 273 to 284 of the same file) waits for two failed retries (a `waitFor` with a 20 s budget, line 277), opens the relay, then reads `inst.db.isDbAvailable()` into `seen.flagAtWarm` at line 279; the cell asserts it is `false` at line 325. The comment at lines 274 and 275 gives the backoff as 1 s, 2 s, 4 s, so the third probe is 4 s after the second failed retry; the delay doubles at line 154 of `Blockchain/Dev/services/security/src/db.ts`. If a stalled event loop lets that timer fire between `relay.open()` and the read (the gate saw host load1 reach 15), the flag flips and the assert fails. The gate did not measure flakiness; no failing run is known.\n\n## What I read\n\nREAD ONLY (the board seat, at develop `425ea1d3df0f`): the lines cited above in the test file and in `Blockchain/Dev/services/security/src/db.ts`. The file has 349 lines and nine cells. I did not run it, and the gate did not either.\n\n## Fix shape\n\nThe verdict gives none. My reading, not the gate's: item 1 is a one-line mark on the cell; item 2 starts with a measurement (run the file repeatedly under load) before any change.\n\n## Related\n\nKS-1370 (In Progress, PR 2071's ticket, left as is). KS-1377 (validate route follow-ups from the KS-1370 gate, not touched). The nine-cell run (G243-N3) is filed as its own ticket from the same gate pass.\n\n## Searched before filing\n\nBoard, includeArchived, title and description and every comment of each open candidate; controls pass. The test file's full path 0 hits; its name stem 0; `flagAtWarm` 0; `F-2071-1` 0; `F-2071-2` 0; `G243-F5` 0; `G243-F6` 0; `G243-N3` 0. `TEST_APP_DATABASE_URL` 2 open hits read at source (KS-485, the security-review stream; KS-1499, KS-1311's test gaps, a different suite). \"nine cells\" 4 open hits read at source (KS-485, KS-1171, KS-1377, KS-1524): none holds these notes; KS-1377 is the validate route's lost update, KS-1524 a different set of nine cells.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2142",
+    "title": "Refs KS-2142: the ks1370 integration test marks pin B2 as one a later fix may change, and notes the 4 s window"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "fe750623-8a60-4334-a285-9112c1cc7fae",
+    "createdAt": "2026-11-09T10:39:59.568Z",
+    "body": "**BLUF:** PR 2142 (head `3ea830e7e221`, one commit on develop `f98afb113c2d`) adds the two comments this ticket asks for in the ks1370 integration test: a may-change mark above pin B2 (item 1) and a note on the 4 s window (item 2). Comments only; it is ready for its gate (tier 2 proposed). Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **Item 1:** B2 now says a later fix under KS 1370 or KS 1377 may change it, and that B2 going red then is that change being made.\n- **Item 2, as a comment only:** the 4 s window now says a stalled event loop could let the retry timer fire first and fail B2, a load flake of the timing. Flakiness is UNMEASURED; the measurement this ticket calls for (repeated runs under load) is not done.\n- **Proof that no code moved:** the TypeScript emit of the file with comments removed is identical before and after (14,704 bytes), with a code control that differs and a comment control that does not. The integration file was not run (it needs the database).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

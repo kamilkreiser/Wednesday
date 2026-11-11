@@ -1,0 +1,190 @@
+{
+ "identifier": "KS-1175",
+ "title": "Anchor / originate / lifecycle-event schemas: accept and anchor platform-s's non-PII actor + organisation identity fields (actorDid, actorLevel, actorSource, actorVerified, orgDid, orgTrust, orgVerified) beside identityCommitment",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-16T08:44:38.104Z",
+ "updatedAt": "2026-11-10T07:21:55.874Z",
+ "description": "## What platform-s needs\n\nFollow-on to [KS-721](https://linear.app/secuura/issue/KS-721/anchor-schema-accept-and-anchor-platform-ss-opaque-identitycommitment) (which accepted `metadata.identityCommitment`). Platform-S now needs the Cardano record to **show** who acted and at what identity level, for the actor and their organisation \u2014 readable, not only committed. The S-side ruling on what is allowed in clear is [PS-869](https://linear.app/secuura/issue/PS-869/5-decision-the-on-chain-identity-record-did-level-source-and-verified) (decision) under epic [PS-864](https://linear.app/secuura/issue/PS-864/epic-id-status-stored-and-shown-throughout-the-system-actor-and); the field list there is the contract:\n\n| Field | Type | Pattern / values |\n| -- | -- | -- |\n| `actorDid` | string \u2264 512 | `^did:(key|web):[A-Za-z0-9._:%-]+$` |\n| `actorLevel` | integer | `1`, `2`, `3` \u2014 NIST 800-63A IAL alignment |\n| `actorSource` | string | `platform` | `stripe` | `entra-verified-id` |\n| `actorVerified` | boolean |  |\n| `orgDid` | string \u2264 512 | as `actorDid` |\n| `orgTrust` | string | `unverified` | `domain` | `document` | `kyc` | `government` |\n| `orgVerified` | boolean |  |\n| `identityCommitment` | string \u2264 128 | already accepted ([KS-721](https://linear.app/secuura/issue/KS-721/anchor-schema-accept-and-anchor-platform-ss-opaque-identitycommitment)); the `vN` will move to `v2` |\n\nAll optional; all non-PII (DIDs are pseudonymous, levels and sources are enumerations, no dates, no names, no emails). Consistent with [KS-240](https://linear.app/secuura/issue/KS-240/strict-by-default-on-chain-minimisation-strip-issuername-any-human) \u2014 no free text, nothing recoverable to a natural person.\n\n## Suggested work\n\n1. Accept the block as `metadata.identity` (or flat under `metadata` \u2014 say which) on **every** endpoint S anchors through: `POST /api/anchors`, `POST /api/documents` (originate), `POST /{id}/version`, `POST /{id}/anchor`, `POST /{id}/share`, `POST /{id}/transfer-custody`, `POST /api/certifications/issue`, `POST /{id}/lifecycle-events`. Today `anchorSchema.ts` strips unknown keys, so S will not send until K is live (the [PS-612](https://linear.app/secuura/issue/PS-612/rename-the-certify-verb-to-declare-across-s) ordering).\n2. Carry it into the on-chain record beside `documentType` / `occurredAt` / `identityCommitment`.\n3. Return it in provenance / verify / anchor-status responses so S can render \"on chain: Level 2, entra-verified-id\" beside its local snapshot and flag any mismatch.\n4. **State which existing request fields reach Cardano metadata**: `holderEmail`, `recipients[].email`, `newHolderEmail`, `onBehalfOf.email` / `displayName`. S sends these today; the requirement is that no PII is stored on the blockchain. If any of them is written to chain metadata, file the defect and link it here.\n5. OpenAPI spec + Schemathesis / Akto examples updated in the same PR ([KS-256](https://linear.app/secuura/issue/KS-256/add-openapi-inline-examples-to-all-329-operations-eliminate-coverage) pattern), and both K-side testing HTML docs.\n\n## Ordering\n\n**K deploys first**, then PS-870 adds the fields on the S request. Pair-test from S against K on paired slots (S slot N \u2194 K slot N) and quote the counts.",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-871"
+    }
+   },
+   {
+    "type": "blocks",
+    "relatedIssue": {
+     "identifier": "PS-870"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-612"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-864"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/platform-s/pull/1247",
+    "title": "PS-1360: dev-ps sends a did:jwk actorDid again (AnchorDidMethods key,web,jwk)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1812",
+    "title": "Refs KS-1175: pin the did:jwk shape pattern against its six regex weakenings (test only)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1807",
+    "title": "Refs KS-1175: refuse a did:jwk that carries a private key or is not a JSON object (51 cells)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1805",
+    "title": "Refs KS-1175: actorDid and orgDid accept did:jwk (spec, docs, 14 red-proven cells)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1607",
+    "title": "Refs KS-1385 (b): a holder's update keeps the first-anchored issuer fields"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1116",
+    "title": "KS-1284 + KS-1175: six anchoring pins - chunk join, explorer, identity, view, decode, attach"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1105",
+    "title": "KS-1175: accept and anchor Platform-S's non-PII actor + organisation identity beside identityCommitment"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "43aa0314-f9e8-4e9a-adf9-faa257c225fd",
+    "createdAt": "2026-11-02T03:11:59.627Z",
+    "body": "Delivered: anchoring accepts and anchors the actor and organisation identity fields beside identityCommitment (PR 1105, cbae988db, with the pins in PR 1116, 910687394) and accepts did:jwk for actorDid and orgDid with a private-key guard (PRs 1805 and 1807, a570cd703 and 6d41673e0), pinned by PR 1812 (5a5c4d2b3). All are in the kintsugi deploy b1fb543640e7 (2026-11-01); the ticket's own comment records 1805 and 1807 live on kintsugi and demo-pk on 2026-10-29. Verified by code read at b1fb543640e7, not observed live: actorDid appears in services/anchoring (anchorSchema.ts, anchoring.openapi.ts, cardano/cardanoMetadatum.ts) and in no non-test source file of originate. Left open: the ticket's 2026-10-29 deploy comment says the originate and lifecycle-event schema scope is not covered by these PRs and stays open; the code read agrees.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "ea1e6b4b-062f-4c98-a72f-a1812b323609",
+    "createdAt": "2026-10-29T13:30:28.007Z",
+    "body": "**BLUF:** Pull request 1812 is open for KS-1175 (test only, zero product bytes; Refs not Closes): https://github.com/Secuura/Distributed_Secuura/pull/1812 at head 8c513e1f6e76d2dbabcd72da9260cf31aec1a507 on develop be2cd084d0f1. It pins the did:jwk shape pattern against the six regex weakenings that QA gate 15 (finding 1805-1) showed survived every cell. Not merged, not deployed; a tier-2 QA gate is requested. Nothing on this ticket's state or assignee was changed.\n\n- What: 18 new cells in `ks1175-identity-anchoring.test.ts` (+32 -0): seven refusal shapes for each of the two did:jwk fields (an empty payload, a trailing newline, a newline between payloads, base64 padding, a trailing space, an upper-case method, a space inside the payload), each asserting exactly one `invalid_string` issue, plus two control cells per field. Both Projects Documents docs gain section 112. \"1805-1\" in the cell names is the gate finding's id, not another ticket.\n- Measured by the seat that raised it, on the branch: the file is 135 of 135 on the untouched product. Each of the six weakenings planted alone is killed (the `m` flag 4 red cells, `=` 2, `$` dropped 10, the `i` flag 2, `+` to `*` 2, `\\s` 8); all six at once turn 14 of 135 red, exactly the 14 new RED cells, and no older cell goes red. Whole anchoring suite 456 to 474 cells with the same one pre-existing failure in both (`threadTokenMint.test.ts`), 0 new reds. `tsc` with the file in the program: 0 errors.\n- Pre-push hook: 13 of 16 legs ran, 3 skipped (legs 3, 4 and 8: local stack not up), nothing failed. That is not a pass of those legs.\n- Not run: the anchoring integration files, the four platform suites, a running stack, any deploy, an LTS Node (the host runs v26.8.1). Not claimed: that the pattern is the right one, or that a seventh weakening would be caught.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "5a282db6-a5d0-415f-9ce8-c186afc7ac77",
+    "createdAt": "2026-10-29T11:56:43.331Z",
+    "body": "**Deployed: #1805 and #1807 are live on both boxes (develop `6d41673e0f79`).** kintsugi (dev-ps) 2026-10-29 22:07:19 AEDT (11:07:19 UTC), demo-pk (uat-ps) 22:48:12 AEDT (11:48:12 UTC). anchoring was recreated in the windows 22:06:58-22:07:07 AEDT on kintsugi and 22:47:45-22:47:59 AEDT on demo-pk.\n\n- **What is live:** anchoring accepts `did:jwk:<base64url>` for `identity.actorDid` and `identity.orgDid` (#1805), and answers 400 to a `did:jwk` whose decoded JWK carries a top-level private-key member (`d`, `p`, `q`, `dp`, `dq`, `qi`, `k`) or does not decode to a JSON object (#1807, Kam's ruling of 29 Oct). Only the JWK's own top-level member names are checked: a private key nested deeper inside the JWK is not checked, and nothing else about the key is validated. The published spec (yaml sha16 `e5c450a67c4def10`) carries the new pattern and the guard sentence.\n- **How it was checked:** by the compiled files in the running anchoring container on both boxes (the old `did:(key|web)` pattern gone, the new pattern, `didJwkRefusal` and the private-member list present) and by the yaml served at `/api/docs/openapi.yaml`. No test write was done, so the new 400s were not exercised against a live route.\n- **Not covered:** the ticket's originate / lifecycle-event schema scope is not covered by these PRs and stays open. This ticket stays In Progress.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "6e9b3f78-d072-4cb1-a19a-50c228ab5450",
+    "createdAt": "2026-10-29T09:50:16.241Z",
+    "body": "**BLUF:** pull request 1807 (https://github.com/Secuura/Distributed_Secuura/pull/1807) is MERGED to develop as squash `6d41673e0f79c0f02c2ec7b893cc960b6fa3ec10` on the coordinator's head-pinned go (head `570cd04dbdac`, develop `fd84001c738a`). NOT deployed: the next deploy round takes it together with #1805, so a `did:jwk` is not reachable on any box until then.\n\n- **What is on develop:** a `did:jwk` on `actorDid` / `orgDid` is refused with a 400 if any of `d`, `p`, `q`, `dp`, `dq`, `qi`, `k` is a top-level member, or if the payload is not unpadded base64url of a JSON object (Kam's ruling of 2026-10-29, option a). Nothing else about the JWK is checked; `did:key` and `did:web` are unchanged.\n- **Verified at origin:** develop is the squash; it has ONE parent, `fd84001c738a`; its tree `a3facc03fcd3` equals the PR head's tree; the PR reads MERGED at 09:49:36Z; the squash changed exactly the PR's 7 files.\n- **Gate 16: GO WITH NOTES (0 blocker, 0 major, 2 minor, 6 info).** Minor 1807-1: no cell covers the early exit that leaves a malformed value to the pattern (removing it would report a malformed `did:jwk` twice, still a 400). Minor 1807-2: the published pattern admits `did:jwk` values the runtime refuses (5,000 of 5,000 random pattern-valid values were refused); the preferred fix is a `map_case` hook in the Schemathesis config, not a wider expected-status list. Both are follow-ups and are not fixed in this PR. The accepted shapes noted as info (an uppercase `D`, a nested `d`, `oth`) are as the ruling says.\n- **Not run before the merge:** the four platform suites, any stack or database, Docker, a Node 24 LTS run, any anchor of a `did:jwk`, any deploy.\n- The ticket's state is unchanged: it closes when it is deployed and tested.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "953e5fc6-107d-4942-b774-28e2b3e33354",
+    "createdAt": "2026-10-29T09:32:38.549Z",
+    "body": "**BLUF:** pull request 1807 (https://github.com/Secuura/Distributed_Secuura/pull/1807), head `570cd04dbdac3bbf04a3298060902e3a38d105d2`, adds the private-key guard Kam ruled on 2026-10-29 19:51:25 AEDT (card secuura-ks1175-private-jwk-guard-1029, option a) to `actorDid` and `orgDid`: a `did:jwk` is decoded only far enough to read its member names and is refused with a 400 when any of `d`, `p`, `q`, `dp`, `dq`, `qi`, `k` is a top-level member, or when the payload is not unpadded base64url of a JSON object. Not merged, not deployed; the `did:jwk` deploy waits on this guard.\n\n- **Change:** `didField` in `anchorSchema.ts` gets a `superRefine` (issue code `custom`, message starting `Invalid DID`, naming the members found, never a value); both DID descriptions in `anchoring.openapi.ts` and the generated yaml say it; `VOCABULARY.md`; both Projects Documents (flow-document section 108 and the cheat sheet). `did:key` and `did:web` are unchanged. Nothing else about the JWK is checked.\n- **Decisions the ruling implies, stated in the PR:** an undecodable `did:jwk` is refused; the decode is strict (base64url alphabet checked before decoding, because Node's decoder skips other characters); members are matched by exact name at the top level.\n- **Proof:** 51 new cells (the file reads 117, was 66; the four named anchoring files 211 of 211, were 160), each red-proven against 28 mutants (develop's file: 39 cells red; each of the seven members killed by its own mutant; six over-broad guards, four too-lenient guards and three message mutants red); 3 cells from the previous entry rebuilt on decodable payloads. Whole anchoring suite 455 of 456 (the one red is `threadTokenMint`, KS 562, the same with these files at develop's); both audit gates rc 0; `check:openapi` rc 0; tsc and eslint clean.\n- **Limits, stated in the PR:** a differently-cased `D` and a nested `d` are not refused; the spec pattern still describes values the runtime now refuses, so a Schemathesis positive case could meet a 400 (unmeasured).\n- **Not run:** the four platform suites, any stack or database, Docker, a Node 24 LTS run, any anchor of a `did:jwk`, any deploy.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "d6b16488-6233-4b2e-8421-b412c54716fc",
+    "createdAt": "2026-10-29T07:32:20.812Z",
+    "body": "**BLUF:** pull request 1805 is merged into develop as the squash commit `a570cd7037858e7d6036e587220c069067a0f9f4` (one parent, `a5962b99d127`; its tree equals the PR head's tree; the 7 files of the PR and no others). `actorDid` and `orgDid` now accept `did:jwk` on develop. **Not deployed.** The deploy waits on a ruling about private-key JWKs (gate finding 1805-3, below).\n\n- **What is on develop:** `DID_PATTERN` is `^did:(key|web|jwk):[A-Za-z0-9._:%-]+$` (cap 512 unchanged), the refusal message names did:jwk and still starts `Invalid DID`, the generated spec and `VOCABULARY.md` follow, 14 new cells, and the two testing docs carry the entry as section 106.\n- **Gate 15 (GO WITH NOTES, 0 blocker, 0 major):** 1805-3 (minor, carded to Kam): the check is shape only and never decodes the JWK, so a `did:jwk` whose JWK has private members (for example `d`) is accepted, and an anchored value is permanent on a public chain; the deploy waits on that ruling. 1805-1 and 1805-2 (minor) are follow-ups filed by the coordinator: six small weakenings of the pattern survive every cell (a newline flag, `=` padding, a dropped end anchor, case-insensitive matching, an empty segment, whitespace), and the alphabet after `did:jwk:` admits `.`, `:` and `%`, so it is not strictly base64url. 1805-6 (info): the anchoring whole suite has one red, `threadTokenMint`, which also fails on develop (KS 562).\n- **Verified at origin after the merge:** develop's tip equals the squash; exactly one parent; tree equal to the PR head's tree; PR state MERGED at 2026-10-29T07:31:32Z.\n- **Not verified live.** Done is tested, works and deployed (secuura-test-discipline \u00a75g), so this ticket is not moved.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "b5488b61-4214-4623-ada6-4283d05e89d7",
+    "createdAt": "2026-10-29T06:50:09.404Z",
+    "body": "**BLUF:** pull request 1805 (https://github.com/Secuura/Distributed_Secuura/pull/1805), head `7d47b67086773b0351dfc851cc16b97da03e808b`, widens `DID_PATTERN` so `actorDid` and `orgDid` accept `did:jwk`. The pattern was `^did:(key|web):[A-Za-z0-9._:%-]+$` and is now `^did:(key|web|jwk):[A-Za-z0-9._:%-]+$`; the 512-character cap is unchanged. This is the ruling on PS 1324 recorded on this ticket on 2026-10-22 (comment `f7cd15da`). Not merged, not deployed.\n\n- **Sites changed:** `services/anchoring/src/anchorSchema.ts` (`DID_PATTERN` at :122, the refusal message at :144, which now names did:jwk and still starts `Invalid DID`), `services/anchoring/src/anchoring.openapi.ts` (two descriptions), the generated `docs/openapi/secuura-api.yaml` (+5 / \u22124: two pattern lines and two description lines), `docs/VOCABULARY.md`, the anchoring test file, and the two Projects Documents entries (provisional section 106). **Read and left:** `services/shared` `DIDSchema` (a generic check for `holderDid` and `verifierDid`), the Prism resolver and patterns (Prism DIDs), and the two originate `ks1709` tests (they stub a 400 body that starts `Invalid DID`).\n- **Cells:** 14 new (7 per field) in `ks1175-identity-anchoring.test.ts`, which reads 66 cells (was 52); the four named anchoring files read 160 of 160 (were 146 of 146). Red-proof on the committed state, new cells red out of 14: develop's whole `anchorSchema.ts` 8, the old pattern alone 6, the old message alone 2, any method (`did:[a-z]+:`) 6, no length cap 2, an alphabet without `-` and `_` 2, the test's own DID shortened by one character 2; green before and after.\n- **Ran** (Node v26.8.1, not an LTS line): whole anchoring suite 404 of 405 (the one red is the `threadTokenMint` cell recorded under KS 562, and it fails the same way with these five files at develop's versions); the 13 other files that read `secuura-api.yaml` 198 of 198; `check:openapi` rc 0; `tsc` over the service with tests 0 errors; `eslint` rc 0; `html_docs_check` rc 0 and the docs matrix 18 of 18; both audit gates rc 0 on this head with no baseline row for GHSA-rmxm-3fg6-px4f (the v2 locks are on develop). The pre-push hook on this head: 13/16 legs ran, 3 skipped (no local stack), nothing failed; not a pass for the skipped legs.\n- **No DID example to change:** the Schemathesis, Akto and systemTest files hold no `did:key`, `did:web` or `did:jwk` value (a value-shaped search finds two `did:prism` values, a different field); Schemathesis takes its examples from the generated yaml (`check:spec-examples`, 414 blocks, OK). The two testing docs get an entry.\n- **Not run / not done:** the four platform suites, any stack or database, Docker, a Node 24 LTS run, any anchor of a `did:jwk` on any network or box, any deploy. The ticket's state and assignee are untouched.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "f7cd15da-4088-4ddd-be0b-47d3873d9c93",
+    "createdAt": "2026-10-22T04:54:19.611Z",
+    "body": "@kamil.kreiser \u2014 **contract amendment from S (Stuart's ruling on PS-1324, 22 Oct 2026): please widen `actorDid` / `orgDid` to accept `did:jwk` as well.**\n\n| Field | Was | Now |\n| -- | -- | -- |\n| `actorDid`, `orgDid` | `^did:(key|web):[A-Za-z0-9._:%-]+$`, \u2264 512 | **`^did:(key|web|jwk):[A-Za-z0-9._:%-]+$`**, \u2264 512 |\n\n**Why.** An actor verified through Entra Verified ID carries the credential's subject DID, which is a `did:jwk` (`did:jwk:` + base64url of the JWK; the one on dev-ps is 231 characters, alphabet `A-Za-z0-9_-`, so it already fits the character class and the length cap). S sent it verbatim; your `anchorSchema.ts:120` enforced the table above exactly, so every anchor for such an actor was refused 400 \u2014 visibly on originate, silently on certify (KS-1709). The value is as pseudonymous as a `did:key` (a public key, nothing recoverable to a person without the off-chain record), so the KS-240 / PS-869 reasoning for a DID in clear is unchanged, and S prefers one identifier per person over converting to `did:key` on the wire.\n\n**What S does regardless (PS-1325):** a guard so S never sends a DID outside this pattern \u2014 it drops the field and logs once, ids only \u2014 shipping with the widened pattern from the start, so an S deployed before your change still sends nothing you refuse. Until the widened pattern reaches Kintsugi and demo-pk, Entra-verified actors' anchors stay refused there, and PS-870's switch stays off on uat-ps (PS-1283 is blocked on both).\n\n**Asked of K:** the one-line `DID_PATTERN` change plus the OpenAPI spec, Schemathesis / Akto examples and the two K testing HTML docs (the KS-256 pattern), then a deploy to Kintsugi and demo-pk with a note on KS-772. If you would rather this were its own KS ticket in work-stream A or H, say so and I will not file it from here \u2014 it is your work-stream to file into.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "b3382cc9-4a3f-4b8c-85b9-fe52422520f5",
+    "createdAt": "2026-10-12T11:09:09.640Z",
+    "body": "Seat J 3rd (Wednesday-briefed), verify-and-close lot L09. Measured at develop `8d34fbf0890a` on 2026-10-12; deployed means the sha that built the running image (Kintsugi anchoring, nft-certificate, transfer, originate, api-gateway: `65d7722f83a6`; timestamping, wallet-connector: `69f2045af2a4`, whose build inputs are byte-identical to `65d7722f83a6`, 0 files differ). By build record, not by a probe of the box. No state moved.\n\n## BLUF\n\n**K's side is complete and deployed; the ticket stays In Progress for Platform S's pair-test.**\n\n* #1105 `cbae988dbe90` and #1116 `910687394db5` are in `65d7722f83a6`. Tests pass: `ks1175-identity-anchoring` 52, `ks1175-anchor-readback` 12, `ks1175-getid-view-wired` 2, `anchorSchema.test` 66.\n* The non-PII statement is in `docs/VOCABULARY.md` (:107-:119) and `identityCommitment` appears six times in the published yaml. The first KS-1175-shaped anchor was confirmed on the preview testnet on 2026-09-22 (see the comment above).\n* Open: \"Pair-test from S against K on paired slots\". That is S's to run.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "c0f62102-d3c4-4bfd-9d53-289d297f7e2c",
+    "createdAt": "2026-09-22T09:18:19.945Z",
+    "body": "## BLUF\n- Kam's ruling on card `secuura-ks1175-kintsugi-deploy-and-first-anchor`, live board 2026-09-22 15:24:16 +10:00 (card `ruled_ts` 2026-09-22T15:25:32+10:00), verbatim: *\"a \u2014 Deploy develop to kintsugi, strings as built; the first anchor happens on kintsugi as part of the deploy verification\"*.\n- Kintsugi (`secuura02-kintsugi-vm`) runs develop `3bad652d17cf111c1e2e1bed1ae7686894637487` as of 2026-09-22T08:55:37Z (28 services recreated, 0 rolled back; `REVISION` on the box names it). The KS-1175 code (#1105, squash `cbae988db`) is the running anchoring image `228dc57ded00`: `dist/cardano/cardanoMetadatum.js` and `dist/anchorReadback.js` present; absent in the rollback image `:pre-20260922`.\n- The first KS-1175-shaped anchor exists on the Cardano **preview** testnet: anchor `anchor_1526505a-03b9-4062-bc91-501e33be43ac`, tx `0180573229ad60a6bd1e369f2dbc28e1bd47f3d1b08cb691b09cea72cd7e76fb`, block 4685580, slot 123412108, fee 196345 lovelace, label 674. POSTed once at 2026-09-22T09:08:19.601Z, `confirmed` at 09:08:50.335Z.\n\n## Detail\n- **The request** (`POST /api/anchors` through the gateway with a human JWT; 573 bytes): `documentId` `doc-1790067801652-seatA16-ks1175-first`, `contentHash` `e3a3f51c945d647ef4f954d07687f223a047b1653baedaa18260806a4db218cf`, `environment` `kintsugi`, `metadata.documentType` `declare`, `metadata.timestamp` `2026-09-22T09:03:21.652Z`, and a top-level `identity` block: `actorDid` `did:key:z6MkvLlg3nW9BCNrhHUTEBJxVPOd93xOHh4htGvNbXsC1Z2DXUurv7srpZxv` (68 bytes), `actorLevel` 2, `actorSource` `entra-verified-id`, `actorVerified` true, `orgDid` `did:web:example.com`, `orgTrust` `domain`, `orgVerified` false, `identityCommitment` `seata16.v1:0911be20c555c497acb95b69d30bf897ac6da046270e29daa46c49d96e1c51f7` (75 bytes). A labelled positive-control record: no document row carries that `documentId`.\n- **The chain shape observed** (Blockfrost `GET /txs/<tx>/metadata`, one entry, label 674, `json_metadata.secuura`, 19 keys and no others): `identityCommitment` = an ARRAY of two strings of 64 and 11 bytes whose concatenation is the sent commitment; `actorDid` = an ARRAY of 64 + 4 bytes; `actorVerified` = the STRING `\"true\"`, `orgVerified` = the STRING `\"false\"`; `actorLevel` = the integer 2; `hash` = the contentHash; `documentId` = `certId` = the documentId; `network` `preview`; `environment` `kintsugi`; `documentType` `declare`; `occurredAt` `2026-09-22T09:03:21.652Z`; `timestamp` `2026-09-22T09:08:20.030Z`; `version` `2.0`; `type` `document`; `algorithm` `sha256`; `orgDid`, `orgTrust`, `actorSource` as sent. Strings as built (Kam's ruling), booleans as `\"true\"`/`\"false\"` strings at the ledger.\n- **The typed API read-back** (`GET /api/anchors/anchor_1526505a-\u2026`): `status` `confirmed`, `transactionHash` = the tx above, `verified` true, no `simulated` key, `blockNumber` 4685580, `identityCommitment` = the sent 75-character string in ONE piece (re-joined from the chunks), `identity` = the seven fields with real booleans (`actorVerified` true, `orgVerified` false). `GET /api/anchors/verify/<contentHash>`: `verified` true, `source` `db`, `txHash` = the tx above, `metadata.identityCommitment` and `metadata.identity` typed the same way, `cardanoScanUrl` `https://preview.cardanoscan.io/transaction/0180573229ad60a6bd1e369f2dbc28e1bd47f3d1b08cb691b09cea72cd7e76fb`.\n- **Control:** the previous newest anchor on kintsugi (`anchor_b57b799d-b470-478f-9412-997810031f3b`, 2026-09-17, pre-KS-1175) read the same way carries label 674 with no `identityCommitment` key.\n- KS-1284 (a \u2265 69-byte commitment anchored, confirmed, and read back joined): this anchor carries 75 bytes on chain as two chunks (Blockfrost `/txs/<tx>/metadata`, label 674); the API `GET /api/anchors/<id>` returns it joined; `GET /api/anchors/verify/<hash>` returned it joined with `source db` \u2014 the DB row was the reader. The product's CHAIN-SOURCE read-back (`source chain`, `fromCardanoMetadatum` as the reader) was NOT exercised by this round; the direct chain copy was joined by the operator's own concatenation, which proves the chunk bytes, not the reader. KS-1284's remaining leg: one verify read where the DB row is absent (or the reader's own unit path at 3bad652d1), so `source chain` is the join.\n- Full record: `5_Project_History/2026-09-22_seatA-16th/anchor/` (payload, POST/GET/verify responses, the Blockfrost metadata and tx records) and `KINTSUGI-DEPLOY-STATE.md`.\n\n## State\n- Stays **In Progress**. Against this ticket's own \"Suggested work\": (2) the seven fields and the commitment are carried into the on-chain record \u2014 met by #1105 + this deploy + this anchor; (3) returned on `GET /api/anchors/{id}` (`identityCommitment` + `identity`) and `GET /api/anchors/verify/{hash}` (`metadata.identityCommitment` + `metadata.identity`) \u2014 met for those two reads; (4) the on-chain key set measured on this anchor is exactly the 19-key whitelist \u2014 none of `holderEmail`, `recipients[].email`, `newHolderEmail`, `onBehalfOf.*` reaches the ledger from `POST /api/anchors`. **Open:** (1) the block is accepted on `POST /api/anchors` only \u2014 the seven originate-fronted endpoints (`POST /api/documents`, `/{id}/version`, `/{id}/anchor`, `/{id}/share`, `/{id}/transfer-custody`, `/api/certifications/issue`, `/{id}/lifecycle-events`) forward no `identity` (originate's forwarder sends `documentId` / `contentHash` / `network` only); (3) `POST /api/anchors/verify` carries no metadata field; (5) the OpenAPI spec is updated request-side, but the two K-side testing HTML docs have no block for it and were not extended, and the spec declares neither anchor GET (KS-723).\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "1be43b54-c7e1-4210-b8dc-e0bf66e38179",
+    "createdAt": "2026-09-20T15:17:37.714Z",
+    "body": "Correction to the 13:53:58Z comment: the threadTokenMint entry is BACKLOG.md:182 at develop (:155 was a working-tree read); buildVerifyResponse keeps the former closure's shape plus metadata.identity, with identityCommitment string-or-null \u2014 not byte-for-byte.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "21af3285-0a40-490c-bfff-bc3466b6066b",
+    "createdAt": "2026-09-20T13:53:58.295Z",
+    "body": "## BLUF\n\n**PR #1105 is open against `develop` at head `e02d3ecb51a457b0eb490db1854f28c6b1af69ad`, gated (tier 1), NOT merged, NOT deployed anywhere; no anchor was made on any network; the S-side switch stays off; the deploy/anchor step is Kam's.** It builds this ticket's K-side fix on the flat path: `POST /api/anchors` accepts the top-level `identity` block as Platform-S built it (comment above, 2026-09-16T10:36:32Z), anchors the seven fields flat under `secuura` beside `identityCommitment`, and reads them back on `GET /api/anchors/verify/:hash` (`metadata.identity`) and `GET /api/anchors/:id` (`identityCommitment` + `identity`) \u2014 the surface named above for the local-vs-chain comparison. Both GETs reach S unchanged through the gateway's `/api/anchors` proxy.\n\n## Ruling that lifted the hold (relayed here so it is in the artefact)\n\nKam, dashboard panel, **2026-09-20 19:42:44 +10:00 (09:42:44Z)**, on card `secuura-ks1175-testonly-pin-on-a-held-ticket`, verbatim:\n\n> *\"Decision secuura-ks1175-testonly-pin-on-a-held-ticket note: remove the rule and make the fix\"*\n\nWednesday's reading, stated back to him on the panel at 19:43 and not corrected: the signature-class hold on this ticket comes off for the BUILD and the GATE; the parked test-only pin is superseded by the real fix. NOT lifted: the deploy of this change and the first real anchor carrying the new fields (his), and KS-1250 (still his).\n\n## What the PR does\n- **Schema** (`services/anchoring/src/anchorSchema.ts`): `identity` \u2014 `actorDid`/`orgDid` (\u2264512, `^did:(key|web):\u2026`), `actorLevel` (1|2|3), `actorSource` (platform|stripe|entra-verified-id), `actorVerified`/`orgVerified` (boolean), `orgTrust` (unverified|domain|document|kyc|government), `identityCommitment` (KS-721's shape). All optional; a present-but-malformed value, `null` or `\"\"` \u2192 **400**; unknown keys inside stripped (KS-240). `identity.identityCommitment` and `metadata.identityCommitment` may both arrive: equal or one present \u2192 ONE anchored key; different \u2192 **400**.\n- **On chain:** the seven anchored FLAT under `secuura`, by name (seven explicit spreads, never a spread of caller input).\n- **Read-back:** `GET /api/anchors/verify/:hash` \u2192 `metadata.identity` (object of the fields anchored, or `null` for an anchor that predates them) beside `metadata.identityCommitment`, db and chain sources; `GET /api/anchors/:id` \u2192 `identityCommitment` + `identity` at the top level (it returned neither before).\n- **Spec:** `FlatAnchorRequest.identity` declared + example; yaml regenerated (`check:openapi` CHECK PASS). `docs/VOCABULARY.md` \u00a72 documents the block.\n\n## Finding: KS-721's commitment could never reach a real chain (KS-1284, filed 2026-09-20, `Refs KS-721`)\nCardano metadata caps every string at **64 bytes** and has **no boolean type**; CSL 15.0.3 throws at tx build (`Max metadata string too long: 69, max = 64`; `bools not allowed in metadata`). `identityCommitment` (\u226569 bytes) therefore failed at `cardano/transaction.ts` on every non-mock anchor \u2014 proven in mock mode only, never hit because S has never sent it. The PR adds a codec at the two chain boundaries only: strings >64 bytes are anchored as arrays of \u226464-byte chunks (the Cardano convention), the two verified flags as `\"true\"`/`\"false\"`; K's readers undo both; the DB row and both read-backs keep the logical typed form. For every payload anchored to date the codec is a byte-identical no-op (pinned by test). An independent chain reader (Cardanoscan / raw Blockfrost) sees the array / string forms.\n\n## Item 4 (PII audit), anchoring half\nOn the flat path the whitelist admits none of `holderEmail`, `recipients[].email`, `newHolderEmail`, `onBehalfOf.email` / `displayName`: `git grep` over `services/anchoring/src` finds none of those names reaching `metadataPayload`, and the exclusion cell (`anchorSchema.test.ts` \"still excludes issuerName and the onBehalfOf triplet\u2026\") plus the new R5/R7 cells pin it with `identity` present. **Originate half NOT DONE, other lane.**\n\n## NOT DONE (named in the PR body)\nThe seven originate-fronted endpoints (originate forwards no identity \u2014 a `services/originate` change); the gateway's `/api/verification` provenance surface (filters `metadata`); the two GET read-back paths in the OpenAPI spec (routed, undeclared \u2014 KS-723); `POST /api/anchors/verify` (carries no metadata fields); the two HTML testing docs (no block to extend); the \u00a75f live sweep \u2014 **this ticket stays In Progress after merge until a real anchor carrying the block reads back on the correct host.**\n\n## Evidence (PR body carries the full Test Evidence block)\nRed-first at develop `dc061f2bb` (45 new cells red by assertion); anchoring suite **318/319** after (the 1 red is develop's own `threadTokenMint`, BACKLOG.md:155); tampers T1\u2013T6 each red exactly their cells and restored by sha256; `tsc` 0; eslint 0 errors; `check:openapi` CHECK PASS. **NOT run:** Schemathesis / Akto / Playwright / k6 (need a booted stack). Records: `5_Project_History/2026-09-20_seatA-15th/`.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "9d9ed4f7-38a7-40d8-9125-426998ba03ce",
+    "createdAt": "2026-09-16T10:36:32.933Z",
+    "body": "## Wire shape as platform-s will send it (PS-870, built 2026-09-16 behind `CardanoAnchor:AnchorIdentity`, default off)\n\nOn **every** anchored write \u2014 `POST /api/documents`, `/{id}/version`, `/{id}/share`, `/{id}/transfer-custody`, `/api/certifications/issue`, `/{id}/lifecycle-events`, `POST /api/anchors` \u2014 a **top-level** `identity` object:\n\n```json\n\"identity\": {\n  \"actorDid\": \"did:key:z6Mk\u2026\",         \"actorLevel\": 2,          \"actorSource\": \"stripe\",\n  \"actorVerified\": true,\n  \"orgDid\": \"did:web:acme.example\",     \"orgTrust\": \"domain\",     \"orgVerified\": true,\n  \"identityCommitment\": \"identity-commitment-l2.v1:<64 hex>\"\n}\n```\n\n- Absent fields are omitted (never `null` / `\"\"`); a row with no snapshot sends no `identity` key at all.\n- `actorLevel` \u2208 {1,2,3}; `actorSource` \u2208 {`platform`,`stripe`,`entra-verified-id`}; `orgTrust` \u2208 {`unverified`,`domain`,`document`,`kyc`,`government`}.\n- On `POST /api/anchors` the commitment ALSO rides as `metadata.identityCommitment` (the KS-721 field). Note the purpose is now `identity-commitment-l2` (layout 2 covers the organisation) \u2014 still matches KS-721's pattern `^[a-z0-9-]+\\.v\\d+:[0-9a-f]{64}$`.\n- Read-back: S records whatever the anchor GET returns under `identityCommitment` and `identity` into `DocumentTransaction.AnchorIdentityJson` on confirmation, so returning them on `GET /api/anchors/{id}` is what makes the local-vs-chain comparison possible (PS-871).\n\nS will not turn the switch on for an environment until its K confirms this contract \u2014 a K that strips the key makes anchors look identity-evidenced while carrying nothing.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   }
+  ]
+ }
+}

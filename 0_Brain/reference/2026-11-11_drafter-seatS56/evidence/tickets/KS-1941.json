@@ -1,0 +1,38 @@
+{
+ "identifier": "KS-1941",
+ "title": "governance: createProposal's best-effort DELETE swallows a failure; the re-save then fails on the unique wallet address (500) and leaves an orphan participant row",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-02T07:43:22.803Z",
+ "updatedAt": "2026-11-02T10:26:30.046Z",
+ "description": "**BLUF:** In `services/governance`, `createProposal` auto-registers an unknown proposer, then deletes the auto-generated row and re-saves it under the proposer's id. A failed DELETE is swallowed (`governanceService.ts:512-514`, `catch { /* best effort */ }`), so the re-save at `:516` runs with the auto-generated row still present. Both rows carry `wallet_address = proposerId` (the auto-register passes the proposer id as the wallet address, `:505`), so on a table with `wallet_address ... UNIQUE` the re-save fails with a unique violation, `dbSaveParticipant` rethrows (`:186-189`), and the request answers 500 with the orphan auto-generated row left behind. On a table without the constraint the result is a second row for the same wallet.\n\n## Where (develop `c234c2388a16`; read from source, NOT run)\n\n* `services/governance/src/services/governanceService.ts:503-517`: the auto-register block; `:512-514` the swallowed DELETE; `:516` the re-save; `:186-189` the save helper's rethrow.\n* DDL `wallet_address TEXT NOT NULL UNIQUE`: `deployment/azure/migrate/init.sql:1108`, `docker/init/04-sprint2-service-tables.sql:189`, `migrations/002_verification-tiers.sql:366`.\n\n## What the next request does (read only, not measured)\n\nThe next `createProposal` by the same user finds no row by id; the auto-register's by-address read finds the orphan (wallet = proposerId) and reuses its id; the DELETE and re-save run again. If the DELETE succeeds that time, the state heals.\n\n## Scope\n\nA failed WRITE (the DELETE), not a failed lookup, so it is outside KS 1940, whose fix stops the lookups and leaves this block unchanged. Fix shape not chosen here: for example the auto-register, delete and re-save in one transaction, or a single insert under the proposer id instead of insert, delete, re-insert.\n\n## Searched first\n\nBoard search over issue content and comment bodies: \"auto-generated record\" 0 hits; \"DELETE FROM svc_governance_participants\" 0; \"best effort\" finds KS 1779 only (originate, unrelated). Control: \"minProposalStake\" finds KS 1940.\n\n## Found by\n\nSeat F 23rd while designing KS 1940; filed on the coordinator's ruling. Not measured against a database.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "11dbf05a-5b6d-44d1-907a-fd89b980b54a",
+    "createdAt": "2026-11-02T10:26:30.063Z",
+    "body": "**BLUF:** Gate 121 (Opus, on PR 1939 for KS 1940) read a pre-existing defect in the same createProposal DELETE-and-re-save step this ticket covers, on the HEALTHY path. When a proposer's user id equals ANOTHER participant's `wallet_address`, that participant's row is upserted at minProposalStake, deleted, and re-inserted under the proposer's id, so the other participant's row is lost. Read from source, not run. PR 1939 does not change it; the gate places it with this ticket.\n\nGate 121's finding, verbatim (from its `verdict.md`, sha256 `f82c0e71131d1d71`...):\n\n> - **G121-F6 (INFO, pre-existing, healthy path, read from source, NOT run)** In createProposal, if a proposer's user id equals ANOTHER participant's wallet_address, `registerParticipant(proposerId)` finds that row and upserts it at minProposalStake. createProposal then `DELETE`s it (`proposer.id !== proposerId`) and re-inserts it under the proposer's id. The other participant's row is lost. This PR does not change it; it belongs with KS-1941.\n\n* Where: `services/governance/src/services/governanceService.ts`, createProposal's auto-register (`registerParticipant(proposerId)`, which looks the row up by wallet address) and the `proposer.id !== proposerId` DELETE and re-insert that follows.\n* Not measured: no cell or real-database run covers this path (the gate's NOT TESTED list says read from source only).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

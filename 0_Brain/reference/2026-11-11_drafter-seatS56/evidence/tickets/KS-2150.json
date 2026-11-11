@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2150",
+ "title": "KS-2109's cheat fragment says 2 files, +2 -2 and its flow fragment says two files; PR 2111 is 4 files, +32 -2 (G275-2111-1)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-09T05:08:15.400Z",
+ "updatedAt": "2026-11-09T11:19:22.040Z",
+ "description": "**BLUF:** The two documentation fragments that PR 2111 added for KS-2109 state a size that is not the PR's. The cheat fragment's Figures row reads \"files, lines: 2 files against develop, +2 -2\", and the flow fragment opens \"Two lines of prose, in two files\". The merged PR is 4 files, +32 -2: the two edited files (+1 -1 each) plus the two fragments themselves (+19 and +11). Read as \"the code and doc files\" the row is true, but a Figures row is read as the PR's figure. A wording defect in two fragments; no code or behaviour is affected. Low: Wednesday ruled it accepted at merge and ticketed by the board seat after the merge. Read at develop `204e62acdc35` (PR 2111's squash).\n\nSource: finding G275-2111-1 (Low; wording), line 60 of `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate275-tier1-t19-d5d6/verdict.md`, on PR 2111 head `4fff98cb12f2`, verdict GO WITH NOTES. The gate says the cheat page states the figure as the PR's, that the PR's cheat for the sibling change (PR 2112) words the same row correctly, and that the finding is \"Not blocking\".\n\n## Where\n\nAt `204e62acdc35` (read through the contents API):\n\n* `Projects Documents/fragments/cheat/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html`, line 16, the Figures row `files, lines`: \"**2** files against develop, **+2 -2**: ... (one comment line) and ... (one line)\". It names the two edited files and counts only them.\n* `Projects Documents/fragments/flow/KS-2109-trustheaders-and-the-agent-rules-name-removed-role-lists.html`, line 2: \"Two lines of prose, in two files.\"\n\n## What the PR is (read at the API, not recounted by hand)\n\nPR 2111 merged 2026-11-09T04:40:08Z, squash `204e62acdc35`, head `4fff98cb12f2`: 4 files, +32 -2.\n\n* `Blockchain/Dev/docs/security/AGENT-DOCUMENT-OPERATION-RULES.md`: +1 -1\n* `Blockchain/Dev/services/api-gateway/src/utils/trustHeaders.ts`: +1 -1\n* the cheat fragment above: added, +19 -0\n* the flow fragment above: added, +11 -0\n\n## Fix shape (the owner's call)\n\nDocs only, size S, a new change on develop. Word the Figures row for the whole PR (\"4 files, +32 -2: the two edited files, +2 -2, plus these two fragments\") or keep its figure and add what it counts (\"of the two edited files\"). Give the flow fragment's opening sentence the same qualifier (\"in two files, besides these fragments\"). The sibling cheat for PR 2112 is the model the gate points to.\n\n## Not done, not read\n\nI did not render the page, did not re-run any suite, and did not read the sibling cheat for PR 2112 (the gate's reading of it is relayed here). Nothing in the fragments is a runtime claim.\n\n## Related\n\nKS-2109 (In Progress; PR 2111's own ticket, which this ticket refs and leaves as it is). The gate's other two findings on PR 2111 are not this ticket: G275-2111-2 is already held by KS-2145, and G275-2111-3 (the branch-name link to KS-1536) was handled before the merge.\n\n## Searched before filing\n\nBoard, includeArchived, title and description and every comment of each open candidate; controls pass (the positive control hit its known ticket KS-1379, a random token hit 0). `Figures row`: 100 candidates, 0 literal hits, open or closed. `2 files, +2 -2`: 102 candidates, 0 hits. `G275-2111-1`: 100 candidates, 0 hits. `Product code changes, by one line` (the sibling wording finding on PR 2113): 100 candidates, 0 hits. KS-2109, the PR's own ticket, was among the open candidates whose whole text and comments were checked, and holds none of these strings.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2143",
+    "title": "Refs KS-2150: the trustheaders fragments state the size PR 2111 really merged, 4 files and +32 -2"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "1d206b14-e457-4f79-8691-c8c32cbb4a2b",
+    "createdAt": "2026-11-09T11:06:12.189Z",
+    "body": "**BLUF:** PR 2143 (head `a9c3bec846c8`, one commit on develop `f98afb113c2d`) corrects the size wording in the two fragments this ticket names: the cheat Figures row and the flow opening sentence. Docs only; it is ready for its gate (tier 2 proposed). Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **The figure, measured:** PR 2111 as merged is 4 files, +32 -2 (GitHub files API: 1+1 in the two edited files, +19 in the cheat fragment, +11 in the flow fragment; re-added by hand, 32 and 2). The cheat row now says that, with the two edited files at +2 -2 plus these two fragments; the flow sentence says \"in two files besides these fragments\".\n- **Checks:** the docs-fragments check ends OK before and after with the same counts, and a planted lint defect makes it fail.\n- **Not in this PR:** anything else in the two fragments.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

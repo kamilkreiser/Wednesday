@@ -1,0 +1,99 @@
+{
+ "identifier": "KS-458",
+ "title": "RLS fail-closed flip + GUC-on-checkout \u2014 flip the consolidated tenant_isolation policy fail-open \u2192 fail-closed (the never-filed \"KS-174\")",
+ "state": {
+  "name": "Done",
+  "type": "completed"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": "2026-08-16T23:20:05.020Z",
+ "createdAt": "2026-07-14T04:19:09.687Z",
+ "updatedAt": "2026-08-12T21:47:34.617Z",
+ "description": "## The follow-up to KS-173 (RLS consolidation) that was referenced as \"KS-174\" but never filed.\n\n**Today the** `tenant_isolation` **RLS policy is fail-OPEN.** Rows are visible when the tenant session GUC is *unset* OR matches `tenant_id`. So any code path that forgets to set the tenant context sees **every** tenant's rows instead of none \u2014 a cross-tenant leak risk (defence-in-depth gap).\n\n**KS-173 (Done, PR #190,** `migrations/038_rls_consolidate_policy.sql`**)** consolidated that policy from 12 scattered copies into ONE authoritative, behaviour-neutral migration \u2014 precisely so this flip is a one-place change.\n\n## Scope\n\n1. **Flip the single** `tenant_isolation` **definition to fail-CLOSED** \u2014 rows visible only when the GUC is set AND matches `tenant_id` (unset GUC \u2192 zero rows). Migration 038's header documents exactly where.\n2. **GUC-on-checkout** \u2014 guarantee every DB connection / pool checkout sets the tenant GUC, or legitimate queries return nothing. This is the risky part: every service's DB path must set it before the flip lands, or that service breaks.\n3. **Exclude** `platform_document_registry` from the flip \u2014 public verify-by-hash is cross-tenant by design (noted in 038).\n4. Remove the `startup-migrations.ts` duplicate declaration in the same change (per 038's note).\n\n## Acceptance\n\n* Unset-GUC query returns 0 rows on every tenant-scoped table (except the documented exclusion).\n* Every service still functions (each sets the GUC on checkout) \u2014 verified on a live local stack.\n* Live-verified, then shipped to the demo VM.\n\nBlocked-by: KS-173 (Done). Security-hardening; test carefully.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/675",
+    "title": "KS-458: derive the fail-closed verify set from the live policy \u2014 action_provenance was never checked"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/542",
+    "title": "KS-464: migrate @prisma/client 5\u21927 (originate, driver-adapter) + KS-458 seed-scope residual (Dependabot #522)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/534",
+    "title": "feat: KS-458 \u2014 RLS tenant_isolation fail-open -> fail-closed + GUC-on-checkout (option a login carve-out)"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "63f63aaa-9ba4-43a1-9785-9e53b7f8636e",
+    "createdAt": "2026-08-12T21:02:40.895Z",
+    "body": "**BLUF \u2014 the demo read-only check this ticket was held open for is DONE and PASSES. The GUC-coverage sweep found no service silently returning empty. But the acceptance script itself had a hole: `action_provenance` has been fail-closed since migration 041 and was never checked \u2014 6 rows locally, **4,629 on demo**. Fixed in [PR #675](https://github.com/Secuura/Distributed_Secuura/pull/675).**\n\n**Recommendation:** merge #675, then this ticket is complete on all three acceptance lines and can close. No code change to the flip itself \u2014 it works exactly as shipped.\n\n---\n\n## Detail\n\n### 1. Demo read-only check \u2014 PASSED\n\n`scripts/rls/verify-fail-closed.sh` run as `secuura_app` against the demo VM: every flipped table returns **0** rows with no context, **0** with a wrong tenant, and correct counts with the right one; all **7** SECURITY DEFINER pre-auth lookups execute GUC-less, and the definer still finds a real user. Read-only \u2014 the script contains no write statements, and the improved version was piped over **stdin** rather than written to the VM, so the Kintsugi hold is intact.\n\n### 2. GUC-coverage sweep \u2014 no exposure\n\nThe concern carried over from the last session was that a service reading a tenant-scoped table *without* setting the GUC now fails **safe but silent** \u2014 zero rows, indistinguishable from \"no data\". Swept every service against the **live** fail-closed policy set (23 tables from `pg_policies`, not a list from a migration file). Result: every service that touches one sets the GUC, by one of **two** mechanisms \u2014\n\n| service | mechanism |\n| --- | --- |\n| api-gateway, auth, billing, originate, prism, security, tokenisation | `@secuura/shared` GUC API (`queryWithTenantGuc` / `withTenantContext` / `runWithTenantId`) |\n| anchoring | raw `set_config('app.current_tenant_id', $1, true)` in-transaction, deliberately documented in `provenance.ts` |\n\n`tenant-provisioning` reads `tenant_config` / `tenant_contacts` with no GUC anywhere and is **still fine**: those tables exist only on the **`secuura_platform`** database, where RLS is off and no policies exist. 039 applies to the main `DATABASE_URL` DB and skipped them, exactly as its routing note states.\n\n**Method note, because it changes how this should be re-run:** import-based grepping cannot answer this question. Three services looked like violations and were not \u2014 prism and tokenisation because they use `queryWithTenantGuc` rather than `withTenantContext`, anchoring because it uses raw `set_config` and imports no GUC helper at all. Only the live policy set crossed with *both* mechanisms gives the right answer.\n\n### 3. The real gap \u2014 `action_provenance`\n\nThe script's `TABLES` was a hand-maintained copy of 039's `tenant_tables` array, so it could only ever check the tables someone remembered. Migration **041** added `action_provenance` with a fail-closed policy and nobody added it here. It went unverified from 041 until today \u2014 the table that records *who acted* on a connector-issued document, certified by a run that never looked at it.\n\nVerified by hand before fixing: no context \u2192 **0**, wrong tenant \u2192 **0**, correct tenant \u2192 **6**, superuser control \u2192 **6** (the control is what rules out over-filtering).\n\n**#675** derives the list from `pg_policies` instead, so a newly flipped table is picked up automatically. Deriving *alone* would test the database against itself and pass happily if a table lost its policy, so `EXPECTED_TABLES` stays as the spec and drift is asserted **both** ways. Both branches red-proved rather than assumed:\n\n- drop `action_provenance` from the spec \u2192 `DRIFT`, still verified\n- add `platform_document_registry` (exists, permissive by design) \u2192 `FAIL`, and the script **exits 1**\n\nExit codes checked explicitly \u2014 green 0, failing 1. A gate that prints `FAILED` and exits 0 is the same class of defect as the hole it is fixing.\n\n**After the change:** local 23 tables + 8 definer checks PASS (was 22 tables); demo 23 tables PASS with `action_provenance (closed=0, wrong=0, tenant=4629, platform=4629)`. Push preflight 6/6.\n\nTest-harness only \u2014 no deployable surface, so local-only per the sync rule.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "af22d3f1-f866-42b3-b56b-f976d100c166",
+    "createdAt": "2026-08-12T12:04:36.638Z",
+    "body": "**BLUF \u2014 verified live on local today: the fail-closed flip has LANDED and works. Three-case proof below, on a table with 413,754 rows so the result cannot be confused with an empty table. Kam's option (a) carve-out is in place too. The only thing I have not verified is the demo database.**\n\n**Recommendation:** confirm the same three cases against the demo DB (read-only, no deploy \u2014 compatible with the Kintsugi hold), then close. I did not run it there unprompted since it touches the live demo.\n\n**Detail**\n\n**1. The policy is fail-closed in the live local DB** \u2014 `migrations/039_rls_fail_closed.sql` applied. Every `tenant_isolation` policy now reads:\n\n```sql\n(current_setting('app.current_tenant_id', true) IS NOT NULL\n AND current_setting('app.current_tenant_id', true) <> ''\n AND tenant_id::text = current_setting('app.current_tenant_id', true))\nOR current_setting('app.tenant_scope_bypass', true) = 'platform_admin'\n```\n\nUnset GUC no longer satisfies the predicate \u2014 which was the whole defect.\n\n**2. Behaviour proof, as `secuura_app` (NOSUPERUSER, NOBYPASSRLS \u2014 confirmed from `pg_roles`), on `audit_logs`:**\n\n| case | rows visible |\n|---|---|\n| superuser baseline (whole table) | 413,754 |\n| superuser baseline (the one tenant) | 353,472 |\n| **A. GUC unset** | **0** |\n| **B. GUC = that tenant** | **353,472** |\n| **C. GUC = a different tenant** | **0** |\n\nA is the fix: under the old fail-open policy that same query returned all 413,754 rows. B matching the superuser per-tenant count exactly is what rules out over-filtering \u2014 the policy is not merely denying everything. C confirms cross-tenant isolation holds rather than leaking.\n\n**Why the table choice matters:** my first attempt ran against `api_keys`, got 0 rows in every case, and looked like a pass. It was not \u2014 that table is empty locally, so \"0 rows always\" is equally consistent with the policy doing nothing. Any re-verification (including on demo) must use a populated tenant-scoped table and check case B, or it proves nothing.\n\n**3. Kam's option (a) landed as specified.** `pg_roles` shows a dedicated **`secuura_auth_lookup`** role \u2014 NOSUPERUSER, NOBYPASSRLS \u2014 i.e. the SECURITY DEFINER carve-out for the pre-auth login path, built without BYPASSRLS exactly as the 2026-07-14 implementation note required (Azure flexible-server admin cannot mint BYPASSRLS roles).\n\n**4. What is left before this can close:**\n- [ ] Same three cases against the **demo** DB (read-only). Demo now runs Postgres in a container on the VM, not the deleted managed server, so this is an `ssh` + `psql` check, not a deploy.\n- [ ] Confirm the audit's scope item 2 \u2014 GUC-on-checkout coverage. The 2026-07-14 audit found only ~3 repos using `withTenantContext`; with the policy now fail-closed, any service still relying on the old permissive behaviour returns **0 rows** rather than leaking. That fails safe, but it fails *silently*, and an empty result set is easy to misread as \"no data\". Worth a sweep for services that read tenant-scoped tables without setting the GUC \u2014 I have not done that sweep.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "b9417d01-acb0-456a-a1c3-67449fb38780",
+    "createdAt": "2026-07-21T09:19:48.401Z",
+    "body": "Hi @kamil.kreiser\n\nYou can move this ticket to done",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "39e4204e-17d1-40f6-b799-d7f720754012",
+    "createdAt": "2026-07-14T10:39:01.244Z",
+    "body": "@stuart @peter \u2014 heads-up: this merged (`46fb9f88d`) and the demo VM runs it. **Your locals need a FULL rebuild after pulling** \u2014 migration 039 flips tenant isolation fail-closed on next `compose up`, and services still on old images can't see any rows (login 401s). `git pull` \u2192 `docker compose build` \u2192 `up -d`, at your convenience. Today's develop also carries KS-450 (governance mock removed \u2014 proposals/vote now hit the real service), KS-459/460 and 4 Dependabot minors. Extranet to-dos updated with the same.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "bfe2d04a-d14d-4200-8009-d5806b3eca7c",
+    "createdAt": "2026-07-14T10:37:18.420Z",
+    "body": "**Done \u2014 shipped and live-verified on BOTH targets.** [PR #534](https://github.com/Secuura/Distributed_Secuura/pull/534) squash-merged to develop `46fb9f88d`; demo VM rebuilt (7 services) + migration 039 applied.\n\n**What shipped**\n* **Migration 039**: `tenant_isolation` fail-closed on 26 tables (GUC must match, or the reviewed platform scope). Excluded by design: `platform_document_registry` (public verify-by-hash) and `svc_m365_connections` (tenant_id holds the ENTRA id \u2014 BACKLOG'd). 13 NULL-tenant users backfilled.\n* **Option (a) carve-out**: NOLOGIN definer role + **7 SECURITY DEFINER lookups** (users by email-hash/legacy/id/social/wallet, oauth_apps by client_id, svc_api_keys by key_hash \u2014 the last keeps sk_* API-key auth alive). No BYPASSRLS.\n* **GUC-on-checkout** (`@secuura/shared` tenant-guc): ALS context seeded from the gateway-verified tenant; GUC bundled per-query in one transaction (pgbouncer-safe). Adopted in auth, api-gateway, originate, security, billing, prism, tokenisation. Gateway's 4 boot-path permissive policy re-declarations REMOVED (038's plan). `startup-migrations.ts` duplicate gone per 038 \u00a7note.\n* **Role-aware admin scope**: platform admins keep cross-tenant views; ORG/ISSUER admins are now genuinely tenant-scoped.\n\n**Acceptance verified (local AND demo)**\n* `scripts/rls/verify-fail-closed.sh` PASSES as `secuura_app` on both envs (no-context=0 / wrong-tenant=0 / platform\u2265tenant per table; all 7 definers work GUC-less).\n* Negative control: old images vs flipped DB \u2192 login 401. New images \u2192 all flows green.\n* Live: login/profile/create 201/list/governance/admin views/portals \u2014 both envs. **Isolation proven:** secuura-co tenant admin sees 0 default-tenant documents.\n* Preflight PASS incl. spec-auth 299/299 on the flipped stack. Suites: shared 210, auth 181, gateway 139, security 28, prism 29, tokenisation 8, billing 80, originate 79 (+19 new tests).\n\n**Known limitations (BACKLOG'd / noted)**: MULTI_TENANCY login-time tenant re-assignment is a no-op under fail-closed (mode off in local/demo; needs a definer if enabled); cross-tenant API-key revoke after cache-cold restart; svc_m365_connections needs a real Secuura-tenant column before it can join the flip; pre-existing originate uuid-v14/jest suite-load issue (reproduced on clean develop).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "9cdd5691-8991-4beb-a481-86681b2fa1e8",
+    "createdAt": "2026-07-14T09:13:19.294Z",
+    "body": "**Kam's pick (2026-07-14): option (a) \u2014 SECURITY DEFINER lookup for the pre-auth login path.** Moving to In Progress.\n\nImplementation note on (a): Azure flexible-server admin cannot mint BYPASSRLS roles, so the carve-out avoids BYPASSRLS entirely \u2014 a dedicated NOLOGIN definer role gets its own `FOR SELECT USING (true)` policy on `users`, owns `auth_find_user_by_email_hash()` (SECURITY DEFINER, pinned search_path), and `secuura_app` gets EXECUTE only. Same pattern for any `organizations` pre-auth lookup the audit's next pass confirms.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "26fb9a7b-9a2a-4f11-823e-940e39c641be",
+    "createdAt": "2026-07-14T08:44:22.324Z",
+    "body": "**Audit done (2026-07-14) \u2014 the flip is NOT safely landable yet. One structural blocker needs a design call before any code.**\n\n## What the audit found\n\n**1. RLS already BINDS on local + demo \u2014 the flip is live-fire, not inert.** Every runtime service connects as `secuura_app` (NOSUPERUSER/NOBYPASSRLS, via pgbouncer) since the KS-109 Stage-2/3 cutover. Only the migrations job + the gateway's `MIGRATION_*` URLs are admin. So the moment 039 flips fail-closed, any GUC-less query on a tenant-scoped table returns 0 rows in every env.\n\n**2. GUC coverage today is ~3 repos, not \"everywhere\".** Only `auth/issuerCertRepo`, `originate/{documentRepo,shareRepo}` use `withTenantContext`. Everything else relies on the permissive policy + explicit `WHERE tenant_id` filters.\n\n**3. Table\u2192service map (grep of live SQL):** 9 services touch the 28 tenant-scoped tables \u2014 api-gateway, auth, billing, m365-integration, originate, prism, security, tenant-provisioning, tokenisation (+ `packages/shared` helpers). The heavy sites are auth (users/organizations/oauth_apps/issuer_certs), originate (11 tables), api-gateway. The other 11 services are unaffected.\n\n**4. \ud83d\udeab THE BLOCKER \u2014 login is structurally cross-tenant.** `auth/userRepo.findByEmail` (and `emailExists`) query `users` by email-lookup-hash **before any tenant is known** \u2014 that's the login flow. Fail-closed on `users` = 0 rows = **every login fails platform-wide**. No amount of GUC-on-checkout fixes this; the login path *cannot* set a tenant GUC it doesn't know yet.\n\n## Design options for the blocker (need Kam's pick)\n\n* **(a) SECURITY DEFINER lookup function** \u2014 `auth_find_user_by_email_hash(hash)` owned by the table owner, bypassing RLS for exactly that lookup. Smallest surface, auditable, keeps `users` in the flip. **Recommended.**\n* **(b) Exclude `users` from the flip** (like `platform_document_registry`) \u2014 defeats much of the point; `users` is the crown-jewel table.\n* **(c) Dedicated `secuura_auth` role** with a permissive policy carve-out, used only by auth's pre-auth lookups \u2014 clean separation but a new role + wiring.\n* Same review needed for `organizations` (pre-auth org resolution) once (a)/(c) is picked.\n\n## Staged plan (once the design call is made)\n\n1. **Mechanism first:** request-scoped tenant context (AsyncLocalStorage seeded by the existing `extractTenantContext` middleware) + a shared query wrapper that bundles `set_config('app.current_tenant_id', $tid, true)` into the same transaction as each query (pgbouncer transaction-pooling-safe \u2014 session GUCs are NOT). Adopt in the 9 affected services' `db.ts` chokepoints.\n2. **Prove with a non-superuser harness:** integration test connecting as `secuura_app`, assert unset-GUC \u2192 0 rows per table, set-GUC \u2192 tenant rows only.\n3. **Then migration 039** \u2014 fail-closed flip over the 038 table set MINUS `platform_document_registry`, plus the agreed login carve-out; remove the `startup-migrations.ts` duplicate in the same PR (per 038's header note).\n4. Live-verify every portal flow on local (login, document CRUD, verify, billing), then demo VM.\n\nEst. 1\u20132 focused sessions after the design pick. Not started on code \u2014 flagging the design call first per the \"pause for product/design calls\" rule.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

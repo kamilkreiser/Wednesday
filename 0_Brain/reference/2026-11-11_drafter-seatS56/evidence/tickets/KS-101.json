@@ -1,0 +1,54 @@
+{
+ "identifier": "KS-101",
+ "title": "Consolidate Platform K billing onto Platform S's Stripe integration (one company, one Stripe)",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "stuart.jamieson@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-05-21T11:49:48.105Z",
+ "updatedAt": "2026-07-14T14:11:27.263Z",
+ "description": "## Decision (Kam, 2026-05-21)\n\nPlatform K will use the **same Stripe integration as Platform S** \u2014 same company, so one Stripe account/integration, not two. Platform K should **not** maintain its own separate Stripe.\n\n## Current state\n\n* **Platform S** (`platform-s-main`, [ASP.NET](<http://ASP.NET>) Core) has a mature **subscription** Stripe integration: `Services/Stripe/StripeSubscriptionClient.cs`, `Controllers/StripeController.cs` + `StripeProductController.cs`, `Services/Idv/StripeIdvService.cs` (Stripe Identity). Hosted-checkout subscriptions (monthly/yearly; sgd/gbp/usd/eur), webhook `/stripe/webhook` (checkout.session.completed, customer.subscription.deleted, invoice.payment_failed). Keys in `StripeCredentialsManager.cs` / appsettings.\n* **Platform K** has its own *separate* billing service (`Blockchain/Dev/services/billing`, Node, Stripe test mode) doing credits/bundles for certifications \u2014 a duplicate Stripe integration.\n\n## Priority / why not urgent\n\nPayments are **not on Platform K's critical path** (core = Cardano cert: Issue \u2192 Verify \u2192 Revoke), so this doesn't block stable/testable. Medium. The billing-500-on-bad-input papercut is **dropped** \u2014 no point hardening a service that's being consolidated away.\n\n## Action\n\n1. @stuart.jamieson **\u2014 please provide the Stripe integration details, or point to where they live:** the company Stripe account/keys (test + live), the subscription/product model, and how Platform K should hook in (share Platform S's billing surface, call its API, or have Platform S own the subscription that covers K usage).\n2. Based on that: either **remove/disable** Platform K's `services/billing` (if K stays payment-free) or **wire it to the shared integration**. Also decide whether to keep Platform K billing deployed on dev meanwhile (relates to [KS-96](https://linear.app/secuura/issue/KS-96/8-dev-services-return-502-unreachable)).\n\n**Open question for the team:** is Platform S the single billing surface for the company, with Platform K payment-free (or deferring to the S subscription)?\n\nFiled 2026-05-21.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "26ed0cbd-d0c7-47f0-add2-4e957afa17c5",
+    "createdAt": "2026-06-03T23:20:41.423Z",
+    "body": "It occured to me this morning, what happens if someone is using the api for a third party app. Ie this is the same model as platform s handling the billing but now we have a third party required to bill.\n\nSome options perhaps \u2026\n\nTrack usage metrics in k and invoice at the end of the month\n\nHave an app subscription that stops if usage exceeds agreement \u2026 ie like Claude \n\nIn advance sub with over spend agreements, again managed by k",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "9b63e1ce-96d5-48a1-8198-339882bc1d69",
+    "createdAt": "2026-06-02T23:04:58.742Z",
+    "body": "**Decision (Kam, 2026-06-03): all billing goes through Platform S for now \u2014 Platform K billing work is paused.** This ticket stays as the tracking item for the consolidation direction (one company, one Stripe, on Platform S), which is exactly the intent here. No new Platform K billing/Stripe feature work until the consolidation is scoped.\n\nThe one in-flight Platform K billing change, KS-157 (admin-auth + audit on `/webhooks/replay`), is being merged regardless \u2014 it only closes a live unprotected-endpoint hole on the currently-deployed billing service; it doesn't extend PK billing. After that, PK billing is frozen pending this consolidation.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "7364f68c-0259-48a7-a5cb-e40ec1e34a57",
+    "createdAt": "2026-05-25T03:43:38.357Z",
+    "body": "**Decided at the 2026-05-25 technical catch-up (Stuart + Kam) \u2014 ALIGNED:** billing consolidates onto **Platform S**. S is the user/org interface and the **single billing route**; **K is a cost center** (no client-facing billing on K). Tokenised models where clients interact directly with K are a **medium-term** possibility but **deferred** \u2014 single billing point via S is the standard for the current phase.\n\nImplementation (consolidate Platform K billing onto Platform S's Stripe) stays with Stuart. Transcript: \u00a7Billing Model and S/K Interaction ~00:43\u201300:46.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

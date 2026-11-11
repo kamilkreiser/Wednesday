@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2095",
+ "title": "Both portals print Block 0 for a document with no block: the verifier's Block Height row and the issuer's Block card",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T12:17:44.739Z",
+ "updatedAt": "2026-11-10T05:19:58.332Z",
+ "description": "**BLUF:** Two portal screens show \"0\" as a block number for a document that has no block, so the claim of a block 0 survives on screen even where the API now answers `null`. The verifier portal prints `Block Height 0` for a pending document. The issuer portal prints `Block 0` for every real anchor, even a confirmed one, because it never carries the height through. Neither is a regression and neither is cured by PR 2054 (KS-1509); gate 238 asked for both to be ticketed. Evidence class: READ ONLY (not run in a browser).\n\n**F4, the verifier portal (READ ONLY at develop** `90b500e19883`**):** `Blockchain/Dev/frontend/verifier/src/components/ResultPage.tsx`. The \"Blockchain Proof\" card shows when `result.verified && (result.blockchain || result.anchor)` (line 449). Its \"Block Height\" row (lines 495 to 498) prints `(result.blockchain?.blockHeight || result.anchor?.blockNumber || 0).toLocaleString()` (line 497), so an unknown height prints 0. `verified` is true for a pending row. Gate 238 records the same lines at the PR head and that the card sits beside a failing \"Anchored on blockchain\" check. Fix shape (gate 238's): hide the row when there is no height.\n\n**F5, the issuer portal (READ ONLY at develop** `90b500e19883`**):** `Blockchain/Dev/frontend/issuer/src/components/DocumentDetail.tsx` lines 185 to 192 build the anchor from `raw.blockchain` with `id`, `status`, `network`, `txHash` and `anchoredAt` and no height; gate 238 records that GET document returns no `anchors` key, so line 120 (`blockNumber: anchor.blockHeight || anchor.block_height || 0`) always falls to 0. The card shows when the proof has a hash (line 490), and `Blockchain/Dev/frontend/issuer/src/components/blockchain/BlockchainCard.tsx` line 195 prints `proof.blockNumber.toLocaleString()`, so any anchor with a hash shows 0, including one confirmed at a real height. Gate 238 did not read whether the row sits behind a collapsed section. Fix shape (gate 238's): carry `blockHeight` through and hide the row when it is null.\n\n**Source:** gate 238 verdict, grade MODERATE for both, `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-06_gate238-tier1-pr2054-ks1509/verdict.md`, findings F4 and F5 (Wednesday's gate; read whole by this seat). The lines above were re-read by this seat at develop `90b500e19883` through the GitHub API; nothing was run.\n\n**Board search (2026-11-06, includeArchived, paginated):** `BlockchainCard.tsx` and `blockHeight || blockNumber`: 0 hits. `ResultPage.tsx`: 1 open hit, KS-735 (the verify result shows nothing about what was registered; a different defect in the same file). `DocumentDetail.tsx`: 1 open hit, KS-1831 (the sign route). `Block Height`: 5 open hits (KS-485, KS-772, KS-1384, KS-1509, KS-1809). KS-1509 was read: it covers the API's height defaults and PR 2054 and does not name either portal screen. No open ticket tracks these two screens.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2165",
+    "title": "Refs KS-2095: the issuer's Block card leaves out its Block row when the proof has no block height, instead of printing \"Block 0\""
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "f537ce3c-ec5b-4b1f-9663-bacc5731aad3",
+    "createdAt": "2026-11-10T05:19:53.211Z",
+    "body": "**BLUF:** PR 2165 (head `f11dc645401a`, one commit on develop `0e6479d7b6c0`) raises the issuer half of this ticket: the Block card leaves out its Block row when the proof has no block height (0 or absent), instead of printing \"Block 0\". Product bytes change (3 lines in `BlockchainCard.tsx`, plus 5 cells); tier 2 by Wednesday's stamp ruling, the gate may raise it. Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **Measured by this seat:** the issuer suite reads 15 of 15 on develop and 20 of 20 with the patch; with the product put back, the three new red cells (R1, R2, R3) fail and the other 8 pass.\n- **Not in this PR:** the verifier portal's Block Height row (F4), and carrying the height through `DocumentDetail` so a confirmed anchor shows its real block.\n- **Environment note:** a first baseline read 11 failed because a stray `node_modules` symlink into another seat's tree gave React two copies; with it moved aside the suite reads 15 of 15.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

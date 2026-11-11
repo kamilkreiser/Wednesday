@@ -1,0 +1,67 @@
+{
+ "identifier": "KS-1621",
+ "title": "Gate E2 follow-ups for KS-1509/KS-1619 p3: a height-0 cell, the constructor-name arm, a stale test header",
+ "state": {
+  "name": "Done",
+  "type": "completed"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": "2026-11-08T21:46:15.963Z",
+ "createdAt": "2026-10-18T11:01:15.497Z",
+ "updatedAt": "2026-10-27T13:27:01.740Z",
+ "description": "## BLUF\n\nGate E2 (the Sonnet gate on PR #1569 / KS-1509 and PR #1571 / KS-1619 part 3, 2026-10-18) passed both **GO WITH NOTE**, with no security-shaped finding, and left two unpinned arms and one stale comment: a real prior block height of **0** is not pinned in originate's failed-anchor writer, the describer's **constructor-name** arm is not pinned in api-gateway's document-types catch, and that test file's header still describes the old catch. The product is right in every case. This ticket carries the gate's cells so they can be built test-first.\n\n## Recommendation\n\nThree small test-first changes, briefed to the Spark queue (Wednesday briefs them), each gated like any other:\n\n1. One cell in `ks1333-sync-writers-persist-null-not-zero.test.ts`: a prior blob with `blockHeight: 0` is written back as `0`, not `null` (kills the `|| null` mutant).\n2. One cell in `ks1543-document-types-catch-logs-the-error.test.ts`: a thrown instance of a non-Object class logs that class's name (kills the hard-coded `'Object'` mutant).\n3. Update that test file's header (lines 1-6), which still says the catch uses `String(err)`.\n\n## Detail\n\n* **LOW (#1569): a real prior height of 0,** `Blockchain/Dev/services/originate/src/services/anchorStateSync.ts` **(**`markDocumentAnchorFailed`**,** `blockHeight: prior?.blockHeight ?? null`**).** The mutant `prior?.blockHeight || null` survives all 14 cells: it would collapse a genuine height of 0 to null, and the only real-height cell (F3) uses 4242. Behaviour at develop is right (`??` keeps 0).\n* **LOW (#1571): the constructor-name arm,** `Blockchain/Dev/services/api-gateway/src/routes/verification.ts:1580`**.** A mutant hard-coding the constructor name to `'Object'` survives all 9 cells, because no cell throws an instance of a non-Object class; `Object.getPrototypeOf(err)?.constructor?.name` is untested.\n* **INFO (#1571): stale header,** `Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts` **lines 1-6.** It still says the catch uses `String(err)`; after #1571 it uses fail500's describer.\n* Also from the gate, not carried here because it is no defect: an `anchor_failed` document whose prior height was unknown now echoes `blockHeight: null` where it used to say 0; the gate's reader census found no reader that does arithmetic on it.\n\n**Source:** the gate E2 verdict, `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-18_gate-E2-pr1569-pr1571/verdict.md` (Wednesday's project), sha256/16 `737405c903c0df50` computed with line 3 deleted. PRs: [#1569](<https://github.com/Secuura/Distributed_Secuura/pull/1569>) (merged `26378a40378dc53787f69a96609a90cad499d50b`), [#1571](<https://github.com/Secuura/Distributed_Secuura/pull/1571>) (merged `9251ae54d4b8225f382abf7973649635330f3b96`).\n\n**Dedupe before filing:** over all 1,609 team issues including archived, 0 hits each for `Gate E2`, `prior height of 0`, `constructor-name arm`, `verification.ts:1580`. Near hits read and different: KS-1485 (pins the `txHash` carry in the same function, not a 0 height), KS-1129 (one of KS-1509's other sites, a heal path), and the broad `|| null` / \"header comment\" matches (none about these files). Controls on the same data: `Gate D` 1 hit (KS-1620), `markDocumentAnchorFailed` 6 hits.\n\nFiled by Seat R 47th on Wednesday's GO of 2026-10-18T10:56:21Z. Not built this session.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1743",
+    "title": "Refs KS-1621 item 3: the ks1543 test header no longer says the catch logs with String(err)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1593",
+    "title": "Refs KS-1621 (2 of 2): pin that a thrown class instance logs its constructor name"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1592",
+    "title": "Refs KS-1621 (1 of 2): pin that a real prior height of 0 is carried forward as 0"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "eb2d2d76-4984-4836-9809-4bc7cc58439e",
+    "createdAt": "2026-10-27T13:26:38.553Z",
+    "body": "**BLUF: all three items are on develop `061c3a4f62d563e723b8cee5fe792b4c27dc3014`, and every change is a test cell or a comment (no runtime surface), so this ticket is moved to Done.** Re-read at that tip by the board seat; the earlier comment of 2026-10-27T05:34:53Z held item 3 open, and #1743 landed it.\n\n| item | PR / commit | what is on develop, at the tip | how found |\n| -- | -- | -- | -- |\n| 1, the height-0 cell | #1592, `fae056052` (2026-10-19), ancestor of the tip | `Blockchain/Dev/services/originate/src/__tests__/ks1333-sync-writers-persist-null-not-zero.test.ts:162`, `it('RED KS-1621 F5 a real prior height of 0 is carried forward as 0, not collapsed to null', ...)` | `git grep -n 'RED KS-1621'` at the tip |\n| 2, the constructor-name arm | #1593, `9f1794488` (2026-10-19), ancestor of the tip | `Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts:142`, `it('RED KS-1621 D4 - a thrown instance of a class logs its constructor name and field names, never a value', ...)` | the same grep |\n| 3, the stale header | #1743, `156713018` (2026-10-27), ancestor of the tip | the same ks1543 file, lines 3-4 now read \"via fail500's describer (routes/batch.ts, KS-1346; KS-1619 part 3 replaced `err instanceof Error ? err.message : String(err)`)\"; the header no longer describes the catch as using `String(err)` | `git show` of lines 1-8 at the tip |\n\nInstrument: `git grep -n 'RED KS-1621' <tip> -- Blockchain/Dev` returned exactly the two cells above. Positive control on the same instrument, `RED KS-1628` \u2192 6 files; a zero-control token coined for this read and written nowhere \u2192 0 files.\n\nThe product code the cells guard is unchanged and was right at the gate (`anchorStateSync.ts` keeps `??`; the describer in `routes/verification.ts` reads the constructor name).\n\n**Left over, filed separately and not part of this ticket's three items:** the same ks1543 file's second block (`:109`) still cites \"the :1579 log line\", now `verification.ts:1067`; it is recorded, with a stale cell title in a sibling file, in KS-1766.\n\n**Not verified:** I ran no suite. The cells' pass state is the merge-time record on #1592, #1593 and #1743, not re-run here.\n\n*Seat G 25th, 2026-10-27 UTC, on Wednesday's brief. State moved to Done by the board seat after this comment; nothing archived.*\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "d3ab5da8-e658-4c0e-a102-638e7fdaf1ca",
+    "createdAt": "2026-10-27T05:50:06.765Z",
+    "body": "**BLUF: [PR #1743](https://github.com/Secuura/Distributed_Secuura/pull/1743) at `7b8094724cbd`, READY FOR GATE. Item 3 of 3, the last open one: the ks1543 test header no longer says the catch logs with `String(err)`. Comment-only, one file, 4 lines in and 4 out, net line delta zero. Nothing merged or deployed.**\n\nItems 1 and 2 were already on develop (#1592 `fae056052f0e`, #1593 `9f1794488669`, both merged 2026-10-19), so this PR leaves the ticket's three items all landed.\n\n**What changed.** Header lines 3-6 of `ks1543-document-types-catch-logs-the-error.test.ts` described the catch as using the document-create pipeline's `err instanceof Error ? err.message : String(err)` shape. It has used fail500's describer since KS 1619 part 3 (`routes/verification.ts:1067`; the file's own second block says so). Only that clause is rewritten, and the paragraph stays six lines so nothing below it moves.\n\n**Comment-only, proved.** TypeScript emit with comments removed, one fixed filename: 6,880 bytes and sha256/16 `cf10f87b237cb568` before and after. Controls: a code-token tamper changes the hash, added comments do not, both emits non-empty. \"Before\" is the blob on develop (`git hash-object` equal to `f48fd4386faa`).\n\n**The test file, 10 runs, pristine and edited: 8 passed 10/10, 2 failed identically** (`beforeAll` hook timed out at the 10 s default, 10 tests skipped: the pristine file's first run in a fresh worktree, import 19.11 s, and the edited file's third, 15.94 s). Pristine 4 of 5 passed, edited 4 of 5 passed, so the edit is not the cause. The mechanism of the slow import is not established here; the class is KS 1748.\n\n**Gate, as it reported itself, not a pass:** push rc 0, hook 14m44s. `PREFLIGHT INCOMPLETE \u2014 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 skipped for a local stack that is not up. Inside it: `shell suites: 95 passed, 0 failed, 1 skipped (of 96)` and api-gateway test type-check `27 errors: 27 in the baseline, 0 new`.\n\n**Not covered.** The other 123 api-gateway test files and the four platform suites were not run. The two HTML docs are not updated: this changes no probe, gate, category, file or timing, and the PR states the skill's \"say so explicitly and why\" clause. One neighbouring stale reference is left alone as out of scope: the file's second block calls the catch \"the :1579 log line\", now `verification.ts:1067`.\n\nTicket state is unchanged by me.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "a2b1e49d-3c8b-4697-85af-960a72c497d9",
+    "createdAt": "2026-10-27T05:34:53.936Z",
+    "body": "## Stays open \u2014 item 3. **NO state change made.** Items 1 and 2 are on develop; item 3 is not, and it is in a current build lane.\n\nRead at develop `885d69b06f5fce7c8f58effea68623ecb25407b1`.\n\n## Items 1 and 2 \u2014 on develop\n\n| item | cell at my tip |\n| -- | -- |\n| 1, the height-0 cell | `Blockchain/Dev/services/originate/src/__tests__/ks1333-sync-writers-persist-null-not-zero.test.ts:162` \u2014 `it('RED KS-1621 F5 a real prior height of 0 is carried forward as 0, not collapsed to null', async () => {` |\n| 2, the constructor-name arm | `Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts:142` \u2014 `it('RED KS-1621 D4 - a thrown instance of a class logs its constructor name and field names, never a value', async () => {` |\n\nFound with `git grep` over `__tests__` at the tip: 2 hits for `KS-1621`, exactly the two above. Positive control on the same instrument: `KS-1159` fires. Zero control: 0.\n\n**One path correction to anyone working from the triage list:** the ks1543 file is under **`services/api-gateway/`**, not `services/originate/`. The two cells are in different services.\n\n## Item 3 \u2014 still open, measured\n\nThe ticket asks for the header of `services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts` **lines 1-6** to be updated, because it still describes the catch as using `String(err)` where after #1571 it uses fail500's describer.\n\nAt my tip, **`:4` still reads**:\n\n`// already uses for the document-create pipeline (\\`err instanceof Error ? err.message : String(err)\\`), and the client`\n\nwhich is inside lines 1-6. So item 3 is unchanged and this ticket is **not** Done.\n\n(`String(err)` occurs twice in the file. The second, `:109`, is a *different* and accurate reference \u2014 it describes what the `:1579` log line used to do, under a `KS-1619 part 3` heading \u2014 and is not what item 3 asks to change. Stated so the next reader does not edit the wrong one.)\n\n## Next\n\nItem 3 is in **lane 10** of the current wave. Revisit this ticket for a Done move when that lane's PR merges; items 1 and 2 need no further work.\n\n*Seat G 24th, 2026-10-27, on Wednesday's brief. Board seat: nothing built, no suite run, no state changed on this ticket, nothing archived.*",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

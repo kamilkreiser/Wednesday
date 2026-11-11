@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-139",
+ "title": "Platform S \u2014 upload your test suite so the extranet live runner executes it (GitHub Actions)",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "stuart.jamieson@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-05-25T06:27:06.805Z",
+ "updatedAt": "2026-09-02T10:25:27.416Z",
+ "description": "## What this is\n\nThe extranet **Testing** tab has a **Run on Dev / Run on Demo** button ([KS-138](https://linear.app/secuura/issue/KS-138/extranet-live-test-runner-trigger-schemathesis-api-e2e-v2-e2e-on)). It triggers a GitHub Actions workflow (`extranet-test-run.yml` in `Secuura/Distributed_Secuura`) that runs test suites **live** against the chosen environment and posts a dashboard back into the portal. Draft workflow + generator are staged in `secuura-extranet/ci/` (`extranet-test-run.yml`, `build-dashboard.mjs`, `README.md`).\n\nThis ticket: **add the Platform S test suite** so the runner executes it. (Peter's Platform K suites already exist \u2014 see the sibling ticket.)\n\n## How to upload test code so the runner runs it\n\n1. **Commit the suite into the repo** (`Secuura/Distributed_Secuura`, on `main`) \u2014 e.g. `systemTest/platform-s/` or `tests/platform-s/`.\n2. **Target via env vars, never hardcode** \u2014 read the base URL from env so the same code hits dev or demo:\n   * Dev API: `https://secuura-dev-api.gentlebush-21213dc4.uksouth.azurecontainerapps.io`\n   * Demo API: `https://secuura-demo-api.blackmoss-2a7eea0b.uksouth.azurecontainerapps.io` (and `https://secuura.com` for the app)\n   * Use the same `API_BASE_URL` / `BASE_URL` convention the existing suites use.\n3. **Runnable headless on an ubuntu GitHub runner** \u2014 a deterministic install + run (Node or Python), no GUI, no Chrome-MCP-only steps.\n4. **Emit machine-readable results** \u2014 a JSON summary (Playwright-style `{stats:{expected,unexpected,skipped}}` is ideal, since the dashboard generator already reads that) plus optionally an HTML report. The runner builds the combined dashboard + posts it back.\n5. **No committed credentials** \u2014 the harness auto-detects the seeded demo/dev logins from the URL; for authed calls, log in at runtime to get a token.\n6. **Wire a workflow step**: add an install+run step for your suite to `extranet-test-run.yml` (gated by the `env` input, `continue-on-error: true`) and point `build-dashboard.mjs` at your results. Ping Kam/Claude and we'll add the step.\n\n## Done when\n\nPlatform S tests run green headless against **dev** from the workflow, produce a results JSON the dashboard reads, and appear in the extranet Testing \u2192 Platform S tab after a run.\n\nRefs: [KS-138](https://linear.app/secuura/issue/KS-138/extranet-live-test-runner-trigger-schemathesis-api-e2e-v2-e2e-on) (the runner), [KS-136](https://linear.app/secuura/issue/KS-136/platform-s-registration-login-issue-jwt) (Platform S auth/JWT). Sibling: Platform K wiring (Peter).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

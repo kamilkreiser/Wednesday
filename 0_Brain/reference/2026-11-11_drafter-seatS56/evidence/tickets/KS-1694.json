@@ -1,0 +1,49 @@
+{
+ "identifier": "KS-1694",
+ "title": "m365-integration tests import @electric-sql/pglite, which NO workspace member declares - it is hoisted from originate's prisma, so a Prisma bump breaks two suites with a load failure",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": null,
+ "archivedAt": null,
+ "createdAt": "2026-10-20T01:10:55.201Z",
+ "updatedAt": "2026-11-04T15:50:43.725Z",
+ "description": "## BLUF\n\n**Two** `m365-integration` **test files import** `@electric-sql/pglite`**, and NO workspace member declares it.** It is present in `node_modules` only as a transitive dependency of **another service's** Prisma: `services/originate` \u2192 `prisma@7.8.0` \u2192 `@prisma/dev@0.24.3` \u2192 `@electric-sql/pglite@0.4.1`, hoisted to `Blockchain/Dev/node_modules/`. So two of this service's suites load today by accident of originate's dependency tree, and any Prisma change that drops or restructures `@prisma/dev` breaks them with a load failure.\n\n**This is LATENT, not present.** A clean `npm ci` in a fresh clone of develop resolves it and the m365 suite runs green \u2014 measured, see below. Nothing is failing now.\n\n## Measured at develop `108091b2e1c1c9d4b486213b6424ebfe88ef9332`\n\nIn a fresh clone, after `npm ci` (rc 0, 1937 packages) and `npm run build --workspace=packages/shared`:\n\n| reading | result |\n| -- | -- |\n| `@electric-sql/pglite` in `services/m365-integration/package.json` | **absent** from `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies` |\n| declared by the root `Blockchain/Dev/package.json` | **absent** from both dependency fields |\n| declared by **any** workspace member | **none** \u2014 `grep -rl '\"@electric-sql/pglite\"' --include=package.json services packages` returns nothing |\n| where it resolves from | `Blockchain/Dev/node_modules/@electric-sql/pglite/dist/index.cjs` \u2014 hoisted to the workspace root, not under the service |\n| why it is there | `npm ls`: `@secuura/originate` \u2192 `prisma@7.8.0` \u2192 `@prisma/dev@0.24.3` \u2192 `@electric-sql/pglite@0.4.1` (also via `pglite-socket@0.1.1` and `pglite-tools@0.3.1`, both deduped) |\n| lockfile dependents | **3**, all transitive: `@prisma/dev` (`dependencies`), `pglite-socket` and `pglite-tools` (`peerDependencies`) |\n\n**The two importers:**\n\n* `services/m365-integration/src/__tests__/ks1677-oauth-state-statements-on-a-real-engine.test.ts`\n* `services/m365-integration/src/__tests__/ks1673-teams-statements-on-a-real-engine.test.ts`\n\n**Positive control that the measurement is live:** the same resolution check run for a declared dependency of this service resolves under the expected path, and the m365 suite itself ran **23 files / 220 cells / 220 passed / 0 failed** on this clone \u2014 so the two files above really do import successfully today.\n\n## Why this is worth a ticket rather than a shrug\n\nThe hazard is not hypothetical for this exact subtree. **KS-664 records that a lockfile regeneration already moved it**: that ticket's description notes the regen *\"downgraded \u2026* `@prisma/get-platform` *7.8.0\u21927.2.0\"* and **dropped** other packages outright. A dependency this service's tests rely on is therefore sitting one unrelated lockfile operation away from disappearing, and the failure mode is a **load failure** \u2014 which reds a whole file with no useful message and can poison a denominator rather than producing one honest red cell.\n\n## Suggested fix\n\nDeclare `@electric-sql/pglite` in `services/m365-integration/package.json` `devDependencies` at the version already resolved (`0.4.1`), so the dependency the tests actually use is stated by the package that uses it. `services/originate` already depends on Prisma for its own reasons; nothing there needs to change. Worth checking whether other services import it undeclared too \u2014 not measured here.\n\n## Board search\n\nOver the whole corpus \u2014 **1682 issues, archived included, pagination exhausted, measured 2026-10-20T01:09:59Z** \u2014 exact substring over title + description:\n\n* `pglite` \u2192 **1**, KS-664, which mentions it only inside a list of versions a lockfile regeneration moved. KS-664 is the deepmerge-ts advisory override; it does not mention `m365` (checked: false) and does not mention an undeclared dependency (checked: false). **Not a duplicate.**\n* `electric-sql` \u2192 0 \u00b7 `undeclared dependency` \u2192 0 \u00b7 `transitive dependency` \u2192 0\n* `@prisma/dev` \u2192 4 (KS-1290, KS-530, KS-493, KS-470), all about advisories or lockfile discriminators, none about this\n\n**Positive controls, same corpus and moment:** `m365-integration` \u2192 **35**, `package.json` \u2192 **80**, `hoisted` \u2192 **25**. The instrument reports matches when there are any.\n\n## How it was found\n\nGate BW1 on PR #1660 raised it as pre-existing residue, framed as \"not declared in m365-integration's package\". Re-measured by Seat R 59th rather than relayed, which sharpened it: **nothing** declares it, not just this service, and the real parent is another service's Prisma. Nothing built here.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1662",
+    "title": "Refs KS-1682: the three fail-closed warnings go through the service logger, and gate BW1's two notes"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "24f36377-52e7-4625-9d50-1136ae781366",
+    "createdAt": "2026-11-04T15:50:43.757Z",
+    "body": "**BLUF:** Facts from QA gate 189 (PR 2001, KS-1256) that answer this ticket's open question: a second service imports `@electric-sql/pglite` without declaring it, the api-gateway real-engine test. Added by the close-out seat; nothing here changes the ticket.\n\n- The file: Blockchain/Dev/services/api-gateway/src/__tests__/ks1256-settings-store-statements-on-a-real-engine.test.ts, line 15, imports the package. This seat re-read it at origin/develop 035685291b9d: Blockchain/Dev/services/api-gateway/package.json has 0 hits for pglite (control: 2 hits for vitest in the same file), and Blockchain/Dev/package.json has 0.\n- Gate 189 measured this (source: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-04_gate189-ks1256-pr2001/verdict.md, G189-F5, line 44). In the lock the package comes only from the dependency tree of the prisma dev package. With a workspace-scoped install (--workspace=services/api-gateway --workspace=packages/shared), 2 test files fail: the import itself, plus 1 new TS2307 in KS-1090's type-check baseline. A full root npm ci passes 154 of 154 files and 1623 of 1623 tests. The gateway Dockerfile build excludes src/__tests__, so images are unaffected.\n- So what this ticket calls latent is already a failure for a scoped install in api-gateway. The fix shape is the same as here, declare it in the package that imports it. This note does not choose it.\n- Not measured by this note: any other service (this ticket's question still stands beyond m365-integration and api-gateway); a run of either install.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "baa5b6bf-465e-41ff-8df8-9b1effeff4bc",
+    "createdAt": "2026-11-02T02:53:13.750Z",
+    "body": "State corrected: In Review to Todo. Nothing is under review on this ticket.\n\nDone: the measurement only; the ticket's own text says \"Nothing built here\". The linked PR 1662 is merged but belongs to KS-1682 (the fail-closed warnings through the service logger) and does not touch this defect. No commit on develop at b1fb543640e7 names KS-1694, and no package.json there declares `@electric-sql/pglite` (git grep, with a control hit on prisma in originate).\n\nLeft: the suggested fix is not applied. `services/m365-integration` still does not declare the dependency (the ticket suggests a devDependencies entry at 0.4.1). The ticket also leaves open whether other services import it undeclared.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

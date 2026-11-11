@@ -1,0 +1,45 @@
+{
+ "identifier": "KS-1632",
+ "title": "verifierVerificationLevel is still seeded, stored, served and admin-editable but enforced nowhere after KS-1628",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-18T20:48:00.990Z",
+ "updatedAt": "2026-11-09T03:31:01.891Z",
+ "description": "**After KS-1628, a document type's** `verifierVerificationLevel` **is still seeded, stored, served and admin-editable, but enforced nowhere.** Wednesday ruled (a) on KS-1628 PR 2: retire the gate with the route, and file this ticket. **The options below are for the owner to choose between; this ticket does not choose.**\n\n## What happened\n\nThe only place the per-type verifier level was enforced was api-gateway's own handler for `POST /api/documents/:id/verify` (`routes/verification.ts`, the level check at develop `:596-608`): it read the document type's `verifierVerificationLevel` and refused a caller below it with 403 `INSUFFICIENT_VERIFICATION_LEVEL` (pinned by `ks1176` section E). KS-1628 retires that route.\n\n**Still present, measured at develop** `83ed01af70fd`**:**\n\n* seeded: `api-gateway/src/routes/admin.ts`, nine document types each carry a `verifierVerificationLevel`;\n* stored and edited: originate `routes/adminConfig.ts:202`, `:234`, `:1768`;\n* served: api-gateway `routes/platform.ts:895` and the document-types route (`routes/verification.ts`).\n\n**Enforced:** nowhere. `meetsVerificationLevel` survives in `services/enforcement.ts:153`, but that is the CREATOR level on document create. The successor `POST /api/verification/verify` is public by design (KS-442).\n\n**Real effect today:** none \u2014 the one enforcement point had 0 calls at the edge on kintsugi (\\~30 days) and demo (\\~38 days), measured read-only 2026-10-19. The risk is a **misleading control**: an administrator who sets a verifier level will reasonably believe it restricts who can verify a document of that type.\n\n## Options for the owner\n\n1. **Remove the setting** \u2014 drop `verifierVerificationLevel` from the type catalogue, the admin UI and the stores.\n2. **Label it inert** in the admin UI (\"not enforced since KS-1628\") and leave the data.\n3. **Re-introduce a verifier-level gate on a non-public verify route** (the public successor is public by design, so a gate there would contradict KS-442).\n\n## Related\n\n* **KS-1190** (\"meetsVerificationLevel fails open on an unknown REQUIRED level\") has two halves. Its **verify** half cites `routes/verification.ts:554-557`, which KS-1628 removes, so that half no longer applies; its **create** half (`POST /api/documents`) is unaffected.\n* `VerificationRouteDeps.meetsVerificationLevel` is now unused by the routes and kept only so existing test doubles still type-check (comment in place; removable together with whichever option is chosen).\n\n## Dedupe\n\n`description: contains` over all issues: `verifierVerificationLevel` 1 (KS-1190), `verifier_verification_level` 1 (KS-1190), `meetsVerificationLevel` 3 (KS-1628, KS-1190, KS-1176), `verifier level` 0. None records the setting as inert. Control: a nonsense literal returns 0.\n\nFiled by Seat R 49th from KS-1628 PR 2. Not built.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1190"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "a68d5277-3fcc-4601-a976-61dbbda4b8e8",
+    "createdAt": "2026-11-09T03:31:00.271Z",
+    "body": "**BLUF:** Kam ruled the 31-decision card `secuura-backlog-31-decisions-1109` on 2026-11-09 at 13:44:07 (live board), in these words: \"Decision secuura-backlog-31-decisions-1109: a \u2014 All recommendations (A and B)\". Option a reads: \"Every row ruled as recommended; a board seat files and moves the tickets; the KS-607 demo rows still wait for a separate yes.\" This ticket is row A10 of the decision pack, ruled as recommended: option 1. Remove the admin setting \"verifier verification level\": public verify is public by ruling (KS-442), so the gate cannot come back on that route, and the setting misleads admins.\n\nA build seat does the work; nothing was changed in code by this comment.\n\nAlongside this comment the ticket, which was unassigned, is assigned to the board account, and moves from Backlog to Todo.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

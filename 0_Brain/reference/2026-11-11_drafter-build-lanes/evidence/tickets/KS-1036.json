@@ -1,0 +1,30 @@
+{
+ "identifier": "KS-1036",
+ "title": "The review-stream overlay covers 57 of 114 active tickets, and DEV-PROCESS still says 'nothing left over'",
+ "state": {
+  "name": "In Progress"
+ },
+ "priority": 2,
+ "assignee": {
+  "name": "kamil.kreiser@secuura.ai"
+ },
+ "updatedAt": "2026-11-03T22:50:19.690Z",
+ "description": "## BLUF\n\n**The review-stream overlay Kam adopted on 2026-09-03 now covers exactly half the board, and** `DEV-PROCESS.md` **still says it covers all of it.** A handover organised by stream today silently omits **22 of the 32** PR-bearing tickets.\n\n## Measured, 2026-09-09\n\n`DEV-PROCESS.md` \u00a7*The four review streams, built 2026-09-03* states:\n\n> All **97** active Platform K tickets now sit under four parents \u2014 40 + 19 + 18 + 20, nothing left over\n\nToday, over `state.type in (started, unstarted)` on team KS:\n\n|  | count |\n| -- | -- |\n| active Platform K tickets | **114** |\n| directly under a review-stream parent | **57** (KS-485 19 \u00b7 KS-772 15 \u00b7 KS-770 12 \u00b7 KS-771 11) |\n| under some other parent | 5 |\n| **no parent at all** | **52** |\n| **NOT under a review stream** | **57 of 114** |\n\nThe doc's per-parent figures (40/19/18/20) do not match any parent's current child count either.\n\n## Why it bites right now\n\nBuilding the review blocks for Kam's handover, **22 of the 32 tickets that carry an open PR have no stream parent** \u2014 including every one of today's ready items: KS-926, KS-963, KS-968, KS-991, KS-992, KS-993, KS-1026, KS-936, KS-942, KS-945, KS-961, KS-909, KS-931, KS-791, KS-798/799/841, KS-764, KS-682, KS-971, KS-229, KS-1004.\n\nThe rule in the same doc is *\"Every new K-side ticket that reaches Todo is parented into one of the four\"*. That step is not happening \u2014 and nothing fails when it is skipped, which is why it went unnoticed for six days. **Same family as KS-926: a rule with no check behind it.**\n\n\u26a0 There is also a **discoverability trap in the doc's own shape**: three parents are findable by title (`Review stream: \u2026`) but the fourth, **KS-485**, is titled *\"Security review \u2014 plan, methodology & handover (Platform K)\"*. A title search for review-stream parents returns **3 of 4**. This session hit exactly that and only caught KS-485 by reading DEV-PROCESS.\n\n## Checklist\n\n- [ ] Parent the 22 PR-bearing tickets into their stream (placement already derived per-PR in the s159 review-block report \u2014 reuse it rather than re-deriving)\n- [ ] Sweep the remaining unparented active tickets (52 total with no parent)\n- [ ] Correct the counts in `DEV-PROCESS.md` \u00a7*The four review streams* \u2014 or, better, stop hardcoding a number that decays and point at a query\n- [ ] Rename KS-485 so all four parents are findable by title, **or** name all four explicitly in the doc so a title search is not the discovery path\n- [ ] Decide where the check lives so an unparented Todo cannot sit unnoticed \u2014 the board equivalent of KS-926's census\n\n## Provenance\n\nLinear GraphQL, team KS, `state.type in (started, unstarted)`, direct `parent` field. PR->ticket map from the 43 open PRs. Measured 2026-09-09 by the Platform K s159 seat.",
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1136",
+    "title": "KS-1035 D + KS-1036 item3: DEV-PROCESS.md notes the withdrawn-approval gap, decayed counts"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "2c2195e1-06ba-49d6-ab96-9c25fe760368",
+    "createdAt": "2026-11-03T22:50:19.719Z",
+    "body": "**BLUF:** Delivered: PR 1136 merged as f372149518f8 on develop (item 3 only); no deploy surface (docs only: Blockchain/Dev/docs/DEV-PROCESS.md, the squash's only file). Verified by docs read: `Blockchain/Dev/docs/DEV-PROCESS.md:219` carries the corrected, decayed-count wording from that PR. Left open: the parenting work is not done. The description still lists five unchecked items when read today, among them parenting the 22 PR-bearing tickets into their stream and sweeping the remaining unparented active tickets, and nothing on the ticket records them done.\n"
+   }
+  ]
+ }
+}

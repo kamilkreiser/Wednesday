@@ -1,0 +1,1862 @@
+lines in file 1861
+1 /**
+2  * =============================================================================
+3  * VERIFICATION ROUTES
+4  * =============================================================================
+5  * API endpoints for document verification, hash validation, and integrity checks
+6  * =============================================================================
+7  */
+8 
+9 import { Router, Request, Response } from 'express';
+10 import { body, validationResult } from 'express-validator';
+11 import crypto from 'crypto';
+12 import { logger } from '../utils/logger';
+13 import { ERASED_MARKER } from '../utils/erasureMarker';
+14 import { prisma, getTenantManager } from '../db';
+15 // KS-458: fail-closed RLS — cross-tenant registry lookups must query the
+16 // resolved tenant's rows under THAT tenant's GUC (bundled in-transaction),
+17 // not the request's (public verify has no auth → default-tenant ALS).
+18 import { runWithTenantId, queryWithTenantGuc } from '@secuura/shared';
+19 import {
+20   walkAncestors as walkDocumentAncestors,
+21   walkDescendants as walkDocumentDescendants,
+22   MAX_LINEAGE_DEPTH,
+23   type LineageEntry,
+24 } from '../repositories/documentRepo';
+25 
+26 export const verificationRouter = Router();
+27 
+28 // KS-252: ceiling on the chain-first lookup to the anchoring service. Without
+29 // it, anchoring's wallet-history chain scan (~20-30 s for a hash that is not
+30 // anchored yet) stalls the public verify endpoint for its full duration —
+31 // 39% of verifies timed out client-side under the KS-194 load baseline. On
+32 // abort we fall through to the local-DB verify path, which both call sites
+33 // already do for any chain-lookup error. Must stay ABOVE anchoring's
+34 // VERIFY_CHAIN_SCAN_BUDGET_MS (default 4 s) so bounded cross-env chain hits
+35 // still arrive.
+36 export const CHAIN_VERIFY_TIMEOUT_MS = parseInt(process.env.CHAIN_VERIFY_TIMEOUT_MS || '5000', 10);
+37 
+38 // =============================================================================
+39 // KS-522 — honest labelling of simulated anchors
+40 // =============================================================================
+41 // A `tx_sim_…`/`mock_tx_`/`mock_batch_tx_`/`tx_…` transaction hash corresponds to NO Cardano
+42 // transaction (SIMULATE_ANCHORING or the legacy dev mock wrote it). Simulation
+43 // is legitimate for local/demo use — presenting its output as on-chain proof
+44 // is not, because the verify response is the artefact a relying party acts on.
+45 // Every verify response passes its blockchain blob through this presenter:
+46 // a simulated anchor keeps document-level verification (content integrity +
+47 // certification status are real) but makes NO on-chain claim — `txHash` is
+48 // nulled (the placeholder moves to `simulatedTxRef`), `anchored` flips false,
+49 // and a machine-readable `simulated: true` marker is set (also surfaced
+50 // top-level by the response builders).
+51 const FABRICATED_TXHASH_RE = /^(tx_sim_|mock_tx_|mock_batch_tx_|tx_)/;
+52 
+53 export function presentBlockchainHonestly(blob: unknown): unknown {
+54   if (!blob || typeof blob !== 'object') return blob;
+55   const b = blob as Record<string, unknown>;
+56   const tx = typeof b.txHash === 'string' ? b.txHash : undefined;
+57   // KS-1628: any TRUTHY `simulated` counts ('true', 1), not only `=== true` — the rule the retired
+58   // gateway handler applied (`Boolean(persistedSimulated)`, KS-1069). Absent or false still does not.
+59   const simulated = Boolean(b.simulated) || (tx !== undefined && FABRICATED_TXHASH_RE.test(tx));
+60   if (!simulated) return blob;
+61   return {
+62     ...b,
+63     simulated: true,
+64     anchored: false,
+65     txHash: null,
+66     ...(tx ? { simulatedTxRef: tx } : {}),
+67     // A scan URL for a non-existent tx is itself a false claim.
+68     cardanoScanUrl: undefined,
+69   };
+70 }
+71 
+72 // =============================================================================
+73 // KS-563 — certified is not anchored
+74 // =============================================================================
+75 // `checks.isCertified` used to be true for `certified | anchored | signed`, so a
+76 // document that was merely originated and auto-anchored (every Platform S
+77 // upload) reported certification nobody performed — a live false "Certified by
+78 // issuer" in front of end users. Certification is now the narrow claim it
+79 // names: an issuer certified this document. Anchoring gets its own honest
+80 // flag, and the certification act — who/when/which certification — is
+81 // surfaced as an object that is ABSENT when no certification happened.
+82 //
+83 // `verified` / `integrityVerified` deliberately keep the OLD broad set
+84 // (VERIFIABLE_STATUSES): their meaning is "in the registry, hash intact, not
+85 // revoked", which is unchanged by this fix. Narrowing them would flip every
+86 // upload-only document to `verified: false` and break consumers for a defect
+87 // that lives in the certification flag alone.
+88 const CERTIFIED_STATUS = 'certified';
+89 const VERIFIABLE_STATUSES = new Set([CERTIFIED_STATUS, 'anchored', 'signed']);
+90 
+91 // KS-584 P3: exported for the /v2 list contract (routes/verificationV2.ts),
+92 // which presents every same-hash registration through the SAME honesty rules
+93 // v1 applies to its selected row. Pure predicates/builders only — exporting
+94 // them changes no v1 behaviour.
+95 export const isCertifiedStatus = (status: unknown): boolean => status === CERTIFIED_STATUS;
+96 export const isVerifiableStatus = (status: unknown): boolean => VERIFIABLE_STATUSES.has(String(status));
+97 
+98 /** KS-1628: anchoring's terminal failure ('failed') and originate's own 'anchor_failed'. */
+99 const FAILED_ANCHOR_STATUSES: ReadonlySet<string> = new Set(['failed', 'anchor_failed']);
+100 
+101 /**
+102  * KS-1628: a positive integer NUMBER, or a positive-integer digit STRING. The retired gateway handler
+103  * took numbers only (KS-1069 item 1); Wednesday ruled (b) on 2026-10-19 to accept the digit string too,
+104  * because it is a real stored shape - originate's heal path writes anchoring's raw pg BIGINT (KS-1129),
+105  * and one live demo anchor carries it. -1, 0, '0', '04', '4.2', 4.2 and non-numeric text are refused.
+106  */
+107 const DIGIT_HEIGHT_RE = /^[1-9][0-9]*$/;
+108 function isAnchorHeight(value: unknown): boolean {
+109   if (typeof value === 'number') return Number.isInteger(value) && value > 0;
+110   return typeof value === 'string' && DIGIT_HEIGHT_RE.test(value);
+111 }
+112 
+113 /**
+114  * True only for a real, non-simulated on-chain anchor. KS-522 rules apply: a placeholder
+115  * (`tx_sim_`/`mock_tx_`/`mock_batch_tx_`/`tx_…`, KS-1628) is not an anchor; never sets this.
+116  * Takes the blob ALREADY passed through presentBlockchainHonestly (which flips
+117  * `anchored` false and nulls `txHash` on simulated rows).
+118  */
+119 export function isAnchoredHonestly(honestChain: unknown, status?: unknown): boolean {
+120   if (honestChain && typeof honestChain === 'object') {
+121     // A chain blob is the authoritative answer — do NOT fall back to the
+122     // document status when one exists. `documents.status` flips to 'anchored'
+123     // when the anchor is SUBMITTED, so a still-pending anchor (status
+124     // 'pending', txHash null) would otherwise report isAnchored: true — the
+125     // same unearned claim this ticket exists to remove, one field over.
+126     const c = honestChain as Record<string, unknown>;
+127     // KS-1628: truthy, not `=== true` — see presentBlockchainHonestly.
+128     if (c.simulated) return false;
+129     // KS-1628: a failed anchor is not an anchor, whatever else the blob says. The chain-first blobs
+130     // carry `anchored: true` and no status, so they are unaffected; a stored blob that pairs
+131     // `anchored: true` with a failed status was on-chain before this line.
+132     if (FAILED_ANCHOR_STATUSES.has(String(c.status))) return false;
+133     // The stored blob is `{status, txHash, network, anchorId, anchoredAt,
+134     // blockHeight}` — anchoring's vocabulary is pending | submitted |
+135     // confirmed | failed (services/anchoring/src/index.ts) and there is NO
+136     // `anchored` boolean on a real row. The chain-first branches DO build a
+137     // blob with `anchored: true`, so accept either shape. Only 'confirmed'
+138     // counts: 'submitted' means the tx is in flight and may still fail — the
+139     // KS-535 class — so it has not earned the claim yet.
+140     const settled = c.anchored === true || c.status === 'confirmed';
+141     // KS-1628: a real hash is 64 hex characters (REAL_TXHASH_RE), not merely a non-empty string, and a
+142     // height that IS reported must be a real one (isAnchorHeight). A height that is not reported at all
+143     // (undefined, or the null anchoring's toBlockNumber returns when it has none) keeps today's answer:
+144     // the chain-first branches build their blob from that value, and ks563 pins that shape as on-chain.
+145     const heightOk = c.blockHeight === undefined || c.blockHeight === null || isAnchorHeight(c.blockHeight);
+146     return settled && typeof c.txHash === 'string' && REAL_TXHASH_RE.test(c.txHash) && heightOk;
+147   }
+148   // No chain blob at all — the document's own status is all we have.
+149   return status === 'anchored';
+150 }
+151 
+152 /**
+153  * The certification act, or undefined when the document was never certified.
+154  * Built from `certification_metadata`, which `POST /api/certifications/issue`
+155  * already writes (issuerName / certificationId / certificationType /
+156  * certifiedAt) alongside `status='certified'` — no new persistence needed.
+157  * Absent (not null) so a consumer's `if (res.certification)` is the honest test.
+158  */
+159 export function buildCertification(doc: any): Record<string, unknown> | undefined {
+160   if (!isCertifiedStatus(doc?.status)) return undefined;
+161   const certMeta = (doc?.certification_metadata || {}) as Record<string, any>;
+162   const certifiedAt = certMeta.certifiedAt || doc?.certified_at || undefined;
+163   const certifiedBy =
+164     certMeta.issuerName
+165     || certMeta.certificationData?.issuedBy
+166     || doc?.organization_name
+167     || undefined;
+168   return {
+169     certificationId: certMeta.certificationId ?? null,
+170     certificationType: certMeta.certificationType ?? null,
+171     certifiedAt: certifiedAt ? new Date(certifiedAt).toISOString() : null,
+172     certifiedBy: certifiedBy ?? null,
+173     certifierOrganizationId: certMeta.issuerId ?? null,
+174   };
+175 }
+176 
+177 // =============================================================================
+178 // KS-584 (interim) — select the registration that evidences its claims
+179 // =============================================================================
+180 // Verify-by-hash used to resolve a content hash to ONE arbitrary row
+181 // (`ORDER BY certified_at DESC NULLS LAST LIMIT 1`) — but the normal certify
+182 // flow creates a SECOND row for the same bytes (the certification's
+183 // signed_document, which carries no chain data), and `certified_at` is NULL on
+184 // whole row-sets in production, so the pick was effectively arbitrary. Live
+185 // consequence (UAT, 2026-08-07): a certified document with three confirmed
+186 // on-chain anchors verified as neither certified nor anchored. The full fix is
+187 // the P3 lookup contract (UUID primary key; verify-by-hash returns a list);
+188 // this interim keeps LIMIT 1 semantics for consumers but picks the row that
+189 // can actually support the answer, and reads certification evidence from the
+190 // same-hash registration set rather than only the selected row.
+191 export const REAL_TXHASH_RE = /^[0-9a-f]{64}$/i;
+192 
+193 export function chainBlobOfRow(row: any): Record<string, unknown> | null {
+194   const certMeta = row?.certification_metadata || {};
+195   const meta = row?.metadata || {};
+196   const blob = certMeta.blockchain || meta.blockchain;
+197   return blob && typeof blob === 'object' ? (blob as Record<string, unknown>) : null;
+198 }
+199 
+200 export function rowHasRealTx(row: any): boolean {
+201   const b = chainBlobOfRow(row);
+202   if (!b || b.simulated === true) return false;
+203   return typeof b.txHash === 'string' && REAL_TXHASH_RE.test(b.txHash);
+204 }
+205 
+206 export const rowCreatedMs = (row: any): number => {
+207   const t = row?.created_at instanceof Date ? row.created_at.getTime() : Date.parse(String(row?.created_at ?? ''));
+208   return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;
+209 };
+210 
+211 // =============================================================================
+212 // KS-1561 — a certification is presented only for the holder of the ORIGINAL registration
+213 // =============================================================================
+214 // Before KS-1561 a 'certified' row won selection whoever held it, and siblingCertification lent any certified sibling's
+215 // certification to the selected row. So organisation A could register organisation B's bytes AFTER B, certify its own
+216 // copy, and make verify(H) answer "certified by Org A" (Seat J 5th, 2026-10-12, real routes, real Postgres).
+217 // Kam ruled option a (card secuura-ks1561-duplicate-hash-certifier-1102, 2026-11-02): "Certify only for the org holding
+218 // the ORIGINAL registration". Wednesday's design ruling (2026-11-04, D1-D4) defines it:
+219 //   D1 the ORIGINAL rows are those tied at the earliest created_at. created_at is server-set on every write path
+220 //      (documentRepo saveDocument NOW(); certificationRepo new Date()), so a caller cannot choose it, and a later
+221 //      registrant cannot overtake an original whose anchor failed (earliest ANCHORED was ruled out for that reason);
+222 //   D2 a row may testify to a certification only when it IS an original row, or carries the SAME non-null
+223 //      issuer_organization_id or the SAME non-null owner_user_id as an original row; a KS-1557-trusted lineage row
+224 //      also qualifies when its parent is an original row. Unknown identity is not a match (fail closed): a portal
+225 //      registration carries no organisation (issuer_organization_id is written only on a bound organizationUuid
+226 //      claim, KS-597), so a re-registration by a different user of the same portal organisation no longer shows as
+227 //      certified. Kam's card names that cost: "Some legitimate re-registrations stop showing as certified".
+228 /** KS-1561: a comparable identity, or null for an absent / blank value (null never matches anything). */
+229 const identityOf = (value: unknown): string | null => {
+230   if (value === null || value === undefined) return null;
+231   const s = String(value).trim().toLowerCase();
+232   return s.length > 0 ? s : null;
+233 };
+234 
+235 export interface CertificationEligibility {
+236   /** KS-1561 D2: may this row's OWN 'certified' status be presented for the set's bytes? */
+237   certifiedRow: (row: any) => boolean;
+238   /** KS-1561 D2: may the KS-1557-trusted evidence this (derived) row carries be presented for the set's bytes? */
+239   evidenceRow: (row: any) => boolean;
+240 }
+241 
+242 /** KS-1561: the eligibility rule over ONE same-hash registration set (see the block comment above). */
+243 export function certificationEligibility(rows: any[]): CertificationEligibility {
+244   const list = rows || [];
+245   const earliest = list.reduce((min: number, r: any) => Math.min(min, rowCreatedMs(r)), Number.MAX_SAFE_INTEGER);
+246   // D1: every row tied at the earliest instant is an original; rows with no readable created_at sort last
+247   // (rowCreatedMs gives MAX_SAFE_INTEGER), so they are originals only when no row carries a readable time.
+248   const originals = list.filter((r: any) => rowCreatedMs(r) === earliest);
+249   const originalRows = new Set<unknown>(originals);
+250   const collect = (pick: (r: any) => unknown): Set<string> =>
+251     new Set(originals.map((r: any) => identityOf(pick(r))).filter((v): v is string => v !== null));
+252   const originalIds = collect((r) => r?.id);
+253   const originalOrgs = collect((r) => r?.issuer_organization_id);
+254   const originalOwners = collect((r) => r?.owner_user_id);
+255   const certifiedRow = (row: any): boolean => {
+256     if (originalRows.has(row)) return true;
+257     const org = identityOf(row?.issuer_organization_id);
+258     if (org !== null && originalOrgs.has(org)) return true;
+259     const owner = identityOf(row?.owner_user_id);
+260     return owner !== null && originalOwners.has(owner);
+261   };
+262   const evidenceRow = (row: any): boolean => {
+263     if (certifiedRow(row)) return true;
+264     const parent = identityOf(row?.parent_document_id);
+265     return parent !== null && originalIds.has(parent);
+266   };
+267   return { certifiedRow, evidenceRow };
+268 }
+269 
+270 /**
+271  * Pick the row that best evidences the platform's claims for these bytes:
+272  *   1. a `certified` row (the legacy certify path writes one) — KS-1561: only one the ORIGINAL holder may present;
+273  *   2. else a row with a REAL on-chain tx (KS-522, KS-1628: no FABRICATED_TX_PREFIX
+274  *      placeholder counts) — 'confirmed' chain state first, then the ORIGINAL registration
+275  *      (created_at ASC), since derived signed_document rows are later copies;
+276  *   3. else the oldest row — deterministic, where the legacy NULLS LAST order
+277  *      was arbitrary.
+278  * Input rows keep the query's certified_at DESC pre-sort, so within rule 1 the
+279  * most recent ELIGIBLE certification still wins.
+280  * KS-1561: a certified row the original's holder may NOT present is left out of every rule, not merely out of rule 1:
+281  * its stored status is 'certified', so selecting it under rule 2 or 3 would still present its certification
+282  * (buildCertification and isCertifiedStatus both read the status). An original row is always a candidate, so the
+283  * candidate set is never empty. Before KS-1561 every row was a candidate and rule 1 took any certified row.
+284  */
+285 function selectVerifiableRow(rows: any[], judged?: CertificationEligibility): any | undefined {
+286   if (!rows || rows.length === 0) return undefined;
+287   if (rows.length === 1) return rows[0];
+288   const eligibility = judged ?? certificationEligibility(rows); // KS-1561; KS-1986: v1's verify passes its cross-tenant judgment
+289   const candidates = rows.filter((r) => !isCertifiedStatus(r?.status) || eligibility.certifiedRow(r)); // KS-1561
+290   const certified = candidates.filter((r) => isCertifiedStatus(r?.status));
+291   if (certified.length > 0) return certified[0];
+292   const anchored = candidates.filter(rowHasRealTx).sort((a, b) => { // KS-1561: was rows.filter
+293     const aConfirmed = chainBlobOfRow(a)?.status === 'confirmed' ? 0 : 1;
+294     const bConfirmed = chainBlobOfRow(b)?.status === 'confirmed' ? 0 : 1;
+295     if (aConfirmed !== bConfirmed) return aConfirmed - bConfirmed;
+296     return rowCreatedMs(a) - rowCreatedMs(b);
+297   });
+298   if (anchored.length > 0) return anchored[0];
+299   return [...candidates].sort((a, b) => rowCreatedMs(a) - rowCreatedMs(b))[0]; // KS-1561: was [...rows]
+300 }
+301 
+302 /**
+303  * KS-1557 (read side). Which derived 'signed' rows may testify to a certification act?
+304  *
+305  * The lineage certify path (`POST /api/certifications/issue` with parentDocumentId) records the act on a DERIVED row (status 'signed',
+306  * `metadata.certificationId`) and leaves the parent untouched. The derived row's `metadata` is filled from the CALLER'S `data` (the
+307  * caller's keys are spread AFTER the server's), so everything in it - certificationId, certifiedAt, certificationType, issuerId - is
+308  * caller-chosen. Reading the evidence from there let a caller choose what verify presented, and let a row whose hash is not its
+309  * parent's count. The rule now: a derived row counts only when ALL of these hold, and the presented id, type and time come from the
+310  * real certification row, never from the derived row's metadata:
+311  *   1. status 'signed', and `metadata.certificationId` is a UUID;
+312  *   2. its parent link is set, and the parent's hash equals its own (the parent is read from the same-hash set, else one lookup);
+313  *   3. its external id carries the first 8 hex characters of that certification id (the route generates doc-<ms>-<certId8>), so a row
+314  *      cannot cite someone else's genuine certification;
+315  *   4. that certification id RESOLVES, in the row's own tenant, to a real certification row (a `documents` row written by
+316  *      saveCertification: certification_metadata carries certificationType and holderId);
+317  *   5. the derived row's owner is the certification's issuer (owner_user_id equals issuer_user_id; both NULL for a connector principal).
+318  * `certifiedBy` stays the caller-asserted display string it always was (ruled); `certifierOrganizationId` is null here because the
+319  * certification row stores the issuer's USER id, not an organisation id (the organisation-id fix is the write side).
+320  */
+321 export const MAX_EVIDENCE_LOOKUPS = 8;
+322 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+323 const DERIVED_EXTERNAL_ID_RE = /^doc-\d+-([0-9a-f]{8})$/i;
+324 const normaliseRowHash = (h: unknown): string => String(h ?? '').replace(/^sha256:/i, '').toLowerCase();
+325 
+326 export interface CertificationEvidenceContext { db?: any }
+327 export type TrustedEvidence = ReadonlyMap<unknown, Record<string, unknown>>;
+328 
+329 /** The certification id a derived row CLAIMS, when it is shaped like a certify-lineage child. No I/O. */
+330 function claimedCertificationId(row: any): string | null {
+331   if (row?.status !== 'signed' || !row?.parent_document_id) return null;
+332   const certId = (row?.metadata as Record<string, unknown> | undefined)?.certificationId;
+333   if (typeof certId !== 'string' || !UUID_RE.test(certId)) return null;
+334   const m = DERIVED_EXTERNAL_ID_RE.exec(String(row?.external_id ?? ''));
+335   if (!m || m[1].toLowerCase() !== certId.slice(0, 8).toLowerCase()) return null;
+336   return certId.toLowerCase();
+337 }
+338 
+339 /** Run one tenant-scoped read for a row: the row's own tenant pool when it came from another tenant, else the request's db. */
+340 async function readForRow(row: any, ctx: CertificationEvidenceContext, sql: string, params: unknown[], tagged: (db: any) => Promise<any[]>): Promise<any[]> {
+341   if (row?._tenantId) {
+342     const mgr = getTenantManager();
+343     if (!mgr) return [];
+344     const tenant = String(row._tenantId);
+345     const out = await runWithTenantId(tenant, () => queryWithTenantGuc(mgr.getPool(tenant), sql, params));
+346     return out.rows;
+347   }
+348   return tagged(ctx.db || prisma);
+349 }
+350 
+351 async function fetchParentHash(row: any, tenant: string, ctx: CertificationEvidenceContext): Promise<string | null> {
+352   const parent = String(row.parent_document_id);
+353   if (!UUID_RE.test(parent)) return null;
+354   const rows = await readForRow(row, ctx, 'SELECT content_hash FROM documents WHERE id = $1::uuid AND tenant_id = $2::uuid LIMIT 1', [parent, tenant],
+355     (db) => db.$queryRaw`SELECT content_hash FROM documents WHERE id = ${parent}::uuid AND tenant_id = ${tenant}::uuid LIMIT 1`);
+356   return rows.length > 0 ? normaliseRowHash(rows[0].content_hash) : null;
+357 }
+358 
+359 async function fetchCertificationRow(row: any, certId: string, tenant: string, ctx: CertificationEvidenceContext): Promise<any | null> {
+360   const rows = await readForRow(row, ctx,
+361     'SELECT id, status, document_type, certified_at, created_at, issuer_user_id, certification_metadata FROM documents WHERE id = $1::uuid AND tenant_id = $2::uuid LIMIT 1', [certId, tenant],
+362     (db) => db.$queryRaw`SELECT id, status, document_type, certified_at, created_at, issuer_user_id, certification_metadata FROM documents WHERE id = ${certId}::uuid AND tenant_id = ${tenant}::uuid LI
+363   return rows[0] ?? null;
+364 }
+365 
+366 /** A real certification row is one saveCertification wrote: it carries certificationType and holderId in certification_metadata. */
+367 function isCertificationRow(cert: any, certId: string, derived: any): boolean {
+368   if (!cert || String(cert.id).toLowerCase() !== certId || String(cert.id) === String(derived?.id)) return false;
+369   const cm = (cert.certification_metadata || {}) as Record<string, unknown>;
+370   return typeof cm.certificationType === 'string' && cm.certificationType.length > 0 && cm.holderId !== undefined && cm.holderId !== null;
+371 }
+372 
+373 /**
+374  * Resolve, for every row of the set that claims to be a certify-lineage child, whether it is a GENUINE act, and the evidence to
+375  * present. Fail closed: any miss, mismatch or error leaves the row out. At most MAX_EVIDENCE_LOOKUPS claimed rows are examined.
+376  * The result is keyed by the row OBJECT, so callers pass it to siblingCertification / ownRowCertification with the same rows.
+377  */
+378 export async function resolveTrustedCertificationEvidence(rows: any[], ctx: CertificationEvidenceContext): Promise<TrustedEvidence> {
+379   const trusted = new Map<unknown, Record<string, unknown>>();
+380   let examined = 0;
+381   for (const r of rows || []) {
+382     const claimed = claimedCertificationId(r);
+383     if (!claimed) continue;
+384     if (examined >= MAX_EVIDENCE_LOOKUPS) break;
+385     examined += 1;
+386     try {
+387       const tenant = String(r?._tenantId ?? r?.tenant_id ?? '');
+388       if (!UUID_RE.test(tenant)) continue;
+389       const own = normaliseRowHash(r.content_hash);
+390       const inSet = rows.find((p: any) => p !== r && String(p?.id) === String(r.parent_document_id));
+391       const parentHash = inSet ? normaliseRowHash(inSet.content_hash) : await fetchParentHash(r, tenant, ctx);
+392       if (parentHash === null || parentHash !== own) continue;
+393       const cert = await fetchCertificationRow(r, claimed, tenant, ctx);
+394       if (!isCertificationRow(cert, claimed, r)) continue;
+395       // The certify route saves the derived row owned by the ISSUER and the certification row with the same issuer, so the two agree (both a
+396       // UUID for a person, both NULL for a connector principal). A sign-cert / sign-wallet row is owned by the SOURCE's owner, so it cannot cite
+397       // an actor's certification unless that actor owns the source.
+398       if (String(r.owner_user_id ?? '') !== String(cert.issuer_user_id ?? '')) continue;
+399       const meta = (r?.metadata || {}) as Record<string, any>;
+400       const cm = (cert.certification_metadata || {}) as Record<string, any>;
+401       const at = cert.certified_at ?? cert.created_at ?? null;
+402       trusted.set(r, {
+403         certificationId: String(cert.id),
+404         certificationType: cm.certificationType,
+405         certifiedAt: at ? new Date(at).toISOString() : null,
+406         certifiedBy: meta.issuerName ?? meta.issuedBy ?? r?.organization_name ?? null,
+407         certifierOrganizationId: null,
+408       });
+409     } catch (err: any) {
+410       logger.warn('KS-1557: certification evidence lookup failed - the row is not counted', { rowId: r?.id, error: err?.message });
+411     }
+412   }
+413   return trusted;
+414 }
+415 
+416 /**
+417  * The certification act evidenced elsewhere in the same-hash registration set: a 'certified' sibling (the legacy path writes one), else a
+418  * derived 'signed' row that resolveTrustedCertificationEvidence accepted. `trusted` is REQUIRED (no default): a call site that forgot to
+419  * resolve would otherwise fail open.
+420  */
+421 function siblingCertification(rows: any[], selected: any, trusted: TrustedEvidence, judged?: CertificationEligibility): Record<string, unknown> | undefined {
+422   if (!rows || rows.length < 2) return undefined;
+423   // KS-1561: a sibling lends its certification only when the ORIGINAL registration's holder may present it. Before
+424   // KS-1561 the first certified sibling, or the first trusted evidence, was returned whoever held it.
+425   const eligibility = judged ?? certificationEligibility(rows); // KS-1986: v1's verify passes its cross-tenant judgment
+426   for (const r of rows) {
+427     if (r === selected) continue;
+428     if (isCertifiedStatus(r?.status)) {
+429       if (eligibility.certifiedRow(r)) return buildCertification(r);
+430       continue; // KS-1561: an ineligible certified sibling is passed over (it used to return here unconditionally)
+431     }
+432     const evidence = trusted.get(r);
+433     if (evidence && eligibility.evidenceRow(r)) return evidence; // KS-1561: was `if (evidence)`
+434   }
+435   return undefined;
+436 }
+437 
+438 // =============================================================================
+439 // KS-584 (interim) — tenant-owned fields do not cross the tenant boundary
+440 // =============================================================================
+441 // Verify is reachable without authentication, and (in multi-tenant mode) the
+442 // row that answers can belong to a DIFFERENT tenant than the caller. The row's
+443 // existence + integrity + anchor facts are the service; the tenant-owned
+444 // naming (title, issuer/organisation) is a disclosure — possession of widely
+445 // shared bytes (a template, a statutory form) must not reveal which named
+446 // organisation registered them. Lineage walks are skipped entirely for scoped
+447 // responses (they enumerate tenant-owned document chains).
+448 function callerTenantOf(req: Request): string | null {
+449   const user = (req as any).user as Record<string, unknown> | undefined;
+450   const fromUser = user?.tenantId;
+451   const fromReq = (req as any).tenantId;
+452   const v = (typeof fromUser === 'string' && fromUser) || (typeof fromReq === 'string' && fromReq) || null;
+453   return v ? String(v).toLowerCase() : null;
+454 }
+455 
+456 export function isCrossTenantResponse(req: Request, row: any): boolean {
+457   const rowTenant = row?._tenantId ?? row?.tenant_id ?? null;
+458   if (!rowTenant) return false; // no tenancy info on the row — nothing to scope by
+459   const caller = callerTenantOf(req);
+460   return !caller || String(rowTenant).toLowerCase() !== caller;
+461 }
+462 
+463 export function scopeTenantFields<T extends Record<string, unknown>>(response: T, scoped: boolean): T {
+464   if (!scoped) return response;
+465   return {
+466     ...response,
+467     title: null,
+468     issuer: null,
+469     // The certification act stays, minus the tenant-owned naming.
+470     ...(response.certification && typeof response.certification === 'object'
+471       ? { certification: { ...(response.certification as Record<string, unknown>), certifiedBy: null } }
+472       : {}),
+473   };
+474 }
+475 
+476 // KS-584 (interim): bounded rowset for the same-hash registration scan. Far
+477 // above the real duplicate counts (max observed: 5 rows per hash) while
+478 // keeping a pathological hash from dragging the whole set through JS.
+479 export const VERIFY_ROWSET_LIMIT = 24;
+480 
+481 // =============================================================================
+482 // KS-1561 round 2 (gate 188, G188-F1) — the original comes from the FULL same-hash set
+483 // =============================================================================
+484 // Every same-hash row-set read is `ORDER BY certified_at DESC NULLS LAST LIMIT VERIFY_ROWSET_LIMIT`. An uncertified
+485 // original sorts LAST, and a certified one with an older certification sorts below newer ones, so once
+486 // VERIFY_ROWSET_LIMIT later rows are certified the original is not fetched. certificationEligibility then took
+487 // MIN(created_at) over the later rows only, and a latecomer's certification was presented again (gate 188 round 1: 24
+488 // later certified copies, measured on PostgreSQL 15). Wednesday's ruling on G188-F1: "the original must be computed over
+489 // the FULL same-hash set, never over the rows a query happened to fetch". So when a read comes back FULL, the earliest
+490 // registration(s) are read by their own bounded query and merged in by id. A read that came back short already holds the
+491 // whole set (its LIMIT was not reached), so the common case costs no extra query.
+492 /**
+493  * KS-1561 G188-F1: the most rows tied at the earliest registration that a verify reads (one more is asked for, to see a
+494  * cut). Past it the rest are not counted as originals. Eligibility only grows with the originals set, so a cut tie group
+495  * presents fewer certifications, never more; the MIN instant itself stays exact (Wednesday's ANSWER, 2026-11-04).
+496  */
+497 export const ORIGINAL_ROWS_LIMIT = VERIFY_ROWSET_LIMIT;
+498 
+499 /** KS-1561 G188-F1: a row-set read that returned VERIFY_ROWSET_LIMIT rows may have been cut by its LIMIT. */
+500 export function rowSetMayBeCut(rows: any[] | null | undefined): boolean {
+501   return Array.isArray(rows) && rows.length >= VERIFY_ROWSET_LIMIT;
+502 }
+503 
+504 /**
+505  * KS-1561 G188-F1: the fetched rows plus each original the fetch did not return, compared by row id. The fetched object is
+506  * kept when the same id comes back: certificationEligibility identifies original rows by object, so one object per id
+507  * keeps its MIN over the merged set equal to the full-set MIN. Added rows go last, after the certified_at DESC NULLS LAST
+508  * order the read returned.
+509  */
+510 export function withOriginalRows(fetched: any[], originals: any[]): any[] {
+511   const list = fetched || [];
+512   let tied = originals || [];
+513   if (tied.length > ORIGINAL_ROWS_LIMIT) {
+514     logger.warn('KS-1561: more registrations tie at the earliest instant than verify reads; the rest are not counted as originals', {
+515       read: ORIGINAL_ROWS_LIMIT,
+516     });
+517     tied = tied.slice(0, ORIGINAL_ROWS_LIMIT);
+518   }
+519   const have = new Set(list.map((r: any) => identityOf(r?.id)).filter((v): v is string => v !== null));
+520   const missing = tied.filter((r: any) => {
+521     const id = identityOf(r?.id);
+522     return id !== null && !have.has(id);
+523   });
+524   return missing.length > 0 ? [...list, ...missing] : list;
+525 }
+526 
+527 /** KS-1561 G188-F1: the originals read for a tenant pool (pg text; $1-$3 are the three hash forms the row-set read binds). */
+528 export const ORIGINAL_ROWS_POOL_SQL = `SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+529          d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+530          d.tenant_id, d.parent_document_id, d.owner_user_id, d.issuer_organization_id, o.name AS organization_name
+531   FROM documents d
+532   LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+533   WHERE (d.content_hash = $1 OR d.content_hash = $2 OR d.content_hash = $3)
+534     AND d.created_at = (SELECT MIN(e.created_at) FROM documents e WHERE e.content_hash = $1 OR e.content_hash = $2 OR e.content_hash = $3)
+535   ORDER BY d.id
+536   LIMIT ${ORIGINAL_ROWS_LIMIT + 1}`;
+537 
+538 /** KS-1561 G188-F1: the originals read in the caller's DB, with the same columns and join as the verify row-set read. */
+539 export async function readOriginalRows(db: any, hash: string, hashNorm: string): Promise<any[]> {
+540   return await db.$queryRaw`
+541     SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+542            d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+543            d.tenant_id, d.parent_document_id, d.owner_user_id, d.issuer_organization_id, o.name AS organization_name
+544     FROM documents d
+545     LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+546     WHERE (d.content_hash = ${hash} OR d.content_hash = ${hashNorm} OR d.content_hash = ${'sha256:' + hashNorm})
+547       AND d.created_at = (SELECT MIN(e.created_at) FROM documents e
+548                            WHERE e.content_hash = ${hash} OR e.content_hash = ${hashNorm} OR e.content_hash = ${'sha256:' + hashNorm})
+549     ORDER BY d.id
+550     LIMIT ${ORIGINAL_ROWS_LIMIT + 1}
+551   `;
+552 }
+553 
+554 /** KS-1561 G188-F1: the same read with the chain-first branch's narrower column list (no join), so its rows keep that shape. */
+555 async function readOriginalRowsNarrow(db: any, hash: string, hashNorm: string): Promise<any[]> {
+556   return await db.$queryRaw`
+557     SELECT external_id, id, status, title, document_type,
+558            certification_metadata, metadata, created_at, certified_at,
+559            owner_user_id, parent_document_id, issuer_organization_id
+560     FROM documents
+561     WHERE (content_hash = ${hash} OR content_hash = ${hashNorm} OR content_hash = ${'sha256:' + hashNorm})
+562       AND created_at = (SELECT MIN(e.created_at) FROM documents e
+563                          WHERE e.content_hash = ${hash} OR e.content_hash = ${hashNorm} OR e.content_hash = ${'sha256:' + hashNorm})
+564     ORDER BY id
+565     LIMIT ${ORIGINAL_ROWS_LIMIT + 1}
+566   `;
+567 }
+568 
+569 // =============================================================================
+570 // KS-1986 — v1 judges "the original registration" across tenants, as v2 does
+571 // =============================================================================
+572 // After KS-1561, v1 (/verify, verify-file) judged the original over the caller's own tenant whenever it had rows there,
+573 // and v2 over every tenant. With the original in another tenant and a later certified copy in the caller's, v1 presented
+574 // the latecomer's certification and v2 the original (gate 188, G188-F2, cell N-SPLIT). Kam's card
+575 // secuura-ks1561-duplicate-hash-certifier-1102 = a: "Stops the later registrant outranking the original".
+576 // Design (Wednesday's ANSWER 2026-11-05 19:32:34Z, D-B1 to D-B4):
+577 //  D-B1 a local row presents a certification, or lends sibling evidence, only when BOTH today's rule over the local rows
+578 //       AND v2's rule over the local rows plus every other tenant's originals allow it. Head is never more permissive than
+579 //       base. The one difference from v2: a local row whose org or owner id equals a FOREIGN original's (one UUID in two
+580 //       tenant databases) is accepted by v2 and refused here.
+581 //  D-B2 local rows are presented first. When none is left, the foreign original is presented, decorated as
+582 //       crossTenantLookup decorates its answer so the cross-tenant scrub applies. crossTenantLookup is NOT the fallback:
+583 //       it searches the registry by document_id first, which would land a latecomer's own id on its own tenant.
+584 //  D-B3 on that new path a certification carries no certifierOrganizationId (Kam's KS-590 card = a: no org UUID).
+585 //  D-B4 if any cross-tenant read fails, no local row presents a certification; if every local row is certified, the
+586 //       route answers as for "no rows" without crossTenantLookup and WITHOUT the chain: not found (round 2, gate 192
+587 //       G192-F2: the chain presented its own certification, issuer org UUID and issuer name there). With no local row
+588 //       the chain still answers, as before.
+589 // Single-tenant deployments (no tenant manager: demo, local) read nothing more and present exactly as before.
+590 
+591 /** KS-1986: tenants consulted per hash for their originals: the same cap and the same order as v2's V2_CROSS_TENANT_LIMIT. */
+592 export const V1_CROSS_TENANT_ORIGINALS_LIMIT = 8;
+593 
+594 /** KS-1986: every other tenant's original rows for these bytes, or ok:false when any read failed (D-B4). */
+595 export type CrossTenantOriginals = { ok: true; rows: any[] } | { ok: false };
+596 
+597 /**
+598  * KS-1986: the earliest registration(s) of these bytes in each tenant the platform registry lists (ranked as v2 ranks them),
+599  * each read by ORIGINAL_ROWS_POOL_SQL over that tenant's FULL same-hash set, never a LIMIT-ed row-set fetch (G188-F1).
+600  * Rows whose id is already among the local rows are dropped (the caller's own tenant is in the registry).
+601  */
+602 export async function readCrossTenantOriginals(hash: string, hashNorm: string, localRows: any[]): Promise<CrossTenantOriginals> {
+603   const mgr = getTenantManager();
+604   if (!mgr) return { ok: true, rows: [] };
+605   const params = [hash, hashNorm, `sha256:${hashNorm}`];
+606   try {
+607     const reg = await mgr.getPlatformPool().query(
+608       `SELECT tenant_id, tenant_slug FROM platform_document_registry
+609        WHERE content_hash = $1 OR content_hash = $2 OR content_hash = $3
+610        GROUP BY tenant_id, tenant_slug
+611        ORDER BY MIN(created_at) ASC, tenant_id
+612        LIMIT ${V1_CROSS_TENANT_ORIGINALS_LIMIT}`,
+613       params,
+614     );
+615     const local = new Set((localRows || []).map((r: any) => identityOf(r?.id)).filter((v): v is string => v !== null));
+616     const out: any[] = [];
+617     for (const t of reg.rows) {
+618       const originals = await runWithTenantId(t.tenant_id, () => queryWithTenantGuc(mgr.getPool(t.tenant_id), ORIGINAL_ROWS_POOL_SQL, params));
+619       let tied: any[] = originals.rows || [];
+620       if (tied.length > ORIGINAL_ROWS_LIMIT) {
+621         logger.warn('KS-1986: more registrations tie at a tenant\'s earliest instant than verify reads; the rest are not counted as originals', {
+622           read: ORIGINAL_ROWS_LIMIT,
+623         });
+624         tied = tied.slice(0, ORIGINAL_ROWS_LIMIT);
+625       }
+626       for (const row of tied) {
+627         const id = identityOf(row?.id);
+628         if (id !== null && local.has(id)) continue;
+629         out.push({ ...row, _tenantId: t.tenant_id, _tenantSlug: t.tenant_slug });
+630       }
+631     }
+632     return { ok: true, rows: out };
+633   } catch (err) {
+634     let reason: string;
+635     try {
+636       reason = String(err instanceof Error ? err.message : err);
+637     } catch {
+638       reason = 'unreadable thrown value';
+639     }
+640     logger.warn('KS-1986: cross-tenant originals read failed; no local row presents a certification', { error: reason });
+641     return { ok: false };
+642   }
+643 }
+644 
+645 /** KS-1986 D-B1: eligible only where BOTH judgments allow it. */
+646 export function bothEligible(a: CertificationEligibility, b: CertificationEligibility): CertificationEligibility {
+647   return {
+648     certifiedRow: (row: any) => a.certifiedRow(row) && b.certifiedRow(row),
+649     evidenceRow: (row: any) => a.evidenceRow(row) && b.evidenceRow(row),
+650   };
+651 }
+652 
+653 /** KS-1986 D-B4: nothing may present a certification. */
+654 const NO_ROW_ELIGIBLE: CertificationEligibility = { certifiedRow: () => false, evidenceRow: () => false };
+655 
+656 /** KS-1986 D-B3: a certification presented on the new foreign-original path carries no certifier org UUID. */
+657 function withoutCertifierOrganizationId(cert: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+658   return cert ? { ...cert, certifierOrganizationId: null } : cert;
+659 }
+660 
+661 export interface V1CrossTenantJudgment {
+662   /** the rows v1 presents from */
+663   rows: any[];
+664   /** the eligibility to select and lend sibling evidence with; undefined for a single decorated foreign original */
+665   eligibility?: CertificationEligibility;
+666   /** true: answer as for "no rows" WITHOUT crossTenantLookup (D-B2, D-B4) */
+667   skipCrossTenantLookup: boolean;
+668   /** KS-1986 G192-F2: true only when a cross-tenant read failed (D-B4): the route answers not found and does not ask the chain */
+669   crossTenantReadFailed: boolean;
+670 }
+671 
+672 /** KS-1986: v1's same-hash local rows judged against every tenant's original (D-B1 to D-B4). Called only with local rows. */
+673 export async function judgeAcrossTenants(localRows: any[], hash: string, hashNorm: string): Promise<V1CrossTenantJudgment> {
+674   const foreign = await readCrossTenantOriginals(hash, hashNorm, localRows);
+675   const eligibility = foreign.ok
+676     ? bothEligible(certificationEligibility(localRows), certificationEligibility([...localRows, ...foreign.rows]))
+677     : NO_ROW_ELIGIBLE;
+678   if (localRows.some((r: any) => !isCertifiedStatus(r?.status) || eligibility.certifiedRow(r))) {
+679     return { rows: localRows, eligibility, skipCrossTenantLookup: false, crossTenantReadFailed: false };
+680   }
+681   if (!foreign.ok) return { rows: [], skipCrossTenantLookup: true, crossTenantReadFailed: true };
+682   // Every local row is a certified copy the original's holder may not present: the original is in another tenant.
+683   const union = [...localRows, ...foreign.rows];
+684   const earliest = union.reduce((min: number, r: any) => Math.min(min, rowCreatedMs(r)), Number.MAX_SAFE_INTEGER);
+685   const originals = foreign.rows.filter((r: any) => rowCreatedMs(r) === earliest);
+686   if (originals.length === 0) return { rows: [], skipCrossTenantLookup: true, crossTenantReadFailed: false };
+687   const crossRule = certificationEligibility(union);
+688   const selected = selectVerifiableRow(originals, crossRule);
+689   const trusted = await resolveTrustedCertificationEvidence(originals, {});
+690   const certMeta = (selected?.certification_metadata || {}) as Record<string, unknown>;
+691   return {
+692     rows: [{
+693       ...selected,
+694       certification_metadata: { ...certMeta, issuerId: null }, // D-B3: buildCertification reads issuerId as certifierOrganizationId
+695       _siblingCertification: withoutCertifierOrganizationId(siblingCertification(originals, selected, trusted, crossRule)),
+696     }],
+697     skipCrossTenantLookup: false,
+698     crossTenantReadFailed: false,
+699   };
+700 }
+701 
+702 // Moved to utils/blockHeight.ts (KS-1333) so the anchorStateSync service can use the same shaping without importing a route
+703 // module; re-exported here so every existing importer, and the KS-1129 cells, keep working unchanged.
+704 import { toBlockHeight } from '../utils/blockHeight';
+705 export { toBlockHeight };
+706 // KS-1384 R2b part 5: the verify heals' one shared path (see healVerifyRow below).
+707 import { healAnchorForVerify } from '../services/anchorStateSync';
+708 
+709 /**
+710  * KS-1384 R2b part 5 (D3): the v1 and v2 verify heals are ONE shared path, anchorStateSync healAnchorForVerify, for one stored
+711  * row. It reads the blob's own anchor row with the caller's bearer and lets the one resolver decide; only a `confirmed`
+712  * decision is presented and written (through the conditional blob write, never over a confirmed blob). Before R2b this file
+713  * held confirmStalePendingAnchor, which healed from verify-by-hash's chain answer on the same tx OR sameDoc, and
+714  * persistHealedAnchor, which wrote that through updateDocument; both are gone. A cross-tenant row (`_tenantId`) came from another
+715  * tenant's pool, so it is presented and never written here.
+716  */
+717 export async function healVerifyRow(row: any, blob: Record<string, unknown> | null, authHeader: string): Promise<Record<string, unknown> | null> {
+718   return healAnchorForVerify({
+719     documentId: String(row?.external_id || row?.id || ''),
+720     documentPk: row?.id ? String(row.id) : null,
+721     tenantId: row?.tenant_id ? String(row.tenant_id) : null,
+722     blob,
+723     contentHash: String(row?.content_hash || ''),
+724     updatedAt: row?.updated_at ?? null,
+725     authHeader,
+726     write: !row?._tenantId,
+727   });
+728 }
+729 
+730 // =============================================================================
+731 // CROSS-TENANT DOCUMENT LOOKUP
+732 // =============================================================================
+733 
+734 /**
+735  * Register a document in the platform cross-tenant registry.
+736  * Called when a document is created or certified.
+737  */
+738 export async function registerInPlatformRegistry(doc: {
+739   documentId: string;
+740   contentHash: string;
+741   tenantId?: string;
+742   tenantSlug?: string;
+743   documentType?: string;
+744   title?: string;
+745   status?: string;
+746 }): Promise<void> {
+747   const mgr = getTenantManager();
+748   if (!mgr) return; // Not in multi-tenant mode
+749 
+750   try {
+751     const platformPool = mgr.getPlatformPool();
+752     await platformPool.query(
+753       `INSERT INTO platform_document_registry (content_hash, document_id, tenant_id, tenant_slug, document_type, title, status)
+754        VALUES ($1, $2, $3::uuid, $4, $5, $6, $7)
+755        ON CONFLICT (content_hash, tenant_id) DO UPDATE SET
+756          document_id = EXCLUDED.document_id, title = EXCLUDED.title, status = EXCLUDED.status, updated_at = NOW()`,
+757       [doc.contentHash, doc.documentId, doc.tenantId, doc.tenantSlug, doc.documentType, doc.title, doc.status || 'active'],
+758     );
+759   } catch (err: any) {
+760     logger.warn('Failed to register document in platform registry', { error: err?.message });
+761   }
+762 }
+763 
+764 /**
+765  * Look up a document across all tenants when it can't be found in the current DB.
+766  * Queries the platform_document_registry, then the specific tenant DB.
+767  */
+768 async function crossTenantLookup(documentId: string, hashToVerify?: string): Promise<any | null> {
+769   const mgr = getTenantManager();
+770   if (!mgr) return null;
+771 
+772   try {
+773     const platformPool = mgr.getPlatformPool();
+774 
+775     // Search registry by documentId or hash
+776     let registryRows;
+777     if (documentId) {
+778       registryRows = await platformPool.query(
+779         'SELECT * FROM platform_document_registry WHERE document_id = $1 LIMIT 1',
+780         [documentId],
+781       );
+782     }
+783     if ((!registryRows || registryRows.rows.length === 0) && hashToVerify) {
+784       // KS-1561 (Wednesday's D4, 2026-11-04): the tenant that answers is the one holding the EARLIEST registration of these
+785       // bytes (the registry's created_at is the first registration in that tenant; the upsert never rewrites it), consistent
+786       // with D1. Before KS-1561 this was LIMIT 1 with no ORDER BY, so with two tenants holding the hash the pick was arbitrary.
+787       registryRows = await platformPool.query(
+788         'SELECT * FROM platform_document_registry WHERE content_hash = $1 ORDER BY created_at ASC, id LIMIT 1',
+789         [hashToVerify],
+790       );
+791     }
+792 
+793     if (!registryRows || registryRows.rows.length === 0) return null;
+794 
+795     const reg = registryRows.rows[0];
+796     const tenantPool = mgr.getPool(reg.tenant_id);
+797 
+798     // Query the tenant's DB for full document details — search by hash first, then ID.
+799     // KS-458: documents/organizations are fail-closed flip tables; the registry
+800     // row's tenant must WIN over the request context, so scope explicitly to
+801     // reg.tenant_id and bundle the GUC in the same transaction as each query.
+802     const searchHash = hashToVerify ? hashToVerify.replace(/^sha256:/, '') : null;
+803     let docRows;
+804     if (searchHash) {
+805       // KS-584 (interim): fetch the same-hash SET and select the row that
+806       // evidences its claims, instead of an arbitrary LIMIT 1.
+807       docRows = await runWithTenantId(reg.tenant_id, () => queryWithTenantGuc(
+808         tenantPool,
+809         `SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+810                 d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+811                 d.tenant_id, d.parent_document_id, d.owner_user_id, d.issuer_organization_id, o.name AS organization_name -- KS-1561: issuer_organization_id is read by the original-holder rule (it was
+812          FROM documents d
+813          LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+814          WHERE d.content_hash = $1 OR d.content_hash = $2 OR d.content_hash = $3
+815          ORDER BY d.certified_at DESC NULLS LAST LIMIT ${VERIFY_ROWSET_LIMIT}`,
+816         [hashToVerify, searchHash, `sha256:${searchHash}`],
+817       ));
+818       // KS-1561 G188-F1: a full read may have cut the original out; read the earliest registration(s), merge them by id.
+819       if (rowSetMayBeCut(docRows.rows)) {
+820         const originals = await runWithTenantId(reg.tenant_id, () => queryWithTenantGuc(
+821           tenantPool, ORIGINAL_ROWS_POOL_SQL, [hashToVerify, searchHash, `sha256:${searchHash}`],
+822         ));
+823         docRows = { ...docRows, rows: withOriginalRows(docRows.rows, originals.rows) };
+824       }
+825     }
+826     // KS-1119: the id lookup says which document an id names; it says nothing about a hash. It runs only when NO hash
+827     // was supplied (the documentId-only strategy, which never claims integrity). When a hash was supplied and the hash
+828     // query above found nothing, the answer is "not found": falling back to the id made strategy 1 present an
+829     // uncompared row as a hash match, and made verify-file (documentId '') match any row with an empty external_id.
+830     if ((!docRows || docRows.rows.length === 0) && !hashToVerify) {
+831       docRows = await runWithTenantId(reg.tenant_id, () => queryWithTenantGuc(
+832         tenantPool,
+833         `SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+834                 d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+835                 d.tenant_id, o.name AS organization_name
+836          FROM documents d
+837          LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+838          WHERE d.external_id = $1 LIMIT 1`,
+839         [documentId],
+840       ));
+841     }
+842 
+843     if (!docRows || docRows.rows.length === 0) return null;
+844 
+845     const selected = selectVerifiableRow(docRows.rows);
+846     // KS-1557: the rows were read from THIS tenant's pool, so the evidence lookups run there too (readForRow keys on _tenantId).
+847     for (const r of docRows.rows) r._tenantId = reg.tenant_id;
+848     const trusted = await resolveTrustedCertificationEvidence(docRows.rows, {});
+849     return {
+850       ...selected,
+851       _tenantId: reg.tenant_id,
+852       _tenantSlug: reg.tenant_slug,
+853       // KS-584 (interim): certification evidence can live on a same-hash
+854       // sibling (the certify lineage path); carry it so response builders
+855       // don't lose it when the anchored row wins selection.
+856       _siblingCertification: siblingCertification(docRows.rows, selected, trusted),
+857     };
+858   } catch (err: any) {
+859     logger.warn('Cross-tenant lookup failed', { documentId, error: err?.message });
+860     return null;
+861   }
+862 }
+863 
+864 // =============================================================================
+865 // HELPER FUNCTIONS
+866 // =============================================================================
+867 
+868 export function generateHash(data: Record<string, unknown> | string): string {
+869   const content = typeof data === 'string' ? data : JSON.stringify(data, Object.keys(data).sort());
+870   return `sha256:${crypto.createHash('sha256').update(content).digest('hex')}`;
+871 }
+872 
+873 // =============================================================================
+874 // ROUTES
+875 // =============================================================================
+876 
+877 /**
+878  * POST /api/verification/verify-file
+879  * Upload a document file → server hashes it → looks up hash in registry.
+880  * This is the strongest verification — the server computes the hash from
+881  * the raw file bytes, so a client cannot lie about the hash.
+882  *
+883  * If the hash matches a certified document: VERIFIED (authentic)
+884  * If the hash is not found: NOT VERIFIED (document was never certified,
+885  * or has been modified — even a single byte change fails verification)
+886  */
+887 verificationRouter.post('/verify-file', async (req: Request, res: Response) => {
+888   try {
+889     // Read raw body and hash it
+890     const chunks: Buffer[] = [];
+891     await new Promise<void>((resolve, reject) => {
+892       req.on('data', (chunk: Buffer) => chunks.push(chunk));
+893       req.on('end', resolve);
+894       req.on('error', reject);
+895     });
+896 
+897     const fileBuffer = Buffer.concat(chunks);
+898     if (fileBuffer.length === 0) {
+899       return res.status(400).json({
+900         verified: false,
+901         error: 'No file content received. Upload the document file as the request body.',
+902       });
+903     }
+904 
+905     const fileHash = `sha256:${crypto.createHash('sha256').update(fileBuffer).digest('hex')}`;
+906     const hashNorm = fileHash.replace('sha256:', '');
+907 
+908     logger.info('File verification request', { size: fileBuffer.length, hash: fileHash.substring(0, 30) + '...' });
+909 
+910     const db = (req as any).db || prisma;
+911 
+912     // Search for this hash in current tenant DB.
+913     // KS-584 (interim): fetch the same-hash SET (bounded) — selection happens
+914     // in selectVerifiableRow, not in an arbitrary LIMIT 1.
+915     let rows: any[] = await db.$queryRaw`
+916       SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+917              d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+918              d.tenant_id, d.parent_document_id, d.owner_user_id, d.issuer_organization_id, o.name AS organization_name -- KS-1561: issuer_organization_id is read by the original-holder rule (it was on
+919       FROM documents d
+920       LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+921       WHERE d.content_hash = ${fileHash} OR d.content_hash = ${hashNorm} OR d.content_hash = ${'sha256:' + hashNorm}
+922       ORDER BY d.certified_at DESC NULLS LAST
+923       LIMIT ${VERIFY_ROWSET_LIMIT}
+924     `;
+925     if (rowSetMayBeCut(rows)) rows = withOriginalRows(rows, await readOriginalRows(db, fileHash, hashNorm)); // KS-1561 G188-F1
+926 
+927     // KS-1986: judge the local rows against every tenant's original, as v2 does (D-B1 to D-B4 above judgeAcrossTenants).
+928     let judged: CertificationEligibility | undefined;
+929     let skipCrossTenantLookup = false;
+930     let crossTenantReadFailed = false;
+931     if (rows.length > 0) {
+932       const j = await judgeAcrossTenants(rows, fileHash, hashNorm);
+933       rows = j.rows;
+934       judged = j.eligibility;
+935       skipCrossTenantLookup = j.skipCrossTenantLookup;
+936       crossTenantReadFailed = j.crossTenantReadFailed;
+937     }
+938 
+939     // Cross-tenant lookup if not found locally
+940     if (rows.length === 0 && !skipCrossTenantLookup) {
+941       const crossDoc = await crossTenantLookup('', fileHash);
+942       if (crossDoc) {
+943         rows = [crossDoc];
+944         logger.info('File hash found via cross-tenant lookup', { tenant: crossDoc._tenantSlug });
+945       }
+946     }
+947 
+948     // Chain-first fallback — ask the anchoring service if this hash was anchored
+949     // on-chain in any environment. Source of truth is the chain, not our DB.
+950     // KS-1986 G192-F2: not after a failed cross-tenant read (D-B4); that answers not found, below.
+951     if (rows.length === 0 && !crossTenantReadFailed) {
+952       try {
+953         const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+954         const resp = await fetch(`${anchoringBase}/api/anchors/verify/${encodeURIComponent(hashNorm)}`, {
+955           signal: AbortSignal.timeout(CHAIN_VERIFY_TIMEOUT_MS), // KS-252
+956         });
+957         if (resp.ok) {
+958           const chain: any = await resp.json();
+959           if (chain?.verified === true) {
+960             logger.info('File hash verified via chain-first lookup', { hash: hashNorm.substring(0, 16), source: chain.source });
+961             // KS-522: legacy mock rows can surface via the chain index —
+962             // never present a fabricated hash as an on-chain claim.
+963             const honestChain = presentBlockchainHonestly({
+964               anchored: true,
+965               network: chain.network,
+966               txHash: chain.txHash,
+967               blockHeight: chain.blockNumber,
+968               cardanoScanUrl: chain.cardanoScanUrl,
+969               confirmedAt: chain.confirmedAt,
+970               simulated: chain.simulated,
+971             });
+972             // KS-563: this branch found the hash ON CHAIN and nothing else. It
+973             // must claim only what it performed: the hash matched an anchor.
+974             // Certification is a separate act with no evidence here unless the
+975             // on-chain metadata carries a certification id.
+976             const chainCertId = chain.metadata?.certId || chain.metadata?.certificationId || null;
+977             const chainIsCertified = Boolean(chainCertId);
+978             return res.json({
+979               verified: true,
+980               fileHash,
+981               fileSize: fileBuffer.length,
+982               source: chain.source === 'chain' ? 'blockchain' : 'blockchain-indexed',
+983               documentId: chain.metadata?.documentId || chain.metadata?.certId,
+984               title: null,
+985               documentType: chain.metadata?.documentType || null,
+986               status: 'anchored',
+987               certifiedAt: chain.confirmedAt,
+988               issuer: chain.metadata?.issuerName || chain.metadata?.issuerOrgId || null,
+989               blockchain: honestChain,
+990               ...(chainIsCertified
+991                 ? {
+992                     certification: {
+993                       certificationId: chainCertId,
+994                       certificationType: chain.metadata?.certificationType ?? null,
+995                       certifiedAt: chain.confirmedAt ?? null,
+996                       certifiedBy: chain.metadata?.issuerName ?? null,
+997                       certifierOrganizationId: chain.metadata?.issuerOrgId ?? null,
+998                     },
+999                   }
+1000                 : {}),
+1001               onChainMetadata: chain.metadata,
+1002               checks: {
+1003                 documentExists: true,
+1004                 hashValid: true,
+1005                 isCertified: chainIsCertified,
+1006                 isAnchored: isAnchoredHonestly(honestChain, 'anchored'),
+1007                 isRevoked: false,
+1008                 integrityVerified: true,
+1009               },
+1010               verifiedAt: new Date().toISOString(),
+1011             });
+1012           }
+1013         }
+1014       } catch (chainErr: any) {
+1015         logger.warn('Chain-first verify-file lookup failed', { error: chainErr?.message });
+1016       }
+1017     }
+1018 
+1019     if (rows.length === 0) {
+1020       return res.json({
+1021         verified: false,
+1022         fileHash,
+1023         fileSize: fileBuffer.length,
+1024         error: 'This document is NOT in the Secuura registry. It may have been modified, or was never certified on this platform.',
+1025         checks: { documentExists: false, hashValid: false, integrityVerified: false },
+1026       });
+1027     }
+1028 
+1029     // KS-584 (interim): select the row that evidences its claims; read
+1030     // certification evidence from the whole same-hash set; confirm a stale
+1031     // 'pending' chain state against the chain index before presenting it.
+1032     const doc = selectVerifiableRow(rows, judged); // KS-1986
+1033     const isRevoked = doc.status === 'revoked';
+1034     const isVerifiable = isVerifiableStatus(doc.status);
+1035     const certMeta = doc.certification_metadata || {};
+1036     const meta = doc.metadata || {};
+1037 
+1038     const certification = buildCertification(doc)
+1039       ?? doc._siblingCertification
+1040       ?? siblingCertification(rows, doc, await resolveTrustedCertificationEvidence(rows, { db }), judged); // KS-1986
+1041     // KS-563: `isCertified` stays the narrow claim — an issuer certified these
+1042     // bytes — now read from the registration set's evidence (KS-584), not just
+1043     // the selected row's status.
+1044     const isCertified = isCertifiedStatus(doc.status) || Boolean(certification);
+1045 
+1046     // KS-522: honest labelling — simulated anchors make no on-chain claim.
+1047     const preHealBlob = chainBlobOfRow(doc);
+1048     const healedBlob = await healVerifyRow(doc, preHealBlob, (req.headers.authorization as string) || '');
+1049     const fileVerifyChain = presentBlockchainHonestly(healedBlob ?? certMeta.blockchain);
+1050     const scoped = isCrossTenantResponse(req, doc);
+1051     res.json(scopeTenantFields({
+1052       verified: isVerifiable && !isRevoked,
+1053       fileHash,
+1054       fileSize: fileBuffer.length,
+1055       documentId: doc.external_id || doc.id,
+1056       title: doc.title,
+1057       documentType: doc.document_type,
+1058       status: doc.status,
+1059       certifiedAt: (certification as Record<string, unknown> | undefined)?.certifiedAt || doc.certified_at || doc.created_at,
+1060       issuer: certMeta.issuerName || certMeta.certificationData?.issuedBy || meta.issuedBy || meta.certifiedBy || meta.issuerName || doc.organization_name || null,
+1061       blockchain: fileVerifyChain,
+1062       ...(fileVerifyChain && (fileVerifyChain as Record<string, unknown>).simulated === true ? { simulated: true } : {}),
+1063       ...(certification ? { certification } : {}),
+1064       checks: {
+1065         documentExists: true,
+1066         hashValid: true,
+1067         isCertified,
+1068         isAnchored: isAnchoredHonestly(fileVerifyChain, doc.status),
+1069         isRevoked,
+1070         integrityVerified: isVerifiable && !isRevoked,
+1071       },
+1072       verifiedAt: new Date().toISOString(),
+1073     }, scoped));
+1074   } catch (error) {
+1075     let reason: string;
+1076     try {
+1077       reason = String(error instanceof Error ? error.message : error);
+1078     } catch {
+1079       reason = 'unreadable thrown value';
+1080     }
+1081     logger.error('File verification error', { error: reason });
+1082     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'File verification failed' } });
+1083   }
+1084 });
+1085 
+1086 /**
+1087  * POST /api/verification/verify
+1088  * Verify by hash or documentId (JSON body).
+1089  * For strongest verification, use /verify-file with the actual document.
+1090  */
+1091 verificationRouter.post(
+1092   '/verify',
+1093   [
+1094     // KS-222: validate every field in the VerifyRequest spec schema
+1095     // (documentId, hash, title, contentHash — all strings) plus the extra hash
+1096     // aliases this handler also reads (providedHash, documentHash) and
+1097     // documentData, so a non-string (e.g. {}) is rejected with 400 rather than
+1098     // slipping through to a lookup miss that returns 200.
+1099     body('documentId').optional().isString(),
+1100     body('hash').optional().isString(),
+1101     body('title').optional().isString(),
+1102     body('contentHash').optional().isString(),
+1103     body('providedHash').optional().isString(),
+1104     body('documentHash').optional().isString(),
+1105     body('documentData').optional().isObject(),
+1106   ],
+1107   async (req: Request, res: Response) => {
+1108     try {
+1109       // KS-222: enforce the declared body validators. Previously no
+1110       // validationResult check existed, so the rules above were dormant and a
+1111       // wrong-type hash reached the lookup and returned 200 instead of a 400.
+1112       const validationErrors = validationResult(req);
+1113       if (!validationErrors.isEmpty()) {
+1114         return res.status(400).json({
+1115           verified: false,
+1116           // KS-1103: the message names every field the chain above checks. It used to
+1117           // name only documentId, providedHash, contentHash and documentHash, so a
+1118           // caller refused for a non-string `hash` or `title` was told about fields it
+1119           // had not sent.
+1120           error: 'Invalid request body: documentId, hash, title, contentHash, providedHash and documentHash must be strings; documentData must be an object.',
+1121         });
+1122       }
+1123 
+1124       // Verification is a public endpoint — auth is optional
+1125       // (used for audit logging if available, but not required)
+1126 
+1127       // KS-1103: read the published `hash` field. KS-222 added it to the validator
+1128       // chain, but the handler never destructured it, so a spec-valid body carrying
+1129       // only `hash` fell through to the 400 below while the same value as
+1130       // `contentHash` answered 200.
+1131       const { documentId, providedHash, documentData, contentHash, documentHash, hash, title } = req.body;
+1132       const db = (req as any).db || prisma;
+1133 
+1134       // Resolve the hash to verify against — accept multiple field names
+1135       // KS-1103: `hash` is read LAST, so every body carrying a pre-existing alias keeps
+1136       // its lookup value — when an alias and `hash` are both present the lookup still
+1137       // sees the alias. Before this change the chain stopped at documentHash.
+1138       // KS-1118 F-3: NOT "every body that worked before keeps its answer", which is what
+1139       // this said and is wrong. A body pairing `hash` with `documentId` or `documentData`
+1140       // now takes the hash strategy where it used to take the id / data one, as v2
+1141       // already does. documentId-only, documentData-only and alias-only bodies are
+1142       // unchanged. No caller in the repo sends that pairing (measured: 73-file census).
+1143       const hashToVerify = providedHash || contentHash || documentHash || hash;
+1144 
+1145       // KS-1114: the title strategy. Kam's ruling, verbatim: "Title lookup open to anyone, one
+1146       // tenant". An empty or whitespace-only title is treated as ABSENT, so `''` cannot match a
+1147       // row and a body carrying only `{title: ''}` keeps today's 400. A present title is matched
+1148       // EXACTLY as sent (case and surrounding spaces included).
+1149       const titleToFind: string | undefined =
+1150         typeof title === 'string' && title.trim().length > 0 ? title : undefined;
+1151 
+1152       if (!documentId && !hashToVerify && !documentData && !titleToFind) {
+1153         return res.status(400).json({
+1154           verified: false,
+1155           // KS-1103: name every field this handler accepts. The previous text said
+1156           // "a content hash (from the document file) or a documentId", which was also
+1157           // what a caller saw after sending the published `hash` field.
+1158           // KS-1114: `title` is now one of them.
+1159           error: 'Please provide a documentId, a content hash (hash, contentHash, providedHash or documentHash), documentData, or a title.',
+1160         });
+1161       }
+1162 
+1163       // If documentData (raw content) is provided, hash it first
+1164       let computedHash = hashToVerify;
+1165       if (documentData && !computedHash) {
+1166         computedHash = generateHash(documentData);
+1167       }
+1168 
+1169       // =================================================================
+1170       // HASH-FIRST VERIFICATION (security model)
+1171       // =================================================================
+1172       // The hash IS the integrity proof. We look up by hash to confirm
+1173       // this exact file content was certified. Looking up by ID alone
+1174       // cannot prove integrity — a bad actor could swap the file.
+1175       // =================================================================
+1176 
+1177       /**
+1178        * KS-70: best-effort lineage walk from a resolved document row.
+1179        *
+1180        * Walks `parent_document_id` up to MAX_LINEAGE_DEPTH and returns
+1181        * the chain (newest first) plus a `truncated` flag. The walk is
+1182        * tenant-scoped to the doc's own tenant — cross-tenant walks
+1183        * would expose lineage information across the isolation
+1184        * boundary, so we stop at the first cross-tenant parent.
+1185        *
+1186        * Public verify is unauthenticated; if the walk fails (FK miss,
+1187        * DB hiccup, parent_document_id column not yet in this env)
+1188        * we return an empty lineage rather than fail the whole verify.
+1189        */
+1190       const walkLineageForDoc = async (
+1191         doc: { external_id?: string; id?: string; tenant_id?: string },
+1192       ): Promise<{ lineage: LineageEntry[]; truncated: boolean }> => {
+1193         const externalId = doc.external_id || doc.id;
+1194         if (!externalId || !doc.tenant_id) {
+1195           return { lineage: [], truncated: false };
+1196         }
+1197         try {
+1198           return await walkDocumentAncestors(externalId, doc.tenant_id, { db });
+1199         } catch (err: any) {
+1200           logger.warn('KS-70 lineage walk failed; returning empty lineage', {
+1201             externalId,
+1202             error: err instanceof Error ? err.message : String(err),
+1203           });
+1204           return { lineage: [], truncated: false };
+1205         }
+1206       };
+1207 
+1208       // KS-280: statuses that count as "certified" for the forward-lineage
+1209       // flag — mirrors `isCertified` in buildResponse below.
+1210       // KS-563: narrowed with it. `hasNewerCertifiedVersion` drives a
+1211       // "superseded by a newer CERTIFIED version" warning, so a merely-anchored
+1212       // descendant must not raise it — that was the same false claim.
+1213       const CERTIFIED_STATUSES = new Set([CERTIFIED_STATUS]);
+1214 
+1215       /**
+1216        * KS-280: forward (descendant) lineage. Given a resolved doc, find any
+1217        * newer/derived versions and whether any of them is certified, so the
+1218        * verifier can flag "this version has been superseded by a newer
+1219        * certified version" (e.g. will v1 once v2 is certified). Best-effort
+1220        * like walkLineageForDoc — never fails the verify.
+1221        */
+1222       const walkNewerVersionsForDoc = async (
+1223         doc: { external_id?: string; id?: string; tenant_id?: string },
+1224       ): Promise<{ newerVersions: LineageEntry[]; truncated: boolean; hasNewerCertifiedVersion: boolean }> => {
+1225         const externalId = doc.external_id || doc.id;
+1226         if (!externalId || !doc.tenant_id) {
+1227           return { newerVersions: [], truncated: false, hasNewerCertifiedVersion: false };
+1228         }
+1229         try {
+1230           const { descendants, truncated } = await walkDocumentDescendants(externalId, doc.tenant_id, { db });
+1231           return {
+1232             newerVersions: descendants,
+1233             truncated,
+1234             hasNewerCertifiedVersion: descendants.some((d) => CERTIFIED_STATUSES.has(d.status)),
+1235           };
+1236         } catch (err: any) {
+1237           logger.warn('KS-280 forward-lineage walk failed; returning none', {
+1238             externalId,
+1239             error: err instanceof Error ? err.message : String(err),
+1240           });
+1241           return { newerVersions: [], truncated: false, hasNewerCertifiedVersion: false };
+1242         }
+1243       };
+1244 
+1245       // Helper: build verification response from a document row.
+1246       // KS-584 (interim): `extras` carries what the selected row alone cannot
+1247       // know — certification evidence from a same-hash sibling, and a chain
+1248       // blob whose stale 'pending' state was confirmed against the chain index.
+1249       const buildResponse = (doc: any, hashMatch: boolean, extras?: { siblingCert?: Record<string, unknown>; healedChain?: Record<string, unknown> | null }) => {
+1250         const isRevoked = doc.status === 'revoked';
+1251         const isVerifiable = isVerifiableStatus(doc.status);
+1252         const certMeta = doc.certification_metadata || {};
+1253         const meta = doc.metadata || {};
+1254         // Resolve issuer name from all possible sources
+1255         const issuerName = certMeta.issuerName || certMeta.certificationData?.issuedBy || meta.issuedBy || meta.certifiedBy || meta.issuerName || doc.issuer_name || doc.organization_name || null;
+1256         // KS-522: honest labelling — a simulated anchor never presents an
+1257         // on-chain claim (see presentBlockchainHonestly above).
+1258         const chain = presentBlockchainHonestly(extras?.healedChain ?? certMeta.blockchain);
+1259         const certification = buildCertification(doc) ?? doc._siblingCertification ?? extras?.siblingCert;
+1260         // KS-563: narrow claim — an issuer certified these bytes; KS-584 reads
+1261         // the evidence from the registration set, not only the selected row.
+1262         const isCertified = isCertifiedStatus(doc.status) || Boolean(certification);
+1263         return {
+1264           verified: hashMatch && isVerifiable && !isRevoked,
+1265           documentId: doc.external_id || doc.id,
+1266           title: doc.title,
+1267           documentType: doc.document_type,
+1268           status: doc.status,
+1269           contentHash: doc.content_hash,
+1270           certifiedAt: (certification as Record<string, unknown> | undefined)?.certifiedAt || doc.certified_at || doc.created_at,
+1271           issuer: issuerName,
+1272           blockchain: chain,
+1273           // KS-522: top-level machine-readable marker so a relying party
+1274           // cannot mistake a simulated anchor for on-chain proof.
+1275           ...(chain && (chain as Record<string, unknown>).simulated === true ? { simulated: true } : {}),
+1276           // KS-563: present ONLY when an issuer actually certified — its
+1277           // absence is the honest signal that no certification happened.
+1278           ...(certification ? { certification } : {}),
+1279           checks: {
+1280             documentExists: true,
+1281             hashValid: hashMatch,
+1282             isCertified,
+1283             isAnchored: isAnchoredHonestly(chain, doc.status),
+1284             isRevoked,
+1285             integrityVerified: hashMatch && isVerifiable && !isRevoked,
+1286           },
+1287           verifiedAt: new Date().toISOString(),
+1288         };
+1289       };
+1290 
+1291       // Normalise hash for comparison (strip or add sha256: prefix)
+1292       const normaliseHash = (h: string) => h.replace(/^sha256:/, '');
+1293 
+1294       /**
+1295        * The by-id answer: strategy 2 (by documentId). It does not prove integrity, so `verified` is
+1296        * false and `hashValid` / `integrityVerified` are false — never an integrity claim on an id match.
+1297        * Hoisted from strategy 2 VERBATIM (only the warning became a parameter); KS-1114's
+1298        * byte-identity cell T9 pins the documentId answer against develop's.
+1299        * KS-1114 round 2: the title strategy deliberately does NOT use this. This answer carries the
+1300        * contentHash, issuer, certification and lineage, and on a title match that turned a guessed
+1301        * title into a full `verified:true` answer through `{hash}` (gate F1, 2026-10-15).
+1302        */
+1303       const respondExistenceOnly = async (doc: any, warning: string) => {
+1304         // KS-563: narrow certification claim (this strategy never proves
+1305         // integrity anyway — `verified` is hardcoded false below).
+1306         const isCertified = isCertifiedStatus(doc.status);
+1307         const isRevoked = doc.status === 'revoked';
+1308         const certMeta = doc.certification_metadata || {};
+1309         const meta = doc.metadata || {};
+1310         // KS-584 (interim): by-id answers cross the tenant boundary via
+1311         // crossTenantLookup too — scope tenant-owned fields and skip the
+1312         // lineage walks for scoped responses.
+1313         const byIdScoped = isCrossTenantResponse(req, doc);
+1314         // KS-70: surface lineage even on the by-ID strategy. Same
+1315         // re-fetch pattern as strategy-1 — the cross-tenant lookup
+1316         // doesn't always return tenant_id directly.
+1317         let lineagePayload: { lineage: LineageEntry[]; truncated: boolean } = {
+1318           lineage: [],
+1319           truncated: false,
+1320         };
+1321         let fwdPayload: { newerVersions: LineageEntry[]; truncated: boolean; hasNewerCertifiedVersion: boolean } = {
+1322           newerVersions: [],
+1323           truncated: false,
+1324           hasNewerCertifiedVersion: false,
+1325         };
+1326         try {
+1327           if (!byIdScoped) {
+1328             const tenantLookup: any[] = await db.$queryRaw`
+1329               SELECT external_id, tenant_id FROM documents
+1330                WHERE id = ${doc.id}::uuid LIMIT 1
+1331             `;
+1332             if (tenantLookup.length > 0) {
+1333               lineagePayload = await walkLineageForDoc(tenantLookup[0]);
+1334               fwdPayload = await walkNewerVersionsForDoc(tenantLookup[0]);
+1335             }
+1336           }
+1337         } catch (lineageErr: any) {
+1338           logger.warn('KS-70 verify (by-id) lineage attach failed', {
+1339             error: lineageErr instanceof Error ? lineageErr.message : String(lineageErr),
+1340           });
+1341         }
+1342         return res.json(scopeTenantFields({
+1343           verified: false,
+1344           warning,
+1345           documentId: doc.external_id || doc.id,
+1346           title: doc.title,
+1347           status: doc.status,
+1348           contentHash: doc.content_hash,
+1349           issuer: certMeta.issuerName || certMeta.certificationData?.issuedBy || meta.issuedBy || meta.certifiedBy || meta.issuerName || doc.organization_name || null,
+1350           ...(buildCertification(doc) ? { certification: buildCertification(doc) } : {}),
+1351           checks: {
+1352             documentExists: true,
+1353             hashValid: false,
+1354             isCertified,
+1355             isAnchored: isAnchoredHonestly(presentBlockchainHonestly(certMeta.blockchain), doc.status),
+1356             isRevoked,
+1357             integrityVerified: false,
+1358           },
+1359           ...(lineagePayload.lineage.length > 0
+1360             ? {
+1361                 lineage: lineagePayload.lineage,
+1362                 lineageTruncated: lineagePayload.truncated,
+1363                 lineageDepthAtTruncation: lineagePayload.truncated ? MAX_LINEAGE_DEPTH : undefined,
+1364               }
+1365             : {}),
+1366           ...(fwdPayload.newerVersions.length > 0
+1367             ? {
+1368                 newerVersions: fwdPayload.newerVersions,
+1369                 newerVersionsTruncated: fwdPayload.truncated,
+1370                 hasNewerCertifiedVersion: fwdPayload.hasNewerCertifiedVersion,
+1371               }
+1372             : {}),
+1373           verifiedAt: new Date().toISOString(),
+1374         }, byIdScoped));
+1375       };
+1376 
+1377       try {
+1378         // STRATEGY 1: Look up by hash (strongest verification — proves file integrity)
+1379         if (computedHash) {
+1380           const hashNorm = normaliseHash(computedHash);
+1381 
+1382           // Local tenant DB first (KS-252) — same-env documents answer in
+1383           // milliseconds and their local status is authoritative anyway
+1384           // (F-DEMO-VERIFY-01: local draft/revoked overrides chain presence).
+1385           // KS-584 (interim): fetch the same-hash SET (bounded); selection
+1386           // happens in selectVerifiableRow, not in an arbitrary LIMIT 1.
+1387           let rows: any[] = await db.$queryRaw`
+1388             SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+1389                    d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+1390                    d.tenant_id, d.parent_document_id, d.owner_user_id, d.issuer_organization_id, o.name AS organization_name -- KS-1561: issuer_organization_id is read by the original-holder rule (it 
+1391             FROM documents d
+1392             LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+1393             WHERE d.content_hash = ${computedHash}
+1394                OR d.content_hash = ${hashNorm}
+1395                OR d.content_hash = ${'sha256:' + hashNorm}
+1396             ORDER BY d.certified_at DESC NULLS LAST
+1397             LIMIT ${VERIFY_ROWSET_LIMIT}
+1398           `;
+1399           if (rowSetMayBeCut(rows)) rows = withOriginalRows(rows, await readOriginalRows(db, computedHash, hashNorm)); // KS-1561 G188-F1
+1400 
+1401           // KS-1986: judge the local rows against every tenant's original, as v2 does (D-B1 to D-B4 above judgeAcrossTenants).
+1402           let judged: CertificationEligibility | undefined;
+1403           let skipCrossTenantLookup = false;
+1404           let crossTenantReadFailed = false;
+1405           if (rows.length > 0) {
+1406             const j = await judgeAcrossTenants(rows, computedHash, hashNorm);
+1407             rows = j.rows;
+1408             judged = j.eligibility;
+1409             skipCrossTenantLookup = j.skipCrossTenantLookup;
+1410             crossTenantReadFailed = j.crossTenantReadFailed;
+1411           }
+1412 
+1413           // If not found locally, search cross-tenant via platform registry
+1414           if (rows.length === 0 && !skipCrossTenantLookup) {
+1415             const crossDoc = await crossTenantLookup(documentId || '', computedHash);
+1416             if (crossDoc) {
+1417               rows = [crossDoc];
+1418               logger.info('Hash found via cross-tenant lookup', { hash: hashNorm.substring(0, 16) });
+1419             }
+1420           }
+1421 
+1422           // KS-1986 G192-F2: not after a failed cross-tenant read (D-B4); that answers not found, below.
+1423           if (rows.length === 0 && !crossTenantReadFailed) {
+1424             // CHAIN FALLBACK for cross-env certs: the chain is shared, so any
+1425             // environment can verify a cert issued by any other environment even
+1426             // though that cert is absent from our tenant registry.
+1427             //
+1428             // KS-252 (2026-06-10): this used to run BEFORE the local DB, but the
+1429             // anchoring chain scan costs seconds for any hash not anchored yet —
+1430             // the common case when a verify races a fresh anchor — and stalled
+1431             // 39% of verifies to client timeout under the KS-194 load baseline.
+1432             // Local + registry hits don't need the chain: F-DEMO-VERIFY-01
+1433             // (2026-04-29) established that the local status (draft/revoked)
+1434             // OVERRIDES chain presence, so for any locally-known document the
+1435             // local answer is both faster and more precise. Only a full miss
+1436             // falls through to the chain scan (preserving the cross-env
+1437             // guarantee in CREDENTIALS-AND-PORTALS §8). The inner local-doc
+1438             // downgrade check stays as belt-and-braces for docs created
+1439             // between the lookups.
+1440             try {
+1441               // F-CHAIN-VERIFY-AUTH-01 (2026-05-02): the anchoring service
+1442               // mounts authenticate() on /api/* (T1-A trust-header migration).
+1443               // Calling /api/anchors/verify without the caller's bearer token
+1444               // returned 500 "No token provided", silently breaking chain-
+1445               // first lookup — and therefore breaking the cross-env shared-
+1446               // chain verify guarantee documented in CREDENTIALS-AND-PORTALS
+1447               // §8. Forwarding Authorization here is the same pattern used
+1448               // by services/api-gateway/src/routes/platform.ts after the
+1449               // BUG-PLATFORM-AUTH-001 fix.
+1450               const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+1451               const callerAuth = (req.headers.authorization as string) || '';
+1452               const resp = await fetch(`${anchoringBase}/api/anchors/verify/${encodeURIComponent(hashNorm)}`, {
+1453                 headers: callerAuth ? { Authorization: callerAuth } : {},
+1454                 signal: AbortSignal.timeout(CHAIN_VERIFY_TIMEOUT_MS), // KS-252
+1455               });
+1456               if (resp.ok) {
+1457                 const chain: any = await resp.json();
+1458                 if (chain?.verified === true) {
+1459                   // F-DEMO-VERIFY-01: check the local tenant DB for a doc with
+1460                   // this hash. If found and status is draft/deleted/revoked,
+1461                   // downgrade — the chain's confirmation is about a different
+1462                   // (prior) document that happened to share the same content.
+1463                   let localDoc: any = null;
+1464                   try {
+1465                     // KS-584 (interim): the downgrade decision must be made on
+1466                     // the row selection would pick — a draft sibling of an
+1467                     // anchored/certified row must not downgrade the verify.
+1468                     const localRows = await db.$queryRaw`
+1469                       SELECT external_id, id, status, title, document_type,
+1470                              certification_metadata, metadata, created_at, certified_at,
+1471                              owner_user_id, parent_document_id, issuer_organization_id -- KS-1561: the identity columns selectVerifiableRow's original-holder rule reads (absent before KS-1561)
+1472                       FROM documents
+1473                       WHERE content_hash = ${computedHash}
+1474                          OR content_hash = ${hashNorm}
+1475                          OR content_hash = ${'sha256:' + hashNorm}
+1476                       ORDER BY certified_at DESC NULLS LAST
+1477                       LIMIT ${VERIFY_ROWSET_LIMIT}
+1478                     ` as any[];
+1479                     // KS-1561 G188-F1: the same full-read rule as the row-set reads above.
+1480                     const allLocal = rowSetMayBeCut(localRows)
+1481                       ? withOriginalRows(localRows, await readOriginalRowsNarrow(db, computedHash, hashNorm))
+1482                       : localRows;
+1483                     if (allLocal.length > 0) localDoc = selectVerifiableRow(allLocal);
+1484                   } catch (lookupErr: any) {
+1485                     logger.warn('Local-doc draft check in chain-first path failed', { error: lookupErr?.message });
+1486                   }
+1487 
+1488                   if (localDoc) {
+1489                     const status = localDoc.status;
+1490                     // KS-563: the gate below is "is this document presentable
+1491                     // as verified", which is the BROAD set — narrowing it here
+1492                     // would 'draft'-reject every anchored document. Only the
+1493                     // reported `checks.isCertified` narrows.
+1494                     const isCertified = isCertifiedStatus(status);
+1495                     const isVerifiable = isVerifiableStatus(status);
+1496                     const isRevoked = status === 'revoked';
+1497                     if (!isVerifiable || isRevoked) {
+1498                       return res.json({
+1499                         verified: false,
+1500                         documentId: localDoc.external_id || localDoc.id,
+1501                         title: localDoc.title,
+1502                         documentType: localDoc.document_type,
+1503                         status,
+1504                         contentHash: computedHash,
+1505                         error: isRevoked
+1506                           ? 'This document was anchored on chain but has since been revoked.'
+1507                           : 'The content hash was anchored on chain previously, but this document is still in draft and has not been certified by the issuer.',
+1508                         chain: {
+1509                           anchored: true,
+1510                           network: chain.network,
+1511                           txHash: chain.txHash,
+1512                           note: 'A different document with the same content was anchored at this txHash; this is not it.',
+1513                         },
+1514                         checks: {
+1515                           documentExists: true,
+1516                           hashValid: true,
+1517                           isCertified,
+1518                           isAnchored: true,
+1519                           isRevoked,
+1520                           integrityVerified: false,
+1521                         },
+1522                         verifiedAt: new Date().toISOString(),
+1523                       });
+1524                     }
+1525                   }
+1526 
+1527                   logger.info('Hash verified via chain-first lookup', { hash: hashNorm.substring(0, 16), source: chain.source });
+1528                   // KS-522: legacy mock rows can surface via the chain
+1529                   // index — never present a fabricated hash as on-chain.
+1530                   const honestChain = presentBlockchainHonestly({
+1531                     anchored: true,
+1532                     network: chain.network,
+1533                     txHash: chain.txHash,
+1534                     blockHeight: chain.blockNumber,
+1535                     cardanoScanUrl: chain.cardanoScanUrl,
+1536                     confirmedAt: chain.confirmedAt,
+1537                     simulated: chain.simulated,
+1538                   });
+1539                   // KS-563: chain evidence proves the hash was anchored, not
+1540                   // that anyone certified it — claim only what was performed.
+1541                   const chainCertId = chain.metadata?.certId || chain.metadata?.certificationId || null;
+1542                   const chainIsCertified = Boolean(chainCertId);
+1543                   return res.json({
+1544                     verified: true,
+1545                     source: chain.source === 'chain' ? 'blockchain' : 'blockchain-indexed',
+1546                     documentId: chain.metadata?.documentId || chain.metadata?.certId,
+1547                     title: null,
+1548                     documentType: chain.metadata?.documentType || null,
+1549                     status: 'anchored',
+1550                     contentHash: chain.metadata?.contentHash || computedHash,
+1551                     certifiedAt: chain.confirmedAt,
+1552                     issuer: chain.metadata?.issuerName || chain.metadata?.issuerOrgId || null,
+1553                     blockchain: honestChain,
+1554                     ...(chainIsCertified
+1555                       ? {
+1556                           certification: {
+1557                             certificationId: chainCertId,
+1558                             certificationType: chain.metadata?.certificationType ?? null,
+1559                             certifiedAt: chain.confirmedAt ?? null,
+1560                             certifiedBy: chain.metadata?.issuerName ?? null,
+1561                             certifierOrganizationId: chain.metadata?.issuerOrgId ?? null,
+1562                           },
+1563                         }
+1564                       : {}),
+1565                     onChainMetadata: chain.metadata,
+1566                     checks: {
+1567                       documentExists: true,
+1568                       hashValid: true,
+1569                       isCertified: chainIsCertified,
+1570                       isAnchored: isAnchoredHonestly(honestChain, 'anchored'),
+1571                       isRevoked: false,
+1572                       integrityVerified: true,
+1573                     },
+1574                     verifiedAt: new Date().toISOString(),
+1575                   });
+1576                 }
+1577               }
+1578             } catch (chainErr: any) {
+1579               logger.warn('Chain-first /verify lookup failed — falling back to DB', { error: chainErr?.message });
+1580             }
+1581           }
+1582 
+1583           if (rows.length > 0) {
+1584             // KS-70: best-effort lineage attachment. The strategy-1 SELECTs
+1585             // above may not include tenant_id (cross-tenant lookups in
+1586             // particular). Re-fetch the minimal {external_id, tenant_id,
+1587             // parent_document_id} so the walk has the right scope.
+1588             // KS-584 (interim): select the evidencing row; carry sibling
+1589             // certification; confirm stale 'pending' chain state; scope
+1590             // tenant-owned fields out of cross-tenant answers (and skip the
+1591             // lineage walks for them — they enumerate tenant-owned chains).
+1592             const docRow = selectVerifiableRow(rows, judged); // KS-1986
+1593             const preHeal = chainBlobOfRow(docRow);
+1594             const healedChain = await healVerifyRow(docRow, preHeal, (req.headers.authorization as string) || '');
+1595             const scoped = isCrossTenantResponse(req, docRow);
+1596             // KS-1557: resolve the derived rows' evidence only when it can be used (no certified row, no carried evidence).
+1597             const siblingCert = buildCertification(docRow) || docRow._siblingCertification
+1598               ? undefined
+1599               : siblingCertification(rows, docRow, await resolveTrustedCertificationEvidence(rows, { db }), judged); // KS-1986
+1600             // KS-1119: the hash flag is computed from the selected row, never assumed. Every row that reaches this line
+1601             // was found by its hash (bare, `sha256:` or prefixed input), so it is true for those; it stops being an
+1602             // assumption a future lookup could break without anything noticing.
+1603             const hashMatch = typeof docRow.content_hash === 'string' && normaliseHash(docRow.content_hash) === hashNorm;
+1604             const base = scopeTenantFields(
+1605               buildResponse(docRow, hashMatch, { siblingCert, healedChain }),
+1606               scoped,
+1607             );
+1608             if (scoped) return res.json(base);
+1609             try {
+1610               // KS-299: a certification can be stored as a separate documents
+1611               // row that shares the content_hash with its source document but
+1612               // has a NULL external_id and no parent_document_id — the
+1613               // `certified_at DESC` resolve above picks that cert row, so the
+1614               // ancestor walk (which keys on external_id) returns empty. Re-
+1615               // resolve the lineage from the external_id-bearing document row
+1616               // for this hash, preferring the resolved row itself, so verify
+1617               // shows the document's provenance rather than an empty lineage.
+1618               // The verify response above is unchanged — only the lineage walk
+1619               // is re-scoped to a row that actually has a chain to follow.
+1620               const lineageHash = (docRow.content_hash || '').replace(/^sha256:/, '');
+1621               const tenantLookup: any[] = await db.$queryRaw`
+1622                 SELECT external_id, tenant_id FROM documents
+1623                  WHERE external_id IS NOT NULL AND tenant_id IS NOT NULL
+1624                    AND (id = ${docRow.id}::uuid
+1625                         OR content_hash = ${lineageHash}
+1626                         OR content_hash = ${'sha256:' + lineageHash})
+1627                  ORDER BY (id = ${docRow.id}::uuid) DESC, certified_at DESC NULLS LAST, created_at DESC
+1628                  LIMIT 1
+1629               `;
+1630               if (tenantLookup.length > 0) {
+1631                 const { lineage, truncated } = await walkLineageForDoc(tenantLookup[0]);
+1632                 const fwd = await walkNewerVersionsForDoc(tenantLookup[0]);
+1633                 if (lineage.length > 0 || fwd.newerVersions.length > 0) {
+1634                   return res.json({
+1635                     ...base,
+1636                     ...(lineage.length > 0
+1637                       ? { lineage, lineageTruncated: truncated, lineageDepthAtTruncation: truncated ? MAX_LINEAGE_DEPTH : undefined }
+1638                       : {}),
+1639                     ...(fwd.newerVersions.length > 0
+1640                       ? { newerVersions: fwd.newerVersions, newerVersionsTruncated: fwd.truncated, hasNewerCertifiedVersion: fwd.hasNewerCertifiedVersion }
+1641                       : {}),
+1642                   });
+1643                 }
+1644               }
+1645             } catch (lineageErr: any) {
+1646               logger.warn('KS-70 verify lineage attach failed', {
+1647                 error: lineageErr instanceof Error ? lineageErr.message : String(lineageErr),
+1648               });
+1649             }
+1650             return res.json(base);
+1651           }
+1652 
+1653           // Hash not found anywhere — this file was never certified
+1654           return res.json({
+1655             verified: false,
+1656             error: 'This document hash is not registered. The file may have been modified or was never certified.',
+1657             providedHash: computedHash,
+1658             checks: { documentExists: false, hashValid: false, integrityVerified: false },
+1659           });
+1660         }
+1661 
+1662         // STRATEGY 2: Look up by document ID only (weaker — confirms existence but not integrity)
+1663         if (documentId) {
+1664           let rows: any[] = await db.$queryRaw`
+1665             SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+1666                    d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+1667                    o.name AS organization_name
+1668             FROM documents d
+1669             LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+1670             WHERE d.external_id = ${documentId} LIMIT 1
+1671           `;
+1672           if (rows.length === 0) {
+1673             try {
+1674               rows = await db.$queryRaw`
+1675                 SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+1676                        d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+1677                        o.name AS organization_name
+1678                 FROM documents d
+1679                 LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+1680                 WHERE d.id = ${documentId}::uuid LIMIT 1
+1681               `;
+1682             } catch { /* not UUID */ }
+1683           }
+1684           if (rows.length === 0) {
+1685             const crossDoc = await crossTenantLookup(documentId);
+1686             if (crossDoc) rows = [crossDoc];
+1687           }
+1688 
+1689           if (rows.length > 0) {
+1690             return await respondExistenceOnly(
+1691               rows[0],
+1692               'Document found by ID but no hash was provided. To verify integrity, provide the document file or its SHA-256 hash.',
+1693             );
+1694           }
+1695 
+1696           return res.json({
+1697             verified: false,
+1698             documentId,
+1699             error: 'Document not found in the registry',
+1700             checks: { documentExists: false, hashValid: false, integrityVerified: false },
+1701           });
+1702         }
+1703 
+1704         // STRATEGY 3 (KS-1114): look up by TITLE — weakest, confirms existence only.
+1705         // Kam's ruling, verbatim: "Title lookup open to anyone, one tenant". Reached only by a
+1706         // body carrying a title and NOTHING else the strategies above read, so every body that
+1707         // answered before answers byte-identically now.
+1708         //
+1709         // ⚠ AN EXISTENCE ORACLE, BY KAM'S RULING. A hash needs the bytes; a title is a guess.
+1710         // This route is unauthenticated and public, and an anonymous caller can now learn
+1711         // whether a document of a given title exists in the default tenant. The pen-test
+1712         // enumeration finding's mitigation is the per-IP limit on this route
+1713         // (api-gateway/src/index.ts, the `/api/verification/verify` limiter). Recorded here so
+1714         // nobody has to rediscover it.
+1715         //
+1716         // "ONE TENANT", by construction rather than by RLS: the caller's tenant is bound in the
+1717         // SQL, and there is NO cross-tenant fallback — crossTenantLookup is deliberately not
+1718         // called. `documents` is FORCE RLS, so the predicate is the second line, not the only one.
+1719         // The caller's tenant is callerTenantOf(req): an anonymous caller resolves in the default
+1720         // tenant, and a caller's own tenant applies only when the gateway VOUCHED the request's
+1721         // x-tenant-id (KS-1032). Compared as text so a malformed tenant value cannot throw a cast.
+1722         //
+1723         // THE REPLY IS EXISTENCE ONLY (KS-1114 round 2). Kam, card
+1724         // secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015 = a, its detail verbatim:
+1725         // "#1555 stays held, unmerged. The J seat fixes it after the reset: an existence-only reply,
+1726         // drafts and revoked kept out, then round 2 of its gate." His 10-13 card (b) also binds: the
+1727         // lookup is open "even if the reply hides the details". Round 1 answered a title hit with the
+1728         // whole by-id body (contentHash, issuer, lineage, newerVersions...), so a guessed title gave a
+1729         // hash and the hash gave `verified:true` (gate F1). Now:
+1730         //   * a HIT answers exactly { verified: false, checks: { documentExists: true } } and nothing
+1731         //     else — no id, hash, issuer, status, certification or lineage. Shape ruled by Wednesday,
+1732         //     2026-10-18T08:31:18Z: `verified` stays because VerifyResponseSchema REQUIRES it (it is the
+1733         //     route's discriminator), `documentExists` sits at the declared `checks` path where the
+1734         //     miss carries it, and nothing else, so a hit and a miss differ only in that bit and the
+1735         //     miss's `error`. Because no row's identity is returned, which row matched is irrelevant:
+1736         //     the query asks only whether one exists.
+1737         //   * DRAFT and REVOKED documents are never matched — in the WHERE, not on the newest row
+1738         //     afterwards, so a newer draft cannot shadow an older published document. A draft or a
+1739         //     revoked match answers the ordinary not-found, and so does a deleted or an expired one (KS-1114
+1740         //     follow-up: the status is lower-cased and trimmed before it is compared). Every other status can be a hit.
+1741         //   * the GDPR erasure sentinel never matches (Wednesday, 2026-10-13T10:52:44Z). Every erased
+1742         //     document's title holds ERASED_MARKER (the column is NOT NULL), so a naive lookup would
+1743         //     make an erased document discoverable through the very field that was erased.
+1744         // Absent, another tenant's, draft, revoked, deleted, expired and the sentinel all answer ONE not-found body.
+1745         if (titleToFind && !documentId && !computedHash) {
+1746           // The title is deliberately NOT echoed: echoing it would make the sentinel's not-found
+1747           // differ from a missing title's by exactly that field, and Wednesday's ruling requires the
+1748           // two bodies to be byte-identical so the answer reveals nothing about erasure.
+1749           const titleNotFound = () => res.json({
+1750             verified: false,
+1751             error: 'Document not found in the registry',
+1752             checks: { documentExists: false, hashValid: false, integrityVerified: false },
+1753           });
+1754           const tenantForTitle = callerTenantOf(req);
+1755           // callerTenantOf always yields a tenant today (resolveRequestTenantId falls back to the
+1756           // default; gate F5 measured this guard unreachable). Kept so a missing tenant answers the
+1757           // not-found without running the query at all.
+1758           if (!tenantForTitle || titleToFind === ERASED_MARKER) return titleNotFound();
+1759           // documents.status is NOT NULL (migration 001), so NOT IN cannot silently drop a NULL row.
+1760           const titleRows: any[] = await db.$queryRaw`
+1761             SELECT 1 AS found
+1762             FROM documents d
+1763             WHERE d.title = ${titleToFind}
+1764               AND d.title <> ${ERASED_MARKER}
+1765               AND d.tenant_id::text = ${tenantForTitle}
+1766               AND lower(btrim(d.status)) NOT IN ('draft', 'revoked', 'deleted', 'expired')
+1767             LIMIT 1
+1768           `;
+1769           if (titleRows.length === 0) return titleNotFound();
+1770           return res.json({ verified: false, checks: { documentExists: true } });
+1771         }
+1772       } catch (dbErr: any) {
+1773         let reason: string | undefined;
+1774         try {
+1775           reason = dbErr?.message;
+1776         } catch {
+1777           reason = 'unreadable thrown value';
+1778         }
+1779         logger.warn('Verification lookup failed', { documentId, error: reason });
+1780         return res.json({ verified: false, error: 'Verification lookup failed' });
+1781       }
+1782 
+1783       res.json({ verified: false, error: 'No verifiable input provided' });
+1784     } catch (error) {
+1785       let reason: string;
+1786       try {
+1787         reason = String(error instanceof Error ? error.message : error);
+1788       } catch {
+1789         reason = 'unreadable thrown value';
+1790       }
+1791       logger.error('Verification error', { error: reason });
+1792       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Verification failed' } });
+1793     }
+1794   }
+1795 );
+1796 
+1797 /**
+1798  * POST /api/verification/hash
+1799  * Generate hash for document data
+1800  */
+1801 verificationRouter.post(
+1802   '/hash',
+1803   [body('data').notEmpty().withMessage('Data is required')],
+1804   async (req: Request, res: Response) => {
+1805     try {
+1806       const errors = validationResult(req);
+1807       if (!errors.isEmpty()) {
+1808         return res.status(400).json({ errors: errors.array() });
+1809       }
+1810 
+1811       const { data } = req.body;
+1812       const hash = generateHash(data);
+1813 
+1814       res.json({
+1815         hash,
+1816         algorithm: 'sha256',
+1817         generatedAt: new Date().toISOString(),
+1818       });
+1819     } catch (error) {
+1820       let reason: string;
+1821       try {
+1822         reason = String(error instanceof Error ? error.message : error);
+1823       } catch {
+1824         reason = 'unreadable thrown value';
+1825       }
+1826       logger.error('Hash generation error', { error: reason });
+1827       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Hash generation failed' } });
+1828     }
+1829   }
+1830 );
+1831 
+1832 /**
+1833  * GET /api/verification/status/:documentId
+1834  * Check verification status of a document
+1835  */
+1836 verificationRouter.get(
+1837   '/status/:documentId',
+1838   async (req: Request, res: Response) => {
+1839     try {
+1840       const { documentId } = req.params;
+1841 
+1842       res.json({
+1843         documentId,
+1844         status: 'unknown',
+1845         message: 'Use POST /api/verification/verify with documentId or contentHash for full verification.',
+1846       });
+1847     } catch (error) {
+1848       let reason: string;
+1849       try {
+1850         reason = String(error instanceof Error ? error.message : error);
+1851       } catch {
+1852         reason = 'unreadable thrown value';
+1853       }
+1854       logger.error('Status check error', { error: reason });
+1855       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Status check failed' } });
+1856     }
+1857   }
+1858 );
+1859 
+1860 export default verificationRouter;
+1861 

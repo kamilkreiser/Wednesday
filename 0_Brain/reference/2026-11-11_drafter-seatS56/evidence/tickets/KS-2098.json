@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2098",
+ "title": "Pre-push hook leg 14 refused a push on 4 failed controls of the slot-literals suite, which passes 11 of 11 alone (one occurrence)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T12:18:27.420Z",
+ "updatedAt": "2026-11-10T05:00:23.115Z",
+ "description": "**BLUF:** The pre-push hook refused a push because the shell suite `systemTest/__tests__/no_hardcoded_slot_literals.test.sh` failed 4 of its 11 cells, on a diff that cannot touch that suite. Run alone on the same worktree it passes 11 of 11, and it passed in an earlier hook run. So this is a hook suite refusing a push intermittently, by one occurrence. Cause UNMEASURED. The refusal cost Seat Z 4th about 23 minutes of the push queue. No fix here.\n\n**The occurrence (MEASURED, one run):** Seat Z 4th pushing KS-1670, head `83ee8509c985`, worktree `worktrees/s-z4-m365err`. Evidence file `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-06_seatZ-4th/evidence/item2/push/push.out`, hook leg 14 of 16 (\"Every shell test suite must actually RUN\"), lines quoted:\n\n* line 2713: `=== systemTest/__tests__/no_hardcoded_slot_literals.test.sh ===`\n* line 2720: `FAIL CONTROL: planted 54 literals, the guard reported 0`\n* line 2724: `FAIL CONTROL: a bare 'slot-literal-ok:' exempted a literal`\n* line 2728: `FAIL CONTROL: an untracked source file was skipped`\n* line 2733: `FAIL CONTROL: the membership check cannot catch a non-from_runs element`, and line 2734: `exempted=0 violations=0 (both must be >= 1)`\n* line 2736: `no_hardcoded_slot_literals: 7 passed, 4 failed`\n* line 3629: `shell suites: 116 passed, 1 failed, 0 skipped (of 117)`; line 3630: `FAILED: systemTest/__tests__/no_hardcoded_slot_literals.test.sh`\n\nThe same suite alone, `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-06_seatZ-4th/evidence/item2/slot_literals_standalone.out`, ends `no_hardcoded_slot_literals: 11 passed, 0 failed`.\n\n**What the four failures share (READ):** each is a control that needs the planted control tree to be a git work tree, and each reads as if the scan found nothing (planted 54, reported 0; exempted 0, violations 0). The two checks before them passed in the same run (lines 2715 to 2718: the 45 computed patterns, and 1383 files scanned with no unmarked slot literal). The suite builds the control tree at line 157 of `systemTest/__tests__/no_hardcoded_slot_literals.test.sh` with `git -C \"$TMP/st\" init -q 2>/dev/null` (read at develop `90b500e19883`), and its comment at line 156 says the scan lists files through git.\n\n**Seat Z 4th's one reading (UNMEASURED):** that `git init` failed under load (load average about 8 at that moment), the `2>/dev/null` hid it, and the four controls then ran on a tree git did not know. Not measured: that the init failed, the load figure, and any second occurrence.\n\n**Why it matters:** leg 14 took 1181 s in that run (line 3631), and a refusal throws the whole run away.\n\n**Board search (2026-11-06, includeArchived, paginated):** `no_hardcoded_slot_literals` has 1 open hit, KS-1451 (In Progress: a bare `slot-literal-ok:` marker exempts a quoted value; a deterministic defect of the same guard), and 1 closed hit, KS-1450 (Done: leg 14 failing every time since 89dff83aa on 8 unmarked slot-2 literals). `planted 54 literals`, `no unmarked slot` and `pre-push hook intermittent` have 0 hits. Neither neighbour describes a failure that varies between runs.\n\n**Possible shape (mine, not a decision):** check the exit status of the `git init` at line 157 and stop the suite with a setup message, so a failed init reads as a setup error and not as four control failures.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2164",
+    "title": "Refs KS-2098: the slot-literals suite names a failed git init in its two control trees, so its controls cannot read as a scan that found nothing"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "e5809615-bdae-450b-b8cc-2a63fa46c377",
+    "createdAt": "2026-11-10T05:00:26.637Z",
+    "body": "**BLUF:** PR 2164 (head `f03f4e72a8b7`, one commit on develop `0e6479d7b6c0`) adds two SETUP cells to the slot-literals suite, one after each of its two `git init` calls, so a failed `git init` in a control tree now fails with a line that says so. Test-only, one bash file, zero product bytes; it is ready for its gate (tier 2). It does NOT explain or fix the occurrence this ticket records: that cause stays UNMEASURED, nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **Measured by this seat:** the suite reads 11 of 11 before and 13 of 13 after. On a scratch copy with `git init` skipped in both trees, the four control lines this ticket quotes are the four that go red, plus the new SETUP lines. That shows the cells would have named a failed `git init`; it does not show there was one.\n- **Hook:** this PR touches only `systemTest/`, so the hook's \"Blockchain/Dev changes detected\" line is not expected, and the PR body quotes what the hook did print.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

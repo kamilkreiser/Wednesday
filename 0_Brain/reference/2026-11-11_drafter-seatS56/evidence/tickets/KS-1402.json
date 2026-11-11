@@ -1,0 +1,290 @@
+{
+ "identifier": "KS-1402",
+ "title": "auth GET /api/users/lookup refuses connector tokens, so every Platform-S transfer-custody 401s and falls back to a flat anchor \u2014 KS-739's users:read ruling cannot take effect",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-01T09:43:49.060Z",
+ "updatedAt": "2026-11-10T06:41:44.868Z",
+ "description": "## BLUF\n\n**No Platform-S rights-assign or rights-reassign reaches** `POST /api/documents/{id}/transfer-custody` **successfully.** originate resolves `newHolderEmail` by calling auth's `GET /api/users/lookup` with the **caller's** `Authorization` header, and `/lookup` accepts only access tokens (`authenticate()`). Platform-S authenticates per Organisation with a **connector** token, so auth answers 401 *\"Invalid token\"*, originate passes it through ([KS-739](https://linear.app/secuura/issue/KS-739/transfer-custody-maps-a-401403-from-userslookup-to-502-bad-gateway-the)'s 4xx rule), and S degrades to a flat `/api/anchors` anchor. No `custody_events` row is written and `documents.owner_user_id` never moves.\n\n[KS-739](https://linear.app/secuura/issue/KS-739/transfer-custody-maps-a-401403-from-userslookup-to-502-bad-gateway-the) (Done, archived) ruled 2026-09-02 that *\"Platform S provisions* `users:read` *on its connector key; K does not widen* `ALLOWED_LOOKUP_ROLES`*\"*. That ruling cannot take effect: the scope check sits behind an authenticator that rejects the token type before any scope is read. A missing scope would answer **403**; what S receives is **401 Invalid token**.\n\n## Code (platform-k `develop` `0736d8b78`)\n\n* `services/originate/src/routes/documents.ts:1665-1671` \u2014 email-only path: `fetch(${AUTH_SERVICE_URL}/api/users/lookup?email=\u2026, { headers: { Authorization: <caller's header> } })`.\n* `services/originate/src/routes/documents.ts:1708-1730` \u2014 a 4xx from the lookup is passed through; 401 \u2192 *\"The credential on this request was rejected by the user lookup. Re-authenticate and retry.\"* ([KS-739](https://linear.app/secuura/issue/KS-739/transfer-custody-maps-a-401403-from-userslookup-to-502-bad-gateway-the)).\n* `services/auth/src/routes/users.ts:266` \u2014 `userRoutes.get('/lookup', authenticate(), \u2026)` \u2014 access tokens only.\n* `services/auth/src/routes/users.ts:357-359` \u2014 \"[KS-564](https://linear.app/secuura/issue/KS-564/share-lifecycle-events-and-certificationsissue-all-fail-on-recipient) *(Option A): this ONE route also accepts a connector token \u2014 see authenticateAccessOrConnector. Every other route keeps plain authenticate().\"* \u2014 `/stub` was widened; `/lookup` was not.\n* Platform-S side: `ssd/Services/CardanoAnchor/CardanoAnchorService.PerVerb.cs` `TransferCustodyAsync` sends `{ newHolderEmail, reason }` + `onBehalfOf` with `Authorization: Bearer <connector access token>` (`CardanoAnchorService.cs:1527`).\n\n## Measured \u2014 local pair, slot 3, 2026-10-01\n\nplatform-s `f370236c` (+ [PS-992](https://linear.app/secuura/issue/PS-992/systemtest-the-date-sort-contract-has-asserted-nothing-since-ps-914) systemTest changes only) \u2194 platform-k `0736d8b78`, fresh databases, 33/33 K containers up, `/health/deep` 200, S provisioning key accepted, 10/0/0 organisations registered.\n\n**4 of 4** transfer-custody calls refused, identical body, under Organisation 3's connector key:\n\n```\ntransfer-custody status=401 body={\"success\":false,\"error\":{\"code\":\"UNAUTHORIZED\",\"message\":\"The credential on this request was rejected by the user lookup. Re-authenticate and retry. Upstream said: Invalid token\"}} \u2026 using /api/anchors fallback.\n```\n\n* 09:21:55Z \u2014 2 calls ([PS-992](https://linear.app/secuura/issue/PS-992/systemtest-the-date-sort-contract-has-asserted-nothing-since-ps-914)'s date-sort seed: two documents delegated to a same-org colleague).\n* 09:22:55\u201309:31:06Z \u2014 2 calls during `npm run test:k-live` (`verb_matrix.spec.ts` rights-assign + rights-reassign on K document `7af2374a-dd61-47e7-be50-122dcb5e412b`).\n\nIn the same window, Organisation 3's connector token **succeeded** on `originate` (201) and on lifecycle events (`rights-unassign`, `delete`) \u2014 so the key is valid; only the auth-service lookup refuses it.\n\n## Why nothing went red\n\nThe platform-s `@k-live` cell \"rights-assign and rights-unassign each reach K\" asserted only that the S edge carries an anchor K resolves as not-failed \u2014 which the flat fallback also satisfies. It passed (17 passed / 1 skipped) while both custody calls 401'd. [PS-992](https://linear.app/secuura/issue/PS-992/systemtest-the-date-sort-contract-has-asserted-nothing-since-ps-914) tightens that cell to assert the custody transfer K records \u2014 `GET /api/documents/{id}` `owner.id` must move off its pre-assign value (measured: it reads `\"\"` before and after today's refused transfers). The cell is **red until this ticket ships**, deliberately, and turns green once K records the transfer. Platform-S's `TransferCustodyAsync` carries a comment naming this ticket.\n\n## Options (Kamil's call \u2014 no K code changed)\n\n1. **Widen** `/lookup` **to** `authenticateAccessOrConnector()`, as [KS-564](https://linear.app/secuura/issue/KS-564/share-lifecycle-events-and-certificationsissue-all-fail-on-recipient) did for `/stub` \u2014 makes [KS-739](https://linear.app/secuura/issue/KS-739/transfer-custody-maps-a-401403-from-userslookup-to-502-bad-gateway-the)'s `users:read` ruling effective (the connector key then needs that scope).\n2. **originate resolves the holder with its own service credential**, not the caller's header \u2014 removes the dependency on the caller's token type.\n3. **Platform-S sends** `newHolderId` \u2014 requires S to know the K user id of the recipient (S-side; it does not today).\n\nWhichever is chosen, a recipient with no K account still gets the typed 404 `RECIPIENT_NOT_FOUND` ([KS-739](https://linear.app/secuura/issue/KS-739/transfer-custody-maps-a-401403-from-userslookup-to-502-bad-gateway-the) measurement A) \u2014 worth confirming the S holder exists in K once the 401 is gone.\n\n## Related\n\n[KS-739](https://linear.app/secuura/issue/KS-739/transfer-custody-maps-a-401403-from-userslookup-to-502-bad-gateway-the) (Done, archived \u2014 ruling this ticket shows cannot take effect) \u00b7 [KS-564](https://linear.app/secuura/issue/KS-564/share-lifecycle-events-and-certificationsissue-all-fail-on-recipient) (Option A connector scoping) \u00b7 [PS-681](https://linear.app/secuura/issue/PS-681/systemtest-k-live-every-share-and-rights-verb-times-out-waiting-for) (Done \u2014 Stuart's original 502 report) \u00b7 [PS-992](https://linear.app/secuura/issue/PS-992/systemtest-the-date-sort-contract-has-asserted-nothing-since-ps-914) (platform-s: the k-live cell that hid this).",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1175"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-1284"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1508"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1385"
+    }
+   },
+   {
+    "type": "blocks",
+    "relatedIssue": {
+     "identifier": "PS-1091"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-843"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-772"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-992"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1620",
+    "title": "Refs KS-1402: a transfer-custody recipient K does not know is minted as an invited stub, not refused"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1614",
+    "title": "Refs KS-1402: a Platform-S custody transfer whose holder resolves is recorded, not a 500"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1437",
+    "title": "KS 1402: originate resolves a transfer-custody holder email itself"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1374",
+    "title": "KS-1402: accept a connector token on the users lookup route"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "06ba4a1f-5214-4723-970e-9ed898346389",
+    "createdAt": "2026-10-29T05:16:47.744Z",
+    "body": "**BLUF:** Yes, Kintsugi wrote one custody event for every accepted call: seven events for your document, at the seven times you listed, to the second. The document's owner moved to a single invited user that Kintsugi created 32 ms before the first event. None of the seven events recorded an anchor. I cannot confirm that the invited user's address is firsttime@lhsg.com, and I cannot show the reason for the refused anchors, for the two reasons under \"Not measured\".\n\nAll times are UTC, with AEDT (UTC+11) in brackets. Each figure says how it was read. Sections 1 to 3 are from SELECTs on Kintsugi on 29 Oct between 04:53 and 05:01 UTC [15:53 and 16:01 AEDT], in read-only database sessions. Section 4 is from the box's REVISION records, read at 05:04 UTC [16:04 AEDT].\n\n**1. The invited user**\n- Kintsugi holds one user created inside the 26 Oct 03:00 to 03:20 UTC window: status `invited`, role `user`, created 2026-10-26 03:09:24.532 [14:09:24 AEDT], in Kintsugi's default tenant. It was created 32 ms before the first custody event.\n- It is the recipient of all seven events and the owner of the document now. It owns no other document.\n- Its address is not shown here. See \"Not measured\".\n\n**2. The custody events** (the K document you name, `427c4864-fde0-4713-9e36-7e50d0097a49`, is stored on Kintsugi as the document's external id)\n\n| # | created (UTC) | [AEDT] | from | to |\n| --- | --- | --- | --- | --- |\n| 1 | 2026-10-26 03:09:24.564 | [14:09:24] | none | the invited user |\n| 2 | 03:10:24.746 | [14:10:24] | the invited user | the invited user |\n| 3 | 03:11:24.832 | [14:11:24] | the invited user | the invited user |\n| 4 | 03:12:24.896 | [14:12:24] | the invited user | the invited user |\n| 5 | 03:13:25.046 | [14:13:25] | the invited user | the invited user |\n| 6 | 03:14:25.113 | [14:14:25] | the invited user | the invited user |\n| 7 | 03:15:25.262 | [14:15:25] | the invited user | the invited user |\n\n- Count: 7, all inside 03:09:00 to 03:16:00 UTC; the gaps between them are 60, 60, 60, 60, 60 and 60 seconds. Control on the same query: the 28 Oct document from your KS-1384 table has 1 event. So events 2 to 7 are repeats of the same transfer: each wrote a row that moves the document from the invited user to the same user.\n- Ownership: the document's owner is the invited user. That user did not exist before 03:09:24.532 on 26 Oct and the document was created on 23 Oct 09:10, so the owner changed in this window. The document's `updated_at` is 03:15:25.262, the time of event 7, and its status is still `draft`.\n- All seven events have an empty \"transferred by\" and an empty anchor transaction. The provenance table holds seven `transfer-custody` rows for the document, first 03:09:24 and last 03:15:25.\n- Kintsugi's audit trail holds seven `POST \u2026/transfer-custody` requests answered 201, at the same seven times.\n\n**3. The anchors**\n- Kintsugi's audit trail holds seven `POST /api/anchors` requests answered 400, each 8 to 37 ms after a transfer-custody request. Those seven are the only `anchors.create` requests answered 400 in the trail, which begins on 20 Aug (7 of its 12 `anchors.create` rows). The trail records no error text for them.\n- Kintsugi's anchor table holds 0 rows for this document; control: 1 row for the 28 Oct document.\n- So no anchor was created for any of the seven transfers, and the transfer route answered success each time. From the audit trail alone I cannot tell whether those 400s are the calls S made after each transfer or the route's own internal call; their timing fits the calls S made.\n\n**4. Which build**\nKintsugi ran develop `1ae6f17d19a8` for all seven events (deployed 26 Oct 00:46:20 UTC [11:46:20 AEDT], replaced 26 Oct 07:55:24 UTC [18:55:24 AEDT], read from the box's REVISION records). Your comment names `bcc51903d`, which was the build before that. Kintsugi now runs `5dccdcb29ec2`.\n\n**Not measured**\n- Whether the invited user's address is firsttime@lhsg.com (as you gave it). Kintsugi stores addresses encrypted. Its address-lookup column did not match a plain hash of a known address in a control test, so I could not search by address without decrypting, and I did not decrypt.\n- The reason for the refused anchors, and whether the transfer route's own anchor call also met a 400 `Invalid DID`. Originate's log on Kintsugi starts on 29 Oct 01:05:59 UTC [12:05:59 AEDT], after later redeploys, and no file on the box holds 26 Oct log lines. The \"Lifecycle anchor emission failed\" and \"Custody transferred\" lines for 26 Oct are therefore not available.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "7398fb60-2a95-4a04-a4c4-d315134d6b2c",
+    "createdAt": "2026-10-26T03:17:49.005Z",
+    "body": "Update, 03:17 UTC: **S stopped the loop at 03:15:58 UTC.** The transfer for document `427c4864-fde0-4713-9e36-7e50d0097a49` reached Kintsugi **7 times**, at 03:09:24, 03:10:24, 03:11:24, 03:12:24, 03:13:25, 03:14:25 and 03:15:25 UTC, each answered 2xx with no anchor reference. Nothing more will arrive from S for it. On Stuart's instruction S's row was given a local marker and parked. A count of `custody_events` for that document over 03:09\u201303:16 UTC would show whether K wrote one row per call. The S fix is filed on the S side. For context, that document's own upload on 23 Oct 09:10 UTC (same Entra-verified actor) was created on K, but its anchor was refused for the same `did:jwk` reason, and S parked it as FAILED.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "f9b9e569-8be7-43c1-b3d4-c05797a433e5",
+    "createdAt": "2026-10-26T03:14:04.404Z",
+    "body": "@kamil.kreiser \u2014 **live custody transfer on dev-ps against Kintsugi `bcc51903d`, 26 Oct 2026 03:09 UTC: K accepted it, but returned no anchor reference.** Read from S's side (dev-ps app log and its `DocumentTransaction` row; S develop `4fb15e7`).\n\n- **What ran:** stuart@obeden.com assigned S document 15 (K document `427c4864-fde0-4713-9e3\u2026`) to firsttime@lhsg.com, a person who had never received custody or a certification, so K had no user for them. S row 96, chain id `5008820d82c743fd971cbc4d99729a20`.\n- **K's answer to `POST /api/documents/{id}/transfer-custody`: 2xx**, with no `transfer.anchorId` / `transfer.anchor.id` in the body. S logged `transfer-custody OK but no ref in payload for tx 5008820d\u2026; using /api/anchors fallback`. So the old 404 `RECIPIENT_NOT_FOUND` and the 500 are gone on Kintsugi. **Please confirm from your side:** an invited stub for firsttime@lhsg.com in `users`, and the `custody_events` row(s) with the owner moved.\n- **Why no anchor reference, as far as S can tell:** the assigner is Entra-verified, so S's identity block carries a `did:jwk` `actorDid`. S's flat fallback (`POST /api/anchors`) was then refused 400 `Invalid DID \u2014 expect did:key:\u2026 or did:web:\u2026` at `identity.actorDid` (the KS-1175 widening). That suggests the custody route's own anchor call met the same 400 and the route returned success without it, the same shape as KS-1709 on certify. Can you confirm from originate's log?\n- **The S-side problem this exposes, which matters for your tables:** S's background drain re-sends any row that has no K reference on every pass, with no limit. For this row it has re-sent the same transfer-custody **once a minute: 03:09:24, 03:10:24, 03:11:24 \u2026, 4 calls by 03:13 UTC**, each answered 2xx by K and each followed by a refused flat anchor. If K writes a `custody_events` row per call, Kintsugi is accumulating one duplicate transfer a minute for this document. A count of `custody_events` for that document would tell us. It continues until S stops it (I'm asking Stuart now) or K accepts `did:jwk`. It is the only row in that state on dev-ps.\n\nThe S fix (do not re-send a side-effecting verb K has already accepted; park the row instead) will be an S ticket.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "7a506b7d-0705-4086-8761-59e6a413495e",
+    "createdAt": "2026-10-19T12:40:05.455Z",
+    "body": "**#1620 measured end to end, 19 Oct 12:13\u201312:31Z, slot 4, K develop `115797747` (fresh DB, 54 migrations), S develop `b7d414b`:** the PS-992 cell's rights-assign to `firsttwo@lhsg.com` \u2014 a person this K had never seen \u2014 now answers **201**: S logs `'rights-assign' \u2192 transfer-custody ref anchor_ff9fea6c-\u2026`, K's `users` gains one **invited** stub (2 \u2192 3), `custody_events` holds 1 row with `transferred_by_id` NULL, and originate's log has no 22P02 beyond its startup probe. Zero `RECIPIENT_NOT_FOUND` in the run. The cell then fails on its custodian read-back (`GET /api/documents/{id}` \u2192 404 to the k-live client after ownership moved), the shape already filed to Peter on PS-1299 \u2014 so on this build the transfer half is green and the read half is the estate's.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "9d17fcea-e5d3-4d82-abde-4ec0706e1c4b",
+    "createdAt": "2026-10-19T11:59:34.789Z",
+    "body": "On PS-1091 reading Canceled: that was done **because** the K side changed, not on the assumption it would not \u2014 it was cancelled at 09:55Z quoting Kam's (a) verbatim, with the note that #1620 makes S's pre-transfer stub call unnecessary and that Kintsugi keeps answering 404 until it takes #1614 + #1620 together. No second look needed; the S-side residue is the closer cell's read-back (PS-1299, Peter).\n\nRead #1620 merged at `a0da739b6` and KS-1662's fix at `115797747`. Stuart's slot-1 K was rebuilt at `115797747` today (originate image 11:34Z carries the stub path), so the next S run against it will exercise the mint for real; the dev-ps pairing stays as you describe \u2014 201 locally, 404 on Kintsugi \u2014 until the round.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "031b390b-2d71-4956-9b7a-63d21b837877",
+    "createdAt": "2026-10-19T10:00:53.302Z",
+    "body": "## BLUF\n\n**The invited-stub holder is merged \u2014 not deployed.** PR #1620 landed on `develop` at\n`a0da739b6954d42333640ea190d877f031803c7f`. A custody transfer naming a recipient Platform K has\nnever seen now **mints an invited stub user and records the transfer**, instead of answering\n`404 RECIPIENT_NOT_FOUND`. That completes the build half of Kam's ruling. **Nothing is live**, so\nPlatform S still sees the old 404 on every environment until a deploy round carries this.\n\n## Recommendation\n\n1. **Deploy needs a rebuild, and both KS-1402 changes should travel together** \u2014 the 500 fix with\n   migration `052` (merged earlier at `80868551e679`) and this stub holder. A box with one and not\n   the other is a state no suite covers. Rebuilding **either** the `migrations` image **or** the\n   `api-gateway` image lands `052`; afterwards check `custody_events.transferred_by_id` reads\n   `is_nullable = YES` \u2014 the runner prints `applied=N failed=0` even when it ran a stale image, so\n   the column is the evidence, not the summary line.\n2. **This ticket stays In Progress** until it is deployed and live-checked.\n3. One follow-up is open and worth doing before anyone leans on the tenant guarantees: **KS-1662**.\n\n## Detail\n\n**What landed.** On the email path's zero-row case only, the route calls auth's\n`POST /api/users/stub` with the caller's credential forwarded \u2014 the shape `certifications/issue`\nalready used for `holderEmail`, which is the precedent Kam's card names. auth stays the only writer\nof `users`, so its PII encryption, the email lookup hash, the cross-tenant rule and the\nclaim-on-registration flow are not duplicated. **No auth change, no new scope, no migration**:\nPlatform S's connector key already passes that endpoint's gate.\n\n**What is deliberately different from Kintsugi.** Kintsugi answers 404 for an unknown recipient;\nPlatform K now answers 201. Recorded separately on this ticket with a case-by-case table \u2014 only that\none branch diverges.\n\n**Gaps in the shipped coverage, stated rather than left to be discovered (KS-1662):**\n- The route's **tenant predicates are not independently proven**. `users` is FORCE RLS for the\n  application role, so dropping a predicate still leaves the suite green \u2014 RLS hides the row anyway.\n  A cell without RLS is needed before anyone treats those predicates as tested.\n- The non-2xx fallback has no cell (it fails safe).\n- Two code comments name an auth test as a scope tripwire; it is not one. The real tripwire is an\n  api-gateway test. Corrected in the PR body; the comments are in KS-1662.\n\n**Review.** Tier-1 gated twice. Round 1 returned NO GO on two blockers \u2014 the race fallback was\nwritten for a database constraint that does not exist, so it could never run in the real race, and\nthe tenant re-read had no cell on the branch where auth skips its own tenant check. Both fixed, each\nwith a cell that reds without the fix, and the gate's own mutant now reds the new cell. Round 2\nreturned GO, and the landed tree equals the figure predicted before the merge.\n\n**Also noted:** PS-1091 \u2014 the Platform-S ticket for this 404 \u2014 now reads **Canceled**. If that was\ndone on the assumption the K side would not change, it is worth a second look now that it has.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "4f435974-ffe2-4a30-a8a0-0e6e177a4214",
+    "createdAt": "2026-10-19T09:55:13.317Z",
+    "body": "Read, 19 Oct 10:00 UTC: #1614 merged (`80868551e`), Kam's ruling (a) \u2014 **K creates the invited stub on transfer, as `certifications/issue` does** \u2014 and the divergence table. Three S consequences, recorded on the S side:\n\n1. **PS-1091 (S stubs the holder first) is withdrawn** \u2014 the ruling makes it unnecessary; the ticket is cancelled with the ruling quoted.\n2. **The PS-992 closer cell will pass on a K at or after #1620 for its transfer** \u2014 and then still needs its custodian read-back fixed (my comment above; filed to Peter on PS-1299), so a red there after #1620 is the read, not the transfer.\n3. **Deploy pairing noted:** #1614 (migration 052) and #1620 ship together, and until Kintsugi takes them a rights-assign to a new person succeeds locally and 404s on dev-ps; S's dev-ps proof (PS-1284) will state which build it ran against.\n\nOne privacy fact for KS-1655, posted there: S's person erasure already sends K a `POST /api/gdpr/erasures`, so the retention question for S-minted stubs is whether that erasure reaches an `invited` row.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "164dd87a-02cb-4dff-8e50-ef9d49a28cfe",
+    "createdAt": "2026-10-19T08:51:15.599Z",
+    "body": "## BLUF\n\n**Platform K now deliberately diverges from Kintsugi on one answer, and it will stay diverged until\nKintsugi takes this build.** For a custody transfer naming a recipient email with no Platform K\nuser: **Kintsugi answers `404 RECIPIENT_NOT_FOUND`; Platform K `develop` answers `201`**, minting an\ninvited stub holder. This is Kam's ruling, not a defect \u2014 recording it because \"Kintsugi still\nanswers the correct 404\" was load-bearing evidence earlier on this ticket, and a future reader\ncomparing the two boxes will otherwise read the difference as a regression.\n\n## Recommendation\n\nTreat the divergence as expected until a Kintsugi deploy round carries this change. Two\nconsequences worth holding:\n\n1. **The deploy order now matters in the other direction.** Earlier on this ticket the risk was that\n   a Kintsugi round would make Platform S *worse*. It is now the reverse: Platform K leads, and\n   Kintsugi keeps refusing these transfers until it is updated.\n2. **Two things ship together or the gap widens**: the KS-1402 500 fix (merged, `80868551e679`, with\n   migration 052) and the invited-stub build (**PR #1620**, at review, head `dbb00e65dfb0`). A box\n   with one and not the other is a state neither suite covers.\n\n## Detail\n\n**What changed, measured.** The old answer was pinned by a cell that passed:\n`KINTSUGI \u2014 a connector naming a holder K does NOT know still answers 404 RECIPIENT_NOT_FOUND and\nwrites nothing`. It has been rewritten and renamed rather than deleted, and it keeps its\nwrites-nothing assertions.\n\n**The divergence is exactly one branch, not a behaviour change across the route:**\n\n| Case | Kintsugi | Platform K after this build |\n|---|---|---|\n| Recipient email has a K user in this tenant | 201 | 201 (unchanged) |\n| Recipient email has **no** K user | **404 `RECIPIENT_NOT_FOUND`** | **201** + an INVITED stub minted |\n| Recipient email belongs to **another** tenant | 404 | 404 (unchanged) |\n| Unknown `newHolderId` (by id, not email) | 404 | 404 (unchanged) |\n| Malformed email | 400 | 400 (unchanged) |\n\n**Authority:** Kam, card `secuura-ks1402-who-creates-the-holder-1019` = (a), 2026-10-19:\n*\"K creates an invited stub user on transfer. As certifications/issue already does for holderEmail.\"*\n\n**What it means for anyone measuring the two boxes.** A rights-assign to a brand-new person will\nsucceed against Platform K and 404 against Kintsugi. Neither is broken; they are at different\ncommits. The S-side ticket for the 404 itself is PS-1091.\n\n**Not deployed.** Nothing has been run against either deployed box for this work \u2014 the readings\nabove are from code and from local suites, not from the live boxes.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "0203a0c6-67a0-4a4b-b27b-85ee890eb931",
+    "createdAt": "2026-10-19T08:45:38.530Z",
+    "body": "**Measured before the merge, as offered: #1614 (`ddd54b836`) fixes the 500, and K now records S's custody transfers.** Slot 4, 19 Oct 07:16\u201308:44 UTC: K built from a local branch = develop `722e07f19` + #1613 + #1614 (`f5c6c0ff2`), fresh database, migration 052 applied (54 of 54); the running originate image carries the new actor helper. S develop `2c1d179`, fresh database, `PII_LOOKUP_HMAC_KEY` present on originate.\n\n**Where the holder resolves (a person K already knows as a user or INVITED stub), the transfer now succeeds:**\n- Five S `rights-assign` events during the full suite went through `POST /{id}/transfer-custody` and came back with a custody anchor (`'rights-assign' \u2192 transfer-custody ref anchor_\u2026` at 08:14:32, 08:15:05, 08:19:50, 08:23:01, 08:35:29Z) \u2014 no flat-anchor fallback.\n- K's `custody_events` holds **5 rows, `transferred_by_id` NULL on all 5** \u2014 exactly the \"resolved user, else NULL\" the fix specifies for S's people; `documents.owner_user_id` moved (e.g. document `81aec073-\u2026` \u2192 owner `8802e2e2-\u2026` at 08:35:29Z).\n- originate log since the run began: **0 \u00d7 `22P02`, 0 \u00d7 \"Failed to transfer custody\"** (the only 22P02 in the whole log is a startup probe with the literal `test-123`, before any S traffic).\n\n**Where the holder is unknown to K, the answer is still 404 `RECIPIENT_NOT_FOUND`, before the insert** \u2014 22 such refusals in the run, all for S people with no K user. That is the holder-stub decision still with Kam (K mints the INVITED stub on transfer, or S stubs first via `POST /api/users/stub` = PS-1091). The PS-992 cell (`verb_matrix` rights-assign) stays red on this slot for that reason: its holder, `firsttwo@lhsg.com`, has no stub on a fresh K.\n\n**One new shape for the spec, not for #1614:** in the full run that cell's holder did resolve (a stub from an earlier spec), the transfer succeeded, and the cell then failed on its *read-back* \u2014 `GET /api/documents/{id}` for the custodian answered **404** to the k-live client after ownership moved to the stub user (the spec's own hint: \"tenant-scoped \u2014 is this the same tenant?\"). So once #1614 deploys, the closer cell needs its custodian read to survive a successful transfer; filed on the S side for Peter.\n\nEvidence files: S app log and `custody_events` reads on slot 4; full suite 2,862 / 3 / 163, S restarts 0. Nothing deployed.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "ede62def-1684-408f-a610-1ac335e594d9",
+    "createdAt": "2026-10-19T08:06:01.905Z",
+    "body": "**Kam has ruled who creates the holder: K does, as an invited stub user, on transfer.**\n\nKam's words, verbatim:\n\n> K creates an invited stub user on transfer\n\nCard `secuura-ks1402-who-creates-the-holder-1019`, option **(a)**. Ruled on the live board 2026-10-19 between 18:22 and 18:23 AEDT; recorded 18:28.\n\nShape, per the card:\n\n- It works the way `certifications/issue` already does for `holderEmail` \u2014 so this follows an existing K pattern rather than introducing a new one.\n- It is a **K build with a tier-1 gate**: a user row created from a connector call, so the tenant boundary and the PII handling both have to be proved, not asserted.\n- **Platform S changes nothing.**\n\nSequencing: this is the next build after #1614 lands. **Nothing is built by this comment** \u2014 it records the ruling only.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "0dabafb1-5987-48a8-826b-05d1b98785fc",
+    "createdAt": "2026-10-19T08:05:22.717Z",
+    "body": "## BLUF\n\n**The 500 is fixed and merged \u2014 not deployed.** PR #1614 landed on `develop` at\n`80868551e67934cb951d28eec44ce3bdf835944c` (squash of `ddd54b836394`, parent `31cfb44dce84`).\nA Platform-S custody transfer whose holder resolves is now recorded instead of answering\n`500 INTERNAL_ERROR \"Failed to transfer custody\"`. **Nothing is live yet**, so Platform S will\nstill see the 500 on any environment until the deploy below happens.\n\n## Recommendation\n\nTwo things, in order:\n\n1. **Deploy is a rebuild, not a config change.** Migration `052` ships *inside an image*, so\n   rsyncing the `.sql` does nothing on its own. Rebuilding **either** the `migrations` image **or**\n   the `api-gateway` image lands it \u2014 the api-gateway image also bundles `migrations/`\n   (`services/api-gateway/Dockerfile:75`) and its Stage 1 applies new files from it.\n2. **Verify the column afterwards, don't assume the runner.** Check\n   `custody_events.transferred_by_id` reads `is_nullable = YES`. The migration runner prints\n   `Summary: applied=N failed=0` even when it ran a stale image's migrations, so the printed\n   summary is not evidence; the column is.\n\nNothing changes on the Platform S side. Once this is deployed, the PS-992 rights-assign cell is\nthe closer.\n\n## Detail\n\n- **What the 500 was.** `custody_events.transferred_by_id` is `UUID NOT NULL` (migration 023),\n  which assumed every transfer is made by an interactive user. Platform S transfers through an\n  `sk_*` connector key whose JWT principal is the literal string `connector:<id>`. Bound into the\n  `::uuid` cast, that raised `22P02` inside the custody transaction and fell to the route's outer\n  catch \u2014 with the owner left unflipped. A holder Platform K does *not* know still answered the\n  typed `404 RECIPIENT_NOT_FOUND` before the INSERT, which is why the defect stayed hidden until a\n  holder existed.\n- **Not a regression.** The same chain is present in Kintsugi's `65d7722f8`.\n- **The fix is the treatment `/share` already had** (migration 043, KS-564 class): bind the actor\n  through `toActorUuid(user.id, transferObo.resolvedUserId)` \u2014 the `onBehalfOf`-resolved same-org\n  user, else NULL \u2014 plus migration `052` dropping the NOT NULL. Without `052` the `22P02` merely\n  becomes a `23502` and the transfer still 500s.\n- **Attribution is not lost.** The connector stays recorded on the KS-480 `action_provenance` row\n  when `onBehalfOf` is supplied. A *bare* connector transfer stores no actor at all \u2014 a real gap,\n  not a regression (the write previously failed outright), tracked in `BACKLOG.md` alongside the\n  same gap on `/share` and `/lifecycle-events`.\n- **Review.** Tier-1 gate, round 1 of 2: GO at `ddd54b836394`, 0 blockers, 5 non-blocking notes.\n  The file set was re-checked against what landed immediately before the merge (zero overlap with\n  #1613's two api-gateway files) and the landing tree was predicted as `9fec48e29e34` before the\n  merge and measured equal after it.\n\n**Still open on this ticket:** who creates the holder. Kam ruled that Platform K creates an invited\nstub user on transfer; that build is designed but not written, and this ticket stays In Progress\nuntil it and the deploy are done.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "9a02dfb5-7f7e-4299-98ba-640ea63125bd",
+    "createdAt": "2026-10-19T06:18:53.912Z",
+    "body": "## BLUF\n**The 500 on Platform-S custody transfers is found, and a fix is at review: PR #1614.** A connector's principal was being cast into a UUID column. It is not a regression, and Kintsugi carries the same defect.\n\n## Recommendation\nNothing changes on the S side. Once it is merged and deployed, the PS-992 rights-assign cell is the closer. @stuart.jamieson, if you would rather measure before the merge, the branch is `feature/ks-1402-transfer-custody-connector-actor-c25-1` at `ddd54b836394`. It carries a new migration (052), so the `migrations` image needs a rebuild.\n\n## Detail\n- **What the 500 was.** The custody INSERT bound the caller into `custody_events.transferred_by_id`, a `UUID NOT NULL` column. A connector token's principal is the literal string `connector:<id>`, so Postgres raised `22P02 invalid input syntax for type uuid` inside the transaction. The route then answered its generic `INTERNAL_ERROR \"Failed to transfer custody\"`, and the rollback left the owner unmoved. That matches each of your measurements.\n- **Why it used to be a 404.** A holder K does not know is refused with `404 RECIPIENT_NOT_FOUND` before that INSERT, and it still is. The 500 appears only once the holder resolves. The code is the same at Kintsugi's `65d7722f8`: run against that commit, the same test answers 500 on 22P02 for a known holder.\n- **The fix.** It is the treatment `/share` got for the same defect (KS-564, migration 043). The actor is the `onBehalfOf`-resolved same-org K user when there is one, otherwise NULL, and the connector is still recorded on `action_provenance` when `onBehalfOf` is sent. For Platform S's people, who have no K user, the actor is NULL. Migration 052 makes the column nullable; without it the 22P02 only becomes a NOT NULL violation.\n- **The holder.** Who creates it is a separate question, and that question is with Kam.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "2b0d2f7e-bf13-4391-9291-7b85de7d3ec3",
+    "createdAt": "2026-10-15T06:32:05.136Z",
+    "body": "@kamil.kreiser \u2014 one reading to go with the 500 measured above (14 Oct, K develop `3c0a5222`), from K's source at `8cbadd8d4`: the 500 is the transfer-custody route's own `catch` (`services/originate/src/routes/documents.ts:2002-2003`, `logger.error('Failed to transfer custody', { error })` then `INTERNAL_ERROR`), which wraps the custody transaction \u2014 `withTenant`, the custody-event INSERT keyed by `external_id`, the owner UPDATE, and the `CUSTODY_EVENT_NOT_WRITTEN` throw. Of the four develop commits that touched `documents.ts` after Kintsugi's `65d7722f8` (KS-1385 `8cbadd8d`, KS-1508 `b2085e99`, KS-1124 `524db0ce`, KS-1203 `a2f575a6`), **none changes the custody block itself**, and the route calls only `withTenant` and `emitLifecycleAnchor` from outside it. So the thrown error is in the originate log line and only K can read it; S sees the envelope and falls back to the flat anchor, so K records no custodian either way. The holder-stub decision (K mints the INVITED stub on transfer, or S stubs first \u2014 PS-1091) still waits behind this. S will re-measure on a slot pair the moment you name a commit.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "e7e7f826-cc7f-436a-b5dc-c017ddfd39ca",
+    "createdAt": "2026-10-14T09:49:36.872Z",
+    "body": "**Still reproducing on the rebuilt K slot 2 (platform-k develop `3c0a52221`, 14 Oct 2026, 09:34 UTC). The answer has changed.**\n- S slot 2 (platform-s round-4 tip) sent `POST /api/documents/{id}/transfer-custody` four times for one document.\n- K answered **500** `{\"code\":\"INTERNAL_ERROR\",\"message\":\"Failed to transfer custody\"}`. Earlier builds answered 403 \"Invalid token\".\n- S used the flat `/api/anchors` fallback, and K recorded no custodian. `verb_matrix.spec.ts` \"rights-assign and rights-unassign each reach K\" fails on this.\n- `rights-unassign` reached K through `/lifecycle-events`.\n- All other k-live specs in the focused re-run passed: 18/19.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "b04a5a8a-3d4c-42f6-a2b2-db3544b5bc50",
+    "createdAt": "2026-10-12T23:00:56.557Z",
+    "body": "**The re-measure you ask for is already done at that commit.** Slot 3 paired with platform-k develop `65d7722f8` (the same revision now on Kintsugi), `PII_LOOKUP_HMAC_KEY` present on originate, S develop `3e2ff5c`, fresh databases, 12 Oct 00:16\u201300:30 UTC \u2014 my comment of 00:33 UTC above: **0 \u00d7 401, 0 \u00d7 403**, and both custody transfers answer **404 RECIPIENT_NOT_FOUND** (\"No user with that email in this tenant. Invite them first (KS-74 pending-invite UX)\"), then fall back to a flat anchor. The holder is a same-organisation Platform-S person who has never had a K user; S registers organisations, never people, and K creates no user from `onBehalfOf`. Kintsugi carrying this build means dev-ps now gets that 404 instead of the 403, and the Q-LEGACY count you read (20 of 20 users hashed) says the edge is empty there.\n\nSo this does not close on the deploy alone. The remaining decision is the holder stub, and it is yours: (1) K's `transfer-custody` by `newHolderEmail` does lookup-or-create of the INVITED stub, as `POST /api/certifications/issue` already does for `holderEmail` (KS-74); or (2) S calls `POST /api/users/stub { email }` under its connector key before the transfer \u2014 allowed today by the `certifications:write` scope S's keys carry (`users.ts`, `hasUsersStubScope`) \u2014 filed as PS-1091 and on hold for your answer. Say which and S re-measures on a slot paired with Kintsugi's commit; the PS-992 rights-assign cell is the closer either way. demo-pk still lacks #1437.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "eb8f6c8e-9461-4217-89c1-ab19754a1bf0",
+    "createdAt": "2026-10-12T07:18:26.191Z",
+    "body": "## BLUF\n**DEPLOYED, not closing: the originate half (#1437) is now in the running kintsugi originate, and everything I can check read-only holds. What is left is the live Platform-S custody re-measure, which is Stuart's and was named on this ticket as the closer.**\n\n## Recommendation\nStuart re-runs `test:k-live` (the PS-992 cell) against kintsugi. If both custody transfers no longer answer 401/403/502, close. Until then leave it open; I cannot run a custody transfer myself (the one kintsugi login is an OWNER, which is not a document-write role, and a transfer writes).\n\n## Detail (kintsugi `REVISION` `65d7722f83a6` `status=DEPLOYED -- PARTIAL`, read 2026-10-12T07:17Z; Seat D 17th's deploy)\n- **Originate half, #1437 (squash `613070f29`):** an ancestor of the deployed revision (control: develop's tip is not). In the running `secuura-originate` (started 2026-10-12T07:02:10Z, 0 restarts) `dist/routes/documents.js` carries `lookup HMAC key unavailable` (1) and `email_lookup_hash` (2); control string 0. The last probe (05:02Z) read the marker as 0, so the redeploy is what changed it.\n- **Auth half, #1374:** the `/lookup` route line in the running `secuura-auth` (up since 2026-10-07) carries `authenticateAccessOrConnector` (1); control 0.\n- **Prerequisite:** `PII_LOOKUP_HMAC_KEY` and `PII_ENCRYPTION_KEY` are both SET on `secuura-originate` (presence only, values never read).\n- **Q-LEGACY (#1437's body: a holder with a plaintext email and no lookup hash resolved before and 404s after):** read-only counts in the postgres container (SELECT only): 20 users, **20 with `email_lookup_hash`, 0 without**. Control: the role is `rolsuper`/`rolbypassrls` = `t|t`, so the zero is complete, and the total is non-zero. Nobody on kintsugi is in that class.\n- **Not run:** a live transfer-custody (no connector token, no document-write role, and it writes); demo was not probed.\n\n- Seat V 3rd (Sonnet 5.5), 2026-10-12. Evidence: `5_Project_History/2026-10-12_seatV-3rd/` (`kintsugi_probe_d17_2026-10-12.out`).\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "ed661371-5915-47f7-ac7c-a731b9bca1e3",
+    "createdAt": "2026-10-12T05:09:15.430Z",
+    "body": "## BLUF\n**VERIFIED-PENDING-DEPLOY, not closing.** The auth half (#1374, squash `2d85b84e1`) is deployed on kintsugi. The originate half (#1437, squash `613070f29`) is on `develop` but **is not in the originate container kintsugi is running**, and Platform-S's transfer-custody needs it.\n\n## Recommendation\nRedeploy originate from `develop` at or after `613070f29`: kintsugi first, then demo. The key prerequisite is already met on kintsugi: `PII_LOOKUP_HMAC_KEY` and `PII_ENCRYPTION_KEY` are both set on `secuura-originate` (presence only, values never read). Demo was not probed. After the deploy, Stuart's `test:k-live` PS-992 re-measure closes it, plus one kintsugi check of Q-LEGACY from #1437's body (a holder with a plaintext email and no lookup hash resolved before and 404s after).\n\n## Detail\n- **Auth, #1374:** `ks1402-lookup-accepts-connector-token.test.ts` 4/4 pass; planted red (`/lookup` back to `authenticate()`) makes 3 of 4 fail; restored 4/4. Deployed: the `/lookup` route line in `dist/routes/users.js` carries `authenticateAccessOrConnector` (count 1).\n- **Originate, #1437:** jest, `ks1402-transfer-custody-resolves-holder-email-in-originate.test.ts` + `ks739` + `ks697`: 3 suites, 45 tests pass. Planted red on the first file (11 tests): dropping the tenant predicate from the `users` read makes 2 fail; turning the missing-key 502 into a 500 makes 1 fail; restored 11/11. (The suite runs under jest; vitest reads it as zero tests.)\n- **Not deployed:** the marker string `lookup HMAC key unavailable` is absent from `dist/routes/documents.js` in the running originate (count 0; control 0). Measured today, kintsugi `REVISION` is `69f2045af2a4` (not `4eaf7741a`, which an earlier comment here names); the conclusion for #1437 is the same.\n- Platform-S's own scope finding (its connector keys carry no `users:read`) is why #1437 resolves the holder inside originate instead of calling the lookup.\n- Seat V 3rd (Sonnet 5.5), 2026-10-12. Evidence: `5_Project_History/2026-10-12_seatV-3rd/` (`planted_red_round1.log`, `kintsugi_probe_2026-10-12.out`).\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "05020fec-7499-4d43-8ac9-37f3a1f6682c",
+    "createdAt": "2026-10-12T00:33:07.954Z",
+    "body": "**Measured with [PR #1437](https://github.com/Secuura/Distributed_Secuura/pull/1437) merged \u2014 K develop `65d7722f8` clean-built on slot 3 with `PII_LOOKUP_HMAC_KEY` set on originate, Platform-S develop `3e2ff5c`, fresh databases, 12 Oct 00:16\u201300:30 UTC.** The credential gate is gone: **0 \u00d7 401, 0 \u00d7 403** across the whole `test:k-live` run (740 \u00d7 200, 77 \u00d7 201, 6 \u00d7 202 at the gateway). Both custody transfers now answer **404**:\n\n```\ntransfer-custody status=404 body={\"success\":false,\"error\":{\"code\":\"RECIPIENT_NOT_FOUND\",\"message\":\"No user with that email in this tenant. Invite them first (KS-74 pending-invite UX).\"}} \u2026 using /api/anchors fallback.\n```\n\nThe holder S names is a same-organisation Platform-S person who has never had a K user. S registers organisations (`register-connector`), never people, and nothing on K creates a user from an `onBehalfOf` actor \u2014 so for S's callers the email path will answer 404 every time, and the custody transfer is still not recorded. `test:k-live` 18 / 2 / 1: the rights-assign cell (PS-992) stays red on the custodian assertion; the other red is a page-load timeout on S with no K call in it. The k-live organisation's key used 126 of its 1,000.\n\nTwo ways to finish \u2014 a choice, not a defect, since the code does what the ruling asked:\n\n1. **K:** `transfer-custody` by `newHolderEmail` does lookup-or-create of the INVITED stub, as `POST /api/certifications/issue` already does for `holderEmail` (KS-74). Today the two email paths differ.\n2. **S:** before the transfer, S calls `POST /api/users/stub {email}` under its connector key and then sends `newHolderEmail` as now. The route takes a connector token (`authenticateAccessOrConnector`, KS-564) and the `certifications:write` scope S's keys already carry authorises it (`users.ts`, `hasUsersStubScope`: \"a connector \u2026 MUST mint the KS-74 INVITED stub to have a holder id to point at\"). No K change, no scope change, no re-mint; it works the moment Kintsugi has this build. Filed on the S side as the fallback.\n\nEither way the deploy requirement stands: Kintsugi, then demo-pk, from develop at or after `613070f29` with `PII_LOOKUP_HMAC_KEY` on originate. @kamil.kreiser \u2014 if you would rather keep K as it is, S takes option 2; say which and I will measure again on the same pair.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "0abf87cd-8689-4dee-b762-f27e5d345e4d",
+    "createdAt": "2026-10-09T08:22:19.976Z",
+    "body": "**Read from the S side, 9 Oct: [PR #1437](https://github.com/Secuura/Distributed_Secuura/pull/1437) is the fix Platform-S needs, and S changes nothing for it.** Originate resolving `newHolderEmail` from its own `users` table (tenant-bound, no token to auth) is option 2 from the description; the minted scope set and every live key stay as they are, which is what S wanted.\n\nTwo things from the PR body that matter for the environments S pairs with:\n\n- **`PII_LOOKUP_HMAC_KEY` must be set on originate at deploy** (the PR: without it every email transfer answers a labelled 502). Kintsugi and demo-pk both serve K `4eaf7741a` today, so neither has this yet; dev-ps transfers are still 403 (7 of 7 on 6 Oct), and uat-ps's would be the same once develop is deployed there.\n- Q-LEGACY in the PR: a K user with a plaintext email and no lookup hash resolved through auth before and 404s after. The holders S names are Platform-S people registered through `register-connector`, so I expect them to carry the hash \u2014 worth one check on Kintsugi after the deploy.\n\nWhen it is merged and Kintsugi is redeployed with the key, I will pair a slot with that build and re-run `test:k-live`: the rights-assign cell (PS-992) asserts K's `owner.id` moves off its pre-assign value, which is the measurement that closes this from the S side.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "7740c258-9335-40ab-83a5-0f93f7564d0c",
+    "createdAt": "2026-10-06T06:01:29.252Z",
+    "body": "**Re-measured 6 Oct against platform-k develop `4eaf7741a`: still 403, nothing changed on either side of this.**\n\nPlatform-s `de0d009` (develop `cc2af11` merged) \u2194 platform-k slot 3 clean-built from develop `4eaf7741a` (35 of 35 services, 33 containers up), fresh databases, provisioning key accepted, 10 organisations registered.\n\n- Full Platform-S suite: **7 of 7** custody transfers under organisation 3's connector key answered `403 FORBIDDEN \u2026 The credential on this request may not resolve users by email. Grant it the users:read scope (or users:* / *)`. `test:k-live` alone on fresh databases: **2 of 2**. **0 \u00d7 401** in either leg.\n- Read at `4eaf7741a`: `S_CONNECTOR_SCOPES` (`api-gateway/src/routes/platform.ts:485-489`) still has no `users:read`; `/lookup` (`auth/src/routes/users.ts:266, 293`) still requires it. The 24 commits since `3ce8cd402` touch neither.\n- Kintsugi was redeployed to a 5 Oct build (its published spec matches develop between `ef4901778` and `3ce8cd402`, which includes `2d85b84e1`), so dev-ps now gets this 403 too \u2014 the same half-fix, live.\n\nThe Platform-S `verb_matrix` rights-assign cell (PS-992) stays red on the custodian assertion until K records the transfer. The two ways to finish it are in my comment of 5 Oct: add `users:read` to the minted set and re-mint existing keys (a recorded ruling, since it reverses the \u00a78 sign-off at `:477-478`), or have originate resolve `newHolderEmail` with its own credential. Platform-S needs no change for either.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "d280f168-81f9-4074-b319-5e698c8558e3",
+    "createdAt": "2026-10-05T09:53:44.345Z",
+    "body": "**Measured on a pair, 5 Oct: with PR 1374 in, Platform-S gets 403, not success.** (Run finished 08:07 UTC; posted late because Linear's connector was disconnected for the session.)\n\nPlatform-s `d4fb370` \u2194 platform-k develop `3ce8cd402` (clean build of all 35 services, includes `2d85b84e1`), slot 3, fresh databases, 33 K containers up, provisioning key accepted, 10 organisations registered.\n\nEvery custody transfer under organisation 3's connector key was refused with the same body \u2014 **7 of 7 in a full Platform-S suite run, 2 of 2 in `test:k-live` alone, 0 \u00d7 401**:\n\n```\ntransfer-custody status=403 body={\"success\":false,\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"The credential on this request may not resolve users by email. Grant it the `users:read` scope (or `users:*` / `*`). Upstream said: users:read scope or an allowed role is required for this \u2026\n```\n\nSo the token type is no longer the gate (your CELL 2, live), and the scope is: `S_CONNECTOR_SCOPES` (`api-gateway/src/routes/platform.ts:485-489`) has no `users:read`, by the \u00a78 sign-off recorded at `:477-478`, and a provisioning key may not override the set (`:529-535`). The Platform-S `verb_matrix` rights-assign cell is still red on the custodian assertion (`K recorded NO custody transfer \u2026 custodian is still \"\"`).\n\nThe two ways to finish it are in my comment above: add `users:read` to the minted set and re-mint existing keys, or have originate resolve the holder with its own credential. Platform-S needs no change for either.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "d62d2bd9-b22a-4fef-b0ac-b0c1ff15fc4a",
+    "createdAt": "2026-10-05T02:28:48.386Z",
+    "body": "@kamil.kreiser \u2014 answering the question you left for the S side: **Platform-S's connector keys do not carry `users:read`, and S cannot add it. So #1374 moves S from 401 to 403; the custody transfer is still refused.** This is readable from platform-k itself, at develop `3ce8cd402`:\n\n- S never chooses its scopes. Each Organisation's key is minted by K's `register-connector` with `S_CONNECTOR_SCOPES` (`services/api-gateway/src/routes/platform.ts:485-489`): `documents:write`, `documents:read`, `documents:share`, `documents:revoke`, `documents:transfer-custody`, `certifications:write`, `anchors:read`, `anchors:write`, `subjects:erase`. No `users:read`.\n- That omission is deliberate and recorded on the line above it (`:477-478`): \"\u2212users:read (Stuart \u2462 \u2014 on-behalf-of resolution is K-side, \u00a76)\".\n- A provisioning-key caller may not override the set: `if (byConnector && body.scopes !== undefined)` \u2192 403 \"A provisioning key may not override the minted scope set\" (`:529-535`). So KS-739's \"Platform S provisions `users:read` on its connector key\" has no mechanism on the S side.\n- The lookup's own gate is role or scope (`services/auth/src/routes/users.ts:282-295`): `ALLOWED_LOOKUP_ROLES` is `ISSUER_ADMIN`, `ORG_ADMIN`, `SYSTEM_ADMIN`, `SUPER_ADMIN` (`:180`), which a connector token is not, and the scope is absent. That is your CELL 2: 403.\n\n**Not measured live** \u2014 this is from the code; I have not run a pair against `2d85b84e1` yet, and Kintsugi still publishes the 28 Sep spec (`f28cd1fbc`), so it does not have #1374 either.\n\nWhat would finish it, your call:\n\n1. Add `users:read` to `S_CONNECTOR_SCOPES`. Scopes are fixed on the key row at mint, so every already-registered Organisation keeps its old set until its key is rotated (platform-admin only) \u2014 the same shape as the `subjects:erase` cutover in KS-843. It also reverses the \u00a78 sign-off quoted above, so it wants a recorded ruling.\n2. Option 2 from the description: originate resolves `newHolderEmail` with its own service credential instead of the caller's header. No scope change, no re-mint, and it keeps \"on-behalf-of resolution is K-side\".\n\nEither way the Platform-S `@k-live` rights-assign cell (PS-992) stays red until K records the transfer; S's `TransferCustodyAsync` needs no change for either option.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "d4e7b940-a176-4db5-a21a-1d7120ba6e6d",
+    "createdAt": "2026-10-04T14:33:35.746Z",
+    "body": "**KS-1402 is fixed on develop, and here is exactly what changed and what is still unverified.**\n\nKam ruled this on 2026-10-02 (live board, card `secuura-ks1402-lookup-refuses-connector-tokens`), option (a): *\"Widen /lookup to accept a connector token, as /stub already does (KS 564).\"*\n\n`GET /api/users/lookup` now authenticates through `authenticateAccessOrConnector()`, the same door `POST /api/users/stub` has used since KS 564. The token type is no longer the gate; the route's own role/scope check runs afterwards, so **`users:read` is the effective permission**, and a cross-tenant lookup still answers 404 rather than 200-empty.\n\nMerged as **#1374**, squash `2d85b84e1012961c880daa3de70d8491fc0a2ff9`, on develop.\n\nFour cells pin it (`services/auth`, `npx vitest run` \u2014 `npm test` there is watch mode):\n\n| cell | at base | at head |\n|---|---|---|\n| connector token WITH `users:read` reaches the handler | 401 | **200** |\n| connector token WITHOUT `users:read` | 401 | **403** |\n| interactive ACCESS token still works (control) | 200 | 200 |\n| tenant-A connector reading a tenant-B-only email | 401 | **404** |\n\nRed-first at the base: 3 failed / 1 passed of 4. Green after: 4/4. Suite 77 \u2192 78 files, 836 \u2192 840 tests, 0 new reds.\n\nA connector token without a tenant claim would skip the cross-tenant 404 on this route. Read in the code, the token exchange always issues a tenant claim, so this was not reached in testing; it is tracked in KS-1406.\n\n**@stuart.jamieson \u2014 one thing needs checking on the S side, and it is the difference between a fix and a half-fix.** Whether Platform-S's connector key actually carries `users:read` is **not measurable from Platform K**. If it does, the transfer-custody call now succeeds. If it does not, S moves from **401 Invalid token** to **403** \u2014 still a refusal, but the correct one, and the scope is then the thing to fix. UNMEASURED from here.\n\nNot done on this PR: no live sweep (skill \u00a75f), no S\u2194K pair run, no Schemathesis/Akto/Playwright/k6, no deploy. The `authenticate.ts` audit-label change this PR carries is **covered by no test** \u2014 reverted alone the suite stays green \u2014 so its route-neutrality is argued and measured in the PR body, not test-guarded.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "d053e35b-e4e4-47dd-8026-854aec1833c5",
+    "createdAt": "2026-10-02T05:48:06.438Z",
+    "body": "Re-measured 2 Oct on a second pair (platform-s `d04829b` \u2194 platform-k develop `88e8877a2`, clean build, slot 3): the refusal is unchanged. Platform-S logged `transfer-custody status=401 \u2026 rejected by the user lookup \u2026 Upstream said: Invalid token` 5 times in a full suite run and 2 times in `test:k-live` alone, all under organisation 3's connector key, while originate, lifecycle events and shares under the same key succeeded. The `verb_matrix` rights-assign cell fails on the custodian assertion as designed (PS-992). Code re-read at `88e8877a2`: `services/auth/src/routes/users.ts:266` still guards `/lookup` with `authenticate()`.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   }
+  ]
+ }
+}

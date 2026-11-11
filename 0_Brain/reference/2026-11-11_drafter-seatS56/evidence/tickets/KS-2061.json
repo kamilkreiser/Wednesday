@@ -1,0 +1,36 @@
+{
+ "identifier": "KS-2061",
+ "title": "governance: a failed by-address participant read logs the wallet address",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T04:22:32.625Z",
+ "updatedAt": "2026-11-06T04:24:28.193Z",
+ "description": "**BLUF:** When the database cannot be read, governance logs the wallet address the caller sent. QA gate 219 saw it in the service log on PR 2039 and marked it a note, because it is pre-existing and the new line in that PR does not do it. Nothing is fixed here.\n\n**Where:** dbGetParticipantByAddress in services/governance/src/services/governanceService.ts, around line 416: logger.error('DB get participant by address failed', { walletAddress, error: reason }).\n\n**Why it matters:** KS 1955 treats a wallet address as a data subject's own data, and erasure does not reach application logs. The one failure log PR 2039 added carries no wallet, with a cell pinning that.\n\n**Fix shape, read only, not tried:** drop walletAddress from that one log call and pin it with a cell. Whether other governance log calls do the same was not walked.\n\n**Searched first:** the log line's text, dbGetParticipantByAddress, walletAddress, \"logs the wallet\", \"PII in logs\". KS 1732 and KS 1940 touch the same read but are about what it answers, not what it logs.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-2058"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

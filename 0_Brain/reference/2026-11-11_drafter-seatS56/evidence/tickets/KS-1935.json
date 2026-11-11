@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-1935",
+ "title": "Billing: addCertificationCredits' optimistic lock is not a compare-and-set, so one call can credit twice under a concurrent write",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-02T00:44:03.004Z",
+ "updatedAt": "2026-11-02T00:44:03.004Z",
+ "description": "**BLUF:** `StripeService.addCertificationCredits` keeps the credit balance in Stripe customer metadata and calls its read-update-verify loop \"optimistic locking\", but Stripe's customer update is unconditional, so the loop is not a compare-and-set. When a concurrent writer changes the balance between this call's update and its verify read, the loop re-reads and adds the credits AGAIN, so one call can credit twice; a write can also be lost. Read in code, not run. It is the same money class as KS-1933 (one purchase credited more than once), through a different door.\n\n**Where** (`services/billing/src/services/stripeService.ts` at PR 1913's head `5d6bd74daa3e`)\n\n* `addCertificationCredits` (:226-247): up to 3 attempts of retrieve (:229), compute `currentBalance + credits` (:231-232), `customers.update` with the new `certificationCredits` (:234-236), retrieve again (:239); if the read-back is not the value it wrote, it logs a conflict (:244) and goes round again from a fresh read.\n* `useCertificationCredits` (:252-278) has the same loop for debits.\n\n**A sequence that credits twice (worked from the code):** the balance is 10. Call A (+5) and call B (+3) both read 10. A writes 15, B writes 13 (A's write is lost). A's verify reads 13, not 15: A retries, reads 13, writes 18, verify passes. B's verify reads 18, not 13: B retries, reads 18, writes 21, verify passes. The final 21 is 10 + 5 + 3 + 3: B's credit landed twice.\n\n**Not in scope here:** no fix is designed or built in KS-1933's pull request (KS-1933 adds a per-payment ledger in PostgreSQL that stops a second CALL for the same purchase; it does not change what one call does). Found by Seat F 22nd while tracing KS-1933 (Wednesday's ANSWER of 2026-11-02 commissioned this filing).\n\n**Related:** KS-1933.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

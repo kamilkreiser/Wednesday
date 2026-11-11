@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-1393",
+ "title": "Repo hygiene: 31 spec files under Blockchain/Dev/tests that no Playwright config covers, 708 branches on the remote, and a duplicated website package a major React version behind",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-29T12:26:27.646Z",
+ "updatedAt": "2026-09-30T13:24:19.810Z",
+ "description": "## BLUF\n\nThree separate bits of accumulated debt, none urgent, all cheap to decide and none of which anyone will notice until it misleads someone. Grouped because they are one afternoon together and three tickets apart. Measured on `develop` `8ba2da02d`, 29 Sep 2026 \u2014 branch count taken from the GitHub API, not the local clone, which is shallow here.\n\n| \\# | Where | Seen | Suggest |\n| -- | -- | -- | -- |\n| 1 | `Blockchain/Dev/tests/*.spec.ts` | **31 spec files** sitting directly in that directory, covered by no Playwright config. The repo has exactly three configs \u2014 `systemTest/playwright` (`testDir: ./tests`), `tests/e2e-v2` (`testDir: ./tests/tierN`), `tests/e2e` (`testDir: ./tests`) \u2014 and none of them resolves to `Blockchain/Dev/tests/` itself. Names read as exploratory leftovers: `admin-sidebar-collapse-{test,fresh,final}.spec.ts`, `issuer-portal-{quick,full,detailed,complete}.spec.ts`, several near-identical variants of one check | Delete, or move the ones worth keeping into `tests/e2e-v2/tests/tierN/` where a config can see them |\n| 2 | The remote | **708 branches** (`gh api repos/Secuura/Distributed_Secuura/branches --paginate`), of which 706 are neither `main` nor `develop`. The oldest carry no commit since March; ten are Dependabot branches whose PRs are open and stale | Prune merged and abandoned branches. Worth agreeing a rule \u2014 delete-on-merge, plus a sweep for anything with no commit in N months |\n| 3 | `secuura-website-package/` | A hand-off bundle whose `source/` duplicates `Blockchain/Dev/frontend/website/` under the **same package name** `@secuura/website` v1.0.0, drifted to React 18 / Vite 5 / eslint 8 against the live copy's React 19 / Vite 8 / eslint 10; `diff -rq` over the two `src/` trees reports 19 differing files. Nothing outside itself references it \u2014 no compose service, no CI, no script | Decide: is it a deliverable that should be generated from `frontend/website` on demand, or dead weight? Either way it should not be a second copy of a shipped app under the same name |\n\n## Why it matters\n\nEach one is a small lie the repository tells a reader.\n\n* **Row 1** \u2014 31 files named `*.spec.ts` look like test coverage. They are not run by anything, cannot fail, and sit next to `tests/e2e`, `tests/e2e-v2` and `tests/connectors`, which are real. Someone counting specs to answer \"how well is the admin portal covered?\" gets a wrong answer. Same class as `KS-718`, where gitignored snapshots meant a fresh clone wrote its own expectations and passed.\n* **Row 2** \u2014 706 stale branches makes `git branch -r` useless for finding live work and slows every clone and fetch. It also hides the ten stale Dependabot branches behind noise.\n* **Row 3** \u2014 two packages with the same name and different major versions of React is the shape that produces \"it works in my build\" confusion. `.planning/codebase/STRUCTURE.md:94` is the only place that mentions it, so nothing in the live docs explains why it exists.\n\nNone of this is a defect in the running platform, which is why Low.\n\n## Suggested shape\n\n1. Row 1 is a judgement call per file, but the duplicated-variant names (`-quick`, `-full`, `-detailed`, `-complete`, `-fresh`, `-final`) suggest most can go. Anything worth keeping earns a home under a config; anything else is deleted in one commit.\n2. Row 2: agree the retention rule first, then sweep once. GitHub's automatic delete-on-merge setting would stop the recurrence.\n3. Row 3: if the bundle is a customer deliverable, generate it from `frontend/website` at release time and stop tracking the copy. If it is not, delete it.\n\n## Acceptance\n\n* Every `*.spec.ts` in the repo is either reachable from a Playwright config or gone.\n* Branch count is back to something a person can read, and the rule that keeps it there is written down.\n* `@secuura/website` names exactly one package.\n\n## Note to Kamil \u2014 please scan before fixing\n\nSuggest doing row 1 together with `KS-1390` (the e2e-v2 harness is in no gate) and `KS-734` (the `tests/e2e` corpus cannot install from a clean checkout) rather than separately \u2014 all three are about which Playwright corpus is real, and the answer to \"which of these three trees survives\" settles all of them at once. Row 2 is independent and can go any time.\n\n## References\n\n`Blockchain/Dev/tests/*.spec.ts` (31 files) \u00b7 `systemTest/playwright/playwright.config.ts` \u00b7 `Blockchain/Dev/tests/e2e-v2/playwright.config.ts` \u00b7 `Blockchain/Dev/tests/e2e/playwright.config.ts` \u00b7 `secuura-website-package/source/package.json` vs `Blockchain/Dev/frontend/website/package.json` \u00b7 `.planning/codebase/STRUCTURE.md:94` \u00b7 related: `KS-1390`, `KS-734` (In Review), `KS-1038` (Backlog), `KS-718` (Done).\n\n## Environment\n\nDistributed_Secuura `develop` **8ba2da02d**, 29 Sep 2026. Static review \u2014 file counts and the package comparison read from the tree at that commit; the branch total came from the GitHub API because the local clone is shallow and its own count differs. Nothing was executed and nothing was deleted.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

@@ -1,0 +1,45 @@
+{
+ "identifier": "KS-2059",
+ "title": "governance: an admin in one tenant can set stake and flags on another tenant's existing participant row",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T04:13:19.282Z",
+ "updatedAt": "2026-11-06T04:30:22.754Z",
+ "description": "**BLUF:** A platform admin in tenant T1 can change the stake, DRep status and committee status of a participant row owned by a user in tenant T2. QA gate 219 measured this at PR 2039 and at the develop before it, so it is not a regression. Nothing is fixed here. It needs a ruling, then a migration.\n\n**Measured by the gate** (real compiled service, real JWT verification and router, real PostgreSQL as secuura_app):\n\n* An admin in T1 on a row owned by a T2 user: 201, and stake, DRep and committee all change.\n* One wallet linked in both tenants: the T1 admin binds it to the T1 user, the T2 owner gets 409, and a T2 admin's registration then writes onto the T1 user's row.\n\n**Cause:** svc_governance_participants has no tenant column and no row-level security. Ruling D2 (a) on KS 1951 protects only the first bind, when no row holds the wallet yet. Once a row holds it, the admin path writes without reading a tenant. The comment in db.ts saying an admin in one tenant never binds another tenant's user is true only for a new row.\n\n**What the ruling has to weigh:**\n\n* **Precedent:** Kam's KS 1906 ruling keeps vc-issuer's owner-less credentials with \"platform administrators of their tenant\". Whether that reaches governance is not ruled.\n* **The seeded SYSTEM_ADMIN sits in the default tenant** (userRepo.ts:1420). Today the only way that admin can stake a user in a provisioned tenant is this path: the owner self-registers, then the admin's stake lands on the row. Closing it plainly takes that away, so someone needs a named way to stake those users.\n* **Other writers:** this was measured on the register route only. The other governance routes that read this table were not walked for the same shape.\n\n**Fix shape, read only, not tried:** a tenant column on svc_governance_participants, backfilled from users, with row-level security and the same GUC the users read uses. A row whose id is not a user id (a legacy uuid row) has no tenant to backfill from, so it needs its own rule.\n\n**Proposed priority:** High, because it writes vote power across a tenant boundary. The priority is for the humans to set.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1536"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "a28d1286-8bac-4100-9580-73b09fa149c6",
+    "createdAt": "2026-11-06T04:30:22.772Z",
+    "body": "**BLUF:** Kam ruled this: close it, tenant admins only, and give stake a named route. Nothing is built yet. A separate seat takes it after KS 2058 lands, and the design returns to Kam before any migration.\n\n- **Card:** secuura-ks2059-cross-tenant-stake-1106, option a, ruled 2026-11-06 at 15:29:05 AEDT (the card's recorded time).\n- **Option text:** \"Close it, tenant admins only, and give stake a named route\"\n- **Detail:** \"A seat designs a tenant column with row-level security plus a named way to stake users in provisioned tenants; the design returns to you before the migration. Opus, tier 1.\"",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

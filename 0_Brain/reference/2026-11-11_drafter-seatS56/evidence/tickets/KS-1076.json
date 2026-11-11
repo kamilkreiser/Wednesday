@@ -1,0 +1,46 @@
+{
+ "identifier": "KS-1076",
+ "title": "No Playwright e2e test has run on any PR since 2026-09-07 \u2014 the suite dies at a static lint gate before any browser opens, and the job name hides it",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 1,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-10T01:44:26.388Z",
+ "updatedAt": "2026-11-09T19:50:44.473Z",
+ "description": "**BLUF \u2014 no Playwright test has executed on any PR since 2026-09-07. The** `Playwright suite` **job goes red at a static lint gate that runs BEFORE any browser opens, so the red names the wrong subject and the coverage hole has been invisible for three days.**\n\nThis is a **test-coverage** ticket, not a CI-config ticket. It was found while measuring CI gate failures (KS-1075) but must not be closed as gate tuning: the gate is a symptom, the missing e2e coverage is the defect.\n\n## What happens\n\n`Playwright suite` (job in `.github/workflows/pr-platform-suites.yml`) fails at **step 6, \"Quality gate \u2014 static (tsc/ESLint/Prettier/knip/audit)\"**. That step runs `npm run format:check && npm run lint && \u2026` ahead of the suite. It exits 1, so **the job stops before a single browser test runs.**\n\n```\n  27:1  error  Missing JSDoc @param \"label\" declaration  jsdoc/require-param\n  27:1  error  Missing JSDoc @throws declaration         jsdoc/require-throws\n  27:1  error  Missing JSDoc @example declaration        jsdoc/require-example\n  48:1  error  Missing JSDoc comment                     jsdoc/require-jsdoc\n\u2716 4 problems (4 errors, 0 warnings)\n```\n\nAll four in `systemTest/playwright/global-setup.ts`. Prettier passes cleanly \u2014 it is the ESLint jsdoc rules alone. ESLint's own output says **3 of the 4 are** `--fix`**-able**.\n\n## Why it hid \u2014 the part worth keeping\n\n**The job's name names the wrong subject.** \"Playwright suite :: failure\" reads as *browser tests ran and failed*. Nobody re-reads a suite they believe is already running. The same shape as a wrapper printing a banner it did not earn: the red was true, and what it implied was false.\n\n## Proven pre-existing, with controls\n\n* Measured identically on **two unrelated PRs** \u2014 #938 (one nginx `location` block, zero service code) and #939 (TypeScript type declarations in one service): same rules, same line numbers, same count.\n* `global-setup.ts` is touched by **neither** \u2014 0 hits in each diff, against controls of 4 and 3 files actually touched.\n* Last changed `42e778203`, **2026-09-07**, *\"KS-969 round 2: a role collapse is not a success\u2026\"* \u2014 three days before either PR.\n\n## What needs doing\n\n1. Fix the four jsdoc errors in `systemTest/playwright/global-setup.ts` (3 are `--fix`-able).\n2. **Then confirm the suite actually runs and report what it finds** \u2014 three days of unrun e2e may be hiding real failures. A green job after the lint fix is not the same as a suite that was green all along, and it must not be reported as one.\n3. Consider whether a static lint gate belongs *ahead* of the suite in the same job at all: as configured, any lint error in the harness silently converts \"e2e coverage\" into \"no e2e coverage\" while still reporting a normal-looking red.\n\n## Related\n\nFound during KS-1075 (CI gate measurement, commissioned by Kam as `measure-then-decide`). KS-1075 covers the two *other* gate causes \u2014 a `bash -e` swallowed diagnostic and an empty npm-audit allow-list \u2014 and should not absorb this one.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "1accb02c-0993-4303-85cc-f11199f9dc94",
+    "createdAt": "2026-11-09T19:50:44.536Z",
+    "body": "**BLUF:** Kam ruled on 2026-11-10 to split this gate: the static and unit gates become their own jobs, and the Playwright job always runs its browser tests. Nothing is built by this comment; the workflow edit is a separate seat's build and Kam merges it.\n\n**What was ruled.** Card `secuura-ks1076-playwright-gate-design-1109`, option a: \"Split it: static and unit gates become their own jobs; the Playwright job always runs its browser tests\". The edit is to `.github/workflows/pr-platform-suites.yml`. This answers item 3 of this ticket, which comment 90ba2f54 (2026-09-14) left as \"a workflow-design call, Kam's; not taken here\".\n\n**What this does not do.** It does not edit the workflow or change this ticket's state or priority. It does not say whether the failing unit cell named in comment 90ba2f54 passes today; that was not measured. The extra CI minutes the split costs were not measured either.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "90ba2f54-bae9-4b7e-9c28-1d1a101b1e7a",
+    "createdAt": "2026-09-13T22:19:28.331Z",
+    "body": "**Verify-only record (2026-09-14, s215) \u2014 measured from the live Actions runs, not re-run; no edit, no state move. Assigned to the board account (was unassigned).**\n\n**Item 1 \u2014 the four jsdoc errors in `systemTest/playwright/global-setup.ts`: already fixed on develop.** Commit `6a047445b` (\"reunite globalSetup with its docblock \u2014 playwright lint is red on develop\"), merged via PR #896 (`38a919d40`, 2026-09-11). Live confirmation: on develop's own push at `8861e6216`, `pr` run 34755906547 / job `Playwright suite` 103721950421, **step 6 `Quality gate \u2014 static (tsc/ESLint/Prettier/knip/audit)` = SUCCESS**. Same at the 2026-09-13 PR heads that ran since.\n\n**Item 2 \u2014 \"confirm the suite actually runs and report\": it does not, and the reason has moved one step later.** In the same job, **step 7 `Quality gate \u2014 unit suite (test:unit)` FAILS** on the Playwright harness's own unit test \u2014 `\u2716 assertSlotNamedForLocalTarget \u203a refuses every slot's gateway when no slot is named, naming both forms of the slot command` (`AssertionError: Missing expected exception: slot 1`; expected `/^Error: No stack slot named\u2026SECUURA_STACK_SLOT=2 npx playwright test --project=api\u2026/`). Steps 8 `Boot isolated platform stack`, 9 `Install Playwright browser engine`, 10 `Run Playwright API tests` are **SKIPPED**; step 11 uploads nothing (`No files were found with the provided path: systemTest/playwright/results/`). **So no browser test has executed at M18** \u2014 this ticket's own sentence (\"a green job after the lint fix is not the same as a suite that was green all along\") is the finding, one gate further on. **The newest record confirms it (2026-09-14):** the `pr` run 34785721735 at PR #942's head `53b9c3cc1` (= its branch + develop `8861e6216`), job `Playwright suite` 103802165697 \u2014 step 6 static SUCCESS, **step 7 FAILURE on the same one cell** (`\u2139 tests 348 \u00b7 pass 347 \u00b7 fail 1`: `assertSlotNamedForLocalTarget \u203a refuses every slot's gateway when no slot is named\u2026`, `Missing expected exception: slot 1`), steps 8\u201310 SKIPPED, step 11 `No files were found \u2026 systemTest/playwright/results/`. Same at develop's own M18 push run. The unit test is the harness's own (`systemTest/playwright/**`), not a product test.\n\n**Item 3 \u2014 whether a static gate belongs ahead of the suite:** a workflow-design call, Kam's; not taken here.\n\n**Board search** for the failing symbol before recording: `assertSlotNamedForLocalTarget` 0 hits (nonsense-token control 0). The `systemTest/playwright/**` unit suite belongs to no current lane; whether a ticket is filed for the step-7 red is the coordinator's call. **Not closed as gate tuning** \u2014 nothing here changes what the job enforces.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

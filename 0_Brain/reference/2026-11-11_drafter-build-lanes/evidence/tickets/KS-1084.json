@@ -1,0 +1,40 @@
+{
+ "identifier": "KS-1084",
+ "title": "READ ONLY / unverified: the gateway's own Authorization-only calls to originate send no x-tenant-id \u2014 single-tenant originate may scope them to DEFAULT_TENANT_ID",
+ "state": {
+  "name": "In Progress"
+ },
+ "priority": 0,
+ "assignee": {
+  "name": "kamil.kreiser@secuura.ai"
+ },
+ "updatedAt": "2026-10-20T12:19:06.957Z",
+ "description": "## BLUF\n\n**READ ONLY, not driven by anyone.** api-gateway calls originate directly \u2014 outside `createProxyRoutes` \u2014 at several sites and sends only `Authorization`. With no `x-tenant-id`, originate's KS-458 block (`services/originate/src/index.ts:248-256`) sets `req.tenantId` to `DEFAULT_TENANT_ID` in single-tenant mode, so those calls **may** read or write in the default tenant rather than the caller's. Independent of PR #951 (unchanged by it). Raised by the #951 tier-1 gate (round 1, Open item b) and not measured.\n\n## Recommendation\n\nMeasure before any fix: drive one site per shape (a read, a write) as a caller in a non-default tenant on a two-tenant local stack and compare which tenant's rows come back. **Unknown that could dissolve this:** whether originate's `authenticate()` sets the tenant from the forwarded JWT on these routes. If confirmed, route gateway\u2192originate calls through one helper that forwards the verified tenant \u2014 the same helper #951's F5 residual needs for the vouch.\n\n## Detail\n\nSites at `develop` `2d864ae92` (grep for the originate URL in `services/api-gateway/src`, headers read at each):\n\n* `routes/proxy.ts:554-556` \u2014 `GET /api/signatories`, headers `{ Authorization }`\n* `routes/proxy.ts:578-579` \u2014 `GET /api/third-party-verifiers`, headers `{ Authorization }`\n* `routes/verification.ts:129-138` and `:167-176` \u2014 `GET /api/documents/:id`, headers `{ Authorization }` when present\n* `routes/batch.ts:146`, `:194` \u2014 batch certify / verify via `ORIGINATE_SERVICE_URL`, `authorization` forwarded; `x-tenant-id` 0 mentions in the file\n* `routes/platform.ts:249-251` \u2014 `POST /api/admin/refresh-tenants`, `Content-Type` + `Authorization`\n\nNot in this ticket (different shape, tracked on PR #951's body as READ ONLY): `routes/verification.ts` `POST /api/documents` and the workflow-approve forward DO send `x-user-id` / `x-tenant-id`, but without the vouch, so #951 would strip them once its secret is provisioned.\n\n**Board searched before filing:** exact `getReqTenantId` \u2192 4 (KS-174, KS-22, KS-26, KS-48 \u2014 none about gateway direct calls), `tenantGucContext` \u2192 6 (none), `KS-458` \u2192 1 (itself); control `KS-468` \u2192 1. Fuzzy `DEFAULT_TENANT_ID`, `x-tenant-id`, `signatories`, `third-party-verifiers`, `Authorization-only` \u2192 nearest KS-468 (Done \u2014 audited the 44 gateway proxy MOUNTS, not these direct calls) and KS-619 (Backlog \u2014 `middleware/auth.ts` conditional tenant overwrite).\n\nRelated: KS-1041 \u00b7 KS-468 \u00b7 KS-619 \u00b7 PR [https://github.com/Secuura/Distributed_Secuura/pull/951](<https://github.com/Secuura/Distributed_Secuura/pull/951>) \u00b7 gate report `Testing Agent MAIN/projects/secuura/reports/2026-09-11-ks1041-951-dd0a0c934-tier1/report.md` (Open b).",
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1211",
+    "title": "KS-1084 SIGTENANT TPVTENANT: two gateway reads forward x-tenant-id to originate"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "ae430016-3188-42f4-92e0-9827e72860c8",
+    "createdAt": "2026-09-25T00:02:14.607Z",
+    "body": "**RULING ON PART B \u2014 Kam, live board, 2026-09-22 20:53-20:54.** Card `secuura-ks1084-part-b-api-batch-surface-unauthenticated-dead`, option **a**, verbatim:\n\n> File the ticket for a Claude seat; part B tabled on KS-1084\n\n**Part B is therefore tabled on this ticket and not worked here.**\n\n**The ticket it was to be filed as already exists, so no duplicate was created** (Wednesday's ruling, 2026-09-25): **KS-1243 \u2014 \"T-3: /api/batch/* is a dead route family - 401 to every caller, 0 upstream hits\"**, state Backlog, `archivedAt` null. Searched before concluding that, with `includeArchived: true` and every page literal-matched: `/api/batch` (40 hits), `batch surface 401 unauthenticated` (40 hits), `x-tenant-id` (40 hits); KS-1243 is the top hit on the first two.\n\n**Why Part B is blocked on it:** the api-gateway `/api/batch` surface answers 401 to every caller, so the write site cannot carry `x-tenant-id` until it is reachable at all. KS-1243 is the blocking ticket.\n\n*Delivered by Seat B 24th, 2026-09-25, under Wednesday's confirmation.*"
+   },
+   {
+    "id": "3ff79aef-86f1-4559-af96-53452aa50c80",
+    "createdAt": "2026-09-25T00:01:14.597Z",
+    "body": "**STAYS IN PROGRESS \u2014 #1211 proved the forwarding; the effect this ticket was raised on is still unmeasured.**\n\n#1211 (`0e730fec6`) makes two gateway reads forward `x-tenant-id` to originate \u2014 `GET /api/signatories` and `GET /api/third-party-verifiers`, at `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts` \u2014 with a test each.\n\n**Remains:**\n\n- **P0 \u2014 the cross-tenant effect is not measured.** The *forwarding* is proven. Whether those calls previously read or wrote in `DEFAULT_TENANT_ID` rather than the caller's tenant is **not**. The ticket's own recommendation stands: drive one site per shape (a read, a write) as a caller in a non-default tenant on a two-tenant local stack and compare which tenant's rows come back. Until then this ticket's headline claim is unverified in both directions.\n- **The remaining sites** listed in the description \u2014 `routes/verification.ts:129-138` and `:167-176`, `routes/batch.ts:146` / `:194`, `routes/platform.ts:249-251` \u2014 are untouched by #1211.\n- **Part B** \u2014 see the separate Part-B comment on this ticket.\n\n*Round-20 closing pass, Seat B 24th, 2026-09-25. Kept open by Wednesday's standing ruling.*"
+   },
+   {
+    "id": "236d5513-b0bc-4140-a154-656c16170244",
+    "createdAt": "2026-09-11T00:19:36.899Z",
+    "body": "## BLUF\n\n**Correction, 2026-09-11: this ticket's body says the workflow-approve forward sends `x-user-id` / `x-tenant-id`. It sends `x-user-id` only.** Nothing else in the body changes. The POST /api/documents forward does send both, as the body says.\n\n## Recommendation\n\nNo action needed. The workflow-approve forward's own defect, that it loses the document when originate refuses it, is now KS-1087.\n\n## Detail\n\n- **develop `2d864ae92`, `services/api-gateway/src/routes/verification.ts:860-864`:** the forward's headers are `Content-Type`, `Content-Length` and `x-user-id` (`:864`, from `pendingDoc.createdBy`). There is no `x-tenant-id` and no `Authorization`. At `02a22f4bb` the `x-user-id` line is `:783`.\n- **The POST /api/documents forward** (`http.request` at develop `:1125`) sends `authorization`, `x-user-id`, `x-tenant-id` and `x-tenant-slug`.\n- Found while filing KS-1087 from the #951 round-2 gate report. Appended here rather than edited into the body.\n"
+   }
+  ]
+ }
+}

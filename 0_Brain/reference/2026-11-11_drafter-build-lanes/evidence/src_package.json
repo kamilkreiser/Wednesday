@@ -1,0 +1,127 @@
+{
+  "name": "secuura",
+  "version": "0.1.0",
+  "description": "Secuura - Document Authenticity Platform on Cardano Blockchain",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "frontend/*"
+  ],
+  "scripts": {
+    "dev": "docker-compose up -d && concurrently \"npm run dev:services\" \"npm run dev:frontend\"",
+    "dev:services": "concurrently \"npm run dev -w services/api-gateway\" \"npm run dev -w services/originate\" \"npm run dev -w services/auth\" \"npm run dev -w services/wallet-connector\"",
+    "dev:frontend": "npm run dev -w frontend/issuer",
+    "dev:infra": "docker-compose up -d postgres redis cardano-devnet",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces --if-present",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v --rmi local",
+    "docker:ps": "docker-compose ps --format 'table {{.Name}}\t{{.Status}}'",
+    "prod:build": "docker compose -f docker-compose.yml -f docker-compose.production.yml build",
+    "prod:up": "docker compose -f docker-compose.yml -f docker-compose.production.yml up -d",
+    "prod:down": "docker compose -f docker-compose.yml -f docker-compose.production.yml down",
+    "prod:logs": "docker compose -f docker-compose.yml -f docker-compose.production.yml logs -f",
+    "prod:ps": "docker compose -f docker-compose.yml -f docker-compose.production.yml ps --format 'table {{.Name}}\t{{.Status}}'",
+    "prod:backup": "docker compose -f docker-compose.yml -f docker-compose.production.yml exec db-backup /backup.sh",
+    "prod:restore": "docker compose -f docker-compose.yml -f docker-compose.production.yml exec db-backup /restore.sh",
+    "migrate": "node-pg-migrate up --migrations-dir migrations --migration-file-language sql",
+    "migrate:down": "node-pg-migrate down --migrations-dir migrations --migration-file-language sql",
+    "migrate:create": "node-pg-migrate create --migrations-dir migrations --migration-file-language sql",
+    "db:migrate": "npm run migrate -w services/originate",
+    "db:seed": "npm run seed -w services/originate",
+    "smoke-test": "./scripts/smoke-test.sh",
+    "smoke-test:quick": "./scripts/smoke-test.sh --quick",
+    "load-test": "k6 run tests/load/k6-load-test.js",
+    "load-test:azure": "k6 run -e BASE_URL=https://secuura02-demo-api.kindtree-935b2ded.southeastasia.azurecontainerapps.io tests/load/k6-load-test.js",
+    "postinstall": "node scripts/fix-libsodium-symlink.js && npm run build --workspaces --if-present",
+    "check:openapi": "npm run generate-openapi -- --check && npm run check:spec-examples",
+    "check:spec-examples": "node scripts/spec-examples/check-spec-examples.mjs",
+    "check:test-types": "node scripts/typecheck-tests/check.cjs services/auth && node scripts/typecheck-tests/check.cjs services/api-gateway && node scripts/typecheck-tests/check.cjs services/vc-issuer && node scripts/typecheck-tests/check.cjs services/security && node scripts/typecheck-tests/check.cjs services/m365-integration",
+    "test:auth-integration": "cd services/auth && vitest run -c vitest.integration.config.ts",
+    "verify:spec-examples": "node scripts/spec-examples/verify-spec-examples.mjs",
+    "audit:locks": "node scripts/audit/audit-locks.mjs",
+    "audit:contract": "node --test scripts/audit/baseline-contract.test.mjs scripts/audit/lock-discovery.test.mjs scripts/audit/gate-exit-codes.test.mjs",
+    "audit:gate": "node scripts/audit/audit-gate.mjs",
+    "generate-openapi": "npm run build --workspace=packages/shared && tsx scripts/generate-openapi.ts",
+    "check:connectors": "node tests/connectors/check-coverage.mjs",
+    "test:connectors": "jest --config tests/connectors/jest.config.cjs",
+    "test:migrations": "bash ./migrations/__tests__/ks667-044-scenarios.sh",
+    "test:contract": "python3 ../../systemTest/schemathesis/scripts/run.py pr",
+    "verify:slot-isolation": "bash scripts/verify-slot-credential-isolation.sh",
+    "test:shell": "bash scripts/run-shell-suites.sh",
+    "e2e:install": "npm --prefix tests/e2e ci && npm --prefix tests/e2e run playwright:install",
+    "e2e:check": "npm --prefix tests/e2e run check:ready",
+    "e2e": "npm --prefix tests/e2e run test --"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@playwright/test": "^1.61.1",
+    "@types/nodemailer": "^8.0.1",
+    "concurrently": "^8.2.2",
+    "eslint": "^10.7.0",
+    "@eslint/js": "^10.0.1",
+    "globals": "^17.7.0",
+    "typescript-eslint": "^8.64.0",
+    "node-pg-migrate": "^8.0.4",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3",
+    "tsx": "^4.23.1",
+    "yaml": "^2.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "// overrides": "Audit 2.4 phase 2: pin known-vulnerable transitive deps to safe versions. path-to-regexp ReDoS GHSA-9wv6-86v2-598j \u2014 express 4.x uses 0.1.x so we pin to the patched ^0.1.13. node-forge basicConstraints bypass GHSA-2qmh-3rxg-87j8 \u2014 pin to 1.3.1+ (current 1.4.0). vite path-traversal in dev-server is dev-only (vite never runs in prod after build) and forcing v7 would break frontends still on v5 \u2014 left unpinned, documented as dev-only risk. undici GHSA (decompression/request-smuggling, fixed in 6.24+) reaches the prod tree only via the issuer-frontend's Cardano-SDK chain (@meshsdk/core \u2192 @utxorpc/sdk \u2192 @connectrpc/connect-node@1.4.0, which pins undici ^5.28.3). undici is a Node HTTP library: it is tree-shaken out of the Vite browser bundle and used by NO backend service, so it is never shipped to or executed in any deployed runtime \u2014 accepted-risk (KS-185). A scoped override dedupes to the hoisted undici@5 (no effect); a global pin to 6.x collaterally downgrades dev-only jsdom (7\u21926) and bumps testcontainers (5\u21926), risking the dev test tooling. Real fix lands when @utxorpc/sdk / @meshsdk adopt @connectrpc/connect-node@2.x (which drops the undici dependency) \u2014 tracked in KS-185.",
+  "// overrides KS-493": "postcss ^8.5.24 (GHSA-6g55-p6wh-862q / GHSA-r28c-9q8g-f849, path-traversal) \u2014 the residual 8.4.31 was nested under next's build tooling and its declared range pinned it below the fix; postcss 8.x is API-stable so a global pin is safe and build-time-only. valibot (GHSA-5qjj) is NOT overridden \u2014 @prisma/dev bundles valibot 1.2.0 (override is inert) and it is reached only via that dev-server tooling, so it is accepted as a dev-only baseline entry instead.",
+  "// overrides KS-530": "@hono/node-server ^2.1.3 for @prisma/dev (GHSA-rmxm-3fg6-px4f, serveStatic decodes the request path twice; vulnerable >=1.19.10 <2.1.3, so no 1.x release is fixed). Before: ^1.19.15, which held the one hoisted copy on 1.19.17. @prisma/dev 0.24.3 declares the exact 1.19.11 and the MCP SDK allows ^1.19.9 || ^2.0.5, so one override moves the single hoisted copy to v2. v2 needs node >=20 and a resolvable hono ^4 || ^5 (4.13.13 is locked). The main-entry API v1 exports is still exported; the only removed subpath is ./vercel, which nothing here imports. @prisma/dev calls serve({createServer, fetch, overrideGlobalObjects:false, port}) only inside `prisma dev`, which no script here runs.",
+  "overrides": {
+    "fast-uri": "^3.1.7",
+    "node-forge": "^1.4.0",
+    "path-to-regexp": "0.1.13",
+    "express": {
+      "path-to-regexp": "0.1.13"
+    },
+    "@cardano-sdk/crypto": "^0.4.5",
+    "postcss": "^8.5.24",
+    "mysql2": "3.23.1",
+    "morgan": "^1.12.1",
+    "ip-address": "^10.5.1",
+    "undici": "^7.29.1",
+    "jsdom": {
+      "undici": "^7.29.1"
+    },
+    "@prisma/dev": {
+      "@hono/node-server": "^2.1.3"
+    },
+    "deepmerge-ts": "^8.0.1",
+    "postcss-selector-parser": "^7.1.6",
+    "minimatch": "^11.0.1",
+    "glob@>=9.0.0 <=14.0.1": "^14.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kksecura/Blockchain_SSV.git"
+  },
+  "keywords": [
+    "blockchain",
+    "cardano",
+    "document-authenticity",
+    "verifiable-credentials",
+    "did",
+    "self-sovereign-data"
+  ],
+  "author": "Secuura",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@lucid-evolution/lucid": "^0.4.30",
+    "nodemailer": "^10.0.12",
+    "zod": "^4.6.7"
+  }
+}

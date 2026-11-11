@@ -1,0 +1,56 @@
+{
+ "identifier": "KS-1343",
+ "title": "Multi-tenancy docs: eight non-blocking overstatements and Polish notes left by #1286's gate (N-1286-3..10)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": null,
+ "archivedAt": null,
+ "createdAt": "2026-09-26T08:08:52.129Z",
+ "updatedAt": "2026-11-04T03:27:12.083Z",
+ "description": "## BLUF\n\nEight non-blocking notes from the gate28 review of PR #1289's batch-mate #1286 (merged `7475697ce65e`), all in `Blockchain/Dev/docs/MULTI-TENANCY.md` (MT) and `Blockchain/Dev/docs/RLS-FAIL-CLOSED-PLAN.md` (RP). None was made worse by #1286's corrections; all were left deliberately because that PR's GO said to change nothing else.\n\n## The notes, as the gate recorded them\n\n* **N-1286-3** \u2014 \"writes **every**\" is overstated, at `MT:27` and `RP:47`. Provisioning writes the rest; the sentence describes the 8 seeded ids.\n* **N-1286-4** \u2014 \"the only tenant isolation that exists\" is overstated, at `RP:54-55`. 21 service files also filter on `tenant_id`. #1286's new sentence about `MULTI_TENANCY_ENABLED` does not strengthen the claim, but does not fix it either.\n* **N-1286-5** \u2014 `RP:60`, \"plus any table not split per-tenant-DB\", is still unmarked (it was `:57` in round 1).\n* **N-1286-6** \u2014 \"The deliberate exception\" at `MT:32` is incomplete: it omits migration 039 \u00a73's `secuura_auth_lookup` path.\n* **N-1286-7** (Polish) \u2014 `MT:43`, \"**This is the flag that actually gates per-tenant databases**, and it is off everywhere.\" Gating is TRUE; \"off everywhere\" is TRUE for the repository and **UNVERIFIABLE for live app settings** (no `az` in the gate). It re-widens the \"in the repository\" qualifier the neighbouring sentence had just added.\n* **N-1286-8** (Polish) \u2014 `MT:40`, \"a distinction the first version of this correction got wrong\", is change-log prose about the correction itself. It will puzzle any reader who never saw the first version. Its home is the commit message, where it already is.\n* **N-1286-9** (Polish) \u2014 `MT:44-47`, \"ON in dev and demo\": all three cites are exact, but \"ON in dev and demo\" is the whole set the deploy script can deploy, which is an understatement rather than a scope statement.\n* **N-1286-10** (Polish) \u2014 `MT:152-153`, the onboarding cite is accurate enough; the granularity is loose (`:245-274` with the INSERT at `:271`, where the measured shape is `:245-257`, `platformQuery(` at `:271`, the INSERT at `:272`, close at `:275`).\n\n## Done when\n\n- [ ] N-1286-3 and N-1286-4's overstatements are narrowed to what the code does, at all four cites\n- [ ] N-1286-5's caveat is marked\n- [ ] N-1286-6 names the 039 \u00a73 `secuura_auth_lookup` exception\n- [ ] N-1286-7's \"off everywhere\" carries the same \"in the repository\" qualifier as its neighbour\n- [ ] N-1286-8's self-referential sentence is removed from the reference document\n- [ ] N-1286-9 and N-1286-10 are tightened or explicitly accepted as-is\n\n## Provenance\n\nGate28 report `2026-09-26-batch1286-g28/report.md` (sha256 `760c86711baee5a5282ed9ddc6f172a34dbe7321e1f7f52c4574243ff6794909`, measured by this seat), the #1286 section. Filed by the merging seat on that GO's instruction; the gate files nothing.\n\n## Board search before filing\n\nLiteral match over **1332 issues (includeArchived) and 3776 comments**: `MULTI-TENANCY.md` -> 2 (KS-1336 the parent, KS-300 Done); `RLS-FAIL-CLOSED-PLAN.md` -> 5 (KS-1336, KS-300, KS-174, KS-172, KS-160). None carries these eight notes. Control token `b31nonce-zqx7vk-never-written` -> 0, and the two doc paths returning 2 and 5 show the search is not blind in either direction.\n\nRefs KS-1336",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1336"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1996",
+    "title": "Refs KS-1343: MULTI-TENANCY and RLS plan wording states what the isolation claims cover"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "98533e55-31fc-4015-a3c6-4857f1bd57ad",
+    "createdAt": "2026-11-04T03:27:12.104Z",
+    "body": "**BLUF:** Delivered: PR 1996 merged as a01e579ca47b on develop (2026-11-04); no deploy surface, `git show --stat` lists `Blockchain/Dev/docs/MULTI-TENANCY.md` and `Blockchain/Dev/docs/RLS-FAIL-CLOSED-PLAN.md` only. Verified by git at a01e579ca47b. Left open: five of this ticket's eight notes, as comment fa23c3ab records.\n\n- **Covered by PR 1996:** N-1286-4, N-1286-7 and N-1286-8 (comment fa23c3ab).\n- **Not covered:** N-1286-3, N-1286-5, N-1286-6, N-1286-9 and N-1286-10.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "fa23c3ab-f025-4503-8095-72e765f019f1",
+    "createdAt": "2026-11-03T22:38:57.641Z",
+    "body": "**BLUF:** PARTIAL. Pull request 1996 (https://github.com/Secuura/Distributed_Secuura/pull/1996, head `6ccdccb07199`, base develop `ea5134d6b98c`, one commit) covers notes N-1286-4, N-1286-7 and N-1286-8 of this ticket only. The other five notes (N-1286-3, N-1286-5, N-1286-6, N-1286-9, N-1286-10) are not part of it, so this ticket stays open. Documentation only: two files, +4/-3. Tier 2.\n\nWhat changes: `Blockchain/Dev/docs/MULTI-TENANCY.md` said the flag that gates per-tenant databases \"is off everywhere\"; it now says it is off everywhere in the repository and that live app settings were not checked, and an aside about an earlier version of the correction is removed. `Blockchain/Dev/docs/RLS-FAIL-CLOSED-PLAN.md` said row-level security is \"the only tenant isolation that exists\"; it now says \"the only database-level tenant isolation that exists\".\n\nEvidence (my runs, 22:36Z): the two held Spark passes (O100-P2B, O100-P3B) apply strictly on the base blobs (`git apply --check -p1` rc 0 with empty output; a copy with one context line corrupted is rejected); the committed blobs equal what the patches produce (2 of 2); the six before-and-after phrase expectations were re-measured on the real files; develop moved by one commit since the base (10 files) and none of the 24 open pull requests touches either file. The pre-push hook printed `PREFLIGHT INCOMPLETE \u2014 13/16 legs ran, 3 SKIPPED. Nothing failed.`, which is not a pass. Not done: a markdown link check, any test (none was changed), a check of the live app's settings, the four platform suites, any deploy.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

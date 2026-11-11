@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-2165",
+ "title": "transfer-custody answers 201 with no anchor when the lifecycle anchor call is refused: seven anchor-less 201s on kintsugi",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-11T05:29:43.619Z",
+ "updatedAt": "2026-11-11T05:29:43.619Z",
+ "description": "**BLUF:** `POST /api/documents/{id}/transfer-custody` answers 201 with `anchorId` null when the anchoring call it makes after writing the custody event is refused, so a caller cannot tell a transfer that was anchored from one that was not without a second call. On kintsugi on 2026-10-26, seven accepted transfers for one document were each followed, 8 to 37 ms later, by a `POST /api/anchors` answered 400; the document has 0 anchor rows and none of its 7 custody events records an anchor. Raised from the KS-1402 read-back (comment 06ba4a1f); KS-1402 stays open and is not changed by this ticket.\n\n## What the code does at develop `249be7c8cd14`\n\n* `Blockchain/Dev/services/originate/src/routes/documents.ts` lines 1458 to 1472: `emitLifecycleAnchor` throws on a non-ok anchoring answer, its catch logs \"Lifecycle anchor emission failed\" and returns `{ anchorId: null, txHash: null, status: 'pending' }` (the comment at line 1466 says the caller falls back to `/api/anchors`).\n* The same file, lines 2506 to 2525: the transfer-custody handler awaits that call and then answers 201 with `transfer.anchorId` and `transfer.anchor.status` taken from it, whatever it returned.\n\n## What was measured on kintsugi (read-only, 2026-10-29, comment 06ba4a1f)\n\n* 7 `custody_events` rows for one document, all with an empty anchor transaction; 7 audit rows `POST .../transfer-custody` answered 201; 7 `anchors.create` requests answered 400, the only such 400s in the trail; the anchor table holds 0 rows for the document (control: another document holds 1).\n* Build: develop `1ae6f17d19a8`.\n\n## Not measured, not decided\n\n* The reason the anchor calls were refused (the Invalid DID text is the likely cause, but originate's log for 26 Oct is not on the box).\n* Whether a refused anchor should make the route answer a non-2xx, or whether 201 with a `pending` anchor is the intended contract: nothing read rules on it.\n\n## Related\n\nKS-1402 (the measurement), KS-1811 (the same seven events seen as self-transfers), KS-1175 and KS-1813 (the did:jwk schema and pattern), KS-1384 (anchor rows per document).\n\n## Searched\n\nSearched `transfer-custody`, `custody event`, `anchorless`, `anchor-less`, `users/lookup`, `Lifecycle anchor emission failed`, `Invalid DID`, `did:jwk`, `no ref in payload`, `anchors fallback` and `transfer-custody+anchor+201` over title, description and comments (archived included; positive control `msgpackr` hits KS-1379, a random token 0): 0 open tickets that cover this; KS-1811 covers the repeat custody event only, KS-1402 carries the measurement.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

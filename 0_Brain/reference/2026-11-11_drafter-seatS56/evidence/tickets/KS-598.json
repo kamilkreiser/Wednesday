@@ -1,0 +1,47 @@
+{
+ "identifier": "KS-598",
+ "title": "Architecture P1: defuse the MULTI_TENANCY registry upsert \u2014 it silently collapses registrations per (hash, tenant) if the flag is ever enabled",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-08-09T23:22:32.661Z",
+ "updatedAt": "2026-10-13T02:59:45.688Z",
+ "description": "**Ask:** In the same phase that touches registration (plan-sheet requirement \u2014 not later, not beside), defuse `platform_document_registry`'s armed landmine: UNIQUE `uq_pdr_hash_tenant (content_hash, tenant_id)` + `ON CONFLICT (content_hash, tenant_id) DO UPDATE` in `registerInPlatformRegistry`. Either re-key the registry on the document UUID, or explicitly remove/disable the upsert.\n\n**Why it matters:** the code path is dormant ONLY because `MULTI_TENANCY_ENABLED !== 'true'` on local and demo (0 registry rows in both DBs). If that flag is ever switched on with today's code, the upsert wakes and silently collapses registration pointers \u2014 newest write wins per (hash, tenant) \u2014 which directly violates ruling (b): duplicate bytes = two registrations, distinguished by UUID. A landmine that has been found and left armed is worse than one nobody found.\n\n**Spec:** `1_Project_Definition/architecture/2026-08-07_K-side-plan-sheet.md` (\"The MULTI_TENANCY landmine \u2014 inside P1, not beside it\").",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1336"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "ce7b193c-d9b2-4fee-bfbb-223489a65465",
+    "createdAt": "2026-09-02T15:11:32.702Z",
+    "body": "## Confirmed live on `develop` `541acae81` \u2014 the landmine is still armed, both halves\n\n**The upsert**, `services/originate/src/routes/verification.ts:396` (read from `origin/develop`, not the working tree):\n\n```sql\nON CONFLICT (content_hash, tenant_id) DO UPDATE SET\n  document_id = EXCLUDED.document_id, title = EXCLUDED.title, status = EXCLUDED.status, updated_at = NOW()\n```\n\n**The constraint**, from the live database:\n\n```\nuq_pdr_hash_tenant   (plus platform_document_registry_pkey, idx_pdr_hash, idx_pdr_doc)\n```\n\nSo both halves are present and they compose exactly as the description says: two documents with the same `content_hash` in one tenant do not collide loudly \u2014 the second **overwrites the first's `document_id`** in the registry, and the first registration stops being findable by hash. Silent, and it looks like a successful registration to the caller.\n\nOne method note, because it nearly gave me a wrong answer: my first search matched `services/originate/dist/routes/verification.d.ts` \u2014 **build output**, which is not the authority and which does not exist at `origin/develop` at all (`git show` refused it). Reading a `dist/` file would have been reading yesterday's compile. The line above is from the `src/` file at the SHA. Also: the search only ran at all once `--include=*.ts` was quoted \u2014 unquoted, zsh's `nomatch` kills grep before it starts and the result reads as a clean zero.\n\nSequencing point from the description stands: this belongs in the same phase as [KS-597](https://linear.app/secuura/issue/KS-597), not after it \u2014 registration is the write path that arms it.\n\nNo code written. Left in Todo.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

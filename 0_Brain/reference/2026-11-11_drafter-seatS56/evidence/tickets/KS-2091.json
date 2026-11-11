@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2091",
+ "title": "No hook suite proves a red preflight makes the pre-push hook refuse a push: its final exit 1 can become exit 0 with every suite green",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T11:46:42.016Z",
+ "updatedAt": "2026-11-10T05:41:25.928Z",
+ "description": "**BLUF:** No hook suite proves that a red preflight makes the pre-push hook refuse a push. The final step of `.githooks/pre-push`, the `|| { ...; exit 1; }` after the preflight call, can be changed to `exit 0` and every hook suite that can run on a sparse tree stays green. If that line regressed, every leg of the preflight would become advisory and no suite would say so. Found by gate 228 (tier 1, round 2 of 2, GO WITH NOTES) on PR 2047 (KS-1728) as its finding F3: pre-existing, outside that PR's diff, for routing. The hook is correct at the gate's head, so this is a missing test and not a defect today. Verdict in full: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-06_gate228-tier1-pr2047-ks1728/verdict.md, finding F3 from line 51 (gate head 0dbf24bc0ce40135ed98fcff92661d752b95f350).\n\n## What the gate measured (evidence class MEASURED AT RUNTIME)\n\n* Mutant H3 changes that `exit 1` to `exit 0`, placed in the gate's own worktree as the real hook. All 8 hook suites that are green on that sparse tree stayed green, at base and at head where run. Files, under /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-06_gate228-tier1-pr2047-ks1728/evidence/: `q1_h3_all_hook_suites.txt` and `q1_matrix.txt`.\n* The ninth suite, `preflight_deps`, is red with and without H3 on the same 5 FAIL lines, because the gate's sparse tree lacks files it reads. It is not evidence either way.\n* A grep of every shell test suite finds no fixture preflight that exits non-zero and no assertion on the refusal text (same folder, `q1_h3_coverage_search.txt`).\n\n## Grade and priority\n\nThe verdict grades F3 Minor, which is its technical grade. The priority here is Medium, set by Wednesday on this ground: one line carries every leg of the preflight, nothing proves it, and a regression would make the whole push gate advisory with no suite saying so. It costs one cell to close.\n\n## Fix shape (the gate's, not built)\n\nA regression test: give the fixture preflight a non-zero exit and assert that the push did not land, and that the refusal text appears.\n\n## Not this ticket\n\nThe gate's other findings on PR 2047 (F1, the here-string temporary file; F2, the empty pattern; N3, the early-closing pipes) stay with PR 2047 and KS-1728. No comment on KS-1728.\n\n## Searched before filing\n\n2026-11-06, includeArchived, titles and descriptions, paginated, in two runs; controls: the term msgpackr hit KS-1379 among open tickets, a random token hit 0. `.githooks/pre-push`: 16 open and 27 closed hits. `pre_push_hook`: 2 open (KS-1728, KS-1759) and 10 closed. `preflight refuses`: 0. `red preflight`: 0. `no hook suite`: 0. `refuses a push`: 3 open (KS-1422, KS-1611, KS-1646). `swallowed`: 20 open and 21 closed. H3: 5 open and 10 closed (the two characters match unrelated text). Read by title around the hits: none states that no hook suite proves a red preflight refuses a push. The three nearest by subject were read whole (description and comments) and probed for the shape (exit 0, swallow, H3, refuses the push, red preflight, advisory): KS-1759 grades the prose of the hook by three counts; KS-1646 is a fresh clone that runs no hook at all; KS-1483 is a push of a branch that is not checked out skipping the preflight. None holds this finding. The key KS-1728 returned no ticket other than its own.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2166",
+    "title": "Refs KS-2091: a hook suite proves a red preflight makes the pre-push hook refuse the push and say why"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "31bfc397-1b11-44e1-8829-35a54b922ae8",
+    "createdAt": "2026-11-10T05:41:26.122Z",
+    "body": "**BLUF:** PR 2166 (head `a0ff676ebaae`, one commit on develop `b602c418296a`) adds the missing hook suite from this ticket: a new bash file, `pre_push_red_preflight_refuses_the_push.test.sh` (4 cells), that proves a red preflight makes the pre-push hook refuse the push and print its \"preflight failed\" line. Test-only, zero product bytes; ready for its gate (tier 2). Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **Measured by this seat:** 4 of 4 pass against the hook as it is on develop now (it carries the later change that runs the preflight when `git diff` fails). With the final `exit 1` changed to `exit 0` in a scratch copy, the cell \"a red preflight refuses the push\" fails (3 of 4); with the failed line removed, \"a red preflight is announced\" fails (3 of 4).\n- **Not in this PR:** any change to the hook.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

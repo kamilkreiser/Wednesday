@@ -1,0 +1,160 @@
+{
+ "identifier": "KS-591",
+ "title": "positive_data_acceptance recurs at scale \u2014 734 failures across 64 ops (KS-255 / KS-515 recurrence, full-2026-08-07 sweep)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-08-07T15:14:42.979Z",
+ "updatedAt": "2026-10-30T10:31:39.443Z",
+ "description": "## Summary\n\nThis register tracks the biggest single class in the sweeps: the API politely refusing (4xx) request bodies the published spec says are valid. The steady fix is to bring each operation's spec and validator into line, in whichever direction is right for it. A small new member was added on 2026-09-28: `POST /api/gdpr/consent`, where the database declines a value the spec allows. Details are below for whenever it's picked up. Thank you, Kamil.\n\n+++ The register (2026-08-07) and the 2026-09-28 addendum\n\n### Why a new ticket\n\nThe predecessors are Done and archived: [KS-255](https://linear.app/secuura/issue/KS-255/fix-tighten-openapi-request-schemas-add-400-responses-for-12-endpoints) (Done 2026-06-15) and [KS-515](https://linear.app/secuura/issue/KS-515/write-path-requestresponse-schema-drift-27-ops-ks-430-recurrence-new) (Done 2026-07-29, itself the [KS-430](https://linear.app/secuura/issue/KS-430/write-path-request-schema-contract-drift-across-60-operations-unmasked) recurrence). This is the same class recurring at a larger scale, filed fresh per the [KS-430](https://linear.app/secuura/issue/KS-430/write-path-request-schema-contract-drift-across-60-operations-unmasked)\u2192[KS-515](https://linear.app/secuura/issue/KS-515/write-path-requestresponse-schema-drift-27-ops-ks-430-recurrence-new) / [KS-431](https://linear.app/secuura/issue/KS-431/16-write-operations-return-raw-500-internal-error-unmasked-by-the-ks)\u2192[KS-497](https://linear.app/secuura/issue/KS-497/write-path-raw-500-internal-error-recurs-on-4-platformtenants-ops-ks) precedent.\n\n### Finding\n\n**734** `positive_data_acceptance` **failures across 64 operations**, about 75% of all check failures in `full-2026-08-07T14-12-05Z` (seed `2794626967`, 22,744 cases, 317 operations; Ubuntu 24.04.4 aarch64 VM, Schemathesis 4.24.3, Postgres 15.18). Each failure card embeds a curl; the run also wrote 94 replayable crash files. Counts are a floor, not a total: generation samples rather than enumerates.\n\n### Fix direction\n\nPer [KS-423](https://linear.app/secuura/issue/KS-423/blocking-pr-pre-merge-schemathesis-coverage-6-contract-drift-failures) / [KS-430](https://linear.app/secuura/issue/KS-430/write-path-request-schema-contract-drift-across-60-operations-unmasked): compare each route's validator with the spec, then tighten the spec to the runtime truth **or** loosen the runtime where the spec is right. Never narrow the generator. Cluster by service registration file.\n\n### Addendum 2026-09-28 ([KS-1353](https://linear.app/secuura/issue/KS-1353/bump-systemtest-schemathesis-pin-4275-4280-first-minor-since-427x-9)): `POST /api/gdpr/consent`\n\n* **What:** a spec-valid body answered **400** `VALIDATION_ERROR` *\"One or more field values cannot be stored (too long or not an allowed value)\"*. It's a draw: 2 of the 6 [KS-1353](https://linear.app/secuura/issue/KS-1353/bump-systemtest-schemathesis-pin-4275-4280-first-minor-since-427x-9) sweeps (sweeps 2 and 5, \u00d71 each).\n* **The case:** `userId` (uuid), `purpose: \"marketing\"`, `source` = a 5-character string with a supplementary-plane character, `expiresInDays: 552`, plus 3 undeclared keys (allowed, since the schema doesn't set `additionalProperties: false`).\n* **Where the 400 comes from:** `services/originate/src/routes/gdpr.ts:153` (`mapGdprWriteDbError`) maps Postgres **22001 / 23514 / 22007 / 22008 / 22021** to this 400. Its own comment says *\"Value the spec permits but the schema can't store\"*. So the refusal is deliberate; the gap is that the published contract doesn't declare the constraint.\n* **Which constraint fired isn't recoverable:** the originate logs predate a slot rebuild. Candidates: `source`'s unusual character (22021 or a length limit), `expiresInDays` with no declared `maximum` (22008), or the extra keys if they reach a stored column. (An earlier note that said \"extra keys \u2192 400\" was too specific.)\n* **Direction:** a targeted probe per candidate names the Postgres code, then declare it in the spec (`maxLength`, `maximum`, a `pattern`, or `additionalProperties: false`).\n* Listed in [KS-1361](https://linear.app/secuura/issue/KS-1361/schemathesis-baselinejson-lags-the-linear-registers-37-of-90-failing) for baselining against this ticket.\n\n+++",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-593"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-693"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1451",
+    "title": "KS-591: six POST request bodies are declared required in the published contract"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1422",
+    "title": "docs: 5d WHY comments on the three gate73 changed lines (KS 998, KS 1435, KS 591)"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1410",
+    "title": "KS-591: declare newHolderId a uuid on the transfer custody request"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "802726e5-c913-4d5b-a0cb-e01ff3b48db3",
+    "createdAt": "2026-10-30T10:31:39.495Z",
+    "body": "**One more member of this class, `GET /api/platform/document-lookup` (measured 2026-10-30).**\n\n- **Run:** `pre-merge-2026-10-30T10-03-47Z-slot1` (platform-k slot 1, Peter's Mac, Schemathesis 4.32.1, seed 881726611). The platform is `develop` `4c14143b3` unchanged; the branch it ran on, KS-1609, changes only `systemTest/` and docs.\n- **Check:** ST202 `positive_data_acceptance`, case `iHOnxs`.\n- **What happened:** `GET /api/platform/document-lookup?hash=` \u2192 **400** `{\"success\":false,\"error\":{\"code\":\"BAD_REQUEST\",\"message\":\"hash or documentId query parameter is required\"}}`.\n- **Why it is spec-valid:** the published operation (added under KS-1773) declares both `hash` and `documentId` as optional `string` query parameters, with no `minLength` and nothing saying one of them must be sent. So `?hash=` alone is valid against the contract.\n- **Same shape as** this register's 2026-09-01 note: a cross-field rule the spec doesn't express (\"Either challengeId or nonce is required\").\n- Not in `schemathesis-baseline.json`, and not added to it.\n- **Direction, as for the rest of the register:** express the rule in the contract (for example `minLength: 1` on both, plus an `anyOf` requiring one of the two), or have the handler treat an empty `hash` as absent and fall through to `documentId` as the description already says.\n- The KS-1773 deploy note records that no `hash` / `documentId` request was sent, so this path was not exercised there.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "c18c31f5-c9ee-41c3-b002-8c7474cee0b1",
+    "createdAt": "2026-10-23T13:29:11.174Z",
+    "body": "**BLUF:** a `positive_data_acceptance` failure on `POST /api/did` in today's pre-merge sweep is a **systemTest harness bug, not a platform defect**. Nothing to do on the platform side; it is being fixed in KS-1680.\n\n- **Where:** run `pre-merge-2026-10-23T13-01-26Z-slot1` (platform-k slot 1, seed `2796048272`, Schemathesis 4.32.1), check ST202 \"Schema-valid request rejected\", response **400** `VALIDATION_ERROR` \"Must not contain control byte U+0012\".\n- **Cause (verified from the request as sent):** the positive-phase body sanitizer (`systemTest/schemathesis/config/positive_sanitizer.py`, KS-472) leaves a raw control-byte key unchanged when the same object already has a `_` key: here `services[4]` carried both `\"\\x12\"` and `\"_\"`. The platform's 400 is the correct KS-472 behaviour.\n- It appears only when a draw generates that key pair, so it can come and go between runs.\n\nThe fix and its red\u2192green test land on the KS-1680 branch. Thank you, Kamil.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "fecd707d-86ee-4ff8-8dfc-b3a22a43da55",
+    "createdAt": "2026-10-06T11:29:58.398Z",
+    "body": "## Addendum 2026-10-06 (KS-571): `/share` and `/transfer-custody` join the register \u2014 the exception that hid them is gone\n\n**BLUF.** Two operations that had been hidden from this check now show it, Kamil. `systemTest/schemathesis/schemathesis.toml` used to let `POST /api/documents/{id}/share` and `/transfer-custody` answer 400 under `positive_data_acceptance`. That was meant for the connector-only `onBehalfOf` 400, but it hid every 400 on those operations. KS-571 replaced it with a narrower mechanism (the sweep no longer sends `onBehalfOf` from JWT personas). The real spec-vs-handler gaps underneath are now reported: **26 + 12 failing cases**. Thank you.\n\n>>> Evidence (re-verified at source, `develop` `f556373b9`; sweep `full-ks-571-2026-10-06T10-09-50Z-slot4`, seed 571, slot 4, Schemathesis 4.29.3)\n\nSpec-valid bodies the handler refuses with 400 (positive phase, no `onBehalfOf` in the body):\n\n| Operation | Handler refusal (`services/originate/src/routes/documents.ts`) | Cases | What the spec says |\n| -- | -- | -- | -- |\n| `POST /api/documents/{id}/transfer-custody` | `:1629` \"One of newHolderId or newHolderEmail is required\" | 26 | request schema has no `required` and no `oneOf`/`anyOf` |\n| same | `:1635` \"Supply either newHolderId or newHolderEmail, not both\" | 3 | mutual exclusion not expressed |\n| same | `:1653` \"newHolderId must be a valid UUID\" | 6 | `newHolderId` is `type: string`, no `format: uuid` |\n| `POST /api/documents/{id}/share` | `:2215` \"Each recipient must have either an email or a userId\" | 16 | `recipients[]` items have no `required` and no `anyOf` |\n\n(Case counts are from the run's HAR, by reason. They overlap the 26 / 12 `positive_data_acceptance` failures reported for the two operations; the 3 `/share` 500s in the same run are KS-593's class, not this one.)\n\n**Also worth knowing.** Before KS-571, `/version` (25) and `certifications/issue` (11) failures under this check were almost all the connector-only `onBehalfOf` 400, not this class (before\u2192after 25\u21921, 11\u21921). Their entries in `config/schemathesis-baseline.json` cite this ticket. That baseline correction is Peter's (KS-1361), not yours.\n\n**Suggested direction (same as the register):** express the rules in the published contract. For transfer-custody, `oneOf` [newHolderId] / [newHolderEmail] plus `format: uuid`; for share, recipient items with `anyOf` [email] / [userId]. Or relax the handler where the spec is right.\n\n>>>\n\nRefs as KS-NNN text. Posted by agent on Peter's behalf.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "dda3949f-217b-4288-99fd-e7179bc9fcf4",
+    "createdAt": "2026-10-05T10:45:47.868Z",
+    "body": "## Addendum 2026-10-05 (KS-1408 sweeps): `POST /api/kyc/{id}/review`\n\n**BLUF.** One new member, Kamil, reproduced in both 4.29.3 sweeps: `POST /api/kyc/{id}/review` answers **400** to a generated body that is **valid against the published request schema** (checked with `jsonschema_rs` against the spec, not assumed). It wasn't on this register or in the baseline. Thank you.\n\n>>> Evidence and what was ruled out\n\n| | 4.28.0 | 4.29.3 | 4.29.3 re-run |\n| -- | -- | -- | -- |\n| failing cases | 0 | 1 | 1 |\n\n* Generated value (no pool-drawn ids), `fuzzing` phase, positive mode. Body validates against the spec, response 400.\n* **Ruled out:** the 4.29.x false positive (a pool draw overwriting the case). That mechanism affects `negative_data_rejection`, not this check, and this case had no pool draw.\n* Two other new `positive_data_acceptance` pairs from the same sweeps (`POST /api/identity-credentials/issue`, `PUT /api/nft/admin/platform-fee`) were sent **no body**. Neither spec marks the body `required`, so they belong to KS-1364's class (In Progress) and are recorded there instead.\n\nRun directories: `systemTest/schemathesis/output/reports/full-ks-1408-2026-10-05T09-32-24Z-slot4`, `\u2026T10-23-55Z-slot4`.\n\n>>>",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "c2559461-68cf-4736-aa7e-7db50e25e2fa",
+    "createdAt": "2026-09-15T12:58:24.748Z",
+    "body": "Class register addendum, 2026-09-15 \u2014 two `positive_data_acceptance` ops not yet in the baseline or on any ticket by name, same class (\"read the counts as a floor\"): **`POST /api/security/keys`** \u00d71 and **`POST /api/billing/checkout/custom`** \u00d71, on `pre-merge-2026-09-15T12-41-42Z-slot3` (seed 1721585185, slot 3 rebuilt from scratch, macOS arm64, Schemathesis 4.27.1, head `f2c2f84e0` of PR #997 \u2014 https://github.com/Secuura/Distributed_Secuura/pull/997). `billing/checkout/custom` is a by-design-503 op (KS-268 set): the \"rejection\" it reports is the declared 503 to a schema-compliant request, i.e. the unconfigured-provider posture, not a validator defect \u2014 worth a `positive_data_acceptance` `expected-statuses` entry of the KS-686 shape rather than a fix, Peter's call on the systemTest side. `security/keys` is the ordinary class. PR #997 changes no service or spec code. Floor, not total.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "37cebf50-2c78-4f47-b566-bad56d8e19d8",
+    "createdAt": "2026-09-14T15:31:55.893Z",
+    "body": "## Results 2026-09-14 \u2014 `positive_data_acceptance` on 4.27.1: 69 operations in `full`, and the auth/MFA cluster is the untriaged core\n\n**Where:** the Mac, slot 3, from-scratch stack, `develop` @ `64c386e04` (4.27.1) + `claude/schemathesis-systemtest-tickets-be524a` @ `ab3ad5c21`. `full-2026-09-14T15-04-07Z-slot3` \u2014 342 ops, 0 errored, ~8,400 cases, 22.3 min. Counts are a floor, not a total.\n\n**69 operations failed `positive_data_acceptance`** (the register's 2026-08-07 figure was 64 \u2014 same order, different sample). 20 of them are not in the baseline; the rest are baselined under this ticket or KS-1015:\n\n**Untriaged (from the baseline gate, evaluated by hand \u2014 KS-752):** `GET /api/auth/social/{provider}/callback` \u00d721, `POST /api/billing/admin/credits` \u00d722, `POST /api/auth/social/link` \u00d712, `POST /api/documents/{id}/revoke` \u00d710, `GET /api/auth/social/{provider}` \u00d77, `POST /api/auth/mfa/disable` \u00d77, `POST /api/users/me/mfa/disable` \u00d77, `POST /api/users/me/mfa/verify` \u00d77, `POST /api/auth/wallet/authenticate` \u00d76, `DELETE /api/auth/wallet/unlink` \u00d74, `POST /api/identity-credentials/issue` \u00d73, `POST /api/nft/ipfs/upload` \u00d73, `PATCH /api/did/{did}` \u00d72, `POST /api/delegations` \u00d72, `POST /api/timestamps/verify` \u00d72, and \u00d71 each on `POST /api/analytics/reports`, `POST /api/auth/mfa/backup-codes/regenerate`, `POST /api/credentials`, `POST /api/gdpr/consent`, `POST /api/security/events`. `pre-merge` (`\u2026T14-48-37Z-slot3`) adds `POST /api/security/audit`, `POST /api/security/keys`, `PUT /api/nft/admin/platform-fee`, `POST /api/billing/checkout/custom` \u00d71 each.\n\n**Two things to know before triaging against this class:**\n1. 4.27.1 changed generation (dependency inference, response-value reuse, a valid-body fallback when examples are invalid), so the population moved: KS-1169's own before/after shows 10 ops LEAVING this bucket and 17 entering. `PATCH /api/did/{did}`, `POST /api/delegations`, `POST /api/identity-credentials/issue`, `POST /api/nft/ipfs/upload`, `POST /api/analytics/reports`, `POST /api/security/events` are new under the bump.\n2. `POST /api/users/me/change-password` is in the failing set but KS-575 established it 404s \"User not found\" for a validly-authenticated user (platform-side; Kamil) \u2014 the rejection is a handler 404, not a validation 400.\n\nThe `/api/auth/` + `/mfa/` cluster (10 ops above) is the KS-1015 finding-1 set and still has zero baseline coverage. Refs as KS-NNN text.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "72736dbd-1c6d-4f85-adfc-beba85935ac7",
+    "createdAt": "2026-09-14T14:04:58.623Z",
+    "body": "KS-1169 (Schemathesis 4.25.2 \u2192 4.27.1, `full` sweep, slot 2, 2026-09-14): `positive_data_acceptance` failing ops **45 \u2192 52** (+17 new, \u221210 gone). The 10 that left did so because 4.27.1's coverage-phase fix now produces a body the validator accepts (they moved to by-design 503s \u2014 see KS-593). The 17 new: `PATCH /api/did/{did}`, `POST /api/analytics/reports`, `/auth/mfa/backup-codes/regenerate`, `/auth/mfa/disable`, `/billing/checkout/bundle`, `/delegations`, `/delegations/validate`, `/m365/connections/init`, `/nft/estimate`, `/nft/ipfs/upload`, `/nft/mint`, `/oauth/apps`, `/onedrive/files/{id}/sync`, `/platform/tenants`, `/security/rate-limit/reset`, `/timestamps/verify`, `/users/me/mfa/verify`. Also relevant: 4.27.0 fixed `positive_data_acceptance`/`negative_data_rejection` false positives on 429 responses. `validation_mismatch` warning 64 \u2192 49 ops.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "d85fc7c9-1f24-4ec3-94ca-5027ad307ac7",
+    "createdAt": "2026-09-10T11:16:00.484Z",
+    "body": "Five operations outside the 64 (the floor, as the ticket says), 2026-09-10, Mac, slot 1, `pre-merge-ks-682-2026-09-10T10-52-00Z-slot1` (`billing/admin/credits` also in `\u2026T10-36-34Z-slot1`): `positive_data_acceptance` on `POST /api/billing/admin/credits` \u00d76, `POST /api/security/audit` \u00d71, `POST /api/security/events` \u00d71, `POST /api/timestamps/verify` \u00d71, `PUT /api/nft/admin/platform-fee` \u00d71 \u2014 each a 400 `Required` on a field the spec leaves optional (`action`/`eventType`/`hash`/`percentage`). Same shape as the class; not baselined, no new ticket. PR under review https://github.com/Secuura/Distributed_Secuura/pull/896 (no service code).",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "7171ea17-701a-4167-b643-45daf61bb45e",
+    "createdAt": "2026-09-03T12:45:01.526Z",
+    "body": "## Still recurring \u2014 pre-merge, 2026-09-03, on the Mac\n\nRecording a fresh observation, not a re-scoping. **38 operations** in this class failed on `pre-merge-2026-09-03T12-18-51Z`.\n\n**This is a much thinner sample than the run of record, so please do not read 38 as an improvement on 64.** The ticket's figures come from a `full` sweep (22,744 cases, 317 operations); this was `pre-merge` with `--max-examples 6`, ~2,016 cases across 340 operations. Property-based generation samples rather than enumerates, so the two numbers are not comparable in either direction \u2014 this only confirms the class is live, on a different host and a newer Schemathesis.\n\n**Environment (differs from the ticket's run of record, which was the Ubuntu VM):**\n\n| | |\n| -- | -- |\n| Host | macOS, Docker Desktop 8 CPU / 31.3 GiB, aarch64 \u2014 slot 1, gateway `:6882` |\n| Schemathesis | 4.25.2 (ticket's run: 4.24.3) |\n| Python / pytest | 3.14.6 / 9.1.1 |\n| Run validity | **OK \u2014 0 of 340 operations errored** |\n| Duration | 14.9 min, 12 workers |\n\nCaveat on the host: three other platform-k stacks were up on the same 8 CPUs, so no timing here is quotable. Verdicts should be unaffected \u2014 contention manufactures timeouts, not check failures \u2014 and run validity came back clean.\n\n<details>\n<summary>The 38 operations (all <code>positive_data_acceptance</code>)</summary>\n\n```\nGET   /api/platform/tenants/{id}\nPATCH /api/platform/tenants/{id}\nPATCH /api/platform/tenants/{id}/status\nPATCH /api/users/admin/{id}\nPOST  /api/anchors\nPOST  /api/anchors/thread-mint\nPOST  /api/billing/customers\nPOST  /api/billing/customers/{customerId}/default-payment-method\nPOST  /api/certifications/issue\nPOST  /api/delegations/validate\nPOST  /api/documents/{id}/anchor\nPOST  /api/documents/{id}/sign-cert\nPOST  /api/documents/{id}/sign-wallet\nPOST  /api/documents/{id}/version\nPOST  /api/issuer-certs\nPOST  /api/issuer-certs/sign\nPOST  /api/issuer-certs/{id}/revoke\nPOST  /api/issuer-certs/{id}/rotate\nPOST  /api/m365/connections/complete\nPOST  /api/m365/documents/sync\nPOST  /api/m365/sites\nPOST  /api/nft/estimate\nPOST  /api/nft/mint\nPOST  /api/nft/record\nPOST  /api/oauth/apps/{id}/rotate-secret\nPOST  /api/onedrive/files/{id}/sync\nPOST  /api/platform/organizations/register-connector\nPOST  /api/platform/tenants\nPOST  /api/referrals/apply\nPOST  /api/referrals/generate\nPOST  /api/stake\nPOST  /api/stake/complete-unstake\nPOST  /api/stake/unstake\nPOST  /api/transfers/{id}/approve\nPOST  /api/transfers/{id}/cancel\nPOST  /api/transfers/{id}/execute\nPOST  /api/transfers/{id}/reject\nPOST  /api/v2/verification/verify\n```\n</details>\n\nTwo representative failures, both \"valid data should have been accepted\":\n\n```\nPATCH /api/platform/tenants/{id}   [400] {\"code\":\"BAD_REQUEST\",\"message\":\"No fields to update\"}\n  curl -X PATCH -H 'Authorization: <bearer>' -H 'Content-Type: application/json' -d '{}' \\\n    http://localhost:6882/api/platform/tenants/00000000-0000-4000-8000-000000000001\n\nPOST /api/anchors                  [400] {\"validation\":\"regex\",\"message\":\"Invalid documentId format\",\"path\":[\"documentId\"]}\n```\n\nThe `PATCH \u2026/{id}` shape is worth a look when this is picked up: the spec permits an empty object, the handler requires at least one field. That is a spec-tightening fix rather than a handler change, and the same shape appears on `PATCH /api/users/admin/{id}` (*\"No valid fields to update\"*).\n\nArtefacts: `systemTest/schemathesis/output/reports/pre-merge-2026-09-03T12-18-51Z/` (HTML report, NDJSON, JUnit XML, VCR cassette, HAR, per-call metrics).\n\nMapped by hand against `config/schemathesis-baseline.json`, because the automated baseline gate did not run \u2014 it is skipped whenever the sweep fails, which is [KS-752](https://linear.app/secuura/issue/KS-752) and exactly the case here.\n\n*Observed while validating KS-717 on a branch that changes only `systemTest/akto` and three docs \u2014 the OpenAPI spec and all platform code are byte-identical to `develop`, so nothing here is attributable to that branch.*",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "daac7bec-a828-42aa-8297-0a286ee772da",
+    "createdAt": "2026-09-01T21:20:37.976Z",
+    "body": "## Sizing: **M**, down from L \u2014 the 2026-09-01 run changed the shape, not just the number\n\nSized, not started (s103).\n\n| run | failures | operations | shape |\n| -- | -- | -- | -- |\n| `full-2026-08-07` (record) | 734 | 64 | deep \u2014 many failures per op |\n| `pre-merge` 2026-08-20 | \u2014 | 42 | \u2014 |\n| `full-2026-09-01` | **60** | **60** | **broad and shallow \u2014 one each** |\n\n**That difference is the whole sizing argument.** 734 failures over 64 ops is a set of operations each rejecting many valid bodies \u2014 dozens of individual schema decisions. 60 failures over 60 ops is one rejected case per operation, which is far more consistent with a small number of *shared* causes (a common validator, an envelope-level constraint, a generator interaction) reaching many operations, than with 60 unrelated bugs.\n\n**So the first unit of work is a triage pass, not fixes:** group the 60 by *reason for rejection* and see how few distinct causes there are. If it collapses to a handful, this is M and possibly S. If it really is 60 independent spec-vs-handler disagreements, it re-sizes to L and should be split.\n\n\u26a0 **Do not start by fixing operations.** Sizing this from the 08-07 numbers would have bought a 64-operation programme for what the current data suggests is a much smaller one. Re-measure first, on current `develop`, and record the run of record \u2014 the two 08-05 runs already demonstrated on this board that runs disagree about *which* operations fail even when they agree about the class.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "2fe7e4ef-9e5a-42bd-94b8-697bdcf553cc",
+    "createdAt": "2026-09-01T12:27:51.354Z",
+    "body": "## Still live 2026-09-01 \u2014 60 failures across 60 operations, but the scale is very different from the 08-07 run\n\n**Run:** `full-2026-09-01T11-57-02Z` \u00b7 Schemathesis **4.25.2** \u00b7 338 operations \u00b7 ~8,400 cases \u00b7 23.2 min.\n**Branch:** `feature/ks-611-post-apitimestampsbatch-errors-on-every-sweep` @ **`35a35ca3d3539c9da391254855789c8fbc92d82c`** (PR #734 \u2014 a `.strict()` change on `POST /api/timestamps/batch` plus systemTest housekeeping; nothing touching the operations below).\n\n## BLUF\n\n`positive_data_acceptance` remains the largest failing class: **60 failures across 60 distinct operations** \u2014 one per operation, no clustering.\n\n**Compared with the 08-07 run this ticket was raised on (734 failures / 64 ops):** the *operation* count is essentially unchanged (60 vs 64), but the *failure* count is down an order of magnitude. **Do not read that as improvement** \u2014 this run used `--max-examples 25` against a different budget on 08-07, so fewer draws per operation means fewer recorded failures for the same underlying defect. **The breadth is the signal here, not the count.**\n\n## What it looks like\n\n**Every one of the 60 is an HTTP 400** \u2014 the API rejecting a body the spec says is valid. Sampled shapes:\n\n`POST /api/analytics/reports` \u2014 spec marks `type` and `period` optional, runtime requires both:\n```json\n{\"code\":\"BAD_REQUEST\",\"message\":\"Invalid report request\",\"details\":[\n  {\"expected\":\"'summary' | 'detailed'\",\"received\":\"undefined\",\"code\":\"invalid_type\",\"path\":[\"type\"],\"message\":\"Required\"},\n  {\"expected\":\"'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year' | 'all'\",\"received\":\"undefined\",\"code\":\"invalid_type\",\"path\":[\"period\"],\"message\":\"Required\"}]}\n```\n\n`POST /api/auth/wallet/authenticate` \u2014 a cross-field rule the spec does not express:\n```json\n{\"code\":\"VALIDATION_ERROR\",\"message\":\": Either challengeId or nonce is required\"}\n```\n\nSo the dominant shape is **spec/runtime divergence on requiredness** \u2014 either a field the Zod schema requires but the spec marks optional, or a conditional rule (`oneOf`-style) the spec cannot express as written. That is consistent with this ticket's existing framing.\n\n## One thing worth separating\n\nSeveral of the 60 are **M365 operations** (`/api/m365/documents/sync`, `/outlook/exchange-token`, `/sites`, `/connections/init`). I checked whether these were KS-693's *\"503 when `ENTRA_*` is unconfigured\"* \u2014 **they are not**: all four return **400**, not 503. So they belong here, not on KS-693. Recording the check so nobody re-derives it.\n\n## Environment\n\nMac, slot 1, 33 containers / 33 healthy, seeded users, Schemathesis 4.25.2, Python 3.14.6, anchoring in mock mode. Artefacts under `systemTest/schemathesis/output/reports/full-2026-09-01T11-57-02Z/`.\n\nRefs as KS-NNN text. Measured and filed by agent on Peter's behalf, 2026-09-01.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "825d5171-1b2c-4d89-a76f-2c7dd68c47ac",
+    "createdAt": "2026-08-20T14:59:52.841Z",
+    "body": "## Still live \u2014 re-measured 2026-08-20, `positive_data_acceptance` on **42 operations**\n\nFresh datapoint from a `pre-merge` sweep run while verifying KS-666 (stack-slot isolation). **Not new work and not a new ticket** \u2014 recording it here because this ticket owns the class and the measurement is current.\n\n**Run:** `pre-merge-ks-666-2026-08-20T13-29-08Z-slot3`, Schemathesis 4.24.3, local stack on slot 3 (`:7082`), 13,724 cases generated, 65 unique failures total.\n\n`positive_data_acceptance` \u2014 reported as **\"API rejected schema-compliant request\"** \u2014 is the dominant class at **42 of 52 failing operations**:\n\n```\nDELETE /api/platform/tenants/{id}     PATCH  /api/platform/tenants/{id}\nPATCH  /api/users/admin/{id}          POST   /api/anchors\nPOST   /api/anchors/thread-mint       POST   /api/billing/checkout/custom\nPOST   /api/certifications/issue      POST   /api/documents/{id}/anchor\n\u2026 34 more\n```\n\n## How this relates to the 734/64 figure in the description\n\nThe earlier measurement was a **full** sweep (`full-2026-08-07`); this is **pre-merge**, which runs fewer examples per operation. So 42 ops vs 64 ops is a difference in sweep depth, **not** evidence of partial remediation \u2014 please don't read it as progress. Same class, smaller sample.\n\n## Attribution\n\nThe branch this ran on (KS-666) changes only `systemTest/` harness plumbing, `Blockchain/Dev/scripts` gates, compose files and docs \u2014 **zero** files under `services/`, `packages/`, `frontend/`, `contracts/`, `migrations/` or `docs/openapi/`. It cannot have caused an API-vs-spec disagreement, and no remediation for this class is being attempted there.\n\n## Caveat on the mapping\n\nTen of these are expected: `docs/known_issues_and_baseline.md` \u00a711 records ~10 precondition refusals as **working-as-intended** under KS-478 / KS-466 \u00a711, and they surface under this same check name. KS-665 covers a further 5 as example-fixable 400s. I have **not** individually attributed the remaining ~27, so the count above is the raw check total, not a defect count.\n\nArtifacts: `systemTest/schemathesis/output/reports/pre-merge-ks-666-2026-08-20T13-29-08Z-slot3/` (allure + NDJSON + VCR).",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "b9063431-ff13-450f-9d2d-93356ea6402c",
+    "createdAt": "2026-08-10T16:23:16.416Z",
+    "body": "**Now surfaced in the report against this ticket (KS-589 / PR #656).**\n\nThe check\u2192ticket map was pointing `positive_data_acceptance` at **KS-255**, Done since 2026-06-15, so the report rendered `KS-255 (closed \u2014 recurrence untracked)` beside every failure in this class. It now renders **KS-591**.\n\nRe-measured on `full-2026-08-10T15-43-09Z` (Mac local, 24.3 min, seed `74570198`): **64 failures**, down from the 734 recorded here on the 08-07 VM sweep.\n\n**Please do not read that as improvement.** Different host, different seed, and the sweep samples rather than enumerates \u2014 counts are a floor, and CLAUDE.md's own rule is that absence from one run is never evidence. Nothing in KS-589 touches this check. The 734/64-op figure in the description remains the better sizing.\n\nNo action needed from you here \u2014 this is a reporting-attribution fix so the failures stop looking owned by a ticket that shipped in June.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   }
+  ]
+ }
+}

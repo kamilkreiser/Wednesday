@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2066",
+ "title": "Gate 213 on PR 2026 (KS-1539): a throw in the 503 path's log line answers 500, and no cell pins \"never the message\" past SyntaxError",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T06:26:48.724Z",
+ "updatedAt": "2026-11-09T11:30:37.349Z",
+ "description": "**BLUF:** Gate 213 raised two findings on PR 2026, the KS-1539 fix, that no ticket carries. F2 (Low): the allow-list catch logs before it answers 503, so a throw inside that log line answers 500 instead. F3 (Info): \"never the message\" is pinned by a cell for a SyntaxError only. KS-1539 was closed (Done, archived 2026-11-06T05:55Z) without the verdict having been read, so the follow-up is this new ticket. Whether F2 can happen in service is not measured.\n\n## F2 (Low), from the gate 213 verdict, line 52\n\nVerbatim: \"The log line precedes the 503, so a throw inside it replaces the answer.\" Where: `routes/verification.ts:855` at the PR's head, in the catch, before the 503 answer. The gate ran 32 rows on the real router over loopback, base against head:\n\n* Working logger, 12 ordinary thrown shapes plus one Error with a planted `constructor.name` (13 rows): base 503, head 503, byte-identical.\n* Working logger, three hostile shapes (an Error with `constructor` undefined, an Error with a throwing `constructor` getter, a revoked Proxy of an Error) (3 rows): base 503, head 500 INTERNAL_ERROR \"Failed to create document\".\n* Throwing logger, all 16 shapes (16 rows): base 503, head 500, the same body.\n* Enforcement ran 0 times in all 32 rows, so the create stays refused: a wrong status, not an opening.\n* The gate's fix shape: log after the answer, or guard the log and the class read so neither can stop the 503. Its oracle: the cheat fragment says \"one log line, nothing else\".\n\n## F3 (Info), from the same verdict, line 65\n\nThe verdict's words: \"Never the message\" is pinned only for a SyntaxError. The gate's own tamper logged the error message for every other Error class and left the 6 new cells green. The product code is correct today: across the 13 rows above the message never reached a log line. The stored-bytes reason in the code applies to the SyntaxError, so this is a gap in the cells, not a leak.\n\n## What is NOT known\n\n* Whether F2 can happen in service. The gate says the three hostile shapes are synthetic (JSON.parse and the real ioredis class cannot produce them) and that it did not make the real gateway logger throw.\n* Whether a follow-up staged by another seat already holds F2 or F3. The board search below finds none; staged files were not searched.\n* Whether F2 and F3 were accepted at the merge. The verdict reads GO WITH NOTES for PR 2026, PR 2026 is merged to develop, and the board search below finds no record of these two notes being accepted or deferred.\n\n## Owed\n\n* F2: decide whether to apply the gate's fix shape given F2 is unmeasured in service; if so, a cell with a throwing logger that still answers 503.\n* F3: a cell that fails when any Error class's message reaches a log line.\n\n## Searched before filing (2026-11-06, includeArchived, titles, descriptions and comments)\n\n* Controls: \"KS-1539\" hit (5 issues, 6 comments); a nonsense symbol returned 0.\n* \"log line precedes\" 0 and 0; \"errorClass\" 0 and 0; `constructor.name` 0 and 0; \"winstonLogger\" 0 and 0; \"throwing logger\" 0 issues, comments on KS-1771, KS-1772 and KS-1818, which fixed the same class of fault at other sites (KS-1771 names the document-types catch at line 1067, not this catch).\n* \"Never the message\": comments on KS-1539 and KS-1885; both describe a fix, not this gap.\n* \"gate 213\": comments on KS-1493 (says the verdict was not read) and KS-1614 (a different finding, G213-F1 on PR 2028).\n* KS-1545, KS-1532, KS-1773 and KS-1952 dumped whole and matched against 17 phrases taken from F2 and F3: 0 hits in each; the verdict text itself hits the same pattern 12 times.\n\nSource: the gate 213 verdict in Wednesday's reference folder (2026-11-06_gate213-tier2-pr2025-2028), F2 at line 52 and F3 at line 65. Filed on Wednesday's order of 2026-11-06 06:05Z, priority Low.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2145",
+    "title": "Refs KS-2066: a cell pins that a plain Error's message never reaches the allow-list read's log line"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "49d70444-96fc-483d-bc43-63366802d80a",
+    "createdAt": "2026-11-09T11:30:06.254Z",
+    "body": "**BLUF:** PR 2145 (head `47cd344c6942`, one commit on develop `f98afb113c2d`) adds the one cell for finding F3: a plain Error whose message quotes stored text logs the class `Error` and none of that text. Test only, +11 -0, product file untouched; it is ready for its gate (tier 2 proposed). Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **It pins today's behaviour** (green on develop, titled CONTROL). It does fail when the log line is made to include the message: with a scratch edit of the product line the file reads 5 of 7 (this cell and the SyntaxError cell red); the edit is not in the PR.\n- **Suite:** the file 6 of 6 to 7 of 7; the whole api-gateway suite 1880 of 1880 to 1881 of 1881. The test-config typecheck reads the same 25 existing errors before and after.\n- **Not in this PR:** F2 (a throw inside the log line answers 500), a product change.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

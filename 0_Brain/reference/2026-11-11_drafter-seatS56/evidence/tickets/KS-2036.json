@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-2036",
+ "title": "originate still logs two email addresses after KS-1937: a share recipient's at INFO (certifications.ts:1385) and a demo-seed user's at ERROR (adminConfig.ts:2123)",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T01:37:14.248Z",
+ "updatedAt": "2026-11-06T01:37:14.248Z",
+ "description": "**BLUF:** Two log calls in `services/originate` still write an email address once the KS-1937 fix lands: `routes/certifications.ts:1385` (INFO, `recipientEmail: recipient.email`, written on every share) and `routes/adminConfig.ts:2123` (ERROR, `email: u.email`, written for each demo-seed user whose insert fails). They were found by the KS-1937 census and left out of that change by Wednesday's ruling, which asked for ONE ticket for both; the adminConfig line also waits for PR 2019, which edits the same file. Both are pre-existing and neither is a thrown-object leak. **Nothing here is a fix; no code change is proposed or made.**\n\n## What is read (develop `7ad5a8b4bdf7`, `Blockchain/Dev/services/originate/src`)\n\n* `routes/certifications.ts:1385`: `logger.info('Certification shared', { certificationId: id, recipientEmail: recipient.email, shareType: recipient.shareType });`. It sits in the share loop right after the share notification is sent, so the person a document is shared with has their address written on every share. That is a third party's address.\n* `routes/adminConfig.ts:2123`: `try { logger.error('Demo user seed failed', { email: u.email, error: readableErrorMessage(err) }); } catch {...}`. `u` is an entry of the hard-coded demo-seed account list in the same route; each entry also carries an `id`. KS-913 (archived) records that a real person's email once sat in that list. Whether any address there is personal today is **not measured here**.\n\n## The ruling it follows\n\nKam's card `secuura-ks1346-logging-thrown-objects-leaks-secrets` = a: \"Log what kind of thing was thrown and the NAMES of its fields, never their values.\" Wednesday's ANSWER of 2026-11-06 on KS-1937 applied it to a recipient address: \"A. Log the template only, never the address\", for `utils/notificationClient.ts` and `services/email.ts`. This ticket carries the two remaining lines of the same class. Related: KS-1937 (originate's client and email service), KS-1964 (the same pattern in the auth service's `email.ts`).\n\n## How these two were found (the census)\n\nA balanced-parenthesis scan of every log call in `services/originate/src`, tests excluded: 60 files, 303 calls, 12 flagged. Ten are in `notificationClient.ts` (3) and `services/email.ts` (7), covered by the KS-1937 change; these two are the rest. Controls: the 3 known client lines, and the 7 `email.ts` lines that a plain grep found independently (the scanner's first version missed those 7 because it blanked template-literal text, interpolations included; fixed, and both controls now pass). **Limits:** it flags the identifiers `to`, `toEmail`, `email`, `emails`, `recipient*` and `address*` inside a log call's arguments. It does not follow a value held under another name, and it does not read error text that a library forwards, so an SMTP or notification-service error that echoes an address is **not** covered.\n\n## Board search (so nobody files this twice)\n\nRun 2026-11-06 over this team's titles, descriptions and comment bodies, archived included: `Certification shared` 0; `recipient.email` 0; `logs the recipient` 0; `email in the log` 0; `u.email` 2 (KS-1802 and KS-1817, both about how the thrown value is read in that catch, not the address); `Demo user seed failed` 6 (KS-1802, KS-1817, KS-1818, KS-1990, KS-2004, KS-960, all seed-demo-users catches or counts, read by title; none is about the address). Positive control: `notificationClient` returns KS-1937 and KS-1964.\n\n## What is not known, and what would settle it\n\n1. Whether either log reaches a persisted destination, and for how long. Settled by reading the deployment's log configuration.\n2. Whether any address in the demo-seed list is a real person's today (KS-913).\n3. The shape of the fix is not decided here. KS-1937's shape is the model: log the identifiers, not the address. For the share line `certificationId` and `shareType` already identify the event; for the seed line the entry's `id` identifies the failing row.\n\n## Priority\n\nMedium, as KS-1937 and KS-1964 read on the board.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

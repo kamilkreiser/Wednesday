@@ -1,0 +1,541 @@
+lines in file 540
+1 /**
+2  * =============================================================================
+3  * VERIFICATION ROUTES — /api/v2 (KS-584 P3: the verify-list contract)
+4  * =============================================================================
+5  * v1 verify-by-hash collapses the same-hash registration SET to one row —
+6  * the interim fix (KS-584, #662) made that collapse deterministic and honest,
+7  * but a single-row answer still cannot represent what the platform actually
+8  * holds: the certify flow legitimately creates multiple registrations for the
+9  * same bytes (original + signed_document), and templates/forms are registered
+10  * by many parties. v2 dissolves the selection problem instead of refining it:
+11  * every same-hash registration is returned as its own match, each presented
+12  * through the SAME honesty rules v1 applies to its selected row (KS-522
+13  * simulated-anchor labelling, KS-563 narrow certification claim, KS-584
+14  * tenant-field scoping).
+15  *
+16  * Contract (docs/design/2026-08-11_p3-verify-list-design.md):
+17  *   POST /api/v2/verification/verify        {hash|contentHash|documentId|documentData}
+18  *   POST /api/v2/verification/verify-file   raw file bytes as body
+19  *   → 200 { hash, count, matches: [...], verifiedAt }
+20  *
+21  * Anchor truth is CALLER-INDEPENDENT (QA finding, 2026-08-11): the anchoring
+22  * chain-fact read is pre-auth (leg 1), and this module never forwards the
+23  * caller's bearer — an anonymous caller and an authenticated one get byte-
+24  * identical anchor facts. Auth posture (Kam ruling: anonymous verify is a
+25  * supported public path): ABSENT token → anonymous 200; PRESENT-but-invalid
+26  * token → 401 via authenticate({required:false}) so a misconfigured client
+27  * learns to re-auth instead of silently degrading to anonymous.
+28  *
+29  * v1 (/api/verification/*) is UNTOUCHED — versioned coordinated cutover;
+30  * the cutover word is Kam's alone.
+31  */
+32 
+33 import { Router, Request, Response } from 'express';
+34 import { body, validationResult } from 'express-validator';
+35 import crypto from 'crypto';
+36 import { logger } from '../utils/logger';
+37 import { prisma, getTenantManager } from '../db';
+38 // KS-458: cross-tenant registry lookups run under the RESOLVED tenant's GUC.
+39 import { runWithTenantId, queryWithTenantGuc } from '@secuura/shared';
+40 import { authenticate } from '../middleware/auth';
+41 import {
+42   presentBlockchainHonestly,
+43   isCertifiedStatus,
+44   isVerifiableStatus,
+45   isAnchoredHonestly,
+46   buildCertification,
+47   chainBlobOfRow,
+48   rowHasRealTx,
+49   rowCreatedMs,
+50   isCrossTenantResponse,
+51   scopeTenantFields,
+52   healVerifyRow,
+53   generateHash,
+54   VERIFY_ROWSET_LIMIT,
+55   CHAIN_VERIFY_TIMEOUT_MS,
+56   resolveTrustedCertificationEvidence,
+57   type TrustedEvidence,
+58   // KS-1561: the original-holder rule v1 applies, shared so the two versions cannot disagree.
+59   certificationEligibility,
+60   type CertificationEligibility,
+61   // KS-1561 G188-F1: the original comes from the full same-hash set, not from the rows a capped read returned.
+62   ORIGINAL_ROWS_POOL_SQL,
+63   readOriginalRows,
+64   rowSetMayBeCut,
+65   withOriginalRows,
+66 } from './verification';
+67 
+68 export const verificationV2Router = Router();
+69 
+70 // PRESENT-but-invalid bearer → 401; ABSENT → anonymous pass-through. The
+71 // design-doc lean, implemented by the existing middleware's optional mode.
+72 verificationV2Router.use(authenticate({ required: false }));
+73 
+74 // Cross-tenant enumeration ceiling: distinct tenants consulted per hash.
+75 // Widely-shared bytes (a statutory form) could be registered by many tenants;
+76 // the list stays bounded and deterministic (registry order) rather than open.
+77 const V2_CROSS_TENANT_LIMIT = 8;
+78 
+79 // Column list for the cross-tenant pg-pool queries (the Prisma tagged
+80 // templates below inline the same list — keep them in step).
+81 const SELECT_COLUMNS = `
+82   d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+83   d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+84   d.tenant_id, d.parent_document_id, d.owner_user_id, d.issuer_organization_id, o.name AS organization_name`; // KS-1561: issuer_organization_id added for the original-holder rule
+85 
+86 // Mirrors repositories/documentRepo.ts — the KS-596 dual-identifier rule:
+87 // external_id is the S-supplied documentUuid when registration carried one;
+88 // otherwise the pkey UUID serves (it is already a working lookup key).
+89 function isValidUuid(s: unknown): boolean {
+90   return typeof s === 'string'
+91     && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+92 }
+93 
+94 const toIso = (v: unknown): string | null => {
+95   if (!v) return null;
+96   const d = v instanceof Date ? v : new Date(String(v));
+97   return Number.isNaN(d.getTime()) ? null : d.toISOString();
+98 };
+99 
+100 /**
+101  * One chain-fact read per request, CALLER-INDEPENDENT: no bearer is forwarded
+102  * (the anchoring endpoint is pre-auth since leg 1), so the answer cannot vary
+103  * with who asks. Non-2xx and transport errors are logged, never swallowed
+104  * silently (QA finding: the v1 heal used to fail closed in silence).
+105  */
+106 async function fetchChainFact(hashNorm: string): Promise<Record<string, any> | null> {
+107   try {
+108     const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+109     const resp = await fetch(`${anchoringBase}/api/anchors/verify/${encodeURIComponent(hashNorm)}`, {
+110       signal: AbortSignal.timeout(CHAIN_VERIFY_TIMEOUT_MS), // KS-252 ceiling
+111     });
+112     if (!resp.ok) {
+113       logger.warn('v2 verify: chain-fact read returned non-2xx; matches present stored state', { status: resp.status });
+114       return null;
+115     }
+116     const chain: any = await resp.json();
+117     return chain?.verified === true ? chain : null;
+118   } catch (err: any) {
+119     let reason: string | undefined;
+120     try {
+121       reason = err?.message;
+122     } catch {
+123       reason = 'unreadable thrown value';
+124     }
+125     logger.warn('v2 verify: chain-fact read failed; matches present stored state', { error: reason });
+126     return null;
+127   }
+128 }
+129 
+130 /**
+131  * The certification act recorded ON THIS ROW by the lineage certify path —
+132  * a 'signed' derived row carrying certificationId in its metadata blob
+133  * (written only by POST /api/certifications/issue; the sign-cert version path
+134  * writes none). In the list contract each registration testifies for itself,
+135  * so there is no sibling smear: the consumer sees the certification-act row
+136  * as its own match.
+137  */
+138 function ownRowCertification(row: any, trusted: TrustedEvidence, eligibility: CertificationEligibility): Record<string, unknown> | undefined {
+139   // KS-1561: a certified row reaching here is one the original's holder may present (matchesForHash drops the others).
+140   const fromStatus = buildCertification(row);
+141   if (fromStatus) return fromStatus;
+142   // KS-1557: a derived row's own metadata is caller-filled, so it testifies only through resolveTrustedCertificationEvidence
+143   // (a genuine act: parent link and hash, the id in its external id, and a real certification row). `trusted` is required: no default.
+144   // KS-1561: and only when the ORIGINAL registration's holder may present it; before KS-1561 any trusted evidence was presented.
+145   // `eligibility` is required, like `trusted`: a caller that forgot it would otherwise fail open.
+146   return eligibility.evidenceRow(row) ? trusted.get(row) : undefined;
+147 }
+148 
+149 /**
+150  * One registration → one match, through the same honesty rules as v1's
+151  * selected row: KS-522 simulated labelling, KS-563 narrow certification,
+152  * KS-584 tenant-field scoping (with an explicit `fieldsWithheld` marker so a
+153  * consumer can tell "withheld" from "absent").
+154  */
+155 function buildMatch(
+156   req: Request,
+157   row: any,
+158   hashValid: boolean,
+159   healed: Record<string, unknown> | null,
+160   trusted: TrustedEvidence,
+161   eligibility: CertificationEligibility, // KS-1561
+162 ): Record<string, unknown> {
+163   const isRevoked = row.status === 'revoked';
+164   const isVerifiable = isVerifiableStatus(row.status);
+165   const certMeta = (row.certification_metadata || {}) as Record<string, any>;
+166   const meta = (row.metadata || {}) as Record<string, any>;
+167   const honest = presentBlockchainHonestly(healed ?? certMeta.blockchain) as Record<string, unknown> | null;
+168   const certification = ownRowCertification(row, trusted, eligibility); // KS-1561: eligibility added
+169   const isCertified = isCertifiedStatus(row.status) || Boolean(certification);
+170   const issuerName = certMeta.issuerName || certMeta.certificationData?.issuedBy
+171     || meta.issuedBy || meta.certifiedBy || meta.issuerName || row.organization_name || null;
+172   const match: Record<string, unknown> = {
+173     documentId: row.external_id || row.id,
+174     documentUuid: isValidUuid(row.external_id) ? row.external_id : row.id,
+175     title: row.title ?? null,
+176     documentType: row.document_type ?? null,
+177     status: row.status,
+178     contentHash: row.content_hash,
+179     createdAt: toIso(row.created_at),
+180     certifiedAt: (certification?.certifiedAt as string | undefined) ?? toIso(row.certified_at),
+181     issuer: issuerName,
+182     blockchain: honest ?? null,
+183     ...(honest && honest.simulated === true ? { simulated: true } : {}),
+184     ...(certification ? { certification } : {}),
+185     checks: {
+186       documentExists: true,
+187       hashValid,
+188       isCertified,
+189       isAnchored: isAnchoredHonestly(honest, row.status),
+190       isRevoked,
+191       integrityVerified: hashValid && isVerifiable && !isRevoked,
+192     },
+193   };
+194   if (isCrossTenantResponse(req, row)) {
+195     return { ...scopeTenantFields(match, true), fieldsWithheld: true };
+196   }
+197   return match;
+198 }
+199 
+200 /**
+201  * A hash known ONLY to the chain index (cross-env cert, no registry row in
+202  * any reachable tenant) still gets an honest match — the v1 chain-first
+203  * fallback, in list shape. Claims only what the chain evidences (KS-563).
+204  */
+205 function chainOnlyMatch(chain: Record<string, any>, contentHash: string): Record<string, unknown> {
+206   const honest = presentBlockchainHonestly({
+207     anchored: true,
+208     network: chain.network,
+209     txHash: chain.txHash,
+210     blockHeight: chain.blockNumber,
+211     cardanoScanUrl: chain.cardanoScanUrl,
+212     confirmedAt: chain.confirmedAt,
+213     simulated: chain.simulated,
+214   }) as Record<string, unknown>;
+215   const certId = chain.metadata?.certId || chain.metadata?.certificationId || null;
+216   const docId = chain.metadata?.documentId || certId || null;
+217   return {
+218     documentId: docId,
+219     documentUuid: isValidUuid(docId) ? docId : null,
+220     source: chain.source === 'chain' ? 'blockchain' : 'blockchain-indexed',
+221     title: null,
+222     documentType: chain.metadata?.documentType || null,
+223     status: 'anchored',
+224     contentHash,
+225     createdAt: null,
+226     certifiedAt: chain.confirmedAt ?? null,
+227     issuer: chain.metadata?.issuerName || chain.metadata?.issuerOrgId || null,
+228     blockchain: honest,
+229     ...(honest && honest.simulated === true ? { simulated: true } : {}),
+230     ...(certId
+231       ? {
+232           certification: {
+233             certificationId: certId,
+234             certificationType: chain.metadata?.certificationType ?? null,
+235             certifiedAt: chain.confirmedAt ?? null,
+236             certifiedBy: chain.metadata?.issuerName ?? null,
+237             certifierOrganizationId: chain.metadata?.issuerOrgId ?? null,
+238           },
+239         }
+240       : {}),
+241     onChainMetadata: chain.metadata,
+242     checks: {
+243       documentExists: true,
+244       hashValid: true,
+245       isCertified: Boolean(certId),
+246       isAnchored: isAnchoredHonestly(honest, 'anchored'),
+247       isRevoked: false,
+248       integrityVerified: true,
+249     },
+250   };
+251 }
+252 
+253 /** Presentation order: certified (most recent act first) → real confirmed tx
+254  *  → real in-flight tx → the rest oldest-first. Deterministic, and mirrors the
+255  *  v1 interim's selection precedence so v2's matches[0] is v1's answer for
+256  *  every same-hash group (asserted by the parity sweep). */
+257 function matchRank(row: any): number {
+258   if (isCertifiedStatus(row?.status)) return 0;
+259   if (rowHasRealTx(row)) return chainBlobOfRow(row)?.status === 'confirmed' ? 1 : 2;
+260   return 3;
+261 }
+262 
+263 // Millisecond-precise read of certified_at. Prisma hands back a Date, and
+264 // Date.parse(String(date)) silently TRUNCATES to whole seconds (the default
+265 // Date stringification carries no ms) — near-simultaneous certifications then
+266 // tie and the wrong tiebreak wins. Caught live by the parity sweep on a
+267 // 576-row group whose certified_at values differ by single milliseconds.
+268 const rowCertifiedMs = (row: any): number => {
+269   const v = row?.certified_at;
+270   if (!v) return 0;
+271   const t = v instanceof Date ? v.getTime() : Date.parse(String(v));
+272   return Number.isFinite(t) ? t : 0;
+273 };
+274 
+275 function sortRowsForPresentation(rows: any[]): any[] {
+276   return [...rows].sort((a, b) => {
+277     const ra = matchRank(a);
+278     const rb = matchRank(b);
+279     if (ra !== rb) return ra - rb;
+280     if (ra === 0) {
+281       // Most recent certification first (v1's certified_at DESC pre-sort).
+282       const diff = rowCertifiedMs(b) - rowCertifiedMs(a);
+283       if (diff !== 0) return diff;
+284     }
+285     return rowCreatedMs(a) - rowCreatedMs(b);
+286   });
+287 }
+288 
+289 /** Same-hash rows from the caller's tenant DB (bounded). */
+290 async function localRowsByHash(db: any, computedHash: string, hashNorm: string): Promise<any[]> {
+291   const rows: any[] = await db.$queryRaw`
+292     SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+293            d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+294            d.tenant_id, d.parent_document_id, d.owner_user_id, d.issuer_organization_id, o.name AS organization_name -- KS-1561: issuer_organization_id is read by the original-holder rule (it was only
+295     FROM documents d
+296     LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+297     WHERE d.content_hash = ${computedHash}
+298        OR d.content_hash = ${hashNorm}
+299        OR d.content_hash = ${'sha256:' + hashNorm}
+300     ORDER BY d.certified_at DESC NULLS LAST
+301     LIMIT ${VERIFY_ROWSET_LIMIT}
+302   `;
+303   // KS-1561 G188-F1: a full read may have cut the original out; read the earliest registration(s), merge them by id.
+304   return rowSetMayBeCut(rows) ? withOriginalRows(rows, await readOriginalRows(db, computedHash, hashNorm)) : rows;
+305 }
+306 
+307 /**
+308  * Same-hash rows from every OTHER tenant the platform registry knows about
+309  * (bounded). v1's crossTenantLookup stops at the FIRST registry row — one
+310  * tenant answers for everyone; here each registered tenant contributes its
+311  * rowset. Single-tenant deployments (demo, local) have no tenant manager and
+312  * skip this entirely.
+313  */
+314 async function crossTenantRowsByHash(computedHash: string, hashNorm: string): Promise<any[]> {
+315   const mgr = getTenantManager();
+316   if (!mgr) return [];
+317   const out: any[] = [];
+318   try {
+319     const platformPool = mgr.getPlatformPool();
+320     // KS-1561 G188-F1 (Wednesday's ruling (b), 2026-11-04): rank the tenants by their EARLIEST registration of these
+321     // bytes, so the cap of V2_CROSS_TENANT_LIMIT cannot drop the tenant holding the original. ORDER BY tenant_id could:
+322     // with nine tenants holding the hash and the original's the ninth by id, v2 listed eight later certified copies
+323     // (PostgreSQL 15, Seat F 30th). The rank reads the registry's created_at, the clock D4 already uses for v1's
+324     // cross-tenant pick, so it carries D4's residual: a tenant whose registry row was written late (the fire-and-forget
+325     // register after POST /documents failed and a later registration wrote it, or no register path ran) ranks late.
+326     const reg = await platformPool.query(
+327       `SELECT tenant_id, tenant_slug FROM platform_document_registry
+328        WHERE content_hash = $1 OR content_hash = $2 OR content_hash = $3
+329        GROUP BY tenant_id, tenant_slug
+330        ORDER BY MIN(created_at) ASC, tenant_id
+331        LIMIT ${V2_CROSS_TENANT_LIMIT}`,
+332       [computedHash, hashNorm, `sha256:${hashNorm}`],
+333     );
+334     for (const r of reg.rows) {
+335       try {
+336         const pool = mgr.getPool(r.tenant_id);
+337         const docRows = await runWithTenantId(r.tenant_id, () => queryWithTenantGuc(
+338           pool,
+339           `SELECT ${SELECT_COLUMNS}
+340            FROM documents d
+341            LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+342            WHERE d.content_hash = $1 OR d.content_hash = $2 OR d.content_hash = $3
+343            ORDER BY d.certified_at DESC NULLS LAST
+344            LIMIT ${VERIFY_ROWSET_LIMIT}`,
+345           [computedHash, hashNorm, `sha256:${hashNorm}`],
+346         ));
+347         // KS-1561 G188-F1: a full read may have cut the original out of this tenant's rows; merge the earliest by id.
+348         let tenantRows: any[] = docRows.rows;
+349         if (rowSetMayBeCut(tenantRows)) {
+350           const originals = await runWithTenantId(r.tenant_id, () => queryWithTenantGuc(
+351             pool, ORIGINAL_ROWS_POOL_SQL, [computedHash, hashNorm, `sha256:${hashNorm}`],
+352           ));
+353           tenantRows = withOriginalRows(tenantRows, originals.rows);
+354         }
+355         out.push(...tenantRows.map((row: any) => ({ ...row, _tenantId: r.tenant_id, _tenantSlug: r.tenant_slug })));
+356       } catch (err: any) {
+357         logger.warn('v2 verify: cross-tenant rowset fetch failed', { tenant: r.tenant_slug, error: err?.message });
+358       }
+359     }
+360   } catch (err: any) {
+361     logger.warn('v2 verify: platform-registry enumeration failed', { error: err?.message });
+362   }
+363   return out;
+364 }
+365 
+366 /** Core: resolve a hash to its full match list. */
+367 async function matchesForHash(req: Request, computedHash: string): Promise<{ hash: string; matches: Record<string, unknown>[] }> {
+368   const hashNorm = computedHash.replace(/^sha256:/, '');
+369   const canonicalHash = `sha256:${hashNorm}`;
+370   const db = (req as any).db || prisma;
+371 
+372   const local = await localRowsByHash(db, computedHash, hashNorm);
+373   const cross = await crossTenantRowsByHash(computedHash, hashNorm);
+374   // Dedupe on pkey — the registry enumeration can include the caller's own
+375   // tenant, whose rows the local query already returned (unscoped wins).
+376   const seen = new Set(local.map((r: any) => String(r.id)));
+377   const rows = [...local, ...cross.filter((r: any) => !seen.has(String(r.id)))];
+378 
+379   // Chain economy (KS-252): the chain-fact read runs only when the registry misses entirely (the chain-first fallback).
+380   // KS-1384 R2b part 5 (D3): it no longer heals a row. Before R2b a stale-pending row was healed from this pre-auth chain
+381   // answer on the same tx OR sameDoc; now every row goes through the one shared heal (verification.ts healVerifyRow), and
+382   // v2 is caller-independent, so it forwards NO bearer and nothing heals here: the stored state is presented, fail closed,
+383   // until the GET reconcile or the poller heals it (Wednesday's ruling on part 5, 2026-10-31 19:55:30Z).
+384   if (rows.length === 0) {
+385     const chain = await fetchChainFact(hashNorm);
+386     return { hash: canonicalHash, matches: chain ? [chainOnlyMatch(chain, canonicalHash)] : [] };
+387   }
+388   const trusted = await resolveTrustedCertificationEvidence(rows, { db });
+389   // KS-1561 (Wednesday's ruling (A), 2026-11-04 08:54:47Z): a CERTIFIED registration that the ORIGINAL registration's
+390   // holder may not present is left out of the matches, exactly as v1 leaves it out of selection. The count excludes it and
+391   // no field of it is presented: keeping it would still tell a verifier about the act through status 'certified',
+392   // certifiedAt and issuer. Uncertified non-original registrations stay listed as before. The rule is computed over the
+393   // WHOLE set, local and cross-tenant, so "original" is the earliest registration anywhere in it.
+394   // Before KS-1561 every same-hash row was a match and a later registrant's certified copy was matches[0].
+395   const eligibility = certificationEligibility(rows);
+396   const presentable = rows.filter((row: any) => !isCertifiedStatus(row?.status) || eligibility.certifiedRow(row));
+397   const sorted = sortRowsForPresentation(presentable); // KS-1561: was sortRowsForPresentation(rows)
+398   const healed = await Promise.all(sorted.map((row) => healVerifyRow(row, chainBlobOfRow(row), '')));
+399   return {
+400     hash: canonicalHash,
+401     matches: sorted.map((row, i) => buildMatch(req, row, true, healed[i], trusted, eligibility)), // KS-1561: eligibility added
+402   };
+403 }
+404 
+405 // =============================================================================
+406 // ROUTES
+407 // =============================================================================
+408 
+409 /**
+410  * POST /api/v2/verification/verify
+411  * The list contract: every registration of the supplied bytes, each match
+412  * standing on its own evidence. 200 always carries {hash, count, matches} —
+413  * count 0 is the honest "never registered" answer.
+414  */
+415 verificationV2Router.post(
+416   '/verify',
+417   [
+418     body('documentId').optional().isString(),
+419     body('hash').optional().isString(),
+420     body('contentHash').optional().isString(),
+421     body('providedHash').optional().isString(),
+422     body('documentHash').optional().isString(),
+423     body('documentData').optional().isObject(),
+424   ],
+425   async (req: Request, res: Response) => {
+426     try {
+427       const validationErrors = validationResult(req);
+428       if (!validationErrors.isEmpty()) {
+429         return res.status(400).json({
+430           success: false,
+431           error: {
+432             code: 'BAD_REQUEST',
+433             message: 'documentId, hash, contentHash, providedHash and documentHash must be strings; documentData must be an object.',
+434           },
+435         });
+436       }
+437 
+438       const { documentId, hash, providedHash, contentHash, documentHash, documentData } = req.body || {};
+439       const hashToVerify = hash || providedHash || contentHash || documentHash;
+440       if (!documentId && !hashToVerify && !documentData) {
+441         return res.status(400).json({
+442           success: false,
+443           error: { code: 'BAD_REQUEST', message: 'Provide a content hash (or documentData to hash), or a documentId.' },
+444         });
+445       }
+446 
+447       // Hash strategy (strongest — proves integrity) wins when present.
+448       let computedHash: string | undefined = hashToVerify;
+449       if (!computedHash && documentData) computedHash = generateHash(documentData);
+450 
+451       if (computedHash) {
+452         const { hash: canonicalHash, matches } = await matchesForHash(req, computedHash);
+453         return res.json({ hash: canonicalHash, count: matches.length, matches, verifiedAt: new Date().toISOString() });
+454       }
+455 
+456       // documentId-only strategy: exact registration lookup (KS-596 dual
+457       // identifiers: external_id first, then pkey UUID). hashValid=false —
+458       // existence, not integrity.
+459       const db = (req as any).db || prisma;
+460       let rows: any[] = await db.$queryRaw`
+461         SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+462                d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+463                d.tenant_id, d.parent_document_id, d.owner_user_id, o.name AS organization_name
+464         FROM documents d
+465         LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+466         WHERE d.external_id = ${documentId} LIMIT 1
+467       `;
+468       if (rows.length === 0 && isValidUuid(documentId)) {
+469         try {
+470           rows = await db.$queryRaw`
+471             SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+472                    d.certification_metadata, d.metadata, d.created_at, d.certified_at,
+473                    d.tenant_id, d.parent_document_id, d.owner_user_id, o.name AS organization_name
+474             FROM documents d
+475             LEFT JOIN organizations o ON d.issuer_organization_id = o.id
+476             WHERE d.id = ${documentId}::uuid LIMIT 1
+477           `;
+478         } catch { /* not resolvable as pkey */ }
+479       }
+480       const trusted = await resolveTrustedCertificationEvidence(rows, { db });
+481       // KS-1561: the documentId strategy names ONE registration, so the rule over that one-row set leaves it unchanged
+482       // (the row is its own original); the eligibility is passed because buildMatch requires it.
+483       const matches = rows.map((row) => buildMatch(req, row, false, chainBlobOfRow(row), trusted, certificationEligibility(rows)));
+484       return res.json({ hash: null, count: matches.length, matches, verifiedAt: new Date().toISOString() });
+485     } catch (error) {
+486       let reason: string;
+487       try {
+488         reason = String(error instanceof Error ? error.message : error);
+489       } catch {
+490         reason = 'unreadable thrown value';
+491       }
+492       logger.error('v2 verification error', { error: reason });
+493       return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Verification failed' } });
+494     }
+495   },
+496 );
+497 
+498 /**
+499  * POST /api/v2/verification/verify-file
+500  * Raw file bytes as the request body; the server computes the hash, so a
+501  * client cannot lie about it. Same list contract as /verify.
+502  */
+503 verificationV2Router.post('/verify-file', async (req: Request, res: Response) => {
+504   try {
+505     const chunks: Buffer[] = [];
+506     await new Promise<void>((resolve, reject) => {
+507       req.on('data', (chunk: Buffer) => chunks.push(chunk));
+508       req.on('end', resolve);
+509       req.on('error', reject);
+510     });
+511     const fileBuffer = Buffer.concat(chunks);
+512     if (fileBuffer.length === 0) {
+513       return res.status(400).json({
+514         success: false,
+515         error: { code: 'BAD_REQUEST', message: 'No file content received. Upload the document file as the request body.' },
+516       });
+517     }
+518     const fileHash = `sha256:${crypto.createHash('sha256').update(fileBuffer).digest('hex')}`;
+519     const { hash: canonicalHash, matches } = await matchesForHash(req, fileHash);
+520     return res.json({
+521       hash: canonicalHash,
+522       fileSize: fileBuffer.length,
+523       count: matches.length,
+524       matches,
+525       verifiedAt: new Date().toISOString(),
+526     });
+527   } catch (error) {
+528     let reason: string;
+529     try {
+530       reason = String(error instanceof Error ? error.message : error);
+531     } catch {
+532       reason = 'unreadable thrown value';
+533     }
+534     logger.error('v2 file verification error', { error: reason });
+535     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'File verification failed' } });
+536   }
+537 });
+538 
+539 export default verificationV2Router;
+540 

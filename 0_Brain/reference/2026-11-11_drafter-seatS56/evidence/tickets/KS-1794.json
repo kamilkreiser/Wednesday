@@ -1,0 +1,51 @@
+{
+ "identifier": "KS-1794",
+ "title": "smoke-test.sh is not remote-clean: 12 localhost:60xx checks, RUNBOOK 2.2's remote full run, and URL credentials echoed in \"Smoke target:\"",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-28T13:40:29.443Z",
+ "updatedAt": "2026-11-09T05:02:29.491Z",
+ "description": "**BLUF:** `scripts/smoke-test.sh` is still not remote-clean after PR 1793 made its `GATEWAY` honour `SMOKE_BASE_URL` (KS-1250). One remote full run would show all three problems below at once, which is why they are one ticket. Low. Related to KS-1250. Filed on the tier-2 gate's note (gate 8, 2026-10-28), after a search of the board (quoted at the end).\n\n**Nobody runs this script against kintsugi, demo or any live box to reproduce or check any of this.** A full run anchors a real document, and that run is held for Kam (the KS-1250 hold). Everything below was read from the script or measured with a stub `curl` on a private PATH against a `.invalid` host.\n\n1. **12 hard-coded** `http://localhost:60xx` **service-port checks remain in the full run** (sections 7 onward): lines 259, 263, 267, 275, 283, 292, 305, 307, 317, 319, 327 and 329 of `Blockchain/Dev/scripts/smoke-test.sh` at PR 1793's head `29989b01ab05`. PR 1793 moves only `GATEWAY`, so with `SMOKE_BASE_URL` set to a remote gateway those 12 checks still hit localhost, and the run mixes two environments while reading as a result for one.\n2. **RUNBOOK section 2.2 still tells an operator to do a remote full run.** `Blockchain/Dev/deployment/azure/RUNBOOK.md` lines 139 to 143: `SMOKE_BASE_URL=https://<prod-gateway-fqdn> ../../scripts/smoke-test.sh`, under the heading \"Bash smoke against production gateway\", with no `--quick`.\n3. **The** `Smoke target:` **line echoes credentials embedded in the URL verbatim.** Measured with a stub `curl` and `--quick`: `SMOKE_BASE_URL='https://alice:s3cr3t-token@smoke-target.invalid:9999'` (a fake credential) prints, as line 1 of the output, `Smoke target: https://alice:s3cr3t-token@smoke-target.invalid:9999`. A base URL carrying a token or basic-auth would be written to the terminal and to any CI log. The stub recorded 9 requests, all to `smoke-target.invalid`.\n\nAlso on this ticket: **no test cell uses an** `https://` **base** (the new suite uses `http://smoke-target.invalid:9999`), so the gate's mutant M11 survives.\n\nFix shapes, not chosen here: route the 12 service-port checks through a base the way `GATEWAY` is, or skip them with a printed line when the base is not localhost; make section 2.2 say `--quick` or say what a remote full run does not cover; print the target as scheme, host and port only.\n\n**Searched before filing** (Linear `issues` filter over title, description and comments, archived included, team KS, 2026-10-28 13:4xZ): `remote-clean` 1 hit, KS-1250 itself; `smoke-test.sh` 11 hits, read: none is this follow-up (KS 1245 is the Done degraded-health fix, KS 1139 the arithmetic-under-errexit fix, KS 1101 a health-aggregation ticket); `SMOKE_BASE_URL` 2 hits, KS-1250 and a review comment on KS 1101 that repeats the same O-2 finding; `Smoke target` 1 hit, KS-1250; the zero control `zzqq-no-such-token-r6b` 0 hits.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2124",
+    "title": "Refs KS-1794: smoke-test.sh no longer prints URL credentials on its \"Smoke target:\" line"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "6d565175-5586-45d7-8d4c-8024d464dcf9",
+    "createdAt": "2026-11-09T03:43:02.288Z",
+    "body": "**BLUF:** PR 2124 (head `17f43f1be6849fc83af073e6ab1eebf373883bc7`, two commits on develop `4d6b7bb17fd3be7b3fde8a3babc5d59c91c959b8`) makes `smoke-test.sh` print its `Smoke target:` line without any `user:password@` part of the base URL, including a password that holds an @, which is item 3 of this ticket, and adds four cells to its existing suite. It changes one tooling script by two comment lines and one rewritten line; no service or frontend changes. The request still goes to the full base URL. It waits for its QA gate (tier 2; fix round 1 of 2 after gate 282, a narrow compare). Nothing is merged or deployed, and this comment changes no state; the pull request says Refs, so it leaves this ticket open, and item 2 (the RUNBOOK) is not in it.\n\n- **The change** (2 files, +22 -1, two commits): `smoke-test.sh` +3 -1 and `smoke_test_honours_smoke_base_url.test.sh` +19. Fix round 1 (gate 282) is the second commit `17f43f1be684`: the comment now says only what the change does, the `sed` is `[^/]*@` (a password that holds an @ no longer leaves its tail), and one cell pins that.\n- **Proof** (measured by Seat T 21st on develop `4d6b7bb17fd3`, with the repository's own stub-curl suites, the script was not run against any real host; round 1 re-measured by Seat T 22nd in scratch copies): the suite goes from 5 to 8 cells with the first commit and to 9 with round 1, 0 failed; with only the first commit's script change reversed it shows the 2 expected FAIL lines; with the script put back to the first commit's the round 1 cell is the only FAIL; the three other suites that drive the script print identical output; two single-cause mutants of the first commit turn 2 cells and 1 cell red; the old pattern back turns exactly the round 1 cell red, and a `.*` variant is NOT caught (no cell pins the stop at the first slash).\n- **Not covered:** the skip warnings (lines 48 and 57 at this head, 15 call sites) still print the full base URL, credentials included, on a full run against a non-local gateway; the cells run in `--quick` mode and cannot see them. Also not covered: a secret in the query string, a base URL with no scheme, and GNU `sed`.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "95c43c3e-cea2-41c5-9a9a-9a50b6aeb639",
+    "createdAt": "2026-11-06T09:21:29.574Z",
+    "body": "**BLUF:** Item 1 of this ticket (the twelve hard-coded localhost service-port checks) is delivered by PR 2043, merged to develop as 9cdb9321aa8a on 2026-11-06. Items 2 and 3 are still open at develop d00221c38e12. Facts only; this ticket's state, priority and assignee are unchanged.\n\n* PR 2043 makes a run against a non-local gateway skip those twelve checks with a printed line instead of testing localhost. Gate 222 (tier 2, GO WITH NOTES at head 825b44b53547) counted 12 call sites matching 12 skip names. Nothing was run against a live box.\n* The gate's notes on that PR are KS-2080 (Medium): the remote run's summary and exit code do not show the skips, sections 10 and 11 still read the local docker stack, and no cell guards the skip count.\n* Item 2, read at develop d00221c38e12: `Blockchain/Dev/deployment/azure/RUNBOOK.md` line 143 still reads `SMOKE_BASE_URL=https://<prod-gateway-fqdn>` in its \"Bash smoke\" section.\n* Item 3, read at the same sha: `Blockchain/Dev/scripts/smoke-test.sh` line 18 is still `echo \"Smoke target: $GATEWAY\"`, with no scrubbing of credentials in the URL.\n* Not covered: nothing was run; both files were read through the GitHub API.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

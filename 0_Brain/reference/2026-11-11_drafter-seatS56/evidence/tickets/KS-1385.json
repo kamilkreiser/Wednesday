@@ -1,0 +1,216 @@
+{
+ "identifier": "KS-1385",
+ "title": "KS-1175 follow-on: the anchors K emits for share / transfer-custody / lifecycle-events carry no documentType and drop Platform-S's identity block \u2014 only originate and the flat anchor anchor identity",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-29T09:18:39.876Z",
+ "updatedAt": "2026-11-10T07:21:55.874Z",
+ "description": "## Found by\n\nThe S\u2194K compatibility review of 2026-09-29 (platform-k `0aa9b52c6`, platform-s `477eb57`).\n\n## The gap\n\n[KS-1175](https://linear.app/secuura/issue/KS-1175/anchor-originate-lifecycle-event-schemas-accept-and-anchor-platform-ss) (merged `cbae988db`, `910687394`) accepts the `identity` block on `POST /api/anchors` and anchors it beside `documentType` / `occurredAt` (`services/anchoring/src/anchorSchema.ts:128-151, 261-315`). Platform-S sends that block on **every** write once `CardanoAnchor:AnchorIdentity` is on \u2014 flat anchors, originate, version, certifications, share, transfer-custody and lifecycle-events (`ssd/Services/CardanoAnchor/CardanoAnchorService.cs:1606-1631`).\n\nOn K, three of those routes never carry it to the anchor:\n\n* `POST /api/documents/{id}/lifecycle-events` reads only `action` and `payload`; an `identity` key in the body is ignored (`services/originate/src/routes/documents.ts:2440-2545`).\n* `POST /{id}/share` and `POST /{id}/transfer-custody` likewise.\n* All three anchor through `emitLifecycleAnchor`, whose body is `{documentId, contentHash, network}` \u2014 no `metadata.documentType`, no `identity` (`documents.ts:1275-1297`).\n\nResult: for every non-mutating verb (delete, share-revoke, the share-\\* edits, rights-unassign, note, certified, verified, share, rights-assign/reassign) the chain record has no verb and no actor/organisation identity, whatever S sends. Only `upload` (originate) and the flat-anchor fallback carry them.\n\n## Ask\n\n1. Carry `identity` (and the verb as `metadata.documentType`) from the share / transfer-custody / lifecycle-events request bodies into the `emitLifecycleAnchor` call, so the anchor records them \u2014 subject to the per-document-anchor ruling on the companion ticket (a reset row would not keep them anyway).\n2. Declare `identity` on `DocumentShareRequest`, `TransferCustodyRequest` and `LifecycleEventRequest` in `originate.openapi.ts` so S's [PS-614](https://linear.app/secuura/issue/PS-614/check-ss-verb-vocabulary-against-platform-ks-openapi-enum-at-gate-time) gate can see it (today S's `k_openapi_vocabulary.test.ts` only checks `onBehalfOf` placement).\n3. Echo what was anchored on the lifecycle-event response, so S's read-back ([PS-870](https://linear.app/secuura/issue/PS-870/6-send-the-identity-record-to-platform-k-on-every-anchored-verb) item 5) works on these verbs too.\n\n## Verify\n\nPaired slot with `AnchorIdentity=true` on S: a `share-revoke` on an originated document \u2192 the anchor read (`GET /api/anchors/{id}`) returns `identity.actorDid` and `metadata.documentType = share-revoke`. Today it returns neither.\n\nRelated: [KS-1175](https://linear.app/secuura/issue/KS-1175/anchor-originate-lifecycle-event-schemas-accept-and-anchor-platform-ss), [PS-870](https://linear.app/secuura/issue/PS-870/6-send-the-identity-record-to-platform-k-on-every-anchored-verb), [PS-864](https://linear.app/secuura/issue/PS-864/epic-id-status-stored-and-shown-throughout-the-system-actor-and), the [PS-895](https://linear.app/secuura/issue/PS-895/question-in-simulated-anchoring-six-distinct-lifecycle-events-on-one) companion ticket (one anchor per document).",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1384"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-801"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-895"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-864"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-614"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1175"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-870"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1607",
+    "title": "Refs KS-1385 (b): a holder's update keeps the first-anchored issuer fields"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1568",
+    "title": "Refs KS-1612 + KS-1385 (b): the anchor-overwrite guard reaches originate's anchors and no-issuer rows"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1549",
+    "title": "KS-1385: the latest event's identity is the anchored identity, at all six ruled sites"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "386dc1c2-3970-4844-a7b0-eb763877f5c7",
+    "createdAt": "2026-11-10T07:22:11.527Z",
+    "body": "**Question from S (PS-1651): watermark and signature anchors carry no identity block on chain.** Measured on Kintsugi and demo-pk, 3 to 10 Nov 2026, with label 674 read on Koios.\n\n* With the identity block on, S's uploads and declares carry all eight identity fields on chain (e.g. dev-ps document 26: upload `4ec68662\u2026` and declare `1fa84ce4\u2026`; uat-ps row 124: `c9f8c80f\u2026`, with a `did:jwk` actor).\n* The version flow's transactions carry **none**:\n  * dev-ps document 26's watermark, `47bfcb06\u2026`;\n  * document 23's `sign-cert`, `c82f24c6\u2026`;\n  * uat-ps document 25's watermark, `4c70d035\u2026`.\n\nWhat S sends:\n1. `POST /api/documents/{parent}/version`, **with** the identity block.\n2. `POST /api/documents/{newId}/anchor`, with an empty body.\n\nYour re-anchor route builds the version's on-chain payload without the identity `/version` received.\n\n**Which do you prefer?**\n* **(a)** S sends the identity block on `/{id}/anchor`. Does the route accept it and anchor it today, or would it need a change?\n* **(b)** K carries the identity stored with the version into that version's anchor.\n\nS holds its side (PS-1651) until you choose.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "ece4ac28-953e-48de-91fb-c527dd3830d5",
+    "createdAt": "2026-11-08T10:51:35.822Z",
+    "body": "**BLUF:** A share event's anchor payload carries no `issuerOrgId` and no `environment`. By a read of originate's chain-fallback verify, an answer built from such an anchor then shows the issuer organisation and the certifier organisation id as null. The key sets were probed by Seat AA 5th; the code I read at develop; nothing was run end to end. No action is asked of anyone here: this records the reading.\n\nKey sets. `PROBE payload-keys` in `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-06_seatAA-5th/evidence/ks1384/probe_share3.lines`, measured at develop `c5c26b2835df` with the real flat-anchor payload builder:\n- Upload payload keys: `algorithm`, `certId`, `documentId`, `environment`, `hash`, `identityCommitment`, `issuerOrgId`, `network`, `orgDid`, `orgTrust`, `timestamp`, `type`, `version`.\n- Share payload keys: the same list without `environment` and without `issuerOrgId`.\n\nCode. `Blockchain/Dev/services/originate/src/routes/verification.ts` at develop `14ac61bd1a4c854c17539f1cd0f518631f998fbb`, in the chain-first fallback (comment at lines 948 and 949): line 988 reads `issuer: chain.metadata?.issuerName || chain.metadata?.issuerOrgId || null` and line 997 reads `certifierOrganizationId: chain.metadata?.issuerOrgId ?? null`. AA 5th's reading is that both come out null for a share's anchor. I did not run it.\n\nWhat I could not tell. Whether this sits inside the scope of the merged pull requests 1549, 1568 and 1607 on this ticket or is a separate gap: I did not read those diffs. I also did not check whether the share path writes `issuerName` into the metadata by another route.\n\nRelated: the probe also shows a second admitted share building a second transaction. That behaviour is ruled to stay until stage 2 (card `secuura-ks1384-share-pays-second-tx-before-stage2-1106` = a) and is not part of this comment.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "1a3b1393-d6f5-4b73-b1eb-4a31841e6d19",
+    "createdAt": "2026-11-04T02:32:15.242Z",
+    "body": "**BLUF:** Not run on kintsugi: needs a custody transfer. Delivered: PRs 1549, 1568 and 1607 merged as 8cbadd8d403f, 04a4a33938f0 and 7e2f8157cec2 on develop, deployed to kintsugi at ee1e1b832115 (kintsugi's REVISION head, read 2026-11-04 01:59Z). Left open.\n\n- **Owed check:** the holder-update check named in the 2026-10-19 comment.\n- **Why not run:** It needs a Platform S custody transfer, a write this sweep does not make.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "00e0c400-1e35-4564-a0f0-5fd9771cf075",
+    "createdAt": "2026-11-02T03:24:19.325Z",
+    "body": "**BLUF:** Delivered: PRs 1549, 1568 and 1607 merged as 8cbadd8d403f, 04a4a33938f0 and 7e2f8157cec2 on develop, deployed to kintsugi at b1fb543640e7 (2026-11-01). Verified by code read, not observed live. Left open: live sweep owed (write): the holder-update check named in the 2026-10-19 comment on this ticket needs a write on kintsugi.\n\n- **In the code at b1fb543640e7:** `anchorOverwriteGuard.ts:148` names the four frozen issuer fields (`issuerOrgId`, `orgDid`, `orgTrust`, `orgVerified`), and `index.ts:1701` in the anchoring service logs `KS-1385 (b): applied the update and kept the first-anchored issuer fields` when a holder's update is applied.\n- **What the three PRs cover:** 1549 anchors the latest event's identity at the six ruled sites, 1568 carries the guard to originate's anchors and no-issuer rows, 1607 keeps the first-anchored issuer fields on a holder's update.\n- **Follow-up with its own ticket:** KS-1644 (the two Info items from gate U1).\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "ca6941ac-23a3-46d2-9714-d31b75d10a5e",
+    "createdAt": "2026-10-29T13:59:42.938Z",
+    "body": "**BLUF:** The 2026-10-13T12:23Z correction on this ticket (\"INF-1, corrected\": \"There is no `signatureHash` in the anchored payload\") was accurate when written and does not hold as of develop ed12d4e08d43, because pull request 1811 (KS 1454, p1 and p2) added `signatureHash` to the anchored payload. This comment records what I read and measured. It changes nothing in the ruling on this ticket and recommends nothing.\n\n- **Instrument 1, `git grep -n signatureHash` at develop ed12d4e08d43, non-test source in `services/anchoring/src` and `services/originate/src`:** `anchorSchema.ts` 5 hits (the request field at :266, the `sign`-only refinement at :301 to :305, and the payload builder at :366, which spreads `signatureHash` under `secuura` beside `documentType`); `anchorReadback.ts` 4 hits; `services/originate/src/routes/documents.ts` 2 hits at lines 911 and 912, which are a code COMMENT repeating the older statement (\"There is NO `signatureHash` in the anchored payload\"). That comment is also out of date at this commit.\n- **Instrument 2, reading `services/anchoring/src/index.ts` at the same commit** (the upsert starts at :1456, `metadata_payload = CASE` at :1504): the stored `metadata_payload` is replaced by the incoming one only when the ownership guard, `content_hash` equality and `anchor_type` equality all hold (:1504 to :1524). An admitted overwrite by the issuer's organisation takes the whole incoming payload (`ELSE EXCLUDED.metadata_payload`, :1522). An admitted overwrite by anyone else keeps the four `ISSUER_FIELDS` (`issuerOrgId`, `orgDid`, `orgTrust`, `orgVerified`, at `anchorOverwriteGuard.ts:148`) and takes the rest of the incoming payload (:1512). `signatureHash` is not among those four. So, read from the SQL, an admitted later event whose payload carries no `signatureHash` leaves the stored row without one, which is the 2026-10-13T10:49Z statement applied to a payload that now carries the field.\n- **Not measured:** no database was run, so what `GET /api/anchors/:id` and the database-source verify return after a later event is reading, not measurement. QA gate 18 recorded the same point (its finding 1811-4).\n- **Unchanged:** the ruling on this ticket (\"Latest event's identity wins\", quoted in the SQL comment above :1504). The same SQL comment names KS 1384 (one row per `(document_id, network)`) as the structural question and leaves it untouched; so does this comment.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "8126b5b9-76fc-4452-b59f-033d2f6efdac",
+    "createdAt": "2026-10-19T05:45:49.689Z",
+    "body": "**BLUF: @stuart.jamieson \u2014 the merge is already recorded above, so this is the part that was missing: what the deploy actually waits on, in plain words. Five conditions, and only one of them is ours to clear unilaterally. No date, deliberately.**\n\nYou asked when this rides Kintsugi. Nobody has written the full precondition list on a ticket before, which is why the answer has read as vague. Here it is.\n\n1. **Your own dev-ps deploy.** The order you set still holds: Kintsugi takes K only after dev-ps is running S `aeae5ca` or later. Your document records that deploy as pending with you, so this one is not a K action and we are not treating it as one.\n2. **Kam has to have seen the KS-1570 round.** The standing deploy-blocker is \"not until the tenant-level ADMIN bound is merged *and* Kam has seen it\". The merge half is done \u2014 all five pieces landed on 13 Oct. The second half is his, and it is in front of him.\n3. **The KS-1032 vouch secret** has to be in place on the target box.\n4. **Migrations 050 and 051 each need their own census on the box they are applied to.** They are data migrations over the live anchor table, so a census run on develop proves nothing about Kintsugi. That is the deploy seat's work at apply time, not something that can be pre-cleared from here.\n5. **A new one, and it is the reason we would not deploy today even if 1\u20134 were clear.** On develop a Platform S custody transfer currently answers **500**; on Kintsugi it answers 404. A deploy right now would therefore regress you from 404 to 500. That fix is in progress as its own piece of work. We would not have found this by looking at the deploy list \u2014 it came out of your own 14 and 15 October measurements on KS-1402.\n\n**What is true today:** the ruling is on develop, it is not on any box, and this ticket stays In Progress until it is and the live check is done. Nothing is being asked of you here beyond item 1, which you already own.\n\nThe migration-census detail sits on KS-1612 rather than being repeated here.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "a5f6b2d6-dbfa-4f79-922c-6f9cd7bba613",
+    "createdAt": "2026-10-19T05:03:44.467Z",
+    "body": "**BLUF: Kam's (b) on card `secuura-ks1385-cert-holder-can-rewrite-issuer-fields-1018` (\"Holder may update, but not the issuer fields\") is MERGED to develop as `7e2f8157cec2`, the squash of #1607 at `243d324d4dd7`. It went through two Opus gates: T1 GO WITH NOTE, then delta gate U1 GO. Nothing is deployed, so this ticket stays In Progress (runtime work). The deploy and the live check are owed.**\n\n## What changed\n- **The four fields hold.** When the anchor guard admits an update for anyone other than the issuer's organisation (today the custodian's organisation, Kam's (c)), `issuerOrgId`, `orgDid`, `orgTrust` and `orgVerified` keep their first-anchored values, and the rest of the holder's payload applies. A field the first anchor did not carry stays absent.\n- **The issuer's own later events are unchanged:** latest event wins.\n- **It is not a refusal:** `POST /api/anchors` still answers 202 with the same body, and the server logs one info line.\n- **The chain carries the same values,** because the Cardano submitter encodes the stored row.\n- **Who the guard admits is unchanged,** byte for byte.\n- **No migration and no trigger.** A trigger cannot see the caller, so it would have frozen the issuer too.\n\n## What the gates measured\n- **T1, booted, round 1:**\n  - verify-by-hash, `GET /api/anchors/:id` and the encoded metadatum all carry the issuer's four fields beside the holder's actor; all four controls hold; develop shows the bug;\n  - its two Minors became round 2: a stored payload of an odd shape failed the write, a refused caller's included; and the log split was pinned only by source text.\n- **U1, booted, round 2:**\n  - those Minors are closed on all 10 stored shapes, for both an admitted holder and a refused caller (the refused caller is byte-identical to develop, 10/10);\n  - the log decision is tested on the real returned row;\n  - on the landing tree: shell suites 91/91, anchoring integration 89/89, unit 379/380 (`threadTokenMint`, KS-562), `tsc` 0.\n\n## One consequence Kam has seen (Wednesday put it on his panel)\nOn rows with no issuer organisation, which is every certification, the four fields are frozen permanently after the first anchor, even against a holder's correction. That is what option (b) chose.\n\n## Follow-up\n**KS-1644** (Low): U1's two Info items. An INCOMING `secuura` that is not an object still raises (no route builds one), and `dbPersistAnchor`'s own row handling is pinned by source text alone.\n\n*Seat J 13th.*\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "e434bf98-1cb0-445c-b869-3d2cd27551ba",
+    "createdAt": "2026-10-18T11:39:34.910Z",
+    "body": "**BLUF: #1568 is held at its review cap at `767ab575818f`, NOT merged and nothing deployed. Round 2 returned NO GO. #1568 would have delivered Kam's no-issuer ruling (b) and carried both of his rulings to originate's real anchors. A third round needs Kam, on card `secuura-ks1612-third-round-after-cap-1018` (default: hold, and re-plan around KS-1384).** Kam's rulings stand as ruled. They are simply not live for originate's anchors yet. This ticket stays In Progress.\n\n**MAJ-A, in one paragraph.** Some anchor records have no document behind them at all. Originate's hash-only `POST /api/anchoring/submit` creates one on every call. Migration 050 only compares documents with documents, so it cannot see these. Another tenant, or on a single-tenant box simply another organisation, can register a document whose external id is that anchor's id; the id is public through verify-by-hash. The new external-id lookup then allows the overwrite, and the anchored identity is rewritten silently. Develop keeps it.\n\n**The gate's three ways forward (findings, not built):**\n* **(i)** The guard refuses when the stored anchor predates the document claiming it.\n* **(ii)** 050 also refuses an external id that is already an anchor id.\n* **(iii)** KS-1384, a tenant column on the anchor table.\n\nFull detail is on KS-1612.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "e8a7d0e0-228e-4b0d-b30d-6feeb680691d",
+    "createdAt": "2026-10-18T10:57:25.166Z",
+    "body": "**BLUF: #1568 round 2 is pushed (head `767ab575818f`), ready for its final gate.**\n\n* It still delivers Kam's (b) and (c) to originate's real anchors and to certifications.\n* It closes the cross-tenant hole round 1's gate found, at the database, via migration 050 (detail on KS-1612).\n* Nothing is merged or deployed, so this ticket stays In Progress.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "28c6d2cd-0e21-471f-903e-a6d22288844d",
+    "createdAt": "2026-10-18T09:52:38.154Z",
+    "body": "**BLUF: Kam's ruling on no-issuer rows (card `secuura-ks1385-null-issuer-certifications-1015` = b, \"Apply (c) to them too\") is built in #1568 (head `16e71610366b`), ready for its gate. Nothing is merged and nothing is deployed.**\n\n* **The change:**\n  * A document with no issuer organisation is no longer refused before the custody rule runs.\n  * The custodian's organisation can now update its anchored identity. Every certification is such a row, so the holder's organisation can do so for a certification issued to it, as the card said.\n  * Anyone else is still refused.\n* **The same PR fixes KS-1612**, the reason neither of this ticket's rulings reached originate's real anchors until now.\n* The ticket stays In Progress: it closes only once this is tested, merged and deployed.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "bbf01fdf-5a0a-42b2-8f02-180736338fc6",
+    "createdAt": "2026-10-15T06:27:25.906Z",
+    "body": "## Pull request 1549 merged as `8cbadd8d403fb440f584e2be5df486496885ee2c` \u2014 the round-1 security findings are answered; **Kam's rulings do not yet reach originate's anchors (KS-1612)**\n\nFacts only. **This ticket stays open.**\n\n**What merged.** Squash of head `80daaa78a2c7` onto develop `53b429ed`, under Kam's two-round cap: the round-2 Opus gate returned NO GO with every round-1 finding answered, so the answered instances ship and the residue goes to a ticket, with no third round. Gate report sha256/16 `7b3442fc82c94a83`. Post-merge read:\n- one parent, `53b429ed`;\n- the landed tree equals the prediction;\n- message byte-equal, zero trailers;\n- 17 files.\n\n**Nothing deployed.**\n\n**Answered, measured by the gate on a booted anchoring service as `secuura_app`:**\n- MAJ-1 \u2014 a caller from another tenant could rewrite an anchor's identity;\n- MAJ-2 \u2014 the content hash and payload could disagree;\n- MIN-1 \u2014 a race between the submitter and a second event;\n- MIN-2 \u2014 the round-1 mutant survivors k04/k05/k06/g08 are now killed;\n- MIN-3 \u2014 a batch item could overwrite a single row.\n\nMutation 21/21.\n\n**\u26a0 What it does NOT do yet \u2014 KS-1612 (gate MAJ-A).** The overwrite guard looks the document up by `documents.id`, but originate anchors under `documents.external_id`. **So for every anchor originate emits, behaviour is unchanged from before this merge: the stored identity is kept.** Neither ruling reaches those anchors yet:\n- (b), \"Latest event's identity wins\";\n- (c), \"Issuer, or anyone in the custodian's organisation\".\n\nThe gate measured it end to end: `doc-\u2026` and Platform S document keys were kept, and only the primary key was replaced. There is no security regression; every arm measured is develop-or-stricter.\n\n**A correction to my comment of 06:02Z today.** It said a colleague in the custodian's organisation is \"the only row that changes\". That is true only when the anchor's `documentId` is the documents primary key, which originate never sends. Every cell and the matrix keyed by the primary key, which is why they passed. KS-1612 asks for a cell keyed the way `saveDocument` writes.\n\n**Two stale comments** still describe the issuer-only option and are carried on KS-1612:\n- `services/anchoring/src/index.ts:1406-1409`;\n- `services/originate/src/routes/documents.ts:896-898`.\n\n**Board note.** On the merge, the GitHub integration set this ticket's link to #1549 to a closing link and moved the ticket In Progress \u2192 In Review (06:23:48Z). Both are restored, to `contributes` and In Progress, and they held across five reads over 100 s. Per Kam's Done rule, this ticket closes only once tested, working **and** deployed.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "58f0c765-9141-4621-9d2c-339f554ba4c5",
+    "createdAt": "2026-10-15T06:02:32.785Z",
+    "body": "## Round 2 built and pushed \u2014 Kam's custody ruling (c), head `80daaa78a2c7adf7196a41cdf240376d8c2bf75a`\n\n**Kam ruled card `secuura-ks1385-custodian-may-update-anchor-identity-1013` = c, verbatim: *\"Issuer, or anyone in the custodian's organisation\"*** \u2014 2026-10-14 11:15:54, Kam's own live-board message. (The decision record's `ruled_ts`, 11:17:07, is when Wednesday's tool recorded the ruling on the card, a record of Wednesday's act, not of his.)\n\nFacts only. Pull request 1549, branch `feature/ks-1385-anchor-identity-latest-event-wins`. Nothing merged, nothing deployed. In the Opus delta gate next.\n\n### What changed\n- **One constant:** `CUSTODY_OPTION` `'a'` \u2192 `'c'` in `services/anchoring/src/anchorOverwriteGuard.ts`. Every other changed line in that file is a comment.\n- **develop merged in twice** (`e67e0dc1` \u2192 `ea799fd4`; then `53b429ed`, the ks884 cure, \u2192 `80daaa78`). File overlap 0 of 17 against develop's 179, with a planted control reading +1. The landed tree equals the `merge-tree` prediction.\n- **Cells re-pinned to (c).** C0 now drives a colleague in the custodian's organisation who is *not* the custodian user. (a) and (b) both refuse that caller and only (c) admits it, so the cell cannot pass under the wrong option. A third organisation is still refused.\n\n### What it does, measured\nA three-arm matrix (develop / round 1 / round 2), each arm running its own guard bytes against real Postgres:\n- The **only** row that changes is a colleague in the custodian's organisation on a document with an issuer. Refused in round 1, admitted in round 2.\n- Round 1's five scenarios are identical between rounds.\n- A third organisation stays refused.\n\nMutation: 27 mutants, 27 killed, including two that make (c) look right while shipping (b).\n\n### KNOWN LIMIT \u2014 kept as built on Wednesday's ruling (2026-10-15T02:17:54Z)\nA document with **no issuer organisation** is refused before the custody check runs. On those rows (c) does not apply, and the stored payload is kept, which is develop's behaviour.\n\n```\nCONTROL  issuer set,  custodian-org colleague, (c): {\"allow\":true,\"reason\":\"caller-shares-custodian-organisation\"}\nPROBE    issuer NULL, custodian-org colleague, (c): {\"allow\":false,\"reason\":\"document-has-no-issuer-organisation\"}\nPROBE    issuer NULL, custodian USER,          (b): {\"allow\":false,\"reason\":\"document-has-no-issuer-organisation\"}\n```\n\nTwo product write sites produce that shape:\n- `services/originate/src/repositories/certificationRepo.ts:199` \u2014 the certification INSERT writes no `issuer_organization_id` and sets `owner_user_id` to the **holder**. So every certification row is this shape.\n- `services/originate/src/repositories/documentRepo.ts:432/458` \u2014 the issuer is a sub-select, NULL whenever the claimed organisation is not in that tenant.\n\nApplying (c) to those rows would let a holder's organisation rewrite the anchored identity of a certification issued to it. That is the false-attribution risk this guard exists to stop. Kam's card was about custody on documents that have an issuer. Wednesday is putting the certification case to him as its own card, defaulting to \"keep as built\". Cell C-f pins the limit.\n\n### Platform S \u2014 read against Stuart's comment of 2026-10-14T00:42Z\nHis point 1 holds under (c) as it did under (a): S signs every per-document call with the **owner** organisation's key, so every S event is admitted as the issuer's. (c) only adds callers from a custodian's organisation, and S sends none. **No S change follows from (c).** His point 2 (a possible false \"Mismatch\" on S's Verify page until KS-1384) is unchanged by this round. His KS-772 request belongs to the deploy round.\n\nLinear link stays `contributes`. This ticket closes only once tested, working **and** deployed.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "9d9c1777-f3c6-4e23-b6ae-0ea48660a08d",
+    "createdAt": "2026-10-14T00:42:51.623Z",
+    "body": "@kamil.kreiser \u2014 two facts from the S side on pull request 1549 and Kam's \"latest event's identity wins\", read at S develop `aeae5ca`.\n\n**1. Option (a), issuer only, covers every S event; the custody limit never fires for S.** S signs every per-document call \u2014 originate, version, share, transfer-custody, revoke, lifecycle-events, certify \u2014 with the connector key of the document's **owner** organisation (`OwnerOrgId(doc)`), which is the organisation K recorded as the issuer at originate (PS-801). The acting person rides only as `onBehalfOf`, and S's rights holder, even a cross-organisation one (PS-401), does not change which key is used. So after an S transfer-custody the next S event still arrives from the issuer's organisation, and MAJ-1's guard admits it. S sends no event from a custodian's organisation.\n\n**2. What the overwrite does to S, and why it is bounded.** S records the identity K read back on each of its rows (`DocumentTransaction.AnchorIdentityJson`, PS-870) \u2014 written **once**, on the first status read that carries an `identity`, and compared to S's own snapshot on the Verify result page (`OnChainIdentity.Compare`: Matches / Mismatch / NotOnChain). With one `anchor_store` row per `(document_id, network)` and the payload now moving to the latest verb, an S row whose first read-back lands **after** a later verb on the same document will record the later actor and present as **Mismatch** on Verify \u2014 a false alarm, not a false \"verified\", since S's `verified` flag comes from the chain status, not from the identity. The window is the gap between S anchoring an event and the refresher's first status read of it, which is seconds normally and up to a hold or a parked period under a 429 or a refused key. S's flat anchors (per S transaction, `doc-\u2026` ids) are each their own row and are not affected. **KS-1384 (one anchor row per event) is the structural answer for S too**; until then S will treat a Mismatch on a row whose K row carries a later `documentType` as \"read back after a later event\" rather than as a falsification, and I will note that on PS-895 / the Verify page's wording. No S change is needed before 1549 deploys; please say on KS-772 when it rides a Kintsugi round so dev-ps's Verify page can be checked the same day.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "ef09f43b-cb96-47cc-aa7c-980462854257",
+    "createdAt": "2026-10-13T12:23:24.157Z",
+    "body": "**Fix round 1 of 2 built and pushed \u2014 head `b1801721d56b35d7982cbe5b103c740113aa70b9`** (pull request 1549, two commits on `feature/ks-1385-anchor-identity-latest-event-wins`). Facts only; the round is in gate, nothing is merged and nothing is deployed.\n\n**The gate's NO GO (report hash `40bdc24d2e1f07dc`) answered item by item.** Ruled principle: overwrite only when the guard positively confirms a legitimate event of this document; otherwise keep the stored payload exactly as develop does. Every condition added can only *reduce* the set of overwrites, so the worst case of this round is develop's behaviour.\n\n- **MAJ-1** \u2014 `anchorOverwriteGuard.ts` reads the owning document from `documents` (same database) and allows the overwrite only when the row is in the caller's tenant **and** the caller's organisation is the document's issuer. Otherwise the payload is kept.\n- **MAJ-2** \u2014 the payload is kept on a content-hash mismatch. No 409, no update-both, no response-shape change, plus one operator log line naming the document and both hash prefixes.\n- **MIN-1** \u2014 compare-and-set in the submitter on the payload it signed, as its own commit, guarding all three writes that claim a transaction.\n- **MIN-2** \u2014 cells for transfer-custody, share and revoke. They kill **k04, k05, k06 and g08**, all four of which survived at the gate.\n- **MIN-3** \u2014 the payload is kept when `anchor_type` differs, so a batch item no longer wipes a single anchor's attestation.\n\nAll three keep-conditions ride in **one CASE** in the upsert, so they are atomic with the write they gate.\n\n**Three measurements that changed the design, recorded because they are not obvious from the code:**\n\n1. **The tenant bound is explicit SQL, not RLS.** `documents`' tenant policy carries an `app.tenant_scope_bypass = 'platform_admin'` escape, and the `secuura` role is `rolsuper` + `rolbypassrls` \u2014 so a GUC-only read would have been **vacuous**. Anchoring runs as `secuura_app`, which is neither, so RLS is live in production; but a guard whose correctness depends on which role is configured is not a guard. The GUC is set as well, and a cell proves the read works under FORCE RLS as `secuura_app`, with a zero-rows-without-the-GUC control.\n2. **`users` carries a second, permissive policy whose qual is literally `true`**, and Postgres ORs permissive policies \u2014 so tenant isolation on `users` is open for SELECT by construction. The custody LEFT JOIN therefore carries its own tenant bound. A mutant that dropped it **survived** the first mutation pass; cell `C-e` now kills it.\n3. **`anchorDocumentSchema` accepts two `documentId` shapes** (`anchorSchema.ts:160-163`): a uuid **or** `doc-<digits>-<alnum>`, which is Platform S's flat form. So the non-uuid branch is half the contract, not an exotic case, and `id = $1::uuid` on it would raise 22P02 and answer 5xx for an anchor that works today.\n\n**CUSTODY \u2014 the stated limit.** Kam holds card `secuura-ks1385-custodian-may-update-anchor-identity-1013`. Custody is recorded as a **user** (`documents.owner_user_id`), not an organisation; there is no custodian-organisation column and it is derivable in one join via `users.organization_id`. **Option (a), issuer only, ships here.** The limit: after a transfer-custody, an event raised by the new custodian's organisation keeps the prior payload rather than overwriting it. Options (b) and (c) are each one condition, and cells `C-b` / `C-c` exercise both for real today by passing the option explicitly \u2014 so \"one condition away\" is measured, not asserted.\n\n**INF-1, corrected.** The previous pull request body and two code comments said \"`documentType` and `signatureHash` are overwritten\". **There is no `signatureHash` in the anchored payload** \u2014 zero hits in anchoring and originate non-test source apart from those comments. What actually travels is the whole `secuura` object plus the seven identity fields and `documentType`. The correction is named in the code so it outlives this round.\n\n**Measured:**\n- anchoring integration **3 files / 29 tests**; originate unit **107 suites / 1352 tests**; `tsc --noEmit` **0 errors** in both (positive control: a planted type error gives rc 2).\n- **Red-first matrix across three trees** over five scenarios. This round is the only column correct in all five rows: head `aca6efb0` falsifies in four, develop fails Kam's ruling in the first. In two rows the guard *allows* and the payload is still kept, which is what shows the hash and `anchor_type` conditions do their own work rather than riding on the ownership guard.\n- **Mutation: 24 mutants, 24 killed, 0 survived**, each by a named cell with a non-empty message, with a load-failure guard so a compile break is never scored as a kill. Every file asserted byte-identical afterwards.\n\n**Not run, stated plainly:** the four platform suites, and the pre-push preflight did not complete \u2014 its own words, with `PUSH_RC=0`: *\"PREFLIGHT INCOMPLETE \u2014 13/16 legs ran, 3 SKIPPED. Nothing failed. legs 3 4 8 \u2014 local stack not up \u2026 This is NOT a pass.\"* The api-gateway was not booted, so MAJ-1's route *through the gateway* still rests on the gate's reading of `proxy.ts` / `scopes.ts`. No real Cardano. The anchoring unit lane is 370 passed / 1 failed \u2014 `threadTokenMint.test.ts`, pre-existing, already in `BACKLOG.md`, and that file's only import is `vitest` with zero references to anything this round touches.\n\n**No migration, no schema change, no environment variable.** Adjacent and deliberately untouched: **KS-1384** (whether there should be one anchor row per `(document_id, network)` at all), **KS-1603**, **KS-1604**.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "bf3c8ab9-3cc6-403d-8521-b389093fad61",
+    "createdAt": "2026-10-13T10:49:04.267Z",
+    "body": "## Built to Kam's ruling \u2014 pull request 1549, head `aca6efb0`, at the Opus gate\n\n**Kam ruled card `secuura-ks1385-anchor-identity-needs-ps895-ruling-1013` = b, verbatim: *\"Latest event's identity wins\"*.**\n\n### What changes\n* Platform S's top-level `identity` block is now forwarded to the anchor at **six** originate sites: `POST /api/documents` (create), `POST /api/documents/:id/anchor`, `emitLifecycleAnchor` (share, transfer-custody, revoke, lifecycle-events), originate's own `POST /api/anchors`, `POST /api/certifications/issue`, and `POST /api/certifications/:id/recertify`. Until now originate's `.passthrough()` schemas let the key through validation and then dropped it.\n* **Site 5, `POST /api/anchoring/submit`, is deliberately excluded** (Wednesday, 2026-10-13T08:48:09Z): a hash-only contract that S does not send an identity to.\n* anchoring's `anchor_store` upsert now updates `metadata_payload` on conflict. Before, the **first** anchored verb's payload was kept for the life of the row, so forwarding identity from a later verb would have shown the uploader's identity beside a share's transaction hash.\n\n### \u26a0 The consequence, which is Kam's ruling and not an oversight\n**An earlier verb's identity is OVERWRITTEN by a later verb on the same `(document_id, network)` row \u2014 and `metadata.documentType` and `signatureHash` are overwritten the same way**, because they travel in the same payload. After deploy, `GET /api/anchors/{id}` for a document with several anchored verbs returns the **latest** verb's identity, documentType and signatureHash. `content_hash` is **not** updated \u2014 unruled, left alone. PS-895 (per-document vs per-event anchoring) stays open on Platform S's board and is the structural answer.\n\n### Evidence\n* Measured on real Postgres against develop's **own** upsert SQL: after a create then a share on one document, develop's row carries the share's transaction hash beside `did:key:zUPLOADER`; this branch carries `did:key:zSHARER`. `content_hash` unchanged in both \u2014 the control.\n* 28 cells across three files, a two-directional red-proof, and a mutation pass of **14 mutants, 14 killed by name, 0 survived**. Two of those were found by the pass itself: sites 6 and 7 had **no** cell until it showed deleting either spread survived everything.\n* Suites on the predicted merge onto develop `d53d80cb`: originate 109/109 suites, 1361/1361 tests; tsc 0 errors. Schemathesis, Akto, Playwright and k6 **not run** (local stack down).\n\n**Not deployed.** develop deploys are held by DEPLOY-BLOCKERS' KS-1570 row; this rides the next permitted deploy. This ticket stays open until deployed and checked live.\n\n*Seat J 9th.*",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "3a550daf-717f-4d28-9357-f43588244902",
+    "createdAt": "2026-10-02T05:48:03.416Z",
+    "body": "**Correction to this ticket's title and scope, measured 2 Oct: originate drops the identity block too.**\n\nI wrote \"only originate and the flat anchor anchor identity\". That is wrong for originate. On a paired slot (platform-s `d04829b`, `AnchorIdentity` on, \u2194 platform-k develop `88e8877a2`, clean build) an upload through `POST /api/documents` came back from `GET /api/anchors/{id}` with **no** identity block, although S sent one.\n\nIn code at `88e8877a2`: originate's auto-anchor body is built at `services/originate/src/routes/documents.ts:857-865` as `{documentId, contentHash, network, environment, issuerOrgId, issuerName, certId}`, and no non-test file under `services/originate/src` mentions `identity` or `identityCommitment`. That matches open item 1 in Kamil's 22 Sep comment on KS-1175 (\"the seven originate-fronted endpoints forward no `identity`\").\n\nSo the scope here is all seven originate-fronted routes (`POST /api/documents`, `/{id}/version`, `/{id}/anchor`, `/{id}/share`, `/{id}/transfer-custody`, `/api/certifications/issue`, `/{id}/lifecycle-events`), not three. Until they forward the block, Platform-S's identity reaches the chain only on its direct `POST /api/anchors` calls, which with per-verb endpoints on is the fallback path. Platform-S side: PS-870.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+ "identifier": "KS-1509",
+ "title": "Seven other places still default a document's block height to 0 (documents.ts create/anchor paths, anchorStateSync's failed-anchor writer): KS-1333 fixed only the four sync writers",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-12T11:42:46.570Z",
+ "updatedAt": "2026-11-10T06:41:44.868Z",
+ "description": "## BLUF\n\nKS-1333 made the four `anchorStateSync` writers persist an unknown block number as `null` instead of a fabricated `0`. Five other places still write a height of 0 for a document whose height is not known, so a document can carry `null` (after a sync) or `0` (at creation, or after a failed anchor) for the same fact.\n\n## Recommendation\n\nDecide once whether the stored blob uses `null` for \"not known\". KS-1333's direction was yes: the blob type already allows `number | null`, and every reader in this repo handles null (the gateway's persisted guard needs an integer > 0 and refuses 0 and null alike; originate's heal ends in `?? 0`; the frontends fall back with `||`). If yes, change these five with one cell each.\n\n## Detail (read at develop `361537eed238`, 2026-10-12)\n\n* `services/originate/src/routes/documents.ts:883` `blockHeight: 0` (the placeholder blob written when an anchor is requested);\n* `:905` `blockHeight: anchorData.blockHeight || 0`;\n* `:938` `blockHeight: 0`;\n* `:1386` `blockHeight: ad.blockHeight || 0`;\n* `services/originate/src/services/anchorStateSync.ts:191` `blockHeight: prior?.blockHeight ?? 0` (the failed-anchor writer: with a null prior it writes 0 back, undoing KS-1333 on that path).\n* `services/originate/src/routes/verification.ts:368` (becomes :346 once #1500 merges, because it removes the moved `toBlockHeight` above it) and `services/originate/src/routes/verificationV2.ts:148` `blockHeight: toBlockHeight(chain.blockNumber) ?? blob.blockHeight ?? 0`: the two heal paths that persist through `persistHealedAnchor` end in `?? 0`, so they can turn the NULL that KS-1333 now stores back into 0 (found by the Sonnet gate on #1500, finding Minor).\n\n## Not claimed\n\nThat any reader breaks today: none does (see above). The cost is inconsistency, a stored 0 that reads as a claim. Nothing deploys because of this. Raised while doing KS-1333 item 4; the decision and the measurement are on KS-1333.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2054",
+    "title": "Refs KS-1509: four documents routes store a null block height, not 0"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1569",
+    "title": "Refs KS-1509 (1 of its 7 sites): the failed-anchor writer keeps an unknown block height NULL"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "85e4444e-f385-4ad8-926e-b8107f4377e7",
+    "createdAt": "2026-11-06T10:45:52.599Z",
+    "body": "**BLUF:** PR 2054 raises KS-1509 (four documents routes store a null block height, not 0), head `7bd7697c86ad`, built on develop `4ccdc3b3e7cf`. It is READY FOR GATE at proposed tier 2; nothing is merged and nothing is deployed. The title says Refs, so this is not a close: the ticket stays In Progress and I changed no state, assignee or field.\n\n* **PR:** https://github.com/Secuura/Distributed_Secuura/pull/2054\n* **What changed:** four writes in `routes/documents.ts` (create under SIMULATE_ANCHORING, the create 202, the create anchor-failed blob, the retry 202) store `null`, or `toBlockHeight(x)` where the height is read off the anchoring answer, instead of 0. One new test file (8 cells), one line in the `ks1293` manifest, the docs fragment pair. Documents already stored with 0 keep it; there is no migration.\n* **Who wrote it:** Seat V 24th built and measured it. I, Seat V 25th, raised the PR as its finisher and re-ran none of its figures. What I read myself: the head on origin equals V 24th's recorded sha and is one commit ahead of develop `44ee04cba478` (32 commits past the base); a merge-tree against that develop is clean; 0 files are shared with the moved range; no open PR touches the changed files.\n* **Evidence:** the Test Evidence block is in the PR body: 8 new cells, 6 red against the unchanged route and 8 of 8 with the change; 8 of 8 planted tampers matched; whole originate suite 215 files / 2565 cells on Node v26.8.1 (not an LTS).\n* **Not run:** a real Postgres, the four platform suites, any LTS Node, any deploy. The pre-push hook said `PREFLIGHT INCOMPLETE \u2014 13/16 legs ran, 3 SKIPPED. Nothing failed.` (legs 3, 4 and 8: local stack not up). That is not a pass.\n* **Owed after merge:** the originate deploy, Kintsugi first; demo is frozen. KS 1695 touches the same file and must rebase on this.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "fcfdc2f9-9055-4da7-85b2-357306c9a4ac",
+    "createdAt": "2026-10-18T11:01:38.021Z",
+    "body": "**BLUF: site 1 of 7 is merged to `develop` as `26378a40378dc53787f69a96609a90cad499d50b` ([PR 1569](https://github.com/Secuura/Distributed_Secuura/pull/1569)). The other six sites and the deploy are not done, so the ticket stays In Progress, link `contributes`.**\n\n* Gate E2 (Sonnet, tier 2): GO WITH NOTE at head `1f5d868b69ba`, no security-shaped finding. Its LOW (no cell uses a real prior height of 0, so `|| null` survives) is filed as KS-1621. Its reader census found no reader doing arithmetic on `blockHeight`, so the null in place of 0 changes no verification outcome.\n* develop had moved to `833984fc9` (#1555, seven originate files, 0 overlap). On the exact predicted tree `2738998e`: originate 1380/1380 in two consecutive full runs, tsc rc 0. The landed tree equals the predicted and tested one; the five-point post-merge read is all true.\n* Owed: the other six sites, then the originate deploy. Nothing deployed. \u2014 Seat R 47th\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "b6973ebc-6af7-4011-b518-67dc033b2776",
+    "createdAt": "2026-10-18T10:17:30.186Z",
+    "body": "**BLUF: site 1 of 7 is raised as [PR 1569](https://github.com/Secuura/Distributed_Secuura/pull/1569), head `1f5d868b69bab7e67389098984a5fc6a604bbbc6` on develop `1197ab38a`. It waits for a gate; nothing merged, nothing deployed. Link `contributes`.**\n\n* The site: originate's `markDocumentAnchorFailed` (`services/anchorStateSync.ts`) carried an unknown prior height forward as `?? 0`, so a document a KS-1333 writer had stored with a NULL height got a fabricated 0 back when its anchor failed. It now carries `?? null`; a real prior height is kept and a confirmed anchor is still never written.\n* The other six sites (`documents.ts` and the two verification heal paths among them) are not in this PR; the ticket stays open for them.\n* Patch authored by Spark (DeepSeek V4 Flash), applied unmodified. Red-first 2 failed / 12 passed, each red receiving 0; green 14/14; originate 1375/1375; tsc rc 0. Preflight at the head: 13/16 legs ran, 3 SKIPPED (3, 4, 8: local stack not up), nothing failed \u2014 not a pass. \u2014 Seat R 47th\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

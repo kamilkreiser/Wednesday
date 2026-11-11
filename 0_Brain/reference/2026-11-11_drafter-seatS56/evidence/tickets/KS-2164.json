@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-2164",
+ "title": "GHSA-chp3-j5qr-2vfr: effect platform 0.71.7 ships in 25 images and the pre-push hook refuses every Blockchain/Dev push",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-11T05:29:33.072Z",
+ "updatedAt": "2026-11-11T05:29:33.072Z",
+ "description": "**BLUF:** The advisory GHSA-chp3-j5qr-2vfr (CVE-2026-115779, moderate, published 2026-11-10T15:57:32Z) covers the `@effect/platform` makeCookie cookie-attribute injection, first patched in 0.97.1. The platform ships 0.71.7 as a production dependency, and the pre-push hook refuses every push that touches `Blockchain/Dev` at legs 6 and 7 until the advisory is baselined or fixed. This ticket tracks the override or upstream fix only; the decision whether to accept the advisory in the audit baseline is Kam's card `secuura-ghsa-chp3-effect-platform-shipped-1111`, still unruled when this was filed, and is not argued here. Priority Medium (3): the advisory is moderate and it blocks every push to this tree.\n\n## What was measured\n\n* Seat R 95th, 2026-11-11: row 13's push was refused with `PREFLIGHT FAILED on leg(s) 6 7 (13/16 legs ran)`; the advisory is not in the audit baseline under `Blockchain/Dev/scripts/audit`, and hook legs 6 and 7 read the LIVE advisory list, so any new advisory refuses every push until it is triaged.\n* The package is SHIPPED: a production dependency of `@lucid-evolution/lucid` in `packages/shared` and `services/anchoring`, copied into 25 service images (R 95th's measurement).\n* Source record: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-11_seatR-95th/HANDOVER.md` (the blocker paragraph and Finding 1).\n\n## What this ticket tracks\n\n* An overrides entry that moves the package to 0.97.1, or an upstream lucid release that does, gated on the whole platform (anchoring and the 25 images), not on the hook alone.\n* Nothing is written to the audit baseline by this ticket.\n\n## Not known\n\n* Whether lucid works with 0.97.1 (an overrides entry is a major jump from 0.71.7).\n* Whether makeCookie is reachable from any code path the platform runs.\n\n## Searched\n\nSearched `GHSA-chp3-j5qr-2vfr`, `@effect/platform` and `makeCookie` over title, description and comments (archived included; positive control `msgpackr` hits KS-1379, a random token 0): 0 open hits that cover this (KS-1216 matches `@effect/platform` only in passing and concerns bundled js-yaml copies).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

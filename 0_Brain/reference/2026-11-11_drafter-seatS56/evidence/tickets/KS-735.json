@@ -1,0 +1,40 @@
+{
+ "identifier": "KS-735",
+ "title": "Verify results show the user nothing about what was registered \u2014 a renamed file confirms green with no explanation (PS-723)",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-01T04:48:20.859Z",
+ "updatedAt": "2026-09-12T00:30:47.336Z",
+ "description": "## BLUF\n\n**A verify result shows the user nothing about what was registered, so a renamed file confirms green with no way to notice the rename.** Stuart hit this on PS-723 and ruled the direction: *\"it should be explained to the user, otherwise confusion will result\u2026 b should also have the note to the user that the filename has changed.\"*\n\nThe API is not the problem \u2014 it already returns the registered `title`, `issuer` and `certifiedAt`. **The portal never displays them**, because it reads a nested shape the backend does not emit. And the portal already sends the presented filename, which the backend silently discards. So both halves of the comparison exist today and nothing joins them.\n\n## RECOMMENDATION\n\nRender the registered metadata beside the confirmation, plus a plain-language line that verification is **content-based** \u2014 a rename neither breaks nor fakes it. Where the presented filename differs from the registered title, say so explicitly rather than leaving the user to spot it.\n\nOne decision is **not mine and should be made before any code**: the flat-vs-nested contract question in \u00a72. That is Peter's call.\n\n## 1. What the verify response actually returns\n\nMeasured live, `POST /api/verification/verify` with `contentHash` \u2014 the path a renamed-file verify takes:\n\n```\nverified: true\ntitle: \"E2E Test Certificate\"     <- the REGISTERED title\nissuer: \"demo\"\ndocumentType, status, contentHash, certifiedAt\ncertification: { certifiedAt, certifiedBy, certifierOrganizationId }\nchecks: { documentExists, hashValid, integrityVerified, ... }\n```\n\nSo the metadata Stuart wants shown is already on the wire.\n\n\u26a0 **The OpenAPI schema understates this. **`VerifyResponse` declares 20 properties and **none** is `title` / `originalFilename` / `registeredAt` / `registrant`; the live response carries `title` and `issuer` anyway. Same declared-vs-actual family as **KS-712** \u2014 worth fixing in the same pass so the contract stops lying about this endpoint.\n\n## 2. Why nothing renders \u2014 the mechanism\n\n`frontend/verifier/src/components/ResultPage.tsx:423` guards the entire \"Document Details\" card:\n\n```tsx\n{result.verified && result.document && ( ...Title... Issuer... )}\n```\n\n* The API returns `title` and `issuer` **at the top level** and emits **no** `document` **object** (measured top-level keys: `verified, documentId, title, documentType, status, contentHash, certifiedAt, issuer, blockchain, certification, checks, verifiedAt`).\n* `result.document` is therefore undefined, the guard is falsy, and **the card never renders**.\n* The portal references `result.document.*` **5** times and `result.title` **0** times. Control: `result.verified` matches **14** times, so the grep discriminates.\n* The data is **not** lost in parsing \u2014 `VerifyResponseSchema` is `.passthrough()`, so the top-level `title` survives into the parsed object and is simply never read.\n* The schema *does* declare `document: DocumentSummarySchema.nullable().optional()` carrying `title` + `issuer`. **The frontend was written against a nested shape the backend does not produce** \u2014 one side moved and the other did not.\n* Confirmed on the path in use: all three verifier call sites hit **v1 **`/verification/verify`. v2 is a different shape entirely (`count, hash, matches, verifiedAt`) and the portal does not use it.\n\n### The contract question \u2014 Peter's call, not to be decided in the fix\n\nEither the **frontend reads the flat fields**, or the **backend nests them** under `document` to match the schema the client already expects. Both work; they differ in blast radius (the backend shape is consumed by the Outlook add-in and issuer too). Naming it rather than picking it.\n\n## 3. `fileName` is already sent, and silently discarded\n\n`frontend/verifier/src/components/VerifyPage.tsx:127` sends `{ contentHash, fileName: file.name }` and `:138` threads `fileName` into the result object. So the **client already holds both halves** of the comparison \u2014 presented name and registered title \u2014 and needs no new input to detect a mismatch.\n\nServer-side, however:\n\n* `VerifyRequest` declares only `documentId, hash, title, contentHash` \u2014 `fileName` **is not in the contract.**\n* **No backend route handler reads it**: 0 files under `services/*/src/routes/` reference `fileName`, against a control of **8** referencing `contentHash`.\n\nSo the field is sent on every verify and thrown away. Either consume it (and declare it) or stop sending it \u2014 the current state is a silent no-op.\n\n## 4. Scope \u2014 three surfaces, per Stuart, not just the verifier portal\n\nHis comment names them: *\"This affects Outlook plug ins, and Verify functionality in 'Views' and directly from the menu.\"* Verify call sites in the tree:\n\n| app | file |\n| -- | -- |\n| verifier portal | `frontend/verifier/src/components/VerifyPage.tsx`, `ResultPage.tsx` |\n| **Outlook add-in** | `frontend/outlook-addin/src/utils/api.ts` |\n| issuer portal | `frontend/issuer/src/services/api.ts`, `components/admin/ConnectorsPage.tsx` |\n\nWhatever wording is agreed should land on all of them, or the same confusion simply moves to whichever surface is left out.\n\n## 5. Design constraint \u2014 the KS-695 erasure interplay\n\n**KS-695 item 2 brings** `documents.title` **INTO erasure coverage**, because S sends the real filename as `Title` on originate (`CardanoAnchorService.cs:407`). For S-originated documents that field **is** the original filename \u2014 exactly what this ticket wants displayed. Item 3 goes further: connector-scoped dissolution blanks all connector documents' titles.\n\nSo the two pull opposite ways: PS-723 wants the registered name shown; KS-695 makes that same field erasable PII that can legitimately be blank. Both are correct on their own terms.\n\n**This must be specified, not discovered:** decide what a verify result shows for a document whose title has been erased \u2014 a blank, or an explicit *\"registered name erased\"* state. Rendering empty silently would recreate today's confusion in a new form.\n\n## Not in scope here\n\nNo fix in this ticket \u2014 it is the specification and the evidence. No change to PS-723, which is Stuart's.\n\n## Related\n\n* **PS-723** \u2014 *Verify still confirms if filename has changed* (Stuart, 2026-09-01). The originating report and his ruling.\n* **KS-712** \u2014 the declared-vs-actual spec gap this endpoint also exhibits.\n* **KS-695** \u2014 `documents.title` erasure coverage; the design constraint in \u00a75.",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "52db90c6-0fde-4527-92c4-372af8bfb2e9",
+    "createdAt": "2026-09-02T16:59:20.812Z",
+    "body": "## Catalogue pass \u2014 **BOUNCE**, no state change\n\nThe remaining actor is **@PeterObeden**, named by this ticket's own text: *\"the flat-vs-nested contract question in \u00a72 \u2014 that is Peter's call\"*, and *\"the contract question \u2014 Peter's call, not to be decided in the fix.\"*\n\nThe specification and the evidence are complete here; the ticket is deliberately fix-free. Nothing on this desk moves it until that contract call is made, so it is not picked up tonight.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

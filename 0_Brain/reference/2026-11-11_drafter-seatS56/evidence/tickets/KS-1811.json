@@ -1,0 +1,34 @@
+{
+ "identifier": "KS-1811",
+ "title": "transfer-custody to the current holder is accepted: on kintsugi 6 of 7 custody_events for one document were from=to",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 3,
+ "assignee": null,
+ "archivedAt": null,
+ "createdAt": "2026-10-29T10:28:57.878Z",
+ "updatedAt": "2026-10-29T10:28:57.878Z",
+ "description": "**BLUF:** `POST /api/documents/{id}/transfer-custody` accepts a transfer to the document's current holder and writes a full set of rows each time. On kintsugi, seven requests for one document on 2026-10-26 (03:09 to 03:15Z, 60 seconds apart) wrote seven `custody_events`. The first moved the owner to an invited recipient; events 2 to 7 have `from_holder_id` equal to `to_holder_id`. Each request also wrote an `action_provenance` row and a `documents.transfer-custody` audit row answered 201. Nothing in the route compares the current holder with the new one.\n\n**Measured** (Seat T 6th, kintsugi, read-only, `5_Project_History/2026-10-29_seatT-6th/mail/04_measured_body.txt`, item B2; the API id `427c4864\u2026` is `documents.external_id`, the internal id differs):\n\n* `custody_events` for the document: 7 (control: another document has 1). `created_at` 03:09:24.564, 03:10:24.746, 03:11:24.832, 03:12:24.896, 03:13:25.046, 03:14:25.113, 03:15:25.262, all inside 03:09 to 03:16Z.\n* Event 1 `from` none; events 2 to 7 `from` = `to` = the invited recipient (self-transfers). `transferred_by` and `anchored_tx` empty on all 7.\n* `documents.owner_user_id` = the recipient; `updated_at` 03:15:25.262; status `draft`.\n* `action_provenance`: 7 `transfer-custody` rows, 03:09:24 to 03:15:25. `audit_logs`: 7 `documents.transfer-custody` 201 at the same times.\n\n**Source** (read at develop `6d41673e0f79`; not exercised): `Blockchain/Dev/services/originate/src/routes/documents.ts`. After the recipient-exists check (`:2088-2100`), the route inserts into `custody_events` (`:2130`) with `from_holder_id` the current owner and `to_holder_id` the resolved holder, inside `withTenant`. I read `:2088-2135` and searched the file for a same-holder or self comparison (patterns for \"same holder\", \"already the holder\", \"newHolderId ===\", \"owner_user_id ===\" and similar): 0 matches that concern this route. The only equality matches are unrelated (`:307`, `:323`, rights-holder access).\n\n**Not decided:** whether a transfer to the current holder should be a no-op, a 4xx, or stay allowed. Nothing I read rules on it.\n\n**Not measured:** the seven `anchors.create` 400s that followed each request in the audit trail (item B3 of the same report) and the Invalid-DID reason; both are outside this ticket.\n\n**Searched** (issues filter over title, description and comments, archived included; positive control `parseScopeString` 9 hits, a random token 0 hits): \"self-transfer\" 0 hits; \"to the current holder\" 0 hits; `from_holder_id` 1 hit (KS-697, archived: a non-existent holder id was accepted, a different defect); \"transfer-custody\" 86 hits, read by title for a same-holder case (KS-1651, KS-1654, KS-1697 and others concern other defects).\n\n**Related:** KS-1402 (the custody transfers this was measured on).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-1402"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

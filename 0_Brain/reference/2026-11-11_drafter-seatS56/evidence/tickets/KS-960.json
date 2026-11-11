@@ -1,0 +1,91 @@
+{
+ "identifier": "KS-960",
+ "title": "Two schema sources disagree on whether users.email is unique \u2014 a statement valid against one is 42P10 against the other, so a suite can be green on a shape that never runs",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-07T01:35:59.059Z",
+ "updatedAt": "2026-11-09T03:27:22.818Z",
+ "description": "**BLUF** \u2014 the `users` table has **two schema sources that disagree about whether** `email` **is unique**, and a statement that is valid against one is a hard error against the other. This is not a row-level inconsistency; it is a **test environment diverging from the deployed environment on a constraint**, which means a suite can be green on a shape that never runs anywhere.\n\n## \u26d4 DO NOT RECONCILE THESE TWO FILES YET\n\n**Nobody has established which source is authoritative.** Aligning either to the other closes the question by erasing the evidence that it was open \u2014 and whichever way it is aligned, the loser's behaviour silently becomes \"the contract\". Establish authority first, then change one file, deliberately, with the reasoning written down.\n\n## The two sources\n\n| file | declaration |\n| -- | -- |\n| `Blockchain/Dev/docker/init/01-schema.sql:21` | `email TEXT NOT NULL` \u2014 **no unique index** |\n| `Blockchain/Dev/migrations/001_initial-schema.sql:20` | `email VARCHAR(255) UNIQUE NOT NULL` |\n\n**The first is deliberate and is documented in place.** Its own comment reads: *\"email is AES-GCM ciphertext \u2026 Lookups go via the deterministic email_lookup_hash \u2026 because non-deterministic encryption can't enforce uniqueness.\"* A unique index on a randomly-IV'd ciphertext cannot block duplicates, so uniqueness was moved to `users_email_lookup_hash_uniq`. `services/auth/src/repositories/userRepo.ts` already reflects this \u2014 `createUser` conflicts on `email_lookup_hash` and says why.\n\n**So the divergence is probably a migration that was never updated when the encryption landed** \u2014 but that is a hypothesis, and this ticket exists so it is checked rather than assumed.\n\n## The evidence, measured\n\nAgainst the running stack (built from `docker/init/01-schema.sql`), in **rolled-back** transactions:\n\n```\nINSERT ... ON CONFLICT (email) DO UPDATE ...\n  -> ERROR: there is no unique or exclusion constraint matching\n            the ON CONFLICT specification            (42P10)\n\nINSERT ... ON CONFLICT (id) DO UPDATE ...\n  -> INSERT 0 1\n```\n\nIndex census on the live table: `users_pkey (id)`, `users_email_lookup_hash_uniq (email_lookup_hash) WHERE NOT NULL`, and six social-id uniques. **No index on** `email`**.**\n\n## Why this is a class hazard, not one row\n\n**KS-949 F1 is the instance.** The api-gateway startup seed used `ON CONFLICT (email)`. The round-1 QA gate reported *\"fresh DB \u2192 INSERT 0 12\"* \u2014 a true measurement, taken against a database built from `migrations/001`. On every environment we actually deploy, the same statement raised 42P10 and the twelve-row seed silently failed on **every** boot, caught and logged at debug level as \"skipped\".\n\n**A green test against the wrong schema source is indistinguishable from a green test.** That is the hazard: not that one seed was broken, but that the instrument could not tell.\n\n## What \"establishing authority\" looks like\n\n1. Which source builds which environment today \u2014 compose/init vs the migration runner \u2014 measured, not assumed.\n2. Whether any deployed database was built from `migrations/001` and therefore **does** have the unique index (if so, the same statement behaves differently per environment, which is worse than either alone).\n3. Whether `migrations/001` is still executed anywhere, or is now only a historical artefact that tests happen to build from.\n4. Only then: change one file, and add a check that the two cannot drift again.\n\n## Scope\n\n**Not** KS-949's (that fixed the instance and is deliberately silent on which source is right). **Not** KS-957's (that is a claims path \u2014 artefacts asserting things their suites cannot check; this is a schema-authority question). Filed separately per the aggregation rule: one ticket per logical path.\n\n**Measured 2026-09-07 during KS-949 round 2.**\n\n---\n\n## \ud83d\udd34 OPEN QUESTION INHERITED BY WHOEVER SETTLES AUTHORITY\n\n**If an environment is built from** `migrations/001`**, does auth's** `seedDemoUsers` **run before document seeding?**\n\nThis is a live consequence of the divergence, not a hypothetical, and it is recorded here because it has no other home.\n\n**Why it only exists on one side.** `migrations/001:107` and `deployment/azure/migrate/init.sql:105` declare `documents.owner_user_id UUID REFERENCES users(id)`. `docker/init/01-schema.sql:127` \u2014 the deployed source \u2014 declares `owner_user_id UUID` with **no** foreign key (verified on the live table via `pg_constraint`; control: that file declares no user foreign keys at all).\n\n**So on a migrations-built database the twelve seeded user rows must exist BEFORE any document referencing them is inserted, and on the deployed schema the question cannot arise.** Same tree, same code, two different ordering requirements.\n\n**Why it is now load-bearing.** KS-949 removes the api-gateway startup migration's user INSERT (ratified 2026-09-07: it has never once succeeded \u2014 42P10 on every boot \u2014 and auth's `seedDemoUsers` already creates all twelve rows with identical tenancy, encrypted, with `email_lookup_hash` set). After that change, **auth is the only creator of those rows.** On the deployed schema that is safe. On a migrations-built schema it depends on an ordering nobody has measured.\n\n**What would settle it:** whether any environment is built from `migrations/001` today, and if so, the actual boot order of auth's seeder against whatever inserts documents.\n\n**Deliberately NOT settled here**, and not guessed at. Which source a given environment used is exactly the authority question this ticket exists to answer, and answering the ordering first would be assuming it.\n\n**Raised 2026-09-07 during KS-949 round 2.**",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1000",
+    "title": "KS-960: pin createUser's conflict target on email_lookup_hash (test only; the reconcile ruling stands)"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "e98c7d1e-577d-4027-892b-e19bb73babd9",
+    "createdAt": "2026-11-09T03:27:21.457Z",
+    "body": "**BLUF:** Kam ruled the 31-decision card `secuura-backlog-31-decisions-1109` on 2026-11-09 at 13:44:07 (live board), in these words: \"Decision secuura-backlog-31-decisions-1109: a \u2014 All recommendations (A and B)\". Option a reads: \"Every row ruled as recommended; a board seat files and moves the tickets; the KS-607 demo rows still wait for a separate yes.\" This ticket is row A1 of the decision pack, ruled as recommended: option 1. What runs is official: a build seat first reads each environment's schema (read-only), then aligns the other schema files to it and adds a check so they cannot drift apart again. That also fixes the demo-user seed that fails 14 of 14 times (KS-1990).\n\nKS-960 and KS-1200 are one question, and the same ruling is recorded on both. The ticket's \"do not reconcile yet\" hold stays until that read has been done: the ruling names the authority, and the read comes first. A build seat does the work; nothing was changed in code by this comment.\n\nAlongside this comment the ticket, which was unassigned, is assigned to the board account, and moves from Backlog to Todo.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "cbc5250e-d222-4416-b420-bf28af2b4fd2",
+    "createdAt": "2026-11-04T23:59:40.172Z",
+    "body": "**BLUF:** The 14-of-14 failure of POST /api/admin/seed-demo-users on a fresh stack (KS-1990) is this ticket's 42P10: the route's INSERT conflicts on `email`, and `users` has no unique index on `email`. Measured on a throwaway local stack at develop 07a2d62be6a0, not on kintsugi or demo. Nothing was changed: no product edit, and neither schema source was touched or reconciled.\n\n- Route: Blockchain/Dev/services/originate/src/routes/adminConfig.ts, INSERT at lines 2108-2112, `ON CONFLICT (email) DO NOTHING` at line 2111 (develop 07a2d62be6a0).\n- Schema sources at that sha: docker/init/01-schema.sql line 37 `email TEXT NOT NULL`; migrations/001_initial-schema.sql line 20 `email VARCHAR(255) UNIQUE NOT NULL`. No later migration adds a unique constraint on users(email). The compose stack is built from the first, so on that stack the table has no such index.\n- Run: disposable compose stack (project w28, images built from develop 07a2d62be6a0, migrations applied=60 failed=0, internal-only network), both demo-seed gate flags set on the originate container only, called as a SYSTEM_ADMIN: HTTP 200, success true, created 0, alreadyPresent 0, failed 14. Controls: a non-admin user gets 403, no token gets 401.\n- Originate log: 14 \"Demo user seed failed\" lines, SQLSTATE 42P10 on 14 of 14, one message: \"there is no unique or exclusion constraint matching the ON CONFLICT specification\".\n- Index census of users on that stack: 14 unique indexes, 0 of them on email. The only email indexes are a non-unique one on lower(email) and the unique partial index users_email_lookup_hash_uniq on email_lookup_hash.\n- Changed-input proof, each statement in its own rolled-back transaction, run as the application role with the platform-scope setting the route uses: the route's statement for the first user with ON CONFLICT (email) gives ERROR 42P10; the same statement with no ON CONFLICT clause gives INSERT 0 1; with ON CONFLICT (id) it gives INSERT 0 1; all 14 rows with no ON CONFLICT clause give INSERT 0 1 on 14 of 14, so no second cause sits behind the 42P10. Rows for the 14 seed ids: 0 before, 0 after.\n- Not measured: kintsugi and demo; any schema other than the compose init schema; what a fix should look like (the ticket's own warning against reconciling the two sources stands).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "da067b65-d5f8-46ca-a50a-f580930435c3",
+    "createdAt": "2026-09-16T12:24:40.538Z",
+    "body": "## BLUF\nThe owed pin **merged**: PR #1000, squash `4ec051032fdab1bfc82854c77273735dc0b8af8c` on develop (parent `0b25f823f`). Nothing is deployed. **This ticket stays open.** The DO NOT RECONCILE ruling stands, and which schema source is authoritative is still undecided.\n\n## Recommendation\nNo action needed on the pin. The reconciliation decision is still owed separately.\n\n## Detail\n- Merge verified at origin: develop tip = the merge commit, single parent `0b25f823f`, 1 file, blob identical to the gated head `ab4a35d75`.\n- Tier-2 QA gate: GO WITH FINDINGS at `ab4a35d75`. Its Polish note (cell 3 is whitespace-brittle, cell 2 case-blind with cell 1 backing it) is left as a possible follow-up, not changed on this head.\n- Board: opening the PR walked this ticket Backlog \u2192 In Progress (GitHub integration). It is set back to **Backlog**, its state before the PR, because the ticket's main ask has not started. The PR description was re-worded before the merge so Linear linked it as \"contributes\", not \"closes\"; it did not walk to Done.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "aaf1dc1c-7316-42e9-9182-fa22e62ffe03",
+    "createdAt": "2026-09-16T11:35:59.161Z",
+    "body": "## BLUF\nPR #1000 raises the owed PIN at head `ab4a35d75d9b7611b4588ce88a792a489a124324`, not yet merged. One auth test asserts `createUser` conflicts on `email_lookup_hash` and never on `email`. **This ticket stays open:** the \"\u26d4 DO NOT RECONCILE THESE TWO FILES YET\" ruling is untouched, and which schema source is authoritative is still undecided.\n\n## Recommendation\nNo action needed on the PR. The reconciliation decision is still owed separately.\n\n## Detail\n- PR: https://github.com/Secuura/Distributed_Secuura/pull/1000 (branch `feature/ks-960-ornith-createuser-conflict-target-pin`, base develop `0b25f823f`).\n- Authored by the local model (Ornith) from a Wednesday-written brief; source-read by Wednesday; re-run by seat A at `ab4a35d75d9b7611b4588ce88a792a489a124324`.\n- Red-proof: `userRepo.ts:688` narrowed to `ON CONFLICT (email) DO UPDATE SET` reddens exactly cells 1\u20133. Dropping only the partial-index predicate reddens exactly cell 3. Both controls and the completeness cell stay green, with 6 cells ran in every row.\n- auth 60 files / 740 tests pass (baseline 59 / 734, 0 pre-existing failures measured at `0b25f823f`). `tsc` rc 0.\n- Neither `docker/init/01-schema.sql` nor `migrations/001_initial-schema.sql` is touched.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "d0f25323-b476-4b3f-998e-901fdcd306f2",
+    "createdAt": "2026-09-07T04:22:21.115Z",
+    "body": "**The third column is now MEASURED on the deployed database, not inferred. Still NOT reconciled.**\n\nThis ticket already records `documents.issuer_organization_id` as a third instance of the divergence: `migrations/001_initial-schema.sql:105` declares it `REFERENCES organizations(id)`, `docker/init/01-schema.sql:125` declares it with no reference. That was read from the two files.\n\nRead-only, from the database the demo actually runs (2026-09-07, during deploy verification):\n\n```\nFK constraints naming issuer_organization_id : 0\n```\n\nControls on the same connection: `users` reports 33 columns; `uuid_generate_v4` present in `pg_proc`.\n\n**So for this column the deployed schema is `docker/init`, measured.** That is one more data point for whichever source turns out to be authoritative \u2014 and it is one column, not a general answer. **The ruling stands: do not reconcile these files until authority is established.**\n\nAlso recorded on KS-597 (#889), where it changes how the resolution subquery should be read.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "01b18220-f0ac-4b9e-95ec-0b7226d56fb4",
+    "createdAt": "2026-09-07T03:14:13.246Z",
+    "body": "**A THIRD column shows the same divergence \u2014 found while opening #889 (KS-597). Recorded, NOT reconciled.**\n\n`documents.issuer_organization_id`:\n- `migrations/001_initial-schema.sql:105` \u2014 `issuer_organization_id UUID REFERENCES organizations(id)` \u2014 **with** a foreign key.\n- `docker/init/01-schema.sql:125` \u2014 `issuer_organization_id UUID` \u2014 **without** one.\n\nThe running DB was measured (by the KS-597 author, on the live DB) to have **no** FK on this column \u2014 so the deployed schema matches `docker/init`, not `migrations/001`. Same direction as this ticket's other two instances.\n\n**Why it is not cosmetic:** KS-597's resolution subquery folds an unknown or cross-tenant org id to NULL specifically because there is no FK to reject it. On the schema `migrations/001` describes, the database would refuse a dangling reference by itself; on the schema we deploy, nothing does. A reader reconciling these two files in the wrong direction would therefore also change whether that code is load-bearing.\n\n**Not reconciled here, per this ticket's ruling** \u2014 authority between the two sources has to be established first.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "cd91e5ee-aee6-4662-a84a-cd6d78f02d05",
+    "createdAt": "2026-09-07T01:53:41.842Z",
+    "body": "## A SECOND column, so the divergence is a PATTERN rather than one row\n\nFound while settling an unrelated question (KS-949's fresh-database case). The two sources disagree about `documents.owner_user_id` in exactly the same way they disagree about `users.email`:\n\n| file | declaration |\n| --- | --- |\n| `docker/init/01-schema.sql:127` \u2014 **the deployed source** | `owner_user_id UUID` \u2014 **no foreign key** |\n| `migrations/001_initial-schema.sql:107` | `owner_user_id UUID REFERENCES users(id)` |\n| `deployment/azure/migrate/init.sql:105` | `owner_user_id UUID REFERENCES users(id)` |\n\nConfirmed on the live local table: `pg_constraint` reports **no** FK from `documents.owner_user_id` to `users`, against 59 documents that have the column set.\n\n**Control:** the same search for `REFERENCES users` across `docker/init/01-schema.sql` returns **nothing at all** \u2014 so that file does not merely omit this one FK, it declares no user foreign keys. The grep can find `REFERENCES` elsewhere in the tree, so the empty result is a real absence.\n\n## Why this matters more than an extra example\n\n`services/api-gateway/src/startup-migrations.ts` justifies its twelve-row user seed as *\"seed per-client users into the main (default tenant) DB so document FK constraints work\"*.\n\n**That justification is true on one schema source and false on the other.** On a database built from `migrations/001` the FK exists and the ordering matters; on the database we actually deploy there is no constraint to satisfy. **A comment explaining why code exists can be correct and misleading at the same time, depending on which source built the database it runs against** \u2014 and nothing in the tree tells a reader which one they are on.\n\nThat is the class hazard this ticket describes, and it is now measured twice. The first instance (`users.email`) made a statement invalid; this one makes a *rationale* unverifiable. **Both point at the same missing fact: which source is authoritative.**\n\nStill: **do not reconcile.** Two data points make the question more urgent, not more obvious.\n\n**Measured 2026-09-07.**",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

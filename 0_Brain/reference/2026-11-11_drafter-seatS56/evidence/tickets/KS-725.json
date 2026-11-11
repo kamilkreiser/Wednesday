@@ -1,0 +1,61 @@
+{
+ "identifier": "KS-725",
+ "title": "test:pr never re-imports the OpenAPI spec, so Akto scans a collection that has drifted from it \u2014 a declared operation is not a scanned one",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-08-29T00:54:23.094Z",
+ "updatedAt": "2026-10-22T15:12:39.629Z",
+ "description": "> **Origin.** Parked on [KS-712](https://linear.app/secuura/issue/KS-712) comment `718362a9` (2026-08-28T22:30:04Z) under \"Related, found today and unfiled for the same reason\" \u2014 `issueCreate` was refusing workspace-wide. Filed 2026-08-29. **No new measurement was taken for this ticket**; the numbers are the ones recorded on 2026-08-28 against PR [#762](<https://github.com/Secuura/Distributed_Secuura/pull/762>).\n\n## BLUF\n\n**Declaring an operation in the OpenAPI spec does not put it in Akto's scan collection. **`test:pr` does **not** re-import the spec \u2014 only `test:pre-merge` runs `feed-har` \u2014 so the collection Akto scans drifts away from the spec silently, and a PR that adds operations gets an Akto result that never touched them.\n\nThis is the [KS-712](https://linear.app/secuura/issue/KS-712) premise reaching one step further than that ticket states it. KS-712 says: an operation absent from the spec is invisible to both tools. This says: an operation **present** in the spec can still be invisible to Akto.\n\n## Measured\n\nOn PR #762, which declares four operations (`GET`/`PUT` on `/api/privacy/settings` and `/api/settings/notifications`):\n\n| operation | occurrences in the Akto report |\n| -- | -- |\n| the two endpoints #762 declares | **0** |\n| control endpoint A | 105 |\n| control endpoint B | 7 |\n\nThe two controls are what make the zero readable: the report was produced, it was parsed, and it does contain occurrence counts \u2014 the declared endpoints simply are not in it. Without the controls, `0` and \"the grep could not have matched\" are the same reading.\n\n## Why it is worth a ticket rather than a note\n\nThe failure is **silent and it points the wrong way**. An author who declares a new operation, runs `test:pr`, and sees no Akto finding on it will reasonably conclude the operation was scanned and is clean. Under the current wiring that conclusion is unsupported: the operation was never in the collection. Every \"Akto clean\" claim in a Test Evidence block on a spec-adding PR carries this caveat, whether or not the author knows it.\n\nThis sits directly against the merge flow adopted 2026-08-25, where the **Test Evidence block carries the testing claim**. A block that says \"Akto FAIL 3, none on a touched route\" is true and still misleading if the touched routes could not have been scanned.\n\n## Not fixed, and why\n\nRe-importing the spec into Akto **mutates harness state** \u2014 the collection is shared, and @PeterObeden has live work on it ([KS-717](https://linear.app/secuura/issue/KS-717)). Doing it unilaterally mid-review would corrupt someone else's measurements to fix a reporting gap. It belongs with the harness owner, alongside [KS-716](https://linear.app/secuura/issue/KS-716).\n\n## Possible shapes (for whoever owns it \u2014 not a design commitment)\n\n1. Have `test:pr` re-import when the spec's hash has changed since the last import \u2014 cheap, and the common case is no change.\n2. Fail `test:pr` loudly when an operation touched by the diff is absent from the collection, rather than reporting a clean scan of it. This is the honesty-guard shape already used elsewhere in the harness.\n3. Leave `test:pr` alone and have the Test Evidence template require the author to state Akto collection coverage explicitly, so the gap is visible rather than assumed away.\n\nOption 2 is the one that fails closed, but it is the harness owner's call.",
+ "parent": {
+  "identifier": "KS-485"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-709"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-716"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "ab522c0f-6f6d-408f-affa-1aa81de2858b",
+    "createdAt": "2026-09-28T09:02:31.785Z",
+    "body": "@kamil.kreiser \u2014 could you take a look? This is your ticket and I have **not** touched it, but there is now a measured reason it matters more than when you filed it.\n\nRe-verified today on `feature/ks-1286-\u2026` (2026-09-28): the premise still holds exactly as you wrote it. `test:pr` is `vitest run tests/prScan.test.ts` and `test:pre-merge` / `test:security` are the same shape \u2014 **none of them import**. The import lives only in `bin/setup.ts`, run separately, so a re-import still depends on someone remembering.\n\n**Why it now looks like the largest lever on scan coverage.** Full OWASP run on slot 2, 50,162 results:\n\n| bucket | count | share |\n|---|---|---|\n| `byDesignFilter` (template did not match the endpoint) | 36,946 | **74%** |\n| `rateLimited` (429, new under KS-709) | 8,730 | 17% |\n| `clean` | 2,338 | 5% |\n| `notApplicableStack` | 1,717 | 3% |\n| `authzPrecondition` | 419 | 1% |\n\n`byDesignFilter` is by far the biggest bucket, and Akto's `api_selection_filters` match on **parameters** \u2014 which is precisely what your measurement showed the import restores: `loadParamsOfEndpoint` saw `identityCommitment` only *after* a re-import, and collection `urlsCount` went **190 \u2192 352**.\n\n**I am being careful not to overclaim:** most of that 74% is legitimate (194 templates \u00d7 348 endpoints \u2014 most genuinely do not apply), and I have not measured how much a re-import would recover. It could be a few percent. But it is the only bucket big enough for the answer to matter, and nobody has measured it.\n\nYour false-zero warning is carried forward and is the part I would most want preserved in any fix: `getCollectionEndpointCount` read **325 before and after** an import that actually took it to 361, so the result must be verified on a **fresh re-read**, never on the value the import call returns.\n\nNot picking this up \u2014 it is assigned to you and I did not want to take it without asking. If you would rather I did the harness side, say so here.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "8b04dbbb-0cfc-4761-ab58-098fbc0fdc21",
+    "createdAt": "2026-08-31T09:34:34.945Z",
+    "body": "## BLUF\n\n**Measured today: after a spec re-import, Akto CAN see `identityCommitment` at parameter level.** This ticket's premise \u2014 that `test:pr` never re-imports, so a newly declared field is invisible to Akto \u2014 is confirmed by the fact that the re-import was what changed it.\n\n## Evidence\n\nRan the OpenAPI import against the widened spec (Peter's requirement 3 on [#760](https://github.com/Secuura/Distributed_Secuura/pull/760)), on a tree rebased onto `436f37bed` so it carried KS-721's field.\n\nTwo Akto instruments queried for `POST /api/anchors`:\n\n```\n/api/loadParamsOfEndpoint   identityCommitment 1x    control 'metadata' 4x\n/api/fetchAllParams         identityCommitment 0x    control 'metadata' 0x\n```\n\nOne instrument sees it, the other sees neither it nor the control \u2014 so the positive comes from the endpoint that actually holds request-parameter data, not from a lucky substring match.\n\n**Collection state, before \u2192 after the import:** `OpenAPI Secuura API` urlsCount **190 \u2192 352**, api_info **325 \u2192 361**. 27 collections before and after, none created, none lost.\n\n## \u26a0 A false zero that will bite the next person\n\n**The endpoint count read 325 before the import and 325 after.** `getCollectionEndpointCount` called immediately after ingest returns a stale `api_info` list; a fresh capture moments later shows 361. That is the KS-700 shape \u2014 an operation that plainly worked, reporting a number that says it did nothing. Anyone automating a re-import check against that call will conclude the import is a no-op.\n\nWorth folding into this ticket's fix: whatever makes `test:pr` re-import should verify the result on a **re-read**, not on the value the import call returns.\n\n## What this does not settle\n\nThe re-import here was manual and one-off. This ticket is about `test:pr` doing it as a matter of course, and that is unchanged \u2014 the next `test:pr` run still will not re-import. So the KS-712 sweep benefit remains dependent on someone remembering to import by hand.\n\n*Measured 2026-08-31 (session 93) on the local Akto stack, from the #760 review thread. Local containers only, not a shared instance. No code written for this ticket.*",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

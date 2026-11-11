@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2107",
+ "title": "originate: five code comments call the lifecycle anchor emit idempotent, but a repeat admitted event builds and sends its own transaction",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-08T10:48:14.175Z",
+ "updatedAt": "2026-11-08T18:08:01.501Z",
+ "description": "**BLUF:** Five code comments in originate's documents routes say the lifecycle-event anchor emit is idempotent and \"reuses the document's existing anchor\". That holds for the anchor id. Seat AA 5th's probe shows it does not hold for the transaction: a repeat admitted event builds and sends a new one, and the row then names the second. Kam ruled that this behaviour stays until stage 2, so the comments are the only thing out of line with it. Evidence class: the behaviour is PROBED by AA 5th against a stand-in chain; the comments I READ at develop; nothing was run on a box. Text only, no behaviour change.\n\nThe comments, in `Blockchain/Dev/services/originate/src/routes/documents.ts` at develop `14ac61bd1a4c854c17539f1cd0f518631f998fbb`:\n\n* Line 1390, the doc block of `emitLifecycleAnchor`: \"Anchoring is idempotent per (document_id, network): re-anchoring an already-anchored document returns its existing anchor id.\" This one is written about the id.\n* Lines 2501 (custody transfer), 2921 (share) and 3023 (revoke): \"return a resolvable anchor id (idempotent \u2014 reuses the document's existing anchor)\".\n* Line 3149: \"shared emitter: idempotent per (document, network) \u2014 the event anchors against the document's existing anchor\".\n* Line 700 also says \"idempotent\", about an external-id match; that is a different subject and is not part of this.\n\nThe probe. Source: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-06_seatAA-5th/evidence/ks1384/probe_share3.lines`, measured by AA 5th at develop `c5c26b2835df`. Instrument, not a committed cell: the real submitter, the real `spendFromView` and `WalletView`, a stand-in chain, the upsert simulated from its SET list. Reading `PROBE admitted-share`: after a first confirmed share, a second admitted share built 2, sent 2, spent coin a then coin b, and the row names the second transaction.\n\nThe ruling. Card `secuura-ks1384-share-pays-second-tx-before-stage2-1106` = a, ruled 2026-11-06T21:04:52+11:00, option text read with `show`: \"Leave it until stage 2\". Detail: \"Admitted events keep paying one fee each. Nothing is built for this. Stage 2 gives each event its own row, on its own schedule.\"\n\nA fix shape, offered and not decided: reword the five comments so they say idempotent for the anchor id only, and name that each admitted event may submit its own transaction (KS-1384).\n\nRelated: KS-1384 (untouched, no comment from this ticket) and KS-1833 (its description cites the comment at the first of these sites and calls whether a repeat call spends a fee UNMEASURED; the probe above is a reading on that question, with the stand-in chain's limits).\n\nPriority: Low, a default set by the board seat because the finding gives none.\n\nDuplicate search before filing (board account, includeArchived, open tickets read with all comments): \"Idempotent\" with \"anchor id\" (KS-1384 and KS-1833 open; KS-319, KS-533 and KS-705 closed); \"false of the transaction\" (0 hits). KS-1833 cites the same comment and calls the fee UNMEASURED; the closed KS-705 is the earlier \"idempotent on the row but not on the submission\" ticket. No ticket tracks the wording of these comments. Output: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-08_seatS-36th/evidence/search_d1.out`",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2103",
+    "title": "Refs KS-2107: five lifecycle-anchor comments in originate documents.ts say the anchor id is idempotent, not the transaction"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "0bb70934-666e-4834-ab44-a840f99cb4ec",
+    "createdAt": "2026-11-08T18:08:01.212Z",
+    "body": "**BLUF:** PR 2103 (head `6de27bab34cd`, one commit on develop `15dca468b86f`) rewords five comments in originate's documents routes so they say the lifecycle-event anchor emit is idempotent for the anchor id only, and that a repeat admitted event may submit its own transaction. Comments only: no code byte changes. It waits for its QA gate (tier 2). Nothing is merged or deployed, and this ticket's state is unchanged by this comment.\n\n- **The change** (3 files, +42 -7): `documents.ts` (+13 -7: the doc block of `emitLifecycleAnchor` and the custody-transfer, share, revoke and shared-emitter comments), and a cheat and a flow documentation fragment (a pair ruled by the coordinator, text from the held passes' notes and this ticket).\n- **Why:** the comments said the emit \"reuses the document's existing anchor\". That holds for the id and not for the transaction (the probe in this ticket). The ruling that behaviour stays until stage 2 is this ticket's; only the words move.\n- **Proof, measured by Seat T 17th:** the emitted JavaScript with comments removed is identical before and after; the two held passes' ten expectation strings read red at the tip, green with the patches and red again reversed; whole originate suite 220 suites / 2592 cells before and after, 0 failed; lint 0 errors; tsc 0 errors.\n- **Left alone:** the comment at line 700 that says \"idempotent\" about an external-id match is a different subject.\n- **Not covered:** the transaction behaviour was not re-run, no box, Node 24 (this was v26.8.1).\n- The pull request says Refs, so it does not close this ticket.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

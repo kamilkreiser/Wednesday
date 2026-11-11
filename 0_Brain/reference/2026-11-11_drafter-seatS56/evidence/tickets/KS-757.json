@@ -1,0 +1,46 @@
+{
+ "identifier": "KS-757",
+ "title": "Connector erasure re-drive is unbounded against concurrency \u2014 and all three prescribed fixes are blocked (QA F-6)",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-02T12:57:31.122Z",
+ "updatedAt": "2026-11-09T03:31:12.791Z",
+ "description": "**BLUF \u2014 QA F-6. The connector erasure re-drive SELECT is unbounded against concurrency, and all THREE of the fixes prescribed for it are blocked by something measurable. Filing rather than half-building one, because each of the three fails in a way that is worse than the defect.**\n\nThe race (`services/originate/src/services/gdprService.ts`, `executeErasureByExternalRef`): the re-drive read\n\n```sql\nSELECT id FROM data_subject_requests\nWHERE user_id = $1::uuid AND type = 'erasure'\n  AND status NOT IN ('completed', 'denied')\nORDER BY requested_at ASC LIMIT 1\n```\n\ntakes no lock. Platform S retries **without bound**, so two retries that overlap either both select the same DSR and both drive `executeErasureImpl` against it, or both miss and both file one \u2014 the orphan accumulation the re-drive was added to prevent.\n\n### The three prescribed fixes, each measured\n\n**1. Partial unique index \u2014 cannot be built on existing data.**\n\n```sql\nCREATE UNIQUE INDEX \u2026 ON data_subject_requests (user_id)\n  WHERE type = 'erasure' AND status NOT IN ('completed','denied');\n```\n\nMeasured on the local database: **4 users already hold more than one non-terminal erasure DSR.** The index would fail to build. (Control: the same GROUP BY \u2026 HAVING count(*) > 1 without the type/status predicate returns **12**, so the query discriminates and the 4 is not a false zero.) This needs a data-reconciliation migration first \u2014 deciding which duplicate survives is a GDPR-records question, not an index.\n\n**2.** `FOR UPDATE SKIP LOCKED` **\u2014 wrong for this shape.** If the row is locked by a concurrent attempt, SKIP LOCKED returns nothing, so the second caller falls through to the `else` branch and **files a new DSR**. That is precisely the accumulation the re-drive block exists to prevent, and the comment above it says so. Plain blocking `FOR UPDATE` is the right semantic, but it is inert outside an explicit transaction \u2014 a single `$queryRaw` commits immediately and drops the lock.\n\n**3.** `prisma.$transaction` **+** `pg_advisory_xact_lock` **\u2014 deadlocks on the connection pool.** Transaction-scoped is the correct lock kind here (`pgbouncer.ini:54` is `pool_mode = transaction`, so a session-scoped advisory lock would leak onto whichever client next receives the server connection). But the block it would have to wrap calls `createDSR`, and `createDSR` issues its INSERT on the **module-level** `prisma` (`gdprService.ts:289`), not on the `tx` handle. So the inner write runs on a *different* connection, outside the transaction \u2014 losing the atomicity the lock was for \u2014 and worse, the outer transaction holds one pooled server connection while the inner call waits for another from the same pool. Under load that is a self-deadlock.\n\n### What a real fix needs\n\nAny of these, and each is its own piece of work:\n\n* Thread a transaction client through `createDSR` (and `writePii`, which it awaits) so the claim and the INSERT share one connection \u2014 then the advisory lock works as intended; **or**\n* an optimistic claim using the status vocabulary that already exists: a single atomic `UPDATE \u2026 SET status='processing' WHERE \u2026 AND status='pending' RETURNING id`, where losing the claim means another attempt is in flight. This needs a staleness timeout, or a crashed attempt strands the DSR in `processing` forever; **or**\n* reconcile the 4 duplicate rows, then add the partial unique index and have the caller catch `23505` and re-read.\n\n### Scope note\n\nNot shipped in #790. That PR closes QA F-1 (denied DSRs re-driven) and F-5 (a test asserting its own fixture), both Majors, and adding a half-bounded lock would have made the concurrency story *look* handled while leaving the deadlock in. The re-drive block itself is not a regression from #790 \u2014 it was added in that PR's earlier revision and the unboundedness is inherent to the shape, not to the KS-695 change.\n\n### Provenance\n\nMeasured 2026-09-02 (session 110) against branch `feature/ks-695-ask1-erasure-by-external-ref` at `b8d658d2a`, `develop` at `0e67228df`. Duplicate counts and the control read from the local Postgres read-only; `pool_mode` read from `docker/pgbouncer/pgbouncer.ini:54` and confirmed inside the running `secuura-pgbouncer` container. No writes.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "cab680e8-d032-4b38-b050-25abfe6a804e",
+    "createdAt": "2026-11-09T03:31:11.449Z",
+    "body": "**BLUF:** Kam ruled the 31-decision card `secuura-backlog-31-decisions-1109` on 2026-11-09 at 13:44:07 (live board), in these words: \"Decision secuura-backlog-31-decisions-1109: a \u2014 All recommendations (A and B)\". Option a reads: \"Every row ruled as recommended; a board seat files and moves the tickets; the KS-607 demo rows still wait for a separate yes.\" This ticket is row A12 of the decision pack, ruled as recommended: option 1. One atomic claim step using the statuses that already exist, plus a timeout for claims left behind by a crash. It needs no ruling on GDPR records and cannot deadlock the connection pool.\n\nA build seat does the work; nothing was changed in code by this comment.\n\nAlongside this comment the ticket moves from Backlog to Todo.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "105ac755-a16e-4134-a6f9-cb1c95abecd4",
+    "createdAt": "2026-09-08T13:18:48.357Z",
+    "body": "## The two gdpr erasure endpoints came off the schemathesis failing set \u2014 measured, not fixed here\n\n`GET /api/gdpr/erasures/{externalRef}` and `POST /api/gdpr/erasures` failed in **every** pre-rebuild run (s152 12:12Z, and two more at 12:57Z / 13:00Z) and passed in **every** post-rebuild run (13:05Z / 13:07Z), on the same commit `5ffaaf396` \u2014 so the fix was already in the code and a stale local image was hiding it.\n\n\u26a0 **This does NOT say this ticket is done.** The measurement separates old code from new code, not one commit from another, and the erasure family spans KS-695 / KS-754 / KS-757 / KS-758. Attributing the change to any one of them needs a bisect that was not run.\n\nFull cells and controls on **KS-695**. *(s153, 2026-09-08.)*\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

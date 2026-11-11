@@ -1,0 +1,51 @@
+{
+ "identifier": "KS-2080",
+ "title": "smoke-test remote run: summary and exit code hide 12 skipped checks, sections 10 and 11 still read local docker, no cell guards the count",
+ "state": {
+  "name": "Done",
+  "type": "completed"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": "2026-11-08T19:22:12.363Z",
+ "createdAt": "2026-11-06T09:18:28.006Z",
+ "updatedAt": "2026-11-08T19:22:11.521Z",
+ "description": "**BLUF:** The three notes of the tier-2 gate (gate 222) on PR 2043 (KS-1250), which merged as 9cdb9321aa8a on 2026-11-06: GO WITH NOTES at head 825b44b53547. They are about what a green remote run of the smoke script does and does not say. Filed so the notes have a ticket before KS-1250 is closed, on Wednesday's ruling of 2026-11-06 09:11Z. Medium (the gate rated F1 and F2 Moderate). One file family, one test pass. Nothing here was run against a live box; the gate used stubs.\n\nVerdict: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-06_gate222-tier2-pr2042-2043/verdict.md`, with the `evidence/q6` folder beside it. Files: `Blockchain/Dev/scripts/smoke-test.sh` and `Blockchain/Dev/scripts/__tests__/smoke_test_direct_ports_follow_the_target.test.sh`.\n\n### F1 (Moderate): the summary and exit code of a remote run do not show that the direct ports were skipped\n\nA skip calls warn(), which only bumps the warning counter. The RESULTS block (lines about 428 to 440 of the smoke script above) prints Passed, Failed, Warnings and Total and exits on the failure counter alone. With no failures its last line is `All checks passed.` and the exit code is 0, whether 12 checks were skipped or none. The twelve skip lines sit mid-output in sections 7 to 9; the RESULTS block never mentions them, and Warnings is the counter every ordinary local run already uses, so 12 is not a signal. The skip lines and the RESULTS shape were measured on stubs; the \"All checks passed.\" branch with 12 skips was read from the code, not displayed. Fix shape: count skips in their own counter, print `Skipped (not covered): 12` in RESULTS, and change the closing line on a skipping run (for example `No check failed. 12 NOT RUN, see warnings.`), with a cell that asserts that line and counter on the remote cell.\n\n### F2 (Moderate): sections 10 and 11 still read the local docker stack, whatever the target\n\nLines about 397 to 426 (`docker compose ... logs originate` and `docker exec secuura-redis redis-cli ...`) are not wrapped by the direct-port skip, so against a remote gateway they test whichever stack is on the operator's machine. With a local stack up, `Redis - authenticated connection (PONG)` prints as a pass under the remote target's banner (measured on a stub docker that answers PONG). With none up, section 11 is a fail and every full remote run exits 1. A remote full run cannot be green for the right reason. Fix shape: skip or relabel sections 10 and 11 for a non-local gateway, or state that they remain local. Wednesday's rule named twelve checks, so whether these two are in scope is the owner's call.\n\n### F3 (Minor): skips printed but not counted pass the whole test\n\nThe suite reads output text only, never the Warnings figure. A tamper that prints the skip line without counting it leaves 11 of 11 cells green. Same root as F1; any F1 fix needs its own cell.\n\n**Related:** KS-1250 (the ticket PR 2043 raised) and KS-1794 (the smoke script is not remote-clean). KS-1794's item 1, the twelve localhost checks, is delivered by PR 2043; its items 2 and 3 are not touched here.\n\n**Searched before filing** (board, includeArchived, title and description plus every comment of each open candidate; 2026-11-06 about 09:15Z; controls: 'msgpackr' hits KS-1379 among open, a random token hits 0): \"direct_skip\" 0 open and 0 closed literal hits; \"Skipped (not covered)\" 0 and 0; \"secuura-redis redis-cli\" 0 and 0; the smoke script's own file name together with \"remote\" 4 open hits (KS-485 and KS-772 review streams, KS-1250, KS-1794), 0 closed. KS-1794 covers the twelve localhost checks, the RUNBOOK text and the credentials echoed in the target line; it covers none of F1, F2 or F3. The newest 60 tickets by creation date hold no gate 222 follow-up.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2068",
+    "title": "Refs KS-2080: a smoke run reports what it skipped, and sections 10 and 11 follow the target"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "fed1eb9c-6d5e-46c0-94aa-ffd5e9c77e1d",
+    "createdAt": "2026-11-08T19:22:10.571Z",
+    "body": "Delivered: PR 2068 (6c9a593df4ab) is merged to develop and has no deploy surface (a dev smoke script, its suite and two documentation fragments). Closing as done.\n\nClosing under the no-deploy-surface rule (docs, tests, CI and dev-tooling-only squashes close on merge, proven from the file list). No live check possible.\n\n* Files (GitHub's list for the PR): `Blockchain/Dev/scripts/smoke-test.sh` (+25), `Blockchain/Dev/scripts/__tests__/smoke_test_direct_ports_follow_the_target.test.sh` (+61 -1), and two fragments under `Projects Documents/fragments/` (cheat and flow).\n* Scope: the PR covers all three items of this ticket (gate 222's F1 to F3), as its comment of 6 November said. Gate 243 (tier 2): GO WITH NOTES.\n* Follow-up with its own ticket: KS-2135 (gate 243's two notes: skips other than the direct-port and local-stack ones are not counted, and a 127.0.0.1:6882 target reads as remote). It does not keep this ticket open.\n\nNOT covered: the script was never run against a live box (the gate and the PR used stubs), and the four platform suites were not run. Demo: nothing deploys with this change, and the demo is untouched.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "9ff928af-f19d-4592-8c57-5036f45e32d4",
+    "createdAt": "2026-11-06T14:29:19.243Z",
+    "body": "**BLUF:** PR 2068 covers all three items of this ticket (F1 to F3, gate 222's notes on `smoke-test.sh` after PR 2043), head `1be849a4fc94` cut from develop `cd773edc2bb8`. It is READY FOR GATE at proposed tier 2; nothing is merged and nothing is deployed. The link is `contributes`; I changed no state, assignee or field, and the parent KS-1250 (closed 09:20Z by my read) gets no comment from me, as Wednesday ruled.\n\n* **PR:** https://github.com/Secuura/Distributed_Secuura/pull/2068\n* **What changed:** a remote run now reports `Skipped (not covered): N` in RESULTS and closes with `No check failed. N NOT RUN against this target...` instead of `All checks passed.`; sections 10 and 11 (local docker stack) are skipped for a non-local gateway; two cells pin the Warnings figure. The exit status stays 0 on a skip: a design call named in the PR for the gate.\n* **Evidence:** the full Test Evidence block is in the PR body (six RED cells against develop, eighteen planted tampers, a byte-identical default local run under stubs, the neighbouring suites, the docs check) with its NOT-run list. No box was touched.\n* **Owed after merge:** no migration or config change. No deploy surface. Whether this ticket closes after the merge is the board seat's call.\n\n\u2014 Seat J 19th",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

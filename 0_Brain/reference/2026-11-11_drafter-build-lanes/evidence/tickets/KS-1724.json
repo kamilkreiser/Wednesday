@@ -1,0 +1,44 @@
+{
+ "identifier": "KS-1724",
+ "title": "Request-body arrays are uncapped: a JSON array of failing elements costs time and memory linearly (1 MB -> 524,288 issues, 338 ms, +165 MB), and two 10 MB JSON limits multiply it",
+ "state": {
+  "name": "In Progress"
+ },
+ "priority": 0,
+ "assignee": {
+  "name": "kamil.kreiser@secuura.ai"
+ },
+ "updatedAt": "2026-11-04T02:09:41.669Z",
+ "description": "## BLUF\n\nA request body that is one large JSON array whose elements all fail validation makes `z.array(...)` build one issue object per element, with no cap, so the cost grows linearly with the body and is paid on the event loop. Measured on the zod 3.25.76 v3 entry that product code uses: 1 MB -> 524,288 issues, 338 ms blocked, +165 MB heap. Two JSON limits are 10 MB. Of 237 `z.array(` call sites, at most 232 show no length bound. This is the exposure-bounding work behind the 14-day baseline row for GHSA-mrhx-c7xc-m3w5 (KS-1723, Kam's card `secuura-ks1723-zod-msal-high-baseline-1026`, ruled a on 2026-10-26 09:55:48 AEDT); it does not clear that advisory.\n\n## Measured\n\n`z.array(z.string())` validating a JSON array of numbers (every element fails), `JSON.parse` then `safeParse`, one throwaway node process per case, `--expose-gc --max-old-space-size=1536`, one run each. Synthetic worst case, no concurrency.\n\n| body | elements | issues | time blocked | heap delta | max RSS |\n| -- | -- | -- | -- | -- | -- |\n| 100 KB (express default) | 51,200 | 51,200 | 41 ms | +22 MB | 86 MB |\n| 1 MB (gateway, mcp-server) | 524,288 | 524,288 | 338 ms | +165 MB | 274 MB |\n| 10 MB (auth service, gateway uploads) | 5,242,880 | 5,242,880 | 4.5 s | +1,382 MB | 1,620 MB |\n\nFor comparison the v4 code that ships inside zod 3.25.76 (`zod/v4`; the advisory's class; an old unpatched copy): 100 KB +45 MB; 1 MB +438 MB heap, max RSS 550 MB; 10 MB aborted (rc 134) at the 1.5 GB heap cap. zod 4.6.5 and 4.6.7 were not tested.\n\n## Where the limits are\n\n* `Blockchain/Dev/services/api-gateway/src/index.ts:402`: `express.json({ limit: '1mb' })`.\n* `index.ts:406`: `uploadBodyParser = express.json({ limit: '10mb' })`, mounted at `:407` (`/api/documents/upload`) and `:408` (`/api/nft/upload`).\n* `Blockchain/Dev/services/auth/src/index.ts:85`: `express.json({ limit: '10mb' })`.\n* `Blockchain/Dev/services/mcp-server/src/http-server.ts:29`: `express.json({ limit: '1mb' })`.\n* 40 `express.json(` sites in services and packages; 12 name a limit; the rest take express's default of 100 KB.\n\n## Sites (an upper bound)\n\nTracked product files under `services/*`, `packages/*`, `frontend/*`, excluding tests, `node_modules`, `dist`, `vendor`:\n\n* `z.array(`: 237 lines in 46 files. 5 show a numeric `.max()` or `.length()` on the same line; 232 do not (multi-line chains are not resolved, so 232 is an upper bound).\n* `.parse(req.body\u2026)` / `.safeParse(req.body\u2026)`: 118 sites.\n* Unbounded, schema line -> parse line, read: `services/originate/src/routes/webhooks.ts:132` -> `:280`; `services/auth/src/routes/oauth.ts:1181` and `:1189` -> `:1201`; `oauth.ts:1301` -> `:1309`; `services/tokenisation/src/index.ts:54` -> `:62`.\n* Bounded, for contrast: `services/referral/src/routes/rewards.ts:20` (`.max(50)`), `services/tokenisation/src/index.ts:89` (`.max(500)`), `services/security/src/index.ts:1605` (`.max(1000)`).\n\n## Not measured\n\nWhether each unbounded route is authenticated; behaviour under concurrent requests; the memory limits of the deployed containers; a request through the real gateway; zod 4.x numbers.\n\n## Searched before filing\n\nThe board (title and description, archived included), by symbol and string, never by my own phrasing: `z.array(` (4 hits: KS-1696, KS-1600, KS-1514, KS-1210, each a different bug that contains the string), `uploadBodyParser` 0, `limit: '10mb'` 0, `express.json` (6 hits, none about a size cap), `handleArrayResult` 0, `zod 4` 0, `zod@4` 0, `zod v4` 0, `msal-node 7` 0, `@azure/identity` (1: KS-1379, lock re-resolution), `GHSA-mrhx-c7xc-m3w5` and `GHSA-xcx6-jx8p-x3h5` (KS-1723 only). Control: `GHSA-w9m9-85wc-3x92` returns KS-749, so the search can see an id. Filed new.",
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1950",
+    "title": "Refs KS-1724: demo edge access log records each request's size as rl=$request_length"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1944",
+    "title": "Refs KS-1724: JSON bodies capped at 1000 per array, 20000 values and depth 32 per service"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "7d034e93-bd2c-40bc-b555-f7de669bdf46",
+    "createdAt": "2026-11-04T02:09:41.710Z",
+    "body": "**BLUF:** Delivered: PR 1944 merged as 9a9bf86967e3 and PR 1950 as 73342c2f8f49 on develop, deployed to kintsugi at ee1e1b832115 (kintsugi's REVISION head, read 2026-11-04 01:59Z). Verified by code read at ee1e1b832115. Left open: the 7-day request-size window and the whatsapp-bot connector.\n\n- **Delivered:** `Blockchain/Dev/packages/shared/src/index.ts:190` exports `boundedJson`, the parser every service mounts in place of a bare `express.json(...)`: a body over 1000 elements in one array, 20000 values or depth 32 gets a 400 before validation. `ks1724-bounded-json-structural-caps.test.ts` pins it.\n- **Left open:** PR 1950 changes only `docker/nginx-gateway/nginx-demo.conf:113` (`rl=$request_length`). Today's deploy was kintsugi only, so the demo edge does not carry it yet and the 7-day window on card secuura-ks1724-edge-request-size-measure-1102 has not started. `connectors/whatsapp-bot` is not on `boundedJson` (named as a follow-up candidate in comment 812c62c3; not filed).\n"
+   },
+   {
+    "id": "75aae46b-34ef-434d-9ce8-9ec13120a42f",
+    "createdAt": "2026-11-02T13:53:00.883Z",
+    "body": "**BLUF:** Pull request 1950 is open against develop: the demo edge's access log now records each request's size, as a trailing `rl=$request_length` field, per Kam's ruling on card secuura-ks1724-edge-request-size-measure-1102 (= a). It is waiting for its QA gate and is not merged.\n\n* Link: https://github.com/Secuura/Distributed_Secuura/pull/1950\n* Head `ce2130fd111c`. One file, `docker/nginx-gateway/nginx-demo.conf`, +1/-1. Only the `secuura_edge` log format gains the field at its end; `nginx.conf` and `nginx-production.conf` are untouched.\n* Measured on the image the Dockerfile pins: `nginx -t` passes with and without the change, and a 1,000-byte POST logs `rl=1149` (the body plus the request line and headers). The one parser of this log (systemTest's gatewayTimeline) reads both lines identically.\n* No request is answered differently. The measurement window (7 days of sizes) starts when a deploy seat ships the merged file to the demo edge and nginx reloads.\n* The Test Evidence block, and what was not run, are in the pull request body."
+   },
+   {
+    "id": "812c62c3-56ac-44b3-8737-f9e012f5bb03",
+    "createdAt": "2026-11-02T11:41:50.797Z",
+    "body": "**BLUF:** Pull request 1944 is open against develop: every service's JSON body parser now refuses over-sized structures (one array over 1000 elements, more than 20000 values, nesting deeper than 32). It is waiting for its QA gate and is not merged.\n\n* Link: https://github.com/Secuura/Distributed_Secuura/pull/1944\n* Head `3b11d11a2988` (three commits; develop `c70f339063ee` merged in). 41 files, +831/-39.\n* `boundedJson` in packages/shared (request-limits.ts): the same options as each service's old `express.json(...)`, plus the three caps. Each cap can be raised per service with `JSON_BODY_MAX_ARRAY_LENGTH`, `JSON_BODY_MAX_NODES` or `JSON_BODY_MAX_DEPTH`, read once at boot. No byte limit changes.\n* Mounted in 23 service entry files and at the api-gateway's 6 parser sites. Not swapped: `connectors/whatsapp-bot` (a separate connector), named as a follow-up candidate.\n* Behaviour: a body over a cap gets a new 400 `BAD_REQUEST` \"Request body exceeds the structural limit (<kind>).\" and one warn log line (service, kind, path; never a value). Every body within the caps behaves as before.\n* Measured: on the zod version the services run, a 1 MB array of failing elements built 524,284 issues (+172 MB heap) before this change; with it, the body is refused before validation in under a millisecond.\n* The Test Evidence block, and what was not run, are in the pull request body."
+   }
+  ]
+ }
+}

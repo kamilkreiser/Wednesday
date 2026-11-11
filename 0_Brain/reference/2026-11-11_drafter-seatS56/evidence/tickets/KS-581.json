@@ -1,0 +1,56 @@
+{
+ "identifier": "KS-581",
+ "title": "register-connector: volume alerting, rate limit, and correlation of refused re-key attempts",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-08-07T01:22:50.791Z",
+ "updatedAt": "2026-09-14T15:53:22.602Z",
+ "description": "## BLUF\n\n`register-connector` is the highest-blast-radius admin operation on the platform and has **no volume alerting and no rate limit**. Bulk re-key ([KS-576](https://linear.app/secuura/issue/KS-576)) makes it cheaper to trigger, which raises the cost of leaving it unmonitored.\n\nCarried over from @peter's own candidate list on KS-480, unchanged.\n\n## Detail\n\nThe route (`services/api-gateway/src/routes/platform.ts:476`) refuses connector-authorised rotates (`:499-509`) but nothing observes the pattern of use:\n\n* no alert on an unusual **volume** of rotations in a window\n* no rate limit on the route itself\n* refused re-key attempts are not correlated \u2014 a series of 403s from a connector credential probing the rotate path looks like nothing\n\n### Added 2026-09-14 \u2014 register #15 from [KS-533](https://linear.app/secuura/issue/KS-533/sk-security-register-data-loss-unrecoverability-scenarios-code) (`externalRef` collision / wrong environment)\n\nCarried here on closing [KS-533](<https://linear.app/secuura/issue/KS-533>) (register row #15, Low likelihood, \u26a0\ufe0f manual merge to recover). Same route, same blast radius, so it belongs with the rate-limit/alerting work rather than on its own ticket.\n\n**Scenario:** a reused or typo'd OrganisationGuid, or a staging S registering against prod K. Duplicate orgs split provenance; `rotate: true` aimed at the wrong org kills a prod key.\n\n**State on** `develop` **today** (`platform.ts:495,537`): `externalRef` is trimmed and checked for presence and `\u2264128` chars only \u2014 no shape check, although \u00a74 defines it as S's Org GUID. Nothing ties the provisioning credential to an environment, so a staging S holding a prod-shaped key is indistinguishable from prod S.\n\n**Add to the done-when:**\n\n* `externalRef` validated as a GUID (400 on anything else) \u2014 a typo cannot mint a second org.\n* Environment-scoped provisioning credentials: a key minted for one environment is refused by another (env tag in the key record or prefix, checked at `register-connector`), so a staging S cannot register or rotate against prod K.\n\n**Done when:** an anomalous rotation volume raises an alert, the route is rate-limited, and refused attempts are correlated well enough that a probing pattern is visible rather than scattered across logs.\n\n---\n\n*Split from* [KS-480](https://linear.app/secuura/issue/KS-480) *per @kamil.kreiser's ruling 2026-08-07.* [KS-579](https://linear.app/secuura/issue/KS-579)\u2013[KS-582](https://linear.app/secuura/issue/KS-582) *are @peter's own candidates carried over unchanged;* [KS-577](https://linear.app/secuura/issue/KS-577) *and* [KS-578](https://linear.app/secuura/issue/KS-578) *are additions from the 2026-08-06 verification. Findings checked against* `develop` `c8ce65dca`; Finding B confirmed live on the demo VM read-only.",
+ "parent": {
+  "identifier": "KS-772"
+ },
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-582"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-579"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-577"
+    }
+   },
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "KS-576"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

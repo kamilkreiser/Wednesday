@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-1936",
+ "title": "api-gateway: ORG_ADMIN and ISSUER_ADMIN can set any user's verification level (tenant bound unmeasured)",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-02T01:06:52.253Z",
+ "updatedAt": "2026-11-02T01:06:52.253Z",
+ "description": "**BLUF:** In the api-gateway, `PATCH /api/admin/identity/users/:id/level` sits behind `requireAdmin`, and `requireAdmin` admits `ORG_ADMIN` and `ISSUER_ADMIN` (and the lower-case `issuer_admin`). A probe with a stub database showed both roles reach the handler and issue `UPDATE users SET verification_level = $1 ... WHERE id = $2::uuid` for ANY user id. The SQL has no tenant or organisation predicate. **Whether row-level security (or anything else) stops those two roles from changing a user in another tenant was NOT run**, so this is an open question, not a confirmed cross-tenant write. A real-PostgreSQL probe with a cross-tenant id settles it.\n\n## What is read in the code (develop `d9acf71a3fcc`, `Blockchain/Dev/services/api-gateway/src/routes/admin.ts`)\n\n* `:600` `const ADMIN_ROLES = ['SYSTEM_ADMIN', 'system_admin', 'super_admin', 'SUPER_ADMIN', 'platform_admin', 'ORG_ADMIN', 'ISSUER_ADMIN', 'issuer_admin'];`\n* `:602-:605` a comment (KS 458) says platform-level admins read across tenants and that \"ORG_ADMIN / ISSUER_ADMIN keep the tenant-scoped view the policy now enforces (their request ALS context applies)\". `PLATFORM_SCOPE_ROLES` (`:606`) lists only the five platform roles, and `adminScope` (`:607-:610`) runs a query under the platform scope for those five only.\n* `:612-:651` `requireAdmin` checks the token and then only `ADMIN_ROLES.includes(role)`; a role outside the list gets 403. It does not look at the target user, the caller's organisation or the caller's tenant.\n* `:1313` `router.patch('/api/admin/identity/users/:id/level', requireAdmin, mockBodyParser, ...)`. The body's `verificationLevel` must be one of NONE, BASIC, SOCIAL, STANDARD, ENHANCED, HIGH, GOVERNMENT (anything else answers 400 with no query).\n* `:1322-:1325` `adminScope(req, () => query('UPDATE users SET verification_level = $1, updated_at = NOW() WHERE id = $2::uuid RETURNING id, verification_level', [verificationLevel, id]))`. The only predicate is the user id. `rowCount === 0` answers 404.\n\n## Source and its limit\n\nFound by gate 98 (the QA gate on pull request 1916, the KS 1868 `admin.ts` catch-read change), finding G98-F4, 2026-11-02. It ran the real admin router (real `createAdminRoutes`, real `requireAdmin`, real `ADMIN_ROLES`) on a loopback listener with only the token verifier, the database, the logger and redis replaced. Its auth matrix: no token 401, a plain USER 403, and ORG_ADMIN, ISSUER_ADMIN and SYSTEM_ADMIN each 200 with exactly one query, `UPDATE users SET verification_level = $1`, parameters the level and the id. **The database was a stub, so row-level security was not run.** The behaviour is pre-existing and unchanged by pull request 1916 (that change only guards how a thrown value is read for a log line). Filed on Wednesday's commission from that note; I read the code lines above at `d9acf71a3fcc`, and I did not run anything against a database.\n\n## What is not known, and what would settle it\n\n1. **Cross-tenant.** Does the tenant row-level security on `users` reject the UPDATE when an `ORG_ADMIN` or `ISSUER_ADMIN` of tenant A names a user of tenant B? Settle with a real PostgreSQL carrying the project's RLS policies and migrations: two tenants, a user in B, a token for an `ORG_ADMIN` of A, `PATCH` the level for B's user. 404 (zero rows) means RLS bounds the call; 200 and a changed row means it does not.\n2. **Same tenant, other organisation.** Tenant row-level security does not know organisations, so an `ORG_ADMIN` or `ISSUER_ADMIN` may be able to change the level of a user in a different organisation of the SAME tenant. Not measured either way. The policy question of which roles may cross an organisation boundary is KS 1535 and the role-list drift is KS 1536; neither covers this route.\n3. **What a changed level buys.** The board's KS 1176 and KS 1190 describe the gateway's `meetsVerificationLevel` checks on this value. Which routes read the stored level for an access decision was not traced here.\n\n## Board search (so nobody files this twice)\n\nRun 2026-11-02 over this team's issues and comment bodies for `admin/identity`, `identity/users`, `/level`, `verification_level`, `requireAdmin`, `ADMIN_ROLES`, `ORG_ADMIN` and `ISSUER_ADMIN`; positive control KS 1865 found. The route terms hit only the KS 1868 umbrella's own comments; the symbol terms hit tickets about other routes. Closest, and not covering this route: KS 1536 (role vocabularies), KS 1584 (an organisation-bound escape through a provisioning key), KS 1855 (gateway admin stand-ins).\n\n## Not in scope\n\nNo change to `admin.ts` is proposed or made here. Severity is not asserted: priority High is the commissioning call, pending the probe above.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

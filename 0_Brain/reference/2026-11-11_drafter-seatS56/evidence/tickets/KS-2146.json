@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2146",
+ "title": "G5b's name says each tokenisation key route is gated, but the cell only reads the source as text (G273-2109-1)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-09T00:52:55.529Z",
+ "updatedAt": "2026-11-09T09:28:07.268Z",
+ "description": "**BLUF:** The test cell `RED ks1536 G5b` is named \"tokenisation puts requirePlatformRole on each key route itself, not only twice somewhere\", which reads as \"each key route is gated\". The cell does something narrower: it reads the tokenisation service's source as text and checks that two route lines contain the text `requirePlatformRole(),`. Gate 273's plant PC inserted an ungated `app.post('/api/generate-key', \u2026)` registration on the line before the gated one, and G5b stayed green (99 of 99 passed) although Express answers the first registration, so generate-key was open. The name claims more than the cell proves. Low, by Wednesday's ruling on gate 273: accepted at merge, ticketed Low by the board seat after the merge. A test-name defect; no behaviour defect was found. Read at develop `2a031f51403f` (PR 2109's squash): the cell is unchanged.\n\nSource: finding G273-2109-1 (Low; test name), lines 106 to 118 of `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate273-tier1-g30-batch/verdict.md`, on PR 2109 head `5350041b426d`, verdict GO WITH NOTES. The gate's own words: \"G5b proves the gated line exists, not that the live route is gated.\"\n\n## Where\n\n`Blockchain/Dev/packages/shared/src/__tests__/ks1536-one-role-vocabulary.test.ts`, lines 176 to 180 at `2a031f51403f` (193 lines in all). The cell reads `services/tokenisation/src/index.ts` with `readFileSync` and asserts `toContain(\"app.post('/api/generate-key', requirePlatformRole(),\")` and the same for `/api/rotate-key`. The cell before it, G5 (line 170), counts `requirePlatformRole()` occurrences in the same text and expects 2.\n\n## What the gate says G5b cannot see (its Q4)\n\nA duplicate or earlier ungated registration of the same path (measured as plant PC); router-level or `app.use` middleware ordering that runs before the route; a literal sitting in a comment or dead code; a route mounted in another file. The PR body and the code comment already say that G5b reads the source file as text and that there is no route-level cell (gate 273, Q7), so the limit is disclosed; the cell's name is what overstates it.\n\nThe gate also records, as Info and not ticketed, that M4 and G5b carry the file's `RED` prefix while green on develop by design, which the PR body says.\n\n## What I read\n\nREAD ONLY (the board seat): lines 160 to 193 of the test file at develop `2a031f51403f` through the contents API; PR 2109 at the GitHub API (closed, merged 2026-11-09T00:16:00Z, squash `2a031f51403f`, 1 file, +7 -0); the gate's finding, Q4 and Q7; Wednesday's ruling (item 2 of the gate 273 addendum). I did not run the test or the plants.\n\n## Fix shape (my reading, not the gate's)\n\nEither rename the cell to say what it proves (the two key route lines in the tokenisation source carry `requirePlatformRole()`), size S; or add a route-level cell that sends a request without the platform role to each key route and expects the refusal, size M. Not decided here.\n\n## Related\n\nKS-2110 (In Progress, PR 2109's ticket; left as it is, this ticket refs it). Its fix shapes, taken from gate 244, are a tighter text match per route at minimum, a route cell if the tokenisation entry module can be split, and an undefined-role row for the middleware. PR 2109 delivered the text match (cell G5b) and the undefined-role row (cell M4), so what KS-2110 leaves open overlaps the second option here. This ticket records what stays true after the merge: the cell's name overstates what a text match proves, and plant PC passes. If a route cell is built under KS-2110, this ticket is done with it.\nKS-1536 (the one role vocabulary, In Progress) and KS-2109 (In Progress, the guard's own follow-up): neither contains `G5b` or the generate-key and requirePlatformRole pair, by the literal check below.\n\n## Searched before filing\n\nBoard, includeArchived, title and description and every comment of each open candidate; controls pass (the positive control hit its known ticket, a random token hit 0). `G5b`: 1 candidate, 1 open literal hit (KS-2110). `tokenisation puts requirePlatformRole`: 88 candidates, 0 hits. `ks1536-one-role-vocabulary`: 2 open (KS-2109, KS-2110). `RED ks1536 G5`: 0. `G273-2109-1`: 0. `generate-key` together with `requirePlatformRole`: 1 open (KS-2110). `no route-level cell`: 3 open (KS-1157, KS-1656, KS-2110). `plant PC`: 0. Read whole: KS-2110, which holds the original gap and the PR 2109 comment but not the finding that the cell's name overstates; KS-1157 and KS-1656 were judged by title and search context only and neither concerns this cell.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2139",
+    "title": "Refs KS-2146: the one-role-vocabulary test's header says G5 and G5b read source text, not live routes"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "572a206c-9a74-41d3-8df7-b1d898080510",
+    "createdAt": "2026-11-09T09:24:29.290Z",
+    "body": "**BLUF:** PR 2139 (head `65954df16a35`, one commit on develop `f98afb113c2d`) makes the test file's header say what cells G5 and G5b prove: that the two gated tokenisation route lines exist in the source text, not that the live routes are gated. Comment only; it is ready for its gate (tier 2 proposed). Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **Measured, not assumed:** with an ungated `generate-key` registration planted before the gated one (scratch edit, restored), the test file still reads 99 of 99; with the gate removed instead it reads 97 of 99. The header's claim holds.\n- **Proof that no code moved:** the TypeScript emit of the file with comments removed is identical before and after (10,436 bytes), with a code control that differs and a comment control that does not. 99 of 99 before and after.\n- **Not in this PR:** renaming cell G5b and a route-level cell, this ticket's two fix shapes.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,46 @@
+{
+ "identifier": "KS-239",
+ "title": "[Decision] Erasure: multi-step to trigger, but irreversible + complete once executed \u2014 confirm no recoverable off-chain link survives (incl. backups)",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "stuart.jamieson@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-06-10T01:58:54.285Z",
+ "updatedAt": "2026-08-12T07:50:40.071Z",
+ "description": "Decision/confirmation for **Stuart** (split out of [KS-234](https://linear.app/secuura/issue/KS-234/document-the-gdpr-art-17-erasure-vs-on-chain-immutability-position)). This is the foundation of the whole GDPR Art.17 position, so it needs an explicit sign-off.\n\n## Requirement (Kam)\n\nErasing a data subject should take **multiple deliberate steps** (guard against accidental deletion), but **once executed it must be gone for good \u2014 irreversible and complete.**\n\n## Why it's the crux\n\nOur Art.17 position is \"anonymisation by destruction\": the permanent on-chain record (a hash + opaque tokens) becomes anonymous because the orphaned token **marries to nothing recoverable by anyone**. That only holds if **every** off-chain link is genuinely destroyed \u2014 not just the live DB row, but the M365 source documents, KYC images, search indexes, logs, the PII vault (`vault_entries`), and crucially **immutable backups** (you cannot delete a row from a 7-year immutable backup).\n\n## The mechanism that makes \"gone for good\" true even in backups\n\n**Crypto-shredding.** All PII is AES-256-GCM encrypted (per-tenant DEKs already exist). On erasure, **destroy the key** \u2192 the ciphertext sitting in backups becomes permanently unrecoverable. Today `gdprService.executeErasure` does row anonymise/soft-delete + a `USER_ERASED` fan-out, but does **not** destroy encryption keys \u2014 so a backup may still hold recoverable ciphertext. Closing that is what turns \"deleted from the live DB\" into \"gone for good everywhere.\"\n\n## For Stuart to confirm / decide\n\n1. **Multi-step trigger** \u2014 e.g. request \u2192 admin approval \u2192 typed confirmation. Confirm the controls/UX (no one-click irreversible deletes).\n2. **\"Gone for good\" = key-destruction (crypto-shred) on erasure**, not just row-delete. Confirm we adopt this as the guarantee.\n3. **Full-surface coverage** \u2014 confirm the destruction reaches every off-chain place a recoverable link could survive: live DB, `vault_entries`, M365 source docs, KYC images, search indexes, application logs, **backups** (via key-destruction). Enumerate + confirm none retains a recoverable link. Anything that does \u2192 file as an implementation gap.\n\n## Acceptance\n\n- [ ] Erasure model confirmed: multi-step trigger + irreversible + crypto-shred + full off-chain surface coverage.\n- [ ] Residual-link gaps (if any) filed as implementation tickets.\n\nRelated: [KS-234](https://linear.app/secuura/issue/KS-234/document-the-gdpr-art-17-erasure-vs-on-chain-immutability-position) (DPIA note), tracker [KS-229](https://linear.app/secuura/issue/KS-229/tracker-2026-06-10-platform-assurance-review-gap-analysis-remediation).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "4de03513-2900-4b0d-bbad-4b7addf2cb2e",
+    "createdAt": "2026-08-12T07:50:40.084Z",
+    "body": "**BLUF \u2014 the decision is still open and still Stuart's, but its technical foundation moved: the mechanism this ticket assumes (crypto-shred via per-subject keys) does not exist and is gated on KS-291. Verified 2026-08-12, nothing changed.**\n\n**Recommendation:** don't chase Stuart for a sign-off yet (and he's out sick). The honest sequencing is KS-291 first \u2014 a sign-off on \"irreversible and complete once executed\" is not worth having while the mechanism that would make it true is unbuilt.\n\n**Detail**\n\n1. **The premise correction on this ticket (2026-06-18) still holds:** PII is encrypted with a **single master key** (`encryptedField.ts`'s keyRing is versioned, not per-tenant or per-subject), so there is no per-subject key to destroy. Crypto-shredding as written is not achievable today, and the Art.17 \"backup-proof erasure\" guarantee rests on it.\n2. **That is what makes the decision premature rather than blocked-on-a-person.** The requirement \u2014 multiple deliberate steps to trigger, irreversible and complete once executed \u2014 is a sound product position, but the second half is currently unenforceable for anything already written to an immutable backup.\n3. **What would make it decidable:** KS-291 (DEK envelope, per-subject keys), after which \"destroy the key\" becomes a real operation and the enumeration on this ticket (M365 sources, KYC images, search indexes, logs, `vault_entries`, backups) becomes checkable one surface at a time. KS-292/293 track the `executeErasure` quirks.\n\nLeft open and assigned as-is; no nudge sent.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "949dc8a0-562c-4c1d-932f-cf469b8734ec",
+    "createdAt": "2026-06-18T02:46:00.085Z",
+    "body": "**Erasure-surface enumeration + key correction (verified against code, 2026-06-18).**\n\n\u26a0\ufe0f **Premise correction:** this ticket says 'per-tenant DEKs already exist' \u2014 they don't. PII is encrypted with a **single master key** (`encryptedField.ts` keyRing is by *version*, not tenant/subject). So **crypto-shred as written is not achievable today** \u2014 there's no per-subject key to destroy. Split to a dedicated architecture item (see sub-issues). The Art.17 'backup-proof erasure' guarantee depends on building per-subject/per-tenant key envelopes first.\n\n**Verified gaps filed as sub-issues:** (1) crypto-shred infeasible / needs per-subject DEK; (2) dead key-deletion code (non-existent tables); (3) refresh_tokens not deleted.\n\n**Reviewed, NOT a gap:** M365 cascade subscriber deliberately does nothing \u2014 `svc_m365_connections` OAuth tokens are **org-scoped, not per-user**; deleting on one user's erasure would break the whole org's connection (documented in `m365-integration/src/userErasedSubscriber.ts`). Correct for per-user Art.17.\n\n**Still to VERIFY before filing (agent-surfaced, not yet code-confirmed by me \u2014 flagged so they're not lost):** KYC image blob deletion, fire-and-forget cascade completion guarantee, app-log PII redaction, Redis user.erased event-history purge, DSR-record anonymisation, backup DEK-rotation policy. Will confirm each against code before raising \u2014 won't auto-file unverified.\n\n**Multi-step trigger (the other half of the requirement):** not yet assessed \u2014 needs a look at the DSR request\u2192approval\u2192confirm UX.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}
