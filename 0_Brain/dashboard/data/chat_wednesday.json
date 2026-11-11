@@ -18017,5 +18017,47 @@
   "project": "WED",
   "ts": "2026-11-12T07:42:19.605278+11:00",
   "text": "Started. One correction first, because it matters for the decision. I did test V4.1 Flash on the 27th of October, through OpenRouter on the same 23 questions. It scored 17 out of 23, against 16 for the V4 Flash the Spark runs now. That's one task better, and the bar you set for buying the second box was at least three better. So it didn't measure as much better; it measured about the same.\n\nThe plan, all on the same 23 questions:\n\nOne. V4.1 Flash: I'll try to squeeze it onto the Spark at a very low bit-depth, the way we fitted V4 Flash last month. I'll also re-run it on OpenRouter, so we can see how much of that one-task gap was noise.\n\nTwo, three and four. Nemotron, Kolibri and LFM run on the Spark, one at a time.\n\nFive. MiMo doesn't fit the Spark, so it runs on OpenRouter, but only through a provider that keeps no data. That's the same privacy setting as October, since the questions contain Secuura code. If no provider offers that, it doesn't run, and I'll tell you.\n\nOpenRouter spend is capped at ten dollars; October's run cost six cents. The Spark has no ticket work right now, so nothing waits. It goes back to V4 Flash at the end, and I'll prove it works before I report. This will take a few hours; I'll post the results table when it lands."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "WED",
+  "ts": "2026-11-12T07:46:25.126085+11:00",
+  "text": "Good point, and you're right that I left it out. By arithmetic, the two together give about 384 gig, which would open up V4.1 Flash and others.\n\nThe catch is your condition that both keep running their normal work. V4.1 at 4-bit needs about 380 gig, roughly all of both machines. So it only fits alongside normal work at a lower bit-depth: at about 3-bit it's near 285 gig, which leaves roughly 100 gig spare between them. That's arithmetic, not measured.\n\nTwo things I don't know yet and won't guess. Can one model actually be split across an NVIDIA box and a Mac? There are tools that claim to do it, but I haven't checked them. And how much does the link between the machines slow each answer down?\n\nI'll research the tooling now, read-only and sourced, and fold it into the test results. The real measurement has to wait until the Studio arrives."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-12T07:52:37.598425+11:00",
+  "text": "Short answer: at 4-bit, no. At 3-bit, just about. At 2-bit, yes.\n\nThree Sparks give 384 GB in total. After the operating system and working memory, about 330 GB is left for the model. That is my arithmetic, not a measurement.\n\nV4.1 Flash is 763 billion parameters according to its model card. One other source says 552 billion, so the size isn't settled.\n- 4-bit is about 380 GB, so it doesn't fit.\n- 3-bit is about 290 GB, so it fits, but with little room for context.\n- 2-bit is about 190 GB, so it fits easily, but it's the same low-bit quality question we hit with V4 Flash.\n- If it's really 552 billion, 4-bit is about 275 GB and it fits.\n\nUnlike your Mac-plus-Spark question, three Sparks run the same software, so standard multi-machine serving with llama.cpp or vLLM works. I haven't checked how three get cabled together. NVIDIA documents two Sparks linked directly, and a third probably needs a switch.\n\nThe Spark tunnel is down right now, probably from the mini restart. I'll bring it back up once you've relaunched, and pick up the five-model test from there."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-12T07:57:46.905279+11:00",
+  "text": "On it. The five-model test has restarted on the Spark, and four drafters are rebuilding the Secuura floor seats from what the reboot left behind. One thing you should know: before the reboot, the previous seat let five agent questions sit unanswered for up to 45 minutes while it was on the model research, including a merge waiting for its go-ahead. The new seats get those answers first. I've logged the miss so it gets fixed properly."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-12T07:58:46.507150+11:00",
+  "text": "The research on joining the Spark and the 256 GB Studio came back. It's possible today with one tool, but it's slow.\n\nOnly llama.cpp can split one model across an NVIDIA machine and a Mac. Exo, vLLM, SGLang and Apple's MLX can't mix the two today, according to their own documentation.\n\nThe catch is speed. The one published test of a Mac plus a Spark over 10 gigabit Ethernet halved the generation speed compared with one machine on its own. Every token has to cross the network.\n\nOn your condition that both machines keep doing their normal jobs: no tool lets you cap how much memory each machine gives. llama.cpp lets you set proportions and headroom, which is the closest. Its own documentation calls this feature a proof of concept and says not to use it on an open network.\n\nTogether the two machines have 384 GB. V4 Flash at 4-bit, about 150 to 185 GB, fits comfortably. V4.1 Flash at 4-bit, about 400 GB, doesn't. The sizes are my arithmetic.\n\nRecommendation: measure it when the Studio arrives, with V4 Flash first. The full file is in the brain under today's new-local-model-research folder."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-12T08:06:45.928684+11:00",
+  "text": "Secuura relaunch, where it stands. No action needed from you.\n\nAll four floor seats have new briefs, each read and checked by me. Every one picks up exactly where its predecessor stopped, with the questions that went unanswered before the reboot now answered:\n- the merge seat merges PR 2186 first;\n- the build seat pushes the one-line KS-2170 fix (I cleared the overlap with PR 2079);\n- the board seat posts the KS-663 comment for your ruling, with one wrong sentence about GitHub Actions removed;\n- the raise seat finishes R 103rd's records.\n\nThe merge seat is up as of 08:06. The other three start as the machine's load allows; it's high right now with the tests running.\n\nA tier-1 security gate is also running on the two auth fixes R 103rd raised just before the reboot. The five-model test is still going on the Spark."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-12T09:09:48.659588+11:00",
+  "text": "Thanks. That makes 09:07 the third unplanned drop today, and the monitor caught it. Short answer: it's not macOS. The drive loses power.\n\nWhat the logs show, in order. The Mac's port did not shut the drive down; nothing on the Mac side came first, no sleep and no eject. The SSD's own counters then went up by one: power cycles 21 to 22, unsafe shutdowns 15 to 16. So the SSD lost power, not just the connection, and 15 of its 22 power cycles have been sudden losses like this. The SSD itself was cool, at 43 to 44 degrees, and has never been near its 82 degree warning. Load was low this time, so this is not only a heavy-load problem.\n\nThat fits your point about different Macs, cables and enclosures. What all of those likely share is a bus-powered USB4 enclosure running a 4 TB 990 PRO off the Mac port's power. My best guess, which I have not measured, is that the power budget dips and the enclosure resets.\n\nRecommended test: put the same drive behind external power, either a self-powered enclosure or a powered Thunderbolt dock, and see whether the drops stop. The monitor keeps logging every drop with the SSD's power counters, so we'll have a clean before and after.\n\nMeanwhile the drive is back. I'll recover the floor now and keep the Secuura work going. Interrupted pushes are safe because GitHub takes them all or nothing; the cost is re-work."
  }
 ]
