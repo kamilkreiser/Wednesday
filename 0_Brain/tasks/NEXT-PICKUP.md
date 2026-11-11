@@ -17,6 +17,28 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## CHECKPOINT 08:0x 12 Nov by the 07:51 REBOOT-RELAUNCH seat (ctx 61%) — READ THIS BLOCK FIRST (supersedes every block below where they differ)
+- **macOS restarted the Mac mini at ~07:49.** Every seat and subagent died: S 63rd, R 103rd, B 145th, A 22nd, and the five-model A/B operator. Kam relaunched Wednesday and approved the relaunch plan ("good plan.  go ahead", ~07:57).
+- **Before the reboot, five seat mails sat UNANSWERED from 07:02 to 07:49.** Ledger row filed (w>=3, regression). Every one is now answered inside a successor's stamp.
+- **develop c78c80bd5370** (unmoved). Kam today: 9 rows, all read. Card `wed-morning-plan-1112` = a; card `secuura-ks663-…-1112` = a.
+- **FLOOR, being launched by the waiter** (scratchpad `launch_four_waiter.sh`, its log beside it; B, R, A, S in order, each at load1 < 7, 3 min apart, Sonnet):
+  - B 146th %4: LAUNCHED 08:06; the rung-5 check is OWED. NEXT = its plan QUESTION. Then the GO for PR 2186 at bb40ba50978a on c78c80bd5370. GO names: test bytes only; expected tree 1ffbf1536078 per B 145th.
+  - R 104th, A 23rd, S 64th: queued behind load. Briefs: `briefs_staged/2026-11-12_seat{R104_raise,A23_laneA_build,S64_board}.md`, all stamped and dry-run PASSED.
+  - If the waiter died, re-run it. It is idempotent per seat ONLY if you check the panes first: never launch a second pane for a lane.
+- **Rulings already made in the stamps (do not re-ask):**
+  - A 23rd: PR 2079 WAIVED for KS-2170; the fragment "113" is fixed in a 2nd commit.
+  - S 64th: KS-663 bytes = the draft minus the "Actions is retired" sentence; Filing 3 (:1234) licensed.
+  - R 104th: completes R 103rd's records; batch 2 = KS-1873 + 32+34 + 16.
+  - B 146th: writes B 145th's history entry.
+- **SUBAGENTS RUNNING.** They die with a rotation: if a folder has no output, RE-COMMISSION from the same commission.md.
+  - GATE 321, tier 1 Opus, PRs 2197 + 2198 (`0_Brain/reference/2026-11-12_gate321-tier1-pr2197-2198/`). On GO / GWN: an ADDENDUM to B 146th naming both. On NO GO: an ADDENDUM fix round to R 104th.
+  - FIVE-MODEL A/B operator, Opus (`0_Brain/reference/2026-11-12_five-model-ab/`, commission.md + RECOMMISSION.md). It writes report.md there. It edits `local-model/spark-ab/ab.py*`: do NOT commit those files while it runs. The Spark must end on V4 Flash with a T01 PASS.
+- **OWED:**
+  - Score R 103rd, B 145th, S 63rd and A 22nd. All four died in the reboot; S 63rd had wrapped at 20:03Z and resumed.
+  - Mark the KS-663 card delivered on S 64th's comment id.
+  - Check trmnlpush recovers at its next 15-min fire (it exited 127 at boot: the drive was not mounted yet).
+  - Carried from the 06:5x block: the drafted KAM-CARDs, the build-seat brief items, the CLAUDE-BUILD lanes, the INDEX refresh, the lapsed weekly consolidation, wed_push.sh.
+
 ## CHECKPOINT 06:5x 12 Nov by the 06:37 rotation-successor seat (ctx 52%) — READ THIS BLOCK FIRST (supersedes every block below where they differ)
 - develop c78c80bd5370 (PR 2183 squash, B 144th; Wednesday ls-remote 06:4x). Kam: 0 rows today. Morning card wed-morning-plan-1112 open (default a). Panel receipt bf-2c1375619320.
 - FLOOR (all Sonnet): S 63rd %104 (board; ANSWER sent 06:42 on its item 3: sweep the old-tenant SHAREPOINT_SITE_URL default + ONE Low ticket; NEXT = STATUS with that key; KS-2170 filed = the ks1725 zod3 pin, a CLAUDE-BUILD row). A 21st %107 (build; KS-2125 committed fed1d35ce95c, push; NEXT = READY FOR GATE -> TIER-2 Sonnet gate, model 0_Brain/reference/2026-11-12_gate318-tier2-pr2194/commission.md). R 103rd %110 (raise; launched 06:4x, brief briefs_staged/2026-11-12_seatR103_raise.md, verified at destination 19:44:30Z; rung 4 only: NEXT = its plan QUESTION = rung 6). B 145th %113 (merge; launched 06:5x, brief briefs_staged/2026-11-12_seatB145_merge.md, verified 19:45:10Z; NEXT = plan QUESTION; expected first plan 2186 + 2189; GO model briefs_staged/2026-11-12_B144_go_2183.md).
