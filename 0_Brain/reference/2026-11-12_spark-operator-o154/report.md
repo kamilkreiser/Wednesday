@@ -1,0 +1,7 @@
+# o154 report (saved by Wednesday; operator's Write refused, text from its result)
+ROUND NOT RUN: STOP at pre-check 4 (exclusions). No held READY.
+1 tunnel + pin PASS (develop d0e58f55c861).
+2 Linear PARTIAL: ticket gives the facts and every line ("Prose in two files says forty-six while the count the test pins is 50"; "The differing text is comments and a test title; no behaviour differs") but no sentence prescribes the new wording; test line 133 ("the forty-two routes not driven here") is in the ticket, not in the board row.
+3 re-measure PASS: adminConfig.ts has 50 fail500(res, calls, 50 distinct contexts; C3 pins 50/50 (test line 144). The digit 46 also at test 110, 142 and route 104/106/108/109 (not in the board row). WORDING CAVEAT: the original 46 were NODE_ENV ternary sites and the four KS-1334 sites are unconditional, so 'fifty ... verbatim unless production' is not literally true of all fifty -> the rewrite is a wording decision, not a number swap.
+4 exclusions FAIL: routes/adminConfig.ts is in OPEN PR 2158 (KS-2145) and OPEN PR 2087 (KS-1600); 10 held READYs name the route or the ks730c test (KS-1334-A/B, KS-1346-C, KS-1462, KS-1544, KS-1779, KS-1780-p2, KS-1802, KS-1818, KS-730-B; merged-ness unchecked).
+Route: KS-2026 after PRs 2158 + 2087 merge, as a Claude-seat row (the wording needs a writer, not a number swap). Unrun brief kept OUT of night/briefs: scratch/brief_unrun/ks_2026_o154_p1_adminconfig_prose_says_fifty/.
