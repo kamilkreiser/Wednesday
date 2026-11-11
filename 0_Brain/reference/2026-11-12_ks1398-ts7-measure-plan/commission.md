@@ -1,0 +1,14 @@
+# KS-1398 measure-and-plan (Secuura/Blockchain): EXECUTE Kam's ruling 'b' of 2026-10-01T07:05:06 on card secuura-ks1398-typescript-7-move: "A seat measures the five breaking tools and the cost on a branch (no merge), and reports a plan to you." Commissioned by Wednesday 2026-11-12 ~10:4x AEDT (the ruling was never executed: ticket unchanged since 2026-10-18, 0 comments before S 65th's today). Model claude-sonnet-5-5.
+
+READ FIRST: KS-1398 on Linear, read-only (key from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, LINEAR_API_KEY, in-process only, never printed): description, its attachments' titles, and companion KS-1396 (Peter's systemTest + observability half). Note which "five tools" the ticket names as failing on TS 7 and how Peter tested.
+
+WORK, isolated (never touch any checkout under /Volumes/DevMASTER/!CODING/; never push; no PR; no Linear/GitHub/mail/board writes):
+1. Clone the project repo by `git clone --no-hardlinks` from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files into THIS folder's scratch/repo (or your session scratchpad), check out origin develop (re-read it by ls-remote first; Wednesday's read d35f75875275), and create a local branch ks-1398-ts7-measure. Disable push in that clone (`git remote set-url --push origin no-push`).
+2. Census: every tracked package.json under Blockchain/Dev (and the repo root): its typescript version range; which use tsc, ts-node, tsx, ts-jest, vitest, eslint's typescript parser, typedoc or similar. Count them (the ticket says 43, 38 on TS 5.x: confirm or correct, with the predicate).
+3. Measure the five tools on TypeScript 7.0.2 in the clone only: for each, the exact failure (command, error lines), and whether a newer version of the tool supports TS 7 (read its registry metadata with `npm view <pkg> versions peerDependencies` - read-only). Measure tsc on 3 representative packages (one service, packages/shared, one test-heavy) under 7.0.2 vs the current version: error counts before/after.
+4. Cost: per package, what changes (version bumps, config edits, code fixes), sized as counts, and the order of work that keeps develop green (tools first, as the ticket proposes, or otherwise).
+DISK: the internal disk has ~350 GB free; node_modules installs go in your scratch only; remove nothing you did not create; report the scratch size at the end.
+
+OUTPUT: report.md in THIS folder (/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_ks1398-ts7-measure-plan/), BLUF first (what breaks, what it costs, the recommended order), then FOUND / TESTED / HOW (commands and controls), then NOT MEASURED. Under 12 KB. If your Write is refused, return the full text. This report goes to Kam as a plan for his decision; write it for him to read in two minutes.
+
+HARD LIMITS: never cd except in a subshell for a package-local runner (say so); quote heredoc delimiters; no .env values printed; if DevMASTER drops, wait, re-read, continue.
