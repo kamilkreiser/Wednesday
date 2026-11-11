@@ -1,0 +1,31 @@
+## What
+
+On the customer roadmap register, a row with nothing stored starts from the action's own owner. When that owner was longer than 100 characters it was shown whole and Save refused it with the bare label "Owner", which the user could not clear without deleting text they did not type.
+
+`startingOwner` (a pure function in `remediation-store.ts`, using the store's own `OWNER_MAX`) now gives the row its starting owner:
+- no owner: empty;
+- an owner that fits (at most 100 after trimming): returned unchanged, byte for byte, so every default that saves today starts exactly as today;
+- a longer owner: trimmed, cut to the longest run of whole code points within 100 UTF-16 units (never a lone surrogate), then end-trimmed.
+
+`RoadmapScreen.tsx` uses it for that one initial value (plus the import line). `checkEntry`, `parseRegister`, the stored shape, `OWNER_MAX` and every `maxLength` are unchanged. No user-facing word is added.
+
+## Scope
+
+This is part (a) of HPSMPOC-408 item 2 only (the code half: cap or truncate the default owner at 100). Part (b), real sentences for the three limits, needs the product owner's words and is held. The ticket stays open; this PR does not close it.
+
+HPSMPOC-228 item N-5 (refresh fan-out) and HPSMPOC-436 (finding explanation of no finding) were found already fixed on main (pull requests 298 and 302) and are shown closed with evidence on the records side; this PR changes neither.
+
+## Tests
+
+Written red-first, each red with the source change removed and green with it:
+- render: a 150-character action owner starts as exactly 100 characters, and Save with Not started stores it with no Owner refusal;
+- render: an owner of 60 astral characters starts as 50 whole characters (100 units), no lone surrogate;
+- unit: seven rows on `startingOwner` (none, fits, exactly 100, 101, a pair that would cross 100, leading spaces, trailing space at the cut, every output accepted by `checkEntry`).
+
+Whole web unit suite: 4216 -> 4225 passed, 0 failed. Lint, typecheck, build and the e2e journey shard pass.
+
+## Not deployed
+
+Nothing is deployed by this change.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
