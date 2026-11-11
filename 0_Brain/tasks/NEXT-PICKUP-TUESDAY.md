@@ -56,6 +56,16 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴🔴🔴 DELTA 1124 — 2026-11-11 20:4x ROTATION HANDOVER (s269 -> successor; ctx ~79%). **READ THIS FIRST, then 1123 (its lines stand except as said here).**
+- **NO IN-SESSION AGENT IS RUNNING** (both gates finished: B1510 GO WITH FINDINGS, B1512-2 GO round 2 of 2).
+- **THREE PRs IN CI — RE-ARM ALL THREE WAITERS (they die with s269):**
+  1. MPS **#181** (L5, gate `tuesday/briefs/2026-11-11_B1512-2_verify/`): `pr_checks_wait.sh datasecau/MPS-Commercial-Calculator 181 fa713a5bdf4b020d8754780c9b3bd269acb9de56 60 100`; squash pinned at fa713a5b.
+  2. MPS **#180** (L3, gate `..._B1510_verify/`): head e2e474b674441c835b9c2f2fc734ad505681358e; squash pinned. **Land MPS ONE at a time; after the first lands, `gh pr update-branch` the other, verify its gated files blob-equal, re-arm, land at the new head.**
+  3. NexusAI **#194** (row 8 archive): head 368e42c3aacad1876fd12f516f0daaaf654b6c39; merge command in 1123; Deploy demo must read skipped.
+- **READY, NEEDS A GATE (commission at boot):** B1514 MPS W3-A @ 0315bd9b (G2); B1519 HPSM SDK pin @ b6ab804a (G2; hosted log must show `--version 10.0.404`).
+- **LIVE SEATS:** M121 (B1515 W3-B), M123 (B1520 MPS SDK pin, in its proof step), N122 (waits #194). Watchers: floor_watch + kam_watch: re-arm both.
+- **REPORT TO KAM WITH THE W3-A LANDING:** Tuesday's call inside C-106: the Administrator's five tiles keep one row from 1138 px up (3 + 2 only over 698-1137), six tiles 3 + 3 over 698-1357.
+
 ## 🔴🔴🔴 DELTA 1123 — 2026-11-11 20:2x ROTATION-READY (s269, ctx 77%). **READ THIS FIRST; supersedes 1122's PR, GATE and LIVE lines.**
 - **LANDED since 1122:** Composer **#125** -> 5d3bf82d (PCOMP-74/80/81; Kam told bf-75d5df720eca incl. the 81 reflow call). HPSM records R217: analysis PR #196 (C-359..C-363), 15 Jira comments, 8 Done.
 - **PR IN CI (waiter dies with this seat: re-arm `pr_checks_wait.sh datasecau/Reporting_Dashboard_Au 194 368e42c3aacad1876fd12f516f0daaaf654b6c39 60 100`, NexusAI GH_CONFIG_DIR):** NexusAI **#194** (row 8 archive). On ALL GREEN: re-read PR + main (93ffb494) in one call, then SEPARATE call `gh pr merge 194 -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit 368e42c3aacad1876fd12f516f0daaaf654b6c39 --subject "$(cat 2_Project_Files/tuesday/briefs/2026-11-10_B1431_verify/merge-subject-archive.txt)" --body-file 2_Project_Files/fleet/state/s269/land8/merge-body.txt`; Deploy demo must read skipped. N122 then does revoke (9), l1 (10).
