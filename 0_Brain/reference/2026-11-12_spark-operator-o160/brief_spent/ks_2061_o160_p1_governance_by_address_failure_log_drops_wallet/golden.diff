@@ -1,0 +1,36 @@
+diff --git a/Blockchain/Dev/services/governance/src/services/governanceService.ts b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+--- a/Blockchain/Dev/services/governance/src/services/governanceService.ts
++++ b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+@@ -417,7 +417,7 @@
+     } catch {
+       reason = 'unreadable thrown value';
+     }
+-    logger.error('DB get participant by address failed', { walletAddress, error: reason });
++    logger.error('DB get participant by address failed', { error: reason });
+     throw new ServiceUnavailableError('Governance participant store');
+   }
+   return undefined;
+diff --git a/Blockchain/Dev/services/governance/src/__tests__/ks1940-failed-participant-lookup-answers-503-and-writes-nothing.test.ts b/Blockchain/Dev/services/governance/src/__tests__/ks1940-failed-participant-lookup-answers-503-and-writes-nothing.test.ts
+--- a/Blockchain/Dev/services/governance/src/__tests__/ks1940-failed-participant-lookup-answers-503-and-writes-nothing.test.ts
++++ b/Blockchain/Dev/services/governance/src/__tests__/ks1940-failed-participant-lookup-answers-503-and-writes-nothing.test.ts
+@@ -518,7 +518,7 @@
+     expect(r.body).toEqual(SERVICE_UNAVAILABLE);
+     expectNothingWritten(before);
+     expect(errorLogs('DB get participant by address failed')).toEqual([
+-      ['DB get participant by address failed', { walletAddress: 'addr_test1_u1', error: 'unreadable thrown value' }],
++      ['DB get participant by address failed', { error: 'unreadable thrown value' }],
+     ]);
+     expect(JSON.stringify(mockH.logErrors)).not.toContain(PLANTED);
+   });
+diff --git a/Blockchain/Dev/services/governance/src/__tests__/ks1942-register-binds-the-linked-wallet-and-stake-is-admin-set.test.ts b/Blockchain/Dev/services/governance/src/__tests__/ks1942-register-binds-the-linked-wallet-and-stake-is-admin-set.test.ts
+--- a/Blockchain/Dev/services/governance/src/__tests__/ks1942-register-binds-the-linked-wallet-and-stake-is-admin-set.test.ts
++++ b/Blockchain/Dev/services/governance/src/__tests__/ks1942-register-binds-the-linked-wallet-and-stake-is-admin-set.test.ts
+@@ -783,7 +783,7 @@
+     expect(r.body).toEqual(PARTICIPANT_STORE_DOWN);
+     expectNothingWritten(before);
+     expect(errorLogs('DB get participant by address failed')).toEqual([
+-      ['DB get participant by address failed', { walletAddress: 'addr_test1_alice', error: 'unreadable thrown value' }],
++      ['DB get participant by address failed', { error: 'unreadable thrown value' }],
+     ]);
+     expect(JSON.stringify(mockH.logErrors)).not.toContain(PLANTED);
+   });
