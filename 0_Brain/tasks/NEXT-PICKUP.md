@@ -17,6 +17,29 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## ROTATION HANDOVER ~10:0x 12 Nov by the 07:51 relaunch seat (ctx ~80%) — READ THIS BLOCK FIRST (supersedes everything below where it differs)
+- **develop d35f75875275** (PR 2186 squash, B 146th; Wednesday's ls-remote). Kam today: 15 rows. Last: 09:24 "drive back in but I disconnected monitor so chat through here"; 09:25 "as monitor is also usb c" → **he is on the PANEL, not the terminal**; answer him there.
+- **DRIVE:** dropped 08:40, 09:07, 09:17 (and power-lost twice more inside the 09:17-09:24 outage: unsafe_shutdowns 16 -> 18). Stable since 09:24, when Kam unplugged his USB-C monitor; that points at the USB-C power budget (UNMEASURED; told to Kam).
+  - The monitor `com.wednesday.dmlinkwatch` now RE-ARMS the wake runner and chat poll 20 s after any remount (built 09:57; the trigger is UNEXERCISED until the next real drop). Read `~/Library/Logs/wednesday_devmaster_linkwatch/state.log` for `REARMED`.
+  - If absent after a drop: `WED_AGENT=wednesday bash fleet/cockpit/arm_wake_watch.sh`, and restart the poll detached.
+- **FLOOR:**
+  - **R 104th %7:** plan confirmed. KS-1873 + rows 32+34 committed; pushes after A 23rd; has the lock three-proof rule. NEXT: its READY FOR GATE (tier 1, Opus gate).
+  - **A 23rd %10:** KS-2170 = **PR 2199**, READY FOR GATE 22:59Z. **GATE 322 RUNNING** (tier 2, Sonnet; `0_Brain/reference/2026-11-12_gate322-tier2-pr2199/`; pins develop d35f75875275, head 4a0a166b95a1). On GO / GWN: an ADDENDUM to B 147th. A 23rd then does A4 only at a meter of 40 or under, else wraps.
+  - **S 64th %15:** plan CONFIRMED 09:58 (`S64_answer_plan.md`): KS-663 post (approved sha 5aea6f24a075), filings 2, 3 and G321-PRE-1 now; G321-2198-1/-3 after 2198 merges. **When it reports the KS-663 comment id:** `decision_queue.sh --delivered secuura-ks663-openapi-drift-check-server-side-1112 "<id>"`.
+  - **B lane: EMPTY.** B 146th wrapped and scored 0.91; pane closed (listeners 18 -> 18). **B 147th DRAFTER RUNNING** (`0_Brain/reference/2026-11-12_drafter-seatB147/commission.md`; queue 2189 first, 2197/2198 slotted after 2196). Stamp, dry-run and launch (Sonnet) when it returns.
+  - **Subagents die with this rotation:** if gate322/verdict.md or drafter-seatB147/brief_B147.md is missing, RE-COMMISSION from the same commission.md.
+- **FIVE-MODEL A/B, HOSTED DONE:**
+  - MiMo 19/23 and V4.1 hosted re-run 19/23 (10-27: 17; 21/23 identical across runs, so two tasks is the noise). V4 Flash 16/23. The Spark T01 PASS proof was run. Cost $0.165.
+  - All told to Kam on the panel.
+  - The local arms (Nemotron, Kolibri, LFM2.5; V4.1 IQ1_S downloaded, 233 GB) are a LATER commission, held while the drive is unstable.
+  - OWED: write `0_Brain/reference/2026-11-12_five-model-ab/report.md` from the operator's returned text: the totals table plus task table above, the T01 proof line `AB deepseek_restore1112 T01 … PASS`, four exited test containers left on the Spark, the V4.1 IQ1_S + llama.cpp pull done.
+- **OWED:**
+  - Score R 103rd, S 63rd and A 22nd (B 145th and B 146th are done by B 146th's entries; score B 145th yourself).
+  - The KS-2055 O141/O142 question (gate 322's Q4 measures it).
+  - doctor.sh + PORTABILITY items for dmlinkwatch + smartmontools.
+  - fleet_ack for A 23rd retry and R 104th lock (refused: agentmail.json collect lag after the drop).
+  - Everything in the 09:1x / 08:0x blocks.
+
 ## CHECKPOINT 09:1x 12 Nov by the 07:51 relaunch seat (ctx 74%) — READ THIS BLOCK FIRST (supersedes the 08:0x block below where they differ)
 - **DRIVE DROPS: DevMASTER dropped at 08:40 (back 08:56) and at 09:07 (back 09:07:51), both unplanned.**
   - Diagnosed: the enclosure LOSES POWER. The SSD's own counters rise at each drop (unsafe shutdowns 15 -> 16, power cycles 21 -> 22). The 09:07 drop showed ACIO "Gen2/3 link error" bursts, then the link went down; no OS eject or sleep came first. The SSD is cool (43-44 C, 0 minutes over its warning).
