@@ -67873,5 +67873,124 @@
    "2026-09-09 15:37",
    "2026-09-10 18:01"
   ]
+ },
+ {
+  "id": "mpscalc-160-rebate-default-no-rights-1111",
+  "client_project": "Datasec/MPS Calculator",
+  "title": "MPS Calculator: should users WITHOUT pricing rights get the 7% partner-rebate default from the server too? It changes the Duplicate rule",
+  "bluf": "Your 7% rebate default (MPSCALC-160) works today only for users WITH pricing rights. The last open part is 'the same default for a user without pricing rights': today they get no rebate at all. An agent measured it tonight: just stamping 7% on their new sections makes 'Duplicate' of their OWN quote fail with 'not allowed' (it works today), because Duplicate re-checks the copied quote as if the user had typed the rebate. Fixing that means changing an existing rule: today a user without pricing rights cannot duplicate a quote that carries internal inputs. Nothing they can see changes (the rebate figures stay hidden from them). Nothing is built until you choose; the rest of that lane is done and goes to its review.",
+  "default_action": "Nothing is built until you rule (c holds meanwhile). On a: a builder seat plus a security-tier review, merged, not deployed.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build it: Duplicate keeps copied internal inputs (recommended)",
+    "detail": "The server stamps 7% on new partner sections for users without pricing rights. Duplicate copies a quote's hidden inputs unchanged instead of refusing them, the same way an edit already keeps them. Side effect: such a user could then duplicate a quote whose rebate a manager set (they still cannot see or change it). The audit records the default when the quote is created."
+   },
+   {
+    "key": "b",
+    "label": "Build it, but keep Duplicate's refusal",
+    "detail": "Stamp 7% only on create and edit; Duplicate keeps refusing when the copy holds internal inputs. Users without pricing rights could then not duplicate their own new quotes. Not recommended."
+   },
+   {
+    "key": "c",
+    "label": "Leave it: the 7% default stays web-only",
+    "detail": "Clause 6 stays open. Users with pricing rights get 7% as today; users without pricing rights keep getting no rebate."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-11T18:54:44.644377+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-04 07:05",
+   "2026-09-17 08:04",
+   "CARD mpscalc-release1-users",
+   "CARD mpscalc-hosting-and-signin",
+   "CARD mpscalc-codeql-scan-csharp",
+   "CARD mpscalc-hosting-tenant-confirm",
+   "CARD mpscalc-pricebook-validity",
+   "CARD mpscalc-software-margin-review",
+   "CARD mpscalc-cost-rounding",
+   "CARD mpscalc-codeql-web-merge-order-1009b",
+   "CARD mpscalc-azure-login-for-hosting-1010",
+   "CARD mpscalc-showcase-known-limits-1010",
+   "CARD mpscalc-purchase-mode-beside-rental-1010",
+   "CARD mpscalc-proposal-format-gst-ref-1010",
+   "CARD mpscalc-proposal-customer-footer-1010",
+   "CARD mpscalc-proposal-template-text-assets-1010",
+   "CARD mpscalc-price-edit-permissions-1010",
+   "CARD mpscalc-inventory-and-manual-items-1010",
+   "CARD mpscalc-hosted-edit-survives-restart-1010",
+   "CARD mpscalc-second-approver-for-kam-test-1010",
+   "CARD mpscalc-accessory-fits-device-1010",
+   "CARD mpscalc-markup-precedence-1010",
+   "CARD mpscalc-new-quote-form-1010",
+   "CARD mpscalc-new-words-hosted-deploy-1011",
+   "CARD mpscalc-b30-new-words-hosted-deploy-1011",
+   "CARD mpscalc-paul-calculator-access-1012",
+   "CARD mpscalc-home-dashboard-mockup-1012",
+   "CARD mpscalc-one-pager-mockup-1012",
+   "CARD mpscalc-decisions-pack-1012",
+   "CARD mpscalc-hosted-deploy-words-1012",
+   "CARD mpscalc-paul-invite-email-1012",
+   "CARD mpscalc-paul-invite-send-1013",
+   "CARD mpscalc-feedback-pill-words-1013",
+   "CARD mpscalc-hosted-deploy-bf60fe8-1013",
+   "CARD mpscalc-rental-full-proposal-1013",
+   "CARD mpscalc-dashboard-seventh-tile-1013",
+   "CARD mpscalc-feedback-attachments-1013",
+   "CARD mpscalc-rental-book-mockup-1013",
+   "CARD mpscalc-rental-parts-cents-rounding-1013",
+   "CARD mpscalc-hosted-deploy-b9a3d76-1013",
+   "CARD mpscalc-rental-book-words-1014",
+   "CARD mpscalc-hosted-deploy-0f8ad97-1016",
+   "CARD mpscalc-rental-pricing-callout-k15-vs-1014-1016",
+   "CARD mpscalc-deal-usage-proposal-rates-1017",
+   "CARD mpscalc-deploy-overlay-copy-retention-1017",
+   "CARD mpscalc-e877-supply-cost-source-1017",
+   "CARD mpscalc-feedback-401-words-1017",
+   "CARD mpscalc-hosted-deploy-12f8e56-1017",
+   "CARD mpscalc-large-format-manual-items-1017",
+   "CARD mpscalc-negative-input-headline-1017",
+   "CARD mpscalc-panel-options-rental-and-tier-1017",
+   "CARD mpscalc-rental-caption-customisation-1017",
+   "CARD mpscalc-quote-list-deals-closed-title-1017",
+   "CARD mpscalc-hosted-deploy-e6f92a5-1017",
+   "CARD mpscalc-v13-gap-15-decisions-1020",
+   "CARD mpscalc-rental-credit-authorisation-1023",
+   "CARD mpscalc-deal-usage-edge-rules-1023",
+   "CARD mpscalc-source-version-id-twins-1023",
+   "CARD mpscalc-source-swap-invalid-words-1023",
+   "CARD mpscalc-b518-api-error-words-1023",
+   "CARD mpscalc-restricted-save-hidden-rates-entry-1023",
+   "CARD mpscalc-body-not-json-object-words-1024",
+   "CARD mpscalc-pr102-cap-nogo-third-round-1024",
+   "CARD mpscalc-pr105-device-class-cell-words-1024",
+   "CARD mpscalc-readiness-no-device-line-words-1024",
+   "CARD mpscalc-words-for-paul-review-1024",
+   "CARD mpscalc-153-ink-rate-hint-1024",
+   "CARD mpscalc-176-feedback-triage-words-1024",
+   "CARD mpscalc-204-refusal-order-1024",
+   "CARD mpscalc-261-credit-approver-1024",
+   "CARD mpscalc-316-reference-length-unit-1024",
+   "CARD mpscalc-176-feedback-triage-word-pack-1024",
+   "CARD mpscalc-waiting-register-1111"
+  ],
+  "amendments": [
+   {
+    "ts": "2026-11-11T18:55:04.583648+11:00",
+    "reason": "Corrected by Tuesday: option c and the first BLUF sentence said web users get 7% today; docs/ENGINE.md X-32 says a user without pricing rights gets no rebate at all, web or not",
+    "changed": [
+     "bluf",
+     "option:c"
+    ],
+    "before": {
+     "bluf": "Your 7% rebate default (MPSCALC-160) works in the web today. The last open part is 'the same default for a user without pricing rights' on the server. An agent measured it tonight: just stamping 7% on their new sections makes 'Duplicate' of their OWN quote fail with 'not allowed' (it works today), because Duplicate re-checks the copied quote as if the user had typed the rebate. Fixing that means changing an existing rule: today a user without pricing rights cannot duplicate a quote that carries internal inputs. Nothing they can see changes (the rebate figures stay hidden from them). Nothing is built until you choose; the rest of that lane is done and goes to its review.",
+     "option:c": "Clause 6 stays open. Users of the web get 7% as today; only direct API callers without pricing rights get none."
+    }
+   }
+  ],
+  "amended_ts": "2026-11-11T18:55:04.583674+11:00"
  }
 ]
