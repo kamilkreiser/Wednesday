@@ -9,6 +9,8 @@ sampler, same checker.
                                      model verdict is trusted.
   ab.py --model v41hosted [--only T01]   DeepSeek V4.1 Flash 1017 via OpenRouter, pinned DeepInfra/fp8/zdr (Kam 2026-10-27 10:06);
                                      key read by name from 4_Credentials/.env; US$5 hard cap (runs/v41hosted/budget.json).
+  ab.py --model mimohosted --budget F --cap 10   MiMo-V2.6-Flash via OpenRouter, the SAME pins as v41hosted (2026-11-12).
+  ab.py --model nemotron|kolibri|lfm25|dsv41iq1s   local Spark arms, 2026-11-12 five-model A/B (lfm25: thinking cannot be off).
   ab.py --model deepseek|ornith [--url http://127.0.0.1:47788] [--only T01,T02] [--served-name NAME]
 
 Per task:
@@ -59,6 +61,21 @@ MODELS = {
     "iq1m": {"served": "DeepSeek-V4-Flash-0731-UD-IQ1_M", "kwargs": {"thinking": False}},
     # 2026-10-27 hosted arm: same prompts/sampler/checker, through OpenRouter. Secuura code => provider pinned, zdr, no fallback.
     "v41hosted": {"served": "deepseek/deepseek-v4.1-flash-1017", "kwargs": {}, "hosted": True},
+    # 2026-11-12 five-model A/B (commission 0_Brain/reference/2026-11-12_five-model-ab/commission.md). Hosted MiMo uses the
+    # SAME privacy pins as v41hosted (DeepInfra fp8 only, no fallbacks, data_collection deny, zdr) — only the model differs.
+    # 2026-11-12 (replacement operator): OpenRouter lists MiMo DeepInfra fp8 at status -2 (not serving); the ZDR list
+    # (GET /api/v1/endpoints/zdr) has Cohere fp8 at status 0. SAME policy pins as v41hosted, provider pinned to Cohere.
+    "mimohosted": {"served": "xiaomi/mimo-v2.6-flash", "kwargs": {}, "hosted": True, "price": (0.14e-6, 0.28e-6),
+                   "provider": {"order": ["Cohere"], "only": ["cohere"], "allow_fallbacks": False, "data_collection": "deny",
+                                "zdr": True, "quantizations": ["fp8"]}, "provider_tag": "cohere"},
+    # Local Spark arms (vLLM v0.33.0 / llama.cpp), thinking OFF through each card's chat-template switch.
+    "nemotron": {"served": "nemotron-3.5-super-vl", "kwargs": {"enable_thinking": False}},
+    "kolibri": {"served": "Kolibri-1", "kwargs": {"enable_thinking": False}},
+    # LFM2.5-24B-A2B is a pure reasoning model: its chat template ALWAYS opens "<think>" and has no off switch (card +
+    # chat_template.jinja). Thinking is therefore ON and recorded, the vLLM reasoning parser separates it, and only a think
+    # tag inside message.content trips the HARNESS rule for this arm.
+    "lfm25": {"served": "LFM2.5-24B-A2B", "kwargs": {}, "thinking_forced": True},
+    "dsv41iq1s": {"served": "DeepSeek-V4.1-Flash-1017-UD-IQ1_S", "kwargs": {"thinking": False}},
 }
 OR_URL = "https://openrouter.ai/api/v1/chat/completions"
 OR_ENV = os.path.join(os.path.dirname(os.path.dirname(LM)), "4_Credentials", ".env")
@@ -102,21 +119,24 @@ def or_key():
     raise SystemExit("ab: OPENROUTER_API_KEY not in 4_Credentials/.env")
 
 
-def assert_or_routing(body):
+def assert_or_routing(body, mk="v41hosted"):
     p = body.get("provider") or {}
-    if p != OR_PROVIDER or body.get("model") != MODELS["v41hosted"]["served"]:
+    want = MODELS[mk].get("provider", OR_PROVIDER)
+    if p != want or p.get("allow_fallbacks") is not False or p.get("data_collection") != "deny" or p.get("zdr") is not True \
+            or len(p.get("only") or []) != 1 or body.get("model") != MODELS[mk]["served"]:
         raise SystemExit("ab: REFUSED: hosted request lacks the absolute provider pin")
 
 
-def post_hosted(body, budget, info):
+def post_hosted(body, budget, info, mk="v41hosted"):
     """Reserve worst case -> POST (same body on 429/502/503, <=3 tries) -> settle on usage.cost. Returns (raw, usd)."""
-    assert_or_routing(body)
-    worst = info["prompt_bytes"] / 2.0 * OR_PRICE_IN + body["max_tokens"] * OR_PRICE_OUT
+    assert_or_routing(body, mk)
+    p_in, p_out = MODELS[mk].get("price", (OR_PRICE_IN, OR_PRICE_OUT))
+    worst = info["prompt_bytes"] / 2.0 * p_in + body["max_tokens"] * p_out
     key = or_key()
     for attempt in range(3):
-        rid = budget.reserve("v41hosted", "deepinfra/fp8", worst)  # replay.Refused if spent + worst > cap
+        rid = budget.reserve(mk, MODELS[mk].get("provider_tag", "deepinfra") + "/fp8", worst)  # replay.Refused if spent + worst > cap
         req = urllib.request.Request(OR_URL, data=json.dumps(body).encode("utf-8"), method="POST", headers={
-            "Content-Type": "application/json", "Authorization": "Bearer " + key, "X-Title": "Wednesday spark-ab v41hosted"})
+            "Content-Type": "application/json", "Authorization": "Bearer " + key, "X-Title": "Wednesday spark-ab " + mk})
         try:
             with urllib.request.urlopen(req, timeout=1800) as r:
                 raw = r.read()
@@ -129,7 +149,7 @@ def post_hosted(body, budget, info):
         usage = (json.loads(raw).get("usage") or {})
         usd = usage.get("cost")
         if not isinstance(usd, (int, float)):
-            usd = (usage.get("prompt_tokens") or 0) * OR_PRICE_IN + (usage.get("completion_tokens") or 0) * OR_PRICE_OUT
+            usd = (usage.get("prompt_tokens") or 0) * p_in + (usage.get("completion_tokens") or 0) * p_out
         budget.settle(rid, float(usd), "usage.cost", usage)
         return raw, float(usd)
 
@@ -149,7 +169,7 @@ def write_outputs(run, raw, wall, body, info, model_key):
     # [11932,223,3180,1] = "OK 42" (no </think> token generated) while /v1/chat/completions returns "</think>OK 42".
     # Strip exactly ONE leading echo, record it; any other think tag still trips the leak detector below.
     prefix_stripped = False
-    if model_key in ("iq2xxs", "iq1m") and content.startswith("</think>"):
+    if model_key in ("iq2xxs", "iq1m", "dsv41iq1s") and content.startswith("</think>"):
         content, prefix_stripped = content[len("</think>"):], True
     reasoning = msg.get("reasoning_content") or msg.get("reasoning") or ""
     finish = choice.get("finish_reason")
@@ -176,7 +196,7 @@ def write_outputs(run, raw, wall, body, info, model_key):
         "decode_tok_s_end_to_end": round(usage["completion_tokens"] / wall, 2) if usage.get("completion_tokens") and wall else None,
         "thinking_chars": len(reasoning), "think_leak_in_content": ("<think>" in content or "</think>" in content),
         "finish_reason": finish, "done": finish is not None, "done_reason": finish,
-        "template_prefix_echo_stripped": prefix_stripped,
+        "template_prefix_echo_stripped": prefix_stripped, "thinking_forced": bool(MODELS[model_key].get("thinking_forced")),
         "unfenced_wrapped": unfenced, "unclosed_fence_closed": closed, "content_chars": len(cleaned),
         "task_file": info["task_path"],
     }
@@ -209,6 +229,12 @@ def main():
     ap.add_argument("--only", default="")
     ap.add_argument("--served-name", default="")
     ap.add_argument("--label", default="", help="suffix for the results file (e.g. restore)")
+    ap.add_argument("--budget", default="", help="hosted: budget file shared across runs (default runs/<label>/budget.json)")
+    ap.add_argument("--cap", type=float, default=OR_CAP, help="hosted: USD cap for --budget (default %(default)s)")
+    # 2026-11-12: spark/cache/src's node_modules moved to the zod-4 deps store on 11-03/11-11 (build_deps.sh), so the
+    # checker's shared build fails at every October tip. --nm-source rewrites ONLY source_checkout in the RUN-DIR COPY of
+    # input.json (the checker's node_modules farm source); the prompt is still built + sha-proven from the round's own dir.
+    ap.add_argument("--nm-source", default="", help="checker node_modules farm source (rewrites the run copy's source_checkout)")
     a = ap.parse_args()
     mk = a.model
     tasks = load_tasks(a.only)
@@ -238,6 +264,12 @@ def main():
             run, n = f"{base}-r{n}", n + 1
         os.makedirs(run)
         shutil.copyfile(os.path.join(srun, "input.json"), os.path.join(run, "input.json"))
+        if a.nm_source:
+            ij = json.load(open(os.path.join(run, "input.json"), encoding="utf-8"))
+            if ij.get("source_checkout"):
+                ij["source_checkout_recorded"], ij["source_checkout"] = ij["source_checkout"], a.nm_source
+                with open(os.path.join(run, "input.json"), "w", encoding="utf-8") as f:
+                    json.dump(ij, f, indent=1)
         shutil.copyfile(info["task_path"], os.path.join(run, "task.md"))
         meta = {}
         if mk == "control":
@@ -251,9 +283,9 @@ def main():
                     "chat_template_kwargs": dict(m["kwargs"])}
             if m.get("hosted"):
                 del body["chat_template_kwargs"]
-                body.update({"provider": dict(OR_PROVIDER), "reasoning": dict(OR_REASONING), "usage": {"include": True}})
+                body.update({"provider": dict(m.get("provider", OR_PROVIDER)), "reasoning": dict(OR_REASONING), "usage": {"include": True}})
                 if budget is None:
-                    budget = replay.Budget(os.path.join(OUT, lab, "budget.json"), OR_CAP)
+                    budget = replay.Budget(a.budget or os.path.join(OUT, lab, "budget.json"), a.cap)
             with open(os.path.join(run, "request.json"), "w", encoding="utf-8") as f:
                 json.dump(body, f, indent=1)
             body_sha = hashlib.sha256(json.dumps(msgs, ensure_ascii=False).encode("utf-8")).hexdigest()
@@ -261,9 +293,9 @@ def main():
             t0 = time.time()
             try:
                 if m.get("hosted"):
-                    raw, usd = post_hosted(body, budget, info)
+                    raw, usd = post_hosted(body, budget, info, mk)
                     spent = budget.total()
-                    print(f"ab: spend ${spent:.5f} of ${OR_CAP:.2f} (this call ${usd:.5f})", flush=True)
+                    print(f"ab: spend ${spent:.5f} of ${a.cap:.2f} (this call ${usd:.5f})", flush=True)
                 else:
                     raw = post(a.url, body)
             except urllib.error.HTTPError as e:
@@ -280,8 +312,9 @@ def main():
                 meta = write_outputs(run, raw, wall, body, info, mk)
                 if m.get("hosted"):
                     served = str(meta.get("provider_served") or "")
-                    if "deepinfra" not in served.lower().replace(" ", ""):
-                        print(f"ab: STOP: {t['id']} served by {served!r}, not DeepInfra (response kept in {run})", flush=True)
+                    ptag = m.get("provider_tag", "deepinfra")
+                    if ptag not in served.lower().replace(" ", ""):
+                        print(f"ab: STOP: {t['id']} served by {served!r}, not {ptag} (response kept in {run})", flush=True)
                         return 4
                     if meta.get("reasoning_tokens"):
                         print(f"ab: NOTE {t['id']}: reasoning_tokens={meta['reasoning_tokens']} with reasoning disabled", flush=True)
@@ -289,7 +322,8 @@ def main():
                 print(f"ab: unexpected response shape on {t['id']}: {e}", flush=True)
                 return 4
         harness = ""
-        if mk != "control" and (meta.get("thinking_chars") or meta.get("reasoning_tokens") or meta.get("think_leak_in_content")):
+        forced = mk != "control" and MODELS[mk].get("thinking_forced")
+        if mk != "control" and (meta.get("think_leak_in_content") or (not forced and (meta.get("thinking_chars") or meta.get("reasoning_tokens")))):
             harness = "thinking ON or leaked (requested off)"
         if harness:
             v, g, res, fc, cs = "HARNESS", "-", harness, "-", 0
