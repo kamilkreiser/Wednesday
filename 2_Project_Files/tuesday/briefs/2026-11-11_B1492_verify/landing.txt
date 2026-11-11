@@ -1,0 +1,6 @@
+# Head-pinned MERGE COMMIT (never squash, never rebase). Head e290417a1861c8806b6d44864a67ecc54963aa55, main at gate 0ab365b1db62c2b60cb63de9deb1ceccb0b1c4c9 (re-read 14:23 AEDT by ls-remote).
+# Test only: one file, __tests__/rd407-r2-missing-mid-swap.test.js. No counts commit: scripts/verify-expected-counts.json is byte-identical to main's (blob 1eae9cc5, 5536 tests / 331 suites).
+# If main has moved before landing: re-check that `git diff --name-only <new main> e290417` is still exactly the one test file and that the counts file at the new main is what the merged tree measures (a sibling landing may change it); do not land on a moved main whose change touches backend/jsonStorage.js or backend/services/authEnforcement.js without re-running this suite on the merged tree.
+# Run with GH_CONFIG_DIR set to the project's 4_Credentials/.gh-config. <PR> is the number of the pull request opened from the gated head. Wait for CodeQL on the PR first.
+gh pr merge <PR> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit e290417a1861c8806b6d44864a67ecc54963aa55 --subject "$(cat merge-subject.txt)" --body-file merge-body.txt
+# After: the Deploy demo run this merge starts (__tests__/ is not path-ignored) must read skipped on every job (CI_DEPLOY_ENABLED gate).

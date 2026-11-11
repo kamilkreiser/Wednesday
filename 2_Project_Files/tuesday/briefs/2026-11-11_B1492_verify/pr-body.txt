@@ -1,0 +1,17 @@
+What changes (1 file, test only, no product change):
+
+- __tests__/rd407-r2-missing-mid-swap.test.js: cells M2, R1 and R3 made the settings name read as missing for a fixed 910 ms wall-clock window. On a host whose sleeps overshoot, the product's eight retries (510 ms requested) took longer than that window, so the last retry read the real store and the cells failed toward the real data. The three cells now keep the name missing for the whole call and restore it afterwards, which is the "store that really went missing" case they describe. M2's "spent the budget" check now adds up the waits the product itself asked for through Atomics.wait instead of timing the call, the same rule the M3 and M4 controls already follow. The unused PAST_BUDGET_MS constant is removed and the header comment says the new model.
+
+Assertions: every expected value is unchanged (same objects, same STORE_UNREADABLE and deny-unknown outcomes). No test is added, removed or renamed: 17 tests in 5 describes, titles byte-identical.
+
+Tests: the suite passes repeatedly on a normal run and under a shim that makes every sleep three times longer; the old cells fail under that same shim. Product changes planted in a scratch copy still turn the new cells red: a missing name read as never written fails M2, R1 and R3; a retry loop cut to two waits fails M2; a fail-open snapshot together with a non-strict value read fails R1 and R3. Full suite on the head: 5536 tests, 331 suites, all passing.
+
+Counts: unchanged. scripts/verify-expected-counts.json is identical to main (5536 tests / 331 suites); no counts commit is needed.
+
+Known limit: M2 now counts the waits that were requested, so it no longer notices a wait that returns at once without sleeping; the earlier timed form did. A follow-up can assert that each wait reports timed-out.
+
+Deploy: this merge starts a Deploy demo run on main (__tests__/ is not in its paths-ignore); its jobs are gated on CI_DEPLOY_ENABLED and are expected to read skipped. Nothing is deployed.
+
+Hosted CodeQL is read on the PR and on main after landing.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
