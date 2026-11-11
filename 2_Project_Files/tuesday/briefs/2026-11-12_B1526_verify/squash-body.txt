@@ -1,0 +1,11 @@
+Feedback hourly limit (product): a submit stored its item under the store's lock but released its
+reservation in a separate locked step, so a concurrent post of the same caller could see that item
+counted twice and be refused 429 while under the limit. The reservation is now released in the same
+locked step that stores the item; an internal test seam and a new row (red without the change) pin it.
+The limit, the counting rule, the 429/503 answers and the 60-minute window are unchanged.
+
+Test host: WebApplicationFactory.CreateClient adds to a plain list, so callers made from several
+tasks at once could leave a null that the host's disposal dereferenced. Callers of the shared test
+host are now made through one locked method. No assertion was removed or weakened.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

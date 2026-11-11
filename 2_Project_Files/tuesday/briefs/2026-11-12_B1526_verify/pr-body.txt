@@ -1,0 +1,22 @@
+Two rows of the Api test project failed once each on main and passed on re-run. This change finds the cause of each and makes each deterministic. One cause is in product code.
+
+Row 1, FeedbackRateLimitTests.Posts_sent_at_the_same_moment_never_pass_the_limit (product fix):
+- Cause: FeedbackStore.SubmitWith stored a new item under the store's lock, but released that submit's reservation later, in the finally block, under a second lock. Between those two steps the item was counted twice: once as stored and once as reserved. A concurrent post from the same caller could then be refused 429 although the caller was under the limit. The row then saw 19 Created and 11 TooManyRequests.
+- Fix: the reservation is now released in the same locked step that stores the item (one line). An internal test seam, AfterItemStored, was added. It is null in the app and nothing outside the new test sets it.
+- Unchanged: the limit, the counting rule, the 429 and 503 answers and the 60-minute window. The finally block still releases the reservation on every failure path.
+- New row FeedbackRateLimitCountTests.A_post_made_while_the_one_before_it_is_finishing_is_not_refused_when_the_caller_is_under_the_limit: red without the fix ("Expected: Created / Actual: RateLimited"), green with it. Its schedule comes from the seam, not from timing.
+
+Row 2, SourceLifecycleTests.B40_3_a_calculation_during_activation_uses_the_old_set_or_the_new_set_never_a_mix (test-side fix):
+- Cause: WebApplicationFactory.CreateClient adds each client to a plain List<HttpClient>. The row creates callers from 6 tasks at once, so an add could be lost or leave a null. The host's disposal then threw NullReferenceException in WebApplicationFactory.DisposeAsync.
+- Fix: every caller of the shared test host is created through one locked method, ApiHost.NewClient. The row itself is unchanged. No product file changed for this row.
+
+Proof (local runs, not a hosted proof; the hosted dotnet job on this PR decides):
+- A store-level probe sends 30 concurrent submits with a limit of 20. On main, 5 of 4000 iterations were off (every one 19 created / 11 refused, no other outcome). At head, 0 of 4000 were off.
+- 20 whole-suite runs, one at a time, each started at load1 above 7. All 20 were green and both rows passed in every run.
+- A separate review made 5 more whole-suite runs at head with load1 19-23. Both rows passed in all 5, and so did the new row. 4 runs were fully green. One run had 2 unrelated failures: a git child process was killed (exit 137) in a store-path check and in a test work-tree helper. Neither touches a changed line, the same shape was recorded on main before this change, and both classes passed 30 of 30 at head and at main.
+- Single-row batches under 18 busy loops: row 1 passed 100 of 100 at head, row 2 passed 60 of 60 at head.
+- Test names: 0 lost, 1 gained (the new row). No assertion was removed or weakened. There is no Skip, no retry and no sleep.
+
+Not fixed: the other direct factory client creations (CreateDefaultClient in two places) are sequential today. They are not routed through the lock.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
