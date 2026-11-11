@@ -1,0 +1,130 @@
+diff --git a/Blockchain/Dev/services/analytics/src/services/exportService.ts b/Blockchain/Dev/services/analytics/src/services/exportService.ts
+--- a/Blockchain/Dev/services/analytics/src/services/exportService.ts
++++ b/Blockchain/Dev/services/analytics/src/services/exportService.ts
+@@ -164,8 +164,14 @@
+     } catch (error) {
+       exportResult.status = 'failed';
+-      // KS-1922: the thrown text (a database, filesystem or library message) must not reach the API answer; it goes to the server log only.
+-      logger.warn('Export failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+       exportResult.error = 'Export failed';
+       await this.dbSaveExport(exportResult);
++      // KS-1922 and KS-2167: the thrown text (a database, filesystem or library message) goes to the server log only, never to the API answer,
++      // and only AFTER the failed row is saved: a logger or a message read that throws must not undo the saved failure or reject the unawaited call.
++      try {
++        const reason = error instanceof Error ? error.message : 'Unknown error';
++        logger.warn('Export failed', { error: reason });
++      } catch {
++        // nothing more can be done with a log line that cannot be written or read
++      }
+     }
+   }
+diff --git a/Blockchain/Dev/services/analytics/src/__tests__/ks2167-a-throwing-logger-in-the-failed-export-catch-still-saves-the-failed-row.test.ts b/Blockchain/Dev/services/analytics/src/__tests__/ks2167-a-throwing-logger-in-the-failed-export-catch-still-saves-the-failed-row.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/analytics/src/__tests__/ks2167-a-throwing-logger-in-the-failed-export-catch-still-saves-the-failed-row.test.ts
+@@ -0,0 +1,105 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-2167: ExportService.processExport logged before it set the constant reason and saved the failed row, and createExport calls it
++// without await or catch, so a logger that throws left the stored export 'processing' and rejected the call with nobody to handle it.
++// The failed row is now saved first, and the log line is written inside its own try.
++// Harness: the real ExportService; the database, the logger and the metrics service are stand-ins (the shape of ks1922's suite).
++const h = vi.hoisted(() => ({
++  thrown: undefined as unknown,
++  warn: vi.fn(),
++  inserts: [] as unknown[][],
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: async (_sql: string, params?: unknown[]) => {
++    h.inserts.push(params || []);
++    return { rows: [], rowCount: 1 };
++  },
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: h.warn, error: vi.fn(), debug: vi.fn() },
++}));
++
++vi.mock('../services/analyticsService', () => ({
++  analyticsService: {
++    getCertificationMetrics: async () => {
++      if (h.thrown !== undefined) throw h.thrown;
++      return { total: 3 };
++    },
++  },
++}));
++
++import { ExportService } from '../services/exportService';
++
++async function settle(type: string, svc = new ExportService()) {
++  const created = await svc.createExport({ type, period: 'day', format: 'json' });
++  await vi.waitFor(async () => {
++    const got = await svc.getExport(created.id);
++    expect(['completed', 'failed']).toContain(got?.status);
++  });
++  await new Promise((resolve) => setTimeout(resolve, 20));
++  return (await svc.getExport(created.id))!;
++}
++
++function failedWrites() {
++  return h.inserts.filter((p) => p[1] === 'failed');
++}
++
++describe('KS-2167 a throwing logger in the failed-export catch still saves the failed row', () => {
++  beforeEach(() => {
++    h.thrown = undefined;
++    h.warn.mockReset();
++    h.inserts.length = 0;
++  });
++
++  it('RED ks2167 R1 a logger that throws still leaves one failed row written with the constant reason', async () => {
++    h.thrown = new Error('boom');
++    h.warn.mockImplementation(() => {
++      throw new Error('logger down');
++    });
++    await settle('certifications');
++    expect(failedWrites()).toHaveLength(1);
++    expect(failedWrites()[0][8]).toBe('Export failed');
++  });
++
++  it('RED ks2167 R2 a logger that throws still leaves the constant reason on the stored export', async () => {
++    h.thrown = new Error('boom');
++    h.warn.mockImplementation(() => {
++      throw new Error('logger down');
++    });
++    const got = await settle('certifications');
++    expect(got.status).toBe('failed');
++    expect(got.error).toBe('Export failed');
++  });
++
++  it('RED ks2167 R3 an Error whose message cannot be read still leaves one failed row written', async () => {
++    const hostile = new Error('hidden');
++    Object.defineProperty(hostile, 'message', {
++      get() {
++        throw new Error('message getter down');
++      },
++    });
++    h.thrown = hostile;
++    const got = await settle('certifications');
++    expect(got.error).toBe('Export failed');
++    expect(failedWrites()).toHaveLength(1);
++  });
++
++  it('control ks2167 C1 a logger that throws does nothing to a successful export', async () => {
++    h.warn.mockImplementation(() => {
++      throw new Error('logger down');
++    });
++    const got = await settle('certifications');
++    expect(got.status).toBe('completed');
++    expect(got.error).toBeUndefined();
++  });
++
++  it('control ks2167 C2 with a working logger a failed export writes one failed row and one Export failed log line', async () => {
++    h.thrown = new Error('boom');
++    await settle('certifications');
++    expect(failedWrites()).toHaveLength(1);
++    expect(h.warn.mock.calls.filter((c) => String(c[0]) === 'Export failed')).toHaveLength(1);
++  });
++});

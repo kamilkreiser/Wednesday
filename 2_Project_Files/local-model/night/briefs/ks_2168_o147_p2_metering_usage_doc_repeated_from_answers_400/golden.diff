@@ -1,0 +1,12 @@
+diff --git a/Blockchain/Dev/docs/METERING-USAGE-API.md b/Blockchain/Dev/docs/METERING-USAGE-API.md
+--- a/Blockchain/Dev/docs/METERING-USAGE-API.md
++++ b/Blockchain/Dev/docs/METERING-USAGE-API.md
+@@ -23,7 +23,7 @@
+ 
+ - `from`, `to` — **optional**, inclusive bounds on the event timestamp (`created_at`).
+   ISO-8601 date (`2026-06-01`) or full timestamp (`2026-06-01T00:00:00Z`). Omit either
+-  for an open bound. A string that does not match the date shape returns **400**. A value that fits the shape but is not a real date (`2026-02-30`, `2026-13-01`) passes that check and reaches the database cast, which fails, so the call answers **500** (known deviation, KS-1875: the check is a regular expression, not a date parse). A value that is not a single string, for example a repeated `from` parameter, is ignored and the call answers **200** with that bound open (KS-1875).
++  for an open bound. A string that does not match the date shape returns **400**. A value that fits the shape but is not a real date (`2026-02-30`, `2026-13-01`) passes that check and reaches the database cast, which fails, so the call answers **500** (known deviation, KS-1875: the check is a regular expression, not a date parse). A value that is not a single string, for example a repeated `from` parameter, is refused: the call answers **400** `BAD_REQUEST` with "from and to may each be given once" (KS-1875 piece 2, PR 2167).
+ 
+ ## Authentication (tenant-scoped)
+ 
