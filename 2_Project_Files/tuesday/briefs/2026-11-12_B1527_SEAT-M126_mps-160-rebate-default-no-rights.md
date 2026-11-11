@@ -89,11 +89,11 @@ The Stamp's Hard stop slot (absolute AEDT, one clock). At it: push nothing unpro
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main): ____
-- GATE TIER (G1: a permission rule on a money input, set by Tuesday from the seat's `## CHANGE`): ____
-- Hard stop (absolute AEDT, one clock): ____
-- Panes and live seats at the stamp: ____
+- STAMP: STAMPED 10:14:29 AEDT 2026-11-12 by Tuesday (s271, s270's successor). Read whole: this kit (99 lines) and the B1527 DRAFTER-REPORT (46 lines). Authority re-read 10:12 (kam_rulings_today.sh, live): 07:31 card mpscalc-160-rebate-default-no-rights-1111 = a, label verbatim "Build it: Duplicate keeps copied internal inputs (recommended)"; terminal "go ahead and implement" ~09:1x; nothing on MPS since. **Q-ANSWERS (Tuesday, inside that ruling):** Q-1 audit attribution UNCHANGED (internal-metrics only; report the measured entry in FOR TUESDAY, it goes to the next records pass, not this build); Q-2 target GP on Duplicate HELD, report base behaviour only; Q-3 no `web/**` change; Q-4 C3 Opus + G1 confirmed (models_latest.json:17 claude-opus-5-5; model-routing.md:93, :108). open PRs 1: #185 `b1526/mps-388-flaky-api-rows` @31907062 (MPSCALC-388; owns `src/MpsCalc.Api/Feedback/**` + tests incl. `tests/MpsCalc.Api.Tests/Infrastructure/ApiHost.cs`/`EntraHost.cs`; in hosted CI, Tuesday lands it: main will MOVE during your run, onto none of your paths); main baf0aabec3c02457072ee848b166b17d3d7b0e80; branches `^b15` on origin: b1502, b1508, b1510, b1511, b1512, b1514, b1515, b1520, b1526 (9); `b1527*`/`b1528*` none; panes at the stamp: %0 tuesday, %1 fleet-monitor, %28 and %29 plain bash (no `Datasec/MPS-` pane); heavy-lock holders: none (`ls -a .tools` lists no `.heavy-lock-*`; control: it lists b1520/b1521/b1522/b1526); `.tools/b1527` and `.tools/b1528` absent; lsof 9830-9849 0 listeners (control 11 machine-wide); df 1282 GiB free.
+- LAUNCH WINDOW: launch now (10:14:29) until 11:00 at the latest; load1 1.41 at the stamp; beside you: B1528 SEAT-M127 (MPS, Sonnet, four `web/` paths: `web/src/screens/ProposalPage.tsx`, `ProposalPage.test.tsx`, `web/e2e/print.spec.ts`, `web/e2e/proposal-buttons.spec.ts`; your partition line says `web/src/proposal/`, the real four are these, disjoint from yours either way) in the same wave; it holds heavy slots too.
+- BASE (code main): baf0aabec3c02457072ee848b166b17d3d7b0e80
+- GATE TIER (G1: a permission rule on a money input, set by Tuesday from the seat's `## CHANGE`): G1 (confirmed by Tuesday: a permission rule on a money input; final from your `## CHANGE`).
+- Hard stop (absolute AEDT, one clock): 14:30 AEDT 2026-11-12 (READY target = your Step-0 `date` + 150 min).
+- Panes and live seats at the stamp: %0 tuesday, %1 fleet-monitor, %28 and %29 plain bash; no `Datasec/MPS-` pane; #185 (b1526) in hosted CI and landing by Tuesday during your run (Feedback + test Infrastructure files: none of yours, and not in your READ WHOLE FIRST item 2 list).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 10:14:29 AEDT 2026-11-12 by Tuesday s271 (99 lines)
