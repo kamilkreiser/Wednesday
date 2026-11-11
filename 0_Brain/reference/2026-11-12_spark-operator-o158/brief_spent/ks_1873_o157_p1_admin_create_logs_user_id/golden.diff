@@ -1,0 +1,150 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/users.ts b/Blockchain/Dev/services/auth/src/routes/users.ts
+--- a/Blockchain/Dev/services/auth/src/routes/users.ts
++++ b/Blockchain/Dev/services/auth/src/routes/users.ts
+@@ -675,7 +675,7 @@
+ 
+     await userRepo.createUser(user);
+ 
+-    logger.info('Admin created user', { email, role: user.role, createdBy: req.user!.userId });
++    logger.info('Admin created user', { userId: user.id, role: user.role, createdBy: req.user!.userId });
+ 
+     res.status(201).json({
+       success: true,
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1873-admin-create-user-logs-the-user-id-not-the-email.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1873-admin-create-user-logs-the-user-id-not-the-email.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1873-admin-create-user-logs-the-user-id-not-the-email.test.ts
+@@ -0,0 +1,133 @@
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { AddressInfo } from 'node:net';
++import type { Server } from 'node:http';
++import express from 'express';
++
++// KS-1873: POST /admin/create logged the new user's plaintext email at info level. Wednesday's ruling: the log line carries the
++// new user's id and never the email (no hash, no mask). This drives the real router with the logger replaced by a recorder, so the
++// assertions read exactly what the route passed to the logger.
++
++const state = vi.hoisted(() => ({
++  caller: { userId: 'dddddddd-4444-4444-8444-dddddddddddd', role: 'SYSTEM_ADMIN', tenantId: 'tenant-default' } as {
++    userId: string;
++    role: string;
++    tenantId?: string;
++  },
++}));
++
++const logged = vi.hoisted(() => ({ calls: [] as Array<{ level: string; message: string; meta: Record<string, unknown> }> }));
++
++const repoMock = vi.hoisted(() => ({
++  emailExists: vi.fn(async () => false),
++  createUser: vi.fn(async (user: unknown) => user),
++}));
++vi.mock('../repositories/userRepo', () => repoMock);
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => false,
++  query: vi.fn(async () => ({ rows: [] })),
++}));
++
++vi.mock('../services/session', () => ({ revokeAllUserSessions: vi.fn(async () => 0) }));
++
++vi.mock('../services/password', () => ({
++  hashPassword: vi.fn(async () => 'hashed'),
++  checkPasswordStrength: vi.fn(() => ({ ok: true })),
++  verifyPassword: vi.fn(async () => true),
++}));
++
++vi.mock('../middleware/authenticate', () => {
++  const injectCaller =
++    () => (req: express.Request & { user?: unknown }, _res: express.Response, next: express.NextFunction) => {
++      (req as { user: unknown }).user = { ...state.caller };
++      next();
++    };
++  return { authenticate: injectCaller, authenticateAccessOrConnector: injectCaller };
++});
++
++vi.mock('../utils/logger', () => {
++  const record = (level: string) => (message: string, meta?: Record<string, unknown>) => {
++    logged.calls.push({ level, message, meta: meta ?? {} });
++  };
++  return { logger: { info: record('info'), warn: record('warn'), error: record('error'), debug: record('debug') } };
++});
++
++import { userRoutes } from '../routes/users';
++import { errorHandler } from '../middleware/errorHandler';
++import { logger } from '../utils/logger';
++
++const PROBE_EMAIL = 'ks1873.probe@example.test';
++let server: Server;
++let baseUrl: string;
++
++const SAVED_DATABASE_URL = process.env.DATABASE_URL;
++beforeAll(async () => {
++  delete process.env.DATABASE_URL;
++  const app = express();
++  app.use(express.json());
++  app.use('/', userRoutes);
++  app.use(errorHandler);
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => {
++      const { port } = server.address() as AddressInfo;
++      baseUrl = `http://127.0.0.1:${port}`;
++      resolve();
++    });
++  });
++});
++
++afterAll(async () => {
++  if (SAVED_DATABASE_URL === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL = SAVED_DATABASE_URL;
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++
++beforeEach(() => {
++  logged.calls.length = 0;
++  repoMock.emailExists.mockClear();
++  repoMock.createUser.mockClear();
++});
++
++async function createProbeUser(): Promise<{ status: number; id: string }> {
++  const res = await fetch(`${baseUrl}/admin/create`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({ email: PROBE_EMAIL, password: 'a-long-enough-password-1', firstName: 'Pat', lastName: 'Probe' }),
++  });
++  const body = (await res.json()) as { data?: { id?: string } };
++  return { status: res.status, id: body.data?.id ?? '' };
++}
++
++function createLine() {
++  return logged.calls.find((c) => c.message === 'Admin created user');
++}
++
++describe('KS-1873 admin create-user logs the new user id, never the email', () => {
++  it('control ks1873 C0 the recorder sees the create line with its role and the caller id', async () => {
++    const made = await createProbeUser();
++    expect(made.status).toBe(201);
++    const line = createLine();
++    expect(line).toBeDefined();
++    expect(line?.level).toBe('info');
++    expect(line?.meta.role).toBe('OWNER');
++    expect(line?.meta.createdBy).toBe('dddddddd-4444-4444-8444-dddddddddddd');
++  });
++
++  it('control ks1873 C1 the recorder would show an email if one were logged', () => {
++    logger.info('planted', { email: PROBE_EMAIL });
++    expect(JSON.stringify(logged.calls)).toContain(PROBE_EMAIL);
++  });
++
++  it('RED ks1873 R1 nothing logged while creating a user contains the email', async () => {
++    const made = await createProbeUser();
++    expect(made.status).toBe(201);
++    expect(logged.calls.length).toBeGreaterThan(0);
++    expect(JSON.stringify(logged.calls)).not.toContain(PROBE_EMAIL);
++  });
++
++  it('RED ks1873 R2 the create line carries the new user id', async () => {
++    const made = await createProbeUser();
++    expect(made.status).toBe(201);
++    expect(made.id).not.toBe('');
++    expect(createLine()?.meta.userId).toBe(made.id);
++  });
++});
