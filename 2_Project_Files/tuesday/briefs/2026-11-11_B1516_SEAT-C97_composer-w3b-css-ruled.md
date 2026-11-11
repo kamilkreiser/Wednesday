@@ -108,16 +108,16 @@ Part and step, lock state (holder text or "mine"), load1, the last command, the 
 
 ## Stamp
 Tuesday fills each slot at launch; one word or clock each, or the answer. The unstamped copy reads twelve such runs (eleven slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Main head at launch (full sha; `879facda441e4f7abccec51583916804f7770789` at drafting): ____
-- Branch head at launch (the new branch must NOT exist): ____
-- Open PRs at launch (#91, #86, #85 at drafting): ____
-- Launch authority and hard stop (READY target 150 minutes after your Step 0, never later than 22:45 AEDT; HARD STOP 23:30 AEDT 2026-11-11): ____
-- SLOTS (HEAVYLOCK `free` or `held`; which Composer panes are live): ____
-- DOCKER (daemon running at launch, by `docker version`; Tuesday may open Docker Desktop under the standing grant, opening the app only): ____
-- IDENTITY (how the clone gets its configured identity; the drafter's default: Tuesday names the clone-local `user.name`/`user.email` the seat sets once with `git config --local`, equal to main's author identity as the B1504 and B1506 stamps did; else STOP before the first commit): ____
-- WORDS (`NONE NEEDED` or `HOLD`; the drafter's default NONE NEEDED: no screen word changes, the only new text is the token name the ruling approved): ____
-- Q-answers (Q-1 include the two white literals of `screens-w3.css` under PCOMP-80, default YES; Q-2 token name `--pc-on-primary` as the ruling approved, default AS RULED; Q-3 stack-based e2e measurement of the real screens, default NO, the local file:// route only; Q-4 the new test file `apps/web/src/styles/b1516-style-leftovers.test.ts`, default YES): ____
+- STAMP: STAMPED 19:27 AEDT 2026-11-11 by Tuesday (s269); Tuesday read this kit whole (124 lines) and the drafter report's BLUF, and re-printed main, open PRs, the b1516 ref, the heavy lock, docker, ports 9660-9669, Composer panes and main's author identity.
+- LAUNCH WINDOW: Until 20:15 AEDT 2026-11-11 (latest start).
+- Main head at launch (full sha; `879facda441e4f7abccec51583916804f7770789` at drafting): 879facda441e4f7abccec51583916804f7770789 (unchanged since drafting)
+- Branch head at launch (the new branch must NOT exist): absent (matching-refs heads/b1516: 0)
+- Open PRs at launch (#91, #86, #85 at drafting): #91, #86, #85 (unchanged since drafting)
+- Launch authority and hard stop (READY target 150 minutes after your Step 0, never later than 22:45 AEDT; HARD STOP 23:30 AEDT 2026-11-11): Tuesday, under the product owner's 2026-11-11 14:15 ruling (C-139) and his 13:25 and 17:52 board words ('keep going. use as many agents as you can manage to get through the backlog'). READY 150 minutes after your Step 0, never later than 22:45 AEDT; HARD STOP 23:30 AEDT 2026-11-11.
+- SLOTS (HEAVYLOCK `free` or `held`; which Composer panes are live): HEAVYLOCK free at the stamp (composer-heavy.lock absent); no Composer pane live (0).
+- DOCKER (daemon running at launch, by `docker version`; Tuesday may open Docker Desktop under the standing grant, opening the app only): running at the stamp (docker version printed server 29.9.2); Tuesday did not open or change it.
+- IDENTITY (how the clone gets its configured identity; the drafter's default: Tuesday names the clone-local `user.name`/`user.email` the seat sets once with `git config --local`, equal to main's author identity as the B1504 and B1506 stamps did; else STOP before the first commit): as the B1504 and B1506 stamps: set ONCE in your clone only: git -C <clone> config --local user.name 'kamilDatasec' and git -C <clone> config --local user.email '88359143+kamilDatasec@users.noreply.github.com' (main 879facda's author identity, read by Tuesday at the stamp); never -c, never GIT_AUTHOR_*/GIT_COMMITTER_*
+- WORDS (`NONE NEEDED` or `HOLD`; the drafter's default NONE NEEDED: no screen word changes, the only new text is the token name the ruling approved): NONE NEEDED
+- Q-answers (Q-1 include the two white literals of `screens-w3.css` under PCOMP-80, default YES; Q-2 token name `--pc-on-primary` as the ruling approved, default AS RULED; Q-3 stack-based e2e measurement of the real screens, default NO, the local file:// route only; Q-4 the new test file `apps/web/src/styles/b1516-style-leftovers.test.ts`, default YES): Q-1 YES (the two screens-w3.css white literals ride PCOMP-80). Q-2 AS RULED (--pc-on-primary). Q-3 NO (file:// route only; the stack e2e is the gate's or the deploy walk's). Q-4 YES (the one new test file).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 19:27 AEDT 2026-11-11 by Tuesday s269 (124 lines, one read)
