@@ -1,0 +1,24 @@
+# Drafter commission: Seat R 100th (Secuura/Blockchain RAISE seat), by Wednesday, 2026-11-12 ~01:3x AEDT
+
+Write ONE file: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatR100/brief_R100.md`, plus `notes.md` beside it (what you could not measure; every departure from the predecessor brief and why). No other writes. If the Write tool refuses either, return the full text and say so.
+
+## Rules
+Follow `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-08_drafter_common.md` for HOW to build (sections, provenance format `- <fact> | <source> | read YYYY-MM-DD`, the UNMEASURED paragraph, no SELF-CHECK stamp, no git write verbs, no directory changes in shell, no rm, no recursive find/grep over 5_Project_History, 0_Brain/reference or local-model). **Its "What changed" section is 11-08 history: ignore it.** Every ticket key the body names (queued or quoted, including keys inside quoted test titles) needs its own provenance line read on Linear (read-only) or from a document that read it; the send gate refuses a named key without one. No placeholder strings. No sentence that contradicts another section.
+
+Git verbs allowed against a client checkout: `ls-remote`, `show`, `log`, `diff`, `ls-tree`, `cat-file`, `grep`, with `GIT_OPTIONAL_LOCKS=0`. Never `fetch`, `pull`, `worktree`, `checkout`, `merge-tree --write-tree`.
+
+## Build from
+1. **Predecessor brief:** `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-11_seatR99_raise.md` (read whole) and Wednesday's mails to R 99th: `2026-11-11_R99_answer_plan.md` and `2026-11-12_R99_answer_ready_r1.md` (same folder; the second carries the round-2 release and the ADDENDUM rows 41 KS-2160 and 42 KS-1163 with their held READY paths, Kam's card for row 42 and the behaviour-change line) for the `RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE` section.
+2. **Predecessor HANDOVER, FINAL block first:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-11_seatR-99th/HANDOVER.md`. NEXT ROW: row 38 (KS-1959, vc-issuer/src/db.ts only), row 40 (KS-2011), then 41 (KS-2160) and 42 (KS-1163); the tier-1 block (4+11, 12, 16, 19, 30+33, 32+34, 39) untouched and NOT released; the kit, its declared changes (R99-D1), traps, trees (s-r99-a on PR 2183's branch, s-r99-b on PR 2182's; s-r96-a/b/c) and the branches checked out nowhere.
+3. Copy and change: keep the structure, standing lines, HOLDS, push protocol, PACE and model line (Sonnet 5.5) unless a fact below changes them.
+
+## Facts measured by Wednesday (cite as Wednesday's)
+- develop = `4f85ca04c622f29099d184bc45de2faa61fb4af0` by Wednesday's ls-remote at 2026-11-12 01:22 AEDT (PR 2174's squash).
+- R 99th WRAPPED ~14:35Z, scored 0.93, pane closed (listeners 18 -> 18); nothing of it running (its wrap). Its five PRs: 2179 (KS-2155), 2180 (KS-1904 p1), 2181 (KS-1904 p2+p3), 2182 (KS-2055 half 2, a live API contract change) are under QA GATE 312 (`/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_gate312-tier2-pr2179-2182/`; no verdict yet); 2183 (KS-2141, test-only bash, head 16a5be1fafa0) is UNGATED and RULED BY WEDNESDAY to ride R 100th's FIRST READY FOR GATE as a batch member (the 2026-09-18 minimise-gate-duplication rule), not gated alone. R 100th does not push to any of the five branches unless Wednesday sends a fix round by ADDENDUM naming the finding (a gate 312 fix round may come this way: s-r99-b holds 2182's branch; 2179, 2180, 2181 are checked out nowhere).
+- ROUND RULE for R 100th: build and push rows 38, 40, 41, 42 one at a time through the driver family, each verified at origin; then ONE READY FOR GATE naming them all PLUS PR 2183 as a batch member. Before cutting rows 41 and 42, re-check that no other held READY or open PR names their four files (the Spark operator's corrected held-path measure, in `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_spark-operator-o145/report.md`, says none; R 99th did not run it).
+- Live seats: B 140th (merge seat, pane %59, launched 01:30) and S 57th (board seat, pane %56). Spark: Wednesday's lane, never the seat's.
+- Standing lines: as R 99th's brief carries them (demo FROZEN; signature classes pause for Kam; QA gate before every merge; client-facing text is ticket/PR comments only; tickets on Peter or Stuart stay theirs). Quote any card exactly from `bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/decision_queue.sh show <id>` (read-only); row 42's authority is card `secuura-ks1163-start-script-never-waits-for-five-services` = a. `kam_rulings_today.sh` prints a pasted API key in one row: the seat filters every token of 28 or more characters out before its transcript.
+- The machine: the Mac mini; after any drive drop re-read files written just before it; report a stale lock, never remove one it does not hold.
+
+## Report back
+Under 100 words: the path, its byte size, the rows queued in order, and what you could not measure.
