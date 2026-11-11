@@ -1,0 +1,8 @@
+# Spark operator commission o134 (Secuura/Blockchain): the RENAME tickets + fresh screen, up to 3 rounds. Wednesday, Mac mini seat, 2026-11-11 ~11:4x AEDT.
+Method: exactly as /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-11_spark-operator-o133/commission.md (read whole, and its report.md) and everything they point at.
+NEW SINCE o133: the DECLARED-RENAME ALLOWANCE is built and accepted (report /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-11_harness-declared-rename/report.md, read WHOLE incl. its addendum; field documented in local-model/spark/README.md). Arms in the real tree after its lint fix: a6_declared_rename 32/0, test_only_bash_spark 35/0, code_patch2 10/0, bash_patch2 22/0 (Wednesday's run 11:3x).
+FIRST: brief KS-2149 and KS-2155 (rename-only bash suites, test_only_bash) with a `## Renames` block whose exact '<suite>.test.sh :: <label>' names you READ from a baseline run (never typed). Then KS-2156 piece 2 if its only blocker was the rename. For each: brief_lint, then a --control round with your golden FIRST (the end-to-end leg the build did not measure), then the real round. A control that fails on the rename path is a HARNESS finding: stop that ticket, report it exactly, do not work around it.
+Exclusions as o133 (re-measure: open PRs 2163-2170 files, every held READY_* incl. o133's KS-2021, R 94th's unraised rows). B 131st (merge seat) is live and touches no files.
+develop: re-read by ls-remote (0b55401ad5dc at 10:24; may have moved if B 131st merged: name the sha you used).
+Load: one rsync copy, one Claude seat; whole-suite legs at load1 < 8, say if not.
+OUTPUT: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-11_spark-operator-o134/report.md (under 50 lines; same per-task fields); return it in full.

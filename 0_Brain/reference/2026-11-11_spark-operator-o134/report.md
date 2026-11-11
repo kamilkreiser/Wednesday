@@ -1,0 +1,1 @@
+Report returned in the operator's final message (Write refused); summary in 0_Brain/daily/2026-11-11.md 11:5x: 2 held (KS-2149, KS-2155), declared-rename end-to-end proven on KS-2149, KS-2156 p2 waits on p1.
