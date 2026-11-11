@@ -9763,5 +9763,110 @@
   "project": "Datasec",
   "ts": "2026-11-10T22:37:02.530796+11:00",
   "text": "Done, Kam: UAT now has all five HPSM changes, deployed at 22:07-22:09. The menu link reads Playbook Partner Readiness on two lines, and the rows below sit a little lower. At the Demo level, Upcoming activity and each customer's name row show the alias. The header logo is easier to tap, and the roadmap evidence sentence has its new wording. Nothing else you can see changed. The database update ran after a full backup copy, and the audit table is now append-only with all 95 entries kept. The API was down about 4 minutes. For about two and a half minutes after that, the old API ran on the updated database. A submit or follow-up review in that window would have errored and saved nothing; none shows in the records, but we can't see attempts. Feedback: 9 items, none new since this morning. Two things for later. The backup copy costs a little until you say delete it; I'll card it once you've had a look. And the Demo Home pipeline panel still shows 4 real names, as it did before; it's on the follow-up list."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T05:32:09.547798+11:00",
+  "text": "Wrapped, Kam. The handover is written and pushed: next steps, a retro and a history entry. Overnight: UAT has all five HPSM changes plus the database update. Composer and HPSM records are done. Two NexusAI branches landed (#186, #187). A viewer could bypass a write gate by changing the letter case of the address: a review found it overnight and a seat fixed it, and the fix is in a second review. Per your 'when everything finishes', I'm keeping this seat up only to merge the next NexusAI PR (#188) when its checks go green and to take in that second review's verdict, then I'll stop. The landing seat (N122) carries on with the remaining NexusAI branches into the day; the morning seat picks it up. Nothing deployed besides UAT."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T07:21:09.127121+11:00",
+  "text": "Morning, Kam. BLUF: the machine rebooted at 05:41 and stopped the overnight NexusAI landing seat mid-chain. I landed the branch it had ready (NexusAI #188, not deployed) and relaunched the seat at 07:17; seven branches to go, it stops at 18:00. The re-check of last night's security fix is running again too. Three cards on the board: the morning summary, deleting the UAT backup copy once you've looked at UAT, and the load limit plus Spotlight on this Studio. Nothing is on fire."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T07:52:22.851955+11:00",
+  "text": "Got it: PCOMP-114 accepted as built. I've recorded your ruling on the card, and a small records seat is closing the ticket now (one comment, the move to Done, and the clarifications entry). I'll confirm once it reads Done in Jira."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T07:57:35.636246+11:00",
+  "text": "Done: PCOMP-114 is closed in Jira (checked at source), with your ruling recorded as a clarifications entry. Security Composer now has PCOMP-113, 62 and 114 closed this morning."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T08:02:27.560502+11:00",
+  "text": "Datasec / MPS records: done and checked at source. MPSCALC-205, 221, 178, 225 and 254 are now Done; 195 and 124 have comments and stay open, each waiting on a specific wording or ruling. One small slip to flag: the seat put your personal email as the committer on one local records commit (the author is your Datasec identity). That repo has no remote, so it never leaves this Mac, and rewriting its history is riskier than the field itself, so I'm leaving it unless you say otherwise. I've tightened future briefs so a seat can't override the git identity."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T09:02:49.131968+11:00",
+  "text": "NAS workflow is set up and saved. Datasec backups and offloads go to DEV-Working/Datasec/Tuesday/, one dated folder per job (for example 2026-11-11_old-worktrees). Each folder has a manifest: what it is, why, where it came from, a checksum per file, and a review-after date 30 days out, so clean-up is easy. It copies and verifies; it never deletes the original. It won't put credentials on the NAS, and it keeps out of the Secuura folder there. A startup check warns if the NAS isn't mounted. Tested once with a small sample, which is in the folder now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T09:09:56.948617+11:00",
+  "text": "Datasec / NexusAI, for your awareness, no action: one auth test started failing on this Studio after this morning's reboot, even on unchanged main code. I had it diagnosed. Since the reboot, the Mac's timers run about twice as long as asked (probably the post-restart photo and file indexing), so the test's timing window is too short. It is not a security problem: every failure went the safe way, with login still enforced. Hosted CI passes it, and landings carry on with it disclosed. I'll ticket a test fix so it stops depending on timing."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T09:20:47.013287+11:00",
+  "text": "To turn Spotlight indexing off on every drive, run this once in Terminal (it asks for your Mac password): sudo mdutil -a -i off . To turn it back on later: sudo mdutil -a -i on . What you lose: Spotlight (Cmd-Space) and Finder search stop finding files by their contents, and new files stop being found by name. What it fixes: the heavy indexing (mds_stores) that kept the load high overnight. Right now indexing is on for the system disk and Datasec_DEV, and already off for Backup and the NAS. If you'd rather keep Spotlight for your own files, run sudo mdutil -i off /Volumes/Datasec_DEV instead, which turns it off for the Datasec drive only. Separately, the photo-analysis process eating a full core this morning (mediaanalysisd) is not Spotlight and settles on its own after a restart. Noted your other two: the load limit is now 24 on this Studio, and the UAT backup copy is deleted only once you say UAT looks right."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T09:22:05.005283+11:00",
+  "text": "Checked at 09:21: Spotlight indexing now reads disabled on every volume (the system disk, Datasec_DEV, DevMASTER, Backup and the NAS). The indexer is no longer in the top CPU list and load is 2.6. The one busy thing left is Finder's DesktopServicesHelper at about 77 percent, which is usually a copy or move still running in Finder. Nothing for you to do."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T10:41:39.688409+11:00",
+  "text": "Kam, on Wednesday's question about my scheduled jobs on the Mac mini: they are stale duplicates. My live set runs here on the Studio (all six loaded, last runs clean, today's 06:00 wake ran here). I recommend removing them from the mini so they can never start a second Tuesday or send you a duplicate email. Either Wednesday can do it on the mini with your OK, or you can paste this into a Terminal on the mini: for j in wake dailysweep escalate48h shiftchange chatsync close; do launchctl bootout gui/$(id -u)/com.tuesday.$j; done . Nothing changes on the Studio."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T10:53:12.287908+11:00",
+  "text": "On it: an updated HPSM-POC UAT user guide (v0.4, replacing the 26 Oct v0.3), covering every section and feature on what UAT runs now, with fresh screenshots and numbered steps, plus a list of what changed since v0.3. Screenshots are taken without saving anything on UAT. A seat builds it and a second pass checks every screenshot against today's site, then I email you the PDF. Rough time: a few hours."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T11:00:40.053772+11:00",
+  "text": "Done: the UAT backup copy (hpsmpoc-b1466-pre) was deleted at 10:54. It was the only change: UAT's live database is untouched and online, and UAT answered healthily before and after. The way back for last night's deploy is now Azure's point-in-time restore, which still covers it."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T12:12:49.047531+11:00",
+  "text": "The HPSM-POC user guide draft 0.4 is done and emailed to your Datasec address; it is also here. 80 pages, every screenshot new from the review site today, nothing saved on the site, every quote checked against the live pages, every figure checked by an independent reader. Two things it found on the site: the Demo Walkthrough's step 12 still says Service offers where the menu says Delivery phases, and Consultant and Admin lists show a fifth customer not marked as a sample. I'll ticket both.\n📎 file in the live drawer: HPSM-POC_UAT-User-Guide_DRAFT_v0.4_email.pdf (id f-47ebbdc1ec)"
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T13:26:22.274481+11:00",
+  "text": "Thank you! On it: I'm sweeping all four Datasec boards (HPSM-POC, Security Composer, MPS, NexusAI) for tickets the agents can do without a decision from you. Then I'll start them in waves. Anything waiting on you or Paul stays parked, including the HTML phase items, which wait for your phase decisions. NexusAI's landing chain resumes once today's test fix lands."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-11T13:55:20.471231+11:00",
+  "text": "As you asked, everything the agents are waiting on you for, in one register (attached, 20 pages; page 1 is the summary). 129 tickets across the four Datasec projects, grouped into 80 decisions; 71 of them are a quick yes or no with my recommendation. One card per project is on the board, each with an option to accept all of that project's quick recommendations in one tap. The five that block the most work are on page 1.\n📎 file in the live drawer: 2026-11-11_WAITING-ON-KAM_register.pdf (id f-c2decbd90e)"
  }
 ]
