@@ -1,0 +1,110 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/redis.ts b/Blockchain/Dev/services/api-gateway/src/services/redis.ts
+--- a/Blockchain/Dev/services/api-gateway/src/services/redis.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/redis.ts
+@@ -683,1 +683,4 @@
++// KS-2011: the two notification-settings Maps below carry no expiry of their own. This Map records when each entry was written (key `n:<key>` or `u:<userId>`)
++// so cleanupFallbackStores can drop entries older than TTL.privacy, the lifetime the Redis branch gives them. `platform-settings` is configuration (KS-1233) and is never recorded.
++const notificationFallbackWrittenAt = new Map<string, number>();
+ const notificationSettingsStore = new Map<string, object>();
+@@ -700,3 +703,4 @@
+   } else {
++    if (key !== 'platform-settings') notificationFallbackWrittenAt.set(`n:${key}`, Date.now());
+     notificationSettingsStore.set(key, data);
+   }
+@@ -729,3 +733,4 @@
+   } else {
++    notificationFallbackWrittenAt.set(`u:${userId}`, Date.now());
+     userNotificationSettingsStore.set(userId, data);
+   }
+@@ -752,3 +757,11 @@
+     }
+   }
++  // KS-2011: notification settings written in fallback mode expire after TTL.privacy, as they do in Redis; platform-settings is never recorded, so it never expires.
++  for (const [recorded, writtenAt] of notificationFallbackWrittenAt.entries()) {
++    if (now - writtenAt > TTL.privacy * 1000) {
++      notificationFallbackWrittenAt.delete(recorded);
++      if (recorded.startsWith('n:')) notificationSettingsStore.delete(recorded.slice(2));
++      else userNotificationSettingsStore.delete(recorded.slice(2));
++    }
++  }
+ }
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks2011-notification-fallback-settings-expire-after-the-redis-ttl.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks2011-notification-fallback-settings-expire-after-the-redis-ttl.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks2011-notification-fallback-settings-expire-after-the-redis-ttl.test.ts
+@@ -0,0 +1,75 @@
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++import * as redisService from '../services/redis';
++
++// KS-2011 (gate 197 G197-F2): in the in-memory fallback mode of services/redis.ts the two notification-settings Maps are written when Redis
++// is not available and are never pruned: cleanupFallbackStores touches only the brute-force and rate-limit stores. The Redis branch gives
++// the same values a 24 hour TTL (TTL.privacy), except `platform-settings`, which is configuration and is written without one (KS-1233).
++// The cells never call initRedis, so the module stays in its fallback (asserted). Only Date is faked, so the pruning is driven by calling
++// cleanupFallbackStores directly after moving the clock; no interval or timer is involved.
++const HOUR_MS = 60 * 60 * 1000;
++const T0 = new Date('2026-11-11T00:00:00Z').getTime();
++
++beforeEach(() => {
++  vi.useFakeTimers({ toFake: ['Date'] });
++  vi.setSystemTime(T0);
++});
++afterEach(() => {
++  vi.useRealTimers();
++});
++
++function advanceHours(hours: number): void {
++  vi.setSystemTime(Date.now() + hours * HOUR_MS);
++}
++
++describe('KS-2011 the fallback notification settings expire after the Redis TTL', () => {
++  it('control ks2011 C0: the module is in its in-memory fallback', () => {
++    expect(redisService.isRedisAvailable()).toBe(false);
++  });
++
++  it('control ks2011 C1: a per-user entry younger than 24 hours survives a cleanup', async () => {
++    await redisService.setUserNotificationSettings('ks2011-c1', { success: true });
++    advanceHours(23);
++    redisService.cleanupFallbackStores();
++    expect(await redisService.getUserNotificationSettings('ks2011-c1')).toEqual({ success: true });
++  });
++
++  it('control ks2011 C2: platform-settings is configuration and survives a cleanup 48 hours after its write', async () => {
++    await redisService.setNotificationSettings('platform-settings', { general: { platformName: 'ks2011' } });
++    advanceHours(48);
++    redisService.cleanupFallbackStores();
++    expect(await redisService.getNotificationSettings('platform-settings')).toEqual({ general: { platformName: 'ks2011' } });
++  });
++
++  it('control ks2011 C3: a rewrite restarts the clock, so an entry rewritten 23 hours in is still there at 25 hours', async () => {
++    await redisService.setUserNotificationSettings('ks2011-c3', { v: 1 });
++    advanceHours(23);
++    await redisService.setUserNotificationSettings('ks2011-c3', { v: 2 });
++    advanceHours(2);
++    redisService.cleanupFallbackStores();
++    expect(await redisService.getUserNotificationSettings('ks2011-c3')).toEqual({ v: 2 });
++  });
++
++  it('RED ks2011 R1: a per-user entry older than 24 hours is dropped by a cleanup', async () => {
++    await redisService.setUserNotificationSettings('ks2011-r1', { success: true });
++    advanceHours(24.01);
++    redisService.cleanupFallbackStores();
++    expect(await redisService.getUserNotificationSettings('ks2011-r1')).toBeNull();
++  });
++
++  it('RED ks2011 R2: a shared-namespace entry other than platform-settings older than 24 hours is dropped by a cleanup', async () => {
++    await redisService.setNotificationSettings('ks2011-r2', { v: 1 });
++    advanceHours(24.01);
++    redisService.cleanupFallbackStores();
++    expect(await redisService.getNotificationSettings('ks2011-r2')).toBeNull();
++  });
++
++  it('RED ks2011 R3: a cleanup drops the stale entry and keeps the fresh one written beside it', async () => {
++    await redisService.setUserNotificationSettings('ks2011-r3-old', { v: 'old' });
++    advanceHours(23);
++    await redisService.setUserNotificationSettings('ks2011-r3-new', { v: 'new' });
++    advanceHours(2);
++    redisService.cleanupFallbackStores();
++    expect(await redisService.getUserNotificationSettings('ks2011-r3-old')).toBeNull();
++    expect(await redisService.getUserNotificationSettings('ks2011-r3-new')).toEqual({ v: 'new' });
++  });
++});
