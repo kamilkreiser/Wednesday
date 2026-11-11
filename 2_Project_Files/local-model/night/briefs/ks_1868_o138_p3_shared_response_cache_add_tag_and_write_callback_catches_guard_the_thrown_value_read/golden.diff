@@ -1,0 +1,172 @@
+diff --git a/Blockchain/Dev/packages/shared/src/cache/response-cache.ts b/Blockchain/Dev/packages/shared/src/cache/response-cache.ts
+--- a/Blockchain/Dev/packages/shared/src/cache/response-cache.ts
++++ b/Blockchain/Dev/packages/shared/src/cache/response-cache.ts
+@@ -153,5 +153,11 @@
+       await this.redis.sadd(`${this.tagPrefix}${tag}`, key);
+     } catch (error) {
+-      logger.error('[ResponseCache] Failed to add tag', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('[ResponseCache] Failed to add tag', { error: reason });
+     }
+   }
+@@ -331,4 +337,10 @@
+         // Store in cache
+         defaultStore.set(cacheKey, cachedResponse, ttl + staleWhileRevalidate).catch(err => {
+-          logger.error('[ResponseCache] Cache write error', { error: err instanceof Error ? err.message : String(err) });
++          let reason: string;
++          try {
++            reason = err instanceof Error ? err.message : String(err);
++          } catch {
++            reason = 'unreadable thrown value';
++          }
++          logger.error('[ResponseCache] Cache write error', { error: reason });
+         });
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1868-response-cache-add-tag-and-write-callback-unreadable-throw.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1868-response-cache-add-tag-and-write-callback-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1868-response-cache-add-tag-and-write-callback-unreadable-throw.test.ts
+@@ -0,0 +1,139 @@
++import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
++
++// KS-1868: two more catches of the response cache read the caught value with `error instanceof Error ? error.message : String(error)` before
++// their logger.error line: the Redis store's `addTag` and the middleware's `.catch` callback on the cache write (`Cache write error`).
++// Neither is awaited, so when the read itself throws (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws, throws on
++// `.message`) the log line is lost AND the rejection is unhandled. Each now logs the constant `unreadable thrown value` for such a value and
++// raises no unhandled rejection; an ordinary Error is still logged with its own message.
++// The redis and store stand-ins are plain objects with plain functions, not vi.fn(): a spy inspects what it rejects with and could itself fail
++// on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  error: vi.fn(),
++  unhandled: 0,
++}));
++
++vi.mock('../logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: h.error },
++}));
++
++import { initializeRedisCache, setDefaultCacheStore, responseCache } from '../cache/response-cache';
++
++const SAVED_LISTENERS = process.listeners('unhandledRejection');
++const onUnhandled = () => {
++  h.unhandled += 1;
++};
++
++beforeAll(() => {
++  process.removeAllListeners('unhandledRejection');
++  process.on('unhandledRejection', onUnhandled);
++});
++afterAll(() => {
++  process.removeListener('unhandledRejection', onUnhandled);
++  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
++});
++
++async function respond(tags: string[]): Promise<void> {
++  const req = { method: 'GET', headers: {}, originalUrl: '/ks1868', url: '/ks1868' };
++  const res = {
++    statusCode: 200,
++    json: (_b?: unknown) => res,
++    setHeader: () => undefined,
++    getHeader: () => undefined,
++  };
++  await responseCache({ ttl: 60, tags })(req as never, res as never, (() => undefined) as never);
++  res.json({ ok: 1 });
++  await new Promise((r) => setTimeout(r, 30));
++}
++
++async function runAddTag(): Promise<void> {
++  initializeRedisCache({
++    get: () => Promise.resolve(null),
++    setex: () => Promise.resolve('OK'),
++    del: () => Promise.resolve(1),
++    smembers: () => Promise.resolve([]),
++    sadd: () => Promise.reject(h.toThrow),
++  });
++  await respond(['ks1868-tag']);
++}
++
++async function runWriteCallback(): Promise<void> {
++  setDefaultCacheStore({
++    get: () => Promise.resolve(null),
++    set: () => Promise.reject(h.toThrow),
++    delete: () => Promise.resolve(),
++    deleteByTag: () => Promise.resolve(),
++  });
++  await respond([]);
++}
++
++const LOGGED = (msg: string) => h.error.mock.calls.filter((c) => c[0] === msg);
++const revoked = () => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++const getterThrows = () =>
++  Object.create(Error.prototype, {
++    message: {
++      get() {
++        throw new Error('getter boom');
++      },
++    },
++  });
++
++describe('KS-1868 the response cache addTag and write callback read a failure safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.error.mockReset();
++    h.unhandled = 0;
++  });
++
++  it('RED ks1868 R1 addTag: a revoked Proxy rejection is logged as a constant reason with no unhandled rejection', async () => {
++    h.toThrow = revoked();
++    await runAddTag();
++    expect(h.unhandled).toBe(0);
++    expect(LOGGED('[ResponseCache] Failed to add tag')).toHaveLength(1);
++    expect(LOGGED('[ResponseCache] Failed to add tag')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 addTag: an Error whose message getter throws is logged as a constant reason with no unhandled rejection', async () => {
++    h.toThrow = getterThrows();
++    await runAddTag();
++    expect(h.unhandled).toBe(0);
++    expect(LOGGED('[ResponseCache] Failed to add tag')).toHaveLength(1);
++    expect(LOGGED('[ResponseCache] Failed to add tag')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R3 write callback: a revoked Proxy rejection of the store write is logged as a constant reason with no unhandled rejection', async () => {
++    h.toThrow = revoked();
++    await runWriteCallback();
++    expect(h.unhandled).toBe(0);
++    expect(LOGGED('[ResponseCache] Cache write error')).toHaveLength(1);
++    expect(LOGGED('[ResponseCache] Cache write error')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R4 write callback: an Error whose message getter throws is logged as a constant reason with no unhandled rejection', async () => {
++    h.toThrow = getterThrows();
++    await runWriteCallback();
++    expect(h.unhandled).toBe(0);
++    expect(LOGGED('[ResponseCache] Cache write error')).toHaveLength(1);
++    expect(LOGGED('[ResponseCache] Cache write error')[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('control ks1868 C1 addTag: an ordinary Error is logged with its own message', async () => {
++    h.toThrow = new Error('redis down');
++    await runAddTag();
++    expect(h.unhandled).toBe(0);
++    expect(LOGGED('[ResponseCache] Failed to add tag')).toHaveLength(1);
++    expect(LOGGED('[ResponseCache] Failed to add tag')[0][1]).toEqual({ error: 'redis down' });
++  });
++
++  it('control ks1868 C2 write callback: an ordinary Error is logged with its own message', async () => {
++    h.toThrow = new Error('redis down');
++    await runWriteCallback();
++    expect(h.unhandled).toBe(0);
++    expect(LOGGED('[ResponseCache] Cache write error')).toHaveLength(1);
++    expect(LOGGED('[ResponseCache] Cache write error')[0][1]).toEqual({ error: 'redis down' });
++  });
++});
