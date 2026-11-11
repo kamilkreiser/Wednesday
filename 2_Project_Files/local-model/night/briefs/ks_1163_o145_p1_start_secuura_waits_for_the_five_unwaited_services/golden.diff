@@ -1,0 +1,50 @@
+diff --git a/Start_Up/start-secuura.sh b/Start_Up/start-secuura.sh
+--- a/Start_Up/start-secuura.sh
++++ b/Start_Up/start-secuura.sh
+@@ -60,7 +60,7 @@
+ BOLD='\033[1m'
+ NC='\033[0m'
+ 
+-# Expected services (27 total — secuura-midnight removed in the KS-312 cut)
++# Expected services (32 total — secuura-midnight removed in the KS-312 cut; the last five added by KS-1163)
+ # KS-1096: these are SUFFIXES, prefixed with STACK_PREFIX below. They used to be
+ # slot 1's bare names (`secuura-postgres`, ...), while docker-compose.local.yml
+ # names every container `${STACK_PREFIX}-<svc>` — `secuura-sN-<svc>` on slot N.
+@@ -79,6 +79,8 @@
+   issuer-frontend verifier-frontend
+   admin-frontend status-frontend
+   website-frontend tokenomics-website
++  demo-service mcp-server pgbouncer
++  tenant-provisioning tokenisation
+ )
+ # Derived once, after stack_env.sh (sourced above) has exported STACK_PREFIX —
+ # `secuura` on slot 1, so slot 1's names are byte-identical to before. Filled
+diff --git a/Blockchain/Dev/scripts/__tests__/start_secuura_expected_services.test.sh b/Blockchain/Dev/scripts/__tests__/start_secuura_expected_services.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/start_secuura_expected_services.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/start_secuura_expected_services.test.sh
+@@ -47,12 +47,7 @@
+ # reason. Anything here that is no longer declared in compose fails the test —
+ # an exception for a service that does not exist is a stale exception.
+ KNOWN_UNWAITED=(
+-  stack-marker          # KS-666 ownership marker; a label carrier, not a service
+-  demo-service          # KS-1163: never in the KS-312 list of 27; wait-or-not is Kamil's call — remove this line when KS-1163 decides
+-  mcp-server            # KS-1163, as above
+-  pgbouncer             # KS-1163, as above
+-  tenant-provisioning   # KS-1163, as above
+-  tokenisation          # KS-1163, as above
++  stack-marker          # KS-666 ownership marker; a label carrier, not a service (the five KS-1163 services are waited for, not excepted)
+ )
+ 
+ expect() {
+diff --git a/Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh b/Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh
+@@ -43,7 +43,7 @@
+ pg_port()    { echo $(( BASE_PG    + 100 * ($1 - 1) )); }
+ redis_port() { echo $(( BASE_REDIS + 100 * ($1 - 1) )); }
+ prefix_of()  { if (( $1 > 1 )); then echo "secuura-s$1"; else echo "secuura"; fi; }
+-readonly EXPECTED_COUNT=27   # the script's EXPECTED_SERVICES size (KS-312 cut)
++readonly EXPECTED_COUNT=32   # the script's EXPECTED_SERVICES size (KS-312 cut, plus the five KS-1163 services)
+ 
+ # KS-786 / KS-1016: strip every variable stack_env.sh honours with `${VAR:-…}`
+ # before running a case, measured under `env -i` exactly as stack_env.test.sh

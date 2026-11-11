@@ -1,0 +1,11 @@
+--- a/Blockchain/Dev/scripts/__tests__/ks1547_preflight_step_header_denominator.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1547_preflight_step_header_denominator.test.sh
+@@ -143,7 +143,7 @@
+ # (gate 247 planted "are checked.", a wrong example, "can read as the right total") passed 26 of 26. This cell pins the WHOLE sentence, whole line 3 of the abort.
+ call_step "3/$TOTAL/17  Title"
+ expect "RED KS-2130 the abort text states the whole sentence: a glued denominator cannot read as the right total, digits after a separator are not checked" "yes" \
+-  "$(has "so a doubled or stale denominator glued to the digits (3/$TOTAL/17) cannot read as the right total. Digits after a separator (3/$TOTAL:17) are not checked.")"
++  "$(if grep -q -x -F -- "  so a doubled or stale denominator glued to the digits (3/$TOTAL/17) cannot read as the right total. Digits after a separator (3/$TOTAL:17) are not checked." "$tmp/out.txt"; then echo yes; else echo no; fi)"
+ call_step "3/$TOTAL:17  Title"
+ expect "PIN KS-1613 F2 digits after an allowed separator are accepted: a stated limit of the rule, which the abort text now says" "0 yes no" "$RC $(has STEP-RETURNED) $(has 'PREFLIGHT ABORTED')"
+ 
