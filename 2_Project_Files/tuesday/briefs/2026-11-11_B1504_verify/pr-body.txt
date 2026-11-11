@@ -1,0 +1,15 @@
+Three small changes to the dev stack scripts and the deploy guide. Nothing is deployed.
+
+1. A failed stack step names the recovery when the objects service cannot write its volume.
+   - scripts/stack-diagnostics.sh gains print_objects_volume_hint. It reads log text on stdin and, when the text holds "Unable to write to the backend", prints one line: the chown -R 65532:65532 recovery for the volume ${PC_COMPOSE_PROJECT}_objects-data, or a new project name. It calls no docker.
+   - print_failed_services passes it the objects logs only. Those logs are printed exactly as before (redacted), and the hint follows.
+   - scripts/up.sh reads the objects logs with its own env file when its up fails, passes them to the same function, and exits with compose's code. A successful up prints nothing new.
+   - New scripts/objects-volume-hint-test.sh (fake docker, no stack), registered as a new ci.sh step.
+2. New scripts/objects-pin-test.sh (no docker, no network), registered as a new ci.sh step. It reads the Chainguard MinIO digest from the PC_OBJECTS_IMAGE export line of scripts/ci.sh and from the "# export PC_OBJECTS_IMAGE=" comment line of compose.yaml by pattern, and fails unless both exist, are cgr.dev/chainguard/minio@sha256: plus 64 hex characters, and are equal. The pin was measured to still resolve anonymously (amd64 and arm64); no pin byte changes.
+3. DEPLOY.md, 0020 section: one sentence replaces "Not yet run end to end on a seat stack". It records a measurement on a throwaway database: a 0019 dump restored onto a 0020 database with the Route B command exits 1 on the foreign key that 0020 adds on content_release_pkey, and nothing changes. No command or step is added or changed. Other lines of that section (and the 0025 section) still say Route B is "as above"; they are left for the way-back decision.
+
+Checks run by the gate: both new shell tests green at head and red under their plants; stack-diagnostics-test.sh unedited and green; ci.sh lines of the existing steps byte for byte; the two DEPLOY.md readers (170 tests) green at base and head; secret scan clean.
+
+Review point: the hint covers a volume that holds data written as root. An empty root-owned volume makes the real image say "file access denied" instead, and gets no hint.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

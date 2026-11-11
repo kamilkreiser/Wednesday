@@ -1,0 +1,17 @@
+Four small changes on the customer workspace and the Playbook frame, plus three test lines that follow them. Web only: no API, package, migration or workflow change.
+
+Snapshot run list (assessment page): the list of runs no longer stops at 768 px, so its right edge matches the "Customer engagement" section and the Next row. At 1440 px wide the list edge moves from 1280.41 to 1397.59, equal to both within 1 px; at 1024 and 1280 the three edges were already equal. Page text is unchanged.
+
+Evidence table (finding page): the table's scroll box is now the shared TableScroll, a named, focusable region whose name is the table's own hidden caption (one constant for both). axe scrollable-region-focusable at 360 px: 1 -> 0; 0 at 390, 412 and 1280; no other rule changes; visible text and unfocused pixels are identical.
+
+Playbook frame: the existing main landmark now holds the top line (product name and modules viewed) as well as the page. axe region: 1 node -> 0 on 17 Playbook page states at 390 and 1280 px (home, 11 modules, snapshot runner, review, result). Still exactly one main landmark and one skip target per page; page text, heights and pixels are unchanged. One behaviour change: the first Tab after "Skip to main content" now lands on the product-name link at the start of main.
+
+Walkthrough step 12: the panel title reads "Delivery phases: Assess / Implement / Optimize", the menu entry's name, instead of "Service offers: ...". Only the title changes; the step's other fields are as before.
+
+Tests: one new row each for the run list, the evidence region and the main frame; the title row follows the new title. Three one-line updates (the evidence card selector, the evidence region name in the demo-path e2e, and the main-frame predicate) keep their assertions and still fail when the property they guard is removed.
+
+Measured on the merged tree (production build, mock API): vitest whole 291 files, 4219 passed, 0 failed (main 289 files, 4216); all 8 e2e shards green with the same counts as main plus the unchanged skips; lint, typecheck and build clean; hidden-character test 14 of 14.
+
+Nothing deploys. This phase builds no integration with HP tools.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

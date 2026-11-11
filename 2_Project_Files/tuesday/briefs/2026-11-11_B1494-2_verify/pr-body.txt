@@ -1,0 +1,19 @@
+## Summary
+API stores lane: four tickets, five commits. Nothing is deployed by this merge.
+
+- MPSCALC-122 (tests only): the hosted feedback-download rows now cover the 400, 500 and 503 answers, as well as 401, 403, 404 and 200. Each refusal carries the three protective headers and no Content-Disposition.
+- MPSCALC-123: each file part of a feedback upload is streamed into a private temporary file inside the store (0600, removed on every path out), not held in memory. The sha256 is computed while streaming. A store write failure during the upload (no permission, a removed directory, a write or flush that fails) answers the existing 503 FEEDBACK_STORE_UNAVAILABLE with its existing words and log line. Refusals that do not depend on the store (file type, size, message, key reuse, replay) still answer first, as before. A client abort, or a failure reading the request body, keeps its own answer.
+- MPSCALC-99: the stage route's lock-wait bound counts from the request's arrival, before the body is read. Validate, activate and rollback keep their own clock.
+- MPSCALC-217: a reference store holding a repeated (model sheet, supply SKU) row is a document fault (503 SOURCES_UNAVAILABLE). It is no longer silently collapsed. The importer has always refused such a row as blocking. One control test that pinned the old behaviour is removed.
+- MPSCALC-98: no code change. The overlay queue tests were shown red under the arrival-order mutant and green without it.
+
+## Deploy notes
+- **MPSCALC-217, check the active reference store before the deploy.** If an Administrator staged and activated a reference store through the admin route before this change, and it holds a repeated (sheet, SKU) pair, it will answer 503 SOURCES_UNAVAILABLE the first time it is needed after the deploy. The importer never writes such a store. Look at the active stored version before the deploy card.
+- MPSCALC-123: if the store directory is removed while the service runs, an upload with files now answers 503, as uploads without files already did. Before this change it re-created the directory and stored the upload. An interrupted upload can leave a `.upload-<id>.tmp` file in the store directory. It is named at the next start under the existing stray-file rule.
+
+## Test plan
+- Local: Release build 0 warnings; full suite 4420 passed, 0 failed; package script rc 0.
+- Every new row was red without its fix (planted faults included). No test name was lost apart from the one 217 control.
+- Hosted CI and CodeQL on this PR.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

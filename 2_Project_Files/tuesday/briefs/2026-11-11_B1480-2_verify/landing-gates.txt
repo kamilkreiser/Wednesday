@@ -1,0 +1,7 @@
+# Head-pinned MERGE COMMIT (never squash, never rebase). Head ef0ff56e1fb7ab87a55617c0632c05a19e728c53, main at gate 0364b252b826576bde6dad43ca5000df436c97b7.
+# ORDER: lands only AFTER the L1 capability branch (70709c61d4f555cd6e28f3bb83ad75d811a32907, a later row of the landing chain) is on main; this branch is stacked on it. Then this branch, then the column-mapping branch (ccb7aa4), never the reverse.
+# Precondition: scripts/verify-expected-counts.json conflicts with main on merge (both changed it). Regenerate it on the merged tree at landing (npm run verify -- --maxWorkers=2 --update-counts, then a plain run). Measured at gate: main 0364b25 + this head = 5559 tests / 337 suites, PASS. On main + l1 the tree content is the same as long as main has not moved; if the session-revocation branch lands first, expect +6 tests / +2 suites more (measure, do not assume).
+# If the counts commit is added to the branch, pin THAT new head instead, after checking `git diff ef0ff56 <new head> --stat` is exactly scripts/verify-expected-counts.json.
+# Run with GH_CONFIG_DIR set to the project's 4_Credentials/.gh-config. <PR> is the number of the pull request opened from the gated head.
+gh pr merge <PR> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit ef0ff56e1fb7ab87a55617c0632c05a19e728c53 --subject "$(cat merge-subject-gates.txt)" --body-file merge-body-gates.txt
+# After: the Deploy demo run this merge starts must read skipped on every job (CI_DEPLOY_ENABLED gate).

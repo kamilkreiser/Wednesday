@@ -1,0 +1,28 @@
+## What
+
+Four small web changes on the customer workspace and the Playbook frame, plus three test lines that follow them.
+
+- **Snapshot run list** (assessment page): `max-w-3xl` removed from the run list so its right edge matches the "Customer engagement" section and the Next row. At 1440 px: 1280.41 -> 1397.59 (all three edges equal within 1 px). At 1024 and 1280 they were already equal. Text unchanged.
+- **Evidence table** (finding page): the scroll box is now `TableScroll`, a named, focusable region named by the table's own hidden caption (one constant). axe `scrollable-region-focusable` at 360 px: 1 -> 0; nothing else changes.
+- **Playbook frame**: the existing `<main id="main">` is the outer element, so the top line sits inside the landmark. axe `region` 1 node -> 0 on 17 page states at 390 and 1280. One `main`, one `#main` per page; text, heights and pixels unchanged.
+- **Walkthrough step 12**: title "Delivery phases: Assess / Implement / Optimize" (the menu entry's name). Only the title changes.
+
+Tests: three new rows (run list, evidence region, main frame), the title row, and three one-line updates (`FindingDetail.test.tsx`, `playbook-customer-screens.spec.ts`, `layout.test.ts`) whose assertions are unchanged.
+
+## Behaviour to know about
+
+The first Tab after the skip link now lands on the product-name link at the start of `main` (one extra stop), because the top line is now inside `main`. The skip target itself works.
+
+## Evidence (production build, mock API, merged tree = this branch on main 009421a2)
+
+- vitest whole: 291 files, 4219 passed, 0 failed (main: 289 files, 4216 passed, 0 failed).
+- e2e: all 8 shards run at head and main; counts equal (playbook-desktop-1 64, playbook-mobile-1 63, playbook-desktop-2 54, playbook-mobile-2 52, prototype-desktop-2 177, prototype-tablet-1 181, prototype-tablet-2 177, journey-and-prototype 2 + 182 + 14).
+- lint, typecheck, build, `--check-shards`: clean. `infra/tests/test_hidden_characters.py`: 14 tests OK. gitleaks over the range: no leaks.
+- Each new or edited test goes red with its fix removed and green with it.
+- New words scan (string literals, template parts, JSX text, head minus main): only the step 12 title.
+
+## Not covered here
+
+Hosted CI and CodeQL run on this PR. shellcheck, bicep and `validate.sh` were not run locally. Screen-reader testing of the landmark order was not done. Nothing deploys; this phase builds no integration with HP tools.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
