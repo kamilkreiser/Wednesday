@@ -1,0 +1,182 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/anchors.ts b/Blockchain/Dev/services/originate/src/routes/anchors.ts
+--- a/Blockchain/Dev/services/originate/src/routes/anchors.ts
++++ b/Blockchain/Dev/services/originate/src/routes/anchors.ts
+@@ -340,4 +340,10 @@
+     } catch (error) {
+-      logger.error('Failed to create anchor', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to create anchor', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create anchor' } });
+     }
+@@ -435,4 +441,10 @@
+     } catch (error) {
+-      logger.error('Failed to submit anchor', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = String(error instanceof Error ? error.message : error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to submit anchor', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to submit anchor' } });
+     }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-anchors-write-route-catches-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-anchors-write-route-catches-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-anchors-write-route-catches-unreadable-throw.test.ts
+@@ -0,0 +1,150 @@
++// KS-1868 (originate anchors.ts, the two WRITE routes): the catches of POST /api/anchors and POST /api/anchors/submit log
++// `error: error instanceof Error ? error.message : String(error)` UNGUARDED, where the GET route and verifyAnchorsDbReady in the same file
++// already guard the read (a revoked Proxy throws on `instanceof`; an object whose toString throws throws on String()). A caught value like
++// that made the catch itself throw before its log line, and an Express 4 async handler that rejects answers nothing: the request hangs.
++// The cells raise the value from inside each route's try (the authenticated principal's `userId` getter throws it, so no network and no
++// database is involved) and assert the route still answers its constant 500, logs the constant reason and leaves no unhandled rejection.
++// Controls: an ordinary Error and a thrown plain string are logged as their own text. Harness: the ks1868 anchors test (same mocks; real
++// router, real loopback server; the abort signal turns a hang into a null answer).
++const mockState: { toThrow: unknown; errored: unknown[][] } = { toThrow: undefined, errored: [] };
++
++jest.mock('../db', () => ({
++  prisma: {
++    $queryRaw: (..._args: unknown[]) => Promise.resolve([]),
++    $executeRaw: (..._args: unknown[]) => Promise.resolve(0),
++  },
++  getTenantManager: jest.fn(() => null),
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    req.user =
++      mockState.toThrow === undefined
++        ? { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' }
++        : {
++            get userId(): string {
++              throw mockState.toThrow;
++            },
++            role: 'ISSUER_ADMIN',
++          };
++    next();
++  },
++}));
++
++jest.mock('../middleware/rbac', () => ({ isAllowedByRoleOrScope: () => true }));
++
++jest.mock('../utils/logger', () => ({
++  logger: {
++    info: () => undefined,
++    debug: () => undefined,
++    warn: () => undefined,
++    error: (...args: unknown[]) => {
++      mockState.errored.push(args);
++    },
++  },
++}));
++
++import express from 'express';
++import { anchorsRouter } from '../routes/anchors';
++
++const app = express();
++app.use('/api/anchors', express.json(), anchorsRouter);
++
++let baseUrl = '';
++let server: ReturnType<typeof app.listen>;
++let unhandled = 0;
++const onUnhandled = () => {
++  unhandled += 1;
++};
++
++beforeAll(async () => {
++  process.on('unhandledRejection', onUnhandled);
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  const address = server.address();
++  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
++});
++
++afterAll(() => {
++  process.removeListener('unhandledRejection', onUnhandled);
++  server?.close();
++});
++
++beforeEach(() => {
++  mockState.toThrow = undefined;
++  mockState.errored.length = 0;
++  unhandled = 0;
++});
++
++const revokedProxy = (): unknown => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++const toStringThrows = (): unknown => ({
++  toString() {
++    throw new Error('ts boom');
++  },
++});
++const reasonOf = (c: unknown[] | undefined): string => {
++  const v = (c?.[1] as { error?: unknown } | undefined)?.error;
++  return typeof v === 'string' ? v : '<' + typeof v + '>';
++};
++
++async function post(path: string, body: unknown): Promise<{ status: number; code: string | undefined } | null> {
++  try {
++    const res = await fetch(`${baseUrl}/api/anchors${path}`, {
++      method: 'POST',
++      headers: { 'Content-Type': 'application/json' },
++      body: JSON.stringify(body),
++      signal: AbortSignal.timeout(1500),
++    });
++    const data = (await res.json()) as { error?: { code?: string } };
++    return { status: res.status, code: data.error?.code };
++  } catch {
++    return null;
++  }
++}
++type Door = { path: string; body: unknown; line: string };
++const CREATE: Door = { path: '', body: { documentId: 'doc-ks1868-write', contentHash: 'a'.repeat(64) }, line: 'Failed to create anchor' };
++const SUBMIT: Door = { path: '/submit', body: { documentHash: 'a'.repeat(64) }, line: 'Failed to submit anchor' };
++
++async function run(door: Door, thrown: unknown, reason: string): Promise<void> {
++  mockState.toThrow = thrown;
++  expect(await post(door.path, door.body)).toEqual({ status: 500, code: 'INTERNAL_ERROR' });
++  expect(unhandled).toBe(0);
++  expect(mockState.errored).toHaveLength(1);
++  expect(mockState.errored[0][0]).toBe(door.line);
++  expect(reasonOf(mockState.errored[0])).toBe(reason);
++}
++
++describe('KS-1868 the originate anchor write catches log text for an unreadable thrown value', () => {
++  it('control ks1868 C1 POST /api/anchors: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await run(CREATE, new Error('boom create'), 'boom create');
++  });
++
++  it('control ks1868 C2 POST /api/anchors/submit: an ordinary Error is logged with its own message and the route answers 500', async () => {
++    await run(SUBMIT, new Error('boom submit'), 'boom submit');
++  });
++
++  it('control ks1868 C3 POST /api/anchors: a thrown plain string is logged as its own text and the route answers 500', async () => {
++    await run(CREATE, 'plain boom', 'plain boom');
++  });
++
++  it('RED ks1868 R1 POST /api/anchors: a revoked Proxy is logged as the constant reason and the route answers 500', async () => {
++    await run(CREATE, revokedProxy(), 'unreadable thrown value');
++  });
++
++  it('RED ks1868 R2 POST /api/anchors: an object whose toString throws is logged as the constant reason and the route answers 500', async () => {
++    await run(CREATE, toStringThrows(), 'unreadable thrown value');
++  });
++
++  it('RED ks1868 R3 POST /api/anchors/submit: a revoked Proxy is logged as the constant reason and the route answers 500', async () => {
++    await run(SUBMIT, revokedProxy(), 'unreadable thrown value');
++  });
++
++  it('RED ks1868 R4 POST /api/anchors/submit: an object whose toString throws is logged as the constant reason and the route answers 500', async () => {
++    await run(SUBMIT, toStringThrows(), 'unreadable thrown value');
++  });
++});

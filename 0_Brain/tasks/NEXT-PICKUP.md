@@ -3,7 +3,7 @@ date: 2026-11-11
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's (she runs on the Studio).
 status: live
-supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 by the 14:05 seat (first seat on the NEW DevMASTER drive) at its 70% checkpoint. The 12:2x pickup (pre-cut-over) is superseded; its still-live items are carried below. Replace wholesale; never stack.
+supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 seat (first seat on the NEW DevMASTER drive) at its 70% checkpoint. The 12:2x pickup (pre-cut-over) is superseded; its still-live items are carried below. Replace wholesale; never stack.
 ---
 
 # NEXT PICKUP, Wed 11 Nov 2026 ~15:25 (Mac mini seat, new 4 TB DevMASTER)
@@ -17,24 +17,22 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 by the 14:05 seat (first seat on
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
-## THE FLOOR (all Sonnet, launched by brief_and_launch, verified at destination)
-| Seat | Pane | Lane | Brief | State at 15:25 |
-|---|---|---|---|---|
-| R 95th (raise) | %2 | R | briefs_staged/2026-11-11_seatR95_raise.md + addenda o135 (rows 19-22) and o136 (rows 23-25) | PUSH BLOCKED by new advisory GHSA-chp3-j5qr-2vfr (see OWED 1); committing rows locally; rows 23-25 -> R 96th's handover |
-| B 132nd (merge) | %11 | B | 2026-11-11_seatB132_merge.md | GO for PR 2164 sent 15:2x (head f03f4e72a8b7, develop 4a91ff3e1c56, tree 2eb67f62985760ea68fad092f29e665d22470e3b = SEAT's computation, not re-derived); told to WRAP after the MERGED; next = B 133rd from row 8x PR 2165 |
-| S 54th (board, even keys) | %8 | C | 2026-11-11_seatS54_board.md | working its 55 even class-B/C keys with 4 read-only screens; ruled (A) on KS-1658/KS-1602 incl. ONE filing (N2 residue) superseding its "no new tickets" |
-| U 23rd (fix round PR 2159) | %14 | U | 2026-11-11_seatU23_fix.md | launched 15:22; plan confirmation owed |
-| S 53rd (board, odd keys) | - | S | 2026-11-11_seatS53_board.md | WRAPPED 04:13Z at 69%: 5 closed + 3 filings (KS-2161, KS-2162, KS-1785 comment); yield 72 partial; ROUTING at 5_Project_History/2026-11-11_seatS-53rd/ROUTING_2026-11-11.md |
+## THE FLOOR at ~15:55 (only U 23rd is live)
+| Seat | Pane | State | Score |
+|---|---|---|---|
+| U 23rd (fix round PR 2159, KS-2111) | %14 | plan CONFIRMED 15:4x, grants (a) worktree+fetch in s-u21-base, (b) npm ci given; (d) gateway half OUT; builds the round, then a READY-to-push QUESTION naming the head; if the advisory card is still unruled it STOPS there and wraps | - |
+| B 132nd | closed %11 | MERGED PR 2164 = squash 249be7c8cd14 (develop now), wrapped 62% | 0.90 |
+| R 95th | closed %2 | wrapped 58%: rows 13 (a06b9986ed8d), 15 (e382d23e2579) in s-r95-a, 14 (c161cc1981cc), 10 (84aa1f4f7ffb, re-cut) in s-r95-b committed at develop 4a91ff3e1c56, NOT pushed (advisory); rows 4, 11, 12, 16-28 unraised; HANDOVER FOR R 96th | 0.85 |
+| S 54th | closed %8 | wrapped 70.9% (over the line): 11 closed (KS-2130, 2132, 2134, 1560, 1602, 1506, 664, 1658, 1534, 1858, 1462), filed KS-2163; FAULT: a span-replace in the shared daily note removed four seats' blocks from the working tree (restored from the vault); asks KS-174/KS-1402 (ruled in the S 55th commission) | 0.85 |
+| S 53rd | closed %5 | wrapped 69.4%: 5 closed + KS-2161, KS-2162, KS-1785 comment | 0.85 |
 
 ## OWED (first work, in order)
-1. **Advisory GHSA-chp3-j5qr-2vfr (@effect/platform 0.71.7, moderate, in packages/shared + services/anchoring locks) blocks EVERY Blockchain/Dev push** (hook legs 6, 7). Asked R 95th (ANSWER 15:2x) to MEASURE: production dep of a shipped image? makeCookie referenced? patched >=0.97.1 inside the manifest range? Then decide by the 2026-09-09 grant (learnings/2026-09-09_advisory-baseline-standing-authority.md): no shipped image (measured, control) -> baseline entry with the SHARED re-triage expiry + flag Kam; shipped tree too -> the EXCEPTION -> card to Kam. A pin bump is its own ticket/PR, not the grant. U 23rd's push will hit it too.
-2. **B 132nd MERGED PR 2164 -> score + pane_close.sh -> B 133rd**: drafter copy-and-change of 2026-11-11_seatB132_merge.md (its stamp block wins; kit = B 131st's _b131 line), queue from row 8x PR 2165; the advisory does NOT block merges (no push). Delegate the contradiction read (422 KB); attest on its report.
-3. **S 55th** (successor board seat for the ODD class-B/C keys + Todo 39 + Backlog ~500): copy-and-change 2026-11-11_seatS53_board.md; predecessor S 53rd's HANDOVER; its 13 PR-gated filings owed; its 59 unverified screen rows re-verify before any brief. KS-902 question for Kam (check the cd in two scripts, or close?) and KS-1387 (Wednesday's read: S 53rd disagreed with o135; leave open) and the live-check rows (KS-1129, KS-1295, KS-1369, KS-1407, KS-1449, KS-1511, KS-1673, KS-1677): whether the kintsugi sweep under card secuura-observation-owed-closeout-1104 ran is UNMEASURED.
-4. **Spark**: o137 RUNNING (Sonnet subagent; commission 0_Brain/reference/2026-11-11_spark-operator-o137/commission.md: KS-1904 p5, admin tickets via the new vitest_config pin, fresh Backlog slice). Subagents die at rotation: if no report.md exists in that folder, re-commission from the same file. S 53rd's SPARK candidates: KS-1485 (verified), KS-629, KS-915, KS-937, KS-1031, KS-1337, KS-1343, KS-2055, KS-2141 (unverified).
-5. **U 23rd plan confirmation** -> ANSWER (grants ruled in advance in its stamp block).
-6. **fleet_ack**: R 95th's advisory QUESTION (04:17Z) not yet collected when tried; ack it ("answered", subject substring from `fleet_ack.sh list`).
-7. **doctor.sh + PORTABILITY** (Wednesday's own tree): the Spark deps store node_modules do not survive a drive copy; admin react dedupe needs spark/build_deps.sh after a rebuild.
-8. **Board-seat ticket candidates**: frontend/admin has no vitest test runner (add config + devDeps + test script); PR 887 fix round (G308-887-1..10) parked behind billing.
+1. **ADVISORY = Kam's card `secuura-ghsa-chp3-effect-platform-shipped-1111`** (posted 15:4x; panel pointer bf-e194cd1e1a6a; rec a = baseline until the shared re-triage date + a ticket for an overrides/upstream fix; default = pushes stay blocked). R 95th measured: production dep via @lucid-evolution/lucid -> provider -> @effect/platform 0.71.7 in packages/shared, services/anchoring and the root lock; 25 images copy /shared; makeCookie unreferenced (0, control 23); 0.97.1 outside every range (newest lucid 0.8.9 / provider 0.4.8 still ^0.71.3). ON RULING a: a seat adds the baseline entry (reason, ticket, SHARED expiry: read the baseline file for the existing re-triage date), it lands, then R 96th re-cuts and pushes. Check his card at every checkpoint (kam_rulings_today.sh).
+2. **Drafters RUNNING** (subagents die at rotation: if the output file is absent, re-commission from the same commission file): B 133rd -> briefs_staged/2026-11-11_seatB133_merge.md (commission 0_Brain/reference/2026-11-11_drafter-seatB133/); S 55th -> briefs_staged/2026-11-11_seatS55_board.md (commission 0_Brain/reference/2026-11-11_drafter-seatS55/; it rules KS-174 close-as-superseded and KS-1402 stays open + one ticket). Each needs a delegated contradiction read, then stamp + brief_and_launch with SEAT_MODEL_ENV=claude-sonnet-5-5.
+3. **Spark o138 RUNNING** (KS-1868 per-site pieces in free files; commission 0_Brain/reference/2026-11-11_spark-operator-o138/). Its PASSes need Wednesday's +/- read at source, then rows for R 96th.
+4. **R 96th** only after the card is ruled (a) and the baseline is on develop: copy-and-change 2026-11-11_seatR95_raise.md + its three addenda; R 95th's HANDOVER; re-cut the four committed rows at the new develop.
+5. **CLAUDE-BUILD lanes**: S 53rd's ROUTING (43 rows) and S 54th's ROUTING (21 rows) tag CLAUDE-BUILD tickets: sweep them into file-disjoint build lanes (as many as the machine allows; load1 < 7). This is the biggest untapped volume.
+6. Owed earlier: fleet_ack R 95th's advisory QUESTION (not collected); doctor.sh + PORTABILITY for the Spark deps store; S 54th's three kintsugi-ancestry closes (KS-1534, KS-1858, KS-1462) stand unless objected to.
 
 ## HELD SPARK PASSES (all owned by R 95th rows 16-25; Wednesday read every +/- line)
 KS-2021 (t1), KS-2149, KS-2155, KS-1931 (t1), KS-1904 p1-p4, KS-1913, KS-1105 (READY_* in local-model/night/).
