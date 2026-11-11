@@ -1,0 +1,27 @@
+## Summary
+Web lane: eight commits, 18 files, all under web/ and .github/workflows/ci.yml. Two changes reach users: the printed A4 proposal books take their box and table-head style from the approved mock (print only), and a feedback file the browser cannot read is now refused instead of freezing the form. The rest is tests and CI. Nothing is deployed by this merge.
+
+- MPSCALC-135: the Playwright run could not list a single test ("0 tests in 0 files") because two specs imported modules that reach a stylesheet. The price view's column definitions and the pricing-rights hint move, unchanged, into two stylesheet-free modules (PriceViewColumns.tsx, pricingHint.ts); PriceView.tsx and the purchase editor import and re-export them, so nothing else changes. The folder now lists 220 tests in 26 files. The smoke journey presses Short-form before it checks the Proposal and repeats the last device when the device list holds fewer than five.
+- MPSCALC-96: bom.spec expects the default section rebate that new purchase sections now start with, and in stub mode allows at most one proxy 502 console message from the stub's create. Every other console error still fails the row.
+- MPSCALC-334: 22 new rows for the stub's getQuoteFigures, recordOutcome and duplicateQuote, each failing under a one-character change of its operation.
+- MPSCALC-130 (style half): inside the existing print media block of proposal.css, the A4 books undo the app's global box-sizing and table-head rules (content-box, centred table heads, no head bottom border). Screen is unchanged. A new spec compares the computed style of every element of the rental book and the purchase book with the approved mock's; it fails on the old CSS and passes on the new.
+- MPSCALC-121: a file the browser cannot read (a dropped folder, a file that vanished) is refused with the sentence the form already has, and a failed add no longer leaves the add chain rejected. No new word.
+- MPSCALC-377: one new quantity-audit row (a device line of -12 is not counted).
+- MPSCALC-198 (CI): the web job now runs the browser specs that need neither a real price store nor pdftotext, in two steps (dev stub on: 173 tests in 17 files; dev stub off with no API: 22 tests in 4 files). The job timeout rises from 20 to 40 minutes. Every spec left out is named in playwright.config.ts with its reason, and the run prints the list. No new job, no new action, no secret, no permission change.
+
+## What is NOT met
+- MPSCALC-135 clause 4 (the smoke journey green in all four legs): NOT MET on the dev-stub leg and on the no-API leg. With the stub on, Save and calculate answers 502 for a created rental quote; with no API the New quote dialog stays. It is green only against an API on invented data, which CI does not run. smoke.spec.ts is left out of CI for that reason.
+- MPSCALC-130 word sets (the printed words per page equal to the approved mock's on all four variants): NOT MET and left open. The app's printed words differ from the mock's (a totals footnote, some mock text the app lacks, the draft ribbon word), and the large book prints 15 pages against the mock's 16. Which side is right is a question for the product owner; no row was rewritten or refreshed to hide it.
+- MPSCALC-369: NOT MET. The five named rows passed in 19 of 20 counted whole-suite runs under load. Measured only; no change here.
+- MPSCALC-251: the sign-in leg is NOT built. MPSCALC-297: the smoke journey at desktop and phone width is green on the invented-data API leg only. MPSCALC-57: the four PDF-text specs are NOT in CI (the runner's pdftotext is unmeasured).
+- MPSCALC-334: updateDraft for a quote the stub created for a rental is not built.
+- MPSCALC-121: the unreadable-file refusal reuses "Only PNG, JPEG or PDF files can be attached.", which does not read true for a PNG the browser cannot read. The words are the product owner's to change. The folder-drop browser step is not built.
+- A spec red at its base (the picker-many spec: a 7th table row since the page-estimate row was added) is left out of CI by name and needs its own ticket.
+
+## Test plan
+- Locally on this branch merged with main: lint, tsc and the production build with its bundle check pass; vitest 145 files, 1517 tests, 0 failed (1492 before: 25 new, none lost); Playwright listing 220 tests in 26 files.
+- The two new CI steps run locally with the same commands: 168 passed and 5 in-spec skips; 22 passed. Run twice with the same result.
+- Each new row fails when the behaviour it covers is removed (stub mutants, the quantity audit, the unreadable-file rows, the print style rows on the old CSS, the smoke journey without Short-form).
+- Not run here: the hosted run of the two new steps (whether Chrome resolves on the hosted runner is proven only by this PR's CI), CodeQL, the dotnet and python jobs (nothing they read changed).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

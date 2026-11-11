@@ -1,0 +1,18 @@
+## Summary
+Documentation only: two new rows in the calculation register, docs/ENGINE.md. No code, no test and no behaviour changes. Nothing is deployed by this merge.
+
+- MPSCALC-196: row X-33 records the purchase refusals the code already makes. Page estimates are checked on every purchase quote, with or without deal usage. A page estimate on a line that is not a device raises PAGES ON NON-DEVICE LINE. Colour pages on a mono book device raise COLOUR VOLUME ON MONO DEVICE. A line on margin on price at 100% or more raises INVALID MARGIN, naming the line or the section, whichever chose margin. Any of the three blocks the calculation before any figure is formed.
+- MPSCALC-147: row X-46 records that colour-panel kits are options. The importer reads a model sheet's colour-panel section as options of that sheet's devices, so a panel picked from the catalogue is class Option, counts in the hardware subtotal by X-23 and X-24, and is costed at its device's pool tier. A manual line keeps the class it is given.
+
+## What this does not do
+- It writes the calculation-register clause of MPSCALC-196 and of MPSCALC-147 only. Any other clause of either ticket is untouched.
+- Row X-46 does not say that stored quotes do not move, because no test pins it.
+- MPSCALC-158, MPSCALC-160 and MPSCALC-200 are not touched by this change.
+
+## Test plan
+- Every sentence of both rows was checked against the code it describes, line by line.
+- No test or script reads docs/ENGINE.md; the register table keeps three cells per row and ids run X-32 to X-46 without a gap.
+- Engine tests 743 passed, Import tests 196 passed; the tests that pin each row pass, and fail when the behaviour the row describes is removed.
+- Hosted CI and CodeQL on this PR.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
