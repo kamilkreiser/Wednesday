@@ -17,6 +17,18 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## CHECKPOINT 10:1x 12 Nov by the 10:0x rotation-successor seat (ctx 50%) — READ THIS BLOCK FIRST (supersedes the 10:0x handover below where they differ)
+- develop d35f75875275 (Wednesday ls-remote 10:1x). Kam: no new rows since 09:25 (he is on the PANEL). Panel receipt bf-abacc0ebbe0f.
+- FLOOR (all Sonnet):
+  - **B 147th %18** (merge): LAUNCHED 10:09:32 (brief briefs_staged/2026-11-12_seatB147_merge.md, stamped, verified 23:09:27Z). Rung 4 only: NEXT = its plan QUESTION (rung 6). ADDENDUM sent 23:11:05Z: PR 2199 = row 2 after 2189 (briefs_staged/2026-11-12_B147_addendum_2199.md). GO for 2199 names: no behaviour change; exact 114 pin (G322-2199-3).
+  - **R 104th %7** (raise): ANSWER 23:05Z ruled OVL_IGNORE_PRS=2075 for ONE KS-1873 push, conditioned on merge-file both orders 0 conflicts + planted control (briefs_staged/2026-11-12_R104_answer_overlap_2075.md). Its reorder (32+34 first) accepted. NEXT = ONE batched READY -> tier-1 Opus gate.
+  - **S 64th %15** (board): KS-663 posted with ALT bytes, comment 831e1b88-1123-4945-8211-0f96aab5d4c5 -> card DELIVERED. Filed KS-2173, KS-2174. ctx 50% acked; its pace: stop starting 55, wrap 60.
+  - **A lane EMPTY**: A 23rd wrapped, SCORED 0.90, pane %10 closed.
+- GATE 322 DONE: PR 2199 GO (verdict.md). O141/O142 KS-2055 READYs RETIRED -> local-model/night/_spent_2026-11-12/ (README). That OWED item is CLOSED.
+- SUBAGENTS RUNNING (die with a rotation: RE-COMMISSION from the same commission.md if no output): Spark operator o162 (0_Brain/reference/2026-11-12_spark-operator-o162/), A 24th drafter (0_Brain/reference/2026-11-12_drafter-seatA24/ -> stamp, SELF-CHECK line, dry-run, launch at load1 < 7 with a waiter like scratchpad launch_b147_waiter.sh).
+- fleet_ack OWED: S64 "KS-663 bytes" + R104 "overlap gate refuses" (REFUSED: agentmail.json collector lag). Re-run fleet_ack.sh answered at next checkpoint.
+- STILL OWED from the 10:0x block: score R 103rd, S 63rd, A 22nd, B 145th; five-model A/B report.md; doctor.sh + PORTABILITY for dmlinkwatch + smartmontools; Linear boot check; INDEX refresh; weekly consolidation lapsed.
+
 ## ROTATION HANDOVER ~10:0x 12 Nov by the 07:51 relaunch seat (ctx ~80%) — READ THIS BLOCK FIRST (supersedes everything below where it differs)
 - **develop d35f75875275** (PR 2186 squash, B 146th; Wednesday's ls-remote). Kam today: 15 rows. Last: 09:24 "drive back in but I disconnected monitor so chat through here"; 09:25 "as monitor is also usb c" → **he is on the PANEL, not the terminal**; answer him there.
 - **DRIVE:** dropped 08:40, 09:07, 09:17 (and power-lost twice more inside the 09:17-09:24 outage: unsafe_shutdowns 16 -> 18). Stable since 09:24, when Kam unplugged his USB-C monitor; that points at the USB-C power budget (UNMEASURED; told to Kam).

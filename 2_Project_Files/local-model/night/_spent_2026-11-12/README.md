@@ -1,0 +1,1 @@
+Retired 2026-11-12 by Wednesday on gate 322 finding G322-2199-2 (verdict: 0_Brain/reference/2026-11-12_gate322-tier2-pr2199/verdict.md): O142's + lines are all present in develop d35f75875275 (PR 2182 added the same site); O141 does not apply (develop carries O142's .nullish()); its own note says O142 supersedes it. Moved, not deleted.
