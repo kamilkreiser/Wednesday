@@ -96,10 +96,10 @@ The Stamp's Hard stop slot (absolute AEDT, one clock). At it: push nothing unpro
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- MAIN (the 40-hex code main; the branch point and the value your Step 0 compares; 009421a28616c8b31dde86b59d4c4ca674c288fa at drafting): ____
-- LAUNCH WINDOW: ____
-- Hard stop (absolute AEDT, one clock): ____
-- Panes and live seats at the stamp: ____
+- STAMP: Tuesday s268 17:53 AEDT 2026-11-11 (Kam 17:52 live board: 'keep going. use as many agents as you can manage to get through the backlog'). Kit read whole by Tuesday; HPSMPOC-408 is not in the WAITING-ON-KAM register Kam accepted at 14:15 (0 hits; control: 25 HPSMPOC hits), so the item 2 (b) hold stands.
+- MAIN (the 40-hex code main; the branch point and the value your Step 0 compares; 009421a28616c8b31dde86b59d4c4ca674c288fa at drafting): 009421a28616c8b31dde86b59d4c4ca674c288fa (Tuesday's ls-remote of refs/heads/main just before this stamp; unchanged since drafting; refs/heads/b1496* absent, control b1463 present)
+- LAUNCH WINDOW: now, one waiter; ports 9620-9629 read 0 listeners just before this stamp
+- Hard stop (absolute AEDT, one clock): 21:30 AEDT 2026-11-11
+- Panes and live seats at the stamp: %0 tuesday, %1 fleet-monitor, %57 Datasec/MPS-M114 (MPS web lane L1), %72 Datasec/NexusAI-N122 (NexusAI landing chain). No other HPSM-POC seat is live. Open HPSM PR: #309 (lane H-A, web components only); branch b1503 (lane H-B/H-D) pushed, PR not yet opened; branch b1507 (one csproj line) in a gate. None touches your four files.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE s268 17:53 (105 lines)

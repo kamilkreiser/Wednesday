@@ -1,0 +1,15 @@
+Web look changes plus tests only. No API, package, migration or workflow change. Not deployed.
+
+Partner panels: the "more" link (View engagements, View details, Open and the KPI tile links) is now a 44 px tall target. Before it was 20 px at 360 to 1440 px wide. Page text is unchanged.
+
+Training page: the three steps get their own look (a flat tinted band with a solid square badge) and a separator line below them, so they no longer read like the round numbered rows of the pathway below. No word, digit or token changes; the steps are not styled as links.
+
+Focus ring: a button, chip or pill with its own corner radius keeps that radius while it holds the keyboard ring (one rule in globals.css, below the :focus-visible block). Before, the fill went square (9 px to 4 px) under a rounded outline. The Feedback pill is unchanged. The sidebar's own rows still square to 4 px on focus by design; that is a spec decision left open (the shell sidebar spec pins it).
+
+CI-reader tests (infra/tests/test_ci_workflow.py only): the shard job's with: key names, the two image repositories and the retry-log file are now pinned. A SHA, tag or digest bump stays no edit.
+
+Measured on the head: vitest whole 290 files, 4222 passed, 0 failed (main 289 files, 4216). All 8 e2e shards green with the same counts as main plus the unchanged skips. Lint, typecheck, build clean. Every new unit row fails on main's source. Focus-ring probe (computed radius and corner pixels, focused versus unfocused): buttons 14 of 14 changed at main, 0 at head; round chips 8 of 12 at main, 0 at head; nothing else changes.
+
+Hosted api jobs may be red for the unrelated runner .NET SDK drift.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

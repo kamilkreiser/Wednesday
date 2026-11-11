@@ -1,0 +1,13 @@
+The hosted runner installs SDK 10.0.404 (the channel-10.0 install behind the
+global.json roll-forward). Its ASP.NET Core framework carries Pkcs file version
+10.0.1526.53008, above the 10.0.14 package's 10.0.1426.52326. The SDK's conflict
+rules then chose the framework copy, and the published API lost the package's DLL
+and its deps entry: two PkcsInPackageTests rows failed on every pull request (the
+api job and the api-other-and-feedback SQL Server shard) with no code change.
+
+The 10.0.15 package's net10.0 DLL has file version 10.0.1526.53008, equal to the
+framework's, and the API project's ranking target settles that tie in the package's
+favour. 10.0.15 is past both advisories whose first patched version is 10.0.13.
+One line changed; no test changed. Not deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

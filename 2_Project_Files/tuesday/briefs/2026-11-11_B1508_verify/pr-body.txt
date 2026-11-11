@@ -1,0 +1,18 @@
+## What
+`src/MpsCalc.Api/MpsCalc.Api.csproj`: the `System.Security.Cryptography.Pkcs` pin 10.0.14 -> 10.0.15 (line 28), and the example-tie sentence in the comment above the ranking target (line 32) now names SDK 10.0.404 = 10.0.15. No test, workflow or global.json change.
+
+## Why
+The hosted `dotnet` job failed two PublishOutputTests rows on a pull request that touches nothing near the publish. The hosted runner's setup-dotnet now installs SDK 10.0.404 with ASP.NET Core 10.0.15, whose framework Pkcs file version 10.0.1526.53008 is above the 10.0.14 package's 10.0.1426.52326, so the publish keeps the framework copy and drops the package's DLL and its deps.json entry.
+
+The 10.0.15 package's net10.0 DLL has file version 10.0.1526.53008, equal to the framework's; the existing ranking target settles that tie in the package's favour (the same mechanism as the 10.0.14 raise in #119). 10.0.15 is past both advisories (GHSA-846f-f764-76mx, GHSA-2fmv-rv2c-59x7; first patched 10.0.13).
+
+## Checked before this PR
+- With an SDK whose ASP.NET Core targeting pack reports the hosted framework's Pkcs file version: main's publish drops the DLL and fails the same two rows with the hosted messages; this branch's publish carries the 10.0.15 DLL (file version 10.0.1526.53008) with one deps.json entry, and all three PublishOutputTests rows pass.
+- Restore and build at this branch with NuGet audit and warnings as errors: 0 warnings; `dotnet list package --vulnerable --include-transitive`: no vulnerable package.
+- No other file pins the package; the squash equals this branch's tree.
+
+## Not covered here
+- Not deployed. MPS hosted is one card per deploy. Hosted CI on this PR is the deciding check.
+- The SDK still floats: `global.json` names 10.0.100 with `rollForward: latestFeature`, and setup-dotnet installs the newest 10.0 SDK, so this raise will recur on each .NET servicing release. Pinning the SDK is a structural option left to the owner.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

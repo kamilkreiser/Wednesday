@@ -1,0 +1,35 @@
+What this changes
+
+- DEPLOY.md, the sections for rolling back 0020, 0024 and 0025 only: the one-step Route B restore refuses on a
+  database that applied each of these migrations (exit 1, nothing changed). Each section now gives the two-step form
+  already used for 0021: write the dump's own clean script, check it is complete, drop the one object the dump lacks
+  (0020: the foreign key policy_version_last_generate_content_release_id_fkey; 0024: the table
+  pc.engagement_governance, then its guard function; 0025: the table pc.attribute_override), and apply the script in
+  one transaction. Each section also says what was measured.
+- The DEPLOY.md reader test for the Route B blocks: 45 rows appended (15 per section), no existing row changed.
+- Controls screen: after "Mark all secret fields local", one marked field reads "Marked 1 secret field as local.";
+  every other count and the stopped line are unchanged. The one test row that pinned the plural for one field is
+  retitled and now expects the singular.
+
+How it was checked
+
+- Each block was run from the file itself (only the container name, the dump path and the script path replaced) on a
+  throwaway postgres 16.15 database on an internal network: the ledger went back one migration, every table's rows
+  equalled the dump's, the row written after the dump was gone, the previous build's migrate printed
+  "migrations applied: none; already applied: N-1", and the roll forward re-applied the migration with the same
+  checksum. The independent gate re-ran the 0020 procedure from the file at this head with its own fixture and got
+  the same results.
+- The 0021 and 0022 sections are byte for byte as on main; every changed line is inside the three sections.
+- The new rows are red against each section as it was on main and green with the change; the existing reader rows
+  lost 0. Lint, format check and typecheck pass; the secret scan finds nothing.
+
+Not done here
+
+- Not deployed. Nothing in this PR is a deploy.
+- The 0022 section's own form (its expected two-step line) was not measured.
+- Guide lines outside the three sections that still read "Route B ... as above" or "UNMEASURED" (the 0022, 0023, 0026
+  and 0027 sections) are left as they are for a records pass.
+- The 0020 roll-forward bullet now reads "roll forward are as above"; the wording fix is left for a words pass.
+- CodeQL runs on this PR (hosted).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

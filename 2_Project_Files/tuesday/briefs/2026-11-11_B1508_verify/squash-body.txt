@@ -1,0 +1,13 @@
+The hosted runner now installs SDK 10.0.404 with ASP.NET Core 10.0.15, whose
+shared-framework Pkcs has file version 10.0.1526.53008, higher than the 10.0.14
+package's 10.0.1426.52326. The SDK settles that conflict by file version before
+package rank, so the publish dropped the app-local DLL and its deps.json entry
+and the two publish-output guard rows failed.
+
+The 10.0.15 package's net10.0 assembly has file version 10.0.1526.53008, equal
+to the framework's, so the tie goes to the package ranked first by the existing
+ranking target and the publish carries the DLL and its deps.json entry again.
+The example-tie sentence in the comment names the current pair. The ranking
+target, the guard rows and their thresholds are unchanged. Not deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
