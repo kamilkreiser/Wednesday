@@ -1,0 +1,16 @@
+# Drafter commission: Seat S 63rd (Secuura/Blockchain BOARD seat), by Wednesday (04:1x rotation-successor seat), 2026-11-12 ~06:0x AEDT
+
+Copy-and-change of `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatS62/commission.md` (read it whole, and the commissions it points at: rules, git-verb limits, report shape stand unless changed below). Read `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-08_drafter_common.md` too. Write ONLY `brief_S63.md` and `notes.md` in `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatS63/`. If your Write is refused, return both texts in full. Never `cd`; never rm; read-only git verbs in any Secuura checkout with GIT_OPTIONAL_LOCKS=0; GitHub: GraphQL, never a per-PR or per-file REST loop. Model: claude-sonnet-5-5.
+
+## What changes
+1. **Predecessor brief + mail:** `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-12_seatS62_board.md` (stamp on top) and `2026-11-12_S62_answer_plan.md` (GraphQL waiter accepted; the G315-2191-3 ADDENDUM).
+2. **Predecessor HANDOVER, FINAL block:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-12_seatS-62nd/HANDOVER.md` (read whole): NEXT KEY KS-2136 (9 eligible p4 left: KS-2136 2137 2140 2143 2154 2157 2159 2161 2162), ROUTING 534 rows (carried by script), the GraphQL waiter (S62-D72) and pr_state_gql_s62.py (S62-N4), drafts/cards_s62.md (KS-2043: Wednesday's to post, never the seat's), the owed filings list.
+3. **develop:** re-read by ls-remote (Wednesday read 2c86b074da97 at 06:0x; B 144th may merge more).
+4. **QUEUE, in order:** (a) FILINGS as PRs merge: S 62nd's owed list exactly (G311-2176-1, G307-2170-1, G313-2187-2, G314-2188-1, G314-2189-1, G316-2190-5, G315-2191-3 (+ -2 as a Note), the fragment-gap ticket after ALL of 2184, 2185, 2186, 2187, 2188, 2189, 2190, 2192 have merged; G306-2169-1 a QUESTION; G306-2167-1/-2168-1 never). The waiter carries those 19 PRs plus PR 2193 (KS-1497, A 20th's A3, under GATE 317: no filing is ruled for it yet; Wednesday will ADDENDUM). (b) the 9 remaining Backlog p4 rows from KS-2136; (c) **then Backlog p3 by key number, from the lowest eligible key** (RULED by Wednesday now: Kam's 2026-11-11 14:0x board instruction covers it; same predicate shape: Backlog, priority 3, no ROUTING row, not in the no-write set, assignee not Peter or Stuart; S 62nd counted 163 eligible p3 at its boot: recount with predicates). Each row on a named fact at develop, close candidates by the (e) rule with an undo.
+5. **Rules carried:** the QUOTA RULES and the SPARK-class rule of S 62nd's brief, PLUS: **a SPARK row also needs a clean open-PR census on every file the fix touches** (three SPARK candidates this morning stopped at the operator's pre-checks: KS-1573 a decision, KS-1663 already held, KS-2026 its file in open PRs 2158 and 2087); name the census result in the STATUS line for each SPARK row.
+6. **Live seats:** write `FLOOR: <Wednesday fills at stamp>`.
+7. **Cost:** S 62nd: boot to plan 27.9, 52 rows in ~22 points, wrap ~4. Ask for a row-rate target.
+8. Provenance: every KS key the body names gets a line; every path absolute (the send gate refuses a relative path in PROVENANCE).
+
+## Report back
+Under 100 words: the brief path, byte size (body and provenance), the queue in order, what you could not measure.

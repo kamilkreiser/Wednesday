@@ -1,0 +1,49 @@
+=========== [INBOUND] 2026-11-11T19:00 | Secuura/Blockchain-A | [Secuura/Blockchain-A -> Wednesday] READY FOR GATE, row A3 (Seat A 20th)
+[Secuura/Blockchain-A -> Wednesday] READY FOR GATE, row A3 (Seat A 20th)
+Seat A 20th
+
+READY FOR GATE, row A3 (Seat A 20th). Ticket KS-1497 (items 1, 3, 5 and 6, plus the two symlink cells comment ba887752 names), a dev script and its shell suite, no service source: my reading is tier 2 because the script's control flow changed (synchronous to asynchronous spawn); the tier is yours. PR 2193 is OPEN, opened by me through the re-keyed guarded creator with the REC text as its body: https://github.com/Secuura/Distributed_Secuura/pull/2193. No PR comment, no Linear write. Sent 2026-11-11T19:00:49Z. Full command evidence: 5_Project_History/2026-11-12_seatA-20th/evidence/ (this mail carries the BRIEF's fields; PR body: mail/pr_a3_body.md).
+
+BRANCH AND HEAD
+- feature/ks-1497-prisma-generate-signals-and-stale-client, HEAD b6397499151ddcd9df67ff322f322d5678c8f143 (equal at origin by ls-remote and in the PR API, read in the same action as the PR create: origin ls-remote b6397499151d, PR API head b6397499151d, equal: True; read-back: open, not draft, base develop, 1 commit, 4 files, +173/-19, no problems). ONE commit, one parent d0e58f55c861 (the pin I cut on; no rebase).
+- develop read from origin at 18:59:34Z (ls-remote): 2c86b074da97c0cd0add46f890e7cd076c2cd6d3, ONE commit past my cut d0e58f55c861: it moved after the gate and during the hook (PR 2182's squash, 2 files under services/transfer). Compare API: ahead 1, behind 0; overlap with my 4 write paths none, 0 files under scripts/, the fragments or services/originate; planted control (the move's own first file added to my path list) fired. The driver's develop gate, under the lock at 18:46:03Z: "develop has not moved (d0e58f55c861...); no overlap: 93 open PRs, none touches any of 4 paths".
+- 4 files, +173 -19 (commit stat). Numstat: ks1497 suite +100 -3; prisma-generate.cjs +45 -16; flow fragment +17 (new); cheat fragment +11 (new). No service source file.
+
+WHAT IT DOES, IN ONE BREATH
+prisma-generate.cjs now runs prisma as an async child: SIGINT and SIGTERM remove node_modules/.generate, kill the child and exit 130 and 143 (item 1); a client older than the run's start is refused with exit 2 naming the file (item 3, mtime with one second of slack); the OK line is relative to the service directory (item 5); a prisma killed by a signal exits 1 and that is pinned, with the two symlink shapes (item 6 and ba887752).
+
+PLAINLY (your rulings)
+- Exit codes unchanged (130/143), chosen by Wednesday to keep caller-visible behaviour; the fix is the cleanup and the child kill. Said in the PR body in those words.
+- The async restructure is your call, made on my three measurements (no handler: 143 at once and an orphan; handler over spawnSync: never ran, exit 0 after 3.26 s; handler over spawn: ran at +961 ms, child killed, 143). They are the table in the PR body. Items 3 and 5 are your accepted defaults, said in the PR body as Wednesday-accepted choices.
+- The stand-in child is a node process that records its pid and waits 30 s (the sleep stand-in, as ruled); no real prisma generate runs. Said in the PR body and the fragments.
+
+RED THEN GREEN (counts, cell by cell in evidence/a3_red_at_develop.txt and a3_green.txt)
+- The old suite on develop: 7 passed, 0 failed. The new suite (22 cells) against develop's unmodified script (sha256 51797120a3f056b5, equal to the pin copy): 14 passed, 8 FAILED by assertion: SIGTERM staging left and child alive (2), SIGINT staging left and child alive (2), an old client plus a prisma that exits 0 and writes nothing accepted with no refusal text (2), the OK line with ../ and not the service-relative line (2). The pins pass there (143, 130, signal-killed prisma exits 1 and loses its staging dir, both symlink shapes), as designed.
+- Against the fix (sha256 0d2266beab2c3571, the committed bytes): 22 passed, 0 failed; the original 7 cells, run from the pin copy of the old suite against the fixed script: 7 passed, 0 failed.
+
+MUTANTS (evidence/a3_mutants.txt; scratch copies through PRISMA_GENERATE_CJS, the tree script's sha256 equal before and after; a planted no-match replacement refused)
+8 of 8 turn at least one cell red: M1 develop's script (spawnSync back): 8; M2 no child kill: 2; M3 no staging removal in the handler: 2; M4 handler exits 1: 2; M5 a missing prisma status mapped to 0 (the gate's surviving mutant): 1, via the item-6 cell, which reads exit 2 because the existence check catches the missing client; M6 stat for lstat: 5; M7 freshness check removed: 2; M8 OK line relative to the cwd: 2. None survived.
+
+LEGS, MARKED RE-RAN or CARRIED
+- RE-RAN at the committed bytes: the new suite 22/0; the old suite against the fixed script 7/0; ks1305 jest (originate, spawns the real script) 9 passed before and 9 after; node --check ok; docs-fragments.mjs check OK, a planted literal-section-number fragment made it exit 1 (2 findings) and was removed; the commit message regex 0 beside a planted positive; the pin census (before the commit, at the same bytes): no other file pins a string I moved, nothing under .github names the script or the suite.
+- CARRIED from the working tree before the commit, same bytes (the script sha256 is 0d2266beab2c3571 in both): the mutant run and the jest before/after.
+- Pre-push hook, unfiltered output in push/a3/push.out: `[pre-push] Blockchain/Dev changes detected → running preflight gate (bypass: --no-verify)` was printed; the closing verdict, verbatim: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 skipped (local stack not up); the hook says this is NOT a pass and I do not call it one. Leg 14: `shell suites: 126 passed, 0 failed, 0 skipped (of 126)`, wall-clock 711s (it runs this suite). Leg 16: `OK — 5 service(s) type-check against their baseline.` The push took 765 s (18:46:03Z to 18:58:48Z, rc 0), VERIFIED by ls-remote at 18:58:52Z, through the one-driver queue and lock; the lock was released and the queue left. No refusal, no retry, nothing bypassed. (The leg 14 figure answers the BRIEF's UNMEASURED item: 711 s here, 741 to 763 s for A 19th; leg 16 is the five-service list on this branch, 6 once PR 2191 merges.)
+- NOT run: a real prisma generate; the four platform suites; any stack, Docker, database or box; node other than v26.8.1 (not the LTS line); another OS; the new cells under heavy load (the waits are 10 s, 8 s and 3 s); SIGHUP.
+
+CENSUS (re-run at this READY, control fired)
+- Open PRs 92 and 398 file rows at 18:59Z (the driver's gate read 93 at 18:46Z; PR 2182 merged, PR 2192 opened). My 17 write paths (A3's four, and A4's thirteen, checked together): 0 hits. Read path scripts/check-shared-relink.sh: PR 2137 (A4's read coupling, unchanged). Controls: PR 2125 api-gateway/src/index.ts FIRED [2125]; the tool's positive control (the newest PR 2192, its first file) [2192] PASS; negative (a nonexistent path) [] PASS.
+- Held READY: 432 names, 378 without a .pre substring, 0 unreadable, 0 hits on my write paths; controls preflight.sh 6 files and the KS-2129 suite path 2 files.
+
+WHAT THE ROW DID NOT DO
+No edit to the ks1305 jest test, to services/originate/package.json, to any service source file, or to any path outside the four. Items 2 and 4 are already merged; the lstat/mkdirSync window and a symlinked node_modules above .generate stay open as the ticket states. Rows A2 and A4 are not started.
+
+FINDINGS, FILING CANDIDATES (I file nothing)
+1. docs-fragments.mjs check prints two ADVISORY lines (flow page line 6249, cheat page line 6235: the committed page differs from the render inside the rendered range) that read the same with my pair removed (measured): pre-existing on develop.
+2. Kit gap: a fresh base clone lacks core.hooksPath=.githooks, gc.auto=0 and the repo-local user identity; the driver's own precheck refused on the first. Fixed in my clone by copying the three values from s-r90-base; the clone script should set them.
+3. The BRIEF named KS-2129 as a held READY; it is Done and its suite is on develop (said in my plan; no action).
+
+MERGE-AFTER: none. No open PR touches any of the four paths (the driver's overlap gate at 18:46:03Z and my own census above); this PR is independent of PR 2191 and of the originate queue.
+BATCH-ELIGIBLE: yes, with other tooling or test-only PRs; it needs no order against any other row, and it changes a dev script that only `npm run generate` in services/originate calls.
+
+READING: my meter 45.1 percent of 1M at this READY (the ruled line for starting A4, 40, was passed before the push). Nothing is running except my mail watcher (re-armed after this send); the driver, the waiter and the lock are finished. Next: the HANDOVER (A4's ruled 28-line scope and predicate verbatim, A2, the UNMEASURED list), the history entry and the wrap mail.
+

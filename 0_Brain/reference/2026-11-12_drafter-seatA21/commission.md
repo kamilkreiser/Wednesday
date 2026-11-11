@@ -1,0 +1,19 @@
+# Drafter commission: Seat A 21st (Secuura/Blockchain BUILD lane A), by Wednesday (04:1x rotation-successor seat), 2026-11-12 ~06:1x AEDT
+
+Copy-and-change of `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatA20/commission.md` and the A 20th brief `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-12_seatA20_laneA_build.md` (stamp on top; read both whole: rules, holds, push kit, census, pace stand unless changed below). Read `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-08_drafter_common.md` too. Write ONLY `brief_A21.md` and `notes.md` in `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatA21/`. If your Write is refused, return both texts in full. Read-only git verbs in any Secuura checkout with GIT_OPTIONAL_LOCKS=0; never `cd`; never rm; GitHub: GraphQL or ls-remote, never a per-PR or per-file REST loop. Model: claude-sonnet-5-5.
+
+## What changes
+1. **Predecessor HANDOVER, FINAL block:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-12_seatA-20th/HANDOVER.md` (read whole) and Wednesday's mails to A 20th: `briefs_staged/2026-11-12_A20_answer_plan.md` (A4 scope ruling item 3, existing-branch driver item 4), `2026-11-12_A20_answer_a3_async.md`. Kit: A 20th's REC/tools (re-key a20 -> a21 by counted replacement, planted wrong count refused first); the kit gap it found (a fresh base clone must set core.hooksPath=.githooks, gc.auto=0 and the repo-local identity: put it in the clone step).
+2. **develop:** re-read by ls-remote at start and end (Wednesday read 2c86b074da97 at 06:0x; B 144th may merge 2183/2186/2189).
+3. **QUEUE, in order:**
+   - (a) **Fix rounds by ADDENDUM only**: GATE 317 on PR 2193 (KS-1497, A3; verdict will land at `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_gate317-tier2-pr2193/verdict.md`) and, if a later finding needs it, PR 2191 (KS-1090, gate 315 GO WITH NOTES: no fix round owed). Trees kept: `worktrees/s-a20-a3` (2193), `worktrees/s-a19-ks1090` (2191). Existing-branch pushes via U 23rd's family re-keyed (Wednesday's ruling to A 20th item 4).
+   - (b) **A4 = KS-1728 batch 3**, scope RULED by Wednesday (A20 answer item 3): 28 lines (the 26 + pre_push_hook_current_develop lines 53 and 57), the narrowed CLASS predicate `[^|;&)]*` with the three planted controls, the widening stated in the PR body. RE-MEASURE the census at develop first.
+   - (c) **NEW: KS-2125 (Claude-seat row; the Spark failed it twice on byte-identity, model fault):** report `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_spark-operator-o155/report.md`; brief and golden at `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_2125_o155_p1_role_list_baseline_tight/` (read only; copy what you use). The fix: lower `packages/shared/src/__tests__/ks1536-inline-role-lists.baseline.json` entries oauth.ts 2 -> 1 and users.ts 11 -> 9, RE-COUNTED at your cut with the guard's own rule (if not 1 and 9, STOP and QUESTION); a tight-ratchet test (each entry equals the true count; one higher fails). Wednesday WAIVED the open PR 2075 (users.ts, count-neutral by o155's diff read) collision: say so in the PR body. Tier 2.
+   - (d) **A2 = KS-1000 item 3** ONLY after PR 2191 has MERGED (read at the API): it edits the same four files as A1.
+   Order (a) then (c) (smallest) then (b), unless the plan's arithmetic says otherwise; A2 only if reached.
+4. **Live seats:** write `FLOOR: <Wednesday fills at stamp>`.
+5. **Cost:** A 20th: plan 22.3, set-up 9.2, A3 13.6 end to end to READY. A 19th: A1 19.0 incl. a hook cycle. Ask for rows-to-READY under a 55 wrap line.
+6. Provenance: every KS key the body names gets a line; every path absolute.
+
+## Report back
+Under 100 words: the brief path and byte size, the queue in order, what you could not measure.
