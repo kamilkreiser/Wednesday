@@ -31,6 +31,8 @@ ok()  { echo "ARM PASS $*"; P=$((P+1)); }
 bad() { echo "ARM FAIL $*"; F=$((F+1)); }
 echo "config_tier_arms: fixtures in $T"
 NOTRUN="override_not_runnable=config-tier-now-exists-2026-10-26"
+# 2026-11-12 (o149r): the fixture briefs were written at 1ae6f17d19a8 and KS-1391 is now In Progress (live Linear state). The arms test the config-tier CLASSIFIER and the golden/break legs, not freshness or ticket state: allow_drift=1 + started_ok= pin those two environmental facts on the command line, in no file.
+NOTRUN="$NOTRUN allow_drift=1 started_ok=arms-fixture-ticket-state-moved-2026-11-12"
 rround() { # rround <out> <cmd...> : retry while BUSY (the ONE-request lock)
   local out="$1"; shift; local i=0 rc
   while :; do
@@ -44,14 +46,14 @@ verdict() { /usr/bin/grep '^SPARK ROUND' "$1" | tail -1 | cut -c1-330; }
 # ---- 1, 2: dry-run ACCEPTED
 for k in 1391 1289; do
   n=1; [ "$k" = 1289 ] && n=2
-  rround "$T/dry$k.out" bash "$SPARK/round.sh" "$BR/ks_${k}_p1" --dry-run "$NOTRUN" < /dev/null; rc=$?
+  rround "$T/dry$k.out" bash "$SPARK/round.sh" "$BR/ks_${k}_p1" --dry-run $NOTRUN < /dev/null; rc=$?
   line="$(verdict "$T/dry$k.out")"
   if [ "$rc" -eq 0 ] && echo "$line" | /usr/bin/grep -q 'DRY-RUN OK'; then ok "$n KS-$k dry-run ACCEPTED rc=0 :: $line"; else bad "$n KS-$k dry-run rc=$rc :: $line"; fi
 done
 
 # ---- direct builder arms: ticket KS-1391 (Todo), its brief, product= pinned to the path under test
 bld() { # bld <builder> <product-pin> <out.json> -> prints builder stdout+stderr; rc via $?
-  NIGHT_SOURCE_CHECKOUT="$SPARK/cache/src" NIGHT_BRIEFS_DIR="$BR/ks_1391_p1" bash "$1" KS-1391 "$3" "product=$2" ref=Blockchain/Dev/frontend/issuer/src/__tests__/provenance-timeline.test.tsx line=10 < /dev/null 2>&1
+  NIGHT_SOURCE_CHECKOUT="$SPARK/cache/src" NIGHT_BRIEFS_DIR="$BR/ks_1391_p1" bash "$1" KS-1391 "$3" "product=$2" started_ok=arms-fixture-ticket-state-moved-2026-11-12 ref=Blockchain/Dev/frontend/issuer/src/__tests__/provenance-timeline.test.tsx line=10 < /dev/null 2>&1
 }
 refuse_arm() { # refuse_arm <id> <product>
   local id="$1" prod="$2" out rc line
@@ -100,7 +102,7 @@ fi
 if [ "${NO_CONTROLS:-0}" != 1 ]; then
   for k in 1391 1289; do
     n=C1; [ "$k" = 1289 ] && n=C2
-    rround "$T/ctl$k.out" bash "$SPARK/round.sh" "$BR/ks_${k}_p1" --control "$NOTRUN" < /dev/null; rc=$?; line="$(verdict "$T/ctl$k.out")"
+    rround "$T/ctl$k.out" bash "$SPARK/round.sh" "$BR/ks_${k}_p1" --control $NOTRUN < /dev/null; rc=$?; line="$(verdict "$T/ctl$k.out")"
     if [ "$rc" -eq 0 ] && echo "$line" | /usr/bin/grep -q 'CONTROL-PASS' && echo "$line" | /usr/bin/grep -q 'BYTE-IDENTICAL'; then ok "$n KS-$k --control golden :: $line"; else bad "$n KS-$k --control rc=$rc :: $line"; fi
   done
   python3 - "$BR" "$T" <<'PY'
@@ -129,12 +131,12 @@ mk2("cfgbreak2_ks1289", "1289", "+**/__tests__\n", "+**/__test__\n")
 PY
   for k in 1391 1289; do
     n=B1; [ "$k" = 1289 ] && n=B2
-    rround "$T/brk$k.out" bash "$SPARK/round.sh" "$T/cfgbreak_ks$k" --control "$NOTRUN" < /dev/null; rc=$?; line="$(verdict "$T/brk$k.out")"
+    rround "$T/brk$k.out" bash "$SPARK/round.sh" "$T/cfgbreak_ks$k" --control $NOTRUN < /dev/null; rc=$?; line="$(verdict "$T/brk$k.out")"
     if [ "$rc" -eq 1 ] && echo "$line" | /usr/bin/grep -q 'CONTROL-FAIL'; then ok "$n KS-$k broken golden FAILS as it must rc=1 :: $line"; else bad "$n KS-$k broken golden rc=$rc (want 1 CONTROL-FAIL) :: $line"; fi
   done
   for k in 1391 1289; do
     n=B3; [ "$k" = 1289 ] && n=B4
-    rround "$T/brk2$k.out" bash "$SPARK/round.sh" "$T/cfgbreak2_ks$k" --control "$NOTRUN" < /dev/null; rc=$?; line="$(verdict "$T/brk2$k.out")"
+    rround "$T/brk2$k.out" bash "$SPARK/round.sh" "$T/cfgbreak2_ks$k" --control $NOTRUN < /dev/null; rc=$?; line="$(verdict "$T/brk2$k.out")"
     rd="$(sed -n 's/^SPARK ROUND [^:]*: .* · \(\/[^ ]*\)$/\1/p' "$T/brk2$k.out" | tail -1)"
     why="$(/usr/bin/grep -m1 '^FAIL' "$rd/checker.out" 2>/dev/null | cut -c1-200)"
     if [ "$rc" -eq 1 ] && echo "$why" | /usr/bin/grep -q 'A5'; then ok "$n KS-$k consistent-but-wrong product line FAILS at A5 (runner reached) :: $why"; else bad "$n KS-$k consistent break rc=$rc (want 1, FAIL A5) :: ${why:-$line}"; fi

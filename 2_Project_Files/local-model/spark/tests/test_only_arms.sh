@@ -137,7 +137,8 @@ t4 t4a_golden_edits_product "PRODUCT: .*golden.diff .*check.cjs"
 t4 t4b_fence_names_product "PRODUCT: .*exact change.*check.cjs"
 t4 t4c_two_products "CONTRACT: the header declares 2 product"
 t4 t4d_tampers_plural "tasks/test_only/build_test_only_input.sh"
-t4 t4e_tamper_caps "REFUSED — tier test_only but the builder parsed no tamper"
+# 2026-11-12 (o149r): since the o148 spec-examples widening the builder refuses a scripts/ product with no (case-exact) `## Tamper` heading at its own gate, before the round's "parsed no tamper" backstop. Still rc 2, still refused: the arm's intent (a case-variant heading never slips through) holds.
+t4 t4e_tamper_caps "carries no .## Tamper. block"
 
 # ---------------------------------------------------------------- T5 lint regression over every brief dir on disk
 OLDLINT="$SPARK/brief_lint.py.pre-1018-testonly"

@@ -1,0 +1,19 @@
+# Spark operator commission o150 (Secuura/Blockchain): seven board-verified rows, easiest first. Up to 5 rounds. Wednesday, 03:0x rotation-successor seat, 2026-11-12 ~03:3x AEDT. Model of this operator: claude-sonnet-5-5 (routing v1.0 Spark-operator row; gauge 29%).
+
+Method: exactly as /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_spark-operator-o148/commission.md and its report.md, and o149r's report (/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_spark-operator-o149/report.md: which arms and tiers are live now). Read all three whole. PIN: develop 16a5c67e676eefa3e620c663fee3162941a22fa0 (Wednesday's ls-remote 03:2x); re-read `ls-remote origin` before every round. Tunnel first: local-model/spark/tunnel.sh check (up if DOWN). One request at a time.
+
+CANDIDATES (each VERIFIED by a board seat on a named line at an earlier tip; YOU re-read the line at the pin before briefing; screen against the kit predicate; a row that fails it is SKIPPED with the reason, never forced):
+1. KS-1053 (S 58th: ks949 test timeouts; test-only).
+2. KS-1177 (S 58th: csrf v1-alias prod cell; test-only; may close the ticket).
+3. KS-948 (S 58th: run-shell-suites.sh backtick check; bash tier).
+4. KS-2061 (S 59th: Blockchain/Dev/services/governance/src/services/governanceService.ts line 420, `logger.error('DB get participant by address failed', { walletAddress, error: reason })`: drop walletAddress from that ONE call; pin with a cell; test to copy: governance src/__tests__/ks1951-an-admin-first-registration-binds-the-wallet-to-its-owner.test.ts).
+5. KS-1104 (S 58th: VerifyPage.tsx aria-labels + a source-scan guard).
+6. KS-2036 (S 59th: originate src/routes/certifications.ts line 1385 `recipientEmail: recipient.email` at INFO and src/routes/adminConfig.ts line 2133 `email: u.email` at ERROR: drop the address from both, per Kam's card secuura-ks1346-logging-thrown-objects-leaks-secrets = a and Wednesday's 2026-11-06 KS-1937 ruling "log the template only, never the address"; test to copy: originate src/__tests__/ks1937-notification-client-logs-the-template-never-the-recipient-address.test.ts). PRIVACY CLASS: its PR will get a TIER-1 gate; say so in the report. It adds an originate test: name it in the report (lane A's ratchet will meet it).
+7. KS-595 (S 58th: staking tiers.ts 405 routes; conditional: read why first).
+Source for 1-3, 5, 7: S 58th's ROUTING and STATUS, /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-12_seatS-58th/ (ROUTING_2026-11-12.md). For 4 and 6: S 59th's ROUTING in .../2026-11-12_seatS-59th/.
+
+EXCLUSIONS: re-measure before each brief (open PRs' file sets incl. PR 2188 KS-2167 and R 100th's row 44 KS-2168 docs/METERING-USAGE-API.md; non-.pre READYs; the queue of B 142nd = open PRs; lane A's 31 paths in 0_Brain/reference/2026-11-12_drafter-laneA-refresh/brief_laneA.md; gate 313's PRs 2183-2187). Any file there is not yours.
+
+Everything else as o148: red-first, BSD tools, quoted heredocs, no directory changes, no npm/npx in the session cwd, READ git verbs only in the Secuura checkout with GIT_OPTIONAL_LOCKS=0 (the Spark cache clone at local-model/spark/cache/src is yours to fetch the pin into), write only under 2_Project_Files/local-model/ and this folder, never delete, never edit a running script. No push, PR, board, Linear write or mail. Load: whole-suite legs at load1 < 8, else targeted with the load written. Counter: original brief + ONE rebrief per ticket, then it is a Claude seat's (say so).
+
+OUTPUT: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_spark-operator-o150/report.md, under 60 lines: per ticket, screened in/out with reason; per round, PASS/FAIL with cause (model / harness / brief); every held READY's file name and its exact +/- product lines. If your Write is refused, return the text in full.

@@ -1,0 +1,25 @@
+# Spark operator o149r report (Secuura/Blockchain), Mac mini, 2026-11-12 ~03:05-03:50 AEDT
+Pins: develop 801a2a7145c6 by ls-remote at start (fetched into the Spark cache clone only); it MOVED to 16a5c67e676e by ~03:35 (harness arms ran at it). Secuura checkout: ls-remote only. Load1 4.9-6.0 throughout (< 8). No model call was made: 0 of 4 rounds used. No push/PR/Linear/mail. Nothing deleted.
+
+## Items: 1 NOT RUN (harness refusal, finding below). 2 DONE except 8 arms that cannot be re-pinned. 3 (the `## Tamper` scripts arm) already existed and is proved.
+
+## TASK 1 KS-1376 doc_only: REFUSED BY THE HARNESS (no round possible; cause = HARNESS, not model, not brief)
+- Pre-checks at 801a2a7145c6 (cache clone, `git show`): 038a lines 16-17 are unchanged text (file 99 lines); 038a diff vs dbde0ac76339 over migrations/ = empty; 058 lines 68-79 still name both claims as false. Brief pins stand; no re-pin needed.
+- Checksum grep: `grep -Eic 'checksum|sha256|createHash|md5'` = 0 on startup-migrations.ts, 0 on run-migrations.sh; POSITIVE CONTROL restore-local-secrets.sh = 9. No runner compares contents.
+- `round.sh <brief> --dry-run` rc 2 (re-run at the new pin, output scratch/dry1376_r.txt): "REFUSED PATH: doc_only File Blockchain/Dev/migrations/038a_ks1054_core_tables_before_039.sql is not *.md, not under `Projects Documents/fragments/`, and not a ts/js/sh/py/yml code file (whose comment-only edits the checker can verify)".
+- Per the commission I did NOT widen the tier. A .sql comment-only class (checker verifies `--` lines) is the widening a later operator would build; the brief + golden are ready in night/briefs/ks_1376_o149_p1_038a_header_two_false_claims/ (golden is a clean 2-line comment hunk).
+- Note for the raise seat: 058 lines 75-78 say editing 038a "forces a re-run everywhere fresh" and was deliberately not edited; the ticket asks for the edit, but confirm that 058's comment, not a checksum, is the only reason (no checksum exists, measured above).
+
+## TASK 2 arm refresh (tooling in local-model/spark/tests/, backups *.pre-1112-armrefresh, plus .pre-1112-t4e for test_only)
+Counts: BEFORE (o148 measure at dbde, and this run's config baseline) -> AFTER (this run, develop 16a5c67e676e).
+- spec_examples_arms.sh: 4/4 -> 7/7 rc 0 (PASS all arms). Includes TASK 2b: arm e = scripts/spec-examples/check/*.mjs WITH `## Tamper` takes the OLD tamper branch (rc 0, tamper parsed at :74); e2 = same brief without the heading takes the NEW admit branch (rc 0); e3 = MUTANT with the `_brief_has_tamper()` guard removed sends the with-Tamper brief to the NEW branch, so arm e can fail. Proved both ways; the dead o149 had already added it.
+- test_only_arms.sh: 9 pass/6 fail (o148) -> 13 pass/2 fail. The dead o149's re-pin to ks_1775_p1 fixed DRY-RUN legs and the pre-run of this session showed 12/3; I then fixed T4e (since the o148 widening the builder refuses a scripts/ product lacking `## Tamper` at its own gate, "carries no `## Tamper` block", still rc 2; arm now accepts that text; 12 -> 13). REMAINING 2: T2 control ks_1775_p1 = CONTROL-FAIL at A4 (golden byte-identical; 15 of 99 cells red under the tamper, controls included): the same failure appears in run dirs 2026-10-29 and 2026-11-12 control/-r2/-r3, so ks_1775_p1 NEVER passed a control; the dead run's re-pin only proved DRY-RUN OK. Candidate replacements that dry-run OK at 801a: ks_1468_p1, ks_1500_p1 (tamper in wallet.ts, not a scripts/ path: would change what T4a-c assert), not tried. T5 lint regression: 84 brief dirs differ (lint-dir drift, environmental, as o148 said).
+- config_tier_arms.sh: 2 pass/19 fail -> 13 pass/8 fail (rc 1). Edit: allow_drift=1 + started_ok=<reason> pinned on the command line (NOTRUN; KS-1391 now In Progress; briefs written at 1ae6f17d19a8) and `$NOTRUN` unquoted so both pins split. Arms 3,4,6,7a-g,5a,5b,5c now pass (classifier refusals read what they test). LEFT, cannot be re-pinned without changing what they test (8): arms 1, C1, B1, B3 (KS-1391: its test file ks1391-issuer-declares-a-test-script.test.ts ALREADY EXISTS at the tip, so a brief that adds it is refused: the ticket's change merged) and arms 2, C2, B2, B4 (KS-1289: archived at 2026-11-08T21:44, builder refuses). A fresh config-tier fixture needs a live Backlog ticket whose change is not yet at develop: a Wednesday call (new brief), not a re-pin.
+- Note: the mv into place printed "set owner/group ... Operation not permitted" (macOS ownership; the file did move and runs).
+
+## Rounds
+None run: R1 KS-1376 refused by the harness before the builder (see above); no model round was warranted for TASK 2.
+
+## READY held: none.
+## Left
+Scratch: scratch/r_*.out (arm runs), r_rcs.txt, dry1376_r.txt (old dead-run files untouched). Spark idle (4 rounds spare). Tunnel UP. The pre-copy runs of the .pre arm files from a scratch copy fail (they resolve LM from their own dir), so the "before" for test_only/spec_examples cites o148's measured 9/6 and 4/4, plus this session's pre-fix run of the current script (12/3).
