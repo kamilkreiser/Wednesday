@@ -17,6 +17,34 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## CHECKPOINT 09:1x 12 Nov by the 07:51 relaunch seat (ctx 74%) — READ THIS BLOCK FIRST (supersedes the 08:0x block below where they differ)
+- **DRIVE DROPS: DevMASTER dropped at 08:40 (back 08:56) and at 09:07 (back 09:07:51), both unplanned.**
+  - Diagnosed: the enclosure LOSES POWER. The SSD's own counters rise at each drop (unsafe shutdowns 15 -> 16, power cycles 21 -> 22). The 09:07 drop showed ACIO "Gen2/3 link error" bursts, then the link went down; no OS eject or sleep came first. The SSD is cool (43-44 C, 0 minutes over its warning).
+  - Kam: it happens across Studio and mini and several cables and enclosures. He has no powered enclosure; he'll look at a UPS or power board; "keep monitoring".
+  - MONITOR: launchd `com.wednesday.dmlinkwatch`, running from `~/Library/Application Support/wednesday/devmaster_linkwatch.sh` (tracked source `2_Project_Files/tools/devmaster_linkwatch.sh`). Logs `~/Library/Logs/wednesday_devmaster_linkwatch/{state,events}.log`. Exercised: a planted logger line was caught, and the predicate replays the real 08:40 drop.
+  - smartmontools installed via brew. OWED at the wrap: doctor.sh check + PORTABILITY items for dmlinkwatch and smartctl.
+- **AFTER EVERY DROP (11-11 rule, and it fired today):** wake_watch_runner DIES and live_chat_poll goes "parse failed".
+  - Re-arm both: `WED_AGENT=wednesday bash fleet/cockpit/arm_wake_watch.sh`, and the poll restarted with start_new_session.
+  - Done 09:10. Then re-read files written in the minutes before the drop.
+- **FLOOR:** all four seats launched (Sonnet).
+  - B 146th %4: GO for PR 2186 SENT ~09:1x (`briefs_staged/2026-11-12_B146_go_2186.md`). NEXT = its MERGED: verify develop = its squash by ls-remote, then its wrap: score it, pane_close.
+  - R 104th %7: plan CONFIRMED. KS-1873 and rows 32+34 committed; it pushes after A 23rd. The lock-removal three-proof rule was given (`R104_answer_lock.md`).
+  - A 23rd %10: plan CONFIRMED. KS-2170 push retry 3 running at 09:14 (killed twice by drops; nothing landed).
+  - S 64th %15: LAUNCHED ~09:14; its rung-5/6 proof is OWED (its plan QUESTION).
+- **GATE 321 DONE:** PRs 2197 + 2198 are GO WITH NOTES, tier 1 (`0_Brain/reference/2026-11-12_gate321-tier1-pr2197-2198/verdict.md`).
+  - OWED: an ADDENDUM to the B lane (B 147th, since B 146th wraps after 2186) naming both. Each GO names its behaviour: 2198 = the fallback text 'unreadable thrown value' now reaches client bodies (400/422/500 with that text) and those failures are no longer logged; 2197 = no behaviour change in bodies.
+  - OWED to S 64th, by ADDENDUM: file G321-2198-1 (Minor: the guard does not stringify inside the try), G321-PRE-1 (the seedDemoUsers timer makes the auth suite exit rc 1 with all green, auth.ts:63-68), and G321-2198-3 (passphrase branch untested) as Low tickets, Refs KS-1868. The Spark shadow was NOT run.
+- **FIVE-MODEL A/B:**
+  - MiMo hosted T01-T12 = 12/12 PASS (V4.1 hosted 9/12, V4 Flash 10/12 on the same twelve). Told to Kam.
+  - V4.1 does NOT fit one Spark (smallest 233 GB vs 121 GB).
+  - The checker had been broken by the zod-4 deps since 11-03; fixed by `--nm-source work/nm_src_1112` (control 23/23 x2).
+  - Operator 3 RUNNING (Sonnet): T01 proof, MiMo T13-23, V4.1 hosted full (`RECOMMISSION2.md`). Local arms are a LATER commission, held while the drive is unstable.
+- **OWED besides:**
+  - Score R 103rd, B 145th, S 63rd and A 22nd.
+  - Check the held KS-2055 O141/O142 READYs, possibly superseded by PR 2182 (A 23rd's flag).
+  - fleet_ack for A 23rd retry and R 104th lock REFUSED: agentmail.json not re-collected since 09:06. Check that dashboard collect.py runs after the drop.
+  - Everything owed in the 08:0x block.
+
 ## CHECKPOINT 08:0x 12 Nov by the 07:51 REBOOT-RELAUNCH seat (ctx 61%) — READ THIS BLOCK FIRST (supersedes every block below where they differ)
 - **macOS restarted the Mac mini at ~07:49.** Every seat and subagent died: S 63rd, R 103rd, B 145th, A 22nd, and the five-model A/B operator. Kam relaunched Wednesday and approved the relaunch plan ("good plan.  go ahead", ~07:57).
 - **Before the reboot, five seat mails sat UNANSWERED from 07:02 to 07:49.** Ledger row filed (w>=3, regression). Every one is now answered inside a successor's stamp.
