@@ -1,0 +1,17 @@
+# Spark operator commission o153 (Secuura/Blockchain): KS-1663, COMMENT-ONLY, one round. Wednesday, 04:1x rotation-successor seat, 2026-11-12 ~05:0x AEDT. Operator model: claude-sonnet-5-5 (routing v1.0 Spark-operator row; gauge 32%).
+
+WHY: the Spark is idle (o152 stopped correctly at its pre-check: KS-1573 was decision-shaped; read 0_Brain/reference/2026-11-12_spark-operator-o152/report.md). Board seat S 61st verified a PARTIAL SPARK row in STATUS 2 (saved beside this file: s61_status2_mail.txt, read the KS-1663 paragraph): Blockchain/Dev/services/anchoring/src/anchorOverwriteGuard.ts lines 257-259 and Blockchain/Dev/services/anchoring/src/__tests__/ks1385-anchor-store-keeps-the-latest-events-metadata.integration.test.ts lines 535-536 both say tenant isolation on users is 'open for SELECT by construction'; the ticket's section 'The two sites' measured that users_auth_lookup is role-restricted, not public. Fix shape: COMMENT-ONLY, rewrite both sentences to the ticket's measured facts, keeping the bound u.tenant_id = $2::uuid untouched; no test-logic change. The ticket's Unmeasured residue (needs a real Postgres) stays with the ticket.
+
+Method: as /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_spark-operator-o152/commission.md and o151's commission + report (read all whole): the code_patch2 kit, or the doc_only / comment tier if the kit has one that admits a .ts comment change (read o149's report for the tiers; if no tier admits a comment-only edit in a .ts product + test file, STOP and report the harness gap: do NOT widen the harness in this round).
+
+PRE-CHECKS (each a STOP, reported, no round):
+1. Tunnel + pin (ls-remote develop; expect d0e58f55c861f12b31e072ea39332324da8dcb23 or newer: PR 2182 may merge during your run, it touches only transfer).
+2. READ KS-1663 at Linear (read-only, key never printed), whole incl. 'Not decided here' / 'Unmeasured' sections: does the ticket NAME the comment rewrite as the fix (or at least name the true facts the comments must state)? If the wording is a choice the ticket leaves open, STOP: a decision. Quote the sentences you rely on.
+3. Re-measure at the pin: the exact text of both sites (line numbers may have moved), and that no code line changes.
+4. Exclusions: open-PR census for both paths (control PR 2125 api-gateway/src/index.ts must fire) and held READYs under 2_Project_Files/local-model/night/. A hit = STOP and name the PR.
+
+The brief to the model: exact current text of each site, the replacement text built ONLY from sentences the ticket states (quote them), what must not change (every non-comment byte), and the check: a diff whose every changed line is a comment line (a planted code-line change must fail the check). Original + ONE rebrief, then it is a Claude seat's. READ every PASS's +/- lines at source yourself before holding.
+
+Everything else as o151/o152: BSD tools, quoted heredocs, `${P}:path`, no directory changes, no npm/npx in the session cwd, READ git verbs only in the Secuura checkout with GIT_OPTIONAL_LOCKS=0, write only under 2_Project_Files/local-model/ and this folder, never delete. No push, PR, board, Linear write or mail. Load: gates 315 and 316 run beside you; whole-suite legs at load1 < 8.
+
+OUTPUT: report.md in THIS folder, under 60 lines (pre-checks with their numbers and the quoted ticket sentences; the round's PASS/FAIL with cause; a held READY's file name and the exact +/- lines). If your Write is refused, return the text in full.
