@@ -1,0 +1,7 @@
+# Spark operator commission o163 (Secuura/Blockchain): RUN the next row of KS-2169, then screen if it stops. Wednesday, 2026-11-12 ~10:2x AEDT. Operator model: claude-sonnet-5-5.
+
+Copy-and-change of ../2026-11-12_spark-operator-o162/commission.md (read it whole, and through it o161's and o159's; every rule stands). Read ../2026-11-12_spark-operator-o162/report.md whole.
+CANDIDATE 1 (first): KS-2169 items G312-2182-3 and G312-2182-4 (the trim-before-max pin and the refused-types pin) as ONE test-only row, if both land in ONE test file with <= 3 edit points; the fix shape and file come from gate 312's verdict (find it under /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/ by `ls -d *gate312*`) and the ticket. Red-first must be real: the cell must go RED on a deliberate break of the behaviour it pins and GREEN on the tip. If it needs more than one file or > 3 edits, split and run the first half only. Do not touch transfer/src/index.ts:427 (o162's held READY) beyond what a test reads.
+Then, if candidate 1 stops at a pre-check, screen up to two more from o162's 'Not screened' list (KS-2101 doc row first), same skip list as o162 plus KS-1466 (a card) and KS-2169 item 7 (held).
+Never cd; quote heredocs; no Linear/GitHub/mail/board writes; no .env values printed. If DevMASTER drops, wait, re-read, continue.
+OUTPUT: report.md in THIS folder; if your Write is refused, return its full text (under 40 lines).
