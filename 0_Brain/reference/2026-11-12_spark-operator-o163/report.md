@@ -1,0 +1,13 @@
+# o163 report (KS-2169 items G312-2182-3 + -4, Secuura/Blockchain, Spark operator, claude-sonnet-5-5), 2026-11-12 ~10:3x AEDT
+RESULT: ROUND 1 PASS (original brief, counter 1 of 2). HELD, not raised. Golden TREE-IDENTICAL (the model omitted only the `diff --git` header line; every +/- line equals golden.diff, read by diff at source). Candidate 1 only; no screening needed.
+READY: 2_Project_Files/local-model/night/READY_KS-2169-KS-2169-O163-P1_spark-dsv4flash_BRIEFED-TESTONLYINPUT-...-TRANSFER-CANCEL-TRIM-BEFORE-MAX-AND-REFUSED-TYPES-PINS-PASS-9of9_2026-11-12.diff.md (strict apply rc 0, +18 -0, 9 legs, products unchanged).
+Pin: tunnel UP (200); develop d35f75875275 (ls-remote at 10:21, cache clone at the same sha, lock key matches).
+1. Fit: ONE test file (transfer/src/__tests__/ks2055-...-1000-characters.test.ts), ONE hunk (appended after R6, 2 cells), so both items in one row. Tier test_only_input; product index.ts read-only, untouched (line 427 not read or touched; o162's READY stands).
+2. Pre-checks: ticket + gate 312 verdict lines 113/114 name the cells. Census 97 open PRs, every file list read, none truncated: none on the test file or transfer/src/index.ts; control PR 2125 fired. grep of READY_* for the test file: none (only o162's KS-2169 READY, index.ts:427).
+3. Cells: R7 = 5 spaces + 1000 x + 5 spaces answers 200, recorded as exactly 1000 x (trim before bound, G-3). R8 = true, false, 0, ['a'] each answer 400 and the transfer stays uncancelled (G-4).
+4. Red-first REAL: plant on index.ts:429 `z.string().trim().max(1000).nullish()` -> `z.coerce.string().max(1000).trim().nullish()` (both bound-before-trim and coercion). Control (golden, no model) and the model round both: A4 green without plant (12 cells, 0 red), A5 both cells fail by assertion under the plant, existing R2/R3 also go red under it (INFO), A6 suite 481 -> 483 no red, A7 restore ok.
+5. Round: 65 s, model 29.2 s, 19957+452 tokens. Run dir: 2_Project_Files/local-model/runs/spark_secuura_2026-11-12_ks_2169_o163_p1_transfer_cancel_trim_before_max_and_refused_types_pins (control: same name + -control).
+6. Spent brief moved to brief_spent/ in this folder; night/briefs holds no copy.
+NOT pinned (said, not hidden): a JSON-array REQUEST BODY (ticket G-4's last example) still answers 400 under the plant so it cannot go red there; left out, item 4 is covered except that example. Items 1, 2, 5, 7 of KS-2169 stay open (7 held as o162's READY). Each cell was not separately mutant-tested one plant per cell; the single plant reds both.
+Raise note: test-only, transfer service, normal gate; "Refs KS-2169", never closing words.
+No push, PR, board, Linear, GitHub or mail write; no secret printed (the GraphQL census read the project env key in-process only).

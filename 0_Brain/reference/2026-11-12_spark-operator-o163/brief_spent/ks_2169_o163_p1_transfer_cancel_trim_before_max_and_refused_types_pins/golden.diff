@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-reason-is-a-string-of-at-most-1000-characters.test.ts b/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-reason-is-a-string-of-at-most-1000-characters.test.ts
+--- a/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-reason-is-a-string-of-at-most-1000-characters.test.ts
++++ b/Blockchain/Dev/services/transfer/src/__tests__/ks2055-transfer-cancel-reason-is-a-string-of-at-most-1000-characters.test.ts
+@@ -169,4 +169,22 @@
+     expect(res.status).toBe(200);
+     expect((await lastEntry(id)).reason).toBe('Cancelled by user');
+   });
++
++  // KS-2169 G312-2182-3 (gate 312, mutant T4): the trim runs BEFORE the 1000 bound, so a 1000-character reason padded with spaces is accepted and recorded trimmed.
++  it('RED ks2169 R7 a 1000-character reason padded with spaces either side is accepted and recorded trimmed', async () => {
++    const id = await makeTransfer();
++    const res = await cancel(id, { reason: `     ${'x'.repeat(1000)}     ` });
++    expect(res.status).toBe(200);
++    expect((await lastEntry(id)).reason).toBe('x'.repeat(1000));
++  });
++
++  // KS-2169 G312-2182-4 (gate 312): beyond a number and an object, a boolean, zero and an array are refused with 400 and write nothing (false and 0 used to fall back to the default text).
++  it('RED ks2169 R8 true, false, 0 and an array as the reason each answer 400 and write nothing', async () => {
++    const id = await makeTransfer();
++    for (const reason of [true, false, 0, ['a']]) {
++      const refused = await cancel(id, { reason });
++      expect([JSON.stringify(reason), refused.status]).toEqual([JSON.stringify(reason), 400]);
++    }
++    expect((await lastEntry(id)).toStatus).not.toBe('cancelled');
++  });
+ });
