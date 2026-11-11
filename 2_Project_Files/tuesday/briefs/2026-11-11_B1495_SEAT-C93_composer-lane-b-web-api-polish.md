@@ -115,16 +115,16 @@ Part and step, lock state (holder text or "mine"), load1, the last command, the 
 
 ## Stamp
 Tuesday fills each slot at launch; one word or clock each, or the answer. The unstamped copy reads twelve such runs (eleven slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Main head at launch (full sha; `c684e808225ef04402b9e83f784831b2574ba633` at drafting): ____
-- Branch head at launch (the new branch must NOT exist): ____
-- Open PRs at launch (#91, #86, #85 at drafting): ____
-- Launch authority and hard stop (READY target 240 minutes after your Step 0; HARD STOP clock): ____
-- SLOTS (HEAVYLOCK `free` or `held`; which Composer panes are live): ____
-- DOCKER (daemon running at launch, by `docker version`; it was NOT running at drafting): ____
-- IDENTITY (how the clone gets its configured identity; the drafter's default: Tuesday names the clone-local `user.name`/`user.email` the seat sets once with `git config --local`, equal to main's author identity; else STOP before the first commit): ____
-- PART-75 and WORDS (PART-75 `BUILD` or `DROP` (the drafter's default DROP: C-71 COMP-2's consequence reads "No Guided work until you turn it back on"); WORDS: the product owner's W1 to W3 (and W4/W5 if given) byte for byte, or `NOT YET`): ____
-- Q-answers (Q-1 D-1 storage route, E (empty string, no migration; the drafter's default) or M (migration: this kit STOPs); Q-2 may "mark all local" overwrite a recorded decision on a secret field (the drafter's default: no, it marks only undecided fields); Q-3 the PCOMP-15 fix criterion (the drafter's default: none, measure and report only)): ____
+- STAMP: Tuesday (s266, s265's successor), 14:07, after reading this kit whole and the drafter report.
+- LAUNCH WINDOW: now, through the one launch_when_cool waiter in the Launch line (load1 gate 24).
+- Main head at launch (full sha; `c684e808225ef04402b9e83f784831b2574ba633` at drafting): c684e808225ef04402b9e83f784831b2574ba633 (gh api commits/main, read by Tuesday 14:06; unmoved since drafting).
+- Branch head at launch (the new branch must NOT exist): absent (gh api git/matching-refs/heads/b1495 returned 0 refs, read 14:06).
+- Open PRs at launch (#91, #86, #85 at drafting): #91, #86, #85 (gh api pulls?state=open, read 14:06; same set as drafting).
+- Launch authority and hard stop (READY target 240 minutes after your Step 0; HARD STOP clock): Kam, live board 2026-11-11 13:25:55 'please work on tickets and backlog items for all projects' and terminal ~13:31 'keep going with the backlog'; routing v1.0 row C2 (Sonnet). HARD STOP 18:40 AEDT (or 240 min after your Step 0, whichever is earlier).
+- SLOTS (HEAVYLOCK `free` or `held`; which Composer panes are live): HEAVYLOCK free (ls -d rc 1 at 14:06); no Composer pane live (tmux list-panes: 0 Composer names).
+- DOCKER (daemon running at launch, by `docker version`; it was NOT running at drafting): RUNNING: Tuesday opened Docker Desktop under Kam's standing grant (card hpsmpoc-308-docker-desktop-1106 = c, 'Start Docker yourself when needed'); docker version printed server 29.9.2 at 14:06:58. Re-check at Step 0; if down, STOP.
+- IDENTITY (how the clone gets its configured identity; the drafter's default: Tuesday names the clone-local `user.name`/`user.email` the seat sets once with `git config --local`, equal to main's author identity; else STOP before the first commit): Set ONCE in your clone only: git -C <clone> config --local user.name 'kamilDatasec' and git -C <clone> config --local user.email '88359143+kamilDatasec@users.noreply.github.com'. Source: Composer main c684e808's author (gh api commits/main, read 14:06) and the identity HPSM-POC's own repo configures (git config --show-origin: file:.git/config, the same email). Tuesday's decision under its own rule; never -c, never GIT_AUTHOR_*/GIT_COMMITTER_*.
+- PART-75 and WORDS (PART-75 `BUILD` or `DROP` (the drafter's default DROP: C-71 COMP-2's consequence reads "No Guided work until you turn it back on"); WORDS: the product owner's W1 to W3 (and W4/W5 if given) byte for byte, or `NOT YET`): PART-75 DROP (C-71 COMP-2 consequence 'No Guided work until you turn it back on'; Guided is OFF). WORDS NOT YET (77b is NOT built; Tuesday carries W1-W5 to the product owner on a card).
+- Q-answers (Q-1 D-1 storage route, E (empty string, no migration; the drafter's default) or M (migration: this kit STOPs); Q-2 may "mark all local" overwrite a recorded decision on a secret field (the drafter's default: no, it marks only undecided fields); Q-3 the PCOMP-15 fix criterion (the drafter's default: none, measure and report only)): Q-1 E (empty string, no migration). Q-2 no: mark only undecided fields (moot while 77b is not built). Q-3 none: measure and report only.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 14:07 Tuesday s266, 131 lines read whole in one Read
