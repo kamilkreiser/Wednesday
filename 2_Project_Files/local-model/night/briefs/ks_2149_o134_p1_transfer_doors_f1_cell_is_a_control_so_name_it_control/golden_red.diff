@@ -1,0 +1,11 @@
+diff --git a/Blockchain/Dev/services/transfer/src/index.ts b/Blockchain/Dev/services/transfer/src/index.ts
+--- a/Blockchain/Dev/services/transfer/src/index.ts
++++ b/Blockchain/Dev/services/transfer/src/index.ts
+@@ -521,6 +521,7 @@
+ // KS-2081: refused before the body is read or any transfer is looked up, so this answer depends on the caller alone and says nothing about any id.
+ const refuseNonUserPrincipal = (req: Request, res: Response): boolean => {
+   if (!isNonUserPrincipal((req as any).user)) return false;
++  res.setHeader('x-ks2121-door', req.path); // TAMPER: a per-door response header
+   res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'An API key cannot open or act on a transfer.' } });
+   return true;
+ };

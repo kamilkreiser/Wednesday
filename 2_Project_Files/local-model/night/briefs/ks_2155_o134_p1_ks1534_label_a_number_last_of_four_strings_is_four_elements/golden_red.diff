@@ -1,0 +1,12 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/connectorAllowList.ts b/Blockchain/Dev/services/api-gateway/src/services/connectorAllowList.ts
+--- a/Blockchain/Dev/services/api-gateway/src/services/connectorAllowList.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/connectorAllowList.ts
+@@ -17,7 +17,7 @@
+  * non-string. A String object is not a string (typeof 'object').
+  */
+ export function allowListHoldsANonString(list: readonly unknown[]): boolean {
+-  for (let i = 0; i < list.length; i += 1) {
++  for (let i = 0; i < (list.length >= 3 ? list.length - 1 : list.length); i += 1) { // PLANT: skip the last element of a list of three or more
+     if (typeof list[i] !== 'string') return true;
+   }
+   return false;

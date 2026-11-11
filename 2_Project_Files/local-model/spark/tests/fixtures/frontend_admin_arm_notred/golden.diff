@@ -1,0 +1,73 @@
+diff --git a/Blockchain/Dev/frontend/admin/src/pages/platform/PlatformAuditLog.tsx b/Blockchain/Dev/frontend/admin/src/pages/platform/PlatformAuditLog.tsx
+--- a/Blockchain/Dev/frontend/admin/src/pages/platform/PlatformAuditLog.tsx
++++ b/Blockchain/Dev/frontend/admin/src/pages/platform/PlatformAuditLog.tsx
+@@ -9,6 +9,9 @@
+   tenant_status_changed: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+   tenant_updated: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+   tenant_deleted: 'bg-red-500/15 text-red-400 border-red-500/30',
++  // KS-1913: DELETE now archives the tenant and writes tenant_archived (tenant_archive_failed on failure); a failed archive must not look like a success.
++  tenant_archived: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
++  tenant_archive_failed: 'bg-red-500/15 text-red-400 border-red-500/30',
+   key_loaded: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+   key_removed: 'bg-gray-500/15 text-gray-400 border-gray-500/30',
+ };
+diff --git a/Blockchain/Dev/frontend/admin/src/__tests__/ks1913-platform-audit-log-archive-actions-are-styled.test.tsx b/Blockchain/Dev/frontend/admin/src/__tests__/ks1913-platform-audit-log-archive-actions-are-styled.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/frontend/admin/src/__tests__/ks1913-platform-audit-log-archive-actions-are-styled.test.tsx
+@@ -0,0 +1,55 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++import { render, screen } from '@testing-library/react';
++
++// KS-1913: the platform audit log colours six known actions and shows any other in the muted fallback style. Deleting a tenant now writes
++// `tenant_archived` (or `tenant_archive_failed` on failure) instead of `tenant_deleted`; both must stand out from routine entries, and a
++// failed archive must not look like a success. The api module is replaced; the page is the real one.
++const h = vi.hoisted(() => ({
++  entries: [] as Array<Record<string, unknown>>,
++}));
++
++vi.mock('../services/api', () => ({
++  fetchPlatformAuditLog: () => Promise.resolve({ entries: h.entries, total: h.entries.length }),
++  fetchDashboardStats: () => Promise.resolve({ totalDocuments: 0, servicesOnline: 0, totalUsers: 0, totalAnchors: 0 }),
++}));
++
++import PlatformAuditLog from '../pages/platform/PlatformAuditLog';
++
++const entry = (action: string) => ({
++  id: `id-${action}`,
++  created_at: '2026-11-01T00:00:00.000Z',
++  action,
++  target_type: 'tenant',
++  target_id: '0123456789abcdef',
++  actor_email: 'admin@example.test',
++  details: {},
++});
++
++const badgeClass = async (action: string) => {
++  h.entries = [entry(action)];
++  render(<PlatformAuditLog />);
++  const badge = await screen.findByText(action.replace(/_/g, ' '));
++  return badge.className;
++};
++
++describe('KS-1913 platform audit log badge styles', () => {
++  beforeEach(() => {
++    h.entries = [];
++  });
++
++  it('control ks1913 C1 tenant_deleted keeps its red badge', async () => {
++    const cls = await badgeClass('tenant_deleted');
++    expect(cls).toContain('text-red-400');
++  });
++
++  it('RED ks1913 R1 tenant_archived is not in the muted fallback style and not green', async () => {
++    const cls = await badgeClass('tenant_archived');
++    expect(cls).not.toContain('text-muted-foreground');
++    expect(cls).not.toContain('green');
++  });
++
++  it('RED ks1913 R2 tenant_archive_failed is red, so a failed archive does not look like a success', async () => {
++    const cls = await badgeClass('tenant_archive_failed');
++    expect(cls).toContain('text-muted-foreground');
++  });
++});
