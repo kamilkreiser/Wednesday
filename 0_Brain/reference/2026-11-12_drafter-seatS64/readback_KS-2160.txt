@@ -1,0 +1,15 @@
+KS-2160 | ks1547 abort-text cell says it pins the whole line but tests a substring, so text appended to the sentence keeps all 27 cells green
+state=In Progress (started) archived=None assignee=kamil.kreiser@secuura.ai creator=kamil.kreiser@secuura.ai priority=4 project=None due=None
+created=2026-11-10T05:08 updated=2026-11-11T15:42 completed=None labels=[]
+parent=None
+children (0): none
+attachments (1):
+   - Refs KS-2160: the preflight abort-sentence cell pins the whole line, s | https://github.com/Secuura/Distributed_Secuura/pull/2186
+--- description (4634 chars; first 400):
+**BLUF:** The cell that PR 2122 (KS-2130) added to the preflight step-header suite is described as pinning "the whole sentence" and "whole line 3 of the abort". It checks the text with the suite's `has()` helper, which is `grep -q -F`, a substring test, so text appended to the sentence or to the line leaves the cell green. The QA gate planted " BUT ACTUALLY THEY ARE." after the sentence and the su
+--- comments: 1 total; newest 1, bodies cut at 700 chars
+[2026-11-11T15:42:53 id=c9c8f596 by kamil.kreiser@secuura.ai]
+**BLUF:** PR 2186 (head `bb40ba50978a`, one commit on develop `4f85ca04c622`) makes the whole-sentence cell of the preflight step-header suite a whole-line match (`grep -q -x -F` with the line's two leading spaces), so text appended to the abort sentence no longer leaves the suite green. Test-only, one bash suite (+1 -1), zero product bytes; it is ready for its gate (tier 2). Nothing is merged or deployed. This ticket stays open (the PR says Refs).
+
+- **Measured by Seat R 100th:** with ` BUT ACTUALLY THEY ARE.` planted on line 246 of `preflight.sh` (in my tree only, restored, never in the diff), the old cell stays 27 of 27 on develop and the patched suite reads 26 passed, 1 failed (the whole
+

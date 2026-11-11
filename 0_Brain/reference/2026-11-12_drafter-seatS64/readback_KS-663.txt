@@ -1,0 +1,39 @@
+KS-663 | The OpenAPI spec is now a consumed contract, but nothing in CI stops it drifting — plus two known spec/code divergences
+state=In Progress (started) archived=None assignee=kamil.kreiser@secuura.ai creator=stuart.jamieson@secuura.ai priority=2 project=OpenAPI Spec & Contract due=None
+created=2026-08-19T06:50 updated=2026-11-02T02:53 completed=None labels=[]
+parent=KS-770 [Todo] Review stream: API contract and the four platform suites
+children (0): none
+attachments (1):
+   - KS-663 divergence 2: publish the documentUuid v4 constraint the runtim | https://github.com/Secuura/Distributed_Secuura/pull/808
+--- description (4308 chars; first 300):
+Raised by Platform S, 2026-08-19, from a full S↔K audit against K develop `74a330fc0`. **Nothing is broken today** — the spec is in sync. This is about keeping it that way now that something depends on it.
+
+## What changed on our side
+
+[PS-614](<https://linear.app/secuura/issue/PS-614>) (merged, S d
+--- comments: 6 total; newest 4, bodies cut at 500 chars
+[2026-11-02T02:53:28 id=63fefa1f by kamil.kreiser@secuura.ai]
+State corrected: In Review to In Progress. Divergence 2 is delivered; divergence 1 is open and tracked on KS-791.
+
+Done: PR 808 (d2fe7d6d2) publishes the documentUuid v4 constraint the runtime already enforces (divergence 2). It was approved on the PR and is an ancestor of the kintsugi deploy b1fb543640e7. The ticket's headline ask, check:openapi in the gate, was recorded on 2026-09-04 as already satisfied.
+
+Left: divergence 1, the verify-file operations. It was kept out of PR 808 because the li
+
+[2026-09-10T21:44:06 id=8a7af9d6 by kamil.kreiser@secuura.ai]
+**Merged to `develop` — PR #808, squash `d2fe7d6d255a19b7bc2a809d2e1a2fe8b1139908`.**
+
+- Approval: Peter at head `3d8b40a07f0b5052513be2cf8fb899d1520279a5` (2026-09-08T14:18:43Z), re-verified immediately before the merge: approval at head, no later Peter review or comment, Test Evidence present.
+- Squash parent `7bcb6612897f012d2051b6ff848b3fbcbb7d2542` = the `develop` tip asserted before the merge; tree `689662d87a247648d93ae9cd59983222c8a036f8` = `git merge-tree --write-tree` of that tip and t
+
+[2026-09-08T14:19:15 id=8b5ab6e7 by peter@obeden.com]
+## PR #808 approved — divergence 2 verified live
+
+Approved [#808](https://github.com/Secuura/Distributed_Secuura/pull/808) (divergence 2, the `documentUuid` v4 constraint). Full review posted on the PR; summarising here with the evidence, and flagging what remains open on this ticket.
+
+Credit where due to the authoring session: divergence 1 was deliberately pulled from that PR after a live probe found `verify-file` 415ing at the gateway, so publishing its spec would have created a divergence rat
+
+[2026-09-04T22:32:50 id=18a9fb8c by kamil.kreiser@secuura.ai]
+**PR [#808](https://github.com/Secuura/Distributed_Secuura/pull/808) is open** — branch `feature/ks-663-wire-check-openapi-into-the-gate`, head `3d8b40a07`, rebased onto `develop` `d928a27f8`.
+
+This branch had been committed and **unpushed since s123**. The reason was never the code: the pre-push preflight's advisory leg hung on an unreachable npm endpoint with no timeout, so the push could not complete. **KS-788 merged this morning (#807) and bounded it — this branch then pushed in 76 seconds, 
+

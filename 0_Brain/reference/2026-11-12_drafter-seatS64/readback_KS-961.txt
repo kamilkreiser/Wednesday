@@ -1,0 +1,45 @@
+KS-961 | The aggregate workspace suite never runs on a PR — wire it advisory (Kam: wire-nonblocking), and it is RED on develop today
+state=In Review (started) archived=None assignee=kamil.kreiser@secuura.ai creator=kamil.kreiser@secuura.ai priority=3 project=None due=None
+created=2026-09-07T01:40 updated=2026-09-14T02:41 completed=None labels=[]
+parent=None
+children (0): none
+attachments (1):
+   - KS-961: run the workspace suites on the PR, advisory and non-blocking  | https://github.com/Secuura/Distributed_Secuura/pull/887
+--- description (3187 chars; first 400):
+**Kam ruled** `wire-nonblocking`**, 2026-09-07 11:41.** Wire the aggregate workspace suite into the PR workflow as an ADVISORY, non-blocking job first, and decide on making it blocking from the evidence it produces.
+
+## The gap
+
+`npm run test --workspaces --if-present` exists in exactly **two** workflows:
+
+| file | trigger | when it runs |
+| -- | -- | -- |
+| `ci.yml:51` | `workflow_dispatch` **onl
+--- comments: 6 total; newest 3, bodies cut at 700 chars
+[2026-09-13T22:31:55 id=66a65371 by kamil.kreiser@secuura.ai]
+**PR #887 — READY FOR QA round 1 (tier 2) at head `3aee3deed` (`ls-remote` 22:31:54Z 2026-09-14; branch `feature/ks-961-workspace-suites-advisory-on-pr` == `refs/pull/887/head`). Peter's one re-run (review `5153400898`, 2026-09-09: "One re-run before I approve") is done and posted on the PR as a facts comment — `https://github.com/Secuura/Distributed_Secuura/pull/887#issuecomment-5656613944`.**
+
+**The four numbers, twice, each in a fresh tree (macOS arm64, node v24.7.0, `openssl` = Homebrew OpenSSL 3.6.3 first on `PATH` — Peter's caveat checked before reading the set; `auth-service` 635/635 both times):**
+- at `cb7a3e3be` (the reviewed head): **40 s · 26 workspaces with a `test` script · 6 s
+
+[2026-09-09T11:05:31 id=2b4960cc by peter@obeden.com]
+## Review of #887 at `cb7a3e3be` — the requested change is in and correct. Holding approval on one re-run.
+
+Kam, this landed well. You didn't take the build step on my say-so — you reproduced it independently (`packages/shared/dist/index.js` **absent before build, present after**), which is the load-bearing assertion and the one worth checking. You also took both optional notes, and made the openssl one **better than mine**: I read it as macOS-only, you traced it to `PATH` order (LibreSSL 3.3.6 at `/usr/bin/openssl` vs OpenSSL 3.6.3 at `/opt/homebrew/bin/openssl`). That's the sharper note and it belongs where you put it.
+
+**Not approving yet** — not a defect, one measurement I'd like refresh
+
+[2026-09-09T05:15:38 id=99d83b3c by kamil.kreiser@secuura.ai]
+## PR #887 is on origin at a new head — `bb0502c80` -> `cb7a3e3be`, and Peter's requested change is now ON the PR
+
+**BLUF: the two-line change Peter asked for has landed, plus `develop`. Zero force pushes.**
+
+**The newest comment before this one names `bb0502c80` — that head is superseded.** New head is **`cb7a3e3be`**.
+
+- **Old head** `bb0502c80` -> **new head** `cb7a3e3be`, a true fast-forward
+- `mergeable_state` `clean`
+- **PREFLIGHT PASSED 13/13**
+
+### What landed
+Peter's named change — `npm run build --workspaces --if-present` **before** the test step — is present in **both** places he asked for: the workflow job (`pr-platform-suites.yml`) and the documented command in `DEV-PROCESS.md`.
+

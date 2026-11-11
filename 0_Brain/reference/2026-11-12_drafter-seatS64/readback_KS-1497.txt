@@ -1,0 +1,32 @@
+KS-1497 | prisma-generate.cjs edge cases: signals skip the cleanup, a symlinked staging directory, a stale client passes the check (KS-1305 gate notes)
+state=In Progress (started) archived=None assignee=kamil.kreiser@secuura.ai creator=kamil.kreiser@secuura.ai priority=4 project=None due=None
+created=2026-10-12T09:14 updated=2026-11-11T20:01 completed=None labels=[]
+parent=None
+children (0): none
+attachments (2):
+   - Refs KS-1497: prisma-generate cleans up and kills prisma on SIGINT and | https://github.com/Secuura/Distributed_Secuura/pull/2193
+   - Refs KS-1497 items 2+4: prisma-generate refuses a symlinked or non-dir | https://github.com/Secuura/Distributed_Secuura/pull/1578
+--- description (1779 chars; first 300):
+## BLUF
+
+Six Minor notes from the Sonnet-tier gate on PR #1489 (KS-1305), all in `scripts/prisma-generate.cjs` and its test. The script is developer tooling. They were left out of that PR because a change to the gated head voids the GO. Filed as ONE ticket; one small tier-2 PR later.
+
+## Recommendat
+--- comments: 3 total; newest 3, bodies cut at 500 chars
+[2026-11-11T20:01:51 id=b0527e69 by kamil.kreiser@secuura.ai]
+**BLUF:** Pull request 2193 (Refs KS-1497: the prisma generate script cleans up and kills prisma on SIGINT and SIGTERM; items 1, 3, 5 and 6 of this ticket's script list, per Wednesday's relay) is OPEN at head b6397499151d and queued for merge. QA gate 317 returned GO WITH NOTES on it (the first line of the gate's verdict, written at that head). Items outside that pull request stay open on this ticket and its state does not change here.
+
+Read 2026-11-11 about 20:01Z: the pull request's state and 
+
+[2026-10-18T14:48:23 id=ba887752 by kamil.kreiser@secuura.ai]
+**PR #1578 is merged to `develop` as `6184eaa0af75c1e27eb69bbff67a7790ef494b5f`.** Items 2 and 4 only — **this ticket stays open** for its other items, starting with signals skipping the cleanup. Nothing deployed.
+
+**Gate G2** (tier 2, Sonnet) returned **GO WITH NOTE**. It measured more staging shapes than the suite pins: a directory symlink, a file symlink, a **dangling** symlink and a regular file are all refused with rc 2, as are a self-loop symlink and a FIFO; an absent `.generate` and a pla
+
+[2026-10-18T13:59:46 id=404c8f79 by kamil.kreiser@secuura.ai]
+**Raised as PR #1578**, head `972286126bc69fad209ef4c270aca94f4d8f4c9f`, on `develop` `8a9970511f2`. Not merged, not deployed — it goes to a gate next.
+
+**⚠ This does NOT close the ticket.** It is **items 2 and 4 only**. The other items — signals skipping the cleanup, and the rest of the KS-1305 gate notes — are untouched and stay open here. The narrowing is stated in the PR body as well, so it cannot be lost.
+
+**What was wrong.** `scripts/prisma-generate.cjs` copies the schema into `<svc>/node_
+

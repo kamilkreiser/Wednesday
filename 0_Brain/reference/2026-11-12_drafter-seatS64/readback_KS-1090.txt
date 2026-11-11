@@ -1,0 +1,41 @@
+KS-1090 | api-gateway + originate: tsc never type-checks #951's three wiring tests, and the mint-scope test pins 2 of 17 non-originate keys
+state=In Progress (started) archived=None assignee=kamil.kreiser@secuura.ai creator=kamil.kreiser@secuura.ai priority=4 project=Internal tooling due=None
+created=2026-09-11T09:34 updated=2026-11-11T20:01 completed=None labels=[]
+parent=None
+children (0): none
+attachments (4):
+   - Refs KS-1090: services/originate joins the test-file type-check ratche | https://github.com/Secuura/Distributed_Secuura/pull/2191
+   - KS-1090: preflight leg 16 also gates the api-gateway test-file ratchet | https://github.com/Secuura/Distributed_Secuura/pull/1507
+   - KS-1090: type-check the api-gateway test files against a shrinking bas | https://github.com/Secuura/Distributed_Secuura/pull/1504
+   - KS-1090 R2-3: type-check the api-gateway wiring test the tsc program n | https://github.com/Secuura/Distributed_Secuura/pull/1305
+--- description (3132 chars; first 300):
+## BLUF
+
+* **The type-check claim does not cover the tests (R2-2).** #951's Test Evidence says "`tsc --noEmit` rc 0 on both services", but that run never reads its 3 new test files.
+  * Both services' tsconfigs exclude `src/__tests__`.
+  * A type error planted in each test file returns rc 0; the sam
+--- comments: 11 total; newest 4, bodies cut at 500 chars
+[2026-11-11T20:01:50 id=d1702cab by kamil.kreiser@secuura.ai]
+**BLUF:** Pull request 2191 (Refs KS-1090: services/originate joins the test-file type-check ratchet, leg 16 of the push preflight) is OPEN at head 96ac07b0cd0d and queued for merge. QA gate 315 returned GO WITH NOTES on it (the first line of the gate's verdict, written at that head). This ticket stays open and its state does not change here.
+
+Read 2026-11-11 about 20:01Z: the pull request's state and head at the GitHub API (state OPEN, not merged, head 96ac07b0cd0d) and the first line of the ga
+
+[2026-10-20T02:19:37 id=009da012 by kamil.kreiser@secuura.ai]
+**The originate half of this ticket is still live on develop `7e3b9362e08b`, and it now has a consequence I can name precisely: preflight leg 16 exists and type-checks test files — but its corpus is `auth`, `api-gateway` and `vc-issuer`. `services/originate` has no `tsconfig.test.json` and is not enrolled, so every originate test file is type-checked by nothing at the gate.**
+
+I came to this from the other direction, filed nothing, and am recording it here rather than as a new ticket because thi
+
+[2026-10-19T16:39:44 id=48b69347 by kamil.kreiser@secuura.ai]
+**R2-2 is still open and still true. A current measurement for `services/originate` at develop `a4187f0f66228603df211628d6d8ae239d6147d0`, plus the enrolment asymmetry and a method trap that makes a hand-built check vacuous while it looks clean.**
+
+BLUF: hit while raising KS-1660 (a new originate jest file), not while looking for it. I was going to file a separate ticket; a board search found this one already names originate in its title, so the measurement belongs here. Nothing in this comment 
+
+[2026-10-19T13:22:04 id=98f5f30b by kamil.kreiser@secuura.ai]
+**⚠ Corrected 2026-10-19 by the same seat, after gate AQ1 (N4) did not reproduce my count.**
+
+The "2 errors" below was produced by a **narrower frame**: my scratch config set `types: ["node", "vitest/globals"]`. Without that override, the same including-tests config finds **6** errors, the same on develop and on #1628's landing:
+* the two below;
+* plus **4 × TS2741 `keepAliveTimeoutBuffer`** in `ks698r1`, `ks952-rate-limit-scope-route` (`:77`), `ks976a` and `ks976b`.
+
+Cause, with the versions me
+
