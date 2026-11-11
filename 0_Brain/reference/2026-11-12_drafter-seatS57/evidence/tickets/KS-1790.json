@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-1790",
+ "title": "The tenant-creation contract, TOKENISATION.md and the admin UI still describe a key file returned once at creation; the key service has not returned one since 2026-04-28",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-28T12:04:14.043Z",
+ "updatedAt": "2026-10-28T12:04:14.043Z",
+ "description": "**BLUF:** The published tenant-creation contract, `docs/TOKENISATION.md`, `docs/METERING-USAGE-API.md` and the admin UI all describe a vault key file that tenant creation returns once. The key service has not returned a key since 2026-04-28 (commit `1f1cba638`, \"Audit Tier-0 ... B-5\", which changed `generate-key` to persist the key wrapped server-side and answer only `{ keyId, keyHash }`), so since that commit the real service has not let `POST /api/tenants` carry a key file on success, and the admin UI's key-file dialog can never open. One logical path, three kinds of site; the checklist below names each. Low: it misleads readers and consumers, it does not break a request.\n\n## Exercised (real entry modules, `pg` and JWT stubbed, no Docker)\n\n* The real `generate-key` answers with the fields `algorithm, createdAt, keyHash, keyId, success, tenantId, tenantSlug, version`: no `keyFile`, no `key`.\n* Tenant creation against that answer: `201` with body keys `meteringApiKey, success, tenant` (no `keyFile` key at all); with the key service refusing (403 `success: false`) the same `201` carries `keyFile: null`. So success and failure differ only as \"key absent\" versus \"key null\", and the admin UI treats both as \"no key dialog\".\n* Files in the Platform K project folder: `5_Project_History/2026-10-28_seatY-4th/evidence/trace/generate_key_probe.json` and `tenant_create_real_shape.json`.\n\n## Checklist (develop `2b7ef12fa564`, line numbers from there)\n\n- [ ] **Published contract.** The `keyFile` property of the 201 of `POST /api/platform/tenants`: description \"The tenant's vault key material (PII/encryption), returned once at creation; null if key generation failed (mint manually later).\" Source `services/tenant-provisioning/src/tenant-provisioning.openapi.ts:385`, published in `docs/openapi/secuura-api.yaml` (regenerate it with `npm run generate-openapi`).\n- [ ] **Docs.** `docs/TOKENISATION.md`: the key file format and the example response near `:312` to `:321`, the Key Security note at `:182`, the write-path example at `:201` (`\"key\": \"<from vault_key_hash lookup>\"`; no code does that lookup and a SHA-256 hash cannot give the key back), Key Lifecycle step 4 at `:382` to `:385` (\"The key file is returned to the super-admin\"), and the troubleshooting step at `:486`. `docs/METERING-USAGE-API.md:120` (\"alongside the vault `keyFile`\").\n- [ ] **Code and UI.** `services/tenant-provisioning/src/index.ts:125` to `:139`: `requestKeyGeneration` is typed as returning `keyFile`, and the handler copies `keyResult.keyFile` (undefined on the real answer). `frontend/admin/src/pages/platform/ClientList.tsx:70` (`if (result.keyFile) setKeyFileJson(...)`) with the dialog at `:323` to `:332`, and the type at `frontend/admin/src/services/api.ts:1045`.\n\n## A decision sits under this (not mine)\n\nEither a way to deliver the tenant's key is restored or `keyFile` is retired from the contract, the docs and the UI. The design comment in `services/tokenisation/src/index.ts:126` promises \"a separate admin-only, audited endpoint can return the wrapped envelope\"; no such route exists (routes: health, tokenise, detokenise, generate-key, rotate-key, detect-pii, hash-key). Related: the gateway keeps a per-session tenant key that an administrator uploads (`POST /api/platform/tenant-key`), but no route returns a key to upload, and the gateway's tokenise and detokenise helpers have no caller in the tree (none at the commit that introduced them either).\n\n## Not covered\n\nThe admin UI was read, not rendered; consumers outside this repository (the Extranet, other repositories, runbooks) are unmeasured; live data on the boxes is unmeasured.\n\n## Board search before filing (Secuura-PK, `issues()` filter over title and description, archived included)\n\nLiterals: `requestKeyGeneration` (1 hit, KS-336, Done; the firing control), `zzqx-no-such-literal-9931` (0; the null control), `keyFile` (1 hit, KS-336, Done, the original design), `key file` (3 hits, none about tenant creation), `B-5` (KS-630, KS-612; neither concerns this), `TOKENISATION.md` (KS-525, KS-300; neither concerns this), `ClientList` (0), `vault key` (0), `keyPending` (0). None records that the key file is no longer returned.\n\nRelated to KS-1240 (not a blocker).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

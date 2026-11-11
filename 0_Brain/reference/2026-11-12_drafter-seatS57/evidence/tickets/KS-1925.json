@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-1925",
+ "title": "analytics: createExport answers 202 for an export the database never saved, because dbSaveExport swallows every database error",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-01T06:32:31.358Z",
+ "updatedAt": "2026-11-01T06:32:31.358Z",
+ "description": "**BLUF:** In the analytics service, `POST /api/analytics/exports` answers `202` for an export the database never saved. `ExportService.dbSaveExport` catches every database error and only logs it, so `createExport` carries on and the route reports success. This holds for ANY error, an ordinary one included. Found by QA gate 78 on pull request 1893 (KS 1868) as a pre-existing item at develop `85c56a3d1eb9`; that change does not cause it. Priority Low.\n\n* **Where (develop** `85c56a3d1eb9`**):** `Blockchain/Dev/services/analytics/src/services/exportService.ts`. `dbSaveExport` puts the export in the in-memory map first (line 31); when a database is configured it then runs the INSERT in a try whose catch, at line 56, only logs `DB save export failed` and returns. `createExport` awaits it at line 75, starts `processExport` without an await, and returns the record. `Blockchain/Dev/services/analytics/src/routes/analytics.ts:308-310` awaits `createExport` and answers `res.status(202)`.\n* **Effect (read from the code, not reproduced):** when the database write fails (an outage, a constraint, a bad value), the caller still gets `202` and an export id, and the record exists only in that process's memory map. It would be lost on a restart and would not be visible to another instance, while the database never holds it. `processExport` swallows its own saves the same way (lines 113, 157 and 161 at the base).\n* **Not caused by pull request 1893:** that change reads the thrown value safely inside this same catch. Before it, an unreadable value rejected `createExport` (a route 500) or left an unhandled rejection from `processExport` (gate 78); after it, that case behaves like an ordinary Error, which already answered `202`.\n* **Not the same as:** KS 1922 (the stored error message that the export routes return) and KS 1856 (the list route's missing role and tenant checks). Both touch `exportService.ts`; neither covers a failed save.\n* **Not measured:** a real database failure, whether anything depends on the `202`, or how often a save fails. A direction for the owner to decide: let `dbSaveExport` report the failure to `createExport` and answer a non-2xx, or document the memory-only behaviour.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

@@ -1,0 +1,98 @@
+{
+ "identifier": "KS-1176",
+ "title": "api-gateway: connector-key principals (verificationLevel 'api_key') fail meetsVerificationLevel against 'none' \u2014 every Platform-S originate 403s once the doc-type catalogue is seeded",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-16T08:56:23.292Z",
+ "updatedAt": "2026-11-11T07:15:24.269Z",
+ "description": "**BLUF:** `meetsVerificationLevel('api_key', 'none')` **returns false because** `'api_key'` **is not in** `VERIFICATION_LEVEL_ORDER` **(**`indexOf` **\u2192 -1, and** `-1 >= 0` **is false). So once the document-type catalogue is seeded, every** `POST /api/documents` **from a Platform-S connector key is refused with** `INSUFFICIENT_VERIFICATION_LEVEL` **\u2014 even though** [KS-388](https://linear.app/secuura/issue/KS-388/k-freeze-documenttype-as-a-strict-enum-originate-flat-anchor-metadata) **seeded** `SSD_DOCUMENT` **as \"deliberately friction-free\" with** `creatorVerificationLevel: 'none'`**. Fix is a few lines in** `services/api-gateway/src/services/enforcement.ts`**; this is the K-side root cause of** [PS-519](https://linear.app/secuura/issue/PS-519/originate-403s-under-connector-keys-k-wants-a-verification-level-api).\n\n## Symptom\n\nPlatform-S app log, on every upload under a connector key (135\u2013142 occurrences per full S suite run):\n\n```\nCardanoAnchor: originate POST status=403 body={\"success\":false,\"error\":{\n  \"code\":\"INSUFFICIENT_VERIFICATION_LEVEL\",\n  \"message\":\"This document type requires NONE verification. Your current level is API_KEY.\"}}\n```\n\nS then falls back to flat `/api/anchors`, which succeeds \u2014 so the anchor badge goes green but **no K document exists**: no content-hash resolution for `/api/verification/verify`, no lineage root, no lifecycle events. S's `@k-live` suite fails 11/14 on this alone.\n\nReproduced 2026-09-16 on Peter's Mac, slot 4 pair: platform-k `0b25f823f` (develop, fresh worktree, fresh volumes) \u2194 platform-s `2fa69634` and again `d36ff71e` (develop). Two full S suite runs, 12 failures each, 11 of them this.\n\n## Builds under test\n\n| Platform | Branch | Commit (full SHA) | Slot |\n| -- | -- | -- | -- |\n| platform-k | `develop` | `0b25f823f6660ac52b665f14055799ff0c3b616d` | 4 \u2014 gateway `:7182`, `secuura_slot4`, fresh worktree + fresh volumes |\n| platform-s (run 1) | `develop` | `2fa696340967313fef214bfe1232f17a69cec410` | 4 \u2014 `https://localhost:5422`, `ssd-slot4` |\n| platform-s (run 2) | `develop` | `d36ff71e5d347089c5cff08a0892bd8cb0e45385` | 4 \u2014 same slot, `--rebuild --reset`; `/Health/Data` `build.Commit` matched |\n\n## Cause\n\n`Blockchain/Dev/services/api-gateway/src/services/enforcement.ts`\n\n* `:39` `VERIFICATION_LEVEL_ORDER = ['none','basic','social','standard','enhanced','high','government']`\n* `:53-57` `meetsVerificationLevel(userLevel, requiredLevel)` = `ORDER.indexOf(user) >= ORDER.indexOf(required)`\n* `middleware/auth.ts:276` sets `verificationLevel: 'api_key'` on every connector-key principal.\n\n`'api_key'` is not in the order \u2192 `indexOf` = `-1` \u2192 `-1 >= 0` is false \u2192 a connector key fails even `none`. Any other unknown level string fails the same way.\n\nThe check is only reached when `resolveDocumentType` finds the type. On an unseeded K it returns null and `:110-127` (the [KS-388](https://linear.app/secuura/issue/KS-388/k-freeze-documenttype-as-a-strict-enum-originate-flat-anchor-metadata) fallback) passes through \u2014 which is why the failure appears and disappears between rebuilds, and why [PS-519](https://linear.app/secuura/issue/PS-519/originate-403s-under-connector-keys-k-wants-a-verification-level-api) saw the suite \"green 2h earlier against the previous K\". `routes/admin.ts:283-303` seeds `SSD_DOCUMENT` with `creatorVerificationLevel: 'none'` and says why: *\"deliberately friction-free \u2026 gating either would break those paths.\"* The ordering bug defeats that intent. Confirmed on the live K: `GET /api/document-types` lists `SSD_DOCUMENT`, `creatorVerificationLevel: none`.\n\n## Fix (either; the first is narrower)\n\n1. In `meetsVerificationLevel`, an unknown `userLevel` satisfies `requiredLevel === 'none'` only \u2014 treat `indexOf === -1` as index 0 when the requirement is `none`, and still refuse any higher requirement, so a connector key cannot originate a `STANDARD`-gated type by accident.\n2. Or place `'api_key'` explicitly in the order \u2014 but where a machine credential ranks against human KYC levels is a product decision, not a bug fix.\n\nEither way the message should stop rendering `NONE` as harder to meet than `API_KEY`.\n\n## Verification\n\n* Unit: `meetsVerificationLevel('api_key','none') === true`; `meetsVerificationLevel('api_key','standard') === false`; an arbitrary unknown string behaves the same as `'api_key'`.\n* Live: S upload under a connector key against a **seeded** K \u2192 originate `201`; S `@k-live` `chain_match.spec.ts` green; `POST /api/verification/verify` resolves the document by content hash.\n\n## Related\n\n* [PS-519](https://linear.app/secuura/issue/PS-519/originate-403s-under-connector-keys-k-wants-a-verification-level-api) \u2014 the S side (surface K's `error.code` instead of the \"revoked or wrongly scoped\" guess); its open question \"deliberate tightening or seed drift?\" is answered here: neither.\n* [KS-388](https://linear.app/secuura/issue/KS-388/k-freeze-documenttype-as-a-strict-enum-originate-flat-anchor-metadata) \u2014 the catalogue seed that arms the check.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": [
+   {
+    "type": "related",
+    "relatedIssue": {
+     "identifier": "PS-519"
+    }
+   }
+  ]
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1014",
+    "title": "KS-1176: a connector key's verification level ranks as none, so a connector key can create a none-level document type"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "d14b938f-ca41-425f-b377-c7551cd51bb5",
+    "createdAt": "2026-11-11T07:15:24.283Z",
+    "body": "**BLUF:** The published 403 text for POST /api/documents still names no allow-list refusal at develop `fcd178ff34fa`; this ticket's own round-2 record (comment 204f3bdd, 2026-09-16, 'R-g, extended') says the same thing, so this comment adds the lines and the source and proposes nothing. Nothing is merged or deployed by it.\n\n- **What the spec says:** `Blockchain/Dev/services/originate/src/originate.openapi.ts` lines 1007 to 1021 describe the 403 for POST /api/documents as 'NOT exhaustive' and list the role or `documents:write` scope, an `organizationUuid` that differs from both identifiers of the acting Organisation, an `onBehalfOf` subject in a different Organisation than the key, and the gateway codes `DOC_TYPE_DISABLED`, `INSUFFICIENT_VERIFICATION_LEVEL`, `MFA_REQUIRED` and `AUTH_PROVIDER_NOT_ALLOWED`. It does not name the connector document-type allow-list refusal that PR 1014 round 2 made reachable through `documentType || type`.\n- **Source:** gate 210 (PR 2020, KS-1534), finding N-3, a Note not against that PR: neither the base nor the head names allow-list refusals in that operation's 403 text, so a connector integrating from the spec alone cannot learn this 403 from the POST operation; the 403 text's own 'NOT exhaustive' sentence softens the gap.\n- **First recorded:** comment 204f3bdd on this ticket, 'the 403 text does not mention the allow-list refusal'.\n- **Board search (S 56th, 2026-11-11):** searched 'allow-list refusal', 'CONNECTOR_ALLOW_LIST_NOT_ALL_STRINGS_MESSAGE', 'not permitted to register', 'NOT exhaustive', 'allowedDocumentTypes' and 'POST /api/documents+403' (both controls held). 'NOT exhaustive' and 'CONNECTOR_ALLOW_LIST_NOT_ALL_STRINGS_MESSAGE' hit nothing; 'allow-list refusal' hit this ticket and two email-logging tickets (KS-1964, KS-2099); the other three terms hit tickets about the allow-list's storage and fail-open behaviour and about other 403 surfaces (KS-1256, KS-1232 and others), read by title only, and none is titled for this gap. The full result is in 5_Project_History/2026-11-11_seatS-56th/evidence/search_n3_s56.out.\n- **NOT done:** no spec edit, no test, no live read.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "97f33914-6bd0-4115-ab14-f979f9fd25f0",
+    "createdAt": "2026-11-06T03:08:07.929Z",
+    "body": "**The check this ticket owes: Platform-S uploads under a connector key, on kintsugi, 6 Nov 2026.** dev-ps wrote two uploads, and each confirmed:\n\n* document 24 (`weakestlink-01-hook.png`), K `23417570-3992-4f5a-8894-297485e32653`: tx `fbde1f22cbaa7e36\u2026`, block 4829158.\n* document 25 (`test-07-unicode.pdf`), K `d7163cda-a6f8-40cb-bceb-28dc0d325dbb`: tx `1a70dd416c735821\u2026`, block 4829159.\n\nBoth were confirmed at 01:29:38 UTC, and on-chain metadata carries each document's own hash and id. S sent `x-api-key`, with the actor unverified.\n\n**Not shown:** I can't see whether kintsugi's document-type catalogue is seeded, which is the condition in this ticket's title. Your side can read that. S's app log for that hour was lost when dev-ps restarted at 02:51 UTC, so the evidence is the ledger and the chain.",
+    "user": {
+     "email": "stuart.jamieson@secuura.ai"
+    }
+   },
+   {
+    "id": "de152da8-e29d-4953-b045-04b86d2b3602",
+    "createdAt": "2026-11-04T02:31:56.461Z",
+    "body": "**BLUF:** Not run on kintsugi: needs a connector key. Delivered: PR 1014 merged as fa887f382b21 on develop, deployed to kintsugi at ee1e1b832115 (kintsugi's REVISION head, read 2026-11-04 01:59Z). Left open.\n\n- **Owed check:** a Platform-S upload under a connector key.\n- **Why not run:** This sweep holds no connector key, and an upload writes a document on a shared box.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "399dea47-26bd-4ccd-b07e-f659ea2f8bde",
+    "createdAt": "2026-11-03T22:50:31.932Z",
+    "body": "**BLUF:** Delivered: PR 1014 merged as fa887f382b21 on develop, deployed to kintsugi at b1fb543640e7 (carried deploy record of 2026-11-01, not re-measured today). Verified by code read, not observed live: `Blockchain/Dev/services/api-gateway/src/services/enforcement.ts:63` ranks an unrecognised verification level as none (`userRank = userIdx === -1 ? 0 : userIdx`), which is how a connector key's api_key level now compares. Left open: observation owed. The merge comment of 2026-09-16 keeps the ticket open until a live Platform-S upload under a connector key is run against a seeded K: live sweep owed (write), not run on kintsugi.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "204f3bdd-9232-4886-98d7-497fb33b8233",
+    "createdAt": "2026-09-16T22:45:57.000Z",
+    "body": "## BLUF\n\nPR #1014 merged. A connector key's `api_key` verification level (any unrecognised level) now ranks as `none`, and the connector document-type allow-list resolves `documentType || type`. **This ticket stays In Progress.**\n\n`Merged fa887f382b212b8da4a0a4a556bacb05ea34daaa; offline gates green; NOT Done per secuura-test-discipline \u00a75f \u2014 live sweep owed (torn-down rebuilt stack, all containers verified up), unverified: the live Platform-S upload under a connector key against a seeded K, a real originate, and the production platform-settings shape`\n\n## Recommendation\n\nNo action needed now. The live sweep is batched into the Sunday QA pass. Three findings from the round-2 gate are filed as separate Backlog tickets (see Detail); one of them is built next as a follow-up PR.\n\n## Detail\n\n**The merge** (Wednesday's GO 2026-09-16 22:41:29Z, spf/dkim/dmarc pass; tier-1 round-2 delta gate GO WITH FINDINGS at `9ba0caf78b8ddb737541df38303b776c982521d2`, no Blocker; F-1 closed: 0 disallowed types admitted on head and merged, 32 at round 1):\n\n* Squash `fa887f382b212b8da4a0a4a556bacb05ea34daaa` at 22:44:35Z, pinned with `--match-head-commit 9ba0caf78\u2026`.\n* Verified at origin: develop tip = the merge commit; one parent = `7e89318bcedbc9a35757d4298ace54a6a23020bd` (#1016); tree `5748a1d68318ed2e310a360fb79e7a1ebc63c785` = the merge-tree prediction; 3 files = the PR's.\n* The GO's equality targets hold: `enforcement.ts` `be466fbf4`, `verification.ts` `28fb58343`, `ks1176-connector-key-level-ranks-as-none.test.ts` `43cebf8d7`. The verification.ts blob differs from the PR head's by design: #1016 landed first in the same file, ~900 lines apart.\n* Reports: round 1 `Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1176-1014-616c766a5-tier1-r1/report.md`; round 2 `\u2026/2026-09-17-ks1176-1014r2-9ba0caf78-tier1-r2/report.md`.\n\n**Records assigned to merge time (fix-round mail, 21:09:01Z):**\n\n* The workflow-bypass connector row.\n* `PROPERTY_DEED` ranks at `none`: a product question, not answered here.\n* The \"nothing beyond anonymous\" premise was vacuous, because anonymous is 401 first. Round 2 reworded the why-comment to \"an unrecognised level ranks as none, the lowest authenticated level\" (R-c, now CLOSED).\n* KS-1190 already names `verification.ts:554-557` (the unknown-REQUIRED fail-open, left as it was at base).\n* The tenant spoof is stripped by the app chain.\n* No level marker is sent on the forward.\n* `x-api-key` is not declared on the spec operation.\n* Two catalogue sources exist, and the seed is off in production.\n\n**Records from round 2:**\n\n* **R-10:** the allow-list matches exactly, while enforcement matches case-insensitively and by id. That is fail-closed: 23 false refusals on head (e.g. `ssd_document`, `dt-seed-7`), 10 at base; no legitimate shape is newly refused against base.\n* **R-g, extended:** `type` is not declared in `DocumentCreateRequest`; the 403 text does not mention the allow-list refusal.\n* PR #1016's `ks1072-\u2026test.ts(124,10)` TS18046 shows on develop under a test-including program. It is #1016's record (KS-1180), not this PR's.\n\n**Filed from round 2 (Backlog, not built by this merge):** N-1 (served `data.documentType` unchecked, Major, pre-existing), N-4 (untyped body from a restricted connector stored as DOCUMENT, Minor, pre-existing), and N-2 + N-3 together (a STRING allow-list substring-matches; no both-present precedence cell, Minor). N-2/N-3 is built next as a tier-1 follow-up PR.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "c90bfc2c-8222-4bdf-b938-e0927542ccb3",
+    "createdAt": "2026-09-16T21:25:09.757Z",
+    "body": "## BLUF\nPR #1014 round 2 is at head `9ba0caf78b8ddb737541df38303b776c982521d2` and awaits its QA delta gate. The round-1 QA gate found that a connector restricted to certain document types could name any type through the `type` field instead of `documentType`, and this change had widened that. Round 2 fixes it in the same PR: the allow-list now reads the same key enforcement reads.\n\n## Recommendation\nNo action needed. This ticket stays open: a live sweep is owed after merge.\n\n## Detail\n- **Fix:** `services/api-gateway/src/routes/verification.ts`, the connector allow-list resolves `documentType || type`.\n- **Measured in-process at the new head:**\n  - a connector restricted to `DOCUMENT` naming `SSD_DOCUMENT` via `type` is refused 403 (201 at round 1);\n  - the same via `documentType` is refused 403;\n  - `DOCUMENT` via `type` still passes;\n  - an untyped body behaves as before.\n- **Suites:** api-gateway 49 files / 428 tests pass; packages/shared 44 / 851 pass; tsc rc 0. A seven-row tamper table in the PR body reds exactly as predicted.\n- **The round-1 gate's other findings are separate tickets, not built:** KS-1195 (per-key rate limiter), KS-1196, KS-1197, KS-1198.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "d2296a6e-b53e-4dd7-bfa1-707c7e0ee834",
+    "createdAt": "2026-09-16T20:07:46.496Z",
+    "body": "## BLUF\nPR #1014 (https://github.com/Secuura/Distributed_Secuura/pull/1014) is open for this ticket at head `616c766a57a51238450c99bbf1d59bb109e3841c`, awaiting its tier-1 QA gate.\n- **The fix:** in `meetsVerificationLevel` (`services/api-gateway/src/services/enforcement.ts:53-64`), an unrecognised user level such as a connector key's `api_key` now ranks as `none`. It satisfies a `none` requirement and nothing higher. This is the narrower of the two fix shapes in this ticket.\n- **What it restores:** a connector-key `POST /api/documents` on `SSD_DOCUMENT` passes enforcement. Every type above `none` still refuses a connector key.\n\n## Recommendation\nNo action needed. This ticket stays open after the merge: the live half of its verification (a Platform-S upload under a connector key against a seeded Platform K, then `POST /api/verification/verify` resolving it) is still owed.\n\n## Detail\n- **Measured in-process, at the PR head** (the real router and the real enforcement, with a mocked document-type catalogue):\n  - a connector key creating `SSD_DOCUMENT` passes enforcement (403 before the fix);\n  - a connector key creating a `standard` type is still refused 403 `INSUFFICIENT_VERIFICATION_LEVEL`;\n  - the verifier gate on `POST /api/documents/:id/verify` still refuses a connector key on a standard-gated type.\n- **Unit cells:**\n  - `api_key` vs `none` \u2192 true; `api_key` vs `basic` / `standard` \u2192 false;\n  - an arbitrary unrecognised string behaves exactly as `api_key`;\n  - every known level pair is unchanged (225 rows).\n- **Not changed, and filed separately:** an unknown REQUIRED level still passes every authenticated caller. That is KS-1190. The PR pins today's behaviour so it cannot move silently.\n- **Not changed:** three other level-order copies with no production callers (auth and shared `requireVerificationLevel`, shared `policy-engine`) and the issuer frontend's upload pre-check. The PR records them.\n- **Suites at the head:** api-gateway 49 files / 423 tests pass; packages/shared 44 / 851 pass; tsc rc 0. A six-row tamper table in the PR body reds exactly as predicted.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

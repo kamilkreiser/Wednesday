@@ -1,0 +1,49 @@
+{
+ "identifier": "KS-1702",
+ "title": "Migration 055 test hardening (gate CN1 N2, N3, N5): the tenant scope is half pinned, REPORT is not hermetic, and the cell file's header is stale",
+ "state": {
+  "name": "Done",
+  "type": "completed"
+ },
+ "priority": 3,
+ "assignee": null,
+ "archivedAt": "2026-11-03T23:00:28.438Z",
+ "createdAt": "2026-10-20T04:31:26.748Z",
+ "updatedAt": "2026-11-03T23:00:27.040Z",
+ "description": "## BLUF\n\n**Three test-only gaps that gate CN1 found in migration 055's cell file after the code was already correct.** Nothing here is a migration defect \u2014 the gate verified the shipped 055 skips every shape below. What is missing is the cells that would stop a future change re-opening them, plus one stale header. One ticket, three items, all in `Blockchain/Dev/services/originate/src/__tests__/ks1557-055-backfill.integration.test.ts`.\n\nSource: gate CN1's verdict on pull request 1654, notes N2, N3 and N5. 055 merged on 2026-10-20 as `32964477fe8828eb78240150e8ab59bd8179f339`.\n\n## Item 1 (N2) \u2014 the tenant scope is only half pinned\n\n`CROSSTENANT` kills the mutant that unscopes **both** halves of the cross-check (2 red, by assertion). **Two equally fail-open variants pass 17/17:**\n\n* **O3** \u2014 remove `ap.tenant_id = p.tenant_id` from the `parent_agrees` half only. On the gate's fixture this credits `gx-K52` to c1 (the parent's own-tenant row names c2, and a row filed under T2 names c1) and also credits `gx-K30` to c7.\n* **O4** \u2014 scope on the **child's** tenant (`d.tenant_id`) instead of the parent's. This credits `gx-K53`: the parent sits in T1 with no own-tenant row, and the child plus a planted row both sit in T2. That is the exact forgery shape the migration header gives as its reason for scoping on the parent.\n\nThe shipped code skips K52, K53 and K30. **Two cells are needed**, one per variant, so each half of the scope is pinned separately rather than only the conjunction.\n\nInert detail worth a comment rather than a cell: `gx-K31` (child in T2, parent in T1, corroborated in T1) is credited and its row lands in T2.\n\n## Item 2 (N3) \u2014 the REPORT cell is not hermetic\n\n055 is global; the `REPORT` cell compares **every** printed skipped id against a set scoped to the run's own tenant. One foreign, uncreditable, version-minted document in a third tenant therefore fails the cell by assertion. The file header's claim \u2014 *\"one tenant of this run's own, so the cells cannot read another seat's rows\"* \u2014 is false for that cell.\n\nBy the same mechanism (read from the code, not measured): on a **shared** integration database the FORWARD and RLS runs insert `create:connector` rows on other tenants' candidates, and `afterAll` deletes only this run's two tenants, so those rows survive the suite.\n\nFix shape: scope the report comparison to the run's tenants, and make the cleanup cover what the run can write \u2014 not only what it created.\n\n## Item 3 (N5) \u2014 the test file's header still carries round-2 cite drift\n\n* Lines 13-14 give `/:id/sign-cert` (`:2891`) and `/:id/sign-wallet` (`:3159`). At the merged head those are `:2905` and `:3173`.\n* Line 18 states *\"server-set on all three minting routes since KS 1508\"* as the premise, and only the next paragraph corrects it. That is the premise blocker B2 was about; stating it unqualified first is the thing that misled round 2.\n\nThe **migration** header's cites were checked by the gate and are all correct (`:124`, `:158`, `:2347`, `:2905`, `:3092`, `:3173`, `:3287`, `:617-618`).\n\n## Why this is a separate ticket\n\nRound 3 was the last round Kam allowed on pull request 1654 (card `secuura-ks1557-055-second-nogo-round3-1020`, tapped (a)). The gate's instruction was explicit: record these, do not change code or tests in that pull request, file one follow-up. This is it.\n\n## Not in scope here\n\nGate CN1's **N1** (corroboration is per parent, not per child) is a product-behaviour residue, not a test gap, and carries a kintsugi counting precondition before 055 runs there \u2014 it stays on KS-1557 and with the coordinator, not on this ticket.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1780",
+    "title": "Refs KS-1702: migration 055 cell file kills the two scope-half mutants, scopes REPORT, cleans up every marker row (test-only)"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "60d95b84-adfa-4eef-9dd0-e09a1241f7c8",
+    "createdAt": "2026-11-03T23:00:25.254Z",
+    "body": "**BLUF:** Delivered: PR 1780 merged as b67a1c8d3a52 on develop, deployed to kintsugi at b1fb543640e7 (recorded deploy, 2026-11-01). Verified by code read at b1fb543640e7, not observed live (a test-only change; migration 055 is untouched). Closing as done.\n\n- **All three items are in `Blockchain/Dev/services/originate/src/__tests__/ks1557-055-backfill.integration.test.ts`:** N2, the two scope-half cells O3 (tenant scope removed from the agreement half only) and O4 (the child's tenant used instead of the parent's), driven by the named-mutant switch at :67; N3, the REPORT cell made hermetic by a third tenant holding a foreign document (:77) and a cleanup that removes only the marker rows that appeared during the run (:91-92); N5, the stale header corrected (:29-36).\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "3fd05e19-02c0-415a-a4ad-0603d5582968",
+    "createdAt": "2026-10-28T08:08:43.207Z",
+    "body": "BLUF: KS-1702 is ready for the gate. The migration 055 cell file now fails on both scope-half mutants the old file let through. Test-only: migration 055 is byte-identical and no product file changes.\n\nPR https://github.com/Secuura/Distributed_Secuura/pull/1780 (base develop `bd6697e079fc`, head `ba9a24a775dab486af04b0586a1314f90ef63eee`, read back from origin after the push).\n\n## What changed\n- N2: cell O3 (tenant scope removed from the `parent_agrees` half only) and cell O4 (scope on the child's tenant instead of the parent's). The inert gx-K31 detail stays a comment.\n- N3: REPORT is scoped to the run's own tenants, and `afterAll` removes every marker row that did not exist before the suite.\n- N5: the header route cites read `:2937` and `:3205` at `bd6697e079fc`, and the \"server-set since KS 1508\" premise carries its qualification first.\n- A test-only red-proof seam (`KS1557_055_SQL_UNDER_TEST`, default is the real migration) plus a SEAM guard cell that is red whenever the loaded SQL's sha256 differs from the real file's, so the suite cannot silently test a copy.\n\n## Measured (real PostgreSQL 15.19, one container, stopped afterwards)\n- Real migration: 20/20 (RLS cell ran, 0 skipped). Base file: 17/17.\n- Mutant O3 on a copy of 055: base file 17/17 (survives), new file 17/20 (O3, REPORT, SEAM red). Mutant O4: base 17/17, new 17/20 (O4, REPORT, SEAM red).\n- REPORT: one foreign uncreditable document in a third tenant turns the old REPORT red (16/17); the scoped version passes.\n- Cleanup: a marker row planted on a tenant the suite did not create is left by the old `afterAll` (1) and removed by the new one (0); a marker row that existed before the suite is kept.\n- `tsc` including test files rc 0, lint 0 errors, `audit:gate` and `audit:locks` rc 0, docs matrix 18 passed 0 failed.\n- Pre-push hook: 13 of 16 legs ran, 3 skipped (legs 3, 4, 8: no local stack up), nothing failed. That is not a pass for those three legs.\n\n## Not done\n- Not run: the four platform suites, the originate unit suite, a running stack, Node 24 (this host has only Node 26.8.1), any deploy.\n- Gate CN1's N1 (corroboration per parent, not per child) is a product-behaviour residue and stays on KS 1557.\n- Both Projects Documents docs gain +19/-0 at a PROVISIONAL section 84 for the merger to renumber. Open PRs 1383, 1775 and 1776 also append to those docs; a docs-only conflict is resolved at merge.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,87 @@
+{
+ "identifier": "KS-770",
+ "title": "Review stream: API contract and the four platform suites",
+ "state": {
+  "name": "Todo",
+  "type": "unstarted"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-09-03T02:02:49.439Z",
+ "updatedAt": "2026-09-28T12:45:06.407Z",
+ "description": "**Review stream for Peter \u2014 one review, one test pass, 19 tickets.**\n\n## The one test pass\n\n1. Regenerate the OpenAPI spec, then **restart** the api-gateway container. The yaml is bind-mounted, so a restart publishes it and a rebuild does not.\n2. `cd systemTest/schemathesis && python3 scripts/run.py pre-merge --base-url http://localhost:6882` \u2014 **13.4 min measured** (~2,016 cases over 318 operations). Report **the failing SET of operation ids and its diff against the develop baseline set**, never a bare count.\n3. `node scripts/preflight/spec-auth-conformance.mjs --base http://localhost:6882` (seconds) \u2014 every bearer-authed operation must reject unauthenticated.\n4. `cd systemTest/playwright && npm run quality:static && npm run test:unit && npm run test:e2e` \u2014 **3.8 s measured**, all three must pass.\n5. `cd systemTest/performance && npm run test:smoke` \u2014 **53 s measured**. Read **the printed** `Status:` **line, not the exit code**, which is 0 either way.\n\n## Two traps that make this run lie\n\n* **A second back-to-back Schemathesis run fails at *setup* with 401**, not on a finding: the fuzz tiers change the test persona's password. `docker restart secuura-auth` re-seeds it. The `Run validity: OK` line does not catch this \u2014 it counts schemathesis operations, not pytest setup errors.\n* **A partial stack produces a confident FALSE RED. **`docker-compose.local.yml` defines 38 services; when some are down the gateway answers `502 BAD_GATEWAY` and the suites score it as a defect indistinguishable from a real one. Run `docker compose -f docker-compose.local.yml ps` first and confirm every service is up.\n\nCommands and wall-clocks are quoted from `Blockchain/Dev/docs/DEV-PROCESS.md` section *Manual CI-gate equivalents*.",
+ "parent": null,
+ "children": {
+  "nodes": [
+   {
+    "identifier": "KS-1015"
+   },
+   {
+    "identifier": "KS-723"
+   },
+   {
+    "identifier": "KS-693"
+   },
+   {
+    "identifier": "KS-678"
+   },
+   {
+    "identifier": "KS-665"
+   },
+   {
+    "identifier": "KS-663"
+   },
+   {
+    "identifier": "KS-188"
+   },
+   {
+    "identifier": "KS-61"
+   }
+  ]
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "1be3b3b5-9d51-4de9-a2ad-0791b2ce4e58",
+    "createdAt": "2026-09-28T12:45:06.432Z",
+    "body": "**Superseded figure, for the record.** This ticket's description quotes the k6 smoke wall-clock as \"`npm run test:smoke` \u2014 **53 s measured**\" (from `Blockchain/Dev/docs/DEV-PROCESS.md`, undated, no host).\n\nRe-measured under KS-1354 on 2026-09-28: **43\u201344 s** runner wall-clock (including actor provisioning), Apple M2 Max, slot 1, on both k6 2.1.0 and 2.3.0, and 42 s again on a later 2.3.0 run. Four stacks were up, so the runs are `machineShared: true` \u2014 not a baseline. KS-1354 updates `DEV-PROCESS.md` and the QA cheat sheet to that figure with the caveat. No action needed here; noting it so the 53 s is not re-quoted.",
+    "user": {
+     "email": "peter@obeden.com"
+    }
+   },
+   {
+    "id": "ffd2ea27-5be2-4db6-9d18-0ea6a1c09c93",
+    "createdAt": "2026-09-05T22:16:07.459Z",
+    "body": "## RECORD ONLY \u2014 Kam's ruling on the #800 status question. No new ask, nothing for Peter to action here.\n\n### `secuura-800-peter-nudge-2026-09-03` \u2014 Kam, recorded 2026-09-04 08:38\n**Verbatim: `doconly` = \"Facts-only status doc, no nudge (DEFAULT)\".**\n\n**What that rules out, stated plainly:** there is to be **no chase, reminder or nudge** to @PeterObeden about review throughput. The deliverable was a facts-only status document and nothing else.\n\n**Where it stands.** The document exists as **PR #811** \u2014 *\"docs: PR status for Peter, measured 2026-09-04 04:46Z \u2014 written, NOT sent\"* \u2014 still **OPEN**, and its own title records that it was deliberately not sent. The measured answer it carries was posted as a comment on **KS-485**, and this ticket plus KS-771 and KS-772 each carry a pointer to it (`90cbe598` here, 2026-09-05T04:01Z), correctly framed as \"Pointer, not a new ask\".\n\nSo the ruling is **satisfied in substance** \u2014 facts were published, no nudge was sent \u2014 and this comment supplies the missing piece: the ruling itself, recorded on the review-stream parent, so the \"no nudge\" half is discoverable by whoever next wonders why nobody chased the queue.\n\n**Provenance:** Wednesday's s137 successor brief, 2026-09-05T21:53:00Z (SPF + DKIM + DMARC pass), item 0(b), card 11. Client-facing communication stays on tickets; the extranet is input-only.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "90cbe598-9ef4-4690-a76e-fa1f02784cb3",
+    "createdAt": "2026-09-05T04:01:58.893Z",
+    "body": "**Pointer, not a new ask:** the current PR-status answer (which PRs are live on develop, which are open and at what review state, measured `2026-09-05T04:00:52Z`) is posted as a comment on **KS-485**, so there is one place for it rather than four. Nothing needed on this ticket.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "b3ab0696-0443-4c16-b070-4f22612243bd",
+    "createdAt": "2026-09-03T02:04:51.738Z",
+    "body": "**Reviewer: Peter.** Nineteen tickets, one review, one test pass \u2014 the four platform suites run once against a freshly published spec.\n\nFolded in: *Schemathesis API Contract Testing* (11) \u00b7 *OpenAPI Spec & Contract* (6) \u00b7 *Playwright UI & Journey Testing* (1) \u00b7 *Performance & Load Testing k6* (1). The full pass, both traps and the measured wall-clocks are in the description.\n\nThe two things most likely to waste your afternoon: a **second** back-to-back Schemathesis run fails at *setup* with 401 (the fuzz tiers change the persona's password \u2014 `docker restart secuura-auth` re-seeds), and a **partial stack** returns 502s that score as findings. Check `docker compose -f docker-compose.local.yml ps` before you start.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

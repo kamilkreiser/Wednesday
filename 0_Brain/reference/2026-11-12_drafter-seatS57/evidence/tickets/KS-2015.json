@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-2015",
+ "title": "api-gateway audit export: the spec declares from and to as ^\\d{4}-\\d{2}-\\d{2}$ (required) but the route only checks new Date(x) - 7 of 9 tried values answer 200 (gate 202 G202-N3, Minor)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-05T10:52:14.192Z",
+ "updatedAt": "2026-11-10T06:41:36.697Z",
+ "description": "**BLUF:** `services/api-gateway/src/api-gateway.openapi.ts` lines 629 and 630 declare `from` and `to` of `GET /api/admin/audit/export` as `z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/)` (described as required plain YYYY-MM-DD UTC dates), but the route's `formatDate` (`services/api-gateway/src/routes/audit-export.ts` lines 99 to 106) only calls `new Date(dateStr)` and rejects NaN. On gate 202's stub nine values were tried: seven answered 200 (`0`, `1`, `-1`, `2026-9-1`, `Sep 1 2026`, `2026-09-01T00:00:00Z`, and `2026-02-30`, which matches the pattern and rolls over) and two answered 400 (`20260901`, `x`). The base behaved the same, so the verdict calls this not a regression; the PR rewrote the declared constraint. Gate 202 grades this Minor.\n\nSource: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate202-ks1645-pr2012/verdict.md` lines 18 and 42 (G202-N3); `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-05_gate202-ks1645-pr2012/ev_pattern.out`. Code read by the filing seat at develop `1b1b65c7415f` with `git show` of that commit from the shared object store (a read), not run.\n\nAs read at `1b1b65c7415f`:\n\n* `services/api-gateway/src/api-gateway.openapi.ts` lines 629 and 630: the two `z.string().regex(...)` declarations above (the verdict cites lines 630 and 631 at the PR head).\n* `services/api-gateway/src/routes/audit-export.ts` lines 99 to 106: `const date = new Date(dateStr); if (isNaN(date.getTime())) { throw ... }; return date.toISOString().split('T')[0];`. A text search of that file at the tip for a regular-expression check finds none (control: the search finds `formatDate` 3 times).\n* Verdict line 42 records the Schemathesis effect as predicted, not run: `negative_data_rejection` is active in `systemTest/schemathesis/config/checks.py` (READ ONLY).\n* KS-1645 (the PR's own ticket, read whole) does not name this.\n\nNot measured: anything by the filing seat; whether a Schemathesis run reports it; the nine values against the real route or a live stack.\n\nPriority: Low, mapped from the verdict's grade Minor (verdict line 18).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2169",
+    "title": "Refs KS-2015: GET /api/admin/audit/export accepts only a real plain YYYY-MM-DD date for from and to, and answers 400 otherwise"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "78f9f88b-a74b-440d-b8c2-5f758c49987b",
+    "createdAt": "2026-11-10T06:41:36.414Z",
+    "body": "**BLUF:** PR 2169 (head `3521d7889c93`, one commit on develop `b602c418296a`) raises piece 1 of this ticket: the audit export route's `formatDate` now accepts only a real plain `YYYY-MM-DD` date. This is a LIVE admin API change: `GET /api/admin/audit/export` will answer 400 for `from` or `to` values that answered 200 before, among them the seven values listed in this ticket (`0`, `1`, `-1`, `2026-9-1`, `Sep 1 2026`, `2026-09-01T00:00:00Z`, `2026-02-30`). Product bytes change; tier 2 by Wednesday's stamp ruling, the gate may raise it. Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **Measured by this seat:** the api-gateway suite reads 1,886 of 1,886 on develop and 1,897 of 1,897 with the patch; with the product put back, 8 of the 11 new cells fail.\n- **Callers:** none found in the frontends, other services or the Extranet by search (a control hit the gateway); the admin frontend's export button calls a different route, `/api/security/audit/export`. Callers outside the repo are UNMEASURED.\n- **Not in this PR:** the OpenAPI declaration (`api-gateway.openapi.ts` lines 629 and 630).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

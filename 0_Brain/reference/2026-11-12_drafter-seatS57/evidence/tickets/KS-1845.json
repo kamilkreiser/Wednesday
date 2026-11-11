@@ -1,0 +1,59 @@
+{
+ "identifier": "KS-1845",
+ "title": "POST /api/kyc/:id/review has no role or owner check: any signed-in caller can approve a verification and set its level, though the spec declares 403 \"Reviewer role required\" (four more admin-labelled routes ungated)",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-30T01:25:45.068Z",
+ "updatedAt": "2026-11-02T10:06:14.513Z",
+ "description": "**BLUF:** `POST /api/kyc/:id/review` approves or rejects a KYC verification and sets its `currentLevel` (up to `GOVERNMENT`), but it checks no role and no ownership. The only authentication in front of it is `jwtAuthenticate` on `/api` inside the kyc service and `authenticateToken(true)` on the `/api/kyc` gateway mount, so any signed-in caller who knows the id of a verification in state `under_review` can decide it. The published spec declares `403 Reviewer role required` on this operation. Four more routes that their own comments or the spec call admin-only have the same shape. Read from code at `develop` `530f09112`; nothing was probed against a running stack.\n\nFound while re-verifying the platform-k docs for KS-1807 (PR-1, authentication, roles and scopes). Doc-versus-code difference: the spec (and the inventory's \"they rely on gateway auth + ownership/tenant checks\") says a gate exists; the code has none.\n\n## The routes\n\n1. **kyc review** \u2014 `services/kyc/src/index.ts`, handler for `POST /api/kyc/:id/review`. It parses `reviewVerificationSchema` (`status` approved or rejected, optional `reviewNotes`, optional `newLevel` NONE to GOVERNMENT), takes `reviewerId` from `req.user?.userId` (falling back to the string `admin`), then writes `verification.status` and, on approval, `verification.currentLevel = data.newLevel || verification.requestedLevel` and saves it. There is no `requireRole`, and nothing compares the verification's owner with the caller. Spec: `services/kyc/src/kyc.openapi.ts` declares the 403 with the description \"Reviewer role required\". Gateway: the `/api/kyc` mount in `services/api-gateway/src/routes/proxy.ts` is `authenticateToken(true)` plus the proxy. Not checked: whether the verification's `currentLevel` is read back into a user's token level elsewhere.\n2. **governance** \u2014 `POST /api/governance/process-expired` in `services/governance/src/routes/governance.ts` (comment: \"admin/cron endpoint\"); spec `governance.openapi.ts` declares 403 \"Admin role required\". The gateway mount `/api/governance` uses `authenticateToken(false)` (the shape KS-736 tracks).\n3. **transfer** \u2014 `POST /api/delegations/admin/process-expired` in `services/transfer/src/routes/delegations.ts` (comment: \"admin trigger\"). Mount is authentication only.\n4. **staking** \u2014 `GET /api/stake/all` in `services/staking/src/routes/stake.ts` (comment: \"List all stakes (admin)\"); the handler pages `SELECT * FROM svc_stake_positions`. Mount is authentication only. Not checked: whether that table is tenant-scoped.\n5. **wallet-connector** \u2014 `GET /api/wallets/sessions` in `services/wallet-connector/src/server.ts` (comment: \"List active sessions (admin)\"). Mount is authentication only.\n\nFor all five the service mounts no role gate (a census of `services/*/src` for `requireRole`, role comparisons and `isAllowedByRoleOrScope` finds none in kyc, governance, transfer, staking or wallet-connector; the same census finds originate's 73 hits, so the instrument fires).\n\n## Evidence and how to confirm\n\nRead at `develop` `530f09112`. A live check is one request per route with a token whose role is `OWNER` (the self-registration default); the expected answer by the spec is 403, and by this reading it is 2xx (or 404 for an unknown id). Not run.\n\n## Suggested direction (your call)\n\nPeter's ruling recorded on KS-1668: the docs lead and the code aligns to them; Kam decides which side moves. The aligned fix is a role gate on each route (the shared `requireRole` in `packages/shared/src/middleware/index.ts` is already mounted in billing, tokenisation and vc-issuer), and for the kyc review an owner-not-reviewer check as well. KS-1807's PR-1 documents the difference rather than the intended gate, and marks the passage so a test is not written against current behaviour.\n\nSearched the board before filing: `Reviewer role required` 0 hits, `process-expired` 1 unrelated hit (KS-1762), `kyc/:id/review` 1 unrelated hit (KS-1327, a read-modify-write race). Control in the same session: `subjects:erase` returned KS-843.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1840",
+    "title": "Refs KS-1845: five admin-labelled routes require a platform administrator; kyc review refuses its own subject"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "9c9ab06f-aca6-40ae-bbba-9eed87674816",
+    "createdAt": "2026-11-02T03:41:01.898Z",
+    "body": "**BLUF:** Delivered: PR 1840 merged as b1216f1040cb on develop, deployed to kintsugi at b1fb543640e7 (2026-11-01). Verified by code read, not observed live. Left open: four routes the 2026-10-30 comment names as not covered and \"reported for separate tickets\" have no ticket on the board that I could find.\n\n- **In the code at b1fb543640e7:** the shared `isPlatformRole` gates the five admin-labelled routes: `POST /api/kyc/:id/review` (`kyc/src/index.ts:30`; the review also refuses its own subject, `:1063`), `POST /process-expired` (`governance/src/routes/governance.ts:495`), `GET /all` (`staking/src/routes/stake.ts:451`), `POST /admin/process-expired` (`transfer/src/routes/delegations.ts:273`) and `GET /api/wallets/sessions` (`wallet-connector/src/server.ts:261`).\n- **Not covered, from that comment:** `GET /api/kyc/:id`, `GET /api/kyc/user/:userId`, `DELETE /api/kyc/user/:userId/data` have no owner check, and `POST /api/kyc/initiate` takes the subject from the body. KS-1882 states that these four were reported separately and are not listed there.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "731f1cbd-92a9-4c6d-921b-b098e109572d",
+    "createdAt": "2026-10-30T08:18:34.525Z",
+    "body": "**BLUF:** Pull request 1840 is ready to merge for this ticket after QA gate 45 (GO WITH NOTES): https://github.com/Secuura/Distributed_Secuura/pull/1840. Nothing is merged or deployed.\n\n* Head `a91b45726ef47099d6c0375536c748702daf14f0`, with develop `ddc644fb4869` merged in. Against develop it is 15 files: five route checks, five new test files (72 cells), three existing test files whose test user's role changed (no assertion changed), and the docs entry as two fragment files. The code and test files are byte-identical to the gated head `4b166a00d60b`.\n* `POST /api/kyc/:id/review`, `POST /api/governance/process-expired`, `POST /api/delegations/admin/process-expired`, `GET /api/stake/all` and `GET /api/wallets/sessions` now answer 403 to any caller who is not SYSTEM_ADMIN or SUPER_ADMIN. The check is the shared `isPlatformRole`; its case fold admits lower-case `system_admin`. The review also refuses the verification's own subject, with both ids case-folded, and refuses an id that is missing or not a string.\n* Red at develop in every service (kyc 18 of 24, the other four 9 of 12). With the change: kyc 58/58, governance 179/179, transfer 104/104, staking 78/78, wallet-connector 61/61. 59 of 59 mutants killed, plus 8 of 8 on the id fold.\n* Pre-push hook on the merge-prep push: 13 of 16 legs ran, 3 skipped (legs 3, 4 and 8 need a local stack), nothing failed. That is not a full pass. develop has since moved by one file this PR does not touch, and the head still merges with it cleanly.\n* Not run: the four platform suites, a running stack. Not covered: `GET /api/kyc/:id`, `GET /api/kyc/user/:userId` and `DELETE /api/kyc/user/:userId/data` have no owner check, and `POST /api/kyc/initiate` takes the subject from the body; reported for separate tickets. The docs conflict is gone: the entry is now its own fragment.\n\n_Edited 2026-10-30 after QA gate 42: new head, and corrected counts. The first version said 73 cells and 9 of 14; at the first head the true figures were 65 cells and 9 of 12. Edited 2026-10-31 at merge prep: develop merged in, the docs entry is a fragment, and the suites were re-run on the merged tree._",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "99060a30-06b1-4c19-8cdd-5c9957f99376",
+    "createdAt": "2026-10-30T01:53:53.518Z",
+    "body": "**BLUF:** The effect of the missing check is narrower than the description reads. By code reading, a forged review changes the verification record held by the kyc service, not any user's token level. The missing role and owner check stands; what is not shown is a path from a forged review to a higher level in a token. Read from code at `develop` `530f09112`; not probed on a running stack.\n\nThe description left \"whether a verification's `currentLevel` reaches a token\" open. Checked now (found while re-verifying `WORKFLOWS.md` for KS-1807 PR-2):\n\n- Writes to `users.verification_level` in service source (tests excluded) exist in three places only: the gateway admin route (`services/api-gateway/src/routes/admin.ts`), the social-login path in auth (`services/auth/src/routes/auth.ts`, sets `SOCIAL`), and originate's admin route (`services/originate/src/routes/adminConfig.ts`). Control: `verification_level` occurs 5 times in `services/auth/src/repositories/userRepo.ts`, so the search can find it.\n- The kyc service touches no users table: `FROM users`, `UPDATE users` and `INTO users` return 0 hits in `services/kyc/src`.\n- No other service reads a kyc verification's `currentLevel` (a search outside `services/kyc` finds `currentLevel` only in unrelated code: the anchoring Merkle builder and an auth upgrade-request type).\n\nSo the review writes `verification.status` and, on approval, `verification.currentLevel` on the kyc service's own record (what `GET /api/kyc/{id}` and `/result` return) and nothing more. The published spec still declares 403 \"Reviewer role required\", and the other four ungated admin-labelled routes in the description are unchanged by this. The priority is the coordinator's call; this comment only narrows the impact statement.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

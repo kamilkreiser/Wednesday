@@ -1,0 +1,79 @@
+{
+ "identifier": "KS-1231",
+ "title": "A connector allow-list fails open when platform-settings integrations is not a clean array; one admin Settings save lifts every restriction",
+ "state": {
+  "name": "Done",
+  "type": "completed"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": "2026-11-08T20:45:59.996Z",
+ "createdAt": "2026-09-17T16:02:42.686Z",
+ "updatedAt": "2026-11-08T20:45:58.479Z",
+ "description": "## BLUF\n\n**A connector restricted by a document-type allow-list becomes UNRESTRICTED whenever the stored platform-settings** `integrations` **container is not a clean array of object entries. One ordinary save on the admin portal's Settings page produces exactly such a container.**\n\n* Major, pre-existing: the same at develop before PR #1035, at #1035's head and on the merged tree.\n* It widens authorisation through the product's own UI, and it is silent: `GET /api/connector/info` then tells the connector `[]`.\n* Found by the #1035 tier-1 QA gate (finding N-1, D1). Filed as its own ticket, not folded into KS-1230, per Wednesday's ruling.\n\n## Recommendation\n\nThe owner's fix. Not built here. An escalation candidate (the gate's grading).\n\n* **Read side, fail closed, in both readers:** `services/api-gateway/src/routes/verification.ts:1212-1219` (the create path) and `services/api-gateway/src/services/health.ts:45-52` (the info reader). For the calling connector, any of these should refuse instead of reading as no restriction:\n  * a non-array `integrations`;\n  * a non-object entry;\n  * a duplicate id;\n  * a non-object `config`.\n* **Portal:** `frontend/admin/src/pages/Settings.tsx` must not regroup `integrations`, or any array, through `key.split('.')`. It flattens every category into `category.key` form values on load (`:37-42`) and splits them back on save (`:66`), which turns an array into `{\"0\": entry}`.\n* **Regression cells:** each container shape below \u00d7 {typed, untyped} \u2192 403. A Settings-save round trip keeps `integrations` an array.\n\n## Detail\n\n* **Repro** (measured at runtime by the gate: the real route, both boots):\n  1. As SYSTEM_ADMIN, `PUT /api/admin/settings` with `integrations: [{ id: \"c1\", config: { allowedDocumentTypes: [\"SSD_DOCUMENT\"] } }]` and a `general.platformName`.\n  2. Connector `c1` sends `POST /api/documents` with `documentType: \"DOCUMENT\"` \u2192 403.\n  3. On the admin portal Settings page, change the platform name and save. The PUT body carries `integrations` as `{\"0\": {...}}`. The portal transform was PROBED by emulation and confirmed by reading `Settings.tsx`; no browser was driven.\n  4. The same create \u2192 **201, forwarded to originate**.\n* **Stored containers measured fail-open.** Each gives typed `DOCUMENT` \u2192 201 forwarded, and info tells `[]`:\n  * `{\"0\": entry}`;\n  * `[null, entry]` (`.find` throws on `null.id`);\n  * `[{id, config: {}}, entry]` (duplicate id, first wins);\n  * `[{id, config: \"SSD_DOCUMENT\"}]`;\n  * `\"x\"` (`.find` is not a function);\n  * `null`.\n  * Control: `[entry]` \u2192 403.\n* **Mechanism:** the container parse sits inside `try { \u2026 } catch {}`. A throw or a miss leaves `connectorConfig = {}`, which reads as no restriction. The same parse is in the info reader.\n* **Related:**\n  * KS-1204: PR #1035 made the leaf value fail closed, but the container above it still fails open;\n  * KS-1230: write-side validation of the value, a different defect;\n  * the 24 h platform-settings TTL expiry, the same fail-open class, filed separately.\n* **Searched before filing:** Linear literal matches in titles, descriptions and comments, archived included, at most 6 pages of 50 fuzzy results per term (2026-09-17 \\~16:00Z):\n  * `Settings.tsx`: 0 of 118 scanned.\n  * `connectorConfig`: 0, but the fuzzy search returned only 1 result, so that zero is the search's reach, not the board.\n  * `integrations`: 15, none about the container parse (the security-review umbrellas KS-485, KS-488 and KS-492, harness tickets and m365 redirect tickets).\n  * `platform-settings`: 3. KS-1230 (write-side validation of the allow-list value), KS-1176 (comments) and KS-37 (admin SPA tests); none covers the container.\n* **Evidence:** #1035 gate report, finding N-1: `Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1204-1035-4b1fb0621-tier1-r1/report.md`. Line references re-read at develop `34cdcfb26`.\n* Refs KS-1204.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2058",
+    "title": "Refs KS-1231: the admin Settings page never sends the integrations array, shows its nine fields read-only and saves only from loaded settings"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1171",
+    "title": "KS-1231: refuse a malformed integrations container on create and on connector info (403)"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "f06fb637-126c-45b2-8794-8247f3efa109",
+    "createdAt": "2026-11-08T20:45:57.612Z",
+    "body": "Delivered: PR 2058 (abd044f63a9d) is merged to develop and is in the running Kintsugi build (k25, base 6c9a593df4ab). Closing as done.\n\nClosing under the done rule (card secuura-done-rule-unit-pinned-deployed-no-live-check, both halves; Wednesday's ruling of 2026-11-08 20:39Z on the board seat's table). No live check possible: the save path was not exercised on Kintsugi.\n\n* Tests (first half): gate 256 (round 2 of 2) ran the Settings suite at the PR head 527d67b1852e, 39 of 39 green, and drove three browser scenarios in real Chrome 156 against its own build of that head (S5 a failed load, S12 a stale page, S14 the gateway's 503 text); the same drive against a build of develop failed all three. Not re-run on develop's tip (UNMEASURED by this seat).\n* Reader half: PR 1171 and the reader fix are recorded as in the Kintsugi deploy b1fb543640e7 (comment f157a1bb). This PR is the portal half.\n* Running build (second half): Seat D 60th's sweep of the k25 round. The bundle string `Reload settings`, counted over every file under the portal's html root, is 0 in the rollback admin image and 1 in the running admin portal (control id=\"root\" 1 to 1; nonce 0; image 9e0370417ee3).\n* What the check does NOT show (Seat D 60th's column, verbatim): No browser session. That Save never sends the integrations array, that the nine fields show read-only, and that reload works are unproved. B1 is one UI label, not the save path.\n* Follow-ups, each its own ticket and none keeping this one open: KS-2113 (the suite cannot see four planted page defects; the fragment's toolchain sentence), KS-1998 (after a Redis eviction a settings save writes the defaults over stored values), KS-2111 (a stored category named `__proto__` pollutes the admin page's `Object.prototype`). Gate 256's N2 was fixed in the PR body before merge; N6 and N7 are notes.\n\nNOT covered: the four platform suites were not run by this seat, and this seat made no API, browser or box call. Demo is frozen at 07a2d62be6a0; this closing makes no claim about it.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "74414f5b-a0a3-4d15-9fd0-2543636d2a58",
+    "createdAt": "2026-11-08T10:47:17.772Z",
+    "body": "**BLUF:** PR 2058 round 2 of 2 is up for the gate at head 527d67b1852e (tier 1). Nothing is merged or deployed, and this ticket stays In Progress.\n\nRound 1 (93bf64e29276) was NO GO at QA gate 236. Round 2 changes the contract: the page never sends an array category and never sends integrations in any shape, because the gateway keeps a category that is absent from the body as stored (routes/admin.ts:1200, read at develop a65ae7ed1d60). The nine integrations fields are read-only with a note (Kam's card, option a; KS 2035 keeps their home). fetchSettings now throws on a failed GET, a page without its settings turns Save off and offers Reload settings, and updateSettings throws with the gateway's own reason.\n\nMeasured, on Node v26.8.1 (not an LTS line; the LTS line was not run): 39 cells, which are 9 pass and 30 fail against round 1 and 39 of 39 at the head; 30 planted changes killed exactly as declared and 3 declared survivors; admin tsc and vite build rc 0; eslint 0 errors and 58 warnings, unchanged. Browser: real Chromium 156 against a real vite build and a stand-in gateway, 20 scenarios: round 2 passes 20 of 20, the round-1 build passes 3 of 20, and the 3 declared survivors go red exactly as declared.\n\nNot run: a real gateway, Redis or Postgres (the browser walk uses a stand-in copied from routes/admin.ts); the four platform suites; Node 24; any real environment.\n\nFound, not fixed here: GET /api/admin/settings reads Redis only (routes/admin.ts:1155), so after a cache eviction the page loads the four defaults. Stored data that already holds an index-keyed object is not repaired.\n\nThe admin portal image is owed a rebuild after merge, kintsugi only (demo is frozen).",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "6cf5f7b9-8e0c-4881-9b21-74e5d618a793",
+    "createdAt": "2026-11-06T10:50:50.606Z",
+    "body": "**BLUF:** PR 2058 is the portal half: the admin Settings page now saves the stored `integrations` array as an array and refuses a save it cannot make safely. READY FOR GATE (TIER 1). Not merged, not deployed; this ticket stays open.\n\n- **Where:** PR 2058, branch `feature/ks-1231-settings-save-keeps-integrations-an-array-r86`, head `93bf64e29276`, base develop `2fd6d529573c`, 6 files.\n- **What changed:** new `frontend/admin/src/lib/settingsSavePayload.ts`, wired into `Settings.tsx`. The cells run with the tsx already in the root install (no test dependency): 3 pass and 16 fail against the page's own logic, 19 of 19 at head; twenty planted tampers, 19 red as declared and one declared survivor (the page glue has no executing cell). The nine scalar fields and the connector array share one key; a save that edits one of them while `integrations` is an array is refused, nothing stored. The conflict is KS 2035.\n- **Env:** none touched. The admin portal image is owed a rebuild after merge; an admin editing one of the nine scalar fields will then see the refusal message.\n\n`Refs`, not a closing reference.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "f157a1bb-ee1a-46fe-9511-ffd368dea15c",
+    "createdAt": "2026-11-02T03:16:22.805Z",
+    "body": "Delivered: the reader half. PR 1171 (c38f3a484) refuses a malformed integrations container on create and on connector info with 403, and KS-1532 (898a1ae11) makes the info reader answer 503 when the settings read throws; both are in the kintsugi deploy b1fb543640e7 (2026-11-01). Verified by code read at b1fb543640e7, not observed live: services/api-gateway/src/routes/verification.ts:826 answers 403 \"Connector allow-list container is malformed\" for a non-array container. Left open: the portal half the ticket's recommendation names is not in the tree. frontend/admin/src/pages/Settings.tsx still builds its save body with `key.split('.')` and `updates[category][field] = formValues[key]` (the lines the ticket cites), no commit has touched that file since 2026-09-18, and no Settings-save round-trip cell exists. So a routine Settings save still stores integrations as an object; the readers now refuse it (403) instead of reading it as no restriction.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "232eb06e-387e-482e-b821-f6aad51a4d00",
+    "createdAt": "2026-09-18T07:00:03.114Z",
+    "body": "**Measured again by the #1045 batch gate (`2026-09-18-batch1042-1045-tier1-r1`, section #1045 B, `evidence/probe1045.out`). This ticket is STILL OPEN (Major), and #1045 does not close it.**\n- **The Settings page produces the failure itself.** A routine save of the admin Settings page over a GOOD restricted allow-list (editing only `general.platformName`) sends `integrations` as an index-keyed object (`Settings.tsx:37-42/63-71`). It stores 200 \u00b7 object.\n  - The creates for that connector go from 403 / 201 / 201 to **201 / 201 / 201**.\n  - `GET /api/connector/info` goes from `[\"SSD_DOCUMENT\"]` to `[]`.\n  - **One routine save flips a restricted connector to unrestricted.**\n- An object container holding a malformed `\"DOCUMENT\"` also stores with 200 and fails open.\n- develop = head on every row (pre-existing).\n- #1045 (KS-1230, merged as `52df64f84`) validates only an ARRAY `integrations`. Widening that 400 to an object would 400 every Settings-page save, so the fix is the page plus the readers, which is this ticket's shape.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

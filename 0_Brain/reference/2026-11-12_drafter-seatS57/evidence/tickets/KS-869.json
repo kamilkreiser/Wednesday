@@ -1,0 +1,103 @@
+{
+ "identifier": "KS-869",
+ "title": "connectorId is never persisted \u2014 svc_api_keys.connector_id is written by nothing and read by nothing, so it dies on restart; blocks KS-577 and nulls KS-843's cutover evidence",
+ "state": {
+  "name": "Done",
+  "type": "completed"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": "2026-11-04T03:14:51.254Z",
+ "createdAt": "2026-09-06T04:43:51.051Z",
+ "updatedAt": "2026-11-04T03:14:50.309Z",
+ "description": "## BLUF\n\n`svc_api_keys.connector_id` **exists as a column and NOTHING in the security service ever writes it or reads it.** A key's `connectorId` lives only in the in-process `memApiKeys` map, from the moment it is minted until the service restarts. After a restart it is gone \u2014 and the boot loader cannot bring it back, because the row mapper does not map the column.\n\nTwo consequences, one of which lands on a ticket shipped today.\n\n## Measured (static, with a control that fires)\n\n|  |  |\n| -- | -- |\n| the column exists | `migrations/018_svc_api_keys_reconcile.sql:79` \u2014 `ALTER TABLE svc_api_keys ADD COLUMN IF NOT EXISTS connector_id TEXT` |\n| nothing writes it | `dbSaveApiKey` (`services/security/src/index.ts:197`) \u2014 `connector_id` is **not** in the INSERT column list |\n| nothing reads it | `rowToApiKey` (`:309`) \u2014 **not** mapped |\n| anywhere in the service | `grep -n \"connector_id\" services/security/src/*.ts` \u2192 **0 hits**, against a control on `key_prefix` \u2192 **2 hits**, so the grep discriminates |\n| memory is rebuilt from those rows | `loadFromDb()` (`:334`) warms `memApiKeys` from `svc_api_keys` through `rowToApiKey` |\n\n`connectorId` is in the `ApiKey` interface (`:132`), set in memory at mint (`:985`), and returned by validate (`:1182` \u2014 `connectorId: apiKey.connectorId || null`). All in-process only.\n\n## Consequence 1 \u2014 it blocks KS-577 (revoke-on-rotate)\n\nKS-577 requires finding a connector's **prior** keys in order to revoke them on rotate. The only identifier tying sibling keys together is `connectorId` (`platform-s:<externalRef>`, set at `platform.ts` mint time). **There is no durable copy of it**, so after any restart of the security service the association needed to find the prior key does not exist in the database at all. KS-577 cannot be built on `connectorId` until this is fixed.\n\n## Consequence 2 \u2014 it degrades KS-843's cutover evidence\n\nTraced end to end:\n\n```\nsecurity  /api/keys/validate  ->  connectorId: apiKey.connectorId || null      (index.ts:1182)\ngateway   auth.ts:230         ->  meta.connectorId = data.connectorId || ''\ngateway   auth.ts:272         ->  userId = `connector:${meta.connectorId || 'api-key'}`\ngateway   auth.ts:281         ->  req.user.connectorId = meta.connectorId\nscopes.ts (KS-843 grace log)  ->  connectorId: user.connectorId ?? null\n```\n\n**After a restart, every Platform S connector key validates with** `connectorId: null`**.** So:\n\n* the `[KS-843]` grace-log line \u2014 the operator's *only* evidence for flipping `SUBJECTS_ERASE_SCOPE_ENFORCED` \u2014 records `connectorId: null`, and cannot say **which** connector was admitted;\n* `userId` collapses to `connector:api-key` for every connector, so audit attribution loses the same distinction.\n\nKS-843's cutover is stated as \"flip to scope-only once the log shows S on the new key\". **That log cannot show which key it is, after a restart.**\n\n## Honesty about the evidence\n\nThis is a **static** read of the write path and the read path, with a grep control that fires. **I did not drive a restart and observe a null**, because that means restarting a container on the local stack while gates are running. The static chain is unambiguous, but it is not a driven observation and is not offered as one. Driving it is a ~10-minute job if wanted.\n\n## Fix shape\n\nWrite `connector_id` in `dbSaveApiKey`'s INSERT (and in the `ON CONFLICT` set, since it is immutable per key it can be omitted there), and map it in `rowToApiKey`. The column already exists, so **no migration is needed**. Existing rows backfill as NULL \u2014 which is what they effectively are today, so nothing regresses; a backfill from any surviving source is a separate question.\n\n## Acceptance\n\nA key minted with a `connectorId` still validates with that same `connectorId` **after the security service restarts**, driven not read; `rowToApiKey` maps the column; the `[KS-843]` grace log names the connector after a restart; `userId` is `connector:platform-s:<ref>`, not `connector:api-key`. Then KS-577 becomes buildable.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/880",
+    "title": "KS-577: a rotate must retire the prior credential \u2014 revoke-on-rotate, with the cutover window as one value"
+   },
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/854",
+    "title": "KS-869: persist connector_id, so a key's connectorId survives the process"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "6567de07-b383-431e-a3c3-4269d1628ef9",
+    "createdAt": "2026-11-04T03:14:49.427Z",
+    "body": "**BLUF:** Delivered: PR 854 merged as 50913d2c3870 and PR 880 merged as 7d7f6bd55fe6 on develop, both deployed to kintsugi at ee1e1b832115. Verified by code read at ee1e1b832115 and by the restart drive recorded in comment 1a03cc89. Closing as done.\n\n- **Written:** `Blockchain/Dev/services/security/src/index.ts:454-469` saves `connector_id` with the key; :459-465 keep an existing value with `COALESCE`, so a later save cannot null it.\n- **Read back on load:** `Blockchain/Dev/services/security/src/converters.ts:180`, in `rowToApiKey` (:156), maps `connector_id` to `connectorId`. `ks869-connector-id-persisted.test.ts` pins both halves.\n- **Driven, not read:** comment 1a03cc89 (2026-09-06) minted a key with a `connectorId`, restarted the security service and validated it again with the same `connectorId`, then revoked both throwaway keys.\n- **The hold is gone:** comments 537b269d and 04e47210 kept this open only because PR 880 was unmerged. It merged on 2026-09-14 and is an ancestor of ee1e1b832115.\n- **Not run here:** a restart on kintsugi; the restart drive above is the observation.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "04e47210-adf8-4bb8-8b15-2b9fd1ceab9b",
+    "createdAt": "2026-09-08T12:01:20.268Z",
+    "body": "**Moved `In Review` \u2192 `Blocked`. It is waiting on Kam, and that should be visible on the board.**\n\nThe 2026-09-07 comment already established this ticket is part-shipped: **#854 merged** to `develop`\n@ `50913d2c3`, **#880 still open**. It was moved out of `Tested Not Deployed` then, for the right\nreason \u2014 *\"it is not finished\"*.\n\n`In Review` is the wrong column for the same class of reason. @peter has already reviewed #880\n(formal `COMMENTED`, at head `47b2b60f2`), so no review is outstanding. **The event that takes this\nticket out of its column is Kam merging #880** \u2014 and, as that comment says, merging it *\"silently picks\nOption 1 for Platform S, a Stuart-facing contractual choice rather than a code decision\"*.\n\n`Blocked` names that. `In Review` hides it behind a column that implies a colleague is mid-review.\n\n\u26a0 **Carried, unchanged:** #880 also removes the key overlap Kam's 2026-09-06 `logged grace` ruling on\nKS-843 depends on \u2014 cross-linked at KS-843 `comment-82de36ad` and KS-577 `comment-868d1211`. The remedy\nneeds no code (set `API_KEY_ROTATION_GRACE_SECONDS` for the window, or mint `rotate:false` then\nretire). **#880's ruled default of `0` stays. Nothing here touches #880.**\n\n*(Disposition pass, s152.)*",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "537b269d-9965-40cb-85f7-62bc1dc50e2d",
+    "createdAt": "2026-09-07T03:27:46.362Z",
+    "body": "**Moving this out of `Tested Not Deployed` \u2014 it is not finished.**\n\nMeasured in a catalogue pass over all 293 open tickets, resolving this ticket's Linear PR attachments against the GitHub API:\n\n| PR | state |\n| -- | -- |\n| #854 | MERGED to `develop` @ `50913d2c3` |\n| **#880** | **OPEN** |\n\nPart of this shipped and part has not. `Tested Not Deployed` reads as work that is done and queued for a deploy \u2014 this is not that, and it would have been archived as complete on the next sweep with an open PR still against it.\n\n**For Kam specifically:** #880 is the one PR on this board that stays his. Merging it silently picks **Option 1 for Platform S**, a Stuart-facing contractual choice rather than a code call. So this is a ticket sitting in a shipped-looking state against a PR only he may merge. **#880 itself untouched.**\n\n\u2014 catalogue pass 2026-09-07 (Blockchain-B, board-only seat). Measured, not inferred.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "272b4f8f-272a-4ef9-8a5d-a19e34b01294",
+    "createdAt": "2026-09-06T15:08:34.385Z",
+    "body": "**Board correction \u2014 this ticket was moved by MY commit, not by anyone deciding to work it.**\n\nLinear's GitHub integration transitions any ticket whose id appears in a commit message or PR body. My commits carried `Refs \u2026` trailers naming this ticket, so the automation moved it. The move is recorded against `(automation)` at the same timestamp as the PR attachment, which is how I found it.\n\nRestoring the state a human set. Nothing about this ticket's substance changed, and no one was working it.\n\n**The lesson, which is mine:** a `Refs` trailer is not a neutral citation \u2014 it is a state change on someone else's ticket. Cite by identifier in prose where the ticket should NOT move; use the trailer only where the transition is the intent.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "829e4d20-1f0a-40a4-940d-54c1077011f0",
+    "createdAt": "2026-09-06T15:08:13.812Z",
+    "body": "**Board correction \u2014 this ticket was moved by MY commit, not by anyone deciding to work it.**\n\nLinear's GitHub integration transitions any ticket whose id appears in a commit message or PR body. My commits carried `Refs \u2026` trailers naming this ticket, so the automation moved it. The move is recorded against `(automation)` at the same timestamp as the PR attachment, which is how I found it.\n\nRestoring the state a human set. Nothing about this ticket's substance changed, and no one was working it.\n\n**The lesson, which is mine:** a `Refs` trailer is not a neutral citation \u2014 it is a state change on someone else's ticket. Cite by identifier in prose where the ticket should NOT move; use the trailer only where the transition is the intent.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "ecd2b2f1-c25e-495e-86c9-e1cf0fedd65d",
+    "createdAt": "2026-09-06T06:19:51.012Z",
+    "body": "## MERGED \u2014 `50913d2c3870c42fc773ea1b83f3be4638c35980`\n\nTier-1 gate **PASS** (2026-09-06T05:54:38Z). Merged by the ruled mechanism onto `develop` re-read.\n\n**Base line:** asserted `6fd033c3603bb2187fc06a118841f8847472dd28` \u00b7 first parent `6fd033c3603bb2187fc06a118841f8847472dd28` \u2014 **base held**, push not refused. Preflight 12/12. Content verified both directions: `connector_id` \u00d75 at the merge, **0 at the first parent** (control).\n\nThe gate executed the INSERT/UPSERT on its own Postgres under the RLS GUC \u2014 SUCCESS / KEPT / BACKFILLED \u2014 with a no-GUC control refused by RLS, and confirmed `init.sql` does not carry the column (only migration 018) by `\\d`, not by a banner.\n\n## Three residues, filed per defect\n\n- **KS-887** \u2014 a defect in the test **I** wrote: the WRITE-half column-list pin can be satisfied by the COALESCE clause, so a statement missing `connector_id` from the column list passes all six cells. Mine, and the ticket says so.\n- **KS-888** \u2014 `dbSaveApiKey` swallows a failed INSERT; `POST /api/keys` answers 201 for a key never written. Pre-existing; this change grew its blast radius.\n- **KS-889** (P2) \u2014 **the one that matters:** the COALESCE backfill has an **empty window**. `memApiKeys` warms only from the DB at boot, so every pre-fix row re-warms with `connectorId` undefined and COALESCE declines the NULL. **\"The next save backfills it for free\" is true only for keys minted after this deploys \u2014 correcting my own PR text.**\n\n## \u26a0 KS-843's cutover is NOT unblocked by this alone\n\nThe flip's evidence needs the 43 existing rows to carry a connector id. They will not. KS-889 carries the measurement that decides it \u2014 a backfill source on the row, or a re-mint of Platform S's keys, which is Stuart's window and therefore Kam's call.\n\n**Not deployed:** `security` was not in today's rebuild set (its `src` did not change), so the box still runs Sept-3 security code. This lands on the box in a later leg.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "1a03cc89-ffeb-4321-850a-3d3d0e217767",
+    "createdAt": "2026-09-06T05:13:06.047Z",
+    "body": "## The drive is DONE \u2014 acceptance line met, observed\n\nAuthorised on the local stack. Container `secuura-security`, `docker-compose.local.yml`, 2026-09-06.\n\n| image | key | before restart | after restart |\n|---|---|---|---|\n| **parent** (`develop`; bundle carries `connector_id` **\u00d70**) | `ks869-drive-20260906T050929Z` | `platform-s:ks869-drive` | **`None`** \u2190 the defect, observed |\n| **head** (this branch; bundle carries `connector_id` **\u00d75**) | `ks869-drive-head-20260906T051126Z` | `platform-s:ks869-drive-head` | **`platform-s:ks869-drive-head`** \u2190 survives |\n\n**The defect in a single frame, before any restart was needed:** at the parent, `validate` returned `platform-s:ks869-drive` from memory while that row's `connector_id IS NULL` was **true** in the database. The value existed and had never been written. At the head, the row carries `platform-s:ks869-drive-head`.\n\n**Timeline (UTC):** mint 05:09:29 \u2192 validate 05:09:37 \u2192 restart 05:09:44 (healthy 05:10:00) \u2192 validate 05:10:05 \u00b7 rebuild 05:10:18 \u2192 up 05:10:58 \u2192 mint 05:11:26 \u2192 validate 05:11:35 \u2192 restart 05:11:35 \u2192 validate 05:11:52.\n\n**Cleanup:** both throwaway keys revoked through the app's own `DELETE /api/keys/:id` \u2014 `is_active = f` for both, and both now validate `false` with reason `\"Key revoked\"`. Nothing else on the stack was touched.\n\n## \u26a0 Correcting myself \u2014 the previous comment's reason was wrong\n\nThe comment above says the drive was blocked because *\"the seeded account to hand is `ISSUER_ADMIN`, not a key admin\"*. **That was wrong.**\n\n`KEY_ADMIN_ROLES` at `services/security/src/index.ts:878` is `{SYSTEM_ADMIN, SUPER_ADMIN, ORG_ADMIN, ISSUER_ADMIN, ADMIN}` \u2014 **`ISSUER_ADMIN` is in the set.** The credential was in hand the whole time.\n\nWhat actually happened: I got a 404 from `POST /api/keys` at the gateway \u2014 which is true, that path genuinely is not gateway-routed \u2014 and attributed it to a missing credential instead of reading the role set. One measurement, two possible causes, and I picked the one I hadn't checked. The route had to be reached on the service's own port, which is what the drive did.\n\nThe earlier caution about not improvising a write still stands as a reason to have asked; the *stated reason* for being blocked did not.\n\n## Note on the local stack\n\n`secuura-security` currently runs this branch's image rather than `develop`'s. Harmless for the push preflight (its legs probe auth and routing, unchanged by this diff) but worth knowing until #854 merges.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "d963101e-b382-4c3e-ba55-e93a69cb77f2",
+    "createdAt": "2026-09-06T05:03:52.601Z",
+    "body": "## Built \u2014 PR #854 @ `0c559490fcfbd78ea885add4a5344e6ac2f10d36`, awaiting its tier-1 gate\n\nTwo halves, both required: `dbSaveApiKey` writes `connector_id`, `rowToApiKey` maps it back. Either alone changes nothing observable. **No migration** \u2014 018 already adds the column.\n\nThe upsert uses `connector_id = COALESCE(EXCLUDED.connector_id, svc_api_keys.connector_id)`: immutable per key so a stored value is never overwritten, but a **pre-fix NULL row backfills for free** from a key still live in memory.\n\n## The census \u2014 driven, and it replaces the static grep that found this\n\n```\nSELECT count(*), count(connector_id), count(key_prefix), count(tenant_id) FROM svc_api_keys;\n->  total 43 | connector_id 0 | key_prefix 43 | tenant_id 43\n```\n\nAcross **every key ever written on this stack**, `connector_id` is NULL **43 of 43**, while two columns that *are* written are populated 43 of 43. The controls fire, so the zero is a reading rather than a grep that cannot match. The running `secuura-security` container's bundle carries `connector_id` **0 times**, confirming the deployed code is exactly what this measures.\n\n## What I said I would drive, and did not\n\nThe acceptance line on this ticket said *\"still validates with that connectorId AFTER a restart, **driven** not read\"*. **That loop was not run.** `POST /api/keys` is not routed through the gateway (404) and the seeded account to hand is `ISSUER_ADMIN`, not a key admin \u2014 getting a key-admin credential meant hunting seeded logins, and minting is a write I would rather have authorised than improvise.\n\nWhat stands in its place: the 43-of-43 census (the write half, live) and **RP-2 \u2014 removing the mapper line, which is the parent's exact read-side state, reds the READ cell**. Together they cover the same two halves without mutating anything, and no container was restarted, which also avoided disturbing the other seat's in-flight push preflight.\n\n**I am not claiming the acceptance line is met.** It is one credential away, and it should be closed at the gate or by whoever merges \u2014 say the word and I will run it.\n\n## Red-proofs \u2014 predicted first, restored by md5\n\n| | tamper | predicted | actual |\n|---|---|---|---|\n| RP-1 | `connector_id` dropped from the INSERT | 1 red | **1 red / 5 passed** |\n| RP-2 | mapper line removed (the parent's state) | 1 red | **1 red / 5 passed** |\n| RP-3 | `COALESCE` \u2192 plain `EXCLUDED` | 1 red | **1 red / 5 passed** |\n\nEach run executed 6 tests, so each red is a run and not a build break. Suite **107 \u2192 113**; tsc 0 with a planted-error control proving it live; eslint 0/0; preflight 12/12.\n\n## Existing rows\n\nA key minted before this change validates with `connectorId: null` after a restart **until re-minted, or until its next in-memory save backfills it** via the COALESCE. **No backfill from another durable field is possible** \u2014 nothing else in the row carries the connector identity.\n\n## Found while here, deliberately not fixed\n\n`src/converters.ts:122` holds a **second `rowToApiKey`**, imported only by its own test and by nothing in production, already diverged further than this ticket \u2014 it maps neither `tenantId` nor `connectorId`. Fixing only `connectorId` there would be arbitrary; the defect is the diverged dead copy, and it would silently reintroduce this class if anyone switched to it. Reported, not widened into.\n\n## Downstream\n\n**KS-843**'s cutover flip is gated on this (comment `6b975c92\u2026`). **KS-577** (revoke-on-rotate) is unblocked once this merges \u2014 its branch exists at the old develop tip with zero commits and is untouched.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

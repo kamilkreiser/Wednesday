@@ -1,0 +1,38 @@
+{
+ "identifier": "KS-1931",
+ "title": "kyc: dbGetVerificationsByUser returns [] on any read error, so the GDPR erasure cascade (dbDeleteUserData) continues with an incomplete list, against its own comment",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-01T14:01:55.367Z",
+ "updatedAt": "2026-11-01T14:43:48.070Z",
+ "description": "**BLUF:** `dbGetVerificationsByUser` in `Blockchain/Dev/services/kyc/src/index.ts` (`:207-221`) catches every ordinary database or decrypt error, logs it and returns `[]`. `dbDeleteUserData` (`:332`), the GDPR erasure cascade, calls it at `:350` to collect legacy image ids and then deletes by `user_id` regardless, so on a read failure the cascade continues with an incomplete list. The comment at `:340-345` says the opposite: failures THROW so the event bus retries and dead-letters. After pull request 1900 an unreadable thrown value takes the same path. **Read, not run.**\n\n## What I read (develop `8126b22bd5aa`, line numbers at that sha)\n\n* `dbGetVerificationsByUser` (`index.ts:207-221`): `try { query(...); return await Promise.all(rows.map(rowToVerification)) } catch (err) { logger.error(...); return []; }`.\n* `dbDeleteUserData` (`:332-368`): `:350` `const verifications = await dbGetVerificationsByUser(userId)`; `:351-357` collects `frontImageId` / `backImageId` from the decrypted documents; `:359-361` deletes those images by id; `:362-364` then deletes images, consents and verifications by `user_id`; `:367` evicts the cached DEK. The comment at `:340-345` says failures THROW \"so the event bus retries and dead-letters instead of reporting a successful cascade that deleted nothing\".\n* Entry points: `DELETE /api/kyc/user/:userId/data` (`:1176-1186`, no `try`, answers 200 `All KYC data for user has been deleted.`) and the `user.erased` subscriber (`userErasedSubscriber.ts`, started at `:1274`, which logs and rethrows a rejection so the bus retries).\n\n## Effect, by reading\n\nWhen the read in `dbGetVerificationsByUser` fails for an ordinary reason (a database error, or a row that cannot be decrypted and throws), the helper returns `[]`. The cascade then skips the legacy image ids found through the verification documents and deletes the verification rows by `user_id`. Legacy images that carry no `user_id` can be found only through those documents, so they are not deleted, and the rows that pointed to them are. The route still answers that all data was deleted, and the subscriber logs `user.erased handled`.\n\n## Not measured\n\nNo database failure was injected and the cascade was not run. I did not look for legacy `svc_kyc_images` rows without a `user_id` in any environment, so how many images this could leave behind is unknown. I did not read the migration that stamped `user_id` (035) for what it leaves out.\n\n## Context\n\nFound while raising the KS 1868 kyc passes (pull request 1900), which make an unreadable thrown value in this helper log a constant reason and return `[]`, so the cascade now continues for that value too instead of aborting. The change is deliberate and described in that pull request; this ticket is about the existing behaviour for ordinary errors. Filed on the coordinator's word after a board search by symbol and path (`dbGetVerificationsByUser`, `dbDeleteUserData`, \"erasure cascade\", \"failures THROW\": no hits).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "92411ebe-9f26-4f5f-abce-e0bd71363528",
+    "createdAt": "2026-11-01T14:43:48.081Z",
+    "body": "**BLUF:** gate 85 on pull request 1900 found two more points in the same erasure path, which belong with this ticket. Both come from a probe with a stand-in database through the `DELETE` route and the real `user.erased` subscriber, not from PostgreSQL. Verdict: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate85-ks1868-kyc-1900/verdict.md`. Line numbers are at the pull request head `a06c3441c237`; at the base they are 30 lower for `index.ts`, and `userErasedSubscriber.ts` is unchanged.\n\n* **G85-F1 (LOW), the subscriber's failure log line is lost in a double fault.** `userErasedSubscriber.ts:42` logs `err?.message` unguarded. When the verification `SELECT` and the `DELETE`s all reject with an unreadable thrown value (a revoked Proxy, or an Error whose `message` getter throws), the handler still rejects, so the bus's three attempts and the dead-letter are unchanged, but reading `err?.message` throws and the `[cascade] user.erased handler failed` line with the user id and request id is not written. With an ordinary Error the line is written.\n* **G85-F3 (INFO, pre-existing), the `DELETE` route has no `try`.** `index.ts:1206` (`app.delete('/api/kyc/user/:userId/data', ...)`) awaits `dbDeleteUserData` with no `try`. An ordinary database error on any `DELETE` inside it rejects out of the handler: an unhandled rejection, which exits the kyc process (no `unhandledRejection` listener; Express 4.22.3 does not catch a rejected async handler). The probe showed the same at base and at head.\n* **Open question the gate raised for this ticket:** whether `dbDeleteUserData` should fail closed when the `SELECT` fails (for example by using a `SELECT` that throws, instead of the helper that swallows the error and returns `[]`), as its own comment at `index.ts:372-373` says it should.\n* The gate also notes, for the record: migration 045 records 0 `svc_kyc_images` rows in local and demo (2026-09-05); production was not measured.\n* Read and probed, not run against a real database.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-1875",
+ "title": "GET /api/metering/usage: impossible dates answer 500 not 400, a repeated from/to is ignored, and the route has no spec path",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-30T07:55:18.522Z",
+ "updatedAt": "2026-11-10T06:01:45.192Z",
+ "description": "**Read from code at develop** `e43a289c1c7b`**, not run against a stack.** Found while checking `METERING-USAGE-API.md` for KS-1807 PR-4 and re-read by me.\n\n**Three small defects on** `GET /api/metering/usage` (`services/originate/src/routes/metering.ts`, `services/originate/src/services/chargeEvents.ts`):\n\n1. **Impossible dates answer 500, not 400.** The guard is the regular expression `^\\d{4}-\\d{2}-\\d{2}([T ][0-9:.+Zz-]*)?$`, which checks shape only. `2026-02-30`, `2026-13-01` and `2026-06-01T99` pass it, the query casts the value `::timestamptz`, the cast fails and the handler's catch answers 500 `INTERNAL_ERROR`. The route's own comment says the guard exists so junk is never handed to the cast. The system test only exercises `notadate`.\n2. **A repeated** `from` **or** `to` **is silently ignored.** The handler reads `typeof req.query.from === 'string' ? ... : undefined`, so `?from=a&from=b` (an array) is dropped and the call answers 200 with that bound open, which is a wider read than the caller asked for.\n3. **The route has no path entry in the published spec.** `docs/openapi/secuura-api.yaml` mentions `/api/metering/usage` once, in the description of another operation, and has no path for it, so the spec-driven suites never exercise it.\n\n**Not established.** Whether the gateway rejects a repeated parameter before it reaches originate (I read originate's handler and the gateway's proxy mount only).\n\n**Docs.** `METERING-USAGE-API.md` states the first two as known deviations in KS-1807 PR-4.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2167",
+    "title": "Refs KS-1875: GET /api/metering/usage refuses a repeated from or to with 400, instead of reading it as an open bound"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "3fbe0bc7-e55a-4a42-8173-42386c34da3f",
+    "createdAt": "2026-11-10T06:01:45.648Z",
+    "body": "**BLUF:** PR 2167 (head `86b0dde15f91`, one commit on develop `b602c418296a`) raises piece 2 of this ticket: `GET /api/metering/usage` answers 400 `BAD_REQUEST` for a repeated `from` or `to`, instead of dropping it and reading the bound as open. Product bytes change (7 added lines in `metering.ts`, plus a 6-cell test); tier 2 by Wednesday's stamp ruling, the gate may raise it. Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **Client-visible change:** a request with a repeated `from` or `to` that used to answer 200 now answers 400. The change refuses input and writes nothing.\n- **Measured by this seat:** the originate suite reads 2,592 of 2,592 on develop and 2,598 of 2,598 with the patch (the READY's 11 baseline failures did not reproduce here); with the product put back, 3 of the 6 new cells fail.\n- **Not in this PR:** impossible dates still answer 500, the missing spec path, and a bracketed `?from[x]=` (parsed as an object) is not refused.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

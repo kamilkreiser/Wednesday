@@ -1,0 +1,51 @@
+{
+ "identifier": "KS-2055",
+ "title": "transfer: cancel writes its history entry as cancelled to cancelled and stores any reason without a check",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 4,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-06T03:48:47.953Z",
+ "updatedAt": "2026-11-11T07:12:45.012Z",
+ "description": "**BLUF:** In `POST /api/transfers/:id/cancel` the status is set to `cancelled` before the history entry is built from `transfer.status`, so every cancel records `fromStatus: cancelled, toStatus: cancelled`; and the `reason` from the body is stored as sent with no type or length check. Low. Priority as ruled by Wednesday (ANSWER 2026-11-06T03:40:16Z). Evidence class: READ ONLY at origin develop; the handler was not run.\n\n**Where**, at origin develop `45d2edc73aa9` (read 2026-11-06 by Seat S 27th with git show and git grep in a shallow scratch clone of origin develop `45d2edc73aa9`; nothing was run), all in `Blockchain/Dev/services/transfer/src/index.ts`:\n\n* Line 875 destructures `reason` from `req.body`. Line 885: `transfer.status = 'cancelled';`. Lines 887 to 892: `transfer.statusHistory.push(` with `fromStatus: transfer.status` at line 888 (already `cancelled`), `toStatus: 'cancelled'`, and `reason: reason || 'Cancelled by user'` at line 891.\n* The approve and reject handlers write literal values (`fromStatus: 'pending_approval'`, lines 708 and 773), so cancel is the one handler with this ordering defect. `GET /api/transfers/:id/history` (line 911) serves the entries.\n* The caller check on cancel (it reads `req.user?.userId` and falls back to 'unknown') belongs to KS-2038, not to this ticket.\n\n**For the owner to decide:** capture the previous status before the assignment, and validate `reason` as a bounded string.\n\n**NOT measured:** the handler at runtime; a real database; what a history reader does with the wrong `fromStatus`.\n\n**Source:** Seat W 29th's QUESTION mail to Wednesday of 2026-11-06T02:47:04Z (section 5, item vi), re-read by Seat S 27th at the lines above.\n\n**Board search before filing (2026-11-06, Seat S 27th, board_search tool, both controls held: 'msgpackr' hit KS-1379 among open tickets, a random token hit 0):** `fromStatus` returned 0 candidates; `Cancelled by user` 100 candidates, 0 open and 0 closed literal hits; `statusHistory` one open hit, KS-1703 (it names the history route among its GET-by-id routes; it does not mention the ordering).",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2113",
+    "title": "Refs KS-2055: the transfer cancel route records the status it moved from (half of the ticket)"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "818431ea-4efe-4dea-afdc-a6808d519bbe",
+    "createdAt": "2026-11-11T07:12:45.025Z",
+    "body": "**BLUF:** Kam ruled the cancel-reason length bound on 2026-11-11: option b, 1000 characters (decision card `secuura-ks2055-cancel-reason-length-bound-1111`; his words on the board at 16:29 AEDT: '1000 characters (recommended)'). This comment records the ruling; no state, assignee or field is changed and no build is started.\n\n- **The two lines it concerns,** read at develop `fcd178ff34fa` in `Blockchain/Dev/services/transfer/src/index.ts`: line 936 `const { reason } = req.body;` and line 956 `reason: reason || 'Cancelled by user',`.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "872bc167-bde6-492d-bded-38095647cb92",
+    "createdAt": "2026-11-08T23:04:06.217Z",
+    "body": "**BLUF:** PR 2113 (head `521ffe0f777fe3f290e9656b637491d9a82f38fc`, one commit on develop `a1bfe7a7df25`) fixes the FIRST HALF of this ticket: the cancel route now records the status it moved from, not \"cancelled\" twice. It changes product code by one line, adds one test file of five cells, and adds the cheat and flow fragments. It waits for its QA gate (tier 2). It does NOT bound the `reason` field, which is the owner's decision, so this ticket stays open. Nothing is merged or deployed, and this comment changes no state.\n\n- **The change** (4 files, +165 -1): in `services/transfer/src/index.ts` the cancel handler captures `previousStatus` before it assigns `cancelled` and writes that as `fromStatus`.\n- **Proof, measured by Seat T 19th on develop `a1bfe7a7df25`:** with the new test file alone 2 of its 5 cells fail by assertion (a pending simple and a pending sale transfer, each \"expected 'cancelled' to be 'pending_approval'\"); with the one-line change all 5 pass; the transfer suite goes from 460 to 465 tests with 0 failed; `tsc --noEmit` output is empty on both sides and `tsc` including the new test file reads rc 0.\n- **Not done here:** the `reason` type and length check (half 2), no real database, no request outside the test's in-process server, and entries already written are not touched.\n- The pull request says Refs, so it leaves this ticket open.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

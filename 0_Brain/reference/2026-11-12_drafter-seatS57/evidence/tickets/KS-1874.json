@@ -1,0 +1,29 @@
+{
+ "identifier": "KS-1874",
+ "title": "GET /api/metering/usage counts free_in_context events as chargeable: totals.count and usdTotal use amount > 0, and the price is applied at read time",
+ "state": {
+  "name": "Backlog",
+  "type": "backlog"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-10-30T07:55:16.208Z",
+ "updatedAt": "2026-11-02T21:02:31.318Z",
+ "description": "**Read from code at develop** `e43a289c1c7b`**, not run against a stack.** Found while checking `METERING-USAGE-API.md` for KS-1807 PR-4 and re-read by me.\n\n**What the code does.** `getUsageSummary` in `services/originate/src/services/chargeEvents.ts` computes `chargeable_count` as `SUM(CASE WHEN amount > 0 THEN 1 ELSE 0 END)` and multiplies that by the event type's USD price, read live from the pricing config at request time. It does not look at `fee_status`. `createChargeEvent` stores the event type's price as `amount` even when the caller passes `feeStatus: 'free_in_context'`. The verification-certificate path (`services/originate/src/routes/certifications.ts`, around line 1451, \"free_in_context for recruitment\") records exactly such an event.\n\n**Effect.** Events recorded as `free_in_context` are counted in `totals.count` and in `usdTotal` as if they were chargeable. This is the figure Platform S reads to reconcile K usage against subscriptions (the page says \"there is no per-event client billing\", so the effect is on reconciliation rather than on a charge). Separately, because the price is applied at read time, the same window read on two days gets two different `usdTotal` values if the price changed in between.\n\n**Not established.** Whether any real tenant has `free_in_context` rows (not measured); whether Platform S subtracts them on its side (not in this tree); the intended definition of \"chargeable\" (the docs say free usage is not billed, but no ruling was found for this event type).\n\n**Docs.** `METERING-USAGE-API.md` now states what the code does, as a known deviation, in KS-1807 PR-4.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": []
+ },
+ "comments": {
+  "nodes": []
+ }
+}

@@ -1,0 +1,51 @@
+{
+ "identifier": "KS-2127",
+ "title": "pre-push hook: a failing git diff reads as no change and the hook exits 0 before leg 1, so a RED commit pushes (gate 263 G1)",
+ "state": {
+  "name": "Done",
+  "type": "completed"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": "2026-11-11T04:09:09.931Z",
+ "createdAt": "2026-11-08T19:13:16.094Z",
+ "updatedAt": "2026-11-11T04:09:09.040Z",
+ "description": "**BLUF:** The real pre-push hook treats a failing `git diff` as an empty change set. With `git config diff.orderFile` naming a missing file, `git diff` exits 128 with no output, the changed set stays empty, and the hook exits 0 before leg 1: a RED commit pushes with rc 0 and no preflight line. Gate 263 measured this on the hook fixture at `35bcfa000`; the same lines are on develop `6c9a593df4ab`. High is Wednesday's call.\n\nSource: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-09_gate263-tier1-x8-prerun-driver-r3/verdict.md`, finding G1 (a note outside the tool under test, which the gate calls the most important thing it found). Not a PR-merge item: it waits on no PR. A build seat fixes the hook; this ticket only records it.\n\n## What was measured, and what was only read\n\n* MEASURED AT RUNTIME by gate 263 (scratch worlds, local bare origins): `git config diff.orderFile <missing file>` makes `git diff` exit 128 with empty output, while `status`, `rev-parse` and `merge-base` still exit 0. The gate probed 17 `diff.*` and `core.*` faults and found this one shape. The real hook fixture, called directly with a new-branch stdin line on a RED commit: with the fault, rc 0 and \"Blockchain/Dev changes detected\" is never printed; without the fault, rc 1, the preflight ran and failed. Evidence in the gate folder: `evidence/order.out`, produced by `evidence/g263_order.py`.\n* On the same fault the pre-run tool (X 8th's) still runs the preflight, so the pre-run path is stronger than the hook here.\n* READ ONLY (the board seat, at develop `6c9a593df4ab`; I did not run the hook): in `.githooks/pre-push`, lines 129, 143 and 252 end `|| true` after `git -c core.quotePath=false diff --no-renames --name-only ...`. Line 251 sets `_informative=1` before the diff at line 252, so the KS-882 branch at line 271 (every base contains HEAD, run unconditionally) does not fire. With `changed` empty, line 372 `[ -z \"$changed\" ] && exit 0` returns success before the preflight message at line 374. These are the lines the gate cited at `35bcfa000`; the gate's fixture hook is not necessarily develop's current hook, and the lines match.\n\n## Why it is the same class as two fixed holes\n\nThe hook's own comments record KS-854 (lines 156 to 160: an unresolvable base left `changed` empty and the hook returned success before leg 1) and KS-882 (lines 181 to 187, banner at line 272: a base equal to HEAD gave an empty diff and the same exit). Both fixes treat \"cannot compute\" as \"run the preflight\" (lines 276 to 277 and 284 to 285 set `changed` to an unconditional marker and `st_all=1`). A diff that fails is the same case: an uncomputable change set is not a clean one.\n\n## Fix shape (READ ONLY, not applied)\n\nCapture the diff's exit status at lines 129, 143 and 252 instead of discarding it with `|| true`; on a non-zero status take the KS-854 and KS-882 path (banner, unconditional marker, `st_all=1`). Regression test: in a scratch repo set `diff.orderFile` to a missing path, push a RED commit, expect rc 1 and the \"changes detected\" line; the same push without the fault expects the same result.\n\n## Related, not this defect\n\n* KS-1483 (Backlog): the hook diffs HEAD, not the pushed ref. A different cause, same symptom class.\n* KS-2091 (Backlog): no hook suite proves that a red preflight makes the hook refuse a push.\n* KS-989, KS-1063, KS-1482 (Done): earlier holes in the same hook.\n* Gate 263's G2 (the pre-run's own copy of the changed set, Minor) and G3 (clean means clean to `git status`) concern the pre-run tool and are not filed here.\n\n## Searched before filing\n\nBoard, includeArchived, title and description and every comment of each open candidate; controls pass (a made-up token hits 0; `msgpackr` hits KS-1379). `orderFile` 0 hits; `gate 263` 0; `gate263` 0; `skips the preflight` 1 open hit (KS-1483, different cause); `pre-push` together with `git diff` 6 open and 3 closed hits, none holds a failing-diff case.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2118",
+    "title": "Refs KS-2127: the pre-push hook runs the preflight when its git diff fails"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "10b87963-a7f5-41ae-82af-fa6b2bc1c285",
+    "createdAt": "2026-11-11T04:09:07.784Z",
+    "body": "Delivered: PR 2118 (0e6479d7b6c0) is merged to develop and has no deploy surface (a repo git hook, its regression suite and two documentation fragments). Closing as done.\n\n- The ask was a fix and a regression test: a failing git diff must not read as \"no change\" in the pre-push hook. PR 2118 (merged 2026-11-10T03:07:53Z, an ancestor of develop; compare, reverse control read) changes `.githooks/pre-push`, adds `Blockchain/Dev/scripts/__tests__/ks2127_pre_push_failing_diff.test.sh` and adds two documentation fragments. Nothing else in it runs in an image or a deploy.\n- At develop 4a91ff3e1c56 (read now, not run): the three diff sites, lines 145, 160 and 270 of `.githooks/pre-push`, now end in `|| { _jr_diff_failed ...; return 0; }`, and the helper `_jr_diff_failed` starts at line 116. The suite names the fault (`diff.orderFile` at a missing path) on 8 lines.\n- NOT covered: the suite and the platform suites were not run. Other shapes of a failing diff are not pinned (the gate probed 17 diff and core faults and found this one). KS-1483 (the hook diffs HEAD, not the pushed ref) and KS-2091 (no hook suite proves a red preflight refuses a push) are separate tickets and stay open on their own scope. The gate 281 note on PR 2118, the refusal banner order, is KS-2159. Demo was not read or changed.\n- Board search before closing (2026-11-11, open, closed and archived tickets, controls held): searched `diff.orderFile`, `_jr_diff_failed` and `ks2127_pre_push_failing_diff`. The only other ticket that names them is KS-2159 (Backlog, the refusal-banner order after a failed diff on this same PR, filed from the gate 281 note and named below). No other ticket asks for this fix.\n- Follow-up: KS-2159.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "8d3c3eff-60d3-41e9-b3e2-e4b95399f72d",
+    "createdAt": "2026-11-09T01:30:06.774Z",
+    "body": "**BLUF:** PR 2118 (head `08cf86d0ec5f`, one commit on develop `273de443c30c`) makes the pre-push hook run the preflight when its `git diff` fails, instead of reading the failure as \"no change\" and passing the push before leg 1. It is ready for its gate (tier 1: the push gate itself); nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **The change.** The three diffs in `.githooks/pre-push` that compute what a push changes (remote branch, upstream, merge-base for a new branch) now read their exit status instead of ending `|| true`. On a failure a new helper prints a KS-2127 banner, sets an unconditional changed marker and checks every systemTest package, the answer the hook already gives a base it cannot compute. A push whose diffs succeed takes the old path.\n- **Red on the old hook.** A new suite plants the fault this ticket names (`git config diff.orderFile` pointing at a missing file) in local fixtures with a stubbed preflight. On develop's hook all 5 fault cells fail (a RED commit pushes with rc 0 and no preflight line) and the 3 controls pass. On the fixed hook 8 of 8.\n- **The hook still does its job.** Without the fault a RED commit is refused and a clean one passes, and the 9 existing suites that run or read the hook give identical tallies before and after (264 cells), including the cases for a base that cannot be resolved and a base that already contains the commit.\n- **Each site is pinned.** Putting any one site back to `|| true` reddens exactly its own cells; removing the helper's marker reddens the four push-outcome cells.\n- **Round 2 (gate 278, GO WITH NOTES), head `cd8b80e38a4b`:** a push whose tip is not HEAD is refused under the fault, and that refusal now names KS-2127 (it gave no cause); a cell pins that the format gate is asked for `--all`. The suite is 12 of 12 (develop's hook: 7 fault cells fail, 5 controls pass).\n- **Not covered.** Other shapes of failing diff. A tag on a new commit whose diff fails used to pass silently; it now runs the preflight if it is HEAD and is refused otherwise (measured by the gate; no cell here pins tags).\n\n_Edited 2026-11-09 for round 2 (gate 278): the tag sentence corrected from the gate's measurement, and the round-2 line added. Edited in place, not stacked._",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

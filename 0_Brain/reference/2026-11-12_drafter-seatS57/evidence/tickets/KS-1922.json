@@ -1,0 +1,43 @@
+{
+ "identifier": "KS-1922",
+ "title": "analytics: a failed export stores the thrown error's message, and GET /api/analytics/exports/:id returns it to the caller",
+ "state": {
+  "name": "In Progress",
+  "type": "started"
+ },
+ "priority": 3,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": null,
+ "createdAt": "2026-11-01T03:21:12.567Z",
+ "updatedAt": "2026-11-10T06:21:44.953Z",
+ "description": "**BLUF:** `ExportService.processExport` (`Blockchain/Dev/services/analytics/src/services/exportService.ts`, line 160) stores the thrown error's message on the export record, and the analytics export routes return that record to the caller. A failed export therefore puts internal error text (a database, filesystem or library message) into the API answer. This is the KS 1410 class (an error message landing in a client-visible body). It is not covered by KS 1853 or KS 1856 (dedupe below). Filed on Wednesday's word; found while raising the KS 1868 analytics loaders, which do not touch this line.\n\n**Where (read at source, develop** `a71479b49bf3`**):**\n\n* Line 160, in the catch of the private `processExport` (starts at line 106): `exportResult.error = error instanceof Error ? error.message : 'Unknown error';`\n* The record type `ExportResult` has `error?: string` (`src/types/analytics.types.ts:419`).\n* `GET /api/analytics/exports/:id` answers `res.json({ success: true, data: exportResult })` (`src/routes/analytics.ts:334-346`), so the stored message is in the body. The list route (`GET /api/analytics/exports`, lines 362-365) and the create route's answer (lines 305-308) return the same record type; those two were read, not traced to the field.\n\n**Measured and not measured:** read with sed and grep at the paths above. NOT reproduced against a running service, and what a given failure message contains was not measured.\n\n**Same file or neighbour, check during the fix:** `dbSaveExport` (`exportService.ts:30`), `dbSaveAlertRule` (`scheduledJobs.ts:30`), `dbSaveAlert` (`scheduledJobs.ts:63`).\n\n**Dedupe (board search by symbol and path, issues and comment bodies; positive control** `gracefulShutdown` **hit, random token 0):** `exportService.ts` hits KS 1853 (spec and docs contracts the code does not follow) and KS 1856 (the list route returns every caller's exports; no role, tenant or user), and neither is this. `dbSaveExport`, `dbSaveAlertRule`, `dbSaveAlert` and `loadScheduledJobsFromDb` return 0.\n\n**Found by:** Seat R 69th, 2026-11-01.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/2168",
+    "title": "Refs KS-1922: a failed analytics export stores a constant reason, and the real text goes to the server log only"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "27321ddc-8737-4564-abb2-e44b7700cfa9",
+    "createdAt": "2026-11-10T06:21:46.081Z",
+    "body": "**BLUF:** PR 2168 (head `2ea098978a4a`, one commit on develop `b602c418296a`) makes a failed analytics export store a constant reason, `\"Export failed\"`, instead of the thrown error's message, and sends the real text to the server log only. Product bytes change (3 added lines and 1 removed in `exportService.ts`, plus a 6-cell test); tier 2 by Wednesday's stamp ruling, the gate may raise it. Nothing is merged or deployed, and this ticket stays open (the PR says Refs).\n\n- **Client-visible change:** the `error` field returned by `GET /api/analytics/exports/:id` for a failed export becomes `\"Export failed\"`; the change adds one `logger.warn` line.\n- **Measured by this seat:** the analytics suite reads 123 of 123 with the patch (two runs). On develop it reads 1 failed of 117 (a 5,000 ms timeout in an untouched `ks1868` pool test, as the READY recorded); the first run also had three load timeouts that did not recur. With the product put back, 4 of the 6 new cells fail.\n- **Not in this PR:** the routes, and any check of who reads the stored `error` text.",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}

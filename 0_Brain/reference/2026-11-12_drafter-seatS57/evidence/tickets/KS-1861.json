@@ -1,0 +1,59 @@
+{
+ "identifier": "KS-1861",
+ "title": "DELETE /api/tenants/:id removes the tenant from the wrong database: its vault entries and wrapped keys survive, DROP DATABASE hits a database that does not exist, and it answers deleted:true",
+ "state": {
+  "name": "Done",
+  "type": "completed"
+ },
+ "priority": 2,
+ "assignee": {
+  "email": "kamil.kreiser@secuura.ai"
+ },
+ "archivedAt": "2026-11-02T03:18:40.973Z",
+ "createdAt": "2026-10-30T04:45:49.624Z",
+ "updatedAt": "2026-11-02T03:18:40.105Z",
+ "description": "**BLUF:** `DELETE /api/tenants/:id` (and `DELETE /api/platform/tenants/:id`, which proxies to it) does not delete a tenant's data. It clears the tenant's rows from the wrong database, drops a database that does not exist on the shared path, touches none of the tenant's rows in the shared application database, swallows every error, and answers `{ success: true, deleted: true }`. The tenant's tokenisation vault entries and wrapped encryption keys are left in the main database. `docs/MULTI-TENANCY.md` says deletion \"Removes all vault entries for the tenant\" and \"Drops the tenant's PostgreSQL database\". Read from code, not probed on a running stack.\n\nFound while re-verifying `docs/MULTI-TENANCY.md` for KS-1807 (PR-3). Related: KS-1336 (the dormant per-tenant database path), KS-1789 (tenant-provisioning key row written after the caller gives up), KS-239 (erasure decision for subjects, a different path).\n\n## What the code does\n\n`Blockchain/Dev/services/tenant-provisioning/src/index.ts`, `app.delete('/api/tenants/:id')` (`:523`):\n\n* **Wrong database for the vault (**`:551`**):** `for (const table of ['vault_entries', 'tenant_contacts', 'tenant_config', 'platform_document_registry']) { try { await platformQuery(`DELETE FROM ${table} WHERE tenant_id = $1`, ...) } catch {} }`. `platformQuery` is the platform database (`secuura_platform`). The tokenisation service connects to the main database instead (`services/tokenisation/src/db.ts:9`, `DATABASE_URL`; its own KS-288 comment says `tenant_keys` and `vault_entries` live in the main `secuura` DB) and writes `vault_entries` there (`vault.ts`, `INSERT INTO vault_entries`). A tenant's live vault entries are therefore not deleted.\n* **Keys never touched:** `tenant_keys` (the wrapped per-tenant key, `tokenisation/src/index.ts`) does not appear in `tenant-provisioning/src/index.ts` (0 hits; control: 12 hits in `tokenisation/src/index.ts`).\n* **No data rows deleted:** the tenant's rows in the shared application database (`users`, `documents`, and the rest) are not touched; every tenant shares that database.\n* `DROP DATABASE` **is a no-op (**`:561`**):** `DROP DATABASE IF EXISTS \"secuura_tenant_<slug>\"`, a database that is never created unless `PROVISION_PER_TENANT_DB` is set (it is set in no configuration file; KS-1336 measured this).\n* **Errors swallowed:** the table loop uses an empty `catch {}`; the drop only warns. The answer is `res.json({ success: true, deleted: true })` (`:573`) whatever happened.\n* **Audit row:** `tenant_deleted` is written to `platform_audit_log` either way.\n\n## Effect\n\nAfter \"deleting\" a tenant, the registry row, contacts and config are gone, but its PII vault entries, wrapped key, users and documents remain in the shared database, and the caller is told the deletion succeeded. Whether any tenant has been deleted on a live environment was not checked.\n\n## How to confirm\n\nCreate a tenant, generate its key and tokenise a field (`POST /api/tokenise`), delete the tenant with `confirm: true`, then `SELECT count(*) FROM vault_entries WHERE tenant_id = '<id>'` and the same for `tenant_keys` and `users` on the main database. Expected by the doc: 0. By this reading: unchanged. Not run.\n\n## Suggested direction (your call)\n\nDecide what tenant deletion must remove on the shared-database path (vault entries and keys at least; users and documents if that is the intent), run those deletes against the database that holds them in one transaction, and report failure instead of `deleted: true`. Drop the `DROP DATABASE` step unless the per-tenant path is built.\n\nSearched the board before filing: `tenant delete`, `DELETE /api/tenants`, `vault_entries`; nothing covers this. Control in the same session: `Connector keys are minted` returned KS-1433.",
+ "parent": null,
+ "children": {
+  "nodes": []
+ },
+ "relations": {
+  "nodes": []
+ },
+ "attachments": {
+  "nodes": [
+   {
+    "url": "https://github.com/Secuura/Distributed_Secuura/pull/1885",
+    "title": "Refs KS-1861: deleting a tenant archives it and keeps every row, and an archived tenant can go back to suspended"
+   }
+  ]
+ },
+ "comments": {
+  "nodes": [
+   {
+    "id": "60ae36a0-a42e-4fb4-8e77-df5fb60fe8e9",
+    "createdAt": "2026-11-02T03:18:38.988Z",
+    "body": "**BLUF:** Delivered: PR 1885 merged as b1fb543640e7 on develop, deployed to kintsugi at b1fb543640e7 (2026-11-01). Verified by code read at Blockchain/Dev/services/tenant-provisioning/src/index.ts:439-443 and :559-626 at b1fb543640e7; not observed live (the route is a DELETE, so no read-only probe applies). Closing as done.\n\n- **Ruled behaviour is in the code:** `DELETE /api/tenants/:id` sets the status to archived for a provisioning, active or suspended tenant and keeps every row. The status update and its `tenant_archived` audit row commit in one transaction, and the answer is `deleted: false`, `archived: true`. An already-archived tenant answers 409.\n- **Archived can go back to suspended:** `STATUS_REACHABLE_FROM` (index.ts:439-443) lists `archived` as a source for `suspended` and does not list it for `active`, so archived to suspended is allowed and archived to active answers 409.\n- **Old behaviour is gone:** 0 hits for `DROP DATABASE` and 0 for `deleted: true` in the file (control: `tenant_archived` has 1 hit).\n- **Named on this ticket as not done, each with its own ticket:** the admin client list (KS-1912), the audit-log styling of the new actions (KS-1913) and the Schemathesis isolation fixture (KS-1914). Erasure is not built, by Kam's ruling (archive, not erase).\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "3edfdb4b-564d-48e3-b5cd-2b4ded3e4327",
+    "createdAt": "2026-10-31T23:48:37.505Z",
+    "body": "## BLUF\n\n**PR [#1885](https://github.com/Secuura/Distributed_Secuura/pull/1885) raises the fix. Deleting a tenant now archives it: every row is kept, nothing is erased and no database is dropped. An archived tenant can go back to suspended through the status route. Not merged, not deployed.**\n\n- **Branch:** `feature/ks-1861-delete-apitenantsid-removes-the-tenant-from-the-wrong`, head `48d05f02ede8`, on develop `60e59bd2270b`.\n- **Rulings applied:**\n  - Kam, 31 Oct 11:33:19 AEDT: \"a \u2014 Archive, not erase\".\n  - Kam, 1 Nov 10:05:44 AEDT: \"b \u2014 As (a), and archived can go back to suspended\".\n  - Wednesday's rulings recorded in comment `9e026ca0-7035-46b9-ae52-8bbba58a6fd6`. No `DROP DATABASE` runs under any flag.\n- **What changed:**\n  - `DELETE /api/tenants/:id` (the gateway's `DELETE /api/platform/tenants/:id`) sets the status to `archived` for a provisioning, active or suspended tenant. It answers `{ success: true, deleted: false, archived: true, status: \"archived\", message }`. An already-archived tenant answers 409.\n  - The status change and its `tenant_archived` audit row commit together. A failure rolls both back, writes `tenant_archive_failed` and answers the constant 500. A concurrent status change answers 409.\n  - The status route also allows `archived \u2192 suspended`. `archived \u2192 active` stays refused.\n  - The spec and `docs/MULTI-TENANCY.md` describe this, and so do the docs fragments.\n- **Evidence:**\n  - At develop `60e59bd2270b`, the two test files are 10 of 30 red.\n  - With the change they are 30 of 30, and 16 of 16 mutants are killed.\n  - The whole tenant-provisioning suite passes, 84 of 84 across 10 files.\n- **Pre-push hook:** 13 of 16 legs ran, nothing failed; legs 3, 4 and 8 skipped (no local stack).\n- **Not done:**\n  - Erasure is not built.\n  - The admin portal is not changed (KS 1912, KS 1913).\n  - The Schemathesis isolation fixture is not changed (KS 1914).\n  - The four platform suites, a running stack, a real Postgres and any deploy were not run.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   },
+   {
+    "id": "9e026ca0-7035-46b9-ae52-8bbba58a6fd6",
+    "createdAt": "2026-10-31T15:07:56.085Z",
+    "body": "**Rulings, recorded as the fix starts (Seat S 9th, 2026-10-31).**\n\nKam, 2026-10-31 11:33:19 AEDT, live board, verbatim: \"Decision secuura-ks1861-what-tenant-delete-means-1031: a \u2014 Archive, not erase (recommended)\"\n\nWhat this fix builds, as relayed and ruled by Wednesday:\n\n* `DELETE /api/tenants/:id` sets the tenant's status to `archived` and keeps every row. Nothing is erased, and erasure is not built (Wednesday, 2026-10-31 00:34:18Z).\n* The answer says the tenant was archived and that its data was kept. The audit row records the outcome (Ruling 1, Wednesday, 2026-10-31 00:31:14Z).\n* No `DROP DATABASE` runs, whatever `PROVISION_PER_TENANT_DB` says. This supersedes Ruling 1's line that kept it behind that flag (Wednesday, 2026-10-31 12:47:44Z).\n* The admin portal reads only whether the call succeeded, so the pull request says what the portal now shows.\n* The correction to `docs/MULTI-TENANCY.md` goes to the docs owner as a note; this fix does not edit that file.\n\nWork starts from develop `b4ec1f060320`. The pull request will be named on this ticket when it opens, after the KS 1860 pull request merges.\n",
+    "user": {
+     "email": "kamil.kreiser@secuura.ai"
+    }
+   }
+  ]
+ }
+}
