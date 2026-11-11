@@ -363,19 +363,34 @@ if pkg is None:
     refuse(f"{service_dir}/package.json is not at the tip")
 test_script = json.loads(pkg).get("scripts", {}).get("test", "")
 fe_env = ""
+_hcfg_ok = False   # 2026-11-11 o136: True only in the frontend tier with a valid harness-supplied vitest config pin
 if frontend_mode:
     # FRONTEND TIER: the package must carry its OWN vitest config at the tip; read-only `git show`, never a guess.
     _fe_cfgs = [f for f in ("vitest.config.ts", "vitest.config.mts", "vitest.config.js", "vitest.config.mjs", "vitest.config.cts", "vitest.config.cjs")
                 if show(f"{svc_prefix}{f}") is not None]
     _fe_vite = [f for f in ("vite.config.ts", "vite.config.mts", "vite.config.js", "vite.config.mjs")
                 if re.search(r"(?m)^\s*test\s*:\s*\{", show(f"{svc_prefix}{f}") or "")]
-    if not (_fe_cfgs or _fe_vite):
+    # 2026-11-11 (Spark o136) HARNESS-SUPPLIED CONFIG: a package with no vitest config of its own (frontend/admin) is admitted ONLY with
+    # the pin vitest_config=<absolute path to a file under local-model/spark/tiers/vitest_configs/>. The file is the harness's, passed to
+    # every vitest run as `--config <abs path>` (checker: VITEST_CFG, tier_checker run_tests); it is never put in a repo tree.
+    _hcfg = pins.get("vitest_config", "")
+    _hdir = os.path.realpath("/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/tiers/vitest_configs")
+    _hcfg_ok = bool(_hcfg) and os.path.isabs(_hcfg) and os.path.isfile(_hcfg) and os.path.realpath(_hcfg).startswith(_hdir + os.sep)
+    if _hcfg and not _hcfg_ok:
+        refuse(f"pin vitest_config={_hcfg!r} is not an existing file under {_hdir} (the only place a harness-supplied vitest config may live)")
+    if _hcfg_ok and (_fe_cfgs or _fe_vite):
+        refuse(f"pin vitest_config={_hcfg!r}: {service_dir} already has its own vitest config at the tip ({(_fe_cfgs or _fe_vite)[0]}); the harness config is only for a package with none")
+    if _hcfg_ok:
+        fe_env = "jsdom"
+        print(f"FRONTEND TIER: {service_dir} has no vitest config at the tip {tip[:9]}; HARNESS-SUPPLIED config {_hcfg} (environment jsdom) passed as --config")
+    elif not (_fe_cfgs or _fe_vite):
         refuse(f"frontend package {service_dir} has no vitest config at the tip {tip[:9]} (no vitest.config.* and no `test: {{` block in vite.config.*) — "
                "the checker would have no runner settings (jsdom, globals, setup) for it; not admitted")
-    _cfg_text = show(f"{svc_prefix}{(_fe_cfgs or _fe_vite)[0]}") or ""
-    _em = re.search(r"environment\s*:\s*['\"]([A-Za-z\-]+)['\"]", _cfg_text)
-    fe_env = _em.group(1) if _em else ""
-    print(f"FRONTEND TIER: {service_dir} vitest config = {(_fe_cfgs or _fe_vite)[0]}" + (f" (environment {fe_env})" if fe_env else " (no environment key: vitest default node)"))
+    if not _hcfg_ok:
+        _cfg_text = show(f"{svc_prefix}{(_fe_cfgs or _fe_vite)[0]}") or ""
+        _em = re.search(r"environment\s*:\s*['\"]([A-Za-z\-]+)['\"]", _cfg_text)
+        fe_env = _em.group(1) if _em else ""
+        print(f"FRONTEND TIER: {service_dir} vitest config = {(_fe_cfgs or _fe_vite)[0]}" + (f" (environment {fe_env})" if fe_env else " (no environment key: vitest default node)"))
 # 2026-09-15 19:5x tool mode: `"test": "npm run test:unit"` is an indirection — resolve ONE level so the runner kind is read
 # from the script that actually runs (systemTest/performance).
 _m_indir = re.match(r"^npm run (\S+)$", test_script.strip())
@@ -384,7 +399,7 @@ if _m_indir:
 # 2026-09-15 18:2x (Kam 18:19 "extend the checker"): jest services (originate, governance — ts-jest) are IN. The runner
 # kind is the first word of repo.test_runner (no new key — the input contract's key set is unchanged); the checker
 # branches on it. Anything that is neither vitest nor jest is still refused by name.
-if "vitest" in test_script:
+if "vitest" in test_script or (frontend_mode and _hcfg_ok):   # 2026-11-11 o136: a harness-supplied config stands in for the package's own test script
     runner_kind = "vitest"
 elif "jest" in test_script:
     if frontend_mode:
@@ -471,7 +486,8 @@ imports = [ln for ln in lines if ln.startswith("import ")][:12]
 test_dir_rel = (pins.get("test_dir") or "tests/unit") if tool_mode else f"{service_dir}/src/__tests__"
 r = git("ls-tree", "-r", "--name-only", tip, "--", f"{subdir}/{test_dir_rel}")
 tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts") or ((config_class or frontend_mode) and p.endswith(".test.tsx"))]
-if not tests:
+if not tests and not (_hcfg_ok and "ref" in pins):
+    # 2026-11-11 o136: a package with NO test yet (frontend/admin) is admitted only with a harness-supplied vitest config AND a pinned ref= (a read-only style template from any package)
     refuse(f"no test files under {test_dir_rel} at the tip")
 mod_rel = product_rel if (tool_mode or config_class or scripts_tamper) else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
 mod_noext = re.sub(r"\.tsx?$" if frontend_mode else r"\.ts$", "", mod_rel)                          # middleware/audit

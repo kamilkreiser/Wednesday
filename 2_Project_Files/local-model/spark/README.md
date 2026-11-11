@@ -213,3 +213,9 @@ that disappears stays LOST. No `## Renames` block = byte-identical to before. co
 (tasks/code_patch/checker.sh suite-delta script, read by code_patch2 at run time) accept the same declaration and grade the pairs
 the same way; that script never flagged a vanished passing cell, so there the allowance only adds the exact-pair checks.
 Arms: tests/a6_declared_rename_arms.sh.
+
+## Harness-supplied vitest config: frontend/admin (2026-11-11, Spark o136; IMPROVEMENTS 2026-11-11 15:0x)
+frontend/admin has no vitest config of its own. A code_patch2 brief for it carries the pin `vitest_config=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/tiers/vitest_configs/frontend-admin.config.mjs`
+(absolute, and only a file under `spark/tiers/vitest_configs/` is accepted) plus `ref=<any existing .test.tsx>` (style template, e.g. the issuer's provenance-timeline.test.tsx). The
+config is the harness's, passed as `--config <abs>` to every vitest run; it is never copied into or diffed against a repo tree. Needs the deps store's admin react symlinks:
+`spark/dedupe_admin_react.sh` (called by build_deps.sh; idempotent). Arms: `tests/frontend_admin_vitest_arms.sh`. Pages that call hooks run; Radix dropdown opening in jsdom is NOT proven.

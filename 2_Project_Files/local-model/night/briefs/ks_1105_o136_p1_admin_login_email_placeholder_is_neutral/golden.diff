@@ -1,0 +1,54 @@
+diff --git a/Blockchain/Dev/frontend/admin/src/pages/Login.tsx b/Blockchain/Dev/frontend/admin/src/pages/Login.tsx
+--- a/Blockchain/Dev/frontend/admin/src/pages/Login.tsx
++++ b/Blockchain/Dev/frontend/admin/src/pages/Login.tsx
+@@ -80,5 +80,5 @@
+                   autoFocus
+                   data-testid="email-input"
+-                  placeholder="admin@secuura.com"
++                  placeholder="you@example.com"
+                 />
+               </div>
+diff --git a/Blockchain/Dev/frontend/admin/src/__tests__/ks1105-admin-login-email-placeholder-is-neutral.test.tsx b/Blockchain/Dev/frontend/admin/src/__tests__/ks1105-admin-login-email-placeholder-is-neutral.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/frontend/admin/src/__tests__/ks1105-admin-login-email-placeholder-is-neutral.test.tsx
+@@ -0,0 +1,39 @@
++import { describe, it, expect, vi } from 'vitest';
++import { render, screen } from '@testing-library/react';
++
++// KS-1105: the admin login's email field showed the cross-tenant SYSTEM_ADMIN seed address as its placeholder. It now shows a neutral
++// example address. The router hook and the auth store are replaced; the page is the real one.
++vi.mock('react-router', () => ({
++  useNavigate: () => vi.fn(),
++}));
++
++vi.mock('../store/authStore', () => ({
++  useAuthStore: () => ({ login: vi.fn() }),
++}));
++
++import Login from '../pages/Login';
++
++const emailInput = () => {
++  render(<Login />);
++  return screen.getByTestId('email-input') as HTMLInputElement;
++};
++
++describe('KS-1105 admin login email placeholder', () => {
++  it('control ks1105 C1 the email field is still a required email input with a placeholder', () => {
++    const input = emailInput();
++    expect(input.type).toBe('email');
++    expect(input.required).toBe(true);
++    expect(input.placeholder).not.toBe('');
++  });
++
++  it('RED ks1105 R1 the placeholder is not the platform super-admin seed address', () => {
++    const input = emailInput();
++    expect(input.placeholder).not.toContain('admin@secuura.com');
++    expect(input.placeholder).not.toMatch(/^admin@/i);
++  });
++
++  it('RED ks1105 R2 the placeholder is a reserved example address', () => {
++    const input = emailInput();
++    expect(input.placeholder).toMatch(/@example\.com$/);
++  });
++});

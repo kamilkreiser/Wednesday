@@ -77,5 +77,7 @@ while IFS= read -r d; do
   fi
 done <<< "$DIRS"
 if [ "$FAILS" -ne 0 ]; then say "FAILED — $FAILS of $N npm ci runs failed; LOCK_KEY NOT written" >&2; exit 1; fi
+# 2026-11-11 (o136): one React for the harness-supplied frontend/admin vitest config (see dedupe_admin_react.sh)
+bash "$HERE/dedupe_admin_react.sh" || { say "FAILED — dedupe_admin_react.sh rc=$?; LOCK_KEY NOT written" >&2; exit 1; }
 echo "$KEY $COMMIT" > "$DEPS/LOCK_KEY"
 say "DONE — $N npm ci runs rc=0; LOCK_KEY: $(cat "$DEPS/LOCK_KEY")"
