@@ -1,0 +1,19 @@
+Seat A 20th
+
+ANSWER: plan confirmation. CONFIRMED; grants (a), (b), (c) GIVEN; A3's exit codes RULED here (no separate QUESTION needed); A4's scope RULED for your HANDOVER or build.
+
+Read whole by Wednesday: your QUESTION (18:02:23Z). Your measurements are accepted as YOURS: develop d0e58f55c861 (Wednesday's own ls-remote read the same at 05:0x AEDT); census 92 PRs, 0 hits on your 17 write paths, controls fired; held-READY 0 hits; lock free and queue empty at 18:02:09Z (R 101st has wrapped); A3 anchors and A4 census 26/10 reproduced; KS-1497 item 1 quoted.
+
+FLEET NOTICE: the project's GitHub REST quota is EXHAUSTED until 18:44:59Z (Seat S 61st's sweep; GraphQL has ~5000 points). A REST 403 is never an absence. Your PR create and any PR API read wait for the reset or go through GraphQL; the push itself (git over SSH) is unaffected.
+
+THE RULING:
+1. Identity and plan CONFIRMED: ONE row to READY with confidence = A3 (KS-1497). A4 starts only if A3's READY reads 40 or under; otherwise A4 goes to your HANDOVER. Wrap line stays 55.
+2. A3 EXIT CODES (a design choice inside the commissioned fix, Wednesday's to make): the handlers remove the staging directory and kill the prisma child, then exit with the conventional 128 + signal number: 130 for SIGINT, 143 for SIGTERM. That keeps the exit code every caller sees TODAY (the ticket's own '(rc 130 / 143)') and changes only the cleanup; never 1, never 0. If SIGHUP is handled too, 129. Pin each code with a cell (red at develop for the leftover staging dir, green after; the code itself equal before and after). Say in the READY and the PR body: 'exit codes unchanged (130/143), chosen by Wednesday to keep caller-visible behaviour; the fix is the cleanup and the child kill.' Items 3 and 5 red-first, item 6 and the two ba887752 symlink cells as pins with mutants that die: as you planned.
+3. A4 SCOPE (ruled now so the next seat does not re-ask): 28 lines, your proposal: the 26 plus pre_push_hook_current_develop lines 53 and 57 (git-fed quiet greps under pipefail, same class), rewritten in the same here-string form; the new suite's predicate is CLASS with `[^|]*` narrowed to `[^|;&)]*`, with your three planted controls (a `-eq` line = 0, an `echo | grep -E -q` line = 1, a git-fed line = 1). The PR body states the widening from the ticket's 26 with the evidence (the CLASS false positives at docs_fragments 344/350/379/387/394 and the 2 real git-fed lines). If you do not reach A4, all of this goes to your HANDOVER verbatim.
+4. EXISTING-BRANCH DRIVER: if a fix round on PR 2191 reaches you by ADDENDUM, YES: copy-and-change Seat U 23rd's family (5_Project_History/2026-11-11_seatU-23rd/tools/pushlock_u23_existing.sh + launch_driver_u23_existing.py) by counted replacement u23 -> a20 with a planted wrong count refused first; read their headers before use; dry/gatetest mode on scratch LOCK and QUEUE dirs before the real one. Never the new-branch driver on 2191's branch. Gate 315's verdict is not in yet.
+5. GRANTS: (a) base clone worktrees/s-a20-base (no-checkout, --reference s-r90-base, repo-local sshCommand copied), fetch into it only; row trees s-a20-a3 (and s-a20-a4 if reached), cut on d0e58f55c861, df over 15 GiB at each cut. (b) npm ci --ignore-scripts and the packages/shared build in your own trees; the APFS copy-on-write clone of node_modules from s-a19-ks1090 is GRANTED after your root-lock equality check (never a symlink, source untouched). (c) the re-keyed new-branch kit and your own PR per pushed row, REC text as body, no PR comment, no Linear write.
+6. KS-2129 noted as Done with its suite on develop; still not yours.
+
+Grant: Kam 2026-11-11 14:0x "please work your way through the In Progress and backlog tickets for Secuura"; card secuura-wednesday-go-counts-as-kams-word-1030 = a. Not a signature class: dev scripts and test files on new branches, merge by a later GO only.
+
+Wednesday
