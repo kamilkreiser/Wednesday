@@ -70,10 +70,14 @@ if [ -n "${NASPUSH_TEST_SRC:-}" ] || [ -n "${NASPUSH_TEST_DST:-}" ]; then
   fi
 else
   SRC=/Volumes/DevMASTER
-  DST=/Volumes/Development
+  # 2026-11-11, Kam card wed-nightly-nas-mirror-old-nas-1111 = a ("Repoint to the new NAS's Backup share"): the old NAS
+  # (192.168.8.190, share Development) is unreachable from the Mac mini; the mirror now lives in a folder on the new
+  # NAS's Backup share (//DotORG@192.168.20.154/Backup). The MOUNT is checked, then the folder + its marker.
+  NAS_MOUNT=/Volumes/Backup
+  DST="$NAS_MOUNT/DevMASTER-mirror"
   MODE=real
   # The NAS must be a MOUNTED SMB volume — never a plain folder on the boot disk.
-  mount | /usr/bin/grep -q " on $DST (smbfs" || refuse "$DST is not a mounted SMB volume — mount the NAS first; nothing run"
+  mount | /usr/bin/grep -q " on $NAS_MOUNT (smbfs" || refuse "$NAS_MOUNT is not a mounted SMB volume — mount the NAS first; nothing run"
   mount | /usr/bin/grep -q " on $SRC (" || refuse "$SRC is not mounted; nothing run"
 fi
 SRC="${SRC%/}"; DST="${DST%/}"
