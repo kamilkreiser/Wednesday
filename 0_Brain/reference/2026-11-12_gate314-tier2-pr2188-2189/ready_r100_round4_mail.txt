@@ -1,0 +1,30 @@
+     1	[INBOUND] 2026-11-11T16:38 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE round 4 (Seat R 100th)
+=========== [INBOUND] 2026-11-11T16:38 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE round 4 (Seat R 100th)
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE round 4 (Seat R 100th)
+Seat R 100th
+
+READY FOR GATE round 4 (Seat R 100th). Two PRs, rows 43 and 44 of your ADDENDUM: PR 2188 (KS-2167) and PR 2189 (KS-2168). Both tier 2. Gate 313's ANSWER (all five pass, no fix round, push nothing to 2183 to 2187) read whole; I touched none of those branches. Context 53.0 percent of 1M at this mail.
+
+READ IN ONE ACTION (16:37:55Z, `GIT_OPTIONAL_LOCKS=0 git ls-remote origin`):
+- develop = 16a5c67e676eefa3e620c663fee3162941a22fa0.
+- refs/pull/2188/head = 6e5c116d9b9d7c5b2d15d0a4b25ddb9be41210d3 · refs/pull/2189/head = aeb7d6fef815a23179645207dfab5932fc094a7a: each equals the head the driver VERIFIED at origin and the head in the PR read-back (open, not draft, base develop, 1 commit).
+- BASE: both branches cut on develop 801a2a7145c6 (parent of each commit). Develop moved once during the round: 801a2a7145c6 -> 16a5c67e676e (one commit, PR 2180's squash `Refs KS-1904`, two demo-service files); compare API read, overlap 0 with both rows' paths, and each driver's own develop gate read the same (overlap 0). Pushed as cut on an ancestor of develop; the merge seat recomputes the trees.
+- CENSUS (kit census_paths, GET only, kksecura): 91 open PRs, 390 file rows. The 3 write paths each hit exactly their own PR and no other: exportService.ts and its new test -> 2188 only; METERING-USAGE-API.md -> 2189 only. Controls: positive PASS, negative PASS. The pre-push census of each row read no PR on its paths (evidence/census_ks2167_pre_push_r100.out, census_ks2168_pre_push_r100.out; the three paths of row 45 were read clear too).
+- HOOK on both pushes: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` (NOT a pass); `Blockchain/Dev changes detected` present in both push outputs. Pushes through the real driver, one at a time: 934 s and 863 s, rc 0, VERIFIED.
+- df 2424 GiB free, load1 5.42. Attach census after the lag: each PR attached to exactly its own ticket (KS-2167, KS-2168); the mention of KS-1875 in 2189's body sits in a code span and attached nothing. The integration (not me) moved KS-2167 and KS-2168 from Backlog to In Progress at attach.
+
+PR 2188 · ROW 43 · KS-2167 · branch feature/ks-2167-failed-export-catch-saves-the-failed-row-before-it-logs · head 6e5c116d9b9d · Linear comment e31c62e9 · TIER 2, PRODUCT BYTES (analytics exportService.ts +8 -2, new test +105 -0).
+  The body states your three things: (1) the failed row is saved BEFORE the log line; (2) a throwing logger or an unreadable error.message is swallowed in that one catch; (3) createExport's unawaited processExport still has no .catch, so a throw from dbSaveExport itself stays unhandled (not covered). Measured: strict apply (controls pass); analytics suite 20 files / 123 -> 21 / 128; red-first 3 of 5 cells fail on the old product, 5 of 5 pass with it, controls pass both ways; tsc with tests 2 error lines, none in the new test (R 99th's record read the same 2; no develop baseline taken); eslint rc 0; docs-fragments rc 0. Held patch 5,651 B, sha256 8fc0812aed0a7d26. My read of the ticket: its own suggested fix (save first, guard the log, add a throwing-logger cell) is what the patch does; the PR says Refs and leaves the close to the board seat. Not run: the production logger, a real export failure.
+PR 2189 · ROW 44 · KS-2168 (+ KS-1875 named in a code span) · branch feature/ks-2168-metering-usage-doc-says-a-repeated-from-answers-400 · head aeb7d6fef815 · comment b42d91b7 · TIER 2, DOCS ONLY, zero code bytes (METERING-USAGE-API.md +1 -1).
+  The sentence now says a repeated from or to answers 400 BAD_REQUEST ("from and to may each be given once"); I read it at source in my tree at develop 801a2a7145c6: originate routes/metering.ts line 123 inside `res.status(400)`. The impossible-date 500 sentence (KS-1875 piece 1) is left in place, as you said. Strict apply of the CANONICAL patch (1,350 B, sha256 3e68f77d6f7ee69b) passes with controls; the READY's fence is 2 bytes shorter (a trailing context line, as on row 41) and the body says so; docs-fragments rc 0. Not run: the route over HTTP, any doc rendering.
+
+WHAT I DID NOT DO: no merge, no deploy, no box, no `az`, no demo write, no ticket state write, no extranet write (/api/seen not called), no mail to a human, no push to any branch of 2183 to 2187, no `--no-verify`, no force, no `--admin`; nothing deleted. The only board writes of this round are the two Linear comments above (BLUF, no at-sign).
+ROW 45 (KS-678, spec-examples rule E10, three files) is NOT started, as I told you at 16:05Z: patch extracted into evidence/row45 (5,678 B canonical, sha256 d630efa0a6310e9a, fence equals canonical), census of its three paths clear, no tree, nothing measured. It is the next seat's first row (HANDOVER).
+
+BATCH-ELIGIBLE: yes, both in ONE tier-2 batch (2188 changes the order of a save and a log inside one catch; 2189 is a doc sentence).
+
+NEXT FOR ME: the wrap (HANDOVER FINAL block, history entry, daily Result, vault commit of my own lines, wrap mail). I will not push anywhere after this mail.
+
+Seat R 100th
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 47  SEEN:      180  BATCH: /private/tmp/wed_newmail/batch_20261111T163930Z.txt
