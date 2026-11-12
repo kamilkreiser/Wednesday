@@ -1,0 +1,19 @@
+# Drafter commission: Seat R 107th (Secuura/Blockchain-R, RAISE lane), the ordinary successor to Seat R 106th (wrapped 03:37Z at ~52; PR 2157 fix round raised at merge-commit head 2c0692100527, under gate 329 tier 1; score deferred to the gate; pane %57 closed). Wednesday (12:3x seat), 2026-11-12 ~14:3x AEDT.
+
+INPUTS (read whole):
+1. R 106th's stamped brief: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-12_seatR106_raise.md, to its PROVENANCE line. Copy-and-change it.
+2. Wednesday's mails to R 106th, same folder: 2026-11-12_R106_addendum_2157_fixround.md, 2026-11-12_R106_answer_plan.md, 2026-11-12_R106_answer_2157_baseline.md (the merge-commit grant: ONE push, SPENT).
+3. R 106th's record: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-12_seatR-106th/ (HANDOVER.md FINAL block first; its kit with the R105-F1 fix R106-D1..D4 and its planted controls; the existing-branch driver family re-keyed for 2157; its traps).
+4. R 106th's wrap mail, saved: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8493ad5e-0999-43e0-978a-fb0dda4c04d0/scratchpad/r106_wrap.txt (session-local; the HANDOVER holds the same).
+5. Gate 329 (PR 2157, tier 1, RUNNING at commissioning): /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_gate329-tier1-pr2157/ (if verdict.md exists when you finish, read line 1 and the findings and say so).
+
+QUEUE for R 107th (Wednesday's order; Wednesday rules at the stamp):
+0. SET-UP: copy and re-key R 106th's kit (r106 -> r107) by counted replacement, KEEPING the R105-F1 fix (do not reintroduce `run` for jest); protect R 106th's trees (s-r106-ks1952 = PR 2157's tree under gate 329, s-r106-ctl, s-r106-mt1952).
+1. A FIX ROUND for PR 2157 ONLY by an ADDENDUM from Wednesday naming gate 329's findings (new commits on 2157's branch in s-r106-ks1952; never a force push, never a rebase).
+2. Row 16 (KS-2021), TIER 1, password.ts held patch (R 105th's and R 106th's briefs carry its row text and its required body statement: a missing or non-numeric count now does NOT match, so that malformed-row case flips from refuse to allow; HIBP always sends counts; quote `Number(countText) > 0`). Starts only at a reading of 48 or under. Then rows 19 (KS-1931), 12 (KS-1923, alone), KS-2061 (tier 2, census PR 2099 first), 46 (KS-1053) in R 106th's HANDOVER order. Re-measure strict apply of every held patch at develop b7137aa97c79.
+3. PRs 2200, 2201, 2203, 2204 (merged), 2205, 2206, 2207 are other lanes' or merged: never yours.
+Carry: drive-drop discipline; lock rules (four proofs); R 105th's standing lines (b) Refs-in-a-code-span, (c) round_gate_launch stops on a busy lock; R 106th's new traps (the old-base audit-gate refusal and the merge-commit route, which needs a NEW Wednesday grant per push); PACE 60 (stop starting at 55; tier-1 start line 48); model claude-sonnet-5-5; the `RULED BY KAM, NOT YET IN AN ARTEFACT` section verbatim from R 106th's stamped brief. Live floor (Wednesday or her successor fills at the stamp).
+
+HARD LIMITS for you, the drafter: never cd (not even the word in heredoc prose); never a bare `=====` shell word; quote heredoc delimiters; read-only git verbs only in client checkouts (GIT_OPTIONAL_LOCKS=0); no writes to Linear, GitHub, mail or boards; no .env values printed; write only into /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatR107/. If DevMASTER drops, wait, re-read, continue.
+
+OUTPUT: brief_R107.md, send_brief-ready: a literal PROVENANCE: line then `KS-NNNN | <ABSOLUTE source path> | read 2026-11-12` for EVERY KS key named; a `RULED BY KAM, NOT YET IN AN ARTEFACT` section; no lesson-file names; ONE blank STAMP block near the top; no SELF-CHECK line; no literal placeholder tokens wrapped in at-signs (the send gate refuses them); under 55 KB. Also notes.md. Return notes.md in full plus the brief's line count and size.
