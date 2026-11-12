@@ -68,6 +68,15 @@ MODELS = {
     "mimohosted": {"served": "xiaomi/mimo-v2.6-flash", "kwargs": {}, "hosted": True, "price": (0.14e-6, 0.28e-6),
                    "provider": {"order": ["Cohere"], "only": ["cohere"], "allow_fallbacks": False, "data_collection": "deny",
                                 "zdr": True, "quantizations": ["fp8"]}, "provider_tag": "cohere"},
+    # 2026-11-12 (13:xx operator): GLM-5.3 Flash hosted. DeepInfra fp4 (tag deepinfra/fp4) is on OpenRouter's ZDR list
+    # (GET /api/v1/endpoints/zdr) at status 0; SAME policy pins as v41hosted (only one provider, no fallbacks,
+    # data_collection deny, zdr), quantizations fp4 (DeepInfra lists no other tier for this model). Price = DeepInfra's listed rate.
+    "glm53flash": {"served": "z-ai/glm-5.3-flash", "kwargs": {}, "hosted": True, "price": (0.15e-6, 0.5e-6),
+                   "provider": {"order": ["DeepInfra"], "only": ["deepinfra"], "allow_fallbacks": False, "data_collection": "deny",
+                                "zdr": True, "quantizations": ["fp4"]}, "provider_tag": "deepinfra", "quant": "fp4",
+                   # 2026-11-12: OpenRouter/DeepInfra answered HTTP 400 "Reasoning is mandatory for this endpoint and cannot be disabled"
+                   # to reasoning:{enabled:false}. So thinking is ON (default), recorded, not a HARNESS fault.
+                   "thinking_forced": True, "reasoning_body": None},
     # Local Spark arms (vLLM v0.33.0 / llama.cpp), thinking OFF through each card's chat-template switch.
     "nemotron": {"served": "nemotron-3.5-super-vl", "kwargs": {"enable_thinking": False}},
     "kolibri": {"served": "Kolibri-1", "kwargs": {"enable_thinking": False}},
@@ -134,7 +143,7 @@ def post_hosted(body, budget, info, mk="v41hosted"):
     worst = info["prompt_bytes"] / 2.0 * p_in + body["max_tokens"] * p_out
     key = or_key()
     for attempt in range(3):
-        rid = budget.reserve(mk, MODELS[mk].get("provider_tag", "deepinfra") + "/fp8", worst)  # replay.Refused if spent + worst > cap
+        rid = budget.reserve(mk, MODELS[mk].get("provider_tag", "deepinfra") + "/" + MODELS[mk].get("quant", "fp8"), worst)  # replay.Refused if spent + worst > cap
         req = urllib.request.Request(OR_URL, data=json.dumps(body).encode("utf-8"), method="POST", headers={
             "Content-Type": "application/json", "Authorization": "Bearer " + key, "X-Title": "Wednesday spark-ab " + mk})
         try:
@@ -283,7 +292,9 @@ def main():
                     "chat_template_kwargs": dict(m["kwargs"])}
             if m.get("hosted"):
                 del body["chat_template_kwargs"]
-                body.update({"provider": dict(m.get("provider", OR_PROVIDER)), "reasoning": dict(OR_REASONING), "usage": {"include": True}})
+                body.update({"provider": dict(m.get("provider", OR_PROVIDER)), "reasoning": dict(OR_REASONING) if "reasoning_body" not in m else m["reasoning_body"], "usage": {"include": True}})
+                if body.get("reasoning") is None:
+                    del body["reasoning"]
                 if budget is None:
                     budget = replay.Budget(a.budget or os.path.join(OUT, lab, "budget.json"), a.cap)
             with open(os.path.join(run, "request.json"), "w", encoding="utf-8") as f:
