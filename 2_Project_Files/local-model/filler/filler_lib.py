@@ -276,6 +276,9 @@ def numstat_prompt(task, mail_text):
         "fragment (+29 and +21)' without their paths) is NOT a per-file count: leave those files out of the list entirely. "
         "A path is a file path copied character for character from the mail (it contains a '/' or a file extension); "
         "a description such as 'flow fragment' or 'the lock' is never a path. "
+        # 2026-11-13 (F17): the model used the count text '+117 -0' as a path for 'one new test file (+117 -0)'.
+        "A count given for a file the mail does not name by path (for example 'plus one new test file (+117 -0)') is "
+        "left out of the list; a count such as '+117 -0' is never a path. "
         "Ignore every other pull request in the mail."
     ) % {"pr": task["pr"]}
     return text, {"pr": task["pr"], "mail": mail_text}
