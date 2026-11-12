@@ -31,7 +31,7 @@ def lines():
         if why:
             out.append("FILLER: Spark busy (%s) - %d queued, waiting" % ("; ".join(why), q))
         else:
-            out.append("FILLER: ⚠ Spark IDLE with %d filler task(s) queued - run: python3 %s" % (q, os.path.join(HERE, "run_filler.py")))
+            out.append("FILLER: ⚠ Spark IDLE with %d filler task(s) queued - run: bash %s (drains all; or python3 %s for one)" % (q, os.path.join(HERE, "drain.sh"), os.path.join(HERE, "run_filler.py")))
     return out
 
 
