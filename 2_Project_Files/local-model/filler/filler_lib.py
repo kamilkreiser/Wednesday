@@ -270,6 +270,12 @@ def numstat_prompt(task, mail_text):
         "Use null for anything the mail does not state for this PR; never compute or estimate a number; copy numbers exactly as the "
         "mail writes them (a figure such as +68/-2 means additions 68, deletions 2; 'files 5' means files_changed 5). "
         "Per-file entries only for files the mail names with a count; an empty list when there are none. "
+        # 2026-11-13 (F15, F16 REJECTED_UNGROUNDED): the model pinned a GROUP's count ('ten tsconfig.json files (+18 -28
+        # together)') on one file and turned a description ('a flow fragment') into a path. Two explicit rules below.
+        "A count the mail gives for a GROUP of files ('ten files ... together', 'the two fragments', 'plus a flow and a cheat "
+        "fragment (+29 and +21)' without their paths) is NOT a per-file count: leave those files out of the list entirely. "
+        "A path is a file path copied character for character from the mail (it contains a '/' or a file extension); "
+        "a description such as 'flow fragment' or 'the lock' is never a path. "
         "Ignore every other pull request in the mail."
     ) % {"pr": task["pr"]}
     return text, {"pr": task["pr"], "mail": mail_text}
