@@ -1,0 +1,16 @@
+For a caller without per-quote pricing rights (Seller AND internal-metrics), PricingPolicy.Apply now
+stores PriceAudit.DefaultSectionRebate (0.07) on every section the caller adds: each section on
+create, a section id the stored draft lacks on an edit. A stored section keeps its rebate or none;
+the value is never returned to that caller. Callers with the right are unchanged.
+
+Duplicate calls Apply in copy mode: the source's hidden inputs (section markup and rebate, line
+pricingMethod, supplies) are copied unchanged with no default on a copied section; manual items,
+sell overrides, fixed rates and a target GP are still refused. Typing a hidden input without the
+right is still 403 INTERNAL_INPUT_FORBIDDEN on create and edit.
+
+Side effect, per the product owner's 2026-11-12 ruling: such a caller can duplicate a quote whose
+rebate a pricing analyst set, without seeing or changing it. Docs (ENGINE.md X-32, API.md), the API
+contract and its generated web copies state the rule. New rows pin the stamp, the copy, the
+refusals and a leak sweep; one existing Duplicate row's purchase block follows the new rule.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
