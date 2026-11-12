@@ -1,0 +1,19 @@
+# Drafter commission: Seat R 106th (Secuura/Blockchain-R, RAISE lane), the ordinary successor to Seat R 105th (READY round 1 sent 01:56:29Z for PRs 2203 + 2206, wrapped 01:58Z; its mail watcher holds until ~02:10Z; score deferred to gate 327). Wednesday (12:3x successor seat), 2026-11-12 ~13:0x AEDT.
+
+INPUTS (read whole):
+1. R 105th's stamped brief: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-12_seatR105_raise.md, to its PROVENANCE line. Copy-and-change it.
+2. Wednesday's mail to R 105th, same folder: 2026-11-12_R105_answer_plan.md (rulings carry; one-push rulings are SPENT).
+3. R 105th's record: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-12_seatR-105th/ (HANDOVER.md FINAL block first; its traps; declared kit changes R105-N1.. ; its findings R105-F1 and (b)-(e) in the wrap).
+4. R 105th's wrap mail, saved: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8493ad5e-0999-43e0-978a-fb0dda4c04d0/scratchpad/r105_wrap.txt (if unreadable, its content is in the HANDOVER).
+5. Gate 327 (tier 2, PRs 2203 + 2206), RUNNING at commissioning: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_gate327-tier2-r105/ (commission.md; verdict.md when it lands: if it exists when you finish, read line 1 and the findings and say so).
+
+QUEUE for R 106th (Wednesday's order; Wednesday rules at the stamp):
+0. SET-UP: fix the kit trap R105-F1 IN YOUR OWN RE-KEYED KIT COPY (never R 105th's tools): `measure_testonly` and `measure_row` must not append `run` to a jest test script (jest reads it as a path filter: a whole-suite leg read 2 suites / 7 tests in services/originate); and `tsc_tests` needs `types node,jest` there. A declared edit R106-D.. with a planted control: on services/originate the fixed tool must report the whole-suite count (R 105th measured 221 suites, 2,598 tests at 088fa84da10c), and the unfixed form must be shown to report fewer.
+1. FIX ROUND for PRs 2203 / 2206 ONLY by an ADDENDUM from Wednesday naming gate 327's findings (new commits on R 105th's kept trees s-r105-ks2169 / s-r105-ks2005; never a force push). Until then those branches are under a gate: no push.
+2. Then R 105th's HANDOVER queue in its order: row 16 (KS-2021, TIER 1), row 19 (KS-1931), row 12 (KS-1923, alone), KS-2061 (tier 2, last: re-check PR 2099's head at the raise; census first), row 46. R 105th measured all held patches strict-apply at develop 1247e1af3c20 with zero offsets: re-measure.
+3. PRs 2200, 2201, 2204, 2205 are other lanes' under gates or in the merge queue: NOT yours; never push to their branches.
+Carry: drive-drop discipline; lock rules (four proofs, never touch another seat's lock); R 105th's finding (b) as a standing line (a PR body that names another ticket never puts Refs in front of its key, code span or not); R 105th's (c) round_gate_launch stops on a busy lock though the driver queues (its R105-N6 hand steps); PACE 60 (stop starting at 55; a tier-1 row starts only under 48, as R 105th's brief ruled); model claude-sonnet-5-5; the `RULED BY KAM, NOT YET IN AN ARTEFACT` section verbatim from R 105th's stamped brief. Live floor (Wednesday fills at the stamp).
+
+HARD LIMITS for you, the drafter: never cd (not even the word in heredoc prose); never a bare `=====` shell word; quote heredoc delimiters; read-only git verbs only in client checkouts (GIT_OPTIONAL_LOCKS=0); no writes to Linear, GitHub, mail or boards; no .env values printed; write only into /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatR106/. If DevMASTER drops, wait, re-read, continue.
+
+OUTPUT: brief_R106.md, send_brief-ready: a literal PROVENANCE: line then `KS-NNNN | <ABSOLUTE source path> | read 2026-11-12` for EVERY KS key named; a `RULED BY KAM, NOT YET IN AN ARTEFACT` section; no lesson-file names; ONE blank STAMP block near the top; no SELF-CHECK line; under 55 KB. Also notes.md. Return notes.md in full plus the brief's line count and size.
