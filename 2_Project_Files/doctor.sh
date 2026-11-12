@@ -1224,6 +1224,25 @@ if [ "$_DOC_AGENT" = "tuesday" ]; then
   fi
 fi
 
+# --- nightly stale-ticket screen (2026-11-12, Kam 11:36 "standard routine"; routine (b)) -----------------------
+# Wednesday-seat launchd job com.wednesday.stalescreen (01:15; screens <=60 open Secuura tickets against develop on the local
+# Spark; proposals only). Machine-local (PORTABILITY 28). The generic sweep above already warns when the plist is missing/unloaded;
+# this block adds the two facts that sweep cannot see: the script path exists, and the last run did not fail / is not stale.
+if [ "$_DOC_AGENT" = "wednesday" ]; then
+  _SS_DIR="$PROJECT_DIR/2_Project_Files/local-model/stale_screen"
+  if [ ! -f "$_SS_DIR/nightly.sh" ] || [ ! -f "$_SS_DIR/screen.py" ]; then
+    warn "stale-ticket screen scripts missing" "restore 2_Project_Files/local-model/stale_screen/{nightly.sh,screen.py} from git"
+  elif ! launchctl print "gui/$(id -u)/com.wednesday.stalescreen" >/dev/null 2>&1; then
+    warn "stale-ticket screen job NOT loaded" "bash 2_Project_Files/scheduler/install_all_jobs.sh (Wednesday tree, WED_AGENT unset) - the nightly screen of open Secuura tickets is not running"
+  elif [ -f "$_SS_DIR/state/last_run_rc" ] && ! /usr/bin/grep -q '^rc=0$' "$_SS_DIR/state/last_run_rc"; then
+    warn "stale-ticket screen last run failed ($(cat "$_SS_DIR/state/last_run_rc"))" "read ~/Library/Logs/wednesday_stalescreen.out; rc 2 = cannot read the board or develop"
+  elif [ -f "$_SS_DIR/state/last_run_at" ] && [ -z "$(find "$_SS_DIR/state/last_run_at" -mtime -3 2>/dev/null)" ]; then
+    warn "stale-ticket screen has not run for 3+ days" "read ~/Library/Logs/wednesday_stalescreen.out (refused nights are logged with the reason: tunnel down / round live / window)"
+  else
+    ok "stale-ticket screen job loaded (com.wednesday.stalescreen; last run $(cat "$_SS_DIR/state/last_run_at" 2>/dev/null || echo 'not yet'))"
+  fi
+fi
+
 # ── PYTHON TOOLS REFERENCE ONLY NAMES THEY BIND (2026-09-20, Tuesday) ─────────
 # Patching reconcile_rulings.py I added os.environ to a module whose imports read
 # "import json, re, subprocess, sys", and verified it with ast.parse — which

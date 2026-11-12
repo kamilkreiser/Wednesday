@@ -86,6 +86,8 @@ for t in "$JOBS"/*.plist.template; do
   case "$job" in trmnlpush) if [ "$SEAT" != "wednesday" ]; then echo "skip $job — the TRMNL push is Wednesday's; seat is $SEAT"; continue; fi ;; esac
   # escalate48h (2026-10-23, Kam 11:13: unanswered > 48 h => email him) is TUESDAY's only: she owns the Datasec board; a second sender on Wednesday's seat would double-mail Kam.
   case "$job" in escalate48h) if [ "$SEAT" != "tuesday" ]; then echo "skip $job - the 48h escalation mailer is Tuesday's; seat is $SEAT"; continue; fi ;; esac
+  # stalescreen (2026-11-12, Kam 11:36: the nightly stale-ticket screen is standard routine) is Wednesday's only: it reads Secuura's board and uses Wednesday's Spark tunnel; a second seat would double-screen and fight for the one-request-at-a-time box.
+  case "$job" in stalescreen) if [ "$SEAT" != "wednesday" ]; then echo "skip $job - the nightly stale-ticket screen is Wednesday's; seat is $SEAT"; continue; fi ;; esac
   # HELD 2026-10-04 (deletion incident): never (re)install a nassync leg whose hold file exists — re-arming is Kam's word.
   if [ "$job" = "nassync" ] && [ -e "$PROJECT_DIR/2_Project_Files/scheduler/NASSYNC_HOLD_$SEAT" ]; then echo "skip $job — HELD (2_Project_Files/scheduler/NASSYNC_HOLD_$SEAT); re-arm only on Kam's word"; continue; fi
   label="com.$SEAT.$job"
