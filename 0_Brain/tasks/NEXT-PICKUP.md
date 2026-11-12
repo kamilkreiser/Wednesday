@@ -17,6 +17,12 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## CHECKPOINT ~17:45 12 Nov by the 16:49 seat (ctx 65%) — READ FIRST
+- No new Kam row since 16:36:09 (live board read 17:44:20); reconcile 0 to rule.
+- **B 153rd:** GO for PR 2157 SENT (briefs_staged/2026-11-12_B153_go_2157.md; head 2c0692100527, develop cea1cdc2b07d, expected tree cf7034f53636; Wednesday ls-remote 17:40:27). NEXT = its MERGED: verify develop by ls-remote + step 8 (one parent, tree = expected); then 2209 at <=52 (re-pinned READY -> GO naming gate 332's live behaviour sentence, in the ADDENDUM 1 body) or WRAP.
+- **D 61st:** STATUS 2 06:40Z: build green (REBUILT 6 / UNCHANGED 27 / NOIMAGE 3), census 35 rows 0 misses, KS-535 695d09df873ff42b, KS-1233 EXISTS 1 TTL -1; SWAPPING now (gateway last). NEXT = STATUS B -> ADDENDUM 2 to S 72nd (the k26-covered DONE-CANDIDATEs, listed in the block below) + the six client-visible changes as notice facts (Kam-class).
+- R 109th: row 19 pushing -> READY -> TIER-1 Opus gate. S 72nd: KS-1815 / KS-1821 closes under the ANSWER.
+
 ## UPDATE ~17:40 12 Nov by the 16:49 seat — READ FIRST
 - **Plan ANSWERS sent + tapped:** B 153rd (2157 then 2209; auth node_modules clonefile YES), S 72nd (30-min default on its candidate QUESTION), R 109th (Q1 cut on cea1cdc2b07d; row 12 ANSWER: start it after row 19's READY if the reading is <=48 — supersedes the plan ANSWER's Q2 by name).
 - **R 109th:** row 19 KS-1931 committed c0e112d6bc3e (kyc 94/94, red-first proven), pushing; READY next -> commission a TIER-1 Opus gate.
