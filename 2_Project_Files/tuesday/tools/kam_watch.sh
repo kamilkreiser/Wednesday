@@ -36,8 +36,16 @@ case "${1:-}" in
   --pending)   u=$(unseen); if [ -n "$u" ]; then echo "UNSEEN:"; printf '%s\n' "$u" | cut -f3-; exit 1; else echo "none unseen"; exit 0; fi ;;
 esac
 
-# control: the instrument must see at least one message today, or it is blind
-c=$(current | /usr/bin/grep -c '^MSG'); [ "$c" -gt 0 ] || { echo "CONTROL FAILED: 0 messages visible"; exit 3; }
+# control: the instrument must see at least one message today, or it is blind.
+# 2026-11-13 03:35 (Tuesday s274): after midnight there are 0 rows of TODAY until Kam's first message, so the
+# old control refused to arm all night. A board read is proven instead by its FRESHNESS line: 'N live rows
+# fetched' with N > 0 (the fetch itself returned rows, whatever their date). Both 0: blind, refuse.
+c=$(current | /usr/bin/grep -c '^MSG')
+if [ "$c" -eq 0 ]; then
+  f=$(bash "$T/tools/kam_rulings_today.sh" 2>/dev/null | /usr/bin/grep -i -o -E '[0-9]+ live rows fetched' | /usr/bin/grep -o -E '^[0-9]+')
+  [ -n "$f" ] && [ "$f" -gt 0 ] || { echo "CONTROL FAILED: 0 messages visible and 0 live rows fetched"; exit 3; }
+  echo "CONTROL: 0 messages today; board read proven by $f live rows fetched"
+fi
 u=$(unseen); if [ -n "$u" ]; then echo "FIRED KAM (already unseen at arm):"; printf '%s\n' "$u" | cut -f3-; exit 0; fi
 echo "ARMED $(date +%H:%M:%S): $c messages visible, all seen"
 for i in $(seq 1 240); do
