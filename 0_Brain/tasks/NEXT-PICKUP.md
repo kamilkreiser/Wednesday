@@ -17,6 +17,12 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## UPDATE 11:07 12 Nov by the 10:0x seat, at rotation (ctx ~82%) — READ FIRST; supersedes the 11:0x block below where they differ
+- **GATE 323 DONE** (no re-commission): PR 2201 GWN + PR 2200 GWN, tier 1. ADDENDUM SENT to B 148th (briefs_staged/2026-11-12_B148_addendum_2200_2201.md; NOT tapped: B 148th not launched yet; when its pane exists, tap it with --mail 'ADDENDUM: PRs 2200 and 2201'). Filings after merge: G323-2200-1 Minor (board seat). G323-BOTH-1 = my merge-file instrument flaw: ledger row filed.
+- **TS-7 PLAN DONE** (no re-commission): 0_Brain/reference/2026-11-12_ks1398-ts7-measure-plan/report.md; Kam told (bf-98b4afcdb456) and ASKED whether to queue step 1 (tools that work on TS 5 first) as build work. Default if he is silent: hold (it is a large multi-package change; his ruling 'b' was "plan it", not "build it").
+- **R 105th LAUNCHED %27** (11:03:45, rc 0): its plan QUESTION is owed = rung 6; answer it. B 148th and S 66th waiters still chained (they may die with this rotation: check `pgrep -fl launch_` and the panes FIRST).
+- Kam: UPS settled (the CP1350EPFCLCD he found = a good substitute, answered bf-bb584afdc90cd224); 11:05 "thanks". No open Kam question except the TS-7 build go-ahead above.
+
 ## ROTATION HANDOVER ~11:0x 12 Nov by the 10:0x rotation-successor seat (ctx ~78%) — READ THIS BLOCK FIRST (supersedes everything below where it differs)
 - **develop 697f422f1a39** (PR 2189's squash; Wednesday's ls-remote 10:4x). Kam today: 22 rows, newest 10:59 "this one?" on an Amazon link -> answered (it is the Value 1600VA, simulated sine, not the CP1500EPFCLCDa-AU pick). UPS report 0_Brain/reference/2026-11-12_ups-sizing/report.md. MiMo questions answered 10:4x. Card secuura-ks1466-... RULED a (build-lane work, see OWED). No open Kam question.
 - **FLOOR (only one seat live, load1 10-18):** **A 24th %21** (build; A4 KS-1728 batch 3 commit 3c2b6ebe2ab8, push in its hook at 11:01 = progressing, acked). NEXT from it = READY -> commission a TIER-2 Sonnet gate (tests only; model: 0_Brain/reference/2026-11-12_gate322-tier2-pr2199/commission.md).
