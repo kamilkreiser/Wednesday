@@ -18185,5 +18185,12 @@
   "project": "Secuura",
   "ts": "2026-11-12T11:34:43.807334+11:00",
   "text": "Received. Yes, I think that's the right use for it. One honest caveat first: running a test suite costs no tokens. What burns Claude tokens is the agents reading long test output, logs and diffs. So the Spark's job would be to read the bulky output and hand Claude a short, checkable summary.\n\nThree candidates, best first.\n\nOne, digest test runs. A harness runs the suites; the Spark turns the raw output into a one-page result: counts, every failure with its first stack line, anything that changed since the last run. Claude reads a page, not fifty thousand characters. The harness checks every count the Spark reports against the raw file, so a wrong summary is caught, not trusted.\n\nTwo, a nightly stale-ticket screen. For each open ticket, does the code it cites still exist at develop, and is it already fixed or duplicated? That's simple and token-heavy, and it's exactly what our board seats spend hours on. The Spark proposes, and a Claude seat confirms before anything changes on the board.\n\nThree, mechanical test work: generating the deliberate breaks we use to prove a test can fail, and checking that a seat's stated counts match the real diff. Low judgement, high volume.\n\nWhat I wouldn't use it for: judging code. Its shadow review on today's gate found none of the five real findings.\n\nMy recommendation is to pilot number one on the next two gates, measuring tokens saved and summary errors against the raw output, then number two overnight. Unless you say otherwise, I'll commission the harness design for the first pilot now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-12T11:37:06.149730+11:00",
+  "text": "Received: all three become standard routine. My reading, so you can correct it: the test digest goes into every gate and build brief once its checks pass, which the pilot running now will show. The stale-ticket screen becomes a nightly job, and I'm commissioning its build now, so tonight is the first run. Its proposals reach the board only after a Claude agent confirms them. The mechanical test work (generating breaks, checking counts) gets added to the Spark's standing queue whenever it's free. I'll report what each one saves."
  }
 ]
