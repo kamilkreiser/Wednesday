@@ -1,0 +1,49 @@
+e547e2b0 | line 8 `actions/runs?head_sha=`: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/runs?head_sha=ab5a16e9.. --jq '.workflow_runs|length' -> 5; names -> Build,Deploy demo,Gitleaks Scan,Push on main,npm-audit; control (30b957b4 same query) -> 5
+95b986f9 | line 8 `VERDICT: PASS`: /usr/bin/grep -c -i -F 'VERDICT: PASS' /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s274/d_nxrec/buildlog.txt -> 1; control 'VERDICT: FAIL' -> 0, 'maxWorkers' -> 3
+4f729d46 | line 8 `30b957b4`: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/runs?head_sha=30b957b4.. --jq '[.workflow_runs[]|.name+":"+.conclusion]|join(",")' -> Build:success,Deploy demo:skipped,Gitleaks Scan:success,Push on main:success,npm-audit:success
+a9015fa4 | line 11 `9f7efc97`: gh api -X GET pulls/199 --jq .head.sha -> 9f7efc979121b96097e418e2d9faff5bd502252b; reviewed head in the independent review title '@ 9f7efc9' grep -c -F '@ 9f7efc9' VERDICT -> 1
+0be4b394 | line 11 `--check`: /usr/bin/grep -c -i -F -- '--check' /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s274/d_nxrec/commitI.msg -> 1 (commit 9f7efc97 message); ANSWER-2 -> 2
+4528e9d0 | line 11 `203 runtime rows = 203 committed`: /usr/bin/grep -c -i -F '203 runtime rows = 203 committed' /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s274/d_nxrec/commitI.msg -> 1; in the merge commit message -> 0
+22495d28 | line 11 `runtime rows 203; committed rows 203`: /usr/bin/grep -c -i -F 'runtime rows 203; committed rows 203' builder STATUS -> 3; the independent review VERDICT -> 2; commit message (control, must be 0) -> 0
+a86433e7 | line 20 `2026-11-12_B1545_ANSWER-1`: ls briefs | /usr/bin/grep -c -i 'B1545_ANSWER-1' -> 1
+707a0c80 | line 20 `ANSWER-6`: ls briefs | /usr/bin/grep -c -i 'B1545_ANSWER-6' -> 1; total B1545_ANSWER files -> 6
+10cbd5a2 | line 20 `--check`: /usr/bin/grep -c -i -F -- '--check' /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s274/d_nxrec/commitI.msg -> 1 (commit 9f7efc97 message); ANSWER-2 -> 2
+0463dd9a | line 24 `.tools/b1545`: ls -d /Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1545 -> /Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1545; control ls -d .tools/b9999 -> '' (absent)
+0c62cd6c | line 27 `WRITE`: /usr/bin/grep -c -F 'exactly `WRITE` or `HOLD`' kit -> 4 (JIRA, CREATE-A, CREATE-B, RECORDS slot lines); control: 'exactly `MAYBE` or' -> 0
+021f3c8b | line 27 `JIRA_SITE`: /usr/bin/grep -c -E '^JIRA_SITE=' .env (name only, value never printed) -> 1; control '^JIRA_ZZZ=' -> 0
+b8933006 | line 27 `JIRA_EMAIL`: /usr/bin/grep -c -E '^JIRA_EMAIL=' .env (name only, value never printed) -> 1; control '^JIRA_ZZZ=' -> 0
+89f0655e | line 27 `JIRA_API_TOKEN`: /usr/bin/grep -c -E '^JIRA_API_TOKEN=' .env (name only, value never printed) -> 1; control '^JIRA_ZZZ=' -> 0
+2828bb53 | line 33 `contents?ref=`: gh api -X GET -H 'Accept: application/vnd.github.raw' repos/datasecau/Reporting_Dashboard_Au/contents/<path>?ref=ab5a16e9.. for 399 paths of the tree listing -> files saved 399, empty files 0; tree listing lines 399
+8623d00c | line 33 `business-hours`: files of the 399 whose text contains 'business-hours' (case-insensitive) -> 5; control 'rd969' (own name in rd969 file) -> 1; control 'zzqxnonexist' -> 0
+61c73ec5 | line 33 `isPlainRequestObject`: files of the 399 whose text contains 'isPlainRequestObject' -> 1; control 'isBooleanSettingValue' -> 1
+73fdf954 | line 33 `occurrences(server, 'function isPlainRequestObject(')`: awk NR==142 rd691 test at ab5a16e9 -> counts.plainObjectCheck = occurrences(server, 'function isPlainRequestObject(');; /usr/bin/grep -c -F -> 1
+520e3c8f | line 33 `27c0b71e`: {"tests": 5612, "suites": 343}; at ab5a16e9 -> {"tests": 5612, "suites": 343}
+b7b3ae89 | line 38 `Push on main`: runs of ab5a16e9 named 'Push on main' -> success; control name 'Nonexistent' -> ''
+a653aafd | line 38 `/api/settings/agent`: /usr/bin/grep -c -F '/api/settings/agent' backend/server.js at ab5a16e9 -> 0; control '/api/settings/business-hours' -> 2; same file at 27c0b71e (control, must be >0) -> 2
+cb6890a4 | line 42 `Test gap: the shared body check isPlainRequestObject lost its only cells with the agent se`: len(A_SUM) -> 191; occurrences of A_SUM in the kit -> 1; scan_d.py -> OK (see report)
+51ccc06e | line 48 `INSTRUMENT ERROR`: project = RD AND ( text ~ "\"INSTRUMENT ERROR\"" ) -> (200, [('RD-591', 'Release Ready'), ('RD-549', 'Release Ready'), ('RD-286', 'Release Ready')]); control bootServer -> 16 hits
+b022210c | line 56 `[LAND-199-691-13NOV]`: python str.count over C_DET -> 1, over LAND -> 0, C_DET ends with marker -> True; Jira marker search (project = RD AND ( text ~ phrase )) -> (200, [])
+8daec3c0 | line 57 `VERDICT: PASS`: /usr/bin/grep -c -i -F 'VERDICT: PASS' /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s274/d_nxrec/buildlog.txt -> 1; control 'VERDICT: FAIL' -> 0, 'maxWorkers' -> 3
+01ca5314 | line 58 ` | Detail `: str.count(' | Detail ') in C_DET -> 0, in C_REC -> 0; in the kit -> 1 (the separator between the three texts of the row)
+8ac2b16a | line 60 `NOT CONFIRMED: <what was read>`: /usr/bin/grep -c -i -F 'NOT CONFIRMED:' CLARIFICATIONS.md -> 0; the previous records kit B1529 -> 1 (a sentence form the seat writes, nothing to match)
+164348dc | line 75 `pulls/199`: gh api -X GET pulls/199 --jq '[.merged,.merge_commit_sha[0:8],.state]' -> [true,"ab5a16e9","closed"]; control pulls/99999 -> gh: Not Found (HTTP 404)
+8311229c | line 75 `pull request 199`: /usr/bin/grep -c -i -F 'pull request 199' CLARIFICATIONS.md -> 0; control 'pull request 190' -> 6
+e2110066 | line 75 `ab5a16e9`: /usr/bin/grep -c -i -F 'ab5a16e9' CLARIFICATIONS.md -> 0; control '30b957b4' -> 5
+eb7c42d0 | line 75 `isPlainRequestObject`: files of the 399 whose text contains 'isPlainRequestObject' -> 1; control 'isBooleanSettingValue' -> 1
+94c6343d | line 76 `RECORDS DRY RUN ONLY: <n> payloads built, nothing posted`: /usr/bin/grep -c -F 'RECORDS DRY RUN ONLY: <n> payloads built, nothing posted' previous kit B1529 -> 2 (form copied from it)
+d974b7df | line 77 `POST`: Jira GET /rest/api/3/issue/RD-691/transitions -> [('31', 'In Review', 'Testing')] (the POST body takes the id; nothing posted by the drafter)
+688661df | line 77 `In Review`: Jira GET /rest/api/3/issue/RD-691/transitions -> [('31', 'In Review', 'Testing')] (the POST body takes the id; nothing posted by the drafter)
+3a9bd2dc | line 77 `Testing`: Jira GET /rest/api/3/issue/RD-691/transitions -> [('31', 'In Review', 'Testing')] (the POST body takes the id; nothing posted by the drafter); control name 'Nonexistent' -> []
+27042967 | line 84 `STOPPED: NEEDS TUESDAY <one question>`: /usr/bin/grep -c -F 'STOPPED: NEEDS TUESDAY' previous kit B1529 -> 3
+d7aaa11c | line 87 `RD-691`: Jira GET issue/RD-691 -> HTTP 200
+c00706ca | line 87 `RD-99999999`: Jira GET issue/RD-99999999 -> HTTP 404
+9b2e5e8b | line 89 `ab5a16e92a20ee356604bd52be04c7029961207a`: gh api -X GET branches/main --jq .commit.sha -> ab5a16e92a20ee356604bd52be04c7029961207a; compare sha...main -> ["identical",0,0]
+1a305774 | line 91 `df -g`: df -g /Volumes/Datasec_DEV -> /dev/disk7s1      1862  610      1252    33% 20224261 13131644560    0%   /Volumes/Datasec_DEV
+RULE-1 | (rule sentences the tool may not list; measured 2026-11-13 06:16 AEDT) "R226 / B1548 held by": grep -l -i -F 'R226' briefs/* minus B1548-named files -> 2 files, both the older B756 kit and its .pre-stamp, token PR226-STATE (line 123); grep -l -i -F 'B1548' minus B1548-named -> 0; control R221 -> 19 files; NexusAI Briefs folder: R226|B1548 -> 0, control R221|B1529 -> 2
+RULE-2 | marker searches today: text ~ phrase LAND-199-691-13NOV -> [], BODYCHK-199-13NOV -> [], INSTRERR-199-13NOV -> []; control LAND-196-982-12NOV -> ['RD-982']; phrase searches isPlainRequestObject 0, currentLog 0, rd691 0, rd563 0 (control bootServer 16)
+RULE-3 | test( cells at 4-space indent at ab5a16e9: grep -c -E '^    test\(' rd691 -> 5 (G1 W1 E1 S1 X1 by grep -n), rd969 -> 8; rd563 file absent from the 399-file listing, skip tokens in rd691 -> 0
+RULE-4 | independent review VERDICT: grep -c -F '40 of 40' -> 2; '46 of 46' -> 2; 'GO WITH FINDINGS' -> 1; 'No Blocker, no Major' -> 1
+RULE-5 | CLARIFICATIONS.md: wc -lc -> 2899 lines 623164 bytes; grep -n '^## 86\.' -> line 2869; '^\*\*C-279\.' -> line 2895; grep -c -F 'RD-691' -> 2; sha256 f0abea6f1d1b83fbdafd287c20507e91925c8f7d0a04fa881a41eb5c9988342b
+RULE-6 | pulls/199: merge tree 0eee69191011d9c7c6af2558d6546c325b66e814 = head tree 9f7efc97 (git/commits .tree.sha both); files 9 (additions 186, deletions 219 by sum of pulls/199/files); commits 2 (cf457c35, 9f7efc97, 1 parent each); open pulls 0 (pulls?state=open length)
+RULE-7 | Stamp: grep -c -F '____' kit -> 10 (nine slot lines and the last line); tmux list-panes -a at 06:16 -> %0 tuesday, %1 fleet-monitor, %28, %29 (no Datasec/NexusAI-* pane); the 5 files that mention business-hours: rd408-r2-misconfigured-explains, rd436-r4-enforce-stamp-and-status, rd691-agent-settings-routes-retired, rd798-log-injection-chat-and-learning, rd969-three-routes-empty-request (ls of the fetched copies)
+RULE-8 | CLAUDE.md lines 286 (Work-tracking rule heading), 302 (Code change -> Testing), 303 (Decision/docs -> Done) by awk NR; JIRA.md 522 convention heading, 530 priority, 552 comment structure heading; model-routing.md line 97 row C7 and 110 row G3; models_latest.json line 23 model_id claude-sonnet-5-5; brief_seat.sh line 24 LEVEL="${BRIEF_SEAT_LEVEL:-opus}"
