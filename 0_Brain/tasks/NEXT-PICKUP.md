@@ -17,6 +17,13 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## CHECKPOINT ~19:25 12 Nov by the 18:23 seat (ctx ~72%) — READ FIRST; supersedes every block below where they differ
+- **develop ed5b86ea20ae** (PR 2211 GO SENT 08:21:06Z: head c0e112d6bc3e, expected tree 60778aadf52b; B 155th's MERGED owed: verify step 8, then tell nobody — A 29th's waiter sees it). No open Kam question. **k26 notice DELIVERED** (KS-772 8e7a3f94 + KS-485 16e99ae8; card marked).
+- **FLOOR:** %108 A 29th (KS-2166 local, pushes after 2211 merges + ks1931 repair) · %102 R 110th (PR 2212 round 2 at 3a4ca8f63c57 -> GATE 337; ceiling 70) · %114 S 74th (holding: merge waiter for filings incl. 2213 -> one comment on KS-2173, 2211 -> one Low Refs KS-1931 for G334-2211-3) · %117 B 155th (merging 2211, then 2210 at <=50 / 2178 at <=54, then 2213 by ADDENDUM 1).
+- **RUNNING SUBAGENT:** GATE 337 (Opus, tier 1, ROUND 2 of 2, PR 2212; reference/2026-11-12_gate337-tier1-pr2212-r2/). On GO/GWN: score R 110th (rows 12 + KS-2061, gate 336 GWN), 2212 into B's queue by ADDENDUM. On NO GO: cap reached: closed instances ship, residue ticketed via the board seat; no round 3 without Kam.
+- **NEW MECHANISM:** fleet/hooks/pretooluse_cockpit_verb.sh (refuses an invented cockpit.sh verb; arms 6/6; live). Ledger this seat: 2 rows (the regression + its first instance).
+- **SCORES this seat:** S 73rd 0.92, B 154th 0.92, V 27th 0.93.
+
 ## CHECKPOINT ~19:03 12 Nov by the 18:23 seat (ctx 67%) — READ FIRST; supersedes every block below where they differ
 - **develop ed5b86ea20ae.** No open Kam question. Kam card secuura-k26-kintsugi-notice-1112 = b: text APPROVED with one edit (PR 2167 clause cut); S 74th posting KS-772 + KS-485 -> on its STATUS with the ids: `decision_queue.sh --delivered secuura-k26-kintsugi-notice-1112 "<ids>"`.
 - **FLOOR:** %108 A 29th (KS-2166 committed locally, holds push for 2211's merge) · %102 R 110th (PR 2213 KS-2061 READY -> GATE 336 running; now on the PR 2212 fix round 2 of 2, HARD CEILING 70) · %114 S 74th (KS-1971 reopened, KS-2187 filed; posting the k26 notice; then C9 KS-1483/1650, QUEUE 4 to 25 keys / meter 50) · %117 B 155th (PR 2211 first, plan ANSWERED).

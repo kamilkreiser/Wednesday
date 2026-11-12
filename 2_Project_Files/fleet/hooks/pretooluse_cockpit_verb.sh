@@ -19,7 +19,7 @@ VERBS=$(/usr/bin/grep -o 'usage: cockpit.sh [a-z]*|[a-z|]*' "$COCKPIT" | tail -1
 BAD=$(printf '%s\n' "$CMD" | python3 -c '
 import re,sys
 verbs=set(sys.argv[1].split("|"))
-bad=[v for v in re.findall(r"cockpit\.sh[\"\x27]?\s+([A-Za-z_][A-Za-z0-9_-]*)", sys.stdin.read()) if v not in verbs]
+bad=[v for v in re.findall(r"/cockpit/cockpit\.sh[\"\x27]?\s+([A-Za-z_][A-Za-z0-9_-]*)", sys.stdin.read()) if v not in verbs]
 print(" ".join(bad))' "$VERBS")
 if [ -n "$BAD" ]; then
   cat >&2 <<MSG
