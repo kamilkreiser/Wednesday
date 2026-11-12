@@ -1,0 +1,25 @@
+BLUF: the rental short proposal now shows at most 5 device lines, then one row "and N more lines (see full proposal)", so a quote with many device lines no longer spills to a second or third page. The wording of that one row is PENDING the product owner's approval. Nothing is deployed. The hardware and software tables are NOT capped, so a quote with 4 or more of each can still print two pages (see "Limit").
+
+What changed (web only, 4 files, +133 -2):
+- ProposalPage.tsx: RENTAL_SHORT_LINE_CAP = 5 and moreRentalLines(n); the Devices table shows the first 5 lines and, above 5, one extra row. A quote with 5 or fewer lines renders the same markup as before. The totals, the monthly charge breakdown, the options and the software still cover the whole quote.
+- ProposalPage.test.tsx: 10 new rows (the cap literal, 1/3/5 lines with no pointer row, 6 lines singular, 7/10/40 lines with literal wording, the words, the uncapped totals at 40 lines).
+- print.spec.ts: 5 new rows (3, 5, 6, 10, 40 lines) that print to PDF and expect exactly one A4 page plus the pointer row where due. They need the route to be reached, so they skip in the stub-on CI step and run in the stub-off step.
+- proposal-buttons.spec.ts (local only, needs pdftotext): the page assertion is now exactly 1, and the pointer text is logged.
+- Not changed: the purchase short form (OnePager*, one-pager.css are byte-identical), any CSS, the API.
+
+Measured (macOS, Chrome, A4, 703 px print width):
+- Before: 2 pages from 9 lines with the monthly charge breakdown (12 lines without it), 3 pages at 40 lines.
+- After: 1 page at 5, 6, 10 and 40 lines, with 33.8 mm of the 265 mm page left (about 3 device rows).
+- Whole web suite 1541 passed, 0 failed (main 1531): 10 names gained, 0 lost. Same on the head merged onto current main.
+- Planted faults go red: cap 9 (10 lines print two pages), the pointer row removed, the cap not applied.
+
+Limit (read this before relying on "always one page"):
+- Hardware and software rows are not capped. With 10 device lines, 3 hardware plus 3 software rows still fit (257.7 mm), 4 plus 4 print two pages (270.9 mm).
+- Device names or sites long enough to wrap over several lines can also use the margin: at 6 lines, 50-character names leave 12.6 mm; 120-character names print two pages even at 5 lines (unchanged by this PR).
+- Linux print was not measured; the hosted web job (stub-off step) is the first Linux read of the new print rows. If it shows two pages, lower the cap.
+
+Words (pending): singular "and 1 more line (see full proposal)", plural "and N more lines (see full proposal)". An alternative is "and N more device lines (see full proposal)".
+
+Tests run locally: lint; npm test; production build and bundle check; print.spec in both CI shapes (stub off: 6 of 6 and the whole job 51 passed; stub on: 1 passed, 5 skipped, whole job 192 passed); proposal-buttons 22 of 22. Hosted CI and CodeQL decide.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,0 +1,17 @@
+The rental short proposal (ProposalView) printed a second page from 9 device lines once the
+monthly charge breakdown was on it (12 lines without it), and a third page at 40 lines. It now
+shows the first five device lines and, above five, one row that points to the full proposal
+("and N more lines (see full proposal)"; "and 1 more line ..." for one). The totals, the
+monthly charge breakdown, the options and the software still cover the whole quote. The
+purchase short form and all CSS are unchanged.
+
+Limit: only the Devices table is capped. A quote with 4 or more hardware rows and 4 or more
+software rows (or very long device names) can still print two pages.
+
+The wording of the pointer row is a slot until the product owner approves it. Nothing is
+deployed. Tests: unit rows for the cap, the literal wording and the uncapped totals; print.spec
+rows that print 3, 5, 6, 10 and 40 lines to exactly one page (they run in the stub-off CI step
+and skip with the stub on); proposal-buttons (local, needs pdftotext) now expects exactly one
+page.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
