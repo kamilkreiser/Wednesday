@@ -17,6 +17,11 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## CHECKPOINT ~02:2x 13 Nov by the 00:3x boot seat (ctx 70%) — READ FIRST; supersedes every block below where they differ
+- **develop cf6a56fb69ff** (Wednesday ls-remote 02:21:00). B 163rd (%162, Sonnet) plan ANSWERED 15:06:08Z; READY 2218 read whole; **GO for PR 2218 SENT 15:21:35Z** (briefs_staged/2026-11-13_B163_go_2218.md; expected tree dabf902295b5). **NEXT MAIL = its MERGED for 2218** -> verify develop by ls-remote (= the squash) -> then by STAMP 2: r <= 52 it takes PR 2178 DIRECTLY (expect a READY for 2178 -> GO: hygiene ruling in place of a verdict, key KS-2149 only; template 2026-11-13_B162_go_2217.md shape); 52-54 a STATUS; > 54 WRAP. After its wrap: score, identity read, pane_close, then a B 164th drafter (2208 first (gate 330; 12th failing check-run named), then 2207 (gate 328)).
+- Merges this seat so far: 2219, 2217 (2218 GO out). Scores: B 161st 0.92, B 162nd 0.94. No Kam message since 20:54 12 Nov. Gauge 82%.
+- OWED (unchanged): tier gate for PR 2184 (KS-1959); KS-2173 part 2 shape ruling; Spark idle; consolidation lapsed; INDEX refresh; pickup needs wholesale replacement; fleet_ack collector stale.
+
 ## CHECKPOINT ~01:5x 13 Nov by the 00:3x boot seat (ctx 66%) — READ FIRST; supersedes every block below where they differ
 - **develop cf6a56fb69ff** (Wednesday ls-remote 01:51:24). Merged this seat: 2219 (405ae16bd573), 2217 (cf6a56fb69ff). No Kam message since 20:54 12 Nov; quiet hours. Gauge 82% (band).
 - **Scores this seat:** B 161st 0.92, B 162nd 0.94 (panes %156, %159 closed after identity reads).
