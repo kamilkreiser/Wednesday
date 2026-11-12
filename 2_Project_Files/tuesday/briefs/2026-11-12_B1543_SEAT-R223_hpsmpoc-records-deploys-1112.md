@@ -250,20 +250,20 @@ No Jira write outside the closed list; no transition; no label or field edit on 
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main, records main, Jira issue count and highest key, analysis open pull requests, `Datasec/HPSM-POC-` panes, as Tuesday reads them; the drafter read: code main 576231b7697bf6a758d8091e9099c0dd60c2dce7, records main 5d2fade9b58f2cfb712121666af3c9a48846826a, highest key HPSMPOC-477, open analysis pull requests 0, no HPSM pane): ____
-- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): ____
-- W1 (minimatch override ticket: exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- W2 (coach ticket re-worded: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- W3 (deploy script ticket: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- W4 (presenter-only lines ticket: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- W5 (comment on HPSMPOC-477: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- W6 (comment on HPSMPOC-467: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entries; the Jira steps stand, then the `entry C-<CE>` citations are not used because the texts above carry none): ____
-- REC-MERGE (exactly `FF` or `HOLD`; default HOLD; FF = this seat lands its own records branch by the B1523 route): ____
-- RULINGS-DEPLOY (the five rulings as Tuesday read them, exact words and clocks, no card id; the drafter read them in the stamped deploy kit's authority slot: the product owner, 2026-11-12 10:51 "please find attached additional feedback to the HP messaging. Please use these and deploy. If anything is not clear, please ask"; 11:21:32 "messaging mapping looks good. deploy based on this and ticket anything left for later"; 14:38:06 "Fix all three before deploying"; 14:54:12 "a — Approve all three as proposed"; and, typed in Tuesday's terminal at about 17:0x after the plan was put to him, "the steps are good.  go ahead"): ____
-- Hard stop (the absolute outer limit AEDT; JIRA DONE 40, RECORDS COMMITTED 80, HARD STOP 110 minutes after your own Step-0 date, whichever is earlier): ____
-- Panes and live seats at the stamp: ____
+- STAMP: STAMPED 19:17 AEDT 2026-11-12 by Tuesday s273 (`date` 19:17:58); kit read WHOLE (269 lines) and its drafter report's five questions; base facts below re-read at source by Tuesday 19:17:58.
+- LAUNCH WINDOW: until 20:30 AEDT 2026-11-12 (load1 0.69 at 19:17).
+- BASE (code main, records main, Jira issue count and highest key, analysis open pull requests, `Datasec/HPSM-POC-` panes, as Tuesday reads them; the drafter read: code main 576231b7697bf6a758d8091e9099c0dd60c2dce7, records main 5d2fade9b58f2cfb712121666af3c9a48846826a, highest key HPSMPOC-477, open analysis pull requests 0, no HPSM pane): Tuesday 19:17:58: code main 576231b7697bf6a758d8091e9099c0dd60c2dce7; records main 5d2fade9b58f2cfb712121666af3c9a48846826a; open analysis pull requests 0; HPSM panes 0. Jira NOT re-read by Tuesday (no reader in this seat): the drafter's HPSMPOC-477 stands as RELAYED and you re-measure it at Step 2.
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): WRITE
+- W1 (minimatch override ticket: exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- W2 (coach ticket re-worded: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- W3 (deploy script ticket: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- W4 (presenter-only lines ticket: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- W5 (comment on HPSMPOC-477: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- W6 (comment on HPSMPOC-467: `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entries; the Jira steps stand, then the `entry C-<CE>` citations are not used because the texts above carry none): WRITE
+- REC-MERGE (exactly `FF` or `HOLD`; default HOLD; FF = this seat lands its own records branch by the B1523 route): FF
+- RULINGS-DEPLOY (the five rulings as Tuesday read them, exact words and clocks, no card id; the drafter read them in the stamped deploy kit's authority slot: the product owner, 2026-11-12 10:51 "please find attached additional feedback to the HP messaging. Please use these and deploy. If anything is not clear, please ask"; 11:21:32 "messaging mapping looks good. deploy based on this and ticket anything left for later"; 14:38:06 "Fix all three before deploying"; 14:54:12 "a — Approve all three as proposed"; and, typed in Tuesday's terminal at about 17:0x after the plan was put to him, "the steps are good.  go ahead"): the product owner, live board 2026-11-12 10:51: "please find attached additional feedback to the HP messaging. Please use these and deploy. If anything is not clear, please ask"; 11:21:32: "messaging mapping looks good. deploy based on this and ticket anything left for later"; 14:38:06: "Fix all three before deploying"; 14:54:12: "a — Approve all three as proposed"; and typed in the coordinator's terminal at about 17:00, after the plan (land the three rewordings, then deploy UAT) was put to him: "the steps are good.  go ahead".
+- Hard stop (the absolute outer limit AEDT; JIRA DONE 40, RECORDS COMMITTED 80, HARD STOP 110 minutes after your own Step-0 date, whichever is earlier): 20:45 AEDT 2026-11-12 (absolute outer limit; your own +40/+80/+110 clocks apply if earlier).
+- Panes and live seats at the stamp: 19:17: no Datasec/HPSM-POC-* or Datasec/HPSM-* pane; no Datasec/MPS-* pane; the sibling MPS records seat R224 may be launched after you (MPS repositories and Jira MPSCALC only).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 19:17 AEDT 2026-11-12 Tuesday s273, 269 lines
