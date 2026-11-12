@@ -1,0 +1,14 @@
+LANDING (head-pinned SQUASH, Composer's rule). Branch b1547/composer-minimatch-alert-28 at head b3d1a6f2c41ede22dfc9dbeb30593196973b47c1 (one commit on main 9c8d2cdb8a24046497739308f42b041bd7aec444; two paths: package.json, package-lock.json).
+
+1. Open the PR from the branch with pr-title.txt and pr-body.txt (both in this folder). Read the hosted code scanning run on the head. Land only if main is still 9c8d2cd; if main moved, a new round.
+
+2. Land (replace N with the PR number):
+
+D='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-12_B1547_verify'
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/4_Credentials/.gh-config' gh pr merge N -R datasecau/Datasec-Security-Composer --squash --match-head-commit b3d1a6f2c41ede22dfc9dbeb30593196973b47c1 --subject "$(cat "$D/squash-subject.txt")" --body-file "$D/squash-body.txt"
+
+3. Not deployed; nothing is deployed from this change (Composer deploys only on the product owner's own instruction).
+
+4. After landing, read `gh api -X GET 'repos/datasecau/Datasec-Security-Composer/dependabot/alerts?state=open&per_page=100'`: alert 28 should be gone and 15 should remain (fast-uri 8, fastify 1, ip-address 1, undici 5). A still-open alert 28 is a new round.
+
+5. Override removal condition: see the pull request body (first stable eslint, @eslint/config-array and typescript-estree declaring minimatch ^11, then delete the overrides block and regenerate the lock with npm 11).

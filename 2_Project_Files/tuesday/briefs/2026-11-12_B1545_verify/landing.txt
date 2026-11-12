@@ -1,0 +1,10 @@
+# Merge commit, pinned to the verified head. Never squash, never rebase.
+# Wait for hosted Build, CodeQL and the other required checks on this head first.
+# Replace <N> with the pull request number; run from the folder holding merge-subject.txt and merge-body.txt.
+# A merge to main starts Deploy demo (backend/server.js is not path-ignored); both its jobs are gated on
+# vars.CI_DEPLOY_ENABLED == 'true', so expect them to read skipped. The demo deploy hold stands.
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+gh pr merge <N> --repo datasecau/Reporting_Dashboard_Au --merge \
+  --match-head-commit 9f7efc979121b96097e418e2d9faff5bd502252b \
+  --subject "$(cat merge-subject.txt)" \
+  --body-file merge-body.txt

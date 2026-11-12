@@ -1,0 +1,41 @@
+Dependabot alert 28 (minimatch, medium, development, vulnerable range
+>= 7.0.0, < 11.0.1, first patched 11.0.1) is open because the lockfile
+resolves one hoisted minimatch 10.2.6 that eslint, @eslint/config-array and
+@typescript-eslint/typescript-estree share.
+
+Why an override: no stable release of those parents admits minimatch 11.
+Registry read on 2026-11-12: eslint 381 stable versions, @eslint/config-array
+20, @typescript-eslint/typescript-estree 415, and 0 of them declare an 11.x
+minimatch. Only typescript-estree prereleases (8.72.3-alpha.1 to -alpha.6)
+declare ^11.0.1. So no bump of a direct dependency reaches the patched version.
+
+Why scoped to those two parents: config-array is eslint's own dependency, so
+the eslint entry covers it. The other minimatch copy, 5.1.9 under
+@redocly/openapi-core, is the OpenAPI generator's exact pin and is outside the
+vulnerable range.
+
+Manifest: one new top-level key, overrides, 8 added lines:
+  eslint -> minimatch 11.0.1
+  @typescript-eslint/typescript-estree -> minimatch 11.0.1
+
+Lockfile, written by npm 11.19.1 on node v24.22.2 (not edited by hand; 58 lines
+added, 16 removed; 348 -> 351 entries). Changed entries, and only these:
+  added    node_modules/eslint/node_modules/minimatch 11.0.1
+  added    node_modules/@eslint/config-array/node_modules/minimatch 11.0.1
+  added    node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch 11.0.1
+  added    node_modules/@isaacs/nonrecursive-glob-match 1.1.0 (dev; minimatch 11 needs it)
+  removed  node_modules/minimatch 10.2.6
+Every minimatch entry in the lock is now outside the vulnerable range (5.1.9 and
+three 11.0.1). npm audit on the lockfile: 14 findings before, 4 after (fast-uri,
+fastify, ip-address, undici); minimatch is gone.
+
+Checked in the project's Node image (node v22.23.2, npm 10.9.8), built from this
+lockfile with npm ci. Lint, format check, typecheck and build exit 0. The whole
+Vitest run is 315 files and 3177 tests at base and at this change, with the same
+3174 passed, 1 skipped and 2 failed (two citation tests that need a source
+document kept out of the repository): lost 0, changed 0, added 0. The database
+suites are 39 files and 674 tests, and 83 files and 1563 tests, all passed at
+both. Not addressed: the other open alerts (fast-uri, fastify, ip-address,
+undici). Not deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

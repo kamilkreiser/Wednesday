@@ -80,3 +80,11 @@ names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned
   X", "Tuesday printed at source Y" or "the drafter's report lines 1-N" as Tuesday's read: Tuesday writes those after doing them.
   No `<clock>`, `<session>` or other angle-bracket placeholder in a value. (Added 2026-11-04 by s240: B1253's and B1255's
   drafters both pre-wrote attestations of reads Tuesday had not done; caught at the stamp and rewritten.)
+
+## MEASURED LITERALS (added 2026-11-12 by Tuesday s274; ledger w=3 REGRESSION, the stamped-text-not-measured family)
+Three seats halted in one evening on literals a kit told them to match that nobody had run: a name said to appear "once" (it was on 2 lines), a step that needed files a later step makes, and a tool line quoted in a wording the tool never prints. Reading a kit checks its sense; only an instrument checks its literals.
+1. Before you report STARTABLE, run `python3 -I -B /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/stamp_check.py <your kit> --init` (it writes `<kit>.measured`, one `<id> | TODO` line per literal the kit tells a seat to match: a backticked or quoted string beside a count or output word).
+2. Replace EVERY `TODO` with what you ran and what it printed: `<id> | grep -c -F '<literal>' <file at ref> -> 1` or `<id> | <tool> --check (run at <ref>) -> runtime rows 205; committed rows 205`. A literal you cannot measure is reworded in the kit to say so (UNMEASURED) or removed; never left as an expectation.
+3. Expected TOOL OUTPUT lines are copied from a real run or a saved log of one, never written from the tool's docs or another kit.
+4. Every chain step lists its inputs, and each input is produced by an EARLIER step or exists at BASE (print that table in the report).
+5. Your last check: `stamp_check.py <kit>` exits 0. Tuesday re-runs it and spot-measures at least five sidecar lines before the stamp.

@@ -210,14 +210,14 @@ No Jira write outside the closed list; no transition of a COMMENT-ONLY key or of
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (root main, code main, whether any `Datasec/MPS-` pane runs and writes Jira or a root record, the CI of the squashes, as Tuesday reads them): ____
-- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): ____
-- MOVE (exactly `NONE` or a comma list of keys from the MOVE rows: 160,389,391,392,393; default NONE; the drafter recommends all five, each reading MET on every clause at drafting; watch items: 160 (the Seller reads that would show its rule through the API were not run), 392 (the new last line did not print on the real run), 393 (the stated 714 px deviation); a key not listed gets its comment with the OPEN sentence): ____
-- CREATE (exactly `HOLD` or a comma list of letters from H,I,J,K,L,M,N; default HOLD; the drafter recommends H,I,J,K,L; M and N are the weakest, see the report; a letter not listed files nothing and the entry says so): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the entries and the appends; the Jira steps stand, and then the `Recorded as entry C-<n>` sentence is dropped from every text): ____
-- REC-MERGE (exactly `FF` or `HOLD`; default HOLD; FF lands `records/b1544` into root main by `merge --ff-only` under the lock): ____
-- Hard stop (the absolute outer limit AEDT; JIRA DONE 45, RECORDS COMMITTED 75, HARD STOP 110 minutes after your own Step-0 date, whichever is earlier): ____
+- STAMP: Tuesday (s274), 2026-11-12 19:22:08 AEDT; kit and drafter report read whole; Q-1 = leave #185/#186/MPSCALC-388 out of this kit (BACKLOG [B1544-OWED-8] hands them to the coordinator; a second records kit follows); Q-2 one release entry C-145; Q-3 move all five; Q-4 create H,I,J,K,L only; Q-5 no ports; Q-6 write the 372 comment.
+- LAUNCH WINDOW: from 2026-11-12 19:22:08 AEDT until 20:15 AEDT; not after.
+- BASE (root main, code main, whether any `Datasec/MPS-` pane runs and writes Jira or a root record, the CI of the squashes, as Tuesday reads them): read 19:21 AEDT: root main 8cec645d1503ca7cf27f16ce08c6c4e832b61e54 (dirty: BACKLOG.md, JIRA.md, 5_Project_History/history.md only; newest heading C-139); code main 0bb3ed12808d72d3187c51d56852b7ecd2174666; open PRs 0; open Dependabot alerts 0; check-runs success 8 of 8 on each of 1515a71d, 286795d7, 50c354ff, 3fb06085, 0bb3ed12; panes %0 tuesday, %1 fleet-monitor, %183 Datasec/HPSM-POC-R223 (HPSM records, not MPS), no `Datasec/MPS-` pane. Re-measured at 0bb3ed12: playwright.config.ts LEFT_OUT 3 / picker-many 0; ProposalPage.tsx:35-45 as the pointer table; the review's stale comment sits at web/src/screens/ProposalPage.test.tsx:416-417 (the phrase is split across the two lines, so a one-line grep reads 0); NEW-I's clause stays as written. Summary lengths H-N 166/167/172/181/186/108/180 (limit 255).
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): WRITE
+- MOVE (exactly `NONE` or a comma list of keys from the MOVE rows: 160,389,391,392,393; default NONE; the drafter recommends all five, each reading MET on every clause at drafting; watch items: 160 (the Seller reads that would show its rule through the API were not run), 392 (the new last line did not print on the real run), 393 (the stated 714 px deviation); a key not listed gets its comment with the OPEN sentence): 160,389,391,392,393
+- CREATE (exactly `HOLD` or a comma list of letters from H,I,J,K,L,M,N; default HOLD; the drafter recommends H,I,J,K,L; M and N are the weakest, see the report; a letter not listed files nothing and the entry says so): H,I,J,K,L
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the entries and the appends; the Jira steps stand, and then the `Recorded as entry C-<n>` sentence is dropped from every text): WRITE
+- REC-MERGE (exactly `FF` or `HOLD`; default HOLD; FF lands `records/b1544` into root main by `merge --ff-only` under the lock): FF
+- Hard stop (the absolute outer limit AEDT; JIRA DONE 45, RECORDS COMMITTED 75, HARD STOP 110 minutes after your own Step-0 date, whichever is earlier): 21:30 AEDT 2026-11-12
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 2026-11-12 19:22:08 AEDT (Tuesday s274; 223 lines + the drafter report, 59 lines)
