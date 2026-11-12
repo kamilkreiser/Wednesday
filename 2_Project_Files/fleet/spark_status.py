@@ -104,4 +104,12 @@ if __name__ == "__main__":
         main()
     except Exception as e:  # noqa: BLE001
         print("SPARK: status unreadable — %s: %s" % (type(e).__name__, e))
+    # 2026-11-12 (routine (c), Kam 11:36): ADDITIVE line(s) for the filler queue; the lines above are unchanged.
+    try:
+        sys.path.insert(0, os.path.normpath(os.path.join(HERE, "..", "local-model", "filler")))
+        import status as _filler_status
+        for _l in _filler_status.lines():
+            print(_l)
+    except Exception as e:  # noqa: BLE001
+        print("FILLER: status unreadable — %s: %s" % (type(e).__name__, e))
     sys.exit(0)
