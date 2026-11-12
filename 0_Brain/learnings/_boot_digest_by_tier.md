@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-12 11:31 from 265 lesson files (1,141,617 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 219. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-12 11:35 from 266 lesson files (1,144,217 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 220. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7793,4 +7793,19 @@ Related: [[2026-07-31_fully-portable-drive]] (the NAS is a machine/network depen
 4. **Two NASes, do not confuse them.** DEV-Working is the NEW NAS (SMB //DotORG@192.168.20.154, mounted by Kam's login; also Backup and Seagate Hub shares). The OLD NAS (ssh alias `nas`, 192.168.8.190; the nightly `nas_push.sh` mirror to /Volumes/Development) did not answer from the Mac mini on 11-11 (ssh timeout; /Volumes/Development not mounted), so the naspush job refuses until Kam says whether to repoint it.
 
 **Built + tested 11-11:** one VERIFIED copy (`General/Wednesday/2026-11-11_workflow-selftest`, 2 files incl. a spaced name) and four refusals (bad --client, existing folder, 4_Credentials source, a Datasec source). The first manifest carried Tuesday's seat label (copied tool); the label was fixed in the tool and corrected in that manifest.
+
+
+## Use the Spark where tokens are spent on BULK, not judgement: digest test-harness output and run simple token-heavy jobs on an ongoing basis; it is not much use on tickets
+`2026-11-12_spark-for-harness-and-token-heavy-simple-tasks.md` · preference · 2026-11-12 · status: live · tier: W
+
+**His words, verbatim:** *"I have been thinking.  as the spark is not much use on tickets, can we utilise it in running harness and other tests.  these seem to be token intensive and could be lead with a good testing harness.  In addition to this, have a think about simple and token expensive tasks that we could get the spark to do on an ongoing basis"*
+
+**How to apply:**
+1. **Running a suite costs no tokens; READING its output does.** The Spark's role is the digest: counts, every failure with its first stack line, the delta since the last run. A deterministic harness re-derives every count from the raw output and refuses a summary that disagrees, so a wrong summary is caught rather than trusted ([[2026-08-07_a-check-that-cannot-fail]]).
+2. **Candidates, in Wednesday's order (told to Kam 11:3x, bf-52eeb070f409):** (a) test-run digests for gates and build seats; (b) a nightly stale-ticket screen (does the cited code still exist at develop; already fixed; duplicate), proposals only, a Claude seat confirms before any board change; (c) mechanical test work: mutant generation for red-proofs, numstat/count reconciliation of a seat's claims.
+3. **Not for judgement:** its shadow review on gate 324 recalled 0 of 5 findings. Code review and rulings stay with Claude gates.
+4. **Pilot, measure, then standing** (go-slow rule 4): pilot (a) on the next two gates: tokens saved vs summary errors caught by the harness. Then (b) overnight.
+5. Unchanged: one client's content per Spark task; the Spark never merges or writes to a board; the never-idle rule stands, and this widens what "busy" can mean.
+
+**Family:** [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] · [[2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-08-03_go-slow-earn-autonomy]].
 

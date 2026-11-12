@@ -2811,3 +2811,8 @@ INCLUDED until he says otherwise.
 > new drive and new seat.  please work your way through the In Progress and backlog tickets for Secuura.  Use the spark as much as you can and use as many agents as it takes to get through it.
 
 *Note:* Boot 14:0x on the new drive; receipt bf-e17e5e8031c9; first wave = merge seat B 132nd, raise seat R 95th, Spark operator, board triage.
+
+## 2026-11-12 11:35 — Kam (live board (view=wednesday) 11:34:05, verbatim)
+> I have been thinking.  as the spark is not much use on tickets, can we utilise it in running harness and other tests.  these seem to be token intensive and could be lead with a good testing harness.  In addition to this, have a think about simple and token expensive tasks that we could get the spark to do on an ongoing basis
+
+*Note:* Answered on the panel bf-52eeb070f409 with three candidates (test-run digests, nightly stale-ticket screen, mechanical test work) and a pilot recommendation; lesson 2026-11-12_spark-for-harness-and-token-heavy-simple-tasks.md.
