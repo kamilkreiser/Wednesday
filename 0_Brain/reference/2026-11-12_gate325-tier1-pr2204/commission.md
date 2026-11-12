@@ -1,0 +1,23 @@
+# Gate 325, TIER 1 (Opus; routing v1.0 tier-1 row: an AUTHORIZATION change at the api-gateway's enforcement point). Seat A 25th's KS-1466 = PR 2204. Commissioned 2026-11-12 ~12:1x AEDT by the 11:0x Wednesday seat.
+
+Method: copy-and-change of `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_gate323-tier1-pr2200-2201/commission.md` (read it whole: its Constraints, controls and output shape apply), and through it gate 320's. Calibration: gate 323's verdict.md.
+
+Authority: Kam's card `secuura-ks1466-document-rules-untyped-creates-1112` = a, 10:48:51 ("Close it, measure first": a build seat measures the stored DOCUMENT entry on kintsugi and demo read-only; if it would refuse any current caller it stops; otherwise test first, tier-1 Opus gate, merge to develop; no deploy; operator doc note in the same PR). The seat measured both catalogues EMPTY; Wednesday ruled BUILD (00:40:54Z).
+
+Pins (Wednesday's `git -C <checkout> ls-remote origin` 12:1x; RE-READ at start and end): develop 088fa84da10ca62c25dd8b6ea86caaa44b64faae; refs/pull/2204/head 25ad80bc8298031c616c63b0419daf6fb24f11f5 (one commit on 088fa84da10c).
+
+READY (read whole; reproduce, do not trust): `ready_a25_ks1466_mail.txt` in THIS folder.
+
+Questions (tier 1: security surface, full weight):
+1. THE CHANGE: an untyped POST /api/documents now resolves to DEFAULT_DOCUMENT_TYPE inside enforceDocumentTypeRules (enforcement.ts, the old untyped return at develop line 117). Read the function whole at the head. Does every path an untyped body can take now meet the DOCUMENT entry's rules (isActive, creatorVerificationLevel, requireMFA, allowedAuthProviders, metadataSchema, requiresApproval) when the catalogue holds one, and pass unchanged when the catalogue is EMPTY (the KS-388 line-137 branch)? Plant one mutant per rule.
+2. BYPASSES: can a caller still skip the check: `documentType: ''`, `null`, a non-string, whitespace, `type` vs `documentType` precedence, case variants (KS-1203's point: the error must name DOCUMENT), an array, a body with both fields? Each as a cell or a measured probe of the function.
+3. OTHER CALLERS of the enforcement function and of the untyped default: the workflow gate (line ~264), routes/verification.ts (~915), originate's routes/documents.ts (~607). Enumerate the callers at the head (not only the ones the READY names) and say, for each, whether its behaviour changed. The early-return-disarms-tests rule: which EXISTING cells stub or exercise this function, and do the NEGATIVE-asserting ones still reach what they are named for? The seat rewrote four cells (enforcement.test.ts:147; three in ks501, two of them KS-1203's): read each old assertion and its replacement and say whether the replacement still tests a security property or only the new default.
+4. The red-then-green (9 of 11 red on develop's code), the whole api-gateway suite (1,897 of 1,897), the 5 of 5 mutants: reproduce at the head. Use the Spark DIGEST for long suite output (STANDING_LINES 'Read test output through the Spark DIGEST'; Secuura content only): read only digest.md, grep the raw log before any finding rests on an anomaly sentence.
+5. The operator note in `Blockchain/Dev/MCP Deployment/troubleshooting.md`: is it true at the head (empty catalogue or current seed: nothing changes; hand-built catalogue without DOCUMENT: every untyped create 400)? The fragment pair: docs-fragments check OK, a planted defect exits 1.
+6. PR 2059 condition (Wednesday's waiver): reproduce `git merge-tree --write-tree 25ad80bc8298 <2059 head, re-read>` rc 0 and the whole-line SURVIVAL counts on troubleshooting.md (both sides' lines present; 2059's removed lines absent), plus a planted conflict that fires. Never merge-file with a hand-chosen base.
+7. Census (GraphQL with a control) on the 7 paths at the head.
+8. The two candidate filings the READY carries (catalogue validation OFF on both boxes; Outlook add-in sends MIME type as documentType at frontend/outlook-addin/src/utils/api.ts:118): read the source for (b) and say whether it is true at develop. No box access: (a) is the seat's measurement, say so.
+
+OUTPUT: `verdict.md` in THIS folder. First line: 'PR 2204: GO / GO WITH NOTES / NO GO (at head 25ad80bc8298; tier 1)'. Findings G325-2204-N, graded. NOT TESTED. If your Write is refused, return the text in full.
+
+Constraints: exactly gate 323's (read-only on the project checkout: clone into your scratchpad for any write verb; no mail, board, Linear or GitHub writes; no box access of any kind; never delete; every zero has a positive control). DevMASTER has dropped several times today: if it drops, wait, re-read what you wrote, then resume.
