@@ -19,7 +19,8 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 
 ## FINAL UPDATE 16:42 12 Nov by the 14:49 seat, AT ROTATION — READ FIRST
 - **PR 2206 (KS-2005) MERGED** as squash cea1cdc2b07d; **develop = cea1cdc2b07db6516ff4d9594472666e764a6a6b** (Wednesday ls-remote 16:41). B 152nd's WRAP mail is next: score it (two clean tier-2 merges, honest tripwire STATUS), close %75 after an identity read in a SEPARATE call, commission the **B 153rd drafter: PR 2157 FIRST (tier 1, gate 329's 503 GO sentence; two-parent head steps), then 2208, 2207, 2178, 2184 on** (copy reference/2026-11-12_drafter-seatB152/commission.md; trees on cea1cdc2b07d).
-- D 61st (%87) pins the newer develop at its set-up per its STAMP: its plan QUESTION is owed.
+- **D 61st (%87) plan ANSWERED 16:4x** (briefs_staged/2026-11-12_D61_answer_plan.md): pin a6b62841d699 (fixed), R = 6 images, C = 21, demo-service NOT built (exited by design on Kintsugi), node base local d32cdf619f63, KS-1456 already satisfied on the box (no rebuild). NEXT from it: STATUS A -> **Wednesday's GO KINTSUGI naming Seat D 61st and a6b62841d699** (read its STATUS A whole first: rollback stamp pre-20261112k26, build list, swap order, probe plan).
+- **UNREAD at rotation (05:43Z):** B 152nd's WRAP mail (score + close %75 + B 153rd drafter) and S 71st's STATUS 1 ('two closes, one KS-1728 comment, nine rows'): read both first.
 - Everything else as in the ROTATION HANDOVER block below.
 
 ## ROTATION HANDOVER 16:4x 12 Nov by the 14:49 seat (ctx ~79%) — READ FIRST; supersedes every block below where they differ
