@@ -15,7 +15,7 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 ## KAM (live words)
 - 2026-11-11 14:0x terminal, verbatim: "new drive and new seat.  please work your way through the In Progress and backlog tickets for Secuura.  Use the spark as much as you can and use as many agents as it takes to get through it." (EXPIRING-GRANTS row added; restates the 11-06 board grant, outer read Fri 20 Nov.)
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
-- Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
+- Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01). CORRECTED 2026-11-13 06:1x: this line used to say KS-961 carries a billing ruling; the B 164th drafter read KS-961 at Linear 13 Nov 02:4x: it is the aggregate workspace suite never running on a PR (In Review), not billing. The billing source to re-read is the panel post bf-111c4c442cff itself.
 
 ## SHIFT-CHANGE HANDOVER 05:3x 13 Nov by the 03:1x rotation-successor seat (ctx ~74%) — READ FIRST; supersedes every block below where they differ
 - **develop 410feda1a85e** (PR 2200's squash; Wednesday ls-remote 05:30:06). NINE merges overnight, all first GOs: 2219, 2217, 2218, 2178, 2208, 2207, 2184, 2201, 2200. **FLOOR EMPTY** (B 166th wrapped 18:28Z, scored 0.94, pane %171 closed). The merge queue those briefs carried is EMPTY.

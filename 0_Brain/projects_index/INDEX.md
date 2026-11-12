@@ -27,6 +27,13 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 > **The full-sweep mechanism is still WED-7 and still unbuilt.** The honest reading of
 > this file today: a rich archive of how the fleet got here, with a stale first page.
 
+**Refreshed 2026-11-13 06:1x (boot, Mac mini morning seat; Secuura only, Datasec is Tuesday's):** Secuura/Blockchain
+history newest = 2026-11-13, Seat B 166th (merge, Sonnet; preceded by B 161st-165th, all merge seats overnight). develop
+410feda1a85e (Wednesday ls-remote 06:03:49). Nine PRs merged overnight on first GOs. Floor empty at boot; next: merge seat
+B 167th on the 79 already-verdicted PRs, gate 345 on PR 2079, raise seat R 116th (lane sweep
+reference/2026-11-13_drafter-next-lanes/lanes.md). Extranet: no 5_Project_History/history.md at the path read (UNMEASURED
+beyond that). The 2026-10-27 block below is superseded where they differ.
+
 **Refreshed 2026-10-27 06:1x (boot, laptop seat; Secuura only, Datasec is Tuesday's):** Secuura/Blockchain
 history newest = 2026-10-26 (Seats R 3rd, T 2nd, V 2nd wrapped; matches NEXT-PICKUP). develop ec3313a80440;
 kintsugi on it (D 34th, 05:49), demo building (D 34th, batch 8/17 at 06:09). No other Secuura seat live.
