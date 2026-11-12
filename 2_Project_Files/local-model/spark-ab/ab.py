@@ -77,6 +77,11 @@ MODELS = {
                    # 2026-11-12: OpenRouter/DeepInfra answered HTTP 400 "Reasoning is mandatory for this endpoint and cannot be disabled"
                    # to reasoning:{enabled:false}. So thinking is ON (default), recorded, not a HARNESS fault.
                    "thinking_forced": True, "reasoning_body": None},
+    # 2026-11-12 (15:xx operator): Nemotron-3.5-Super-VL hosted. CoreWeave nvfp4 (tag coreweave/nvfp4, status 0) is on the ZDR list
+    # (GET /api/v1/endpoints/zdr); same NVFP4 format as the local build. SAME policy pins; reasoning disabled (probe: 0 reasoning tokens).
+    "nemotronhosted": {"served": "nvidia/nemotron-3.5-super-vl", "kwargs": {}, "hosted": True, "price": (0.15e-6, 0.47e-6),
+                   "provider": {"order": ["CoreWeave"], "only": ["coreweave"], "allow_fallbacks": False, "data_collection": "deny",
+                                "zdr": True, "quantizations": ["nvfp4"]}, "provider_tag": "coreweave", "quant": "nvfp4"},
     # Local Spark arms (vLLM v0.33.0 / llama.cpp), thinking OFF through each card's chat-template switch.
     "nemotron": {"served": "nemotron-3.5-super-vl", "kwargs": {"enable_thinking": False}},
     "kolibri": {"served": "Kolibri-1", "kwargs": {"enable_thinking": False}},
