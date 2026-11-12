@@ -1,0 +1,24 @@
+# Drafter notes: Seat A 26th, KS-1398 step one L5 (tsconfig cleanup). Drafter: Sonnet. 2026-11-12 ~12:4x AEDT.
+
+Output: `brief_A26.md` (this folder). Nothing else written; no Linear, GitHub, mail or board writes; no cd; no credential read or printed; nothing written in the project checkout or any worktree.
+
+## What I measured (instrument + control)
+- develop = `088fa84da10ca62c25dd8b6ea86caaa44b64faae`: `git ls-remote origin refs/heads/develop` in the checkout (read verb). The sha is not an object in the checkout (`cat-file -t 088fa84da10c` = not valid); I read files with `git show <sha>:<path>` through the kept tree `worktrees/s-a25-ks1466` (its commit is a child of that sha; control: `cat-file -t` = commit there). Read verbs only.
+- `git rev-list --count 697f422f1a39..088fa84da10c` = 1 commit, 2 files; diff over `*tsconfig*`, `*package.json`, `*package-lock.json` between the shas = empty. So lanes.md's L5 census (5 moduleResolution, 5 baseUrl) stands.
+- All 46 non-systemTest, non-observability tsconfigs parsed (comment-stripping parser, scratch script, 46 of 46 parsed; lanes.md's parse failed on 4). 5 `moduleResolution: node` (all commonjs), 5 `baseUrl` (all with `paths`), `types` set in 2 (outlook-addin, scripts/openapi-examples). 18 tsconfig.json files are commonjs with no moduleResolution (the precedent for deleting the line).
+- **Three probes with the tree's own tsc 5.9.3** (scratch project, module commonjs): `moduleResolution: node16` -> TS5110; `bundler` -> TS5095; `baseUrl` deleted with a non-relative `paths` value -> TS5090; `baseUrl` kept -> rc 0. These change the lane: lanes.md said "node16/bundler", which does not compile for commonjs without changing `module` (an emit change). The brief makes DELETING the line the default (identical to node10 on TS 5, report measured shared 0 errors on TS 7 after deletion) and puts "following the files, not the lane text" into the plan confirmation. `baseUrl` removal is a two-hunk edit (`paths` values need `./`).
+- vite alias lives in `frontend/admin/vite.config.ts` (own `resolve.alias`), mobile babel has no alias plugin; grep for bare `from 'src/'`/`'vendor/'` imports in the five baseUrl packages = 0 hits. Ratchet: five gated services (auth, api-gateway, vc-issuer, security, m365-integration), each `tsconfig.test.json` extends `./tsconfig.json`; vc-issuer is both a gated service and an L5 baseUrl file (the ratchet-sensitive hunk).
+
+## NOT measured (named in the brief)
+Any tsc/test/ratchet number at develop (no npm ci, read-only); the open-PR census at 088fa84 (no fetch allowed into the checkout; lanes.md's census at 697f422 says none, and the 2-file delta touches no tsconfig); PR 2204's gate verdict; issuer/verifier vite configs and Metro's use of `paths`; which packages need `types` on TS 7 (hence the types edit is evidence-driven, possibly zero files); whether a vite build is byte-deterministic.
+
+## Judgement calls to check at the stamp
+1. **Routing:** row C2, gate G2 (tier 2 Sonnet), Sonnet, as you expected. Spark NO as a lane (decision inside; baseUrl files are rung 2). G2 becomes G1 only if a frontend bundle output changes. P2/P3 left blank for your gauge read.
+2. **Lane text vs files:** stated plainly as a "tell the plan mail" item. If you would rather Kam/you rule "delete the line" before the seat starts, add it to the STAMP.
+3. **`types` scope:** brief allows `types` in any tsconfig*.json except originate and governance, only where a scratch TS 7 run shows the need AND TS 5 gates stay equal; warns that explicit `types` stops auto-including other `@types/*` (the vc-issuer @types/jest interplay with L1). Needs a stamp grant for the scratch `typescript@7.0.2` install (the report did the same; nothing committed).
+4. **Forward collisions flagged:** A2 (KS-1000 item 3) will add `tsconfig.test.json` that extend billing/wallet-connector `tsconfig.json`; PR 2191 touches originate's tsconfig.test.json and ratchet baselines (not L5 files); PR 2204's gate pending. L1 touches vc-issuer package.json only; L5 touches its tsconfig.json: disjoint files.
+5. **Kit:** generic A 25th tools only; KS-1466-specific tools excluded; protected trees listed (s-a25-ks1466, s-a24-ks1728b3, s-a22-ks2170, s-a21-ks2125, s-a20-base, s-a20-a3, s-t24-*). I did not list the whole worktrees dir (listing was cut at 30); `s-t24-*` is by name from your T24 answer.
+6. KS-907 is named (carried from the L1 brief's hold 7) with a provenance line to STANDING_LINES.md (grep count 1 there). KS-2176 sourced to `seatS67_board.md` (lanes.md does not name it).
+
+## Compliance checks run on brief_A26.md
+PROVENANCE: line present (line 120); a `KS-NNNN | path | read 2026-11-12` line for each of the six keys named (KS-1000, 1090, 1398, 1466, 2176, 907), each counted 1; `RULED BY KAM, NOT YET IN AN ARTEFACT` section present; blank STAMP block; `SELF-CHECK` count 0; double-at-sign count 0; `learnings/` count 0; size 37,747 bytes (under 55 KB).
