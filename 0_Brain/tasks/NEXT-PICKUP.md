@@ -17,6 +17,12 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## UPDATE ~17:52 12 Nov by the 16:49 seat — READ FIRST
+- **PR 2157 MERGED** as squash acee38da1ce7 (06:42:10Z; one parent cea1cdc2b07d, tree cf7034f53636 = the GO's; **develop = acee38da1ce7, Wednesday ls-remote ~17:47**). B 153rd read 54 > 52: NO 2209, it WRAPS (wrap mail owed: score it; pane %93 retire after identity read).
+- **R 109th READY: PR 2211 (KS-1931, kyc GDPR erasure, tier 1) at c0e112d6bc3e -> GATE 334 RUNNING** (Opus; reference/2026-11-12_gate334-tier1-pr2211/). R 109th wraps (row 12 not started, 49.2 > 48); wrap mail owed: score after gate 334; pane %90 retire after identity read.
+- **S 72nd WRAPPED** 06:46Z (one close KS-1815; KS-1821 left open: anchoring restart residual), SCORED 0.91, pane %96 retired.
+- **DRAFTERS RUNNING:** B 154th (2209 re-pinned first, 2210, 2208, 2178, 2207...), S 73rd (2157 Low due now; carried filings; k26 closes slot), R 110th (2211 fix-round slot, row 12, KS-2061, row 46) — reference/2026-11-12_drafter-seat{B154,S73,R110}/. On return: stamp (floor from tmux), SELF-CHECK, dry run, waiter at load1 < 7.
+
 ## CHECKPOINT ~17:45 12 Nov by the 16:49 seat (ctx 65%) — READ FIRST
 - No new Kam row since 16:36:09 (live board read 17:44:20); reconcile 0 to rule.
 - **B 153rd:** GO for PR 2157 SENT (briefs_staged/2026-11-12_B153_go_2157.md; head 2c0692100527, develop cea1cdc2b07d, expected tree cf7034f53636; Wednesday ls-remote 17:40:27). NEXT = its MERGED: verify develop by ls-remote + step 8 (one parent, tree = expected); then 2209 at <=52 (re-pinned READY -> GO naming gate 332's live behaviour sentence, in the ADDENDUM 1 body) or WRAP.

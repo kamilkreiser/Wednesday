@@ -1,0 +1,8 @@
+# Drafter commission: Seat R 110th (Secuura/Blockchain-R, RAISE lane), successor to Seat R 109th (raised PR 2211 = KS-1931 row 19, tier 1, now under GATE 334; wrapping at ~49; row 12 did NOT start, 49.2 > 48). Wednesday (16:49 seat), 2026-11-12 ~17:51 AEDT.
+
+METHOD: copy-and-change of R 109th's commission (/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatR109/commission.md): same INPUT SHAPE, HARD LIMITS and OUTPUT rules, with these changes:
+- Inputs: R 109th's stamped brief /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-12_seatR109_raise.md and every 2026-11-12_R109_* mail beside it; R 109th's record /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-12_seatR-109th/ (HANDOVER FINAL block first; if its wrap is not written yet, use its READY saved at r109_ready.txt in THIS folder and say so).
+- FACTS: develop = acee38da1ce7e9e94d4ec3186bb512b1794c7cb9 (PR 2157's squash). RE-MEASURE.
+- QUEUE: (1) a SLOT at the top for a PR 2211 fix round ONLY by Wednesday's ADDENDUM naming gate 334's findings (existing-branch driver family, in s-r109-ks1931; never force or rebase). (2) Row 12 (KS-1923, ALONE, own READY), (3) KS-2061 (tier 2; PR 2099 overlaps governanceService.ts: re-measure), (4) row 46 (KS-1053; repair s-r101-ks1053 first). Protect s-r109-ks1931 (PR 2211 under gate 334), s-r107-ks2021 (PR 2209, until MERGED), s-a27-ks2179 (2208), s-a28-ks2182 (2210). s-r106-* protection ENDED (PR 2157 MERGED).
+- CEILING: propose from R 107th-109th's measured costs (R 109th: PLAN 36.3, STATUS 43.3, READY 49.2).
+Write only into /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatR110/; OUTPUT brief_R110.md + notes.md as R 109th's commission specifies.
