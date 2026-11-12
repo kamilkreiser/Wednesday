@@ -1,0 +1,21 @@
+BLUF: clears Dependabot alert 10 (minimatch, medium, development scope, vulnerable range >= 7.0.0 and < 11.0.1) with one scoped npm override in the web app manifest and the npm-written lockfile. Two files change. Nothing is deployed and no source or test changes.
+
+What changes
+- web/package.json gains one top-level key and nothing else: "overrides": { "@typescript-eslint/typescript-estree": { "minimatch": "11.0.1" } } (5 lines added, 0 removed).
+- web/package-lock.json (12 lines added, 4 removed, written by npm 11.19.1 at Node v24.22.2) changes exactly two entries: node_modules/@isaacs/nonrecursive-glob-match 1.1.0 is added (dev, BlueOak-1.0.0, no dependencies), and the minimatch copy nested under typescript-estree moves 10.2.6 to 11.0.1 (its brace-expansion range goes ^5.0.8 to ^5.0.12). Entries 297 to 298. All resolved URLs are on registry.npmjs.org.
+
+Why an override, and why scoped
+- typescript-estree 8.71.1 declares minimatch ^10.2.2, and so do all 21 stable releases from 8.60.0 to 8.72.2. The 10.x line of minimatch ends at 10.2.6, so no bump of a direct dependency reaches a patched version.
+- The other two minimatch copies (3.1.5 under eslint, 5.1.9 under the redocly openapi-core) are outside the vulnerable range and need their own majors, so an unscoped override would be wrong.
+- Remove the override once a stable typescript-estree release declares minimatch ^11.
+
+What was measured (Node v24.22.2, npm 11.19.1)
+- Re-running npm over main with no change leaves main's lockfile byte-identical; with the override it reproduces this lockfile exactly.
+- Every minimatch copy in the lockfile is outside the range (3.1.5, 5.1.9, 11.0.1). npm audit --package-lock-only: 7 moderate (all this one advisory) on main, 0 on this change.
+- Production dependency tree (npm ls --omit=dev --all): identical at main and here.
+- npm ci, lint (0 problems), the whole Vitest set (145 files, 1541 tests), both Playwright modes (192 passed and 10 skipped; 51 passed) and the entra production build with the bundle check (8 files, 1109118 bytes, markers 0/57) all pass, with test names lost 0, changed 0, added 0 against main.
+- The merge with main is clean and equals main plus these two files.
+
+Not addressed: this is alert 10 only; no other alert is part of this change. Not deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

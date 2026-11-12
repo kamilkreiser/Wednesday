@@ -1,0 +1,19 @@
+The rental short proposal (ProposalView) now shows at most three device lines and, in each of
+the hardware-options table and the software table, at most two rows. Each table that is longer
+than its cap ends with one row that points to the full proposal: "and N more options (see full
+proposal)" ("and 1 more option ..." for one); the devices table keeps "and N more lines (see
+full proposal)". The device cap moves from five to three so the option caps keep two device
+rows of room: at 703 px the page is 236 mm of 265 mm for any number of lines and options.
+A table at or under its cap prints as before. The totals, the monthly charge breakdown and the
+full proposal still cover the whole quote. The purchase short form and all CSS are unchanged.
+
+Limit: very long device names or option text wrap and use the room, so they can still push the
+page to two pages.
+
+The wording of the new row is a slot until the product owner approves it. Nothing is deployed.
+Tests: unit rows for both caps, the literal wording and the uncapped totals; print.spec rows
+that print 40/40/40, 10/4/4, 10/2/2, 3/1/1, 3/12/12, 12/3/12 and 12/12/3 lines, hardware and
+software to exactly one page (they run in the stub-off CI step and skip with the stub on);
+proposal-buttons (local, needs pdftotext) expects exactly one page.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

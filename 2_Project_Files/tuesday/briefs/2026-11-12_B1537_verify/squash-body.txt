@@ -1,0 +1,27 @@
+Clears Dependabot alert 10 (minimatch, medium, development scope, vulnerable
+range >= 7.0.0, < 11.0.1, first patched 11.0.1) for web/.
+
+web/package.json gains one top-level key and nothing else:
+  "overrides": { "@typescript-eslint/typescript-estree": { "minimatch": "11.0.1" } }
+
+web/package-lock.json was written by npm 11.19.1 at Node v24.22.2, not by hand.
+Two entries change (297 to 298 entries; 12 lines added, 4 removed):
+- node_modules/@isaacs/nonrecursive-glob-match 1.1.0 is added (dev, no dependencies).
+- the minimatch copy under typescript-estree moves 10.2.6 to 11.0.1; its
+  brace-expansion range goes ^5.0.8 to ^5.0.12.
+Every minimatch copy is now outside the range: 3.1.5, 5.1.9, 11.0.1.
+
+Why an override: typescript-estree and all 21 stable releases from 8.60.0 to
+8.72.2 declare minimatch ^10.2.2, and the 10.x line ends at 10.2.6, so no bump of
+a direct dependency reaches a patched version. Scoped to that parent because the
+other copies (3.1.5, 5.1.9) need their own majors. Remove the override once a
+stable typescript-estree release declares minimatch ^11.
+
+Checked at Node v24.22.2: npm ci, lint (0 problems), Vitest 1541 of 1541,
+Playwright 192 passed and 10 skipped plus 51 passed, entra build and bundle
+check; test names lost 0, changed 0, added 0. npm audit: 7 moderate before, 0
+after. Production dependency tree unchanged.
+
+This addresses alert 10 only; no other alert is addressed.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>

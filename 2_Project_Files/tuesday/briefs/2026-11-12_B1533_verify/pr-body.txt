@@ -1,0 +1,21 @@
+BLUF: three operator messages now say what actually happened (MPSCALC-392), and the Home page no longer leaves a lone tile on a row or scrolls sideways from 601 px up (MPSCALC-393). The wording is the approved text, byte for byte. Nothing is deployed by this PR; no workflow file changes, so a merge runs CI only.
+
+MPSCALC-392 (words only; no exit code, refusal or condition changed):
+- scripts/deploy-from-ci.sh: when the site did not report that it started, the run now ends on its own last line: "deploy-from-ci: NOT PROVEN: the site did not report that it started, even though the files match, so this deploy is not finished; do not report it as done, and check that the site is running before you deploy again." (exit 3, as before).
+- scripts/deploy-from-ci.sh: the stop after the overlay re-read now reads "deploy-from-ci: STOP: the hosted overlay could not be confirmed unchanged just before the deploy (the line above says why); nothing was put on the site. Look at the kept copy named above, then run the deploy again." (exit 1, as before). The first-check stop is unchanged.
+- tools/demo/seed.py: a dry run's last line adds "The output folder was not checked; a real run refuses it if it is outside this repository's .local folder."; the help and the opening note say "everything except the output folder".
+
+MPSCALC-393 (web/src/styles.css, web/src/screens/Dashboard.tsx):
+- An Administrator's five tiles are 3 + 2 from 601 px (were 2 + 2 + 1 to 697 px).
+- With a 17 px classic scrollbar (most Windows browsers) the upper edges move to 1374 px (six tiles) and 1154 px (five tiles), so 5 + 1 and 4 + 1 no longer occur. Cost: on a browser with a floating scrollbar, 1358 to 1374 px (six tiles) and 1138 to 1154 px (five tiles) show three across where one row would have fit.
+- The two Home queue tables (Needs follow-up, work queue) sit inside the existing table-wrap, so they scroll inside their panel and the page does not scroll sideways (it did from 601 px to about 1190 px when the tables had rows).
+- Stated deviation: the five-tile rule runs 601 to 714 px, not 601 to 697: with a classic 17 px scrollbar three 210 px tracks need 715 px of container, so 698 to 714 px would otherwise show a lone fifth tile. Proof: the classic-scrollbar rows at 698, 706 and 714 px for the Administrator and the 1 px classic sweeps.
+
+Tests:
+- Python: new rows in scripts/tests/test_scripts.py, scripts/tests/test_deploy_pre1.py and tools/demo/test/test_seed.py; the four dry-run last-line literals in the seed tests carry the new sentence. Each new row fails on the old text.
+- web/e2e/home-tiles-fill.spec.ts: rows at 600/601/641/697 px; 1 px sweeps from 500 to 1500 px for each role, plain and with a real classic scrollbar (a fixture launches the installed Chrome without --hide-scrollbars and checks the bar takes 17 px); no-sideways-scroll rows at nine widths that, in the stub step, require the queue tables to have rows; a planted-wide-element control. The file runs in both e2e steps (stub and api-off); in the api-off step the queue tables are empty, so the sideways rows there cover the tiles only.
+- CI cost: the sweeps add about 10 minutes to EACH e2e step (measured locally: the whole api-off step took 10 minutes at low load, the whole stub step 13 minutes). The web job's timeout is 40 minutes; watch its duration on this PR.
+
+Not changed: tile content, any other screen, playwright.config.ts, package files, workflows, the API.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

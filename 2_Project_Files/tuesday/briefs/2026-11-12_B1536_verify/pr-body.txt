@@ -1,0 +1,22 @@
+BLUF: the rental short proposal now shows at most 3 device lines and, in each of the hardware-options table and the software table, at most 2 rows, each table followed by one row "and N more options (see full proposal)" (devices keep "and N more lines (see full proposal)"). It prints on one A4 page for any number of lines and options. The wording of the new row is PENDING the product owner's approval. Nothing is deployed. The purchase short form is untouched.
+
+What changed (web only, 4 files):
+- ProposalPage.tsx: RENTAL_SHORT_LINE_CAP 5 -> 3; new RENTAL_SHORT_OPTION_CAP = 2 and moreRentalOptions(n) (singular "and 1 more option (see full proposal)", plural "and N more options (see full proposal)"); each option table shows its first 2 rows and, when longer, one extra row. A table at or under its cap renders the same markup as before. Totals, the monthly charge breakdown and the full proposal still cover the whole quote.
+- ProposalPage.test.tsx: the device-cap rows re-expressed for 3; 10 new rows for the option tables (cap literal, at/over the cap, singular and plural literal words, independence of the two tables, 40/40/40 with totals still whole).
+- print.spec.ts: the device rows re-expressed for 3; 7 new rows (40/40/40, 10/4/4, 10/2/2, 3/1/1, 3/12/12, 12/3/12, 12/12/3 lines/hardware/software) that print to PDF and expect exactly one A4 page, the row counts and the pointer words. They skip in the stub-on CI step and run in the stub-off step.
+- proposal-buttons.spec.ts (local only, needs pdftotext): one threshold 5 -> 3 and 3 new rows (10/4/4, 40/40/40, 40/2/2) expecting one page.
+- Not changed: OnePager*, one-pager.css (byte-identical), any CSS, the API, the rental book.
+
+Why the device cap moved from 5 to 3: with 5 devices there is no option cap of 2 or more that keeps two device rows of room on the page (257.70 mm of 265 mm at 5 devices and 2 options; the page limit is about 258 mm). With 3 devices and 2 options the page is 236.00 mm for every count above the caps, 29.0 mm (2.67 device rows) of room.
+
+Measured (macOS, Chrome, A4, 703 px print width): 1 page at 3/12/12, 12/3/12, 12/12/3 and 40/40/40 lines/hardware/software, article 236.00 mm. Whole web suite 1551 passed, 0 failed (main 1541); 6 device-cap rows are re-titled for the new cap and 10 rows are new. Planted faults go red (device cap 5, option cap 1 or 3, options uncapped, summary row removed, software table left uncapped).
+
+Limits:
+- Very long device names or option descriptions wrap and use the room: with about 50-character option text the page is still one page with 17.4 mm to spare; with much longer text it can print two pages.
+- Linux print was not measured; the hosted web job (stub-off step) is the first Linux read of the new print rows. If it shows two pages, lower a cap.
+
+Words (pending): singular "and 1 more option (see full proposal)", plural "and N more options (see full proposal)". An alternative is "and N more hardware options ..." under the hardware table and "and N more software products ..." under the software table.
+
+Tests run locally: lint; npm test; production build and bundle check; print.spec in both CI shapes; proposal-buttons 25 of 25. Hosted CI and CodeQL decide.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

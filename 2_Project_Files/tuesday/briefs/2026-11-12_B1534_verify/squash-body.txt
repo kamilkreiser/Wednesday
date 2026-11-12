@@ -1,0 +1,30 @@
+Manifests: package.json "vitest" ^5.0.0 -> ^5.0.5; apps/web/package.json
+"vite" ^8.2.2 -> ^8.3.4.
+
+Lockfile entries moved (34 entries): vitest, @vitest/mocker and @vitest/spy
+5.0.0 -> 5.0.5; chai 6.2.2 -> 6.3.0; magic-string 1.3.1 -> 1.4.3; obug
+2.2.1 -> 3.0.0; std-env 4.2.0 -> 4.3.0; tinybench 6.1.4 -> 6.2.2; tinyexec
+1.3.0 -> 1.3.1; why-is-node-running 2.3.0 -> 3.2.1; siginfo and stackback
+removed; vite 8.3.0 -> 8.3.4; rolldown and its 15 platform binding packages
+1.2.8 -> 1.2.14; @oxc-project/types 0.149.0 -> 0.154.0; nanoid 3.3.18 ->
+3.3.20; postcss 8.5.28 -> 8.5.31; plus the root and apps/web entries.
+
+The lockfile was regenerated with npm 11.20.0 inside the pinned node:22 image
+(node v22.23.2) because the image's npm 10.9.8 crashes on this update
+("Cannot read properties of null (reading 'edgesOut')"). npm 11.20.0
+reproduces the previous lockfile byte-for-byte when nothing changes, and
+resolution was dated (--before) to the versions current when these two
+updates were first proposed, so no other package moved. The image's npm 10.9.8
+installs the result with npm ci.
+
+Checked in the pinned image at base and at this change: lint, format check,
+typecheck and build pass; the whole test suite is identical (315 files, 3177
+tests, 3174 passed, 1 skipped, 2 failing at both because they need a source
+text that is not in the repository); the database suites are identical (674
+and 1563 tests, all passing); the web image builds with vite 8.3.4.
+
+Clears dependency alerts 12 and 11 (@vitest/mocker below 5.0.3) and 10 to 5
+(vite 8.3.0 to 8.3.2). The other open alerts are not addressed. Replaces the
+dependency-bot updates #91 and #86.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>

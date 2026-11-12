@@ -1,0 +1,19 @@
+BLUF: two test-and-CI-reader changes, no product code. (1) MPSCALC-389: the SDK pin guard (scripts/tests/test_sdk_pin.py) now also reads quoted step keys and the other routes that could select a .NET SDK besides global.json. (2) MPSCALC-391: the picker-many e2e spec is repaired and taken out of the left-out list, so it runs in the "e2e, dev stub on" CI step again. Nothing is deployed. No file under web/src, src, .github, global.json or scripts/package.sh changes.
+
+MPSCALC-389 (scripts/tests/test_sdk_pin.py, new scripts/tests/test_sdk_pin_routes.py)
+- The step-key pattern accepts keys in matching single or double quotes, so a quoted dotnet-version key is no longer invisible.
+- A setup-dotnet step written in a form the text reader cannot follow is reported as a problem instead of passing: a flow mapping, an anchor/alias/merge key, a block scalar, or a repeated key.
+- In ci.yml and in the scripts it runs (a closed list, scripts/package.sh): any DOTNET_ name other than DOTNET_CLI_TELEMETRY_OPTOUT and DOTNET_NOLOGO (any case), dotnet-install, dot.net/v1, --roll-forward and RollForward are problems; so is any other action whose name contains dotnet.
+- The scripts ci.yml runs must equal that closed list; any global.json other than the root one (outside build and tool folders) is a problem.
+- pin_note() puts the pinned version into the failure message of the real-files row.
+- The 13 existing rows are unedited and green. The only changed original line is the step-key pattern, now a module constant. 34 new rows live in a second file because the first would have passed 450 lines; each plants one fault on a copy and expects the exact problem list, with controls that must stay green.
+
+MPSCALC-391 (web/e2e/b100-picker-many.spec.ts, web/playwright.config.ts)
+- The table in Section 1 has the 6 ticked line rows plus one page-estimate sub-row (tr.bom-subline) after the device line DEMO-A3C-50. The spec now counts line rows (tr:not(.bom-subline) = 6), sub-rows (tr.bom-subline = 1, a measured literal) and the whole table (6 + 1), and reads the code and number columns from the line rows only.
+- The spec's entry is deleted from LEFT_OUT in playwright.config.ts (one line removed, none added). It runs in the stub step only: the stub-mode test list gains exactly its 2 tests; the stub-off list is unchanged.
+
+Not covered (listed, not closed): the allowPrerelease and paths keys of global.json, PowerShell steps, the runtime setup-dotnet installs first, a second workflow file, local actions, GITHUB_PATH or PATH edits, MSBuild SDK variables (not DOTNET_ names), names built at run time.
+
+Verified locally (macOS, Node 24, installed Chrome): python job loop with the same results as main (infra tests not run: no Bicep compiler); lint; Vitest; production build and bundle check; stub-step Playwright run 194 passed, 5 skipped (each skip is another spec's own live-mode skip). Hosted CI and CodeQL decide.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
