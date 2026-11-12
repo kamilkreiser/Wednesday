@@ -1,0 +1,91 @@
+terms: 10
+controls: 'msgpackr' literal-hits KS-1379 among open: True | random token hits: 0 (want 0)
+
+## searched 'svc_kyc_verifications': 82 candidate(s), 2 OPEN literal hit(s), 1 closed/archived literal hit(s)
+   OPEN   KS-851   [In Progress] KS-386 residues from the round-2 gate: G-1 column ordinal drift, G-2 the second-image orphan, G-3 the in-memory docstrin
+   OPEN   KS-1327  [Backlog] kyc verification writes are a whole-row read-modify-write: two timers, or a timer and an admin review, can still race
+   closed KS-386   [Deployed to UAT] KYC images: stop storing svc_kyc_images.data at all — Platform K holds the attestation, not the imag
+
+## searched 'dbDeleteUserData': 6 candidate(s), 6 OPEN literal hit(s), 0 closed/archived literal hit(s)
+   OPEN   KS-1868  [In Progress] 253 catch and log sites read a thrown value unguarded (X instanceof Error ? X.message : String(X)) across 15 services: o
+   OPEN   KS-1931  [In Progress] kyc: dbGetVerificationsByUser returns [] on any read error, so the GDPR erasure cascade (dbDeleteUserData) continues wit
+   OPEN   KS-1955  [Backlog] GDPR erasure: a failed kyc or wallet-connector user.erased step leaves the subject's data in place and nothing reports i
+   OPEN   KS-2166  [In Progress] kyc: four routes never compare the signed-in caller with the user they act on (read, list, delete, initiate)
+   OPEN   KS-2185  [Backlog] kyc: DELETE /api/kyc/user/:userId/data has no try/catch, so a failed erasure leaves the request unanswered and exits the
+   OPEN   KS-2188  [Backlog] kyc erasure cascade: one undecodable verification row now stops the whole erasure, deleting nothing, and no cell pins th
+
+## searched 'user.erased': 82 candidate(s), 9 OPEN literal hit(s), 0 closed/archived literal hit(s)
+   OPEN   KS-239   [Backlog] [Decision] Erasure: multi-step to trigger, but irreversible + complete once executed — confirm no recoverable off-chain 
+   OPEN   KS-485   [Todo] Security review — plan, methodology & handover (Platform K)
+   OPEN   KS-772   [Todo] Review stream: S<->K integration contract
+   OPEN   KS-1868  [In Progress] 253 catch and log sites read a thrown value unguarded (X instanceof Error ? X.message : String(X)) across 15 services: o
+   OPEN   KS-1931  [In Progress] kyc: dbGetVerificationsByUser returns [] on any read error, so the GDPR erasure cascade (dbDeleteUserData) continues wit
+   OPEN   KS-1955  [Backlog] GDPR erasure: a failed kyc or wallet-connector user.erased step leaves the subject's data in place and nothing reports i
+   OPEN   KS-2060  [In Progress] erasure: an erased user's wallet stays on their users row, and their governance participant row keeps its vote power
+   OPEN   KS-2094  [In Progress] originate publishEvent swallows every Redis failure in an empty catch: a failed user.erased publish is silent and the lo
+   OPEN   KS-2188  [Backlog] kyc erasure cascade: one undecodable verification row now stops the whole erasure, deleting nothing, and no cell pins th
+
+## searched 'erasure+upper': 100 candidate(s), 5 OPEN literal hit(s), 1 closed/archived literal hit(s)
+   OPEN   KS-485   [Todo] Security review — plan, methodology & handover (Platform K)
+   OPEN   KS-772   [Todo] Review stream: S<->K integration contract
+   OPEN   KS-1191  [Backlog] Audit log records the caller's spelling: case splits the action namespace, /API/ is unaudited, unrouted 404s put caller 
+   OPEN   KS-1533  [In Progress] Security: an organisation-scoped admin can mint a key for ANOTHER organisation, or carrying another organisation's conne
+   OPEN   KS-1536  [In Progress] One role vocabulary, seven divergent lists: platform_admin is a super-role to the gateway and an ordinary tenant user to
+   closed KS-1535  [Done] POLICY (Kam's call): role ADMIN is a KEY_ADMIN_ROLE that the KS-764 organisation arm never engages f
+
+## searched 'upper-case+kyc': 100 candidate(s), 4 OPEN literal hit(s), 0 closed/archived literal hit(s)
+   OPEN   KS-485   [Todo] Security review — plan, methodology & handover (Platform K)
+   OPEN   KS-772   [Todo] Review stream: S<->K integration contract
+   OPEN   KS-1175  [In Progress] Anchor / originate / lifecycle-event schemas: accept and anchor platform-s's non-PII actor + organisation identity field
+   OPEN   KS-1853  [Backlog] Spec and docs describe contracts the code does not follow: analytics export sends no Location or Retry-After and returns
+
+## searched 'case-sensitive+erasure': 101 candidate(s), 4 OPEN literal hit(s), 2 closed/archived literal hit(s)
+   OPEN   KS-525   [Backlog] Playwright: end-to-end flow coverage across all 310 published API operations
+   OPEN   KS-758   [In Progress] Connector erasure: three permanent failures present as retryable and nothing dead-letters; the unresolvable path records
+   OPEN   KS-843   [In Progress] KS-695 F5: build the dedicated `subjects:erase` scope gate on POST /api/gdpr/erasures — Kam ruled it 2026-09-03 and it h
+   OPEN   KS-1191  [Backlog] Audit log records the caller's spelling: case splits the action namespace, /API/ is unaudited, unrouted 404s put caller 
+   closed KS-861   [Done] KS-843 half 2 (#845) round-3 residue: case-insensitive matching (F-9), the removed mint-set cell (F-
+   closed KS-1212  [Done] ks1187 tests: no cell pins that the erasure door reads its own router's caseSensitive option (door v
+
+## searched 'refresh token+bearer': 76 candidate(s), 6 OPEN literal hit(s), 2 closed/archived literal hit(s)
+   OPEN   KS-329   [Backlog] Phase 2 — JWT RS256 → hybrid (RS256 + ML-DSA-65)
+   OPEN   KS-485   [Todo] Security review — plan, methodology & handover (Platform K)
+   OPEN   KS-772   [Todo] Review stream: S<->K integration contract
+   OPEN   KS-1677  [In Progress] m365: the OAuth callback lets any holder of a connection id rebind it - pending or already connected - state is the bare
+   OPEN   KS-1690  [Backlog] auth: the OAuth refresh_token grant never checks the ORIGIN SESSION, so a revoked session's refresh token still redeems 
+   OPEN   KS-1883  [Backlog] shared authenticate() never checks a token's type, so a refresh token is accepted as an access token at a service
+   closed KS-561   [Done] Gateway 401s cookie-only POST /api/auth/refresh — spec wrongly declares bearerAuth since KS-424 (#48
+   closed KS-1151  [Done] Security: POST /api/auth/refresh re-mints an OAuth-bound refresh token as an UNBOUND, full-RBAC logi
+
+## searched 'verifyJwtRs256': 6 candidate(s), 0 OPEN literal hit(s), 1 closed/archived literal hit(s)
+   closed KS-1503  [Done] Pin the front door's fall-through for an unverifiable Bearer (500 on every route if it ever rethrows
+
+## searched 'type !== 'access'': 100 candidate(s), 1 OPEN literal hit(s), 0 closed/archived literal hit(s)
+   OPEN   KS-1883  [Backlog] shared authenticate() never checks a token's type, so a refresh token is accepted as an access token at a service
+
+## searched 'refresh+authenticate': 157 candidate(s), 17 OPEN literal hit(s), 28 closed/archived literal hit(s)
+   OPEN   KS-188   [Todo] Stateful testing: declare OpenAPI `links` + `operationId` so POST→GET→DELETE chains are exercised (currently 0 of 613 li
+   OPEN   KS-485   [Todo] Security review — plan, methodology & handover (Platform K)
+   OPEN   KS-525   [Backlog] Playwright: end-to-end flow coverage across all 310 published API operations
+   OPEN   KS-772   [Todo] Review stream: S<->K integration contract
+   OPEN   KS-1003  [Backlog] The OAuth token endpoint is outside the credential-stuffing rate-limit zone — /api/oauth/ is not keyed in $secuura_auth_
+   OPEN   KS-1084  [In Progress] READ ONLY / unverified: the gateway's own Authorization-only calls to originate send no x-tenant-id — single-tenant orig
+   OPEN   KS-1670  [In Progress] m365-integration: three more reflection sites from gate AM1 - an unencoded connectionId in the success redirect, and two
+   OPEN   KS-1673  [In Progress] m365: no connection is bound to its organisation - any authenticated user can list every site's connectionId, then list 
+   OPEN   KS-1677  [In Progress] m365: the OAuth callback lets any holder of a connection id rebind it - pending or already connected - state is the bare
+   OPEN   KS-1691  [Backlog] auth: a request in flight resurrects a revoked session — updateSessionActivity and rotateSessionRefreshToken write back 
+   OPEN   KS-1703  [Backlog] Security: seven GET-by-id routes serve any authenticated caller's object — transfers/{id}, transfers/{id}/history, deleg
+   OPEN   KS-1776  [Backlog] services/auth routes/auth.ts:62: a module-scope 2 s setTimeout calls userRepo.seedDemoUsers, and a test whose userRepo m
+   OPEN   KS-1854  [Backlog] Reset-password has no rate limit of its own (the limiter is mounted on /api/auth/password-reset, which has no route) and
+   OPEN   KS-1883  [Backlog] shared authenticate() never checks a token's type, so a refresh token is accepted as an access token at a service
+   OPEN   KS-1965  [Backlog] auth: if Redis is down when the service boots, the session availability flag never returns to true, because the ready li
+   OPEN   KS-2048  [Backlog] auth oauth router POST /authorize: a non-string action is taken as approve, and an array client_id passes the charset ch
+   OPEN   KS-2109  [In Progress] KS-1536 follow-up: the one-role-vocabulary guard counts one shape only, and three pointers name removed lists
+   closed KS-122   [Done] schemathesis suite content remediation: write-test role scope + api-key + login-envelope + https-coo
+   closed KS-214   [Done] Performance Test: Cache auth token per VU to avoid rate limit in soak test
+   closed KS-215   [Done] Local gateway can't run CORE_MIGRATIONS (no MIGRATION_DATABASE_URL) → charge_events + platform_docum
+   closed KS-258   [Done] test(schemathesis): add GDPR IDOR ownership-guard regression tests — KS-228 fix verification
+   closed KS-317   [Done] Akto self-hosted dashboard "Access Restricted" — upstream plan gate (akto#5512), no supported bypass
+   closed KS-360   [Done] Suspending/deactivating a user doesn't revoke active sessions — access persists up to ~1h (access-to
+   closed KS-366   [Done] Dependency currency review: core stack is one+ version behind upstream stable/LTS (Node, Postgres, R
+   closed KS-395   [Canceled] Validate weekend platform fixes — Akto OWASP security scan
