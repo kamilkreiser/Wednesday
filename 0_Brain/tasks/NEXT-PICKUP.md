@@ -17,6 +17,11 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## UPDATE 15:20 12 Nov by the 14:49 seat — READ FIRST
+- **A 28th STAMPED** (TS-7 L2b, briefs_staged/2026-11-12_seatA28_ts7_L2b_build.md): runner shape A `.ts`; grants (a) root-lock = vitest line + 24 rollup optional entries only, audit:locks rc 0; (b) `git rm` jest.config.cjs LANE-SCOPED (not fleet-wide); (c) s-t24-l1 read-only cp -c source; **L2b RE-SLOTTED to root-lock slot 2 ahead of L2a**; plan mail = CONFIRMATION only (it builds without waiting). Dry run PASSED; WAITER pid 42702 chained after B 152nd's pane (scratchpad launch_a28.log). Chain: S 70th (pid 9845, load) -> B 152nd (64590) -> A 28th (42702).
+- **KAM 15:11:37 + 15:12:11:** OpenRouter Nemotron run RESUMED (spend OK); the Spark KEEPS Nemotron if it scores >= 16/23, is stable and fast enough, else V4 Flash is restored. If Nemotron stays: re-point + re-prove the Spark routines (digest harness, nightly stale screen) from the caller list in its report. EXPIRING-GRANTS Spark cell annotated.
+- Load 11-17 at 15:1x is Wednesday's own two `ab.py --model control` runs (~10 node checkers); R 107th holds by design (legs at load1 < 8 or ~15:42 regardless; wake_ack'd).
+
 ## UPDATE 15:08 12 Nov by the 14:49 seat — READ FIRST
 - **B 152nd STAMPED** (briefs_staged/2026-11-12_seatB152_merge.md; rows 2203+2206, 2207 alone as a second row at <=50; **2157 = B 153rd's FIRST row, then 2208 (gate 330 GWN)**; clonefile scope extended to transfer/originate node_modules), dry run PASSED, WAITER pid 64590 chained after S 70th's pane (+180 s) and load1 < 7 (scratchpad launch_b152.log). S 70th waiter pid 9845 (launch_s70.log). Load was 12-18 (an orphan esbuild killed 15:05; now decaying).
 - **A 28th DRAFTER RUNNING** (TS-7 lane L2b, tests/connectors -> vitest): reference/2026-11-12_drafter-seatA28-ts7-L2b/ (commission.md). Stamp, dry-run, waiter (chain after B) when it returns.
