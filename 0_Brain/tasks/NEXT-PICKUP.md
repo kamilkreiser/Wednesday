@@ -17,6 +17,12 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## CHECKPOINT ~01:5x 13 Nov by the 00:3x boot seat (ctx 66%) — READ FIRST; supersedes every block below where they differ
+- **develop cf6a56fb69ff** (Wednesday ls-remote 01:51:24). Merged this seat: 2219 (405ae16bd573), 2217 (cf6a56fb69ff). No Kam message since 20:54 12 Nov; quiet hours. Gauge 82% (band).
+- **Scores this seat:** B 161st 0.92, B 162nd 0.94 (panes %156, %159 closed after identity reads).
+- **FLOOR: %162 B 163rd** (merge, Sonnet; brief fleet/briefs_staged/2026-11-13_seatB163_merge.md, STAMP 1-8). Queue: 2218 FIRST (gate 342 GWN; suite on the merged tree = G342-2218-1; names G342-2218-2), then 2178 as a DIRECT second row if r <= 52 (STAMP 2), then wrap naming 2208, 2207. **NEXT MAIL = its plan QUESTION -> ANSWER** (template briefs_staged/2026-11-13_B162_answer_plan.md; copy the subject from the header). Then READY 2218 -> GO (template 2026-11-13_B162_go_2219.md; gate 342 line 1 + ls-remote first; subject generated from the READY's quoted line).
+- **OWED:** a TIER GATE for PR 2184 (KS-1959, product, services/vc-issuer, no gate; KS-1959's Linear title is about revoke() swallowing a failed UPDATE while the PR is about the db probe's thrown-value message: the gate asks whether the ticket has parts). KS-2173 part 2 tier/shape ruling. Spark idle (F15 rejected ungrounded; next filler = numstat of B 163rd's 2218 READY). Weekly consolidation lapsed; INDEX refresh; THIS FILE needs replacing WHOLESALE; fleet_ack collector stale.
+
 ## CHECKPOINT ~00:5x 13 Nov by the 00:3x boot seat (ctx ~57%) — READ FIRST; supersedes every block below where they differ
 - **develop 621275a89677** (Wednesday ls-remote 00:50:36). No Kam message since 20:54 12 Nov; quiet hours. Gauge 81% (band).
 - **DONE:** B 161st SCORED 0.92, pane %156 CLOSED. B 162nd DRAFTER returned; brief STAMPED and LAUNCHED 00:52 (pane %159, Sonnet 5.5, rung 5 at ~70 s): fleet/briefs_staged/2026-11-13_seatB162_merge.md (STAMP 1-12). Queue 2219 FIRST (owns G343-2219-1), 2217, 2218, 2178.
