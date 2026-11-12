@@ -1,0 +1,24 @@
+# Drafter commission: Seat A 27th (Secuura/Blockchain-A, BUILD lane), KS-1398 TypeScript 7 STEP ONE lane L7 (sdk/javascript d.ts: tsconfig + lock + emitter). Wednesday (12:3x successor seat), 2026-11-12 ~13:3x AEDT.
+
+Why L7 and why lane A: Seat A 26th wrapped 02:25Z (L5 = PR 2207, at gate 328; its pane closed). lanes.md section 3 puts L7 in a FREE slot ("(free) | L7 sdk | no | no | everything"): not a workspace, no root lock, parallel-safe with every lane. L2b holds root-lock slot 3 and merges only after L1 (PR 2205, in the merge queue) and L2a (waits for PR 2099), so L7 is the lane that can build AND merge without waiting.
+
+INPUTS (read whole):
+1. `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_ts7-step1-lanes/lanes.md` (sections 1, 2 L7, 3, NOT MEASURED, and WEDNESDAY'S RULINGS at the end; they bind).
+2. A 26th's stamped brief as the MODEL: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-12_seatA26_ts7_L5_build.md` (its stamp, AUTHORITY, HOLDS, TESTS, PUSH, PACE, RULED BY KAM sections). Copy its shape; change the lane.
+3. Wednesday's ANSWER to A 26th: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/` — find it by `ls -t | grep -i A26` (the plan confirmation ANSWER; it was sent from a scratchpad at 01:33Z: if no staged copy exists, say so and use A 26th's HANDOVER for its content).
+4. A 26th's record: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-12_seatA-26th/` (HANDOVER.md FINAL block first): the kit to copy is A 26th's, re-keyed a26 -> a27, protecting every named worktree that is not yours (s-a26-l5 is PR 2207's kept tree under gate 328; s-a25-ks1466 is PR 2204's). A 26th's slip (1) (an `npm exec` that ran in the caller's directory and scanned the project root) becomes a standing line: every npm/npx/vitest/tsc call names its directory explicitly.
+5. The measured plan: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_ks1398-ts7-measure-plan/report.md` (its sdk/javascript findings: tsup dts red on TS 5.9.3; `ignoreDeprecations: "6.0"` asked for tsup 8.5's injected baseUrl).
+
+L7 SCOPE (from lanes.md; re-measure at develop): `Blockchain/Dev/sdk/javascript/` only (9 files; `package.json`, `src/**`, README): a NEW `tsconfig.json` and a NEW `package-lock.json` (standalone; NOT a workspace, no root lock), and an emitter that produces `dist/index.d.ts` (`npm run build`: tsup cjs+esm+dts) on TypeScript 5.9.3, with the "before" being today's red dts step. **THE EMITTER CHOICE IS A DESIGN DECISION the seat states in its PLAN with measured evidence (tsup 9 / tsup 8.5 + ignoreDeprecations / tsc --emitDeclarationOnly / another), and Wednesday rules it in the plan ANSWER before any build.** NOT yours: KS-2136 (`npm test` runs vitest with no test files and exits 1) unless Wednesday folds it in; any workspace package.json; the root lock; any other lane's files.
+
+OPEN-PR CONTACT: lanes.md says possibly-open PR 2106 (2026-11-09) edits `sdk/javascript/README.md` and `src/modules/transfers.ts` (merge-ref absent; UNMEASURED). The seat measures its state and file list FIRST; an overlap with any path it will write is a STOP and QUESTION.
+
+PUBLISHING CHECK (G1 if it changes published artefacts): the package is `"license": "MIT"` with `prepublishOnly: npm run build`; the seat establishes, read-only, that nothing publishes it (no CI publish job, no npm token use) and says so; any publish path found = STOP and QUESTION (a publish is external = Kam's signature class).
+
+FACTS: develop 1247e1af3c203d369d01b4d574de377adeec4b98 (Wednesday's ls-remote 13:25:49; re-measure). KS-1398 is the parent: ONE child ticket for L7 (search first by 'sdk', 'tsup', 'd.ts', 'declaration'; KS-2176 is L1's, KS-2177 is L5's). Open-PR census on every path it owns (GraphQL, with a control).
+
+ROUTING: decide by `2_Project_Files/fleet/specs/model-routing.md` v1.0 and say which row in notes.md (lanes.md: `model: claude-sonnet-5-5 -- C2`; gate G2, tier-2 Sonnet).
+
+HARD LIMITS for you, the drafter: never cd (not even the word in heredoc prose); never a bare `=====` shell word; quote heredoc delimiters; read-only git verbs only in client checkouts (GIT_OPTIONAL_LOCKS=0); no writes to Linear, GitHub, mail or boards; no .env values printed; write only into /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatA27-ts7-L7/. If DevMASTER drops, wait, re-read, continue.
+
+OUTPUT: brief_A27.md, send_brief-ready: a literal PROVENANCE: line then `KS-NNNN | <ABSOLUTE source path or Linear URL> | read 2026-11-12` for EVERY KS key named; a `RULED BY KAM, NOT YET IN AN ARTEFACT` section (Kam's 11:09:41 go for step one; card secuura-ks1398-typescript-7-move = b; carry the section verbatim from A 26th's stamped brief); no lesson-file names; ONE blank STAMP block near the top; no SELF-CHECK line; no literal double-at-sign placeholder text; under 55 KB. Also notes.md. Return notes.md in full plus the brief's line count and size.
