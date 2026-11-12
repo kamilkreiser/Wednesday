@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-13 06:00 from 266 lesson files (1,145,222 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-13 07:55 from 267 lesson files (1,147,116 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7880,4 +7880,18 @@ sections (open the file for these): RULED STANDING 2026-11-12 11:36:33 — Kam, 
 3. **Not for judgement:** its shadow review on gate 324 recalled 0 of 5 findings. Code review and rulings stay with Claude gates.
 4. **Pilot, measure, then standing** (go-slow rule 4): pilot (a) on the next two gates: tokens saved vs summary errors caught by the harness. Then (b) overnight.
 5. Unchanged: one client's content per Spark task; the Spark never merges or writes to a board; the never-idle rule stands, and this widens what "busy" can mean.
+
+
+## Our PRs no longer carry a "do not merge until the pre-merge tests run" sentence, and the nine held for it merge like the rest
+`2026-11-13_premerge-do-not-merge-sentence-dropped-nine-released.md` · grant · 2026-11-13 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is writing a raise or build brief for Secuura, stamping one, or deciding whether a gated PR whose own body says "Do not merge until the pre-merge tests have been run and pass" may join a merge queue. **It may.** Since Kam's ruling (c) at 07:52:34 on 2026-11-13, those PRs merge on the TESTED grant like every other, and new PR bodies stop writing that sentence.
+
+**How to apply:**
+1. The nine released (2134, 2126, 2098, 2097, 2096, 2095, 2090, 2089, 2079) join the merge queue behind the current merge seat's rows, each still on its own gate verdict at its current head and Wednesday's head-pinned GO. The GO says once that the Schemathesis/Akto suites were not run and the boxes stay unticked.
+2. Every Secuura raise/build brief carries the standing line in `2_Project_Files/fleet/STANDING_LINES.md` (section dated 2026-11-13): no self-hold sentence; the Test Evidence block still names what was NOT run.
+3. Existing bodies are not edited for this (a merge seat edits no body).
+4. Unchanged: the QA gate before every merge, the signature classes, demo frozen.
+
+**Family:** [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] (the TESTED grant this rests on) · [[2026-09-09_my-authority-and-the-targets-rules-are-two-checks]] (why the nine went to Kam rather than being waived by stamp) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
