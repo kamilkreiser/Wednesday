@@ -17,6 +17,13 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## UPDATE ~20:16 12 Nov by the 18:23 seat (ctx ~80%) — READ FIRST
+- **develop eab5ac6bff8d** (PR 2210's squash, B 156th; step 8 OK; Wednesday ls-remote ~20:15). Merges this seat: 2209, 2211, 2210.
+- **B 156th WRAPPING** (no second row expected) -> score it, retire %120 after an identity read in a separate call, then **B 157th drafter: 2213 first (gate 336 GWN, tier 2), then 2212 (gate 337 GWN, tier 1, linear two-commit, ADDENDUM 1 of B 156th), then 2178, 2208, 2207, 2184** on develop eab5ac6bff8d; PR 2214 (KS-2166) joins only after gate 338.
+- **S 74th WRAPPING** (STATUS 7: 2210 MERGED, its Low carried for S 75th) -> score, retire %114, **S 75th drafter**: carried filings (2210 Low Refs KS-2182 incl. G333-2210-1; 2213 -> comment on KS-2173; 2212 -> Low Refs KS-1923), then the clear-the-board pass.
+- **A 29th pane %108 KEPT OPEN** for a possible gate-338 fix round (its watcher armed to ~09:42Z); close it after the verdict if GO/GWN.
+- R 111th: row 46 push running (READY -> tier-2 Sonnet gate).
+
 ## UPDATE ~20:0x 12 Nov by the 18:23 seat (ctx 78%) — READ FIRST
 - **A 29th READY: PR 2214 (KS-2166) at eb7315988de5 on develop fa2d60ca8cee -> GATE 338 RUNNING** (Opus, tier 1; reference/2026-11-12_gate338-tier1-pr2214/). If verdict.md is absent after a rotation, RE-COMMISSION from its commission.md. On GO/GWN: score A 29th; PR 2214 into the B queue by ADDENDUM (it shares services/kyc with nothing open). On NO GO: fix round by ADDENDUM to A 29th (round 2 of 2).
 - R 111th plan ANSWERED (row 46 tier 2; no whatsapp-bot clone; push after A 29th's lock). A 29th will wrap after its READY.
