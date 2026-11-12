@@ -89,14 +89,14 @@ Step and part, slot state (holder text or "mine"), load1, the last command, the 
 
 ## Stamp
 Tuesday fills each slot at launch; one word, clock or answer each. The unstamped copy reads the slot count by `grep -o ... | wc -l` (the slots below plus the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main full sha; `5239020234b416c6c2c07f8a7912d88830de6f7f` at drafting) and the two web blobs (`7c7d4608f669a19e4b52c963cdb4debb81d6f879` lock, `f74032cf4fae0b00ea26d2efc984f4a58f1fa9fb` manifest at drafting): ____
-- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting): ____
-- Launch authority (the product owner's 2026-11-12 10:55 ruling on re-pushing the dependency-bot updates as our own) and hard stop (READY target 150 minutes after your Step 0; HARD STOP clock): ____
-- SLOTS (the two heavy slots `free` or `held` with holders; which MPS panes are live and the paths their kits grant): ____
-- IDENTITY (the clone-local `user.name` and `user.email` the seat sets once, equal to what the project's configured identity prints; else STOP before the first commit): ____
-- GATE-ROUND (whether a gate follows, its tier, the class and the round it counts): ____
-- Q-answers (Q-1 to Q-5 of the drafter report): ____
+- STAMP: STAMPED 11:29:05 AEDT 2026-11-12 by Tuesday s271; read whole: this kit (102 lines) and the drafter's returned summary (Q-1..Q-5).
+- LAUNCH WINDOW: launch now (11:29:05) until 12:30; MPS beside you: M129 (B1533), M130 (B1536), and the landing of PR #187 (B1527) by Tuesday; NexusAI N125, Composer C94, HPSM H160 on other projects.
+- BASE (code main full sha; `5239020234b416c6c2c07f8a7912d88830de6f7f` at drafting) and the two web blobs (`7c7d4608f669a19e4b52c963cdb4debb81d6f879` lock, `f74032cf4fae0b00ea26d2efc984f4a58f1fa9fb` manifest at drafting): 5239020234b416c6c2c07f8a7912d88830de6f7f; lock 7c7d4608f669a19e4b52c963cdb4debb81d6f879; manifest f74032cf4fae0b00ea26d2efc984f4a58f1fa9fb (all read at source by Tuesday). Main WILL move when PR #187 lands (its files: API, docs, `web/src/api/generated/**`: none of yours; apply A MOVED MAIN).
+- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting): `b1537*` absent (matching-refs length 0); open PRs: #187 (MPSCALC-160; 0 of its files match `package`, read by Tuesday): not a REFUSE 5 hit.
+- Launch authority (the product owner's 2026-11-12 10:55 ruling on re-pushing the dependency-bot updates as our own) and hard stop (READY target 150 minutes after your Step 0; HARD STOP clock): the product owner's 2026-11-12 10:55 ruling, card datasec-bot-pr-scan-back-1112 option a (detail: 'the MPS and HPSM minimatch alerts each get a small lane'), carried by Tuesday; READY target Step 0 + 150 min; HARD STOP 15:30 AEDT 2026-11-12.
+- SLOTS (the two heavy slots `free` or `held` with holders; which MPS panes are live and the paths their kits grant): both heavy slots free at the stamp; MPS panes M129 (B1533: deploy-from-ci.sh + tests, seed.py + tests, web/src/styles.css, web/e2e/home-tiles-fill.spec.ts) and M130 (B1536: web/src/screens/ProposalPage*, web/e2e/print.spec.ts, web/e2e/proposal-buttons.spec.ts): neither grants web/package*.json.
+- IDENTITY (the clone-local `user.name` and `user.email` the seat sets once, equal to what the project's configured identity prints; else STOP before the first commit): set by program from `git -C '<project>/2_Project_Files' --no-optional-locks config --local --get user.name` / `user.email` (both non-empty at the stamp); never typed.
+- GATE-ROUND (whether a gate follows, its tier, the class and the round it counts): yes: a G2 gate after your READY, class dependency-override, round 1 of 2.
+- Q-answers (Q-1 to Q-5 of the drafter report): all defaults: Q-1 pin exactly 11.0.1; Q-2 the seat writes ticket-text.txt and Tuesday files the MPSCALC ticket (the seat reads and writes no Jira); Q-3 if an estree release admitting minimatch 11 appears, STOP; Q-4 if the pinned npm rewrites the lock on the no-change control, STOP with both blobs; Q-5 your own base run is the control (the hosted web job at main is not relied on).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 11:29:05 AEDT 2026-11-12 by Tuesday s271 (102 lines)
