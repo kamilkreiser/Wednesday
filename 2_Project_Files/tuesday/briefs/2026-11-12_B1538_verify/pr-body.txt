@@ -1,0 +1,35 @@
+BLUF: Clears Dependabot alert 9 (minimatch, medium, development scope, vulnerable range >= 7.0.0, < 11.0.1, first patched 11.0.1; GHSA-g3hv-75wg-m249) with one scoped npm "overrides" entry and a lockfile that npm regenerated. Two paths change: web/package.json and web/package-lock.json. One commit, 61ce4c3d310b786616e238165d634fb0c3533222, on top of main c717ba1a945191ffa31f13320c19967a6cf7f15a (main has since moved to c6b5c8cf62fc8bc32246589bc7246bae6808f98d by one commit that touches neither path; merging the branch into it gives main plus these two files). Not deployed.
+
+WHAT CHANGES
+- web/package.json: one new top-level key, last after "engines" (5 added lines, 0 removed):
+    "overrides": { "@typescript-eslint/typescript-estree": { "minimatch": "11.0.1" } }
+  Parsed JSON equals main's plus that key. Manifest blob b549f7f554e19857fd504088a86e81d03d8e819d.
+- web/package-lock.json: written by npm 11.19.1 at node v24.22.2 (npm install --package-lock-only --ignore-scripts --no-audit --no-fund), never by hand. Lock blob add1be79fe97684581d0cd5adce62c4d96730b2f. 12 lines added, 4 removed, 589 -> 590 entries. Exactly two entries differ:
+  - node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch: 10.2.6 -> 11.0.1 (integrity equals the registry's; dependencies now brace-expansion ^5.0.12 and @isaacs/nonrecursive-glob-match ^1.0.1)
+  - node_modules/@isaacs/nonrecursive-glob-match: new, 1.1.0, dev, no dependencies
+  The other minimatch copies (3.1.5, 5.1.9) are byte-equal to main's. Every added "resolved" is registry.npmjs.org.
+
+WHY AN OVERRIDE, AND WHY SCOPED
+- The only copy inside the vulnerable range is 10.2.6, pulled by @typescript-eslint/typescript-estree 8.70.1 (lint-time, development only, not in the production bundle).
+- All 21 stable releases of typescript-estree from 8.60.0 to latest 8.72.2 declare minimatch ^10.2.2 and the 10.x line of minimatch ends at 10.2.6, so no parent upgrade reaches a patched copy. Read from the registry for 307 versions of the 8.60+ line: 299 declare ^10.2.2; the 8 that declare ^11.0.1 are canary prereleases 8.72.3-alpha.1 to -alpha.8 (dist-tag "canary"; "latest" is 8.72.2). A caret range never selects a prerelease, so none of them is reachable by a normal install.
+- The override is scoped to that one parent. The other two copies need their own major (3.x, 5.x) and are outside the range, so an unscoped override would have broken them.
+- Why a new branch rather than a bot pull request: there is none for this alert (0 open pull requests when this was made), and code scanning has never analysed a bot-authored pull request here.
+
+WHAT WAS MEASURED (local, macOS, node v24.22.2, npm 11.19.1; vitest 5.0.5, Playwright 1.63.0, Next 16.4.2 at base and head)
+- No-change control: re-running the same npm command over main's two files leaves the lock blob unchanged (81393fd77c36489b3e8b17a13bde28e225350fb4) under both the pinned node 24.22.2 / npm 11.19.1 and node 24.21.0 / npm 11.19.0.
+- Alert check against the lock: main 3.1.5 clear, 5.1.9 clear, 10.2.6 VULNERABLE; this branch 3.1.5, 5.1.9, 11.0.1 all clear. npm audit (package-lock-only): main moderate 7, high 0, critical 0; this branch 0 in every class, and minimatch no longer appears. The CI-style counts line over all dependencies printed moderate 7 at base and moderate 0 at head.
+- npm ci rc 0 (so lock and manifest agree); lint rc 0 with 0 warnings; typecheck rc 0; build rc 0 including postbuild; npm audit --omit=dev --audit-level=high rc 0 (found 0 vulnerabilities); e2e shard plan check rc 0 (198/181/182/181/68/67/68/67 tests).
+- The new minimatch copy was exercised directly from the typescript-estree directory: version 11.0.1; a/b.ts matches **/*.ts (true), a/b.js does not (false); typescript-estree loads and parses. The same program at base prints 10.2.6.
+- Production dependency tree (npm ls --omit=dev --all --parseable): identical to base once the clone path is normalised (dev-only change).
+- Unit tests: base 4234 tests in 932 suites, all passed. Head, three further full runs (load average 21, 4 and 7 at their starts, alternating with three base runs that also all passed): 4234 passed each time; by-name comparison against base: lost 0, added 0, changed 0 (292 files at both). Two earlier head runs, made while other work loaded the machine (load average 20 to 40), each had the same one test fail (customer "result could not be loaded" error-state test); alternating single-file runs of it at moderate load passed 6 of 6 at head and 6 of 6 at base, and three of its single-file runs at load 38 failed at base. It does not touch minimatch.
+- e2e shards, run one at a time at head on ports 9930-9939: six passed on the first run (prototype-desktop-2, prototype-tablet-2, playbook-desktop-1, playbook-desktop-2, playbook-mobile-1, playbook-mobile-2). journey-and-prototype and prototype-tablet-1 were red under machine load; re-run once at base: both red at base too (journey-and-prototype: 1 failed, the a11y.spec.ts:39 axe scan over the 30 s test timeout; prototype-tablet-1: 2 failed, a11y.spec.ts:39 and customer-frame-alias.spec.ts:73). Re-run at head: journey-and-prototype the same single a11y.spec.ts:39 failure with the same message as base (2 + 181 + 14 passed); prototype-tablet-1 passed. So every red at head was also red at base on this machine.
+- deploy-package step: refuses on this macOS host at base AND at head with the same 15 lines (darwin sharp native modules; it needs a Linux x64 build). Not provable here; the hosted web-build job is the read.
+- infra/tests test_hidden_characters.py and test_ci_workflow.py rc 0 on the head tree (a planted U+202E in a scratch copy makes the first one fail). The rest of infra/tests and validate.sh need the Bicep compiler and were NOT RUN.
+- Secret scan over main..head: no leaks found (a planted canary token was refused first).
+
+WHAT IS NOT TOUCHED
+- No audit allow-list, workflow or audit test is touched or needed. web/scripts/audit-dev.mjs holds an EMPTY exception list and the audit only fails on high or critical, and this alert is medium, so it never blocked CI.
+- Not addressed: any other open alert. This is one package.
+- Nothing is deployed.
+
+Hosted CodeQL, dependency review and the required checks on this head are for the reviewer to read.

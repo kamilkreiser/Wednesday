@@ -1,0 +1,38 @@
+## BLUF
+
+Three customer-facing lines are reworded exactly as the product owner approved them, nine files change, and two new test rows pin the new wording. Words only: no layout, route, behaviour or data change. Nothing is deployed, and no integration with HP tools is claimed anywhere.
+
+Approval, quoted from the live board, 12 November 14:54:12: "a — Approve all three as proposed" (card hpsmpoc-three-words-proposal-ok-1112). Earlier word, 14:38: "Fix all three before deploying".
+
+## The three lines, before and after
+
+1. Walkthrough cover (step 1 title card)
+   - Before: "... reviewed findings, HP-aligned recommendations, customer reporting ..."
+   - After: "... reviewed findings, recommendations mapped to applicable HP capabilities, customer reporting ..."
+2. Next engagement page lead
+   - Before: "The logical next engagement (a paid assessment, a no-fee review or a managed review), chosen by rule, with the reason shown."
+   - After: "The logical next engagement for the area with the biggest gap, chosen by rule, with the reason shown."
+3. Home tools note (drawn once under each of the three "Tools / assets" headings)
+   - Before: "Tools named here are planned or subject to implementation until release validation is complete."
+   - After: "Integration with the tools named here is planned or subject to implementation until release validation is complete."
+
+The list item "SIEM integration if available" is unchanged.
+
+## Tests
+
+- Follow the Home note: PhaseFlow.test.tsx, PartnerDashboard.text.test.tsx (the whole-page text literals re-cut by program at the same 110-character width, after proving the rule reproduces the old literals line for line: 47 and 45 chunks).
+- Two new rows: the walkthrough title card lead (WalkthroughPanel.test.tsx) and the Next engagement lead (LoadFailed.states.test.tsx).
+- Hygiene: tiers row renamed to match its lead; the phases-caveat row moved inside its describe block; two comments say "Applicable HP solutions".
+- Red first: run against main's product code, exactly 5 tests fail (the Home note row, the two whole-page text rows, the two new rows); the same files at this branch: 58 of 58 pass.
+
+## Counts (local runs on Node v24.21.0, on main 60d442e2)
+
+- Whole unit run: 292 files, 4238 passed, 0 failed (main: 4236 passed). Lost names 2 (the renamed tiers row and the moved phases-caveat row, each with a same-body successor), added 4.
+- lint (0 warnings), typecheck, build, dev audit, production audit (0 vulnerabilities) and the shard plan check all pass.
+- All 8 end-to-end shards pass whole at this branch (independent run).
+- Infra hidden-character test: 14 tests OK.
+- Rendered on the local mock build at 1280 and 390 wide: new wording found (Home note exactly 3 times), old wording absent; on main the reverse (builder's run).
+
+## Not done / not claimed
+
+Not deployed. The api jobs were not run (no api path changes and no api or infra test reads these files). No integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM) is built or shown as done.
