@@ -30,7 +30,7 @@ import argparse, json, os, re, sys, time, urllib.request, urllib.error
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATE = os.path.normpath(os.path.join(HERE, "..", "spark", "state"))
 URL = os.environ.get("SPARK_URL", "http://127.0.0.1:47788").rstrip("/")
-MODEL = os.environ.get("SPARK_MODEL", "deepseek-v4-flash-0731")
+MODEL = os.environ.get("SPARK_MODEL", "nemotron-3.5-super-vl")  # 2026-11-12 (was deepseek-v4-flash-0731)
 MAX_SENT_CHARS = int(os.environ.get("DIGEST_MAX_CHARS", "400000"))
 MAX_TOKENS = int(os.environ.get("DIGEST_MAX_TOKENS", "6000"))
 REQ_TIMEOUT = int(os.environ.get("DIGEST_TIMEOUT", "900"))
@@ -367,7 +367,7 @@ def call_spark(messages):
         return open(stub).read(), {"stub": True}, 0.0
     wait_for_box()
     body = {"model": MODEL, "messages": messages, "max_tokens": MAX_TOKENS, "temperature": 0, "stream": False,
-            "chat_template_kwargs": {"thinking": False}}
+            "chat_template_kwargs": {"thinking": False, "enable_thinking": False}}
     req = urllib.request.Request(URL + "/v1/chat/completions", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
     t0 = time.time()
     with urllib.request.urlopen(req, timeout=REQ_TIMEOUT) as r:

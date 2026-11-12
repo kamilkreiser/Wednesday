@@ -95,7 +95,7 @@ def main():
         "messages": [{"role": "system", "content": system}, {"role": "user", "content": user_content}],
         "max_tokens": max_tokens,
         "temperature": 0,
-        "chat_template_kwargs": {"thinking": think},
+        "chat_template_kwargs": {"thinking": think, "enable_thinking": think},  # both: V4 Flash reads thinking, Nemotron enable_thinking
     }
     try:
         load_at_start = subprocess.check_output(["sysctl", "-n", "vm.loadavg"], text=True).strip()

@@ -21,7 +21,7 @@ import argparse, json, os, re, subprocess, sys, time, urllib.request, urllib.err
 HERE = os.path.dirname(os.path.abspath(__file__))
 LOCK = os.path.normpath(os.path.join(HERE, "..", "spark", "state", "round.lock"))
 URL = os.environ.get("SPARK_URL", "http://127.0.0.1:47788").rstrip("/")
-MODEL = os.environ.get("SPARK_MODEL", "deepseek-v4-flash-0731")
+MODEL = os.environ.get("SPARK_MODEL", "nemotron-3.5-super-vl")  # 2026-11-12 (was deepseek-v4-flash-0731)
 THINK = os.environ.get("SPARK_THINK", "0") not in ("0", "", "false", "off")
 MAX_FILE_CHARS = int(os.environ.get("SPARK_REVIEW_MAX_FILE_CHARS", "120000"))
 SEV = {"Major", "Minor", "Note"}; VERD = {"GO", "GO WITH NOTES", "NO GO"}
@@ -157,7 +157,7 @@ def call(messages, max_tokens):
     Stops reading (closing the connection, which frees the box) as soon as detect_repetition fires."""
     wait_for_box()
     body = {"model": MODEL, "messages": messages, "max_tokens": max_tokens, "temperature": 0, "stream": True,
-            "stream_options": {"include_usage": True}, "chat_template_kwargs": {"thinking": THINK}}
+            "stream_options": {"include_usage": True}, "chat_template_kwargs": {"thinking": THINK, "enable_thinking": THINK}}
     req = urllib.request.Request(URL + "/v1/chat/completions", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
     t0 = time.time(); parts, fin, usage, rep, nchunks, last_chk = [], None, {}, None, 0, 0
     resp = urllib.request.urlopen(req, timeout=1800)

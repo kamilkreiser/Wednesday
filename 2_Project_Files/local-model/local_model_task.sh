@@ -80,7 +80,7 @@ case "${LM_BACKEND:-ollama}" in
   omlx) ;;   # 2026-10-08: handled below, AFTER the load rule (it runs on this Mac, like ollama)
   spark)
     SPARK_URL="${SPARK_URL:-http://127.0.0.1:47788}"
-    SPARK_MODEL="${SPARK_MODEL:-deepseek-v4-flash-0731}"
+    SPARK_MODEL="${SPARK_MODEL:-nemotron-3.5-super-vl}"  # 2026-11-12: Spark serves Nemotron (Kam 15:12 keep-if-better; was deepseek-v4-flash-0731)
     SPARK_MAX_TOKENS="${SPARK_MAX_TOKENS:-16384}"
     SPARK_THINK="${SPARK_THINK:-0}"
     HEALTH_OUT="$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "$SPARK_URL/health" 2>&1)"

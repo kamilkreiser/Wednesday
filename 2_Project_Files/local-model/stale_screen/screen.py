@@ -30,7 +30,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LM = os.path.normpath(os.path.join(HERE, ".."))
 SPARK_STATE = os.environ.get("SPARK_STATE_DIR") or os.path.join(LM, "spark", "state")
 URL = os.environ.get("SPARK_URL", "http://127.0.0.1:47788").rstrip("/")
-MODEL = os.environ.get("SPARK_MODEL", "deepseek-v4-flash-0731")
+MODEL = os.environ.get("SPARK_MODEL", "nemotron-3.5-super-vl")  # 2026-11-12 (was deepseek-v4-flash-0731)
 SECUURA = "/Volumes/DevMASTER/!CODING/Secuura/Blockchain"
 DEFAULT_REPO = SECUURA + "/2_Project_Files"
 DEFAULT_ENV = SECUURA + "/4_Credentials/.env"
@@ -199,7 +199,7 @@ def spark_call(key, prompt, max_tokens=500):
             raise RuntimeError("stub has no reply for %s" % key)
         return (r if isinstance(r, str) else json.dumps(r)), 0.0
     body = {"model": MODEL, "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}],
-            "max_tokens": max_tokens, "temperature": 0, "chat_template_kwargs": {"thinking": False}}
+            "max_tokens": max_tokens, "temperature": 0, "chat_template_kwargs": {"thinking": False, "enable_thinking": False}}
     req = urllib.request.Request(URL + "/v1/chat/completions", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
     t0 = time.time()
     with urllib.request.urlopen(req, timeout=600) as r:
