@@ -1,0 +1,63 @@
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS 441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`): **NOT run** (no local stack in this seat; see Test Evidence)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`): **NOT run** (no local stack in this seat)
+
+### PII review (KS 256 R15/R16)
+
+Not applicable: this PR deletes unused code and its tests and moves one test floor. No published OpenAPI spec, example value, fixture or seed data.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-657
+
+## Summary
+
+Kam's card `secuura-ks-657-dead-shared-cache-code-1106` = a (ruled 2026-11-06 14:59:30): "Delete the cache section; keep the types". Wednesday drew the file list (option A, ANSWER 2026-11-06 05:40:48Z, tier 1) and ruled the one edit outside the package (ANSWER 05:48:54Z). The ticket stays In Review: the card closes the decision, not the ticket.
+
+**Deleted** from `services/shared` (the service-utils package): `src/cache/` (5 files, 1,434 lines), `src/security/redis-security-store.ts` (417 lines; it imports `../cache/redis-client`, so the cache cannot go without it), the two re-exports that named them (`export * from './cache'` in `src/index.ts`, the store's export block in `src/security/index.ts`), and the six KS 1868 tests that pinned them (3 pin cache files, 3 pin the store; 32 cells), each named by file in the commit. **Kept:** `types/` (billing vendors it), `src/security/{audit,headers,rate-limiter,validation}.ts`, `src/utils/logger.ts`, the three validation tests. `package.json` and the lock are untouched, so `ioredis` stays declared and is now unused. `services/redis.ts` (outside `src/`, never compiled, no importers) is **not** deleted: the card did not reach it. No runtime behaviour changes: nothing imports the deleted code.
+
+**A floor moved on purpose (named for the gate).** `packages/shared/src/__tests__/ks1725-zod3-compat.test.ts` line 394, in the F2 cell, asserted that its walk over the product source of `services/` and `packages/` found more than 500 files, so the walker cannot go blind. The walk reads **506** files at develop `c5c26b2835df` and **500** after this change (both measured, by a temporary probe patch restored by sha256). Six deleted product files take it to equality, so the floor is now `toBeGreaterThan(494)`: the cell still fails once the walk loses six files, as before. It is the only edit outside `services/shared` (Wednesday, 05:48:54Z). The census is 268 of 268 before and after.
+
+**The card's "15 files".** The card said the cache section is 15 files. At the ticket's own date (PR 717 merged as `74a330fc0`) `src/` held exactly 15 files: 13 sources and 2 tests, that is the whole `src/` tree, not the cache section. Today `src/` holds 22 (13 and 9 tests); the cache section is 5 files, plus the store that imports it. Wednesday's audit and mine agree.
+
+**The frame of "nothing imports it".** Searched at develop `c5c26b2835df`, every tracked file, for a relative path into `services/shared/src` or the package name: no code import. The hits are notes and docs, the frontends' `../shared/src` (that is `frontend/shared`, another directory), and path strings in the zod census of `packages/shared` that name `validation.ts` and `audit.ts`, both kept. Of 37 Dockerfiles, 15 compose files and 17 workflows (and the bicep and build scripts), the only line that copies from `services/shared` is `services/billing/Dockerfile:47`, `COPY services/shared/types/`; `scripts/build-docker.sh:7` names the folder in a comment. Positive control: the same style of search finds billing's live `types/` import and that COPY line. **Outside the frame:** consumers outside this repository, and files that are not tracked.
+
+`Refs KS-657`. No deploy is owed: nothing runs this package.
+
+## Test Evidence
+
+**Touched (18 paths):** `services/shared/src/cache/*` (5 deleted), `src/security/redis-security-store.ts` (deleted), six `src/__tests__/ks1868-*` files (deleted), `src/index.ts` and `src/security/index.ts` (edited), the new test `src/__tests__/ks657-the-dead-cache-section-is-gone.test.ts` (7 cells), the one line in `packages/shared/src/__tests__/ks1725-zod3-compat.test.ts`, one docs fragment each under `Projects Documents/fragments/flow/` and `.../cheat/`.
+
+**Ran by Seat Z 4th** (2026-11-06, arm64 macOS 27.2, shared with other seats; **Node v26.8.1, not the LTS 24 line**):
+- New file at develop with the product untouched: 4 of 7 fail, every one by an `AssertionError` (the folder, the store and both re-exports are still there, and the store imports a path into the cache); the 3 controls pass. With the change: 7 of 7.
+- `services/shared` unit suite: 9 files / 45 cells at develop; 4 files / **20 cells, all pass**, three runs (45 minus the 32 deleted plus 7 new). `npm run build` in the package: exit 0 before and exit 0 after, and `dist` holds no cache or redis file.
+- **Billing**, which vendors `types/`: `npm run build` exit 0 and its suite 20 files / 377 cells, before and after. The package-lock and `package.json` of `services/shared` are untouched.
+- `packages/shared` zod census: 268 of 268 before, 268 of 268 after (with the floor above).
+- Planted regressions: **8 of 8 caught** (either re-export back, one cache file back, the store back, a kept security file deleted, `types/svs-types.ts` deleted, billing's COPY line altered, a kept file importing the deleted client); the four that break an import make `npm run build` exit 2. Each file restored by content and checked by sha256.
+- `tsc` on the package config: 0 errors; with the test files in the program: 0 errors (a planted type error was reported, TS2322). eslint `--max-warnings 0` on the 4 changed TypeScript files: clean (a planted file raised `no-constant-condition`). `docs-fragments.mjs check`: OK (a planted defect gave rc 1).
+- Push gates at the lock: the develop gate accepted (overlap 0); the overlap gate found no open PR on the 18 paths.
+- Pre-push preflight, verbatim from the hook (its leg 14 ran 117 of 117 shell suites, 0 failed; leg 16 reported 0 new type errors in 5 services):
+
+```
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+```
+
+**NOT run:** Schemathesis, Akto, Playwright, k6 (no local stack; the two acknowledgment boxes above are unticked). Node 24. Any Docker image build (billing was built with `tsc`, not as an image). Consumers outside this repository. `services/redis.ts` is left in place (a candidate for its own ticket).
+
+**Migrations and config:** none. **Deploy owed:** none.
