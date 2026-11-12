@@ -177,10 +177,10 @@ The Stamp's Hard stop slot (absolute AEDT, one clock). At it: push nothing unpro
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- MAIN (the 40-hex code main; the branch point and the value your Step 0 compares; c717ba1a945191ffa31f13320c19967a6cf7f15a at drafting): ____
-- LAUNCH WINDOW: ____
-- Hard stop (absolute AEDT, one clock): ____
-- Panes and live seats at the stamp: ____
+- STAMP: STAMPED 11:17:25 AEDT 2026-11-12 by Tuesday s271. Read whole: this kit (186 lines) and the drafter's returned summary (Q-1..Q-8). The product owner's word (10:51:13, live board): "please find attached additional feedback to the HP messaging. Please use these and deploy. If anything is not clear, please ask"; the map was sent to him at 11:0x; he has not written since on HPSM. **Tuesday's answers, all defaults:** Q-1 keep U+2192 in W12/W16 as the lines carry it today; Q-2 new test rows only for P6, W7/W11 and R2; Q-3 H6a's '. ' connector as written; Q-4 H6b HELD (NEEDS-SHARED parts.tsx); Q-5 P5a keeps its colon; Q-6 9900-9909 is yours (B1484/N122 is not live; lsof 0 at the stamp); Q-7 reuse seat id H160; Q-8 run BOTH SQL Server parts under emulation (hard stop set for it).
+- MAIN (the 40-hex code main; the branch point and the value your Step 0 compares; c717ba1a945191ffa31f13320c19967a6cf7f15a at drafting): c717ba1a945191ffa31f13320c19967a6cf7f15a
+- LAUNCH WINDOW: launch now (11:17:25) until 12:30; load1 9.23 at the stamp; open PRs 0; `b1535*` absent; ports 9900-9909 0 listeners. A parallel HPSM seat may launch beside you later (B1538, minimatch in `web/package*.json` only: none of your paths); an MPS gate and three seats run on other projects.
+- Hard stop (absolute AEDT, one clock): 17:30 AEDT 2026-11-12.
+- Panes and live seats at the stamp: %159 Datasec/MPS-M130, %156 Datasec/Security-Composer-C94, %153 Datasec/MPS-M129, %147 Datasec/NexusAI-N125; no HPSM pane.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 11:17:25 AEDT 2026-11-12 by Tuesday s271 (186 lines)
