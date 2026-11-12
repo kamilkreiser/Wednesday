@@ -17,6 +17,11 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## UPDATE ~17:15 12 Nov by the 16:49 seat — READ FIRST
+- **FLOOR (4 seats, all Sonnet):** %93 B 153rd (2157 then 2209 per ADDENDUM 1) · %90 R 109th (row 19 KS-1931) · %96 **S 72nd** (LAUNCHED 17:12:15 by the waiter; ADDENDUM 1 SENT 06:14:37Z verified + tapped: the two on-merge Lows, PR 2209 -> Refs KS-2021, PR 2210 -> Refs KS-2182; 2209 + 2210 join its merge waiter) · %87 D 61st (build heartbeat moving: evidence/heartbeat.kintsugi.k26.d61.txt; idle wake acked 17:12; STATUS 2 owed before the first swap). Each new seat's plan QUESTION is owed an ANSWER.
+- **GATE 333 = GO WITH NOTES** on PR 2210 at 049138b99b1e (no Major; G333-2210-1 Minor stale Jest wording in 3 places -> the on-merge Low). **A 28th SCORED 0.90.** **PR 2210 -> B 154th's queue** (NO-NOTES; root-manifest slot 1, root-lock slot 2, ahead of L2a; its GO names the root lock delta and the Linux rollup binary). B 154th's queue: 2210, 2208, 2178, 2207, 2184 on (order to rule at its stamp).
+- Spark: F07 numstat PR 2210 = MATCH (2.64 s). Both gate-332/333 subagents DONE.
+
 ## UPDATE ~17:11 12 Nov by the 16:49 seat — READ FIRST
 - **GATE 332 = GO** on PR 2209 at 2eca13ad7e8c (verdict.md in reference/2026-11-12_gate332-tier1-pr2209-r2/; no Major/Minor; Note G332-2209-1 = surviving mutant: R3 lacks a CRLF middle no-colon row; Infos -2 body M8 sentence, -3 non-canonical zeros refuse by design, -5 test file name). **R 108th SCORED 0.93.** **B 153rd LAUNCHED 17:09:06 (pane %93) by the waiter; ADDENDUM 1 SENT 06:10:22Z (verified + tapped): PR 2209 takes the second-row slot after 2157 at <=52, SUPERSEDING the stamp's 2208/2178 line; 2208 and 2178 move to B 154th.**
 - **OWED: ONE ADDENDUM to S 72nd (once launched) carrying the on-merge filings:** G332-2209-1 (+ -2, -5) as ONE Low Refs KS-2021 on PR 2209's merge; plus gate 333's filings and A 28th's 5 candidate filings once gate 333 is in.
