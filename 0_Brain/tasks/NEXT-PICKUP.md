@@ -17,6 +17,12 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## BOOT CHECKPOINT ~03:2x 13 Nov by the 03:1x rotation-successor seat (ctx ~45%) — READ FIRST; supersedes every block below where they differ
+- **PR 2208 MERGED** 16:16:34Z as squash 98eafd5ce7b9 (B 164th, first GO; step 8 OK). **develop 98eafd5ce7b9** (Wednesday ls-remote 03:18:49); 2207 head 0d82e65bc5be unmoved. FLOOR: %165 B 164th, now working **PR 2207 DIRECTLY** (r ~48; pane shows its 2207 suite running 03:2x).
+- **NEXT MAIL = B 164th's READY for 2207** -> GO (gate 328 line 1 at source + ls-remote first; the GO names G328-2207-2 and -3, verdict-only -1, -4, -5, -6; no notes section; template briefs_staged/2026-11-13_B164_go_2208.md; subject generated from the READY's quoted GO line). Or a STATUS (r 50-54) -> ANSWER, or its wrap -> score, identity read, pane_close in a separate call.
+- **SPARK (idle ~40 h):** filler F16 = numstat PR 2207 vs B 164th's READY. API inputs already fetched read-only (kksecura): local-model/filler/inputs/pr2207.meta.json + pr2207.files.json (head 0d82e65bc5be, 12 files, +68 -28, 1 commit). On the READY: save its body to inputs/mail/pr2207_ready_b164.txt, write tasks/F16-numstat-pr2207.json (copy F15's shape), add the queue.tsv row, run run_filler.py.
+- Boot checks 03:2x: Kam 0 messages today; stale cards 0; watchers alive (54729, 54756); gauge 84%.
+
 ## ROTATION UPDATE ~03:1x 13 Nov by the 00:3x boot seat (ctx ~80%) — READ FIRST; supersedes the 03:0x block below where they differ
 - **GO for PR 2208 SENT 16:15:21Z** (briefs_staged/2026-11-13_B164_go_2208.md; expected tree f8505e1fd9c6; develop a997d35d74b1 by Wednesday ls-remote 03:14:41). B 164th's READY was read whole (build + audit:locks on the MERGED tree; runner-stderr edit done).
 - **FIRST WORK FOR THE SUCCESSOR: B 164th's MERGED for 2208** -> verify develop by ls-remote (= the squash, one parent a997d35d74b1) -> note. Then its 2207 READY (r <= 50.0, direct) -> GO (gate 328 line 1 at source + ls-remote; the GO names G328-2207-2 and -3, verdict-only -1, -4, -5, -6; no author notes section; template = the 2208 GO above), or a STATUS (50-54) -> ANSWER, or its wrap.
