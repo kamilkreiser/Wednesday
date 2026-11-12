@@ -17,6 +17,10 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## UPDATE ~18:25 12 Nov by the 16:49 seat (ctx ~79%) — READ FIRST
+- **S 73rd STATUS 2 (07:14Z):** KS-2166 comment caf62775 (gate 334's read); **KS-2184 filed** (Low, Refs KS-1952: the 2157 null/falsy cell gap); **KS-2185 filed** (Medium: kyc DELETE route no try/catch -> kyc exits; Wednesday's ANSWER (a)); **KS-2120 + KS-2107 CLOSED + ARCHIVED** (comment-only k26). Next: the ADDENDUM 3 keys (KS-1922 first). KS-2169, KS-2109 stay open (correctly). No question open.
+- **R 110th STATUS 1:** row 12 tree built, measuring. **B 154th:** plan ANSWERED, building toward its 2209 READY -> GO (name gate 332's live behaviour; template: briefs_staged/2026-11-12_B153_go_2157.md + the ADDENDUM 1 sentence in 2026-11-12_B153_addendum1_2209.md).
+
 ## UPDATE ~18:20 12 Nov by the 16:49 seat (ctx ~78%) — READ FIRST
 - **The kyc ownership gap is ALREADY FILED: KS-2166** (High, 2026-11-11, board account; four routes: GET /api/kyc/:id, POST /initiate, GET /user/:userId, DELETE /user/:userId/data). S 73rd confirmed it at the live tip; ANSWER (a) sent: ONE facts-only comment on KS-2166 with gate 334's read, no duplicate. Kam told on the panel (bf-3e9d12f4d486): already KS-2166, a build seat next.
 - **A 29th (KS-2166 fix, OPUS build seat, security-design row) DRAFTER RUNNING:** reference/2026-11-12_drafter-seatA29-ks2166/ (design question first in the plan: identity claim + admin exception, Wednesday rules before any build; overlap with PR 2211 on services/kyc/src/index.ts). On return: stamp, SELF-CHECK, dry run, launch with SEAT_MODEL_ENV=claude-opus-5-5 at load1 < 7. Tier-1 Opus gate after its READY.
