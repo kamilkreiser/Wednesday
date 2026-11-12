@@ -17,6 +17,14 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
+## ROTATION HANDOVER ~19:47 12 Nov by the 18:23 seat (ctx ~77%) — READ FIRST; supersedes every block below where they differ
+- **develop fa2d60ca8cee** (PR 2211's squash; merges this seat: 2209, 2211). No open Kam question. k26 notice DELIVERED (card marked).
+- **FLOOR (3 seats):** %108 **A 29th** (Opus, KS-2166; push REFUSED by hook legs 14+16 = missing auth/api-gateway installs in its tree; ANSWER sent: clone lock-equal node_modules, prove leg 16 = 0 new, relaunch same head eb7315988de5; then READY -> TIER-1 OPUS GATE) · %120 **B 156th** (Sonnet, merge: PR 2210 FIRST (gate 333 GWN), 2213 second at <=56, then 2212 by ADDENDUM 1 (gate 337 GWN, linear two-commit); plan QUESTION owed an ANSWER) · %114 **S 74th** (board, at its stop line; merge waiter files: 2210 -> Low Refs KS-2182; 2213 -> ONE comment on KS-2173; 2212 -> Low Refs KS-1923 (ADDENDUM 3); KS-2188 + KS-2187 filed, KS-1971 reopened).
+- **DRAFTER RUNNING (dies with rotation):** R 111th (reference/2026-11-12_drafter-seatR111/: row 46 KS-1053 test-only). If brief_R111.md is absent, re-commission from its commission.md; then stamp (floor from tmux), dry run, launch Sonnet at load1 < 7.
+- **SCORES this seat:** S 73rd 0.92, B 154th 0.92, V 27th 0.93, B 155th 0.92, R 110th 0.86. Gates this seat: 335 NO GO -> 337 GWN (2212), 336 GWN (2213).
+- **NEW MECHANISM:** fleet/hooks/pretooluse_cockpit_verb.sh (refuses an invented cockpit.sh verb; 6/6; live). Ledger this seat: 2 rows.
+- **OWED:** Spark idle (feed numstat for each READY via local-model/filler/ + drain.sh); fleet_ack collector stale since 01:13Z; G331-2209-5 digest.py rc-1 bug; INDEX refresh; weekly consolidation lapsed; yesterday's note and INDEX not read this boot.
+
 ## CHECKPOINT ~19:25 12 Nov by the 18:23 seat (ctx ~72%) — READ FIRST; supersedes every block below where they differ
 - **develop ed5b86ea20ae** (PR 2211 GO SENT 08:21:06Z: head c0e112d6bc3e, expected tree 60778aadf52b; B 155th's MERGED owed: verify step 8, then tell nobody — A 29th's waiter sees it). No open Kam question. **k26 notice DELIVERED** (KS-772 8e7a3f94 + KS-485 16e99ae8; card marked).
 - **FLOOR:** %108 A 29th (KS-2166 local, pushes after 2211 merges + ks1931 repair) · %102 R 110th (PR 2212 round 2 at 3a4ca8f63c57 -> GATE 337; ceiling 70) · %114 S 74th (holding: merge waiter for filings incl. 2213 -> one comment on KS-2173, 2211 -> one Low Refs KS-1931 for G334-2211-3) · %117 B 155th (merging 2211, then 2210 at <=50 / 2178 at <=54, then 2213 by ADDENDUM 1).

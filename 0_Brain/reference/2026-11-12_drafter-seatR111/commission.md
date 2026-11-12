@@ -1,0 +1,7 @@
+# Drafter commission: Seat R 111th (Secuura/Blockchain-R, RAISE seat), successor to Seat R 110th (wrapped 08:21Z at 58.8; scored 0.86; PRs 2212 GWN round 2 and 2213 GWN). Wednesday (18:23 seat), 2026-11-12.
+
+METHOD: copy-and-change of R 110th's stamped brief /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-12_seatR110_raise.md (find it; if the name differs, the newest 2026-11-12_seatR110* file) and every 2026-11-12_R110_* mail beside it, as a DELTA. Read R 110th's record /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-12_seatR-110th/ (HANDOVER FINAL block first) and its wrap saved at r110_wrap.txt in THIS folder.
+- FACTS: develop = fa2d60ca8ceec35299bf934c9c8d2bf74a330c8d (PR 2211's squash). RE-MEASURE.
+- QUEUE: (1) row 46 = KS-1053 (test-only; repair worktrees/s-r101-ks1053 first: services/auth node_modules 245 of 249 per R 110th). (2) Then the next held Spark/READY rows R 110th's HANDOVER names, if any; otherwise propose in notes.md the next test-only or one-file rows from the board (do not invent; cite each at source). PRs 2212 and 2213 are DONE for the raise lane (both gated, queued for merge seats): do NOT touch their branches.
+- Tier per row by its surface; the READY names it. Filings are the board seat's.
+Write only into /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-12_drafter-seatR111/; OUTPUT brief_R111.md (full brief, one blank STAMP block, PROVENANCE, RULED BY KAM section) + notes.md.
