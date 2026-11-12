@@ -91,14 +91,14 @@ Step and part, lock state (holder text or "mine"), load1, the last command, the 
 
 ## Stamp
 Tuesday fills each slot at launch; one word, clock or answer each. The unstamped copy reads the slot count by `grep -o ... | wc -l` (the slots below plus the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main full sha; `c717ba1a945191ffa31f13320c19967a6cf7f15a` at drafting) and the two web blobs (`81393fd77c36489b3e8b17a13bde28e225350fb4` lock, `2e7ed8b306e8a9a8d8a9ce507c4129dc6444d2c8` manifest at drafting): ____
-- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting): ____
-- Launch authority (the product owner's 2026-11-12 10:55 ruling on re-pushing the dependency-bot updates as our own) and hard stop (READY target 240 minutes after your Step 0; HARD STOP clock): ____
-- SLOTS (which HPSM-POC panes are live and the paths their kits grant; whether B1535 is live): ____
-- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): ____
-- GATE-ROUND (whether a gate follows, its tier, the class and the round it counts): ____
-- Q-answers (Q-1 to Q-6 of the drafter report): ____
+- STAMP: STAMPED 11:35 AEDT 2026-11-12 by Tuesday s272 (s271's successor); this kit read whole by Tuesday s272 (105 lines) and the drafter report's Q-1..Q-6.
+- LAUNCH WINDOW: launch at the first cool load (launch_when_cool) until 13:30; HPSM beside you: H160 (B1535, messaging); MPS M129/M130/M131, NexusAI N125, Composer C94 on other projects.
+- BASE (code main full sha; `c717ba1a945191ffa31f13320c19967a6cf7f15a` at drafting) and the two web blobs (`81393fd77c36489b3e8b17a13bde28e225350fb4` lock, `2e7ed8b306e8a9a8d8a9ce507c4129dc6444d2c8` manifest at drafting): c717ba1a945191ffa31f13320c19967a6cf7f15a; lock 81393fd77c36489b3e8b17a13bde28e225350fb4; manifest 2e7ed8b306e8a9a8d8a9ce507c4129dc6444d2c8 (all three read at source by Tuesday s272 via gh api, equal to drafting). Main may move when B1535 lands (web/src/** etc., none of yours): apply A MOVED MAIN.
+- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting): b1538* absent (matching-refs length 0; control b1519 length 1); open PRs: 0; open Dependabot alerts: [9].
+- Launch authority (the product owner's 2026-11-12 10:55 ruling on re-pushing the dependency-bot updates as our own) and hard stop (READY target 240 minutes after your Step 0; HARD STOP clock): the product owner's 2026-11-12 10:55 ruling, card datasec-bot-pr-scan-back-1112 option a ('Re-push as our own, on all four projects (recommended)'; detail: the MPS and HPSM minimatch alerts each get a small lane), carried by Tuesday; READY target Step 0 + 240 min; HARD STOP 17:30 AEDT 2026-11-12.
+- SLOTS (which HPSM-POC panes are live and the paths their kits grant; whether B1535 is live): one HPSM pane live: Datasec/HPSM-H160 (B1535, messaging; owns web/src/** product files and tests, two web/e2e specs, ReportModelBuilder.cs per its kit); it grants neither web/package.json nor web/package-lock.json.
+- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): set by program from git -C '<project>/2_Project_Files' --no-optional-locks config --local --get user.name / user.email (both non-empty at the stamp); never typed.
+- GATE-ROUND (whether a gate follows, its tier, the class and the round it counts): yes: a G2 gate after your READY, class dependency-override, round 1 of 2.
+- Q-answers (Q-1 to Q-6 of the drafter report): all defaults: Q-1 pin exactly 11.0.1; Q-2 no Jira by the seat, ticket-text.txt for Tuesday; Q-3 an estree release admitting minimatch 11 = STOP; Q-4 base re-run only for shards red at head; Q-5 the no-change control rewriting the lock = STOP with both blobs; Q-6 the braces-2026-11-30 premise is stale (Tuesday's own pickup line is voided), say so in STATUS.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 11:35 AEDT 2026-11-12 by Tuesday s272 (105 lines)
