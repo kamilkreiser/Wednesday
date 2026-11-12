@@ -1,0 +1,90 @@
+== A. lint: a clean tree passes, every rule refuses its own planted defect
+  ok   A1 a clean tree: lint clean, rc 0
+  ok   A1b both pages current, counted 2 of 2
+  ok   A2 check --committed on a current tree: rc 0
+  ok   A3 a badly named fragment is refused
+  ok   A4 a stray file in the fragment directory is refused
+  ok   A5 an unbalanced fragment is refused, naming the tag
+  ok   A6 two entries in one fragment are refused
+  ok   A7 a new Flow heading without the number token is refused
+  ok   A8 a literal section number in a new h3 is refused
+  ok   A9 a reference to a fragment that does not exist is refused
+  ok   A10 a number token in a legacy file is refused
+  ok   A11 a number token in a Cheat fragment is refused
+  ok   A12 a carriage return is refused
+  ok   A13 a fragment without a trailing newline is refused
+  ok   A14 a gap in the legacy numbering is refused
+  ok   A15 a render the page checker rejects is refused, with its finding
+  ok   A16 content above the h2 is refused
+  ok   A17 a comment and a wrapper line above the h2 are accepted (positive control)
+== B. numbering follows the commit that first added a fragment
+  ok   B1 two commits: the first-added fragment is 4 though its name sorts last; a later edit does not move it
+  ok   B2 one commit adds both: ties go by file name
+  ok   B3 a not-yet-committed fragment sorts last
+  ok   B4 merge-in shape: the branch's own fragment first, the one merged in after
+  ok   B9 a fragment deleted and added again keeps its FIRST-add place
+  ok   B10 clock skew and a side branch do not reorder the chain: the fragment added first is still 4
+  ok   B5 a reference resolves to the other fragment's number, and <!--n--> to the entry's own
+  ok   B6 a shallow clone is refused, not guessed at (rc 2)
+  FAIL B7 a tree that is not a git checkout is refused (rc 2)
+       rc=0 (want 2), want text: not a git work tree; output: flow: committed page is lagging, 2 of 3 entries rendered (the refresh step brings it current) cheat: committed page is current (1 of 1 entries rendered) docs-fragments: flow 2 legacy + 1 new, cheat 1 legacy + 0 new; lint clean, render passe
+  ok   B8 build --out leaves the committed page untouched
+== C. the committed page may lag; an outside hand edit is advisory (ruling A1)
+  ok   C1 lagging page: rc 0, says how far
+  ok   C1b the same tree under --committed is refused
+  ok   C2 a hand-appended entry: ADVISORY naming adopt, rc 0 (the push is not stopped)
+  ok   C2b the same page under --committed: rc 1
+  ok   C3 an edit inside the rendered range: ADVISORY with the line, rc 0
+  ok   C3b the same page under --committed: rc 1
+  ok   C4 a hand-edited head is advisory too (the page no longer starts with it), at line 3
+  ok   C5 a same-length edit of the head is seen, not read as current
+== D. build: only on the develop you read, never over content the fragments do not hold
+  ok   D1 build with neither --base nor --out is refused (rc 2)
+  ok   D2 a short --base is refused (rc 2)
+  ok   D3 build on a base containing the sha rewrites both pages
+  ok   D3b after build, check --committed is current (rc 0)
+  ok   D3c the new entries are in both committed pages
+  ok   D4 a second build is a no-op
+  ok   D5 a base that is not an ancestor of HEAD is refused (rc 2)
+  ok   D6 a sha this checkout does not have is refused (rc 2)
+  ok   D7 build will not overwrite a hand-appended entry (rc 1)
+  ok   D7b the page is byte-for-byte as it was
+  ok   D8 build with a lint finding writes nothing (rc 1)
+  ok   D8b the page is untouched
+== E. adopt: a hand-appended entry becomes a fragment and the rebuilt page is byte-equal
+  ok   E1 adopt a hand-appended Flow entry: names the file and the number it renders as
+  ok   E1b the fragment is KS-42-hand.html
+  ok   E1c the h2 and the h3 carry the token, not the literal 4
+  ok   E1d after adopt and build the page is byte-equal to the hand-edited one
+  ok   E1e and --committed is current
+  ok   E2 adopt a hand-appended Cheat entry (unnumbered)
+  ok   E2b the Cheat page round-trips byte-equal
+  ok   E3 adopt on a current page has nothing to do (rc 0)
+  ok   E4 adopt refuses an edit inside the rendered range: a hand step (rc 1)
+  ok   E5 adopt --from-ref reads the page from a commit while the working tree is current
+  ok   E9 a --from-ref that looks like an option is refused (rc 2)
+  ok   E6 an entry that is already a fragment (same name, same content) is skipped
+  ok   E6b no second file was written
+  ok   E7 the same file name with a different entry is refused, nothing written (rc 1)
+  ok   E7b still one KS-42 file
+  ok   E7c the same heading with other content is an edit, a hand step (rc 1)
+  ok   E8 with a pending fragment ahead of it, adopt says the entry will renumber
+  ok   E10 control: without --against a stale PR page is read against today's render and refused (rc 1)
+  ok   E10b with --against only the PR's own appended entry is taken (rc 0)
+  ok   E10c the fragment is KS-42-hand.html
+  ok   E11 a PR that rewrites existing page text is refused: a hand step (rc 1)
+  ok   E11b nothing was written
+  ok   E15 a same-length edit of old text plus an appended entry is refused, not half-adopted (rc 1)
+  ok   E15b nothing was written
+  ok   E12 an entry already in the legacy set (same text, another number) is skipped
+  ok   E12b no file was written
+  ok   E13 the same heading with different text is refused, nothing written (rc 1)
+  ok   E14 an --against that looks like an option is refused (rc 2)
+== F. the real fragment tree
+  ok   F1 the frozen legacy part renders to the pinned pages (Flow and Cheat sha256 equal)
+  ok   F2 control: editing one legacy file changes the legacy hash
+  ok   F2b the file is restored by content (sha256 equal)
+  ok   F3 the legacy files are 117 (Flow) and 112 (Cheat)
+  ok   F4 the real fragment tree lints clean and its render passes html_docs_check
+
+docs_fragments: 80 passed, 1 failed, 0 skipped

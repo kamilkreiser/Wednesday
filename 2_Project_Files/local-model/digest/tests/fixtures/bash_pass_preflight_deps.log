@@ -1,0 +1,84 @@
+ok   every bare import in scripts/audit/*.mjs is declared in its package.json
+ok   scripts/* is NOT in the root workspaces list
+ok   deps-present.sh self-test passes
+ok   a partial install (root present, nested absent) is refused
+ok   a complete install is accepted
+ok   preflight runs deps-present.sh BEFORE the drift check
+ok   pre-push hook sources slot-target.sh BEFORE running preflight
+ok   hook makes preflight probe slot 1's gateway
+ok   hook makes preflight probe slot 2's gateway
+ok   hook makes preflight probe slot 3's gateway
+ok   hook makes preflight probe slot 4's gateway
+ok   nginx /health block exists (guards against a vacuous pass)
+ok   nginx /health JSON hardcodes no port
+ok   /health advertises at least one route (guards a vacuous pass)
+ok   every route in /health has a location block (KS-641 /demo-api/ class)
+ok   the allocation yielded platform-k ports to check (non-vacuity)
+ok   PORT-REGISTRY.md cites K6_WEB_DASHBOARD_PORT's real base (5665)
+ok   PORT-REGISTRY.md cites CARDANO_MOCK_PORT's real base (6090)
+ok   PORT-REGISTRY.md cites CARDANO_N2N_PORT's real base (6091)
+ok   PORT-REGISTRY.md cites YACI_STORE_PORT's real base (6092)
+ok   PORT-REGISTRY.md cites CARDANO_ADMIN_PORT's real base (6093)
+ok   PORT-REGISTRY.md cites CARDANO_SUBMIT_PORT's real base (6094)
+ok   PORT-REGISTRY.md cites REDIS_EXTERNAL_PORT's real base (6379)
+ok   PORT-REGISTRY.md cites POSTGRES_EXTERNAL_PORT's real base (6432)
+ok   PORT-REGISTRY.md cites PGBOUNCER_PORT's real base (6433)
+ok   PORT-REGISTRY.md cites WEBSITE_PORT's real base (6881)
+ok   PORT-REGISTRY.md cites GATEWAY_PORT's real base (6882)
+ok   PORT-REGISTRY.md cites TOKENOMICS_PORT's real base (8881)
+ok   PORT-REGISTRY.md cites AKTO_MONGO_EXPRESS_PORT's real base (9490)
+ok   PORT-REGISTRY.md cites AKTO_DASHBOARD_PORT's real base (9091)
+ok   PORT-REGISTRY.md cites PW_REPORT_PORT's real base (9324)
+ok   PORT-REGISTRY.md cites OLLAMA_PORT's real base (11434)
+ok   PORT-REGISTRY.md cites AKTO_MONGO_PORT's real base (27017)
+ok   PORT-REGISTRY.md no longer binds mongo-express on host 8081
+ok   preflight installs scripts/audit deps BEFORE audit-locks.mjs
+ok   an un-installable scripts/audit is a SKIP, not a FAIL
+ok   scripts/audit has its own lockfile
+ok   that lock pins semver
+ok   lock root name matches package.json (lock is in sync)
+ok   declared semver range is satisfied by the pinned version
+ok   DEV-PROCESS records the Akto budgets as unbaselined here
+ok   leg 1 FAILS the run when deps-present exits non-zero
+ok   leg 1 lets the run proceed when deps-present exits 0
+ok   leg 14: suites green -> preflight passes
+ok   leg 14: a RED suite fails the push, after de-slotting
+ok   leg 14: an empty de-slot measurement REFUSES rather than running polluted
+ok   F-925-3: a step header whose denominator disagrees with TOTAL_LEGS ABORTS the run, naming the header
+ok   leg 14: the refusal SHORT-CIRCUITS — a red suite present, still not run
+ok   KS-1638: the hook-stub fixture still reaches a green leg 14
+ok   KS-1638: leg 14 names the hook controls it strips, and ALLOW_FORCE is among them
+ok   KS-1643 nit 1: the strip line names EXACTLY the derived set (not merely contains it)
+ok   KS-1638: a hook with no derivable control REFUSES rather than running leaked
+ok   KS-1638: that refusal SHORT-CIRCUITS — a red suite present, still not run
+ok   KS-1643: the hook-control refusal still classifies as before
+ok   KS-1643 Minor 1: the refusal WITHHOLDS the run — the stub suite never printed
+ok   KS-1643 CONTROL: on the green path the stub suite DOES print (the oracle fires)
+ok   KS-1643: ALLOW_FORCE=1 in the caller's environment still reaches a green leg 14
+ok   KS-1643 Minor 2: the suite does NOT see ALLOW_FORCE — the strip HAPPENS
+ok   KS-1643 MUTANT M3: announcing without stripping LEAKS the control into the suite
+ok   KS-1643 MUTANT M3: and it still announces, which is why no prior cell caught it
+ok   KS-1746: a hook with a COMMENTED control beside its live one still reaches a green leg 14
+ok   KS-1746 item 5: the derived set is EXACTLY ALLOW_FORCE — the commented FAKE is filtered out
+ok   KS-1746 item 5: FAKE is named NOWHERE in the strip line
+ok   KS-1746 item 5: the suite still SEES FAKE=1 — a commented control is never stripped
+ok   KS-1746 CONTROL: ALLOW_FORCE is stripped in the same run (the live read IS honoured)
+ok   KS-1746 CONTROL: the commented-hook arm is still green with FAKE unset
+ok   KS-1746 CONTROL: with FAKE unset the probe reads <unset> either way — why the arm above SETS it
+ok   KS-1756: a hook with NO derivable control is refused (the empty-set arm)
+ok   KS-1756: ...and the set it names is EMPTY, which is what makes this the -z arm
+ok   KS-1756: a control named only in a TRAILING comment is still derived, and refused for lacking ALLOW_FORCE
+ok   KS-1756: ...and the set it names is [NAME], which is what makes this the non-empty arm
+ok   KS-1756: that refusal also WITHHOLDS the run — the stub suite never printed
+ok   KS-1756 CONTROL: the empty arm's output does not carry [NAME]
+ok   KS-1756 CONTROL: the trailing-comment arm's output is not the empty set
+ok   deps-present says it is NOT spec drift
+ok   deps-present names the actual fix (npm ci)
+ok   deps-present names WHERE to run it (Blockchain/Dev)
+ok   KS-469 STALE classifier still present
+ok   real spec drift still has its own FAIL branch
+ok   KS-376 esbuild SKIP branch still present
+ok   precondition precedes the STALE branch
+ok   precondition precedes the drift catch-all
+
+preflight_deps: 82 passed, 0 failed
