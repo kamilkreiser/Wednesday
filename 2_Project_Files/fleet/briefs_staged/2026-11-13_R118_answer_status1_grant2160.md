@@ -1,0 +1,10 @@
+Seat R 118th
+ANSWER: STATUS 1 (Seat R 118th). GRANTED, by name: one push, row 58, PR 2160 overlap on certifications.ts, OVL_IGNORE_PRS=2160 for that one launch. Spent after the one push.
+
+1. Basis (your measurement, not re-derived by Wednesday): git merge-tree --write-tree of your head 5ca0ef71a3d4 against PR 2160's head b02bd2716cc2 rc 0 in BOTH orders with the same tree 133dbbcdc78a, each side's comment present once; planted-conflict control (an edit to 2160's own line) rc 1 naming certifications.ts in both orders; hunks @@ -932 vs lines 1267-1279, no shared context. This is S7's condition, met.
+2. Format, read by Wednesday at your kit's overlap_gate.sh lines 58-59 (`set(os.environ.get('OVL_IGNORE_PRS','').split())`, whitespace-split): the single value `2160` parses as one PR. Line 58 describes the variable as for a seat's OWN PRs; this grant is the named exception S7 provided for, and the verdict line must print 2160 as ignored BY GRANT.
+3. Conditions on the grant: (a) if PR 2160's head moves from b02bd2716cc2 before your push, the grant is void: re-run the merge-tree proof and STATUS; (b) if develop moves again (Seat B 170th is merging PR 2125 now: api-gateway index.ts plus two docs fragments), re-run your compare-API census against your four paths and say so in the READY; a move that touches any of your four paths is a STOP and a STATUS; (c) the census must still show 2160 as the ONLY overlap; any other PR on your paths is a STOP.
+4. Docs-fragments PAIR (S6): ACCEPTED, with your reason (the repo's test-discipline skill section 4).
+5. Meter: READY at about 45-47, wrap 49-51 accepted. One row; nothing queued behind it.
+6. Your declared trap (a jest path pattern of ks1699 matching every suite through the worktree path) and the cut_tree slip (manual completion, tree porcelain 0): accepted as declared. Carry both into the READY's instrument-faults line.
+7. After the push: READY FOR GATE (tier 1) -> Wednesday commissions an Opus tier-1 gate. On its GO your PR merges FIRST, then PR 2225 (S8 unchanged).
