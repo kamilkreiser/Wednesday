@@ -1,0 +1,20 @@
+=========== [QUESTION] 2026-11-12T07:10 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] QUESTION: ownership filing, KS-2166 already holds it (
+[Secuura/Blockchain-S -> Wednesday] QUESTION: ownership filing, KS-2166 already holds it (Seat S 73rd)
+Seat S 73rd
+
+QUESTION: ownership filing (ADDENDUM 4 item 1). Written 07:10:08Z.
+
+## Context
+- I read both routes at the live develop tip acee38da1ce7 (ls-remote at 07:04Z). proxy.ts lines 1161 to 1164: /api/kyc behind authenticateToken(true) and the proxy, nothing else. kyc index.ts: line 600 app.use('/api', jwtAuthenticate()) (the gate wrote 602); GET /api/kyc/user/:userId at line 820 and DELETE /api/kyc/user/:userId/data at line 1223 pass req.params.userId straight to the database call with no comparison to the caller; no app.param, no async wrapper in that file. A search of the 38 non-test api-gateway source files (2 GraphQL batches) found no ownership guard. Nothing exercised.
+- The board already holds this defect. KS-2166 (Backlog, priority High, board account, created 2026-11-11, 0 comments): "kyc: four routes never compare the signed-in caller with the user they act on (read, list, delete, initiate)". I read it whole. It names the same two routes at the same lines (820 and 1223 at develop c1f3d66e7720; unchanged at this tip), the same gate lines (kyc 600, proxy 1161 to 1164), and two more routes (GET /api/kyc/:id at 803, POST /api/kyc/initiate at 705). Its ask is the check plus one test per route. It says it was read from code and not run against a stack, as the gate did. KS-1882 (Backlog, priority Medium) is adjacent: different kyc routes, and its text says these four are not on it.
+- Search: 12 terms in one background run; at this mail the first 7 are done (kyc+ownership, kyc+IDOR, kyc/user/:userId, kyc+authorization, kyc+another user, dbDeleteUserData, authenticateToken(true)+kyc). The positive control held (msgpackr hits KS-1379) and the random-token control read 0.
+
+## Question
+ADDENDUM 4 says a near hit is a QUESTION, so I file nothing for the ownership gap. Which: (a) no new ticket, and ONE facts-only comment on KS-2166 giving gate 334's independent read (finding G334-2211-4, found while reviewing PR 2211 for KS-1931) with the lines at acee38da1ce7 and what is not measured (no request made; authenticateToken and jwtAuthenticate bodies not read); (b) no new ticket and no comment, since KS-2166 already says it; or (c) file the new High Bug anyway. I recommend (a): it adds a second reader's confirmation for the build seat without a duplicate on the board.
+
+## Meanwhile
+Continuing with the Medium (the DELETE route has no try/catch): the five remaining search terms for it are still running; I file it only if they are clean, under ADDENDUM 4 item 1's licence line. Then the PR 2157 Low (its search is starting now). No write on KS-2166 until your ANSWER.
+
+## Needed-by
+None: the Medium and the PR 2157 Low do not wait on this.
+
