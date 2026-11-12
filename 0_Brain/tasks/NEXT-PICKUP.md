@@ -17,7 +17,12 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01; KS-961 carries his ruling that billing is the only unblock).
 
-## BOOT CHECKPOINT ~20:3x 12 Nov by the 20:2x seat (ctx ~50%) — READ FIRST; supersedes every block below where they differ
+## CHECKPOINT ~20:4x 12 Nov by the 20:2x seat (ctx 50%) — READ FIRST; supersedes every block below where they differ
+- **FLOOR (3 seats):** %126 **B 157th** (Sonnet, merge: 2213 -> 2212 -> 2214 -> 2215, all NO-NOTES; brief briefs_staged/2026-11-12_seatB157_merge.md; plan QUESTION owed an ANSWER; rung 5 not yet seen at 20:40) · %129 **R 112th** (Sonnet, raise: KS-2174 six sites tier 2, then KS-2029 at <=48; brief briefs_staged/2026-11-12_seatR112_raise.md; plan QUESTION owed; rung 5 not yet seen) · %114 **S 74th** (holding on its merge waiter at 54.7; S 75th DRAFTER owed on its wrap).
+- **Scores this seat:** A 29th 0.92, R 111th 0.91. Gate 339 = GWN on PR 2215 (in B 157th's queue). KS-2174 part 2 (userRepo 1764/1773 + ks949 F2 cells) carried until PR 2215 merges.
+- No subagent running. No open Kam question.
+
+## BOOT CHECKPOINT ~20:3x 12 Nov by the 20:2x seat (ctx ~50%) — superseded by the block above where they differ
 - **develop eab5ac6bff8d** (Wednesday ls-remote 20:25:00 and ~20:28). No open Kam question; panel receipt bf-e37aba16de8a.
 - **A 29th DONE:** STATUS 4 (PR 2214 body edit read back equal, updatedAt 09:21:51Z, head eb7315988de5) -> SCORED 0.92, pane %108 CLOSED. Spark F11 numstat PR 2214 = MATCH (reference/2026-11-12_spark-filler-f11/report.md).
 - **RUNNING SUBAGENTS (die with a rotation; re-commission from commission.md if output absent):** B 157th DRAFTER (reference/2026-11-12_drafter-seatB157/; queue 2213 -> 2212 -> 2214 -> 2178 -> 2208 -> 2207) -> on return: stamp (floor from tmux), dry run, launch Sonnet at ROOM. GATE 339 (Sonnet, tier 2, PR 2215 KS-1053 at ba847c2ef9f9; reference/2026-11-12_gate339-tier2-pr2215/) -> on GO/GWN: score R 111th (after its wrap), PR 2215 into B 157th's queue by ADDENDUM (tier 2, never batched with tier 1).

@@ -1,0 +1,72 @@
+=========== [INBOUND] 2026-11-12T09:02 | Secuura/Blockchain-A | [Secuura/Blockchain-A -> Wednesday] READY FOR GATE: KS-2166 PR 2214 head eb7315988de5 (Sea
+[Secuura/Blockchain-A -> Wednesday] READY FOR GATE: KS-2166 PR 2214 head eb7315988de5 (Seat A 29th)
+Seat A 29th
+
+READY FOR GATE (Seat A 29th), 09:02:30Z. Meter 46.1 of 1M. Gate G1, tier 1, Opus.
+
+THE RULE AND THE ONE HELPER:
+- GET /api/kyc/:id: the subject (verification.userId, after the lookup) or a platform role.
+- GET /api/kyc/user/:userId: the subject or a platform role.
+- DELETE /api/kyc/user/:userId/data: the subject only.
+- POST /api/kyc/initiate: the subject named by the BODY userId only.
+- Helper: callerMayActOn(req, subjectId, platformMayRead), beside foldedUserId in services/kyc/src/index.ts. Caller = req.user.userId; both ids non-empty strings, equal after an ASCII-only fold; the platform role is the shared isPlatformRole (SYSTEM_ADMIN, SUPER_ADMIN), passed only on the two reads.
+- Refusal: 403 { success:false, error:{ code:'FORBIDDEN', message:'Forbidden' } }. On the list, DELETE and initiate it comes before any statement (initiate after the body parse); on GET /:id it follows the lookup (existence-oracle trade-off named in the PR body). Rulings: your ANSWER 07:37:17Z, ADDENDUM 1 07:46:45Z, ANSWER (hook refusal) 08:44:00Z.
+
+THE FIVE ARTEFACTS:
+1. PR 2214, https://github.com/Secuura/Distributed_Secuura/pull/2214: open, base develop, 2 commits, 10 files, +507 -9; closingIssuesReferences 0; Linear URL in the body; closing-word guard 0 (planted control 1); the only hyphenated key in the body is KS-2166.
+2. HEAD eb7315988de5c63cd6f9a1d96a89cb131b2643be, read from origin by ls-remote in this action. refs/pull/2214/head is the same.
+3. TICKET KS-2166 (now In Progress, moved by the PR link): comment 595e26e4-8130-4741-a882-3c991969b878 (09:01:19Z) names PR 2214 and the head, read back exact. My only board write.
+4. TEST EVIDENCE: in the PR body (touched / ran / NOT run / migrations+config), filled by script from my evidence files; I ran every run it quotes.
+5. NOT DONE / NOT COVERED: point 9.
+
+1. PINS. develop fa2d60ca8ceec35299bf934c9c8d2bf74a330c8d (PR 2211's squash, merged 08:22:42Z; unmoved from my re-cut to this mail). Head eb7315988de5c63cd6f9a1d96a89cb131b2643be. refs/pull/2211/head c0e112d6bc3e (PR MERGED).
+- Commit 1 fe1587f57b99: the change plus the ks849 and four ks1868 principal repairs and the fragment pair. It is my original commit ebe0408ba3fc, rebased while still unpushed; patch-id identical.
+- Commit 2 eb7315988de5: the ks1931 principal repair (ADDENDUM 1).
+- Three-dot numstat: exactly the claimed paths, index.ts +54 -0; ks2166 test +376; ks849 +10 -1; ks1868 x4 (+3 -1, +6 -2, +6 -2, +6 -2); ks1931 +3 -1; fragments +22, +21.
+
+2. MEASURED at this head on develop fa2d60ca8cee (Mac, my own tree, in-memory stand-in, no stack; Node v26.8.1 not an LTS measurement, npm 11.19.0, vitest 4.1.12, express 4.22.3, tsc 5.9.3):
+- Baseline, develop: whole kyc suite 17 files, 94 of 94.
+- Red-first (this head's tests, develop's index.ts): new file 61 of 83 failed; every failing cell RED-named; 0 RED-named passing; every other file 94 of 94.
+- After: 18 files, 177 of 177. New file alone 83 of 83.
+- Mutants on the merged index.ts: 18 of 18 killed, 0 survivors, restored by sha256 each time. M11 (DELETE check after the erase) is killed only by the zero-DELETE assertion: status 403, body Forbidden, deletes() length 3 against 0. Planted failing cell rc 1, restored, blob equal (new-file blob 20c1364fa524, unchanged since).
+- tsc --noEmit service rc 0; tsc over src plus 18 test files (scratch config) rc 0.
+- Counted diff of lines beginning expect( over the 6 existing test files: 0. Control on my new file: 34. My first count used BSD sed with \s, its control read 0, and I discarded it.
+- docs-fragments check: OK. Its 2 ADVISORY lines are present without my pair too. A planted typed section number refuses it (rc 1); restored blob-equal.
+- BEFORE (throwaway cells, the plan mail): 7 of 7, all four routes served a non-subject and a request with no principal.
+
+3. PR 2211 interplay (merged before this push, so rule 2 of the cut rule applies; the repair rides here):
+- Measured first on a scratch merge (my first head plus refs/pull/2211/head): merge-tree rc 0, 0 conflicts; the planted overlap control conflicted (rc 1). Suite 175 of 177, the reds ks1931 C1 and C2.
+- With 2211's fix taken out and no repair, R1 and R2 still PASSED (vacuous). With the repair and the fix taken out they went RED; with both, 4 of 4.
+- At this head the ks1931 file is green 4 of 4 inside the 177.
+
+4. CENSUS at READY (one GraphQL pass, 102 open PRs, each PR's files asserted against totalCount):
+- kyc index.ts = [2214] (the control holds). kyc.openapi.ts = []. An absent-path control reads []. kyc __tests__ = [2214].
+- Reverse services/kyc/ = [575, 649, 2214] (575 and 649 are dependabot, package.json only).
+- packages/shared/src/ has 11 PRs, none mine. keyRevokePolicy.ts = [2066], open on the file defining isPlatformRole. I built against develop fa2d60ca8cee's copy.
+- merge-tree head vs develop rc 0 (develop is an ancestor of the head).
+
+5. PUSH:
+- First push (drv1, 08:26:24Z to 08:41:39Z) REFUSED by legs 14 and 16: my tree lacked the auth and api-gateway installs, so their tests were type-checked against the root's @types/node 26.1.0. Nothing reached origin.
+- Your ANSWER 08:44:00Z granted the clone: 31 trees cloned, 0 refused, s-t24-l1 untouched. Leg 16 alone then read auth 41 of 41 baselined, 0 new; api-gateway 25 of 25, 0 new. The leg 14 suite alone read 46 of 46.
+- Second push (drv2) of the SAME head: lock 08:45:44Z (queue empty), 08:45:59Z to 09:00:24Z, 865 s, rc 0, VERIFIED by ls-remote. Hook: "shell suites: 127 passed, 0 failed, 0 skipped (of 127)" and "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 skipped (local stack not up): 13 of 16 legs ran; NOT a pass of 16.
+
+6. GRANTS used: the STAMP node_modules grant (kyc, root, shared, from s-t24-l1), widened by your ANSWER 08:44:00Z (every tree whose lock is byte-equal). Your ANSWER 07:37:17Z item 8 accepted the throwaway BEFORE cells. Repo-local git identity in my base clone copied from the shared checkout's local config (Kam Kreiser, as A 28th's commits).
+
+7. SLIPS, each caught by its own output:
+- The BEFORE harness: my mock's SELECT branch matched DELETE text, so the first run read 6 of 7. Fixed.
+- A red-first record expectation omitted riskLevel: null. Fixed.
+- A planted-control rc was read through a pipe. Re-run without it: rc 2.
+- The BSD sed expect count (point 2).
+- One indented predecessor NAMED EDIT line in lin.py was re-attributed by my re-key. Restored; 0 diff lines under a reverse shift.
+- One cmp of the drafter's saved copy wrote a temp file to /tmp, not my scratchpad.
+- Faults: cd 0; rm 0; key in argv 0; no .env value or name printed; shared-checkout git lockless; no fetch there.
+
+8. CANDIDATE FILINGS (none filed; for you to route):
+- (a) the shared verifyJwtRs256 checks signature and algorithm only, and auth signs refresh tokens with the same userId: whether kyc accepts a refresh token as a bearer is UNMEASURED.
+- (b) initiate stores an upper-case body userId verbatim, so the owner's lower-case list never shows those rows.
+- (c) the spec text and docs/openapi, SCOPES.md and WORKFLOWS.md say nothing of the owner rule on these four routes.
+- (d) the four routes' callers outside this repository are unknown (the 200-to-403 change is stated in the PR body and the ticket comment).
+- No gate-334-style survivor to file: 0 survivors.
+
+9. NOT DONE / NOT COVERED: a running stack and a real token through the gateway to kyc; Postgres (the stand-in matches statements by text); the user.erased bus path; Node 24; a container build; any consumer outside the repo; the four platform suites; hook legs 3, 4 and 8; every other service's suite (nothing outside services/kyc and the fragments changed). The kept tree is worktrees/s-a29-ks2166 at the PR head, porcelain 0. My scratch merge worktree is in my session scratchpad, registered in s-a29-base. The lane ends here; a fix round only by ADDENDUM.
+
