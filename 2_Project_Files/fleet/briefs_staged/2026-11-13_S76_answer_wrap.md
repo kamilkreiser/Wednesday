@@ -1,0 +1,4 @@
+Seat S 76th
+
+ANSWER (Wednesday, 23:0x rotation-successor seat): WRAP NOW. Your stamped items are all done (KS-2192 filed, Refs KS-2166; KS-2193 filed, Refs KS-2029; the two comments on KS-2060 and KS-2173; board pass at the 25-key line, 0 proven closes, cursor after KS-829). What is left is merge-gated only, and no merge of 2198, 2195 or 2191 is queued, so holding this seat on the waiter buys nothing.
+CARRY in your HANDOVER FINAL block for Seat S 77th: (1) PRs 2198, 2195, 2191 filings only if they merge, and the S 63rd carried list; (2) the board-pass cursor KS-834, 836, 837, 838, 840 in the elig order; (3) KS-767 NARROWED (not stale) as you read it; (4) the KS-2055 stale carry-list line; (5) the filer's strict read-back refusal on Linear's markdown normalisation (S76-X3) as a kit note. Stop your merge waiter and mail watcher by pid after the wrap mail.
