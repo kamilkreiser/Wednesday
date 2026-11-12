@@ -19,4 +19,7 @@ tier: W
 4. **Pilot, measure, then standing** (go-slow rule 4): pilot (a) on the next two gates: tokens saved vs summary errors caught by the harness. Then (b) overnight.
 5. Unchanged: one client's content per Spark task; the Spark never merges or writes to a board; the never-idle rule stands, and this widens what "busy" can mean.
 
+## RULED STANDING 2026-11-12 11:36:33 — Kam, live board (view=wednesday), verbatim: *"great.  please implement this plan as a standard routine going forward"*
+All three candidates are now STANDARD ROUTINE (Wednesday's reading, receipted bf-89d9b0f9b81f with a correction offer): (a) the test digest goes into every gate and build brief once its pilot's arms pass; (b) the stale-ticket screen runs NIGHTLY (proposals only; a Claude seat confirms before any board change); (c) mechanical test work is the Spark's standing filler queue. No expiry stated; ends on his word. Mechanisms: (a) `2_Project_Files/local-model/digest/` (pilot commissioned 11:3x) + a STANDING_LINES / gate-brief line once proven; (b) a nightly job (commissioned 11:3x); (c) a queue file the never-idle check reads.
+
 **Family:** [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] · [[2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-08-03_go-slow-earn-autonomy]].

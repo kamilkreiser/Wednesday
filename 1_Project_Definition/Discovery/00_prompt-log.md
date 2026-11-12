@@ -2816,3 +2816,8 @@ INCLUDED until he says otherwise.
 > I have been thinking.  as the spark is not much use on tickets, can we utilise it in running harness and other tests.  these seem to be token intensive and could be lead with a good testing harness.  In addition to this, have a think about simple and token expensive tasks that we could get the spark to do on an ongoing basis
 
 *Note:* Answered on the panel bf-52eeb070f409 with three candidates (test-run digests, nightly stale-ticket screen, mechanical test work) and a pilot recommendation; lesson 2026-11-12_spark-for-harness-and-token-heavy-simple-tasks.md.
+
+## 2026-11-12 11:37 — Kam (live board (view=wednesday) 11:36:33, verbatim)
+> great.  please implement this plan as a standard routine going forward
+
+*Note:* Receipted bf-89d9b0f9b81f; lesson ruled standing; nightly stale-ticket screen commissioned.

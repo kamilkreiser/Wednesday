@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-12 11:35 from 266 lesson files (1,144,007 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-12 11:37 from 266 lesson files (1,144,796 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7872,12 +7872,12 @@ Related: [[2026-07-31_fully-portable-drive]] (the NAS is a machine/network depen
 
 **His words, verbatim:** *"I have been thinking.  as the spark is not much use on tickets, can we utilise it in running harness and other tests.  these seem to be token intensive and could be lead with a good testing harness.  In addition to this, have a think about simple and token expensive tasks that we could get the spark to do on an ongoing basis"*
 
+sections (open the file for these): RULED STANDING 2026-11-12 11:36:33 — Kam, live board (view=wednesday), verbatim: *"great.  please implement this plan as a standard routine going forward"*
+
 **How to apply:**
 1. **Running a suite costs no tokens; READING its output does.** The Spark's role is the digest: counts, every failure with its first stack line, the delta since the last run. A deterministic harness re-derives every count from the raw output and refuses a summary that disagrees, so a wrong summary is caught rather than trusted ([[2026-08-07_a-check-that-cannot-fail]]).
 2. **Candidates, in Wednesday's order (told to Kam 11:3x, bf-52eeb070f409):** (a) test-run digests for gates and build seats; (b) a nightly stale-ticket screen (does the cited code still exist at develop; already fixed; duplicate), proposals only, a Claude seat confirms before any board change; (c) mechanical test work: mutant generation for red-proofs, numstat/count reconciliation of a seat's claims.
 3. **Not for judgement:** its shadow review on gate 324 recalled 0 of 5 findings. Code review and rulings stay with Claude gates.
 4. **Pilot, measure, then standing** (go-slow rule 4): pilot (a) on the next two gates: tokens saved vs summary errors caught by the harness. Then (b) overnight.
 5. Unchanged: one client's content per Spark task; the Spark never merges or writes to a board; the never-idle rule stands, and this widens what "busy" can mean.
-
-**Family:** [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] · [[2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-08-03_go-slow-earn-autonomy]].
 
