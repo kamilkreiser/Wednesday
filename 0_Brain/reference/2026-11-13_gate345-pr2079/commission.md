@@ -23,3 +23,10 @@ Establish the tier from the file list and the diff, per `0_Brain/learnings/2026-
 Verdict format: line 1 `PR 2079: <GO | GO WITH NOTES | NO GO> (at head <full sha>; tier <n>)`, then FOUND / TESTED / HOW / NOT TESTED, findings numbered G345-2079-N.
 
 Model: Sonnet (tier 2). Return a 10-line summary.
+
+## RELAUNCH 2026-11-13 06:1x — TIER 1 CONFIRMED, now on OPUS (routing v1.0: tier-1 gates = Opus)
+Wednesday read `tier.md` at source (16 lines): PR 2079 deletes `services/shared/src/security/redis-security-store.ts` (RedisRateLimitStore, RedisBruteForceStore, the CSRF token store), so this is a tier-1 access-control surface. **Run the FULL tier-1 gate now; ignore the TIER FIRST stop above.**
+- Reuse `scratch/clone` (push URL disabled; core.sshCommand already set from the project's repo config, per tier.md). `scratch/repo` is an empty leftover: leave it.
+- Re-pin develop and refs/pull/2079/head first and again before the verdict.
+- The five questions above stand, made tier-1: (3) consumer enumeration is THE question: every importer, constructor, Dockerfile COPY, build/census walker, and any service whose brute-force lockout, CSRF or rate limiting would change behaviour at runtime if the store vanished. Use a fast instrument (`git grep` at the head commit in the clone, not a filesystem walk over a blobless clone; a full walk timed out last time). Positive control: grep a symbol you know is imported somewhere. (4) suites for packages/shared + every service the enumeration names. (2) the 500 -> 494 floor red-proof. (5) merge-tree vs develop + survival control. Also: the KS-657 scope sentence; the body's PREFLIGHT INCOMPLETE (13/16) and unticked Schemathesis/Akto boxes: say whether they block a merge under the project's rules.
+- Verdict file `verdict.md` here, format as above with `tier 1`. Findings G345-2079-N.
