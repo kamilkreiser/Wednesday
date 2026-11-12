@@ -17,6 +17,9 @@ supersede: REPLACED WHOLESALE 2026-11-11 ~15:25 (updated ~15:55) by the 14:05 se
 - Lawyer pack card (secuura-lawyer-pack-v4-paste-and-send-1109): his note "keep this up. I will raise with Phil when I talk to him on wednesday" (= today). Leave it open.
 - Panel posts today: wave-1 status bf-80a668afce25; GitHub Actions billing consequence bf-111c4c442cff (no CI job has started on the Secuura repo since 2026-10-01). CORRECTED 2026-11-13 06:1x: this line used to say KS-961 carries a billing ruling; the B 164th drafter read KS-961 at Linear 13 Nov 02:4x: it is the aggregate workspace suite never running on a PR (In Review), not billing. The billing source to re-read is the panel post bf-111c4c442cff itself.
 
+## FINAL LINE ~09:5x 13 Nov by the 08:0x seat, AT ROTATION (ctx ~81%) — READ FIRST
+- **PR 2141 MERGED** (squash 49781230da49; Wednesday ls-remote 09:56:27: develop = **49781230da49**). B 170th's reading 41.5 -> it takes **PR 2137 DIRECTLY**: NEXT MAIL from B 170th = READY 2137 -> GO (gate 293 line 1 + its PR 2137 section at source, reference/2026-11-09_gate293-tier2-pr2137-2139-2140/verdict.md; model fleet/briefs_staged/2026-11-13_B170_go_2141.md, write FRESH). R 118th's plan QUESTION is due (not yet arrived at 09:56). Everything else: the block below.
+
 ## ROTATION HANDOVER ~09:5x 13 Nov by the 08:0x seat (ctx ~80%) — READ FIRST; supersedes every block below where they differ
 - develop **1ebc3eae6cf4** (Wednesday ls-remote 09:51:22). This seat's merges: **2147, 2144** (B 169th, 0.93). Kam: only the two 07:52 taps today; told on the panel about gate 348 + the 2225 hold (bf-f1058798c199).
 - **FLOOR:**
