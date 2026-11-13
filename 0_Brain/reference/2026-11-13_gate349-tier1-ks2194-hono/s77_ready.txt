@@ -1,0 +1,42 @@
+=========== [INBOUND] 2026-11-13T00:16 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] READY FOR GATE, KS-2194, PR 2226, tier 1 (Seat S 77th)
+[Secuura/Blockchain-S -> Wednesday] READY FOR GATE, KS-2194, PR 2226, tier 1 (Seat S 77th)
+Seat S 77th
+READY FOR GATE, KS-2194, PR 2226, tier 1 (Seat S 77th)
+
+FIVE THINGS EXIST, each by identifier
+1. PR number: 2226, https://github.com/Secuura/Distributed_Secuura/pull/2226 (state OPEN, not a draft, base develop, MERGEABLE, 2 files, +6 -6).
+2. Head sha, read from GitHub (gh pr view) and from origin (git ls-remote of the branch) in the same run, both equal: 15914b780cb605df02895eb173aeaa2a70c35262. Branch feature/ks-2194-two-new-hononode-server-advisories-ghsa-qv5m. ONE commit, one parent, the pin dc57df60a959286af013daaf34427965fd9ea178.
+3. Ticket comment naming the PR: comment id 4c4db94b-587a-4ff4-af17-6f0623fe2251 on KS-2194 (https://linear.app/secuura/issue/KS-2194), posted 2026-11-13T00:15:35Z, read back: 1445 characters, no user-mention node. KS-2194 is priority 1, In Progress, board account, project Dependency and Version Currency.
+4. Test Evidence block: in the PR 2226 body (section "Test Evidence"); the body read back from GitHub equals the file I sent. It carries the Node line (host v26.8.1, not Node 24), the BEFORE/AFTER table, the hook verdict verbatim, the open-PR scan, what is NOT covered, and "Before this deploys: nothing deploys from this PR; deploy is Kam's tap". It has NO self-hold sentence. The two pre-merge acknowledgment boxes are UNTICKED (Schemathesis and Akto did not run).
+5. NOT done / NOT covered (also in the PR body): no run of the MCP server against a live HTTP client; no image build; no deploy; no az; Schemathesis, Akto, Playwright and k6 not run; hook legs 3, 4 and 8 SKIPPED (local stack not up); not measured on Node 24; docker node:24-alpine route not run (not required: each host diff exactly +3 -3); the 2.1.6 -> 2.1.8 dist diff is the drafter's read, not re-diffed by me; services/originate not changed (inert override, 0 hono entries in its lock).
+
+HOOK, verbatim final verdict of the real run (push rc 0, 00:00:02Z to 00:14:18Z, 14 min 16 s)
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+Legs 6 and 7 on my branch: leg 6 "5 distinct advisories reported, 5 baselined", OK; leg 7 "45 standalone lockfiles", OK. Leg 2: all 35 standalone locks pass clean-room npm ci (services/mcp-server among them). Leg 5: 62 of 62. Leg 16: 5 services, 0 new errors. Ran with no failure: 1, 2, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16.
+
+PROOF 1 to 6 (host Node v26.8.1, npm 11.19.0; each in a fresh throwaway tree at the pin = BEFORE and at the head = AFTER)
+1. audit:gate BEFORE rc 1 ("7 distinct advisories reported, 5 baselined", both ids named) -> AFTER rc 0 ("5 distinct, 5 baselined", OK). audit:locks BEFORE rc 1 ("45 standalone lockfiles", "2 advisories ... NOT in the baseline", both in services/mcp-server) -> AFTER rc 0 (45 standalone lockfiles, OK). The two ids appear 0 times in either AFTER output; BEFORE control: gate 2 and 2, locks 1 and 1. audit:contract rc 0, 62 of 62, both sides.
+2. Census (JSON parse of all 47 tracked locks, planted controls pass): BEFORE 2 at 2.1.5, 45 none; AFTER 2 at 2.1.8, 45 none.
+3. npm ls: root (--package-lock-only --all) 2.1.8 under @modelcontextprotocol/sdk 1.32.1 and under @prisma/dev 0.24.3 (deduped), 0 occurrences of 2.1.5; mcp-server (isolated npm ci copy) 2.1.8 under the SDK only. Root npm ci --ignore-scripts rc 0 BEFORE and rc 0 AFTER.
+4. mcp-server whole suite on the Dockerfile route: BEFORE 15 of 15 files, 137 of 137 tests; AFTER 15 of 15 files, 137 of 137 tests (same ratio). tsc --noEmit rc 0 both sides. The 2.1.6 -> 2.1.8 code changes sit in stream handling that the SDK's HTTP transport uses (your drafter's read).
+5. Lock diff: git diff --numstat 3 3 and 3 3; only version, resolved, integrity of node_modules/@hono/node-server, integrity equals npm view; no libc/os/cpu line; both package.json files unchanged (diff --quiet rc 0); scripts/audit/audit-baseline.json sha256 d6e7f1ed1175cec9e567e37f4eb98ce1661d07499f711a9e7c4a0650f6fd21aa before and after.
+6. See item 5 above.
+
+DEVELOP MOVED during the push: 9105cfdee484a6342d4980d8fc9ea6da3bc87851 now (was dc57df60a959 at my cut and at the pre-push ls-remote). Compare API dc57df60a959...9105cfdee484: status ahead, 2 commits (KS-1976 and KS-1718, two test and comment rows), 2 files (an api-gateway test and systemTest/fixtures/provision.ts), NO lock and NO package.json in the range, my base is an ancestor. Accepted under the BRIEF's rule; I did not merge develop in (the move came after my push, not before it), so the head is still the one the hook checked.
+
+OPEN PRs ON THE SAME LOCK (scan of 90 of 90, planted control true, PR 2099 present; identical at the pre-push scan): 2099 head 8967de8b1755 and Dependabot 575, 635, 639, 649, 945, 946, 947, 948, 949, 1965 touch Blockchain/Dev/package-lock.json; none touches mcp-server's lock or manifest. Reported, not fought. If one of them merges before 2226 and its hunk sits near this entry (line 6055 in the root lock), that is a STOP per the BRIEF, so Seat B 171st's merge tool should re-run the conflict check at the GO.
+
+WHAT IS RUNNING: only my mail watcher, pid 7387, armed from the ANSWER stamp 23:53:41.000Z, deadline 03:54Z (limit 14400 s), with a ps reading taken in the action that sent this mail. Push lock released (holder then rmdir) and queue ticket left after the rc and the ls-remote were both in hand; worktrees/.push-lock is absent. Context: 32.9 percent of 1M by the transcript's own usage figure at record 251 (no kit meter).
+
+MY FAULTS (disclosed, cumulative since the plan mail)
+- My STATUS mail (message id 010001a1d236eee4) said hook legs "8 to 13 OK". Wrong: leg 8 was SKIPPED (local stack not up); 9 to 13 were OK. Correct reading is in the HOOK block above.
+- The first ticket-filing call got HTTP 400 on a wrong field name (gitBranchName; the field is branchName); nothing was created; I added an exact-title duplicate guard and filed once.
+- My first mail-watcher launch was mis-armed (behind & inside the background shell, so its exit would not have woken me); I stopped my own pid 4985 and re-armed it as the background command itself.
+- My first monitor on the push matched the words REFUSED and INCOMPLETE inside the hook's own test output and woke me several times on noise; I stopped my own task and re-armed a tighter one.
+- Carried from the plan mail: a draft runner with a directory change in a heredoc (never ran); a read-only git grep in the shared checkout that failed; three discarded throwaway runs kept as evidence.
+
+NEXT
+I am idle until you send gate notes to patch or tell me to wrap. Wrap (history entry, HANDOVER, vault commit and push, wrap mail) follows on your word or when the gate notes are patched.
+
