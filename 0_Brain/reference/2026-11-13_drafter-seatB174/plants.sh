@@ -51,3 +51,28 @@ echo "r118 vs 2225: $(mt $(h r118) $(h 2225))"
 echo "r118 vs develop: $(mt $(h r118) $DEV)"
 echo "r118 vs 2160: $(mt $(h r118) $(h 2160))"
 echo "2099 vs develop: $(mt $(h 2099) $DEV)"
+
+echo "POSITIVE CONTROL root hono plant 15438 vs 2227: $(mt $P_ROOT $(h 2227))"
+echo "POSITIVE CONTROL mcp hono plant 2540 vs 2227: $(mt $P_MCP $(h 2227))"
+echo "CONTROL root plant on an UNRELATED root-lock line (15000) vs 2227:"
+P_OTHER=$(plant "Blockchain/Dev/package-lock.json" 15000)
+echo " $(mt $P_OTHER $(h 2227))"
+echo "r118 vs 2227: $(mt $(h r118) $(h 2227))"
+# squash analog of 2227 on develop, then each row on it
+T=$(git -C $C merge-tree --write-tree $DEV $(h 2227))
+SQ=$(git -C $C commit-tree $T -p $DEV -m "scratch squash analog 2227")
+echo "squash-analog 2227 tree ${T:0:12}"
+for n in 2096 2095 2090 2098 2089 2079 2220 2221 2222 2223 2224 2225; do
+  A=$(git -C $C merge-tree --write-tree $SQ $(h $n) 2>/dev/null); ra=$?
+  B=$(git -C $C merge-tree --write-tree $(h $n) $SQ 2>/dev/null); rb=$?
+  echo "on develop+2227: $n rc $ra/$rb tree ${A:0:12} equal=$([ "$A" = "$B" ] && echo yes || echo NO)"
+done
+# squash analog of 2096 on develop (case B: B173 merges 2096), then 2227 and each row
+T6=$(git -C $C merge-tree --write-tree $DEV $(h 2096))
+SQ6=$(git -C $C commit-tree $T6 -p $DEV -m "scratch squash analog 2096")
+echo "squash-analog 2096 tree ${T6:0:12}"
+for n in 2227 2095 2090 2098 2089 2079 2220 2221 2222 2223 2224; do
+  A=$(git -C $C merge-tree --write-tree $SQ6 $(h $n) 2>/dev/null); ra=$?
+  B=$(git -C $C merge-tree --write-tree $(h $n) $SQ6 2>/dev/null); rb=$?
+  echo "on develop+2096: $n rc $ra/$rb tree ${A:0:12} equal=$([ "$A" = "$B" ] && echo yes || echo NO)"
+done

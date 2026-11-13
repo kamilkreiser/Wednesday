@@ -1,0 +1,37 @@
+Refs KS-2195
+
+Edited at 01:54Z (12:54 AEDT) after gate 350 (G350-2227-1 and -5): my BEFORE figures and my sentences about GHSA-46wx-v44x-9hh2 and GHSA-4h7h-rv7c-7m2v went stale once npm's feed listed all five ids, and the checkbox claim was wrong. Body only: no commit, no push, head unchanged at `e29f8e8fa4b6`.
+
+**BLUF.** After PR 2226 (KS-2194) merged, the pre-push legs 6 and 7 still refused every push, now on `hono` 4.13.13 (3 new advisories at my cut; 5 once npm's feed listed all five, per gate 350 below). This PR is an in-range, lock-only refresh of `hono` 4.13.13 -> 4.13.18 in the two locks that carry it: two files, 3 lines each. No manifest edit, no baseline row. It clears GHSA-4m76-xfj5-7975, GHSA-h7mg-cq63-vhpq, GHSA-3gg2-335m-rxc6, GHSA-46wx-v44x-9hh2 and GHSA-4h7h-rv7c-7m2v.
+
+Before this deploys: nothing deploys from this PR; deploy is Kam's tap.
+
+## Test Evidence
+
+Host Node v26.8.1, npm 11.19.0 (NOT Node 24). Base `a288aa45d6b2` (develop after PR 2226), head `e29f8e8fa4b6`. Every run is in a throwaway clone after `npm ci --ignore-scripts`, output to files, rc recorded.
+
+**Touched:** `Blockchain/Dev/package-lock.json` and `Blockchain/Dev/services/mcp-server/package-lock.json`, only `version`, `resolved` and `integrity` of `node_modules/hono` (`git diff --numstat` 3 3 each; no libc, os or cpu line moved). Both `package.json` files and `scripts/audit/audit-baseline.json` are byte-identical (sha256 before = after; baseline `d6e7f1ed1175...`).
+
+**Ran:**
+- Legs 6 and 7 BEFORE (base `a288aa45d6b2`), as I measured them at my cut (01:11Z, 12:11 AEDT): `audit:gate` rc 1, "8 distinct advisories reported, 5 baselined", 3 NEW; `audit:locks` rc 1, "45 standalone lockfiles", "7 advisories match, 4 already baselined", the same 3 NEW in `services/mcp-server`. Gate 350 (12:4x AEDT) re-measured after npm's feed listed all five: develop 10 distinct / 5 NEW and 9 match; the head 0 of all five.
+- Legs 6 and 7 AFTER (head): `audit:gate` rc 0, "5 distinct advisories reported, 5 baselined", OK; `audit:locks` rc 0, "45 standalone lockfiles", "4 advisories match, 4 already baselined", OK. All five hono ids and both node-server ids occur 0 times in either AFTER output, and there is no FAIL section. (My instrument: `grep -c` of each id over the leg output.) At my cut npm's feed did not yet list GHSA-46wx-v44x-9hh2 and GHSA-4h7h-rv7c-7m2v, so I had no audit-output control for those two and gave the range as their proof (GitHub `/advisories`: `< 4.13.16` and `>= 4.5.1, <= 4.13.15`, first patched 4.13.16; 4.13.18 is outside both). Gate 350's re-measurement above shows all five ids on develop and none at the head, so all five are also cleared by an audit-output absence.
+- The hook's own legs 6 and 7 on the pushed branch: both OK, same figures ("5 distinct advisories reported, 5 baselined"; "45 standalone lockfiles").
+- `audit:contract` rc 0: tests 62, pass 62, fail 0, skipped 0.
+- Advisory ranges: GitHub `/advisories?affects=hono&ecosystem=npm` (61 rows; range evaluator with a planted control): 5 ranges include 4.13.13, 0 include 4.13.18. npm `dist-tags.latest` is 4.13.18; npm's bulk advisory feed for `hono` 4.13.18 returns `[]`. Re-read at the push: develop unchanged at `a288aa45d6b2`, 0 new hono ids.
+- Census (JSON parse of all 47 tracked `package-lock.json`, four planted controls OK): BEFORE 2 locks at `hono` 4.13.13; AFTER 2 at 4.13.18 and 45 with none; `@hono/node-server` 2.1.8 in both. `merge-base --is-ancestor a288aa45d6b2 <head>` rc 0.
+- Root `npm ci --ignore-scripts` rc 0 BEFORE and AFTER (1794 packages). `npm ls hono @hono/node-server --package-lock-only --all` rc 0: ONE copy of `hono` 4.13.18 under the SDK 1.32.1, `@prisma/dev` 0.24.3 and the node-server peer; no 4.13.13 anywhere.
+- mcp-server whole suite on the Dockerfile route (isolated copy, standalone-lock `npm ci`, `@secuura/shared` linked from a `packages/shared` built by its own `npm ci` and build): BEFORE and AFTER both 15 of 15 files, 137 of 137 tests, rc 0; `tsc` (`npm run build -- --noEmit`) rc 0 both. The suite is a no-regression check, not a `hono`-path check, because `hono` is installed but not loaded by mcp-server's two entries (next bullet).
+- Import walk (`module.register` resolve hook over the BUILT dist, 5 s cap, ESM graph only), identical BEFORE and AFTER: `dist/http-server.js` (the Dockerfile CMD) 55 modules resolved, `hono` 0, `@hono/node-server` 0; `dist/index.js` 185, 0, 0; control, the SDK's `server/streamableHttp.js`, 109, 1, 2. Static grep: 0 imports of `hono` or `@hono/*` in mcp-server `dist` and `src` (control: the `express` import is found in 1 dist file).
+- Pre-push hook on the pushed branch, verbatim: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 were skipped ("local stack not up on http://localhost:6882"). This is not a pass of those legs.
+- Dry run of the refresh verb in a throwaway `git archive` of the base: the same three lines and the same integrity.
+
+**NOT run / NOT covered:** no runtime exercise of the MCP server against a live HTTP client (its HTTP entry was only started for the 5 s import walk); no image build; no deploy; the hook's legs 3, 4 and 8, and the Schemathesis, Akto, Playwright and k6 suites, were not run; `services/originate` is unchanged; the `hono` 4.13.13 -> 4.13.18 code diff was not read; CommonJS `require` paths, `@prisma/dev` reachability and every other shipped entry are not measured by me.
+
+**Migrations and config:** none.
+
+**Docs:** no fragment pair. `.claude/skills/secuura-test-discipline/SKILL.md` lines 483-484 say "If a change genuinely does not affect either doc, say so explicitly and why". This PR adds no test, probe or gate and changes no documented behaviour; it moves one dependency's version, resolved URL and integrity in two lock files.
+
+Sibling: KS-2194 (`@hono/node-server`, PR 2226) is untouched. A tier 1 gate is requested: a wrong lock re-freezes every push.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
