@@ -60,7 +60,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **NO SEAT LIVE.** All panes closed (R226, R227, AT3 verified).
 - **ATTIO CLOSED, AND IT WAS MY MISTAKE:** the 13 Nov digest was NOT missing (arrived 2026-11-12T21:00:07Z = 08:00 AEDT; I checked at 06:00, before it was due). AT3 (B1550) confirmed: 11-13 sent fine (H4); 11-07 the one real miss, not determinable (logs kept ~3 days). Kam told on the board (bf-97d99d29f716): my mistake; suggestion only (log each send, keep logs longer), no ticket unless he asks. Card attio-digest-missing-1113 delivered. **Do not re-raise.**
 - **Ledger this morning:** card-fact w=16 (soft card wording), the time-family row (missing-before-due), cross-client print w=9 (I listed wednesday-agent@; nothing persisted). OWED mechanism: a hook refusing wednesday-agent@ URLs from this seat.
-- **12:5x DONE: floor_watch matches 'DONE: ' (tested); stamp_check is a HARD GATE in brief_seat.sh for kits dated 2026-11-13+ (tested pass / refuse / skip).** OWED next: NexusAI stored-values pin ticket (next records pass); the Composer 15-alerts lane (big; weekly usage 98%).
+- **12:5x DONE: floor_watch matches 'DONE: ' (tested); stamp_check is a HARD GATE in brief_seat.sh for kits dated 2026-11-13+ (tested pass / refuse / skip); inbox-scope hook live (8/8). KAM 12:57 'great. keep going if you can'.** OWED next: NexusAI stored-values pin ticket (next records pass); the Composer 15-alerts lane (big; weekly usage 98%).
 - Cards open for Kam: none of this session's (morning plan ruled a; ATTIO ruled a + delivered). Composer L05 setup card (since 10-14) still awaits him.
 
 ## 🔴🔴🔴 DELTA 1156 — 2026-11-13 08:5x 65% CHECKPOINT (s274). **READ THIS FIRST; 1155's lines stand where not superseded.**
