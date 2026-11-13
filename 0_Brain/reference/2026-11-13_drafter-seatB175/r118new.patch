@@ -1,0 +1,460 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1699-certification-verify-needs-issuer-holder-or-admin.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1699-certification-verify-needs-issuer-holder-or-admin.test.ts
+new file mode 100644
+index 000000000..71ae78af5
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1699-certification-verify-needs-issuer-holder-or-admin.test.ts
+@@ -0,0 +1,388 @@
++/**
++ * KS-1699 - `POST /api/certifications/:id/verify` had no per-record read check.
++ *
++ * The route looked a certification up by primary key (tenant-scoped) and then wrote a `verification`
++ * charge event and answered `status`, `checks`, `issuer {id, did}` and the raw `blockchain` object to
++ * ANY authenticated same-tenant caller, whoever they were (gate 348, finding G348-2225-1). Behind the
++ * gateway's stand-in the lookup used to go through `GET /api/documents/:id`, which 404-cloaks a
++ * non-owner; once the stand-in stops answering this route, the caller reaches this handler itself.
++ *
++ * This file pins the KS-1695 rule on the verify route: a platform admin, the issuer or the holder (and
++ * the issuing connector, whose `userId` is the issuer id) - exactly what `GET /:id` applies through
++ * `callerMayReadCertification`. It pins three things:
++ *   1. the refusal is indistinguishable from the route's OWN unknown-id answer (same status, same
++ *      bytes: `{ verified: false, error: 'Certification not found' }`, not the GET shape);
++ *   2. a refused caller causes NO `verification` charge event (R2: the guard precedes the charge);
++ *   3. the refusal leaks no issuer id or did, no `blockchain` object and no `chargeEventId`.
++ *
++ * Audience: this is a NARROWING. After the change a third-party verifier who is not a party cannot
++ * call this route. Whether verify, share and recertify should be open to third-party verifiers is an
++ * open question on KS-1699 for Kam to rule; this file decides nothing about share or recertify.
++ *
++ * `getCertification` is mocked to honour the tenant exactly as the real query does
++ * (`WHERE id = $1 AND tenant_id = $2`), so control C2 proves the tenant wall is still the first wall.
++ */
++import { createHash } from 'crypto';
++
++const mockGetCertification = jest.fn();
++const mockSaveCertification = jest.fn(async (..._a: unknown[]) => undefined);
++const mockGetShares = jest.fn(async (..._a: unknown[]) => [] as unknown[]);
++const mockGetLineageEvents = jest.fn(async (..._a: unknown[]) => [] as unknown[]);
++const mockCreateChargeEvent = jest.fn(async (..._a: unknown[]) => ({ id: 'charge-new', eventType: 'verification' }));
++const mockGetChargeEvents = jest.fn(async (..._a: unknown[]) => [] as unknown[]);
++const mockLog = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
++
++jest.mock('../repositories/certificationRepo', () => ({
++  initRepo: jest.fn(async () => undefined),
++  getCertification: (...a: unknown[]) => mockGetCertification(...a),
++  saveCertification: (...a: unknown[]) => mockSaveCertification(...a),
++  listCertifications: jest.fn(),
++  saveShare: jest.fn(),
++  getSharesByCertification: (...a: unknown[]) => mockGetShares(...a),
++  getLineageEvents: (...a: unknown[]) => mockGetLineageEvents(...a),
++  deleteCertification: jest.fn(),
++  reserveCertificationRow: jest.fn(),
++}));
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: jest.fn(async () => []), $executeRaw: jest.fn(async () => 1), $executeRawUnsafe: jest.fn() },
++}));
++jest.mock('../services/chargeEvents', () => ({
++  createChargeEvent: (...a: unknown[]) => mockCreateChargeEvent(...a),
++  getChargeEventsByCertification: (...a: unknown[]) => mockGetChargeEvents(...a),
++}));
++jest.mock('../utils/notificationClient', () => ({
++  notifyDocumentCertified: jest.fn(async () => undefined),
++  notifyDocumentRevoked: jest.fn(async () => undefined),
++  notifyDocumentShared: jest.fn(async () => undefined),
++}));
++jest.mock('../events', () => ({
++  publishEvent: jest.fn(async () => undefined),
++  EventTypes: { CERTIFICATION_ISSUED: 'certification.issued' },
++}));
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: jest.fn(),
++  saveDocument: jest.fn(async () => undefined),
++  assertNoCycle: jest.fn(async () => undefined),
++  generateContentHash: jest.fn(() => 'hash'),
++}));
++let testUser: Record<string, unknown> | null = null;
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => { req.user = testUser; next(); },
++}));
++jest.mock('../utils/logger', () => ({ logger: mockLog }));
++
++import express from 'express';
++import { certificationsRouter } from '../routes/certifications';
++
++const TENANT = 'a0000000-0000-4000-8000-0000000000aa';
++const OTHER_TENANT = 'a0000000-0000-4000-8000-0000000000bb';
++let callerTenant = TENANT;
++
++const app = express();
++app.use((req: any, _res: unknown, next: () => void) => { req.tenantId = callerTenant; next(); });
++app.use('/api/certifications', express.json(), certificationsRouter);
++
++// principals
++const ISSUER = '11111111-2222-4333-8444-555555555555';
++const HOLDER = '22222222-2222-4333-8444-555555555555';
++const READER_A = '33333333-2222-4333-8444-555555555555';   // same tenant, same organisation
++const READER_A2 = '44444444-2222-4333-8444-555555555555';  // same tenant, ANOTHER organisation
++const READER_B = '55555555-2222-4333-8444-555555555555';   // another tenant
++const ADMIN = '66666666-2222-4333-8444-555555555555';
++const CONNECTOR = 'connector:platform-s:4f12abcd';
++
++// values the refusal must never carry
++const ISSUER_DID = 'did:example:issuer-ks1699';
++const TX_HASH = 'f00dfacetx1699';
++
++// ids
++const HUMAN_CERT = 'aaaaaaaa-1111-4111-8111-111111111111';
++const CONNECTOR_CERT = 'bbbbbbbb-1111-4111-8111-111111111111';
++const BARE_DOC = 'cccccccc-1111-4111-8111-111111111111';
++const TAMPERED_CERT = 'dddddddd-1111-4111-8111-111111111111';
++const REVOKED_CERT = 'ffffffff-1111-4111-8111-111111111111';
++const MIXED_CERT = 'f1f1f1f1-1111-4111-8111-111111111111';
++const UNKNOWN_ID = 'eeeeeeee-1111-4111-8111-111111111111';
++// a near-miss test needs an issuer id with LETTERS: `toUpperCase()` on an all-digit uuid is the identity.
++const MIXED_ISSUER = 'aaaabbbb-cccc-4ddd-8eee-ffff11112222';
++
++// The route's own content hash (routes/certifications.ts `generateContentHash`, not exported):
++// sha256 of JSON.stringify(data, sortedKeys). A row whose contentHash equals it verifies as valid.
++const contentHashOf = (data: Record<string, unknown>): string =>
++  createHash('sha256').update(JSON.stringify(data, Object.keys(data).sort())).digest('hex');
++
++// the route's own not-found answer, byte for byte
++const NOT_FOUND_BODY = '{"verified":false,"error":"Certification not found"}';
++
++type Row = { tenant: string; cert: Record<string, unknown> };
++let rows: Record<string, Row> = {};
++
++const cert = (over: Record<string, unknown> = {}) => {
++  const data = (over.data as Record<string, unknown> | undefined) ?? { title: 't' };
++  return {
++    id: HUMAN_CERT, type: 'employment_certificate', status: 'issued',
++    issuer: { id: ISSUER, did: ISSUER_DID, name: 'Issuer Co' }, holder: { id: HOLDER, name: 'Holder' },
++    data, privacySettings: undefined,
++    issuedAt: '2026-01-01T00:00:00.000Z', expiresAt: undefined,
++    revokedAt: undefined, revocationReason: undefined,
++    blockchain: { txHash: TX_HASH }, contentHash: contentHashOf(data),
++    createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z', ...over,
++  };
++};
++
++let baseUrl = '';
++let server: ReturnType<typeof app.listen>;
++beforeAll(async () => {
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', () => resolve()); });
++  const address = server.address();
++  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
++});
++afterAll(() => { server?.close(); });
++
++beforeEach(() => {
++  jest.clearAllMocks();
++  callerTenant = TENANT;
++  testUser = null;
++  rows = {
++    [HUMAN_CERT]: { tenant: TENANT, cert: cert() },
++    // KS-1659's row type: a connector certified with no holder, so BOTH principals read back as the raw connector id.
++    [CONNECTOR_CERT]: { tenant: TENANT, cert: cert({ id: CONNECTOR_CERT, issuer: { id: CONNECTOR }, holder: { id: CONNECTOR } }) },
++    // a bare-connector `POST /api/documents` row: no actor anywhere, so both ids map to ''.
++    [BARE_DOC]: { tenant: TENANT, cert: cert({ id: BARE_DOC, issuer: { id: '' }, holder: { id: '' }, data: {} }) },
++    // stored hash does not match the data: the owner still gets a verdict (verified:false), not a refusal.
++    [TAMPERED_CERT]: { tenant: TENANT, cert: cert({ id: TAMPERED_CERT, contentHash: 'not-the-hash-of-the-data' }) },
++    [REVOKED_CERT]: { tenant: TENANT, cert: cert({ id: REVOKED_CERT, status: 'revoked', revokedAt: '2026-02-01T00:00:00.000Z' }) },
++    [MIXED_CERT]: { tenant: TENANT, cert: cert({ id: MIXED_CERT, issuer: { id: MIXED_ISSUER, did: ISSUER_DID }, holder: { id: HOLDER } }) },
++  };
++  // the real query is `WHERE id = $1::uuid AND tenant_id = $2::uuid` with NO document_type filter
++  mockGetCertification.mockImplementation(async (id: string, tenantId: string) => {
++    const row = rows[id];
++    if (!row || row.tenant !== tenantId) return null;
++    return JSON.parse(JSON.stringify(row.cert));
++  });
++  mockGetShares.mockImplementation(async () => []);
++  mockGetLineageEvents.mockImplementation(async () => []);
++  mockGetChargeEvents.mockImplementation(async () => []);
++  mockCreateChargeEvent.mockImplementation(async () => ({ id: 'charge-new', eventType: 'verification' }));
++});
++
++const asHuman = (userId: string, role = 'ISSUER_ADMIN') => { testUser = { userId, role }; };
++const asAdmin = (userId: string, role = 'system_admin') => { testUser = { userId, role }; };
++const asConnector = (userId: string) => { testUser = { userId, role: 'connector', scopes: ['certifications:read'] }; };
++
++async function call(method: 'GET' | 'POST', path: string): Promise<{ status: number; text: string }> {
++  const res = await fetch(`${baseUrl}${path}`, {
++    method,
++    headers: { 'content-type': 'application/json' },
++    ...(method === 'POST' ? { body: '{}' } : {}),
++  });
++  return { status: res.status, text: await res.text() };
++}
++const post = (path: string) => call('POST', path);
++const verify = (id: string) => post(`/api/certifications/${id}/verify`);
++const byId = (id: string) => call('GET', `/api/certifications/${id}`);
++
++describe('KS-1699 POST /:id/verify is bound to the issuer, the holder or a platform admin', () => {
++  describe('RED on develop - a same-tenant caller who is neither party is refused', () => {
++    it('R1: reader a (same tenant, same organisation) gets 404 on a human-issued certification', async () => {
++      asHuman(READER_A);
++      const r = await verify(HUMAN_CERT);
++      expect(r.status).toBe(404);
++    });
++
++    it('R2: the same call writes NO verification charge event - the guard precedes the charge', async () => {
++      asHuman(READER_A);
++      await verify(HUMAN_CERT);
++      expect(mockCreateChargeEvent).not.toHaveBeenCalled();
++      // the comparator can fail: a party's call DOES write exactly one
++      asHuman(ISSUER);
++      await verify(HUMAN_CERT);
++      expect(mockCreateChargeEvent).toHaveBeenCalledTimes(1);
++    });
++
++    it('R3: reader a2 (same tenant, ANOTHER organisation) gets 404 and no charge event', async () => {
++      asHuman(READER_A2);
++      const r = await verify(HUMAN_CERT);
++      expect(r.status).toBe(404);
++      expect(mockCreateChargeEvent).not.toHaveBeenCalled();
++    });
++
++    it('R4: the refusal status and body are BYTE-IDENTICAL to the route\'s own unknown-id answer', async () => {
++      asHuman(READER_A);
++      const refused = await verify(HUMAN_CERT);
++      const unknown = await verify(UNKNOWN_ID);
++      expect(unknown.status).toBe(404);
++      expect(unknown.text).toBe(NOT_FOUND_BODY);
++      expect(refused.status).toBe(unknown.status);
++      expect(refused.text).toBe(unknown.text);
++      // the comparator must be able to fail: an allowed call differs from both
++      asHuman(ISSUER);
++      const allowed = await verify(HUMAN_CERT);
++      expect(allowed.status).toBe(200);
++      expect(allowed.text).not.toBe(unknown.text);
++    });
++
++    it('R5: a bare-connector row (issuer.id and holder.id both empty) is refused for reader a and writes no charge', async () => {
++      asHuman(READER_A);
++      const r = await verify(BARE_DOC);
++      expect(r.status).toBe(404);
++      expect(mockCreateChargeEvent).not.toHaveBeenCalled();
++      // the route serves ANY documents row by pkey, which is why this is reachable at all
++      expect(mockGetCertification).toHaveBeenCalledWith(BARE_DOC, TENANT);
++    });
++
++    it('R6: the refusal leaks no issuer id, no issuer did, no blockchain object and no chargeEventId', async () => {
++      asHuman(READER_A);
++      const refused = await verify(HUMAN_CERT);
++      expect(refused.status).toBe(404);
++      for (const leak of [ISSUER, ISSUER_DID, TX_HASH, 'chargeEventId', 'blockchain', 'checks']) {
++        expect(refused.text).not.toContain(leak);
++      }
++      // the comparator can fail: the allowed answer carries every one of them
++      asHuman(ISSUER);
++      const allowed = await verify(HUMAN_CERT);
++      for (const leak of [ISSUER, ISSUER_DID, TX_HASH, 'chargeEventId', 'blockchain', 'checks']) {
++        expect(allowed.text).toContain(leak);
++      }
++    });
++
++    it('R7: an EMPTY principal is refused - no user at all, and an empty userId on a bare-connector row', async () => {
++      // the production authenticate() answers 401 first; this pins the in-handler defence. Without the
++      // empty-userId guard `'' === certification.issuer.id` is TRUE for a bare-connector row.
++      testUser = null;
++      const none = await verify(HUMAN_CERT);
++      expect(none.status).toBe(404);
++      expect(none.text).toBe(NOT_FOUND_BODY);
++      testUser = { userId: '', role: 'ISSUER_ADMIN' };
++      const empty = await verify(BARE_DOC);
++      expect(empty.status).toBe(404);
++      expect(empty.text).toBe(NOT_FOUND_BODY);
++      // the comparator can fail: the same bare-connector row IS answered to a platform admin
++      asAdmin(ADMIN);
++      expect((await verify(BARE_DOC)).status).toBe(200);
++    });
++
++    it.each([
++      ['upper-cased', MIXED_ISSUER.toUpperCase()],
++      ['a prefix of the issuer id', MIXED_ISSUER.slice(0, -1)],
++      ['the issuer id with a suffix', `${MIXED_ISSUER}a`],
++      ['the issuer id with surrounding spaces', ` ${MIXED_ISSUER} `],
++    ])('R8[%s]: a near-miss of the issuer id is REFUSED - the compare is exact, not loose', async (_label, candidate) => {
++      // guard against a vacuous fixture: the variant must actually differ from the real id
++      expect(candidate).not.toBe(MIXED_ISSUER);
++      asHuman(candidate);
++      const r = await verify(MIXED_CERT);
++      expect(r.status).toBe(404);
++      expect(r.text).toBe(NOT_FOUND_BODY);
++    });
++
++    it('R8-control: the EXACT issuer id on that same record is 200, so R8 can fail', async () => {
++      asHuman(MIXED_ISSUER);
++      const r = await verify(MIXED_CERT);
++      expect(r.status).toBe(200);
++      expect(JSON.parse(r.text).issuer.id).toBe(MIXED_ISSUER);
++      expect(MIXED_ISSUER.toUpperCase()).not.toBe(MIXED_ISSUER);
++    });
++  });
++
++  describe('GREEN at develop and after - the parties and the platform are still served', () => {
++    it('O1: the issuer gets 200 and EXACTLY ONE verification charge event with the documented arguments', async () => {
++      asHuman(ISSUER);
++      const r = await verify(HUMAN_CERT);
++      expect(r.status).toBe(200);
++      const body = JSON.parse(r.text);
++      expect(body.verified).toBe(true);
++      expect(body.certificationId).toBe(HUMAN_CERT);
++      expect(body.chargeEventId).toBe('charge-new');
++      expect(mockCreateChargeEvent).toHaveBeenCalledTimes(1);
++      const args = mockCreateChargeEvent.mock.calls[0];
++      expect(args.slice(0, 4)).toEqual(['verification', HUMAN_CERT, ISSUER, TENANT]);
++      expect(args[4]).toEqual({ metadata: { verified: true } });
++    });
++
++    it('O2: the holder gets 200 and exactly one charge event', async () => {
++      asHuman(HOLDER, 'HOLDER');
++      const r = await verify(HUMAN_CERT);
++      expect(r.status).toBe(200);
++      expect(mockCreateChargeEvent).toHaveBeenCalledTimes(1);
++      expect(mockCreateChargeEvent.mock.calls[0][2]).toBe(HOLDER);
++    });
++
++    it.each([
++      ['system_admin'],
++      ['SUPER_ADMIN'],
++    ])('O3[%s]: a platform admin in that spelling (admitted by isPlatformRole) gets 200 and one charge event', async (role) => {
++      asAdmin(ADMIN, role);
++      const r = await verify(HUMAN_CERT);
++      expect(r.status).toBe(200);
++      expect(mockCreateChargeEvent).toHaveBeenCalledTimes(1);
++      expect(mockCreateChargeEvent.mock.calls[0][2]).toBe(ADMIN);
++    });
++
++    it('O4: the issuing connector gets 200 and one charge event on its OWN holder-less certification', async () => {
++      asConnector(CONNECTOR);
++      const r = await verify(CONNECTOR_CERT);
++      expect(r.status).toBe(200);
++      expect(mockCreateChargeEvent).toHaveBeenCalledTimes(1);
++      expect(mockCreateChargeEvent.mock.calls[0][2]).toBe(CONNECTOR);
++    });
++  });
++
++  describe('CONTROLS that must stay green - the bound does not over-reach', () => {
++    it('C1: an unknown id is 404 with the route\'s own body and writes no charge event', async () => {
++      asHuman(ISSUER);
++      const r = await verify(UNKNOWN_ID);
++      expect(r.status).toBe(404);
++      expect(r.text).toBe(NOT_FOUND_BODY);
++      expect(mockCreateChargeEvent).not.toHaveBeenCalled();
++    });
++
++    it('C2: another tenant is still 404 and writes no charge event - the tenant wall is the first wall', async () => {
++      callerTenant = OTHER_TENANT;
++      asHuman(READER_B);
++      const r = await verify(HUMAN_CERT);
++      expect(r.status).toBe(404);
++      expect(mockGetCertification).toHaveBeenCalledWith(HUMAN_CERT, OTHER_TENANT);
++      expect(mockCreateChargeEvent).not.toHaveBeenCalled();
++    });
++
++    it('C3: an owner on a certification whose stored hash does not match gets 200 verified:false and one charge - a refusal is not a verdict', async () => {
++      asHuman(ISSUER);
++      const r = await verify(TAMPERED_CERT);
++      expect(r.status).toBe(200);
++      const body = JSON.parse(r.text);
++      expect(body.verified).toBe(false);
++      expect(body.checks.hashValid).toBe(false);
++      expect(mockCreateChargeEvent).toHaveBeenCalledTimes(1);
++      expect(mockCreateChargeEvent.mock.calls[0][4]).toEqual({ metadata: { verified: false } });
++    });
++
++    it('C4: an owner on a REVOKED certification gets 200 with checks.notRevoked false and one charge', async () => {
++      asHuman(ISSUER);
++      const r = await verify(REVOKED_CERT);
++      expect(r.status).toBe(200);
++      const body = JSON.parse(r.text);
++      expect(body.verified).toBe(false);
++      expect(body.checks.notRevoked).toBe(false);
++      expect(mockCreateChargeEvent).toHaveBeenCalledTimes(1);
++    });
++
++    it('C5: a reader with role ORG_ADMIN who is neither party is 404 - the admin set is not widened', async () => {
++      asHuman(READER_A2, 'ORG_ADMIN');
++      const r = await verify(HUMAN_CERT);
++      expect(r.status).toBe(404);
++      // ISSUER_ADMIN is refused for the same reason, so the role name is not what decided it
++      asHuman(READER_A2, 'ISSUER_ADMIN');
++      expect((await verify(HUMAN_CERT)).status).toBe(404);
++    });
++
++    it('C6: GET /:id still refuses reader a with the GET body - the shape this copies is unchanged', async () => {
++      asHuman(READER_A);
++      const r = await byId(HUMAN_CERT);
++      expect(r.status).toBe(404);
++      expect(JSON.parse(r.text)).toEqual({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
++      // and it is a DIFFERENT body from the verify route's own refusal
++      expect(r.text).not.toBe(NOT_FOUND_BODY);
++    });
++  });
++});
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+index 4257bdf3b..3bbdcd6f1 100644
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -1264,6 +1264,19 @@ certificationsRouter.post(
+         });
+       }
+ 
++      // KS-1699: bind the verify on the record, the way `GET /:id` does (KS-1695). Before this, any
++      // authenticated same-tenant caller who was not a party got 200 with `status`, `checks`,
++      // `issuer {id, did}` and the raw `blockchain` object, and a `verification` charge row was written
++      // for them. This precedes the charge write below, so a refused caller is never billed. The refusal
++      // is the SAME status and body as this route's own unknown-id answer above (not the GET shape), so
++      // "not yours" cannot be told from "no such certification".
++      if (!callerMayReadCertification(req, certification)) {
++        return res.status(404).json({
++          verified: false,
++          error: 'Certification not found',
++        });
++      }
++
+       // Check status
+       const isValid = certification.status === 'issued';
+       const isExpired = certification.expiresAt && new Date(certification.expiresAt) < new Date();
+diff --git a/Projects Documents/fragments/cheat/KS-1699-certification-verify-needs-the-reader-check.html b/Projects Documents/fragments/cheat/KS-1699-certification-verify-needs-the-reader-check.html
+new file mode 100644
+index 000000000..d6aca8779
+--- /dev/null
++++ b/Projects Documents/fragments/cheat/KS-1699-certification-verify-needs-the-reader-check.html	
+@@ -0,0 +1,19 @@
++<h2>The originate certification verify route refuses a caller who is not a party, as GET /:id does &mdash; KS-1699 (verify only)</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> <code>POST /api/certifications/:id/verify</code> in <code>services/originate</code> used to answer any authenticated same-tenant caller with <code>status</code>, <code>checks</code>, the issuer's <code>id</code> and <code>did</code> and the raw <code>blockchain</code> object, and to write a <code>verification</code> charge event for them. It now answers only a platform admin, the issuer, the holder and the issuing connector. Anyone else gets the route's own unknown-id answer (404, <code>{"verified":false,"error":"Certification not found"}</code>) and no charge event.
++    </td></tr><tr><td><strong>Audience narrowed, verify only.</strong> Whether verify, share and recertify should be open to a third-party verifier is an open question on KS-1699 for the owner to rule; <code>/:id/share</code> and <code>/:id/recertify</code> are unchanged here and the ticket stays open.
++    </td></tr></table>
++</div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> No real gateway and originate pair, no real database, no Schemathesis or Akto run, no deploy.
++    </td></tr></table>
++</div>
++<h3>Checking it</h3>
++<pre><code>npm --prefix Blockchain/Dev/services/originate test -- ks1699-certification-verify   # jest, 23 cells
++node Blockchain/Dev/scripts/docs-fragments.mjs check                                  # the fragment checker</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>product change</td><td><code>routes/certifications.ts</code> <strong>+13 -0</strong>: the guard (7 lines) and its comment (6 lines)</td></tr>
++<tr><td>red first</td><td>over the unchanged route <strong>12 of 23</strong> cells fail (R1-R7, the four R8 cases, C5); with the guard all <strong>23</strong> pass</td></tr>
++<tr><td>planted reverts</td><td>guard removed <strong>12</strong> fail; guard after the charge write <strong>3</strong> fail (R2, R3, R5); guard inverted <strong>20</strong> fail (C1, C2, C6 stay green)</td></tr>
++<tr><td>suite, before then after</td><td><code>services/originate</code> 222 files and 2,609 tests, then 223 and 2,632, 0 failed on both sides, 3 of 3 interleaved pairs each</td></tr>
++</table>
+diff --git a/Projects Documents/fragments/flow/KS-1699-certification-verify-needs-the-reader-check.html b/Projects Documents/fragments/flow/KS-1699-certification-verify-needs-the-reader-check.html
+new file mode 100644
+index 000000000..ff6086eda
+--- /dev/null
++++ b/Projects Documents/fragments/flow/KS-1699-certification-verify-needs-the-reader-check.html	
+@@ -0,0 +1,11 @@
++<h2><!--n-->. The originate certification verify route refuses a caller who is not a party, as GET /:id does (KS-1699, verify only)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> One handler, <code>POST /api/certifications/:id/verify</code> in <code>services/originate/src/routes/certifications.ts</code>. It looked a certification up by id and answered <code>status</code>, <code>checks</code>, <code>issuer {id, did}</code> and the raw <code>blockchain</code> object to any authenticated same-tenant caller, and wrote a <code>verification</code> charge event for that caller. It now applies <code>callerMayReadCertification</code>, the rule <code>GET /:id</code> already applies, after the not-found check and before the charge write.
++    </td></tr><tr><td><strong>A refused caller gets the route's own unknown-id answer.</strong> Same 404 status and the same bytes, <code>{"verified":false,"error":"Certification not found"}</code>, so "not yours" cannot be told from "no such certification", and no charge event is written. <strong>This narrows the audience</strong> to a platform admin, the issuer, the holder and the issuing connector; whether verify, share and recertify should be open to a third-party verifier is an open question on KS-1699 for the owner to rule. <strong>This is the verify route ONLY:</strong> <code>/:id/share</code> and <code>/:id/recertify</code> are untouched and the ticket stays open.
++    </td></tr></table>
++<h3><!--n-->.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Red first, then green, then three plants.</strong></td><td> The new file <code>ks1699-certification-verify-needs-issuer-holder-or-admin.test.ts</code> has 23 cells. Over the unchanged route 12 fail and 11 pass; with the guard all 23 pass. Plant (a), the guard removed: 12 fail. Plant (b), the guard moved after the charge write: 3 fail (R2, R3, R5, each of which asserts no charge on the refused path). Plant (c), the guard inverted: 20 fail, only C1, C2 and C6 stay green.
++    </td></tr><tr><td><strong>The product change is 13 added lines and no changed or removed line</strong>: the guard (7 lines) and its comment (6 lines). The whole <code>services/originate</code> jest suite reads 222 files and 2,609 tests before and 223 files and 2,632 tests after, 0 failed on both sides, three interleaved pairs each.
++    </td></tr></table>
++<h3><!--n-->.2 What it does not cover</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> No real gateway and originate pair, no real database (the cells use an in-process server and a mocked repository that honours the tenant), no Schemathesis or Akto run, and no deploy. Callers of the route outside this repository are not enumerated by this change.
++    </td></tr></table>
