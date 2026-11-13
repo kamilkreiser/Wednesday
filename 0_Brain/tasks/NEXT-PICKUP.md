@@ -8,7 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## CHECKPOINT 12:1x 13 Nov, the 11:5x seat (ctx 50%) - READ FIRST
+## CHECKPOINT 13:0x 13 Nov, the 11:5x seat (ctx 65%) - READ FIRST; supersedes the 12:1x block below where they differ
+- develop **a6af38a51716** (PR 2097's squash, 01:44:56Z). Merges today: 2147, 2144, 2141, 2137, 2125, 2134, 2126, 2226, 2097 (9). Push freeze ON until PR 2227 merges (merges are NOT affected: measured on 2 rows).
+- **PR 2227** (KS-2195, hono 4.13.18, head e29f8e8fa4b6): **gate 350 = GO WITH NOTES** (line 1 read at source); body patched + KS-2195 comment/description edited by S 78th. **Seat S 78th WRAPPED, scored 0.95, pane %204 closed.**
+- %207 **Seat B 173rd**: GO for PR 2096 sent 01:58:56Z (fleet/briefs_staged/2026-11-13_B173_go_2096.md). NEXT MAIL = MERGED 2096 -> ls-remote -> then its WRAP (naming 2227 first) -> score -> identity read (own call) -> pane_close.sh next call.
+- **B 174th DRAFTER RUNNING** (reference/2026-11-13_drafter-seatB174/commission.md; ROW 1 = PR 2227). On return: read WHOLE, stamp (re-read develop: it moves when 2096 merges), dry run, capacity in own call, brief_and_launch --to 'Secuura/Blockchain-B' SEAT_MODEL_ENV=claude-sonnet-5-5 WED_USAGE_STOP=100. Its 2227 GO: gate 350 line 1; carry G350-2227-1..-5. After 2227 MERGES: mail Seat R 118th 'GO: re-push row 58 (Seat R 118th)' (body: develop sha; grant per fleet/briefs_staged/2026-11-13_R118_answer_audit_block.md) + tap -R.
+- **WEDNESDAY repo is ahead 3 / behind 2 of origin, NOT pushed:** safe_pull refused while the B 174th drafter writes into its folder. When the drafter returns: commit its folder by pathspec, `bash 2_Project_Files/tools/safe_pull.sh`, read `git status -sb`, then push in the NEXT call.
+- Kam 12:57:21 'fantastic. Thank you!' (praise, ledger row; no reply). Nothing else since 07:52.
+
+## CHECKPOINT 12:1x 13 Nov, the 11:5x seat (ctx 50%) - superseded by the block above where they differ
 - **develop a288aa45d6b2** (PR 2226's squash, merged 01:04:58Z; gh api + Wednesday ls-remote 12:06:15). Merges today: 2147, 2144, 2141, 2137, 2125, 2134, 2126, 2226 (8).
 - **PUSH FREEZE, still on:** pre-push audit legs 6/7 refuse every push on three `hono` 4.13.13 advisories (GHSA-4m76-xfj5-7975, GHSA-h7mg-cq63-vhpq, GHSA-3gg2-335m-rxc6) plus two GitHub-only ids (GHSA-46wx-v44x-9hh2, GHSA-4h7h-rv7c-7m2v; Wednesday read both at api.github.com: patched 4.13.16). MERGES are not affected (B 172nd measured: `gh pr merge` via API, no pre-push leg; one row's measurement).
 - **FLOOR:**
