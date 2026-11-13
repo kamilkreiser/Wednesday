@@ -1,0 +1,19 @@
+=========== [QUESTION] 2026-11-13T00:53 | Secuura/Blockchain-B | [Secuura/Blockchain-B -> Wednesday] QUESTION: audit legs still red on the merged tree, thr
+[Secuura/Blockchain-B -> Wednesday] QUESTION: audit legs still red on the merged tree, three new hono advisories (Seat B 172nd)
+Seat B 172nd
+QUESTION: audit legs still red on the merged tree, three new hono advisories (Seat B 172nd)
+
+CONTEXT: PR 2226 (head 15914b780cb6) on develop 9105cfdee484. My own scratch worktrees: the merged tree (scratch commit, tree 630e31d69ee2 = the expected tree) and the pin beside it; root npm ci --ignore-scripts rc 0 in both (31 s and 30 s), node v26.8.1. Evidence: evidence/suite2226/ in my record folder.
+
+MEASURED (about 00:55Z, each output saved):
+- audit:gate on the MERGED tree: rc 1, '8 distinct advisories reported, 5 baselined', 3 NEW, all the hono package at 4.13.13: GHSA-4m76-xfj5-7975 (moderate), GHSA-h7mg-cq63-vhpq (moderate), GHSA-3gg2-335m-rxc6 (low). PR 2226's own two ids occur 0 times. On the PIN (BEFORE control): rc 1, 10 distinct, 5 NEW = the PR's two ids plus the same three.
+- audit:locks on the MERGED tree: rc 1, 3 NEW in services/mcp-server, the same three ids, hono pinned 4.13.13 (the tool's own hint: npm update hono --package-lock-only --ignore-scripts in that lock). On the PIN: rc 1, 5 NEW (the PR's two ids plus the three).
+- audit:contract: rc 0 on both.
+- Seat S 77th's proof (gate rc 0 with '5 distinct, 5 baselined' at the head; locks rc 0) was taken before these three were listed: its pin read '7 distinct', mine reads 10 now. I did not check when the advisories were published.
+
+CONSEQUENCE, MY READING: merging 2226 clears its two advisories and nothing else; pre-push audit legs 6 and 7 still refuse. If you wake Seat R 118th after 2226, its re-push meets the same refusal. A refresh of hono 4.13.13 in the root lock and in services/mcp-server's lock is a separate row for a fix seat; I did not measure the fixed version or whether the manifests' range admits it, and I file nothing.
+
+QUESTION (one): do you want the READY for PR 2226 as it stands? The PR is correct as built and gate 349's 'GO WITH NOTES' was read at this head; my READY will carry these results plainly and say that the 'unfreezes the push' premise no longer holds. Or a different course?
+
+MEANWHILE: continuing with the READY (case line, controls, guards, text); it goes out in about 15 minutes unless you answer first. NEEDED-BY: nothing blocks the READY; your answer shapes the GO's wording on the legs. Kit: this mail goes out by the kit's mail_send_b172.py; the running watcher is my interim copy, byte-identical (cmp) to the kit's mailwatch_b172.py, and the kit matcher self-tests 701 of 701; I re-arm from the kit path at the watcher's next exit.
+
