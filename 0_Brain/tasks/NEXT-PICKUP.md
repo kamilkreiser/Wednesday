@@ -8,6 +8,16 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## SHIFT HANDOVER 05:30 14 Nov, the 14:1x seat (overnight wrap) - READ FIRST; supersedes every block below where they differ
+- develop **48883ba5976b** (PR 2090's squash, 03:24:03Z 13 Nov; Wednesday ls-remote 05:30 14 Nov unchanged). Merges on 11-13: 13 (+2095 3b2fba2788b6, +2090 48883ba5976b).
+- **FLOOR EMPTY.** Seat B 175th WRAPPED 03:27Z, scored 0.95, pane %213 closed. B 176th NOT launched: gauge **99%** (renews ~3d 12h from 05:30 = about Tue 18 Nov evening).
+- **OPEN CARD secuura-login-for-2228-at-99pct-1113** (rec a: Kam /login another account in Wednesday's pane, then launch B 176th; DEFAULT b: hold until renewal). Unruled at 05:30. His word moves it; on a new account, the statusline shows 7d:0%.
+- **B 176th's queue (ready, not drafted):** PR 2228 FIRST (KS-1699, tier 1, gate 351 GWN, head 4383051cafcf; GO shape in the 14:1x block below; carry G351-2228-1..-5), then 2098, 2089, 2079 t1, 2220, 2221, 2222, 2223, 2224 t1; 2225 stays out. Every pin/tree recomputed on develop 48883ba5976b. Drafter commission model: 0_Brain/reference/2026-11-13_drafter-seatB175/. B 175th's HANDOVER (FINAL block for B 176th): !CODING/Secuura/Blockchain/5_Project_History/2026-11-13_seatB-175th/HANDOVER.md.
+- **Card secuura-ks1699-verify-audience-1113** still open (G351-2228-1; not a merge blocker; nothing deploys until he rules).
+- **FIXED 13 Nov:** tuesday/hooks/pretooluse_inbox_scope.sh is seat-aware (it refused Wednesday her own inbox). Lesson filed.
+- **This seat booted LEAN** (digest + ledger not read whole, at 99%). The 06:00 seat: do the full boot if the gauge allows.
+- OWED (unchanged from below): STANDING_LINES line for raise/fix seats; board-seat filing list (+ gate 265 N-2095-1/-2, gate 252 F4, KS-2012 and KS-692 In Progress); weekly consolidation lapsed since 10-19; INDEX.md refresh; fleet_ack collector stale; Spark idle since 11-11.
+
 ## ROTATION HANDOVER 14:1x 13 Nov, the 11:5x seat (ctx 81%) - READ FIRST; supersedes every block below where they differ
 - develop **49e4d6a4d007** (PR 2227's squash). Merges today 11. PUSH FREEZE LIFTED. Kam: 07:52 x2, 12:57 praise; nothing since. Usage 98% (card 1110 = c: run to 100%).
 - **FLOOR: ONE seat.** %213 **Seat B 175th** (MERGE -B, Sonnet; brief fleet/briefs_staged/2026-11-13_seatB175_merge.md). GO for **PR 2095** sent 03:09:58Z (fleet/briefs_staged/2026-11-13_B175_go_2095.md). **ADDENDUM 1** sent 03:11:33Z (fleet/briefs_staged/2026-11-13_B175_addendum_2228.md): **PR 2228** (KS-1699) is its next row after 2095 (tier-1 rule: r <= 52 and legs close before 58, else WRAP naming 2228 first, then 2090). NEXT MAIL = MERGED 2095 -> ls-remote -> then READY 2228 (or a WRAP) -> GO for 2228: line 1 of gate 351 'PR 2228: GO WITH NOTES (at head 4383051cafcf7c4535ab74eaa82a850be8efd780; tier 1)'; squash `QA gate GO WITH NOTES; merge GO pinned to 4383051cafcf.`; carry G351-2228-1..-5; model fleet/briefs_staged/2026-11-13_B174_go_2227.md (tier-1 GO shape); ls-remote in the send action; subject = the seat's requested subject verbatim.
