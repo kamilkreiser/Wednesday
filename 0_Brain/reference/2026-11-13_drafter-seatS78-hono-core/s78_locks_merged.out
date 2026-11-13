@@ -1,0 +1,24 @@
+
+> secuura@0.1.0 audit:locks
+> node scripts/audit/audit-locks.mjs
+
+audit-locks: 45 standalone lockfiles (47 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate covers, minus 1 declared out of scope = 47 - 1 - 1 = 45; reproduce the tracked count with `git ls-files '*package-lock.json' | wc -l`; out of scope: Blockchain/Dev/mobile/secuura-app (KS-1981, expires 2027-01-01: React Native app tree, not built by any compose file (0 references against a control of 2 for services/originate) or by any workflow (0 against a control of 3 referencing services/). 81 advisories (2 critical, 45 high) pending their own triage rather than 81 unmeasured baseline rows.)), 1629 distinct packages pinned — 7 advisories match, 4 already baselined.
+
+FAIL — 3 advisories in standalone locks and NOT in the baseline:
+  - GHSA-4m76-xfj5-7975 [moderate] hono: Hono: `mount()` and `app.mount()` can forward a path that bypasses middleware scoped inside the mount prefix
+    pinned: 4.13.13
+    in 1 lock(s): services/mcp-server
+  - GHSA-h7mg-cq63-vhpq [moderate] hono: Hono: RegExpRouter skips wildcard middleware for some route sets and for paths with an encoded line terminator
+    pinned: 4.13.13
+    in 1 lock(s): services/mcp-server
+  - GHSA-3gg2-335m-rxc6 [low] hono: Hono: `css` helper does not escape a closing tag split between the template and an interpolated value, allowing HTML injection
+    pinned: 4.13.13
+    in 1 lock(s): services/mcp-server
+  Triage each: bump the pin (commands below), or add a reasoned entry (reason + ticket +
+  expires) to scripts/audit/audit-baseline.json.
+  To bump a pin, run from Blockchain/Dev, once per lock. `npm update` moves a pin only inside
+  its manifest's range (a fix outside it needs the range edited first, and a run that moves
+  nothing still exits 0, so re-run `npm run audit:locks`); `npm install --package-lock-only`
+  moves nothing while the pin still satisfies its range (KS-1394):
+  services/mcp-server
+    docker run --rm -v "$PWD/services/mcp-server":/app -w /app node:24-alpine npm update hono --package-lock-only --ignore-scripts
