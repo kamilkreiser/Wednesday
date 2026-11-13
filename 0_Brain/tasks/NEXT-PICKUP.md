@@ -8,7 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## UPDATE 13:4x 13 Nov, the 11:5x seat (ctx ~75%) - READ FIRST; supersedes every block below where they differ
+## UPDATE 13:5x 13 Nov, the 11:5x seat (ctx ~79%) - READ FIRST; supersedes every block below where they differ
+- **PR 2228** (KS-1699, R 118th; head 4383051cafcf on develop 49e4d6a4d007): READY FOR GATE 02:56Z. **GATE 351 RUNNING** (Opus, background; RE-COMMISSION from 0_Brain/reference/2026-11-13_gate351-tier1-pr2228-ks1699/commission.md if verdict.md is absent after a rotation). THE question: callers of POST /:id/verify the new guard would refuse. On GO/GWN: line 1 at source -> ADDENDUM to Seat B 175th inserting 2228 as its next row (before 2225; 2225 stays out) -> GO -> MERGED. R 118th is WRAPPING (score it from its wrap; pane %192 close after identity in its own call). R 118th finding: PR 2228 also attached to KS-1695 (branch name) -> board seat's.
+- %213 **Seat B 175th**: plan ANSWERED 02:54:30Z (GO to start; READY 2095 next).
+
+## UPDATE 13:4x 13 Nov, the 11:5x seat (ctx ~75%) - superseded by the block above where they differ
 - **PUSH FREEZE LIFTED:** PR 2227 merged 02:32:50Z; develop **49e4d6a4d007** (Wednesday ls-remote 13:35:55). Merges today 11. Seats S 78th, B 172nd, B 173rd, B 174th all WRAPPED, scored 0.95, panes closed.
 - %192 **Seat R 118th**: re-push GO sent 02:36:10Z (fleet/briefs_staged/2026-11-13_R118_go_repush.md: SUPERSEDES item (c) of the earlier answer; rebase onto the new develop). STATUS 3 02:38Z: rebased (head 4383051cafcf), both legs rc 0, merge-tree vs 2160 clean; re-push launching. NEXT MAIL = READY FOR GATE (tier 1) -> commission an OPUS gate (copy reference/2026-11-13_gate348-tier1-pr2224-2225/commission.md's shape; KS-1699, the verify guard; the 2160 overlap is a gate question) + Spark numstat filler F25 -> ADDENDUM to the B seat inserting it BEFORE 2225.
 - %213 **Seat B 175th** LAUNCHED 02:47:08Z (brief fleet/briefs_staged/2026-11-13_seatB175_merge.md STAMPED 13:4x). ROW 1 = PR 2095 (gate 265 'GO'; squash `QA gate GO; merge GO pinned to 90e8ee1d8f93.`), then 2090, 2098, 2089, 2079 t1, 2220-2223, 2224 t1. NEXT MAIL = its plan QUESTION -> ANSWER (model 2026-11-13_B174_answer_plan.md) -> READY 2095 -> GO (model 2026-11-13_B173_go_2096.md, the twin row) -> MERGED.
