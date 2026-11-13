@@ -18,7 +18,7 @@ set -u
 ONCE=0; MARK=0; [ "${1:-}" = "--once" ] && { ONCE=1; shift; }; [ "${1:-}" = "--mark-seen" ] && { MARK=1; shift; }
 IV="${1:-60}"; MAXM="${2:-240}"
 ROOT='/Volumes/Datasec_DEV/!CODING/Datasec'
-TERM_RE='^(READY |STOPPED|CLOSED |DEPLOYED |HANDOVER |RECORDS (COMMITTED|PUSHED|DRY RUN|DONE)|ROLLED BACK)'
+TERM_RE='^(READY |STOPPED|CLOSED |DEPLOYED |HANDOVER |DONE: |RECORDS (COMMITTED|PUSHED|DRY RUN|DONE)|ROLLED BACK)'  # DONE: added 2026-11-13 (B1550's final line 'DONE: B1550 ...' was invisible to this watcher)
 
 snapshot() {
   tmux list-panes -a -F '#{pane_id} #{pane_pid} #{@cockpit_name}' 2>/dev/null | while read -r pid_ ppid name; do

@@ -18,6 +18,13 @@ SELF_DIR="$(cd "$(dirname "$0")" && pwd)"; TREE="$(cd "$SELF_DIR/../.." && pwd)"
 [ -d "$DIR" ] || { echo "brief_seat: no such project dir: $DIR" >&2; exit 2; }
 [ -f "$BRIEF" ] || { echo "brief_seat: no such brief: $BRIEF" >&2; exit 2; }
 case "$DIR" in */!CODING/Datasec/*) ;; *) echo "brief_seat: REFUSED — $DIR is not a Datasec project (Tuesday's scope is Datasec only)" >&2; exit 2 ;; esac
+# stamp_check gate (2026-11-13, ledger w=3 REGRESSION of the stamped-text-not-measured family): a kit dated
+# 2026-11-13 or later must have every literal it tells a seat to match measured in its .measured sidecar.
+KDATE=$(basename "$BRIEF" | /usr/bin/grep -o -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}')
+if [ -n "$KDATE" ] && [ ! "$KDATE" \< "2026-11-13" ]; then
+  python3 -I -B "$(dirname "$0")/tools/stamp_check.py" "$BRIEF" > /dev/null 2>&1 \
+    || { echo "brief_seat: REFUSED — stamp_check.py fails on $BRIEF (a literal the kit tells the seat to match is not measured in its .measured sidecar); run it and fill the sidecar" >&2; exit 2; }
+fi
 # LEVEL (2026-10-19, s119): routing v1.0 (Kam-approved 2026-10-18) puts tier-2 gates on Sonnet, and a /model switch
 # after launch leaves the seat's FIRST turn on Opus. BRIEF_SEAT_LEVEL=sonnet|opus (default opus) picks the level;
 # the id is still read from models_latest.json, never typed. Any other value REFUSES.
