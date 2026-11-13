@@ -47,6 +47,10 @@ def _window(line, a, b):
 def claims(text):
     out = []
     for n, line in enumerate(text.splitlines(), 1):
+        # The Stamp section is Tuesday's own text, written AFTER the measurement; it holds no literal a seat matches.
+        # (2026-11-13 13:12: the launch gate refused B1551 on the word `.measured` inside Tuesday's stamp line.)
+        if re.match(r"^##\s+Stamp\b", line, re.I):
+            break
         if SKIP.search(line):
             continue
         for rx_lit, kind in ((TICK, "tick"), (QUOTE, "quote")):
@@ -116,6 +120,8 @@ def selftest():
     t("path pointer ignored", not any(l.startswith("/Volumes/") for l in lits))
     t("plain backtick without assertion ignored", "code" not in lits)
     t("exactly two claims", len(cs) == 2)
+    stamped = kit + "## Stamp\n- STAMP: Tuesday read `.measured` once and stamp_check prints `110 claims`\n"
+    t("Stamp section text is not a claim", len(claims(stamped)) == 2)
     d = tempfile.mkdtemp(); k = os.path.join(d, "k.md"); open(k, "w").write(kit)
     t("refuses with no sidecar", main(["x", k]) == 1)
     t("--init writes skeleton", main(["x", k, "--init"]) == 0 and os.path.exists(k + ".measured"))
