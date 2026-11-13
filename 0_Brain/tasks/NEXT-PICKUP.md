@@ -20,6 +20,8 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 - **Usage 96%** (a guide, Kam 2026-10-22). Only repo-write seats (merge, fix) launched. Spark IDLE since 11-11 (o162-o164 screens all stopped on open-PR overlaps); its next work = the numstat fillers on S 78th's and B 173rd's READYs.
 - **Gate commissions are Agent-tool subagents and die with a rotation:** re-commission from their commission.md if verdict.md is absent.
 
+- **B 174th DRAFTER RUNNING** (Sonnet, background; RE-COMMISSION from reference/2026-11-13_drafter-seatB174/commission.md if fleet/briefs_staged/2026-11-13_seatB174_merge.md is absent or notes.md lacks 'UNMEASURED'): ROW 1 = PR 2227 (lifts the push freeze). B 173rd (12:56): sending READY 2096 (legs done) -> GO -> MERGED, then WRAP naming 2227 first.
+
 ## OWED (in order, after the floor)
 1. The floor items above.
 2. **Weekly consolidation LAPSED since 10-19** (skills/weekly-consolidation.md). Promotion candidates waiting: (a) a PreToolUse advisory on unbounded listings (ledger 13 Nov, w=3 today); (b) advisory on `<script>.sh --help`; (c) a checkpoint check that a wed-morning-plan-<MMDD> card exists after 09:00; (d) brief_and_launch refusing a bare 'Secuura/Blockchain' and reading back by message id; (e) wed_push.sh (store-safe push, w=3 11-11).
