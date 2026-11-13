@@ -8,7 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## UPDATE 13:0x (2) 13 Nov, the 11:5x seat - READ FIRST; supersedes the block below where they differ
+## CHECKPOINT 13:1x 13 Nov, the 11:5x seat (ctx 70%) - READ FIRST; supersedes every block below where they differ
+- develop **ef22a2d10182**; merges today 10. Kam: 07:52 x2 + 12:57 praise; reconcile 0; no agent mail pending at 13:14.
+- %210 **Seat B 174th**: plan ANSWERED 02:12:53Z (GO to start; takes PR 2227 as ROW 1, fallback WRAP-naming if SET-UP > 38 or READY > 58). NEXT MAIL = READY 2227 -> GO: write FRESH from fleet/briefs_staged/2026-11-13_B173_go_2096.md's shape; tier 1 (gate 350 line 1 'PR 2227: GO WITH NOTES (at head e29f8e8fa4b6ff15ffb3c749d400b93586f66aab; tier 1)'); squash `QA gate GO WITH NOTES; merge GO pinned to e29f8e8fa4b6.`; carry G350-2227-1..-5; ls-remote in the send action; subject = the seat's requested subject verbatim -> MERGED -> ls-remote develop -> **mail Seat R 118th** `GO: re-push row 58 (Seat R 118th)` (body: the new develop sha; PR 2227 merged; its grant OVL_IGNORE_PRS=2160 + CENSUS_ACCEPT certifications.ts=2160 per fleet/briefs_staged/2026-11-13_R118_answer_audit_block.md; re-run conditions a-c there) + `cockpit.sh say 'Secuura/Blockchain-R' ... --mail`.
+- %192 **Seat R 118th** HOLDING (wake acked 13:0x). After its re-push: READY FOR GATE tier 1 -> Opus gate (shape reference/2026-11-13_gate348-tier1-pr2224-2225/commission.md) -> ADDENDUM to the B seat; merged BEFORE PR 2225.
+- Usage 98% (Kam card 1110 = c: run to 100%; FYI posted). At 100 every Claude seat stops.
+- Rotation band 80-90: at the next safe boundary inside it, write the handover, push, `wednesday_rotate.sh --self` detached, read rotate_wednesday.log for 'respawned OK'.
+
+## UPDATE 13:0x (2) 13 Nov, the 11:5x seat - superseded by the block above where they differ
 - develop **ef22a2d10182** (PR 2096's squash). Merges today: 10 (+2097, 2096). B 173rd WRAPPED, scored 0.95, pane %207 closed.
 - %210 **Seat B 174th** LAUNCHED 02:04:44Z (brief fleet/briefs_staged/2026-11-13_seatB174_merge.md STAMPED 13:0x, CASE A; ROW 1 = PR 2227). NEXT MAIL = its plan QUESTION -> ANSWER (model 2026-11-13_B173_answer_plan.md) -> READY 2227 -> GO (fixed squash `QA gate GO WITH NOTES; merge GO pinned to e29f8e8fa4b6.`; gate 350 line 1; ls-remote in the send action) -> MERGED -> mail Seat R 118th 'GO: re-push row 58 (Seat R 118th)' + tap -R.
 - **Usage 98%.** Kam's card wed-usage-94pct-renews-sunday-1110 = c ('run to 100% as normal'): no new card; FYI posted 13:07 (bf-6666fe9efe69). At 100% every Claude seat stops (Wednesday too) until his /login or the renewal.
