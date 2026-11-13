@@ -69819,5 +69819,44 @@
    "CARD secuura-five-new-advisories-block-every-push-0929",
    "CARD secuura-ks1231-nine-fields-share-integrations-key-1106"
   ]
+ },
+ {
+  "id": "secuura-ks1699-verify-audience-1113",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1699: who may verify a certification? Rule before PR 2225 deploys",
+  "bluf": "Kam, I need one ruling from you: who may call verify on a certification. PR 2228 (KS-1699) now refuses anyone who is not the platform admin, the issuer, the holder or the issuing connector. Gate 351 (tier 1, GO WITH NOTES) found that no caller in the repo today is refused. But three legitimate-in-principle callers would be: a non-party using the JS SDK's verify, someone sent a 'verify' share, and the Verifier -> Certifier user (recertify stays open to them). It only bites once PR 2225 deploys; nothing deploys now (demo frozen). The merge of 2228 to develop goes ahead either way.",
+  "default_action": "Nothing deploys until you rule (demo frozen). PR 2228 merges to develop on its gate; the deploy of PR 2225 waits for this card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep the narrow audience",
+    "detail": "Only admin, issuer, holder and issuing connector may verify. The SDK readme and the verify share type get a follow-up ticket to match."
+   },
+   {
+    "key": "b",
+    "label": "Narrow, plus 'verify' share recipients",
+    "detail": "A follow-up fix lets someone holding a verify share call verify too, before 2225 deploys. The other two cases stay refused."
+   },
+   {
+    "key": "c",
+    "label": "Leave verify open to any signed-in caller",
+    "detail": "The guard is reverted before 2225 deploys; KS-1699 is closed as intended behaviour."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-11-13T14:11:15.954417+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1114-verify-title-strategy",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks1352-revoked-credentials-still-verify",
+   "CARD secuura-ks1628-retire-deprecated-verify-route-1019",
+   "CARD secuura-ks590-verify-disclosure-four-questions-1102",
+   "CARD secuura-ks1991-verify-presents-later-copy-fix-1110"
+  ]
  }
 ]
