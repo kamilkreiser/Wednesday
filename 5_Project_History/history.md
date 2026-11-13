@@ -3,6 +3,12 @@
 - Seat B 175th: PR 2095 (KS-2012) and PR 2090 (KS-692) merged on head-pinned GOs; develop 48883ba5976b; 13 merges on 11-13. Wrap scored 0.95, pane closed.
 - B 176th held; card secuura-login-for-2228-at-99pct-1113 (rec /login, default hold) open. Queue: 2228 first.
 
+## 2026-11-13 14:03 -> 2026-11-14 05:3x — Tuesday s275 (Datasec seat; s274's successor; parked at the weekly-allowance edge; wrap at the scheduled 05:30 shift change)
+- Security Composer: confirmed at source that all 15 Dependabot alerts (13-27) closed after #128 (0 open; alert 26 fixed 03:01:34Z; main 68975c10). Kam told (bf-a6330434602f). NOT deployed; a stack smoke was suggested before his next Composer deploy.
+- Usage: usage_gate REFUSED all night (weekly 99% >= 95%). One edge line went to Kam (bf-8b60d92a1ba8). No agent launched; the board was watched by kam_watch, re-armed at every 4 h timeout (14:03, 18:10, 22:17, 02:23). No Kam message after 12:57.
+- OWED for the next seat, on renewal or an account switch: Composer records pass for #128; NexusAI stored-values pin ticket; then the boot ticket sweep. Handover DELTA 1160.
+- Boot-read finding: the by-tier digest (7825 lines, ~280K tokens) did not fit a single turn. Lines 1-2000 were read whole, the rest by headline.
+
 ## 2026-11-10 19:56 -> 2026-11-11 05:3x — Tuesday s264 (Datasec seat; boot after an accidental window close; wrap at the scheduled 05:30 shift change)
 - Recovered the floor: re-commissioned the dead UAT deploy-kit drafter; stopped two orphaned gate scripts holding the NexusAI jest lock; read every seat's wrap mail.
 - HPSM-POC: UAT DEPLOYED main 009421a2 (#304-#308) WITH the ledger migration (backup copy proven first; API down 3m45s; old-API exposure 146 s, 0 rows); records R203 (analysis PR #192, HPSMPOC-324 Done); delta gate B1440-3 GO unblocks 410/417/438.
