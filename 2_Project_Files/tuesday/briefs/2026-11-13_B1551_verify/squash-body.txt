@@ -1,0 +1,47 @@
+Only package-lock.json changes. Eight lock entries move, each inside the range
+its parent already declares, none across a major version:
+
+- undici 6.28.1 -> 6.29.1 (dev only)
+- fast-uri 4.2.2 -> 4.2.3
+- ajv/node_modules/fast-uri 3.1.8 -> 3.1.9
+- fastify 5.12.5 -> 5.12.8 (its find-my-way range ^9.6.0 -> ^9.10.0)
+- find-my-way 9.9.0 -> 9.10.0
+- ip-address 10.7.2 -> 10.7.6
+- ret 0.5.0 -> 0.5.1
+- safe-regex2 5.1.1 -> 5.1.2
+
+No package.json changes: every declared range already admits the patched
+version, so the lock is the only place the fix lives.
+
+Clears 15 Dependabot alerts:
+- undici 26, 27, 18, 20, 25 (all fixed in 6.29.1)
+- fast-uri 14, 15, 16, 17 (fixed in 4.2.3) and 19, 22, 23, 24 (fixed in 3.1.9)
+- fastify 13 (fixed in 5.12.6)
+- ip-address 21 (fixed in 10.7.4)
+npm audit over the lock goes from 4 findings to 0.
+
+Seven of the eight entries are runtime packages (the API, worker and mock
+identity provider). Release notes and the published code of each move were
+read: fast-uri now rejects a percent-encoded scheme and a host holding
+delimiter characters (it fails closed); find-my-way 9.10.0 reworks route
+lookup internally (and, with its ignoreDuplicateSlashes option on, no longer
+strips duplicate slashes from a query string);
+fastify limits an error status code to 400-599 and decodes string bodies once;
+ip-address fixes a bit-test off-by-one used only for Teredo flags. None of
+these touches an option this project sets.
+
+The lock was written by npm 11.19.1 on Node v24.22.2 with
+npm update undici fast-uri fastify ip-address --package-lock-only
+--ignore-scripts --before=2026-11-13T02:00:00Z. A no-change install with the
+same tool reproduces the old lock byte for byte. The CI image (Node v22.23.2,
+npm 10.9.8) installs the new lock with npm ci.
+
+Checks, same at base and at this commit: lint, format:check, typecheck and
+build pass; the whole Vitest run has 315 files and 3177 tests (3174 passed,
+1 skipped, 2 failed: the two source-document citation tests that need
+withheld text), with no test lost, changed or added; the database suites run
+39 files / 674 tests and 83 files / 1563 tests, all passing, with the same
+test names and results at base and head; the CI-stage and web images build.
+Not deployed: Composer deploys only on the product owner's own instruction.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

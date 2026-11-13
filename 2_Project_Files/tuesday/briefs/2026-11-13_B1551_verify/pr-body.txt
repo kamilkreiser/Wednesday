@@ -1,0 +1,51 @@
+BLUF: a lockfile-only update that clears all 15 open Dependabot alerts (undici, fast-uri, fastify, ip-address; 3 high) without touching any package.json. Not deployed: Composer reaches the live site only when the product owner deploys.
+
+## What changes
+One path: package-lock.json (25 lines added, 25 removed; 351 entries before and after). Eight lock entries move, each inside the range its parent already declares, none across a major version:
+- undici 6.28.1 -> 6.29.1 (development only)
+- fast-uri 4.2.2 -> 4.2.3
+- ajv/node_modules/fast-uri 3.1.8 -> 3.1.9
+- fastify 5.12.5 -> 5.12.8 (its find-my-way range ^9.6.0 -> ^9.10.0)
+- find-my-way 9.9.0 -> 9.10.0
+- ip-address 10.7.2 -> 10.7.6
+- ret 0.5.0 -> 0.5.1
+- safe-regex2 5.1.1 -> 5.1.2
+
+Seven of the eight are runtime packages (the API, worker and mock identity provider servers). Composer deploys only on the product owner's own instruction, so merging this does not change the live site.
+
+## Why no package.json changes
+Every declared range already admits the patched version, so the fix lives only in the lock. The manifests' floors still read ^5.12.5 and similar: a fresh install without a lock could resolve below the patched version, and only the lock holds the fix.
+
+## Why our own branch
+Dependabot has no open pull request for these alerts, and code scanning has never analysed a bot-authored pull request, so this is our own change, regenerated and tested here.
+
+## How it was made
+npm 11.19.1 on Node v24.22.2 (never edited by hand): npm update undici fast-uri fastify ip-address --package-lock-only --ignore-scripts --before=2026-11-13T02:00:00Z. A no-change install with the same tool reproduces main's lock byte for byte (blob 0fabc670e1b9aadf275a51e9c5044c32cd2d19a4); the updated lock is blob 4364f1649bb96fafacec020a0e65d809b7090139. The same blob was reproduced from main's files by a second, independent run.
+
+## Runtime behaviour changes (release notes and published code read for every move)
+- fast-uri 4.2.3 and 3.1.9 (security release): a percent-encoded scheme is rejected instead of decoded; a domain host holding delimiter or control characters is rejected instead of rewritten; relative-reference dot-segment handling and suffix-reference colons follow RFC 3986. Inputs that were wrong now fail closed. Used through ajv and fast-json-stringify to resolve schema references; this project's references are the fragment form and the relative id "openapi", which resolve identically before and after (checked).
+- find-my-way 9.10.0: internal rework of route lookup (faster registration and lookup; an opt-in compiled mode this project does not enable); with ignoreDuplicateSlashes on, a query string is no longer altered. This project sets none of the router options.
+- fastify 5.12.6 to 5.12.8 (two security releases): an error status code is limited to 400-599 with 500 as the fallback; string bodies are decoded once; a synchronous throw in a custom content-type parser becomes an error response; the content-type cache is FIFO. The API's own error handler and its upload parsers are unaffected (checked).
+- ip-address 10.7.3 to 10.7.6: a bit-test off-by-one used only for Teredo flags is fixed; IPv6 zone parsing, in-addr.arpa length and error-message escaping are hardened. Reached only through the rate limiter's default IP key, which the API replaces with a per-caller key.
+- safe-regex2 5.1.2 and ret 0.5.1: no behaviour change for ordinary patterns (typing and build changes; ret no longer rejects an empty capture-group name).
+- undici 6.29.1: development only (OpenAPI parser used by the contract package); the services use Node's built-in fetch, not this package.
+
+## What was measured
+- The changed key set is exactly the eight above; all eight integrity values equal the registry's; all 8 added resolved URLs are registry.npmjs.org.
+- The 15 alerts: every vulnerable range matches an entry in main's lock and none in this lock. npm audit over the lock: 4 findings (fast-uri, fastify, ip-address, undici) before, 0 after.
+- The CI-stage image (Node v22.23.2, npm 10.9.8), built without cache, installs the new lock with npm ci; the web image builds.
+- Lint, format:check, typecheck and build pass at base and at head. The whole Vitest run is identical at base and head: 315 files, 3177 tests (3174 passed, 1 skipped, 2 failed); lost 0, changed 0, added 0 by (file, test, status). The 2 failures are the same two citation tests at base and head (they need source text that is withheld).
+- The database suites (scripts/test-db.sh) pass at head: 39 files / 674 tests and 83 files / 1563 tests, with the same test names and results as base.
+- A probe in the head image with the API's own schema setup (ajv strict off, the "openapi" schema id, fragment and relative references), regex and multi-parameter routes, a bad URL, bad JSON and a rate limit: the same answers at base and head.
+- Not run: the bridge (.NET) and compose-stack parts of the local CI script (this change feeds them no file), and any browser test (none exists in this project's CI).
+
+## The 15 alerts this clears
+- undici (fixed in 6.29.1): 26 (>= 4.0.0, < 6.29.1, high), 27 (>= 4.2.1, < 6.29.1, high), 18 (>= 6.23.0, < 6.29.1, high), 20 (>= 6.5.0, < 6.29.1, medium), 25 (>= 5.15.0, < 6.29.1, medium)
+- fast-uri 4.x (fixed in 4.2.3): 14 (>= 4.0.1, < 4.2.3, medium), 17 (>= 4.0.0, < 4.2.3, medium), 15 and 16 (>= 4.0.0, < 4.2.3, low)
+- fast-uri 3.x (fixed in 3.1.9): 19 (>= 3.1.3, < 3.1.9, medium), 22 (>= 3.0.0, < 3.1.9, medium), 23 and 24 (>= 3.0.0, < 3.1.9, low)
+- fastify (fixed in 5.12.6): 13 (>= 5.12.2, < 5.12.6, low)
+- ip-address (fixed in 10.7.4): 21 (<= 10.7.3, medium)
+
+Hosted code scanning on the head is read after the pull request opens. Nothing is deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

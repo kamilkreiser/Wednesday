@@ -1,0 +1,14 @@
+LANDING (head-pinned SQUASH, Composer's rule). Branch b1551/composer-dependabot-alerts at head 83f9423b10699a48329ff5b78fb092ef9a8db52e (one commit on main c2b231fada1a9a7d44c3e6a3f9ad733a12ab2b9b; one path: package-lock.json; lock blob 4364f1649bb96fafacec020a0e65d809b7090139).
+
+Rule: head-pinned squash (--match-head-commit). The project records line CLARIFICATIONS.md:689 says "merged head-pinned" and "Not deployed"; squash is the recorded practice (lines 157, 182, 582, 855).
+
+1. Open the PR from the branch with pr-title.txt and pr-body.txt (both in this folder). Read the hosted code scanning run on the head. Land only if main is still c2b231fa; if main moved, or the branch head is not 83f9423b, a new round.
+
+2. Land (replace N with the PR number):
+
+D='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-13_B1551_verify'
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/4_Credentials/.gh-config' gh pr merge N -R datasecau/Datasec-Security-Composer --squash --match-head-commit 83f9423b10699a48329ff5b78fb092ef9a8db52e --subject "$(cat "$D/squash-subject.txt")" --body-file "$D/squash-body.txt"
+
+3. Not deployed; nothing is deployed from this change. Seven of the eight entries are runtime packages (API, worker, mock identity provider), so the live site changes only when the product owner deploys, on the product owner's own instruction. Composer deploys only on that instruction.
+
+4. After landing, read: gh api -X GET 'repos/datasecau/Datasec-Security-Composer/dependabot/alerts?state=open&per_page=100'. None of alerts 13 to 27 should remain open (Dependabot closes a fixed alert on the default branch); a still-open one is a new round.
