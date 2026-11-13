@@ -13,6 +13,16 @@
 # ALLOWS: inboxes/tuesday-agent@..., inboxes/coagent@..., and any command that only NAMES another address elsewhere
 # (for example the "to" field of a mail this seat sends from its own inbox: coordination mail to the other seat).
 # FAIL-OPEN, stated: unparseable hook input -> pass, with a line on stderr saying the check did not run.
+# SEAT-AWARE (2026-11-13 14:2x, Wednesday seat): settings.template.json registers this hook on EVERY tree, so the
+# hardcoded tuesday-agent set refused the WEDNESDAY seat its OWN inbox at boot. The seat is now the tree's (the same
+# folder-name rule as fleet/cockpit/seat_resolve.sh); on the TUESDAY tree the allowed set is identical to before.
+_TREE="${CLAUDE_PROJECT_DIR:-$(CDPATH= cd -- "$(dirname -- "$0")/../../.." && pwd -P)}"
+case "$(basename "$_TREE")" in
+  TUESDAY|Tuesday|tuesday) INBOX_SEAT=tuesday ;;
+  FRIDAY|Friday|friday)    INBOX_SEAT=friday ;;
+  *)                       INBOX_SEAT=wednesday ;;
+esac
+export INBOX_SEAT
 HOOK_INPUT="$(cat)"; export HOOK_INPUT
 python3 -I - <<'PY'
 import json, os, re, sys
@@ -20,7 +30,8 @@ try:
     cmd = json.loads(os.environ.get("HOOK_INPUT", "")).get("tool_input", {}).get("command", "") or ""
 except Exception:
     print("pretooluse_inbox_scope: input not parseable; check NOT run", file=sys.stderr); sys.exit(0)
-ALLOWED = {"tuesday-agent", "coagent"}
+SEAT = os.environ.get("INBOX_SEAT", "tuesday")
+ALLOWED = {SEAT + "-agent", "coagent"}
 bad = []
 for m in re.finditer(r"agentmail\.to/v[0-9]+/inboxes/([^/\s\"'?]+)", cmd):  # the API path only: prose that mentions an inbox is not a read (2026-11-13 false positive on a note)
     who = m.group(1)
@@ -31,7 +42,7 @@ for m in re.finditer(r"agentmail\.to/v[0-9]+/inboxes/([^/\s\"'?]+)", cmd):  # th
     if name not in ALLOWED:
         bad.append(who)
 if bad:
-    print("REFUSED by pretooluse_inbox_scope.sh: this seat reads only its own inbox (tuesday-agent@) and the fleet bus "
+    print("REFUSED by pretooluse_inbox_scope.sh: this seat reads only its own inbox (" + SEAT + "-agent@) and the fleet bus "
           "(coagent@). Path(s) naming another inbox: " + ", ".join(sorted(set(bad))) + ". Another seat's inbox holds another "
           "client's mail (ledger 2026-11-13, w=9 of the cross-client print family). Write each inbox URL out; never loop "
           "over inboxes.", file=sys.stderr)
