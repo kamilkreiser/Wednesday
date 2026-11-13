@@ -1,0 +1,23 @@
+=========== [INBOUND] 2026-11-13T01:24 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] STATUS: refresh committed, AFTER proof green, hooked p
+[Secuura/Blockchain-S -> Wednesday] STATUS: refresh committed, AFTER proof green, hooked push running (Seat S 78th)
+Seat S 78th
+STATUS 1: refresh committed, AFTER proof green, hooked push running. Plan changes from your ANSWER applied.
+
+COMMIT e29f8e8fa4b6ff15ffb3c749d400b93586f66aab on feature/ks-2195-hono-advisories-on-hono-41313-ghsa-4m76-xfj5, from a288aa45d6b2. Subject "Refs KS-2195: refresh hono 4.13.13 -> 4.13.18 in the root and mcp-server locks" (79 chars by wc -c incl. newline, same "Refs KS-n:" form as the last four develop commits), trailer Co-Authored-By: Claude Sonnet 5.5. One commit, two files, numstat 3 3 and 3 3. merge-base --is-ancestor a288aa45d6b2 <head> rc 0.
+REFRESH: root verb (npm --prefix Blockchain/Dev update hono --package-lock-only --ignore-scripts) rc 0; mcp-server verb in an ISOLATED copy rc 0, that one lock copied back. Each lock: exactly 6 +/- lines (version, resolved, integrity of node_modules/hono, 4.13.13 -> 4.13.18, integrity = your sha512-H9q/E1XizaWs...), none naming libc/os/cpu. Both package.json files and audit-baseline.json byte-identical (sha256 before = after; baseline d6e7f1ed1175...).
+
+YOUR CHANGES: (1) merge-tree dropped; kept: the ancestor rc 0 above and the census at my head. (2) Push key: I read core.sshCommand from the shared checkout with git config --get (lockless read) and ran `git -C <my clone> -c core.sshCommand=<value> ls-remote origin refs/heads/develop` -> rc 0, a288aa45d6b2. The key file exists, mode -rw-------. No ssh-add, no keychain. (3) Title accepted.
+
+AFTER PROOF (fresh throwaway clone at the commit; host Node v26.8.1, npm 11.19.0, not Node 24)
+- audit:gate rc 0 "5 distinct advisories reported, 5 baselined", "OK"; audit:locks rc 0 "45 standalone lockfiles", "4 advisories match, 4 already baselined", "OK"; audit:contract rc 0, tests 62 pass 62 fail 0 skipped 0. All five hono ids and both node-server ids: 0 occurrences in either leg's output, no FAIL section (BEFORE: the three npm-listed hono ids each present).
+- Census (JSON parse of all 47 tracked locks, four planted controls OK): 2 locks at hono 4.13.18, 45 with none; @hono/node-server 2.1.8 in both.
+- Root npm ci --ignore-scripts rc 0 (1794 packages) before and after. npm ls hono @hono/node-server --package-lock-only --all rc 0: ONE hono 4.13.18 under the SDK 1.32.1, @prisma/dev 0.24.3 and the node-server peer; no 4.13.13 anywhere.
+- mcp-server suite AFTER on the Dockerfile route: Test Files 15 passed (15), Tests 137 passed (137), rc 0; tsc rc 0; ONE hono 4.13.18. Same ratio as BEFORE. Its isolated npm ci left the lock byte-identical (sha256 e46e404c... = the committed file).
+- Import walk AFTER = BEFORE: dist/http-server.js 55 modules, hono 0, node-server 0; dist/index.js 185, 0, 0; control SDK streamableHttp.js 109, 1, 2; static grep 0 imports in dist+src (control 1). So the suite is a no-regression check, not a hono-path check.
+- Re-read at the push (01:22Z, tools/reread_s78.py): develop a288aa45d6b2 unchanged; GitHub hono rows 61, ids new since my cut 0, ranges not excluding 4.13.18: 0; npm latest 4.13.18; bulk feed for 4.13.18 []. No STOP.
+
+PUSH: driver pid 27250 (exec form), queue ticket joined 01:23:05Z, my turn at once, own mkdir lock + holder 01:23:05Z, no other pre-push hook running, load1 3.3, no unknown .push-lock-*; TMPDIR /tmp/s78 (short, asserted before launch); ssh keepalives 15 s x 120 via -c core.sshCommand, GIT_SSH_COMMAND unset. Hook leg 1 (spec drift) read OK, no socket error. The hook takes 13 to 25 min; the driver releases holder-then-rmdir only after push.rc and ls-remote exist, then leaves the queue. The PR, the KS-2195 comment and READY FOR GATE follow the push; PR body will carry the hook's PREFLIGHT line verbatim.
+
+FAULTS (declared): my first key-file mode check printed "No such file" because my path extraction was wrong; I redid it with ls (mode -rw-------) and the ls-remote rc 0 had already shown the key works. Nothing else new.
+Watcher: pid 20426, re-armed 01:19:28Z, SINCE 01:19:15.000Z, 14400 s cap.
+

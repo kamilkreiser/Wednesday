@@ -1,0 +1,29 @@
+=========== [INBOUND] 2026-11-13T01:39 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] READY FOR GATE, KS-2195, PR 2227, tier 1 (as commissio
+[Secuura/Blockchain-S -> Wednesday] READY FOR GATE, KS-2195, PR 2227, tier 1 (as commissioned) (Seat S 78th)
+Seat S 78th
+READY FOR GATE, KS-2195, PR 2227, tier 1 (as commissioned). Nothing merged, nothing deployed.
+
+THE FIVE THINGS, BY IDENTIFIER
+1. PR: 2227, https://github.com/Secuura/Distributed_Secuura/pull/2227. Open, not draft, base develop, 2 files, +6 -6; body read back equal to the file I sent. GitHub reads mergeable MERGEABLE, mergeStateStatus UNSTABLE (I measured the field only; your gate note on 2226 puts the red CI on billing).
+2. Head, read from origin in the same action as this mail (git ls-remote of the branch and gh pr view, 01:38Z): e29f8e8fa4b6ff15ffb3c749d400b93586f66aab, branch feature/ks-2195-hono-advisories-on-hono-41313-ghsa-4m76-xfj5. Base a288aa45d6b2 = develop at 01:38:46Z (ls-remote, unchanged since my cut); merge-base --is-ancestor rc 0; one commit, two files.
+3. Ticket comment: KS-2195 comment id cc53912a-3866-4b93-92ef-9c90673dd563 (createdAt 2026-11-13T01:38:25.621Z), the only comment on the ticket, read back: no user-mention node.
+4. Test Evidence block: the "## Test Evidence" section of the PR body (touched / ran / NOT run / migrations and config), with the Node line, the DOCS sentence (no fragment pair, SKILL.md lines 483-484 quoted), "Before this deploys: nothing deploys from this PR; deploy is Kam's tap", the attribution line, and NO self-hold sentence.
+5. NOT done or NOT covered (also in the body): no live MCP HTTP client run (its HTTP entry only started for the 5 s import walk); no image build; no deploy; hook legs 3, 4, 8 skipped, and Schemathesis, Akto, Playwright, k6 not run; services/originate unchanged; the hono 4.13.13 -> 4.13.18 code diff not read; CommonJS require paths, @prisma/dev reachability and every other shipped entry not measured; GHSA-46wx-v44x-9hh2 and GHSA-4h7h-rv7c-7m2v are not in npm's feed yet, so for those two the proof is the range against 4.13.18, not an audit-output absence.
+
+PROOF IN ONE PLACE (host Node v26.8.1, npm 11.19.0, NOT Node 24; evidence in 5_Project_History/2026-11-13_seatS-78th/evidence)
+- Legs 6 and 7: BEFORE rc 1 and rc 1 (3 NEW hono ids; gate "8 distinct, 5 baselined", locks "7 advisories match, 4 already baselined"); AFTER rc 0 "5 distinct advisories reported, 5 baselined" and rc 0 "45 standalone lockfiles ... 4 advisories match, 4 already baselined". All five hono ids and both node-server ids: 0 occurrences in either AFTER output. audit:contract rc 0, 62 of 62.
+- THE HOOK'S OWN legs 6 and 7 on the pushed branch (push.out): both OK with the same figures. Hook line verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4, 8 "local stack not up on http://localhost:6882". Not quoted as a pass.
+- Census, 47 locks, four planted controls OK: BEFORE 2 at hono 4.13.13; AFTER 2 at 4.13.18, 45 none; node-server 2.1.8 in both. npm ls (root, package-lock-only): ONE hono 4.13.18 under the SDK 1.32.1, @prisma/dev 0.24.3 and the node-server peer. Root npm ci rc 0 before and after.
+- Lock diff: exactly 6 +/- lines per lock, only version, resolved, integrity of node_modules/hono, integrity sha512-H9q/E1XizaWs... as in your BRIEF; no libc/os/cpu line moved; both package.json files and audit-baseline.json byte-identical (sha256 before = after, baseline d6e7f1ed1175...).
+- mcp-server suite, Dockerfile route, BEFORE and AFTER: 15 of 15 files, 137 of 137 tests, tsc rc 0. Import walk, same before and after: dist/http-server.js 55 modules, hono 0, node-server 0; dist/index.js 185, 0, 0; control SDK streamableHttp.js 109, 1, 2. So the suite is a no-regression check, not a hono-path check (said in the PR body).
+- Advisory and develop re-read at the push (tools/reread_s78.py, 01:22Z): develop unchanged, GitHub hono rows 61, 0 new ids, 0 ranges including 4.13.18; npm latest 4.13.18; bulk feed for 4.13.18 [].
+
+PUSH: driver pid 27250 through the queue; own mkdir lock 01:23:05Z; push rc 0 at 01:37:08Z (14 min 3 s); ls-remote of the branch = the head in the driver's own log; lock released (holder then rmdir) and ticket left at 01:37:12Z; no lock or queue entry of mine remains. TMPDIR /tmp/s78; hook leg 1 read OK at launch.
+OPEN-PR SCAN at READY (pr_scan_s78.py, one GraphQL census, planted control True, real control PR 2099 present): 89 open PRs, 12 touch the two locks or the two package.json files = the 11 from my cut (575, 635, 639, 649, 945, 946, 947, 948, 949, 1965, 2099) plus my own 2227; 0 touch services/mcp-server's lock besides mine. None is mine to touch.
+
+FOR THE GATE TO CHECK (my suggestion): that the two merged blobs equal the verb's output (sha256 of the isolated mcp-server install's lock = the committed file, e46e404c...); that audit:gate and audit:locks are rc 0 on a fresh install of the head; that no other seat's lock change lands near the hono entry before the GO (PR 2099 is the one to watch).
+
+FAULTS (declared): none new since STATUS 1 (the key-file mode check, already declared).
+NEXT: I patch only the PR body (PATCH, no new commit, no push) if the gate has notes; the wrap follows the gate notes, or when you tell me.
+WATCHER: pid 20426, armed 01:19:28Z, SINCE 01:19:15.000Z, cap 14400 s (ends about 05:19Z); nothing else of mine is running.
+
