@@ -8,7 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## CHECKPOINT 13:0x 13 Nov, the 11:5x seat (ctx 65%) - READ FIRST; supersedes the 12:1x block below where they differ
+## UPDATE 13:0x (2) 13 Nov, the 11:5x seat - READ FIRST; supersedes the block below where they differ
+- develop **ef22a2d10182** (PR 2096's squash). Merges today: 10 (+2097, 2096). B 173rd WRAPPED, scored 0.95, pane %207 closed.
+- %210 **Seat B 174th** LAUNCHED 02:04:44Z (brief fleet/briefs_staged/2026-11-13_seatB174_merge.md STAMPED 13:0x, CASE A; ROW 1 = PR 2227). NEXT MAIL = its plan QUESTION -> ANSWER (model 2026-11-13_B173_answer_plan.md) -> READY 2227 -> GO (fixed squash `QA gate GO WITH NOTES; merge GO pinned to e29f8e8fa4b6.`; gate 350 line 1; ls-remote in the send action) -> MERGED -> mail Seat R 118th 'GO: re-push row 58 (Seat R 118th)' + tap -R.
+- **Usage 98%.** Kam's card wed-usage-94pct-renews-sunday-1110 = c ('run to 100% as normal'): no new card; FYI posted 13:07 (bf-6666fe9efe69). At 100% every Claude seat stops (Wednesday too) until his /login or the renewal.
+
+## CHECKPOINT 13:0x 13 Nov, the 11:5x seat (ctx 65%) - superseded by the block above where they differ
 - develop **a6af38a51716** (PR 2097's squash, 01:44:56Z). Merges today: 2147, 2144, 2141, 2137, 2125, 2134, 2126, 2226, 2097 (9). Push freeze ON until PR 2227 merges (merges are NOT affected: measured on 2 rows).
 - **PR 2227** (KS-2195, hono 4.13.18, head e29f8e8fa4b6): **gate 350 = GO WITH NOTES** (line 1 read at source); body patched + KS-2195 comment/description edited by S 78th. **Seat S 78th WRAPPED, scored 0.95, pane %204 closed.**
 - %207 **Seat B 173rd**: GO for PR 2096 sent 01:58:56Z (fleet/briefs_staged/2026-11-13_B173_go_2096.md). NEXT MAIL = MERGED 2096 -> ls-remote -> then its WRAP (naming 2227 first) -> score -> identity read (own call) -> pane_close.sh next call.
