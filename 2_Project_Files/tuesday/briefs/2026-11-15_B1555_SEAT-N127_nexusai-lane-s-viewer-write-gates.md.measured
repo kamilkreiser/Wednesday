@@ -1,0 +1,132 @@
+63d456a1 | line 8 `CLARIFICATIONS.md:2680-2682`: sed -n 2680p/2682p of CLARIFICATIONS.md contain 'no admin routes in open (no sign-in) mode': True / True; control line 2681 (not the ruling) contains it: False -> printed True / True; control False
+f2d89ea4 | line 12 `backend/services/authEnforcement.js:634-647`: awk NR==634 -> 'function adminGateRefuses({ firstRunComplete, hasUsers, user'; NR==647 -> "return !(user && user.role === 'admin');"; control NR==600 does not start 'function adminGateRefuses': True
+798829c8 | line 12 `adminGateRefuses`: grep -c -F in authEnforcement.js -> 3; in kit -> 6; control 'adminGateRefusesZZ' -> 0
+30b79e51 | line 12 `:630`: awk NR==630 of authEnforcement.js -> "* Kam's rule (C-01): NexusAI is open until the admin sets Entra. So while no" (holds 'NexusAI is open until': True); control NR==300 holds it: False
+87bdc551 | line 12 `NexusAI is open until the admin sets Entra`: grep -c -F 'NexusAI is open until the admin sets Entra' authEnforcement.js -> 1 (the comment wraps lines 630-631, so the single-line count may read 0: 'NexusAI is open until' -> 1); control zzz -> 0
+2de883cd | line 19 `/api/admin/*`: inventory rows with open 403 whose path starts /api/admin/: 14 of 14; control path prefix /api/zzz/ -> 0
+0e06727c | line 19 `GET /api/auth/users`: inventory row open status 401 (rows with open 401: 2); control GET /api/health open 200
+733a1846 | line 19 `GET /api/user-data/export`: inventory row open status 401 (rows with open 401: 2); control GET /api/health open 200
+4096d8f0 | line 21 `scripts/role-capability-inventory.js:635`: awk NR==635 -> "const ctlOpen = scan.get('backend/server.js').found.get('POST /api/settings/costs');"; control NR==300 has 'ctlOpen': False
+fa4e7ff6 | line 21 `POST /api/settings/costs`: awk NR==635 of inventory script holds it: True; inventory row POST /api/settings/costs viewer 200; control line 300 holds it: False
+3b7bfc15 | line 21 `:637`: awk NR==637 -> "if (!ctlOpen || ctlOpen.length !== 0) throw new Error('scan control failed: POST /api/sett"; control NR==300 no 'must read ungated': True
+9da73755 | line 21 `--generate`: grep -c -F '--generate' inventory script -> 5; kit 4x; control '--zzz' -> 0
+6144a1d5 | line 21 `case sensitive routing`: grep -c -i -F in server.js -> 0; control: 'app.set(' -> 1 (nonzero, so the search can see the setting API)
+c44d10ce | line 21 `app.set(`: grep -c -F 'app.set(' server.js -> 1; control 'zzz' -> 0
+a736beca | line 21 `/API/...`: grep -c -F 'F5' and '/API/' in the 2026-11-11 verdict: 3 and 1; control zzz -> 0
+bf4e9b4b | line 21 `must read ungated`: grep -c -F in inventory script -> 1; kit 2x
+18850b70 | line 22 `b1480/nexusai-s-viewer-write-gates`: grep -c in refs.txt (37 heads/b1* refs from matching-refs) -> 1; control 'b1480/zzz' -> 0
+a17de495 | line 23 `skipped`: gh api actions/runs?branch=main&per_page=4 printed 'Deploy demo ab5a16e9 completed skipped' (read 05:47); control: Build row printed 'success'
+c8589587 | line 24 `worktreeSlot()`: grep -c -F 'function worktreeSlot(' test-server.js -> 1; awk NR==89 -> function worktreeSlot(root = worktreeRoot()) ; control zzz -> 0
+2115aeee | line 25 `queue-docker`: ls locks-laptop-1017 -> ['queue-docker', 'queue-jest', 'released']; contains queue-docker: True; control zzz: False
+8c08b1c1 | line 25 `queue-jest`: ls locks-laptop-1017 -> ['queue-docker', 'queue-jest', 'released']; contains queue-jest: True; control zzz: False
+d8579bb8 | line 25 `released`: ls locks-laptop-1017 -> ['queue-docker', 'queue-jest', 'released']; contains released: True; control zzz: False
+54ba450b | line 31 `'access'`: grep -c -F the access literal in server.js at main -> 1 (line 19125: "if (password !== 'access') return res.status(403).json({ success: fals"); control 'zzz' -> 0
+8ac08250 | line 34 `axios.get`: grep -c -F 'axios.get(' server.js -> 5; the 169.254.169.254 call: 1
+9fd53981 | line 34 `:555`: awk NR==555 of server.js -> "const response = await axios.get('http://169.254.169.254/metadata/instance?api-v"; control NR==556 differs: True
+b6170a5b | line 34 `{ available: false, type: 'none' }`: grep -c -F in server.js -> 1; awk NR==593 -> 'return false;'
+ef3d0b70 | line 34 `not_configured`: grep -c -F in server.js -> 12; control zzz -> 0
+9e1b871d | line 35 `GET /api/risk-conditions`: grep -n of the registration in server.js -> [21116]; inventory viewer 200
+efb728ad | line 35 `GET /api/settings/emails`: grep -n of the registration in server.js -> [20763]; inventory viewer 200
+8ffc5b67 | line 35 `administrators only for writes`: grep -c -F in rd965.txt (Jira RD-965 newest comment, saved) -> 1; control zzz -> 0
+6da5571d | line 38 `POST /api/settings/costs`: awk NR==635 of inventory script holds it: True; inventory row POST /api/settings/costs viewer 200; control line 300 holds it: False
+67db05df | line 39 `enforced.seeded.viewerSession`: grep -c -F in old branch rd958 test -> 1; at main inventory script -> 0
+f09c2e3a | line 39 `.adminSession`: grep -c -F in old branch rd958 test -> 1; at main inventory script -> 2
+e4bb34a4 | line 39 `tokens.viewerSession`: grep -c -F in inventory script -> 2 (lines 457 and 586); control zzz -> 0
+a09ec268 | line 39 `tokens.adminSession`: grep -c -F in inventory script -> 2 (lines 457 and 586); control zzz -> 0
+a69217b2 | line 39 `:457`: awk NR==457 of inventory script holds 'tokens.viewerSession': True
+48c0ee7b | line 39 `:586`: awk NR==586 holds 'tokens.viewerSession': True
+dcffca07 | line 42 `complete-first-run`: grep -c -F "/api/setup/complete-first-run" server.js -> 1; control zzz -> 0
+466b72dc | line 43 `validate-condition`: grep -c -F "/api/validate-condition" server.js -> 1; control zzz -> 0
+d74ce252 | line 67 `STOPPED: NEEDS TUESDAY <one question>`: template kit has it 4x; this kit 4x; rule sentence copied unchanged
+5c8019b9 | line 69 ` is not `: rule/shape text: grep -c -F in kit -> 8; in the template kit (shape source) -> 9; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+44cef8ea | line 71 `refs/heads/main`: template has 5x, kit 5x; the instruction is to run git ls-remote; this drafter ran gh api branches/main -> ab5a16e9 (a sha printed)
+bd4fc910 | line 73 `GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/`: template 1x, kit 1x; the path exists: True
+44244cf0 | line 73 `datasec`: rule/shape text: grep -c -F in kit -> 5; in the template kit (shape source) -> 5; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+a98a5c6a | line 74 `lsof`: drafter ran lsof -nP -iTCP:9770-9779 -sTCP:LISTEN -> 0 rows; band 20640-21279 -> 0 rows; machine-wide listeners 14 (control)
+536d8c34 | line 75 `.../inv18/backups/`: form copied from the template's inv1/backups line; directory b1555-nodot/inv18 does not exist yet: True
+a7f36133 | line 78 `/usr/bin/grep -n -i 'Merge path'`: grep -n -i 'Merge path' CLARIFICATIONS.md -> [2067, 2611]; line 2067 starts '  2. Merge path: open a PR from the gated branch, wait for C'
+45eb061e | line 78 `:2067`: grep -n -i 'Merge path' CLARIFICATIONS.md -> [2067, 2611]; line 2067 starts '  2. Merge path: open a PR from the gated branch, wait for C'
+e1e7b224 | line 78 `skipped`: gh api actions/runs?branch=main&per_page=4 printed 'Deploy demo ab5a16e9 completed skipped' (read 05:47); control: Build row printed 'success'
+df58acda | line 78 `git checkout --detach <sha>`: template 1x, kit 1x (rule sentence)
+68f50aa8 | line 78 `git show`: kit 2x (read verb allowed by the drafter rules, fence 3)
+5992f89e | line 78 `refs/remotes/origin/b1480/nexusai-s-viewer-write-gates`: kit 3x; ref name = the branch measured in refs.txt (1x)
+225bf356 | line 78 `**; absolute single-quoted paths (`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+b08c7c10 | line 78 `); `: rule/shape text: grep -c -F in kit -> 74; in the template kit (shape source) -> 73; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+cf668175 | line 78 ` ports your own harness started. 10. Verdicts, STATUS files,`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+c6a88fb5 | line 78 `mut.sh --dry`: B1545 STATUS Corrections item 7 names 'mut.sh --dry': 1x; control zzz 0
+456858ea | line 78 `--plan`: grep -c -F '--plan' kit -> 1 (an instruction to the seat to build and prove, not a literal a tool prints)
+9ef60ddd | line 78 `b15*-nodot/**`: template has 1x (shape copy); kit 1x
+2be4ff16 | line 78 ` BEFORE the scan so its lines are scanned. 15. **Git identit`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+b98d6c53 | line 78 `user.email`: template 2x, kit 2x (rule sentence copied)
+0fc2b438 | line 78 `git -C '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/`: clone exists at the path: True; template used the b1532 clone form (copied shape; drafter did not run it, it prints lengths only)
+d8193057 | line 78 `GIT_AUTHOR_*`: template 1x, kit 1x (forbidding sentence copied; nothing to match)
+8b30199f | line 78 `GIT_COMMITTER_*`: template 1x, kit 1x (forbidding sentence copied; nothing to match)
+4aaf74ef | line 78 `git log --format='%h %ae | %ce'`: template 2x, kit 2x (copied)
+d3157906 | line 78 `LC_ALL=C uptime`: ran at 05:47: ' 5:47  up 4 days, 5 mins, 3 users, load averages: 2.80 2.38 1.89'; template 1x
+86a3ae60 | line 78 `decide()`: grep -c -F 'function decide(' capabilities.js -> 1; awk NR==249 -> "if (mode === 'open') return 'allow';"
+3cd915de | line 78 `open a PR from the gated branch, wait for CodeQL ..., then l`: CLARIFICATIONS.md line 2067 holds 'open a PR from the gated branch, wait for CodeQL': True; control line 2000: False
+292456ad | line 81 `--check`: grep -c -F '--check' inventory script -> 5; B1545 STATUS prints 'runtime rows 203; committed rows 203': 3
+491b2e1f | line 81 `chain.done`: B1545 STATUS Corrections item 5 describes chain.done recorded at step start: False; the kit changes it to end-green (a rule, nothing to match)
+4113429b | line 82 `'+refs/heads/b1480/nexusai-s-viewer-write-gates:refs/remotes`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+cf76e15b | line 82 `origin/main`: rule/shape text: grep -c -F in kit -> 8; in the template kit (shape source) -> 10; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+d163b830 | line 82 `git -C <clone> checkout --detach <BASE>`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+87162457 | line 82 `npm ci`: rule/shape text: grep -c -F in kit -> 2; in the template kit (shape source) -> 3; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+528417c4 | line 82 `node -e "require('<clone>/node_modules/sqlite3')"`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+6e7a950e | line 82 `grep -n`: rule/shape text: grep -c -F in kit -> 5; in the template kit (shape source) -> 5; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+fa89290d | line 82 `awk NR==n`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+f5f29a84 | line 95 `cp -n`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+7c0f58f5 | line 100 `grep -n`: rule/shape text: grep -c -F in kit -> 5; in the template kit (shape source) -> 5; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+6a246940 | line 102 ` calls in `: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+5ec5122f | line 102 ` rises by exactly 19 (17 in handlers plus one in each of the`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+a687cbf3 | line 102 ` over `: rule/shape text: grep -c -F in kit -> 10; in the template kit (shape source) -> 18; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+95564fef | line 102 ` = **0** (control: BASE 1); the `: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+72070056 | line 102 ` flag present on the sustainability gate regex (`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+a225d1e0 | line 102 ` prints 1; control: the same over a scratch string without t`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+bd3744f0 | line 102 ` call inside `: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+779c73b5 | line 102 `new RegExp(`: rule/shape text: grep -c -F in kit -> 2; in the template kit (shape source) -> 2; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+04d0a7b0 | line 102 `-anchored, one `: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+23dc02ec | line 102 `'access'`: grep -c -F the access literal in server.js at main -> 1 (line 19125: "if (password !== 'access') return res.status(403).json({ success: fals"); control 'zzz' -> 0
+9d3fcdda | line 104 `nexusai-lock.sh jest b1555-chain bash '/Volumes/Datasec_DEV/`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+48d44b7e | line 104 `.tools/b1555/chain.list`: template form .tools/b1545/chain.list 1x; B1545 chain.list exists: True
+4ce1c8b1 | line 104 `chain.done`: B1545 STATUS Corrections item 5 describes chain.done recorded at step start: False; the kit changes it to end-green (a rule, nothing to match)
+6fe57600 | line 109 `node scripts/role-capability-inventory.js --generate --out-d`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+d2343c63 | line 109 `inv14`: names.py prints inv14 for slot 1 under b1555-nodot; dir absent now: True
+f989b0d6 | line 109 `--generate`: grep -c -F '--generate' inventory script -> 5; kit 4x; control '--zzz' -> 0
+b7ee9d6b | line 109 `inv18`: names.py prints inv18 for slot 1 under b1555-nodot; dir absent now: True
+0a4116ee | line 109 `--check`: grep -c -F '--check' inventory script -> 5; B1545 STATUS prints 'runtime rows 203; committed rows 203': 3
+ac9c346f | line 111 `rd969-three-routes-empty-request`: git/trees ab5a16e9 holds __tests__/rd969-three-routes-empty-request.test.js: 1; control zzz 0
+50f2c1c9 | line 111 `rd691-agent-settings-routes-retired`: git/trees ab5a16e9 holds __tests__/rd691-agent-settings-routes-retired.test.js: 1; control zzz 0
+847e3fd7 | line 112 `node tests/e2e/rd436-r4-login-after-selfheal.browser.js <evi`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 1; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+ff7462a4 | line 112 `env -u NODE_OPTIONS`: rule/shape text: grep -c -F in kit -> 3; in the template kit (shape source) -> 3; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+dc7fad1c | line 112 `old2`: tree names computed by names.py: old2 slot 1 (control b1430-nodot/b1 -> 6); kit 7x
+1f7b63aa | line 116 ` | `: rule/shape text: grep -c -F in kit -> 81; in the template kit (shape source) -> 77; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+ba9f92b8 | line 118 `VERDICT: PASS`: B1545 STATUS holds 'VERDICT: PASS': 2x (a real run's line; control zzz 0)
+4c0fc7b4 | line 118 `EADDRINUSE`: B1545 STATUS holds it 4x as a counted token (copied rule)
+22b626e7 | line 119 `EADDRINUSE`: B1545 STATUS holds it 4x as a counted token (copied rule)
+a12c5aa0 | line 119 `lsof`: drafter ran lsof -nP -iTCP:9770-9779 -sTCP:LISTEN -> 0 rows; band 20640-21279 -> 0 rows; machine-wide listeners 14 (control)
+0137707a | line 122 `backups/`: rule/shape text: grep -c -F in kit -> 9; in the template kit (shape source) -> 6; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+c8638138 | line 122 `.tools/b1555/_quarantine/`: rule/shape text: grep -c -F in kit -> 3; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+66a2b432 | line 122 `routerUseGate`: grep -c -F routerUseGate inventory script -> 10; inventory rows with routerUseGate true at main: 5
+ede64922 | line 122 `capability`: inventory rows have key capability: 203 of 203
+44f34ba6 | line 122 `runtime rows N; committed rows N`: B1545 STATUS (a real run) holds 'runtime rows 203; committed rows 203': 3x (the form with N standing for the count; control: the old kit wording '203 runtime rows = 203' -> 1)
+e686c640 | line 128 `restart-services`: grep -c -F restart-services route in server.js -> 1
+da4aed26 | line 129 ` flag removed from the sustainability gate regex (match coun`: rule/shape text: grep -c -F in kit -> 1; in the template kit (shape source) -> 0; control 'zzz-none' -> 0. Not a literal a tool prints; the drafter asserts nothing about an output here
+b0aadfb4 | line 130 `/^\/[a-z0-9-]+\/?$/`: literal of the old branch's plant shape (a case-sensitive letter class); kit 1x; feedback regex at main (none; added by this kit): grep -c -F in server.js -> 0
+70dd4fb9 | line 131 `req.user?.role !== 'admin'`: grep -c -F in server.js -> 0; kit 1x (a plant text, not at main unless count above)
+f451c0fd | line 131 `rd436`: tree holds rd436 tests: 8 paths
+0a23be06 | line 132 `checkManagedIdentityAvailable`: grep -c -F in server.js -> 4 (def :539 + 3 calls)
+af359f94 | line 133 `'RD-958'`: grep -c -F RD-958 key in capabilities.js -> 1
+428a3a75 | line 133 `PENDING_GATE`: grep -c -F in capabilities.js -> 3
+5a9677de | line 134 `if (password !== 'access') return res.status(403).json({});`: plant text; main has the password test 1x at :19125
+40d79acb | line 135 `GET /api/setup/managed-identity`: inventory row open 200 viewer 200; fence cellsWithRefusedDial lists it: True
+8d649e56 | line 139 `COUNTS <t>/<s> = measured`: template 1x (form copied, printed by the seat)
+437acd7a | line 139 `git show <head>:scripts/verify-expected-counts.json`: template 1x (copied)
+144286c0 | line 142 `ls-remote origin refs/heads/b1555/nexusai-lane-s-viewer-writ`: gh api git/matching-refs/heads/b1555 -> length 0 at 05:45 (control heads/b1545 -> 1)
+4673b3f4 | line 142 `refs/heads/main`: template has 5x, kit 5x; the instruction is to run git ls-remote; this drafter ran gh api branches/main -> ab5a16e9 (a sha printed)
+dfa592cf | line 142 `merge-base --is-ancestor origin/main <head>`: template 1x (copied)
+826947ad | line 142 `/usr/bin/grep -n -A8 '^on:'`: template 1x; sed -n 24,34p deploy-demo.yml printed the on: block (push main, paths-ignore, workflow_dispatch)
+370e7a4f | line 145 `EADDRINUSE`: B1545 STATUS holds it 4x as a counted token (copied rule)
+d695e71a | line 145 `static/**`: kit 3x; tree.txt static/ entries: 65
+49bd50cf | line 145 `skipped`: gh api actions/runs?branch=main&per_page=4 printed 'Deploy demo ab5a16e9 completed skipped' (read 05:47); control: Build row printed 'success'
+ea0b94da | line 155 `## READY`: template 3x; kit 3x
+9f26f8a0 | line 155 `SEAT-N127`: kit file name holds SEAT-N127: True; control SEAT-N126 -> False
