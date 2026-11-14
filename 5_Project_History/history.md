@@ -1,3 +1,10 @@
+## 2026-11-14 06:0x -> 2026-11-15 06:1x — Wednesday seat (morning 14 Nov, kept as the 15 Nov morning seat; wrapped on Kam's "plase wrap up")
+- Lean boot at 7d 99% (stated deviation: digest read to line 3,299, ledger unread, Linear and INDEX skipped). Floor held empty all day; no seat, no merge, no deploy, no Spark task.
+- Kam 10:13 14 Nov (live board): "I will sign in with a new account tomorrow morning" -> card secuura-login-for-2228-at-99pct-1113 ruled b (hold); wed-morning-plan-1114 ruled a. Morning cards wed-morning-plan-1114 and -1115 posted (HTTP 201).
+- 05:30 15 Nov shift wrap: retro in the 15 Nov note, pickup block (first acts after his /login: statusline, re-read board grant, ls-remote, B 176th with PR 2228 first, feed the Spark), handover mail verified at wednesday-agent@.
+- Wrap: ledger rule 3c moved 42 rows (11-11, 11-12) to _ledger_archive.md, conservation 1834 == 1834; both boot digests regenerated.
+- OWED: unchanged (pickup OWED section); boot debt: full boot once the gauge resets. Open for Kam: secuura-ks1699-verify-audience-1113.
+
 ## 2026-11-14 05:30 — Wednesday seat 14:1x (13 Nov 14:1x to 14 Nov 05:30)
 - Lean boot at 99% weekly usage (stated deviation). Fixed the shared inbox-scope hook that refused Wednesday her own inbox (seat-aware, 12 cases tested).
 - Seat B 175th: PR 2095 (KS-2012) and PR 2090 (KS-692) merged on head-pinned GOs; develop 48883ba5976b; 13 merges on 11-13. Wrap scored 0.95, pane closed.
