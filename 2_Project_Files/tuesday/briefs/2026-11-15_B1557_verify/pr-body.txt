@@ -1,0 +1,28 @@
+BLUF: two changes to the deploy scripts, both under the product owner's 2026-11-11 ruling, plus the fixes a review asked for. (A) PRE-1, the pre-deploy check of the hosted price overlay, now refuses every overlay form the app's own reader refuses, and a malformed file stops with one plain line, never a traceback. (B) The deploy rolls forward only: once the hosted store holds care-pack or staging rows, it refuses a package built from a commit older than the first build that knows those classes. Nothing is deployed by this change. The Part B stop words are PENDING the product owner's approval.
+
+Part A, PRE-1 (MPSCALC-202), scripts/deploy-package.py:
+- PRE-1 reads the overlay the way the app's reader does: a repeated property name, bare NaN or Infinity, a lone surrogate, nesting over 64 levels, a byte order mark, a wrong format string, a missing or null member, a numeric or absent itemClass, a repeated row key, an audit out of sequence, a time that is not a real one and a version below the audit are counted or stopped, by name and number only, never by value.
+- A shape that cannot be counted ends in one "PRE-1: STOP:" line and exit 1. The deploy says "PRE-1 stopped the deploy" for any non-zero result.
+- scripts/tests/overlay_forms.json holds 252 synthetic forms, each with the answer of the app's own reader (CatalogueOverlayStore, checked with a throw-away harness, never committed). test_deploy_pre1_forms.py checks PRE-1 against every form in both directions. Ten forms the app opens are stopped by PRE-1 on purpose; each is listed with its reason (knownDifference).
+- test_deploy_pre1.py's helper now writes a document the app accepts; its two rows that pinned the old behaviour (an absent or numeric itemClass passing) now expect a count of 1.
+
+Part B, roll forward only (MPSCALC-222, MPSCALC-103, MPSCALC-226), scripts/deploy-from-ci.sh and deploy-package.py:
+- New subcommands newtype-count, newtype-names and floor (the first commit that knows care packs and staging: the squash of pull request 76).
+- deploy counts the overlay rows (from the copy PRE-1 passed) and every hosted quote and snapshot file, each streamed from Kudu VFS into the counter; no quote or snapshot byte is written to disk, and only counts are printed.
+- Count 0: nothing changes. Count above 0: the package's commit must contain the floor (git merge-base --is-ancestor): rc 0 goes on, rc 1 stops as older, any other answer stops as undecided. A listing or file that cannot be read or counted stops. probe and check never read the store.
+- test_deploy_rollforward.py: 22 rows; the fake curl answers a folder listing.
+
+Review fixes in the last commit:
+- The Kudu token never appears in a traced deploy. kudu_get now takes its own token inside its subshell after tracing is switched off, as read_overlay and download_wwwroot already do; the main shell never holds it. The existing test test_xtrace_never_prints_the_token now also runs deploy under bash -x and SHELLOPTS=xtrace, with and without a care-pack row, and checks that the run really went through the Kudu reads.
+- PRE-1's time pattern accepts ASCII digits only and anchors at the true end, so a time with other-script digits or a trailing newline stops, as the app refuses it. Five such forms are added to the fixture.
+- Five forms the app opens and PRE-1 stops are listed as known differences: a unitCost of 7.91e28 and the decimal maximum (the overlay writer refuses prices above 1000000), a time one tick after the default, a fraction mark with no digits, and a comma list of classes.
+
+Behaviour notes:
+- Each Kudu read now asks az for a token, so a deploy makes two token calls plus one per hosted quote or snapshot file.
+- If az fails to give a token during the roll-forward, the run prints the existing token line, then the existing listing or file stop line, then the final roll-forward stop. Nothing is deployed.
+
+Stop words (PENDING the product owner): the count-0 line, the "contains the build" line, the "older" stop, the "cannot say" stop, the listing and file stops, and the final "the roll-forward rule stopped the deploy" line.
+
+Tests run locally (Python 3.9.6, bash 3.2, fake az and curl; the real az never reachable): the CI python loop gives the same result per file as before the review fixes; test_run_demo.py and test_infra.py need node and the Bicep compiler, which hosted CI has. Hosted CI and CodeQL decide.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,0 +1,26 @@
+Two changes to the deploy scripts under the product owner's 2026-11-11 ruling.
+
+PRE-1 (MPSCALC-202): the pre-deploy check of the hosted price overlay now reads the file the way
+the app's own reader does and refuses every form that reader refuses: repeated names, NaN or
+Infinity, lone surrogates, deep nesting, a byte order mark, a wrong format, missing or null
+members, a numeric or absent itemClass, repeated keys, an audit out of sequence, a time that is
+not a real one (ASCII digits only, anchored at the end) and a version below the audit. Problems
+are named and counted, never shown by value. A shape that cannot be counted ends in one
+"PRE-1: STOP:" line, never a traceback. scripts/tests/overlay_forms.json holds 252 synthetic
+forms with the app reader's answer for each; ten forms the app opens are stopped on purpose and
+listed with their reasons.
+
+Roll forward only (MPSCALC-222, MPSCALC-103, MPSCALC-226): once the hosted overlay, quotes or
+snapshots hold care-pack or staging rows, deploy refuses a package whose commit does not contain
+the first build that knows those classes (the squash of pull request 76). Quote and snapshot
+files are streamed from Kudu into the counter; nothing is written to disk and only counts are
+printed. A count of 0 changes nothing; a listing, file or ancestry answer that cannot be read
+stops. probe and check never read the store.
+
+The Kudu token is taken inside each reader's subshell after tracing is off, so a deploy under
+bash -x or SHELLOPTS=xtrace never prints it; the xtrace test now covers deploy.
+
+The roll-forward stop words are pending the product owner's approval. Nothing is deployed by
+this change.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
