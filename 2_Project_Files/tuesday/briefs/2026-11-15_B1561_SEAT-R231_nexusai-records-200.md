@@ -157,14 +157,14 @@ No Jira write outside the closed list; no GitHub write at all; no statement that
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. The unstamped copy reads 10 four-underscore lines (nine slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main, `CLARIFICATIONS.md` sha256, whether any `Datasec/NexusAI-*` pane writes, the Build state of the merge commit): ____
-- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): ____
-- CREATE-A (the re-triage ticket; exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- CREATE-B (the front-end callers ticket; exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- MOVE (exactly `NONE` or numbers drawn from `958 964 965 968` separated by single spaces; default NONE; the drafter recommends 958 964 965 968): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD writes no section and the entry waits): ____
-- Hard stop (absolute outer limit AEDT; JIRA DONE 45, RECORDS WRITTEN 60, HARD STOP 80 minutes after your Step-0 date, whichever is earlier): ____
+- STAMP: Tuesday s277, 10:46 2026-11-15. Kit read whole by s277 this session (170 lines). The s276 rulings on the completion drafter's Q1-Q4 stand: Q1 ticket B stays Low; Q2 and Q3 text edits were applied by s276 (T-A-P1 7f1b4282e86f, T-A-P3 ced143480c1b); Q4 965 stays in MOVE.
+- LAUNCH WINDOW: now, after this stamp; no Datasec/NexusAI-* pane exists (tmux panes %0-%3 only, none NexusAI)
+- BASE (code main, `CLARIFICATIONS.md` sha256, whether any `Datasec/NexusAI-*` pane writes, the Build state of the merge commit): code main 4ba2e03cc88e928c2c6fdf6694ebed0e7cadf2e5 with 0 open pull requests; CLARIFICATIONS.md sha256 dbd08c9d9ad1ca006e47a28ed93480ef6de56326c7b40bb7df6f39a0134de9a4, 633924 bytes, no section 89 (control: section 88 present once); no Datasec/NexusAI-* pane, so none writes; the Build check-run of the merge reads completed success (8 check-runs: 6 success, 2 skipped, both Deploy demo). All re-read by Tuesday s277 at 10:46.
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 and posts nothing): WRITE
+- CREATE-A (the re-triage ticket; exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- CREATE-B (the front-end callers ticket; exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- MOVE (exactly `NONE` or numbers drawn from `958 964 965 968` separated by single spaces; default NONE; the drafter recommends 958 964 965 968): 958 964 965 968
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD writes no section and the entry waits): WRITE
+- Hard stop (absolute outer limit AEDT; JIRA DONE 45, RECORDS WRITTEN 60, HARD STOP 80 minutes after your Step-0 date, whichever is earlier): 12:30 AEDT 2026-11-15
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s277 at 10:46 (all 170 lines). The behaviour sentences were read against source at 4ba2e03c by s276 before its 10:13 wrap (feedback.js, authEnforcement.js, capabilities.js, feedback-admin.js), and main has not moved since.

@@ -73,14 +73,14 @@ Step, lock state (holder text or "mine"), load1, the last command, the next one,
 
 ## Stamp
 Tuesday fills each slot at launch; one word, clock or answer each. The unstamped copy reads the slot count by `grep -o ... | wc -l` (the slots below plus the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main full sha; `b6c282ee50086bc1ac7d773ccabf00fcf8c055cc` at drafting): ____
-- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting): ____
-- Launch authority (the product owner's 2026-11-11 14:15 acceptance of the quick recommendations, the ruling quoted above) and hard stop (READY target 240 minutes after Step 0; HARD STOP clock): ____
-- SLOTS (which HPSM-POC panes are live and the paths their kits grant; whether lanes H-1 and H-3 are live): ____
-- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): ____
-- GATE-ROUND (whether a gate follows, its tier G1 or G2, the class and the round it counts): ____
-- Q-answers (Q-1 to Q-5 of the drafter report): ____
+- STAMP: Tuesday s277, 10:50 2026-11-15. Read whole: this kit (86 lines) and the drafter report. Re-printed by Tuesday at main b6c282ee via gh api raw, each as the kit states: ForwardedClientAddress.cs :23-34, :51-60, :63-78, :105-106 (Refuse writes the value); Program.cs :39-41, :119-124; FollowUpLink.cs :43, :87-95, :280; bff.ts :22, :49, :51, :141, :296-306.
+- LAUNCH WINDOW: Until 11:45 AEDT 2026-11-15. Live beside you: Datasec/NexusAI-R231 (records, NexusAI) and Datasec/MPS-M135 (dotnet builds, MPS repo, its own heavy locks). The machine rebooted at about 10:35 and Docker was down. Tuesday opened Docker Desktop at 10:50 under Kam's 2026-11-06 grant: run docker info at Step 0, and if the daemon is not up by Step 7, STOPPED: NEEDS TUESDAY.
+- BASE (code main full sha; `b6c282ee50086bc1ac7d773ccabf00fcf8c055cc` at drafting): b6c282ee50086bc1ac7d773ccabf00fcf8c055cc
+- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting): refs/heads/b1565*: 0 rows; open PRs 0; ports 9810-9819: 0 listeners (control: 13 listeners unfiltered); read by Tuesday at 10:50
+- Launch authority (the product owner's 2026-11-11 14:15 acceptance of the quick recommendations, the ruling quoted above) and hard stop (READY target 240 minutes after Step 0; HARD STOP clock): The product owner's 2026-11-11 14:15 acceptance (comment 41009, option b), worked under Kam's 2026-11-06 grant 'please work through the backlog, tickets and tasks for the current projects'. READY target: Step 0 + 240 min. HARD STOP 15:30 AEDT 2026-11-15.
+- SLOTS (which HPSM-POC panes are live and the paths their kits grant; whether lanes H-1 and H-3 are live): no HPSM-POC pane is live; H-1 landed as #317 (main b6c282ee); H-3 has no kit and nothing of it is live
+- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): Copy by program at Step 0 from the project's 2_Project_Files local config. Tuesday read both values present at 10:50 (name 12 characters; email a GitHub noreply address). An empty value means STOP before the first commit.
+- GATE-ROUND (whether a gate follows, its tier G1 or G2, the class and the round it counts): yes: a G1 gate (Opus), separate kit after your READY, class HPSMPOC-193 forwarded-address trust, round 1 of 2
+- Q-answers (Q-1 to Q-5 of the drafter report): Q-1: OPUS builder, Tuesday's ruling under model-routing.md:93 row C3 (a security design surface; the Step 3a shape choice is design). The launch carries BRIEF_SEAT_LEVEL=opus, so read every SONNET in this kit as Opus, model id claude-opus-5-5 (models_latest.json:17); the gate after is G1 Opus. Q-2: fail closed (the default). Q-3: yes, the one infra-test line only. Q-4: not built; Tuesday cards the infra kit after landing. Q-5: H-3 is left for a later kit.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s277 at 10:50 (86 lines + drafter report; behaviour lines re-printed at b6c282ee, see STAMP)
