@@ -1301,6 +1301,18 @@ else
   warn "DEV-Working NAS not mounted" "offloads unavailable until Kam mounts it (Finder > Go > Connect to Server) — see PORTABILITY.md 27"
 fi
 
+# --- CodeQL CLI, drive-local (PORTABILITY 29; ledger 2026-11-15 w=2: gate pre-scans were a denylist of past
+# misses, so MPS #192 passed two gates and failed hosted CodeQL). The check RUNS the binary and asks it for the
+# languages the Datasec repos ship (javascript, csharp, python): a present-but-broken bundle (lost exec bits after a
+# sync, a partial unpack) fails here instead of passing a path test.
+CQ="$(cd "$(dirname "$0")" && pwd)/tools/codeql/codeql/codeql"
+if [ -x "$CQ" ] && CQL=$("$CQ" resolve languages 2>&1) && printf '%s\n' "$CQL" | /usr/bin/grep -q '^javascript ' \
+   && printf '%s\n' "$CQL" | /usr/bin/grep -q '^csharp ' && printf '%s\n' "$CQL" | /usr/bin/grep -q '^python '; then
+  ok "CodeQL CLI $("$CQ" version --format=terse 2>&1) (javascript, csharp, python packs present; gates run the real pack)"
+else
+  warn "CodeQL CLI missing or broken at tools/codeql/" "gates fall back to the pre-scan rows only — reinstall per PORTABILITY.md 29${CQL:+ (last output: $(printf '%s' "$CQL" | head -1))}"
+fi
+
 if [ "$HARD_FAIL" = "1" ]; then
 
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."
