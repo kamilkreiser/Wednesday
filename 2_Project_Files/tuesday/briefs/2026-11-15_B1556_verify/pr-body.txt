@@ -1,0 +1,91 @@
+## BLUF
+
+A Demo viewer (the HP reviewer) now sees each customer's alias, not its stored name, on six more pages. Every in-progress answer count now reads "N of M scored questions answered" where the scored numbers exist. The product owner ruled both on 11 November. Nothing is deployed, and nothing here builds or claims integration with any HP tool.
+
+The product owner's 2026-11-11 ruling, alias: "Alias on all seven. It matches your 10 Nov ruling for the first two pages and the security pages."
+The product owner's 2026-11-11 ruling, count: "Yes, everywhere. Two different counts on neighbouring screens confuse a reviewer."
+
+Seven surfaces were ruled. This change builds six; the Home pipeline table is left for the Home rebuild.
+
+## The alias, before and after, per surface
+
+The rule is the one the customer frame and the security pages already use:
+- a viewer with Demo sees the alias, or the existing words "Alias not available yet (no scored run)";
+- a Partner without Demo sees the stored name;
+- while that is not yet known, a list shows the neutral word and a customer page shows no name line.
+
+Only the name text changes. Links, keys, option values, sort and search keep the stored values.
+
+1. Customers list
+   - Before: each row's link and the row menu's screen-reader text held the stored name.
+   - After: the alias for Demo.
+2. Engagements list
+   - Before: the row-head link held the stored name.
+   - After: the alias for Demo.
+3. Document preview cover
+   - Before: the stored name.
+   - After: the alias for Demo; no line while unknown.
+4. Profile, Customer context row
+   - Before: the stored name.
+   - After: the alias for Demo; no pair while unknown. The Industry select and the other fields are unchanged.
+5. Firmware risk task
+   - Before: the customer switcher options and the related-engagement row held stored names.
+   - After: aliases for Demo. The checklist, its wording and its behaviour are unchanged.
+6. Snapshot launcher
+   - Before: the customer picker options and each snapshot row held stored names.
+   - After: aliases for Demo. The partner's own organisation keeps its line "Your organisation (self-assessment)" for everyone.
+
+## The count, before and after
+
+(In the quoted lines below, " . " stands for the middle dot the page prints.)
+
+1. Customer overview run line
+   - Before: "Started <date> . N answers so far".
+   - After: "Started <date> . N of M scored questions answered". This is the same figure the customer frame's chip already shows.
+2. Activity feed, in-progress row
+   - Before: "N answers so far".
+   - After: "N of M scored questions answered".
+3. Launcher in-progress label (the Assessment step's run list uses the same label)
+   - Before: "In progress . N answers so far".
+   - After: "In progress . N of M scored questions answered".
+
+Without scored numbers (a question set that no ruleset scores), the count disappears:
+- the launcher reads "In progress" alone;
+- the overview line reads "Started <date>";
+- the feed row reads "Started".
+
+On the local mock build the snapshot set is scored, so the count shows. Before this change, the overview read "5 answers so far" beside a chip reading "3 of 10 scored questions answered". After it, both read "3 of 10 scored questions answered".
+
+## Tests
+
+- New: 6 test files, 19 rows. Each surface has three cases: Demo, Partner without Demo (the control) and not yet known. The launcher file adds the own-organisation line and the count row.
+- engagement.test.ts: 2 new rows and 1 rewritten row.
+- 4 end-to-end lines now pin the new wording, using text printed from the mock.
+- 4 existing tests read a stored name in a harness where the viewer's role never arrives. Each now supplies the offline demo's mode (or a Partner) and waits for it. No assertion is weakened.
+- Red first: the new and changed tests run against the old code give 16 of 51 rows red. Every Demo row, every not-yet-known row and every rewritten count row fails, and every Partner control row passes. With one surface put back, only that surface's rows fail.
+
+## Counts (local runs on Node 24, on main 576231b7)
+
+- Whole unit run: 298 files, 4258 passed, 0 failed. Main: 292 files, 4238 passed. Compared by name, 1 row was retitled and 21 rows were added.
+- Lint (0 warnings), typecheck, the production and dev-tooling audits, the build and the shard plan check all pass.
+- All 8 end-to-end shards pass whole. One shard needed a re-run after a 30-second accessibility timeout under machine load; main timed out the same way.
+- Infra: validate, 325 tests and the hidden-character scan all pass. Secret scan: no leaks.
+- Rendered on the local mock build at 1280 and 390 wide:
+  - As Demo, no stored sample-customer name is in the visible text of the six pages or the customer overview.
+  - On main as Demo, and on this branch as a Partner, the names are visible.
+
+## Not done / not claimed
+
+Not built:
+- the Home pipeline table;
+- the Industry choice list and fleet-size note (awaiting a ruling and the product owner's own words);
+- the result page "Answered" tile;
+- the finished-run count line;
+- the /documents chooser;
+- the runner's own progress text.
+
+Sort and search on the Customers list still read the stored name.
+
+Not deployed. No integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM) is built or shown as done.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

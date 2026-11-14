@@ -1,0 +1,46 @@
+A Demo viewer now reads the customer's alias, never the stored name, on
+six more pages:
+- the customers list
+- the engagements list
+- the document preview cover
+- the profile context row
+- the firmware task
+- the snapshot launcher
+
+The rule is the one the customer frame and the security pages already use:
+- Demo: the alias, or the no-run words.
+- A Partner without Demo: the stored name.
+- While that is not known: the neutral word, or no line.
+
+Links, keys, sort and search keep the stored values. The partner's own
+organisation keeps its own line in the launcher.
+
+A count of answers now reads "N of M scored questions answered" where the
+scored numbers exist:
+- the customer overview's in-progress run line
+- the activity feed's in-progress row
+- the launcher's in-progress label, also shown on the Assessment step
+
+Without scored numbers these show what they showed with no count. The
+finished-run count and the result page tile are unchanged.
+
+The product owner ruled both on 11 November. Nothing is deployed.
+
+Files:
+- 8 product files under web/src/components/customer and playbook.
+- 6 new alias test files (19 rows).
+- engagement.test.ts: 2 new rows, 1 rewritten.
+- 4 existing tests that read a stored name now supply the viewer's mode or
+  role and wait for it.
+- 4 end-to-end lines now pin the new wording.
+
+Red first: run against the old code, every Demo case, every not-yet-known
+case and every rewritten count row failed (16 of 51 rows), and the Partner
+control rows passed. With one surface put back, only that surface failed.
+
+Checks: the whole unit run has 298 files, 4258 passed, 0 failed (before:
+292 files, 4238). Lint, typecheck, both audits, the build and the shard
+plan pass. All 8 end-to-end shards pass. Infra validate and its 325 tests
+pass.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
