@@ -1,0 +1,82 @@
+STARTABLE: YES (after Tuesday's own stamp; nothing in the kit blocks a seat)
+
+# B1561 completion drafter report (Datasec / NexusAI only)
+
+## BLUF
+- **The kit is complete and internally consistent.** 170 lines; every section its BLUF and READ-WHOLE list name exists (BUILD, READ WHOLE FIRST, BINDING HOLD, THE JIRA CLOSED LIST, THE JIRA TEXT RULES, POINTERS, THE ROW, THE TEXTS, THE NEW TICKETS, THE ENTRY, THE WORK, CLOCK AND HARD STOP, REFUSE AT ONCE, PARTITION, HOLDS, STATUS FILE AND LAST LINE, Stamp). The Stamp section is intact: 9 slot lines and the last line = 10 lines matching `_{4}` (`/usr/bin/grep -c -E '_{4}'` -> 10, lines 160 to 168 and 170); I filled no slot.
+- **The sidecar is complete and `stamp_check.py` ends rc 0** (54 claims, 54 measured, 0 not measured). It holds 54 claim lines from real runs, 80 sentence-level source lines `S01` to `S80` (the BLUF (4) promise), and 8 extra `D01` to `D08` lines for the duplicate searches, the records file, the text hashes and the panes. The skeleton is kept as `<sidecar>.pre-completion` (51 TODO lines).
+- **Every MEASURED-BY-DRAFTER fact was re-measured live and all but three still hold.** Three kit changes (all small, no decision in them) and two questions are below. The one real movement: **the Build run of the merge commit has completed `success`** (it was `in_progress` at 09:36), so the BUILD wait of the kit is now moot unless main moves.
+- **No `Datasec/NexusAI-*` pane is live.** Nothing in Jira, GitHub or `CLARIFICATIONS.md` has moved since the kit's drafting.
+
+## Recommendation
+Stamp as the kit recommends, with these readings from my measurements:
+- JIRA `WRITE`, CREATE-A `WRITE`, CREATE-B `WRITE`, MOVE `958 964 965 968`, RECORDS `WRITE`, subject to your answers to Q1 to Q3 (each has a default that needs no change to the kit except Q3, which changes one text and its hash).
+- Re-run `stamp_check.py` and spot-measure at least five sidecar lines before stamping (suggested: `0bcc8782`, `867f31c2`, `33bc7c96`, `S52`, `D06`).
+- A seat launched now sees Build `completed`/`success`; its `<<CHECKS>>` form will print `6 of 8 check-runs success (Deploy demo deploy skipped) (Deploy demo build skipped)` (the same shape the C-280 entry carries), and its `<<BUILDLINE>>` will be the `VERDICT: PASS` form.
+
+## Detail
+
+### 1. Completeness and consistency
+- Header promises vs file: BLUF (1) to (6), the Launch paragraph, the context band, READ WHOLE FIRST 1 to 3, all present. BLUF (4) promised `S01` and up in the sidecar: now present (80).
+- Internal cross-references: "Q1 of the report" (priority of the second ticket) and "Q2 of the report holds the RD-965 question" are answered below as Q1 and Q2 so the numbering matches the kit.
+- `/usr/bin/grep -c -E '_{4}'` of the kit -> 10 before and after my edits; last line `READ-WHOLE-BY-TUESDAY: ____`.
+- All 34 labelled texts: sha256 first 12 hex against the bracket label (`m_hash.py`, work folder) -> 34 of 34 equal. Summary lengths 242 (A) and 235 (B) equal the kit's. Own ban-class scan (`m_scan.py`; controls fire for `x_by_Kam_y`, `the gate`, `gated`, `R226`, `B1548`, `C-280`, `1.5`, an at-sign, a percent sign; `kamera` quiet) over the 34 texts with drafting fill-ins -> 0 hits; each Detail's marker once and at the end.
+- Kit line 15 and the named files: `launch_when_cool.sh`, the B1548 and B1553 kits, B1553 ANSWER-1, the B1555 VERDICT and three ANSWER files, the B1548, B1553 and B1555 STATUS files all exist. `.tools/b1561` does not exist (as it should not). `df -g` available 1231 GiB (limit 25).
+
+### 2. Re-measurements (instrument; result). The full commands are in the sidecar.
+GitHub (`gh api -X GET`, NexusAI `GH_CONFIG_DIR`, `gh auth status` logged in):
+- main `branches/main` -> `4ba2e03cc88e928c2c6fdf6694ebed0e7cadf2e5`; `compare ...main` -> identical 0 0; open pull requests 0. MATCHES.
+- `pulls/200`: merged true, merged_at 2026-11-14T22:17:51Z (09:17:51 AEDT), 5 commits, 14 paths, 972 additions, 95 deletions, head `a5c256c2...`. `git/commits/4ba2e03c`: parents `ab5a16e9...` and `a5c256c2...`, tree `b52c8378d041b1c26b3d914c970b646d88098343`. Control `pulls/99999` -> 404. MATCHES.
+- Runs of the merge commit (`actions/runs?head_sha=`): Deploy demo completed/skipped, npm-audit success, Gitleaks Scan success, Push on main success, **Build 43647337701 completed/success (was in_progress at 09:36: CHANGED, benign)**. Check-runs: total 8, 6 success, 2 skipped (both Deploy demo jobs); none in progress. Hosted Build job log (job 132607954015): one `VERDICT: PASS` line, 5636/5636 tests across 349 suites.
+- Code scanning on main, state open, paged: 64 open, 10 `js/user-controlled-bypass`, newest `created_at` 2026-11-11T12:28:37Z, **0 created after the merge**, every `most_recent_instance.commit_sha` prefix `4ba2e03c`. MATCHES.
+- POINTERS (kit lines 34 to 48): 129 `file:line` pointers, each fetched by `contents?ref=4ba2e03c...`, line stripped, must start with the fragment: **129 of 129 OK, 0 bad**; control: line 540 of server.js does not start with the line-539 fragment (False), line 539 does (True).
+- Counts over the frame (tree `git/trees/<sha>?recursive=1`, truncated false, 1011 blobs, 190 in the frame, 190 fetched, 0 failed, 0 empty): `requireAdminFor(` in server.js 30; `'access'` 0 (control `'admin'` 38); `/triage` feedback.js 1, capabilities.js 2, none under static; `coordinator-action` server.js 3, feedback.js 2, capabilities.js 2; `RD-965` 4 (control `RD-964` 3); the four no-caller routes 0 under static (control `/api/setup/test-ai` 1); `/api/feedback` in feedback-admin.js **6 lines, 7 occurrences** (see Q3); counts file 5636/349 at the merge, 5612/343 at the parent; test( counts 5 5 4 4 2 4 (=24); the PR patch adds 19 `requireAdminFor(req, res)` lines (17 handlers + 2 router checks).
+- The 21 static write call sites: settings.js 10, feedback-admin.js 4, sustainability-ui.js 1, first-run-setup.js 6 (each line plus the next read by program for the method), and the GET at first-run-setup.js:1325. The two the kit says the review lacks (settings.js :2412 and :2918) are not in the review's list (VERDICT row FOR TUESDAY 2). Limit: the census is by literal path; a call that builds its path in a variable would not be seen (UNMEASURED).
+
+Jira (GET only, own helper `jget1561.py`, credentials read in-process):
+- RD-958 GET -> 200; RD-99999999 -> 404.
+- RD-958, RD-964, RD-965, RD-966, RD-968: each To Do, exactly 1 comment (ids **41032, 41033, 41034, 41035, 41036**, each starting "Ruling recorded; not moved"), no `LAND-200` text (5-key OR search -> 0), each offers transition **31 `In Review` -> `Testing`** (10 transitions listed). Labels: 958 `b1341-2026-11-06 roles-ui-2026-11 security`; 964 and 968 `b1353-2026-11-06 roles-ui-2026-11 security`; 965 and 966 `b1353-2026-11-06 roles-ui-2026-11`. Priority: 958, 964, 968 Medium; 965 Low; 966 Medium (type Bug). MATCHES.
+- 983 issues, highest key RD-987 (only issue created since 2026-11-14). MATCHES.
+- Duplicate searches (phrase form, project and parentheses): `TRIAGEGAP-200-15NOV` 0 (control `INSTRERR-199-13NOV` -> RD-986); `"feedback/:id/triage"` 0; `"/:id/triage"` RD-116 only; `"coordinator-action"` RD-822, RD-801, RD-116; `triage` + `viewer` RD-761, RD-135; `FECALLERS-200-15NOV` 0; `"sustainability-ui.js:1666"` 0; the three-file OR `viewer` search gives exactly RD-902, RD-836, RD-774, RD-395, RD-269 (the kit's five); `"pull request 200"` 0. All equal the kit. RD-929 text counted (not read line by line): `feedback` 0 (holds). I counted words in RD-116, RD-822, RD-801, RD-761, RD-135, RD-371, RD-389 and the five: none holds the re-triage gap or the front-end callers subject by these counts; **the seat still reads them whole as the kit says**.
+- Labels `records-pass-1115` (1: RD-987), `security` (215), `frontend` (3), `roles-ui-2026-11` (40) all exist. `date +%m%d` -> 1115.
+
+`CLARIFICATIONS.md` (not in a git repository, read only): 2917 lines; 633924 bytes; sha256 `dbd08c9d9ad1ca006e47a28ed93480ef6de56326c7b40bb7df6f39a0134de9a4`; highest section 88 at line 2909; highest entry C-282 at line 2917; section 89 count 0; `C-283` 0, `pull request 200` 0, `4ba2e03c` 0, `TRIAGEGAP` 0, `FECALLERS` 0 (control `C-282` 1); last byte newline. C-249 line 2679, C-166 line 1761, C-190 line 2062, C-224 line 2412, sections 87 at 2901. MATCHES.
+
+Other kit reads: `CLAUDE.md` lines 286, 297, 302, 303; `JIRA.md` 522, 530 ("`Medium` for everything else"), 552; `model-routing.md` row C7 line 97 and G3 line 110; `models_latest.json` line 23 `claude-sonnet-5-5`; `brief_seat.sh` line 31 `LEVEL="${BRIEF_SEAT_LEVEL:-opus}"`: all MATCH. Seat ids: R231 and B1561 occur only in this kit (`grep -r -l -F`, control B1553 finds files). A seat id R232 (MPS) exists now in the briefs folder; no collision.
+
+### 3. Kit changes (backup `<kit>.pre-completion`, line numbers unchanged, still 170 lines)
+1. **Line 22**: `the rules at lines 10 to 14` -> `the rules at lines 11 to 14`. Measurement: `awk NR==10` of `CLARIFICATIONS.md` is blank; line 11 `**Rules for entries**`, 12 to 14 the three rules.
+2. **Line 8** (end of BLUF (1)): appended one sentence: the Build run 43647337701 now reads `completed`/`success`, job `build` completed/success, the job log holds one `VERDICT: PASS` line (5636/5636 across 349 suites), 8 check-runs, 6 `success` and 2 `skipped`. Old text kept. Measurement: runs and check-runs calls at 09:59 AEDT by `date`. (This added three backticked literals, ids `a129589d`, `0d5381d6`, `95b986f9`, all measured in the sidecar.)
+3. **Line 31**: `the longest is 2392 characters;` -> `the longest is 2392 characters with the fill-ins unfilled and 2653 with the completed-Build fill-ins filled (the completion drafter's count);`. Measurement: T-958-Detail is 1962 characters unfilled; with `<<LAND>>` filled by the completed-Build values it is 2653. The kit said "after its fill-ins at their drafting values" next to the unfilled number.
+
+No text in THE TEXTS was changed; all 34 hashes stand.
+
+### 4. Stamp recommendations (evidence)
+- **JIRA `WRITE`**: all five tickets are To Do with exactly their one comment and no marker; transition 31 offered on each; no `Datasec/NexusAI-*` pane; no other writer of RD or the records file; Jira reachable by the NexusAI identity.
+- **CREATE-A `WRITE`**: marker 0 (control fires), `feedback/:id/triage` 0, the three other searches return only the tickets the kit names; none holds the gap by counts. Subject to Q2 for one sentence in T-A-P1.
+- **CREATE-B `WRITE`**: marker 0, `sustainability-ui.js:1666` 0, the five-ticket search reproduces the kit exactly; 21 call sites recounted. Priority: Q1.
+- **MOVE `958 964 965 968`**: check (i) to (vi) all print today (merged, parents, tree, compare identical, Build success, all workflow runs success, Deploy demo skipped, six test files and counts, tickets To Do with transition 31, 0 new alerts). Q4 is the only reservation, on RD-965.
+- **RECORDS `WRITE`**: section 89 and C-283 are free; sha equals the BASE value the kit gives; no pane writes the file. For the BASE slot a stamper can write: code main `4ba2e03cc88e928c2c6fdf6694ebed0e7cadf2e5`, sha256 `dbd08c9d9ad1ca006e47a28ed93480ef6de56326c7b40bb7df6f39a0134de9a4`, no NexusAI pane writes (drafter read), Build `completed`/`success` (drafter read, see sidecar). Hard stop and launch window are Tuesday's.
+
+### 5. Panes
+`tmux list-panes -a -F '#{pane_id} #{@cockpit_name}'`, run twice. First: `%0 tuesday`, `%1 fleet-monitor`, `%235 Datasec/MPS-R232`, `%28`, `%29`, `%236`, `%237` (last four unnamed). Later: `%0 tuesday`, `%1 fleet-monitor`, `%28`, `%29`. **No `Datasec/NexusAI-*` pane live in either read.** The MPS pane is an MPS seat; its kit's scope was not read (another project).
+
+### 6. Sentence-level support (S01 to S80) and weak points
+Every sentence that says what code, a test or a review finding does has its source line printed in the sidecar. Three are weaker than the kit's tone and are flagged:
+- **T-A-P1 loopback sentence** ("the review's server ran on 127.0.0.1 (its raw request lines name that address)"): the review's VERDICT row 3 says only "400 (validation, so the handler was reached)". The address 127.0.0.1 appears in the review for the sustainability raw lines (row 1 check, `absolute-form http://127.0.0.1:<port>`), not for its feedback probe. The sentence is an inference. It does not change what ticket A asks for. See Q2.
+- **Line 20, "a selftest re-run after a write moves guard files into quarantine"**: inherited from the B1548 and B1553 kits; the B1548 STATUS says only "my selftests rename guard files, they delete none" (line 56) and the B1553 STATUS says its selftests renamed nothing in the project. The instruction it supports (never re-run `--selftest` after the first write) also stands on Step 1 of this kit. Left unchanged.
+- **T-A-P3 "6 times"**: Q3.
+
+### 7. Not measured (UNMEASURED)
+Hosted behaviour of any route; the pages in a browser; the form of the three review "own working trees"; whether `b1480/*` branches carry the old rd958 file names (the two branches exist: `ef0ff56e`, `ccb7aa4a`; the file names are RELAYED from the review); static callers that build their path in a variable; RD-116, RD-822, RD-801, RD-761, RD-135, RD-371, RD-389 read whole (counted only); the code-scanning state beyond the open list on main.
+
+### 8. Fences kept
+Read-only in `!CODING` (one read of `CLARIFICATIONS.md`, `CLAUDE.md`, `JIRA.md`, `4_Credentials/.env` names by count, and a `.gh-config` use under the project's own `GH_CONFIG_DIR`); no Jira write of any kind (the helper has only `GET`); no git write; no message to any human or agent; no tmux send-keys; nothing deployed; no `.tools/` folder of another seat read; no decision card read; no token printed (`.env` read by name inside the helper only). Writes by me: the sidecar and its `.pre-completion`, the kit and its `.pre-completion`, this report, and the work folder `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s276/d1561/` (helpers `jget1561.py`, `m_*.py`, `m_*.sh`, raw JSON, fetched sources, outputs).
+
+## QUESTIONS FOR TUESDAY
+- **Q1 (priority of ticket B, kit BLUF (3)).** Default: keep Low. Evidence: `JIRA.md:530` reads "`Medium` for everything else. Don't over-grade"; RD-958, RD-964, RD-968 (the routes) are Medium, RD-965 Low, RD-966 Medium (a Bug); RD-985, RD-986 and RD-987 (the earlier records-pass Tasks) are Low. The administrator flow is unchanged, so Low follows the kit's own reasoning. No change to the kit unless you rule Medium (then T-B's priority name and the closed-list line change in one place each).
+- **Q2 (T-A-P1 loopback sentence).** The sentence reads as a measurement of where the review's feedback probe ran from; the review does not say so. Default: leave the text (its hash stands), since the paragraph already labels the -action route as not shown open. If you want it exact, replace the clause "but the review's server ran on 127.0.0.1 (its raw request lines name that address), which that route's own caller check lets through; so only the re-triage route is shown open to a viewer" with "and the review does not say which address its probe came from; so only the re-triage route is shown open to a viewer", and recompute that hash (I have not done it; it is a decision on a frozen text).
+- **Q3 (T-A-P3 "6 times").** `/api/feedback` occurs on 6 LINES of `static/js/feedback-admin.js` (`/usr/bin/grep -c -F` -> 6) but 7 times (line 45 holds two). The kit line 49 counts lines; the Jira text says "occurs ... 6 times". Default: change the clause "control: /api/feedback occurs in static/js/feedback-admin.js 6 times." to "control: /api/feedback occurs on 6 lines of static/js/feedback-admin.js.", new sha256 prefix of T-A-P3 `ced143480c1b` (old `5ef5e781d1d5`, text 1727 -> 1730 characters; the rest unchanged). I did not apply it because the text is yours to approve byte for byte.
+- **Q4 (RD-965 to Testing, the kit's own Q2).** RD-965's change is comments above four routes and four cells; no handler line changed (server.patch has no non-comment change in those hunks). The kit's rule moves "a code change" to Testing and a "decision, docs or non-code" straight to Done; a comment-only change is arguably docs. Default: MOVE includes 965 (as the kit's text T-965-OUTCOME-MOVE says), because the four cells are code in the repository and Testing is the reversible move. Drop 965 from the MOVE slot if you read it as non-code.
+
+DRAFTED B1561: kit 170 lines, sidecar rc 0, changes 3, questions 4
