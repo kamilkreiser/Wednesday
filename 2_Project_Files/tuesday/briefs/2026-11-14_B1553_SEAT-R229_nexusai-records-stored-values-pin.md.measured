@@ -1,0 +1,32 @@
+48127e92 | line 8 `ab5a16e92a20ee356604bd52be04c7029961207a`: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha (GH_CONFIG_DIR = the NexusAI project's) -> ab5a16e92a20ee356604bd52be04c7029961207a; control pulls/99999 -> gh: Not Found (HTTP 404); open pulls length -> 0
+c9b9004c | line 8 `.html`: /usr/bin/grep -E '^(backend|static|scripts)/' tree.txt | /usr/bin/grep -c -E '\.html$' (tree.txt = git/trees/<main sha>?recursive=1 blobs, 1005 lines) -> 16; control ext zzz -> 0; frame total over the six extensions 146+16+0+0+7+21 -> 190
+24e0c8e0 | line 8 `.mjs`: same count with '\.mjs$' -> 0 (kept in the frame on purpose; the kit says so at its POINTERS line); control '\.js$' -> 146
+7877e5e6 | line 8 `.cjs`: same count with '\.cjs$' -> 0 (kept in the frame on purpose); control '\.css$' -> 21
+b113d2be | line 8 `business_weekday_start`: /usr/bin/grep -r -c -i -F business_weekday_start over the 190 fetched files (one dir, src/) summed -> 7; files holding it (grep -r -l | wc -l) -> 1 (backend@server.js); controls: the five agent key names -> 0 each
+9a66a8d8 | line 24 `git -c user.name` rule sentence: /usr/bin/grep -c -F 'git -c user.name' kit -> 1 (the one sentence that forbids it); control 'git -c user.zzz' -> 0. A rule the seat obeys, nothing to match.
+c0ad0473 | line 24 `, no ` is a rule fragment, not a literal to match: /usr/bin/grep -c -F 'GIT_AUTHOR_' kit -> 1 (the same forbidding sentence)
+0c62cd6c | line 27 `WRITE`: /usr/bin/grep -c -F 'exactly `WRITE` or `HOLD`' kit -> 3 (the JIRA, CREATE and RECORDS slot lines); control 'exactly `MAYBE` or' -> 0
+021f3c8b | line 27 `JIRA_SITE`: /usr/bin/grep -c -E '^JIRA_SITE=' NexusAI/4_Credentials/.env (name only, value never printed) -> 1; control '^JIRA_ZZZ=' -> 0
+b8933006 | line 27 `JIRA_EMAIL`: /usr/bin/grep -c -E '^JIRA_EMAIL=' .env (name only) -> 1; control '^JIRA_ZZZ=' -> 0
+89f0655e | line 27 `JIRA_API_TOKEN`: /usr/bin/grep -c -E '^JIRA_API_TOKEN=' .env (name only) -> 1; control '^JIRA_ZZZ=' -> 0
+28314892 | line 33 `:3435`: awk NR==3435 of backend/jsonStorage.js at main ab5a16e9 -> settings[`${key}_updated_at`] = new Date().toISOString();  (the kit's fragment test is "begins settings[ and holds _updated_at", see next two ids)
+56108951 | line 33 `settings[`: awk NR==3435 | sed strip blanks | /usr/bin/grep -c -E '^settings\[' -> 1
+cedd4782 | line 33 `_updated_at`: awk NR==3435 | /usr/bin/grep -c -F '_updated_at' -> 1; control line 3436 -> 0
+69ad06e7 | line 33 `git/trees/<sha>?recursive=1`: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/trees/ab5a16e92a20ee356604bd52be04c7029961207a?recursive=1 --jq .truncated -> false; blobs listed -> 1005; under backend/static/scripts -> 245; of those ending in the six extensions -> 190
+53ff2f33 | line 33 `.mjs`: same tree count '\.mjs$' under the three folders -> 0 (stated as 0 in the kit); control '\.json$' -> 7
+5463d569 | line 33 `.cjs`: same tree count '\.cjs$' -> 0 (stated as 0 in the kit); control '\.html$' -> 16
+51da9888 | line 33 `agent_use_markdown`: /usr/bin/grep -r -c -i -F -- agent_use_markdown over the 190 fetched files (contents?ref=ab5a16e9, 190 fetched, 0 failed, 0 empty) summed -> 0; same for agent_response_style, agent_language, agent_use_emojis -> 0 each; control business_weekday_start -> 7
+779627f7 | line 33 `agent_role`: same sum -> 0; control: the rd691 test at main (not in the 190 frame) holds the seeded key agent_role at line 39 (awk NR==39 -> agent_role: 'rd691-role',)
+9bbf8c8f | line 33 `business_weekday_start`: summed over the 190 files -> 7, in 1 file (backend@server.js)
+9b6e7ccd | line 36 `date +%m%d`: date +%m%d (at drafting, Sun Nov 15 2026 05:3x AEDT) -> 1115
+3958e955 | line 36 `records-pass-1115`: Jira GET search project = RD AND ( labels = "records-pass-1115" ) -> HTTP 200, 0 issues; control labels = "records-pass-1113" -> HTTP 200, 2 issues (RD-985, RD-986)
+490a9e2d | line 44 `NOT CONFIRMED: <what was read>`: /usr/bin/grep -c -i -F 'NOT CONFIRMED:' CLARIFICATIONS.md -> 0 (a sentence form the seat writes when a value cannot be printed; nothing to match)
+0d53923b | line 47 `Stored values never erased`: /usr/bin/grep -c -F 'Stored values never erased' 2026-11-12_B1545_verify/VERDICT.md -> 1 (line 12, the finding 3 row, severity Info); /usr/bin/grep -c -F 'Stored values never erase' control -> 1; the full sentence in the verdict reads "Stored values never erased" is pinned by a cell only through the two retired paths (rd691 S1).
+335fc520 | line 54 `created`: /usr/bin/grep -o -F '<<KEY>>' kit | wc -l -> 3 (the entry template: Per ticket, Settles, Related; the kit says 3 occurrences in all); /usr/bin/grep -o -F '<<KEY-OR-NONE>>' kit | wc -l -> 1
+1489871a | line 59 `STOREDPIN`: /usr/bin/grep -c -i -F STOREDPIN CLARIFICATIONS.md -> 0; control 'C-280' -> 1; Jira phrase search project = RD AND ( text ~ "\"STOREDPIN-199\"" ) -> HTTP 200, 0; control text ~ "\"INSTRERR-199-13NOV\"" -> 1 (RD-986)
+864ad4e7 | line 59 `C-281`: /usr/bin/grep -c -i -F 'C-281' CLARIFICATIONS.md -> 0; control 'C-280' -> 1
+87c3db03 | line 71 `STOPPED: NEEDS TUESDAY <one question>`: /usr/bin/grep -c -F 'STOPPED: NEEDS TUESDAY <one question>' kit -> 3 (first line of the kit, REFUSE heading, STATUS last-line list); a sentence form the seat writes, nothing to match
+cd6f0757 | line 74 `RD-691`: Jira GET /rest/api/3/issue/RD-691 via jget.py (GET only, creds in-process) -> HTTP 200, Testing, Task, Low, comments 40804 and 41191
+56789412 | line 74 `RD-99999999`: Jira GET /rest/api/3/issue/RD-99999999 -> HTTP 404 (the control that must fail)
+d8c9e83d | line 76 `ab5a16e92a20ee356604bd52be04c7029961207a`: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha -> ab5a16e92a20ee356604bd52be04c7029961207a (head sha equals the merge commit of pull request 199); the 8 latest commits of main read (commits?sha=main&per_page=8), newest ab5a16e9 2026-11-12T10:39:13Z
+efa0d964 | line 78 `df -g`: df -g /Volumes/Datasec_DEV -> 1862 total, 614 used, 1248 GiB avail (limit 25); control: the limit 25 is below the avail figure
