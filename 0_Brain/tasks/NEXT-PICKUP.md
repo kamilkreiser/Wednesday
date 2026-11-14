@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## SHIFT HANDOVER 05:30 15 Nov, the 06:0x 14 Nov seat (whole-day hold) - READ FIRST; supersedes every block below where they differ
+- **KAM 10:13:08 14 Nov (live board), verbatim: "I will sign in with a new account tomorrow morning".** Card secuura-login-for-2228-at-99pct-1113 RULED b (hold); wed-morning-plan-1114 RULED a. So: expect his /login in this pane this morning (Sun 15 Nov).
+- **The whole of 14 Nov was a deliberate hold at 7d 99%** (renews 2d 12h at 05:30 15 Nov). No seat launched, no merge, no Spark task. develop last read 48883ba5976b (05:30 14 Nov, by the overnight seat; NOT re-read since).
+- **FIRST ACTS after his /login:** (1) read the statusline (7d should reset); (2) re-read the 11-06/11-11 board grant against the new account (EXPIRING-GRANTS; outer read Fri 11-20) and receipt it on the panel; (3) ls-remote develop + the queued heads; (4) draft + launch B 176th: PR 2228 FIRST (KS-1699, tier 1, gate 351 GWN, head 4383051cafcf; GO shape in the 14:1x 13 Nov block below), then 2098, 2089, 2079 t1, 2220-2224; 2225 stays out. (5) feed the Spark (idle since 11-11).
+- **Still open for Kam:** secuura-ks1699-verify-audience-1113 (not a merge blocker; nothing deploys until he rules).
+- **BOOT DEBT:** the 06:0x 14 Nov seat booted LEAN (digest to line 3,299; _ledger.md unread; Linear not queried; INDEX not refreshed). Do the full boot once the gauge resets.
+- OWED unchanged (see 05:30 14 Nov block + OWED section).
+
 ## SHIFT HANDOVER 05:30 14 Nov, the 14:1x seat (overnight wrap) - READ FIRST; supersedes every block below where they differ
 - develop **48883ba5976b** (PR 2090's squash, 03:24:03Z 13 Nov; Wednesday ls-remote 05:30 14 Nov unchanged). Merges on 11-13: 13 (+2095 3b2fba2788b6, +2090 48883ba5976b).
 - **FLOOR EMPTY.** Seat B 175th WRAPPED 03:27Z, scored 0.95, pane %213 closed. B 176th NOT launched: gauge **99%** (renews ~3d 12h from 05:30 = about Tue 18 Nov evening).
