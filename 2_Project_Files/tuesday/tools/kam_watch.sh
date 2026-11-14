@@ -43,8 +43,15 @@ esac
 c=$(current | /usr/bin/grep -c '^MSG')
 if [ "$c" -eq 0 ]; then
   f=$(bash "$T/tools/kam_rulings_today.sh" 2>/dev/null | /usr/bin/grep -i -o -E '[0-9]+ live rows fetched' | /usr/bin/grep -o -E '^[0-9]+')
-  [ -n "$f" ] && [ "$f" -gt 0 ] || { echo "CONTROL FAILED: 0 messages visible and 0 live rows fetched"; exit 3; }
-  echo "CONTROL: 0 messages today; board read proven by $f live rows fetched"
+  # 2026-11-15 02:44 (Tuesday s275): today's live fetch can ALSO be empty when Kam has been quiet since
+  # yesterday morning (the window holds only today's rows). Fall back to YESTERDAY's live read as the proof
+  # the same instrument can reach the board; both empty = blind, refuse.
+  w="today"
+  if [ -z "$f" ] || [ "$f" -eq 0 ]; then
+    f=$(bash "$T/tools/kam_rulings_today.sh" "$(date -v-1d +%Y-%m-%d)" 2>/dev/null | /usr/bin/grep -i -o -E '[0-9]+ live rows fetched' | /usr/bin/grep -o -E '^[0-9]+'); w="yesterday"
+  fi
+  [ -n "$f" ] && [ "$f" -gt 0 ] || { echo "CONTROL FAILED: 0 messages visible and 0 live rows fetched (today and yesterday)"; exit 3; }
+  echo "CONTROL: 0 messages today; board read proven by $f live rows fetched ($w's window)"
 fi
 u=$(unseen); if [ -n "$u" ]; then echo "FIRED KAM (already unseen at arm):"; printf '%s\n' "$u" | cut -f3-; exit 0; fi
 echo "ARMED $(date +%H:%M:%S): $c messages visible, all seen"
