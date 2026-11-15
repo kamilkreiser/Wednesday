@@ -1,0 +1,31 @@
+BLUF: three follow-ups to the deploy script's roll-forward rule, under scripts/ only: scripts/deploy-from-ci.sh, scripts/deploy-package.py and scripts/tests/test_deploy_rollforward.py. No stop word, warning line or message of either script changes. There is no new setting, status code or dependency. NOT deployed: no deploy and no run of the deploy script against any host was made for this change, and merging it deploys nothing (MPS has no merge-triggered deploy workflow).
+
+MPSCALC-400, the overlay re-read runs last (order only):
+- In the deploy block the roll-forward count (rollforward_hosted) now runs before the overlay re-read (reread_overlay), so the re-read is the last read before az webapp deploy. Only the two call lines swap places, each one byte for byte.
+- The count reads no overlay. It takes the overlay's number from the copy PRE-1 passed, so moving it changes no input. When the roll-forward rule stops a deploy, the re-read is no longer reached: 1 overlay read instead of 2, and nothing is deployed either way.
+- Access-token calls per deploy are counted and not changed. There is one per Kudu read: 2 overlay reads, 2 folder listings, 1 per stored file and 1 wwwroot download, so 5 plus the number of stored quote and snapshot files (5, 6 and 8 for 0, 1 and 3 files, the same before and after). The token is still printed 0 times under bash -x and SHELLOPTS=xtrace (the existing xtrace row is unchanged and green).
+- Left: whether one token may serve the whole count. The ticket does not make that decision. The rows that pin "5 plus files" will need editing when it is made.
+
+MPSCALC-401, a shallow checkout is undecided, never "older":
+- After git merge-base --is-ancestor answers 1, the script asks git rev-parse --is-shallow-repository. Any answer other than exactly false (true, empty, or anything else) sets the result to undecided, and the existing undecided stop runs. That stop asks for a full checkout. An answer of 0 still goes on, and the shallow question is asked only after an answer of 1.
+- The test git stand-in answers the shallow question itself. Without that, the existing older-package rows would turn red on hosted CI's one-commit checkout. Running the old test file against the new script inside a depth-1 copy shows two rows red.
+
+MPSCALC-403, end-of-string anchors:
+- SHA and NEWTYPE_FILES (quotes and snapshots) in deploy-package.py end with \Z instead of $. In Python, $ also matches before one trailing newline.
+- One row per pattern shows that the value with a trailing newline is refused and the plain value accepted. Rows also go through the commands: newtype-names, newtype-count --store, make --commit and verify --expect-commit (exit 2 with the usage line). scripts/package.sh passes git rev-parse HEAD (40 hex, no newline), so packaging is unaffected.
+- The other $-ended patterns in deploy-package.py (:58, :165 and :329) are not changed. :58 and :165 are refuse-lists over package leaf names, where $ is the safer side. :329 pulls the run id from a manifest value and is noted for a later look.
+
+MPSCALC-402 is LEFT: all four of its items change operator-visible stop words, and that word pack is still waiting for the product owner's approval. No word of any stop line is touched here.
+
+Wording note ('128'): in the shallow case the existing undecided line now prints "git answered 128" although git answered 1. That wording belongs to the pending stop-word pack. The line's instruction (run from a full checkout) is the right one for this case.
+
+Tests and checks (run at head e5994b7cc4ab4a0afed8a3c95c45aab8d4b4107d by an independent gate, Python 3.9.6, bash 3.2):
+- The CI python job's loop (every tools/demo/test, infra/tests and scripts/tests test file) gives the same rc per file at base, at head, and on the merge with current main, both in a full clone and in a depth-1 copy, which is the hosted shape. test_deploy_rollforward.py goes from 22 to 39 tests, all passing. No test is lost.
+- Run against the old scripts, 11 of the 17 new rows fail. The other 6 (the unchanged stops, the token counts, an answer of 0, a count of 0) pass before and after, as intended.
+- 7 planted mutants each turned at least one row red: the order swapped back, the shallow test inverted, the older-only guard removed, only "true" counted as shallow, and each of the three anchors put back to $.
+- No test reached the real az (a tripwire placed after the test fakes on PATH logged 0 calls).
+- CodeQL pre-scan (CLI v2.27.4, python-code-scanning suite): 0 results. This is a pre-scan, not hosted CodeQL.
+
+NOT RUN: hosted CI, hosted CodeQL, the package job (scripts/package.sh), the dotnet and web jobs (they read no changed path), and any deploy.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
