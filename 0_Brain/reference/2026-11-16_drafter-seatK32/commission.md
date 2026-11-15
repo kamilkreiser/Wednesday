@@ -7,3 +7,5 @@ QUEUE: ROW 1 = PR 2093 (KS-2053, tier 2, a DNM-template row, originate test-only
 ALSO MEASURE, in notes.md only (no change to the brief's shape): how many of K 31st's ~13 context points before row 1 went to re-keying the kit; one paragraph on what a re-key-free kit (seat-agnostic tool names, the ordinal passed as an argument) would remove. Wednesday is weighing a consolidation item on it; do NOT build it.
 Live seats (never touch): none in panes at commission time; the S 84th BOARD drafter runs beside you (Linear read-only; no shared files). Load gate 8. Short TMPDIR for every tsx/tsc/jest/vitest leg.
 Return a 10-line summary: path, size, develop read, row 1 state and tree, first table rows (and any REMOVED), re-key counts, matcher result, anything Wednesday must rule.
+
+PARTITION ADDED BY WEDNESDAY (04:25, after commission): K 32nd owns rows 1-26 of K 31st's order (2093 ... 2195); rows 27-51 (2087 ... 2191) belong to Seat B 184th (card secuura-merge-throughput-sixty-ready-1115 = a). On re-commission, carry this.
