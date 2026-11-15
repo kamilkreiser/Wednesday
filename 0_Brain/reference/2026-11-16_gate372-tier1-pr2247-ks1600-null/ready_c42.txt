@@ -1,0 +1,39 @@
+=========== [INBOUND] 2026-11-15T20:43 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-1600 (Seat C 42nd)
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-1600 (Seat C 42nd)
+Seat C 42nd
+READY FOR GATE KS-1600, TIER 1 (the route mints credentials). PR 2247, head c4edaa734aba5da0aa8557573c6f6213e6b1ad30, one commit on develop 9942bae93563, 7 files, +202 -11. Nothing merged, deployed, moved or filed by me.
+
+BLUF: the originate admin API-key mint (POST /api/admin/api-keys) now refuses permissions: null with 400, the same message and body as every other malformed value. One token group in one condition in routes/adminConfig.ts (the carve-out from PR 2087 removed) plus its comment. Red at develop: 5 of 12 new cells, all AssertionError. With the change: 12 of 12, the one forced 2087 cell flipped, both files 29 of 29, the whole originate suite 226 suites / 2708 tests green twice. Hook final line: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. A first push attempt was refused (my slip, declared below).
+
+LINKS: PR https://github.com/Secuura/Distributed_Secuura/pull/2247 | branch feature/ks-1600-originate-admin-mint-refuses-null-permissions | ticket comment c4f2b77d-7add-4ae4-8d8d-c356b646c749 (20:42:32Z, read back exact, 0 mention nodes; KS-1600 In Progress before and after, priority and assignee untouched). No closing word and no self-hold sentence in the PR (BRIEF scan list gives 0, positive control fired).
+
+CELLS (new file ks1600-null-permissions-refused-at-the-admin-mint.test.ts, harness copied from the 2087 file, $executeRaw now a named double):
+- RED at develop, final bytes: N1 null as platform caller, N2 as ORG_ADMIN, N3 null plus a foreign organisation (403 where 400 is wanted), N4 the literal wire body, C6 the null refusal body equals the bare-string refusal body. 5 failed / 7 passed, each a matcher AssertionError (Expected 400, Received 201; 403 for N3). Green controls: C1 omitted, C2 [], C3 valid array (positive control), C4 missing name, C5 the falsy '' / 0 / false rows.
+- The ONE existing cell forced red (measured before editing): the 2087 null -> 201 cell (expected [201,1], received [400,0]); flipped to the 400 expectation, header sentence edited, nothing else in that file.
+- Docs: new pair KS-1600-originate-admin-mint-refuses-null-permissions.html (flow and cheat) and, as your ANSWER widened W-2, the four statements that said null stays corrected in place (3 flow, 1 cheat). docs-fragments.mjs check OK, a planted unclosed div made it FAIL rc 1, restored byte-identical; the same 2 ADVISORY lines print on clean develop; a preview build showed the references rendering (sections 394 and 391).
+
+SUITES (whole services/originate jest, one at a time behind the load wait, interleaved): develop 225 suites / 2696 tests passed (load1 4.65), change 226 / 2708 (5.83), develop 225 / 2696 (7.12), change 226 / 2708 (7.01). Failure sets empty in all four.
+
+MUTANTS (REAL red sets over the two KS-1600 files, 29 cells; each old text occurs once; restored by sha256 after each; control m0 turned C4 red):
+- m1 fix reverted alone: N1-N4, C6, flipped 2087 cell (6). BRIEF predicted N1-N4.
+- m2 truthiness test: N1-N4, C6, C5 x3, flipped cell (9).
+- m3 null coalesced to undefined: N1-N4, C6, flipped cell (6).
+- m4 refusal after the organisation decisions: N3 + the 2087 "validation comes first" cell (2). BRIEF predicted N3 only.
+- m5 omitted key refused: C1 + the 2087 absent control (2). m6 [] refused: C2 + the 2087 [] control (2).
+- m7 null refused with another message: N1-N4, C6, flipped cell (6).
+- m8 null refused AFTER the INSERT: N1-N4 + flipped cell (5); C6 stays green (it asserts status and body only), so the not-called assertions carry that one.
+Each fix line reverted alone (m1) turns cells red.
+
+TSC / ESLINT: originate own tsc over src rc 0 (adminConfig.ts in the program). Test-inclusive config (258 test files): 4 errors, all in two EXISTING files (ks1937-... and ks488-smtp-opt-in, TS2300 and TS2451), the same 4 on clean develop; 0 in my three files; planted TS2322 reported. eslint by absolute path on the 3 changed TS files: 0 errors, 0 warnings; a planted var reported. npm run check:test-types does not list originate (auth, api-gateway, vc-issuer, security, m365-integration); after my fix below it reads 0 new in all five.
+
+PUSH: gates before the push: overlap gate rc 0 (64 open PRs, none on my 7 paths), planted control rc 1; develop gate; queue empty. ATTEMPT 1 (20:12:54Z to 20:24:57Z, 723 s) was REFUSED: PREFLIGHT FAILED on leg(s) 14 16 - fix the above before pushing. (13/16 legs ran). Cause (mine): my tree had 4 of the donor's 34 node_modules; the ratchet needs auth and api-gateway's nested installs (a clean develop tree with the same three-tree deps printed the same 2 + 2 new errors). I cloned the 30 missing trees, the ratchet read 0 new, the shell suite preflight_test_types_ratchet_leg.test.sh read 46 passed 0 failed, and the SAME commit went again (STATUS mailed 20:29Z). ATTEMPT 2 (20:29:56Z to 20:40:41Z, 645 s): VERIFIED on origin; shell suites 126 passed, 0 failed, 1 skipped; legs 3, 4 and 8 skipped (no local stack up). No --no-verify.
+DEVELOP MOVED during the build: now 6185f0f1ace8 (two merges: m365-integration and a shared-package test). No file name shared with this change; merge-tree of my head with it clean in both orders, same tree. Not re-based.
+
+NOT MEASURED: callers outside this repository and live traffic (gate 251: 0 production callers in the repository); a real database or running stack; the four platform suites; preflight legs 3, 4 and 8; Node LTS status (v26.8.1 on this host, unverified). The security-service facts (scopes schema line 718, parse line 1268, the 400 in its catch line 1551) are READS at develop 9942bae93563, not runs.
+
+CANDIDATE FILINGS (in my HANDOVER, none filed): (1) [] is stored ['read'] at originate and [] at the security service (W-5). (2) check:test-types does not cover originate; a test-inclusive tsc over originate shows 4 existing errors in 2 files at develop (script-scope duplicate names, no import or export). (3) Kit: mk_tree should clone all nested installs.
+
+SLIPS (declared): the partial node_modules above (C42-N8); zsh did not split a variable twice (one wrote an empty-named scratch file, moved to evidence/_quarantine, nothing deleted); one wrong-case replacement string refused by my own count before any write; first shared-checkout git used --no-optional-locks. cd 0, rm 0, key in argv 0, no .env name or value printed.
+
+COST: meter 48.6 of 1M at this send (PLAN 33.3, STATUS 46.3). Next: HANDOVER, history entry, vault commit, wrap mail. A fix round only by ADDENDUM on NEW commits. Tier-1 gate: yours to commission.
+
