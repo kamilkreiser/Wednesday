@@ -1,0 +1,44 @@
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE KS-1699 (Seat R 120th)
+Seat R 120th
+
+READY FOR GATE, TIER 1: KS-1699 follow-up, "a same-tenant ORG_ADMIN may share and recertify" (Kam's card secuura-ks1699-admin-means-platform-admin-1115 = b).
+
+PR 2239 https://github.com/Secuura/Distributed_Secuura/pull/2239
+- Title: "Refs KS-1699: an ORG_ADMIN of the tenant may share and recertify a certification" (Refs, no closing keyword).
+- Head f1ac5fec9b679f8cde1a406cbeeb6cd58ee7c13d, ONE commit, parent develop daa54a26d163. Develop at launch 6af62b9ac556 (the move daa54a26..6af62b9a changed 6 files, 0 of mine; the round gate's compare and the driver's DOCSRULE both read 0 overlap with a planted control).
+- Linear: PR 2239 attached to KS-1699 only (census re-read 11:03Z; the read at create time was empty, the integration lag); KS-1699 still In Progress.
+- Branch feature/ks-1699-an-org-admin-of-the-tenant-may-share-and-recertify, tree worktrees/s-r120-ks1699 (porcelain 0). 6 files +276 -18: routes/certifications.ts +32 -3; the ks1699 test file +209 -12; the new fragment pair (+20, +12); PR 2233's pair (2 lines in cheat, 1 in flow).
+- Push 10:49:52Z to 11:01:37Z (705 s; lock acquired with 0 polls, queue empty, released after), rc 0 VERIFIED (origin head = f1ac5fec9b67). Hook final verdict, verbatim:
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+- Leg 14: shell suites: 126 passed, 0 failed, 1 skipped (of 127).
+
+THE CHANGE
+- One new helper callerMayShareOrRecertify(req, certification) = callerMayReadCertification(...) || (isPlatformOrOrgAdminRole(role) && decideTenantAccess(authUser, getReqTenantId(req)).allow), role and authUser read from req.user as the neighbour does.
+- Share and recertify: one word each (callerMayReadCertification -> callerMayShareOrRecertify), one comment line each citing the card. Same position (after not-found, before the revoked 400 and every email, anchor, write and charge), same 404 bytes.
+- Import extended with isPlatformOrOrgAdminRole and decideTenantAccess (first use in services/originate).
+- callerMayReadCertification and GET /:id, lineage, evidence-bundle unchanged; revoke issuer-only 403; verify open.
+
+D1-D3 AS RULED
+- D1: claim compared; no claim or an empty claim is refused (S8, R8). Reachability: slot-4 local 5 ORG_ADMIN, 0 without a tenant (37 users, 0 without); demo not measured. The two seed paths are named in the PR body, one sentence each, unchanged.
+- D2: tenant-wide; the PR body's "What this admits" says a sibling organisation's ORG_ADMIN in the same tenant is admitted. A possible later refinement, not built: bind the admit to the admin's own organisation (decideTenantAccess's organisation-scope arm); the certification row exposes no organisation, so it is not a one-line change.
+- D3: org_admin admitted (S10, R10); the dotless-i spelling org_admın (U+0131) refused (S9, R9).
+
+EVIDENCE (all in REC = 5_Project_History/2026-11-15_seatR-120th/)
+- Cells: 24 -> 54. Red first over the PR 2233 routes: 31 of 54, all AssertionError (expected 201 or 400, received 404). Green: 54 of 54, and the 37 KS-1695 cells unchanged (91 of 91). evidence/cells/.
+- Plants (evidence/plants3/plants_run3.out), 16, each restored to sha256 f34d8413064a: arm removed 31; role check true 14; lookup-only 8; tenant allow inverted 31; arm moved into the read helper 3 (P3); share 403 / one byte 15 / 15; recertify 403 / share's body 15 / 15; share after revoked 2 (S5, S11); share after charge 14; recertify after revoked 2 (R5, R11); recertify after charge 14; ISSUER_ADMIN admitted 2 (S9, R9); ADMIN admitted 2 (S9, R9). Every red is an assertion. No tamper reddens 0.
+- R120-D1 (accepted 10:48Z): plant (5) first reddened 0 cells because KS-1695's R14/R15 sign their ORG_ADMIN in with no tenant claim; cell P3 added (the admitted ORG_ADMIN is 404 on GET /:id, lineage, evidence-bundle); named in the PR body's Test Evidence. The BRIEF's expectation for plant (5) was Wednesday's item, named here as asked.
+- Whole originate jest suite A/B, 3 of 3 interleaved pairs, each run started at load1 <= 8: develop 223 files / 2633 tests / 0 failed x3; branch 223 / 2663 / 0 x3. No pre-existing red. Node 26.8.1, not LTS. evidence/suite/ab.out.
+- tsc plain rc 0 (planted control rc 2); tsc incl tests 4 lines on branch AND develop (ks488 x2, ks1937 x2), 0 in my file; eslint 0/0 both files (planted no-var 1 error); check:test-types not applicable (originate not enrolled); docs-fragments check OK (planted defect FAIL rc 1; the 2 ADVISORY lines are on develop too). evidence/checks/.
+- merge-tree vs PR 2160 head b02bd2716cc2: rc 0 both orders, tree f5a100365115, 0 conflicts; planted control rc 1 both orders. evidence/merge_proof_2160.out. Grant used exactly as named: CENSUS_ACCEPT certifications.ts=2160, OVL_IGNORE_PRS=2160.
+
+NOT COVERED (also in the PR body): no real gateway + originate pair, no real database, no Schemathesis, Akto, Playwright or k6, no deploy, no browser run of ShareDialog.tsx:87 / RecertifyDialog.tsx:54 (in-repo callers, no change needed). Deploy owed; not this seat's; demo frozen.
+
+FOR THE GATE
+- callerMayReadCertification's doc comment still says share and recertify "apply the same rule" (develop :159-160); the partition excluded that helper, so it is unedited. One-sentence amend offered.
+- KS-1699 comment drafted (push/linear_comment_ks1699.md, --dry rc 0), NOT posted: per your 10:48Z ruling it waits for the gate.
+- Slips and named edits: R120 slip 1 (red-proof run started at load1 17.45); R120-N1/N3/N4 (every jest run now waits for load1 <= 8), R120-N2 (plant 5 compile fix), R120-N5 (finish chain runs the comment --dry only). evidence/slips_r120.tsv, evidence/declared_r120.tsv.
+- No ticket state or assignee changed. No merge, no deploy, no box.
+
+Meter 41.0 percent of 1M at this mail. The seat ends here unless you send more.

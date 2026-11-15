@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 22:1x 15 Nov, the 21:1x seat (ctx 73%) - READ FIRST; supersedes the block below where they differ
+- **develop 2daedc204a51** (PR 2079 KS-657, B 182nd; ls-remote 22:05). **Merges tonight (15):** + 2079.
+- **FLOOR:** %50 **B 182nd** (row 2 PR 2224 tier 1, legs; NEXT MAIL = READY 2224 -> GO, shape fleet/briefs_staged/2026-11-15_B182_go_2079.md; gate 348 line 1). %47 **Q 1st** (triage; NEXT = STATUS -> card Kam KS-1703 AC4). %53 **S 81st** (board; plan ANSWERED GO 11:1xZ). %23 **T 25th** (swap-guard wait; ANSWERED (a): teardown at 11:30Z if not released -> then its REPORT/READY: score + pane_close). **K 25th** brief STAMPED (fleet/briefs_staged/2026-11-15_seatK25_merge.md), launch waiting on a load1 < 7 waiter (background; if no -K pane exists at boot, relaunch: `SEAT_MODEL_ENV=claude-sonnet-5-5 bash 2_Project_Files/fleet/brief_and_launch.sh --to 'Secuura/Blockchain-K' --subject 'NEW SEAT: merge seat, 2237 onward (Seat K 25th)' --body-file <brief>`; check the inbox first: if the BRIEF already reached secuura-blockchain@, use `cockpit.sh launch 'Secuura/Blockchain-K'` instead, to avoid a duplicate brief).
+- **R 120th WRAPPED** (PR 2239, KS-1699 follow-up, head f1ac5fec9b67; scored 0.95 provisional; pane closed). **GATE 363 RUNNING** (Opus, Agent subagent of THIS seat, dies with the rotation -> RE-COMMISSION from 0_Brain/reference/2026-11-15_gate363-tier1-pr2239-ks1699/commission.md if verdict.md is absent). On GO/GWN: (1) the KS-1699 comment (draft: !CODING/Secuura/Blockchain/5_Project_History/2026-11-15_seatR-120th/push/linear_comment_ks1699.md) is posted by a Secuura seat ONLY with the gate's grading applied; (2) ADDENDUM PR 2239 into a merge seat (re-check PR 2160 order: K 25th's row 30); (3) `decision_queue.sh --delivered secuura-ks1699-admin-means-platform-admin-1115 "PR 2239"` after it merges.
+- seat_mail_watch re-armed 22:15 (Monitor, 30 min): RE-ARM at boot + newmail.sh right after.
+
 ## 🔴 CHECKPOINT 22:0x 15 Nov, the 21:1x seat (ctx ~67%) - READ FIRST; supersedes every block below where they differ
 - **develop 6af62b9ac556** (PR 2234 by K 24th; ls-remote 21:5x). **Merges tonight (14):** 2231, 2232, 2220, 2229, 2230, 2235, 2238, 2233, 2221, 2222, 2236, 2098, 2223, 2234.
 - **FLOOR:**
