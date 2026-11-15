@@ -1,0 +1,13 @@
+The journey test in the accessibility spec ran under the 30 s default
+test timeout. It now has its own 90 s bound, like the other long journeys
+in the suite. Test code only: one comment line and one call in
+web/e2e/a11y.spec.ts; no product file, nothing deployed.
+
+Measured alone, the journey test takes 10 to 13 s (about 11 s median),
+so it can pass the default on a loaded machine. At a 5000 ms
+command-line default the old spec times out on desktop and tablet and
+the new one passes; with 1_000 in place of 90_000 it times out again,
+so the in-file bound is what governs. The other two tests keep the
+default.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

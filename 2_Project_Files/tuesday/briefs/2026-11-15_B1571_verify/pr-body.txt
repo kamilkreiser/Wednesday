@@ -1,0 +1,17 @@
+## Summary
+The journey test in the accessibility spec (web/e2e/a11y.spec.ts) walks sixteen screens with an axe scan on each. It ran under Playwright's 30 s default. Alone it takes 10 to 13 s, but on a loaded machine it can pass 30 s. It now sets its own 90 s bound, the same value other long journeys in the suite use. Test code only: one comment line and one call. No product file, no new word, nothing deployed.
+
+## Before and after
+Before: the journey test had the 30 s default. After: the journey test has `test.setTimeout(90_000);` as its first statement. The other two tests in the file (3.3 s and 0.8 s at most) keep the default.
+
+## Evidence
+- Alone (three runs per project, one worker): journey 10.6 to 12.5 s.
+- Red first at a 5000 ms command-line default: on main the journey test times out on desktop and tablet ("Test timeout of 5000ms exceeded"); with this change it passes (11.2 s, 10.7 s); the negative control passes in all runs. With 1_000 in place of 90_000 it times out again at the same 5000 ms, so the in-file bound is what governs.
+- Unit tests: 298 files, 4264 passed, same names as main. Lint, type check and shard plan exit 0.
+- E2E shards that hold this file (retries on, as in CI): journey-and-prototype 2 + 182 + 14 passed; prototype-tablet-1 181 passed, 1 skipped by design; 0 failed, 0 flaky. Same counts on main.
+- Local static analysis (javascript, extended suite): 0 results. Hidden-character test: 14 OK.
+
+## What this does not do
+It does not make the page faster and does not touch the timed journey. Other points of the ticket are not part of it.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
