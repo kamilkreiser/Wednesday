@@ -8,7 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## 🔴 CHECKPOINT 20:3x 15 Nov, the 19:3x seat (ctx ~66%) - READ FIRST; supersedes every block below where they differ
+## 🔴 CHECKPOINT 20:4x 15 Nov, the 19:3x seat (ctx 70%) - READ FIRST; supersedes every block below where they differ
+- **develop 9cbb9687021a** (PR 2236 by K 23rd; gh api 20:4x). **Merges tonight (11):** + 2236.
+- **FLOOR:** %38 **B 181st** (merge -B, Sonnet; brief fleet/briefs_staged/2026-11-15_seatB181_merge.md STAMPED 20:37 W-1..W-6; booting; row 1 PR 2098 auth -> NEXT MAIL = plan QUESTION -> ANSWER GO). %35 **K 23rd** WRAPPING (1 merge, names PR 2234 first; its row-2 pytest forecast > 58) -> read wrap, SCORE, pane_close.sh %35. %23 **T 25th** (Schemathesis then Akto).
+- **K 24th DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatK24/commission.md -> fleet/briefs_staged/2026-11-15_seatK24_merge.md; RE-COMMISSION if absent). On return: read WHOLE, stamp after K 23rd's wrap, launch Sonnet --to 'Secuura/Blockchain-K' behind a load1 < 7 waiter.
+- GO shape: fleet/briefs_staged/2026-11-15_K23_go_2236.md (tier 2) / 2026-11-15_B180_go_2233.md (tier 1).
+
+## CHECKPOINT 20:3x 15 Nov, the 19:3x seat (ctx ~66%) - superseded by the block above where they differ
 - **develop d7dc7de435ce** (PR 2222 by B 180th; gh api 20:33). **Merges tonight (10):** 2231, 2232, 2220, 2229, 2230, 2235, 2238, 2233, 2221, 2222. GOs one at a time; GO shape = fleet/briefs_staged/2026-11-15_B180_go_2222.md (pins re-read by gh api in the SEND action, `if` guard, send_brief --kind answer, then cockpit.sh say --mail).
 - **FLOOR:** %35 **K 23rd** (merge -K, Sonnet; SET-UP CLOSED 34.2; row 1 PR 2236 legs -> READY -> GO; then 2234 pytest, 2237, 2139 onward; its merge_k23 has the UNION-AUTO post-check fix, tested). %23 **T 25th** (slot 4: preflight 16/16 PASSED, k6 pass, Playwright 12 passed, migrations 17 passed; admin123 ruling executed; Schemathesis pre-merge running, Akto LAST; findings F1-F11 to file via a board seat). K 22nd, B 180th, S 80th, A 32nd: WRAPPED, scored, panes closed.
 - **B 181st DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatB181/commission.md -> fleet/briefs_staged/2026-11-15_seatB181_merge.md; RE-COMMISSION if absent). On return: read WHOLE, stamp (B 180th's HANDOVER FINAL at 5_Project_History/2026-11-15_seatB-180th/), launch Sonnet --to 'Secuura/Blockchain-B' when load1 < 7 (waiter pattern: until-loop then brief_and_launch.sh).
