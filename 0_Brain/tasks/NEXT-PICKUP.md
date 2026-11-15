@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATION HANDOVER 18:3x 15 Nov, the 17:31 seat (ctx ~77%) - READ FIRST, then the 17:5x block below and its dated lines
+- **develop 96aa5fc17c60** (PR 2232 merged 07:22:12Z). Merges since the 17:18 outage: **2231** (240d1f664b52), **2232** (96aa5fc17c60).
+- **IN FLIGHT:** %8 **B 178th**: GO PR 2220 SENT 07:2xZ (fleet/briefs_staged/2026-11-15_B178_go_2220.md; head ab5a7e119cc8, develop 96aa5fc17c60, tree e9fb489d36f0) -> its MERGED, then it WRAPS naming **2230** first. %11 **K 20th**: told to WRAP (ANSWER 07:2xZ; 2229 first for K 21st). %2 **D 63rd**: k27 SWAPS running on its own green STATUS 2 (originate apk patch bumps ruled (a)) -> STATUS B -> the 8 A2 tickets close via S 80th. **Gate 361 RUNNING** (Agent subagent, Opus: PR 2235 delta at 19b6f52483c6; DIES with this rotation -> RE-COMMISSION from 0_Brain/reference/2026-11-15_gate361-tier1-delta-pr2235-ks1935/commission.md if verdict.md absent).
+- **A 31st WRAPPED** 07:25Z (pane %5 CLOSED 18:28 by pane_close.sh --live-ok: its watch_a31.py; listeners gone = its own claude + two node test hosts replaced by new ones = other seats' suites). SCORE OWED.
+- **NEXT LAUNCHES (briefs drafted, NOT stamped; read WHOLE + stamp + launch Sonnet):** **K 21st** = fleet/briefs_staged/2026-11-15_seatK21_merge.md (drop 2231 + 2232; ROW 1 = 2229; after K 20th's wrap mail; read its HANDOVER FINAL). **B 179th** = fleet/briefs_staged/2026-11-15_seatB179_merge.md (ROW 1 = 2230; W-1..W-8 to rule; drop 2220 if merged; after B 178th's wrap). --to copied from receipts: 'Secuura/Blockchain-K' / 'Secuura/Blockchain-B'.
+- **ADDENDUM POOL (gated GWN, unqueued):** 2233 (t1), 2234 (t2), 2236 (t2), 2237 (t2). Add to K 21st's / B 179th's stamps or by ADDENDUM. 2235 joins after gate 361 GO.
+- **CARD OPEN for Kam:** secuura-ks1897-email-match-owner-bind-1115 (rec a; default: build nothing). The A lane has NO live seat: when Kam rules, a new A seat builds KS-1897 from A 31st's HANDOVER (5_Project_History/2026-11-15_seatA-31st/HANDOVER.md, plan verbatim at its end).
+- **SCORES OWED:** A 31st, K 20th (2 merges), + AA 6th, R 119th, E 40th, F 36th, B 176th, S 79th, C 37th (from the 11:0x seat); the dead K 19th / B 177th / D 62nd / A 30th are scored as killed by the outage, not as failures.
+- **OWED unchanged:** S 80th board seat (61 L-keys + filings: G358-2230-2 latent thread-mint Medium, G355-2235-2, originate apk pin, BillingDashboard /api/billing/checkout, G353-2231-1); Stuart reply after 2230 merges (Kam's instruction); tonight Docker 14 GB + T 25th + brew (hold tmux upgrade: the 17:18 outage cause is UNMEASURED); Linear check + INDEX refresh not done this seat; weekly consolidation lapsed.
+- seat_mail_watch.sh: re-arm under Monitor at boot (it seeds silently: run newmail.sh right after arming).
+
 ## 🔴 CHECKPOINT 17:5x 15 Nov, the 17:31 seat (ctx 54%) - READ FIRST; supersedes every block below where they differ
 - **FLEET OUTAGE 17:18:** the tmux server died (17:17:53-17:18:24, cause UNMEASURED; new `fleet` session 17:20:13). EVERY seat pane died: K 19th, B 177th, D 62nd, A 30th, C 37th (had wrapped), AA 6th (had finished: PR 2230 pushed 220df650550a + READY FOR GATE 06:26Z, so **AA 7th is NOT owed**). Kam told on the panel 17:37. KS-1910 branch 48916cd82394 pushed by A 30th's detached driver AFTER the death; no PR yet (A 31st row 1).
 - **develop ce35818d50ae** (unchanged at 17:41). GO 2231 was sent ~17:33 to dead K 19th: NEVER acted on.
