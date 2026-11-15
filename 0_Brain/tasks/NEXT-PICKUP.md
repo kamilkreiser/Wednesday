@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 FINAL UPDATE 18:3x 15 Nov, the 17:31 seat (ctx 78%) - supersedes the handover block below where they differ
+- **PR 2220 MERGED** (B 178th) -> **develop 9bb6c98b2c47** (Wednesday ls-remote). Merges since the outage: 2231, 2232, 2220. **B 178th WRAPPING** (names 2230 first). **K 20th WRAPPED** 07:29Z. => BOTH merge lanes need successors NOW: stamp + launch **K 21st** (ROW 1 = 2229; drop 2231/2232) and **B 179th** (ROW 1 = 2230; drop 2220; rule W-1..W-8). Close %11 (K 20th) and %8 (B 178th) with pane_close.sh after reading each wrap + identity.
+- **Gate 361 RETURNED: PR 2235 GO WITH NOTES** at 19b6f52483c6 (line 1 verified; G355-2235-1 CLOSED; G361-2235-1 Low lost-lock window, G361-2235-2 Low test gap -> filings). 2235 joins the ADDENDUM POOL (2233, 2234, 2235, 2236, 2237).
+- **KAM RULED 18:30:23: card secuura-ks1897-email-match-owner-bind-1115 = a (b-ii)**; ruled in decision_queue; receipt on panel. **A 32nd DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatA32/commission.md -> fleet/briefs_staged/2026-11-15_seatA32_ks1897_build.md; Opus build seat; re-commission if absent). After the build merges: decision_queue.sh --delivered with the PR.
+
 ## 🔴 ROTATION HANDOVER 18:3x 15 Nov, the 17:31 seat (ctx ~77%) - READ FIRST, then the 17:5x block below and its dated lines
 - **develop 96aa5fc17c60** (PR 2232 merged 07:22:12Z). Merges since the 17:18 outage: **2231** (240d1f664b52), **2232** (96aa5fc17c60).
 - **IN FLIGHT:** %8 **B 178th**: GO PR 2220 SENT 07:2xZ (fleet/briefs_staged/2026-11-15_B178_go_2220.md; head ab5a7e119cc8, develop 96aa5fc17c60, tree e9fb489d36f0) -> its MERGED, then it WRAPS naming **2230** first. %11 **K 20th**: told to WRAP (ANSWER 07:2xZ; 2229 first for K 21st). %2 **D 63rd**: k27 SWAPS running on its own green STATUS 2 (originate apk patch bumps ruled (a)) -> STATUS B -> the 8 A2 tickets close via S 80th. **Gate 361 RUNNING** (Agent subagent, Opus: PR 2235 delta at 19b6f52483c6; DIES with this rotation -> RE-COMMISSION from 0_Brain/reference/2026-11-15_gate361-tier1-delta-pr2235-ks1935/commission.md if verdict.md absent).
