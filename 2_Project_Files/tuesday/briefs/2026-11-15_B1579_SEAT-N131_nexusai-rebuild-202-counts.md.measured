@@ -1,0 +1,105 @@
+7f931c92 | awk 'NR==22||NR==23' /Volumes/Datasec_DEV/TUESDAY/0_Brain/dashboard/data/models_latest.json -> 22: "sonnet": {  23: "model_id": "claude-sonnet-5-5",
+62801a8d | /usr/bin/grep -n -E '"(sonnet|opus)"|model_id' models_latest.json -> 22: "sonnet": { (the entry starts at :22)
+25bcfc8d | same grep -> the "sonnet" key is on line 22, its model_id on line 23
+9f9c5a8f | /usr/bin/grep -n -i BRIEF_SEAT_LEVEL tuesday/brief_seat.sh -> 31: LEVEL="${BRIEF_SEAT_LEVEL:-opus}" ; 32: case "$LEVEL" in opus|sonnet) (sonnet is an accepted value; default is opus, so the level must be written)
+1b44a313 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/202 --jq mergeable (15:29:54 and 15:35:27) -> null then false
+d23deb7d | gh api -X GET .../pulls/202 --jq mergeable_state (15:35:27) -> dirty (first read 15:29:54 printed unknown)
+7afbca42 | same read at 15:35:27 -> mergeable=false dirty
+9d56785f | gh api -X GET .../compare/4ba2e03c...8586c094 -> status ahead, ahead_by 2, behind_by 0, merge_base 4ba2e03cc88e928c2c6fdf6694ebed0e7cadf2e5
+81b5c97b | /usr/bin/grep -c '"_updated"' scratch copies of the counts file at 4ba2e03c and 0fdc77f0 -> 1 and 1; merge-file conflict hunk holds the _updated line on both sides (s278/d1579/mf/merged.json)
+74d72b72 | /usr/bin/grep -c -F 'verify-suite: expectation UPDATED' .tools/b1567/logs/verify-u-update.log (a real --update-counts run, 13:55) -> 1 (line 22122: "verify-suite: expectation UPDATED <U+2014> tests=5638 suites=349"); source scripts/verify-suite.sh:337 at 0fdc77f0
+d47732d3 | /usr/bin/grep -c -i CI_DEPLOY_ENABLED deploy-demo.yml at 0fdc77f0 -> 3 (job gate at :53 printed by awk); 'skipped' itself is RELAYED (gate B1567 VERDICT finding 2), the kit says "must read skipped" as a landing expectation, not a value this seat reads
+e20a1550 | command -v node (drafter shell, 15:39) -> /opt/homebrew/bin/node
+8d75faba | node --version (15:35) -> v26.13.0 ; control: .tools/node24/bin/node --version -> "no such file or directory"
+beba2287 | npm --version (15:35) -> 11.20.0
+07f95029 | tail -1 '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-11-15_B1568_STATUS.md' at 15:30 -> WORKING: B1568 chain, holding the jest lock, step p-plain-K started 15:30:19 ; at 15:39 -> WORKING: B1568 chain, holding the jest lock, last completed [browser redfirst newcells related mut mainmove p-plain u-update kstep ] 15:34:13
+60ecd24b | /usr/bin/grep -c -i worktreeSlot __tests__/helpers/test-server.js at 0fdc77f0 -> 3 (definition at :89 by grep -n); N129 STATUS line 27 RELAYED: worktreeSlot() printed 7 in its trees
+207d739f | ls -d '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1567/' -> exists (lists clone, logs, raw, lib.sh, jestwrap.sh, loadprint.sh, namescan.py, s6_verify.sh, s7k.sh, chain.sh, prepush.py, working.py and others)
+6bb745d7 | ls -d '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/b1567-nodot/'* -> chk2 fin22 mut35 new5 old39 upd10
+dfb95785 | /usr/bin/grep -c -E 'READY|STOPPED|HANDOVER' tuesday/tools/status_watch.sh (64 lines) -> 3; the form is copied from the stamped template kit B1567 line 1, which its seat used (B1567 STATUS)
+f03c0fdc | not a literal: the text between two backticked items on REFUSE 1 ("prints anything but 0"); the literal there is the four-underscore grep: /usr/bin/grep -c -E '_''_''_''_' <this kit> -> 5 (four slots and the last line), which is the .pre-stamp value the kit names
+a4b7bdba | gh api -X GET .../contents/scripts/verify-expected-counts.json?ref=0fdc77f0 (raw) -> "tests": 5651, "suites": 352
+bc080375 | git hash-object s278/d1579/mf/theirs.json (raw bytes of main's counts file) -> e145afd00f02c9657272b7654d122aa354bf73ee ; gh api contents ?ref=0fdc77f0 --jq .sha -> e145afd00f02c9657272b7654d122aa354bf73ee (equal)
+8bec9a83 | ls -d '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' -> exists; every gh read in this drafting ran under it
+a9e12832 | gh api -X GET user --jq .login | /usr/bin/grep -c -i datasec -> 1 ; control /usr/bin/grep -c -i zzqx -> 0 (login never printed)
+25c61216 | lsof -nP -iTCP:25760-26399 -sTCP:LISTEN | wc -l (15:31) -> 0 ; control lsof -nP -iTCP -sTCP:LISTEN | wc -l -> 20
+0bd7e747 | as d47732d3: 'skipped' is RELAYED from gate VERDICT B1567 finding 2 and landing.txt line 4; deploy-demo.yml:53 gate printed by awk at 0fdc77f0 -> if: ${{ vars.CI_DEPLOY_ENABLED == 'true' && ... }}
+71c18658 | instruction (an allowed verb), not an output to match; N129 STATUS line 24 RELAYED: git checkout --detach BASE rc 0 in its own clone
+a220e979 | not a literal: fragment between backticks in HOLD 7 ("Never type cd"); the hook that refuses cd fired on this drafter's environment design (DRAFTER_RULES fence 5)
+7b9b0968 | not a literal: punctuation fragment between two backticked items in HOLD 7
+3271c2f3 | not a literal: fragment between backticked 127.0.0.1 and the next item in HOLD 9
+dbba0b85 | instruction for the seat's own tools; N129 STATUS line 50 RELAYED: its --plan proof printed PLANPROOF OK with a control that fired
+6e864426 | ls -d '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/b1579-nodot' (15:31) -> No such file or directory (must not exist before Step 0)
+d006c9f4 | not a literal: fragment of HOLD 12/13 between backticks
+d382d180 | not a literal: fragment of HOLD 15 between backticks
+97fa3f41 | git -C '.tools/b1567/clone' --no-optional-locks config --local --get user.email | awk '{print length($0)}' -> 46 (value not printed)
+0ba9141b | git -C '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1567/clone' --no-optional-locks config --local --get user.name | awk '{print length($0)}' -> 12 (value not printed)
+93e5f877 | prohibition, not an output: no command of this kit sets it; /usr/bin/grep -n -i -F 'GIT_AUTHOR_' <this kit> | cut -d: -f1 -> 59 only (HOLD 15, the prohibition itself)
+4a57ac48 | prohibition, not an output (as 93e5f877)
+4f7a9d96 | N129 STATUS lines 110-114 RELAYED: git log --format='%h %ae | %ce' origin/main..HEAD printed two rows, author = committer = the configured noreply email
+6439ae2e | LC_ALL=C uptime (15:39) -> load averages: 21.31 15.44 13.18 (below the 54 gate)
+d790b001 | quoted rule from DRAFTER_RULES.md line 51 and the template kit HOLD 2; no read is asked of the seat
+f8da9ee3 | gh api -X GET .../commits/main (15:29:54, 15:35:27) -> 0fdc77f0181bf7b0534ca562ebb142c8e5da435e tree 66dc47f21cbc81c26fe36b6a3548c0e9d35ca241
+cbde87ac | gh api -X GET .../git/matching-refs/heads/b1567 -> refs/heads/b1567/nexusai-lane-b-test-pins 8586c094434b294749dc66ea02d6c35f3690a44f (the sha exists at origin, so a fetched clone can detach at it)
+975b554f | N129 STATUS line 24 RELAYED: npm ci --no-audit --no-fund at 4ba2e03c rc 0; compare 4ba2e03c...0fdc77f0 lists 0 paths starting .github/ or package (jq length -> 0), so the merged tree needs the same modules
+ddaa248f | gh api -X GET .../git/matching-refs/heads/b1567 -> 1 ref at 8586c094434b294749dc66ea02d6c35f3690a44f, so the new local branch made from it prints that sha
+1830b41b | same read as ddaa248f -> 8586c094434b294749dc66ea02d6c35f3690a44f
+bfc2b05b | N129 STATUS line 24 RELAYED: require('.../node_modules/sqlite3') rc 0 "sqlite3 ok" at the same npm
+919c7d35 | ls '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1567/' -> lib.sh jestwrap.sh loadprint.sh namescan.py s6_verify.sh s7k.sh chain.sh prepush.py working.py all present (the nine names the kit lists)
+91bc6d8f | gh api -X GET .../pulls/202 --jq .head.sha (15:35:27) -> 8586c094434b294749dc66ea02d6c35f3690a44f
+acc43463 | cp ours.json merged.json; git merge-file -L ours -L base -L theirs merged.json base.json theirs.json (scratch s278/d1579/mf, blobs f42e25f1 / 6c772ba5 / e145afd0) -> rc 1, one hunk over _updated, tests, suites
+6be68b0b | PREDICTED from two measurements: merge-file rc 1 on the counts file (acc43463) and the path sets by program (main 6 paths, branch 4 paths, intersection exactly ['scripts/verify-expected-counts.json'], branch-only 3, main-only 5); no git merge was run in any project repo (fence 3)
+6fb3d257 | gh api -X GET .../git/matching-refs/heads/b1567 -> 8586c094434b294749dc66ea02d6c35f3690a44f
+dbb00abe | /usr/bin/grep -c -E '^(<<<<<<<|=======|>>>>>>>)' s278/d1579/mf/merged.json -> 3
+8d44c9d4 | git hash-object s278/d1579/mf/theirs.json -> e145afd00f02c9657272b7654d122aa354bf73ee (the bytes git show origin/main:<path> writes)
+f9f6c2f0 | as 8d44c9d4; gh api contents ?ref=0fdc77f0 --jq .sha -> e145afd00f02c9657272b7654d122aa354bf73ee
+3d81e7d9 | path-set program (6be68b0b) -> branch-only paths = the three test files; so M (main plus the branch) differs from main in those three only
+c2cabcd0 | after the resolution the seat's own read; PREDICTED 0 lines (one conflicted path, resolved and added); not measurable before the merge exists
+4feb4e0a | gh api -X GET .../commits/main --jq parents -> 4ba2e03c..., a6eae4f1... (the form of a merge commit's %P: two shas); for M the parents are PREDICTED 8586c094 then 0fdc77f0 (git merge puts HEAD first)
+e5348fa0 | sed -n 2p session-tools/nexusai-lock.sh -> # nexusai-lock.sh <jest|docker> <tag> [--after <ticket-tag> | --replace <own-ticket>] <command...> ; lock owner file read 15:31 -> tag=b1568-chain (a live tag of the same form)
+feeb03df | a file the seat creates (form of .tools/b1567/chain.list, which exists: ls -> listed)
+b81a5deb | scripts/verify-suite.sh:333 at 0fdc77f0 (awk) -> e._updated = new Date().toISOString();
+f73bd613 | /usr/bin/grep -c -F 'VERDICT: PASS' .tools/b1567/logs/verify-p-plain-K.log -> 1 ; control: the same grep over .tools/b1567/logs/verify-p-plain.log (a refused run) -> 0 ; verify-u-update.log -> 1
+138c20c0 | /usr/bin/grep -c -i EADDRINUSE .tools/b1567/logs/verify-p-plain-K.log -> 0 and verify-u-update.log -> 0 ; control: /usr/bin/grep -c -F 'PASS __tests__/' verify-p-plain-K.log -> 349 (the log is a full run)
+5d87c3a8 | lsof -nP -iTCP:25760-26399 -sTCP:LISTEN | wc -l -> 0 (control 20 machine-wide)
+e1e09da5 | gh api compare 4ba2e03c...8586c094 files -> exactly 4 paths; minus main's 6 by program -> the three test files (the control's predicted non-empty difference)
+a4f5cb43 | DERIVED pair 5653 / 352 (s278/d1579/derive.out); main's file reads tests 5651, so the tests line changes
+d6007afb | main's file reads suites 352 and the DERIVED suites is 352, so the suites line does not change (PREDICTED)
+5c32a4ba | gh api compare 0fdc77f0...8586c094 -> status diverged, ahead 2, behind 3: K2 = 8586c094 + M + K2, so 8586c094 is an ancestor (PREDICTED rc 0) and rev-list 8586c094..K2 = 3 main commits + 2 = 5
+5db11701 | same compare -> origin/main..K2 = A, K, M, K2 = 4 (PREDICTED rc 0 for --is-ancestor origin/main K2, since M has origin/main as second parent)
+28f9d061 | the seat's own new tool's last line, defined by this kit; no earlier run exists to copy (not an output of an existing tool)
+d2ec4878 | gh api -X GET .../git/matching-refs/heads/b1567 (15:35:27) -> refs/heads/b1567/nexusai-lane-b-test-pins 8586c094434b294749dc66ea02d6c35f3690a44f
+11144370 | same read -> 8586c094434b294749dc66ea02d6c35f3690a44f
+b67de944 | gh api -X GET .../git/matching-refs/heads/main -> refs/heads/main 0fdc77f0181bf7b0534ca562ebb142c8e5da435e
+5275109d | gh api compare 4ba2e03c...0fdc77f0 and 4ba2e03c...8586c094 files filtered to .github/ (jq) -> 0 and 0, so 8586c094..K2 brings no .github/ path
+b14bff1d | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/202 --jq .head.sha (15:35:27) -> 8586c094434b294749dc66ea02d6c35f3690a44f (one ref, the form the seat re-reads)
+747f23c9 | gh api -X GET .../pulls/202 --jq mergeable -> false (15:35:27); first read 15:29:54 -> null (why the kit says "as read, not a condition")
+1df8af8e | gh api -X GET .../pulls/202 --jq mergeable_state -> dirty (15:35:27); unknown at 15:29:54
+7395c9ec | as 138c20c0 -> 0 in both N129 full-run logs
+01cb1da8 | as d47732d3 (RELAYED landing expectation)
+fb3d1c0e | /usr/bin/grep -c -F '## READY' N129 STATUS 2026-11-15_B1567_STATUS.md -> 1 (line 107), the form this kit copies
+S01 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/main (15:29:54) -> 0fdc77f0181bf7b0534ca562ebb142c8e5da435e tree 66dc47f21cbc81c26fe36b6a3548c0e9d35ca241 parents 4ba2e03cc88e928c2c6fdf6694ebed0e7cadf2e5,a6eae4f17a3dcc77b1563c808fe895ad8cb1d2b7 ; re-read 15:35:27 same sha
+S02 | awk 'NR==95 || NR==109' fleet/specs/model-routing.md -> 95: | C5 | **Merge on a GO** (port the tools, merge-in, squash; the coordinator verifies the squash at source) | no | no | **1st** ... ; 109: | G2 | **Tier 2**: tests-only, spec-only, docs, config/CI, tooling, and follow-ups whose mechanism a prior gate already measured ...
+S03 | awk NR==23 models_latest.json -> "model_id": "claude-sonnet-5-5", (entry "sonnet": { at :22)
+S04 | gh api -X GET compare/4ba2e03c...0fdc77f0 -> ahead 3 behind 0, 6 files: added __tests__/rd932-access-audit-unit.test.js f390927a, added __tests__/rd932-access-denied-audited.test.js 6216ff3e, added __tests__/rd932-role-change-audited.test.js f66ea322, modified backend/server.js 86f0dc0d, added backend/services/accessAudit.js 88ccb423, modified scripts/verify-expected-counts.json e145afd0 (s278/d1579/main_diff.txt)
+S05 | gh api -X GET pulls/202 -> open head 8586c094434b294749dc66ea02d6c35f3690a44f b1567/nexusai-lane-b-test-pins base main; mergeable=false mstate=dirty (15:35:27); pulls/201 -> closed merged=true merge_commit 0fdc77f0... head a6eae4f1... b1563/nexusai-permission-core-audit
+S06 | gh api compare 4ba2e03c...8586c094 -> 2 commits (50ce61f1, 8586c094), 4 files: rd486 +2 -1, rd791 +55 -0, security-fixes +5 -0, counts +2 -2 ; python set program over both path lists -> intersection ['scripts/verify-expected-counts.json']
+S07 | gh api contents raw at 4ba2e03c / 8586c094 / 0fdc77f0 / a6eae4f1 -> 5636/349, 5638/349, 5651/352, 5651/352 ; git hash-object of the scratch copies -> 6c772ba5..., f42e25f1..., e145afd0... ; contents --jq .sha at 0fdc77f0 -> e145afd0... (equal)
+S08 | git merge-file over scratch copies (s278/d1579/mf) -> rc 1; merged.json holds one hunk <<<<<<< ours (_updated 2026-11-15T02:55:24.148Z, tests 5638, suites 349) ======= (_updated 2026-11-15T01:43:01.815Z, tests 5651, suites 352) >>>>>>> theirs ; marker count 3
+S09 | python3 -I -B s278/d1579/derive.py over copies of .tools/b1563/raw/jest-p-plain-K.json and .tools/b1567/raw/jest-p-plain-K.json (copied by cat into scratch) -> main run 5651/352 failed 0; head run 5638/349 failed 0; files only in main run: the three rd932 files; differs: rd791 6 vs 8, rd932 3/8/4 vs absent; DERIVED merged tree: tests 5653 suites 352; control main alone 5651 352 = reported; control head alone 5638 349 = reported
+S10 | gh api git/commits/a6eae4f1 and /0fdc77f0 --jq .tree.sha -> both 66dc47f21cbc81c26fe36b6a3548c0e9d35ca241 ; .tools/b1563/logs/step-p-plain-K.log -> "p-plain-K tree 66dc47f2... head a6eae4f1...; MEASURED pair: 5651 / 352"
+S11 | gh api git/matching-refs/heads/b1567 -> 1 ref at 8586c094 ; matching-refs/heads/b1579 --jq length -> 0 ; matching-refs/heads/b1568 -> no rows ; pulls?state=open --jq length -> 1 ; ls both Briefs folders | grep -c 2026-11-1[5-9]_B1579 -> 0
+S12 | build.yml at 0fdc77f0: /usr/bin/grep -n -A10 '^on:' -> 3: on: 4: pull_request: 5: branches: 6: - main 7: push: 8: branches: 9: - main ; awk NR==29,92,93 -> node-version: '24' ; - name: Run tests (verify gate) ; run: npm run verify -- --maxWorkers=2 ; verify-suite.sh:354-360 (awk) -> the "Above the expectation" branch ending fail "the committed test-count expectation is stale (expected ..., measured ...)"
+S13 | awk NR 300-367 scripts/verify-suite.sh at 0fdc77f0 -> :320 if UPDATE_COUNTS; :325-326 tests/suites; :333 _updated; :334 JSON.stringify(e, null, 2) + "\n"; :337 echo "verify-suite: expectation UPDATED <U+2014> tests=..."; :366 echo "VERDICT: PASS <U+2014> $PASSED/$TOTAL tests passed across $SUITES suites (jest exit $JEST_RC)" ; real lines in .tools/b1567/logs/verify-u-update.log :22122 and :22127
+S14 | deploy-demo.yml at 0fdc77f0, awk NR 24-34 and 53 -> 26: on: 27: push: 28: branches: [main] 29: paths-ignore: 30-32 '**.md' 'docs/**' 'tests/**' 33: workflow_dispatch: ; 53: if: ${{ vars.CI_DEPLOY_ENABLED == 'true' && ... }} ; deploy.yml grep -n -A10 '^on:' -> 14: on: 15: workflow_dispatch: ; workflows dir -> arm-ttk.yml build.yml deploy-demo.yml deploy.yml gitleaks.yml npm-audit.yml
+S15 | /usr/bin/grep -n -i 'Merge path' 1_Project_Definition/CLARIFICATIONS.md -> 2067: 2. Merge path: open a PR from the gated branch, wait for CodeQL (a background wait that EXITS), then land the SAME commit. Never squash, never rebase ([[C-68]]). ...
+S16 | ls .tools/ | /usr/bin/grep -i -E 'node|dotnet' -> no rows; control ls .tools/ lists b1567 b1568 ; .tools/node24/bin/node --version -> no such file or directory ; which node -> /opt/homebrew/bin/node ; node --version -> v26.13.0 ; npm --version -> 11.20.0 ; N129 STATUS :21 and N130 STATUS :15 -> v26.13.0, npm 11.20.0
+S17 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | /usr/bin/grep -i Datasec (15:31) -> MPS-M140, HPSM-POC-H166, MPS-M138, HPSM-POC-H165, MPS-M139, NexusAI-N130 ; cat locks-laptop-1017/nexusai-jest.lock/* -> tag=b1568-chain pid=23740 ; ls queue-jest -> empty ; B1568 kit OWNS-B1568 grep -> static/css, static/testing.html, static/js/testing.js, tests/e2e/*, ... ; B1568 STATUS :17 -> branch b1568/nexusai-f2-banner-above-overlay
+S18 | /usr/bin/grep -n on test-server.js at 0fdc77f0 -> 69: const BAND_BASE = 20000; 74: const SLOT_COUNT = ...; 89: function worktreeSlot(...); 93: return h.readUInt32BE(0) % SLOT_COUNT;
+S19 | python3 -I -B s278/d1579/slot.py -> realpath base unchanged; control b1567-nodot/upd10 7, fin22 7, b1568-nodot/old52 4, b1563-nodot/old12 1; slot 9 names include upd21 and fin4
+S20 | lsof -nP -iTCP:25760-26399 -sTCP:LISTEN | wc -l -> 0 ; lsof -nP -iTCP -sTCP:LISTEN | wc -l -> 20 ; band arithmetic 20000 + 9 x 640 = 25760, + 640 - 1 = 26399
+S21 | ls -d .tools/b1579 b1579-nodot Briefs/2026-11-15_B1579_STATUS.md b1567-nodot (15:31) -> three "No such file or directory", b1567-nodot listed (control)
+S22 | lsof -nP -iTCP:9940-9949 -sTCP:LISTEN | wc -l -> 0 ; 27 kits (ls briefs | grep -E '^2026-11-1[45]_B[0-9]+_SEAT-.*\.md$') ; grep -l '(^|[^0-9])994[0-9]([^0-9]|$)' -> 0 files ; control 993[0-9] -> 1 file (2026-11-15_B1578_SEAT-M140_mps-170-fleet-line-id.md)
+S23 | sed -n 1,40p session-tools/nexusai-lock.sh -> line 2 is the usage header quoted; FIFO and owner-file design lines 16-34
+S24 | git -C .tools/b1567/clone --no-optional-locks config --local --get user.name / user.email | awk length -> 12 / 46
+S25 | gh api contents --jq .sha at 8586c094: security-fixes f9d85334929bb6027cd3937137990b986beb1a7d, rd486 ae170116cd333b15badc6b9217b93e374048a6af, rd791 c854910cb9c2d9246942bfd535bc45bfdcee1ebb ; at 0fdc77f0 (control, they differ): e47f3545..., a17dd70a..., e7a2885c... (s278/d1579/testblobs.txt)
