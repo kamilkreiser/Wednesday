@@ -1,0 +1,26 @@
+BLUF: three changes under web/, all in the dev stub, its tests and comments. Nothing here reaches a production byte: the stub is absent from the Entra build (bundle check: markers found 0/57, 8 files, 1109700 bytes, the same as main). No new word a user can see, no new session-storage key, no new status or refusal code. Nothing is deployed by this change.
+
+MPSCALC-396, stale comments (comments only):
+- ProposalPage.tsx, ProposalPage.test.tsx, print.spec.ts and proposal-buttons.spec.ts now state what the code does: the device cap is 3 lines (RENTAL_SHORT_LINE_CAP), the hardware-options table and the software table are each capped at 2 rows (RENTAL_SHORT_OPTION_CAP), each capped table ends with one pointer row, and the pointer words are the ones the product owner approved on 2026-11-12 (relayed on the ticket). The page-count table in proposal-buttons.spec.ts is described as older counts that feed one log line.
+- No code token, test body or string changed: the parser's token stream and the emitted JavaScript (comments removed) of each changed file are identical to main.
+
+MPSCALC-334, the dev stub answers an update of a held-created rental quote (web/src/api/stub/stubApi.ts, purchaseQuotes.ts):
+- A rental quote the stub holds because no API answered its create is now updated by the stub itself instead of going to the real API (which answers 502 with no API behind the proxy). The answer carries revision + 1 and the new draft; a stale revision is the existing 409, a caller without the Seller role the existing 403 (same words as the purchase path); getQuote and a reload read it back. An id the stub does not hold still goes to the real API with the same arguments. Calculate for such a quote is unchanged (still the real API).
+- The smoke.spec.ts comment that said such a quote cannot be saved is corrected.
+
+MPSCALC-399, the dev stub follows the server's partner rebate default and Duplicate:
+- A section a caller without internal-metrics adds (on an edit, or on a held create) is stored with the default rebate (DEFAULT_REBATE_FRACTION), the value is never returned to that caller, an internal caller reads it, a section the caller did not add keeps its stored values, a caller with internal-metrics gets no stamp, and the edit needs no price reason.
+- Duplicate of a quote the stub holds no longer answers 501: for a Seller it makes a new held Draft (new id, version 1, revision 1) from the source's STORED draft with every hidden input copied unchanged and no default added to a copied section. The reference is the typed one trimmed, else the source's with -COPY, else none; a repeated reference is not refused; the source is unchanged. The two rows that pinned the 501 are rewritten to the new behaviour.
+- Not modelled (named, not built): Duplicate does not apply create's checks to the caller (docs/API.md:435-437: a caller without internal-metrics duplicating a draft with a target GP, manual items or visible purchase prices is refused by the server; the stub copies it), the 100-unit and control-character limits on a typed reference, and the cut of a too-long derived reference.
+
+Tests and counts (run at head a4cc7ff86d336b55b95a121cfa305e8a08985663 by an independent gate):
+- npm run lint rc 0; tsc --noEmit rc 0.
+- npm test: 145 files, 1575 tests, 0 failed (main: 1551, 145 files; +24 = 26 new rows minus the 2 rewritten rows' old titles). The two rows that pinned the 501 are rewritten to the new behaviour.
+- Playwright, stub step on port 9821: 253 passed, 17 skipped. api-off step: 117 passed. Test lists (--list) equal main: 270 tests in 18 files and 117 tests in 4 files.
+- VITE_MPSCALC_AUTH=entra npm run build then node scripts/check-bundle.mjs dist: markers found 0/57.
+- Red without the change: with main's two stub source files and these tests, 21 of the new or rewritten rows fail. 11 of 12 independent planted mutants of the new code turned a row red.
+- CodeQL pre-scan (CLI v2.27.4, javascript-code-scanning suite, 298 files): 0 results. This is a pre-scan, not hosted CodeQL.
+
+NOT deployed. NOT RUN: hosted CI, hosted CodeQL, the dotnet, python and package jobs (they read no changed path), smoke.spec.ts and the four pdftotext specs (left out of CI), a Linux or Node 24 run (the box runs Node 26).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

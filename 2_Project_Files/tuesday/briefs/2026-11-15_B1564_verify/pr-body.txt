@@ -1,0 +1,18 @@
+BLUF: tests only, three new files under tests/MpsCalc.Api.Tests, no product byte. They pin the open clause of MPSCALC-99 (64 overlay writers plus 16 source steps held on their locks) and the three review findings held on it (the async lock-file poll, the blocking turn wait, the in-process hand-off order). Nothing is deployed by this change.
+
+What is pinned (rows in the OverlayTimingGroup collection, synthetic documents only, no new product word):
+- LaneMAClause5Tests: ONE host holding both stores; 64 overlay writers held behind the overlay lock and 16 (and 64) source steps held on store.lock. Every overlay and source answer arrives within its 2000 ms bound plus 500 ms, a read of the sources list stays under 500 ms, a read of the overlay under 100 ms, nothing changes while held, and one change of each kind goes through once released. The pool is left with a known number of free threads (LaneMAParkedPool), so a step that holds a thread while it waits starves the writers on any machine.
+- LaneMAPollAndHandOffTests, poll: 24 stores each with a step polling for its lock file; none may hold a thread between polls and all answer Busy within the bound plus 500 ms.
+- LaneMAPollAndHandOffTests, hand-off: in each of 24 stores a step that gave up its place does not let the step behind it take the store before the step in front.
+
+Red first, by planted one-line faults of SourceLifecycle (not committed), each run at the shipped thresholds, 3 runs each, by an independent gate: a blocking turn wait (SourceLifecycle.cs:630) turns the clause-5 rows red (63/64 overlay answers late, max 5.5 to 7.0 s; 12 to 18 of 64 source answers late on the 64-step case); Thread.Sleep in the poll (:705) turns the poll row red (17 to 18 of 24 late, max 6.0 s); the given-up turn completing at once (:667) turns the hand-off row red (13 of 24 stores overtaken). The four existing LaneM5 rows stay green under the last two.
+
+Counts at this head: build of MpsCalc.slnx -c Release rc 0, 0 warnings; Api tests 3641 passed, 0 failed, 0 skipped (main before: 3637; +4 rows); Engine and Import untouched. Diff: 3 added files, 0 removed lines, ASCII only.
+
+Known sensitivity, measured and stated: on the 18-CPU dev machine the rows were green in 26 of 26 batch runs; with the process's thread pool limited to 4 threads (DOTNET_PROCESSOR_COUNT=4) the clause-5 16-step row and the poll row were red on unchanged code in 4 of 35 runs (every answer late together by 25 to 170 ms past the 500 ms margin).
+
+CodeQL: the C# pack could not be run locally (x86_64-only extractor on an arm64 machine); the hand pre-scan rows over every added line found 0 (no request-built path or log line, no sensitive-named value written, no process start, no weak hash, one catch that records the answer). Hosted CodeQL is the proof.
+
+NOT deployed. NOT RUN: hosted CI, hosted CodeQL, the CodeQL CLI csharp pack, a hosted runner.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

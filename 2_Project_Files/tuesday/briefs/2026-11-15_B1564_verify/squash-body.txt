@@ -1,0 +1,9 @@
+Tests only, no product change. Three new files under tests/MpsCalc.Api.Tests pin the open clause of MPSCALC-99 and the three review findings held on it:
+
+- One host holding both stores: 64 overlay writers held behind the overlay's lock and 16 (and 64) source steps held behind store.lock. Every answer arrives within its bound plus 500 ms, a read of each store stays fast, nothing changes while held, and one change of each kind goes through once released. The pool is left with a known number of free threads, so a source step that holds a thread while it waits for its turn starves the writers on any machine.
+- Several stores with a step polling for the lock file in each: the poll holds no thread between polls and every step answers Busy within the bound.
+- Several stores where a step in the middle of the line gives up first: the step behind it still waits for the step in front, so the store is taken in order.
+
+Each row passes on the unchanged code and fails under a planted one-line fault of SourceLifecycle (a blocking turn wait, a thread sleep in the poll, the given-up turn completing at once); the faults are not committed. No product byte, no new word, nothing deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

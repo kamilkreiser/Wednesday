@@ -1,0 +1,11 @@
+Three follow-ups to the deploy script's roll-forward rule, under scripts/ only. No stop word, warning line or message changes, and there is no new setting, status code or dependency. Nothing is deployed by this change.
+
+MPSCALC-400: in the deploy block the roll-forward count now runs before the hosted overlay re-read, so the re-read is the last read before az webapp deploy. The count reads no overlay. It takes the overlay's number from the copy PRE-1 passed, so moving it changes no input. Only the two call lines swap places, each one byte for byte. The access-token calls per deploy do not change: one per Kudu read, 5 plus the number of stored quote and snapshot files. Whether one token could serve the whole count is a separate decision and is not made here.
+
+MPSCALC-401: on a shallow checkout that holds the floor commit but not the commits between it and the package, git merge-base --is-ancestor answers 1 even when the package contains the floor. After an answer of 1 the script now asks git rev-parse --is-shallow-repository. Any answer other than exactly false is treated as undecided and goes to the existing undecided stop, which asks for a full checkout. An answer of 0 still goes on, and nobody asks whether the checkout is shallow. The test git stand-in answers the shallow question itself, so the rows do not depend on how deep the checkout they run in is (hosted CI checks out one commit).
+
+MPSCALC-403: the package sha pattern and the quote and snapshot file name patterns in deploy-package.py end with \Z instead of $. In Python, $ also matches before one trailing newline. Rows show that the newline values are refused through the module and through the commands (newtype-names, newtype-count --store, make --commit, verify --expect-commit), and that the plain values are still accepted.
+
+Known wording, left for the pending stop-word pack (MPSCALC-402, not built): in the shallow case the existing undecided line prints "git answered 128" although git answered 1. Its instruction to run from a full checkout is the right one for that case.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

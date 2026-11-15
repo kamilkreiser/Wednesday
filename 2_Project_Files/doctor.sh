@@ -1313,7 +1313,7 @@ fi
 CQ="$(cd "$(dirname "$0")" && pwd)/tools/codeql/codeql/codeql"
 if [ -x "$CQ" ] && CQL=$("$CQ" resolve languages 2>&1) && printf '%s\n' "$CQL" | /usr/bin/grep -q '^javascript ' \
    && printf '%s\n' "$CQL" | /usr/bin/grep -q '^csharp ' && printf '%s\n' "$CQL" | /usr/bin/grep -q '^python '; then
-  ok "CodeQL CLI $("$CQ" version --format=terse 2>&1) (javascript, csharp, python packs present; gates run the real pack)"
+  ok "CodeQL CLI $("$CQ" version --format=terse 2>&1) (javascript and python packs run; csharp is LISTED but cannot extract on this arm64 box: x86_64-only extractor, no Rosetta, gate B1564 F4 2026-11-15; C# proof is hosted CodeQL only)"
 else
   warn "CodeQL CLI missing or broken at tools/codeql/" "gates fall back to the pre-scan rows only — reinstall per PORTABILITY.md 29${CQL:+ (last output: $(printf '%s' "$CQL" | head -1))}"
 fi

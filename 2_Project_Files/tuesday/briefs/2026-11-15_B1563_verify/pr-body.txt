@@ -1,0 +1,61 @@
+## BLUF
+
+Every 401 and every 403 the server answers below its audit middleware now writes one REQUEST_DENIED audit row, whatever the method. That includes reads: a refused GET or HEAD used to leave no row at all. A role change through `PUT /api/auth/users/:email` now writes one ROLE_CHANGED row with the role before and after. No status changes anywhere. The `STATE_MUTATION` row is unchanged. Nothing is deployed.
+
+## The ruling
+
+This builds part of the product owner's 2026-11-11 ruling, which approved the server-side permission model as proposed, including "reads and denials are audited". It covers the denials and role changes that exist today, for the two roles the product has (`admin`, `viewer`). It adds no role, mask or scope.
+
+## What changes
+
+- `backend/services/accessAudit.js` (new, pure, keeps no request object):
+  - `denialReason(status)` returns `unauthenticated` for 401, `forbidden` for 403 and null for anything else.
+  - `denialDetails(req, status)` returns exactly `method`, `path`, `statusCode`, `reason`, `userEmail` (masked with the same expression as the `STATE_MUTATION` row) and `userRole`.
+- `backend/server.js`:
+  - `AUDIT_ACTIONS` gains `REQUEST_DENIED` and `ROLE_CHANGED`.
+  - `auditMutationMiddleware`, reads: GET and HEAD attach one `res.once('finish')` hook. It writes a row only when the answered status is 401 or 403. No read route has its `res.json` or `res.send` wrapped, so streaming reads are untouched. OPTIONS writes nothing, as before.
+  - `auditMutationMiddleware`, writes: the existing `STATE_MUTATION` call is unchanged, and a refused write then gets one `REQUEST_DENIED` row after it, in its own try. The new code records a status that was already answered. It decides nothing.
+  - The user update route reads the stored role before the update. Only after the update succeeds, and only when the role really changed, it writes ROLE_CHANGED `{ email, roleFrom, roleTo, changedBy }`. The `CONFIG_CHANGE` row is unchanged. The handler gains no gate token.
+- Tests: three new files, 15 cells (8 denial cells, 4 role-change cells, 3 unit cells).
+- `scripts/verify-expected-counts.json`: 5651 tests across 352 suites.
+
+## What is audited, and what is not yet
+
+- Audited now: every refused request below the audit middleware (401 not signed in or session gone, 403 not allowed), reads included, and every role change through the user update route.
+- Not audited yet:
+  - ordinary reads (an allowed read writes no row);
+  - the sensitive-field grants and the audit of a granted read;
+  - the row scope of RD-930;
+  - the assistant, export and report scope of RD-931.
+  These come after the capability build of RD-929.
+- Out of scope:
+  - The CSRF refusal is answered above the audit middleware and writes no row. It is a request-integrity refusal, not a permission denial.
+  - Adding and deleting users already write their own rows.
+  - SCIM has no role path.
+- The audit envelope that `auditLog` puts around every row carries the client address and the user agent. That was already true for every row. A row's details carry no header, cookie, query or body value.
+
+## Evidence (independent gate)
+
+See the gate verdict. In short:
+- The diff is the six paths and only adds lines to `backend/server.js`; the merge tree equals the head tree.
+- The new tests fail on main where they should and pass at head:
+  - on main: 10 red, plus 5 pins of today's answers green;
+  - at head: 15 of 15, two runs.
+- 18 related suites (the log-injection, audit-buffer, erasure, session-revocation, role-census and handler-span suites): 288 of 288 green.
+- The gate's own mutants turn the matching cells red: a header copied into the row, the old row's email unmasked, the read hook on every method, HEAD not hooked, `changedBy` dropped, and `roleFrom` written wrong.
+- On a real server, a refused anonymous read, a refused viewer read, a refused HEAD and a refused write each write exactly the rows stated.
+- A user agent crafted to fake a second audit record stays inside one JSON string, and control characters are refused by the HTTP parser.
+- CodeQL `javascript-security-extended` (the suite the hosted default setup runs) gives 64 results at main and 64 at head. Each rule's count is the same, there are 0 results in the added files, and the 64 at main match the 64 open hosted alerts rule by rule.
+- The name, id, secret and hidden-character scans are 0, each with a control that fires.
+- The builder's full verify at head reads PASS, 5651 of 5651 tests across 352 suites.
+
+## Not in this change
+
+- A REQUEST_DENIED row records `req.path`, the same field as the `STATE_MUTATION` row. For a refusal answered inside a mounted router, that is the path relative to the mount (a viewer's refused `GET /api/setup/entra-provisioning` reads `/`). That fix belongs to a later change for both rows.
+- An anonymous caller can now push older rows out of the 10,000-row export window faster than before: a refused write writes two rows instead of one, and a refused read writes one. The per-address rate limiter is the bound, and the winston log keeps the rows. A coalescing rule is a later ticket.
+
+## Landing
+
+Merge with a merge commit pinned to the head sha. Do not squash or rebase. A merge to main touches `backend/`, so the Deploy demo workflow starts. Both of its jobs run only when `CI_DEPLOY_ENABLED` is `'true'`, which reads unset, so both are expected to read skipped. Nothing is deployed by this change.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

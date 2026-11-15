@@ -1,0 +1,30 @@
+## BLUF
+
+Three test-only pins. No product file changes. Two existing cells now guard what they are named for, one label now says what its cell sends, and the warning that the data export logs when it withholds a store that is a symbolic link is asserted for the first time. The expected test counts move from 5636 to 5638 (two new cells in one existing suite; suites stay 349). Nothing is deployed.
+
+## What changes (four paths)
+
+- `__tests__/security-fixes.test.js` (RD-576): the cell "incomplete override (missing apiKey) is ignored" passed an override with no mode, so since RD-549 it returned at the mode gate in `backend/llm/index.js` and never reached the incompleteness guard it is named for. The override now carries `mode: 'admin'`, as the control cell in `rd503-r2-doc-claims-against-product` already does. The cell name is unchanged.
+- `__tests__/rd486-ai-test-key-forwarding.test.js` (RD-590): the first row of the d-nomatch `test.each` was labelled "same machine by another name (127.0.0.1 for localhost)". Since RD-574 the stored endpoint is a name and the cell sends the address that name resolves to, so the label now says that. Same row, same cell, same cell count.
+- `__tests__/rd791-export-store-links.test.js` (RD-826 item 2): the file mocks the logger but no cell read it. Two cells now do, with a `beforeEach` that clears the mock (the jest configuration sets no `clearMocks`).
+  - W1 plants two withheld links (one to a file outside the data directory, one dangling) and requires exactly two warnings, one per link, whose second argument has exactly the keys `file` and `resolves` with the pairs `feedback.json` / true and `sessions.json` / false, and none of the four paths (data directory, outside directory, outside target, dangling target) anywhere in the calls.
+  - W2 is a control: a real file store streams and writes no link warning.
+- `scripts/verify-expected-counts.json`: 5638 tests across 349 suites.
+
+## Evidence (independent gate)
+
+- The merge of this head into main is clean and its tree equals the head's tree (main is an ancestor). The four changed paths are all test or counts files; none is under `backend/`, `static/`, `docs/` or `.github/`.
+- The three edited files at head: 107 of 107 cells green (security-fixes 54, rd486 45, rd791 8). Related suites (rd503-r2, rd464-rd549, sustainability stand-in labels, tracked-files, secret-scan hooks, key-suffix guard): 86 of 86 green.
+- RD-576, by mutation: deleting the incompleteness guard (`!o.endpoint || !o.apiKey`) in `backend/llm/index.js` leaves the OLD cell green at main and turns the fixed cell red at this head (the control cell in rd503-r2 is red in both).
+- RD-826 item 2, by mutation (each plant in a scratch tree, never committed): at main all six old rd791 cells stay green with the warning deleted; at this head W1 turns red, with W2 and the six old cells green, under nine plants: warning deleted, warning doubled, an extra key carrying a path, the key `resolves` renamed, the file field replaced by the full path, the full path appended to the message, `resolves` inverted, the warning emitted for resolving links only, and the warning downgraded from warn to info.
+- CodeQL (local CLI, javascript-code-scanning suite, over this head): 31 results, all in existing product files; none in the three edited test files.
+- Added lines: no `new RegExp`, hand-escape, `innerHTML`, `eval`, child process, skip/only/todo, timers, sensitive-named identifier, name, secret or non-ASCII character.
+- The builder reports a full verify at 5638 of 5638 tests across 349 suites; the gate did not rerun it. Hosted Build is the proof.
+
+## Landing
+
+Merge with a merge commit pinned to the head sha. Do not squash or rebase. A merge to main starts the Deploy demo workflow (`__tests__/**` and `scripts/**` are not path-ignored); both of its jobs run only when `CI_DEPLOY_ENABLED` is `'true'`, which reads unset, so both are expected to read skipped. Nothing is deployed by this change.
+
+Landing order: another open branch also edits `scripts/verify-expected-counts.json` (5651 tests across 352 suites). Whichever of the two lands second has its counts file rebuilt at landing with `npm run verify -- --maxWorkers=2 --update-counts` on the merged tree.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
