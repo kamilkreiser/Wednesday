@@ -1,0 +1,13 @@
+# Commission: DRAFTER for Seat B 179th (Secuura/Blockchain merge seat, lane -B), 2026-11-15 18:2x AEDT
+
+Commissioned by Wednesday (the 17:31 seat). Read-only drafter: write ONLY the brief path below and notes.md in THIS folder. Nothing merged, pushed, posted, mailed or written to Linear or GitHub. Never write inside any `!CODING` checkout (read verbs only). GitHub read-only with GH_CONFIG_DIR="/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.gh-config". No `cd`, no `rm`, bounded listings, never print a secret. notes.md ends with 'UNMEASURED'. Heading exactly `## RULED BY KAM, NOT YET IN AN ARTEFACT`. Under 60 KB. Model: Sonnet. Return a 10-line summary.
+
+Template brief (STAMPED 17:44, rulings W-1..W-6 carry): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_seatB178_merge.md (read WHOLE; carry by reference where unchanged). Wednesday's mails to B 178th: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_B178_*.md (ADDENDUM 1 = PR 2230 as row 2; SSH tools run as carried; re-pin). Predecessor: Seat B 178th, record /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-15_seatB-178th/ (HANDOVER.md FINAL block 'FOR SEAT B 179th' first and whole; if B 178th has not wrapped yet, say so and draft from its HANDOVER state block, and Wednesday re-stamps after its wrap).
+Output: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_seatB179_merge.md + notes.md here.
+
+## Facts (verify each at source)
+- develop moved: PR 2231 merged as 240d1f664b52 (07:12:59Z). B 178th is merging PR 2220 next (re-pinned READY on 240d1f664b52); develop will move again: read it LIVE.
+- Queue for B 179th: ROW 1 = PR 2230 (KS-2196, anchoring, TIER 1, gate 358 GO WITH NOTES at 220df650550a; Stuart's FAILED sign anchor fix; shares provider.ts with 2081 (clean both orders); verdict /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-15_gate358-tier1-pr2230-ks2196/verdict.md), then 2221, 2222, 2098, 2079 (T1), 2223, 2224 (T1), 2081 LAST (T1, BLUF 6 stacked rule). 2220 drops if merged.
+- Anchoring row model: no B kit has one; read how gate 358 ran the anchoring suite (its scratch/ scripts) and say how the seat proves the 2230 row (suite on merged tree and develop, the pre-existing threadTokenMint failure named). Merge only; the anchoring deploy stays held (card 1107 = a).
+- Gated, NOT queued unless an ADDENDUM names them: 2233, 2234, 2236, 2237. 2235 in a fix round (A 31st). Seat K 21st (being drafted) takes 2232 then 2229.
+- Re-key source: B 178th's kit (one counted generation shift b178 -> b179).
