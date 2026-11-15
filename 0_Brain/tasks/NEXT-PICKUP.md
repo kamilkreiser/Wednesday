@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 09:49 16 Nov, the 08:3x rotation seat (ctx 72%) - READ FIRST; supersedes every block below where they differ
+- **develop 9ddba202bb15** (PR 2088 by K 36th, verified 09:46:00). Merges since 15 Nov evening: 43. No GO in flight.
+- **FLOOR:** %161 **B 189th** (MERGE, Sonnet, launched 09:49, rows from PR 2064; brief fleet/briefs_staged/2026-11-16_seatB189_merge.md STAMPED; NEXT plan QUESTION -> ANSWER (shape 2026-11-16_B188_answer_plan.md)). %155 **C 43rd** (BUILD billing; gate TIER 1 when READY). %158 **W 32nd** (BUILD Opus, Kam's verification rulings; NEXT plan QUESTION -> ANSWER). %140 **D 65th** (Kintsugi k29 swapping; ON STATUS B: panel receipt to Kam + anchoring card delivery mark + score + pane close). K 36th WRAPPED, scored 0.94, pane closed.
+- **K 37th DRAFTER RUNNING** (subagent of THIS seat; DIES with a rotation -> RE-COMMISSION from 0_Brain/reference/2026-11-16_drafter-seatK37/commission.md if fleet/briefs_staged/2026-11-16_seatK37_merge.md is absent): on return read WHOLE, stamp (MERGE WINDOW with B 189th; develop has moved past the drafter's pin), launch Sonnet --to 'Secuura/Blockchain-K' with the load gate.
+- Kam card OPEN: secuura-cert-verify-anonymous-billing-1116 (money; default no anonymous charge, PR-V does not merge until he taps). Scores this seat: K 35th 0.93, B 188th 0.94, K 36th 0.94.
+- seat_mail_watch under Monitor (re-armed ~09:35): RE-ARM + newmail.sh at boot. OWED: as the block below.
+
 ## 🔴 CHECKPOINT 09:47 16 Nov, the 08:3x rotation seat (ctx ~69%) - READ FIRST; supersedes every block below where they differ
 - **develop 9ddba202bb15** (PR 2088 by K 36th, verified 09:46:00: ONE parent 7398976ba14a = PR 2247 by B 188th, verified 09:31:08). **Merges since 15 Nov evening: 43.** No GO in flight.
 - **KAM RULED 09:16:45 + 09:17:09 (both recorded in the store, receipts on the panel, lesson 2026-11-16_audit-records... + both digests):** cert verify open to ANYONE incl. anonymous (supersedes 1113 = c); verification NAMES open (reverses 1102 = a: PR 2138 OUT of the B queue by ADDENDUM 1, PR 2225 superseded). **NEW KAM CARD OPEN (money):** secuura-cert-verify-anonymous-billing-1116 (rec a no charge; default: build opens with no anonymous charge, PR-V does not MERGE until he taps).
