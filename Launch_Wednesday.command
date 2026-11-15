@@ -741,7 +741,7 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    one digest to Kam for this seat's open cards over 48 h, at most once a day per card.
    Never wait on Kam: while a card waits, the agents work the tickets; a blocker is
    flagged and re-raised, never pushed past.
-10c. SPARK: RETIRED 2026-11-15 (Kam: "the Spark has gone, retire the checks"; the HP
+10c. SPARK: RETIRED 2026-11-15 (Kam: \"the Spark has gone, retire the checks\"; the HP
    loan box was wiped and returned). No Spark allocation check, no tunnel; there is no
    local Spark tier. The 2026-10-28 never-idle rule is retired, not live.
 11. In text, confirm: brain loaded (learnings count), tasks carried over, project
