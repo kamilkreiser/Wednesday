@@ -27,6 +27,8 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 > **The full-sweep mechanism is still WED-7 and still unbuilt.** The honest reading of
 > this file today: a rich archive of how the fleet got here, with a stale first page.
 
+**Refreshed 2026-11-15 22:4x (boot, the 22:3x Mac mini successor seat; Secuura only, Datasec is Tuesday's):** Secuura/Blockchain: develop `7b452b1bbb96` (gh api 22:38:23); 16 merges on 15 Nov (2231, 2232, 2220, 2229, 2230, 2235, 2238, 2233, 2221, 2222, 2236, 2098, 2223, 2234, 2079, 2224). Kintsugi runs k27 (develop `4e4347818772`, 8 services; D 63rd FINAL); k28 drafter commissioned 22:4x. Floor: K 25th (merge, from PR 2237), Q 1st (BOLA triage), B 183rd (merge, PR 2081), R 121st (PR 2239 fix round for gate 363's notes). Demo FROZEN; anchoring deploy held on card 1107 pending Wednesday's ruling at the k28 stamp.
+
 **Refreshed 2026-11-13 06:1x (boot, Mac mini morning seat; Secuura only, Datasec is Tuesday's):** Secuura/Blockchain
 history newest = 2026-11-13, Seat B 166th (merge, Sonnet; preceded by B 161st-165th, all merge seats overnight). develop
 410feda1a85e (Wednesday ls-remote 06:03:49). Nine PRs merged overnight on first GOs. Floor empty at boot; next: merge seat
