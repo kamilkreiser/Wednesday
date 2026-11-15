@@ -10,8 +10,8 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 ## 🔴 CHECKPOINT 02:2x 16 Nov, the 00:5x seat (ctx ~57%) - READ FIRST; supersedes every block below where they differ
 - **develop 6fdba4e013b3** (verified 01:46:43; merges since 15 Nov evening 26). GO PR 2145 sent 02:24 to K 28th's successor **K 29th (%95, Sonnet)**, which WRAPS after that MERGED naming **PR 2242** first.
-- **K 30th DRAFTER RUNNING** (re-commission from 0_Brain/reference/2026-11-16_drafter-seatK30/commission.md if fleet/briefs_staged/2026-11-16_seatK30_merge.md is absent). ITS STAMP MUST ADD: **PR 2243** (KS-2052, gate 368 GWN, head 40c99308b84b) as a tier-1 row after PR 2242, and **PR 2244** (KS-1882) once gate 369 returns GO/GWN.
-- **GATES:** 367 PR 2242 GWN (in K 29th's ADDENDUM 1 -> carried to K 30th row 1); 368 PR 2243 GWN; **369 PR 2244 RUNNING** (re-commission from 0_Brain/reference/2026-11-16_gate369-tier1-ks1882-wallet-sessions/commission.md if verdict.md absent).
+- **K 30th DRAFTER RUNNING** (re-commission from 0_Brain/reference/2026-11-16_drafter-seatK30/commission.md if fleet/briefs_staged/2026-11-16_seatK30_merge.md is absent). ITS STAMP MUST ADD: **PR 2243** (KS-2052, gate 368 GWN, head 40c99308b84b) as a tier-1 row after PR 2242, and **PR 2244** (KS-1882, gate 369 GWN at 02:3x, head 6b9a4caa4dae) after it.
+- **GATES:** 367 PR 2242 GWN (in K 29th's ADDENDUM 1 -> carried to K 30th row 1); 368 PR 2243 GWN; 369 PR 2244 GWN (W 31st scored 0.93).
 - **SCORED:** K 28th 0.95, X 10th 0.93, C 39th 0.93. **OWED:** W 31st score (after gate 369). Build panes C, W, X all CLOSED.
 - **S 82nd WRAPPED, scored 0.94, pane closed. PR 2145 MERGED (develop a5e13a242917, verified 02:26:50; merges 27). S 83rd BOARD DRAFTER RUNNING** (re-commission from 0_Brain/reference/2026-11-16_drafter-seatS83/commission.md if its brief is absent).
 - **Kam card ac4 AMENDED** with gate 367 N3 (tenant-less signups share one default tenant). **Morning fleet card OWES Kam:** the AC6 export marker stays until ac4 is answered; deploys held: anchoring (card), transfer (2241 + 2243), analytics (2242), wallet-connector (2244, with the ownerless-after-restart cost).
