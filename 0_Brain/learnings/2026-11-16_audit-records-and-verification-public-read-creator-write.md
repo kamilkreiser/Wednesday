@@ -28,3 +28,7 @@ He answered the card OUTSIDE its two options (a company-wide, b creator and admi
 4. No expiry stated: "new rule for all related tasks and tickets" reads as standing until he changes it.
 
 **Family:** [[2026-09-20_ks1175-hold-lifted-make-the-fix]] (a card answered outside its options; recorded by hand) · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (the privacy measurement goes back to him) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope: audit + verification, not exports) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+## RULED 2026-11-16 07:16:08 — Kam, live board (view=wednesday), verbatim: "Decision secuura-public-audit-personal-fields-1116: a — Public, with personal fields removed"
+- The public read of an audit record does NOT carry the personal fields: `userId`, `ipAddress`, `userAgent` and the free-text fields (`details`, `previousState`, `newState`; `errorMessage` by Wednesday's reading of "free text"), and, by Wednesday's reading, a `resourceId` / `target_id` that names a person. The platform admin log counts as an audit record (Wednesday's reading, stated in the S 85th ANSWER; Kam may narrow it).
+- Still OPEN with Kam (defaults = nothing changes): `secuura-verify-public-withheld-names-1116` (do verification's four withheld name fields open?) and `secuura-cert-verify-anyone-or-signed-in-1116` (does certification verify, which records a billing charge, open to anonymous callers?).
