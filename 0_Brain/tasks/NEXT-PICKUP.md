@@ -13,7 +13,7 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 - **K 30th DRAFTER RUNNING** (re-commission from 0_Brain/reference/2026-11-16_drafter-seatK30/commission.md if fleet/briefs_staged/2026-11-16_seatK30_merge.md is absent). ITS STAMP MUST ADD: **PR 2243** (KS-2052, gate 368 GWN, head 40c99308b84b) as a tier-1 row after PR 2242, and **PR 2244** (KS-1882) once gate 369 returns GO/GWN.
 - **GATES:** 367 PR 2242 GWN (in K 29th's ADDENDUM 1 -> carried to K 30th row 1); 368 PR 2243 GWN; **369 PR 2244 RUNNING** (re-commission from 0_Brain/reference/2026-11-16_gate369-tier1-ks1882-wallet-sessions/commission.md if verdict.md absent).
 - **SCORED:** K 28th 0.95, X 10th 0.93, C 39th 0.93. **OWED:** W 31st score (after gate 369). Build panes C, W, X all CLOSED.
-- **S 82nd (%80):** idle ~75 min on Wednesday's unsent 4c answer; answered 02:2x, told to WRAP -> score + pane_close.
+- **S 82nd WRAPPED, scored 0.94, pane closed. PR 2145 MERGED (develop a5e13a242917, verified 02:26:50; merges 27). S 83rd BOARD DRAFTER RUNNING** (re-commission from 0_Brain/reference/2026-11-16_drafter-seatS83/commission.md if its brief is absent).
 - **Kam card ac4 AMENDED** with gate 367 N3 (tenant-less signups share one default tenant). **Morning fleet card OWES Kam:** the AC6 export marker stays until ac4 is answered; deploys held: anchoring (card), transfer (2241 + 2243), analytics (2242), wallet-connector (2244, with the ownerless-after-restart cost).
 - **NEXT LANES (hold while load1 ~7-8):** C 37th's kyc job KS-2189 + KS-2188; KS-2219 billing by-email 500; a BOARD seat for: KS-2052 D2, gate 368 N2, gate 365 N1/N3-N6, G366-2241-1/-2, G297-2149-1/-2, G296-2145-1, gate 367 N1/N2, X 10th's four candidates, C 39th's and W 31st's candidates.
 
