@@ -552,12 +552,24 @@ fi
 # expensive to debug when a launcher silently fails instead.
 # 2026-10-29: prune the regenerable trees. local-model/spark/cache/work holds a full repo clone per Spark round (~12.6M files by 10-29);
 # the unpruned walk took minutes and two concurrent launches hung on it (both seats stuck at "doctor.sh --quiet"). Backup: doctor.sh.pre-1029-findprune.
-NOEXEC="$(find "$SCRIPT_DIR" \( -path '*/local-model/spark/cache' -o -path '*/local-model/spark-ab' -o -path '*/local-model/runs' -o -path '*/fleet/qa-agent' -o -name .venv -o -name node_modules -o -name .git \) -prune -o \( -name '*.sh' -o -name '*.command' \) ! -perm -u+x -print 2>/dev/null)"
+# 2026-11-16 (Tuesday, Kam "fix the exec bits"): the walk above flagged 1,853 files and NONE was broken —
+# ~1,690 were fleet/state/sNNN session clones of client repos (their modes are the client's, not ours) and
+# the rest were committed 644 on purpose and always run as `bash x.sh` (a scan of 3,987 callers found 0
+# direct or [ -x ]-guarded uses; positive control doctor.sh:383 caught). A warning that is always on is a
+# warning nobody reads. "LOST its bit" has one exact meaning: the repo records 100755 and the disk says
+# not executable — that is what a drive sync does. Outside a git checkout, fall back to the walk with
+# fleet/state pruned. Backup: doctor.sh.pre-1116-xbit-tracked.
+if git -C "$PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+  NOEXEC="$(git -C "$PROJECT_DIR" ls-files -s 2>/dev/null | awk '$1=="100755"{sub(/^[^\t]*\t/,""); print}' \
+    | while IFS= read -r f; do [ -f "$PROJECT_DIR/$f" ] && [ ! -x "$PROJECT_DIR/$f" ] && echo "$PROJECT_DIR/$f"; done)"
+else
+  NOEXEC="$(find "$SCRIPT_DIR" \( -path '*/fleet/state' -o -path '*/local-model/spark/cache' -o -path '*/local-model/spark-ab' -o -path '*/local-model/runs' -o -path '*/fleet/qa-agent' -o -name .venv -o -name node_modules -o -name .git \) -prune -o \( -name '*.sh' -o -name '*.command' \) ! -perm -u+x -print 2>/dev/null)"
+fi
 if [ -n "$NOEXEC" ]; then
   warn "scripts have lost their executable bit (drive sync drops modes)" \
        "chmod +x on: $(echo "$NOEXEC" | tr '\n' ' ')"
 else
-  ok "all on-drive scripts are executable"
+  ok "every script the repo records as executable is executable on disk"
 fi
 
 # --- Fleet send queue not draining (added 2026-08-08) ---
