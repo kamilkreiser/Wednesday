@@ -108,7 +108,8 @@ fi
 # Spark ALLOCATION check (Kam 2026-10-28: "introduce an allocation check for local LLM into your wakeup
 # procedure"; rule learnings/2026-10-28_never-keep-the-spark-idle-quota-and-capability-data.md). Same contract as
 # the Ornith line: stderr, Wednesday's seat only, always exits 0, so it can never block a send.
-if [ "$SEAT_KEY" = "Wednesday" ] && [ -f "$SELF_DIR/spark_status.py" ]; then
+# RETIRED 2026-11-15 (Kam: "the Spark has gone, retire the checks" — the HP loan box was wiped and returned to HP). Kept, disabled: re-enable by removing "false &&" if a Spark returns.
+if false && [ "$SEAT_KEY" = "Wednesday" ] && [ -f "$SELF_DIR/spark_status.py" ]; then
   python3 -I "$SELF_DIR/spark_status.py" >&2
 fi
 # Fleet CAPACITY check (Kam 2026-10-28 17:5x: "track so we can make sure that we always keep as many agents
