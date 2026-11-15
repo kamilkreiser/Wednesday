@@ -8,7 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## 🔴 CHECKPOINT 18:5x 15 Nov, the 18:33 seat (ctx ~55%) - READ FIRST; supersedes every block below where they differ
+## 🔴 CHECKPOINT 19:1x 15 Nov, the 18:33 seat (ctx 69%) - READ FIRST; supersedes the 18:5x block where they differ
+- **develop dc42dc89493f** (PR 2229 MERGED by K 21st, 08:09Z; ls-remote 19:09). Merges tonight: 2231, 2232, 2220, 2229.
+- **FLOOR (5):** %14 K 21st WRAPPING (names 2235 first) -> read its wrap, score, pane_close.sh. **K 22nd DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatK22/commission.md -> fleet/briefs_staged/2026-11-15_seatK22_merge.md; re-commission if absent): on return read WHOLE, stamp (develop live, K 21st's FINAL block), launch Sonnet --to 'Secuura/Blockchain-K'. %17 B 179th (row 1 PR 2230 legs; READY due; it re-pins on dc42dc89 itself). %20 A 32nd (KS-1897; plan ANSWERED 07:52Z). %23 T 25th (slot 4; offline legs; plan ANSWERED 07:56Z; STATUS 08:07Z). %26 **S 80th** (board; STAMPED 19:03 with Done licences for 15 keys + 6 filings incl. a G352-2229-1 follow-up is NOT in its brief: add by ADDENDUM or the next board seat).
+- GO model: fleet/briefs_staged/2026-11-15_K21_go_2229.md. GOs one at a time across B and K.
+- seat_mail_watch.sh re-armed 19:05 under Monitor (expires ~19:35): run newmail.sh right after every re-arm (a READY landed in the 19:05 gap).
+
+## CHECKPOINT 18:5x 15 Nov, the 18:33 seat (ctx ~55%) - superseded by the block above where they differ
 - **develop 9bb6c98b2c47** (PR 2220 merged 07:28Z; gh api 18:45). **D 63rd WRAPPED 07:42Z: k27 COMPLETE on Kintsugi** (pin 4e4347818772, 8 swaps, census 41/0); scored 0.95; pane closed. Q3 for PR 2195 MET (told K 21st).
 - **FLOOR (4 seats):** %14 **K 21st** (merge -K, Sonnet; brief fleet/briefs_staged/2026-11-15_seatK21_merge.md STAMPED; queue 2229, 2235 t1, 2236, 2234, 2237, then K table; plan ANSWERED 07:48:21Z = GO; NEXT MAIL = READY 2229 -> GO). %17 **B 179th** (merge -B, Sonnet; 2026-11-15_seatB179_merge.md STAMPED W-1..W-8; queue 2230 t1, 2233 t1, 2221 ... 2081 LAST; plan ANSWERED 07:48:43Z = GO; NEXT = READY 2230 -> GO). %20 **A 32nd** (Opus, KS-1897 b-ii build; 2026-11-15_seatA32_ks1897_build.md STAMPED; tier 1; NEXT = plan QUESTION). %23 **T 25th** (Sonnet, local stack slot + Peter suites baseline; 2026-11-15_seatT_test_stack.md STAMPED: Docker VM 13.63 GiB; NEXT = plan QUESTION with slot + guard).
 - **GOs one at a time across K 21st and B 179th.** GO shape: fleet/briefs_staged/2026-11-15_K20_go_2232.md (head-pinned, squash `QA gate GO WITH NOTES; merge GO pinned to <head12>.`, ls-remote in the send action, subject = the seat's requested subject).

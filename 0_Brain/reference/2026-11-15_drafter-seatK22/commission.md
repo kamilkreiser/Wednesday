@@ -1,0 +1,17 @@
+# Commission: DRAFTER for Seat K 22nd (Secuura/Blockchain-K, MERGE seat, Sonnet), 2026-11-15 19:1x AEDT
+
+Commissioned by Wednesday. Read-only drafter: write ONLY the brief below and notes.md in THIS folder. Never write under /Volumes/DevMASTER/!CODING (read verbs only; no fetch/pull/worktree there). No `cd`, no `rm`, bound every listing (`| head -N`), never print a secret. GitHub read-only with GH_CONFIG_DIR="/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.gh-config" (repo Secuura/Distributed_Secuura). notes.md ends with an UNMEASURED section. Under 50 KB. Model: Sonnet.
+
+Output: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_seatK22_merge.md
+
+TEMPLATE: Seat K 21st's STAMPED brief /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_seatK21_merge.md (read WHOLE, including its STAMP; it is LEAN, carrying K 20th's brief by reference). Write K 22nd as the same kind of DELTA: `K 21st -> K 22nd`, `K 20th -> K 21st`, ordinal 22nd takes `nd`. Wednesday's GO to K 21st (shape for the next GO): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_K21_go_2229.md.
+
+STATE (verify each at source; Wednesday's reads):
+- PR 2229 MERGED by K 21st as squash dc42dc89 (08:09Z); develop = dc42dc89493f4235e7954dcd6c181e05072d1231 (Wednesday ls-remote 19:09). K 21st is WRAPPING (r over 52.0), naming PR 2235 first. Its record: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-15_seatK-21st/ (HANDOVER.md; if its FINAL block is not there yet, say so and draft from its latest state block; Wednesday re-stamps after the wrap).
+- K 22nd's queue: ROW 1 = PR 2235 (KS-1935 billing credit lock, TIER 1, gate 361 GO WITH NOTES at head 19b6f52483c6514f1212be26b538df8789a17b1d; verdict /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-15_gate361-tier1-delta-pr2235-ks1935/verdict.md; services/billing/src/** = Seat A 32nd's live write set (KS-1897 build): name it). Then 2236 (KS-2192, t2, gate 359), 2234 (KS-1914, t2, gate 357), 2237 (KS-1910 docs, t2, gate 360), then K 21st's table from 2139 in its order (2229 now dropped). PR 2195 (row 34): Q3 is MET (Seat D 63rd's STATUS B 07:39Z: k27 done), so it is ordinary queue now. Read each head live (pulls API) and its gate line 1; drop and name any moved head.
+- Re-key: K 21st's kit (its REC tools/evidence/aids) by ONE counted shift k21 -> k22; count the source set at drafting from K 21st's REC (it re-keyed 82 files + four _build.py models per Wednesday's ANSWER); measure the matcher self-test on a scratch copy; FORBID a bare `21st -> 22nd` rule (neighbours K 121st etc.).
+- Merge trees: recompute every queued row on develop dc42dc89 (both orders) with planted controls, as K 21st's drafter did; and the 2235 head vs develop.
+- Seat B 179th is live on the other half (2230, 2233, 2221, 2222, 2098, 2079, 2223, 2224, 2081): never touch its PRs/REC. Seats A 32nd, T 25th, S 80th are live too.
+- A blank `## STAMP` block for Wednesday; heading exactly `## RULED BY KAM, NOT YET IN AN ARTEFACT` (carry K 21st's); PROVENANCE lines `- <fact> | <ABSOLUTE path / URL / ticket / command> | read 2026-11-15` (every KS id you name in a QUEUE needs its Linear state and newest comment time, or the send gate refuses; every path absolute); final line `SELF-CHECK: re-read end-to-end for contradictions | 2026-11-15 HH:MM` (machine clock).
+
+Return a 10-line summary: path, size, develop read, row 1 and its head, rows dropped, re-key counts, matcher result, anything Wednesday must rule.
