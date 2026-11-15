@@ -205,3 +205,9 @@ if stale:
     print("#      bash <this repo>/2_Project_Files/tools/safe_pull.sh   then re-run this script.")
     print("#      (never a hand-typed --autostash: it sweeps decisions.json and the chat streams; ledger w=3 2026-10-06)")
 PY
+# TAPPED-BUT-OPEN (2026-11-16, ledger w=3 regression of the clear-fleet-activity rule): after Kam's
+# rulings, list every card he tapped today that is still open in the store. Skipped inside the check
+# itself (KAM_TBO_INNER) so it never recurses.
+if [ -z "${KAM_TBO_INNER:-}" ] && [ -f "$(dirname "$0")/../tuesday/tools/tapped_but_open.sh" ]; then
+  bash "$(dirname "$0")/../tuesday/tools/tapped_but_open.sh"
+fi
