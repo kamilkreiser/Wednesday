@@ -1,0 +1,48 @@
+## BLUF
+The snapshot's placeholder industry field ("Industry (placeholder field)" on the Profile step) is now a choice of Healthcare, Financial services, Public sector or Other instead of free text. It ships as a new question-set version: ruleset snapshot-policy-aligned 0.1.3 and content playbook-placeholder 0.7.1, pinned where 0.1.2 and 0.6.1 / 0.7.0 were. The customer's ten-option industry list, the partner readiness set (still 0.7.0) and every older version are unchanged. One commit, 41 files. Nothing is deployed by this merge.
+
+## The ruling
+The product owner, 2026-11-15: "Keep the ten-option customer list as built; make the snapshot placeholder field a four-choice list (Healthcare, Financial services, Public sector, Other)". The four labels are the only new user-readable words in this change.
+
+## Before and after
+- Before: the field was a text box; new snapshots started on content 0.6.1 / ruleset 0.1.2; the Playbook screens showed 0.7.0; the hosted demo setting named snapshot-policy-aligned@0.1.2.
+- After: the same field (same label, help text, still optional) is a radio group: Healthcare, Financial services, Public sector, Other, plus the existing "Not recorded". Save sends an option id (industry-healthcare, industry-financial-services, industry-public-sector, industry-other). New snapshots against the API and the Playbook screens use 0.7.1; the seeder's snapshot package, the Bicep value HostedDemo__DraftRuleset, its pin in infra/tests/test_security_baseline.py and HostedDemoFactory.DraftRuleset name 0.7.1 / 0.1.3. A new readiness run still starts on 0.7.0. The web screen needed no new code.
+- The two new files differ from their sources only at these JSON paths (deep diff by program, with a control that a changed question text is listed): 0.1.3 vs 0.1.2 at ruleset.version and P-industry type/options; 0.7.1 vs 0.7.0 at package.version, the snapshot set's ruleset.version and the package-level P-industry type/options. Every other byte, including the files' own header notes and provenance text, is the source's. The API seed and web copies are byte-identical.
+- Hashes: file sha256 9bbe9b7dcd0532119def0921ed6cf281d6c22abde54027e706759540cb321010 (0.1.3) and 030df89fbb307011d9788e6ee24e605ca1f8d9ca15a13a09fb68e7b8fd99a1fe (0.7.1); canonical sha256:4035158720cd6a5eedef6071074b8c141e98d00781fb742869628764212cba54 and sha256:0f179147c49558a82fd3f87368b5b634ac19c727f98c6a6c6b8aa359637da40d.
+- Scoring: a 0.7.1 snapshot gives exactly the findings, scores, actions and next engagement a 0.6.1 snapshot gives (tested).
+
+## The samples (a closed table in the seeder)
+| Sample (overview industry, unchanged) | Stored P-industry | Profile step shows |
+|---|---|---|
+| Wattle Health Group (Healthcare) | industry-healthcare | Healthcare |
+| Kookaburra Council (Government) | industry-public-sector | Public sector |
+| Banksia Manufacturing (Manufacturing) | industry-other | Other |
+| Quokka Freight (Logistics & warehousing) | industry-other | Other |
+A sample industry outside the table throws at seed time; there is no silent default. The issued report PDF of the Kookaburra sample lists the industry by its label (tested).
+
+## Tests
+- New, each red on main plus only the new and changed test files, green here: web content-071.test.ts (9 rows; on main the file fails to load because 0.1.3 does not exist), ApiProfile.test.tsx (the four radios plus "Not recorded" and the saved id; a stored free-text industry shows no choice and the next Save sends null; the closed list has no text box), dotnet Content071Tests (5), Content071ShowcaseTests (4), Content071HostedDemoTests (1), the rewritten sample-profile row, and the rewritten browser spec playbook-profile-fields.spec.ts (4 of 4 red on main's build). Its axe scan of the Profile step passes (the helper asserts no serious or critical violation).
+- Rewritten rows that named 0.6.1 / 0.7.0 / 0.1.2 as current now name 0.7.1 / 0.1.3; no test was deleted. Web unit names: 9 retitled, 11 added.
+
+## Checks (run locally on the merge tree, which equals this head)
+| Job | Main | This branch |
+|---|---|---|
+| web lint / typecheck / client-content check / e2e shard plan / audit-dev / npm audit / build | 0 warnings / ok / 17 copies / ok / passed / 0 vulnerabilities / ok | 0 warnings / ok / 19 copies / ok / passed / 0 vulnerabilities / ok (same build warnings) |
+| web unit (vitest) | 298 files, 4264 passed | 299 files, 4275 passed |
+| e2e, 8 shards, CI=1 | all pass | all pass, the same counts per shard (passed plus flaky) |
+| dotnet, default host with Azurite | 4115 passed | 4129 passed (the 10 Blob tests passed by name) |
+| dotnet on SQL Server 2025 (pinned image) | not run | api-other-and-feedback 1348 passed, 243 databases; api-assessment 1461 passed + 1 failed (see below), 319 databases |
+| infra validate / unittest discover | 325 OK / 325 OK | 325 OK / 325 OK; hidden characters 14 OK; hosted-demo pin 10 OK |
+The one SQL Server red is ForwardedProofTests.The_web_front_end_value_is_gone_from_the_request_once_the_pipeline_has_read_it, a timing-dependent test that already exists on main (this change touches no hosting code or test): run alone on SQL Server it failed 3 of 5 times here and 1 of 5 times on main. The e2e flaky row shell-sidebar.spec.ts:1262 appeared on both main and this branch under load.
+
+## Deploy notes (read at source; nothing is deployed by this merge)
+1. The Bicep value and the API ship together, or the host refuses to start. A new API with the old setting: the hosted seed check (HostedDemoLocks.CheckSeedRuleset, run at start-up before the seed is looked for) refuses, because the seeder now scores with 0.1.3. An old API with the new setting: start-up validation refuses (with draft scoring on, as on the demo and UAT), because 0.1.3 is not a loaded ruleset there.
+2. The hosted seed is idempotent (the showcase.seeded audit event): the deploy does NOT re-seed. The four existing samples keep their 0.6.1 / 0.1.2 stamps and their free-text industries until an Admin runs resetDemoData (it needs force while the demo is frozen), which soft-deletes the seeded rows and writes new samples on 0.7.1 / 0.1.3.
+3. A snapshot in progress on 0.6.1 is no longer scored once the hosted setting names 0.1.3: its submit is refused (422 ruleset.not-approved) and it stays in progress. This includes the Quokka Freight sample's in-progress snapshot until a reset.
+4. A profile saved while the industry was free text holds a value no choice matches: the Profile step shows no choice selected, and the next Save clears it (sends null). This includes the existing samples' profiles until a reset.
+5. Older stamped assessments keep their own versions: 0.1.2 and 0.6.1 / 0.7.0 stay shipped and unchanged, and a profile stored against 0.1.2 is still accepted against 0.1.2.
+
+## Not built (held)
+The fleet-size neutral note (its words are not written; they go to the product owner first) and the ticket's provenance line. No change to the ten-option customer list or to readiness. No integration with HP tools is built or claimed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

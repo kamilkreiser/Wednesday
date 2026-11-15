@@ -1,0 +1,28 @@
+A page after the cover, headed "Table of contents", lists the nine sections of the executive
+report with the page each one starts on. Each row is a link to its section, and the running
+header on every page after the cover is a link back to the contents page. The bookmarks are
+kept as they were. The readiness report is unchanged. No library change: the links are written
+by the PdfPig 0.1.16 already in use, each with a zero border, so nothing is drawn around a link
+on screen or on paper.
+
+The contents page is page 2, so every section page moves down by one. The heading is a string
+of the report model (null means no contents page), which keeps the Demo copy's name check
+counting it as one of the report's own words. The readiness builder passes null and its four
+golden PDFs are byte-identical to before; the executive PDF drawn with a null heading is
+byte-identical to before for all three fixtures at A4 and Letter.
+
+The three executive golden outlines move by exactly one page. Three test locators that searched
+the whole document now search the pages after the contents page. New tests cover the contents
+rows and their pages, the link targets and areas, the link back on every page after the cover,
+the zero borders, the unchanged rest of the report, the readiness report, the one-page limit
+and repeatable output. API suite: 4131 run, 4131 passed, 0 skipped (before the change: 4115).
+
+Deploy note: a report already issued keeps the PDF it was issued with, so it has no contents
+page. The Demo copy of such a report is drawn again with the contents page, no longer matches
+the stored file, and is refused as changed after issue until the report is issued again. The
+sample reports of an existing showcase seed are not redrawn on start, so the same holds for
+them until the showcase is reset.
+
+Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

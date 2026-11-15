@@ -1,0 +1,44 @@
+## Summary
+
+On the live snapshot question card, inside the note's disclosure, the assessor can now choose how each answer is known, from the five words the product already uses, pre-filled with today's default ("stated by the customer"). The choice is saved with the answer, comes back on return, and the exported report prints it exactly as it already prints the stored basis. Web only: no API, contract, report or wording change; nothing deployed.
+
+Authority: the product owner's 2026-11-15 ruling on the reseller reviewer's feedback: "please action the reviewers feedback.   keep the 16 questions.  and yes, the stated-by-the-customer label does print in the exported report".
+
+## Before and after
+
+- Before: every answer typed on the live card was saved as "stated by the customer" (stored `asserted`), and an uncited answer stored with any other basis was rewritten to `asserted` on its next save from the live card.
+- After: open "Add a note" on a question; under the note box a list labelled "How do we know?" offers verified, observed, stated by the customer, assumed, not assessed, showing "stated by the customer" until changed. A choice saves at once (like a radio), is shown again on return (the note section opens by itself when a choice is held), and a choice made before the question is answered is sent with the answer.
+
+## Words
+
+- Label `How do we know?`: already the scripted sample's chooser label (`web/src/components/screens/QuestionBlock.tsx:64`).
+- The five entries are read from `evidenceText()` (`web/src/lib/plain-words.ts:6-14`), the same words the exported report prints (`ReportModelBuilder.cs:208` and `:414`). No new user-readable word; the disclosure summary stays "Add a note" / "Edit note".
+
+## Rules kept
+
+- An answer drawn from an import shows no chooser and keeps its own rule (observed until confirmed, then verified); a draft with a citation always sends that basis.
+- The client follow-up and the partner's review render as before (the chooser is an opt-in prop only the snapshot runner passes). A locked card shows no chooser.
+
+## Files
+
+`web/src/content/questionnaire.ts`, `web/src/components/snapshot/useSnapshot.ts`, `web/src/components/snapshot/QuestionCard.tsx`, `web/src/components/snapshot/SnapshotRunner.tsx`; tests `useSnapshot.basis.test.ts`, `QuestionCard.basis.test.tsx`, `web/e2e/playbook-answer-basis.spec.ts`, and one rewritten expectation in `SnapshotRunner.provenance.test.tsx`.
+
+## Verification (local)
+
+- Unit: 300 files, 4291 passed, 0 failed (main: 298 files, 4264); by name lost 0, added 27.
+- Without the product change: 13 of the 34 rows in the three affected files fail (12 new plus the rewritten one); the other new rows pin rules the change keeps, and four one-line mutations of the product code each turn at least one of them red. The browser spec fails 4 of 4 without the change and passes 4 of 4 with it; its accessibility scan of the open disclosure reports 0 violations and the chooser is one Tab from the note.
+- Browser: playbook shards 65, 55, 64, 53 passed, 0 failed, 0 flaky; journey-and-prototype 198 passed. Shard plan OK (playbook shards 69, 68, 69, 68).
+- Lint, typecheck and build clean. Hidden-character scan of every tracked file: OK.
+- Also checked on a local merge with the open industry-choice branch: clean merge, unit 4302 passed 0 failed, shard plan OK, build clean, playbook shards 65, 55, 64, 53 passed, 0 failed, 0 flaky.
+
+## Deploy notes
+
+No migration; no API, contract, mock or report change. Existing stored answers keep their basis; answers stored as `asserted` still print "stated by the customer". An uncited answer already stored with another basis now shows that basis in the chooser and keeps it on its next save.
+
+## Not built
+
+- The optional wording change ("stated, not checked").
+- Any chooser on the client follow-up or the partner's review; any change to how an imported answer's basis is set.
+- No integration with HP tools is built or claimed. Nothing deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

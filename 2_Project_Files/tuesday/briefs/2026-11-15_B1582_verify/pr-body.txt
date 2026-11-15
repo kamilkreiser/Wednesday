@@ -1,0 +1,31 @@
+## What
+
+MPSCALC-57, clause 3 (generated files): the four browser specs that read a printed PDF back as text now run in CI.
+
+- Part A: in itemised-summaries, proposal-buttons, proposal-purchase and rental-book, the one pdftotext call reads the PDF from a file the spec writes into a private folder made with mkdtempSync, not from standard input. The folder is removed in a finally. Timeout (30 s) and kill signal are unchanged; test titles and assertions are unchanged.
+- Part B: the four names move from the Playwright config's left-out list to the list that runs only with the dev stub off, and the web job gets one step before the stub-off e2e step that installs poppler-utils with apt and prints where pdftotext is and its version. Two comments that said CI leaves these specs out are corrected.
+
+Files: the four specs, web/playwright.config.ts, .github/workflows/ci.yml. No product file, no package, no lock file, no new action or script.
+
+## Checked locally (independent gate, Node 24, Chrome, poppler 26.11.0)
+
+- Test lists: stub 270 tests in 18 files (unchanged, per-file counts identical); api-off 117 in 4 files -> 157 in 8 files (+5 +25 +2 +8 = 40). The printed left-out list holds 3 entries.
+- npm run lint rc 0; npm test 145 files, 1575 tests, 0 failed (same as main); the timeout pin (web/src/test/pdftotextTimeout.test.ts, unedited) 14 passed.
+- e2e stub step as CI runs it: 253 passed, 17 skipped, 0 failed. e2e api-off step: 157 passed (main: 117 passed).
+- The temp file is really read: a logging pdftotext wrapper saw 42 calls across the four specs, every one on a file inside a mode-700 mpscalc-pdftext-* folder, starting with the PDF header, never standard input; 0 folders left after the run, and 0 left when pdftotext is made to fail (24 rows red, folders gone).
+- Red without the fix: with Part B reverted the api-off list is 117 in 4 files and the four specs are named as left out; with the file argument put back to standard input both proposal-purchase rows fail ("pdftotext is required ... Command failed: pdftotext -layout - -"); with the finally removed 2 folders leak.
+- The three python rows that read ci.yml pass; a planted `bash tools/x.sh` in the new step turns test_sdk_pin_routes red and a planted secrets expression turns test_ci_workflow red.
+- CodeQL CLI pre-scan (not hosted CodeQL): javascript-typescript 0 results (87 rules), actions 0 results (17 rules); a planted incomplete-sanitization line fires the JS suite.
+
+## What only hosted CI can show
+
+1. Ubuntu poppler: the runner's pdftotext is older than the local 26.11.0 and its -layout text may space words differently; the specs' text assertions run there for the first time. A red only on Linux is a fix round.
+2. The apt step on ubuntu-latest: that apt-get update and install succeed there (the step is idempotent if the image already has poppler-utils, and command -v pdftotext fails the step if the tool is missing).
+3. The web job's total time against its 40-minute limit: last main run about 18.4 minutes; expect roughly 1 to 2 more (the 40 added rows plus the apt step), not measured.
+4. Hosted CodeQL (javascript-typescript and actions) on the PR.
+
+Nothing is deployed by this change.
+
+Not in this change: the stale header line at web/src/test/pdftotextTimeout.test.ts:4 ("CI runs no Playwright"), left for a later edit.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

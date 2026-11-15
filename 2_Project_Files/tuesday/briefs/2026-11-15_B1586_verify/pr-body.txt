@@ -1,0 +1,40 @@
+BLUF: the executive report PDF gets a contents page right after the cover, headed "Table of contents", listing the nine numbered sections with the page each starts on, every row a link to its section. The running header on every later page is a link back to it. Bookmarks kept. The readiness report is byte-for-byte unchanged. No library change, nothing deployed.
+
+Authority: the product owner's 2026-11-15 ruling on the reseller reviewer's feedback: "please action the reviewers feedback.   keep the 16 questions.  and yes, the stated-by-the-customer label does print in the exported report". The reviewer asked for "a table of contents with hyperlinks to sections, and a link back to the table of contents somewhere on each page (e.g. the HP logo or text)". The PDF draws no logo, so the link back sits on the existing running header text.
+
+Before and after
+- Before: cover, then the sections from page 2. Bookmarks only; no contents page, no links.
+- After: cover; page 2 is "Table of contents" with the nine section headings and their page numbers; the sections start on page 3. A row opens its section (at the heading's own height, the same destination as its bookmark). The running header text, top left on every page after the cover, opens page 2. "Page x of y" counts the new page.
+- The one new user-readable word is "Table of contents". Page numbers are digits, the rows are the existing section headings, the back-link sits on the existing header text.
+
+What changed
+- Pdf/Layout.cs: page 2 reserved after the cover when the model has a contents heading, filled after the sections are laid out; one row per bookmark with its page right-aligned, the whole row a link; a list that would need a second page throws (never a silent spill).
+- Pdf/PdfPigReportRenderer.cs: the link writer (GoTo to an explicit XYZ destination, zero border), and the header back-link on every page after the cover.
+- Report/ReportModel.cs: one optional last parameter ContentsHeading, default "Table of contents", null = no contents page and no link. A model string, so the Demo copy's any-form name check counts it as one of the report's own words (a customer named "Contents Hospitality (sample)" is not refused; a test and its control pin this).
+- Readiness/ReadinessReportModelBuilder.cs: ContentsHeading: null.
+- The module README's ADR-R11 row. ReportModelBuilder.cs is untouched. PdfPig stays 0.1.16.
+
+Tests
+- Rewritten: the golden-outline locator, the SOW-order test and the HPSM section slice now read the pages after the contents page (the SOW-order test would otherwise have stayed green for the wrong reason, because the contents page lists the headings in order). The three executive goldens were regenerated and differ from before only by PageCount + 1 and every Page + 1.
+- New: ContentsPageTests (14) and ContentsHeadingNameCheckTests (2). With the layout and renderer changes removed, 13 of the 14 page tests, the three golden cases, the SOW-order test and both name-check tests fail; removing only the header link fails 3; giving the readiness report the heading fails 27.
+- The Demo copy name-check tests are unchanged and pass.
+
+Verification (local, this change's head)
+- API suite: 4131 run, 4131 passed, 0 failed, 0 skipped (before the change: 4115 of 4115); the ten Azurite tests ran and passed by name.
+- SQL Server 2025 (pinned image): api-assessment @@SQL1@@; api-other-and-feedback 1348 passed, 0 skipped, 243 test databases (floor 110), no host start retried.
+- Infra: @@INFRA@@
+- Render evidence: the executive PDF drawn with a null heading is byte-identical to the old PDF for three fixtures at A4 and Letter (6 of 6); four readiness PDFs are byte-identical (4 of 4). In the 9-page sample: 17 links (9 rows + 8 header links), each a GoTo with /Border [ 0 0 0 ]; no URI, Launch or JavaScript action; every row's destination equals its bookmark's page and height.
+- Web jobs: no changed file is named under web/, infra/ or scripts/. The live-API web specs are in no CI shard and were not run. CodeQL for C# cannot run on the local arm64 machine; hosted CodeQL is the C# proof.
+
+Deploy notes
+1. Issued reports keep their stored PDF. A report issued before the deploy is served as stored, so it has no contents page.
+2. The Demo copy of a report issued before the deploy is refused until the report is issued again. The copy is first redrawn and compared byte for byte with the stored file (ReportingEndpoints.cs:485); the new page makes them differ, and the answer is 409 "This report changed after it was issued" (:514). Derived from the code, not run.
+3. Hosted showcase: ShowcaseSeeder.cs:146 returns "already seeded" when a complete seed is in place, so a normal start does not redraw the sample reports; :274 draws them with the renderer only at seed time. After the deploy the existing sample reports keep no contents page and their Demo copies are refused until the showcase is reset (the Admin reset, or a fresh database); a reset or a fresh seed draws them with the contents page. Derived from the code, not run.
+4. Printing: a link draws nothing (zero border on every link, counted in the PDF; not a print run).
+5. Accessibility: the PDF is still untagged (ADR-R11). A screen reader reads the contents page as text in reading order and does not announce the links as links. No screen-reader run was made.
+6. No integration with HP tools is built or claimed. Nothing is deployed.
+
+Follow-ups (not in this change)
+- The README's ADR-R13 row still says the executive golden outlines are unchanged; they now move by one page.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

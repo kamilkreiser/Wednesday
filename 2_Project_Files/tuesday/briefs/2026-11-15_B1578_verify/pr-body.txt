@@ -1,0 +1,65 @@
+## What
+
+MPSCALC-170 clause 1, the renumbering row: each fleet line now has a stable,
+server-assigned `fleetLineId`, and the price audit pairs fleet lines by it.
+Removing a middle fleet line and renumbering the later ones now records only
+the removed line's override entries (before: 3 entries for the ticket's case,
+now 1). The "Give each line its own number" save of a stored quote with two
+lines numbered 1 records 0 override entries.
+
+Product owner's ruling: "fleetLineId, screen unchanged". The audit keeps
+naming a line `fleet[<line number>]`; no screen, proposal, export or refusal
+carries the id; no web source changes except the three generated contract
+copies.
+
+## How
+
+- `FleetLineDto.FleetLineId` (JSON `fleetLineId`, string or null) beside
+  `lineNumber`; contract `FleetLineInput.fleetLineId`; `required` unchanged.
+- Create assigns every id (`fl_` + 32 lower-hex, `RandomNumberGenerator`).
+- Save and duplicate keep a held id, else take the same-number stored line's
+  id, else mint one. This runs before the unchanged-draft check, so a draft
+  sent back unchanged without ids is still no change. Unknown or repeated ids
+  are treated as no id.
+- Quotes stored before the id get ids worked out on read (SHA-256 of the
+  quote id, line number and occurrence, in the same `fl_` form), the same on
+  every read; the stored document is not rewritten until the next save.
+  Snapshots are not rewritten.
+- `PriceAudit.RentalOverrides` pairs by id when every line on both sides has a
+  unique id, else by number as before. The purchase BOM audit is unchanged.
+- Allow-list: `FleetLineDto.FleetLineId = N` (never on a proposal or export).
+- Quote format string unchanged (`mpscalc-quote/1`).
+
+## Checks (local)
+
+- `dotnet build MpsCalc.slnx -c Release`: 0 warnings; `dotnet test`: Engine
+  743, Import 196, Api 3650 (3637 at main + 13 new), 0 failed; no test lost.
+- 12 of the 13 new tests fail at main without the change (1 is a control
+  that passes by design).
+- web: lint, `npm test` 145 files / 1575 tests, both Playwright modes and the
+  entra bundle check green at the head and at the merge with current main;
+  bundle summary equal to main's.
+- `tools/demo/test` python rows green.
+- CodeQL javascript-typescript (local CLI): 0 results at main and at head.
+  CodeQL csharp could not run locally; hosted CodeQL is the C# proof.
+
+## Deploy note (rollback)
+
+Nothing is deployed by this merge. Once a build with this change is deployed:
+a snapshot written by it carries `fleetLineId` and is read with the API's
+strict JSON options, so a build older than this one refuses that snapshot at
+load, and refuses every quote that refers to it (measured locally: quote and
+snapshot both 404 on the older build; the same snapshot with the field removed
+loads). Quote documents written by this build stay readable by an older build,
+which skips the field (measured: 200, field absent). A rollback after deploy
+therefore needs those snapshots kept readable, or a roll forward.
+
+## Follow-ups (not blocking)
+
+- No committed row pins that a renumbered pair's override change is named by
+  its new number, nor the identical-line-first step of the same-number
+  fallback; both survive a planted change.
+- The contract text says "Never refused"; a non-string `fleetLineId` is
+  refused by the generic wrong-type rule.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,0 +1,13 @@
+LANDING (head-pinned squash; nothing here was run by the gate)
+
+The landing rule, read at source: "The landing form is a head-pinned squash"
+(datasecau/HPSM-POC-analysis, origin main, 1_Project_Definition/CLARIFICATIONS.md:3617, also :3680; read by GET this session).
+Land through hosted CI and CodeQL; never bypass, never dismiss an alert.
+
+Run from this folder (it holds squash-subject.txt and squash-body.txt). <PR-NUMBER> is the PR whose head is the gated commit;
+the head sha is pinned:
+
+gh pr merge <PR-NUMBER> -R datasecau/HPSM-POC --squash --match-head-commit fda8877735975f03e9d1418c4e72c5c17fcbfc19 --subject "$(cat squash-subject.txt)" --body-file squash-body.txt
+
+Before running: re-read main (gated on f32b209bfa6f33c3c0268c1daa76753c816b316e). If main has moved, re-check that
+git merge-tree --write-tree <new main> fda88777 is clean and that no new main commit touches the 41 paths; if it does, re-gate.
