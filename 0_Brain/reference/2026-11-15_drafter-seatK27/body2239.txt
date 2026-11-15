@@ -1,0 +1,123 @@
+Refs KS-1699 · https://linear.app/secuura/issue/KS-1699
+
+**TIER 1** (an authorization surface: who may share and recertify a certification). Follow-up to PR 2233. Gate requested from Wednesday; this PR is NOT for merge until a gate verdict names its head.
+
+## The ruling, verbatim
+
+"Decision secuura-ks1699-admin-means-platform-admin-1115: b — Also a company's own admin" (Kam, live board 2026-11-15 21:03:48).
+
+Card option b's detail text: "A same-tenant ORG_ADMIN may share and recertify too. A follow-up PR, one line per route, tier 1 gate."
+
+The earlier cards still stand: `secuura-ks1699-share-recertify-1115` = a ("Guard share and recertify like revoke", built by PR 2233) and `secuura-ks1699-verify-audience-1113` = c ("Leave verify open to any signed-in caller").
+
+## What changes
+
+`Blockchain/Dev/services/originate/src/routes/certifications.ts`, nothing else in the product:
+
+- One NEW helper, `callerMayShareOrRecertify(req, certification)`, placed after `callerMayReadCertification`. It returns `callerMayReadCertification(...) || (isPlatformOrOrgAdminRole(role) && decideTenantAccess(authUser, getReqTenantId(req)).allow)`, reading `role` and `authUser` from `req.user` exactly as the neighbour does.
+- `POST /:id/share` and `POST /:id/recertify`: each route's check changes by one word, from `callerMayReadCertification` to `callerMayShareOrRecertify`, with one comment line citing the card. Same place as before: after the not-found check, before the revoked 400 and before every email, anchor, write and charge. Same refusal: each route's own 404 bytes.
+- The import from the shared package gains `isPlatformOrOrgAdminRole` and `decideTenantAccess` (both already exported; this is their first use in `services/originate`).
+- `callerMayReadCertification` and the three reads it gates (`GET /:id`, `/:id/lineage`, `/:id/evidence-bundle`) are unchanged. Revoke stays issuer-only (403). Verify stays open.
+
+## D1-D3, as Wednesday ruled them
+
+- **D1, the tenant half: the token's claim is compared** (`decideTenantAccess`). An ORG_ADMIN with no `tenantId` claim (or an empty one) is refused with the route's 404, rather than falling through to the default tenant. Measured at boot (reachability, for Kam): the slot-4 local database holds 5 ORG_ADMIN users (stored role `org_admin`, minted as `ORG_ADMIN` by the auth service's role map) and 37 users in all, none with a NULL tenant; the demo was not measured (frozen). Two seed paths can create the case: originate's seed-demo-users route inserts 4 ORG_ADMIN accounts with no `tenant_id` column (`routes/adminConfig.ts`, the INSERT under the seed list). `deployment/azure/migrate/seed-azure-dev.sql` inserts 3 ORG_ADMIN rows with no `tenant_id` column (a Container Apps-era seed). Neither is changed here.
+- **D2, tenant versus organisation: TENANT.** See "What this admits".
+- **D3, spelling: the shared predicate's ASCII fold.** `org_admin` is admitted; the dotless `org_admın` (U+0131) is refused. Both pinned.
+
+## What this admits
+
+- An `ORG_ADMIN` whose token's tenant claim equals the tenant the certification was looked up in may share it and recertify it, even when that admin is neither its issuer nor its holder.
+- **Tenant-wide, sibling organisations included:** an ORG_ADMIN of organisation B shares and recertifies a certification issued in organisation A of the same tenant. A recertify by that admin saves a new certificate naming the admin as its issuer and writes a `verification_certificate` charge; a share sends the email and writes a `share` charge.
+- Not admitted: an ORG_ADMIN of another tenant (refused at the lookup, and by the claim if the two ever differ), an ORG_ADMIN with no tenant claim, and every other role, including `ISSUER_ADMIN`, `ADMIN`, `USER` and the old `platform_admin` spelling.
+- A possible later refinement, not built here: bind the admit to the admin's own organisation (`decideTenantAccess`'s organisation-scope arm). The certification row exposes no organisation, so that is not a one-line change.
+
+## Test plan / Test Evidence
+
+Environment: this Mac, my own worktree `worktrees/s-r120-ks1699` at develop `daa54a26d163`; jest unit cells with a mocked repository that honours the tenant and a real local HTTP anchoring server; no Docker stack. Node 26.8.1, not an LTS line (the only Node on this host).
+
+**Touched:**
+- `Blockchain/Dev/services/originate/src/routes/certifications.ts` (+32 -3)
+- `Blockchain/Dev/services/originate/src/__tests__/ks1699-share-and-recertify-refuse-a-non-party.test.ts` (24 cells to 54)
+- `Projects Documents/fragments/{cheat,flow}/KS-1699-an-org-admin-of-the-tenant-may-share-and-recertify.html` (new pair)
+- `Projects Documents/fragments/{cheat,flow}/KS-1699-share-and-recertify-refuse-a-non-party.html` (PR 2233's pair): the one sentence in each that is now wrong ("serve only a platform admin, the issuer, the holder and the issuing connector") amended to name the follow-up, and the cheat's "24 cells" figure.
+
+**Ran**
+- Red first: over the PR 2233 routes 31 of 54 cells fail, all by AssertionError (each expected 201 or 400 and received 404): S3, R3, S10, R10, S11, R11, S11b, R11b, P3 x3, and the comparator of every refusal cell (S7 and R7 x2, S8 and R8 x2, S9 and R9 x6). The 37 cells of `ks1695-certification-reads-need-issuer-holder-or-admin.test.ts` pass, unchanged.
+- Green: with the change, 54 of 54 pass, and the 37 `ks1695` cells pass unchanged (91 of 91).
+- Planted tampers, each restored by content and sha256 `f34d8413064a`:
+  - the admin arm removed: 31 fail (every admit cell, P3, and every refusal cell's comparator)
+  - the role check made always true: 14 (S9 and R9, six roles each; the USER half of S11b and R11b)
+  - the tenant compare removed, so only the lookup decides: 8 (S7b, R7b, S8 x2, R8 x2, and the claim-wall half of S11 and R11)
+  - the tenant answer inverted: 31
+  - the arm written into `callerMayReadCertification` instead: 3 (P3 x3). `ks1695`'s R14 and R15 sign their ORG_ADMIN in with no tenant claim, so they cannot see this tamper; P3 was added for it (the first run of this plant turned 0 cells red; declared R120-D1, accepted by Wednesday in her grant ANSWER of 10:48Z).
+  - share's refusal made a 403, or one byte of its body changed: 15 each; recertify's refusal made a 403, or given share's body: 15 each
+  - share's check moved after the revoked check: 2 (S5, S11); recertify's: 2 (R5, R11)
+  - share's check moved after the charge write: 14; recertify's: 14
+  - `ISSUER_ADMIN` admitted: 2 (S9, R9); `ADMIN` admitted: 2 (S9, R9)
+  - the PR 2233 route (develop's file): 31, the red-first set
+- Whole `services/originate` jest suite, interleaved, develop tree vs branch tree: 3 of 3 pairs read develop 223 files, 2,633 tests, 0 failed and branch 223 files, 2,663 tests, 0 failed (the 30 new cells). No pre-existing red. Each run started only at load1 8 or below.
+- tsc: plain over `services/originate` rc 0 with no output (a planted `string` into `number` makes it rc 2). Including the test files: the same 4 pre-existing lines on the branch and on develop (`ks488-smtp-opt-in` x2, `ks1937-email-service-logs-never-carry-the-recipient-address` x2), 0 in the touched test file.
+- eslint: 0 errors, 0 warnings on both changed files (a planted `var` gives 1 error).
+- `check:test-types`: not applicable: `services/originate` is not enrolled (the script names auth, api-gateway, vc-issuer, security and m365-integration; `check.cjs` on originate answers rc 2, "no tsconfig.test.json").
+- Fragments: `node Blockchain/Dev/scripts/docs-fragments.mjs check` ends `OK` (a planted fragment without its number token ends `FAIL`, rc 1). Its 2 ADVISORY lines (the committed pages lag the fragments) read the same at develop.
+- merge-tree against PR 2160 (`KS-2017`, the only open PR touching `routes/certifications.ts`): both orders rc 0, the same tree `f5a100365115`, 0 conflicts (2160 changes one hunk at line 932; mine sit at 54, 155, 173, 1349 and 1455). A planted conflicting line on 2160's first changed line makes both orders rc 1 with a conflict in `certifications.ts`.
+
+**NOT run:**
+- No real gateway and originate pair, no real database, no Schemathesis, Akto, Playwright or k6 run, no deploy.
+- The issuer portal's Share and Recertify dialogs (`frontend/issuer/src/components/ShareDialog.tsx:87`, `RecertifyDialog.tsx:54`) are the in-repo callers; they need no change, and no browser run was made.
+
+**Migrations + config:** none.
+
+**Pre-push hook:**
+```
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+```
+- Leg 14, verbatim: `shell suites: 126 passed, 0 failed, 1 skipped (of 127)`
+
+## Before this deploys
+
+- **deploy owed; not this seat's; demo frozen**
+- Gate first (tier 1). The certification row's tenant is the request tenant by construction (`getCertification(id, tenant)`), so the admin arm only ever sees a same-request-tenant row.
+
+## Notes for the gate
+
+- `callerMayReadCertification`'s doc comment still says share and recertify "apply the same rule"; the partition excluded that helper, so the sentence was left as written. The new helper's comment states the widened rule. A one-sentence amend is offered.
+- Plant 5 (the admin arm moved into the read helper) reddened 0 cells in `KS-1695`'s file: its R14 and R15 sign an ORG_ADMIN in with no tenant claim, which D1 refuses in either place. Cell P3 in this file signs in the ADMITTED ORG_ADMIN and reads; it is the cell that catches plant 5.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+
+## Round 2 (gate 363 notes)
+
+Gate 363 read this PR at `f1ac5fec9b679f8cde1a406cbeeb6cd58ee7c13d` and ruled **GO WITH NOTES** (tier 1). Round 2 adds two commits on that head, as a fast-forward (no force push, no rebase or amend): new head `9036b3d0c78a5a83d8e08092d4c0a08eb37793d7`, delta `f1ac5fec9b67..9036b3d0c78a`, 2 files, +76 −3. Nothing else in this PR changed; the sections above stand as the gate read them.
+
+**G363-2239-1 (D1, "refused, not defaulted"): cells S12 and R12 added.** The row sits in the default tenant (`a0000000-0000-4000-8000-000000000001`) and the request tenant comes from originate's real `resolveRequestTenantId` (unvouched, no upstream tenant, so it falls back to the default tenant). An ORG_ADMIN with no `tenantId` claim, and one with an empty claim, each get 404 with the route's own bytes and no side effect; the default tenant's own ORG_ADMIN gets 201 on the same row. Against gate 363's mutant `claim_defaults_to_default_tenant` these four cells go red by assertion (201 where 404 is due) and no other cell does; at the head they are green. The flow fragment's sentence "The claim is compared, not defaulted" is now backed by these cells; the fragments are unchanged.
+
+**G363-2239-2 (D2, tenant-wide): cells S13 and R13 added.** A same-tenant ORG_ADMIN whose token carries a sibling `organizationId` shares and recertifies: 201 with one of each side effect. Red by assertion against gate 363's mutant `org_bound_D2`, green at the head. This pins D2 as ruled; it changes no behaviour.
+
+**G363-2239-3: `callerMayReadCertification`'s doc comment amended** to the gate's sentence (share and recertify apply this rule PLUS a same-tenant ORG_ADMIN through `callerMayShareOrRecertify`; that arm must not move into this helper; verify applies neither). Comment only: the function's text hashes the same before and after.
+
+**G363-2239-4: the KS-1699 ticket comment draft is re-worded** (the revoke clause dropped, "every other non-platform role", the Next line cites gate 363 and this head, the counts recomputed). It is still **not posted**: it posts after the delta gate reads it.
+
+**Harness.** Gate 363's request-tenant switch is ported at its minimum: `tenantFrom` is `'direct'` (the default; every pre-existing cell runs as before) or `'resolver'` (S12 and R12 only). The cells stay in this file because a new originate test file that names `ANCHORING_SERVICE_URL` would have to join the KS-1293 hermetic manifest.
+
+### Round 2 Test Evidence
+
+Host: this Mac, Node 26.8.1, which is not an LTS line; every figure below was measured on it.
+
+- **Cells:** 54 → 60 (S12 ×2, R12 ×2, S13, R13). At the new head 60/60, and KS-1695's file 37/37, unchanged. Develop's route under the new file: 37 of 60 red, all by assertion (the 31 before, plus all 6 new).
+- **Plants** on certifications.ts, each restored by content and sha256 (`6e6472ffb6d0`); every red is an assertion and KS-1695's 37 cells are never red. Red cells of 97 (60 + 37): develop's route 37; arm removed 37; role check always true 14; tenant compare dropped 12; tenant allow inverted 37; arm moved into the read helper 3; share refusal 403 17; share refusal one byte off 17; recertify refusal 403 17; recertify refusal with share's body 17; share check after the revoked check 2; share check after the charge 16; recertify check after the revoked check 2; recertify check after the charge 16; ISSUER_ADMIN admitted 2; ADMIN admitted 2; gate 363's claim_defaults_to_default_tenant 4; gate 363's org_bound_D2 2.
+- **Suite** (the whole `services/originate` jest run, interleaved ×3, load1 ≤ 8 at every start): develop `7b452b1bbb96` 223 files / 2633 tests / 0 failed in all 3 runs; this branch 223 files / 2669 tests / 0 failed in all 3 runs (2663 + the 6 new cells).
+- **tsc** plain: rc 0, 0 errors (develop the same; a planted TS2322 gives rc 2). With the test files: the same 4 pre-existing lines on both sides (ks488 ×2, ks1937 ×2), 0 new.
+- **eslint** (the root flat config) on both files: 0 errors, 0 warnings (a planted `var` + `debugger`: 2 errors).
+- **docs-fragments check:** OK, with 2 ADVISORY lines that develop also prints; a planted defect FAILs.
+- **merge-tree:** this head × develop `bbb75755064e`: rc 0 both orders, tree `1b6128cefd85`, the merged certifications.ts and test file equal to this head's blobs. × PR 2160's head `b02bd2716cc2`: rc 0 both orders, tree `d11624b7203b`. Each with a planted control that conflicts (rc 1) in both orders.
+- **Census and overlap gate:** run under Wednesday's grant for this one push: `CENSUS_ACCEPT` names `certifications.ts` = 2160, 2239 and the ks1699 test file = 2239, and `OVL_IGNORE_PRS="2160 2239"`.
+- **Pre-push hook, final line:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 were skipped because the local stack was not up; leg 1 printed "OK — spec is in sync" and leg 14 ran 127 shell suites (126 passed, 1 skipped). The first push attempt was refused on leg 1 because my push launcher's TMPDIR was a 123-character path, which broke tsx's IPC socket (the macOS limit is about 104 bytes). The leg reported that crash as "spec drifted". The same check passes with a 52-character TMPDIR (proven both ways on the same tree), and nothing reached origin that time.
+- **NOT run:** a running stack, Postgres, the real gateway, Schemathesis, Akto, Playwright and k6 (as in round 1).
+
+**deploy owed; not this seat's; demo frozen.**
+

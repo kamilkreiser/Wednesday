@@ -1,0 +1,108 @@
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS-441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`)
+
+Both boxes are left unticked on purpose: **neither suite was run** for this PR (see NOT run below).
+
+### PII review (KS-256 R15/R16)
+
+Not applicable. This PR changes no published spec, example, fixture, seed or customer-facing artifact. Its only new runtime text is one error message ("A chain reply without a block hash is not an answer: the transaction lookup returned <shape class> (KS-2103)"). It names a shape class and carries no personal data, no transaction hash and no reply body.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-2103
+
+## What this does
+
+Kam ruled on two cards, quoted verbatim:
+
+- `secuura-ks2103-answered-chain-reply-shape-1110` = a: "Strict - only a 404 (null) or an object carrying a block hash counts as an answer; anything else counts as unreachable".
+- `secuura-anchoring-second-fee-on-empty-reply-1107` = a (2026-11-08T20:31:42): "Two tickets by a board seat, High for the empty reply and Medium to measure the mint on an image. A build seat fixes the empty reply next, tier 1 gate. Anchoring's deploy stays held for your word."
+
+`getTransaction` (`services/anchoring/src/cardano/provider.ts`) used to return whatever the Blockfrost client's `txs` resolved. QA gate 248 (finding F1) measured the real blockfrost-js 6.1.1 resolving `''` for an empty 200 and for a 204, `null` for a body of `null`, and `{}` for `{}`. On the production schedule the poller then read `''` and `null` as "not found": `polled` 30 and ABSENT, which lets guard 3 schedule the ordinary retry, a **second fee-paying Cardano transaction**. It read `{}` as confirmed, with no block hash.
+
+`getTransaction` now behaves like this:
+
+- **An object carrying a block hash** (a non-empty string `block`) is returned as it came.
+- **A 404** returns `null`, as before.
+- **No client** returns `undefined`, as before (KS-1171 8k's tri-state is untouched).
+- **Everything else throws**: an empty body, `null` from a 200, `undefined` from a client, `{}`, an array, a string, a number, or an object whose `block` is missing, empty or not a string. The message names the shape class, never the body or the hash.
+
+No form is required of the hash: the ruling says *carrying*, not validating. A `valid_contract: false` reply still carries `block`, so KS-1384 F0 M-1 is unchanged.
+
+**Why a throw.** All three readers of `getTransaction` already treat a throw as "the chain did not answer":
+
+1. `waitForConfirmation` counts it in `errored`, never in `polled` or `lastAnswered*`. So `definitelyAbsent` cannot fire on it, and `{}` cannot reach `confirmed: true`.
+2. `settleExpiredSpenders` (`walletSpend.ts`, via the `lookup` closure in `cardano/index.ts`) settles nothing. Before, it marked a spender DEAD on `''` or `null` and CONFIRMED on `{}`.
+3. The family read in `anchorSubmission.ts` (`try { info = await chain.txInfo(spender); } catch { return 'rest'; }`) rests the row.
+
+`confirmation.ts` changes in **comments only**: the two comments that define an answer now say that a 2xx without a block hash is a throw. A grep of the diff for non-comment changed lines prints nothing.
+
+**What this admits (a real reply now refused?).** By read, none. The client's own declared type for a found transaction, `tx_content` in `@blockfrost/openapi` 0.1.86, makes `block: string` required, and a transaction that is not yet in a block is a 404. This was not measured against the real Blockfrost service: no network call was made.
+
+**Partition extension, ruled by Wednesday (ANSWER 12:16Z).** One more file, for exactly two fixture lines: `services/anchoring/src/__tests__/ks671-chain-health.test.ts` at :277 and :290, each changed from `{ block_height: 1 }` to `{ block: 'b'.repeat(64), block_height: 1 }` with a `// KS-2103:` comment. Those two staleness cells fake one successful chain call to set health to 'ok'. Under card 1110 their reply is not an answer, so the cells errored before reaching their assertions. The fixture moves; the rule does not. No assertion changed.
+
+**Named, not changed:**
+
+- KS-1171 8k cell **8k-9** ("a configured client whose txs resolves undefined reads as no client and rests") stays green by name, since its assertions are 30 `txs` calls, 0 retries and no failed write. That reply now counts as `errored` (a throw) rather than `noClient`, so the cell's title describes the old mechanism. Its file is not edited here.
+- **Chain health** (`/health`) still reads an empty 2xx as reachable: the instrumented client records the resolved `txs` call before `getTransaction` judges its shape. It is left as it was and is a candidate filing for the board seat.
+- `src/index.ts:773` has its own `bf.txs(...).catch(() => null)` for historic rows, a different purpose. It is not touched.
+
+## Test Evidence
+
+**Touched (6 files, 5 commits, base develop `bbb75755064e`):** `services/anchoring/src/cardano/provider.ts`, `services/anchoring/src/cardano/confirmation.ts` (comments only), the new `services/anchoring/src/__tests__/ks2103-a-malformed-2xx-reply-is-not-an-answer.test.ts`, `services/anchoring/src/__tests__/ks671-chain-health.test.ts` (two fixture lines), and the fragment pair `Projects Documents/fragments/{cheat,flow}/KS-2103-a-malformed-2xx-reply-is-not-an-answer.html`.
+
+**Ran.** Host: Apple Silicon (arm64) Mac, macOS 27.2, node v26.8.1, vitest 4.1.12, 2026-11-15 UTC, shared with other seats. Each run started at load1 8 or below.
+
+- **New cells, red first.** 14 cells in one new file. On develop `bbb75755064e` the **10 RED cells are red, all 10 by AssertionError and 0 by TypeError**, and the 4 CONTROL cells pass. With the change, all **14 pass**. The reds show the defect itself:
+  - E1: `''` for a whole window reads polled 30 and ABSENT.
+  - E5: guard 3 after a node 400 schedules 1 retry and writes `failed`.
+  - E6b: `settleExpiredSpenders` marks `''` and `null` DEAD and `{}` CONFIRMED.
+  - E7: two 404s then empty replies read polled 30, not 2.
+- **The controls:**
+  - E4a: a 404 is `null` and its window is absent.
+  - E4b and E4c: a reply carrying a block hash confirms, including a short `'h'` with `valid_contract: false`.
+  - E5c: the same guard 3 harness DOES schedule a retry on a 404 window, so E5's zero is not the harness.
+- **Planted mutants: 6 of 6.** Each one's red cells were written down before any mutant ran (`mutants_declared.tsv`). Each turned exactly those cells red: **36 of 36 by AssertionError**, and every restore was sha256-identical. The mutants:
+  - m1, drop the check: E1 E2 E3a E3b E5 E6a E6b E6c E7 D3.
+  - m2, accept any object: E3a E3b E6a E6b E6c D3.
+  - m3, `''`/`null` read as the 404: E1 E2 E5 E6a E6b E6c E7.
+  - m4, the 404 throws: E1 E2 E4a E5c E6b E7.
+  - m5, require a hash form: E4c.
+  - m6, the poller counts a malformed reply as an answer: E1 E2 E3a E3b E5 E7.
+  - Commit 3 exists because m4 first turned E4a red by the propagated "Error: Not Found" rather than by its assertion. Both E4 cells now capture that call's outcome as data.
+- **Whole `services/anchoring` vitest suite.** Before: 64 files, 871 tests, **870 passed**, 1 failed. After: 65 files, 885 tests, **884 passed**, 1 failed. The one failure is the same on both sides and is the only one: the pre-existing `threadTokenMint` round-trip, "Could not serialize the data: Error: Unsupported type" (gate 248 F2). Suite A ran on a local merge-tree of develop `61a3953e6d66` + PR 2081 head `17c453253d68`. Its whole tree `2f9321b06575` EQUALS the real `bbb75755064e`'s, so it is the same tree.
+- **Cells named green after the change:** every `ks1171-*` file (8j, 8k with all 28 cells, b1, ks1171b, guard-3), `ks726-gate-f1-unreachable-chain`, `ks726-review-f1-f3`, `ks726-write-ahead-tx-hash`, `ks1384-f0-builder-and-provider`, every `ks1868-*` file, `mock-provider`, `ks2196-anchor-never-spends-a-reference-script-coin` and `ks671-chain-health`. That is 20 files and 220 cells, 0 failed.
+- **tsc over src AND test files** (anchoring is not enrolled in `check:test-types`, so a temporary config outside the repo was used): 1 error, the pre-existing TS6133 at `src/__tests__/ks1868-anchoring-message-coercion-unreadable-throw.test.ts:46`, and 0 in a changed file. A planted `number = "x"` in the new cell file fired TS2322 and was restored sha-identical.
+- **eslint** on the 4 changed `.ts` files, with zero warnings allowed (the repo's `eslint.config.mjs`, run with cwd `Blockchain/Dev`): 0 errors, 0 warnings, 0 ignored. A planted unused variable fired `no-unused-vars` and failed the run; it was restored sha-identical.
+- **`node Blockchain/Dev/scripts/docs-fragments.mjs check`: `OK`.** Its two ADVISORY lines are pre-existing and unrelated. A planted unclosed `<h3>` in the cheat fragment made it FAIL, naming the file, and it was restored sha-identical. A `build --out` preview renders the entry in both pages (Flow section 384, provisional).
+- **Overlap:** no open PR touches any of the 6 paths (74 open at 12:2xZ). A planted path from PR 2194 fired the gate.
+- **pre-push hook**, final line verbatim: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` This is NOT a pass: 13 of 16 legs ran, legs 3, 4 and 8 were skipped (the local stack was not up), and nothing failed. The push went through the fleet queue and lock (queued 12:23:24Z, lock 12:33:27Z, push 666 s). `ls-remote` reads `067274804d31`.
+
+**NOT run, and not claimed:**
+
+- a real Blockfrost, a real node, or a real unreachable chain;
+- any box, image or gateway path;
+- how often a provider sends an empty 2xx (gate 248: low, not seen in service);
+- guard 3 in a built container (E5 drives the real submitter in process);
+- the four platform suites (Schemathesis, Akto, Playwright, k6).
+
+**Migrations / config:** none.
+
+## Deploy
+
+**Deploy owed: anchoring only, held for Kam's word (card 1107); not done by this seat.** PR 2230 (KS-2196, merged `918f5e6d`) reaches Kintsugi with it, on that word.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+

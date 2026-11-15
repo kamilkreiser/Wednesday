@@ -1,0 +1,82 @@
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS 441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`): **NOT run** (no local stack in this seat; see Test Evidence)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`): **NOT run** (no local stack in this seat)
+
+### PII review (KS 256 R15/R16)
+
+Not applicable: this PR adds two cells to an existing bash suite. No personal data, no published OpenAPI spec, no new example value; the cells count lines of the two example env files.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-1415
+
+## Summary
+
+**Tier 2: TEST ONLY (a bash suite), no product byte: two cells added to `prometheus_targets.test.sh` (+7 -0).**
+
+ITEM 2 OF THE TICKET ONLY (gate 62's review of an earlier change). The suite's existing pins read only the FIRST `SECUURA_NGINX_STATUS_URI` line of each example env file, so a later active line that names the gateway's published host port 6882 passes them. This PR adds one count cell per file (`observability/.env.example` and `observability/config/alerting.env.example`): no line of the file may name `secuura-nginx-gateway:6882`. A count does not depend on position. Item 1 of the ticket (the two HTML documents' "all three cmp-equal" claim) is NOT in this PR.
+
+`Refs KS-1415`. This PR leaves the ticket open. Nothing is deployed by this PR.
+
+**This is not a regression test for a present bug. The new cells are green on develop by design and red under a named plant; the evidence below says which plant turns which cell red.**
+
+**Notes for the reader:**
+
+- Raised from one held Spark pass (test bytes only, plant shape), applied strictly. The coordinator's ruling for the E rows, restated for this pass on 2026-11-09 at 05:38Z: test-only, no fragment pair, so this PR carries no cheat or flow fragment.
+- The READY's fence is byte-equal to its canonical patch (the pre-check prints it); the patch matches the READY's sha256 prefix and size (`05f8d272cf7376a2`, 1051 bytes).
+- Linear's suggested branch name for this ticket carries the token `1387` (a pull request number) but only the ticket's own key; I used it as given, after grepping it for other ticket keys beside a positive control.
+- The red proof plants one active status line in the two example env files in my worktree only, never in the PR (the checker's plant, and each file alone). Product bytes are untouched and restored byte-equal by sha256 after every plant.
+
+## Test Evidence
+
+**Touched (1 file, one commit):** `Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh` (+7 -0).
+
+**Ran by Seat T 22nd** (2026-11-09, on develop `6beac8734a2f`, macOS Apple M2 Max shared with other seats and pre-push hooks running, `/bin/bash` 3.2.57, macOS BSD `grep`):
+- **Strict apply, my own worktree:** the canonical patch matches the READY's sha256 prefix and size (`05f8d272cf7376a2`, 1051 bytes); `git apply --check -p1` on the pristine tip, rc 0 and no offset line; a planted copy (a token altered) is refused, rc 1; the suite goes from sha256 prefix `9077564a69e4baf7` to `9d3a4c2b615fe532`, equal to a scratch-directory apply done first; `bash -n` on it: rc 0.
+- **Cells, before then after:** the declared suite 6 passed, 0 failed, then 8 passed, 0 failed (`/bin/bash` 3.2). A grep of `Blockchain/Dev/scripts` finds no other file that names the two example files or the status URI, so there is no sibling suite to compare.
+- **Red-first by named plants** (applied in the worktree and reverse-applied; sha256 equal and `git diff` empty after each): on the patched suite the checker's plant (an active `SECUURA_NGINX_STATUS_URI=http://secuura-nginx-gateway:6882/stub_status` line added to each file) prints exactly TWO FAIL lines, the two new cells (6 passed, 2 failed); the plant in `observability/.env.example` alone prints exactly that file's cell (7 passed, 1 failed), and the plant in `observability/config/alerting.env.example` alone prints exactly that file's cell (7 passed, 1 failed). On the UNPATCHED suite all three plants leave 6 of 6 green, which is the blindness the ticket describes, measured on today's develop.
+- **Open-PR census** (REST, GET only) before the push: 55 open PRs, none lists the suite or either example file; the planted positive (`baseline-api-gateway`, found in PR 2102) and a planted negative both behaved. Gatetest: main passed; control A (wrong declared head) refused; control B (PR 2102's path) refused naming 2102.
+- **Pre-push hook, this push:** ```text
+[pre-push] Blockchain/Dev changes detected → running preflight gate (bypass: --no-verify)
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+```
+
+**Re-measured by Seat T 22nd after the push** (2026-11-09 07:14:02Z, from the push driver's record, `git ls-remote` and `git diff-tree`): origin holds the new branch at `b6f0c319c5d4`, one commit whose parent is `6beac8734a2f` (develop when I cut it); 1 files changed (`prometheus_targets.test.sh` M). origin develop is `e8d23ce366e2`; the driver's develop gate at 06:53:21Z read: DOCSRULE: move 6beac873..e8d23ce3 changed 4 files, branch changes 1, overlap 0 (all in the two shared docs), planted control 1 = 0 + 1. The push took 1192 s. The hook printed 'Blockchain/Dev changes detected' and its own verdict line, quoted above; that wording is the hook's, and it is not a pass.
+
+**NOT run:** Any product file (the two example env files are read, not changed); the hook's legs beyond its verdict line; shellcheck; item 1 of the ticket; any box or deploy.
+
+**Migrations / config:** none.
+
+## Held patches
+
+One held pass from the local model ("the Spark"), raised by Seat T 22nd: `READY_KS-1415-KS-1415-O114-P3_spark-dsv4flash_BRIEFED-TESTONLYBASH-PROMETHEUS-TARGETS-GATEWAY-HOST-PORT-COUNT-PASS-10of10_2026-11-09.diff.md`. The checker legs are the checker's, measured at tip `204e62acdc35`; the apply, the cell counts and the plants were re-run by Seat T 22nd on develop `6beac8734a2f` as above.
+
+## What this did NOT do
+
+- It changes no product byte and no other test.
+- It does not touch item 1 of the ticket (the two HTML documents' claim).
+- It keeps the existing first-line pins as they are; the new cells add a count that does not depend on position and replace nothing.
+- It does not prove that either plant is the regression that matters.
+- It leaves KS-1415 open.
+
+## Test plan
+
+- [ ] `bash Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh` (from the repository root)
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
