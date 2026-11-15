@@ -1,0 +1,44 @@
+=========== [INBOUND] 2026-11-15T07:22 | Secuura/Blockchain-A | [Secuura/Blockchain-A -> Wednesday] READY FOR GATE KS-1935 (Seat A 31st)
+[Secuura/Blockchain-A -> Wednesday] READY FOR GATE KS-1935 (Seat A 31st)
+Seat A 31st
+
+READY FOR GATE KS-1935: PR 2235 fix round 1 (gate 355, G355-2235-1), a DELTA. New head 19b6f52483c6. Tier 1 (money surface), as ADDENDUM 1 says.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/2235 . Head 19b6f52483c6514f1212be26b538df8789a17b1d is ONE new commit on e17704c1a432 (the head gate 355 read); a plain fast-forward, nothing amended or forced. GraphQL at 07:21Z: OPEN, MERGEABLE, mergeStateStatus UNSTABLE (no testing claim).
+- The delta for the gate: `git diff e17704c1a432 19b6f52483c6`, 5 files +173 -5:
+  - services/billing/src/creditLock.ts +12. While withCustomerCreditLock holds the client, client.on('error') logs the error with describeThrown (type and field names only) and sets broken, so the client is released destroyed. The listener is removed just before release (pg-pool 3.13.0 re-attaches its own idle listener on every release, index.js 385). A WHY + KS-1935 comment sits on the changed lines.
+  - new src/__tests__/ks1935-credit-lock-connection-error-while-held.test.ts: 7 cells, E1 to E7.
+  - src/__tests__/ks1935-billing-credit-balance-one-writer-per-customer.test.ts +6 -2: its fake pg client became an EventEmitter, as a real PoolClient is. Fixture only; no assertion changed.
+  - the KS-1935 flow and cheat fragments: a new flow sub-section .5, and the counts updated to the measured 400 / 22 files.
+- Red first (Node v26.8.1, vitest 4.1.12), new file on the unfixed creditLock.ts: 5 failed, all AssertionError (E1 the 'error' emit throws; E2 the call rejects instead of resolving 15; E3 nothing logged; E4 a client that emitted 'error' goes back to the pool; E7 the ledger is marked failed, not granted), and 2 controls passed (E5 release(true) after a dropped connection, E6 a clean call leaves no listener). With the fix: 7 of 7.
+- Fixture neutrality: with the fix and the OLD plain-object fake, the old file failed 12 of 16 with "TypeError: client.on is not a function"; with the new fake, 16 of 16. On the UNFIXED creditLock.ts with the new fake also 16 of 16, so the fixture change alone changes nothing.
+- Planted tampers, one per changed line, each a counted (site count 1) edit, restored by content (sha256 equal); every red was an AssertionError:
+  - T1 listener not attached: E1 E2 E3 E4 E7;
+  - T2 broken flag dropped: E4;
+  - T3 listener left on: E6;
+  - T4 the raw error logged: E3;
+  - T5 release flag dropped: E4 E5 (this now pins your gate's surviving mutant M7).
+  Each red set was exactly the cells predicted for that tamper. (tools/mutants_a31_ks1935.py; evidence/ks1935/mutants.out)
+- The gate's own reproduction: tools/g355_pg.ts is a verbatim copy (sha256 1714b3b46e8c both). It ran on a throwaway Homebrew PostgreSQL 15.19 (initdb -U gate, 127.0.0.1:55436 only, unix sockets off, stopped after):
+  - at e17704c1a432, terminate with no process handler: rc 1, "throw er; // Unhandled 'error' event"; with a recording handler: 2 uncaught ("terminating connection due to administrator command", "Connection terminated unexpectedly"), as your verdict;
+  - at the fix: rc 0 both ways, uncaughtAfterTerminate [], the call resolves "fn-returned", advisory locks after: []. My log line appears twice, because pg emits two 'error' events for one termination;
+  - the idle-backend control: rc 0, 0 uncaught at both.
+- Billing suite, interleaved twice. develop ce35818d50ae's billing tree (develop's stripeService.ts and billing.ts, my 3 files moved aside, tracked diff vs develop 0): 20 files, 377 / 0, both runs. New head: 22 files, 400 / 0, both runs. 377 + 16 + 7 = 400.
+- tsc and lint:
+  - tsc --noEmit on the service: rc 0.
+  - tsc with tests: 18 errors at develop and 18 at the head, lists identical (pre-existing).
+  - eslint on my 3 .ts files: 0 problems; a planted no-fallthrough fails it (rc 1).
+  - check:test-types: rc 0 (billing is not in its list).
+- Docs: docs-fragments check OK; a planted literal "12.5" heading fails it (rc 1, 1 finding); restored by content, OK.
+- Push: Seat AA 6th's existing-branch driver, a counted copy beside its own two gates (tools/existing/), through the queue and lock, OUTDIR push/drv-ks1935-r2c.
+  - Two earlier launches refused at precheck, before joining the queue, and pushed nothing: my tree had no local branch name, then core.hooksPath was unset.
+  - Gates at 07:10:27Z: develop ce35818d50ae accepted by the no-overlap rule (DOCSRULE, planted control 1 = 0 + 1); 90 open PRs, none touches the 7 paths (2235 ignored by name).
+  - PUSH 07:10:27Z to 07:20:50Z, rc 0, 623 s; ls-remote VERIFIED 19b6f52483c6 at 07:20:52Z; lock released, queue left.
+  - The hook's final lines, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran." So 13 legs ran and passed, legs 3, 4 and 8 did not run, and it is not a pass. Leg 14's shell suites: 126 passed, 0 failed, 1 skipped (restore_local_secrets.test.sh).
+- Develop moved AFTER the push, to 240d1f664b52 (one commit, KS-2185 kyc, 4 files, 0 of mine; the control path counts 1). merge-tree --write-tree is clean both orders (tree 25f492ac3ff7), and the billing subtree at the merge (8df081d58b1a) equals the head's, so the billing measured at the head is the billing at the merge.
+- PR body: a "Fix round 1" section with its own Test Evidence block was appended above the trailer and read back equal; the old body is kept whole and saved in evidence/ks1935/pr2235_body_before.json. No magic-word reference (positive controls fire); the only KS key outside code spans is KS-1935; no self-hold sentence.
+- Ticket comment: KS-1935, d41c399a, 07:22:08Z. Read back exact; 0 mention nodes. No state or assignee change by me.
+- NOT covered: real Stripe; Azure PostgreSQL (its idle-in-transaction timeout and failover) and PgBouncer; a booted billing service; a real webhook delivery; Node 24 (the host has v26.8.1, not LTS); the four platform suites; preflight legs 3, 4 and 8. G355-2235-2 (pool exhaustion, no lock timeout) is NOT in this round: candidate filing (c) in my HANDOVER.
+
+Next: the wrap (history, vault, wrap mail). KS-1897 stays held for Kam's card; nothing else of mine is open.
+
