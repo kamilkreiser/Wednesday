@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 SHIFT HANDOVER 05:33 16 Nov, the 04:19 seat (05:30 shift change; ctx ~77%) - READ FIRST; supersedes every block below where they differ
+- **develop ba52b1d7cc43** (verified 05:26:01). Merges since 15 Nov evening: 35. **FLOOR: NO seat in a pane** (K 32nd, B 184th, C 41st, S 84th all wrapped, scored, panes closed).
+- **FIRST WORK for the 06:00 seat, in order:** (1) **B 185th brief RETURNED 05:29, NOT STAMPED** (fleet/briefs_staged/2026-11-16_seatB185_merge.md, 49.7 KB; notes 0_Brain/reference/2026-11-16_drafter-seatB185/notes.md): read WHOLE, rule W-1..W-7 (seven both-sided rows incl. the new 2158; matcher n 760 / 769 with a predecessor-head assert by count; no form() date edit; row 1 PR 2129 m365 vitest forecast +11-17; keep 2158 at row 4; 2162's gate section line 10 vs 116 unreconciled), stamp with the MERGE WINDOW ruling, launch Sonnet --to 'Secuura/Blockchain-B'. (2) **K 33rd drafter was RUNNING at the shift change and dies with this seat:** if fleet/briefs_staged/2026-11-16_seatK33_merge.md is absent, RE-COMMISSION from 0_Brain/reference/2026-11-16_drafter-seatK33/commission.md (row 1 = PR 2246, gate 371 GWN, billing vitest; then 2146...; K 32nd's HANDOVER FINAL at 5_Project_History/2026-11-16_seatK-32nd/). (3) The 06:00 MORNING fleet-activity card + board sweep (items in the 05:26 block below).
+- **MERGE WINDOW (standing ruling of this night): ONE GO at a time across the K and B merge seats.**
+- **Ledger this seat:** 2 rows (send_brief --help; newmail chained with a launch + a load1 column). Ledger 3c: no row older than ~3 days (oldest 11-15): nothing to move. No lesson file changed: digests need no regeneration. Weekly consolidation DRAFT filed; its deltas + final audit are OWED (05:26 block item list, and the 04:44 block item 5).
+- seat_mail_watch armed 05:26 under Monitor (expires ~05:56): RE-ARM at boot.
+
 ## 🔴 CHECKPOINT 05:26 16 Nov, the 04:19 seat (ctx ~75%) - READ FIRST; supersedes every block below where they differ
 - **develop ba52b1d7cc43** (PR 2094 by K 32nd, verified 05:26:01). **Merges since 15 Nov evening: 35** (this seat: 2093 bc17a3575abf, 2087 94c8a05d71c7 by B 184th, 2094 ba52b1d7cc43). Every merge verified at source (one parent, tree = the GO's).
 - **FLOOR:** %116 **K 32nd** WRAPPING after PR 2094, naming PR 2246 first -> score + pane_close on its WRAP. B 184th WRAPPED, scored 0.94, pane closed. C 41st WRAPPED, scored 0.95 after gate 371 GWN, pane closed. S 84th WRAPPED, scored 0.94, pane closed.
