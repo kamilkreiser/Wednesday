@@ -1,0 +1,35 @@
+Summary
+- Test only. No product file changes: one path changed, api/tests/HpsmPoc.Api.Tests/Hosting/ForwardedProofTests.cs (40 lines added, 6 removed).
+- Fixes the intermittent red of ForwardedProofTests.The_web_front_end_value_is_gone_from_the_request_once_the_pipeline_has_read_it, which failed the api job on hosted CI.
+
+Cause
+- The test's watch filter (a test-only startup filter) ran `await nextMiddleware(context);` and only then wrote its reading into a plain field.
+- TestServer's SendAsync completes once the response has started, and the 404 body is written inside the app's pipeline (UseStatusCodePages). So SendAsync can return before the filter's code after the pipeline has run.
+- The test then read the field. It got either nothing yet, `(False, null)`, or the previous request's correct reading, `(False, "198.51.100.7")`.
+
+Why it is not a product race
+- ForwardedProofGate holds only the ForwardedClientAddress it was built with: a sealed record whose proof digest is init-only. It decides per request on that request's own headers (ForwardedProofGate.cs:20-22).
+- The gate and the forwarded-headers options are built once at start-up (Program.cs:134 and :136, plus the PostConfigure at :46-50). Nothing writes them per request.
+- No product code writes the connection address, and no product static is mutable.
+- Every wrong value the test ever showed was "not yet written" or "the previous request's right answer", never an address that no request produced.
+- With the fix, the same three assertions pass every run. A scratch product mutant that keeps X-Forwarded-For on a wrong value still fails the fixed test 5 of 5, so the fix did not blind the check.
+
+Fix
+- The filter hands each reading over through an unbounded channel, written at the same place as before (after the pipeline). The test awaits it.
+- The three original assertions are unchanged apart from `api.Watched` becoming `await api.WatchedAsync()`. A new `Assert.Equal(0, api.Unread)` checks that each request gives exactly one reading.
+- The 30 second WaitAsync only turns a reading that never arrives into a failure (TimeoutException). It cannot make the test pass.
+- New forcing test: it holds the filter after the pipeline until the response is back, asserts the reading is not yet available, then releases the hold and checks the reading. A try/finally always releases the hold.
+
+Run counts (local, this head and main)
+- Target test alone: main 11 of 20 red (9 at line 165, 2 at line 163, only the two shapes above). Head: 20 of 20 green.
+- 250 ms delay planted after the pipeline (scratch only): main 10 of 10 red, all `(False, null)`. Head: 10 of 10 green for the target test and 10 of 10 green for the forcing test.
+- Forcing test in its red form (the same hook, reading the field): 10 of 10 red. Head: 10 of 10 green.
+- Hosting group: head 3 of 3 runs at 221 of 221 (main 220 of 220).
+- api-assessment SQL Server part, as ci.yml runs it, with its judge: head 3 of 3 runs green: judge bad == 0, 1486 passed (main's 1485 plus the forcing test), 325 test databases against the floor of 100.
+
+Records
+- No ticket yet. A records pass will file the ticket and cite this PR.
+
+Nothing is deployed, and the change adds no integration with HP tools.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

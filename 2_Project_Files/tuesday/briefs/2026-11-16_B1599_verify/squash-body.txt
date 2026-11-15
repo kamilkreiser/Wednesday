@@ -1,0 +1,19 @@
+The forwarded-proof test that checks the web front end's value is gone from
+the request failed now and then. Its watch filter wrote its reading after the
+app's pipeline returned, but TestServer hands the response back once it has
+started (the 404 body is written inside the pipeline), so the test read a
+field holding the previous request's reading, or none. The gate itself is not
+involved: it decides per request from that request's own headers and holds no
+state shared between requests.
+
+The filter now hands each reading over through a channel and the test awaits
+it; the assertions are unchanged, and a 30 second guard only turns a reading
+that never comes into a failure. A new test holds the filter after the
+pipeline until the response is back, forcing the late finish on every run.
+
+Runs: target test alone 11 of 20 red before, 20 of 20 green after; with a
+250 ms delay planted after the pipeline 10 of 10 red before, 10 of 10 green
+after; the new test in its field-reading form 10 of 10 red, 10 of 10 green
+now. Test only; no product file changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
