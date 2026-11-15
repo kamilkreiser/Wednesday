@@ -1,0 +1,30 @@
+=========== [INBOUND] 2026-11-15T14:56 | Secuura/Blockchain-X | [Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-1703 (Seat X 10th)
+[Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-1703 (Seat X 10th)
+Seat X 10th
+
+READY FOR GATE: KS-1703 (analytics exports half). Tier 1 (gate row G1). PR 2242, one commit.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/2242 "Refs KS-1703: the analytics exports refuse a caller of another company" (Refs, no closing word; KS-1856 named in the body, not closed). State open, not draft, base develop.
+- Head: 62ecc89eafdb4de83a4ca46cd999a856ed273776 (ls-remote = PR API head). Built on develop dbb053b756aef4896d719ed7db364c41a983efc2.
+- develop now: 6fdba4e013b384c7d1f60d36327491ff61e6476c (two merges past my base: 0fa14b4cbd33 PR 2241, then 6fdba4e013b3 KS-2123). develop_gate at READY: "DOCSRULE: move dbb053b7..6fdba4e0 changed 11 files, branch changes 7, overlap 0 (all in the two shared docs), planted control 1 = 0 + 1". merge-tree head + that develop: rc 0. 0 develop paths under services/analytics. mergeable true, mergeable_state unstable (it carries no testing claim).
+- Files (7, +580 -2): Blockchain/Dev/services/analytics/src/services/exportAccess.ts (new, 82 lines); Blockchain/Dev/services/analytics/src/routes/analytics.ts (/exports block, +14 -2); src/__tests__/ks1703-analytics-export-by-id-refuses-another-company.test.ts (23 cells), ks1703-analytics-export-list-refuses-another-company.test.ts (11), ks1703-analytics-export-access-rule-unit.test.ts (48); Projects Documents/fragments/{flow,cheat}/KS-1703-analytics-exports-refuse-another-company.html. Untouched, as ruled: exportService.ts, analytics.openapi.ts, the DDL/INSERT, the gateway, frontends, systemTest.
+
+THE RULE (D1-D4 as stamped): platform administrator (isPlatformRole) reads all; else the creator's tenantId === the caller's (both non-empty); else a tenant-less creator by non-empty userId; no owner record = admin only. POST records the owner before the 202; the by-id door answers the unknown-id 404 bytes; the list keeps listExports(limit) byte for byte for a platform admin, else filter then slice. Nothing inside a company changes (Kam's card; the RULING cells pin it, m9 proves it).
+
+EVIDENCE (all in /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-16_seatX-10th/evidence/)
+- Red at dbb053b756ae: by-id 13 red (AssertionError), 10 green; list 7 red, 4 green. After: 82 of 82.
+- Suite A (22 tracked files at base): 22 files, 129 tests green. Suite B: 25 files, 211 tests green, each file named in the PR body (every ks1868, ks1922, ks1904, ks1364, exportReportRequest, smoke green).
+- Mutants m1-m10: 10 of 10 exact (counts 13, 7, 14, 3, 5, 14, 4, 13, 7, 1), restored by content and sha256 (exportAccess 7ee4e1f19bf76e94, routes 82c346a3bcdec3ed). m9 needed one declared correction (6 to 7), re-run exact.
+- tsc: tests checked through a temp config (the service tsconfig excludes them): 0 errors in my files, 2 pre-existing TS2835 elsewhere; planted TS2322 fires. eslint 0/0 on 5 files; planted no-debugger fires.
+- docs-fragments check OK; planted defect rc 1; restored sha-equal.
+- merge-tree vs PR 2188 both orders clean; planted same-line control rc 1. (PR 2241 now merged; same result before it merged.)
+- Push: queue and lock driver, new branch, rc 0 in 637 s, VERIFIED by ls-remote at 14:54:54Z. Hook's final line, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." (legs 3 4 8: no local stack). Shell suites 126 of 127, 1 skipped (restore_local_secrets.test.sh).
+- Ticket comment on KS-1703: id 4b47cbeb-8aaf-47a6-97ef-4597626c33be at 14:55:56Z, read back exact, 0 mention nodes. KS-1703 BEFORE and AFTER: In Progress, priority 0, assignee kamil.kreiser@secuura.ai (comments 7 to 8). No state, priority or assignee change by me.
+
+AC: AC1 YES (another company); AC2 YES; AC3 NO (no stack); AC4 NO (Kam's card); AC5 PR 2241; AC6 NO, marker stays (the module's actors share a company).
+NOT covered: a stack, the gateway, a browser, the four platform suites, external clients, the DB reload path, the other KS-1703 routes, the admin fetchReports() shape. Analytics deploy owed, held for Kam's word. Pre-merge boxes left unticked (not run).
+
+Candidate filings for the board seat (in my HANDOVER, none filed): admin fetchReports() reads res.data?.exports from an array answer; svc_analytics_exports DDL lacks four upserted columns; unscoped analytics metrics routes; two pre-existing TS2835 nothing gates.
+
+The seat ends here, per the BRIEF: I wrap next (history, HANDOVER FINAL, vault, wrap mail). Meter: 36.5 of 1M.
+
