@@ -945,6 +945,46 @@ if [ -f "$WLAUNCH" ]; then
   fi
 fi
 
+# --- INITIAL_PROMPT quoting (2026-11-15: the s278 "Spark retired" edit put a bare "..." quote inside the
+# INITIAL_PROMPT="..." block at line 744; the string closed early, the assignment became a command prefix, and the
+# seat died at boot with "INITIAL_PROMPT: unbound variable"). bash -n cannot catch it — the result is still valid
+# syntax. The check walks every INITIAL_PROMPT="... assignment, honours backslash escapes, and requires the closing
+# quote to be the LAST thing on its line. A stray quote mid-prose closes the string mid-line and fails here.
+# Literal quotes inside the prompt must be written \"...\" (or use single quotes).
+if [ -f "$WLAUNCH" ]; then
+  if ! bash -n "$WLAUNCH" 2>/dev/null; then
+    fail "Launch_Wednesday.command syntax error" "bash -n fails — the seat cannot boot; run: bash -n Launch_Wednesday.command"
+  elif PQ=$(python3 - "$WLAUNCH" <<'PYEOF'
+import re, sys
+src = open(sys.argv[1], encoding="utf-8").read()
+lines = src.split("\n")
+offs = [0]
+for l in lines: offs.append(offs[-1] + len(l) + 1)
+def lineno(i):
+    import bisect
+    return bisect.bisect_right(offs, i)
+bad = []
+for m in re.finditer(r'(?m)^[ \t]*INITIAL_PROMPT="', src):
+    i = m.end()
+    while i < len(src):
+        c = src[i]
+        if c == "\\": i += 2; continue
+        if c == '"': break
+        i += 1
+    rest = src[i+1:src.find("\n", i+1) if src.find("\n", i+1) != -1 else len(src)]
+    if rest.strip():
+        n = lineno(i)
+        bad.append(f"block at line {lineno(m.start())} closes early at line {n}: {lines[n-1].strip()[:70]}")
+print("; ".join(bad))
+sys.exit(1 if bad else 0)
+PYEOF
+  ); then
+    ok "Wednesday launcher: INITIAL_PROMPT blocks quote-clean (no bare \" inside the prompt)"
+  else
+    fail "Launch_Wednesday.command: bare \" in INITIAL_PROMPT" "${PQ:-python3 check failed} — escape it as \\\" or the seat dies with 'INITIAL_PROMPT: unbound variable'"
+  fi
+fi
+
 # ── WEEK-SCOPED AUTONOMY GRANTS — they expire themselves (added 2026-09-07) ──────
 # Kam gave TWO week-scoped grants on 2026-09-07, in his own words, hours apart:
 #   09:40  "you can give the go ahead to merge as it becomes relevant so that I'm not
