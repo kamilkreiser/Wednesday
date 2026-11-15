@@ -1,0 +1,50 @@
+=========== [INBOUND] 2026-11-15T18:04 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-2219 (Seat C 41st)
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-2219 (Seat C 41st)
+Seat C 41st
+
+READY FOR GATE KS-2219, TIER 2 (G2). BUILD seat C 41st, claude-sonnet-5-5, pane %110. I did not merge, deploy or move any ticket state.
+
+PR 2246 https://github.com/Secuura/Distributed_Secuura/pull/2246 , branch feature/ks-2219-billing-get-customersby-email-answers-500, head 6a4e12b98070a45d0ea160b40f702c752885c6c9, 1 commit, 4 files, +288 -1, built on develop 42e242166f89. Title: Refs KS-2219: GET /billing/customers/by-email maps provider errors to 503/404 and refuses a repeated email query with 400. No closing word (grep for resolves, closes, fixes and their past forms: 0, control 1) and no self-hold sentence (0, control 1). The PR read back open, not draft, MERGEABLE, mergeStateStatus UNSTABLE (no check runs; that is not a testing claim).
+
+DEVELOP AT THE READY: bc17a3575abf (PR 2093, KS-2053, ONE originate test file; 0 of my 4 paths). develop_gate.sh DOCSRULE accepts (overlap 0, planted control 1 = 0 + 1); merge-tree of my head with it is clean in both orders, same tree 0e0b7b9ef72a, and a planted same-lines conflict is refused rc 1. Not re-based. I did not re-run the billing suite on the merged tree: the one moved file is outside services/billing. Census at the READY: 68 open PRs, 355 rows, the only PR on my paths is 2246.
+
+TIER 2 HOLDS. The owner check mayActOnCustomer is untouched. G5 (a customer owned by someone else answers 404 byte-identical to "no customer") pins who is admitted, and the m11 mutant that bypasses the check turns G5 red. No cell shows the change altering who is admitted.
+
+THE CHANGE (billing.ts, the by-email handler only, 14 lines added, 1 removed). (1) The catch calls sendClassifiedBillingError(error, res, 'Customer not found'), the three-argument form, before the 500. (2) A non-string email answers 400 BAD_REQUEST "email query parameter must be a single string" before getStripeService() or the provider is touched; an absent or single empty email keeps its 400 message byte for byte. No email-format validation, no openapi change (the entry already declares 200, 400, 401, 403, 404, 429, 500, 502, 503: I read it).
+
+MEASURED
+- Red first, the final test bytes (sha256 ec84d6804a65b78b) against develop's billing.ts in a develop-only tree: 15 cells, 8 failed / 7 passed, every red an AssertionError. C1 to C5 expected 500 to be 503 or 404; A1 to A3 expected 404 to be 400 (A2 red: express 4.22.3, qs). With the change 15 of 15.
+- Whole billing suite, interleaved, load1 read first: develop 24 files 443 of 443 (17:39:10Z, 7.38); change 25 files 458 of 458 (17:45:07Z, 6.05, before one edit to G3); develop again 443 of 443 (17:46:50Z, 4.24); change again 458 of 458 (17:46:53Z, 4.30, final bytes). No pre-existing red.
+- tsc on the service source rc 0. Over source plus all 25 test files with an ES-module override: nothing in my two files (the 2 left are TS6196 chargeable-events and TS18046 webhooks-replay-auth, both at develop); under billing's own commonjs setting my test file shows only TS1378, as 10 existing tests do. Planted TS2322: rc 2.
+- eslint by absolute path on the two files: 0 errors, 0 warnings; planted debugger: rc 1 no-debugger.
+- npm run check:test-types: 0 new in its five services; billing is NOT one of them.
+- docs-fragments check: OK (263 new per folder); a planted unbalanced div: rc 1, restored sha256-equal, OK again. The pair KS-2219-billing-by-email-error-mapping.html is in both folders, new files only.
+
+REAL RED SET PER MUTANT (each the fixed billing.ts edited by a counted, exactly-once replacement, ks2219 file run behind the load gate, bytes restored and sha256 270538dc03db98f9 equal after every one; all reds AssertionError)
+- m0 control (404 body text changed): G4 (fires).
+- m1 classifier call removed: C1 C2 C3 C4 C5. BRIEF predicted C1 to C4; C5 is mine.
+- m2 refusal removed: A1 A2 A3 (as predicted).
+- m3 refusal after the provider call: A1 A2 A3 (as predicted, on the never-called assertions; the status stays 400).
+- m3b (mine) refusal after getStripeService() before the provider call: A1 A2 A3, on the getStripeService never-called assertion.
+- m4 Array.isArray only: A2 (as predicted).
+- m5 catch answers 503 for any error: C1 C2 C4 C5 G1. BRIEF predicted G1 only; C3 stays green because the mutant's 503 text equals C3's expectation.
+- m6 first element of an array: A1 A3 (as predicted; G3 stays green).
+- m7 empty-string case dropped: G2b (as predicted: the ?email= half).
+- m8 lower-case on the way to the provider: G3 (as predicted, after I made G3's address mixed-case; with a lowercase address it was an equivalent mutant).
+- m9 (mine) four-argument classifier call: C5.
+- m10 (mine) 400 echoes the address: A1 A2 A3 G6.
+- m11 (mine, R2) owner check bypassed: G5.
+Every fix line reverted alone turns at least one cell red.
+
+PUSH. Queue and lock empty at launch; lock 17:50:22Z (load1 2.78), hook 679 s, origin verified at 6a4e12b98070 by ls-remote at 18:01:56Z. Shell suites 126 passed, 0 failed, 1 skipped of 127 (restore_local_secrets, no docker CLI). The hook's final line, verbatim: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. (legs 3, 4 and 8: local stack not up). That is not a pass for those three legs and the PR body says so.
+
+TICKET. KS-2219 read Backlog at boot, In Progress at 18:02:47Z (the GitHub integration when the PR opened, not me), priority 4 and assignee unchanged. One comment, id 32a4eb5a-8a7e-4083-b887-e9285a41f7ca at 18:03:08Z, read back exact, 0 mention nodes (the counter sees a planted node).
+
+NOT RUN: a real Stripe account, the production provider's answer to an array email, a running billing process or stack, Schemathesis, Akto, Playwright, k6, any deploy. Node v26.8.1: its LTS status is unverified and the PR says so.
+
+DIFFERENCES FROM THE BRIEF: develop's billing __tests__ held 24 test files, not 25. G6 is status-agnostic (green on develop and after) because the BRIEF's "the 400 body" cannot be green on develop.
+
+CANDIDATE FILINGS (in my HANDOVER; none filed). (1) docs-fragments.mjs check is not called by .githooks/pre-push or scripts/preflight at develop, contradicting the skill's "leg 14 runs it" (git grep, control hit). (2) No gate type-checks billing's test files: billing is outside check:test-types and 10 of its test files carry TS1378 under its own module setting. (3) Other billing routes whose query value is read with a bare as string cast or whose catch lacks the classifier were not searched.
+
+METER: 44.9 at this mail (plan mail 31.6). Next I write the HANDOVER, the history entry, the vault commit and the wrap mail; a fix round only by ADDENDUM on new commits.
+
