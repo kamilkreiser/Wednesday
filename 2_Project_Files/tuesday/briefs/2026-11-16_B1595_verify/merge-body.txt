@@ -1,0 +1,27 @@
+RD-456: the first-run AI step no longer sends aiEnabled: true on every save. The page
+remembers the stored state from its last successful read of /api/setup/ai-model and
+sends aiEnabled: true only when that state is not-set-up (the AI step was skipped, so
+configuring it afterwards is the customer turning AI on). Otherwise the key is left
+out and the server leaves the stored value alone. A save the server answers with
+aiEnabled true makes the remembered state on.
+
+RD-492: after a successful step 3 enforce, the page looked up an element it does not
+have, which threw and replaced the success box with the failure text. The lookup is
+now guarded; no element, colour or word is added.
+
+RD-808: the endpoint cleanup replaced a trailing slash with itself. It now removes
+the one trailing slash; the server accepts both forms.
+
+RD-475, RD-560: the sign-in page's Bootstrap Icons 1.10.0 integrity value is the full
+64-character SHA-384 digest that the other pages already carry for the same URL. The
+four sign-in icons now render (a visible change).
+
+RD-481: every relative src and href on static/login.html (5) and
+static/first-run-setup.html (18) gains a leading slash, so the pages load their
+assets when opened as /login/ or /first-run-setup/. Three existing tests that pinned
+the relative spelling now accept an optional leading slash; no assertion removed.
+
+Five new test files (21 cells); expected counts 5707 tests in 361 suites after main
+2a033405 is merged into the branch and the counts are regenerated. Nothing deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,15 @@
+MPSCALC-224: the API package now carries the patched System.Security.Cryptography.Xml 10.0.15 (the shared framework's patch
+on SDK 10.0.404), as it already carries Pkcs. The pin is ranked first beside Pkcs, and a target takes Xml, and only Xml, off
+the SDK's package-prune list, because a pruned reference resolves to no DLL. The tests project's Xml 10.0.13 pin is removed
+(NU1605 once the API floors 10.0.15). Two publish-output rows prove the Xml DLL and its single deps.json entry, and the Pkcs
+rows' messages are unchanged. The publish gains exactly one file plus deps.json, and no other package version moves.
+
+MPSCALC-397: one SDK pin guard row plants a fault for each of the three readers all_problems chains.
+
+MPSCALC-398: the guard reads six more routes (GITHUB_PATH, MSBUILD names, non-bash shells, local actions, extra sdk keys in
+global.json, extra workflow files), each with a red plant and a clean control. Two routes are accepted in the docstring and
+not read: names built at run time, and the runtime setup-dotnet first installs.
+
+MPSCALC-224 stays open. Nothing is deployed; the package reaches a host only on its own deploy card.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

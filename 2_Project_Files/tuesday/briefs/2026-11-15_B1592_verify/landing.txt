@@ -1,0 +1,13 @@
+# Land by MERGE COMMIT, never squash or rebase, pinned to the gated head. NexusAI repo datasecau/Reporting_Dashboard_Au.
+# Gated head 78a1c4fb92b076dbd981459d08100895974163b7 on main 117bf81e6182ac31157223112a062bc044182ba6 (main is an ancestor of the head; the merge tree equals the head tree 886135be).
+# If main has moved past 117bf81e, do not run this: the branch needs a new merge of main, regenerated counts, and a re-gate of that delta.
+# Open the PR from branch b1592/nexusai-nx-s1-triage-gate-logsafe-risk-limit, wait for CodeQL and Build on the PR head (a background wait that exits), then land the SAME commit:
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh pr merge <N> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit 78a1c4fb92b076dbd981459d08100895974163b7 --subject "$(cat '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-15_B1592_verify/merge-subject.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-15_B1592_verify/merge-body.txt'
+#
+# DEPLOY DEMO: this merge WILL start a Deploy demo run. deploy-demo.yml triggers on push to main with paths-ignore '**.md', 'docs/**', 'tests/**' only;
+# the merge changes backend/server.js, backend/services/*.js, __tests__/*.js and scripts/verify-expected-counts.json, none of them ignored.
+# Both jobs (build :53, deploy :91) are gated on vars.CI_DEPLOY_ENABLED == 'true'. The run MUST read skipped (both jobs skipped), as today's merge 117bf81e did (run 43697870565: build skipped, deploy skipped).
+# Check after the merge (replace <MERGE_SHA> with the merge commit the merge prints):
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/deploy-demo.yml/runs?head_sha=<MERGE_SHA>' --jq '.workflow_runs[] | "\(.id) \(.event) \(.status) \(.conclusion)"'
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<RUN_ID>/jobs' --jq '.jobs[] | "\(.name) \(.conclusion)"'
+# Required: one run, event push, conclusion skipped; jobs build skipped and deploy skipped. Anything else (success, in_progress with a running job, failure) is a deploy: stop and report.

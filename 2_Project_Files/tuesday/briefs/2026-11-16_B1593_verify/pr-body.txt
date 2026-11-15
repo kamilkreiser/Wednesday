@@ -1,0 +1,33 @@
+## What this changes
+
+**MPSCALC-224: the patched System.Security.Cryptography.Xml ships inside the API package, as the patched Pkcs already does.**
+- `src/MpsCalc.Api/MpsCalc.Api.csproj`: a `PackageReference` for System.Security.Cryptography.Xml at 10.0.15 (the shared framework's own patch on SDK 10.0.404, file version 10.0.1526.53008); Xml ranked first beside Pkcs in `PackageConflictPreferredPackages` (the ranking target is renamed `PreferPinnedPackagesOverSharedFramework`); and a new target `KeepPinnedXmlOutOfPackagePruning` that removes Xml, and only Xml, from `PrunePackageReference` after the SDK's `AddPrunePackageReferences` builds that list.
+- Why the extra target: the SDK lists Xml (not Pkcs) as provided by the ASP.NET Core framework, and restore prunes it. A pruned reference resolves to `lib/net10.0/_._`, so a pin plus `NoWarn="NU1510"` plus first rank builds clean and still ships no Xml DLL. Measured locally: that shape publishes 0 Xml DLL and 0 deps.json lines. With the target, the prune list differs from that shape by exactly one entry (Xml), restore raises no NU code, and no `NoWarn` is needed.
+- `tests/MpsCalc.Api.Tests/MpsCalc.Api.Tests.csproj`: its direct Xml 10.0.13 pin and comment are removed. With the API now flooring Xml at 10.0.15, keeping it fails restore with NU1605 (downgrade 10.0.15 to 10.0.13); its own comment said to remove it when the parent floors it. Nothing else in that file changes.
+- `tests/MpsCalc.Api.Tests/PublishOutputTests.cs`: the Pkcs assertion is generalised into one helper, and the Pkcs messages stay byte-equal. Two new Xml rows: the publish carries the Xml DLL with exactly one deps.json entry whose fileVersion is the DLL's, and a twin that removes that entry from a temporary copy and expects "deps.json lists 0 System.Security.Cryptography.Xml entries". Both are red at main and green at this head.
+- Publish output, main vs head: exactly one added file (System.Security.Cryptography.Xml.dll) plus a changed MpsCalc.Api.deps.json. deps.json gains Xml 10.0.15 once under targets and once under libraries, and names it as a dependency of MpsCalc.Api and of Microsoft.Identity.Web.TokenCache. No other library entry changes.
+- Package set: the only new package is the Xml pin. The API goes from 30 to 31 packages (plus Xml 10.0.15). The API tests project moves Xml from 10.0.13 to 10.0.15 and adds nothing. No other package version moves in any project.
+
+**MPSCALC-397:** one row in `scripts/tests/test_sdk_pin_routes.py` plants one fault for each of the three readers `all_problems` chains: the global.json/ci.yml pair, the scripts CI runs, and the nested global.json walk. It asserts the three problem strings in order, and a clean control root reads an empty list. Dropping any one reader turns only this row red.
+
+**MPSCALC-398:** the SDK pin guard now reads six more routes, each a closed property: a GITHUB_PATH write, any MSBUILD name (in ci.yml and the CI scripts), every `shell:` is bash, no local action (`uses: ./` or `../`), the `sdk` object of global.json holds only `version` and `rollForward`, and the workflow folder holds only `ci.yml`. Each route has a red row on a plant and a clean control, and the real files read an empty list. The docstring names the two routes that are accepted and not read: names built at run time, and the runtime that setup-dotnet first installs on channel LTS. No existing row or expected list changes.
+
+## Status
+- **MPSCALC-224 stays open.** Nothing is deployed and nothing here is on a host. The package reaches a host only on its own deploy card. The host-side read (the docker-log patch line and the loaded Xml file version) belongs to that deploy.
+- MPSCALC-349 (the tie example in the project file comment) was re-measured on SDK 10.0.404 and holds: without the ranking target the publish carries 0 Pkcs DLL and 0 deps.json lines, and with it the DLL ships. No change is built for it.
+- A merge runs no deploy workflow. The repo's only workflow is ci.yml; its `package` job builds and keeps the package as a 7-day artifact on main.
+
+## Local verification (independent gate)
+- `dotnet build MpsCalc.slnx -c Release`: 0 warnings, 0 errors. `dotnet test`: Engine 743, Import 196, Api 3656 (main 3654 plus the two new rows), 0 failed. The merge tree equals the head tree.
+- The whole python CI loop (15 files) is rc 0 at main and head. The guard rows go from 13 + 34 at main to 13 + 51 at head, and the CI workflow rows stay at 8.
+- CodeQL python (code-scanning and security-extended suites): 0 results, and a planted control fired.
+- CodeQL csharp was not run locally (its extractor cannot run on arm64). Hosted CodeQL is the only C# proof.
+- Only hosted CI shows the runner's registry restore of Xml 10.0.15, the `package` job's publish, and the python job on the runner's Python.
+
+## Known limits (follow-ups)
+- `scripts/tests/test_sdk_pin.py:17-18`: the docstring still says a new SDK needs "raise the Pkcs pin ... only if its publish-output guard says so". After this change it is both pins (Pkcs and Xml).
+- `src/MpsCalc.Api/MpsCalc.Api.csproj:29`: the comment "Remove when the parent floors them" does not say that removing the Xml pin must also remove `KeepPinnedXmlOutOfPackagePruning` (:37). Without the pin, that target un-prunes the transitive Xml.
+- The MSBUILD route reader also flags a plain `dotnet msbuild` command. That is stricter than needed, and safe.
+- global.json keys outside the `sdk` object (for example `msbuild-sdks`) are not read.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

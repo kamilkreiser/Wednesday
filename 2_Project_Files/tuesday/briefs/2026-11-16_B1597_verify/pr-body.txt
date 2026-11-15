@@ -1,0 +1,62 @@
+BLUF: one new question-set version, ruleset 0.1.4 and content 0.7.2, made by program from 0.1.3 / 0.7.1, carries the reviewer's question-set changes (HPSMPOC-488 order, HPSMPOC-489 wording, HPSMPOC-485 Partly, HPSMPOC-487 Covered another way). The customer snapshot keeps exactly 16 questions with the same ids, weights and sections. New snapshots, the Playbook screens and the hosted demo setting (in the repository only) move to it; readiness stays on 0.7.0. Nothing is deployed. No integration with HP tools is built or claimed.
+
+## Authority (the product owner's 2026-11-15 ruling)
+- On the feedback, verbatim: "please action the reviewers feedback.   keep the 16 questions.  and yes, the stated-by-the-customer label does print in the exported report". No question is added or dropped.
+- F1, option a, verbatim: "Approve as written (Q1 only, scored 50)"; the words it approves: "one new answer on Q1 only, between Yes and No: 'Partly: some printers can, others cannot', scored 50 (a draft for HP to vet), and it still raises the trusted-start-up finding".
+- F4, option a, verbatim: "Approve the words; it counts as covered (score 100, no finding, so it does not appear in the PDF)"; the words it approves: "one new answer on that question: 'Covered another way (for example, printers in a secured room)', plus a help line: 'If uncollected output is controlled another way, for example printers in a secured room, choose Covered another way and say how in the note.'"
+- F7 (the reviewer's two replacement sentences for sign-in and role-based access) is built under a recorded reading, not a quoted ruling: the clarifications entry C-373 reads them as approved words. The sentences are taken byte for byte from the reviewer's mail.
+
+## What the customer sees
+Order asked, before (0.7.1): Q-CS-01, 02, 03, 04, 06, 08, 10, 11, 13, 09, 05, 07, 15, 12, 14, 16
+Order asked, after (0.7.2):  Q-CS-13, 02, 03, 04, 01, 08, 10, 11, 06, 05, 07, 15, 09, 12, 14, 16
+The fleet inventory question is asked first; the trusted start-up question moves to 5th, held print release to 9th; Identity & access (sign-in, roles, certificates) is asked before Network.
+
+The five new words (byte for byte in the files; no other user-readable word is new):
+- Q-CS-01 answer `partly`, scored 50: Partly: some printers can, others cannot
+- Q-CS-06 answer `compensating`, scored 100: Covered another way (for example, printers in a secured room)
+- Q-CS-06 help line: If uncollected output is controlled another way, for example printers in a secured room, choose Covered another way and say how in the note.
+- Q-CS-05 text: Do users authenticate at the printer (e.g., PIN, badge, or username/password) before accessing secured print, copy, or scan functions?
+- Q-CS-07 text: Are printer functions and administrative settings restricted based on user roles or assigned permissions (e.g., limiting access to color printing, copying, scanning, or device configuration)?
+The existing labels Yes, No and Unsure become explicit options on Q-CS-01 and Q-CS-06.
+
+Two visible effects, accepted, no new words:
+1. Q-CS-01 and Q-CS-06 are now single-choice, so the card shows their four answers as a stacked column of radios (they were three inline choices). The card component is not changed.
+2. The audience filter ("Show questions for") and the runner's grouping list Identity & access before Network. The content rule that sections run audience by audience in the declared order requires this: of the 120 orders of the five audiences, PF, IA, NW, GR, SO is the only one the new section order passes, one swap from the old list. Both the web loader and the API loader accept it and refuse the old list.
+
+## The files
+- ruleset 0.1.4: file sha256 6afb1222114346e93babfd8ba6814854d51d91762cfc606abbff44e2148b7b2d, canonical sha256:774164ccc6f71f4239c8535fb83f4bfdec489a878481225c33f2e52ec19c14ad. Differs from 0.1.3 at exactly 11 JSON paths: version, the S2 and S3 section order, three question orders, the Q-CS-05 and Q-CS-07 texts, the Q-CS-01 and Q-CS-06 answers, and R-001 also firing on `partly`. R-006 is unchanged, so `compensating` raises no finding.
+- content 0.7.2: file sha256 76670e238d3d5def35f221ebf993eacb155a7b493fc04d6263f8abc0e0995796, canonical sha256:5173dcd4d0fa662b370d15f8f84705e1e90359fcb68f34dc0e6700e0db8daf82. Differs from 0.7.1 at exactly 15 paths (the same changes, the two questions' type and options, the Q-CS-06 help, and the audience list order).
+- Web source and API seed are byte-identical; the client copies are 21 (were 19). Earlier versions are untouched.
+- The result recap counts an Unsure on a single-choice question (two lines in SnapshotResult.tsx); without that change an Unsure on Q-CS-01 or Q-CS-06 would stop being counted.
+- The hosted demo's ruleset moves to snapshot-policy-aligned@0.1.4 in all three places tied together (appservice.bicep, test_security_baseline.py, HostedDemoTests.cs). The PROVENANCE note "Named by the hosted demo" moves from the 0.1.2 row to the 0.1.4 row.
+
+## Scoring, measured at the API
+- Partly on Q-CS-01 (everything else Yes): finding R-001 is raised; section S1 scores 92.3, which is Q-CS-01 at 50 of its weight 4 in 26; overall 95.7.
+- Covered another way on Q-CS-06 (everything else Yes): no finding, overall 100.
+- Unsure on Q-CS-01 and Q-CS-06: both findings raised, and both counted on the result recap.
+- Refused with answer.option-unknown (422): an unknown option id; Partly on Q-CS-06; Covered another way on Q-CS-01; Partly on a yes/no/unsure question; Partly on a 0.7.1 snapshot.
+- All 16 answered No: the same 16 findings and the same scores as 0.7.1, in the new order (R-002, R-003, R-001, ... instead of R-001, R-002, R-003, ...). The PDF names them in that order, and prints the Partly words as the evidence of a Partly answer.
+
+## Checks on this head (the merge with main a9e0052f is this head's own tree)
+- web: lint 0 warnings, typecheck, build, npm audit 0 and dev audit 0, client copies 21 match, shard plan OK. Unit: 303 files, 4318 passed, 0 failed (main: 301 files, 4302); by name, 9 tests renamed (titles naming the current version) and 16 new.
+- end to end, all eight shards as CI runs them (CI=1): 970 passed, 0 failed, 46 skipped, 0 flaky, the same at main and here.
+- .NET on the default host with Azurite: 4161 passed, 0 failed (main: 4145).
+- SQL Server 2025 (pinned image), with the CI judge: other-and-feedback 1348 passed, 0 failed, 243 databases (floor 110). Assessment-and-hosting: 1473 passed and 1 failed, 321 databases (floor 100). The one red is the known timing-dependent ForwardedProofTests test in Hosting, which this change does not touch; run alone 5 times it failed 5 of 5 at main and 5 of 5 here.
+- infra: validate.sh and the infra suite (325) pass under Python 3.14; under the machine's Python 3.9 one test_resource_hygiene test fails at main and here alike (it expects Python 3.11+ output). The hosted-demo pin test (10) and the hidden-character scan (14) pass.
+- CodeQL javascript and python, security-extended: 0 results at main and here.
+
+## Deploy notes (measured; nothing is deployed)
+1. Once the hosted demo setting HostedDemo__DraftRuleset names snapshot-policy-aligned@0.1.4, a snapshot already in progress on 0.7.1 is refused at submit with ruleset.not-approved (422) and stays in progress, as 0.6.1 was when 0.1.3 was named.
+2. The API refuses to start when the seed's ruleset and the setting differ, in both directions (HostedDemoLocks.CheckSeedRuleset, an exact string comparison; Program.cs ValidateLoaded). The new API and the new setting must ship together.
+3. The showcase seed is idempotent, so existing samples keep their 0.7.1 stamps, and the in-progress sample (Quokka Freight) cannot be scored until the demo is reset, which re-seeds it on 0.7.2.
+4. The PDF's finding order follows the new question order (above).
+5. Snapshots already started keep the package they are stamped with, and its order.
+
+## Not built
+F2, F3 and F12 (they wait on HP); the reviewer's two titles ("User Authentication", "Role-Based Access Control": the product has no per-question title); any hint, legend or result text about the new answers; any change to readiness.
+
+## Not run
+- CodeQL csharp: NOT RUN (cannot extract on arm64); hosted CodeQL is the only C# proof.
+- The live-API Playwright specs (in no CI shard), including the two lines changed in playbook-content-050-live-api.spec.ts.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

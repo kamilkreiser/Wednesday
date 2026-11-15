@@ -1,0 +1,26 @@
+## What changes
+
+RD-988 (the product owner's 2026-11-11 ruling: write routes are administrator-only)
+- backend/server.js: feedbackItemWriteGate, the check that runs ahead of the feedback router, now also matches POST on /<id>/triage with `/^\/[^/]+\/triage\/?$/i` (case-insensitive, one optional trailing slash, as Express routes). Same function, same mount line, same single requireAdminFor call (30 in the file before and after). The PATCH/DELETE condition is unchanged.
+- backend/services/capabilities.js: the triage route leaves the pending list (L1). The coordinator-action entry stays.
+- Not changed: backend/routes/feedback.js (same blob), the open window, and the internal coordinator-action route, which keeps its own caller check and is left for a separate decision.
+- docs/role-capabilities.json and docs/ROLE-CAPABILITIES.md regenerated: only the triage row changes (viewer 404 to 403 and its capability sentence), plus the generation line and the two status-count rows that follow from it.
+
+RD-926
+- Three log lines that wrote the model's own text raw now go through logSafe: "AI Validation Response", "AI response lacks measurable terms" and "Invalid AI response detected, using fallback". CR/LF are removed and other controls escaped. An ordinary answer logs byte-identically, emoji prefix included. A long invalid chat answer is cut at logSafe's 500.
+
+RD-888
+- New backend/services/riskRunLimit.js holds the database path's formula. The Log Analytics arm of POST /api/risk-conditions/:id/execute slices by clampRiskRunLimit(parseInt(limit)), the same value the database calls receive. Both paths now answer alike for every input: at most 1,000 rows, 100 for a malformed or absent limit, 1 for a negative one.
+
+## Evidence (independent gate, own clone)
+- Full verify at the head tree: PASS 5686/5686 across 356 suites, no port clash. The counts file reads 5686/356.
+- HTTP probe on a real server, signed in as a viewer, using raw request lines. Every form an administrator reaches is refused 403 for a viewer, and the stored item is unchanged: canonical, query strings, mixed case, trailing slash, a percent-encoded id, a fragment and the absolute form. The other forms reach neither role: encoded slashes, double slashes, dot segments, an encoded letter, NUL, `;`, backslash, lower-case method, HEAD/PUT/PATCH/GET. OPTIONS returns 200 without running the handler. At main the same viewer requests re-triaged the item on all nine routed forms.
+- New regex timing: 0.9 to 2 ms on a 1,000,000-character path (linear).
+- CodeQL javascript security-extended on head and main: 64 results each, with no new or removed result. The 10 js/user-controlled-bypass results are the ones already open on main.
+- Builder mutation matrix (each plant reddens the expected cells) and inventory drives are recorded in the branch's status file.
+
+## Landing notes
+- Merge commit, pinned to the head. Main 117bf81e is already merged into the branch, and the merge tree equals the head tree.
+- backend/ is not path-ignored by Deploy demo, so a merge starts that workflow. Both jobs are gated on CI_DEPLOY_ENABLED and must read skipped.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

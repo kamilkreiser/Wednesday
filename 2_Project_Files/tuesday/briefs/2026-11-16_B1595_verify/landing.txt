@@ -1,0 +1,17 @@
+# Land by MERGE COMMIT, never squash or rebase, pinned to the gated head. NexusAI repo datasecau/Reporting_Dashboard_Au.
+# Gated head b2732d92d90e278db02008942dc9d15cb20104b0 on main 117bf81e6182ac31157223112a062bc044182ba6 (main is an ancestor of the head; the merge tree equals the head tree 28020ab4).
+# LANDING ORDER: PR #204 LANDED during the gate (main is now 2a033405, parents 117bf81e + 78a1c4fb). DO NOT RUN the merge below on b2732d92. First:
+#   merge main into this branch (scripts/verify-expected-counts.json WILL conflict; it is the only conflicting path, measured by merge-tree against 78a1c4fb),
+#   regenerate the counts by a real `npm run verify -- --maxWorkers=2 --update-counts` (never by hand; DERIVED 5707/361 = 5686+21, 356+5; the gate's merge verify measured jest 5707/361 all green, refusing on counts only),
+#   commit that, and re-gate that delta. Then land the NEW head with --match-head-commit set to it.
+# Open the PR from branch b1595/nexusai-f1-first-run-login-fixes, wait for CodeQL and Build on the PR head (a background wait that exits), then land the SAME commit (substitute the REBUILT, re-gated head sha for b2732d92 below):
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh pr merge <N> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit b2732d92d90e278db02008942dc9d15cb20104b0 --subject "$(cat '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-16_B1595_verify/merge-subject.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-16_B1595_verify/merge-body.txt'
+#
+# DEPLOY DEMO: this merge WILL start a Deploy demo run. deploy-demo.yml (unchanged by this branch) triggers on push to main with paths-ignore '**.md', 'docs/**', 'tests/**' only;
+# the merge changes static/js/first-run-setup.js, static/login.html, static/first-run-setup.html, __tests__/*.js and scripts/verify-expected-counts.json, none of them ignored.
+# Both jobs (build :53, deploy :91) are gated on vars.CI_DEPLOY_ENABLED == 'true'. The run MUST read skipped (both jobs skipped), as main 117bf81e's did (run 43697870565: push, completed, skipped).
+# Check after the merge (replace <MERGE_SHA> with the merge commit the merge prints):
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/deploy-demo.yml/runs?head_sha=<MERGE_SHA>' --jq '.workflow_runs[] | "\(.id) \(.event) \(.status) \(.conclusion)"'
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<RUN_ID>/jobs' --jq '.jobs[] | "\(.name) \(.conclusion)"'
+# Required: one run, event push, conclusion skipped; jobs build skipped and deploy skipped. Anything else (success, in_progress with a running job, failure) is a deploy: stop and report.
+# After landing: CodeQL alert 22 (js/identity-replacement, static/js/first-run-setup.js:383) should close on main's re-analysis; check it, do not assume it.

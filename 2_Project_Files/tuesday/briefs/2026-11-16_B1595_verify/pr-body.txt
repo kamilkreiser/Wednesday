@@ -1,0 +1,40 @@
+## What changes
+
+RD-456 (static/js/first-run-setup.js)
+- The first-run AI step no longer sends `aiEnabled: true` on every save. The page remembers the stored state from its last successful read of /api/setup/ai-model and sends `aiEnabled: true` only when that state is `not-set-up` (the AI step was skipped, so configuring it is the customer turning AI on). In every other case, including a failed read, the key is absent and the server leaves the stored value alone. A save the server answers with `aiEnabled: true` makes the remembered state `on`. The server is unchanged.
+
+RD-492 (same file)
+- After a successful step 3 enforce, the lookup of `#enforce-auth-card` (an element the page does not have) is guarded, so it no longer throws and the success box is no longer replaced by "Failed to enforce authentication". No element, colour or word is added.
+
+RD-808 (same file)
+- The endpoint cleanup `.replace(/\/$/, '/')` (a slash replaced by itself; CodeQL js/identity-replacement, alert 22) becomes `.replace(/\/$/, '')`. The server accepts the endpoint with or without one trailing slash.
+
+RD-475, RD-560 (static/login.html line 10)
+- The Bootstrap Icons 1.10.0 integrity value becomes the full 64-character SHA-384 value that static/index.html:13 carries for the same URL, byte for byte. Nothing else on the line changes. This is a VISIBLE change: the four sign-in icons now render.
+
+RD-481 (static/login.html, static/first-run-setup.html)
+- 5 + 18 relative src/href values gain a leading slash, so the pages load their assets when opened as /login/ or /first-run-setup/. Three existing tests that pinned the relative spelling (rd412-mail-setup-ui, dark-mode-wiring, identifier-mask) accept an optional leading slash; no assertion removed, cell counts unchanged (10, 12, 22).
+
+Five new test files, 21 cells. Expected counts: 5687 tests / 358 suites on main 117bf81e, and 5707 / 361 once main 2a033405 (PR #204) is merged in. That pair comes from the gate's merge run, and the rebuild must regenerate it.
+
+## Evidence (independent gate, own clone)
+- Full verify at the head tree: PASS 5687/5687 across 358 suites, no port clash.
+- At the merge with main 2a033405 (PR #204 landed): jest 5707/5707 across 361 suites, all green. The verify refuses on the counts file only (expected 5686/356, measured 5707/361). The only conflicting path is scripts/verify-expected-counts.json.
+- RD-456 end to end: a real server and the real page script. The page reads the stored state from the server, then saves through its own save function. At head: stored on, never set, turned off and a failed read each keep their value (key absent). Skipped then configured sends `aiEnabled: true` and turns AI on, and the second save omits the key. With an unreadable settings file the save fails exactly as at main, and the key is absent. Control with main's page script: turned off and failed read both flip to on.
+- Red first: 13 of the 21 new cells fail with the fixes removed (main's product files), and the 8 controls and pins pass.
+- Programs: the two pages differ from main only in the added leading slashes, with a planted-word control. Every reference resolves to a tracked file at /login/, /login, /login.html, /first-run-setup/, /first-run-setup and /first-run-setup.html; at main, 6 of 8 and 18 of 23 did not resolve under a slash. No added user-visible string. Name, id, secret, non-ASCII and CodeQL-pattern scans: 0, each with a firing control.
+- CodeQL javascript security-extended (the repository's default-setup suite), CLI 2.27.4: main 64 results, head 63. The one removed result is js/identity-replacement at static/js/first-run-setup.js:383. No new result.
+
+## Known limits (owed, not in this change)
+- The icons branch rd-721-icons-vendor-s91p also rewrites static/login.html line 10, so it will conflict on that line when it lands. Its replacement uses a relative `vendor/...` href, which the new RD-481 test will flag.
+- Stale comments: __tests__/rd465-first-run-open-window.test.js:164-166 still says the success branch throws on the missing card, and __tests__/rd486-ai-test-key-forwarding.test.js:267 says the wizard body carries `aiEnabled: true`. It now does so only after a skipped AI step.
+- 19 external links on other pages carry no integrity attribute. The new test does not demand one.
+- After a save, the AI step's success text is the server's own note ("Active immediately ...") even when AI is turned off by an administrator. These are server words, untouched here.
+- Not tested: a real browser at /login/ and /first-run-setup/, a real browser load of the sign-in page with the CDN reachable, the CSP console of the first-run page, Node 24 and Linux (hosted Build is the proof).
+
+## Landing notes
+- Merge commit, pinned to the head. Main moved to 2a033405 during the gate, so the branch must first merge main, regenerate the counts with a real --update-counts verify, and have that delta re-gated.
+- static/ is not path-ignored by Deploy demo, so a merge starts that workflow. Both jobs are gated on CI_DEPLOY_ENABLED and must read skipped.
+- CodeQL alert 22 closes only when main is re-analysed after the landing.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
