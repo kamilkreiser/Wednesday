@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATION HANDOVER 04:1x 16 Nov, the 00:5x seat (ctx 78%) - READ FIRST; supersedes every block below where they differ
+- **develop 42e242166f89** (PR 2245, verified 04:14:55). **Merges since 15 Nov evening: 31. ALL FOUR security/privacy fixes from tonight are ON DEVELOP: 2242 (KS-1703 analytics exports), 2243 (KS-2052 workflow approve), 2244 (KS-1882 wallet sessions), 2245 (KS-2189 + KS-2188 kyc erasure); none deployed.**
+- **FLOOR:** %107 **K 31st** WRAPPING (2 merges: 2244, 2245) -> score (~0.94 unless its wrap shows otherwise) + pane_close (its own watcher may need --live-ok). Then **NO seat in a pane.**
+- **FIRST WORK for the successor:** (1) K 31st's wrap -> score + close. (2) Commission a **K 32nd** merge drafter (shape 0_Brain/reference/2026-11-16_drafter-seatK31/commission.md, shift k31 -> k32 ('nd' suffix!), row 1 = PR 2093 (KS-2053, tier 2, DNM) per K 31st's HANDOVER FINAL at 5_Project_History/2026-11-16_seatK-31st/). (3) Commission an **S 84th** board drafter for the owed filings (list in the 03:3x block below: gate 369 notes, G370-1/-2, C 40th's three incl. the pii_subject_keys PRIVACY residue). (4) Next build lanes: KS-2219 billing by-email 500; S 81st's F12 leftovers.
+- **06:00 MORNING:** the fleet-activity summary card (Kam's deploys held: anchoring card + Kintsugi disk; transfer 2241+2243; analytics 2242; wallet-connector 2244 with the restart cost; kyc 2245 with what is/is not erased; card ac4 amended; KS-2223 Medium) + the board sweep (launcher step 10).
+- Ledger this seat: 8 rows (latest: ADDENDUM 1's unmeasured env-var instruction to K 31st). Ledger 3c DONE. No lesson file changed: digests need no regeneration. Doctor python3 check still owed. seat_mail_watch armed 03:58 (expires ~04:28): RE-ARM + newmail.sh at boot.
+
 ## 🔴 HANDOVER 03:3x 16 Nov, the 00:5x seat (ctx 75%) - READ FIRST; supersedes every block below where they differ
 - **develop 701dfdd5b874** (PR 2244, verified 04:04:49). **Merges since 15 Nov evening: 30** (this seat: 2240, 2241, 2149, 2145, 2242, 2243, 2244).
 - **FLOOR (1 seat):** %107 **K 31st** (merge, Sonnet; launched 03:34; row 1 PR 2244 (KS-1882 wallet sessions, gate 369 GWN, DNM-template), **row 2 PR 2245 by ADDENDUM 1** (KS-2189 + KS-2188 kyc erasure, gate 370 GWN, TWO-key title), then PR 2093...). NEXT = its plan QUESTION -> ANSWER (shape fleet/briefs_staged/2026-11-16_K30_answer_plan.md) -> READY 2244 -> GO (shape fleet/briefs_staged/2026-11-16_K30_go_2243.md: re-pin develop + head by gh api, read gate 369 line 1 at source, the seat's expected tree, merge only).
