@@ -1,0 +1,24 @@
+Three test-only pins; no product file changes.
+
+RD-576: the security-fixes cell "incomplete override (missing apiKey) is ignored"
+passed an override with no mode, so since RD-549 it returned at the mode gate and
+never reached the incompleteness check it is named for. The override now carries
+mode 'admin', as the control cell in rd503-r2 does, so the cell reaches its own
+check again. Deleting that check now turns the cell red.
+
+RD-590: the first row of the d-nomatch test.each in rd486 was labelled "same
+machine by another name (127.0.0.1 for localhost)". Since RD-574 the stored
+endpoint is a name and the cell sends the address the name resolves to; the
+label now says so. Same row, same cell.
+
+RD-826 item 2: nothing asserted the warning the data export logs when it
+withholds a store that is a symbolic link (RD-791). Two cells in
+rd791-export-store-links now read the logger mock: one requires exactly one
+warning per withheld link, carrying exactly the keys file and resolves and no
+path; the other is a control with a real file store and no warning. Deleting,
+doubling, renaming or adding a path to the warning now turns the first red.
+
+Expected counts are 5638 tests across 349 suites (was 5636 across 349). Nothing
+is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

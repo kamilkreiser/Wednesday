@@ -1,0 +1,28 @@
+Every 401 and every 403 the server answers below its audit middleware now writes one
+REQUEST_DENIED audit row, whatever the method. A refused GET or HEAD used to leave no row at
+all; it now writes one when its response finishes. A refused write keeps its STATE_MUTATION
+row exactly as before and gains one REQUEST_DENIED row after it. A role change through
+PUT /api/auth/users/:email writes one ROLE_CHANGED row with the role before and after and
+who made the change; the same role again, or a role value the route ignores, writes none,
+and the CONFIG_CHANGE row is unchanged.
+
+This is the denial and role-change part of the product owner's 2026-11-11 ruling ("reads and
+denials are audited"), for the two roles the product has today. A REQUEST_DENIED row holds
+the method, the path, the status, the reason (unauthenticated or forbidden), the masked
+email and the role, and nothing read from a header, cookie, query or body; the audit
+envelope around it carries the client address and user agent, as every audit row already
+does. The read hook listens for the response's finish event, so no read route has its
+res.json or res.send wrapped. The new code decides nothing: it records a status that was
+already answered.
+
+Not audited yet: ordinary reads (an allowed read writes no row), the sensitive-field grants
+and the audit of a granted read, the row scope of RD-930 and the assistant, export and
+report scope of RD-931, which come after the capability build of RD-929. The CSRF refusal
+is answered above the audit middleware and writes no row; an OPTIONS refusal writes none.
+
+No status changes: no gate is added or moved, the role-capability inventory is unchanged,
+and the open (no sign-in) window answers as before. One new service file
+(backend/services/accessAudit.js), three new test files with 15 cells, and the counts file:
+5651 tests across 352 suites. Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

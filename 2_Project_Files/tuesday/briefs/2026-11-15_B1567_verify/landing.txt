@@ -1,0 +1,12 @@
+# Merge commit, pinned to the verified head. Never squash, never rebase.
+# Wait for hosted Build, CodeQL and the other required checks on this head first.
+# Replace <N> with the pull request number; run from the folder holding merge-subject.txt and merge-body.txt.
+# A merge to main starts Deploy demo (__tests__/ and scripts/ are not path-ignored); both its
+# jobs are gated on vars.CI_DEPLOY_ENABLED == 'true', so expect them to read skipped. The demo deploy hold stands.
+# Counts: if the other branch that edits scripts/verify-expected-counts.json (5651/352) has landed first, rebuild this
+# branch's counts file at landing (npm run verify -- --maxWorkers=2 --update-counts on the merged tree); do not resolve by hand.
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+gh pr merge <N> --repo datasecau/Reporting_Dashboard_Au --merge \
+  --match-head-commit 8586c094434b294749dc66ea02d6c35f3690a44f \
+  --subject "$(cat merge-subject.txt)" \
+  --body-file merge-body.txt
