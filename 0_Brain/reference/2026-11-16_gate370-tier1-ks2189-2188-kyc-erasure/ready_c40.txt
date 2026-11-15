@@ -1,0 +1,55 @@
+=========== [INBOUND] 2026-11-15T16:23 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-2189 + KS-2188 (Seat C 40th)
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-2189 + KS-2188 (Seat C 40th)
+Seat C 40th
+READY FOR GATE: KS-2189 + KS-2188, PR 2245. Tier 1, gate row G1 (an irreversible path: the kyc erasure).
+
+PR: https://github.com/Secuura/Distributed_Secuura/pull/2245 "Refs KS-2189, KS-2188: the kyc erasure reaches every ASCII-case spelling of the id and keeps an undecodable row loudly" (Refs, no closing word).
+- TWO KS KEYS IN ONE TITLE: the known merge-tool case, said here and in the PR body. One coupled PR by the ANSWER of 2026-11-15 04:41:40Z item 1.
+- Head 616c57ba4e5136c98947b277aaed6e40429b8c1b, 1 commit on develop d041f1a54f8f8516e97782363059bfde818e139e.
+- Branch feature/ks-2189-kyc-a-verification-row-started-with-an-upper (KS-2189's Linear branch name).
+- 8 files, +1001 -15 (git numstat): services/kyc/src/index.ts (+74 -7, comments included), the two new cell files (ks2189 +427, ks2188 +459), ks2185 (+2 -2), ks1931 (+2 -2), ks2166 (+4 -4), and the fragment pair (+19, +14).
+- Develop moved during the build: PR 2242 (KS-1703 analytics, 7 files, 0 in services/kyc, 0 lock files, 0 of my 8 paths) merged as d041f1a54f8f. Nothing was committed yet, so the change was moved onto it before the first commit. Suite B4 on it: 258 of 258. No re-base after a push, so no force.
+
+PUSH: attempt 1, push/drv_1. Queue empty; lock 16:10:32Z (load1 5.37); develop gate: d041f1a54f8f unchanged; overlap gate: 70 open PRs, none touches any of my 8 paths. Hook 625 s; PUSH end rc=0 at 16:21:11Z; "VERIFIED: origin ... is 616c57ba4e51" by ls-remote 16:21:14Z; lock released, queue left rc 0.
+- Shell suites: 126 passed, 0 failed, 1 skipped (restore_local_secrets.test.sh: no docker CLI on PATH). Leg 16, the test-type ratchet: 0 new errors in all five services.
+- Develop moved AFTER the push: PR 2243 (KS-2052, 5 transfer files, 0 in services/kyc, 0 of my 8 paths) merged as c7b3c2abf08c. git merge-tree --write-tree of my head onto it: clean, rc 0. Not re-based (no overlap; a re-base would be a new branch).
+- The hook's final line, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." It goes on: "legs 3 4 8 — local stack not up; you can clear this by starting it." and "This is NOT a pass. Do not quote it as one — say which legs ran." Named in the PR body.
+
+THE CHANGE (services/kyc/src/index.ts only; GET /api/kyc/user/:userId, the owner check, userErasedSubscriber.ts, db.ts, subjectDeks.ts, packages/shared and the spec untouched)
+- 2a: initiate schema userId: z.string().guid().transform(asciiFoldedUserId) (a hoisted function declaration).
+- 2b, as you ruled at W4: USER_ID_MATCHES_ASCII_FOLDED = translate(user_id, 'A..Z', 'a..z') = translate($1, 'A..Z', 'a..z'), on the erasure read and all three DELETEs. Not lower().
+- 3 ii: dbReadVerificationsForErasure decodes row by row (Promise.allSettled); a failed SELECT still logs and throws (KS-1931). DELETEs in today's order; the verifications DELETE adds AND id <> ALL($2::text[]) with the kept ids (W2). Then evict, then (if any kept) ONE logger.error { keptVerificationIds, kept } and throw "kyc erasure incomplete: <n> undecodable verification row(s) kept: <ids>". No stored value, no caught text.
+- W1: dbGetVerificationsByUser's code untouched; its KS-1931 comment line (240) edited only. Removing throwOnError: a candidate filing.
+- Existing cells changed by design, each declared: ks2185 lines 115, 116 and ks1931 lines 137, 147 (W3; regex widened to WHERE (?:translate\()?user_id); ks2166 cell I lines 323, 325, 328, 329 (your ANSWER of 16:00:53Z).
+
+EVIDENCE (all local, Node v26.8.1, vitest 4.1.12, zod 4.6.7, typescript 5.9.3; load1 read before every suite, gate 8; two legs waited behind the gate)
+- Red first against develop's index.ts (a5e13a242917): 17 of 40 new cells red, every one by AssertionError; 23 controls green. KS-2189 5 of 12 (S1, S2, S3, S4, I1). KS-2188 12 of 28 (P1, P5, P6, B1 for each of the 3 causes). On develop P5 found the poison value or the caught JSON.parse/DEK text in 3 log lines per cause. With the change 40 of 40.
+- Whole kyc suite, interleaved: A 218/218 (20 files) at 15:45:38Z; B 258/258 (22 files) at 16:06:44Z; A 218/218 at 16:07:18Z; B 258/258 at 16:07:21Z; B on d041f1a 258/258 at 16:09:37Z. No pre-existing red.
+- W3 proven both ways: with the change and the OLD regexes, 7 cells red because the injection stopped firing (ks1931 R1, R2; ks2185 R1a, R1b, R3a, R3b, R3c); widened, all green. My plan said 9: ks2185 R2a and R2b stay green either way (they only count unhandled rejections), accepted by name in your ANSWER.
+- Mutants (tools/mutants_c40.py; whole suite each; sha256 restore proven after each; evidence/mutants/summary_all.txt). Corrections to the plan's predictions, by name:
+  - m0 (develop's index.ts, control): 18 red (the 17 plus amended ks2166 cell I).
+  - m1 {S3}. m2 and m3 {S1, S2, S4}. m4 {S1, S2, S3, S4}: S3 was not predicted; the upper row's verification survives, so V is not empty.
+  - m5 {I1, ks2166 I}. m6 {P1, P5, P6, B1} x3, as predicted.
+  - m7 {P1, P2, P4, P5, P7, B1}: wider than predicted. The bus call after the route finds nothing undecodable and answers success.
+  - m8 {P3, P4, P5, P6, P7, B1}: wider than predicted. m9 {P1, B1}. m10a {P5}. m10b {P5, P6}.
+  - m11b (lower() on the read only) {O2a, O2b, plus the W3 regex cells, which do not match lower(user_id)}. m11c (lower() everywhere) the same set.
+  - m11 (toLowerCase at initiate) 0 red: EQUIVALENT as declared and accepted.
+  - The m0-m2 rows were re-run after the ks2166 amendment; the first run's rows are kept in mutants/_superseded_run1.
+- O2 is NOT vacuous: the stand-in models translate() char by char and lower() as JavaScript's Unicode-aware toLowerCase (an approximation of PostgreSQL lower() on a UTF-8 locale, not measured). m11b and m11c turn O2 red.
+- tsc: src rc 0; src plus 22 test files rc 0 (--listFilesOnly shows both new files); planted TS2322 rc 2. eslint on the 6 changed TS files: 0 errors, 0 warnings; planted debugger rc 1. check:test-types: 0 new. deps-present: OK.
+- docs-fragments check: OK at the head; planted unclosed div FAIL rc 1; restored sha256-equal.
+- Census before the commit: 70 open PRs, 364 rows, services/kyc/src 0, my fragment names 0, control services/transfer 7. No PR touches my paths, so there is no merge-tree pair to run.
+- PR created 16:22Z (create_pr_c40.py, read back: open, base develop, head 616c57ba4e51, 1 commit, 8 files, +1001/-15, one PR for this head).
+- Ticket comments (dry first, then real, read back exact, 0 mention nodes, planted control 1): KS-2189 8591cb13-b949-4d2a-b694-2970f04a68f1 at 16:22:50Z; KS-2188 f17e04f4-c8fa-4fef-9c28-4d3df855548c at 16:22:52Z.
+- States: both Backlog at boot (15:4xZ); both In Progress at 16:22Z, moved by the Linear-GitHub integration when the PR opened, not by me (C 39th's trap g). Priorities 3 and 4 before and after; assignee unchanged.
+
+NOT RUN / UNMEASURED: a real PostgreSQL (translate(), id <> ALL($2::text[]) and the scans are modelled or stated, not run); a running kyc process; a real Redis bus; a real gateway token; the GET route for an upper-case-stored row; Schemathesis, Akto, Playwright, k6; the hook's skipped legs; Node 24 (v26.8.1 is not LTS). Row counts for the scan cost: UNMEASURED.
+
+CANDIDATE FILINGS (in the PR body and my HANDOVER; none filed):
+1. The upper-case spelling's pii_subject_keys row survives a kyc-side erasure (packages/shared/src/crypto/subjectDek.ts exact-text keying; originate's DEK destruction unmeasured): a privacy residue.
+2. rowToVerification's checks: parseJsonb(r.checks, []) outside any try: my per-row catch covers it for the erasure read only; the GET read still fails whole.
+3. The shared errorHandler reads err.message unguarded (C 37th filing 1, still open).
+4. dbGetVerificationsByUser's throwOnError has no caller passing true now (W1).
+
+The seat ends here: no merge, no deploy, no ticket state move. A fix round only by ADDENDUM, on NEW commits.
+
