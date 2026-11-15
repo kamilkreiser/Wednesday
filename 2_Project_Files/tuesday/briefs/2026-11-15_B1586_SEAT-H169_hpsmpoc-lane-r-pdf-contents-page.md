@@ -73,15 +73,15 @@ Step, lock state (holder text or "mine"), load1, containers up, the last command
 
 ## Stamp
 Tuesday fills each slot at launch; one word, clock or answer each.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main full sha; `f32b209bfa6f33c3c0268c1daa76753c816b316e` at drafting): ____
-- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting); whether b1577 has landed: ____
-- Launch authority (the product owner's 2026-11-15 ruling on the reviewer feedback) and hard stop (READY target 240 minutes after Step 0; HARD STOP clock): ____
-- SLOTS (which HPSM-POC panes are live and the paths their kits grant, P and N included): ____
-- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): ____
-- TICKET (the F11 ticket key the records seat created, or "none yet": then code comments cite no ticket key): ____
-- GATE-ROUND (a G1 gate follows; the class and the round it counts): ____
-- Q-answers (Q-1 to Q-6 of the drafter report): ____
+- STAMP: STAMPED 17:56 AEDT 2026-11-15 by Tuesday s279. Read whole: this kit (87 lines) and the drafter report (162 lines). Re-printed by Tuesday at main f32b209b (gh api raw): ReportingEndpoints.cs:797-800 ReportWords reads every model string by reflection and :659-666 Telling() = 4+ letters and not in own (so the heading as a model string is the report's own word, D3 holds); :485 the gate compares sha256 of the redrawn PDF with the stored row, :514 the 409 'This report changed after it was issued' (Q-3 deploy note holds); ReadinessReportGenerator.cs:55 renderer.Render(model) (the shared renderer, Q-1 holds); PdfPigReportRenderer.cs:34 Name pdfpig-0.1.16, :66 DrawChrome for i > 0, :79 top = height - 34, :80 the header Text, :148 WithDeterministicId; ReportModel.cs:40 the record.
+- LAUNCH WINDOW: until 19:30 AEDT 2026-11-15
+- BASE (code main full sha; `f32b209bfa6f33c3c0268c1daa76753c816b316e` at drafting): f32b209bfa6f33c3c0268c1daa76753c816b316e
+- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting); whether b1577 has landed: b1586 absent on origin (matching-refs heads/b1586 length 0, control heads/b1541 length 1, read by Tuesday); open PRs 0; b1577 NOT landed (in its G1 gate at fda88777; it may land while you work: A MOVED MAIN applies, re-run Steps 4 and 6)
+- Launch authority (the product owner's 2026-11-15 ruling on the reviewer feedback) and hard stop (READY target 240 minutes after Step 0; HARD STOP clock): The product owner's 2026-11-15 ruling on the reviewer feedback (live board 17:16:37, view=tuesday, verbatim in Authority), launched by Tuesday. READY by your Step-0 date + 240 min; HARD STOP 22:30 AEDT 2026-11-15
+- SLOTS (which HPSM-POC panes are live and the paths their kits grant, P and N included): Datasec/HPSM-POC-H167 (B1584 lane P, F9 basis chooser, ports 10000-10009; at its step 2). Lane N (B1585) is HELD on a product-owner card and not launched. Tuesday scanned both kits for your seven owned paths (Layout.cs, PdfPigReportRenderer.cs, ReportModel.cs, ReadinessReportModelBuilder.cs, Reporting/README.md, PdfReportGoldenTests.cs, outline.json) and the port prefix 1002: 0 hits each in both (control: ReportModelBuilder.cs reads 2 in the B1584 kit). If lane P changes what the executive PDF prints, the executive goldens move again: the second to land regenerates, never by hand.
+- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): user.name kamilDatasec, user.email 88359143+kamilDatasec@users.noreply.github.com (the project's 2_Project_Files config, read by Tuesday)
+- TICKET (the F11 ticket key the records seat created, or "none yet": then code comments cite no ticket key): none yet (the records seat B1583 is not launched): code comments cite no ticket key
+- GATE-ROUND (a G1 gate follows; the class and the round it counts): Yes: a G1 Opus gate after your READY, as a separate commission; class: client-tester deliverable (the executive PDF); round 1 of 2. Then Tuesday opens the PR, reads hosted CI and CodeQL, lands by head-pinned squash. Nothing deployed; the deploy is a separate card to the product owner carrying your deploy notes.
+- Q-answers (Q-1 to Q-6 of the drafter report): Q-1: (a), the executive report only, through ContentsHeading; the readiness builder passes null. Q-2: 'Table of contents' (the reviewer's own words, actioned by the product owner's ruling). Q-3: accept; measure what you can; state both effects in the PR body as deploy notes, with the showcase re-seed reading. Q-4: Sonnet, with the G1 Opus gate. Q-5: none yet, no key in comments. Q-6: no overlap measured (see SLOTS); if one appears in your diff, STOP NEEDS-SHARED.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s279 (87 lines; behaviour lines re-printed at f32b209b, see STAMP)

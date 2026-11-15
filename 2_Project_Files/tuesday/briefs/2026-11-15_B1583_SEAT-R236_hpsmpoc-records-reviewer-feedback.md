@@ -279,18 +279,18 @@ No Jira write outside the closed list; **no transition on any key**; no statemen
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. The unstamped copy has 14 four-underscore lines (thirteen slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main, records main, Jira issue count and highest key, analysis open pull requests, `Datasec/HPSM-POC-` panes, as Tuesday reads them; the drafter read: code main f32b209bfa6f33c3c0268c1daa76753c816b316e, records main a91447c45f7ff25a1b0276250b7cca313128a78c, 484 issues and highest key HPSMPOC-484, open analysis pull requests 0, no HPSM pane): ____
-- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 for the comments and posts neither W10 nor W11): ____
-- CREATE (the nine new tickets W1 to W9: exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- HP-WORD (the word HP as the plan wrote it in W1, W2, W9, W10, W11, W13: exactly `VERBATIM` or `HOLD`; default HOLD; HOLD skips those six items; the drafter recommends VERBATIM, see drafter report Q-1): ____
-- COMMERCIAL (W12 and W13, the plan's optional comments on HPSMPOC-474 and HPSMPOC-392: exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- RULING-87 (W14, the question-count ruling on HPSMPOC-87, the drafter's text: exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): ____
-- MOVE (a move of any key: exactly `HOLD`; nothing is built, so this kit carries no moved-variant text and `WRITE` is refused): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entry; the Jira steps stand, with the records line and sentence dropped from each text as PART 1 says): ____
-- REC-MERGE (exactly `FF` or `HOLD`; default HOLD; FF = this seat lands its own records branch by the B1575 route): ____
-- Hard stop (the absolute outer limit AEDT; JIRA DONE 45, RECORDS COMMITTED 85, HARD STOP 120 minutes after your own Step-0 date, whichever is earlier): ____
-- Panes and live seats at the stamp: ____
+- STAMP: STAMPED 17:59 AEDT 2026-11-15 by Tuesday s279. Read whole: this kit (296 lines) and the drafter report (159 lines). The ruling text equals the live board row of 17:16:37 byte for byte, spacing included (kam_msgs.sh --source live, three spaces after the first full stop and two after the second, checked by program). W1 and W3's T4 quotes and options equal the two open cards' proposal text and options a to d (decision_queue.sh show, read by Tuesday; neither card is ruled). Behaviour lines re-printed at f32b209b by Tuesday (gh api raw): ReportModelBuilder.cs:19, :371, :414; useSnapshot.ts:70; NarrativeReview.cs:28; Requests.cs:103; ApiNarrative.tsx:111, :190; Layout.cs:101; registry.ts:80 (0.6.1 start package). Each prints the fragment the pointer table gives.
+- LAUNCH WINDOW: until 19:30 AEDT 2026-11-15
+- BASE (code main, records main, Jira issue count and highest key, analysis open pull requests, `Datasec/HPSM-POC-` panes, as Tuesday reads them; the drafter read: code main f32b209bfa6f33c3c0268c1daa76753c816b316e, records main a91447c45f7ff25a1b0276250b7cca313128a78c, 484 issues and highest key HPSMPOC-484, open analysis pull requests 0, no HPSM pane): code main f32b209bfa6f33c3c0268c1daa76753c816b316e; records main a91447c45f7ff25a1b0276250b7cca313128a78c; open analysis pull requests 0; refs/heads/records/b1583 absent (control records/b1575 present); Jira count and highest key NOT re-read by Tuesday (the drafter's 484 / HPSMPOC-484 stands until your Step 2); HPSM panes: Datasec/HPSM-POC-H167 (lane P) and Datasec/HPSM-POC-H169 (lane R), both kits 'Jira: 0 reads, 0 writes'
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 3 for the comments and posts neither W10 nor W11): WRITE
+- CREATE (the nine new tickets W1 to W9: exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- HP-WORD (the word HP as the plan wrote it in W1, W2, W9, W10, W11, W13: exactly `VERBATIM` or `HOLD`; default HOLD; HOLD skips those six items; the drafter recommends VERBATIM, see drafter report Q-1): VERBATIM
+- COMMERCIAL (W12 and W13, the plan's optional comments on HPSMPOC-474 and HPSMPOC-392: exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- RULING-87 (W14, the question-count ruling on HPSMPOC-87, the drafter's text: exactly `WRITE` or `HOLD`; default HOLD; the drafter recommends WRITE): WRITE
+- MOVE (a move of any key: exactly `HOLD`; nothing is built, so this kit carries no moved-variant text and `WRITE` is refused): HOLD
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD drops the branch, the pull request and the entry; the Jira steps stand, with the records line and sentence dropped from each text as PART 1 says): WRITE
+- REC-MERGE (exactly `FF` or `HOLD`; default HOLD; FF = this seat lands its own records branch by the B1575 route): FF
+- Hard stop (the absolute outer limit AEDT; JIRA DONE 45, RECORDS COMMITTED 85, HARD STOP 120 minutes after your own Step-0 date, whichever is earlier): 21:00 AEDT 2026-11-15 (or your Step-0 date plus 120 minutes, whichever is earlier)
+- Panes and live seats at the stamp: %69 Datasec/HPSM-POC-H169 (B1586 lane R, PDF contents page: code branch only, Jira 0, analysis 0); %66 Datasec/HPSM-POC-H167 (B1584 lane P: code branch only, Jira 0, analysis 0); %54 Datasec/MPS-M140 (other project). Lane N (B1585) is held, not launched. No pane writes Jira HPSMPOC or the analysis CLARIFICATIONS.md. Main may move while you work if lane R or P lands: REFUSE 6 applies (W6, W7, W8 hold unless every pointer still prints).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s279 (296 lines; ruling, card quotes and behaviour lines checked at source, see STAMP)
