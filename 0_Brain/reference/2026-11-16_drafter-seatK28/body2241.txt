@@ -1,0 +1,156 @@
+<!-- ⚠️ Keep the "Before merging" block and the two acknowledgment checkboxes below —
+     they appear on every PR by design and the pr-premerge-ack workflow parses them. -->
+
+> ## ⚠️ Before merging — run the pre-merge suites
+> **Do not merge until the pre-merge tests have been run and pass.** The fast PR
+> gate is not sufficient on its own. Run each suite's pre-merge tier locally
+> against the stack (do not dispatch `pre-merge-platform-suites.yml`: KS-441,
+> Actions is retired) — confirm it is green, then tick its box.
+
+### Pre-merge acknowledgment (author)
+
+Tick each box **only after** you have run that suite's pre-merge tier and it passed:
+
+- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`)
+- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`)
+
+**Both left unticked on purpose: neither suite was run.** This change was built with no stack on the host. See NOT run below.
+
+### PII review (KS-256 R15/R16)
+
+Not applicable. This PR changes no published spec, example value, fixture, seed, log or error message. The only new data is in unit-test files: synthetic UUIDs and `example.test` addresses.
+
+---
+
+## Linear
+
+https://linear.app/secuura/issue/KS-1703
+
+`Refs`, not a closing word. KS-1703 also covers analytics, governance, audit and timestamp routes; this PR is its transfer-service half only.
+
+## Summary
+
+Seat Q 1st measured that a second signed-in user, in the same tenant and in another tenant, could read someone else's transfer and delegation by id and list every transfer. The same was open on three sibling reads. This PR closes all six transfer-service read paths with one rule.
+
+**The rule.** A caller may read a transfer or a delegation when either holds:
+- they are a person named on it, compared with `sameId` (an ASCII-only case fold). For a transfer that is `currentOwnerId`, `newOwnerId`, `initiatedBy` or `executorId`, the same `PARTY_FIELDS` as the KS-2038 write rule. For a delegation it is `delegatorId` or `delegateId`.
+- they are a person whose role is a platform role, `SYSTEM_ADMIN` or `SUPER_ADMIN` (the shared `isPlatformRole`).
+
+Everyone else gets exactly what an unknown id gets, so a refusal never confirms that an object exists. That includes every company-level role, every API key whatever id or role it carries, and a token with no user id.
+
+**Where it lives.** Three pure functions sit beside the write rule in `services/transfer/src/services/transferAccess.ts`: `mayReadTransfer`, `mayReadDelegation` and `isPlatformReader`. `decideTransferAccess` and the four KS-2038 write doors are untouched.
+
+| Door | Before | Now |
+|---|---|---|
+| `GET /api/transfers/:id` | any signed-in caller | rule; else the route's own 404 bytes |
+| `GET /api/transfers/:id/history` | any signed-in caller | rule; else the same 404 bytes |
+| `GET /api/transfers/document/:documentId` (door 4) | every transfer of the document | only those the caller may read; with none, byte-equal to an unknown document's answer |
+| `GET /api/delegations/:id` | any caller, with the whole ancestor chain | rule, checked BEFORE `buildDelegationChain`; else the delegation 404 bytes |
+| `GET /api/delegations/document/:documentId` (door 3) | every delegation of the document | only those the caller may read (filtered, not all-or-nothing) |
+| `GET /api/transfers` (AC5) | every transfer (no `ownerId`), or any client-named owner's | platform reader: unchanged. Anyone else: only what they may read. An `ownerId` that is not the caller's own: an empty page. `total`, `limit` and `offset` count the filtered set |
+
+**Rulings this follows** (Wednesday, 2026-11-15):
+- **W1 (a): parties plus platform administrators.** These rows carry no tenant column (`migrations/002_verification-tiers.sql`), so a "same-company administrator" arm cannot be built without a migration. Kam's open card `secuura-ks1703-ac4-same-company-reads-1115` builds nothing inside a company.
+- **W2: keep the platform-administrator arm.**
+- **W3: history, door 4 and AC5 are in this PR.**
+
+The party rule is Kam's card `secuura-ks2038-who-may-approve-transfers-1106` = a. Keys are never a party: card `secuura-ks2038-connector-principals-on-transfer-doors-1106` = a.
+
+**Branch name.** The branch is `feature/ks-1703-the-transfer-get-doors-refuse-a-non-party`, not Linear's suggested `feature/ks-1703-security-seven-get-by-id-routes-serve-any`. Linear's name covers all seven routes of the ticket, and this PR is the transfer half; the key is in the branch name, so Linear still links it. Wednesday ruled this deviation.
+
+### KS-1703 acceptance criteria
+
+| AC | This PR |
+|---|---|
+| 1. 404 for a non-entitled caller | **Yes**, on the transfer-service routes: the three in the title plus doors 3 and 4 |
+| 2. Red-then-green two-user test per route | **Yes**: three new files (below). Seat Q 1st's cells are kept, with their controls |
+| 3. Live `full` sweep | **No.** No stack on this host |
+| 4. Same-tenant ruling for analytics, governance, audit | **No.** Not this PR. Kam's card is open |
+| 5. `GET /api/transfers` scoped to the caller | **Yes** |
+| 6. The systemTest module XPASSes | **Markers removed** for `test_transfer_by_id`, `test_transfer_history` and `test_delegation_by_id` (marker lines only; the other three stay). The module itself was **not run**: it needs the stack |
+| 7. Baseline entries | Nothing to do: `schemathesis-baseline.json` holds 0 `object_level` entries |
+
+### What this admits
+- Every party of a transfer: owner, recipient, initiator, executor. An initiator who is neither owner nor recipient now also sees the transfer in their own list. Before, `?ownerId=` matched only the two owner columns.
+- The delegator and the delegate of a delegation. A party's answer still carries the ancestor chain, which names the delegators and delegates above it, the authority they already hold through.
+- `SYSTEM_ADMIN` and `SUPER_ADMIN`, in either case, on every read and the full list.
+
+### What this REFUSES that was open before
+- **Every same-tenant non-party**, a company's own administrators included: `ORG_ADMIN`, `ISSUER_ADMIN`, `ADMIN`, `OWNER`, `USER`. This is stricter than today, which Seat Q 1st measured as 200 for a same-tenant `OWNER`. The caller search found no consumer that needs the read: in-repo frontends, gateway, SDK and e2e, at live develop, 373 lines in 34 files. External SDK consumers were not measured.
+- Every caller of another tenant.
+- Every API key, including one that carries a party's user id or `SYSTEM_ADMIN`, and every token with no user id.
+- A client-named `ownerId` on the list.
+- Three existing KS-2081 cells changed by design, plus one helper:
+  - `control P7 a key can still read all four GET doors` became `RED P7 a key reads nothing at the four GET doors (KS-1703)`, as its own comment said it would.
+  - The two `RED R5` cells and `control R5` read the list total and the document count as `STRANGER`; they now read as `OWNER`, a party to every row that file opens. Their assertions are unchanged, and the control still proves the instrument can see a write.
+  - The file's `statusOf` helper, used by 8 cells, read by id as `STRANGER`; it now reads as `OWNER`. The brief named the three cells only.
+
+### The administrator asymmetry (D4)
+The write rule admits no administrator: `transferAccess.ts`, "No role is read". Delegation revoke admits only the delegator and the delegate. This read rule admits platform administrators. The asymmetry is deliberate, per ruling W2.
+
+### For the board seat (not filed by this PR)
+- Doors 3 and 4 (`/api/delegations/document/:documentId`, `/api/transfers/document/:documentId`) had no ticket of their own. Both are fixed here; please file them as tickets.
+- Other read paths that are still unscoped, not touched here:
+  - `GET /api/delegations/stats/overview`, an unscoped aggregate.
+  - `GET /api/notifications`, whose `?userId=` fallback applies when the token has no user id.
+  - `GET /api/delegations`, whose own `?userId=` fallback likewise applies to a token with no user id.
+- Spec (Wednesday's D5 ruling: spec unchanged here):
+  - The read routes' spec text carries no owner-scope sentence (the write doors' "a caller the transfer does not name gets the same 404" sentence).
+  - `GET /api/transfers` declares a 404 it never answers.
+- `systemTest/schemathesis/tests/test_get_by_id_object_authorization.py`: the module docstring's "Which markers mean what" paragraph still calls transfers and delegations confirmed defects. Only the marker lines were licensed, so that paragraph is Peter's to update.
+
+### Known limits
+- `executorId` has no column. After a restart an executor is no party and reads 404, as on the KS-2038 write doors (fails closed).
+- The list reads its rows and filters in the service: no SQL change, no index, no migration. For a non-administrator, `?ownerId=<own>` now reads the full set, as the no-`ownerId` list already did, instead of the owner-column query. That is one scan of `svc_transfers` per call, the cost today's unfiltered list already paid.
+
+## Test Evidence
+
+**Touched (10 files):**
+- `services/transfer/src/services/transferAccess.ts` (+54)
+- `services/transfer/src/index.ts`: the four doors and the list
+- `services/transfer/src/routes/delegations.ts`: two doors
+- `services/transfer/src/__tests__/ks2081-transfer-doors-refuse-non-user-principals.test.ts`: the changes above
+- three new test files: `ks1703-transfer-get-doors-refuse-a-non-party.test.ts`, `ks1703-delegation-get-doors-refuse-a-non-party.test.ts` and `ks1703-transfer-read-rule-unit.test.ts`
+- `systemTest/schemathesis/tests/test_get_by_id_object_authorization.py`: three marker lines
+- the fragment pair `Projects Documents/fragments/{flow,cheat}/KS-1703-get-doors-refuse-a-non-party.html`
+
+**Ran (all local, Node v26.8.1, macOS arm64, load1 read before each run):**
+- **Red first.** The three new files hold 112 cells. Against develop's product bytes (`bbb75755064e`), 87 of 87 RED cells fail by AssertionError (never TypeError) and 25 of 25 controls pass. With the change, 112 of 112 pass.
+- **Whole `services/transfer` vitest suite.**
+  - Before (develop `bbb75755064e`, load1 4.24): 483 of 483 in 18 files.
+  - After (this head, load1 6.09): 595 of 595 in 21 files.
+  - Cell diff, by file and full name: the only cell gone is the old `control P7` (renamed above). All other 482 are present and green, by name including `ks2038-*`, `ks2081-*`, `ks1845-*`, `ks1015-*`, `ks474-*`, `ks444-*`, `ks1868-*`, `ks2055-*`, `ks591-*` and `transfer.test.ts`.
+  - No pre-existing red.
+- **tsc** over `src` (the service tsconfig): 0 errors. Over `src` plus every test file (a temporary tsconfig that drops the `__tests__` exclude): 0 errors. Planted controls in a source file and in two test files each read rc 2 naming the planted line, and the files were restored sha256-equal.
+- **eslint** over the 7 changed TS files: 0 errors. One warning, `no-useless-assignment` on `let filtered` in `GET /api/transfers`, is pre-existing: develop has it at line 628, the same statement. A planted control (`var` plus `debugger`) read 2 errors.
+- **Planted mutants.** 15 mutants plus develop's own bytes. Each declared its red cells before the run; the whole suite ran against each; the product bytes were restored and proven by sha256 after every one. All 16 matched as declared:
+  - every door's check removed (m1 to m3);
+  - each document filter (m4a, m4b);
+  - the list filter (m5a) and the foreign-`ownerId` empty page (m5b);
+  - `===` in place of `sameId` (m6a, m6b);
+  - `ORG_ADMIN` admitted (m7);
+  - the administrator arm removed (m8);
+  - the key refusal removed (m9);
+  - 403 in place of the 404 bytes (m10);
+  - a same-tenant arm (m11);
+  - the chain built before the check (m12, via a spy).
+  
+  One declaration was amended after the first run. Under m9, KS-2081's `RED P7` also went red, because that file's seeded rows name the key's own id, `connector:api-key`, as `initiatedBy`. That is a correct kill.
+- **Merge-tree** against the open PRs that touch `services/transfer`. 2170 is clean both orders. 649 and 575 conflict both orders, but they conflict with develop alone in the same `package.json` and lock files, none of them mine. A planted same-line control against 2170 conflicted (rc 1).
+- `node Blockchain/Dev/scripts/docs-fragments.mjs check`: `OK`. With a planted unclosed `<div>` in my flow fragment it failed, rc 1, "tags are not balanced"; the file was restored sha256-equal. It prints a cheat-page ADVISORY at line 6235 that develop's own fragments print too.
+- Pre-push hook: pushed through the fleet queue and lock driver (695 s of hook, load1 7.28 at the gate; origin verified at 42fd872d49cd by ls-remote). The hook's final line, verbatim: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 skipped (local stack not up). Shell suites: `126 passed, 0 failed, 1 skipped (of 127)`; the skip is `restore_local_secrets.test.sh`, which printed `SKIP — docker compose is not on PATH`: on this host the docker CLI sits only inside the app bundle, not on PATH (a host gap, unrelated to this change). Develop moved during the push from bbb75755064e to 263a28fcca82 (one file, `Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh`, no overlap with this PR's ten paths).
+
+**NOT run:**
+- The four platform suites (Schemathesis, Akto, Playwright, k6), the live sweep and any gateway path: no stack on this host.
+- The systemTest module whose markers this removes.
+- A second tenant end to end, a browser, and external SDK consumers.
+- Node 24: the measurements are on Node v26.8.1, which is not LTS.
+- ruff on the Python edit (not installed here). The edit is three comment lines, the longest 118 characters against the 120 limit, and Python's own parser accepts the file.
+
+**Migrations and config:** none.
+
+## Deploy
+
+A transfer-service deploy is owed for this to reach any environment, held for Kam's word. Nothing was deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
