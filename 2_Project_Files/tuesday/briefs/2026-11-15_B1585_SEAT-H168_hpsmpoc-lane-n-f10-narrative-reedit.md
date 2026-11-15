@@ -74,15 +74,15 @@ Step, lock state (holder text or "mine"), load1, containers and APIs up, the las
 
 ## Stamp
 Tuesday fills each slot at launch; one word, clock or answer each.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main full sha; `f32b209bfa6f33c3c0268c1daa76753c816b316e` at drafting): ____
-- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting): ____
-- MIGRATION (exactly `ALLOWED` or `HOLD`, with its authority quoted; default HOLD, and HOLD means this kit is not launched): ____
-- Launch authority (the product owner's 2026-11-15 ruling on the reviewer feedback, plan item F10) and hard stop (READY target 360 minutes after Step 0; HARD STOP clock): ____
-- SLOTS (which HPSM-POC panes are live and the paths their kits grant; whether b1577 has landed; the B1584 and B1586 OWNS lines): ____
-- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): ____
-- GATE-ROUND (a G1 gate follows; the class and the round it counts): ____
-- Q-answers (Q-1 to Q-7 of the drafter report): ____
+- STAMP: STAMPED 18:31 AEDT 2026-11-15 by Tuesday s279. Read whole: this kit (88 lines) and the drafter report. Re-printed by Tuesday at f32b209b (gh api raw): ReportingEndpoints.cs:306-311 the accepted review overwrites Status, NarrativeText, ReviewBy, ReviewAt, ReviewNote, ReviewRole; PersonalDataEndpoints.cs:215-222 StoredReportsAsync finds reports only through narrative.ReviewBy (so D5 is needed); NarrativeReview.cs:28 refuses anything not generated (read earlier today). Partition: lane R (B1586, live) owns Pdf/, ReportModel.cs and ReadinessReportModelBuilder.cs and lists your files as NOT its own; lane P (B1584, live) owns web snapshot, web/src/lib and ReportModelBuilder.cs; re-read both at Step 0.
+- LAUNCH WINDOW: until 19:45 AEDT 2026-11-15
+- BASE (code main full sha; `f32b209bfa6f33c3c0268c1daa76753c816b316e` at drafting): f32b209bfa6f33c3c0268c1daa76753c816b316e
+- Branch head at launch (the new branch must NOT exist) and open PRs (0 at drafting): b1585 absent on origin (matching-refs heads/b1585 length 0, read by Tuesday); open PRs 0 on HPSM-POC; ports 10010-10019 free (lsof 0)
+- MIGRATION (exactly `ALLOWED` or `HOLD`, with its authority quoted; default HOLD, and HOLD means this kit is not launched): ALLOWED. Authority, the product owner on the live board 2026-11-15 18:29:59 (view=tuesday), verbatim: "a — Allow the one migration (gated, not deployed)" on the card asking whether this lane may add its one migration. One migration per provider, NarrativeRevisions, creating narrative_revision only; nothing applied to any hosted database.
+- Launch authority (the product owner's 2026-11-15 ruling on the reviewer feedback, plan item F10) and hard stop (READY target 360 minutes after Step 0; HARD STOP clock): The product owner's 2026-11-15 ruling on the reviewer feedback (17:16:37, plan item F10) and his 18:29:59 migration word; launched by Tuesday. READY by your Step-0 date + 360 min; HARD STOP 01:30 AEDT 2026-11-16
+- SLOTS (which HPSM-POC panes are live and the paths their kits grant; whether b1577 has landed; the B1584 and B1586 OWNS lines): Datasec/HPSM-POC-H167 (B1584 lane P, ports 10000-10009) and Datasec/HPSM-POC-H169 (B1586 lane R, ports 10020-10029) are live; b1577 has NOT landed (in its G1 gate at fda88777; it touches none of your paths per the drafter: a no-overlap MOVED MAIN if it lands). The HPSM records seat for the plan has finished (it created the F10 ticket HPSMPOC-491; you read no Jira and cite no key).
+- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): user.name kamilDatasec, user.email 88359143+kamilDatasec@users.noreply.github.com (the project's 2_Project_Files config, read by Tuesday)
+- GATE-ROUND (a G1 gate follows; the class and the round it counts): Yes: a G1 Opus gate after your READY, as a separate commission; class: schema migration + the human review gate + the erasure lookup; round 1 of 2. Then Tuesday opens the PR, reads hosted CI and CodeQL, lands by head-pinned squash. Nothing deployed; the deploy (bundle + grant re-run) is a separate card to the product owner carrying your deploy notes.
+- Q-answers (Q-1 to Q-7 of the drafter report): Q-1 ALLOWED (see MIGRATION). Q-2 Sonnet with the G1 Opus gate. Q-3 no: revisions stored and exported, not shown. Q-4 contract text unchanged now; name the sentence in the PR body. Q-5 infra/README.md unchanged by you. Q-6 run the live-API set as written. Q-7 one window with the context band and the handover form.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s279 (88 lines; the overwrite and erasure lines re-printed at f32b209b, see STAMP)
