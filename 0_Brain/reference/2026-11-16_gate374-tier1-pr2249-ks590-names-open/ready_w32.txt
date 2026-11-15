@@ -1,0 +1,58 @@
+=========== [INBOUND] 2026-11-15T23:28 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-590 (Seat W 32nd)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-590 (Seat W 32nd)
+Seat W 32nd
+
+READY FOR GATE KS-590 (Seat W 32nd). TIER 1. PR-N of two.
+
+## The PR
+- PR 2249 (https://github.com/Secuura/Distributed_Secuura/pull/2249; created 23:27Z, read back: base develop, head 10057c4f63c3, 1 commit, 11 files, +310 -79), `Refs KS-590: document verification names its title, issuer, certifier and organisation to every caller (Kam 2026-11-16 09:17)`.
+- Branch feature/ks-590-verification-names-open-to-every-caller. Head 10057c4f63c3641eab82ec5688c1d41ef77c325d, ONE commit on develop 9ddba202bb15c8eb45a692f77291d6a52adb5aec.
+- 11 files, +310 -79: originate routes/verification.ts and routes/verificationV2.ts; 1 new and 4 edited test files; the KS-1986 fragment pair (2 sentences edited) and a new KS-590 fragment pair.
+- Pre-push hook final line, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." (legs 3, 4 and 8 skipped: no local stack on :6882; shell suites 126 passed, 0 failed, 1 skipped). Push VERIFIED 23:27:14Z, hook 721 s, push.rc 0, lock released.
+- Push: driver push/drv_ks590_1, launched 23:15:13Z under your overlap ANSWER (OVL_IGNORE_PRS="2138 2161"). Conditions a and b passed in the launch action: develop 9ddba202bb15 by gh api at 23:15:10Z; PR 2161 head 0e50defb7819, merge-tree 0/0 conflicts both orders, same tree 0aca64bc3e2c. The override is named in the PR body in one line, as you wrote it.
+
+## What it does (Kam 09:17, card secuura-verify-public-withheld-names-1116 = b)
+The four names reach every caller on all four paths: v1 /verify by hash, v1 /verify by document id, verify-file, and v2 /verify. The D-B3 org-id null is reversed. v2 no longer sends fieldsWithheld. Unchanged: verdict, checks and anchor facts; same-tenant answers; the chain-first answer; the lineage skip (D5). No caller id or email appears in an answer.
+
+## Measurement (runner JSON; evidence/names_table_develop.txt)
+On develop, an anonymous caller and another company's signed-in caller both got title, issuer and certifiedBy as null on all four paths. certifierOrganizationId was already open on those paths and null only on the D-B3 path (ks1986 pins it).
+
+## Cells, mutants, suites
+- New file: 23 cells, red-first on develop 9 of 23, all AssertionError (N1 x4, N5 x4, N4). 14 controls green on both sides.
+  - One harness correction BEFORE the product change: N-C1 first read red on develop because of the per-request verifiedAt and the v2 marker (both outside the facts). I excluded both keys; N4 pins the marker.
+- After-suite census: 15 forced cells in 4 files, all AssertionError, each inverted in place, card cited on the line (W32-N4).
+  - ks1986 (12): helper lines 206/207, the canary loop 231, lines 242-245, line 285.
+  - ks584-p3 (1): lines 374-376. ks584 row selection (1): lines 296-297.
+  - ks1561-g188-f1 line 355 (1). That file was NOT in my plan's grep list (the scrubbed title inside a toEqual): R7, the measurement wins.
+  - The owner id and the issuer_organization_id column stay asserted absent.
+- Mutants (tools/mutants_ks590_w32.py, predictions written before the run): 10 of 10 killed, every red AssertionError, product sha256 equal after.
+  - m0 (develop bytes): 24 red = the 9 new + 15 forced.
+  - m-N1 (by-hash title null): 9 red. m-N2 (certifiedBy null): 3. m-N3 (D-B3 org null): 2 (FOREIGN ORIGINAL CERTIFIED x2). m-N4 (chain-first org null): 1 (N-C2). m-N5 (lineage skip off): 1 (D5). m-N6 (v2 marker back): 2. m-N8 (by-id title null): 2. m-N9 (v2 title null): 4.
+  - m-N7 (verify-file title null for EVERY caller): 10 red, 7 more than I predicted (ks1986's verify-file cells). My prediction was too narrow; the real set is in evidence/mutants_ks590/summary.txt.
+  - My m0 and m-N1 predicted labels named a describe block, not the cell title; those cells did go red.
+- originate jest whole suite: after 228 suites 2739/2739 (load1 6.84); develop before and after 227 suites 2716/2716 (load1 3.19 and 6.90). The BRIEF's reading was 225/2696.
+- tsc: src rc 0. Tests: the same 4 pre-existing errors as clean develop (ks1937, ks488), 0 in my files, plant TS2322 reported.
+- eslint: 7/7 files 0/0, plant reported. check:test-types: 0 new in five services. Docs check: green, plant red, restored equal, green.
+- NOT run: Schemathesis, Akto, Playwright, k6; real multi-tenant PostgreSQL; production. Node v26.8.1 (LTS status unverified).
+
+## Tickets (state, priority and assignee untouched by me; read before and after)
+- KS-590: facts comment 8faf4004-d319-46d7-b713-2eab363d0f9c (23:28:04Z), read back exact, 0 mention nodes.
+- KS-1995: facts comment b7c2c702-4b86-4c1b-b017-0d03ca1aa806 (23:28:06Z), read back exact, 0 mention nodes.
+- Linear integration: state, priority and assignee of KS-584, 590, 834, 1561, 1699, 1855, 1986 and 1995 are identical before and after the PR opened (evidence/lin_states_before_pr_ks590.txt, _after_). PR 2249 is attached to KS-590 only; the other keys named in the commit message linked nothing.
+
+## Differences from the BRIEF's reading (R7)
+- Suite counts as above.
+- ks1561-g188-f1 is a fourth forced file.
+- VERIFICATION.md states no withholding at develop and is untouched (PR 2138's +4 -2 added text develop never had).
+- The KS-1986 fragment pair stated the scrub as current behaviour and is corrected in place (BRIEF step 3).
+- The BRIEF's chargeEventId readers do not exist at develop (from my plan; PR-V's concern).
+
+## Candidate filings (none filed)
+1. originate.openapi.ts line 2093 and the yaml line 30222 still describe the fieldsWithheld marker (D4: left untouched as ruled).
+2. KS-1995's ask is reversed by the 09:17 card (comment posted). The board seat may close or re-scope it.
+3. Closing PR 2138 (Wednesday's GO; it now conflicts with PR-N by design).
+
+## PR-V and pace (your item 13)
+Meter at this READY: 46.2.
+That is under your 48 line, so item 13 lets me start PR-V. But PR-N cost about 26 points from plan to READY, and PR-V is larger: two services, gateway cells not yet written, eight mutants, two whole suites, the mandatory case cell, three comments. Its READY forecast is about 73, past the BRIEF's 70 HANDOVER line. I propose handing PR-V to a successor now, with its measurement done. It is in my HANDOVER, FINAL block first: the plan as ruled; the originate red-first (5 red by assertion, 11 controls green, V-A4 against the real middleware); gateway suite A 1927/1927; the trees. If you prefer, I build PR-V until about 68 and hand over at whatever stage that is. Either way I wrap after your word.
+
