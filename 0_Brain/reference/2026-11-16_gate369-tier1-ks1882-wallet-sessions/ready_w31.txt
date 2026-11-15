@@ -1,0 +1,46 @@
+=========== [INBOUND] 2026-11-15T15:19 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1882 (Seat W 31st)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1882 (Seat W 31st)
+Seat W 31st
+
+READY FOR GATE: KS-1882 wallet-connector half. Tier 1, gate row G1. PR 2244, head 6b9a4caa4daebd725d05e11c3c32dd1a99827f1d, base develop e659170439406810d368bdebf19dd39c08abeace (1 commit, 7 files, +570 -15). This seat ends here: no merge, no deploy, no ticket state move.
+
+PR: https://github.com/Secuura/Distributed_Secuura/pull/2244
+Branch: feature/ks-1882-wallet-sessions-are-the-owners (verified on origin by ls-remote: 6b9a4caa4daebd725d05e11c3c32dd1a99827f1d at 15:17:03Z (driver VERIFIED) and again before the PR)
+Ticket comment: f8533b1f-58ae-4efa-9ca7-8afae1eb5416 at 15:18:32Z (read back exact and content-only equal, 0 mention nodes). KS-1882 state/priority/assignee BEFORE Backlog / 2 / kamil.kreiser@secuura.ai; AFTER In Progress / 2 / kamil.kreiser@secuura.ai. The state move Backlog -> In Progress at 15:18:15Z is the GitHub integration bot reacting to the PR (issue history botActor GitHub, type integration), not my write.
+
+WHAT IT DOES (your rulings D1-D5, W1-W3, and the check-first ANSWER)
+- POST /api/wallets/session records the creator's userId in a process map (sessionOwner) apart from the session object. A token with no usable userId gets 401 UNAUTHORIZED before the 400 body check and creates nothing (cell E12 pins the order).
+- GET and DELETE: owner or platform administrator. Sign: owner only.
+- Refusal = the route's own 404 bytes, decided from the map before any read or write (no SELECT, INSERT or UPDATE). Only a permitted caller reaches the lookup. KS-2042 item 1 no longer happens for refused or unknown callers; items 2 and 3 stay open.
+- Ownerless (not in this process's map) = platform administrator only on GET/DELETE, nobody on sign. The PR names card secuura-ks1695-ownerless-records-who-reads-1020 (b) as your reading by analogy, and the restart/replica cost; deploy held for Kam's word.
+- ks1360's stand-in now sets a principal (0 expect lines changed); m0b proves its two session-creating cells are the by-design change.
+
+EVIDENCE (REC 5_Project_History/2026-11-16_seatW-31st/evidence/)
+- Red first at develop e65917043940: 29 of 42 route cells RED, every one by AssertionError; 13 controls green. The 25-row unit file cannot load at develop (new module), so its red stage is the mutant set.
+- Whole wallet-connector suite: develop 76/76 in 11 files; branch 143/143 in 13 files. Named green at both: ks1845 12, ks1360 3, ks452 3, ks488 13, ks1868 9+6, signRequest 5, sessionRequest 6, smoke 1, cardano-cip30 10, db.retry 8. No pre-existing red.
+- Mutants 13 of 13 killed, red sets pre-registered in tools/mutants_w31.py (evidence/mutants_run1/declared.json), each matched exactly, every failure an AssertionError, files restored and proved by sha256. Counts: m1 17, m2 5, m3 6, m4 2, m5 47, m6 8, m7 10, m8 31, m9 4, m10 3, m11 15, m12 7, m13 4; m0 29 (develop server.ts), m0b 2 (develop ks1360). The load gate stopped two runs (load1 8.12 and 9.66); both resumed after the load fell, restore proved by sha256 in between.
+- tsc --noEmit on the service rc 0. Service plus tests (scratch tsconfig): 1 error, cardano-cip30.test.ts(8,32) TS6133, file untouched and byte-identical to develop; 0 in my files. Planted TS2322 reported.
+- eslint (Node API, cwd Blockchain/Dev), 5 changed files: 0 errors, 0 warnings, 0 ignored. Planted debugger: 1 error.
+- docs-fragments check OK; its 2 ADVISORY lines identical with my pair moved out; planted literal section number: rc 1.
+- merge-tree vs develop dbb053b756ae: clean both orders (tree b5654fadd07b). Vs PR 649: rc 1 both orders, but develop alone vs 649 has the same 15 CONFLICT lines; 0 on my paths. Discriminating control (billing/package.json pg line, a file 649 merges cleanly): exactly +1 CONFLICT. My first control (wallet-connector/package.json) did not discriminate, because that file already conflicts; replaced, the old output kept in quarantine.
+- Push: driver pid 55308, queued 14:30:33Z behind C 39th, lock 14:32:12Z, push 1 REFUSED (14:32:25Z-14:43:57Z, legs 14 and 16, my tree deps: STATUS 2), push 2 driver pid 63339 queued 14:45:51Z, pushed 15:06:06Z-15:17:00Z, 654 s, VERIFIED. Hook final line, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4, 8: no local stack. Leg 14: 126 passed, 0 failed, 1 skipped (restore_local_secrets.test.sh, docker CLI not on PATH). Leg 16: 0 new in all five services
+- Develop at the READY: 6fdba4e013b384c7d1f60d36327491ff61e6476c, 3 commits past my base (KS-2103, KS-1703, KS-2123), 17 files, 0 on my 7 paths, 0 under wallet-connector (control: my paths self-match 7). merge-tree my head vs 6fdba4e013b3 clean both orders, same tree 6910946e3f4c.
+
+NOT RUN: the four platform suites; a stack or the gateway; a real JWT; Postgres; a restart; replicas; a second tenant end to end; a browser; key or connector principals; Node 24 (measured on v26.8.1, not LTS); a container build; callers outside this repo.
+
+FOR WEDNESDAY (none filed by me)
+1. GET /health answers an unauthenticated count of sessions.
+2. The durable owner column and the double definition of svc_wallet_sessions (KS-2042 items 2 and 3, Kam's migration), and the replica question (unmeasured).
+3. The user.erased cascade deletes rows by address and leaves the in-process maps; it now also leaves sessionOwner entries (same lifetime as the session map entry).
+4. Key and connector principals on wallet sessions: not ruled; a principal's userId is the owner string.
+5. Observation, not measured: Akto's similarityTolerance comment says its scan creates seven sessions itself. If its tokens carry no userId, those creates now answer 401. Schemathesis's object-level-authorization leg flagged GET /api/wallets/session/{sessionId} on 2026-11-15; this PR should clear it on a stack run.
+6. The push driver releases the lock with rm and rmdir (the fleet lock protocol). Your ANSWER says every removal is a move; I did not change the shared protocol. In my gatetest it ran against my own scratch lock dir.
+
+FAULTS: cd 0; rm 0 by my own commands; key in argv 0; no .env name or value printed; shared checkout lockless reads only, no fetch.
+(1) The commit ran with -c core.hooksPath=/dev/null. .githooks holds only pre-push, so no hook was skipped and the push ran the hook. A needless flag.
+(2) The non-discriminating first merge-tree control (above).
+(3) My worktree lacked its 30 nested node_modules (I cloned only three folders), so push 1 failed hook legs 14 and 16 on @types/node shapes in auth and api-gateway. One 692 s push lost; fixed under byte-equal guards and proved by check:test-types rc 0 before the relaunch (STATUS 2).
+(4) One zsh trap: a loop with set -- $o did not split, so one merge-tree call got empty arguments and printed rc 1; caught at once, re-run with explicit arguments (clean both orders). Nothing reached a mail or the PR.
+
+Meter: 38.9 of 1M at this mail.
+
