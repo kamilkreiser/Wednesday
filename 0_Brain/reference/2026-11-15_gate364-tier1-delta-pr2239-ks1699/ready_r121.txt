@@ -1,0 +1,87 @@
+=========== [INBOUND] 2026-11-15T12:36 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE KS-1699 (Seat R 121st)
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE KS-1699 (Seat R 121st)
+Seat R 121st
+
+READY FOR GATE: KS-1699, PR 2239, TIER 1, DELTA gate on f1ac5fec9b67..9036b3d0c78a (round 2 of 2, gate 363 notes). Pushed, not merged, not deployed; demo frozen. The seat ends here.
+
+HEAD
+- New head 9036b3d0c78a5a83d8e08092d4c0a08eb37793d7 (origin read by ls-remote after the push, 12:33:26Z). Parent chain: 9036b3d0c78a <- 7dedfce0b (cells) <- f1ac5fec9b67 (gate 363's head). Fast-forward; no force push, no rebase or amend, no --no-verify.
+- Delta f1ac5fec9b67..9036b3d0c78a: 2 commits, 2 files, +76 -3:
+    Blockchain/Dev/services/originate/src/__tests__/ks1699-share-and-recertify-refuse-a-non-party.test.ts  +73 -2 (blob aac6cb5163a4)
+    Blockchain/Dev/services/originate/src/routes/certifications.ts  +4 -2, comment only (blob 473e968f72ed, sha256 6e6472ffb6d0)
+- Commit subjects: "Refs KS-1699: cells pin D1 (a missing claim is not defaulted) and D2 (tenant-wide), per gate 363" and "Refs KS-1699: callerMayReadCertification's comment names the ORG_ADMIN arm share and recertify add". Refs only, no closing keyword.
+
+THE FOUR ITEMS
+1. G363-2239-1: cells S12 (share) and R12 (recertify), each over two claim shapes (no tenantId claim; an empty one) = 4 cells. Default-tenant row a0000000-0000-4000-8000-000000000001; request tenant from the REAL resolveRequestTenantId (unvouched, no upstream tenant, falls back to the default tenant); 404 with each route's own bytes and zero side effects (share: rows, emails, charges; recertify: anchors, saves, charges); comparator in the same cell: the default tenant's own ORG_ADMIN 201 on the same row (it also proves the resolver ran: in direct mode nobody can reach that row). Ported into the EXISTING file (Wednesday ruled 11:46:53Z): tenantFrom 'direct' (default, every pre-existing cell unchanged) | 'resolver' (S12/R12 only), reset in the top-level beforeEach. No @ts-nocheck.
+   G4 IN as S13/R13: a same-tenant ORG_ADMIN carrying organizationId 'org-sibling-b' shares and recertifies, 201 with one of each side effect.
+2. G363-2239-3: the :159-160 sentence replaced by the gate's sentence; unwrapped, it equals verdict.md line 31's quoted text byte for byte (checked by script). Wrapped to 4 lines (max 117 cols). callerMayReadCertification's function text sha256 295846646299a6ef before and after. evidence/item2.diff.
+3. G363-2239-4: draft at /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-15_seatR-121st/push/linear_comment_ks1699.md (diff against R 120th's: evidence/comment_draft.diff, 5 changed lines) (copy of R 120th's; R 120th's untouched, sha256 ea487ef651aa). Fix 1 DROP (the clause "such an admin is refused here, as revoke already refuses it" removed); Fix 2 "every other non-platform role"; Next line cites verdict line 1 verbatim plus "corrected per G363-2239-4" and the new head; BLUF head/commit count updated; evidence counts recomputed (24 -> 60, 37 red over the PR 2233 routes, the builder's 16 plants each >= 2 red, the gate's two mutants 4 and 2). --dry: rc 0, "guards pass", 2544 chars, "DRY: nothing posted"; KS-1699 read In Progress / priority 2 / assignee unchanged; no at-sign anywhere in the text, so no mention node can form (bodyData is read back only on --real). The --real command, after your gate, from REC: python3 -I tools/envrun_r121.py LINEAR_API_KEY -- python3 -I tools/post_comment_r121.py --real KS-1699 push/linear_comment_ks1699.md push/linear_comment_ks1699.json. NOT posted.
+4. Commits, push, PR body: below.
+
+CELLS (KS-1699 file 60 + KS-1695 file 37 = 97, jest, my tree)
+- At the head: 0 of 97 red. 54 -> 60.
+- Gate mutant claim_defaults_to_default_tenant (plant.py's edit, byte-copied): 4 red = S12 x2, R12 x2, all AssertionError ("Expected 404 ... Received 201"); the other 56 and KS-1695's 37 green (re-confirms the gate's 0 of 54).
+- Gate mutant org_bound_D2: 2 red = S13, R13, AssertionError (Expected 201, Received 404); nothing else red.
+- Restored by content and sha256 each time.
+
+PLANTS (tools/plants2_r121.py on the final certifications.ts, sha256 6e6472ffb6d0 restored after each; evidence/plants_final/)
+- head (no plant): 0 of 97 red (of them new S12/R12/S13/R13: 0)
+- p0 develop's route (7b452b1bb blob): 37 of 97 red (of them new S12/R12/S13/R13: 6)
+- p1 admin arm removed: 37 of 97 red (of them new S12/R12/S13/R13: 6)
+- p2 role check always true: 14 of 97 red (of them new S12/R12/S13/R13: 0)
+- p3 tenant compare dropped: 12 of 97 red (of them new S12/R12/S13/R13: 4)
+- p4 tenant allow inverted: 37 of 97 red (of them new S12/R12/S13/R13: 6)
+- p5 arm moved into the read helper: 3 of 97 red (of them new S12/R12/S13/R13: 0)
+- p6a share refusal 403: 17 of 97 red (of them new S12/R12/S13/R13: 2)
+- p6b share refusal one byte off: 17 of 97 red (of them new S12/R12/S13/R13: 2)
+- p6c recertify refusal 403: 17 of 97 red (of them new S12/R12/S13/R13: 2)
+- p6d recertify refusal with share's body: 17 of 97 red (of them new S12/R12/S13/R13: 2)
+- p7a share check after the revoked check: 2 of 97 red (of them new S12/R12/S13/R13: 0)
+- p7b share check after the charge: 16 of 97 red (of them new S12/R12/S13/R13: 2)
+- p7c recertify check after the revoked check: 2 of 97 red (of them new S12/R12/S13/R13: 0)
+- p7d recertify check after the charge: 16 of 97 red (of them new S12/R12/S13/R13: 2)
+- p8a ISSUER_ADMIN admitted: 2 of 97 red (of them new S12/R12/S13/R13: 0)
+- GATE claim_defaults_to_default_tenant: 4 of 97 red (of them new S12/R12/S13/R13: 4)
+- GATE org_bound_D2: 2 of 97 red (of them new S12/R12/S13/R13: 2)
+- p8b ADMIN admitted: 2 of 97 red (of them new S12/R12/S13/R13: 0)
+- 0 non-assertion reds in any plant; KS-1695's 37 never red. p0 = develop's route (7b452b1bb blob; named edit R121-N2, because my HEAD is the PR head).
+
+SUITE A/B (whole services/originate jest, interleaved develop/branch x3, load1 <= 8 at each start, no CLI ignore flag; evidence/suite/ab.out)
+- develop 7b452b1bb (s-r121-base): run1 223 files / 2633 tests / 0 failed (29 s); run2 the same (12 s); run3 the same (18 s).
+- branch 9036b3d0c78a (s-r121-ks1699): run1 223 / 2669 / 0 failed (29 s); run2 the same (13 s); run3 the same (14 s). 2669 = 2663 (R 120th's branch) + 6.
+- Pre-existing reds: none on either side. Develop moved after the suite (8095a4d2: 2 KS-1910 fragments; 61a3953e: a KS-2146 test-header comment in packages/shared; bbb75755: KS-1171 anchoring-service files + fragments); none is an originate path or a packages/shared source file.
+
+CHECKS (evidence/checks_run.out, evidence/checks/)
+- tsc --noEmit plain: mine rc 0 / 0 errors, develop rc 0 / 0; planted TS2322 rc 2.
+- tsc with test files (node,jest): 4 lines both sides (ks1937 TS2300+TS2451, ks488 TS2300+TS2451), delta 0 new / 0 gone; touched test file 0; control rc 2.
+- eslint (root flat config, ESLint API) on both files: 0 errors 0 warnings; planted var+debugger 2 errors (rc 1).
+- docs-fragments check: OK on mine and on develop (2 ADVISORY lines on both); planted defect FAIL rc 1. Fragments untouched; their "The claim is compared, not defaulted" is now backed by S12/R12 (said in the PR body).
+- porcelain 0 after every check and plant.
+
+MERGE-TREE (objects only)
+- x develop at READY bbb75755064e: rc 0 both orders, tree 1b6128cefd85, the merged certifications.ts (473e968f72ed) and test file (aac6cb5163a4) equal my head's; planted control on develop's first modified hunk (packages/shared ks1536 test, line 16) rc 1 both orders. Also x develop at launch 7b452b1bb: rc 0 both orders, tree 14a51a4d6278; control rc 1 both.
+- x PR 2160 head b02bd2716cc2 (re-read live at READY): rc 0 both orders, tree d11624b7203b; planted control on 2160's first changed line (base :935 -> my :967) rc 1 both orders, conflict naming certifications.ts.
+
+GATES AND PUSH
+- Grants used, exactly as your ANSWER of 11:54:36Z: CENSUS_ACCEPT="Blockchain/Dev/services/originate/src/routes/certifications.ts=2160,2239;Blockchain/Dev/services/originate/src/__tests__/ks1699-share-and-recertify-refuse-a-non-party.test.ts=2239" and OVL_IGNORE_PRS="2160 2239".
+- Round gate 12:22:04Z (evidence/round_gate_2.out): develop bbb75755064e; move daa54a26..bbb75755 35 files, overlap with my 2 paths 0 (control 35); origin branch at f1ac5fec9b67; tree clean at 9036b3d0c78a, HEAD~2 f1ac5fec9b67, hooksPath .githooks; lock absent, queue 0; census: certifications.ts HIT [2160, 2239] ACCEPTED, test file HIT [2239] ACCEPTED, controls PASS, RESULT OK.
+- Driver precheck overlap gate: "no overlap: 73 open PRs, none touches any of 2 paths ... ignored (mine, named): [2239, 2160]"; develop gate DOCSRULE overlap 0, with its planted control.
+- Push 1 (12:09:21Z-12:20:16Z, 655 s): REFUSED by the hook, final line "PREFLIGHT FAILED on leg(s) 1 - fix the above before pushing. (13/16 legs ran)"; cause: my launcher's 123-char TMPDIR (tsx IPC socket over macOS's ~104-byte limit), proven both ways on the same tree (rc 1 vs rc 0 "CHECK PASS"); nothing reached origin; mailed in STATUS 2 at 12:21:39Z; named edit R121-N6 (52-char TMPDIR); failed driver folder quarantined.
+- Push 2 (driver pid 14067, 12:22:47Z-12:33:23Z, 636 s): rc 0, "f1ac5fec9..9036b3d0c", ls-remote VERIFIED 12:33:26Z; lock released, queue left. Hook's final line, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." (legs 3 4 8: local stack not up; leg 1 "OK — spec is in sync"; leg 14 126 passed / 0 failed / 1 skipped of 127; leg 16 0 new).
+- GitHub after the push: PR 2239 open, not merged, head 9036b3d0c78a, 3 commits, 6 files +352 -21.
+
+PR BODY
+- PATCHed by gh pr edit --body-file: the live body (9605 chars, byte-equal to the boot read and re-read just before the edit) plus ONE section "## Round 2 (gate 363 notes)"; read back equal, starts with the pre-edit body, section count 1, 15020 chars. Guards: no closing keyword, no at-mention, no bare #n. File: push/pr_body_round2.final.md.
+- It names G363-2239-1..-4, the new head, 54 -> 60, the plants, suite, checks, merge-trees, grants, the hook's final line, the first push's leg-1 refusal and its cause, Node 26.8.1 not LTS, and "deploy owed; not this seat's; demo frozen".
+
+NOT DONE / NOT THIS SEAT'S
+- No merge, no deploy, no box, no az; nothing on Linear (no comment, state or assignee change). Deploy owed; not this seat's; demo frozen.
+- If Kam wants company-only (organisation-bound) scope, that is a follow-up this round did not build: the Certification row exposes no organisation, so it is not a one-line change.
+- Node 26.8.1 (not LTS) on this host for every figure.
+
+DECLARED
+- R121-N1..N6 named edits on my copied kit (N1/N4/N5 TMPDIR to my scratchpad; N2 plants p0 reads develop at launch; N3 gate 363's two mutants added; N6 the push launcher's TMPDIR shortened to 52 chars after push 1's leg-1 refusal). One slip: the first N1 edit put a comment inside a call and the red-proof failed at import before touching the tree (quarantined, fixed, re-run).
+- Push driver: A 31st's copy of AA 6th's existing-branch driver set, copied with two counted edits (usage name, SEAT); gates byte-equal.
+- Own clone instead of a worktree (ruled 11:46:53Z); the fetch went into MY clone, nothing written in s-r90-base.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 42  SEEN:      297  BATCH: /private/tmp/wed_newmail/batch_20261115T123624Z.txt
