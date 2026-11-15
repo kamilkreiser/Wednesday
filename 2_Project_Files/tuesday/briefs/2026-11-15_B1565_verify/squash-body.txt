@@ -1,0 +1,56 @@
+The API now believes X-Forwarded-For only when the same request also
+carries X-Hpsm-Web-Proof with exactly one value equal to
+ForwardedHeaders:Proof, a value that only the web front end holds and
+sends. The check is constant time over the SHA-256 of each side.
+Otherwise a new gate removes X-Forwarded-For before anything reads it, so
+the connection's own address counts. The proof header is removed in every
+case.
+
+The one rule covers both readers of the header:
+- the forwarded-headers middleware (KnownNetworks, KnownProxies)
+- the follow-up link's own FollowUp:TrustedProxies
+
+ASP.NET Core's platform switch (ASPNETCORE_FORWARDEDHEADERS_ENABLED) puts
+its own forwarded-headers middleware in front of the whole pipeline. That
+middleware now gets options that believe nothing. Program.cs adds the gate
+and then its own forwarded-headers middleware with the named proxies,
+whether or not the switch is on.
+
+With no value configured, nothing is believed. The host still starts, and
+it logs one line when trusted proxies are named. A value outside 32 to 128
+characters of A-Za-z0-9._~+/=- stops the host. The message names the key,
+never the value.
+
+The web server reads HPSM_FORWARD_PROOF and keeps it only in the form the
+API accepts. It sends it as X-Hpsm-Web-Proof beside the forwarded address
+on the client session call only. It is never sent on another path or in
+mock mode, the browser's own copy is never passed on, and it is never
+logged. The infra rule lists HPSM_FORWARD_PROOF as a name the hosted web
+does not set yet.
+
+Nothing is stored or set on a host. Until the same value is set on both
+apps, no forwarded address is believed, and the follow-up unknown-link
+limit counts the connection's own address. The global ceiling holds. The
+product owner ruled this option on 11 November. Nothing is deployed.
+
+Files:
+- api/src/HpsmPoc.Api/Auth/ForwardedClientAddress.cs
+- api/src/HpsmPoc.Api/Auth/ForwardedProofGate.cs (new)
+- api/src/HpsmPoc.Api/Program.cs
+- web/src/server/bff.ts
+- tests: ForwardedProofTests.cs (new, 22 cases); ForwardedClientAddressTests.cs
+  and FollowUpHardeningTests.cs (the two rows that sent a forwarded address
+  without the value now send it); bff.client.test.ts (6 new rows); one
+  entry in infra/tests/test_security_baseline.py
+
+Red first on the old code: 16 of the 22 new API cases and 3 of the 6 new
+web rows fail by assertion. The rows that pin what the old code already
+does pass there.
+
+Checks: web unit 4264 passed (before: 4258); the api solution run 4115
+passed (before: 4093); SQL Server shards api-assessment 1453 passed and
+api-other-and-feedback 1348 passed, none skipped; e2e shard
+journey-and-prototype passed; infra 325 tests and the hidden-character
+scan pass.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

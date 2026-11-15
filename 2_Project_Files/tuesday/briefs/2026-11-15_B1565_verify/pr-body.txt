@@ -1,0 +1,74 @@
+## BLUF
+
+The API now believes a forwarded client address (`X-Forwarded-For`) only when the same request also carries a shared header value that only the web front end holds and sends (`X-Hpsm-Web-Proof`, equal to `ForwardedHeaders:Proof`). Without it, the API counts the connection's own address. The web server sends the value beside the address on the client session call only.
+
+Nothing is stored or set on a host, and nothing is deployed. Until the same value is stored on both hosted apps, the API believes no forwarded address (fail closed).
+
+## The ruling
+
+The product owner's 2026-11-11 acceptance: "a shared header value that only the web front end sends, held on both apps, so that the API believes a forwarded address only when that header is present."
+
+The ticket's regression row: "a peer in KnownProxies WITHOUT a header proven to come from the BFF must not be believed."
+
+## What changed
+
+- **API gate (`ForwardedProofGate`, new).** It runs before anything reads the caller's address. It keeps `X-Forwarded-For` only when `X-Hpsm-Web-Proof` carries exactly one value equal to the configured one. The comparison is constant time over the SHA-256 of each side. The gate always removes `X-Hpsm-Web-Proof`, so no later code sees it.
+- **Both readers are covered.** The one rule covers the forwarded-headers middleware (`KnownNetworks`, `KnownProxies`) and the follow-up link's own `FollowUp:TrustedProxies`.
+- **The platform switch.** `ASPNETCORE_FORWARDEDHEADERS_ENABLED` adds its own forwarded-headers middleware in front of the whole pipeline, ahead of anything `Program.cs` adds. That middleware now gets options that believe nothing. `Program.cs` adds the gate and then its own forwarded-headers middleware with the named proxies, in both switch states.
+- **Configuration (`ForwardedClientAddress`).** The new key is `ForwardedHeaders:Proof`.
+  - No value configured: nothing is believed. The host starts and logs one line when trusted proxies are named.
+  - A value outside 32 to 128 characters of `A-Za-z0-9._~+/=-`: the host refuses to start. The message names the key and never the value.
+  - The value is kept only as its digest.
+- **Web (`bff.ts`).** It reads `HPSM_FORWARD_PROOF` and keeps it only in the form the API accepts. The form is checked with a regex literal, and any other value is dropped, never an error. It sends the value as `X-Hpsm-Web-Proof` only together with the forwarded address on `POST /api/v1/client/session`. It is never sent on another path or in mock mode, the browser's own copy is never passed on, and it is never logged.
+- **Infra test.** One entry in `WEB_SETTINGS_NOT_HOSTED_YET` names `HPSM_FORWARD_PROOF` as a variable the web reads that the hosted web does not set yet.
+
+## What a deploy needs first (fail closed until then)
+
+- **Until the value is stored on both apps,** the API believes no forwarded address and counts the connection's own address. Only the follow-up unknown-link limit is affected: unknown openings share one bucket per connecting address. Real links keep their own per-link bucket, and the global ceiling holds.
+- **Storing and rotating the value** is configuration for a separate infra change: API `ForwardedHeaders__Proof` and web `HPSM_FORWARD_PROOF`, as Key Vault references. It is not made here.
+- **A Key Vault reference that does not resolve** reaches the API as its own literal text. That text is outside the value form, so the API refuses to start, and the message names only the key. The infra change must confirm the reference resolves before it sets the API's setting. The same holds for a stored value with a trailing newline.
+- **Not measured here:** whether App Service passes the custom header unchanged from the web to the API. That belongs to the hosted measurement already on the backlog.
+
+## Tests
+
+- **New `ForwardedProofTests`:** 22 cases, on the real pipeline.
+  - A trusted peer without the value is not believed.
+  - These values are not believed: another value, an empty one, one character changed, another letter case, and the value sent twice.
+  - The right value gives each client its own bucket.
+  - The right value from an untrusted peer, or with no forwarded address, is not believed.
+  - With the platform switch on, the address is believed only with the value.
+  - The Development sign-in still cannot be reached from a remote caller.
+  - `FollowUp:TrustedProxies` is believed only with the value.
+  - The value's header is gone after the pipeline.
+  - Five malformed values stop the host, and the message never holds the value.
+  - Values of 32 and 128 characters start the host.
+  - With no value configured, nothing is believed.
+- **Edited:** the two existing rows that sent a forwarded address without the value now configure and send it.
+- **New web rows:** 6.
+- **Red first, on the old product code:** 16 of the 22 new API cases and 3 of the 6 new web rows fail, all by assertion.
+- **Independent gate run at this head:**
+  - The three API classes: 89 passed.
+  - The web server tests: 41 files, 1336 passed.
+  - Infra security baseline (138) and hidden characters (14): pass.
+- **Gate mutants:** each was caught by a test going red.
+  - A reference `==` in place of the constant-time compare.
+  - A gate that removes the address only when the value is absent, not when it is wrong.
+  - The value's header not removed.
+  - The platform switch's middleware given the lists.
+  - More than one sent value accepted.
+  - Three web mutations.
+- **Builder's local counts** (main in brackets):
+  - Web unit: 4264 passed (4258).
+  - api solution: 4115 passed (4093).
+  - SQL Server shards: `api-assessment` 1453 passed (1431); `api-other-and-feedback` 1348 passed (1348); none skipped.
+  - e2e shard `journey-and-prototype`: passed.
+
+## NOT RUN
+
+- The other seven e2e shards. No spec sets either forwarding variable.
+- CodeQL for C#: the local extractor cannot run on this machine. Hosted CodeQL is the proof.
+- Any hosted measurement, the stored value and its rotation.
+
+Not deployed. No integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM) is built or shown as done.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
