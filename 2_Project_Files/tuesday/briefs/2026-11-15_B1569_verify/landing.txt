@@ -1,0 +1,14 @@
+LANDING (head-pinned SQUASH, Composer's rule). Branch b1569/composer-deploy-guide-route-b-lines at head 56fe57d4775cc59663af95e86f03113046f45bbc (one commit on main 68975c10ad4d5b65fcdcacba9029ffeb12cc53e1; one path: DEPLOY.md, 9 insertions, 3 deletions; blob 0183290 at the head, d728baa at main).
+
+Rule: head-pinned squash (--match-head-commit), CLARIFICATIONS.md:1799 (C-101 (1)), re-applied in every landing since. Nothing is deployed; Composer deploys only on the product owner's own instruction.
+
+1. Open the PR from the branch with pr-title.txt and pr-body.txt (both in this folder). The repo has no workflow files, so there are no hosted checks to wait for beyond whatever code scanning the PR shows; read it before landing. Land only if main is still 68975c10 and the branch head is still 56fe57d4; if either moved, a new round.
+
+2. Land (replace N with the PR number):
+
+D='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-15_B1569_verify'
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/4_Credentials/.gh-config' gh pr merge N -R datasecau/Datasec-Security-Composer --squash --match-head-commit 56fe57d4775cc59663af95e86f03113046f45bbc --subject "$(cat "$D/squash-subject.txt")" --body-file "$D/squash-body.txt"
+
+3. Not deployed. PR #85 (draft, held) does not touch DEPLOY.md (re-read at the gate: it is the only open PR).
+
+4. After landing, read: gh api -X GET 'repos/datasecau/Datasec-Security-Composer/contents/DEPLOY.md?ref=main' -H 'Accept: application/vnd.github.raw' and see 764 lines, with UNMEASURED on lines 360 and 693 only.
