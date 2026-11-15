@@ -1,0 +1,34 @@
+## What changes
+
+The policy PDF cover's Date line named the calendar day in UTC, so a release made before 10 am Sydney time showed the previous day. Per the product owner's 2026-10-12 ruling (COMP-15 (a): brand profile, Sydney time, cover only):
+
+- `BrandProfile.document` gains `time_zone` (an IANA zone id); the platform default brand sets `Australia/Sydney`.
+- New `dateWordsInZone(iso, timeZone)` in `policy-summary.ts`: the day, month and year numbers come from `Intl.DateTimeFormat` in that zone; the month word still comes from `MONTHS`. A zone the platform refuses throws `RenderRecordError`; it is never read as UTC.
+- The cover's two Date values lose ", UTC": `<date> (released)` and `<date> (draft generated)`. No other customer word is added or changed.
+
+## What does not change
+
+- The executive summary's first sentence still reads the UTC day and says `(UTC)`.
+- The appendix keeps the ISO instants (`Released at`, `Generated at`).
+- The HPSM Preview keeps its UTC clock.
+- `dateWords` is byte-for-byte unchanged.
+- Output bytes compared at base and head (five inputs, three host time zones): only page 1's Date line of the policy PDF differs; the Preview, DOCX and evidence package bytes are equal. The `brand_profile_hash` of the default brand moves (new field); nothing compares a stored output's hash with a fresh render's, and stored outputs keep their old hash.
+
+## Known and accepted
+
+For a release at 20:00 UTC on 3 October the cover says 4 October while the summary still says "released on 3 October 2026 (UTC)". That is the ruling's own scope (cover only).
+
+## Checks (CI image, --network none)
+
+- lint, format:check, typecheck, build: green at base and head.
+- renderers project: 266 passed / 1 skipped at base, 278 passed / 1 skipped at head (12 new rows; 0 test names lost).
+- workspace project: 2908 passed, 2 failed at base and at head (the two rows that need the withheld SOW text).
+- db suites: 674 and 1563 passed at base and at head.
+- The new rows: 8 red / 4 green with the fix removed, 12 green with it, under host TZ UTC, America/Los_Angeles, Australia/Sydney, Pacific/Kiritimati and Pacific/Pago_Pago.
+- The existing policy PDF cover test is green, unedited.
+- A 15-minute sweep from December 2025 to December 2027 matched an independent Sydney DST oracle at every one of 73,056 instants.
+- Secret scan: no leaks. CodeQL (javascript-code-scanning, local CLI): 0 results at base and head.
+
+Nothing is deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
