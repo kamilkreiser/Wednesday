@@ -1,0 +1,7 @@
+The rental price screen showed Software / month twice, as a summary card (the portfolio's softwareMonthlySell) and as a row of the monthly charge breakdown (the software part), from two sums that can differ by a cent. Under the product owner's 2026-11-11 ruling (keep only the breakdown row), the summary card entry is removed from CARDS in web/src/screens/PriceViewColumns.tsx. No word is added or changed.
+
+A new test, web/src/screens/PriceView.softwareOnce.test.tsx, pins that the label is found once outside the Fleet lines table and inside the monthly charge breakdown, that the Commercial outcome region holds no such label, that the other nine card labels stay in order, that the breakdown row shows the software part and not the portfolio figure, and that the Fleet lines table keeps its own per-line Software / month column. Four of its five rows fail with the card entry restored.
+
+Limit: a calculation stored before the rental parts existed shows the existing "Breakdown not available for this calculation." note instead of breakdown rows, so after this change the price screen shows no monthly software total for it. The proposal view's own Software / month total is unchanged.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

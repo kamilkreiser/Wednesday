@@ -1,0 +1,11 @@
+Landing form: head-pinned squash. Repo datasecau/MPS-Commercial-Calculator. Head 878dacbc52d2262da830cb912e4052c4fef23df3.
+Land only after hosted CI (dotnet, web, python, package) and CodeQL are green on the PR, and after re-reading that the branch head is still the sha above.
+V is the folder that holds this file. The --head value is the branch ref name, unavoidable here; it is not PR text.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/4_Credentials/.gh-config'
+
+# 1. open the PR
+gh pr create -R datasecau/MPS-Commercial-Calculator --base main --head "$(git ls-remote git@github.com:datasecau/MPS-Commercial-Calculator.git | awk '$1=="878dacbc52d2262da830cb912e4052c4fef23df3" && $2!="HEAD"{sub("refs/heads/","",$2);print $2}')" --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.txt"
+
+# 2. land it (replace <PR> with the number step 1 prints)
+gh pr merge <PR> -R datasecau/MPS-Commercial-Calculator --squash --match-head-commit 878dacbc52d2262da830cb912e4052c4fef23df3 --subject "$(cat "$V/squash-subject.txt")" --body-file "$V/squash-body.txt"

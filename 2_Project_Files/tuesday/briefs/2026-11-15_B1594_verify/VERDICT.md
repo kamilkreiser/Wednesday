@@ -1,0 +1,51 @@
+GATE B1594: GO WITH FINDINGS @ 878dacb on main 58320ea
+
+Tier G1 (kit S8 and S4 Q-4: raised to G1). Independent gate, 2026-11-15 21:10-21:45 AEDT. Load at start 10.77 (`LC_ALL=C uptime`), peak read 25.44 during the CodeQL step; heavy jobs run one at a time.
+Head `878dacbc52d2262da830cb912e4052c4fef23df3` (the commissioned branch, one ref at origin). Main `58320ea04b664ebc432248ef1cad3e5587809fa9`. Builder base `56578ac6a0371d111fa196e579718f9cf41fa2bc` (= merge-base, by `git merge-base`).
+Every number below was printed by a program in the gate's own clone and worktrees under its session scratchpad (`.../scratchpad/g/`), logs in `.../scratchpad/logs/`. The clone's push URL is `INVALID-NO-PUSH`; nothing was pushed.
+
+## Findings table
+
+| # | Point | Result | Severity |
+|---|---|---|---|
+| 1 | Builder departed from kit row (1) "exactly once on the screen" | **The builder's reading matches the ruling.** The ruled question, quoted in `1_Project_Definition/CLARIFICATIONS.md:2736` (C-111), is: "The rental price screen shows 'Software / month' twice, from two sums that can differ by a cent. Keep only the breakdown row?" That names two deal-level sums: the card (`PriceViewColumns.tsx:123` at main, `p.softwareMonthlySell`) and the breakdown row (`PriceBreakdown.tsx:59`, `RENTAL_PART_LABELS.software`). The third occurrence, the Fleet lines column header `PriceViewColumns.tsx:49` (`RENTAL_PART_LABELS.software`, per-line `rentalPartValues(l)?.software`), is a per-line figure and not a second sum. It was already on the screen when the question was written: added by d636147 and 33f2cb4 (2026-10-13), before the 2026-11-11 ruling (`git log -S'RENTAL_PART_LABELS.software'`). The kit's literal "once on the screen" was the drafter's DERIVED reading. Its own grep for the string could not see a label read through a constant. **The test is not vacuous:** with the deleted line restored on the merge result, R1 fails with "expected 2 to be 1" (point 5). With the per-line column deleted on the merge result, R5 fails (1 failed, 4 passed; `logs/probe-col.log`). The Fleet lines table is present in the fixture: R5 finds exactly 1 column header. | Note (sound departure; ruled) |
+| 2 | MPSCALC-229 ALREADY-ON-MAIN | **TRUE at main by program.** At `58320ea0`, `Proposal.cs:530` holds `HasEstimatedColourPages` and `:561` holds `if (u.AppliedColourClick is decimal colour && HasEstimatedColourPages(countedLines))`. The test is at `tests/MpsCalc.Api.Tests/DealUsageCombinedPair.cs:97`. Run at main (`dotnet test ... --filter FullyQualifiedName~QuoteApiTests.CombinedPair`, restore from the local `~/.nuget/packages` only): **17 passed, 0 failed**, the `_mono_row_only` test included. Control that can fail: with the gate removed at `:561` (`true \|\| ...`), **5 failed, 12 passed**, `CombinedPair_when_no_class_has_colour_pages_the_deal_prints_the_mono_row_only` among them. The edit was then undone (`git diff --quiet` rc 0). The STATUS pointers `:529`/`:560` are correct at the base it names (`56578ac6`, re-printed), but they are off by one at current main: the fleet-line-id squash `58320ea0` touched `Proposal.cs`. The records pass should cite `:530`/`:561` at `58320ea0`. | Note (pointer drift) |
+| 3 | Old-calculation note in pr-body.txt | **Present** under "Notes and limits", written as a stated limit with no names. Probed at source: `GateProbeOldCalc.test.tsx`, a gate-only file in the gate's red copy, never in the branch. It renders a calculation with the four rental parts and their in-cents forms removed. At the merge result it passes: no `Software / month` outside the Fleet lines table, and the `NO_BREAKDOWN` note is shown. Control: the same probe at main fails (the card is present). The builder's phrasing "no software figure at all on the price screen" (STATUS FOR TUESDAY 5) overstates this: the per-line `Software / device / month` column (`PriceViewColumns.tsx:45`, `softwareMonthlySellPerDevice`) is untouched. The PR body therefore says "no monthly software total". | Minor (claim overstated; wording corrected in pr-body) |
+| 4 | MPSCALC-150 not presented as built | pr-title, pr-body, squash-subject, squash-body and landing: `MPSCALC-150` or a bare `150` = 0 hits in each. MPSCALC-229 is also not named (it is not this PR). Control: the same id pattern fires on a planted id. | OK |
+| 5 | Red without the fix, at the merge result | Gate copy `w-red` = merge result `48993fc6` with the one deleted line restored (the file is then byte-identical to main's, by `diff`). The new file run alone gives **rc 1, 4 failed, 1 passed**. R1 "expected 2 to be 1", R2 "expected [card-label] to have a length of +0 but got 1", R3 "[Devices, ...(9)] to deeply equal [Devices, ...(8)]", R4 "expected card-value to be null". R5 stays green: it pins unchanged behaviour, and its own red is shown in row 1. The same file on the unmodified merge result gives **5 passed**. | OK |
+| 6 | Refs | `git ls-remote`: branch = `878dacbc...` (1 row), main = `58320ea0...`. `gh api -X GET compare/main...878dacbc`: ahead 1, behind 1, files exactly `web/src/screens/PriceView.softwareOnce.test.tsx` and `web/src/screens/PriceViewColumns.tsx` (2 of 2 inside the lane property). Open PRs: 0 (`pulls?state=open`). Control: `state=closed` lists #196 and #195. The two live sibling MPS kits of 2026-11-15 (lane M-O package guard; lane MA round 3): `PriceViewColumns`, `softwareOnce` and `web/src/screens` = 0 hits each (control: this lane's kit = 7). | OK |
+| 7 | Merge | `git merge-tree --write-tree refs/gate/main refs/gate/head` rc 0, tree `48993fc60ba4442c3c89d3be48d9327c7cbb8020`. The diff from main names exactly the 2 paths, and both blobs equal the head blobs (`e8e9b91f`, `a31a67fc`). | OK |
+| 8 | CI web job at main / head / merge (Node v24.21.0, `npm ci --prefer-offline`, 0 registry fetches each) | lint rc 0 / 0 / 0. `npm test`: **145 files 1575 tests / 146 / 1580 / 146 / 1580, 0 failed**; 145+1 and 1575+5 match. e2e stub on (port 10081): **253 passed 17 skipped** at all three, 0 failed. e2e stub off: **157 passed** at all three. Build + `check-bundle`: `dist: 8 files, 1109700 bytes; markers found 0/57` at main; `1109639 bytes; 0/57` at head and at merge (-61 bytes, as the builder measured). Listeners on 10080-10089: 0 before and 0 after every step. | OK |
+| 9 | Scans | Over 80 added lines, 1 removed line and the commit message: names (underscore-aware, 9 names) 0 hits (control `_by_<name>_` 9 of 9); B-number, seat, card and finding ids 0 (control fires); non-ASCII 0; Cf 0 (control fires); secrets, hosts, tenant or GUID ids, `.local`, `Source_Documents` 0 (control fires). Repo-wide Cf walk over tracked text files: main 712 files, 6 with Cf (17 chars, all in existing test files); merge 713 files, the same 6 and 17. Nothing added. gitleaks 8.30.1: random `ghp_` canary rc 1, range `main..head` rc 0. CodeQL hand rows (RegExp from a variable, hand-escape, innerHTML, child_process, sensitive NAME): 0 each, each with a firing control. **CodeQL CLI 2.27.4 `javascript-typescript`, `javascript-code-scanning.qls`, on the merge result: 87 rules, 0 results.** Control: a planted file gave `js/incomplete-sanitization` and `js/xss`. No Python file and no C# file changed. | OK |
+| 10 | Removed lines | Exactly 1: `{ label: 'Software / month', value: (p) => formatMoney(p.softwareMonthlySell) },`. `formatMoney` stays in use (lint rc 0). No docs file describes the cards (`docs`, `*.md`: 0 hits for the card labels; control `readiness` hits `docs/`). | OK |
+| 11 | Commit message | Its trailer reads `Co-Authored-By: Claude Sonnet 5.5`, the builder's model. The squash body written here replaces it. | Note |
+| 12 | Gate side effect | To clean up after its own `dotnet` run, the gate ran `dotnet build-server shutdown` on the project's shared SDK. That also stopped idle MSBuild node-reuse workers that were already running from a concurrent seat. That seat's own `dotnet test --no-build` run kept running (seen in `ps` afterwards). A later build there respawns the workers. Another process also uses this session's scratchpad (`.../scratchpad/wt-base`). The gate touched nothing under that folder. | Note (reported, not hidden) |
+
+## Claims (builder STATUS)
+
+| Claim | Grade |
+|---|---|
+| One commit `878dacbc`, ahead 1, exactly the two files | true |
+| One line deleted, a new 5-row test file, no word added or changed | true |
+| Base `npm test` 145 files / 1575 tests | true at main `58320ea0` (not re-run at `56578ac6`) |
+| Head lint rc 0; 146 / 1580, 0 failed | true (head and merge) |
+| e2e 253 passed / 17 skipped and 157 passed, at base and head | true |
+| Build `1109700` -> `1109639` bytes, markers 0/57 | true |
+| CodeQL pre-scan 0 results | true (gate's own run on the merge result) |
+| R1-R4 red and R5 green at base; mA1 the same | true (gate run on the merge result with the line restored) |
+| mA2 and mA3 results | not shown (builder's own; not re-run) |
+| Per-line column at `PriceViewColumns.tsx:49` via `RENTAL_PART_LABELS.software` | true |
+| 229 at `Proposal.cs:529`/`:560` and test `:97` | true at `56578ac6`; at main the lines are `:530`/`:561` (row 2) |
+| Main moved to `58320ea0`; no overlap with the paths read | true (merge clean, 2 paths) |
+| Old calculation shows "no software figure at all" | partly true: no monthly software total; the per-device column remains (row 3) |
+| gitleaks rc 0; names 0 | true |
+
+## NOT RUN
+
+- Hosted CI (dotnet, web, python, package jobs) and hosted CodeQL: these are the proof after the PR is opened.
+- The dotnet job in full and the python job: neither reads the changed files (`git grep` over `scripts/tests`, `tools/demo/test`, `infra/tests` and `tests` for `web/src`, `PriceView` or `.tsx`: 3 hits, all in comments about other files). Only the 229 tests were run, for row 2.
+- `scripts/package.sh` (package job).
+- CodeQL `actions` (no workflow changed), `python` (no Python changed) and `csharp`. C# CANNOT extract on this arm64 box, and no C# file changed. Hosted CodeQL is the only C# proof.
+- Builder mutants mA2 and mA3 (not re-run).
+- A look at the screen in a real browser. The e2e suites and the jsdom tests cover the screen.
+- Runs at the builder's base `56578ac6`. The gate ran at current main, the head and the merge result.

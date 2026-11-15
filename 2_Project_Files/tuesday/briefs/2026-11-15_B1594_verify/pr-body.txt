@@ -1,0 +1,28 @@
+## Summary
+
+The rental price screen showed Software / month twice: as a summary card (the portfolio's softwareMonthlySell) and as a row of the monthly charge breakdown (the software part). The two come from different sums and can differ by a cent. The product owner's 2026-11-11 ruling: keep only the breakdown row. This PR removes the summary card.
+
+- `web/src/screens/PriceViewColumns.tsx`: one line removed, the `Software / month` entry of `CARDS`. No other line changes.
+- `web/src/screens/PriceView.softwareOnce.test.tsx` (new, 5 tests).
+- No word is added or changed. No other screen changes.
+
+## Tests
+
+The new file checks that:
+1. the label is found once outside the Fleet lines table, and that one is inside the monthly charge breakdown;
+2. the Commercial outcome region has no such label;
+3. the other nine card labels stay, in order;
+4. the breakdown row shows the software part, and the portfolio figure (a synthetic value one cent away) is not shown anywhere;
+5. the Fleet lines table keeps its own per-line Software / month column.
+
+With the removed card entry put back, tests 1 to 4 fail. With the per-line column removed, test 5 fails.
+
+Local runs on the merge with current main: lint clean; `npm test` 146 files, 1580 tests, 0 failed (main: 145 files, 1575 tests); e2e with the dev stub 253 passed, 17 skipped, 0 failed; e2e with the stub off 157 passed, 0 failed; both match main. The production build and bundle check pass (8 files, markers 0/57). Hosted CI and CodeQL are the proof for this PR.
+
+## Notes and limits
+
+- Old calculations: a calculation stored before the rental parts existed has no breakdown rows. For those, the breakdown block shows the existing "Breakdown not available for this calculation." note. Without the card, the price screen now shows no monthly software total for those calculations. This is a known limit of the ruling and is not changed here. The per-line columns are not changed.
+- The Fleet lines table has its own per-line Software / month column, which shows each line's software part. The ruling covers the summary card and the breakdown row only, so this column stays, and test 5 checks that it does.
+- The proposal view shows its own Software / month total, with its own test. It is not changed by this PR.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

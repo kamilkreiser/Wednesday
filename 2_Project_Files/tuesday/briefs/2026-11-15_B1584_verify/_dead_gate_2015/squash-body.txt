@@ -1,0 +1,23 @@
+On the live snapshot card, inside the note's disclosure, the assessor now
+chooses how the answer is known from the five existing words (verified,
+observed, stated by the customer, assumed, not assessed), under the label
+"How do we know?", pre-filled with today's default (stated by the customer).
+The choice saves at once with the answer and is read back on return, so the
+next save keeps it. The exported report prints the stored basis as it
+already does. An answer drawn from an import keeps its own rule (observed
+until confirmed, then verified) and shows no choice. The client follow-up
+and the partner's review are unchanged. No API, report or wording change.
+
+Web only: the draft carries the basis, toWrite sends it and fromRecords
+reads it back; the question card takes an opt-in prop that only the
+snapshot runner passes. An uncited answer already stored with a basis other
+than "stated by the customer" now keeps that basis on its next save from the
+live card.
+
+One existing test expectation was rewritten (the fromRecords expectation over
+uncited verified and observed records). Added: 27 unit and component tests
+(12 fail without the change, as does the rewritten one; the other 15
+pin the rules it keeps) and 2
+browser tests in each of the two playbook projects. Nothing deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
