@@ -30,6 +30,17 @@ else
 fi
 command -v git    >/dev/null && ok "git"    || fail "git missing" "xcode-select --install"
 command -v python3 >/dev/null && ok "python3" || fail "python3 missing" "brew install python"
+# 2026-11-16 (ledger 2026-11-15 brew row): `brew upgrade python@3.14` removed the UNVERSIONED
+# /opt/homebrew/bin/python3 + pip3, so every seat's `python3` silently fell to Apple's 3.9.6 for
+# 12 minutes with 11 seats live. Check the NAMES the fleet calls, not the versioned binary.
+PY_VER="$(python3 -c 'import sys;print("%d.%d"%sys.version_info[:2])' 2>&1)"
+PY_PATH="$(command -v python3 2>&1)"
+case "$PY_VER" in
+  3.1[0-9]|3.[2-9][0-9]) ok "python3 on PATH is $PY_VER ($PY_PATH)" ;;
+  *) fail "python3 on PATH is '$PY_VER' ($PY_PATH), below 3.10: a brew upgrade dropped the unversioned name" "ln -sf ../opt/python@3.14/libexec/bin/python3 /opt/homebrew/bin/python3 && ln -sf ../opt/python@3.14/libexec/bin/pip3 /opt/homebrew/bin/pip3" ;;
+esac
+PIP_PY="$(pip3 --version 2>&1 | sed -n 's/.*(python \([0-9.]*\)).*/\1/p')"
+if [ -n "$PIP_PY" ] && [ "$PIP_PY" = "$PY_VER" ]; then ok "pip3 matches python3 ($PIP_PY)"; else warn "pip3 reports python '${PIP_PY:-unreadable}', python3 is $PY_VER" "re-point /opt/homebrew/bin/pip3 at ../opt/python@3.14/libexec/bin/pip3"; fi
 command -v curl   >/dev/null && ok "curl"   || fail "curl missing" "part of macOS — PATH problem?"
 
 [ -f "$PROJECT_DIR/4_Credentials/.env" ] && ok ".env present" || fail "4_Credentials/.env missing" "restore from password manager — never in git"
