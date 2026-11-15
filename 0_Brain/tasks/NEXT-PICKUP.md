@@ -10,7 +10,7 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 ## 🔴 CHECKPOINT 02:2x 16 Nov, the 00:5x seat (ctx ~57%) - READ FIRST; supersedes every block below where they differ
 - **develop 6fdba4e013b3** (verified 01:46:43; merges since 15 Nov evening 26). GO PR 2145 sent 02:24 to K 28th's successor **K 29th (%95, Sonnet)**, which WRAPS after that MERGED naming **PR 2242** first.
-- **K 30th DRAFTER RUNNING** (re-commission from 0_Brain/reference/2026-11-16_drafter-seatK30/commission.md if fleet/briefs_staged/2026-11-16_seatK30_merge.md is absent). ITS STAMP MUST ADD: **PR 2243** (KS-2052, gate 368 GWN, head 40c99308b84b) as a tier-1 row after PR 2242, and **PR 2244** (KS-1882, gate 369 GWN at 02:3x, head 6b9a4caa4dae) after it.
+- **K 30th LAUNCHED %101 (Sonnet) 02:39: rows 1-3 = PR 2242, 2243, 2244 (all gated GWN), then PR 2093; NEXT = plan QUESTION -> ANSWER (shape 2026-11-16_K29_answer_plan.md) -> READY -> GO.** Its STAMP added: **PR 2243** (KS-2052, gate 368 GWN, head 40c99308b84b) as a tier-1 row after PR 2242, and **PR 2244** (KS-1882, gate 369 GWN at 02:3x, head 6b9a4caa4dae) after it.
 - **GATES:** 367 PR 2242 GWN (in K 29th's ADDENDUM 1 -> carried to K 30th row 1); 368 PR 2243 GWN; 369 PR 2244 GWN (W 31st scored 0.93).
 - **SCORED:** K 28th 0.95, X 10th 0.93, C 39th 0.93. **OWED:** W 31st score (after gate 369). Build panes C, W, X all CLOSED.
 - **S 82nd WRAPPED, scored 0.94, pane closed. PR 2145 MERGED (develop a5e13a242917, verified 02:26:50; merges 27). **S 83rd LAUNCHED %98 (Sonnet) 02:38: filings F1-F4 + 10 comments (F1 at MEDIUM by Wednesday), NEXT = plan QUESTION -> ANSWER -> STATUS -> WRAP.**
