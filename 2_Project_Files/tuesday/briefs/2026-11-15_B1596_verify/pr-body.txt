@@ -1,0 +1,21 @@
+## What
+
+Tests only, one file: `tests/MpsCalc.Api.Tests/LaneMAPollAndHandOffTests.cs`, inside the hand-off row. No product file changes.
+
+- The hand-off row no longer pins the thread pool (the pin made it flaky under machine load). It asserts order, not starvation.
+- It prints `slack2` and `slack3` (margins to the 2 s bound), the CPU count, the pool minimum and the thread counts on one clock. No new assertion; the order assertion, the Busy words and the 2 s bound are unchanged.
+- The release of the held stores moves from 1500 ms to 1350 ms: at 1500 ms the third steps' margin fell under 250 ms in 13 of 20 unpinned runs (worst 172 ms); at 1350 ms the worst margin over 100 runs was 278 ms, at machine load up to about 62.
+
+## Evidence
+
+- Order mutant (a step that gave up no longer hands its place on): the row is red 9 of 9 at 2, 4 and unset CPUs, each time on the overtaken count.
+- 100 hand-off runs at head and at the merge with main: 0 red.
+- Merge with main is clean and equals main plus the three test files.
+
+## Not shown
+
+Hosted CI, hosted CodeQL (C# cannot be extracted on the arm64 review box), a real 2- or 4-vCPU runner.
+
+Refs MPSCALC-99.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

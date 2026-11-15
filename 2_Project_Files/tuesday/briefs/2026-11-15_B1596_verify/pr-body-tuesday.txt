@@ -1,0 +1,28 @@
+## What
+
+Tests only, no product file. This PR adds three new test files under `tests/MpsCalc.Api.Tests/`: the regression rows for the source lock waits of MPSCALC-99 (its clause 5 and the held review findings). It lands in one squash. It went through three review rounds; the third changed only the hand-off row.
+
+- `LaneMAParkedPool.cs` (new): a test helper that parks pool threads and reads back how many are free.
+- `LaneMAClause5Tests.cs` (new): the clause-5 rows. Overlay writers hold while source steps wait on the store lock, at 16 and at 64, and each answer comes within the bound plus 500 ms.
+- `LaneMAPollAndHandOffTests.cs` (new): the async lock-file poll row and the hand-off (turn order) row.
+
+## The hand-off row (round 3)
+
+- It does not pin the thread pool. A pin made it fail on unchanged code under machine load, so it asserts order, not starvation.
+- It prints `slack2` and `slack3` (the margins to the 2 s bound), the CPU count, the pool minimum and the thread counts on one clock. The order assertion, the Busy words and the 2 s bound are unchanged.
+- The held stores are released at 1350 ms, not 1500 ms. At 1500 ms the third steps' margin fell under 250 ms in 13 of 20 unpinned runs (worst 172 ms). At 1350 ms the worst margin over 100 runs was 278 ms, at machine load up to about 62.
+
+## Evidence (local, on the arm64 review box)
+
+- The poll and both clause-5 rows were steady in 70 batches at 4, 2 and unset CPUs (round 2). Each of the three planted mutants turns its row red (27 of 27).
+- Hand-off row with the order mutant: red 9 of 9 at 2, 4 and unset CPUs, each time on the overtaken count. 100 hand-off runs at head and at the merge with main: 0 red.
+- An interleaved head-vs-old-head run did not discriminate this time (0 red in 60 on each side). The round-3 claim rests on the printed margins and the mutant, not on a red that went away.
+- The merge with main is clean and equals main plus these three files.
+
+## Not shown
+
+Hosted CI, hosted CodeQL (C# cannot be extracted on the arm64 review box), a real 2- or 4-vCPU Linux runner. The class summary comment of `LaneMAPollAndHandOffTests.cs` still says the pool is pinned, which is now true of the poll row only. That is a one-line follow-up.
+
+Refs MPSCALC-99.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

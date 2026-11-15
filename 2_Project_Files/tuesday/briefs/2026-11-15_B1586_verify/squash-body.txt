@@ -1,0 +1,30 @@
+A page after the cover, headed "Table of contents", lists the nine sections of the executive
+report with the page each one starts on. Each row is a link to its section, and the running
+header on every page after the cover is a link back to the contents page. The bookmarks are
+kept, with the same titles. The readiness report is unchanged: its builder passes no heading,
+so it has no contents page and no link. No library change: the links are written by the
+PdfPig 0.1.16 already in use, each with a zero border, so nothing is drawn around a link on
+screen or on paper.
+
+The contents page is page 2, so every section page moves down by one. The three executive
+golden outlines differ from before only by one more page and every section page plus one.
+The heading is a string of the report model (null means no contents page), so the Demo copy's
+name check counts it as one of the report's own words; a test pins that a customer named
+"Contents ..." is not refused because of the heading, with a control that fires.
+
+Tests, local, on the merge of this change with current main: whole api suite 4145 run,
+4145 passed, 0 failed, 0 skipped (main alone: 4129 run, one known intermittent hosting test
+red); the ten Azurite tests ran and passed by name; SQL Server part api-other-and-feedback
+1348 passed, 0 skipped; part api-assessment 1463 passed and 1 failed, the same known
+intermittent hosting test, which fails 2 of 5 runs at main and 2 of 5 at the merge; infra
+325 tests ok. With the layout and renderer change removed, 19 test cases fail: 15 of the 16 new
+ones and 4 of the 5 rewritten ones; the remaining new case, the readiness guard, fails
+when the readiness builder is given the heading.
+
+Deploy note: a report already issued keeps the PDF it was issued with, so it has no contents
+page. The Demo copy of such a report is drawn again with the contents page, no longer matches
+the stored file, and is refused as changed after issue until the report is issued again.
+
+Nothing is deployed. This phase builds no integration with HP tools.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,23 @@
+RD-988: re-triage of one feedback item (POST /api/feedback/:id/triage) rewrites its
+stored clarity_status and triage_notes, so under the product owner's 2026-11-11 ruling
+it is administrator-only. The check that already runs ahead of the feedback router
+(feedbackItemWriteGate) now also matches POST on /<id>/triage, case-insensitive with
+one optional trailing slash, the way Express routes. Same function, same mount line,
+same single requireAdminFor call. The open window is unchanged, and the internal
+coordinator-action route is not matched (it keeps its own caller check, to be decided
+separately). The route leaves the capability table's pending list, and the
+role-capability inventory is regenerated: only that row changes.
+
+RD-926: three log lines that wrote the AI model's own text raw now pass it through
+logSafe, so a line break in an answer cannot start a forged log record. An ordinary
+answer logs byte-identically; a long invalid chat answer is cut at logSafe's 500.
+
+RD-888: the Log Analytics path of POST /api/risk-conditions/:id/execute takes the
+database path's 1,000-row ceiling and its answer to a malformed limit (the product
+owner's 2026-11-11 ruling). A new pure module, backend/services/riskRunLimit.js, writes
+out the database formula, and the arm applies it to the same parseInt(limit) the
+database calls receive, so both paths give the same answer for every input.
+
+Three new test files (20 cells); expected counts 5686 tests in 356 suites.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

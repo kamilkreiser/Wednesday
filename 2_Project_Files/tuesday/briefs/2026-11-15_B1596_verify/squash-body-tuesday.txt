@@ -1,0 +1,18 @@
+Tests only, no product change. Adds three test files under
+tests/MpsCalc.Api.Tests/ for the source lock waits of MPSCALC-99 (its
+clause 5 and the held review findings):
+
+- LaneMAParkedPool.cs: a helper that parks pool threads and reads back
+  how many are free.
+- LaneMAClause5Tests.cs: overlay writers hold while source steps wait on
+  the store lock, at 16 and 64, each answering within the bound plus
+  500 ms.
+- LaneMAPollAndHandOffTests.cs: the async lock-file poll row and the
+  hand-off (turn order) row.
+
+The hand-off row does not pin the pool (a pin made it fail on unchanged
+code under load). It asserts order, prints slack2 and slack3 (the margins
+to the 2 s bound) with the CPU and pool counts, and releases the held
+stores at 1350 ms so that both margins stay above 250 ms.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

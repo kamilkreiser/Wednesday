@@ -1,0 +1,59 @@
+BLUF: the executive report PDF gets a contents page after the cover, headed "Table of
+contents", listing the nine numbered sections with their pages; each row links to its
+section, and the running header on every later page links back to the contents page. This
+actions the reseller reviewer's feedback as ruled by the product owner on 2026-11-15
+("please action the reviewers feedback"). The only new user-readable words are
+"Table of contents". No library change. Nothing is deployed.
+
+Before: cover, then the nine sections from page 2; bookmarks only.
+After: cover, contents page (page 2), then the nine sections from page 3; bookmarks kept with
+the same titles; every link has a zero border, so nothing is drawn around it on screen or on
+paper.
+
+What changed (11 files, +366 -37):
+- Pdf/Layout.cs: reserves page 2 when the model has a contents heading, fills it after the
+  sections are laid out; a list that would not fit on one page throws instead of spilling.
+- Pdf/PdfPigReportRenderer.cs: writes each link as a GoTo link annotation with a zero border;
+  adds the header link back to page 2 on every page after the cover.
+- Report/ReportModel.cs: optional ContentsHeading, default "Table of contents"; null means
+  no contents page and no link.
+- Readiness/ReadinessReportModelBuilder.cs: passes null; the readiness report is unchanged.
+- README (ADR-R11 row), the three executive golden outlines (one more page, each section +1),
+  three test locators that now read from page 3, and two new test files (16 tests).
+
+Gate measurements (local; merge of this head with current main; api, infra and workflow
+trees of that merge are identical to the merge first measured):
+- whole api suite with Azurite: 4145 run, 4145 passed, 0 failed, 0 skipped; main alone 4129
+  run, 4128 passed, 1 failed (the known intermittent hosting test below); head alone 4131 of
+  4131 passed. The ten Azurite tests ran and passed by name at main, head and merge.
+- SQL Server (pinned image, emulated on arm64): api-other-and-feedback 1348 passed, 0
+  skipped, judge bad 0, 243 databases (floor 110); api-assessment 1463 passed, 1 failed,
+  judge bad 1, 319 databases (floor 100). The one failure is
+  ForwardedProofTests.The_web_front_end_value_is_gone_from_the_request_once_the_pipeline_has_read_it,
+  intermittent at main: 2 of 5 runs red at main and 2 of 5 at the merge. Not this change
+  (no hosting file is touched); a hosted red of only that test is a re-run, not a fix.
+- infra validate.sh 325 tests ok at main and merge; hidden-characters scan ok on the newest
+  merge tree.
+- red without the fix: with Layout.cs and PdfPigReportRenderer.cs at main, 19 test cases
+  fail (13 contents-page cases, 2 name-check cases, the 3 golden outline cases and the SOW
+  order case); the readiness guard fails when the readiness builder takes the default heading.
+  The rewritten HPSM-section test is green either way: its rewrite only skips the contents page.
+- web jobs not owed: no web, script or infra file changed and none references a changed file.
+- CodeQL csharp: NOT RUN locally (cannot extract on arm64); hosted CodeQL is the only C#
+  proof. No JS, TS or Python file changed.
+
+Deploy notes:
+- An issued report keeps its stored PDF, so it has no contents page.
+- The Demo copy of a report issued before the deploy is redrawn with the contents page, no
+  longer matches the stored file, and is refused as "This report changed after it was
+  issued" until the report is issued again.
+- The hosted showcase does not redraw its sample reports on an ordinary start (it is already
+  seeded); a reset or a fresh seed draws them with the contents page.
+- The PDF is still untagged: a screen reader reads the contents page as text and does not
+  announce the links as links. No screen-reader run was made.
+
+Nothing is deployed by this merge: ci.yml builds and tests on a push to main and keeps the
+build packages; it has no deploy job and no cloud credentials. This phase builds no
+integration with HP tools.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
