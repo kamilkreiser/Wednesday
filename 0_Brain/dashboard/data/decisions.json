@@ -70873,5 +70873,46 @@
    "CARD hpsmpoc-narrative-timeout-221-1006",
    "CARD hpsmpoc-retention-migration-1110"
   ]
+ },
+ {
+  "id": "secuura-ks1897-email-match-owner-bind-1115",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1897: your 'match the email' ruling needs one guard, or a stranger can be credited",
+  "bluf": "Kam, I need one tap. Your 17:09 ruling (b) credits an email-only checkout to the customer whose email matches. Seat A 31st read the code: any signed-in user can create a customer under ANY email (POST /customers checks only the user id, not the email) or change theirs (PUT). So if someone registers your buyer's email first, THEY get the credits for the buyer's payment. Recommended (b-ii): the checkout records who started it (from their login), and the webhook credits only a customer that person owns. Nothing is built until you tap; this changes who gets money credited, so it is yours.",
+  "default_action": "Nothing is built for KS-1897 until Kam taps; Seat A 31st carries on with KS-1910 and the PR 2235 fix. Email-only checkouts keep crediting nothing (today's behaviour).",
+  "options": [
+   {
+    "key": "a",
+    "label": "b-ii: match the email, but only the buyer's own customer",
+    "detail": "The checkout records the signed-in buyer; the webhook credits only a customer that buyer owns. No match: credit nothing, keep the record, an admin replay credits it later."
+   },
+   {
+    "key": "b",
+    "label": "b-ii, and create a customer for the buyer when none matches",
+    "detail": "Same guard, but a first-time buyer with no customer gets one made and is credited at once. Cost: one Stripe create; two simultaneous first purchases could split credits across two of the buyer's own customers."
+   },
+   {
+    "key": "c",
+    "label": "Keep (b) exactly as worded",
+    "detail": "Matches any customer with that email. Measured risk: another user can be credited for the buyer's payment."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-15T17:56:14.464780+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-780-owner-merge",
+   "CARD secuura-ps-759-760-merge-owner",
+   "CARD nas-shared-folders-owner",
+   "CARD secuura-ks597-bind-compares-two-id-spaces-now-deployed",
+   "CARD secuura-audit-fuse-0930-needs-your-email",
+   "CARD secuura-ks1116-null-owner-who-reads-1020",
+   "CARD secuura-ks769-close-keep-owner-1104",
+   "CARD secuura-ks692-status-revoke-bind-creator-1105",
+   "CARD secuura-ks1494-seed-legacy-email-row-1105",
+   "CARD secuura-ks1897-checkout-without-customer-1115"
+  ]
  }
 ]
