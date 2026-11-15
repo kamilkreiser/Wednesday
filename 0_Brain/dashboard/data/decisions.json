@@ -70840,5 +70840,38 @@
    "CARD mpscalc-rollforward-stop-words-1115",
    "CARD mpscalc-170-fleet-line-id-name-1115"
   ]
+ },
+ {
+  "id": "hpsmpoc-narrative-reedit-migration-1115",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HP feedback F10 (re-edit an approved narrative) needs one database migration. Allow it?",
+  "bluf": "You asked me to action the reviewer's feedback; one item is letting a reviewer edit a narrative again after approval. Done safely, each re-edit keeps the version it replaces in a new append-only revisions table, so nothing is lost and the report and approver line stay as they are. That needs one database migration, and migrations have been frozen since 10 November unless you open one. It also fixes a gap we found: after a re-edit, erasing the first approver must still find their reports. Gated, not deployed. (Your 10 Nov 'allow one migration' was for the retention build only; the narrative-timeout ruling is a different subject.)",
+  "default_action": "Hold lane N (nothing built); the other feedback lanes go ahead",
+  "options": [
+   {
+    "key": "a",
+    "label": "Allow the one migration (gated, not deployed)",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Keep migrations frozen; build a smaller version that stores each re-edit as a new narrative row (changes what the narratives-attempted metric counts)",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Not now",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-15T17:47:47.350752+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-narrative-timeout-221-1006",
+   "CARD hpsmpoc-retention-migration-1110"
+  ]
  }
 ]
