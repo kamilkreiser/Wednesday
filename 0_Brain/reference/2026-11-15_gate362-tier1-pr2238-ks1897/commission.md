@@ -1,0 +1,19 @@
+# Commission: QA GATE 362, TIER 1, on PR 2238 (KS-1897), Secuura/Blockchain, 2026-11-15 19:2x AEDT
+
+Commissioned by Wednesday (the 18:33 seat). Model: OPUS (routing row G1). Findings only: nothing fixed, posted, mailed, pushed, merged or written to Linear or GitHub. Work only in `scratch/` of THIS folder (any clone in `scratch/`); write `verdict.md` here, line 1 exactly `PR 2238: <GO|GO WITH NOTES|NO GO> (at head <40-hex>; tier 1)`. Never write inside `/Volumes/DevMASTER/!CODING/`; GitHub reads with GH_CONFIG_DIR="/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.gh-config"; repo Secuura/Distributed_Secuura. No `cd`, no `rm`, bounded output, never print a secret, no Stripe call of any kind, no network beyond GitHub reads.
+
+Read WHOLE first: the builder's READY `ready_batch.txt` in THIS folder; Wednesday's stamped brief to the builder `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_seatA32_ks1897_build.md` (its "The design" 1-7, cells M1-M12, residuals 6a-6g); the ruling it builds.
+
+THE RULING (Kam, verbatim): card secuura-ks1897-email-match-owner-bind-1115 = a, 2026-11-15 18:30:23: "b-ii: match the email, but only the buyer's own customer". Option detail: the checkout records the signed-in buyer (metadata userId/tenantId from the TOKEN, never the body) on POST /checkout/bundle and /checkout/custom; handleCheckoutComplete, for a session with no customer, lists customers by the session email, keeps only those owned by session.metadata.userId (owner+tenant rule WITHOUT the platform-admin pass), credits only when exactly one is left, through grantCreditsOnce. No match: credit nothing, 200, log session id + reason only. Several: credit nothing, log the count. Order: paid, certifications > 0, customer or match, grantCreditsOnce.
+
+Subject: PR 2238, head 59f31402e77f8f9baaa9a5194570a49895ddd9c4 (re-pin by gh api before measuring and before the verdict), one commit on develop 9bb6c98b2c47; develop has since moved to dc42dc89493f (PR 2229, vc-issuer): measure merge-tree both orders on the develop YOU read.
+
+Questions (this changes WHO IS CREDITED FOR A PAYMENT: money, tier 1):
+1. Does the code do exactly the ruling: buyer recorded from the token only (prove a body userId/tenantId/metadata cannot reach session metadata, incl. the builders' `...params.metadata` spread order); the order paid -> certifications -> customer-or-match -> grant; the owner filter (userId equal, both non-empty; a recorded tenantId must equal the session's; NO platform-admin pass); exactly-one rule; no-match and several-match credit nothing and log no email/customer id.
+2. ATTACK it: can a signed-in caller get credited for someone else's payment, or credit someone else, by any route (forged metadata, a customer created with victim's email and caller's userId, tenant mismatch, case/whitespace variants of the email, a session with customer AND email, async_payment_succeeded after completed, a replay via POST /webhooks/replay)? Build the cells yourself in scratch against the PR's tree; red-proof your attacks against the as-worded mutant.
+3. Re-run the billing suite at the head and on the merged tree (develop you read + PR), develop beside it; count it yourself (builder: develop 395/21, head 420/22). Kill or confirm the builder's mutants on 3 of its 18 at random plus the as-worded one.
+4. ks1934's cells: unchanged file, still green? C2d behaviour kept?
+5. The PR body / fragments: any claim the code does not back (Test Evidence honest about NOT run: Schemathesis/Akto/stack legs 3,4,8 skipped)?
+6. PR 2235 overlap: merge-tree of 2238 with 2235's head 19b6f52483c6 both orders; any semantic interaction with the credit lock.
+NOT TESTED must be listed verbatim at the end. Severity per finding (Major / Medium / Low / Info) with file:line read at the head.
+Return a 10-line summary with the verdict line verbatim.

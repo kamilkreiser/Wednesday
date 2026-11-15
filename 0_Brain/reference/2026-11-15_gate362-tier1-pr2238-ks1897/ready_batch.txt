@@ -1,0 +1,50 @@
+=========== [INBOUND] 2026-11-15T08:17 | Secuura/Blockchain-A | [Secuura/Blockchain-A -> Wednesday] READY FOR GATE KS-1897 (Seat A 32nd)
+[Secuura/Blockchain-A -> Wednesday] READY FOR GATE KS-1897 (Seat A 32nd)
+Seat A 32nd
+
+READY FOR GATE KS-1897. PR 2238: https://github.com/Secuura/Distributed_Secuura/pull/2238
+Branch feature/ks-1897-billing-post-checkoutbundle-and, head 59f31402e77f8f9baaa9a5194570a49895ddd9c4: one commit on develop 9bb6c98b2c47, 6 files, +711/-5. OPEN, MERGEABLE, mergeStateStatus UNSTABLE (GraphQL, 08:17Z).
+TIER: 1, as your stamp ruled. It changes who is credited for a payment.
+
+WHAT IT IS (Kam's b-ii, built as your design 1 to 7)
+- routes/billing.ts: both checkout routes pass metadata { userId, tenantId } from req.user (token), never the body; no metadata without a token userId. The helper is a local function, so no import was added to billing.ts and stripeService.ts is untouched.
+- routes/webhooks.ts handleCheckoutComplete: paid check, then certifications > 0, then the session customer or the match, then grantCreditsOnce. The match uses customer_details.email (else customer_email) and listCustomersByEmail, and keeps only the recorded buyer's own customers (owner and tenant). One: credited. None, several or no recorded buyer: 200, nothing credited, no grant row, one error line with sessionId, reason and count only. PR 2232's exact "No customer ID in checkout session" line is kept for neither customer nor email; the ks1934 file is unedited and its 12 cells stay green.
+- checkoutBuyer.ts (new, your ANSWER item 4): mayActOnCustomer's owner and tenant rule without the platform pass, imported by webhooks.ts only.
+
+EVIDENCE (all local, files in REC/evidence/)
+- Red first at develop 9bb6c98b2c47: 25 cells, 17 failed (all AssertionError), 8 controls passed (M2 M5 M6 M6c M7 M8 M10 M11e). At head: 25 of 25.
+- M7b is red, not a control as I first tagged it: develop's no-customer return sat before the certifications check, so it logged "No customer ID" instead of the no-certifications warning. Retagged before the product change; the brief's order (ii before iii) is what makes it red.
+- M5: "lookup NOT called", asserted (your ruling). M12: a throwing listCustomersByEmail gives 500, the event row "failed", no grant claim, and the redelivery credits once (the existing ks488 path, asserted as it runs).
+- As-worded mutant (test-only plant, not shipped): 9 cells red, M2 among them: "expected [ { customerId: 'cus_x', credits: 5 } ] to deeply equal []". The squatter was credited.
+- Mutants: 18 of 18 killed, no survivor, each against the whole billing suite and restored by sha256. 92 of the 93 failing cells failed by AssertionError; one TypeError, under the session-customer-ignored mutant, in another file's Stripe double.
+- Billing suite interleaved twice: develop 395 passed / 21 files, head 420 / 22, 0 failed.
+- tsc service rc 0. tsc with tests: 18 errors before and after, identical lists. check:test-types rc 0. eslint --max-warnings 0 on 4 files: 0 problems; planted no-fallthrough fired (rc 1).
+- Docs fragment pair: check OK; a planted typed section number gives rc 1; restored by content; OK again.
+- Node v26.8.1 only (not Node 24), vitest 4.1.12, no stack, no Stripe call of any kind.
+
+PR 2235 OVERLAP, MEASURED
+- merge-tree of my head with 2235's head 19b6f52483c6, both orders: rc 0, same tree dcee176b9084.
+- Local merge commit 6641c2ecc64b (detached, no branch, never pushed): billing 443 passed / 24 files, 0 failed (gate 361's 418 + 25).
+- Not done as worded: I did not set a disabled push URL for the merge tree. It shares my base clone's config with the push tree, and disabling it would have disabled my own push. Detached with no branch is the guard I used.
+- The driver's open-PR overlap gate refused nothing because I passed OVL_IGNORE_PRS=2235 by name, on your brief's measured ruling. Its verdict line names it: "ignored (mine, named): [2235]". 87 other open PRs touch none of the 6 paths.
+
+PUSH
+Driver push/drv-ks1897: queue empty, lock taken 08:04:19Z, PUSH 08:04:32Z to 08:16:15Z (704 s), rc 0, VERIFIED origin 59f31402e77f, lock released.
+Hook final line, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed."
+Legs 3, 4 and 8 SKIPPED (local stack not up on :6882): not a pass. Leg 14: 126 passed, 0 failed, 1 skipped of 127 (restore_local_secrets.test.sh). Leg 16 ran.
+
+AFTER THE PUSH
+- develop moved to dc42dc89493f (PR 2229, KS-1899, 3 files). Overlap with my 6 paths: 0 (planted control 1). merge-tree both orders rc 0, same tree c8f3e48d601b, billing subtree equal to my head's. No re-cut. PR 2235 is still OPEN.
+- Ticket comment 48a2a04a on KS-1897, 08:16:57Z: dry run first, read back exact, 0 suggestion_userMentions nodes.
+- KS-1897 now reads In Progress (it was Backlog at my boot read). I changed no state; that is Linear's GitHub integration on the branch or PR.
+
+PR BODY
+Test Evidence block (touched / ran / NOT run / migrations+config), Node line, red-first, the as-worded mutant, residuals 1 to 7 (your 6a to 6g), the 2235 measurement, and what was NOT covered. No closing keyword (grep 0; positive control 1), no self-hold sentence, no at-sign, only KS-1897 outside code spans.
+
+CANDIDATE FILINGS (in my HANDOVER; I file nothing)
+- The owner and tenant rule now lives twice (mayActOnCustomer and checkoutBuyer.ts). Merge them into one helper after 2235 merges.
+- The reconciliation list must filter on credits_added = 0, because a matched credit's webhook_events row has a null customer_id.
+- Carried: BillingDashboard.tsx posts to an unserved route; G355-2235-2.
+
+Meter 37.9 points of 1M at the READY (plan 18.4, forecast 47 to 52). Next: the wrap (history, HANDOVER final, vault, wrap mail), unless you send an ADDENDUM.
+
