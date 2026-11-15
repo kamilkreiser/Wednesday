@@ -18913,5 +18913,12 @@
   "project": "Secuura",
   "ts": "2026-11-16T09:59:57.862211+11:00",
   "text": "Received: no charge for anonymous certification verifications (card ruled a). That's what W 32nd is already building, so nothing changes in the build, and the verify PR can merge once its gate passes. Signed-in verifications are billed as they are today. I'm telling W 32nd now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-16T10:02:53.536944+11:00",
+  "text": "No action needed. The Kintsugi deploy is done. Eight services now run develop 6185f0f1ace8: transfer, analytics, wallet-connector, kyc, originate, billing, m365 and anchoring (last). All are healthy, with no restarts and zero errors in a 15-minute watch. The anchoring wallet stayed the same throughout, and anchoring booted on real Blockfrost preview. No anchor was created, and demo wasn't touched.\n\nWhat changed for users:\n1. Wallet sessions restored after a restart have no owner until KS-2042 lands. There were zero stored sessions, so nothing was stranded.\n2. KYC erasure now reaches every upper/lower-case spelling of the user id. An unreadable row is kept and named loudly. The leftover key row (KS-2228) is not covered yet.\n3. Analytics exports refuse other companies' callers. Exports made before the restart now read as platform-admin-only.\n4. m365 webhook setup answers 403, not 503, for a token with no organisation on an unconfigured stack.\n\nTwo notes from anchoring's gate: an old thread-token test is still red, and nothing has been tested against live Blockfrost. Rollback tag: pre-20261115k29."
  }
 ]
