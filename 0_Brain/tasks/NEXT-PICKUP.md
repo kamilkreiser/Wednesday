@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 20:3x 15 Nov, the 19:3x seat (ctx ~66%) - READ FIRST; supersedes every block below where they differ
+- **develop d7dc7de435ce** (PR 2222 by B 180th; gh api 20:33). **Merges tonight (10):** 2231, 2232, 2220, 2229, 2230, 2235, 2238, 2233, 2221, 2222. GOs one at a time; GO shape = fleet/briefs_staged/2026-11-15_B180_go_2222.md (pins re-read by gh api in the SEND action, `if` guard, send_brief --kind answer, then cockpit.sh say --mail).
+- **FLOOR:** %35 **K 23rd** (merge -K, Sonnet; SET-UP CLOSED 34.2; row 1 PR 2236 legs -> READY -> GO; then 2234 pytest, 2237, 2139 onward; its merge_k23 has the UNION-AUTO post-check fix, tested). %23 **T 25th** (slot 4: preflight 16/16 PASSED, k6 pass, Playwright 12 passed, migrations 17 passed; admin123 ruling executed; Schemathesis pre-merge running, Akto LAST; findings F1-F11 to file via a board seat). K 22nd, B 180th, S 80th, A 32nd: WRAPPED, scored, panes closed.
+- **B 181st DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatB181/commission.md -> fleet/briefs_staged/2026-11-15_seatB181_merge.md; RE-COMMISSION if absent). On return: read WHOLE, stamp (B 180th's HANDOVER FINAL at 5_Project_History/2026-11-15_seatB-180th/), launch Sonnet --to 'Secuura/Blockchain-B' when load1 < 7 (waiter pattern: until-loop then brief_and_launch.sh).
+- **Kam cards open:** secuura-stuart-whatsapp-ks2196-1115 (he sends; default nothing), secuura-ks1699-admin-means-platform-admin-1115 (default a = as built). KS-1897 card --delivered PR 2238 (done).
+- **OWED:** a board seat (S 81st) to file: T 25th F1-F11 (F4 limiter-catalogue 575/577, F6 ruff+graphql-core CVE, F7 quality rewrites a tracked file, F11 Schemathesis super_admin hardcoded), the gate findings the merge seats listed (G356/G346/G347/G361/G362), the 3 pre-existing eslint warnings, the merge_k22 post-check gap, KS-1935/1897/1699/1913/1912 board moves after k28; a k28 Kintsugi deploy round (October grant live) carrying tonight's merges; brew upgrades; INDEX refresh; weekly consolidation; wrap duties (digests, ledger 3c, doctor python3 check).
+- seat_mail_watch re-armed 20:33 under Monitor (30 min): re-arm + newmail.sh at expiry.
+
 ## UPDATE 19:4x 15 Nov, the 19:3x seat (boot, ctx 45%) - supersedes the block below where they differ
 - develop still **918f5e6d312a** (gh api 19:4x). FLOOR: %29 K 22nd (SET-UP CLOSED 08:35Z, row 1 = 2235 legs -> READY -> GO), %23 T 25th (slot-4 build), %26 S 80th (board; Stuart comment DONE). **A 32nd WRAPPED, scored 0.92, pane %20 CLOSED.**
 - **Stuart duty DONE on our side:** S 80th posted the KS-2196 comment 08:29:36Z (229af4ee, byte-equal to the file). **Card `secuura-stuart-whatsapp-ks2196-1115` POSTED** (WhatsApp text + URL; Kam sends). Panel receipt bf-d42ba14cb040.
