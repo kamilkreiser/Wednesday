@@ -277,13 +277,22 @@ RUNNER='
     esac
     if [ -n "$MSG" ]; then
         # Tap target = the resolved coordinator pane id (seat name, else the guarded legacy name) - 2026-09-13
-        WPANE=$(coord_pane_id fleet:0 2>/dev/null || true)
+        # 2026-11-16 (ledger: 399 WAKEs logged only from 11-15 13:16 to 11-16 10:18, nobody read the log):
+        # the resolver stderr was discarded, so the log never said WHY. Now it is kept and logged,
+        # consecutive logged-only WAKEs are counted, and the 3rd (then every 30th) goes to the panel.
+        WPANE=$(coord_pane_id fleet:0 2>"'"$STATE_DIR"'/coord_resolve_err.txt" || true)
         if [ -n "$WPANE" ]; then
+          LOGGED_ONLY=0
           # Guard, own-stuck-tap submit, tap, read-back and off-pane escalation:
           # deliver_wake in TAPFN above (2026-10-06; same bytes the taptest runs).
           deliver_wake "$WPANE" "$MSG"
         else
-          echo "$(date "+%Y-%m-%d %H:%M:%S") no $SEAT coordinator pane (nor an adoptable legacy wednesday pane) — WAKE logged only"
+          LOGGED_ONLY=$(( ${LOGGED_ONLY:-0} + 1 ))
+          echo "$(date "+%Y-%m-%d %H:%M:%S") no $SEAT coordinator pane (nor an adoptable legacy wednesday pane) — WAKE logged only ($LOGGED_ONLY in a row; resolver said: $(tr "\n" " " < "'"$STATE_DIR"'/coord_resolve_err.txt" 2>&1 | cut -c1-300))"
+          if [ "$LOGGED_ONLY" -eq 3 ] || [ $(( LOGGED_ONLY % 30 )) -eq 0 ]; then
+            ESC_OUT=$(WED_AGENT="$SEAT" CHAT_ALLOW_REPEAT=1 "${WAKE_ESCALATE_CMD:-'"$PROJECT_DIR"'/2_Project_Files/tools/chat_reply.sh}" --project WED "Seat $SEAT: the wake watcher has logged $LOGGED_ONLY wakes in a row without reaching the coordinator pane, so seat mail and context alerts are not arriving. Check the $SEAT pane and re-arm the watcher (arm_wake_watch.sh disarm, then arm)." 2>&1); ESC_RC=$?
+            echo "$(date "+%Y-%m-%d %H:%M:%S") ESCALATED logged-only x$LOGGED_ONLY to the panel rc=$ESC_RC: $(printf "%s" "$ESC_OUT" | tail -1)"
+          fi
         fi
         sleep 120   # give the session time to read before re-arming
     fi

@@ -605,6 +605,20 @@ AGENT_PANES="$("$TMUX_CHK" list-panes -t fleet:0 -F '#{@cockpit_name}' 2>/dev/nu
 if [ "${AGENT_PANES:-0}" -gt 0 ] 2>/dev/null; then
   if pgrep -f 'wake_watch\.sh' >/dev/null 2>&1; then
     ok "wake_watch armed ($AGENT_PANES agent pane(s) live)"
+    # DELIVERY, not liveness (ledger 2026-11-16: the runner was ALIVE for 21 h while 399 WAKEs were
+    # "logged only" and nothing reached the coordinator; this check said ✓ the whole time). Read the
+    # runner's last 5 delivery outcomes: all 5 logged-only = the watcher is alive and useless.
+    _WW_LOG="$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs/wake_watch_runner.log"
+    if [ -f "$_WW_LOG" ]; then
+      _WW_LAST="$(/usr/bin/grep -i -E 'tapped [a-z]+ pane|WAKE logged only' "$_WW_LOG" | tail -5)"
+      _WW_N="$(printf '%s\n' "$_WW_LAST" | /usr/bin/grep -c -i 'WAKE logged only')"
+      _WW_T="$(printf '%s\n' "$_WW_LAST" | /usr/bin/grep -c -i -E 'tapped [a-z]+ pane')"
+      if [ "${_WW_N:-0}" -ge 5 ]; then
+        fail "wake_watch NOT DELIVERING" "last 5 outcomes in logs/wake_watch_runner.log are 'WAKE logged only': re-arm (fleet/cockpit/arm_wake_watch.sh disarm, then arm) and read the resolver reason in the log"
+      else
+        ok "wake_watch delivering (last outcomes: $_WW_T tapped, $_WW_N logged-only)"
+      fi
+    fi
   else
     fail "wake_watch NOT running — $AGENT_PANES agent pane(s) live unwatched" \
          "arm: fleet/cockpit/wake_watch.sh '<latest-inbound-mail-ts>' as a background task"
