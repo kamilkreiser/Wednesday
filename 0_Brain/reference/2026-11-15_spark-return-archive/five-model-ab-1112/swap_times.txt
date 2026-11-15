@@ -1,0 +1,17 @@
+2026-11-11T21:32:06Z STOP deepseek-v4-flash-spark-deepseek-v4-flash-1 (swap 1)
+2026-11-11T21:32:12Z run ab1112-lfm25 image=nvcr.io/nvidia/vllm:26.09-py3 dir=/home/datasec-rd/five-model-ab-1112/lfm25-24b-a2b served=LFM2.5-24B-A2B args=--gpu-memory-utilization 0.80 --reasoning-parser deepseek_r1
+2026-11-11T21:37:57Z FAILED ab1112-lfm25: FA2 no sm_121 kernel (CUDA_ERROR_UNSUPPORTED_PTX_VERSION); kept Exited
+2026-11-11T21:37:57Z run ab1112-lfm25-b image=nvcr.io/nvidia/vllm:26.09-py3 dir=/home/datasec-rd/five-model-ab-1112/lfm25-24b-a2b served=LFM2.5-24B-A2B args=--gpu-memory-utilization 0.80 --reasoning-parser deepseek_r1 --attention-backend FLASHINFER
+2026-11-11T21:41:46Z ABORT LFM arm: Mac lost the DevMASTER drive (harness/prompts/checker unavailable); stopping ab1112-lfm25-b, restoring DeepSeek
+2026-11-11T21:42:17Z START deepseek-v4-flash-spark-deepseek-v4-flash-1 (restore)
+2026-11-11T21:45:27Z HEALTHY deepseek (restore)
+2026-11-11T21:45:52Z CORRECTION: the preceding HEALTHY line was written by a loop that timed out while the container was still health:starting; it is FALSE
+2026-11-11T21:45:55Z HEALTHY deepseek (restore, verified by docker health)
+2026-11-12T03:59:56Z STOP deepseek-v4-flash-spark-deepseek-v4-flash-1 (nemotron-local-ab swap)
+2026-11-12T04:00:07Z run ab1112-nemotron image=vllm/vllm-openai:v0.33.0 dir=/home/datasec-rd/five-model-ab-1112/nemotron35-super-vl-nvfp4 served=nemotron-3.5-super-vl extra=
+2026-11-12T04:12:07Z FAILED ab1112-nemotron: OOMKilled=true at encoder-cache profiling (1 video item, budget 1048576 tokens) after weights loaded 70.1 GiB in 439.7 s; the recipe video flags were omitted by this operator; kept Exited
+2026-11-12T04:12:07Z run ab1112-nemotron-b image=vllm/vllm-openai:v0.33.0 dir=/home/datasec-rd/five-model-ab-1112/nemotron35-super-vl-nvfp4 served=nemotron-3.5-super-vl extra=--video-pruning-rate 0.5 --media-io-kwargs {"video": {"fps": 2, "num_frames": 256}}
+2026-11-12T04:25:52Z FAILED ab1112-nemotron-b: global OOM-kill 04:25:25 during FlashInfer MoE autotune (8192-token buckets), after weights 70.1 GiB + KV 23.97 GiB allocated at gpu-mem-util 0.75; peak host used 124266 MiB; kept Exited
+2026-11-12T04:25:52Z run ab1112-nemotron-c image=vllm/vllm-openai:v0.33.0 dir=/home/datasec-rd/five-model-ab-1112/nemotron35-super-vl-nvfp4 served=nemotron-3.5-super-vl extra=--video-pruning-rate 0.5 --media-io-kwargs {"video": {"fps": 2, "num_frames": 256}} --disable-flashinfer-autotune
+2026-11-12T04:36:37Z SERVING ab1112-nemotron-c (third attempt; /v1/models 200 at 04:36:19Z; probe OK 42, reasoning_tokens 0)
+2026-11-12T05:10:43Z KEPT ab1112-nemotron-c serving (branch (a) of Wednesday 15:1x rule: 16/23 >= 16, served 23+3 requests clean, decode 41.5-51.3 tok/s); T01 PASS keep1112; DeepSeek container left STOPPED (Exited), restore = docker stop ab1112-nemotron-c && docker start deepseek-v4-flash-spark-deepseek-v4-flash-1

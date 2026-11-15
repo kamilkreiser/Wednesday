@@ -1,0 +1,95 @@
+=== PROVIDER=ollama  MODEL=ornith:35b ===
+
+--- 1/10 regex-engine
+   round1: 19/19 (1396 tok, 25.8s)
+
+--- 2/10 topo-scheduler
+   round1: 12/12 (295 tok, 3.9s)
+
+--- 3/10 interval-set
+   round1: 15/18 (593 tok, 7.6s)
+      FAIL adjacent merge                     got [(0, 1), (1, 2)] want [(0, 2)]
+      FAIL contained add noop                 got [] want [(0, 10)]
+      FAIL bridge merge                       got [(0, 5), (4, 6)] want [(0, 6)]
+   round2: 16/18 (870 tok, 12.0s)  delta +1
+      STILL adjacent merge                     got [(0, 1), (1, 2)] want [(0, 2)]
+      STILL bridge merge                       _Timeout: exceeded time limit
+
+--- 4/10 ttl-lru-cache
+   round1: 13/13 (448 tok, 6.2s)
+
+--- 5/10 jsonpath
+   round1: 14/14 (623 tok, 8.3s)
+
+--- 6/10 expr-evaluator
+   round1: 3/22 (1261 tok, 16.3s)
+      FAIL int                                ParseError: Unexpected token
+      FAIL decimal                            ParseError: Unexpected token
+      FAIL add                                ParseError: Unexpected token
+      FAIL precedence                         ParseError: Unexpected token
+      FAIL parens                             ParseError: Expected ')'
+      FAIL left assoc minus                   ParseError: Unexpected token
+      FAIL left assoc div                     ParseError: Unexpected token
+      FAIL unary minus                        ParseError: Unexpected token
+      FAIL double negative                    ParseError: Unexpected token
+      FAIL pow                                ParseError: Unexpected token
+      FAIL pow right assoc                    ParseError: Unexpected token
+      FAIL unary vs pow                       ParseError: Unexpected token
+      FAIL pow precedence                     ParseError: Unexpected token
+      FAIL max fn                             ParseError: Expected ',' in max
+      FAIL min fn                             ParseError: Expected ',' in min
+      FAIL fn case insensitive                ParseError: Expected ',' in max
+      FAIL nested fn                          ParseError: Expected ',' in max
+      FAIL fn in expr                         ParseError: Expected ',' in max
+      FAIL whitespace                         ParseError: Unexpected token
+   round2: 3/22 (1260 tok, 17.1s)  delta +0
+      STILL int                                ParseError: Unexpected token
+      STILL decimal                            ParseError: Unexpected token
+      STILL add                                ParseError: Unexpected token
+      STILL precedence                         ParseError: Unexpected token
+      STILL parens                             ParseError: Expected ')'
+      STILL left assoc minus                   ParseError: Unexpected token
+      STILL left assoc div                     ParseError: Unexpected token
+      STILL unary minus                        ParseError: Unexpected token
+      STILL double negative                    ParseError: Unexpected token
+      STILL pow                                ParseError: Unexpected token
+      STILL pow right assoc                    ParseError: Unexpected token
+      STILL unary vs pow                       ParseError: Unexpected token
+      STILL pow precedence                     ParseError: Unexpected token
+      STILL max fn                             ParseError: Expected ',' in max
+      STILL min fn                             ParseError: Expected ',' in min
+      STILL fn case insensitive                ParseError: Expected ',' in max
+      STILL nested fn                          ParseError: Expected ',' in max
+      STILL fn in expr                         ParseError: Expected ',' in max
+      STILL whitespace                         ParseError: Unexpected token
+
+--- 7/10 fuzzy-trie
+   round1: 8/15 (776 tok, 10.0s)
+      FAIL fuzzy exact                        NameError: name 'max_dist' is not defined
+      FAIL fuzzy substitution                 got [] want ['cat']
+      FAIL fuzzy deletion                     NameError: name 'max_dist' is not defined
+      FAIL fuzzy insertion                    NameError: name 'max_dist' is not defined
+      FAIL fuzzy dist2                        got [] want ['cat']
+      FAIL fuzzy multiple sorted              NameError: name 'max_dist' is not defined
+      FAIL fuzzy zero dist                    NameError: name 'max_dist' is not defined
+   round2: 7/15 (788 tok, 10.6s)  delta -1
+      STILL fuzzy exact                        TypeError: Trie._fuzzy_collect() missing 1 required positional argument: 'results'
+      STILL fuzzy substitution                 TypeError: Trie._fuzzy_collect() missing 1 required positional argument: 'results'
+      STILL fuzzy deletion                     TypeError: Trie._fuzzy_collect() missing 1 required positional argument: 'results'
+      STILL fuzzy insertion                    TypeError: Trie._fuzzy_collect() missing 1 required positional argument: 'results'
+      STILL fuzzy too far                      TypeError: Trie._fuzzy_collect() missing 1 required positional argument: 'results'
+      STILL fuzzy dist2                        TypeError: Trie._fuzzy_collect() missing 1 required positional argument: 'results'
+      STILL fuzzy multiple sorted              TypeError: Trie._fuzzy_collect() missing 1 required positional argument: 'results'
+      STILL fuzzy zero dist                    TypeError: Trie._fuzzy_collect() missing 1 required positional argument: 'results'
+
+--- 8/10 semver-resolver
+   round1: 16/16 (396 tok, 5.4s)
+
+--- 9/10 line-diff
+   round1: 13/13 (376 tok, 5.1s)
+
+--- 10/10 state-machine
+   round1: 17/17 (304 tok, 4.1s)
+
+=== ollama TOTAL: round1 130/159 (81.8%)  round2 130/159 (81.8%)  132s ===
+raw -> /home/datasec-rd/spark-eval/results_ollama.json

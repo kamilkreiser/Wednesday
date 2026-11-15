@@ -1,0 +1,1348 @@
+# Schemathesis Test Configuration for Secuura API
+# Compliant with: Schemathesis 4.32.1 (pyproject.toml pin: schemathesis==4.32.1; venv synced,
+#   verified installed 2026-10-19) — https://github.com/schemathesis/schemathesis/releases/tag/v4.32.1.
+#   KS-1607: prior pin 4.31.1 (KS-1615); 4.32.0/4.32.1 add stable failure codes (ST101…), `st explain`,
+#   `--report pytest` and renamed failure titles; checks (14), warnings (15) and WFC codes unchanged.
+#   KS-1615: prior pin 4.31.0 (KS-1478); 4.31.1 is fixes only (no new check or warning). Bumped app-only
+#   at Peter's instruction (new failures recorded, not fixed).
+#   KS-1478: prior pin 4.30.1 (KS-1476); 4.31.0 adds the `object_level_authorization` check and the `html`
+#   report format (+ --report-html-path). Bumped app-only at Peter's instruction (new issues logged, not fixed).
+#   KS-1476: prior pin 4.30.0 (KS-1455); 4.30.1 is a patch (3 changed, 21 fixed, none breaking) and
+#   adds a 13th warning, `rate_limited` (accounted INFORMATIONAL; see the checks compatibility test).
+#   KS-1455: prior pin 4.29.4 (KS-1439); 4.30.0 is a minor (5 added, 3 changed, 33 fixed, none breaking).
+#   KS-1439: prior pin 4.29.3 (KS-1408); 4.29.4 is a fixes-only patch (35 entries, none marked breaking).
+#   KS-1408: prior pin 4.28.0 (KS-1353). 4.29.0 changed exit codes (nothing tested -> 2, Ctrl+C -> 130)
+#   and added the `wfc` report format; both are now consumed (src/sweep_outcome.py, harness reports).
+#   KS-684: this header lagged at 4.24.2 against a 4.24.3 pin — the same drift KS-495 fixed on
+#   2026-07-24, recurred. It is now stated as the EXACT pin, so a floor bump cannot silently
+#   outrun it again.
+#   KS-1285 (2026-09-21): it lagged AGAIN — this line still said 4.25.2 through the KS-1169 (4.27.1)
+#   and KS-1268 (4.27.2) bumps, because nothing read it. tests/unit/test_config_header_pin_parity.py
+#   now asserts the pin clause above equals the pyproject.toml pin, so a bump that forgets this
+#   sentence fails the offline gate instead of misinforming the next reader.
+#   Verified against tests/functional/config/test_schemathesis_checks_compatibility.py +
+#   tests/functional/config/test_schemathesis_phases_compatibility.py, which read the installed
+#   package's own check/phase registries and assert this file matches them in both directions. All
+#   checks (not_a_server_error, status_code_conformance, content_type_conformance,
+#   response_headers_conformance, response_schema_conformance, negative_data_rejection,
+#   positive_data_acceptance, missing_required_header, unsupported_method, use_after_free,
+#   ensure_resource_availability, ignored_auth, allow_header_conformance [KS-684, new in 4.25.0])
+#   and phases (examples, coverage, fuzzing, stateful)
+#   referenced below match the installed 4.24.2 registries exactly — no renames, removals, or
+#   additions versus 4.22.4 (see the 2026-07-21 KS-495 audit entry below for the full five-step
+#   4.23/4.24 bump findings, and the 2026-07-24 entry for the 4.24.1/4.24.2 patch re-audits).
+#   NOTE: 4.24 moved the skip/warning plumbing off OutputHandler into a
+#   dedicated WarningCollector (schemathesis.cli.commands.run.warnings) — the KS-226 gate's runtime
+#   behaviour is unchanged, but tests/functional/config/test_warnings_gate.py now drives
+#   WarningCollector (KS-495). Before bumping the pin further, re-run the compatibility unit tests +
+#   the quality gate against the target version.
+# Reference: QA Tool Cheat Sheet v4 (2026-05-21)
+# Generated from documented test scenarios and recommended flag syntax
+# See Distributed_Secuura/.github/workflows/api-contract-tests.yml for nightly tests
+
+version: "1.0"
+metadata:
+  project: Secuura
+  updated: 2026-07-24
+  documentation: https://schemathesis.readthedocs.io/en/stable/
+  revision_log:
+    - date: 2026-07-24
+      change: >
+        KS-495 (reopen) — currency re-check + header reconciliation. Confirmed 4.24.2 (2026-07-22) is the
+        newest Schemathesis release on both GitHub releases and PyPI as of 2026-07-24, so the pin
+        (schemathesis>=4.24.2) and the venv (installed 4.24.2) are already at latest — no version change
+        needed, only the record. This header still claimed 4.24.0 because the 4.24.1 (KS-500) and 4.24.2
+        bumps updated pyproject.toml without updating it here, so the config described a library two
+        patches older than the one that actually runs every sweep. Both patches were pure bug-fixes with
+        no new/renamed checks, phases, warnings, CLI flags, or report artefacts (report-format list still
+        junit,vcr,har,ndjson,allure), which is why nothing below this header changed: 4.24.1 fixed
+        fuzz-dictionary application under oneOf/anyOf/allOf + if/then/else, and 4.24.2 fixed
+        positive_data_acceptance allOf/anyOf/oneOf property counting, fuzz dicts/body-overrides behind
+        $ref, and config.*.update() flag reset. The checks/phases compatibility guards
+        (tests/functional/config/) re-assert this against the installed registries on every gate run.
+    - date: 2026-07-21
+      change: >
+        KS-495 (report completeness) — made the HTML report surface EVERYTHING the 4.24 sweep emits
+        (CLAUDE.md completion-gate MUST: "the HTML report must surface everything Schemathesis
+        generates"). Three gaps closed: (1) reauth_count / reauth_broke — new 4.24 dynamic-auth
+        telemetry in the EngineFinished payload — parsed and shown in the overview's Execution Details;
+        (2) cache_observations_total — was parsed-but-unused — now shown there too; (3) the eight
+        SchemathesisWarning types (missing_auth, missing_test_data, validation_mismatch,
+        missing_deserializer, unused_openapi_auth, unsupported_regex, method_not_allowed,
+        constants_extraction), which Schemathesis emits to STDOUT ONLY (no result file) — the runner now
+        tees the sweep's stdout to schemathesis-console.txt and a defensive parser surfaces them in a new
+        Warnings tab (headline + affected operations + tip, raw-block fallback if the console format
+        drifts). This supersedes the "warnings are console-only / deferred" note in the bump entry below.
+        Verified end-to-end on a live test-fast sweep (61 kB capture, Warnings tab rendered with real
+        Authentication-failed / Missing-test-data / Schema-validation-mismatch groups); report headline
+        still reconciles with JUnit. skip_reason (4.24's changed skip-reporting) was already surfaced.
+    - date: 2026-07-21
+      change: >
+        KS-495 — bumped the pin schemathesis>=4.22.4 -> >=4.24.0 (latest stable, 2026-07-19) per the
+        CLAUDE.md five-step version-bump workflow; venv verified 4.24.0; src/html_report/utils/version.py
+        restamps the report. Five-step findings: (1) NO new/renamed/removed check, phase, or warning —
+        both compatibility unit tests pass unchanged against the installed 4.24 registries. (2) No new
+        --report format or artefact (still junit,vcr,har,ndjson,allure). (3) Result-file fields: verified
+        against a live 4.24 sweep — the 4.24 skip-reason change surfaces as ScenarioFinished.skip_reason,
+        which the NDJSON parser already reads; the HTML report generates cleanly from all files and its
+        headline (operations/failed/error) reconciles exactly with the JUnit XML + results.json (a
+        test-fast run: report 308 ops / 16 failed / 1 error == JUnit tests=308/failures=16/errors=1). (4)
+        No CLI-flag change — every flag scripts/runner/args_builder.py emits is still valid on 4.24. (5)
+        Changelog read: 4.23/4.24 add config keys (--rate-limit=auto, validate-formats, analysis.constants,
+        [auth.wfc]) + reactive dynamic-auth (retry_on), and fix a batch of positive_data_acceptance /
+        negative_data_rejection FALSE POSITIVES — all in schema-data-generation edge cases (arrays w/
+        contains, dependentRequired, int32/64 range, empty-enum, prefixItems, additionalProperties:false
+        bodies #4332, etc.). ONE code change was forced: 4.24 moved _record_skip_warning/_handle_warning
+        off OutputHandler into a new WarningCollector (schemathesis.cli.commands.run.warnings) — the KS-226
+        gate's runtime behaviour is unchanged, tests/functional/config/test_warnings_gate.py now drives
+        WarningCollector. Native reactive auth (retry_on) was EVALUATED and REJECTED: it is strictly weaker
+        than config/hooks.py::after_call (no auth-sent gating, no dead-token discrimination, no KS-141/144
+        login-storm cooldown, and it replays in-flight calls) — the custom handler stays. Live evidence: a
+        full sweep back-off-logged 'login is rate-limited; not retrying yet' exactly where retry_on would
+        have stormed /api/auth/login. Live sweeps ran clean under 4.24 (test-fast + full, 0 request-level
+        429s; failures are all pre-existing endpoint/finding classes — unconfigured-503, malformed-input-500,
+        response-schema drift, and semantic valid-data-400 / invalid-data-2xx on non-exception ops — none
+        attributable to the library bump). NOTE: the full run's tail was degraded by the platform LOGIN
+        rate-limiter (10/hr window exhausted by token churn), so its 81-failure count is inflated by
+        auth-degraded probes and is NOT a clean 4.22.4-baseline diff; the custom cooldown correctly backed
+        off rather than storming. Offline quality gate green throughout (655 unit/functional, 95.82% cov).
+    - date: 2026-07-21
+      change: >
+        KS-255 re-validation under the 4.24 bump (KS-495): re-examined all 18 per-operation expected-status
+        exceptions in schemathesis.toml against the 4.23/4.24 changelog and a live full sweep. Finding: NONE
+        are removable. Every exception absorbs a RUNTIME-SEMANTIC 400/422 — stricter Zod .email() vs
+        format:email (login/register/forgot-password), checkPasswordStrength 422 (register/reset-password),
+        Cardano bech32 checksum/signature (wallet/*), unregistered OAuth client per RFC 6749 (oauth/*),
+        Stripe HMAC / document content-hash (webhooks/stripe, verification/verify), missing tenant/org claim
+        on the service token (issuer-certs, security/keys, gdpr/consent/check), and the admin-managed
+        documentType catalogue (documents). The 4.23/4.24 false-positive fixes are all in schema-DATA-
+        GENERATION edge cases, a disjoint class — so none of them makes a semantic exception unnecessary. The
+        full sweep confirms it empirically: none of the 18 exception operations appears in the sweep's
+        positive_data_acceptance/negative_data_rejection failures (their exceptions still resolve correctly),
+        so all 18 stay. (Separately, the sweep surfaced valid-data-400 / invalid-data-2xx findings on
+        NON-exception ops — nft/verify/asset, oauth/apps, referrals/generate, presentations/verify — these
+        are pre-existing endpoint findings, out of scope for the bump and not KS-255 exceptions to remove.)
+    - date: 2026-07-21
+      change: >
+        KS-472 — added the control_byte_acceptance_guard custom check (config/checks.py) closing the harness
+        blind spot where a schema-valid body carrying a C0 control byte is accepted 2xx and persisted,
+        invisible to positive_data_acceptance/negative_data_rejection/not_a_server_error. Landed REPORT-ONLY, but
+        FLIPPED TO A HARD GATE on 2026-07-24: report-only could never go red, so it could never prove the
+        KS-472 fix (green before, green after) — which the red→green rule forbids. It now RAISES on an
+        accepted control byte. Red-before verified live: PATCH /api/users/me with U+0001 returns 200, so the
+        full sweep fails on this class until the shared-base rejection lands. Validated live: the full 4.24 sweep logged 19 report-only hits (e.g. POST
+        /api/auth/forgot-password accepting a C0 byte in an object key), proving the detector works end-to-end
+        without red-ing the shared gate. Unit-tested in tests/unit/checks/. Also folded in on this branch:
+        KS-484 (the cross-tenant isolation un-skip, already merged via #582) re-validated live under 4.24 —
+        both tests pass against the single-tenant stack.
+    - date: 2026-07-08
+      change: >
+        KS-406 posture decision (Kam): undeclared HTTP methods answering 401 (auth-first, before
+        routing) is the intended platform behaviour — the method surface is not revealed to
+        unauthenticated callers. schemathesis.toml therefore sets [phases.coverage]
+        unexpected-methods = [], stopping the coverage phase's undeclared-method probes that failed
+        `unsupported_method` on every authenticated route by design (228 findings = 100% of the
+        2026-07-07 sweep's failures). The `unsupported_method` check itself stays configured (it is
+        inert without probes), and the KS-226 [warnings] fail-on = [method_not_allowed] gate is
+        unaffected. Pinned by tests/functional/config/test_coverage_unexpected_methods.py.
+    - date: 2026-07-02
+      change: >
+        Added unsupported_method + missing_required_header checks (coverage-phase, zero added request cost)
+        to pre-merge/full/nightly; excluded from pr/test-fast (no coverage phase). Added
+        harness.warnings.fail_on: [method_not_allowed] as a native alternative to a hand-maintained
+        skip-count allowlist for KS-226. Corrected request_cost.per_example_full_mode from 346 to 333 —
+        the old value was derived from a stale 14,710 req / 24 examples reference that contradicted this
+        file's own authoritative measured full-profile run (14,746 req / 25 examples, 2026-07-01); the
+        corrected value also reconciles the nightly (formerly full-soak) empirical row far more closely (0.40% off vs 3.42%
+        off under the old value).
+    - date: 2026-07-02
+      change: >
+        Re-verified compliance against the actual installed CLI (schemathesis 4.22.1, matching the
+        pyproject.toml pin of schemathesis>=4.22.1) via `schemathesis run --help`, superseding the prior
+        4.21.10/GitHub-Releases-based verification. All checks and phases referenced in this file are
+        unchanged in 4.22.1 — no config edits were needed beyond updating the version-compliance header.
+        Confirmed separately that schemathesis.toml's [warnings] fail-on = ["method_not_allowed"] parses
+        correctly under 4.22.1 (SchemathesisConfig.from_path(...).projects.get_default().warnings.fail_on).
+    - date: 2026-07-02
+      change: >
+        Audited the real upstream changelog (docs/changelog.md via `gh api repos/schemathesis/schemathesis`,
+        not a guess) across the last 10 released versions — 4.21.5, 4.21.6, 4.21.7, 4.21.8, 4.21.9, 4.21.10,
+        4.22.0, 4.22.1, 4.22.2, 4.22.3. Finding: no new built-in --checks value and no new --phases value
+        was added in this window; every entry is either a false-positive bug fix to an existing check
+        (negative_data_rejection, positive_data_acceptance, response_schema_conformance) or a performance/
+        internal change. The one new capability, 4.22.0's "class-based checks that run per response and
+        once after the whole run" (#1147, #1689), is a plugin API for authoring custom checks in Python —
+        it does not add a named value to --checks and requires writing custom check code, which is out of
+        scope here. 4.22.0 also added `schemathesis replay` (crash-file replay) and dropped the junit-xml/tenacity/
+        httpx runtime dependencies — neither affects this file's checks/phases/flags. Re-confirmed the
+        installed 4.22.1 `schemathesis run --help` --checks/--phases possible-values lists are byte-for-
+        byte what this file already declares. Conclusion: this file's checks and phases are current with
+        no gaps as of 4.22.3; no functional changes required.
+    - date: 2026-07-03
+      change: >
+        Bumped the pin to schemathesis>=4.22.3 (https://github.com/schemathesis/schemathesis/releases/
+        tag/v4.22.3) per the CLAUDE.md version-bump workflow: pyproject.toml dependency updated, venv
+        synced (`pip3 install -U 'schemathesis>=4.22.3'`, confirmed via
+        `python3 -c "import schemathesis; print(schemathesis.__version__)"` -> 4.22.3), --checks/--phases
+        re-verified identical against the live `schemathesis run --help` output, and the full
+        `python3 scripts/run.py quality` gate re-run clean — including
+        tests/functional/config/test_schemathesis_checks_compatibility.py and
+        tests/functional/config/test_schemathesis_phases_compatibility.py, which passed with no changes needed
+        (already established in the 2026-07-02 changelog audit above that 4.22.2/4.22.3 only changed a
+        failure-message string and fixed an unrelated array-generation crash — neither touches checks,
+        phases, or warnings).
+    - date: 2026-07-10
+      change: >
+        Bumped the pin to schemathesis>=4.22.4 (https://github.com/schemathesis/schemathesis/releases/
+        tag/v4.22.4) per the CLAUDE.md five-step version-bump workflow. pyproject.toml updated, venv
+        synced (`pip3 install -U 'schemathesis>=4.22.4'`, confirmed 4.22.4), full `python3 scripts/run.py
+        quality` gate green. The 4.22.3 -> 4.22.4 changelog holds exactly two entries: a use_after_free
+        false-positive fix (PUT re-creating a resource after DELETE, #4286) and a jsonschema-rs 0.47.0
+        performance bump. Step-by-step findings: (1) no new/renamed/removed check, phase, or warning —
+        both compatibility unit tests pass unchanged against the installed registries; (2) no new
+        artefact file or --report format (still junit,vcr,har,ndjson,allure); (3) no format/field change
+        in ANY existing result file — verified empirically, not assumed, by running the same
+        stateful_workflows sweep on 4.22.3 and 4.22.4 and diffing the union of field/attribute names
+        across JUnit XML, VCR, HAR, NDJSON, Allure, and the crash files: identical. This is the check
+        that matters most, since 4.22.0 moved JUnit generation from the junit-xml package to the stdlib;
+        its attribute set is unchanged. (4) No CLI parameter change — every flag build_schemathesis_args()
+        emits is still accepted by `schemathesis run` on 4.22.4 (note --exclude-path,
+        --include-path-regex and --exclude-path-regex are valid but hidden from --help; a bogus flag
+        errors with "No such option", these do not). use_after_free is enabled in the stateful_workflows
+        category below, so the fix applies to us; it recorded no failures in either sweep, so the false
+        positive it removes was not one this spec was reproducing. No functional changes required.
+    - date: 2026-07-10
+      change: >
+        Excluded /api/dashboard/stream from every sweep. Found when a local `run.py full` sat at
+        314/315 operations with one worker stuck on that endpoint. It is a Server-Sent Events
+        route: services/analytics/src/routes/dashboard.ts writes an event immediately and then
+        every 5s via setInterval, closing only on the client's disconnect. Schemathesis's requests
+        transport reads the full response body before returning, and --request-timeout is a *read*
+        timeout measuring the gap between bytes — so at the harness default of 10s the 5s heartbeat
+        resets it forever. Verified empirically: requests with timeout=10 never returns; timeout=2
+        raises ReadTimeout at 2.0s. A per-operation `request-timeout = 3.0` in schemathesis.toml
+        (OperationConfig.request_timeout exists on 4.22.4) does bound the run at 21.8s, but
+        Schemathesis can only record the cut-off as `Network Error: 1` / `Errored: 1` / `Tested: 0`
+        — a permanently red run, not a result. No "read one event, then close" hook exists (checked
+        the requests transport, the hook surface, and OperationConfig). Nothing about the 4.22.4 bump
+        caused this; it would hang identically on 4.22.3. Excluding it is not a coverage loss: the
+        contract (200, text/event-stream, JSON snapshot framing, UTC timestamp, 401 unauthenticated,
+        clean reconnect) is asserted by tests/test_sse_dashboard_stream.py with a bounded client that
+        reads one frame and disconnects — 7 tests, 0.24s. tests/functional/config/test_excluded_paths.py
+        pins both exclusions and fails if any future exclusion lands without recorded replacement
+        coverage. Not tracked in Linear (KS-97 and KS-31 are different, resolved hangs).
+  runtime_note: >
+    Background: max_examples values were previously reduced to work around 429 false positives.
+    schemathesis.toml now accepts 429 as a valid response, removing that constraint.
+    max_examples is sized for fuzz coverage quality and target wall-clock runtime — not to avoid 429s.
+    Design principle: max_examples controls fuzz depth (more examples = more edge cases found).
+    k6 performance tests own rate-limit and sustained-load testing. A 429 from the fuzz run
+    confirms the rate limiter is active; schemathesis.toml accepts it so it never fails the suite.
+
+    Rate limit = floor(RATE_LIMIT_MAX_REQUESTS / 60 * 0.80), floored to integer for Schemathesis.
+    Fixed cost: ~6,417 req (coverage+stateful phases, schema-driven, independent of max_examples).
+    Variable cost: ~614 req/example (all mode, 4 phases) | ~310 req/example (positive mode, 2 phases).
+    429 rate: ~0.001/req empirical (21 observed / 19,925 req at max_examples=22; accepted via schemathesis.toml).
+    max_examples formula: int((target_secs x harness_rate - fixed_cost) / variable_cost);
+      harness_rate = int(RATE_LIMIT_MAX_REQUESTS / 60 x 0.80) = 26/s (20% burst headroom baked in).
+    Environment rate limits (confirmed in codebase, 2026-06-09):
+      Local dev  (docker-compose.yml RATE_LIMIT_MAX_REQUESTS=2000)  ceiling 33.3/s  harness 26/s
+      Azure dev  (services.bicep    RATE_LIMIT_MAX_REQUESTS=2000)  ceiling 33.3/s  harness 26/s
+      Azure demo (services.bicep    RATE_LIMIT_MAX_REQUESTS=100)   ceiling  1.7/s  harness  1/s  do not run coverage-phase profiles against demo
+    Request model (328 ops, at 26/s; target runtimes drive max_examples):
+      pr:               1,550 req / max_examples=5   / ~1 min    target ~1 min   (theoretical ceiling: 15, ~3 min, ~5 429s)
+      test-fast:        1,860 req / max_examples=6   / ~1.2 min  target ~1-3 min (theoretical ceiling: 15, ~3 min, ~5 429s)
+      pre-merge:       10,101 req / max_examples=6   / ~6.5 min  target ~6 min   (theoretical ceiling: 27, ~14.7 min, ~24 429s)
+      auth-rate-limited:  ~100 req / max_examples=2   / ~1 min    auth endpoints only; run after pre-merge; ≤10 429s (KS-270)
+      full:            14,746 req / max_examples=25  / ~10.9 min target ~11 min  (measured: 2026-07-01 run, output/reports/
+                          schemathesis-results.json duration=654.49s, request count counted from schemathesis-output.har;
+                          supersedes an earlier unverified estimate of 21,767 req / ~25 min for this row)
+      nightly:        374,215 req / max_examples=1100 / ~4.0 hrs  target 4+ hrs  (formula-derived per max_examples formula above;
+                          scheduled overnight via the schemathesis-soak job in .github/workflows/nightly-platform-suites.yml; see notes on that profile for derivation)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# HARNESS: Shared tunable constants loaded by scripts/run.py
+# All throughput, concurrency, timeout, and cost-model values live here.
+# run.py reads this section at startup and derives all constants from it.
+# ──────────────────────────────────────────────────────────────────────────────
+
+harness:
+  # ── WHERE EACH KIND OF SETTING LIVES (KS-544) ────────────────────────────────
+  # This block is RUN-LEVEL: everything here applies to every operation in the
+  # sweep. If a setting should affect ONE endpoint, it does NOT belong here — put
+  # it in schemathesis.toml under [[operations]] include-name = "<METHOD /path>",
+  # which is the only place Schemathesis supports per-operation scoping.
+  #
+  # See schemathesis.toml's header for the full three-file map, and
+  # systemTest/CLAUDE.md -> "The gate must be TRUTHFUL — never blanket-suppress a
+  # signal" for the rule that decides between them. Short version: a run-level
+  # relaxation silences the signal for all 318 operations, so prefer the narrowest
+  # scope that solves the problem, and record the reason next to the value.
+
+  # ── Concurrency ──────────────────────────────────────────────────────────────
+  workers_default: 6 # --workers for profiles that don't pin their own value
+  workers_cli_default: 12 # default when --workers is passed on the CLI (optimised for Mac M2)
+
+  # ── Timeouts ─────────────────────────────────────────────────────────────────
+  sweep_timeout_seconds:
+    1800 # wall-clock kill timeout for the schemathesis subprocess
+    # (overridden by SECUURA_SWEEP_TIMEOUT env var)
+  request_timeout_seconds: 10 # per-request cap (overridden by SECUURA_REQUEST_TIMEOUT env var)
+
+  # ── Rate limiting ─────────────────────────────────────────────────────────────
+  # Formula: floor(RATE_LIMIT_MAX_REQUESTS / 60 * rate_limit_headroom_factor)
+  # 80 % headroom prevents burst 429s when parallel workers fire simultaneously.
+  rate_limit_headroom_factor: 0.80
+  rate_limit_max_requests_default: 2000 # env var fallback (local dev + Azure dev)
+
+  # ── Request cost model ────────────────────────────────────────────────────────
+  # Calibrated from KS-204 runs on the 329-operation secuura-api.yaml spec.
+  # Used by run.py to estimate run duration before each sweep starts.
+  # Fixed cost applies when coverage or stateful phases are active (schema-driven,
+  # independent of max_examples). Variable cost scales linearly with max_examples.
+  request_cost:
+    coverage_stateful_fixed:
+      6417 # req — coverage+stateful phases combined
+      # derived: 8,873 req (pre-merge ref run at max_examples=4) − 614×4 = 6,417
+    per_example_all_mode:
+      614 # req/example — all mode, 4 phases (examples+coverage+fuzzing+stateful)
+      # derived: (8,873 − 6,417) / 4 = 614  [ref run, not tied to current max_examples]
+    per_example_full_mode:
+      333 # req/example — all mode, full profile (reuses stateful chains)
+      # derived: (14,746 − 6,417) / 25 = 333 [corrected 2026-07-02; see metadata.revision_log —
+      # the prior value of 346 was derived from a stale 14,710/24 reference]
+    per_example_positive_mode:
+      310 # req/example — positive mode (pr, test-fast)
+      # derived: 1,239 / 4 ≈ 310
+
+  # ── Paths permanently excluded from every sweep ───────────────────────────────
+  # Excluded here means "cannot be fuzzed", never "not tested" — each entry below
+  # names the suite that covers it instead. An untested endpoint is not a verified-safe
+  # endpoint, so an exclusion without a replacement test is not acceptable.
+  #
+  # KS-219: Microsoft OAuth callback endpoints — always 302 to a frontend SPA;
+  # following the redirect lands on HTML which fails all JSON contract checks
+  # (21 false positives in the 2026-06-09 pre-merge run). Cannot be fuzzed without
+  # a live Microsoft auth session.
+  #
+  # /api/dashboard/stream: a Server-Sent Events endpoint. The response body never
+  # ends by design (services/analytics/src/routes/dashboard.ts pushes an event every
+  # 5s until the client disconnects), and Schemathesis's transport reads the full body
+  # before returning. `--request-timeout` is a *read* timeout measuring the gap between
+  # bytes, so at the harness default of 10s the 5s heartbeat resets it forever: one
+  # worker parks on the socket and only the runner's 1800s wall-clock kill ends the run.
+  # Verified 2026-07-10: a per-operation `request-timeout = 3.0` in schemathesis.toml
+  # does bound it (21.8s), but Schemathesis can only record the cut-off as
+  # `Network Error: 1` / `Errored: 1` / `Tested: 0` — a permanently red run, not a result.
+  # The library exposes no "read one event, then close" hook (checked the requests
+  # transport, the hook surface, and OperationConfig on 4.22.4). Contract coverage
+  # therefore lives in tests/test_sse_dashboard_stream.py, which reads a single event
+  # with a bounded client and asserts the status, content type, and event framing.
+  excluded_paths:
+    - "/api/m365/callback"
+    - "/api/dashboard/stream"
+
+  # ── Warnings-as-failures (native Schemathesis mechanism; confirmed on 4.22.4) ─
+  # KS-226: Schemathesis maintains a persistent cross-run cache of operations that
+  # consistently return 405 and skips them in later phases with a "method_not_allowed"
+  # warning. Failing the run on that warning turns a silent skip into a hard CI
+  # signal, self-correcting as the cache observes real API behaviour — an
+  # alternative to a hand-maintained skip-count allowlist (see anti_patterns).
+  warnings:
+    fail_on:
+      - "method_not_allowed"
+      # KS-684: new in Schemathesis 4.25.0 — a filter expression matching zero operations is
+      # silent coverage loss, and our profiles filter heavily. Confirmed not to fire on the
+      # current filter set across two pre-merge sweeps (2026-08-25) before being made fatal.
+      # Mirrors schemathesis.toml [warnings] fail-on — keep both in sync.
+      - "unmatched_filter"
+      # KS-1169: new in Schemathesis 4.26.0 — parameters/responses skipped over a dangling $ref is
+      # silent coverage loss. (Its sibling `base_url_mismatch` is deliberately NOT here: it fired on
+      # 73 operations of a correctly-targeted sweep; see schemathesis.toml [warnings] and the
+      # INFORMATIONAL map in test_schemathesis_checks_compatibility.py.) Keep both files in sync.
+      - "unresolvable_reference"
+      # KS-1607: new in Schemathesis 4.31.0 — a timeout of 1000+ "seconds" is a milliseconds typo, a harness
+      # misconfiguration rather than a platform finding. Cannot fire on today's values (10 s / 5 s). Reason in
+      # full beside schemathesis.toml [warnings]. Keep both files in sync.
+      - "timeout_units"
+
+  # ── Fallback check set (KS-209) ───────────────────────────────────────────────
+  # Used when a profile or test_category resolves with no explicit checks key,
+  # preventing KeyError in build_schemathesis_args. This is also the full PRIMARY
+  # check set shared verbatim by the pre-merge/full/nightly profiles below —
+  # anchored here as &full_checks and aliased from each rather than copy-pasted
+  # (structural-duplication fix; the four copies previously drifted independently,
+  # e.g. this list was missing two checks the profiles already had). Grouped by
+  # category for readability — the alias sites below carry no per-item comments
+  # since a YAML alias resolves to one shared node:
+  #   Contract & Schema Validation: not_a_server_error, response_schema_conformance,
+  #     status_code_conformance, content_type_conformance, response_headers_conformance
+  #   Data Generation: negative_data_rejection, positive_data_acceptance
+  #   Auth: ignored_auth
+  #   Stateful Workflows: use_after_free, ensure_resource_availability
+  #   Protocol Compliance (coverage-phase, no added request cost): unsupported_method,
+  #     missing_required_header, allow_header_conformance
+  #
+  # KS-684 — allow_header_conformance ADOPTED (new in Schemathesis 4.25.0, enabled here at 4.25.2).
+  # Prior behaviour: absent, because the check did not exist.
+  # Read from the installed source (venv .../specs/openapi/checks.py) rather than the changelog:
+  # it returns None unless the request method is OPTIONS *and* the response carries an `Allow`
+  # header, then compares the advertised methods against those declared for the path.
+  # Expected outcome here: it never fires. Kam's KS-406 ruling (2026-07-08, quoted at
+  # schemathesis.toml:69) is that the platform's auth middleware runs BEFORE method dispatch, so
+  # undeclared verbs answer 401 and the method surface is deliberately not advertised — meaning no
+  # `Allow` header for this check to read. It is enabled anyway because it costs nothing and the
+  # tool-update MUST forbids leaving new capability silently disabled.
+  # >>> IF IT EVER FIRES, that CONTRADICTS Kam's ruling and is a finding for him — it must not be
+  # baselined away. A firing check here means the platform started advertising a method surface
+  # that KS-406 says it does not.
+  default_checks: &full_checks
+    - "not_a_server_error"
+    - "response_schema_conformance"
+    - "status_code_conformance"
+    - "content_type_conformance"
+    - "response_headers_conformance"
+    - "negative_data_rejection"
+    - "positive_data_acceptance"
+    # KS-1271: the built-in `ignored_auth` is NOT listed — `ignored_auth_rate_limit_aware` (custom_checks
+    # below, config/auth_probe_checks.py) calls it and scores a 429 on the auth probe as INCONCLUSIVE
+    # (recorded + reported, neither pass nor fail) instead of as an auth gap. Prior behaviour: a
+    # rate-limited no-auth probe on POST /api/users/me/mfa/enable was filed as "Unexpected response to
+    # a request without authentication" (2026-09-18). Listing both would probe every operation twice.
+    - "use_after_free"
+    - "ensure_resource_availability"
+    - "unsupported_method"
+    - "missing_required_header"
+    - "allow_header_conformance" # KS-684: new in 4.25.0 — see the adoption note above
+
+  # ── Custom checks — ALWAYS selected, on EVERY profile and category (KS-1170) ──────────────
+  # The checks config/checks.py registers with `@schemathesis.check`. They are NOT listed in any
+  # profile's `checks:` above; scripts/runner/checks_resolution.py appends every name here to
+  # whatever `--checks` list a profile or test_category resolves to.
+  #
+  # WHY (KS-1170, measured 2026-09-15 on 4.27.1): through 4.25.2 a registered custom check ran on
+  # every run regardless of `--checks`, so no profile ever named one. Schemathesis 4.26.1 changed
+  # that — an explicit `--checks` list now DISABLES every custom check it does not name (the
+  # library's own comment on `ChecksConfig.update`: "included_check_names disables unlisted custom
+  # checks too"). Because every profile here passes `--checks` explicitly, all five guards were
+  # silently OFF on every sweep from the KS-1169 bump (2026-09-14) until this key existed —
+  # integration_5xx_guard, by_design_501_guard, by_design_input_tolerance_guard,
+  # control_byte_acceptance_guard and public_operation_auth_conformance recorded nothing at all.
+  #
+  # Prior behaviour restored: custom checks are unconditional. Listing them in ONE place, appended
+  # in code, means a seven-list hand edit cannot drift and a targeted category (`checks:
+  # ["response_schema_conformance"]`) still runs the guards, exactly as it did on 4.25.2.
+  #
+  # Lockstep: this list ⇔ the checks config/checks.py registers.
+  # tests/functional/config/test_schemathesis_checks_compatibility.py
+  # (`TestCustomChecksAreDeclared`) fails the offline gate in BOTH directions — a guard added to
+  # checks.py but not here would be registered-and-disabled; a name here that nothing registers
+  # would be a `--checks: invalid choice` at run time. tests/functional/config/
+  # test_not_a_server_error_suppression.py proves the selection against the installed CLI.
+  custom_checks:
+    - "integration_5xx_guard" # KS-268 / KS-499 / KS-544 — declared-503 envelope arbiter
+    - "by_design_501_guard" # KS-686 — declared-501 envelope arbiter (POST /api/wallets/verify)
+    - "by_design_input_tolerance_guard" # KS-662 — the narrow half of the KS-518 input tolerance
+    - "control_byte_acceptance_guard" # KS-472 — hard gate on accepted control bytes
+    - "public_operation_auth_conformance" # KS-425 — a declared-public read that 401s is a defect
+    - "ignored_auth_rate_limit_aware" # KS-1271 — the built-in ignored_auth; a 429 probe = inconclusive
+
+  # ── Execution options (KS-544) ────────────────────────────────────────────────
+  # How the run is DRIVEN — failure handling, retries, health checks, output. Before KS-544 these
+  # flags were defaulted by omission, with no record of whether each had been considered and
+  # rejected or simply never noticed. Every applicable flag now has an explicit value and a reason;
+  # the ones deliberately not adopted are listed under deliberately_unused_flags below.
+  # A profile's `flags:` block may override any key here. Resolved by scripts/runner/run_options.py.
+  #
+  # NOT listed here: --continue-on-failure. It is a POLICY constant in run_options.py
+  # (CONTINUE_ON_FAILURE), always on and deliberately not overridable — see the
+  # "tests always continue on failure" MUST in systemTest/CLAUDE.md. Without it a scenario stops at
+  # its first failing case, so every later case never runs and the report's Check Matrix is
+  # structurally incomplete: blank cells read as "passed" when they mean "never ran".
+  execution:
+    # KS-544: passed natively for the first time. These two were previously registered via an
+    # inline Hypothesis profile in a `python3 -c` bootstrap, which NEVER took effect — Schemathesis
+    # builds its own hypothesis.settings(...) per operation and passes suppress_health_check
+    # explicitly, overriding any externally loaded profile (verified on 4.24.3: the effective list
+    # was []). Both are aborts driven by schema COMPLEXITY, not by a contract defect:
+    #   too_slow        — large schemas (200+ kB) make Hypothesis spend excessive time building
+    #                     strategy reprs; without this the sweep stalls/aborts on big operations.
+    #   filter_too_much — KS-500: positive generation of complex nested bodies (e.g.
+    #                     POST /api/timestamps/batch, an array of {hash, documentId}) inherently
+    #                     filters a large fraction of draws, so at the low max_examples the fast
+    #                     sweeps use the ratio ERRORS the operation even though it IS exercised.
+    # EMPTY by operator decision (KS-544, 2026-07-31) — the sweep suppresses NO health check, so
+    # the flag is not emitted at all. Both former entries were removed:
+    #
+    #   too_slow        — reports that building strategies for a large schema is expensive. That is
+    #                     a timing signal we do not act on, so suppressing it silenced something
+    #                     nobody wanted silenced while also hiding any genuine slowdown.
+    #   filter_too_much — reports that too many generated draws were filtered out. It is
+    #                     BUDGET-SENSITIVE (KS-500: trips at max_examples 6-15, clears at >=25), so
+    #                     it fired on pr/pre-merge (5-6) and never on full (25). That makes it a
+    #                     "this profile's budget is too low for this schema" signal, not a defect
+    #                     signal — and blanket-suppressing it across all 318 operations to
+    #                     accommodate ONE endpoint is the masking pattern KS-156 argued against
+    #                     ("the gate must catch real regressions and not catch phantoms").
+    #
+    # The one endpoint that needed it — POST /api/timestamps/batch — is now handled at the right
+    # scope: a per-operation `generation.max-examples` in schemathesis.toml lifts just that
+    # operation's budget above the threshold, leaving the signal armed everywhere else.
+    # (`suppress-health-check` is root-only in Schemathesis's config schema and cannot be scoped
+    # per operation; `[[operations]] generation.max-examples` can.)
+    #
+    # A non-empty list here still works if a future case genuinely warrants it — the emitter is
+    # unchanged — but adding one silences the check for EVERY operation, so prefer the per-operation
+    # budget first.
+    suppress_health_check: []
+
+    # null → flag not emitted. Terminating the suite after N failures directly contradicts the
+    # continue-on-failure policy: a truncated run is not a result.
+    max_failures: null
+
+    # 0 → no network-level retries. A retry would silently paper over the intermittent
+    # 502 BAD_GATEWAY under sweep concurrency tracked in KS-529 — the sweep's job is to SEE that,
+    # not to smooth it out. Raise only when deliberately measuring past a known-flaky network.
+    request_retries: 0
+
+    # null → flag not emitted, so the underlying requests default (30) applies unchanged.
+    # Deliberately NOT pinned to 0: schemathesis maps this straight onto requests'
+    # `session.max_redirects`, where 0 raises TooManyRedirects on the FIRST redirect rather than
+    # meaning "don't follow" — that would turn every 3xx into an engine error, not a check result.
+    # The one operation where following a redirect genuinely false-positives (/api/m365/callback,
+    # KS-219) is handled by excluded_paths above, which is the targeted fix.
+    max_redirects: null
+
+    # null → flag not emitted. The schema is a local file (OPENAPI_PATH), so there is nothing to
+    # wait for. Set this only if a profile is ever pointed at a schema served over HTTP.
+    wait_for_schema: null
+
+    # false → deprecated operations stay IN the sweep. A deprecated operation is still published
+    # contract surface that clients can call, so it must still honour its contract; excluding it
+    # would silently drop coverage. Flip only once an operation is actually removed from the spec.
+    exclude_deprecated: false
+
+    # false → KEEP Schemathesis's coloured console output (operator preference, KS-544).
+    #
+    # The original justification for suppressing colour was WRONG and is corrected here: it claimed
+    # ANSI escapes would corrupt the WARNINGS parse. They do not — src/html_report/parsing/warnings.py
+    # has stripped ANSI/OSC sequences since KS-495 (`_strip_ansi`, applied before any line matching),
+    # so the report is unaffected by colour either way.
+    #
+    # What the strip is actually for: the tee'd schemathesis-console.txt now contains escape codes,
+    # and HTML does not interpret them — leaving them in would render literal "ESC[33m" noise in the
+    # report's warning text. The report takes its colour from report.css instead. So the strip is
+    # what makes coloured console output safe, not a reason to avoid it.
+    no_color: false
+
+    # false → keep FULL failure messages (operator preference, KS-544; Schemathesis's default is
+    # true). Truncation shortens the schema and the response body *inside* a failure message —
+    # precisely the part needed to diagnose a contract violation without re-running the sweep.
+    # Cost: larger artefacts and a larger self-contained HTML report, since every failure now
+    # carries its complete schema/body. Emitted explicitly in both states so the report's Run
+    # Settings section always records which applied.
+    #
+    # NOT paired with a configurable `output_sanitize`: that stays hard-coded true in
+    # args_builder._report_args(). Redaction of tokens, keys and passwords from every artefact is a
+    # safety property, not a preference — the report is long-lived and shared, so there is no
+    # legitimate profile that wants secrets in it.
+    output_truncate: false
+
+  # ── Generation options (KS-544) ───────────────────────────────────────────────
+  # How test DATA is produced. Values match the installed Schemathesis defaults (verified against
+  # its config/_generation.py on 4.24.3) unless noted, so adopting these flags makes the existing
+  # behaviour explicit and reviewable rather than changing it. `database` is the one deliberate
+  # behaviour change. A profile's `flags:` block may override any key here.
+  generation:
+    # REMOVED (KS-544, 2026-07-31) — this is now `none`, i.e. no cross-run example database.
+    #
+    # It was added earlier in KS-544 on the theory that persisting Hypothesis' example database
+    # would replay a previously-failing input on every later run ("real regression catching").
+    # That benefit was never demonstrated, and the feature was measured to CAUSE a false failure:
+    # with 109 stored entries, `POST /api/timestamps/batch` tripped Hypothesis's `filter_too_much`
+    # health check because replayed entries no longer fit the current strategy and were filtered
+    # out. Isolated by a controlled A/B on the live stack, all else equal:
+    #
+    #     per-op budget 30 + database=<path>  -> Failed Health Check (filtered out)
+    #     per-op budget 30 + database=none    -> 130 generated, 130 passed
+    #
+    # A harness feature that manufactures a failure the platform did not cause is precisely the
+    # "phantom" the truthful-gate MUST forbids (systemTest/CLAUDE.md #13, Kamil KS-156: the gate
+    # must "catch real regressions and not catch phantoms"). Reproduction is already served by
+    # Schemathesis's own crash files, which the runner deliberately clears each run so the
+    # Reproduce tab reflects only the current sweep.
+    #
+    # Re-introducing this needs evidence it catches something, and proof it does not re-trip the
+    # health check — not the theory that it ought to help.
+    database: "none"
+
+    # utf-8 — and this is NOT a narrowing choice, which is worth stating because the name suggests
+    # otherwise. Schemathesis maps this onto Hypothesis `st.characters(codec=...)`, i.e. "characters
+    # ENCODABLE in this codec". UTF-8 encodes the whole of Unicode, so the generated alphabet spans
+    # CJK, emoji, RTL, combining marks and C0/C1 controls (NUL included — see allow_x00 below).
+    #
+    # Measured on 4.24.3 over 4,000 draws: codec="utf-8" → 97% non-ASCII across 23 Unicode general
+    # categories. The ONLY thing it excludes is lone surrogates (U+D800–U+DFFF), and setting this to
+    # null buys nothing but those: same 97% non-ASCII, plus ~0.1% surrogates.
+    #
+    # Lone surrogates are not a coverage win — they cannot be encoded into an HTTP request at all,
+    # so they fail inside our own client before reaching the platform. That tests the harness, not
+    # the API. If we ever want to prove the API's behaviour on unencodable input, the right vehicle
+    # is a coded regression that sends the bytes deliberately, not a generator setting.
+    # Guarded by tests/functional/config/test_generation_alphabet.py.
+    codec: "utf-8"
+
+    # true — matches the Schemathesis default. Keeps NUL (0x00) generation ON: the KS-472
+    # control_byte_acceptance_guard exists precisely to catch NUL/control bytes being accepted and
+    # persisted, so turning this off would disarm that check rather than fix anything.
+    allow_x00: true
+
+    # true — matches the Schemathesis default. Security parameters (the spec's securitySchemes)
+    # are generated, which is what lets ignored_auth and missing_required_header see real inputs.
+    with_security_parameters: true
+
+    # null → flag not emitted (Schemathesis default). Targeted property-based testing that steers
+    # generation toward slower responses; it costs example budget that the short profiles need for
+    # breadth, so it is enabled per-profile (nightly) rather than globally.
+    maximize: null
+
+    # false — matches the Schemathesis default. Forcing unique inputs raises generation cost per
+    # example without adding contract coverage; the phases already vary inputs.
+    unique_inputs: false
+
+    # false — matches the Schemathesis default. --seed already gives run-over-run reproducibility;
+    # derandomising as well would freeze the input space and stop the sweep finding anything new.
+    deterministic: false
+
+    # false — matches the Schemathesis default. Shrinking is what reduces a failure to a minimal
+    # reproducible case, which is what the report's Reproduce tab renders. Disabling it would be
+    # trading the report's most actionable surface for speed.
+    no_shrink: false
+
+  # ── Built-in checks deliberately NOT enabled (KS-1607) ────────────────────────
+  # A check the installed CLI offers is either listed in a profile / default_checks / a category, wrapped
+  # (the compat test's WRAPPED map), or listed HERE with a reason and the ticket that will enable it.
+  # tests/functional/config/test_schemathesis_checks_compatibility.py enforces all three, so a new upstream
+  # check can never be silently unreferenced. Prior behaviour (to KS-1607): there was no "excluded" state,
+  # so 4.31.0's object_level_authorization turned that test red with no way to record a decision.
+  # KS-1674: emptied. Its only entry, object_level_authorization (KS-1607), now runs in its own leg — see
+  # `object_level_authorization` below. The key stays so the next new upstream check has somewhere to go.
+  excluded_checks: []
+
+  # ── object_level_authorization leg (KS-1674) ─────────────────────────────────
+  # Schemathesis's BOLA/IDOR oracle (4.31.0+, WFC code 906, failure code ST402): replays one peer's GET of
+  # an object it created as every OTHER peer, and fails when that peer is served the same object.
+  #
+  # Why a SEPARATE sweep and not one more check in the profiles below (Peter, 2026-10-20, option A):
+  #   * The check needs Schemathesis's own multi-user auth — [auth.wfc] with `peers`
+  #     (specs/openapi/object_authorization.py returns at once unless the request was sent as a peer).
+  #   * [auth.wfc] registers a SCHEMA-level provider, and upstream applies schema-level auth BEFORE the
+  #     global @schemathesis.auth() provider (auths.py set_on_case). Adding it to the shipped
+  #     schemathesis.toml would silently switch PersonaAuth off for every request of the main sweep.
+  #   * The main sweep sends every authenticated operation as super_admin (the spec declares no x-persona),
+  #     who may legitimately read every object — so the check could never see a leak there anyway.
+  # So the main sweep is unchanged, and after it the runner sends a second sweep with only this check, its
+  # own generated schemathesis.toml (the shipped one plus [auth.wfc]) and the two peers below. Prior
+  # behaviour (KS-1607): the check was listed in excluded_checks and never ran.
+  #
+  # Peers (Peter, 2026-10-20, option B(i)): two OWNER actors in the SAME tenant, provisioned by
+  # systemTest/fixtures/provision-actors.ts. That tests owner-to-owner isolation inside a tenant; the
+  # cross-tenant pairing the ticket asked for needs a way to put a user in a second tenant that the local
+  # stack does not offer today, and is recorded as remaining scope on KS-1674.
+  object_level_authorization:
+    ticket: "KS-1674"
+    check: "object_level_authorization"
+    # The profiles whose run includes the leg. All three run the stateful phase; the short profiles
+    # (pr, test-fast, local-debug) do not, and are budgeted for speed.
+    profiles: ["pre-merge", "full", "nightly"]
+    # fuzzing supplies pool draws (an id a peer's POST returned, reused in its own GET); stateful supplies
+    # linked steps (POST then GET of what it created). The check reads both; examples/coverage add none.
+    phases: ["fuzzing", "stateful"]
+    # Caps, applied as min(profile, cap) (code review 2026-10-20). The leg selects ONE check over every operation,
+    # and most operations refuse an OWNER peer, so inheriting nightly's 1,100 examples and 4-hour clock would
+    # double the run for little extra reach. 25 = `full`'s own budget; 1800 s = harness.sweep_timeout_seconds.
+    max_examples: 25
+    wall_clock_timeout_seconds: 1800
+    # Actor keys in the provisioned manifest (fixtures/generated/actors-<slot>.json); each becomes a WFC
+    # user of the same name. Exactly two: the check replays each one's reads as the other.
+    peers: ["owner", "ownerPeer"]
+    # Operations the leg must NOT send (passed as --exclude-name). The leg authenticates through [auth.wfc], so
+    # the two hook shields that ride on PersonaAuth's identities do not cover the peers:
+    #   * session-destructive ops (config/disposable_session.py SESSION_DESTRUCTIVE_OPS, KS-517) — fuzzed with a
+    #     peer's own token they revoke it, and every later request is a dead-token 401 (the 2026-07-24 cascade);
+    #   * the account-lockout doors (config/principal_shield.py LOCKOUT_DOORS, KS-575) — a peer's address comes
+    #     back from GET /api/users/me, is reused in a login body, and 5 failures lock that actor for 15 minutes.
+    # The check only replays GETs, so excluding these POSTs loses it nothing; the main sweep still covers all four.
+    # tests/unit/runner/test_ola_leg.py fails if either hook constant gains an operation this list lacks.
+    exclude_operations:
+      - "POST /api/auth/logout"
+      - "POST /api/auth/refresh"
+      - "POST /api/auth/login"
+      - "POST /api/oauth/authorize"
+
+  # ── CLI flags deliberately NOT adopted (KS-544) ───────────────────────────────
+  # Documented so the flag audit is complete rather than silent: a flag missing from the argv is
+  # either listed here with a reason, or it is a bug. Re-check this list on every version bump
+  # (step 4 of the bump ritual diffs `schemathesis run --help` against build_schemathesis_args()).
+  deliberately_unused_flags:
+    - flag: "--auth"
+      reason: "Bearer tokens are issued per-persona by config/hooks.py's auth provider; HTTP Basic is not used by the platform."
+    - flag: "--header"
+      reason: "Same — request headers are set by the auth provider and the positive_sanitizer hook, not statically per run."
+    - flag: "--proxy"
+      reason: "Sweeps target the local stack or the demo VM directly; no proxy in either path."
+    - flag: "--tls-verify"
+      reason: "Local target is plain HTTP and the demo VM presents a valid Caddy-issued certificate, so the default verification is correct."
+    - flag: "--request-cert"
+      reason: "The platform does not use mutual TLS."
+    - flag: "--request-cert-key"
+      reason: "Same as --request-cert."
+    - flag: "--generation-graphql-allow-null"
+      reason: "GraphQL-only option; the contract under test is OpenAPI (secuura-api.yaml)."
+    - flag: "--force-color"
+      reason: "Directly contradicts execution.no_color above, which the console-capture parser depends on."
+    - flag: "--exclude-checks"
+      reason: "Check selection is expressed positively via harness.default_checks and each profile's `checks:` list; a second, subtractive mechanism would let the two disagree."
+    - flag: "--warnings"
+      reason: "Warning behaviour is configured in schemathesis.toml ([warnings] fail-on), which is auto-discovered from the working directory — one mechanism, not two."
+    # KS-1169 — flags added between Schemathesis 4.25.2 and 4.27.1 (--help diff, bump step 4). Seven
+    # of the eight new flags are declined here; the eighth, --report-json-path, is USED by
+    # _report_args because `json` joined the ReportFormat enum and every format is generated.
+    # KS-1674: both reasons reworded. A WFC auth file IS now used, by the object_level_authorization leg, but
+    # through its generated config's [auth.wfc] table rather than these flags. Prior reasons said the harness
+    # did not use WFC auth at all.
+    - flag: "--auth-wfc"
+      reason: "Main sweep: auth is per-persona via config/hooks.py's provider (reactive re-auth included); a second credential source would let the two disagree about who is calling. The KS-1674 object_level_authorization leg does use a WFC file, set in its generated config's [auth.wfc] table, because `peers` has no CLI flag."
+    - flag: "--auth-wfc-user"
+      reason: "Same as --auth-wfc. The KS-1674 leg pins no user: each operation starts as the first peer, as upstream intends, and the other peer is the replay identity."
+    - flag: "--baseline"
+      reason: "4.27.0 native baseline (fail only on NEW failures). The harness already has a TRIAGED baseline gate — evaluate_schemathesis_baseline in scripts/run.py (KS-256), reachability tracked in KS-752 — whose entries carry a ticket per check/operation pair. Two baselines would disagree; adopting the native one is a design decision for its own ticket, not a side effect of a version bump."
+    - flag: "--baseline-update"
+      reason: "Same as --baseline — rewrites a native baseline file the harness does not keep."
+    - flag: "--baseline-prune"
+      reason: "Same as --baseline — prunes a native baseline file the harness does not keep."
+    - flag: "--max-time"
+      reason: "4.26.0 in-tool wall clock. Every profile already declares wall_clock_timeout_seconds, enforced by the runner around the whole invocation (provisioning + sweep + report); a second clock inside the tool would truncate a run the outer one still considers healthy — and a truncated run is not a result."
+    - flag: "--origin"
+      reason: "4.26.1 alternative to --url (scheme+host+port, base path appended from the schema). The target comes from systemTest/slot-target.sh as a full --url so the slot is the single source of the port; --origin is a second spelling of the same fact."
+
+  # ── Fallback phase set ────────────────────────────────────────────────────────
+  # Used when a profile resolves with no explicit flags.phases key, mirroring the
+  # full/pre-merge profiles' all-four-phases set. Sibling of default_checks above —
+  # added so scripts/runner/config.py's phases default is sourced from this file
+  # instead of a hardcoded Python literal (clean-slate redesign, checks/phases kept
+  # as separate concerns throughout).
+  default_phases:
+    - "examples"
+    - "coverage"
+    - "fuzzing"
+    - "stateful"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# PROFILES: Different test configurations for CI, Nightly, and Local
+# ──────────────────────────────────────────────────────────────────────────────
+
+profiles:
+  test-fast:
+    name: "test-fast"
+    description: "Quick validation for development and debugging (~1.2 min)"
+    trigger: "On demand during development"
+    flags:
+      mode: "positive"
+      max_examples: 6
+      # Shared verbatim with pr/local-debug/auth-rate-limited below — anchored
+      # here rather than copy-pasted (structural-duplication fix).
+      phases: &two_phases "examples,fuzzing"
+      max_response_time: 5
+    # Baseline read-only contract checks — shared verbatim with pr below, anchored
+    # here rather than copy-pasted (structural-duplication fix; the two profile
+    # copies had previously drifted to different orderings of the same five checks).
+    checks: &baseline_checks
+      - "not_a_server_error"
+      - "response_schema_conformance"
+      - "status_code_conformance"
+      - "content_type_conformance"
+      - "response_headers_conformance"
+    supplementary_tools: []
+    notes:
+      - "Positive-only mode — no negative/invalid inputs"
+      - "Skips coverage and stateful phases to keep under 3 min"
+      - "Ideal for smoke tests and quick debugging"
+      - "No unsupported_method/missing_required_header — those are coverage-phase checks, and this profile skips the coverage phase"
+    estimated_runtime_minutes: 2 # RATE_LIMIT_MAX_REQUESTS=2000 (local dev + Azure dev); theoretical max: 15 examples / ~3 min
+
+  pr:
+    name: "pr"
+    description: "Read-only contract validation (~1 min at RATE_LIMIT_MAX_REQUESTS=2000)"
+    trigger: "Every pull request (blocking gate)"
+    flags:
+      mode: "positive"
+      max_examples: 5
+      phases: *two_phases
+      max_response_time: 10
+      exclude_path_regex: "^/api/auth/"
+    checks: *baseline_checks
+    supplementary_tools: []
+    notes:
+      - "Read-only checks only — no negative_data_rejection or ignored_auth (those require mutations)"
+      - "Positive-only mode to keep under 3 min"
+      - "Skips coverage and stateful phases for speed"
+      - "Excludes /api/auth/ via exclude_path_regex (KS-275) — auth coverage provided by auth-rate-limited stage"
+      - "No unsupported_method/missing_required_header — those are coverage-phase checks, and this profile skips the coverage phase"
+    estimated_runtime_minutes: 1 # RATE_LIMIT_MAX_REQUESTS=2000 (local dev + Azure dev); target ~1 min
+
+  pre-merge:
+    name: "pre-merge"
+    description: "Comprehensive checks + all phases (~6 min at RATE_LIMIT_MAX_REQUESTS=2000)"
+    trigger: "Every pull request (ready-for-review label, blocking gate)"
+    flags:
+      mode: "all"
+      max_examples: 6
+      # Shared verbatim with full/nightly below — anchored here rather than
+      # copy-pasted (structural-duplication fix).
+      phases: &four_phases "examples,coverage,fuzzing,stateful"
+      max_response_time: 10
+    # Full PRIMARY check set — see harness.default_checks (&full_checks) for the
+    # category breakdown; aliased here rather than copy-pasted (structural-duplication fix).
+    checks: *full_checks
+    supplementary_tools: []
+    estimated_runtime_minutes: 6 # RATE_LIMIT_MAX_REQUESTS=2000 (local dev + Azure dev); target ~6 min; theoretical max: 27 examples / ~15 min
+
+  full:
+    name: "Full Test Suite"
+    description: "All Schemathesis PRIMARY checks + deep fuzzing (~11 min at RATE_LIMIT_MAX_REQUESTS=2000)"
+    trigger: "On demand — comprehensive report-only run"
+    flags:
+      mode: "all"
+      max_examples: 25
+      phases: *four_phases
+      max_response_time: 10
+      # KS-1271 D: honoured since 2026-09-18 (it was inert before — config.py never read it and drew
+      # secrets.randbits(32) regardless). "<random>" = a fresh CSPRNG seed per run, which is the
+      # ruling for ROUTINE sweeps: random seeds accumulate different stateful chains across runs, a
+      # fixed seed freezes one sample (KS-1271 finding 6). Fix a seed ONLY for a before/after
+      # comparison — `python3 scripts/run.py full --seed <int>` overrides this, or set an integer here
+      # on a throwaway branch. Test categories keep the random default; their seed keys are prose.
+      seed: "<random>"
+    # Full PRIMARY check set — see harness.default_checks (&full_checks) for the
+    # category breakdown; aliased here rather than copy-pasted (structural-duplication fix).
+    # KS-1271 E: the auth probe in this set is ignored_auth_rate_limit_aware (via harness.custom_checks),
+    # not the built-in — a 429 on the probe is reported as inconclusive, see harness.default_checks.
+    checks: *full_checks
+    parallel_instances: "4× endpoint coverage via separate Docker instances with unique --seed values"
+    supplementary_tools: []
+    estimated_runtime_minutes:
+      11 # measured (2026-07-01 real run, output/reports/schemathesis-results.json:
+      # duration=654.49s at max_examples=25); previously read 15, inconsistent with both the
+      # ~25 min description above and the measured run — corrected on both instead of picking one
+
+  nightly:
+    name: "Nightly — Extended Soak"
+    description: "Same PRIMARY checks as 'full', sized for a sustained 4-hour+ soak run rather than a quick nightly pass"
+    trigger: "Scheduled overnight (report-only, nightly)"
+    flags:
+      mode: "all"
+      max_examples:
+        1100 # target ≥4h wall clock. Formula value (see metadata.runtime_note) at 26/s harness rate,
+        # fixed=6417, variable=333 (corrected 2026-07-02, see metadata.revision_log) gives 1105 —
+        # already within ~0.5% of 1100, so left unchanged rather than retuning a live 4-hour test
+        # parameter for a sub-1% difference. (Under the prior, incorrect variable=346 the formula
+        # gave 1063, and 1100 was chosen as a ~10% margin above that — the margin reasoning no
+        # longer applies now that the corrected formula already lands at 1105.) The
+        # 2026-07-01 reference run's *measured* throughput (14,746 req / 654.49s ≈ 22.5 req/s)
+        # ran below the 26/s design rate, and sustained multi-hour runs tend to see more retries/
+        # GC pauses than a short burst. Re-derive with the formula if request_cost calibration changes.
+      phases: *four_phases
+      max_response_time: 10
+      seed: "<random>" # KS-1271 D: honoured; random per run by ruling — see the `full` profile's note
+      # KS-544: targeted property-based testing, nightly only. Steering generation toward slower
+      # responses costs example budget, which the short profiles need for breadth — the soak run is
+      # the one that can afford it, and slow-path inputs are what its Performance/Latency tabs are
+      # for. Overrides harness.generation.maximize (null).
+      maximize: "response_time"
+      wall_clock_timeout_seconds:
+        21600 # 6h subprocess kill timeout (harness.sweep_timeout_seconds is 1800s /
+        # 30 min, which killed this run after 38 min on the first live attempt —
+        # see runner/core.py invoke_schemathesis's wall_clock_override param).
+        # Set above the ~4.2h estimate (see max_examples comment) with margin:
+        # the live run's fuzzing phase was visibly slower per-endpoint than the
+        # formula assumes, so this gives ~1.8h of slack rather than cutting the
+        # run off right at the estimate.
+    # Full PRIMARY check set — see harness.default_checks (&full_checks) for the
+    # category breakdown; aliased here rather than copy-pasted (structural-duplication fix).
+    checks: *full_checks
+    supplementary_tools: []
+    estimated_runtime_minutes: 240 # ~4 hours; see flags.max_examples comment for derivation
+    notes:
+      - "Scheduled nightly — implemented as the schemathesis-soak job in .github/workflows/nightly-platform-suites.yml (currently workflow_dispatch-only; see that file's header for the promotion step to go live on a cron schedule)"
+      - "Watch for sustained-load side effects beyond the per-request rate limiter: log/report artifact size scales"
+      - "  with request volume (the 25-example reference run alone produced ~120MB HTML + ~50MB YAML/HAR each),"
+      - "  and any cumulative-abuse ban/anomaly-detection mechanism (distinct from the per-minute rate limiter) has"
+      - "  not been verified absent for a run this long — check services/ before running unattended"
+
+  auth-rate-limited:
+    name: "Auth — Rate-Limited Endpoints"
+    description: "Low-frequency fuzz of register/login/forgot-password (~2 min at RATE_LIMIT_MAX_REQUESTS=2000)"
+    trigger: "Run as part of pre-merge, after the main sweep"
+    flags:
+      mode: "all"
+      max_examples: 2
+      phases: *two_phases
+      max_response_time: 10
+      include_path_regex: "^/api/auth/"
+    checks:
+      - "not_a_server_error"
+      - "response_schema_conformance"
+      - "status_code_conformance"
+      - "negative_data_rejection"
+    notes:
+      - "max_examples=2 keeps total auth requests low enough to avoid the ~33-min Retry-After window (KS-270)"
+      - "Covers POST /api/auth/register, /api/auth/login, /api/auth/forgot-password and related auth variants"
+      - "Main pr/pre-merge sweep excludes /api/auth/ via exclude_path_regex (KS-275); this profile provides dedicated auth coverage"
+    estimated_runtime_minutes: 2 # auth endpoints only; ~100 req at 26/s
+
+  local-debug:
+    name: "Local/Debug — Developer Testing"
+    description: "Quick smoke test for single endpoint debugging"
+    trigger: "On demand"
+    flags:
+      mode: "positive"
+      max_examples: 4
+      phases: *two_phases
+      max_response_time: 5
+    checks:
+      - "not_a_server_error"
+    notes:
+      - "Swap --mode to 'negative' when debugging rejection logic"
+      - "Single tool focus — match tool to the bug being investigated"
+    estimated_runtime_minutes: 2
+
+# ──────────────────────────────────────────────────────────────────────────────
+# TEST CATEGORIES: Organized by functional area
+# ──────────────────────────────────────────────────────────────────────────────
+
+test_categories:
+  # ──────────────────────────────────────────────────────────────────────────
+  # CONTRACT & SCHEMA VALIDATION
+  # ──────────────────────────────────────────────────────────────────────────
+  contract_schema:
+    name: "Contract & Schema Validation"
+    description: "OpenAPI compliance and schema conformance testing"
+    tests:
+      schema_validation:
+        name: "Schema Validation"
+        purpose: "Verify responses conform to OpenAPI schema"
+        category: "Contract testing"
+        flags:
+          checks: ["response_schema_conformance"]
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+
+      schema_drift:
+        name: "Schema Drift Detection"
+        purpose: "Catch breaking changes and contract violations"
+        category: "Contract changes"
+        flags:
+          checks: ["response_schema_conformance", "status_code_conformance"]
+        notes: "Run on every PR in CI"
+        coverage: "PRIMARY"
+
+      status_code_validation:
+        name: "Status Code Conformance"
+        purpose: "Validate HTTP status codes match OpenAPI specification"
+        category: "Contract testing"
+        flags:
+          checks: ["status_code_conformance"]
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+
+      response_headers:
+        name: "Response Headers Conformance"
+        purpose: "Ensure response headers match OpenAPI contract"
+        category: "Contract testing"
+        flags:
+          checks: ["response_headers_conformance"]
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+
+      unsupported_method:
+        name: "Unsupported HTTP Method Handling"
+        purpose: "Verify undocumented HTTP methods on a known path return 405 with an Allow header (RFC 9110 §15.5.6)"
+        category: "Contract testing"
+        flags:
+          checks: ["unsupported_method"]
+        notes:
+          - "Runs during the coverage phase — no added request cost on top of pre-merge/full/nightly"
+          - "pr/test-fast skip the coverage phase, so this check does not run there"
+          - >
+            KS-406 (2026-07-08): effectively INERT on this platform — schemathesis.toml sets
+            [phases.coverage] unexpected-methods = [] because auth-first 401 on undeclared methods is
+            the intended posture (auth runs before routing), so no unexpected-method probes are
+            generated for this check to judge. The check stays configured so the installed-check
+            compatibility coverage is complete.
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+
+      missing_required_header:
+        name: "Missing Required Header Handling"
+        purpose: "Verify requests missing a required header are rejected (400/401/403/406/422, or 401 for Authorization) rather than accepted"
+        category: "Contract testing"
+        flags:
+          checks: ["missing_required_header"]
+        notes:
+          - "Runs during the coverage phase — no added request cost on top of pre-merge/full/nightly"
+          - "Complements ignored_auth for missing-Authorization-header scenarios specifically"
+          - "pr/test-fast skip the coverage phase, so this check does not run there"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # DATA GENERATION & COVERAGE
+  # ──────────────────────────────────────────────────────────────────────────
+  data_generation:
+    name: "Data Generation & Coverage"
+    description: "Input generation strategies for comprehensive testing"
+    tests:
+      happy_path:
+        name: "Examples & Happy Path"
+        purpose: "Test valid inputs and smoke tests"
+        category: "Positive seeds"
+        flags:
+          mode: "positive"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/"
+
+      boundary_coverage:
+        name: "Coverage & Edge Cases"
+        purpose: "Test boundary values and edge conditions"
+        category: "Edge cases"
+        flags:
+          mode: "all"
+          max_examples: 100
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/"
+
+      fuzzing:
+        name: "Fuzzing (Random + Mutation)"
+        purpose: "Property-based fuzzing with random and mutated inputs"
+        category: "Random + mutation"
+        flags:
+          mode: "all"
+          max_examples: 200
+          seed: "<random>"
+        notes:
+          - "--seed replaces --hypothesis-derandom (removed in v4)"
+          - "For nightly runs (full profile), max_examples is 25"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/"
+
+      negative_testing:
+        name: "Negative Testing"
+        purpose: "Test rejection of invalid inputs and error handling"
+        category: "Invalid inputs"
+        flags:
+          mode: "negative"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/"
+
+      positive_testing:
+        name: "Positive Testing"
+        purpose: "Valid-only mode, no invalid inputs"
+        category: "Valid-only mode"
+        flags:
+          mode: "positive"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/"
+
+      parameter_combinations:
+        name: "Parameter Combinations"
+        purpose: "Test all combinations of query, path, and header parameters"
+        category: "Query/path/header"
+        flags:
+          mode: "all"
+          max_examples: 150
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # STATEFUL & WORKFLOW TESTING
+  # ──────────────────────────────────────────────────────────────────────────
+  stateful_workflows:
+    name: "Stateful & Workflow Testing"
+    description: "Multi-step operation sequences and state management"
+    tests:
+      stateful_workflows:
+        name: "Stateful Workflows"
+        purpose: "Test POST→GET→DELETE chains and resource lifecycles"
+        category: "POST→GET→DELETE chains"
+        flags:
+          phases: "stateful"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/stateful/"
+
+      operation_linking:
+        name: "Operation Linking"
+        purpose: "Automatically infer and test operation dependencies"
+        category: "Auto-infer chains"
+        flags:
+          phases: "stateful"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/stateful/"
+
+      idempotency:
+        name: "Idempotency Testing"
+        purpose: "Verify requests are safe to retry (same result on repeat)"
+        category: "Retry safety"
+        flags:
+          phases: "stateful"
+        notes:
+          - "Requires custom hooks for retry validation"
+          - "Compare responses on repeated requests"
+        coverage: "PARTIAL"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/hooks/"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # SECURITY & AUTHENTICATION
+  # ──────────────────────────────────────────────────────────────────────────
+  security_auth:
+    name: "Security & Authentication"
+    description: "Auth validation and security testing"
+    tests:
+      auth_scenarios:
+        name: "Auth Scenarios"
+        purpose: "Test missing, invalid, and expired authentication"
+        category: "Missing / invalid / expired"
+        flags:
+          # KS-1271: was ["ignored_auth"]. The auth probe now runs as the custom check
+          # ignored_auth_rate_limit_aware, which checks_resolution appends to EVERY resolved list, so
+          # this category names no built-in of its own: it falls back to harness.default_checks +
+          # the custom checks, and the probe still runs on every operation the category sweeps.
+          checks: []
+        notes:
+          - "KS-1271: ignored_auth_rate_limit_aware wraps the built-in ignored_auth — a 429 on the no-auth / invalid-auth probe is recorded as INCONCLUSIVE and reported ('auth enforcement NOT verified on: …'), never as a pass and never as an auth gap"
+          - "Complements Akto for auth bypass detection"
+          - "Also checks JWT attacks and token lifecycle"
+          - "KS-270: register/login/forgot-password carry a ~33-min Retry-After brute-force limiter; use auth-rate-limited profile (max_examples=2) to fuzz them without locking out the runner IP"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+
+      idor_rbac:
+        name: "IDOR & RBAC Testing"
+        purpose: "Cross-user access control and privilege escalation detection"
+        category: "Cross-user access"
+        flags:
+          phases: "stateful"
+          hooks: "multi_user_contexts"
+        notes:
+          - "KS-228 regression: TestGdprOwnershipGuard in test_auth_security.py covers all four GDPR read/export routes"
+          - "Token setup: python3 scripts/setup.py --idor-tokens (writes GDPR_IDOR_TEST_* to .env — KS-258 ONLY)"
+          - "Two-user fixture: ISSUER_ADMIN (User A) vs VERIFIER (User B)"
+          - "SCOPE: GDPR_IDOR_TEST_* tokens must not be referenced in any other Schemathesis test (KS-258 mandatory)"
+        coverage: "PRIMARY"
+        reference:
+          - "https://schemathesis.readthedocs.io/en/stable/guides/stateful-testing/"
+          - "https://schemathesis.readthedocs.io/en/stable/reference/hooks/"
+
+      api_probing:
+        name: "API Probing — Security Behaviour Probes"
+        purpose: "Detect whether the API accepts malformed inputs that indicate missing input sanitisation"
+        category: "Automatic security probes (v4.x+)"
+        phase: "API probing"
+        flags: {} # No flags required — Schemathesis runs this phase automatically before the test suite
+        probes:
+          - name: "Supports NULL byte in headers"
+            outcome_failure: "API rejected the null byte (correct — no injection surface)"
+            outcome_success: "API accepted the null byte (potential header injection / log poisoning risk)"
+          - name: "Accepts backslash and control characters in URL paths"
+            outcome_failure: "API rejected the malformed path (correct — input sanitisation in place)"
+            outcome_success: "API accepted the path (potential path traversal / control-char injection risk)"
+        outcome_key: |
+          outcome: "failure" → API REJECTED the probe  → correct security posture (shown as ✅ in HTML report)
+          outcome: "success" → API ACCEPTED the probe  → potential security concern  (shown as ⚠ in HTML report)
+        notes:
+          - "Results are surfaced in the HTML report: Console Summary (API Probing section) and Phases tab"
+          - "An outcome of 'success' does NOT automatically mean the API is vulnerable — investigate manually"
+          - "Phase runs once per sweep, before examples/fuzzing/coverage/stateful phases"
+          - "If the phase is unsupported or disabled, the Console Summary section is omitted"
+        coverage: "AUTOMATIC"
+        reference: "https://schemathesis.readthedocs.io/en/stable/"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # RELIABILITY & STABILITY
+  # ──────────────────────────────────────────────────────────────────────────
+  reliability_stability:
+    name: "Reliability & Stability"
+    description: "Error handling and endpoint robustness"
+    tests:
+      server_error_detection:
+        name: "Server Error Detection"
+        purpose: "Detect 5xx errors and crashes from fuzzing"
+        category: "5xx / crashes"
+        flags:
+          checks: ["not_a_server_error"]
+        notes:
+          - "Baseline check — always enabled"
+          - "Supplements k6 error rate thresholds"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+
+      input_handling:
+        name: "Input Handling & Rejection"
+        purpose: "Verify invalid inputs are rejected gracefully"
+        category: "Reject invalid requests"
+        flags:
+          mode: "negative"
+          checks: ["not_a_server_error"]
+        notes:
+          - "Validates error response structure and messaging"
+          - "Ensures 4xx responses for bad inputs, not 5xx"
+        coverage: "PRIMARY"
+        reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+
+      timeout_stability:
+        name: "Timeout & Stability"
+        purpose: "Detect hanging endpoints and slow responses"
+        category: "Hanging endpoints"
+        flags:
+          max_response_time: 5
+        notes:
+          - "NOT a performance tool — validates stability only"
+          - "For latency/p95/p99, use k6 instead"
+        coverage: "PARTIAL"
+        reference: "https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# TOOL COMBINATIONS: When to combine Schemathesis with other tools
+# ──────────────────────────────────────────────────────────────────────────────
+
+tool_combinations:
+  schemathesis_plus_akto:
+    tools: ["Schemathesis", "Akto"]
+    purpose: "Contract coverage + deep auth bypass & IDOR detection"
+    workflow:
+      - "Step 1: Run Schemathesis for schema conformance baseline"
+      - "Step 2: Feed failing endpoints into Akto for security deep-dive"
+    coverage: "Contract logic + security validation"
+
+  schemathesis_plus_apifuzzer:
+    tools: ["Schemathesis"]
+    purpose: "Schema-driven fuzzing + injection/mutation security fuzzing"
+    workflow:
+      - "Step 1: Schemathesis finds logic bugs via schema-driven testing"
+    coverage: "Complementary — logic + injection security"
+
+  schemathesis_plus_k6:
+    tools: ["Schemathesis", "k6"]
+    purpose: "Functional correctness validation + load/stress at scale"
+    workflow:
+      - "Step 1: Run Schemathesis to prove API correctness"
+      - "Step 2: k6 hammers it with realistic load scenarios"
+    coverage: "Correctness before performance"
+
+  schemathesis_nightly:
+    tools: ["Schemathesis (×4 parallel instances)", "Akto", "k6", "Playwright"]
+    purpose: "Comprehensive overnight validation with 4× endpoint coverage"
+    workflow:
+      - "4× parallel Schemathesis instances, each with unique --seed"
+      - "All supplementary tools in parallel"
+    flags:
+      max_examples: 25
+      seed: "<unique random per instance>"
+    coverage: "4× deeper input space exploration + full security suite"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# BASELINE CONFIGURATION
+# Recommended flags for every PR (CI profile)
+# ──────────────────────────────────────────────────────────────────────────────
+
+baseline_configuration:
+  description: "Equivalent to running: python3 scripts/run.py pre-merge"
+  command_template: |
+    schemathesis run {OPENAPI_URL} \
+      --checks=not_a_server_error,response_schema_conformance,status_code_conformance,content_type_conformance,response_headers_conformance,negative_data_rejection,ignored_auth,unsupported_method,missing_required_header \
+      --mode=all \
+      --max-examples=6 \
+      --phases=examples,coverage,fuzzing,stateful \
+      --rate-limit=26/s \
+      --request-timeout=10 \
+      -H "Authorization: Bearer $API_TOKEN"
+
+  flag_explanations:
+    checks: "What to validate — baseline contract checks plus negative_data_rejection and ignored_auth for pre-merge; unsupported_method and missing_required_header ride the coverage phase at no added request cost"
+    mode: "all = valid + invalid inputs; positive = valid only (pr, test-fast, local-debug)"
+    max_examples: "pr=5 (~1 min), test-fast=6 (~1.2 min), pre-merge=6 (~6.5 min, target ~6 min) for CI/on-demand; full=25 (~25 min) for nightly (see runtime_note for theoretical ceilings and Background)"
+    phases: "all four phases for pre-merge and full; examples,fuzzing only for pr, test-fast, local-debug"
+    rate_limit: "floor(RATE_LIMIT_MAX_REQUESTS / 60 * 0.80) — 26/s at 2000 (local dev + Azure dev), 1/s at 100 (Azure demo)"
+    max_response_time:
+      "Fail responses slower than 10s (stability baseline); 5s for test-fast and local-debug.
+      KS-544 rename: this key was called `request_timeout`, which implied it set the TRANSPORT timeout
+      (--request-timeout, i.e. how long to wait before abandoning a request). It never did — it has always
+      fed --max-response-time, a CHECK that FAILS a case whose response was slower than the threshold.
+      The transport timeout comes only from SECUURA_REQUEST_TIMEOUT (harness.request_timeout_seconds) and
+      is deliberately not per-profile. The behaviour is unchanged; only the name now matches it."
+    auth_header: "v4 syntax: --auth only works for basic auth; use -H for Bearer tokens"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ANTI-PATTERNS: What NOT to do
+# ──────────────────────────────────────────────────────────────────────────────
+
+anti_patterns:
+  - pattern: "Using Schemathesis as a load tool"
+    problem: "Sends sequential requests, not concurrent VUs"
+    solution: "Use k6 for throughput and latency measurement"
+
+  - pattern: "Relying on Akto for schema validation"
+    problem: "Akto has no OpenAPI contract awareness"
+    solution: "Schemathesis owns conformance checking"
+
+  - pattern: "Skipping --phases stateful on CRUD APIs"
+    problem: "Missing resource lifecycle bugs (create→read→delete chains)"
+    solution: "Always include --phases stateful for stateful operations"
+
+  - pattern: "Running --max-examples uncapped in CI"
+    problem: "Will timeout and fail"
+    solution: "Use pr=5, test-fast=6, pre-merge=6 (see runtime_note); 25 for nightly full (~25 min at RATE_LIMIT_MAX_REQUESTS=2000)"
+
+  - pattern: "--hypothesis-derandom flag (v3 syntax)"
+    problem: "Removed in v4; causes syntax error"
+    solution: "Use --seed=<random> in v4"
+
+  - pattern: "Hand-maintained allowlist for operations that consistently 405 (KS-226)"
+    problem: "A manually curated skip list drifts from real API behaviour and needs ongoing upkeep"
+    solution: "Use harness.warnings.fail_on: [method_not_allowed] — Schemathesis's own persistent cross-run cache tracks 405-consistent operations and self-corrects as it observes real behaviour"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ENVIRONMENT & SETUP
+# ──────────────────────────────────────────────────────────────────────────────
+
+# KS-1386: an `environment:` block stood here — `OPENAPI_URL` example `http://localhost:6882/...` and a
+# `docker_services.ports` table (api_gateway 6882, postgres 5432, redis 6379, cardano_devnet 6092).
+# Nothing read it (no loader, runner or test references the key), it was wrong (Postgres is published
+# on 6432, not 5432) and it typed slot 1's ports as THE ports. Removed rather than corrected:
+#   * ports: Blockchain/Dev/scripts/port-allocations.json is the single registry of slot-1 bases, and
+#     slot N publishes base + 100*(N-1) (Blockchain/Dev/scripts/stack_env.sh; src/port_registry.py
+#     reads it). Name the slot — `SECUURA_STACK_SLOT=<n>` or `systemTest/run-in-slot.sh <n> …` — and
+#     the harness derives the gateway; there is no default stack.
+#   * API_TOKEN: `python3 scripts/setup.py` (under the named slot) bootstraps it; see setup_commands.
+
+setup_commands:
+  # KS-1386: every command that reaches a stack names the slot; there is no default stack. `<n>` is the
+  # slot (1 to SECUURA_MAX_STACK_SLOT). regenerate_report reads files already on disk and needs none.
+  first_time_setup: "SECUURA_STACK_SLOT=<n> python3 systemTest/schemathesis/scripts/run.py setup" # ONE command: venv + deps + .env files + API token (alias: install)
+  refresh_token: "SECUURA_STACK_SLOT=<n> python3 systemTest/schemathesis/scripts/setup.py" # (later) re-acquire the API token only — needs the venv + Docker
+  comprehensive_test: "SECUURA_STACK_SLOT=<n> python3 systemTest/schemathesis/scripts/run.py pre-merge" # also writes the HTML report
+  quick_validation: "SECUURA_STACK_SLOT=<n> python3 systemTest/schemathesis/scripts/run.py test-fast"
+  quality_gate: "SECUURA_STACK_SLOT=<n> python3 systemTest/schemathesis/scripts/run.py quality"
+  regenerate_report: "python3 systemTest/schemathesis/scripts/run.py report" # Rebuild HTML from cached cassettes — no re-run
+
+# ──────────────────────────────────────────────────────────────────────────────
+# REFERENCE LINKS
+# ──────────────────────────────────────────────────────────────────────────────
+
+references:
+  schemathesis_docs: "https://schemathesis.readthedocs.io/en/stable/"
+  data_generation: "https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/"
+  checks_reference: "https://schemathesis.readthedocs.io/en/stable/reference/checks/"
+  stateful_testing: "https://schemathesis.readthedocs.io/en/stable/explanations/stateful/"
+  stateful_guide: "https://schemathesis.readthedocs.io/en/stable/guides/stateful-testing/"
+  hooks_reference: "https://schemathesis.readthedocs.io/en/stable/reference/hooks/"

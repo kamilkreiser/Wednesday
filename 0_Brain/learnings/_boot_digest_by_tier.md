@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-15 10:14 from 268 lesson files (1,148,701 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 222. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-15 17:01 from 271 lesson files (1,155,903 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 225. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7602,7 +7602,7 @@ sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #168
 
 
 ## NEVER keep the Spark idle — use it for one thing or another; a failed task is data, not waste; pick work that does not relate to other in-flight work
-`2026-10-28_never-keep-the-spark-idle-quota-and-capability-data.md` · grant · 2026-10-28 · status: live · tier: W
+`2026-10-28_never-keep-the-spark-idle-quota-and-capability-data.md` · grant · 2026-10-28 · status: retired — 2026-11-15, the Spark was wiped and returned to HP (Kam: "the Spark has gone, retire the checks"); see [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]] · tier: W
 
 **The operative case, so the headline matches it:** I am at a boot, a checkpoint, or between waves, and the Spark has no round running. **That is the rule being broken, not a gap to notice later.** Before anything else at that boundary: is the tunnel up (`local-model/spark/tunnel.sh check`), is a round queued, and if not, what can I give it from the 400+ open tickets that does NOT touch code another seat is changing?
 
@@ -7844,4 +7844,47 @@ OWN inbox: the inbox her merge seat reports READY and MERGED to.
 4. Unchanged: the QA gate before every merge, the signature classes, demo frozen.
 
 **Family:** [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] (the TESTED grant this rests on) · [[2026-09-09_my-authority-and-the-targets-rules-are-two-checks]] (why the nine went to Kam rather than being waived by stamp) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Mirror Peter's tests: our PRs run the same suites his process runs — the full preflight, Schemathesis pre-merge, Akto, Playwright and k6 — so nothing he would catch reaches him first
+`2026-11-15_mirror-peters-tests-so-we-catch-everything.md` · principle · 2026-11-15 · status: live · tier: W
+
+**The lesson:** "Tested" for a Secuura PR means tested the way Peter's process tests it, not the subset an agent can run without a stack. The suites defined in `systemTest/` (Schemathesis `run.py pre-merge`, Playwright API journeys, Akto OWASP scan, k6 performance) and all 16 pre-push preflight legs run against a local stack slot of the PR's tree. A run that skips legs is reported as skipped, and the gap is closed by bringing the stack up, not by accepting "PREFLIGHT INCOMPLETE" as normal.
+
+**How to apply:**
+1. The stack is a prerequisite, so keep it available: Docker Desktop running, one named slot (`SECUURA_STACK_SLOT`, `systemTest/run-in-slot.sh`), seeded admin credentials for that slot (`TEST_ADMIN_EMAIL` / `TEST_ADMIN_PASSWORD`, never printed). This Mac has 24 GB: a full slot (~36 containers) is brought up only when the floor leaves room (load1 < 7, memory checked), and never on Kintsugi or demo.
+2. Gates and merge seats add a "Peter suites" leg once a slot exists: the PR's tree on the slot, the suites' own pass lines quoted verbatim, and a baseline run on develop beside it, so a red is attributable.
+3. Card secuura-premerge-block-nine-prs-1113 = c still means our PR text carries no self-hold sentence; this lesson changes what is RUN, not what is written. Until the slot is live, merges continue on gate verdicts (Kam 15:40 "the recent merge rules override everything historic") and say the suites were not run.
+4. Peter remains the reviewer of his own process; this is us running it first, not replacing him.
+
+**Family:** [[2026-11-15_recent-merge-rules-override-historic-holds]] · [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]]
+
+
+## The recent merge rules override every historic hold: a PR that is ready merges unless a CURRENT reason says otherwise
+`2026-11-15_recent-merge-rules-override-historic-holds.md` · principle · 2026-11-15 · status: live · tier: W
+
+**The lesson:** When a PR has passed its gate at its current head, the current merge rules decide: merge what is ready (Kam 2026-11-12 15:01, 2026-11-15 15:07), one head-pinned GO at a time (2026-09-11 TESTED grant, 2026-10-10 merge-and-archive grant), two merge seats in parallel (card secuura-merge-throughput-sixty-ready-1115 = a), and the self-hold sentence never blocks (card secuura-premerge-block-nine-prs-1113 = c). An OLD hold carried forward brief to brief — a "not in queue" list, a "do not merge" sentence, a hold whose reason no brief records — does NOT keep a ready PR out.
+
+**How to apply:**
+1. A carried-forward hold with no current, readable reason is lifted. Do not keep it "to be safe"; that is exactly what Kam overrode.
+2. What still holds a PR is a CURRENT, specific reason: the gate's own verdict at this head says it must not merge as written (e.g. a NO GO, or a Medium that says "should not merge as written"); a Kam card ruled after the newer merge rules that names the PR; a signature-class step (deploy, production, money, comms) — merge stays allowed, the deploy waits.
+3. When a hold is lifted on this rule, say so in the GO and name the PR; when one is kept, name the current reason in one line.
+
+**First application (15:4x):** PRs 2075, 2052, 2073, 2131, 2136 released to Seat K 19th's queue; 2159 kept (gate 301 G301-2159-1: "should not merge as written") and 2225 kept (card secuura-ks1699-verify-audience-1113 ties it to an open deploy question), each with its current reason.
+
+**Family:** [[2026-10-10_merge-and-archive-when-done-and-ready]] · [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] · [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]
+
+
+## The Spark is gone: there is no local Spark tier — never route to it, never check it, never nag about it idling
+`2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier.md` · principle · 2026-11-15 · status: live · tier: W · supersedes: 2026-10-28_never-keep-the-spark-idle-quota-and-capability-data (retired, not superseded in content: its subject no longer exists)
+
+**The lesson:** As of 2026-11-15 the HP loan Spark (hp-loan-spark / ZGX-Nano-G1n / zgx-15d5) has been wiped and returned to HP. Every rule that routes work to the Spark, asks for it to be kept busy, or checks its tunnel is **inactive**. Model choice is now Ornith (local, where it still runs), Sonnet or Opus, by `fleet/specs/model-routing.md` with the Spark column read as "not available".
+
+**How to apply:**
+1. A Spark-first / Spark-max / Spark-target line in any older lesson (14 other files carry "spark" in the name, 2026-09-23 to 2026-11-12) is **historical**: do not act on it; route the work to the next tier the routing spec names.
+2. Never run `local-model/spark/tunnel.sh`, `round.sh` or `queue.sh`, and never brief "Spark" in a launch receipt.
+3. Our records from the box are in `0_Brain/reference/2026-11-15_spark-return-archive/` (105 files, 8.3 MB, no weights) — read there, not on the box.
+4. If Kam gets a new local box, the checks come back by removing the `false &&` guards — a new ruling, not an assumption.
+
+**Family:** [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] (retired) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] (its Spark tier is gone) · [[2026-11-12_spark-for-harness-and-token-heavy-simple-tasks]] (historical)
 

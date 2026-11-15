@@ -1,0 +1,37 @@
+=== HARD SUITE  provider=deepseek  model=deepseek-v4-flash-0731 ===
+   test counts: {'persistent-bst': 14, 'lazy-segment-tree': 14, 'crdt-sequence': 12, 'exact-decimal': 19, 'priority-scheduler': 12}  (total 71)
+
+--- 1/5 persistent-bst
+   round1: 14/14 (968 tok, 20.8s)
+
+--- 2/5 lazy-segment-tree
+   round1: 14/14 (1634 tok, 29.6s)
+
+--- 3/5 crdt-sequence
+   round1: 7/12 (1162 tok, 28.7s)
+      FAIL CONVERGE: 2 replicas, sequential exchange      A='punzmqpzojrxrjzijoyjgzcivjusnrouxnpieccb' B='idwkpjoyvrjzvxlizmpvoiuqpbnjvodhhuernukc'
+      FAIL CONVERGE: 2 replicas, REVERSED delivery order  A='ifoeapfhgreqbvvzpdyallfhniurjcxeow' B='fiaoephelzqfralvvjxfdpbguhnicreoyw'
+      FAIL CONVERGE: 2 replicas, SHUFFLED delivery order  A='ptmvnpmxbntjwqvoyksliazumvtgdsqsdqfnuqgi' B='hfimtwvpmeqbnnnjtiaitlsoukzddqspvxtvsudg'
+      FAIL CONVERGE: 3 replicas, 60 concurrent ops, shuffled texts=['gsxkodoafmjlutwxsvncetkphiydjr', 'xbuosxmdorhjlofwqtckgmhakampdr', 'xguxmkodjarnew
+      FAIL CONVERGE: concurrent inserts at SAME index     A='ba-' B='b-a'
+   round2: 7/12 (19.4s)  delta +0
+      STILL CONVERGE: 2 replicas, sequential exchange     A='pumpzojnzqrjxrjzioyjgzcivjusonruxnpieccb' B='idwkpjoyvrjzvxlizmopviuqpjvnboudhhernukc'
+      STILL CONVERGE: 2 replicas, REVERSED delivery order A='ifoeafphrgeqbvvzydpallfnhiurjcxeow' B='fiaoepzhleqfrvvxjlafdpbguhnriecoyw'
+      STILL CONVERGE: 2 replicas, SHUFFLED delivery order A='ptmnvpmbxntjwvqoyksliagdumszqtvsdqfnqugi' B='hfimtwvpqembnnnjtaoilitsukzddqspvxtvsudg'
+      STILL CONVERGE: 3 replicas, 60 concurrent ops, shuffled texts=['gsxkodmajfolutwxnestvckphyidjr', 'xbuosxmdorhjfolwqtckgahmkampdr', 'xguxkodmrajlwn
+      STILL CONVERGE: concurrent inserts at SAME index    A='ba-' B='b-a'
+
+--- 4/5 exact-decimal
+   round1: 18/19 (1924 tok, 47.0s)
+      FAIL PROPERTY: 200 random div vs exact oracle       div(914.38,-6440,1)=-0.2 want -0.1
+   round2: 19/19 (79.6s)  delta +1
+
+--- 5/5 priority-scheduler
+   round1: 10/12 (1203 tok, 26.9s)
+      FAIL arrival delay skips ticks                      got [3, 4] want [3]
+      FAIL TRANSITIVE inheritance across 3 tasks          C ends at 19, D starts at 6
+   round2: 10/12 (24.2s)  delta +0
+      STILL arrival delay skips ticks                     got [3, 4] want [3]
+      STILL TRANSITIVE inheritance across 3 tasks         C ends at 19, D starts at 6
+
+=== deepseek-v4-flash-0731 HARD TOTAL: round1 63/71 (88.7%)  round2 64/71 (90.1%)  276s ===

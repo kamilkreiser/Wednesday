@@ -1,0 +1,66 @@
+=== waiting for pull 2026-09-22T07:05:47+00:00 ===
+=== pull complete 2026-09-22T07:19:18+00:00 ===
+NAME          ID              SIZE     MODIFIED      
+ornith:35b    5a470e0f652c    21 GB    6 seconds ago    
+=== smoke test (loads model onto GPU) ===
+{"id":"chatcmpl-718","object":"chat.completion","created":1790061610,"model":"ornith:35b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"ORNITH_OK","reasoning":"The user wants me to reply with exactly \"ORNITH_OK\".\nI will output just that string."},"finish_reason":"stop"}],"usage":{"prompt_tokens":76,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens":28,"total_tokens":104}}
+
+mem after load: 31G/121G
+18 %, [N/A]
+=== running the 10-task suite 2026-09-22T07:20:10+00:00 ===
+=== PROVIDER=ollama  MODEL=ornith:35b ===
+
+--- 1/10 regex-engine
+   round1: 9/19 (3210 tok, 41.1s)
+      FAIL star many                          got False want True
+      FAIL star middle many                   got False want True
+      FAIL question one                       got False want True
+      FAIL class plus                         TypeError: 'set' object is not subscriptable
+      FAIL class range                        TypeError: 'set' object is not subscriptable
+      FAIL class range reject                 TypeError: 'set' object is not subscriptable
+      FAIL negated class                      TypeError: 'set' object is not subscriptable
+      FAIL negated class reject               TypeError: 'set' object is not subscriptable
+      FAIL dot star                           IndexError: tuple index out of range
+      FAIL dot star empty mid                 IndexError: tuple index out of range
+   round2 ERROR: TRUNCATED at 6144 tokens
+
+--- 2/10 topo-scheduler
+   round1: 12/12 (1581 tok, 20.8s)
+
+--- 3/10 interval-set
+   round1 ERROR: TRUNCATED at 4096 tokens (53.5s)
+
+--- 4/10 ttl-lru-cache
+   round1: 13/13 (2650 tok, 34.3s)
+
+--- 5/10 jsonpath
+   round1: 12/14 (1744 tok, 22.3s)
+      FAIL wildcard then key                  got [{'b': 1}, {'b': 2}] want [1, 2]
+      FAIL wildcard missing key skips         got [{'b': 1}, {'z': 9}] want [1]
+   round2 ERROR: TRUNCATED at 6144 tokens
+
+--- 6/10 expr-evaluator
+   round1 ERROR: TRUNCATED at 4096 tokens (52.7s)
+
+--- 7/10 fuzzy-trie
+   round1 ERROR: TRUNCATED at 4096 tokens (53.7s)
+
+--- 8/10 semver-resolver
+   round1: 10/16 (852 tok, 10.9s)
+      FAIL caret major                        IndexError: list index out of range
+      FAIL caret excludes next major          IndexError: list index out of range
+      FAIL caret floor                        IndexError: list index out of range
+      FAIL caret zero major                   IndexError: list index out of range
+      FAIL tilde                              IndexError: list index out of range
+      FAIL tilde excludes minor bump          IndexError: list index out of range
+   round2: 16/16 (1047 tok, 13.8s)  delta +6
+
+--- 9/10 line-diff
+   round1 ERROR: TRUNCATED at 4096 tokens (53.6s)
+
+--- 10/10 state-machine
+   round1: 17/17 (1147 tok, 15.1s)
+
+=== ollama TOTAL: round1 73/91 (80.2%)  round2 79/91 (86.8%)  534s ===
+raw -> /home/datasec-rd/spark-eval/results_ollama.json
+=== done rc=0 2026-09-22T07:29:04+00:00 ===

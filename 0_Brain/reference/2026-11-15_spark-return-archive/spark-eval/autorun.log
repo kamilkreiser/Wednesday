@@ -1,0 +1,34 @@
+=== watcher started 2026-09-22T00:24:59+00:00 ===
+=== /health UP at 2026-09-22T04:37:02+00:00 ===
+=== probing http://127.0.0.1:8888 at 2026-09-22T04:37:22Z ===
+
+--- t_identity ---
+[PASS] served model id: ['deepseek-v4-flash-0731']
+
+--- t_reasoning_field ---
+[PASS] reasoning field placement: content
+
+--- t_kv_pool ---
+[PASS] KV pool / cache metrics: 4 metric lines captured
+      # TYPE vllm:kv_cache_usage_perc gauge
+      vllm:kv_cache_usage_perc{engine="0",model_name="deepseek-v4-flash-0731"} 0.0
+      # TYPE vllm:cache_config_info gauge
+      vllm:cache_config_info{_block_size_resolved="True",block_size="4",cache_dtype="nvfp4_ds_mla",calculate_kv_scales="False",enable_prefix_caching="True",engine="0",gpu_memory_utilization="0.94",is_attent
+
+--- t_decode ---
+    trial 1: 800 tok in 21.7s = 36.92 tok/s
+    trial 2: 800 tok in 21.5s = 37.13 tok/s
+    trial 3: 800 tok in 19.2s = 41.58 tok/s
+[PASS] decode tok/s (code): median 37.13 tok/s over 3 trials (brief: 38.12)
+
+--- t_prefill ---
+[PASS] prefill tok/s: 47096 prompt tokens in 45.6s = 1032 tok/s
+
+--- t_code_correctness ---
+[PASS] generated code executes correctly: solve([2,7,11,15],9) -> [0, 1] (expect [0,1])
+
+--- t_tool_calls ---
+[PASS] structured tool_calls: get_weather({"city": "Sydney"})
+
+=== 7/7 passed; raw -> /home/datasec-rd/spark-eval/results.json ===
+=== probe finished rc=0 at 2026-09-22T04:39:18+00:00 ===
