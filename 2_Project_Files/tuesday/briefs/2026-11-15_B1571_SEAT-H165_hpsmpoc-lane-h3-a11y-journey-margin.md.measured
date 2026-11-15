@@ -1,0 +1,79 @@
+6523d50b | drafter helper jsearch.py (GET only, s277/d1571) JQL 'project = HPSMPOC AND ( labels in (next-phase, gather, awaiting-hp) AND key in (HPSMPOC-470, HPSMPOC-480) )' -> COUNT 0 ; control: the same without the key in part -> COUNT 27
+bbcb4464 | fragment of the JQL above; measured by the same two runs -> 0 with it, 27 without
+41fb0d9b | grep -c -F 'labels=landing-minor,rec-2026-11-11' t470_480.txt (jget.py output for HPSMPOC-470) -> 1; control 'labels=zzz' -> 0
+0b138514 | gh api -X GET repos/datasecau/HPSM-POC/pulls/318/files --jq .[].filename at 13:05 -> 9 names: api/src/HpsmPoc.Api/Auth/ForwardedClientAddress.cs, ForwardedProofGate.cs, api/src/HpsmPoc.Api/Program.cs, api/tests/HpsmPoc.Api.Tests/FollowUp/FollowUpHardeningTests.cs, Hosting/ForwardedClientAddressTests.cs, Hosting/ForwardedProofTests.cs, infra/tests/test_security_baseline.py, web/src/server/bff.client.test.ts, web/src/server/bff.ts (none under web/e2e); control pulls/99999 -> HTTP 404
+21741398 | values chosen by this kit inside the block 9890-9899; lsof -nP -iTCP:9890-9899 -sTCP:LISTEN -> 0 rows at 13:08; control lsof -nP -iTCP -sTCP:LISTEN -> 21 rows; word-boundary scan of 19 non-.pre- SEAT kits of 14-15 Nov for 989[0-9] -> 0 each; control 981[0-9] over the B1565 kit -> 2
+18b0edfe | awk NR over web/playwright.config.ts at main -> 4: const PORT = Number(process.env.WEB_PORT ?? 3100); 21: const HOSTED_PORT = Number(process.env.E2E_HOSTED_PORT ?? 3598); 22: const STUB_PORT = Number(process.env.E2E_STUB_PORT ?? 3597); 25: const CHOOSER_PORT = Number(process.env.E2E_CHOOSER_PORT ?? 3599)
+135a301a | ls .github/workflows over the tarball of main -> ci.yml and security
+956cdccb | grep -n -F 'name: web build (audit' ci.yml -> 372 (job id web-build at 371); control 'name: web build zzz' -> 0
+a2ab7910 | awk NR==49 over web/playwright.config.ts -> '  retries: process.env.CI ? 1 : 0,'
+e3ef1f70 | last-line marker, kit-defined (same wording as the precedent kit B1565); grep -c -o -F 'STOPPED: NEEDS TUESDAY' in this kit -> 4
+7652b871 | instruction; the installed version in the same-sha tree: grep -o '"version": "[^"]*"' node_modules/@playwright/test/package.json -> "version": "1.63.0"; the seat prints its own
+86670591 | instruction to the seat; kit-defined; the drafter read main through gh api branches/main -> b6c282ee50086bc1ac7d773ccabf00fcf8c055cc at 13:05 (and again at 13:08)
+983d3ba8 | line the seat WRITES to STATUS (format kit-defined, same as the precedent kit); grep -c -F in kit -> 1
+c7be3b31 | the drafter ran it: 'load averages: 9.65 8.92 8.70' at 13:11
+0f8d147f | /usr/bin/grep -c -E '^  timeout:' over web/playwright.config.ts at main -> 0
+38c59854 | /usr/bin/grep -c -E '^  retries:' over the same file -> 1 (the control that the pattern can match a two-space-indented key)
+4b5e8bba | /usr/bin/grep -n -F 'timeout' over web/playwright.config.ts -> 77: timeout: 60_000, 82: timeout: 30_000, 89: timeout: 60_000, 95: timeout: 60_000 (four lines, each inside a webServer entry, none top-level)
+8c8bad21 | /usr/bin/grep -n -F 'test.setTimeout(90_000)' web/e2e/walkthrough-uat.spec.ts -> 17:  test.setTimeout(90_000); (and playbook-print.spec.ts:90)
+aaf15094 | instruction; kit-defined; the drafter's gh api reads stand in. instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+00b750b8 | RELAYED from the B1565 sidecar (drafter of that kit printed it from the project's own checkout); not re-run here (git ls-remote from that checkout is not needed to draft)
+2d7470fe | instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+58f70a00 | instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+a24304d3 | instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+144447d6 | instruction to the seat (read by program, never printed in a message); the drafter did not read the identity (not needed to draft)
+20f5ecac | /usr/bin/grep -c -F 'setTimeout' web/e2e/a11y.spec.ts over the tarball of main -> 0 ; control web/e2e/walkthrough-uat.spec.ts -> 1 (the seat's own run is git grep at its base; the drafter has no clone)
+c7711279 | drafter helper jsearch.py JQL 'project = HPSMPOC AND ( key in (HPSMPOC-470, HPSMPOC-480, HPSMPOC-110, HPSMPOC-273, HPSMPOC-282, HPSMPOC-308) )' -> COUNT 6 (470 Backlog, 480 Backlog, 110 Done, 273 Done, 282 Done, 308 Done)
+7ca5553f | instruction (the seat re-prints each pointer with it); the drafter printed each pointer with grep -n / awk NR over the tarball
+f2597402 | web/scripts/e2e.mjs:54 -> '"journey-and-prototype": [TIMED_RUN, half("desktop", 1), { name: "hosted", env: REST, args: ["--project=hosted"] }],' ; the word 'hosted' is the project/run name there, not a string the seat matches
+8665e308 | drafter ran playwright cli.js test --list -c playwright.config.ts a11y.spec in a tree of the same sha (s276 d1565 src; diff -q of web/e2e/a11y.spec.ts against this tarball's copy: identical) -> 'Total: 6 tests in 1 file' (3 ids [desktop], 3 ids [tablet]: a11y.spec.ts:39:5, :47:5, :72:5)
+d7d0cf32 | as the previous line: --list printed 'Listing tests:' then 6 ids and 'Total: 6 tests in 1 file'
+cc8fc70a | bash lst.sh --project=desktop --no-deps --shard=1/2 -> 'Total: 182 tests in 12 files', a11y rows 3; --shard=2/2 -> 'Total: 181 tests in 14 files', a11y rows 0; tablet 1/2 -> 182 tests, a11y rows 3; tablet 2/2 -> 181, a11y rows 0
+30edbc75 | /usr/bin/grep -rn -F 'a11y.spec' over web/src infra scripts .github in the tarball -> 0 lines
+91e06ead | /usr/bin/grep -rn -F 'journey.spec' over the same four folders -> 2 lines (control: the pattern can match)
+118a1408 | awk NR==1 over web/e2e/axe.ts -> '// The accessibility gate for the B04 screens: the same rules and thresholds as B02's a11y.spec ...'; grep -c -F 'a11y.spec' on that line -> 1 (a comment)
+29cb1294 | instruction; UNMEASURED: the drafter ran no test (no build, no browser). The flags are Playwright 1.63.0's: '--timeout <timeout>' is at playwright/lib/program.js:219 of the same-sha tree (read by grep -n)
+b338f32a | UNMEASURED by the drafter: the field path of Playwright's JSON report; the kit makes the seat print a parsed fixture with a known max as the control and stop if the report does not parse
+42f3508c | instruction: the seat prints the first number of LC_ALL=C uptime; kit-defined name
+facf0512 | instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+f1b76300 | web/playwright.config.ts:74 -> command HPSM_API_MODE=mock npm run start -- --hostname 127.0.0.1 --port ${PORT} (npm run start = next start); the literal in the kit is prose naming that process
+00e520d8 | awk NR==85 over web/playwright.config.ts -> '    command: "node .next/standalone/server.js",'
+efb0d961 | clone name chosen by this kit; grep -c -F '.tools/b1571/mut' in kit -> 1; absent at main: 0
+12990cd6 | clone name chosen by this kit; grep -c -F '.tools/b1571/head' in kit -> 1; absent at main: 0
+4397b93a | prose fragment picked by the tool (text between two backticked words); no literal for the seat to match
+bb6dee69 | prose fragment picked by the tool; no literal for the seat to match
+9ea5777c | awk NR==409 over ci.yml -> '        run: npm run typecheck'
+f2b67efd | awk NR==426 over ci.yml -> '        run: node scripts/e2e.mjs --check-shards'
+8f176436 | awk NR==518 over ci.yml -> '        run: node scripts/e2e.mjs --shard "$SHARD"'; the shard name is the first entry of the ci.yml:494 matrix and the first key of SHARDS at e2e.mjs:54
+f7217a70 | as above: ci.yml:426 and the flag is described in web/scripts/e2e.mjs header line 23
+0a6943fa | awk NR==630 over ci.yml -> '        run: bash infra/scripts/validate.sh'
+ba9653f4 | RELAYED from the B1565 drafter report line 65 (code-scanning/default-setup query suite extended); not re-read here (a hosted call is fenced to gh GET, and the drafter did not make it)
+25d2c630 | RELAYED from the B1565 drafter report line 65; not re-read here
+e9cc4565 | drafter ran codeql version -> 'CodeQL command-line toolchain release 2.27.4.'; also ran database create (rc 0) and analyze with javascript-security-extended.qls over a copy of web/e2e/a11y.spec.ts at BASE: sarif results 0, rules run 103
+77f0f387 | planted control line the seat plants itself (kit-defined; a name matching auth/token); the drafter did not run the seat's scan
+e0802341 | instruction; instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+a310115e | names of forbidden environment variables, standing text copied from DRAFTER_RULES.md line 64; no tool output to match
+543e2701 | same: DRAFTER_RULES.md line 64
+9250f4d1 | instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+94933337 | instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+fac1636f | instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+d1d7fcf8 | instruction; branch name chosen by this kit; gh api git/matching-refs/heads/b1571 -> length 0 at 13:08; control heads/b1541 -> length 1
+ef671acc | instruction; kit-defined; the drafter's gh api reads stand in. instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+ff76bf8a | instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+d5353800 | instruction; same format string as the precedent kit; instruction or marker WRITTEN by this kit for the seat to run; the drafter did not run it (no project clone, no write verb); grep -c -F of the literal in the kit file -> present (kit-defined, nothing matched against a tool's output)
+7dc652e1 | awk NR==85 over web/playwright.config.ts -> '    command: "node .next/standalone/server.js",'
+62c4a8fd | names of forbidden environment variables, standing text copied from DRAFTER_RULES.md line 64; no tool output to match
+9a7f8e3d | same: DRAFTER_RULES.md line 64
+8e9d8cb3 | prose fragment picked by the tool; the standing 'no cd' line is copied from the precedent kit
+2e0dfa9c | prose fragment picked by the tool (!CODING contains !)
+44ab9b96 | prose fragment picked by the tool
+422b8157 | prose fragment picked by the tool; standing line copied from the precedent kit
+S01 | awk NR==39 web/e2e/a11y.spec.ts -> test("every journey screen: 0 serious/critical axe violations", async ({ page }, info) => {
+S02 | grep -n -F timeout web/playwright.config.ts -> lines 77, 82, 89, 95 (all webServer entries); grep -c -E '^  timeout:' -> 0; control '^  retries:' -> 1
+S03 | grep -c -F setTimeout web/e2e/a11y.spec.ts -> 0; control walkthrough-uat.spec.ts -> 1
+S04 | grep -l -E 'test\.setTimeout\((60|90|120)_000\)' web/e2e/*.ts | wc -l -> 11; walkthrough-uat.spec.ts:17 and playbook-print.spec.ts:90 read 'test.setTimeout(90_000);'
+S05 | playwright test --list a11y.spec (same-sha tree) -> 6 tests in 1 file; [desktop] and [tablet] each at a11y.spec.ts:39:5 (every journey screen...), :47:5 (design system, empty, error...), :72:5 (negative control...)
+S06 | --list --project=desktop --no-deps --shard=1/2 -> 182 tests, a11y rows 3; 2/2 -> 181, 0; tablet 1/2 -> 182, 3; tablet 2/2 -> 181, 0; e2e.mjs:54 desktop half 1 is in journey-and-prototype, :56 tablet half 1 is prototype-tablet-1
+S07 | grep -rn -F 'a11y.spec' web/src infra scripts .github -> 0 lines; web/e2e/axe.ts:1 names it in a comment; the e2e-runner test reads only the *-live-api.spec.ts files by name (web/src/e2e-runner.test.ts:254-259)
+S21 | ci.yml predicates: awk NR 396 'run: npm run lint'; 409 'run: npm run typecheck'; 413 'run: npm run build'; 426 'run: node scripts/e2e.mjs --check-shards'; 478 'run: npm test'; 494 matrix 'shard: [journey-and-prototype, prototype-desktop-2, prototype-tablet-1, ...'; 518 'run: node scripts/e2e.mjs --shard "$SHARD"'; 630 'run: bash infra/scripts/validate.sh'; e2e.mjs:65-67 overall(): every status 0 -> 0 else 1; playwright.config.ts:49 retries CI ? 1 : 0
+S30 | awk NR 4,21,22,25 of web/playwright.config.ts print WEB_PORT 3100, E2E_HOSTED_PORT 3598, E2E_STUB_PORT 3597, E2E_CHOOSER_PORT 3599
