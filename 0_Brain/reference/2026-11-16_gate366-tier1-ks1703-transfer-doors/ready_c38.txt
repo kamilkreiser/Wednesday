@@ -1,0 +1,70 @@
+=========== [INBOUND] 2026-11-15T12:59 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-1703 (Seat C 38th)
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-1703 (Seat C 38th)
+Seat C 38th
+
+READY FOR GATE: KS-1703, transfer-service half. Tier 1 (gate row G1, Opus).
+
+PR 2241: https://github.com/Secuura/Distributed_Secuura/pull/2241
+Title: "Refs KS-1703: the transfer and delegation read doors refuse a caller who is no party". It uses Refs, with no closing word.
+Head: 42fd872d49cdb4e1a0fe120d5eaf5d971dcaccac (1 commit on develop bbb75755064e; 10 files, +709 -26).
+Branch: feature/ks-1703-the-transfer-get-doors-refuse-a-non-party. The PR body states why it is not Linear's branchName, as you ruled.
+Develop now: 09b11a163694, ahead of my base by 2 commits and 2 files (KS-1415 and KS-716). Neither touches my 10 paths (control: my own paths file matches 10 of 10). merge-tree of my head against today's develop: rc 0, clean.
+GitHub reads the PR as MERGEABLE, mergeStateStatus UNSTABLE. That status carries no testing claim, because Actions is retired.
+Record: 5_Project_History/2026-11-15_seatC-38th/ (HANDOVER.md; evidence/ has every run cited below).
+
+WHAT IT DOES (as you ruled: D1 to D3, D5 spec unchanged, D6, W1 a, W2 keep, W3 in scope)
+- The read rule is three pure functions beside the write rule in services/transfer/src/services/transferAccess.ts: mayReadTransfer, mayReadDelegation and isPlatformReader. It admits a person who is a party (the KS-2038 PARTY_FIELDS, or the delegator and delegate, compared by sameId), or a person whose role is a platform role (the shared isPlatformRole). Everyone else gets the unknown-id answer: a key, a token with no user id, and every company role, ORG_ADMIN included. decideTransferAccess is untouched.
+- Doors 1 and 1b (by id, history) and door 2 (delegation by id) answer their own 404 bytes. Door 2 checks before buildDelegationChain.
+- Doors 3 and 4 (both /document reads) are filtered. With nothing readable, the answer is byte-equal to an unknown document's.
+- AC5, GET /api/transfers: a platform reader's answer is unchanged. Anyone else gets only what they may read, through a JS filter with no SQL change. A foreign ownerId answers an empty page, and total, limit and offset count the filtered set.
+- AC6: three marker lines in systemTest/schemathesis/tests/test_get_by_id_object_authorization.py were replaced by a KS-1703 comment line each. The three ruling-pending markers stay.
+- Fragment pair: Projects Documents/fragments/{flow,cheat}/KS-1703-get-doors-refuse-a-non-party.html.
+
+EVIDENCE (all local, Node v26.8.1, macOS arm64)
+- Red first: 112 new cells in 3 files. Against develop's product bytes, 87 of 87 RED cells fail by AssertionError and 25 of 25 controls pass. On the head, 112 of 112 pass.
+- Whole services/transfer vitest suite. A: develop bbb75755064e, load1 4.24: 483 of 483 in 18 files. B: head, load1 6.09: 595 of 595 in 21 files. A cell diff by file and full name: the only cell gone is the old "control P7", renamed. The other 482 are present and green, including ks2038-*, ks2081-*, ks1845-*, ks1015-*, ks474-*, ks444-*, ks1868-*, ks2055-*, ks591-* and transfer.test.ts. No pre-existing red. W4: load1 never reached 8 at any suite run, so I did not wait.
+- tsc: over src, 0 errors. Over src plus every test file (a temporary tsconfig without the __tests__ exclude), 0 errors. Planted controls in transferAccess.ts, my unit file and the KS-2081 file each read rc 2 naming the planted line, and were restored sha-equal.
+- eslint: over the 7 changed TS files, 0 errors. One warning, no-useless-assignment on "let filtered" in GET /api/transfers, is pre-existing: develop has it at line 628. A planted var plus debugger read 2 errors.
+- Mutants: m0 (develop's bytes) plus 15 mutants. Each one's red cells were declared before the run, the whole suite ran against it, and the product bytes were restored by sha256 after it. All 16 matched as declared.
+  - The mutants: m1 to m3 (each door's check removed), m4a and m4b (the document filters), m5a (the list filter), m5b (the foreign-ownerId empty page), m6a and m6b (=== for sameId), m7 (ORG_ADMIN admitted), m8 (the admin arm removed), m9 (the key refusal removed), m10 (403 in place of the 404 bytes), m11 (a same-tenant arm), and m12 (the chain built before the check, caught by a spy).
+  - DECLARED AMENDMENT: m9 was declared with 13 cells, and run 1 reddened 14. The extra cell was KS-2081's RED P7. Its seeded rows name the no-id key's own user id, connector:api-key, as initiatedBy, so without the key refusal that key is a party. That is a correct kill. The declaration was amended and m9 re-run, matching 14 of 14 (evidence/declared_changes.md C38-N5).
+- Merge-tree against the open PRs touching services/transfer: 2170 is clean both orders, and a planted same-line control conflicted (rc 1). 649 and 575 conflict both orders, but they conflict with develop alone in the same package.json and lock files, none of them mine.
+- docs-fragments.mjs check: OK. A planted unclosed div failed it (rc 1), and the file was restored sha-equal. It prints a cheat-page ADVISORY at line 6235 that develop's own fragments print too.
+- Push: through the queue and lock driver, queued behind Seat AA 7th. Lock at 12:45:04Z; load1 7.28 at the gate; the hook ran 695 s. ls-remote verified origin at 42fd872d49cd at 12:56:55Z, and the lock was released.
+  - Hook final line, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 skipped: local stack not up.
+  - Shell suites: "126 passed, 0 failed, 1 skipped (of 127)". The skip is restore_local_secrets.test.sh: "SKIP — docker compose is not on PATH". HOST GAP: on this Mac the docker CLI sits only in /Applications/Docker.app/Contents/Resources/bin, and neither /usr/local/bin/docker nor /opt/homebrew/bin/docker exists. C 37th's pushes read 127 of 127. This is unrelated to my diff, but someone should restore the link.
+- Ticket comment cc9ff0e0-141e-49c1-aecd-6b9a7cf1442f, posted 12:58:23Z. Dry run first, then real. Read back exact, with 0 suggestion_userMentions nodes.
+  - KS-1703 BEFORE: Backlog (boot read; updatedAt 11:55:05Z), priority 0, kamil.kreiser@secuura.ai.
+  - AFTER: In Progress (updatedAt 12:58:04Z), priority 0, kamil.kreiser@secuura.ai.
+  - The state move is the Linear-GitHub integration reacting to the PR opening, 19 s before my comment. I wrote no state, priority or assignee.
+
+WHERE I DEPARTED FROM THE BRIEF (each named in the PR)
+1. KS-2081 changes beyond the three named cells. That file's statusOf helper (8 users) read by id as STRANGER, which the rule now refuses. It reads as OWNER now, a party to every row the file opens or seeds, with the assertions unchanged. The two RED R5 cells and control R5 also read as OWNER; the control still proves the instrument sees a write.
+2. I added cell L-O2. Without it, m5b (the foreign-ownerId arm dropped while the filter stays) cannot fail: a caller with no transfers of their own gets an empty list either way. L-O2's caller, R, has transfers of their own.
+3. The mutants are split finer than the brief: m4, m5 and m6 into a and b, with m0 added. m6 is applied to the read functions only: changing sameId itself would also redden the KS-2038 write cells, which pin the shared fold.
+4. Kelvin-sign and dotless-i cells pin the refusal at the door, not sameId's fold. Such a spelling of a GUID is never GUID-shaped, so the non-user arm refuses it first. sameId's own fold stays pinned by KS-2038's unit test.
+
+NOT COVERED (in the PR)
+- The four platform suites (Schemathesis, Akto, Playwright, k6), the live full sweep (AC3) and any gateway path: no stack.
+- The systemTest module whose markers I removed (it needs the stack), a second tenant end to end, a browser, and external SDK consumers.
+- Node 24: everything was measured on Node v26.8.1.
+- ruff: not installed. The Python edit is three comment lines, the longest 118 characters, and it parses.
+- The rest of KS-1703 (analytics, governance, audit, timestamps) and the inside-company ruling.
+- The transfer-service deploy is owed, held for Kam's word.
+
+CANDIDATE FILINGS (none filed; in the PR body and the HANDOVER)
+1. Doors 3 and 4 had no ticket. Both are fixed in this PR.
+2. GET /api/delegations/stats/overview is an unscoped aggregate.
+3. GET /api/notifications has a ?userId= fallback for a token with no user id.
+4. NEW, not in the brief: GET /api/delegations (the list) has the same ?userId= fallback for a token with no user id.
+5. Spec (your D5 ANSWER): the read routes carry no owner-scope sentence, and GET /api/transfers declares a 404 it never answers.
+6. The systemTest module docstring's "Which markers mean what" paragraph still calls transfers and delegations confirmed defects. That is Peter's text; only the marker lines were licensed.
+7. Pre-existing eslint warning on "let filtered" (develop line 628).
+8. Host: the docker CLI is not on PATH (the hook's restore_local_secrets suite skipped).
+
+W5 (copied into the HANDOVER as the STAMP orders): this seat did the transfer BOLA fix only. C 37th's KS-2189 + KS-2188 kyc job goes to a later seat.
+
+The seat ENDS here. I am writing the HANDOVER, the history entry, the writes ledger and the vault commit, then the wrap mail.
+Meter: 45.5 of 1M at this mail. Faults: cd 0, rm 0, key in argv 0, no .env name or value printed, shared-checkout git lockless with no fetch there. One zsh glob abort with no write. One mutant declaration amended (above).
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 45  SEEN:      308  BATCH: /private/tmp/wed_newmail/batch_20261115T130024Z.txt
