@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATION HANDOVER 10:07 16 Nov, the 08:3x seat (ctx ~80%) - READ FIRST; supersedes every block below where they differ
+- **develop 9ddba202bb15** (PR 2088, verified 09:46:00). Merges since 15 Nov evening: 43. No GO in flight. **No Kam card open in this seat's scope** (09:16, 09:17, 09:59 all ruled + recorded; lesson 2026-11-16_audit-records... carries them).
+- **FLOOR (all plans ANSWERED except K 37th's, which is booting):** %161 **B 189th** (MERGE, SET-UP; row 1 PR 2064; READY -> GO shape fleet/briefs_staged/2026-11-16_B188_go_2247.md). %166 **K 37th** (MERGE, launched 10:07, brief fleet/briefs_staged/2026-11-16_seatK37_merge.md STAMPED; NEXT plan QUESTION -> ANSWER (shape 2026-11-16_K36_answer_plan.md); row 1 PR 2101). %158 **W 32nd** (BUILD Opus, PR-N KS-590 then PR-V KS-1699; ANSWERED + ADDENDUM 1 (Kam's billing ruling = a); NEXT READY FOR GATE (tier 1) per PR -> commission a tier-1 gate like gate 373's commission). **MERGE WINDOW: one GO at a time across B 189th and K 37th.**
+- **FIRST WORK:** (1) **GATE 373** (tier 1, PR 2248 KS-2231 billing; Opus subagent of THE PREVIOUS SEAT: it DIES with the rotation) -> if `0_Brain/reference/2026-11-16_gate373-tier1-pr2248-ks2231-billing-catches/verdict.md` is ABSENT, RE-COMMISSION from commission.md there (Opus Agent). On GO/GWN: SCORE C 43rd (deferred; its WRAP + HANDOVER are on disk, pane already closed), then an ADDENDUM row for PR 2248 to B 189th or K 37th (billing touches neither lane's rows) and GO after that seat's READY. A billing deploy is owed after the merge (demo frozen). (2) K 37th's plan ANSWER. (3) rung-5 check on K 37th if the wait did not land.
+- **Scores this seat:** K 35th 0.93, B 188th 0.94, K 36th 0.94, D 65th 0.96 (C 43rd deferred to gate 373). Kintsugi k29 done: Kam receipt bf-bbc301e35bee; card secuura-anchoring-deploy-after-ks2103-1116 delivered.
+- seat_mail_watch under Monitor (re-armed 10:04, expires ~10:34): RE-ARM + newmail.sh at boot.
+- OWED: weekly consolidation (DRAFT 0_Brain/learnings/_audits/2026-11-16_consolidation_DRAFT.md); INDEX.md refresh; `--help` advisory hook (w=3); closing PRs 2138 + 2225 (Wednesday GO once W 32nd's PRs exist); retro for this seat's ledger (0 rows this seat).
+
 ## 🔴 HANDOVER 10:02 16 Nov, the 08:3x rotation seat (ctx ~76%) - READ FIRST; supersedes every block below where they differ
 - **develop 9ddba202bb15** (PR 2088, verified 09:46:00). Merges since 15 Nov evening: 43. No GO in flight.
 - **KAM 09:59:15:** card secuura-cert-verify-anonymous-billing-1116 = a ("No charge for anonymous calls"), ruled in the store, receipt bf-4b37e4fb1603, W 32nd told by ADDENDUM 1 (its money hold is gone). **No Kam card is open in this seat's scope** (his three 09:1x rulings all recorded; lesson 2026-11-16_audit-records... carries them).
