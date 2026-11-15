@@ -69845,9 +69845,9 @@
   ],
   "recommended": "b",
   "ts": "2026-11-13T14:11:15.954417+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "c",
+  "ruled_ts": "2026-11-15T13:49:11.777927+11:00",
   "prior_rulings_overridden": [
    "CARD secuura-ks622-mfa-verify-fix",
    "CARD secuura-ks1041-step1-demo-verify-now",
@@ -70022,9 +70022,9 @@
   ],
   "recommended": "a",
   "ts": "2026-11-15T06:00:41.430682+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-15T13:49:17.614148+11:00",
   "prior_rulings_overridden": [
    "2026-08-21 20:41",
    "2026-08-27 19:40",
@@ -70301,6 +70301,195 @@
    "CARD mpscalc-hosted-deploy-words-1112",
    "CARD mpscalc-staff-words-31-deploy-1112",
    "CARD mpscalc-deploy-seed-secret-expired-1112"
+  ]
+ },
+ {
+  "id": "secuura-ks1699-share-recertify-1115",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1699: verify stays open as you ruled. What about share and recertify?",
+  "bluf": "PRIOR RULING (override reason): you ruled verify = c at 13:48 today, and that card was about verify only. I read PR 2228's diff at 14:0x: it only ever guarded verify. KS-1699 also reports that /:id/share and /:id/recertify have no per-record access check, so any signed-in user in the same tenant can share or recertify a certification they are not a party to. Revoke checks the issuer; these two don't. No card has ruled on them, so I kept KS-1699 open rather than cancelling it. Platform S calls neither route (Stuart, 20 Oct). The other matches, KS-1384 (what a share pays) and KS-1231 (admin settings), are different questions.",
+  "default_action": "KS-1699 stays In Progress and nothing is built on share or recertify until you tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Guard share and recertify like revoke",
+    "detail": "A build seat adds the per-record check (issuer, holder or admin) to both routes, tier 1 gate, merge to develop. No deploy without your word."
+   },
+   {
+    "key": "b",
+    "label": "Leave both open too, close KS-1699",
+    "detail": "Same as verify: intended behaviour. KS-1699 is closed with that sentence."
+   },
+   {
+    "key": "c",
+    "label": "Guard share only",
+    "detail": "Share hands a record to someone else, so that's the riskier of the two. Recertify stays open, as the 1113 card noted for the Verifier to Certifier user."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-15T14:04:10.792918+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-15T14:21:15.338786+11:00",
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1384-share-pays-second-tx-before-stage2-1106",
+   "CARD secuura-ks1231-nine-fields-share-integrations-key-1106",
+   "CARD secuura-ks1699-verify-audience-1113"
+  ]
+ },
+ {
+  "id": "secuura-merge-throughput-sixty-ready-1115",
+  "client_project": "Secuura/Blockchain",
+  "title": "60 reviewed PRs are waiting to merge. Run two merge seats in parallel?",
+  "bluf": "Tap one, please. The In Progress screen (253 tickets) found 60 open PRs that have a GO or GO WITH NOTES review at their current commit, none of them queued; 105 more tickets have already landed and only need closing. The bottleneck is merging: one merge seat lands about 2 or 3 PRs before it has to hand over (B 172nd to 175th merged 13 between them on 13 Nov), so 60 PRs is about 20 seats in a row, roughly a day. I can roughly double that by running a second merge seat that prepares its PRs (tests and checks) at the same time, while I still give each merge its own go-ahead, one at a time, pinned to its exact commit. The machine is at its limit right now, so it starts as soon as there's room. PRIOR RULINGS read (29 matches): they hold or order specific PRs, for example #1383 behind KS-1404 and KS-695 timing, and each merge seat checks every PR against them. None of them covers running merge seats in parallel.",
+  "default_action": "If you don't answer: option a starts when the machine has room, and nothing else changes.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Two merge seats in parallel",
+    "detail": "A second merge seat works a separate half of the 60 PRs. I still release merges one at a time, each pinned to its commit, and nothing deploys. About twice as fast."
+   },
+   {
+    "key": "b",
+    "label": "One merge seat at a time",
+    "detail": "Today's pace: about 2 or 3 PRs per seat, roughly a day for all 60."
+   },
+   {
+    "key": "c",
+    "label": "One go-ahead for a batch of low-risk PRs",
+    "detail": "For tier-2 PRs only, one go-ahead covers 3 to 5 PRs. The seat merges them one after another with a check after each. Faster again, but fewer stops for me to look in between."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-15T15:15:26.926342+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-15T15:20:38.051205+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 20:14",
+   "2026-09-08 07:10",
+   "2026-09-08 08:09",
+   "2026-09-08 15:18",
+   "2026-09-09 16:37",
+   "2026-09-09 16:39",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 11:41",
+   "2026-09-14 21:56",
+   "2026-09-18 09:15",
+   "2026-09-18 14:14",
+   "2026-09-20 15:25",
+   "CARD secuura-568-merge",
+   "CARD secuura-780-owner-merge",
+   "CARD secuura-ks764-merge-order-2026-09-03",
+   "CARD secuura-ps-759-760-merge-owner",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD secuura-merge-914-without-reviewer-approval",
+   "CARD secuura-develop-merge-frozen-branch-protection",
+   "CARD secuura-880-merge-kam-platform-s-cutover",
+   "CARD secuura-ks1194-1032-round2-merge-tap",
+   "CARD secuura-ks1404-anchors-before-049-merge-order-1005",
+   "CARD secuura-ks695-erasure-merge-timing-1013",
+   "CARD secuura-92pct-stop-ready-work-waits-1014",
+   "CARD secuura-ks1688-org-merge-edge-which-side-1020",
+   "CARD secuura-ks1401-058-merge-demo-billing-1104",
+   "CARD secuura-lawyer-pack-ready-to-send-1109"
+  ]
+ },
+ {
+  "id": "secuura-test-stack-docker-memory-1115",
+  "client_project": "Secuura/Blockchain",
+  "title": "To run Peter's suites here, Docker needs more memory, and the stack only fits once the seats have wrapped",
+  "bluf": "Tap one, please. To mirror Peter's tests, a seat (T 25th) brings up one local test stack and runs his suites: the 16 push checks, Schemathesis pre-merge, Playwright, k6, Akto, plus his CI's integration and migration tests. The stack reserves about 9.2 GB (limits add up to 20 GB, 38 containers), but Docker Desktop's VM has only 7.7 GB, and this Mac has 24 GB with swap already at 1.8 of 3 GB while nine seats run. So it can't run alongside the seats. Raising Docker's memory is your setting. Earlier rulings I read: Docker wedged twice on the Studio during a stack bring-up on 3 Sep, and you ruled a STAGED bring-up (infra first, then six services at a time), which T 25th follows. None of the 22 matches decides Docker memory.",
+  "default_action": "If you don't answer: nothing changes tonight. Merges continue and say which suites were not run, and the question comes back in the morning.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Tonight: raise Docker to 14 GB, then run the suites",
+    "detail": "Once the seats have wrapped this evening, I raise Docker Desktop's memory to 14 GB (its settings file, then a Docker restart), and T 25th brings up the stack, runs the develop baseline and leaves a per-PR procedure. The stack is taken down afterwards, and nothing is deleted."
+   },
+   {
+    "key": "b",
+    "label": "You raise it yourself",
+    "detail": "You set Docker Desktop to 14 GB (Settings, then Resources), and I launch T 25th when the floor is quiet."
+   },
+   {
+    "key": "c",
+    "label": "Wait for the 256 GB Studio",
+    "detail": "Peter's suites run there when it arrives. Until then, merges keep saying which suites were not run."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-15T16:21:59.889594+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-15T16:36:27.461590+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-26 17:11",
+   "2026-09-03 09:49",
+   "2026-09-03 10:27",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 20:27",
+   "2026-09-10 20:29",
+   "CARD secuura-studio-docker-wedge",
+   "CARD secuura-studio-docker-wedge-2",
+   "CARD secuura-archive-uat-tickets-vs-peters-test-list",
+   "CARD secuura-ks1011-stack-marker-unknown-on-restore",
+   "CARD secuura-ks1245-smoke-test-degraded-semantics",
+   "CARD secuura-gate-stack-slots-full-of-kept-volumes",
+   "CARD wed-mac-purchase-test-first-1010",
+   "CARD wed-ornith-122b-test-on-spark-1026",
+   "CARD secuura-m1b-test-write-credential-1028",
+   "CARD wed-docker-vm-cpu-spin-1104",
+   "CARD secuura-ks-residue-disposable-stack-1104",
+   "CARD wed-nas-address-and-memory-1106",
+   "CARD wed-openrouter-key-for-hosted-test-1111"
+  ]
+ },
+ {
+  "id": "secuura-ks1897-checkout-without-customer-1115",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1897: a checkout started without a customer still credits no one. Change the checkout contract?",
+  "bluf": "Tap one, please. The billing seat is fixing KS-1897: the checkout routes read a Stripe customer that nothing ever sets. Its fix finds or creates the buyer's own Stripe customer from their login, so normal purchases will credit the right account. One case is left: a checkout created with no customer at all (an email-only checkout) still credits nothing when it's paid, which means a lost purchase. Closing that gap changes what the checkout route accepts, so it's your call. Nothing is deployed either way; billing only reaches Kintsugi first. Earlier rulings I read (11 matches): the closest is your 29 Aug KS-719 ruling to require sign-in on two other routes, a similar shape on a different surface. None covers the checkout routes.",
+  "default_action": "If you don't answer: c. The PR ships with the gap named and a ticket holds it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Require a signed-in buyer for every checkout",
+    "detail": "The route refuses a checkout with no logged-in buyer, so every paid session has a customer to credit. This changes the contract for any caller that sends email-only checkouts."
+   },
+   {
+    "key": "b",
+    "label": "Credit email-only checkouts by matching the email",
+    "detail": "After payment, the buyer is found by email and credited. That's more permissive, and a wrong match would be a money error."
+   },
+   {
+    "key": "c",
+    "label": "Leave it, ticket the gap",
+    "detail": "The PR ships as is, with the gap named. A follow-up ticket holds it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-15T16:55:20.428875+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "2026-08-21 09:47",
+   "2026-08-21 20:06",
+   "2026-08-29 07:59",
+   "2026-09-03 10:26",
+   "2026-09-03 10:26",
+   "2026-09-04 10:08",
+   "2026-09-08 11:50",
+   "2026-09-08 14:00",
+   "CARD secuura-merge-914-without-reviewer-approval",
+   "CARD secuura-m365-admin-setup-for-customer-org-1020"
   ]
  }
 ]
