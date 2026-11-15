@@ -1,0 +1,31 @@
+## What changes
+
+RD-532 (the product owner's 2026-11-11 ruling: the open-site warning is never hidden while a page loads)
+- static/css/open-access-banner.css: the banner's z-index rises from 1100 to 10000, above the dashboard loading overlay (9999) and below the session-expired overlay (20000). One declaration and its comment. The inline variant is unchanged.
+- tests/e2e/open-access-banner-guard.js: new guardLoadingPage measures the banner while the dashboard overlay is held up (the dashboard's start-up request is held open), and reports the failure code OVERLAY if the overlay is not really up. Existing functions are unchanged; the only edit to an existing line is the export list.
+- tests/e2e/open-access-banner-concealments.js: new red cell L01 (banner at the old value under the overlay). Six existing red cells (G05, G06, G07, G13, G14, N06) had planted covers at z-index 2000 or 3000; they are raised to 30000 so each cover still sits above the banner and the guard still has to report HIT. Nothing else about those cells changes.
+- __tests__/rd490-open-access-banner-browser.test.js: three loading measurements and cells L0 to L3.
+
+RD-538
+- New edge cell G15: a banner that removes itself one millisecond past the guard's 10-minute hold must be caught. Cell H1 pins the hold at ten virtual minutes or more.
+
+RD-858
+- static/testing.html, static/js/testing.js, static/css/testing-styles.css: the editable query box, Run Edited Query, Reset to Original, their functions and their style rule are removed. The read-only query display, condition list, Run Query, Copy Query and results stay. Copy Query copies the chosen condition's own query.
+- New __tests__/rd858-testing-page-no-custom-sql.test.js (7 cells) pins the page without the control and what stays.
+
+No user-visible word is added anywhere. The server route /api/test-custom-query is untouched.
+
+## Evidence (independent gate, own clone)
+- Full verify at the head tree: PASS 5649/5649 across 350 suites, no port clash.
+- The browser test file holds 72 cells (66 before plus 6), all green; the Testing page test 7 of 7.
+- Without the fix (product files at the base): rd858 T1, T2, T5 red; rd490 L1 and L3 red; everything else green.
+- With the banner put back to 1100: L1 and L3 red, the six cover cells still read HIT.
+- With the six cover values left at 2000 and 3000: those cells go red (7 cells, N06 on two pages), so the raise is needed.
+- Guard hold lowered to 5 minutes: G15 and H1 red. Held request not routed: L0 red.
+- CodeQL javascript code-scanning pack on the head: 31 results, none in the changed files (all in backend/ and other static/ files).
+
+## Landing notes
+- Based on the earlier main; the counts file (5649/350) conflicts with main and is rebuilt after the next landing. Only that file overlaps other work.
+- static/ is not path-ignored by Deploy demo, so a merge starts that workflow; both jobs are gated on CI_DEPLOY_ENABLED and must read skipped.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
