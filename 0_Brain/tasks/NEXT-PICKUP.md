@@ -8,7 +8,8 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## 🔴 FINAL UPDATE 18:3x 15 Nov, the 17:31 seat (ctx 78%) - supersedes the handover block below where they differ
+## 🔴 FINAL UPDATE 18:3x 15 Nov, the 17:31 seat (ctx 80%) - supersedes the handover block below where they differ
+- **B 178th WRAPPED 07:31Z** (r 59.2; 1 merge 2220; HANDOVER FINAL in its REC, names 2230 first) and **K 20th WRAPPED 07:29Z**: panes %8 and %11 CLOSED by pane_close.sh (gone listeners = each seat's own claude, pids 10640 / 30828). FLOOR NOW: %2 D 63rd only (k27 swaps). **FIRST ACTS of the next seat: stamp + launch K 21st and B 179th, then A 32nd when its drafter returns.**
 - **PR 2220 MERGED** (B 178th) -> **develop 9bb6c98b2c47** (Wednesday ls-remote). Merges since the outage: 2231, 2232, 2220. **B 178th WRAPPING** (names 2230 first). **K 20th WRAPPED** 07:29Z. => BOTH merge lanes need successors NOW: stamp + launch **K 21st** (ROW 1 = 2229; drop 2231/2232) and **B 179th** (ROW 1 = 2230; drop 2220; rule W-1..W-8). Close %11 (K 20th) and %8 (B 178th) with pane_close.sh after reading each wrap + identity.
 - **Gate 361 RETURNED: PR 2235 GO WITH NOTES** at 19b6f52483c6 (line 1 verified; G355-2235-1 CLOSED; G361-2235-1 Low lost-lock window, G361-2235-2 Low test gap -> filings). 2235 joins the ADDENDUM POOL (2233, 2234, 2235, 2236, 2237).
 - **KAM RULED 18:30:23: card secuura-ks1897-email-match-owner-bind-1115 = a (b-ii)**; ruled in decision_queue; receipt on panel. **A 32nd DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatA32/commission.md -> fleet/briefs_staged/2026-11-15_seatA32_ks1897_build.md; Opus build seat; re-commission if absent). After the build merges: decision_queue.sh --delivered with the PR.
