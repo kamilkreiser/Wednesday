@@ -1,0 +1,217 @@
+=== relaunch 2026-09-25T05:00:13+00:00 HF_TOKEN=set ===
+Wrote compose.yml
+  KV record     : stock432 (padded_NVFP4=0, fp8_rope=0)
+  model len     : 384000
+  ablation      : 0 (image model.py)
+  CPU KV offload: 0 GiB
+  local cache   : /home/datasec-rd/DeepSeek-v4-Flash-One-DGX-Spark/hf-hub (fully local)
+  source dir    : /home/datasec-rd/DeepSeek-v4-Flash-One-DGX-Spark/hf-hub/hub/models--0xSero--deepseek-v4-flash-0731-spark/snapshots/22f28d32b9b29b4352eaa380ff8c2c170b2847ab
+  serving data  : /home/datasec-rd/DeepSeek-v4-Flash-One-DGX-Spark/data (TP1 checkpoint, draft, caches)
+>> Pulling pinned image (first run only) and starting the server...
+ Image ghcr.io/0xsero/deepseek-v4-flash-0731-spark-sparkinfer@sha256:2e077489a83a0360952828051fe7f7a32c1801e5ce8436d85f7267583d614ff4 Pulling 
+ Image ghcr.io/0xsero/deepseek-v4-flash-0731-spark-sparkinfer@sha256:2e077489a83a0360952828051fe7f7a32c1801e5ce8436d85f7267583d614ff4 Pulled 
+ Container deepseek-v4-flash-spark-deepseek-v4-flash-1 Starting 
+ Container deepseek-v4-flash-spark-deepseek-v4-flash-1 Started 
+>> First boot is intentionally long: pulls image, downloads ~107 GB
+   of weights onto the shared folder, coalesces TP4->TP1, builds the
+   K64 draft, captures CUDA graphs. Waiting up to 21600s for
+   http://127.0.0.1:8888/health — live logs above; Ctrl-C
+   here only stops the watcher, the server keeps running.
+
+deepseek-v4-flash-1  | (APIServer pid=1)   File "/opt/vllm/vllm/v1/engine/async_llm.py", line 217, in from_vllm_config
+deepseek-v4-flash-1  | (APIServer pid=1)     return cls(
+deepseek-v4-flash-1  | (APIServer pid=1)            ^^^^
+deepseek-v4-flash-1  | (APIServer pid=1)   File "/opt/vllm/vllm/v1/engine/async_llm.py", line 146, in __init__
+deepseek-v4-flash-1  | (APIServer pid=1)     self.engine_core = EngineCoreClient.make_async_mp_client(
+deepseek-v4-flash-1  | (APIServer pid=1)                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deepseek-v4-flash-1  | (APIServer pid=1)   File "/opt/vllm/vllm/v1/engine/core_client.py", line 132, in make_async_mp_client
+deepseek-v4-flash-1  | (APIServer pid=1)     return AsyncMPClient(*client_args)
+deepseek-v4-flash-1  | (APIServer pid=1)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deepseek-v4-flash-1  | (APIServer pid=1)   File "/opt/vllm/vllm/v1/engine/core_client.py", line 963, in __init__
+deepseek-v4-flash-1  | (APIServer pid=1)     super().__init__(
+deepseek-v4-flash-1  | (APIServer pid=1)   File "/opt/vllm/vllm/v1/engine/core_client.py", line 573, in __init__
+deepseek-v4-flash-1  | (APIServer pid=1)     with launch_core_engines(
+deepseek-v4-flash-1  | (APIServer pid=1)   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
+deepseek-v4-flash-1  | (APIServer pid=1)     next(self.gen)
+deepseek-v4-flash-1  | (APIServer pid=1)   File "/opt/vllm/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+deepseek-v4-flash-1  | (APIServer pid=1)     wait_for_engine_startup(
+deepseek-v4-flash-1  | (APIServer pid=1)   File "/opt/vllm/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+deepseek-v4-flash-1  | (APIServer pid=1)     raise RuntimeError(
+deepseek-v4-flash-1  | (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+deepseek-v4-flash-1  | [toolfix] xgrammar upgraded, transformers restored
+deepseek-v4-flash-1  | {"checksums": true, "manifest": "/models/tp1/rank-sliced-tp1-manifest.json", "tensor_bytes": 106096777512, "tensor_files": 48}
+deepseek-v4-flash-1  | /opt/vllm/vllm/__init__.py:7: RuntimeWarning: Failed to read commit hash:
+deepseek-v4-flash-1  | No module named 'vllm._version'
+deepseek-v4-flash-1  |   from .version import __version__, __version_tuple__  # isort:skip
+deepseek-v4-flash-1  | {'device': 'NVIDIA GB10', 'compute_capability': (12, 1), 'record_bytes': 432, 'results': [{'rows': 1, 'cosine': 0.9999977350234985, 'max_abs': 0.0011390149593353271, 'mean_abs': 0.0001389923709211871, 'graph_replay_max_abs': 0.0}, {'rows': 16, 'cosine': 0.9999979138374329, 'max_abs': 0.0012316703796386719, 'mean_abs': 0.00013930964632891119, 'graph_replay_max_abs': 0.0}]}
+deepseek-v4-flash-1  | DS4 launch: mode=dspark backend=b12x-a8 allreduce=nccl b12x_dma=0 indexer=b12x tp=1 dcp=1 max_seqs=1 graph=24 load_format=instanttensor instanttensor_backend=BUFFERED model=/models/tp1
+deepseek-v4-flash-1  | Command: /opt/runtime-venv/bin/python -m vllm.entrypoints.cli.main serve /models/tp1 --revision 22f28d32b9b29b4352eaa380ff8c2c170b2847ab --served-model-name deepseek-v4-flash-0731 --host 127.0.0.1 --port 8888 --trust-remote-code --kv-cache-dtype nvfp4_ds_mla --block-size 256 --load-format instanttensor --tensor-parallel-size 1 --decode-context-parallel-size 1 --gpu-memory-utilization 0.94 --max-model-len 384000 --max-num-seqs 1 --max-num-batched-tokens 8224 --max-cudagraph-capture-size 24 --compilation-config \{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\"\,\"custom_ops\":\[\"all\"\]\} --async-scheduling --no-scheduler-reserve-full-isl --enable-chunked-prefill --tokenizer-mode deepseek_v4 --tool-call-parser deepseek_v4 --reasoning-parser deepseek_v4 --enable-auto-tool-choice --enable-prompt-tokens-details --enable-force-include-usage --enable-request-id-headers --default-chat-template-kwargs.thinking=true --default-chat-template-kwargs.reasoning_effort=max --enable-flashinfer-autotune --enable-prefix-caching --cudagraph-capture-sizes 6 12 24 --speculative-config \{\"model\":\"/models/dspark-draft-k64\"\,\"method\":\"dspark\"\,\"num_speculative_tokens\":5\,\"draft_sample_method\":\"probabilistic\"\,\"rejection_sample_method\":\"standard\"\,\"attention_backend\":\"B12X_MLA_SPARSE\"\} --attention-backend B12X_MLA_SPARSE --moe-backend b12x --linear-backend b12x --disable-custom-all-reduce --long-prefill-token-threshold 1024
+deepseek-v4-flash-1  | /opt/vllm/vllm/__init__.py:7: RuntimeWarning: Failed to read commit hash:
+deepseek-v4-flash-1  | No module named 'vllm._version'
+deepseek-v4-flash-1  |   from .version import __version__, __version_tuple__  # isort:skip
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [api_utils.py:345] 
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [api_utils.py:345]        █     █     █▄   ▄█
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [api_utils.py:345]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version dev
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [api_utils.py:345]   █▄█▀ █     █     █     █  model   /models/tp1
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [api_utils.py:345]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [api_utils.py:345] 
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [api_utils.py:273] non-default args: {'model_tag': '/models/tp1', 'default_chat_template_kwargs': {'thinking': True, 'reasoning_effort': 'max'}, 'enable_auto_tool_choice': True, 'tool_call_parser': 'deepseek_v4', 'enable_prompt_tokens_details': True, 'enable_force_include_usage': True, 'host': '127.0.0.1', 'port': 8888, 'enable_request_id_headers': True, 'model': '/models/tp1', 'tokenizer_mode': 'deepseek_v4', 'trust_remote_code': True, 'revision': '22f28d32b9b29b4352eaa380ff8c2c170b2847ab', 'max_model_len': 384000, 'served_model_name': ['deepseek-v4-flash-0731'], 'load_format': 'instanttensor', 'attention_backend': 'B12X_MLA_SPARSE', 'reasoning_parser': 'deepseek_v4', 'disable_custom_all_reduce': True, 'block_size': 256, 'gpu_memory_utilization': 0.94, 'kv_cache_dtype': 'nvfp4_ds_mla', 'enable_prefix_caching': True, 'max_num_batched_tokens': 8224, 'max_num_seqs': 1, 'long_prefill_token_threshold': 1024, 'enable_chunked_prefill': True, 'scheduler_reserve_full_isl': False, 'async_scheduling': True, 'cudagraph_capture_sizes': [6, 12, 24], 'max_cudagraph_capture_size': 24, 'enable_flashinfer_autotune': True, 'moe_backend': 'b12x', 'linear_backend': 'b12x', 'speculative_config': {'model': '/models/dspark-draft-k64', 'method': 'dspark', 'num_speculative_tokens': 5, 'draft_sample_method': 'probabilistic', 'rejection_sample_method': 'standard', 'attention_backend': 'B12X_MLA_SPARSE'}, 'compilation_config': {'mode': None, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': None, 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}}
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:02:14 [envs.py:2377] Unknown vLLM environment variable detected: VLLM_VERSION
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:02:14 [envs.py:2377] Unknown vLLM environment variable detected: VLLM_DSPARK_CAPACITY_LOG_INTERVAL
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:02:14 [envs.py:2377] Unknown vLLM environment variable detected: VLLM_USE_B12X_PCIE_DMA
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:02:14 [envs.py:2377] Unknown vLLM environment variable detected: VLLM_CACHE_DIR
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:02:14 [envs.py:2377] Unknown vLLM environment variable detected: VLLM_PYTHON
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:02:14 [envs.py:2377] Unknown vLLM environment variable detected: VLLM_DSPARK_STS_LOG_INTERVAL
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:02:14 [envs.py:2377] Unknown vLLM environment variable detected: VLLM_DSPARK_TP_CHECK
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:02:14 [envs.py:2377] Unknown vLLM environment variable detected: VLLM_FLASH_ATTN_SRC_DIR
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [model.py:622] Resolved architecture: DeepseekV4ForCausalLM
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [model.py:1794] Using max model len 384000
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [cache.py:286] Using nvfp4_ds_mla data type to store kv cache. It reduces the GPU memory footprint and boosts the performance. Meanwhile, it may cause accuracy drop without a proper scaling factor
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [model.py:622] Resolved architecture: DeepSeekV4MTPModel
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [model.py:1794] Using max model len 1048576
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [speculative.py:1252] Overriding draft model max model len from 1048576 to 384000
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [scheduler.py:252] Chunked prefill is enabled with max_num_batched_tokens=8224.
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [vllm.py:1162] Asynchronous scheduling is enabled.
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [kernel.py:299] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:02:14 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+deepseek-v4-flash-1  | /opt/vllm/vllm/__init__.py:7: RuntimeWarning: Failed to read commit hash:
+deepseek-v4-flash-1  | No module named 'vllm._version'
+deepseek-v4-flash-1  |   from .version import __version__, __version_tuple__  # isort:skip
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:18 [core.py:116] Initializing a V1 LLM engine (vdev) with config: model='/models/tp1', speculative_config=SpeculativeConfig(method='dspark', model='/models/dspark-draft-k64', num_spec_tokens=5), tokenizer='/models/tp1', skip_tokenizer_init=False, tokenizer_mode=deepseek_v4, revision=22f28d32b9b29b4352eaa380ff8c2c170b2847ab, tokenizer_revision=22f28d32b9b29b4352eaa380ff8c2c170b2847ab, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=384000, download_dir=None, load_format=instanttensor, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=exl3, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=nvfp4_ds_mla, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='deepseek_v4', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=deepseek-v4-flash-0731, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::linear_attention', 'vllm::plamo2_mamba_mixer', 'vllm::qwen_gdn_attention_core', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::kda_attention', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::minimax_m3_sparse_attention_with_output', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update', 'vllm::minimax_m3_sparse_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8224], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [6, 12, 24], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 24, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='b12x', linear_backend='b12x')
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:18 [parallel_state.py:1847] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://192.168.7.113:44261 backend=nccl
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:18 [parallel_state.py:2244] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank 0, EPLB rank N/A
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:18 [gpu_worker.py:397] Using V2 Model Runner
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:19 [model_runner.py:372] Loading model from scratch...
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:19 [model.py:890] DeepSeek V4 b12x mHC enabled.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:19 [quant_config.py:75] DeepSeek V4 expert_dtype resolved to 'fp4'
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:19 [__init__.py:647] Selected B12xFp8BlockScaledMMKernel for Fp8LinearMethod
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:19 [attention.py:108] Using DeepSeek's 432-byte NVFP4 MLA KV cache format.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:19 [attention.py:1066] Using FP8 indexer cache for Lightning Indexer.
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:   0% Completed | 0/117005 [00:00<?, ?it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:   0% Completed | 496/117005 [00:01<03:56, 492.40it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:   2% Completed | 2493/117005 [00:02<01:24, 1353.05it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:   4% Completed | 4647/117005 [00:03<01:06, 1692.18it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:   9% Completed | 10443/117005 [00:04<00:32, 3269.52it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  14% Completed | 15800/117005 [00:05<00:25, 3995.41it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  19% Completed | 21687/117005 [00:06<00:20, 4631.17it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  24% Completed | 28230/117005 [00:07<00:17, 5213.75it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  29% Completed | 33511/117005 [00:08<00:15, 5229.62it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  33% Completed | 38862/117005 [00:09<00:14, 5239.61it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  38% Completed | 44138/117005 [00:10<00:13, 5249.90it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  42% Completed | 49450/117005 [00:11<00:12, 5246.40it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  47% Completed | 54759/117005 [00:12<00:11, 5264.04it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  53% Completed | 61926/117005 [00:13<00:09, 5761.15it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  58% Completed | 67676/117005 [00:14<00:09, 5345.62it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  64% Completed | 74573/117005 [00:15<00:07, 5785.22it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  69% Completed | 80420/117005 [00:16<00:06, 5526.26it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  74% Completed | 86006/117005 [00:17<00:05, 5394.14it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  79% Completed | 92780/117005 [00:18<00:04, 5782.33it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  84% Completed | 98618/117005 [00:19<00:03, 5477.83it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  89% Completed | 104159/117005 [00:21<00:02, 5386.15it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:  95% Completed | 111174/117005 [00:22<00:01, 5796.14it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader: 100% Completed | 117005/117005 [00:23<00:00, 5062.11it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) 
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:43 [default_loader.py:451] Loading weights took 23.79 seconds
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:44 [eagle3_utils.py:28] Using Eagle3 auxiliary layers from config: (41, 42, 43)
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:44 [vllm.py:1162] Asynchronous scheduling is enabled.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:44 [kernel.py:299] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:44 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:44 [mxfp4.py:426] Using 'B12X' Mxfp4 MoE backend.
+deepseek-v4-flash-1  | (EngineCore pid=359) WARNING 09-25 05:02:44 [vllm.py:2399] `torch.compile` is turned on, but the model /models/tp1 does not support it. Please open an issue on GitHub if you want it to be supported.
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader:   0% Completed | 0/1249 [00:00<?, ?it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Loading safetensors using InstantTensor loader: 100% Completed | 1249/1249 [00:00<00:00, 1548.63it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) 
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:45 [dspark.py:565] DSpark draft model loaded: 97 params
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:45 [default_loader.py:451] Loading weights took 0.84 seconds
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:45 [mxfp4.py:1833] Using MoEPrepareAndFinalizeNoDPEPModular
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:45 [mxfp4.py:1834] Using B12xExperts
+deepseek-v4-flash-1  | (EngineCore pid=359) WARNING 09-25 05:02:45 [b12x_moe.py:810] B12X MoE force-A8 enabled: using quant_mode=w4a8_mx for E8M0 FP4 weights.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:46 [model_runner.py:394] Model loading took 95.39 GiB and 27.548194 seconds
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:46 [topk_topp_sampler.py:55] Using FlashInfer for top-p & top-k sampling.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:47 [caching.py:335] reconstructed serializable fn from standalone compile artifacts. num_artifacts=44 num_submods=44
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:47 [decorators.py:311] Directly load AOT compilation from path /cache/vllm/torch_compile_cache/torch_aot_compile/1db83016c4d16df3629a3148a05c030412e59aba23f1e99b17eb9671c4018116/rank_0_0/model
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:47 [monitor.py:53] torch.compile took 0.33 s in total
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:48 [exl3.py:2262] EXL3 rank-sliced runtime planned: Trellis m=1..32 block_m=8, prefill trellis block_m=64 arena=1502.0MiB capacity=8224 chunk=128 topk=6
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:55 [monitor.py:81] Initial profiling/warmup run took 7.92 s
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:56 [deepseek_v4_mhc_warmup.py:276] Warming up DeepSeek V4 mHC kernels for token sizes: [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 65, 128, 129, 193, 256, 257, 321, 385, 512, 513, 577, 769, 1024, 1025, 1537, 2048, 4096, 8192, 8220, 8224]
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:56 [deepseek_v4_mhc_warmup.py:282] DeepSeek V4 mHC warmup finished in 0.15 seconds.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:56 [kernel_warmup.py:385] Skipping FlashInfer autotune because no FlashInfer compute kernels are active.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:02:56 [kernel_warmup.py:82] Warming up ll_bf16 router GEMM kernels.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:00 [cutedsl_warmup.py:101] Skipping CuTeDSL warmup because no compile units were requested.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:05 [indexer.py:461] DSA indexer decode path: use_flattening=False use_varlen=False (next_n=6, use_fp4_indexer_cache=False)
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:05 [kernel.py:299] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+deepseek-v4-flash-1  | (EngineCore pid=359) Profiling CUDA graph memory (PIECEWISE):   0%|          | 0/3 [00:00<?, ?it/s]Profiling CUDA graph memory (PIECEWISE):  33%|███▎      | 1/3 [00:00<00:00,  3.16it/s]Profiling CUDA graph memory (PIECEWISE):  67%|██████▋   | 2/3 [00:00<00:00,  3.36it/s]Profiling CUDA graph memory (PIECEWISE): 100%|██████████| 3/3 [00:00<00:00,  3.76it/s]Profiling CUDA graph memory (PIECEWISE): 100%|██████████| 3/3 [00:00<00:00,  3.62it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Profiling CUDA graph memory (FULL):   0%|          | 0/1 [00:00<?, ?it/s]Profiling CUDA graph memory (FULL): 100%|██████████| 1/1 [00:00<00:00,  2.02it/s]Profiling CUDA graph memory (FULL): 100%|██████████| 1/1 [00:00<00:00,  2.02it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:07 [speculator.py:188] Capturing model for DSpark speculator...
+deepseek-v4-flash-1  | (EngineCore pid=359) Capturing dspark CUDA graphs (FULL):   0%|          | 0/1 [00:00<?, ?it/s]Capturing dspark CUDA graphs (FULL): 100%|██████████| 1/1 [00:00<00:00, 15.44it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:07 [model_runner.py:1014] Estimated MRV2 CUDA graph memory: 1.08 GiB total (0.82 GiB retained in the reusable pool)
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:07 [gpu_worker.py:617] Available KV cache memory: 8.38 GiB
+deepseek-v4-flash-1  | (EngineCore pid=359) WARNING 09-25 05:03:07 [gpu_worker.py:649] CUDA graph memory profiling is disabled (VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0). Without it, CUDA graph memory is not accounted for during KV cache allocation, which may require lowering --gpu-memory-utilization to avoid OOM. Consider re-enabling it (the default as of v0.21.0) and increasing --gpu-memory-utilization from 0.9400 to 0.9489.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:07 [kv_cache_utils.py:2459] GPU KV cache size: 432,383 tokens
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:07 [kv_cache_utils.py:2460] Maximum concurrency for 384,000 tokens per request: 1.13x
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:07 [kernel.py:299] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+deepseek-v4-flash-1  | (EngineCore pid=359) Capturing CUDA graphs (PIECEWISE):   0%|          | 0/3 [00:00<?, ?it/s]Capturing CUDA graphs (PIECEWISE):  33%|███▎      | 1/3 [00:00<00:00,  3.54it/s]Capturing CUDA graphs (PIECEWISE):  67%|██████▋   | 2/3 [00:00<00:00,  3.70it/s]Capturing CUDA graphs (PIECEWISE): 100%|██████████| 3/3 [00:00<00:00,  4.08it/s]Capturing CUDA graphs (PIECEWISE): 100%|██████████| 3/3 [00:00<00:00,  3.95it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) Capturing CUDA graphs (FULL):   0%|          | 0/1 [00:00<?, ?it/s]Capturing CUDA graphs (FULL): 100%|██████████| 1/1 [00:02<00:00,  2.40s/it]Capturing CUDA graphs (FULL): 100%|██████████| 1/1 [00:02<00:00,  2.40s/it]
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:11 [speculator.py:188] Capturing model for DSpark speculator...
+deepseek-v4-flash-1  | (EngineCore pid=359) Capturing dspark CUDA graphs (FULL):   0%|          | 0/1 [00:00<?, ?it/s]Capturing dspark CUDA graphs (FULL): 100%|██████████| 1/1 [00:00<00:00, 17.79it/s]
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:11 [model_runner.py:1067] Graph capturing finished in 3 secs, took -0.03 GiB
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:11 [gpu_worker.py:854] CUDA graph pool memory: -0.03 GiB (actual), 1.08 GiB (estimated), difference: 1.11 GiB (119689216000.0%).
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:11 [gpu_worker.py:918] Free memory on device (117.13/121.63 GiB) on startup. Desired GPU memory utilization is (0.94, 114.33 GiB). Actual usage is 95.39 GiB for weight, 5.81 GiB for peak activation, 4.75 GiB for non-torch memory, and -0.03 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory-bytes=8878506640` (8.27 GiB) to fit into requested memory, or `--kv-cache-memory-bytes=11891488768` (11.07 GiB) to fully utilize gpu memory. Current kv cache memory in use is 8.38 GiB.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:48 [jit_monitor.py:79] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:48 [core.py:345] init engine (profile, create kv cache, warmup model) took 61.56 s (compilation: 0.33 s)
+deepseek-v4-flash-1  | (EngineCore pid=359) INFO 09-25 05:03:49 [kernel.py:299] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [api_server.py:680] Supported tasks: ['generate']
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [parser_manager.py:37] "auto" tool choice has been enabled.
+deepseek-v4-flash-1  | (APIServer pid=1) WARNING 09-25 05:03:49 [model.py:1552] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'temperature': 1.0, 'top_p': 1.0}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [api_server.py:684] Starting vLLM server on http://127.0.0.1:8888
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:37] Available routes are:
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /openapi.json, Methods: GET, HEAD
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /docs, Methods: GET, HEAD
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /docs/oauth2-redirect, Methods: GET, HEAD
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /redoc, Methods: GET, HEAD
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /load, Methods: GET
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /version, Methods: GET
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /health, Methods: GET
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /metrics, Methods: GET
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /tokenize, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /detokenize, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/models, Methods: GET
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /ping, Methods: GET
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /ping, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /invocations, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/chat/completions, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/chat/completions/batch, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/responses, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/responses/{response_id}, Methods: GET
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/responses/{response_id}/cancel, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/completions, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/messages, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/messages/count_tokens, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /generative_scoring, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /scale_elastic_ep, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /is_scaling_elastic_ep, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/chat/completions/render, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/completions/render, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/chat/completions/derender, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /v1/completions/derender, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO 09-25 05:03:49 [launcher.py:46] Route: /inference/v1/generate, Methods: POST
+deepseek-v4-flash-1  | (APIServer pid=1) INFO:     Started server process [1]
+deepseek-v4-flash-1  | (APIServer pid=1) INFO:     Waiting for application startup.
+deepseek-v4-flash-1  | (APIServer pid=1) INFO:     Application startup complete.
+deepseek-v4-flash-1  | (APIServer pid=1) INFO:     127.0.0.1:54986 - "GET /health HTTP/1.1" 200 OK
+deepseek-v4-flash-1  | (APIServer pid=1) INFO:     127.0.0.1:54992 - "GET /health HTTP/1.1" 200 OK
+deepseek-v4-flash-1  | (APIServer pid=1) INFO:     127.0.0.1:54300 - "GET /health HTTP/1.1" 200 OK
+
+
+>> Model is serving: http://127.0.0.1:8888 (OpenAI-compatible)
+   Served model name: deepseek-v4-flash-0731
+
+   Try it:
+     curl -sS http://127.0.0.1:8888/v1/chat/completions \
+       -H 'Content-Type: application/json' -d '{
+         "model": "deepseek-v4-flash-0731",
+         "messages": [{"role": "user", "content": "Write a correct Python function that returns the first n Fibonacci numbers."}],
+         "temperature": 0, "max_completion_tokens": 256 }'
+
+   Inspect runtime: ./start.sh logs    Shut down: ./start.sh down
+=== start.sh exited rc=0 at 2026-09-25T05:03:59+00:00 ===

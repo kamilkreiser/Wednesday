@@ -2,7 +2,7 @@
 date: 2026-10-28
 type: grant
 source: "Kam, Wednesday's terminal (laptop), 2026-10-28 ~12:0x AEDT, verbatim: 'That is very good to hear.  thank you for the feedback and this helps with making decisions going forward.  There is another reason to use the spark - I am hopin that it makes the weekly quota last the full week.  I see that allocating to Sonnet is probably going to help a large amount but just to make sure, please create a new rule for now - never keep the spark idle.  Use it for one thing or another.  The speed will matter if they are related tasks but with a board of 400 I am sure we can find enough tasks that do not relate to other work.  Giving it tasks it fails on is an overhead for you (sorry) but it also gives us more real world information about its capability which is good.  Please capture this as well'"
-status: live
+status: retired — 2026-11-15, the Spark was wiped and returned to HP (Kam: "the Spark has gone, retire the checks"); see [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]
 tier: W
 expires: none stated ("for now" — until Kam changes it)
 extends: 2026-09-18_ornith-works-constantly-standing-rule (Ornith) and 2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry — now explicitly the SPARK

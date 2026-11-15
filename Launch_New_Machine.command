@@ -337,8 +337,7 @@ if command -v claude >/dev/null 2>&1 || [ -x "$HOME/.local/bin/claude" ]; then r
 else rec MANUAL "Claude Code: install it (Kam). Then launch Launch_Tuesday.command and /login once on this Mac."; fi
 if [ -d "$HOME/.ssh" ] && [ -n "$(ls -A "$HOME/.ssh" 2>/dev/null)" ]; then rec OK "~/.ssh has $(ls "$HOME/.ssh" | wc -l | tr -d ' ') entries"
 else rec MANUAL "~/.ssh is empty: copy ~/.ssh from the Mac mini (AirDrop/USB), then chmod 700 ~/.ssh; chmod 600 its private keys. Project deploy keys are on the drive and need nothing."; fi
-if ssh -G Spark 2>/dev/null | awk '/^hostname /{print $2}' | grep -qv '^spark$'; then rec OK "ssh alias 'Spark' resolves"
-else rec MANUAL "NVIDIA Sync: open it and pair with the Spark so 'ssh Spark' works; then: bash $PF/local-model/spark/tunnel.sh check"; fi
+# Spark/NVIDIA Sync step RETIRED 2026-11-15 (Kam: "the Spark has gone, retire the checks" — the HP loan box was wiped and returned to HP).
 rec MANUAL "Voice: System Settings → Accessibility → Spoken Content → Manage Voices → Moira (Enhanced), en_IE (the mini's choice; speak.sh falls back without it)"
 rec MANUAL "gh/az: per-project tokens may not survive the move — each project's launcher prompts gh auth login / az login --tenant <its tenant> on first use. Never run the June credential bundle here."
 rec MANUAL "Apps: sign in to Chrome, Superwhisper, Obsidian (open the vault at $WS/Notes (MASTER)) as you normally do"

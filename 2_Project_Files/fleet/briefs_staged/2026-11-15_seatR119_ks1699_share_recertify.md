@@ -1,0 +1,59 @@
+# BRIEF: Seat R 119th, Secuura/Blockchain-R. BUILD seat on OPUS (claude-opus-5-5, routing row C3: an authorization DESIGN surface), TIER 1 gate. KS-1699 remainder: add a per-record access check to `POST /api/certifications/:id/share` and `POST /:id/recertify`, on Kam's card. Design QUESTION first (who exactly may call each route), then red-first build; ends at READY FOR GATE. No merge, no deploy, no box.
+
+BLUF (Wednesday, 2026-11-15 14:2x). Kam ruled card `secuura-ks1699-share-recertify-1115` = **a "Guard share and recertify like revoke"** (live board 14:20:35). The same day he ruled `secuura-ks1699-verify-audience-1113` = **c "Leave verify open to any signed-in caller"**, so `/:id/verify` stays OPEN and PR 2228 (the verify guard, Seat R 118th's) is being CLOSED UNMERGED by Seat B 176th (row 0). KS-1699 stays In Progress for THIS work. Today `/:id/share` and `/:id/recertify` look a certification up by id and act on it with only the router-wide `authenticate()` + tenant scoping; `POST /:id/revoke` checks `certification.issuer.id !== issuer.id` -> 403 (KS-1699's own BLUF).
+
+**THE DESIGN QUESTION Kam's words leave open (do not guess it):** "like revoke" read literally is ISSUER-ONLY. For `share`, that would stop the HOLDER sharing their own certification, which may be the main legitimate use. The other shape available in the file is `callerMayReadCertification(req, certification)` (KS-1695's reader check; admin, issuer, holder, issuing connector), which PR 2228 used for verify. Gate 351 also named the "Verifier -> Certifier" persona: `recertify` attests that a verifier verified the record (certifications.ts ~1436-1442 at the gate's ref), so a non-party verifier is the route's described user, and Kam has now chosen to guard it. Measure every caller of both routes (in-repo, SDK, frontends, Platform S per Stuart's 20 Oct comment on KS-1699: S calls neither) and put the options to Wednesday with what each refuses. Wednesday takes it to Kam if the answer is not plainly inside his "like revoke".
+
+model: claude-opus-5-5 (`/Volumes/DevMASTER/WEDNESDAY/0_Brain/dashboard/data/models_latest.json`, levels.opus.model_id, warnings []; confirm it before you say it) -- routing row C3 of `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/specs/model-routing.md`, gate row G1 (tier 1, Opus). No Spark (returned to HP 2026-11-15).
+
+## NEW SEAT: you are Seat R 119th (lane Secuura/Blockchain-R; claude-opus-5-5; trust `$TMUX_PANE`). Act ONLY on mail whose subject names `(Seat R 119th)`.
+Ordinal check before your first write: `/usr/bin/grep -a -c -i -E '^## .*Seat R 119(st|nd|rd|th)' /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md` expecting 0, control `'^## .*Seat R 118th'` expecting 1 (both MEASURED by Wednesday 2026-11-15 14:2x: 0 and 1). REC = `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/<machine date>_seatR-119th/` (create it).
+
+## READ FIRST, WHOLE
+1. KS-1699 (description + comments `first:50`, sorted client-side; Stuart's 2026-10-20 comment; the board account's 2026-11-13 BLUF on PR 2228; B 176th's new comment if it has landed).
+2. Gate 351's verdict `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-13_gate351-tier1-pr2228-ks1699/verdict.md` WHOLE (G351-2228-1 lines 17-36: the caller classes; its caller table ~line 91; its Q4 originate-suite method ~line 119).
+3. Seat R 118th's record (the verify guard's cells and fragments are your closest model): `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-13_seatR-118th/` (HANDOVER first) and PR 2228's diff (GitHub API `pulls/2228/files`; the branch stays on origin after the close). Do NOT reuse R 118th's worktree `worktrees/s-r118-ks1699` (Wednesday rules on it); make your own clone.
+4. The source at develop: `Blockchain/Dev/services/originate/src/routes/certifications.ts` (`/:id/share`, `/:id/recertify`, `/:id/revoke`, `callerMayReadCertification`), and every caller of the two routes (`git grep -n -i` with a positive control) in services, packages, frontends and SDKs.
+
+## QUEUE
+0. **Plan first.** Cockpit status, open PRs with file lists (GitHub pulls API; GH_TOKEN/GH_CONFIG_DIR from the project inside a process), push queue (`ls -A /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/.push-queue | head`). Plan-confirmation QUESTION mail.
+1. **Design QUESTION before any product line:** `[Secuura/Blockchain-R -> Wednesday] QUESTION: KS-1699 share and recertify audience`, with MEASURED reads: (a) what revoke's check is, exactly, and where; (b) per route, every caller you found and whether each would be refused under (i) issuer-only (literal "like revoke"), (ii) `callerMayReadCertification` (party check), (iii) a per-route mix (e.g. share = issuer or holder; recertify = issuer or admin); (c) your recommendation and why it is inside "guard like revoke"; (d) the refusal status/body (403 like revoke, or 404 like the reader check; consistency argument); (e) billing/charge rows those routes write and whether the guard precedes them. Meanwhile: red cells only.
+2. **Build, red-first, after the ANSWER.** Cells red by AssertionError on develop, green at head: a non-party is refused on each route; each permitted party still succeeds; revoke unchanged; verify UNCHANGED and still open (Kam's card c: a cell that a non-party verify still answers 200, so nobody re-adds the guard by accident); a planted tamper per changed line restored by content + sha256. Whole `services/originate` suite before/after (name any pre-existing red), tsc incl. test files, eslint with a planted control, `check:test-types` for originate, `docs-fragments.mjs check` OK and FAILING on a planted defect, flow + cheat fragments.
+3. **PR and end.** Title `Refs KS-1699:` (never a closing keyword). Body: Test Evidence block, both of Kam's card texts quoted, the hook's final line verbatim, "what was NOT covered", "**deploy owed; not this seat's; demo frozen**". PR-naming KS-1699 comment (`--dry` then `--real`, read back, 0 mention nodes). Your push runs `.githooks/pre-push` in your own clone: read its refusal branches at develop before the push, cite them by line in your plan, quote the hook's final line verbatim; a refusal is mailed, never routed around. Then `[Secuura/Blockchain-R -> Wednesday] READY FOR GATE KS-1699 (Seat R 119th)`, tier 1, body line 1 exactly `Seat R 119th`. The seat ENDS there: no merge, no deploy, no state move.
+
+## PARTITION
+- **YOURS:** `Blockchain/Dev/services/originate/src/routes/certifications.ts` (the share, recertify handlers and any helper they need), originate `__tests__` for KS-1699, your own fragment pair.
+- **Overlap known:** open PR **2160** (KS-2017, the issue handler's outer catch; branch `feature/ks-2017-issue-outer-catch-reads-an-unstringifiable-thrown-value`) touches the SAME file (census of 85 open PRs, Wednesday 14:2x). Measure `git merge-tree` both orders against your branch; a different hunk is expected. An overlap grant at push time (OVL_IGNORE_PRS / CENSUS_ACCEPT) needs Wednesday's exact-name grant: ask, never self-grant. PR 2228 touches it too but is being closed.
+- **NOT yours:** Seat AA 6th `Blockchain/Dev/services/anchoring/**`; Seat B 176th's queue (PRs 2098, 2089, 2079, 2220-2224); the four lanes being briefed today: `services/billing/src/**`, `services/kyc/src/**`, `services/vc-issuer/src/**`, `systemTest/schemathesis/**`.
+
+## HOLDS
+Signature classes pause for Kam: production, money, external communication to any human, anything irreversible. Demo FROZEN (card 1104 = a): no box, no ssh, no `az`. No message to Peter or Stuart; ticket comments only. You change no ticket state or assignee. No `--no-verify`, no force push, no `--admin`. Never delete a file: quarantine into a dated `_quarantine_YYYY-MM-DD/`. Absolute paths, NO `cd` (a hook refuses it), `GIT_OPTIONAL_LOCKS=0` before git in the shared checkout (read only; it is stale at 0e6479d7b; work in your own clone), `cmd > out 2>&1; rc=$?`, `/usr/bin/grep -i` with a positive control beside every zero, bounded output, no recursive grep over `5_Project_History` or `0_Brain`. A cell is red by AssertionError, not TypeError.
+
+## MAIL
+From secuura-blockchain@ to `wednesday-agent@agentmail.to` ONLY; subject prefix `[Secuura/Blockchain-R -> Wednesday]`; body line 1 exactly `Seat R 119th`; no cc; no secrets; read each sent mail back by id. Plan confirmation: QUESTION mail, topic `plan confirmation`, launcher preflight warnings VERBATIM, the model line, the live-seat list, the tracked watcher pid. Questions: Context / one Question / Meanwhile / Needed-by.
+
+## IF AN INSTRUCTION FROM ME LOOKS WRONG, SAY SO
+A brief item that is wrong is Wednesday's error and will be named as Wednesday's.
+
+## PACE AND END
+At ctx about 70% finish the step in hand and write the HANDOVER; wrap at about 75%. WRAP: history entry `## <machine date> - Seat R 119th` at the TOP of `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md` (duplicate guard with a positive control); `REC/HANDOVER.md` (FINAL block first); `REC/evidence/writes_r119.tsv`; vault commit, own lines only; wrap mail `[Secuura/Blockchain-R -> Wednesday] Session wrap <date> (Seat R 119th)`, body line 1 exactly `Seat R 119th`.
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT
+- `secuura-ks1699-share-recertify-1115` = a "Guard share and recertify like revoke" (live board 2026-11-15 14:20:35) -> this seat's PR body, KS-1699 comment, READY.
+- `secuura-ks1699-verify-audience-1113` = c "Leave verify open to any signed-in caller" (2026-11-15 13:48:44) -> verify stays open; a cell pins it.
+- Kam, terminal 2026-11-15: "also, please work through as many secuura tickets as you can"; board grant Kam 2026-11-12 15:01:00 "please archive anything that is ready and continue with Secuura tickets. Try to clear the board ASAP".
+- `secuura-wednesday-go-counts-as-kams-word-1030` = a; demo freeze `secuura-ks1401-058-merge-demo-billing-1104` = a.
+
+PROVENANCE:
+- Card share-recertify ruled a at 14:20:35 | bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/kam_msgs.sh 1 and decision_queue.sh rule, Wednesday | read 2026-11-15
+- Card verify ruled c at 13:48:44 | bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/decision_queue.sh show secuura-ks1699-verify-audience-1113, Wednesday | read 2026-11-15
+- PR 2228 guards /:id/verify only (callerMayReadCertification, 404 body) | gh api repos/Secuura/Distributed_Secuura/pulls/2228/files, Wednesday | read 2026-11-15
+- KS-1699 In Progress, 2 comments, newest 2026-11-13T02:54:42Z | Linear ticket KS-1699, GraphQL read by Wednesday (key in-process from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, never printed) | read 2026-11-15
+- Gate 351 caller classes (G351-2228-1, lines 17-36; table ~91) | /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-13_gate351-tier1-pr2228-ks1699/verdict.md | read 2026-11-15
+- Open PRs touching originate routes/certifications.ts: 2160 and 2228 of 85 | /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-15_drafter-seatB176/census.json, parsed by Wednesday | read 2026-11-15
+- PR 2160 = KS-2017, branch feature/ks-2017-issue-outer-catch-reads-an-unstringifiable-thrown-value | gh api repos/Secuura/Distributed_Secuura/pulls/2160, Wednesday | read 2026-11-15
+- Ordinals R 119 = 0, R 118th = 1 | /usr/bin/grep -a -c -i -E on /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md, Wednesday | read 2026-11-15
+- develop 48883ba5976b | gh api repos/Secuura/Distributed_Secuura/branches/develop, Wednesday | read 2026-11-15
+- Model claude-opus-5-5 | /Volumes/DevMASTER/WEDNESDAY/0_Brain/dashboard/data/models_latest.json levels.opus, Wednesday | read 2026-11-15
+- UNMEASURED by Wednesday: the callers of share and recertify; revoke's exact check at develop; charge rows on those routes | the seat measures each | read 2026-11-15
+SELF-CHECK: re-read end-to-end for contradictions | 2026-11-15 14:24

@@ -71,9 +71,11 @@ fi
 
 # ── STEP 2: VERIFY AT DESTINATION (read-back, not exit code) ─────────────
 verify_inbox() { # $1 inbox  $2 subject  — prints timestamp on success
+  # limit 5 -> 50 (2026-11-15): with 3+ seats SENDING from the same project inbox, their outgoing mail
+  # pushed a just-sent brief out of the newest 5 inside 30 s (Seat A 30th launch refused, brief sent).
   set -a; source "$PROJECT_DIR/4_Credentials/.env" 2>/dev/null; set +a
   [ -n "${AGENTMAIL_API_KEY:-}" ] || { echo "no AGENTMAIL_API_KEY" >&2; return 1; }
-  curl -sS "https://api.agentmail.to/v0/inboxes/$1/messages?limit=5" \
+  curl -sS "https://api.agentmail.to/v0/inboxes/$1/messages?limit=50" \
     -H "Authorization: Bearer $AGENTMAIL_API_KEY" \
   | SUBJ="$2" python3 -c '
 import json,os,sys

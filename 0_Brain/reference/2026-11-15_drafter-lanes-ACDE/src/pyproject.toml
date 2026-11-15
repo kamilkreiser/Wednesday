@@ -1,0 +1,502 @@
+[build-system]
+# KS-1439 (2026-10-07, Peter: update every package in this file): floors raised to the latest
+# release, read from the registry that day - setuptools >=61.0 -> >=84.0.0, wheel (no floor) ->
+# >=0.48.0. Prior behaviour: setuptools 61.0 (2022) and an unbounded wheel, so the build backend
+# a clean install used was whatever pip3 resolved, not a verified version.
+requires = ["setuptools>=84.0.0", "wheel>=0.48.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "secuura-schemathesis"
+version = "1.0.0"
+description = "Contract compliance and fuzz testing for Secuura API"
+readme = "README.md"
+# KS-571 (2026-10-06): floor raised ">=3.14" -> ">=3.14.8" (Peter: 3.14.8 is the minimum; newer
+# patches accepted). Prior behaviour: any 3.14.x, and nothing at runtime checked it. The runtime
+# guard is scripts/python_pin.py (REQUIRED_PYTHON); tests/unit/runner/test_python_pin.py keeps the
+# two equal. pip3 itself also refuses `-e .` into a venv below this floor.
+requires-python = ">=3.14.8"
+authors = [
+    { name = "Secuura Testing Team" }
+]
+dependencies = [
+    # KS-495: bumped 4.22.4 → 4.24.0 (latest stable, 2026-07-19) per the CLAUDE.md five-step
+    # version-bump workflow. 4.23/4.24 add config keys + reactive dynamic-auth and fix a batch of
+    # positive_data_acceptance/negative_data_rejection false positives (KS-255 re-validated). 4.24
+    # also moved the skip/warning plumbing OutputHandler→WarningCollector (test_warnings_gate.py
+    # updated). version.py reads this pin to stamp the HTML report; venv must match.
+    # KS-500: bumped 4.24.0 → 4.24.1 (latest stable, 2026-07-21) — patch fixing fuzz-dictionary
+    # application to body fields nested under oneOf/anyOf/allOf and if/then/else. Five-step audit
+    # re-run; report-format list unchanged (junit,vcr,har,ndjson,allure). venv verified 4.24.1.
+    # Bumped 4.24.1 → 4.24.2 (latest stable, 2026-07-22) — pure bug-fix patch: positive_data_acceptance
+    # allOf/anyOf/oneOf property counting, fuzz dicts/body-overrides behind $ref (#4350), and
+    # config.*.update() flag reset. No new checks/phases/warnings/CLI/report-files (five-step audit
+    # re-run; checks+phases compatibility guards pass; report-format list unchanged). venv verified 4.24.2.
+    # KS-544: bumped 4.24.2 → 4.24.3 (latest stable, 2026-07-31) — performance/internal-only patch:
+    # faster strategy construction for string/integer/anyOf schemas, with data generation for those
+    # types now built from the jsonschema-rs canonical form. Six-step audit re-run: no new
+    # checks/phases/warnings/CLI flags/report formats (ReportFormat enum still junit,vcr,har,ndjson,
+    # allure). The generation-internals change CAN shift which draws reach a check, so the bump was
+    # validated with a live `full` sweep + Delta-tab comparison, not offline gates alone.
+    # venv verified 4.24.3.
+    # KS-684: pin form changed from `>=` to `==` (prior behaviour: `schemathesis>=4.24.3`).
+    # A floor pin cannot express "the installed venv must EQUAL the pin", which
+    # systemTest/CLAUDE.md item 2a states as a MUST. The remediation that rule documented,
+    # `pip3 install -U 'schemathesis>=X.Y.Z'`, resolves to whatever is newest on PyPI that day, so
+    # following it could BREAK the equality it was meant to restore: on 2026-08-25 a fresh venv
+    # built from `>=4.24.3` installed 4.25.2 while every offline gate stayed green.
+    # That drift is what KS-684 was filed for. 4.24.3's own unbounded `jsonschema-rs>=0.49.0`
+    # admitted 0.51.0, which removed `CanonicalSchema.is_satisfiable` and produced 310 generation
+    # errors in a run that still rendered a complete, plausible-looking failure table.
+    # An exact pin makes the parity assertion mean what it says; a version bump becomes a
+    # deliberate act, never a side effect of rebuilding a venv.
+    # KS-1169 (2026-09-14): bumped 4.25.2 → 4.27.1 (latest stable; 4.27.1 published 2026-09-13).
+    # Three releases folded in — 4.26.0, 4.26.1, 4.27.0/4.27.1 — none reviewed before this bump.
+    # Prior behaviour: 4.25.2 (KS-684). Every 4.27.1 fix is in generation internals (negative bodies,
+    # coverage-phase bodies, oneOf branches, multipart terminator, nullable), so which draws reach a
+    # check CAN shift: validated with a live before/after `full` sweep on the named slot, not
+    # offline gates alone. Six-step audit findings are recorded next to the setting they changed:
+    # new warnings → schemathesis.toml [warnings] / the INFORMATIONAL map, new CLI flags →
+    # harness.deliberately_unused_flags, new `--report json` + baseline file → args_builder notes.
+    # KS-1268 (2026-09-18): bumped 4.27.1 → 4.27.2. Prior behaviour: 4.27.1 (KS-1169). The ticket
+    # was raised for 4.27.3 (published 2026-09-17) and the bump was retargeted after 4.27.3 failed the
+    # offline gate: its "st starts 2.5x faster" commit (5c2b5ae) moves `import requests` inside
+    # reporting/ndjson.py's serialize(), which the NDJSON writer THREAD calls; the import deadlocks on
+    # the main thread's own `requests` import (_frozen_importlib._DeadlockError on
+    # requests.structures), the thread dies silently, and every event after `Initialize` is lost —
+    # a 1-line NDJSON while the CLI exits 0 and lists the file. Bisected with one command: 4.27.1 and
+    # 4.27.2 write 21 lines for one tested op, 4.27.3 writes 1. NDJSON is the only file carrying the
+    # per-case check matrix (Delta tab, baseline gate, KS-1170 guard), so 4.27.3 is unusable here;
+    # tracked on its own ticket (linked from KS-1268). 4.27.2 is fix-only (19 fixes) and was validated
+    # with a live before/after `full` sweep on slot 1 (109 → 95 unique failures; seed-driven churn
+    # inside known registers, 3 platform findings routed) plus a fixed-seed stateful comparison
+    # (76 vs 74 distinct ops chained — the link-inference change does not reduce coverage).
+    # No new checks/phases/warnings/CLI flags/report formats; `--help` byte-identical to 4.27.1.
+    # KS-1285 (2026-09-21): bumped 4.27.2 → 4.27.5. Prior behaviour: 4.27.2 (KS-1268), held there by
+    # KS-1270 because 4.27.3's NDJSON writer thread deadlocked on a lazy `import requests` and wrote a
+    # 1-line file while exiting 0. Upstream closed that as issue 4807 ("Fixed via #4809", released in
+    # 4.27.4): the writer thread now re-raises its exception on join() and reporting/ndjson.py no longer
+    # imports requests at all — read at the v4.27.5 tag, not inferred from the changelog. Acceptance was
+    # the KS-1270 one-op check on 4.27.5: 3 of 3 runs wrote 21 NDJSON lines with `EngineFinished` present,
+    # identical to 4.27.2 (tests/functional/config/test_ndjson_completeness.py runs the same check on
+    # every `quality`). 4.27.4 also CHANGES behaviour, not just fixes: the examples phase now fills
+    # missing values from schema `default`s and counts required-parameter defaults as examples; with
+    # 4.27.5's "drop/skip examples that violate their own schema" that moves examples-phase counts on the
+    # KS-256/KS-665 surface — see the KS-1285 before/after tables (same slot, head and seed). Audit:
+    # `--help` byte-identical to 4.27.2 (54 flags), check/phase/warning registries identical, `--report`
+    # list unchanged (6, SARIF still absent), `ignored_auth` message wording unchanged.
+    # KS-1353 (2026-09-28): bumped 4.27.5 -> 4.28.0, the first MINOR since the 4.27.x line (upstream
+    # CHANGELOG dates it 2026-09-23; the tag was pushed 2026-09-22). Prior behaviour: 4.27.5 (KS-1285).
+    # No release sits between them, so this carries exactly the 4.28.0 notes.
+    # WHAT REACHES US, measured against the spec at d9ce1403d rather than read off the release page:
+    #   * NEW WARNING `low_valid_rate` (opt-in) - trips TestAllInstalledWarningsAreAccountedFor (KS-684)
+    #     by existing. Triaged INFORMATIONAL for this bump: making a warning fatal without a measured
+    #     sweep is what `unmatched_filter`/`unresolvable_reference` were explicitly not allowed to do.
+    #   * NEW run-ending `Server Unavailable` error when the server stops accepting connections.
+    #   * `negative_data_rejection` false positives for regex/uri-reference-ish string formats - our
+    #     nearest surface is 22 `uri` formats + 56 `pattern` keywords, so plausible, to be measured.
+    #   * top-level `format: binary` JSON bodies now send a JSON string, not raw bytes - exactly 2 ops.
+    #   * generation-failure text reworded (a parser risk, not a result change).
+    # WHAT DOES NOT, and why the ticket's first draft was wrong about four of them: 0 HEAD operations,
+    # 0 boolean query parameters, 0 declared `links:` (KS-188 is still Todo), 0 `examples:` maps and
+    # 0 duplicate parameter names - so the HEAD, boolean-query, OpenAPI-link and all three examples-map
+    # fixes are inapplicable here. Everything else in 4.28.0 is GraphQL, `st replay` or the Python API.
+    # NOTE FOR THE NEXT BUMP: upstream *Unreleased* already carries BREAKING changes - exit code 2 when
+    # nothing is tested, exit 2 on schema/config/internal errors, exit 130 on Ctrl+C, and per-operation
+    # seeding (which changes what a fixed seed means for our before/after comparisons).
+    # KS-1408 (2026-10-05): bumped 4.28.0 -> 4.29.3 (4.29.0 2026-10-02, 4.29.1 + 4.29.2 2026-10-04,
+    # 4.29.3 2026-10-05; no 4.28.x patch exists). Prior behaviour: 4.28.0 (KS-1353). That NOTE landed:
+    #   * EXIT CODES, measured 4.28.0 -> 4.29.3 on a throwaway local spec: nothing tested 0 -> 2,
+    #     Ctrl+C 0 -> 130, missing schema 2 -> 2. The runner read every non-zero code as "failed", so
+    #     src/sweep_outcome.py now classifies the code once for the console, results.json and report.
+    #   * Six-surface audit: checks 13 -> 13, phases 4 -> 4, warnings 12 -> 12, `run --help` 59 -> 60
+    #     flags (`--report-wfc-path`), `--report` gains `wfc` - now generated and surfaced.
+    #   * Per-operation seeding: a fixed seed no longer replays the same cases across this bump, so the
+    #     before/after pair diff classifies every vanished pair (not generated vs fixed), never "passed".
+    #   * Forced transitive move: jsonschema-rs `<0.58.0,>=0.57.1` -> `<0.59.0,>=0.58.5`.
+    # KS-1439 (2026-10-07): bumped 4.29.3 -> 4.29.4 (released 2026-10-06; fixes only, 35 entries, none
+    # marked breaking). Prior behaviour: 4.29.3 (KS-1408). What reaches this estate, from the spec and
+    # harness, to be confirmed by the sweep rather than asserted:
+    #   * network-error and crashed-check cases are now reported ERRORED, not skipped - our skipped and
+    #     errored panels, src/sweep_outcome.py and report_reconciliation.py read those counts;
+    #   * credentials are sanitised in NDJSON recorded cases - the recorder.cases[] readers;
+    #   * 8 negative_data_rejection fixes (nullable query null, form fields, path anyOf/oneOf, nullable
+    #     mutations, string query values) - NONE is the KS-1414 pool-draw mechanism, so that count is
+    #     not expected to fall; it is measured, not assumed.
+    # INAPPLICABLE by inspection: 0 multipart, 0 XML and 0 text/plain bodies in the published spec; no
+    # filter_case hook is registered (map_case, before_add_examples, after_call only).
+    # KS-1455 (2026-10-09): bumped 4.29.4 -> 4.30.0 (released 2026-10-08; the latest, no 4.30.x patch
+    # yet). Prior behaviour: 4.29.4 (KS-1439). A MINOR: 5 additions, 3 changes, 33 fixes, none marked
+    # breaking. The three CHANGED entries move counts by design and are measured, not assumed:
+    #   * redirects are followed only within the requested host (others returned as the response);
+    #   * `positive_data_acceptance` now accepts 3xx by default;
+    #   * the coverage phase leads with values learned from earlier responses over declared examples.
+    # Estate impacts are recorded where they land (see KS-1455 in systemTest/CLAUDE.md).
+    # KS-1476 (2026-10-12): bumped 4.30.0 -> 4.30.1 (uploaded to PyPI 2026-10-09; the latest, read from
+    # the registry). Prior behaviour: 4.30.0 (KS-1455). A PATCH: 3 changed, 21 fixed, none marked breaking.
+    # What touches this estate (wheel diff 4.30.0 vs 4.30.1, 52 files):
+    #   * NEW WARNING `rate_limited` (12 -> 13): an operation answered >= 90 % 429 is named under "Rate
+    #     limited". Accounted INFORMATIONAL in test_schemathesis_checks_compatibility.py; reaches the
+    #     console, verdict and Warnings tab (test_rate_limited_warning_reaches_every_surface.py);
+    #   * 429s no longer count toward the 4xx breakdown behind validation_mismatch / missing_test_data;
+    #   * random credentials for an ALTERNATIVE security scheme are dropped when auth is configured - one
+    #     operation here declares two (POST /api/platform/organizations/register-connector);
+    #   * `--request-timeout` default 10 -> None (config-file value now honoured) - inert here, the argv
+    #     always passes it from SECUURA_REQUEST_TIMEOUT;
+    #   * a private HTML writer, enabled only by SCHEMATHESIS_HTML_REPORT_DIR ("Private until the HTML
+    #     report is complete" upstream) - deliberately not wired; `--report` formats unchanged (7).
+    # UNCHANGED (byte-identical): the NDJSON and WFC writers, recorder, statistic, outage, `run` command.
+    # KS-1478 (2026-10-14): bumped 4.30.1 -> 4.31.0 (uploaded to PyPI 2026-10-12; the latest, read from the
+    # registry 2026-10-14). Folded into the Akto 2.38.2 bump at Peter's instruction (it was filed ahead of the
+    # release as KS-1502). Peter's ruling for this bump: update the app, LOG new issues, do not fix them.
+    # KS-1615 (2026-10-15): bumped 4.31.0 -> 4.31.1 (Release v4.31.1, the latest on PyPI that day). Fixes
+    # only - no new check or warning; touches stateful negative_data_rejection false failures,
+    # object_level_authorization reproduction/replay, HTML-report and summary counts. App-only at Peter's
+    # ruling: new failures are recorded, not fixed, and logged on Linear only after the PR merges.
+    # KS-1607 (2026-10-19): bumped 4.31.1 -> 4.32.1 (4.32.0 2026-10-18, 4.32.1 2026-10-19 - the latest on PyPI,
+    # read from the registry 2026-10-19). Checks (14), warnings (15) and WFC codes unchanged. Adds stable failure
+    # codes (ST101...) to console/JSON/NDJSON/JUnit, `st explain`, `--report pytest`, renamed failure titles, and
+    # a cli/wfc_report <-> cli/executor import cycle (tests import it via tests/support/upstream_wfc_report.py).
+    "schemathesis==4.32.1",
+    # KS-1439 (2026-10-07): every floor below re-read from the registry and already equals the latest
+    # release (hypothesis 6.168.5, httpx 0.28.1, pytest 9.1.1, pytest-cov 7.1.0, pytest-html 4.2.0,
+    # python-dotenv 1.2.4, jinja2 3.1.6, pyyaml 6.0.3, allure-python-commons 2.16.2, ruff 0.16.10,
+    # mypy 2.4.0, pytest-xdist 3.8.0, pytest-timeout 2.4.0, pip-audit 2.10.1, cssutils 2.15.0,
+    # html5lib 1.1, types-pyyaml 6.0.12.20260906) - none moved since KS-571 (2026-10-06), so none changes.
+    # KS-1455 (2026-10-09): re-read from the registry again - all 17 floors above still equal the latest
+    # release, so none moves; the transitive tree is refreshed in constraints.txt by `update-deps`.
+    # KS-1476 (2026-10-12): re-read from the registry - two floors moved upstream: hypothesis 6.168.5 ->
+    # 6.169.0 (raised below, on its own sweep) and ruff 0.16.10 -> 0.17.0 (dev, below). The other 15 equal
+    # the latest release.
+    # KS-684 (2026-08-25): floors below re-verified against PyPI and raised to the latest
+    # release of each. Prior floors were the versions last verified under KS-544 (2026-08-05);
+    # every one of them already resolved to something newer in a fresh venv, so the floors
+    # recorded history rather than what runs. Raising them makes the declared floor equal the
+    # verified version. NOTE these remain `>=` floors, unlike the schemathesis `==` pin above —
+    # determinism for the whole tree is the constraints-file work, not a floor bump.
+
+    # KS-1169 (2026-09-14): floors re-verified against PyPI; only the three below moved since
+    # KS-684 — hypothesis 6.165.10 → 6.168.0, ruff 0.16.4 → 0.16.7, types-pyyaml 20260815 → 20260906.
+    # The other 14 already equal the latest release and are unchanged.
+    # KS-1353 (2026-09-28): 6.168.0 -> 6.168.3. hypothesis IS the generator, so its floor moves on its
+    # own evidence, not the Schemathesis bump's: sweep 3 measures it against sweep 2 on the same slot,
+    # head and seed, so a change in what is generated is attributable to this line rather than to 4.28.0.
+    # KS-571 (2026-10-06): 6.168.3 -> 6.168.5, the latest release (every floor raised to latest).
+    # KS-1476 (2026-10-12): 6.168.5 -> 6.169.0, the latest release. Measured on its OWN sweep (same slot,
+    # head and seed 1476 as the 4.30.1 sweep before it) so a change in what is generated is attributable
+    # to this line rather than to the Schemathesis bump - the KS-1353 method.
+    # KS-1478 (2026-10-14): 6.169.0 -> 6.169.1, the latest release (read from the registry that day; update-deps
+    # reported it as the only floor not raised). Prior floor: 6.169.0 (KS-1476).
+    # KS-1615 (2026-10-15): 6.169.1 -> 6.169.3, the latest release (read with `pip3 index versions` that day).
+    # KS-1607 (2026-10-19): 6.169.3 -> 6.170.2, the latest on PyPI that day (update-deps reported it held back).
+    "hypothesis>=6.170.2",
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-html>=4.2.0",
+    # KS-571: 1.2.3 -> 1.2.4 (latest).
+    "python-dotenv>=1.2.4",
+    # Templating engine for the HTML report: panels/shell render from .html.j2 templates
+    # under src/html_report/templates/ rather than inline Python f-strings.
+    "jinja2>=3.1.6",
+    # Required by scripts/run.py (imports yaml to load schemathesis_tests.yaml and pyproject.toml).
+    "pyyaml>=6.0.3",
+    # Required for schemathesis --report allure to write Allure result files.
+    # Schemathesis declares this as an optional extra so it is NOT installed by a
+    # plain `pip3 install schemathesis` — pinned here to guarantee it is present.
+    # KS-1353 (2026-09-28): 2.16.0 -> 2.16.1, the latest release.
+    # KS-571 (2026-10-06): 2.16.1 -> 2.16.2, the latest release.
+    "allure-python-commons>=2.16.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Formatting + import-sorting are BOTH owned by ruff (ruff format + ruff's isort rules).
+    # black and isort were removed 2026-07-24: running them alongside ruff meant two formatters
+    # and two import-sorters with separately-maintained first-party lists, and they demonstrably
+    # disagreed (isort split the imports in parsing/crashes/reproduce.py, ruff --fix merged them
+    # back). One tool, one config, no drift.
+    # KS-1353 (2026-09-28): 0.16.7 -> 0.16.9. A ruff minor can introduce new rules; anything it flags is
+    # fixed rather than ignored, and the gate below is the proof it introduced nothing here.
+    # KS-571 (2026-10-06): ruff 0.16.9 -> 0.16.10 and mypy 2.3.1 -> 2.4.0 (latest); quality:static
+    # re-run on both, findings (if any) fixed, not ignored.
+    # KS-1476 (2026-10-12): 0.16.10 -> 0.17.0, the latest release (a minor; quality:static is the proof).
+    # KS-1607 (2026-10-19): 0.17.0 -> 0.17.1, the latest (a patch); quality:static is the proof it flags nothing new.
+    "ruff>=0.17.1",
+    "mypy>=2.4.0",
+    "pytest-xdist>=3.8.0",
+    # Hypothesis-driven fuzz/stateful tests can hang on a bad shrink or a wedged connection;
+    # without this only the runner's outer wall-clock catches it. Fails the case, not the job.
+    "pytest-timeout>=2.4.0",
+    # Dependency vulnerability scanning for the quality gate (mirrors `npm audit` in the
+    # Node-based systemTest packages).
+    "pip-audit>=2.10.1",
+    # Report-asset linters (tests/unit/report/test_report_assets.py): cssutils syntax-checks the
+    # report stylesheet, html5lib checks the generated report HTML for well-formedness.
+    "cssutils>=2.15.0",
+    "html5lib>=1.1",
+    # Type stubs for mypy — matches pyyaml in [project.dependencies]
+    "types-pyyaml>=6.0.12.20260906",
+]
+
+# ===================================================
+# Tool Configurations
+# ===================================================
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "--tb=short --strict-markers -v --cov=src --cov=tests/unit --cov=tests/functional --cov-report=term-missing"
+# Per-test wall-clock ceiling (pytest-timeout). Generous enough for the live orchestration tests
+# that stop/recreate services, tight enough that a wedged fuzz case fails in minutes rather than
+# hanging until the runner's outer timeout.
+timeout = 300
+filterwarnings = [
+    # Hypothesis emits this when building repr() of a very large generated value (>100 kB).
+    # It is a performance hint, not a test failure — safe to suppress in CI output.
+    "ignore::hypothesis.errors.HypothesisWarning",
+]
+markers = [
+    "stateful: marks tests as stateful (deselect with '-m \"not stateful\"')",
+    "fuzz: marks tests as fuzz tests (deselect with '-m \"not fuzz\"')",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "workflow: marks end-to-end workflow scenarios (used in test_workflows_stateful.py)",
+]
+
+# ===================================================
+# Type Checking (MyPy)
+# ===================================================
+
+[tool.mypy]
+python_version = "3.14"
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+# The three flags `strict = true` would set that we deliberately do NOT set, and why (recorded
+# 2026-07-24 so nobody later assumes full strict-mode is in effect):
+#   - disallow_any_expr / disallow_any_decorated: schemathesis + hypothesis decorators and the
+#     check/hook signatures they impose are untyped upstream, so enabling these would require
+#     blanket `# type: ignore` across config/ and the report parsers — noise, not safety.
+#   - disallow_any_unimported: kept false for now; the seven `ignore_missing_imports` overrides
+#     below mean it should be near-noise-free to flip, so it is the safe one to revisit first.
+disallow_any_unimported = false
+disallow_any_expr = false
+disallow_any_decorated = false
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "schemathesis.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "hypothesis.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pytest_.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "allure.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "httpx.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "azure.identity.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "azure.keyvault.secrets.*"
+ignore_missing_imports = true
+
+# ===================================================
+# Linting (Ruff)
+# ===================================================
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+extend-include = ["*.pyi"]
+
+[tool.ruff.lint]
+select = [
+    "A",      # builtin-shadowing
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "D",      # pydocstyle (docstrings)
+    "E",      # pycodestyle errors
+    "F",      # Pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "PIE",    # flake8-pie
+    "PT",     # flake8-pytest-style
+    "RUF",    # ruff-specific
+    "S",      # flake8-bandit — static security linting. A framework whose job is finding security
+              # defects should hold its own code to the same bar (hardcoded creds, shell=True,
+              # insecure hashes). Test-only carve-outs live in per-file-ignores below.
+    "SIM",    # flake8-simplify
+    "UP",     # pyupgrade
+    "W",      # pycodestyle warnings
+]
+
+ignore = [
+    "D100",   # Missing module docstring (allow)
+    "D104",   # Missing package docstring (allow)
+    "D105",   # Missing magic method docstring
+    "D107",   # Missing __init__ docstring
+    "SIM102", # Use a single if statement instead of nested if statements
+    # Ambiguous-unicode warnings: the report intentionally uses typographic glyphs
+    # (em/en dashes, ×, ✓, ⊘) in generated HTML strings, docstrings, and comments.
+    "RUF001", # ambiguous-unicode-character-string
+    "RUF002", # ambiguous-unicode-character-docstring
+    "RUF003", # ambiguous-unicode-character-comment
+]
+
+# E501 is ignored only in the HTML report builders: these modules emit inline HTML as
+# f-strings where a single tag's attributes legitimately exceed the 120-col limit, and
+# wrapping them would hurt readability without changing output. All other code is held
+# to the line limit.
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".eggs",
+    "*.egg-info",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Docstring rules relaxed for test classes/methods (the test name IS the description).
+# S-rule carve-outs are scoped and justified — the goal is real security signal, not silence.
+"tests/**/*.py" = [
+    "D101", "D102", "D103",
+    "S101",  # assert IS the pytest idiom (1,387 hits) — flagging it would drown the real signal
+    "S105", "S106",  # seeded test credentials (issuer123 etc.) are fixtures, not secrets
+    "S102",  # one test execs build_hypothesis_setup()'s output — verifying that IS its purpose
+    "S108",  # "/tmp/openapi.yaml" is a string literal in an assertion, not a file operation
+    "S603", "S606", "S607",  # test helpers spawn docker/pytest with LIST args (shell=False, safe form)
+    "S314",  # ET over the suite's OWN fixture XML strings, not untrusted input
+]
+# config/ holds the seeded test personas the harness authenticates as. These are fixtures for a
+# local test stack, not secrets — the real credentials come from .env (gitignored).
+"config/**/*.py" = ["S105", "S106"]
+"conftest.py" = []
+"src/html_report/**/*.py" = [
+    "E501",
+    "S314",  # ET.parse over OUR OWN generated JUnit/NDJSON artefacts, not untrusted input
+]
+# The runner legitimately shells out to docker compose / pytest. Every call uses list args
+# (shell=False) — the safe form S603 flags generically. Partial paths ("docker") are resolved
+# from PATH by design so the harness works across machines.
+"scripts/**/*.py" = ["S603", "S606", "S607"]
+
+[tool.ruff.lint.flake8-comprehensions]
+allow-dict-calls-with-keyword-arguments = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["tests"]
+known-third-party = ["schemathesis", "hypothesis", "pytest"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+# MUST stay "double": ruff format is now THE formatter (black removed). This was "single" while
+# ruff format was never invoked — adopting it would have silently rewritten every string literal.
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ===================================================
+# Coverage (pytest-cov)
+# ===================================================
+
+[tool.coverage.run]
+branch = true
+# Measure src/ (report generation, parsing, config) — the production logic worth tracking.
+# The two OFFLINE test trees are included so uncalled test helpers surface as a smell, not a
+# blind spot: tests/unit/ (unit tests of Python modules) and tests/functional/ (contract tests
+# of this repo's schemathesis_tests.yaml / schemathesis.toml against the installed library).
+# Only those two are measured: the top-level tests/*.py files are live-API integration suites
+# (schemathesis sweep / GDPR IDOR) that run against a running platform during a full/pre-merge
+# run, NOT during the offline gate; counting them here would peg coverage at ~0% for ~700
+# statements no offline run can ever execute. They are exercised in their own (live) job.
+# scripts/ (run.py + runner/) is excluded: subprocess/signal paths cannot be meaningfully unit-tested.
+source = ["src", "tests/unit", "tests/functional"]
+omit = [
+    "*/tests/conftest.py",
+    "*/venv/*",
+    "scripts/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "^\\s*\\.\\.\\.\\s*$",
+]
+# 90% locks in the panel-builder + parse→dataclass→render coverage added with the Jinja /
+# typed-model migration (actual is ~94%, leaving ~4% headroom so a minor edit does not trip
+# the gate). The remaining uncovered lines are exception/subprocess paths that legitimately
+# cannot be hit in unit tests. Ratchet upward as coverage rises; do not lower without cause.
+# If the gate fails after a change, run: python3 -m pytest --cov --cov-report=term-missing
+# to identify uncovered lines — add tests or mark pragma: no cover with justification.
+fail_under = 90
+precision = 2
+
+# ===================================================
+# Schemathesis Configuration
+# ===================================================
+# Fallback defaults only — profiles (pr, pre-merge, full, test-fast, local-debug)
+# and all profile-specific flags are defined in config/schemathesis_tests.yaml.
+# scripts/run.py enforces profile flags at runtime; values here apply only when
+# schemathesis is invoked directly (e.g. `st run schema.yaml`).
+# Reference: systemTest/schemathesis/config/schemathesis_tests.yaml
+
+[tool.schemathesis]
+# KS-1016: `base-url = "http://localhost:6882"` used to live here and has been removed.
+#
+# A checked-in literal cannot know which stack slot a run is aimed at, and this one named slot 1.
+# `scripts/run.py` already preferred the environment over it (KS-672, scripts/runner/config.py), so
+# the key only ever took effect on a DIRECT `st run schema.yaml` — which this file's own comment and
+# tests/test_fuzz_comprehensive.py both document as a supported way to run the suite. On slot 3 that
+# invocation silently drove slot 1: the requests went to :6882 and nothing said so.
+#
+# With the key gone, `run.py` falls through to src.constants.DEFAULT_API_BASE_URL, which resolves the
+# slot; and a direct `st run` with no --base-url now fails asking for one, instead of answering
+# confidently about the wrong stack. Loud beats silently wrong — the reason this suite exists.
+#
+# Host only, no /api — OpenAPI paths carry their own prefix (see scripts/run.py).
+
+[tool.schemathesis.generation]
+# "all" = valid + invalid inputs. Overridden per-profile by scripts/run.py.
+mode = "all"
+
+[tool.schemathesis.checks]
+# Maximum allowed response time in seconds. Applies to all profiles.
+max_response_time = 5.0
+
+[tool.schemathesis.output.sanitization]
+# Strip auth tokens, keys, and passwords from all report artefacts.
+enabled = true

@@ -1,0 +1,881 @@
+# =============================================================================
+# Schemathesis check configuration (KS-255)
+# =============================================================================
+# Auto-discovered by the schemathesis CLI from the working directory.
+#
+# Why this file exists: `positive_data_acceptance` and `negative_data_rejection`
+# do NOT consult the OpenAPI spec's declared responses — each has its own
+# expected-statuses list (defaults: positive = 2xx,401,403,404,409,5xx;
+# negative = 400,401,403,404,405,406,409,422,428,5xx). Declaring a status in
+# the spec therefore cannot clear these checks; it must be expected here.
+#
+# Policy (KS-255, agreed direction from the 2026-06-11 review thread):
+# - 429 is expected globally for both checks. Every targeted endpoint declares
+#   429 (x-ratelimit-* extensions); a rate-limited probe says nothing about
+#   whether the data would have been accepted or rejected.
+# - Per-operation 400/422 additions are ONLY for endpoints whose schema-valid
+#   inputs are semantically unresolvable by construction (random OAuth client
+#   ids, unsigned wallet payloads, unverifiable Stripe HMACs, weak passwords).
+#   These cannot be fixed by schema tightening: KS-255 round 1 (#240) tried
+#   minLength/pattern tightening and it regressed negative_data_rejection
+#   (reverted in #248) — the runtime accept-set is not regex-expressible.
+# Evidence for every entry: 2026-06-12 local full run, seed in the run log
+# (output/reports/test-run-20260612_095819.log).
+#
+# -----------------------------------------------------------------------------
+# WHERE EACH KIND OF SETTING LIVES (KS-544) — read this before moving anything.
+# Three files configure the sweep. They are not interchangeable: putting a setting
+# in the wrong one either silently does nothing, or applies far too widely.
+#
+#   1. THIS FILE (schemathesis.toml) — settings Schemathesis reads itself, and the
+#      ONLY place a setting can be scoped to a single operation, via [[operations]]
+#      include-name. Use it for anything that should affect ONE endpoint: check
+#      expected-statuses, a per-operation generation budget, per-operation timeouts.
+#      Auto-discovered from the working directory; no CLI flag involved.
+#
+#   2. config/schemathesis_tests.yaml — the harness's own configuration: profiles,
+#      check/phase sets, and the harness.execution / harness.generation blocks that
+#      become CLI flags. RUN-LEVEL only. Every value carries its reason, and flags
+#      deliberately NOT passed are listed under harness.deliberately_unused_flags
+#      with a reason each, so an absent flag is documented rather than forgotten.
+#
+#   3. scripts/runner/args_builder.py — turns (2) into the argv. Its module
+#      docstring records why each flag is or is not emitted. Nothing belongs
+#      hard-coded there that could live in (2).
+#
+# The rule that decides between them (systemTest/CLAUDE.md -> "The gate must be
+# TRUTHFUL — never blanket-suppress a signal"): scope a relaxation to the SMALLEST
+# thing that needs it, because a run-level switch silences the signal for all 318
+# operations. Worked example: the global `--suppress-health-check filter_too_much`
+# was removed in KS-544 and replaced by the per-operation generation budget at the
+# bottom of this file — Schemathesis's suppress-health-check is root-only and cannot
+# be scoped, whereas [[operations]] generation.max-examples can.
+# -----------------------------------------------------------------------------
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# KS-226: fail the run on the "method_not_allowed" warning instead of relying on
+# a hand-maintained skip-count allowlist. Schemathesis maintains a persistent
+# cross-run cache (.schemathesis/<project-slug>/cache/) of operations that
+# consistently return 405 and skips them in later phases with this warning;
+# failing on it turns a silent skip into a hard CI signal, self-correcting as
+# the cache observes real API behaviour. Mirrors config/schemathesis_tests.yaml
+# harness.warnings.fail_on — keep both in sync.
+# -----------------------------------------------------------------------------
+# KS-684: `unmatched_filter` ADOPTED (new in Schemathesis 4.25.0). Prior behaviour: absent,
+# because the warning did not exist. 4.25.0 reports filter expressions that match no API
+# operations, with the closest match as a suggestion.
+#
+# WHY IT EARNS `fail-on` HERE SPECIFICALLY: our profiles filter heavily, so a filter expression
+# matching ZERO operations is silent coverage loss — the run reports success having tested less
+# than it was asked to, which is the same shape as KS-517 (masking by loss of reach) and the
+# skip-count class KS-226 exists for. A typo'd or stale filter is exactly the sort of drift that
+# survives review because nothing goes red.
+#
+# CONFIRMED SAFE BEFORE ENABLING: two full `pre-merge` sweeps on 2026-08-25 (12,527 and 13,296
+# cases) produced ZERO unmatched_filter warnings against the current filter set, so turning this
+# into a failure does not red an already-correct configuration.
+# -----------------------------------------------------------------------------
+# KS-1169: `unresolvable_reference` ADOPTED as fatal; `base_url_mismatch` classified INFORMATIONAL
+# (both new in Schemathesis 4.26.0; accepted in `[warnings]` since 4.26.1). Prior behaviour:
+# absent, because neither warning existed on 4.25.2. TestAllInstalledWarningsAreAccountedFor
+# (KS-684) caught both on the 4.25.2 → 4.27.1 bump, as designed — a new warning is a decision.
+#
+# WHY `unresolvable_reference` EARNS `fail-on`: parameters/responses were SKIPPED over a missing
+# schema component. Our spec is generated (`npm run generate-openapi`), so a dangling `$ref` is spec
+# drift that would otherwise shrink coverage without going red — the unmatched_filter shape.
+# CONFIRMED SAFE BEFORE ENABLING: the KS-1169 `full` sweep on 4.27.1 (2026-09-14, slot 2, 341 ops
+# tested) raised it on ZERO operations, so making it fatal reds nothing that is correct today.
+#
+# WHY `base_url_mismatch` IS NOT FATAL — measured, not assumed: it is Schemathesis's heuristic for
+# "every response was 404, maybe --url lacks the base path". On the same sweep it fired on 73
+# operations — the SAME 404-only set `missing_test_data` names (non-existent-id probes, the KS-478
+# precondition class) — while the auth-coverage gate proved 341/342 operations reached past auth,
+# i.e. the URL was right. For this spec it is a false positive that would red every run, so it is
+# accounted for in TestAllInstalledWarningsAreAccountedFor.INFORMATIONAL instead, with the reason.
+#
+# WHY `timeout_units` EARNS `fail-on` (KS-1607, Schemathesis 4.31.0): it fires only when
+# `--request-timeout` or `max_response_time` is 1000 or more — almost certainly milliseconds where
+# Schemathesis takes seconds, i.e. a run configured to wait ~17 minutes per request. That is a harness
+# misconfiguration, never a platform finding, so the run should stop rather than sweep with it. It
+# CANNOT red a correct run today: harness.request_timeout_seconds is 10 and max_response_time is 5.
+# Upstream applies a fatal startup warning at engine finish (WarningCollector.on_startup_warning), so
+# "fatal" FAILS the run without STOPPING it: every remaining test still executes (Peter's ruling,
+# KS-1607, 2026-10-19 — fatal, but the rest of the run must complete). Pinned by
+# test_dictionary_and_timeout_warnings_reach_every_surface.py::test_fatal_does_not_stop_the_run_every_test_still_executes.
+# Timeouts stay as they are (Peter agreed 2026-10-19): request-timeout 10 s, max_response_time 5 s.
+# `dictionary_mismatch` (also 4.31.0) is INFORMATIONAL — reason in the compat test. Prior behaviour:
+# neither warning existed on 4.30.1, so neither was listed.
+[warnings]
+fail-on = ["method_not_allowed", "unmatched_filter", "unresolvable_reference", "timeout_units"]
+
+# -----------------------------------------------------------------------------
+# KS-406 (decision, Kam 2026-07-08): the platform's auth middleware runs before
+# routing, so an HTTP method an endpoint does not declare answers 401 (auth-first)
+# rather than RFC 9110's 405 + Allow. That posture is INTENDED — it avoids
+# revealing the method surface to unauthenticated callers. The coverage phase's
+# unexpected-method probes would therefore fail `unsupported_method` on every
+# authenticated route by design (228 findings = 100% of the 2026-07-07 sweep's
+# failures), so we stop generating those probes rather than asserting a 405 the
+# platform deliberately does not send. Everything else about the coverage phase
+# stays on. Pinned by tests/unit/test_coverage_unexpected_methods.py; the
+# `unsupported_method` check stays configured (harmless without probes) so the
+# checks-compatibility coverage of installed check names is unaffected.
+# -----------------------------------------------------------------------------
+[phases.coverage]
+unexpected-methods = []
+
+[checks.positive_data_acceptance]
+# defaults + 429 (declared rate limits). KS-1353: register is 100/hr/ip on every local and non-prod
+# stack the sweeps run against, and 5/hr/ip only in production —
+# `api-gateway/src/index.ts`: REGISTER_RATE_LIMIT || (isNonProd ? '100' : '5'). Prior text said
+# "5/hr" alone, the production figure, which no sweep here ever meets. Measured on slot 3,
+# 2026-09-28: `RateLimit-Policy: 100;w=3600`.
+expected-statuses = ["2xx", "401", "403", "404", "409", "429", "5xx"]
+
+[checks.negative_data_rejection]
+# defaults + 429 (a rate-limited negative probe was still not accepted)
+expected-statuses = ["400", "401", "403", "404", "405", "406", "409", "422", "428", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# Auth — login: a schema-valid body can legitimately 400. The email field is
+# `format: email` in the spec but validated at runtime with Zod `.email()`,
+# which is stricter — it rejects some format:email-valid addresses (e.g.
+# `%@r.lr`, `~rD@…`, `DSmJmbH_&%@…`). Schemathesis can generate such an address
+# as a POSITIVE case, and the runtime correctly returns 400 VALIDATION_ERROR
+# ("email: Invalid email"). The KS-285 custom `email` format strategy reduces
+# this in the fuzzing phase, but it is a hypothesis strategy (hook-load- and
+# version-dependent) and proved not to be a complete guarantee — KS-356 recurred
+# on a 4.21.10 full run despite it. Tightening the spec's email `pattern` is the
+# #240/#248 trap (regresses negative_data_rejection — see lines 16-21), so the
+# durable, phase-agnostic fix is this expected-statuses exception. The runtime
+# email accept-set is not spec-expressible without that regression.
+# Verified 2026-06-30 (schemathesis 4.21.10, live local auth): the fuzzing phase
+# emits Zod-invalid emails as positive cases (VCR), the runtime 400s them (curl),
+# and schemathesis resolves login's expected-statuses to include 400. (NB the
+# coverage phase emits a Zod-VALID `0@a.com`, so it is NOT the source.) register
+# + forgot-password share this (same `email` validation) — see
+# known-issues-and-baseline.md (KS-356 note).
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "POST /api/auth/login"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# Auth — password endpoints: weak password is a documented 422 (ValidationError
+# per the auth error convention, checked at runtime by checkPasswordStrength —
+# minLength 12 + 3-of-4 character classes + score; not regex-expressible).
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "POST /api/auth/register"
+# 400: a schema-compliant positive case can legitimately 400 — both from the
+# stricter runtime Zod `.email()` (see the login note above) and from the runtime
+# rejecting extra unknown body properties Schemathesis injects (additionalProperties
+# → 400 VALIDATION_ERROR). Same exception as login; do NOT tighten the spec
+# (additionalProperties:false is the #240/#248 trap that regresses negative_data_
+# rejection). 422 stays: weak password is a documented ValidationError. KS-362.
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "422", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/auth/forgot-password"
+# 400: same email-validation + additional-properties rejection as register/login.
+# No 422 here — forgot-password takes only an email (no password-strength check).
+# KS-362 (sibling of KS-356).
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/auth/reset-password"
+# 422 weak password (checked before token lookup); 400 expired token;
+# 404 invalid/used token — all legitimate outcomes for schema-valid bodies.
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "422", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/auth/mfa/verify"
+# KS-622: this operation is RETIRED. It answers 410 Gone unconditionally — backup-code
+# redemption moved to POST /api/auth/login, where the password is verified before the
+# code is read. The old rationale here ("generated userId/code pairs never correspond
+# to a real pending MFA session") described the live handler and is no longer true:
+# there is no session lookup left to miss.
+#
+# 410 must be listed explicitly. Neither positive_data_acceptance nor
+# negative_data_rejection consults the spec — both raise purely on
+# `status_code not in allowed_statuses` — and `deprecated: true` does not exempt the
+# operation, because exclude_deprecated is deliberately false and pinned by
+# test_deprecated_operations_are_not_excluded. The pre-merge and auth-rate-limited
+# profiles both reach /api/auth/, so without 410 here they go red on every run.
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "410", "429", "5xx"]
+# The global negative list (lines 88-90) VERBATIM, plus 410 — a per-operation
+# expected-statuses REPLACES the global one rather than extending it, so
+# 405/406/428/5xx have to be restated here or this operation would silently
+# become stricter than every other one for reasons unrelated to KS-622.
+checks.negative_data_rejection.expected-statuses = ["400", "401", "403", "404", "405", "406", "409", "410", "422", "428", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# Wallet — Cardano bech32 address + signature verification cannot be satisfied
+# by generated data (runtime checks address checksum / challenge signature).
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "POST /api/auth/wallet/challenge"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/auth/wallet/verify"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# OAuth — client_id / code / redirect_uri must reference a registered client
+# or a previously-issued grant; generated values 400 with invalid_request /
+# invalid_grant / unsupported_grant_type per RFC 6749 error semantics.
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "GET /api/oauth/authorize"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/oauth/authorize"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/oauth/token"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# Webhooks / verification — require a cryptographic proof (Stripe HMAC
+# signature; document content hash) that generated data cannot carry.
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "POST /webhooks/stripe"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/verification/verify"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "422", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# Tenant / org-scoped reads — the suite's service token carries no tenantId /
+# organizationId claim, so these answer 400 (TENANT_REQUIRED / organizationId
+# required) for any parameter values. Token-shape, not data, drives the 400.
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "GET /api/issuer-certs"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "GET /api/issuer-certs/{id}"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "GET /api/security/keys"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "GET /api/gdpr/consent/check"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# Documents — create: documentType validates dynamically against the registered
+# document-type catalogue (KS-388; admin-managed, so not spec-expressible as an
+# enum). A schema-valid random documentType therefore legitimately 400s
+# (UNKNOWN_DOCUMENT_TYPE) once the catalogue is seeded — which the sweep itself
+# triggers by fuzzing GET /api/admin/document-types with the admin persona.
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "POST /api/documents"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# Webhook / Teams URL fields — SSRF guard (KS-487 B-1 + B-2).
+#
+# `url` and `webhookUrl` are declared `type: string, format: uri` with no
+# pattern, so the positive generator legitimately emits spec-valid URIs the
+# runtime must now refuse: `http://` (https-only), single-label and `.internal`
+# hosts, IPv4/IPv6 literals in private, loopback and link-local ranges, and —
+# since the guard resolves DNS — any host whose A/AAAA records point inside the
+# perimeter. Every one of those is a **correct** 400, so without this exception
+# `positive_data_acceptance` floods on three operations.
+#
+# This is deliberately an expected-statuses exception and NOT a tightened spec
+# `pattern`: narrowing the published schema is the #240/#248 trap (it regresses
+# `negative_data_rejection` and quietly shrinks a contract customers generate
+# clients from), and the runtime's accept-set here is not spec-expressible at
+# all — "resolves to a public address" is a DNS fact, not a grammar. Same
+# reasoning as the login/register email exception above, and the same shape as
+# the control-byte widening precedent: a platform-wide rejection was widened, so
+# the positive generator is bounded in the same PR rather than after the flood.
+#
+# NB the guard also runs at SEND time inside `deliverWebhook` / the Teams notify
+# loop, but that path is not reachable from a positive sweep case — the sweep
+# never triggers a delivery — so no delivery operation needs an exception here.
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "POST /api/webhooks"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "PATCH /api/webhooks/{id}"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/teams/webhook-config"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+# -----------------------------------------------------------------------------
+# (KS-267 landed) The former tolerant-reader GET exceptions — analytics ×7,
+# system-errors, timestamps ×2 — were removed here. Those endpoints now strictly
+# validate their declared query/path params (Zod) and return 400 on negative
+# probes, so negative_data_rejection guards them again with no exception.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# Integrations that 503 by design when their provider is unconfigured (local/dev
+# has no M365 license, no billing provider, no VC signing key, no Cardano
+# anchoring). The 503 is declared and carries setup instructions;
+# not_a_server_error would red every local run because it cannot tell that
+# expected 503 from a genuine 500/502/504.
+#
+# KS-1170 (2026-09-15) — HOW the exception is expressed changed; WHAT is excepted
+# did not. These entries used to read `checks.not_a_server_error.enabled = false`.
+# Schemathesis 4.26.1 made an explicit `--checks` list (which every profile in
+# config/schemathesis_tests.yaml passes) mark the check EXPLICITLY ENABLED, and
+# that marker wins over a per-operation `enabled = false` (config/_checks.py
+# `from_hierarchy`, read on 4.27.1). From the KS-1169 bump every one of these
+# lines was dead and the declared 503s redded 14 pairs of noise per sweep.
+# Per-operation `expected-statuses` is an ordinary field merged operation-first
+# and SURVIVES the explicit list — proven offline against the installed library
+# by tests/functional/config/test_not_a_server_error_suppression.py, which drives
+# the real CLI with the real argv and this real file.
+#
+# WHY expected-statuses and not a filter hook (the alternative KS-1170 named):
+#   1. It is this file's established mechanism — ~25 entries already tolerate a
+#      ruled status this way for positive_data_acceptance / negative_data_rejection,
+#      and the KS-662 ruling (Kam, 2026-08-25) fixed the honest shape: the
+#      tolerance names ONE status on ONE operation, and a guard classifies what
+#      the tolerance is not meant to cover. `integration_5xx_guard` is that guard.
+#   2. It is NARROWER than the old disable. `enabled = false` silenced every 5xx
+#      on the operation and left the guard alone to notice a 500; now
+#      not_a_server_error itself still fails a 500/502/504 here. Kamil's own
+#      wording on KS-693 (2026-08-27) asked for exactly this: "scoped … to the
+#      503-when-unconfigured case only — never a blanket 5xx tolerance."
+#   3. Both checks can still fail on these operations — the built-in on any
+#      non-declared 5xx, the guard on a 503 whose body is not the declared
+#      SERVICE_UNAVAILABLE envelope. A raw 500 is therefore reported TWICE (check
+#      + guard). That is deliberate: a genuine server error on a by-design
+#      operation should be loud, not filtered back to one row post hoc.
+#   4. The one weakness — if the guards were ever silently unselected again this
+#      would tolerate ANY 503 body — is what the KS-1170 offline tripwires close:
+#      harness.custom_checks in the yaml is pinned to the registered guards in
+#      both directions, every profile's argv is asserted to name them, and the
+#      functional guard above reds if a guard records nothing.
+#
+# KS-268: the genuine-500 blind spot the tolerance opens is closed at the harness
+# by the `integration_5xx_guard` custom check (config/checks.py) — for these
+# operations it passes the declared 503 SERVICE_UNAVAILABLE envelope (and any
+# non-5xx) but fails every other 5xx.
+#
+# KS-499: extends the original three GET reads with seven WRITE ops across three
+# provider classes — billing (Stripe), VC signing (VC_SIGNING_KEY), and Cardano
+# anchoring. They were unmasked after the KS-428 CSRF-guard fix let write probes
+# through and redded not_a_server_error on every full sweep. The include-name
+# must match the spec path template verbatim (mind the mixed {id} vs {customerId}
+# param names) and stay in lockstep with _UNCONFIGURED_503_OPS in config/checks.py.
+# To hold an op to the default again: seed that provider's local config, verify
+# green, then remove its entry here AND from the guard's set.
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "GET /api/billing/customers/{customerId}/payment-methods"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "GET /api/onedrive/files"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "GET /api/teams/webhook-config"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+# KS-499 — billing writes (no Stripe provider configured locally).
+[[operations]]
+include-name = "POST /api/billing/customers"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "PUT /api/billing/customers/{id}"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "POST /api/billing/customers/{customerId}/setup-intent"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "POST /api/billing/customers/{customerId}/default-payment-method"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "DELETE /api/billing/payment-methods/{id}"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+# KS-499 — VC issuance (no VC_SIGNING_KEY) and Cardano anchoring (unconfigured).
+[[operations]]
+include-name = "POST /api/credentials"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "POST /api/anchors/thread-mint"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+# KS-544 (2026-08-05) — four more by-design 503s, each LIVE-VERIFIED by curl against the
+# local stack before being added, NOT inferred from the spec. 306 of 318 operations
+# declare 503 as boilerplate, so a declaration proves nothing; only a reproduction does.
+#
+# ALL FOUR ARE CONDITIONAL on a generated field — the same operation returns 2xx without
+# it. Probing one minimal body is therefore NOT enough to classify an operation here; send
+# the shape that reaches the provider. A first pass probed `{"credentials": []}` against
+# /api/presentations, got 201, and wrongly cleared it — the 503 needs `holderDID`.
+#
+# `integration_5xx_guard` (config/checks.py) keeps genuine-500 coverage on all four — this
+# disables the blanket check, it does not stop reporting real server errors.
+# Lockstep: the same four keys are in _UNCONFIGURED_503_OPS. Edit both or neither;
+# TestLockstepWithSchemathesisToml fails the offline gate if they drift.
+[[operations]]
+# 503 QUALIFIED_TSA_UNAVAILABLE when the spec-legal `requireEidas: true` is drawn and no
+# eIDAS TSA is reachable (KS-523 fail-closed). 201 with requireEidas false.
+include-name = "POST /api/timestamps"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+# 503 "VC_SIGNING_KEY is required to sign a presentation. Refusing to emit an HMAC-signed
+# presentation falsely labelled Ed25519" when `holderDID` is present (the signing path);
+# 201 without it. Same VC-signing-unconfigured class as POST /api/credentials.
+include-name = "POST /api/presentations"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+# 503 "Billing provider unavailable" — KS-431 provider classifier, Stripe unconfigured
+# locally. Same class as the KS-499 billing writes above.
+include-name = "POST /api/billing/checkout/custom"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+# 503 "Billing provider unavailable" — as above.
+include-name = "POST /api/billing/credits/use"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+# KS-693 — the M365 / OneDrive / Teams integration surface. Every one answers the
+# DECLARED `SERVICE_UNAVAILABLE` 503 when ENTRA_* is unconfigured — which it is on
+# every dev machine and in CI. The gate is UNCONDITIONAL of the body: the per-route
+# `requireM365` middleware (m365-integration index.ts, about line 261) short-circuits
+# to M365_UNAVAILABLE_RESPONSE before any
+# route logic (unlike the KS-544 four above, whose 503 needs a triggering field).
+# Live-verified 2026-09-04: all seven return 503 with the declared envelope. As
+# with every entry here, membership is NOT a mask — the integration_5xx_guard in
+# check_predicates.py still fails a genuine 500 or a malformed 503 on these ops.
+[[operations]]
+include-name = "POST /api/m365/connections/init"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "POST /api/m365/connections/{id}/refresh"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "POST /api/m365/documents/sync"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "POST /api/m365/outlook/exchange-token"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "POST /api/m365/sites"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+[[operations]]
+include-name = "POST /api/onedrive/files/{id}/sync"
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]
+
+
+# -----------------------------------------------------------------------------
+# KS-480 §6 / KS-539 G-1 / KS-566 / KS-571 — `onBehalfOf` is CONNECTOR-ONLY,
+# which OpenAPI cannot say. NO [[operations]] entry here any more (KS-571).
+#
+# The field is published on the operations that honour it, because S generates
+# clients from the spec: document create, /version, /share, /transfer-custody,
+# /revoke and certifications/issue. It is valid only under an `sk_` connector
+# key; an interactive JWT caller sending it gets a deliberate 400
+# ("onBehalfOf is connector-only — interactive callers act as themselves") — a
+# security property, not a defect.
+#
+# This block used to list /lifecycle-events and flat /api/anchors and omit
+# /revoke: the pre-ruling §6 set. Kam's G-1 split ruling (2026-08-05, WED-65),
+# as recorded on KS-571: "onBehalfOf pattern = share / revoke / transfer-custody
+# · connector pattern = anchor / lifecycle". KS-566 (#742, merged 2026-09-01)
+# delivered it; Kamil's KS-566 status note, verbatim: "**ADD** `onBehalfOf` to
+# revoke | **live**", "**DROP** from lifecycle-events | **live**", "**DROP**
+# from flat anchors | **live**". The comment then disagreed with the code for a
+# month — so the honouring set now lives in config/connector_only_field.py and
+# a unit test holds it equal to the published spec.
+#
+# PRIOR MECHANISM (removed, KS-571): /share and /transfer-custody widened
+# `positive_data_acceptance` to accept 400. That hid EVERY 400 on those two
+# operations, not just the connector-only one (the KS-544 rule below: a widened
+# expected-status list is masking), while /version, /revoke and
+# certifications/issue had no entry at all — their connector-only 400s were
+# reported, and /version + certifications/issue were baselined under KS-591 as
+# a different defect class. Measured on the KS-571 before-sweep (full, seed
+# 571, slot 4, 2026-10-06): 210 connector-only 400s across the five honouring
+# operations the sweep reached.
+#
+# CURRENT MECHANISM: the `map_case` hook in config/connector_only_field.py drops
+# `onBehalfOf` from POSITIVE bodies on those six operations, so every other
+# 400 they return is judged again. The negative phase keeps the field, and
+# tests/test_connector_only_refusal.py pins the refusal on all six.
+#
+# The ACCEPTED path (connector key + onBehalfOf → 2xx, cross-org → 403) is not
+# reachable from a JWT persona; its systemTest coverage is KS-571 item 3 / KS-568.
+# -----------------------------------------------------------------------------
+
+# ============================================================================
+# ⚠️  DO NOT "FIX" A FAILING SWEEP BY MAKING IT QUIETER.  (KS-544)
+#
+# Every knob in this file can turn a red run green. Almost none of them should.
+# Before changing anything here to stop a failure, answer ONE question:
+#
+#     Does this change make MORE tests run, or FEWER?
+#
+#   MORE  -> legitimate. A generation budget lets cases be built and sent, so the
+#            endpoint is exercised. Worked example: POST /api/timestamps/batch at
+#            budget 25 aborts with ZERO fuzzing cases; at 100 it runs ~320, all
+#            passing. That is added coverage, not a hidden result.
+#
+#   FEWER -> masking. `--suppress-health-check`, `--max-failures`, an exclusion,
+#            a widened expected-status list, a raised `request-timeout` — each of
+#            these removes signal. The failure stops being reported; it does not
+#            stop existing.
+#
+# Three rules, each of which was broken here once and cost real time:
+#
+#   1. SCOPE IT. Fix the one operation that needs it, never all 318.
+#      `--suppress-health-check` is root-only, so it CANNOT be scoped — that alone
+#      disqualifies it. `[[operations]] generation.max-examples` can be.
+#
+#   2. PROVE IT TOOK EFFECT. A green run is not proof. KS-500 recorded three
+#      "verified" fixes for one endpoint; TWO were inert, and the green that
+#      "confirmed" one of them came from an unrelated budget change. If a fix
+#      configures the tool, assert the tool RECEIVED it.
+#
+#   3. MEASURE, DO NOT GUESS. This health check is NON-DETERMINISTIC — the same
+#      seed and settings produced pass and fail on consecutive runs. A threshold
+#      that clears once proves nothing. 100 was kept only after 3/3 clean runs.
+#
+# Guarded by tests/unit/runner/test_args_builder.py, which fails if a suppression
+# appears in this file or the budget drops below the measured minimum. Those tests
+# were themselves verified red before being trusted.
+#
+# Full policy: systemTest/CLAUDE.md -> MUST #13, "The gate must be TRUTHFUL".
+# ============================================================================
+
+# -----------------------------------------------------------------------------
+# POST /api/timestamps/batch — per-operation generation budget (KS-544 / KS-500)
+#
+# ⚠️  STATUS 2026-09-01 (KS-611) — READ THIS BEFORE THE ANALYSIS BELOW. The generator every
+#     measurement in this block was taken against HAS BEEN REPLACED. Schemathesis 4.25.0
+#     dropped `hypothesis-jsonschema` entirely (`jsonschema-rs` 0.51.0 in its place), so the
+#     `small_example_cap` mechanism, the cliff at ~90 and the "budget 25 -> 0 fuzzing cases
+#     execute" line below all describe a dependency that is NO LONGER INSTALLED.
+#
+#     Re-measured on 4.25.2 by driving Schemathesis's own generator (`op.as_strategy()`) against
+#     the real TimestampBatchRequest body: budgets 6/25/30/50/70/90/100 at 20 seeds each, plus
+#     positive AND negative mode at 25/50 — 440 runs, ZERO trips. Controls confirmed detection
+#     works, generation is real, and the same call trips 10/10 on a pathological schema, so the
+#     zero is the schema's, not the harness's.
+#
+#     CONSEQUENCES: (1) the budget below is no longer doing the job this block credits it with —
+#     it is retained because nothing has been measured that justifies changing it, NOT because
+#     50 is a proven floor; (2) raising it to 100 buys nothing; (3) the "untried lead" further
+#     down is CLOSED as measured-and-rejected. ⚠ The check still trips LIVE on 4.25.2 (one abort
+#     in two consecutive sweeps, 2026-08-25) while reproducing 0/440 offline, so whatever now
+#     drives it sits ABOVE the generator and there is currently NO KNOWN MECHANISM. It is carried
+#     as an accepted residual on KS-611. Do not "fix" this by tuning the number.
+#
+# Replaces the global `--suppress-health-check filter_too_much`, which silenced the
+# check for all 318 operations to accommodate this one. Schemathesis's positive
+# generation of this operation's array-of-objects body (`hashes[]`, minItems 1 /
+# maxItems 100) filters a large fraction of draws, so the RATIO trips the check
+# unless the operation is given a bigger budget. The `^[a-f0-9]{64}$` hash is NOT
+# the cause — `from_regex` generates it fine.
+#
+# WHY THIS IS A BUDGET AND NOT A SUPPRESSION — the distinction that matters:
+#   `--suppress-health-check` silences the signal. A budget does the opposite: it
+#   lets generation succeed, so cases actually RUN. Measured on the live stack:
+#       budget  25 -> health check trips, 0 fuzzing cases execute
+#       budget 100 -> 316-332 cases generated, ALL passed (3/3 runs)
+#   So raising it converts "aborted, nothing tested" into "~320 cases tested". It
+#   increases real coverage; it hides nothing. It also makes the platform's
+#   large-batch timeout MORE likely to surface, not less.
+#
+# ⚠️  STATUS 2026-07-31: THIS BUDGET REDUCES THE FAILURE RATE BUT DOES NOT ELIMINATE IT.
+# A full sweep at budget 50 STILL tripped the check. Do not read the budget as a fix.
+#
+# WHAT WAS MEASURED (live stack, ~30 targeted runs):
+#   * The check is FLAKY, not configuration-dependent. Identical config, back to back:
+#     one batch tripped 0/8; another tripped 2 times. Budget shifts the probability only.
+#   * Budget floor is real: 25 and 30 trip ~always; 50 mostly clears; 100 cleared 3/3 in
+#     isolation — yet the FULL sweep at 50 still tripped. Isolation results do not transfer.
+#   * It lives in the FUZZING phase: coverage alone 0/3, fuzzing alone 1/3, both 2/3.
+#   * NOT caused by --workers (1 and 12 both trip and both pass) or by the phase count.
+#   * NOT negative-mode specific: mode=positive 2/3, mode=negative 1/3.
+#   * WAS made worse by the cross-run example database — that is now `none`; see the yaml.
+#
+# ROOT CAUSE — ⚠ SUPERSEDED 2026-09-01 (KS-611); no longer believed to be operative. It was a
+# property of `hypothesis-jsonschema`, which 4.25.0 removed. Original claim follows:
+# Hypothesis's fuzzing generation for this array-of-objects body has a high and VARIABLE filter
+# ratio. The budget only buys more attempts; it does not make generation efficient.
+#
+# THE UNTRIED LEAD — ⚠ CLOSED 2026-09-01 (KS-611) as MEASURED-AND-REJECTED. Retained as history
+# because it was standing here for months; do not pick it up again. The hash was never what was
+# being filtered, so generating it directly cannot help, and the generator it targeted is gone.
+# Original note follows:
+#   Generate the hash DIRECTLY instead of filtering for it, via a registered positive
+#   format strategy — the pattern config/formats.py already uses for `email` (KS-285) and
+#   `date-time` (KS-427). KS-500 tried exactly this (`format: hex-digest-64` +
+#   `from_regex(^[a-f0-9]{64}$)`) and REVERTED it as ineffective — but that judgement rests
+#   on a run at max_examples=60, above the trip threshold, so it proved nothing either way.
+#   Neither the spec annotation nor the formats.py registration survives today. Worth
+#   re-testing properly, measured over repeated runs rather than one observation.
+#
+# WHY 50 — MEASURED, NOT GUESSED. The earlier value came from KS-500's "clears at
+# >=25", measured on an older generator and stale for 4.24.3. The check is also
+# NON-DETERMINISTIC: identical seed and settings produced 130-generated-pass and
+# 84-generated-fail on consecutive runs, so a threshold that clears once proves
+# nothing. Re-measured on the live stack, mode=all + coverage,fuzzing:
+#
+#     budget  25  -> TRIPS (0 fuzzing cases execute)
+#     budget  30  -> TRIPS
+#     budget  50  -> clear 3/3   (184 / 178 / 206 cases generated, all passed)
+#     budget 100  -> clear 3/3   (316 / 332 / 328 cases generated, all passed)
+#
+# 100 was rejected in favour of 50 on COST, not correctness. This override applies
+# to every profile, and `pr` is the only one with a time budget (~1 min target):
+#
+#     pr with budget 100 -> 14.6s, 14.7s   (consistent; ~+24% of the pr target)
+#     pr with budget  50 ->  7.9s,  2.7s   (variable, materially cheaper)
+#
+# `pr` runs mode=positive and does NOT trip the check at all, so its share of this
+# budget buys nothing — which is why the cheaper value wins. If this trips again,
+# RE-MEASURE and raise it. Never suppress: see the header note above.
+#
+# Scope note: Schemathesis's `suppress-health-check` is root-only and cannot be set
+# per operation; `[[operations]] generation.max-examples` can, which is why this is
+# expressed as a budget rather than a scoped suppression.
+#
+# NOT raising this operation's `request-timeout`: a spec-legal 100-element batch
+# (maxItems: 100) exceeds the 10s transport timeout, and that is a platform finding
+# to report, not something to tune away.
+# -----------------------------------------------------------------------------
+# COVERAGE NOTE — this budget is a CEILING as well as a floor. `generation_for()`
+# gives the operation-level value priority over the project value, so this 50
+# applies to every profile, including ones whose global budget is HIGHER:
+#     pr 5 · test-fast 6 · pre-merge 6 · full 25   -> raised to 50 (more coverage)
+#     nightly 1100                                 -> CAPPED to 50 (less coverage)
+# The nightly cap is accepted deliberately: 1100 draws of a body holding up to 100
+# hashes would spend most of the soak on one endpoint that ALREADY exceeds the 10s
+# transport timeout at maxItems — more draws would buy more timeouts, not more
+# signal. Recorded here so it is a decision, not a surprise. Schemathesis offers no
+# 'raise but never lower' semantics, so a single value must serve every profile.
+[[operations]]
+include-name = "POST /api/timestamps/batch"
+generation.max-examples = 50
+
+# -----------------------------------------------------------------------------
+# KS-488 C-2 — POST /api/wallets/verify always answers 501 NOT_IMPLEMENTED.
+#
+# The operation used to return 200 `{verified:true}` for any three non-empty
+# strings while performing no cryptography at all, and its published description
+# claimed CIP-30/COSE and ecrecover verification. It now fails closed: the
+# handler refuses before validating, so 200 and 400 can no longer occur and both
+# were removed from the spec; 501 was added and is the ONLY response this
+# operation produces (besides the transport/auth codes the gateway can still
+# raise ahead of it).
+#
+# Without this exception `positive_data_acceptance` floods: every positive case is
+# spec-legal by construction and every one of them is correctly refused. The 501
+# is the contract, not a rejection of the generated data — there is no body that
+# could be accepted.
+#
+# Deliberately an expected-statuses exception and NOT a spec tightening — the
+# #240/#248 trap. There is nothing to narrow: the request schema is *already*
+# accurate, and the reason no request can succeed is that the schema is MISSING
+# the CIP-30 COSE key (KS-475 removed it as "unread", which it was, because the
+# runtime never verified anything). Constraining the existing fields harder would
+# express the wrong thing entirely.
+#
+# This exception comes OUT when real verification lands — that work re-adds the
+# `key` request field and reintroduces a 2xx, at which point the operation should
+# be held to normal positive-acceptance again.
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "POST /api/wallets/verify"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "501", "5xx"]
+# KS-686 — the SAME 501 also failed `not_a_server_error`, which ignores the declared status
+# list and flags every 5xx: 29 × 501 in one pre-merge sweep (2026-08-25), inflating KS-593's
+# raw-5xx register by an operation that carries no unhandled exception at all. Prior state:
+# the check ran blanket here and reported the fail-closed refusal as a defect every run.
+#
+# Tolerated per the platform ruling, quoted verbatim (systemTest MUST #15):
+#   "Tolerate the 501 until KS-627 lands (guard + tripwire, land it on the KS-684 branch)"
+#   — Kam, 2026-08-26 10:44:51 AEST (relayed by Wednesday), on KS-686.
+#
+# NOT a bare exclusion — the tolerance below names the ONE status (501); `by_design_501_guard`
+# (config/checks.py) passes ONLY the declared 501 NOT_IMPLEMENTED envelope; a raw 500, a 502
+# or a 501 with any other body still fails BOTH checks. KS-1170 (2026-09-15): this line was
+# `checks.not_a_server_error.enabled = false` until Schemathesis 4.26.1 made an explicit
+# `--checks` list override a per-operation disable; `expected-statuses` survives it — see the
+# KS-1170 note on the 503 block above for the full reasoning. Lockstep: this entry ⇔ `_BY_DESIGN_501_OPS` in
+# config/check_predicates.py; `TestLockstepWithSchemathesisToml` in
+# tests/unit/checks/test_by_design_501_guard.py fails the offline gate if they drift.
+#
+# EXPIRY: when KS-627 lands, remove this line AND the frozenset entry (and the
+# positive_data_acceptance exception above, per KS-627's own scope). The live tripwire
+# `tests/test_wallet_verify_stub.py` goes RED naming KS-627 when the 501 posture ends.
+checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "501"]
+
+# -----------------------------------------------------------------------------
+# KS-487 B-4 — kyc image uploads now verify magic bytes before storing.
+#
+# `frontImage` / `backImage` / `selfieImage` are `type: string` carrying base64
+# image bytes. Before this change the runtime accepted ANY string and stored it
+# labelled `image/jpeg` — including strings that were not base64 at all. It now
+# decodes strictly, sniffs the container, and 400s anything that is not a real
+# JPEG, PNG or WebP.
+#
+# Every positive case Schemathesis generates for these operations is a random
+# schema-legal string, which is by construction not a real image, so all of them
+# are correctly refused with 400. Without this exception
+# `positive_data_acceptance` floods on a working guard.
+#
+# Deliberately an expected-statuses exception and NOT a spec tightening — the
+# #240/#248 trap. "The first bytes must be FF D8 FF, or the PNG signature, or
+# RIFF….WEBP, after base64-decoding" is not expressible in JSON Schema: a
+# `pattern` constrains the base64 TEXT, not the bytes it decodes to, and any
+# pattern strong enough to matter would regress negative_data_rejection by
+# turning malformed-base64 negatives into schema-invalid ones the generator can
+# no longer produce.
+#
+# This exception does NOT come out when inline examples land (the extranet
+# 329-operation item). Examples feed the coverage phase; the fuzzing phase still
+# emits random strings, and those are exactly the cases this covers.
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "POST /api/kyc/{id}/document"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+[[operations]]
+include-name = "POST /api/kyc/{id}/selfie"
+checks.positive_data_acceptance.expected-statuses = ["2xx", "400", "401", "403", "404", "409", "429", "5xx"]
+
+# =============================================================================
+# KS-662 — by-design permissive input tolerance (negative_data_rejection)
+# =============================================================================
+# KS-518 was closed BY DESIGN, not fixed: the permissive input handling on these
+# operations is intentional at this phase. Without these entries the sweep
+# re-reports a settled decision every run, and a permanently-red gate stops being
+# read — the same failure mode OUT_OF_SCOPE was introduced for under KS-519.
+#
+# ✅ RATIFIED — Kam, 2026-08-25, "Option A, the property reading" (KS-662 comment
+# 16aa42bd, relayed by Wednesday). Prior state: this scope was proposed and under
+# review, with KS-592 appearing to place three of these four back in its fix set.
+# The ruling settles that: KS-518's closure is honoured on its PROPERTY, not on
+# its COUNT of ten, and "costs zero build change — nothing on the branch moves".
+# The /api/status/* trio came OUT of KS-592's fix set as a result.
+#
+# ⚠️ THE SET IS THREE STATUS-LIST OPERATIONS + audit-log — NOT "four status-list
+# operations". audit-log rides on a SEPARATE authority (Kam's 2026-07-29
+# unknown-query-param rule), which survives whichever way the status trio is
+# ruled, so changing one must not silently move the other. And note
+# POST /api/status/{id}/allocate is a fourth status-list operation carrying NO
+# violation in KS-518's table — deliberately not tolerated here, and it never
+# needed to be. Two different "fours" are in circulation; do not merge them.
+#
+# ⚠️ IF A TOLERATED CASE STOPS BEING PRODUCED (e.g. Schemathesis 4.25.x's
+# `format: float` bound fixes dissolving the check/{index} float case), the entry
+# is DELETED, not kept — Kam's standing instruction. The tripwire tests in
+# tests/test_by_design_permissive.py are the signal; per the 2026-08-05
+# correction, absence from one run is not evidence and wants a targeted re-probe.
+#
+# ⚠️  THESE ENTRIES ALONE WOULD MASK THE ENDPOINT. `expected-statuses` is
+# per-operation and all-or-nothing, and `400` is already expected — so adding
+# `2xx` here makes the blanket check pass whether the platform accepts OR
+# rejects, hiding the go-live hardening KS-518 says is coming (KS-545 gated
+# hardening). They are therefore HALF of the mechanism. The other half is
+# `by_design_input_tolerance_guard` (config/checks.py), which fails any violation
+# on these operations OUTSIDE the ruling, so correct-response coverage is kept.
+#
+# The two halves are pinned together by TestLockstepWithSchemathesisToml in
+# tests/unit/checks/test_by_design_input_tolerance_guard.py — drift in the
+# dangerous direction (excepted here, absent from the guard) would tolerate
+# everything silently.
+#
+# Each is additionally pinned by a tripwire in tests/test_by_design_permissive.py
+# asserting the tolerated behaviour. If the platform hardens, the tripwire goes
+# RED — the signal to DELETE the entry, not to update the assertion.
+# -----------------------------------------------------------------------------
+
+# Kam, KS-518, 2026-07-29: "rejecting unknown query params is NOT standard REST
+# practice and a platform-wide flip would fight the positive generator (the
+# KS-472 lesson) — recommend registering this one (and the class) as by-design
+# tolerated rather than 'fixing' it."
+# Ruled violation: an UNDECLARED query key. A declared param given a violating
+# value and still accepted is not covered and still fails (guard-enforced).
+[[operations]]
+include-name = "GET /api/platform/audit-log"
+checks.negative_data_rejection.expected-statuses = ["2xx", "400", "401", "403", "404", "405", "406", "409", "422", "428", "429", "5xx"]
+
+# Kam, KS-518 closure, 2026-08-04: "the flagged operations are status-list service
+# reads whose permissive input handling is intentional at this phase … if the
+# contract posture changes at go-live hardening, a fresh ticket picks it up under
+# the KS-545 gated-hardening pattern."
+# Ruled violation: a non-integer `index` path parameter. NOTE the platform does
+# not merely accept it — it silently coerces (2.589e-42 answered as index 2), which
+# is flagged on KS-662 as arguably beyond the ruling.
+[[operations]]
+include-name = "GET /api/status/{id}/check/{index}"
+checks.negative_data_rejection.expected-statuses = ["2xx", "400", "401", "403", "404", "405", "406", "409", "422", "428", "429", "5xx"]
+
+# Same KS-518 closure ruling. Ruled violation: `index` below the declared minimum.
+[[operations]]
+include-name = "POST /api/status/{id}/revoke"
+checks.negative_data_rejection.expected-statuses = ["2xx", "400", "401", "403", "404", "405", "406", "409", "422", "428", "429", "5xx"]
+
+# Same KS-518 closure ruling. Ruled violation: a non-string `reason`.
+[[operations]]
+include-name = "POST /api/status/{id}/unrevoke"
+checks.negative_data_rejection.expected-statuses = ["2xx", "400", "401", "403", "404", "405", "406", "409", "422", "428", "429", "5xx"]
+
+# -----------------------------------------------------------------------------
+# KS-1447: GET /api/users/admin/list joins the KS-662 two-halves set above, on
+# the same authority CLASS as audit-log (Kam's 2026-07-29 unknown-query-param
+# rule), but with a STRICT classifier (config/unknown_query_tolerance.py):
+# tolerated only when an undeclared query key is the request's ONLY violation.
+# A declared limit/offset violation accepted with 2xx still fails
+# by_design_input_tolerance_guard, and the offset=-1 500s still fail
+# not_a_server_error (KS-593 / KS-565 §2) — nothing else is configured here.
+#
+# KAMIL, KS-592 (2026-08-26), Linear comment 11ea84ac-7623-4b91-943c-f0aeb72c726d:
+#   "**The second is operative.** The tolerated thing is the
+#    `negative_data_rejection` **check** on `GET /api/users/admin/list` —
+#    **not the operation**."
+#   "**17:11:38 AEST** — *"check — Tolerate the CHECK (unknown-query-param class) …"*"
+#   "🔴 **The two `offset=-1` HTTP 500s on this operation stay LIVE.** A
+#    whole-operation exclusion would have swallowed them, and a ruling can
+#    settle a 200-where-a-400-was-wanted but cannot make an unhandled 500
+#    correct."
+#
+# Prior behaviour: no entry; only the schemathesis-baseline.json entry
+# (ticket KS-1015) kept the pair quiet. The first KS-1447 cut tolerated the
+# WHOLE check here — wider than Kam's stated class — and was narrowed on
+# Peter's instruction (2026-10-15).
+# -----------------------------------------------------------------------------
+[[operations]]
+include-name = "GET /api/users/admin/list"
+checks.negative_data_rejection.expected-statuses = ["2xx", "400", "401", "403", "404", "405", "406", "409", "422", "428", "429", "5xx"]

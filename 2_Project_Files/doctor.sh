@@ -348,7 +348,8 @@ fi
 # from NVIDIA Sync's own ssh_config Include, and the model is reached through a loopback tunnel on :8888
 # (0_Brain/reference/2026-09-22_spark-deepseek-v4-flash/HANDOFF.md §1). WARN only, no network probe beyond a
 # 3-second local curl: a missing Spark is a degraded feature, never a broken seat. Other seats skip it entirely.
-if [ "${WED_AGENT:-}" = "friday" ]; then
+# RETIRED 2026-11-15 (Kam: "the Spark has gone, retire the checks" — the HP loan box was wiped and returned to HP). Disabled with "false &&".
+if false && [ "${WED_AGENT:-}" = "friday" ]; then
   if ! ssh -G ZGX-Nano-G1n 2>/dev/null | /usr/bin/grep -qi '^hostname zgx-15d5'; then
     warn "Spark ssh alias ZGX-Nano-G1n missing" "install/sign in to NVIDIA Sync (it writes the Include in ~/.ssh/config) — PORTABILITY item 22"
   elif curl -sf -m 3 http://127.0.0.1:8888/health >/dev/null 2>&1; then
@@ -361,6 +362,9 @@ fi
 # local forward on 127.0.0.1:47788 (PORTS.md). It dropped silently on 10-15 and 10-16 and nothing said so. Check-only
 # here; local-model/spark/round.sh re-opens it in-path (tunnel.sh up) before refusing ENDPOINT DOWN.
 if [ "$_DOC_AGENT" = "wednesday" ]; then
+  # Spark tunnel + allocation: RETIRED 2026-11-15 (Kam: "the Spark has gone, retire the checks" — the HP loan box was wiped and returned to HP). Disabled; the CAPACITY check below stays live.
+  ok "Spark retired 2026-11-15 (returned to HP): tunnel and allocation checks off"
+  if false; then
   TUN_OUT="$(bash "$PROJECT_DIR/2_Project_Files/local-model/spark/tunnel.sh" check 2>&1)"
   if [ $? -eq 0 ]; then
     ok "Spark tunnel 47788 up ($(echo "$TUN_OUT" | head -1 | cut -c1-80))"
@@ -375,6 +379,7 @@ if [ "$_DOC_AGENT" = "wednesday" ]; then
   else
     ok "Spark allocated: $(echo "$ALLOC_OUT" | head -1 | cut -c1-120)"
   fi
+  fi  # end of the retired Spark block
   # Fleet CAPACITY (Kam 2026-10-28 17:5x; rule learnings/2026-10-28_track-agent-capacity-keep-the-floor-full.md):
   # ROOM with a briefable backlog is a WARN: the floor should be full.
   CAP_OUT="$(python3 -I "$PROJECT_DIR/2_Project_Files/fleet/capacity_status.py" 2>&1)"
