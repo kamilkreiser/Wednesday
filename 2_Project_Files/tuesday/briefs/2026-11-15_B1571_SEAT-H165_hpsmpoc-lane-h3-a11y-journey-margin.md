@@ -63,14 +63,14 @@ Step, lock state (holder text or "mine"), load1, the last command, the next one,
 
 ## Stamp
 Tuesday fills each slot at launch; one word, clock or answer each. The unstamped copy reads the slot count by `grep -o ... | wc -l` (the slots below plus the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main full sha; `b6c282ee50086bc1ac7d773ccabf00fcf8c055cc` at drafting): ____
-- Branch head at launch (the new branch must NOT exist) and open PRs (1 at drafting, #318): ____
-- Launch authority (HPSMPOC-470 point 1 as a sweep lane H-3 item; the scope call that a test timeout is built) and hard stop (READY target 180 minutes after Step 0; HARD STOP clock): ____
-- SLOTS (which HPSM-POC panes are live and the paths their kits grant; whether #318 has landed): ____
-- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): ____
-- GATE-ROUND (whether a gate follows, its tier G2, the class and the round it counts): ____
-- Q-answers (Q-1 to Q-4 of the drafter report): ____
+- STAMP: STAMPED 14:33 AEDT 2026-11-15 by Tuesday s278 (s277's successor). Read whole: this kit (76 lines) and the drafter report (81 lines). Re-printed by Tuesday at main 8766b253 through gh api contents: a11y.spec.ts:39 is the journey test ('every journey screen: 0 serious/critical axe violations', expects 16 screens); the file is 88 lines with 0 setTimeout; playwright.config.ts has 0 top-level '  timeout:' lines and 1 '  retries:' line, :49 'retries: process.env.CI ? 1 : 0'; walkthrough-uat.spec.ts:17 'test.setTimeout(90_000);'. stamp_check.py: 70 claims, 70 measured.
+- LAUNCH WINDOW: until 15:45 AEDT 2026-11-15; load1 8.99 at the stamp; live beside you: Datasec/MPS-M139 and Datasec/NexusAI-N130 (other repos)
+- BASE (code main full sha; `b6c282ee50086bc1ac7d773ccabf00fcf8c055cc` at drafting): 8766b253bb11e9ef23978abc6741e1c6146e74c4 (MAIN MOVED since drafting: #318 landed; its 9 files are 3 api/src, 3 api/tests, infra/tests/test_security_baseline.py, web/src/server/bff.client.test.ts, web/src/server/bff.ts: no owned path touched; re-print the pointers at this base)
+- Branch head at launch (the new branch must NOT exist) and open PRs (1 at drafting, #318): b1571 absent on origin (matching-refs heads/b1571 length 0); open PRs 0 (#318 landed as 8766b253)
+- Launch authority (HPSMPOC-470 point 1 as a sweep lane H-3 item; the scope call that a test timeout is built) and hard stop (READY target 180 minutes after Step 0; HARD STOP clock): Tuesday, under Kam's 'keep going with the tickets' (Tuesday terminal, 2026-11-15) and his 2026-10-24 every-boot standing order; the scope call is Tuesday's: a bound on one test changes no product behaviour and adds no word, so point 1 is built. READY target your Step-0 date + 180 min; HARD STOP 19:00 AEDT 2026-11-15
+- SLOTS (which HPSM-POC panes are live and the paths their kits grant; whether #318 has landed): No HPSM-POC pane is live. #318 has landed (main 8766b253). No other H-3 kit exists.
+- IDENTITY (the clone-local `user.name` and `user.email` the seat copies, equal to what the project's configured identity prints; else STOP before the first commit): user.name kamilDatasec, user.email 88359143+kamilDatasec@users.noreply.github.com (read from the project's 2_Project_Files config by Tuesday; copy by program and print that you did)
+- GATE-ROUND (whether a gate follows, its tier G2, the class and the round it counts): Yes: a G2 gate (tests-only) after your READY, as a separate kit; round 1 of 2 on this class. Then Tuesday opens the PR, reads hosted CI and CodeQL, and lands by head-pinned squash. Nothing deployed.
+- Q-answers (Q-1 to Q-4 of the drafter report): Q-1: build it (the kit as written). Q-2: HPSMPOC-480 is NOT ruled; it stays LEFT. Q-3: yes, point 4 is a separate later H-3 kit, not yours. Q-4: READY by your Step-0 date + 180 min; hard stop 19:00 AEDT; a load wait is not a finding.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s278 at 14:33 (76 lines + drafter report 81 lines; pointers re-printed at 8766b253, see STAMP)
