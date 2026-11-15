@@ -71960,5 +71960,46 @@
    }
   ],
   "amended_ts": "2026-11-16T07:52:24.993287+11:00"
+ },
+ {
+  "id": "secuura-cert-verify-anyone-or-signed-in-1116",
+  "client_project": "Secuura/Blockchain",
+  "title": "Certification verify: anyone, or signed-in callers only (each call records a billing charge)?",
+  "bluf": "Tap a, b or c. Your 07:03 rule says verification can be read by anyone. On 15 Nov you ruled certification verify (POST /api/certifications/:id/verify) open to any SIGNED-IN caller (card secuura-ks1699-verify-audience-1113 = c). Measured by the S 85th board seat at develop a129a5f03f88: originate's route sits behind a login (certifications.ts line 66), and each call records a billing charge event. Today an anonymous caller only reaches a gateway stand-in that answers 'not verified'; open PR 2225 would send it to originate, which answers 401. Document verify (/api/verification) is already public; this card is only the certification route. New question: the prior-rulings gate will match 1113 and 1102; neither is about anonymous callers under your new rule.",
+  "default_action": "If no answer: nothing changes. Certification verify stays signed-in only (card 1113 = c); the board seat posts the question as a fact on KS-1699 and KS-1855; PR 2225 does not merge before its gate re-reads this card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Signed-in only, as ruled 15 Nov",
+    "detail": "Certification verify keeps its login; document verification stays public. No anonymous billing charges. PR 2225 and KS-1699 go ahead as ruled"
+   },
+   {
+    "key": "b",
+    "label": "Anyone, including anonymous",
+    "detail": "A build seat opens the route to anonymous callers; someone must decide who is billed for an anonymous charge (or none is recorded)"
+   },
+   {
+    "key": "c",
+    "label": "Anyone, but no charge for anonymous calls",
+    "detail": "Open it, and an anonymous call records no billing event"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T07:44:03.819706+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1114-verify-title-strategy",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks1352-revoked-credentials-still-verify",
+   "CARD secuura-ks1385-cert-holder-can-rewrite-issuer-fields-1018",
+   "CARD secuura-ks1628-retire-deprecated-verify-route-1019",
+   "CARD secuura-ks590-verify-disclosure-four-questions-1102",
+   "CARD secuura-ks1991-verify-presents-later-copy-fix-1110",
+   "CARD secuura-ks1699-verify-audience-1113"
+  ]
  }
 ]
