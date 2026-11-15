@@ -71722,5 +71722,52 @@
    "CARD mpscalc-staff-words-31-deploy-1112",
    "CARD mpscalc-deploy-seed-secret-expired-1112"
   ]
+ },
+ {
+  "id": "secuura-public-audit-personal-fields-1116",
+  "client_project": "Secuura/Blockchain",
+  "title": "Public audit records: what happens to the personal fields (user id, IP address, browser, free-text details)?",
+  "bluf": "(Override of the prior-ruling gate: its matches share only the words public/audit/fields; none rules who may READ audit records' personal fields.) Your 07:03 rule makes audit records readable by anyone in the world. Measured by the board drafter at develop 9942bae93563 (services/security/src/converters.ts, AuditLog): each audit record carries userId, ipAddress, userAgent, and free-text details / previousState / newState that can hold personal data. Today the audit routes (security GET /api/audit and /api/audit/:id, the gateway's token-only /api/security mount, platform audit-log) are tenant- or admin-only. Nothing is opened until you choose. Verification reads are already public.",
+  "default_action": "HOLD: nothing is opened until you choose. The board seat still records your rule on every related ticket and files the opening work as a held ticket.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Public, with personal fields removed",
+    "detail": "Anyone can read audit records; the public view drops userId, IP address and browser, and the free-text fields are reduced to the action and resource. The full record stays readable by its own tenant and admins."
+   },
+   {
+    "key": "b",
+    "label": "Public, the full record",
+    "detail": "Anyone can read every field, including user id, IP address, browser and free text."
+   },
+   {
+    "key": "c",
+    "label": "Keep audit records tenant-only for now",
+    "detail": "Your rule applies to verification (already public); audit records stay as they are until you revisit."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T07:12:40.678747+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-01 17:25",
+   "2026-09-17 18:31",
+   "CARD secuura-ks1102-public-status-what-may-show",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD secuura-audit-row-mysql2-override-vs-prisma-pin",
+   "CARD secuura-audit-rows-react-router-v7-migration",
+   "CARD secuura-audit-row-ip-address-high-override",
+   "CARD secuura-audit-root-lock-0930-remeasured",
+   "CARD secuura-audit-fuse-0930-needs-your-email",
+   "CARD secuura-ks1359-platform-audit-log-bounds",
+   "CARD secuura-ks1385-cert-holder-can-rewrite-issuer-fields-1018",
+   "CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022",
+   "CARD secuura-ks1773-document-lookup-public-1028",
+   "CARD secuura-ks-1205-rate-limit-refusal-audit-row-1106",
+   "CARD secuura-ks-1545-audit-log-in-band-marker-1106",
+   "CARD secuura-ks1231-nine-fields-share-integrations-key-1106"
+  ]
  }
 ]
