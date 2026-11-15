@@ -15,7 +15,7 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 - **SCORED:** K 28th 0.95, X 10th 0.93, C 39th 0.93. **OWED:** W 31st score (after gate 369). Build panes C, W, X all CLOSED.
 - **S 82nd WRAPPED, scored 0.94, pane closed. PR 2145 MERGED (develop a5e13a242917, verified 02:26:50; merges 27). **S 83rd LAUNCHED %98 (Sonnet) 02:38: filings F1-F4 + 10 comments (F1 at MEDIUM by Wednesday), NEXT = plan QUESTION -> ANSWER -> STATUS -> WRAP.**
 - **Kam card ac4 AMENDED** with gate 367 N3 (tenant-less signups share one default tenant). **Morning fleet card OWES Kam:** the AC6 export marker stays until ac4 is answered; deploys held: anchoring (card), transfer (2241 + 2243), analytics (2242), wallet-connector (2244, with the ownerless-after-restart cost).
-- **K 29th WRAPPED 15:30Z, scored 0.92, pane closed (first unmerged PR 2242). C-lane kyc DRAFTER RUNNING** (KS-2189 + KS-2188; re-commission from 0_Brain/reference/2026-11-16_drafter-seatC40-ks2189-2188/commission.md if its brief is absent).
+- **K 29th WRAPPED 15:30Z, scored 0.92, pane closed (first unmerged PR 2242). **C 40th LAUNCHED %104 (Opus) 02:40: KS-2189 + KS-2188 kyc erasure, ONE tier-1 PR; NEXT = plan QUESTION -> ANSWER -> READY FOR GATE -> gate (tier 1).**
 - **NEXT LANES:** KS-2219 billing by-email 500; a BOARD seat for: KS-2052 D2, gate 368 N2, gate 365 N1/N3-N6, G366-2241-1/-2, G297-2149-1/-2, G296-2145-1, gate 367 N1/N2, X 10th's four candidates, C 39th's and W 31st's candidates.
 
 ## 🔴 BOOT 00:5x 16 Nov, the 00:5x rotation successor (ctx 24% after load) - READ FIRST; supersedes every block below where they differ
