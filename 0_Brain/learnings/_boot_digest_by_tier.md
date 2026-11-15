@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-16 07:04 from 272 lesson files (1,159,470 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 226. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-16 07:14 from 273 lesson files (1,162,090 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 227. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7901,4 +7901,30 @@ OWN inbox: the inbox her merge seat reports READY and MERGED to.
 4. No expiry stated: "new rule for all related tasks and tickets" reads as standing until he changes it.
 
 **Family:** [[2026-09-20_ks1175-hold-lifted-make-the-fix]] (a card answered outside its options; recorded by hand) · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (the privacy measurement goes back to him) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope: audit + verification, not exports) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## A preflight failure must never stop a rotation; carry it into the new seat's boot instead
+`2026-11-16_preflight-failure-must-not-kill-a-rotation.md` · correction · 2026-11-16 · status: live · tier: W
+
+**The lesson:** a human-answered gate must never sit in an unattended path. When a seat is
+launched by a rotation (`wednesday_rotate.sh --self|--dead`), a HARD preflight failure is
+**carried forward, not gated**: the launcher continues, logs the ✗ lines, and puts them at the
+top of the new seat's boot prompt as first work. A human launch (Kam at the keyboard) still gets
+"Continue anyway?", because there someone can decide.
+
+**How to apply:**
+- `wednesday_rotate.sh` inlines `SEAT_ROTATION=$MODE` into the respawn command. It has to be
+  inlined: `respawn-pane` runs in the tmux server's environment, so an export would not reach it.
+- `Launch_Wednesday.command`: with `SEAT_ROTATION` set, a non-zero doctor exit sets
+  `PREFLIGHT_HARD`, appends it to `cockpit/logs/rotate_wednesday.log` and adds a 🔴 block to
+  INITIAL_PROMPT. The seat that boots fixes those lines BEFORE the brain load and re-runs doctor.
+  These are still failures (no-skip), just not a stop.
+- Tested 2026-11-16 with a stub doctor that fails: rotation mode reached the end and logged the
+  failures (rc 0); a human launch answering "no" exited 1, and one answering "yes" continued.
+  Backups: `*.pre-1116-rotation-nogate`.
+- Open gap, not fixed here: rotate_liveness.sh passed a seat that was still in its launcher.
+  "Pane present" is not "seat booted". The `pane_is_booting` process check in monitor.sh is
+  the right signal for it.
+- When Kam names a cause ("the NAS"), verify which line actually failed before fixing the named
+  thing. See [[2026-08-03_mental-model-not-source-of-truth]].
 

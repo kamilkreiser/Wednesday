@@ -372,8 +372,30 @@ fi
 # there. With the render below this gate, a fresh seat hard-failed one step before the fix
 # that would have passed it — every time, by construction. Tuesday's hooks existed on this
 # boot only because Kam ran the renderer by hand. A gate must run AFTER the repair it gates on.
+#
+# ROTATION MODE (Kam 2026-11-16, after the 07:04 --self respawn sat at "Continue anyway?"
+# until he typed yes): "if the problem occurs it should not kill the rotation". When
+# wednesday_rotate.sh launches this (SEAT_ROTATION=--self|--dead), a HARD failure is NOT a
+# gate: the boot continues, the ✗ lines are logged and carried into the boot prompt, and the
+# new seat fixes them first. A human launch still gets the prompt — Kam at the keyboard can
+# decide; an unattended rotation has nobody to decide, so stopping it only ever kills the seat.
+PREFLIGHT_HARD=""
 if [ -x "$PROJECT_DIR/2_Project_Files/doctor.sh" ]; then
-  if ! "$PROJECT_DIR/2_Project_Files/doctor.sh" --quiet; then
+  _PF_OUT="$(mktemp -t preflight.XXXXXX)"
+  "$PROJECT_DIR/2_Project_Files/doctor.sh" --quiet 2>&1 | tee "$_PF_OUT"
+  _PF_RC=${PIPESTATUS[0]}
+  if [ "$_PF_RC" -ne 0 ] && [ -n "${SEAT_ROTATION:-}" ]; then
+    PREFLIGHT_HARD="$(/usr/bin/grep -i '✗' "$_PF_OUT" | cut -c1-400)"
+    [ -n "$PREFLIGHT_HARD" ] || PREFLIGHT_HARD="doctor.sh exited $_PF_RC with no ✗ line — run it and read the whole output"
+    echo ""
+    echo "ROTATION ($SEAT_ROTATION): preflight HARD failures do NOT stop a rotation (Kam 2026-11-16) — continuing; the new seat fixes them first."
+    mkdir -p "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs"
+    { printf '%s [launcher] ROTATION %s: preflight HARD failures carried into the boot prompt, not gated:\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$SEAT_ROTATION"
+      printf '%s\n' "$PREFLIGHT_HARD" | sed 's/^/    /'; } >> "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs/rotate_wednesday.log"
+    _PF_RC=0
+  fi
+  rm -f "$_PF_OUT"
+  if [ "$_PF_RC" -ne 0 ]; then
     echo ""
     echo "Preflight found HARD failures (above)."
     # DRAIN FIRST, THEN INVITE. A one-character read is answerable by anything that reaches
@@ -860,6 +882,19 @@ did not wrap so Kam knows before he relaunches; (2) prepare the
 day's briefing and speak the greeting as usual — if he doesn't answer, leave the
 briefing on screen and wait quietly; do NOT start executing priorities without
 his confirm. Quiet-hours rule stands: nothing spoken before 06:00."
+fi
+
+# ── Rotation carried preflight HARD failures (Kam 2026-11-16: they must not kill the rotation) ──
+if [ -n "$PREFLIGHT_HARD" ]; then
+  INITIAL_PROMPT="$INITIAL_PROMPT
+
+🔴 PREFLIGHT HARD FAILURES AT THIS ROTATION LAUNCH ($SEAT_ROTATION) — NOT GATED.
+Kam 2026-11-16: 'if the problem occurs it should not kill the rotation', so the launcher
+continued instead of stopping at 'Continue anyway?'. They are still failures (no-skip):
+FIX THEM FIRST, before the brain load, then re-run 2_Project_Files/doctor.sh --quiet and
+confirm 'PREFLIGHT: OK'. If a fix needs Kam's hands, card him (decision_queue.sh add) and
+carry on. The lines doctor printed:
+$PREFLIGHT_HARD"
 fi
 
 # Model (Kam, 2026-09-05 13:1x, verbatim: "you should load in latest fable model

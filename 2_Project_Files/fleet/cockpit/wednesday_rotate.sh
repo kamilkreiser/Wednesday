@@ -64,7 +64,12 @@ export WED_AGENT="$SEAT"   # the detached checker resolves the seat from this
 if [ -z "${ROTATE_LAUNCH_CMD:-}" ] && [ ! -f "$SEAT_LAUNCHER" ]; then
   log "REFUSED: seat '$SEAT' but its launcher is missing: $SEAT_LAUNCHER"; exit 2
 fi
-LAUNCH_CMD="${ROTATE_LAUNCH_CMD:-bash \"$SEAT_LAUNCHER\"}"
+# SEAT_ROTATION tells the launcher this boot is a ROTATION, not Kam at the keyboard: a HARD
+# preflight failure must not stop it at "Continue anyway?" (Kam 2026-11-16 07:1x: "if the
+# problem occurs it should not kill the rotation" — the 07:04 respawn sat at that prompt
+# until he typed yes). Inlined, not exported: respawn-pane runs the command in the tmux
+# server's environment, so an export from this script would never reach the launcher.
+LAUNCH_CMD="${ROTATE_LAUNCH_CMD:-SEAT_ROTATION=$MODE bash \"$SEAT_LAUNCHER\"}"
 
 "$TMUX_BIN" has-session -t "=$FLEET" 2>/dev/null || { log "REFUSED: no tmux session '$FLEET'"; exit 2; }
 # The pane: @cockpit_name == $SEAT, else the legacy "wednesday" pane IF this tree's
