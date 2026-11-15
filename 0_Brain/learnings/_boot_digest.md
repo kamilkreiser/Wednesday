@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-16 06:00 from 271 lesson files (1,155,693 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-16 07:04 from 272 lesson files (1,159,260 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7959,4 +7959,18 @@ OWN inbox: the inbox her merge seat reports READY and MERGED to.
 4. If Kam gets a new local box, the checks come back by removing the `false &&` guards — a new ruling, not an assumption.
 
 **Family:** [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] (retired) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] (its Spark tier is gone) · [[2026-11-12_spark-for-harness-and-token-heavy-simple-tasks]] (historical)
+
+
+## Secuura: audit records and verification are PUBLIC to read; only the creator (and uses the smart contract expressly allows) may WRITE them. A standing rule for every related task and ticket
+`2026-11-16_audit-records-and-verification-public-read-creator-write.md` · grant · 2026-11-16 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is about to brief, stamp, gate or GO any Secuura work that decides WHO may read or write an audit record or a verification result (KS-1703 and its siblings, the analytics/audit routes, any access-control cell on them). **Read access is not restricted for these two record kinds: anyone in the world may read them. Write access is the creator, plus any use the smart contract expressly allows.** Brief and gate against that, not against the older "company-wide" or "creator and admins only" options.
+
+**How to apply:**
+1. Every Secuura brief touching audit or verification access carries this rule verbatim in RULED BY KAM, with the reading above.
+2. A cell that pins "cross-company audit read refused" is now pinning the OPPOSITE of his rule: such cells are named in the next build/measure seat's brief, not silently kept or silently deleted.
+3. Do not widen it: exports, documents (KS-1695: ownerless documents = platform admins only) and certifications keep their own rulings.
+4. No expiry stated: "new rule for all related tasks and tickets" reads as standing until he changes it.
+
+**Family:** [[2026-09-20_ks1175-hold-lifted-make-the-fix]] (a card answered outside its options; recorded by hand) · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (the privacy measurement goes back to him) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope: audit + verification, not exports) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-16 06:00 from 271 lesson files (1,155,903 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 225. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-16 07:04 from 272 lesson files (1,159,470 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 226. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7887,4 +7887,18 @@ OWN inbox: the inbox her merge seat reports READY and MERGED to.
 4. If Kam gets a new local box, the checks come back by removing the `false &&` guards — a new ruling, not an assumption.
 
 **Family:** [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] (retired) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] (its Spark tier is gone) · [[2026-11-12_spark-for-harness-and-token-heavy-simple-tasks]] (historical)
+
+
+## Secuura: audit records and verification are PUBLIC to read; only the creator (and uses the smart contract expressly allows) may WRITE them. A standing rule for every related task and ticket
+`2026-11-16_audit-records-and-verification-public-read-creator-write.md` · grant · 2026-11-16 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to brief, stamp, gate or GO any Secuura work that decides WHO may read or write an audit record or a verification result (KS-1703 and its siblings, the analytics/audit routes, any access-control cell on them). **Read access is not restricted for these two record kinds: anyone in the world may read them. Write access is the creator, plus any use the smart contract expressly allows.** Brief and gate against that, not against the older "company-wide" or "creator and admins only" options.
+
+**How to apply:**
+1. Every Secuura brief touching audit or verification access carries this rule verbatim in RULED BY KAM, with the reading above.
+2. A cell that pins "cross-company audit read refused" is now pinning the OPPOSITE of his rule: such cells are named in the next build/measure seat's brief, not silently kept or silently deleted.
+3. Do not widen it: exports, documents (KS-1695: ownerless documents = platform admins only) and certifications keep their own rulings.
+4. No expiry stated: "new rule for all related tasks and tickets" reads as standing until he changes it.
+
+**Family:** [[2026-09-20_ks1175-hold-lifted-make-the-fix]] (a card answered outside its options; recorded by hand) · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (the privacy measurement goes back to him) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope: audit + verification, not exports) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
