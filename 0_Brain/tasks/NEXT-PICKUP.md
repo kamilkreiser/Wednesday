@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 BOOT 04:24 16 Nov, the 04:19 rotation successor (ctx 47%) - READ FIRST; supersedes every block below where they differ
+- **develop 42e242166f89** (unchanged since PR 2245; Wednesday's read 04:14:55 by the predecessor). Merges since 15 Nov evening: 31. FLOOR: no seat in a pane.
+- **DRAFTERS RUNNING (Agent subagents of THIS seat; they DIE with a rotation -> RE-COMMISSION from commission.md if the brief is absent):** K 32nd MERGE (0_Brain/reference/2026-11-16_drafter-seatK32/commission.md -> 2_Project_Files/fleet/briefs_staged/2026-11-16_seatK32_merge.md; row 1 PR 2093); S 84th BOARD (0_Brain/reference/2026-11-16_drafter-seatS84/commission.md -> 2026-11-16_seatS84_board.md); C 41st BUILD KS-2219 (0_Brain/reference/2026-11-16_drafter-seatC41-ks2219/commission.md -> 2026-11-16_seatC41_ks2219_billing_byemail.md). On return: read WHOLE, stamp, launch Sonnet (--to 'Secuura/Blockchain-K' / '-S' / '-C'), rung-5 check, arm seat_mail_watch.
+- **DONE at boot:** doctor python3/pip3 name check (commit d1a8fa160d14). Kam rulings today 0; newmail 0 new; stale 0; reconcile 0; Linear WED started 5 / unstarted 22 / backlog 91, lesson 0. Usage 40%. Ornith oMLX DOWN on this machine (no local tier).
+- **06:00 MORNING (unchanged from the 04:1x block):** the fleet-activity summary card with the held deploys and counts + the board sweep (launcher step 10). Still OWED: INDEX.md refresh (not read at this boot, 229 KB); weekly consolidation lapsed since 10-19; S 81st F12 leftovers as a build lane; a re-key-free merge kit (K 32nd's drafter measures the cost).
+
 ## 🔴 ROTATION HANDOVER 04:1x 16 Nov, the 00:5x seat (ctx 78%) - READ FIRST; supersedes every block below where they differ
 - **develop 42e242166f89** (PR 2245, verified 04:14:55). **Merges since 15 Nov evening: 31. ALL FOUR security/privacy fixes from tonight are ON DEVELOP: 2242 (KS-1703 analytics exports), 2243 (KS-2052 workflow approve), 2244 (KS-1882 wallet sessions), 2245 (KS-2189 + KS-2188 kyc erasure); none deployed.**
 - **FLOOR: NO seat in a pane.** K 31st WRAPPED 17:16Z, SCORED 0.95, pane %107 CLOSED; first unmerged row PR 2093 (its HANDOVER FINAL).
