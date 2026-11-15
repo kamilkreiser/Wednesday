@@ -1,0 +1,69 @@
+=========== [INBOUND] 2026-11-15T15:07 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-2052 (Seat C 39th)
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-2052 (Seat C 39th)
+Seat C 39th
+READY FOR GATE: KS-2052, PR 2243. Tier 1, gate row G1 (an authorization door).
+
+PR: https://github.com/Secuura/Distributed_Secuura/pull/2243 "Refs KS-2052: the workflow approve route takes the approver from the token" (Refs, no closing word).
+- Head 40c99308b84b7aa86185e31cb6e5c2474ee59682, 1 commit on develop 0fa14b4cbd33929a036527b888178d54e80f52ec (re-based per your ADDENDUM 1). The pre-rebase head 778cf72b2ce6 never reached origin.
+- Branch feature/ks-2052-the-workflow-approve-route-takes-the-approver-from-the-token.
+- 5 files, +579 -2, read at the API at 15:07Z: routes/workflows.ts (+20 -2), the two new cell files (+339, +193) and the fragment pair. transferAccess.ts is NOT in the PR (0 bytes, as you ruled).
+- Develop is now 6fdba4e013b3 (PR 2149, one gateway test file). At the push, the driver's develop gate read overlap 0 and the overlap gate read 0 of my 5 paths across 69 open PRs.
+
+PUSH: attempt 3, push/drv_ks2052_3. Queued 14:35:29Z behind W 31st and X 10th; lock 14:54:55Z (load1 4.56); hook 643 s; PUSH end rc=0 at 15:05:50Z; "VERIFIED: origin ... is 40c99308b84b" by ls-remote 15:05:53Z; lock released, queue left rc 0.
+- The hook's final line, VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed."
+- It goes on: "legs 3 4 8 — local stack not up; you can clear this by starting it." and "This is NOT a pass. Do not quote it as one — say which legs ran."
+- Shell suites: 126 passed, 0 failed, 1 skipped (restore_local_secrets.test.sh: the docker CLI is not on PATH, C 38th's trap f).
+- Leg 16, the test-type ratchet: 0 new errors in all five services.
+- Attempts 1 and 2 pushed nothing (STATUS 1).
+
+THE CHANGE (route only; the service, delegationService, transferAccess.ts, the gateway, the spec and the frontend are untouched)
+- A token naming no user gets 401 "Authentication required", before the body is read.
+- A key or connector principal (isNonUserPrincipal) gets 403 "Only a signed-in person may approve a workflow step" (D3: one removable check, extending Kam's card secuura-ks2038-connector-principals-on-transfer-doors-1106 = a in spirit).
+- approverId is now optional. A body approverId that is not the caller's own id (sameId, ASCII fold) gets 403 "approverId must be the signed-in user" (D1).
+- Otherwise processApproval gets { ...body, approverId: <token userId> }.
+- No admin override (cells D4a, D4b).
+- D1 alternative, as you asked me to say: 'ignore' is one line away. Drop the mismatch block and B1-B4 and D4a-b read 200, recorded under the caller's own id.
+
+EVIDENCE (all local, Node v26.8.1, vitest 4.1.12, zod 4.6.7; load1 read before each leg, gate 8)
+- Red first: against develop's route, 25 of 39 new cells red, every one by AssertionError (no TypeError); 14 controls pass. With the change, 39 of 39.
+- The end-to-end file (real route, real service, a stateful database stand-in): at develop the stranger's 'approve' and 'reject' overwrote the stored row under the assignee's name. Now the row stays pending, with no actual_approver_id and 0 writes.
+- Whole transfer suite:
+  - 483 of 483 in 18 files at e659170.
+  - 595 of 595 in 21 files at 0fa14b4cbd33.
+  - 634 of 634 in 23 files at the head. No pre-existing red.
+- Mutants (tools/mutants_ks2052_c39.py), declared before each run, whole suite, bytes restored by sha256 after each one, run at both bases:
+  - m0 25/25; m1 {A3, A4, C1, D4c}; m2 8; m3 {A4}; m5 7; m6 6; m7 {A4}; m8 14; m9 {D4a, D4b}; m10 {D3d, D3e, B5b} (a temporary helper plant, scoped to the two KS-2052 files); mC planted control 8/8: all as declared.
+  - m4 is an equivalent survivor, 0 red, as declared (W2; evidence/fold_scan.txt).
+  - m1's set is W4's {A3, A4, C1} plus D4c, a cell added after W4 was written. Declared in the tool before the run (C39-N6).
+- tsc (src, and src plus tests): 0 errors; a planted TS2322 fired. eslint on my 3 files: 0 errors, 0 warnings; a planted control fired.
+- npm run check:test-types in my tree: 0 new (your ADDENDUM 2). deps-present.sh OK; 34 node_modules trees.
+- docs-fragments check: OK; a planted unclosed div gives FAIL rc 1; restored sha256-EQUAL; OK. The pre-existing cheat ADVISORY appears in C 38th's run too.
+- merge-tree of the head: clean against develop 0fa14b4cbd33 and both ways against PR 2170. A planted same-place control conflicts with 2170 (rc 1). PRs 575 and 649 conflict exactly as develop alone does, in package files outside this PR.
+- The touchpoint with PR 2241 is merged, and the imports are unchanged: signedInCaller, isNonUserPrincipal and sameId are byte-identical at e659170 and at 0fa14b4cbd33.
+
+TICKET KS-2052
+- BEFORE at boot (14:1xZ): Backlog, priority 2 (High), assignee kamil.kreiser@secuura.ai, 1 comment.
+- Before my comment (15:06Z): In Progress, priority 2. The Linear-GitHub integration moved it at 15:06:33Z when the PR opened (C 38th's trap g). Not written by me.
+- My comment 12c9785e-0e9a-4874-81a0-f751e9cd6588 at 15:06:49Z: --dry, then --real; read back exact; 0 mention nodes (bodyData read).
+- AFTER: In Progress, priority 2, assignee unchanged, 2 comments. No state, priority or assignee written by me.
+
+NOT COVERED (named in the PR)
+- D2: delegatedFrom is recorded as given, and validateDelegation is not tied to the assignee and is called with the transfer id.
+- The live stack, a real database, the gateway (which does not proxy /api/workflows/steps: proxy.ts registers only GET and POST /api/workflows and GET and DELETE /api/workflows/:id; transfer.openapi.ts lines 13-15 call transfer's workflows.ts dev-only), a browser, the four platform suites and Node 24.
+- ApprovalQueue.tsx has no render site in Blockchain/Dev/frontend (git grep at the head).
+- Transfer-service deploy owed, held for Kam's word.
+
+CANDIDATE FILINGS for the board seat (none filed)
+1. GET /api/workflows, /:id and /transfer/:transferId/status read no caller; the last returns step instances to anyone.
+2. D2's delegatedFrom facts above.
+3. ApprovalQueue.tsx: exported, no render site.
+4. By reading the code, not run: processApproval's assignee compare is exact-case, so an assignee stored in another case than the token would be refused 400 (beside KS-1591).
+
+FAULTS (evidence/faults.md)
+- F1: one 1.4 s tsc plant control ran at load1 8.97.
+- F2: a zsh 'path' variable clobbered PATH (nothing ran).
+- F3: my first stop of my own hook passed an unsplit pid list (nothing was killed; redone under bash).
+- Declared changes C39-N0 to N9 in evidence/declared_changes.md. cd 0, rm 0 (every removal a move into _quarantine_2026-11-16), key in argv 0, no .env name or value printed, shared checkout lockless and never fetched.
+
+Meter: 42.2 at 15:07Z. The seat ends here, per the brief: HANDOVER FINAL, history entry, wrap mail and vault next.
+
