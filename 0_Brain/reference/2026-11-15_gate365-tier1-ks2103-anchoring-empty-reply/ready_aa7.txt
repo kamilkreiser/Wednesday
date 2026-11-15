@@ -1,0 +1,77 @@
+=========== [INBOUND] 2026-11-15T12:47 | Secuura/Blockchain-AA | [Secuura/Blockchain-AA -> Wednesday] READY FOR GATE KS-2103 (Seat AA 7th)
+[Secuura/Blockchain-AA -> Wednesday] READY FOR GATE KS-2103 (Seat AA 7th)
+Seat AA 7th
+
+READY FOR GATE, tier 1 (gate row G1, Opus): KS-2103, PR 2240, head 067274804d31ffb8d1b0288292fbe2d8a5b6b377, base develop bbb75755064ee3d7aecd716ed8dcc890223828c8 (the post-2081 squash), 5 commits, 6 files. Pushed through the fleet queue and lock; not merged, not deployed.
+
+W6: anchoring's deploy (PR 2230 + this fix) is NOT this seat's; Wednesday decides it on Kam's word (card 1107).
+
+## What it is
+Card secuura-ks2103-answered-chain-reply-shape-1110 = a, built as D1-D4 ruled. getTransaction (services/anchoring/src/cardano/provider.ts):
+- returns a reply only when it is an object carrying a non-empty string `block`;
+- keeps null for the 404 and undefined for no client (2081's tri-state untouched);
+- throws for every other shape. The message names the shape class (for example "an object without a block hash"), never the body or the hash.
+No hash form is required (D2; mutant m5 proves it).
+
+The three callers fail safe on a throw, as before: the poller counts errored, settleExpiredSpenders settles nothing, and the family read rests the row. confirmation.ts changes in comments only (P2); a grep of the diff for non-comment changed lines prints nothing.
+
+## Files
+1. services/anchoring/src/cardano/provider.ts: the fix.
+2. services/anchoring/src/cardano/confirmation.ts: 2 comment edits (P2).
+3. services/anchoring/src/__tests__/ks2103-a-malformed-2xx-reply-is-not-an-answer.test.ts: new, 14 cells.
+4. services/anchoring/src/__tests__/ks671-chain-health.test.ts: the PARTITION EXTENSION you ruled at 12:16Z. Exactly :277 and :290, `{ block_height: 1 }` to `{ block: 'b'.repeat(64), block_height: 1 }`, each with a `// KS-2103:` comment; no assertion changed.
+5 and 6. Projects Documents/fragments/{cheat,flow}/KS-2103-a-malformed-2xx-reply-is-not-an-answer.html.
+
+## Commits
+340a29012 red cells; 36016b6a0 fix; a6d026684 E4a/E4b capture getTransaction's outcome as data (m4 had made E4a red by a propagated throw, not by its assertion); 1e018a05e ks671 fixture; 067274804 fragments.
+
+## Evidence (all local, offline; Apple Silicon arm64, macOS 27.2, node v26.8.1, vitest 4.1.12; every run started at load1 8 or below)
+- RED FIRST on the real base bbb75755064e: 10 RED cells red, 10 by AssertionError and 0 by TypeError; 4 CONTROL cells green. With the fix: 14 of 14. The reds are the harm itself:
+  - E1: '' reads polled 30 and ABSENT.
+  - E5: guard 3 after a node 400 retries 1 and writes failed. This is your W3 cell, required; E5c proves the harness CAN retry (on a 404 window).
+  - E6b: '' and null mark the spender DEAD, {} marks it CONFIRMED.
+  - E7: two 404s then '' read polled 30, not 2.
+- D4, both windows:
+  - The all-malformed window reads confirmed false, polled 0, errored 30, definitelyAbsent false (E1, E2). Guard 3 ends with no retry and one submit (E5).
+  - The mixed window reads polled 2, lastAnswered* equal to the second 404's, and not absent (E7).
+- D3: the poller's line is `error: ...` like a 502's, names the shape, and echoes no body and no hash (cell D3).
+- Mutants: m1-m6 were pre-registered before any ran (evidence/mutants_declared.tsv, sha256 7b19f7c1). Each turned EXACTLY its declared cells red, 36 of 36 by AssertionError, and every restore was sha-identical. Declared sets: m1 E1 E2 E3a E3b E5 E6a E6b E6c E7 D3 | m2 E3a E3b E6a E6b E6c D3 | m3 E1 E2 E5 E6a E6b E6c E7 | m4 E1 E2 E4a E5c E6b E7 | m5 E4c | m6 E1 E2 E3a E3b E5 E7. Each is a superset of your BRIEF's list for that mutant, written down before the run.
+- Whole anchoring vitest:
+  - Suite A: 64 files, 871 tests, 870 passed. It ran on the local merge-tree of 61a3953e6d66 + 17c453253d68; that whole tree, 2f9321b06575, EQUALS bbb75755064e's (P1).
+  - Suite B at the head: 65 files, 885 tests, 884 passed.
+  - The 1 failure both sides is the only one: threadTokenMint, "Could not serialize the data: Error: Unsupported type" (gate 248 F2).
+  - Named green after: 20 files, 220 cells, 0 failed. They include ks1171 8j, 8k (28 of 28, with 8k-9), b1, ks1171b and guard-3, ks726 gate-f1, review-f1-f3 and write-ahead, ks1384-f0, all 7 ks1868 files, mock-provider, ks2196, and ks671 (23 of 23).
+- tsc over src and tests (temporary config outside the repo, types node): 1 error, the pre-existing TS6133 at ks1868-anchoring-message-coercion-unreadable-throw.test.ts:46. 0 in my files. A planted TS2322 fired.
+- eslint (repo eslint.config.mjs, cwd Blockchain/Dev through ESLint's API, zero warnings allowed) on the 4 changed .ts files: 0 errors, 0 warnings, 0 ignored. A planted unused variable fired.
+- docs-fragments check: OK. Its two ADVISORYs are pre-existing and identical to AA 6th's. A planted unclosed h3 FAILED naming my file. A build --out preview renders the entry in both pages.
+- Hook, final line verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." (legs 3, 4 and 8: local stack not up). Not a pass. The push took 666 s; queued 12:23:24Z behind R 121st, lock 12:33:27Z, released and left cleanly. ls-remote reads 067274804d31, and my own ls-remote agrees.
+- Overlap:
+  - At push time, 74 open PRs and 0 touch my 6 paths; a planted path from 2194 fired.
+  - Since my base, develop moved to 263a28fcca82 (KS-1415, 12:43:33Z): 1 file, 0 of my paths, 0 under anchoring.
+  - merge-tree of my head with 263a28fcca82 is clean in both orders. A planted same-line edit of provider.ts on top of it conflicts, rc=1. No rebase.
+- What this admits: by read, no real reply is refused, since @blockfrost/openapi 0.1.86 declares tx_content.block a required string. Not measured against the real service.
+
+## Board and PR
+- PR body: Test Evidence, cards 1107 and 1110 verbatim, "what this admits", the hook line, NOT run, and "deploy owed: anchoring only, held for Kam's word (card 1107); not done by this seat". Read back equal. Both pre-merge boxes are left unticked: Schemathesis and Akto were not run.
+- KS-2103 comment 14f6d91e: BLUF first, 0 mention nodes, body equal on read-back. State, priority and assignee are the same before and after my post.
+- NOTE, not mine: KS-2103 moved Backlog to In Progress at 12:45:30Z. Linear's history names the actor as the GitHub bot, when PR 2240 opened. I made no state move (W5). The board seat may want it back in Backlog until the merge; that is yours to route.
+
+## Named, not changed (candidates for the board seat; Wednesday routes)
+1. Chain health (/health) still reads an empty 2xx as reachable: the instrumented client records the resolved txs call before getTransaction judges its shape. It is in the PR's NOT-covered list as you ruled.
+2. KS-1171 8k cell 8k-9 stays green by name, but its title now describes the old mechanism (that reply counts as errored, not noClient). 2081's file is not edited.
+3. index.ts:773 `bf.txs(...).catch(() => null)` (historic rows) is not touched.
+
+## NOT run
+A real Blockfrost, node or unreachable chain; a box, image or gateway; how often a provider sends an empty 2xx; guard 3 in a built container (E5 drives the real submitter in process); the four platform suites.
+
+## Faults and slips, mine
+- 1 bounded grep -r over the 2-file gate-248 folder (declared at the plan).
+- 1 zsh `echo ===` failure, and 1 zsh no-match glob abort while looking for the eslint config. Neither ran anything.
+- I reset my own scratch tree's two product files with `git checkout --` to run the final cell file red on the unfixed base. Fixed copies are kept in evidence/scratch_fixed_copy/.
+- /private/tmp/aa7t was created empty, unused and left in place (AA7-D3).
+- Reads of AA 6th's worktree (git log, config --get) ran without GIT_OPTIONAL_LOCKS=0. No status and no ref write there.
+- cd 0; every shared-checkout git call was lockless; no key went into argv; no .env names were printed.
+
+Meter 44.6 of 1M at the READY. The seat ends here; HANDOVER and the wrap follow. Watcher pid live, re-armed from 12:16:27Z.
+
+NEW-ROWS: 2  ROWS-IN-DIGEST: 44  SEEN:      304  BATCH: /private/tmp/wed_newmail/batch_20261115T124822Z.txt
