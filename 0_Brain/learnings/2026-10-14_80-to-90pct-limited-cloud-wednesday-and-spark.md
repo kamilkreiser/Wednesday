@@ -2,12 +2,12 @@
 date: 2026-10-14
 type: grant
 source: Kam, terminal (Wednesday's pane), 2026-10-14 ~06:47 AEDT
-status: live
+status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 tier: W
 supersedes: the 70% thresholds in 2026-09-25_three-tier-routing-ornith-spark-cloud-always-on (rule 4) and 2026-10-06_past-70pct-spark-takes-80pct-of-tasks, for this seat — the band is now 80–90%
 ---
 
-# From 80% to 90% of the weekly allowance, cloud agents are LIMITED and the work centres on Wednesday and the Spark; above 90% the hard stop stands
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: From 80% to 90% of the weekly allowance, cloud agents are LIMITED and the work centres on Wednesday and the Spark; above 90% the hard stop stands
 
 **His words, verbatim (answering the morning receipt and card `secuura-92pct-stop-ready-work-waits-1014`):**
 > *"thank you. please move to working with the spark.  going forward once we reach 80 - 90% should be the start of limited cloud model usage and a focus on you and the spark"*

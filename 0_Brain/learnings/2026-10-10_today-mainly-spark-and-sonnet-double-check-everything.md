@@ -2,12 +2,14 @@
 date: 2026-10-10
 type: grant
 source: Kam, live board 2026-10-10 09:04:22 view=wednesday
-status: live
+status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 tier: W
 expires: end of Saturday 2026-10-10 ("today"; `date -j`: 2026-10-10 is a Saturday)
 ---
 
-# Today, the Spark and Sonnet do the real work — and Wednesday double-checks everything because Kam is still experimenting
+# SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+
+*Original headline, kept verbatim:* Today, the Spark and Sonnet do the real work — and Wednesday double-checks everything because Kam is still experimenting
 
 **The operative case, so the headline matches it:** Wednesday is about to launch a Claude seat or route a task on 2026-10-10. **Default the Claude seat to Sonnet and the task to the Spark where it fits; keep the QA gates on Opus as the independent check; verify every output at source before it is scored, GO'd or merged.**
 

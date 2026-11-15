@@ -2,11 +2,11 @@
 date: 2026-10-09
 type: grant
 source: Kam, live board 2026-10-09 13:55:34 / 13:55:51 / 13:56:03 (view=wednesday)
-status: live
+status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 tier: W
 ---
 
-# Use the Spark as much as possible; after the Sonnet analysis, Wednesday chooses between the three models — and Ornith's idle time needs no report or apology
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Use the Spark as much as possible; after the Sonnet analysis, Wednesday chooses between the three models — and Ornith's idle time needs no report or apology
 
 **His words, verbatim (three messages, the second and third correcting the first's dictation):**
 > 13:55:34 *"I need to report or apologize on the usage of Ornith.  It's now up to you to use the Spark as much as possible. And once we finish the analysis of Sonnet, you can decide between the three models available."*

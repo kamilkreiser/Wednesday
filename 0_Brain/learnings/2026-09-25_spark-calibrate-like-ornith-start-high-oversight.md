@@ -2,11 +2,13 @@
 date: 2026-09-25
 type: preference
 source: Kam, terminal, 2026-09-25 ~12:0x
-status: live
+status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 tier: W
 ---
 
-# The Spark is calibrated the way Ornith was: start with HIGH oversight, measure what the model can and cannot do, adjust task complexity and how much the brief guides it, and reduce oversight only once the capability is known
+# SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+
+*Original headline, kept verbatim:* The Spark is calibrated the way Ornith was: start with HIGH oversight, measure what the model can and cannot do, adjust task complexity and how much the brief guides it, and reduce oversight only once the capability is known
 
 **His words, verbatim:** *"Working with the spark, keep a similar approach to what we did with a smaller LLM in testing its capability and adjusting the complexity, or how much you need to guide it. Once you have a good idea of what the metal can and cannot do, we can reduce the level of oversight. So, let's start with height."*
 ("the metal" = the model; "start with height" read as **start with HIGH oversight**. That reading was said back to him on the panel; his word corrects it.)

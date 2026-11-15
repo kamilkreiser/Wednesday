@@ -2,11 +2,13 @@
 date: 2026-10-05
 type: preference
 source: Kam, Wednesday's terminal, 2026-10-05 ~11:0x AEDT
-status: live
+status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 tier: W
 ---
 
-# The Spark's target is 50 tasks a day — push it harder; the bottleneck is ours, so build the pipeline, not the effort
+# SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+
+*Original headline, kept verbatim:* The Spark's target is 50 tasks a day — push it harder; the bottleneck is ours, so build the pipeline, not the effort
 
 **His words, verbatim:** *"push the spark harder, aim for 50 a day"* — after Wednesday measured the
 week (2026-09-29 → 10-05): 24 tasks, 24/24 first-round PASS, ~13 min of Spark time in total

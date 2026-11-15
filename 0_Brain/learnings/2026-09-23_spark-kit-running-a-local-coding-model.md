@@ -2,11 +2,13 @@
 date: 2026-09-23
 type: principle
 source: Wednesday's spark-kit (written 2026-09-23 10:30 for Kam; zip "spark-kit_2026-09-23.zip", sha1 458ca5df18026ffc…), given to Friday by Kam 13:2x with "incorporate this into your learnings"; checked against Friday's own Spark measurements of 12:52
-status: live
+status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 tier: W
 ---
 
-# The Spark is FRIDAY'S to run (Kam 2026-09-23) — the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
+# SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+
+*Original headline, kept verbatim:* The Spark is FRIDAY'S to run (Kam 2026-09-23) — the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
 
 **The operative case, so the headline matches it:** Friday is about to send work to the local coding model on the Spark box (HP ZGX Nano, DeepSeek V4 Flash, reached through the 8888 tunnel), or to judge something it returned. **The method is Wednesday's spark-kit, filed whole at `0_Brain/reference/2026-09-22_spark-deepseek-v4-flash/spark-kit_2026-09-23/`.** Read `02_FOR_THE_COORDINATOR.md` before the first task of a session. The rules below are the ones that decide outcomes. Where this box differs from the kit, the box wins, and the differences are listed further down.
 

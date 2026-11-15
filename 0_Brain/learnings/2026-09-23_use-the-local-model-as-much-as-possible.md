@@ -2,11 +2,13 @@
 date: 2026-09-23
 type: preference
 source: Kam, terminal, 2026-09-23 ~15:3x AEST — "also, please use the local LLM as much as posible for tasks and tickets"
-status: live
+status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 tier: W
 ---
 
-# Route tasks and tickets to the LOCAL model (the Spark) first — as much as possible; Claude seats take what it cannot do
+# SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+
+*Original headline, kept verbatim:* Route tasks and tickets to the LOCAL model (the Spark) first — as much as possible; Claude seats take what it cannot do
 
 **The operative case, so the headline matches it:** Friday is about to hand a task or a ticket to a worker (a Claude build seat, a
 subagent, or herself). **Ask first: can the local model do this, under the kit's rules?** If yes, it goes to the Spark

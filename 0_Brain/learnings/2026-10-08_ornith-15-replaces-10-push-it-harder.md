@@ -2,11 +2,11 @@
 date: 2026-10-08
 type: grant
 source: Kam, live board 2026-10-08 18:12:53 view=wednesday
-status: live
+status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 tier: W
 ---
 
-# Ornith 1.5 replaces Ornith 1.0 — push it to harder tasks, and run it AND the Spark as much as possible
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Ornith 1.5 replaces Ornith 1.0 — push it to harder tasks, and run it AND the Spark as much as possible
 
 **The operative case, so the headline matches it:** Wednesday is about to route a task to the local Studio model, or to brief one. **The Studio model is now Ornith‑1.5‑35B‑A3B (MLX 8‑bit, served by oMLX on 47780), not Ornith 1.0 on Ollama.** Give it harder tasks than 1.0 got, measured rung by rung, and keep both it and the Spark busy.
 

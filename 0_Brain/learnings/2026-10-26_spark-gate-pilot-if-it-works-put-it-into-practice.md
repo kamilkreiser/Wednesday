@@ -2,11 +2,13 @@
 date: 2026-10-26
 type: grant
 source: "Kam, Wednesday's terminal (laptop), 2026-10-26 ~09:2x AEDT, verbatim: 'launch another agent once the load drops.  also, most of the usage per week is eaten up by the tests.  Is it possible to do all validation, review and test by the local LLM (Spark).  if so, it might need better instruction or clearer tooling.  if this works, please put it into practice'"
-status: live
+status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 tier: W
 ---
 
-# Grant (conditional): move QA validation, review and test to the Spark wherever the measurement shows it works — tooling and instructions first, tier by tier, never on a guess
+# SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+
+*Original headline, kept verbatim:* Grant (conditional): move QA validation, review and test to the Spark wherever the measurement shows it works — tooling and instructions first, tier by tier, never on a guess
 
 **The operative case, so the headline matches it:** Wednesday is about to commission a QA gate. **Ask whether a measured Spark gate covers that tier yet.** If it does, run the Spark gate (the deterministic runner plus the Spark review) and keep the Claude gate only where the calibration says the Spark misses things. If it does not, the Claude gate runs as today and the Spark gate runs beside it as a SHADOW, adding a calibration row.
 

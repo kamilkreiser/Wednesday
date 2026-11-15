@@ -2,11 +2,11 @@
 date: 2026-10-18
 type: grant
 source: Kam, terminal, 2026-10-18 ~19:0x AEDT (after ruling four Secuura cards on the live board 18:59-19:00)
-status: live
+status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 tier: W
 ---
 
-# Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
 
 **The operative case, so the headline matches it:** Wednesday is on the account Kam announced on 2026-10-18 and is choosing what to start. **Start the work, not a question.** Every ticket the Spark can be briefed for goes to the Spark; Claude seats raise, gate, merge and build what the Spark cannot; and the routing definition is written as a document Kam approves.
 

@@ -2,12 +2,12 @@
 date: 2026-10-22
 type: grant
 source: Kam, live board 2026-10-22 15:34:23 AEDT, view=wednesday (verbatim below)
-status: live
+status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 tier: W
 supersedes: the 90% HARD STOP of 2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model and the band wording of 2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark (both become GUIDES, not stops)
 ---
 
-# Weekly usage is a GUIDE, never a stop: route every task by what we have learned (Opus, Sonnet, Spark, Ornith), lean on Sonnet and the Spark past 70%, and when unsure ASK on fleet activity and keep going — nothing happening is the worst outcome
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Weekly usage is a GUIDE, never a stop: route every task by what we have learned (Opus, Sonnet, Spark, Ornith), lean on Sonnet and the Spark past 70%, and when unsure ASK on fleet activity and keep going — nothing happening is the worst outcome
 
 **The operative case, so the headline matches it:** Wednesday is about to hold back a launch, a deploy or a piece of work because the weekly gauge is high, or because a rule seems to say stop, or because she is unsure. **Don't stop.** Route the task by the model-routing learnings, launch it (past 70% lean harder on Sonnet and the Spark), and if genuinely unsure post a question card on fleet activity with a default and carry on with the next thing.
 

@@ -2,11 +2,13 @@
 date: 2026-11-12
 type: preference
 source: Kam, live board 2026-11-12 11:34:05 (view=wednesday)
-status: live
+status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 tier: W
 ---
 
-# Use the Spark where tokens are spent on BULK, not judgement: digest test-harness output and run simple token-heavy jobs on an ongoing basis; it is not much use on tickets
+# SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+
+*Original headline, kept verbatim:* Use the Spark where tokens are spent on BULK, not judgement: digest test-harness output and run simple token-heavy jobs on an ongoing basis; it is not much use on tickets
 
 **His words, verbatim:** *"I have been thinking.  as the spark is not much use on tickets, can we utilise it in running harness and other tests.  these seem to be token intensive and could be lead with a good testing harness.  In addition to this, have a think about simple and token expensive tasks that we could get the spark to do on an ongoing basis"*
 

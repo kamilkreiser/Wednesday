@@ -2,11 +2,11 @@
 date: 2026-10-04
 type: grant
 source: Kam, terminal, 2026-10-04 ~19:4x
-status: live
+status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 tier: W
 ---
 
-# Do as much Secuura work as possible with the Spark AND Claude agents (standing until Kam changes it)
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Do as much Secuura work as possible with the Spark AND Claude agents (standing until Kam changes it)
 
 **His words, verbatim:** *"go — schedule the NAS backup nightly and do as much work with the spark and claude agents on the secura projects as you can"*
 

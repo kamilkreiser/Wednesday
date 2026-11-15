@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-16 10:00 from 273 lesson files (1,164,403 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-16 10:14 from 273 lesson files (1,169,788 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6692,12 +6692,14 @@ sections (open the file for these): The rule · Why it generalises past this flo
 **Family:** [[2026-08-11_coordinator-not-carrier]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] · [[2026-09-10_claim-a-task-with-tuesday-before-starting-it]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]].
 
 
-## The Spark is FRIDAY'S to run (Kam 2026-09-23) — the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
-`2026-09-23_spark-kit-running-a-local-coding-model.md` · principle · 2026-09-23 · status: live
+## SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+`2026-09-23_spark-kit-running-a-local-coding-model.md` · principle · 2026-09-23 · status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 
 (no rules-shaped section — file included WHOLE)
 
-# The Spark is FRIDAY'S to run (Kam 2026-09-23) — the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
+# SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+
+*Original headline, kept verbatim:* The Spark is FRIDAY'S to run (Kam 2026-09-23) — the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
 
 **The operative case, so the headline matches it:** Friday is about to send work to the local coding model on the Spark box (HP ZGX Nano, DeepSeek V4 Flash, reached through the 8888 tunnel), or to judge something it returned. **The method is Wednesday's spark-kit, filed whole at `0_Brain/reference/2026-09-22_spark-deepseek-v4-flash/spark-kit_2026-09-23/`.** Read `02_FOR_THE_COORDINATOR.md` before the first task of a session. The rules below are the ones that decide outcomes. Where this box differs from the kit, the box wins, and the differences are listed further down.
 
@@ -6728,12 +6730,10 @@ sections (open the file for these): The rule · Why it generalises past this flo
 **Family:** [[2026-09-18_ornith-is-cheap-the-brief-is-the-cost]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] · [[2026-08-07_a-check-that-cannot-fail]] · [[2026-09-11_red-proof-arms-cover-every-legitimate-shape-of-the-real-event]] · [[2026-09-22_ornith-is-studio-only-not-datasec]] (Ornith is the Studio's; the Spark is a different box and a different model) · [[2026-08-03_role-beyond-code-three-priorities]] (no cross-client leak).
 
 
-## Route tasks and tickets to the LOCAL model (the Spark) first — as much as possible; Claude seats take what it cannot do
-`2026-09-23_use-the-local-model-as-much-as-possible.md` · preference · 2026-09-23 · status: live
+## SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+`2026-09-23_use-the-local-model-as-much-as-possible.md` · preference · 2026-09-23 · status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 
-**The operative case, so the headline matches it:** Friday is about to hand a task or a ticket to a worker (a Claude build seat, a
-subagent, or herself). **Ask first: can the local model do this, under the kit's rules?** If yes, it goes to the Spark
-(DeepSeek V4 Flash, `learnings/2026-09-23_spark-kit-running-a-local-coding-model.md`). Claude seats take what it cannot do.
+*Original headline, kept verbatim:* Route tasks and tickets to the LOCAL model (the Spark) first — as much as possible; Claude seats take what it cannot do
 
 **How to apply:**
 1. **The Spark loop must be PROVEN before real tickets go near it:** the owed smoke test (a trivial known change plus the two
@@ -6781,11 +6781,10 @@ sections (open the file for these): EXTENSION 2026-11-10 (ledger w=2): a 201 pro
 **What happened.** Kam, live board 2026-11-10 02:48:13: *"I cannot see any cards on fleet activity"*. The same words came on 2026-11-06 20:42; that seat listed the cards in chat and left the cause "unmeasured". Thirteen cards were open and every post had returned HTTP 201. His screenshot (IMG_0044) showed the footer `0 need you · 0 ruled today · 915 cards synced · 30 synthetic hidden`, the key unlocked, and the `× clear` chip on screen. In index.html, `× clear` renders only when a filter is saved in the browser's localStorage, and "need you" counts only cards passing that filter and the active agent tab. He tapped clear and ruled twelve cards in four minutes.
 
 
-## The Spark is calibrated the way Ornith was: start with HIGH oversight, measure what the model can and cannot do, adjust task complexity and how much the brief guides it, and reduce oversight only once the capability is known
-`2026-09-25_spark-calibrate-like-ornith-start-high-oversight.md` · preference · 2026-09-25 · status: live
+## SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+`2026-09-25_spark-calibrate-like-ornith-start-high-oversight.md` · preference · 2026-09-25 · status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 
-**His words, verbatim:** *"Working with the spark, keep a similar approach to what we did with a smaller LLM in testing its capability and adjusting the complexity, or how much you need to guide it. Once you have a good idea of what the metal can and cannot do, we can reduce the level of oversight. So, let's start with height."*
-("the metal" = the model; "start with height" read as **start with HIGH oversight**. That reading was said back to him on the panel; his word corrects it.)
+*Original headline, kept verbatim:* The Spark is calibrated the way Ornith was: start with HIGH oversight, measure what the model can and cannot do, adjust task complexity and how much the brief guides it, and reduce oversight only once the capability is known
 
 sections (open the file for these): EXTENSION 2026-09-25 15:28 — Kam, live board (view=wednesday), verbatim: *"great.  Use the spark as much as possible and push it to its limits as part of the test.  from my laptop tests, it usually corrects things on the second pass with some assistance but after the second time, its a diminishing return game so switch to Opus5.5 after the second attempt"* · 15:28:32 *"and by test I mean give it real work but measure progress"*
 
@@ -6805,8 +6804,8 @@ sections (open the file for these): EXTENSION 2026-09-25 15:28 — Kam, live boa
 - **As much as possible:** the Spark is the default for medium work while it is healthy; Ornith keeps the simplest; cloud only on the counter or on a clause the Spark cannot meet.
 
 
-## Standing routine: Ornith for the simplest tasks, the Spark for medium and normal ones, cloud agents only when necessary. Wednesday orchestrates and tests everything, the routine always runs, and from 70% of the weekly allowance cloud agents are minimised
-`2026-09-25_three-tier-routing-ornith-spark-cloud-always-on.md` · grant · 2026-09-25 · status: live
+## PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Standing routine: Ornith for the simplest tasks, the Spark for medium and normal ones, cloud agents only when necessary. Wednesday orchestrates and tests everything, the routine always runs, and from 70% of the weekly allowance cloud agents are minimised
+`2026-09-25_three-tier-routing-ornith-spark-cloud-always-on.md` · grant · 2026-09-25 · status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 
 **His words, verbatim:** *"Were you able to use and continue connect to the spark.  if So, please create a new workflow where you use Ornith for the simplest task, Spark for medium and normal tasks, and escalate to cloud agents when necessary and relevant. Still orchestrate everything and test everything. This routine should always run, and once you get to 70% of the weekly usage, minimize cloud agents."*
 
@@ -6966,8 +6965,8 @@ which dialog option is inside the grant).
 **Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (money is his, and he granted it here) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5) · [[2026-09-08_name-the-field-that-says-whose-it-is]] (every resource names its subscription and RG).
 
 
-## Do as much Secuura work as possible with the Spark AND Claude agents (standing until Kam changes it)
-`2026-10-04_as-much-secuura-work-as-possible-spark-and-claude.md` · grant · 2026-10-04 · status: live
+## PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Do as much Secuura work as possible with the Spark AND Claude agents (standing until Kam changes it)
+`2026-10-04_as-much-secuura-work-as-possible-spark-and-claude.md` · grant · 2026-10-04 · status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 
 **His words, verbatim:** *"go — schedule the NAS backup nightly and do as much work with the spark and claude agents on the secura projects as you can"*
 
@@ -7016,12 +7015,10 @@ arrive by MAIL; this names a second channel he accepts for one class) ·
 **Family:** [[2026-09-10_kintsugi-first-then-demo-behind-gates]] · [[2026-09-10_deploy-both-boxes-grant-expires-sunday]] (the September precedent, same shape) · [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] (its demo clause is lifted for October) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 
 
-## The Spark's target is 50 tasks a day — push it harder; the bottleneck is ours, so build the pipeline, not the effort
-`2026-10-05_spark-target-50-tasks-a-day.md` · preference · 2026-10-05 · status: live
+## SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+`2026-10-05_spark-target-50-tasks-a-day.md` · preference · 2026-10-05 · status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 
-**His words, verbatim:** *"push the spark harder, aim for 50 a day"* — after Wednesday measured the
-week (2026-09-29 → 10-05): 24 tasks, 24/24 first-round PASS, ~13 min of Spark time in total
-(median 39 s/task), against ~20 cloud-only merges.
+*Original headline, kept verbatim:* The Spark's target is 50 tasks a day — push it harder; the bottleneck is ours, so build the pipeline, not the effort
 
 sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, verbatim): "go with your recommendation, use a review agent"
 
@@ -7144,8 +7141,8 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 **Family:** [[2026-10-08_use-to-100pct-raise-gate-merge-seats-only]] · [[2026-09-16_new-account-spin-up-agents-to-test-approve-merge]] (the same shape on 09-16 and 09-20) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 
 
-## Ornith 1.5 replaces Ornith 1.0 — push it to harder tasks, and run it AND the Spark as much as possible
-`2026-10-08_ornith-15-replaces-10-push-it-harder.md` · grant · 2026-10-08 · status: live
+## PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Ornith 1.5 replaces Ornith 1.0 — push it to harder tasks, and run it AND the Spark as much as possible
+`2026-10-08_ornith-15-replaces-10-push-it-harder.md` · grant · 2026-10-08 · status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 
 **The operative case, so the headline matches it:** Wednesday is about to route a task to the local Studio model, or to brief one. **The Studio model is now Ornith‑1.5‑35B‑A3B (MLX 8‑bit, served by oMLX on 47780), not Ornith 1.0 on Ollama.** Give it harder tasks than 1.0 got, measured rung by rung, and keep both it and the Spark busy.
 
@@ -7159,8 +7156,8 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 **Family:** [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-18_ornith-works-constantly-standing-rule]] · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (a recommendation overruled is recorded, and the ruling is executed fully) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
-## Trial Sonnet seats against the Spark and Opus, find Sonnet's limits, and write ONE model-routing definition that Tuesday and Friday can use too
-`2026-10-08_sonnet-trials-and-a-shared-model-routing-definition.md` · grant · 2026-10-08 · status: live
+## PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Trial Sonnet seats against the Spark and Opus, find Sonnet's limits, and write ONE model-routing definition that Tuesday and Friday can use too
+`2026-10-08_sonnet-trials-and-a-shared-model-routing-definition.md` · grant · 2026-10-08 · status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 
 **The operative case, so the headline matches it:** Wednesday is about to launch a Claude seat, or to choose which worker takes a task. **The worker is no longer "Opus 5.5 by default."** There are now four tiers to route between (Ornith 1.5 · the Spark · Sonnet · Opus). Until the definition below exists and has evidence behind it, Sonnet seats are TRIALS: measured, never assumed equivalent to Opus.
 
@@ -7196,8 +7193,8 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **Family:** [[2026-10-06_use-to-100pct-spark-all-tickets-one-or-two-deployers]] (the same shape, expired at the 10-07 /login) · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 
 
-## Use the Spark as much as possible; after the Sonnet analysis, Wednesday chooses between the three models — and Ornith's idle time needs no report or apology
-`2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis.md` · grant · 2026-10-09 · status: live
+## PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Use the Spark as much as possible; after the Sonnet analysis, Wednesday chooses between the three models — and Ornith's idle time needs no report or apology
+`2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis.md` · grant · 2026-10-09 · status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 
 **His words, verbatim (three messages, the second and third correcting the first's dictation):**
 > 13:55:34 *"I need to report or apologize on the usage of Ornith.  It's now up to you to use the Spark as much as possible. And once we finish the analysis of Sonnet, you can decide between the three models available."*
@@ -7243,10 +7240,10 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **Family:** [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] · [[2026-10-07_archive-bulky-leftovers-to-g-drive-clear-after-a-month]] · [[2026-09-29_regenerable-build-leftovers-are-not-kept]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
-## Today, the Spark and Sonnet do the real work — and Wednesday double-checks everything because Kam is still experimenting
-`2026-10-10_today-mainly-spark-and-sonnet-double-check-everything.md` · grant · 2026-10-10 · status: live
+## SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+`2026-10-10_today-mainly-spark-and-sonnet-double-check-everything.md` · grant · 2026-10-10 · status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 
-**The operative case, so the headline matches it:** Wednesday is about to launch a Claude seat or route a task on 2026-10-10. **Default the Claude seat to Sonnet and the task to the Spark where it fits; keep the QA gates on Opus as the independent check; verify every output at source before it is scored, GO'd or merged.**
+*Original headline, kept verbatim:* Today, the Spark and Sonnet do the real work — and Wednesday double-checks everything because Kam is still experimenting
 
 **How to apply:**
 1. Every launch receipt names the model and this file. Every Sonnet seat is a row in `fleet/specs/model-routing.md` §6 (rounds, defects found after delivery, outcome) — the evidence the routing rule will be written from.
@@ -7356,8 +7353,8 @@ sections (open the file for these): How to apply
 **Family:** [[2026-08-06_ghost-suggestions-in-panes]] (prompt lines are never the principal) · [[2026-09-01_a-tap-is-a-pointer-not-a-message]] · [[2026-08-07_authorship-is-checkable-dkim]] · [[2026-09-18_use-the-fleets-own-tool-before-rebuilding-its-behaviour]] (the Esc is the one raw keypress, and it is disclosed).
 
 
-## From 80% to 90% of the weekly allowance, cloud agents are LIMITED and the work centres on Wednesday and the Spark; above 90% the hard stop stands
-`2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark.md` · grant · 2026-10-14 · status: live · supersedes: the 70% thresholds in 2026-09-25_three-tier-routing-ornith-spark-cloud-always-on (rule 4) and 2026-10-06_past-70pct-spark-takes-80pct-of-tasks, for this seat — the band is now 80–90%
+## PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: From 80% to 90% of the weekly allowance, cloud agents are LIMITED and the work centres on Wednesday and the Spark; above 90% the hard stop stands
+`2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark.md` · grant · 2026-10-14 · status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands · supersedes: the 70% thresholds in 2026-09-25_three-tier-routing-ornith-spark-cloud-always-on (rule 4) and 2026-10-06_past-70pct-spark-takes-80pct-of-tasks, for this seat — the band is now 80–90%
 
 **His words, verbatim (answering the morning receipt and card `secuura-92pct-stop-ready-work-waits-1014`):**
 > *"thank you. please move to working with the spark.  going forward once we reach 80 - 90% should be the start of limited cloud model usage and a focus on you and the spark"*
@@ -7476,12 +7473,12 @@ sections (open the file for these): How to apply
 **Family:** [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis]] · [[2026-10-18_new-account-tickets-backlog-routing-definition-spark-max]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
-## Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
-`2026-10-18_new-account-tickets-backlog-routing-definition-spark-max.md` · grant · 2026-10-18 · status: live
+## PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
+`2026-10-18_new-account-tickets-backlog-routing-definition-spark-max.md` · grant · 2026-10-18 · status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 
 (no rules-shaped section — file included WHOLE)
 
-# Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
 
 **The operative case, so the headline matches it:** Wednesday is on the account Kam announced on 2026-10-18 and is choosing what to start. **Start the work, not a question.** Every ticket the Spark can be briefed for goes to the Spark; Claude seats raise, gate, merge and build what the Spark cannot; and the routing definition is written as a document Kam approves.
 
@@ -7543,12 +7540,12 @@ sections (open the file for these): EXTENSION 2026-10-22 16:52:09 — Kam, live 
 > *"No, at the moment you don't have a spark or Ornith. you will soon have more (I have already ordered a 256gb Mac Studio) so more will be added soon. For now, please 1) put into practice the differentiated delegation to Opus or Sonnet agents. Also, take the following in to practice - New instructions going forward - always use your learnings of Opus, Sonnet, spark and onrith task allocation. Regardless of % of context. 2)use weekly usage % as a guide but don't let it stop productivity. this should make sure that once we are over 70% we allocate more heavily to sonnet and spark but deployment, progress and outcomes are more important than rules. 3)If unsure, do not just stop, post a fleet activity question but the worst outcome is when nothing happens because of a rule I made kills productivity. Lets check in together and work through things to constantly improve 4)you manage the tasks and workload on a daily stage, you are more knowledgeable than I on what works best so if you ever disagree with me just say so"*
 
 
-## Weekly usage is a GUIDE, never a stop: route every task by what we have learned (Opus, Sonnet, Spark, Ornith), lean on Sonnet and the Spark past 70%, and when unsure ASK on fleet activity and keep going — nothing happening is the worst outcome
-`2026-10-22_usage-is-a-guide-outcomes-over-rules-route-by-learnings.md` · grant · 2026-10-22 · status: live · supersedes: the 90% HARD STOP of 2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model and the band wording of 2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark (both become GUIDES, not stops)
+## PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Weekly usage is a GUIDE, never a stop: route every task by what we have learned (Opus, Sonnet, Spark, Ornith), lean on Sonnet and the Spark past 70%, and when unsure ASK on fleet activity and keep going — nothing happening is the worst outcome
+`2026-10-22_usage-is-a-guide-outcomes-over-rules-route-by-learnings.md` · grant · 2026-10-22 · status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands · supersedes: the 90% HARD STOP of 2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model and the band wording of 2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark (both become GUIDES, not stops)
 
 (no rules-shaped section — file included WHOLE)
 
-# Weekly usage is a GUIDE, never a stop: route every task by what we have learned (Opus, Sonnet, Spark, Ornith), lean on Sonnet and the Spark past 70%, and when unsure ASK on fleet activity and keep going — nothing happening is the worst outcome
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Weekly usage is a GUIDE, never a stop: route every task by what we have learned (Opus, Sonnet, Spark, Ornith), lean on Sonnet and the Spark past 70%, and when unsure ASK on fleet activity and keep going — nothing happening is the worst outcome
 
 **The operative case, so the headline matches it:** Wednesday is about to hold back a launch, a deploy or a piece of work because the weekly gauge is high, or because a rule seems to say stop, or because she is unsure. **Don't stop.** Route the task by the model-routing learnings, launch it (past 70% lean harder on Sonnet and the Spark), and if genuinely unsure post a question card on fleet activity with a default and carry on with the next thing.
 
@@ -7641,10 +7638,10 @@ sections (open the file for these): How to apply
 **Unchanged boundaries.** The v1.3 signature classes still pause for him: production, money, external communication to a human, anything irreversible. Deploys follow each project's own rule (HPSM-POC and the Composer demo under the 2026-10-16 push grant; MPS hosted still card-per-deploy; Composer K1-K10 "nothing is deployed without your card"). New customer-facing words go to him as a word pack first. Gates before every merge.
 
 
-## Grant (conditional): move QA validation, review and test to the Spark wherever the measurement shows it works — tooling and instructions first, tier by tier, never on a guess
-`2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice.md` · grant · 2026-10-26 · status: live
+## SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+`2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice.md` · grant · 2026-10-26 · status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 
-**The operative case, so the headline matches it:** Wednesday is about to commission a QA gate. **Ask whether a measured Spark gate covers that tier yet.** If it does, run the Spark gate (the deterministic runner plus the Spark review) and keep the Claude gate only where the calibration says the Spark misses things. If it does not, the Claude gate runs as today and the Spark gate runs beside it as a SHADOW, adding a calibration row.
+*Original headline, kept verbatim:* Grant (conditional): move QA validation, review and test to the Spark wherever the measurement shows it works — tooling and instructions first, tier by tier, never on a guess
 
 sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #1687 rounds 1 and 2 against the two Sonnet verdicts (tooling drafter; Wednesday re-ran the runner's arms: 3/3 PASS once the deploy key was set) · CALIBRATION 2, 2026-10-26 ~16:3x — PR #1690 (KS-1717, TIER 1) plus nine tier-2 shadows (Sonnet shadow agent; Wednesday read its report, findings not re-checked at source by Wednesday) · CALIBRATION 3, 2026-10-26 ~20:0x — #1708 (KS-1728) + #1709 (KS-1554), tier 2, after the tooling fixes (repetition guard, bash/vitest runner, PR-body input) · CALIBRATION 4, 2026-10-26 ~22:1x — #1711 (KS-1735, bash), #1712 (KS-1731, vitest), #1714 (KS-1729, vitest), tier 2 · CALIBRATION 5, 2026-10-30 ~18:4x — #1828 + #1831 (gate 34, tier 2, facts from the gate's own deterministic run) + #1837 (gate 40, tier 2), after the oversized-file fix to spark_review.py
 
@@ -7867,10 +7864,10 @@ Related: [[2026-07-31_fully-portable-drive]] (the NAS is a machine/network depen
 **Built + tested 11-11:** one VERIFIED copy (`General/Wednesday/2026-11-11_workflow-selftest`, 2 files incl. a spaced name) and four refusals (bad --client, existing folder, 4_Credentials source, a Datasec source). The first manifest carried Tuesday's seat label (copied tool); the label was fixed in the tool and corrected in that manifest.
 
 
-## Use the Spark where tokens are spent on BULK, not judgement: digest test-harness output and run simple token-heavy jobs on an ongoing basis; it is not much use on tickets
-`2026-11-12_spark-for-harness-and-token-heavy-simple-tasks.md` · preference · 2026-11-12 · status: live
+## SUPERSEDED (do not apply) — the Spark was returned to HP on 2026-11-15; route by `fleet/specs/model-routing.md`
+`2026-11-12_spark-for-harness-and-token-heavy-simple-tasks.md` · preference · 2026-11-12 · status: superseded — the Spark was wiped and returned to HP 2026-11-15 ([[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); this rule's subject no longer exists. Route by fleet/specs/model-routing.md. Marked at the 2026-11-16 consolidation.
 
-**His words, verbatim:** *"I have been thinking.  as the spark is not much use on tickets, can we utilise it in running harness and other tests.  these seem to be token intensive and could be lead with a good testing harness.  In addition to this, have a think about simple and token expensive tasks that we could get the spark to do on an ongoing basis"*
+*Original headline, kept verbatim:* Use the Spark where tokens are spent on BULK, not judgement: digest test-harness output and run simple token-heavy jobs on an ongoing basis; it is not much use on tickets
 
 sections (open the file for these): RULED STANDING 2026-11-12 11:36:33 — Kam, live board (view=wednesday), verbatim: *"great.  please implement this plan as a standard routine going forward"*
 

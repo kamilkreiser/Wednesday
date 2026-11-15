@@ -2,11 +2,11 @@
 date: 2026-09-25
 type: grant
 source: Kam, terminal, 2026-09-25 ~11:4x
-status: live
+status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 tier: W
 ---
 
-# Standing routine: Ornith for the simplest tasks, the Spark for medium and normal ones, cloud agents only when necessary. Wednesday orchestrates and tests everything, the routine always runs, and from 70% of the weekly allowance cloud agents are minimised
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Standing routine: Ornith for the simplest tasks, the Spark for medium and normal ones, cloud agents only when necessary. Wednesday orchestrates and tests everything, the routine always runs, and from 70% of the weekly allowance cloud agents are minimised
 
 **His words, verbatim:** *"Were you able to use and continue connect to the spark.  if So, please create a new workflow where you use Ornith for the simplest task, Spark for medium and normal tasks, and escalate to cloud agents when necessary and relevant. Still orchestrate everything and test everything. This routine should always run, and once you get to 70% of the weekly usage, minimize cloud agents."*
 

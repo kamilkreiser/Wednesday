@@ -2,11 +2,11 @@
 date: 2026-10-08
 type: grant
 source: Kam, live board 2026-10-08 20:34:09 view=wednesday
-status: live
+status: live — PARTLY SUPERSEDED 2026-11-16 consolidation: every Spark clause is dead (the Spark was returned to HP 2026-11-15, [[2026-11-15_the-spark-is-gone-checks-retired-no-local-spark-tier]]); the non-Spark rest of the rule stands
 tier: W
 ---
 
-# Trial Sonnet seats against the Spark and Opus, find Sonnet's limits, and write ONE model-routing definition that Tuesday and Friday can use too
+# PARTLY SUPERSEDED — its Spark half is dead (the Spark was returned 2026-11-15); the rest stands: Trial Sonnet seats against the Spark and Opus, find Sonnet's limits, and write ONE model-routing definition that Tuesday and Friday can use too
 
 **The operative case, so the headline matches it:** Wednesday is about to launch a Claude seat, or to choose which worker takes a task. **The worker is no longer "Opus 5.5 by default."** There are now four tiers to route between (Ornith 1.5 · the Spark · Sonnet · Opus). Until the definition below exists and has evidence behind it, Sonnet seats are TRIALS: measured, never assumed equivalent to Opus.
 
