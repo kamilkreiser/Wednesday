@@ -1,0 +1,18 @@
+# Commission: DRAFTER for Seat B 182nd (Secuura/Blockchain-B, MERGE seat, Sonnet), 2026-11-15 21:2x AEDT
+
+Commissioned by Wednesday. Read-only drafter: write ONLY the brief below and notes.md in THIS folder (any clone in a `_work` subfolder here). Never write under /Volumes/DevMASTER/!CODING (read verbs only; no fetch/pull/worktree/merge-tree --write-tree there). No `cd`, no `rm`, bound every listing (`| head -N`), never print a secret. GitHub read-only with GH_CONFIG_DIR="/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.gh-config" (repo Secuura/Distributed_Secuura). notes.md ends with an UNMEASURED section. Under 50 KB. Model: Sonnet.
+
+Output: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_seatB182_merge.md
+
+TEMPLATE: Seat B 181st's STAMPED brief /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-15_seatB181_merge.md (read WHOLE incl. its STAMP and rulings W-1..W-6) + Wednesday's mails to B 181st (2026-11-15_B181_answer_plan.md, 2026-11-15_B181_go_2098.md, 2026-11-15_B181_addendum1_2223.md in the same folder: the GO and ADDENDUM shapes). Write B 182nd as a LEAN DELTA: `B 181st -> B 182nd`, `B 180th -> B 181st`; ordinal 182nd takes `nd`.
+
+STATE (verify each at source):
+- B 181st merged PR 2098 (daa54a26d163, 10:11:20Z) and holds ADDENDUM 1 (sent 10:15Z): PR 2223 (tier 2, gate 347 line 2, head 8752357228cd) as its row 2, then it WRAPS naming PR 2079 first. Read develop LIVE in your own clone; if 2223 is still open, say so and keep it OUT of B 182nd's queue (B 181st owns it); if merged, record its squash. Record: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-15_seatB-181st/ (HANDOVER.md FINAL block first; if absent yet, draft from its latest state block and say so; Wednesday re-stamps after the wrap).
+- B 182nd's queue: ROW 1 = PR 2079 (KS-657, TIER 1, gate 345, 18 files, +123 -2567, a services/shared row: NAME every downstream importer of services/shared whose suite is a leg, and build a leg MODEL for it, because B 181st forecast +12 to +16 from SET-UP to READY with no model), then 2224 (tier 1, gate 348), 2081 LAST (tier 1, gate 248; stacked-tree rule). Read each head live and its gate verdict line; drop and name any moved head.
+- B 181st's observation for the legs: the test `ks1000-auth-test-files-are-type-checked-against-a-...` ran 8.1-10.1 s in all four of its runs (over vitest's 5 s default); gate 264's instrument used --testTimeout=120000. Say which timeout the auth legs use and why.
+- Re-key: B 181st's kit by ONE counted shift b181 -> b182 (count the source set from B 181st's REC; matcher self-test on a scratch copy incl. a mutant; FORBID a bare `181st -> 182nd` rule; check hex-fragment traps for `b181`/`b182` beside hex digits or hyphens; guard the KS-1105 comment id `...4705-b177-...` so the shift cannot corrupt it; `B 182nd` removed from the matcher's OTHER list if present as a control).
+- Merge trees: every queued row on the live develop, both orders, planted controls on each row's own hunk line.
+- Live seats: K 24th (lane -K: its queue from PR 2234; never touch), R 120th (lane -R, KS-1699 build, Opus), T 25th (local stack slot 4; loads the machine: no suite while load1 > 8).
+- A blank `## STAMP` block; heading exactly `## RULED BY KAM, NOT YET IN AN ARTEFACT` (carry B 181st's, with Kam's verbatim quotes); PROVENANCE lines with ABSOLUTE paths and every KS id's Linear state + newest comment time; final line `SELF-CHECK: re-read end-to-end for contradictions | 2026-11-15 HH:MM` (machine clock).
+
+Return a 10-line summary: path, size, develop read, row 1 and head, rows dropped, re-key counts, matcher result, the 2079 leg model, anything Wednesday must rule.
