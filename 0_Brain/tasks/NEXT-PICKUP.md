@@ -8,6 +8,19 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 22:0x 15 Nov, the 21:1x seat (ctx ~67%) - READ FIRST; supersedes every block below where they differ
+- **develop 6af62b9ac556** (PR 2234 by K 24th; ls-remote 21:5x). **Merges tonight (14):** 2231, 2232, 2220, 2229, 2230, 2235, 2238, 2233, 2221, 2222, 2236, 2098, 2223, 2234.
+- **FLOOR:**
+  - %50 **B 182nd** (merge -B, Sonnet; brief fleet/briefs_staged/2026-11-15_seatB182_merge.md STAMPED). **GO PR 2079 SENT** (fleet/briefs_staged/2026-11-15_B182_go_2079.md; head 0fffdfba0f95, develop 6af62b9ac556, tree 7a8cdb3a8a4c; G345-2079-1 waived). NEXT MAIL = MERGED 2079 -> ls-remote -> its row line (2224 tier 1 if r <= 52.0 and READY <= 58, else WRAP naming 2224; B 183rd owed then). GO shape: that file.
+  - %44 **R 120th** (BUILD -R, Opus, KS-1699 tenant ORG_ADMIN, Kam card b). Commit f1ac5fec9b67; PR 2160 overlap GRANTED by exact name (fleet/briefs_staged/2026-11-15_R120_answer_2160_grant.md). NEXT = READY FOR GATE -> commission a TIER-1 OPUS gate (Agent subagent; commission.md + verdict.md under 0_Brain/reference/2026-11-15_gate363-tier1-<pr>-ks1699/) -> its KS-1699 comment posts only AFTER the gate reads it -> ADDENDUM the PR into a merge seat -> `decision_queue.sh --delivered secuura-ks1699-admin-means-platform-admin-1115 <PR>`.
+  - %47 **Q 1st** (TRIAGE -Q, Opus; brief fleet/briefs_staged/2026-11-15_seatQ_bola_triage.md; plan ANSWERED GO). Reproduces T 25th's 5 BOLA routes in-process; comments on KS-1703/KS-1882. NEXT = STATUS with 10 verdicts -> CARD Kam the KS-1703 AC4 question (same-tenant visibility of exports/audit: deliberate?) with the seat's evidence; then build lanes for REAL routes.
+  - %23 **T 25th** (stack slot 4): Akto PASS (0 vulns), remaining: auth restart + login proof, 2 controls, REPORT, READY, teardown.
+  - **S 81st** (BOARD -S, Sonnet): brief fleet/briefs_staged/2026-11-15_seatS81_board.md STAMPED 22:0x; launch queued behind a load waiter (check the pane list; relaunch by hand if absent: `SEAT_MODEL_ENV=claude-sonnet-5-5 bash 2_Project_Files/fleet/brief_and_launch.sh --to 'Secuura/Blockchain-S' --subject 'NEW SEAT: board seat, filings F/G/H (Seat S 81st)' --body-file <brief>`).
+  - **K lane EMPTY.** K 24th WRAPPED (scored 0.93, pane closed). **K 25th DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatK25/commission.md -> fleet/briefs_staged/2026-11-15_seatK25_merge.md; row 1 = PR 2237 docs, gate 360; RE-COMMISSION if absent). On return: read WHOLE, stamp, launch Sonnet --to 'Secuura/Blockchain-K'.
+- **New lane letters need TWO config lines** before brief_and_launch: fleet/inbox_routing.conf AND fleet/cockpit/launchers.conf (lane -Q added tonight; backups .pre-1115-213x committed).
+- **OWED (unchanged):** k28 Kintsugi deploy round (October grant live, EXPIRING-GRANTS line 38) carrying tonight's 14+ merges; 46 brew upgrades (quiet window, tmux only with fleet down); INDEX refresh; weekly consolidation (lapsed since 10-19); wrap duties (digests regen only if lessons changed; ledger 3c archive; doctor check for python3 >= 3.14.8 + PORTABILITY).
+- seat_mail_watch re-armed 21:45 under Monitor (expires ~22:15): RE-ARM at boot + newmail.sh right after.
+
 ## 🔴 ROTATION HANDOVER 21:1x 15 Nov, the 19:3x seat (ctx 79%) - READ FIRST; supersedes every block below where they differ
 - **develop 9cbb9687021a** (gh api 21:10). **Merges tonight (11):** 2231, 2232, 2220, 2229, 2230, 2235, 2238, 2233, 2221, 2222, 2236.
 - **FLOOR (4 seats, none with an unanswered QUESTION at 21:1x):**
