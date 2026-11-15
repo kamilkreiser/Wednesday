@@ -8,7 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## 🔴 CHECKPOINT 20:4x 15 Nov, the 19:3x seat (ctx 70%) - READ FIRST; supersedes every block below where they differ
+## 🔴 CHECKPOINT 21:0x 15 Nov, the 19:3x seat (ctx ~77%) - READ FIRST; supersedes every block below where they differ
+- **develop 9cbb9687021a** (unchanged since PR 2236). Merges tonight (11).
+- **FLOOR:** %38 **B 181st** (merge -B; SET-UP CLOSED 31.4; row 1 PR 2098 auth legs -> READY -> GO; brief 2026-11-15_seatB181_merge.md). %41 **K 24th** (merge -K; plan ANSWERED GO 10:03:56Z; SET-UP then row 1 PR 2234 pytest; brief 2026-11-15_seatK24_merge.md, rulings 1-6). %23 **T 25th** (Akto last, then its REPORT; Schemathesis findings below). K 23rd WRAPPED, scored 0.93, pane closed.
+- **KAM 21:03 (live):** card secuura-ks1699-admin-means-platform-admin-1115 = **b** (a same-tenant ORG_ADMIN may share and recertify too: follow-up PR, one line per route, tier 1 gate). **R 120th BUILD DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatR120/commission.md -> fleet/briefs_staged/2026-11-15_seatR120_ks1699_tenant_admin.md; RE-COMMISSION if absent): on return read WHOLE, stamp, launch Opus (SEAT_MODEL_ENV=claude-opus-5-5) --to 'Secuura/Blockchain-R' behind a load1 < 7 waiter; READY FOR GATE -> tier-1 Opus gate -> a merge seat ADDENDUM; then `decision_queue.sh --delivered` with the PR. Card secuura-stuart-whatsapp-ks2196-1115 = **a** (Kam sends; mark --delivered "KS-2196 comment 229af4ee; Kam's WhatsApp"). Kam 21:04 "thank you". Panel receipt bf-8a6c441ade34.
+- **STILL OWED:** the BOLA TRIAGE seat (block below), the board seat for F1-F12 + gate findings, k28 Kintsugi round, brew upgrades, INDEX, weekly consolidation, wrap duties.
+
+## CHECKPOINT 20:4x 15 Nov, the 19:3x seat (ctx 70%) - superseded by the block above where they differ
 - **develop 9cbb9687021a** (PR 2236 by K 23rd; gh api 20:4x). **Merges tonight (11):** + 2236.
 - **FLOOR:** %38 **B 181st** (merge -B, Sonnet; brief fleet/briefs_staged/2026-11-15_seatB181_merge.md STAMPED 20:37 W-1..W-6; booting; row 1 PR 2098 auth -> NEXT MAIL = plan QUESTION -> ANSWER GO). %35 **K 23rd** WRAPPING (1 merge, names PR 2234 first; its row-2 pytest forecast > 58) -> read wrap, SCORE, pane_close.sh %35. %23 **T 25th** (Schemathesis then Akto).
 - **K 24th DRAFTER RUNNING** (0_Brain/reference/2026-11-15_drafter-seatK24/commission.md -> fleet/briefs_staged/2026-11-15_seatK24_merge.md; RE-COMMISSION if absent). On return: read WHOLE, stamp after K 23rd's wrap, launch Sonnet --to 'Secuura/Blockchain-K' behind a load1 < 7 waiter.
