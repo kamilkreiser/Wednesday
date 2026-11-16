@@ -8,6 +8,18 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATION HANDOVER 07:5x 17 Nov, the 06:0x morning seat (ctx 81%) - READ FIRST; supersedes every block below where they differ
+- **develop 94f5158ad626** (PR 2132). **Merges since 15 Nov evening: 61** (this seat: 2067, 2085, 2251, 2132). **No GO in flight.** Kam is TRAVELLING today (07:37 "I am travelling so I cannot access the machine"): anything for him is a CARD.
+- **KAM RULED 07:37 (all in the store):** wed-held-prompt-recovery-1117 = a (BUILT + ARMED 07:43, runner pid 8222; see note); wed-morning-plan-1117 = a; secuura-demo-five-accounts-gain-admin-1117 = a (Deploy). No card of this seat open.
+- **FLOOR (all Sonnet merge seats unless noted):**
+  - %232 **D 69th** (Opus, DEMO round): GO DEMO sent 07:39 (fleet/briefs_staged/2026-11-17_D69_go_demo.md; pin (a) eb27110fc6e4, option a: no role change). STATUS 1 (20:47Z) D8 re-run unchanged, build launched; STATUS 1b (20:50Z) build running. NEXT: STATUS 2 / swaps / STATUS B -> post Kam's PANEL RECEIPT (what Peter/Stuart see; the 5 accounts hold their named roles) -> score -> pane_close.
+  - %244 **K 46th** (rows from PR 2169; STAMP K46-W1..W4; plan ANSWERED 07:42). NEXT: SET-UP CLOSED (stop 38.0 may bind) -> READY 2169 -> GO (shape 2026-11-17_K45_go_2251.md; NAME G306-2169-4 as a deploy note: seven date forms now 400; access unchanged, exports keep their own rulings).
+  - %247 **B 198th** (rows from PR 2161; STAMP B198-W1..W9; launched 07:52, rung 5 met). NEXT: plan QUESTION -> ANSWER (shape 2026-11-17_B197_answer_plan.md). Its READY: SHORT s3 on merged verification.ts required (W5a); UNION= primary + finish script read-only after (W5b); the GO names the create route's ~5 s wait (G302-2161-2); backfill NOT run.
+  - MERGE WINDOW: one GO at a time across K and B.
+- **Scores this seat:** B 196th 0.96, K 45th 0.95, B 197th 0.97.
+- **OWED (in order):** (1) Kintsugi k33 by a D seat (Opus): api-gateway (2162, 2185, 2132), staking (2067), security (2085), originate (2251); Kam 16:55:27 grant; Kintsugi first, then a later demo round to develop. (2) Standing brief line: "first Bash call has NO cd" (three seats slipped 11-17) into fleet/STANDING_LINES.md. (3) Board seat (gate notes 67-1..5, g248 G1-G6, G288-2132-1..3, G306-2169-1..4, G302-2161-1..3). (4) INDEX.md refresh. (5) --help advisory hook. (6) Weekly consolidation (lapsed).
+- **Watch:** D 69th's idle wakes (ack-hash fix 06:43; one oscillation seen 07:24); the recovery's first live use (email + C-u) is UNTESTED in a real Claude box.
+
 ## 🔴 CHECKPOINT 07:2x 17 Nov, the 06:0x morning seat (ctx 70%) - READ FIRST; supersedes every block below where they differ
 - **develop 94f5158ad626** (PR 2132 by B 197th, verified 07:16: one parent 0397efb3e7e4, tree 29d12064213226dd). **Merges since 15 Nov evening: 61** (this seat: 2067, 2085, 2251, 2132). No GO in flight. Kam: 0 messages today (07:2x); reconcile_rulings to rule 0.
 - **FLOOR:** D 69th (%232) holding for card secuura-demo-five-accounts-gain-admin-1117 (acked; ack-hash fix live). No merge seat live.
