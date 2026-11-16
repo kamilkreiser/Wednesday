@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 17:1x 16 Nov, the 15:1x rotation successor (ctx 66%) - READ FIRST; supersedes every block below where they differ
+- **develop eb27110fc6e4** (PR 2124 by K 43rd, verified 16:49:34). **Merges since 15 Nov evening: 55.** Kintsugi k32 current (nothing owed: 2123/2124/2127 are scripts). **KAM 16:55:27: "Deploy everything so all systems are up to date and continue with all the Secuura tickets you can"** -> demo freeze (card 1104) LIFTED by his word; EXPIRING-GRANTS row added; receipt bf-6fe3b0b596c2; then the measured demo delta + a CORRECTION (058 already on demo; ledger row) + a HOLD offer posted 17:1x (bf-81e63e2d05b3). **KAM 17:08:43: card secuura-certifier-user-id-on-chain-1116 = b (keep writing it): ruled + delivered + receipt.** No Kam card open.
+- **FLOOR (4 seats):**
+  - %223 **B 195th** (MERGE, rows from PR 2162): **GO for PR 2162 sent 17:10** (2026-11-16_B195_go_2162.md; both-sided: rc 1 after a completed merge expected -> finish_by_hand_2162_b195.sh). NEXT: MERGED -> verify at source -> row line (likely WRAP naming PR 2067) -> score -> close -> B 196th drafter (commission template 0_Brain/reference/2026-11-16_drafter-seatB195/commission.md; suffix th->th own, th->th lineage; row 1 PR 2067 has NO leg model).
+  - %229 **K 44th** (MERGE, rows from PR 2185; STAMPED K44-W1..W5, lean mutants; launched 17:06). NEXT: plan QUESTION -> ANSWER (shape 2026-11-16_K43_answer_plan.md); its READY waits for B 195th's MERGED; **its GO must name the 24 h expiry (G313-2185-1)**.
+  - %226 **W 34th** (BUILD Opus, KS-2239: issuer.id + issuer.did withheld from non-parties; STAMP W34-R1..R5; plan ANSWERED 17:0x). NEXT: READY FOR GATE -> commission a TIER-1 QA gate (find the gate commission template: grep briefs_staged for the latest *gate* commission, e.g. gate 375/376 folders in 0_Brain/reference) -> GO by a merge seat -> later a Kintsugi round.
+  - %232 **D 69th** (DEPLOY Opus, DEMO catch-up d15 + Kintsugi owed-check; STAMP D69-W1..W6; launched 17:11). NEXT: plan QUESTION + STATUS A (the HOLD POINT): read D8.1 admin-role counts and D8.2 API-key transfer calls; positive = card Kam; clean AND Kam has not said hold -> GO DEMO (Seat D 69th) naming the pin. Then STATUS 2 -> swaps -> STATUS B -> PANEL RECEIPT (what Peter/Stuart see; KS-2239 open).
+  - **MERGE WINDOW: one GO at a time across B and K.**
+- **Scores this seat:** D 67th 0.96, K 42nd 0.96, B 194th 0.95, D 68th 0.97, K 43rd 0.96.
+- **OWED:** next board seat (KS-1600 Low ticket, gate findings from today's merges: G282/284/288/301/313); INDEX.md refresh; `--help` advisory hook (w=3); boot-digest gap (700 KB / ~287K tokens; Kam's call).
+
 ## 🔴 CHECKPOINT 16:4x 16 Nov, the 15:1x rotation successor (ctx 52%) - READ FIRST; supersedes every block below where they differ
 - **develop e5a6eb82c607** (PR 2127 by B 194th; verified at source 16:25:03; one parent e79f70e2b6dc = PR 2123). **Merges since 15 Nov evening: 54.** **Kintsugi k32 DONE** (D 68th: prism + originate + api-gateway at 8292da2c9dbc; anonymous cert verify live, issuer id/did null, no charge; PANEL RECEIPT bf-9600f89aeb90 posted 16:4x). k31 receipt bf-d6221f3d5e45. No Kam card open; no Kam message since 14:29:35. PRs 2225 + 2138 CLOSED (superseded).
 - **FLOOR:**

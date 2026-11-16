@@ -19004,5 +19004,26 @@
   "project": "Secuura",
   "ts": "2026-11-16T16:39:43.131750+11:00",
   "text": "Kintsugi has this afternoon's anonymous certificate verify change, and it's working.\n\nAnyone can now verify a certificate without signing in. They see whether it verifies, its status and its checks. The issuer's user ID and DID come back empty, and no charge is recorded. I tested it live: before the update the old gateway answered every anonymous call with not found; after it, the same call verifies, with the issuer fields empty and the charge table unchanged. The test added three audit log rows and moved no other table.\n\nOne thing is still open: someone who is signed in still sees the issuer's ID and DID, and is still charged. That's ticket KS-2239, and it's next on my list to build. I'm not calling it done.\n\nPrism also changed: its credential issue now refuses with not implemented, instead of issuing a fake credential. It isn't reachable from outside the system.\n\nDemo was not touched, and nothing was sent to Peter or Stuart."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-16T16:56:35.649775+11:00",
+  "text": "Got it: deploy everything, and keep going on the tickets.\n\nHere's how I'm reading it. Kintsugi already runs today's last service change, so the big one is demo. Demo has been held since your 4 November card, which stopped demo redeploys until you said so. I'm taking this message as you saying so. Demo will be brought up to date with develop, including the migration that card was about, and any anchoring update you released this morning will go to Kintsugi too.\n\nBefore anything is swapped, a deploy agent will measure exactly what demo is missing: the services, the migrations, and the risk. I'll post that list here first. Nothing is sent to Peter or Stuart.\n\nIf you meant Kintsugi only, or want demo left alone for Peter's testing, just say stop and I'll hold demo."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-16T17:09:49.507585+11:00",
+  "text": "Thanks, noted: new anchors keep writing the certifier's user ID to the chain. Nothing changes, and the build I'm running now only stops our own API answers from showing it to people who aren't party to the certificate."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-16T17:11:04.361992+11:00",
+  "text": "Demo update, before anything is touched. First, a correction: at 4:55 I said demo would get the migration your 4 November card was about. It already has it. It was applied on 4 November, before the freeze, so no database change is needed at all.\n\nWhat demo is missing: about 200 merged changes since 5 November, so nearly every service would be rebuilt. Nothing needs Kintsugi; it's already current, and anchoring went out this morning as you asked.\n\nWhat Peter and Stuart would notice on demo:\n- tighter access: admin roles, API keys on transfers, cross-company reads, KYC routes, wallet sessions;\n- anyone can verify a certificate without signing in, no charge, with names shown and personal data removed;\n- the three portals move to a newer router version;\n- personal notification settings reset to defaults until saved again;\n- billing fixes, still on Stripe test mode, so no real money;\n- Stuart's anchoring fee fix.\n\nBefore swapping, the deploy agent first checks on the box whether any of the tighter access would cut off a real admin or a live API key. If it would, that comes back to you first.\n\nThis is a large change to the system Peter tests on. If you'd rather wait until he's finished testing, say hold and demo stays as it is."
  }
 ]
