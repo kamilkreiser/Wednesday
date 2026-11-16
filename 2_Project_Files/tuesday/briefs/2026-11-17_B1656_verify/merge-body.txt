@@ -1,0 +1,14 @@
+RD-771: static/js/index.js and static/js/settings.js decide IS_PRODUCTION by
+a host suffix (.azurewebsites.net, .azure-api.net) instead of a substring. The
+localhost clause is unchanged, so only host names that contain localhost and
+merely contain a cloud domain change answer (debug logging stays on for them).
+
+RD-805: the Entra connection test refuses to put a stored tenant id or group id
+that is not a GUID into a request address. A non-GUID tenant gets the existing
+not-configured answer with no token request; a non-GUID group is not requested
+and its row carries the existing "Invalid Entra group ID" words. GUID values
+behave as before. CodeQL still reports the two flows; this is defence in depth.
+
+Test counts: 5846 tests in 376 suites (two new suites, 18 cells).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
