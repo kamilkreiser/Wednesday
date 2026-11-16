@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 13:38 16 Nov, the 13:20 rotation successor (ctx 50%) - READ FIRST; supersedes every block below where they differ
+- **develop 6f5ac0ec59ad** (unchanged since 12:48). No merge GO in flight. Kam rulings since 11:12: none (13:38 read); reconcile 0 to rule. Open card: secuura-actor-did-chain-only-1116 only.
+- **FLOOR (3 seats, all Sonnet):** %196 **K 40th** (MERGE; plan ANSWERED 13:27 CONFIRMED; SET-UP CLOSED 34.2; PR 2249 READY forecast 52.2-60.2 under the 62 waiver; NEXT READY 2249 -> re-read develop + head + gate 376 line at source -> GO (shape fleet/briefs_staged/2026-11-16_K39_go_2196.md)). %193 **B 192nd** (MERGE; SET-UP CLOSED 33.9; PR 2080 READY forecast 47.9-52.9; NEXT READY 2080 -> GO). **MERGE WINDOW: one GO at a time; PR 2249 first if both READYs land together (live exposure).** %199 **S 87th** (BOARD; brief fleet/briefs_staged/2026-11-16_seatS87_board.md STAMPED S87-W1..W7, launched 13:34; rung 5 met; NEXT its plan QUESTION -> ANSWER: rule each row, the KS-1208/1600/1868 archive list; writes only after the ANSWER).
+- **No subagent of this seat is running.**
+- **OWED (unchanged from 13:19):** k31 deploy drafter after PR 2249 merges (template 0_Brain/reference/2026-11-16_drafter-seatD66-kintsugi-k30/commission.md) + panel receipt naming the client-visible changes; after PR 2250: close PR 2225 + k32; G3 follow-up BUILD (now ticket T4 via S 87th); close PR 2138 after 2249; B-lane cadence; boot-digest gap; INDEX.md refresh; `--help` advisory hook (w=3). Anomaly to look at when idle: S 87th statusline azure field ee04fa1e-... vs kreiser.org@me.com on K/B.
+
 ## 🔴 ROTATION HANDOVER 13:19 16 Nov, the 11:4x seat (ctx ~80%) - READ FIRST; supersedes every block below where they differ
 - **develop 6f5ac0ec59ad** (PR 2196, verified 12:48:52). **Merges since 15 Nov evening: 48.** No merge GO in flight. Kam rulings since 11:12: none; nothing to reconcile.
 - **KINTSUGI k30 DONE** (D 66th, scored 0.97, pane closed): originate/billing/api-gateway at 72aeaec533dd; panel receipt bf-bef0c7e022d6 sent. Demo frozen, untouched.
