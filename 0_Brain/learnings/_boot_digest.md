@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-16 10:25 from 273 lesson files (1,170,474 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-16 11:15 from 273 lesson files (1,171,803 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7958,7 +7958,7 @@ OWN inbox: the inbox her merge seat reports READY and MERGED to.
 
 **The operative case, so the headline matches it:** Wednesday is about to brief, stamp, gate or GO any Secuura work that decides WHO may read or write an audit record or a verification result (KS-1703 and its siblings, the analytics/audit routes, any access-control cell on them). **Read access is not restricted for these two record kinds: anyone in the world may read them. Write access is the creator, plus any use the smart contract expressly allows.** Brief and gate against that, not against the older "company-wide" or "creator and admins only" options.
 
-sections (open the file for these): RULED 2026-11-16 07:16:08 — Kam, live board (view=wednesday), verbatim: "Decision secuura-public-audit-personal-fields-1116: a — Public, with personal fields removed" · RULED 2026-11-16 09:16:45 and 09:17:09 — Kam, live board (view=wednesday), verbatim: "Decision secuura-cert-verify-anyone-or-signed-in-1116: b — Anyone, including anonymous" · "Decision secuura-verify-public-withheld-names-1116: b — Open the names too"
+sections (open the file for these): RULED 2026-11-16 07:16:08 — Kam, live board (view=wednesday), verbatim: "Decision secuura-public-audit-personal-fields-1116: a — Public, with personal fields removed" · RULED 2026-11-16 09:16:45 and 09:17:09 — Kam, live board (view=wednesday), verbatim: "Decision secuura-cert-verify-anyone-or-signed-in-1116: b — Anyone, including anonymous" · "Decision secuura-verify-public-withheld-names-1116: b — Open the names too" · RULED 2026-11-16 11:12:46 — Kam, live board (view=wednesday), verbatim: "Decision secuura-verify-names-personal-data-1116: a — Open the names, but not personal data"
 
 **How to apply:**
 1. Every Secuura brief touching audit or verification access carries this rule verbatim in RULED BY KAM, with the reading above.
@@ -7967,6 +7967,8 @@ sections (open the file for these): RULED 2026-11-16 07:16:08 — Kam, live boar
 4. No expiry stated: "new rule for all related tasks and tickets" reads as standing until he changes it.
 
 **Family:** [[2026-09-20_ks1175-hold-lifted-make-the-fix]] (a card answered outside its options; recorded by hand) · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (the privacy measurement goes back to him) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope: audit + verification, not exports) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+**How to apply:** (1) a public answer carries no value derived from a person (email or its local part, user id, owner id, DID); (2) when opening any field to the public, a brief states what the field HOLDS (column and how the write side fills it), never just its name — the 09:17 error came from a field named "OrganizationId" holding a user id; (3) PR 2249 merges only after its fix round (Seat C 44th) and a tier-1 re-gate; PR-V (W 33rd) withholds issuer.id/did from anonymous callers.
 
 
 ## A preflight failure must never stop a rotation; carry it into the new seat's boot instead
