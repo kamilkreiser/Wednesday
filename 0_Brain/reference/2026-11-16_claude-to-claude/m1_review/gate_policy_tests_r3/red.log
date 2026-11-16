@@ -1,0 +1,26 @@
+RED OK      red_no_hard_deny -> t05_hard_deny failed (hard deny of gate-configuration writes): explicit panic
+RED OK      red_execute_mentions_ignored -> t05_hard_deny failed (execute text naming a hard-deny path): Ask { card: Card { tier: T2, kind: Execute, tool_name: "Bash", input_hash: "sha256:f94608b7962fe46a9fbd03af3010f0a9bc8c5e22f637962cc419442dbf07c416", command: S
+RED OK      red_no_exclusions -> t07_exclusions failed (exclusions beat everything): Ask { card: Card { tier: T2, kind: Other, tool_name: "Agent", input_hash: "sha256:0fa9fc4e00f93a19278309c051e9785be8af5e021552a0a37f9f4850606ffeb5", command: No
+RED OK      red_exclusion_name_leaks -> t07_exclusions failed (excluded names never appear in output): Deny { reason: ExcludedLeaky { path: "[Path { role: Read, path: Certain { canonical: \"/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/1d34e9cf-ed94-49aa-ba4
+RED OK      red_t3_grantable -> t06_t3 failed (T3 always asks): read ~/.ssh/id_rsa [link=Open grant=false surface=Console] -> Allow { why: SessionApproval { scope: ExactInput { hash: "sha256:94661b7cbb3f8233ce9d7ef1fc7d66e70
+RED OK      red_hash_ignores_input -> t08_binding failed (approval bound to the exact input hash): assertion failed: matches!(r.decision, Decision::Deny { reason: DenyReason::InputMismatch })
+RED OK      red_exact_command_ignores_cwd -> t08_binding failed ('this exact command' includes the directory): different cwd -> Allow { why: SessionApproval { scope: ExactCommand { text: "npm test", cwd: "/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/1d34e9cf-ed94-4
+RED OK      red_ask_without_surface -> t10_surface failed (no surface means deny, never ask): acceptEdits-ask: Ask { card: Card { tier: T1, kind: Edit, tool_name: "Write", input_hash: "sha256:5f2bc6792433f1bcbd468cba17e451160822bb72a2e54b77f214f1141af061
+RED OK      red_grant_no_expiry -> t09_grants failed (grant 8 h maximum): assertion `left == right` failed
+RED OK      red_grant_ignores_subjects -> t09_grants failed (grant applies only to its subjects): Allow { why: Grant { grant_id: "gr_1", rule: "read scope", edited: [] } }
+RED OK      red_windows_exec_grantable -> t09_grants failed (Windows host: a grant never auto-allows a command): Allow { why: Grant { grant_id: "gr_1", rule: "execute: npm test", edited: [] } }
+RED OK      red_normaliser_lexical_only -> t04_paths failed (symlinks resolved by the OS): assertion `left == right` failed: measured: realpath returns the on-disk case
+RED OK      red_reads_clock -> t11_determinism failed (time is only the parameter): inside the window
+RED OK      red_card_unescaped -> t14_gate_return failed (no raw control/bidi character on a card (M8)): raw '\n' reached the owner: "Write: <S>/target/
+RED OK      red_closed_link_allows_t2 -> t14_gate_return failed (after the link closes only T0 is auto-allowed (M7)): read outside the workspace: Allow { why: PostSessionRead }
+RED OK      red_no_bounds -> t14_gate_return failed (over-bound paths are refused before any work (M6)): path over MAX_PATH_BYTES: Ask { card: Card { tier: T1, kind: Edit, tool_name: "Write", input_hash: "sha256:a128780874aeddba1ccab1b036beb4dfe1c5ae0ce695523385856
+RED OK      red_shell_text_lowers -> t13_option_spellings failed (shell text never lowers scrutiny (addendum 3)): assertion `left == right` failed: cat a.txt | sort -rn -k 2 -t , | uniq -c | tr -d x
+RED OK      red_shell_text_lowers -> t15_addendum3 failed (shell text never lowers scrutiny (addendum 3)): assertion `left == right` failed: "cat README.md"
+RED OK      red_no_unicode_fold -> t15_addendum3 failed (compatibility + case folding on raising lists (N8)): SRC/a.rs: Allow { why: Grant { grant_id: "g", rule: "edit scope", edited: ["/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/1d34e9cf-ed94-49aa-ba4c-99451dcbb
+RED OK      red_mentions_cap10 -> t15_addendum3 failed (every word of an execute is checked up to the bound (R11)): SRC/a.rs: Allow { why: Grant { grant_id: "g", rule: "edit scope", edited: ["/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/1d34e9cf-ed94-49aa-ba4c-99451dcbb
+RED OK      red_no_component_bound -> t15_addendum3 failed (an existing path deeper than the bound is refused (R17)): SRC/a.rs: Allow { why: Grant { grant_id: "g", rule: "edit scope", edited: ["/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/1d34e9cf-ed94-49aa-ba4c-99451dcbb
+RED OK      red_automount_to_os -> t15_addendum3 failed (automount roots never reach the OS (R22)): /net/host/x: Certain { canonical: "/net/host/x", lexical: "/net/host/x" }
+RED OK      red_free_text_100 -> t15_addendum3 failed (free text checked as far as a card shows it (R24)): Ask { card: Card { tier: T2, kind: Other, tool_name: "Agent", input_hash: "sha256:bec99b9995b4613759842edc6ffad5da395b78f50e2236650c21257869c1e327", command: No
+NOT GREEN   normal build fails
+RED CONTROLS: 1 problem(s)
+red rc=1
