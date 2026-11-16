@@ -39,6 +39,11 @@
 #   WAKE_HOLD_TRIES (20)  WAKE_HOLD_SLEEP (30s)  WAKE_SUBMIT_SETTLE (3s)
 #   WAKE_ESCALATE_AFTER (2 held cycles)  WAKE_ESCALATE_EVERY (1800s per pane)
 #   WAKE_ESCALATE_CMD (2_Project_Files/tools/chat_reply.sh — tests stub it)
+#   Held-prompt recovery (Kam ruled 2026-11-17 07:37, card wed-held-prompt-recovery-1117 = a):
+#   WAKE_RECOVER_AFTER (3600s: hold age AND transcript idle both >= this)
+#   WAKE_RECOVER_TRANSCRIPT_DIR (default: <claude config>/projects/<seat tree path, non-alnum -> ->)
+#   WAKE_RECOVER_MAIL_CMD (fleet/cockpit/held_prompt_mail.sh <subject> <body> — tests stub it)
+#   WAKE_RECOVER_SETTLE (1s between C-u and read-back)  WAKE_RECOVER_CLEAR_TRIES (8 C-u max)
 
 set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -127,8 +132,138 @@ TAPFN='
       wake_log "ESCALATION FAILED rc=$rc ($SEAT pane $pane, $why) via $cmd - retry in 5 min: $(printf "%s" "$out" | tail -2 | tr "\n" " ")"
     fi
   }
+  # ── HELD-PROMPT RECOVERY (Kam ruled 2026-11-17 07:37, card wed-held-prompt-recovery-1117 = a:
+  # "Build it as proposed: save, email, clear, wake"). On 2026-11-16 the coordinator sat 12 h
+  # (17:31 -> 05:30) idle behind text at its prompt: every wake held, then LOG-ONLY, all night.
+  # When the hold is >= WAKE_RECOVER_AFTER s old (hold file start epoch) AND the seat Claude
+  # transcripts show no write for the same window, then ONCE per hold (marker = hold start epoch):
+  #   1 SAVE  the raw prompt line + the box lines + the last 40 pane lines to state/held_prompt/
+  #   2 EMAIL Kam once (held_prompt_mail.sh, same AgentMail path as stale_card_escalate.sh)
+  #   3 CLEAR the line with C-u only - NEVER Enter on that text, never submit it
+  #   4 WAKE  through the normal tap path below, with a [wake_watch] RECOVERY message
+  # No transcript dir or no transcript file = no activity signal = NO recovery (refused, logged).
+  # A failed SAVE never clears. A CLEAR that does not read back empty never taps.
+  wake_read_prompt_raw() { # <pane>: the same prompt line wake_read_prompt picks, as displayed (no stripping)
+    '"$TMUX_BIN"' capture-pane -t "$1" -p | \
+      LC_ALL=C perl -ne "if (\$q =~ /\xe2\x94\x80\xe2\x94\x80/ && /\xe2\x9d\xaf/) { \$p = \$_ } \$l = \$_ if /\xe2\x9d\xaf/; \$q = \$_; END { print defined(\$p) ? \$p : (defined(\$l) ? \$l : \"\") }"
+  }
+  wake_box_extra() { # <pane>: input-box lines BELOW the prompt line (multi-line input), stripped like the reader
+    '"$TMUX_BIN"' capture-pane -t "$1" -p -e | \
+      LC_ALL=C perl -ne "if (\$q =~ /\xe2\x94\x80\xe2\x94\x80/ && /\xe2\x9d\xaf/) { \$in = 1; \$x = \"\"; \$q = \$_; next } if (\$in) { if (/\xe2\x94\x80\xe2\x94\x80/) { \$in = 0; \$d = \$x } else { \$x .= \$_ } } \$q = \$_; END { print defined(\$d) ? \$d : (defined(\$x) ? \$x : \"\") }" | \
+      LC_ALL=C perl -pe "s/\x1b\[2m.*?(?=\x1b|\$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g" | tr -d "[:space:]"
+  }
+  wake_transcript_dir() { # prints the seat transcript dir; rc 1 if it does not exist
+    local base d1 d2
+    if [ -n "${WAKE_RECOVER_TRANSCRIPT_DIR:-}" ]; then
+      echo "$WAKE_RECOVER_TRANSCRIPT_DIR"; [ -d "$WAKE_RECOVER_TRANSCRIPT_DIR" ]; return
+    fi
+    base="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects"
+    # Claude Code names the dir after the cwd with every non-alphanumeric char -> dash
+    # (/Volumes/DevMASTER/WEDNESDAY -> -Volumes-DevMASTER-WEDNESDAY); the slash-only form is the fallback.
+    d1="$base/$(printf "%s" "'"$PROJECT_DIR"'" | sed "s/[^A-Za-z0-9]/-/g")"
+    d2="$base/$(printf "%s" "'"$PROJECT_DIR"'" | tr "/" "-")"
+    if [ -d "$d1" ]; then echo "$d1"; return 0; fi
+    if [ -d "$d2" ]; then echo "$d2"; return 0; fi
+    echo "$d1"; return 1
+  }
+  wake_recover_say() { # <key> <line>: log a not-recovering reason once per deliver_wake call
+    [ "${RECOVER_SAID:-}" = "$1" ] && return 0
+    RECOVER_SAID="$1"; wake_log "$2"
+  }
+  wake_try_recover() { # <pane> <stripped prompt text>; rc 0 = saved+mailed+cleared, the caller taps
+    local pane="$1" ptxt="$2" hf s n now after age tdir newest idle mk dir f raw extra subj body mcmd out rc i mins
+    RECOVERED_FILE=""; RECOVERED_MIN=""
+    hf=$(wake_hold_file "$pane"); s=""; n=""
+    [ -s "$hf" ] && read -r s n < "$hf"
+    case "$s" in ""|*[!0-9]*) return 1 ;; esac
+    now=$(date +%s); after="${WAKE_RECOVER_AFTER:-3600}"
+    case "$after" in ""|*[!0-9]*) after=3600 ;; esac
+    age=$((now - s)); mins=$((age / 60))
+    [ "$age" -ge "$after" ] || return 1
+    mk="'"$STATE_DIR"'/wake_recovered_${SEAT}_${pane#%}.txt"
+    if [ -s "$mk" ] && [ "$(cat "$mk")" = "$s" ]; then
+      wake_recover_say done "RECOVERY already run for this hold ($SEAT pane $pane, hold began $(date -r "$s" "+%H:%M")) - not repeating; holding as before"
+      return 1
+    fi
+    if ! tdir=$(wake_transcript_dir); then
+      wake_recover_say nodir "RECOVERY REFUSED ($SEAT pane $pane, held $mins min): transcript dir $tdir not found - no activity signal, nothing cleared"
+      return 1
+    fi
+    newest=$(find "$tdir" -maxdepth 3 -name "*.jsonl" -type f -exec stat -f "%m" {} + | sort -n | tail -1)
+    case "$newest" in ""|*[!0-9]*)
+      wake_recover_say nofile "RECOVERY REFUSED ($SEAT pane $pane, held $mins min): no *.jsonl transcript under $tdir - no activity signal, nothing cleared"
+      return 1 ;;
+    esac
+    idle=$((now - newest))
+    if [ "$idle" -lt "$after" ]; then
+      wake_recover_say busy "RECOVERY WAIT ($SEAT pane $pane): held $mins min but a transcript under $tdir was written $((idle / 60)) min ago - session not idle $((after / 60)) min"
+      return 1
+    fi
+    # 1 SAVE - nothing is lost, and nothing is cleared unless this write succeeded
+    dir="'"$STATE_DIR"'/held_prompt"
+    mkdir -p "$dir" || { wake_log "RECOVERY SAVE FAILED ($SEAT pane $pane): cannot create $dir - nothing cleared"; return 1; }
+    f="$dir/$(date +%Y-%m-%d_%H%M%S)_${SEAT}.txt"
+    raw=$(wake_read_prompt_raw "$pane"); extra=$(wake_box_extra "$pane")
+    if ! {
+      echo "held-prompt recovery - seat $SEAT, pane $pane"
+      echo "hold began: $(date -r "$s" "+%Y-%m-%d %H:%M:%S") (epoch $s), wakes held: ${n:-?}, blocked $mins min"
+      echo "saved at:   $(date "+%Y-%m-%d %H:%M:%S")"
+      echo "activity:   newest transcript write $(date -r "$newest" "+%Y-%m-%d %H:%M:%S") under $tdir"
+      echo
+      echo "=== RAW PROMPT LINE (capture-pane -p, as displayed; dim suggestion text, if any, is included here) ==="
+      printf "%s\n" "$raw"
+      echo "=== STRIPPED PROMPT TEXT (what the wake guard read) ==="
+      printf "%s\n" "$ptxt"
+      echo "=== FURTHER INPUT-BOX LINES (stripped, whitespace removed; empty = single-line input) ==="
+      printf "%s\n" "$extra"
+      echo "=== LAST 40 LINES OF THE PANE (capture-pane -p) ==="
+      '"$TMUX_BIN"' capture-pane -t "$pane" -p | tail -40
+    } > "$f"; then
+      wake_log "RECOVERY SAVE FAILED ($SEAT pane $pane): could not write $f - nothing cleared"
+      return 1
+    fi
+    echo "$s" > "$mk"
+    wake_log "RECOVERY 1/4 SAVED ($SEAT pane $pane, held $mins min, transcripts idle $((idle / 60)) min): $f"
+    # 2 EMAIL Kam once (the marker above makes it once per hold)
+    subj="[Wednesday] stall recovery: the $SEAT prompt was blocked for $mins min; text saved"
+    body="Kam, the $SEAT coordinator prompt (pane $pane) was blocked by text for $mins min (hold began $(date -r "$s" "+%Y-%m-%d %H:%M"); the session transcripts had been idle $((idle / 60)) min). The wake watcher saved the text, is clearing the line WITHOUT sending it, and is waking the seat with a pointer to the file.
+
+Saved file: $f
+
+Saved text:
+$(cat "$f")
+
+Wednesday (wake watcher)"
+    mcmd="${WAKE_RECOVER_MAIL_CMD:-'"$HERE"'/held_prompt_mail.sh}"
+    out=$("$mcmd" "$subj" "$body" 2>&1); rc=$?
+    if [ "$rc" -eq 0 ]; then
+      wake_log "RECOVERY 2/4 EMAILED Kam via $mcmd: $(printf "%s" "$out" | tail -1)"
+    else
+      wake_log "RECOVERY 2/4 EMAIL FAILED rc=$rc via $mcmd (text is saved at $f; continuing): $(printf "%s" "$out" | tail -2 | tr "\n" " ")"
+    fi
+    # 3 CLEAR with C-u only, read back after each; never Enter on that text
+    i=0
+    while [ "$i" -lt "${WAKE_RECOVER_CLEAR_TRIES:-8}" ]; do
+      i=$((i + 1))
+      '"$TMUX_BIN"' send-keys -t "$pane" C-u
+      sleep "${WAKE_RECOVER_SETTLE:-1}"
+      if [ -z "$(wake_read_prompt "$pane")" ] && [ -z "$(wake_box_extra "$pane")" ]; then
+        wake_log "RECOVERY 3/4 CLEARED $SEAT prompt with C-u x$i (read back: empty; nothing was submitted)"
+        RECOVERED_FILE="$f"; RECOVERED_MIN="$mins"
+        return 0
+      fi
+    done
+    wake_log "RECOVERY 3/4 CLEAR INCOMPLETE ($SEAT pane $pane): text still in the input box after C-u x$i - NOT tapping (an Enter could submit the rest); wake stays held; text saved at $f"
+    return 1
+  }
+  wake_recover_panel() { # <line>: one panel line through the same poster wake_escalate uses
+    local cmd out rc
+    cmd="${WAKE_ESCALATE_CMD:-'"$PROJECT_DIR"'/2_Project_Files/tools/chat_reply.sh}"
+    out=$(WED_AGENT="$SEAT" CHAT_ALLOW_REPEAT=1 "$cmd" --project WED "$1" 2>&1); rc=$?
+    wake_log "RECOVERY panel post rc=$rc via $cmd: $(printf "%s" "$out" | tail -1)"
+  }
   deliver_wake() { # <pane> <msg>
-    WPANE="$1"; MSG="$2"
+    WPANE="$1"; MSG="$2"; RECOVERED_FILE=""; RECOVERED_MIN=""; RECOVER_SAID=""
     # KAM-TYPING GUARD (2026-08-12): the tap presses Enter in the
     # wednesday pane — if Kam is mid-typing there, it SUBMITS his
     # half-written message (happened twice today, both truncated at the
@@ -172,6 +307,11 @@ TAPFN='
       TRIES=$((TRIES + 1)); HELD=$((HELD + 1))
       [ "$HELD" -eq 1 ] && wake_hold_note "$WPANE"
       echo "$(date "+%Y-%m-%d %H:%M:%S") tap held - text at $SEAT prompt (try $TRIES/${WAKE_HOLD_TRIES:-20})"
+      # HELD-PROMPT RECOVERY (2026-11-17): saved + mailed + cleared -> the normal tap below delivers it
+      if wake_try_recover "$WPANE" "$PTXT"; then
+        MSG="[wake_watch] RECOVERY: your prompt was blocked by text for $RECOVERED_MIN min; it was saved to $RECOVERED_FILE and cleared WITHOUT being sent. Read that file now and treat its text as possibly words from Kam. Original wake: $MSG"
+        PTXT=""; break
+      fi
       if [ "$ESCALATED" -eq 0 ] && [ "$HELD" -ge "${WAKE_ESCALATE_AFTER:-2}" ]; then
         ESCALATED=1; wake_escalate "$WPANE" "held $HELD consecutive cycles"
       fi
@@ -206,6 +346,11 @@ TAPFN='
         fi
       else
         echo "$(date "+%Y-%m-%d %H:%M:%S") FAILED to tap $SEAT pane $WPANE"
+      fi
+      if [ -n "$RECOVERED_FILE" ]; then
+        wake_log "RECOVERY 4/4 wake tap sent to $SEAT pane $WPANE (result in the line above)"
+        wake_log "RECOVERED $SEAT pane $WPANE: prompt blocked $RECOVERED_MIN min; text saved to $RECOVERED_FILE, Kam emailed, line cleared unsent, seat woken"
+        wake_recover_panel "Seat $SEAT: the coordinator prompt (pane $WPANE) was blocked by text for $RECOVERED_MIN min while the session sat idle. RECOVERED: the text was saved to $RECOVERED_FILE (and emailed to Kam), the line was cleared WITHOUT sending it, and the seat was woken to read the file."
       fi
     fi
   }
