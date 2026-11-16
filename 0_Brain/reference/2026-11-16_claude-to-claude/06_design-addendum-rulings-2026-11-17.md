@@ -16,6 +16,8 @@ project: General / CoAgent (no client)
 > - **Section 7:** one sentence in the n8 row. **Section 8:** the first two rows and the proposal-ids row changed, two rows added. **Section 9.1:** the N1, N2 and audit-share rows. **Section 10:** I-1 and I-5 RULED, I-2 CONFIRMED, new I-14 to I-21.
 > Sections 3, 4 and 6 are unchanged.
 
+> **Revision 2, 2026-11-17.** The owner ruled the deputy. His words, verbatim as Friday relayed them from the board: "Decision general-c2c-deputy-powers-1117: a — Build the small deputy as described". The option's text on the card: "Build the small deputy as described — Lets in proposed people only, provisionally, into seats the starter set aside". So **I-18, I-19 and I-20 are RULED as stated**. I-17 and I-21 were not put to him and stay INTERPRETATIONS, built as stated. Changed by Revision 2, and only these: the rulings line at the head of 2.8; one clarifying sentence in 2.8.3 (the form in which an admission carries the proposal); three known limits added to 2.8.10; 2.8.11; the I-17 to I-21 rows of section 10.
+
 **Revises:** `04_design-revision-rulings.md` (cited **[04 §n]**) and, through it, `03_architecture-design.md` (**[03 §n]**). Neither file is edited. Where this addendum and [04] differ, this addendum wins.
 
 **How to read the labels.**
@@ -284,7 +286,9 @@ Then the proposal is **pending** until the human decides or `PROPOSAL_TTL` passe
 
 **The added trust, in two sentences.** With a deputy named, one more person can let newcomers into your session while you are away, as long as another member proposed them, and you find out when you are back. They cannot remove anyone, change the limit or act as you, and everyone they let in leaves the session the moment you renew or withdraw the deputy's role, unless you choose to keep them.
 
-Everything in 2.8 is REASONED, NOT TESTED, and nothing in it is built today (2.8.11).
+**Revision 2: ruled.** "Decision general-c2c-deputy-powers-1117: a — Build the small deputy as described". What "as described" was, in Friday's words to him on the card: the starter remains the only one who writes the member list; the deputy can only let in someone another member proposed, only into seats the starter set aside for it, and only while the deputy cannot reach the starter; people let in that way are provisional and the starter keeps or drops them on return; the deputy cannot remove anyone, raise the limit, end the session or name another deputy. He did not choose "the deputy should be able to do more". That rules I-18, I-19 and I-20 as stated below. I-17 and I-21 are still mine.
+
+Everything in 2.8 is REASONED, NOT TESTED. It is built in its own lane after the roster lane has merged (2.8.11).
 
 #### 2.8.1 The design choice: the roster keeps one writer
 
@@ -320,6 +324,8 @@ Rules for every member's validator, each its own error:
   "proposal": { … the member's signed proposal, as in 2.3 … },
   "sig": "<deputy's signature>" }
 ```
+
+(Revision 2: the `proposal` inside an admission is carried as the short record the roster crate already uses for a proposed member, namely proposal id, proposer, the version and hash it was made against, the proposed role and the proposer's signature; the candidate's keys are the entry's own, and the signed proposal is rebuilt from the two, as the roster branch does in `Member::rebuilt_proposal` [branch m3-roster at 0a47fc9: crates/coagent-roster/src/lib.rs:173-192].)
 
 Signed by the deputy's device key under its own label, `coagent-roster-deputy-admission-v1`, so an admission can never be taken for a roster version or a proposal, in either direction.
 
@@ -404,10 +410,14 @@ The proposer hands the newcomer, over their pairing channel: the starter's curre
 
 - How the audit crate treats a provisional member. It decides membership from the roster's own member list [branch m3-audit: crates/coagent-audit/src/session.rs:512, 574, 778]. UNKNOWN whether a provisional member should author and countersign audit events before the starter keeps them; closed by reading that crate after it merges and by a design decision then. Default until then: a provisional member takes no part in the audit exchange, and members are told so.
 - Whether a kept member's proposer should stay a signed fact (2.8.3, last paragraph).
+- Revision 2, three known limits, stated and not closed:
+  - **"Removed" is known by key id only.** The roster keeps a removed entry's key id and nothing else [main: crates/coagent-roster/src/lib.rs:100-108]. A removed person who comes back with the same signing key and a new channel key has a new key id, so "the deputy cannot bring back someone the starter removed" (2.8.3 rule 5) holds for the removed KEY, not the removed PERSON. The roster seat found the same gap for the starter's own path [STATUS_M3_ROSTER, DESIGN QUESTIONS item 3]. Closing it means keeping removed entries' keys, which changes a type the unmerged audit crate imports. Design owner's question, not the deputy lane's.
+  - **One candidate, two approvers.** A member can send the same newcomer to the starter and to the deputy. If both approve, the key is in the roster and in an admission: the roster entry counts and the admission is ignored, but its seat stays used until the starter renews the grant.
+  - **"Only while the deputy cannot reach the starter" is the deputy's own program's rule** (I-19, now ruled). No other member can check it. The roster crate therefore cannot enforce it; it lives in the daemon, and a dishonest deputy can ignore it. What every member does enforce is everything else in 2.8.3.
 
-#### 2.8.11 Not built today
+#### 2.8.11 Where it is built
 
-The deputy is a second signed object, a second chain, a new notion of membership for every consumer, and five choices that are his (I-17 to I-21). It is not added to the roster lane that is running. It is its own lane, after that lane has merged, with its own gate. The running lane is asked for one thing only: that "who may sign a roster version" and "who may approve a proposal" are each decided in one place.
+Its own lane (M3-DEPUTY), in the roster crate only, after the roster lane has passed its gate and merged; brief `2026-11-17_coagent_M3_DEPUTY_brief.md` in Friday's `briefs_drafts`. The daemon's part (carrying grants, admissions and the welcome; the absence rule; the screens) and the audit crate's part (what a provisional member is, 2.8.10) are later lanes.
 
 ---
 
@@ -670,8 +680,8 @@ Every stored or buffered input a peer can cause has a bound from the first versi
 | I-14 | 1.1 | The limit may be lowered back to 4 whenever the people present fit | Once raised it stays at 8 for the session |
 | I-15 | 1.1 | A starter may open a session at 8 from the start; the product's own default is 4 | Every session opens at 4; 8 is always a later, visible step |
 | I-16 | 1.1 | Only the starter changes the limit | The deputy may raise it while the starter is away |
-| I-17 | 2.8.2 | One deputy at a time, and a guest, not an observer | Several deputies; an observer as deputy |
-| I-18 | 2.8.4 | The deputy can only approve a newcomer another member proposed, into seats the starter set aside | Each widening separately: approve alone; remove people or change roles; change the limit; end the session; name a further deputy (all but the first need the larger design in which the deputy writes the member list) |
-| I-19 | 2.8.4 | The deputy's program offers approvals only while it cannot reach the starter (nobody else can check this) | The deputy may approve at any time |
-| I-20 | 2.8.4 | People a deputy lets in are provisional until the starter keeps them | A deputy's admission is as permanent as the starter's |
-| I-21 | 2.8.4 | The deputy's role has no time limit and outlasts a starter who has left for good | It ends when the starter leaves for good, or after a set time |
+| I-17 | 2.8.2 | **STILL OPEN; built as stated.** One deputy at a time, and a guest, not an observer | Several deputies; an observer as deputy |
+| I-18 | 2.8.4 | **RULED as stated** (Revision 2; his words: "Decision general-c2c-deputy-powers-1117: a — Build the small deputy as described"). The deputy can only approve a newcomer another member proposed, into seats the starter set aside | Each widening separately: approve alone; remove people or change roles; change the limit; end the session; name a further deputy (all but the first need the larger design in which the deputy writes the member list) |
+| I-19 | 2.8.4 | **RULED as stated** (Revision 2, same words). The deputy's program offers approvals only while it cannot reach the starter (nobody else can check this) | (not chosen: the deputy may approve at any time) |
+| I-20 | 2.8.4 | **RULED as stated** (Revision 2, same words). People a deputy lets in are provisional until the starter keeps them | (not chosen: a deputy's admission is as permanent as the starter's) |
+| I-21 | 2.8.4 | **STILL OPEN; built as stated.** The deputy's role has no time limit and outlasts a starter who has left for good | It ends when the starter leaves for good, or after a set time |
