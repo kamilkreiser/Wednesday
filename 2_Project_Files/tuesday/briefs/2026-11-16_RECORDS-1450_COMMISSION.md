@@ -65,3 +65,20 @@ Read-only. Write `tuesday/briefs/2026-11-16_SWEEP-1450_datasec-actionable-lanes.
 - **Counts:** any count comes from `2_Project_Files/fleet/board_count.sh`.
 - **Priority order:** HPSM-POC, then MPS, then Composer, then NexusAI.
 - **Last section:** questions for Tuesday, each with a default.
+
+## LANE WAVE 1 (from SWEEP-1450; Tuesday s282 at 14:5x)
+Tuesday accepts all 8 of SWEEP-1450's section-6 questions at their defaults. Tuesday re-read three of its claims at source: NexusAI open alerts on main = 47 (paginated GET); HPSM main = 678a1153; MPS main = 5e800095.
+
+**Every lane drafter:**
+- Follows "For every drafter" points 1, 2 (write a lane kit, not a records kit), 3 (grep the pickup and today's note for each key; drop any held key), 6 and 7 above, and the SWEEP-1450 lane text for its keys and owned paths.
+- Takes as its template the latest same-project BUILD kit, read with its STATUS: HPSM `2026-11-16_B1599_SEAT-H171_hpsmpoc-forwardedproof-race.md`; MPS `2026-11-15_B1593_SEAT-M142_mps-lane-mo-package-sdk-guard.md`; NexusAI `2026-11-15_B1595_SEAT-N134_nexusai-nx-f1-first-run-login-settings.md`.
+- Writes the HPSM standing line into every HPSM kit.
+- Never deploys. A gate follows each build, at the tier the sweep names.
+
+The lanes:
+- **B1615 SEAT-H173: HPSM lane H-1** (HPSMPOC-484 + optional 496). Sonnet builder, G2.
+- **B1616 SEAT-H174: HPSM lane H-4** (HPSMPOC-495, two stale statements). Sonnet builder, G3. Re-read the README clause against the golden-outline files first.
+- **B1617 SEAT-M145: MPS lane M-S** (MPSCALC-404, 405; owns `web/src/api/stub/**`). Sonnet builder, G2.
+- **B1618 SEAT-N137: NexusAI lane NX-T** (RD-987, 985, 986, 983, 991, 993, 810; owns `__tests__/**` and `tests/uat-run.js`). Sonnet builder, G2. Uses the NexusAI jest lock as B1603 did. Read RD-810 before changing anything.
+
+Next waves (not yet commissioned): H-3, M-D, M-E, M-G, M-T, NX-S2 (Opus), NX-P (Opus).
