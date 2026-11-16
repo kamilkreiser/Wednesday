@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 FINAL 09:52 17 Nov, the 07:5x rotation successor (ctx 81%, ROTATING) - READ FIRST; supersedes the 09:4x ROTATION HANDOVER below where they differ
+- **K 48th LAUNCHED 09:52** (Sonnet; fleet/briefs_staged/2026-11-17_seatK48_merge.md, STAMP K48-W1..W6; 14 rows from PR 2176 KS-1927 demo-service, gate 311 line 1 GWN, tier 2 stands; W5: NO hold for the demo round, D 69th deploys a fixed pin). Rung 5 OWED. NEXT: its plan QUESTION -> ANSWER (shape 2026-11-17_K47_answer_plan.md; the rulings line quotes a fresh kam_rulings_today.sh FRESHNESS line).
+- **B 200th drafter: subagent of THIS seat, DIES with this rotation.** If fleet/briefs_staged/2026-11-17_seatB200_merge.md is ABSENT, RE-COMMISSION it from 0_Brain/reference/2026-11-17_drafter-seatB200/commission.md (9 rows from PR 2059, KS-1410, mcp-server; develop at commissioning e348b0208894).
+- Everything else: the 09:4x ROTATION HANDOVER block below (D 69th demo build ~10:25-10:40; D 70th stamped waiting on D 69th's wrap; OWED list).
+
 ## 🔴 ROTATION HANDOVER 09:40 17 Nov, the 07:5x rotation successor (ctx ~79%) - READ FIRST; supersedes every block below where they differ
 - **develop e348b0208894** (PR 2066 by B 199th, verified 09:34:57: one parent 96b87083d1f1, tree a738b51a030b). **Merges since 15 Nov evening: 65** (this seat: 2169, 2161, 2192, 2066). **No GO in flight. No merge seat live.** Kam: 4 messages today, newest 07:37:54 (travelling: anything for him is a CARD).
 - **FLOOR:** D 69th only (%232, Opus, DEMO d15 build, 14 batches, ~10 min each; batch 7/14 at 09:16; heartbeat /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-16_seatD-69th/evidence/heartbeat.demo.d15.d69.txt; finish ~10:25-10:40; then STATUS 2 -> swaps -> STATUS B -> Kam's panel receipt (what Peter/Stuart see; the 5 accounts keep their named roles, option a) -> score -> pane_close). Acked 09:16; on an idle wake read the heartbeat's LAST LINE before acking.
