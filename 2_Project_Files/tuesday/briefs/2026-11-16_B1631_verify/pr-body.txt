@@ -1,0 +1,20 @@
+Test-side changes only (nine paths) plus the expected test counts. No product file changes. Nothing is deployed by this change itself.
+
+What changes
+- RD-987: new cell S2 in the retired agent settings routes test posts a valid business hours body to a server seeded with the five stored agent preference values, expects 200 with the posted value stored, and reads the five values byte-equal before and after.
+- RD-985 (partly): new cells H6 (no body) and H7 (array body) pin that the business hours write answers 400 naming the five required fields and writes nothing. They do NOT go red when the shared body check is made to return true (a JSON request with no body reaches the handler as an empty object, and an array body gets the same field list), so RD-985 stays open: a request with no content type and no body answers 500 under that change and 400 today, and needs its own cell.
+- RD-986: the failure branch of the enforce probe takes the harness log record's text instead of treating the record as text, so a real instrument failure throws its own message and not a TypeError. Cells I1 and I2 cover the failure with and without a log record.
+- RD-983: the shared server harness sets the child's log level to info before a cell's own env is applied, so an exported LOG_LEVEL no longer hides the child's own listening line. New cells L1 (boot with the level exported as error) and L2 (source pin). The ordinary-boot control cell of the port band file now allows 25 seconds, not 120.
+- RD-991: the group-read fault check orders its two events by a counter instead of two clock readings that can tie. Cells T1 to T4 cover a tie with the arm first (passes), a tie with the arm second (throws), a later arm (throws) and a missing answer stamp (throws). The twin check for a tampered store has the same strict shape and is not changed here.
+- RD-993: two stale test comments reworded; no cell changes.
+- Expected counts: 5763/368 -> 5774/369 (11 new cells, 1 new suite).
+
+Verification (test files and counts only)
+- Plain verify on the merged tree: 5774/5774 tests, 369 suites, PASS.
+- Red first: L1, L2, I1 and T1 fail without their fix; S2, H6, H7, I2, T2, T3, T4 pin today's behaviour and are checked by plants (S2 fails if the write blanks an agent preference; I2 fails if the null case is unguarded; T2 fails if equal clock readings are accepted).
+- CodeQL CLI over main and over this head: 47 and 15 results on both, no new result. The existing alert on the UAT runner (RD-810) is unchanged and stays open; this change does not touch the runner.
+
+Landing note
+A merge to main starts Deploy demo (the changed paths are not covered by its paths-ignore). Both of its jobs are gated on the CI_DEPLOY_ENABLED variable and read skipped while it is unset. The demo deploy hold stands.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

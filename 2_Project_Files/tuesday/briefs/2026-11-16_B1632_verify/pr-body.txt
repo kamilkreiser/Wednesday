@@ -1,0 +1,31 @@
+## Summary
+
+A host that sets only the follow-up link's own proxy list (`FollowUp:TrustedProxies`) and no `ForwardedHeaders:Proof` value now says so at start-up. Before, it logged nothing while the proof gate quietly removed every `X-Forwarded-For` the follow-up link would have believed.
+
+The new line uses the existing warning's message template unchanged, with the section name swapped:
+
+`FollowUp:TrustedProxies names trusted proxies, but ForwardedHeaders:Proof is not set: no X-Forwarded-For is believed.`
+
+It is written when the follow-up options hold at least one non-blank entry and no shared value is set. It reads the same options the follow-up link reads. No address and no value appear in it. When both lists name proxies and no value is set, each line is written once. The two existing warnings and the proof gate are unchanged.
+
+## Tests (`ForwardedProofTests`)
+
+- Five rows read the captured start-up log: the line is written once (whole text checked), no line with the value set, no line with no proxy named, both lines once, and no line for a blank entry.
+- Without the product line, the two rows that expect the line fail by assertion. Each of the three absence rows is killed by its own mutation of the condition.
+- The forcing test's first request now has the same 30 second wait the watch read already uses. If the request never returns, the test fails with a `TimeoutException` after about 30 s; before, the run hung.
+
+## Effect at start-up
+
+The follow-up options are now read when the host starts. A malformed `FollowUp` value (for example a non-number in `FollowUp:SessionMinutes`) now stops the host at start-up with the binder's error. Before, the host started and only the follow-up requests failed. The shipped settings and valid values are unaffected.
+
+## Verification (local)
+
+- Release build: 0 warnings.
+- Hosting group: 221 tests at base, 226 at head.
+- SQL Server part: 1486 tests at base and 1491 at head, judge clean.
+- Whole api predicate: 4179 passed.
+- Hidden-characters scan: clean.
+
+Log line and tests only; no setting changed; nothing deployed; no integration with HP tools.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,0 +1,111 @@
+using HpsmPoc.Api.Tests.FollowUp;
+using HpsmPoc.Api.Tests.Support;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace HpsmPoc.Api.Tests.Hosting;
+
+// Gate probe only (never committed): the start-up warnings at the boundaries, hosted (Production, real bearer) and local
+// (Development with the Development sign-in) modes.
+public class GateProbeTests
+{
+    private const string FU = "FollowUp:TrustedProxies names trusted proxies, but ForwardedHeaders:Proof is not set: no X-Forwarded-For is believed.";
+    private const string FH = "ForwardedHeaders names trusted proxies, but ForwardedHeaders:Proof is not set: no X-Forwarded-For is believed.";
+    private const string PS = "ASPNETCORE_FORWARDEDHEADERS_ENABLED is set, but ForwardedHeaders names no trusted proxy: no X-Forwarded-For is believed.";
+    private static readonly string Value = "probe." + new string('8', 34);
+    private const string Key = "ForwardedHeaders:Proof";
+
+    private static (int Fu, int Fh, int Ps, int AnyFuPrefix) Count(Dictionary<string, string> s, string mode)
+    {
+        using var api = new ProbeFactory(s, mode);
+        _ = api.CreateClient();
+        var w = api.Logs.Entries.Where(e => e.Level == LogLevel.Warning).Select(e => e.Message).ToArray();
+        return (w.Count(m => m == FU), w.Count(m => m == FH), w.Count(m => m == PS), w.Count(m => m.Contains("FollowUp:TrustedProxies", StringComparison.Ordinal)));
+    }
+
+    private static readonly Dictionary<string, string> Hosted = new()
+    {
+        ["ForwardedHeaders:KnownNetworks"] = "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16",
+        ["ForwardedHeaders:KnownProxies"] = "192.0.2.10,192.0.2.11",
+        ["ForwardedHeaders:ForwardLimit"] = "2",
+    };
+
+    [Theory]
+    [InlineData("hosted")]
+    [InlineData("local")]
+    [InlineData("testing")]
+    public void P01_named_proof_absent_1(string mode) => Assert.Equal((1, 0, 0, 1), Count(new() { ["FollowUp:TrustedProxies:0"] = "10.0.0.4" }, mode));
+
+    [Theory]
+    [InlineData("hosted")]
+    [InlineData("local")]
+    public void P02_named_proof_set_0(string mode) => Assert.Equal((0, 0, 0, 0), Count(new() { ["FollowUp:TrustedProxies:0"] = "10.0.0.4", [Key] = Value }, mode));
+
+    [Theory]
+    [InlineData("hosted")]
+    [InlineData("local")]
+    public void P03_named_proof_blank_1(string mode) => Assert.Equal((1, 0, 0, 1), Count(new() { ["FollowUp:TrustedProxies:0"] = "10.0.0.4", [Key] = "" }, mode));
+
+    [Theory]
+    [InlineData("hosted")]
+    [InlineData("local")]
+    public void P04_absent_proof_absent_0(string mode) => Assert.Equal((0, 0, 0, 0), Count(new(), mode));
+
+    [Theory]
+    [InlineData("hosted")]
+    [InlineData("local")]
+    public void P05_section_value_empty_starts_and_0(string mode) => Assert.Equal((0, 0, 0, 0), Count(new() { ["FollowUp:TrustedProxies"] = "" }, mode));
+
+    [Theory]
+    [InlineData("hosted")]
+    [InlineData("local")]
+    public void P06_entry_empty_0(string mode) => Assert.Equal((0, 0, 0, 0), Count(new() { ["FollowUp:TrustedProxies:0"] = "" }, mode));
+
+    [Fact]
+    public void P07_blank_tab_entry_0() => Assert.Equal((0, 0, 0, 0), Count(new() { ["FollowUp:TrustedProxies:0"] = "\t " }, "hosted"));
+
+    [Fact]
+    public void P08_blank_then_named_1() => Assert.Equal((1, 0, 0, 1), Count(new() { ["FollowUp:TrustedProxies:0"] = " ", ["FollowUp:TrustedProxies:1"] = "10.0.0.4" }, "hosted"));
+
+    [Fact]
+    public void P09_two_named_once() => Assert.Equal((1, 0, 0, 1), Count(new() { ["FollowUp:TrustedProxies:0"] = "10.0.0.4", ["FollowUp:TrustedProxies:1"] = "10.0.0.5" }, "hosted"));
+
+    [Fact]
+    public void P10_both_lists_proof_set_0() => Assert.Equal((0, 0, 0, 0), Count(new(Hosted) { ["FollowUp:TrustedProxies:0"] = "10.0.0.4", [Key] = Value }, "hosted"));
+
+    [Fact]
+    public void P11_forwarded_only_no_proof_existing_only() => Assert.Equal((0, 1, 0, 0), Count(new(Hosted), "hosted"));
+
+    [Fact]
+    public void P12_both_lists_no_proof_two_lines() => Assert.Equal((1, 1, 0, 1), Count(new(Hosted) { ["FollowUp:TrustedProxies:0"] = "10.0.0.4" }, "hosted"));
+
+    [Fact]
+    public void P13_platform_switch_and_followup_no_proof() => Assert.Equal((1, 0, 1, 1), Count(new() { ["ForwardedHeaders_Enabled"] = "true", ["FollowUp:TrustedProxies:0"] = "10.0.0.4" }, "hosted"));
+
+    [Fact]
+    public void P14_platform_switch_alone_existing_only() => Assert.Equal((0, 0, 1, 0), Count(new() { ["ForwardedHeaders_Enabled"] = "true" }, "hosted"));
+
+    [Fact]
+    public void P15_unparseable_entry_named_1() => Assert.Equal((1, 0, 0, 1), Count(new() { ["FollowUp:TrustedProxies:0"] = "web-server" }, "hosted"));
+
+    // A malformed follow-up setting: does the host still start (main resolves FollowUpOptions only on a follow-up request)?
+    [Fact]
+    public void P16_malformed_followup_setting_host_starts() => Assert.Null(Record.Exception(() => Count(new() { ["FollowUp:SessionMinutes"] = "abc" }, "hosted")));
+
+    private sealed class ProbeFactory(Dictionary<string, string> settings, string mode) : FollowUpFactory
+    {
+        public LogCapture Logs { get; } = new();
+
+        protected override string EnvironmentName => mode switch { "hosted" => "Production", "local" => "Development", _ => "Testing" };
+
+        protected override bool UseTestAuthentication => mode == "testing";
+
+        protected override void Configure(IWebHostBuilder builder)
+        {
+            base.Configure(builder);
+            if (mode == "local") builder.UseSetting("Auth:Development:Enabled", "true");
+            foreach (var (key, value) in settings) builder.UseSetting(key, value);
+            builder.ConfigureLogging(l => l.AddProvider(Logs).AddFilter<LogCapture>(null, LogLevel.Information));
+        }
+    }
+}

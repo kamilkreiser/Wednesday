@@ -1,0 +1,20 @@
+The follow-up link's own proxy list (FollowUp:TrustedProxies) is stopped by the
+proof gate when ForwardedHeaders:Proof is not set, so no X-Forwarded-For is
+believed. The existing start-up warning reads only the ForwardedHeaders lists,
+so a host that set only the follow-up list logged nothing.
+
+One start-up warning with the same message template as the existing one,
+naming FollowUp:TrustedProxies, written when that list holds a non-blank entry
+and no shared value is set; it reads the same options the follow-up link reads.
+Five test rows read the log lines (once, none with the value set, none with no
+proxy named, both lines once, none for a blank entry). The forcing test's first
+request gets the same 30 second wait the watch read already uses, so a hang
+becomes a failure instead of a stuck run.
+
+The follow-up options are now read at start-up, so a malformed FollowUp value
+stops the host at start-up instead of failing the follow-up requests later;
+the shipped settings are unaffected.
+
+Log line and tests only; no setting changed; nothing deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

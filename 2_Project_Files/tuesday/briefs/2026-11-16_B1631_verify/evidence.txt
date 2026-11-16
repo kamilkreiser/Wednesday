@@ -1,0 +1,424 @@
+GATE EVIDENCE (ASCII-sanitised copy of the gate chain log, probe outputs, scans, sarif summary)
+=== chain.out (jest runs under the shared lock; verify log tail) ===
+[nexusai-lock] jest lock acquired by b1631-gate after 0s
+=== chain start Mon 16 Nov 2026 18:08:04 AEDT
+=== STEP browser
+assert-browser: OK - Playwright's bundled Chromium 151.0.7922.34
+=== STEP red-first (wt-red = main + head test files, P3 and P6 planted back)
+--- RUN rf-rd983 tree=/private/tmp/b1631-gate/wt-red band-before:[] 18:08:05 load 13.77 15.03 14.29
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd983-harness-ignores-exported-log-level.test.js: cells=2 notpassed=2 suiteStatus=failed
+   FAILED  L1: with the log level exported as error, an ordinary boot resolves and its outp [20363 ms]
+      msg: Error: [rd983-level] never answered /api/health (HTTP 200 without this child's own listening line). a 200 answered on :21280 that did not come from this child (its own 'running on port 21280' line was never printed). child pid 38004 stopped. output: azureOpenAIAdapter.js:250:10)\n    at AzureOpenAIAdapter.generateWithTools (/private/tmp/b1631-gate/
+   FAILED  L2: the harness holds the level assignment on exactly one line, before the cell  [3 ms]
+      msg: Error: expect(received).toEqual(expected) // deep equality  - Expected  - 2 + Received  + 2    Object { -   "beforeCellEnv": true, +   "beforeCellEnv": false,     "controlWithout": 0, -   "lines": 1, +   "lines": 0,   }     at Object.toEqual (/private/tmp/b1631-gate/wt-red/__tests__/rd983-harness-ignores-exported-log-level.test.js:59:12)     at Pro
+TOTAL cells 2 notpassed 2
+--- RUN rf-rd691 tree=/private/tmp/b1631-gate/wt-red band-before:[] 18:08:27 load 15.41 15.32 14.41
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd691-agent-settings-routes-retired.test.js: cells=6 notpassed=0 suiteStatus=passed
+   PASSED  S1: the five stored values are still in the settings file, exactly as seeded, af [11 ms]
+   PASSED  S2: a valid business hours write answers 200, stores its own value, and leaves t [118 ms]
+TOTAL cells 6 notpassed 0
+--- RUN rf-rd969 tree=/private/tmp/b1631-gate/wt-red band-before:[] 18:08:31 load 16.90 15.63 14.53
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd969-three-routes-empty-request.test.js: cells=10 notpassed=0 suiteStatus=passed
+   PASSED  H1: POST /api/settings/business-hours with an empty object answers 400 naming th [8 ms]
+   PASSED  H6: POST /api/settings/business-hours with no body answers 400 naming the five r [2 ms]
+   PASSED  H7: POST /api/settings/business-hours with an array body answers 400 naming the  [3 ms]
+TOTAL cells 10 notpassed 0
+--- RUN rf-rd436 tree=/private/tmp/b1631-gate/wt-red band-before:[] 18:08:34 load 16.90 15.63 14.53
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd436-r4-enforce-stamp-and-status.test.js: cells=12 notpassed=1 suiteStatus=failed
+   FAILED  I1: a failed probe throws the instrument error, naming the failed step and holdi [2 ms]
+      msg: Error: expect(received).toEqual(expected) // deep equality  - Expected  - 3 + Received  + 3    Object { -   "begins": true, -   "holdsLog": true, -   "namesStep": true, +   "begins": false, +   "holdsLog": false, +   "namesStep": false,   }     at Object.toEqual (/private/tmp/b1631-gate/wt-red/__tests__/rd436-r4-enforce-stamp-and-status.test.js:424
+   PASSED  I2: with no log record yet (null) the same failed probe still throws the instrum [0 ms]
+TOTAL cells 12 notpassed 1
+--- RUN rf-rd982 tree=/private/tmp/b1631-gate/wt-red band-before:[] 18:08:42 load 18.24 15.94 14.65
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd982-harness-port-band.test.js: cells=4 notpassed=0 suiteStatus=passed
+   PASSED  B1: a 200 from a server that is not this child is refused, by name, and the chil [1069 ms]
+   PASSED  B2: an ordinary boot resolves, and its output holds its own listening line [769 ms]
+TOTAL cells 4 notpassed 0
+--- RUN rf-rd452 tree=/private/tmp/b1631-gate/wt-red band-before:[] 18:08:46 load 17.74 15.88 14.63
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd452-group-config-strict-callback.test.js: cells=35 notpassed=1 suiteStatus=failed
+   FAILED  T1 - equal clock readings, the arm ordered before the answer: the check passes [21 ms]
+      msg: Error: expect(received).not.toThrow()  Error name:    "Error" Error message: "RD-452 harness [rd991-hand-built]: the group-read fault was not armed inside the token exchange (armed at 5000 as event 1, token answered at 5000 as event 2); this cell would not measure the callback's read"        422 |     // RD-991: the order of the two events, not the
+   PASSED  T2 - equal clock readings, the arm ordered after the answer: the check throws th [0 ms]
+   PASSED  T3 - an arm clocked and ordered after the answer: the check throws the harness e [0 ms]
+   PASSED  T4 - a result with no answer stamp: the check throws the harness error [0 ms]
+TOTAL cells 35 notpassed 1
+=== STEP head cells (wt-head)
+--- RUN hd-rd983 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:09:48 load 14.61 15.37 14.53
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd983-harness-ignores-exported-log-level.test.js: cells=2 notpassed=0 suiteStatus=passed
+   PASSED  L1: with the log level exported as error, an ordinary boot resolves and its outp [918 ms]
+   PASSED  L2: the harness holds the level assignment on exactly one line, before the cell  [0 ms]
+TOTAL cells 2 notpassed 0
+--- RUN hd-rd691 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:09:50 load 14.61 15.37 14.53
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd691-agent-settings-routes-retired.test.js: cells=6 notpassed=0 suiteStatus=passed
+   PASSED  S2: a valid business hours write answers 200, stores its own value, and leaves t [110 ms]
+TOTAL cells 6 notpassed 0
+--- RUN hd-rd969 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:09:54 load 14.08 15.25 14.49
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd969-three-routes-empty-request.test.js: cells=10 notpassed=0 suiteStatus=passed
+   PASSED  H6: POST /api/settings/business-hours with no body answers 400 naming the five r [2 ms]
+   PASSED  H7: POST /api/settings/business-hours with an array body answers 400 naming the  [2 ms]
+TOTAL cells 10 notpassed 0
+--- RUN hd-rd436 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:09:57 load 13.60 15.12 14.45
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd436-r4-enforce-stamp-and-status.test.js: cells=12 notpassed=0 suiteStatus=passed
+   PASSED  I1: a failed probe throws the instrument error, naming the failed step and holdi [1 ms]
+   PASSED  I2: with no log record yet (null) the same failed probe still throws the instrum [0 ms]
+TOTAL cells 12 notpassed 0
+--- RUN hd-rd982 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:10:05 load 15.15 15.42 14.56
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd982-harness-port-band.test.js: cells=4 notpassed=0 suiteStatus=passed
+   PASSED  B1: a 200 from a server that is not this child is refused, by name, and the chil [1066 ms]
+   PASSED  B2: an ordinary boot resolves, and its output holds its own listening line [803 ms]
+TOTAL cells 4 notpassed 0
+--- RUN hd-rd452 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:10:09 load 14.74 15.33 14.54
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd452-group-config-strict-callback.test.js: cells=35 notpassed=0 suiteStatus=passed
+   PASSED  T1 - equal clock readings, the arm ordered before the answer: the check passes [1 ms]
+   PASSED  T2 - equal clock readings, the arm ordered after the answer: the check throws th [9 ms]
+   PASSED  T3 - an arm clocked and ordered after the answer: the check throws the harness e [1 ms]
+   PASSED  T4 - a result with no answer stamp: the check throws the harness error [0 ms]
+TOTAL cells 35 notpassed 0
+--- RUN hd-rd465 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:11:10 load 13.44 15.04 14.50
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd465-first-run-open-window.test.js: cells=10 notpassed=0 suiteStatus=passed
+   PASSED  PRECONDITION: the page script is loaded AND the page opens on its first tab, not [5 ms]
+   PASSED  #users selects the User Access tab (hashchange on the page itself) [18 ms]
+   PASSED  a valid hash moves the tab; an unknown or malformed one changes nothing [60 ms]
+   PASSED  the banner link names the User Access step [3 ms]
+   PASSED  Turn on Authentication Control: success removes the banner [29 ms]
+   PASSED  Step 3 "Enforce Authentication": success removes the banner [28 ms]
+   PASSED  a fresh load with no hash: the page script runs and LEAVES the first tab open [101 ms]
+   PASSED  RED PROOF: with no page script the fixture still reads dashboard, and scriptRan  [98 ms]
+   PASSED  RED PROOF: a page script that throws before the end does not count as having run [95 ms]
+   PASSED  a fresh load at #users opens User Access from the script itself, before any hash [95 ms]
+TOTAL cells 10 notpassed 0
+--- RUN hd-rd486 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:11:12 load 13.44 15.04 14.50
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd486-ai-test-key-forwarding.test.js: cells=45 notpassed=0 suiteStatus=passed
+   PASSED  K1 (cell c, ENV) ? the stored endpoint, no body key: the stored key IS used, suc [1 ms]
+   PASSED  K1b (cell c0, ENV) ? no endpoint and no key tests the stored config with the sto [1 ms]
+   PASSED  K2 ? the SAVED boot hydrated its config from storage [0 ms]
+   PASSED  K1c (cell c, SAVED) ? the saved endpoint (trailing slash), no body key: the SAVE [1 ms]
+   PASSED  a (ENV) ? the attacker endpoint receives NOTHING, the call is refused 400 AI_TES [0 ms]
+   PASSED  a (SAVED) ? the attacker endpoint receives NOTHING, the call is refused 400 AI_T [1 ms]
+   PASSED  b ? only the body key is sent; the stored key never is [0 ms]
+   PASSED  d-match ? scheme and host case and a trailing slash still match: stored key, sto [0 ms]
+   PASSED  d-nomatch ? the address the stored name resolves to, in place of the name: refus [1 ms]
+   PASSED  d-nomatch ? a different path (/other): refused, and NOTHING reaches any stand-in [0 ms]
+   PASSED  d-nomatch ? a different scheme (https): refused, and NOTHING reaches any stand-i [0 ms]
+   PASSED  d-nomatch ? a different port: refused, and NOTHING reaches any stand-in [0 ms]
+   PASSED  e ? the 6th request from one address inside the window is refused 429 and sends  [0 ms]
+   PASSED  K3 ? another address in the same window still gets through (the 429 is per addre [0 ms]
+   PASSED  f ? the typed key reaches the typed endpoint; the route answers success [0 ms]
+   PASSED  f-control ? the same body with the key field empty on a fresh deployment is refu [0 ms]
+   PASSED  sameAoaiEndpoint(stored, identical): https://contoso-aoai.openai.azure.com/ -> t [9 ms]
+   PASSED  sameAoaiEndpoint(stored, no trailing slash): https://contoso-aoai.openai.azure.c [0 ms]
+   PASSED  sameAoaiEndpoint(stored, several trailing slashes): https://contoso-aoai.openai. [0 ms]
+   PASSED  sameAoaiEndpoint(stored, host case): https://CONTOSO-AOAI.OpenAI.Azure.com/ -> t [0 ms]
+   PASSED  sameAoaiEndpoint(stored, scheme case): HTTPS://contoso-aoai.openai.azure.com/ -> [1 ms]
+   PASSED  sameAoaiEndpoint(stored, explicit default port :443): https://contoso-aoai.opena [0 ms]
+   PASSED  sameAoaiEndpoint(stored, surrounding whitespace):   https://contoso-aoai.openai. [0 ms]
+   PASSED  sameAoaiEndpoint(stored, http instead of https): http://contoso-aoai.openai.azur [0 ms]
+   PASSED  sameAoaiEndpoint(stored, explicit :80 on https): https://contoso-aoai.openai.azu [0 ms]
+   PASSED  sameAoaiEndpoint(stored, another port): https://contoso-aoai.openai.azure.com:84 [0 ms]
+   PASSED  sameAoaiEndpoint(stored, another resource): https://contoso-aoai2.openai.azure.c [0 ms]
+   PASSED  sameAoaiEndpoint(stored, suffix trick): https://contoso-aoai.openai.azure.com.ex [0 ms]
+   PASSED  sameAoaiEndpoint(stored, userinfo trick): https://contoso-aoai.openai.azure.com@ [0 ms]
+   PASSED  sameAoaiEndpoint(stored, userinfo on the stored host): https://user@contoso-aoai [0 ms]
+   PASSED  sameAoaiEndpoint(stored, trailing dot on the host): https://contoso-aoai.openai. [0 ms]
+   PASSED  sameAoaiEndpoint(stored, a path): https://contoso-aoai.openai.azure.com/proxy -> [0 ms]
+   PASSED  sameAoaiEndpoint(stored, a query): https://contoso-aoai.openai.azure.com/?x=1 -> [0 ms]
+   PASSED  sameAoaiEndpoint(stored, not a URL): contoso-aoai.openai.azure.com -> false [0 ms]
+   PASSED  sameAoaiEndpoint(stored, a non-http scheme): ftp://contoso-aoai.openai.azure.com [0 ms]
+   PASSED  sameAoaiEndpoint(stored, empty):  -> false [0 ms]
+   PASSED  path case counts: /Proxy is not /proxy [0 ms]
+   PASSED  nothing stored matches nothing [0 ms]
+   PASSED  resolveAiTestCredentials ? no endpoint, no key: the stored pair [0 ms]
+   PASSED  resolveAiTestCredentials ? the stored endpoint (variant), no key: the stored key [0 ms]
+   PASSED  resolveAiTestCredentials ? another endpoint, no key: refused [0 ms]
+   PASSED  resolveAiTestCredentials ? another endpoint, body key: the body key [0 ms]
+   PASSED  resolveAiTestCredentials ? the stored endpoint, body key: the body key [0 ms]
+   PASSED  resolveAiTestCredentials ? the stored endpoint but nothing stored as a key: refu [0 ms]
+   PASSED  resolveAiTestCredentials ? a fresh deployment, typed endpoint, no key: refused [0 ms]
+TOTAL cells 45 notpassed 0
+--- RUN hd-rd875 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:12:11 load 12.51 14.51 14.33
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd875-uat-run-target-and-port.test.js: cells=7 notpassed=0 suiteStatus=passed
+   PASSED  an unset or empty UAT_BASE yields NO target (no default host) [1 ms]
+   PASSED  the usage line names UAT_BASE and no default host [1 ms]
+   PASSED  an explicit UAT_BASE is returned as given [0 ms]
+   PASSED  the port in the URL is the port connected to (8443, as a number) [1 ms]
+   PASSED  no port in the URL means 443 [0 ms]
+   PASSED  the server certificate is still verified (RD-789 cb8755a is not undone) [1 ms]
+   PASSED  requiring the script makes no request, starts no timer and does not exit [0 ms]
+TOTAL cells 7 notpassed 0
+--- RUN hd-rd436g tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:12:11 load 12.51 14.51 14.33
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd436-group-gate-callback.test.js: cells=14 notpassed=0 suiteStatus=passed
+   PASSED  CONTROL the group was really configured and authentication really enforced [1 ms]
+   PASSED  RD-436 enforce tells the administrator the group check fails closed and names th [1 ms]
+   PASSED  RD-501 Graph 403 -> refused, no session, no user record, one audit line (4xx, 40 [162 ms]
+   PASSED  Graph 503 -> refused, no session, no user record, one audit line (5xx, 503) [7 ms]
+   PASSED  Graph hangs -> refused at the 10 s bound, not left hanging [10008 ms]
+   PASSED  Graph 200 with a malformed body that NAMES the group -> refused (malformed) [134 ms]
+   PASSED  token response with no access token -> refused (no_token), Graph never asked [5 ms]
+   PASSED  RD-501 checkMemberGroups returns the group (direct member) -> admitted, asked th [3095 ms]
+   PASSED  member through a NESTED group (memberOf would not list it) -> admitted [3080 ms]
+   PASSED  RD-501 checkMemberGroups returns empty (a non-member) -> refused as not authoris [7 ms]
+   PASSED  no token and no Graph body anywhere in the server output; nothing reached any ot [0 ms]
+   PASSED  CONTROL authentication really was enforced, with no group, and the enforce answe [0 ms]
+   PASSED  RD-501 a tenant user is admitted, Graph is never asked, a user record and a sess [3214 ms]
+   PASSED  L4 ? a setup step fails AFTER /api/health answered (csrf-token is not JSON): the [615 ms]
+TOTAL cells 14 notpassed 0
+--- RUN hd-rd441 tree=/private/tmp/b1631-gate/wt-head band-before:[] 18:12:34 load 12.03 14.27 14.25
+rc=0 band-after:[] EADDRINUSE=0
+FILE rd441-persistence-alarm-reaches-dashboard.test.js: cells=20 notpassed=0 suiteStatus=passed
+   PASSED  P1 - W enforces auth and its sessions are real; F is open mode [48 ms]
+   PASSED  S1 - a real first boot on an EMPTY volume raises no alarm [3 ms]
+   PASSED  S2 - a real boot on stores without a sentinel raises it, and admin health says s [21 ms]
+   PASSED  R1 - signed out, with auth enforced: 401, nothing about the volume [1 ms]
+   PASSED  R2 - a signed-in VIEWER gets the alarm, and exactly two booleans [23 ms]
+   PASSED  R3 - an admin gets the same two booleans; details stay on /api/admin/health [18 ms]
+   PASSED  R4 - open mode (auth not enforced) answers too: the first boot is not wiped [3 ms]
+   PASSED  H1 - no persistence key, and nothing beyond the PT-026 fields, signed in or not [5 ms]
+   PASSED  U1 - a signed-in VIEWER on the wiped deployment sees the red storage banner [363 ms]
+   PASSED  U2 - CONTROL: the first-boot deployment does not show the storage banner [356 ms]
+   PASSED  U3 - CONTROL: signed out, the route answers 401 and that never raises the storag [305 ms]
+   PASSED  B1 - stale data feed shows the stale warning [327 ms]
+   PASSED  B2 - DEGRADED shows the public degradedReason [265 ms]
+   PASSED  B3 - healthy and not wiped: hidden [271 ms]
+   PASSED  B4 - the storage alarm wins over stale data and DEGRADED [263 ms]
+   PASSED  B5 - the storage alarm still shows when /api/health itself fails; without it, th [526 ms]
+   PASSED  B6 - an ephemeral store reporting volumeWiped never raises the storage banner [321 ms]
+   PASSED  G1 - every banner source is a route the real server serves, returning each field [29 ms]
+   PASSED  G2 - the dashboard load actually calls testAPIConnection() [1 ms]
+   PASSED  L1 ? a server that never listens: the boot throws, the error carries the pid, an [4112 ms]
+TOTAL cells 20 notpassed 0
+=== STEP mutations (wt-mut)
+--- RUN mut-probe-P0 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:12:46 load 12.20 14.21 14.23
+rc=0 band-after:[] EADDRINUSE=0
+FILE zz-gate-probe.test.js: cells=1 notpassed=0 suiteStatus=passed
+   PASSED  probe business hours shapes [27 ms]
+TOTAL cells 1 notpassed 0
+json-no-body: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+text-plain-no-body: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+text-plain-array-text: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-array: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-null: 400 {"error":"Invalid request","message":"Unexpected token 'n', \"null\" is not valid JSON","code":"UNKNOWN_ERROR","hint":"C
+no-content-type-no-body: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-empty-object: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-string: 400 {"error":"Invalid request","message":"Unexpected token '\"', \"\"x\"\" is not valid JSON","code":"UNKNOWN_ERROR","hint":
+P1 applied backend/server.js count 1
+--- RUN mut-P1 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:12:47 load 12.20 14.21 14.23
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd691-agent-settings-routes-retired.test.js: cells=6 notpassed=1 suiteStatus=failed
+   PASSED  S1: the five stored values are still in the settings file, exactly as seeded, af [10 ms]
+   FAILED  S2: a valid business hours write answers 200, stores its own value, and leaves t [115 ms]
+      msg: Error: expect(received).toEqual(expected) // deep equality  - Expected  - 1 + Received  + 1  @@ -1,10 +1,10 @@   Object {     "after": Object {       "agent_language": "rd691-language",       "agent_response_style": "rd691-style", -     "agent_role": "rd691-role", +     "agent_role": "",       "agent_use_emojis": "rd691-emojis",       "agent_use_ma
+TOTAL cells 6 notpassed 1
+P1 reverted backend/server.js blob equal
+X4 applied backend/server.js count 1
+--- RUN mut-X4 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:12:51 load 11.71 14.08 14.18
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd691-agent-settings-routes-retired.test.js: cells=6 notpassed=1 suiteStatus=failed
+   PASSED  S1: the five stored values are still in the settings file, exactly as seeded, af [9 ms]
+   FAILED  S2: a valid business hours write answers 200, stores its own value, and leaves t [84 ms]
+      msg: Error: expect(received).toEqual(expected) // deep equality  - Expected  - 1 + Received  + 1  @@ -12,7 +12,7 @@       "agent_role": "rd691-role",       "agent_use_emojis": "rd691-emojis",       "agent_use_markdown": "rd691-markdown",     },     "status": 200, -   "written": "08:30", +   "written": undefined,   }     at Object.toEqual (/private/tmp/b
+TOTAL cells 6 notpassed 1
+X4 reverted backend/server.js blob equal
+P2 applied backend/server.js count 1
+--- RUN mut-P2 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:12:55 load 11.71 14.08 14.18
+rc=0 band-after:[] EADDRINUSE=0
+FILE zz-gate-probe.test.js: cells=1 notpassed=0 suiteStatus=passed
+FILE rd969-three-routes-empty-request.test.js: cells=10 notpassed=0 suiteStatus=passed
+   PASSED  H1: POST /api/settings/business-hours with an empty object answers 400 naming th [7 ms]
+   PASSED  H6: POST /api/settings/business-hours with no body answers 400 naming the five r [2 ms]
+   PASSED  H7: POST /api/settings/business-hours with an array body answers 400 naming the  [2 ms]
+TOTAL cells 11 notpassed 0
+json-no-body: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+text-plain-no-body: 500 {"error":"Failed to save business hours"}
+text-plain-array-text: 500 {"error":"Failed to save business hours"}
+json-array: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-null: 400 {"error":"Invalid request","message":"Unexpected token 'n', \"null\" is not valid JSON","code":"UNKNOWN_ERROR","hint":"C
+no-content-type-no-body: 500 {"error":"Failed to save business hours"}
+json-empty-object: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-string: 400 {"error":"Invalid request","message":"Unexpected token '\"', \"\"x\"\" is not valid JSON","code":"UNKNOWN_ERROR","hint":
+P2 reverted backend/server.js blob equal
+P3 applied __tests__/rd436-r4-enforce-stamp-and-status.test.js count 1
+--- RUN mut-P3 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:12:58 load 13.01 14.31 14.26
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd436-r4-enforce-stamp-and-status.test.js: cells=12 notpassed=1 suiteStatus=failed
+   FAILED  I1: a failed probe throws the instrument error, naming the failed step and holdi [1 ms]
+      msg: Error: expect(received).toEqual(expected) // deep equality  - Expected  - 3 + Received  + 3    Object { -   "begins": true, -   "holdsLog": true, -   "namesStep": true, +   "begins": false, +   "holdsLog": false, +   "namesStep": false,   }     at Object.toEqual (/private/tmp/b1631-gate/wt-mut/__tests__/rd436-r4-enforce-stamp-and-status.test.js:424
+   PASSED  I2: with no log record yet (null) the same failed probe still throws the instrum [0 ms]
+TOTAL cells 12 notpassed 1
+P3 reverted __tests__/rd436-r4-enforce-stamp-and-status.test.js blob equal
+X3 applied __tests__/rd436-r4-enforce-stamp-and-status.test.js count 1
+--- RUN mut-X3 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:13:07 load 12.97 14.25 14.24
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd436-r4-enforce-stamp-and-status.test.js: cells=12 notpassed=1 suiteStatus=failed
+   PASSED  I1: a failed probe throws the instrument error, naming the failed step and holdi [0 ms]
+   FAILED  I2: with no log record yet (null) the same failed probe still throws the instrum [1 ms]
+      msg: Error: expect(received).toEqual(expected) // deep equality  - Expected  - 3 + Received  + 3    Object { -   "begins": true, -   "emptyTail": true, -   "namesStep": true, +   "begins": false, +   "emptyTail": false, +   "namesStep": false,   }     at Object.toEqual (/private/tmp/b1631-gate/wt-mut/__tests__/rd436-r4-enforce-stamp-and-status.test.js:4
+TOTAL cells 12 notpassed 1
+X3 reverted __tests__/rd436-r4-enforce-stamp-and-status.test.js blob equal
+P4 applied __tests__/helpers/rd395-server-harness.js count 1
+--- RUN mut-P4 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:13:16 load 13.99 14.44 14.31
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd983-harness-ignores-exported-log-level.test.js: cells=2 notpassed=2 suiteStatus=failed
+   FAILED  L1: with the log level exported as error, an ordinary boot resolves and its outp [20285 ms]
+      msg: Error: [rd983-level] never answered /api/health (HTTP 200 without this child's own listening line). a 200 answered on :27040 that did not come from this child (its own 'running on port 27040' line was never printed). child pid 46962 stopped. output: azureOpenAIAdapter.js:250:10)\n    at AzureOpenAIAdapter.generateWithTools (/private/tmp/b1631-gate/
+   FAILED  L2: the harness holds the level assignment on exactly one line, before the cell  [2 ms]
+      msg: Error: expect(received).toEqual(expected) // deep equality  - Expected  - 2 + Received  + 2    Object { -   "beforeCellEnv": true, +   "beforeCellEnv": false,     "controlWithout": 0, -   "lines": 1, +   "lines": 0,   }     at Object.toEqual (/private/tmp/b1631-gate/wt-mut/__tests__/rd983-harness-ignores-exported-log-level.test.js:59:12)     at Pro
+TOTAL cells 2 notpassed 2
+P4 reverted __tests__/helpers/rd395-server-harness.js blob equal
+X5 applied __tests__/helpers/rd395-server-harness.js count 1
+--- RUN mut-X5 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:13:37 load 16.65 14.97 14.50
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd983-harness-ignores-exported-log-level.test.js: cells=2 notpassed=2 suiteStatus=failed
+   FAILED  L1: with the log level exported as error, an ordinary boot resolves and its outp [20352 ms]
+      msg: Error: [rd983-level] never answered /api/health (HTTP 200 without this child's own listening line). a 200 answered on :27040 that did not come from this child (its own 'running on port 27040' line was never printed). child pid 47933 stopped. output: azureOpenAIAdapter.js:250:10)\n    at AzureOpenAIAdapter.generateWithTools (/private/tmp/b1631-gate/
+   FAILED  L2: the harness holds the level assignment on exactly one line, before the cell  [2 ms]
+      msg: Error: expect(received).toEqual(expected) // deep equality  - Expected  - 2 + Received  + 2    Object { -   "beforeCellEnv": true, +   "beforeCellEnv": false,     "controlWithout": 0, -   "lines": 1, +   "lines": 0,   }     at Object.toEqual (/private/tmp/b1631-gate/wt-mut/__tests__/rd983-harness-ignores-exported-log-level.test.js:59:12)     at Pro
+TOTAL cells 2 notpassed 2
+X5 reverted __tests__/helpers/rd395-server-harness.js blob equal
+P5 applied backend/server.js count 1
+--- RUN mut-P5 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:13:58 load 19.81 15.80 14.81
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd982-harness-port-band.test.js: cells=4 notpassed=1 suiteStatus=failed
+   PASSED  B1: a 200 from a server that is not this child is refused, by name, and the chil [1064 ms]
+   FAILED  B2: an ordinary boot resolves, and its output holds its own listening line [25286 ms]
+      msg: Error: [rd982-ok] never answered /api/health (HTTP 200 without this child's own listening line). a 200 answered on :27040 that did not come from this child (its own 'running on port 27040' line was never printed). child pid 48876 stopped. output: ter.js:250:10)\n    at AzureOpenAIAdapter.generateWithTools (/private/tmp/b1631-gate/wt-mut/backend/llm
+TOTAL cells 4 notpassed 1
+P5 reverted backend/server.js blob equal
+P6 applied __tests__/rd452-group-config-strict-callback.test.js count 1
+--- RUN mut-P6 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:14:27 load 19.69 16.10 14.95
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd452-group-config-strict-callback.test.js: cells=35 notpassed=1 suiteStatus=failed
+   FAILED  T1 - equal clock readings, the arm ordered before the answer: the check passes [24 ms]
+      msg: Error: expect(received).not.toThrow()  Error name:    "Error" Error message: "RD-452 harness [rd991-hand-built]: the group-read fault was not armed inside the token exchange (armed at 5000 as event 1, token answered at 5000 as event 2); this cell would not measure the callback's read"        422 |     // RD-991: the order of the two events, not the
+   PASSED  T2 - equal clock readings, the arm ordered after the answer: the check throws th [0 ms]
+   PASSED  T3 - an arm clocked and ordered after the answer: the check throws the harness e [0 ms]
+   PASSED  T4 - a result with no answer stamp: the check throws the harness error [0 ms]
+TOTAL cells 35 notpassed 1
+P6 reverted __tests__/rd452-group-config-strict-callback.test.js blob equal
+X1 applied __tests__/rd452-group-config-strict-callback.test.js count 1
+--- RUN mut-X1 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:15:29 load 14.21 15.15 14.67
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd452-group-config-strict-callback.test.js: cells=35 notpassed=3 suiteStatus=failed
+   PASSED  T1 - equal clock readings, the arm ordered before the answer: the check passes [0 ms]
+   FAILED  T2 - equal clock readings, the arm ordered after the answer: the check throws th [0 ms]
+      msg: Error: expect(received).toThrow(expected)  Expected substring: "RD-452 harness [rd991-hand-built]: the group-read fault was not armed inside the token exchange"  Received function did not throw     at Object.toThrow (/private/tmp/b1631-gate/wt-mut/__tests__/rd452-group-config-strict-callback.test.js:849:53)     at Promise.then.completed (/Volumes/D
+   FAILED  T3 - an arm clocked and ordered after the answer: the check throws the harness e [0 ms]
+      msg: Error: expect(received).toThrow(expected)  Expected substring: "RD-452 harness [rd991-hand-built]: the group-read fault was not armed inside the token exchange"  Received function did not throw     at Object.toThrow (/private/tmp/b1631-gate/wt-mut/__tests__/rd452-group-config-strict-callback.test.js:854:53)     at Promise.then.completed (/Volumes/D
+   FAILED  T4 - a result with no answer stamp: the check throws the harness error [0 ms]
+      msg: Error: expect(received).toThrow(expected)  Expected substring: "RD-452 harness [rd991-hand-built]: the group-read fault was not armed inside the token exchange"  Received function did not throw     at Object.toThrow (/private/tmp/b1631-gate/wt-mut/__tests__/rd452-group-config-strict-callback.test.js:859:53)     at Promise.then.completed (/Volumes/D
+TOTAL cells 35 notpassed 3
+X1 reverted __tests__/rd452-group-config-strict-callback.test.js blob equal
+X2 applied __tests__/rd452-group-config-strict-callback.test.js count 1
+--- RUN mut-X2 tree=/private/tmp/b1631-gate/wt-mut band-before:[] 18:16:31 load 9.72 13.71 14.16
+rc=1 band-after:[] EADDRINUSE=0
+FILE rd452-group-config-strict-callback.test.js: cells=35 notpassed=1 suiteStatus=failed
+   PASSED  T1 - equal clock readings, the arm ordered before the answer: the check passes [0 ms]
+   FAILED  T2 - equal clock readings, the arm ordered after the answer: the check throws th [1 ms]
+      msg: Error: expect(received).toThrow(expected)  Expected substring: "RD-452 harness [rd991-hand-built]: the group-read fault was not armed inside the token exchange"  Received function did not throw     at Object.toThrow (/private/tmp/b1631-gate/wt-mut/__tests__/rd452-group-config-strict-callback.test.js:849:53)     at Promise.then.completed (/Volumes/D
+   PASSED  T3 - an arm clocked and ordered after the answer: the check throws the harness e [1 ms]
+   PASSED  T4 - a result with no answer stamp: the check throws the harness error [0 ms]
+TOTAL cells 35 notpassed 1
+X2 reverted __tests__/rd452-group-config-strict-callback.test.js blob equal
+=== mutation tree porcelain: []
+=== STEP plain verify at head tree wt-chk
+pre verify band [] porcelain [] tree d1dd146557b4c13337d153eb959cba45652907de load 8.01 12.50 13.68
+verify rc=0 Mon 16 Nov 2026 18:42:06 AEDT
+Test Suites: 369 passed, 369 total
+Tests:       5774 passed, 5774 total
+Time:        1471.513 s
+VERDICT: PASS ? 5774/5774 tests passed across 369 suites (jest exit 0)
+EADDRINUSE=0
+post band [] porcelain []
+=== chain done Mon 16 Nov 2026 18:42:06 AEDT
+[nexusai-lock] jest lock released by b1631-gate
+
+=== probe outputs: P0 (head) and P2 (isPlainRequestObject returns true) ===
+--- probe-P0
+json-no-body: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+text-plain-no-body: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+text-plain-array-text: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-array: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-null: 400 {"error":"Invalid request","message":"Unexpected token 'n', \"null\" is not valid JSON","code":"UNKNOWN_ERROR","hint":"C
+no-content-type-no-body: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-empty-object: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-string: 400 {"error":"Invalid request","message":"Unexpected token '\"', \"\"x\"\" is not valid JSON","code":"UNKNOWN_ERROR","hint":
+
+--- probe-P2
+json-no-body: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+text-plain-no-body: 500 {"error":"Failed to save business hours"}
+text-plain-array-text: 500 {"error":"Failed to save business hours"}
+json-array: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-null: 400 {"error":"Invalid request","message":"Unexpected token 'n', \"null\" is not valid JSON","code":"UNKNOWN_ERROR","hint":"C
+no-content-type-no-body: 500 {"error":"Failed to save business hours"}
+json-empty-object: 400 {"success":false,"error":"Invalid business hours: weekdayStart, weekdayEnd, saturdayStart, saturdayEnd, excludeSunday","
+json-string: 400 {"error":"Invalid request","message":"Unexpected token '\"', \"\"x\"\" is not valid JSON","code":"UNKNOWN_ERROR","hint":
+
+=== scan.py output ===
+added lines 185 chars 11207 ; commits msg chars 4579
+name Kam        added=0 msgs=0 control_planted=1 longer_word_ctl=0
+name Kamil      added=0 msgs=0 control_planted=1
+name Kreiser    added=0 msgs=0 control_planted=1
+name Steve      added=0 msgs=0 control_planted=1
+name Peter      added=0 msgs=0 control_planted=1
+name Paul       added=0 msgs=0 control_planted=1
+name Blanchard  added=0 msgs=0 control_planted=1
+name Inch       added=0 msgs=0 control_planted=1
+name Waite      added=0 msgs=0 control_planted=1
+row new RegExp(                added_hits=0 msg_hits=0
+row innerHTML                  added_hits=0 msg_hits=0
+row eval/new Function          added_hits=0 msg_hits=0
+row child_process/exec/spawn   added_hits=0 msg_hits=0
+row hand-escape replace        added_hits=0 msg_hits=0
+row timer tokens               added_hits=0 msg_hits=0
+row sensitive names            added_hits=5 msg_hits=8
+    > // RD-991: two events stamped in this process (the token answer and the fault arm) are ordered by
+    > const answer = () => { plan.answeredAt = Date.now(); plan.answeredOrder = ++eventOrder; send(200, issueTokens(code)); };
+    > `(armed at ${r.faultArmedAt} as event ${r.faultArmedOrder}, token answered at ${r.answeredAt} as event ${r.answeredOrder}); this cell would not measure the callback's read`);
+    > const REFUSAL = 'RD-452 harness [rd991-hand-built]: the group-read fault was not armed inside the token exchange';
+    > // no #enforce-auth-card and paints nothing, so it no longer throws into "Error").
+row skip/only/todo/xit/each    added_hits=0 msg_hits=0
+row B-number/seat              added_hits=0 msg_hits=0
+row card/decision              added_hits=0 msg_hits=0
+row uuid/guid tenant           added_hits=0 msg_hits=0
+row hosts                      added_hits=0 msg_hits=0
+row secret shapes              added_hits=0 msg_hits=0
+non-ASCII/Cf added lines 0
+msg non-ascii 0
+control Cf plant: 1
+control B-num plant: 1 decision plant 1
+control sens plant: 1 timer plant 1 RegExp plant 1
+
+=== sarif summary ===
+security-extended main 47 head 47 codeql None new_at_head [] gone []
+  uat rows main [('js/file-access-to-http', 'tests/uat-run.js', 43)] head [('js/file-access-to-http', 'tests/uat-run.js', 43)]
+  rows in __tests__ or tests/ at head [('js/file-access-to-http', 'tests/uat-run.js', 43)]
+code-scanning main 15 head 15 codeql None new_at_head [] gone []
+
+=== deploy filter (glob.py) ===
+__tests__/helpers/rd395-server-harness.js not ignored
+__tests__/rd436-r4-enforce-stamp-and-status.test.js not ignored
+__tests__/rd452-group-config-strict-callback.test.js not ignored
+__tests__/rd465-first-run-open-window.test.js not ignored
+__tests__/rd486-ai-test-key-forwarding.test.js not ignored
+__tests__/rd691-agent-settings-routes-retired.test.js not ignored
+__tests__/rd969-three-routes-empty-request.test.js not ignored
+__tests__/rd982-harness-port-band.test.js not ignored
+__tests__/rd983-harness-ignores-exported-log-level.test.js not ignored
+scripts/verify-expected-counts.json not ignored
+control tests/uat-run.js True control HISTORY.md True
+workflow starts if any path not ignored: True
