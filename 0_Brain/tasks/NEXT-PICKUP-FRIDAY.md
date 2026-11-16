@@ -12,7 +12,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
-## 🔴 FIRST ACT — CoAgent (General/Claude to Claude): three pieces to check and merge; NO new build work without Kam's word
+## 🔴🔴 READ FIRST — WRAPPED Tuesday 2026-11-17 mid-morning on Kam's word ("I will need to leave soon so please wrap up as soon as you can"). THE PLAN IS `0_Brain/reference/2026-11-16_claude-to-claude/08_plan-of-attack-overnight-2026-11-17.md`: read it WHOLE; it supersedes the lists below wherever they differ.
+
+- Kam is at a conference; "we will continue with the build overnight". His restriction STANDS: "work on whats in progress but dont start new items or new agents." The next session's FIRST QUESTION to him: may the two second checks (ROSTER, RELAY-IDENTITY) and the next pieces in the plan's section 3 start?
+- At the wrap (10:13): POLICY %6 at READY FOR KAM r5 and DAEMON %7 at READY FOR KAM r3, each with its THIRD check running inside the wrapped Friday session (verdict files `m1_review/gate_M2_POLICY_r5_verdict.md`, `gate_M1_DAEMON_r3_verdict.md`: absent at the wrap; if still absent or without a VERDICT first line, the checks died: re-commission is in-progress work, they were approved by his 07:26 card). ROSTER %12 at READY FOR QA r2 (d88d5d7) and RELAYID %13 at READY FOR QA r2 (afc2472): second checks NOT started (new agents). AUDIT %18 rebuilding (addendum 3, design 07). main = 18005d6. No card open.
+- If the wrapped session is still alive in pane %0 when a verdict arrives, it handles it per the plan (steps 1 and 2) and records it in the note.
+
+## 🔴 FIRST ACT (earlier block, kept for its detail) — CoAgent (General/Claude to Claude): three pieces to check and merge; NO new build work without Kam's word
 
 **The overnight build grant is DEAD** (its event happened: Kam reviewed at 07:26 on 2026-11-17). What is authorised now is exactly his card answers of 07:26-07:33, recorded with his notes and Friday's readings in `0_Brain/reference/2026-11-16_claude-to-claude/05_kam-rulings-2026-11-17.md` (read it whole): a third independent check for AUDIT, DAEMON and POLICY after their fixes, then the merge method. **Whether building continues past those three is ASKED on card `general-c2c-morning-plan-1117`** (a = today, b = stop after the three, c = until he says stop). Until he answers: finish, check, merge the three; start nothing new.
 
