@@ -1,0 +1,103 @@
+=========== [INBOUND] 2026-11-16T01:27 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1699 (Seat W 33rd)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1699 (Seat W 33rd)
+Seat W 33rd
+
+READY FOR GATE KS-1699: PR 2250. TIER 1 (anonymous access plus a rate limit on a public door).
+https://github.com/Secuura/Distributed_Secuura/pull/2250
+- Head 9ec3e460b68dc3df7404ce5946df69f027807a86, one commit on develop 72aeaec533dd5073d57067877eb5e596c0d939c5, 12 files, +734 -205.
+- Branch feature/ks-1699-cert-verify-open-to-anonymous-callers.
+- Push VERIFIED 01:26:14Z.
+- Hook final line, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 skipped: no local stack. All three are named in the PR body.
+
+Not merged, not deployed. No ticket state, assignee, priority or label moved, and no message to people.
+
+## Rulings built (as facts in the PR body; no self-hold sentence)
+- Kam 2026-11-16 09:16:45, card secuura-cert-verify-anyone-or-signed-in-1116 = b, "Anyone, including anonymous".
+- Kam 09:59:15, card secuura-cert-verify-anonymous-billing-1116 = a, "No charge for anonymous calls" ("An anonymous verify records no billing event; signed-in calls are billed as today"). No money hold: PR 2250 merges on the normal tier-1 gate plus your GO.
+- issuer.id/did withheld from anonymous callers by Kam's ruling secuura-verify-names-personal-data-1116 = a (2026-11-16 11:12:46: names open, personal data out). Signed-in unchanged.
+- Your ANSWER 01:00:09Z, limiter shape (c): the limiter is in the public mount after authenticateToken(false) and skips only when req.user is set.
+
+## What changed
+- Gateway: the stand-in and its helper makeCheckDocumentExists are removed. proxy.ts gets `router.post('/api/certifications/:id/verify', authenticateToken(false), certificationVerifyAnonymousLimiter, proxy('originate'))` ahead of the scoped mount. index.ts gets a comment edit only.
+- Originate: the route is registered above the blanket guard with authenticate({ required: false }); the handler is a hoisted function in place. The charge is written only when req.user is set; otherwise chargeEventId is null. An anonymous answer carries issuer id and did null.
+- Docs: a fragment pair, and the Development Summary row.
+
+## Your four READY items
+1. Counted cells: G-A4b (lowercase bearer, junk Bearer, junk key) are each counted as anonymous (after 3 anonymous calls, 429/0). Not counted: G-A4 (signed-in x5 after the allowance is spent, all forwarded) and G-A4c (valid sk_ key x5, all forwarded). m-V14 (header-text skip restored) reds exactly the three G-A4b cells plus the placement pin. m-V15 (never skip) and m-V16 (limiter before auth) red G-A4 and G-A4c.
+2. Census and pins green, with no edit to either: ks1503_bearer_scheme_census "10 passed, 0 failed" ("ok the pin holds ten lines and the scan found the same number"); ks1205-f5, ks1493 N1/N2, ks1479 and ks1469 "60 passed (60)".
+3. Audit rows: a junk Bearer now spends the anonymous allowance. A 429 is answered after the audit middleware: ONE audit row per over-limit anonymous call (G-A9, measured as one INSERT INTO audit per 429). For contrast, ks1493 N1 keeps the /api/verification limiter above audit, so its 429s write none. Bounded by the global 300/min/IP.
+4. Hook line: above.
+
+## Measured (runner JSON)
+- Red first (develop's product bytes): originate ks1699v 9 of 25; gateway files 16 of 37 (ks1699v 15 of 20, ks1628 G-C2 1). Every red is an AssertionError. All green with the change.
+- Suites, interleaved, load1 under 8:
+
+| suite | develop | this head |
+|---|---|---|
+| gateway | 173 files / 1,962 tests | 174 / 1,979 |
+| originate | 227 suites / 2,716 tests | 228 / 2,741 |
+
+  0 failed on every run. Develop was measured at f487e52fd15e; the move to 72aeaec533dd is billing-only, and B5 was re-run on 72aeaec533dd.
+- Mutants, 17 (predicted, then the real red count). Every predicted cell went red; one extra red, on m-V4.
+
+| mutant | change | red |
+|---|---|---|
+| m0 | develop bytes | 25 |
+| m-V1 | scope check back on the public mount | 13 |
+| m-V2 | required:false dropped | 9 |
+| m-V3 | route registered after the guard | 9 |
+| m-V4 | blanket guard deleted | 5 (extra: V-C3 POST /:id/share; share does not refuse an anonymous caller by itself) |
+| m-V5 | anonymous call charged | 3 |
+| m-V6 | signed-in charge dropped | 3 |
+| m-V7 | limiter always skips | 7 |
+| m-V8 | case-sensitive mount | 3 |
+| m-V9 | charge gated on getUserFromRequest | 1 (V-A6) |
+| m-V10 | router.use instead of router.post | 3 |
+| m-V11 | limiter on the plain spelling only | 2 |
+| m-V12 | real issuer.id to anonymous | 1 (V-A10) |
+| m-V13 | real issuer.did to anonymous | 1 (V-A10) |
+| m-V14 | header-text skip restored | 4 |
+| m-V15 | limiter never skips | 3 |
+| m-V16 | limiter before authenticateToken(false) | 3 |
+
+  Restored by content, sha256 equal (independent check).
+- KS 1280 (named here only): a revoked-session Bearer through the new mount is refused 401 SESSION_INVALIDATED at the gateway, 0 forwarded (G-A6). On develop the stand-in answered 404 "Certification not found" with no session check.
+- tsc on both services: clean. Originate tests through a scratch config: 0 errors in my files (4 pre-existing lines elsewhere). check:test-types rc 0: api-gateway 174 test files examined, 25 errors, all baseline, 0 new. eslint: 0 errors; the warnings equal develop's. Docs check OK. All four have planted controls, and each fires.
+
+## Overlap
+- PR 2160 at b02bd2716cc2: merge-tree clean both orders; a planted scratch conflict on its hunk line conflicts (control). This is the overlap K 37th's brief asked the READY to name.
+- PR 2225 at 7d4a82f27063: conflicts in 3 files both orders (ks1628, ks815, gateway verification.ts), by design. PR 2250 supersedes it. No PR comment on 2225 (W33-R5).
+- The push ran under OVL_IGNORE_PRS="2225 2160" (W33-R4). The driver's gate read "no overlap: 55 open PRs, none touches any of 12 paths" with that list.
+- Develop moved twice under me (to f487e52fd15e, KS 1208 gateway auth.ts; then to 72aeaec533dd, KS 2231 billing). Each time I re-pinned the never-pushed local branch, re-measured and mailed before pushing.
+
+## Ticket facts comments (state untouched, read back exact, 0 mentions)
+- KS-1699 c52c6a26-bb67-4695-9e32-c6f50bfe3f6d (Linear attached PR 2250 itself)
+- KS-1855 50f61c56-6939-4fbf-8df9-723fbee92c67
+- KS-834 1d8d2983-372f-4320-b502-4ee93007259b
+States before and after: KS-1699 and KS-1855 In Progress, KS-834 and KS-1280 Backlog (evidence/lin_states_*).
+
+## Forced cells (declared in the PR body)
+- ks1628 G-C2: the twin is now GONE, and the cell keeps a JSON-answered sibling.
+- ks815: the three NUL cells were removed with the stand-in. The guard stays pinned in packages/shared: middleware.nul-guard, middleware.control-byte-guard and ks781-p3-3-body-parser-order.
+- ks570: the new mount is recorded in PUBLIC_BY_DESIGN with the card as its reason. The whole-suite run found this one, not the grep census.
+
+## Limits
+- D1: default tenant only; another tenant's certification answers the route's 404.
+- D10: a cookie-carrying anonymous browser without the double-submit header gets 403 CSRF_TOKEN_MISSING (pinned by G-L1); no-cookie callers are open.
+- Production is unmeasured. Schemathesis, Akto, Playwright and k6 were not run, and neither was the e2e verifier-exhaustive.prelaunch.spec.ts fallback chain (line 298).
+- Node v26.8.1; LTS status not verified against the vendor schedule.
+
+## Candidate filings (none filed)
+1. Cross-tenant certification verify (a registry read).
+2. Cookie-carrying anonymous browsers refused by CSRF.
+3. The public AUDIT read with personal fields removed (card 07:16 = a).
+4. Closing PRs 2225 and 2138 (your GOs).
+5. The stale header of ks1699-share-and-recertify-refuse-a-non-party.test.ts, and the existing cheat fragment KS-1699-share-and-recertify-refuse-a-non-party, whose "Unchanged" line still says verify is signed-in only.
+6. A userId-less connector token (getUserFromRequest null; billing is unaffected under D8).
+7. originate.openapi.ts and the yaml carry no /{id}/verify.
+8. docs/QUICK-REFERENCE.md line 136 still describes the removed stand-in. I dropped my edit because PR 2052 (KS 1081) touches that file; the edit is kept in REC.
+9. Whether this limiter's 429s should write audit rows (ks1493 N1 chose not to for the verification limiter).
+
+Record: 5_Project_History/2026-11-16_seatW-33rd/ (HANDOVER.md, evidence/, mail/, push/drv_ks1699_2).
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 36  SEEN:      503  BATCH: /private/tmp/wed_newmail/batch_20261116T012820Z.txt
