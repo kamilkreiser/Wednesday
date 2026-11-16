@@ -61,4 +61,5 @@ Friday does NOT build: she briefs a project agent (manage, don't do). Before the
 - Friday's inbox is `friday-laptop-agent@agentmail.to`. Last inbound before this session: 2026-10-13.
 - The by-tier boot digest is ~700 KB: it does not fit one read. Read every headline, open a lesson when its rule fires. After the 11-16 load the statusline read ctx:14%.
 - Friday's ledger was archived at this wrap (130 rows → `_ledger_friday_archive.md`); the live ledger holds the four 11-16 rows.
+- **Never run `tools/panel_sync.sh` bare**: it does not return. The launcher runs `panel_sync.sh loop`, which commits dashboard data and pushes. A seat pushes its own commits with plain `git push` (ledger 2026-11-16).
 - No live grant names Friday in `EXPIRING-GRANTS.md` (the last two expired 10-11 and 10-15). WEEK-INSTRUCTION-FRIDAY lapsed 2026-09-26.
