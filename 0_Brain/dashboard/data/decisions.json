@@ -74166,7 +74166,7 @@
   "id": "nexusai-session-cookie-viewer-bypass-1116",
   "client_project": "Datasec/NexusAI",
   "title": "SECURITY: NexusAI sign-in can be bypassed to viewer level before the first user is stored",
-  "bluf": "Tonight's independent security review measured, over HTTP on a local NexusAI server, that when sign-in is enforced but no user has signed in yet, a session cookie with the value constructor (or __proto__ or toString) is accepted as a signed-in viewer: the auth check, printers, stats and chat answer 200; admin routes still refuse (403); once a user is stored the same cookie gets a 500 error instead. It is on main today, not caused by tonight's work, and every deployment passes through that state between turning sign-in on and the first sign-in. Whether the hosted demo or any customer instance is in that state right now is NOT measured. I recommend a: an Opus seat builds the fix in getSession and its callers with a security review before merge; nothing deploys without your card. The storage-hardening branch that found it removes only the half that polluted shared objects and is otherwise safe to land.",
+  "bluf": "Tonight's independent security review measured, over HTTP on a local NexusAI server, that when sign-in is enforced but no user has signed in yet, a session cookie with the value constructor (or __proto__ or toString) is accepted as a signed-in viewer: the auth check, printers, stats and chat answer 200; admin routes still refuse (403); once a user is stored the same cookie gets a 500 error instead. WIDER than first carded (measured in-process since): all 12 built-in object property names pass the same way, and so does a JSON-style cookie j:[\"constructor\"]. It is on main today, not caused by tonight's work, and every deployment passes through that state between turning sign-in on and the first sign-in. Whether the hosted demo or any customer instance is in that state right now is NOT measured. I recommend a: an Opus seat builds the fix (one commit: a session is found only by a plain string cookie naming the store's own entry), with HTTP tests on two local servers and a security review before merge; nothing deploys without your card. The fix kit is already drafted and waits only for your word.",
   "default_action": "A ticket is filed tonight and the fix is drafted; nothing is built, merged or deployed until you choose.",
   "options": [
    {
@@ -74189,6 +74189,19 @@
   "ts": "2026-11-16T23:27:09.132389+11:00",
   "status": "open",
   "ruled_choice": null,
-  "ruled_ts": null
+  "ruled_ts": null,
+  "amendments": [
+   {
+    "ts": "2026-11-16T23:44:26.671925+11:00",
+    "reason": "The fix drafter measured the bypass wider than the gate's three names: every Object.prototype name and a JSON-array cookie; the options are unchanged.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "Tonight's independent security review measured, over HTTP on a local NexusAI server, that when sign-in is enforced but no user has signed in yet, a session cookie with the value constructor (or __proto__ or toString) is accepted as a signed-in viewer: the auth check, printers, stats and chat answer 200; admin routes still refuse (403); once a user is stored the same cookie gets a 500 error instead. It is on main today, not caused by tonight's work, and every deployment passes through that state between turning sign-in on and the first sign-in. Whether the hosted demo or any customer instance is in that state right now is NOT measured. I recommend a: an Opus seat builds the fix in getSession and its callers with a security review before merge; nothing deploys without your card. The storage-hardening branch that found it removes only the half that polluted shared objects and is otherwise safe to land."
+    }
+   }
+  ],
+  "amended_ts": "2026-11-16T23:44:26.671946+11:00"
  }
 ]
