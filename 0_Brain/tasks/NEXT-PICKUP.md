@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 07:2x 17 Nov, the 06:0x morning seat (ctx 70%) - READ FIRST; supersedes every block below where they differ
+- **develop 94f5158ad626** (PR 2132 by B 197th, verified 07:16: one parent 0397efb3e7e4, tree 29d12064213226dd). **Merges since 15 Nov evening: 61** (this seat: 2067, 2085, 2251, 2132). No GO in flight. Kam: 0 messages today (07:2x); reconcile_rulings to rule 0.
+- **FLOOR:** D 69th (%232) holding for card secuura-demo-five-accounts-gain-admin-1117 (acked; ack-hash fix live). No merge seat live.
+- **DRAFTERS (subagents of THIS seat; die with a rotation -> re-commission from commission.md if the brief is absent):** K 46th (0_Brain/reference/2026-11-17_drafter-seatK46/commission.md -> fleet/briefs_staged/2026-11-17_seatK46_merge.md; row 1 PR 2169 KS-2015 gateway audit-export: the audit-access reading from the diff is owed at the stamp) and B 198th (0_Brain/reference/2026-11-17_drafter-seatB198/commission.md -> 2026-11-17_seatB198_merge.md; row 1 PR 2161 KS-1991 originate verification, BOTH-SIDED, verification-access by path). NEXT: read whole, spot-check the gate line + one diff fact at source, STAMP, launch on Sonnet (SEAT_MODEL_ENV=claude-sonnet-5-5 brief_and_launch.sh), rung 5, then plan ANSWER. GO shape: 2026-11-17_K45_go_2251.md / 2026-11-17_B197_go_2132.md.
+- **Scores this seat:** B 196th 0.96, K 45th 0.95, B 197th 0.97.
+- **Kintsugi k33 OWED (a D seat after D 69th or beside it; D 69th is the DEMO seat):** api-gateway (2162, 2185, 2132), staking (2067), security (2085), originate (2251). Kam's 16:55:27 "deploy everything" grant (EXPIRING-GRANTS row, event-bound) covers Kintsugi; demo waits for the five-accounts card.
+- **Cards for Kam:** wed-morning-plan-1117 (default a at 10:00), wed-held-prompt-recovery-1117 (default BUILD at 10:00), secuura-demo-five-accounts-gain-admin-1117 (default demo held).
+- **OWED (carried):** board seat (gate notes 67-1..5, G1-G6 g248, G288-2132-1..3, G282/284/301/313); INDEX.md refresh; --help advisory hook; weekly consolidation.
+
 ## 🔴 CHECKPOINT 06:5x 17 Nov, the 06:0x morning seat (ctx 65%) - READ FIRST; supersedes every block below where they differ
 - **develop 4bf62f3dec42** (PR 2067). **GO IN FLIGHT: B 197th (%241) PR 2085** (fleet/briefs_staged/2026-11-17_B197_go_2085.md, sent 06:56, expected tree fd0410bddb34). NEXT: its MERGED -> verify at source (gh api commits/develop: one parent 4bf62f3dec42, tree fd0410bddb34) -> its row line (2132 or WRAP naming 2132).
 - **K 45th (%238)**: SET-UP CLOSED 37.1; running PR 2251 legs; its READY waits for B's MERGED, then re-pin; GO shape = 2026-11-17_B196_go_2067.md with the access sentence + N5 `did: null` (STAMP K45-W3).
