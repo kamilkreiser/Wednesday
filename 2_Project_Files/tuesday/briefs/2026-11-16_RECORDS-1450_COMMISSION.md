@@ -82,3 +82,12 @@ The lanes:
 - **B1618 SEAT-N137: NexusAI lane NX-T** (RD-987, 985, 986, 983, 991, 993, 810; owns `__tests__/**` and `tests/uat-run.js`). Sonnet builder, G2. Uses the NexusAI jest lock as B1603 did. Read RD-810 before changing anything.
 
 Next waves (not yet commissioned): H-3, M-D, M-E, M-G, M-T, NX-S2 (Opus), NX-P (Opus).
+
+## LANE WAVE 2 (from SWEEP-1450; Tuesday s283 at 15:4x, s282's successor)
+Same "Every lane drafter" rules as LANE WAVE 1 (templates: HPSM `2026-11-16_B1615_SEAT-H173_hpsmpoc-lane-h1-followup-proxy-startup-warning.md`; MPS `2026-11-16_B1617_SEAT-M145_mps-lane-ms-stub-duplicate-and-update-pins.md` with its STATUS `<MPS>/1_Project_Definition/Briefs/2026-11-16_B1617_STATUS.md`, which READY'd cleanly). Scratch under `fleet/state/s283/b<n>/`. Live seats a kit must not overlap: H173 (B1615, `api/src/HpsmPoc.Api/Program.cs`, `ForwardedProofTests.cs`), N137 (B1618, NexusAI `__tests__/**`, `tests/uat-run.js`); B1617's branch `b1617/...` (MPS `web/src/api/stub/**`) is at its gate, not landed: a kit's base is MPS main at drafting, and no MPS kit may touch `web/src/api/stub/**`.
+- **B1620 SEAT-H175: HPSM lane H-3** (HPSMPOC-470 point 3, the emoji cut; owns `web/src/components/customer/remediation-store.ts` + `.test.ts`). Sonnet builder, row C2, G3.
+- **B1621 SEAT-M146: MPS lane M-G** (MPSCALC-406 items 1 and 2; owns `scripts/tests/test_sdk_pin.py`, `src/MpsCalc.Api/MpsCalc.Api.csproj` comment lines only). Sonnet, row C2, G3. Items 3-4 at the sweep's question-4 default.
+- **B1622 SEAT-M147: MPS lane M-D** (MPSCALC-390, 200, 371, 394; 195 and 316 re-read first; owns `docs/ENGINE.md`, `docs/IMPORTER.md`, `docs/API.md`, `docs/api/openapi.json` only via the project's own generator). Sonnet, G3 text / G2 if openapi regenerated.
+- **B1623 SEAT-M148: MPS lane M-E** (the sweep's M-E keys and owned paths, read from SWEEP-1450). Sonnet, row L6, G2.
+Disjointness between B1621/B1622/B1623 is each drafter's to print (OWNS vs the other two sections here); a shared path is a STOP in its report.
+Still not commissioned: M-T (after the others), NX-S2 and NX-P (Opus; after N137 lands, they would touch `__tests__/**`).
