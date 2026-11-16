@@ -1,0 +1,26 @@
+RED OK      red_no_hard_deny -> t05_hard_deny failed (hard deny of gate-configuration writes): explicit panic
+RED OK      red_execute_mentions_ignored -> t05_hard_deny failed (execute text naming a hard-deny path): Ask { card: Card { tier: T2, kind: Execute, tool_name: "Bash", input_hash: "sha256:4cdc3606162b53121c3897dcfdeab4d7619c5fcfab37899a593ff2f3199ec22f", command: S
+RED OK      red_no_exclusions -> t07_exclusions failed (exclusions beat everything): Ask { card: Card { tier: T2, kind: Other, tool_name: "Agent", input_hash: "sha256:bd47e517eb09a53753ccd483f54407816f0d6adbfb220e58cbf41304beba0c6f", command: No
+RED OK      red_exclusion_name_leaks -> t07_exclusions failed (excluded names never appear in output): Deny { reason: ExcludedLeaky { path: "[Raw { input: \"{\\\"prompt\\\":\\\"summarise secret/plan.txt for me\\\"}\" }, Path { role: InText, path: Uncertain { raw:
+RED OK      red_t3_grantable -> t06_t3 failed (T3 always asks): read ~/.ssh/id_rsa [link=Open grant=false surface=Console] -> Allow { why: SessionApproval { scope: ExactInput { hash: "sha256:56a02053c08bd1248b369fcf4758b9ff6
+RED OK      red_hash_ignores_input -> t08_binding failed (approval bound to the exact input hash): assertion failed: matches!(r.decision, Decision::Deny { reason: DenyReason::InputMismatch })
+RED OK      red_exact_command_ignores_cwd -> t08_binding failed ('this exact command' includes the directory): different cwd -> Allow { why: SessionApproval { scope: ExactCommand { text: "npm test", cwd: "/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/1d34e9cf-ed94-4
+RED OK      red_ask_without_surface -> t10_surface failed (no surface means deny, never ask): acceptEdits-ask: Ask { card: Card { tier: T1, kind: Edit, tool_name: "Write", input_hash: "sha256:5f2bc6792433f1bcbd468cba17e451160822bb72a2e54b77f214f1141af061
+RED OK      red_grant_no_expiry -> t09_grants failed (grant 8 h maximum): assertion `left == right` failed
+RED OK      red_grant_ignores_subjects -> t09_grants failed (grant applies only to its subjects): Allow { why: Grant { grant_id: "gr_1", rule: "read scope", edited: [] } }
+RED OK      red_windows_exec_grantable -> t09_grants failed (Windows host: a grant never auto-allows a command): Allow { why: Grant { grant_id: "gr_1", rule: "execute: npm test", edited: [] } }
+RED OK      red_lexer_allows_dollar -> t02_property failed ('$' expansion is refused): recognised after injecting "$X" at 3: "wc -l a.txt $X"
+RED OK      red_lexer_allows_redirect -> t02_property failed (redirection is refused): recognised after injecting "> out" at 2: "wc -l > out a.txt"
+RED OK      red_find_allows_exec -> t02_property failed (find -exec/-delete are refused): destructive command recognised as read/search: "find . -delete"
+RED OK      red_cd_semicolon -> t02_property failed ('cd x ;' is refused): recognised: "du -sh src; cd /x; ls"
+RED OK      red_normaliser_lexical_only -> t04_paths failed (symlinks resolved by the OS): assertion `left == right` failed: measured: realpath returns the on-disk case
+RED OK      red_reads_clock -> t11_determinism failed (time is only the parameter): inside the window
+RED OK      red_allowlist_open -> t13_option_spellings failed (unlisted long options are execute (B1, B2)): grep --include x .
+RED OK      red_allowlist_open -> q01_gate_attacks failed (gate attack suite: sort --o=, grep --recur (B1, B2)): "cat README.md | sort --o=/tmp/x" classified Read (can write/execute/escape)
+RED OK      red_git_is_read -> t14_gate_return failed (git is never below execute (M4, mutant M12)): assertion `left == right` failed: git status
+RED OK      red_card_unescaped -> t14_gate_return failed (no raw control/bidi character on a card (M8)): raw '\n' reached the owner: "Write: /private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/1d34e9cf-ed94-49aa-ba4c-99451dcbbc42/scratchpad/gate_m2_policy_r2/target/
+RED OK      red_closed_link_allows_t2 -> t14_gate_return failed (after the link closes only T0 is auto-allowed (M7)): read outside the workspace: Allow { why: PostSessionRead }
+RED OK      red_no_bounds -> t14_gate_return failed (over-bound paths are refused before any work (M6)): path over MAX_PATH_BYTES: Ask { card: Card { tier: T1, kind: Edit, tool_name: "Write", input_hash: "sha256:e65a4af925d3a37d535cd722e4b39e751da1b061af69faf30aed8
+GREEN       normal build: all coagent-policy tests pass
+RED CONTROLS: all 23 went red; normal build green
+exit 0
