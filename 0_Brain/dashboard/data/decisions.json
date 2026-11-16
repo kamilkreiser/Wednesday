@@ -73641,5 +73641,525 @@
    "CARD attio-digest-setting-agent-write-vision-identity-1101",
    "CARD mpscalc-records-pass-three-asks-1112"
   ]
+ },
+ {
+  "id": "general-c2c-d2-licence-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: licence and money",
+  "bluf": "D2. v0.4.4 had a paid download, and the paywall could be bypassed. People trust a security tool more when they can read its code. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md).",
+  "default_action": "Design assumes a; nothing is published or priced.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Apache-2.0, free, no paywall",
+    "detail": "Revenue later from hosted or team features: managed relay, org policy, audit retention"
+   },
+   {
+    "key": "b",
+    "label": "Source-available, paid tier now",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Closed source",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:49:54.657574+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-d3-relay-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: who runs the public relay, and where?",
+  "bluf": "D3, money and public posture, so it is yours. The relay only passes encrypted traffic it cannot read. Running cost has NOT been priced. Running it yourself makes you the operator of something that could be misused for remote-support scams; the design reduces that risk but does not remove it. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md).",
+  "default_action": "Design and tests assume a; nothing is deployed and nothing is spent without your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "You run one small relay",
+    "detail": "One container on a personal or side-project account, never a client tenant; self-hosting documented from day one"
+   },
+   {
+    "key": "b",
+    "label": "No public relay",
+    "detail": "Self-host only"
+   },
+   {
+    "key": "c",
+    "label": "Rebuild on Cloudflare Workers",
+    "detail": "Reuse the existing account"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:49:56.777204+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-d8-review-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: pay for an outside security review before 1.0?",
+  "bluf": "D8, money, so it is yours. The pairing and encryption glue is our own code and nobody independent has checked it. Cost NOT priced: a few days of a specialist's time. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md).",
+  "default_action": "Releases are labelled beta; nothing is commissioned or paid.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, before calling it 1.0",
+    "detail": "Public beta until then"
+   },
+   {
+    "key": "b",
+    "label": "No, ship as unreviewed beta indefinitely",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Community review only",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:03.900884+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-d10-platforms-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: which computers in phase 1?",
+  "bluf": "D10. Native Windows has no Claude Code sandbox and needs its own installer. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md).",
+  "default_action": "Design assumes a.",
+  "options": [
+   {
+    "key": "a",
+    "label": "macOS, Linux and Windows through WSL2",
+    "detail": "Native Windows at 1.1"
+   },
+   {
+    "key": "b",
+    "label": "Native Windows in phase 1 as well",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:06.953468+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-d11-two-parties-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: two people only, or groups?",
+  "bluf": "D11. v0.4.4's support for more than two people is what broke its encryption. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md).",
+  "default_action": "Design assumes a.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Exactly two, plus each owner's own devices",
+    "detail": "An auditor or observer role at milestone 7"
+   },
+   {
+    "key": "b",
+    "label": "Groups and observers in phase 1",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:08.870842+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-language-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: build the core in Rust?",
+  "bluf": "Not in the design's decision list, but it is the biggest choice in it (section 11). v0.4.4 is JavaScript. Rust gives one installable binary with no Node, a fast hook on every tool call, and the only maintained libraries for the pairing and encryption. The cost is a new toolchain. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md).",
+  "default_action": "Nothing is built until you answer; M0 spikes would use Rust.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Rust core, TypeScript for the browser console",
+    "detail": "The design's choice"
+   },
+   {
+    "key": "b",
+    "label": "TypeScript everywhere",
+    "detail": "Crypto compiled from the Rust libraries to WebAssembly: two toolchains anyway"
+   },
+   {
+    "key": "c",
+    "label": "TypeScript with JavaScript crypto libraries",
+    "detail": "Those libraries describe themselves as not production-ready"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:11.991464+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-nightly-tests-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: run the real Claude Code gate tests every night?",
+  "bluf": "Money, so it is yours. The proof that the gate holds runs real Claude Code against it. Every pull request uses a free recorded replay; only the live run costs model calls. Cost NOT priced; small on the smallest model. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md).",
+  "default_action": "Live runs happen only on a release until you say otherwise.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Nightly, on the smallest model",
+    "detail": "With a spending cap you set"
+   },
+   {
+    "key": "b",
+    "label": "Only on each release",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Weekly",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:15.746238+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-d1-name-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: what is the product called?",
+  "bluf": "D1. Anthropic's plugin rules reserve or warn on names containing 'claude', and products must not look like Claude Code, so 'Claude to Claude' cannot be the product name in phase 2. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md). (Override of the prior-ruling gate: it matched only a generic word on unrelated cards from other projects; Kam asked for this card 2026-11-16 22:47.)",
+  "default_action": "Design proceeds as CoAgent (a); nothing is published under any name.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep CoAgent",
+    "detail": "Product CoAgent, binary and plugin coagent, command /collaborate"
+   },
+   {
+    "key": "b",
+    "label": "A new name",
+    "detail": "You name it; nothing else changes"
+   },
+   {
+    "key": "c",
+    "label": "Claude to Claude for phase 1 only",
+    "detail": "Rename at phase 2"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:27.182387+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD composer-hp-sow-name-on-demo",
+   "CARD hpsmpoc-pdf-approver-name",
+   "CARD hpsmpoc-summary-customer-name-1003",
+   "CARD hpsmpoc-pdf-name-note-1005",
+   "CARD hpsmpoc-demo-name-check-residue-1012",
+   "CARD hpsmpoc-name-check-r3-hosted-timing-1012",
+   "CARD hpsmpoc-name-check-r3-residue-1012",
+   "CARD hpsmpoc-deputy-po-name-1023",
+   "CARD mpscalc-170-fleet-line-id-name-1115"
+  ]
+ },
+ {
+  "id": "general-c2c-d5-reads-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: in Controlled mode, are reads inside the project asked?",
+  "bluf": "D5. Your requirement says the owner monitors every file, folder or service. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md). (Override of the prior-ruling gate: it matched only a generic word on unrelated cards from other projects; Kam asked for this card 2026-11-16 22:47.)",
+  "default_action": "Design assumes a.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Ask on the first read of each file or folder",
+    "detail": "One click allows all reads under that folder for this session"
+   },
+   {
+    "key": "b",
+    "label": "Reads inside the project are automatic",
+    "detail": "Everything else is still asked; a could become a preset"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:29.058406+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-08 11:50",
+   "2026-09-17 08:22"
+  ]
+ },
+ {
+  "id": "general-c2c-d6-trust-limits-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: how far can Approved Trust go?",
+  "bluf": "D6. A grant lets the other side's requests run without a prompt inside its scope. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md). (Override of the prior-ruling gate: it matched only a generic word on unrelated cards from other projects; Kam asked for this card 2026-11-16 22:47.)",
+  "default_action": "Design assumes a.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Default 60 min, maximum 8 h",
+    "detail": "Unattended running only if chosen per grant; a human always accepts every session"
+   },
+   {
+    "key": "b",
+    "label": "Stricter: no unattended mode at all",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Looser: known contacts can start sessions without you accepting",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:31.018299+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD mpscalc-showcase-known-limits-1010",
+   "CARD nexusai-risk-query-odd-limits-1027",
+   "CARD hpsmpoc-review-door-limits-1106"
+  ]
+ },
+ {
+  "id": "general-c2c-d7-identity-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: how is a person identified in phase 1?",
+  "bluf": "D7. Phase 1 has no accounts: an identity is a key on a device, checked by three spoken words at first contact. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md). (Override of the prior-ruling gate: it matched only a generic word on unrelated cards from other projects; Kam asked for this card 2026-11-16 22:47.)",
+  "default_action": "Design assumes a.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Device keys, nicknames and verify-words only",
+    "detail": "GitHub or similar sign-in badge added at milestone 7"
+   },
+   {
+    "key": "b",
+    "label": "Add GitHub or OIDC sign-in in phase 1",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:32.988003+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD rd104-gh-identity-acceptance-false-premise",
+   "CARD attio-digest-setting-agent-write-vision-identity-1101"
+  ]
+ },
+ {
+  "id": "general-c2c-d9-browser-agent-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: how does the browser console run an agent?",
+  "bluf": "D9. Anthropic does not allow third-party products to offer claude.ai login without its approval, so a hidden agent on your subscription would need that approval. Asking Anthropic is an outside contact, so it would be yours to send. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md). (Override of the prior-ruling gate: it matched only a generic word on unrelated cards from other projects; Kam asked for this card 2026-11-16 22:47.)",
+  "default_action": "Design assumes a; nobody contacts Anthropic.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Embedded terminal running your own claude",
+    "detail": "No policy question; ask Anthropic separately later"
+   },
+   {
+    "key": "b",
+    "label": "Hidden agent that needs an API key",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Ask Anthropic for approval now, then do b on subscription login",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:34.867402+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD attio-agent-browser"
+  ]
+ },
+ {
+  "id": "general-c2c-d12-audit-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: how much does the audit log keep?",
+  "bluf": "D12. Nothing ever leaves the machine as telemetry, whichever you choose. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md). (Override of the prior-ruling gate: it matched only a generic word on unrelated cards from other projects; Kam asked for this card 2026-11-16 22:47.)",
+  "default_action": "Design assumes a.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Hashes and short redacted previews",
+    "detail": "Full capture switched on per session; the security-audit preset turns it on"
+   },
+   {
+    "key": "b",
+    "label": "Full capture by default",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Summaries only",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:36.940397+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD nexusai-audit-details-size-cap-1116"
+  ]
+ },
+ {
+  "id": "general-c2c-repo-home-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: where does the new code live?",
+  "bluf": "The design wants a fresh repository, with the old v0.4.4 tree kept as legacy. The old folder is not a git repository today. This is a General side project, so it must sit under neither the Secuura nor the Datasec GitHub account. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md). (Override of the prior-ruling gate: it matched only a generic word on unrelated cards from other projects; Kam asked for this card 2026-11-16 22:47.)",
+  "default_action": "Nothing is created; no agent is briefed until this is answered.",
+  "options": [
+   {
+    "key": "a",
+    "label": "A new private repository under your personal GitHub",
+    "detail": "Old tree copied in as legacy/; the old folder is left untouched"
+   },
+   {
+    "key": "b",
+    "label": "Under another account or org you name",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Keep working in the existing folder",
+    "detail": "Turn it into a git repository as it is"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:40.364655+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-home-data-mutated",
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD attio-repo-home",
+   "CARD hpsm-composer-repo-and-jira-home",
+   "CARD hpsmpoc-analysis-repo-backup",
+   "CARD composer-sow-text-in-repo",
+   "CARD hpsmpoc-deck-slides-in-repo",
+   "CARD hpsm-self-host-home-1002b",
+   "CARD mpscalc-home-dashboard-mockup-1012",
+   "CARD hpsmpoc-partner-home-words-1101"
+  ]
+ },
+ {
+  "id": "general-c2c-build-model-1116",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: which model builds it?",
+  "bluf": "You ruled that analysis and design agents run on the newest Fable. Building agents are not ruled. The standing routing table picks a model per task. Source: design section 13 (reference/2026-11-16_claude-to-claude/03_architecture-design.md). (Override of the prior-ruling gate: it matched only a generic word on unrelated cards from other projects; Kam asked for this card 2026-11-16 22:47.)",
+  "default_action": "No build agent is started until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fable for the M0 spikes, then the routing table",
+    "detail": "The spikes settle design questions, so they stay at the design level"
+   },
+   {
+    "key": "b",
+    "label": "Fable for all of it",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Routing table from M0 onwards",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:50:42.847946+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-16T22:55:33.079695+11:00",
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-ai-screenshot-local-model",
+   "CARD nexusai-220-image-build-timing",
+   "CARD hpsmpoc-real-ai-model-before-meetings",
+   "CARD hpsm37-scoring-model-accept",
+   "CARD hpsmpoc-client-followup-model",
+   "CARD nexusai-gate11-opus55-safeguard-model-switch",
+   "CARD composer-ux-build-guided-1-4",
+   "CARD nexusai-rd846-build-broken-demo-deploy-1013",
+   "CARD datasec-80pct-band-build-lanes-1020",
+   "CARD hpsmpoc-hp-review-which-build-1021",
+   "CARD composer-pcomp124-126-build-now-1103"
+  ]
+ },
+ {
+  "id": "general-friday-boot-on-fable-1116",
+  "client_project": "WED/Friday seat",
+  "title": "Boot Friday on the newest Fable from the next launch?",
+  "bluf": "No, as things stand: the shared launcher starts every seat with --model opus (your 2026-10-21 ruling), and that flag overrides any saved default, which is why this afternoon's Fable switch did not survive the 22:42 launch. A one-line change that applies only when the seat is Friday would boot her on Fable; Wednesday and Tuesday stay on Opus. Suggested under your 22:50 rule: the next session is the design review. (Override: the gate matched only the words boot and friday on unrelated cards.)",
+  "default_action": "Launcher unchanged: Friday boots on Opus 5.5.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, Friday boots on Fable",
+    "detail": "Friday-only condition in the shared launcher; Wednesday and Tuesday unchanged; sisters told by mail"
+   },
+   {
+    "key": "b",
+    "label": "Only for the review",
+    "detail": "Fable for the next launch, then back to Opus"
+   },
+   {
+    "key": "c",
+    "label": "No, keep Opus",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T22:52:44.579810+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-16T22:55:30.158176+11:00",
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD tuesday-boot-digest-outgrew-the-window",
+   "CARD composer-two-logins-deploy-for-paul-friday"
+  ]
  }
 ]
