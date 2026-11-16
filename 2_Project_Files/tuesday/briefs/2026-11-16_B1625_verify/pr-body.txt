@@ -1,0 +1,12 @@
+Adds one new Playwright spec, web/e2e/dashboard-390.spec.ts (five rows, dev stub step). No product file changes.
+
+- For each of the three roles (seller, approver, admin) the Home screen at 390x844 holds scrollWidth <= clientWidth; both numbers are in the failure message.
+- For the Seller, the New quote form open on Home holds the same.
+- A control plants a 600 px element into the Home screen and the same check must see it (scrollWidth > clientWidth), so the check can fail.
+- Synthetic data only: the figures and the quote list are answered by route.
+
+Does not address MPSCALC-111 or MPSCALC-139 (the axe check stays open; no dependency is added).
+
+Verified by an independent gate at the merge with main: whole web vitest, eslint, tsc -b, the dev stub step (main plus 5 tests) and the api-off step (unchanged), both planted mutants (the .kpis min-width turns the four layout rows red and leaves the control green; a 300 px control turns only the control red), gitleaks, and a CodeQL javascript pre-scan (0 results).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

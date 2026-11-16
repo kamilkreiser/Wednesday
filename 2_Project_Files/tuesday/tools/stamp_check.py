@@ -87,7 +87,12 @@ def main(argv):
     if len(argv) < 2:
         print(__doc__); return 2
     kit = argv[1]; side = kit + ".measured"
-    cs = claims(open(kit, encoding="utf-8").read())
+    # 2026-11-16 s283: an EMPTY kit (a stamp script truncated it) printed rc 0 here: 0 claims, 0 measured.
+    # A kit with no text cannot be a kit: refuse it (rc 3), never pass it.
+    text = open(kit, encoding="utf-8").read()
+    if not text.strip():
+        print(f"stamp_check: REFUSED: {kit} is empty ({len(text)} bytes)"); return 3
+    cs = claims(text)
     if "--init" in argv[2:]:
         if os.path.exists(side):
             print(f"stamp_check: sidecar exists, not overwritten: {side}"); return 2
@@ -133,6 +138,8 @@ def selftest():
     with open(k + ".measured", "w") as f:
         f.write(f"{cs[0][0]} | grep -c -> 1\n")
     t("refuses when one claim missing", main(["x", k]) == 1)
+    e = os.path.join(d, "empty.md"); open(e, "w").write("")
+    t("refuses an empty kit (rc 3, not a pass)", main(["x", e]) == 3)
     print("selftest:", "OK" if ok else "FAILED")
     return 0 if ok else 1
 
