@@ -2846,3 +2846,13 @@ Done: recorded as R-SLASH in reference/2026-11-16_claude-to-claude/00_requiremen
 > but create a full browser mode as well.  I wont interfere anymore
 
 Done: recorded as R-BROWSER in reference/2026-11-16_claude-to-claude/00_requirements.md; Friday carries on to the design without further questions unless blocked.
+
+## 2026-11-16 22:51 — Kam (terminal, verbatim)
+> are you watching the messages from the chat board.  please check and make sure this is always on.  Confirm message recipt when possible / appropriate.  my last message - lets do a review now.  I have gone through the document and it looks good.  lets start with the things that need clarification.  please put each on the fleet activity
+
+*Note:* Poller verified running (launcher-armed, 30 s); 15 Claude to Claude clarification cards added to Fleet activity, one each.
+
+## 2026-11-16 22:51 — Kam (live board (view=friday), verbatim)
+> going forward and as an ongoing rule - please suggest to me when you think 1)I should switch you to latest fable 2)we should use the latest fable for a specific task
+
+*Note:* Filed learnings/2026-11-16_suggest-when-to-switch-to-the-newest-fable.md; first suggestion made (relaunch on Fable 5.2 for the review).

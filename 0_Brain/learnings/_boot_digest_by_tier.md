@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-16 22:42 from 274 lesson files (1,173,703 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 228. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-16 22:51 from 275 lesson files (1,175,686 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 3 · W 229. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7935,4 +7935,26 @@ top of the new seat's boot prompt as first work. A human launch (Kam at the keyb
   the right signal for it.
 - When Kam names a cause ("the NAS"), verify which line actually failed before fixing the named
   thing. See [[2026-08-03_mental-model-not-source-of-truth]].
+
+
+## Suggest to Kam when he should switch me to the newest Fable, and when a task should use it
+`2026-11-16_suggest-when-to-switch-to-the-newest-fable.md` · preference · 2026-11-16 · status: live · tier: W
+
+**Kam, verbatim:** *"going forward and as an ongoing rule - please suggest to me when you think 1)I should switch you to latest fable 2)we should use the latest fable for a specific task"*
+
+sections (open the file for these): How to apply · First application (same minute)
+
+## How to apply
+
+1. **At boot, compare the model this seat is running on (statusline model field / system context) with the
+   newest Fable in `0_Brain/dashboard/data/models_latest.json`.** If the work ahead is design, architecture,
+   review or hard reasoning and I am not on the newest Fable, say so on the panel with a one-line reason.
+   Never type a model ID from memory; read it from that file.
+2. **Before starting or commissioning a task**, ask whether it deserves the newest Fable: architecture and
+   design (already ruled: [[2026-11-16_architecture-agents-run-on-the-newest-fable]]), security design or
+   review, a hard diagnosis, anything with real ambiguity. Routine build, mechanical or bulk work stays on the
+   routing table (`2_Project_Files/fleet/specs/model-routing.md`). Raise the suggestion; Kam rules.
+3. **It is a suggestion, not a switch.** The seat's model is set at launch. Recommend a relaunch, never
+   `/model` in a seat pane (2026-11-03: it wrote Kam's GLOBAL default, ledger w=2).
+4. **Also suggest switching back** when the Fable-worthy work is finished and the rest is routine.
 
