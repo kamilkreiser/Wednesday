@@ -1,0 +1,42 @@
+  --> crates/coagent-roster/tests/qa_gate.rs:12:67
+warning: `coagent-roster` (test "qa_gate") generated 1 warning (run `cargo fix --test "qa_gate" -p coagent-roster` to apply 1 suggestion)
+     Running tests/qa_gate.rs (/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/0bad48b2-2056-45a8-9019-8cc0029c12d3/scratchpad/gate_m3_roster/target/attack/debug/build/coagent-roster/c9d07d5d7dca5b8f/out/qa_gate-c9d07d5d7dca5b8f)
+test obs_approval_staled_proposals_are_not_reported_by_tick ... QA obs: after approval, outcome(b) = Some(Stale); tick reports []
+test qa_dq3_removed_signing_key_comes_back_through_a_proposal ... QA DQ3: intake -> Ok(ProposalId(01010101010101010101010101010101))
+QA DQ3: validator -> Ok(Advanced { added: [KeyId(cf3f26204f074dd1f64cec8ed97a081c5aa3d4ed8e72edad127eb2d62b56e883)], removed: [], role_changed: [] }); new entry slot 2 (removed key had slot 3)
+test qa_every_cap_value_in_version_1_and_later ... ok
+test qa_extra_mirror_demoted_guest_promoted_back_and_proposer_removed ... QA extra mirror: proposed guest admitted observer then promoted -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(bf2c3728d50fe0848776a0a05be9d4b6823c8404a2a867ab1f98794f4cdc516b)] })
+QA extra mirror: proposer removed -> Ok(Advanced { added: [], removed: [KeyId(300299c025f23b41047b7bc4329995da3dc6f66ee90959faa3e22e0551ec1ab2)], role_changed: [] })
+test qa_extra_promote_a_proposed_observer_to_guest ... QA extra: promote proposed observer -> Err(ProposedRoleRaised(KeyId(a7bfeebb6eaa428b17f5fabdf312a876898fc30207cfbb5aee9d6a033b8ac06f)))
+QA extra: joiner first roster with promoted proposed observer -> Some(ProposedRoleRaised(KeyId(a7bfeebb6eaa428b17f5fabdf312a876898fc30207cfbb5aee9d6a033b8ac06f)))
+thread 'qa_extra_promote_a_proposed_observer_to_guest' (6831723) panicked at crates/coagent-roster/tests/qa_gate.rs:419:5:
+test qa_genuine_proposal_reused_for_other_fields ... QA obs: proposer's own signing key as candidate (new Noise key) -> Some(DuplicateDeviceKey(KeyId(8c6b1dbbb60ca3f3f26c760fbc01f0a236eba149bdee3ee33a016621714eabd7)))
+test qa_intake_approval_at_version_256_builds_a_refused_body ... QA: intake receive at version 256 -> Ok(ProposalId(01010101010101010101010101010101))
+QA: validator on the approved body at 256 -> Err(TooManyVersions); outcome Some(Approved)
+thread 'qa_intake_approval_at_version_256_builds_a_refused_body' (6831737) panicked at crates/coagent-roster/tests/qa_gate.rs:550:5:
+test qa_intake_approval_of_a_twin_key_builds_a_refused_body_and_stales_others ... QA: intake receive of twin-key candidate -> Ok(ProposalId(02020202020202020202020202020202))
+QA: honest proposal after approving the twin -> Some(Stale), Q quota used 1
+QA: validator on the approved body -> Err(DuplicateDeviceKey(KeyId(28aa8a135208451c1344e7529415df836612e7109f584652c6707456802d695c)))
+thread 'qa_intake_approval_of_a_twin_key_builds_a_refused_body_and_stales_others' (6831759) panicked at crates/coagent-roster/tests/qa_gate.rs:526:5:
+test qa_intake_order_inside_check_9_and_10 ... ok
+test qa_intake_refusal_after_an_expiry_changes_accounting ... QA obs: refused input at TTL: Err(Malformed); accounting before IntakeAccounting { pending: 1, remembered_ids: 1, counted_proposers: 1, muted: 0 } after IntakeAccounting { pending: 0, remembered_ids: 1, counted_proposers: 1, muted: 0 }
+test qa_intake_time_backwards_and_far_future ... ok
+test qa_joiner_proposer_readded_and_duplicate_ids_across_versions ... QA obs: proposal id reused across versions after the first holder left -> Ok(Advanced { added: [KeyId(6a7686f36ff9e6954a4eb6fe8f36964c56aec16216247b4948b9061b074e363e)], removed: [], role_changed: [] })
+test qa_lifetime_edges_via_start ... ok
+test qa_lowering_in_every_slot_arrangement ... QA: 256 slot arrangements lowered
+test qa_main_bytes_round_trip_on_head ... QA: 3 main-produced versions decode, re-encode, hash and validate identically on head
+test qa_no_canonical_roster_body_begins_with_the_label ... ok
+test qa_one_version_lowers_and_removes ... ok
+test qa_replay_after_no_change_and_cap_only_versions ... ok
+test qa_stale_across_cap_only_change ... ok
+test qa_starvation_by_colluding_guests ... QA starvation: 1 hostile guest(s): honest proposal accepted after 0 min (starter idle)
+QA starvation: 2 hostile guest(s): honest proposal accepted after 0 min (starter idle)
+QA starvation: 3 hostile guest(s): honest proposal accepted after 80 min (starter idle)
+QA starvation: 4 hostile guest(s): honest proposal accepted after 100 min (starter idle)
+QA starvation: 5 hostile guest(s): honest proposal accepted after 130 min (starter idle)
+test qa_two_approvals_race ... ok
+    qa_extra_promote_a_proposed_observer_to_guest
+    qa_intake_approval_at_version_256_builds_a_refused_body
+    qa_intake_approval_of_a_twin_key_builds_a_refused_body_and_stales_others
+test result: FAILED. 18 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.08s
+error: test failed, to rerun pass `-p coagent-roster --test qa_gate`
