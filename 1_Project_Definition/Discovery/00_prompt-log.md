@@ -2856,3 +2856,12 @@ Done: recorded as R-BROWSER in reference/2026-11-16_claude-to-claude/00_requirem
 > going forward and as an ongoing rule - please suggest to me when you think 1)I should switch you to latest fable 2)we should use the latest fable for a specific task
 
 *Note:* Filed learnings/2026-11-16_suggest-when-to-switch-to-the-newest-fable.md; first suggestion made (relaunch on Fable 5.2 for the review).
+
+## 2026-11-16 23:07 — Kam (live board (view=friday), verbatim; card taps 22:58-23:04 are in the decision store)
+> (22:58, note on card general-c2c-d7-identity-1116) this is good for phase 1. Phase 2 should have multiple options
+
+> (23:06) I am going to have a nap now.  let me know if you have enough to keep working on this.  I can then review in the morning.  or if you need anything else, let me know
+
+> (23:07) please generate a key for me.
+
+*Note:* d7 recorded as a + R-IDENTITY-P2 in the requirements; all 17 Claude to Claude cards ruled (b on groups, native Windows, relay, outside review; c on the old download); Fable design revision commissioned; deploy key pair generated in Friday's own 3_Access_Keys and the public half given on the panel.
