@@ -2821,3 +2821,8 @@ INCLUDED until he says otherwise.
 > great.  please implement this plan as a standard routine going forward
 
 *Note:* Receipted bf-89d9b0f9b81f; lesson ruled standing; nightly stale-ticket screen commissioned.
+
+## 2026-11-16 14:55 — Friday (laptop)
+> welcome back.  Its good to see you.  I would like your help on a new version of an old project.  In a moment i will switch you to fable and I would like the architecture agents you use to analyse and design this project to also use the latest fable
+
+Done: recorded as learnings/2026-11-16_architecture-agents-run-on-the-newest-fable.md (newest Fable read from models_latest.json = claude-fable-5-2); asked Kam which project.

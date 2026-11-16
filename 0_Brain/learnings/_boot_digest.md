@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-16 14:45 from 273 lesson files (1,171,803 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-16 14:55 from 274 lesson files (1,173,493 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7951,6 +7951,18 @@ OWN inbox: the inbox her merge seat reports READY and MERGED to.
 4. If Kam gets a new local box, the checks come back by removing the `false &&` guards — a new ruling, not an assumption.
 
 **Family:** [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] (retired) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] (its Spark tier is gone) · [[2026-11-12_spark-for-harness-and-token-heavy-simple-tasks]] (historical)
+
+
+## Architecture agents for the new-version project run on the NEWEST Fable — the same level as the seat
+`2026-11-16_architecture-agents-run-on-the-newest-fable.md` · preference · 2026-11-16 · status: live
+
+**The lesson:** For the new version of the old project Kam brought to Friday on 2026-11-16, every agent Friday uses to ANALYSE or DESIGN it (architecture, discovery, design review) runs on the newest Fable, the same model Kam switches the Friday seat to. This is a named exception to the routing table (`fleet/specs/model-routing.md`), where Fable has no worker row: Kam's word is the authority, and the row it supersedes is the "Opus 5.5 for every agent" override, for this project's architecture work only.
+
+**How to apply:**
+1. The model ID is READ from `0_Brain/dashboard/data/models_latest.json` (`levels.fable.model_id`) at the moment of launch, never typed from memory. At 2026-11-16 14:46 it read `claude-fable-5-2` (source: docs models-overview page, warnings []). If the file names a newer Fable later, the newer one is used: Kam said "the latest".
+2. In-session subagents: the Agent tool with `model: "fable"`. Cockpit panes: `/model <id from the file>` right after launch, and say so in the brief.
+3. Scope is ANALYSIS and DESIGN for this project. Build, test and gate seats still route by model-routing.md unless Kam extends it; ask, don't widen.
+4. Every launch names this file as the reason for the model choice.
 
 
 ## Secuura: audit records and verification are PUBLIC to read; only the creator (and uses the smart contract expressly allows) may WRITE them. A standing rule for every related task and ticket
