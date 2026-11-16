@@ -1,0 +1,7 @@
+# Drafter notes: Seat B 192nd brief (2026-11-16 12:50 to 13:11 AEDT)
+
+Brief: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-16_seatB192_merge.md (about 49.9 KB, STAMP blank, SELF-CHECK from `date`). Linted by my own script (_work/lint.py: provenance format, absolute sources, KS ids in the block, scope words, no QUEUE heading); send_brief.sh was NOT run, even as a dry run (commission).
+Work dir _work/: d (local no-hardlinks clone of the B191 drafter's clone; fetched live), scripts/ (env, fetch, cr, mt, sum, ov, pn, plant2, p2099, matcher192, kit192, kit192_post, fbh_shift, fbh_dry, lint, assemble ...), kit192/ (93 files), kit192_manifest.txt, kit192_extra/finish_by_hand_2080_b192.sh, m192/ (matcher scratch), pre/ (shift-only matcher copy), blocks/ (brief pieces).
+Measured: develop 6f5ac0ec59ad (PR 2196); 18 heads unmoved; trees 18/18 rc 0 both orders and stacked; plants 10/10, 20/20; PR 2249 d04080d7a523 and PR 2250 9ec3e460b68d vs all 18 rows 18/18 each, no shared path for 2250; K 39th's 19 rows x 18 = 342 pairs, 0 shared; kit192 93 files sed==python; matcher n 793 self-test 802/802; finish-by-hand survival block ran on a scratch squash.
+Slips: zsh/hook refusals (word-splitting loop, rm in a sed cleanup, `=====` word) fixed by bash scripts; the first assembled draft was 61 KB and was trimmed to 49.9 KB; `sed -i.bak` left scratch_work/scripts/fbh_shift.py.bak. No writes under !CODING, no mail, no board or GitHub writes, no cd, no rm.
+UNMEASURED: see the brief's UNMEASURED section.
