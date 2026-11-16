@@ -1,0 +1,87 @@
+b8bb6f54 | awk NR==n is the instrument form; used for every S line below (e.g. awk NR==17 over the raw stamped-set.test.ts at main 678a1153 -> line 17 text) -> works (line 1, output: awk NR==n)
+a7eea035 | gh api -X GET repos/datasecau/HPSM-POC/branches/main --jq .commit.sha (15:02:27) -> 678a1153d28be006a088a3b1fba8f5aab52e8d0e (line 1, output: gh api -X GET)
+a35ac5c9 | gh api -X GET repos/datasecau/HPSM-POC/branches/main --jq .commit.sha (15:02:27) -> 678a1153d28be006a088a3b1fba8f5aab52e8d0e; git ls-remote (deploy key, from outside any repo, 15:03) -> 678a1153d28be006a088a3b1fba8f5aab52e8d0e refs/heads/main (line 1, output: 678a1153d28be006a088a3b1fba8f5aab52e8d0e)
+9ad795e5 | gh api -X GET repos/datasecau/HPSM-POC/commits -f path=<Golden/readiness-NN.outline.json> -f per_page=10 --jq '[.[].sha[0:8]]|join(",")' for NN in 02 06 10 14 (14:58) -> 8d65fece each (one commit each); example-structural -> a9e0052f,32b74ba3 (control: two commits) (line 10, count: 8d65fece)
+9d91ea78 | awk NR==74 README.md (main) | grep -o -F '(the executive report only)' -> 1 hit (S05) (line 10, output/quoted: (the executive report only))
+c6fd39ae | grep -c -F 'questions[0]' stamped-set.test.ts at main -> 1 (line 17) (line 11, output: questions[0])
+3087a9c0 | grep -c -F 'ASK_ORDER' content-072.test.ts at main -> 3 lines; awk NR==37 -> const ASK_ORDER = ["Q-CS-13", "Q-CS-02", ... (line 11, output: ASK_ORDER)
+2592949e | awk NR==37 over content-072.test.ts at main -> const ASK_ORDER = ["Q-CS-13", "Q-CS-02", "Q-CS-03", "Q-CS-04", "Q-CS-01", "Q-CS-08", "Q-CS-10", "Q-CS-11", "Q-CS-06", (S12) (line 11, output: web/src/content/content-072.test.ts:37)
+bb83b431 | gh api -X GET 'repos/datasecau/HPSM-POC/pulls?state=open' --jq length (14:57 and 15:02) -> 0; -i first line -> HTTP/2.0 200 OK (line 13, output: pulls?state=open)
+d03935c7 | ci.yml at main: job key `api:` at line 32, `name: api (ASP.NET Core)` at line 33 (grep -n over the raw file, 14:58) (line 34, count: api)
+3c24ab21 | awk NR==87 over .github/workflows/ci.yml at main -> run: dotnet test HpsmPoc.slnx -c Release --no-build --logger "trx;LogFileName=test-results.trx" (line 34, output: dotnet test HpsmPoc.slnx -c Release --no-build)
+d80066fb | awk NR==87 over .github/workflows/ci.yml at main -> run: dotnet test HpsmPoc.slnx -c Release --no-build --logger ... (ci.yml at 678a1153 is byte-identical to the main read at 14:57: cmp printed ci-same) (line 34, count: ci.yml:87)
+2d1beb1f | <project>/.tools/node24/bin/node --version (15:02) -> v24.21.0 (line 38, output: node --version)
+f74dfed9 | <project>/.tools/node24/bin/node --version (15:02) -> v24.21.0 (starts v24.); ci.yml:384 -> node-version: 24 (S20) (line 38, output: v24.)
+f7996054 | <project>/.tools/dotnet-10.0.404/dotnet --version (15:02) -> 10.0.404 (line 39, output: dotnet --version)
+233e5c0c | awk NR==3 over global.json at main -> "version": "10.0.404", (line 39, output: 10.0.404)
+b44d94ae | RELAYED from the B1599 sidecar (ids 9703091c, fdb3496d, 4ae0bbe4: builds with these settings rc 0, 0 warnings); NOT re-run by this drafter (no build here) (line 40, output: RestoreAdditionalProjectFallbackFolders)
+c4d62d34 | RELAYED from the B1599 sidecar (id fdb3496d); NOT re-run by this drafter (line 40, output: NUGET_PACKAGES)
+fb14eed2 | RELAYED from the B1599 sidecar (id 4ae0bbe4); NOT re-run by this drafter (line 40, output: DOTNET_CLI_HOME)
+f6a9a97f | grep -c -F 'STOPPED: NEEDS TUESDAY' over the B1599 template kit -> 4 lines (kit form the seat WRITES, not a match) (line 44, count: STOPPED: NEEDS TUESDAY)
+70905531 | gh api -X GET repos/datasecau/HPSM-POC/pulls/99999 (15:02) -> {"message":"Not Found"...} (HTTP 404 body) (line 50, output: pulls/99999)
+0d1062b4 | gh api -X GET -i 'repos/datasecau/HPSM-POC/pulls?state=open' (15:02) -> HTTP/2.0 200 OK (line 50, output: pulls?state=open)
+6c590fa8 | git -c core.sshCommand='ssh -i <project>/3_Access_Keys/github_deploy_rw -o IdentitiesOnly=yes' ls-remote git@github.com:datasecau/HPSM-POC.git refs/heads/main (15:03, run from outside any repo) -> 678a1153d28be006a088a3b1fba8f5aab52e8d0e refs/heads/main (line 63, output: git ls-remote origin refs/heads/main)
+9d413e8c | LC_ALL=C uptime (15:03) -> load averages: 5.40 6.79 6.12 (line 72, count: LC_ALL=C uptime)
+da284c58 | python3 -I -B over pkg-0.7.2.json (snapshot set: sections sorted by order, then questions by order) -> ask first5 ['Q-CS-13','Q-CS-02','Q-CS-03','Q-CS-04','Q-CS-01'] (S13) (line 90, output: Q-CS-13)
+cffe0ba5 | a form or placeholder the seat WRITES or runs, not a string to match (the seat runs it in its own clone; the drafter made no clone) (line 101, output: git rev-parse HEAD)
+590ebb00 | git -C <project>/2_Project_Files config user.name (15:03) -> non-empty, length 12 (value not printed) (line 102, count: user.name)
+15005b94 | git -C <project>/2_Project_Files config user.email (15:03) -> non-empty, length 46 (value not printed) (line 102, count: user.email)
+6900a8cb | git -C <project>/2_Project_Files config user.email (15:03) -> non-empty, length 46 (value not printed) (line 102, output: git -C '/Volumes/Datasec_DEV/!CODING/Datasec/HPSM-POC/2_Project_Files' config user.email)
+7898750f | a form or placeholder the seat WRITES or runs, not a string to match (a heading the seat writes; same as the B1599 kit) (line 105, output: ## PRIOR WORK)
+e666fc60 | a form or placeholder the seat WRITES or runs, not a string to match (Sxx stands for the ids S01-S22 below) (line 111, output: Sxx)
+0ff27b0d | python3 -I -B -c 'print(1)' (15:03) -> 1, rc 0 (line 115, output: -I -B)
+5dbe992e | git show is a read verb in DRAFTER_RULES.md fence 3 (line 28 of that file); the drafter used gh api raw reads, not git show (line 115, output: git show)
+bb287395 | gh api git/trees/main?recursive=1 (truncated false, 1845 entries): path api/tests/HpsmPoc.Modules.Reporting.Tests/Golden/example-structural.outline.json present (blob a287a6fe) (line 116, output: example-structural)
+139ba045 | same tree: Golden/rich-plain.outline.json present (blob f12b13a3) (line 116, output: rich-plain)
+29d5d699 | same tree: Golden/rich-sentinels.outline.json present (blob 49f02a89) (line 116, output: rich-sentinels)
+112839d4 | gh api -X GET repos/datasecau/HPSM-POC/commits/a9e0052f --jq '.parents[0].sha' (14:57) -> d607c8fb1f204042d0a7ada63610072970df8ab0 (line 116, output: a9e0052f^)
+78b5ed68 | a form or placeholder the seat WRITES or runs, not a string to match (printed by the seat's own program; the drafter's S03 program printed 'all +1: True' for each of the three and its plant control is the seat's to run) (line 116, output: NOT +1)
+d862966c | /usr/bin/grep -c -F '(0.5.0)' over stamped-set.test.ts at main -> 1 (line 9, S14); on the head simulation (scratch copy with Edit B applied) -> 0 (line 119, count: (0.5.0))
+32140160 | python3 -I -B over pkg-0.7.2.json -> array first five ['Q-CS-01','Q-CS-02','Q-CS-03','Q-CS-04','Q-CS-06'] (same for 0.5.0, 0.6.0, 0.7.0 and 0.7.2 packages); ask order first id Q-CS-13 for 0.7.2 and Q-CS-01 for 0.5.0 (line 119, output: Q-CS-01)
+53bb2527 | /usr/bin/grep -c -F "0.5.0's" over stamped-set.test.ts at main -> 1 (line 17 only, by grep -n); head simulation (Edit B applied to a scratch copy) -> 0
+02bcb59a | /usr/bin/grep -c -E '^\s*it\(' over stamped-set.test.ts at main -> 3 (line 126, count: it()
+7012e783 | RELAYED from the B1599 kit (h); the drafter did not run it. B1599 STATUS line 63 printed 'validate.sh rc 0, unittest discover ran 325 OK at both, hidden-characters alone 14 OK' (line 128, output: python3 -B -W error::ResourceWarning -m unittest discover -s infra/tests -p 'test_hidden_c)
+a94f8bb8 | python3 -I -B -m unittest discover on a one-test scratch module (15:03) -> 'Ran 1 test in 0.000s' then OK: the tool prints 'Ran <n> test(s) in <t>s'; N is a placeholder (line 128, output: Ran N tests)
+0ea1d821 | a fragment of kit prose between two backticks, not a literal the seat matches (line 128, output: ), and the whole )
+2881684f | a form or placeholder the seat WRITES or runs, not a string to match (the seat writes 'not run' if validate.sh needs a missing tool) (line 129, output/quoted: not run)
+e573a2f3 | a fragment of kit prose between two backticks, not a literal the seat matches (line 138, output:  after whitespace). Control: a planted edit of )
+27b1c929 | /usr/bin/grep -c -i -F 'toBe("Q-CS-01")' over stamped-set.test.ts at main -> 2 (lines 17 and 22); /usr/bin/grep -c -F 'Q-SNAP-01' -> 1 (line 18, the toEqual row) (line 139, output: toBe("Q-CS-01"))
+2b23b201 | same as 27b1c929: two toBe("Q-CS-01") lines (17, 22) plus the Q-SNAP-01 toEqual line 18 = three assertion lines Step 5(d) compares (line 139, output/quoted: Q-CS-01)
+07b62986 | awk NR==10 over web/package.json at main -> "lint": "eslint --max-warnings=0",; ci.yml:396 -> - run: npm run lint (line 148, output: npm run lint)
+3d1c3a9f | awk NR==10 over web/package.json at main -> "lint": "eslint --max-warnings=0", (line 148, output: --max-warnings=0)
+387b97a2 | awk NR==11 over web/package.json at main -> "typecheck": "next typegen && tsc --noEmit",; awk NR==12 -> "test": "vitest run", (line 148, output: npm run typecheck)
+812ef1f5 | tree has api/tests/HpsmPoc.Modules.Reporting.Tests/HpsmPoc.Modules.Reporting.Tests.csproj (rg.sh read at main printed ProjectReference lines); /usr/bin/grep -c -i 'README' over HpsmPoc.Modules.Reporting.csproj -> 0 (control: 'Content' -> 2) (S21) (line 150, count: dotnet test api/tests/HpsmPoc.Modules.Reporting.Tests/HpsmPoc.Modules.Reporting.Tests.cspr)
+4774d81d | head SIMULATION (drafter's scratch copies, Edit A and B applied by python): README OLD-sentence count 0, NEW-sentence count 1, changed lines 2 (one removed, one added); stamped-set (0.5.0's) count 0 (line 152, count: 0.5.0's)
+789cb517 | head SIMULATION: (0.5.0) count 0 in the scratch copy of stamped-set.test.ts with Edit B applied; code left of each ' // ' byte-identical for lines 9 and 17 (True, True) (line 152, count: (0.5.0))
+2934d876 | a fragment of kit prose between two backticks, not a literal the seat matches (a forbidden-name pattern in a standing line) (line 160, count: GIT_AUTHOR_*)
+417a5349 | a fragment of kit prose between two backticks, not a literal the seat matches (a forbidden-name pattern in a standing line) (line 160, count: GIT_COMMITTER_*)
+d361ff16 | a fragment of kit prose between two backticks, not a literal the seat matches (a forbidden-name pattern in a standing line) (line 213, count: GIT_AUTHOR_*)
+dba2f765 | a fragment of kit prose between two backticks, not a literal the seat matches (a forbidden-name pattern in a standing line) (line 213, count: GIT_COMMITTER_*)
+31c8d2e6 | a fragment of kit prose between two backticks, not a literal the seat matches (line 214, count:  (a hook refuses it). Use absolute single-quoted paths ()
+328f3cfd | a fragment of kit prose between two backticks, not a literal the seat matches (line 214, count:  contains )
+d9786bd9 | a fragment of kit prose between two backticks, not a literal the seat matches (line 214, count: ), )
+f1d76a1d | a fragment of kit prose between two backticks, not a literal the seat matches (line 214, output:  with a positive control for every count, and python )
+S01 | awk NR==76 over api/src/HpsmPoc.Modules.Reporting/README.md at main 678a1153 (gh api raw) -> row ADR-R13, ends "...on the SAME ReportModel and renderer. ... | One renderer, one set of layout tests. The executive report's golden outlines are unchanged (asserted). |"
+S02 | /usr/bin/grep -c -F "The executive report's golden outlines are unchanged (asserted)." over the README at main -> 1; grep -n -> line 76 only (control: 'ADR-R13' count 1)
+S03 | python3 -I -B over the three Golden/<name>.outline.json at a9e0052f^ (d607c8fb) vs a9e0052f (14:58): example-structural PageCount 5->6, rich-plain 9->10, rich-sentinels 8->9; headings 9 of 9 each +1 page; other fields equal (True/True); 41 lines each file (diff printed only Page and PageCount lines)
+S04 | gh api -X GET commits -f path=Golden/readiness-{02,06,10,14}.outline.json -f per_page=10 -> 8d65fece only, for each (4 of 4); control: example-structural lists a9e0052f and 32b74ba3
+S05 | awk NR==74 over the README at main -> ADR-R11 row: "... a contents page after the cover (the executive report only) whose rows link to their sections ..."
+S06 | awk NR==115 over Readiness/ReadinessReportGoldenTests.cs at main -> Assert.All(outline.Headings, h => Assert.True(h.Page >= 2, $"{h.Heading} not found in the PDF"));
+S07 | awk NR==50 over Pdf/PdfReportGoldenTests.cs at main -> Assert.All(outline.Headings, h => Assert.True(h.Page >= 3, $"{h.Heading} not found in the PDF after the contents page")); awk NR==20 -> Goldens = rich-sentinels, rich-plain, example-structural
+S08 | awk NR==17 over web/src/components/snapshot/stamped-set.test.ts at main -> expect(moduleSet.questions[0].id).toBe("Q-CS-01"); // control: the route's set is 0.5.0's
+S09 | awk NR==9 over stamped-set.test.ts at main -> const moduleSet = playbookPackage.questionSets.find((s) => s.id === "snapshot")!; // what the route hands the runner (0.5.0)
+S10 | awk NR==92 over web/src/content/registry.ts at main -> export const playbookPackage: ContentPackage = PACKAGES.find((p) => p.package.id === "playbook-placeholder" && p.package.version === "0.7.2")!; ...
+S11 | python3 -I -B over web/src/content/packages/playbook-placeholder.v{0.5.0,0.6.0,0.7.0,0.7.2}.json (gh api raw at main): snapshot set, 16 questions, array first five ['Q-CS-01','Q-CS-02','Q-CS-03','Q-CS-04','Q-CS-06'] in all four
+S12 | awk NR==37 over web/src/content/content-072.test.ts at main -> const ASK_ORDER = ["Q-CS-13", "Q-CS-02", "Q-CS-03", "Q-CS-04", "Q-CS-01", "Q-CS-08", "Q-CS-10", "Q-CS-11", "Q-CS-06",
+S13 | python3 -I -B over pkg 0.7.2: snapshot sections S1 order 1 (lowest order of all sections), Q-CS-13 {sectionId S1, order 1}; ask order (sections by order, questions by order) first five Q-CS-13, Q-CS-02, Q-CS-03, Q-CS-04, Q-CS-01; the 0.5.0 package's ask first three: Q-CS-01, Q-CS-02, Q-CS-03
+S14 | same as S09 (line 9 ends "(0.5.0)")
+S15 | awk NR==22 over stamped-set.test.ts at main -> expect(stampedSet(stamped("0.5.0"), moduleSet)!.questions.map((q) => q.id)[0]).toBe("Q-CS-01");
+S16 | wc -l over the README at main -> 91 lines
+S17 | wc -l over stamped-set.test.ts at main -> 31 lines
+S18 | awk NR==10,11,12 over web/package.json at main -> "lint": "eslint --max-warnings=0", / "typecheck": "next typegen && tsc --noEmit", / "test": "vitest run",
+S19 | <project>/.tools/node24/bin/node --version (14:59 and 15:02) -> v24.21.0
+S20 | awk NR==384 over ci.yml at main -> node-version: 24 (in the web build job; the web unit job has the same at :463)
+S21 | /usr/bin/grep -c -i 'README' over src/HpsmPoc.Modules.Reporting/HpsmPoc.Modules.Reporting.csproj at main -> 0 (control: 'Content' -> 2; the file holds an EmbeddedResource of Content/**/*.json at line 25)
+S22 | python3 len() of the commit subject 'Correct two stale statements: Reporting README golden outlines and a snapshot test comment' -> 90
+S23 | the replaced-sentence simulation: README line 76 OLD sentence count 1 -> 0 and NEW sentence 0 -> 1 in a scratch copy; NEW sentence is 238 characters, ASCII only, no pipe; changed lines 2 (1 removed, 1 added)
+S24 | the Edit B simulation: line 17 241 characters and line 9 161 characters after the edit, ASCII only; left of the first ' // ' unchanged on both
