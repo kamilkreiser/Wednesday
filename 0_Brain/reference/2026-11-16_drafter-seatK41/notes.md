@@ -1,0 +1,12 @@
+# Drafter notes: Seat K 41st brief (2026-11-16 14:08 to 14:30 AEDT)
+
+Brief: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-16_seatK41_merge.md (49,834 bytes; STAMP blank; PROVENANCE 13 lines, 0 malformed, absolute sources, every KS id in the body in the block, no QUEUE heading, no scope-claim words, SELF-CHECK 14:29). Work dir `_work/`: kit41 (604 files, 3,574,300 bytes, manifest kit41_manifest.sha256, fingerprint d8e82cd2adf32e7e; READ-ONLY BYTE-COMPARE TARGET), c41 (cp -R of the K 40th drafter clone, push URL DISABLED), scripts *41.py, parts/ (brief sections, assembled_pre.md), scratch/ outputs.
+
+## Measured (key figures)
+develop db2b80073264 (K 40th's PR 2249 squash, one parent de2491334ea5, tree c14d545942fb), re-read 14:12, 14:17, 14:29. 20 heads equal, trees 20/20 rc 0/0 same, plants 20/20, per-file 56/56 (+56 unrelated), 2 SKIPS (same two as K 40th). Pairs among 20: 1 of 190 (2250 x 2160, certifications.ts). K x B 0 of 340. PR 2250 tree 99bd1fe0e73f = gate 375's d630ad8d141e + develop's delta (path-list equality proven). Source set 96/280/228 = 604 = K 40th's FINAL. Table P1 1/0/0, G1 62/237/157, G4 1/0/92, G5 240/452/597, G6 63/165/214, G7 688/1687/1687 (each equal by independent grep -o -F), N 95/280/82. T list SIX, none present; 840 -> 846; self-test 855/855; without P1 850/855; mutant 855/856; wrong suffix 852/855. `41th` 0 in kit41. `before_k41stamp` TAKEN (K 40th's `before_k40stamp`), `before_k41ordinal` free. Hex 8967de8k415 x21. Engine text counts match K 40th's HANDOVER; dry double pass own th->st, lineage th->th: python == sed, 11,332 bytes. Precedent for the suffix change: K 31st's derive_engine_own_31.py (SUF_OWN/SUF_LIN). Row 1 forecast: READY about 58 to 71 (central 64): reads NO against 58 (W-item 3 asks A stock vs B waiver to 62).
+
+## Slips
+1. First Bash call carried a `cd` (hook refused, no effect); a heredoc separator starting with an equals sign (hook refused); a `git -C $C merge-tree` through an unexpanded variable path (hook refused; rerun in python on the literal path). 2. A stray `sed -i.orig ... /dev/null` (no effect), two `sed -i` calls refused by macOS sed, one `sed -i.bak` that left `_work/ctrl41.py.bak` (no removal). 3. Many trim passes to get under 50,000 bytes. 4. Linear NOT read (hard limits: GitHub reads only), so ticket states are K 40th's drafter's 13:08 read.
+
+## UNMEASURED
+Any install/suite/mutant/tsc/eslint run; the inbox; the floor; B 193rd's brief (absent); Linear; D 67th's pin; the lineage derive as a whole; the ready_guard self-test.
