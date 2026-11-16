@@ -968,7 +968,14 @@ bash "$PROJECT_DIR/2_Project_Files/tools/latest_models.sh" || echo "[launcher] W
 # THIS SEAT (the coordinator) boots on the `opus` ALIAS. Until now the line below carried NO model flag, so a seat took whatever default the config had saved (Sonnet 5.5 after a /model switch).
 # An ALIAS, not a dated id (Kam 2026-09-05; doctor.sh warns on a dated pin): `opus` tracks the newest Opus, and ANTHROPIC_DEFAULT_OPUS_MODEL above pins the alias target to claude-opus-5-5 (models_latest.json).
 # Worker seats keep their own launchers (Sonnet by /model after launch, per fleet/specs/model-routing.md). REVERT = delete the --model flag; backup Launch_Wednesday.command.pre-1022-opus.
-claude --dangerously-skip-permissions --model opus "$INITIAL_PROMPT"
+# 2026-11-16 22:5x (Kam, live board 22:55:10 view=friday, card general-friday-boot-on-fable-1116 = a: "Yes, Friday boots on Fable"):
+# the FRIDAY seat boots on the `fable` ALIAS with opus as the availability fallback (the 2026-09-05 shape); Wednesday and Tuesday are
+# unchanged on `opus`. Why the flag and not a saved default: --model on this line overrides any /model default, which is why Kam's
+# afternoon switch did not survive the 22:42 launch. REVERT = delete the friday branch; backup Launch_Wednesday.command.pre-1116-fable.
+SEAT_MODEL_ARGS=(--model opus)
+[ "$AGENT" = "friday" ] && SEAT_MODEL_ARGS=(--model fable --fallback-model opus)
+echo "[launcher] seat $AGENT boots with: ${SEAT_MODEL_ARGS[*]}"
+claude --dangerously-skip-permissions "${SEAT_MODEL_ARGS[@]}" "$INITIAL_PROMPT"
 SEAT_RC=$?
 mkdir -p "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs"
 printf '%s seat=%s host=%s rc=%s\n' "$(date '+%F %T')" "${WED_AGENT:-wednesday}" "$(hostname -s)" "$SEAT_RC" >> "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs/seat_exit.log"
