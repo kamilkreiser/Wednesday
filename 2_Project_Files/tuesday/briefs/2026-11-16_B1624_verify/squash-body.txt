@@ -1,0 +1,16 @@
+A default owner longer than 100 units was cut at whole code points, so the
+cut could land inside a character: after the joiner of a joined emoji, between
+a base and its skin tone, between the two halves of a flag, before the
+enclosing mark of a keycap, or between a letter and its accent. The result was
+accepted, but it read wrong.
+
+The cut now walks whole characters (grapheme clusters) where the browser
+provides Intl.Segmenter, with a fixed "en" locale so the result does not depend
+on the visitor's locale, and whole code points where it does not. A character
+that alone is longer than the limit gives an empty start, which the entry check
+accepts. An owner that fits is returned unchanged, byte for byte.
+
+Ten test rows added to the startingOwner block. No setting, label, message,
+limit or other function changed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

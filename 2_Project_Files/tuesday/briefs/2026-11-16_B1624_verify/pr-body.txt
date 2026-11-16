@@ -1,0 +1,16 @@
+## Summary
+
+A default owner longer than 100 units is now cut at a whole character (an extended grapheme cluster) where the browser provides `Intl.Segmenter`, and at whole code points where it does not. Before, the cut could land inside a character, so the start could end on a dangling joiner, lose a skin tone or an accent, or leave half a flag. The result was always accepted; it read wrong.
+
+## What changed
+
+- `startingOwner` in `web/src/components/customer/remediation-store.ts`: the walk uses the segments of a fixed-locale grapheme segmenter when `Intl.Segmenter` is a function, else the code points of the text. The rule is unchanged: add a unit while the cut stays at most 100 units, stop at the first that does not fit, then end-trim. An owner that fits is returned byte for byte as before; `undefined` gives an empty string. A character that alone is longer than the limit gives an empty start, which the entry check accepts.
+- Ten rows added to the `startingOwner` block of `remediation-store.test.ts` (no existing row changed): joined emoji at its joiner, shorter-family cut, skin tone, flag, keycap, accent, a character ending exactly at the limit, a first character over the limit, the fallback without `Intl.Segmenter`, and a property row (prefix, at most 100 units, cut on a character boundary, no lone half, accepted).
+
+## Checked
+
+- Owner test file 125 tests before, 135 after; whole web suite 4327 before, 4337 after, none lost, none changed. Lint, typecheck and build pass; the infra tests and validation pass.
+- Eight of the ten new rows fail on an assertion against the old function; the other two are green by construction and are caught by an off-by-one and a no-fallback-guard variant.
+- Code and tests only; nothing deployed; no integration with HP tools; no customer-facing word, limit or setting changed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
