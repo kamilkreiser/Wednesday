@@ -91,3 +91,6 @@ Same "Every lane drafter" rules as LANE WAVE 1 (templates: HPSM `2026-11-16_B161
 - **B1623 SEAT-M148: MPS lane M-E** (the sweep's M-E keys and owned paths, read from SWEEP-1450). Sonnet, row L6, G2.
 Disjointness between B1621/B1622/B1623 is each drafter's to print (OWNS vs the other two sections here); a shared path is a STOP in its report.
 Still not commissioned: M-T (after the others), NX-S2 and NX-P (Opus; after N137 lands, they would touch `__tests__/**`).
+
+## LANE WAVE 3 (Tuesday s283 at 16:2x)
+- **B1626 SEAT-M149: MPS lane M-T** (MPSCALC-369, 163; SWEEP-1450 lane text). Same "Every lane drafter" rules; template: `2026-11-16_B1617_SEAT-M145_mps-lane-ms-stub-duplicate-and-update-pins.md` + its STATUS. Base = MPS main read at drafting (72fa8d9c or later: PR #200 landed 16:2x; open PRs #201 `web/src/api/stub/**` and #202 docs are other lanes). Scratch under `fleet/state/s283/b1626/`. Sonnet, row L6, gate G2. Its owned paths must not include `web/src/api/stub/**`, `docs/**`, `web/e2e/**`, `web/package*.json`, `scripts/tests/test_sdk_pin.py` or the csproj (the other wave lanes, landed or in PR). The 163 overlay files under `tests/MpsCalc.Api.Tests/**` are UNMEASURED names: find them by program. Clause wording from the sweep: 369's clause stays unmet until a loop above load 7 is counted.

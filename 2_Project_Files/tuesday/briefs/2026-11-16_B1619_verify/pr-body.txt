@@ -1,0 +1,17 @@
+## What
+Dev stub and its tests only (`web/src/api/stub/purchaseQuotes.ts`, `web/src/api/stub/stubApi.test.ts`). No product code, no words, no setting, no package. The production bundle holds no stub.
+
+- MPSCALC-404, refusals: a Duplicate by a caller without internal-metrics is refused 403 for a draft that holds a target GP (INTERNAL_INPUT_FORBIDDEN), then a manual item or manual line (MANUAL_ITEM_FORBIDDEN), then a sell override or a fixed rate (PRICE_EDIT_FORBIDDEN), in the server's order, with the stub's existing words and before anything is written. The rows that copy such a draft now run as the Pricing analyst; a Seller row keeps the hidden-inputs-only copy.
+- MPSCALC-404, references: a typed reference over 100 UTF-16 code units or holding a control character is refused 400 BAD_REQUEST (the server's title plus the stub suffix); a derived reference is cut so the whole fits 100 units, never splitting a surrogate pair.
+- MPSCALC-405: one row pins that the answer to an update of a held rental quote hides the hidden inputs (red when the answer is built from the stored draft).
+
+## Checks (independent gate, node 26 on the box; CI uses node 24)
+- Whole web suite 1580 -> 1610 tests, 0 failed, 0 names lost, 30 gained.
+- eslint, tsc -b, entra build and bundle check (0 of 57 markers): rc 0.
+- Playwright in both CI modes (stub on: 253 passed, 17 skipped by config; stub off: 157 passed): 0 failed.
+- CodeQL CLI javascript pack over web/src: 0 results. gitleaks: clean.
+- 17 new rows are red without the fix; planted mutants of each check are killed (three boundary mutants survive: code 31, code 159, explicit null target GP; a pin gap, not a defect).
+
+Nothing is deployed by this merge.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
