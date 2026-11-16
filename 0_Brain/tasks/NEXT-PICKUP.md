@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 06:5x 17 Nov, the 06:0x morning seat (ctx 65%) - READ FIRST; supersedes every block below where they differ
+- **develop 4bf62f3dec42** (PR 2067). **GO IN FLIGHT: B 197th (%241) PR 2085** (fleet/briefs_staged/2026-11-17_B197_go_2085.md, sent 06:56, expected tree fd0410bddb34). NEXT: its MERGED -> verify at source (gh api commits/develop: one parent 4bf62f3dec42, tree fd0410bddb34) -> its row line (2132 or WRAP naming 2132).
+- **K 45th (%238)**: SET-UP CLOSED 37.1; running PR 2251 legs; its READY waits for B's MERGED, then re-pin; GO shape = 2026-11-17_B196_go_2067.md with the access sentence + N5 `did: null` (STAMP K45-W3).
+- **D 69th (%232)**: holding for Kam's card secuura-demo-five-accounts-gain-admin-1117 (acked; the ack-hash fix landed 06:43, so it should stay quiet).
+- **Cards open for Kam:** wed-morning-plan-1117 (default carry on at 10:00), wed-held-prompt-recovery-1117 (default BUILD at 10:00: arm_wake_watch.sh TAPFN; stop the runner, copy+mv, taptest on a scratch pane, re-arm), secuura-demo-five-accounts-gain-admin-1117.
+- **Done this seat:** scores B 196th 0.96; ack-hash fix (wake_ack.sh + wake_watch.sh drop 'Checking for updates'); stall measured (ledger 11-17 amended).
+- **OWED:** Kintsugi k33 (gateway 2162+2185, staking 2067, security 2085 once merged, originate 2251 once merged) by a D seat; board seat (gate notes 67-1..5, G1-G6 of gate 248, G282/284/288/301/313); INDEX.md refresh; --help advisory hook; weekly consolidation.
+
 ## 🔴 CHECKPOINT 06:1x 17 Nov, the 06:0x morning seat (ctx ~53%) - READ FIRST; supersedes every block below where they differ
 - **Morning ritual DONE:** card wed-morning-plan-1117 (default a carry on at 10:00); stale 0; KS board 220 IP / 7 IR / 35 Todo / 3 Blocked / Backlog >250 (board_count); panel bf-36416bb9fe06 + correction bf-0adb539fa557ee05; greeting spoken.
 - **develop 4bf62f3dec42** (PR 2067 by B 196th, verified 06:08: one parent c480a84e7f53, tree 7c05db6e0701). **Merges since 15 Nov evening: 58.** No GO in flight.
