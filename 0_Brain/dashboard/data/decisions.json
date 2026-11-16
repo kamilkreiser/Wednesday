@@ -73569,5 +73569,38 @@
    "CARD mpscalc-150-usage-section-placement-1115",
    "CARD mpscalc-deploy-seed-secret-again-1116"
   ]
+ },
+ {
+  "id": "nexusai-rd810-uat-runner-alert-1116",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: one code-scanning alert on the test-only UAT runner. Leave it open, reshape the runner, or remove it?",
+  "bluf": "One open code-scanning alert (a file's contents sent over the network) sits on tests/uat-run.js, a test-only script that reads the repo's own list of 105 sample prompts and sends them to whatever UAT address the operator names. That is exactly its job, so the alert describes intended behaviour. Today's test lane tried adding a shape check on the prompts; CodeQL still flags the same flow, so nothing was committed. Your rule is that we never dismiss an alert, so it needs one of: a) leave it open and record why (my recommendation: honest, no code churn for a test tool); b) move the 105 prompts into the script itself as code, so there is no file read for the scanner to follow (small change, through a gate); c) remove the UAT runner from the repository. Default: nothing changes and the alert stays open. (Prior-rulings check: the two matches share only the word 'alert': an HPSM budget alert and a withdrawn MPS alert, neither this one.)",
+  "default_action": "Nothing changes: the alert stays open and RD-810 stays To Do.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Leave it open, recorded as intended",
+    "detail": "the ticket (RD-810) records why; no code change"
+   },
+   {
+    "key": "b",
+    "label": "Move the prompts into the script as code",
+    "detail": "a small test-only change through the normal gate"
+   },
+   {
+    "key": "c",
+    "label": "Remove the UAT runner from the repository",
+    "detail": "if nobody runs it any more"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T17:51:29.625546+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-uat-budget-alert-1021",
+   "CARD mps-384-withdrawn-alert-close-1106"
+  ]
  }
 ]
