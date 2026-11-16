@@ -74161,5 +74161,34 @@
    "CARD tuesday-boot-digest-outgrew-the-window",
    "CARD composer-two-logins-deploy-for-paul-friday"
   ]
+ },
+ {
+  "id": "nexusai-session-cookie-viewer-bypass-1116",
+  "client_project": "Datasec/NexusAI",
+  "title": "SECURITY: NexusAI sign-in can be bypassed to viewer level before the first user is stored",
+  "bluf": "Tonight's independent security review measured, over HTTP on a local NexusAI server, that when sign-in is enforced but no user has signed in yet, a session cookie with the value constructor (or __proto__ or toString) is accepted as a signed-in viewer: the auth check, printers, stats and chat answer 200; admin routes still refuse (403); once a user is stored the same cookie gets a 500 error instead. It is on main today, not caused by tonight's work, and every deployment passes through that state between turning sign-in on and the first sign-in. Whether the hosted demo or any customer instance is in that state right now is NOT measured. I recommend a: an Opus seat builds the fix in getSession and its callers with a security review before merge; nothing deploys without your card. The storage-hardening branch that found it removes only the half that polluted shared objects and is otherwise safe to land.",
+  "default_action": "A ticket is filed tonight and the fix is drafted; nothing is built, merged or deployed until you choose.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build the fix now",
+    "detail": "an Opus seat fixes getSession and its callers, independent security review, merge; nothing deploys until you say"
+   },
+   {
+    "key": "b",
+    "label": "Build the fix and check hosted",
+    "detail": "as a, plus a read-only check of whether the hosted demo is in the no-user state (no change to it)"
+   },
+   {
+    "key": "c",
+    "label": "Ticket it only",
+    "detail": "file the ticket; no build tonight"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T23:27:09.132389+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
