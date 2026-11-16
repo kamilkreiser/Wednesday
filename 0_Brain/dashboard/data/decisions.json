@@ -74475,8 +74475,8 @@
   "id": "general-c2c-terminal-commands-gate-1117",
   "client_project": "General/Claude to Claude",
   "title": "CoAgent: every terminal command asks you, because recognising safe ones failed twice",
-  "bluf": "The gate tried to recognise harmless terminal commands (ls, cat, grep) so they would not need your approval each time. Two independent checks overnight each found ways to make a dangerous command look harmless: first a file overwrite and a secret read (round 1), then, after a full rebuild, reading your cloud credentials through a folder shortcut (round 2). The second check judged that this cannot be made safe. So I removed it: every terminal command now asks, and reads only pass without asking when the agent uses its own file tools. Cost: many more approval prompts per session, unless you approve an exact command for the session or grant a pattern. Source: reference/2026-11-16_claude-to-claude/m1_review/gate_M2_POLICY_verdict.md and gate_M2_POLICY_r2_verdict.md. (Prior-ruling check overridden: every match shared only the generic word gate with unrelated cards from other projects; Kam has not ruled on this question.)",
-  "default_action": "a is applied now: every terminal command asks. Nothing else changes until you answer.",
+  "bluf": "The gate tried four ways overnight to tell harmless terminal commands from dangerous ones, and four independent checks broke each: a file overwrite and a secret read; your cloud credentials read through a folder shortcut; the gate's own settings overwritten using braces; and commands that quietly change what your home folder means. The last check judged that a list of safe shapes cannot be made sound. So the default now applied is the strictest one: EVERY terminal command is asked in red, every time, and cannot be batched or covered by a trust grant. The only exception is an exact list of commands that you type yourself. Reads still pass quietly when the agent uses its own file tools. Cost, measured on 79 everyday commands: about 67 red cards and 12 refused, none ordinary. Sources: reference/2026-11-16_claude-to-claude/m1_review/gate_M2_POLICY_verdict.md, _r2_, _r3_ and _r4_verdict.md. (Prior-ruling check overridden: every match shared only the generic word gate with unrelated cards from other projects.)",
+  "default_action": "a is applied now in its strictest form: every terminal command asks in red; only commands on a list you type yourself pass. Nothing merges from this piece until you answer.",
   "options": [
    {
     "key": "a",
@@ -74508,7 +74508,22 @@
    "CARD mps-null-class-three-rows-gate-nogo-1027",
    "CARD datasec-load-gate-cpu-count-1111",
    "CARD datasec-gate-artifact-published-1115"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-11-17T07:12:07.963371+11:00",
+    "reason": "Two further independent checks overnight (rounds 3 and 4) broke the next two attempts as well; the default applied is now stricter",
+    "changed": [
+     "bluf",
+     "default_action"
+    ],
+    "before": {
+     "bluf": "The gate tried to recognise harmless terminal commands (ls, cat, grep) so they would not need your approval each time. Two independent checks overnight each found ways to make a dangerous command look harmless: first a file overwrite and a secret read (round 1), then, after a full rebuild, reading your cloud credentials through a folder shortcut (round 2). The second check judged that this cannot be made safe. So I removed it: every terminal command now asks, and reads only pass without asking when the agent uses its own file tools. Cost: many more approval prompts per session, unless you approve an exact command for the session or grant a pattern. Source: reference/2026-11-16_claude-to-claude/m1_review/gate_M2_POLICY_verdict.md and gate_M2_POLICY_r2_verdict.md. (Prior-ruling check overridden: every match shared only the generic word gate with unrelated cards from other projects; Kam has not ruled on this question.)",
+     "default_action": "a is applied now: every terminal command asks. Nothing else changes until you answer."
+    }
+   }
+  ],
+  "amended_ts": "2026-11-17T07:12:07.963449+11:00"
  },
  {
   "id": "general-c2c-windows-testing-1117",
@@ -74915,6 +74930,50 @@
    "2026-08-17 20:01",
    "2026-09-15 09:30",
    "CARD wed-secuura-storage-27-held-worktrees-1019"
+  ]
+ },
+ {
+  "id": "general-c2c-daemon-policy-third-check-1117",
+  "client_project": "General/Claude to Claude",
+  "title": "CoAgent: allow one more independent check each for the daemon and the policy piece?",
+  "bluf": "Two more pieces hit my two-failed-checks limit overnight, so I am asking before spending a further check on either. The daemon (two programs pairing and exchanging messages): its second check found that a hard stop after mismatched words could be bypassed through a mechanism added by the first fix, and that one lost message could leave a session stalled. Message containment, the part that keeps the other person's text from steering your agent, held in both checks. The policy piece: see the terminal-commands card; it is being reduced to its strictest form. Both builders are fixing now; neither piece merges. What is merged and sound is unchanged: the encryption core and the relay. Sources: reference/2026-11-16_claude-to-claude/m1_review/gate_M1_DAEMON_r2_verdict.md and gate_M2_POLICY_r4_verdict.md. (Prior-ruling check overridden where needed: any match shares only a generic word with unrelated cards from other projects.)",
+  "default_action": "The fixes are made but neither piece is checked again and neither merges until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, one more check each after the fixes",
+    "detail": "Two independent check sessions; each piece merges only if its check passes"
+   },
+   {
+    "key": "b",
+    "label": "Daemon only",
+    "detail": "Check the daemon; leave the policy piece unmerged until you have decided the terminal-commands card"
+   },
+   {
+    "key": "c",
+    "label": "Pause both",
+    "detail": "Nothing more is checked or merged until we talk"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T07:12:20.047739+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-redis-down-fail-closed-policy",
+   "CARD hpsmpoc-c30-policy-principles-and-sections",
+   "CARD hpsmpoc-signin-hardening-third-round",
+   "CARD composer-policy-target-1006",
+   "CARD composer-e8-level-after-policy-1006",
+   "CARD hpsmpoc-feedback-files-third-round-1007",
+   "CARD mpscalc-pr102-cap-nogo-third-round-1024",
+   "CARD nexusai-143-roster-third-round-1030",
+   "CARD nexusai-143-roster-after-third-round-1030",
+   "CARD composer-pcomp102-third-round-on-capped-class-1101",
+   "CARD hpsmpoc-388b-cap-land-or-third-round-1101",
+   "CARD composer-pcomp116-third-round-1103"
   ]
  }
 ]
