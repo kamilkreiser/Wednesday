@@ -8,6 +8,16 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 15:4x 16 Nov, the 15:1x rotation successor (ctx ~35%) - READ FIRST; supersedes every block below where they differ
+- **develop 8292da2c9dbc** (PR 2250; re-read 15:42:23). No merge GO in flight. No Kam card open; no Kam message since 14:29:35 (read 15:10). k31 PANEL RECEIPT DONE (bf-d6221f3d5e45, 15:20).
+- **FLOOR (3 seats; no subagent of this seat running):**
+  - %211 **D 68th** (DEPLOY Opus, Kintsugi k32: prism + originate + api-gateway at pin 8292da2c9dbc; brief STAMPED D68-W1..W6; **GO KINTSUGI sent 15:42** (fleet/briefs_staged/2026-11-16_D68_go_kintsugi.md); idfp 931d7c659ca9f303; probe OLD before swaps, NEW/NONE after gateway swap; issuer.did unset on the row = did test cannot discriminate). NEXT: STATUS 1/2 -> swaps -> STATUS B -> **PANEL RECEIPT to Kam** (anonymous cert verify, no charge, issuer id/did null for anonymous; prism issue now 501; KS-2239 OPEN, never 'closed') -> score -> pane_close.
+  - %214 **K 42nd** (MERGE Sonnet, 19 rows from PR 2123; STAMPED K42-W1..W5; plan ANSWERED 15:40 (2026-11-16_K42_answer_plan.md): first write = PR 2225 CLOSE, then SET-UP). NEXT: SET-UP CLOSED -> READY 2123 -> GO (shape 2026-11-16_K41_go_2250.md).
+  - %217 **B 194th** (MERGE Sonnet, 16 rows from PR 2127; STAMPED B194-W1..W8 incl. PR 2138 CLOSE + stray-file mv released in the stamp; launched 15:43). NEXT: plan QUESTION -> ANSWER (shape 2026-11-16_B193_answer_plan.md).
+  - **MERGE WINDOW: one GO at a time across B and K.**
+- **Scores this seat:** D 67th 0.96.
+- **OWED:** KS-2239 BUILD lane (issuer.id/did withheld from every caller but the owner); next board seat (KS-1600 Low ticket, gate 286/246/375 findings, prism ratchet gap); INDEX.md refresh; `--help` advisory hook (w=3); boot-digest gap = MEASURED 700,706 B / ~287K tokens, cannot be read whole (told Kam in terminal 15:1x; needs his call).
+
 ## 🔴 ROTATION HANDOVER 15:09 16 Nov, the 13:20 seat (ctx ~80%) - READ FIRST; supersedes every block below where they differ
 - **develop 8292da2c9dbc** (PR 2250 by K 41st, verified 15:07:49: ONE parent fe514a7b29a8, tree 8325c80b5a03). **Merges since 15 Nov evening: 52** (this seat: 2080, 2249, 2130, 2250). No merge GO in flight. No Kam card open; no Kam message since 14:29:35.
 - **GATE 376 K-A IS CLOSED LIVE ON KINTSUGI** (D 67th STATUS 3, 04:07Z): probe OLD showed the email local part + user id to an anonymous caller; probe NEW on the same doc shows neither; NONE verified false; audit_logs +3 only, everything else +0.
