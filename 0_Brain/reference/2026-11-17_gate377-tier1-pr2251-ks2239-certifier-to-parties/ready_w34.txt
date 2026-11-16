@@ -1,0 +1,100 @@
+=========== [INBOUND] 2026-11-16T06:36 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2239: PR 2251, TIER 1, head 26a85f3e
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2239: PR 2251, TIER 1, head 26a85f3ece80 on develop aa4ddb096053 (Seat W 34th)
+Seat W 34th
+
+READY FOR GATE KS-2239: PR 2251. TIER 1 (an access decision on a public answer).
+https://github.com/Secuura/Distributed_Secuura/pull/2251
+- Head 26a85f3ece804fd45d707d061e2ef8f6817b89bc: one commit on develop aa4ddb0960530e450ae80d237f9e899bcf1b0fbe, 7 files, +364 -15.
+- Branch feature/ks-2239-cert-verify-names-the-certifier-to-its-parties-only.
+- Push VERIFIED 06:34:42Z (ls-remote = head; hook 659 s; one push, new branch, nothing refused).
+- Hook final line, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 skipped (local stack not up on :6882). Leg 14: 126 shell suites passed, 0 failed, 1 skipped (restore_local_secrets.test.sh). Leg 16: 0 new in all five services. All of this is named in the PR body.
+
+Not merged, not deployed. No ticket state, assignee, priority or label moved, and no message to people. The facts comment on KS-2239 is 4483df5f (06:36:00Z, read back exact, 0 mention nodes). KS-2239 read In Progress before and after it; its one state move, Backlog to In Progress at 06:35:30Z, was the GitHub integration on the PR open (issue.history botActor GitHub), not me.
+
+## Rulings built (as facts in the PR body; no self-hold sentence)
+- Kam's card 11:12:46 secuura-verify-names-personal-data-1116 = a. The certifier's id and did go only to the certification's parties.
+- W34-R1 = A: `did: mayNameIssuer ? certification.issuer.did : null`. My boot re-check found no contradiction with W-1 items 1-4: the did-key census is 0 on every mint path, and the one gateway hit is the mock wallet's response body.
+- W34-R2: callerMayReadCertification is reused as it is; its body is not edited (m-X10 shows what an edit would break).
+- W34-R3: an ORG_ADMIN is not a party (X-A3, m-X8).
+- W34-R4: OVL_IGNORE_PRS="2160", one PR-body line naming it.
+- W34-R5: only the two "is unchanged" sentences in the KS-1699 cert-verify fragments changed.
+- Billing is untouched: the charge line is byte-identical. X-C5 pins the whole argument list for seven kinds of caller, and m-X6 reds 7 cells.
+
+## The change (originate only)
+- One const after the charge: `const mayNameIssuer = principal ? callerMayReadCertification(req, certification) : false;`
+- Two ternaries on it, for issuer.id and issuer.did.
+- Three prose edits: the handler JSDoc, the issuer comment, and the callerMayReadCertification JSDoc sentence ("POST /:id/verify applies neither"). It now says the rule applies to NAMING the certifier only, never to access or the charge.
+- Not edited: getUserFromRequest, authenticate, the gateway, billing and chargeEvents.ts.
+
+## Declared deviations from the BRIEF's cell labels
+- Correction to my STATUS of 06:23:03Z: it said m-X10 reds "the 4 predicted plus 17". The real split is the 2 predicted (X-A3, X-C8) plus 19 read cells (21 in total, as reported).
+- Three of the BRIEF's controls had a half that measures RED on develop, because develop names '' or the id to any signed-in caller: X-C4 (the empty-issuer row), X-C7 (a non-party on the revoked and expired rows) and X-C9 (a non-party's key set). Those halves are red cells X-A5, X-A6 and X-A7; X-C4, X-C7 and X-C9 keep the party halves. So m-X5 reds X-A5, not X-C4.
+- ks1699v: besides V-C7 (title cites card 11:12 and KS-2239; expectations become the nulls), its header sentence "a signed-in answer is unchanged (V-A10, V-C7)" is rewritten. My change makes that sentence false, and it names V-C7.
+
+## Measured (runner JSON)
+- Red first, on develop's product bytes: ks2239 has 10 red of 34, every one an AssertionError:
+  - X-A1, on two rows: a same-tenant user of another organisation;
+  - X-A2: the legacy typed did;
+  - X-A3: an ORG_ADMIN of the certifier's own organisation;
+  - X-A4: a userId-less token;
+  - X-A5, x2: the empty-issuer row;
+  - X-A6, x2: revoked and expired;
+  - X-A7: the shape.
+  All 34 are green with the change.
+- Suites, whole originate jest, load1 under 8:
+
+| run | tree | suites / tests | failed | load1 |
+|---|---|---|---|---|
+| A1 | develop eb27110fc6e4 | 230 / 2,817 | 0 | 6.86 |
+| B1 | change on eb27110 | 231 / 2,851 | 0 | 6.25 |
+| A2 | develop aa4ddb096053 | 230 / 2,817 | 0 | 3.38 |
+| B2 | head 26a85f3ece80 | 231 / 2,851 | 0 | 5.80 |
+
+- Mutants. Each red set was registered in the tool before any run; each mutant was run twice (once per base) with the same result both times:
+
+| mutant | change | BRIEF prediction | real red |
+|---|---|---|---|
+| m0 | develop bytes | (red stage) | 11: X-A1..A7 cells and V-C7 |
+| m-noop | comment-only CONTROL | 0 | 0 |
+| m-X1 | naming on principal (PR 2250 shape) | X-A1, A2, A3, A4 | 11: the same as m0 |
+| m-X2 | naming on same tenant | X-A1, A3 | 11 (every caller here is same-tenant, so it equals m-X1) |
+| m-X3 | holder arm dropped | X-C1 | 4: X-C1, X-C7 x2, X-C9 |
+| m-X4 | issuer arm dropped | X-C2 | 3: X-C2 (issued to another, legacy), X-C4 (connector) |
+| m-X5 | no empty-principal guard | X-C4 | 1: X-A5 (userId-less token on the empty row) |
+| m-X6 | charge gated on the party rule | X-C5 | 7: X-C5 x3 (non-party, ORG_ADMIN, userId-less), ks1699v V-C1, V-A6, V-C6, share V1 |
+| m-X7 | did left on principal | X-A2 | 9: X-A2, A3, A4, A5 x2, A6 x2, A7, V-C7 |
+| m-X8 | callerMayShareOrRecertify | X-A3 | 1: X-A3 |
+| m-X9 | real id to anonymous | X-C6, V-A10 | 6: X-C6 x5, V-A10 |
+| m-X10 | read rule admits ORG_ADMIN | X-A3, X-C8 | 21: X-A3, X-C8, plus 19 read cells in the ks1695 and ks1699-share files (by name: P3, R7, R8, R9, R11, R12, R14, R15, S7, S8, S9, S11, S12; several are it.each rows) |
+
+  Every red is an AssertionError. Each restore was checked by sha256. Every mutant fired; the no-op fired none.
+- Static checks:
+  - tsc originate src: rc 0.
+  - tsc over the test tree: the same 4 pre-existing errors as develop (ks1937 and ks488), 0 in my files; a planted TS2322 is reported.
+  - eslint: 0 errors and 0 warnings on all 3 files; the planted control gives 2.
+  - check:test-types: rc 0 (originate is not in its list).
+- Docs check: green; a planted unclosed div turns it red (rc 1); after the restore it is green again. The one ADVISORY line (cheat page line 6235) is the same on develop.
+
+## Overlap (W34-R4)
+- Develop moved once before my first launch: eb27110 to aa4ddb096053 (PR 2162, KS-2122; 5 gateway and docs files, 0 overlap). My launch gate stopped, nothing reached origin, and I rebased locally (patch-id unchanged). I re-ran A2/B2, the mutants and the docs check, and mailed STATUS at 06:23:03Z before launching.
+- At the launch (06:23:11Z): develop by gh api = aa4ddb096053. Merge-tree of this head vs PR 2160 (b02bd2716cc2) is clean in both orders. The planted control (an edit of 2160's first removed line, `const msg = ...`) gives 1 CONFLICT.
+- Overlap gate: 46 open PRs, none other than 2160 on my 7 paths. A planted verificationV2.ts finds 2161.
+- Who re-measures: if PR 2160 merges first, this branch is re-measured against the new develop. If this merges first, 2160's merge seat re-runs its merge-tree.
+
+## Kintsugi consequence (receipt line for a later deploy)
+"certification verify: a signed-in caller who is not a party to the certification no longer sees the certifier's user id (KS-2239); billing unchanged."
+- A non-party (another organisation's user in the same tenant, an ORG_ADMIN, a userId-less token) gets issuer.id null, and issuer.did null as a NEW key where the key used to be absent.
+- Parties' answers are byte-identical. Anonymous callers are unchanged.
+- The verifier ResultPage.tsx 405 falls back to issuer.id as a display name, so a non-party viewer sees "Unknown".
+- Production is UNMEASURED.
+
+## Candidate filings (none filed; yours to route)
+1. The certifying user's id is anchored on chain as issuerOrgId at certification issue (certifications.ts 667, then anchorSchema.ts 359). It is public and permanent whatever the API withholds. Kam's 11:12 card did not address the write side; this is a card for Kam.
+2. The legacy meta.issuerDid fallback reads caller-typed document data (certificationRepo.ts 83, documentRepo.ts 367-373). A party still sees typed text as "the certifier's DID".
+3. ResultPage.tsx 405 falls back to issuer.id as a display name. A non-party now sees "Unknown"; a name field (issuer.name is the email local part, so personal) is a product question.
+4. Unchanged from the BRIEF: gate 375 F3 / IP keying, and W 33rd's candidates (1)-(9).
+5. New, test hygiene: the originate test tree carries 4 pre-existing tsc errors (ks1937 and ks488 each redeclare EmailModule and saved at global scope). originate is not in check:test-types' list, so nothing gates them.
+
+## Identity and cost
+claude-opus-5-5, pane %226, claude pid 80662, session 1cff063b. Context meter about 37.6 of 1M.
+
