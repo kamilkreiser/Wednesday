@@ -57,6 +57,23 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **STALE, VOID 2026-11-12 (B1537/B1538 drafter, read at HPSM main c717ba1a: `web/scripts/audit-dev.mjs:2-3` says the exception list is empty and the ruling lapsed, `:11` `EXCEPTIONS = Object.freeze([])`, `ci.yml:391-393` "no exception is in force"; 2026-11-30 survives only as a synthetic fixture in `web/src/audit-dev.test.ts`). No action on 11-23.** ~~~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30~~ (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴🔴🔴 DELTA 1194 — 2026-11-16 15:1x ROTATION-READY (s282, ctx ~72%). **READ THIS FIRST; supersedes 1193's LIVE, STAMPED and DRAFTED lines.**
+- **LIVE (stamped by s282, rung 5 read, status_watch armed by s282; RE-ARM all of them after rotation, because the watchers die with this seat):**
+  - H173 %150 (B1615 HPSM H-1, `HPSM-POC/.../Briefs/2026-11-16_B1615_STATUS.md`);
+  - R245 %153 (B1612 Composer records, `Datasec Security Composer/.../2026-11-16_B1612_STATUS.md`);
+  - H174 %156 (B1616 HPSM H-4, `.../2026-11-16_B1616_STATUS.md`);
+  - R246 %159 (B1613 HPSM records, `.../2026-11-16_B1613_STATUS.md`);
+  - M145 (B1617 MPS M-S, `Datasec MPS Commercial Calculator/.../2026-11-16_B1617_STATUS.md`): launched by s282 if this line says so below, else launch it.
+- **STAMPED, NOT LAUNCHED (launch ONE waiter at a time, then rung 5, then a watcher):**
+  - **B1618 NexusAI NX-T** (`Datasec/NexusAI-N137`; its kit's own launch line);
+  - **B1614 NexusAI records** (`Datasec/NexusAI-R247`; slots WRITE/WRITE/MOVE all seven/WRITE/WRITE; RD-992 ruling time corrected at the stamp).
+  - Both write NexusAI, but N137 is code-only (no Jira) and R247 is records and Jira only: no conflict.
+- **DRAFTED, NOT STAMPED:** **B1611 MPS records R244** (88 KB, read whole and stamp):
+  - its two "one ticket" items already exist (MPSCALC-395 seed secret, -372 templates path): it comments, it does not create;
+  - the CREATE slot (one ticket for #196's review Minors) is Tuesday's call: default NONE;
+  - BASE needs both card clocks re-read: datasec-demo-deploy-round-apply-1116 a (tap 10:01, store 10:24:02) and mpscalc-deploy-seed-secret-again-1116 a (10:25:36).
+- **On each READY:** follow the delta lines above. Then the next lane wave from SWEEP-1450: H-3, M-D, M-E, M-G, M-T, NX-S2 (Opus), NX-P (Opus).
+
 ## 🔴🔴🔴 DELTA 1193 — 2026-11-16 15:1x (s282, ctx ~65%). **READ THIS FIRST; supersedes 1192's LAUNCHED, DRAFTED and STILL-DRAFTING lines.**
 - **LIVE (each stamped by s282 with its sources re-printed; rung 5 read; status_watch armed):** H173 %150 (B1615 HPSM H-1); R245 %153 (B1612 Composer records); H174 %156 (B1616 HPSM H-4, Edit B corrected).
 - **STAMPED, waiting on the one-waiter queue:** B1613 HPSM records R246 (its launch_when_cool runs now as a background task; on exit read rung 5 and ARM status_watch on its STATUS); then **B1617 MPS M-S M145** (stamped 15:11, slots S0-S10; launch with its kit's own launch line).
