@@ -4,74 +4,48 @@ type: pickup
 seat: friday
 scope: BOTH Secuura and Datasec, from Kam's laptop. Claim each project before driving it (wed_claim.sh)
 status: live
-written_by: Friday, WRAP 2026-11-16 ~22:5x (Kam: "in that case, wrap up but will the next reboot start in fable?")
-supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1116-2255 (the 16:57 wrap), read on demand only
+written_by: Friday, boot #3 (Fable 5.2), handover block written 23:14 on 2026-11-16 while the overnight CoAgent build runs
+supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1116-2314 (the 22:5x wrap), read on demand only
 ---
 
 # NEXT PICKUP — FRIDAY
 
-**The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MBP).** Quote every path.
+**The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MBP).** Quote every path. This seat boots on Fable (launcher change 22:5x held: statusline "Fable 5.2" at 22:59).
 
-## 🔴 FIRST ACT — check the model, then work the review cards
+## 🔴 FIRST ACT — the overnight CoAgent build (grant ends at Kam's MORNING REVIEW, Tue 2026-11-17)
 
-1. **Which model is this seat on?** Kam ruled card `general-friday-boot-on-fable-1116` = a (22:55). DONE 22:5x: the
-   shared launcher now boots Friday with `--model fable --fallback-model opus` (Wednesday/Tuesday unchanged on opus;
-   commit "Launcher: Friday seat boots on the fable alias", backup Launch_Wednesday.command.pre-1116-fable; sisters mailed
-   b684789c / ced43887). VERIFY at boot: the launcher's "[launcher] seat friday boots with:" line and the model this
-   session reports. If not Fable, diagnose before anything else. Under Kam's 22:50 rule, say on the panel which model
-   the seat is on and whether the day's work warrants Fable.
-2. Run `kam_rulings_today.sh` + `decision_queue.sh list open`, then rule every tapped card in the store.
-3. **Claude to Claude (General) review: Kam said 22:47 "I have gone through the document and it looks good. lets start
-   with the things that need clarification. please put each on the fleet activity".** 15 clarification cards were posted;
-   RULED at 22:55-22:56 (all a): build-model (Fable for M0 spikes, then routing table), repo-home (new PRIVATE repo
-   under Kam's PERSONAL GitHub, old tree as legacy/), d12-audit, d9-browser-agent. The rest stay open, each rec a:
-   `general-c2c-{d1-name, d2-licence, d3-relay, d5-reads, d6-trust-limits, d7-identity, d8-review, d9-browser-agent,
-   d10-platforms, d11-two-parties, d12-audit, language, repo-home, build-model, nightly-tests}-1116`.
-   Plus the 16:5x pair: `general-c2c-design-go-1116` (start M0) and `general-c2c-v044-withdraw-rotate-1116` (D4; Kam's
-   own action). Approval-class (money / public posture): d3 relay, d8 review, nightly-tests; none is priced (U14).
-4. When the clarifications are ruled and the go card is a: Friday does NOT build. Read the project's own CLAUDE.md and
-   Launch_Claude.command (`/Volumes/Laptop-DEV/!CODING/Claude to Claude/claude-bridge`, read-only, not a git repo), set
-   up the repo per the repo-home ruling, model per the build-model ruling, then brief a project agent for M0 (Appendix B,
-   U1–U13). Kam asked 22:56 "let me know when to set it up" (the repo): Friday told him once the go card is
-   ruled, with steps in the chat one per block. Kam's GitHub identity for a General project is NOT Secuura's nor Datasec's: confirm it at point of use.
+Grant: top row of `tasks/EXPIRING-GRANTS.md` + `learnings/2026-11-16_grant-build-coagent-overnight-until-the-morning-review.md`. CoAgent only. No deploy, publish or spend.
 
-## Where everything is
+1. **A project seat is running in cockpit pane `General/CoAgent` (%4), Fable 5.2,** brief `2_Project_Files/friday/briefs_drafts/2026-11-16_coagent_M0_brief.md`. It works ONLY in a new folder `/Volumes/Laptop-DEV/!CODING/Claude to Claude/coagent/` and reports in `coagent/5_Project_History/STATUS_M0.md` (last line `READY FOR REVIEW M0` when done; `IN PROGRESS:` until then). Read the pane (`tmux capture-pane -p -t %4`) and the STATUS file first. A background watcher woke the launching seat; a NEW seat has no watcher: arm one or read by hand.
+2. **A Fable design-revision agent (in-session, launched 23:04) writes** `0_Brain/reference/2026-11-16_claude-to-claude/04_design-revision-rulings.md` (groups, native Windows, no public relay, phase-2 identity options, revised M0 list and estimate). If the file is missing or partial, the in-session agent died with the seat: re-commission it (the brief is in the 2026-11-16 daily note, 23:03-23:05 entries; model fable).
+3. **When STATUS says READY:** Friday re-runs G1, G2 and a sample of the spikes' `run.sh` herself (brief section 8), reads raw outputs, checks the settings checksums did not change, then briefs the next step: Part B spikes if the revision landed after the seat finished Part A, then M1 from the delivery plan (model by `fleet/specs/model-routing.md`; card build-model = a: Fable for M0 only). Launch with `2_Project_Files/friday/general_seat.sh` (start dir can be `coagent/` once it exists).
+4. **For Kam in the morning, on the Friday tab:** the revised design + new estimate (PDF via md2pdf if long), what the spikes proved, new decisions as cards (`decision_queue.sh add`, then confirm he can SEE them, not just HTTP 201), and the model suggestion per his 22:50 rule.
 
-`0_Brain/reference/2026-11-16_claude-to-claude/` — `00_requirements.md`, `01_existing-code-review.md`,
-`02_prior-art-research.md`, `03_architecture-design.md` (+ PDF, shared to Kam f-a27bbae499). **Friday has now read the
-whole design** (sections 1–13 and Appendices A–B; 14 is a traceability table). Her five review points are in the
-2026-11-16 daily note (22:44 entry): Rust toolchain, relay operator/scam risk, phase-2 workflow change, nightly test
-cost, M0 before build. Linear WED-162.
+## Kam's rulings on CoAgent (all 17 cards ruled; store has 0 open at 23:05)
+
+a: name CoAgent, licence Apache-2.0 free, reads ask-on-first-read, trust 60 min / 8 h, identity device keys (note: "Phase 2 should have multiple options"), browser agent embedded terminal, audit hashes + previews, Rust core + TS console, nightly tests on smallest model, build model Fable for M0 then routing table, repo new private under personal GitHub, go.
+**b (depart from the design):** groups and observers in phase 1; native Windows in phase 1; NO public relay (self-host only); no outside review (unreviewed beta indefinitely).
+**c:** old v0.4.4 download and its credentials: leave as is (Friday disagreed once on the panel; ruling stands; do not raise it again).
+
+## Repo and key (MEASURED 23:09)
+
+`git@github.com:kamilkreiser/coagent.git`: exists, empty, private (anonymous 404). Deploy key pair generated by Friday at Kam's request: `3_Access_Keys/coagent_github_deploy_rw` (+ `.pub`) in THIS tree (gitignored, machine-local: NOT on the other machines). It authenticates as kamilkreiser/coagent. Write access is unproven until the seat's first push.
 
 ## OWED (Friday)
 
-- 🔴 **Kam could not see ANY Fleet activity card at 22:53** (screenshot in his board message f-9f81b3c88483: "Needs
-  you (0)", "1050 cards synced", "✕ clear" drawn with no project chip lit). Probable cause: a stale saved project
-  filter in his browser that the board does not draw as a chip (`dashboard-cloud/app/static/index.html` renderFilters
-  ~694-695 only draws filters whose agentOfProject() is the active seat; projOk ~809 still applies all of them). Kam was
-  told to tap "✕ clear" (bf-7d53a4eb58e88). FIRST: ask whether the cards now show. Then fix the board (draw every active
-  filter, or drop filters outside this view), claim first: the live board is shared fleet tooling, so mail both sisters;
-  its deploy goes to the board's Azure app, so read dashboard-cloud/README.md for the deploy path and whose grant
-  covers it before deploying. Ledger w=3 (201 is storage, not sight).
-
-- Sister acks still outstanding: the shared inbox-scope hook change (e30563fa5d; threads fa7f0784… Wednesday,
-  412cc0c8… Tuesday) and Kam's 16:37 Composer ruling mailed to Tuesday (thread f0f1f881…). Check friday-laptop-agent@.
-- From 10-16, said once, not carded: Spotlight Privacy + Disk Utility First Aid on Laptop-DEV; wordsplit hook refuse
-  unquoted `$(ls …)` in a `for` list (ledger w=5, 10-15).
-- Stale OPEN claims in `wed_claim.sh list` on Kamils-MBP / Kamils-MacBook-Pro (09-08 wed_claim.sh itself, 09-25
-  live_chat_poll arming — DONE in the launcher, 10-10 Friday tooling): verify each is Friday's, then release.
-- Linear WED-48 and WED-147 overdue; the WED board has not moved since mid-September.
+- **Live board filter fix: committed (468f35c235), NOT deployed.** Deploy asked of Wednesday by mail (thread 0f4782ef…); Tuesday informed (2c899d16…). Check friday-laptop-agent@ for her confirmation; until then say "committed, not live".
+- Sister acks still outstanding: inbox-scope hook change (e30563fa5d), launcher Fable change (b684789c / ced43887), Kam's 16:37 Composer ruling to Tuesday (f0f1f881…).
+- Wrap step 3a (doctor/PORTABILITY) for the new machine-local items: the deploy key above, `4_Credentials/clients/general/`, and `general_seat.sh`'s reliance on them.
+- Untracked backup `2_Project_Files/dashboard-cloud/app/static/index.html.pre-1116-2305-hiddenfilter` (the deploy zip excludes `*.pre-*`; keep until the deploy is confirmed, it is the red arm of 09f).
+- From 10-16, not carded: Spotlight Privacy + Disk Utility First Aid on Laptop-DEV; wordsplit hook for unquoted `$(ls …)` in a `for` list.
+- Stale OPEN claims in `wed_claim.sh list` on Kamils-MBP / Kamils-MacBook-Pro (09-08, 09-25, 10-10, 10-26, 10-29, 11-03, 11-06): verify each is Friday's, then release.
+- Linear WED-48 and WED-147 overdue; WED-162 is the CoAgent issue (update it with tonight's state).
 
 ## Standing facts a cold seat needs
 
-- Friday drives NO Datasec and NO Secuura project. HPSM-POC, MPS calculator, Security Composer, HPSM records are
-  Tuesday's (since 10-15). Friday holds only `General/Claude to Claude — Friday (laptop)` (kept across this wrap).
-- The board poller `live_chat_poll.sh --seat friday` (30 s) is armed by the shared launcher at every launch and doctor
-  fails without it; Kam asked 22:4x that it be always on and that receipts go on the panel. Receipt every board message
-  on the panel the moment it is read.
-- The by-tier boot digest is ~700 KB: read every headline (`grep '^## '`), open a lesson when its rule fires. ctx 14%
-  after that load (both 11-16 boots).
-- Never run `tools/panel_sync.sh` bare (it does not return). Push own commits with `git push`.
-- The prior-ruling gate refuses on generic words (name, build, home, audit, boot…) from unrelated cards; override
-  with the reason in the BLUF, after reading what it matched.
-- No live grant drives Friday work. WEEK-INSTRUCTION-FRIDAY lapsed 2026-09-26.
+- Friday drives NO Datasec and NO Secuura project (Tuesday's since 10-15). Friday holds only `General/Claude to Claude — Friday (laptop)`.
+- Poller `live_chat_poll.sh --seat friday` is armed by the launcher; receipt every board message on the panel when read. `kam_rulings_today.sh` prints TAPPED-BUT-OPEN: rule those at once.
+- Hooks that will refuse you: any `cd`; `git -C $VAR` with a write verb (write the path literally); a note or panel message in the same command as a send; reading two inboxes in a loop; receipt verbs in a note without the send's own output.
+- By-tier boot digest ~700 KB: read every headline, open a lesson when its rule fires. ctx 13% after the load.
+- Never run `tools/panel_sync.sh` bare. Push own commits with `git push`.
+- The prior-ruling gate refuses on generic words from unrelated cards; override with the reason in the BLUF after reading what it matched.
