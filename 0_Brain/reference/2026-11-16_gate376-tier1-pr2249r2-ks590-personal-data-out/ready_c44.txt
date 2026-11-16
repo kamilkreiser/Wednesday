@@ -1,0 +1,104 @@
+=========== [INBOUND] 2026-11-16T01:39 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-590 (Seat C 44th)
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE KS-590 (Seat C 44th)
+Seat C 44th
+READY FOR GATE KS-590 (Seat C 44th). TIER 1. PR 2249, fix round 1.
+
+PR 2249: https://github.com/Secuura/Distributed_Secuura/pull/2249 (branch feature/ks-590-verification-names-open-to-every-caller)
+NEW HEAD: d04080d7a5233d0d1de2d0d755ec304d3d0e0f9f. Delta 10057c4f63c3..d04080d7a523: ONE commit, 14 files, +452 -88. Built on 9ddba202bb15 (no re-base, no force push). Origin VERIFIED at 01:37:37Z (ls-remote = d04080d7a523; push rc 0 in 666 s, fast-forward).
+Develop at this READY: 72aeaec533dd5073d57067877eb5e596c0d939c5 (re-read 01:38:38Z; unmoved since 00:49:28Z). PR 2249 reads OPEN, MERGEABLE, head d04080d7a523.
+
+RULINGS THIS ROUND FOLLOWS
+- Kam 2026-11-16 11:12:46, card secuura-verify-names-personal-data-1116 = a, "Open the names, but not personal data".
+- C44-R1 Rule R on row-backed answers: organizations.name, else metadata.issuerName, certificationData.issuedBy, metadata.issuedBy, metadata.certifiedBy, each trimmed, non-empty, no "@"; else null. certification_metadata.issuerName never read. certifierOrganizationId null, key kept.
+- C44-R2 view X: one public view for every caller, all four paths. THE OWNER'S OWN VERIFY ANSWER CHANGES: it loses the email local part and the user id.
+- Chain-first: your ANSWER 01:02:12Z, ruling (b), superseding the chain-first half of C44-R1: issuer, certifiedBy, certifierOrganizationId, onChainMetadata.issuerOrgId and onChainMetadata.issuerName null on v1 verify-file, v1 by hash and v2 chainOnlyMatch, always. The PR body carries your sentence verbatim. Whether any pre-KS-240 anchor with a local part exists on preview: UNMEASURED.
+- C44-R4 residual, for Kam: a person's own name TYPED into a company field (issuedBy, issuerName) still shows. Not built against.
+
+WHAT EACH CALLER SEES (realistic fixture: owner and certifier = a user UUID, certification_metadata.issuerName = the email local part, issuer_organization_id set, organizations.name set, an uploader email in metadata; anonymous modelled as the live app does, req.tenantId = the default tenant, no req.user)
+| caller | PR head 10057c4f63c3 | develop 72aeaec533dd | d04080d7a523 |
+| anonymous, live config, default-tenant row | user id and local part | user id and local part | title + company; no user id, no local part |
+| anonymous, another tenant's row | user id and local part | user id (names null) | same public view |
+| another company's signed-in user | user id and local part | user id (names null) | same public view |
+| the row's own tenant | user id and local part | user id and local part | same public view (CHANGED) |
+| chain-first, all three paths | user id in issuer, COID, onChainMetadata | the same | no issuer, no user id |
+Measured by an answer dump (54 answers: 4 fixtures x 4 paths x 3 callers, plus 2 chain blobs x 3 chain-first paths), PR head bytes against mine:
+- (a) answers carrying the user id, the local part or the org column: PR head 54 of 54, mine 0 of 54.
+- (c) the facts with the name fields removed (issuer, certifiedBy, certifierOrganizationId, onChainMetadata.issuerOrgId/issuerName, timestamps): 0 of 54 differ. A planted change to `checks` is detected (control).
+- One view: in my bytes every caller gets the byte-identical answer in 22 of 22 fixture-and-path groups.
+evidence/dump_s-c44-headA.json and dump_s-c44-fixD.json in my REC.
+
+THE CHANGE (originate only)
+- verification.ts: NEW exported publicCompanyName, publicIssuerName, publicOnChainMetadata (above buildCertification). buildCertification: certifiedBy = publicIssuerName, certifierOrganizationId null. resolveTrustedCertificationEvidence: certifiedBy = publicIssuerName(r). Row-backed issuer on verify-file and by id, and the by-hash buildResponse issuerName: publicIssuerName (the dead doc.issuer_name read dropped). Both chain-first blocks: issuer, certifiedBy, COID null; onChainMetadata through publicOnChainMetadata. Three now-unused `meta` locals removed. Stale KS-590 comments corrected in place.
+- verificationV2.ts: imports the two helpers; buildMatch issuerName = publicIssuerName(row); chainOnlyMatch as the v1 chain-first blocks.
+- NOT touched: originate.openapi.ts and the yaml, any other route, schema, migration, audit file. For S 86th (F3): openapi line 446 still describes certifierOrganizationId as the "Organisation id of the certifying issuer"; it is now always null, and its old value was a user id.
+
+CELLS
+- NEW ks590p-verification-answers-carry-no-personal-data.test.ts, 53 cells: P1 x16 (4 callers x 4 paths: title, issuer = certifiedBy = company, COID null, no fieldsWithheld, leak check clean), P1b x4 (one view per path), P2 x4 (no company: all null, never the local part), P3 x4 (a typed issuedBy company beats the local part), P4 x4 ("@" issuedBy not named), P4b x4 (field order, trim, "@" and blank skipped), P8 x2 (same-tenant WITH lineage: lineage present, clean), P5 x3 (the chain's user id reaches no field; the rest of the chain blob still shown), P6 x3 ("@" chain issuerName), P6b x3 (legacy local-part chain issuerName -> null everywhere), P6c x3 (a company-looking chain issuerName withheld too), P7 x2 (resolveTrustedCertificationEvidence through a derived-row fixture), P-control x1.
+- Red first: PR head bytes 48 of 53 red, develop 72aeaec533dd bytes 48 of 53 red, every red an AssertionError. Green there: P1b x4 + control on the head (the head already gives every caller the same, leaking, answer); P4 x4 + control on develop. Mine: 53 of 53.
+- Lineage, by reading: LineageEntry (documentRepo.ts 1021-1033) has no name or identity field (id, dbId, contentHash, documentType, status, createdAt).
+
+FORCED EXISTING CELLS: 20 in 6 files, exactly the census the BRIEF predicted (whole-suite run on my bytes before the edits: 20 red, all assertion). Name values only, each with the 11:12 card in the line; every non-name assertion kept:
+- ks590n-verification-names-are-open-to-every-caller (PR 2249's own): 13. OPEN.certifierOrganizationId ORG_UUID -> null (N1/N2/N3/N4 x4, N5 x4, N-C3 x4) and N-C2's chain-first triple -> [null, null, null]. Titles and header corrected.
+- ks1986-v1-original-across-tenants: 2 (FOREIGN ORIGINAL CERTIFIED, /verify and verify-file): COID toBe(CANARY_ORG_UUID) -> toBeNull(); certifiedBy CANARY_ORG_NAME kept (now from organization_name).
+- ks1557-trusted-certification-evidence: 2. GENUINE child certifiedBy 'Oxford University' -> 'Acme Ltd' (organization_name first). The order cell's title rewritten to Rule R's order; its row a given organization_name null so it still tests a fallback ('Issued By Co').
+- ks584-p3-verify-list: 1 (multiplicity): certifiedBy 'Oxford University' -> 'Acme Ltd'.
+- ks1561-verify-original-registrant-certifier: 1 (C2 DEFECT): certifiedBy 'Org B' -> null ('Org B' sat in certification_metadata.issuerName; the row has no company).
+- ks563-certified-vs-anchored: 1 (isCertified): certifiedBy -> 'Acme Ltd', COID issuerId UUID -> null.
+ks1561-g188-f1 and ks584-verify-row-selection stay green unedited.
+
+MUTANTS (on my bytes; cells: ks590p + ks590n, 76 tests; every red an AssertionError; product sha256 equal after each and at the end; m0 no-change control 76 of 76 green)
+- m1 certification_metadata.issuerName first in publicIssuerName: 36 red (P1, P2, P3, P4, P4b, P7, P7b, P8)
+- m2 buildCertification COID back to certMeta.issuerId: 38 red (ks590n N1-N5, N-C3; P1, P2, P3, P8)
+- m3 the "@" filter dropped: 9 red (P4, P4b, P7b)
+- m4 v1 chain-first issuer back to issuerName || issuerOrgId (two sites): 8 red (P5, P6, P6b, P6c)
+- m5 publicOnChainMetadata returns the raw blob: 13 red (N-C2, P5, P6, P6b, P6c)
+- m6 v2 chain-first COID back to issuerOrgId: 3 red (P5, P6, P6b)
+- m7 YOUR mutant, the "@"-filtered chain issuerName restored in issuer and certifiedBy (v1 two sites + v2): 7 red (P6b x3, P6c x3, N-C2)
+- m8 publicOnChainMetadata restores the "@"-filtered issuerName: 6 red (P6b, P6c)
+- mY a same-tenant exception (by-id answer keeps certMeta.issuerName when the caller is same-tenant): 4 red (P1, P1b, P8)
+- gB (gate 374) v2 buildMatch adds owner_user_id: 6 red. (d) answered: RED.
+- gC (gate 374) by-id answer adds owner_user_id: 7 red. (d) answered: RED.
+(The family column groups ks590n cells by their describe title; per-cell lists are in evidence/mutants/.)
+
+WHOLE ORIGINATE SUITE (this Mac, offline jest, no stack, no slot, Node v26.8.1; LTS status not checked against the vendor schedule)
+- B1 my bytes before the forced edits: 229 suites, 2,792 tests, 20 red (the forced census), load1 7.53 at start.
+- A1 PR head bytes: 2,731 of 2,731, but ks488-smtp-opt-in FAILED TO LOAD (TS2300). B2 my final bytes: 229 suites, 2,792 of 2,792 (load1 6.02). A2 PR head: 228 suites, 2,739 of 2,739 (load1 7.09; ks488 loaded).
+- ks488 measured: it and ks1937-email-service-logs-never-carry-the-recipient-address are both script files (no top-level import/export) declaring a global `type EmailModule`; a worker holding both fails TS2300. Alone: 8 of 8, twice in each tree. Byte-equal to develop, not in this PR. Candidate filing (6).
+
+STATIC AND DOCS
+- tsc over originate src (noUnusedLocals): rc 0. Planted unused local in verificationV2.ts: rc 2, TS6133; file restored sha256-equal.
+- eslint from Blockchain/Dev on the 2 product and 7 test files: 0 errors, 0 warnings each. Planted unused variable (stdin copy): reported (no-unused-vars).
+- docs-fragments.mjs check: OK (one ADVISORY: the pages lag the fragments, expected). Planted unbalanced div in the KS-590 cheat fragment: FAIL rc 1; restored sha256-equal.
+- Docs changed: KS-590 cheat + flow fragments rewritten to this rule (figures from my runs); KS-1986 cheat + flow one sentence each; docs/VERIFICATION.md chain-first example (issuer null, onChainMetadata issuerOrgId/issuerName null) plus one paragraph.
+
+MERGE-TREE (--write-tree, both orders, my clone) at 01:38:00Z
+- develop 72aeaec533dd: clean both orders, same tree 2ebc664bdeed
+- PR 2161 0e50defb7819: clean both orders, same tree 4a9b6deee237
+- PR-V (W 33rd, KS-1699, branch feature/ks-1699-cert-verify-open-to-anonymous-callers): head 9ec3e460b68d (on origin after W 33rd's push): clean both orders, same tree c31a543df990
+- PR 2138 (control): conflicts both orders (rc 1), as expected.
+
+PUSH
+- Existing-branch driver (R 121st's set, my counted copy; gates sha256-equal), TMPDIR Blockchain/.c44t, launched 01:20:55Z, queued behind W 33rd. Lock taken after W 33rd released it; PUSH 01:26:27Z to 01:37:33Z, rc 0, 666 s, fast-forward 10057c4f63c3..d04080d7a523, VERIFIED 01:37:37Z; lock released (rm_rc 0, rmdir_rc 0), queue left (rc 0).
+- Pre-push hook final line, verbatim: PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  Legs skipped: 3 spec-auth conformance, 4 path resolvability, 8 served-spec consistency ("local stack not up on http://localhost:6882"). Shell suites 126 passed, 0 failed, 1 skipped (restore_local_secrets.test.sh).
+- Overlap gate: OVL_IGNORE_PRS=2138 2161 2249 on your ANSWER 00:56:07Z (C44-R3). Develop gate at the launch: develop 72aeaec533dd, 15 develop-move files vs 16 branch paths, intersection 0 (planted control 1).
+- F-02: did not block the push.
+
+PR BODY: one appended section "Fix round 1 (Kam 2026-11-16 11:12, gate 374 notes)" before the pre-merge checkboxes, plus 13 counted in-place corrections of sentences the new rule makes false: (i) What and why; (ii) the after column, the KS 1986 row, the same-tenant row (CHANGED) and the chain-first row (CHANGED); (iii) Design and Tests bullets (issuerId no longer read; the realistic-fixture absence asserts); (iv) TIER 1 named; (v) the old override line marked as round 1's, the new grant in the section; (vi) NOT run adds production and preview's legacy anchors; (vii) no closing keyword, no self-hold sentence (checked: 0). Your chain-first sentence is in it verbatim (capital C, bold). Title corrected (it said "names its title, issuer, certifier and organisation to every caller"): "Refs KS-590: document verification names the title and the issuing company to every caller, and no personal data (Kam 2026-11-16 11:12)". Body and title read back equal at 01:38Z.
+
+LINEAR: KS-590 read before (In Progress, 8 comments, newest 2026-11-15T23:28Z) and after (In Progress, 8 comments, newest unchanged; its updatedAt moved to 01:38:35Z with the push and PR edit (the GitHub integration), not a write of mine). No state move, no comment, no filing by me.
+
+CANDIDATE FILINGS (none filed; you route them)
+(1) originate.openapi.ts 446 (and 674-677, 2092-2093) plus yaml 6873, 30222: certifierOrganizationId described as an organisation id, fieldsWithheld still declared: stale (S 86th).
+(2) The typed-person-name residual; a possible write-time "@"/email-shape refusal on certificationData.issuedBy.
+(3) certifications.ts stores the certifier's email local part and user id in certification_metadata at all (write-side minimisation).
+(4) The anchored issuerOrgId fallback owner.id in documents.ts ~899 puts a user id on chain (KS-240 minimisation).
+(5) Closing PR 2138 after PR 2249 merges.
+(6) NEW: ks488-smtp-opt-in and ks1937-email-service-logs-never-carry-the-recipient-address both declare a global `type EmailModule` in script files; a whole-suite run can fail ks488 to load (TS2300), order-dependent. Fix shape: `export {}` in one of them.
+(7) NEW, a correction of my own: in my chain-first QUESTION I dated KS-240 2026-07-30 (a pickaxe on the anchorSchema comment text). docs/VERIFICATION.md dates KS-238 to 2026-06-10 with KS-240 as its implementation. It does not change ruling (b).
+
+FOR THE GATE (gate 374's six questions plus): (a) the dump's 0 of 54 and the P1/P5/P6 cells with the planted-value control; (b) title and company present: P1 x16, P3 x4, P4b x4; (c) the dump's 0 of 54 differing facts; (d) gB and gC red.
+NOT RUN: Schemathesis, Akto, Playwright, k6; real PostgreSQL in multi-tenant mode; production's answer; preview's legacy anchors.
+COST: meter 47.5 of 1M at this READY (plan mail ~18). Next: the HANDOVER update, history entry and wrap unless you send a gate note for a fix round 2.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 39  SEEN:      507  BATCH: /private/tmp/wed_newmail/batch_20261116T014036Z.txt
