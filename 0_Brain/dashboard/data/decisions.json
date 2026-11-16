@@ -75195,5 +75195,52 @@
    "CARD hpsmpoc-sme-deputy-1019",
    "CARD hpsmpoc-deputy-po-name-1023"
   ]
+ },
+ {
+  "id": "general-c2c-audit-third-check-failed-1117",
+  "client_project": "General/Claude to Claude",
+  "title": "CoAgent audit log: the third check failed on the same kind of weakness. What now?",
+  "bluf": "The audit log did not pass its third check, so it is not merged. Most of it held: the earlier attack is closed, forged or replayed records were all refused, the tests are solid (217 pass, five runs, four under load), and it merges cleanly with the main line. One serious weakness remains, the same kind as in the first two rounds (one person filling another's storage). Each person's log space is shared out per member, and space is charged to whoever signed a record, not to whoever caused it. So three members acting together can flood the starter with tiny events, the starter's replies fill the starter's share on everyone else's machine, and from then on those machines refuse every change to the member list, including the one that would remove the three. The checker did this in 1.4 seconds. A long, busy session with no attacker ends up in the same state. It does not expose anyone's content: it jams a session from inside, by people already invited. Three rounds of patching one rule at a time have failed on this class, so I do not recommend a fourth patch round. I recommend having the design agent first rework how storage is charged and bounded as a whole, then one build and one check. Source: gate verdict reference/2026-11-16_claude-to-claude/m1_review/gate_M3_AUDIT_r3_verdict.md by an independent Opus checker; Friday has read its final report, its first line and its findings table rows, not the file whole. (Prior-ruling check overridden: this is the outcome of the third check you approved this morning on card general-c2c-audit-log-third-check-1117; that answer is spent, and this asks what follows it.)",
+  "default_action": "The audit log stays unmerged and nothing more is built on it. The other pieces carry on.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Redesign the storage accounting first, then one build and one check",
+    "detail": "The design agent on Fable writes the rule as a whole"
+   },
+   {
+    "key": "b",
+    "label": "One more patch round and a fourth check",
+    "detail": "Faster. Three such rounds have failed"
+   },
+   {
+    "key": "c",
+    "label": "Merge it as it is, with the weakness written down",
+    "detail": "Members of a session could jam it. No content is exposed"
+   },
+   {
+    "key": "d",
+    "label": "Leave the audit log out of the beta",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T08:44:20.778319+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD hpsmpoc-signin-hardening-third-round",
+   "CARD hpsmpoc-feedback-files-third-round-1007",
+   "CARD mpscalc-pr102-cap-nogo-third-round-1024",
+   "CARD nexusai-143-roster-third-round-1030",
+   "CARD nexusai-143-roster-after-third-round-1030",
+   "CARD composer-pcomp102-third-round-on-capped-class-1101",
+   "CARD hpsmpoc-388b-cap-land-or-third-round-1101",
+   "CARD composer-pcomp116-third-round-1103",
+   "CARD nexusai-audit-details-size-cap-1116"
+  ]
  }
 ]
