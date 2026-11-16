@@ -1,0 +1,14 @@
+# Land by MERGE COMMIT, never squash or rebase, pinned to the gated head. NexusAI repo datasecau/Reporting_Dashboard_Au.
+# Gated head a8358d923d8461f6668f05b3be6c934de91ec98e on main d1152289f7c0f2d97b4bd82187488c47d51c65fc (main is an ancestor of the head; merge tree = head tree 606337cc84013b355f7fb71c9d8d927a72d3cef1).
+# If main has moved past d1152289, do not run this: the branch needs a merge of main, regenerated counts, and a re-gate of that delta.
+# Open the PR from branch b1603/nexusai-nx-s1-server-security-2, wait for CodeQL and Build on the PR head (a background wait that exits), then land the SAME commit:
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh pr merge <N> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit a8358d923d8461f6668f05b3be6c934de91ec98e --subject "$(cat '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-16_B1603_verify/merge-subject.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-16_B1603_verify/merge-body.txt'
+#
+# DEPLOY DEMO: this merge WILL start a Deploy demo run. deploy-demo.yml (blob 597b3487, unchanged by this branch) triggers on push to main
+# with paths-ignore '**.md', 'docs/**', 'tests/**' only; the merge changes backend/server.js, backend/services/serverGuards.js,
+# __tests__/*.test.js and scripts/verify-expected-counts.json, none ignored. Both jobs (build :53, deploy :91) are gated on
+# vars.CI_DEPLOY_ENABLED == 'true'. The run MUST read skipped (both jobs skipped). The gate did not read the variable (no hosted API call).
+# Check after the merge (replace <MERGE_SHA> with the merge commit the merge prints):
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/deploy-demo.yml/runs?head_sha=<MERGE_SHA>' --jq '.workflow_runs[] | "\(.id) \(.event) \(.status) \(.conclusion)"'
+GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<RUN_ID>/jobs' --jq '.jobs[] | "\(.name) \(.conclusion)"'
+# Required: one run, event push, conclusion skipped; jobs build skipped and deploy skipped. Anything else is a deploy: stop and report.

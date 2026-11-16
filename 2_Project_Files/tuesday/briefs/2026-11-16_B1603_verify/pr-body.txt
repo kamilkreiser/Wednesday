@@ -1,0 +1,26 @@
+## What changes (backend/server.js and one new module, backend/services/serverGuards.js)
+
+- RD-762: the legal, first-run, marketplace-landing, status, login and setup pages take the existing generalLimiter as a route argument and share the /api/ counter. No new limiter (the census stays at seven); handler bodies unchanged.
+- RD-770: the AI answer shape is chosen by the endpoint's host (new URL, exact or dot-boundary suffix), not by `includes('openai.com')`. A lookalike host, path, query or user-info no longer passes for the vendor.
+- RD-772: the department keyword is escaped in full before it becomes a pattern; matching of the fourteen keywords is unchanged.
+- RD-773: the stream's fake-chunk loop walks `lines.keys()`; every line is still sent.
+- RD-765, RD-766: the five polynomial patterns in server.js are one-pass helpers that return what the old expressions returned. No length cap.
+- RD-769: a column-mapping key `__proto__`, `constructor` or `prototype` refuses the whole request with the route's existing invalid-format answer, before anything is saved; the mapping is built with Object.fromEntries.
+- RD-711: the interval audit flush and both shutdown flushes run one at a time (a promise queue whose tail never rejects). The tmp name and the RD-615 epoch checks are unchanged.
+- RD-806: the audit write goes to a fixed path and the ring is capped at 10,000 entries; entry details are not bounded in bytes. Reported, not dismissed; a cap is a product decision.
+- RD-830: a non-GUID workspace id is refused at POST/PUT /api/data-sources and POST /api/setup/data-sources (before the connection test), and a stored non-GUID is refused at POST /api/setup/data-sources/:id/test before any token is requested. The value is never echoed. The log-analytics route keeps its own refusal.
+- Not changed: the open window (authEnforcement.js and every adminGateRefuses line are byte-equal), requireAdminFor (30 before and after), the non-server.js sites of RD-765, RD-766, RD-769 and RD-806.
+
+## Evidence (independent gate, own clone)
+- Merge tree equals the head tree; main is an ancestor of the head.
+- Full verify at the head: PASS 5763/5763 across 368 suites, no port clash; the counts file reads 5763/368.
+- New cells: 56/56 green at the head. With the change removed (main plus the new test files), every cell that asserts new behaviour is red and the pins are green; with only the new module added to main, the behaviour and source cells of the module-importing files are still red.
+- Local CodeQL CLI 2.27.4, javascript security-extended: main 63, head 47; code-scanning: main 30, head 15. The 16 lane alerts are gone and no new result appears (by rule, file and line text). js/http-to-file-access on the audit write remains, unchanged.
+- Differential fuzz of the helpers against the old expressions: 2,000,000 comparisons, 0 differences (planted defects were caught). Timing at 10^4 / 10^5 / 10^6 characters grows about tenfold per step on 21 attack shapes; the old patterns took 1 to 7 s at 2,000 to 40,000 characters.
+
+## Landing notes
+- Merge commit, pinned to the head.
+- backend/ and __tests__/ are not path-ignored by Deploy demo, so the merge starts that workflow. Both jobs are gated on CI_DEPLOY_ENABLED and must read skipped.
+- Main's CodeQL analysis at the merge commit decides the tickets.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,0 +1,44 @@
+RD-762: the seven page routes that read or send a file (/legal/privacy,
+/legal/terms, /first-run-setup, /marketplace-landing, /status, /login, /setup)
+take the existing generalLimiter as a route argument, so they share the /api/
+counter. No new limiter is built (the limiter census is unchanged at seven).
+Handler bodies are unchanged.
+
+RD-770: the AI path picks its answer shape by the endpoint's host, parsed with
+new URL and compared exactly or as a suffix at a dot boundary, not by a
+substring. A lookalike host, path, query or user-info that only contains the
+vendor text now takes the plain-answer branch.
+
+RD-772: the department keyword is escaped in full (every pattern
+metacharacter, the class the file already uses) before it is built into a
+pattern. Matching for the fourteen keywords is unchanged.
+
+RD-773: the chat stream's fake-chunk loop walks lines.keys(); no
+request-sized number bounds it and no line is dropped.
+
+RD-765, RD-766: the five polynomial patterns in server.js (the email check on
+user creation, the three user-name patterns, the times multiplier, the
+compound-query split, the trailing-punctuation strip) are replaced by one-pass
+helpers in the new backend/services/serverGuards.js that return what the old
+expressions returned. No length cap. The other files of both tickets are not
+changed.
+
+RD-769: a column-mapping key __proto__, constructor or prototype refuses the
+whole request with the route's existing invalid-format answer before anything
+is saved, and the mapping is built with Object.fromEntries. The other four
+sites of the ticket are not changed.
+
+RD-711: the interval audit flush and the two shutdown flushes queue behind
+one another; the tmp name, the RD-615 epoch checks and the public name are
+unchanged. RD-806: the audit write stays at its fixed path, reported, not
+dismissed; entry details are unbounded in bytes, left to a product decision.
+
+RD-830: a workspace id that is not a GUID is refused at the data-source
+writers (with the policy's own check and sentence, never echoing the value)
+and a stored non-GUID is refused at the stored-value test route before any
+token is requested. The log-analytics route keeps its own refusal. The open
+window is unchanged.
+
+Seven new test files (56 cells); expected counts 5763 tests in 368 suites.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

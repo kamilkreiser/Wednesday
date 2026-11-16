@@ -71735,7 +71735,9 @@
    "CARD mpscalc-hosted-deploy-words-1112",
    "CARD mpscalc-staff-words-31-deploy-1112",
    "CARD mpscalc-deploy-seed-secret-expired-1112"
-  ]
+  ],
+  "delivered_artefact": "HPSM-POC/1_Project_Definition/Briefs/2026-11-16_B1609_STATUS.md (UAT on 678a1153, live predicate passed)",
+  "delivered_ts": "2026-11-16T13:07:39.903749+11:00"
  },
  {
   "id": "secuura-public-audit-personal-fields-1116",
@@ -71986,7 +71988,9 @@
     }
    }
   ],
-  "amended_ts": "2026-11-16T07:52:24.993287+11:00"
+  "amended_ts": "2026-11-16T07:52:24.993287+11:00",
+  "delivered_artefact": "Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-11-16_B1607_STATUS.md (DEPLOYED 5e800095); Datasec Security Composer/1_Project_Definition/Briefs/2026-11-16_B1608_STATUS.md (DEPLOYED b4681297)",
+  "delivered_ts": "2026-11-16T13:07:28.097016+11:00"
  },
  {
   "id": "secuura-cert-verify-anyone-or-signed-in-1116",
@@ -72559,7 +72563,9 @@
    "CARD mpscalc-331-clause3-location-1115",
    "CARD mpscalc-341-measurement-move-1115",
    "CARD mpscalc-150-usage-section-placement-1115"
-  ]
+  ],
+  "delivered_artefact": "Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-11-16_B1607_STATUS.md (DEPLOYED 5e800095)",
+  "delivered_ts": "2026-11-16T13:07:31.011320+11:00"
  },
  {
   "id": "composer-cover-date-words-1116",
@@ -72773,7 +72779,9 @@
    "CARD mpscalc-hosted-deploy-words-1112",
    "CARD mpscalc-staff-words-31-deploy-1112",
    "CARD mpscalc-rollforward-stop-words-1115"
-  ]
+  ],
+  "delivered_artefact": "Datasec Security Composer/1_Project_Definition/Briefs/2026-11-16_B1608_STATUS.md (DEPLOYED b4681297)",
+  "delivered_ts": "2026-11-16T13:07:34.011869+11:00"
  },
  {
   "id": "composer-footer-cut-names-count-1116",
@@ -72948,7 +72956,9 @@
    "CARD composer-pcomp77-mark-all-local-words-1111",
    "CARD composer-pcomp77-followups-1111",
    "CARD composer-route-b-refuses-at-0020-1111"
-  ]
+  ],
+  "delivered_artefact": "Datasec Security Composer/1_Project_Definition/Briefs/2026-11-16_B1608_STATUS.md (DEPLOYED b4681297)",
+  "delivered_ts": "2026-11-16T13:07:36.917079+11:00"
  },
  {
   "id": "hpsmpoc-review-site-deploy-effects-1116",
@@ -73047,7 +73057,9 @@
    "CARD hpsmpoc-deploy-round-scope-1116",
    "CARD datasec-demo-deploy-round-apply-1116",
    "CARD mpscalc-deploy-seed-secret-again-1116"
-  ]
+  ],
+  "delivered_artefact": "HPSM-POC/1_Project_Definition/Briefs/2026-11-16_B1609_STATUS.md (UAT on 678a1153, live predicate passed)",
+  "delivered_ts": "2026-11-16T13:07:42.972580+11:00"
  },
  {
   "id": "secuura-verify-names-personal-data-1116",
@@ -73203,6 +73215,78 @@
    "CARD mpscalc-staff-words-31-deploy-1112",
    "CARD mpscalc-rollforward-stop-words-1115",
    "CARD composer-cover-date-words-1116"
+  ],
+  "delivered_artefact": "HPSM-POC/1_Project_Definition/Briefs/2026-11-16_B1609_STATUS.md (UAT on 678a1153, live predicate passed) (deploy ran at once, per the 'iso it now' note; the words to HP are Kam's to send)",
+  "delivered_ts": "2026-11-16T13:07:46.009061+11:00"
+ },
+ {
+  "id": "nexusai-audit-details-size-cap-1116",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI audit log: entries can be any size. Cap them?",
+  "bluf": "While fixing NexusAI's server security tickets, the builder found that each audit-log entry's details have no size limit. Some entries copy what a request sent, such as an email or a data source name. The log keeps the newest 10,000 entries, but one request can be up to 50 MB, so the audit file on disk has no practical size limit. Nothing is broken today, and the security fixes don't depend on this. I recommend a: cap each entry's details at 8 KB and mark any entry that was cut. b checks each entry type's fields instead, which is more work. c leaves it as it is. (Override: the two earlier matches are RD-245, which moved the AI audit log out of the settings file, and an HPSM VM size. Neither is about the size of an entry.)",
+  "default_action": "Nothing changes; it's recorded as an open ticket",
+  "options": [
+   {
+    "key": "a",
+    "label": "Cap each entry at 8 KB and mark cut entries",
+    "detail": "recommended; a small ticket and build"
+   },
+   {
+    "key": "b",
+    "label": "Check each entry type's fields instead",
+    "detail": "more work; exact per type"
+   },
+   {
+    "key": "c",
+    "label": "Leave it as it is",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T12:09:55.208118+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD hpsm-vm-size-quota-zero"
+  ]
+ },
+ {
+  "id": "hpsmpoc-uat-backup-copy-b1609-delete-1116",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Delete today's backup copy of the HP review site database?",
+  "bluf": "Before today's update, the review site's database was copied as a backup (hpsmpoc-b1609-pre). It costs money for as long as it exists. The update is now live and checked. Azure also keeps its own restore points for 7 days. I recommend a: delete the copy now. That's the same as you approved for the last one on 11 November. b keeps it for a week as an extra safety net. (Override: your 11 November ruling, hpsmpoc-uat-backup-copy-delete-1111, deleted that night's copy. It does not cover today's new one.)",
+  "default_action": "The copy stays, and keeps costing, until you choose",
+  "options": [
+   {
+    "key": "a",
+    "label": "Delete the copy now",
+    "detail": "recommended; Azure's 7-day restore points remain"
+   },
+   {
+    "key": "b",
+    "label": "Keep it a week, then delete it",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Keep it until I say",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T13:08:22.359480+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-05 10:52",
+   "CARD hpsmpoc-analysis-repo-backup",
+   "CARD hpsmpoc-plan-no-delete",
+   "CARD mpscalc-deploy-overlay-copy-retention-1017",
+   "CARD composer-demo-vm-write-role-after-copy-1019",
+   "CARD hpsmpoc-uat-backup-copy-delete-1111"
   ]
  }
 ]
