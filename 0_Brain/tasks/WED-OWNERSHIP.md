@@ -224,3 +224,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-16 10:21 | Kamils-Mac-mini | wake runner delivery: log coord_pane_id stderr (arm_wake_watch.sh ~line 280), panel escalation after 3 consecutive 'WAKE logged only', doctor FAIL when recent runner outcomes are logged-only (ledger 2026-11-16 21-h silent-wake row) | CLOSED |  2026-11-16 10:27 done 10:3x: both branches exercised, doctor check 3 ways, runner re-armed pid 95229 |
 | 2026-11-16 14:50 | Kamils-MBP | WED/tooling pretooluse_inbox_scope Friday inbox name — Friday (laptop) | CLOSED |  2026-11-16 14:51 done |
 | 2026-11-16 15:03 | Kamils-MBP | General/Claude to Claude — Friday (laptop) | OPEN | |
+| 2026-11-16 22:55 | Kamils-MacBook-Pro | WED tooling: Launch_Wednesday.command Friday-only Fable boot (Kam card general-friday-boot-on-fable-1116 = a) — Friday (laptop) | OPEN | |
