@@ -57,6 +57,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **STALE, VOID 2026-11-12 (B1537/B1538 drafter, read at HPSM main c717ba1a: `web/scripts/audit-dev.mjs:2-3` says the exception list is empty and the ruling lapsed, `:11` `EXCEPTIONS = Object.freeze([])`, `ci.yml:391-393` "no exception is in force"; 2026-11-30 survives only as a synthetic fixture in `web/src/audit-dev.test.ts`). No action on 11-23.** ~~~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30~~ (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴🔴🔴 DELTA 1195 — 2026-11-16 15:2x (s282, ctx 74%). **READ THIS FIRST; supersedes 1194's LIVE and STAMPED-NOT-LAUNCHED lines (its B1611 and next-wave lines stand).**
+- **ALL SEVEN STAMPED KITS ARE LIVE, rung 5 read** (the model read from process args where the status line had not drawn yet):
+  - H173 %150 B1615; H174 %156 B1616; R245 %153 B1612; R246 %159 B1613; **M145 %162 B1617; N137 %165 B1618; R247 %168 B1614** (each claude-sonnet-5-5).
+  - s282's status_watch tasks die with this seat: **a successor RE-ARMS one per STATUS file** (paths in DELTA 1194).
+- **Next work:** B1611 MPS records (read whole, then stamp); then the gate kits as each lane READY lands (H-1 G2 on Opus; H-4 G3, no gate, Tuesday's completion check; M-S G2; NX-T G2); then the records READYs (verify each merge at source; mark cards delivered); then SWEEP-1450's next wave.
+
 ## 🔴🔴🔴 DELTA 1194 — 2026-11-16 15:1x ROTATION-READY (s282, ctx ~72%). **READ THIS FIRST; supersedes 1193's LIVE, STAMPED and DRAFTED lines.**
 - **LIVE (stamped by s282, rung 5 read, status_watch armed by s282; RE-ARM all of them after rotation, because the watchers die with this seat):**
   - H173 %150 (B1615 HPSM H-1, `HPSM-POC/.../Briefs/2026-11-16_B1615_STATUS.md`);
