@@ -14,19 +14,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1116-2255 (th
 
 ## 🔴 FIRST ACT — check the model, then work the review cards
 
-1. **Which model is this seat on?** The shared launcher passes `--model opus` to every seat (Launch_Wednesday.command
-   line ~971, Kam's 2026-10-21 ruling), so Friday boots on Opus 5.5 unless the launcher changed. Card
-   `general-friday-boot-on-fable-1116` asks Kam: a = Friday-only Fable boot (rec), b = Fable for the next launch only,
-   c = keep Opus. **If he ruled a or b:** claim `WED tooling: Launch_Wednesday.command Friday-only model — Friday (laptop)`,
-   add a seat condition (AGENT=friday → `--model fable`, keep `--fallback-model opus` if the 09-05 shape is used),
-   back up the launcher as `.pre-1116-fable`, `bash -n` it, mail BOTH sisters that the shared launcher changed (their
-   seats unchanged), release the claim. Never `/model` a pane. Under Kam's 22:50 rule
-   (`learnings/2026-11-16_suggest-when-to-switch-to-the-newest-fable.md`), say on the panel which model the seat is on
-   and whether the day's work warrants Fable.
+1. **Which model is this seat on?** Kam ruled card `general-friday-boot-on-fable-1116` = a (22:55). DONE 22:5x: the
+   shared launcher now boots Friday with `--model fable --fallback-model opus` (Wednesday/Tuesday unchanged on opus;
+   commit "Launcher: Friday seat boots on the fable alias", backup Launch_Wednesday.command.pre-1116-fable; sisters mailed
+   b684789c / ced43887). VERIFY at boot: the launcher's "[launcher] seat friday boots with:" line and the model this
+   session reports. If not Fable, diagnose before anything else. Under Kam's 22:50 rule, say on the panel which model
+   the seat is on and whether the day's work warrants Fable.
 2. Run `kam_rulings_today.sh` + `decision_queue.sh list open`, then rule every tapped card in the store.
 3. **Claude to Claude (General) review: Kam said 22:47 "I have gone through the document and it looks good. lets start
-   with the things that need clarification. please put each on the fleet activity".** 15 clarification cards are open,
-   each rec a with a stated default (nothing is built by default):
+   with the things that need clarification. please put each on the fleet activity".** 15 clarification cards were posted;
+   RULED at 22:55-22:56 (all a): build-model (Fable for M0 spikes, then routing table), repo-home (new PRIVATE repo
+   under Kam's PERSONAL GitHub, old tree as legacy/), d12-audit, d9-browser-agent. The rest stay open, each rec a:
    `general-c2c-{d1-name, d2-licence, d3-relay, d5-reads, d6-trust-limits, d7-identity, d8-review, d9-browser-agent,
    d10-platforms, d11-two-parties, d12-audit, language, repo-home, build-model, nightly-tests}-1116`.
    Plus the 16:5x pair: `general-c2c-design-go-1116` (start M0) and `general-c2c-v044-withdraw-rotate-1116` (D4; Kam's
@@ -34,7 +32,8 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1116-2255 (th
 4. When the clarifications are ruled and the go card is a: Friday does NOT build. Read the project's own CLAUDE.md and
    Launch_Claude.command (`/Volumes/Laptop-DEV/!CODING/Claude to Claude/claude-bridge`, read-only, not a git repo), set
    up the repo per the repo-home ruling, model per the build-model ruling, then brief a project agent for M0 (Appendix B,
-   U1–U13). Kam's GitHub identity for a General project is NOT Secuura's nor Datasec's: confirm it at point of use.
+   U1–U13). Kam asked 22:56 "let me know when to set it up" (the repo): Friday told him once the go card is
+   ruled, with steps in the chat one per block. Kam's GitHub identity for a General project is NOT Secuura's nor Datasec's: confirm it at point of use.
 
 ## Where everything is
 
