@@ -225,4 +225,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-16 14:50 | Kamils-MBP | WED/tooling pretooluse_inbox_scope Friday inbox name — Friday (laptop) | CLOSED |  2026-11-16 14:51 done |
 | 2026-11-16 15:03 | Kamils-MBP | General/Claude to Claude — Friday (laptop) | OPEN | |
 | 2026-11-16 22:55 | Kamils-MacBook-Pro | WED tooling: Launch_Wednesday.command Friday-only Fable boot (Kam card general-friday-boot-on-fable-1116 = a) — Friday (laptop) | CLOSED |  2026-11-16 22:57 done |
-| 2026-11-16 23:01 | Kamils-MacBook-Pro | live board index.html: a saved project filter with no chip in the current view hides every card (Kam 2026-11-16 22:53) — Friday (laptop) | OPEN | |
+| 2026-11-16 23:01 | Kamils-MacBook-Pro | live board index.html: a saved project filter with no chip in the current view hides every card (Kam 2026-11-16 22:53) — Friday (laptop) | CLOSED |  2026-11-16 23:08 done |
