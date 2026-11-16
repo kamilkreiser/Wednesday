@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-17 07:39 from 277 lesson files (1,179,492 B). M 38 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 229. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-17 07:52 from 278 lesson files (1,182,234 B). M 39 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 229. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7972,4 +7972,16 @@ sections (open the file for these): How to apply · First application (same minu
 2. **At a gate return:** if round 2 fails on a different dimension from round 1, ask the gate the direct question "can this approach be made sound at all?" in the round-2 commission, so the answer arrives with the verdict. (Done here; it saved a third round.)
 3. **The two-NO-GO cap is the trigger, and removal is not a third round.** Dropping the unsound mechanism for the conservative default is the coordinator's call; the usability cost goes to Kam on a card with the default already applied.
 4. **Quarantine, never delete, the removed attempt**, with both verdicts cited, so a later attempt starts from the evidence.
+
+
+## A recorded test fixture is made from a scratch tree the seat builds, never from the real drive: raw tool output carries whatever the drive holds, and a repository's history keeps it
+`2026-11-17_recorded-fixtures-come-from-a-scratch-tree-never-the-real-drive.md` · lesson · 2026-11-17 · status: live · tier: M
+
+**The lesson:** A build seat that records real tool output as a fixture (a search, a directory listing, a debug log, a session stream) copies into the repository whatever that tool happened to walk: other projects' names, the user name, the drive's folder layout, memory paths. Once committed it is in the history, and removing the file later does not remove it. In a repository that will be opened, or that belongs to a different client from what the tool walked, that is a leak waiting for one click.
+
+**How to apply:**
+1. Every build brief that allows recorded output says: fixtures are generated from a scratch tree the seat creates for the purpose (invented names, a scratch home), and a recording made against the real drive is never committed. Paths in committed output are relative or scrubbed.
+2. Before any repository changes visibility, or is handed to anyone outside the project, a sweep of EVERY branch and the WHOLE history runs first (secrets, personal data, other clients' and projects' names, internal layout, commit identities), with a positive control for every search that returns nothing. The sweep's main findings are confirmed at source by the coordinator before they reach Kam.
+3. The link to a visibility setting is given to Kam only with the sweep result beside it.
+4. A finding in history is fixed by a fresh repository from a cleaned copy or by a history rewrite; both are Kam's decision (the rewrite is irreversible).
 
