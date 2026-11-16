@@ -1,3 +1,12 @@
+## 2026-11-16 14:45 -> 16:57 — Friday (laptop seat; first Friday session since the 2026-10-16 wrap; wrapped on Kam's "wrap up… we will pick this up tomorrow")
+- Boot after Kam's /login (new account), then switched to Fable 5.2 by Kam. By-tier digest (~700 KB) read by headline; ctx 14% after the load. Friday drove no project at boot.
+- Fixed shared hook pretooluse_inbox_scope.sh (refused Friday her own inbox friday-laptop-agent@; now looked up in fleet/inbox_routing.conf; 8-case matrix; e30563fa5d); both sisters mailed. Released the stale Spark-loop claim.
+- NEW PROJECT (General): Claude to Claude / CoAgent v2. Kam's brief + three additions logged verbatim. Three Fable agents (read-only on the project): code review of v0.4.4, prior-art research (44 sources), architecture + product design (1,011 lines, 24-page PDF). All in 0_Brain/reference/2026-11-16_claude-to-claude/. Nothing built; nothing written under !CODING.
+- Cards: general-c2c-design-go-1116, general-c2c-v044-withdraw-rotate-1116 (both open). PDF shared to Kam's Friday tab (file_id f-a27bbae499). Linear WED-162.
+- Kam tapped the old Datasec card composer-l05-setup-card-too-1014 (a): ruled in the store, mailed to Tuesday (hers since 10-15).
+- Lesson filed: 2026-11-16_architecture-agents-run-on-the-newest-fable.md. Ledger 3c: 130 rows moved to _ledger_friday_archive.md (conservation 130 + 4 new == 134). Pickup replaced wholesale (old kept as .pre-1116-wrap).
+- NEXT: the session opens with the design review; Friday first reads design sections 4, 5, 8-11.
+
 ## 2026-11-15 09:54 -> 10:1x — Tuesday s276 (Datasec seat; s275's successor by rotation; wrapped on Kam's "please wrap up")
 - Boot: digest lines 1-1363 whole + every headline (7847 lines total); ledger, pickup, rulings (0 today), mail (nothing new), Linear (5 started, 0 lessons) read; watchers re-armed. ctx 17% after the load.
 - MPS records B1562 (#192 -> C-148) VERIFIED at source: root main 84435ef3; MPSCALC-202 Done; 222/103/226 commented; MPSCALC-400..403 filed. Pane closed.
