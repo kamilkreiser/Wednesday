@@ -8,6 +8,14 @@ project: General / CoAgent (no client)
 
 # CoAgent: design addendum applying the owner's rulings of 2026-11-17
 
+> **Revision 1, 2026-11-17.** The owner answered three INTERPRETATIONS on the live board the same day. His words, verbatim as Friday relayed them from the board: "Decision general-c2c-i1-limit-fixed-1117: b — Four by default, the starter may raise it to eight"; "Decision general-c2c-i5-starter-gone-1117: b — The starter can name a deputy"; "Decision general-c2c-i2-who-hands-invite-1117: a — The member hands out the invitation, the starter approves".
+> **Sections changed by Revision 1, and only these:**
+> - **Section 1** is replaced (the limit is 4 by default, raisable to 8). The first text is kept below it as "1-OLD" for the record and must not be built from.
+> - **Section 2:** the opening paragraph, 2.1 (I-2 confirmed, I-5 ruled), 2.4 rule 4, the bounds table of 2.5, the "starter is gone" paragraph of 2.6, 2.7, and a NEW section **2.8 (the deputy)**.
+> - **Section 5.2 item 3** (the figure now depends on the limit in force) and one sentence added to item 2.
+> - **Section 7:** one sentence in the n8 row. **Section 8:** the first two rows and the proposal-ids row changed, two rows added. **Section 9.1:** the N1, N2 and audit-share rows. **Section 10:** I-1 and I-5 RULED, I-2 CONFIRMED, new I-14 to I-21.
+> Sections 3, 4 and 6 are unchanged.
+
 **Revises:** `04_design-revision-rulings.md` (cited **[04 §n]**) and, through it, `03_architecture-design.md` (**[03 §n]**). Neither file is edited. Where this addendum and [04] differ, this addendum wins.
 
 **How to read the labels.**
@@ -26,13 +34,81 @@ Nothing below was measured. No project code was run.
 
 ---
 
-## 1. n1: a session holds at most 4 people
+## 1. n1: a session holds 4 people by default; the starter may raise it to 8 (Revision 1)
+
+**His words.** Card n1-people-limit, option b: "A smaller limit, such as 4". Then, on my INTERPRETATION I-1: "Decision general-c2c-i1-limit-fixed-1117: b — Four by default, the starter may raise it to eight".
+
+### 1.1 The rule
+
+1. **Two values only.** The `cap` field of a roster version is 4 or 8. Nothing else is valid. Why two values and not a range: there is then exactly one step up and one step down to test and to explain; every bound in the code is already sized for 8; and "raised to 8" is one sentence on a member's screen. A range would add six more states and buy nothing he asked for.
+2. **The hard maximum stays the constant on main.** `pub const CAP: u8 = 8` keeps its name, type and value [main: crates/coagent-roster/src/lib.rs:34]. A new constant `CAP_DEFAULT: u8 = 4` is added. This matters for the two unmerged crates: both write `cap: CAP` when they build a roster [branch m1-daemon at 8e7b032: crates/coagent-daemon/src/engine.rs:1781] [branch m3-audit at 882e094: crates/coagent-audit/tests/common/mod.rs:71], and a roster with `cap` 8 stays valid.
+3. **The limit in force is the version's own `cap`.** On main the validator compares the member count with the constant, not with the field (`b.cap != CAP || b.members.len() > usize::from(CAP)` [main: lib.rs:311]). New rule: `cap` must be 4 or 8; the member count must not exceed `b.cap`; every slot must be below `b.cap` (that part is already so [main: lib.rs:334]).
+4. **Who may change it: the starter only.** A change of `cap` is valid only in a version the starter signed. Today that is every version; it is written as its own rule so that it stays true when a deputy exists (2.8). The deputy cannot change the limit.
+5. **Raising** from 4 to 8 is always valid. It is never implied: approving a proposal when the session is full does not raise the limit; the proposal is refused as "full" and the starter must raise first, as a separate act.
+6. **Lowering** from 8 back to 4 is valid exactly when the result is a valid version: at most 4 members and every member in a slot below 4. No extra rule is needed; rule 3 decides it. A member's slot cannot change [main: lib.rs:525-533], so a session whose members sit in slots 4 to 7 cannot be lowered until they have left or been removed.
+7. **A session may start at either value.** Version 1 may carry 4 or 8.
+8. **A change of limit is a roster change.** Every member's daemon is told by the validator that the limit changed and from what to what; it suspends every active grant, as for any roster change ([04 §3.6]), and shows a line the user cannot miss: "Kam raised this session's limit from 4 to 8 people. Up to 4 more people can now be added. Nobody new sees anything of yours until you accept them." The raise is in the signed, hash-chained roster, so the starter cannot raise it for some members and not others without producing fork evidence [main: lib.rs:451-462].
+
+- **INTERPRETATION (for Kam) I-14.** The limit may be lowered back to 4 whenever the people present fit. Alternative: once raised, it stays at 8 for the rest of the session. I chose to allow lowering because it only ever reduces exposure and needs no rule of its own.
+- **INTERPRETATION (for Kam) I-15.** A starter may open a session at 8 from the first moment. Alternative: every session opens at 4 and reaching 8 is always a later, visible step. I chose "either" because a starter who may raise at once gains nothing extra by starting at 8, and because the two unmerged crates build their rosters at 8 today; the product's own default when it creates a session is 4.
+- **INTERPRETATION (for Kam) I-16.** Only the starter raises or lowers the limit, never the deputy. Alternative: the deputy may raise it while the starter is away. His words name the starter.
+
+No member is asked to agree to a raise. Admission still gives no access ([04 §3.4] rule 2), and a member who does not want a larger room can leave. That is the existing design applied, not a choice of mine.
+
+### 1.2 What is derived, at each value
+
+Arithmetic from [04 §3.2, §3.8]; nothing measured.
+
+| Quantity | Formula | Limit 4 | Limit 8 |
+|---|---|---|---|
+| Pairwise channels in a session | N(N−1)/2 | 6 | 28 |
+| Ordered pairs the relay buffers for | N(N−1) | 12 | 56 |
+| Encryptions per message sent to everyone | N−1 | 3 | 7 |
+| Entries a device can see claiming to be one person at once, hostile starter | N−2 | 2 | 6 (section 5.2 item 3) |
+
+**What no longer changes, because 8 is still possible.**
+
+| Where | On main or on the branch | After Revision 1 |
+|---|---|---|
+| Relay slots | `MAX_SLOTS: u8 = 8` [main: crates/coagent-relay/src/limits.rs:15]; `chan.create` accepts `cap` 2 to 8 [frame.rs:351] | **Stays 8.** No relay change, no gate test edited. |
+| Relay texts that say "7" | [main: limits.rs:78-80, 199-206] | Stay correct. |
+| Audit store share | "one peer may use at most 1/7 of the peers' part" [branch m3-audit: crates/coagent-audit/src/session.rs:13] | **Stays 1/7.** It is exact at 8 and merely cautious at 4. |
+| Roster cap test | `test7_ninth_member_is_refused` [main: crates/coagent-roster/tests/roster.rs:133-154] | Stays, unchanged: it runs at 8. New tests cover 4. |
+| Roster gate files | use the `CAP` symbol [main: tests/gate_roster.rs, tests/gate_return.rs] | Untouched. |
+
+**What does change.**
+
+| Quantity | Was (first text) | Now | Why |
+|---|---|---|---|
+| Lifetime bound on entries, `MAX_ENTRIES_EVER` | 16 | **32** (PROPOSED: four times the hard maximum, the same ratio) | A session at 8 with 16 would allow only 8 removals in its life. |
+| Proposers that can ever exist | 15 | 31 | Follows from the lifetime bound. |
+| Remembered proposal ids | 120 | 248 (31 × 8) | Follows. |
+| Pending proposals per session | 3 | **3, unchanged** | It bounds cards on the starter's screen, not seats. |
+| "Is there a free seat" in the proposal intake | members < 4 | members < the current version's `cap` | Rule 3. |
+| Verify-words residue with a hostile starter | 11 × 2^-31 | 11 × 2^-31 at 4; 35 × 2^-31 at 8 | Section 5.2 item 3. |
+
+**Per-address relay limits** are untouched, as before: no comment at source derives them from the group size [main: limits.rs:36-46].
+
+### 1.3 Plan and tests
+
+- The product's default when it creates a session is `CAP_DEFAULT`. The unmerged daemon writes `cap: CAP` (8) today [branch m1-daemon: engine.rs:1781]; changing that to the default, and the starter's "raise the limit" act and its screen line, are daemon work for the groups lane.
+- [04 §4.6] group tests run at 3, 4 and 8 members. [04 §7.1] M3 acceptance keeps its eight-party session and gains a four-party one that refuses a fifth.
+- The first text's "N1-PASS" lane (carrying 4 into the relay, the audit crate and shared docs) is no longer needed. What is left of it is one line in the daemon and the equality test below.
+- Rule kept from the first text: the first crate that depends on both the roster and the relay (the daemon) asserts `coagent_roster::CAP as usize == coagent_relay::frame::SLOTS`.
+
+**Tests the roster crate needs** (properties; the build addendum turns them into a list): `cap` 4 and 8 are accepted and 0, 2, 3, 5, 6, 7 are refused; `cap` 9 is refused as today; at 4, a fifth member is refused and a slot of 4 is refused; after a raise the fifth member in slot 4 is accepted; a lowering with five members, or with a member in slot 5, is refused and with four members in slots 0 to 3 is accepted; a version that only changes the limit is reported as a change with both values; approving a proposal never changes `cap`; version 1 is accepted at 4 and at 8.
+
+**Threat considered.** A raise doubles the number of people whose text can reach a host's agent ([04 §3.7] row H) and triples the entries a hostile starter can use against the verify-words (section 5.2). That is why it is visible to everyone, suspends grants, and is the starter's alone. A starter who flips the limit up and down can keep suspending everyone's grants; that is nuisance a starter can already cause by any roster change.
+
+---
+
+## 1-OLD. SUPERSEDED by Revision 1. Kept for the record; do not build from it. (n1 first read as a fixed limit of 4)
 
 **His words.** Card n1-people-limit, option b: "A smaller limit, such as 4". No note.
 
 **INTERPRETATION (for Kam) I-1.** The limit is exactly 4, fixed in the code, the starter and observers included. Alternative: 4 as the normal limit with a setting that lets a starter raise it to 8. I chose the fixed number because he picked the smaller-limit option and gave one example, and because every derived figure below is then one number, not a range. (Friday's READING in the rulings file is the same.)
 
-### 1.1 What changes, by crate
+### 1-OLD.1 What changes, by crate (superseded)
 
 | Where | On main now | New rule | Who changes it |
 |---|---|---|---|
@@ -44,7 +120,7 @@ Nothing below was measured. No project code was run.
 | `coagent-daemon` (in flight) | imports `CAP` from the roster crate [branch m1-daemon: crates/coagent-daemon/src/engine.rs:42]; builds two-member rosters only [engine.rs:1761-1769] | No code change expected from the constant alone: UNKNOWN until its tests are run against `CAP = 4`. Closed by running `scripts/check.sh` on a tree with both merged. | N1-PASS lane |
 | Docs | "cap 8" in the roster README [main: crates/coagent-roster/README.md:7], the roster module doc [lib.rs:10], `docs/CRYPTO-GLUE.md` G-15 ("`cap` must be 8 and members ≤ 8") | Say 4 and cite ruling n1. `docs/M0-OUTCOMES.md` line 53 records a measurement taken at 8 members: it is a record and is not rewritten. | ROSTER lane (its own README and module doc); N1-PASS for the shared docs |
 
-### 1.2 What is derived from the limit (N = 4)
+### 1-OLD.2 What is derived from the limit (N = 4) (superseded)
 
 All figures are arithmetic from [04 §3.2, §3.8], not measurements.
 
@@ -60,7 +136,7 @@ All figures are arithmetic from [04 §3.2, §3.8], not measurements.
 
 **Per-address relay limits.** `MAX_CONNS_PER_IP = 16`, `MAX_CHANNELS_PER_IP = 16`, `MAX_MAILBOXES_PER_IP = 8` [main: limits.rs:36-46]. No comment at source derives them from the group size, so I leave them unchanged. Consequence at 4 [inferred]: behind one address (a tunnel), 16 connections now carry four full sessions where they carried two. The open relay decisions R2 (cut versus throttle) and G1-r2a/b (table filled from four addresses; tunnel totals) are not answered by n1 and stay open (section 9).
 
-### 1.3 Plan and tests that assumed 8
+### 1-OLD.3 Plan and tests that assumed 8 (superseded)
 
 - [04 §4.6] "Group tests run 3 and 8 daemons" becomes 3 and 4.
 - [04 §7.1] M3 acceptance "Three-party and eight-party sessions" becomes three-party and four-party. The M6 soak was already four members.
@@ -77,8 +153,11 @@ All figures are arithmetic from [04 §3.2, §3.8], not measurements.
 
 **The design in one paragraph.** The roster keeps ONE admitting authority: only the starter's key signs a roster version, exactly as on main [main: lib.rs:304-309, 595]. What is new is a **proposal**: a member pairs with the newcomer, signs a statement "I propose this device key for this session at this roster version", and sends it to the starter. The starter's human approves or declines in a dialog on the starter's own machine. On approval the starter signs the next roster version; the new entry carries the proposer's signature, so every member can check who proposed whom and the starter cannot attribute a newcomer to a member who did not propose them. Each machine's owner still accepts the newcomer separately before anything is shared ([04 §3.4] rule 2, unchanged).
 
+**Revision 1.** He has since ruled that the starter can name a deputy. Section 2.8 designs it so that the sentence above stays true: **roster versions are still signed by the starter's key alone.** The deputy signs a separate, add-only list of provisional admissions that hangs off a grant inside the starter's roster. Sections 2.2 to 2.6 describe the starter's path and are unchanged except where marked.
+
 ### 2.1 Interpretations in this section
 
+- **I-2 is CONFIRMED** (Revision 1; his words: "Decision general-c2c-i2-who-hands-invite-1117: a — The member hands out the invitation, the starter approves"). **I-5 is RULED the other way** (his words: "Decision general-c2c-i5-starter-gone-1117: b — The starter can name a deputy"); the I-5 line below is the first text, kept for the record, and section 2.8 replaces it.
 - **INTERPRETATION (for Kam) I-2.** "Invite" means the member hands out the invite and pairs with the newcomer themselves (code or link, verify-words with the member). Alternative: the member only *asks* the starter to invite someone, and the starter issues the invite and pairs as today. The alternative is smaller and keeps every newcomer verified directly by the starter; I did not choose it because it is the option he did not pick (option a) with a request button added.
 - **INTERPRETATION (for Kam) I-3.** Observers cannot propose. "Any member" is read as any member who can already address agents (the starter and guests). Alternative: observers may propose too. I chose the narrower reading because [04 §3.6] gives observers no act that changes the session.
 - **INTERPRETATION (for Kam) I-4.** "Permission must be granted by the person" means a human act on the starter's machine, every time: no rule, no grant and no agent can approve a proposal. Alternative: the starter may pre-approve ("accept anyone Priya proposes for the next hour").
@@ -139,7 +218,7 @@ Each is a distinct error and a distinct test.
 1. **Shape (one version alone).** A `proposal` is refused if `proposer` is the entry's own key, if `proposer` is the starter, if `at_version` is not `added_in − 1`, or if the entry's role is guest while the proposed role was observer (I-7).
 2. **Transition (the version that adds the entry).** For each newly added entry with a `proposal`: the proposer is a member of the previous version with role guest; `at_version` and `at_hash` are the previous version's number and hash; the signature verifies under the proposer's signing key as listed in the previous version; the candidate's key id is not on the previous version's `removed` list (I-6); no two entries of the new version share a `proposal_id`.
 3. **First roster a joiner holds.** A joiner cannot check history from before it joined (existing rule; [STATUS_M1_CORE §6 DQ15]). For entries added earlier, the signature is checked when the proposer is still a member (a member's keys cannot change, [main: lib.rs:525-533]); when the proposer has since been removed, the entry is accepted and reported through an accessor as "proposal not checkable". The joiner's own entry is always checkable by the daemon: it must name the proposer the joiner actually paired with.
-4. **Lifetime bound.** A version is refused if `members + removed` exceeds `MAX_ENTRIES_EVER = 16` (PROPOSED: four times the limit). On main the `removed` list grows without a bound of its own [main: lib.rs:354-371 has no length check]; it is stored input a peer (the starter) causes, so it gets a bound now. An honest session that reaches it must start a new session.
+4. **Lifetime bounds.** A version is refused if `members + removed` exceeds `MAX_ENTRIES_EVER = 32` (PROPOSED: four times the hard maximum of 8; Revision 1, was 16). A version numbered above `MAX_VERSIONS = 256` (PROPOSED) is refused: on main every version a member accepts is kept in a map with no bound [main: lib.rs:410, 479], and a version that changes nothing is valid [main: lib.rs:486-554 has no "must change something" rule], so a starter could grow every member's stored history without end. On main the `removed` list grows without a bound of its own [main: lib.rs:354-371 has no length check]; it is stored input a peer (the starter) causes, so it gets a bound now. An honest session that reaches it must start a new session.
 
 ### 2.5 The starter's side: one state machine
 
@@ -165,9 +244,9 @@ Then the proposal is **pending** until the human decides or `PROPOSAL_TTL` passe
 | Input a peer causes | Bound | On overflow |
 |---|---|---|
 | Pending proposals per proposer | 1 | refused, no card |
-| Pending proposals per session | 3 (`CAP − 1`) | refused, no card |
+| Pending proposals per session | 3 (a bound on cards in front of the human; it does not follow the limit) | refused, no card |
 | Proposals per proposer per session, any outcome | 8 | refused, no card, for the rest of the session |
-| Remembered `proposal_id`s per session | 15 × 8 = 120 (at most 15 entries other than the starter can ever exist under the lifetime bound of 2.4, each with a quota of 8) | cannot overflow |
+| Remembered `proposal_id`s per session | 31 × 8 = 248 (at most 31 entries other than the starter can ever exist under the lifetime bound of 2.4, each with a quota of 8; Revision 1, was 120) | cannot overflow |
 | `note` | 256 bytes | proposal refused |
 | Encoded proposal | 2,048 bytes | refused before decoding |
 | Life of a pending proposal | `PROPOSAL_TTL` = 10 minutes (the pairing mailbox's life, a design value [main: limits.rs:25]) | expires; proposer is told |
@@ -188,7 +267,7 @@ Then the proposal is **pending** until the human decides or `PROPOSAL_TTL` passe
 | Admit someone without any proposal | hostile starter | Always possible; that is the starter's direct invite. The entry then shows no proposer. |
 | Propose "the same person" again under a fresh key so the verify-words tries start over | hostile member with a careless or colluding starter | Closed by the inheritance rule of section 5.2 (c), which treats every newcomer after a removal as possibly the removed person. |
 
-**If the starter is offline.** The proposal waits in the proposer's outbox like any message [03 §4.5] and expires after `PROPOSAL_TTL`; the proposer may propose again (it counts against the quota only when the starter's daemon received it). **If the starter is gone** (sent `session.leave`, or the session ended for their absence), the proposer's daemon refuses to create a proposal and says: "The person who started this session has left. Nobody can be added. Start a new session." (I-5.)
+**If the starter is offline.** The proposal waits in the proposer's outbox like any message [03 §4.5] and expires after `PROPOSAL_TTL`; the proposer may propose again (it counts against the quota only when the starter's daemon received it). **If the starter is away or gone** (Revision 1). With no deputy named, nothing can be added: the proposer's daemon says "The person who started this session is not here and named no deputy. Nobody can be added until they return." With a deputy named, the proposal goes to the deputy instead (2.8). Nobody but the starter can remove a member, change a role, change the limit or end the session for everyone, whether or not a deputy exists.
 
 ### 2.7 What changes in [04]
 
@@ -197,6 +276,138 @@ Then the proposal is **pending** until the human decides or `PROPOSAL_TTL` passe
 - [04 §3.8] gains the two message types of 2.3.
 - [04 §3.5] identity provenance gains nothing: a proposed member is `introduced_by:<proposer key id>` for everyone but the proposer, who holds `by_code_with_me`.
 - [04 §9] N2's default (a) is replaced by this section.
+- Revision 1: [04 §3.5] "if the convener leaves, the roster is frozen … Convener hand-over is not in phase 1" and [04 §10] assumption 6 are replaced by 2.8: the roster is still frozen, and a named deputy can still let people in. [04 §7.1] M8 keeps "convener hand-over" (passing the starter's whole role to someone else), which 2.8 does not provide.
+
+### 2.8 The deputy (Revision 1)
+
+**His words.** "Decision general-c2c-i5-starter-gone-1117: b — The starter can name a deputy". The card text he answered: "the starter can name a deputy who may approve in their absence, which is more to build and one more person to trust".
+
+**The added trust, in two sentences.** With a deputy named, one more person can let newcomers into your session while you are away, as long as another member proposed them, and you find out when you are back. They cannot remove anyone, change the limit or act as you, and everyone they let in leaves the session the moment you renew or withdraw the deputy's role, unless you choose to keep them.
+
+Everything in 2.8 is REASONED, NOT TESTED, and nothing in it is built today (2.8.11).
+
+#### 2.8.1 The design choice: the roster keeps one writer
+
+Two ways to give a second person the power to admit:
+
+- **(Rejected) The deputy also signs roster versions.** Then two keys can each sign "version N+1". What the code does with two different versions of one number, read at source: `RosterChain::apply` looks the number up in the versions it holds; the same object again is harmless; a different object is refused as `RosterError::Fork` carrying both signed objects [main: lib.rs:451-462], and that is documented and used as "proof the convener equivocated" [main: lib.rs:205-206, 231-238]; the unmerged audit crate collects exactly this as `roster_forks` when it compares two members' bundles [branch m3-audit: crates/coagent-audit/src/bundle.rs:1071-1074]. With two signers, a starter's N+1 and a deputy's N+1 would be an honest accident whenever the two are cut off from each other, not proof of anything. Making that safe needs a precedence rule ("the starter's wins") and, with it, members UNDOING versions they already applied, and it changes what "version N" means to every crate that refers to roster versions by number (the audit crate's heads and countersignatures carry `roster_v` [STATUS_M3_AUDIT §5 Q3]). Deciding "the starter is absent" for everyone at once is an agreement problem this design has no server for ([04 §3.5] gets its ordering "by not allowing concurrent writers").
+- **(Chosen) The deputy never writes the roster.** The starter's chain stays single-writer, totally ordered, and its fork evidence stays proof against the starter. The starter puts a **grant** in the roster: this member is my deputy, and these seats are theirs to fill. The deputy signs **admissions** into those seats only, as its own small hash chain. Two writers never write the same object, so there is nothing to order between them and nothing to undo: the starter's next version always stands, and it either keeps the grant (the admissions stand) or changes it (they fall away).
+
+#### 2.8.2 Naming and revoking: a grant in the roster
+
+One member entry may carry an optional field (absent on every other entry, so existing rosters encode as before):
+
+```jsonc
+"deputy": { "epoch": 7,          // the roster version that set THIS grant
+            "slots": [5, 6] }    // the seats this deputy may fill
+```
+
+Rules for every member's validator, each its own error:
+
+1. At most one entry carries a grant. It is never the starter's entry, and its role is guest.
+2. Every granted slot is below `cap`, is not occupied by a member, and appears once; `members + granted slots ≤ cap`. So the starter cannot use a seat while it is set aside, and the deputy can never exceed the limit.
+3. `epoch` equals the number of the version in which this exact grant (same holder, same slot list) first stood under this same `cap`. If the holder, the slot list or `cap` differs from the previous version, `epoch` must be the new version's number; otherwise it must be carried unchanged.
+4. Only the starter signs roster versions (unchanged), so only the starter names, changes or withdraws a deputy. Withdrawing is a version without the grant. Removing the deputy from the roster removes the grant with them.
+
+- **INTERPRETATION (for Kam) I-17.** One deputy at a time, and the deputy must be a guest, not an observer. Alternative: several deputies, or an observer as deputy. One is what his words say ("a deputy") and is all the design needs.
+
+#### 2.8.3 What the deputy signs: admissions
+
+```jsonc
+{ "session_id": "…", "epoch": 7, "seq": 0,            // 0, 1, 2 … within this epoch
+  "prev": "<hash of the previous admission of this epoch; all zero for seq 0>",
+  "entry": { "key_id", "noise_static", "sign_pub", "binding_sig", "role", "slot", "added_at" },
+  "proposal": { … the member's signed proposal, as in 2.3 … },
+  "sig": "<deputy's signature>" }
+```
+
+Signed by the deputy's device key under its own label, `coagent-roster-deputy-admission-v1`, so an admission can never be taken for a roster version or a proposal, in either direction.
+
+A member holding the starter's current version C accepts an admission only if all of these hold, checked in this order:
+
+1. C carries a grant, and the admission's `epoch` is that grant's epoch;
+2. the signature verifies under the signing key of the entry that holds the grant in C;
+3. `seq` is exactly the next one for this epoch and `prev` is the hash of the one before (the admissions of an epoch are a single-writer chain, like the roster);
+4. `entry.slot` is one of the granted slots and no earlier admission of this epoch took it;
+5. the candidate's keys verify and match its key id; the candidate is not a member in C, not provisionally admitted already, and **not on C's `removed` list** (what the starter removed, the deputy cannot bring back);
+6. the proposal's signature verifies under a member of C with role guest who is neither the deputy nor the candidate, and it names a starter version at or after `epoch` that this member holds;
+7. the entry's role is the proposed role or observer (I-7).
+
+**Effective membership** is C's members plus the accepted admissions of C's grant epoch. Everything that today takes the roster (opening pairwise channels, deciding what a sender may send) takes this combined view; its identity for the handshake is a hash over C's hash and the head of the admission chain, so two members whose views differ fail the handshake until they have caught up, exactly as two members with different rosters do today (the handshake binds the roster hash and both slots [main: docs/CRYPTO-GLUE.md, KK section, test `f4_kk_prologue_binds_roster_hash_and_slots`]).
+
+A person admitted this way is **provisional**. Every member's screen says: "Sam, let in by Priya's proposal and approved by Dana, the deputy. Kam has not confirmed Sam." Each machine's owner still accepts them separately before anything is shared.
+
+**When the starter's chain moves.** If the new version carries the same grant and epoch, the admissions stand. If the epoch differs or the grant is gone, every admission of the old epoch is void: members close their channels to those keys and erase the channel keys, as for a removal. The starter keeps a provisional member by adding their key to the roster directly, in the version that changes the grant; a key that is now a roster member simply stops being provisional. (The roster entry of a kept member carries no proposal: the proposal named an older version and rule 2 of 2.4 would refuse it. Who proposed them is then local history, not a signed fact. Stated, not solved.)
+
+#### 2.8.4 What a deputy may do
+
+| Act | Default (the most conservative reading) | The widening, each for Kam |
+|---|---|---|
+| Approve a newcomer whom ANOTHER roster member proposed, into a granted seat | **Yes** | n/a |
+| Approve their own proposal (invite someone alone) | No | Yes: the deputy alone can fill their seats |
+| Approve a proposal made by a provisional member | No | Yes |
+| Bring back someone the starter removed | No | (not offered) |
+| Remove a member; change guest ↔ observer | No | Yes, as the starter can |
+| Raise or lower the limit | No (I-16) | Yes |
+| End the session for everyone | No | Yes |
+| Name a further deputy, or pass the role on | No | Yes |
+| Sign a roster version of any kind | **Never** (2.8.1) | (not offered: it is the rejected design) |
+
+- **INTERPRETATION (for Kam) I-18.** The deputy's power is the first row only. Each other row is a separate widening he can ask for; all but the last would need the deputy to write the roster, which is the larger, rejected design, so "the deputy can also remove people" is not a small request.
+- **INTERPRETATION (for Kam) I-19.** The deputy's own program offers the approval only while it has been unable to reach the starter for the absence period ([03 §4.5] pauses a session after 5 minutes without the peer). Nobody else can check that, so a dishonest deputy can approve while the starter is present; the design stays sound either way because the starter's next version always stands. Alternative: the deputy may approve at any time, as a second approver.
+- **INTERPRETATION (for Kam) I-20.** Everyone a deputy lets in is provisional until the starter keeps them. Alternative: a deputy's admission is as permanent as the starter's. The alternative again needs the deputy to write the roster.
+- **INTERPRETATION (for Kam) I-21.** The deputy's role has no time limit and continues after the starter has left the session for good, until the granted seats are used up. Alternative: it ends when the starter leaves for good, or after a set time (each member's own clock would decide, so members could disagree for a while).
+
+#### 2.8.5 Two admissions with one number
+
+The deputy's chain can be forked only by the deputy: two different admissions with the same session, epoch and `seq`, both verifying under the deputy's key, are self-contained proof that the deputy told two stories, checkable by a third party who holds the roster version that names the deputy. A member keeps the one it accepted first, refuses the other, raises the alarm and stores both. Members who saw different ones disagree about that seat until the starter renews or withdraws the grant, which voids both. That is the same position members are in today when a starter forks the roster.
+
+#### 2.8.6 Threats considered
+
+| Attempt | By | Result |
+|---|---|---|
+| Sign or alter a roster version | hostile deputy | Cannot: the validator accepts the starter's key only, and an admission's signed bytes carry their own label. |
+| Block, override or outrun a change by the starter | hostile deputy | Cannot: nothing the deputy signs is in the starter's chain. A starter version that changes or drops the grant voids the deputy's admissions wherever it arrives. |
+| Stay deputy after being withdrawn | hostile deputy, with a relay delaying the starter's version | Works only against members who have not yet received the newer version, and only until they do: the same lag a removal has today ([04 §3.5]), visible because every envelope carries the sender's roster version. |
+| Fill the granted seats with confederates | hostile deputy plus one member who proposes for them (colluding or deceived) | Possible. They are labelled provisional, get nothing from any machine until its owner accepts them, cannot be granted more seats than the starter set aside, and all go when the starter renews the grant. This is the trust the starter takes on. |
+| Use up the seats so nobody else can join | hostile deputy | Possible (denial of seats). The starter renews the grant. |
+| Admit someone alone | hostile deputy | Refused by every member: the proposal must be signed by another roster member. |
+| Re-admit a removed member | hostile deputy | Refused by every member (2.8.3 rule 5). |
+| Sit between a newcomer and the members | hostile deputy, even one who runs the relay | Cannot without the starter's key: the newcomer learns every member's key from the starter-signed roster, and the handshake authenticates both static keys, so a false key for the newcomer only replaces the newcomer with a confederate (the row above). REASONED, NOT TESTED. |
+| Tell different members different admissions | hostile deputy | Evidence, 2.8.5. |
+| Forge a grant, an admission or a proposal | relay | Cannot: all three are signed, and travel inside pairwise channels. |
+| Withhold admissions from some members | relay | Those members cannot open channels to the newcomer; the mismatch is visible as a failed handshake and a view that is behind. |
+| Name a deputy the members did not expect | hostile starter | Always possible; it is the starter's power, and a starter can already admit anyone directly. The grant is in the roster, so every member sees who the deputy is. |
+
+#### 2.8.7 A newcomer who joins through the deputy
+
+The proposer hands the newcomer, over their pairing channel: the starter's current signed version (which carries the grant) and the admissions of the current epoch up to and including the newcomer's own. The newcomer checks the roster's signature under the starter key the proposer stated (the starter is "introduced by" the proposer, as in 2.6), then every admission by the rules of 2.8.3, and requires its own key to be the entry of the last one. On main a first roster that does not list the local device is refused [main: lib.rs:427-429]; a provisional newcomer is by definition not in the roster, so this needs a second, explicit way to start a chain ("my place is in the admissions"), never a relaxation of the existing check. As for any joiner, history before joining cannot be checked ([STATUS_M1_CORE §6 DQ15]).
+
+#### 2.8.8 With the verify-words rule (I-12) and with removed members
+
+- A provisional member who is dropped because the grant changed counts as removed for the inheritance rule of 5.2: everyone admitted afterwards, by the starter or the deputy, starts with the tries this device already used with them, and inherits a hard stop.
+- A provisional member sits in a real slot, so the per-slot rule of 5.2 (b.1) applies to them unchanged.
+- The deputy cannot multiply the entries that claim to be one person beyond the granted seats; the count of section 5.2 item 3 (limit minus 2) already covers every seat.
+
+#### 2.8.9 Bounds
+
+| Input | Who causes it | Bound |
+|---|---|---|
+| Granted seats | starter | at most `cap − members`, so at most 7 |
+| Admissions held per epoch | deputy | the number of granted seats |
+| Admissions of old epochs | deputy | none kept (only fork evidence) |
+| Encoded admission | deputy | 4,096 bytes, checked before decoding (PROPOSED) |
+| Stored fork evidence | deputy | one pair per epoch (PROPOSED) |
+| Pending proposals in front of the deputy | members | the same bounds as the starter's intake (2.5) |
+
+#### 2.8.10 What stays undecided inside this design
+
+- How the audit crate treats a provisional member. It decides membership from the roster's own member list [branch m3-audit: crates/coagent-audit/src/session.rs:512, 574, 778]. UNKNOWN whether a provisional member should author and countersign audit events before the starter keeps them; closed by reading that crate after it merges and by a design decision then. Default until then: a provisional member takes no part in the audit exchange, and members are told so.
+- Whether a kept member's proposer should stay a signed fact (2.8.3, last paragraph).
+
+#### 2.8.11 Not built today
+
+The deputy is a second signed object, a second chain, a new notion of membership for every consumer, and five choices that are his (I-17 to I-21). It is not added to the roster lane that is running. It is its own lane, after that lane has merged, with its own gate. The running lane is asked for one thing only: that "who may sign a roster version" and "who may approve a proposal" are each decided in one place.
 
 ---
 
@@ -324,9 +535,9 @@ A new address or pin that arrives out of band should be signed by the starter so
 **(b) The same person re-added under a fresh key gets fresh tries.** Three sub-cases:
 
 1. *Fresh key, same slot.* Closed on main when the caller names the slot: `insert_with_slot` makes a new key in a slot inherit the attempts the slot already used and refuses a slot that hard-stopped [main: crates/coagent-crypto/src/channel_map.rs:128-153]. **Rule:** every channel to a roster member is inserted with its slot. Plain `insert` [channel_map.rs:110] must not be reachable from daemon code. The in-flight daemon says it uses `insert_with_slot` everywhere [STATUS_M1_DAEMON §1 item 12]. Making plain `insert` unreachable in the crate itself means touching tests the two gates wrote [STATUS_M1_CORE A2.4 item 2a], so it needs Friday's ruling and is a REQUEST for the crypto follow-up lane. Until then a source check in the daemon crate (no call to `ChannelMap::insert`) holds the rule.
-2. *Fresh key, another slot, after a removal.* Open on main ([main: BACKLOG.md lines 110-112]: "a hostile convener can still re-introduce a person under a fresh key into a NEW slot"). **New rule (inheritance from removed entries):** on each device, an entry added in or after a roster version that removes anyone starts with `attempts_used` equal to the highest count this device used with any entry removed so far in this session; and if this device hard-stopped with any removed entry, every entry added afterwards is refused a channel on this device until its owner deliberately overrides (the existing `verify_override_slot` act [channel_map.rs:155-161]). The daemon applies it, because the daemon sees which keys a version removed and added (`Applied::Advanced { added, removed, .. }` [main: lib.rs:391-399]) and holds the stored counts. REASONED, NOT TESTED. It needs R2 (seeding `ChannelMap`) or the daemon's parallel count.
+2. *Fresh key, another slot, after a removal.* Open on main ([main: BACKLOG.md lines 110-112]: "a hostile convener can still re-introduce a person under a fresh key into a NEW slot"). **New rule (inheritance from removed entries):** on each device, an entry added in or after a roster version that removes anyone starts with `attempts_used` equal to the highest count this device used with any entry removed so far in this session; and if this device hard-stopped with any removed entry, every entry added afterwards is refused a channel on this device until its owner deliberately overrides (the existing `verify_override_slot` act [channel_map.rs:155-161]). The daemon applies it, because the daemon sees which keys a version removed and added (`Applied::Advanced { added, removed, .. }` [main: lib.rs:391-399]) and holds the stored counts. REASONED, NOT TESTED. It needs R2 (seeding `ChannelMap`) or the daemon's parallel count. (Revision 1: a provisional member dropped when a deputy's grant changes counts as removed for this rule; 2.8.8.)
    - **INTERPRETATION (for Kam) I-12.** This rule makes an honest newcomer pay for a removed member's failed tries: if you failed twice with someone who was then removed, the next person added gets one try with you in that session, and if you had said "the words do not match" about a removed member, you must deliberately override before you can talk to anyone added later. Alternative: do not inherit, and state plainly that a hostile starter gets five more guesses each time they remove and re-add (bounded only by the 16-entry lifetime limit of 2.4). I chose inheritance because the ruling's sentence says "per pair per session" and a re-added person is the same pair to the two humans.
-3. *A second entry for the same person while the first stays.* **Documented, not closed.** Keys are the only identity the software has ([03 §4.3]); it cannot know two entries are one person. A hostile starter who is also the relay can show each victim up to `CAP − 2 = 2` entries claiming to be the other (the slots that are neither the victim's nor the starter's). With three tries per entry per side that is 6 tries per side and 6 + 6 − 1 = **11 comparisons, at most 11 × 2^-31 per session** [inferred: the G-14 schedule with a = b = 3 × (CAP − 2); REASONED, NOT TESTED]. It requires both humans to run the ceremony against two members who both claim to be the same person. Mitigation that is not a bound: when two roster entries carry the same claimed display name, every member's screen says so on both chips. The threat model states the 11.
+3. *A second entry for the same person while the first stays.* **Documented, not closed.** Keys are the only identity the software has ([03 §4.3]); it cannot know two entries are one person. A hostile starter who is also the relay can show each victim up to (limit − 2) entries claiming to be the other (the slots that are neither the victim's nor the starter's). With three tries per entry per side, at the default limit of 4 that is 6 tries per side and 6 + 6 − 1 = **11 comparisons, at most 11 × 2^-31 per session**; at the raised limit of 8 it is 18 per side and **35 comparisons, at most 35 × 2^-31 (about 1 in 61 million) per session** (Revision 1) [inferred: the G-14 schedule with a = b = 3 × (limit − 2); REASONED, NOT TESTED]. Raising the limit is the starter's act, and the starter is the attacker in this case, so the figure to state publicly is the one at 8. It requires both humans to run the ceremony against two members who both claim to be the same person. Mitigation that is not a bound: when two roster entries carry the same claimed display name, every member's screen says so on both chips. The threat model states the 35 and says it is 11 while the limit is 4.
 
 **What a hard stop means for the starter** (the open F2 questions [STATUS_M1_CORE A1.6 item 1]): not ruled. The defaults builders assume are in section 9.
 
@@ -362,7 +573,7 @@ The policy crate is in flight (addendum 5 builds the rule; [STATUS_M2_POLICY] AD
 |---|---|---|
 | n4 | Option a "Sign through Microsoft's signing service", note: "yes but lets build the other versions first as I wont be next to the windows machine until the end of the week" | macOS (and Linux) builds come first. Windows signing is set up when he is at the Windows machine. It costs money and needs his identity: his act, never a seat's ([04 §9] N4 is approval-class). No seat creates a signing account or pays for anything. |
 | Windows testing | Option a "I will provide a Windows machine or VM", note: "which is better? will a VM be sufficient or is it best to do it on a proper machine. I am travelling and will be next to my windows machine on friday" | Friday answered on the panel: wait for the real machine on Friday 2026-11-20 (her reasoning, not a measurement). Until then every Windows path stays compiler-checked and labelled UNTESTED. Spikes W1 and W3 [04 §7.2] and the pipe identity checks R3 (a)-(c) [STATUS_M1_RELAY ADDENDUM 1 §4] wait for that day and need him present. No lane today owns Windows behaviour. |
-| n8 | Option a "One beta with everything" | One beta at M6 carrying groups, observers and native Windows. The private two-party checkpoint that [04 §9] N8 recommended (option b) is not a release. Milestones stay as internal gates. With n1, "everything" means groups of up to 4. |
+| n8 | Option a "One beta with everything" | One beta at M6 carrying groups, observers and native Windows. The private two-party checkpoint that [04 §9] N8 recommended (option b) is not a release. Milestones stay as internal gates. With n1 as ruled (Revision 1), "everything" means groups of 4 by default and up to 8 when the starter raises the limit. |
 | n6 | Option a "Open from the first commit" | The repository is to be public, and stays PRIVATE until his card on publication is answered: making it public is his own click, and the pre-publication sweep found recorded spike output carrying material that must not be published (`prepub_sweep_2026-11-17.md`; Friday's lesson on recorded fixtures). Consequence for every seat from today: write every commit as if it were already public. No absolute paths, user names or other projects' names in committed output; recorded fixtures only from a scratch tree. No seat changes a repository setting. |
 | n7 | Option a "Approve those obligations" | The disclosure obligations of [04 §6.2] are approved as written. The option text in [04 §9] N7 (a) includes "wording drafted at M6 for sign-off": the text itself is still shown to him before it is published. `coagent --version` already prints "beta (not independently reviewed)" [STATUS_M1_RELAY "What exists"]. |
 
@@ -374,14 +585,16 @@ Every stored or buffered input a peer can cause has a bound from the first versi
 
 | Input | Who causes it | Bound | Where enforced | Status |
 |---|---|---|---|---|
-| Members in a roster | starter | 4 | roster validator | CAP = 4 (section 1) |
-| `removed` list plus members, session lifetime | starter | 16 | roster validator | PROPOSED (2.4) |
+| Members in a roster | starter | the version's `cap`: 4 or 8 | roster validator | Revision 1 (section 1.1) |
+| `removed` list plus members, session lifetime | starter | 32 | roster validator | PROPOSED (2.4; Revision 1, was 16) |
+| Roster versions kept per session | starter | 256 | roster validator | PROPOSED (2.4; Revision 1, new; unbounded on main) |
+| Deputy's seats, admissions, admission size, evidence | starter, deputy | see 2.8.9 | roster crate, later lane | PROPOSED, not built |
 | Encoded roster version | starter | 65,535 bytes | canonical decoder [main: canonical.rs:25] | on main |
 | Encoded proposal | any guest | 2,048 bytes | starter's proposal intake, before decoding | PROPOSED (2.5) |
 | Proposal `note` | any guest | 256 bytes | starter's proposal intake | PROPOSED |
 | Pending proposals | guests | 1 per proposer, 3 per session | starter's proposal intake | PROPOSED |
 | Proposals per proposer per session | a guest | 8 | starter's proposal intake | PROPOSED |
-| Remembered proposal ids | guests | 120 (15 possible proposers × 8) | follows from the quota and the lifetime bound | derived |
+| Remembered proposal ids | guests | 248 (31 possible proposers × 8; Revision 1) | follows from the quota and the lifetime bound | derived |
 | Life of a pending proposal | a guest | 10 minutes | starter's proposal intake (time passed in) | PROPOSED |
 | Verify ceremonies | a peer | 3 per entry per side; inherited across slots and removals | crypto crate and daemon (section 5) | 3 is on main; inheritance is new |
 | Saved relay identity file / standard-input blob | local user or parent process (not a peer) | 16 KiB, read deadline on standard input | `coagent relay` | PROPOSED (section 4) |
@@ -394,8 +607,8 @@ Every stored or buffered input a peer can cause has a bound from the first versi
 
 | Source | Question | Answer |
 |---|---|---|
-| [04 §9] N1; [STATUS_M1_CORE §6 DQ4] | How many parties; `cap` must equal 8 | 4 (section 1; I-1). |
-| [04 §9] N2 | Who may bring a new person in | A member proposes, the starter approves (section 2). |
+| [04 §9] N1; [STATUS_M1_CORE §6 DQ4] | How many parties; `cap` must equal 8 | 4 by default, the starter may raise it to 8; `cap` is 4 or 8 (section 1, Revision 1; I-1 RULED). |
+| [04 §9] N2 | Who may bring a new person in | A member proposes, the starter approves (section 2; I-2 CONFIRMED). In the starter's absence a named deputy may approve (2.8; I-5 RULED; design written, not built). |
 | [04 §9] N3; [STATUS_M2_POLICY A3.7 item 1, A4.6 item 1] | Commands on Windows; every shell command asks | Same rule everywhere: every command asks, plus the owner's exact list (section 6; I-13). |
 | [04 §9] N4 | Sign the Windows binaries | Yes, through Microsoft's service, after the other builds, when he is at the machine. |
 | [04 §9] N5 | Third-party rendezvous | Opt-in, asked at connection time, guided (section 3). The mechanism is UNDECIDED. |
@@ -407,7 +620,7 @@ Every stored or buffered input a peer can cause has a bound from the first versi
 | [STATUS_M1_CORE A2.4 item 1] | Accept 5 × 2^-31, lower the cap to 2, or count per human pair | Accept: three tries each side (5.1). |
 | [STATUS_M1_CORE A2.4 item 2] | The count is unlimited across restarts and fresh-key re-adds | Answered in part. The ruling accepts a bound "per pair per session"; section 5.2 gives the rules that make it hold. Restart: closed by persistence (in flight). Same slot: closed by mandatory slots. New slot after removal: closed by inheritance (I-12). Second simultaneous entry: documented at 11 × 2^-31. |
 | [STATUS_M3_AUDIT A2.8 item 1] | A third check on the audit log | Yes (process ruling; commissioned). |
-| [STATUS_M3_AUDIT A2.7 Q19] (the divisor only) | Each peer's share is 1/7 | Becomes 1/(CAP − 1) = 1/3 as a consequence of n1. The sizes themselves stay open (9.2). |
+| [STATUS_M3_AUDIT A2.7 Q19] (the divisor only) | Each peer's share is 1/7 | Revision 1: stays 1/7, because 8 members remain possible (section 1.2). The sizes themselves stay open (9.2). |
 
 ### 9.2 Still open
 
@@ -441,11 +654,11 @@ Every stored or buffered input a peer can cause has a bound from the first versi
 
 | # | Where | I assumed | The alternative |
 |---|---|---|---|
-| I-1 | 1 | The limit is exactly 4, fixed | 4 by default, raisable to 8 by the starter |
-| I-2 | 2.1 | The member hands out the invite and pairs with the newcomer | The member only asks; the starter invites and pairs |
+| I-1 | 1 | **RULED, against my assumption** (Revision 1). His words: "Decision general-c2c-i1-limit-fixed-1117: b — Four by default, the starter may raise it to eight". Section 1 is rewritten. | (my assumption was a fixed 4) |
+| I-2 | 2.1 | **CONFIRMED** (Revision 1). His words: "Decision general-c2c-i2-who-hands-invite-1117: a — The member hands out the invitation, the starter approves". | n/a |
 | I-3 | 2.1 | Observers cannot propose | Observers may propose |
 | I-4 | 2.1 | The starter approves each proposal by hand | The starter may pre-approve a member's proposals for a time |
-| I-5 | 2.1 | If the starter has left, nobody can be added | The starter can name a deputy |
+| I-5 | 2.1 | **RULED, against my assumption** (Revision 1). His words: "Decision general-c2c-i5-starter-gone-1117: b — The starter can name a deputy". Section 2.8 is the design. | (my assumption was that nobody can be added) |
 | I-6 | 2.1 | A member cannot propose a removed person | Allowed, with "previously removed" on the card |
 | I-7 | 2.1 | The starter may admit a proposed guest as an observer | Admit exactly as proposed, or decline |
 | I-8 | 3.1 | The connection question is asked every time | Asked once and remembered |
@@ -454,3 +667,11 @@ Every stored or buffered input a peer can cause has a bound from the first versi
 | I-11 | 4.2 | The daemon's own relay keeps an identity only when the user turned the setting on | Within one session the same identity is always re-supplied from memory; only keeping it across sessions needs the setting |
 | I-12 | 5.2 | Newcomers after a removal inherit the removed members' used tries and hard stops | No inheritance; state that a hostile starter gets five more guesses per remove-and-re-add |
 | I-13 | 6 | "Same rules as mac" means every command asks plus the exact list, and Windows follows the Mac if the Mac rule ever changes | He meant only the original option c; a later relaxation on the Mac would need a separate decision for Windows |
+| I-14 | 1.1 | The limit may be lowered back to 4 whenever the people present fit | Once raised it stays at 8 for the session |
+| I-15 | 1.1 | A starter may open a session at 8 from the start; the product's own default is 4 | Every session opens at 4; 8 is always a later, visible step |
+| I-16 | 1.1 | Only the starter changes the limit | The deputy may raise it while the starter is away |
+| I-17 | 2.8.2 | One deputy at a time, and a guest, not an observer | Several deputies; an observer as deputy |
+| I-18 | 2.8.4 | The deputy can only approve a newcomer another member proposed, into seats the starter set aside | Each widening separately: approve alone; remove people or change roles; change the limit; end the session; name a further deputy (all but the first need the larger design in which the deputy writes the member list) |
+| I-19 | 2.8.4 | The deputy's program offers approvals only while it cannot reach the starter (nobody else can check this) | The deputy may approve at any time |
+| I-20 | 2.8.4 | People a deputy lets in are provisional until the starter keeps them | A deputy's admission is as permanent as the starter's |
+| I-21 | 2.8.4 | The deputy's role has no time limit and outlasts a starter who has left for good | It ends when the starter leaves for good, or after a set time |
