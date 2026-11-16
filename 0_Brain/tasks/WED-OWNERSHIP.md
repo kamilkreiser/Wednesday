@@ -226,5 +226,5 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-16 15:03 | Kamils-MBP | General/Claude to Claude — Friday (laptop) | OPEN | |
 | 2026-11-16 22:55 | Kamils-MacBook-Pro | WED tooling: Launch_Wednesday.command Friday-only Fable boot (Kam card general-friday-boot-on-fable-1116 = a) — Friday (laptop) | CLOSED |  2026-11-16 22:57 done |
 | 2026-11-16 23:01 | Kamils-MacBook-Pro | live board index.html: a saved project filter with no chip in the current view hides every card (Kam 2026-11-16 22:53) — Friday (laptop) | CLOSED |  2026-11-16 23:08 done |
-| 2026-11-17 06:07 | Kamils-Mac-mini | wake runner: held-wake RECOVERY (>60 min held: email Kam + respawn the wednesday seat via the --dead path when the pane shows no progress) — ledger 2026-11-17 | OPEN | |
+| 2026-11-17 06:07 | Kamils-Mac-mini | wake runner: held-wake RECOVERY (>60 min held: email Kam + respawn the wednesday seat via the --dead path when the pane shows no progress) — ledger 2026-11-17 | CLOSED |  2026-11-17 07:44 built + armed 07:43 (pid 8222); tests a-e on a scratch socket |
 | 2026-11-17 06:42 | Kamils-Mac-mini | wake_ack/wake_watch pane hash: exclude Claude Code's transient 'Checking for updates' line (it flips the idle-ack hash; D 69th re-woke 3x on an unchanged hold) — 2026-11-17 | OPEN | |
