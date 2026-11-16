@@ -74470,5 +74470,44 @@
    "CARD composer-demo-pgrestore-version-read-1101",
    "CARD mps-257-253-red-first-meaning-1102"
   ]
+ },
+ {
+  "id": "general-c2c-terminal-commands-gate-1117",
+  "client_project": "General/Claude to Claude",
+  "title": "CoAgent: every terminal command asks you, because recognising safe ones failed twice",
+  "bluf": "The gate tried to recognise harmless terminal commands (ls, cat, grep) so they would not need your approval each time. Two independent checks overnight each found ways to make a dangerous command look harmless: first a file overwrite and a secret read (round 1), then, after a full rebuild, reading your cloud credentials through a folder shortcut (round 2). The second check judged that this cannot be made safe. So I removed it: every terminal command now asks, and reads only pass without asking when the agent uses its own file tools. Cost: many more approval prompts per session, unless you approve an exact command for the session or grant a pattern. Source: reference/2026-11-16_claude-to-claude/m1_review/gate_M2_POLICY_verdict.md and gate_M2_POLICY_r2_verdict.md. (Prior-ruling check overridden: every match shared only the generic word gate with unrelated cards from other projects; Kam has not ruled on this question.)",
+  "default_action": "a is applied now: every terminal command asks. Nothing else changes until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it: every terminal command asks",
+    "detail": "Safest. Already applied as the default overnight"
+   },
+   {
+    "key": "b",
+    "label": "Try a third time to recognise safe commands",
+    "detail": "The second check advises against; it would need a new approach and another independent check"
+   },
+   {
+    "key": "c",
+    "label": "Ask Claude Code's makers for a safer hook",
+    "detail": "Keep a for now; raise with Anthropic whether the hook could pass the parsed command"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T04:09:24.736393+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-setup-window-admin-gate-scope",
+   "CARD hpsmpoc-approve-stage-gate-pack",
+   "CARD hpsmpoc-qa-gate-at-90pct-stop",
+   "CARD hpsmpoc-f1-redeploy-after-gate-1005",
+   "CARD mps-null-class-three-rows-gate-nogo-1027",
+   "CARD datasec-load-gate-cpu-count-1111",
+   "CARD datasec-gate-artifact-published-1115"
+  ]
  }
 ]
