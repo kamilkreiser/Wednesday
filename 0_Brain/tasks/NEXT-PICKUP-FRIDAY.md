@@ -42,6 +42,9 @@ a: name CoAgent, licence Apache-2.0 free, reads ask-on-first-read, trust 60 min 
 
 ## OWED (Friday)
 
+- 🔴 **`tools/safe_pull.sh` loses rulings:** its decisions.json union took upstream's OPEN copy over a locally RULED one for twelve cards on the night of 11-16/17 (repaired by re-ruling; daily note 2026-11-17, 04:2x entry; ledger row). Fix: per-id merge, ruled beats open, newest ruled_ts wins, with an arm that fails on the old behaviour. Shared tooling: claim first, mail both sisters. UNTIL FIXED: after ruling any card, run safe_pull + `git push` in the same action, and after every safe_pull compare `decision_queue.sh list open` with what should be open.
+- Twelve more CoAgent cards are open for Kam: n1-n8 (design revision) and four from the night (`general-c2c-terminal-commands-gate-1117`, `-verify-words-tries-1117`, `-relay-identity-restart-1117`, `-windows-testing-1117`). Confirm he can SEE them.
+
 - **Live board filter fix: committed (468f35c235), NOT deployed.** Deploy asked of Wednesday by mail (thread 0f4782ef…); Tuesday informed (2c899d16…). Check friday-laptop-agent@ for her confirmation; until then say "committed, not live".
 - Sister acks still outstanding: inbox-scope hook change (e30563fa5d), launcher Fable change (b684789c / ced43887), Kam's 16:37 Composer ruling to Tuesday (f0f1f881…).
 - Wrap step 3a (doctor/PORTABILITY) for the new machine-local items: the deploy key above, `4_Credentials/clients/general/`, and `general_seat.sh`'s reliance on them.
