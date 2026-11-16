@@ -1,0 +1,28 @@
+# Drafter notes: Seat K 44th brief (2026-11-16 16:49 to 17:05 AEDT)
+
+Brief: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-16_seatK44_merge.md (49,924 bytes, 157 lines; STAMP blank; PROVENANCE 16 lines, 0 malformed by my lint, every KS id in the body in the block, no QUEUE heading, blank line before `## UNMEASURED`; SELF-CHECK 17:05 from `date`). RULED BY KAM = K 43rd's STAMPED lines 15-28 verbatim under a one-line header. Work dir `_work/`: c44 (cp -R of the K43 drafter's clone, push DISABLED, fetched), wt_mrg (sparse worktree with npm ci), kit44 (676 files, 3,961,983 bytes, manifest kit44_manifest.sha256, fingerprint 5e04e786789f7a2a; READ-ONLY BYTE-COMPARE TARGET), legs/legs_2185_k44.sh + legs_2185/ outputs, scripts *44.py, partA/partB/prov/assembled.md, k43_ruled_14_28.txt, scratch/*.out, t/ (TMPDIR).
+send_brief.sh and the other send/write tools were NOT invoked in any form.
+
+## Measured (key figures)
+- develop eb27110fc6e4 (PR 2124 squash by K 43rd; parent e5a6eb82c607, tree 931779919c97), read 16:50:57, 16:58:33, 17:03:34, 17:05 (unchanged). PR 2124 merged 05:45:58Z. PR 2162 open, not merged at every read.
+- 17 heads = K 43rd's table rows 2-18 (0 REMOVED); mergeable_state unknown 16 / unstable 1 at 16:51, unstable 17 at 17:03. DNM 0. PR 2152 two commits, all others one.
+- Trees 17/17 rc 0/0 same; row plants 17/17; per-file 40/40 own 1/1 + 40/40 unrelated 0/0; 2 SKIPS (2190 insertion hunk, 2160 cert.ts). Pairs 0 of 136. K x B 0 of 255. 48 open PRs, none outside the two sets sharing a K path.
+- UNION-AUTO: PR 2160 only; tree e6d8f245c50a on develop, 47a35139cda7 on fe514a; C3 1/1 vs 2160, 0/0 vs 2185; C4 1/1 vs develop, 0/0 vs fe514a.
+- Row 1 PR 2185: head 6e9281eb7e24, 1 commit, 2 files +88 -0, merge-base 4f85ca04c622 (104 behind), body 6,842 chars, DNM 0, closing 0, at-sign body 0 / commit 1 (Co-Authored-By), 1 issue comment, both-sided 0, merged blobs = head 2/2, tree ace16713a069. Gate 313 read (line 3 and the PR 2185 section whole, common checks, what was run).
+- Legs (legs_2185_k44.sh, 36 counted pairs from legs_2162_d195.sh): npm ci 20 s, shared build 3 s; red-first 3 of 7 (R1-R3); cells 7/7 at merged; whole gateway develop 174/1,979 (1,970 pass, 0 fail, 9 skip), merged 175/1,986 (1,977 pass, 0 fail, 9 skip), failure-name sets equal = 1 FILE-ERR ks1128b in both, caused by my TMPDIR (95 chars > 88 guard; confirmed by a single-file rerun printing the guard message); tsc 0/0, plant rc 2; eslint redis.ts 0/2 = develop, test 0/0, plant caught; docs-fragments rc 0, plant rc 1; ratchet 25 baseline 0 new; porcelain 0. Mutants NOT run (gate 313's 12 stand).
+- Kit44: source 108/313/255 = 676 (16:54:23, 16:58:33, 17:03:36 equal; newest 16:48:56; evidence regular 387 vs FINAL's 385); table P1 1/0/0, G1 71/263/173, G4 1/0/115, G5 264/497/685, G6 69/188/250, G7 793/1909/1893 (each = independent grep -o -F), N 107/313/87; sed 676/676; syntax 0 bad; neighbour control PASS. T six entries absent 6/6; 858 -> 864 distinct; self-test 873/873; no P1 868/873 (5 MISMATCH); bare 866/867 (853 distinct of 858); mutant 873/874; wrong suffix 44rd 870/873; gap 872/872 rc 0; dup 874/874 rc 0. Classifier 21 subjects: only Seat K 44th / 44TH MINE. 44th 1,976 (17 pre-existing); 44rd 0; 44nd 3 (k44nd) and 44st 2 (k44stamp) raw, 0 ordinal. Stale K 43rd 1, seatK-43rd 10 (engine prose). Hex 8967de8k445 x25 in 25. Glued 440 (10/266/164). P1-elsewhere (0,0,2). 23 taken before_k44* suffixes after the shift (incl. before_k44shift 3/4); before_k44rekey free. Executable 66/100/3. kit43 control fingerprint e865d572be33b722 reproduced.
+- Engine rekey_engine_own_43.py 11,520 B / 232 lines: own k43 7, K43 4, 43rd 12 (20 all), 43RD 3; lineage k42 27, K42 7, 42nd 22 (29 all, 3 in k42nd), 42ND 5; [kK]42 2 (line 178). Double pass python == sed. k42nd -> k43nd 3. Reversed order: 44th 34, k44 34. Unfixed lines 41, 45, 46, 47, 102, 106, 109, 181, 199-203.
+- Hand-edit sites: ready_guard line 26 (05:18:26) and 37 (05:45:00); census_new line 33 == 18 -> 17; session 186f86ad in ctx_usage, go_gate_fixture_run (+gg43), wrap_moves, wrap_moves_2124; hold_scan_2123 want 1 (model for 2185), 2124 want 2.
+- Ordinals: K 44th 0, K 43rd 1 (line 1), K 34th 2 (207, 235), K 18th 1 (3551). Lane 1. df 1957 GiB. load1 7.38 at 16:58.
+- K 43rd FINAL (16:5x): r 48.1, WRAPPED naming PR 2185; meter PLAN 18.9 / CLOSED 31.6 / READY 42.1 / MERGED 48.1. HANDOVER 20,494 bytes at 16:50, 20,553 at 16:52 (B 195th briefed 05:47:26Z added), unchanged at 17:05 re-check.
+
+## Slips
+1. Hook refusal: an unquoted `=====` separator (nothing ran). Advisories on case-sensitive greps and grep|cut (counts paired with outputs; no absence claimed from them).
+2. First conversion script for indep/manifest/nbr/cls failed an assert (no file written); rewritten by hand.
+3. A partB edit batch failed an assert on one key (no write); re-run with the corrected key.
+4. My TMPDIR (inside my folder, to stay within the write limit) was too long for the ks1128b real-postgres file: 1 file error in both suite arms; declared in the brief, not re-run with a short path (that would write outside my folder).
+5. First assembled brief was 51,151 bytes; trimmed to 49,924.
+6. B 195th's brief, the W 34th commission and Wednesday's B195 mails NOT read; Linear NOT read; K 43rd's REC only read; no cd, no rm, no write under !CODING.
+
+## UNMEASURED
+Gate 313's mutants; the whole gateway suite with a short TMPDIR; docs-fragments on develop; the inbox and any Wednesday ANSWER to K 43rd's wrap; whether a GO is in flight; Linear (KS-2011 and every row ticket); check runs; the lineage derive as a whole; the ready_guard self-test; kit files after 16:48:56; legs beyond row 1; UNION-AUTO on a real merge; every cost figure (forecast reasoned).
