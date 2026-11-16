@@ -1,0 +1,6 @@
+# Landing (merge commit, head-pinned). Open the PR from the gated branch first, wait for
+# CodeQL on the PR with a background wait that exits, then land the SAME commit.
+# Run from this verify folder; replace <PR> with the pull request number. Never squash, never rebase.
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+gh pr merge <PR> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit 0dc6a0d32e068002793af9044aa7fbb95d16d4ba --subject "$(cat merge-subject.txt)" --body-file merge-body.txt
+# After the merge: the Deploy demo run the merge starts must read skipped (repository variables: 0 at the gate).

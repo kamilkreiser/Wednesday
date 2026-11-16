@@ -1,0 +1,12 @@
+BLUF: one new test row pins that the owner cut stops at the first character that does not fit. Tests only; no product line changed. Nothing deployed; no integration with HP tools.
+
+What changed: one row in the startingOwner block of web/src/components/customer/remediation-store.test.ts. Input: 99 letters, then the joined man, woman and girl emoji (8 units, written with the block's escaped FAMILY), then the letter b (108 units). The cut must give exactly the 99 letters and must not end with b. No earlier row could tell the loop's stop (break) from a skip (continue): at exactly 100 units nothing is left to add.
+
+Proof (measured in a clean clone of this branch):
+- Passes now: owner test file 135 -> 136 passed, 0 failed; whole web suite 304 files, 4337 -> 4338 passed, 0 failed (compared row by row: lost 0, added 1, changed 0). Lint (max-warnings 0), typecheck and build with its client-bundle check all rc 0.
+- Fails when the stop is replaced by a skip: with break changed to continue in a scratch copy, the new row is the only red row (135 pass), by assertion. With its expected value changed to 98 letters, the row also fails at the unchanged code.
+- Infra: hidden-character test 14 OK; whole infra discover 325 OK; validate.sh rc 0 (same as main).
+
+Diff: 1 file, 6 lines added, 0 removed, one hunk inside the block.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

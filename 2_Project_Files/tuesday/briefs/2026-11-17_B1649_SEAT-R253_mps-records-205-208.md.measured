@@ -1,0 +1,229 @@
+084f8647 | ls -l of the sidecar at drafting -> exists
+23e4d1aa | git -C <root> --no-optional-locks rev-parse main HEAD (run at drafting) -> 7d6206a1d2b6596fb7b33b5afc9ab7eb57d381c5 | 7d6206a1d2b6596fb7b33b5afc9ab7eb57d381c5
+62d8e6c9 | git -C <root> remote -v | wc -l -> 0 (control: git config user.email prints kamil.kreiser@datasec.com.au)
+bddf7c37 | git -C <root> status --short, tracked lines only ->  M 5_Project_History/history.md |  M BACKLOG.md |  M JIRA.md
+ab5d5da2 | grep -c -F ' M 5_Project_History/history.md' over the status output -> 1
+643a5baf | grep -c -F ' M BACKLOG.md' over the status output -> 1
+ed2b3025 | grep -c -F ' M JIRA.md' over the status output -> 1
+708fee93 | grep -c -E '^### C-172' over root main CLARIFICATIONS.md (git show main:) -> 1 (control '^### C-171' -> 1; line of C-172: 3372 of 3382)
+879ef849 | grep -c -E '^### C-173' over root main CLARIFICATIONS.md (git show main:) -> 0 (control '^### C-171' -> 1; line of C-172: 3372 of 3382)
+12481c90 | grep -c -E '^### C-177' over root main CLARIFICATIONS.md (git show main:) -> 0 (control '^### C-171' -> 1; line of C-172: 3372 of 3382)
+277066cc | gh api -X GET actions/jobs/133302713742/logs WITHOUT the flag -> 98 bytes: 'the response contains terminal escape sequences; pass --allow-escape-s'; WITH it -> 186262 bytes saved (raw/weblog_c74e2ecf.txt)
+410613d8 | ls -d '.tools/b1636' '.tools/b1611' -> /Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/.tools/b1611 /Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/.tools/b1636
+97a6da1d | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+21cd9104 | ls -d .tools/b15* | wc -l -> 40
+0264a353 | ls -d .tools/b16* | wc -l -> 12
+fefa4ea0 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+345b0582 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 14 times; the seat's own check prints it (UNMEASURED as an output)
+ea9b6aa4 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 10 times; the seat's own check prints it (UNMEASURED as an output)
+54b55f3f | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+ee3a6b70 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+4509161e | shasum -a 256 over the nine sources -> ffdcc7a64f551044 ... (table in THE SOURCES)
+f4d1b08c | head -1 of B1635 VERDICT.md -> GATE B1635: GO WITH FINDINGS @ 9738361 on main 87dc262
+ad62b095 | last line of each builder status file -> B1626: READY B1626: 973836133ee09d00aa204481587a1496f84fc9b3 | B1640: READY B1640: 4ac454010fc09b1bc6950bc681562522aa922b8d | B1641: READY B1641: c5279894be4b6f0a48115073c5977f17c571f416 | B1642: READY B1642: 3669403445736ba0d4c7e1a9e91d2619df3b0b7f
+f68f3a82 | last line of the B1626 status file -> READY B1626: 973836133ee09d00aa204481587a1496f84fc9b3 (control: first line of the same file -> PROGRESS B1626: READY)
+9c473beb | gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/pulls?state=open&per_page=100' --jq length -> 0 (control: pulls/205 merged True)
+e76b68f6 | gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/ref/heads/main --jq .object.sha -> c74e2ecf24898220d9d2ab3c1262fcc63ecfcd55 (rc 0)
+5e129136 | GET /rest/api/3/search/jql, JQL project = MPSCALC AND ( statusCategory != Done ), paginated -> 169 rows (Done 240, total 409; Done plus not Done equals total)
+e1e1e5fb | same search with key >= MPSCALC-1 -> 409 rows
+cce88342 | gh api -X GET git/ref/heads/main --jq .object.sha at drafting -> c74e2ecf24898220d9d2ab3c1262fcc63ecfcd55 (equal to the literal: True)
+9cef133d | gh api -X GET git/trees/c74e2ecf24898220d9d2ab3c1262fcc63ecfcd55?recursive=1 -> truncated false, 720 blobs (python len over type blob)
+ccd4c42e | check-runs of the squashes, conclusion success -> #205 8 of 8, #206 8 of 8, #207 8 of 8, #208 8 of 8
+1269d4a0 | gh api -X GET commits/<squash>/check-runs, names starting 'web' -> #205 1, #206 1, #207 1, #208 1; job ids #205 133245787280, #206 133281965809, #207 133284284981, #208 133302713742; the log of 133302713742 is raw/weblog_c74e2ecf.txt, 186262 bytes
+78338694 | gh api -X GET actions/jobs/133302713742/logs --allow-escape-sequences -> 186262 bytes saved after stripping colour codes (rc 0)
+efa45143 | grep -c -E 'Tests  1616 passed \(1616\)' over the web logs of c74e2ecf -> 1, 12cb188a -> 1 (control: over the log of 41a75c5e, which holds 1610 -> 0)
+79e9949a | grep -c -F '260 passed' over the web log of c74e2ecf -> 1 (control: '258 passed' over the log of 12cb188a -> 1; over c74e2ecf -> 0)
+33eee81a | grep -c -F '17 skipped' over the web log of c74e2ecf -> 1 (control: '99 skipped' -> 0)
+8aa65823 | grep -c -F '157 passed' over the web log of c74e2ecf -> 1, of 12cb188a -> 1, of 41a75c5e -> 1, of 56bfe232 -> 1 (control: '999 passed' -> 0)
+ea53d008 | grep -c -E '[1-9][0-9]* failed' over the web logs of c74e2ecf, 12cb188a, 41a75c5e, 56bfe232 -> 0, 0, 0, 0 (control: a copy of the c74e2ecf log with the planted line '1 failed' -> 1)
+21f3e9a2 | grep -c -F '258 passed' over the web log of 12cb188a -> 1, of 56bfe232 -> 1, of 41a75c5e -> 1 (control: over c74e2ecf -> 0)
+351ee8bd | grep -c -F 'const WAIT_MS = 10_000;' over the raw files at c74e2ecf -> PriceReason.test.tsx 1, PurchaseBomEditor.test.tsx 1 (control: 'const WAIT_MS = 20_000;' -> 0)
+c4232704 | grep -c -F '## PART A LOOP' over the B1626 status file -> 1 (control '## PART C LOOP' -> 0); its table rows by program: 20 rows, counted column values ['yes'], load min 7.26 max 22.56, failed/total values ['0/1610'] (control: the Part B table has 23 rows, 16 yes, 7 NO)
+0cd5ff88 | the counted column of the Part A loop table of the B1626 status file, by program -> 20 rows, all ['yes'] (control: the Part B table holds 7 rows marked NO)
+c32fb240 | grep -c -E '^const INTERNAL_INPUT_TITLE = ' over web/src/api/stub/purchaseQuotes.ts at c74e2ecf -> 1 (control '^const INTERNAL_INPUT_TITLE_X = ' -> 0)
+18eeef93 | grep -c -E '^const MANUAL_ITEM_TITLE = ' over web/src/api/stub/purchaseQuotes.ts at c74e2ecf -> 1 (control '^const MANUAL_ITEM_TITLE_X = ' -> 0)
+a39bc79a | grep -c -E '^const PRICE_EDIT_TITLE = ' over web/src/api/stub/purchaseQuotes.ts at c74e2ecf -> 1 (control '^const PRICE_EDIT_TITLE_X = ' -> 0)
+a2d6dce4 | fragment of the E408 line: the pattern is the three definitions counted above (each 1); grep -c -F over the kit -> 1
+e36505ae | grep -c -F 'Running 157 tests' over the web log of c74e2ecf -> 1 (the line before the api-off step; control 'Running 158 tests' -> 0)
+32eff8c8 | grep -c -F 'no sideways scroll on the Proposal page' over the web log of c74e2ecf -> 6 in all, 6 between 'Running 157 tests' and '157 passed' (sections of 56bfe232, 41a75c5e, 12cb188a: 6, 6, 6; control: a phrase that is not there -> 0)
+14ce5691 | gh api -X GET repos/datasecau/MPS-Commercial-Calculator/pulls/206 -> merged True, merge_commit_sha 41a75c5e7358c5413d693908235e9b758955bf97, changed_files 1, additions 78, deletions 0
+86bba3d5 | pulls/206 merge_commit_sha -> 41a75c5e7358c5413d693908235e9b758955bf97 (equal: True)
+553b94cc | git hash-object over the 12 raw files read, each printed beside the tree's blob in THE BLOBS -> equal 12 of 12
+200f64de | gh api -X GET contents/<file>?ref=c74e2ecf with Accept application/vnd.github.raw -> 16 files saved under raw/main_*, rc 0 each
+ee6138bd | gh api -X GET contents/docs/API.md?ref=efe6cdd5... and git hash-object -> 51212a43773b6c5318dbbea19d6be005a58ebe7c; proposal-buttons.spec.ts -> ca09841721dd1d1ce678dddda0e177e1c29d9789 (both equal the blobs at c74e2ecf; control: docs/API.md hash differs from proposal-buttons hash)
+dc97bc74 | gh api -X GET contents/<file>?ref=c74e2ecf with Accept application/vnd.github.raw -> 16 files saved under raw/main_*, rc 0 each
+7679d7fb | the raw read of web/e2e/dashboard-390.spec.ts begins -> import { expect, test, type Page } from '@playwright/test';
+01f2b769 | the pointer rows were found by program (ptrs1649.py: line of the nth line holding the needle, fragment = the line stripped, first 60 characters) -> 37 of 37 print (control: fragment+ZZ prints 0 of 37)
+233b7907 | the pointer rows were found by program (ptrs1649.py: line of the nth line holding the needle, fragment = the line stripped, first 60 characters) -> 37 of 37 print (control: fragment+ZZ prints 0 of 37)
+8b2d73f0 | gh api -X GET git/ref/heads/main --jq .object.sha at drafting -> c74e2ecf24898220d9d2ab3c1262fcc63ecfcd55 (equal to the literal: True)
+c39e3039 | gh api -X GET git/ref/heads/main --jq .object.sha at drafting -> c74e2ecf24898220d9d2ab3c1262fcc63ecfcd55 (equal to the literal: True)
+8e204166 | GET /rest/api/3/issue/<KEY>/transitions for the 7 keys, entries named Done -> {'369': [('41', 'Done')], '163': [('41', 'Done')], '407': [('41', 'Done')], '408': [('41', 'Done')], '409': [('41', 'Done')], '371': [('41', 'Done')], '111': [('41', 'Done')]}
+7eebf847 | GET /rest/api/3/issue/<KEY>/transitions for the 7 keys, entries named Done -> {'369': [('41', 'Done')], '163': [('41', 'Done')], '407': [('41', 'Done')], '408': [('41', 'Done')], '409': [('41', 'Done')], '371': [('41', 'Done')], '111': [('41', 'Done')]}
+727614b5 | grep -c '^JIRA_BASE_URL=' over the project .env (names only, no value read into this file) -> 1
+4899fca3 | grep -c '^JIRA_EMAIL=' over the project .env (names only, no value read into this file) -> 1
+f1c75e88 | grep -c '^JIRA_API_TOKEN=' over the project .env (names only, no value read into this file) -> 1
+132af6a1 | ls .tools/b1649 -> ls: /Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/.tool (control: ls .tools/b1636 -> exists)
+72dd54b2 | gh api -X GET git/ref/heads/main --jq .object.sha at drafting -> c74e2ecf24898220d9d2ab3c1262fcc63ecfcd55 (equal to the literal: True)
+282b3ce0 | fill-in sentence, printed once in the kit: grep -c -F -> 1 (the values are read by the seat; drafter's: see THE LANDINGS)
+32759fdf | fill-in sentence, printed once in the kit: grep -c -F -> 1 (the values are read by the seat; drafter's: see THE LANDINGS)
+80531ead | grep -c -F over the kit -> 1 lines (the sentence is used by the comment variants and defined in PART 1)
+e23e394a | grep -c -F over the kit -> 1
+d0a99622 | fill-in form, printed once in the kit: grep -c -F -> 1 (filled by program from what happened)
+b3d7e536 | fill-in form, printed once in the kit: grep -c -F -> 1 (filled by program from what happened)
+7058db8b | grep -c -F '**[B1636-OWED-9]**' BACKLOG.md -> 1 (line 5829; the last row of B1636; BACKLOG has 5834 lines)
+1576ceab | wc -l BACKLOG.md 5834, JIRA.md 833, 5_Project_History/history.md 1510
+b8592d77 | wc -l BACKLOG.md 5834, JIRA.md 833, 5_Project_History/history.md 1510
+0609eeb0 | wc -l BACKLOG.md 5834, JIRA.md 833, 5_Project_History/history.md 1510
+0a5b225b | the scanner control: scan('x_by_Kam_y') reports a name hit -> True (the copy of scan.py; build1649.py planted it)
+7a12a85a | git show main:1_Project_Definition/CLARIFICATIONS.md | wc -l -> 3382
+029a2e20 | grep -c -E '^### C-172' over root main CLARIFICATIONS.md (git show main:) -> 1 (control '^### C-171' -> 1; line of C-172: 3372 of 3382)
+bc20aedf | grep -c -i -F 'REC-MOVE-371' over root main CLARIFICATIONS.md -> 0 (control 'MPS #196' -> 5 lines)
+31ce4baa | grep -c -i -F 'REC-MOVE-111' over root main CLARIFICATIONS.md -> 0 (control 'MPS #196' -> 5 lines)
+d8056529 | grep -c -F 'RECORDS DRY RUN ONLY' tuesday/tools/status_watch.sh -> 1
+a6025407 | GET .../transitions on MPSCALC-408 -> Done id [('41', 'Done')]; the POST body is {"transition": {"id": "41"}} as in B1601's poster (read, not run)
+d6b59358 | GET /rest/api/3/issue/<KEY>/transitions for the 7 keys, entries named Done -> {'369': [('41', 'Done')], '163': [('41', 'Done')], '407': [('41', 'Done')], '408': [('41', 'Done')], '409': [('41', 'Done')], '371': [('41', 'Done')], '111': [('41', 'Done')]}
+aed93245 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+fb6eeb40 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+b38f0ee2 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 7 times; the seat's own check prints it (UNMEASURED as an output)
+32313dc1 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 102 times; the seat's own check prints it (UNMEASURED as an output)
+3349df6d | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+b65139cb | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+8964902d | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+05682bcb | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+fc2a3489 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+3e1b7936 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+fdbc06a3 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+5e4e1e7e | the case line of tuesday/tools/status_watch.sh split on '|': pattern STOPPED:* present -> 1 (the literal begins with it); control pattern ZZZZ:* -> 0
+85fb8d3f | tmux display -p -t %0 '#{@cockpit_name}' -> tuesday (the control the kit names; the seat's own pane is not launched yet)
+87805fb3 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | grep -c -F 'Datasec/MPS-R253' -> 0 (not launched at drafting; control: the name tuesday -> 1)
+aef76098 | tmux display -p -t %0 '#{@cockpit_name}' -> tuesday
+698bf73d | GET /rest/api/3/issue/MPSCALC-1 -> HTTP 200 (control MPSCALC-361: (200, 'Done'))
+4ede8ba1 | GET /rest/api/3/issue/MPSCALC-99999 -> HTTP 404 (control MPSCALC-361: (200, 'Done'))
+a9a9f03c | git -C <root> remote -v | wc -l -> 0 (control: git config user.email prints kamil.kreiser@datasec.com.au)
+ecbe9518 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | names starting 'Datasec/MPS-' -> 0 (names read: none; control: the name tuesday -> 1)
+0e27e9fd | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | names starting 'Datasec/MPS-M' -> 0 (names read: none; control: the name tuesday -> 1)
+3d5a7616 | df -g /Volumes/Datasec_DEV -> /dev/disk5s1      1862  737      1124    40% 23643810 11796026840    0%   /Volum
+2614d0c2 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+6655d7b9 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+263cbc1a | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+12509adc | status_watch.sh case line holds the pattern "READY B"[0-9]* -> 1, "HANDOVER B"[0-9]* -> 1, "RECORDS DRY RUN ONLY:"* -> 1
+e13e8301 | git branch --list 'records/b1649' | wc -l -> 0 (control 'records/b1636' -> 1)
+src-01 [B1635 first line] | VERDICT.md:1 -> GATE B1635: GO WITH FINDINGS @ 9738361 on main 87dc262
+src-02 [B1635 F1 loop not re-run] | VERDICT.md:8 -> | F1 | Minor | MPSCALC-369 acceptance (20 counted whole-suite runs) is the builder's record (STATUS table: 20 of 20, load1 7.26 to 22.56); not re-run by the gate (commission: not a 20-run lo
+src-03 [B1635 F2 trailer] | VERDICT.md:9 -> | F2 | Minor | Builder commit trailer is "Claude Sonnet 5.5"; the squash body provided ends with the repo's usual "Claude Opus 5.5" trailer (main's recent squashes carry it), so the landed c
+src-04 [B1635 F3 mutant 5 vs 4] | VERDICT.md:10 -> | F3 | Minor (named) | Builder's mutant mA3 predicted 5 red, measured 4 (mine also 4). The row "the price audit shows only ..." stays green because its own explicit wait fills the cache befo
+src-05 [B1635 F4 16 of 20] | VERDICT.md:11 -> | F4 | Minor (Part B, not a blocker) | Builder's Part B reached 16 of 20 counted runs, not 20 (machine load stayed at or below 7). Logs confirm 16 counted / 23 run / 91 of 91 green (see Part
+src-06 [B1635 F5 restore] | VERDICT.md:12 -> | F5 | Minor | Builder's NuGet restore was wider than "one package": 3 versions of the one id plus audit metadata GETs (builder named it). Outside this merge. |
+src-07 [B1635 merge clean two files] | VERDICT.md:17 -> 2. **Merge.** `git merge-tree --write-tree main head` clean (rc 0), tree c64eeff5. Merge blobs of both files = head blobs (f4293b9a, e5615f6d); `diff --name-only main merge` = the 2 files; `
+src-08 [B1635 pair program 29 removed] | VERDICT.md:18 -> 3. **Rule 1, diff by own program (check1.py).** Over main..merge: 29 removed lines, 37 added; every removed line has an added partner equal once the wait option, `{}` filler or the 15_000 bu
+src-09 [B1635 property 22 awaited] | VERDICT.md:19 -> 4. **Rule 2, property by own program (prop2.py, paren-matching parser).** At main: 31 violations (22 unguarded awaited calls plus the missing constant and 8 rows without a budget). At the me
+src-10 [B1635 delay plant 13 of 16 / 16 of 16] | VERDICT.md:20 -> 5. **Red without the fix (own plant: every `fakeApi(` call wrapped so `getQuote` waits 1100 ms; PriceReason 1 site, PurchaseBomEditor 10 sites, generated by mkplant.py from each tree's own f
+src-11 [B1635 whole web 1610 lost 0 gained 0, 3 runs] | VERDICT.md:21 -> 6. **Whole web.** `npx vitest run` (cwd web): main 146 files / 1610 tests / 0 failed; merge 146 files / 1610 tests / 0 failed. Sorted name lists (file :: full name): `comm -23` lost 0, `comm
+src-12 [B1635 Playwright 258 / 157] | VERDICT.md:22 -> 7. **Playwright, both steps as CI runs them (stub, then api-off; port 9973 only; no timeout wrapper; 0 listeners before and after every run).** Main: stub 258 passed, 17 skipped; api-off 157
+src-13 [B1635 CodeQL 0] | VERDICT.md:23 -> 8. **CodeQL CLI v2.27.4, javascript-typescript, javascript-code-scanning.qls, over the two files (db and sarif in my work folder).** Main 0 results, merge 0 results: 0 new. Both files extrac
+src-14 [B1626 Part A loop 20 of 20] | 2026-11-16_B1626_STATUS.md:117 -> **Result of the Part A loop: the five rows (and every other row of the two files: 16 tests, 3 + 13; and the whole suite of 1610 tests in 146 files) passed in 20 of 20 counted runs** at the p
+src-15 [B1626 Part B loop 16 of 20] | 2026-11-16_B1626_STATUS.md:157 -> **Result of the Part B loop: the group passed in 16 of 20 counted runs** (all 16 at 91 of 91 executed, 0 failed, 0 skipped; load1 at the start 7.42 to 12.56, printed per row). **The 20 count
+src-16 [B1626 FOR TUESDAY 369 reading] | 2026-11-16_B1626_STATUS.md:190 -> - **MPSCALC-369, clause 1 (the coordinator's reading, not Done):** "20 of 20 counted whole-suite runs clean at load above seven, the load printed in the table" (load1 at start 7.26 to 22.56;
+src-17 [B1626 FOR TUESDAY 163 reading] | 2026-11-16_B1626_STATUS.md:191 -> - **MPSCALC-163, clause 3 (the coordinator's reading, not Done):** "the group passed in 16 of 20 counted runs at load above seven (7.42 to 12.56, the load printed), 4 short, because the mach
+src-18 [B1635 Part B 23 rows 16 above 7] | VERDICT.md:29 -> Read from `<P>/.tools/b1626/` (read-only): loop-grp.tsv has 23 rows; rows with load1 above 7.0: 16 (uncounted rows 4, 9, 10, 18, 19, 20, 21 at 6.54 to 4.66); for each of the 23, the run log'
+src-19 [369 comment 40932 release condition] | jira_369.txt:25 -> Open. The 5 second timeout did not reproduce on code main either (4 of 4 green at load 27 to 45). What would release it: a build or review that makes 20 whole-suite runs each started above l
+src-20 [163 comment 40390 clauses] | jira_163.txt:22 -> Done-when, clause by clause. 1 MET: no synchronous waits on pool threads in the store path (the squash moves the interleave test's blocking writer to its own thread; the store fix was alread
+src-21 [369 acceptance check] | jira_369.txt:7 -> Acceptance check: The named rows pass in all of 20 whole-suite runs started at a load average above seven, the load printed; no assertion removed or weakened; no title changed; no product by
+src-22 [B1643 first line] | VERDICT.md:1 -> GATE B1643: GO @ 4ac4540 on main 56bfe23
+src-23 [B1643 minor 1 trailer] | VERDICT.md:8 -> | 1 | Minor | The head commit's trailer reads `Co-Authored-By: Claude Sonnet 5.5`; the repo's recent squashes on main (56bfe23, 87dc262, d991547) carry `Claude Opus 5.5`. squash-body.txt use
+src-24 [B1643 minor 2 restore not re-read] | VERDICT.md:9 -> | 2 | Minor | The builder's STATUS (c) second restore of the solution: its "no HTTP request" claim was not re-read from the builder's log (another seat's .tools is not read); my own equivale
+src-25 [B1643 diff +78 -0] | VERDICT.md:14 -> 1. Diff at merge (merge-tree --write-tree origin/main head; merge tree e5e9bcc6 = head tree e5e9bcc6, clean): by my own program over `git diff -U0`, paths = {tests/MpsCalc.Api.Tests/FleetLin
+src-26 [B1643 mutants mA mB] | VERDICT.md:15 -> 2. Mutants in my copy (Api.Tests only built per mutant, 0 warnings 0 errors each; filter `FullyQualifiedName~MpsCalc.Api.Tests.FleetLineId`, 16 tests at head; main = 13).
+src-27 [B1643 mA 2 failed 14 passed] | VERDICT.md:16 -> - mA (`PriceAudit.cs:250` `Number(x)` -> `Number(o)`): 2 failed (R12 both cases, Actual names `fleet[3].colourClickOverride`), 14 passed (R13, R1 x2, R1_control, R2-R5, R6, R7, R8, R9, R10, 
+src-28 [B1643 mB 1 failed 15 passed] | VERDICT.md:17 -> - mB (`QuoteEndpoints.cs:1672` `new[] { true, false }` -> `new[] { false }`): 1 failed (R13 at the final assertion; Expected [idB, idA], Actual [idA, idB]; its in-row controls before it pass
+src-29 [B1643 whole solution 743 196 3663] | VERDICT.md:20 -> 4. Whole solution at the merge (merge tree = head tree): `dotnet build MpsCalc.slnx -c Release` 0 warnings 0 errors; `dotnet test MpsCalc.slnx -c Release --no-build` rc 0: Engine.Tests 743 p
+src-30 [B1643 claim graded true] | VERDICT.md:29 -> - Claims graded: R12 red under mA, R13 red under mB, all existing rows green under each: TRUE. Whole solution 743/196/3663, 0 failed: TRUE. One file +78 -0: TRUE. R12 Theory both cases work:
+src-31 [B1640 item 1 pinned] | 2026-11-16_B1640_STATUS.md:20 -> - **Item 1: PINNED** by `R12_a_renumbered_line_whose_override_changes_is_recorded_under_its_new_number` (Theory, `internalMetrics` false and true): green on main, **red under mA** (`PriceAud
+src-32 [B1640 item 2 pinned and correction] | 2026-11-16_B1640_STATUS.md:21 -> - **Item 2: PINNED** by `R13_two_stored_lines_sharing_a_number_keep_their_own_ids_when_the_sent_lines_swap_and_carry_no_ids` (Fact, calls `FleetLineIds.Keep` directly): green on main, **red 
+src-33 [B1640 FOR TUESDAY correction] | 2026-11-16_B1640_STATUS.md:90 -> - **Item 2: pinned by `R13_two_stored_lines_sharing_a_number_keep_their_own_ids_when_the_sent_lines_swap_and_carry_no_ids`, red under mB, every existing row of both files green under mB (13 
+src-34 [407 recommendation (1) and (2)] | jira_407.txt:4 -> Recommendation. (1) Add a committed row that removes line 2, renumbers line 3 to 2 and changes the moved line's colour override, expecting the entries the review's own probe printed, so that
+src-35 [407 acceptance check] | jira_407.txt:7 -> Acceptance check. Items 1 and 2: each new row is red on its planted change and green on main, and no existing row of the fleet line id files is removed or changed. Item 3: the product owner'
+src-36 [B1644 first line] | VERDICT.md:1 -> GATE B1644: GO @ c527989 on main 56bfe23
+src-37 [B1644 removed lines 0 and 7] | VERDICT.md:11 -> | 4 | - | Removed lines | Part A (e2b7930e): 0 removed. Part B: 7 removed by `git diff -U0` program; each is reproduced exactly by substituting the constant's text into the matching head lin
+src-38 [B1644 titles verbatim] | VERDICT.md:12 -> | 5 | - | Titles verbatim | By program: each of the three constants equals the base literal byte for byte (3 distinct literals, counts 2/3/2 at base; at head each literal appears once, in it
+src-39 [B1644 mutants] | VERDICT.md:13 -> | 6 | - | Red without the fix | Own copy, 136 tests in the two lane files, 0 red with no mutant. mA1 (c<31): 1 red, the code-31 row. mA2 (c<33): 1 red, the existing space row. mA3 (c<=158): 
+src-40 [B1644 null row not vacuous] | VERDICT.md:14 -> | 7 | - | Null row not vacuous | The row asserts `JSON.stringify(stored.draft.assumptions)` contains `"targetGrossMargin":null` as the analyst before the Seller's Duplicate; mA5 turns exactl
+src-41 [B1644 whole web 1610 to 1616] | VERDICT.md:15 -> | 8 | - | Whole web | Vitest at main 146 files, 1610 passed, 0 failed; at head 146 files, 1616 passed, 0 failed; by name program (`LC_ALL=C comm`): lost 0, gained exactly the six new test na
+src-42 [B1644 entra build bundle 0/57] | VERDICT.md:16 -> | 9 | - | Entra build | At head: `VITE_MPSCALC_AUTH=entra npm run build` rc 0; `node scripts/check-bundle.mjs dist` rc 0 ("8 files, 1109639 bytes; markers found 0/57"). |
+src-43 [B1644 Playwright equal] | VERDICT.md:17 -> | 10 | - | Playwright, as CI runs them, port 9974 | Stub step: main 258 passed, 17 skipped, rc 0; head 258 passed, 17 skipped, rc 0 (EQUAL). api-off step: main 157 passed rc 0; head 157 pass
+src-44 [B1644 CodeQL 0] | VERDICT.md:18 -> | 11 | - | CodeQL | CLI v2.27.4, javascript-code-scanning.qls (87 rules) over the two files (copied into a work folder, database there): 0 results at main, 0 at head, so 0 new. Control: a pl
+src-45 [B1644 trailer minor] | VERDICT.md:22 -> | 15 | Minor | Trailer | The two branch commits end `Co-Authored-By: Claude Sonnet 5.5`; the repo's two most recent squashes on main use `Claude Opus 5.5`. Immaterial on a head-pinned squash
+src-46 [B1644 minor not shown] | VERDICT.md:23 -> | 16 | Minor | Not shown | The ticket's survivor `if (target)` (a numeric 0 target) and the fourth duplicated text are reported by the kit, not built; not a defect of this lane. |
+src-47 [B1641 BLUF] | 2026-11-16_B1641_STATUS.md:24 -> **Both parts are in and pushed; READY at the head `c5279894be4b6f0a48115073c5977f17c571f416`** of `b1641/mps-lane-ms2-stub-followups` (2 commits on main `56bfe232`, no PR, nothing deployed, 
+src-48 [B1641 Part B source +15 -7] | 2026-11-16_B1641_STATUS.md:71 -> - **Source (`web/src/api/stub/purchaseQuotes.ts`, +15 / -7 by `git diff -U0`):** three module constants `INTERNAL_INPUT_TITLE`, `MANUAL_ITEM_TITLE`, `PRICE_EDIT_TITLE` at `:87-89` with ONE c
+src-49 [B1641 FOR TUESDAY survivor] | 2026-11-16_B1641_STATUS.md:119 -> 1. **The `if (target)` survivor:** a truthy test in place of `target !== undefined && target !== null` (`purchaseQuotes.ts:321` at head, `:316` at base) would stay green: a numeric `0` targe
+src-50 [B1641 fourth title] | 2026-11-16_B1641_STATUS.md:120 -> 2. **The fourth duplicated text** ("Editing a draft needs the Seller role. (stub)") exists at `purchaseQuotes.ts:93` (`guarded`) and `:331` (`requireSeller`) at head (`:88` and `:326` at bas
+src-51 [B1641 comparing row limit] | 2026-11-16_B1641_STATUS.md:121 -> 3. The new comparing row does not pin the words themselves for the update path (only that both paths agree); the update path's words stay asserted by nothing against a fixed text (a title ch
+src-52 [408 acceptance check] | jira_408.txt:7 -> Acceptance check. Items 1 and 2: each new row is red on its planted change and green on main, and no existing row is removed or changed. Item 3: a change to one title cannot leave the other 
+src-53 [B1646 first line] | VERDICT.md:1 -> GATE B1646: GO WITH FINDINGS @ 3669403 on main 41a75c5
+src-54 [B1646 minor 1 counts] | VERDICT.md:10 -> | 1 | Minor | Builder STATUS line counts are false: it says the file went 55 -> 89 lines with 34 lines appended. Measured: 55 -> 95 lines, 40 added lines (`git diff -U0`: `@@ -55,0 +56,40 @@
+src-55 [B1646 minor 2 baseline] | VERDICT.md:11 -> | 2 | Minor | Builder ran no whole-stub baseline (it said so). Gate did: main 258 passed + 17 skipped, head 260 passed + 17 skipped (+2, skips unchanged). |
+src-56 [B1646 minor 3 audit] | VERDICT.md:12 -> | 3 | Minor (gate note) | npm ci made one registry call: the npm audit POST to registry.npmjs.org (advisories/bulk). 0 package fetches (all from cache). I also ran two read-only `gh api -X G
+src-57 [B1646 predicate and mutants] | VERDICT.md:20 -> 4. Predicate: `left < 0 || right > client` (both edges); message prints left, right, clientWidth; control plants `style.minWidth = '600px'`. In MY copy (head worktree, undone with cp, cmp eq
+src-58 [B1646 whole steps 258 to 260] | VERDICT.md:25 -> 5. Whole steps (port 9975, load1 under 24 on two reads 120 s apart, not independent; lsof 9975 count 0 after every run; no timeout wrapper):
+src-59 [B1646 CodeQL 0 no planted control] | VERDICT.md:29 -> 6. CodeQL CLI 2.27.4, javascript pack, suite javascript-security-and-quality.qls (201 rules), databases in /private/tmp/b1646-gate/cq: spec at main 0 results, spec at head 0 results. New vs 
+src-60 [B1646 claims graded] | VERDICT.md:31 -> 8. Claims graded: one file true; 0 removed true; line counts 89/34 FALSE (95/40); mE1 message true; mE2 message true; stub list 275->277 and api-off 157 true; file alone 7 passed true; whole
+src-61 [B1642 box left 0 right 390] | 2026-11-16_B1642_STATUS.md:47 -> **The dialog's printed box at base (MEASURED by my own run, via the failure/ pass reads below):** the new row is GREEN at base, so the STOP case does not hold. mE2's failure message prints t
+src-62 [B1642 the build both edges] | 2026-11-16_B1642_STATUS.md:42 -> One file, `web/e2e/dashboard-390.spec.ts`: 55 lines at base, 89 at head (34 lines appended below the old last line, **0 removed lines**; no existing line touched). Imports unchanged. Added: 
+src-63 [B1642 FOR TUESDAY nothing defective] | 2026-11-16_B1642_STATUS.md:82 -> - Seen outside scope: **nothing** found defective. The dialog is exactly 390 px wide at 390 px today (no product defect).
+src-64 [B1642 drawer note] | 2026-11-16_B1642_STATUS.md:83 -> - Note for the gate: `.drawer` is `width: min(720px, 100%)` and the backdrop is `justify-content: flex-end`; a widening by `min-width` runs off the LEFT edge, which is why a right-edge-only 
+src-65 [409 acceptance check] | jira_409.txt:7 -> Acceptance check. The new row is green on main and red on a planted change that widens the dialog past the window; the existing five rows of the file are unchanged.
+src-66 [daily 22:01 both edges accepted (relayed)] | 2026-11-16.md:141 -> - 22:01 — s284: B1642 M153 MPS M-E2 (MPSCALC-409) STAMPED and queued (launch_when_cool waiting: load1 13.84 at the stamp). Kit 78 lines read whole by the Read tool + two long-line tails; FAC
+src-67 [daily 23:38 #208 landing and CodeQL disclosure (relayed)] | 2026-11-16.md:170 -> - 23:38 — s284: MPS PR #208 (M-E2, B1642, MPSCALC-409; gate B1646 GO WITH FINDINGS) LANDED. Its first CI run predated #207; pr_retrigger attempt 1 built 'Merge 36694034 into 41a75c5e' (STALE
+src-68 [daily 23:02 #207 landing (relayed)] | 2026-11-16.md:165 -> - 23:02 — s284: MPS PR #207 (M-S2, B1641, MPSCALC-408; gate B1644 GO) LANDED. pr_checks_wait ALL GREEN on c5279894; open alerts on refs/pull/207/head 0; mergeable clean; head 1 behind main 4
+src-69 [daily 22:57 #206 landing (relayed)] | 2026-11-16.md:154 -> - 22:57 — s284: MPS PR #206 (M-F, B1640, MPSCALC-407 items 1-2; gate B1643 GO) LANDED. pr_checks_wait ALL GREEN on 4ac45401 (9 check-runs incl. CodeQL + 4 Analyze, dotnet build Release 0 war
+src-70 [daily 21:46 #205 landing (relayed)] | 2026-11-16.md:136 -> - 21:46 — s284: MPS PR #205 (M-T, B1626, MPSCALC-369; gate B1635 GO WITH FINDINGS) LANDED. pr_checks_wait ALL GREEN on 97383613 at 21:45:33 (9 check-runs: CodeQL + Analyze actions/csharp/jav
+src-71 [371 comment 41073 acceptance] | jira_371.txt:21 -> Records note, 2026-11-11, read at code main 54ed7627. On 2026-11-11 at 14:34 AEDT the product owner accepted all 29 quick recommendations of that day's decision register for this project, th
+src-72 [371 comment 41303 left the move] | jira_371.txt:24 -> BLUF. MPSCALC-371: MPS #202 landed on main and the template-store paragraph of docs/API.md now carries the three sentences of this ticket and the three points of comment 40681 written from t
+src-73 [371 acceptance check] | jira_371.txt:8 -> Acceptance check: After the product owner's word, the three sentences of docs/API.md read as the gate's true wording (or the product owner's replacement), so a reader is told that a second p
+src-74 [C-79 Done rule] | CLARIFICATIONS.md (git show main:):1712 -> ### C-79 -- May an MPS ticket move to Done once its change is merged to main (not deployed), where every Done-when clause of the ticket is met? (the product owner's 2026-
+src-75 [111 clause 4 not met earlier] | jira_111.txt:26 -> Done-when, clause by clause. 1. Contain the draft watermark on screen: MET, proposal.css at the squash clips the document edge (overflow-x clip, screen only). 2. A screen-only rule for the f
+src-76 [111 comment 41306 left the move] | jira_111.txt:32 -> BLUF. MPSCALC-111: the one clause this ticket still lacked, that the existing 390 px end-to-end rows go green unedited on the merged state, now has evidence on main; every clause of comment 
+src-77 [B1636 Deviations (open PR count read at the write)] | 2026-11-16_B1636_STATUS.md:65 -> - Pull request #205 (the time-budget build, branch b1626..., names MPSCALC-369 only, not one of my 11 keys) opened at 2026-11-16 10:26:55Z, after the kit's drafting read of 0; it had not lan
+src-78 [B1636 Deviations (logs read as empty)] | 2026-11-16_B1636_STATUS.md:67 -> - My first facts run read the web logs as empty (the logs call needs --allow-escape-sequences); fixed and re-run before any write. My first facts selftest had a mistyped empty-blob constant;
+ptr-01 | web/src/screens/bom/PriceReason.test.tsx:18 -> const WAIT_MS = 10_000; (print True; control fragment+ZZ: False)
+ptr-02 | web/src/screens/bom/PurchaseBomEditor.test.tsx:20 -> const WAIT_MS = 10_000; (print True; control fragment+ZZ: False)
+ptr-03 | web/src/screens/bom/PriceReason.test.tsx:29 -> await screen.findAllByText('DEMO-A3C-50', {}, { timeout: WAIT_MS }); (print True; control fragment+ZZ: False)
+ptr-04 | web/src/screens/bom/PurchaseBomEditor.test.tsx:32 -> await screen.findByRole('region', { name: 'Purchase BOM' }, { timeout: WAIT_MS }); (print True; control fragment+ZZ: False)
+ptr-05 | tests/MpsCalc.Api.Tests/FleetLineIdTests.cs:330 -> public async Task R12_a_renumbered_line_whose_override_changes_is_recorded_under_its_new_number(bool internalMetrics) (print True; control fragment+ZZ: False)
+ptr-06 | tests/MpsCalc.Api.Tests/FleetLineIdTests.cs:369 -> public void R13_two_stored_lines_sharing_a_number_keep_their_own_ids_when_the_sent_lines_swap_and_carry_no_ids() (print True; control fragment+ZZ: False)
+ptr-07 | src/MpsCalc.Api/Quotes/PriceAudit.cs:250 -> pairs.Add(byId.TryGetValue(o.FleetLineId!, out var x) ? (Number(x), o, x) : (Number(o), o, null)); (print True; control fragment+ZZ: False)
+ptr-08 | src/MpsCalc.Api/Quotes/QuoteEndpoints.cs:1672 -> foreach (bool identicalOnly in new[] { true, false }) (print True; control fragment+ZZ: False)
+ptr-09 | docs/API.md:284 -> without one, or with one the stored version does not hold (or that an earlier line of the same draft already sent), take (print True; control fragment+ZZ: False)
+ptr-10 | docs/api/openapi.json:952 -> "fleetLineId": { "type": ["string", "null"], "description": "MPSCALC-170: the line's own id. Assigned by the server; uni (print True; control fragment+ZZ: False)
+ptr-11 | web/src/api/stub/purchaseQuotes.ts:87 -> const INTERNAL_INPUT_TITLE = 'Internal pricing inputs need the internal-metrics permission. (stub)'; (print True; control fragment+ZZ: False)
+ptr-12 | web/src/api/stub/purchaseQuotes.ts:88 -> const MANUAL_ITEM_TITLE = 'Manual items need the Seller role and the internal-metrics permission. (stub)'; (print True; control fragment+ZZ: False)
+ptr-13 | web/src/api/stub/purchaseQuotes.ts:89 -> const PRICE_EDIT_TITLE = 'Changing a price needs the Seller role and the internal-metrics permission. (stub)'; (print True; control fragment+ZZ: False)
+ptr-14 | web/src/api/stub/purchaseQuotes.ts:100 -> if (hasInternal) throw refusal('INTERNAL_INPUT_FORBIDDEN', 403, INTERNAL_INPUT_TITLE); (print True; control fragment+ZZ: False)
+ptr-15 | web/src/api/stub/purchaseQuotes.ts:104 -> throw refusal('MANUAL_ITEM_FORBIDDEN', 403, MANUAL_ITEM_TITLE); (print True; control fragment+ZZ: False)
+ptr-16 | web/src/api/stub/purchaseQuotes.ts:106 -> throw refusal('PRICE_EDIT_FORBIDDEN', 403, PRICE_EDIT_TITLE); (print True; control fragment+ZZ: False)
+ptr-17 | web/src/api/stub/purchaseQuotes.ts:321 -> if (target !== undefined && target !== null) throw refusal('INTERNAL_INPUT_FORBIDDEN', 403, INTERNAL_INPUT_TITLE); (print True; control fragment+ZZ: False)
+ptr-18 | web/src/api/stub/purchaseQuotes.ts:323 -> throw refusal('MANUAL_ITEM_FORBIDDEN', 403, MANUAL_ITEM_TITLE); (print True; control fragment+ZZ: False)
+ptr-19 | web/src/api/stub/purchaseQuotes.ts:325 -> if (prices.overrides.length > 0) throw refusal('PRICE_EDIT_FORBIDDEN', 403, PRICE_EDIT_TITLE); (print True; control fragment+ZZ: False)
+ptr-20 | web/src/api/stub/purchaseQuotes.ts:326 -> if (prices.rates.length > 0) throw refusal('PRICE_EDIT_FORBIDDEN', 403, PRICE_EDIT_TITLE); (print True; control fragment+ZZ: False)
+ptr-21 | web/src/api/stub/stubApi.test.ts:997 -> ] as [string, number][])('a typed reference holding %s is refused (400 BAD_REQUEST) and creates nothing: the edge of the (print True; control fragment+ZZ: False)
+ptr-22 | web/src/api/stub/stubApi.test.ts:1001 -> it('a stored draft with an explicit null target GP counts as having none: a Seller copies it and the copy is a Draft', a (print True; control fragment+ZZ: False)
+ptr-23 | web/src/api/stub/stubApi.test.ts:1045 -> const SAME_WORDS: [string, string, QuoteDraft, QuoteDraft][] = [ (print True; control fragment+ZZ: False)
+ptr-24 | web/src/api/stub/stubApi.test.ts:1051 -> it.each(SAME_WORDS)('a Seller refused for %s is told the same 403 words by an update and by a Duplicate', async (_name,  (print True; control fragment+ZZ: False)
+ptr-25 | web/e2e/dashboard-390.spec.ts:64 -> async function dialogBox(page: Page) { (print True; control fragment+ZZ: False)
+ptr-26 | web/e2e/dashboard-390.spec.ts:82 -> test(`MPSCALC-409: the New quote dialog's own box stays inside the window at 390 px`, async ({ page }) => { (print True; control fragment+ZZ: False)
+ptr-27 | web/e2e/dashboard-390.spec.ts:88 -> test(`MPSCALC-409 control: a dialog widened past the window is seen by the same check`, async ({ page }) => { (print True; control fragment+ZZ: False)
+ptr-28 | docs/API.md:909 -> does not detect a hand edit that leaves the file well formed and its event count equal. A running store overwrites a han (print True; control fragment+ZZ: False)
+ptr-29 | docs/API.md:910 -> edit at its next write when the edit leaves the file's event count equal, adopts it when the count is higher, and refuse (print True; control fragment+ZZ: False)
+ptr-30 | docs/API.md:911 -> that write when the count is lower (503 `TEMPLATE_UNAVAILABLE`, nothing changed). A second process on the same directory (print True; control fragment+ZZ: False)
+ptr-31 | docs/API.md:912 -> serves the file as it last read it; it re-reads the file under the lock when it attempts a change, even one answered 404 (print True; control fragment+ZZ: False)
+ptr-32 | docs/API.md:915 -> and otherwise does not see another process's writes until it restarts. No acknowledged write is lost, because a writer (print True; control fragment+ZZ: False)
+ptr-33 | docs/API.md:917 -> write interrupted by a kill can leave a stray copy of the document, full or empty, as `.templates.json.<id>.tmp`; a stra (print True; control fragment+ZZ: False)
+ptr-34 | web/e2e/proposal-buttons.spec.ts:433 -> for (const state of ['purchase full, approved', 'purchase full, draft', 'purchase short form, approved', 'purchase short (print True; control fragment+ZZ: False)
+ptr-35 | web/e2e/proposal-buttons.spec.ts:434 -> test(`390 px: no sideways scroll on the Proposal page (${state})`, async ({ page }) => { (print True; control fragment+ZZ: False)
+ptr-36 | .github/workflows/ci.yml:73 -> run: npx playwright test (print True; control fragment+ZZ: False)
+ptr-37 | .github/workflows/ci.yml:86 -> run: npx playwright test (print True; control fragment+ZZ: False)
+land-205 | gh api -X GET pulls/205, commits/56bfe232, files, check-runs, analyses filtered by commit_sha -> squash 56bfe232cbf4c98a9752f949f1f279d755565750, parent 87dc2623, merged 2026-11-16 21:45:53 AEDT, files [('PriceReason.test.tsx', 9, 5), ('PurchaseBomEditor.test.tsx', 28, 24)], checks 8 of 8 success, analyses results [0, 0, 0, 0]
+land-206 | gh api -X GET pulls/206, commits/41a75c5e, files, check-runs, analyses filtered by commit_sha -> squash 41a75c5e7358c5413d693908235e9b758955bf97, parent 56bfe232, merged 2026-11-16 22:57:48 AEDT, files [('FleetLineIdTests.cs', 78, 0)], checks 8 of 8 success, analyses results [0, 0, 0, 0]
+land-207 | gh api -X GET pulls/207, commits/12cb188a, files, check-runs, analyses filtered by commit_sha -> squash 12cb188a3830df9df4c90efcf3c70dd3063c56e7, parent 41a75c5e, merged 2026-11-16 23:02:25 AEDT, files [('purchaseQuotes.ts', 12, 7), ('stubApi.test.ts', 42, 0)], checks 8 of 8 success, analyses results [0, 0, 0, 0]
+land-208 | gh api -X GET pulls/208, commits/c74e2ecf, files, check-runs, analyses filtered by commit_sha -> squash c74e2ecf24898220d9d2ab3c1262fcc63ecfcd55, parent 12cb188a, merged 2026-11-16 23:38:11 AEDT, files [('dashboard-390.spec.ts', 40, 0)], checks 8 of 8 success, analyses results [0, 0, 0, 0]

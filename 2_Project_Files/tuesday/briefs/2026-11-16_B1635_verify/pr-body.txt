@@ -1,0 +1,11 @@
+Tests only: two files, web/src/screens/bom/PriceReason.test.tsx and web/src/screens/bom/PurchaseBomEditor.test.tsx. No product file, no shared test setup, no global testing-library setting.
+
+- Each file gets one constant, WAIT_MS = 10_000, and every awaited findBy*, findAllBy* and waitFor( call (22 in all) passes it as its explicit wait, so none depends on the library's 1000 ms default.
+- Every row that holds such a wait, or calls the file's open helper, carries the 15_000 ms row budget (the wait ends inside it).
+- 29 lines removed, each paired with an added line that differs only by the wait option or the row budget. No assertion, expect line or row title changes.
+
+MPSCALC-369 asks for the named rows to hold in 20 whole-suite runs started above load 7; the builder's loop recorded 20 of 20, and that count is a record, not a closure of the ticket.
+
+Verified by an independent gate at the merge with main: a 1100 ms getQuote delay plant turns 13 of 16 rows red at main and none red at the merge; three removed-wait mutants turn rows red again and a 20_000 constant is refused by the property check; whole web vitest (1610 tests, no name lost or gained), eslint, tsc -b, both Playwright steps (counts equal to main), gitleaks, and a CodeQL javascript pre-scan.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

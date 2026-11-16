@@ -1,0 +1,12 @@
+Dev stub only (web/src/api/stub/stubApi.test.ts and web/src/api/stub/purchaseQuotes.ts). No product code, no contract, no word, code or status changes for any caller; the production bundle holds no stub.
+
+Tests (stubApi.test.ts, 42 lines added, 0 removed):
+- an it.each of two rows: a typed reference holding control code 31 (the last C0 control) and control code 159 (the last C1 control) is refused 400 BAD_REQUEST and creates nothing;
+- one row: a stored draft with an explicit null target GP is copied by a Seller as a Draft (null counts as absent); the row first asserts the stored JSON holds "targetGrossMargin":null, so it is not vacuous;
+- one it.each of three rows comparing what a Seller is told on an update and on a Duplicate: both 403, the same code, the same non-empty words.
+
+Source (purchaseQuotes.ts): the three refusal titles (internal pricing inputs, manual items, changing a price) were written two or three times, in guarded (update) and in requireCopyable (Duplicate). They are now three module constants holding the same text byte for byte, read by both. Exactly the seven literal-bearing lines are rewritten to read the constants; the fourth text ("Editing a draft needs the Seller role. (stub)") is untouched.
+
+Verified by an independent gate: each new row is green at main and red under its planted change (control code bound moved by one on each side, the null test narrowed, a reworded title in each of the update and Duplicate paths); whole web vitest 1610 -> 1616 with no name lost, eslint, tsc -b, the entra build with check-bundle, both Playwright steps (258 passed / 17 skipped and 157 passed, equal to main), gitleaks, and a CodeQL javascript scan over the two files (0 results at main and at the head).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

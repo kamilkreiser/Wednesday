@@ -1,0 +1,9 @@
+PurchaseBomEditor.test.tsx and PriceReason.test.tsx waited on the testing
+library's own default of 1000 ms for every findBy*, findAllBy* and waitFor, so
+a loaded machine could fail a row on a wait that the row budget never reached.
+Every awaited query and wait in the helper and in the rows now carries one
+shared WAIT_MS of 10_000 ms, which ends inside the 15_000 ms row budget, and
+every row that holds such a wait or calls the helper has that second layer.
+Tests only: no assertion, title or product line changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

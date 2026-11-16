@@ -1,0 +1,14 @@
+## What
+
+Two rows added to `tests/MpsCalc.Api.Tests/FleetLineIdTests.cs` (78 lines added, none removed). Tests only: no product, docs or openapi file changes, no new package, setting or word.
+
+- A renumbered pair is named by its new number: remove line 2, renumber line 3 to 2 with its id as read, change its colour click override; the price audit records `fleet[2].colourClickOverride`. Runs with and without internal metrics. A control in the same row sends the same edit without ids and expects the by-number list.
+- The identical-line-first pass of the id keeper: two stored lines share a number, the sent lines carry no ids and are swapped; each takes the id of its identical stored line. Controls: the two stored lines differ, each sent line has its stored twin, and the sent lines in stored order keep the stored ids.
+
+## Checks
+
+- Both rows green on main's code; the first turns red when the audit names a paired line by its old number, the second when the identical-line-first pass is removed. In each case every other row of both fleet line id test files stays green.
+- `dotnet build MpsCalc.slnx -c Release`: 0 warnings, 0 errors; `dotnet test MpsCalc.slnx -c Release --no-build`: 0 failed, 3 more test cases than main in the API test project.
+- The wording at `docs/API.md` and `docs/api/openapi.json` is not touched.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

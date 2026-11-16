@@ -1,0 +1,10 @@
+Two rows appended to web/e2e/dashboard-390.spec.ts (stub step only; no product file changes, no config change).
+
+- The new row opens the New quote dialog as a Seller at 390 px and reads the dialog element's own box: its left edge is at least 0 and its right edge no further than the window's client width. Both edges are checked because the dialog ends its flex line, so a widening runs off the left edge while the right edge still equals the client width, and the existing page-level form row (scroll width) stays green on it.
+- The control sets the dialog's inline min-width to 600 px and expects the same check to see it.
+
+Checked: the file alone passes 7 of 7; with `min-width: 600px` planted on `.drawer` the new row fails with `dialog left -210 right 390 vs clientWidth 390` and the control stays green; with the control's min-width at 390 px the control fails and the new row stays green; a right-edge-only widening (width 600 px, no shrink, backdrop at flex-start) is also caught. Whole stub step 258 -> 260 passed, whole api-off step 157 -> 157, whole web vitest 1610 passed, eslint and tsc clean, CodeQL javascript pre-scan 0 results.
+
+Nothing is deployed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

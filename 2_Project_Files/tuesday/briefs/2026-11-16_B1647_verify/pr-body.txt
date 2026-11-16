@@ -1,0 +1,29 @@
+What this changes
+
+- RD-766: the query preprocessor (filler prefixes, vague suffixes) and the benign-negation strip read a chat message in one pass instead of running backtracking expressions over it. Same answer for every input; a long run of blanks no longer holds a worker for seconds.
+- RD-765: the ticket intake checks an email address with the existing one-pass helper (isPlausibleEmail) instead of an inline expression that backtracked quadratically. Same addresses accepted.
+- RD-767: the cost-centre file is opened once and its mtime and contents come from that descriptor; the machine identifier's files are read without a separate existence check, and the two direct writes create only (flag wx), keeping the value of a file that appeared meanwhile.
+- RD-421: the persistence sentinel looks for the machine identifier in the store's own directory, so a store built with an explicit directory while DATA_DIR is unset no longer creates or reads a .machine-id elsewhere. For the server (directory resolved once and passed) and a default-constructed store the identifier and the sentinel HMAC are unchanged.
+- RD-769: a request-chosen id can no longer name a prototype key in the session store, the marketplace store or the request filter. A real session, subscription, event or body field is stored exactly as before.
+- Expected test counts: 5828 tests / 374 suites (five new test files, 54 cells).
+
+What stays
+
+- Every answer, stored byte, file name and file mode for ordinary input; the tmp-then-rename write and its tmp name; the .machine-id name; FALLBACK_DATA_DIR; the 50 MB body limit; every route, status and handler gate (role inventory check: 203/203, route set equal).
+
+Evidence (local, before this PR)
+
+- Local CodeQL 2.27.4, javascript-security-extended: 47 -> 33 (code-scanning suite 15 -> 8); 14 rows gone by rule, file and statement text; 0 new rows. Main's analysis at the merge commit decides every ticket.
+- Plain verify at the head: VERDICT PASS at the committed pair.
+- Each new test file has red cells at the base commit and is green at the head.
+
+Not in this PR
+
+- RD-768 (two temp-directory writes) and RD-805's three emailService.js rows: read and reported only.
+- RD-806's two rows (separate ruling), RD-807.
+- A session cookie of __proto__, constructor or toString is still accepted by getSession (read side); reported separately.
+- The chat message length is still unbounded (linear now); reported separately.
+
+Not deployed. The merge starts the Deploy demo workflow, whose jobs read skipped while the deploy switch is off.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

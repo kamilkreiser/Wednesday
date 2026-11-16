@@ -1,0 +1,230 @@
+6c445204 | ls -l of the sidecar at drafting -> exists
+23e4d1aa | git -C <root> --no-optional-locks rev-parse main HEAD (run at drafting) -> ba4dd57a09bd1b840ca468366030bbe86c169669 | ba4dd57a09bd1b840ca468366030bbe86c169669
+62d8e6c9 | git -C <root> remote -v | wc -l -> 0 (control: git config user.email prints kamil.kreiser@datasec.com.au)
+bddf7c37 | git -C <root> status --short, tracked lines only ->  M 5_Project_History/history.md |  M BACKLOG.md |  M JIRA.md
+ab5d5da2 | grep -c -F ' M 5_Project_History/history.md' over the status output -> 1
+643a5baf | grep -c -F ' M BACKLOG.md' over the status output -> 1
+ed2b3025 | grep -c -F ' M JIRA.md' over the status output -> 1
+3ebf12f0 | grep -c -E '^### C-166' over root main CLARIFICATIONS.md (git show main:) -> 1 (line 3311 of 3322 split lines; control '^### C-165' -> 1)
+00a6552e | grep -c -E '^### C-167' over root main CLARIFICATIONS.md -> 0 (control '^### C-166' -> 1)
+708fee93 | grep -c -E '^### C-172' over root main CLARIFICATIONS.md -> 0 (control '^### C-166' -> 1)
+460cfd17 | analyses read by gh api -X GET code-scanning/analyses, filtered python-side by commit_sha equal to the squash -> #200 4, #201 4, #202 4, #203 4, #204 4 (the unfiltered list carries analyses of other commits)
+410613d8 | ls -d '.tools/b1611' '.tools/b1601' -> /Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/.tools/b1601 /Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/.tools/b1611
+8b3d92c5 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+21cd9104 | ls -d .tools/b15* | wc -l -> 40
+0264a353 | ls -d .tools/b16* | wc -l -> 8
+fefa4ea0 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+345b0582 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 16 times; the seat's own check prints it (UNMEASURED as an output)
+ea9b6aa4 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 14 times; the seat's own check prints it (UNMEASURED as an output)
+54b55f3f | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+ee3a6b70 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+4509161e | shasum -a 256 over the six sources -> 50e15b6deb3f6b5d ... (table in THE SOURCES)
+36540225 | last line of each builder status file -> B1621: READY B1621: d8c114df48da4e773fea085878c8c8c98bea10aa | B1622: READY B1622: b2a4dd71b5611868422f9ba33cb96e4491d845d1 | B1623: READY B1623: f825a9ecf86dcbbc0e33b1c6c6bf1b3ba22347d6 | B1627: READY B1627: 8c64a8959a467455ddfb51a7454c2fab092fb790
+46ae9ad9 | last line of the B1627 status file -> READY B1627: 8c64a8959a467455ddfb51a7454c2fab092fb790 (control: first line of the same file -> PROGRESS B1627: READY)
+9c473beb | gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/pulls?state=open&per_page=100' --jq length -> 0 (control: pulls/200 merged true)
+e76b68f6 | gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/ref/heads/main --jq .object.sha -> 87dc2623ecbc7c1ac0ea22c1eca0f63a94c9a679 (rc 0)
+c9947376 | the card read by exact id into out/card_template.txt; grep -c -F "Nothing changes: templates stay in memory on the showcase" -> 1
+c0207fa3 | GET /rest/api/3/search/jql, JQL project = MPSCALC AND ( statusCategory != Done ), paginated -> 172 rows (Done 235, total 407; Done plus not Done equals total)
+00d0dc49 | same search with key >= MPSCALC-1 -> 407 rows
+a4b35f09 | gh api -X GET git/ref/heads/main --jq .object.sha at drafting -> 87dc2623ecbc7c1ac0ea22c1eca0f63a94c9a679 (equal to the literal: True)
+006212c9 | gh api -X GET git/trees/87dc2623...?recursive=1 -> truncated false, 720 blobs (python len over type blob)
+6fdea0b8 | check-runs of the squashes, conclusion success -> #200 8 of 8, #201 8 of 8, #202 8 of 8, #203 8 of 8, #204 8 of 8
+d6c0b0b5 | gh api -X GET commits/87dc2623.../check-runs, names starting 'web' -> 1 (job id 133158189620, the id whose log is raw/weblog_87dc2623.txt, 176383 bytes; at d991547f job 133131073933, at efe6cdd5 job 133113664258)
+5941d2c1 | gh api -X GET actions/jobs/133158189620/logs --allow-escape-sequences -> 176383 bytes saved after stripping colour codes (rc 0)
+67b3baa2 | grep -c -F 'Tests  1610 passed (1610)' over the web logs of 87dc2623 -> 1, d991547f -> 1, efe6cdd5 -> 1 (control: 'Tests  1580 passed (1580)' over the log of 72fa8d9c -> 1)
+3a7011a2 | grep -c -F '258 passed' over the web log of 87dc2623 -> 1, of d991547f -> 1, of efe6cdd5 -> 0 (control: '253 passed' over the log of efe6cdd5 -> 1)
+eb761bd4 | grep -c -F '17 skipped' over the web log of 87dc2623 -> 1, of d991547f -> 1 (control: '99 skipped' -> 0)
+a4be911d | grep -c -F '157 passed' over the web log of 87dc2623 -> 1, of d991547f -> 1 (control: '999 passed' -> 0)
+2883dea4 | grep -c -F '253 passed' over the web log of efe6cdd5 -> 1 (control: over 87dc2623 -> 0)
+b808a89e | grep -c -F 'no sideways scroll on the Proposal page' over the web log of efe6cdd5 -> 6, of 87dc2623 -> 6 (control: a phrase that is not there -> 0)
+74515e58 | gh api -X GET 'commits?path=web/e2e/proposal-buttons.spec.ts&per_page=5' -> newest 56578ac6 2026-11-15T07:42:21Z (E2E: four PDF text specs run in CI, MPSCALC-57)
+7f4d271e | gh api -X GET repos/datasecau/MPS-Commercial-Calculator/pulls/204 -> merged True, merge_commit_sha 87dc2623ecbc7c1ac0ea22c1eca0f63a94c9a679, changed_files 5, additions 99, deletions 0 (control: pulls/99999 not 404 check is the seat's)
+24c50fda | git hash-object over the 18 raw files read, each printed beside the tree's blob in THE BLOBS -> equal 18 of 18
+4d44d130 | gh api -X GET contents/<file>?ref=87dc2623... with Accept application/vnd.github.raw -> 19 files saved under raw/main_*, rc 0 each
+afa081bf | gh api -X GET contents/<file>?ref=87dc2623... with Accept application/vnd.github.raw -> 19 files saved under raw/main_*, rc 0 each
+fa74f4c4 | the raw read of web/e2e/dashboard-390.spec.ts begins -> import { expect, test, type Page } from '@playwright/test';
+e7fef5e9 | the pointer rows were found by program (ptrs1636.py: line index of the unique needle, fragment = the line stripped, first 60 characters) -> 50 of 50 print (control: fragment+ZZ prints 0 of 50)
+053e29ae | the pointer rows were found by program (ptrs1636.py: line index of the unique needle, fragment = the line stripped, first 60 characters) -> 50 of 50 print (control: fragment+ZZ prints 0 of 50)
+a3313924 | gh api -X GET git/ref/heads/main --jq .object.sha at drafting -> 87dc2623ecbc7c1ac0ea22c1eca0f63a94c9a679 (equal to the literal: True)
+1de9304f | gh api -X GET git/ref/heads/main --jq .object.sha at drafting -> 87dc2623ecbc7c1ac0ea22c1eca0f63a94c9a679 (equal to the literal: True)
+980b7e66 | GET /rest/api/3/issue/<KEY>/transitions for the 11 keys, entries named Done -> {'406': [('41', 'Done')], '404': [('41', 'Done')], '405': [('41', 'Done')], '390': [('41', 'Done')], '394': [('41', 'Done')], '371': [('41', 'Done')], '195': [('41', 'Done')], '185': [('41', 'Done')], '111': [('41', 'Done')], '139': [('41', 'Done')], '372': [('41', 'Done')]}
+66896085 | GET /rest/api/3/issue/<KEY>/transitions for the 11 keys, entries named Done -> {'406': [('41', 'Done')], '404': [('41', 'Done')], '405': [('41', 'Done')], '390': [('41', 'Done')], '394': [('41', 'Done')], '371': [('41', 'Done')], '195': [('41', 'Done')], '185': [('41', 'Done')], '111': [('41', 'Done')], '139': [('41', 'Done')], '372': [('41', 'Done')]}
+2b8a7f36 | grep -c '^JIRA_BASE_URL=' over the project .env (names only, no value read into this file) -> 1
+2dacf58e | grep -c '^JIRA_EMAIL=' over the project .env (names only, no value read into this file) -> 1
+cefd6277 | grep -c '^JIRA_API_TOKEN=' over the project .env (names only, no value read into this file) -> 1
+34e860f5 | ls .tools/b1636 -> ls: /Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/.tool (control: ls .tools/b1611 -> exists)
+a20de348 | gh api -X GET git/ref/heads/main --jq .object.sha at drafting -> 87dc2623ecbc7c1ac0ea22c1eca0f63a94c9a679 (equal to the literal: True)
+8398cb1d | fill-in sentence, printed once in the kit: grep -c -F -> 1 (the values are read by the seat; drafter's: see THE LANDINGS)
+af80c38a | fill-in sentence, printed once in the kit: grep -c -F -> 1 (the values are read by the seat; drafter's: see THE LANDINGS)
+929c6523 | grep -c -F over the kit -> 1 lines (the sentence is used by the comment variants and defined in PART 1)
+926d23fc | grep -c -F over the kit -> 1
+8b9e3006 | fill-in form, printed once in the kit: grep -c -F -> 1 (filled by program from what happened)
+01423197 | fill-in form, printed once in the kit: grep -c -F -> 1 (filled by program from what happened)
+03d8c78e | fill-in form, printed once in the kit: grep -c -F -> 1 (filled by program from what happened)
+abfa1c37 | grep -c -F '[B1611-OWED-5]' BACKLOG.md -> 1 (line 5769; the last row of B1611)
+12ce231e | wc -l BACKLOG.md 5774, JIRA.md 826, 5_Project_History/history.md 1503
+49ea74d6 | wc -l BACKLOG.md 5774, JIRA.md 826, 5_Project_History/history.md 1503
+411e13f8 | wc -l BACKLOG.md 5774, JIRA.md 826, 5_Project_History/history.md 1503
+8d01c781 | git show main:1_Project_Definition/CLARIFICATIONS.md | wc -l -> 3321
+d830c58a | grep -c -E '^### C-166' over root main CLARIFICATIONS.md (git show main:) -> 1 (line 3311 of 3322 split lines; control '^### C-165' -> 1)
+50f4d253 | grep -c -i -F 'REC-SET-372' over root main CLARIFICATIONS.md -> 0 (control 'MPS #196' -> 5 lines)
+e53d1512 | grep -c -F 'RECORDS DRY RUN ONLY' tuesday/tools/status_watch.sh -> 1
+d891037b | GET .../transitions on MPSCALC-406 -> Done id [('41', 'Done')]; the POST body is {"transition": {"id": "41"}} as in B1601's poster (read, not run)
+be67b21a | GET /rest/api/3/issue/<KEY>/transitions for the 11 keys, entries named Done -> {'406': [('41', 'Done')], '404': [('41', 'Done')], '405': [('41', 'Done')], '390': [('41', 'Done')], '394': [('41', 'Done')], '371': [('41', 'Done')], '195': [('41', 'Done')], '185': [('41', 'Done')], '111': [('41', 'Done')], '139': [('41', 'Done')], '372': [('41', 'Done')]}
+9a87c9fc | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+9d5c7e80 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+acf57ad1 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 6 times; the seat's own check prints it (UNMEASURED as an output)
+cb4ff170 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 139 times; the seat's own check prints it (UNMEASURED as an output)
+35a03a38 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+b7523a15 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+a86f7e74 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+09aa4958 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+51fd380d | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+3e5e0aed | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+3072bd0e | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+5c004ad7 | the case line of tuesday/tools/status_watch.sh (line 56) split on '|': pattern STOPPED:* present -> 1 (the literal begins with it); control pattern ZZZZ:* -> 0
+67516349 | tmux display -p -t %0 '#{@cockpit_name}' -> tuesday (the control the kit names; the seat's own pane is not launched yet)
+7b671dc6 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | grep -c -F 'Datasec/MPS-R250' -> 0 (not launched at drafting; control grep -c -x ' tuesday' -> 1)
+48412750 | tmux display -p -t %0 '#{@cockpit_name}' -> tuesday
+b9001047 | GET /rest/api/3/issue/MPSCALC-1 -> HTTP 200 (control MPSCALC-361: (200, 'Done'))
+1dcbd3e6 | GET /rest/api/3/issue/MPSCALC-99999 -> HTTP 404 (control MPSCALC-361: (200, 'Done'))
+55aa312d | git -C <root> remote -v | wc -l -> 0 (control: git config user.email prints kamil.kreiser@datasec.com.au)
+ae6d7131 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | names starting 'Datasec/MPS-' -> 0 (names read: Datasec/NexusAI-N138; control: the name Datasec/NexusAI-N138 -> 1)
+4c18ff80 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | names starting 'Datasec/MPS-M' -> 0 (names read: Datasec/NexusAI-N138; control: the name Datasec/NexusAI-N138 -> 1)
+edd63c28 | df -g /Volumes/Datasec_DEV -> /dev/disk5s1      1862  732      1129    40% 23501392 11848599920    0%   /Volum
+36e355eb | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+88ffa9d7 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+5ff08cc6 | instruction text, not a matched literal (a fragment between two backticked names, a command shape or a path the seat is told to use): grep -c -F over the kit -> 1 times; the seat's own check prints it (UNMEASURED as an output)
+7ed82637 | status_watch.sh case line holds the pattern "READY B"[0-9]* -> 1, "HANDOVER B"[0-9]* -> 1, "RECORDS DRY RUN ONLY:"* -> 1
+0949e711 | git branch --list 'records/b1636' | wc -l -> 0 (control 'records/b1611' -> 1)
+src-01 [B1619 first line] | VERDICT.md:1 -> GATE B1619: GO WITH FINDINGS @ 3bcdd21 on main 5e80009
+src-02 [1580 to 1610, 30 gained 0 lost] | VERDICT.md:15 -> | `npx vitest run` whole web | 146 files, 1580 tests, 0 failed | 146 files, 1610 tests, 0 failed |
+src-03 [17 red] | VERDICT.md:27 -> 17 red, 113 green, all red rows new: the 5 Seller refusal rows (target GP, manual item, manual line, sell override, fixed click rate), the 2 order rows, 10 Part C rows (1
+src-04 [13 red under 'applied to every caller'] | VERDICT.md:38 -> | check applied to every caller | 13 (8 moved rows, 5 analyst rows) | killed |
+src-05 [Part B mutant 1 red] | VERDICT.md:39 -> | Part B: update answer built from the stored draft (`stubApi.ts` answer without `draftForCaller`) | 1 (the new row, first failure on `rebatePercent`) | killed; every oth
+src-06 [draftForCaller stops omitting supplies 2 red] | VERDICT.md:40 -> | Part B: `draftForCaller` stops omitting `supplies` | 2 (the new row; the hidden-only Seller row) | killed |
+src-07 [three mutants survive] | VERDICT.md:47 -> | lower control bound 31 instead of 32 (code 31 not refused) | 0 | SURVIVED |
+src-08 [0/57 markers] | VERDICT.md:21 -> | `VITE_MPSCALC_AUTH=entra npm run build` then `node scripts/check-bundle.mjs dist` | not run | rc 0 and rc 0; `dist: 8 files, 1109639 bytes; markers found 0/57`; no `req
+src-09 [Minor 1 control codes] | VERDICT.md:54 -> | 1 | Minor | The control-character rows pin one value per range (code 1, 127, 0x85). The boundaries code 31 and code 159 are not pinned: two mutants of the loop bounds s
+src-10 [Minor 3 titles twice] | VERDICT.md:56 -> | 3 | Minor | The three refusal titles now exist twice in `purchaseQuotes.ts` (`guarded` and `requireCopyable`), verbatim. A change to one needs the other. The builder re
+src-11 [Minor 4 load gate] | VERDICT.md:57 -> | 4 | Minor | Gate-process deviation, not a product finding: the heavy-run gate (load1 under 7) was not met. Reads: 6.85 and 9.82 at the two whole-suite runs, 6.76 at the
+src-12 [B1625 first line] | VERDICT.md:1 -> GATE B1625: GO WITH FINDINGS @ f825a9e on main efe6cdd
+src-13 [stub 253 to 258, +5] | VERDICT.md:21 -> - Stub step WHOLE: main (72fa8d9 tree, new spec set aside) 253 passed + 17 skipped, 0 failed; merge 258 passed + 17 skipped, 0 failed (+5 exactly); re-run at the efe6cdd 
+src-14 [mB1 616 vs 390] | VERDICT.md:24 -> - Red without the fix (own copy, each undone, `git diff --quiet` rc 0, cmp equal): mB1 (`.kpis` + `min-width: 600px`, styles.css): the 3 role rows and the form row RED, e
+src-15 [mB2 control red] | VERDICT.md:24 -> - Red without the fix (own copy, each undone, `git diff --quiet` rc 0, cmp equal): mB1 (`.kpis` + `min-width: 600px`, styles.css): the 3 role rows and the form row RED, e
+src-16 [form row measures page not dialog] | VERDICT.md:12 -> | 5 | Info | The new spec checks the PAGE scroll width with the New quote dialog open; it does not measure the dialog's own box (builder said so; agreed). The new file ru
+src-17 [Minor 4 Ctrl-C tests] | VERDICT.md:11 -> | 4 | Minor | tools/demo/test/test_run_demo.py has 2 failures (the two Ctrl-C tests of C5StopsExactlyWhatItStarted) in this non-tty shell, identically at main and at the 
+src-18 [Minor 2 push after main moved] | VERDICT.md:9 -> | 2 | Minor | The builder's STATUS (residue 1) says its push script printed a moved main and pushed anyway; checked here: the move touched none of the paths the kit lists
+src-19 [Minor 3 rm -f] | VERDICT.md:10 -> | 3 | Minor | Builder residue 2 and 3 (an rm -f of a not-yet-existing marker file; npm's built-in audit POST during npm ci). Process notes, no product or diff effect. |
+src-20 [B1621 BLUF items 1-2 and 3-4] | 2026-11-16_B1621_STATUS.md:22 -> Both parts are in and pushed on `b1621/mps-lane-mg-sdk-pin-guard-wording`: Part A (MPSCALC-406 items 1 and 2) at `806adfb`, Part B (items 3 and 4) at `d8c114d`. Words onl
+src-21 [B1621 FOR TUESDAY] | 2026-11-16_B1621_STATUS.md:86 -> - Head `d8c114df48da4e773fea085878c8c8c98bea10aa` on `b1621/mps-lane-mg-sdk-pin-guard-wording`; open the PR, read hosted CI and CodeQL, land by head-pinned squash. Nothin
+src-22 [B1617 BLUF counts] | 2026-11-16_B1617_STATUS.md:26 -> - **Counts:** whole web suite 146 files, **1580 -> 1610 tests (+30), 0 failed, 0 names lost**; eslint rc 0, `tsc -b` rc 0, entra build and bundle check rc 0 (0/57 markers
+src-23 [B1617 FOR TUESDAY 1] | 2026-11-16_B1617_STATUS.md:159 -> 1. `web/src/api/stub/purchaseQuotes.ts:45-53` `draftForCaller` does not omit `assumptions.targetGrossMargin` for a caller without internal-metrics (the kit's own note; wh
+src-24 [B1617 FOR TUESDAY 2] | 2026-11-16_B1617_STATUS.md:160 -> 2. `purchaseQuotes.ts:90-95` `guarded`'s `hasInternal` list has no `assumptions.targetGrossMargin` either, so the stub's UPDATE of a held quote does not refuse a Seller a
+src-25 [B1617 FOR TUESDAY 3] | 2026-11-16_B1617_STATUS.md:161 -> 3. **A server/stub difference in the typed reference:** the stub trims a typed reference (pinned by a base row); `QuoteEndpoints.cs:542` uses `req.QuoteRef` as given when
+src-26 [B1617 FOR TUESDAY 4] | 2026-11-16_B1617_STATUS.md:162 -> 4. A whitespace-only SOURCE reference: the server's `CopyRef` returns none (`QuoteEndpoints.cs:586`, `IsNullOrWhiteSpace`); the stub's derived reference is the spaces plu
+src-27 [B1617 FOR TUESDAY 5] | 2026-11-16_B1617_STATUS.md:163 -> 5. Documented, not modelled (Q4): the server refuses a draft whose `manualItems` list is present but empty; the stub copies it (the `holdCopy` docstring says so).
+src-28 [B1617 RESIDUE duplicate titles] | 2026-11-16_B1617_STATUS.md:146 -> - **The three refusal titles now exist twice** (`guarded` and `requireCopyable`, verbatim): the kit forbids removing lines outside the moved rows and the docstring, so th
+src-29 [B1622 BLUF Parts A-D] | 2026-11-16_B1622_STATUS.md:16 -> **Parts A, B, C and D are pushed; READY at `b2a4dd71b5611868422f9ba33cb96e4491d845d1`** on `b1622/mps-lane-md-developer-docs` (5 commits over main `5e800095`, `docs/ENGIN
+src-30 [B1622 FOR TUESDAY item 1 stale comment] | 2026-11-16_B1622_STATUS.md:169 -> 1. `tests/MpsCalc.Engine.Tests/PurchasePageEstimate.cs:10` stale comment (390; Part A2 not run).
+src-31 [B1622 item 2] | 2026-11-16_B1622_STATUS.md:85 -> **Left unsaid (Q4, and the rule):** U+212A, U+212B and the combining U+0345 (no test names any of them: `/usr/bin/grep -rn -i -E 'u0345|u212a|u212b' tests` printed 0 line
+src-32 [B1622 item 3 (316)] | 2026-11-16_B1622_STATUS.md:16 -> **Parts A, B, C and D are pushed; READY at `b2a4dd71b5611868422f9ba33cb96e4491d845d1`** on `b1622/mps-lane-md-developer-docs` (5 commits over main `5e800095`, `docs/ENGIN
+src-33 [B1622 item 4 (195 clause 3)] | 2026-11-16_B1622_STATUS.md:172 -> 4. 195 clause 3 `API.md:760` and the engine-target sentence need the product owner's words (his decision register is outside the repository).
+src-34 [B1622 item 5 (200)] | 2026-11-16_B1622_STATUS.md:173 -> 5. 200 needs counts-only access to the local price-book store, or a coordinator ruling that `IMPORTER.md:115-116` is enough.
+src-35 [B1622 item 6 (195 clause 1)] | 2026-11-16_B1622_STATUS.md:174 -> 6. 195 clause 1 follow-up: a proof field by field of what still reaches the engine at the door (e.g. `hardware[i].quantityPerDevice` and the service costs are magnitude-c
+src-36 [B1622 item 7 test gaps] | 2026-11-16_B1622_STATUS.md:175 -> 7. Test gaps found (not mine): the template store's lower-count refusal `TemplateStore.cs:462-466` has no test row; no test asserts the issue `rule` value `DATA-IMP-001` 
+src-37 [B1622 195 clause 1 false for two fields] | 2026-11-16_B1622_STATUS.md:16 -> **Parts A, B, C and D are pushed; READY at `b2a4dd71b5611868422f9ba33cb96e4491d845d1`** on `b1622/mps-lane-md-developer-docs` (5 commits over main `5e800095`, `docs/ENGIN
+src-38 [B1623 BLUF] | 2026-11-16_B1623_STATUS.md:4 -> Parts A and B are in; Part C did not run (Q2 = NO, by the stamp). **Part A:** every existing 390 px row is green at base `5e800095` in my run (stub subset 125 passed, api
+src-39 [B1623 111 clause 4 evidenced] | 2026-11-16_B1623_STATUS.md:49 -> - MPSCALC-111 clause 4 (the existing 390 px e2e green unedited on the merged state): the six `proposal-buttons.spec.ts:434` rows are green on main `5e800095` in my run (a
+src-40 [B1623 185 clause 2] | 2026-11-16_B1623_STATUS.md:50 -> - MPSCALC-185 clause 2 (home dashboard): `home-tiles-fill.spec.ts:66` x3 green in my stub run and my api-off run, and in CI (RELAYED). Clause 3's control for the dashboar
+src-41 [B1623 139 clause 4 open] | 2026-11-16_B1623_STATUS.md:4 -> Parts A and B are in; Part C did not run (Q2 = NO, by the stamp). **Part A:** every existing 390 px row is green at base `5e800095` in my run (stub subset 125 passed, api
+src-42 [B1623 form row limit] | 2026-11-16_B1623_STATUS.md:60 -> - Limit, said plainly: the form row measures the PAGE's scroll width with the New quote dialog open on Home; it does not measure the dialog's own box (a fixed-position bo
+src-43 [B1623 48 lines claim] | 2026-11-16_B1623_STATUS.md:54 -> - File `web/e2e/dashboard-390.spec.ts`, 48 lines, 5 tests; `ls web/e2e` before: no file of that name. Titles (the reference's): `MPSCALC-185: the home dashboard (seller|a
+src-44 [coordinator Q2 = NO (daily note)] | 2026-11-16.md:112 -> - 17:28 — s283: MPS PR #203 (M-E, B1623, MPSCALC-185 dashboard control; 111 clause 4 evidence) LANDED. pr_checks_wait ALL GREEN on f825a9ec (5 CodeQL/Analyze among the ru
+src-45 [coordinator's #202 completion check (daily note)] | 2026-11-16.md:99 -> - 16:17 — s283: (1) G2 gate B1619 (MPS M-S) = GO WITH FINDINGS @ 3bcdd21 on main 5e80009 (no Blocker/Major; 4 Minors: control codes 31/159 unpinned, no explicit-null targ
+src-46 [ruling tap 16:37:28 (daily note)] | 2026-11-16.md:105 -> - 16:38 — s283: KAM 16:37:28 (live board, view=tuesday), verbatim: "Decision mpscalc-showcase-template-path-1116: a — Store templates in /home/data/templates/ and warn wh
+src-47 [card ruled 16:37:51] | card_template.txt:13 -> ruling: choice='a' ruled_ts=2026-11-16T16:37:51.577906+11:00
+src-48 [card option a words] | card_template.txt:6 -> [a] Store templates in /home/data/templates/ and warn when blank
+src-49 [card BLUF words] | card_template.txt:4 -> bluf: On the hosted MPS showcase, any quote template someone saves is lost the next time the site restarts, because no storage folder is set for templates (this morning's
+src-50 [Done rule C-79 wording] | CLAR.md:1712 -> ### C-79 -- May an MPS ticket move to Done once its change is merged to main (not deployed), where every Done-when clause of the ticket is met? (the product owner's 2026-
+src-51 [ticket 371 comment 41073 words] | jira_371.txt:21 -> Records note, 2026-11-11, read at code main 54ed7627. On 2026-11-11 at 14:34 AEDT the product owner accepted all 29 quick recommendations of that day's decision register 
+src-52 [ticket 111 clause 4 not met] | jira_111.txt:26 -> Done-when, clause by clause. 1. Contain the draft watermark on screen: MET, proposal.css at the squash clips the document edge (overflow-x clip, screen only). 2. A screen
+src-53 [ticket 139 clauses 4 and 5] | jira_139.txt:39 -> Done-when, clause by clause. 1. One reusable InfoHint: a button with an accessible name, a popover, Esc closes, works on touch: MET, InfoHint.tsx, InfoHint.test.tsx and b
+src-54 [ticket 185 clause 2 not met] | jira_185.txt:22 -> Done-when, clause by clause. 1. scrollWidth no more than clientWidth at 390 px on the quote screen (Playwright): MET, b100-quote-390.spec.ts: rental, purchase, purchase a
+src-55 [sweep question 4 default] | 2026-11-16_SWEEP-1450_datasec-actionable-lanes.md:167 -> 4. MPSCALC-406 items 3 and 4 ask to "decide". Default: M-G does only items 1 and 2 and records items 3 and 4 as "named in the docstring as accepted" with no strictness ch
+src-56 [B1611 STATUS Deviations 1] | 2026-11-16_B1611_STATUS.md:63 -> - I ran `sed -i.bak1` once to rewrite the first line of this STATUS file (the kit says no sed -i). It touched only this STATUS file; the backup was moved to .tools/b1611/
+src-57 [B1630 first line] | VERDICT.md:1 -> GATE B1630: GO WITH FINDINGS @ 8c64a89 on main d991547
+src-58 [B1630 W1 words] | VERDICT.md:6 -> `Warning: The template store is in memory: MpsCalc:Templates:Path is blank, so every template is lost at the next restart.`
+src-59 [B1630 Minor 1 merge-tree] | VERDICT.md:11 -> | 1 | Minor | `git merge-tree --write-tree` NOT RUN: the session hook refuses any write-verb git call (merge-tree included) on a clone outside the TUESDAY folder. Substit
+src-60 [B1630 Minor 2 mutants] | VERDICT.md:12 -> | 2 | Minor | The builder's mutants mB1-mB3 (code mutants) were not re-run by this gate. The red-without-fix of the three blank rows (the property) was run independently 
+src-61 [B1630 Minor 3 kit wording] | VERDICT.md:13 -> | 3 | Minor | Kit text says mA3 fires the distinct-directories assertion; it fires the first assertion (value equality). The second needs the overlay mutant (a3b, `2 != 3
+src-62 [B1630 infra 28 to 29] | VERDICT.md:18 -> - Infra (Bicep 0.48.1 from the project .tools): base `test_infra.py` Ran 28 OK; head and merge Ran 29 OK; `test_validate_script.py` Ran 6 OK; `validate.sh` on merge rc 0 
+src-63 [B1630 Api tests 3656 to 3660 and the two failures] | VERDICT.md:21 -> - Whole `MpsCalc.Api.Tests` in the proof rig (git archive, git init, one csproj pin 10.0.15 -> 10.0.13 in the rig only, restore from ~/.nuget/packages, no registry): base
+src-64 [B1630 58 store, isolation and new rows] | VERDICT.md:22 -> - Set-path behaviour unchanged: `TemplateStartWarningTests` + `TemplateStoreTests` + `TemplateIsolationTests` on merge: 58 passed, 0 failed (4 + 30 + 24); the two older c
+src-65 [B1630 Release build 0 warnings] | VERDICT.md:23 -> - Release build of `MpsCalc.slnx` on the merge rig, --no-restore: 0 Warning(s), 0 Error(s).
+src-66 [B1630 red without fix] | VERDICT.md:20 -> - Red without the fix, B: new test file on base source: Failed 3, Passed 1, Total 4; the three blank rows red with `Expected: ["Warning: The template store is in memory: 
+src-67 [B1630 no deploy by the merge] | VERDICT.md:27 -> - Deploy: a merge of this branch triggers no deploy by itself (no deploy workflow edited; nothing under .github changed); the infra apply and the site start are the later
+src-68 [B1630 CodeQL csharp not run] | VERDICT.md:30 -> CodeQL csharp: NOT RUN (cannot extract on arm64); hosted CodeQL is the only C# proof. `git merge-tree` (finding 1). Builder mutants mB1-mB3. Engine and Import test projec
+src-69 [B1627 BLUF] | 2026-11-16_B1627_STATUS.md:16 -> **Both parts are in and pushed; READY.** Branch `b1627/mps-lane-mtp-template-store-path-and-blank-warning`, two commits on base `efe6cdd5`, head `8c64a8959a467455ddfb51a7
+src-70 [B1627 infra apply only] | 2026-11-16_B1627_STATUS.md:91 -> 1. The setting reaches the site only by an INFRA APPLY (`infra/README.md` what-if then create; a zip deploy leaves the app settings unchanged, RELAYED from the kit's FACT
+src-71 [B1627 first start creates the folder] | 2026-11-16_B1627_STATUS.md:92 -> 2. A start of the site with the setting set creates `/home/data/templates/` by the store's own rule and refuses the start in words if the rule is broken (the hosted-root 
+src-72 [B1627 order and warning once per start] | 2026-11-16_B1627_STATUS.md:93 -> 3. **Order (DERIVED from `docs/API.md` and C-166, not run):** the hosted site already runs a build that holds the template store (PR #145, the template store, is merged; 
+src-73 [B1627 docs follow-up API.md:903] | 2026-11-16_B1627_STATUS.md:95 -> - **Docs (docs-lane item, not edited here):** `docs/API.md:903` still says `empty = in memory in both modes` for `MpsCalc:Templates:Path` with no mention of the warning o
+src-74 [PR 204 body infra] | pull204_body.txt:3 -> - Infra: the showcase app settings declare MpsCalc__Templates__Path as /home/data/templates/, beside the quote store and overlay paths; one new infra test row pins the va
+src-75 [PR 204 body API warning] | pull204_body.txt:4 -> - API: one start-up Warning when the template store path is blank, in either mode: "The template store is in memory: MpsCalc:Templates:Path is blank, so every template is
+src-76 [PR 204 body not deployed] | pull204_body.txt:6 -> Nothing is deployed. The setting reaches the site only with an infra apply; the ticket's restart acceptance belongs to that deploy card.
+src-77 [daily note 17:43 no word on W1 (shown at 17:1x)] | 2026-11-16.md:114 -> - 17:43 — s283: M150 B1627 MPS M-TP (templates path, MPSCALC-372) READY 8c64a895 (watcher FINAL; BLUF read: Part A infra line + row, Part B W1 warning + 4-row new test fi
+src-78 [daily note 18:21 no word on W1] | 2026-11-16.md:118 -> - 18:21 — s283: G2 gate B1630 (MPS templates path 8c64a895) = GO WITH FINDINGS @ 8c64a89 on main d991547 (no Blocker/Major; Minors: git merge-tree not run (the session ho
+src-79 [daily note 18:40 no word, W1 ships as frozen] | 2026-11-16.md:120 -> - 18:40 — s283: MPS PR #204 (templates path, MPSCALC-372, Kam's 16:37 ruling; B1627 built, gate B1630 GO WITH FINDINGS) LANDED. pr_checks_wait ALL GREEN on 8c64a895 incl.
+src-80 [daily note 18:40 landing, one parent, five blobs] | 2026-11-16.md:120 -> - 18:40 — s283: MPS PR #204 (templates path, MPSCALC-372, Kam's 16:37 ruling; B1627 built, gate B1630 GO WITH FINDINGS) LANDED. pr_checks_wait ALL GREEN on 8c64a895 incl.
+src-81 [daily note 21:05 B1628 superseded] | 2026-11-16.md:130 -> - 21:05 — s284: B1628 (MPS records, drafted by s283 at main d991547f) NOT STAMPED and superseded, kept as is. Reason, read at source: its frozen MPSCALC-372 comment says 
+ptr-01 | scripts/tests/test_sdk_pin.py:17 -> A new .NET SDK therefore needs its own pull request: edit the version in global.json, and raise the Pkcs or Xml pin in (print True; control fragment+ZZ: False)
+ptr-02 | src/MpsCalc.Api/MpsCalc.Api.csproj:29 -> Remove when the parent floors them. The target KeepPinnedXmlOutOfPackagePruning below exists only for the Xml pin (print True; control fragment+ZZ: False)
+ptr-03 | src/MpsCalc.Api/MpsCalc.Api.csproj:30 -> and must go with it: remove or change the two together, never one alone. --> (print True; control fragment+ZZ: False)
+ptr-04 | scripts/tests/test_sdk_pin.py:33 -> Also accepted, with no change in strictness: the MSBuild reader (MSBUILD_NAME, used by route_problems) flags any name th (print True; control fragment+ZZ: False)
+ptr-05 | scripts/tests/test_sdk_pin.py:36 -> msbuild-sdks) are not read: problems() reads the sdk object only. (print True; control fragment+ZZ: False)
+ptr-06 | web/src/api/stub/purchaseQuotes.ts:276 -> requireCopyable(source.draft, persona); (print True; control fragment+ZZ: False)
+ptr-07 | web/src/api/stub/purchaseQuotes.ts:313 -> function requireCopyable(draft: QuoteDraft, persona: Persona | null): void { (print True; control fragment+ZZ: False)
+ptr-08 | web/src/api/stub/purchaseQuotes.ts:95 -> if (hasInternal) throw refusal('INTERNAL_INPUT_FORBIDDEN', 403, 'Internal pricing inputs need the internal-metrics permi (print True; control fragment+ZZ: False)
+ptr-09 | web/src/api/stub/purchaseQuotes.ts:318 -> throw refusal('MANUAL_ITEM_FORBIDDEN', 403, 'Manual items need the Seller role and the internal-metrics permission. (stu (print True; control fragment+ZZ: False)
+ptr-10 | web/src/api/stub/purchaseQuotes.ts:320 -> if (prices.overrides.length > 0) throw refusal('PRICE_EDIT_FORBIDDEN', 403, 'Changing a price needs the Seller role and  (print True; control fragment+ZZ: False)
+ptr-11 | web/src/api/stub/purchaseQuotes.ts:321 -> if (prices.rates.length > 0) throw refusal('PRICE_EDIT_FORBIDDEN', 403, 'Changing a price needs the Seller role and the  (print True; control fragment+ZZ: False)
+ptr-12 | web/src/api/stub/purchaseQuotes.ts:289 -> function requireValidRef(ref: string): void { (print True; control fragment+ZZ: False)
+ptr-13 | web/src/api/stub/purchaseQuotes.ts:295 -> if (bad) throw refusal('BAD_REQUEST', 400, 'The draft is not valid. (stub)'); (print True; control fragment+ZZ: False)
+ptr-14 | web/src/api/stub/stubApi.test.ts:690 -> // ---- MPSCALC-405: the answer to an update of a held rental quote is the caller's view of the stored draft, never the  (print True; control fragment+ZZ: False)
+ptr-15 | docs/ENGINE.md:160 -> | X-33 | (MPSCALC-196) page estimates are checked on **every** purchase quote, with or without deal usage, and a refusal (print True; control fragment+ZZ: False)
+ptr-16 | docs/ENGINE.md:173 -> | X-46 | (MPSCALC-147) **colour-panel kits are options**: the importer reads a model sheet's colour-panel section as opt (print True; control fragment+ZZ: False)
+ptr-17 | tests/MpsCalc.Engine.Tests/PurchasePageEstimate.cs:10 -> /// X-33 (docs/ENGINE.md row text in the seat's STATUS): page estimates are checked on every purchase quote, with or wit (print True; control fragment+ZZ: False)
+ptr-18 | docs/API.md:707 -> and across every governed version that did not fail; not the Active version's document; and the engine reads it (its (print True; control fragment+ZZ: False)
+ptr-19 | docs/API.md:712 -> A source version id is compared ignoring the case of A-Z and a-z and the spelling of a Latin accent: for the letters A-Z (print True; control fragment+ZZ: False)
+ptr-20 | docs/API.md:715 -> id is (issue `DUPLICATE_SOURCE_VERSION_ID` at `devices.version.id`, `options.version.id` or `software.version.id`). Not (print True; control fragment+ZZ: False)
+ptr-21 | src/MpsCalc.Api/Sources/SourceDocumentChecks.cs:28 -> public const string DuplicateSourceVersionId = "DUPLICATE_SOURCE_VERSION_ID"; (print True; control fragment+ZZ: False)
+ptr-22 | src/MpsCalc.Api/Sources/SourceDocumentChecks.cs:406 -> internal static bool CountsAsDuplicate(string state) => (print True; control fragment+ZZ: False)
+ptr-23 | docs/API.md:909 -> does not detect a hand edit that leaves the file well formed and its event count equal. A running store overwrites a han (print True; control fragment+ZZ: False)
+ptr-24 | docs/API.md:910 -> edit at its next write when the edit leaves the file's event count equal, adopts it when the count is higher, and refuse (print True; control fragment+ZZ: False)
+ptr-25 | docs/API.md:911 -> that write when the count is lower (503 `TEMPLATE_UNAVAILABLE`, nothing changed). A second process on the same directory (print True; control fragment+ZZ: False)
+ptr-26 | docs/API.md:912 -> serves the file as it last read it; it re-reads the file under the lock when it attempts a change, even one answered 404 (print True; control fragment+ZZ: False)
+ptr-27 | docs/API.md:915 -> and otherwise does not see another process's writes until it restarts. No acknowledged write is lost, because a writer (print True; control fragment+ZZ: False)
+ptr-28 | docs/API.md:917 -> write interrupted by a kill can leave a stray copy of the document, full or empty, as `.templates.json.<id>.tmp`; a stra (print True; control fragment+ZZ: False)
+ptr-29 | docs/API.md:87 -> too (MPSCALC-105, MPS-5), and so is a value below the lower bound its field states for itself (`opportunityDeviceCount`, (print True; control fragment+ZZ: False)
+ptr-30 | docs/API.md:88 -> 400 `INPUT_OUT_OF_RANGE`, and a purchase line's `quantity`, 400 `BAD_REQUEST`, each from 0); other negative values still (print True; control fragment+ZZ: False)
+ptr-31 | web/e2e/dashboard-390.spec.ts:29 -> test(`MPSCALC-185: the home dashboard (${role}) does not scroll sideways at 390 px`, async ({ page }) => { (print True; control fragment+ZZ: False)
+ptr-32 | web/e2e/dashboard-390.spec.ts:36 -> test('MPSCALC-185: the New quote form (seller) does not scroll sideways at 390 px', async ({ page }) => { (print True; control fragment+ZZ: False)
+ptr-33 | web/e2e/dashboard-390.spec.ts:44 -> test('MPSCALC-185 control: a planted 600 px element is seen by the same check', async ({ page }) => { (print True; control fragment+ZZ: False)
+ptr-34 | web/e2e/home-tiles-fill.spec.ts:66 -> test(`390 px, ${role.persona}: no sideways scroll`, async ({ page }) => { (print True; control fragment+ZZ: False)
+ptr-35 | web/e2e/proposal-buttons.spec.ts:433 -> for (const state of ['purchase full, approved', 'purchase full, draft', 'purchase short form, approved', 'purchase short (print True; control fragment+ZZ: False)
+ptr-36 | web/e2e/proposal-buttons.spec.ts:434 -> test(`390 px: no sideways scroll on the Proposal page (${state})`, async ({ page }) => { (print True; control fragment+ZZ: False)
+ptr-37 | .github/workflows/ci.yml:73 -> run: npx playwright test (print True; control fragment+ZZ: False)
+ptr-38 | .github/workflows/ci.yml:86 -> run: npx playwright test (print True; control fragment+ZZ: False)
+ptr-39 | infra/modules/showcase.bicep:82 -> MpsCalc__QuoteStore__Path: '/home/data/quotes/' (print True; control fragment+ZZ: False)
+ptr-40 | infra/modules/showcase.bicep:83 -> MpsCalc__CatalogueOverlay__Path: '/home/data/catalogue-overlay/' // B22: the overlay persists beside the quote store, sa (print True; control fragment+ZZ: False)
+ptr-41 | infra/modules/showcase.bicep:84 -> MpsCalc__Templates__Path: '/home/data/templates/' // the template store persists beside the quote store and the overlay, (print True; control fragment+ZZ: False)
+ptr-42 | src/MpsCalc.Api/Program.cs:96 -> if (app.Services.GetRequiredService<TemplateStore>().StoreDirectory is null) (print True; control fragment+ZZ: False)
+ptr-43 | src/MpsCalc.Api/Program.cs:98 -> TemplateLog.PathBlank(app.Logger, TemplateStore.PathKey); // a blank path keeps templates in memory, in both modes (print True; control fragment+ZZ: False)
+ptr-44 | src/MpsCalc.Api/Templates/TemplateStore.cs:87 -> public const string PathKey = "MpsCalc:Templates:Path"; (print True; control fragment+ZZ: False)
+ptr-45 | src/MpsCalc.Api/Templates/TemplateStore.cs:483 -> [LoggerMessage(Level = LogLevel.Warning, Message = "The template store is in memory: {Key} is blank, so every template i (print True; control fragment+ZZ: False)
+ptr-46 | src/MpsCalc.Api/Templates/TemplateStore.cs:484 -> public static partial void PathBlank(ILogger log, string key); (print True; control fragment+ZZ: False)
+ptr-47 | infra/tests/test_infra.py:239 -> def test_templates_path_sits_beside_the_other_stores(self): (print True; control fragment+ZZ: False)
+ptr-48 | tests/MpsCalc.Api.Tests/TemplateStartWarningTests.cs:14 -> private const string BlankPathLine = "Warning: The template store is in memory: MpsCalc:Templates:Path is blank, so ever (print True; control fragment+ZZ: False)
+ptr-49 | docs/API.md:903 -> - **Persistence:** `MpsCalc:Templates:Path`; empty = in memory in both modes (a restart then loses the templates, and th (print True; control fragment+ZZ: False)
+ptr-50 | docs/API.md:1004 -> | `MpsCalc__QuoteStore__Path` = `/home/data/quotes/` | quote and snapshot files | empty = in memory (a restart loses quo (print True; control fragment+ZZ: False)
