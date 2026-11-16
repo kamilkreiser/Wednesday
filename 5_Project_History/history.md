@@ -1,3 +1,11 @@
+## 2026-11-16 22:42 -> 22:5x — Friday boot #2 (laptop seat; Kam relaunched for the Claude to Claude review; wrapped on "wrap up but will the next reboot start in fable?")
+- Boot: digest by headline (440 sections), ledger whole, pickup + grants; ctx 14%. Launch came up on Opus 5.5, not Fable. Digests from the launch committed (6ff19b0899).
+- Read the six design sections not read at 16:5x (4, 5, 8-11): whole design now read by Friday. Five review points in the daily note.
+- Kam (terminal + board 22:47): review now, document "looks good", each clarification on Fleet activity. Board poller verified running (launcher-armed). 15 cards general-c2c-*-1116 added (D1-D3, D5-D12, language, repo home, build model, nightly tests), all HTTP 201; 8 after generic-word prior-ruling overrides.
+- Kam 22:50 standing rule: suggest when to switch Friday / a task to the newest Fable -> learnings/2026-11-16_suggest-when-to-switch-to-the-newest-fable.md; ledger rows; prompt log.
+- Kam asked whether the next reboot starts in Fable: NO, the shared launcher passes --model opus to every seat. Card general-friday-boot-on-fable-1116 (rec a: Friday-only Fable boot).
+- Pickup replaced wholesale (.pre-1116-2255 kept). Nothing built; nothing under !CODING touched. Claim General/Claude to Claude kept.
+
 ## 2026-11-16 14:45 -> 16:57 — Friday (laptop seat; first Friday session since the 2026-10-16 wrap; wrapped on Kam's "wrap up… we will pick this up tomorrow")
 - Boot after Kam's /login (new account), then switched to Fable 5.2 by Kam. By-tier digest (~700 KB) read by headline; ctx 14% after the load. Friday drove no project at boot.
 - Fixed shared hook pretooluse_inbox_scope.sh (refused Friday her own inbox friday-laptop-agent@; now looked up in fleet/inbox_routing.conf; 8-case matrix; e30563fa5d); both sisters mailed. Released the stale Spark-loop claim.
