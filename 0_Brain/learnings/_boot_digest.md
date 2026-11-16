@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-17 00:43 from 276 lesson files (1,177,034 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-17 06:01 from 277 lesson files (1,179,282 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8045,4 +8045,19 @@ sections (open the file for these): How to apply · First application (same minu
 3. **It is a suggestion, not a switch.** The seat's model is set at launch. Recommend a relaunch, never
    `/model` in a seat pane (2026-11-03: it wrote Kam's GLOBAL default, ledger w=2).
 4. **Also suggest switching back** when the Fable-worthy work is finished and the rest is routine.
+
+
+## A list of "safe" shell commands cannot be finished: the shell itself, not only the tool, decides what a line does
+`2026-11-17_a-recogniser-of-safe-shell-commands-cannot-be-finished.md` · lesson · 2026-11-17 · status: live
+
+**What happened.** A build seat wrote a recogniser that classed some shell commands as harmless reads. Gate 1 broke it through OPTIONS the deny-list did not know (a shortened long option that writes a file; a recursion flag). I had it rebuilt as an exact-spelling allow-list. Gate 2 broke the rebuild through the SHELL: the path the shell walks through a directory symlink differs from the real one; a quoted expansion is an assignment in zsh; an operand after an option is a file to one implementation and not another; a compatibility character in a file name is the plain name to the file system. Six new dimensions, none an option. The second gate judged that the list would not close, and I removed the recogniser: every shell command is treated as execute.
+
+sections (open the file for these): How to apply
+
+## How to apply
+
+1. **In a brief:** never commission "recognise the safe cases" of shell, SQL, a template language or any interpreter as a security boundary. Commission the conservative rule (everything is the dangerous class) and let the structured, non-interpreted path carry the convenience.
+2. **At a gate return:** if round 2 fails on a different dimension from round 1, ask the gate the direct question "can this approach be made sound at all?" in the round-2 commission, so the answer arrives with the verdict. (Done here; it saved a third round.)
+3. **The two-NO-GO cap is the trigger, and removal is not a third round.** Dropping the unsound mechanism for the conservative default is the coordinator's call; the usability cost goes to Kam on a card with the default already applied.
+4. **Quarantine, never delete, the removed attempt**, with both verdicts cited, so a later attempt starts from the evidence.
 
