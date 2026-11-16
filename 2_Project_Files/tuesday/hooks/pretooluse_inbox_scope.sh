@@ -23,6 +23,12 @@ case "$(basename "$_TREE")" in
   *)                       INBOX_SEAT=wednesday ;;
 esac
 export INBOX_SEAT
+# OWN INBOX IS LOOKED UP, NOT COMPOSED (2026-11-16, Friday seat): "<seat>-agent" is wrong for Friday, whose inbox is
+# friday-laptop-agent@ (fleet/inbox_routing.conf, the same table send_brief.sh reads), so this hook refused Friday her
+# OWN inbox at boot. Look the seat's row up; fall back to the composed name only when the table has no row.
+_SEAT_KEY="$(printf '%s' "$INBOX_SEAT" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')"
+INBOX_OWN="$(awk -F'|' -v k="$_SEAT_KEY" '$1==k {split($2,a,"@"); print tolower(a[1]); exit}' "$_TREE/2_Project_Files/fleet/inbox_routing.conf" 2>/dev/null)"
+export INBOX_OWN="${INBOX_OWN:-${INBOX_SEAT}-agent}"
 HOOK_INPUT="$(cat)"; export HOOK_INPUT
 python3 -I - <<'PY'
 import json, os, re, sys
@@ -31,7 +37,8 @@ try:
 except Exception:
     print("pretooluse_inbox_scope: input not parseable; check NOT run", file=sys.stderr); sys.exit(0)
 SEAT = os.environ.get("INBOX_SEAT", "tuesday")
-ALLOWED = {SEAT + "-agent", "coagent"}
+OWN = os.environ.get("INBOX_OWN") or (SEAT + "-agent")
+ALLOWED = {OWN, "coagent"}
 bad = []
 for m in re.finditer(r"agentmail\.to/v[0-9]+/inboxes/([^/\s\"'?]+)", cmd):  # the API path only: prose that mentions an inbox is not a read (2026-11-13 false positive on a note)
     who = m.group(1)
@@ -42,7 +49,7 @@ for m in re.finditer(r"agentmail\.to/v[0-9]+/inboxes/([^/\s\"'?]+)", cmd):  # th
     if name not in ALLOWED:
         bad.append(who)
 if bad:
-    print("REFUSED by pretooluse_inbox_scope.sh: this seat reads only its own inbox (" + SEAT + "-agent@) and the fleet bus "
+    print("REFUSED by pretooluse_inbox_scope.sh: this seat reads only its own inbox (" + OWN + "@) and the fleet bus "
           "(coagent@). Path(s) naming another inbox: " + ", ".join(sorted(set(bad))) + ". Another seat's inbox holds another "
           "client's mail (ledger 2026-11-13, w=9 of the cross-client print family). Write each inbox URL out; never loop "
           "over inboxes.", file=sys.stderr)
