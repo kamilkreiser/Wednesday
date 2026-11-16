@@ -1,0 +1,10 @@
+Two small changes for MPSCALC-372, per the product owner's ruling to store templates in /home/data/templates/ and warn when blank.
+
+- Infra: the showcase app settings declare MpsCalc__Templates__Path as /home/data/templates/, beside the quote store and overlay paths; one new infra test row pins the value and that the three store directories are distinct.
+- API: one start-up Warning when the template store path is blank, in either mode: "The template store is in memory: MpsCalc:Templates:Path is blank, so every template is lost at the next restart." Four new test rows. What the store does when its path is set is unchanged.
+
+Nothing is deployed. The setting reaches the site only with an infra apply; the ticket's restart acceptance belongs to that deploy card.
+
+Verified in a proof rig: Api tests 3656 -> 3660 with the same two PublishOutputTests failures at base and merge (rig pin only); infra 28 -> 29, validate.sh OK, deploy test 44 OK; Release build 0 warnings.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
