@@ -8,6 +8,16 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 16:4x 16 Nov, the 15:1x rotation successor (ctx 52%) - READ FIRST; supersedes every block below where they differ
+- **develop e5a6eb82c607** (PR 2127 by B 194th; verified at source 16:25:03; one parent e79f70e2b6dc = PR 2123). **Merges since 15 Nov evening: 54.** **Kintsugi k32 DONE** (D 68th: prism + originate + api-gateway at 8292da2c9dbc; anonymous cert verify live, issuer id/did null, no charge; PANEL RECEIPT bf-9600f89aeb90 posted 16:4x). k31 receipt bf-d6221f3d5e45. No Kam card open; no Kam message since 14:29:35. PRs 2225 + 2138 CLOSED (superseded).
+- **FLOOR:**
+  - %220 **K 43rd** (MERGE Sonnet, 18 rows from PR 2124; **GO for PR 2124 sent 16:45** (fleet/briefs_staged/2026-11-16_K43_go_2124.md), expected tree 931779919c97). NEXT: its MERGED -> verify at source -> expect WRAP naming PR 2185 -> score -> pane_close -> K 44th drafter (commission template 0_Brain/reference/2026-11-16_drafter-seatK43/commission.md; own 43->44 rd->th, lineage 42->43 nd->rd; row 1 PR 2185 = gateway vitest row: model = B 195th's legs_2162 / K 41st's gateway arm).
+  - %223 **B 195th** (MERGE Sonnet, 15 rows from PR 2162; STAMPED B195-W1..W8, W5 = lean legs + B 192nd's proven finish-by-hand, no UNION=; launched 16:47). NEXT: plan QUESTION -> ANSWER (shape 2026-11-16_B194_answer_plan.md); its first READY waits for K 43rd's MERGED.
+  - **W 34th DRAFTER running** (subagent of this seat; KS-2239 build: issuer.id owner-only; issuer.did behind W-1 switch: does it equal the chain actorDid/orgDid Kam's 14:29 kept? Rule at stamp only if the code makes it plain, else CARD Kam with a default). Re-commission from 0_Brain/reference/2026-11-16_drafter-seatW34-ks2239/commission.md if absent.
+  - **MERGE WINDOW: one GO at a time across B and K.**
+- **Scores this seat:** D 67th 0.96, K 42nd 0.96, B 194th 0.95, D 68th 0.97.
+- **OWED:** W 34th stamp + launch (Opus build); next board seat (KS-1600 Low ticket, gate 286/246/375 findings, prism ratchet gap, gate 282/284/288/301 findings from today's merges); INDEX.md refresh; `--help` advisory hook (w=3); boot-digest gap (700 KB / ~287K tokens; Kam's call); next D round k33 only when something deployable merges (2123/2124/2127 are scripts: no image).
+
 ## 🔴 CHECKPOINT 15:4x 16 Nov, the 15:1x rotation successor (ctx ~35%) - READ FIRST; supersedes every block below where they differ
 - **develop 8292da2c9dbc** (PR 2250; re-read 15:42:23). No merge GO in flight. No Kam card open; no Kam message since 14:29:35 (read 15:10). k31 PANEL RECEIPT DONE (bf-d6221f3d5e45, 15:20).
 - **FLOOR (3 seats; no subagent of this seat running):**

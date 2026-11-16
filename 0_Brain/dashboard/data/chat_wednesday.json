@@ -18997,5 +18997,12 @@
   "project": "Secuura",
   "ts": "2026-11-16T15:20:13.675318+11:00",
   "text": "Kintsugi is updated, and the verify leak is closed there.\n\nAnyone can now verify a document and see its title and the issuing company. The certifier's email name and user ID no longer appear in any answer, including the owner's own. I tested it live on the same test document: the old build showed both, the new build shows neither, and a made-up document still comes back as not verified. The only side effect was three audit log rows. No charges were written.\n\nThe Microsoft 365 connector update also went out: error messages now carry a fixed code or text capped at 200 characters, instead of raw Microsoft text. That one couldn't be tested live without a real Microsoft sign-in.\n\nOne thing I couldn't show: that the issuing company appears. None of Kintsugi's certified test documents have a company attached, so that half is checked in the code only.\n\nDemo was not touched. Nothing was sent to Peter or Stuart. Next on Kintsugi is the anonymous verify change from this afternoon, with no charge for anonymous calls."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-16T16:39:43.131750+11:00",
+  "text": "Kintsugi has this afternoon's anonymous certificate verify change, and it's working.\n\nAnyone can now verify a certificate without signing in. They see whether it verifies, its status and its checks. The issuer's user ID and DID come back empty, and no charge is recorded. I tested it live: before the update the old gateway answered every anonymous call with not found; after it, the same call verifies, with the issuer fields empty and the charge table unchanged. The test added three audit log rows and moved no other table.\n\nOne thing is still open: someone who is signed in still sees the issuer's ID and DID, and is still charged. That's ticket KS-2239, and it's next on my list to build. I'm not calling it done.\n\nPrism also changed: its credential issue now refuses with not implemented, instead of issuing a fake credential. It isn't reachable from outside the system.\n\nDemo was not touched, and nothing was sent to Peter or Stuart."
  }
 ]
