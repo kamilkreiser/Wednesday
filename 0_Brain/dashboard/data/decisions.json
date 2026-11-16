@@ -73288,5 +73288,36 @@
    "CARD composer-demo-vm-write-role-after-copy-1019",
    "CARD hpsmpoc-uat-backup-copy-delete-1111"
   ]
+ },
+ {
+  "id": "secuura-actor-did-chain-only-1116",
+  "client_project": "Secuura/Blockchain",
+  "title": "Chain-only verify answers show the anchor's actor DID to everyone: keep or withhold?",
+  "bluf": "No action is needed unless you want to withhold it. When a verify answer comes only from the blockchain, every caller sees the anchor's identity block: actorDid, orgDid and identityCommitment. KS-1175 (a ticket ruling, not one of your cards) treated this as not personal data, and it is already public on the chain. But an actor DID is a lasting per-person identifier, so whether it falls under your 11:12 rule (names open, not personal data) is your call. Gate 376 found it; PR 2249 does not change it. For your information: gate 376 confirmed by its own probe that develop today shows anonymous callers the certifier's user id and email local part, and Kintsugi runs the same code. PR 2249 removes that; I am merging it and deploying it to Kintsugi under your standing grants (demo stays frozen). Override note: the two prior cards the gate matched (KS-1171 and KS-2103) rule whether the anchoring service's Cardano connection counts as an answer, not who may read the identity block; no card on that exists.",
+  "default_action": "Nothing changes: chain-only answers keep the identity block. Wednesday merges and deploys PR 2249 regardless.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it (recommended)",
+    "detail": "It is already on the public chain, so withholding it in the API hides nothing; KS-1175's reading stands"
+   },
+   {
+    "key": "b",
+    "label": "Withhold actorDid and orgDid from chain-only answers",
+    "detail": "A small build round after PR 2249; the chain itself still carries them"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-16T13:05:33.383178+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-ks-1171-8k-unconfigured-chain-counts-as-answered-1106",
+   "CARD secuura-ks2103-answered-chain-reply-shape-1110"
+  ]
  }
 ]
