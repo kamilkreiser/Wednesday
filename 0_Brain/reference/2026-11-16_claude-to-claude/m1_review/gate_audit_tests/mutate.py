@@ -91,6 +91,14 @@ M = [
  ("M38", "session.rs", "receive_head: countersign even a refused (forked) head",
   "                self.persist(&Record::Evidence((*ev).clone()))?;\n                return Err(AuditError::Receive(ReceiveError::Fork(ev)));",
   "                self.persist(&Record::Evidence((*ev).clone()))?;\n                return Ok(head.countersign(id)?);"),
+ ("M39", "received.rs", "accept: head-vs-header conflict at the same number never reported",
+  "            if head.hash != hash {", "            if false {"),
+ ("M40", "bundle.rs", "verify: duplicate/unsorted countersignatures accepted",
+  "        if last_cs.is_some_and(|l| l >= key) {", "        if false {"),
+ ("M41", "bundle.rs", "verify: duplicate/unsorted peer heads accepted",
+  "            if h.author_seq <= last || h.author_seq == 0 {", "            if h.author_seq == 0 {"),
+ ("M42", "session.rs", "receive_heads_seen: own record accepted",
+  "        if hs.from == self.local {\n            return Err(AuditError::WrongAuthor);\n        }\n", ""),
 ]
 
 def run(only=None):

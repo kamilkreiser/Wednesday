@@ -64,6 +64,7 @@ before this merges.**
 | A-m4 | Minor | `bundle.rs:664`; `docs/AUDIT.md` §4 | The builder's "EQUIVALENT mutant" claim for `verify`'s sequence check is **false** against the key holder. An author or re-sealing exporter can sign a properly linked chain numbered 1, 2, 2. Without the check, `verify` accepts it and reports `last_seq: 3`. No builder test covers this. | Mutant M03 SURVIVES the builder suite; `gate_ok_verify_refuses_a_linked_chain_with_a_repeated_sequence_number` kills it (passes on the real code). | Add that test; correct `AUDIT.md` §4. |
 | A-m5 | Minor | `docs/AUDIT.md` §2 | Undocumented consequence: an honest author whose daemon loses its chain and re-records event n produces valid, transferable equivocation evidence against itself. This is the right outcome for the construction, but users need to be told, and `SessionAudit` cannot yet reload from its `Store` (BACKLOG), so a restart today means exactly this. | `gate_note_crash_recovery_is_indistinguishable_from_equivocation` (passes: evidence verifies). | State it in the limits list; make store reload a precondition of daemon wiring. |
 | A-m6 | Minor | `session.rs:201-215, 249-261` | No re-anchor path. If a joiner receives any event of an author before `join_author`, a from-genesis view is created and `join_author` is then refused (`Replay`). A stale but genuine anchor also leaves the view refusing every live event as `Gap` forever. Liveness only. | reasoning only | Allow re-anchoring to a later author-signed head while nothing is held after the old one. |
+| A-m7 | Minor | `tests/` | **14 security checks have no test that fails when they are removed** (mutation table: M13-M15 cap boundaries, M18/M19 checkpoint-vs-chain in `verify`, **M20 seal digest**, M24 link adjacency, **M25 heads-seen entry signatures**, M26 `MAX_SEQ` in `accept`, M28 exporter self-countersignature, M35, M40 duplicate countersignatures inflating "who attested", M41, M42). Four more (M16 summary redaction, M33/M38/M39 receiver head-conflict paths) were untested by the builder; my tests cover them now. The code is correct at every one of these sites (read; for M16/M33/M38/M39, `gate_ok_receiver_reports_head_conflicts_and_does_not_countersign_them` passes). This breaks the brief's rule "every property gets a test that fails when it is broken". | mutation runs | add one guard test per survivor (e.g. a substituted record of equal count for M20; a forged heads-seen entry for M25) |
 | A-n1 | Note | `received.rs:343-359` | Watermark: no denial of service found. A non-author or another session cannot move it (checks run first), and reordered honest delivery is accepted once in order. There is no buffering: reordered delivery needs transport redelivery. | `gate_ok_watermark_cannot_be_used_to_refuse_honest_delivery` passes. | none |
 | A-n2 | Note | `tiers.rs:79-87`, `header.rs:123-128` | Neither commitments nor chain hashes carry a label. The two tiers share one commitment function, and the chain hash has the same `32 bytes ‖ data` shape. Each split is unambiguous (fixed 32-byte prefix), and no code compares a commitment with a chain hash, so I found no cross-use. A label per tier would cost nothing now and change pinned values later. | reasoning | design owner, together with REQUEST 1 |
 | A-n3 | Note | `session.rs:229-237` (receipts) | Receipts tell a member who is at `summaries` for the receiver, but `nothing` for the original author, the existence and receipt time of each of that author's events. That is finer than threat row L's "checkpoints reveal counts and roughly when". | reasoning | design owner: state it, or batch receipts |
@@ -138,7 +139,66 @@ before this merges.**
 
 ## Mutation testing (my mutants, one at a time, builder's full crate suite)
 
-MUTATION_TABLE_PLACEHOLDER
+42 mutants. Each was applied alone to a pristine clone and the builder's whole crate suite was
+run (`cargo test -p coagent-audit --no-fail-fast`); the worktree was clean afterwards. Each
+survivor was then run against my `gate_attacks.rs`, counting only tests that pass on the
+unmutated code. Driver: `gate_audit_tests/mutate.py`.
+
+| id | mutation | builder suite | my tests |
+|---|---|---|---|
+| M01 | drop outer `prev_hash ‖` from chain hash | killed only by pinned value `test11_pure_functions_match_recorded_values` (**builder claim confirmed**) | — |
+| M02 | chain hash = H(prev_hash), ignores header | killed (11 tests incl. test1 exporter-rewrite, test5, test6, test9) | — |
+| M03 | `verify`: drop sequence-number check | **SURVIVED** (builder says EQUIVALENT) | **killed**: `gate_ok_verify_refuses_a_linked_chain_with_a_repeated_sequence_number` → **not equivalent** (A-m4) |
+| M04 | drop `type` from signed bytes | killed (test1, test9, pinned) | — |
+| M05 | `attests`: drop session compare | SURVIVED | survives: equivalent at current call sites (A-n9) |
+| M06 | head-vs-header compare on 4-byte prefix | SURVIVED | survives (prefix mutants need a crafted near-collision; effectively equivalent) |
+| M07 | received: seq == next−1 not treated as held | killed (test5) | — |
+| M08 | skip summary-tier commitment check | killed (test1, test6, test9) | — |
+| M09 | send full salt to a summaries recipient | killed (test3 and 5 others) | — |
+| M10 | `verify`: skip countersigner membership | killed (test8 removed member) | — |
+| M11 | author stores a non-member's countersignature | killed (test7, test8) | — |
+| M12 | evidence: accept identical statements | killed (test5) | — |
+| M13 | `MAX_RECORDS` +1 | **SURVIVED** | survives |
+| M14 | `MAX_RECORD_BYTES` +1 | **SURVIVED** | survives |
+| M15 | `MAX_BUNDLE_BYTES` +1 | **SURVIVED** | survives |
+| M16 | **skip redaction on the summary tier** | **SURVIVED** (DESIGN Q7 claims it; no test) | killed: `gate_ok_receiver_reports_head_conflicts_and_does_not_countersign_them` |
+| M17 | `verify`: skip countersignature signature | killed (test9) | — |
+| M18 | `verify`: skip own checkpoint-hash-vs-chain | **SURVIVED** | survives |
+| M19 | `verify`: skip peer checkpoint-hash-vs-chain | **SURVIVED** | survives |
+| M20 | **`verify`: seal digest not compared (count only)** | **SURVIVED** | survives |
+| M21 | joiner takes a header AT the anchor number | killed (test8) | — |
+| M22 | joiner takes heads before the anchor | killed (test8) | — |
+| M23 | evidence `verify`: drop session check | **SURVIVED** | killed: `gate_ok_cross_session_statements_never_form_evidence` |
+| M24 | link evidence: drop adjacency check | **SURVIVED** | survives |
+| M25 | **heads-seen: entry signatures not checked** | **SURVIVED** | survives |
+| M26 | `accept`: drop `MAX_SEQ` | **SURVIVED** | survives |
+| M27 | author accepts its own countersignature | killed (test7) | — |
+| M28 | `verify`: exporter's self-countersignature accepted | **SURVIVED** | survives |
+| M29 | `omitted_own` off-by-one | killed (`stated_limits_are_what_the_docs_say`) | — |
+| M30 | seal label = head label | killed (`domain::tests::labels_are_distinct…`) | — |
+| M31 | `verify`: anchor signature not checked | killed (test9) | — |
+| M32 | `accept`: prev_hash link not checked | killed (test6) | — |
+| M33 | `accept_head`: never compares with held statements | **SURVIVED** | killed: `gate_ok_receiver_reports_head_conflicts…` |
+| M34 | `accept`: drop author check | killed (`test6_first_event_rules`) | — |
+| M35 | heads-seen entry about the reporter itself allowed | **SURVIVED** | survives |
+| M36 | export drops countersignatures | killed (test8, test9) | — |
+| M37 | commitment uses half the salt | killed (pinned, test1, test9) | — |
+| M38 | `receive_head` countersigns a forked head | **SURVIVED** | killed: `gate_ok_receiver_reports_head_conflicts…` |
+| M39 | head-vs-header conflict at `accept` never reported | **SURVIVED** | killed: `gate_ok_receiver_reports_head_conflicts…` |
+| M40 | `verify`: duplicate/unsorted countersignatures accepted (inflates "who attested") | **SURVIVED** | survives |
+| M41 | `verify`: duplicate/unsorted peer heads accepted | **SURVIVED** | survives |
+| M42 | `receive_heads_seen`: own record accepted | **SURVIVED** | survives |
+
+**Totals:** builder suite killed 20 of 42 and 22 survived. My tests kill 6 of those 22 (M03, M16,
+M23, M33, M38, M39). That leaves 16 surviving every test I have: 2 equivalent or near-equivalent
+(M05, M06) and **14 genuine test gaps** (A-m7). I read the code at each of those 14 sites: the
+check is present and correct in the real code. These are missing guards, not present bugs.
+
+**The chain-linkage question.** Dropping the outer `prev_hash ‖` (M01) is caught only by the
+pinned value, and that is correct: `prev_hash` is also a field inside the signed, hashed header,
+so linkage still holds. The linkage property itself IS behaviourally tested: M02 (hash ignores the
+header) is killed by the exporter-rewrite, evidence and receive tests, and M32 (link not checked
+on receive) by test6.
 
 ## Builder's DESIGN QUESTIONS and REQUESTS
 
@@ -175,10 +235,10 @@ MUTATION_TABLE_PLACEHOLDER
 
 ## Ran or reasoned
 
-Ran: `check.sh`; the red-control runner (43 rows plus green); 16 attack tests in `gate_attacks.rs`
-(14 in the debug suite plus 2 `--release --ignored`): 8 demonstrate findings (A-B1, A-M1, A-M2,
-A-M3, A-M4, A-m1, A-m2, A-m3), 7 confirm refusals or documented outcomes, 1 is a measurement; the
-mutation table. Reasoned only: A-m6, A-n2 to A-n6, the duplicate/unknown/mixed bundle cases, the
+Ran: `check.sh`; the red-control runner (43 rows plus green); 17 attack tests in `gate_attacks.rs`
+(15 in the debug suite plus 2 `--release --ignored`): 8 demonstrate findings (A-B1, A-M1, A-M2,
+A-M3, A-M4, A-m1, A-m2, A-m3), 8 confirm refusals or documented outcomes, 1 is a measurement; 42
+mutants against the builder suite and 22 survivors against my tests. Reasoned only: A-m6, A-n2 to A-n6, the duplicate/unknown/mixed bundle cases, the
 quadratic bound in `verify`, and the realistic-session cap estimate (from the measured per-event
 growth).
 

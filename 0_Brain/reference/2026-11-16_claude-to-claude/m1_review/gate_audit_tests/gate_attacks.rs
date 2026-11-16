@@ -13,6 +13,7 @@ use coagent_audit::equivocation::{EquivocationEvidence, EvidenceError, Statement
 use coagent_audit::header::{HeaderBody, SignedHeader};
 use coagent_audit::received::{ReceiveError, ReceivedChain};
 use coagent_audit::redact::{preview, PatternRedactor, Redactor};
+use coagent_audit::store::Store;
 use coagent_audit::tiers::ShareLevel;
 use coagent_audit::AuditError;
 use coagent_crypto::identity::{verify_device, DeviceIdentity, SignDomain};
@@ -595,6 +596,85 @@ fn gate_redaction_time_scales_linearly() {
         let (a, b) = (times[0].1.max(1) as f64, times[2].1 as f64);
         assert!(b / a < 8.0, "{name}: 4x input took {}x time: {times:?}", b / a);
     }
+}
+
+/// Measurement (no assertion on the result): bytes an HONEST receiver's export grows by per event
+/// it receives at `full`, to size the 16 MiB / 65,536-record caps against real sessions.
+#[test]
+fn gate_measure_export_bytes_per_received_event() {
+    let size = |n: u64| {
+        let w = World::new(230, 2, 2);
+        let mut a = w.audit(0, every(50));
+        let mut b = w.audit(1, every(50));
+        a.set_share_level(w.key(1), ShareLevel::Full);
+        let full = "x".repeat(300);
+        for k in 1..=n {
+            a.record(&w.ids[0], input("action.finished", "Bash: cargo test -p some-crate", &full), t(k))
+                .unwrap();
+            let e = a.outgoing(k)[0].1.clone();
+            b.receive(&w.ids[1], &e, t(k)).unwrap();
+        }
+        let bytes = b.export(&w.ids[1]).unwrap().encode().unwrap();
+        (bytes.len(), b.store().records(&w.s).unwrap().len())
+    };
+    let (s1, r1) = size(100);
+    let (s2, r2) = size(200);
+    let per = (s2 - s1) as f64 / 100.0;
+    let per_rec = (r2 - r1) as f64 / 100.0;
+    eprintln!(
+        "EXPORT GROWTH: {per:.0} bytes and {per_rec} records per received full-tier event; \
+         16 MiB reached after ~{:.0} received events, 65,536 records after ~{:.0}",
+        (16.0 * 1024.0 * 1024.0) / per,
+        65_536.0 / per_rec
+    );
+}
+
+/// Receiver-side head conflicts (paths that mutants M33, M38, M39 showed the builder suite never
+/// exercises): a conflicting head after a header, a conflicting header after a head; neither is
+/// stored, the first is not countersigned, and the summary tier is redacted (mutant M16).
+#[test]
+fn gate_ok_receiver_reports_head_conflicts_and_does_not_countersign_them() {
+    let w = World::new(240, 3, 3);
+    let mut a = w.audit(0, every(100));
+    a.set_share_level(w.key(1), ShareLevel::Full);
+    a.record(&w.ids[0], input("action.finished", "export TOKEN=abc123secretxyz", "f"), t(1))
+        .unwrap();
+    let e1 = a.outgoing(1)[0].1.clone();
+    assert!(!e1.summary.as_ref().unwrap().body.contains("abc123secretxyz"), "summary not redacted");
+    let lie = |seq| {
+        let body = HeadBody {
+            session_id: w.s,
+            author: w.key(0),
+            author_seq: seq,
+            hash: coagent_proto::bytes::Digest32([9; 32]),
+            roster_v: 1,
+        };
+        let sig = domain::sign(&w.ids[0], AuditDomain::Head, &canonical::encode(&body).unwrap());
+        SignedHead {
+            session_id: body.session_id,
+            author: body.author,
+            author_seq: body.author_seq,
+            hash: body.hash,
+            roster_v: body.roster_v,
+            sig,
+        }
+    };
+    // header first, then a conflicting head
+    let mut b = w.audit(1, every(100));
+    b.receive(&w.ids[1], &e1, t(2)).unwrap();
+    assert!(matches!(
+        b.receive_head(&w.ids[1], &lie(1)),
+        Err(AuditError::Receive(ReceiveError::Fork(_)))
+    ));
+    assert!(b.peer(&w.key(0)).unwrap().heads().is_empty());
+    // head first, then a conflicting header
+    let mut c = w.audit(2, every(100));
+    c.receive_head(&w.ids[2], &lie(1)).unwrap();
+    assert!(matches!(
+        c.receive(&w.ids[2], &e1, t(3)),
+        Err(AuditError::Receive(ReceiveError::Fork(_)))
+    ));
+    assert_eq!(c.peer(&w.key(0)).unwrap().events().count(), 0);
 }
 
 #[allow(dead_code)]

@@ -1,0 +1,230 @@
+[
+ [
+  "M01",
+  "drop outer prev_hash prefix from chain hash",
+  "KILLED",
+  "test11_pure_functions_match_recorded_values"
+ ],
+ [
+  "M02",
+  "chain hash ignores the header (hash = H(prev_hash))",
+  "KILLED",
+  "test11_pure_functions_match_recorded_values, test11_two_runs_differ_only_in_salt_derived_values, test1_the_exporter_cannot_rewrite_its_own_attested_events_even_re_signing_them, test5_evidence_cannot_be_forged_without_the_authors_key, test5_head_against_header_and_head_against_head_and_broken_link, test5_heads_seen_exchange_turns_a_mismatch_into_stored_evidence, test5_two_headers_at_one_seq_yield_evidence_that_verifies_standalone, test6_gap_replay_reorder_and_fork_are_distinct_refusals_that_change_nothing, test9_any_single_field_corrupted_fails_naming_its_class, test9_extreme_numbers_in_any_field_never_panic, test9_verify_together_reports_an_equivocating_author"
+ ],
+ [
+  "M03",
+  "verify: drop own/peer author_seq check",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M04",
+  "drop `type` from the signed header bytes",
+  "KILLED",
+  "test11_pure_functions_match_recorded_values, test1_tamper_is_detected_at_every_position_of_both_chains, test9_any_single_field_corrupted_fails_naming_its_class"
+ ],
+ [
+  "M05",
+  "countersignature attests: drop session comparison",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M06",
+  "accept: compare only 4-byte prefix of head hash",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M07",
+  "accept: seq == next-1 treated as next (off-by-one on held range)",
+  "KILLED",
+  "test5_the_same_header_twice_yields_no_evidence, test5_two_headers_at_one_seq_yield_evidence_that_verifies_standalone"
+ ],
+ [
+  "M08",
+  "skip summary-tier commitment check",
+  "KILLED",
+  "test1_tamper_is_detected_at_every_position_of_both_chains, test6_a_bad_tier_body_is_refused_and_nothing_is_partially_applied, test9_any_single_field_corrupted_fails_naming_its_class"
+ ],
+ [
+  "M09",
+  "send the full-tier salt (no body) to a summaries recipient",
+  "KILLED",
+  "receipts_name_the_stored_header, stated_limits_are_what_the_docs_say, test11_the_bundle_does_not_depend_on_the_order_records_were_stored, test11_two_runs_differ_only_in_salt_derived_values, test3_a_nothing_recipient_receives_only_checkpoints, test3_a_summaries_recipient_holds_no_part_of_the_full_tier_and_cannot_confirm_a_guess, test4_every_recipient_holds_a_byte_identical_header, test5_heads_seen_exchange_turns_a_mismatch_into_stored_evidence, test9_any_single_field_corrupted_fails_naming_its_class, test9_export_then_verify_round_trips, test9_extreme_numbers_in_any_field_never_panic, test9_malformed_and_oversize_bundles_are_refused_without_panic, test9_verify_together_passes_for_honest_bundles"
+ ],
+ [
+  "M10",
+  "verify: skip countersigner roster-membership check",
+  "KILLED",
+  "test8_a_removed_members_last_countersigned_checkpoint_bounds_what_it_can_attest"
+ ],
+ [
+  "M11",
+  "author: store countersignature from a non-member",
+  "KILLED",
+  "test7_bad_countersignatures_are_refused, test8_a_removed_members_last_countersigned_checkpoint_bounds_what_it_can_attest"
+ ],
+ [
+  "M12",
+  "evidence verify: accept two identical statements",
+  "KILLED",
+  "test5_the_same_header_twice_yields_no_evidence"
+ ],
+ [
+  "M13",
+  "off-by-one MAX_RECORDS",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M14",
+  "off-by-one MAX_RECORD_BYTES",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M15",
+  "off-by-one MAX_BUNDLE_BYTES",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M16",
+  "skip redaction on the summary tier",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M17",
+  "verify: skip countersignature signature check",
+  "KILLED",
+  "test9_any_single_field_corrupted_fails_naming_its_class"
+ ],
+ [
+  "M18",
+  "verify: skip own checkpoint-hash-vs-chain check",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M19",
+  "verify: skip peer checkpoint-hash-vs-chain check",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M20",
+  "verify: seal digest not compared (count only)",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M21",
+  "joiner: accept a header AT the anchor number",
+  "KILLED",
+  "test8_a_joiners_view_starts_at_its_anchor_and_holds_nothing_before"
+ ],
+ [
+  "M22",
+  "joiner: accept heads before the anchor",
+  "KILLED",
+  "test8_a_joiners_view_starts_at_its_anchor_and_holds_nothing_before"
+ ],
+ [
+  "M23",
+  "evidence verify: drop session check",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M24",
+  "link evidence: drop adjacency check",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M25",
+  "heads-seen: entry signatures not checked",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M26",
+  "accept: drop MAX_SEQ bound",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M27",
+  "author: accept its own countersignature",
+  "KILLED",
+  "test7_bad_countersignatures_are_refused"
+ ],
+ [
+  "M28",
+  "verify: accept countersignature by the exporter itself",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M29",
+  "verify_together: omitted_own off-by-one",
+  "KILLED",
+  "stated_limits_are_what_the_docs_say"
+ ],
+ [
+  "M30",
+  "seal label collides with head label",
+  "KILLED",
+  "domain::tests::labels_are_distinct_and_never_a_prefix_of_one_another"
+ ],
+ [
+  "M31",
+  "verify: joiner anchor signature not checked",
+  "KILLED",
+  "test9_any_single_field_corrupted_fails_naming_its_class"
+ ],
+ [
+  "M32",
+  "accept: prev_hash link not checked",
+  "KILLED",
+  "test6_gap_replay_reorder_and_fork_are_distinct_refusals_that_change_nothing"
+ ],
+ [
+  "M33",
+  "accept_head: never compares with held statements",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M34",
+  "accept: drop author check (key is the author's anyway)",
+  "KILLED",
+  "test6_first_event_rules"
+ ],
+ [
+  "M35",
+  "heads-seen: entry about the reporter itself allowed",
+  "SURVIVED",
+  ""
+ ],
+ [
+  "M36",
+  "export: countersignatures dropped",
+  "KILLED",
+  "test8_a_removed_members_last_countersigned_checkpoint_bounds_what_it_can_attest, test9_any_single_field_corrupted_fails_naming_its_class, test9_export_then_verify_round_trips"
+ ],
+ [
+  "M37",
+  "tier commitment uses only half the salt (128 bits)",
+  "KILLED",
+  "test11_pure_functions_match_recorded_values, test1_tamper_is_detected_at_every_position_of_both_chains, test9_any_single_field_corrupted_fails_naming_its_class"
+ ],
+ [
+  "M38",
+  "receive_head: countersign even a refused (forked) head",
+  "SURVIVED",
+  ""
+ ]
+]
