@@ -46,6 +46,15 @@ cost, M0 before build. Linear WED-162.
 
 ## OWED (Friday)
 
+- 🔴 **Kam could not see ANY Fleet activity card at 22:53** (screenshot in his board message f-9f81b3c88483: "Needs
+  you (0)", "1050 cards synced", "✕ clear" drawn with no project chip lit). Probable cause: a stale saved project
+  filter in his browser that the board does not draw as a chip (`dashboard-cloud/app/static/index.html` renderFilters
+  ~694-695 only draws filters whose agentOfProject() is the active seat; projOk ~809 still applies all of them). Kam was
+  told to tap "✕ clear" (bf-7d53a4eb58e88). FIRST: ask whether the cards now show. Then fix the board (draw every active
+  filter, or drop filters outside this view), claim first: the live board is shared fleet tooling, so mail both sisters;
+  its deploy goes to the board's Azure app, so read dashboard-cloud/README.md for the deploy path and whose grant
+  covers it before deploying. Ledger w=3 (201 is storage, not sight).
+
 - Sister acks still outstanding: the shared inbox-scope hook change (e30563fa5d; threads fa7f0784… Wednesday,
   412cc0c8… Tuesday) and Kam's 16:37 Composer ruling mailed to Tuesday (thread f0f1f881…). Check friday-laptop-agent@.
 - From 10-16, said once, not carded: Spotlight Privacy + Disk Utility First Aid on Laptop-DEV; wordsplit hook refuse
