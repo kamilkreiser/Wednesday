@@ -2831,3 +2831,18 @@ Done: recorded as learnings/2026-11-16_architecture-agents-run-on-the-newest-fab
 > this is the project I would like you to  review and improve '/Volumes/Laptop-DEV/!CODING/Claude to Claude'  the intent of this project is to connect 2 agents (this can be mine or anyones in the world).  As such, there has to be a way to link the 2 agents together.  For phase 1, assume 2 claude code agents but for phase 2 I woulld like to add the ability for users to use different agents from different makers.  Once connected, there should be 2 modes 1)controlled.  Under this mode, the user should be able to monitor every file, folder or service that is being interacted with and approve it.  A possible layout would be to have the chat at the bottom, a visual pain that shows changing code or elements in the main screen and approvals and historical approvals on the right.  this is only an idea and please come up with a better layout if you can.  2) option 2 is approvewd trust.  Once trust is given, the user gets to follow what is going on but no longer has to approve things.  The user should always be able to jump in and pause, ask questions or revoke approval.   Look at how different AI companies have done this (if at all), leverage best practice for multi system collaboration and open source projects.  Some use cases for this solution would be to help trouble shoot someones system, to run a security audit (not part of this code so dont switch out of fable), remote configuration of environments or general collaboration
 
 Done: claimed the project; read-only review of the existing tree + prior-art research + architecture design commissioned to Fable agents.
+
+## 2026-11-16 15:04 — Friday (laptop), Claude to Claude (mid-turn addition)
+> make the solution as easy to deploy and collaborate with and ideally change the natural workflow of AI users as little as possible
+
+Done: recorded as design requirement R-EASE for the architecture synthesis (reference/2026-11-16_claude-to-claude/00_requirements.md).
+
+## 2026-11-16 15:04 — Friday (laptop), Claude to Claude
+> maybe even allow for it to be called within claude code through "/collaborate"
+
+Done: recorded as R-SLASH in reference/2026-11-16_claude-to-claude/00_requirements.md for the architecture synthesis.
+
+## 2026-11-16 15:05 — Friday (laptop), Claude to Claude
+> but create a full browser mode as well.  I wont interfere anymore
+
+Done: recorded as R-BROWSER in reference/2026-11-16_claude-to-claude/00_requirements.md; Friday carries on to the design without further questions unless blocked.
