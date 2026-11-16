@@ -684,6 +684,8 @@ function renderTally() {
   tallyEl.appendChild(s);
 }
 const TYPE_ORDER = ["decision"], TYPE_LABEL = { decision: "DECISION" };
+let drawnProjects = [];
+function activeProjectFilters() { return filters.projects.filter(p => drawnProjects.includes(p)); }
 function renderFilters(decisions) {
   filtersEl.innerHTML = "";
   if (decisions.length || filters.types.includes("decision")) {
@@ -691,13 +693,17 @@ function renderFilters(decisions) {
     b.addEventListener("click", () => { filters.types = filters.types.includes("decision") ? filters.types.filter(x => x !== "decision") : filters.types.concat("decision"); saveFilters(); renderFeed({ resetScroll: true }); });
     filtersEl.appendChild(b);
   }
+  // 2026-11-16 (Kam 22:53 "I also cannot see any items on the fleet activity"): a saved project filter APPLIES only when its chip is
+  // DRAWN in this view. Before, a filter saved on another tab (or for a project with no chip here) was not drawn but still excluded
+  // every card, and only "✕ clear" showed. drawnProjects is the one list both the chips and projOk read.
   const projects = [...new Set(decisions.filter(d => d.agent === activeAgent).map(d => d.project))].sort();
-  for (const p of projects.concat(filters.projects.filter(x => !projects.includes(x) && agentOfProject(x) === activeAgent))) {
+  drawnProjects = projects.concat(filters.projects.filter(x => !projects.includes(x) && agentOfProject(x) === activeAgent));
+  for (const p of drawnProjects) {
     const b = document.createElement("button"); b.className = "fchip" + (filters.projects.includes(p) ? " on" : ""); b.textContent = p;
     b.addEventListener("click", () => { filters.projects = filters.projects.includes(p) ? filters.projects.filter(x => x !== p) : filters.projects.concat(p); saveFilters(); renderFeed({ resetScroll: true }); });
     filtersEl.appendChild(b);
   }
-  if (filters.types.length || filters.projects.length) {
+  if (filters.types.length || activeProjectFilters().length) {
     const b = document.createElement("button"); b.className = "fchip clear"; b.textContent = "✕ clear";
     b.addEventListener("click", () => { filters = { types: [], projects: [] }; saveFilters(); renderFeed({ resetScroll: true }); });
     filtersEl.appendChild(b);
@@ -806,7 +812,8 @@ function renderFeed(opts) {
   renderTally();
   renderFilters(dp.open.concat(dp.ruledToday));
   const typeOk = t => !filters.types.length || filters.types.includes(t);
-  const projOk = d => d.agent === activeAgent && (!filters.projects.length || filters.projects.includes(d.project));
+  const activeProj = activeProjectFilters();   // only filters whose chip is drawn in this view (see renderFilters)
+  const projOk = d => d.agent === activeAgent && (!activeProj.length || activeProj.includes(d.project));
   const needDecs = dp.open.filter(d => typeOk("decision") && projOk(d));
   const updates = dp.ruledToday.filter(d => typeOk("decision") && projOk(d)).map(d => ({ ruled: d, t: d.ruledT })).sort((a, b) => b.t - a.t);
   const prevTop = feedScroll.scrollTop, prevH = feedScroll.scrollHeight;
