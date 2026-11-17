@@ -1,0 +1,64 @@
+cb6ddf0a | date at the drafter start -> Tue 17 Nov 2026 20:32:37 AEDT; 20:33:51 mid-way; 20:37:12 at the last re-check
+4f0bf3b1 | awk NR==20 over web/package.json at b81793d1 -> `    "next": "16.4.2",` (S05)
+7807cb58 | awk NR==20 over web/package.json at b81793d1 -> `    "next": "16.4.2",` (S05)
+1ff49ff8 | npm view / lock read at b81793d1: package.json:20 16.4.2; lock node_modules/next version 16.4.2 (awk NR==6646) (S05, S06)
+e7ad9790 | npm --prefix <scratch copy of web> install next@16.4.5 --save-exact --package-lock-only --ignore-scripts --no-audit --no-fund -> rc 0 (S06)
+a3dfbee7 | python JSON compare of packages{} main vs 16.4.5 lock -> changed entries 11, added [], removed [], top-level non-packages keys equal True (S06)
+83214fd4 | python JSON compare, root entry -> root dependencies.next 16.4.5 (S06)
+7ae6d437 | same install for 16.4.6 -> same 11 entries; 16.4.5 is the target (S06)
+37520039 | npm view next@16.4.5 dist.integrity -> sha512-rmdfsWosjTUO+6R0S3KokoIk6Kj0sWDRTe86tZHdqaWH/oXq/udX3/4xb+YQi7aWbyEFoglDU54kaifLCdXbBw== ; equals the scratch lock value (S06)
+3c80babf | npm --prefix <lock dir> audit --package-lock-only: main lock -> "1 moderate severity vulnerability" (next 16.3.0 - 16.4.4, GHSA-mfr8-8qww-v76h); 16.4.5 lock -> "found 0 vulnerabilities" (S07)
+52d7007d | npm audit --package-lock-only at main lock -> `1 moderate severity vulnerability` (S07)
+639efccc | npm audit --package-lock-only at the 16.4.5 lock -> `found 0 vulnerabilities`; the 16.4.6 lock -> same (S07)
+69ae278b | /usr/bin/grep -r -i -l -E over web/src web/next.config.ts web/e2e web/scripts for the cache family -> 0 files; control outputFileTracingRoot in next.config.ts -> 1, next/server -> 13 files in web/src (S08)
+a1a76327 | web/AGENTS.md at b81793d1 tells the reader to read node_modules/next/dist/docs/ before writing code (sed -n 1,40p printed it); this lane writes no code (S05)
+3ebf7d78 | PATH with .tools/node24/bin first, node --version -> v24.21.0
+8bf6e992 | node --version -> v24.21.0 (begins v24.: True)
+8988b148 | node --version -> v24.21.0 at 20:32
+17785d99 | RELAYED from B1659 STATUS lines 51 and 124 (npm run build rc 1 then rc 0 at 5f6b916b with the notice); the drafter ran no build at either version
+2dd88042 | RELAYED: B1659 STATUS line 124 names SecurityFatalError on every build of every tree; not re-run here (UNMEASURED at 16.4.5)
+9f96022e | RELAYED: B1659 STATUS line 124 quotes this notice text; not run here
+779c645c | gh api -X GET repos/datasecau/HPSM-POC/commits/main --jq .sha at 20:33 -> b81793d15f41d133f5c2657329e31aef3ac00322; scratch clone HEAD equals it (S04)
+26c20785 | gh api -X GET git/matching-refs/heads/b1672 --jq length -> 0 (control heads/b1658 -> 1) (S04); proposed new branch name only
+f28dd0cf | /usr/bin/grep -c -F on this kit for the phrase -> counted by stamp_check over the kit text; a protocol phrase, not an output
+d09e6d00 | gh api -X GET repos/datasecau/HPSM-POC/pulls/99999 -i | head -1 -> HTTP/2.0 404 Not Found (20:37)
+421128f5 | gh api -X GET repos/datasecau/HPSM-POC/pulls?state=open -i | head -1 -> HTTP/2.0 200 OK; length 0
+7fa851eb | npm view next@16.4.5 version -> 16.4.5 (20:37)
+ffb1dd02 | npm view next@16.4.5 deprecated -> empty (no deprecation); NO positive control found (next@9.0.0 also empty), so absence of a deprecated field is weakly measured
+1426e955 | gh api -X GET repos/datasecau/HPSM-POC/dependabot/alerts?state=open -> #11 next web/package-lock.json GHSA-mfr8-8qww-v76h 16.4.5 ; #10 next web/package.json GHSA-mfr8-8qww-v76h 16.4.5 (S04)
+a19308e2 | same command as e7ad9790 (rc 0, 11 entries, S06)
+fbf67a1c | path .tools/b1672/head does not exist yet: a name the seat creates (instruction); drafter scratch clone is fleet/state/s286/d1672/clone
+6d59e624 | gh api -X GET ...dependabot/alerts?state=open at 20:33 -> alerts 10 and 11 as above (S04)
+50eead3f | S07 line at main lock: 1 moderate severity vulnerability (npm audit --package-lock-only); the seat re-runs it as npm audit --omit=dev (not run by the drafter)
+7e6c6a53 | instruction to the seat, not an output the drafter observed; the fact under it is in S-lines (no run by the drafter)
+f9714e08 | instruction to the seat, not an output the drafter observed; the fact under it is in S-lines (no run by the drafter)
+f12e0863 | instruction to the seat, not an output the drafter observed; the fact under it is in S-lines (no run by the drafter: no node_modules installed in scratch; expected 16.4.5)
+749af50e | instruction to the seat, not an output the drafter observed; the fact under it is in S-lines (same)
+51ac5d9a | ci.yml line 390 at b81793d1 -> `        run: npm audit --omit=dev --audit-level=high` (S09); the drafter ran the lock-only audit of S07, not this form
+171cb7bd | ci.yml line 395 at b81793d1 -> `        run: node scripts/audit-dev.mjs` (S09); not run by the drafter
+0f9abe15 | npm audit --package-lock-only is S07; the seat runs the full form
+81a320e4 | ci.yml line 396 area: `- run: npm run lint` (S09); not run by the drafter
+b7c0dc13 | ci.yml typecheck step (S09); not run by the drafter
+3d0aebf3 | ci.yml line 413 at b81793d1 -> `      - run: npm run build` (S09); not run by the drafter
+06377e3e | ci.yml line 426 area: `run: node scripts/e2e.mjs --check-shards` (S09); /usr/bin/grep -o -E count of SHARDS names in e2e.mjs -> 8, equals the matrix length 8; the check itself not run
+ac9019b2 | instruction to the seat, not an output the drafter observed; the fact under it is in S-lines (shard names playbook-desktop-1 to playbook-mobile-2 are in e2e.mjs SHARDS, S09)
+37dd5d93 | instruction to the seat, not an output the drafter observed; the fact under it is in S-lines (Step 5e scan over the commit message; the drafter measured the commit subject length: 67 characters by wc -c)
+8fe219b7 | instruction to the seat, not an output the drafter observed; the fact under it is in S-lines (directory web exists in the clone)
+5d6e59f2 | ls web/node_modules in the drafter scratch clone -> No such file or directory (a clone has none; the seat runs npm ci); not an output the kit relies on
+7e34ed2f | the lock key node_modules/next exists (S06); the planted-control step edits it
+f94382c9 | same instrument as 3c80babf (S07); the planted-control result is for the seat to produce, UNMEASURED by the drafter
+62b058de | S07 main line; the planted 16.4.4 lock is a seat step, UNMEASURED
+f3debbf5 | git ls-remote on the drafter clone for a b1672 ref -> 0 lines; the origin read was gh api matching-refs -> length 0
+0eef7f6e | instruction to the seat, not an output the drafter observed; the fact under it is in S-lines (a file the seat writes)
+6e58468b | the allowed network read form; drafter used gh api -X GET only for reads
+fdfeaca7 | git over the deploy key: the drafter ran one shallow clone with core.sshCommand naming github_deploy_rw (not analysis_deploy_rw); rc 0, HEAD b81793d1
+S01 | jdesc.py (GET-only, creds by env name, never printed) HPSMPOC-508 -> status Backlog, upd 2026-11-17T16:16, labels dependabot,follow-up,rec-2026-11-17; description BLUF as quoted in the kit; saved scratch d1672/jira508.txt
+S02 | npm view next versions --json -> 4038 versions; stable 16.4: 16.4.0 .. 16.4.6; dist-tag latest 16.4.6; canary 16.5.0-canary.53
+S03 | npm view next time --json -> 16.4.2 2026-10-15, 16.4.4 2026-11-02, 16.4.5 2026-11-03T18:01:54Z, 16.4.6 2026-11-09T20:33:38Z; deprecated field empty for both (weak, see ffb1dd02)
+S04 | gh api -X GET (GH_CONFIG_DIR of HPSM-POC): commits/main b81793d1... ; pulls?state=open length 0; matching-refs/heads/b1672 length 0 (control b1658 1); pulls?state=all latest #331 closed b1658/hpsmpoc-revenue-unit-suffix-one-width; dependabot alerts #10 and #11 as in 1426e955
+S05 | web/package.json at b81793d1: line 20 "next": "16.4.2"; line 41 "eslint-config-next": "16.3.6"; web/AGENTS.md first lines
+S06 | lock compare by python JSON at b81793d1 vs scratch install: 11 entries changed: "", node_modules/next, node_modules/@next/env, 8 x node_modules/@next/swc-*; eslint-config-next lock entry 16.3.6 untouched; package.json diff 1 line; lock diff 168 lines unified, 80 changed lines (diff | grep -c), lock 9225 lines; integrity of next 16.4.5 equals registry; 16.4.6 same 11 entries
+S07 | npm --prefix <dir> audit --package-lock-only: main lock -> next 16.3.0 - 16.4.4 moderate, 1 moderate severity vulnerability; 16.4.5 lock -> found 0 vulnerabilities; 16.4.6 lock -> found 0 vulnerabilities
+S08 | /usr/bin/grep -r -i -l -E cache-family over web/src web/next.config.ts web/e2e web/scripts -> 0; controls: outputFileTracingRoot 1 in next.config.ts, next/server 13 files, use client 116 files
+S09 | ci.yml at b81793d1: 372 web build job; 390 npm audit --omit=dev --audit-level=high; 395 node scripts/audit-dev.mjs; 396 npm run lint; 413 npm run build; 426 e2e --check-shards; matrix of 8 shards; audit-dev.mjs header: EXCEPTIONS frozen empty, blocking high and critical
+S10 | lsof -nP -iTCP:9900-9909 -sTCP:LISTEN -> 0 rows (and 9910-9919, 10200-10219 -> 0); word-boundary scan 990x over 55 non-.pre- SEAT kits of 16 and 17 Nov -> 0 files; control 997x -> 3 files

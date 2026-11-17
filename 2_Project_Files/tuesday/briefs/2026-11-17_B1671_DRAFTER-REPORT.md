@@ -1,0 +1,12 @@
+STARTABLE: YES, after the stamp; one default needs Tuesday's eye (Q1: the added words are the ticket's own acceptance phrase "any mapped model sheet's", staff-visible only inside a stored file, 0 readers in code; if Tuesday holds it needs the owner's word, do not launch)
+
+# B1671 drafter report: MPS lane M-I (MPSCALC-207 clause 3), seat M155
+Drafted 2026-11-17 20:32-~20:50 AEDT. Kit: briefs/2026-11-17_B1671_SEAT-M155_mps-lane-m-i-panel-block-lineage-note.md (+ .measured; stamp_check: 52 claims, 52 measured, rc 0; 8 stamp slots left as four underscores). Scratch clone and logs: fleet/state/s286/d1671/.
+
+- Base: MPS main 125f7a52eb2514179147644578a86d8768e532f9 (re-read; 0 open PRs; 0 b1671 refs). MPSCALC-207 Backlog, newest comment 41234 (2026-11-15).
+- Change: ONE phrase on PriceBookImporter.cs:150 ("every row of a model sheet's" -> "every row of any mapped model sheet's") plus ONE new red-first test row at the end of PanelSectionEndTests.cs (11 added lines, the row comment 40944 asked for). Branch b1671/mps-lane-mi-panel-block-note, one commit, no PR.
+- NOT MEASURED item closed: NO test, doc, golden or stored artifact pins the note text. The only test naming PANEL-BLOCK matches by Code (PanelSectionEndTests.cs:164,166); 0 files outside the importer read any lineage text (src, web, tools, Api/Engine tests); no tracked file other than the importer holds the string. So no pin edit, no regeneration. Stores held outside the repo keep the old text until re-import (reported only).
+- Measured in my scratch clone (heavy-lock slot 1 taken and released; load1 5.4-5.8, reads minutes apart, disclosed): base build 0 warnings, Import tests 196 passed; RED 1 failed of 197 (the new row, "Sub-string not found"); GREEN 197 passed, 0 warnings; diff --check rc 0. Blobs predicted: source b28b2b9a..., test 3ed8d982.... Api/Engine tests NOT run (hosted CI; nothing reads the text).
+- Model: claude-sonnet-5-5 (models_latest.json:23), row C2 (two files; the sweep said L1 which is one file), gate G2; pane Datasec/MPS-M155; launch carries BRIEF_SEAT_LEVEL=sonnet.
+- Context Tuesday should know: on 2026-11-10 the then-coordinator ruled reading A for lane M10 (path not granted, no commit); C-154 (11-15) then listed the words as "to the words review first". The kit prints both and takes reading B on the sweep's commission; the parity sentence at the note's end ("does not compare them", incomplete since #84/#122) is deliberately untouched (Q3).
+- Hold: seat pushes a branch only; Tuesday opens the PR and lands (CodeQL rule). Nothing deployed.
