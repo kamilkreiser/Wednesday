@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-18 09:00 from 279 lesson files (1,185,409 B). M 40 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 229. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-18 09:35 from 281 lesson files (1,191,505 B). M 42 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 229. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -7986,6 +7986,19 @@ sections (open the file for these): How to apply · First application (same minu
 4. A finding in history is fixed by a fresh repository from a cleaned copy or by a history rewrite; both are Kam's decision (the rewrite is irreversible).
 
 
+## A fix a seat extends beyond the paths the ruling named is a STOP question, not a courtesy: the extension is unreviewed design, and it is where the round's new fault came from
+`2026-11-18_a-fix-extended-beyond-the-named-paths-is-a-stop-question.md` · lesson · 2026-11-18 · status: live · tier: M
+
+**The operative case.** Friday is writing a ruling of the form "do X in these N places", or reading a seat's report that says "I also did X in two more places". **Say in the brief that the list is closed, and read every "also" in a report as a new change that nobody ruled on.**
+
+**How to apply:**
+1. **A ruling that names places says the list is closed:** "these four and no others; if you find the same shape elsewhere, list it with the lines and STOP on it". The later audit-fix brief has this form ("look, report, and fix under the same rule only where you show it").
+2. **In a report, every "also", "in addition", "while I was there" is a change with no ruling behind it.** Before commissioning the check, name each one in the check's brief as an item to attack first, not as a line in a list of things to rule on.
+3. **When a fix moves an operation earlier (store before apply, write before check), ask what the later step was protecting.** An order was there for a reason; the brief asks the seat to state that reason for each path before it reorders anything.
+
+**Family:** [[2026-08-04_validate-brief-pointers]] (validate the EXTENSION of what a brief commissions) · [[2026-08-07_enumerate-every-surface-before-done]] (finding the sibling is right; fixing it unruled is not) · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("the same fix" is a classification nobody checked).
+
+
 ## A gate keyed on tool NAMES misses the next tool that runs a command: brief the gate on what the input DOES, never on what the tool is called
 `2026-11-18_a-gate-keyed-on-tool-names-misses-the-next-tool-that-runs-a-command.md` · lesson · 2026-11-18 · status: live · tier: M
 
@@ -7998,4 +8011,19 @@ sections (open the file for these): How to apply · First application (same minu
 4. **In a gate commission, ask for the sibling:** "which other inputs reach the same effect by another route?" is a standing line in the check's attack list.
 
 **Family:** [[2026-11-17_a-recogniser-of-safe-shell-commands-cannot-be-finished]] (the same piece: an allow-list of safe commands cannot be finished; here an allow-list of dangerous tools cannot either) · [[2026-08-07_enumerate-every-surface-before-done]] (list the render paths; here, list the tools) · "A guard's refusal set is built from MISSING and MALFORMED" and "Read a guard's EXCLUSION list before trusting the guard" (the class a guard skips is where the failure is).
+
+
+## A seat that waits past the prompt cache on a long run gets compacted: its brief says what to re-read, and the coordinator sends a re-read line the moment the pane shows it
+`2026-11-18_a-seat-that-waits-on-a-long-run-gets-compacted.md` · lesson · 2026-11-18 · status: live · tier: M
+
+**The operative case.** A build seat has started a run that takes longer than about an hour (a full check, a five-run test, a hundred red-control rows) and ends its turn to wait for it. **Expect the host to compact that seat's context while it is idle.** The pane then shows a line saying it was compacted while idle and names the setting that turns this off. From that moment the seat's closing report, the part a check and an owner read, would be written from a summary.
+
+**How to apply:**
+1. **Every build brief carries the sentence** "after any context compaction, re-read this brief and your own STATUS file WHOLE before you write anything more". The two briefs of 18 November have it. It costs one line and does not depend on the coordinator being awake.
+2. **Read the pane on every idle alert.** An acknowledgement without a look would have hidden all three. The pane line is the only signal.
+3. **The remedy line names the seat's brief or addendum** (a seat is told to act on nothing else at its prompt), says what to re-read, and says whether a run of the seat's own is still alive, measured by `ps`, so it does not start a second copy.
+4. **A seat reports its long runs' results into its STATUS file as each ends**, not only in its head: then a compaction loses nothing that matters. Ask for "update STATUS at least every 20 minutes" and check the file's time, not the pane.
+5. **Whether to turn idle compaction off for build seats is a settings change and the owner's choice.** Friday has not changed any seat's settings. It is on the list for Kam.
+
+**Family:** [[2026-08-03_context-discipline-close-before-full]] (never work on summaries of summaries; here the summary was imposed while the seat slept) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the brief sentence is the in-path form; the coordinator's line is the backstop) · [[2026-08-06_artifact-presence-is-not-execution]] (an idle alert says a turn ended, not what state the seat is in).
 
