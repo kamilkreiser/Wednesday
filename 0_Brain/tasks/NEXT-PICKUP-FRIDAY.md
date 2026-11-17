@@ -63,6 +63,8 @@ Project: `/Volumes/Laptop-DEV/!CODING/Claude to Claude/coagent/` (repo `2_Projec
 
 ## OWED (Friday)
 
+- **FUTURE PROJECT named by Kam (live board 2026-11-17 20:30:00, verbatim in the ledger): after Claude to Claude, "redesign of os system based on user ID (key) tokenised infrastructure. lots of details to come."** Nothing starts until he brings the details. OWED: file it in Linear (General, Backlog) with his words and the two panel answers of the same evening (note 2026-11-17, the 20:26 and 20:28 lines). Two points Friday told him are UNVERIFIED and offered to check, not started: whether Claude Code on a subscription login works through a local swap program, and whether the subscription terms allow altering the traffic.
+
 - 🔴 **A launch must not replace a fleet session that holds live agent panes** (ledger 2026-11-17): find what ran at 07:37-07:39 (a new wake_watch armed 07:37:49; session created 07:39:40), then make the launcher refuse or re-attach, with an arm. Shared tooling: claim first, mail both sisters.
 - 🔴 **`tools/safe_pull.sh` loses rulings** (ledger 2026-11-17, first row of the night): per-id merge, ruled beats open, with a failing arm. UNTIL FIXED: after ruling any card run safe_pull + `git push` in the same action and recount `decision_queue.sh list open`.
 - The n5 card's tile-hide was not re-run after its live write failed once: `kam_rulings_today.sh` will show it if his board still has it.
