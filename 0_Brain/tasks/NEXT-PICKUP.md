@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 16:4x 17 Nov, the 14:52 rotation successor (ctx ~40%) - READ FIRST; supersedes every block below where they differ
+- **FLOOR EMPTY. Gauge 97%.** Told Kam (bf-a6e855c69de7): nothing new launches unless he asks; Wednesday stays answering.
+- **Today since 14:52 (all scored + closed):** W 35th 0.95 (PR 2252 KS-2253 Redis mask), D 71st 0.95 (Kintsugi k34 auth+transfer at fab4edcdcd07), S 89th 0.96 (9 archived + 3 archive-only), S 90th 0.96 (filed KS-2254..KS-2263; closed KS-2167, 784, 785, 657, 2083, 1954, 1797). Gate 378 GWN on PR 2252.
+- **FRIDAY (after the account switch), in order:** (1) MERGE PR 2252 (gate 378 GWN, head 62124803a881; re-pin; one-row merge seat, lean delta on K 51st's brief); (2) a D seat deploys api-gateway to Kintsugi (k35; D 71st's FOR A SUCCESSOR); (3) the Redis password ROTATION on Kintsugi (Kam 14:45 = a) with a HEX password (gate 378 F2); (4) the DEMO round (delta posted to Kam: 18 squashes, REBUILD 29/33, 0 migrations; Kam told "Friday unless sooner"); (5) B 204th (staged) and K 52nd (re-draft) merge briefs. Re-measure develop first: it has not moved since fab4edcdcd07 at 16:4x.
+- **Open for Kam / held:** KS-2122 (notifications not ruled by Kam; decide if it needs a card). KS-771 parent stays (children KS-1149, KS-365, KS-412/418 Peter's). KS-2262 (Medium, role allow-list prototype keys) is a build candidate for Friday.
+- **Wrap duty owed (this seat edited _ledger.md: a praise row):** regenerate BOTH boot digests at the wrap (`boot_digest.py --by-tier` AND bare).
+
 ## 🔴 UPDATE 16:1x 17 Nov, the 14:52 rotation successor - READ FIRST; supersedes every block below where they differ
 - **KINTSUGI k34 COMPLETE (D 71st STATUS B 05:09Z):** develop fab4edcdcd07 for transfer c848dab07df5 + auth 04a08563981f; watch clean; KS-535 0; rollback pre-20261117k34 (idfp 02c59f9ba39e3da4). Receipt posted to Kam bf-e4110e97d348. D 71st wrapping: SCORE + pane_close owed on its wrap mail.
 - **DEMO delta POSTED to Kam (same post; grant line 11 requires this BEFORE any demo swap):** eb27110fc6e4 -> fab4edcdcd07: 18 squashes, 93 files, 0 .sql, 0 infra; map REBUILD 29 of 33 (most shared-only keyRevokePolicy.ts; own-code: analytics, api-gateway, auth, demo-service, mcp-server, migrations, originate, security, staking, transfer, verifier-frontend). Measurement: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-17_seatD-71st/evidence/demo_next_measure.txt. **Plan told to Kam: run the demo round FRIDAY after the account switch unless he says sooner.**
