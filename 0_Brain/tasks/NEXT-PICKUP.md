@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 11:08 17 Nov, the 09:5x rotation successor (ctx 65%) - READ FIRST; supersedes every block below where they differ
+- **develop df2291409217** (PR 2059 by B 200th, verified 10:45: one parent e42118ad08cc, tree 6307d2d8b8cd). **Merges since 15 Nov evening: 67** (this seat: 2176 by K 48th, 2059 by B 200th). **No GO in flight.** Kam: 4 messages today, newest 07:37:54 (FRESHNESS 11:06:47).
+- **FLOOR:**
+  - %265 **K 49th** (Sonnet; fleet/briefs_staged/2026-11-17_seatK49_merge.md, STAMP K49-W1..W6; 13 rows from PR 2188 KS-2167, gate 314 line 1 GWN, T2): plan ANSWERED 00:07Z (2026-11-17_K49_answer_plan.md: 38.0 stop ruled in advance as report-not-stop while re-forecast READY < 58). NEXT: SET-UP CLOSED STATUS -> READY 2188 -> GO (shape 2026-11-17_K48_go_2176.md; NAME G314-2188-2: a failed export's log line is silently dropped when the logger throws; MERGED says 'this merge deploys nothing', no demo mention) -> verify at source -> WRAP naming PR 2170 (expected).
+  - %232 **D 69th** (Opus, DEMO): SWAPS DONE 27/27 OK on eb27110fc6e4 (STATUS 3, 00:02Z); 15-min watch reads 00:12:30Z; NEXT: REVISION, STATUS B + Kam's receipt draft -> post the receipt on Kam's panel (what Peter/Stuart see; 5 accounts keep named roles) -> score -> pane_close -> THEN launch D 70th.
+- **DRAFTER (subagent of THIS seat; RE-COMMISSION from 0_Brain/reference/2026-11-17_drafter-seatB201/commission.md if fleet/briefs_staged/2026-11-17_seatB201_merge.md is absent):** B 201st, 8 rows from PR 2136 (KS-2151, docs, S-K contract), FIRST suffix change th->st. NEXT: read whole, spot-check gate 291 line 20 + head at source, STAMP, capacity ROOM, launch Sonnet.
+- **STAMPED, WAITING:** D 70th Kintsugi k33 (fleet/briefs_staged/2026-11-17_seatD70_kintsugi_k33.md): launch ONLY after D 69th's wrap is read and its pane closed (SEAT_MODEL_ENV=claude-opus-5-5 brief_and_launch.sh --to Secuura/Blockchain-D). Since its draft develop gained 2161, 2192, 2066, 2176, 2059: its STATUS A re-derives (W5); mcp-server and demo-service now in the delta.
+- **Scores this seat:** K 48th 0.94, B 200th 0.97.
+- **Kam's panel:** told demo was slow (bf-9c099b33f867) and then normal again (bf-5dae6f7cf3b6); the final receipt is OWED after D 69th's STATUS B.
+- **OWED (carried):** board seat (KS-2250 comment; gate notes G316-2192, gate 245 F1-F3, gate 258 N1-N4, G302-2161, G311-2176-1..6, gate 250 R2-1..R2-7 + M2 5xx test); Stuart's KS-772 comment 14dce195; Secuura brief item: launcher boot-step cd (K 49th did it again); INDEX.md refresh; --help advisory hook; weekly consolidation (lapsed); brief_and_launch refusing on capacity FULL; send_brief check for an un-run 'live read'.
+
 ## 🔴 CHECKPOINT 10:16 17 Nov, the 09:5x rotation successor (ctx 52%) - READ FIRST; supersedes every block below where they differ
 - **develop e348b0208894** (unchanged since PR 2066). **No GO in flight.** Kam: 4 messages today, newest 07:37:54 (FRESHNESS 10:15:35); reconcile to rule 0; newmail 0 at this block; stale cards 0. Gauge 7d 86% (80-90 band: launch receipts name the clause).
 - **FLOOR (one GO at a time across K and B):**
