@@ -75568,5 +75568,45 @@
   ],
   "delivered_artefact": "Seven dismissed 15:34 (142,143,144,147,148,149,150; won't fix, comments read back); open 29->22; RD-805 c41346, RD-804 c41347 + Done; C-298",
   "delivered_ts": "2026-11-17T15:37:47.969169+11:00"
+ },
+ {
+  "id": "general-c2c-daemon-third-check-failed-1117",
+  "client_project": "General/Claude to Claude",
+  "title": "CoAgent background service: the third and last check failed on one fault. What now?",
+  "bluf": "The background service did not pass its third check, so it is not merged. This was the last allowed round, so it comes to you. What held: the hard-stop fault from round two is fixed, everything else round two named is fixed, and peer text still cannot escape its wrapper. One serious fault remains, of the same kind as in rounds one and two (a relay leaving a session stalled). The relay numbers each frame it passes on. If a relay sends one frame with a forged, enormous number, the receiving side records that number, saves it to disk, and from then on never acknowledges real messages; after 500 messages the sender is refused and the session stops. It survives a restart of the service. The checker ran it: 500 of 600 messages arrived, then nothing; 498 of the next 600 after a restart. Context you should weigh: in this product a relay is run by someone in the session (there is no public relay), and whoever runs a relay can always cut a session by switching it off. What is wrong here is that one bad frame does lasting damage after the relay behaves again. No content is exposed. Three rounds have each found a different stall of this kind, so I do not recommend another single patch. I recommend the same step you chose for the audit log: a design agent first writes down every value the service takes from the relay on trust and how each side recovers, then one build and one check. Source: gate verdict reference/2026-11-16_claude-to-claude/m1_review/gate_M1_DAEMON_r3_verdict.md by an independent Opus checker; Friday has read its first lines, its one Major finding whole and its closing section, not the whole 268-line file. (Prior-ruling check overridden: this is the outcome of the third check you approved at 07:26 on card general-c2c-daemon-policy-third-check-1117; that answer is spent, and this asks what follows it.)",
+  "default_action": "The background service stays unmerged and nothing is sent back to its build session until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Design the recovery rules as a whole first, then one build and one check",
+    "detail": "Recommended. Same route as the audit log"
+   },
+   {
+    "key": "b",
+    "label": "One more patch and a fourth check",
+    "detail": "Faster. Three rounds have each found a new stall"
+   },
+   {
+    "key": "c",
+    "label": "Merge it with the weakness written down",
+    "detail": "Only the person running the relay can do this, and they can already switch it off"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T17:35:22.229327+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-signin-hardening-third-round",
+   "CARD hpsmpoc-feedback-files-third-round-1007",
+   "CARD mpscalc-pr102-cap-nogo-third-round-1024",
+   "CARD nexusai-143-roster-third-round-1030",
+   "CARD nexusai-143-roster-after-third-round-1030",
+   "CARD composer-pcomp102-third-round-on-capped-class-1101",
+   "CARD hpsmpoc-388b-cap-land-or-third-round-1101",
+   "CARD composer-pcomp116-third-round-1103"
+  ]
  }
 ]
