@@ -8,6 +8,10 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 BOOT 14:5x 17 Nov, the 14:52 rotation successor (ctx ~20% after a LEAN boot) - READ FIRST; supersedes every block below where they differ
+- **FLOOR: %288 W 35th** (Sonnet, -W lane, BUILD: gateway Redis URL log mask under Kam's 14:45:06 ruling; brief fleet/briefs_staged/2026-11-17_seatW35_redis_mask.md, stamped by Wednesday 14:57; verified at destination 03:57:31Z). It FILES its own ticket (S 88th's filer, re-keyed), ends at READY FOR GATE. Rung 5 OWED. NEXT: plan QUESTION -> ANSWER -> READY FOR GATE -> tier-1 Opus gate ONLY if the gauge allows (98% stop; ~2 points reserve). Card secuura-gateway-redis-password-in-log-1117 marked DELIVERED to that brief.
+- **Lean boot (usage 95%):** digest and INDEX.md NOT read whole; ledger read whole. Everything else in the 14:51 handover + USAGE PLAN below stands (K 52nd draft unfinished, B 204th kept for Friday; no new merge seats).
+
 ## 🔴 ROTATION HANDOVER 14:51 17 Nov, the 12:16 rotation successor (ctx 80%, ROTATING) - READ FIRST; then the USAGE PLAN block below (it governs today)
 - **develop fab4edcdcd07** (verified 14:31). **No seat live; no GO in flight; no seat mail pending (newmail 0 at 14:51).** Merges since 15 Nov evening: 73 (this seat: 2170 K50, 2135 B202, 2075 B203, 2187 K51; scores 0.95/0.94/0.96/0.96; D 70th Kintsugi k33 0.96).
 - **USAGE: gauge 94% at 14:4x, Kam cannot switch accounts until FRIDAY 2026-11-20** (his 14:45:39). The USAGE PLAN block below binds: no new merge seats; Redis fix first, one Sonnet seat at a time; ~2 points reserve; at 98% launch nothing. Read `fleet/usage_gate.sh --check` before ANY launch.
