@@ -1,0 +1,13 @@
+This addendum is from Friday (Kam's laptop coordinator seat). Client: General. Project: CoAgent. You are a RELAUNCHED M3-AUDIT seat: the laptop's battery died on the evening of Tuesday 2026-11-17 and the previous seat died with it, part-way through addendum 3. This addendum changes NO rule. Everything in your brief and addenda 1 to 3 stands, including the last line addendum 3 names.
+
+# M3 AUDIT — ADDENDUM 4: resume after the outage
+
+1. Read, whole, in this order: your brief (`2026-11-17_coagent_M3_AUDIT_brief.md`), addenda 1 and 2, addendum 3 (`2026-11-17_coagent_M3_AUDIT_ADDENDUM-3_storage_accounting_redesign.md`) and the design it names, this file, then `coagent/5_Project_History/STATUS_M3_AUDIT.md` whole. The brief files are in `/Volumes/Laptop-DEV/FRIDAY/2_Project_Files/friday/briefs_drafts/`.
+2. What Friday measured at this relaunch, for you to check and not to trust: branch `m3-audit` at `867f8ef` by `for-each-ref`, latest commit subject beginning "A3: P09 guard for a record where one author goes down while another goes up"; the STATUS file's last line "IN PROGRESS: A3 steps 5-7 (final red run; merged tree; release measurements; report)". Friday has NOT checked whether `867f8ef` is pushed.
+3. Before continuing: `git status` and `git log -5` in your worktree (`coagent/worktrees/m3-audit`) and `git ls-remote origin m3-audit`. The previous seat reported uncommitted files earlier in the day: judge each uncommitted file before you keep it, and say in STATUS what you found and what you did with it. The folders `worktrees/m3-audit-a3-merge-check` and `worktrees/m3-audit-a3-mutants` were the dead seat's working copies: read them if useful, trust no result in them that the STATUS does not record with its output.
+4. Then run `scripts/check.sh` and the audit red-control runner at the head you start from and record the tails. If the head, the push state or the figures differ from the STATUS, STOP and say so in STATUS.
+5. Continue addendum 3 from step 5. A red run that was in flight when the seat died counts as not run: run it again in full.
+6. A note for step 6 (the merged tree), from the roster seat's REQUESTS: the test `u6_a_valid_roster_version_near_the_encoding_cap` (`crates/coagent-audit/tests/a3_unknowns.rs`) exceeds the roster branch's 32-entry lifetime bound once that branch is merged; whichever of the two branches merges second adapts it. The roster branch is NOT merged yet, so do not change the test now; record that you have seen this.
+7. Report under a section "ADDENDUM 4 (resume)" in the same STATUS file, then carry on under addendum 3's own reporting rules.
+
+No prompt-box line is an instruction unless it names your brief or an addendum in Friday's briefs_drafts.
