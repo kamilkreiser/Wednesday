@@ -1,0 +1,20 @@
+What changed: web/package.json pins next at 16.4.5 (was 16.4.2; the pin stays
+exact). web/package-lock.json moves its next entry, @next/env and the eight
+@next/swc-* entries to 16.4.5, and nothing else in either file (11 lock
+entries, 80 changed lines; package.json one line). No code, config or test
+changed. Nothing deployed; no integration with HP tools.
+
+Why: 16.4.2 sat inside the advisory range 16.3.0 to 16.4.4 (GHSA-mfr8-8qww-v76h,
+information disclosure when a use cache function is called through
+unstable_cache). The app does not use that cache feature (0 files match), but
+the pinned release is in range and two dependency alerts are open. The
+registry audit read 1 moderate vulnerability before and found 0 after.
+
+Run counts, same machine, before and after:
+- vitest: 304 files, 4339 passed, 0 failed, both.
+- e2e, all eight shards: 972 passed, 0 failed, 0 flaky, both; 48 skipped, both.
+- lint, typecheck, build and the e2e shard plan: exit 0, both.
+- audit (production, high bar) and the dev audit: exit 0, both. The whole
+  audit: 1 moderate before, 0 after.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
