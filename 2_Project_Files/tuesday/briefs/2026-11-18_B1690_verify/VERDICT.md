@@ -1,0 +1,64 @@
+GATE B1690: GO WITH FINDINGS @ 700ed93 on main 2de5e84
+
+Reviewer: independent G2 (tests-only tier), Sonnet, in-session. Target: datasecau/Reporting_Dashboard_Au, branch `b1687/nexusai-lane-nx-l-log-sink-tests`, head `700ed93a9da2a91613c0fcee00d32ffc65298bd6` (ONE commit, parent = main `2de5e84c799e32232d65cd759085d728d7141583`; `ls-remote` at the end: branch = that head, main still `2de5e84c`). Clock `date` 18 Nov 2026 07:21 to 07:55 AEDT. Own clone and four worktrees under `fleet/state/s288/g1690/` (jest slot 17, band 30880-31519, `lsof` 0 listeners before and after every run; slot 6 never used), `npm ci`, `env -u NODE_OPTIONS`, `--maxWorkers=2`, load1 4.78 and 5.90 at the two gate reads 120 s apart. One lock acquisition (`b1690-gate`, acquired after 0 s, 07:27:41 to 07:52:06) holds every red-first run and the full verify; a second 9-second acquisition (`b1690-gate2`) re-took one measurement, see F6. No host, address or revision value was printed or is written here; `backend/server.js` is named by file and anchor string only, never by a range.
+
+## Findings
+
+| # | Severity | Finding |
+|---|---|---|
+| F1 | Minor | The new job-line mask is a SHAPE (digits and `/ . , : -` and space, lazily, between two digits, then an optional am/pm), not a date validator, so it also hides a digits-only or digit-and-punctuation string in the time slot. Measured on the head file's own `clockMasked`: `12345`, an epoch in ms, `99`, `1.2.3.4`, `1 - 2` and a digit glued before a real time (`7 06/11/2026, 6:44:28 pm`) all compare EQUAL to a real time (a product change that printed a bare number there would stay green). Letters, words and punctuation markers before or after the time, `Invalid Date`, `invalid date`, `undefined`, `NaN`, an empty string, `6:44:xx`, `(x)`, `: ok` and a glued `Z` all compare DIFFERENT (the three ticket plants and every adversarial letter string are caught). The expression is the one the ticket itself proposes, so the lane met the ticket; this is a limit to know, not a defect. No action needed now; a later tightening could require a `:` and a 4-digit year. |
+| F2 | Info | Locales the kit did not list: `ar-EG`, `fa-IR` and `ko-KR` (native digits or a Korean am/pm word) are NOT hidden by the mask (15 of the 18 locales tried are hidden, including the kit's seven). Unreachable today because every boot of the file pins the child to C.UTF-8; only a future change of the pin would show it. |
+| F3 | Info | Item 3 is done in the rd798 file's own boot env (kit decision, first-listed option) rather than in the shared harness the ticket names: 5 `bootServer(` calls and 5 spreads of `LOCALE_ENV` plus the one definition (the sixth grep hit of `bootServer` is the import line); the harness applies a cell's env last (`rd395-server-harness.js` Object.assign with `extraEnv` after its own keys), and the locale run proves it reaches the child. rd799 and rd800 hold no locale pin and were green under de_DE at BASE and head. |
+| F4 | Info | Route 190 values: each state's frozen hash equals the real, unmasked answer of that state (my own dump of the answer text in both states, two runs, `sha256("<status> <text>")` equals the cell's canon with the new mask list, so no mask touched it): day = `Critical Issues (7)`, no off-hours paragraph; night = `Critical Issues (8)` plus the off-hours paragraph (it names 1445 jobs from the seeded data, stable across 7 boots in this gate). Day != night, `p190` = `h190` within each state, the two runs agree. This dump is how I know the 1445 is seeded and stable; if the demo seed ever changes, the night cell goes red by design. |
+| F5 | Info | A merge touches only `__tests__/**`, which is not in `deploy-demo.yml` paths-ignore (`**.md`, `docs/**`, `tests/**`; the folder here is `__tests__`), so a merge to main WILL start Deploy demo; its jobs are gated on the variable `CI_DEPLOY_ENABLED`, not measured here. Tuesday should read that run. |
+| F6 | Process, mine | My first measurement dump wrote to a path that jest's own `--outputFile` then overwrote (same name), so the first acquisition had no dump. I re-ran only the dump, twice, in a second short lock acquisition (9 s, two boots), scratch file moved to quarantine, porcelain 0. Every other number is from the first acquisition. |
+| F7 | Info | `author` equals `committer` (display name and email); both emails equal the project repo's configured `user.email` (byte `cmp`, equality only); the author display name has 0 ban-list hits. Commit message and every added line: names 0, ids (B/N/card/decision/REC-REG) 0, dotted quads 0, host words 0, non-ASCII 0; ticket keys present: RD-980 only. gitleaks `stdin` over the diff: no leaks (control: a planted non-example AKIA-shaped pair reports 1 leak; the well-known AWS example key is allow-listed and does not fire). The secret-word multiset shows only the two re-added `API_KEY` env lines, equal added and removed. |
+| F8 | Info | The third log-injection file (rd800) is not edited; the full verify prints no "worker process failed to exit" line this time. |
+
+No blocking finding.
+
+## Judgement (check 4): MASK-COUNT and MASK-PARAGRAPH as negative controls: KEEP
+
+They are string comparisons of the test file's own helper, so on their face they only test that two masks are absent. Measured value: plant T2 (both masks put back) turns exactly `MASK-COUNT`, `MASK-PARAGRAPH`, `C-BODY-HOURS IN 190` and `C-BODY-HOURS OUT 190` red. The two 190 cells would also catch a mask coming back, but only until someone "fixes" them by re-freezing the hashes with the mask present; the two MASK cells hold no frozen hash, so they stay red through that path. That is the one thing they add, and it is real. Cost of deleting them: the counts file drops by two and needs a regenerate. Recommendation: keep; optionally reword the `// FAIL` line to say "a re-freeze of the 190 hashes does not make this pass". Not a fix, a finding.
+
+## Measured rows
+
+1. Refs: `ls-remote` branch = the READY head; main read now = `2de5e84c` = the base; `git rev-list --count main..head` = 1; head parent = base. Diff name-status: `M` for exactly `__tests__/rd798-log-injection-chat-and-learning.test.js` and `__tests__/rd799-log-injection-auth-and-storage.test.js`; stat 34 insertions, 26 deletions (rd798 +33 -25, rd799 +1 -1, equals Tuesday's numbers).
+2. Patch equality: the kit's frozen patch block (146 lines, sha256 prefix `1c1373dbaa46ea4e` equals the kit's stated value) applied with `patch -p1` to the BASE blobs; against the committed head blobs `diff` shows rd799 identical (rc 0) and rd798 differing in exactly four lines, the four `p190`/`h190` hashes, nothing else.
+3. Titles by jest JSON (`assertionResults`, BASE tree vs head tree, 3 files each): 121 cells at both; per file rd798 65, rd799 23, rd800 33 (all three equal BASE and head); exactly six titles differ: rd798 `C-BODY-HOURS IN 190`, `C-BODY-HOURS OUT 190`, `MASK-JOB-TIME`, `MASK-COUNT`, `MASK-PARAGRAPH` and rd799 `C-PLAIN 169 and 170` (each keeps its prefix); control: a planted extra title change reads as a seventh. Added lines hold none of `.skip(`, `.only(`, `.todo(`, `xit(`, `xdescribe(`, `.each(`, `new RegExp(`, `eval(`, timers, `innerHTML`, `child_process` (each with a positive control); added `test(` lines 6, removed 6.
+4. Item 1: all four items of RD-980 read whole (GET-only; To Do, 0 comments) are met: (1) the mask is the ticket's own regex (slash escaped), `MASK-JOB-TIME` has the three negative plants plus two must-stay-equal rows; (2) route 190: masks gone, each state its own value, the two MASK cells rewritten in place (count 65 held); (3) the child locale pinned (F3); (4) the rd799 title reads "the first 8 characters of the state and of the cookie, and MISSING for an absent cookie", which is what the cell asserts (four keys: `plainsta...` / `plainsta` for the state, `plaincoo` for the cookie, `MISSING` for the absent one). Mask probes: F1 and F2 (41 strings, a node program over the head file's `clockMasked`: 18 locales, 23 adversarial; at head 17 of the 23 adversarial compare different and the six in F1 compare equal; the same program at BASE reads 22 of the 23 EQUAL, all but the empty string, i.e. the weakness).
+5. Route 190 values re-measured: F4. The hours cells at head: green three times in a row (`C-BODY-HOURS`, 5 of 5 each), plus green in the full head run, under en_AU and under the verify.
+6. Locale pin reach: 5 `bootServer(` calls, 5 `LOCALE_ENV` spreads (`runSeeded`, `runCache`, `runOff`, `runClarify`, `runHours`). Plant T3 (pin removed at ONE boot, `-t 'RD-798 CONTROLS'`, under de_DE): exactly `C-BODY` red, so that boot is covered by a cell that can see it.
+7. Static scans: names, ids, hosts, non-ASCII all 0 over the message and added lines (controls fire: a planted `_by_<name>_` for the name list, a planted dotted quad, host word, B-number, `decision-queue`, U+2014); see F7 for gitleaks.
+8. Red-first, one acquisition, all at head unless stated (each plant matched exactly once, reverted by copying the original back, blob hash equals the HEAD blob and porcelain 0 after every one):
+
+| plant | selector | red cells received | the kit named | match |
+|---|---|---|---|---|
+| J1 marker before the time | `C-BODY-HOURS` | `OUT 198 201` | `OUT 198 201` | yes |
+| J2 marker after the time | same | `OUT 198 201` | same | yes |
+| J3 time unreadable | same | `OUT 198 201` | same | yes |
+| K1 count + 2 | same | `IN 190`, `OUT 190` | same | yes |
+| K2 marker in off-hours description | same | `OUT 190` | `OUT 190` | yes |
+| K3 marker in impact string | same | `OUT 190` | same | yes |
+| K4 marker in action string | same | `OUT 190` | same | yes |
+| K5 off-hours count + 1 | same | `OUT 190` | same | yes |
+| T1 old job mask back | `MASK-` | `MASK-JOB-TIME` | `MASK-JOB-TIME` | yes |
+| T2 both route-190 masks back | `MASK-\|C-BODY-HOURS` (jest regex, a pipe) | `MASK-COUNT`, `MASK-PARAGRAPH`, `IN 190`, `OUT 190` | the same four | yes |
+| T3 pin off at one boot, de_DE | `RD-798 CONTROLS` | `C-BODY` | `C-BODY` | yes |
+
+   All 11 plants: no `EADDRINUSE`, no other cell red. The eight server plants at BASE were not re-run by me (the BASE weakness is shown by the node program, row 4); the builder's STATUS says all eight are green there.
+9. Locale runs (`LC_ALL=de_DE.UTF-8 LANG=de_DE.UTF-8` on the one command, three log-injection files, 121 cells): BASE: rd798 `C-BODY` red (65 cells, 64 pass), rd799 and rd800 green; head: 121 of 121 green. Head rd798 under en_AU: green.
+10. BASE and head runs of the three files without a locale: 121 of 121 passed at each (rd798 65, rd799 23, rd800 33).
+11. Full verify at head in a fresh worktree after `node scripts/assert-browser.js` (rc 0): `npm run verify -- --maxWorkers=2`, 07:29 to 07:52 AEDT (about 23 min): `VERDICT: PASS - 5870/5870 tests passed across 377 suites (jest exit 0)`; rc 0; `EADDRINUSE` 0; porcelain 0 after. The committed counts file at head reads tests 5870, suites 377 = the received pair; the diff does not touch it.
+12. CodeQL (CLI 2.27.4, javascript, `security-extended` 103 rules and `code-scanning` 87 rules): databases over a source root holding ONLY the two changed test files at BASE and at head (not the whole repo: the lane changes nothing else; helpers are not extracted, so cross-file flow is not modelled). Rows: BASE 0, head 0 in both suites; control: a planted file with an incomplete-sanitization and two xss shapes produces 4 rows in `security-extended`. By hand over the added lines: no `RegExp(` from a variable, no hand-escape, no request value in a path or log; the one added regex literal has one lazy quantifier under `^` per line, linear, no ReDoS shape. Hosted CodeQL on the merge commit stays Tuesday's.
+13. Builder STATUS claims graded: head sha, one commit, two paths, +33 -25 / +1 -1 (true); counts N798/N799/N800 65/23/33 (true); locale BASE red set `C-BODY` only and head green (true); 19 plant rows matching (true for the 11 I re-ran; the 8 at BASE not shown by me); four hashes three-run stable (true: my two dumps and 8 green hours runs); verify PASS 5870/377 (true); Correction 1 (`MASK-|C-BODY-HOURS`, a pipe) is right and I used it.
+
+## NOT RUN
+
+Hosted CodeQL, the hosted Build (Node 24 against this machine's Node 26), Deploy demo (F5), the BASE plant half (eight server plants at BASE), a whole-repo CodeQL database, the hosted runner's real locale. Nothing outside the scratch folder was written; no push, PR, Jira or deploy.
+
+## PR files
+
+`pr-title.txt`, `pr-body.md`, `merge-subject.txt` (placeholder `(#PRNUM)`), `merge-body.txt` are beside this file. Landing is a MERGE COMMIT pinned to head `700ed93a9da2a91613c0fcee00d32ffc65298bd6` (never squash, never rebase), only after the picomatch audit hold lifts.
+
+Scratch: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s288/g1690/` (clone, four worktrees, programs, jest JSONs, logs).

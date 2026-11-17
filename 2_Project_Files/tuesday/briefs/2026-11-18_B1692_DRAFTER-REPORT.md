@@ -1,0 +1,62 @@
+STARTABLE: YES (once Tuesday stamps the eight slots; Q-1 is a reading of yours to confirm, not a blocker)
+
+# B1692 drafter report (SEAT-R266, MPS records pass for PR #210 / MPSCALC-364)
+Kit: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-18_B1692_SEAT-R266_mps-records-210.md` (226 lines, 9 four-underscore lines, last line `READ-WHOLE-BY-TUESDAY: ____`), sidecar `.measured` 113 lines. `stamp_check.py` exits 0 (113 claims, 113 measured, 0 TODO; run alone, rc=0). Drafted 2026-11-18, `date` printed 07:42:27 at the first read and 07:56:50 at the last. Shape copied from B1665 (R257).
+
+## BLUF
+- **MPSCALC-364 gets a comment and NO move: its third Done-when clause does not read met at main.** Instrument: over the tarball of `863e0337` the phrase `until lane V2 fills` reads 1 line (`tests/MpsCalc.Api.Tests/QuoteApiTests.V0Home.cs:38`), `until lane V2` reads 3 lines in that one file (:14, :38, :69), `until the Home work fills` 0. The ticket's clause says "no file says until lane V2 fills ... for a column the code fills"; :38 says it for the columns. So under C-79 (merged AND every clause MET) the ticket stays Backlog. Clause table: 1 REPLACED by C-109, 2 MET, 3 NOT MET, 4 MET. This is the one thing I would have you look at (Q-1).
+- **Facts verified at source:** PR #210 squash `863e03376a08f4953e0198390ae412fc837e0d5b`, merged 2026-11-17T20:41:55Z = 2026-11-18 07:41:55 AEDT, ONE parent `125f7a52`, squash tree `0edf03be...` = the head `9947cf35` tree, 6 paths +21 -19, compare squash vs main `identical`, open PRs 0, head check-runs 9 of 9 success, analyses on `refs/pull/210/head` 4 with results 0, open alerts 0 on the PR ref and on main. **One of your stated facts needs a nuance: "hosted checks 9/9 green" is true of the reviewed HEAD; the squash's own runs were still in progress** (7 listed, 2 success at 07:44, 5 at 07:46, 6 of 7 with 0 failures at 07:56; `web` or `dotnet` last). The kit has the seat poll up to 20 minutes and state `<k> of <m> ... <r> still running` if needed; a failed run holds the comment.
+- **Kit:** C-179 (highest at root main `94da6541` is C-178, line 3437; `### C-179` 0), ONE create FIRST (new ticket for the stale text, slot CREATE `STALE`, label `records-pass-1118`, Task), ONE comment on MPSCALC-364 SECOND (names the new key), no transition, BACKLOG rows `[B1692-DONE-1]`, `-OWED-1`, `-OWED-2`, JIRA.md section, history entry, own branch `records/b1692`, FF land. Sonnet; rows C7 (line 97) and G3 (line 110), id `claude-sonnet-5-5` (`models_latest.json` line 23); the launch line carries `BRIEF_SEAT_LEVEL=sonnet` inside the quotes.
+- **Your decisions are written as the coordinator's, never the product owner's.** F1 and F2 kept (because MPSCALC-315 must rewrite those lines); F3 becomes ONE ticket listing docs/API.md:379 and V0Home.cs :14, :38, :69, each with file:line printed at 863e0337; the text says the review did not check :14 or :69 against the code. C-109 is quoted verbatim from `CLARIFICATIONS.md:2720` and the Done rule from `:1714` and `:1716`; no new ruling is claimed anywhere.
+
+## Re-printed model lines (`fleet/specs/model-routing.md`)
+- Line 97: `| C7 | **Client-facing ticket comment** (on a client's board) | no | no | **drafts 1st**; posts only a body the coordinator has approved byte for byte | drafts if the comment explains a security finding | ...`
+- Line 110: `| G3 | **Tier 3**: backlog or citation fixes, ticket hygiene, comment corrections | ... | No gate: the builder's own red-proof plus Wednesday's completion check (RULED 09-05). | ... |`
+- Model id: `models_latest.json` line 23 `"model_id": "claude-sonnet-5-5"`.
+
+## The rules quoted at source (root main CLARIFICATIONS.md, read by `git show main:`)
+- C-109 `:2720`: "What it settles. Option (b): developer-only documentation sentences are corrected from what the code does without the product owner's word review; only a sentence a customer sees goes to the product owner for approval." Heading `:2716`; per-ticket `:2721` says MPSCALC-364 comment 41072, not moved.
+- C-79 `:1714`: *"Done means merged to main, the same as Composer"*; `:1716`: "Settles: for this project, until the product owner rules otherwise, Done means merged to main, not deployed", with the coordinator's reading that a ticket moves when merged AND each Done-when clause is MET. (The project CLAUDE.md and JIRA.md hold no separate rule; I searched them.) The Jira scanner bans the word `deployed`, so the texts quote only the first form.
+
+## Facts re-measured (instrument, control)
+- Squash/PR: `gh api -X GET pulls/210` (merged true, `merge_commit_sha` = the squash; control `pulls/99999` 404), `commits/<squash>` (one parent, tree), `compare` identical (control `compare 125f7a52...main` ahead 1). Merge time `2026-11-17T20:41:55Z` = 07:41:55 AEDT.
+- CI: `commits/<head>/check-runs` 9 total 9 success (control: failure filter 0); job logs read with `--allow-escape-sequences` (without it `gh api` refuses; that flag is in the kit): dotnet `0 Warning(s)` 1, `0 Error(s)` 1, 743/196/3663 each once; web (ANSI stripped) `Tests  1616 passed (1616)` 1, `260 passed` 1, `17 skipped` 1, `157 passed` 1, `[1-9][0-9]* failed` 0 (control: planted `1 failed` counts 1). Code scanning by `commit_sha`; alerts 0 (note: my first control, `state=fixed`, returned 0, so it controls nothing; the kit's control for alerts is the analyses filter by `commit_sha`).
+- Blobs: 7 files, `git hash-object` of the raw files and of the tarball copies equals the tree blob 7 of 7; planted byte differs 7 of 7; tree 720 blobs not truncated. Pointers P01 to P30 print 30 of 30 (control `fragment+ZZ` 0).
+- Jira (GET only, project `.env` read in-process by names): MPSCALC-364 Backlog, labels `lane-v2, mpscalc-b1092, plan-b1092-t2, tier-2`, 1 comment id 41072, summary 163 chars (I first typed 169 from memory and caught it in the sidecar pass: fixed to the printed 163); project 410 issues / 245 Done / 165 not Done (three paginated searches, control MPSCALC-361 Done); marker searches `REC-LAND-364-18NOV` 0, `LAND-NEW-STALE-18NOV` 0 (control `REC-LAND-390-17NOV` finds MPSCALC-390); label `records-pass-1118` 0 keys (control `records-pass-1117` finds MPSCALC-410); `MPSCALC-411` 404.
+- Roots: root main `94da654117637fd22fdcbedba3f9f8b56fd1755c`, HEAD `main`, tracked dirty files exactly ` M` history.md, BACKLOG.md, JIRA.md, `remote -v` 0 lines, `records/b1665` and `.tools/wt-b1665-records` exist (expected), `.tools/b1692`, `records/b1692`, `.git-lock` absent; line counts BACKLOG 5888, JIRA.md 847 (section `## B1665` at 841), history 1524; user.email domain `@datasec.com.au`.
+- Panes at drafting (`tmux list-panes -a`): `tuesday`, `Datasec/NexusAI-N150`, `fleet-monitor`, four unnamed; no `Datasec/MPS-*`. `R266` was free in the SEAT kits of 11-17 and 11-18 (the `C-179` word-grep over those kits hits only B1665's own text and B1688's Composer C-153 kit text where it is a different project number; R265 is Composer).
+- Scan: `scan.py` copy plus double-quote and URL refusals over the comment, summary, six paragraphs and the four record blocks, with sample fill-ins: 12 items, 0 problems, 14 of 14 controls fire. Frozen: comment sha256 `dc82d095...378de` (3842 chars), summary `93a3a760...c1d217` (177 chars), description `8192e695...5f2` (4530 chars).
+
+## Input table for the chain (rule 4)
+| Step | Inputs | Produced by |
+|---|---|---|
+| 0 | the kit and sidecar, root repo state, the four record files | exist at BASE |
+| 1 | `.tools/b1665/` helpers (read), `scan.py` copy | exist at BASE |
+| 2 | root main, code main, tarball, job logs, Jira reads, record greps | exist at BASE (read-only) |
+| 3 | Step 0-2 prints, frozen hashes in the kit | Steps 0-2, kit |
+| 4 | Step 3 payloads, `snap_before.json`, the new key (create first) | Steps 2-3 and 4a |
+| 5 | Step 4 results (comment id, key, counts), worktree of `main` | Step 4, BASE |
+| 6 | the Step 5 commit, `refs-before.txt` | Steps 0 and 5 |
+| 7 | all | Steps 0-6 |
+
+## D-decisions (mine; each reversible by your word)
+- D-1: **create FIRST, comment SECOND** (B1665 did comment, move, create) because the comment must name the new key; the closed list says so; max writes 2.
+- D-2: **no MOVE slot at all.** With clause 3 NOT MET a move slot would be dead and a risk; the kit STOPs with NEEDS TUESDAY if E3 reads 0 (clause now met) rather than posting a now-false text. The unstamped copy therefore has 9 four-underscore lines, not 10 (REFUSE 1 says 9; `stamp_brief.py` fills by label, so the missing MOVE label is fine).
+- D-3: **Jira texts say "the V2 work", never "lane"** (`lane` is banned by `scan.py`); the test method name at :67 contains `lane` so the ticket says only that the method name is code and not asked to change. The marker is `LAND-NEW-STALE-18NOV` (a marker holding `F3` would trip the finding-id scan).
+- D-4: **the ticket lists exactly the review's four places** (docs/API.md:379, V0Home.cs :14, :38, :69) and names five more V2 lines (V0Home.cs :12 and :67, Dtos.cs:464, V2Ready.cs:11, V2Staff.cs:11) as read-and-not-asked. For :14 and :69 I read QuoteFigures.cs:149 and :227 and the test's own :71/:72 (asserts 200): the kit says the records pass read those lines and nothing more; the review did not check :14 or :69.
+- D-5: the comment states the two kept wording points and the stale-text decision as "the coordinator's decisions", and quotes C-109 as the authority without restating it as new.
+- D-6: the second review point (F4 SOURCE.txt names commit 424b0dc) is carried only as an optional note in BACKLOG row OWED-2, no ticket.
+
+## Q-questions for Tuesday (each with a default)
+- Q-1: Do you read clause 3 ("no file says until lane V2 fills ... for a column the code fills") as covering a test comment, so MPSCALC-364 stays open? Default: yes (the literal phrase is in a file). If you read it as the five named files only, the ticket would move; the kit has no move path, so say so and I (or a second kit) add the MET form of the comment and a MOVE slot.
+- Q-2: CREATE `STALE` (recommended) or NONE? Default: STALE. NONE puts the same text in BACKLOG row OWED-1 and the comment says the ticket is not filed yet.
+- Q-3: Is C-179 still the next number at stamp time? Default: yes (the seat re-derives by program and STOPs on a taken heading).
+- Q-4: The new ticket's acceptance asks for edits to a docs sentence and three test comments only (no method rename, no contract byte, no sync). Keep? Default: yes.
+
+## UNMEASURED
+- What the squash's `web` and `dotnet` runs end at (still running at the last read; the seat polls). Whether the assertions at V0Home.cs:47-53 hold for a staff caller on a rental quote with a calculation (the new ticket says only the words are stale; I read :52, which allows a value or none). Whether :14 and :69 should be reworded or removed (the ticket asks the builder to read them against the code). The 35 instruction-text sidecar lines are fragments and fill-in forms the seat prints itself (same form as B1665's sidecar).
+- Not read: any decision card, `decision_queue.sh`, the Jira comment bodies other than 41072 (read whole) and MPSCALC-410's text (read whole).
+
+## Outside-the-fences disclosure
+- Wrote only the kit, its `.measured` sidecar (via `stamp_check.py --init`, then filled by a scratchpad script from my own reads, then one Edit of the sidecar to correct a line count) and this report. Scratch (raw files, the extracted tarball in its own folder, job logs, scripts, a Jira dump) is in the session scratchpad `/private/tmp/claude-501/-Volumes-Datasec-DEV-TUESDAY/0f6ab911-939a-403c-8cca-13683e6f84b8/scratchpad/`; nothing in any project tree.
+- Jira: GETs only, with a scratchpad script that reads the project `.env` by name in-process (no token printed) and, for the two whole-ticket reads, the project's own read helper `.tools/b1686/scratch/jira_get.py`; every JQL is `project = MPSCALC AND ( ... )`. GitHub: `gh api -X GET` only, under the project's `GH_CONFIG_DIR`, one tarball GET (3.2 MB, extracted into its own new folder, no script run from inside). Git: read verbs with `--no-optional-locks`. One call was refused by a hook (`git symbolic-ref`, a write-class verb) and replaced by `rev-parse --abbrev-ref`. Hook advisories (case-sensitive greps, `cut` after grep, pipe rc) were taken: counts were repeated case-insensitively or by script with controls. tmux: `list-panes` and one `display -t %0` (read). No HTTP to any hosted site, no az, ssh, docker.

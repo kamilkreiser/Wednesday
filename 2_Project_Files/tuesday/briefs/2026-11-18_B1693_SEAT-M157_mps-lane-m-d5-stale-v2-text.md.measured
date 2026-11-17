@@ -1,0 +1,97 @@
+cb6ddf0a | `date` run at drafting -> Wed 18 Nov 2026 08:16:18 AEDT (earlier reads 08:09:06, 08:10:28, 08:13:30; the kit's clocks are these)
+55d75938 | ls -d '<project>/2_Project_Files' -> the path exists; `ls '<project>/2_Project_Files/web'` -> No such file or directory (so the folder is stale and holds no web/)
+00e05f64 | same ls of '<project>/2_Project_Files/web' -> No such file or directory (the kit says to work in a clone, and no web/ in the stale folder is why)
+636a999d | gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/ref/heads/main --jq .object.sha (run 08:10:28) -> 863e03376a08f4953e0198390ae412fc837e0d5b; and the tarball dir name carries the same 40 hex
+9bb9f1aa | parser artefact, no claim: the text between two backticked spans of the NOT-do paragraph (an instruction, not an output expectation); nothing to match
+f9e73e09 | prohibition text (a folder the seat must never open); the drafter never opened it; not a literal the seat matches -> n/a
+0a056e4f | prohibition text (a path glob the seat must never open); the drafter never opened it; not a literal the seat matches -> n/a
+2fd4e8fe | /usr/bin/grep -n -E '^\| (L3|C1|C2|G2|G3) ' over model-routing.md -> 82:| L3 ; 91:| C1 ; 92:| C2 ; 109:| G2 ; 110:| G3 (the L3 row is line 82)
+5619a471 | same grep -> 109:| G2 (the G2 row is line 109; its text starts "Tier 2: tests-only, spec-only, docs, config/CI, tooling")
+92f24add | launch line text the seat does not match; the drafter printed brief_seat.sh with /usr/bin/grep -n -F 'BRIEF_SEAT_LEVEL:-opus' -> 31:LEVEL="${BRIEF_SEAT_LEVEL:-opus}" (the default is opus, so the level inside the quotes matters)
+3e7f4526 | /usr/bin/grep -n -F 'BRIEF_SEAT_LEVEL:-opus' /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh -> 31:LEVEL="${BRIEF_SEAT_LEVEL:-opus}" (line 31, not 24; the kit gives no line number)
+89a28b9c | /usr/bin/grep -c -i -F 'Two- or three-file fix, spelled out' model-routing.md -> 1 (row L3, line 82)
+b881396c | awk 'NR==38' of QuoteApiTests.V0Home.cs at main 863e0337 -> `        // Both callers read the contract-checked list. Until lane V2 fills the values the columns are absent for both; what must`
+289cf39e | `main` is a ref name; gh api -X GET .../git/ref/heads/main --jq .object.sha -> 863e03376a08f4953e0198390ae412fc837e0d5b
+9c7570a8 | gh api -X GET repos/datasecau/MPS-Commercial-Calculator/compare/863e03376a08f4953e0198390ae412fc837e0d5b...main --jq .ahead_by (08:10) -> 0
+0099d4e5 | awk 'NR==71' of QuoteApiTests.V0Home.cs at main -> `        var (r, _) = await _host.Seller().Get("/api/v1/quotes?group=readyToExport");`
+3adf1013 | awk 'NR==72' of QuoteApiTests.V0Home.cs at main -> `        Assert.Equal(HttpStatusCode.OK, r.StatusCode);`
+033bc40c | /usr/bin/grep -c -F 'var (r, _) = await _host.Seller().Get("/api/v1/quotes?group=readyToExport");' QuoteApiTests.V0Home.cs at main -> 1
+46eee996 | awk 'NR==38' of QuoteApiTests.V0Home.cs at main -> the line starting `        // Both callers read the contract-checked list. Until lane V2 fills`
+de47a27d | /usr/bin/grep -c -F '        // Both callers read the contract-checked list. Until lane V2 fills the values the' QuoteApiTests.V0Home.cs at main -> 1
+910c47ea | awk 'NR==39' of QuoteApiTests.V0Home.cs at main -> `        // hold now and later is that the restricted caller never has the names at all (a byte check of the whole answer).`
+a6bd26b4 | /usr/bin/grep -c -i -F oneOffGp docs/API.md at main -> 2 (the positive control is nonzero)
+add074db | /usr/bin/grep -r -i -F -o 'until lane V2 fills' over docs, src, tests, web/src of the main tarball | wc -l -> 1 (the row is tests/MpsCalc.Api.Tests/QuoteApiTests.V0Home.cs:38); the same over the edited scratch copy -> 0
+01e5e21c | /usr/bin/grep -rl -F 'docs/API.md' over tests/ of the main tarball | wc -l -> 3 (QuoteApiTests.Showcase.cs, RoleMatrixTests.cs, FeedbackRateLimitTests.cs, each a comment)
+b04bb4c9 | awk 'NR==35' of tests/MpsCalc.Import.Tests/OutputGuardTests.cs at main -> `        File.WriteAllBytes(Path.Combine(_repo, "docs", "IMPORTER.md"), _trackedBytes);` (the control that a path-built reader is visible to the same grep)
+1d8f8744 | parser artefact, no claim: the text between two backticked spans; nothing to match
+a127f8fc | parser artefact, no claim: the build sentence of FACT 5; its measured facts are the lines for 3b99cb4b, 2dce6931, 012f7041 and a1478271 below
+7260cc87 | parser artefact, no claim: the word "printed" between two spans; see the lines for 2dce6931 and 012f7041
+8bf45513 | parser artefact, no claim: the word "and" between two spans; see the lines for 2dce6931 and 012f7041
+a1478271 | /usr/bin/grep -c -F 'MpsCalc.Api.Tests ->' build.log (the scratch build with the four edits applied, dotnet 10.0.404, rc 0) -> 1
+519b34b8 | DOTNET_ROOT=<project>/.tools/dotnet-10.0.404 <that>/dotnet --version -> 10.0.404
+3b99cb4b | dotnet build MpsCalc.slnx -c Release in the scratch copy of the main tarball with E1-E4 applied (dotnet 10.0.404) -> rc 0; `0 Warning(s)`; `0 Error(s)`; Time Elapsed 00:00:17.08
+b935d387 | /usr/bin/grep -n -F 'dotnet test MpsCalc.slnx -c Release --no-build' .github/workflows/ci.yml at main -> 43:      - run: dotnet test MpsCalc.slnx -c Release --no-build (the CI command; the drafter did NOT run it: UNMEASURED, the kit says so)
+8c476cc8 | LC_ALL=C uptime at 08:12 -> load averages 9.06 7.04 6.60 (the figure in FACT 8)
+c888b12a | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' at 08:16 -> %0 tuesday ; %303 Datasec/NexusAI-N150 ; %1 fleet-monitor ; four unnamed panes
+8c7be2de | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | /usr/bin/grep -c -F 'Datasec/MPS-' -> 0 (control in the next line)
+063ce159 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' | /usr/bin/grep -c -F 'tuesday' -> 1 (the control fires)
+a2e1cd73 | git -C '<project>/2_Project_Files' --no-optional-locks config --local --get user.name | wc -l -> 1 (non-empty; value not printed here)
+b5139398 | git -C '<project>/2_Project_Files' --no-optional-locks config --local --get user.email -> one line, domain part @datasec.com.au (the Datasec address; full value not typed in the kit)
+8eed6ecd | same config read for user.email (the `...` in the kit is an elision of the repo path) -> one line, @datasec.com.au
+10a55e26 | prohibition text; `env | /usr/bin/grep -c -E '^GIT_(AUTHOR|COMMITTER)_'` in the drafter's shell -> 0 (nothing set that could override identity)
+fb6834e3 | same env scan covers GIT_COMMITTER_ -> 0
+188f810f | awk 'NR>=125 && NR<=128' of src/MpsCalc.Api/Quotes/QuoteFigures.cs at main -> 125 private static StaffFigures Staff(CalculationDto c, bool purchase) => ; 126 purchase ; 127 ? new StaffFigures(c.Purchase?.HardwareProfit, null, c.Purchase?.PurchaseTotalExTax, c.Purchase?.DealProfit) ; 128 : new StaffFigures(null, null, c.Portfolio?.ContractValueExTax, null);
+cdd07681 | awk 'NR==149' of QuoteFigures.cs at main -> `        public const string ReadyToExport = "readyToExport";`
+86f4d8c7 | /usr/bin/grep -c -F 'QuoteFigures' docs/API.md at main -> 3 (the token of E1 already occurs in the file)
+84d036e1 | /usr/bin/grep -c -F 'list. Until lane V2 fills' QuoteApiTests.V0Home.cs at main -> 1 (the E3 OLD starts after `list. ` on line 38)
+a832ead5 | awk 'NR>=40 && NR<=46' of QuoteApiTests.V0Home.cs at main -> the restricted GET, `string text = restricted.GetRawText();`, the positive control Assert.Contains(id, ...), and a foreach with Assert.DoesNotContain(column, text, ...) over the four columns
+c8d942f9 | awk 'NR==128' of QuoteFigures.cs at main -> `            : new StaffFigures(null, null, c.Portfolio?.ContractValueExTax, null);` (a rental row: Tcv only); and QuoteApiTests.V0Home.cs:37 is `string id = await ApprovedRentalQuote();`
+0b89a890 | /usr/bin/grep -c -F 'V0_group_readyToExport_is_accepted_now_that_lane_V2_builds_it' QuoteApiTests.V0Home.cs at main -> 1 (the method name, line 67)
+cc688b6e | awk 'NR==67' of QuoteApiTests.V0Home.cs at main -> `    public async Task V0_group_readyToExport_is_accepted_now_that_lane_V2_builds_it()`
+0cffccc7 | instruction command; its syntax run in a scratch git repo (gscratch, not a project repo): git rev-parse HEAD:docs/API.md -> 0edfca519ba1524a6f1115a9e88639f80d1520c1 (a blob id printed)
+2739c506 | /usr/bin/grep -r -i -F -o 'until lane V2 fills' over docs, src, tests, web/src of the main tarball | wc -l -> 1 at base; 0 on the edited copy
+f5001614 | instruction text (the stop line the seat writes); nothing to match -> n/a
+10066cfe | dotnet build MpsCalc.slnx -c Release in the scratch copy with the four edits -> rc 0, 0 Warning(s), 0 Error(s)
+9a18b285 | command -v timeout -> /usr/bin/timeout (so `timeout 1800 dotnet test ...` is runnable on this machine); the drafter did NOT run the whole-solution test: UNMEASURED
+99d523ec | /usr/bin/grep -c -F 'Passed!' <project>/1_Project_Definition/Briefs/2026-11-18_B1686_STATUS.md -> 3 (the template lane's seat printed Passed! summary lines; RELAYED)
+9cde1fd4 | /usr/bin/grep -c -F 'Failed:' the same STATUS -> 3 (each Passed! line carries `Failed:     0`; the kit's "Failed!" is the tool's failure line, not seen in a green run: UNMEASURED as printed)
+82c91505 | awk 'NR>=125 && NR<=128' of QuoteFigures.cs at main -> the four lines of the line above (the kit's step 4(a))
+82ad980b | /usr/bin/grep -r -i -F -c 'V0Home' over web/src, src, docs, scripts of the main tarball, summed -> 0 each (the test file's name is copied into none of them; control: /usr/bin/grep -c -F QuoteFigures over src/MpsCalc.Api/Quotes/QuoteFigures.cs -> nonzero, the instrument reads content)
+38b8757d | ls -d web/src of the main tarball -> exists (the frame of the seat's scans)
+b0956289 | /usr/bin/grep -rn -F '"API.md"' over tests web/src scripts tools infra .github of the main tarball -> 0 rows; control `/usr/bin/grep -rn -F '"IMPORTER.md"' tests` -> 3 rows (OutputGuardTests.cs:35, :71, :138)
+526aa565 | the `"docs"` of the path-built reader pattern: OutputGuardTests.cs:35 holds `Path.Combine(_repo, "docs", "IMPORTER.md")` -> a reader of that shape exists for IMPORTER.md and none for API.md
+eb83768f | /usr/bin/grep -rn -F '"API.md"' as above -> 0 rows (the control fires for IMPORTER.md)
+f5b40145 | parser artefact, no claim: the word "and" between two spans; nothing to match
+8683c4a2 | ls -d '<project>/.tools/b1693' -> No such file or directory (the seat creates .tools/b1693/scratch; the drafter did not)
+f550f80f | instruction command; its syntax run in the scratch git repo: git show HEAD:docs/API.md | wc -l -> 1050
+70a1d8e0 | ls -d docs in the main tarball -> exists (frame of the search)
+78e9d0a9 | ls -d src in the main tarball -> exists
+3970cc45 | ls -d tests in the main tarball -> exists
+2baeba26 | ls -d web/src in the main tarball -> exists
+2dce6931 | /usr/bin/grep -c -F '0 Warning(s)' build.log of the scratch build -> 1
+012f7041 | /usr/bin/grep -c -F '0 Error(s)' build.log of the scratch build -> 1
+baf345e1 | /usr/bin/grep -c -F 'Passed!' the template lane's STATUS -> 3 (RELAYED; the drafter's own whole-solution test: not run, UNMEASURED)
+374097dc | /usr/bin/grep -c -v -x -F -f allowed.txt paths.txt in the scratch repo (the two real paths) -> 0; control with docs/ENGINE.md added -> 1
+6a6d4acd | git diff --stat <base>..HEAD | tail -1 in the scratch repo holding base and the four edits -> ` 2 files changed, 5 insertions(+), 5 deletions(-)`
+ddbc32e7 | git diff -U0 <base>..HEAD in the scratch repo | /usr/bin/grep -c '^+[^+]' -> 5 added lines; LC_ALL=C non-ASCII scan of them -> 0; control `printf '+a<U+200B>b' | same scan` -> 1
+6f351821 | git diff --check <base>..HEAD in the scratch repo -> rc 0
+86515506 | instruction text (the gitleaks step label); gitleaks version -> 8.30.1; range scan of the scratch base..HEAD -> rc 0
+5c890db9 | gitleaks detect on a scratch repo holding a random ghp_ token (canary) -> rc 1
+815e62dd | gitleaks detect --log-opts=<base>..HEAD on the scratch repo -> rc 0
+dac3dbbd | gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/matching-refs/heads/b1693/mps-lane-m-d5-stale-v2-text --jq length -> 0 now (the seat's read-back must read 1 after the push); control heads/b1686/mps-lane-m-d4-staff-columns-docs -> 1
+93b8655d | /usr/bin/grep -c -F 'READY B1686: ' the template lane's STATUS -> 1 (the last-line form `READY B1686: <sha40>` exists; this kit writes the same form with B1693)
+f1daeac1 | gh api -X GET ... runs under the project GH_CONFIG_DIR -> returned main, compare, refs and 210 PR numbers in this session
+db847a65 | /usr/bin/grep -c -F '## PRIOR WORK' the template lane's STATUS -> 1
+c93bc5d1 | gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/ref/heads/main --jq .object.sha -> 863e03376a08f4953e0198390ae412fc837e0d5b
+b7d0b4a0 | GET /rest/api/3/search/jql with `project = MPSCALC AND ( key = MPSCALC-361 )` (own helper, token read in-process) -> [('MPSCALC-361', 'Done')]; the same shape for MPSCALC-411 -> [('MPSCALC-411', 'Backlog')]
+d8d4c5e4 | gh api -X GET .../compare/863e03376a08f4953e0198390ae412fc837e0d5b...main --jq .ahead_by -> 0
+38749fa0 | table labels of the PRIOR-WORK step; measured: each of the four OLD strings of E1-E4 counts exactly 1 in its file at main (apply script asserts count==1) -> every row WORK, none ALREADY-ON-MAIN
+fbea3891 | the label WORK: the apply script asserted OLD count 1 and NEW count 0 for E1, E2, E3 and E4 at main -> all four WORK
+46091682 | the label DROPPED applies to a Done key: MPSCALC-411 reads Backlog (search above) -> not DROPPED
+b3eeacea | stop-line label of the REFUSE heading; nothing to match -> n/a
+b6a64b79 | parser artefact, no claim: instruction text of the HEAVY paragraph; the load figure is the line for 8c476cc8
+b3044190 | parser artefact, no claim: instruction text of the STANDING LINES paragraph; nothing to match
+1775449b | parser artefact, no claim: instruction text; nothing to match
+f11dab59 | parser artefact, no claim: instruction text; nothing to match
+b33b1395 | parser artefact, no claim: the word "or" between two spans; nothing to match
+a5d1da16 | parser artefact, no claim: instruction text; nothing to match

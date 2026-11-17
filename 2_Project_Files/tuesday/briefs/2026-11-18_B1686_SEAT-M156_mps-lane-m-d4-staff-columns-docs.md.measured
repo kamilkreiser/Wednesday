@@ -1,0 +1,103 @@
+cb6ddf0a | not a literal the seat matches: the word 'date' names the command the seat runs; the drafter's clock reads were `date` at 06:21:23, 06:27:49, 06:29:58, 06:32:15 and 06:33:37 AEDT 18 Nov 2026
+55d75938 | not a literal the seat matches: a directory name; `ls '<project>' | grep -c -i -F 2_Project_Files` -> 1 (the stale checkout exists), and `ls '<project>/2_Project_Files'` printed Directory.Build.props, docs, global.json, MpsCalc.slnx, README.md, src, tests, tools (no web)
+00e05f64 | `ls '<project>/2_Project_Files'` printed 8 names with no `web` (control: the same ls holds `docs`); the tarball of main 125f7a52 holds `web/` (ls of the extract printed it)
+177965cf | `gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/ref/heads/main --jq .object.sha` (run 06:33 AEDT, under the project GH_CONFIG_DIR) -> 125f7a52eb2514179147644578a86d8768e532f9
+9bb9f1aa | not a literal the seat matches: kit prose about never typing cd; no output to match
+f9e73e09 | not a literal the seat matches: a folder the seat is told never to read; the drafter did not open it
+0a056e4f | not a literal the seat matches: a folder the seat is told never to read; the drafter did not open it
+92f24add | `/usr/bin/grep -c -i -F 'BRIEF_SEAT_LEVEL=sonnet' <this kit>` (06:35 AEDT) -> 2 (the model-row sentence and the Launch line; the launch line has it inside the quotes)
+3e7f4526 | `/usr/bin/grep -n -i -F 'BRIEF_SEAT_LEVEL' /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh` (06:35) -> line 31 `LEVEL="${BRIEF_SEAT_LEVEL:-opus}"` (so the default is opus); the kit gives no line number
+289cf39e | `gh api -X GET repos/datasecau/MPS-Commercial-Calculator/compare/125f7a52eb2514179147644578a86d8768e532f9...main --jq '[.status,.ahead_by,.behind_by]|@tsv'` (06:33) -> identical 0 0 (the word main there is the compared ref)
+9c7570a8 | same compare as 289cf39e: ahead_by -> 0 (the field name is as the API returns it; status printed identical)
+6374dc69 | `awk 'NR>=121&&NR<=123' src/MpsCalc.Api/Quotes/QuoteFigures.cs` over the main tarball printed the three lines of the T-V2-1 comment ("... (BACKLOG: needs result fields, lane V4). A rental has no one-off figure." on line 123)
+c662fb3d | `awk 'NR==36' tests/MpsCalc.Api.Tests/QuoteApiTests.V2Staff.cs` over the main tarball -> `    public async Task V2_1_red_an_internal_metrics_caller_gets_a_purchase_quotes_stored_figures()`; line 51 is the rental one (same awk printed its name when listing the five test names with grep -n)
+98903e42 | `awk 'NR>=1509&&NR<=1512' docs/api/openapi.json` over the main tarball printed the four member lines starting oneOffGp at 1509 (`/usr/bin/grep -n -F 'Absent as oneOffGp' docs/api/openapi.json` -> 1510, 1511, 1512; `grep -n -F 'until the Home work'` -> 1509)
+070b3848 | not a literal the seat matches: kit prose describing Dtos.cs:466 as a // comment above the :467 XML summary; `awk 'NR>=464&&NR<=468'` of Dtos.cs at main printed 464-466 as // lines and 467 as the /// summary
+8d55d864 | not a literal the seat matches: kit prose; the frame is stated in the sentence (grep -rl over tests, web/src, scripts, .github, infra, tools for 'docs/API.md': hits RoleMatrixTests.cs:40, QuoteApiTests.Showcase.cs:18, FeedbackRateLimitTests.cs:11 and :15, all /// comment lines)
+62dcd51f | `/usr/bin/grep -n -E 'API\.md' tests/MpsCalc.Api.Tests/RoleMatrixTests.cs tests/MpsCalc.Api.Tests/QuoteApiTests.Showcase.cs tests/MpsCalc.Api.Tests/FeedbackRateLimitTests.cs` over the main tarball -> 4 lines, each beginning with whitespace then /// (comments); the zero for a test that READS API.md as text has control: tests/MpsCalc.Import.Tests/OutputGuardTests.cs:35 and :71 read docs/IMPORTER.md, tools/demo/test/test_demo_doc.py:10 reads docs/DEMO.md
+3e51e3dc | not a literal the seat matches: the word 'and' in kit prose
+778dbb87 | `git diff --stat` in the drafter's scratch copy after `node scripts/sync-contract.mjs 90f87b2439b6d2ba94b2bbf615c692baf3d60ac3` (06:2x) -> last line ` 3 files changed, 12 insertions(+), 12 deletions(-)`; per file added-line counts by diff -U0: SOURCE.txt 2, openapi.snapshot.json 4, schema.ts 6
+135585f3 | `dotnet build MpsCalc.slnx -c Release` in the scratch copy of main with the Dtos.cs comment edited, DOTNET_ROOT and PATH = <project>/.tools/dotnet-10.0.404 -> `    0 Warning(s)`
+3517cabc | same build as 135585f3 -> `    0 Error(s)`
+ab135a1f | `awk 'NR==56' web/src/api/contract.sync.test.ts` over the main tarball -> `  // The generator is measured deterministic (three runs byte-equal, on Node 24 and on the default Node), so the output`
+db3cd3c8 | `for d in /Volumes/Datasec_DEV/!CODING/Datasec/*/ ... [ -d "$d.tools/node24" ]` -> only HPSM-POC/.tools/node24 (`node --version` v24.21.0); `ls '<MPS project>/.tools' | grep -c -i node` -> 0 (control: `grep -c -i dotnet` -> 3)
+519b34b8 | `ls '<MPS project>/.tools' | /usr/bin/grep -c -i dotnet` -> 3 (names dotnet, dotnet-10.0.404, dotnet-install.sh); `<project>/.tools/dotnet-10.0.404/dotnet --version` -> 10.0.404
+3b99cb4b | `awk 'NR==42' .github/workflows/ci.yml` over the main tarball -> `      - run: dotnet build MpsCalc.slnx -c Release`
+c1f551b8 | `awk 'NR==42' .github/workflows/ci.yml` -> line 42 is the dotnet build step (printed with 3b99cb4b)
+b935d387 | `awk 'NR==43' .github/workflows/ci.yml` over the main tarball -> `      - run: dotnet test MpsCalc.slnx -c Release --no-build`
+a6ec5580 | `awk 'NR==43' .github/workflows/ci.yml` -> line 43 is the dotnet test step (printed with b935d387)
+ab1f6ad7 | `gh auth status` under the project GH_CONFIG_DIR (06:25) -> github.com, Logged in, Active account: true (the Datasec account); the account login is not typed in the kit
+c98fbf7f | not a literal the seat matches: an environment variable name; the drafter exported GH_CONFIG_DIR='<project>/4_Credentials/.gh-config' for every gh call and gh auth status read the Datasec account active
+8c476cc8 | `LC_ALL=C uptime` (06:23) -> load averages: 7.86 6.48 5.81; `df -g /Volumes/Datasec_DEV` -> 1091 GiB available
+c888b12a | `tmux list-panes -a -F '#{pane_id} #{@cockpit_name}'` (06:23 and 06:27) -> `%0 tuesday`, `%1 fleet-monitor`, `%34 `, `%35 ` (4 panes; 0 names starting Datasec/MPS-; control: the `tuesday` pane exists)
+8c7be2de | same tmux read as c888b12a: panes whose name starts `Datasec/MPS-` -> 0 (control: 2 named panes exist, tuesday and fleet-monitor)
+063ce159 | same tmux read as c888b12a: a pane named `tuesday` -> %0 (the control for the zero)
+ea0da8f5 | `bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tools/decision_queue.sh show mps-410-openapi-195-wording-1117 > scratch` (exact id; usage read from the script header line 38) -> 1728 bytes; `/usr/bin/grep -c -F 'mps-410-openapi-195-wording-1117' scratch` -> 1; first lines: `status:  open   (Datasec/MPS)` and `ruling:  choice=None  ruled_ts=None`; `/usr/bin/grep -c -i -F 'MPSCALC-364' scratch` read through the id filter: the card text does not name 364 (the bluf names 410, 195 and 207 and lines 751 and 768)
+e79bf1c0 | not a literal the seat matches: a git config key name the seat reads from the repo by program
+09790a9c | `git -C '<project>/2_Project_Files' --no-optional-locks config --local --get user.email` -> a non-empty address at the datasec.com.au domain (printed by awk -F@ '{print $2}' so the address is not echoed)
+b9935041 | not a literal the seat matches: the ellipsis shorthand for the same git config read as 09790a9c
+a0691a94 | not a literal the seat matches: environment variable names the seat is forbidden to set
+d54ba8bd | not a literal the seat matches: environment variable names the seat is forbidden to set
+8ecb0203 | `awk 'NR==125||NR==127||NR==128' src/MpsCalc.Api/Quotes/QuoteFigures.cs` over the main tarball -> `    private static StaffFigures Staff(CalculationDto c, bool purchase) =>` / `            ? new StaffFigures(c.Purchase?.HardwareProfit, null, c.Purchase?.PurchaseTotalExTax, c.Purchase?.DealProfit)` / `            : new StaffFigures(null, null, c.Portfolio?.ContractValueExTax, null);`; line 43 is the record StaffFigures(decimal? OneOffGp, decimal? AnnualRecurringGp, decimal? Tcv, decimal? TotalGp)
+22e722d4 | not a literal the seat matches: the word 'or' in kit prose
+b7c9bf06 | `/usr/bin/grep -c -i -F 'Absent as oneOffGp'` over the main tarball: docs/api/openapi.json 3, openapi.snapshot.json 3, schema.ts 3, docs/API.md 0, Dtos.cs 0; control: `grep -c -i -F oneOffGp` 6, 6, 6, 1, 0 on the same files; after the six replacements in the scratch copy every Absent-as count is 0 and oneOffGp reads 3, 3, 3, 2 (API.md gained one)
+9e0f90ef | not a literal the seat matches: the member name tcv inside the frozen sentence E4; `/usr/bin/grep -c -i -F 'tcv' docs/api/openapi.json` at main is a nonzero count and the contract defines the member (awk NR==1511 printed it)
+2378e79c | not a literal the seat matches: a git plumbing command shape; the drafter ran no git in the project repo
+99488842 | `ls -d /opt/homebrew/bin/node /opt/homebrew/bin/npm` -> both exist; `/opt/homebrew/bin/node --version` -> v26.13.0 and `/opt/homebrew/bin/npm --version` -> 11.20.0
+db359b48 | `env -C '<scratch>/work/web' /opt/homebrew/bin/npx openapi-typescript --version` -> `v7.13.0`
+4d9d889b | the same run as db359b48 printed `v7.13.0` (with a leading v; the kit's step 1 now says so); web/package.json:42 pins "openapi-typescript": "7.13.0"
+c639c1cd | `env -C '<scratch>/work/web' /opt/homebrew/bin/npm test` after the sync (scratch copy, Node v26.13.0) -> ` Test Files  146 passed (146)` and `      Tests  1616 passed (1616)`, 13.1 s; the BASE count at unedited main is UNMEASURED here (no test file changes, so the seat's own base run decides)
+9ed7d8c9 | not a literal the seat matches: the seat's own last-line text, nothing to match
+fa9ac06a | `dotnet build MpsCalc.slnx -c Release` on the scratch copy -> 0 Warning(s), 0 Error(s) (see 135585f3 and 3517cabc)
+0fa16631 | `dotnet test MpsCalc.slnx -c Release --no-build` on the scratch copy (started 06:24 AEDT): NO summary line printed; the test host (pid 92458) sat at about 100% CPU (17 min CPU) until the drafter stopped it at 06:39; whole-solution result UNMEASURED; `dotnet test tests/MpsCalc.Engine.Tests -c Release --no-build` (06:39) -> `Passed!  - Failed:     0, Passed:   743, Skipped:     0, Total:   743, Duration: 1 s - MpsCalc.Engine.Tests.dll (net10.0)`
+baf345e1 | the Engine run of 0fa16631 printed the summary prefix `Passed!` (the form of a green run); the whole-solution run printed none (UNMEASURED)
+e6ad4d93 | the xunit summary line prefix of a red run: not measured by the drafter (no red run happened); a green run prints the Passed! form
+e960a9e1 | `awk 'NR>=121&&NR<=128'` printed 8 lines of QuoteFigures.cs in the drafter's earlier awk reads (lines 121-123 comment, 125 Staff, 127-128 the two branches); a printed range, not a count
+e8dca7d1 | `awk 'NR==125||NR==127||NR==128'` as for 8ecb0203 -> the three lines quoted there
+4413c1f1 | not a literal the seat matches: a folder name in a frame list; `ls` of the main tarball root printed docs, infra, scripts, src, tests, tools, web
+6be37302 | not a literal the seat matches: a folder name in a frame list (see 4413c1f1)
+9649df80 | not a literal the seat matches: a folder name in a frame list (see 4413c1f1)
+b13dd88d | not a literal the seat matches: a folder name in a frame list (see 4413c1f1)
+ab6c36a1 | `/usr/bin/grep -rn -i -F 'staff-only, internal-metrics callers only' web/src src tests docs scripts tools` over the main tarball -> 12 rows (docs/api/openapi.json 1509-1512, web/src/api/generated/openapi.snapshot.json 1509-1512, web/src/api/generated/schema.ts 1520, 1522, 1524, 1526); the shorter literal 'internal-metrics callers only' also hit src/MpsCalc.Api/Quotes/QuoteEndpoints.cs:771 and four tests files (comments), so the kit names the long literal
+ce957909 | not a literal the seat matches: the seat's own last-line text
+ce8ee744 | not a literal the seat matches: a folder the seat creates; the drafter created none under the project
+0d129eb4 | not a literal the seat matches: a git show command shape the seat runs
+9109fbf0 | not a literal the seat matches: kit prose describing the comment-only proof the seat writes; the drafter did not run that script (UNMEASURED)
+b0581f98 | not a literal the seat matches: kit prose (the build rerun after commit 1)
+7d706c49 | `dotnet build ... -c Release` on the scratch copy -> `    0 Error(s)` (same run as 3517cabc)
+c94dad80 | not a literal the seat matches: the placeholder <ref> naming the sha of commit 1
+65094580 | `env -C '<scratch>/work/web' /opt/homebrew/bin/node scripts/sync-contract.mjs 90f87b2439b6d2ba94b2bbf615c692baf3d60ac3` (a scratch commit of the edited tree) -> exit ok; printed `contract 90f87b2439b6d2ba94b2bbf615c692baf3d60ac3 blob 2abbf7bcef8a6bc6d669cb7ec4490aca9ba62609 sha256 402e45860082fbfab222d0810c832bbb49b70faa7ccf93f42c902a4d29f85e77`
+7171f0cb | `sed -n 1,3p web/scripts/sync-contract.mjs` over the main tarball printed the header, line 3 being `// Usage: node scripts/sync-contract.mjs <git-ref>     e.g. origin/main, origin/b09/api-catalogue-quotes-proposal`
+e3582e2f | the same sync run as 65094580 printed its last line `contract 90f87b2439b6d2ba94b2bbf615c692baf3d60ac3 blob 2abbf7bcef8a6bc6d669cb7ec4490aca9ba62609 sha256 402e45860082fbfab222d0810c832bbb49b70faa7ccf93f42c902a4d29f85e77` (the script's final console.log, sync-contract.mjs last line, by awk over the file: `console.log(`contract ${commit} blob ${blob} sha256 ${sha256}`);`)
+7c57d6e0 | not a literal the seat matches: kit prose; the FACT 5 figure 12 insertions and 12 deletions was printed by `git diff --stat` (see 778dbb87)
+397adc26 | not a literal the seat matches: kit prose '(f)' step label
+8f98e9aa | `/usr/bin/grep -c -v -x -F -f six.txt chg.txt` in the drafter's scratch: with chg.txt equal to the six paths -> 0; after appending docs/ENGINE.md -> 1 (the control fires)
+d289a6a4 | not a literal the seat matches: a git diff command shape; the drafter measured the ASCII property on added lines by `diff -U0 base new | grep -E '^\+[^+]' | LC_ALL=C grep -c -v -x -E '\+[ -~]*'` -> 0 for docs/api/openapi.json, docs/API.md and Dtos.cs combined; control: a printf line with U+200B -> 1 and a plain line -> 0
+c5c250fc | the generated files' non-ASCII added lines by the same diff -U0 method over base vs scratch: SOURCE.txt 1, schema.ts 1, openapi.snapshot.json 0 (each of the two is the line holding the middle dot U+00B7 before 'sha256:')
+7e1766f9 | `sed -n 3p web/src/api/generated/SOURCE.txt` in the scratch copy after the sync printed `Contract git blob: 2abbf7bcef8a6bc6d669cb7ec4490aca9ba62609 · sha256: ...` (the hash 402e4586... equals `shasum -a 256` of the snapshot and the blob equals `git hash-object docs/api/openapi.json` there)
+4160dec9 | not a literal the seat matches: a git diff command shape; not run by the drafter in the project (UNMEASURED)
+f9bae224 | `/usr/bin/grep -c -F 'MPSCALC-315' docs/API.md` over the main tarball -> 0 (the key is new text in E1); `/usr/bin/grep -c -F 'MPSCALC-' docs/API.md` -> 44 (control: the file cites other keys); MPSCALC-315 read whole by Jira GET: status Backlog, summary starts "[B347-7] Stored per-year recurring GP and whole-term rental GP are not carried on the quote list"
+095ef264 | not a literal the seat matches: a gitleaks canary prefix the seat plants; the drafter did not run gitleaks (version only: `gitleaks version` -> 8.30.1)
+fc6d05e7 | not a literal the seat matches: kit prose for the gitleaks canary step
+1d10f860 | not a literal the seat matches: kit prose step label
+62002814 | `gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/matching-refs/heads/b1686 --jq length` (06:33) -> 0 (control: heads/b1653 -> 1)
+dd5f9360 | not a literal the seat matches: the seat's own last line, written by the seat after its push
+a86b46e9 | not a literal the seat matches: the command name
+1b32a1aa | not a literal the seat matches: a STATUS section heading the seat writes
+79943ed7 | `gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/ref/heads/main --jq .object.sha` (06:33) -> 125f7a52eb2514179147644578a86d8768e532f9
+fbe593a6 | the drafter's own GET-only helper (reads the project .env in-process, token never printed): control `MPSCALC-361` -> `ctrl 361 Done`
+88bd16ff | `gh api -X GET .../compare/125f7a52eb2514179147644578a86d8768e532f9...main --jq '[.status,.ahead_by,.behind_by]|@tsv'` (06:33) -> identical 0 0
+4113d79c | not a literal the seat matches: a status word the seat prints in its table
+1c0d18dd | not a literal the seat matches: a status word the seat prints in its table
+6e4ab4cd | not a literal the seat matches: a status word the seat prints in its table
+3525f2f5 | not a literal the seat matches: the seat's own last-line text
+e7afce87 | not a literal the seat matches: kit prose; the load rule is the product owner's 2026-11-11 ruling as carried by the B1653 kit's HEAVY paragraph (RELAYED)
+902623ca | not a literal the seat matches: kit prose
+e13b0fe4 | not a literal the seat matches: kit prose
+6c7b5c80 | not a literal the seat matches: kit prose
+cfb4ffb9 | not a literal the seat matches: kit prose
+c2e2b6db | `env -C '<scratch>/work' dotnet test tests/MpsCalc.Engine.Tests -c Release --no-build` (DOTNET_ROOT and PATH = <project>/.tools/dotnet-10.0.404, 06:39 AEDT) -> `Passed!  - Failed:     0, Passed:   743, Skipped:     0, Total:   743, Duration: 1 s - MpsCalc.Engine.Tests.dll (net10.0)` (in the scratch copy with the Dtos.cs comment edited and built)
+0ca104f6 | `env -C '<scratch>/work/web' /opt/homebrew/bin/npx openapi-typescript --version` -> `v7.13.0` (same run as db359b48)
+f614aec0 | the Engine test command printed in c2e2b6db ran at 06:39 and exited with the summary line there (command shape as in the kit)
+8eeaa1a2 | same run and line as c2e2b6db (743 passed, 0 failed, 743 total)
+fe2ee284 | the whole-solution form `dotnet test MpsCalc.slnx -c Release --no-build` was run by the drafter WITHOUT the timeout wrapper and printed no summary in 15 minutes (see 0fa16631); `command -v timeout` printed /usr/bin/timeout and `timeout 170 dotnet test tests/MpsCalc.Api.Tests ... --filter ...` ran and returned normally (the wrapper works; it never reached its cap); a run that reaches the 1200-second cap is UNMEASURED
