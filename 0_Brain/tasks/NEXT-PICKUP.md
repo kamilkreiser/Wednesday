@@ -8,6 +8,10 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 15:3x 17 Nov, the 14:52 rotation successor - READ FIRST; supersedes every block below where they differ
+- **W 35th READY FOR GATE: PR 2252 (KS-2253), head 62124803a881** on develop fab4edcdcd07. **GATE 378 RUNNING (Opus subagent of THIS seat; DIES with a rotation -> RE-COMMISSION from 0_Brain/reference/2026-11-17_gate378-tier1-pr2252-ks2253-redis-url-mask/commission.md if verdict.md is ABSENT).** NEXT: verdict -> if GO, a merge (decide K/B merge seat vs Friday by the gauge; 96% at 15:3x) -> Kintsugi deploy of the gateway (a D seat) -> THEN the Redis password rotation on Kintsugi (Kam 14:45 = a). W 35th: score after its wrap, pane_close.
+- **D 71st: GO KINTSUGI SENT** 15:27 (pin fab4edcdcd07; fleet/briefs_staged/2026-11-17_D71_go_kintsugi.md; tap 04:27:02Z). NEXT: STATUS 2 -> swaps -> STATUS B -> Kam panel receipt (draft in the GO) -> score -> close -> demo measure.
+
 ## 🔴 UPDATE 15:1x 17 Nov, the 14:52 rotation successor - READ FIRST; supersedes every block below where they differ
 - **Kam 15:09:07 "archive and deploy what you can" + 15:11:24 "you have my permission to deploy anything that has been tested and is ready".** These supersede the USAGE PLAN's "no new seats" for deploy + archive work (98% stop still Wednesday's line).
 - **FLOOR (3):** %288 **W 35th** (Sonnet, BUILD Redis mask; plan ANSWERED 04:10Z incl. its regex `//[^/?#]*@`; NEXT: READY FOR GATE -> tier-1 Opus gate if gauge allows). %291 **D 71st** (Opus, Kintsugi k34; brief 2026-11-17_seatD71_kintsugi_k34.md; NEXT: plan QUESTION -> ANSWER -> STATUS A (derive auth/transfer from their OWN bases) -> GO KINTSUGI naming the pin (shape 2026-11-17_D70_go_kintsugi.md) -> STATUS B -> Kam panel receipt -> score -> close; then a DEMO measure seat). %294 **S 89th** (Sonnet, archive sweep; brief 2026-11-17_seatS89_archive.md; NEXT: plan QUESTION with candidate table -> rule the list -> archive; Group P (KS-2083, KS-1954) only after k34 complete).

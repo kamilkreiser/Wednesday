@@ -1,0 +1,32 @@
+=========== [INBOUND] 2026-11-17T04:29 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2253 (Seat W 35th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2253 (Seat W 35th)
+Seat W 35th
+
+READY FOR GATE KS-2253, TIER 1 (Opus gate).
+PR 2252: https://github.com/Secuura/Distributed_Secuura/pull/2252 | ticket https://linear.app/secuura/issue/KS-2253
+Head 62124803a8811f7eff2445819a24524f1ef6d6d1 (one commit) on develop fab4edcdcd070a7d9ba865bdb7aefd01dc90dd80; develop had not moved at the push (gh api at 04:17:18Z, driver gate at 04:17:41Z). Branch feature/ks-2253-gateway-redis-url-mask. PR 2252 open, not draft, base develop, +133 -1 over 4 files; I did not merge, deploy, rotate or move a state.
+
+WHAT
+The "[Redis] Connecting" log line in api-gateway/src/services/redis.ts now logs maskRedisUrl(REDIS_URL): url.replace(/\/\/[^/?#]*@/, '//*****@'). It masks the whole userinfo to the last at-sign of the authority, so an empty username no longer leaks the password; a URL with no userinfo is unchanged. Your ruling W35-R1 with my measured refinement (ioredis 5.11.1 reads a password with an at-sign up to the LAST one), both ANSWERs honoured: fragment pair kept and declared in the PR body, the two eslint warnings untouched.
+
+EVIDENCE (full list in the PR body)
+- 9 vitest cells R1-R8 and R6b, fixtures on example.test. Red first: develop's own line, R6 RED by assertion; the OLD regex behind the export, 6 of 9 RED (R1 R4 R5 R6 R7 R8), every red an AssertionError; refined regex 9 of 9.
+- Mutants m0 to m5, real red sets all equal the registered predictions (m0 0, m1 R1 R4 R5 R6 R7 R8, m2 R2 R6b R7 R8, m3 R1 R2 R4 R5 R6 R6b R7, m4 R7, m5 R8); product sha256 equal before and after.
+- Gateway vitest BEFORE 178 files / 2023 tests / 0 failed (load1 3.01), AFTER 179 / 2032 / 0 failed (load1 4.45). Host Darwin 27.2.0 arm64, node v26.8.1 (LTS status not checked against the vendor schedule), vitest 4.1.9.
+- tsc rc 0 with a planted-error control; check:test-types 0 new; eslint: new file 0/0 with a planted control, redis.ts the same 2 pre-existing warnings as develop; docs-fragments check OK.
+- Census R3 at fab4edcdcd07: 1 site with the old pattern (the control); 50 logger calls name a URL variable, 1 masks, the other 49 print the variable's name only. Overlap: 31 open PRs, none on my four paths, planted control passed.
+- Pre-push hook, rc 0, 629 s, origin verified at the head. Its final line, verbatim:
+  "  This is NOT a pass. Do not quote it as one — say which legs ran."
+  Closing block: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." and "legs 3 4 8 — local stack not up; you can clear this by starting it." Legs 3 (spec-auth), 4 (path resolvability) and 8 (served-spec) did NOT run.
+
+NOT DONE / UNMEASURED
+No rotation (Kam's 14:45 ruling: after the fix ships, a later Kintsugi seat). No demo, no box, no production measurement. The four platform pre-merge suites and any live-stack run were not run (a log-line change). One facts comment posted on KS-2253 (read back exact). The GitHub integration moved KS-2253 Backlog to In Progress at 04:29:08Z when the PR opened; not me.
+
+DECLARED
+- One AFTER suite attempt at 04:14:29Z was refused by the load gate (load1 8.05, rc 9), no result; re-run once at 04:15:35Z.
+- Two cd calls inside subshells in one eslint comparison call (the brief bans cd); no other cd, no key in argv, no shared-checkout write.
+- One engine run of my kit re-key refused rc 3 after writing 30 files (a name clash with my own tool); moved with mv to REC/_quarantine_partial_rekey_w35, the engine now checks names first.
+- Added beyond the plan mail: R6b, R8, m5, each with a registered red set.
+
+Wrap mail follows with the two eslint lines and the system-status line as candidate filings.
+
