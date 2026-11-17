@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 12:27 17 Nov, the 12:16 rotation successor (ctx 52%) - READ FIRST; supersedes every block below where they differ
+- **develop 3e6146c3d2f8** (unchanged; GitHub API read 12:24). **No GO in flight.** Kam: 4 messages today, newest 07:37:54 (FRESHNESS 12:25:05); reconcile 0 to rule; newmail 0 at this block. Gauge 7d 91% (usage is a guide; merges only, Sonnet).
+- **FLOOR (one GO at a time across K and B):**
+  - %274 **K 50th** (Sonnet; 2026-11-17_seatK50_merge.md, STAMP K50-W1..W7): rung 5 MET 12:19 (pane named itself + PR 2170). Plan QUESTION 01:24Z ANSWERED (fleet/briefs_staged/2026-11-17_K50_answer_plan.md; tap verified 01:25:24Z; fleet_ack cleared). NEXT: SET-UP CLOSED STATUS (crossing 38.0 expected, report-not-stop while re-forecast READY < 58) -> READY 2170 -> GO (shape 2026-11-17_K49_go_2188.md; gate 307 Pins line 6 head 52f482a83436; NAME G307-2170-1/-3; 'this merge deploys nothing') -> MERGED verify -> WRAP naming PR 2187 expected.
+  - %277 **B 202nd** (Sonnet; fleet/briefs_staged/2026-11-17_seatB202_merge.md, STAMP B202-W1..W11 at 12:24; launched 12:24, verified at destination 01:24:43Z; rung 5 MET 12:26 (saved brief_b202.txt)). NEXT: plan QUESTION -> ANSWER (shape 2026-11-17_K50_answer_plan.md / B201 answer) -> SET-UP CLOSED -> READY 2135 -> GO (gate 291 line 19; case line WITH UNION=Blockchain/Dev/docs/S-K-OWNERSHIP-CONTRACT.md; on non-zero after a completed merge: tree assertion, finish_by_hand_2135_b202.sh, never undo) -> WRAP naming PR 2075 expected.
+  - %268 **D 70th** (Opus, KINTSUGI k33): build batch 1/3 at 01:20Z, heartbeat moving (LOGB 25402->26222); idle wake acked 12:20 after reading the heartbeat. NEXT unchanged from the 12:16 block (STATUS 2 -> swaps, api-gateway LAST -> watch -> STATUS B -> panel receipt naming the 12 held services -> score -> close).
+- **B 202nd drafter DONE** (the 12:16 FIRST WORK closed): re-commissioned, brief read whole, stamped, launched. Its _work folder: 0_Brain/reference/2026-11-17_drafter-seatB202/_work (scratch; the brief names files there the seat COPIES).
+- **OWED (carried, unchanged):** the 12:16 block's OWED line; plus INDEX.md refresh and the weekly consolidation still lapsed.
+
 ## 🔴 ROTATION HANDOVER 12:16 17 Nov, the 09:5x rotation successor (ctx 81%) - READ FIRST; supersedes every block below where they differ
 - **develop 3e6146c3d2f8** (PR 2136 by B 201st, verified 11:47: one parent caace2ef3d61, tree 41c3a1e1660c). **Merges since 15 Nov evening: 69** (this seat: 2176 K48, 2059 B200, 2188 K49, 2136 B201). **No GO in flight.** Kam: 4 messages today, newest 07:37:54 (FRESHNESS 11:43:18); reconcile 0; gauge 7d 90% (the 80-90 band: Sonnet tilt; usage is a guide; merges need a repo identity no local tier has).
 - **FLOOR:**
