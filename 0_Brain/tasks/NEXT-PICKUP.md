@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 14:34 17 Nov, the 12:16 rotation successor (ctx ~78%) - READ FIRST; supersedes every block below where they differ
+- **develop fab4edcdcd07** (PR 2187 by K 51st, verified 14:31: one parent e36b3af9da59, tree 4d7b19c69ade). **Merges since 15 Nov evening: 73** (this seat: 2170, 2135, 2075, 2187). **No seat live; no GO in flight; no question pending.** Kam: 4 messages today, newest 07:37:54; his open card secuura-gateway-redis-password-in-log-1117 (default: no rotation).
+- **Scores this seat:** K 50th 0.95, B 202nd 0.94, D 70th 0.96, B 203rd 0.96, K 51st 0.96 (all panes CLOSED).
+- **DRAFTERS RUNNING (subagents of THIS seat; DIE with a rotation -> RE-COMMISSION from commission.md if the output is ABSENT):**
+  - B 204th: 0_Brain/reference/2026-11-17_drafter-seatB204/commission.md -> fleet/briefs_staged/2026-11-17_seatB204_merge.md (row 1 PR 2073 KS-1152 T1, both-sided on THREE paths; own rd->th; PRE = the pin's TREE; it may recommend a different first row if 2073 cannot fit under 58).
+  - K 52nd: 0_Brain/reference/2026-11-17_drafter-seatK52/commission.md -> fleet/briefs_staged/2026-11-17_seatK52_merge.md (row 1 PR 2194 KS-1663 T2, gate 318 line 1; own st->nd AND lineage th->st).
+  NEXT for each: read WHOLE, check every case-line hash field against what the runner compares (PRE = TREE), spot-check gate line + head at source, STAMP, capacity ROOM, launch Sonnet; plan ANSWER shapes 2026-11-17_K51_answer_plan.md / _B203_answer_plan.md; GO shapes _K51_go_2187.md / _B203_go_2075.md.
+- **OWED NEXT:** Kintsugi k34 by a D seat (Opus): auth (2075) + transfer (2170) at the then-develop pin (2135 docs and 2187 start script reach no image); commission from fleet/briefs_staged/2026-11-17_seatD70_kintsugi_k33.md and 5_Project_History/2026-11-17_seatD-70th/HANDOVER.md. Then: Redis mask fix (ticket + build + gate); the 6 unexplained preview anchors (11-16 08:27Z-09:08Z); board seat; INDEX.md; weekly consolidation (lapsed).
+
 ## 🔴 CHECKPOINT 14:09 17 Nov, the 12:16 rotation successor (ctx ~76%) - READ FIRST; supersedes every block below where they differ
 - **develop e36b3af9da59** (PR 2075 by B 203rd, verified 14:04: one parent 49d8a7a981fd, tree 0a4fa23ea2a1). **Merges since 15 Nov evening: 72** (this seat: 2170 K50, 2135 B202, 2075 B203). **No GO in flight.**
 - **FLOOR:** %280 **K 51st** (Sonnet, 11 rows from PR 2187; SET-UP CLOSED 38.4 at 02:51Z; in row 1 legs; its pins sat on 49d8a7a981fd: it re-pins to e36b3af9da59 before its READY). NEXT: READY 2187 -> verify head + develop at source -> GO (fleet/briefs_staged/2026-11-17_B203_go_2075.md / _K50_go_2170.md shapes; gate 313 line 5; NAME G313-2187-1: with any of the five new services unhealthy the start script waits 120 s, warns by name, continues rc 0; 'this merge deploys nothing') -> MERGED verify -> WRAP naming PR 2194 expected -> score -> pane_close.
