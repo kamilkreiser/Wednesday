@@ -1,0 +1,65 @@
+HEAD:crates/coagent-policy/_quarantine_2026-11-17_plain-opaque/README.md:12:Why it came out (Friday, addendum 5, `2026-11-17_coagent_M2_POLICY_ADDENDUM-5_all_shell_T3.md`):
+HEAD:crates/coagent-policy/_quarantine_2026-11-17_plain-opaque/README.md:30:Decision (Friday, conservative default, on a card for Kam): there is no PLAIN class. Every Bash and PowerShell
+HEAD:crates/coagent-policy/_quarantine_2026-11-17_shell-recogniser/README.md:20:- **Round 1** (`FRIDAY/0_Brain/reference/2026-11-16_claude-to-claude/m1_review/gate_M2_POLICY_verdict.md`, NO GO at
+HEAD:crates/coagent-policy/_quarantine_2026-11-17_shell-recogniser/README.md:36:**Decision** (Friday, addendum 3; put to Kam on a card): every `Bash` and every `PowerShell` call is `execute`. Reads
+HEAD:crates/coagent-policy/src/path/mod.rs:28:    "/System/Volumes/Data/net",
+HEAD:crates/coagent-policy/src/path/mod.rs:29:    "/System/Volumes/Data/home",
+HEAD:crates/coagent-policy/src/path/mod.rs:37:    "/System/Volumes/Data/net",
+HEAD:crates/coagent-policy/src/path/winrules.rs:110:        assert!(matches!(classify("/c/Users/kam"), Uncertain(_)));
+HEAD:crates/coagent-policy/tests/common/mod.rs:16:    // COAGENT_TEST_TMP (test code only) puts every fixture on another volume, e.g. one under /private/tmp on
+HEAD:crates/coagent-policy/tests/q01_gate_attacks.rs:205:    // RULING (Friday, 2026-11-17): prefixes are never recognised; was unwrap()
+HEAD:crates/coagent-policy/tests/q01_gate_attacks.rs:407:    // RULING (Friday, 2026-11-17): a bounded assertion, not a report. Bound: 50 ms per decision
+HEAD:crates/coagent-policy/tests/r2_gate_attacks.rs:102:    // classifier: /private/tmp -> /private -> /private/<rel> (not a credential)
+HEAD:crates/coagent-policy/tests/r2_gate_attacks.rs:531:    // RULING (Friday, 2026-11-17, addendum 4): was `recognise_posix(&cmd).is_ok()` (round 2), then the trivially
+HEAD:crates/coagent-policy/tests/r2_gate_attacks.rs:534:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3. The under-bound line is a T3 ask (was:
+HEAD:crates/coagent-policy/tests/r3_gate_attacks.rs:374:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3. A session "this exact command" approval
+HEAD:crates/coagent-policy/tests/r4_gate_attacks.rs:7:// RULING (Friday, 2026-11-17, addendum 5): every shell command is T3. `bash_plain`/`powershell_plain` are removed
+HEAD:crates/coagent-policy/tests/r4_gate_attacks.rs:687:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3. There is no PLAIN class to select lines
+HEAD:crates/coagent-policy/tests/r4_gate_attacks.rs:790:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3 (see above); the rewrites are measured, not
+HEAD:crates/coagent-policy/tests/t01_table.rs:90:    assert_eq!(fx.bash("cat src/main.rs").kind, Kind::Execute); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser; was Read
+HEAD:crates/coagent-policy/tests/t01_table.rs:91:    assert_eq!(fx.bash("grep -rn main src").kind, Kind::Execute); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser; was Search
+HEAD:crates/coagent-policy/tests/t01_table.rs:95:        .any(|(r, p)| *r == PathRole::Mentioned && p.canonical() == Some(main_rs.as_path()))); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser; was a Read 
+HEAD:crates/coagent-policy/tests/t01_table.rs:98:    // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t01_table.rs:237:    assert_eq!(kinds, vec![Kind::Execute, Kind::Edit], "{kinds:?}"); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t02_property.rs:116:        assert!(recognise_posix(b).is_err(), "base recognised: {b}"); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t02_property.rs:117:        assert_eq!(bash_kind(b), coagent_policy::Kind::Execute, "{b}"); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t02_property.rs:307:    assert_eq!(recognised, 0, "{recognised} of {total} recognised"); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t02_property.rs:312:        assert_eq!(bash_kind(&cmd), coagent_policy::Kind::Execute, "{cmd:?}"); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t03_b16.rs:53:        ); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t03_b16.rs:58:    ); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t03_b16.rs:120:        assert!(recognise_posix(c).is_err(), "control recognised: {c}"); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t04_paths.rs:230:    // realpath (std::fs::canonicalize) returns the ON-DISK case, so /USERS/SHARED becomes /Users/Shared and
+HEAD:crates/coagent-policy/tests/t04_paths.rs:233:    let shared = Path::new("/Users/Shared");
+HEAD:crates/coagent-policy/tests/t04_paths.rs:234:    if !shared.is_dir() || !Path::new("/USERS/SHARED").is_dir() {
+HEAD:crates/coagent-policy/tests/t04_paths.rs:240:    let p = PosixNormaliser.normalise("/USERS/SHARED", Path::new("/"), &env);
+HEAD:crates/coagent-policy/tests/t04_paths.rs:246:    let p = PosixNormaliser.normalise("/USERS/SHARED/not-yet-existing-file", Path::new("/"), &env);
+HEAD:crates/coagent-policy/tests/t04_paths.rs:266:        &json!({"session_id": SESSION, "cwd": "/Users/Shared", "hook_event_name": "PreToolUse",
+HEAD:crates/coagent-policy/tests/t04_paths.rs:267:        "tool_name": "Read", "tool_input": {"file_path": "/USERS/SHARED/.SSH/id_rsa"}})
+HEAD:crates/coagent-policy/tests/t04_paths.rs:330:    assert_eq!(a.kind, Kind::Execute); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t06_t3.rs:153:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3: a shell command is never granted (was: is_allow)
+HEAD:crates/coagent-policy/tests/t06_t3.rs:168:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3. A curl GET is T3 for the one fixed
+HEAD:crates/coagent-policy/tests/t07_exclusions.rs:157:        assert_eq!(a.kind, Kind::Execute); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t07_exclusions.rs:160:        assert!(!is_allow(&d), "{c}: {d:?}"); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t07_exclusions.rs:195:    ))); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser; was the Bash `grep -rn TODO .`
+HEAD:crates/coagent-policy/tests/t08_binding.rs:48:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3: a session "this exact command" approval allows
+HEAD:crates/coagent-policy/tests/t08_binding.rs:111:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3: no session scope is offered (was: "this exact command")
+HEAD:crates/coagent-policy/tests/t08_binding.rs:135:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3: a shell command is never session-approved, so the
+HEAD:crates/coagent-policy/tests/t08_binding.rs:232:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3: it generates no session scope at all.
+HEAD:crates/coagent-policy/tests/t09_grants.rs:55:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3: a grant execute line never allows (was: is_allow)
+HEAD:crates/coagent-policy/tests/t09_grants.rs:206:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3: a grant never covers a shell command, with the
+HEAD:crates/coagent-policy/tests/t09_grants.rs:287:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3 (was: a "native Windows" note on a T2 card)
+HEAD:crates/coagent-policy/tests/t09_grants.rs:332:    // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t13_option_spellings.rs:99:    // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser. Each of these was asserted RECOGNISED by
+HEAD:crates/coagent-policy/tests/t13_option_spellings.rs:120:        assert_eq!(kind_of(&fx, l), Kind::Execute, "{l}"); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:62:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3 (was: T2)
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:66:    assert_eq!(a.kind, Kind::Execute); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:67:    assert!(!is_allow(&decide(&a, &st, Surface::Console, NOW))); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:111:    ); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:634:    // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3: the session approval allows nothing (was: allowed)
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:692:    ))); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:811:    assert!(recognise_powershell("gci -Recurse .", true).is_err()); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:812:    assert!(recognise_powershell("Get-Content -Path a.txt -TotalCount 5", true).is_err()); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:813:    assert!(recognise_powershell("GET-CONTENT -PATH a.txt", true).is_err()); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:crates/coagent-policy/tests/t14_gate_return.rs:819:    ); // RULING (Friday, 2026-11-17, addendum 3): no shell recogniser
+HEAD:docs/POLICY.md:396:   would be a structure, a recogniser again. Decision: Friday, confirmed by Kam 2026-11-17: "Keep it: every terminal command asks".
+HEAD:docs/POLICY.md:414:   `FRIDAY/0_Brain/reference/2026-11-16_claude-to-claude/m1_review/gate_M2_POLICY_verdict.md` and

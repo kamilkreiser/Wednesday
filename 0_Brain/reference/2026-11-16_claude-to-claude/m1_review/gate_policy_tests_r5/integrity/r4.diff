@@ -1,0 +1,40 @@
+7c7,14
+< use coagent_policy::shell::{bash_plain, powershell_plain};
+---
+> // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3. `bash_plain`/`powershell_plain` are removed
+> // (there is no PLAIN class); these stand-ins keep the survey prints, which now always show plain=false.
+> fn bash_plain(_: &str) -> Result<(), &'static str> {
+>     Err("no PLAIN class (addendum 5)")
+> }
+> fn powershell_plain(_: &str) -> Result<(), &'static str> {
+>     Err("no PLAIN class (addendum 5)")
+> }
+680c687,693
+<     let (mut generated, mut opaque) = (0usize, 0usize);
+---
+>     // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3. There is no PLAIN class to select lines
+>     // with, so every generated line is run through print only (the character guard below still holds), and every
+>     // line, whatever a shell does with it, must be decided deny-or-strict-T3. Was: lines filtered by `bash_plain`
+>     // and `assert!(rewrites.is_empty())`.
+>     let st = fx.state_with(defaults());
+>     let mut not_t3: Vec<String> = vec![];
+>     let (mut generated, opaque) = (0usize, 0usize);
+686,688c699,701
+<         if bash_plain(&format!("print {line}")).is_err() {
+<             opaque += 1;
+<             continue;
+---
+>         let d = bash_d(&fx, &st, &format!("print {line}"));
+>         if !deny_or_strict_t3(&d) {
+>             not_t3.push(format!("print {line} -> {}", short(&d)));
+777c790,797
+<     assert!(rewrites.is_empty(), "{} rewrites", rewrites.len());
+---
+>     // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3 (see above); the rewrites are measured, not
+>     // forbidden, because no line is trusted to be what runs.
+>     assert!(
+>         not_t3.is_empty(),
+>         "{} lines not T3:\n{}",
+>         not_t3.len(),
+>         not_t3.join("\n")
+>     );

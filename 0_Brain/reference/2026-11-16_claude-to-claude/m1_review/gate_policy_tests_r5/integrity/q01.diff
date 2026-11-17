@@ -1,0 +1,37 @@
+205c205
+<     let r = recognise_powershell("gci -Rec .", true).unwrap();
+---
+>     // RULING (Friday, 2026-11-17): prefixes are never recognised; was unwrap()
+207,208c207,208
+<         r.paths.iter().all(|p| p.1),
+<         "-Rec = -Recurse not seen: {r:?}"
+---
+>         recognise_powershell("gci -Rec .", true).is_err(),
+>         "-Rec must be execute"
+407c407,430
+<     panic!("TIMING REPORT\n{}", rep.join("\n"));
+---
+>     // RULING (Friday, 2026-11-17): a bounded assertion, not a report. Bound: 50 ms per decision
+>     // (docs/POLICY.md §8). Each case here is ONE run in the unoptimised debug test build; the documented
+>     // debug-build worst cases at the bounds are 13-36 ms (median of three), so 50 ms leaves the margin.
+>     // The 16 000-component input (a stack overflow before addendum 1) stays in the loop above.
+>     eprintln!("TIMING REPORT\n{}", rep.join("\n"));
+>     let bound = std::time::Duration::from_millis(50);
+>     for line in &rep {
+>         let d = line.rsplit(": ").next().unwrap_or("");
+>         let ms = if let Some(v) = d.strip_suffix("µs") {
+>             v.parse::<f64>().unwrap() / 1000.0
+>         } else if let Some(v) = d.strip_suffix("ms") {
+>             v.parse::<f64>().unwrap()
+>         } else if let Some(v) = d.strip_suffix("ns") {
+>             v.parse::<f64>().unwrap() / 1_000_000.0
+>         } else if let Some(v) = d.strip_suffix('s') {
+>             v.parse::<f64>().unwrap() * 1000.0
+>         } else {
+>             panic!("unparsed timing: {line}")
+>         };
+>         assert!(
+>             ms < bound.as_secs_f64() * 1000.0,
+>             "over the 50 ms bound: {line}"
+>         );
+>     }

@@ -1,0 +1,21 @@
+531c531,548
+<     assert!(recognise_posix(&cmd).is_ok());
+---
+>     // RULING (Friday, 2026-11-17, addendum 4): was `recognise_posix(&cmd).is_ok()` (round 2), then the trivially
+>     // true `.is_err()` (addendum 3). Now: this line is under every bound, so it is an ordinary PLAIN ask (T2);
+>     // the same shape just over a bound (MAX_MENTIONS + 1 distinct words) is OPAQUE-or-denied, never a PLAIN T2.
+>     // RULING (Friday, 2026-11-17, addendum 5): every shell command is T3. The under-bound line is a T3 ask (was:
+>     // T2); the over-bound assertion below is unchanged.
+>     let d = decide(&fx.bash(&cmd), &st, Surface::Console, NOW);
+>     assert_eq!(tier_of(&d), Some(Tier::T3), "{d:?}");
+>     let over: Vec<String> = (0..161).map(|i| format!("f{i}")).collect();
+>     let d = decide(
+>         &fx.bash(&format!("cat {}", over.join(" "))),
+>         &st,
+>         Surface::Console,
+>         NOW,
+>     );
+>     assert!(
+>         matches!(d, Decision::Deny { .. }) || tier_of(&d) == Some(Tier::T3),
+>         "{d:?}"
+>     );
