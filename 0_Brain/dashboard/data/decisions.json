@@ -75452,5 +75452,46 @@
    "CARD hpsmpoc-review-site-deploy-effects-1116",
    "CARD hpsmpoc-revenue-unit-box-look-1117"
   ]
+ },
+ {
+  "id": "secuura-gateway-redis-password-in-log-1117",
+  "client_project": "Secuura/Blockchain",
+  "title": "Kintsugi's gateway writes its Redis password into its own log: rotate that password once the fix is deployed?",
+  "bluf": "D 70th found (12:58, pre-existing, not from today's deploy) that the api-gateway logs REDIS_URL at every boot, and its mask fails when the username is empty, as on Kintsugi, so the password shows in clear in the box's docker log. Measured by booleans only; the value was never printed or mailed. Demo probably has the same line (unmeasured). We will fix the mask in code either way (a seat, gated, then a Kintsugi round). This card asks only: rotate the Redis password afterwards? The old log lines keep the password until the containers are recreated. (Prior-ruling override: the 15 matches share the words gateway/redis/password; none is about a secret written to a log. KS-762 was a committed DB password default, a different secret and mechanism.)",
+  "default_action": "b: no rotation. The mask fix is built, gated and deployed to Kintsugi regardless; nothing is rotated without your tap",
+  "options": [
+   {
+    "key": "a",
+    "label": "Rotate after the fix ships",
+    "detail": "Once the masked gateway is on Kintsugi (and demo, after a D seat measures demo's line), a D seat rotates the Redis password on each box and redeploys; old log lines then hold a dead password"
+   },
+   {
+    "key": "b",
+    "label": "No rotation",
+    "detail": "Fix the mask only; the old lines stay until a container recreate. Reading them needs docker log access on the box, which already means box access"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T12:59:14.125567+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-03 09:54",
+   "2026-09-11 16:55",
+   "CARD secuura-ks762-db-password-rotation",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1369-gateway-proxy-crash-guard-shape",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-ks762-db-password-rotation-confirm-1102",
+   "CARD secuura-pr1970-gateway-failopen-1103",
+   "CARD secuura-auth-lockout-failopen-redis-down-1103",
+   "CARD secuura-ks1233-redis-ttl-read-1104",
+   "CARD secuura-ks657-redis-security-store-delete-1107",
+   "CARD secuura-ks1372-gateway-lockout-wire-or-retire-1109",
+   "CARD secuura-ks1952-redis-down-doctype-rules-1110",
+   "CARD secuura-ks1855-gateway-standin-routes-1110"
+  ]
  }
 ]
