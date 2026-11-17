@@ -8,6 +8,28 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 13:35 17 Nov, the 12:16 rotation successor (ctx 71%) - READ FIRST; supersedes every block below where they differ
+- **develop 49d8a7a981fd.** Merges since 15 Nov evening: 71. **No GO in flight.** Kam: 4 messages today, newest 07:37:54; his open card: secuura-gateway-redis-password-in-log-1117 (default: no rotation).
+- **FLOOR (one GO at a time across K and B):**
+  - %280 **K 51st** (Sonnet; fleet/briefs_staged/2026-11-17_seatK51_merge.md, STAMP K51-W1..W7 at 13:3x; 11 rows from PR 2187 KS-1163, bash start-script row, gate 313 line 5). Launched 13:32 (verified 02:32:57Z); rung 5 OWED. NEXT: plan QUESTION -> ANSWER (shape 2026-11-17_K50_answer_plan.md; 38.0 stop ruled non-binding in W7) -> SET-UP CLOSED -> READY 2187 -> GO (shape 2026-11-17_K50_go_2170.md; MUST NAME G313-2187-1: with any of the five new services unhealthy the start script waits 120 s, warns by name, continues rc 0; 'this merge deploys nothing') -> WRAP naming PR 2194 expected.
+  - %283 **B 203rd** (Sonnet; fleet/briefs_staged/2026-11-17_seatB203_merge.md, STAMP B203-W1..W11 at 13:3x; 6 rows from PR 2075 KS-2083 auth role-change-ends-sessions, gate 254 line 1, both-sided on users.ts). Launched 13:33 (verified 02:33:50Z); rung 5 OWED. NEXT: plan QUESTION -> ANSWER (shape 2026-11-17_B202_answer_plan.md) -> SET-UP CLOSED -> READY 2075 -> GO (shape 2026-11-17_B202_go_2135.md; UNION=Blockchain/Dev/services/auth/src/routes/users.ts, finish_by_hand_2075_b203.sh; name F3 unmeasured) -> WRAP naming PR 2073 expected.
+- **Drafters: none running** (K 51st and B 203rd briefs delivered, stamped, launched).
+- **OWED:** Kintsugi k34 by a D seat AFTER B 203rd's 2075 merges (auth: 2075; transfer: 2170; docs 2135 reaches no image); the Redis mask fix (ticket + build + gate); measure the 6 unexplained preview anchors (11-16 08:27Z-09:08Z); board seat (gate notes list in the 12:16 block); INDEX.md refresh; weekly consolidation lapsed. Scores this seat: K 50th 0.95, B 202nd 0.94, D 70th 0.96.
+
+## 🔴 CHECKPOINT 13:12 17 Nov, the 12:16 rotation successor (ctx 65%) - READ FIRST; supersedes every block below where they differ
+- **develop 49d8a7a981fd.** Merges since 15 Nov evening: 71. **No seat live; no GO in flight.** Kam: 4 messages today, newest 07:37:54.
+- **D 70th DONE:** Kintsugi k33 complete at caace2ef3d61 (7 services); receipt on Kam's panel bf-eb2d6268d890; SCORED 0.96; pane CLOSED. Deploy notice to Peter/Stuart HELD (Kam's). Kintsugi now lacks 2170 (transfer) and 2135 (docs): a later k34 round.
+- **DRAFTERS still running (re-commission from commission.md if output absent):** K 51st and B 203rd, exactly as the UPDATE block below says.
+- **OWED NEW:** measure who wrote 6 confirmed preview anchors on Kintsugi 2026-11-16 08:27Z-09:08Z (not a D seat; D 70th STATUS B finding b). Redis mask fix (OWED NEW 12:59). Scores this seat: K 50th 0.95, B 202nd 0.94, D 70th 0.96.
+
+## 🔴 UPDATE 13:03 17 Nov, the 12:16 rotation successor (ctx ~64%) - READ FIRST; supersedes every block below where they differ
+- **develop 49d8a7a981fd** (PR 2135 by B 202nd, verified 12:56: one parent 64cb8b88649f, tree f5dfa4c74612). **Merges since 15 Nov evening: 71** (this seat: 2170 K50, 2135 B202). **No GO in flight. No merge seat live.**
+- **Scores this seat:** K 50th 0.95, B 202nd 0.94 (both panes CLOSED).
+- **DRAFTERS (subagents of THIS seat; DIE with a rotation -> RE-COMMISSION from commission.md if the output is ABSENT):** K 51st (0_Brain/reference/2026-11-17_drafter-seatK51/commission.md -> fleet/briefs_staged/2026-11-17_seatK51_merge.md; own th->st; row 1 PR 2187 KS-1163 gate 313 line 5) and B 203rd (0_Brain/reference/2026-11-17_drafter-seatB203/commission.md -> fleet/briefs_staged/2026-11-17_seatB203_merge.md; own nd->rd; row 1 PR 2075 KS-2083 gate 254 line 1, both-sided on auth routes/users.ts). NEXT for each: read WHOLE, spot-check gate line + head at source, STAMP, capacity ROOM, launch Sonnet (SEAT_MODEL_ENV=claude-sonnet-5-5 brief_and_launch.sh --to Secuura/Blockchain-K|-B --subject '...' --body-file ...); plan ANSWER shapes 2026-11-17_K50_answer_plan.md / _B202_answer_plan.md; GO shapes _K50_go_2170.md / _B202_go_2135.md. One GO at a time across K and B.
+- **D 70th** (%268, Kintsugi k33): swaps DONE 7/7 OK (STATUS 3 01:58Z), REVISION written (3b); +15 min watch ~02:06Z -> STATUS B -> post Kam's PANEL RECEIPT (must say once: the 12 held services still run the earlier copy of the shared key-revoke file; none calls the changed functions) -> score -> pane_close.
+- **Kam card OPEN:** secuura-gateway-redis-password-in-log-1117 (rotate Redis password after the mask fix; rec a; DEFAULT b no rotation). The mask FIX is OWED regardless (see the 12:2x block's OWED NEW).
+- **B 202nd key-in-argv: RESOLVED** (census false positive; audited by value, 0 copies; nothing to rotate).
+
 ## 🔴 CHECKPOINT 12:27 17 Nov, the 12:16 rotation successor (ctx 52%) - READ FIRST; supersedes every block below where they differ
 - **develop 3e6146c3d2f8** (unchanged; GitHub API read 12:24). **No GO in flight.** Kam: 4 messages today, newest 07:37:54 (FRESHNESS 12:25:05); reconcile 0 to rule; newmail 0 at this block. Gauge 7d 91% (usage is a guide; merges only, Sonnet).
 - **FLOOR (one GO at a time across K and B):**
@@ -16,6 +38,7 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
   - %268 **D 70th** (Opus, KINTSUGI k33): build batch 1/3 at 01:20Z, heartbeat moving (LOGB 25402->26222); idle wake acked 12:20 after reading the heartbeat. NEXT unchanged from the 12:16 block (STATUS 2 -> swaps, api-gateway LAST -> watch -> STATUS B -> panel receipt naming the 12 held services -> score -> close).
 - **B 202nd drafter DONE** (the 12:16 FIRST WORK closed): re-commissioned, brief read whole, stamped, launched. Its _work folder: 0_Brain/reference/2026-11-17_drafter-seatB202/_work (scratch; the brief names files there the seat COPIES).
 - **OWED (carried, unchanged):** the 12:16 block's OWED line; plus INDEX.md refresh and the weekly consolidation still lapsed.
+- **OWED NEW (12:59):** the REDIS_URL log-mask fix: services/api-gateway/src/services/redis.ts line 56, the mask regex needs a non-empty username, so Kintsugi's empty-username URL logs its password in clear (D 70th STATUS 3, 01:58Z; pre-existing at k32). Needs a ticket (board seat) + a build seat (mask any userinfo, unit test with an empty username) + gate + a Kintsugi round; then demo measured. Kam card secuura-gateway-redis-password-in-log-1117 asks only about ROTATION (default: none).
 
 ## 🔴 ROTATION HANDOVER 12:16 17 Nov, the 09:5x rotation successor (ctx 81%) - READ FIRST; supersedes every block below where they differ
 - **develop 3e6146c3d2f8** (PR 2136 by B 201st, verified 11:47: one parent caace2ef3d61, tree 41c3a1e1660c). **Merges since 15 Nov evening: 69** (this seat: 2176 K48, 2059 B200, 2188 K49, 2136 B201). **No GO in flight.** Kam: 4 messages today, newest 07:37:54 (FRESHNESS 11:43:18); reconcile 0; gauge 7d 90% (the 80-90 band: Sonnet tilt; usage is a guide; merges need a repo identity no local tier has).
