@@ -75750,5 +75750,117 @@
    "CARD hpsmpoc-name-check-r3-residue-1012",
    "CARD composer-106-107-routeb-residue-round-1028"
   ]
+ },
+ {
+  "id": "general-c2c-daemon-d1-end-on-absence-1117",
+  "client_project": "General/Claude to Claude",
+  "title": "CoAgent daemon design: should a session ever end by itself when the other person is away?",
+  "bluf": "The recovery design you asked for is written (09_daemon-recovery-rules-design.md). It leaves this to you. The first design said: pause after 5 minutes away, end after 30. The current build does neither. The designer and I recommend never ending by itself: a laptop asleep over lunch, or a relay holding traffic back for 30 minutes, would otherwise end a session for good. (Override reason: the one earlier message the gate matched is a 16 September ruling about restarting a coordinator seat, a different subject.)",
+  "default_action": "The build goes ahead on option a; changing it later is a small change",
+  "options": [
+   {
+    "key": "a",
+    "label": "Never end by itself",
+    "detail": "Shows not connected since a time, keeps unsent messages, ends only when a person ends it"
+   },
+   {
+    "key": "b",
+    "label": "As first designed",
+    "detail": "Pause at 5 minutes, end at 30"
+   },
+   {
+    "key": "c",
+    "label": "End after a long time",
+    "detail": "For example 7 days away"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T20:36:00.476085+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-16 20:22"
+  ]
+ },
+ {
+  "id": "general-c2c-daemon-d3-withheld-handshakes-1117",
+  "client_project": "General/Claude to Claude",
+  "title": "CoAgent daemon design: accept that a relay which keeps interfering can keep blocking the key exchange?",
+  "bluf": "From the recovery design (09). A hostile relay that held back genuine handshake messages earlier can spend them to block a new key exchange, for as long as it keeps doing it. When it stops, the two sides reconnect. Closing this fully means changing the handshake in the merged cryptography piece, which passed two checks, and costs a build and a check of its own. Recommended: accept it and say so plainly; the first design already accepts that an active relay can deny service.",
+  "default_action": "The build goes ahead on option a",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept and say so plainly",
+    "detail": "No change to the cryptography piece"
+   },
+   {
+    "key": "b",
+    "label": "Change the handshake",
+    "detail": "Reopens the merged cryptography piece; one more build and one more check"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T20:36:16.177550+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-daemon-d4-recovery-times-1117",
+  "client_project": "General/Claude to Claude",
+  "title": "CoAgent daemon design: accept the proposed recovery times?",
+  "bluf": "From the recovery design (09). Proposed, not measured: after interference stops, the two sides are working again within two minutes. One lost packet in a healthy session heals in about 17 seconds, where it took about 2 before; that is the price of never acting on unproven signals. Faster is possible, with more background traffic and a weaker limit on what a hostile relay can make your computer send. Recommended: accept, and look again once the build has measured the real figures.",
+  "default_action": "The build goes ahead on option a",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept, revisit once measured",
+    "detail": "Two minutes after interference; about 17 seconds for one lost packet"
+   },
+   {
+    "key": "b",
+    "label": "Ask for faster recovery",
+    "detail": "More background traffic and a weaker limit on a hostile relay"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T20:36:18.337402+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "general-c2c-daemon-d2-tell-assistant-of-loss-1117",
+  "client_project": "General/Claude to Claude",
+  "title": "CoAgent daemon design: tell the assistant when messages were lost on your own computer?",
+  "bluf": "From the recovery design (09). Today, if a file on your computer is damaged or a message could not be sent, only the status command and a log line say so, and the assistant cannot see either. So the assistant was told sent and never learns otherwise. Recommended: yes, one fixed sentence that gives only a count. (Override reason: the gate matched two already-ruled cards of other projects that share only the words assistant and tell; neither is about this.)",
+  "default_action": "The build goes ahead on option a",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, one fixed count-only sentence",
+    "detail": "Shown in the assistant's next tool result; adds two fixed sentences to what a result may contain"
+   },
+   {
+    "key": "b",
+    "label": "No change",
+    "detail": "Status and log only, as today"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-17T20:36:30.062212+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd476-assistant-prompt-words-1018",
+   "CARD hpsmpoc-hp-content-gaps-tell-hp-1021"
+  ]
  }
 ]
