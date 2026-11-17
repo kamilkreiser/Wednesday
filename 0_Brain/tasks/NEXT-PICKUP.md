@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 11:21 17 Nov, the 09:5x rotation successor (ctx 71%) - READ FIRST; supersedes every block below where they differ
+- **develop df2291409217.** Merges since 15 Nov evening: 67. **No GO in flight.** Kam: 4 messages, newest 07:37:54 (FRESHNESS 11:20:46); reconcile 0; newmail 0 at this block.
+- **DEMO DONE:** D 69th round d15 COMPLETE on eb27110fc6e4 (27/27, no migration); receipt posted to Kam (bf-dfb27ac428d4); D 69th SCORED 0.94, pane CLOSED.
+- **FLOOR (one GO at a time across K and B):**
+  - %265 **K 49th** (Sonnet; 2026-11-17_seatK49_merge.md, STAMP K49-W1..W6): SET-UP CLOSED 42.2 (00:18Z), READY 2188 forecast 52.7-55.3 (advance ruling: proceeds). NEXT: READY 2188 -> verify head + develop at source -> GO (shape 2026-11-17_K48_go_2176.md; gate 314 line 1; NAME G314-2188-2; 'this merge deploys nothing', no demo mention) -> MERGED verify -> WRAP naming PR 2170.
+  - %268 **D 70th** (Opus, KINTSUGI k33; 2026-11-17_seatD70_kintsugi_k33.md with ADDENDUM D70-W7: develop moved, measure Kintsugi RAM, portals one at a time). Launched 11:18; rung 5 OWED; NEXT its plan QUESTION -> ANSWER, then STATUS A (re-derived REBUILT set; frontend in it = STOP-and-QUESTION) -> GO KINTSUGI naming the pin.
+  - %271 **B 201st** (Sonnet; 2026-11-17_seatB201_merge.md, STAMP B201-W1..W7; FIRST suffix change th->st; row order 2136 then 2135 (docs), then 2075). Launched 11:20; rung 5 OWED; NEXT plan QUESTION -> ANSWER (shape 2026-11-17_B200_answer_plan.md) -> READY 2136 -> GO (gate 291 line 20, no UNION=).
+- **Scores this seat:** K 48th 0.94, B 200th 0.97, D 69th 0.94.
+- **Launch refusals today (2):** D 70th and B 201st briefs each had ONE malformed provenance line (no fact|source split); send_brief refused before sending; fixed by reshaping the line. Drafters' format check misses it: add to the drafter commission template.
+- **OWED (carried):** board seat (KS-2250 comment; gate notes G316-2192, 245 F1-F3, 258 N1-N4, G302-2161, G311-2176-1..6, gate 250 R2-1..R2-7 + M2 5xx test, G314-2188 once merged); Stuart's KS-772 comment 14dce195; Secuura brief items: launcher boot-step cd (K 49th did it again), demo portals build serially (D 69th), history.md size moves under other writers (7,203,071 -> 7,155,969 -> 7,201,743 B: find the writer); INDEX.md refresh; --help advisory hook; weekly consolidation (lapsed); brief_and_launch refusing on capacity FULL; send_brief check for an un-run 'live read'.
+
 ## 🔴 CHECKPOINT 11:08 17 Nov, the 09:5x rotation successor (ctx 65%) - READ FIRST; supersedes every block below where they differ
 - **develop df2291409217** (PR 2059 by B 200th, verified 10:45: one parent e42118ad08cc, tree 6307d2d8b8cd). **Merges since 15 Nov evening: 67** (this seat: 2176 by K 48th, 2059 by B 200th). **No GO in flight.** Kam: 4 messages today, newest 07:37:54 (FRESHNESS 11:06:47).
 - **FLOOR:**
