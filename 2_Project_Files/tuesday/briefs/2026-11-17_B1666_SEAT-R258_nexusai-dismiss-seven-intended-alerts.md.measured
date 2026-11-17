@@ -1,0 +1,63 @@
+cb6ddf0a | `date` read Tue 17 Nov 2026 15:13:02 AEDT first, 15:18:17 last before this sidecar
+71a3e540 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' at 15:13:32 -> %0 tuesday, %249 Datasec/NexusAI-R256, %246 Datasec/HPSM-POC-D67, %1 fleet-monitor, 5 unnamed
+034dbde2 | tail of 1_Project_Definition/Briefs/2026-11-17_B1663_STATUS.md at 15:14 -> RECORDS B1663: PENDING | JIRA pending
+3c4eef87 | gh api -X GET code-scanning/alerts?state=open|fixed|dismissed&ref=refs/heads/main paged at 15:13 -> open 29, fixed 222, dismissed 0 (positive control: alert 99999 -> 404 No alert found)
+85635fd9 | sed -n 2062,2072p CLARIFICATIONS.md -> item 3 reads 'NEVER dismiss a code-scanning alert, from any side, and never touch the ruleset.'
+1cc5ccc2 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/code-scanning/alerts/142..150 --jq at 15:13 -> each open, js/file-access-to-http, path/line as BLUF 3, commit 58c5823e, created 2026-09-28T19:01:08Z
+9f618af8 | gh auth status under the project GH_CONFIG_DIR -> logged in as the company user, scopes gist, read:org, repo, workflow
+ca3840c3 | gh auth status scopes line has no security_events (positive control: it lists repo)
+6b1ad28b | gh api -X GET repos/datasecau/Reporting_Dashboard_Au --jq permissions -> admin true, push true, private true; gh api -X GET -i alerts/142 -> HTTP/2.0 200, X-Accepted-Oauth-Scopes: ... repo ... security_events ...
+ae927770 | gh api -X GET -i alerts/142 -> X-Accepted-Oauth-Scopes line lists repo and security_events (GET endpoint)
+48455165 | WebFetch docs.github.com update-a-code-scanning-alert at drafting -> classic token needs security_events scope for private or public repositories; whether repo also works for PATCH: not run, UNMEASURED
+99ef9a29 | awk NR==439 over contents/backend/azureLogAnalytics.js?ref=58c5823e -> 'return resolveLawApiBase(this.apiEndpoint);'; NR==757 isLawGuid line; NR==758 encodeURIComponent line; NR==798 axios.post(queryUrl, requestBody
+67a29019 | awk/grep over contents/backend/services/mailAddress.js?ref=58c5823e -> line 29 ADDRESS_SHAPE, line 36 function normaliseAddress, line 42 ADDRESS_SHAPE.test; emailService.js line 21 imports it, line 372 const saved = normaliseAddress(, line 385 const url = ...encodeURIComponent(inbox)...
+c774f73a | pointer to a folder name the seat creates; not a printed value
+26405df0 | pointer; no read by the seat, nothing measured
+444924ee | gh api -X GET code-scanning/alerts?state=open|fixed|dismissed&ref=refs/heads/main paged at 15:13 -> open 29, fixed 222, dismissed 0 (positive control: alert 99999 -> 404 No alert found)
+2d942f58 | alerts 142-150 rule.id read at 15:13 -> js/file-access-to-http each
+222ad39d | alert JSON field name; read at 15:13 -> open for all nine
+d1b052c9 | alert state word; reads 0 dismissed on main at 15:13
+2f6c1fa0 | alert state word; 222 fixed on main at 15:13; alerts 138-141 fixed 2026-10-18T10:47:07Z RELAYED from the B1663 kit, seat re-reads
+6ee3a6e3 | alert JSON field name; read at 15:13 -> open for all nine
+08bb37b3 | alert JSON field name; read at 15:13 -> open for all nine
+471804a9 | slot word list; not a printed value (the seat's own selftest checks it)
+933081d2 | GET /rest/api/3/issue/RD-804/transitions and RD-805 at 15:14 -> ('41','Done','Done') present on both
+fd242dc6 | slot value; RD-804 read at 15:14 -> To Do, Task, Medium, labels codeql-baseline, security
+e3ff4a76 | grep -c -i '^JIRA_SITE=' over the project .env -> 1 (name only, value never printed)
+3500d12c | grep -c -i '^JIRA_EMAIL=' -> 1
+0568d081 | grep -c -i '^JIRA_API_TOKEN=' -> 1
+a590c0cd | alert state word; reads 0 dismissed on main at 15:13
+1afceb31 | format literal for fill-in DONE805; not a printed value
+4fa11195 | slot value; RD-804 read at 15:14 -> To Do, Task, Medium, labels codeql-baseline, security
+db25ac4d | alert state word; 222 fixed on main at 15:13; alerts 138-141 fixed 2026-10-18T10:47:07Z RELAYED from the B1663 kit, seat re-reads
+699c4759 | gh api -X GET code-scanning/alerts?state=open|fixed|dismissed&ref=refs/heads/main paged at 15:13 -> open 29, fixed 222, dismissed 0 (positive control: alert 99999 -> 404 No alert found)
+bbff8271 | jget1666.py GET .../transitions for RD-804 and RD-805 -> 10 transitions each including In Review->Testing id 31 and Done id 41
+1cf1dce2 | GET /rest/api/3/issue/RD-804/transitions and RD-805 at 15:14 -> ('41','Done','Done') present on both
+236aa8ee | format literal; not a printed value
+fbdb8d53 | board text relayed in Tuesday's commission: 'b - Dismiss the seven'; the board card was not read by the drafter (RELAYED)
+5b835906 | format literal for the entry; not a printed value
+b7252de7 | slot value; RD-804 read at 15:14 -> To Do, Task, Medium, labels codeql-baseline, security
+e5c2a786 | format literal for the entry heading; not a printed value
+ee7d92cc | format literal; not a printed value
+274e5d54 | gh api -X GET git/ref/heads/main --jq .object.sha at 15:13 -> 58c5823eae5029a52669684775b6224a51d7e790
+d0c7dc26 | instruction literal, not a printed value
+92bb6ef4 | slot value; RD-804 read at 15:14 -> To Do, Task, Medium, labels codeql-baseline, security
+d214b7c0 | alert state word; reads 0 dismissed on main at 15:13
+1f023345 | jget1666.py search/jql text ~ "\"DISMISS-805-17NOV\"" -> issues [] (0); DISMISS-804-17NOV -> 0; control LAND-209-766-17NOV -> RD-766
+0cbd1eb9 | instruction sentence, not a printed value
+0f1a6317 | grammar fragment captured between two literals; not a value
+732e2221 | instruction sentence, not a printed value
+07a1f344 | jget1666.py GET .../transitions for RD-804 and RD-805 -> 10 transitions each including In Review->Testing id 31 and Done id 41
+c0b23c40 | HTTP verb literal; not a printed value
+3da66150 | GET /rest/api/3/issue/RD-804/transitions and RD-805 at 15:14 -> ('41','Done','Done') present on both
+b2da41fc | last-line form copied from the B1663 kit, line 193 of that kit
+d8d5749d | jget1666.py GET issue/RD-805 at 15:14 -> 200, To Do
+d4fefcc2 | jget1666.py GET issue/RD-99999999 -> {"http": 404}
+d7e9295b | df -g /Volumes/Datasec_DEV at 15:14 -> 1106 GiB available
+S01 | scan1666.py over the 7 dismissal comments (193 to 269 characters), 2 OUT texts, 6 Jira texts with fill-ins at drafting values -> 0 problems; controls fire (x_by_Kam_y, Tuesday, B1548, R226, at-sign, percent, backtick, non-ASCII, C-280, datasec, 'the gate', incomplete, 1.5) and kamera, V1 G4 M3, version 1.4.7 stay quiet
+S02 | OUT-OPEN sha256 prefix c892c556ac0c equals the R256 kit's OUT-OPEN (same text)
+S03 | source readings: mondayClient.js:29 fetch(MONDAY_ENDPOINT, :36 body JSON.stringify({ query, variables }); marketplace-api.js:504 activateUrl with encodeURIComponent(subscriptionId), :511 body planId/quantity; entraGroupGate.js:204 post(`${graphBase}/me/checkMemberGroups`, { groupIds: [groupId] }; emailService.js:385 url with encodeURIComponent(inbox), :387 axios.post(url, { (alert 147 columns 43-46 = url; alert 148 lines 387-392 = body object; alert 149 lines 393-396 = headers); azureLogAnalytics.js:798 axios.post(queryUrl, requestBody
+S04 | review VERDICT.md (B1656) CodeQL line read whole: #142 sink requestBody, #143 JSON.stringify({ query, variables }), #144 JSON.stringify({ planId..., quantity... }), #150 { groupIds: [groupId] }: 'All four are BODY sinks'
+S05 | Jira RD-804 and RD-805 reads 15:14: both To Do, Task, Medium, labels codeql-baseline+security; RD-804 comment 40799 only; RD-805 no comment
+S06 | CLARIFICATIONS.md 709200 bytes, 2995 lines, last entry C-294 at 2995; grep -c -i C-295 -> 0, C-294 -> 3
+S07 | work-tracking rule NexusAI/CLAUDE.md lines 286-306: 'Code change -> Testing'; 'Decision / docs / non-code -> straight to Done'
