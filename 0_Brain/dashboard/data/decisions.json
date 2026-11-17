@@ -76391,5 +76391,40 @@
   ],
   "delivered_artefact": "Acted on: the morning plan runs (MPS #210 landed 07:41 and recorded as C-179; MPSCALC-411 lane live; NexusAI NX-L reviewed and held for the picomatch card; NX-M building)",
   "delivered_ts": "2026-11-18T08:35:41.964713+11:00"
+ },
+ {
+  "id": "hpsmpoc-picomatch-dev-audit-exception-1118",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC: may the same picomatch exception cover HPSM's developer-tools check? Built and reviewed, not landed",
+  "bluf": "I need one tap from you before an HPSM change lands. At 08:36 you chose a 'Narrow, dated exception' on the picomatch card. That card was written about NexusAI's production check only, and its option said '#219 and #220 land' (both NexusAI). I told you at 06:10 that the advisory also blocks HPSM, but the card you tapped never said so in its own text. So I am not treating your tap as covering HPSM. The HPSM change is ready: it lets HPSM's developer-tools audit allow this one advisory (picomatch, GHSA-fc5q-39xc-vjpf), only through 18 December (Sydney time), failing from 19 December or as soon as npm reports a different range. Every other advisory still blocks, and the production audit is unchanged. The picomatch code is only used by build and test tools, never by the site itself. An independent review passed it: the exception is exactly that one advisory. Until it lands, any new HPSM change fails that check; nothing is waiting on it right now, and today's UAT deploy did not need it. I recommend a. (Override note: the queue matched your 08:36 ruling on the NexusAI card; this card asks whether that ruling extends to a second repository, which its text did not say.)",
+  "default_action": "Hold: the HPSM change stays unlanded; HPSM merges wait",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, same exception for HPSM",
+    "detail": "Allowed through 18 Dec (Sydney), failing from 19 Dec; then it lands after its checks"
+   },
+   {
+    "key": "b",
+    "label": "No, HPSM waits for a fix",
+    "detail": "HPSM changes cannot merge until picomatch ships a fix"
+   },
+   {
+    "key": "c",
+    "label": "Something else",
+    "detail": "Tell me in a note"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T09:22:12.260746+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD nexusai-audit-details-size-cap-1116",
+   "CARD nexusai-audit-entry-limits-994-1118",
+   "CARD nexusai-picomatch-advisory-audit-1118"
+  ]
  }
 ]
