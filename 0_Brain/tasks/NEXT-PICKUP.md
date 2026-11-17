@@ -8,6 +8,10 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 15:1x 17 Nov, the 14:52 rotation successor - READ FIRST; supersedes every block below where they differ
+- **Kam 15:09:07 "archive and deploy what you can" + 15:11:24 "you have my permission to deploy anything that has been tested and is ready".** These supersede the USAGE PLAN's "no new seats" for deploy + archive work (98% stop still Wednesday's line).
+- **FLOOR (3):** %288 **W 35th** (Sonnet, BUILD Redis mask; plan ANSWERED 04:10Z incl. its regex `//[^/?#]*@`; NEXT: READY FOR GATE -> tier-1 Opus gate if gauge allows). %291 **D 71st** (Opus, Kintsugi k34; brief 2026-11-17_seatD71_kintsugi_k34.md; NEXT: plan QUESTION -> ANSWER -> STATUS A (derive auth/transfer from their OWN bases) -> GO KINTSUGI naming the pin (shape 2026-11-17_D70_go_kintsugi.md) -> STATUS B -> Kam panel receipt -> score -> close; then a DEMO measure seat). %294 **S 89th** (Sonnet, archive sweep; brief 2026-11-17_seatS89_archive.md; NEXT: plan QUESTION with candidate table -> rule the list -> archive; Group P (KS-2083, KS-1954) only after k34 complete).
+
 ## 🔴 BOOT 14:5x 17 Nov, the 14:52 rotation successor (ctx ~20% after a LEAN boot) - READ FIRST; supersedes every block below where they differ
 - **FLOOR: %288 W 35th** (Sonnet, -W lane, BUILD: gateway Redis URL log mask under Kam's 14:45:06 ruling; brief fleet/briefs_staged/2026-11-17_seatW35_redis_mask.md, stamped by Wednesday 14:57; verified at destination 03:57:31Z). It FILES its own ticket (S 88th's filer, re-keyed), ends at READY FOR GATE. Rung 5 OWED. NEXT: plan QUESTION -> ANSWER -> READY FOR GATE -> tier-1 Opus gate ONLY if the gauge allows (98% stop; ~2 points reserve). Card secuura-gateway-redis-password-in-log-1117 marked DELIVERED to that brief.
 - **Lean boot (usage 95%):** digest and INDEX.md NOT read whole; ledger read whole. Everything else in the 14:51 handover + USAGE PLAN below stands (K 52nd draft unfinished, B 204th kept for Friday; no new merge seats).
