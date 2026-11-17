@@ -1,0 +1,129 @@
+5c0b8e9a | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main -> f8a6232aaee87ffee903d6bdbfd0f55fdde4d1f0 tree dc368ba7359ad8c2e4c1f6ac28de58745224c8db, 'Records: history for pull request 216 (#217)'; pulls?state=open length -> 0 (02:04)
+0fda3b22 | /usr/bin/grep -n -i 'RD-994' CLARIFICATIONS.md | awk -F: '{print $1}' -> 2967 2971; grep -i -c -> 2
+687fb37b | awk NR==2971 CLARIFICATIONS.md -> starts '**C-289. WHAT DID THE PRODUCT OWNER RULE ON 2026-11-16 ABOUT THE SIZE OF AN AUDIT LOG ENTRY'S DETAILS (RD-806): OPTION (b)'
+38588203 | /usr/bin/grep -c -F '<the quoted sentence, whole>' CLARIFICATIONS.md -> 1 (at line 2971)
+035d90b5 | awk NR==431 server.js@bf648e29 -> 'const AUDIT_ACTIONS = {'
+d6d43cfc | sed -n 431,458p server.js | grep -c -F 'SETTINGS_CHANGE' -> 0; control grep -c -F 'ROLE_CHANGED' -> 1 (line 457)
+6a54f242 | grep -n -F 'SETTINGS_CHANGE' server.js -> 17201 17445 only; git grep -n -F at 751285aa over the whole tree -> backend/server.js:17201, :17445 only
+576c5b90 | sed -n 431,458p server.js | /usr/bin/grep -c -F 'SETTINGS_CHANGE' -> 0 (control ROLE_CHANGED -> 1)
+b823feed | sed -n 16660,16672p server.js | grep -c -F 'AI_ENABLED_NOT_BOOLEAN' -> 2
+587a4008 | grep -c -F 'AI_ENABLED_NOT_BOOLEAN' server.js -> 2 (both inside 16660-16672)
+043ed49d | git show 751285aa:backend/services/aiEnabled.js | grep -n 'function parseAiEnabledInput' -> 160; awk NR==167 -> '}'
+7e8f559d | git show 7bc1c5d2:backend/services/aiEnabled.js | awk NR==160 -> 'function parseAiEnabledInput(body) {'; NR==167 -> '}'
+f870afbc | census_sites.txt -> '== 16692-16695 auditLog(AUDIT_ACTIONS.AI_ENABLED_CHANGED, { from..., requested: req.body.aiEnabled }'
+5d9bb40a | gh api -X GET .../compare/751285aa...f8a6232a --jq status,ahead_by,behind_by,files -> ahead 2 0 'HISTORY.md modified'
+04053768 | gh api -X GET .../compare/f8a6232a...7bc1c5d2 -> diverged 5 2; files: 4 __tests__ files (handover-gate-table, rd638, rd648, rd969) + scripts/verify-expected-counts.json
+b001d465 | git -C .tools/b1680/clone rev-parse 751285aa:backend/server.js 7bc1c5d2:backend/server.js -> bf648e298429052962af0d1994d532be160f6066 twice; contents API ?ref=f8a6232a sha -> bf648e298429052962af0d1994d532be160f6066 size 1129271
+0a411709 | not a literal the seat matches: the read-only clone the drafter read objects from (cat-file -t 7bc1c5d2 -> commit; f8a6232a absent there, read via the API)
+d30493b5 | git ls-tree --name-only 751285aa __tests__/ | grep -c -i -E 'rd994|rd932' -> 3; at 7bc1c5d2 grep -c -i rd994 -> 0, rd932 -> 3
+7e7b0971 | git ls-tree --name-only 7bc1c5d2 __tests__/ | grep -c -i rd932 -> 3 (control)
+ed914263 | not a literal the seat matches: a directory named in the grep scope (git grep -c -F 'AUDIT-FIELDS' 7bc1c5d2 -- backend __tests__ -> rc 1, no output)
+1832f6ff | git grep -c -F 'fieldCheck' 7bc1c5d2 -- backend __tests__ static -> rc 1, no output
+24e6d931 | git -C .tools/b1680/clone cat-file -t 7bc1c5d201c6f39b78fc2af9e0ca10c1436565c1 -> commit; matching-refs heads/b168 -> refs/heads/b1680/nexusai-lane-nx-t3-test-tail 7bc1c5d201c6f39b78fc2af9e0ca10c1436565c1
+87ecfd96 | git grep -c -F 'AUDIT-FIELDS' / 'fieldCheck' 7bc1c5d2 -- backend __tests__ [static] -> rc 1 both; control git grep -c -F 'denialDetails' 7bc1c5d2 -- backend/server.js -> 7bc1c5d2:backend/server.js:2
+9de11f88 | git grep -c -F 'denialDetails' 7bc1c5d2 -- backend/server.js -> 2
+edb91122 | gh api -X GET 'code-scanning/alerts?state=fixed&ref=refs/heads/main&per_page=100' --jq length -> 100; state=open paginated -> 22 rows, 13 on backend/server.js, #237 js/http-to-file-access backend/server.js:390
+847b45ac | grep -c 'refs/heads/main$' heads_all.txt -> 1 of 478 (gh api -X GET --paginate git/matching-refs/heads/)
+770fa139 | grep -i -E 'audit|b1682|rd-?994' heads_all.txt -> 7 audit-named old heads, 0 b1682
+c4575319 | git show 7bc1c5d2:.github/workflows/build.yml | awk NR==29 -> "node-version: '24'"
+390bc840 | awk NR==64 build.yml@7bc1c5d2 -> 'run: node scripts/assert-browser.js'; NR==93 -> 'run: npm run verify -- --maxWorkers=2'
+9cf7c7c2 | awk NR==64 build.yml@7bc1c5d2 -> 'run: node scripts/assert-browser.js'
+b24a67a6 | git show 7bc1c5d2:.github/workflows/deploy-demo.yml | grep -n -A8 '^on:' -> 26 on: push: branches [main] paths-ignore '**.md' 'docs/**' 'tests/**' (no backend entry)
+0b318c12 | RELAYED, not measured: earlier merges' Deploy demo jobs read skipped (B1680 kit, C-291/C-293 records); no run of this lane exists
+92069b3b | grep -l -i -E '\bslot 3\b|21920' briefs/2026-11-1[78]_*GATE_COMMISSION.md -> no file, rc 1
+1d9c4f90 | git show 7bc1c5d2:__tests__/helpers/test-server.js | awk NR==89 -> 'function worktreeSlot(root = worktreeRoot()) {'; names1682.py controls old51 16, old8 16, old22 17, old13 12, b1680 old34 2, b1670 old10 1
+33d9e180 | grep -c -F 'fieldCheck' server.js@bf648e29 -> 0 (control AUDIT_BUFFER_MAX -> 6); a NEW key this lane adds (PREDICTED)
+a6ea729d | grep -c -F 'AUDIT-FIELDS' server.js@bf648e29 -> 0: the marker lines are NEW; 'once' is a property of the head the seat writes (its own grep -c at A)
+16924a27 | not a literal the seat matches at drafting: a NEW marker key name of DESIGN 3 (absent at base: grep -c -F 'itemsFrom' over git grep 7bc1c5d2 backend -> none, see 1832f6ff form)
+921a8469 | census_sites.txt -> AI_ENABLED_CHANGED details carry 'requested: req.body.aiEnabled' (line 16694)
+0b0f70b9 | not a literal the seat matches: the JS value the design stores for a wrong type (DESIGN 3)
+e653ecdd | not a literal the seat matches at drafting: a NEW marker key of DESIGN 3; absent at base like fieldCheck (grep -c -F -> 0)
+7b1d15ac | not a literal the seat matches: a cell id the seat writes
+4d0e4651 | not a literal the seat matches: a cell id the seat writes
+f0ac6684 | not a literal the seat matches: ordinary words
+044229be | UNMEASURED and said so in the kit: express ^5.1.0 (package.json:58 at 7bc1c5d2); whether the callback writes its row with a list-valued error is measured by the seat at chain step 2 (candidate H2 kept or dropped by kept.py)
+ff68d95b | census_sites.txt -> 3219 AUTHENTICATION_FAILURE { provider: 'entra-id', error: error, description: error_description } with error from req.query (line 3214)
+76cc42f3 | git show 7bc1c5d2:scripts/role-capability-inventory.js | awk NR==394 -> 'async function bootShape({ shape, tag, made, limiters = true, extraEnv = {}, withPreload = true }) {'
+41283abb | git show 751285aa:__tests__/rd932-role-change-audited.test.js -> 'fetch(`${h.base}${EXPORT}?format=json&action=${action}`'
+56c74bd2 | not a literal the seat matches: a token the shape rule forbids in added lines; the seat's static tool counts it (B1680 form)
+13e28f01 | not a literal the seat matches: the jest call each cell makes once
+426dbef4 | RELAYED: B1680 kit names role-capability-inventory.js --check as the inventory check; the seat runs it at step 5 (no route changes in this lane)
+4575a5cf | grep -c -F 'STOPPED: NEEDS TUESDAY <one question>' B1680 kit -> 4 (the template's form)
+ffec4d04 | not a literal the seat matches: ordinary words in a refusal sentence
+92668a39 | not a literal the seat matches: ordinary words in a refusal sentence
+4fa54775 | not a literal the seat matches: ordinary words in a refusal sentence
+a90eea51 | not measured at drafting (7bc1c5d2 is not on main yet: compare f8a6232a...7bc1c5d2 -> diverged): the seat's own read; rc 1 is the STOP the kit names
+a58c47e0 | not a literal the seat matches: a control whose rc is the seat's reading (751285aa is an ancestor of main f8a6232a: compare 751285aa...f8a6232a -> ahead 2)
+6b33227c | not a literal the seat matches: the seat's own rc; f8a6232a is main at drafting (branches/main)
+a7532d99 | grep -c 'refs/heads/main$' heads_all.txt -> 1
+993a74b1 | not a literal the seat matches: the repo-local git key the seat configures (B1680 form)
+4f94dcef | GH_CONFIG_DIR=... gh api user --jq .login | grep -c -i datasec -> 1
+f28a0cb7 | gh api user --jq .login | /usr/bin/grep -c -i datasec -> 1 (login not quoted)
+7f0a3de0 | lsof -nP -iTCP:21920-22559 -sTCP:LISTEN | wc -l at 02:08 -> 0; control without range -> 20
+7b4e37cd | not a literal the seat matches: a tag name the seat replaces (ls .tools/b1680 -> lib.sh ... static.py present)
+38e6a0b5 | ls -d .tools/b1682* b1682* -> no match (zsh 'no matches found'): absent at drafting
+df33f960 | grep -n 'cd ' in B1670 STATUS Corrections 1 and B1680 STATUS Corrections 1 -> each records a subshell cd (read whole by the drafter)
+6fb52146 | not a literal the seat matches: ordinary words
+23348610 | not a literal the seat matches: a path pattern for a fence
+4a2f58ca | not a literal the seat matches: a path pattern for a fence
+2623be47 | ls .tools/b1680 -> lib.sh jestwrap.sh chain.sh loadprint.sh namescan.py prepush.py commit.sh judge.py plant.py apply_patch.py cmp_patch.py census.sh s1_browser.sh s6_verify.sh s6m_verify.sh s_mstep.sh s8_kstep.sh static.py: each 'ok' by [ -e ]
+b617f7e8 | ls .tools/b1670 exists (B1680 kit read from it); not a literal the seat matches
+51ee2afd | not a literal the seat matches: a copy command
+c6b1a59e | not a literal the seat matches: a git config key
+a1a14e85 | not a literal the seat matches: a git config key
+0cf993e5 | not run by the drafter (the identity is the seat's read, lengths only); B1680 HOLD 15 used the same command on .tools/b1670/clone
+76a4a1ba | not a literal the seat matches: forbidden env names
+9e1dab7f | not a literal the seat matches: forbidden env names
+2aa92a06 | not a literal the seat matches: the READY print form (DRAFTER_RULES git identity rule)
+b361e208 | not a literal the seat matches: the load read command (uptime at 02:08 -> 4.45 5.35 5.42)
+8935bcdf | not a literal the seat matches: words
+1651b46d | awk NR==2067 CLARIFICATIONS.md -> '  2. Merge path: open a PR from the gated branch, wait for CodeQL ...'; awk NR==2971 -> C-289
+ef6fc113 | ls -la CLARIFICATIONS.md -> 743458 bytes; B1680 STATUS Correction 8 -> 'the Read tool's size cap refused a whole read'
+87e6b507 | not a literal the seat matches: the remote ref the seat fetches
+560e5076 | not a literal the seat matches: the install command (B1680 form)
+e7ba23c7 | not a literal the seat matches: the seat's own check, rc is its reading
+a2e02200 | not a literal the seat matches: the instrument named
+2acfd35a | not a literal the seat matches: the instrument named
+e1cb0ac1 | branches/main -> f8a6232aaee87ffee903d6bdbfd0f55fdde4d1f0
+39d3ebee | not a literal the seat matches: a copy command
+36ffe524 | see 2623be47: every named tool present in .tools/b1680 ([ -e ] ok for all 18)
+deeede47 | git -C .tools/b1680/clone log --format='%h %ad %s' -3 7bc1c5d2 -- backend/server.js -> 94cccbd 2026-11-16 RD-769 ..., 9226b02 2026-11-16 RD-830 ..., a63d7f2 2026-11-16 RD-711 RD-806 ...
+77a398c6 | see deeede47 (read at 7bc1c5d2)
+0fc01225 | git log -3 7bc1c5d2 -- backend/server.js -> first line '94cccbd 2026-11-16 RD-769: the column mapping is built from its entries'
+2a41ba2d | git log -3 7bc1c5d2 -- backend/server.js -> second line '9226b02 2026-11-16 RD-830: a workspace id that is not a GUID is refused ...'
+57085a5a | grep -c -F over server.js@bf648e29: 'AUDIT-FIELDS' -> 0, 'fieldCheck' -> 0, 'shapeAuditDetails' -> 0 (git grep at 7bc1c5d2 rc 1)
+7ea2f30d | grep -c -F 'AUDIT_BUFFER_MAX' server.js@bf648e29 -> 6 (the control fires)
+830cd094 | not a literal the seat matches: the instrument named
+69a6125f | /usr/bin/grep -c 'auditLog(' server.js@bf648e29 -> 48; grep -c 'auditLog' -> 52; census_sites.txt: 48 entries, 3 NOT-A-CALL (305, 514, 1619), 3 forwarding (22211, 22223, 22251), 42 direct
+037029d2 | /usr/bin/grep -c -F 'details: details,' server.js@bf648e29 -> 1 (line 309)
+3ddb1c7e | server.js blob at f8a6232a (contents API) = bf648e298429 = the file grepped
+16e6ac6e | not a literal the seat matches: the instrument named (its result for 'details: details,' is 1, see 037029d2)
+80427958 | not a literal the seat matches: the seat's own diff print
+ee1d8ea1 | grep -n -F 'details: details,' server.js -> 309 only
+5fdf9946 | not run by the drafter (the edit does not exist yet): the seat's static step
+1b5c5878 | not run by the drafter: the seat's static step
+9d4a5573 | grep -c -F 'Object.prototype.hasOwnProperty.call' server.js@bf648e29 -> 3 (an existing idiom in the file)
+c61df973 | sed -n 1,30p session-tools/nexusai-lock.sh -> usage 'nexusai-lock.sh <jest|docker> <tag> [--after <ticket-tag> | --replace <own-ticket>] <command...>'; ls locks-laptop-1017 -> nexusai-jest.lock queue-docker queue-jest released (lock held by a gate at 02:10; queue-jest 0 entries)
+15bf684e | not a literal the seat matches: the seat's own list file (B1680 form)
+bcf539eb | not a literal the seat matches: words (B1670 kit lesson)
+ba45245b | awk NR==64 build.yml@7bc1c5d2 -> 'run: node scripts/assert-browser.js'
+848df38f | not a literal the seat matches at drafting: the seat writes mkT.py (no such file exists: ls .tools/b1682* -> no match)
+588d0965 | not a literal the seat matches at drafting: an env name the seat's probe variant reads; the final file must hold it 0 times (the seat's grep -c at 2b)
+37ef1d70 | not a literal the seat matches: the record form the seat's probe hook writes
+12eddd07 | not a literal the seat matches: the seat's own --stat read (B1680 step 3/11 form)
+f013a972 | grep -c -F 'VERDICT: PASS' B1680 STATUS -> 2 (the verify prints this form)
+68447fd8 | grep -c -F 'EADDRINUSE' B1680 STATUS -> 16 (the per-run log word the chain counts)
+dbd173e9 | grep -c -F 'VERDICT: PASS' B1680 STATUS -> 2
+eaeeb0a3 | grep -c -F 'EADDRINUSE' B1680 STATUS -> 16
+6a9faa2c | grep -c -F 'EADDRINUSE' B1680 STATUS -> 16
+3bf5bd35 | grep -c -F 'details: shapeAuditDetails(action, details),' server.js@bf648e29 -> 0: the line commit A writes; 'count 1' is the seat's plant spec at T
+79e4f482 | grep -c -F 'details: details,' server.js@bf648e29 -> 1 (the plant restores the base line)
+fb0e120a | not a literal the seat matches: the READY print form (B1680 COUNTS form)
+145de4c7 | git show 7bc1c5d2:scripts/verify-expected-counts.json -> tests 5870, suites 377; at 751285aa (= f8a6232a blob 0ee27c40ed9a) -> 5868, 377
+f574d775 | grep -c 'b1682' heads_all.txt -> 0 (478 refs; control refs/heads/main -> 1)
+82952bcd | grep -c 'refs/heads/main$' heads_all.txt -> 1
+96310dfd | not a literal the seat matches: the seat's own rc
+2a760412 | grep -c -F 'EADDRINUSE' B1680 STATUS -> 16
+cf212746 | RELAYED, not measured: a landing's Deploy demo run is Tuesday's to read
+7a7bf3d4 | grep -c -F '## READY' B1680 STATUS -> 1
+b0682630 | ls briefs/ | grep -c 'SEAT-N147' -> 2 (this kit and its .measured sidecar); ls briefs/ | grep -i -E '^2026-11-1[8-9]_B1682_(ADDENDUM|ANSWER)' -> no file

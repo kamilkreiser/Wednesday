@@ -1,0 +1,23 @@
+RD-995: the role table's row for the internal feedback action route
+(POST /api/feedback/:id/coordinator-action) now says in its Note column
+why the route keeps its own caller check: the check is in the handler and
+is reached after the sign-in check; the route answers 403 unless the
+request comes from the loopback address or carries the shared coordinator
+header value; no page calls it; and it was kept as it is by the product
+owner's 2026-11-16 ruling on RD-992.
+
+The route left the pending list in backend/services/capabilities.js and
+is named in a new frozen export, OWN_CALLER_CHECK. The census test
+excuses exactly the routes named there, and the feedback triage test now
+pins that the route is not on the pending list. The inventory generator
+writes the note from a closed map, and the inventory pair was regenerated
+with node scripts/role-capability-inventory.js --generate: one row and
+the two generation clock lines changed. One new census cell pins the
+excused list, the pending state and the exact note.
+
+No route, status, handler or middleware changed; the route stays in
+feedback.manage in the table, and nothing in backend/ reads the table.
+
+Test counts: 5868 tests in 377 suites (one new cell).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

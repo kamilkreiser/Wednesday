@@ -1,0 +1,21 @@
+Adds one test row to the register store's startingOwner block. It pins
+the result the code already gives: an owner of 99 letters, one lone high
+surrogate (U+D83D) and the letter b starts as 100 units ending in the
+lone half. The b is not added, and the register's own check accepts it.
+
+The result is kept as it is (decided: the ticket's proposed default for
+this case, approved). The row's title states the expected value. The alternative,
+ending the result before a lone high surrogate that would be its last
+unit, was declined.
+
+Red first: with the expectation planted as the 99 letters alone, 1 test
+failed (136 passed of 137); with the length planted as 99, 1 failed; the
+true row passes (137 passed).
+
+Whole web suite locally: main 304 files and 4339 passed; this change
+304 files and 4340 passed, 0 failed. Lint, typecheck and the infra scans
+pass.
+
+Tests only. No product line changed. Nothing deployed.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>

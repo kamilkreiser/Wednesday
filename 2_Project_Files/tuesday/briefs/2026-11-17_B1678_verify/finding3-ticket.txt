@@ -1,0 +1,24 @@
+Summary (candidate):
+Internal feedback action route: in an enforced deployment the sign-in check answers 401 before the route's own caller check, so its machine caller cannot reach it; decide how that caller gets in (or record that it never runs against an enforced deployment)
+
+Type: Task. Priority (proposed): Medium. Labels as the project uses them.
+
+BLUF
+The internal feedback action route (POST /api/feedback/:id/coordinator-action, backend/routes/feedback.js line 406) keeps its own caller check by the product owner's 2026-11-16 ruling on RD-992: it answers 403 unless the request comes from the loopback address or carries the shared coordinator header value (lines 407-415). In an enforced deployment that check is never reached by a caller without a session: the global sign-in middleware (requireAuth, backend/server.js line 2598, mounted at line 2782) answers 401 AUTH_REQUIRED to any /api/ request with no session cookie, and its machine-to-machine exemption (COORDINATOR_EXEMPT_PATHS, line 2241) names only /api/coordinator-state; the comment at lines 2238-2240 says this route is deliberately not in that set. A headless coordinator holding only the shared header value cannot hold a session, so in an enforced deployment it is refused 401 before its own check runs. In open (first-run) mode the sign-in check lets every request through and the route's own check is the only gate.
+
+Read at source, not run against a deployment
+- Order of the layers for a POST to this route: CSRF check (backend/server.js line 1615; a request whose header value matches the configured value in constant time skips CSRF, lines 1554-1565; a loopback request without the value still needs a CSRF token), then requireAuth (line 2782), then the feedback router mount (app.use('/api/feedback', feedbackItemWriteGate, feedbackRoutes)), where the write gate does not match this route.
+- The committed inventory row reads anonymous 401, viewer 400, administrator 400, open 400, authOrder after-global-auth (docs/role-capabilities.json). The viewer and administrator 400 come from requests made from the loopback address with a session; the anonymous 401 is the sign-in check.
+- The route's own value comparison is a plain string equality (secret === headerSecret, feedback.js line 411), not the constant-time comparison that RD-88 put on the coordinator-state routes (coordinatorSecretMatches, server.js). Today it is only reachable with a session (enforced) or in open mode.
+- "The loopback address" is req.ip under app.set('trust proxy', 1) (server.js line 1143): behind one ingress hop that is the client address the ingress reports; a server reached directly with no proxy in front would take the last X-Forwarded-For entry a client sends.
+- The role table maps the route to feedback.manage (backend/services/capabilities.js line 174) and, separately, names it in OWN_CALLER_CHECK (excused from the pending list). Nothing in backend/ reads either today. If the L1 core is later wired from ROUTE_CAPABILITY through decide(), the route would take the feedback.manage check, which is option (b) of RD-992, the option not chosen, unless the wiring honours OWN_CALLER_CHECK.
+
+Not measured
+Whether any deployment runs the internal coordinator against this route with sign-in enforced; whether the shared header value is set on any deployment; the route from a remote caller on a hosted deployment.
+
+Recommendation
+The product owner decides one of: (a) record that the internal coordinator only calls this route on hosts where sign-in is not enforced, and say so in the route's row note; (b) add the route to the machine-to-machine exemption, matched exactly on its one dynamic segment (the RD-88 comment says a new route there is a new decision), gated on a configured value, and switch its value comparison to the constant-time helper; (c) something else. Separately, whoever wires the L1 core must keep the routes named in OWN_CALLER_CHECK out of the feedback.manage decision (or move the route to the own-credential coordinator capability).
+
+Acceptance (proposed)
+The decision is recorded on this ticket and in the project's clarifications file. If (b): a separate build with cells for a no-session request carrying the right value (reaches the handler), the wrong value or none (401, the same answer for each), the open window unchanged, the inventory regenerated. Any L1 wiring ticket names OWN_CALLER_CHECK in its acceptance.
+Related, not duplicates: RD-992 (the ruling), RD-995 (the role table note), RD-88 (the coordinator-state exemption), RD-822 (the reason check of this route).
