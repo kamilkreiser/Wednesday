@@ -76097,5 +76097,39 @@
    "CARD small-wording-1110",
    "CARD nexusai-audit-details-size-cap-1116"
   ]
+ },
+ {
+  "id": "nexusai-picomatch-advisory-audit-1118",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: a new advisory with no fix yet fails every PR's production audit check",
+  "bluf": "A high-severity advisory (GHSA-fc5q-39xc-vjpf) was published overnight against 'picomatch'. NexusAI pulls it in only through the sqlite3 install tooling (sqlite3, then node-gyp, then tinyglobby). No fixed version exists yet: 4.0.7 is the newest, and it is affected (checked on npm at 05:1x). The production audit check now fails on every NexusAI pull request, whatever it changes. Two are waiting: #219, which is records only, and #220, the stale-comments fix (RD-689). Both have every other check green. I do not merge past a red check. I recommend a: let the production audit skip this one advisory until 18 Dec, or until a fixed picomatch ships, whichever comes first. Every other advisory stays blocking. The exception is built and reviewed like any change, then #219 and #220 land. This is the same shape as your 3 Oct ruling for HPSM-POC's braces advisory. That one was in the developer-tools check; this one is in the production check, which is why I am asking rather than copying it. (Override note: the queue matched that HPSM card on 'advisory' and two audit-log cards on 'audit'. None of them covers this repository's production audit.)",
+  "default_action": "Hold: #219 and #220 wait; nothing merges past the red check",
+  "options": [
+   {
+    "key": "a",
+    "label": "Narrow, dated exception",
+    "detail": "This advisory only, lapses 18 Dec or on a fix; gated and merged; then #219 and #220 land"
+   },
+   {
+    "key": "b",
+    "label": "Wait for an upstream fix",
+    "detail": "No date known; no NexusAI change can merge until then"
+   },
+   {
+    "key": "c",
+    "label": "Something else",
+    "detail": "Tell me in a note"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T05:12:15.582252+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD hpsmpoc-braces-advisory-no-patch-1003",
+   "CARD nexusai-audit-details-size-cap-1116"
+  ]
  }
 ]
