@@ -1,0 +1,80 @@
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:32:1
+   |
+32 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+   Compiling coagent-audit v0.0.1 (/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/80ecfb7f-8674-4d45-8f56-097f69bdbe0b/scratchpad/gate_audit_r5/atk/crates/coagent-audit)
+    Finished `test` profile [unoptimized] target(s) in 0.79s
+     Running tests/gate_r5.rs (/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/80ecfb7f-8674-4d45-8f56-097f69bdbe0b/scratchpad/gate_audit_r5/target_atk/debug/build/coagent-audit/6672d1f7a3bd3197/out/gate_r5-6672d1f7a3bd3197)
+
+running 13 tests
+r5 R18 guard: cs held_from None swapped for Some(1); plain resume Ok(()); with anchor Err(Older { part: Fixed(Attestation), author: KeyId(f7c102df732c00c7c234010ba1ccaff7c704dcb88ad7d26be78cbc3dd4bbeb6b), n: 0 })
+test r5_guard_a_same_order_different_record_in_a_replaced_slot_is_refused ... ok
+r5 block: G accepted 1, G's allowance (524, 1); V lowers its records to 26 per seat (allowance (1168, 1)); first checkpoint Err(LogFull); then 12 own records accepted, 0 checkpoints Ok, 20 refused LogFull; newest covered own seq None of 14; free part (6293, 12) of (8179, 13); H's new request Err(LogFull), checkpoint then Err(LogFull)
+test r5_finding_a_payer_that_cannot_pay_blocks_every_later_checkpoint ... ok
+r5 R23 guard: 524289 bytes -> Err(Malformed("too large"))
+test r5_guard_an_oversized_anchor_encoding_is_refused ... ok
+r5 R26 guard: after a refused version, resume_with_anchor Ok(())
+test r5_guard_an_anchor_after_a_refused_roster_version_accepts_the_store ... ok
+r5 refused version, remove failing: apply Err(Store(Unavailable("r5: remove fails"))); records 2 -> 3; resume Err(Roster(Gap { have: 1, got: 4 })); the real next version then Ok(()); resume Err(Roster(Gap { have: 2, got: 4 })); export verify Err(VerifyError { class: Roster, what: "roster version refused", author: None, seq: None })
+test r5_finding_a_refused_roster_version_with_a_failing_remove_stays_in_the_store ... ok
+r5 all-or-nothing own record: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing requested record: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing own checkpoint paid by an allowance: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing announce: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing own checkpoint paid by the free part: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing first countersignature: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing newer countersignature: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing received event: ONLY difference an empty received chain: ["peers: [\"None\", \"None\", \"None\", \"None\", \"None\", \"None\"] -> [\"Some((None, None))\", \"None\", \"None\", \"None\", \"None\", \"None\"]"]
+r5 all-or-nothing received event: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing received checkpoint: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing fork evidence: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing cross-check record: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing roster version: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 all-or-nothing joiner's anchor: refused Err(Store(Unavailable("r5: put fails"))), member unchanged
+r5 reused slot: with requests 4 accepted, then 1 own records (free (524, 1), seat 2 (15705, 12)); without requests 8 own records (free (4192, 8), seat 2 (15625, 11)); free part limit (8160, 32)
+test r5_finding_requests_refuse_own_records_in_a_reused_slot ... ok
+test r5_ok_all_or_nothing_on_every_write_path ... ok
+r5 anchor bound: largest anchor 172974 bytes (MAX_ANCHOR_BYTES 524288); reads back true; one run more Err(Malformed("too many entries")); one slot more Err(Malformed("too many entries"))
+test r5_ok_the_anchor_is_bounded ... ok
+r5 no lowering: 400 checkpoint calls Ok, 0 refused
+test r5_ok_without_lowering_every_checkpoint_after_requests_is_paid ... ok
+test r5_release_width_bound_default_limits ... ignored, release: cargo test --release --test gate_r5 -- --ignored
+r5 newest pays: A accepted 3 (allowance (1572, 3), checkpoints paid 0), H accepted 2 (allowance (1461, 3), checkpoints paid 1)
+test r5_newest_pays_a_requester_can_move_checkpoint_cost_onto_another ... ok
+r5 anchor progression: 15 states; newer anchor refused 105 ({"Missing": 102, "Older": 3}); older anchor accepted 105; same 15
+r5 anchor: 14 records; each removal refused and named 14; fixed records flipped and refused 6
+test r5_ok_anchor_newer_than_store_refused_older_accepted_every_removal_named ... ok
+r5 reach:   ... after an own record accepted only with peers: 3
+r5 reach: V lowers its limits: 199
+r5 reach: add into a free slot: 39
+r5 reach: checkpoint paid by an allowance: 123
+r5 reach: checkpoint paid by the allowance of an EMPTY slot: 2
+r5 reach: checkpoint paid by the free part: 116
+r5 reach: checkpoint refused: free part full (after Lower): 61
+r5 reach: checkpoint refused: its allowance cannot pay (after Lower): 63
+r5 reach: checkpoint with no own event (NoSuchEvent(0)): 30
+r5 reach: own call accepted in both runs: 564
+r5 reach: own call accepted only with peers: 17
+r5 reach: own call refused in both runs: 759
+r5 reach: own call refused only with peers (free part fuller): 3
+r5 reach: own record larger with peers: 61
+r5 reach: removal: 124
+r5 reach: request accepted: 190
+r5 reach: request from a non-member refused: 712
+r5 reach: request refused LogFull: 799
+r5 reach: resume: 221
+r5 reach: slot changes hands with requested records in it: 5
+r5 reach: step with no own call so far (d2): 171
+r5 examples: 3
+r5 example: own call refused only with peers at op 52: free before (12565, 14) with, (11632, 16) without; free-paid checkpoints 3 with, 6 without; ops [Req(58, 2), Cp, Announce(122, 1), Req(67, 1), Remove(44), Own(2), Resume, Req(130, 1), Cp, Own(0), Own(1), Req(246, 2), CpNow, Req(176, 0), Req(137, 1), Resume, Req(135, 2), Own(1), CpNow, Tick, Req(62, 0), Cp, Remove(138), Resume, Req(205, 2), Resume, CpNow, CpNow, Announce(56, 1), Req(139, 2), Own(1), Req(96, 2), CpNow, Req(92, 2), Req(73, 1), ReAdd(207), ReAdd(106), Own(0), Req(134, 1), Req(66, 1), Own(1), Cp, Own(1), Req(30, 2), Req(12, 2), Own(2), Own(2), Req(249, 1), Req(112, 0), Cp, ReAdd(188), Own(2), Own(1), Req(27, 1), Announce(251, 0), Req(129, 1), Own(0), Req(137, 0), Own(1), Tick, Announce(84, 2), Cp, Cp, Req(56, 1), Announce(108, 0), Own(1), Announce(79, 1), Req(166, 0)]
+r5 example: own call refused only with peers at op 54: free before (12565, 14) with, (12500, 17) without; free-paid checkpoints 3 with, 6 without; ops [Req(58, 2), Cp, Announce(122, 1), Req(67, 1), Remove(44), Own(2), Resume, Req(130, 1), Cp, Own(0), Own(1), Req(246, 2), CpNow, Req(176, 0), Req(137, 1), Resume, Req(135, 2), Own(1), CpNow, Tick, Req(62, 0), Cp, Remove(138), Resume, Req(205, 2), Resume, CpNow, CpNow, Announce(56, 1), Req(139, 2), Own(1), Req(96, 2), CpNow, Req(92, 2), Req(73, 1), ReAdd(207), ReAdd(106), Own(0), Req(134, 1), Req(66, 1), Own(1), Cp, Own(1), Req(30, 2), Req(12, 2), Own(2), Own(2), Req(249, 1), Req(112, 0), Cp, ReAdd(188), Own(2), Own(1), Req(27, 1), Announce(251, 0), Req(129, 1), Own(0), Req(137, 0), Own(1), Tick, Announce(84, 2), Cp, Cp, Req(56, 1), Announce(108, 0), Own(1), Announce(79, 1), Req(166, 0)]
+r5 example: own call refused only with peers at op 50: free before (7804, 7) with, (6876, 9) without; free-paid checkpoints 1 with, 4 without; ops [Req(149, 2), Remove(246), Lower(1), Req(152, 1), Req(191, 2), Cp, CpNow, Cp, Own(1), Req(53, 2), Req(239, 2), Req(228, 2), CpNow, Own(1), Req(187, 2), Req(104, 0), Resume, Resume, Cp, Lower(1), Cp, Cp, Req(219, 2), Req(10, 1), Req(224, 0), Tick, Announce(54, 0), Cp, Remove(88), Tick, Req(107, 0), Own(0), Tick, CpNow, Cp, Req(117, 0), Tick, Req(227, 0), Remove(54), Req(184, 0), Cp, Own(2), Own(2), Req(220, 0), Req(149, 2), CpNow, Own(2), Req(220, 2), Req(66, 1), Req(35, 2), Own(0), Cp, Own(2), Lower(0), Req(196, 1), Cp, Req(111, 0), Resume, Resume, Cp, Own(2), Remove(42), Announce(146, 1), Lower(3), Req(137, 1), Own(1), Announce(177, 2), Req(135, 2), CpNow, Req(128, 2), Cp, Remove(201), Req(118, 2), CpNow, Own(2), Req(61, 0), Req(106, 2), CpNow, Req(203, 2), Req(120, 2), Announce(112, 2), Req(245, 1), Own(1), Own(0), Own(0), Own(2), Own(1), Tick, Req(119, 0)]
+test r5_prop_peers_request ... ok
+
+test result: ok. 12 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 12.61s
+

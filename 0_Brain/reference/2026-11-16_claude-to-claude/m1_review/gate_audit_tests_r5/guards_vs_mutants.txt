@@ -1,0 +1,42 @@
+=== R17
+r5 R23 guard: 524289 bytes -> Err(Malformed("too large"))
+test r5_guard_an_oversized_anchor_encoding_is_refused ... ok
+r5 R18 guard: cs held_from None swapped for Some(1); plain resume Ok(()); with anchor Err(Older { part: Fixed(Attestation), author: KeyId(f7c102df732c00c7c234010ba1ccaff7c704dcb88ad7d26be78cbc3dd4bbeb6b), n: 0 })
+test r5_guard_a_same_order_different_record_in_a_replaced_slot_is_refused ... ok
+r5 R26 guard: after a refused version, resume_with_anchor Ok(())
+test r5_guard_an_anchor_after_a_refused_roster_version_accepts_the_store ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.02s
+=== R18
+r5 R23 guard: 524289 bytes -> Err(Malformed("too large"))
+test r5_guard_an_oversized_anchor_encoding_is_refused ... ok
+r5 R18 guard: cs held_from None swapped for Some(1); plain resume Ok(()); with anchor Ok(())
+thread 'r5_guard_a_same_order_different_record_in_a_replaced_slot_is_refused' (9234567) panicked at crates/coagent-audit/tests/gate_r5.rs:1367:5:
+test r5_guard_a_same_order_different_record_in_a_replaced_slot_is_refused ... FAILED
+r5 R26 guard: after a refused version, resume_with_anchor Ok(())
+test r5_guard_an_anchor_after_a_refused_roster_version_accepts_the_store ... ok
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.03s
+=== R23
+r5 R23 guard: 524289 bytes -> Ok(())
+thread 'r5_guard_an_oversized_anchor_encoding_is_refused' (9234901) panicked at crates/coagent-audit/tests/gate_r5.rs:1384:5:
+  left: Ok(())
+ right: Err(Malformed("too large"))
+test r5_guard_an_oversized_anchor_encoding_is_refused ... FAILED
+r5 R18 guard: cs held_from None swapped for Some(1); plain resume Ok(()); with anchor Err(Older { part: Fixed(Attestation), author: KeyId(f7c102df732c00c7c234010ba1ccaff7c704dcb88ad7d26be78cbc3dd4bbeb6b), n: 0 })
+test r5_guard_a_same_order_different_record_in_a_replaced_slot_is_refused ... ok
+r5 R26 guard: after a refused version, resume_with_anchor Ok(())
+test r5_guard_an_anchor_after_a_refused_roster_version_accepts_the_store ... ok
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.02s
+=== R26
+r5 R23 guard: 524289 bytes -> Err(Malformed("too large"))
+test r5_guard_an_oversized_anchor_encoding_is_refused ... ok
+r5 R26 guard: after a refused version, resume_with_anchor Err(Missing { part: Fixed(Roster), author: KeyId(f7c102df732c00c7c234010ba1ccaff7c704dcb88ad7d26be78cbc3dd4bbeb6b), n: 4 })
+thread 'r5_guard_an_anchor_after_a_refused_roster_version_accepts_the_store' (9235307) panicked at crates/coagent-audit/tests/gate_r5.rs:1403:5:
+assertion `left == right` failed: a good store was refused against its own anchor
+  left: Err(Missing { part: Fixed(Roster), author: KeyId(f7c102df732c00c7c234010ba1ccaff7c704dcb88ad7d26be78cbc3dd4bbeb6b), n: 4 })
+ right: Ok(())
+test r5_guard_an_anchor_after_a_refused_roster_version_accepts_the_store ... FAILED
+r5 R18 guard: cs held_from None swapped for Some(1); plain resume Ok(()); with anchor Err(Older { part: Fixed(Attestation), author: KeyId(f7c102df732c00c7c234010ba1ccaff7c704dcb88ad7d26be78cbc3dd4bbeb6b), n: 0 })
+test r5_guard_a_same_order_different_record_in_a_replaced_slot_is_refused ... ok
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.02s
+ M crates/coagent-audit/Cargo.toml
+?? crates/coagent-audit/tests/gate_r5.rs
