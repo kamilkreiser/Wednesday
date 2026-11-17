@@ -8,6 +8,10 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 USAGE PLAN 14:46 17 Nov (12:16 successor) - READ FIRST; supersedes every block below where they differ
+- **Kam 14:45:39 (live board, verbatim): "thank you.  I will rotate agents on Friday but unfortunately I cannot do that from afar".** Read as: no account switch until FRIDAY 2026-11-20 (`date -j`: Friday). Gauge 94% at 14:4x (usage_gate --check), renews ~4d 23h; pace today ~+1.6/h, so 100% (everything stops, coordinator included) in ~4 h at full tilt.
+- **PLAN (told to Kam on the panel 14:4x with an override offer; default stands if silent):** NO new merge seats; the two running drafters (K 52nd, B 204th) finish and their briefs are KEPT UNLAUNCHED for Friday (if a drafter dies with a rotation, do NOT re-commission it now: Friday); the remaining allowance goes FIRST to the Redis mask fix (Kam ruled 14:45:06, see below), ONE Sonnet seat at a time, then Kintsugi k34; keep ~2 points in reserve for the coordinator's own answers. Re-read the gauge before EVERY launch; at 98% launch nothing.
+
 ## 🔴 CHECKPOINT 14:34 17 Nov, the 12:16 rotation successor (ctx ~78%) - READ FIRST; supersedes every block below where they differ
 - **develop fab4edcdcd07** (PR 2187 by K 51st, verified 14:31: one parent e36b3af9da59, tree 4d7b19c69ade). **Merges since 15 Nov evening: 73** (this seat: 2170, 2135, 2075, 2187). **No seat live; no GO in flight; no question pending.** Kam: 4 messages today, newest 07:37:54; his open card secuura-gateway-redis-password-in-log-1117 (default: no rotation).
 - **Scores this seat:** K 50th 0.95, B 202nd 0.94, D 70th 0.96, B 203rd 0.96, K 51st 0.96 (all panes CLOSED).
