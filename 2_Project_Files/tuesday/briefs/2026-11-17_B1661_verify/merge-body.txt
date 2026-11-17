@@ -1,0 +1,15 @@
+RD-999: getSession in backend/jsonStorage.js answers only for a string cookie
+that names an own entry of the session store, holding a string email and an
+expiry that reads as a time. A cookie whose value is the name of a built-in
+object property (constructor, __proto__, toString and the other names every
+object inherits), or a JSON cookie that wraps one, is now refused like an
+unknown cookie with the existing session-expired answer: with sign-in enforced
+it no longer passes as a viewer when no user is stored, and no longer answers
+500 when users are stored. A malformed own entry is refused, not removed.
+
+A real session's answer, expiry, removal when expired and the store's bytes
+are unchanged. No route gate, no server code and no user-facing words change.
+
+Test counts: 5862 tests in 377 suites (one new suite, 16 cells).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
