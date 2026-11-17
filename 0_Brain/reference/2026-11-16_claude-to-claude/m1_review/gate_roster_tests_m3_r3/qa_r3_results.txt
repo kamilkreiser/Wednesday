@@ -1,0 +1,44 @@
+== check.sh tail
+==> 4/4 deny: cargo deny check licenses
+licenses ok
+CHECK OK: fmt, clippy, test, deny all passed
+check_rc=0
+== check.sh test totals
+passed 363 failed 0
+== red-controls-roster.sh tail
+      panic: assertion `left == right` failed: receive_wire checked a string against another session's roster
+rows: 58
+==> rows that must stay GREEN under their control (equivalent mutant; second line of defence)
+approve_no_validate              GREEN      a5_r2_1_a_reused_roster_proposal_id_is_stopped_by_the_validator_run_in_approve (equivalent: receive refuses first)
+approve_no_validate              GREEN      f2_property_every_approval_validates_and_a_refusal_touches_no_one_else (equivalent: receive refuses first)
+      property: 396 cases, 84 approvals, 0 refused approvals, 18 reused-roster-id cases (12 refused as IdCarriedByRoster)
+intake_roster_id_unchecked       GREEN      a5_r2_1_a_reused_roster_proposal_id_is_stopped_by_the_validator_run_in_approve (second line holds)
+intake_roster_id_unchecked       GREEN      f2_property_every_approval_validates_and_a_refusal_touches_no_one_else (second line holds; refused approvals > 0)
+      property: 396 cases, 84 approvals, 12 refused approvals, 18 reused-roster-id cases (0 refused as IdCarriedByRoster)
+equivalence rows: 4
+==> a release build with a roster red control must be refused
+RED: release build refused (COAGENT_RED_ROSTER is for test builds only)
+==> an unknown roster red control name must be refused
+RED: unknown name refused
+==> green run (no red control): coagent-roster
+GREEN: 131 tests ok
+ROSTER RED CONTROLS OK: every guard went red on its property, and green without
+red_rc=0
+== RED rows
+58
+== main+roster (454bfb5 + 44662d5)
+Auto-merging BACKLOG.md
+CONFLICT (content): Merge conflict in BACKLOG.md
+Automatic merge failed; fix conflicts and then commit the result.
+merge_main_rc=1
+check_rc=0
+workspace (excl. daemon) passed 434 failed 0
+test_rc=0
+== +m3-audit 52d12e9
+    Finished `dev` profile [unoptimized] target(s) in 1.86s
+roster+audit passed 292 failed 1
+thread 'u6_a_valid_roster_version_near_the_encoding_cap' (2197772) panicked at crates/coagent-audit/tests/a3_unknowns.rs:248:14:
+the roster chain accepts the version: LifetimeExceeded
+== +m1-daemon 77642ad (on main+roster)
+    Finished `dev` profile [unoptimized] target(s) in 5.08s
+roster+daemon lib passed 17 failed 0
