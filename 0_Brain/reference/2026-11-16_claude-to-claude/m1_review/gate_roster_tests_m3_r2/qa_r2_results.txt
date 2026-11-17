@@ -1,0 +1,41 @@
+test r2_f1_joiner_cannot_detect_an_unseen_raised_admission ... R2 F1 joiner given v4 over a refused v3 -> ok=true
+R2 F1 two-step promotion as seen by a holder -> Advanced { added: [], removed: [], role_changed: [KeyId(d81765871a1c9635b7c4d9560eee57597e498d4d67da4afc68bf882fd206d0e4)] }
+test r2_f1_promotion_demotion_sequences ... R2 F1 holder v3 -> Ok(Advanced { added: [KeyId(9d110ad7749968f055e99c63ccc691460b8da243c8f04c07437a86a7d5d53f52)], removed: [], role_changed: [] })
+R2 F1 joiner first v3 -> ok=true unchecked=Ok(0)
+R2 F1 holder v4 -> Ok(Advanced { added: [KeyId(b2be0560eb08dda23807f20cc9d2918243ee32f581e7248dccf9c75e9bb1c327)], removed: [], role_changed: [] })
+R2 F1 joiner first v4 -> ok=true unchecked=Ok(0)
+R2 F1 holder v5 -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(9d110ad7749968f055e99c63ccc691460b8da243c8f04c07437a86a7d5d53f52)] })
+R2 F1 joiner first v5 -> ok=true unchecked=Ok(0)
+R2 F1 holder v6 -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(b2be0560eb08dda23807f20cc9d2918243ee32f581e7248dccf9c75e9bb1c327)] })
+R2 F1 joiner first v6 -> ok=true unchecked=Ok(0)
+R2 F1 holder v7 -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(6d2a66386b1ad075015226f4cce927b91746b95517d4e0531f1083248e16202c)] })
+R2 F1 joiner first v7 -> ok=true unchecked=Ok(0)
+R2 F1 holder v8 -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(9d110ad7749968f055e99c63ccc691460b8da243c8f04c07437a86a7d5d53f52)] })
+R2 F1 joiner first v8 -> ok=true unchecked=Ok(0)
+R2 F1 holder v9 -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(b2be0560eb08dda23807f20cc9d2918243ee32f581e7248dccf9c75e9bb1c327)] })
+R2 F1 joiner first v9 -> ok=true unchecked=Ok(0)
+R2 F1 holder v10 -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(9d110ad7749968f055e99c63ccc691460b8da243c8f04c07437a86a7d5d53f52), KeyId(b2be0560eb08dda23807f20cc9d2918243ee32f581e7248dccf9c75e9bb1c327)] })
+R2 F1 joiner first v10 -> ok=true unchecked=Ok(0)
+R2 F1 holder v11 -> Ok(Advanced { added: [], removed: [KeyId(30a54b632db8ef3ef452dea768bb100ea90da16f63e651d17c283e3e9fac5003)], role_changed: [] })
+R2 F1 joiner first v11 -> ok=true unchecked=Ok(2)
+R2 F1 holder v12 -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(9d110ad7749968f055e99c63ccc691460b8da243c8f04c07437a86a7d5d53f52)] })
+R2 F1 joiner first v12 -> ok=true unchecked=Ok(2)
+R2 F1 holder v13 -> Ok(Advanced { added: [], removed: [], role_changed: [KeyId(9d110ad7749968f055e99c63ccc691460b8da243c8f04c07437a86a7d5d53f52)] })
+R2 F1 joiner first v13 -> ok=true unchecked=Ok(2)
+test r2_f1_raise_on_admitting_version_refused_in_combinations ... ok
+test r2_f1_remove_and_readd_with_old_record ... R2 F1 readd old record added_in=5 -> Err(BadProposalVersion(KeyId(501b54a214fb7b31eac53f6ba275c0852c206bb880b004198b36d8ff102e50e8)))
+R2 F1 readd old record added_in=3 -> Err(ReaddWithoutNewEntry(KeyId(501b54a214fb7b31eac53f6ba275c0852c206bb880b004198b36d8ff102e50e8)))
+R2 F1 readd new proposal -> Err(ProposedRemovedKey(KeyId(501b54a214fb7b31eac53f6ba275c0852c206bb880b004198b36d8ff102e50e8)))
+R2 F1 direct readd as guest -> Ok(Advanced { added: [KeyId(501b54a214fb7b31eac53f6ba275c0852c206bb880b004198b36d8ff102e50e8)], removed: [], role_changed: [] })
+test r2_f2_candidate_variants ... ok
+test r2_f2_cap_full_by_another_route_other_session_time_backwards ... ok
+test r2_f2_lifetime_and_version_edges ... ok
+test r2_f2_proposal_id_carried_by_an_existing_entry_reaches_a_card ... R2 F2 receive of a proposal reusing an entry's proposal id -> Ok(ProposalId(07070707070707070707070707070707))
+R2 F2 approve of it -> Err(InvalidApproval(DuplicateProposalId(KeyId(ce488655f474ea88c0812c11345a6b3870930d096bbe425157c67945247ebf6c))))
+test r2_f3_counter_who_can_move_it ... R2 F3 muted+quota-used guest's crowded counter: 5
+R2 F3 accounting unchanged while the counter moved: IntakeAccounting { pending: 3, remembered_ids: 11, counted_proposers: 4, muted: 1 }
+test r2_f4_wire_spellings ... R2 F4 refused spellings: 48
+test r2_f5_expiry_swallowed_by_an_internal_tick ... R2 F5 approve: outcome(a)=Some(Expired) made_stale=[] later tick=[]
+R2 F5 junk receive: outcome(a)=Some(Expired) later tick=[]
+test r2_f5_made_stale_edges ... ok
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.63s
