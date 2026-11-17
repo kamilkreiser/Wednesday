@@ -1,0 +1,50 @@
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:32:1
+   |
+32 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+
+running 2 tests
+test gate_r3::r3_finding_release_receipt_proxy_default_limits ... hostile=3: H events stored at C 14430; C receipts stored at V 0; C's quota at V full: false; C usage at V (0, 0) of per-peer (5097490, 28604); V.apply_roster(removal of H1) -> Ok(()); own record -> Ok(())
+release, default limits: 898.696333ms
+ok
+test gate_r3::r3_release_flood_measurements ... (a) removed member, 100000 attempts in 4.9439495s: accepted 0, last refusal Some(ReporterRemoved), store (4976, 3), own record Ok(())
+colluder: 1000 advancing records stored, Y charged (0, 0) (per-peer (5097490, 28604)); own record ok true; other peer ok true; store (4784, 4)
+(b) colluder advancing at default limits: 1000 stored, 0 bytes, 112.26575ms
+
+thread 'gate_r3::r3_release_flood_measurements' (3358466) panicked at crates/coagent-audit/tests/gate_r3.rs:407:18:
+called `Result::unwrap()` on an `Err` value: LogFull
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    gate_r3::r3_release_flood_measurements
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 12 filtered out; finished in 7.16s
+
+error: test failed, to rerun pass `-p coagent-audit --test gate_r3`
+        9.14 real        12.35 user         0.29 sys
+           266960896  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               49962  page reclaims
+                 107  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   3  signals received
+                  14  voluntary context switches
+                8930  involuntary context switches
+           765215502  instructions retired
+           298714378  cycles elapsed
+            27607784  peak memory footprint
+rc=101

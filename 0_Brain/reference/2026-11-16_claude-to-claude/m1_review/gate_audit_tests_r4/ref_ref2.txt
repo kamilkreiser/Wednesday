@@ -1,0 +1,132 @@
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:32:1
+   |
+32 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+error[E0061]: this method takes 1 argument but 3 arguments were supplied
+   --> crates/coagent-audit/tests/ref2_body.rs:241:11
+    |
+241 |     au[1].note_share_level(w.key(0), w.key(2), ShareLevel::Summaries);
+    |           ^^^^^^^^^^^^^^^^ --------  --------  --------------------- unexpected argument #3 of type `ShareLevel`
+    |                            |         |
+    |                            |         unexpected argument #2 of type `KeyId`
+    |                            expected `&AuditEvent`, found `KeyId`
+    |
+note: method defined here
+   --> crates/coagent-audit/src/session.rs:762:12
+    |
+762 |     pub fn note_share_level(&mut self, stmt: &AuditEvent) -> Result<(), AuditError> {
+    |            ^^^^^^^^^^^^^^^^
+help: remove the extra arguments
+    |
+241 -     au[1].note_share_level(w.key(0), w.key(2), ShareLevel::Summaries);
+241 +     au[1].note_share_level(/* &AuditEvent */);
+    |
+
+error[E0061]: this method takes 1 argument but 3 arguments were supplied
+   --> crates/coagent-audit/tests/ref2_body.rs:245:11
+    |
+245 |     au[1].note_share_level(w.key(0), w.key(2), ShareLevel::Nothing);
+    |           ^^^^^^^^^^^^^^^^ --------  --------  ------------------- unexpected argument #3 of type `ShareLevel`
+    |                            |         |
+    |                            |         unexpected argument #2 of type `KeyId`
+    |                            expected `&AuditEvent`, found `KeyId`
+    |
+note: method defined here
+   --> crates/coagent-audit/src/session.rs:762:12
+    |
+762 |     pub fn note_share_level(&mut self, stmt: &AuditEvent) -> Result<(), AuditError> {
+    |            ^^^^^^^^^^^^^^^^
+help: remove the extra arguments
+    |
+245 -     au[1].note_share_level(w.key(0), w.key(2), ShareLevel::Nothing);
+245 +     au[1].note_share_level(/* &AuditEvent */);
+    |
+
+error[E0061]: this method takes 1 argument but 3 arguments were supplied
+   --> crates/coagent-audit/tests/ref2_body.rs:268:11
+    |
+268 |     au[1].note_share_level(w.key(0), w.key(2), ShareLevel::Full);
+    |           ^^^^^^^^^^^^^^^^ --------  --------  ---------------- unexpected argument #3 of type `ShareLevel`
+    |                            |         |
+    |                            |         unexpected argument #2 of type `KeyId`
+    |                            expected `&AuditEvent`, found `KeyId`
+    |
+note: method defined here
+   --> crates/coagent-audit/src/session.rs:762:12
+    |
+762 |     pub fn note_share_level(&mut self, stmt: &AuditEvent) -> Result<(), AuditError> {
+    |            ^^^^^^^^^^^^^^^^
+help: remove the extra arguments
+    |
+268 -     au[1].note_share_level(w.key(0), w.key(2), ShareLevel::Full);
+268 +     au[1].note_share_level(/* &AuditEvent */);
+    |
+
+error[E0061]: this method takes 1 argument but 3 arguments were supplied
+   --> crates/coagent-audit/tests/ref2_body.rs:295:7
+    |
+295 |     b.note_share_level(w.key(0), w.key(2), ShareLevel::Full);
+    |       ^^^^^^^^^^^^^^^^ --------  --------  ---------------- unexpected argument #3 of type `ShareLevel`
+    |                        |         |
+    |                        |         unexpected argument #2 of type `KeyId`
+    |                        expected `&AuditEvent`, found `KeyId`
+    |
+note: method defined here
+   --> crates/coagent-audit/src/session.rs:762:12
+    |
+762 |     pub fn note_share_level(&mut self, stmt: &AuditEvent) -> Result<(), AuditError> {
+    |            ^^^^^^^^^^^^^^^^
+help: remove the extra arguments
+    |
+295 -     b.note_share_level(w.key(0), w.key(2), ShareLevel::Full);
+295 +     b.note_share_level(/* &AuditEvent */);
+    |
+
+error[E0061]: this method takes 1 argument but 3 arguments were supplied
+   --> crates/coagent-audit/tests/ref2_body.rs:311:11
+    |
+311 |     au[1].note_share_level(w.key(0), w.key(2), ShareLevel::Full);
+    |           ^^^^^^^^^^^^^^^^ --------  --------  ---------------- unexpected argument #3 of type `ShareLevel`
+    |                            |         |
+    |                            |         unexpected argument #2 of type `KeyId`
+    |                            expected `&AuditEvent`, found `KeyId`
+    |
+note: method defined here
+   --> crates/coagent-audit/src/session.rs:762:12
+    |
+762 |     pub fn note_share_level(&mut self, stmt: &AuditEvent) -> Result<(), AuditError> {
+    |            ^^^^^^^^^^^^^^^^
+help: remove the extra arguments
+    |
+311 -     au[1].note_share_level(w.key(0), w.key(2), ShareLevel::Full);
+311 +     au[1].note_share_level(/* &AuditEvent */);
+    |
+
+error[E0061]: this method takes 1 argument but 3 arguments were supplied
+   --> crates/coagent-audit/tests/ref2_body.rs:766:7
+    |
+766 |     b.note_share_level(w.key(0), w.key(2), ShareLevel::Full);
+    |       ^^^^^^^^^^^^^^^^ --------  --------  ---------------- unexpected argument #3 of type `ShareLevel`
+    |                        |         |
+    |                        |         unexpected argument #2 of type `KeyId`
+    |                        expected `&AuditEvent`, found `KeyId`
+    |
+note: method defined here
+   --> crates/coagent-audit/src/session.rs:762:12
+    |
+762 |     pub fn note_share_level(&mut self, stmt: &AuditEvent) -> Result<(), AuditError> {
+    |            ^^^^^^^^^^^^^^^^
+help: remove the extra arguments
+    |
+766 -     b.note_share_level(w.key(0), w.key(2), ShareLevel::Full);
+766 +     b.note_share_level(/* &AuditEvent */);
+    |
+
+For more information about this error, try `rustc --explain E0061`.
+error: could not compile `coagent-audit` (test "ref2") due to 6 previous errors
+rc=101

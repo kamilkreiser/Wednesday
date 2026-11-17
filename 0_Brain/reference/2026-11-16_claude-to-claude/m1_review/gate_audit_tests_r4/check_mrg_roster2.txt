@@ -1,0 +1,109 @@
+scripts/env.sh: no toolchain at /private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/80ecfb7f-8674-4d45-8f56-097f69bdbe0b/scratchpad/gate_audit_r4/tools (set COAGENT_TOOLS, or install rustup there); using whatever cargo is on PATH
+==> 1/4 fmt: cargo fmt --all --check
+==> 2/4 clippy: cargo clippy --workspace --all-targets --locked -- -D warnings
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:32:1
+   |
+32 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+==> 3/4 test: cargo test --workspace --locked
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:32:1
+   |
+32 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+
+running 2 tests
+test time::tests::rfc3339_known_values ... ok
+test domain::tests::each_kind_has_its_own_crypto_domain_and_label ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 17 tests
+test p16_a_share_statement_must_have_the_share_level_kind ... ok
+test p09_a_lower_number_does_not_advance_even_when_another_author_goes_up ... ok
+test p09_a_lower_number_for_a_held_author_does_not_advance ... ok
+test p08_a_cross_check_record_at_a_lower_roster_version_does_not_advance ... ok
+test own_size_exact_an_own_record_that_exactly_fills_the_room_fits_and_one_byte_more_does_not ... ok
+test p01_a_seat_stops_at_its_record_limit ... ok
+test p22_a_statement_naming_a_roster_version_not_held_is_refused ... ok
+test p19_the_same_evidence_twice_is_stored_once ... ok
+test p20_an_exact_replay_of_a_held_countersignature_is_a_no_op ... ok
+test p18_levels_learnt_from_a_removed_author_are_forgotten ... ok
+test p28_set_limits_cannot_raise ... ok
+test p02_the_free_part_keeps_its_records_for_the_members_own_choices ... ok
+test p30_a_share_statement_with_an_unknown_field_is_refused ... ok
+test p27_the_evidence_cap_is_four ... ok
+test n06_verify_refuses_a_record_whose_reporter_was_not_a_member_at_its_version ... ok
+test r3n3_reapplying_a_held_roster_version_gives_the_roster_crates_answer ... ok
+test p9_a_new_occupant_fills_a_whole_seat_after_release ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+
+running 11 tests
+test p7_an_honest_author_is_never_refused_for_space_by_an_honest_peer ... ok
+test p1c_an_own_free_record_fits_whenever_its_own_count_leaves_room ... ok
+test p6_evidence_before_space ... ok
+test p1a_the_next_roster_version_always_applies_with_the_roster_crates_answer ... ok
+test p1b_evidence_for_a_fresh_conflict_is_stored_returned_and_exported ... ok
+test p9_release_gives_the_seat_back_and_loses_nothing ... ok
+test p3_bounds_and_exact_accounting ... ok
+test p4_latest_state_only ... ok
+test p2_seats_do_not_interfere ... ok
+test p5_the_accounting_is_a_function_of_the_store ... ok
+test p8_the_export_always_verifies has been running for over 60 seconds
+test p8_the_export_always_verifies ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 82.49s
+
+
+running 4 tests
+test release_receipt_proxy_flood ... ignored
+test release_removed_member_100000_fresh_records ... ignored
+test release_seven_hostile_members_fill_seven_seats ... ignored
+test release_three_peers_flood_maximum_size_events ... ignored
+
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 5 tests
+test rule_1_accepts_a_first_countersignature_of_a_head_at_a_version_where_the_signer_was_a_member ... ok
+test starter_fills_its_seat_at_a_victim_and_a_removal_still_applies ... ok
+test a_nothing_member_learns_nothing_that_follows_another_authors_events ... ok
+test advancing_cross_check_records_replace_one_slot_and_the_store_does_not_grow ... ok
+test beyond_the_cap_one_slot_keeps_the_newest_checkpoint_and_countersigning_continues ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.90s
+
+
+running 2 tests
+test u5_the_largest_object_of_each_slot_kind_fits_its_slot ... ok
+test u6_a_valid_roster_version_near_the_encoding_cap ... FAILED
+
+failures:
+
+---- u6_a_valid_roster_version_near_the_encoding_cap stdout ----
+
+thread 'u6_a_valid_roster_version_near_the_encoding_cap' (2651169) panicked at crates/coagent-audit/tests/a3_unknowns.rs:248:14:
+the roster chain accepts the version: LifetimeExceeded
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    u6_a_valid_roster_version_near_the_encoding_cap
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.87s
+
+error: test failed, to rerun pass `-p coagent-audit --test a3_unknowns`
+CHECK FAILED at step: 3/4 test
+check_rc=1

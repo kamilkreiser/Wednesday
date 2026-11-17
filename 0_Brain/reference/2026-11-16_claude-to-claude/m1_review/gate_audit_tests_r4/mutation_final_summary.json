@@ -1,0 +1,544 @@
+{
+ "M01": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p3_bounds_and_exact_accounting",
+   "r2m1_one_peer_cannot_take_more_than_its_quota_whatever_the_others_do",
+   "r2m1_own_logging_keeps_its_reserved_share_through_member_churn"
+  ],
+  "r4_killed": [
+   "r4_fixed_a_m4_checkpoints_are_bounded_and_the_export_verifies",
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: seat 0 holds 8827 bytes, above its limit 8192",
+   "r2m1_one_peer_cannot_take_more_than_its_quota_whatever_the_others_do": "crates/coagent-audit/tests/gate_return_r2.rs:148:5 :: peer 1 used (131718, 127) over its quota (131072, 12500)",
+   "r2m1_own_logging_keeps_its_reserved_share_through_member_churn": "crates/coagent-audit/tests/gate_return_r2.rs:189:5 :: peers used 922026 > pool (917504, 87500)",
+   "r4_fixed_a_m4_checkpoints_are_bounded_and_the_export_verifies": "crates/coagent-audit/tests/gate_r4.rs:564:9 :: assertion failed: v.seat_usage(2).0 <= v.limits().per_peer().0",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 2 Ev { k: 0, size: 0, n: 1 }: Case failed: I3: seat 0 holds (1575, 3), above its limit (1500, 3)."
+  }
+ },
+ "M02": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p01_a_seat_stops_at_its_record_limit",
+   "p3_bounds_and_exact_accounting"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p01_a_seat_stops_at_its_record_limit": "crates/coagent-audit/tests/a3_guards.rs:128:5 :: assertion `left == right` failed: P01: a seat took more records than its record limit",
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: seat 2 holds 16 records, above its record limit 15",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 16 Ev { k: 137, size: 1, n: 3 }: Case failed: I3: seat 3 holds (1989, 4), above its limit (2070, 3)."
+  }
+ },
+ "M03": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "own_size_exact_an_own_record_that_exactly_fills_the_room_fits_and_one_byte_more_does_not"
+  ],
+  "r4_killed": [],
+  "texts": {
+   "own_size_exact_an_own_record_that_exactly_fills_the_room_fits_and_one_byte_more_does_not": "crates/coagent-audit/tests/a3_guards.rs:214:5 :: assertion `left == right` failed: own size: an own record one byte larger than the room was accepted"
+  }
+ },
+ "M04": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p3_bounds_and_exact_accounting",
+   "p7_an_honest_author_is_never_refused_for_space_by_an_honest_peer"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: the requested allowance of slot 0 holds (1650, 2), above its limit (2339, 1)",
+   "p7_an_honest_author_is_never_refused_for_space_by_an_honest_peer": "crates/coagent-audit/tests/a3_props.rs:2632:9 :: P7: event 11 the author's own log accepted was refused by an honest peer with equal limits: LogFull",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 0 For { k: 12, size: 0, n: 1 }: Case failed: I3: requested allowance 0 holds (524, 1) above (107, 0)."
+  }
+ },
+ "M05": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "advancing_cross_check_records_replace_one_slot_and_the_store_does_not_grow",
+   "beyond_the_cap_one_slot_keeps_the_newest_checkpoint_and_countersigning_continues",
+   "p3_bounds_and_exact_accounting",
+   "p5_the_accounting_is_a_function_of_the_store"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "advancing_cross_check_records_replace_one_slot_and_the_store_does_not_grow": "crates/coagent-audit/tests/a3_replacements.rs:144:5 :: assertion `left == right` failed",
+   "beyond_the_cap_one_slot_keeps_the_newest_checkpoint_and_countersigning_continues": "crates/coagent-audit/tests/a3_replacements.rs:179:5 :: assertion `left == right` failed: stored checkpoints are not the cap plus one slot",
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: the store holds 17534 framed bytes in 20 records but the usages sum to (17948, 21)",
+   "p5_the_accounting_is_a_function_of_the_store": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P5: the resumed member differs from the one that stopped:",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 2 Hs { k: 0, about: 0, to_me: false }: Case failed: I2: seats (0, 0) + fixed (3944, 4) != store (3597, 3)."
+  }
+ },
+ "M06": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p3_bounds_and_exact_accounting",
+   "p5_the_accounting_is_a_function_of_the_store",
+   "p8_the_export_always_verifies",
+   "p9_release_gives_the_seat_back_and_loses_nothing"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: the store holds 3984 framed bytes in 3 records but the usages sum to (3250, 2)",
+   "p5_the_accounting_is_a_function_of_the_store": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P5: the resumed member differs from the one that stopped:",
+   "p8_the_export_always_verifies": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P8: the member's own export fails verify: VerifyError { class: Header, what: \"prev_hash link\", author: Some(KeyId(a3e1f862a3e6300e416b2b97bb9d49bf025fb15eb27e8d272f0d9a2b8e7cae61)), seq: Some(2) }",
+   "p9_release_gives_the_seat_back_and_loses_nothing": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P9: the store after a release does not export and verify: Ok(Err(VerifyError { class: Header, what: \"sequence\", author: Some(KeyId(a3e1f862a3e6300e416b2b97bb9d49bf025fb15eb27e8d272f0d9a2b8e7cae61)), seq: Some(2) }))",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 2 Release { k: 0 }: Case failed: release left 1 records of the key."
+  }
+ },
+ "M07": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "a1_m4_the_store_refuses_before_its_limit_and_the_export_still_verifies",
+   "gate_r3::r3_finding_evidence_not_stored_when_peer_pool_full",
+   "gate_r3::r3_finding_fork_from_an_author_at_quota_gives_logfull_not_evidence",
+   "gate_r3::r3_finding_identity_rotation_fills_peer_pool_and_blocks_rosters_at_non_convener",
+   "gate_r3::r3_finding_restart_charges_existing_peer_records_to_own",
+   "p01_a_seat_stops_at_its_record_limit",
+   "p3_bounds_and_exact_accounting",
+   "r2m1_one_peer_cannot_take_more_than_its_quota_whatever_the_others_do",
+   "r2m1_own_logging_keeps_its_reserved_share_through_member_churn",
+   "starter_fills_its_seat_at_a_victim_and_a_removal_still_applies"
+  ],
+  "r4_killed": [
+   "r4_fixed_r3_m1_traffic_to_one_member_cannot_spend_its_seat_at_another_and_rosters_apply",
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "a1_m4_the_store_refuses_before_its_limit_and_the_export_still_verifies": "crates/coagent-audit/tests/gate_return.rs:547:9 :: store passed its limit",
+   "gate_r3::r3_finding_evidence_not_stored_when_peer_pool_full": "crates/coagent-audit/tests/gate_r3.rs:536:18 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "gate_r3::r3_finding_fork_from_an_author_at_quota_gives_logfull_not_evidence": "crates/coagent-audit/tests/gate_r3.rs:63:10 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "gate_r3::r3_finding_identity_rotation_fills_peer_pool_and_blocks_rosters_at_non_convener": "crates/coagent-audit/tests/gate_r3.rs:721:18 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "gate_r3::r3_finding_restart_charges_existing_peer_records_to_own": "crates/coagent-audit/tests/gate_r3.rs:445:18 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "p01_a_seat_stops_at_its_record_limit": "crates/coagent-audit/tests/a3_guards.rs:128:5 :: assertion `left == right` failed: P01: a seat took more records than its record limit",
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: seat 0 holds 11287 bytes, above its limit 8192",
+   "r2m1_one_peer_cannot_take_more_than_its_quota_whatever_the_others_do": "crates/coagent-audit/tests/gate_return_r2.rs:120:14 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "r2m1_own_logging_keeps_its_reserved_share_through_member_churn": "crates/coagent-audit/tests/gate_return_r2.rs:120:14 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "r4_fixed_r3_m1_traffic_to_one_member_cannot_spend_its_seat_at_another_and_rosters_apply": "crates/coagent-audit/tests/gate_r4.rs:635:75 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 2 Ev { k: 0, size: 0, n: 1 }: Case failed: I3: seat 0 holds (1575, 3), above its limit (1500, 3).",
+   "starter_fills_its_seat_at_a_victim_and_a_removal_still_applies": "crates/coagent-audit/tests/a3_replacements.rs:88:5 :: the starter's seat at the victim never filled"
+  }
+ },
+ "M08": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p3_bounds_and_exact_accounting"
+  ],
+  "r4_killed": [
+   "r4_fixed_a_m4_checkpoints_are_bounded_and_the_export_verifies",
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: seat 0 holds 8492 bytes, above its limit 8192",
+   "r4_fixed_a_m4_checkpoints_are_bounded_and_the_export_verifies": "crates/coagent-audit/tests/gate_r4.rs:564:9 :: assertion failed: v.seat_usage(2).0 <= v.limits().per_peer().0",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 2 Head { k: 55, extra: 0 }: Case failed: I3: seat 2 holds (1878, 4), above its limit (1500, 3)."
+  }
+ },
+ "M09": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p27_the_evidence_cap_is_four",
+   "p4_latest_state_only",
+   "r2m1_evidence_is_capped_per_accused_author"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p27_the_evidence_cap_is_four": "crates/coagent-audit/tests/a3_guards.rs:483:9 :: assertion `left == right` failed: P27: after 5 distinct evidence records against one author, the store holds the wrong number",
+   "p4_latest_state_only": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P4: 5 evidence records stored about one accused",
+   "r2m1_evidence_is_capped_per_accused_author": "crates/coagent-audit/tests/gate_return_r2.rs:264:5 :: 5 evidence records kept about one author (cap 4)",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 12 Fork { k: 27, head: true }: Case failed: a fifth evidence record was stored."
+  }
+ },
+ "M10": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "gate_r3::r3_ok_current_member_fresh_empty_records_are_not_newer",
+   "m20_the_seal_covers_the_bundle_contents_not_only_the_count",
+   "r2m1_a_heads_seen_record_is_stored_only_when_it_advances"
+  ],
+  "r4_killed": [],
+  "texts": {
+   "gate_r3::r3_ok_current_member_fresh_empty_records_are_not_newer": "crates/coagent-audit/tests/gate_r3.rs:307:5 :: assertion `left == right` failed",
+   "m20_the_seal_covers_the_bundle_contents_not_only_the_count": "crates/coagent-audit/tests/gate_return.rs:714:10 :: called `Option::unwrap()` on a `None` value",
+   "r2m1_a_heads_seen_record_is_stored_only_when_it_advances": "crates/coagent-audit/tests/gate_return_r2.rs:100:5 :: assertion failed: after_addressed.1 == after_first.1 + 1"
+  }
+ },
+ "M11": {
+  "rule": "1.4a roster lifetime backstops (256 versions, 32 keys)",
+  "compile_error": false,
+  "seat_killed": [],
+  "r4_killed": [
+   "r4_guard_roster_lifetime_backstops"
+  ],
+  "texts": {
+   "r4_guard_roster_lifetime_backstops": "crates/coagent-audit/tests/gate_r4.rs:1645:5 :: assertion `left == right` failed: version 257 was not refused RosterLifetime"
+  }
+ },
+ "M12": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "gate_r3::r3_finding_restart_charges_existing_peer_records_to_own",
+   "p5_the_accounting_is_a_function_of_the_store"
+  ],
+  "r4_killed": [],
+  "texts": {
+   "gate_r3::r3_finding_restart_charges_existing_peer_records_to_own": "crates/coagent-audit/tests/gate_r3.rs:479:5 :: start on a used store was not refused",
+   "p5_the_accounting_is_a_function_of_the_store": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P5: start on a used store was not refused StoreInUse: Ok(())"
+  }
+ },
+ "M13": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p1c_an_own_free_record_fits_whenever_its_own_count_leaves_room",
+   "p3_bounds_and_exact_accounting",
+   "p5_the_accounting_is_a_function_of_the_store"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p1c_an_own_free_record_fits_whenever_its_own_count_leaves_room": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P1(c): an own free record of 4822 bytes was refused LogFull although the member's own free records ((10882, 4)) leave 4978 bytes and 2 records (free part (16376, 7))",
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: the free part holds (6188, 8), above its limit (16376, 7)",
+   "p5_the_accounting_is_a_function_of_the_store": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P5: the resumed member differs from the one that stopped:",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 18 Resume: Case failed: resume: status differs:"
+  }
+ },
+ "M14": {
+  "rule": "1.4b one requester cannot use another's allowance",
+  "compile_error": false,
+  "seat_killed": [],
+  "r4_killed": [
+   "r4_finding_requested_events_drive_checkpoints_into_the_free_part",
+   "r4_guard_one_requester_cannot_use_anothers_allowance"
+  ],
+  "texts": {
+   "r4_finding_requested_events_drive_checkpoints_into_the_free_part": "crates/coagent-audit/tests/gate_r4.rs:160:5 :: R4-M1 not shown: requests used 1652 bytes of the free part; own records 26 against 29",
+   "r4_guard_one_requester_cannot_use_anothers_allowance": "crates/coagent-audit/tests/gate_r4.rs:1762:5 :: assertion `left == right` failed: requester B's allowance was used by requester A"
+  }
+ },
+ "M15": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "gate_r3::r3_finding_evidence_not_stored_when_peer_pool_full",
+   "gate_r3::r3_finding_fork_from_an_author_at_quota_gives_logfull_not_evidence",
+   "gate_r3::r3_finding_identity_rotation_fills_peer_pool_and_blocks_rosters_at_non_convener",
+   "gate_r3::r3_finding_restart_charges_existing_peer_records_to_own",
+   "p01_a_seat_stops_at_its_record_limit",
+   "p2_seats_do_not_interfere",
+   "p3_bounds_and_exact_accounting",
+   "p9_a_new_occupant_fills_a_whole_seat_after_release",
+   "r2m1_one_peer_cannot_take_more_than_its_quota_whatever_the_others_do",
+   "r2m1_own_logging_keeps_its_reserved_share_through_member_churn"
+  ],
+  "r4_killed": [
+   "r4_finding_own_seat_re_added_into_a_used_slot_exceeds_the_seat",
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "gate_r3::r3_finding_evidence_not_stored_when_peer_pool_full": "crates/coagent-audit/tests/gate_r3.rs:536:18 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "gate_r3::r3_finding_fork_from_an_author_at_quota_gives_logfull_not_evidence": "crates/coagent-audit/tests/gate_r3.rs:63:10 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "gate_r3::r3_finding_identity_rotation_fills_peer_pool_and_blocks_rosters_at_non_convener": "crates/coagent-audit/tests/gate_r3.rs:721:18 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "gate_r3::r3_finding_restart_charges_existing_peer_records_to_own": "crates/coagent-audit/tests/gate_r3.rs:445:18 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "p01_a_seat_stops_at_its_record_limit": "crates/coagent-audit/tests/a3_guards.rs:128:5 :: assertion `left == right` failed: P01: a seat took more records than its record limit",
+   "p2_seats_do_not_interfere": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P2: seat 0's charges or LogFull refusals depend on other seats' inputs (at step 6: with others ((734, 1), false), alone ((0, 0), false))",
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: seat 0 holds 15179 bytes, above its limit 8192",
+   "p9_a_new_occupant_fills_a_whole_seat_after_release": "crates/coagent-audit/tests/a3_guards.rs:692:5 :: X did not fill the seat: 0 of 40000",
+   "r2m1_one_peer_cannot_take_more_than_its_quota_whatever_the_others_do": "crates/coagent-audit/tests/gate_return_r2.rs:120:14 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "r2m1_own_logging_keeps_its_reserved_share_through_member_churn": "crates/coagent-audit/tests/gate_return_r2.rs:120:14 :: called `Result::unwrap()` on an `Err` value: LogFull",
+   "r4_finding_own_seat_re_added_into_a_used_slot_exceeds_the_seat": "crates/coagent-audit/tests/gate_r4.rs:382:5 :: R4-m2 not shown: seat 2 holds (5050, 1), within a seat",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 1 Ev { k: 103, size: 0, n: 3 }: Case failed: I3: seat 0 holds (1989, 4), above its limit (1500, 3)."
+  }
+ },
+ "M16": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "a1_m1_a_record_from_a_member_removed_after_making_it_still_verifies",
+   "gate_r2::r2_ok_readd_under_a_new_key",
+   "gate_r3::r3_finding_convener_quota_full_blocks_every_roster_update",
+   "p4_latest_state_only",
+   "starter_fills_its_seat_at_a_victim_and_a_removal_still_applies"
+  ],
+  "r4_killed": [
+   "r4_fixed_r2_m1_heads_seen_replays_and_removed_reporters_store_nothing",
+   "r4_fixed_r3_m1_traffic_to_one_member_cannot_spend_its_seat_at_another_and_rosters_apply"
+  ],
+  "texts": {
+   "a1_m1_a_record_from_a_member_removed_after_making_it_still_verifies": "crates/coagent-audit/tests/gate_return.rs:375:5 :: assertion `left == right` failed",
+   "gate_r2::r2_ok_readd_under_a_new_key": "crates/coagent-audit/tests/gate_r2.rs:435:5 :: assertion failed: matches!(c.receive_heads_seen(&hs_signed(&w.ids[3], &w, None, 1, vec![])),",
+   "gate_r3::r3_finding_convener_quota_full_blocks_every_roster_update": "crates/coagent-audit/tests/gate_r3.rs:144:5 :: assertion `left == right` failed",
+   "p4_latest_state_only": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P4: the stored cross-check record is not the latest by its rule",
+   "r4_fixed_r2_m1_heads_seen_replays_and_removed_reporters_store_nothing": "crates/coagent-audit/tests/gate_r4.rs:603:5 :: assertion `left == right` failed",
+   "r4_fixed_r3_m1_traffic_to_one_member_cannot_spend_its_seat_at_another_and_rosters_apply": "crates/coagent-audit/tests/gate_r4.rs:662:5 :: assertion failed: after_head.is_err() && after_hs.is_err()",
+   "starter_fills_its_seat_at_a_victim_and_a_removal_still_applies": "crates/coagent-audit/tests/a3_replacements.rs:100:5 :: assertion `left == right` failed"
+  }
+ },
+ "M17": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p9_release_gives_the_seat_back_and_loses_nothing"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p9_release_gives_the_seat_back_and_loses_nothing": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P9: archive-and-release of a current member was not refused StillMember: Ok(())",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 15 Release { k: 74 }: Case failed: release of a current member was accepted."
+  }
+ },
+ "M18": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p19_the_same_evidence_twice_is_stored_once",
+   "p27_the_evidence_cap_is_four",
+   "p6_evidence_before_space"
+  ],
+  "r4_killed": [
+   "r4_fixed_r3_n2_fork_from_an_author_with_a_full_seat_is_a_fork_with_evidence",
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p19_the_same_evidence_twice_is_stored_once": "crates/coagent-audit/tests/a3_guards.rs:541:9 :: assertion `left == right` failed: P19: the same evidence presented twice was stored twice (after 1 distinct)",
+   "p27_the_evidence_cap_is_four": "crates/coagent-audit/tests/a3_guards.rs:483:9 :: assertion `left == right` failed: P27: after 1 distinct evidence records against one author, the store holds the wrong number",
+   "p6_evidence_before_space": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P6: the evidence for a forked event was returned but not stored (accused had 1 stored)",
+   "r4_fixed_r3_n2_fork_from_an_author_with_a_full_seat_is_a_fork_with_evidence": "crates/coagent-audit/tests/gate_r4.rs:423:5 :: assertion `left == right` failed: the fork stored something other than its evidence",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 12 Fork { k: 28, head: false }: Case failed: fork evidence not stored: 1 -> 1."
+  }
+ },
+ "M19": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p1b_evidence_for_a_fresh_conflict_is_stored_returned_and_exported",
+   "p6_evidence_before_space"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p1b_evidence_for_a_fresh_conflict_is_stored_returned_and_exported": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P1(b): the evidence for a fresh conflict was returned but not stored",
+   "p6_evidence_before_space": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P6: the evidence for a forked checkpoint was returned but not stored (accused had 0 stored)",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 5 Fork { k: 156, head: true }: Case failed: fork evidence not stored: 0 -> 0."
+  }
+ },
+ "M20": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "r2m1_nothing_from_a_removed_member_not_even_a_countersignature"
+  ],
+  "r4_killed": [],
+  "texts": {
+   "r2m1_nothing_from_a_removed_member_not_even_a_countersignature": "crates/coagent-audit/tests/gate_return_r2.rs:210:5 :: assertion `left == right` failed: a removed member's countersignature was taken"
+  }
+ },
+ "M21": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p08_a_cross_check_record_at_a_lower_roster_version_does_not_advance",
+   "p09_a_lower_number_does_not_advance_even_when_another_author_goes_up",
+   "p09_a_lower_number_for_a_held_author_does_not_advance",
+   "p4_latest_state_only",
+   "r2m1_a_heads_seen_record_is_stored_only_when_it_advances"
+  ],
+  "r4_killed": [],
+  "texts": {
+   "p08_a_cross_check_record_at_a_lower_roster_version_does_not_advance": "crates/coagent-audit/tests/a3_guards.rs:240:5 :: assertion `left == right` failed: P08: a record at a lower roster version advanced",
+   "p09_a_lower_number_does_not_advance_even_when_another_author_goes_up": "crates/coagent-audit/tests/a3_guards.rs:299:5 :: assertion `left == right` failed: P09: a record with one author lower advanced because another went up",
+   "p09_a_lower_number_for_a_held_author_does_not_advance": "crates/coagent-audit/tests/a3_guards.rs:259:5 :: assertion `left == right` failed: P09: a lower number for a held author advanced",
+   "p4_latest_state_only": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P4: the stored cross-check record is not the latest by its rule",
+   "r2m1_a_heads_seen_record_is_stored_only_when_it_advances": "crates/coagent-audit/tests/gate_return_r2.rs:88:5 :: assertion `left == right` failed: a record that does not advance was taken"
+  }
+ },
+ "M22": {
+  "rule": "4.1 the FIRST roster conflict is kept",
+  "compile_error": false,
+  "seat_killed": [],
+  "r4_killed": [
+   "r4_guard_the_first_roster_conflict_is_kept",
+   "r4_guard_the_first_roster_conflict_survives_resume"
+  ],
+  "texts": {
+   "r4_guard_the_first_roster_conflict_is_kept": "crates/coagent-audit/tests/gate_r4.rs:1690:5 :: assertion `left == right` failed: the roster conflict slot does not hold the FIRST conflict",
+   "r4_guard_the_first_roster_conflict_survives_resume": "crates/coagent-audit/tests/gate_r4.rs:1742:5 :: assertion `left == right` failed: after resume the conflict slot no longer holds the FIRST conflict"
+  }
+ },
+ "M23": {
+  "rule": "1.4b own checkpoints are charged to the free part (space checked)",
+  "compile_error": false,
+  "seat_killed": [],
+  "r4_killed": [
+   "r4_guard_an_own_checkpoint_is_space_checked"
+  ],
+  "texts": {
+   "r4_guard_an_own_checkpoint_is_space_checked": "crates/coagent-audit/tests/gate_r4.rs:1718:5 :: assertion failed: c1.is_ok() && f1.is_ok()"
+  }
+ },
+ "M24": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "own_size_exact_an_own_record_that_exactly_fills_the_room_fits_and_one_byte_more_does_not"
+  ],
+  "r4_killed": [],
+  "texts": {
+   "own_size_exact_an_own_record_that_exactly_fills_the_room_fits_and_one_byte_more_does_not": "crates/coagent-audit/tests/a3_guards.rs:214:5 :: assertion `left == right` failed: own size: an own record one byte larger than the room was accepted"
+  }
+ },
+ "M25": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "n15_the_default_store_limit_leaves_room_for_meta_and_seal",
+   "own_size_exact_an_own_record_that_exactly_fills_the_room_fits_and_one_byte_more_does_not"
+  ],
+  "r4_killed": [],
+  "texts": {
+   "n15_the_default_store_limit_leaves_room_for_meta_and_seal": "crates/coagent-audit/tests/gate_return_r2.rs:368:5 :: assertion `left == right` failed: the own seat is not one byte per record smaller than a seat",
+   "own_size_exact_an_own_record_that_exactly_fills_the_room_fits_and_one_byte_more_does_not": "crates/coagent-audit/tests/a3_guards.rs:205:9 :: assertion `left == right` failed"
+  }
+ },
+ "M26": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p4_latest_state_only",
+   "p5_the_accounting_is_a_function_of_the_store"
+  ],
+  "r4_killed": [],
+  "texts": {
+   "p4_latest_state_only": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P4: the stored cross-check record is not the latest by its rule",
+   "p5_the_accounting_is_a_function_of_the_store": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P5: a resumed member answered differently from one that never stopped: Some(\"Ok\") against Some(\"Duplicate\")"
+  }
+ },
+ "M27": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p5_the_accounting_is_a_function_of_the_store"
+  ],
+  "r4_killed": [
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p5_the_accounting_is_a_function_of_the_store": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P5: after step 15 a resumed member's accounting or export differs:",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 13 Fork { k: 163, head: false }: Case failed: fork evidence not stored: 1 -> 1."
+  }
+ },
+ "M28": {
+  "rule": "1.10 resume rebuilds the roster conflict slot",
+  "compile_error": false,
+  "seat_killed": [],
+  "r4_killed": [
+   "r4_guard_the_first_roster_conflict_survives_resume"
+  ],
+  "texts": {
+   "r4_guard_the_first_roster_conflict_survives_resume": "crates/coagent-audit/tests/gate_r4.rs:1742:5 :: assertion `left == right` failed: after resume the conflict slot no longer holds the FIRST conflict"
+  }
+ },
+ "M29": {
+  "rule": "",
+  "compile_error": false,
+  "seat_killed": [
+   "p01_a_seat_stops_at_its_record_limit",
+   "p3_bounds_and_exact_accounting",
+   "r2m1_one_peer_cannot_take_more_than_its_quota_whatever_the_others_do",
+   "r2m1_own_logging_keeps_its_reserved_share_through_member_churn"
+  ],
+  "r4_killed": [
+   "r4_fixed_a_m4_checkpoints_are_bounded_and_the_export_verifies",
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p01_a_seat_stops_at_its_record_limit": "crates/coagent-audit/tests/a3_guards.rs:128:5 :: assertion `left == right` failed: P01: a seat took more records than its record limit",
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: seat 0 holds 11287 bytes, above its limit 8192",
+   "r2m1_one_peer_cannot_take_more_than_its_quota_whatever_the_others_do": "crates/coagent-audit/tests/gate_return_r2.rs:148:5 :: peer 1 used (917484, 884) over its quota (131072, 12500)",
+   "r2m1_own_logging_keeps_its_reserved_share_through_member_churn": "crates/coagent-audit/tests/gate_return_r2.rs:189:5 :: peers used 6422388 > pool (917504, 87500)",
+   "r4_fixed_a_m4_checkpoints_are_bounded_and_the_export_verifies": "crates/coagent-audit/tests/gate_r4.rs:564:9 :: assertion failed: v.seat_usage(2).0 <= v.limits().per_peer().0",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1367:9 :: r4 property failed: Test failed: step 2 Ev { k: 0, size: 0, n: 1 }: Case failed: I3: seat 0 holds (1575, 3), above its limit (1500, 3)."
+  }
+ },
+ "M30": {
+  "rule": "(R4-M1 check) own checkpoints charged outside the free part",
+  "compile_error": false,
+  "seat_killed": [
+   "p3_bounds_and_exact_accounting",
+   "p5_the_accounting_is_a_function_of_the_store",
+   "p8_the_export_always_verifies"
+  ],
+  "r4_killed": [
+   "r4_finding_requested_events_drive_checkpoints_into_the_free_part",
+   "r4_guard_an_own_checkpoint_is_space_checked",
+   "r4_prop_storage_accounting"
+  ],
+  "texts": {
+   "p3_bounds_and_exact_accounting": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P3: the requested allowance of slot 7 holds (826, 2), above its limit (584, 1)",
+   "p5_the_accounting_is_a_function_of_the_store": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P5: resume failed: UnknownHead",
+   "p8_the_export_always_verifies": "crates/coagent-audit/tests/a3_props.rs:2400:9 :: P8: verify's attestations {1: []} differ from the author's {}",
+   "r4_finding_requested_events_drive_checkpoints_into_the_free_part": "crates/coagent-audit/tests/gate_r4.rs:160:5 :: R4-M1 not shown: requests used 0 bytes of the free part; own records 29 against 29",
+   "r4_guard_an_own_checkpoint_is_space_checked": "crates/coagent-audit/tests/gate_r4.rs:1718:5 :: assertion failed: c1.is_ok() && f1.is_ok()",
+   "r4_prop_storage_accounting": "crates/coagent-audit/tests/gate_r4.rs:1375:9 :: r4 property failed: Test failed: step 15 Ckpt: Case failed: I3: requested allowance 7 holds (413, 1) above (428, 0)."
+  }
+ },
+ "M31": {
+  "rule": "(R4-m1 check) own event stored before the chain advances",
+  "compile_error": false,
+  "seat_killed": [],
+  "r4_killed": [
+   "r4_finding_a_failed_store_write_leaves_the_own_chain_ahead_of_the_store"
+  ],
+  "texts": {
+   "r4_finding_a_failed_store_write_leaves_the_own_chain_ahead_of_the_store": "crates/coagent-audit/tests/gate_r4.rs:260:5 :: R4-m1 not shown: the in-memory chain did not run ahead of the store"
+  }
+ },
+ "M32": {
+  "rule": "(R4-m1 check) received event stored before the chain advances",
+  "compile_error": false,
+  "seat_killed": [],
+  "r4_killed": [
+   "r4_finding_a_failed_store_write_leaves_a_hole_in_a_received_chain"
+  ],
+  "texts": {
+   "r4_finding_a_failed_store_write_leaves_a_hole_in_a_received_chain": "crates/coagent-audit/tests/gate_r4.rs:320:5 :: R4-m1 not shown: stored received numbers [1, 2, 3]"
+  }
+ },
+ "M33": {
+  "rule": "(R4-m2 check) own records also count the own slot's peer records",
+  "compile_error": false,
+  "seat_killed": [],
+  "r4_killed": [
+   "r4_finding_own_seat_re_added_into_a_used_slot_exceeds_the_seat"
+  ],
+  "texts": {
+   "r4_finding_own_seat_re_added_into_a_used_slot_exceeds_the_seat": "crates/coagent-audit/tests/gate_r4.rs:382:5 :: R4-m2 not shown: seat 2 holds (15153, 3), within a seat"
+  }
+ }
+}

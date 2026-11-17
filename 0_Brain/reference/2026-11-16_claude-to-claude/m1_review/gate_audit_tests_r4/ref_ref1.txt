@@ -1,0 +1,142 @@
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:32:1
+   |
+32 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+error[E0432]: unresolved import `coagent_audit::domain::nested_message`
+  --> crates/coagent-audit/tests/ref1_attacks.rs:11:35
+   |
+11 | use coagent_audit::domain::{self, nested_message, AuditDomain};
+   |                                   ^^^^^^^^^^^^^^ no `nested_message` in `domain`
+
+error[E0603]: function `sign` is private
+  --> crates/coagent-audit/tests/ref1_attacks.rs:40:27
+   |
+40 |         let sig = domain::sign(&a, d, &msg);
+   |                           ^^^^ private function
+   |
+note: the function `sign` is defined here
+  --> crates/coagent-audit/src/domain.rs:85:1
+   |
+85 | pub(crate) fn sign(id: &DeviceIdentity, domain: AuditDomain, msg: &[u8]) -> Signature64 {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `verify` is private
+   --> crates/coagent-audit/tests/ref1_attacks.rs:120:25
+    |
+120 |         assert!(domain::verify(d, *k, msg, sig).is_ok(), "{k:?} own domain");
+    |                         ^^^^^^ private function
+    |
+note: the function `verify` is defined here
+   --> crates/coagent-audit/src/domain.rs:90:1
+    |
+ 90 | / pub(crate) fn verify(
+ 91 | |     dev: &VerifiedDevice,
+ 92 | |     domain: AuditDomain,
+ 93 | |     msg: &[u8],
+ 94 | |     sig: &Signature64,
+ 95 | | ) -> Result<(), SigInvalid> {
+    | |___________________________^
+
+error[E0603]: function `verify` is private
+   --> crates/coagent-audit/tests/ref1_attacks.rs:124:29
+    |
+124 |                     domain::verify(d, other, msg, sig).is_err(),
+    |                             ^^^^^^ private function
+    |
+note: the function `verify` is defined here
+   --> crates/coagent-audit/src/domain.rs:90:1
+    |
+ 90 | / pub(crate) fn verify(
+ 91 | |     dev: &VerifiedDevice,
+ 92 | |     domain: AuditDomain,
+ 93 | |     msg: &[u8],
+ 94 | |     sig: &Signature64,
+ 95 | | ) -> Result<(), SigInvalid> {
+    | |___________________________^
+
+error[E0603]: function `verify` is private
+   --> crates/coagent-audit/tests/ref1_attacks.rs:140:25
+    |
+140 |         assert!(domain::verify(&dev, k, &rb, &r.sig).is_err());
+    |                         ^^^^^^ private function
+    |
+note: the function `verify` is defined here
+   --> crates/coagent-audit/src/domain.rs:90:1
+    |
+ 90 | / pub(crate) fn verify(
+ 91 | |     dev: &VerifiedDevice,
+ 92 | |     domain: AuditDomain,
+ 93 | |     msg: &[u8],
+ 94 | |     sig: &Signature64,
+ 95 | | ) -> Result<(), SigInvalid> {
+    | |___________________________^
+
+error[E0603]: function `sign` is private
+   --> crates/coagent-audit/tests/ref1_attacks.rs:373:33
+    |
+373 |     forged.header.sig = domain::sign(
+    |                                 ^^^^ private function
+    |
+note: the function `sign` is defined here
+   --> crates/coagent-audit/src/domain.rs:85:1
+    |
+ 85 | pub(crate) fn sign(id: &DeviceIdentity, domain: AuditDomain, msg: &[u8]) -> Signature64 {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `sign` is private
+   --> crates/coagent-audit/tests/ref1_attacks.rs:399:23
+    |
+399 |     let sig = domain::sign(&w.ids[0], AuditDomain::Head, &canonical::encode(&body).unwrap());
+    |                       ^^^^ private function
+    |
+note: the function `sign` is defined here
+   --> crates/coagent-audit/src/domain.rs:85:1
+    |
+ 85 | pub(crate) fn sign(id: &DeviceIdentity, domain: AuditDomain, msg: &[u8]) -> Signature64 {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `sign` is private
+   --> crates/coagent-audit/tests/ref1_attacks.rs:444:23
+    |
+444 |     let sig = domain::sign(&w.ids[0], AuditDomain::Header, &canonical::encode(&body).unwrap());
+    |                       ^^^^ private function
+    |
+note: the function `sign` is defined here
+   --> crates/coagent-audit/src/domain.rs:85:1
+    |
+ 85 | pub(crate) fn sign(id: &DeviceIdentity, domain: AuditDomain, msg: &[u8]) -> Signature64 {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `sign` is private
+   --> crates/coagent-audit/tests/ref1_attacks.rs:499:27
+    |
+499 |         let sig = domain::sign(&w.ids[0], AuditDomain::Head, &canonical::encode(&body).unwrap());
+    |                           ^^^^ private function
+    |
+note: the function `sign` is defined here
+   --> crates/coagent-audit/src/domain.rs:85:1
+    |
+ 85 | pub(crate) fn sign(id: &DeviceIdentity, domain: AuditDomain, msg: &[u8]) -> Signature64 {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `sign` is private
+   --> crates/coagent-audit/tests/ref1_attacks.rs:652:27
+    |
+652 |         let sig = domain::sign(&w.ids[0], AuditDomain::Head, &canonical::encode(&body).unwrap());
+    |                           ^^^^ private function
+    |
+note: the function `sign` is defined here
+   --> crates/coagent-audit/src/domain.rs:85:1
+    |
+ 85 | pub(crate) fn sign(id: &DeviceIdentity, domain: AuditDomain, msg: &[u8]) -> Signature64 {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0432, E0603.
+For more information about an error, try `rustc --explain E0432`.
+error: could not compile `coagent-audit` (test "ref1") due to 10 previous errors
+rc=101
