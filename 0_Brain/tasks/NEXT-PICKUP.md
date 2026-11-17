@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 16:1x 17 Nov, the 14:52 rotation successor - READ FIRST; supersedes every block below where they differ
+- **KINTSUGI k34 COMPLETE (D 71st STATUS B 05:09Z):** develop fab4edcdcd07 for transfer c848dab07df5 + auth 04a08563981f; watch clean; KS-535 0; rollback pre-20261117k34 (idfp 02c59f9ba39e3da4). Receipt posted to Kam bf-e4110e97d348. D 71st wrapping: SCORE + pane_close owed on its wrap mail.
+- **DEMO delta POSTED to Kam (same post; grant line 11 requires this BEFORE any demo swap):** eb27110fc6e4 -> fab4edcdcd07: 18 squashes, 93 files, 0 .sql, 0 infra; map REBUILD 29 of 33 (most shared-only keyRevokePolicy.ts; own-code: analytics, api-gateway, auth, demo-service, mcp-server, migrations, originate, security, staking, transfer, verifier-frontend). Measurement: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-17_seatD-71st/evidence/demo_next_measure.txt. **Plan told to Kam: run the demo round FRIDAY after the account switch unless he says sooner.**
+- **S 90th** (%297, Sonnet board): ADDENDUM 1 sent (Group P licensed with the k34 facts). NEXT: its plan QUESTION -> ANSWER (rule T1-T7 texts, ROW 2 closes incl. KS-657) -> wrap -> score -> close.
+- **PR 2252 merge** (Redis fix, gate 378 GWN): still OWED; launch only if the gauge allows after S 90th (96% at 16:1x; Kam's 15:58 gives the last 4%, Wednesday keeps 1).
+
 ## 🔴 UPDATE 15:5x 17 Nov, the 14:52 rotation successor - READ FIRST; supersedes every block below where they differ
 - **S 89th DONE (0.96, pane CLOSED):** 9 Done+archived (KS-2239, 2145, 1473, 624, 2125, 2138, 2150, 2151, 1163), 3 archive-only (KS-724, 741, 1454). **KS-771 NOT archived** (stream parent, 13 of 23 children open; tool guard refused): Wednesday's ruling: a parent WAITS until its children are Done; never work around the guard. KS-2122 held (Kam has not ruled on notifications). Record: 5_Project_History/2026-11-17_seatS-89th/HANDOVER.md (FOR SEAT S 90th).
 - **GROUP P OWED after D 71st's k34 completes:** KS-2083 (PR 2075), KS-1954 (PR 2170), KS-1797 (PR 2088, partition list) -> Rule A with the NEW auth/transfer image ids from D 71st's record. Next board seat (S 90th) or fold into a later board row; cost-check first.
