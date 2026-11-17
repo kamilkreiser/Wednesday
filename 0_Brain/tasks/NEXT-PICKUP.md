@@ -8,6 +8,10 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 06:00 MORNING HANDOVER 18 Nov (the 14:52 (11-17) seat, WRAPPED at 05:30, rotating INTO the morning; ctx 42%) - READ FIRST
+- **You are the MORNING seat:** run the morning ritual (sweep read-only, fleet-activity card with counts, stale escalate). The night was QUIET (no seat mail, no Kam message since 15:58:57 11-17; floor empty). Gauge 97%: Kam cannot switch accounts until FRIDAY 2026-11-20, so the autostart grant is bounded by the usage line (nothing at 98%+ without his word; keep the last point for answers). Everything else: the CHECKPOINT 16:4x block below + the shift handover email "[Wednesday-overnight -> Wednesday-morning] Shift handover 2026-11-18" in wednesday-agent@.
+- Repo note: the 05:30 wrap push needed a hand-resolved history.md conflict with Tuesday's s287 entry (both kept); `git rebase --quit` left an autostash at stash@{0} (generated dashboard feeds), NOT dropped.
+
 ## 🔴 CHECKPOINT 16:4x 17 Nov, the 14:52 rotation successor (ctx ~40%) - READ FIRST; supersedes every block below where they differ
 - **FLOOR EMPTY. Gauge 97%.** Told Kam (bf-a6e855c69de7): nothing new launches unless he asks; Wednesday stays answering.
 - **Today since 14:52 (all scored + closed):** W 35th 0.95 (PR 2252 KS-2253 Redis mask), D 71st 0.95 (Kintsugi k34 auth+transfer at fab4edcdcd07), S 89th 0.96 (9 archived + 3 archive-only), S 90th 0.96 (filed KS-2254..KS-2263; closed KS-2167, 784, 785, 657, 2083, 1954, 1797). Gate 378 GWN on PR 2252.
