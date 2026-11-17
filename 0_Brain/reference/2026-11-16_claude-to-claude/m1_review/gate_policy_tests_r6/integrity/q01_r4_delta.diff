@@ -1,0 +1,137 @@
+diff --git a/crates/coagent-policy/tests/q01_gate_attacks.rs b/crates/coagent-policy/tests/q01_gate_attacks.rs
+index 30ead9d..bee18be 100644
+--- a/crates/coagent-policy/tests/q01_gate_attacks.rs
++++ b/crates/coagent-policy/tests/q01_gate_attacks.rs
+@@ -373,41 +373,58 @@ fn z_timing() {
+     let st = fx.state_with(patterns::default_exclusions());
+     let mut rep = vec![];
+     for n in [1_000usize, 4_000, 16_000] {
+-        let t = std::time::Instant::now();
+-        let _ = decide(
+-            &fx.bash(&format!("cat {}", "a/".repeat(n))),
+-            &st,
+-            Surface::Console,
+-            NOW,
+-        );
+-        rep.push(format!("cat a/ x{n}: {:?}", t.elapsed()));
++        // RULING (Friday, 2026-11-18, addendum 7): smallest of five runs; was `let t = std::time::Instant::now();`
++        // and `let _ = decide(` ... `);` measured once
++        let t = smallest_of_five(|| {
++            let _ = decide(
++                &fx.bash(&format!("cat {}", "a/".repeat(n))),
++                &st,
++                Surface::Console,
++                NOW,
++            );
++        });
++        // RULING (Friday, 2026-11-18, addendum 7): smallest of five runs; was `rep.push(format!("cat a/ x{n}: {:?}", t.elapsed()));`
++        rep.push(format!("cat a/ x{n}: {:?}", t));
+         eprintln!("{}", rep.last().unwrap());
+-        let t = std::time::Instant::now();
+-        let _ = decide(
+-            &fx.bash(&format!("rm {}", "x/*/".repeat(n / 4))),
+-            &st,
+-            Surface::Console,
+-            NOW,
+-        );
+-        rep.push(format!("rm x/*/ x{}: {:?}", n / 4, t.elapsed()));
++        // RULING (Friday, 2026-11-18, addendum 7): smallest of five runs; was `let t = std::time::Instant::now();`
++        // and `let _ = decide(` ... `);` measured once
++        let t = smallest_of_five(|| {
++            let _ = decide(
++                &fx.bash(&format!("rm {}", "x/*/".repeat(n / 4))),
++                &st,
++                Surface::Console,
++                NOW,
++            );
++        });
++        // RULING (Friday, 2026-11-18, addendum 7): smallest of five runs; was `rep.push(format!("rm x/*/ x{}: {:?}", n / 4, t.elapsed()));`
++        rep.push(format!("rm x/*/ x{}: {:?}", n / 4, t));
+         eprintln!("{}", rep.last().unwrap());
+-        let t = std::time::Instant::now();
+-        let _ = decide(
+-            &fx.bash(&format!("cat {}", "a ".repeat(n))),
+-            &st,
+-            Surface::Console,
+-            NOW,
+-        );
+-        rep.push(format!("cat with {n} operands: {:?}", t.elapsed()));
++        // RULING (Friday, 2026-11-18, addendum 7): smallest of five runs; was `let t = std::time::Instant::now();`
++        // and `let _ = decide(` ... `);` measured once
++        let t = smallest_of_five(|| {
++            let _ = decide(
++                &fx.bash(&format!("cat {}", "a ".repeat(n))),
++                &st,
++                Surface::Console,
++                NOW,
++            );
++        });
++        // RULING (Friday, 2026-11-18, addendum 7): smallest of five runs; was `rep.push(format!("cat with {n} operands: {:?}", t.elapsed()));`
++        rep.push(format!("cat with {n} operands: {:?}", t));
+         eprintln!("{}", rep.last().unwrap());
+     }
+-    let t = std::time::Instant::now();
+-    let _ = HookInput::parse(&"[".repeat(100_000));
+-    rep.push(format!("nested [ x100000 parse: {:?}", t.elapsed()));
++    // RULING (Friday, 2026-11-18, addendum 7): smallest of five runs; was `let t = std::time::Instant::now();`
++    // and `let _ = HookInput::parse(&"[".repeat(100_000));` measured once
++    let t = smallest_of_five(|| {
++        let _ = HookInput::parse(&"[".repeat(100_000));
++    });
++    // RULING (Friday, 2026-11-18, addendum 7): smallest of five runs; was `rep.push(format!("nested [ x100000 parse: {:?}", t.elapsed()));`
++    rep.push(format!("nested [ x100000 parse: {:?}", t));
+     // RULING (Friday, 2026-11-17): a bounded assertion, not a report. Bound: 50 ms per decision
+     // (docs/POLICY.md §8). Each case here is ONE run in the unoptimised debug test build; the documented
+     // debug-build worst cases at the bounds are 13-36 ms (median of three), so 50 ms leaves the margin.
+     // The 16 000-component input (a stack overflow before addendum 1) stays in the loop above.
++    // RULING (Friday, 2026-11-18, addendum 7): each case above is now the SMALLEST of five runs (`smallest_of_five`).
+     eprintln!("TIMING REPORT\n{}", rep.join("\n"));
+     let bound = std::time::Duration::from_millis(50);
+     for line in &rep {
+@@ -429,3 +446,18 @@ fn z_timing() {
+         );
+     }
+ }
++
++// RULING (Friday, 2026-11-18, addendum 7): new helper. `decide` takes the time as a parameter and reads no clock, so
++// an injected clock cannot measure it; the wall clock is noisy on a busy machine (the round-5 gate saw 52.07 ms once
++// in 22 runs under load). Each case is therefore run FIVE times and the SMALLEST time is reported and asserted. A
++// real regression is extra work done on every run, so it makes all five runs slow and still fails the bound.
++fn smallest_of_five(mut f: impl FnMut()) -> std::time::Duration {
++    (0..5)
++        .map(|_| {
++            let t = std::time::Instant::now();
++            f();
++            t.elapsed()
++        })
++        .min()
++        .unwrap()
++}
+diff --git a/crates/coagent-policy/tests/r4_gate_attacks.rs b/crates/coagent-policy/tests/r4_gate_attacks.rs
+index 9405000..9ccfb76 100644
+--- a/crates/coagent-policy/tests/r4_gate_attacks.rs
++++ b/crates/coagent-policy/tests/r4_gate_attacks.rs
+@@ -251,15 +251,19 @@ const PS: &[&str] = &[
+     "Get-ChildItem Cert:\\CurrentUser\\My",
+     "Get-ChildItem Env:",
+     "Get-Item HKCU:\\Software\\Microsoft",
+-    "cmd /c type C:\\Users\\<OLD-USER-FOLDER>\\.ssh\\id_rsa",
++    // RULING (Friday, 2026-11-18, addendum 7): user folder name replaced
++    "cmd /c type C:\\Users\\someone\\.ssh\\id_rsa",
+     "cmd /c type id_rsa",
+     "iex Get-Content",
+     "Invoke-Expression x",
+     "Start-Process sudo",
+     ".\\script.ps1",
+-    "Set-Location C:\\Users\\<OLD-USER-FOLDER>\\.claude",
+-    "Set-Content -Path C:\\Users\\<OLD-USER-FOLDER>\\.claude.\\settings.json -Value x",
+-    "Copy-Item payload.json C:\\Users\\<OLD-USER-FOLDER>\\.claude\\settings.json",
++    // RULING (Friday, 2026-11-18, addendum 7): user folder name replaced
++    "Set-Location C:\\Users\\someone\\.claude",
++    // RULING (Friday, 2026-11-18, addendum 7): user folder name replaced
++    "Set-Content -Path C:\\Users\\someone\\.claude.\\settings.json -Value x",
++    // RULING (Friday, 2026-11-18, addendum 7): user folder name replaced
++    "Copy-Item payload.json C:\\Users\\someone\\.claude\\settings.json",
+     "cd .claude",
+     "sudo -n true",
+ ];
