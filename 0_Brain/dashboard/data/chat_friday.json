@@ -5458,5 +5458,26 @@
   "project": "Friday",
   "ts": "2026-11-17T20:19:10.533610+11:00",
   "text": "General / CoAgent. Got all three messages, and your yes in the terminal: the audit piece's one check will run when its seat is ready.\n\nNothing needs your hands right now. Three seats are building, the policy check is re-running, and the daemon recovery design is being drafted.\n\nOne question. I read keep working through the items as: the items already in progress. So the deputy piece and other new pieces still wait for your word. Say go on new pieces if you want those started too, after the roster piece merges."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-11-17T20:26:07.622131+11:00",
+  "text": "General, next project question. Got it. Short answer: no, a model cannot work on truly encrypted text. Ciphertext looks like random noise, the model has no key, and what comes back would be noise too. This is from my own knowledge, not fresh research.\n\nWhat does work, from most practical to least.\n\nOne. Tokenise before sending. Software on the user's side swaps names, account numbers and other identifiers for placeholders, sends the text, and swaps the real values back into the answer. The model works well because the meaning is intact. Two limits: the surrounding context can still give away who it is about, and anything that needs the real value, like sums on masked figures, breaks.\n\nTwo. Confidential computing. The data stays encrypted on the wire and in memory and is only opened inside a sealed hardware enclave where the model runs. The model sees plain text, but the cloud operator does not. You are trusting the chip maker and the proof the enclave gives.\n\nThree. A local model. Nothing leaves the machine. Smaller model, weaker answers.\n\nFour. Computing directly on encrypted data, called homomorphic encryption. It is real and it does give correct results, not random ones, but for a large language model it is thousands of times too slow today. Research, not product.\n\nMy recommendation for a product: tokenise on the user's device, plus a no retention agreement with the model provider, and offer the enclave route for customers who need the strongest claim. Be careful with the word encrypted in marketing, because with tokenising the model still reads the non-sensitive text in the clear.\n\nIf you want, I can have this researched properly with sources and written up as a short paper. I will not start that unless you say so."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-11-17T20:28:36.531159+11:00",
+  "text": "General, hypothetical. Got it. Short answer: it would work for names and identifiers, and it would not hide the content. Reasoned from how the tool works; I have not checked the two points I flag below against the documentation.\n\nHow it would work. A small program on your machine sits between Claude Code and the provider. On the way out it swaps every listed value for a placeholder: client names, people, email addresses, domains, tenant numbers, ticket prefixes. On the way back it swaps the real values in again before Claude Code sees the reply. Because commands run on your machine, after the swap back, the agent still opens the real files and runs the real commands. The results are masked again before they go up. The same value always gets the same placeholder, so the model can still follow who is who.\n\nWhat it would hide. Which clients and people the work is for.\n\nWhat it would not hide. The code, the documents and the reasoning themselves. Those have to stay readable or the model cannot work, and for us that is most of what is sent. It also only catches what is on the list or matches a pattern, so a name inside a longer word, a new name, a screenshot or free text slips through.\n\nWhat it would cost. Some quality, where a name carries meaning. Anything the provider runs on its side, like web search, would get placeholders and fail. Replies arrive in pieces, so the swap back needs care or a placeholder is split in two.\n\nTwo things I have not verified. One, whether Claude Code on a subscription login will talk through a local program like that at all; it is built for it with paid API keys. Two, whether the subscription terms allow altering the traffic.\n\nMy view. For our operating model it buys little: it protects the label, not the contents. If the aim is that the provider never learns which client is which, it does that. If the aim is that the provider cannot read the work, it does not, and nothing on the current subscription does.\n\nI can check the two unverified points if you want them settled. Not started unless you say so."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-11-17T20:30:22.455493+11:00",
+  "text": "General. Got it, and noted as the next project after Claude to Claude: a redesign of the operating system around a user identity key with tokenised infrastructure. I have written it down so it survives a restart. I start nothing on it until you bring the details. Looking forward to it."
  }
 ]
