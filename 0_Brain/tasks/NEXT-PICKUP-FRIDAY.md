@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
+## 🔴🔴 NEWEST — WRAPPED Wed 2026-11-18 at 2026-11-18 12:01 on Kam's terminal word ("please notify wednesday and tuesday and wrap up when its safe"). No seat, no check, no agent and no watcher of this seat is running.
+
+- This session did the lesson-digest work only (block below). **CoAgent was NOT touched:** the three parked pieces are exactly as the 10:00 wrap block further down describes; Kam has NOT answered "may I carry on now?" (panel bf-bffa61a7529c3). RE-ASK before relaunching anything.
+- Disk, owed to Kam: finish the coding-folder measurement. Complete top level: `0_Brain/reference/2026-11-18_disk_du_top.txt`. Partial second level: `0_Brain/reference/2026-11-18_disk_du_coding_partial.txt` (largest measured so far: the Datasec MPS calculator folder at about 334 GB; several client folders, including Claude to Claude, were NOT reached). `du` counts shared blocks more than once on this drive: a listed size is not what a removal frees. Remove nothing.
+- Sister seats were told the work is at rest (mails of 2026-11-18). Read their replies at boot in friday-laptop-agent@.
+
 ## 🔴 RULES CARD TRIAL (Kam, 2026-11-18: "please implement the 5 reccomendations"; this block is newer than everything below about the boot digest)
 
 - **This seat now boots on `0_Brain/learnings/_rules_card_friday.md`, read WHOLE, in place of the whole by-tier digest** (the launcher regenerates it and the boot prompt says so). It is a FORWARD TRIAL: the replay test could not show what the full digest prevented. At each boot: read the card whole, then report the statusline after the load, and record in the note any moment where a rule was needed and the card did not carry it (that is the trial's data). Still read `_ledger_friday.md` whole: 11 of 105 replayed mistakes had their stopping rule only in a ledger row.
