@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
+## 🔴 RULES CARD TRIAL (Kam, 2026-11-18: "please implement the 5 reccomendations"; this block is newer than everything below about the boot digest)
+
+- **This seat now boots on `0_Brain/learnings/_rules_card_friday.md`, read WHOLE, in place of the whole by-tier digest** (the launcher regenerates it and the boot prompt says so). It is a FORWARD TRIAL: the replay test could not show what the full digest prevented. At each boot: read the card whole, then report the statusline after the load, and record in the note any moment where a rule was needed and the card did not carry it (that is the trial's data). Still read `_ledger_friday.md` whole: 11 of 105 replayed mistakes had their stopping rule only in a ledger row.
+- When a rule fires: open its family file in `0_Brain/learnings/families/` or the lesson. The family files were written BEFORE the last two rounds of row fixes and the extra rule lines: owed, regenerate or re-check them against the index.
+- A lesson written or edited gets its row in `_rules_index.tsv` in the same action (CLAUDE.md step 3b-i); `python3 2_Project_Files/tools/rules_card.py --check --seat friday`.
+- Evidence and reports: `0_Brain/reference/2026-11-18_rules-card/` (review_report.md, replay_report.md, accuracy/, multi/). Commit on origin: 8591bb48ec.
+- Sister seats were mailed the steps (to both, 2026-11-18); the Tuesday seat had asked for them. Owed: read their replies; correct the README's seat-to-machine line once they say which is true; the contradictions between live lessons listed in the reports (about 20 pairs) are NOT yet carded except the usage one.
+- OPEN CARD: `wed-friday-usage-stop-90-or-guide-1118` (rec a; default: Friday keeps the 90 percent stop).
+- Two readings given to Kam and not yet confirmed by him: the hard rules of the project rules file stay hard at any count; folded lesson files stay on disk.
+- Disk: top-level sizes went to Kam on the panel (the coding folder measures about 1,940 GB, more than the drive: shared blocks are counted more than once; the WEDNESDAY tree here is 140 GB). A second-level measurement of the coding folder was started in this session; if no result is in the note, re-run it.
+
 ## 🔴🔴 READ FIRST — WRAPPED Tuesday 2026-11-17 mid-morning on Kam's word ("I will need to leave soon so please wrap up as soon as you can"). THE PLAN IS `0_Brain/reference/2026-11-16_claude-to-claude/08_plan-of-attack-overnight-2026-11-17.md`: read it WHOLE; it supersedes the lists below wherever they differ.
 
 - 🔴🔴 **BOOT #5 (Tue 2026-11-17 evening, after the battery death) — NEWEST, supersedes the bullets below where they differ; stamps and detail in the note's two "Boot #5" blocks.**
@@ -111,6 +122,6 @@ Project: `/Volumes/Laptop-DEV/!CODING/Claude to Claude/coagent/` (repo `2_Projec
 - Hooks that will refuse you: any `cd`; git write verbs outside this tree; a note in the same turn as another tool call; a note whose body has a receipt verb (even the tool's own word followed by a colon) without `--receipt`; reading two inboxes in a loop; `--override-prior-rulings` before a plain add was refused.
 - Never type a clock: `date` or the note tool's own stamp (boot #4 typed "07:5x" three times in a reference file and had to remove them).
 - Sourcing `_live_board.sh` works only under `bash -c`, not from zsh.
-- By-tier boot digest is about 288K tokens: it cannot be read whole in one turn. Read lines 1-587 and every `## ` headline; open a lesson when its rule fires. Statusline after the load: read it from the pane.
+- The by-tier boot digest (about 290K tokens) is no longer the boot read on this seat: the rules card is (block at the top). The digest stays the reference, opened by section.
 - Never run `tools/panel_sync.sh` bare. Push own commits with `git push` after `safe_pull.sh`.
 - The prior-ruling gate refuses on generic words from unrelated cards; run the plain add, read the matches, then override with the reason in the BLUF.
