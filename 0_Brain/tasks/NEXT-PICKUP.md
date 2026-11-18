@@ -8,6 +8,10 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 11:3x 18 Nov, the 06:0x morning seat - READ FIRST; supersedes every block below where they differ
+- **Kam ruled wed-morning-plan-1118 = a (08:37:21): HOLD EVERYTHING TO FRIDAY.** Floor empty; gauge 97%.
+- **NEW FRIDAY ITEM (Kam 11:29:07 + 11:29:19 "this can wait until Friday"): review FRIDAY's boot optimisation + synthesis steps** (Friday found much of its boot unread due to size and changed it; Friday will mail the steps). Consider, adopt what works, improve; **use the latest Fable** (claude-fable-5-2 per models_latest.json 08:55, re-read before launch). Home: **WED-164** (comment a1dd9711, Kam's words verbatim). No advisory from Friday in wednesday-agent@ at 11:3x. Friday queue order: this sits AFTER the Secuura items (2252 merge, k35, Redis rotation, demo, B 204th/K 52nd) unless Kam says otherwise.
+
 ## 🔴 06:00 MORNING HANDOVER 18 Nov (the 14:52 (11-17) seat, WRAPPED at 05:30, rotating INTO the morning; ctx 42%) - READ FIRST
 - **You are the MORNING seat:** run the morning ritual (sweep read-only, fleet-activity card with counts, stale escalate). The night was QUIET (no seat mail, no Kam message since 15:58:57 11-17; floor empty). Gauge 97%: Kam cannot switch accounts until FRIDAY 2026-11-20, so the autostart grant is bounded by the usage line (nothing at 98%+ without his word; keep the last point for answers). Everything else: the CHECKPOINT 16:4x block below + the shift handover email "[Wednesday-overnight -> Wednesday-morning] Shift handover 2026-11-18" in wednesday-agent@.
 - Repo note: the 05:30 wrap push needed a hand-resolved history.md conflict with Tuesday's s287 entry (both kept); `git rebase --quit` left an autostash at stash@{0} (generated dashboard feeds), NOT dropped.
