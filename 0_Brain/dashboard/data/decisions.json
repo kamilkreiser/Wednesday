@@ -76659,5 +76659,30 @@
    "CARD hpsmpoc-picomatch-dev-audit-exception-1118",
    "CARD mps-413-web-audit-instrument-1118"
   ]
+ },
+ {
+  "id": "general-c2c-daemon-r4-check-failed-1118",
+  "client_project": "General/Claude to Claude",
+  "title": "Claude to Claude: the daemon's one check found a way a brand-new session can stall for good. Fix it, then one short check?",
+  "bluf": "The daemon's one independent check after the redesign returned NO GO. Everything the redesign was built for held: all three earlier stall faults are closed, 1,002 tests pass, all 113 planted faults are caught, and the flaky test was only a test problem. But it found one new stall: right after two people pair, if the relay loses a single 'the other side has joined' message, the session never starts and both sides show not connected until someone restarts. It stalled in 6 of 8 tries, every time once a lucky timing race was taken out. The cause is narrow: in that first moment no recovery timer is running. A test gap let it through, and the check lists six smaller items too (a person's name left in two code comments, twelve untested timer values, docs wrong for that state). Nothing is merged; the daemon seat waits.",
+  "default_action": "Nothing is built or merged on the daemon until you answer. The policy and audit merges continue.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix it, then one short check",
+    "detail": "A small round: start the recovery timer in a new session, close the test gap and the smaller items, then one short independent check"
+   },
+   {
+    "key": "b",
+    "label": "Hold the daemon for now",
+    "detail": "Leave the branch as it is; the deputy lane does not start (it waits on the daemon merge)"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T21:45:05.167691+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-18T21:48:38.332051+11:00",
+  "seat": "friday"
  }
 ]
