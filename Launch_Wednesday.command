@@ -264,6 +264,23 @@ else
 fi
 rm -f /tmp/wednesday_boot_digest.$$
 
+# --- Rules card (Kam 2026-11-18, the lesson-digest synthesis): a seat that HAS a card
+# (0_Brain/learnings/_rules_card_<seat>.md) gets it regenerated here from the rules index
+# and the ledgers, and its boot prompt reads the card instead of the whole by-tier digest.
+# A seat without a card file is untouched: adopting the card is that seat's own step
+# (python3 2_Project_Files/tools/rules_card.py --seat <seat>, then commit the file).
+RULES_CARD="$PROJECT_DIR/0_Brain/learnings/_rules_card_${AGENT}.md"
+RULES_CARD_NOTE=""
+if [ -f "$RULES_CARD" ]; then
+  if python3 "$PROJECT_DIR/2_Project_Files/tools/rules_card.py" --seat "$AGENT" >/tmp/wednesday_rules_card.$$ 2>&1; then
+    tail -1 /tmp/wednesday_rules_card.$$
+    RULES_CARD_NOTE="RULES CARD FIRST (Kam 2026-11-18, a trial on this seat): read ${RULES_CARD} WHOLE. It holds one line per lesson rule with its reinforcement count, the most reinforced first; the lines are weighted guidance and the hard rules stay in the project rules file. It REPLACES the whole read of the by-tier digest described next: do NOT read that digest at boot. When a rule fires, open its family file in 0_Brain/learnings/families/ or the lesson itself. Everything else in this step still applies: your own seat ledger WHOLE, the other ledgers as row headlines only, and the statusline reading after the load. The digest text that follows is kept for a seat without a card: "
+  else
+    echo "⚠ rules_card.py FAILED — this boot falls back to the by-tier digest:"; cat /tmp/wednesday_rules_card.$$
+  fi
+  rm -f /tmp/wednesday_rules_card.$$
+fi
+
 # ── Arm panel_sync (2026-09-13) — the loop that keeps Kam's ONE chat page current ──
 # `panel_sync.sh loop` (60 s pull/rebuild/push, tools/panel_sync.sh) ran outside tmux and
 # outside every launcher: it died with the 09-12 16:27 reboot and nothing noticed until a
@@ -656,7 +673,7 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
 1. Read ./CLAUDE.md (project rules), then ${BRAIN_DIR}/CLAUDE.md (brain routing).
 2. Become Wednesday: read ${BRAIN_DIR}/identity/persona.md and
    identity/voice-protocol.md, then ${BRAIN_DIR}/people/kam.md.
-3. Read ${BRAIN_DIR}/learnings/_boot_digest_by_tier.md WHOLE (WED-145 Phase 0, Kam 2026-09-05 20:28: the by-tier digest — W whole, M rules-only, P cases as one-line handles; if it is missing, read _boot_digest.md instead) — it was GENERATED at this
+3. ${RULES_CARD_NOTE}Read ${BRAIN_DIR}/learnings/_boot_digest_by_tier.md WHOLE (WED-145 Phase 0, Kam 2026-09-05 20:28: the by-tier digest — W whole, M rules-only, P cases as one-line handles; if it is missing, read _boot_digest.md instead) — it was GENERATED at this
    launch from every lesson file (headline = the retrieval handle, frontmatter,
    the operative paragraph, the section index, and every rules section verbatim;
    6 short files included whole) — then YOUR OWN SEAT'S LEDGER,

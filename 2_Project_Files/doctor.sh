@@ -663,6 +663,23 @@ else
   warn "boot_digest.py missing" "the seat will read every lesson file (34% boot) — restore 2_Project_Files/tools/boot_digest.py"
 fi
 
+# --- Rules index + card current (Kam 2026-11-18): every lesson file has a row in
+# 0_Brain/learnings/_rules_index.tsv, and a seat that boots on a rules card has a
+# current one. A lesson without a row never reaches the card, so this is the backstop
+# for "a new lesson gets its row in the same action".
+RC="$PROJECT_DIR/2_Project_Files/tools/rules_card.py"
+if [ -f "$RC" ] && [ -f "$PROJECT_DIR/0_Brain/learnings/_rules_index.tsv" ]; then
+  RC_SEAT="${WED_AGENT:-}"
+  if [ -n "$RC_SEAT" ] && [ -f "$PROJECT_DIR/0_Brain/learnings/_rules_card_${RC_SEAT}.md" ]; then
+    RC_OUT="$(python3 "$RC" --check --seat "$RC_SEAT" 2>&1)"; RC_RC=$?
+  else
+    RC_OUT="$(python3 "$RC" --check 2>&1)"; RC_RC=$?
+  fi
+  if [ "$RC_RC" -eq 0 ]; then ok "$(printf '%s' "$RC_OUT" | tail -1 | sed 's/^OK: //')"
+  else warn "rules index or card has faults" "$(printf '%s' "$RC_OUT" | head -2 | tr '\n' ' ') — add the missing row to 0_Brain/learnings/_rules_index.tsv, then python3 2_Project_Files/tools/rules_card.py --seat <seat>"
+  fi
+fi
+
 # --- Weekly consolidation not lapsed (2026-10-19 consolidation catch-up): the ritual
 # (0_Brain/skills/weekly-consolidation.md) lapsed FOUR Sundays (09-27..10-18) because
 # nothing checked it; a ritual nothing triggers is a habit (learnings/2026-08-10_a-ritual-

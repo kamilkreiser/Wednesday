@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-18 11:12 from 281 lesson files (1,191,295 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-18 11:52 from 282 lesson files (1,194,186 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8114,4 +8114,20 @@ sections (open the file for these): How to apply
 5. **Whether to turn idle compaction off for build seats is a settings change and the owner's choice.** Friday has not changed any seat's settings. It is on the list for Kam.
 
 **Family:** [[2026-08-03_context-discipline-close-before-full]] (never work on summaries of summaries; here the summary was imposed while the seat slept) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the brief sentence is the in-path form; the coordinator's line is the backstop) · [[2026-08-06_artifact-presence-is-not-execution]] (an idle alert says a turn ended, not what state the seat is in).
+
+
+## A lesson is weighted guidance, not an absolute law: its weight is how often it has been reinforced, and repeats are kept as a count, not as more text
+`2026-11-18_lessons-are-weighted-by-reinforcement-never-absolute.md` · principle · 2026-11-18 · status: live
+
+**The operative case.** I am about to write a lesson, a rule line on the rules card, a family file, or a ledger row; or I am about to apply a lesson to a situation. **Ask how often this has actually happened, and write and apply it with that weight.**
+
+**How to apply:**
+1. **Once = a note.** A single occurrence is recorded and worth knowing; it is not written as "never" or "always" unless the lesson itself is about a hard boundary.
+2. **Twice = the start of a pattern.** It gets attention and a diagnosis (this is the ledger's w=2).
+3. **Many times = pay the most attention.** High counts come first on the card and are the ones a seat reads before anything else.
+4. **Repeats are stored as reinforcement, not as more entries.** A second write-up of the same rule is folded into the first line and adds to its count; the extra text does not have to be read, carried in the card, or kept in what a seat loads. (Friday's reading, offered to Kam for correction: the folded lesson files stay on disk as the record; they are not deleted.)
+5. **The hard rules are not lessons.** Client separation, secrets, production, money, messages to people outside the team and irreversible actions are rules of the project rules file and stay hard at any count. (Friday's reading, same offer.)
+6. **When applying a lesson, weigh it against the case in hand.** A low-count lesson that does not fit the situation is not obeyed mechanically; say what was weighed.
+
+**Mechanism:** `2_Project_Files/tools/rules_card.py` computes each rule's count from the ledgers at every generation and orders the card by it; a superseded row passes its count to the line it was folded into.
 

@@ -136,6 +136,13 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
    doctor printed "boot digest current"). The launcher regenerates both at boot;
    doctor's `--check` now covers both — the wrap keeps origin current for a seat
    that boots elsewhere.
+3b-i. **Rules index (Kam, 2026-11-18):** a lesson written or edited this session
+   has its row in `0_Brain/learnings/_rules_index.tsv` written or corrected in the
+   same action (spec: `0_Brain/learnings/_rules_index/README.md`; a lesson that
+   repeats an existing rule is folded into that rule's line, its count carries the
+   reinforcement). Then `python3 2_Project_Files/tools/rules_card.py --check` and,
+   on a seat that boots on a card, `--seat <seat>`; commit the card. Doctor warns on
+   a lesson without a row.
 3c. **Ledger archive (Kam-ruled 2026-09-04 08:32, card `wed-ledger-boot-cost`):**
    move every `_ledger.md` row **older than ~3 days** into `_ledger_archive.md`,
    verbatim, newest-first, under a dated `## Archived …` heading naming this rule.

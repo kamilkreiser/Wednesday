@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-18 11:12 from 281 lesson files (1,191,505 B). M 42 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 229. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-18 11:52 from 282 lesson files (1,194,396 B). M 42 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 230. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -8026,4 +8026,20 @@ sections (open the file for these): How to apply · First application (same minu
 5. **Whether to turn idle compaction off for build seats is a settings change and the owner's choice.** Friday has not changed any seat's settings. It is on the list for Kam.
 
 **Family:** [[2026-08-03_context-discipline-close-before-full]] (never work on summaries of summaries; here the summary was imposed while the seat slept) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the brief sentence is the in-path form; the coordinator's line is the backstop) · [[2026-08-06_artifact-presence-is-not-execution]] (an idle alert says a turn ended, not what state the seat is in).
+
+
+## A lesson is weighted guidance, not an absolute law: its weight is how often it has been reinforced, and repeats are kept as a count, not as more text
+`2026-11-18_lessons-are-weighted-by-reinforcement-never-absolute.md` · principle · 2026-11-18 · status: live · tier: W
+
+**The operative case.** I am about to write a lesson, a rule line on the rules card, a family file, or a ledger row; or I am about to apply a lesson to a situation. **Ask how often this has actually happened, and write and apply it with that weight.**
+
+**How to apply:**
+1. **Once = a note.** A single occurrence is recorded and worth knowing; it is not written as "never" or "always" unless the lesson itself is about a hard boundary.
+2. **Twice = the start of a pattern.** It gets attention and a diagnosis (this is the ledger's w=2).
+3. **Many times = pay the most attention.** High counts come first on the card and are the ones a seat reads before anything else.
+4. **Repeats are stored as reinforcement, not as more entries.** A second write-up of the same rule is folded into the first line and adds to its count; the extra text does not have to be read, carried in the card, or kept in what a seat loads. (Friday's reading, offered to Kam for correction: the folded lesson files stay on disk as the record; they are not deleted.)
+5. **The hard rules are not lessons.** Client separation, secrets, production, money, messages to people outside the team and irreversible actions are rules of the project rules file and stay hard at any count. (Friday's reading, same offer.)
+6. **When applying a lesson, weigh it against the case in hand.** A low-count lesson that does not fit the situation is not obeyed mechanically; say what was weighed.
+
+**Mechanism:** `2_Project_Files/tools/rules_card.py` computes each rule's count from the ledgers at every generation and orders the card by it; a superseded row passes its count to the line it was folded into.
 
