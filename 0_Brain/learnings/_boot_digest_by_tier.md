@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-18 13:45 from 283 lesson files (1,198,916 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 230. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-18 13:55 from 283 lesson files (1,202,143 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 230. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -1062,7 +1062,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): The cases — moved 2026-09-20, read on demand
+sections (open the file for these): The cases — moved 2026-09-20, read on demand · 2026-11-18 — rule line added from the Tuesday seat's ledger
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1859,7 +1859,7 @@ string, a capped query, or something I wrote earlier — **that is a representat
 thing, not the thing.** Go to the source. Every time. Especially when I am in the middle
 of requiring someone else to do exactly that.
 
-sections (open the file for these): The six, in one day · Why this is a distinct lesson and not six instances of old ones · Why the existing rules did not fire, which is the part to fix · How to apply · Will it persist? Yes — and the dangerous half is not the half that showed up today · Sharpened 2026-08-15: the variable is not WHOSE claim it is · Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest · The clock-composition sub-class, consolidated 2026-08-23: GENERATE timestamps, never type them · The honest note on credit · The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances) · The 2026-09-03 evening sub-class: FOUR instances in one session, all in COORDINATION messages, all agent-caught (ledger w=73–76) · The rule promoted from this (enforceable in the sentence, not in a tool) · The PERSON sub-class, added 2026-09-03 22:5x (ledger w=77) — and it is a lesson about how THIS FILE was written · SHARPENED 2026-09-08 by the Secuura seat (s151) — a COMPRESSION is a single-point failure, and the only catchable hop is the one that compresses
+sections (open the file for these): The six, in one day · Why this is a distinct lesson and not six instances of old ones · Why the existing rules did not fire, which is the part to fix · How to apply · Will it persist? Yes — and the dangerous half is not the half that showed up today · Sharpened 2026-08-15: the variable is not WHOSE claim it is · Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest · The clock-composition sub-class, consolidated 2026-08-23: GENERATE timestamps, never type them · The honest note on credit · The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances) · The 2026-09-03 evening sub-class: FOUR instances in one session, all in COORDINATION messages, all agent-caught (ledger w=73–76) · The rule promoted from this (enforceable in the sentence, not in a tool) · The PERSON sub-class, added 2026-09-03 22:5x (ledger w=77) — and it is a lesson about how THIS FILE was written · SHARPENED 2026-09-08 by the Secuura seat (s151) — a COMPRESSION is a single-point failure, and the only catchable hop is the one that compresses · 2026-11-18 — rule line added from the Tuesday seat's ledger
 
 ## How to apply
 
@@ -3109,7 +3109,7 @@ RULED for that project since the last brief and ask, per card, WHERE the ruling 
 answer is "on Kam's panel and in a mail to a seat that has since wrapped", it lives nowhere a
 reader lands, and the next agent will find the question open and ask it again.
 
-sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads · EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes) · EXTENSION 2026-09-09 19:5x — an UNKNOWN in a brief NAMES why it is unknown and the instrument that closes it, or it is an assertion wearing a hedge's clothes · EXTENSION 2026-09-23 06:0x — A **RELEASE** MAILED TO A NAMED SEAT DIES AT THAT SEAT'S ROTATION. Caught at source, 0 harm, but only because main was measured.
+sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads · EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes) · EXTENSION 2026-09-09 19:5x — an UNKNOWN in a brief NAMES why it is unknown and the instrument that closes it, or it is an assertion wearing a hedge's clothes · EXTENSION 2026-09-23 06:0x — A **RELEASE** MAILED TO A NAMED SEAT DIES AT THAT SEAT'S ROTATION. Caught at source, 0 harm, but only because main was measured. · 2026-11-18 — rule line added from the Tuesday seat's ledger
 
 **How to apply:**
 1. **A ruled card is not closed until its RECEIPT names the artefact** the ruling was written into
@@ -5048,7 +5048,7 @@ wrote the artefacts as **"END OF SUNDAY 2026-09-14"**. 14 September 2026 is a **
 weekday was right, the date was wrong, and because both appeared in the same phrase the sentence
 *looked* self-checking. Nobody re-derived one from the other.
 
-sections (open the file for these): How to apply · RECURRENCE THE SAME DAY (w=2), FOUR HOURS AFTER THIS FILE WAS WRITTEN — and the diagnosis is the headline, not the discipline
+sections (open the file for these): How to apply · RECURRENCE THE SAME DAY (w=2), FOUR HOURS AFTER THIS FILE WAS WRITTEN — and the diagnosis is the headline, not the discipline · 2026-11-18 — rule line added from the Tuesday seat's ledger
 
 ## How to apply
 
@@ -6130,7 +6130,7 @@ applies to anything I put under a question to Kam** — arguably more, because a
 who will check it, and a question goes to a principal who will *act on it*. **Never pass a receiving
 agent's summary into a decision for Kam without validating it at the source first.**
 
-sections (open the file for these): ⚠ REGRESSION, same day (w=3, 10:5x): the second instance names the exact shape · ENFORCED 12:5x, same day, at w=4 · w=5, 13:3x: the authority costume
+sections (open the file for these): ⚠ REGRESSION, same day (w=3, 10:5x): the second instance names the exact shape · ENFORCED 12:5x, same day, at w=4 · w=5, 13:3x: the authority costume · 2026-11-18 — rule line added from the Tuesday seat's ledger
 
 **How to apply:**
 1. **Before any question to Kam, list its load-bearing premises and name the source of each.** If a
@@ -6801,6 +6801,8 @@ client channel, so they carry client-grade care) · [[2026-09-01_qa-gate-before-
 `2026-09-29_datasec-github-commits-go-through-codeql.md` · preference · 2026-09-29 · status: live · tier: W
 
 **His words, verbatim:** *"there has been a change to the datasec github account.  this is an organisational policy recently implemented.   we need to adhere to it so adjust accordingly - commits need to go through codeQL"*
+
+sections (open the file for these): 2026-11-18 — rule line added from the Tuesday seat's ledger
 
 **How to apply:**
 1. **Every Datasec brief carries the standing line:** *"Push your branch only. Friday opens the PR and lands it once CodeQL and the checks are green (the org ruleset requires CodeQL results; never push an unscanned commit to main)."* Records go on a `records/<round>` branch from the seat's own worktree.

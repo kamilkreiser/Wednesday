@@ -12,10 +12,15 @@ Usage:
   rules_card.py --stats                              counts by status / seat scope / family / trigger
   rules_card.py --weights                            TSV file/weight/own_rows/last (stdout), summary (stderr)
   rules_card.py --at <trigger> --top <n>             only the n highest-weight lines, then a '(+k more...)' line
+                                                     (plus, never cut: this seat's own regressions of the last 30 days)
 Multi-rule lessons: the `file` field may be `<lesson>.md#<n>` (n >= 2) for a lesson's 2nd, 3rd ... rule; the plain
 `<lesson>.md` row is its first rule and must exist. A '#n' row shows its base lesson's weight.
 Weights (reinforcement) = ledger table rows citing a lesson, recomputed every run from the _ledger*.md files;
 never stored. A superseded row `-> <file>:` passes its weight to <file>.
+Seat weights (P4): a seat with its own ledger files (SEAT_LEDGERS below; named by the files' own headers) also gets a
+weight counted from those files only. The line shows it beside the fleet weight when the two differ: `[x5, seat x1]` (x = the multiply sign).
+A seat REGRESSION = seat weight >= 3 and last seat citation within 30 days; `--top n` never cuts one (printed in addition,
+marked). A seat with no ledger file of its own (wednesday: its rows share _ledger.md) sees no change at all.
 Options: --learnings-dir <dir> (tests), --root <dir> (tree root for enforced_by paths; default = parent
 of 2_Project_Files, derived from this file's location). Standard library only. Never discards stderr.
 """
@@ -91,6 +96,12 @@ def enforced(r):
 
 
 LEDGER_SKIP = ("(conflict_on_", ".pre-", "_fleet_insights")
+# Which ledger files are one seat's OWN (file stems; stem.md and stem_archive.md). Taken from the files' headers:
+# _ledger_friday.md "Friday's OWN corrections"; _ledger_laptop_datasec.md "LAPTOP (Datasec) seat" = Tuesday.
+# Wednesday has none of its own: _ledger.md / _ledger_archive.md are the SHARED files (they also hold other seats' rows).
+SEAT_LEDGERS = {"friday": "_ledger_friday", "tuesday": "_ledger_laptop_datasec"}
+REGRESSION_W = 3
+REGRESSION_DAYS = 30
 ROW_RE = re.compile(r"^\|\s*(\d{4}-\d{2}-\d{2})")
 ABBR_RE = re.compile(r"(\d{4}-\d{2}-\d{2})_([^\s\[\]()`,|\u2026]*)\u2026")
 MIN_ABBR = 20
@@ -106,7 +117,15 @@ def ledger_files(learn):
     return out
 
 
-def compute_weights(learn, rows):
+def seat_ledger_files(learn, seat):
+    stem = SEAT_LEDGERS.get(seat)
+    if not stem:
+        return []
+    want = (stem + ".md", stem + "_archive.md")
+    return [p for p in ledger_files(learn) if os.path.basename(p) in want]
+
+
+def compute_weights(learn, rows, ledgers=None):
     """-> (weights, scanned). weights: file -> dict(w, own, last) after merging superseded rows into their
     target; scanned: ledger file name -> table rows scanned. Matching is a regex over the WHOLE line
     (row prose contains '|', so never by column)."""
@@ -119,7 +138,7 @@ def compute_weights(learn, rows):
     own = dict((f, 0) for f in files)
     last = dict((f, "") for f in files)
     scanned = {}
-    for p in ledger_files(learn):
+    for p in (ledger_files(learn) if ledgers is None else ledgers):
         n = 0
         with open(p, encoding="utf-8", errors="replace") as fh:
             for line in fh:
@@ -174,16 +193,47 @@ def compute_weights(learn, rows):
     return weights, scanned
 
 
-def wlabel(weights, f):
+def seat_weights(learn, rows, seat):
+    """-> weights computed from the seat's own ledger files only, or None when the seat has none (no change then)."""
+    if not seat:
+        return None
+    files = seat_ledger_files(learn, seat)
+    if not files:
+        return None
+    return compute_weights(learn, rows, files)[0]
+
+
+def wlabel(weights, f, sw=None):
     n = weights.get(f, {}).get("w", 0)
-    return "[new]" if n <= 0 else "[\u00d7%d]" % n
+    if n <= 0:
+        return "[new]"
+    if sw is not None:
+        m = sw.get(f, {}).get("w", 0)
+        if m > 0 and m != n:  # a seat weight of 0 is not printed: it was noise on most lines (Friday, 2026-11-18)
+            return "[\u00d7%d, seat \u00d7%d]" % (n, m)
+    return "[\u00d7%d]" % n
+
+
+def is_regression(sw, f, today=None):
+    """Seat weight >= REGRESSION_W and its last seat citation within REGRESSION_DAYS of today."""
+    if sw is None:
+        return False
+    x = sw.get(f)
+    if not x or x["w"] < REGRESSION_W or not x["last"]:
+        return False
+    today = today or datetime.date.today()
+    try:
+        last = datetime.date.fromisoformat(x["last"])
+    except ValueError:
+        return False
+    return (today - last).days <= REGRESSION_DAYS
 
 
 def wkey(weights):
     return lambda r: (-weights.get(r["base"], {}).get("w", 0), r["base"], r["n"])
 
 
-def build_card(rows, seat, date, weights=None):
+def build_card(rows, seat, date, weights=None, sw=None):
     weights = weights or {}
     live = [r for r in rows if r["status"] == "live"]
     mine = [r for r in live if for_seat(r, seat)]
@@ -210,14 +260,14 @@ def build_card(rows, seat, date, weights=None):
     top = [r for r in sorted(on_card, key=wkey(weights)) if r["n"] == 1 and weights.get(r["base"], {}).get("w", 0) > 0][:20]
     L.append("## Most reinforced (read these first)")
     for r in top:
-        L.append("- %s %s \u2014 %s" % (wlabel(weights, r["base"]), r["rule"], label(r)))
+        L.append("- %s %s \u2014 %s" % (wlabel(weights, r["base"], sw), r["rule"], label(r)))
     if not top:
         L.append("- (nothing reinforced yet)")
     L.append("")
     for fam in sorted(fams, key=lambda k: (-len(fams[k]), k)):
         L.append("## " + fam)
         for r in sorted(fams[fam], key=wkey(weights)):
-            L.append("- %s %s \u2014 %s" % (wlabel(weights, r["base"]), r["rule"], label(r)))
+            L.append("- %s %s \u2014 %s" % (wlabel(weights, r["base"], sw), r["rule"], label(r)))
         L.append("")
     L.append("## Enforced by a tool (the tool remembers; one line each)")
     for r in sorted(enf, key=lambda x: (x["base"], x["n"])):
@@ -308,7 +358,7 @@ def check(learn, root, seat, rows):
             faults.append("card missing: %s (run --seat %s)" % (card, seat))
         else:
             g = good_rows(rows)
-            want, _ = build_card(g, seat, "", compute_weights(learn, g)[0])
+            want, _ = build_card(g, seat, "", compute_weights(learn, g)[0], seat_weights(learn, g, seat))
             have = open(card, encoding="utf-8").read()
             if strip_date(want) != strip_date(have):
                 faults.append("card stale: %s differs from what would be generated now (run --seat %s)" % (card, seat))
@@ -372,15 +422,20 @@ def main():
         hits = [r for r in good_rows(read_index(idx)) if r["status"] == "live"
                 and for_seat(r, seat) and a.at in r["triggers"]
                 and (not a.primary or r["triggers"][:1] == [a.at])]
-        wts = compute_weights(learn, good_rows(read_index(idx)))[0]
+        allrows = good_rows(read_index(idx))
+        wts = compute_weights(learn, allrows)[0]
+        sw = seat_weights(learn, allrows, seat)
         hits = sorted(hits, key=wkey(wts))
         shown = hits[:a.top] if a.top is not None and a.top >= 0 else hits
+        # P4: --top never cuts this seat's own recent regression; those are printed in addition, marked
+        kept = [r for r in hits[len(shown):] if is_regression(sw, r["base"])]
         print("Rules for: %s (%d)" % (a.at, len(hits)))
-        for r in shown:
-            print("• %s %s%s  (%s)" % (wlabel(wts, r["base"]), "[enforced] " if enforced(r) else "", r["rule"],
-                                       r["base"] if r["n"] <= 1 else "%s, rule %d" % (r["base"], r["n"])))
-        if len(hits) > len(shown):
-            print("(+%d more: rules_card.py --at %s)" % (len(hits) - len(shown), a.at))
+        for r in shown + kept:
+            print("• %s %s%s%s  (%s)" % (wlabel(wts, r["base"], sw), "[seat regression] " if r in kept else "",
+                                         "[enforced] " if enforced(r) else "", r["rule"],
+                                         r["base"] if r["n"] <= 1 else "%s, rule %d" % (r["base"], r["n"])))
+        if len(hits) > len(shown) + len(kept):
+            print("(+%d more: rules_card.py --at %s)" % (len(hits) - len(shown) - len(kept), a.at))
         return 0
 
     if not os.path.isfile(idx):
@@ -413,7 +468,8 @@ def main():
         return 0
     if a.seat:
         g = good_rows(rows)
-        text, n = build_card(g, a.seat, datetime.date.today().isoformat(), compute_weights(learn, g)[0])
+        text, n = build_card(g, a.seat, datetime.date.today().isoformat(), compute_weights(learn, g)[0],
+                             seat_weights(learn, g, a.seat))
         out = os.path.join(learn, "_rules_card_%s.md" % a.seat)
         with open(out, "w", encoding="utf-8") as f:
             f.write(text)

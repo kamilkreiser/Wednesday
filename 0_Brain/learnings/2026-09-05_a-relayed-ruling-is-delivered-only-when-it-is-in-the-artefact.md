@@ -147,3 +147,9 @@ with the seat that was pointed at, and the pointer is the part that makes a mail
 4. **A wrap at a shift change is exactly when this fires**, because the shift change is timed to
    catch seats mid-queue. Any seat wrapping with an unexecuted GO in its inbox must name it in its
    handover, and the coordinator that sent the GO owns re-arming it.
+
+## 2026-11-18 — rule line added from the Tuesday seat's ledger
+
+Before commissioning a lane from a sweep or census: grep the pickup and today's note for the lane id and ticket keys and read every DROPPED or HELD line; a sweep is dated the hour it ran. A hold Kam set is lifted only by his word naming it.
+
+Source: the Tuesday seat's ledger rows named in 0_Brain/reference/2026-11-18_rules-card-tuesday/PROPOSED-ROW-FIXES.tsv (reason column).

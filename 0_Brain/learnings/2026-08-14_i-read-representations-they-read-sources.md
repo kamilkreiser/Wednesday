@@ -406,3 +406,11 @@ versions at once.**
 form · [[2026-08-16_classification-is-the-field-that-grants-authority]] (*"by ruling"* IS that field,
 and here Wednesday manufactured it) · [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]]
 (its exact inverse — a ruling that was never made, delivered everywhere).
+
+## 2026-11-18 — rule line added from the Tuesday seat's ledger
+
+Before a kit, commit text or PR body says who decided ('product owner', 'ruling', 'Kam'): grep those words, run decision_queue.sh show <id>, check the card's client_project and option detail name THIS lane. A decision I made is written as mine.
+
+Before stamping a kit READ WHOLE: read it with the Read tool, or print the tail of every line a display cut; never through cut -c. Each frozen sentence saying what code, a test or a gate finding DOES gets its source lines printed in the stamp action.
+
+Source: the Tuesday seat's ledger rows named in 0_Brain/reference/2026-11-18_rules-card-tuesday/PROPOSED-ROW-FIXES.tsv (reason column).

@@ -65,3 +65,9 @@ the morning's correction, and 13 + 2 felt like Monday.** Deriving from a nearby 
 handled is the same error as deriving from a nearby field — **a date I corrected an hour ago is not
 a calendar.** Run `date -j -f "%Y-%m-%d" "<date>" "+%A"` every time; it costs nothing and it is the
 only thing that has ever caught this.
+
+## 2026-11-18 — rule line added from the Tuesday seat's ledger
+
+Before calling a scheduled output missing or late: print its due time converted to local time (date -j) beside the current time in the same command and require now > due plus a grace period. Before the due time an absence is not an absence.
+
+Source: the Tuesday seat's ledger rows named in 0_Brain/reference/2026-11-18_rules-card-tuesday/PROPOSED-ROW-FIXES.tsv (reason column).

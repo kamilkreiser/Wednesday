@@ -96,3 +96,9 @@ the approval, and it explicitly retires Peter as the per-PR approver. **A claim 
 in a written rule: read the rule, not your model of it.** The absence advisory can't catch this, because it's a positive
 authority claim. Caught by the decision queue's prior-rulings gate. **Rule: before telling anyone that X needs Kam, find the
 written grant or rule that decides it, and quote it.**
+
+## 2026-11-18 — rule line added from the Tuesday seat's ledger
+
+Before a card that removes or retires an environment, deliverable or named artefact of a client project: grep the signed contract (SOW) for it and state the hits on the card, or write 'SOW not read'. A removal ruled on a missing premise cannot be undone.
+
+Source: the Tuesday seat's ledger rows named in 0_Brain/reference/2026-11-18_rules-card-tuesday/PROPOSED-ROW-FIXES.tsv (reason column).

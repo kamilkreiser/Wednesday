@@ -136,3 +136,11 @@ The 27 case sections below were moved VERBATIM to `_cases_2026-08-07_a-check-tha
 - A TEST HELPER THAT REIMPLEMENTS THE PRODUCT IS A MOCK THE MOMENT THE PRODUCT MOVES (2026-09-05, Secuura s128 — found by its own red-proof, not by reading)
 - THE DELIVERY MEMBER, and it is the sharpest one yet because the failing check IS this family's own enforcement (2026-09-07, W-tier, agent-caught in two minutes)
 - THE MEMBER THAT NAMES THE RIGHT PROPERTY AND OBSERVES THE WRONG WRITE (2026-09-08, Secuura s152 — twice in one seat, both caught by RUNNING)
+
+## 2026-11-18 — rule line added from the Tuesday seat's ledger
+
+After every stamp, before launch: print the kit's byte count and last line and check them against the kit's own Step-0 rule; a stamp tool's OK proves slots are filled, not their shape. Rewrite a kit via temp file then os.replace, never open(path,'w') first.
+
+When a kit changes an answer the code gives (status, gate) or tells a seat to MATCH a tool's output: quote the output from a real run, list each step's inputs against the step that makes them, and carry a by-program census of tests pinning the OLD answer.
+
+Source: the Tuesday seat's ledger rows named in 0_Brain/reference/2026-11-18_rules-card-tuesday/PROPOSED-ROW-FIXES.tsv (reason column).

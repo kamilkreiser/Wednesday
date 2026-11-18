@@ -282,6 +282,43 @@ if echo "$OUT" | grep -q "($A)" && ! echo "$OUT" | grep -q 'rule 2'; then pass "
 run --stats --learnings-dir "$D"
 if echo "$OUT" | grep -q '^lessons: 6, rule lines: 10$'; then pass "multi: --stats shows lessons vs rule lines"; else fail "multi stats ($OUT)"; fi
 
+# ---- P4: seat weight beside fleet weight; --top never cuts a seat regression of the last 30 days
+D5="$($PY -c 'import datetime;print((datetime.date.today()-datetime.timedelta(days=5)).isoformat())')"
+D45="$($PY -c 'import datetime;print((datetime.date.today()-datetime.timedelta(days=45)).isoformat())')"
+# mkp <name> <seat-ledger-date> <with-seat-ledger 1|0>: p0 fleet 9 (shared ledger), p1 fleet 3 / seat 1, p2 fleet 2 / seat 0,
+# p3 fleet 3 / seat 3 (equal); friday's own ledger is _ledger_friday.md
+mkp() {
+  D="$TMP/$1"; mkdir -p "$D"
+  for n in p0 p1 p2 p3; do echo "# l" > "$D/2026-03-01_$n.md"; done
+  for n in p0 p1 p2 p3; do row 2026-03-01_$n.md live all checks-that-can-fail git - "When I do $n: rule $n."; done > "$D/_rules_index.tsv"
+  IDX="$D/_rules_index.tsv"
+  { for i in 1 2 3 4 5 6 7 8 9; do echo "| 2026-03-02 | [[2026-03-01_p0]] r$i |"; done
+    echo "| 2026-03-02 | [[2026-03-01_p1]] |"; echo "| 2026-03-03 | [[2026-03-01_p1]] |"
+    echo "| 2026-03-02 | [[2026-03-01_p2]] |"; echo "| 2026-03-03 | [[2026-03-01_p2]] |"; } > "$D/_ledger.md"
+  if [ "$3" = 1 ]; then
+    { echo "| 2026-03-04 | [[2026-03-01_p1]] |"
+      for i in 1 2 3; do echo "| $2 | [[2026-03-01_p3]] s$i |"; done; } > "$D/_ledger_friday.md"
+  fi
+}
+mkp sw1 "$D5" 1
+run --seat friday --learnings-dir "$D"
+CARD="$D/_rules_card_friday.md"
+if grep -q '^- \[×3, seat ×1\] When I do p1: rule p1\. — `2026-03-01_p1.md`$' "$CARD" && grep -q '^- \[×2\] When I do p2' "$CARD"; then pass "P4 card: seat weight shown beside fleet weight when they differ"; else fail "P4 card differ ($(grep 'rule p' "$CARD"))"; fi
+if grep -q '^- \[×3\] When I do p3: rule p3\. — `2026-03-01_p3.md`$' "$CARD" && grep -q '^- \[×9\] When I do p0: rule p0\. — `2026-03-01_p0.md`$' "$CARD"; then pass "P4 card: seat weight not shown when equal to fleet weight"; else fail "P4 card equal ($(grep 'rule p' "$CARD"))"; fi
+run --check --seat friday --learnings-dir "$D"
+if [ "$RC" = 0 ]; then pass "P4: --check --seat passes on a card with seat weights"; else fail "P4 check ($OUT)"; fi
+run --at git --seat friday --learnings-dir "$D"
+if echo "$OUT" | grep -q '^• \[×3, seat ×1\] .*p1' && echo "$OUT" | grep -q '^• \[×3\] .*p3'; then pass "P4 --at: seat weight shown when different, absent when equal"; else fail "P4 --at ($OUT)"; fi
+run --at git --top 1 --seat friday --learnings-dir "$D"
+if [ "$(echo "$OUT" | grep -c '^•')" = 2 ] && echo "$OUT" | grep -q '^• \[×3\] \[seat regression\] .*p3' && ! echo "$OUT" | grep '^•' | sed -n 1p | grep -q 'seat regression' && echo "$OUT" | tail -1 | grep -q '^(+2 more: rules_card.py --at git)$' && echo "$OUT" | grep -q '^Rules for: git (4)$'; then pass "P4: a recent seat regression survives --top 1, marked, more-line counts the rest"; else fail "P4 recent regression ($OUT)"; fi
+run --at git --top 1 --seat tuesday --learnings-dir "$D"
+if [ "$(echo "$OUT" | grep -c '^•')" = 1 ] && ! echo "$OUT" | grep -q 'seat' && echo "$OUT" | tail -1 | grep -q '^(+3 more: rules_card.py --at git)$'; then pass "P4: a seat with no ledger of its own is unchanged (no seat text, plain --top)"; else fail "P4 no ledger ($OUT)"; fi
+run --seat tuesday --learnings-dir "$D"
+if ! grep -q 'seat ×' "$D/_rules_card_tuesday.md"; then pass "P4: card of a seat with no own ledger carries no seat weights"; else fail "P4 tuesday card"; fi
+mkp sw2 "$D45" 1
+run --at git --top 1 --seat friday --learnings-dir "$D"
+if [ "$(echo "$OUT" | grep -c '^•')" = 1 ] && ! echo "$OUT" | grep -q 'seat regression' && echo "$OUT" | tail -1 | grep -q '^(+3 more: rules_card.py --at git)$'; then pass "P4: a seat regression over 30 days old does not survive --top 1"; else fail "P4 old regression ($OUT)"; fi
+
 
 echo
 if [ "$FAILS" -gt 0 ]; then echo "$FAILS arm(s) FAILED"; exit 1; fi

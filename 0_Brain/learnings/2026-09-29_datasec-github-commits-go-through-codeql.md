@@ -22,3 +22,9 @@ tier: W
 **Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (merges are Friday's; the policy decides HOW) · [[2026-09-09_my-authority-and-the-targets-rules-are-two-checks]] (my authority AND the target's rules; this is the target's rule) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the ruleset is in-path enforcement: work with it, never around it).
 
 **NARROWED 2026-09-29 13:3x, the same hour, by Tuesday** (mail `[Tuesday -> Friday] Re: Datasec GitHub CodeQL`): the first headline said "never a direct push", which is wider than the ruleset and would have contradicted NexusAI's recorded C-190 procedure. Her formulation was adopted: *"never push a commit to main that CodeQL has not scanned on a PR; never bypass; never dismiss"*. This is [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] caught within the hour.
+
+## 2026-11-18 — rule line added from the Tuesday seat's ledger
+
+Before a head-pinned merge: read the printed check TABLE and confirm it names every job that repo expects (tuesday/tools/pr_checks_wait.sh --min-checks N, N from the last merged PR); never merge on the ALL GREEN line. A finished set of 1 is not the set.
+
+Source: the Tuesday seat's ledger rows named in 0_Brain/reference/2026-11-18_rules-card-tuesday/PROPOSED-ROW-FIXES.tsv (reason column).
