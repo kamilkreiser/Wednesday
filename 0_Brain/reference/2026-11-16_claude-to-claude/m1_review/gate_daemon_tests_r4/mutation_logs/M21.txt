@@ -1,0 +1,63 @@
+$ cargo build --workspace --bins --locked -q
+# rc=0 2s
+$ cargo test --locked -p coagent-daemon --no-fail-fast --test recovery_model --test recovery_measure -- --skip v12_honest_runs_are_quiet --skip v14_everything_bounded
+test measure_a_healthy_looking_stale_channel ... ok
+test measure_one_lost_packet_in_a_healthy_session ... ok
+test measure_the_cost_of_the_idle_flush ... ok
+test measure_a_link_in_maximum_backoff ... ok
+test measure_the_proposed_numbers ... ok
+test v15_connected_needs_the_peers_position ... ok
+test a_replayed_kk1_with_a_huge_label_replaces_nothing_and_connected_holds ... ok
+test model_an_honest_pair_connects_and_exchanges_messages ... ok
+test v4_isolated_t_blind_alone_heals_a_suppressed_announcement ... ok
+test v4_isolated_t_held_alone_heals_a_lost_room ... ok
+test v4_isolated_t_keying_alone_heals_a_responder_without_a_channel ... ok
+test v4_isolated_t_rto_alone_heals_a_lost_message ... ok
+test v4_isolated_the_confirmation_clock_alone_heals_a_lost_confirmation ... ok
+test v14_counters_stop_at_the_limit ... ok
+test v6_a_hostile_peers_numbers_never_enter_out_of_order ... ok
+test v11_attachment_budget ... ok
+test v12_the_link_queue_check_alone_keeps_a_stalled_socket_lossless ... ok
+test v7_repeats_are_labelled ... ok
+test v13_final_states_have_causes ... ok
+test v5_v15_every_waiting_state_has_a_deadline_and_status_is_true ... ok
+test v10_restart_never_lowers ... FAILED
+test v9_write_before_send ... FAILED
+test v8_no_silent_loss_inbound ... ok
+test v4_recovers_from_any_state ... FAILED
+test v4_isolated_the_idle_flush_alone_empties_a_relay_buffer_left_full ... ok
+test v8_no_silent_loss_outbound ... FAILED
+test v6_inbox_once_in_order ... ok
+test v3_answers_are_bounded ... ok
+test v1_relay_numbers_never_reach_disk ... ok
+test v14_frame_caused_log_lines_stay_under_their_rate ... ok
+test v1_v2_hints_never_reach_disk_and_never_act ... ok
+V10 restart_never_lowers: side 1: application number 40 was sent before the crash, the next one after it is 1 (seed 15485863, crashes [(13.964s, 1, 4), (19.318s, 1, 14), (23.898s, 1, 11)])
+V10 restart_never_lowers: side 1: application number 7 was sent before the crash, the next one after it is 1 (seed 77429315, crashes [(27.488s, 1, 5), (6.382s, 1, 19)])
+V10 restart_never_lowers: side 1: application number 32 was sent before the crash, the next one after it is 1 (seed 77429315, crashes [(27.488s, 1, 5), (6.382s, 1, 19)])
+thread 'v10_restart_never_lowers' (13302016) panicked at crates/coagent-daemon/tests/recovery_model.rs:1169:5:
+V10 restart_never_lowers: side 1: application number 40 was sent before the crash, the next one after it is 1 (seed 15485863, crashes [(13.964s, 1, 4), (19.318s, 1, 14), (23.898s, 1, 11)])
+V9 failing: 70
+V9 write_before_send: side 1 number 2 carried m1-00001 and then m1-00018 (seed 4996655)
+thread 'v9_write_before_send' (13302096) panicked at crates/coagent-daemon/tests/recovery_model.rs:1143:5:
+V9 write_before_send: side 1 number 2 carried m1-00001 and then m1-00018 (seed 4996655)
+V4 failing schedules: 27 of 60
+V4 recovers_from_any_state: 3 message(s) not delivered 120s after the relay turned honest (seed 40503, ops [(38.202s, Cut { to: 1 }), (41.712s, Flip { to: 0 }), (43.403s, Label { to: 0, v: 1099511627776 })], crashes [(2.321s, 0, 14), (3.749s, 1, 7), (42.688s, 0, 5)]); missing ["m0-90000", "m0-90001", "m0-90002"]; side 0 "attached true present true live Some(3) pos Some(3) kk false unconfirmed fals
+V4 recovers_from_any_state: 3 message(s) not delivered 120s after the relay turned honest (seed 162012, ops [], crashes [(20.245s, 1, 7), (44.611s, 0, 10)]); missing ["m1-90000", "m1-90001", "m1-90002"]; side 0 "attached true present true live Some(2) pos Some(33) kk false unconfirmed false pending 0 peer_full false refusing false outbox 0 link true resyncs {\"T-RTO\": 1}"; side 1 "attached true p
+V4 recovers_from_any_state: 3 message(s) not delivered 120s after the relay turned honest (seed 202515, ops [(2.626s, Counter { to: 1, v: 2 })], crashes [(932ms, 0, 16), (39.937s, 1, 1), (53.435s, 0, 17)]); missing ["m1-90000", "m1-90001", "m1-90002"]; side 0 "attached true present true live Some(4) pos Some(33) kk false unconfirmed false pending 0 peer_full false refusing false outbox 0 link true
+V4 recovers_from_any_state: 6 message(s) not delivered 120s after the relay turned honest (seed 324024, ops [(4.866s, Counter { to: 1, v: 1 }), (43.732s, Left { to: 0 }), (51.642s, DropNext { to: 1, n: 4 }), (31.571s, Dup { to: 1, secs: 1 }), (19.856s, Flip { to: 0 }), (53.296s, Counter { to: 0, v: 1000003 }), (43.659s, Truncate { to: 0 }), (9.211s, Counter { to: 0, v: 1099511627776 }), (47.606s, 
+V4 recovers_from_any_state: 3 message(s) not delivered 120s after the relay turned honest (seed 364527, ops [], crashes [(42.762s, 1, 23), (22.497s, 1, 15)]); missing ["m1-90000", "m1-90001", "m1-90002"]; side 0 "attached true present true live Some(3) pos Some(33) kk false unconfirmed false pending 0 peer_full false refusing false outbox 0 link true resyncs {\"T-RTO\": 1}"; side 1 "attached true 
+V4 recovers_from_any_state: 6 message(s) not delivered 120s after the relay turned honest (seed 486036, ops [], crashes [(34.567s, 1, 19), (35.725s, 0, 11)]); missing ["m0-90000", "m0-90001", "m0-90002", "m1-90000", "m1-90001"]; side 0 "attached true present true live Some(3) pos Some(3) kk false unconfirmed false pending 0 peer_full false refusing false outbox 0 link true resyncs {\"T-RTO\": 1}";
+thread 'v4_recovers_from_any_state' (13302032) panicked at crates/coagent-daemon/tests/recovery_model.rs:1064:5:
+V4 recovers_from_any_state: 3 message(s) not delivered 120s after the relay turned honest (seed 40503, ops [(38.202s, Cut { to: 1 }), (41.712s, Flip { to: 0 }), (43.403s, Label { to: 0, v: 1099511627776 })], crashes [(2.321s, 0, 14), (3.749s, 1, 7), (42.688s, 0, 5)]); missing ["m0-90000", "m0-90001", "m0-90002"]; side 0 "attached true present true live Some(3) pos Some(3) kk false unconfirmed fals
+V8 no_silent_loss (outbound): side 0: 15 accepted message(s) neither held, nor at the peer, nor counted (0 counted): ["m0-00025", "m0-00026", "m0-00027", "m0-00028", "m0-00029"] (seed 104723, crashes [(16.504s, 1, 6), (13.011s, 0, 9), (11.13s, 1, 15)])
+V8 no_silent_loss (outbound): side 1: 19 accepted message(s) neither held, nor at the peer, nor counted (0 counted): ["m1-00019", "m1-00020", "m1-00021", "m1-00022", "m1-00023"] (seed 104723, crashes [(16.504s, 1, 6), (13.011s, 0, 9), (11.13s, 1, 15)])
+V8 no_silent_loss (outbound): side 1: 17 accepted message(s) neither held, nor at the peer, nor counted (0 counted): ["m1-00017", "m1-00018", "m1-00019", "m1-00020", "m1-00021"] (seed 209446, crashes [(10.089s, 1, 19)])
+V8 (outbound): 0 schedule(s) did not recover and were not judged: []
+V8 (outbound): reach {"accepted": 80}
+thread 'v8_no_silent_loss_outbound' (13302086) panicked at crates/coagent-daemon/tests/support/model.rs:1365:13:
+V8 (outbound): rule `counted_loss` was never reached (reach is counted)
+# rc=101 37s
+$ cargo test --locked -p coagent-daemon --test recovery_repro -- --exact fd_a_damaged_outbox_does_not_leave_a_gap_for_ever
+test fd_a_damaged_outbox_does_not_leave_a_gap_for_ever ... ok
+# rc=0 4s

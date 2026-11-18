@@ -1,0 +1,56 @@
+$ cargo build --workspace --bins --locked -q
+# rc=0 2s
+$ cargo test --locked -p coagent-daemon --no-fail-fast --test recovery_model --test recovery_measure
+test measure_one_lost_packet_in_a_healthy_session ... ok
+test measure_a_healthy_looking_stale_channel ... ok
+test measure_the_cost_of_the_idle_flush ... ok
+test measure_a_link_in_maximum_backoff ... ok
+test measure_the_proposed_numbers ... ok
+test v15_connected_needs_the_peers_position ... ok
+test v14_counters_stop_at_the_limit ... ok
+test a_replayed_kk1_with_a_huge_label_replaces_nothing_and_connected_holds ... FAILED
+test model_an_honest_pair_connects_and_exchanges_messages ... ok
+test v4_isolated_t_held_alone_heals_a_lost_room ... ok
+test v4_isolated_t_blind_alone_heals_a_suppressed_announcement ... ok
+test v4_isolated_t_rto_alone_heals_a_lost_message ... ok
+test v4_isolated_the_confirmation_clock_alone_heals_a_lost_confirmation ... ok
+test v4_isolated_t_keying_alone_heals_a_responder_without_a_channel ... ok
+test v11_attachment_budget ... ok
+test v12_the_link_queue_check_alone_keeps_a_stalled_socket_lossless ... FAILED
+test v6_a_hostile_peers_numbers_never_enter_out_of_order ... ok
+test v3_answers_are_bounded ... FAILED
+test v13_final_states_have_causes ... ok
+test v7_repeats_are_labelled ... ok
+test v4_isolated_the_idle_flush_alone_empties_a_relay_buffer_left_full ... ok
+test v10_restart_never_lowers ... ok
+test v5_v15_every_waiting_state_has_a_deadline_and_status_is_true ... ok
+test v9_write_before_send ... ok
+test v4_recovers_from_any_state ... ok
+test v8_no_silent_loss_inbound ... ok
+test v8_no_silent_loss_outbound ... ok
+test v6_inbox_once_in_order ... ok
+test v14_frame_caused_log_lines_stay_under_their_rate ... ok
+test v1_relay_numbers_never_reach_disk ... FAILED
+test v1_v2_hints_never_reach_disk_and_never_act ... FAILED
+test v14_everything_bounded ... ok
+test v12_honest_runs_are_quiet ... FAILED
+thread 'a_replayed_kk1_with_a_huge_label_replaces_nothing_and_connected_holds' (11328199) panicked at crates/coagent-daemon/tests/recovery_model.rs:2181:5:
+V12 (link queue): reach {"queue_filled": 201}
+thread 'v12_the_link_queue_check_alone_keeps_a_stalled_socket_lossless' (11328204) panicked at crates/coagent-daemon/tests/support/model.rs:1365:13:
+V12 (link queue): rule `queue_at_margin` was never reached (reach is counted)
+thread 'v3_answers_are_bounded' (11328212) panicked at crates/coagent-daemon/tests/recovery_model.rs:1475:5:
+V1 (relay numbers): reach {"forge": 8, "garbage": 8, "live": 16, "pair_seq": 8}
+thread 'v1_relay_numbers_never_reach_disk' (11328210) panicked at crates/coagent-daemon/tests/support/model.rs:1365:13:
+V1 (relay numbers): rule `held` was never reached (reach is counted)
+V1 failing schedules: 0; V2 failing schedules: 0
+thread 'v1_v2_hints_never_reach_disk_and_never_act' (11328211) panicked at crates/coagent-daemon/tests/support/model.rs:1365:13:
+V12 honest_runs_are_quiet: side 0: attachments 2, relay refusals 0, gaps 0, frames lost at the link queue 0, received 193 of 193 (seed 1, n 193, size 2000, read every 3 ticks, stall false)
+V12 honest_runs_are_quiet: side 1: attachments 2, relay refusals 0, gaps 0, frames lost at the link queue 0, received 193 of 193 (seed 1, n 193, size 2000, read every 3 ticks, stall false)
+V12 honest_runs_are_quiet: side 0: attachments 3, relay refusals 0, gaps 0, frames lost at the link queue 0, received 158 of 158 (seed 2, n 158, size 8000, read every 10 ticks, stall false)
+V12 honest_runs_are_quiet: side 1: attachments 3, relay refusals 0, gaps 0, frames lost at the link queue 0, received 158 of 158 (seed 2, n 158, size 8000, read every 10 ticks, stall false)
+thread 'v12_honest_runs_are_quiet' (11328203) panicked at crates/coagent-daemon/tests/recovery_model.rs:1318:5:
+V12 honest_runs_are_quiet: side 0: attachments 2, relay refusals 0, gaps 0, frames lost at the link queue 0, received 193 of 193 (seed 1, n 193, size 2000, read every 3 ticks, stall false)
+# rc=101 567s
+$ cargo test --locked -p coagent-daemon --test reconnect -- --exact test5a_cut_connection_redelivers_exactly_once_in_order
+test test5a_cut_connection_redelivers_exactly_once_in_order ... ok
+# rc=0 9s

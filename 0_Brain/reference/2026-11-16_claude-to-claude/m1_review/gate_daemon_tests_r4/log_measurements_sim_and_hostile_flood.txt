@@ -1,0 +1,53 @@
+Wed 18 Nov 2026 19:36:29 AEDT
+test measure_real_a_healthy_looking_stale_channel ... coagentd: created a new device identity e4a208c850ba5d2db2a8f1bf1a930735bddb90bc48464f11dc591875a10ec6ba
+test measure_real_a_link_in_maximum_backoff ... coagentd: created a new device identity 5de021a436917133c4f1135f6a3c9532e3f56838f2629dbd76818a09e9d8338e
+test measure_real_one_lost_packet_in_a_healthy_session ... coagentd: created a new device identity 1d51db04c18f640fa84aac8a592a4c54c0f1de427776fe0f06f0b2dffae119fe
+test measure_real_the_cost_of_the_idle_flush ... coagentd: created a new device identity 2ba08cf050e816074a9cc1f2c4567f8c2af20e260d8d64a621af4c320f9c048b
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 18 filtered out; finished in 315.97s
+  --> Cargo.toml:35:1
+   |
+35 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+   Compiling coagent-daemon v0.0.1 (/private/tmp/claude-501/gd4/g/crates/coagent-daemon)
+    Finished `test` profile [unoptimized] target(s) in 0.63s
+     Running tests/recovery_measure.rs (/private/tmp/claude-501/gd4/target_g/debug/build/coagent-daemon/5f024bae5673c7d6/out/recovery_measure-5f024bae5673c7d6)
+
+running 5 tests
+test measure_a_healthy_looking_stale_channel ... MEASURE healthy-looking stale channel (responder restarted, presence suppressed): 31.4 s (V4 bound 120 s)
+MEASURE healthy-looking stale channel (initiator restarted, presence suppressed): 20.5 s (V4 bound 120 s)
+ok
+test measure_a_link_in_maximum_backoff ... MEASURE link in maximum backoff (seed 0), from the relay's return: 3.4 s (V4 bound 120 s)
+MEASURE link in maximum backoff (seed 1), from the relay's return: 52.4 s (V4 bound 120 s)
+MEASURE link in maximum backoff (seed 2), from the relay's return: 41.4 s (V4 bound 120 s)
+MEASURE link in maximum backoff (seed 3), from the relay's return: 30.4 s (V4 bound 120 s)
+MEASURE link in maximum backoff (seed 4), from the relay's return: 19.4 s (V4 bound 120 s)
+MEASURE link in maximum backoff, worst of 5: 52.4 s
+ok
+test measure_one_lost_packet_in_a_healthy_session ... MEASURE one lost packet (seed 0): 16.4 s (V4 bound 120 s)
+MEASURE one lost packet (seed 1): 16.4 s (V4 bound 120 s)
+MEASURE one lost packet (seed 2): 16.4 s (V4 bound 120 s)
+MEASURE one lost packet (seed 3): 16.4 s (V4 bound 120 s)
+MEASURE one lost packet (seed 4): 16.4 s (V4 bound 120 s)
+MEASURE one lost packet, worst of 5: 16.4 s
+ok
+test measure_the_cost_of_the_idle_flush ... MEASURE idle FLUSH cost, side 0: 721 frames in one idle hour, 58 bytes of JSON each = 41818 bytes/hour before TLS framing
+MEASURE idle FLUSH cost, side 1: 721 frames in one idle hour, 58 bytes of JSON each = 41818 bytes/hour before TLS framing
+ok
+test measure_the_proposed_numbers ... MEASURE proposed: honest 250 x 4 KiB burst: delivered true; peak in flight 128 frames / 541204 bytes (limits 128 / 1048576); receiver FLUSHes in its busiest second 3 (limit 10); relay refusals 0; relay numbers used 254 with 2 reservation(s) of 4096 (session.json writes for relay numbers)
+MEASURE proposed: attachment bucket (5 + 1 per 12 s): 6 attachments in 120 s under a cut-after-attach relay (bucket bound 15)
+MEASURE proposed: replay flood (500 replayed frames per 100 ms to side 1, 120 s): side 1's busiest second: 10 FLUSHes (limit 10), 0 answers to new messages 1, 1 answers to replays (limit 2); KK messages 1 dropped unexamined 51213 (limit 8 examined per second); side 0's busiest second: 0 key-exchange starts (limit 1), 1 FLUSHes; side 1's busiest minute of log lines: 0 (60 per category), 0 suppressed
+ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.62s
+
+hostile flood with a 1 s pause: 41 of 41 unread; hostile saw 0 `relay error full`
+thread 'gr3::r3_item2_hostile_flood_with_paused_victim_loses_frames_at_the_relay' (10793559) panicked at crates/coagent-daemon/tests/gate/gr3.rs:509:5:
+diagnosis not reproduced: 41 unread, 0 full
+test gr3::r3_item2_hostile_flood_with_paused_victim_loses_frames_at_the_relay ... FAILED
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 12.76s
+Wed 18 Nov 2026 19:42:13 AEDT
+EXIT

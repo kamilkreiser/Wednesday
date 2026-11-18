@@ -1,0 +1,42 @@
+$ cargo build --workspace --bins --locked -q
+# rc=0 2s
+$ cargo test --locked -p coagent-daemon --no-fail-fast --test recovery_model --test recovery_measure -- --skip v12_honest_runs_are_quiet --skip v14_everything_bounded
+test measure_a_healthy_looking_stale_channel ... ok
+test measure_one_lost_packet_in_a_healthy_session ... ok
+test measure_the_cost_of_the_idle_flush ... FAILED
+test measure_a_link_in_maximum_backoff ... ok
+test measure_the_proposed_numbers ... ok
+MEASURE idle FLUSH cost, side 0: 361 frames in one idle hour, 58 bytes of JSON each = 20938 bytes/hour before TLS framing
+thread 'measure_the_cost_of_the_idle_flush' (12889652) panicked at crates/coagent-daemon/tests/recovery_measure.rs:198:9:
+test v15_connected_needs_the_peers_position ... ok
+test a_replayed_kk1_with_a_huge_label_replaces_nothing_and_connected_holds ... ok
+test model_an_honest_pair_connects_and_exchanges_messages ... ok
+test v4_isolated_t_blind_alone_heals_a_suppressed_announcement ... ok
+test v4_isolated_t_keying_alone_heals_a_responder_without_a_channel ... ok
+test v4_isolated_t_held_alone_heals_a_lost_room ... ok
+test v4_isolated_the_confirmation_clock_alone_heals_a_lost_confirmation ... ok
+test v4_isolated_t_rto_alone_heals_a_lost_message ... ok
+test v14_counters_stop_at_the_limit ... ok
+test v6_a_hostile_peers_numbers_never_enter_out_of_order ... ok
+test v11_attachment_budget ... ok
+test v7_repeats_are_labelled ... ok
+test v12_the_link_queue_check_alone_keeps_a_stalled_socket_lossless ... ok
+test v13_final_states_have_causes ... ok
+test v5_v15_every_waiting_state_has_a_deadline_and_status_is_true ... ok
+test v10_restart_never_lowers ... ok
+test v4_recovers_from_any_state ... ok
+test v9_write_before_send ... ok
+test v8_no_silent_loss_inbound ... ok
+test v4_isolated_the_idle_flush_alone_empties_a_relay_buffer_left_full ... ok
+test v8_no_silent_loss_outbound ... ok
+test v6_inbox_once_in_order ... ok
+test v3_answers_are_bounded ... ok
+test v1_relay_numbers_never_reach_disk ... ok
+test v14_frame_caused_log_lines_stay_under_their_rate ... ok
+test v1_v2_hints_never_reach_disk_and_never_act ... ok
+# rc=101 33s
+$ cargo test --locked -p coagent-daemon --test recovery_repro -- --exact measure_real_the_cost_of_the_idle_flush
+test measure_real_the_cost_of_the_idle_flush ... FAILED
+MEASURE real idle FLUSH cost: 6 relay acknowledgements in 60 idle seconds, 348 bytes (360 per hour, 20880 bytes per hour, before TLS framing)
+thread 'measure_real_the_cost_of_the_idle_flush' (12930665) panicked at crates/coagent-daemon/tests/recovery_repro.rs:1437:5:
+# rc=101 67s

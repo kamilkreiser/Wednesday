@@ -1,0 +1,46 @@
+$ cargo build --workspace --bins --locked -q
+# rc=0 2s
+$ cargo test --locked -p coagent-daemon --no-fail-fast --test recovery_model --test recovery_measure
+test measure_a_healthy_looking_stale_channel ... ok
+test measure_one_lost_packet_in_a_healthy_session ... ok
+test measure_the_cost_of_the_idle_flush ... ok
+test measure_a_link_in_maximum_backoff ... ok
+test measure_the_proposed_numbers ... ok
+test a_replayed_kk1_with_a_huge_label_replaces_nothing_and_connected_holds ... ok
+test v15_connected_needs_the_peers_position ... ok
+test model_an_honest_pair_connects_and_exchanges_messages ... ok
+test v14_counters_stop_at_the_limit ... ok
+test v4_isolated_t_blind_alone_heals_a_suppressed_announcement ... ok
+test v4_isolated_t_held_alone_heals_a_lost_room ... ok
+test v4_isolated_t_keying_alone_heals_a_responder_without_a_channel ... ok
+test v4_isolated_t_rto_alone_heals_a_lost_message ... ok
+test v4_isolated_the_confirmation_clock_alone_heals_a_lost_confirmation ... ok
+test v11_attachment_budget ... ok
+test v12_the_link_queue_check_alone_keeps_a_stalled_socket_lossless ... ok
+test v6_a_hostile_peers_numbers_never_enter_out_of_order ... ok
+test v13_final_states_have_causes ... ok
+test v10_restart_never_lowers ... ok
+test v5_v15_every_waiting_state_has_a_deadline_and_status_is_true ... ok
+test v7_repeats_are_labelled ... ok
+test v4_recovers_from_any_state ... ok
+test v9_write_before_send ... ok
+test v4_isolated_the_idle_flush_alone_empties_a_relay_buffer_left_full ... ok
+test v8_no_silent_loss_inbound ... ok
+test v8_no_silent_loss_outbound ... ok
+test v6_inbox_once_in_order ... ok
+test v3_answers_are_bounded ... ok
+test v1_relay_numbers_never_reach_disk ... ok
+test v14_frame_caused_log_lines_stay_under_their_rate ... ok
+test v1_v2_hints_never_reach_disk_and_never_act ... ok
+test v14_everything_bounded ... ok
+test v12_honest_runs_are_quiet ... FAILED
+V12 honest_runs_are_quiet: side 0: attachments 2, relay refusals 2, gaps 0, frames lost at the link queue 0, received 217 of 217 (seed 3, n 217, size 16000, read every 1 ticks, stall false)
+V12 honest_runs_are_quiet: side 1: attachments 2, relay refusals 2, gaps 0, frames lost at the link queue 0, received 217 of 217 (seed 3, n 217, size 16000, read every 1 ticks, stall false)
+V12 honest_runs_are_quiet: side 0: attachments 2, relay refusals 127, gaps 0, frames lost at the link queue 0, received 474 of 474 (seed 4, n 474, size 8000, read every 50 ticks, stall false)
+V12 honest_runs_are_quiet: side 1: attachments 2, relay refusals 127, gaps 0, frames lost at the link queue 0, received 474 of 474 (seed 4, n 474, size 8000, read every 50 ticks, stall false)
+thread 'v12_honest_runs_are_quiet' (12656894) panicked at crates/coagent-daemon/tests/recovery_model.rs:1318:5:
+V12 honest_runs_are_quiet: side 0: attachments 2, relay refusals 2, gaps 0, frames lost at the link queue 0, received 217 of 217 (seed 3, n 217, size 16000, read every 1 ticks, stall false)
+# rc=101 685s
+$ cargo test --locked -p coagent-daemon --test recovery_repro -- --exact ff_a_stalled_link_queue_loses_no_frame_the_daemon_sealed
+test ff_a_stalled_link_queue_loses_no_frame_the_daemon_sealed ... ok
+# rc=0 18s
