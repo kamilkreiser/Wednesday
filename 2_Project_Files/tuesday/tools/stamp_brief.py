@@ -79,3 +79,16 @@ open(brief, "w", encoding="utf-8").write(out)
 for key, n in done.items():
     print(f"stamped line {n}: {out.split(chr(10))[n-1][:160]}")
 print(f"OK: {len(done)} slots stamped by label, 0 four-underscore lines left, clock {now}")
+
+# RULES CARD AT THE MOMENT OF ACTION (2026-11-18, the Tuesday rules-card audit, gap G2/P3): after a stamp, print the
+# card's brief rules for this seat on stderr, the stamp checklist among them. Advisory only: it never changes the exit
+# code and prints nothing for a seat without a card file (--if-card).
+try:
+    import subprocess as _sp, os as _os
+    _rc = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "..", "tools", "rules_card.py")
+    _out = _sp.run([sys.executable, _rc, "--at", "brief", "--primary", "--if-card", "--top", "8"],
+                   capture_output=True, text=True, timeout=20)
+    if _out.stdout.strip():
+        print(_out.stdout.rstrip(), file=sys.stderr)
+except Exception as _e:
+    print(f"(rules card print skipped: {_e})", file=sys.stderr)
