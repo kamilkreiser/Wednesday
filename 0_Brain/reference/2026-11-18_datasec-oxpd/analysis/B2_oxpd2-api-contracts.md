@@ -1,0 +1,388 @@
+# B2: OXPd2 API contracts (16 OpenAPI files and per-call samples)
+
+Lane B2 of the Datasec OXPd analysis, 2026-11-18. Library root: `/Volumes/Laptop-DEV/!CODING/Datasec/OXPd/`.
+
+Citation shorthand used throughout (all relative to the library root):
+- `oa/<service>:<line>` = `OXPd2/Docs/SDK-Documentation/openapi/<service>.openapi.json:<line>` (the line where the path or schema key is defined).
+- `g/<file>:<line>` = `OXPd2/Docs/SDK-Documentation/guides/<file>.md:<line>`.
+- `cs/<file>` = `OXPd2/Docs/SDK-Documentation/code-samples/<file>`.
+
+## 1. BLUF
+
+This lane holds the exact REST contracts of the 16 OXPd2 device services (170 paths, 201 operations, 1,483 schemas) and 448 per-call samples. Every service is `1.0 (Beta n)` except userPolicy (`Alpha 2`) and solutionDiagnostics (`1.1 Beta 2`). The five facts that most shape the port:
+
+1. **Sign-in from a server-side card lookup is fully supported.** An owned USB HID reader posts its reports to the solution server; the server answers with an `initiateLogin` action or calls `POST authenticationAgents/{agentId}/login` with a `succeeded` result that carries the user's identity (`oa/usbAccessories:6165`, `oa/authentication:950`, `oa/authentication:2427`).
+2. **There is no REST call that submits a print job.** The printJob service only registers an agent; printing is IPP to the device, and the OXPd2 priority extensions for Print-Job and Print-URI are marked "currently not supported" (`oa/printJob:682`, `g/printJobIppExtensions:47-49`).
+3. **Scan to a server endpoint is supported, but only inside a walk-up UI session.** `POST scanJobs` needs a UI-context token; the device then POSTs `multipart/mixed` to an HTTP(S) destination the ticket names (`oa/scanJob:2452`, `g/scanJobServiceOverview:122-137`).
+4. **The device session can carry identity, not tokens.** Custom attributes are capped at 256 pairs of 512 characters each; Entra tokens must stay on the server, keyed by the device session id (`oa/authentication:2363`, `oa/authentication:2427`).
+5. **Every callback target has a `workpath` variant beside `http`**, the webHook service accepts only a Workpath target, and applications are classed `apNative | apWorkpath | apOXPd2`: the same service set is exposed to Workpath packages on the device (`oa/authentication:3513`, `oa/webHook:846`, `oa/application:6497`).
+
+## 2. Coverage
+
+| Item | Count | How |
+|---|---|---|
+| OpenAPI files parsed whole by script | 16 of 16 | python3 standard library, run with `-I`; scripts in the scratch folder `/private/tmp/claude-501/-Volumes-Laptop-DEV-FRIDAY/d534540a-a4f0-44ac-a3a3-685bcd5abffc/scratchpad/oxpd_B2/` (`ops2.py`, `schema2.py`, `targets.py`, `reg.py`, `ctx.py`) |
+| Operations listed (method, path, operation id, security, scopes, authorization text, request and response schema) | 201 of 201 | all read |
+| Schemas extracted | 1,483 | all dumped to text; read as below |
+| Schemas read in full | authentication (88), security (20), printJob (18), webHook (23) | whole |
+| Schemas read except shared boilerplate (links, errors, bindings, collection fields) | application (207) | whole minus common types |
+| Schemas read selectively | usbAccessories (HID, registration, callbacks, actions; generic-USB endpoint types skipped), scanJob (ticket, destinations, status, notification, enums; SMB, FTP, SMTP detail and option-rule types skipped), copy (stored jobs, notifications, status; copy options skipped), jobStatistics (job, jobInfo, printInfo, scanInfo, callback, user info; fax and supply detail skipped), userPolicy (registration, configuration, permissions, policy update), solutionManager (states, notifications, runtime registration; certificate, context and package types by name only) | chosen by relevance to the suite |
+| Schemas not read (operations only) | device, deviceUsage, supplies, solutionDiagnostics, sdkSupport | not needed for the questions asked |
+| Code samples inventoried by name | 448 of 448 (161 C#, 147 Java, 140 JS) | `ls` and counts by service |
+| Code samples opened | 7 | one per question: agent login (C#), solution notification (JS, Java), create scan job (JS), release stored job (C#), resolve security expression (JS), modify open HID accessory (JS); first 40 to 80 lines each (median file size is 878 bytes) |
+| Guides read whole (outside the lane, to get the callback contracts the OpenAPI files only reference) | 4: `authenticationServiceOverview` (233 lines), `printJobServiceOverview` (58), `printJobIppExtensions` (232), `securityModel` (296) | whole |
+| Guides read in part | `scanJobServiceOverview` 60-194, `applicationServiceBrowserUseModel` 20-204, `architectureModel` 960-995; grep hits only in `usbAccessoriesOverview`, `copyServiceOverview`, `authenticationServiceRegistration`, `applicationServiceOverview` | targeted |
+| Not opened | the other 36 guides, the SDK libraries, demos, forum | other lanes |
+
+## 3. Inventory
+
+- Format: OpenAPI 3.0.1 JSON, one file per service, 3,700 to 10,500 lines each, generated by HP tool version `2.19.0.202505142133` (`info.x-hp-ext-tool-version` in every file). Server URL is a placeholder (`http://localhost/<service>`); real URLs come from service discovery at `/cdm/servicesDiscovery` (`g/architectureModel:501-512`).
+- One security scheme in every file: `e2-claims`, HTTP bearer, `bearerFormat: JWE` (for example `oa/authentication` components). Every operation requires it, including `GET capabilities`.
+- Each operation carries `x-hp-ext-permitting-scopes` (path-pattern scope names) and an authorization table in its description with three kinds: Client-Based (solution provider, sometimes "must own the containing resource"), Role-Based (local device administrator), Context-Based (holder of a UI-context token or an authentication-session token).
+- Polymorphic types are objects with exactly one member (`x-hp-ext-polymorph-info`). "Bindable" fields take either `explicit` or `expression` (a macro pattern expanded on the device).
+- Code samples: C# `OXPd2ExamplesHost_Services_*`, Java `oxpd2examples_*`, JS `services_*`. All follow one pattern: discovery, build a service client, pick a token type (`AccessTokenType.Admin | Solution | UI_Context`, plus an auth-context token), call (`cs/services_scanJobService_CreateScanJob.js`, `cs/OXPd2ExamplesHost_Services_AuthenticationService_AuthenticationAgentLogin.cs`).
+
+| Service | Version | Paths | Ops | Schemas | Registration record(s) |
+|---|---|---|---|---|---|
+| application | 1.0 (Beta 14) | 24 | 30 | 207 | applicationAgent (many), i18nAsset (many), messageCenterAgent (one) |
+| authentication | 1.0 (Beta 6) | 9 | 8 | 88 | authenticationAgent (many) |
+| copy | 1.0 (Beta 3) | 12 | 13 | 141 | copyAgent (one) |
+| device | 1.0 (Beta 7) | 10 | 10 | 31 | none |
+| deviceUsage | 1.0 (Beta 5) | 4 | 4 | 48 | deviceUsageAgent (one) |
+| jobStatistics | 1.0 (Beta 7) | 5 | 6 | 146 | jobStatisticsAgent (one) |
+| printJob | 1.0 (Beta 5) | 3 | 3 | 18 | printJobAgent (one) |
+| scanJob | 1.0 (Beta 10) | 13 | 15 | 226 | scanJobAgent (one) |
+| sdkSupport | 1.0 (Beta 11) | 15 | 20 | 48 | none; "not present in production firmware" (info description) |
+| security | 1.0 (Beta 6) | 4 | 4 | 20 | securityAgent (one) |
+| solutionDiagnostics | 1.1 (Beta 2) | 5 | 5 | 20 | solutionDiagnosticsAgent (one) |
+| solutionManager | 1.0 (Beta 13) | 28 | 36 | 174 | solutionNotificationAgent (many), runtimeRegistrationAgent (one), solutionModification |
+| supplies | 1.0 (Beta 4) | 6 | 6 | 44 | suppliesAgent (one) |
+| usbAccessories | 1.0 (Beta 13) | 19 | 23 | 138 | usbAccessoriesAgent (one) |
+| userPolicy | 1.0 (Alpha 2) | 10 | 15 | 111 | userPolicyAgent (one) |
+| webHook | 1.0 (Beta 3) | 3 | 3 | 23 | webHookAgent (one) |
+
+## 4. Findings
+
+### 4.1 Tokens, grants and access control (security model)
+
+The token endpoint is not in any of the 16 files; it is the device's CDM OAuth2 resource, documented in `g/securityModel`.
+
+| Token | How obtained | Lifetime | What it opens |
+|---|---|---|---|
+| Admin | `POST <deviceRoot>/cdm/oauth2/v1/token`, form body `grant_type=password`, device admin user and password (`g/securityModel:149`, `169-175`) | 1 hour, no refresh token (`g/securityModel:163`) | Role-Based operations: install and uninstall solutions, enumerate all solutions, `applicationRuntime/reset`, `PATCH homescreen`, `reissueInstallCode` |
+| Solution | After install the device POSTs an `ntAuthCode` notification to the solution's notification target; the server exchanges the code with `grant_type=authorization_code`, `client_id=com.hp.cdm.client.hpE2Solution`, `refresh_token_requested=true` (`g/securityModel:205-227`). The code must be exchanged within 5 minutes; an admin can force a new one with `reissueInstallCode` (`g/securityModel:218`, `oa/solutionManager:5674`) | 1 hour plus refresh token (`g/securityModel:244-250`, `260-268`) | Resources public to all solution providers, and resources this solution owns |
+| UI context | Created when an application is launched in the embedded browser; read in page script as `window.oxpd2.uiContextToken` (`g/applicationServiceBrowserUseModel:120`) | The UI session | Context-Based operations: create scan or copy job, runtime chrome, exec, exit, reset inactivity timer, shared accessories. Also the value of the IPP `priority-print-auth-cookie` (`g/printJobIppExtensions:197`) |
+| Authentication session | Returned by `authenticationAgents/{id}/login` as `sessionAccessToken`, or delivered to the agent's callbacks through the macro `$SOLUTION_SESSION(AUTHENTICATION_CONTEXT_TOKEN)$` in a header or path (`oa/authentication:1672`, `g/authenticationServiceOverview:64`, `g/authenticationServiceRegistration:79-83`) | The login session | `session/forceLogout` |
+
+- OAuth roles: the device is identity manager, authorization server and resource server; the solution is the client; one grant per device (`g/securityModel:130-136`). A server driving a fleet therefore holds one refresh token per printer.
+- Scope aliases seen: `com.hp.cdm.auth.alias.deviceRole.deviceAdmin`, `...deviceRole.solutionProvider` (`g/securityModel:191`, `249`).
+- **security service** (`oa/security`): purpose is read access to the signed-in user's security context and a CORS switch.
+
+| Method and path | Does | Token | Notes |
+|---|---|---|---|
+| GET `/capabilities` (`:86`) | service description | any | |
+| GET `/securityAgents`, `/securityAgents/{agentId}` (`:231`, `:395`) | list or read agent | solution (owner for one) or admin | |
+| POST `/securityAgents/{agentId}/resolveSecurityExpression` (`:553`) | expands a macro expression against the current signed-in user | solution owner or admin | request `{expression}`; response `{result}`; undeclared operands return the literal `ACCESS_DENIED` (`oa/security:900`) |
+
+- Registration record fields: `corsEnabled` (lets script loaded from the solution's targets call the device's REST APIs from the embedded browser) and `declaredExpressionOperators` (the list of `SECURITY_CONTEXT` operands the solution may read) (`oa/security:900`).
+- Available operands: `DISPLAY_NAME`, `EMAIL_ADDRESS`, `EXCHANGE_MAILBOX`, `FQ_USER_NAME`, `HOME_FOLDER`, `LDAP_BIND_USER`, `USER_NAME`, `USER_DOMAIN`, `USER_PRINCIPAL`, `AUTH_TYPE`, `AUTH_AGENT_ID`, `SAM_ACCOUNT`, `SID`, `CUSTOM_<key>` (`g/architectureModel:954-967`).
+- Certificates: each solution has its own store on the device. `solutions/{id}/certificateAuthorities` (import, export, delete) and `solutions/{id}/certificates` (import key pair, delete; private keys cannot be exported) (`oa/solutionManager:2479-3888`). The IPP Print-URI text says HTTPS fetches are validated against "the OXPd2 CA Certificate store" (`g/printJobIppExtensions:134`).
+- Solution bundles: unsigned bundles install only on debug-bridge devices; production needs HP verification and signature (`g/securityModel:30-38`, `54-62`). Of four install routes only the Solution Manager Installer API is supported for OXPd2 today (`g/securityModel:71-74`).
+
+### 4.2 authentication service
+
+Purpose: register a custom sign-in method (agent) and start or end device sessions from a server (`oa/authentication` info).
+
+| Method and path | Does | Token | Notes |
+|---|---|---|---|
+| GET `/capabilities` (`:1139`) | description | any | |
+| GET `/authenticationAccessPoints` (`:124`), `/{accessPointId}` (`:289`) | list every sign-in method on the device, native and custom | solution or admin | `kind` enum: `akOther, akDeviceAdmin, akDeviceUser, akPIN, akDeviceService, akPushButton, akLDAP, akWindows, akWindowsSmartCard, akCustom` (`:2015`); `customName` for custom |
+| POST `/authenticationAccessPoints/{accessPointId}/initiateLogin` (`:450`) | starts that sign-in method on the panel as if the user pressed it | solution or admin | no body; returns at once; succeeds even if the agent is unreachable; wakes a sleeping device; 409 when the UI is not idle |
+| GET `/authenticationAgents` (`:627`), `/{agentId}` (`:791`) | list or read agents | solution (owner for one) or admin | |
+| POST `/authenticationAgents/{agentId}/login` (`:950`) | starts a login and supplies the pre-prompt result directly | solution, owner only | body `prePromptResult`; response `sessionId` and `sessionAccessToken` when result is `succeeded` or `continue` (`:1672`); 409 `uiNotIdle` (`:1906`) |
+| POST `/session/forceLogout` (`:1288`) | logs the current user out, UI returns to home | authentication-session token only | asynchronous; succeeds when nobody is signed in (`g/authenticationServiceOverview:230`) |
+
+All the ways a solution can establish a session:
+1. The user presses Sign In or a protected feature; the device runs the agent's callback sequence (`g/authenticationServiceOverview:23-25`).
+2. The server calls `initiateLogin` on any access point (its own or a native one).
+3. The server calls `login` on its own agent with a result. `succeeded` signs the user in with no panel interaction; `continue` opens the agent's prompt page; `failed` shows a message; `canceled` does nothing (`oa/authentication:2672`).
+4. The server answers a USB callback with the action `initiateLogin {accessToken, agentAccessPointId}` (`oa/usbAccessories:7525`).
+
+Ways to query a session: there is no session resource. The contracts offer (a) `resolveSecurityExpression` for the current user's attributes, (b) `GET applicationRuntime` for `activityState` and `GET applicationRuntime/currentContext` for the active application (`oa/application:1435`, `:1580`), (c) the solution notifications `ntWalkupSignIn` and `ntWalkupSignOut` (`oa/solutionManager:11158`), (d) the agent's own `signoutNotification` callback.
+
+Ways to end a session: `session/forceLogout` with the session token; the USB response action `forceLogout {accessToken}` (`oa/usbAccessories:7553`); admin-only `POST applicationRuntime/reset` (`oa/application:3282`); the device inactivity timeout (default 60 s, settable 10 to 300 s, `g/applicationServiceOverview:448`).
+
+Identity data that can be set on the session (`writableAuthenticatedUserDetails`, `oa/authentication:2427`):
+
+| Field | Limit | Note |
+|---|---|---|
+| `userName` (required), `fullyQualifiedUserName` (required) | 128; DOMAIN\user normalisation rules at `:2405` | |
+| `displayName`, `emailAddress`, `userPrincipalName`, `sAMAccountName`, `sidString`, `userDomain` | 255; 254; 512; 512; 512; 256 with a PJL-safe pattern | |
+| `emailFromAddress`, `emailToAddresses`, `emailCCAddresses`, `emailBCCAddresses`, `emailSubject`, `emailMessage` | lists up to 100; subject 127; body 2,047 | pre-fill the device's native email app for the session |
+| `homeFolderPath`, `exchangeMailboxUri`, `ldapBindUser`, `faxBillingCode`, `faxCompanyName` | 512; 512; 512; 16; 30 | |
+| `preferredLanguage` | xx or xx-YY | switches the panel language for the session |
+| `permissionSets` | list of permission set UUIDs | assigns device permissions |
+| `customAttributes` | up to 256 pairs; key and value 1 to 512 characters; keys must not start with `com.hp` | flows to user-policy agents, job statistics and applications |
+| `password` | 128 | "may be used by workflow applications to impersonate the user"; see section 8 |
+
+The agent must declare in its registration record which standard and custom attributes it will set (`modifiedUserAttributes`, `oa/authentication:3604`); undeclared ones are not processed (stated for user-policy agents at `oa/userPolicy:4045`; for authentication agents inferred from `g/authenticationServiceRegistration:91`).
+
+Registration record (`oa/authentication:3604`): common agent fields (`agentId`, `name`, `localizedName`, `localizedDescription`), `authenticationTarget` (`http` or `workpath`), `enablePrePromptCheck`, `enableSignoutNotification`, `modifiedUserAttributes`. Several agents per solution are allowed.
+
+Result actions: both pre- and post-prompt results may carry `action`: `none` or `initiateAppLaunch {applicationAccessPointId, startIntent}` (`oa/authentication:2313`, `:2290`). The guide marks `startIntent` "property not currently supported" (`g/authenticationServiceOverview:160`).
+
+### 4.3 Callbacks the device makes to the solution server
+
+Two target kinds exist (`oa/application:7546`, `oa/authentication:3423`):
+- **Service target**: a base URL; the device calls named sub-resources under it and uses the response body.
+- **Payload target**: the device POSTs `application/json` with standard metadata and a `payloads` array; no response body is expected (`oa/application:7546`; the Java sample iterates `payload.getPayloads()`, `cs/oxpd2examples_solutionmanager_SolutionNotificationsController_PostSolutionNotification.java`).
+
+Both kinds share the same HTTP settings: `scheme`, `host` (authority, may include port), `path`, optional `authorization` (`basic {username, password}` up to 127 characters each, or `bearer {token}` up to 1,024), up to 25 custom `headers`, optional `retry.basic {maxRetries, timeoutSeconds}`. Without `retry`, the connection times out in 30 seconds and is not retried (`oa/authentication:3423`, `:3094`, `:2879`, `:2968`). All of host, path, credentials and header values are bindable, so they can come from the solution context after install.
+
+How the server knows the caller is the device: only by what the solution configures, that is a static Basic or Bearer credential, custom headers, and TLS. Nothing in the 16 files describes a device signature or a device client certificate on callbacks (searched the target schemas in all files with `targets.py`; positive control: the same script found all 9 target definitions).
+
+How fast the server must answer: the contracts give a connection timeout only (30 s default). No response deadline is stated for any callback. For "critical" targets the retry text says a new retry sequence starts after the count is exhausted (`oa/authentication:3378`; I read only the first 700 characters of that description).
+
+| Service | Target (kind) | What the device sends | What the server answers | Source |
+|---|---|---|---|---|
+| authentication | `authenticationTarget` (service) | `POST <target>/prePromptResult` (if enabled) with `sessionId`, `sessionAccessToken`, `languageCode`; `GET <target>/prompt` loaded in the embedded browser; `POST <target>/postPromptResult` with the same three fields after the browser closes; `POST <target>/signoutNotification` with `sessionId` (if enabled) | pre-prompt: `prePromptResult` (`result` = `succeeded {details}` \| `failed {message}` \| `continue` \| `canceled`, optional `action`); prompt: an HTML page; post-prompt: the outcome (schema not in the OpenAPI file, see section 6) | `g/authenticationServiceOverview:66-88`, `oa/authentication:2700` |
+| usbAccessories | `registrationTarget` (service, "critical" when present) | `registrationRequest {usbAttached \| usbDetached {resourceLink}}`; `usbCallbackEnvelope {operationContext, usbCallback: hidRead {data, hidReadSequence} \| usbRead \| usbWrite \| usbClosed}`; `postRegistrationPromptResultRequest` (if enabled) | `registrationResponse {prompt}`; `operationCallbackResponse {action: none \| initiateLogin \| forceLogout}` | `oa/usbAccessories:6133`, `:6152`, `:6531`, `:6044`, `:6165` |
+| userPolicy | `policyUpdateTarget` (service) | `policyUpdateRequest {userInfo, permissionsGranted}` at sign-in; a configuration-change notification with `configurationDetails` | `policyUpdateResult {succeeded {userAttributes, permissionsToAdd, actions} \| failed {message}}`; `configurationChangeResult {actions}` | `oa/userPolicy:3955`, `:3990`, `:4045`, `:2929` |
+| jobStatistics | `notificationTarget` (service) | `statisticsCallbackPayload {jobDetails[], lastSequenceNumberNotified, lastSequenceNumberProcessed, missingSequenceNumbers}` | `statisticsCallbackResponse {lastSequenceNumberNotified, lastSequenceNumberProcessed}` (the acknowledgement) | `oa/jobStatistics:3671`, `:3723` |
+| scanJob | HTTP destination in the ticket (service) | `multipart/mixed` POST: part `content` (JSON `serviceTargetContent`), 1..n parts `scanFile`, optional part `metadata` | not specified beyond HTTP status | `g/scanJobServiceOverview:122-177`, `oa/scanJob:6184` |
+| scanJob | `scanNotificationTarget` (payload) | `scanNotification.jobNotification {scanJobId, scanJobStatus, solutionContext}` | none | `oa/scanJob:4916` |
+| copy | `copyNotificationTarget` (payload) | `copyNotification.jobNotification {copyJobId, copyJobStatus, solutionContext}` | none | `oa/copy:2773` |
+| application | `resultIntentTarget` given in `initiateLaunch` (payload) | `resultIntentNotificationContent` when the launched application exits | none | `oa/application:7636`, `:6027` |
+| solutionManager | `notificationTarget` (payload) | `solutionNotification` of a subscribed type | none | `oa/solutionManager:7956`, `:7968` |
+
+Solution notification types (`oa/solutionManager:11158`): `ntAll, ntDeviceBoot, ntShuttingDown, ntSolutionInstalled, ntSolutionUninstalled, ntAuthCode, ntWalkupSignIn, ntWalkupSignOut, ntContextModified, ntConfigurationModified, ntModificationInstalled, ntModificationUninstalled, ntCertificateAuthorityAdded, ntCertificateAuthorityDeleted, ntCertificateAdded, ntCertificateDeleted, ntInstallerOperation, ntRuntimeRegistrationAdded, ntRuntimeRegistrationDeleted`. The payload fields of the two walk-up notifications were not read.
+
+The callback contracts for userPolicy, jobStatistics and usbAccessories are named in the OpenAPI files as `clientService.userPolicyServiceTarget`, `statisticsServiceTarget`, `accessoriesAgentServiceTarget` and `httpDestinationServiceTarget`, but their resource paths are not in the files (`oa/userPolicy:4088`, `oa/jobStatistics:3380`, `oa/usbAccessories:6189`, `oa/scanJob:3313`). The payload types are.
+
+### 4.4 application service
+
+Purpose: register walk-up applications that load a server-hosted web page in the device's embedded browser, launch them, control the browser chrome, post messages, and manage the home screen (`oa/application` info).
+
+| Method and path | Does | Token | Notes |
+|---|---|---|---|
+| GET `/applicationAccessPoints` (`:345`), `/{id}` (`:553`) | list every launchable application on the device | solution or admin | filters by category and platform; fields `title`, `icon`, `category`, `platform`, `intentProfile` (`:6728`) |
+| POST `/applicationAccessPoints/{id}/initiateLaunch` (`:712`) | launches that application when the UI is idle | solution or admin | JSON or `multipart/mixed` body; optional `resultIntentTarget`; returns at once; wakes the device |
+| GET `/applicationAgents` (`:916`), `/{agentId}` (`:1101`) | list or read registered applications | solution (owner) or admin | |
+| POST `/applicationAgents/{agentId}/refresh` (`:1260`) | re-evaluates the tile's registration and appearance on the home screen | owner or admin | used after a context change that affects the bindable `enabled` flag (inferred) |
+| GET `/applicationRuntime` (`:1435`) | `activityState` and `currentLanguage` | solution or admin | `asAsleep, asInactive, asAwakeIdle, asAwakeActive`; the enum is declared fixed (`:7829`) |
+| GET `/applicationRuntime/currentContext` (`:1580`) | identifier and `activeApplication {applicationId, name, solutionId}` | solution or admin | |
+| POST `.../currentContext/beep`, `/exec`, `/exit`, `/resetInactivityTimer` (`:1725`, `:1885`, `:2059`, `:2219`) | beep; launch another application that takes the context and returns it on exit; close; extend the timeout | UI-context token | `exec` takes `applicationId` and an optional start intent |
+| GET, PUT `.../currentContext/resultIntent` (`:2379`) | read or set the result handed back to the launcher | UI-context token | |
+| GET `.../currentContext/startIntent` (`:3137`) | read the intent the application was started with | UI-context token | |
+| GET, PUT, PATCH `.../currentContext/runtimeChrome` (`:2680`) | change header, footer, buttons, soft keyboard at run time | UI-context token | fields at `:8029` |
+| POST `/applicationRuntime/reset` (`:3282`) | forces the active application to exit and signs the user out | admin only | |
+| GET `/homescreen` (`:3587`) | default application and custom message | solution or admin | |
+| PATCH `/homescreen` (`:3587`) | set `defaultApplicationId` (kiosk) or `homescreenCustomMessage` | admin only | message variants `emptyMessage`, `message` (string reference), `inlineMessage` (`:8444`) |
+| GET `/i18nAssets`, `/{assetId}` (`:3889`, `:4054`) | read string tables | solution (owner) or admin | |
+| GET `/messageCenterAgents`, `/{agentId}` (`:4213`, `:4398`) | list or read | solution (owner) or admin | |
+| GET, POST `/messageCenterAgents/{agentId}/messages`; GET, DELETE `.../{messageId}` (`:4556`, `:4908`) | post a message to the panel's Message Center | owner or admin | `messageType` `mtInfo, mtWarning, mtError`; localized title and text inline or by reference; optional image (`:8615`) |
+| GET `/capabilities` (`:3442`) | includes `userInterfaceAttributes`: display size and resolution, header and footer height, icon size and formats, keyboards (`:5677`) | any | |
+
+Application registration (`applicationContent`, `oa/application:10104`): `category` (`acStandardWalkup` or `acKiosk`), `platform` (`apNative, apWorkpath, apOXPd2`), `target` (web target = the common HTTP target plus default start and result intents, or a Workpath package), `localizedTitle`, `icon` or `iconSet` keyed "[width]X[height]", bindable `enabled`, `chrome`, `failureBehavior` (dialog shown when the page fails to load), `intentProfile` (JSON schemas of start and result intents).
+
+Chrome controls (`oa/application:8029`): header title and colours, footer visible and colour, Home, Help, Start buttons, soft keyboard. Date/time, header icon, Info, Reset and the Sign In/Sign Out control are kiosk-only. Soft keyboard types: `sktStandard, sktFax, sktFraction, sktHex, sktPin` (`:8185`).
+
+Internationalisation: an `i18nAsset` is a string table per language (inline or a JSON file in the bundle), strings up to 1,024 characters, ids up to 256 (`oa/application:10218-10336`); every localized name in every registration record is a reference `{i18nAssetId, stringId}` (`oa/authentication:2179`).
+
+Embedded browser (guide, not OpenAPI): Chromium 87.0.4280.144 on QtWebEngine 5.15.16 (`g/applicationServiceBrowserUseModel:73`, `:129`); file input, downloads, popups, tabs, notifications, fullscreen disabled (`:89-98`); the feature set, cookies and custom hooks are each flagged as still under development (`:68`, `:115`, `:195`); the primary page is never cached (`:201`).
+
+### 4.5 usbAccessories service
+
+Purpose: let a server use USB devices plugged into the printer, card readers above all (`oa/usbAccessories` info).
+
+| Method and path | Does | Token | Notes |
+|---|---|---|---|
+| GET `/accessories` (`:472`), `/{accessoryID}` (`:702`) | list attached USB devices | any solution | filters: vendor, product, serial, class, subclass, protocol, `selectClientUsableOnly`; `registration` shows `rkOwned` or `rkShared` (`:6084`) |
+| GET `/accessories/{id}/hid` (`:2814`) | HID description (report lengths, country code) | solution | |
+| POST `/accessories/{id}/hid/open` (`:2976`) | opens the HID, returns `openHIDAccessory` | solution token if owned; UI-context token if shared | body `operationContext` (cookie echoed in callbacks, bindable) and `reportReadingActive`; reopening closes the earlier handle with a warning (`:5141`) |
+| GET, PATCH, DELETE `/accessories/{id}/hid/{openId}` (`:3152`) | read, start or stop report reading, close | same token as open | PATCH body `reportReadingActive` |
+| POST `.../readReport`, `.../writeReport` (`:3627`, `:3818`) | GET_REPORT and SET_REPORT on the control pipe | same | `reportId`, `reportType` (`hrtInput, hrtOutput, hrtFeature`), `length` or `data`; `async` needs a registered callback |
+| `/accessories/{id}/generic` and `open`, `controlRead`, `controlWrite`, `endpointRead`, `endpointWrite`, `endpointHalt`, `reset` (`:863-2639`) | raw USB access: claim interfaces, read and write endpoints | same rule | for non-HID readers |
+| GET `/usbAccessoriesAgents`, `/{agentId}` (`:4154`, `:4319`) | list or read | solution (owner) | |
+
+- Registration (`oa/usbAccessories:6281`): `registrations[]` of `{vendorId, productId, serialNumber?, registrationKind}`; optional `registrationTarget`; `enablePostRegistrationPromptCheck`. One record per solution.
+- Ownership: an owned accessory belongs to one solution, usable at any time, with attach and detach notifications; once owned by one solution no other may own or share it. A shared accessory is usable only while the solution's application is active on the panel and needs the UI-context token (`g/usbAccessoriesOverview:22-48`).
+- Events: `usbAttached`, `usbDetached`, `hidRead` (base64 `data`, monotonically increasing `hidReadSequence`), `usbRead`, `usbWrite`, `usbClosed` (sent on explicit close, detach, or loss of the UI for shared devices) (`oa/usbAccessories:6469-6891`).
+- Data limit: 65,535 bytes per transfer (`oa/usbAccessories:6604`).
+- Transfer status: `utsOk, utsStall, utsBabble` (`:5575`).
+- The data delivered is the raw HID report. Nothing in the contract decodes keyboard-wedge scan codes into characters (inferred from `hidReadCallbackPayload`, `:5350`).
+- Test aid: `sdkSupport/simulatedHidDevices` and `.../tap` simulate a card tap on non-production firmware (`oa/sdkSupport:2795`, `:3418`).
+
+### 4.6 printJob service and IPP
+
+| Method and path | Does | Token |
+|---|---|---|
+| GET `/capabilities` (`oa/printJob:76`) | description | any |
+| GET `/printJobAgents`, `/{agentId}` (`:221`, `:386`) | list or read agents | solution (owner) or admin |
+
+- That is the whole service. The record "gives the solution the right to use priority printing features as provided through IPP" (`oa/printJob:682`). Check: the script lists 3 paths for printJob and 13 for scanJob including `POST .../scanJobs`.
+- Submission is IPP at `http://<device>:631/ipp/print`, also ports 80 and 443 (`g/printJobIppExtensions:26-34`).
+- Push: standard IPP Print-Job sends the document by value. Pull: IPP Print-URI makes the device fetch a URL; HP adds `print-uri-user-name` and `print-uri-password` (Basic) and `print-uri-cookie` (up to 4 text sets, placed in a Cookie header) (`g/printJobIppExtensions:107-129`). There is no bearer-token or custom-header attribute for the device's fetch.
+- Priority printing: `Priority-Print-Enter` (0x4029) and `Priority-Print-Exit` (0x402A) reserve the printer for the solution while it holds the UI context; the cookie is the UI-context token; other IPP clients get `server-error-busy`, port 9100 and LPD jobs are held (`g/printJobIppExtensions:61-86`, `:161-178`, `:197`). Reservation ends on the inactivity timeout.
+- **Not supported today** per the guide: submitting by value or by reference "to a reserved print device" (`g/printJobIppExtensions:47-49`).
+- Job tracking: `job-uuid` on Get-Job-Attributes; fetch failures show as `job-state aborted` with `document-access-error` (`:136-159`).
+- Formats and page description languages: none of the 16 files or the two print guides lists accepted document formats. They must be read from the device's IPP `document-format-supported` attribute (inferred; standard IPP).
+- Job tickets, hold and release: no OXPd2 print ticket type exists. Hold and release are not exposed for print; see stored jobs below.
+
+### 4.7 scanJob service
+
+| Method and path | Does | Token | Notes |
+|---|---|---|---|
+| GET `/capabilities`, `/defaultOptions`, `/profile` (`oa/scanJob:640`, `:785`, `:930`) | description; default ticket per destination; valid options and constraint rules | any; solution; solution | |
+| GET `/scanJobAgents`, `/{agentId}` (`:1075`, `:1239`) | list or read | solution (owner) | |
+| POST `/scanJobAgents/{agentId}/scanJobs` (`:2452`) | **starts a scan** | UI-context token only | body `scanTicket` and optional `solutionContext` (up to 255 characters, echoed in notifications) |
+| GET `.../scanJobs`, `.../scanJobs/{id}` (`:2452`, `:2786`) | list or read job and status | solution owner; the creating UI context for one job | |
+| POST `.../scanJobs/{id}/cancel` (`:2955`) | cancel; never fails, ignored once data is delivered | solution owner or creating UI context | |
+| GET, DELETE `.../localScans`, `.../localScans/{id}`, `.../files`, `.../files/{fileId}`, `.../files/{fileId}/data` (`:1397-2257`) | scans kept on the device and pulled by the server | solution owner | the guide says the `localFolder` destination is not currently supported (`g/scanJobServiceOverview:89`) |
+
+- Ticket (`oa/scanJob:4683`): `destinationOptions` (one of `http`, `networkFolder` (SMB or FTP, credentials provided or from the signed-in user's security context), `jobStorage` (folder, job name, PIN type), `localFolder`, `email`), `scanOptions`, optional `metadataOptions` (file name, content type, content; all bindable), optional `retryOptions` (0 to 5 attempts, 1 to 300 s apart).
+- Receiving the image: the server hosts an endpoint taking `multipart/mixed` POST with part `content` (`scanJobId`, `transmittingState` `tsStarted | tsTransmitting | tsCompleted`, `includedScanFiles`, `deliveredScanFiles` each 0 to 9,999, `metadataFile`), parts `scanFile` (Content-Disposition with `ordinal` and `filename`), optional part `metadata` (`g/scanJobServiceOverview:122-177`, `oa/scanJob:6184`).
+- Multi-page and delivery: `fileTransmissionMode` `tmJob` (everything in one request) or `tmImage` (one or more requests as files become ready) (`oa/scanJob:6797`). `scanCaptureMode` `scmStandard, scmJobBuild, scmBook, scmIdCard` (`:5968`).
+- Settings: about 60 scan options (`oa/scanJob:5508`). Key enums: `colorMode` (9 values, `:5631`), `resolution` `dpi75` to `dpi1200` (`:5958`), `plexMode` (`:5948`), `outputFileFormat` (44 literals including `ffPdf, ffPdfa, ffTiff, ffMtiff, ffJpeg, ffPng, ffOcrPdf, ffOcrPdfa, ffOcrText`; the enum is the whole imaging pipeline's list, and `/profile` says which a device accepts, `:7679`), `mediaSizeId`, `scanProgressMode` (`spmNone` hides the native progress dialog, `:5978`), `imagePreviewMode`. PDF encryption via `outputFileEncryption` and `encryptionPassword`.
+- Size limits: none stated for the upload. Only the file count ceiling of 9,999.
+- Status (`oa/scanJob:4674`): counters `totalImagesScanned`, `totalImagesProcessed`, `totalImagesTransmitted`, retry counters, and per-phase activity lists.
+
+### 4.8 copy service and stored jobs (the only hold-and-release contract)
+
+- Operations: copy jobs (`POST copyJobs` needs a UI-context token, `oa/copy:709`), and stored jobs: `GET storedJobs` (`:1381`), `GET storedJobs/{jobId}` (`:1559`), `POST storedJobs/{jobId}/release` (`:1728`), `POST storedJobs/{jobId}/remove` (`:1912`).
+- Stored job fields: `jobId, jobName, folderName, jobUserName, jobTimestamp, totalPages, jobPasswordType` (`sjptNone, sjptNumericPIN, sjptAlphanumericPIN`) (`oa/copy:5008`, `:6997`).
+- Release takes `copyOptions` (constrained by the profile's `storedCopy` rules), `jobPassword`, `solutionContext`, and creates a copy job (`oa/copy:4895`). Release needs only the solution token (owner) or admin, so a server can release without a panel session (`cs/OXPd2ExamplesHost_Services_CopyService_ReleaseStoredJob.cs`).
+- Scope: the guide says stored jobs are "primarily created using the Scan Service" with the `jobStorage` destination and "can also include jobs stored by other agents and/or walk-up users" (`g/copyServiceOverview:495-497`). It does not say whether driver-submitted stored print jobs appear.
+
+### 4.9 userPolicy service (Alpha)
+
+Purpose: a server-side authorization agent that runs after authentication and can add permissions and user attributes, and can manage the device's permission model (`oa/userPolicy` info).
+
+- Operations (15): agent read; `GET, PATCH configuration` (allowed sign-in methods, default sign-in method, sign-in choice, guest attributes, lock configuration, `:784`, `:2846`); permission sets (list, create custom, bulk update, read, modify, delete non-built-in, `:1098-1605`); permissions (list, bulk update, read, modify: each permission has an ordered list of sign-in methods offered when it is required, `:2071-2422`, `:3116`). All are solution-owner only; the admin role is not listed on the sub-resources.
+- Registration (`:4222`): `policyUpdateTarget`, `modifiedUserAttributes`, `lockUserConfiguration` (blocks EWS and CDM changes to authorization settings), `policyFilter` (run only for given authentication agents).
+- Callback: `policyUpdateRequest {userInfo: authenticatedUserInfo, permissionsGranted}`; answer `succeeded {userAttributes, permissionsToAdd, actions}` or `failed {message}`, and a failure signs the user out (`:3955`, `:4045`, `:3939`).
+- This is how "sign in with Entra, then unlock only the device features this user may use" is expressed.
+
+### 4.10 webHook service
+
+- Operations: capabilities and agent list or read only (`oa/webHook:96-406`).
+- Registration: 1 to 256 `webHooks`, each `{method, target}`; methods `whmGet, whmPut, whmPost, whmPatch, whmDelete, whmHead, whmOptions` (`:732`, `:831`).
+- The only target variant is `workpath {package, absolutePath}` (`:846`, `:862`). The service forwards HTTP requests arriving at the device to a Workpath package on the device. It gives an off-device OXPd2 server nothing.
+- No guide exists for it (search of the guides folder for file names containing `userPolicy` or `webHook`: 0; control: `authentication` matches 2).
+
+### 4.11 jobStatistics service
+
+- Operations (6): agents; `GET, PATCH .../jobs` (the ring buffer with `totalJobEntries`, `availableJobEntries`, `jobSubmissionLocked`, `highestSequenceNumberCompleted`, `lastSequenceNumberNotified`, `lastSequenceNumberProcessed`); `GET .../jobs/{sequenceNumber}` (`oa/jobStatistics:773`, `:1129`, `:2826`).
+- Per job: `jobInfo` (category, source, destinations, done status, timestamps, application name, device job name), `printInfo` (impressions mono and colour, sheets simplex and duplex, A4-equivalents, supplies used), `scanInfo`, `emailInfo`, `folderInfo`, `ftpInfo`, `httpInfo`, fax blocks, `driverInfo`, and `userInfo` = the authenticated user including `customAttributes` and the authentication agent id (`:2267`, `:2387`, `:2408`, `:2427`, `:6005`).
+- `jobCategory`: `jcPrint, jcDigitalSend, jcFax, jcStored, jcService, jcConfigurationDiagnostic, jcMixed, jcNotification, jcOther` (`:2544`).
+- Registration (`:2702`): `criticalSolution`, `notificationTarget`, `defaultNotificationFilter`, `jobFilters` by category.
+- **Critical mode**: the device keeps entries until the solution confirms them; when the buffer is full "the device will not allow jobs to be created until all critical solutions have processed the oldest entry" (`oa/jobStatistics` info description, line 5).
+
+### 4.12 Remaining services (operations only)
+
+| Service | What it offers | Source |
+|---|---|---|
+| device | read-only identity (model, serial, firmware), status, alerts, scanner, print engine, email, fax, deployment information; open to any client | `oa/device:198-1539` |
+| deviceUsage | lifetime counters | `oa/deviceUsage:579` |
+| supplies | supplies info, usage, configuration | `oa/supplies:606-922` |
+| solutionDiagnostics | pull the solution's log and crash report from the device as multipart | `oa/solutionDiagnostics:567`, `:738` |
+| solutionManager | install by upload, install by remote pull, modifications, uninstall, installer operations with cancel; per-solution context (get, put, patch; sensitive and non-sensitive sections), configuration data, certificates, runtime registrations (add a registration record after install, limited to types declared in the manifest and allowed by HP) | `oa/solutionManager:555-6176`, `:7779` |
+| sdkSupport | development only: screen capture, simulated key and screen presses, run script in the active application, macro expander, obtain a solution token without the install-code exchange, simulated HID devices | `oa/sdkSupport:236-3418` |
+
+### 4.13 State machines
+
+- **Login session.** Idle (no user, home screen) → trigger (panel press, `initiateLogin`, `login`, or USB response action) → pre-prompt result (called if enabled, or supplied by `login`) → `succeeded` | `failed` | `canceled` | `continue` → prompt page in the embedded browser → post-prompt result → user-policy update for each matching agent → session active with `sessionId` and session token → optional `initiateAppLaunch` → ends by `forceLogout`, Reset, or inactivity timeout → sign-out notification. A trigger while the UI is not idle returns 409 `uiNotIdle`. A new session cannot start while one is active (`g/authenticationServiceOverview:31`).
+- **UI activity**: `asAsleep`, `asInactive`, `asAwakeIdle`, `asAwakeActive` (`oa/application:7829`).
+- **Jobs (scan, copy)**: each phase (`jobActivity`, `scanningActivity`, `processingActivity`, `transmittingActivity` or `printingActivity`, `cancelingActivity`) moves `jasNotStarted → jasStarted → jasCompleted` with timestamps; overall `jobDoneStatus` `jdsActive → jdsSucceeded | jdsPartiallySucceeded | jdsFailed | jdsCanceled` (fixed enum) (`oa/scanJob:8402`, `:4984`).
+- **Scan upload**: `tsStarted → tsTransmitting → tsCompleted` (`oa/scanJob:6226`).
+- **Accessory**: attached → (owned: `usbAttached` callback) → open → report reading active → `hidRead` callbacks in sequence → `usbClosed`.
+- **Solution**: `ssInstalling → ssInstalled | ssDeactivated → ssUninstalling → ssUninstalled` (`oa/solutionManager:9911`); install code `icsPending → icsDelivered | icsDeliveryFailed` (`:9744`); installer operation `iosScheduled, iosInProgress, iosRebootRequired, iosPermissionsPrompt, iosSucceeded, iosFailed, iosPartialSuccess` (`:8574`).
+- **Job statistics**: sequence numbers; LSN (last notified) and LSP (last processed) advance by callback acknowledgement or PATCH.
+
+### 4.14 Versioning, deprecated and non-production items
+
+- Identity of a service: a "GUN" with the major version, for example `com.hp.ext.service.authentication.version.1`; clients find services by major version through discovery; different majors are different services (`g/architectureModel:506`). `capabilities.apiVersion` reports `<major>.<minor>` at run time (`oa/authentication:1788`).
+- `info.version` carries the release level: `1.0 (Beta n)`; userPolicy `1.0 (Alpha 2)`; solutionDiagnostics `1.1 (Beta 2)`.
+- Every operation, schema and property is tagged `x-hp-ext-version-added: "1.0"` (counts per file from 66 to 660; no other value occurs, including in solutionDiagnostics 1.1).
+- Deprecated: none. No `deprecated: true` flag and no occurrence of the word in any of the 16 files (control: the same scan finds "Beta" 5 times in 15 files).
+- Most enums are marked as open to new values in later revisions; `activityState`, `jobDoneStatus`, `solutionState`, `installCodeState` are declared fixed.
+- Reserved: `jdsWebService` and `jdWebService` "Reserved for future use" (`oa/jobStatistics:4503`, `:4523`).
+- Non-production: all of sdkSupport.
+- Marked unsupported in the guides although present in the contracts: scan destinations `localFolder` and `email`; IPP priority Print-Job and Print-URI; `startIntent` on the post-authentication launch action; three of four install routes.
+
+## 5. What this means for the port
+
+**What the contracts allow that the suite needs**
+
+1. *Card sign-in with a server-side lookup* (4.2, 4.3, 4.5). Register the reader models as owned HID accessories with a `registrationTarget`; on `usbAttached` open the HID with `reportReadingActive: true`; on `hidRead` decode the report, look the card up on the server (the existing product keeps card-to-user mappings in Entra custom security attributes, per `START-HERE.md:27`), then call `login` with `succeeded` and the user's details. No panel interaction is needed for a known card.
+2. *First enrolment and interactive Microsoft sign-in.* Return `continue`; the device loads the agent's `/prompt` page from the server in the embedded browser; the outcome is collected by `/postPromptResult`. The QR and mobile sign-in models fit this well, because the page only has to show a code while the server waits for the phone.
+3. *Shared identity for the other apps.* The session's `userPrincipalName`, `emailAddress` and custom attributes are readable by every application of the same solution through `resolveSecurityExpression`, and arrive in job statistics. Each app page gets its own UI-context token; the server maps device plus session id to the Entra tokens it holds.
+4. *Scan to OneDrive, SharePoint, Teams, mail.* The app page (with the UI-context token) or the server on its behalf creates a scan job with an `http` destination pointing at the server; the server receives the multipart upload and calls Microsoft Graph.
+5. *Print a document fetched from Graph.* The server downloads and, where needed, converts the document, then sends it to the device by IPP Print-Job.
+6. *Feature lock-down by user.* The userPolicy agent can add permissions per user at sign-in.
+7. *Accounting and logs.* jobStatistics delivers per-job counts with the user identity; this can replace the Log Analytics job feed the Workpath product writes (`START-HERE.md:55`).
+8. *Panel messages and home-screen text.* Message Center messages and the home-screen custom message.
+9. *Configuration without re-signing.* Server address, credentials, reader ids and tile visibility are bindable to the solution context, which the server can PATCH with its solution token.
+
+**What the contracts do not offer**
+
+| Missing | Evidence | Consequence |
+|---|---|---|
+| A REST print-submit call, print ticket, or print hold and release | printJob has 3 read-only paths (4.6) | Printing is IPP; the server needs an IPP client and must hold pull-print jobs itself |
+| Device fetch of a document with a bearer token | Print-URI adds Basic and Cookie only (`g/printJobIppExtensions:107-129`) | The device cannot pull straight from Graph; the server must proxy or push |
+| Starting a scan with no user at the panel | `POST scanJobs` is UI-context only (`oa/scanJob:2452`) | Scan is always inside the solution's application session |
+| A session query resource | authentication has 8 operations, none reads a session (4.2) | Track sessions from `login` responses, callbacks and `ntWalkupSignIn/Out` |
+| Logging out a session the server does not hold the token for | `forceLogout` is context-based; `reset` is admin-only | Keep the session token; keep an admin path only for recovery |
+| Storage for tokens on the device | attributes capped at 512 characters (`oa/authentication:2363`) | All Entra tokens live on the server |
+| Bluetooth or NFC APIs | no such service among the 16 | BLE badge sign-in must come through a reader that presents as USB HID, or through the phone-to-server path |
+| Decoding of keyboard-wedge input | raw reports only (`oa/usbAccessories:5350`) | Port the HID decoding; the earlier OXPd 1.x build has per-model handling (`START-HERE.md:24`) |
+| An inbound hook to an off-device server through the device | webHook is Workpath-only (4.10) | None for the server design |
+| Code or files running on the device | all targets are remote HTTP or Workpath packages | The server does everything; the panel is a Chromium 87 page |
+
+**Constraints and traps**
+
+- One refresh token per device; the install code must be exchanged within 5 minutes, so the server's notification endpoint must be reachable from every printer at install time, and an admin credential is needed to re-issue.
+- Admin tokens last one hour and need the device admin password: the deployment tool needs it, the run-time server should not store it.
+- A USB `registrationTarget` is a critical target, and a critical jobStatistics agent blocks all jobs when the server stops acknowledging. Server availability becomes device availability. Decide per feature whether to register as critical.
+- Callbacks are authenticated only by a static credential placed in the solution context. Use HTTPS, import the server's CA into the solution's certificate store, and rotate the credential by PATCHing the context.
+- Sign-in triggers fail with 409 when the UI is not idle. A card tap while another user is signed in must be handled by the server (for example answer the USB callback with `forceLogout`, then log in).
+- The inactivity timeout defaults to 60 seconds. Long uploads to Graph need `resetInactivityTimer` calls, and the guide forbids extending it indefinitely (`g/applicationServiceOverview:450-452`).
+- Chromium 87 with popups and file inputs disabled. The Microsoft sign-in pages and any modern front-end framework must be tested against it; the code-display flows avoid loading the Microsoft pages on the panel at all.
+- Priority printing ends with the UI session; a release-at-device flow must finish sending jobs before the user leaves.
+- userPolicy is Alpha; build the suite so that it works without it.
+
+**Reusable parts**: the SDK client libraries wrap every call and the token exchange (`cs/` samples show the pattern); `sdkSupport` simulated HID taps and screen capture allow automated tests on development firmware.
+
+## 6. Contradictions and doubts
+
+1. Token endpoint path: the table says `<deviceRoot>/cdm/oauth2/v1/token`, the three examples say `<deviceRoot>/oauth2/v1/token` (`g/securityModel:149` against `:179`, `:233`, `:274`).
+2. The OpenAPI files define `localFolder` and `email` scan destinations and the `localScans` resources; the guide says both destinations are not currently supported (`oa/scanJob:1397`, `:3313` against `g/scanJobServiceOverview:89-90`).
+3. `printJob` is described as "support for submitting and managing print jobs" while offering no such operation (`oa/printJob` info).
+4. Post-prompt result: the guide names `POST /postPromptResult`, and the description of `promptResultAction` mentions "postPromptResult objects", but the file has no `postPromptResult` schema (88 schema names listed; `prePromptResult` is there). I assume it mirrors the pre-prompt result without `continue` (inferred).
+5. Copy-paste descriptions: the scanJob, copy and security registration records are each described as "A registration record for an authentication provider" (`oa/scanJob:4751`, `oa/copy:2524`, `oa/security:900`). `copyNotificationTarget` is marked required yet described "If omitted, no notifications will be made" (`oa/copy:2524`).
+6. The guide attributes `initiateLogin` to "the Application Access Points API" and uses `agentId` for an access point id (`g/authenticationServiceOverview:28`, `:181`); the contract is clear (`oa/authentication:450`).
+7. The files were generated by a tool dated May 2025 while the SDK build is April 2026 (`README.md:27`). The files may predate the firmware; `capabilities.apiVersion` on a real device is the check.
+8. solutionDiagnostics is version 1.1 but tags nothing as added in 1.1.
+9. Whether an authentication agent's undeclared attributes are dropped or rejected is not stated in the OpenAPI file.
+10. The response deadline for callbacks, the upload size limit for scans, and the accepted print formats are not stated anywhere I read.
+
+## 7. Questions for Kam or his team
+
+1. **How should printing be delivered: plain IPP Print-Job from the server, and is "priority print" required?** Why: the priority extensions for job submission are marked not supported, and no REST print exists. Assumed if unanswered: the server holds Universal Print jobs and pushes them by standard IPP at release time, converting to PDF or a PDL the device reports.
+2. **Is the server always reachable from every printer, and may a server outage block the device?** Why: owned-reader targets are critical and critical job statistics lock job submission. Assumed: owned reader with retry; job statistics registered as non-critical.
+3. **Which card readers and which sign-in methods must work on OXPd2 on day one (card, QR, BLE badge, PIN)?** Why: BLE has no device API; readers must present as USB HID and their vendor and product ids go into the signed manifest or the context. Assumed: the six reader models of the earlier OXPd 1.x build, card plus QR.
+4. Will HP run verification and signing for a Beta-10 bundle, and what is the production date? Why: unsigned bundles install only on debug-bridge devices. Assumed: development on debug-bridge devices only.
+5. Do driver-submitted stored print jobs appear in `copy/storedJobs`? Why: decides whether on-device held jobs can be listed and released. Assumed: no; needs a device test.
+6. Is userPolicy (Alpha) in scope? Assumed: optional, off by default.
+7. Do the newer Workpath devices expose these same services to the existing Workpath apps (the `workpath` target variants)? Why: could give one sign-in agent contract across a mixed fleet. Assumed: unknown; ask HP.
+8. Who holds the device admin password at deployment, and may the deployment tool store it? Assumed: entered at install, never stored.
+
+## 8. Secrets and sensitive items seen, and weaknesses not to carry over
+
+- No secret, key, token, tenant id or personal data was found in the 16 OpenAPI files, the 7 samples opened, or the guides read. The guides use placeholders (`g/securityModel:182`, `:236`).
+- `writableAuthenticatedUserDetails.password` exists so that an agent can hand the user's password or PIN to the device for impersonation by workflow applications (`oa/authentication:2427`). The port should never populate it.
+- Callback targets accept the `http` scheme and static Basic credentials as explicit values in the manifest. Use `https` and context-bound credentials only.
+- `corsEnabled` lets any script served from the solution's targets call the device's REST APIs from the panel browser; enable it only if page-side calls are needed, and serve no third-party script on those pages.
+- Custom attributes travel to other solutions' user-policy agents and into job statistics. Put no token, refresh token or card number in them.
+- `sdkSupport` can run script in the active application and mint solution tokens; confirm it is absent on customer firmware before relying on any other control.
+- The earlier OXPd 1.x build used the card sequence as the user name and display name (`START-HERE.md:24`); with OXPd2 the card number should stay on the server and never be written to the session.

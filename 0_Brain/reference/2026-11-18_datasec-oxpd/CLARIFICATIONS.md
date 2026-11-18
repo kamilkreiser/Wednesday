@@ -14,3 +14,15 @@ Source line of the export: `2026-11-18T21:18:56.501000+11:00 | [live] view=frida
 
 > spin up as many agents as you can manage to do this work
 
+## C-3
+
+Source line of the export: `2026-11-18T21:37:59.071000+11:00 | [live] view=friday`
+
+> keys will be old and rotated so don't worrry
+
+Context: Friday's panel message of the same evening reporting that the licence service source holds files its readme calls the root licence-signing private key and the API private key, and that other repositories hold a client secret, a hardcoded card key and a release keystore (locations only, from the analysis reports). Friday's reading: no rotation action is asked; the keys found in the library are not live. The architecture still states that the new server keeps no secret in source.
+
+## C-4
+
+Kam, Friday's terminal, about 21:36: "fable limit hit.  if fable does not work.  use opus" (typed in the terminal, recorded from the session, not from a board export). Friday's reading: agents for this project run on the newest Fable while it answers and on Opus when it does not.
+
