@@ -8,6 +8,9 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 06:00 MORNING HANDOVER 19 Nov (the 06:0x 11-18 seat, WRAPPED at 05:30, rotating INTO the morning) - READ FIRST
+- **You are the MORNING seat:** run the morning ritual (cheap sweep, morning card with counts, stale escalate). Night QUIET: no seat mail, no Kam message since 13:54:49 11-18. Gauge 97%: boot LEAN (WED-164). Everything else: the 05:30 block below + the handover email "[Wednesday-overnight -> Wednesday-morning] Shift handover 2026-11-19".
+
 ## 🔴 05:30 SHIFT HANDOVER 19 Nov (the 06:0x 11-18 morning seat, WRAPPED; ctx ~22%) - READ FIRST
 - **HOLD TO FRIDAY stands** (Kam ruled wed-morning-plan-1118 = a). Gauge 97% at 13:5x (11-18), renews ~3d; Kam travelling for work until Friday 2026-11-20. Floor empty; nothing launched 11-18; no seat mail pending; last Kam message 13:54:49 11-18.
 - **Morning duties today:** the ritual (cheap sweep, morning card with counts, stale escalate). Boot LEAN again unless the gauge moved (WED-164).
