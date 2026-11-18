@@ -229,4 +229,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-17 06:07 | Kamils-Mac-mini | wake runner: held-wake RECOVERY (>60 min held: email Kam + respawn the wednesday seat via the --dead path when the pane shows no progress) — ledger 2026-11-17 | CLOSED |  2026-11-17 07:44 built + armed 07:43 (pid 8222); tests a-e on a scratch socket |
 | 2026-11-17 06:42 | Kamils-Mac-mini | wake_ack/wake_watch pane hash: exclude Claude Code's transient 'Checking for updates' line (it flips the idle-ack hash; D 69th re-woke 3x on an unchanged hold) — 2026-11-17 | OPEN | |
 | 2026-11-18 11:19 | Mac | WED/Lesson digest synthesis — Friday (laptop) | CLOSED |  2026-11-18 11:54 done |
-| 2026-11-18 13:52 | Kamils-MacBook-Pro | WED/Rules card: Tuesday's 10 proposed index rows and generator proposal P4 — Friday (laptop) | OPEN | |
+| 2026-11-18 13:52 | Kamils-MacBook-Pro | WED/Rules card: Tuesday's 10 proposed index rows and generator proposal P4 — Friday (laptop) | CLOSED |  2026-11-18 13:58 applied and pushed in 70c1e6e56f; Tuesday mailed |
