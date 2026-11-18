@@ -1,3 +1,8 @@
+## 2026-11-18 13:44 -> 2026-11-19 08:05 — Friday (laptop seat; Opus 5.5 after the Fable limit; one rotation at ~03:45; wrapped on Kam's terminal word, he left for an event)
+- General / CoAgent: strict policy (f33482b) and audit-fix2 (bfe435a) MERGED, each after an independent check and Friday's clean-clone check. Daemon r5 check NO GO (R5-1 skip budget), Kam ruled a; addendum 12 built to READY r6, check NOT yet run. Audit-fix3 launched (%18), holding on STOP Q1 for Friday.
+- Datasec/OXPd: twelve analysis reports, architecture (02) and plan (03), 25 questions carded; Kam answered all 25 (C-6 to C-30), documents updated and re-rendered. Fable review pass owed after 2026-11-20 09:00.
+- NEXT: `0_Brain/tasks/NEXT-PICKUP-FRIDAY.md` top block (daemon r6 check; rule audit-fix3 Q1).
+
 ## 2026-11-18 06:00 -> 2026-11-19 05:30 — Wednesday (Mac mini morning seat, Opus 5.5; lean boot at gauge 97%; no rotation; wrapped at the 05:30 shift change)
 - Secuura: nothing launched (gauge 97% all day; Kam ruled wed-morning-plan-1118 = a at 08:37, hold everything to Friday 2026-11-20). Floor empty; develop fab4edcdcd07 unchanged. Friday queue unchanged: merge PR 2252, Kintsugi k35, Redis password rotation (hex), demo round, B 204th / K 52nd.
 - WED: Kam 11:29 asked Wednesday to adopt/improve Friday's boot rules-card work with the latest Fable, "this can wait until Friday": filed on WED-164 + pickup. Friday's advisory (00:53Z) and wrap (01:00Z) read, dmarc pass; two corrections sent and confirmed (seat machine = Mac mini; usage cut per seat, Wednesday 100).

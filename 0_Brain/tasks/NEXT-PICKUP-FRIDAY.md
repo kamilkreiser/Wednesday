@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
+## 🔴🔴🔴🔴 NEWEST — WRAPPED Thu 2026-11-19 about 08:05 on Kam's terminal word ("please start wrapping up as I have to go to the event in about 30 min"). Supersedes every block below where they differ.
+
+- **Model:** Kam, terminal: "fable limit reached until tomorrow". Fable resets 2026-11-20 09:00. Kam ran `/model` in this pane and the host saved Opus 5.5 as the GLOBAL default for new sessions (his act; told to him). Launch seats with SEAT_MODEL_ENV, never /model.
+- **CoAgent (General/Claude to Claude), both seats HOLDING, nothing running inside Friday:**
+  - **%9 DAEMON**: STATUS last line `READY FOR QA M1-DAEMON r6` (read 08:02). FIRST ACT: commission the ONE short check exactly as the 03:45 bullet below says (inputs: r5 verdict + `gate_daemon_tests_r5/`, addendum 12, design 09, STATUS section A12; rule on the R5-1 fix (choice (b), row 54), the generated hostile-alphabet property incl. V5 counting the attach-reply clock (A12.1), R5-2, R5-3 / A5-3 retirement, the main merge). NO GO = card for Kam.
+  - **%18 AUDIT-FIX3**: STATUS last line is `STOP Q1 (Friday)`: are the two edits at `qa_fix2.rs:601-602` (`set_l` and `cp_d2` now asserted `Ok(())`, beyond the lines the brief names) permitted? Read the brief and that diff, then rule; on yes its last line becomes `READY FOR QA M3-AUDIT-FIX3`, then ONE short check.
+  - Then the merge method and, after the daemon merges, the DEPUTY lane (unchanged).
+- **Datasec/OXPd:** unchanged from the block below: Fable review pass after 2026-11-20 09:00 (C-5).
+- **Not done this boot (cut short by the wrap):** `_ledger_friday.md`, TASKS, INDEX, Linear, both inboxes, the morning card. Wrap items still OWED from the 03:45 block (retro, pickup archive, pull-before-digests lesson, seat watch in tree, doctor/PORTABILITY).
+- **Claims:** left open (Datasec/OXPd and General/Claude to Claude, both Friday's; the seats are holding mid-work).
+
 ## 🔴 Datasec/OXPd — a SECOND project on this seat since 2026-11-18 21:18 (one client per block: this block is Datasec only)
 
 - **What:** Kam's new Datasec project (his words, saved by the tool: `0_Brain/reference/2026-11-18_datasec-oxpd/00_kam-brief_verbatim_2026-11-18.txt`): the existing HP Workpath printer app suite recreated for OXPd on a localised server, OXPd 2 and the latest OXPd 1, mixed fleets. Deliverables asked: thorough analysis of `/Volumes/Laptop-DEV/!CODING/Datasec/OXPd` (READ-ONLY), an architecture document, a plan of attack and build, questions as cards on his board. Agents on the newest Fable (his word), as many as can be managed. Grant row in EXPIRING-GRANTS; claim `Datasec/OXPd — Friday (laptop)` OPEN.
