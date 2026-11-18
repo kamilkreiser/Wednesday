@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 05:30 SHIFT HANDOVER 19 Nov (the 06:0x 11-18 morning seat, WRAPPED; ctx ~22%) - READ FIRST
+- **HOLD TO FRIDAY stands** (Kam ruled wed-morning-plan-1118 = a). Gauge 97% at 13:5x (11-18), renews ~3d; Kam travelling for work until Friday 2026-11-20. Floor empty; nothing launched 11-18; no seat mail pending; last Kam message 13:54:49 11-18.
+- **Morning duties today:** the ritual (cheap sweep, morning card with counts, stale escalate). Boot LEAN again unless the gauge moved (WED-164).
+- **Cheap in-folder work owed BEFORE Friday:** write the WED-165 remote-access steps as a short file in 0_Brain/reference/ (Remote Login, Tailscale on Mac mini + phone, Screen Sharing over it, `claude auth login` from afar with the code paste-back tested WITH Kam on Friday).
+- **Friday (after the account switch), in order:** Secuura queue (11:3x block below: 2252 merge, k35, Redis rotation hex, demo, B 204th/K 52nd); then the rules-card adoption (WED-164; steps in the 11:3x block; claim shared files with Friday first); then WED-165 with Kam at the Mac.
+- Friday seat has an open card `wed-friday-usage-stop-90-or-guide-1118` (its lane, not ours).
+
 ## 🔴 UPDATE 11:3x 18 Nov, the 06:0x morning seat - READ FIRST; supersedes every block below where they differ
 - **Kam ruled wed-morning-plan-1118 = a (08:37:21): HOLD EVERYTHING TO FRIDAY.** Floor empty; gauge 97%.
 - **PROMISED TO KAM (13:5x, panel bf-5f6f25d02c69): remote-access steps READY BY FRIDAY** so he can switch accounts from afar in future. He is travelling for work until Friday (13:54:49). Content: Remote Login on (System Settings > General > Sharing; remote full-disk-access OFF), Tailscale on the Mac mini + his phone, Screen Sharing over Tailscale, then `claude auth login` from afar (paste-back of the sign-in code UNTESTED: test it on Friday with him present, not before). This seat cannot do the Mac side (sudo needs his password). Write the steps as a short file in 0_Brain/reference/ before Friday; Linear WED item filed.
