@@ -231,3 +231,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-18 11:19 | Mac | WED/Lesson digest synthesis — Friday (laptop) | CLOSED |  2026-11-18 11:54 done |
 | 2026-11-18 13:52 | Kamils-MacBook-Pro | WED/Rules card: Tuesday's 10 proposed index rows and generator proposal P4 — Friday (laptop) | CLOSED |  2026-11-18 13:58 applied and pushed in 70c1e6e56f; Tuesday mailed |
 | 2026-11-18 14:00 | KamilsMacStudio | Clock-guard PreToolUse hook (Edit/Write): refuse a typed HH:Mx clock in 0_Brain/tasks/*.md, learnings/_ledger*.md and daily notes; seat-scoped to the TUESDAY tree; registered in the shared settings.template.json — Tuesday (Mac mini), ledger w=3 in s290 | CLOSED |  2026-11-18 14:01 done: hook + arms 14/14 + live control; a no-op on any tree but TUESDAY |
+| 2026-11-18 21:19 | Kamils-MacBook-Pro | Datasec/OXPd — Friday (laptop) | OPEN | |
