@@ -1,0 +1,33 @@
+What changed: live-check now allows exactly
+.next/server/route-cache/APP_ROUTE/<64 lowercase hex>/$/favicon.ico.body and
+.meta as site-only names, on the web site only, matched whole-name (no prefix,
+no suffix, no trailing newline). Each name is judged on its own. When any are
+present, a second output line counts them ("live-check web: allowed site-only
+(the favicon route-cache pair): N"), and only when the count is above 0. The
+first output line is byte-identical to before. The module docstring and
+infra/README.md name the allowed site-only names.
+
+Why (HPSMPOC-509): this pair appears on the web site between a deploy and the
+live check, and the live check reports it as site-only, which turns a healthy
+deploy into exit 3 NOT PROVEN. 3 of 3 BEFORE reads of the UAT updates found
+the pair. The deploy records read it as left by a page visit; that cause is
+not tested. This is the ticket's proposed default, approved by the
+coordinator.
+
+Not changed: the API stays strict (the same two names are still reported
+there), the Oryx allowance, every other site-only name (any other name, any
+other route-cache file, another hex width or case is still SITE-ONLY and red),
+live_files, package_files, make, verify and deploy-from-ci.sh.
+
+Evidence, red first: against the unchanged script the 4 allowing test rows
+fail (5 failure records, of 29 rows in LiveCheck); with the change all 29
+pass. 10 planted over-allowing copies of the script each turn at least one row
+red; the unmutated copy passes. Runs at the base and at the change:
+test_deploy_hpsmpoc208 35 tests to 42 (python 3.14 and 3.9), the infra suite
+325 to 332 (by test id: lost 0, added 7, changed 0), validate.sh rc 0 at the
+change with ResourceWarnings 0 and no files left open, test_deploy_package 44
+at both.
+
+Nothing deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

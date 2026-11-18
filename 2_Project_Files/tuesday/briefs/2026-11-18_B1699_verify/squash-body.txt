@@ -1,0 +1,26 @@
+The dev-tooling audit (web/scripts/audit-dev.mjs) gains ONE dated exception:
+GHSA-fc5q-39xc-vjpf on picomatch <=4.0.7, last allowed day 2026-12-18
+(Australia/Sydney), under the product owner's 2026-11-18 ruling. The audit
+fails again from 19 Dec, and as soon as npm reports the advisory with a
+different range or package. Any other advisory still fails.
+
+No patched picomatch exists: npm's latest is 4.0.7, and the advisory has no
+first patched version. It is reached only through dev tooling (vite, vitest,
+the eslint toolchain). The production audit finds 0 vulnerabilities.
+
+The real audit step failed on this advisory alone before the change. After
+it, the step passes with one ALLOWED line.
+
+Also changed:
+- the comment above the dev-tooling step in ci.yml;
+- the audit tests: the empty-list row is replaced by a row pinning the one
+  entry; five rows are added for the shipped entry; the zod row passes an
+  empty list on purpose; the synthetic exception is cast to the list's
+  element type so the file typechecks (type-only).
+
+Not changed: the production audit step, evaluate(), the step names and run
+lines, every dependency and the lockfile.
+
+The exception is not extended without a new ruling. Nothing deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

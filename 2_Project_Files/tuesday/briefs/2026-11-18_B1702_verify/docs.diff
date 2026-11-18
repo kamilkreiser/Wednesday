@@ -1,0 +1,15 @@
+diff --git a/docs/API.md b/docs/API.md
+index 0edfca5..04cf544 100644
+--- a/docs/API.md
++++ b/docs/API.md
+@@ -708 +708,2 @@ Governed source versions: stage → validate → activate → (rollback), with e
+-  and across every governed version that did not fail; not the Active version's document; and the engine reads it (its
++  and across every governed version in the state `Validating`, `Active` or `Superseded`
++  (or in a state word the server does not know); a `Draft`, a `Failed Validation` and an `Expired` version do not count; not the Active version's document; and the engine reads it (its
+diff --git a/docs/api/openapi.json b/docs/api/openapi.json
+index 2abbf7b..7796e61 100644
+--- a/docs/api/openapi.json
++++ b/docs/api/openapi.json
+@@ -751 +751 @@
+-        "description": "Requires role Administrator. No body. Checks: each source slot holds its type, no source type is empty, no duplicate device SKU, device+option pair or software product+term, every source version id unique (within the document and across governed versions that did not fail), not the Active version's document, and the engine reads it (its reference data, and the purchase catalogue, whose derived keys must not collide). 409 INVALID_SOURCE_STATE unless the version is Draft; 409 SOURCE_DOCUMENT_CHANGED when its document no longer matches its checksum; 409 SOURCE_DOCUMENT_INVALID when it matches but no longer reads; 409 SOURCE_LIFECYCLE_OFF when the version store is off. 500 SOURCE_LIFECYCLE_FAILED on a server fault (logged by its type only, never its text).",
++        "description": "Requires role Administrator. No body. Checks: each source slot holds its type, no source type is empty, no duplicate device SKU, device+option pair or software product+term, every source version id unique (within the document and across governed versions in the state Validating, Active or Superseded, or in a state word the server does not know; a Draft, a Failed Validation and an Expired version do not count), not the Active version's document, and the engine reads it (its reference data, and the purchase catalogue, whose derived keys must not collide). 409 INVALID_SOURCE_STATE unless the version is Draft; 409 SOURCE_DOCUMENT_CHANGED when its document no longer matches its checksum; 409 SOURCE_DOCUMENT_INVALID when it matches but no longer reads; 409 SOURCE_LIFECYCLE_OFF when the version store is off. 500 SOURCE_LIFECYCLE_FAILED on a server fault (logged by its type only, never its text).",

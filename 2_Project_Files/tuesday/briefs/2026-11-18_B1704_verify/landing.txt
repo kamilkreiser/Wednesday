@@ -1,0 +1,6 @@
+# Run from the verify folder after replacing <PR> (here) and (#PRNUM) (in merge-subject.txt) with the PR number.
+# Before running: hosted Build, Gitleaks, npm-audit (audit-production-deps) and CodeQL green on the PR head; PR head still
+# 86ae678f28591215f152be556120625ec9c79f8d; origin main still 2de5e84c799e32232d65cd759085d728d7141583 (if main moved, re-gate);
+# repository variable CI_DEPLOY_ENABLED not 'true' (the merge starts Deploy demo, whose jobs must read skipped).
+# Merge commit, never squash, never rebase.
+env GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config' gh pr merge <PR> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit 86ae678f28591215f152be556120625ec9c79f8d --subject "$(cat merge-subject.txt)" --body-file merge-body.txt

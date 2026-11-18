@@ -1,0 +1,18 @@
+The production dependency audit (check audit-production-deps) failed on every
+run because of one advisory, GHSA-fc5q-39xc-vjpf in picomatch (high), for which
+no patched release exists. The product owner's 2026-11-18 ruling allows that one
+advisory in this audit until 18 Dec 2026 or a fix, and nothing else.
+
+- scripts/audit-prod.js reads the npm audit report and decides: every moderate,
+  high or critical advisory fails, except one entry (that id, on picomatch, at
+  the range text <=4.0.7). The entry is allowed through the end of 2026-12-18 in
+  Australia/Sydney and fails again by itself from 19 Dec; a changed range or
+  package fails; an unreadable, empty, error or wrong-version report fails.
+- .github/workflows/npm-audit.yml keeps the same npm audit command and makes the
+  script's exit status the step's verdict. Job id and check name unchanged.
+- __tests__/audit-prod-dated-exception.test.js: 11 cells.
+- scripts/verify-expected-counts.json: 5881 tests in 378 suites.
+
+Nothing is deployed by this change.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
