@@ -26,3 +26,7 @@ Context: Friday's panel message of the same evening reporting that the licence s
 
 Kam, Friday's terminal, about 21:36: "fable limit hit.  if fable does not work.  use opus" (typed in the terminal, recorded from the session, not from a board export). Friday's reading: agents for this project run on the newest Fable while it answers and on Opus when it does not.
 
+## C-5
+
+Kam, Friday's terminal, 2026-11-18 evening: "no problem.  use opus now and we will run a fable run to review" (typed in the terminal, recorded from the session). Friday's reading: the remaining analysis, the synthesis (architecture document, plan of attack and build) and the question list are produced on Opus now; once Fable answers again (its limit resets 2026-11-20 09:00 AEDT) a Fable review pass reads the documents and reports corrections before they are final. This narrows C-1's "keep latest fable running" for this stage only.
+
