@@ -11,6 +11,7 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 ## 🔴 BOOT 06:0x 19 Nov, the morning seat (ctx low, LEAN boot at gauge 98%) - READ FIRST
 - **Morning ritual DONE:** card wed-morning-plan-1119 posted (rec a: keep holding to Friday; default a at 10:00); panel greeting bf-fb12c0f39af2; stale 0; WED 5 started / 22 unstarted / lesson 0; KS 212 / 35 unchanged; no new Stuart/Peter comment since 11-17. Nothing launched.
 - **WED-165 steps file DONE:** 0_Brain/reference/2026-11-19_wed-165-remote-access-steps.md (Linear comment 063c25a2). Friday: run its checklist WITH Kam (paste-back untested).
+- **FRIDAY 20 Nov, before any Secuura launch: RE-ASK the 'clear the Secuura board over 1-2 weeks' grant** (EXPIRING-GRANTS row, given 11-06; outer read = Friday 20 Nov). Not renewed by inference. WEEK-INSTRUCTION lapsed since 10-12: not acted on.
 - Everything else: the 05:30 block below (Friday queue unchanged).
 
 ## 🔴 06:00 MORNING HANDOVER 19 Nov (the 06:0x 11-18 seat, WRAPPED at 05:30, rotating INTO the morning) - READ FIRST
