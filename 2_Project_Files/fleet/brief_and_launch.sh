@@ -99,6 +99,10 @@ fi
 echo "verified at destination: $INBOX @ $found"
 
 # ── STEP 3: LAUNCH (only reachable through 1 and 2) ───────────────────────
+# RULES AT THE MOMENT OF ACTION (Kam 2026-11-18, the lesson-digest synthesis): print the
+# lesson rules whose first trigger is this action, from the rules index. Advisory, on
+# stderr, never changes the exit code; silent for a seat that has no rules card yet.
+python3 "$PROJECT_DIR/2_Project_Files/tools/rules_card.py" --at launch --primary --if-card --top 8 >&2 || true
 if [ -n "${BAL_LAUNCH_CMD:-}" ]; then $BAL_LAUNCH_CMD "$TO"; rc=$?
 else bash "$SELF_DIR/cockpit/cockpit.sh" launch "$TO"; rc=$?; fi
 [ "$rc" -eq 0 ] || { echo "launch step exited $rc (brief IS at destination — launch by hand: cockpit.sh launch '$TO')" >&2; exit 1; }

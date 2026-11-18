@@ -89,6 +89,12 @@ case "${1:-}" in
   add|rule|--delivered|amend|withdraw)
     store_guard "$DQ_FILE" || exit $? ;;
 esac
+if [ "${1:-}" = "add" ]; then
+  # RULES AT THE MOMENT OF ACTION (Kam 2026-11-18, the lesson-digest synthesis): print the
+  # lesson rules whose first trigger is this action, from the rules index. Advisory, on
+  # stderr, never changes the exit code; silent for a seat that has no rules card yet.
+  python3 "$DIR/rules_card.py" --at card --primary --if-card --top 8 >&2 || true
+fi
 # The python below is delivered on stdin (heredoc), so a `--json` payload
 # cannot also ride stdin — capture it into DQ_JSON first.
 DQ_JSON=""

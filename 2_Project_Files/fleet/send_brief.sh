@@ -671,6 +671,10 @@ set -a; . "$ENV_FILE" 2>/dev/null; set +a
 # inbox, so replies reach the coordinator who asked. What remains is attribution.
 # Raised to Kam and to Tuesday 2026-09-09 as a sequenced change: her agents accept
 # the tag first, the prefix flips second.
+# RULES AT THE MOMENT OF ACTION (Kam 2026-11-18, the lesson-digest synthesis): print the
+# lesson rules whose first trigger is this action, from the rules index. Advisory, on
+# stderr, never changes the exit code; silent for a seat that has no rules card yet.
+python3 "$PROJECT_DIR/2_Project_Files/tools/rules_card.py" --at brief --primary --if-card --top 8 >&2 || true
 FULL_SUBJECT="[Wednesday -> $TO] $SUBJECT"
 CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" RCPTS="$RECIPIENTS" INBOXADDR="$INBOX" python3 - <<'PYEOF'
 import json, os, urllib.request, urllib.error
