@@ -1,0 +1,41 @@
+fix_qam1_seat EXIT 101
+qa_fix2 EXIT 101
+fix_r5m1_limits EXIT 0
+qa_fix EXIT 0
+gate_r5 EXIT 0
+gate_r4 EXIT 0
+gate EXIT 0
+fix_notes_pinned EXIT 0
+a5_requester_pays EXIT 0
+a5_anchor EXIT 0
+a5_guards EXIT 0
+prop1024 strict EXIT 101
+clamp_fix_qam1_seat.log:test qam1_finding_input_records_the_lowering_is_refused_and_every_checkpoint_is_ok ... ok
+clamp_fix_qam1_seat.log:test qam1_finding_input_bytes_the_lowering_is_refused_and_every_checkpoint_is_ok ... ok
+clamp_fix_qam1_seat.log:test qam1_nothing_owed_a_lowering_below_the_seat_is_accepted_and_the_next_request_refused ... ok
+clamp_fix_qam1_seat.log:test qam1_the_gate_guards_shape_own_events_only_is_accepted ... ok
+clamp_fix_qam1_seat.log:test qam1_the_seat_clause_at_its_exact_boundary_bytes_and_records ... ok
+clamp_fix_qam1_seat.log:test qam1_exception_after_resume_in_n1s_state_is_exactly_as_ruled ... ok
+clamp_fix_qam1_seat.log:test qam1_set_limits_is_try_set_limits_with_the_answer_dropped_over_seat_refusals ... ok
+clamp_fix_qam1_seat.log:thread 'qam1_the_resume_defaults_recogniser_is_exactly_that_state' (14487210) panicked at crates/coagent-audit/tests/fix_qam1_seat.rs:840:5:
+clamp_fix_qam1_seat.log:assertion `left == right` failed: the pin's state was not recognised
+clamp_fix_qam1_seat.log:  left: Err("(ii) not explained by clause (A) alone under the defaults (Checkpoint(4)): allowance short false, seat (361254, 687) of (5097490, 28604), owing {4}, allowances {4: (361254, 687)} of (362063, 2043)")
+clamp_fix_qam1_seat.log:test qam1_the_resume_defaults_recogniser_is_exactly_that_state ... FAILED
+clamp_fix_qam1_seat.log:fix qam1 resume defaults: under StoreLimits { bytes: 40779920, records: 171624 } (allowance (362574, 1532)) 687 tiny requests and one of None characters: allowance (361254, 687), owing {4}; defaults' allowance (362063, 2043); after resume limits StoreLimits { bytes: 40779920, records: 228832 }; 3 checkpoints [Ok(()), Ok(()), Ok(())]; try_set_limits(defaults) Ok(()); the limits in force before the restart Ok(()); checkpoint then Ok(687) of 687
+clamp_fix_qam1_seat.log:thread 'qam1_finding_resume_defaults_leave_an_owed_checkpoints_payer_without_room' (14487204) panicked at crates/coagent-audit/tests/fix_qam1_seat.rs:734:5:
+clamp_fix_qam1_seat.log:test qam1_finding_resume_defaults_leave_an_owed_checkpoints_payer_without_room ... FAILED
+clamp_fix_qam1_seat.log:test qam1_prop_no_owed_checkpoint_is_refused_for_room_after_an_accepted_limit_change ... ok
+clamp_fix_qam1_seat.log:test result: FAILED. 9 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.86s
+clamp_qa_fix2.log:test qa2_boundary_bytes_exact_ok_one_less_refused_and_the_room_holds_against_everything ... ok
+clamp_qa_fix2.log:test qa2_boundary_records_exact_ok_one_fewer_refused ... ok
+clamp_qa_fix2.log:test qa2_lowering_in_steps_every_accepted_step_keeps_the_room ... ok
+clamp_qa_fix2.log:test qa2_set_limits_equals_try_set_limits_across_seat_refusals ... ok
+clamp_qa_fix2.log:test qa2_finding_slot0_fallback_a_later_slot0_event_takes_the_room_after_an_accepted_change ... ok
+clamp_qa_fix2.log:qa2 N1 seat: own alone (19876, 21), seat (24880, 24); own-only limits Err(LogFull); whole seat Ok(()); checkpoint Ok(21)
+clamp_qa_fix2.log:test qa2_re_added_into_a_clean_slot_the_room_follows_and_into_n1s_seat_the_clause_counts_it ... ok
+clamp_qa_fix2.log:test qa2_a_peer_alone_cannot_take_the_owed_checkpoints_room ... ok
+clamp_qa_fix2.log:qa2 N1+resume-defaults: L StoreLimits { bytes: 40619920, records: 16000 } allowance (362535, 142) (defaults (362063, 2043)); H's allowance (361098, 78); own records (1411956, 1077); X's seat (2108893, 2000) target 2973597; after re-add seat (3520849, 3077) (L seat (5077490, 2000), default seat (5097490, 28604)); under L: checkpoint Err(LogFull), L again Err(LogFull); after resume: checkpoint Ok(()), defaults Ok(()), L Ok(()), checkpoint Ok(()), limits StoreLimits { bytes: 40575872, records: 24784 }; a third limit StoreLimits { bytes: 40779920, records: 24784 }: Ok(()), checkpoint Ok(1077) of 1077
+clamp_qa_fix2.log:thread 'qa2_finding_n1_and_resume_defaults_together_neither_named_remedy_works' (14510811) panicked at crates/coagent-audit/tests/qa_fix2.rs:596:5:
+clamp_qa_fix2.log:assertion failed: fits(hu, l.requested_allowance()) && !fits(hu, d.requested_allowance())
+clamp_qa_fix2.log:test qa2_finding_n1_and_resume_defaults_together_neither_named_remedy_works ... FAILED
+clamp_qa_fix2.log:test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.89s

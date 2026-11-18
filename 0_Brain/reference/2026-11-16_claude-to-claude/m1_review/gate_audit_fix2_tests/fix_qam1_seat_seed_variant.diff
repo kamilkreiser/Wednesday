@@ -1,0 +1,14 @@
+1775,1777c1775,1783
+<         proptest::test_runner::TestRng::deterministic_rng(
+<             proptest::test_runner::RngAlgorithm::ChaCha,
+<         ),
+---
+>         match std::env::var("FIX_QAM1_SEED").ok().and_then(|s| s.parse::<u8>().ok()) {
+>             Some(b) => proptest::test_runner::TestRng::from_seed(
+>                 proptest::test_runner::RngAlgorithm::ChaCha,
+>                 &[b; 32],
+>             ),
+>             None => proptest::test_runner::TestRng::deterministic_rng(
+>                 proptest::test_runner::RngAlgorithm::ChaCha,
+>             ),
+>         },
