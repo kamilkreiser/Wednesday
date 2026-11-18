@@ -1,0 +1,21 @@
+A request to the sign-in, user, setup and data-source routes that carries a
+value that is too long, or of the wrong type, in a field an audit entry records
+is refused with a 400 and a one-key error before the route runs, so no audit
+entry holds it. One table of fifteen rows on thirteen routes, one check and one
+guard, mounted below the sign-in gate and above the routes it names. The answer
+is built from the table and never repeats the request. auditLog, AUDIT_ACTIONS,
+every audit call and every route handler are unchanged.
+
+The product owner chose to refuse the request and show an error, with the
+limits email 254 characters, name 256, address 2048 and lists of 50. The 400,
+the wording and shape of the error, refusing a wrong-type value, every other
+number, the guard's place before the routes' own administrator checks and the
+rememberMe check are this change's defaults. Because of that place, a signed-in
+non-administrator who sends an over-long value to an administrator route gets
+400 instead of 403, and no REQUEST_DENIED row is written for it; the
+STATE_MUTATION row still records it with status 400.
+
+111 new cells; one expected text in the RD-765 HTTP cell follows the new
+refusal; expected counts 6009 tests over 380 suites. Not deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

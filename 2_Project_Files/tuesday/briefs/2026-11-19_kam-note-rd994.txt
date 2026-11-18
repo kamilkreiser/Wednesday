@@ -1,0 +1,9 @@
+NexusAI, RD-994 (your ruling b: refuse an over-long value; the user sees an error): built, gated, merged. Not deployed.
+
+Your numbers are in: email 254 characters, name 256, address 2048, lists of 50 items. A request carrying a longer value, or a value of the wrong type, in a field the audit log records is refused with a 400 and a one-line error before the route runs, so the log never holds it.
+
+My defaults, not your words (say if you want any changed): the 400 status and the error wording; wrong-type values refused too; the other limits (for example role 32, workspace id 64, the sign-in callback's error description 8192, because an existing test sends 5000).
+
+One trade-off I chose, and the independent review agreed: the check runs before each route's admin check. So a signed-in non-admin who sends an over-long value to an admin-only page gets "bad request" instead of "forbidden". They can do nothing more than before, and the attempt is still logged, but as a refused request rather than a forbidden one.
+
+Numbers: 6,009 tests pass; 111 new; the security review tried about 60 ways around it and none got through. Not covered yet: audit rows from other modules (a follow-up ticket). No action needed.
