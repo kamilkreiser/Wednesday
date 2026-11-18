@@ -1,0 +1,40 @@
+      evidence: assertion `left == right` failed: R4-m1 roster version: the member changed although the write failed
+      evidence:   left: "[(StoreKey { part: Fixed(Roster), author: KeyId(f0b6a8c5e3b6a29dc12a0a23b924d48b9d2a9cc4381daf97ef63a99652db61b7), n: 1 }, [123, 34, 114, 111, 115, 116, 101, 114, 34, 58, 123, 34, 98, 111, 100, 1
+own_seat_overfill            R4-m2 RED     r4m2_a_member_re_added_into_a_used_slot_cannot_overfill_that_seat
+      evidence: R4-m2: seat 2 holds (16725, 6), above the seat (16384, 64), after 3 own records
+      evidence: note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+anchor_not_checked           R4-m3 RED     r4m3_every_removed_record_is_refused_and_named
+      evidence: R4-m3: a store missing a whole record was not refused by name: ["removed Fixed(Roster) n=1: ACCEPTED", "removed Fixed(Roster) n=2: ACCEPTED", "removed Fixed(Evidence) n=0: ACCEPTED", "removed Fixed(Attest
+      evidence: note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+conflict_keep_last           R4-m4 M22 RED     m22_the_first_roster_conflict_is_kept_and_exported
+      evidence: assertion `left == right` failed: M22: the conflict slot does not hold the FIRST conflict
+      evidence:   left: Some(SignedRoster { body: RosterBody { session_id: SessionId(8383838383838383838383838383838383838383838383838383838383838383), version: 2, prev_hash: Digest32(d669c6c02022509c53b19b18838cec24c46c
+own_cp_unchecked             R4-m4 M23 RED     m23_an_own_checkpoint_the_free_part_pays_is_space_checked
+      evidence: assertion `left == right` failed: M23: an own checkpoint with no room in the free part was not refused
+      evidence:   left: Ok(())
+own_cp_unchecked             R4-m4 M23 (gate guard, edited per addendum 6) RED     gate_r4::r4_guard_an_own_checkpoint_is_space_checked
+      evidence: assertion `left == right` failed
+      evidence:   left: Ok(())
+resume_no_conflict           R4-m4 M28 RED     m28_resume_rebuilds_the_conflict_slot
+      evidence: assertion `left == right` failed: M28: after resume the conflict slot no longer holds the first conflict
+      evidence:   left: Some(SignedRoster { body: RosterBody { session_id: SessionId(8484848484848484848484848484848484848484848484848484848484848484), version: 2, prev_hash: Digest32(ef47c38b1c08637d1006620aae088cae0c4a
+requested_one_allowance      R4-m4 M14 RED     m14_one_requester_cannot_use_anothers_allowance
+      evidence: assertion `left == right` failed: M14: requester B could record 0, requester A 3: B's allowance was used by A
+      evidence:   left: 0
+roster_store_first           R5-m2 RED     r5m2_prop_every_stored_roster_version_is_accepted_in_order
+      evidence: Test failed: R5-m2 property: step 0 (Forged, store mode 2): the store holds roster version 2, which the roster crate refuses in order: Err(BadSignature).
+      evidence: minimal failing input: [
+limits_strand_payer          R5-m1 RED     r5m1_prop_no_checkpoint_is_refused_because_its_payer_lacks_room
+      evidence: Test failed: R5-m1 property: step 24: a policy checkpoint was refused LogFull because its payer, the allowance of slot 0, lacks room: usage (524, 1) + one checkpoint > allowance (875, 3) (limits StoreLimi
+      evidence: minimal failing input: (
+mut_same_order_slot_accepted R5-m3 (anchor.rs:215) RED     gate_r5::r5_guard_a_same_order_different_record_in_a_replaced_slot_is_refused
+      evidence: a same-order different record was accepted: Ok(())
+      evidence: note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+mut_anchor_bytes_unbounded   R5-m3 (anchor.rs:261) RED     gate_r5::r5_guard_an_oversized_anchor_encoding_is_refused
+      evidence: assertion `left == right` failed
+      evidence:   left: Ok(())
+rows: 150 cfg rows + 2 source-mutant rows
+==> green run (no red control): coagent-audit, every test
+GREEN: 238 tests ok
+RED CONTROLS OK: every guard went red under its control, on its property, and green without
+rc=0

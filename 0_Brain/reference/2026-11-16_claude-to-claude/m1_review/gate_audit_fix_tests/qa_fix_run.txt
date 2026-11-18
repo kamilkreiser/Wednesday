@@ -1,0 +1,32 @@
+qa join_author: [("other session", "Err(Receive(WrongSession))", 0), ("not a member", "Err(Receive(NotMember))", 0), ("own", "Err(WrongAuthor)", 0)]; good Ok(()) (1 calls); again Err(Receive(Replay { seq: 1 })) (0 calls)
+test qa_ok_join_author_refusals_make_no_store_call ... ok
+qa seat-bytes: own records 33, free (31935, 33); H's allowance (525, 1); seat (32460, 34); lowering to StoreLimits { bytes: 259576, records: 4096 } (allowance (2281, 36), seat (32447, 512)): Ok(()); 5 checkpoints [Err(LogFull), Err(LogFull), Err(LogFull), Err(LogFull), Err(LogFull)]; payer Some(3), room true
+test qa_finding_lowering_accepted_by_rule_a_blocks_an_allowance_paid_checkpoint_seat_bytes ... ok
+qa rule A edges: 216 accepted, 63 refused over 279 changes; H (524, 1) G (1048, 2) need (1564, 3); ["bytes: allowance exactly (1564, 36) -> Ok(()); one seat byte less (allowance (1563, 36)) -> Err(LogFull)"]; lowered StoreLimits { bytes: 65536, records: 256 } -> Err(LogFull); after resume: no call StoreLimits { bytes: 40779920, records: 228832 }; same Ok(()); much lower Err(LogFull) (limits then StoreLimits { bytes: 40779920, records: 228832 })
+test qa_ok_rule_a_edges_steps_raise_zero_huge_resume ... ok
+qa seat-records: G accepted 42, its checkpoint [Ok(7), Ok(14), Ok(21), Ok(28), Ok(35), Ok(42)]; H's allowance (525, 1); V's seat (25049, 49); lowering to StoreLimits { bytes: 524288, records: 392 } (allowance (4677, 3), seat (65536, 49)): try_set_limits Ok(()); then 10 checkpoints: 0 Ok, 10 refused LogFull; payer slot Some(3) usage (525, 1) of allowance (4677, 3) (room: true); newest covered Some(42) of own seq 42; free part (0, 0); own record Err(LogFull); raising back Ok(()), checkpoint then Ok(43)
+test qa_finding_lowering_accepted_by_rule_a_blocks_an_allowance_paid_checkpoint_seat_records ... ok
+qa bound: 256 with put failing Err(Store(Unavailable("qa: put fails"))); then Ok(()); resumed member Ok(()); 257 Err(RosterLifetime) with 0 store calls; export Ok(())
+test qa_ok_r5m2_at_the_history_bound ... ok
+qa prop R5-m1: 40 cases; counts {"V re-added": 22, "V removed": 36, "checkpoint call ok": 329, "free-paid checkpoint refused": 99, "limit change accepted": 342, "limit change refused": 2, "member added": 49, "member removed": 84, "own record call": 725, "request accepted": 128, "request refused": 249, "resume": 164}; seat examples []
+test qa_prop_no_checkpoint_refused_for_its_payer_rule_a ... ok
+test qa_prop_r5m2_answers_match_the_roster_crate_on_the_stored_versions has been running for over 60 seconds
+qa prop R5-m2: 40 cases; {
+test qa_prop_r5m2_answers_match_the_roster_crate_on_the_stored_versions ... ok
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 161.99s
+rc=0
+qa prop R5-m2: 40 cases; {
+    "broken chain: refused": 173,
+    "duplicate: accepted": 152,
+    "forged: refused": 161,
+    "fork: refused": 128,
+    "fork: store failed": 27,
+    "gap: refused": 181,
+    "next: accepted": 273,
+    "next: store failed": 225,
+    "out of order: refused": 206,
+    "resume": 361,
+    "stale: accepted": 64,
+    "stale: refused": 98,
+    "unsigned: refused": 166,
+}
