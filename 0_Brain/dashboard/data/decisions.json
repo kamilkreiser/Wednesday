@@ -76684,5 +76684,933 @@
   "ruled_choice": "a",
   "ruled_ts": "2026-11-18T21:48:38.332051+11:00",
   "seat": "friday"
+ },
+ {
+  "id": "datasec-oxpd-q01-hp-confirm-m365-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Has HP confirmed in writing that a printer app whose server talks to Microsoft 365 is allowed and signable?",
+  "bluf": "This decides whether the newer printer track (OXPd 2) can ship at all, and when; HP said in 2023 it does not support public cloud links, and HP signing is delayed. If you do not answer, the design assumes HP has not been asked yet: the older printers (OXPd 1.x) go first and the newer ones wait on HP. It also asks whether Datasec has HP App Center access and a partner contact. Part of this needs HP to answer: take it to your HP partner contact, or to the team meeting.",
+  "default_action": "The design proceeds on: Not yet asked; older printers (OXPd 1.x) first, newer printers (OXPd 2) wait on HP, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, HP confirmed",
+    "detail": "HP has said yes in writing; OXPd 2 can be planned with a date."
+   },
+   {
+    "key": "b",
+    "label": "No, HP refused",
+    "detail": "HP said no; OXPd 2 is dropped or rethought."
+   },
+   {
+    "key": "c",
+    "label": "Not yet asked",
+    "detail": "We ask HP; older printers first, newer ones wait on HP."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-11-18T22:11:52.610714+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD attio-entra-consent-m365",
+   "CARD hpsmpoc-na-rulings-confirm",
+   "CARD mpscalc-hosting-tenant-confirm",
+   "CARD hpsmpoc-hosted-reset-confirm-count-1011"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q02-phone-signin-step-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: May the Microsoft sign-in step happen on the user's phone instead of the printer screen?",
+  "bluf": "This shapes the whole sign-in design: printer screens have old browsers that fail at Microsoft's sign-in page. If you do not answer, the design uses the phone (typing a short code on the phone, or a link that opens on the phone), on-screen sign-in only on newer printers after a test, and a QR scan with the HP phone app is still followed by the phone step when extra verification (MFA) is on. Your team may need to say what customers expect.",
+  "default_action": "The design proceeds on: Phone-based sign-in (code or link); on-screen only after a test; QR scan still followed by the phone step when MFA is on, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Phone code or phone link",
+    "detail": "User finishes Microsoft sign-in on their phone; QR app is not counted as MFA."
+   },
+   {
+    "key": "b",
+    "label": "Phone, and QR app counts as MFA",
+    "detail": "Same, but a QR scan with the HP app is enough as the second factor."
+   },
+   {
+    "key": "c",
+    "label": "Must be on the printer screen",
+    "detail": "Only possible on newer (OXPd 2) printers, after a test."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:12:13.761313+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-dev-signin",
+   "CARD composer-phone-flows",
+   "CARD composer-discovery-notices-on-phone",
+   "CARD hpsmpoc-showcase-phone-access",
+   "CARD hpsmpoc-signin-hardening-third-round",
+   "CARD mpscalc-hosting-and-signin",
+   "CARD composer-245-feedback-pill-phone-1008",
+   "CARD hpsmpoc-paul-signin-emails-forward-1008",
+   "CARD composer-flow-step-pills-look-1009",
+   "CARD hpsmpoc-uat-no-signin-which-level-1021",
+   "CARD nexusai-rd1003-action-route-signin-1118"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q03-card-interop-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Must a card or phone enrolled on a Workpath printer also work on an OXPd printer in the same company, and the reverse?",
+  "bluf": "This decides how card records and their protection key are shared, and which Microsoft app registration the server uses. If you do not answer, the design assumes full sharing: the same card, badge, phone, saved sign-in and user settings work on both kinds of printer.",
+  "default_action": "The design proceeds on: Full sharing of cards, phones, saved sign-ins and settings across both kinds of printer, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Full sharing",
+    "detail": "Cards, phones, saved sign-ins and settings work on both."
+   },
+   {
+    "key": "b",
+    "label": "Enrolment only",
+    "detail": "A card enrolled on one works on the other, nothing else shared."
+   },
+   {
+    "key": "c",
+    "label": "Separate",
+    "detail": "The two kinds of printer keep separate records."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:12:20.806151+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD attio-rate-card",
+   "CARD composer-l05-setup-card-too-1014"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q04-azure-backend-frozen-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Are the customer-side Azure pieces and the HP phone app frozen, and where is the gateway's source code?",
+  "bluf": "This decides how the QR phone sign-in plugs in and whether customers must redeploy anything in Azure; the gateway source is missing from every code copy we hold. If you do not answer, the design assumes they are frozen, with one extra endpoint added only if you allow it. Your team may know where the gateway source lives.",
+  "default_action": "The design proceeds on: Frozen; one relay endpoint only if you allow it, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Frozen",
+    "detail": "Nothing changes on the customer's Azure side or the phone app."
+   },
+   {
+    "key": "b",
+    "label": "May add one endpoint",
+    "detail": "One small addition to relay phone sign-ins is allowed."
+   },
+   {
+    "key": "c",
+    "label": "May change",
+    "detail": "The Azure side and phone app can be changed as needed."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:12:38.465043+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:05",
+   "2026-09-11 08:06",
+   "CARD nexusai-rd367-frozen-trunk",
+   "CARD hpsmpoc-azure-providers",
+   "CARD hpsm39-azure-region-sweep",
+   "CARD mpscalc-azure-login-for-hosting-1010"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q05-server-location-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Where will the server run for the first customers: on each site's network, one per company, or hosted by Datasec?",
+  "bluf": "This drives the deployment design, backup pairs and how server seats are licensed. If you do not answer, the design assumes the customer hosts it: one server per site, serving one company account.",
+  "default_action": "The design proceeds on: Customer-hosted, one server per site, one company account, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "On each site's network",
+    "detail": "Customer hosts one server per site."
+   },
+   {
+    "key": "b",
+    "label": "One per company account",
+    "detail": "One server per customer Microsoft account, covering its sites."
+   },
+   {
+    "key": "c",
+    "label": "Hosted by Datasec",
+    "detail": "Datasec or a partner hosts it, with a relay to each site."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:12:46.645809+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-01 17:25",
+   "CARD mpscalc-331-clause3-location-1115"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q06-reuse-entra-registration-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Should the server reuse the customer's existing HP Authentication Manager app registration in Microsoft, or a new one?",
+  "bluf": "This affects saved sign-ins, settings roaming and how many steps a customer does to get started. If you do not answer, the design reuses the existing registration and adds a web return address and a server credential to it.",
+  "default_action": "The design proceeds on: Reuse the existing registration (adding a web return address and a server credential), until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Reuse the existing one",
+    "detail": "Add a web return address and a server credential to it."
+   },
+   {
+    "key": "b",
+    "label": "New registration",
+    "detail": "Customers create a separate registration for the server."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:12:53.734984+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD attio-entra-consent-m365",
+   "CARD attio-entra-consent-decision",
+   "CARD hpsmpoc-entra-app"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q07-store-device-admin-pw-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: May the server keep each printer's administrator password, stored encrypted?",
+  "bluf": "Older printers (OXPd 1.x) need this password for everyday calls, so without it they cannot work unattended. If you do not answer, the design stores it encrypted on the customer's own server for older printers, and newer printers (OXPd 2) forget it after install. Customers may also need a say.",
+  "default_action": "The design proceeds on: Stored encrypted on the customer's server for older printers; newer printers discard it after install, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Store it encrypted",
+    "detail": "Kept encrypted on the customer's server for older printers; newer ones discard it."
+   },
+   {
+    "key": "b",
+    "label": "Enter it each time",
+    "detail": "An admin types it for every operation; older printers lose unattended running."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:13:01.986814+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD nexusai-customer-test-store-wizard-clickthrough",
+   "CARD nexusai-setup-window-admin-gate-scope",
+   "CARD hpsmpoc-sm-admin-optin-1006",
+   "CARD mpscalc-accessory-fits-device-1010",
+   "CARD hpsmpoc-device-identifiers-1011",
+   "CARD mpscalc-pr105-device-class-cell-words-1024",
+   "CARD mpscalc-readiness-no-device-line-words-1024",
+   "CARD mps-vanished-store-wording-1025",
+   "CARD nexusai-risk-store-writers-rd868-1029",
+   "CARD mps-269-template-store-round-cap-1102",
+   "CARD nexusai-action-route-admin-check-1116"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q08-card-reader-models-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Is the first release's card reader list the six readers HP Authentication Manager already supports?",
+  "bluf": "On newer printers each reader model is written into a signed package, so adding one later means re-signing. If you do not answer, the design supports the six existing readers, plus two others (an OMNIKEY 5427 and one unknown model) only if they work on Workpath today. Your team may know which readers customers actually use.",
+  "default_action": "The design proceeds on: The six existing readers; the two extra only if they work on Workpath today, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "The six existing readers",
+    "detail": "Plus the two extra ones only if they work on Workpath today."
+   },
+   {
+    "key": "b",
+    "label": "Others too (add a note)",
+    "detail": "Name the extra reader models needed."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:13:09.632904+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD attio-rate-card",
+   "CARD composer-l05-setup-card-too-1014",
+   "CARD hpsmpoc-217-ci-reader-round-cap-1025"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q09-printer-generations-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Is the target fleet newer HP printers only (FutureSmart 4.7 and up), with older and Pro models out?",
+  "bluf": "This sets which printers are supported, the screen layouts and the test list. If you do not answer, the design covers FutureSmart 4.7 and later on the older track, FutureSmart 6 on the newer track, touch screens of 4.3 inches and up, and leaves out Pro and the oldest models. You may not be able to answer this alone: it is one for your team meeting.",
+  "default_action": "The design proceeds on: FutureSmart 4.7 and later (5.8+ preferred) and FutureSmart 6; Pro and oldest out; touch screens 4.3 inches and up, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "FutureSmart 4.7 and up only",
+    "detail": "Older track on 4.7 to 5, newer track on 6."
+   },
+   {
+    "key": "b",
+    "label": "Include FutureSmart 3",
+    "detail": "Adds the oldest generation; more work."
+   },
+   {
+    "key": "c",
+    "label": "Include Pro models",
+    "detail": "Adds the Pro range; more work."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:13:21.854107+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-08 11:50",
+   "2026-09-10 18:01"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q10-site-size-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Is the biggest customer site about 500 printers, 5,000 users and 20 sign-ins a minute?",
+  "bluf": "This sets server size, whether a backup pair is needed, and how often print queues are checked. If you do not answer, the design is sized for 500 printers, 5,000 users and 20 sign-ins a minute per server. You may not be able to answer this alone: it is one for your team meeting.",
+  "default_action": "The design proceeds on: 500 printers, 5,000 users, 20 sign-ins a minute per server, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, as assumed",
+    "detail": "The design keeps its current assumption."
+   },
+   {
+    "key": "b",
+    "label": "No, it is different (add a note)",
+    "detail": "Tell me what is different and the design changes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:13:29.060214+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD hpsm-vm-size-quota-zero",
+   "CARD hpsmpoc-demo-site-for-0805-1026",
+   "CARD hpsmpoc-deploy-live-which-site-1104",
+   "CARD hpsmpoc-demo-site-remove-1105",
+   "CARD hpsmpoc-review-site-deploy-effects-1116",
+   "CARD nexusai-audit-details-size-cap-1116"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q11-licensing-model-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Is an OXPd printer licensed as one seat, the same as a Workpath printer, under the customer's existing licence?",
+  "bluf": "This changes the licence service and what happens when a server cannot reach it. If you do not answer, the design counts one seat per printer on any platform, the server itself is not licensed but is identified, it keeps running 20 days without reaching the licence service, and stops at confirmed expiry.",
+  "default_action": "The design proceeds on: One seat per printer on any platform; server unlicensed but identified; 20-day grace; stop at confirmed expiry, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Same seat, any platform",
+    "detail": "One seat per printer; 20-day grace; stop at expiry."
+   },
+   {
+    "key": "b",
+    "label": "Separate caps per platform",
+    "detail": "OXPd and Workpath printers counted separately."
+   },
+   {
+    "key": "c",
+    "label": "Server seats too",
+    "detail": "The server itself also needs a licence."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:13:36.332170+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-17 08:34",
+   "CARD nexusai-ai-screenshot-local-model",
+   "CARD hpsmpoc-real-ai-model-before-meetings",
+   "CARD hpsm37-scoring-model-accept",
+   "CARD hpsmpoc-client-followup-model",
+   "CARD nexusai-gate11-opus55-safeguard-model-switch"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q12-other-vendor-coexist-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Do customers run other companies' sign-in, pull-print or accounting software on the same printers?",
+  "bluf": "Two products fighting over the card reader or the same printer role break each other. If you do not answer, the design assumes they must live side by side (we stay out of the way of other products' access and quota control), and each printer runs either Workpath or OXPd, never both. You may not be able to answer this alone: it is one for your team meeting.",
+  "default_action": "The design proceeds on: Must coexist; one Datasec stack (Workpath or OXPd) per printer, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, must coexist",
+    "detail": "Share the printer; one Datasec stack per printer."
+   },
+   {
+    "key": "b",
+    "label": "No, ours only",
+    "detail": "Our product owns the printer outright."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:13:43.340496+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-10 18:01",
+   "CARD hpsmpoc-open-vendor-asks-1023"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q13-legacy-keycloak-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Are any customers who will buy OXPd still on the old Keycloak sign-in back end?",
+  "bluf": "Supporting the old back end doubles the sign-in code. If you do not answer, the design assumes no: Microsoft-only card records.",
+  "default_action": "The design proceeds on: No customer on the old Keycloak back end; Microsoft-only, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "No, none are",
+    "detail": "Microsoft-only; the old back end is not supported."
+   },
+   {
+    "key": "b",
+    "label": "Yes, some are",
+    "detail": "Both back ends are built, roughly doubling sign-in work."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:13:57.641560+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "datasec-oxpd-q14-server-packaging-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Should customers get the server as a Linux container or appliance first, with Windows second?",
+  "bluf": "This sets how it is packaged, where its keys are kept and which database it uses. If you do not answer, the design ships a container and a ready-made virtual machine first, a Windows service second, keeps keys in its own encrypted store, and lets customers use their Azure Key Vault (Microsoft's key safe) if they want. Your team may know what customers' IT will accept.",
+  "default_action": "The design proceeds on: Container and virtual appliance first, Windows second; local encrypted key store, Azure Key Vault optional, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Container and appliance first",
+    "detail": "Windows second; local encrypted keys, Key Vault optional."
+   },
+   {
+    "key": "b",
+    "label": "Windows first",
+    "detail": "Windows service is the main package."
+   },
+   {
+    "key": "c",
+    "label": "Both equally",
+    "detail": "Container, appliance and Windows all at release."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:14:10.212718+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-11 08:18",
+   "2026-09-17 08:34"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q15-release-one-scope-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Should the first release carry all five apps and the sign-in hub, with core journeys first?",
+  "bluf": "This sets the size of the build. If you do not answer, the design ships all five apps (Mailflow, Teams, OneDrive, SharePoint, Universal Print) plus the sign-in hub, OneDrive for Business only (not personal), Teams channels only (not chats), and full matching of today's scan-to and print-from first.",
+  "default_action": "The design proceeds on: All five apps plus the hub; OneDrive for Business only; Teams channels only; scan-to and print-from first, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "All five, core journeys first",
+    "detail": "Business OneDrive only, Teams channels only."
+   },
+   {
+    "key": "b",
+    "label": "Full match of everything",
+    "detail": "Every feature of today's Workpath apps at release."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:14:26.215330+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-07 07:07",
+   "CARD nexusai-rd167-dark-mode-scope",
+   "CARD nexusai-three-lineages-in-scope-or-parked",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD hpsm-composer-round4-commit-guard-and-forged-release",
+   "CARD hpsm-composer-demo-release-unreachable-c12",
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD hpsm-live-release-verification-unprovable",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD t9-nas-leg-scope-mechanism",
+   "CARD hpsmpoc-partner-scope",
+   "CARD composer-content-release-deploy",
+   "CARD nexusai-release-package-files-into-main",
+   "CARD nexusai-package-files-scope",
+   "CARD nexusai-setup-window-admin-gate-scope",
+   "CARD composer-release-05070f1d-deploy",
+   "CARD hpsmpoc-section-intro-video-scope",
+   "CARD hpsmpoc-good-better-best-tiers-scope",
+   "CARD composer-out-of-scope-answers-1002",
+   "CARD composer-designer-rename-scope-1009",
+   "CARD mps-paul-review-scope-k15-k17-k19-1016",
+   "CARD hpsmpoc-deploy-round-scope-1116",
+   "CARD datasec-new-agents-restriction-scope-1117"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q16-scan-print-behaviour-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: For scan and print, use small previews, convert mail attachments on the server, and send email through Microsoft?",
+  "bluf": "This changes three scan and print behaviours. If you do not answer, the design shows a small preview with remove or rescan, converts mail attachments on the server instead of through the user's OneDrive, and sends 'Send to e-mail' through Microsoft 365 instead of the printer's own mail settings.",
+  "default_action": "The design proceeds on: Thumbnail preview with remove/rescan; server-side attachment conversion; email sent through Microsoft 365, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "As assumed",
+    "detail": "Preview, server conversion, send through Microsoft."
+   },
+   {
+    "key": "b",
+    "label": "Keep today's behaviour",
+    "detail": "Full preview forced on, OneDrive round trip, printer mail."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:14:34.203325+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-17 07:51",
+   "CARD mpscalc-codeql-scan-csharp",
+   "CARD hpsmpoc-client-print-heading",
+   "CARD composer-94-heredoc-scan-round-cap-1026",
+   "CARD mps-375-template-scan-round-cap-1103",
+   "CARD mps-bot-prs-no-scan-route-1104",
+   "CARD datasec-bot-pr-scan-findings-1104",
+   "CARD datasec-bot-pr-scan-back-1112"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q17-universal-print-model-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: For Universal Print, keep three printers per device, admin sign-in at setup, and hold Secure jobs off the device?",
+  "bluf": "This sets how Microsoft's cloud printing is wired in. If you do not answer, the design keeps the three printers per device with today's names, registers them with an admin signing in on the server console, and holds 'Secure' jobs in the cloud or on the server rather than on the printer.",
+  "default_action": "The design proceeds on: Three printers per device, same names, admin sign-in on the server console, Secure jobs held off-device, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "As assumed",
+    "detail": "Three printers, same names, console sign-in, Secure held off-device."
+   },
+   {
+    "key": "b",
+    "label": "Merge Secure into Pull",
+    "detail": "Two printers per device; Secure jobs become Pull jobs."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:14:42.635539+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-10 18:01",
+   "2026-09-17 08:34",
+   "CARD nexusai-ai-screenshot-local-model",
+   "CARD hpsmpoc-real-ai-model-before-meetings",
+   "CARD hpsm37-scoring-model-accept",
+   "CARD hpsmpoc-client-followup-model",
+   "CARD nexusai-gate11-opus55-safeguard-model-switch",
+   "CARD hpsmpoc-client-print-heading"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q18-pull-sharing-ipps-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Do customers share Pull printers as one pool (Print Anywhere), and can the server reach printers on port 631?",
+  "bluf": "This decides how a Pull job is released on any printer in a mixed fleet, and how jobs reach the printer (secure printing over network port 631). If you do not answer, the design assumes one Print Anywhere pool and port 631 open on the printer network. You may not be able to answer this alone: it is one for your team meeting. Customers may also need to confirm.",
+  "default_action": "The design proceeds on: One Print Anywhere pool; port 631 open on the printer network, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, as assumed",
+    "detail": "The design keeps its current assumption."
+   },
+   {
+    "key": "b",
+    "label": "No, it is different (add a note)",
+    "detail": "Tell me what is different and the design changes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:14:49.802311+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-10 18:01"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q19-workpath-deploy-today-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Are Workpath fleets set up today with both HP Command Center and the HPK utility, and do customers have config files?",
+  "bluf": "This shapes the setup tool for new customers. If you do not answer, the design assumes both tools are used, an importer for existing config files is wanted, and HP Web Jetadmin support is optional. You may not be able to answer this alone: it is one for your team meeting.",
+  "default_action": "The design proceeds on: Both HP Command Center and the HPK utility in use; config importer wanted; Web Jetadmin optional, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, as assumed",
+    "detail": "The design keeps its current assumption."
+   },
+   {
+    "key": "b",
+    "label": "No, it is different (add a note)",
+    "detail": "Tell me what is different and the design changes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:15:08.453233+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-17 07:54",
+   "2026-09-17 08:34",
+   "CARD nexusai-scim-deploy-live-ab",
+   "CARD nexusai-rd296-deploy-timing",
+   "CARD nexusai-erasure-deploy-after-regate8-2026-09-05",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD composer-design-deploy",
+   "CARD composer-mobile-deploy",
+   "CARD composer-s5-fold-deploy",
+   "CARD composer-content-release-deploy",
+   "CARD composer-typed-answers-deploy",
+   "CARD composer-release-05070f1d-deploy",
+   "CARD vision-vsp65-production-deploy",
+   "CARD composer-two-logins-deploy-for-paul-friday",
+   "CARD composer-end-page-fix-deploy",
+   "CARD composer-0412eb6-deploy-before-paul",
+   "CARD composer-771ce4a-deploy-before-paul",
+   "CARD composer-771ce4a-deploy-3-rows-counted",
+   "CARD composer-1e4599d-deploy",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD composer-5a983f0-guided-layout-deploy",
+   "CARD hpsmpoc-pill-hosted-deploy-1003",
+   "CARD composer-6d026a7-deploy-before-monday",
+   "CARD composer-3d92736-deploy-1005",
+   "CARD hpsmpoc-577c27c-hosted-deploy-1005",
+   "CARD hpsmpoc-05f30b0-hosted-deploy-1005",
+   "CARD composer-7377099-deploy-1005",
+   "CARD composer-555593a-deploy-1005",
+   "CARD hpsmpoc-c2d321c-hosted-deploy-1005",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD composer-19c5e8a-deploy-1006",
+   "CARD composer-expert-66-demo-deploy-1007",
+   "CARD composer-lane3c-look-before-deploy-1009",
+   "CARD mpscalc-new-words-hosted-deploy-1011",
+   "CARD mpscalc-b30-new-words-hosted-deploy-1011",
+   "CARD composer-4e00d57-words-look-demo-deploy-1011",
+   "CARD hpsmpoc-tuesday-hosted-deploy-1011",
+   "CARD composer-new-words-look-demo-deploy-1012",
+   "CARD mpscalc-hosted-deploy-words-1012",
+   "CARD mpscalc-hosted-deploy-bf60fe8-1013",
+   "CARD mpscalc-hosted-deploy-b9a3d76-1013",
+   "CARD nexusai-rd846-build-broken-demo-deploy-1013",
+   "CARD mpscalc-hosted-deploy-0f8ad97-1016",
+   "CARD tuesday-dashboard-clock-deploy-az-login-1016",
+   "CARD mpscalc-deploy-overlay-copy-retention-1017",
+   "CARD mpscalc-hosted-deploy-12f8e56-1017",
+   "CARD mpscalc-hosted-deploy-e6f92a5-1017",
+   "CARD composer-demo-deploy-eaff2b7-words-1020",
+   "CARD mps-hosted-deploy-main-f5b6f5a-1022",
+   "CARD mps-hosted-deploy-words-f5b6f5a-1022",
+   "CARD mps-hosted-deploy-main-e027ebd-1022",
+   "CARD hpsmpoc-232-chooser-demo-deploy-1027",
+   "CARD composer-demo-deploy-87-105-1031",
+   "CARD hpsmpoc-uat-deploy-firstclick-keepawake-1101",
+   "CARD hpsmpoc-uat-deploy-269-270-1101",
+   "CARD composer-deploy-md-255-pinned-sentence-1103",
+   "CARD composer-deploy-md-255-sentence-round1-nogo-1103",
+   "CARD composer-deploy-md-255-path-once-clause-1103",
+   "CARD hpsmpoc-deploy-live-which-site-1104",
+   "CARD hpsmpoc-demo-deploy-words-schema-1104",
+   "CARD datasec-which-deploy-1104",
+   "CARD hpsmpoc-uat-deploy-five-landings-1110",
+   "CARD mpscalc-hosted-deploy-words-1112",
+   "CARD mpscalc-staff-words-31-deploy-1112",
+   "CARD mpscalc-deploy-seed-secret-expired-1112",
+   "CARD hpsmpoc-deploy-round-scope-1116",
+   "CARD datasec-demo-deploy-round-apply-1116",
+   "CARD mpscalc-deploy-seed-secret-again-1116",
+   "CARD hpsmpoc-review-site-deploy-effects-1116",
+   "CARD hpsmpoc-uat-deploy-unit-boxes-1117",
+   "CARD hpsmpoc-uat-next-1645-deploy-1118"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q20-hp-code-rights-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: What rights does Datasec hold to reuse HP's Workpath code and ship HP's OXPd libraries and sample code in the product?",
+  "bluf": "This decides whether we reuse code or rewrite it. If you do not answer, the design rewrites the logic itself, ships HP's older-printer library unchanged (its terms allow that), and ships HP's newer-printer library only once HP releases it from beta. Part of this needs HP to answer: take it to your HP partner contact, or to the team meeting.",
+  "default_action": "The design proceeds on: Rewrite the logic; ship the older-printer library unchanged; the newer-printer library only after HP's production release, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "As assumed",
+    "detail": "Rewrite logic; ship older library unchanged; newer library after beta."
+   },
+   {
+    "key": "b",
+    "label": "Different rights (add a note)",
+    "detail": "Tell me what Datasec may reuse or ship."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:15:16.022257+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD datasec-github-code-security-off-1014",
+   "CARD hpsmpoc-demo-chooser-code-change-1027",
+   "CARD mpscalc-160-rebate-default-no-rights-1111"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q21-job-audit-supplies-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Is job auditing best effort, and are supplies reports for older printers left out of release one?",
+  "bluf": "Complete auditing would let a printer lock itself if the server misses records. If you do not answer, the design treats auditing as best effort (printers never lock) and has no toner and supplies reports for older printers in release one.",
+  "default_action": "The design proceeds on: Best-effort auditing; no supplies reports for older printers in release one, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Best effort, no 1.x supplies",
+    "detail": "Printers never lock; supplies reports later."
+   },
+   {
+    "key": "b",
+    "label": "Complete auditing",
+    "detail": "Printers may lock if records are missed."
+   },
+   {
+    "key": "c",
+    "label": "Best effort, with 1.x supplies",
+    "detail": "Add supplies reports for older printers now."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:15:23.958147+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD nexusai-audit-details-size-cap-1116",
+   "CARD nexusai-audit-entry-limits-994-1118",
+   "CARD nexusai-picomatch-advisory-audit-1118",
+   "CARD hpsmpoc-picomatch-dev-audit-exception-1118",
+   "CARD mps-413-web-audit-instrument-1118"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q22-tls-certificate-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Will customers issue the server's security certificate from their own internal authority, with a name in their DNS?",
+  "bluf": "This shapes the installer and setup steps for printers to trust the server. If you do not answer, the design uses the customer's internal certificate authority and a server name in the customer's own DNS. You may not be able to answer this alone: it is one for your team meeting. Customers may also need to confirm.",
+  "default_action": "The design proceeds on: Customer internal certificate authority; server name in the customer's DNS, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Customer internal authority",
+    "detail": "Name in the customer's DNS."
+   },
+   {
+    "key": "b",
+    "label": "Public certificate",
+    "detail": "A publicly issued certificate."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:15:31.137179+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-10 11:25",
+   "2026-09-10 18:01"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q23-admin-view-location-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Should the single admin view for mixed fleets be the licence portal plus each server's console?",
+  "bluf": "This decides where admins manage Workpath and OXPd printers together. If you do not answer, the design puts the fleet view in the extended licence portal and the site view in each server's console.",
+  "default_action": "The design proceeds on: Licence portal for the fleet, each server's console for its site, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Licence portal plus consoles",
+    "detail": "Fleet in the licence portal, site in each server."
+   },
+   {
+    "key": "b",
+    "label": "Server consoles only",
+    "detail": "Each server manages its own site."
+   },
+   {
+    "key": "c",
+    "label": "Administration Portal",
+    "detail": "Extend the Administration Portal to manage printers."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:15:38.624603+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-setup-window-admin-gate-scope",
+   "CARD composer-guided-view-1006",
+   "CARD hpsmpoc-sm-admin-optin-1006",
+   "CARD mpscalc-331-clause3-location-1115",
+   "CARD nexusai-action-route-admin-check-1116"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q24-no-mfa-token-storage-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Is No-MFA mode carried over as it is today, or should OXPd launch with encrypted saved sign-ins?",
+  "bluf": "No-MFA mode keeps each user's saved sign-in unencrypted in the directory today, although the documents say it is encrypted. If you do not answer, the design carries it over as it is, switched off by default with the risk written down, and adds encryption in a later release together with Workpath.",
+  "default_action": "The design proceeds on: Carried over as is, off by default, risk documented; encryption in a later joint release, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "As is, off by default",
+    "detail": "Risk documented; encryption later with Workpath."
+   },
+   {
+    "key": "b",
+    "label": "Encrypt at launch",
+    "detail": "Needs a matching Workpath update."
+   },
+   {
+    "key": "c",
+    "label": "Drop No-MFA on OXPd",
+    "detail": "OXPd printers do not offer it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:15:46.770997+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-06 10:52",
+   "CARD nexusai-rd198-border-token-naming",
+   "CARD nexusai-brand-chrome-dark-token",
+   "CARD nexusai-rd104-gh-token-storage",
+   "CARD hpsmpoc-uat-api-accepts-demo-audience-token-1021"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-q25-test-devices-1118",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: Can the team get one newer HP printer plus HP's simulator and one older printer for development?",
+  "bluf": "This sets the build and certification schedule; HP's self-certification needs more printers (one per test group). If you do not answer, the design assumes one newer (OXPd 2) printer plus the simulator and one older (FutureSmart 5) printer, with certification blocked until more are borrowed. It also asks whether there is an HP contact for early firmware. Part of this needs HP to answer: take it to your HP partner contact, or to the team meeting.",
+  "default_action": "The design proceeds on: One OXPd 2 printer plus simulator and one FutureSmart 5 printer; certification blocked until more are borrowed, until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "As assumed",
+    "detail": "One newer printer plus simulator, one older printer."
+   },
+   {
+    "key": "b",
+    "label": "More devices available (add a note)",
+    "detail": "Tell me which printers the team can get."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-18T22:15:55.926842+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD composer-purge-test-engagements",
+   "CARD nexusai-customer-test-cost-bound",
+   "CARD nexusai-customer-test-which-subscription",
+   "CARD nexusai-customer-test-store-wizard-clickthrough",
+   "CARD hpsmpoc-test-user-partner-1003",
+   "CARD mpscalc-second-approver-for-kam-test-1010",
+   "CARD hpsmpoc-148-310-round2-test-gap-merge-1023"
+  ]
  }
 ]
