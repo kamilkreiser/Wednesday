@@ -12,7 +12,7 @@ status: live
 - Open the family file in families/ or the lesson itself the moment a rule fires or a diagnosis needs its cases.
 - Lessons that say the same thing are merged into one line; the count carries their combined reinforcement.
 
-Counts: 282 lessons, 357 rule lines, 285 on this card, 1 enforced, 12 dead, 23 superseded, 36 other-seat-only
+Counts: 283 lessons, 360 rule lines, 288 on this card, 1 enforced, 12 dead, 23 superseded, 36 other-seat-only
 
 ## Most reinforced (read these first)
 - [×766] Before stating any fact in a brief, score, report or ack: take it from a read made in the same action, never a widget, board column, error string, capped query or my earlier prose; name the instrument inline. Never state a mechanism I have not read. — `2026-08-14_i-read-representations-they-read-sources.md`
@@ -68,6 +68,8 @@ Counts: 282 lessons, 357 rule lines, 285 on this card, 1 enforced, 12 dead, 23 s
 - [×2] When relying on or writing a guard: read its exclusion list against its subject (a conflict-marker hook that skipped .json missed the files that carry markers). Plant the defect in an excluded file type, and install the hook in each seat's .git/hooks. — `2026-09-09_a-guard-whose-exclusion-list-contains-its-own-subject.md`
 - [×1] Never commission "recognise the safe cases" of a shell or interpreter as a security boundary: commission the conservative rule (all of it dangerous). If gate round 2 fails on a new dimension, ask "can this be sound at all?" and remove it, no third patch. — `2026-11-17_a-recogniser-of-safe-shell-commands-cannot-be-finished.md`
 - [new] When writing a sweep that emits a list of suspect tests or sites: give it a self-test that ABORTS (a known-changed path is in, a known-unchanged path is out, the population is non-empty). State exclusions as 'by construction' with the reason. — `2026-09-20_an-early-return-disarms-tests-outside-the-diff.md` (rule 2)
+- [new] Before stamping a kit: run the 10-item stamp checklist in this lesson (read whole, no cut -c; who-decided grep; source lines beside behaviour sentences; selectors in the consuming tool's syntax; predicted numbers measured). A stamp tool's OK is not it. — `2026-11-18_the-kit-stamp-checklist.md`
+- [new] After every stamp, before launch: check the kit's byte count (never 0) and its last line against the kit's own Step-0 rule; rewrite via temp file then os.replace, never open(path,'w') first. A stamped kit joins the launch queue; it is never fired. — `2026-11-18_the-kit-stamp-checklist.md` (rule 3)
 
 ## sources-not-representations
 - [×766] Before stating any fact in a brief, score, report or ack: take it from a read made in the same action, never a widget, board column, error string, capped query or my earlier prose; name the instrument inline. Never state a mechanism I have not read. — `2026-08-14_i-read-representations-they-read-sources.md`
@@ -96,6 +98,7 @@ Counts: 282 lessons, 357 rule lines, 285 on this card, 1 enforced, 12 dead, 23 s
 - [×1] Before calling any ticket 'not started': search the whole project folder, not only the repo (git sees only 2_Project_Files). Rescue deliverables found outside it via the project's own agent; commissions name a repo path for output. — `2026-09-20_most-of-a-project-folder-is-outside-its-git-repo.md`
 - [×1] Before a brief, card, tap or queue line touching a coding file or deploy leaves me: run the read-only precondition myself (path exists, sha on remote, lock free). When unsure choose the reversible action and say so. — `2026-10-12_be-more-careful-with-coding-files-and-deploys.md`
 - [new] When recording any analysis (gate, probe, verification, re-derivation): write three fields, FOUND, TESTED (scope, and what was NOT tested) and HOW (instrument, command, positive and negative controls, instrument errors), plus the evidence path. — `2026-09-07_analysis-records-what-tested-and-how.md`
+- [new] Before a kit, commit or PR body says who decided (product owner, ruling, Kam): grep those words, run decision_queue.sh show <id>, confirm the card's client_project and option detail name THIS lane. A decision I made is written as mine. — `2026-11-18_the-kit-stamp-checklist.md` (rule 2)
 
 ## kam-communication
 - [×98] When writing any line that reports a send, tap, card, ack or launch (panel, note, mail, provenance): write it in a LATER call, from the tool's output ('launched %11, verified HH:MM'); before that say what I am doing. If a refusal would falsify it, hold it. — `2026-08-26_mirror-reports-state-not-intent.md`
