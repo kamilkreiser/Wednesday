@@ -1,0 +1,10 @@
+A chat message longer than 100000 characters is refused at once with a 400 and the
+existing one-key error shape on POST /api/chat, GET /api/chat/stream and
+POST /api/chat/stream. A request body under the /api/chat prefix larger than 2 MB is
+refused with a 413 by the chat prefix's own parsers before any chat route runs; every
+other route keeps the 50 MB limit. The 100000 is the product owner's ruling; the 2 MB
+cap, the error wording and counting a character as one UTF-16 code unit are this
+change's defaults. Eleven new cells; expected counts 5898 tests over 379 suites.
+Not deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

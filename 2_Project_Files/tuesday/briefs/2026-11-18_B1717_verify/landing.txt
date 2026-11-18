@@ -1,0 +1,24 @@
+Landing for the chat message limit (repo datasecau/Reporting_Dashboard_Au). MERGE COMMIT, head-pinned. Never squash, never rebase.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-18_B1717_verify'
+
+0. Re-read before acting: main must still be b0450dcda4f51c327ba302913f0f7d74aeba63f6 and the branch head 2b323aebf8ddec1132ca8d9013a108799f3cdf58
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/b1716/nexusai-lane-rd1000-chat-message-limit --jq .commit.sha
+   If main moved: re-gate (compare ahead/behind and paths) before landing.
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1716/nexusai-lane-rd1000-chat-message-limit --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks (Build, CodeQL, gitleaks, npm audit) with a background wait that EXITS; all must pass. CodeQL must show no new alert; alerts 145 and 146 stay open and untouched.
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit:
+   gh pr merge <PR> -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit 2b323aebf8ddec1132ca8d9013a108799f3cdf58 --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing: the merge touches backend/**, which deploy-demo.yml does not path-ignore, so a Deploy demo run starts on main. Its build and deploy jobs MUST read skipped (gated on vars.CI_DEPLOY_ENABLED). Read the run's jobs; anything other than skipped is a stop-and-report. Do not dispatch, re-run or touch a variable.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert.
+Not deployed. No Jira from the landing seat (records seat posts after).
