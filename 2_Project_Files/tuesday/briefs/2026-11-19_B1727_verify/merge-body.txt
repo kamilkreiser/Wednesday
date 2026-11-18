@@ -1,0 +1,19 @@
+RD-1005: on POST /api/chat, POST /api/chat/stream and GET /api/chat/stream a message
+that is not a string (an array, an object, a number, a boolean, null, or a key sent
+twice in a form or a query) is answered 400 Message is required before any other use
+of it and before any model call. A failing chat route sends the client the constant
+Error processing chat message (the stream routes keep their Stream error and Analysis
+error prefixes) instead of the thrown error's own text, which stays in the server log.
+The named refusal of an AI endpoint that redirected (RD-523) keeps its words.
+
+RD-1007: POST /api/auth/users reads its fields through the existing plain-object
+check, so an administrator's add whose body no parser read (merge-patch+json,
+vnd.api+json, text/plain, or no body) answers 400 Email, name, and password are
+required instead of 500 and stores no user. The administrator check still answers
+a viewer 403 first. An ordinary JSON add is unchanged.
+
+Two new suites (32 cells) and the expected counts (6041 tests, 382 suites).
+The texts and the reuse of the shared check are this change's defaults.
+Not deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
