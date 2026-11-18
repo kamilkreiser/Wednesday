@@ -1,0 +1,53 @@
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:35:1
+   |
+35 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+    Finished `test` profile [unoptimized] target(s) in 0.66s
+     Running tests/gate_r5_model.rs (/private/tmp/claude-501/gd5/target_red/debug/build/coagent-daemon/7022c521bb8e7ff9/out/gate_r5_model-7022c521bb8e7ff9)
+
+running 5 tests
+G5-1 after full/room at 0: outbox 0 in_flight 128 skips_left 128 desync_out true pos Some(0) proven true connected true peer_full false next_deadline Some(14.7s) lost_outbound 128 resyncs {}
+G5-1 after full/room at 0: outbox 0 in_flight 128 skips_left 128 desync_out true pos Some(0) proven true connected true peer_full false next_deadline Some(14.7s) lost_outbound 128 resyncs {}
+G5-1 after resume at 128 (envelope ack 0): outbox 0 in_flight 128 skips_left 0 desync_out true pos Some(128) proven true connected true peer_full false next_deadline Some(14.7s) lost_outbound 256 resyncs {}
+G5-1 after resume at 128 (envelope ack 0): outbox 0 in_flight 128 skips_left 0 desync_out true pos Some(128) proven true connected true peer_full false next_deadline Some(14.7s) lost_outbound 256 resyncs {}
+G5-1 after resume at 256 (envelope ack 0): outbox 0 in_flight 0 skips_left 0 desync_out true pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+G5-1 after resume at 256 (envelope ack 0): outbox 0 in_flight 0 skips_left 0 desync_out true pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+G5-1 after the send: outbox 1 in_flight 0 skips_left 0 desync_out true pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+G5-1c (peer honest from now on): delivered false in 120s; outbox 1 in_flight 0 skips_left 0 desync_out true pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+
+thread 'g5_1c_same_forgery_then_an_honest_peer_still_gets_the_message' (18950339) panicked at crates/coagent-daemon/tests/gate_r5_model.rs:210:5:
+V4 (R4-8 rule): after the peer's forged positions, an honest peer did not get the queued message within 120 s: outbox 1 in_flight 0 skips_left 0 desync_out true pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test g5_1c_same_forgery_then_an_honest_peer_still_gets_the_message ... FAILED
+G5-1 600 s later: frames side 0 emitted toward the peer in that time 0; longest stretch waiting with no deadline 599.9s; outbox 1 in_flight 0 skips_left 0 desync_out true pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+
+thread 'g5_1_r4_8_peer_trims_skips_without_acknowledging_waiting_state_has_a_deadline' (18950338) panicked at crates/coagent-daemon/tests/gate_r5_model.rs:175:5:
+V5 (R4-8 rule): a peer that stated a low position and trimmed the skips in flight with a position above its acknowledgement left the sender waiting with no deadline for 599.9s: outbox 1 in_flight 0 skips_left 0 desync_out true pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+test g5_1_r4_8_peer_trims_skips_without_acknowledging_waiting_state_has_a_deadline ... FAILED
+G5-3 after 600 s with the responder away: initiator resyncs {"T-BLIND": 1, "key exchange clock": 114}, reconnects 0, relay refusals 0, attaches 1, frames toward the absent slot 0; responder attaches 0; initiator outbox 1 in_flight 0 skips_left 256 desync_out false pos None proven false connected false peer_full false next_deadline Some(0ns) lost_outbound 0 resyncs {"T-BLIND": 1, "key exchange clock": 114}
+G5-3: after the responder may attach: delivered both ways true in 400ms; initiator outbox 1 in_flight 1 skips_left 256 desync_out false pos Some(0) proven true connected true peer_full false next_deadline Some(14.9s) lost_outbound 0 resyncs {"T-BLIND": 1, "key exchange clock": 114}; responder outbox 1 in_flight 1 skips_left 256 desync_out false pos Some(0) proven true connected true peer_full false next_deadline Some(14.9s) lost_outbound 0 resyncs {}
+test g5_3_r4_1_fresh_session_responder_absent_10_minutes ... ok
+G5-4: 30 s after the peer stated 0, no message queued: outbox 0 in_flight 0 skips_left 84 desync_out true pos Some(300) proven true connected true peer_full false next_deadline None lost_outbound 300 resyncs {}
+
+thread 'g5_4_r4_8_desync_status_after_the_pump_passed_the_gap' (18950460) panicked at crates/coagent-daemon/tests/gate_r5_model.rs:326:5:
+G5-4 (row 54 status): the pump passed every missing number (next_out 301 send_next 301) but desync is still shown
+test g5_4_r4_8_desync_status_after_the_pump_passed_the_gap ... FAILED
+G5-2: 50 forged full/room pairs (100 control frames) in 15s: side 0 emitted 6400 data frames (128 per pair); lost_outbound 6400; outbox 0 in_flight 128 skips_left 128 desync_out true pos Some(0) proven true connected true peer_full false next_deadline Some(14.8s) lost_outbound 6400 resyncs {}
+test g5_2_measure_hostile_full_room_pairs ... ok
+
+failures:
+
+failures:
+    g5_1_r4_8_peer_trims_skips_without_acknowledging_waiting_state_has_a_deadline
+    g5_1c_same_forgery_then_an_honest_peer_still_gets_the_message
+    g5_4_r4_8_desync_status_after_the_pump_passed_the_gap
+
+test result: FAILED. 2 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.04s
+
+error: test failed, to rerun pass `-p coagent-daemon --test gate_r5_model`
+rc 101
