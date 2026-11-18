@@ -30,3 +30,153 @@ Kam, Friday's terminal, about 21:36: "fable limit hit.  if fable does not work. 
 
 Kam, Friday's terminal, 2026-11-18 evening: "no problem.  use opus now and we will run a fable run to review" (typed in the terminal, recorded from the session). Friday's reading: the remaining analysis, the synthesis (architecture document, plan of attack and build) and the question list are produced on Opus now; once Fable answers again (its limit resets 2026-11-20 09:00 AEDT) a Fable review pass reads the documents and reports corrections before they are final. This narrows C-1's "keep latest fable running" for this stage only.
 
+
+## C-6
+
+Live board, view=friday, card datasec-oxpd-q25-test-devices-1118, his tap verbatim from the board export:
+
+> 03:29 [live] | Decision datasec-oxpd-q25-test-devices-1118: a — As assumed
+
+## C-7
+
+Live board, view=friday, card datasec-oxpd-q24-no-mfa-token-storage-1118, his tap verbatim from the board export:
+
+> 03:29 [live] | Decision datasec-oxpd-q24-no-mfa-token-storage-1118: a — As is, off by default
+
+## C-8
+
+Live board, view=friday, card datasec-oxpd-q23-admin-view-location-1118, his tap verbatim from the board export:
+
+> 03:30 [live] | Decision datasec-oxpd-q23-admin-view-location-1118: a — Licence portal plus consoles
+
+## C-9
+
+Live board, view=friday, card datasec-oxpd-q22-tls-certificate-1118, his tap verbatim from the board export:
+
+> 03:30 [live] | Decision datasec-oxpd-q22-tls-certificate-1118: a — Customer internal authority
+
+## C-10
+
+Live board, view=friday, card datasec-oxpd-q21-job-audit-supplies-1118, his tap verbatim from the board export:
+
+> 03:30 [live] | Decision datasec-oxpd-q21-job-audit-supplies-1118: a — Best effort, no 1.x supplies
+
+## C-11
+
+Live board, view=friday, card datasec-oxpd-q20-hp-code-rights-1118, his tap verbatim from the board export:
+
+> 03:30 [live] | Decision datasec-oxpd-q20-hp-code-rights-1118: a — As assumed
+
+## C-12
+
+Live board, view=friday, card datasec-oxpd-q19-workpath-deploy-today-1118, his tap verbatim from the board export:
+
+> 03:30 [live] | Decision datasec-oxpd-q19-workpath-deploy-today-1118: a — Yes, as assumed
+
+## C-13
+
+Live board, view=friday, card datasec-oxpd-q18-pull-sharing-ipps-1118, his tap verbatim from the board export:
+
+> 03:30 [live] | Decision datasec-oxpd-q18-pull-sharing-ipps-1118: a — Yes, as assumed
+
+## C-14
+
+Live board, view=friday, card datasec-oxpd-q17-universal-print-model-1118, his tap verbatim from the board export:
+
+> 03:30 [live] | Decision datasec-oxpd-q17-universal-print-model-1118: a — As assumed
+
+## C-15
+
+Live board, view=friday, card datasec-oxpd-q16-scan-print-behaviour-1118, his tap verbatim from the board export:
+
+> 03:30 [live] | Decision datasec-oxpd-q16-scan-print-behaviour-1118: a — As assumed
+
+## C-16
+
+Live board, view=friday, card datasec-oxpd-q15-release-one-scope-1118, his tap verbatim from the board export:
+
+> 03:31 [live] | Decision datasec-oxpd-q15-release-one-scope-1118: b — Full match of everything
+
+## C-17
+
+Live board, view=friday, card datasec-oxpd-q14-server-packaging-1118, his tap verbatim from the board export:
+
+> 03:31 [live] | Decision datasec-oxpd-q14-server-packaging-1118: c — Both equally
+
+## C-18
+
+Live board, view=friday, card datasec-oxpd-q13-legacy-keycloak-1118, his tap verbatim from the board export:
+
+> 03:31 [live] | Decision datasec-oxpd-q13-legacy-keycloak-1118: a — No, none are
+
+## C-19
+
+Live board, view=friday, card datasec-oxpd-q12-other-vendor-coexist-1118, his tap verbatim from the board export:
+
+> 03:32 [live] | Decision datasec-oxpd-q12-other-vendor-coexist-1118: b — No, ours only
+
+## C-20
+
+Live board, view=friday, card datasec-oxpd-q11-licensing-model-1118, his tap verbatim from the board export:
+
+> 03:32 [live] | Decision datasec-oxpd-q11-licensing-model-1118: a — Same seat, any platform
+
+## C-21
+
+Live board, view=friday, card datasec-oxpd-q10-site-size-1118, his tap verbatim from the board export:
+
+> 03:32 [live] | Decision datasec-oxpd-q10-site-size-1118: a — Yes, as assumed
+
+## C-22
+
+Live board, view=friday, card datasec-oxpd-q09-printer-generations-1118, his tap verbatim from the board export:
+
+> 03:32 [live] | Decision datasec-oxpd-q09-printer-generations-1118: a — FutureSmart 4.7 and up only
+
+## C-23
+
+Live board, view=friday, card datasec-oxpd-q08-card-reader-models-1118, his tap verbatim from the board export:
+
+> 03:32 [live] | Decision datasec-oxpd-q08-card-reader-models-1118: a — The six existing readers
+
+## C-24
+
+Live board, view=friday, card datasec-oxpd-q07-store-device-admin-pw-1118, his tap verbatim from the board export:
+
+> 03:32 [live] | Decision datasec-oxpd-q07-store-device-admin-pw-1118: a — Store it encrypted
+
+## C-25
+
+Live board, view=friday, card datasec-oxpd-q06-reuse-entra-registration-1118, his tap verbatim from the board export:
+
+> 03:32 [live] | Decision datasec-oxpd-q06-reuse-entra-registration-1118: a — Reuse the existing one
+
+## C-26
+
+Live board, view=friday, card datasec-oxpd-q05-server-location-1118, his tap verbatim from the board export:
+
+> 03:33 [live] | Decision datasec-oxpd-q05-server-location-1118: a — On each site's network
+
+## C-27
+
+Live board, view=friday, card datasec-oxpd-q04-azure-backend-frozen-1118, his tap verbatim from the board export:
+
+> 03:33 [live] | Decision datasec-oxpd-q04-azure-backend-frozen-1118: c — May change
+
+## C-28
+
+Live board, view=friday, card datasec-oxpd-q03-card-interop-1118, his tap verbatim from the board export:
+
+> 03:33 [live] | Decision datasec-oxpd-q03-card-interop-1118: a — Full sharing
+
+## C-29
+
+Live board, view=friday, card datasec-oxpd-q02-phone-signin-step-1118, his tap verbatim from the board export:
+
+> 03:33 [live] | Decision datasec-oxpd-q02-phone-signin-step-1118: a — Phone code or phone link
+
+## C-30
+
+Live board, view=friday, card datasec-oxpd-q01-hp-confirm-m365-1118, his tap verbatim from the board export:
+
+> 03:34 [live] | Decision datasec-oxpd-q01-hp-confirm-m365-1118: a — Yes, HP confirmed
