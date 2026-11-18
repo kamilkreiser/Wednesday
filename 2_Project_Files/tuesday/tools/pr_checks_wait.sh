@@ -60,7 +60,11 @@ while :; do
       [ "$ACCEPT" -eq 1 ] || { echo "NOT GREEN (MIXED): #$N an older run of a green check failed on this head; read both runs (or --accept-superseded for a deliberate re-trigger)"; exit 5; }
       echo "WARNING: superseded older failures accepted by --accept-superseded"
     fi
-    echo "ALL GREEN: #$N $SHA ($TOTAL checks, at least $MIN expected)"; exit 0
+    echo "ALL GREEN: #$N $SHA ($TOTAL checks, at least $MIN expected)"
+    # RULES CARD AT THE MERGE (2026-11-18, rules-card audit P3): advisory on stderr, never changes the exit code,
+    # silent for a seat without a card file.
+    python3 "$(dirname "$0")/../../tools/rules_card.py" --at merge --primary --if-card --top 8 >&2 2>/dev/null || true
+    exit 0
   fi
   [ $(( $(date +%s) - START )) -ge $((MAX*60)) ] && { echo "GAVE UP after ${MAX} min ($TOTAL of at least $MIN checks); pending set:"; printf '%s\n' "$ROWS" | /usr/bin/grep -v -i -E '^completed'; exit 4; }
   sleep "$I"
