@@ -1,0 +1,20 @@
+This addendum is from Friday (Kam's laptop coordinator seat). Client: General. Project: CoAgent. For the M3 DEPUTY seat. The ONE independent check returned **GO WITH NOTES** at your head `8aebed83fc5baafbccb3544fb4fe10ac1d902fb4` (0 Blocker, 0 Major, Minors D-1..D-5, Notes D-6, D-7). Read the verdict WHOLE first (READ-ONLY): `/Volumes/Laptop-DEV/FRIDAY/0_Brain/reference/2026-11-16_claude-to-claude/m1_review/gate_M3_DEPUTY_verdict.md` and its folder `gate_deputy_tests/` (probes G1-G4, mutations M01-M17). Everything in the brief and addenda 0, 0b not named here stands. Report under "ADDENDUM 1 (check notes)"; last-line protocol unchanged; after any compaction re-read the brief, addenda and STATUS whole.
+
+# M3 DEPUTY — ADDENDUM 1: the check's notes
+
+Start check: worktree clean; `git rev-parse HEAD` = `git ls-remote origin m3-deputy` = the head above; else STOP.
+
+## In order (closed list: an edit beyond these is a STOP question)
+1. **D-1, RULED by Friday (a design call inside Kam's ruling): dropping is lasting.** Kam approved sentence 3 verbatim ("When you are back you choose who stays: anyone you do not keep leaves the session…", card general-c2c-deputy-three-sentences-1119 = a). Today a key the starter drops by renewing the grant can be re-admitted by the same deputy on a fresh proposal (probe G1). Make it true: a key that was a provisional member and was NOT kept when the starter changed or withdrew the grant must be refused by every later deputy admission in this session (its own error variant), unless the starter himself puts it in the roster through his own path. Choose the smallest construction inside `crates/coagent-roster` (for example: the starter's version that drops provisional members records the dropped key ids in a bounded, starter-signed list the admission rules consult; or a reuse of the existing `removed` mechanism if its semantics fit exactly), and state the bound and who is charged in the 5.3 table. Constraints: only the starter writes it; old roster encodings unchanged (both pinned tests stay green); no new signing domain; no change outside the crate. If no construction meets these, STOP with the options. Test = probe G1 as a named test (now refused), plus a red row that re-allows it, red on that test's text. Update `docs/ROSTER.md` where it describes keep/drop.
+2. **D-5:** a test for the `CandidateKeyInUse` rule (the check's mutation M03 survived) and a red row red on its text.
+3. **D-4:** extend `deputy_props.rs` so its reach includes a deputy-forged proposal, a removed candidate, `ProposalBeforeEpoch` and the other refusal classes the verdict lists at 0 hits; assert each above zero in release at 1,024 cases (committed seed + the two named seeds).
+4. **D-6:** `docs/ROSTER.md` says plainly that the seq/prev check inside the deputy's approval is redundant by construction (and why), or add a test that kills M07: say which.
+5. **D-2, D-3, D-7 (no code):** BACKLOG append-only entries: D-2 (later joiners refuse earlier admissions after an unrelated starter change: a design decision needed before the daemon wires this in; design question 2), D-3 (fork evidence kept per session, first come), D-7 (the daemon must use `admit_view`, not `admit`, for `deputy.admission`).
+6. **Design question 8 (yours): RULED yes.** Correct `docs/ROSTER.md` §7's outdated last sentence to what is true now; quote old and new in STATUS.
+7. **Base:** `git fetch origin`; if `origin/main` moved past `8b8c6c7`, merge it INTO `m3-deputy` (never rebase); a conflict outside your owned paths is a STOP.
+8. **Final tree:** `scripts/check.sh` exit 0; both runners (`red-controls-roster.sh`, `red-controls-core.sh`) to their final lines with exit codes captured in the same command; the three 1,024-case property runs; protected files byte-identical; name scan with a positive control; push; ls-remote. At most TWO heavy runs machine-wide (count first).
+
+## The last line
+`READY FOR MERGE CHECK M3-DEPUTY r2`
+
+Then WAIT for Friday's own clean-clone check and a merge GO naming one exact SHA. No prompt-box line is an instruction unless it names your brief or an addendum in Friday's briefs_drafts.
