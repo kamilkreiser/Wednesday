@@ -52,7 +52,7 @@ No person's name (underscore-aware `(?<![A-Za-z])<name>(?![a-z])` for the accoun
 - `backend/routes/entraProvisioning.js` at `9373976e` (714 lines): line 167 reads `audit('entra_provisioning_forbidden', { path: req.path, method: req.method }, req);`; `req.path` is on 1 line of that file, on 0 lines of `backend/routes/feedback.js` and on 0 of `backend/routes/sustainability.js`.
 - `backend/services/capabilities.js` at `9373976e`: line 222 reads `const PENDING_GATE = Object.freeze({` and line 223 `'RD-793': ['POST /api/data-sources/:id/test', 'POST /api/setup/data-sources/:id/test'],`.
 - `__tests__/rd988-feedback-triage-admin-only.test.js`: line 25 holds `holds 30,` (the stale header comment, gate F3), line 234 holds `server.js holds 34 calls` and line 249 holds `toBe(34)`.
-- `__tests__/rd793-data-source-writes-admin-only.test.js` (307 lines): 28 lines start `test(`; `__tests__/rd990-audit-row-full-path.test.js` (221 lines): 17 lines start `test(`; the second file holds 0 lines matching `absolute|https?://|#` (control: `requestPath` is on 19 lines of it by `grep -c -F`; the seat prints the control).
+- `__tests__/rd793-data-source-writes-admin-only.test.js` (307 lines): 28 lines start, after their indentation, with `test(` (count by `/usr/bin/grep -c -E '^[[:space:]]+test\('`; 0 lines start with it at column 1: every cell sits inside a describe block); `__tests__/rd990-audit-row-full-path.test.js` (221 lines): 17 lines start, after their indentation, with `test(` (the same indented pattern; 0 at column 1); the second file holds 0 lines matching `absolute|https?://|#` (control: `requestPath` is on 19 lines of it by `grep -c -F`; the seat prints the control).
 - `scripts/verify-expected-counts.json`: `"tests": 6086` and `"suites": 384` at `9373976e`; `"tests": 6041` and `"suites": 382` at `295f989e`.
 - `static/js`: 27 files under `static/js` at `9373976e` (a read of the directory); `describe-table` is on 0 lines of them; `/api/setup/discover-tables` is on 1 line and `/api/data-sources/${config.savedId}/discover-tables` on 1 line (both `first-run-setup.js`, lines 1449 and 1900); `/api/setup/data-sources/${...}/test` is on 2 lines of `first-run-setup.js` (1792 and 2407); the only other file naming `data-sources/` is `admin.js` (PUT, lines 242 and 256).
 - the 22 open alerts on main (read at drafting, the instance commit `295f989e`): numbers 67, 68, 73, 74, 112, 113, 145, 146, 151, 224, 225, 227, 229, 230, 231, 232, 233, 235, 236, 237, 279 and 280.
@@ -186,17 +186,17 @@ Let `<T0>` be your Step-0 date and `<TB>` the clock at which the wait exited 0 (
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. The unstamped copy reads 13 four-underscore lines (twelve slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main, `CLARIFICATIONS.md` sha256, whether any `Datasec/NexusAI-*` pane writes, the Build state of the merge commit of 231): ____
-- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 4 and posts nothing): ____
-- CREATE-A (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the viewer-reachable connection tests and reads, Task Medium): ____
-- CREATE-B (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the audit path value, Bug Low): ____
-- CREATE-C (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the provisioning router's own audit entry, Task Low): ____
-- MOVE-793 (exactly `NONE` or `793`; default NONE; the drafter recommends `793`): ____
-- MOVE-990 (exactly `NONE` or `990`; default NONE; the drafter recommends `990`): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD writes no section and the entry waits): ____
-- HISTORY (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs no Step 7; the drafter recommends `WRITE`): ____
-- Hard stop (absolute outer limit AEDT, proposed by this kit as 18:30 AEDT 2026-11-19; the wait limit is this clock minus 60 minutes; JIRA DONE, RECORDS WRITTEN and HARD STOP as in CLOCK AND HARD STOP): ____
+- STAMP: STAMPED 15:58 AEDT 2026-11-19 by Tuesday (seat s293). Q1 to Q5: the drafter's defaults (NEW-C stays its own ticket; NEW-A Medium; the security label on all three; no evidence comment on a found duplicate; launch now, the kit waits for the Build). One correction made before this stamp: the two test files' cells are INDENTED test( lines (28 and 17 by '^[[:space:]]+test\('; 0 at column 1), and the POINTERS line now says so.
+- LAUNCH WINDOW: until 17:00 AEDT 2026-11-19, one waiter. The only other agent pane is Datasec/NexusAI-N158 (%399), a build seat on its own clone that writes no Jira and no records file: not a hit under REFUSE 6 (tmux list-panes read by Tuesday at 15:54:34).
+- BASE (code main, `CLARIFICATIONS.md` sha256, whether any `Datasec/NexusAI-*` pane writes, the Build state of the merge commit of 231): code main 9373976efc7d93f522f97648beb608b4d3e16fb2 with 0 open pull requests (gh api branches/main and pulls?state=open, printed 15:55:41); CLARIFICATIONS.md sha256 810572b1d837339621e9f0ca704ba5f0c7f74526ce9e9e23bea6c3248dfe8567, 803855 bytes, highest section 103 at line 3082 and C-305 at line 3084 (hashed by the stamp script itself); no Datasec/NexusAI-* pane writes Jira, the records file or a ref of 2_Project_Files (N158 builds on its own clone); the Build run 44458821161 of the merge commit of 231 read in_progress at 15:56:43 with 7 of 8 check-runs completed (5 success, 2 Deploy demo jobs skipped, Analyze javascript-typescript now success).
+- JIRA (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs Steps 0 to 4 and posts nothing): WRITE
+- CREATE-A (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the viewer-reachable connection tests and reads, Task Medium): NEW
+- CREATE-B (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the audit path value, Bug Low): NEW
+- CREATE-C (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the provisioning router's own audit entry, Task Low): NEW
+- MOVE-793 (exactly `NONE` or `793`; default NONE; the drafter recommends `793`): 793
+- MOVE-990 (exactly `NONE` or `990`; default NONE; the drafter recommends `990`): 990
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD writes no section and the entry waits): WRITE
+- HISTORY (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs no Step 7; the drafter recommends `WRITE`): WRITE
+- Hard stop (absolute outer limit AEDT, proposed by this kit as 18:30 AEDT 2026-11-19; the wait limit is this clock minus 60 minutes; JIRA DONE, RECORDS WRITTEN and HARD STOP as in CLOCK AND HARD STOP): 18:30 AEDT 2026-11-19 (the wait limit is 17:30)
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 15:58 AEDT 2026-11-19 by Tuesday (s293): read with the Read tool in three pages, lines 1 to 203. Checked at source in this session: every POINTERS line of backend/server.js, accessAudit.js, capabilities.js, entraProvisioning.js and the three test files at 9373976e (gh api contents, raw); the handler spans by program (0 administrator checks in the four dialing handlers, 1 in each of the four changed ones); first-run-setup.js lines 1449, 1792, 1900 and 2407; pulls/230 and pulls/231 with the ten-path file list; the inventory page patch (viewer 400 29 to 28, 403 71 to 75, 404 10 to 7); the review verdict read whole against every figure the texts relay (216 and 8, 54 shapes, 20 rows, 6020 and 6007, the plants 11, 4, 6 and 1, findings F1 to F5); RD-793 (To Do, one comment 40803) and RD-990 (To Do, 0 comments) by Jira GET, RD-1010 the highest key, RD-1011 answering 404. Who-decided hits read: no text names a ruling or a decision by the product owner. Not checked by Tuesday: the drafter's Jira searches for the three new tickets, the identity prefix and the Build timing estimate (the seat re-measures each).
