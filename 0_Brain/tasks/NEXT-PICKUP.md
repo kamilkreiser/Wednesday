@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 50% 03:0x 20 Nov, the 02:5x rotation-successor seat - READ FIRST; supersedes every block below where they differ
+- **develop = 6ebd769a0301** (unmoved since 02:12 per the K 58th stamp probe 02:53). Kam silent since 18:38:54 (kam_rulings_today 02:58:09). Gauge 20%. Capacity ROOM.
+- **FLOOR:** %93 **K 58th** (Sonnet, merge, ROW 0 PR 2260 then 2153 ...): booting (pane read 02:59: building its plan mail). NEXT: plan QUESTION -> ANSWER -> SET-UP -> READY 2260 -> GO (names gates 382 + 383 notes) -> MERGED (verify at source) -> READY 2153 ...
+- **B 207th DRAFTER RUNNING** (Sonnet subagent of THIS seat; dies with a rotation -> re-commission from 0_Brain/reference/2026-11-20_drafter-seatB207/commission.md if fleet/briefs_staged/2026-11-20_seatB207_merge.md is ABSENT). PR 2052 alone (KS-1081, tier 1, four-path UNION, builds a leg model, same-day re-key, K-row overlap census). On return: read WHOLE, STAMP, launch (Sonnet C5), ONE GO at a time with K.
+- **fleet_ack: FLAGGED 0** (S 98th's plan QUESTION cleared 03:00).
+- **OWED unchanged from the 02:51 block:** board seat S 99th (KS-2277 correcting comment; gate 383 F1/F2 after PR 2260 merges); MORNING CARD 06:00; NEXT-PICKUP fold (this file is 295 KB of stacked blocks against its own replace-wholesale rule: fold lines ~170-1060 to a .pre- copy at the next quiet boundary).
+
 ## 🔴 ROTATION HANDOVER 02:51 20 Nov, the 23:4x (19 Nov) rotation-successor seat (ctx ~78%, ROTATING at a safe boundary) - READ FIRST; supersedes every block below where they differ
 - **develop = 6ebd769a0301.** Six merges tonight, each verified at source: PR 2257, 2131, 2190, 2193, 2102, 2191. Kintsugi round k36 DONE (vc-issuer, auth, api-gateway at d4ffc8308249). Kam silent since 18:38:54 (kam_rulings_today 02:4x). Gauge ~19%.
 - **FIRST WORK (in order):**

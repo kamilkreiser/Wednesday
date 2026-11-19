@@ -27,6 +27,8 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 > **The full-sweep mechanism is still WED-7 and still unbuilt.** The honest reading of
 > this file today: a rich archive of how the fleet got here, with a stale first page.
 
+**Refreshed 2026-11-20 03:0x (boot, the 02:5x Mac mini rotation successor; Secuura only, Datasec is Tuesday's):** Secuura/Blockchain: develop `6ebd769a0301` (PR 2191; verified at source 02:12 by the previous seat). Six merges overnight 19-20 Nov (2257, 2131, 2190, 2193, 2102, 2191) after three on the 19th evening (2194, 2073, 2259). Kintsugi runs round k36 (vc-issuer, auth, api-gateway at `d4ffc8308249`; verify matrix PASS). PR 2260 (KS-1936) gated GO WITH NOTES twice (382, 383), merge row 0 of K 58th. Tickets KS-2276..KS-2282 filed; KS-772 answered to Stuart. Floor: K 58th (merge) + B 207th drafter. Demo round waits on Kam's card. Source: the project's history.md top entries (S 98th, W 42nd, D 75th, B 206th) and tonight's note.
+
 **Refreshed 2026-11-15 22:4x (boot, the 22:3x Mac mini successor seat; Secuura only, Datasec is Tuesday's):** Secuura/Blockchain: develop `7b452b1bbb96` (gh api 22:38:23); 16 merges on 15 Nov (2231, 2232, 2220, 2229, 2230, 2235, 2238, 2233, 2221, 2222, 2236, 2098, 2223, 2234, 2079, 2224). Kintsugi runs k27 (develop `4e4347818772`, 8 services; D 63rd FINAL); k28 drafter commissioned 22:4x. Floor: K 25th (merge, from PR 2237), Q 1st (BOLA triage), B 183rd (merge, PR 2081), R 121st (PR 2239 fix round for gate 363's notes). Demo FROZEN; anchoring deploy held on card 1107 pending Wednesday's ruling at the k28 stamp.
 
 **Refreshed 2026-11-13 06:1x (boot, Mac mini morning seat; Secuura only, Datasec is Tuesday's):** Secuura/Blockchain
