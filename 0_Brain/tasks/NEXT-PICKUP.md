@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 WRAP 15:2x 19 Nov, the morning seat (Kam: "please wrap up and I will do a software update") - READ FIRST
+- **ACCOUNT SWITCHED A DAY EARLY:** Kam ran /login in pane %0 (Login successful); statusline 7d:0% renews 5d 2h (15:24). The 98% hold's premise is GONE; morning card wed-morning-plan-1119 WITHDRAWN.
+- **FIRST WORK at the next boot (full boot, not lean, unless the gauge says otherwise):** (1) kam_rulings_today; (2) RE-ASK the 11-06 'clear the Secuura board' grant (its row says re-read on an account switch) with ONE card proposing the Friday queue below; (3) on his word, run it in order: merge PR 2252 (re-pin head 62124803a881, gate 378 GWN), D seat Kintsugi k35 gateway, Redis rotation with a HEX password, demo round (re-measure develop first; last fab4edcdcd07), B 204th / K 52nd; (4) WED-164 rules-card adoption; (5) WED-165 test with Kam at the Mac (steps file 0_Brain/reference/2026-11-19_wed-165-remote-access-steps.md).
+- Software update: after it, check the launcher/doctor output and that the fleet tmux session and dashboard server (47787) came back.
+
 ## 🔴 BOOT 06:0x 19 Nov, the morning seat (ctx low, LEAN boot at gauge 98%) - READ FIRST
 - **Morning ritual DONE:** card wed-morning-plan-1119 posted (rec a: keep holding to Friday; default a at 10:00); panel greeting bf-fb12c0f39af2; stale 0; WED 5 started / 22 unstarted / lesson 0; KS 212 / 35 unchanged; no new Stuart/Peter comment since 11-17. Nothing launched.
 - **WED-165 steps file DONE:** 0_Brain/reference/2026-11-19_wed-165-remote-access-steps.md (Linear comment 063c25a2). Friday: run its checklist WITH Kam (paste-back untested).

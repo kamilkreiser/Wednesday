@@ -1,3 +1,9 @@
+## 2026-11-19 06:00 -> 15:25 — Wednesday (Mac mini, morning seat; Opus 5.5; lean boot at 98%; wrapped on Kam's word for a software update)
+- Morning ritual: card wed-morning-plan-1119 (hold to Friday), panel greeting, stale 0, WED 5/22/lesson 0, KS 212/35 unchanged; nothing launched.
+- WED-165: remote-access steps file written (0_Brain/reference/2026-11-19_wed-165-remote-access-steps.md) from re-measured facts; paste-back untested; Linear comment.
+- Kam /login 15:2x: new account, 7d 0%. Morning card withdrawn (premise gone). Next boot: re-ask the board-clearing grant, then the Friday Secuura queue.
+- Ledger +1 (self-caught: claimed two files read from an unopened persisted result).
+
 ## 2026-11-18 13:44 -> 2026-11-19 08:05 — Friday (laptop seat; Opus 5.5 after the Fable limit; one rotation at ~03:45; wrapped on Kam's terminal word, he left for an event)
 - General / CoAgent: strict policy (f33482b) and audit-fix2 (bfe435a) MERGED, each after an independent check and Friday's clean-clone check. Daemon r5 check NO GO (R5-1 skip budget), Kam ruled a; addendum 12 built to READY r6, check NOT yet run. Audit-fix3 launched (%18), holding on STOP Q1 for Friday.
 - Datasec/OXPd: twelve analysis reports, architecture (02) and plan (03), 25 questions carded; Kam answered all 25 (C-6 to C-30), documents updated and re-rendered. Fable review pass owed after 2026-11-20 09:00.
