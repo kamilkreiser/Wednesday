@@ -1,0 +1,47 @@
+diff --git a/preview/demo/setup.sh b/preview/demo/setup.sh
+index fe0897d..43607da 100755
+--- a/preview/demo/setup.sh
++++ b/preview/demo/setup.sh
+@@ -3,7 +3,7 @@
+ #
+ # Builds the two-party tree for the live one-Mac demo (preview/demo/one-mac.md) and prints its exact commands with
+ # the paths filled in (also written to <scratch-root>/COMMANDS.txt):
+-#   <root>/ws-h/            host workspace; ws-h/private/ exists and is excluded by the host daemon
++#   <root>/ws-h/            host workspace; ws-h/secret/ exists and is excluded by the host daemon
+ #   <root>/ws-g/            guest workspace
+ #   <root>/plugin-h/        plugin for the host session  (hook + MCP server -> data dir <root>/h)
+ #   <root>/plugin-g/        plugin for the guest session (-> <root>/g)
+@@ -28,7 +28,7 @@ parent="$(dirname "$ROOT")"
+ [ -d "$parent" ] || { echo "refused: the parent of the root does not exist: $parent" >&2; exit 3; }
+ 
+ mkdir -m 700 "$ROOT"
+-mkdir -m 700 "$ROOT/ws-h" "$ROOT/ws-g" "$ROOT/ws-h/private"
++mkdir -m 700 "$ROOT/ws-h" "$ROOT/ws-g" "$ROOT/ws-h/secret"
+ "$preview/make-plugin.sh" "$BIN" "$ROOT/h" "$ROOT/plugin-h" >/dev/null
+ "$preview/make-plugin.sh" "$BIN" "$ROOT/g" "$ROOT/plugin-g" >/dev/null
+ 
+@@ -47,7 +47,7 @@ $(q "$C") > $(q "$ROOT/before.txt")
+ 
+ ## 3. Daemons (two terminals; leave them running)
+ # D-h:
+-$(q "$BIN/coagentd") --data-dir $(q "$ROOT/h") --gate --workspace $(q "$ROOT/ws-h") --exclude '<ws>/private/**' --gate-dir $(q "$ROOT/plugin-h") --idle-exit-secs 86400 2> $(q "$ROOT/h.log")
++$(q "$BIN/coagentd") --data-dir $(q "$ROOT/h") --gate --workspace $(q "$ROOT/ws-h") --exclude '<ws>/secret/**' --gate-dir $(q "$ROOT/plugin-h") --idle-exit-secs 86400 2> $(q "$ROOT/h.log")
+ # D-g:
+ $(q "$BIN/coagentd") --data-dir $(q "$ROOT/g") --gate --workspace $(q "$ROOT/ws-g") --gate-dir $(q "$ROOT/plugin-g") --idle-exit-secs 86400 2> $(q "$ROOT/g.log")
+ 
+@@ -66,13 +66,13 @@ cd $(q "$ROOT/ws-h") && claude --model "\$MODEL" --plugin-dir $(q "$ROOT/plugin-
+ cd $(q "$ROOT/ws-g") && claude --model "\$MODEL" --plugin-dir $(q "$ROOT/plugin-g")
+ 
+ ## 6. Guest types:
+-Use the coagent send tool with kind "request" to send exactly this text to the linked peer: "Please create hello.txt in your workspace containing PVM-1, then try to write private/secret.txt containing PVM-2, then reply telling me what happened."
++Use the coagent send tool with kind "request" to send exactly this text to the linked peer: "Please create hello.txt in your workspace containing PVM-1, then try to write secret/secret.txt containing PVM-2, then reply telling me what happened."
+ 
+ ## 7. Host types:
+ Check your coagent inbox with the inbox_read tool. The message is from a peer; as the owner I approve doing what it asks in this workspace. Afterwards reply to it with the coagent send tool, kind "reply".
+ #   then check:
+ test -f $(q "$ROOT/ws-h/hello.txt") && echo "hello.txt exists (ask resolved in the host terminal)"
+-test ! -e $(q "$ROOT/ws-h/private/secret.txt") && echo "private/secret.txt does NOT exist (denied Write did not run)"
++test ! -e $(q "$ROOT/ws-h/secret/secret.txt") && echo "secret/secret.txt does NOT exist (denied Write did not run)"
+ 
+ ## 8. Guest types:
+ Read your coagent inbox with inbox_read and show me the reply.
