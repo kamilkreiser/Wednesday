@@ -180,3 +180,17 @@ Live board, view=friday, card datasec-oxpd-q02-phone-signin-step-1118, his tap v
 Live board, view=friday, card datasec-oxpd-q01-hp-confirm-m365-1118, his tap verbatim from the board export:
 
 > 03:34 [live] | Decision datasec-oxpd-q01-hp-confirm-m365-1118: a — Yes, HP confirmed
+
+## C-31
+
+Tuesday terminal, 2026-11-20 (after his /login), the instruction that moved the project to the Fable review, verbatim:
+
+> please use fable to review the oxpd project, architecture and plan of attack.  continue where friday left off and let me know when you are ready to build
+
+## C-32
+
+Live board, view=tuesday, card datasec-oxpd-thirteen-defaults-1120, his tap verbatim (kam_msgs, live):
+
+> 2026-11-20T09:38:43.436000+11:00 [live] | Decision datasec-oxpd-thirteen-defaults-1120: a — Accept the defaults for now
+
+The option's detail, word for word from the card: "The design proceeds on each default; I bring each question back before the phase it blocks." The thirteen are questions 1 to 6 and 9 to 15 of `05_readiness-to-build.md` (OQ-1 to OQ-6 and OQ-9 to OQ-15 in the documents). Each stays an OPEN question on its default: this answer accepts the defaults for now and rules none of them.
