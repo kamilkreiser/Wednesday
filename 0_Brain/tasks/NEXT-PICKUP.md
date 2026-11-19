@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 03:3x 20 Nov, the 02:5x rotation-successor seat (ctx ~60%) - READ FIRST
+- **develop = 70a0d984ac70** (PR 2260 KS-1936 MERGED by K 58th 16:24Z; Wednesday verified at source 03:27: one parent 6ebd769a0301, tree 036976c22254). Seven merges tonight.
+- **FLOOR (3 seats):** %93 **K 58th** (PR 2153 row 1 legs running; re-measures before its READY, wraps naming 2153 if >= 58). %96 **S 99th** (Sonnet board: KS-2277 correcting comment, gate 383 F1/F2 follow-up ticket, KS-1936 facts comment; plan QUESTION with drafts -> licence BY ITEM; brief fleet/briefs_staged/2026-11-20_seatS99_board.md). %99 **B 207th** (Sonnet merge, PR 2052 alone, STAMP B207-W1..W10; plan QUESTION next). ONE GO at a time across K and B.
+- **NEW for the MORNING CARD:** gate 259 N2 (PR 2052's production guard refuses LOG_LEVEL=debug, CARDANO_NETWORK=preview, a rate limit of 10000: wider than his card's words; for his eyes, not a hold). **NEW DEPLOY PRECONDITION (B207-W3):** any deploy of a build containing PR 2052 first has the D seat read-only check that box's .env for the eight refused values under NODE_ENV=production.
+
 ## 🔴 CHECKPOINT 50% 03:0x 20 Nov, the 02:5x rotation-successor seat - READ FIRST; supersedes every block below where they differ
 - **develop = 6ebd769a0301** (unmoved since 02:12 per the K 58th stamp probe 02:53). Kam silent since 18:38:54 (kam_rulings_today 02:58:09). Gauge 20%. Capacity ROOM.
 - **FLOOR:** %93 **K 58th** (Sonnet, merge, ROW 0 PR 2260 then 2153 ...): booting (pane read 02:59: building its plan mail). NEXT: plan QUESTION -> ANSWER -> SET-UP -> READY 2260 -> GO (names gates 382 + 383 notes) -> MERGED (verify at source) -> READY 2153 ...
