@@ -77,37 +77,46 @@ MAN="$DEST/MANIFEST.txt"
   echo "REVIEW-AFTER: $REVIEW  (eligible for clean-up review on or after this date; delete only on a human's word)"
   echo
 } > "$MAN"
-TOTAL_F=0; TOTAL_B=0; BAD=0
+TOTAL_F=0; BAD=0
+SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
 for s in "$@"; do
   name=$(basename "$s")
   echo "## source: $s" >> "$MAN"
-  # What rsync SELECTS (regular files after excludes), counted before the copy, compared after it.
-  want=$(rsync -a -n "${EXCL[@]}" --out-format='%i %n' "$s" "$CTL/dry/" 2>&1 | /usr/bin/grep -c '^>f')
-  if ! rsync -rlt "${EXCL[@]}" "$s" "$DEST/" 2> "$DEST/.rsync_err_$name.txt"; then
-    echo "nas_backup: COPY FAILED for $s (rsync stderr follows)" >&2; cat "$DEST/.rsync_err_$name.txt" >&2
-    echo "COPY FAILED: $(cat "$DEST/.rsync_err_$name.txt")" >> "$MAN"; exit 3
+  # The copy. rsync code 24 = some source files vanished during the copy (a live tree): recorded, not fatal.
+  rsync -rlt "${EXCL[@]}" "$s" "$DEST/" 2> "$DEST/.rsync_err_$name.txt"; rrc=$?
+  if [ "$rrc" -ne 0 ] && [ "$rrc" -ne 24 ]; then
+    echo "nas_backup: COPY FAILED for $s (rsync exit $rrc; stderr follows)" >&2; cat "$DEST/.rsync_err_$name.txt" >&2
+    echo "COPY FAILED (rsync exit $rrc): $(cat "$DEST/.rsync_err_$name.txt")" >> "$MAN"; exit 3
   fi
+  [ "$rrc" -eq 24 ] && echo "rsync exit 24: some source files vanished during the copy (a live tree); they are not on the NAS (see warnings)" >> "$MAN"
   [ -s "$DEST/.rsync_err_$name.txt" ] && { echo "rsync warnings:"; cat "$DEST/.rsync_err_$name.txt"; } >> "$MAN"
-  rm -f "$DEST/.rsync_err_$name.txt"
-  if [ -d "$s" ]; then base="$s"; dbase="$DEST/$name"; else base=$(dirname "$s"); dbase="$DEST"; fi
-  got=0
-  # Verify every file that LANDED against its source (the copied set is the excluded-filtered set).
-  while IFS= read -r -d '' d; do
-    if [ -d "$s" ]; then rel="${d#$dbase/}"; f="$base/$rel"; else rel="$name"; f="$s"; fi
-    a=$(shasum -a 256 "$f" 2>&1 | awk '{print $1}'); b=$(shasum -a 256 "$d" 2>&1 | awk '{print $1}')
-    sz=$(stat -f %z "$d" 2>&1)
-    if [ "$a" = "$b" ]; then echo "ok  $a  $sz  $rel" >> "$MAN"; else echo "MISMATCH  src=$a dst=$b  $rel" >> "$MAN"; BAD=$((BAD+1)); fi
-    got=$((got+1)); TOTAL_F=$((TOTAL_F+1)); TOTAL_B=$((TOTAL_B+sz))
-  done < <(if [ -d "$s" ]; then find "$dbase" -type f -print0; else printf '%s\0' "$DEST/$name"; fi)
-  echo "count: rsync selected $want regular files, $got landed and were hashed" >> "$MAN"
-  [ "$want" -eq "$got" ] || { echo "COUNT MISMATCH for $s: selected $want, landed $got" >> "$MAN"; BAD=$((BAD+1)); }
+  mv "$DEST/.rsync_err_$name.txt" "$CTL/rsync_err_$name.txt"
+  # Verification (2026-11-19 fix): the per-file loop that compared two FAILED hashes as equal is gone. A folder is
+  # verified by nas_verify.sh (batch sha256 compared by path, read errors fail, red-proofed); a single file by one
+  # hash pair whose FORM is checked (64 hex) before it is compared. A live tree that changed after the copy reads
+  # NOT VERIFIED: that is the truth about it, not a fault to hide.
+  if [ -d "$s" ]; then
+    rep="$DEST/VERIFY-$name.txt"
+    if "$SELF_DIR/nas_verify.sh" "$s" "$DEST/$name" "$rep" >> "$MAN" 2>&1; then
+      n=$(LC_ALL=C /usr/bin/grep -c -E '^[0-9a-f]{64}  \./' "$rep"); TOTAL_F=$((TOTAL_F+n))
+      echo "verify: VERIFIED, $n files (report $rep)" >> "$MAN"
+    else
+      echo "verify: NOT VERIFIED (report $rep)" >> "$MAN"; BAD=$((BAD+1))
+    fi
+  else
+    a=$(shasum -a 256 "$s" 2>&1 | awk '{print $1}'); b=$(shasum -a 256 "$DEST/$name" 2>&1 | awk '{print $1}')
+    case "$a" in *[!0-9a-f]*|"") a="ERROR" ;; esac; [ ${#a} -eq 64 ] || a="ERROR"
+    case "$b" in *[!0-9a-f]*|"") b="ERROR" ;; esac; [ ${#b} -eq 64 ] || b="ERROR"
+    if [ "$a" != "ERROR" ] && [ "$a" = "$b" ]; then echo "ok  $a  $name" >> "$MAN"; TOTAL_F=$((TOTAL_F+1))
+    else echo "PROBLEM  src=$a dst=$b  $name" >> "$MAN"; BAD=$((BAD+1)); fi
+  fi
   echo >> "$MAN"
 done
 SEC=$(secret_scan "$DEST" | /usr/bin/grep -v '/MANIFEST.txt$')
 if [ -n "$SEC" ]; then echo "SECRET-SHAPED FILES ON THE NAS (must be none):"; echo "$SEC"; BAD=$((BAD+1)); fi >> "$MAN"
 echo "secret scan of destination: $( [ -z "$SEC" ] && echo '0 names (scanner proved on a planted control first)' || echo 'FOUND, see above')" >> "$MAN"
-echo "TOTAL: $TOTAL_F files, $TOTAL_B bytes, problems $BAD" >> "$MAN"
+echo "TOTAL: $TOTAL_F files verified, problems $BAD" >> "$MAN"
 if [ "$BAD" -ne 0 ] || [ "$TOTAL_F" -eq 0 ]; then
   echo "nas_backup: NOT VERIFIED — $BAD problem(s), $TOTAL_F file(s); see $MAN" >&2; exit 4
 fi
-echo "VERIFIED: $TOTAL_F files, $TOTAL_B bytes -> $DEST (MANIFEST.txt; review after $REVIEW). Sources untouched."
+echo "VERIFIED: $TOTAL_F files -> $DEST (MANIFEST.txt; review after $REVIEW). Sources untouched."
