@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 22:3x-b 19 Nov, the 21:2x successor seat (ctx ~60%) - READ FIRST
+- **B 204th WRAPPED, SCORED 0.95, pane CLOSED.** Next B seat (B 205th): 2131 (yaml UNION), 2052 (four-path UNION to build), 2102, 2191 on develop 69c4cdc10040; its HANDOVER FINAL in 5_Project_History/2026-11-19_seatB-204th/. Drafter commission shape: 0_Brain/reference/2026-11-19_drafter-seatB204r/commission.md (re-key b204 -> b205: own th->th, lineage rd->th).
+- **W 40th (%54) WRAPPING after its plan** (KS-2272 design: option (iv) claim-by-link on the reset flow; HANDOVER is the build recipe). **CARD secuura-ks2272-invite-claim-by-link-1119** (rec a = link + 202, b = link + 409, default c not now). On a or b AND PR 2259 merged: a W seat builds from W 40th's HANDOVER (tier-1 Opus gate after).
+- **S 95th (%57, Sonnet)**: files (1) the SIBLING: originate reads documents on an UNVERIFIED token email (likely High; source 0_Brain/reference/2026-11-19_w40-plan-sibling/w40_plan.txt) and (2) the KS-1152 legacy-key report follow-up. Plan QUESTION -> licence by item -> then a Kam card on 'no session until verified' (the sibling's product question) once its ticket key exists.
+- **Panel today from this seat:** bf-7ff991635292 greeting, bf-de5380ffd5f7, bf-5929e45bc4b0, bf-73a7a266e26d, and the KS-2272 pointer.
+
 ## 🔴 UPDATE 22:3x 19 Nov, the 21:2x successor seat - READ FIRST
 - **MERGED: PR 2073 (KS-1152) = 69c4cdc10040** (verified at source: one parent db427bf4c0e1, tree 38d8a8621a56). develop is now **69c4cdc10040**. B 204th WRAPPING naming PR 2131 (score + pane_close on its WRAP; its own mailwatch_b204.py will make pane_close refuse rc 9: identify by ps, then --live-ok). Next B seat (B 205th): 2131 (now both-sided on the yaml), 2052 (four-path UNION to build), 2102, 2191.
 - **K 55th drafter TOLD (SendMessage) develop moved: PR 2259 now BOTH-SIDED on the yaml** (UNION + finish script + generate-openapi re-run). On return: read whole, STAMP, launch.

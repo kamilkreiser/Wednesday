@@ -1,0 +1,135 @@
+=========== [QUESTION] 2026-11-19T11:31 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 40th)
+[Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 40th)
+Seat W 40th
+
+BLUF: census done, read only, at develop db427bf4c0e1 and at PR 2259's head a0e58b942c22. The cited files are byte-equal on both arms except auth.ts, where PR 2259 shifts the claim lines by +14 to +17 and does not touch the claim logic. I recommend option (iv): option (iii) built on the reset-token flow auth already has. Register stops claiming. A register on an INVITED address mails a single-use link and issues no session. Following the link sets the password and activates the row. This changes what an invitee sees, and it breaks the mobile app's register-then-login for that case, so it is a product decision for Kam. Nothing is branched or edited. I also found one sibling outside this ticket: originate grants document reads on an unverified token email (section SIBLING).
+
+IDENTITY AND BOOT
+- Seat W 40th, pane %54, claude pid 69428 started 22:19:38 AEDT = the launch stamp 11:19:38Z; BRIEF 11:19:33Z. Model claude-opus-5-5 (the process's own --model argument), which matches the BRIEF. Other live sessions: pid 1503 = Seat B 204th (Sonnet, started 21:58:20 AEDT); pid 14089 = the claude daemon. No other session claims W 40th.
+- Ordinal: history.md has 0 "Seat W 40th" (control: "Seat W 39th" 3). REC = 5_Project_History/2026-11-19_seatW-40th/.
+- Own clone: worktrees/s-w40-base, a clone --shared --no-checkout of s-a20-base. Develop and refs/pull/2259/head were fetched into it only (refs/w40/develop, refs/w40/pr2259): develop db427bf4c0e1ac3e1aac515129f04389e12caee2 and head a0e58b942c22e5ca7c9dff216fe17c243f2e3548, both EQUAL to the BRIEF. Merge-base 86bfeda9e3e1; develop's one extra commit touches 3 anchoring files only.
+- Shared checkout (read only, lockless, no fetch): develop at 0e6479d7b6c0; origin develop db427bf4c0e1 by ls-remote. The behind count is unknown because that object is not local. 18 untracked files, 0 modified or staged.
+- Kit: send, watch, ctx and linear_boot, re-keyed from W 39th's by my counted tools/rekey_w40.py. It refused once on its own docstring detector (nothing written), I fixed that, and it then wrote 4 files with 0 code-line "W 39th" left. Plus my own mk_base_w40.sh and lin_read_w40.py (read only).
+- Mail: coagent@ not listed (this key sees secuura-blockchain@ only, as expected). Linear: 220 active assigned to the key owner (In Progress 182, Todo 31, In Review 5, Blocked 2); backlog 537 (High 77, Medium 241, Low 198, None 21); Done in the last 24 h, archived included: 6 (KS-1129, KS-1783, KS-2038, KS-1968, KS-968, KS-1380). Extranet (session hook, read only, seen NOT posted): 6 tasks and 1 doc, the September-era set.
+- Context meter 24.2% of 1M at the census end.
+
+LAUNCHER PREFLIGHT (verbatim, 4_Credentials/.launch_preflight_last.txt):
+# launch 2026-11-19T11:19:38Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 2 other live session(s) on this project: PID 1503 (up since Thu 19 Nov 21:58:20 2026), PID 14089 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+(F-02 note: my clone's ls-remote and fetch worked through the repo's core.sshCommand, which mk_base copied from the shared checkout.)
+
+THE DEFECT, RE-READ (develop line; PR 2259 line)
+- register looks the email up and treats INVITED as claimable: auth.ts:205-206 (PR :219-220); every other status gets 409 at :207-208 (PR :221-222).
+- The claim: createUser :271 (PR :288), then updateUserOrThrow sets status ACTIVE, the caller's hash and names, emailVerified false and role OWNER (:276-284; PR :293-301). It keeps the stub's tenant (:259-260) and created_at (:262), and logs "KS-74: invited stub claimed on register" with the userId (:285).
+- The verification link is stored and mailed only afterwards (:289-296; PR :306-313), and the session is created in the same request (:306; PR :323).
+- refresh asks only for ACTIVE (:760; PR :777). login goes through the shared gate (:547; KS-796 comment :514-523, passwordLoginGate.ts:39 and :153), which refuses PENDING and INVITED. No door reads emailVerified (census b).
+- I read PR 2259's auth.ts diff whole: the schema line, the new 422 block and the user literal's organisation line. Nothing else changes.
+
+CENSUS (a): WHO MAKES STUBS, WHAT IS ATTACHED, WHAT THE CLAIMANT GETS
+Frame: git grep at refs/w40/develop over Blockchain/Dev, node_modules and lock files excluded. Blob compare: userRepo.ts, users.ts, documents.ts, certifications.ts and passwordLoginGate.ts are equal at PR 2259's head.
+- One writer: userRepo.createInvitedStub (userRepo.ts:756-796). It writes status INVITED, role USER, no password hash, emailVerified false, the caller's tenant and no organisation. The name has 16 hits in all files. Its only non-test caller is POST /api/users/stub (users.ts:373, call at :406), which admits an allowed role or one of these scopes: users:read, users:create, users:*, certifications:write, documents:transfer-custody (users.ts:254-267). Nothing is mailed to the address when a stub is made; the route and the repo function hold no send call.
+- POST /api/users/stub has two in-repo callers, both in originate, both forwarding the caller's token (a person's or a connector's; KS-564, KS-1402):
+  1. POST /api/certifications/issue with holderEmail (certifications.ts:374-421, fetch at :378). The certification is issued with the stub as its holder.
+  2. POST /api/documents/:id/transfer-custody with newHolderEmail (mintInvitedStubHolder at documents.ts:1990, fetch at :2025). The custody event names the stub, and documents.owner_user_id is SET to the stub (documents.ts:2511-2517).
+  Platform S calls both with its connector key (outside this repo; not read).
+- What is attached before a claim, and what the claimant can then do (read in code; nothing run):
+  - Certifications the stub holds: read by id, lineage and evidence bundle (callerMayReadCertification, certifications.ts:179-194, holder arm :193), and share or recertify (the same rule plus a same-tenant ORG_ADMIN, per the comment at :171-172).
+  - Documents whose custody was transferred to the stub: the claimant is their OWNER. They can read them, revoke them (owner-only check, documents.ts:3038), and pass the owner arm of the legacy certify check (certifications.ts:136). The share and version routes check role or scope first (:2837, :2639); I did not read their owner checks.
+  - The stub's tenant, which is the issuer's. The claim keeps it (auth.ts:259-260), so the claimant lands in the issuing tenant, not the tenant their own request names.
+  - An organisation, if an admin set one on the stub. PATCH /api/users/admin/:id accepts organizationId and status (users.ts:699, :710; org check at :806), and the next refresh carries it (gate 381 F2, F3). Under Kam's 2026-11-16 ruling, a member of an organisation can write its records.
+
+CENSUS (b): EVERY READER OF emailVerified / email_verified
+115 hits in all files, 56 outside tests and docs (evidence/census_b_emailverified_src.txt). None of them is an access decision on the USER's flag:
+- Writes: register :245 and :282 (false), verify-email :1007 (true), admin create users.ts:658 (true), wallet sign-up wallet.ts:214 (false), social sign-up auth.ts:1319 (the provider's value), and the repo's insert and ON CONFLICT (userRepo.ts:698, an OR that never lowers it), plus the seeders.
+- The one branch is the social auto-link (auth.ts:1282, mayAutoLinkByEmail). It reads the PROVIDER's flag, not the row's.
+- Serialisation only: users.ts:920 (admin read), frontend/shared/src/schemas/auth.ts:28, packages/shared/src/vc/identity-credentials.ts:38 (a type), and the OpenAPI examples.
+- The access token does not carry it. jwt.ts:193-202 carries userId, email, role, organizationId, verificationLevel, tenantId, tenantSlug and scopes. No hit in api-gateway or any other service's src.
+So a false emailVerified changes nothing anywhere today.
+
+SIBLING (outside KS-2272; a separate ticket if you agree): originate trusts the token's EMAIL, and a fresh register never verifies it.
+- GET /api/documents list: a document counts as "mine" when data.recipientEmail equals the token email (documents.ts:364-380).
+- GET /api/documents/:id: the same recipient arm (:1221-1224).
+- The legacy certify check, callerMayCertifyDocument (certifications.ts:137-140), admits a write on the same match.
+A fresh register of address X, no stub involved, is ACTIVE with a session at once (auth.ts:261, :306) and reads every document issued with recipientEmail X. Options (i), (iii) and (iv) do not close this. Only "no session until verified, for every account" (option (ii) widened) or originate checking a verified claim would. It is in originate, outside my scope; I filed nothing.
+Shares are not matched by email: no recipient_email lookup in services src (the same pattern's control, documents.ts:2006 email_lookup_hash, matches).
+
+CENSUS (c): CALLERS AND TESTS OF THE CLAIM PATH
+- 21 files outside services call auth/register (evidence/census_c_register_callers.txt):
+  - mobile/secuura-app/src/contexts/AuthContext.tsx:142 registers, then AUTO-LOGS IN with the same password (:146);
+  - frontend/issuer/src/services/api.ts:397 is a definition only; the issuer app has no register route (its App.tsx paths are /login, the two policy pages and the signed-in pages);
+  - frontend/admin/src/pages/Users.tsx:277-307, refused since KS-82 for its role field (KS-2267);
+  - 13 e2e spec and fixture files, tests/load/k6-load-test.js, systemTest/inline-runner/runner.js, scripts/smoke-test.sh, insurance-test-runner.js.
+  I did not read these file by file for invited addresses.
+- The frontends have no verify-email, reset-password, forgot-password or register page. Those four strings appear in 0 files under frontend/ and mobile/ (control: "/login" appears in 8). The links auth mails (FRONTEND_URL/verify-email, /reset-password) land on pages outside this repo.
+- These tests ASSERT today's claim (201 and a session with no proof), and any fix rewrites them by ruling:
+  - auth.integration.test.ts:1583;
+  - ks1460-register-over-an-invited-stub-confirms-its-activating-write.test.ts R1 :102, R2 :108, C1 :115, C3 :131 (C2 :122 is the fresh-register control);
+  - PR 2259's ks1107 test, R3 :139 and C2 :167.
+  The originate stub tests (two ks1402 files with 27 cells; ks739, ks697, ks1662, ks1213, ks1538) mint stubs and never register. 178 INVITED/claim hits in all files (evidence/census_c_invited_all.txt).
+
+CENSUS (d): AN INVITE EMAIL OR TOKEN TO REUSE
+- auth has two single-use mailed tokens of its own, both stored as sha256 and both expiring:
+  - Email verification: storeEmailToken and verify-email (auth.ts:289-296, :980-1010). It sets emailVerified only.
+  - Password reset: forgot-password (:838-868) mails a reset link to ANY existing row, INVITED stubs included. reset-password (:873-975) sets the hash, revokes the sessions and burns the token, but does NOT change status or emailVerified. So today an invitee who uses forgot-password gets a password on a row that stays INVITED, and still cannot log in.
+  - Sender: auth services/email.ts:182 sendEmail (ACS, then SMTP, else a log line and false), :227 verification, :246 reset. auth has no invitation template.
+- originate's rights-holder invite: sendRightsHolderInvite (originate services/email.ts:317), called by POST /api/admin/rights-holders (adminConfig.ts:1499-1567) and /rights-holders/:id/invite (:1652-1699). It stores a PLAIN 64-hex token in rights_holders.invite_token (:1531, :1667) and mails FRONTEND_URL/register?invite=<token> (:1543, :1672). Nothing reads that token back: "invite" as a URL or body parameter appears in 0 files under frontend/, mobile/ and services/auth (control: adminConfig.ts holds 2), and register's .strip() schema drops the key. rights_holders is a separate table from the users stub. Reusing it means editing originate, which is a STOP under the HOLDS.
+- Delivery: SMTP_ENABLED defaults to false with no host (docker-compose.yml:638-643, :827-834). With no provider the send returns false, and the verify link is only logged outside production (auth.ts:297-302). I did NOT measure whether demo or production has ACS or SMTP set; that is a box read, not mine. Every mailed-proof option below works only where mail is delivered.
+
+OPTIONS
+(i) A claim token is mailed when the stub is made and required on register.
+  - Invitee: gets a mail at issue time with a link that carries the token. Register with the token claims, and can set emailVerified true.
+  - Someone else first: refused without the token; the stub stays INVITED and the invitee claims normally later.
+  - Issuer and connector flows: POST /api/users/stub gains a side effect, a mail to the recipient for every new stub, including Platform S's certify and transfer-custody calls. Idempotent resolves must not re-mail. S may already tell its users through its own channel (not read).
+  - Cost: a token store (migration), a new register field and a client that passes it (no in-repo page reads a URL token; census d), a resend path for lost or expired tokens, and a backfill or fallback for the stubs that exist today without a token.
+  - Cells: no token, wrong token, expired token: refused, row untouched. Right token: 201, ACTIVE, verified. Squatter then invitee: the squatter is refused, the invitee gets 201.
+(ii) The claim leaves the row INVITED (or pending) until the verification link is followed; no session to an unverified claimant.
+  - Invitee: register answers "check your email" with no session; the click activates.
+  - Someone else first: the squatter never gets a session. BUT if the password is chosen at register, this is a pre-account hijack. The squatter registers first with their own password, the invitee receives a "verify your email" mail for a sign-up they did not make, clicks it, and so activates the account with the squatter's password. It is safe only if each register's password is bound to that one mailed token and held off the row until the click; even then, an invitee who clicks an older mail activates the squatter's attempt.
+  - Issuer and connector flows: unchanged.
+  - Widened to every account (no session until emailVerified): it closes the SIBLING as well. But every new user must verify before their first login, and on a deployment with no mail provider nobody could finish registering. That is a larger product decision.
+(iii) Register never claims; the invitee gets a claim link instead.
+  - Invitee: register on an INVITED address answers with no session and mails a single-use link. The link's page lets the invitee set their own password; the row turns ACTIVE with emailVerified true, and they log in.
+  - Someone else first: the squatter's register changes nothing on the row and only mails the real address. No password is chosen before the proof, so there is no pre-hijack. The invitee may get one unexpected mail.
+  - Issuer and connector flows: unchanged; stub creation is not touched.
+(iv) My shape: (iii) built on the reset flow that already exists.
+  - Register on an INVITED address: no write to the row and no session. Store a reset-style token (the existing hashed store), send a claim mail to the stub's address (a NEW template in auth's email.ts, inside services/auth), and answer with no session (status code and wording are Kam's; see the sub-choice below).
+  - reset-password on an INVITED row: set the hash AND flip status to ACTIVE with emailVerified true, because the token proves the mailbox. Nothing else in reset changes; ACTIVE rows behave as today.
+  - Cost: two routes in auth, one template and their OpenAPI entries; no migration and no originate or gateway change. The mobile register-then-login (AuthContext.tsx:146) fails on the new answer and needs its own change, outside services/auth. The link lands on FRONTEND_URL/reset-password (or a claim path), which, like today's verify and reset links, is not a page in this repo.
+  - Red-first cells (form body AND JSON for each register cell; gate 381 F1):
+    - R1 no proof: register on an INVITED address gives the no-session answer: no access token and no refresh cookie, the row still INVITED with no hash, updateUserOrThrow never called, and exactly one claim mail, to the stub's address.
+    - R2 wrong proof: reset-password with an unknown or expired token gives 404 or 400, and the row stays INVITED.
+    - R3 right proof: reset-password with the mailed token on an INVITED row gives 200; the row is ACTIVE with emailVerified true and the hash set, and login with that password succeeds.
+    - R4 invitee after a squatter: the squatter registers (R1 shape), then the invitee follows the link and sets their password, so the row is ACTIVE. Login with the squatter's password gives 401.
+    - Controls: a fresh register still answers 201 with a session; an ACTIVE address still gets 409; reset-password on an ACTIVE row changes only the hash (status and emailVerified unchanged).
+    - Rewritten by ruling, not weakened: auth.integration.test.ts:1583, ks1460 R1, R2, C1 and C3, and PR 2259's R3 and C2.
+- Enumeration sub-choice (for Kam): today a register on an invited address answers 201, indistinguishable from a new address. (iii) and (iv) make "invited" visible unless the answer for INVITED matches the one for a registered address (409 "Email already registered", which already reveals existence), with the mail sent only for INVITED. So the choice is a 409 like a registered address (no new enumeration, but confusing to an invitee) or a 202 "check your email" (clear, but it reveals "invited").
+- Mail flooding: anyone can make register mail an invited address again and again, as forgot-password already can today. Existing auth rate limits apply (not measured).
+
+RECOMMENDATION: (iv).
+- It sets no password before proof, so there is no pre-hijack (unlike (ii)).
+- It leaves Platform S, issuer and connector flows untouched (unlike (i)).
+- It reuses the hashed single-use token store, the route and the sender auth already has.
+- It fits inside services/auth plus its tests, docs and spec.
+It is a PRODUCT decision: what an invitee sees on register changes (no instant session, a mail to follow), the mobile auto-login breaks for that case, and the 202-or-409 wording is user-facing. Please put it to Kam as a card. The SIBLING needs its own ruling and its own seat.
+
+EXISTING CLAIMS: were stubs claimed by someone other than the invitee? A query DESIGN only, NOT run; production is Kam's.
+- No column records a claim. The read-only signals:
+  1. auth's log line "KS-74: invited stub claimed on register" with the userId (auth.ts:285), wherever logs are kept.
+  2. users rows that began as stubs: the id is referenced by custody_events.to_holder_id (023_custody_events.sql:23) or certifications.holder_user_id (migrations 005, 012), with the user's created_at (which a claim keeps from the stub, auth.ts:262) within a minute of that referencing row's created_at, and the row now status 'active' (stored lower case, userRepo.ts:714) with a password_hash.
+  3. Among those, email_verified = false is the strong squatter signal: the claimant never clicked the link sent to the real address. true means someone with the mailbox clicked, so the invitee or the mailbox's owner.
+- Sketch (confirm certifications.created_at and the holder_user_id type before use; cast as needed):
+  SELECT u.id, u.tenant_id, u.organization_id, u.created_at, u.updated_at, u.email_verified FROM users u WHERE u.status = 'active' AND u.password_hash IS NOT NULL AND (EXISTS (SELECT 1 FROM custody_events ce WHERE ce.to_holder_id = u.id AND abs(extract(epoch FROM ce.created_at - u.created_at)) < 60) OR EXISTS (SELECT 1 FROM certifications c WHERE c.holder_user_id = u.id::text AND abs(extract(epoch FROM c.created_at - u.created_at)) < 60)) ORDER BY u.email_verified, u.updated_at;
+- Limits: it gives candidates, not proof. A claimant who later verified through the mailbox does not look like a squatter. Row-level security needs a role that reads across tenants.
+
+ORDER AND WAIT
+- I create no branch and edit nothing until your ANSWER, and I build only on a develop that contains PR 2259's squash. PR 2259 was open at a0e58b942c22 at my read; its claim lines sit at :219 to :313 there.
+- If the ANSWER waits on Kam's card or on PR 2259, I wrap after this plan with a HANDOVER a successor can build from: the census, the cells above, my clone and my kit.
+- My watcher is armed for your mail naming (Seat W 40th), from this mail's stamp.
+
+NOT DONE / NOT MEASURED: no route was run; no box or database read; Platform S, the mobile app beyond AuthContext.tsx, and the pages behind FRONTEND_URL were not read; originate's share and version owner checks were not read past the role gate; whether demo or production delivers mail is unknown.
+
