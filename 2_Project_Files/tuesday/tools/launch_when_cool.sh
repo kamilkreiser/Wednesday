@@ -12,6 +12,33 @@
 # Bounded: gives up after MAX_WAIT seconds (default 3600) with rc 4 and launches nothing.
 NAME="$1"; CMD="$2"
 [ -n "$NAME" ] && [ -n "$CMD" ] || { echo "usage: launch_when_cool.sh <cockpit name> <command>" >&2; exit 2; }
+# PROJECT HOLD (Kam, live board 2026-11-19 16:25:45: "no more HPSM work for the next 3 weeks or until I request something
+# new"; lesson 2026-11-19_no-hpsm-work-for-three-weeks-or-until-kam-asks.md). Every *.hold file in tuesday/holds/ names a
+# project_match and an until date. A launch whose NAME or CMD holds the match is REFUSED (rc 6) while today <= until.
+# Past the date the hold no longer refuses but says so loudly: the hold ended by its date, tell Kam and quarantine the file.
+# LWC_HOLD_OVERRIDE="<Kam's words>" passes one launch and prints the words. Test hooks: LWC_HOLDS_DIR, LWC_TODAY,
+# LWC_HOLD_CHECK_ONLY=1 (run the check, launch nothing, exit 0 when it passes).
+HOLDS_DIR="${LWC_HOLDS_DIR:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/holds}"
+TODAY="${LWC_TODAY:-$(date +%Y-%m-%d)}"
+if [ -d "$HOLDS_DIR" ]; then
+  for HF in "$HOLDS_DIR"/*.hold; do
+    [ -f "$HF" ] || continue
+    HM="$(sed -n 's/^project_match=//p' "$HF" | head -n 1)"; HU="$(sed -n 's/^until=//p' "$HF" | head -n 1)"
+    case "$HU" in [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;; *) echo "REFUSED: hold file $HF has no valid until=YYYY-MM-DD line; fix the file before any launch" >&2; exit 6 ;; esac
+    [ -n "$HM" ] || { echo "REFUSED: hold file $HF has no project_match line; fix the file before any launch" >&2; exit 6; }
+    if printf '%s\n%s\n' "$NAME" "$CMD" | /usr/bin/grep -q -i -F -- "$HM"; then
+      if [ "$TODAY" \> "$HU" ]; then
+        echo "HOLD PAST ITS DATE: $HF (until $HU, today $TODAY) no longer refuses. Tell Kam on the board that the hold ended by its date, and quarantine the file." >&2
+      elif [ -n "${LWC_HOLD_OVERRIDE:-}" ]; then
+        echo "HOLD OVERRIDDEN for this one launch ($HF, until $HU): $LWC_HOLD_OVERRIDE" >&2
+      else
+        echo "REFUSED: project hold $HF matches this launch ('$HM', until $HU, today $TODAY). $(sed -n 's/^source=//p' "$HF" | head -n 1). Nothing launched. Only Kam's word lifts it: LWC_HOLD_OVERRIDE=\"<his words>\"." >&2
+        exit 6
+      fi
+    fi
+  done
+fi
+[ "${LWC_HOLD_CHECK_ONLY:-0}" = 1 ] && { echo "hold check passed for $NAME (check only, nothing launched)"; exit 0; }
 # LOAD_MAX default scales with the CPU count (Kam, live board 2026-11-11 09:19:32, card datasec-load-gate-cpu-count-1111 = a,
 # "Raise the limit to 24 and I will exclude the drive from Spotlight"): 4/3 of hw.ncpu, rounded, never below the old 7.
 # 18 CPUs (the M5 Studio) -> 24. The old fixed 7 was set on an 8-CPU Mac. An explicit LOAD_MAX still wins.
