@@ -53,6 +53,15 @@ for key, val in slots.items():
         sys.exit(why)
     if why:
         print(f"STAMP_ALLOW_CLOCK used for {key!r}: {allow}")
+# LABEL ECHO (ledger _ledger_laptop_datasec.md 2026-11-19 w=2 of the 11-17 READ-WHOLE-prefix row): a value that
+# starts with its own label (or with any "(S<digit>)" slot label, or "READ-WHOLE-BY-TUESDAY:") is written with the
+# label twice, because this script keeps the label and appends the value. Refuse before anything is written.
+LABEL_HEAD = re.compile(r"^\s*(\(S\d+\)|READ-WHOLE-BY-TUESDAY:)")
+for key, val in slots.items():
+    k = key.strip()
+    if LABEL_HEAD.match(val) or (k and val.lstrip().startswith(k)):
+        sys.exit(f"REFUSED: label {key!r}: the value starts with a slot label ({val.strip()[:40]!r}); "
+                 f"give the value only, the label stays in the kit (ledger 2026-11-19); nothing written")
 for key, val in slots.items():
     val = val.replace("@NOW@", now)
     if key == "READ-WHOLE":
