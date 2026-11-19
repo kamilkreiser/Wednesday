@@ -216,3 +216,19 @@ Which model, firmware and OXPd generation (1.x or 2) it is has not been said: as
 Live board, view=tuesday, 2026-11-20T10:23:04.108000+11:00, his words verbatim (kam_msgs, live):
 
 > I am looking for a reader and will connect my old windows PC to see if its suitable.  I can also run a windows emulator on your machine
+
+## C-36
+
+Live board, view=tuesday, 2026-11-20T10:47:28.863000+11:00, his words verbatim (kam_msgs, live):
+
+> windows environment will be the same environment used by HPSM.  you should have cli access and should be able to create resources.  please tell me if not.  Also, create a jira board for this project (check if there is another ODPd board.  use a different name like OXPD 2 (and add 2026) if you need).
+
+Done by Tuesday the same hour, each read back. (1) Access: the sign-in kept in the HPSM-POC project's own Azure settings folder is the user kamil@datasec-rd.com, subscription a6b8fe11-d1b5-4293-8727-b34aba08a705, role Owner at subscription scope; read-only test: five resource groups listed and one Windows machine, vm-hpsm-sm (Standard_D4as_v5, running). Nothing was created. It is a user sign-in, not an identity confined to OXPd. Whether a Windows machine in Azure can run HP's simulator (VMware inside it) is unmeasured. A machine is spend: its size and cost go to him on a card before it is created. (2) Jira: 41 projects read to the last page; one earlier board, OXPD1, exists; the new project is key OXPD2, name "OXPd 2 (2026)", id 10655, classic software kanban (board 674), issue types Task, Sub-task, Story, Bug, Epic, statuses Backlog, Selected for Development, In Progress, Done; empty.
+
+## C-37
+
+Live board, view=tuesday, 2026-11-20T10:48:48.115000+11:00, his words verbatim (kam_msgs, live):
+
+> I created a a GitHub repository called OXPd_2  please create keys and I will add to a deploy key with write privelages
+
+Done by Tuesday: datasecau/OXPd_2 read (private, empty, default branch main, 0 deploy keys); an ed25519 pair created in Tuesday's own keys folder under `3_Access_Keys/oxpd_2/` (git-ignored; fingerprint SHA256:aW+vD2Bd2JdHqd0OB/jmJ0GLgfkv3RMmqKxgIfWPiyg); the public half and the four steps sent to him on the board. The key works only after he adds it with write access: not yet verified. The private half moves to the project's own keys folder when that folder exists.
