@@ -1,0 +1,336 @@
+# B1730 sidecar. Drafter instruments run 2026-11-19 11:09 to 12:0x AEDT; ids are stamp_check ids. Source files counted per claim: kit, server.js@46050e25, server.js@37fb1bcb, index.js@46050e25, adapter@46050e25, Dockerfile@46050e25, rd523 test, rd1005 test, rd1007 test, counts@46050e25, counts@37fb1bcb, HISTORY.md@46050e25, CLARIFICATIONS.md, review round1, review round2, round1 landing.txt, builder STATUS r1, builder STATUS r2, drafter report r2, pr229.json, merge229.json, checkruns229, runs229, pr228.json, CLAUDE.md, JIRA.md, previous kit, previous STATUS, RD-1005, RD-1007, RD-1006, jira searches, jira searches 2. Lines below the claim ids (who-*) match each sentence about a review finding, a ruling or a change to its source row (grep -c -F over the named file, printed); ptr-* rows are the POINTERS table.
+cb6ddf0a | date -> 'Thu 19 Nov 2026 11:09:04 AEDT' (first read) and 'Thu 19 Nov 2026 11:15:16 AEDT' (identity read); the last read is in the drafter report ; kit lines holding it -> 14 (run Thu 19 Nov 2026 11:30:36 AEDT)
+65fde75b | gh api -X GET commits/46050e25.../check-runs -> 5 success (Analyze x3, audit-production-deps, scan), 2 skipped (Deploy demo build 135230909746, deploy 135230862140), 1 in_progress (Build 135230859971) ; kit lines holding it -> 12 (run Thu 19 Nov 2026 11:30:36 AEDT)
+1668cd6f | python3 re over the full head id '2ec6937792ffc48abbd11a2928b293c954e14cd5' with b\d{3,4} (case-insensitive) -> fires on 'b293'; the same scan over '46050e25f8b0b6acc972a0e033ea9a738b57b7d4' -> no hit; over the first 8 characters of each -> no hit ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0e3a2e20 | python3 re b\d{3,4} over '2ec6937792ffc48abbd11a2928b293c954e14cd5' -> matches 'b293' (control: 'x b1996 y' fires) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+da478620 | gh api -X GET pulls/229 .head.sha -> 2ec6937792ffc48abbd11a2928b293c954e14cd5; git/commits/2ec69377.tree.sha -> 49793dfa56c5640b495d010989ee2f3b75baf364 = merge tree (11:13) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+8473a270 | gh api -X GET pulls/229 .base.sha -> 37fb1bcbec2e19f2404774633349da76b75120d3; pulls/228 .merge_commit_sha -> 37fb1bcbec2e19f2404774633349da76b75120d3 (11:12) ; kit lines holding it -> 12 (run Thu 19 Nov 2026 11:30:36 AEDT)
+e057a750 | /usr/bin/grep -c -i -F 'on main 37fb1bc' over round 1 VERDICT.md -> 1 line; over round 2 VERDICT.md -> 1 line ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+1e298a18 | kit wording that the entry is told to use once; the entry template holds 'gate' on 1 line (python3 count over the entry block: 1) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+4e5e266f | gh api -X GET pulls/229/commits -> 5th commit cd019f382c63589c735b0b0bf1add22bfdebec10 (the first version's head); round 1 VERDICT.md line 1 '@ cd019f3' ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+9513c9b1 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; server.js@46050e25 -> 1; rd1007 test -> 1; review round2 -> 1; builder STATUS r2 -> 4; drafter report r2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+bfcc610d | round 2 VERDICT.md row 1: 'the user-add hunk is a pure insertion, @@ -3606,0 +3616,5 @@: removed 0, added 5' (RELAYED; /usr/bin/grep -c -F over round 2 VERDICT.md printed in the who rows below) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0bc0c7fc | /usr/bin/grep -c -i -F 'new 0, gone 0' over round 2 VERDICT.md -> 1 ('main, cd019f38 and the head each read new 0, gone 0') ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+619a619d | gh api -X GET commits/46050e25.../check-runs (11:09 to 11:13): 7 completed, 1 in_progress (Build job 135230859971) ; kit lines holding it -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+310d0c54 | gh api -X GET commits/46050e25.../check-runs -> 5 success (Analyze x3, audit-production-deps, scan), 2 skipped (Deploy demo build 135230909746, deploy 135230862140), 1 in_progress (Build 135230859971) ; kit lines holding it -> 12 (run Thu 19 Nov 2026 11:30:36 AEDT)
+c7d9d50b | gh api -X GET --allow-escape-sequences actions/jobs/135016064059/logs | /usr/bin/grep -a 'VERDICT: PASS' | cat -v -> '2026-11-18T19:03:00.4042785Z VERDICT: PASS M-^@M-^T 6009/6009 tests passed across 380 suites (jest exit 0)' (the Build of the merge of 228); job 134931824959 (227) -> the same form; the Build job 135230859971 of 229 is in_progress and prints none yet ; kit lines holding it -> 5 (run Thu 19 Nov 2026 11:30:36 AEDT)
+ac9484bd | gh api -X GET actions/runs/44364946780/jobs --jq .jobs[] -> 135016064059 build completed success 2026-11-18T18:00:41Z 2026-11-18T19:03:04Z ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+c7b20397 | gh api -X GET actions/runs?head_sha=37fb1bcb... -> 44364946780 Build completed success ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+4ac9b97a | gh api -X GET code-scanning/alerts?state=open&ref=refs/heads/main (paged) -> 22 open; set of most_recent_instance.commit_sha[0:8] over the open alerts -> {46050e25} ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+e972a2fd | as above: pulls/229 .merge_commit_sha[0:8]; the set of most_recent_instance.commit_sha[0:8] over the 22 open alerts -> {46050e25}; analyses ref main: 2201148107 javascript-typescript 29 results 2026-11-19T00:08:17Z ; kit lines holding it -> 25 (run Thu 19 Nov 2026 11:30:36 AEDT)
+b2ecb1c3 | jget.py (the drafter's reader) read JIRA_SITE, JIRA_EMAIL and JIRA_API_TOKEN by name in-process from /Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.env; no value printed ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+7f6ed927 | RD-1005 and RD-1007 descriptions via GET /rest/api/3/issue/<key>, adf text split on newline, lines holding 'alert' (case-insensitive) -> RD-1005 0, RD-1007 0; controls RD-1006 -> 1, RD-994 -> 1 (11:23) ; kit lines holding it -> 29 (run Thu 19 Nov 2026 11:30:36 AEDT)
+7e4cfb98 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+a6975536 | project = RD AND ( key >= RD-1 ) via search/jql -> 0 issues (11:12; the previous STATUS Deviation 2 read the same); control created >= "2000-01-01" paged -> 1003 issues ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+08c9c325 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/matching-refs/heads/records/b1730 --jq length -> 0 (11:19); control git/matching-refs/heads/records/b1725 -> 1 ; kit lines holding it -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2aa5b255 | git -C <G> --no-optional-locks config --get user.email | tr -d '\n' | shasum -a 256 | cut -c1-16 -> be76c2c1baf03ec1 (11:15:16) ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+4b67ad5d | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 13; CLARIFICATIONS.md -> 1; review round2 -> 1; builder STATUS r1 -> 10; builder STATUS r2 -> 12; drafter report r2 -> 3; previous kit -> 12; previous STATUS -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+114f1467 | project = RD AND ( key >= RD-1 ) via search/jql -> 0 issues (11:12; the previous STATUS Deviation 2 read the same); control created >= "2000-01-01" paged -> 1003 issues ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0aee0f68 | project = RD AND ( created >= "2000-01-01" ) paged -> 1003 issues, highest key RD-1007, lowest RD-3 (11:12) ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+260126ba | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 4; builder STATUS r2 -> 1; previous kit -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+61b3c208 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+9d65dde4 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 22 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+899f1a9b | project = RD AND ( created >= "2000-01-01" ) paged -> 1003 issues (11:12) ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+5c058aa0 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; HISTORY.md@46050e25 -> 8; CLARIFICATIONS.md -> 2; round1 landing.txt -> 8; builder STATUS r2 -> 1; pr229.json -> 1; merge229.json -> 1; checkruns229 -> 1; runs229 -> 1; pr228.json -> 1; CLAUDE.md -> 5; previous kit -> 1; jira searches -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+a0663792 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 47; server.js@46050e25 -> 148; server.js@37fb1bcb -> 148; index.js@46050e25 -> 3; adapter@46050e25 -> 1; rd523 test -> 7; HISTORY.md@46050e25 -> 242; CLARIFICATIONS.md -> 163; review round1 -> 2; review round2 -> 1; builder STATUS r1 -> 14; builder STATUS r2 -> 1; drafter report r2 -> 1; pr229.json -> 1; checkruns229 -> 1; CLAUDE.md -> 3; JIRA.md -> 7; previous kit -> 40; previous STATUS -> 6; RD-1005 -> 1; RD-1006 -> 1; jira searches -> 5; jira searches 2 -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2b44c12b | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 9; HISTORY.md@46050e25 -> 18; CLARIFICATIONS.md -> 11; review round1 -> 1; review round2 -> 1; round1 landing.txt -> 1; builder STATUS r1 -> 1; builder STATUS r2 -> 1; drafter report r2 -> 1; CLAUDE.md -> 14; JIRA.md -> 2; previous kit -> 9 (run Thu 19 Nov 2026 11:30:36 AEDT)
+7cb6caae | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; builder STATUS r1 -> 1; drafter report r2 -> 1; previous kit -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+ddbd086a | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; CLARIFICATIONS.md -> 1; previous kit -> 2; previous STATUS -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+b23bd64c | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 12 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+eae8197f | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+b832270e | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 17; server.js@46050e25 -> 15; server.js@37fb1bcb -> 15; Dockerfile@46050e25 -> 1; HISTORY.md@46050e25 -> 137; CLARIFICATIONS.md -> 74; review round1 -> 1; review round2 -> 3; builder STATUS r1 -> 7; builder STATUS r2 -> 4; drafter report r2 -> 1; CLAUDE.md -> 4; JIRA.md -> 2; previous kit -> 14; previous STATUS -> 1; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+97319feb | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+608b260e | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+c4ada02e | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+6e441e35 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+54e8952d | git -C <G> --no-optional-locks config --get user.email | sed 's/.*@//' -> users.noreply.github.com (11:15:16) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+7ea66889 | ls -d /Volumes/Laptop-DEV -> ls: /Volumes/Laptop-DEV: No such file or directory (11:15:16) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+e6c4892b | ls -d /Volumes/Laptop-DEV -> 'ls: /Volumes/Laptop-DEV: No such file or directory' (11:15:16) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+9901ccd3 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; HISTORY.md@46050e25 -> 5; CLARIFICATIONS.md -> 9; review round1 -> 1; review round2 -> 1; builder STATUS r1 -> 2; builder STATUS r2 -> 2; drafter report r2 -> 2; JIRA.md -> 1; previous kit -> 4; previous STATUS -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+21e6233a | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 5; server.js@46050e25 -> 106; server.js@37fb1bcb -> 106; index.js@46050e25 -> 86; adapter@46050e25 -> 14; rd523 test -> 1; rd1005 test -> 1; rd1007 test -> 1; HISTORY.md@46050e25 -> 34; CLARIFICATIONS.md -> 12; review round2 -> 2; builder STATUS r1 -> 5; builder STATUS r2 -> 2; drafter report r2 -> 1; JIRA.md -> 1; previous kit -> 5; previous STATUS -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+15dbeecf | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; CLARIFICATIONS.md -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+026d038a | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha -> 46050e25f8b0b6acc972a0e033ea9a738b57b7d4 (11:09:33 and 11:13); pulls/229 .merge_commit_sha -> 46050e25f8b0b6acc972a0e033ea9a738b57b7d4; git/commits/<that> parents -> 37fb1bcb, 2ec69377 ; kit lines holding it -> 6 (run Thu 19 Nov 2026 11:30:36 AEDT)
+1a4a27db | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; CLARIFICATIONS.md -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+11b07d65 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha -> 46050e25f8b0b6acc972a0e033ea9a738b57b7d4 (11:13) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0e33b9ca | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+349827b5 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 72; server.js@46050e25 -> 376; server.js@37fb1bcb -> 376; index.js@46050e25 -> 190; adapter@46050e25 -> 4; rd523 test -> 12; rd1005 test -> 6; HISTORY.md@46050e25 -> 408; CLARIFICATIONS.md -> 245; review round1 -> 3; review round2 -> 4; round1 landing.txt -> 2; builder STATUS r1 -> 24; builder STATUS r2 -> 17; drafter report r2 -> 13; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; CLAUDE.md -> 18; JIRA.md -> 7; previous kit -> 63; previous STATUS -> 9; jira searches -> 1; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+c91ab543 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 47; server.js@46050e25 -> 148; server.js@37fb1bcb -> 148; index.js@46050e25 -> 3; adapter@46050e25 -> 1; rd523 test -> 7; HISTORY.md@46050e25 -> 242; CLARIFICATIONS.md -> 163; review round1 -> 2; review round2 -> 1; builder STATUS r1 -> 14; builder STATUS r2 -> 1; drafter report r2 -> 1; pr229.json -> 1; checkruns229 -> 1; CLAUDE.md -> 3; JIRA.md -> 7; previous kit -> 40; previous STATUS -> 6; RD-1005 -> 1; RD-1006 -> 1; jira searches -> 5; jira searches 2 -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+8a8d5d19 | GET /rest/api/3/issue/RD-1005/transitions and RD-1007/transitions (11:23) -> ('31','In Review','Testing') among 10 transitions each; JIRA.md lines 146, 189 and 198 name In Review 31 -> Testing ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2a0fe276 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 43; server.js@46050e25 -> 1; rd1005 test -> 29; HISTORY.md@46050e25 -> 2; CLARIFICATIONS.md -> 3; review round1 -> 6; review round2 -> 1; round1 landing.txt -> 2; builder STATUS r1 -> 75; builder STATUS r2 -> 4; drafter report r2 -> 1; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; previous kit -> 11; previous STATUS -> 2; RD-1007 -> 1; jira searches -> 3; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2ca26ce2 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 46; server.js@46050e25 -> 1; rd1007 test -> 14; HISTORY.md@46050e25 -> 5; CLARIFICATIONS.md -> 3; review round1 -> 9; review round2 -> 7; round1 landing.txt -> 2; builder STATUS r1 -> 45; builder STATUS r2 -> 25; drafter report r2 -> 11; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; previous STATUS -> 4; jira searches -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+cb9e62c3 | jget.py reads the key JIRA_SITE by name in-process (11:09) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+f3135feb | jget.py reads the key JIRA_EMAIL by name in-process (11:09) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+5aeb3c32 | jget.py reads the key JIRA_API_TOKEN by name in-process (11:09) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+c3fbaf91 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+ba7128d3 | python3 scan over the Jira texts with SUBS including 'password' -> 0 hits at their drafting values (scan.py); control 'password' fires ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+99485006 | the phrase is in the T-NEWA/T-1007 texts (texts.py); the scan for 'password' over every text -> 0 hits ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2c909060 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; builder STATUS r1 -> 1; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+3f10dedb | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+fa39ab39 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; builder STATUS r1 -> 1; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+cdd1f925 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; builder STATUS r1 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+c26dcc8f | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; rd1005 test -> 1; builder STATUS r1 -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+96051f86 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; server.js@46050e25 -> 5; server.js@37fb1bcb -> 4; builder STATUS r1 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+9135188b | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 2; server.js@37fb1bcb -> 2; builder STATUS r1 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+77b4646a | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+76fa6820 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; builder STATUS r1 -> 1; builder STATUS r2 -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+f0a0f3a7 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 9; server.js@37fb1bcb -> 9; CLARIFICATIONS.md -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+4fb9a474 | awk NR==3616 server.js at 46050e25 holds 'RD-1007' (ptr-24) ; kit lines holding it -> 39 (run Thu 19 Nov 2026 11:30:36 AEDT)
+18bbd4e6 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; server.js@46050e25 -> 1; rd1007 test -> 1; review round2 -> 1; builder STATUS r2 -> 4; drafter report r2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+81336429 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 5; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; rd1007 test -> 1; CLARIFICATIONS.md -> 1; review round1 -> 1; review round2 -> 1; builder STATUS r1 -> 3; builder STATUS r2 -> 3; pr229.json -> 1; previous kit -> 9; previous STATUS -> 1; RD-1007 -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+55d351f7 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; rd1005 test -> 1; builder STATUS r1 -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0ea8b404 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; server.js@46050e25 -> 3; rd1005 test -> 1; builder STATUS r1 -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+d47e5fe6 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 6; server.js@46050e25 -> 8; server.js@37fb1bcb -> 7; adapter@46050e25 -> 4; rd523 test -> 1; rd1005 test -> 1; CLARIFICATIONS.md -> 2; review round1 -> 1; builder STATUS r1 -> 3; jira searches -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2564d2f4 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 5; rd1005 test -> 1; builder STATUS r1 -> 6 (run Thu 19 Nov 2026 11:30:36 AEDT)
+ae779df5 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; builder STATUS r1 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+61226f66 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; builder STATUS r1 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+f49f7578 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; builder STATUS r1 -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+b4af223f | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 3; server.js@37fb1bcb -> 3; builder STATUS r1 -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+5a7bdcb5 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; builder STATUS r2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+a6cfcefb | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+8739f853 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+04727dd1 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+9a01772b | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; server.js@46050e25 -> 10; server.js@37fb1bcb -> 11; rd1005 test -> 1; builder STATUS r1 -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+53ce855f | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+434b3a6e | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; index.js@46050e25 -> 6 (run Thu 19 Nov 2026 11:30:36 AEDT)
+e559b788 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; index.js@46050e25 -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+df14f122 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; index.js@46050e25 -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2077c228 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; index.js@46050e25 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+5848b505 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; adapter@46050e25 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+9bbca794 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; adapter@46050e25 -> 2; review round1 -> 1; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+e81aba71 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; adapter@46050e25 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+b92b2894 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 4; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; Dockerfile@46050e25 -> 1; HISTORY.md@46050e25 -> 28; CLARIFICATIONS.md -> 8; review round1 -> 1; CLAUDE.md -> 1; jira searches -> 2; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+6eaa4d85 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; Dockerfile@46050e25 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+23970830 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+22f787d5 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+ce8ebc74 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+169d3c5a | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+f19cc5ec | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+5a4f4bfd | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+bda903fd | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+f6691d2b | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; CLARIFICATIONS.md -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+5c1acd03 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; CLARIFICATIONS.md -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+78b23dd6 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; CLARIFICATIONS.md -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+f9de8fee | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; CLARIFICATIONS.md -> 2; round1 landing.txt -> 1; builder STATUS r2 -> 1; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+8784d08c | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; HISTORY.md@46050e25 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+be8af4a8 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+7012e6ac | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 44; server.js@46050e25 -> 140; server.js@37fb1bcb -> 140; index.js@46050e25 -> 81; adapter@46050e25 -> 1; rd523 test -> 3; HISTORY.md@46050e25 -> 464; CLARIFICATIONS.md -> 337; review round1 -> 14; review round2 -> 19; round1 landing.txt -> 8; builder STATUS r1 -> 16; builder STATUS r2 -> 25; drafter report r2 -> 22; pr229.json -> 1; runs229 -> 1; pr228.json -> 1; CLAUDE.md -> 4; JIRA.md -> 10; previous kit -> 38; previous STATUS -> 7; RD-1005 -> 1; RD-1007 -> 1; RD-1006 -> 1; jira searches -> 4; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+46b83e22 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/229 (11:09) -> merged true, merged_at 2026-11-19T00:04:15Z, merge_commit_sha 46050e25f8b0b6acc972a0e033ea9a738b57b7d4 ; kit lines holding it -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+3bca64ea | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 8; server.js@46050e25 -> 49; server.js@37fb1bcb -> 49; index.js@46050e25 -> 5; adapter@46050e25 -> 1; rd523 test -> 4; counts@46050e25 -> 1; counts@37fb1bcb -> 1; HISTORY.md@46050e25 -> 81; CLARIFICATIONS.md -> 81; review round1 -> 1; review round2 -> 1; round1 landing.txt -> 1; builder STATUS r1 -> 3; builder STATUS r2 -> 1; checkruns229 -> 1; runs229 -> 1; previous kit -> 8; previous STATUS -> 2; jira searches -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+30bb231f | gh api -X GET commits/46050e25.../check-runs -> 5 success (Analyze x3, audit-production-deps, scan), 2 skipped (Deploy demo build 135230909746, deploy 135230862140), 1 in_progress (Build 135230859971) ; kit lines holding it -> 12 (run Thu 19 Nov 2026 11:30:36 AEDT)
+4ffa3707 | gh api -X GET pulls/229 .base.sha -> 37fb1bcbec2e19f2404774633349da76b75120d3; pulls/228 .merge_commit_sha -> 37fb1bcbec2e19f2404774633349da76b75120d3 (11:12) ; kit lines holding it -> 12 (run Thu 19 Nov 2026 11:30:36 AEDT)
+61019155 | RD-1005 and RD-1007 descriptions via GET /rest/api/3/issue/<key>, adf text split on newline, lines holding 'alert' (case-insensitive) -> RD-1005 0, RD-1007 0; controls RD-1006 -> 1, RD-994 -> 1 (11:23) ; kit lines holding it -> 29 (run Thu 19 Nov 2026 11:30:36 AEDT)
+190da752 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 26; server.js@46050e25 -> 161; server.js@37fb1bcb -> 161; index.js@46050e25 -> 35; adapter@46050e25 -> 33; Dockerfile@46050e25 -> 6; rd523 test -> 36; rd1005 test -> 6; HISTORY.md@46050e25 -> 343; CLARIFICATIONS.md -> 292; review round1 -> 3; review round2 -> 4; round1 landing.txt -> 2; builder STATUS r1 -> 10; builder STATUS r2 -> 4; drafter report r2 -> 4; pr229.json -> 1; pr228.json -> 1; CLAUDE.md -> 4; JIRA.md -> 4; previous kit -> 26; previous STATUS -> 5; RD-1005 -> 2; RD-1007 -> 1; RD-1006 -> 1; jira searches -> 9; jira searches 2 -> 5 (run Thu 19 Nov 2026 11:30:36 AEDT)
+c55e2118 | gh api -X GET --allow-escape-sequences actions/jobs/135016064059/logs | /usr/bin/grep -a 'VERDICT: PASS' | cat -v -> '2026-11-18T19:03:00.4042785Z VERDICT: PASS M-^@M-^T 6009/6009 tests passed across 380 suites (jest exit 0)' (the Build of the merge of 228); job 134931824959 (227) -> the same form; the Build job 135230859971 of 229 is in_progress and prints none yet ; kit lines holding it -> 5 (run Thu 19 Nov 2026 11:30:36 AEDT)
+30c6b5ef | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; server.js@46050e25 -> 7; server.js@37fb1bcb -> 7; Dockerfile@46050e25 -> 1; HISTORY.md@46050e25 -> 74; CLARIFICATIONS.md -> 57; review round1 -> 2; review round2 -> 1; builder STATUS r1 -> 7; drafter report r2 -> 3; CLAUDE.md -> 1; JIRA.md -> 1; previous kit -> 4; jira searches -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+df4d1b90 | kit wording, the previous kit's property; applied to the 11:13 table: 5 success, 2 skipped (Deploy demo build and deploy), 1 in progress ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+4002ff33 | project = RD AND ( labels = "records-pass-1119" ) -> 2 issues: RD-1007, RD-1006 (11:09); control labels = "records-pass-1118" -> 3 ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+332dc89a | project = RD AND ( labels = "records-pass-1118" ) -> 3 issues: RD-1005, RD-1004, RD-1003 (11:09) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+f9433159 | project = RD AND ( labels = "records-pass-1119" ) -> 2 issues: RD-1007, RD-1006 (11:09) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+ac7e3721 | project = RD AND ( labels = "records-pass-1118" ) -> 3 issues: RD-1005, RD-1004, RD-1003 (11:09) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+35b5edc4 | project = RD AND ( text ~ "\"NONSTRING-225-18NOV\"" ) -> 1 (RD-1005) (11:09) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+da1a8f69 | project = RD AND ( text ~ "\"BODYTYPE-227-19NOV\"" ) -> 1 (RD-1007) (11:09) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+190e0491 | project = RD AND ( text ~ "\"LAND-227-994-19NOV\"" ) -> 1 (RD-994) (11:23) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2fee6240 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; server.js@46050e25 -> 110; server.js@37fb1bcb -> 114; index.js@46050e25 -> 12; rd1005 test -> 4; HISTORY.md@46050e25 -> 1; review round1 -> 1; builder STATUS r1 -> 16; RD-1005 -> 1; jira searches -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+b04b0060 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 17; server.js@46050e25 -> 13; server.js@37fb1bcb -> 13; Dockerfile@46050e25 -> 4; rd1005 test -> 1; HISTORY.md@46050e25 -> 20; CLARIFICATIONS.md -> 8; review round1 -> 1; builder STATUS r1 -> 5; pr229.json -> 1; CLAUDE.md -> 2; RD-1005 -> 1; jira searches -> 1; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+d137251a | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; server.js@46050e25 -> 5; server.js@37fb1bcb -> 5; HISTORY.md@46050e25 -> 2; jira searches -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+a6d99a96 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; server.js@46050e25 -> 2; server.js@37fb1bcb -> 2; HISTORY.md@46050e25 -> 8; CLARIFICATIONS.md -> 1; review round1 -> 1; round1 landing.txt -> 1; builder STATUS r1 -> 34; previous kit -> 1; RD-1007 -> 1; jira searches -> 5 (run Thu 19 Nov 2026 11:30:36 AEDT)
+56b45bf6 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 6; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; review round1 -> 2; builder STATUS r1 -> 3; drafter report r2 -> 2; previous kit -> 2; RD-1007 -> 1; jira searches -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+5d013304 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 4; review round1 -> 2; builder STATUS r1 -> 1; jira searches -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+71947afd | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 8; server.js@46050e25 -> 1; server.js@37fb1bcb -> 1; HISTORY.md@46050e25 -> 6; CLARIFICATIONS.md -> 1; review round1 -> 1; builder STATUS r1 -> 3; pr229.json -> 1; previous kit -> 1; RD-1005 -> 3; RD-1007 -> 1; jira searches -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+b9974875 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+e01f0ade | gh api -X GET commits/37fb1bcb.../check-runs (11:12) -> 6 check-runs: Analyze x3 success, audit-production-deps success, build success, scan success -> '6 of 6 check-runs success'; workflow runs npm-audit, Gitleaks Scan, Push on main, Build (no Deploy demo run) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+ca5c0c48 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+1dbaac2c | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 7; server.js@46050e25 -> 216; server.js@37fb1bcb -> 216; index.js@46050e25 -> 3; adapter@46050e25 -> 12; Dockerfile@46050e25 -> 2; rd523 test -> 4; rd1005 test -> 2; counts@46050e25 -> 1; counts@37fb1bcb -> 1; HISTORY.md@46050e25 -> 490; CLARIFICATIONS.md -> 361; review round1 -> 6; review round2 -> 14; round1 landing.txt -> 3; builder STATUS r1 -> 11; builder STATUS r2 -> 2; drafter report r2 -> 3; CLAUDE.md -> 10; JIRA.md -> 10; previous kit -> 9; jira searches -> 16; jira searches 2 -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+4533b544 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; HISTORY.md@46050e25 -> 2; CLARIFICATIONS.md -> 3; previous kit -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+221d21f5 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+f4b59426 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 118; server.js@46050e25 -> 647; server.js@37fb1bcb -> 645; index.js@46050e25 -> 138; adapter@46050e25 -> 35; Dockerfile@46050e25 -> 19; rd523 test -> 46; rd1005 test -> 14; rd1007 test -> 7; HISTORY.md@46050e25 -> 2214; CLARIFICATIONS.md -> 1310; review round1 -> 38; review round2 -> 49; round1 landing.txt -> 8; builder STATUS r1 -> 81; builder STATUS r2 -> 41; drafter report r2 -> 38; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; pr228.json -> 1; CLAUDE.md -> 68; JIRA.md -> 81; previous kit -> 104; previous STATUS -> 15; RD-1005 -> 5; RD-1007 -> 4; RD-1006 -> 5; jira searches -> 47; jira searches 2 -> 25 (run Thu 19 Nov 2026 11:30:36 AEDT)
+8b3d8801 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; HISTORY.md@46050e25 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+50e0e715 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 2 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+1e1c1d70 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 5 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+804c8e19 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 2 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+05daaa7f | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 124; server.js@46050e25 -> 1033; server.js@37fb1bcb -> 1031; index.js@46050e25 -> 269; adapter@46050e25 -> 40; Dockerfile@46050e25 -> 22; rd523 test -> 64; rd1005 test -> 24; rd1007 test -> 8; counts@46050e25 -> 1; counts@37fb1bcb -> 1; HISTORY.md@46050e25 -> 2823; CLARIFICATIONS.md -> 1435; review round1 -> 44; review round2 -> 50; round1 landing.txt -> 10; builder STATUS r1 -> 99; builder STATUS r2 -> 45; drafter report r2 -> 42; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; pr228.json -> 1; CLAUDE.md -> 80; JIRA.md -> 102; previous kit -> 107; previous STATUS -> 19; RD-1005 -> 5; RD-1007 -> 4; RD-1006 -> 5; jira searches -> 52; jira searches 2 -> 27 (run Thu 19 Nov 2026 11:30:36 AEDT)
+a2a3e52f | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+13576151 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+a95088e6 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 65; server.js@46050e25 -> 221; server.js@37fb1bcb -> 219; index.js@46050e25 -> 22; adapter@46050e25 -> 11; Dockerfile@46050e25 -> 4; rd523 test -> 2; rd1005 test -> 2; rd1007 test -> 1; counts@46050e25 -> 1; counts@37fb1bcb -> 1; HISTORY.md@46050e25 -> 260; CLARIFICATIONS.md -> 383; review round1 -> 8; review round2 -> 5; round1 landing.txt -> 2; builder STATUS r1 -> 22; builder STATUS r2 -> 4; drafter report r2 -> 5; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; pr228.json -> 1; CLAUDE.md -> 19; JIRA.md -> 18; previous kit -> 58; previous STATUS -> 3; RD-1005 -> 2; RD-1007 -> 1; RD-1006 -> 2; jira searches -> 9; jira searches 2 -> 5 (run Thu 19 Nov 2026 11:30:36 AEDT)
+60136c6a | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; previous kit -> 3; previous STATUS -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+8ef3670d | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; server.js@46050e25 -> 21; server.js@37fb1bcb -> 21; HISTORY.md@46050e25 -> 2; JIRA.md -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2927c80a | project = RD AND ( created >= "2000-01-01" ) paged -> 1003 issues, highest key RD-1007, lowest RD-3 (11:12) ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+df535fef | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/228 (11:12) -> merged_at 2026-11-18T18:00:36Z, merge_commit_sha 37fb1bcbec2e19f2404774633349da76b75120d3, 1 file HISTORY.md 19/0 ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+579d6505 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 4 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+c56ad9b7 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 13 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+e45e966f | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 3 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+2be3030c | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 36; server.js@46050e25 -> 1; rd1005 test -> 7; HISTORY.md@46050e25 -> 2; CLARIFICATIONS.md -> 3; review round1 -> 3; round1 landing.txt -> 2; builder STATUS r1 -> 16; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; previous kit -> 11; previous STATUS -> 2; RD-1007 -> 1; jira searches -> 3; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+9cfb056d | project = RD AND ( text ~ "\"NONSTRING-225-18NOV\"" ) -> 1 (RD-1005) (11:09) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+988582c2 | project = RD AND ( text ~ "\"BODYTYPE-227-19NOV\"" ) -> 1 (RD-1007) (11:09) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+af96f8f7 | project = RD AND ( text ~ "\"LAND-227-994-19NOV\"" ) -> 1 (RD-994) (11:23) ; kit lines holding it -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+c0b055d1 | gh api -X GET .../git/matching-refs/heads/records/b1725 --jq length -> 1 (11:19); b1730 -> 0 ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+ad2155db | project = RD AND ( created >= "2000-01-01" ) paged -> 1003 issues (11:12) ; kit lines holding it -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+4da9d7fd | kit wording (a Bash tool parameter); no tool output to match ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+178914ef | gh api -X GET actions/runs/44425992381 -> 44425992381 Build in_progress, run_started_at 2026-11-19T00:04:18Z, head_sha 46050e25 (11:14:37) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0597ab3d | gh api -X GET commits/46050e25.../check-runs (11:09 to 11:13): 7 completed, 1 in_progress (Build job 135230859971) ; kit lines holding it -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+a83be60f | gh api -X GET --allow-escape-sequences actions/jobs/135016064059/logs | /usr/bin/grep -a 'VERDICT: PASS' | cat -v -> '2026-11-18T19:03:00.4042785Z VERDICT: PASS M-^@M-^T 6009/6009 tests passed across 380 suites (jest exit 0)' (the Build of the merge of 228); job 134931824959 (227) -> the same form; the Build job 135230859971 of 229 is in_progress and prints none yet ; kit lines holding it -> 5 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0484104c | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+122d7d8d | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; previous kit -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+8886fa7d | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 32; server.js@46050e25 -> 125; server.js@37fb1bcb -> 125; index.js@46050e25 -> 8; rd523 test -> 12; rd1005 test -> 28; rd1007 test -> 7; HISTORY.md@46050e25 -> 113; CLARIFICATIONS.md -> 55; review round1 -> 8; review round2 -> 1; round1 landing.txt -> 1; builder STATUS r1 -> 79; builder STATUS r2 -> 12; drafter report r2 -> 6; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; JIRA.md -> 6; previous kit -> 21; previous STATUS -> 5; RD-1005 -> 3; RD-1007 -> 2; jira searches -> 18; jira searches 2 -> 5 (run Thu 19 Nov 2026 11:30:36 AEDT)
+cb1c29ce | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 13; server.js@46050e25 -> 7; server.js@37fb1bcb -> 7; index.js@46050e25 -> 1; rd523 test -> 1; HISTORY.md@46050e25 -> 191; CLARIFICATIONS.md -> 69; CLAUDE.md -> 8; JIRA.md -> 24; previous kit -> 14; previous STATUS -> 5; jira searches -> 41; jira searches 2 -> 15 (run Thu 19 Nov 2026 11:30:36 AEDT)
+cde5b26d | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; HISTORY.md@46050e25 -> 1; JIRA.md -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0d6d57b1 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 4; builder STATUS r2 -> 1; previous kit -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+5d8ee061 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0bd9ecbd | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 47; server.js@46050e25 -> 148; server.js@37fb1bcb -> 148; index.js@46050e25 -> 3; adapter@46050e25 -> 1; rd523 test -> 7; HISTORY.md@46050e25 -> 242; CLARIFICATIONS.md -> 163; review round1 -> 2; review round2 -> 1; builder STATUS r1 -> 14; builder STATUS r2 -> 1; drafter report r2 -> 1; pr229.json -> 1; checkruns229 -> 1; CLAUDE.md -> 3; JIRA.md -> 7; previous kit -> 40; previous STATUS -> 6; RD-1005 -> 1; RD-1006 -> 1; jira searches -> 5; jira searches 2 -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+7c7fcf60 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+fed97590 | /usr/bin/grep -c -i -F over the kit and over each source file (listed in this sidecar's header) -> only the kit holds it: kit lines 1 (an operational term, a command or a placeholder; the seat's own check measures it; run Thu 19 Nov 2026 11:30:36 AEDT)
+7c543b4e | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+66b63f3c | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 3; previous kit -> 3 (run Thu 19 Nov 2026 11:30:36 AEDT)
+98f376ce | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 36; server.js@46050e25 -> 1; rd1005 test -> 7; HISTORY.md@46050e25 -> 2; CLARIFICATIONS.md -> 3; review round1 -> 3; round1 landing.txt -> 2; builder STATUS r1 -> 16; pr229.json -> 1; merge229.json -> 1; runs229 -> 1; previous kit -> 11; previous STATUS -> 2; RD-1007 -> 1; jira searches -> 3; jira searches 2 -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+8bbf169d | kit wording; the seat's own REFUSE 3 call measures the 404 (the drafter did not request RD-99999999) ; kit lines holding it -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+2bf08fe2 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha -> 46050e25f8b0b6acc972a0e033ea9a738b57b7d4 (11:09:33 and 11:13); pulls/229 .merge_commit_sha -> 46050e25f8b0b6acc972a0e033ea9a738b57b7d4; git/commits/<that> parents -> 37fb1bcb, 2ec69377 ; kit lines holding it -> 6 (run Thu 19 Nov 2026 11:30:36 AEDT)
+f15b0416 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+9f0f0209 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 8; server.js@46050e25 -> 49; server.js@37fb1bcb -> 49; index.js@46050e25 -> 5; adapter@46050e25 -> 1; rd523 test -> 4; counts@46050e25 -> 1; counts@37fb1bcb -> 1; HISTORY.md@46050e25 -> 81; CLARIFICATIONS.md -> 81; review round1 -> 1; review round2 -> 1; round1 landing.txt -> 1; builder STATUS r1 -> 3; builder STATUS r2 -> 1; checkruns229 -> 1; runs229 -> 1; previous kit -> 8; previous STATUS -> 2; jira searches -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+fb20ece5 | gh api -X GET --allow-escape-sequences actions/jobs/135016064059/logs | /usr/bin/grep -a 'VERDICT: PASS' | cat -v -> '2026-11-18T19:03:00.4042785Z VERDICT: PASS M-^@M-^T 6009/6009 tests passed across 380 suites (jest exit 0)' (the Build of the merge of 228); job 134931824959 (227) -> the same form; the Build job 135230859971 of 229 is in_progress and prints none yet ; kit lines holding it -> 5 (run Thu 19 Nov 2026 11:30:36 AEDT)
+a8843456 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 47; server.js@46050e25 -> 148; server.js@37fb1bcb -> 148; index.js@46050e25 -> 3; adapter@46050e25 -> 1; rd523 test -> 7; HISTORY.md@46050e25 -> 242; CLARIFICATIONS.md -> 163; review round1 -> 2; review round2 -> 1; builder STATUS r1 -> 14; builder STATUS r2 -> 1; drafter report r2 -> 1; pr229.json -> 1; checkruns229 -> 1; CLAUDE.md -> 3; JIRA.md -> 7; previous kit -> 40; previous STATUS -> 6; RD-1005 -> 1; RD-1006 -> 1; jira searches -> 5; jira searches 2 -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+14098830 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/matching-refs/heads/records/b1730 --jq length -> 0 (11:19); control git/matching-refs/heads/records/b1725 -> 1 ; kit lines holding it -> 4 (run Thu 19 Nov 2026 11:30:36 AEDT)
+6b0ad639 | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+0aa29c1c | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 2; previous kit -> 2 (run Thu 19 Nov 2026 11:30:36 AEDT)
+1e007f7b | /usr/bin/grep -c -i -F (lines holding the literal, per file) -> kit -> 1; builder STATUS r1 -> 1; builder STATUS r2 -> 2; previous kit -> 1 (run Thu 19 Nov 2026 11:30:36 AEDT)
+who-01 | /usr/bin/grep -c -i -F 'GO WITH FINDINGS @ cd019f3 on main 37fb1bc' over review round1 -> 1
+who-02 | /usr/bin/grep -c -i -F 'No Blocker, no Major.' over review round1 -> 1
+who-03 | /usr/bin/grep -c -i -F 'The RD-523 exception matches the code STRING' over review round1 -> 1
+who-04 | /usr/bin/grep -c -i -F 'copies `code` from the endpoint's HTTP error body' over review round1 -> 1
+who-05 | /usr/bin/grep -c -i -F 'Measured with `node` and no server' over review round1 -> 1
+who-06 | /usr/bin/grep -c -i -F 'The control code `Other` gives the constant' over review round1 -> 1
+who-07 | /usr/bin/grep -c -i -F 'The residual needs an administrator-configured endpoint that answers with exactly that code.' over review round1 -> 1
+who-08 | /usr/bin/grep -c -i -F 'Before this change EVERY thrown text reached those sinks.' over review round1 -> 1
+who-09 | /usr/bin/grep -c -i -F 'Cannot destructure property 'message' of 'req.body' as it is undefined.' over review round1 -> 1
+who-10 | /usr/bin/grep -c -i -F '`Dockerfile:144` sets `NODE_ENV=production`' over review round1 -> 1
+who-11 | /usr/bin/grep -c -i -F 'rd1007 R4's title says "and stores no user" but the cell asserts only status and body' over review round1 -> 1
+who-12 | /usr/bin/grep -c -i -F 'stored false for it at BASE and head' over review round1 -> 1
+who-13 | /usr/bin/grep -c -i -F 'The builder's Corrections are judged true.' over review round1 -> 1
+who-14 | /usr/bin/grep -c -i -F 'POST /api/chat and POST stream with the model failing: 200 at both' over review round1 -> 1
+who-15 | /usr/bin/grep -c -i -F 'so the POST-stream sinks are proved by U and C only' over review round1 -> 1
+who-16 | /usr/bin/grep -c -i -F 'is the first line of each of the five catches' over review round1 -> 1
+who-17 | /usr/bin/grep -c -i -F 'inference 0' over review round1 -> 2
+who-18 | /usr/bin/grep -c -i -F '8 of 8 EQUAL' over review round1 -> 1
+who-19 | /usr/bin/grep -c -i -F '22 green, 2 red of 24 rd523 cells' over review round1 -> 1
+who-20 | /usr/bin/grep -c -i -F 'Head, run 1 and run 2: 2/2 suites, 32 cells, 32 passed (rd1005 23, rd1007 9)' over review round1 -> 1
+who-21 | /usr/bin/grep -c -i -F '6041/6041 tests passed across 382 suites' over review round1 -> 1
+who-22 | /usr/bin/grep -c -i -F '29 and 29 rows' over review round1 -> 1
+who-23 | /usr/bin/grep -c -i -F 'Viewer: 403 `Admin access required` for every shape that reaches the route (10 of 12)' over review round1 -> 1
+who-24 | /usr/bin/grep -c -i -F 'The census of 30 other unguarded reads (taken from the builder's list, not re-run)' over review round1 -> 1
+who-25 | /usr/bin/grep -c -i -F 'is clean, tree 8655bdd0' over review round1 -> 1
+who-26 | /usr/bin/grep -c -i -F 'GO WITH FINDINGS @ 2ec6937 (delta over cd019f3) on main 37fb1bc' over review round2 -> 1
+who-27 | /usr/bin/grep -c -i -F 'No Blocker, no Major.' over review round2 -> 2
+who-28 | /usr/bin/grep -c -i -F 'has **0 results**' over review round2 -> 1
+who-29 | /usr/bin/grep -c -i -F 'No new alerts in code changed by this pull request' over review round2 -> 1
+who-30 | /usr/bin/grep -c -i -F 'is BEFORE the javascript analysis was created' over review round2 -> 1
+who-31 | /usr/bin/grep -c -i -F 'Hosted Build on 2ec69377 read `in_progress`' over review round2 -> 1
+who-32 | /usr/bin/grep -c -i -F 'placeholder, Step 0 running' over review round2 -> 1
+who-33 | /usr/bin/grep -c -i -F '@@ -3606,0 +3616,5 @@' over review round2 -> 1
+who-34 | /usr/bin/grep -c -i -F 'For **0 of 26 rows**' over review round2 -> 1
+who-35 | /usr/bin/grep -c -i -F '**R1-R4 RED**, each received `500 "Failed to add user"`' over review round2 -> 1
+who-36 | /usr/bin/grep -c -i -F '**C1 RED only**' over review round2 -> 1
+who-37 | /usr/bin/grep -c -i -F 'keeps **5**, equal to hosted PR analysis 2199861480' over review round2 -> 1
+who-38 | /usr/bin/grep -c -i -F 'keeps **0**' over review round2 -> 1
+who-39 | /usr/bin/grep -c -i -F 'keeps 7 at cd019f38 and 2 at the head' over review round2 -> 1
+who-40 | /usr/bin/grep -c -i -F 'new 0, gone 0' over review round2 -> 1
+who-41 | /usr/bin/grep -c -i -F 'rd969 (11 cells, H8 included) and rd691 (6 cells), 17/17 green' over review round2 -> 1
+who-42 | /usr/bin/grep -c -i -F 'FULL VERIFY: not re-run.' over review round2 -> 1
+who-43 | /usr/bin/grep -c -i -F '6041/6041 tests passed across 382 suites' over review round2 -> 1
+who-44 | /usr/bin/grep -c -i -F 'Each finding's fingerprint is EQUAL on main and on the PR head.' over drafter report r2 -> 1
+who-45 | /usr/bin/grep -c -i -F 'every one of the five has server.js 3618' over drafter report r2 -> 1
+who-46 | /usr/bin/grep -c -i -F 'Whether GitHub's check logic labels alerts' over drafter report r2 -> 1
+who-47 | /usr/bin/grep -c -i -F '5 new alerts including 4 high severity security vulnerabilities' over drafter report r2 -> 1
+who-48 | /usr/bin/grep -c -i -F '235, 232, 231, 230, 229, all open and created 2026-09-28' over drafter report r2 -> 1
+who-49 | /usr/bin/grep -c -i -F 'DEFAULTS PENDING' over builder STATUS r1 -> 1
+who-50 | /usr/bin/grep -c -i -F 'UNGUARDED  3090 POST   /api/auth/login' over builder STATUS r1 -> 1
+who-51 | /usr/bin/grep -c -i -F 'UNGUARDED 22130 POST   /api/learning/confirm-clarification' over builder STATUS r1 -> 1
+who-52 | /usr/bin/grep -c -i -F '31 unguarded single-line `req.body` destructures' over builder STATUS r1 -> 1
+who-53 | /usr/bin/grep -c -i -F 'A7b' over builder STATUS r2 -> 11
+who-54 | /usr/bin/grep -c -i -F 'the PR check's five findings were main's open alerts 229 to 232 and 235' over builder STATUS r2 -> 1
+who-55 | /usr/bin/grep -c -i -F '30 other route handlers read fields from `req.body` without a guard' over pr229.json -> 1
+who-56 | /usr/bin/grep -c -i -F 'The RD-523 exception matches the error code string.' over pr229.json -> 1
+who-57 | /usr/bin/grep -c -i -F 'The thrown text is still written to the server log' over pr229.json -> 1
+who-58 | /usr/bin/grep -c -i -F 'Every R, E, H, U and C cell is red on the current main and green on this branch' over pr229.json -> 1
+who-59 | /usr/bin/grep -c -i -F 'the pull request's check listed them as new' over pr229.json -> 1
+who-60 | /usr/bin/grep -c -i -F 'The texts and the reuse of the shared check are this change's defaults.' over merge229.json -> 1
+who-61 | /usr/bin/grep -c -i -F 'Two new suites (32 cells)' over merge229.json -> 1
+who-62 | /usr/bin/grep -c -i -F 'LANDING HOLD: the branch carries Tuesday's defaults' over round1 landing.txt -> 1
+who-63 | /usr/bin/grep -c -i -F 'RD-1007: a body the parsers did not read' over server.js@46050e25 -> 1
+who-64 | /usr/bin/grep -c -i -F 'the thrown error's own text stays' over server.js@46050e25 -> 1
+who-65 | /usr/bin/grep -c -i -F 'SECURITY: Escape HTML in the text before processing' over index.js@46050e25 -> 1
+who-66 | /usr/bin/grep -c -i -F 'No angle brackets: the dashboard chat writes error messages through innerHTML.' over adapter@46050e25 -> 1
+who-67 | /usr/bin/grep -c -i -F 'String(m).includes(NAMED)' over rd523 test -> 4
+who-68 | /usr/bin/grep -c -i -F '102. Added 2026-11-19' over CLARIFICATIONS.md -> 1
+who-69 | /usr/bin/grep -c -i -F 'RD-1006 created (Task, Medium, summary 193 characters' over CLARIFICATIONS.md -> 1
+who-70 | /usr/bin/grep -c -i -F 'issuekey >= RD-1 returned 0 issues' over previous STATUS -> 1
+who-71 | /usr/bin/grep -c -i -F 'cross-module log path' over previous STATUS -> 1
+who-72 | /usr/bin/grep -c -i -F 'each helper loads its own copy of common1725' over previous STATUS -> 1
+ptr-01 | /usr/bin/grep -c -F 'CHAT_ERROR_TEXT' server.js at 46050e25 -> 2 (kit expects 2); at 37fb1bcb -> 0 (kit expects 0) PASS
+ptr-02 | /usr/bin/grep -c -F 'function chatErrorText(' server.js at 46050e25 -> 1 (kit expects 1); at 37fb1bcb -> 0 (kit expects 0) PASS
+ptr-03 | /usr/bin/grep -c -F 'chatErrorText(' server.js at 46050e25 -> 6 (kit expects 6); at 37fb1bcb -> 0 (kit expects 0) PASS
+ptr-04 | /usr/bin/grep -c -F "typeof message !== 'string' || !message" server.js at 46050e25 -> 3 (kit expects 3); at 37fb1bcb -> 0 (kit expects 0) PASS
+ptr-05 | /usr/bin/grep -c -F 'if (!isPlainRequestObject(req.body)) {' server.js at 46050e25 -> 1 (kit expects 1); at 37fb1bcb -> 0 (kit expects 0) PASS
+ptr-06 | /usr/bin/grep -c -F 'Email, name, and password are required' server.js at 46050e25 -> 2 (kit expects 2); at 37fb1bcb -> 1 (kit expects 1) PASS
+ptr-07 | /usr/bin/grep -c -F 'function isPlainRequestObject(' server.js at 46050e25 -> 1 (kit expects 1); at 37fb1bcb -> 1 (kit expects 1) PASS
+ptr-08 | /usr/bin/grep -c -F "error.code === 'AI_ENDPOINT_REDIRECT_REFUSED'" server.js at 46050e25 -> 4 (kit expects 4); at 37fb1bcb -> 3 (kit expects 3) PASS
+ptr-09 | /usr/bin/grep -c -F 'const { email, name, password, role } = req.body;' server.js at 46050e25 -> 1 (kit expects 1); at 37fb1bcb -> 1 (kit expects 1) PASS
+ptr-10 | /usr/bin/grep -c -F 'Failed to add user' server.js at 46050e25 -> 1 (kit expects 1); at 37fb1bcb -> 1 (kit expects 1) PASS
+ptr-11 | /usr/bin/grep -c -F 'app.use((error, req, res, next) => {' server.js at 46050e25 -> 1 (kit expects 1); at 37fb1bcb -> 1 (kit expects 1) PASS
+ptr-12 | /usr/bin/grep -c -F 'function sanitizeErrorForClient(' server.js at 46050e25 -> 1 (kit expects 1); at 37fb1bcb -> 1 (kit expects 1) PASS
+ptr-13 | /usr/bin/grep -c -F 'message: error.message || ' server.js at 46050e25 -> 6 (kit expects 6); at 37fb1bcb -> 6 (kit expects 6) PASS
+ptr-14 | /usr/bin/grep -c -F 'through the final error handler' server.js at 46050e25 -> 1 (kit expects 1); at 37fb1bcb -> 1 (kit expects 1) PASS
+ptr-15 | single-line destructure frame (regex ^\s*(const|let|var)\s*\{[^}]*\}\s*=\s*req\.body;\s*$) server.js at 46050e25 -> 31 lines; at 37fb1bcb -> 31 lines; the user add line 3621 is in the first set: True PASS
+ptr-16 | = req.body || {}; lines: at 46050e25 -> 5; at 37fb1bcb -> 5
+ptr-17 | awk NR==1435 server.js at 46050e25 holds "const CHAT_ERROR_TEXT = 'Error processing chat message';" -> PASS
+ptr-18 | awk NR==1436 server.js at 46050e25 holds 'function chatErrorText(error) {' -> PASS
+ptr-19 | awk NR==1437 server.js at 46050e25 holds "error.code === 'AI_ENDPOINT_REDIRECT_REFUSED'" -> PASS
+ptr-20 | awk NR==1439 server.js at 46050e25 holds "app.use('/api/chat'," -> PASS
+ptr-21 | awk NR==3606 server.js at 46050e25 holds "app.post('/api/auth/users', async (req, res) => {" -> PASS
+ptr-22 | awk NR==3612 server.js at 46050e25 holds 'adminGateRefuses(' -> PASS
+ptr-23 | awk NR==3616 server.js at 46050e25 holds 'RD-1007' -> PASS
+ptr-24 | awk NR==3618 server.js at 46050e25 holds 'if (!isPlainRequestObject(req.body)) {' -> PASS
+ptr-25 | awk NR==3620 server.js at 46050e25 holds '}' -> PASS
+ptr-26 | awk NR==3621 server.js at 46050e25 holds 'const { email, name, password, role } = req.body;' -> PASS
+ptr-27 | awk NR==3672 server.js at 46050e25 holds 'Failed to add user' -> PASS
+ptr-28 | awk NR==7189 server.js at 46050e25 holds "app.post('/api/chat'" -> PASS
+ptr-29 | awk NR==7191 server.js at 46050e25 holds '= req.body;' -> PASS
+ptr-30 | awk NR==7193 server.js at 46050e25 holds "typeof message !== 'string' || !message" -> PASS
+ptr-31 | awk NR==7598 server.js at 46050e25 holds 'AI_ENDPOINT_REDIRECT_REFUSED' -> PASS
+ptr-32 | awk NR==7653 server.js at 46050e25 holds 'AI_ENDPOINT_REDIRECT_REFUSED' -> PASS
+ptr-33 | awk NR==7670 server.js at 46050e25 holds 'chatErrorText(error)' -> PASS
+ptr-34 | awk NR==7678 server.js at 46050e25 holds "app.get('/api/chat/stream'" -> PASS
+ptr-35 | awk NR==7682 server.js at 46050e25 holds "typeof message !== 'string' || !message" -> PASS
+ptr-36 | awk NR==7865 server.js at 46050e25 holds 'chatErrorText(error)' -> PASS
+ptr-37 | awk NR==7872 server.js at 46050e25 holds 'chatErrorText(error)' -> PASS
+ptr-38 | awk NR==7878 server.js at 46050e25 holds "app.post('/api/chat/stream'" -> PASS
+ptr-39 | awk NR==7879 server.js at 46050e25 holds 'const { message, conversationId' -> PASS
+ptr-40 | awk NR==7881 server.js at 46050e25 holds "typeof message !== 'string' || !message" -> PASS
+ptr-41 | awk NR==7991 server.js at 46050e25 holds 'chatErrorText(analyzeError)' -> PASS
+ptr-42 | awk NR==7998 server.js at 46050e25 holds 'chatErrorText(error)' -> PASS
+ptr-43 | awk NR==20660 server.js at 46050e25 holds 'function isPlainRequestObject(body) {' -> PASS
+ptr-44 | awk NR==20964 server.js at 46050e25 holds 'if (!isPlainRequestObject(body)) return BUSINESS_HOURS_REQUIRED_FIELDS' -> PASS
+ptr-45 | awk NR==22220 server.js at 46050e25 holds 'function sanitizeErrorForClient(' -> PASS
+ptr-46 | awk NR==22236 server.js at 46050e25 holds 'if (isDev) {' -> PASS
+ptr-47 | awk NR==22239 server.js at 46050e25 holds 'message: error.message' -> PASS
+ptr-48 | awk NR==22489 server.js at 46050e25 holds 'app.use((error, req, res, next) => {' -> PASS
+ptr-49 | awk NR==1421 server.js at 46050e25 holds 'chat request over the cap is refused (413, through the final error handler)' -> PASS
+ptr-50 | awk NR==3512 static/js/index.js at 46050e25 holds 'textDiv.innerHTML = `<span class="text-danger">' -> PASS
+ptr-51 | awk NR==3466 static/js/index.js at 46050e25 holds 'formatAIResponse(fullResponse)' -> PASS
+ptr-52 | awk NR==3577 static/js/index.js at 46050e25 holds 'escapeHtml(text)' -> PASS
+ptr-53 | awk NR==3169 static/js/index.js at 46050e25 holds 'formatAIResponse(message)' -> PASS
+ptr-54 | awk NR==103 backend/llm/azureOpenAIAdapter.js at 46050e25 holds 'No angle brackets' -> PASS
+ptr-55 | awk NR==104 backend/llm/azureOpenAIAdapter.js at 46050e25 holds 'REDIRECT_REFUSED_MESSAGE' -> PASS
+ptr-56 | awk NR==110 backend/llm/azureOpenAIAdapter.js at 46050e25 holds 'this.code = AI_ENDPOINT_REDIRECT_REFUSED' -> PASS
+ptr-57 | awk NR==144 Dockerfile at 46050e25 holds 'ENV NODE_ENV=production' -> PASS
+ptr-58 | awk NR==546 __tests__/rd523-aoai-redirect-refused.test.js at 46050e25 holds "test('C1" -> PASS
+ptr-59 | awk NR==650 __tests__/rd523-aoai-redirect-refused.test.js at 46050e25 holds "test('E4" -> PASS
+ptr-60 | awk NR==78 __tests__/rd1007-user-add-unparsed-body.test.js at 46050e25 holds "test('R4" -> PASS
+ptr-61 | awk NR==119 __tests__/rd1007-user-add-unparsed-body.test.js at 46050e25 holds "test('C1" -> PASS
+ptr-62 | awk NR==144 __tests__/rd1005-chat-message-not-text.test.js at 46050e25 holds "test('E1" -> PASS
+ptr-63 | rd1005 test file: lines 242 (kit expects 242); lines starting with test( -> 13 (12 explicit cells + 1 generated line for 11 cells = 23 cells) PASS
+ptr-64 | rd1007 test file: lines 127 (kit expects 127); lines starting with test( -> 7 (R4, N1-N4, C1 + 1 generated line for 3 cells = 9 cells) PASS
+ptr-65 | server.js at 46050e25 -> 22788 lines; at 37fb1bcb -> 22774 lines
+who-jira | RD-1005 description (GET) holds 'each non-string shape on each of the three routes answers 400 with no model call and no internal text' -> 1
+who-jira | RD-1005 description (GET) holds 'the details field and the stream error events carry no text of a thrown error' -> 1
+who-jira | RD-1005 description (GET) holds 'cells for both; the full verify passes' -> 1
+who-jira | RD-1007 description (GET) holds 'the three content types answer 400 with no user stored and no 500' -> 1
+who-jira | RD-1007 description (GET) holds 'a cell for each; the full verify passes' -> 1
