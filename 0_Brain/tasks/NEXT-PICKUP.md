@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 BOOT 06:0x 20 Nov, the MORNING seat (Mac mini, Opus 5.5) - READ FIRST; supersedes every block below where they differ
+- **develop = edfb8b230e4f** (git ls-remote 06:03:58). Kam silent since 18:38:54 (19 Nov; kam_rulings_today 06:02:59 = 0 rows today). Gauge 25%. Capacity ROOM.
+- **W 44th WRAPPED** (READY FOR GATE KS-2276 19:01Z + WRAP 19:03Z): PR 2262 head b79fc89dd880 on base 2ad55ceceb7c, 3 paths +55 -0, verified at source 06:03; SCORED 0.93; pane %111 CLOSED. **FLOOR: no seat panes** (only %0 wednesday, %1 fleet-monitor).
+- **TWO SUBAGENTS RUNNING (die with a rotation; re-commission from the commission file if the output is ABSENT):**
+  - **GATE 385** (Opus, tier 2 ruled: G2's G1-surface clause), PR 2262 / KS-2276: 0_Brain/reference/2026-11-20_gate385-tier2-pr2262-ks2276/commission.md -> verdict.md beside it. On GO: PR 2262 goes to K 60th by ADDENDUM (or K 60th's STAMP if it lands before the stamp).
+  - **K 60th DRAFTER** (Sonnet): 0_Brain/reference/2026-11-20_drafter-seatK60/commission.md -> fleet/briefs_staged/2026-11-20_seatK60_merge.md (rows 2155 tier 1 with a NEW leg model, 2150, 2152; 2160/2195 still need Wednesday's words). On return: read WHOLE, STAMP (kit-stamp checklist), launch Sonnet.
+- **MORNING CARD DONE:** wed-morning-plan-1120 (HTTP 201). Today's plan in it: gate 2262, K 60th, then the KS-2280 lane (auth hardening, Opus, plan question first).
+- **OWED:** fleet_ack for W 44th's plan QUESTION (refused 4x: the collector never ingested it; FLAGGED 0); the 12-row collector window (WED tooling); weekly consolidation lapsed since 10-19; INDEX.md refresh; WED-48 + WED-147 overdue on the WED board (WED-48 is a CypherKey tickler: not this seat's).
+
 ## 🔴 SHIFT HANDOVER 05:30 20 Nov, the 04:5x rotation-successor seat (overnight wrap) - READ FIRST; supersedes every block below where they differ
 - **ROTATED at the 06:00 wake** (this seat was the wrapped overnight seat at ~65% ctx; the 05:30 instruction said the 06:00 wake begins fresh). Panes BEFORE the respawn: %0 wednesday, %111 Secuura/Blockchain-W (W 44th, push attempt 2 running from 18:45:33Z), %1 fleet-monitor. The successor's first act: list panes and compare; then the MORNING CARD.
 - **develop = edfb8b230e4f** (PR 2154 MERGED by K 59th, verified at source 05:4x: one parent e92365022814, tree e508a30be2ea; PR 2153 and PR 2261 before it). ELEVEN merges overnight. Kam silent since 18:38:54 (19 Nov). Gauge 24%. Board grant to Fri 27 Nov.
