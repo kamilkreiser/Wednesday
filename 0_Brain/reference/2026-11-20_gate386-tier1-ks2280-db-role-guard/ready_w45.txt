@@ -1,0 +1,85 @@
+     1	[INBOUND] 2026-11-19T20:49 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2280 (Seat W 45th)
+=========== [INBOUND] 2026-11-19T20:49 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2280 (Seat W 45th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2280 (Seat W 45th)
+Seat W 45th
+
+READY FOR GATE KS-2280 (Seat W 45th). TIER recommended: 1 (G1: a security surface; the flag can stop a box once set).
+
+PR 2263: https://github.com/Secuura/Distributed_Secuura/pull/2263 , "Refs KS-2280: the gateway reads the database role it connected as, first in its DB boot work". Open, not draft, base develop.
+- Head 2e8b9fffd91fa21b1a079b65d09aa014b9525544: ONE commit on develop 718b15bbeb2004afe562ae097f3bb1246458cbdf (PR 2262), 7 paths, +378 -1.
+- Develop at this READY (gh api, 20:48:10Z): 718b15bbeb20, the PR's own base; nothing to re-measure. The plan's figures were on 2f9899b750e8, one commit back (PR 2262: vc-issuer and fragments only).
+- mergeable true; mergeable_state unstable. The head carries 6 Actions runs: 5 failure (pr-platform-suites, pr-security-gates, pr-premerge-ack, pr-lockfiles-noop, security-scan) and 1 skipped. Control: PR 2262's head shows the same shape. Actions is retired, so these carry no testing claim either way.
+
+BUILT AS RULED (your ANSWER 20:13:31Z)
+- Q1, option (iii): a superuser or BYPASSRLS role WARNS. The gateway exits 1 only when DB_ROLE_GUARD is exactly "refuse"; unset or any other value warns. The check calls process.exit(1) itself, before loadFromDb (db.ts runDbReadyHook 102-117 would swallow a throw). An unavailable check never refuses. I set no flag anywhere and touched no box.
+- Q3: logs carry the two booleans and fixed words only. Never the URL, user, password or role name; G6 pins it.
+- Q4: the 7th path (the shared-side test file) and ONE PGlite cell (P1). The PR body says it is the fourth KS-1694 importer. No package.json or lockfile edit.
+- Q5: two new fragments (flow, cheat: KS-2280-gateway-db-role-check-at-boot.html).
+- Your accepted correction is in the PR body and the Linear comment, worded as you asked: demo's gateway role and NODE_ENV are UNMEASURED; deploy-demo.yml's secuuraadmin URL is the deleted Container Apps path.
+- PATHS:
+  - Blockchain/Dev/packages/shared/src/db/runtime-role-guard.ts (new, +59)
+  - Blockchain/Dev/packages/shared/src/index.ts (+3: the export)
+  - Blockchain/Dev/packages/shared/src/__tests__/ks2280-runtime-role-guard.test.ts (new, +97)
+  - Blockchain/Dev/services/api-gateway/src/index.ts (+34 -1: the import, checkDbRoleAtBoot, runDbBootTasks exported, the check first)
+  - Blockchain/Dev/services/api-gateway/src/__tests__/ks2280-db-role-guard-at-boot.test.ts (new, +148)
+  - the two fragments (+21, +16)
+
+EVIDENCE (develop 718b15bbeb20; Node v26.8.1, vitest 4.1.12, Apple Silicon; Node 26 is NOT the LTS line 24, nothing re-measured on 24)
+- Red first, on the branch tree before any product edit: the shared file failed to load (Cannot find module '../db/runtime-role-guard'); gateway 0 of 6 (runDbBootTasks is not a function). With the change, same tree: shared 7 of 7, gateway 6 of 6.
+- Mutants (tools/mutants_ks2280_w45.py: stage 1 is a counted re-key of W 44th's script, 17 edits by a suffix function 44th -> 45th, every count equal to an independent grep, fenced against glued neighbours; then the KS-2280 table and the two-workspace runner, written by hand). Each row lists the cells that fail:
+  - M1 drop rolsuper: S1, P1, G2
+  - M2 drop rolbypassrls: S2, P1, G1, G5
+  - M3a throw instead of exit: G1, G2, G6
+  - M3b no exit: G1, G2, G6
+  - M4 refuse when unavailable: G4
+  - M4b failed query reads bypass: S4, G4
+  - M5 refuse by default: G5, G6
+  - M5b loose flag match: G5
+  - M6 session_user: S6, P1
+  - M7 check after loadFromDb: G1, G2
+  - M8 warning prints DATABASE_URL: G6
+  - M9 no row-shape check: S5
+  - M10 inverted half: S2, S3, P1, G1, G3, G5
+  Every mutant is caught, and every cell catches at least one. Shared-side mutants rebuild packages/shared/dist before their runs (the gateway reads dist); product bytes are restored and sha256-checked after each (0a7235a5ad37, 9bdc79a8ec6b). Two slips, both fixed: M4b and M9 did not COMPILE as first written (tsc caught them, so no cell was exercised), and were reshaped and re-run (m2). S3 and G3 had no mutant until M10 was added (m3). The OLD-cells trap does not apply here: every cell is new and the product code does not exist on develop.
+- Whole suites, both arms at 718b15bbeb20 (evidence/suites_S2_*):
+  - api-gateway: 2,071 of 2,071 (181 files) then 2,077 of 2,077 (182)
+  - shared: 1,718 of 1,723 (86 files) then 1,725 of 1,730 (87)
+  - failure-name sets EQUAL; shared's 5 = KS-1727 + KS-2281's four, no other red
+- Static (tools/static_ks2280_w45.py), each beside a planted control that fired (planted files are NEW untracked files, moved to evidence/planted):
+  - tsc --noEmit 0 on api-gateway, 0 on shared, 0 on the new shared test file. Shared excludes src/__tests__ and is NOT ratchet-gated (no baseline: the six gated are auth, api-gateway, vc-issuer, security, m365-integration, originate), so that file went through a temp config outside the tree.
+  - eslint --max-warnings 0: 0 on the four new or shared files. Gateway index.ts carries 2 warnings (no-namespace, an unused disable directive); develop's index.ts has the same 2, so 0 are new. No preflight leg runs eslint (0 files under scripts/preflight; control: "ratchet" 2 hits in preflight.sh).
+  - Ratchet: api-gateway 220 files, 15 errors all baselined, 0 new.
+- Standalone proof before the push (W 44th's trap; branch tree with ALL 34 node_modules trees, one foreign self-link moved aside): test-types-ratchet.sh rc 0, six services 0 new / 0 stale (17 s); preflight_test_types_ratchet_leg.test.sh 48 passed, 0 failed (24 s).
+- docs-fragments.mjs check: OK (flow and cheat 301 new each); a planted two-heading fragment was refused.
+
+PUSH (ONE, through the queue, no waiver)
+- gatetest 20:31:36Z to 20:31:58Z rc 0. Then real: 20:32:34Z to 20:47:06Z, 872 s, rc 0, ls-remote VERIFIED at 2e8b9fffd91f. Lock released and queue left both times. F-02 did not bite (core.sshCommand).
+- Overlap gate at the push: 20 open PRs, none on any of the 7 paths; planted control package-lock.json 11 of 11 PASS.
+- .githooks/pre-push branches met (read first):
+  - KS-856 non-fast-forward: not met (a new branch, origin did not hold it).
+  - KS-989 formatting-gate presence: met, passed.
+  - KS-998 / KS-1483 fail-closed (the pushed commit must be the checked-out HEAD): met, passed.
+  - The preflight: 13 of 16 legs ran, legs 3, 4 and 8 SKIPPED (local stack not up), nothing failed. The hook says that is NOT a pass. Leg 14 shell suites 130 of 130; leg 15 production-guard coverage 23 of 23; leg 16 0 new.
+
+GITHUB AND LINEAR
+- PR made by W 41st's create_pr_w41.py, unedited; read back clean (1 commit, 7 files, one PR for this head).
+- ONE facts comment on KS-2280, id e11e8f2c, read back identical. No closing keyword.
+- KS-2280 moved to In Progress by Linear's own automation when the PR opened.
+
+NOT RUN: no live stack, container, database server, box or deploy; none of the four platform suites (the pre-merge Schemathesis and Akto acknowledgements are not ticked).
+
+FOR YOU / KAM (not mine to act on)
+- The default: stay at warn, move to refuse in production-like envs (option ii), or refuse everywhere (option i). And whether any box sets DB_ROLE_GUARD=refuse now; Kintsugi is the measured-safe candidate. Kam's card.
+- Demo's gateway role is still unmeasured. Under (iii), its next boot after a deploy prints the answer, "WARNING (KS-2280) ..." or nothing.
+- rights_holders (027, no FORCE, outside 038/039): its owner skips its RLS. You said you'd route it.
+
+KIT TRAP for the next W seat: W 44th's `clone --shared` of s-w44-base now FAILS ("alternate object stores, nesting too deep"). Use X 10th's URL clone with --reference-if-able <shared checkout> --dissociate (tools/mk_base_w45.sh, 10 s).
+
+TREES (never delete):
+- worktrees/s-w45-base: my clone, refs/w45/develop
+- worktrees/s-w45-dev: detached at 718b15bbeb20, clean
+- worktrees/s-w45-ks2280: branch feature/ks-2280-no-service-checks-the-db-role-it-connected at 2e8b9fffd91f, pushed, clean, all 34 node_modules trees
+
+Timeline: launch 19:58:16Z; plan 20:11:21Z; your ANSWER 20:13:31Z; branch tree 20:15:01Z, red run just after; matrix 20:20-20:23Z; suites 20:22-20:28Z; commit 20:30Z; push 20:32-20:47Z; PR 20:47:39Z; comment 20:48:00Z; this READY ~20:50Z. Meter: 41.9% of 1M at 20:48Z (ctx_usage_k60.py). The seat ends at this READY: I write the HANDOVER, history and daily-note lines, commit my vault lines, and send one wrap.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 39  SEEN:      893  BATCH: /private/tmp/wed_newmail/batch_20261119T205010Z.txt
