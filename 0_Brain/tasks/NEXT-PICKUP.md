@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 23:51 19 Nov, the 23:4x rotation-successor seat (ctx ~25%) - READ FIRST; supersedes the blocks below where they differ
+- **FLOOR: %66 K 56th (Sonnet, PR 2257 first of ten; STAMP K56-W1..W6) and %69 B 205th (Sonnet, PR 2131 first, order A 2131/2102/2191/2052; STAMP B205-W1..W8; writes its own b205 engine, expect ONE merge).** Both launched 23:50 by brief_and_launch.sh rc 0, statusline Sonnet 5.5. NEXT for each: plan QUESTION -> ANSWER -> SET-UP STATUS -> READY -> GO (ONE GO at a time across K and B).
+- **K56-W4 RULED NOT A HOLD:** KS-584 is Deployed to UAT (completed 2026-08-19, Stuart confirmed). KS-590's description ('blocked on KS-584') is stale: a board seat refreshes it (OWED, below).
+- **OWED (board seat S 97th, not yet briefed):** (1) ONE BLUF comment on KS-1107 for Peter (merged e86325fdbaed, what changed, not deployed, Kam's existing-joiners card open); (2) KS-590 stale-description note; (3) G287-1 follow-up ticket (no cell pins domainValid; search first); (4) KS-772 draft reply to Stuart for Wednesday's licence. **Then:** the Kintsugi deploy (auth KS-1107 + api-gateway KS-1152 + vc-issuer after PR 2131; re-verify the deploy grant row; the vc-issuer brief names the verified:false user effect); the hook extension (claim first); the 06:00 MORNING CARD.
+- **Ornith:** PAUSED by Kam 2026-10-12 (0_Brain/tasks/ORNITH-PAUSED present); the launch tool's IDLE flag is not acted on and not raised with Kam.
+
 ## 🔴 ROTATION HANDOVER 23:4x 19 Nov, the 21:2x successor seat (ctx ~75%, ROTATING at a safe boundary) - READ FIRST; supersedes every block below where they differ
 - **FLOOR EMPTY. No seat live, no agent question open, no drafter running.** Kam's last message 18:38:54 (kam_rulings_today live read 23:42). Gauge ~8%.
 - **FIRST WORK: TWO STAGED BRIEFS, both UNREAD by Wednesday, both blank STAMP, both drafted on develop e86325fdbaed:**
