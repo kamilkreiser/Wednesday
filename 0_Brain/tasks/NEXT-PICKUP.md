@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 00:25 20 Nov, the 23:4x rotation-successor seat (ctx ~38%) - READ FIRST
+- **FLOOR: %66 K 56th: GO SENT for PR 2257 at 00:22 (fleet/briefs_staged/2026-11-20_K56_go_2257.md) -> its MERGED: verify at source (one parent e86325fdbaed, tree 530ac275a183) -> WRAP naming PR 2190 expected -> score + pane_close. %69 B 205th: SET-UP CLOSED, legs on PR 2131 -> READY (one GO at a time: none until K's MERGED). %75 W 41st (Opus): KS-1936 measure on local Postgres -> plan QUESTION.**
+- **S 97th DONE (scored 0.96, pane closed):** KS-1107 comment f23aebe9 for Peter; KS-2276 filed (Low, G287-1). KS-772 T3 held (sha 90043f899539) for the deploy seat's live read.
+- **Hook extension LIVE** (fleet/hooks/pretooluse_cockpit_verb.sh + _check.py; command-position fix 00:0x).
+
 ## 🔴 CHECKPOINT 23:51 19 Nov, the 23:4x rotation-successor seat (ctx ~25%) - READ FIRST; supersedes the blocks below where they differ
 - **FLOOR: %66 K 56th (Sonnet, PR 2257 first of ten; STAMP K56-W1..W6) and %69 B 205th (Sonnet, PR 2131 first, order A 2131/2102/2191/2052; STAMP B205-W1..W8; writes its own b205 engine, expect ONE merge).** Both launched 23:50 by brief_and_launch.sh rc 0, statusline Sonnet 5.5. NEXT for each: plan QUESTION -> ANSWER -> SET-UP STATUS -> READY -> GO (ONE GO at a time across K and B).
 - **K56-W4 RULED NOT A HOLD:** KS-584 is Deployed to UAT (completed 2026-08-19, Stuart confirmed). KS-590's description ('blocked on KS-584') is stale: a board seat refreshes it (OWED, below).
