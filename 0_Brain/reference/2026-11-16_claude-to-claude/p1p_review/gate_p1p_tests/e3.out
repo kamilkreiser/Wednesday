@@ -1,0 +1,85 @@
+== empty stdin
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== non-UTF-8 stdin
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== JSON with invalid UTF-8 inside a string
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== stdin = []
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== stdin = null
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== stdin = "x"
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== stdin = {}
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: event not handled"}} err=
+== nesting 200
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== nesting 120
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: the gate could not read this call; not run"}} err=
+== PreToolUse renamed PostToolUse
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: event not handled"}} err=
+== UserPromptSubmit
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: event not handled"}} err=
+== lowercase pretooluse
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: event not handled"}} err=
+== missing hook_event_name
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: event not handled"}} err=
+== PreToolUse missing session_id
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: the gate could not read this call; not run"}} err=
+== dup key ConfigChange then PreToolUse
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coagent asks: Read (Read, T2); why: outside the workspace; targets: Read: /private/etc/hosts"}} err=
+== dup key PreToolUse then ConfigChange
+rc=0 out={"decision":"block","reason":"coagent: settings changes are blocked while the CoAgent gate is on"} err=
+== PreToolUse 1.1 MiB
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: this call is too large for the gate to check; not run"}} err=
+== PreToolUse 200 KiB
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: this call is too large for the gate to check; not run"}} err=
+== ConfigChange 200 KiB
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: this call is too large for the gate to check; not run"}} err=
+== ConfigChange 1.1 MiB
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent: this call is too large for the gate to check; not run"}} err=
+== args: none
+rc=2
+== args: extra
+rc=2
+== data-dir socket path too long
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== socket is a regular file
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+== stub garbage (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=0s
+== stub noline (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=10s
+== stub close (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=0s
+== stub slow11 (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=10s
+== stub huge (PreToolUse)
+Exception in thread Thread-1 (serve):
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=2s
+== stub wrongdec (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=0s
+== stub allow_nohalt (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=0s
+== stub okfalse_unknown (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=0s
+== stub ok_string (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=0s
+== stub partial (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=0s
+== stub wrongid (PreToolUse)
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"r"}} err=
+elapsed=0s
+== stub reason_num (PreToolUse)
+rc=2 out= err=coagent gate: daemon unreachable or refused - call blocked
+elapsed=0s

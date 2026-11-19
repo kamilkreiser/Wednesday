@@ -1,0 +1,73 @@
+diff --git a/crates/coagent-daemon/tests/p1p_deny_blocks.rs b/crates/coagent-daemon/tests/p1p_deny_blocks.rs
+index e6acb42..47088c9 100644
+--- a/crates/coagent-daemon/tests/p1p_deny_blocks.rs
++++ b/crates/coagent-daemon/tests/p1p_deny_blocks.rs
+@@ -19,7 +19,7 @@ fn p1p_deny_blocks() {
+     for mode in ["default", "bypassPermissions"] {
+         let o = hook(
+             &d,
+-            &write_event(&s, &run.ws, &run.ws.join("private/x.txt"), mode),
++            &write_event(&s, &run.ws, &run.ws.join("secret/x.txt"), mode),
+         );
+         o.assert_decided();
+         assert_eq!(o.decision(), "deny", "excluded Write in {mode}: {o:?}");
+@@ -34,7 +34,7 @@ fn p1p_deny_blocks() {
+         // The output names nothing from the tool input but the policy's own texts.
+         assert!(!o.stdout.contains("\"content\""), "{o:?}");
+     }
+-    assert!(!run.ws.join("private/x.txt").exists());
++    assert!(!run.ws.join("secret/x.txt").exists());
+     // The workspace-rooted spelling `<ws>/private/**` (docs/DAEMON.md §8: a relative glob means
+     // `**/<glob>`, which under /private/tmp would cover the whole workspace).
+     let ws = run.ws.display().to_string();
+@@ -45,13 +45,13 @@ fn p1p_deny_blocks() {
+             "--workspace".into(),
+             ws,
+             "--exclude".into(),
+-            "<ws>/private/**".into(),
++            "<ws>/secret/**".into(),
+         ],
+     );
+     let dx = run.dir(x);
+     let o = hook(
+         &dx,
+-        &write_event(&s, &run.ws, &run.ws.join("private/x.txt"), "default"),
++        &write_event(&s, &run.ws, &run.ws.join("secret/x.txt"), "default"),
+     );
+     assert_eq!(o.decision(), "deny", "{o:?}");
+     assert_eq!(o.reason(), EXCLUDED);
+diff --git a/crates/coagent-daemon/tests/p1p_liveness.rs b/crates/coagent-daemon/tests/p1p_liveness.rs
+index 61bf7e8..ad307c4 100644
+--- a/crates/coagent-daemon/tests/p1p_liveness.rs
++++ b/crates/coagent-daemon/tests/p1p_liveness.rs
+@@ -111,7 +111,7 @@ fn p1p_liveness_d_ttl() {
+     cfg.stop = Some(stop_rx);
+     cfg.idle_exit = Duration::from_secs(300);
+     let mut gc = GateConfig::new(vec![run.ws.clone()], run.home.clone());
+-    gc.exclusions = vec!["private/**".into()];
++    gc.exclusions = vec!["<ws>/secret/**".into()];
+     gc.witness_ttl = Duration::from_secs(2);
+     cfg.gate = Some(gc);
+     let th = std::thread::spawn(move || {
+diff --git a/crates/coagent-daemon/tests/p1p_support/mod.rs b/crates/coagent-daemon/tests/p1p_support/mod.rs
+index 1fc42d9..a523cf5 100644
+--- a/crates/coagent-daemon/tests/p1p_support/mod.rs
++++ b/crates/coagent-daemon/tests/p1p_support/mod.rs
+@@ -125,7 +125,7 @@ impl Run {
+         let home = root.join("home");
+         let tmp = root.join("tmp");
+         let ws = root.join("w");
+-        for d in [&home, &tmp, &ws, &ws.join("private")] {
++        for d in [&home, &tmp, &ws, &ws.join("secret")] {
+             fs::create_dir(d).unwrap();
+         }
+         // Canonical spellings: the policy compares canonical paths.
+@@ -155,7 +155,7 @@ impl Run {
+             "--workspace".into(),
+             self.ws.display().to_string(),
+             "--exclude".into(),
+-            "private/**".into(),
++            "<ws>/secret/**".into(),
+         ]
+     }
+ 

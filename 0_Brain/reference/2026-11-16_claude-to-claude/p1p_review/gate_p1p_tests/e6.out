@@ -1,0 +1,30 @@
+extra field in args:
+{"error":{"code":"bad_args","message":"arguments missing or invalid"},"id":1,"ok":false,"v":1}
+event not an object:
+{"error":{"code":"bad_args","message":"arguments missing or invalid"},"id":2,"ok":false,"v":1}
+no args:
+{"error":{"code":"bad_args","message":"arguments missing or invalid"},"id":3,"ok":false,"v":1}
+unknown top-level field:
+{"error":{"code":"malformed","message":"not a request object"},"id":4,"ok":false,"v":1}
+v=2:
+{"error":{"code":"unsupported_version","message":"protocol version not supported"},"id":5,"ok":false,"v":1}
+request > 128 KiB:
+{"error":{"code":"too_large","message":"request line over the size limit"},"id":0,"ok":false,"v":1}
+
+ConfigChange (just under limit, 120 KiB pad):
+{"id":7,"ok":true,"result":{"decision":"block","halt":false,"reason":"coagent: settings changes are blocked while the CoAgent gate is on"},"v":1}
+
+daemon log lines mentioning the pad or tool input (expect 0):
+0
+gate.json unreadable variants -> refuse start:
+[{"v":2,"tainted":[]}] exit=1 coagentd: data directory refused: mode 0755, must be exactly 0700
+[{"v":1,"tainted":[],"extra":1}] exit=1 coagentd: data directory refused: mode 0755, must be exactly 0700
+[garbage] exit=1 coagentd: data directory refused: mode 0755, must be exactly 0700
+gate.json mode 000 (unreadable):
+exit=1 coagentd: data directory refused: mode 0755, must be exactly 0700
+--gate without --workspace:
+exit=2
+--gate with HOME unset:
+exit=2
+--exclude without --gate:
+exit=2

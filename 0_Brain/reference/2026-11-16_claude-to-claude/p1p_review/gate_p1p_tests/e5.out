@@ -1,0 +1,47 @@
+== render with space and ! in bin, data, out
+<qp1>/p/s p!c/plug
+rc=0
+[('PreToolUse', 'block', 30, '*'), ('ConfigChange', 'block', 30, None)]
+command: '<qp1>/p/s p!c/bin/coagent-hook' --data-dir '<qp1>/p/s p!c/d'
+== daemon DOWN: run the command through sh, zsh, bash
+/bin/sh rc=2 err=coagent gate: daemon unreachable or refused - call blocked
+/bin/zsh rc=2 err=coagent gate: daemon unreachable or refused - call blocked
+/bin/bash rc=2 err=coagent gate: daemon unreachable or refused - call blocked
+== daemon UP (gate): the same three
+/private/tmp/claude-501/qp1/p/lib.sh: line 8: $d.log: ambiguous redirect
+/private/tmp/claude-501/qp1/p/lib.sh: line 9: 1: ambiguous redirect
+startfail
+/bin/sh rc=2 out=coagent gate: daemon unreachable or refused - call blocked
+/bin/zsh rc=2 out=coagent gate: daemon unreachable or refused - call blocked
+/bin/bash rc=2 out=coagent gate: daemon unreachable or refused - call blocked
+== interactive-style zsh/bash with history expansion on
+bash -H rc=2 out=coagent gate: daemon unreachable or refused - call blocked
+cat: /private/tmp/claude-501/qp1/p/s: No such file or directory
+cat: p!c/d.pid: No such file or directory
+cat: /private/tmp/claude-501/qp1/p/s: No such file or directory
+cat: p!c/d.pid: No such file or directory
+== .mcp.json
+{
+  "mcpServers": {
+    "link": {
+      "command": "<qp1>/p/s p!c/bin/coagent-mcp",
+      "args": [
+        "--data-dir",
+        "<qp1>/p/s p!c/d"
+      ]
+    }
+  }
+}
+== refusals (scratch HOME only)
+refused: out-dir is under the Claude config directory (<qp1>/p/fakehome/.claude); load the plugin with --plugin-dir from a throwaway directory
+rc=3 exists=no
+refused: out-dir is under the Claude config directory (<qp1>/p/fakehome/.claude); load the plugin with --plugin-dir from a throwaway directory
+rc=3
+refused: out-dir is under the Claude config directory (<qp1-lowercased>/p/fakehome/.claude); load the plugin with --plugin-dir from a throwaway directory
+symlink-into rc=3
+refused: out-dir is under the Claude config directory (<qp1>/p/fakeccd); load the plugin with --plugin-dir from a throwaway directory
+rc=3
+refused: out-dir already exists (never overwritten): <qp1>/p/s p!c/plug
+existing rc=3
+refused: data-dir contains a single quote or a control character
+quote rc=3

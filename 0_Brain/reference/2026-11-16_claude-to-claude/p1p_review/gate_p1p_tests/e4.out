@@ -1,0 +1,49 @@
+connected h=True g=True
+== (b) inbox_read PreToolUse in dontAsk mode (decided deny?) then read
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coa
+err gate_missing [] 
+unread=1
+== (d1) wait witness, then inbox_read
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+err gate_missing [] 
+== (d2) consume stray wait witness with a wait (inbox non-empty -> immediate)
+True ['MK-1'] 1
+unread=0
+== (c) one witness, two concurrent reads
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+ok  ['MK-2'] 2
+err gate_missing [] 
+== (a) witness from session S-OTHER releases a read (known limit) and taints S-OTHER
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+ok  ['MK-3'] 3
+gate.json tainted: ['S-A', 'S-OTHER']
+== (f) wait witness; wait times out with empty inbox? (inbox has MK-4, so use timeout path first)
+== (e) restart drops a live witness
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+reconnected=False
+err gate_missing [] 
+== (g) witness older than 330 s TTL: NOT TESTED here (lane A test d uses an in-process 2 s TTL)
+== (h) taint write fails (gate.json replaced by a directory) -> nothing released
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+err state_not_saved [] 
+unread=1
+== (h2) after the failed taint write: is S-NEW tainted in memory? second witness + read
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+ok  ['MK-4'] 4
+gate.json tainted: ['S-A', 'S-OTHER']
+== (i) wait witness consumed by a wait that times out; then a message; a second wait without witness
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+{"id":9,"ok":true,"result":{"messages":[],"timed_out":true,"unread":0,"withheld_oversize":0},"v":1}
+not delivered
+{"error":{"code":"gate_missing","message":"no witnessed tool call: the gate did not see this read"},"id":10,"ok":false,"v":1}
+err gate_missing [] 
+== (j) two waits on one wait witness (empty inbox): second refused
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+ok  [] 0
+unread=0
+rc=0 out={"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"coag
+{"error":{"code":"gate_missing","message":"no witnessed tool call: the gate did not see this read"},"id":12,"ok":false,"v":1}
+
+not delivered
+{"id":11,"ok":true,"result":{"messages":[],"timed_out":true,"unread":0,"withheld_oversize":0},"v":1}
+

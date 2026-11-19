@@ -1,0 +1,27 @@
+[M1_ttl_removed] p1p_liveness_a_b_c_e ... ok;p1p_liveness_d_ttl ... FAILED;
+thread 'p1p_liveness_d_ttl' (5479122) panicked at crates/coagent-daemon/tests/p1p_liveness.rs:158:5:
+assertion `left == right` failed: (d) expired witness: {"id":7,"ok":true,"result":{"ack":1,"messages":[{"audience":null,"from_key_id":"6756edc0e5ac30bc6851f58ce9436c0f7e52a8013acd6de438c4eb07b85bda02","from_nickname":"peer-6756edc0","id":"d9194b791dfd3a6e92999
+  left: Bool(true)
+error: test failed, to rerun pass `-p coagent-daemon --test p1p_liveness`
+error: 1 target failed:
+[M2_witness_on_deny] p1p_ask_in_workspace ... ok;p1p_configchange ... ok;p1p_too_large_is_denied_without_asking ... ok;p1p_deny_blocks ... ok;p1p_liveness_a_b_c_e ... ok;p1p_liveness_d_ttl ... ok;p1p_taint_persists ... ok;p1p_unknown_tool_strict ... ok;
+[M3_offtoken_none] p1p_liveness_a_b_c_e ... ok;p1p_liveness_d_ttl ... ok;test8_one_release_point_and_it_needs_the_witness ... ok;
+[M4_taint_failure_ignored] p1p_liveness_a_b_c_e ... ok;p1p_liveness_d_ttl ... ok;p1p_taint_persists ... ok;
+[M5_taint_wrong_session] p1p_taint_persists ... FAILED;
+thread 'p1p_taint_persists' (5489461) panicked at crates/coagent-daemon/tests/p1p_taint_persists.rs:53:5:
+the closed-link note must survive the restart: coagent asks: Write (Edit, T1); targets: Write: <qp1>/tools/tmp/pg/e62b36/w/hello.txt
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p coagent-daemon --test p1p_taint_persists`
+error: 1 target failed:
+[M13_hook_halt_dropped] p1p_hook_mapping ... FAILED;
+thread 'p1p_hook_mapping' (5490564) panicked at crates/coagent-daemon/tests/p1p_hook_mapping.rs:29:5:
+assertion `left == right` failed
+  left: Object {"hookSpecificOutput": Object {"hookEventName": String("PreToolUse"), "permissionDecision": String("deny"), "permissionDecisionReason": String("coagent: stopped by the owner")}}
+error: test failed, to rerun pass `-p coagent-daemon --test p1p_hook_mapping`
+error: 1 target failed:
+[M14_hook_cc_as_pretooluse] p1p_configchange ... FAILED;
+thread 'p1p_configchange' (5490943) panicked at crates/coagent-daemon/tests/p1p_configchange.rs:26:5:
+assertion `left == right` failed: HookOut { code: Some(0), stdout: "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"coagent: settings changes are blocked while the CoAgent gate is on\"}}\
+  left: Object {"hookSpecificOutput": Object {"hookEventName": String("PreToolUse"), "permissionDecision": String("deny"), "permissionDecisionReason": String("coagent: settings changes are blocked while the CoAgent gate is on")}}
+error: test failed, to rerun pass `-p coagent-daemon --test p1p_configchange`
+error: 1 target failed:

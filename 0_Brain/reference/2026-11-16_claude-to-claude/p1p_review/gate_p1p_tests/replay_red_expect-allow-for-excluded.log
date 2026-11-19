@@ -1,0 +1,25 @@
+run.sh: scratch root /private/tmp/claude-501/qp1/r/R-expect-allow-for-excluded (red control: expect-allow-for-excluded)
+PASS A01 daemons-up-gate-on: h gate=on, g gate=on
+PASS A02 paired-and-connected: join paired=true, h connected=true, g connected=true
+PASS A03 guest-request-sent: id=1ccf35efa3b37f19070bdac7c4ebfeed seq=1
+PASS A04 host-request-arrived: h unread=1
+PASS A05 host-read-without-witness-refused: ok=false code=gate_missing (expected gate_missing); unread before=1 after=1
+PASS A06 hook-inbox-read-asks: decision=ask reason="coagent asks: mcp__plugin_coagent_link__inbox_read (Service, T3); why: a tool the gate has not been taught: it asks every time, on a red card; targets: MCP tool: plugin_coagent_link:inbox_read, input: {}; requested by peer key 721eb79c6eb1d46a0075d78dcec24c8dc0ae2e171b7a50bef1399ab2f1dc76eb"
+PASS A07 host-read-with-witness-released: request id=1ccf35efa3b37f19070bdac7c4ebfeed, ack=1
+PASS A08 host-second-read-refused: ok=false code=gate_missing
+PASS A09 hook-write-workspace-asks: decision=ask reason="coagent asks: Write (Edit, T1); targets: Write: <qp1>/r/R-expect-allow-for-excluded/ws-h/hello.txt; requested by peer key 721eb79c6eb1d46a0075d78dcec24c8dc0ae2e171b7a50bef1399ab2f1dc76eb; peer text in this session from: 721eb79c6eb1d46a0075d78dcec24c8dc0ae2e171b7a50bef1399ab2f1dc76eb"
+FAIL A10 hook-write-excluded-denied: decision=deny reason="coagent: a target is on the owner's exclusion list" (expected allow)
+PASS A11 hook-write-excluded-bypass-denied: decision=deny reason="coagent: a target is on the owner's exclusion list"
+PASS A12 hook-write-git-hooks-denied: decision=deny reason="coagent: never allowed in a linked session (git hooks run code on the next git command); the owner can do this outside it"
+PASS A13 hook-unknown-mcp-tool-asks: decision=ask reason="coagent asks: mcp__other__do (Service, T3); why: a tool the gate has not been taught: it asks every time, on a red card; targets: MCP tool: other:do, input: {\"x\":1}; requested by peer key 721eb79c6eb1d46a0075d78dcec24c8dc0ae2e171b7a50bef1399ab2f1dc76eb; peer text in this session from: 721eb79c6eb1d46a0075d78dcec24c8dc0ae2e171b7a50bef1399ab2f1dc76eb"
+PASS A14 hook-no-such-tool-asks: decision=ask reason="coagent asks: NoSuchTool (Other, T3); why: a tool the gate has not been taught: it asks every time, on a red card; targets: input: {}; requested by peer key 721eb79c6eb1d46a0075d78dcec24c8dc0ae2e171b7a50bef1399ab2f1dc76eb; peer text in this session from: 721eb79c6eb1d46a0075d78dcec24c8dc0ae2e171b7a50bef1399ab2f1dc76eb"
+FAIL A15 hook-bash-asks: decision=deny reason="coagent: a target is on the owner's exclusion list"
+PASS A16 hook-configchange-blocked: decision=block reason="coagent: settings changes are blocked while the CoAgent gate is on"
+PASS A17 host-reply-sent: id=4160032624922a36860bb79eb85173ea re=1ccf35efa3b37f19070bdac7c4ebfeed
+PASS A18 guest-read-without-witness-refused: g unread=1; ok=false code=gate_missing
+PASS A19 guest-read-with-witness-released: decision=ask reason="coagent asks: mcp__plugin_coagent_link__inbox_read (Service, T3); why: a tool the gate has not been taught: it asks every time, on a red card; targets: MCP tool: plugin_coagent_link:inbox_read, input: {}; requested by peer key dd64074e07c054e55d18d9bb1ab3fcd86876fc226f6cf627713d9bd7d62e2cea"; released reply id=4160032624922a36860bb79eb85173ea re=1ccf35efa3b37f19070bdac7c4ebfeed
+PASS A20 relay-log-has-no-marker: marker hits in h.log+g.log=0 (expected 0); relay| lines captured=16
+PASS A21 positive-control-marker-in-released: request marker in released-h.json=1, reply marker in released-g.json=1
+PASS A22 daemon-down-hook-blocks: rc=2 stdout="" stderr="coagent gate: daemon unreachable or refused - call blocked" (expected rc 2)
+PASS A23 settings-checksums-unchanged: 2 file(s) checked
+replay: 21 passed, 2 failed; scratch root left in place: /private/tmp/claude-501/qp1/r/R-expect-allow-for-excluded
