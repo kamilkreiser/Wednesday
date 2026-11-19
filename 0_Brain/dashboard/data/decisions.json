@@ -79097,5 +79097,254 @@
    "CARD secuura-ks1081-template-flips-secrets-production-path-1106",
    "CARD secuura-ks1107-existing-joiners-query-production-1119"
   ]
+ },
+ {
+  "id": "datasec-oxpd-start-phase0-1120",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: the review is done and applied. Start phase 0 now with the work that needs no printer and no tenant?",
+  "bluf": "The architecture and the plan were reviewed on Fable against the source code, HP's documents and your 25 answers: 92 corrections, all dealt with (69 applied, 8 turned into phase-0 tests, 14 left as questions for you, 1 rejected), none overturning the approach. We are not ready to build product code yet: phase 0 comes first, a lab and thirteen short tests on real printers and a real tenant, and it needs a kit of 17 items (printers, a Windows PC, card readers, a test Microsoft tenant, HP developer access). Twelve work packages need none of that and can start on your word: they need a new project folder, a private repository under the Datasec GitHub organisation and a build pipeline, which is a new ask and yours to give. The readiness statement (6 pages) and both corrected documents are in your file drawer. One thing before you give anyone a date: the newer printers (OXPd 2) cannot reach a customer until HP delivers four undated things; the older printers (OXPd 1.x) do not depend on HP. (Override note: the queue matched earlier cards on shared words; this is a new question from today's review.)",
+  "default_action": "Nothing is built, no repository is created and nothing is sent to anyone until you tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Start the no-hardware work now",
+    "detail": "I set up the project folder and a private repository under the Datasec GitHub organisation, and Fable agents start the twelve work packages that need no printer, tenant or answer. Nothing goes to HP or any person, no Azure, no spend."
+   },
+   {
+    "key": "b",
+    "label": "Wait until the phase-0 kit is in hand",
+    "detail": "Nothing is built. I draft the kit list and the questions for HP for you to send, and start when you say the kit is ready."
+   },
+   {
+    "key": "c",
+    "label": "Not yet",
+    "detail": "Nothing starts. The documents stay as they are until you have read them."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T09:23:22.083956+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:05",
+   "2026-08-21 09:56",
+   "2026-09-10 18:01",
+   "CARD hpsmpoc-hosted-dsteps-start-today",
+   "CARD hpsmpoc-hosted-connect-timeout-start-limit-1007",
+   "CARD hpsmpoc-uat-start-page-words-1021",
+   "CARD datasec-oxpd-q01-hp-confirm-m365-1118",
+   "CARD datasec-oxpd-q02-phone-signin-step-1118",
+   "CARD datasec-oxpd-q03-card-interop-1118",
+   "CARD datasec-oxpd-q04-azure-backend-frozen-1118",
+   "CARD datasec-oxpd-q05-server-location-1118",
+   "CARD datasec-oxpd-q06-reuse-entra-registration-1118",
+   "CARD datasec-oxpd-q07-store-device-admin-pw-1118",
+   "CARD datasec-oxpd-q08-card-reader-models-1118",
+   "CARD datasec-oxpd-q09-printer-generations-1118",
+   "CARD datasec-oxpd-q10-site-size-1118",
+   "CARD datasec-oxpd-q11-licensing-model-1118",
+   "CARD datasec-oxpd-q12-other-vendor-coexist-1118",
+   "CARD datasec-oxpd-q13-legacy-keycloak-1118",
+   "CARD datasec-oxpd-q14-server-packaging-1118",
+   "CARD datasec-oxpd-q15-release-one-scope-1118",
+   "CARD datasec-oxpd-q16-scan-print-behaviour-1118",
+   "CARD datasec-oxpd-q17-universal-print-model-1118",
+   "CARD datasec-oxpd-q18-pull-sharing-ipps-1118",
+   "CARD datasec-oxpd-q19-workpath-deploy-today-1118",
+   "CARD datasec-oxpd-q20-hp-code-rights-1118",
+   "CARD datasec-oxpd-q21-job-audit-supplies-1118",
+   "CARD datasec-oxpd-q22-tls-certificate-1118",
+   "CARD datasec-oxpd-q23-admin-view-location-1118",
+   "CARD datasec-oxpd-q24-no-mfa-token-storage-1118",
+   "CARD datasec-oxpd-q25-test-devices-1118"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-card-key-live-1120",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: is the card key in the library the one fielded printers and phone apps use today?",
+  "bluf": "You said the keys in the library are old and rotated. The review found one that may not be: the key that protects stored card numbers is compiled into the 4.4.1 source the shipped apps are built from, and the same value is also the key for the phone-app QR code (two source files; I compared them by fingerprint without displaying the value, and they are identical). It cannot be rotated without re-enrolling cards and releasing the phone app. The new server needs this key to read existing cards and draw the QR, so phase 0 and phase 1 depend on the answer. Location only: HPAuthenticationManager-main, util/CardValidator.kt line 10 and util/Encryptor.kt line 12. This is the measured difference from your earlier words 'keys will be old and rotated so don't worry': this one is in the current source and two features depend on it. (Override note: the queue matched earlier cards on shared words; this is a new question from today's review.)",
+  "default_action": "Treated as live; never copied or printed; nothing is built on it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, it is the live key",
+    "detail": "It is treated as live: recorded as an accepted weakness carried over from Workpath, never copied or printed, and it reaches the lab only through a secure channel you choose."
+   },
+   {
+    "key": "b",
+    "label": "No, production uses a different key",
+    "detail": "Tell me in a note how production builds get theirs; the design then takes the key from that route."
+   },
+   {
+    "key": "c",
+    "label": "I do not know, I will ask",
+    "detail": "The design keeps treating it as live until you come back."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-11-20T09:23:25.619865+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD attio-rate-card",
+   "CARD nexusai-scim-deploy-live-ab",
+   "CARD secrev-live-pass-blocked-on-tenant",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD nexusai-live-listing-lockout-warn-now",
+   "CARD hpsm-live-release-verification-unprovable",
+   "CARD nexusai-rd535-live-listing-restore-reopen",
+   "CARD nexusai-rd549-live-211-exfiltration",
+   "CARD where-should-project-decision-records-live",
+   "CARD nexusai-degraded-flip-and-live-deployments",
+   "CARD hpsmpoc-ai-live-on-stage",
+   "CARD composer-l05-setup-card-too-1014",
+   "CARD hpsmpoc-feedback-button-live-proof-1021",
+   "CARD hpsmpoc-231-circle-logon-go-live-1027",
+   "CARD hpsmpoc-deploy-live-which-site-1104",
+   "CARD datasec-oxpd-q01-hp-confirm-m365-1118",
+   "CARD datasec-oxpd-q02-phone-signin-step-1118",
+   "CARD datasec-oxpd-q03-card-interop-1118",
+   "CARD datasec-oxpd-q04-azure-backend-frozen-1118",
+   "CARD datasec-oxpd-q05-server-location-1118",
+   "CARD datasec-oxpd-q06-reuse-entra-registration-1118",
+   "CARD datasec-oxpd-q07-store-device-admin-pw-1118",
+   "CARD datasec-oxpd-q08-card-reader-models-1118",
+   "CARD datasec-oxpd-q09-printer-generations-1118",
+   "CARD datasec-oxpd-q10-site-size-1118",
+   "CARD datasec-oxpd-q11-licensing-model-1118",
+   "CARD datasec-oxpd-q12-other-vendor-coexist-1118",
+   "CARD datasec-oxpd-q13-legacy-keycloak-1118",
+   "CARD datasec-oxpd-q14-server-packaging-1118",
+   "CARD datasec-oxpd-q15-release-one-scope-1118",
+   "CARD datasec-oxpd-q16-scan-print-behaviour-1118",
+   "CARD datasec-oxpd-q17-universal-print-model-1118",
+   "CARD datasec-oxpd-q18-pull-sharing-ipps-1118",
+   "CARD datasec-oxpd-q19-workpath-deploy-today-1118",
+   "CARD datasec-oxpd-q20-hp-code-rights-1118",
+   "CARD datasec-oxpd-q21-job-audit-supplies-1118",
+   "CARD datasec-oxpd-q22-tls-certificate-1118",
+   "CARD datasec-oxpd-q23-admin-view-location-1118",
+   "CARD datasec-oxpd-q24-no-mfa-token-storage-1118",
+   "CARD datasec-oxpd-q25-test-devices-1118"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-sharepoint-source-1120",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: where is the source code that builds the SharePoint app?",
+  "bluf": "I need you to ask the Workpath team one thing: where the SharePoint app's source is. The suite ships SharePoint as its own app, but nothing in the library builds it (the reviewer's finding; the OneDrive source is there, and its release pipeline builds the business app only, which I checked at the file). Your 'full match of everything' answer includes SharePoint, so without the source its match with Workpath can only be built from the manual and cannot be verified. The same team also holds the customer gateway's source (the Function App), which is in none of the library's repositories and is needed to answer a security question about QR sign-in. Your answer on the earlier card about the Azure side (you chose 'May change') did not say where the gateway source lives, so I am asking again here. (Override note: the queue matched earlier cards on shared words; this is a new question from today's review.)",
+  "default_action": "SharePoint is designed from the manual alone and marked unverified at source.",
+  "options": [
+   {
+    "key": "a",
+    "label": "I will get both sources",
+    "detail": "You ask the Workpath team for the SharePoint app source and the gateway source and add them to the library."
+   },
+   {
+    "key": "b",
+    "label": "SharePoint is built from the OneDrive code",
+    "detail": "Tell me in a note which revision or branch; the gateway source is still needed."
+   },
+   {
+    "key": "c",
+    "label": "Build SharePoint from the manual",
+    "detail": "No source will come; its match with Workpath stays unverified at source and is recorded as such."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T09:23:29.113130+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-paper-factor-source",
+   "CARD hpsm-phase1-missing-source-workbook",
+   "CARD composer-paul-110-questions-source",
+   "CARD hpsmpoc-revenue-source-1011",
+   "CARD mpscalc-e877-supply-cost-source-1017",
+   "CARD mpscalc-source-version-id-twins-1023",
+   "CARD mpscalc-source-swap-invalid-words-1023",
+   "CARD mps-markups-source-field-1025",
+   "CARD datasec-oxpd-q01-hp-confirm-m365-1118",
+   "CARD datasec-oxpd-q02-phone-signin-step-1118",
+   "CARD datasec-oxpd-q03-card-interop-1118",
+   "CARD datasec-oxpd-q04-azure-backend-frozen-1118",
+   "CARD datasec-oxpd-q05-server-location-1118",
+   "CARD datasec-oxpd-q06-reuse-entra-registration-1118",
+   "CARD datasec-oxpd-q07-store-device-admin-pw-1118",
+   "CARD datasec-oxpd-q08-card-reader-models-1118",
+   "CARD datasec-oxpd-q09-printer-generations-1118",
+   "CARD datasec-oxpd-q10-site-size-1118",
+   "CARD datasec-oxpd-q11-licensing-model-1118",
+   "CARD datasec-oxpd-q12-other-vendor-coexist-1118",
+   "CARD datasec-oxpd-q13-legacy-keycloak-1118",
+   "CARD datasec-oxpd-q14-server-packaging-1118",
+   "CARD datasec-oxpd-q15-release-one-scope-1118",
+   "CARD datasec-oxpd-q16-scan-print-behaviour-1118",
+   "CARD datasec-oxpd-q17-universal-print-model-1118",
+   "CARD datasec-oxpd-q18-pull-sharing-ipps-1118",
+   "CARD datasec-oxpd-q19-workpath-deploy-today-1118",
+   "CARD datasec-oxpd-q20-hp-code-rights-1118",
+   "CARD datasec-oxpd-q21-job-audit-supplies-1118",
+   "CARD datasec-oxpd-q22-tls-certificate-1118",
+   "CARD datasec-oxpd-q23-admin-view-location-1118",
+   "CARD datasec-oxpd-q24-no-mfa-token-storage-1118",
+   "CARD datasec-oxpd-q25-test-devices-1118"
+  ]
+ },
+ {
+  "id": "datasec-oxpd-thirteen-defaults-1120",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec OXPd: thirteen further questions from the review, each with a default. Accept the defaults for now?",
+  "bluf": "No action is needed to keep moving: none of these thirteen blocks phase 0. They are questions 1 to 6 and 9 to 15 in the readiness statement in your file drawer, each with options, my recommendation and the default the design uses meanwhile. The ones worth your eye: three of your answers had been applied more widely than the option you tapped (a stored admin password on newer printers, one central server for several sites, all six card readers) and the documents now follow the narrower option text; whether 'full match' means what Workpath ships today and no more; OneDrive personal (default out: the release pipeline builds the business app only); HP Advance and LRS sign-in (default out); and whether the server may use Datasec's own Universal Print registration (assumed yes, nothing built on it). (Override note: the queue matched earlier cards on shared words; this is a new question from today's review.)",
+  "default_action": "The design proceeds on the defaults; each question returns before the phase it blocks.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept the defaults for now",
+    "detail": "The design proceeds on each default; I bring each question back before the phase it blocks."
+   },
+   {
+    "key": "b",
+    "label": "I will answer them in the document",
+    "detail": "You mark the readiness statement and send it back or add notes here."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T09:23:32.452209+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 20:15",
+   "CARD datasec-oxpd-q01-hp-confirm-m365-1118",
+   "CARD datasec-oxpd-q02-phone-signin-step-1118",
+   "CARD datasec-oxpd-q03-card-interop-1118",
+   "CARD datasec-oxpd-q04-azure-backend-frozen-1118",
+   "CARD datasec-oxpd-q05-server-location-1118",
+   "CARD datasec-oxpd-q06-reuse-entra-registration-1118",
+   "CARD datasec-oxpd-q07-store-device-admin-pw-1118",
+   "CARD datasec-oxpd-q08-card-reader-models-1118",
+   "CARD datasec-oxpd-q09-printer-generations-1118",
+   "CARD datasec-oxpd-q10-site-size-1118",
+   "CARD datasec-oxpd-q11-licensing-model-1118",
+   "CARD datasec-oxpd-q12-other-vendor-coexist-1118",
+   "CARD datasec-oxpd-q13-legacy-keycloak-1118",
+   "CARD datasec-oxpd-q14-server-packaging-1118",
+   "CARD datasec-oxpd-q15-release-one-scope-1118",
+   "CARD datasec-oxpd-q16-scan-print-behaviour-1118",
+   "CARD datasec-oxpd-q17-universal-print-model-1118",
+   "CARD datasec-oxpd-q18-pull-sharing-ipps-1118",
+   "CARD datasec-oxpd-q19-workpath-deploy-today-1118",
+   "CARD datasec-oxpd-q20-hp-code-rights-1118",
+   "CARD datasec-oxpd-q21-job-audit-supplies-1118",
+   "CARD datasec-oxpd-q22-tls-certificate-1118",
+   "CARD datasec-oxpd-q23-admin-view-location-1118",
+   "CARD datasec-oxpd-q24-no-mfa-token-storage-1118",
+   "CARD datasec-oxpd-q25-test-devices-1118"
+  ]
  }
 ]
