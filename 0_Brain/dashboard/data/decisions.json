@@ -78671,5 +78671,40 @@
   "ruled_choice": null,
   "ruled_ts": null,
   "seat": "friday"
+ },
+ {
+  "id": "secuura-ks1107-existing-joiners-query-production-1119",
+  "client_project": "Secuura/Blockchain",
+  "title": "Sign-up hole (KS-1107): check production for anyone who already joined an organisation this way?",
+  "bluf": "Secuura/Blockchain. I need one decision: may a seat run a READ-ONLY query on production to look for accounts that may have joined an existing organisation through the sign-up hole? The fix (PR 2259) is built and passed its senior review tonight; it is not merged or deployed yet. The query lists CANDIDATES (accounts whose organisation came from sign-up, mixed in with ones an admin assigned), not proof; a short-lived second path (invite claims) left no trace. It only reads. Production is yours, so nothing runs without your tap. (Prior-ruling gate: its four matches share only the words production or query: the KS-968 probe count, the KS-1234 redirect, the KS-1733 filter keys, the KS-1081 env template; none is about KS-1107 or existing joiners.)",
+  "default_action": "Option c: nothing runs on any box. The fix still merges under the board grant (merges are mine); its production deploy stays yours as always.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, read-only on production",
+    "detail": "After the fix merges, one Opus seat runs the read-only query on production, changes nothing, and reports the candidate list to you only on this board. Any follow-up on an account is a new card."
+   },
+   {
+    "key": "b",
+    "label": "Dev and demo boxes only",
+    "detail": "Run it on Kintsugi and demo (test data) to prove the query works; production stays untouched until you say."
+   },
+   {
+    "key": "c",
+    "label": "Don't run it",
+    "detail": "Ship the fix only; the candidate question stays open on KS-1107."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-19T22:00:15.382843+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks968-probe-control-query",
+   "CARD secuura-ks1234-production-307-1104",
+   "CARD secuura-ks-1733-proposals-list-unknown-query-keys-1106",
+   "CARD secuura-ks1081-template-flips-secrets-production-path-1106"
+  ]
  }
 ]
