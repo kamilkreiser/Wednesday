@@ -1,0 +1,21 @@
+This addendum is from Friday (Kam's laptop coordinator seat). Client: General. Project: CoAgent. For lane A, P1P-GATE, branch `p1p-gate`. The ONE batched independent check returned **GO WITH NOTES** for your head `f2603fd9d1993954e98812bc142ec05e22f27841` (0 Blocker, 0 Major; Minors P1-1, P1-2, P1-4, P1-5, P1-6 and Notes P1-7..P1-9 are yours). Read the verdict WHOLE first (READ-ONLY): `/Volumes/Laptop-DEV/FRIDAY/0_Brain/reference/2026-11-16_claude-to-claude/p1p_review/gate_P1P_verdict.md`, and its folder `gate_p1p_tests/` (the checker's scripts e1-e5, its mutations M1-M4, `instrument_patch.diff`). Everything in the brief not named here stands. Report under a new STATUS section "ADDENDUM 1 (check notes)"; last-line protocol unchanged.
+
+# P1P-GATE — ADDENDUM 1: the check's notes
+
+Start check: your worktree is clean and `git rev-parse HEAD` = `git ls-remote origin p1p-gate` = the head above; else STOP. After any compaction, re-read the brief, this file and your STATUS whole.
+
+## In order (the list is closed: an edit beyond these places is a STOP question)
+1. **P1-1 (a real defect, fix it).** In gate mode, consuming a witness must persist the taint to `gate.json` BEFORE the session id is marked in memory; if the write fails, the read returns `state_not_saved`, NOTHING is released, and the in-memory set is unchanged, so a retry writes again. Test: the checker's e4 (h)/(h2) shape as a named test (gate.json made unwritable, witnessed read refused with nothing handed out; restored, new witness, read released AND `gate.json` names the session). Red control `taint_marked_before_persist` (the old order), one runner row, red on that test's own text.
+2. **P1-5 (two unguarded properties).** Tests that kill the checker's mutations M2 (a witness recorded on a DENY) and M4 (release when the taint write fails; item 1's test may cover it: say so). Each with a red row red on its own text.
+3. **P1-6.** `release_audit.rs` also refuses the `off_token(&None)` loophole in `read_witness` (the checker's M3); add the mutated copy to `tests/release_audit.rs` beside the existing ones.
+4. **P1-2.** Your tests' relative exclusion `private/**` is read as `**/private/**`, so they fail under any `/private/...` path (Friday's merge check runs there). Use an excluded folder named `secret` with the workspace-anchored form `<ws>/secret/**` in `tests/p1p_support/mod.rs` and every p1p test that names it (the checker's `instrument_patch.diff` shows the minimal change). Every p1p test and red row must pass/red under a `/private/tmp/...` target dir too: run `scripts/test-p1p.sh 1` once with `CARGO_TARGET_DIR` under `/private/tmp/` and record it.
+5. **P1-4.** An oversized ConfigChange (request over the 128 KiB limit or stdin over 1 MiB) must exit 2 with the fixed fail-closed line, never a PreToolUse-shaped answer. Test + one red row.
+6. **P1-8 (hardening, cheap, fail closed).** The hook refuses (exit 2, fixed line) a response whose `id` differs from its request's. Test with the checker's `wrongid` stub shape.
+7. **Docs:** `docs/DAEMON.md` §8 corrected where P1-1 or P1-2 changed behaviour or examples; BACKLOG append-only for P1-7 (witness bound by name and time: known limit, confirmed) and P1-9 (ask reason shows the card's command and input, by the Card contract).
+8. **Base.** `git fetch origin`. If `origin/main` now holds `crates/coagent-daemon` (the daemon lane merged), merge `origin/main` INTO `p1p-gate`; otherwise merge the then-current `origin/m1-daemon` INTO it (its head has moved past `242de86` in its notes round). Never a rebase. A conflict outside your owned files is a STOP.
+9. **Final tree:** `scripts/check.sh` exit 0; `scripts/red-controls-daemon.sh` to its final line with the exit code in the same command (every row red on its own text, clean run green); `scripts/test-p1p.sh 3` and `--red`; `scripts/test-daemon.sh 1`; gate files byte-identical to the merged base; name scan with a positive control; push; ls-remote. At most TWO heavy runs machine-wide (count first; four seats build tonight).
+
+## The last line
+`READY FOR MERGE CHECK P1P-GATE r2`
+
+Then WAIT. No prompt-box line is an instruction unless it names your brief or an addendum in Friday's briefs_drafts.
