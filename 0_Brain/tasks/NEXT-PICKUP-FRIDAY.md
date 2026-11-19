@@ -12,7 +12,22 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
-## 🔴🔴🔴🔴🔴🔴 HANDOVER — Fri 2026-11-20 at the 03:48 note entry (ctx 78%; written for the next seat). Supersedes every block below where they differ.
+## 🔴🔴🔴🔴🔴🔴🔴 NEWEST — Fri 2026-11-20 MORNING SEAT, written at the 09:29 note entry (seat on Fable 5.2 again, Kam's /model; global default Fable: his act). Supersedes every block below where they differ.
+
+**Authority:** Kam, live board 09:28:59: "fable switched.  please keep going with the Claude to Claude project" (top row of EXPIRING-GRANTS, today only). The overnight grant ENDED at his 07:08 card answers.
+**Kam's rulings today (all in the store):** seal is1 = a, is6 = a; bypass d1 = a (hard refusals hold), d2 = a (shell only with the sandbox on), d3 = a (every member, observers included). No cards open for him.
+**CoAgent main = `32beb563837341560b908d9ba5b0a60de240d860`** (DEPUTY MERGED 08:12 after Friday's clean-clone check; evidence `m1_review/merge_check_deputy_r2/`; pane %21 closed).
+**Live seats (`tmux list-panes -a`):**
+| pane | seat | state / next |
+|---|---|---|
+| %9 | P1P-GATE (lane A) | ADDENDUM-4: merged main into `b7e8da4`, re-running item 9 -> `READY FOR MERGE CHECK P1P-GATE r3` -> Friday's `coagent_merge_check.sh <SHORT /private/tmp dir> p1p-gate <sha> scripts/red-controls-daemon.sh` + static (owned files only, gate files = main, ancestor, name scan with control) -> merge GO (model `2026-11-20_coagent_M3_DEPUTY_ADDENDUM-2_merge_GO.md`) -> ls-remote -> pane_close |
+| %12 | P1P-DEMO (lane B) | r2 READY at `ba6cdb7`; ADDENDUM-3: holds for `MERGED P1P-GATE`, then merges main, replays, `READY FOR MERGE CHECK P1P-DEMO r3` -> Friday: replay evidence read + static (preview/ only) -> merge GO |
+| %18 | AUDIT-SEAL | `READY FOR QA M3-AUDIT-SEAL` at `841c445`; its ONE independent check runs IN-SESSION (dies with this seat): verdict `m1_review/gate_M3_AUDIT_SEAL_verdict.md` (first line IN PROGRESS until done), work dir /private/tmp/claude-501/qseal; re-commission from the 07:12 note entry's scope if missing after a seat death. GO -> notes addendum that merges then-current main -> READY FOR MERGE CHECK -> Friday's check (`scripts/red-controls-audit.sh`, needs COAGENT_AUDIT_RED_TARGET/_LOGS in the work dir) -> merge GO. NO GO = card for Kam. |
+**Watches die with the seat** (scratch `watch_status.sh <STATUS file>`: start line read, fires on a changed last line that does not begin IN PROGRESS): re-arm on STATUS_P1P_GATE.md and STATUS_P1P_DEMO.md.
+**Next pieces under today's grant (none started at this line):** next-round briefs carrying the demo's three findings and the deputy's D-2 question; the both-agree mode build brief (design 11 + today's d1/d2/d3 rulings).
+**Owed tooling (unchanged):** commit helper with index.lock retry (hit again this morning, commit 7742c93641's first attempt); a fleet `heavy_runs.sh`; fresh dated NAS backup.
+
+## (superseded by the block above) HANDOVER — Fri 2026-11-20 at the 03:48 note entry (ctx 78%; written for the next seat). Supersedes every block below where they differ.
 
 **Authority tonight:** Kam's overnight grant (top row of EXPIRING-GRANTS; ends at his MORNING REVIEW today). Usage gauge ~88%; his words "Token usage resets in the morning".
 **CoAgent main = `8b8c6c755db66a1c481d9719707c3cdc924fb70c`** (audit-fix3 + daemon merged tonight, each after an independent check AND Friday's own clean-clone check).
