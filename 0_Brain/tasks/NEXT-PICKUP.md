@@ -11,7 +11,7 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 ## 🔴 UPDATE 16:5x 19 Nov, the afternoon seat (booted 15:3x after Kam's software update) - READ FIRST
 - **Kam ruled secuura-board-grant-reask-1119 = a (16:49:14): grant RENEWED to Fri 27 Nov, run the queue now.** EXPIRING-GRANTS row updated.
 - **develop 4436ced55274** (Peter's PRs 2253-2256, harness bumps, 11-17 UTC). PR 2252 head 62124803a881 unchanged; gate 378 GWN stands.
-- **K 52nd DRAFTER running** (Sonnet subagent of THIS seat; dies with a rotation -> re-commission from 0_Brain/reference/2026-11-19_drafter-seatK52/commission.md if fleet/briefs_staged/2026-11-19_seatK52_merge.md is ABSENT). Row 1 = PR 2252, then K 51st's order.
+- **FLOOR 18:1x: K 52nd LAUNCHED** (%7, Sonnet; brief fleet/briefs_staged/2026-11-19_seatK52_merge.md STAMPED K52-W1..W10; NEXT: plan QUESTION -> ANSWER -> SET-UP -> READY 2252 -> GO naming head 62124803a881 + pin + G378 F1/F2/F5 notes, shape 2026-11-17_K51_go_2187.md). **S 91st LAUNCHED** (%4, Sonnet, Linear only; brief fleet/briefs_staged/2026-11-19_seatS91_board.md; NEXT: plan QUESTION with the In Review table -> ANSWER licensing closes -> ROW 2 In Progress census). Kam 18:00:32: 'work through as many secuura tickets as you can' (new login, all credits).
 - **NEXT:** stamp K 52nd -> launch (SEAT_MODEL_ENV Sonnet, row C5) -> GO 2252 naming head -> merge -> D seat Kintsugi gateway deploy -> Redis rotation (HEX) -> B 204th re-measure + launch -> demo round as its own CARD to Kam.
 
 ## 🔴 WRAP 15:2x 19 Nov, the morning seat (Kam: "please wrap up and I will do a software update") - READ FIRST
