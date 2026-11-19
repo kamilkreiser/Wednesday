@@ -1,0 +1,42 @@
+=========== [INBOUND] 2026-11-19T10:43 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1107 (Seat W 39th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1107 (Seat W 39th)
+Seat W 39th
+
+READY FOR GATE KS-1107 (Seat W 39th). TIER 1: auth, the public register route.
+
+PR 2259: https://github.com/Secuura/Distributed_Secuura/pull/2259 · head a0e58b942c22e5ca7c9dff216fe17c243f2e3548 · branch feature/ks-1107-post-apiauthregister-accepts-a-client · one commit on develop 86bfeda9e3e10256e8811778621ce3390e1aa22b (develop unmoved: ls-remote 10:42:46Z). Open, not draft, base develop, 6 files +247 -4, title "Refs KS-1107: register refuses a caller-chosen organizationId".
+
+THE CHANGE (services/auth/src/routes/auth.ts; each changed line carries a KS-1107 why-comment naming the old behaviour): a body carrying an organizationId KEY is refused with 422 VALIDATION_ERROR, message "organizationId is not a permitted field on /register — an account is created with no organisation and assigned to one by an admin via PATCH /api/users/admin/{id}", on presence (null too), right after the KS-82 role check (still first) and before any read or write. organizationId is removed from registerSchema and from the user object (the old write at :254), so no path carries a body value onto the row or the token, the INVITED-stub claim included. The register 422 description in auth.openapi.ts names the field; secuura-api.yaml regenerated (that one description, 17230). Admin PATCH (KS-467) untouched; other spellings still dropped by .strip().
+
+RED FIRST (new file services/auth/src/__tests__/ks1107-register-refuses-a-caller-chosen-organisation.test.ts, 9 cells, R1 to R4 and C1 to C4 as ruled; real router, error handler and RS256 signer; repo, hashing, breach lookup, session, mail, events mocked). On develop's auth.ts: 4 of 9 failed, every one by assertion: R1 and R3 "expected '3f1c2a9e-...1107' to be undefined" (the access token carried the named organisation, fresh and stub-claim paths); R2 "expected 201 to be 422"; R4 "expected 400 to be 422" (a schema error). The 5 controls green. With the fix: 9 of 9.
+One harness fault on the way, mine: my first version used the real signer without awaiting initJwtKeys(), so every cell answered 500 on develop (the R cells red for the wrong reason, the controls red). Diagnosed with two scratch test copies (logger to a file; both moved to REC/_quarantine_2026-11-19, never committed), fixed by awaiting initJwtKeys() in beforeAll; the red-first figures above are from the fixed harness.
+
+MUTANTS (counted change sets on the fixed auth.ts, restored by content, sha256 equal after every run): M1 no refusal: R1 R2 R3 R4 fire; M2 refuse only a truthy value: R4; M3 refuse after createUser: R1 and R3 by the no-write assertion ("expected vi.fn() to not be called"); M4 the organisationId spelling instead: R1 to R4 and C3; M5 restore schema field and write: R1 to R4; M6 stub claim writes the body value: R3 by the token assertion, R1 to R4. 6 of 6 killed.
+
+SUITES (vitest, run alone, load1 3 to 6): auth whole on develop 1,929 of 1,929 in 159 files (10:14Z); on the branch 1,938 of 1,938 in 160 files (final run after the OpenAPI edit); failure-name sets equal, both empty. KS-467 files ks467-user-admin-isolation 38 of 38 and usersAdminStatus 9 of 9 on both arms; auth.integration.test.ts 56 of 56 on both (the KS-82 role cell inside).
+
+STATIC, each with a planted control that fired and a byte-equal restore: tsc --noEmit -p services/auth rc 0 (planted TS2322 fired); eslint --max-warnings 0 on auth.ts, auth.openapi.ts and the test file rc 0 (planted unused variable fired); test-type ratchet check.cjs services/auth rc 0, 211 examined, 160 under __tests__, 41 errors all baselined, 0 new (planted error fired). OpenAPI: generate-openapi --check PASS before the edit; after it the YAML differs by that description only; check:openapi rc 0.
+
+DOCS: fragment pair KS-1107-register-refuses-caller-chosen-organisation in flow and cheat. docs-fragments.mjs check OK; a planted unclosed div turned it red (rc 1), restored by content. Two ADVISORY lines (flow 6249, cheat 6235) read identically on pristine develop 86bfeda9e3e1 (my own detached tree s-w39-devA).
+
+OVERLAP (once, as ruled): the spec file overlaps open PRs 2073, 2099 and 2131; git merge-tree --write-tree of a0e58b942c22 against each head is clean (rc 0, no conflicted file), with a positive control (a scratch commit editing the same line conflicts, rc 1). The waiver was yours (ANSWER 10:25:53Z), for this push and the spec file only. My launcher re-checked at 10:26:47Z that the five other paths had no open PR and the spec file exactly those three, then passed OVL_IGNORE_PRS="2073 2099 2131"; the driver's gate read "29 open PRs, none touches any of 6 paths". Whichever of those PRs merges first changes develop under the spec file: the merging seat re-measures it then.
+
+PUSH AND HOOK: one push through the queue, lock acquired 10:26:58Z after 0 polls, PUSH rc 0 after 880 s, VERIFIED 10:41:52Z (origin branch = a0e58b942c22), lock released, queue left. Hook: 13 of 16 legs ran, nothing failed; leg 16 auth 0 new. Its closing lines:
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+
+TICKET: ONE facts comment on KS-1107, id 7040bd39-2edc-4e06-87bd-6e8cbd6cfedd (10:42:39Z), read back exact; no closing word, no other key. KS-1107 moved Backlog to In Progress at 10:42:27Z by the GitHub bot (Linear history: actor none, botActor GitHub), on the PR's creation; I moved no state.
+
+PLATFORM S (once, as ruled): its client code is outside this repo and UNREAD, so whether it sends organizationId is UNKNOWN; the in-repo integration note and the published contract say it does not. The existing-users query is a DESIGN only, NOT run; it is in the PR body.
+
+NOT RUN: hook legs 3, 4, 8; the Schemathesis and Akto pre-merge sweeps, Playwright and k6 (no local stack; the two acknowledgment boxes are UNTICKED on purpose); the auth integration config (vitest.integration.config.ts); any booted service, gateway, live stack or environment. Node here is v26.8.1, not the LTS line: nothing was measured on Node 24.
+
+MY OWN SLIPS (none reached the PR): (1) one Bash call carried a no-op "( cd /; true )" in a subshell; the working directory did not move, but it is a cd and I count it; (2) the harness fault above.
+
+TREES (mine, never deleted): worktrees/s-w39-base (clone --shared of s-a20-base; PR refs 2073, 2099, 2131 fetched into it as refs/w39/*), worktrees/s-w39-ks1107 (the pushed branch; hooksPath .githooks; node_modules cloned from s-w36-ks930, 34 trees, locks byte-equal), worktrees/s-w39-devA (pristine develop for the docs control; carries one never-pushed scratch commit b734715b00a0, the merge-tree positive control). Short TMPDIR Blockchain/.w39t.
+
+COST (1M meter): plan mail 19.4 at 10:11Z; READY 38.0.
+
+NEXT ROW (not mine): the tier-1 Opus gate on PR 2259, then your GO naming the head SHA, then a K seat's merge. The seat wraps now; the wrap mail follows.
+
