@@ -78951,5 +78951,50 @@
    "CARD general-c2c-morning-plan-1117",
    "CARD wed-morning-plan-1118"
   ]
+ },
+ {
+  "id": "secuura-ks2280-db-role-guard-default-1120",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2280: when should the gateway REFUSE to start on a superuser or row-security-bypassing database login?",
+  "bluf": "No action needed now. KS-2280: today nothing checks which database role the gateway connected as, so a superuser or BYPASSRLS login silently switches off row-level security (every tenant boundary that rests on it). Seat W 45th is building a boot check now, as WARN-ONLY by default: it refuses only on a box that sets DB_ROLE_GUARD=refuse, so it stops nothing that runs today. Measured: local and CI run as secuura_app (safe); Kintsugi's gateway is safe (Seat D 75th, 19 Nov); demo's gateway role and NODE_ENV are NOT measured (the demo VM runs docker-compose.yml with its own APP_DB_USER); any docker-compose.production.yml stack runs as the database owner and WOULD be refused under b or c. The demo round you approved this morning can read demo's role, which would make b safe to switch on. Logs carry only the two yes/no flags, never the role name or URL (your card ks1346 = a). (Duplicate check overridden: the earlier cards it matched share only the word 'role'; none is about this guard.)",
+  "default_action": "If no answer: option a. The warn-only guard ships through the usual tier-1 gate; no box gets the flag; nothing that boots today stops.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep warn-only; refuse only where the flag is set",
+    "detail": "What is being built now. Nothing stops; each box's boot log shows whether its role is unsafe. Turning the flag on per box is a later word from you."
+   },
+   {
+    "key": "b",
+    "label": "Refuse in production-like environments once demo is measured",
+    "detail": "Default becomes: refuse when NODE_ENV is production, staging or demo; warn elsewhere. Switched only after the demo round measures demo's gateway role as safe. Would stop any compose-production stack on the owner role."
+   },
+   {
+    "key": "c",
+    "label": "Refuse everywhere",
+    "detail": "Any environment on a superuser or bypass role refuses to start, including a developer's local stack pointed at the owner. Strictest; can stop machines we have not measured."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T07:14:17.208425+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-21 20:06",
+   "2026-09-17 15:09",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-ks1369-gateway-proxy-crash-guard-shape",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013",
+   "CARD secuura-ks1175-private-jwk-guard-1029",
+   "CARD secuura-ks-1536-platform-admin-role-one-list-1106",
+   "CARD secuura-ks2063-add-session-end-on-role-change-1106",
+   "CARD secuura-ks1785-secret-guard-hook-platform-k-1109"
+  ]
  }
 ]
