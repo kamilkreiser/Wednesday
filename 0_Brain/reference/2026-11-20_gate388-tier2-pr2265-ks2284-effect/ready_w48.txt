@@ -1,0 +1,47 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261119T234709Z.txt)
+     1	[INBOUND] 2026-11-19T23:45 | Secuura/Blockchain-X | [Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-2284 (Seat W 48th)
+=========== [INBOUND] 2026-11-19T23:45 | Secuura/Blockchain-X | [Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-2284 (Seat W 48th)
+[Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-2284 (Seat W 48th)
+Seat W 48th
+
+READY FOR GATE KS-2284 (Seat W 48th). TIER 2 recommended (config and dependency; 0 importers of the changed copies, measured); your call at the gate. Build seat on Sonnet, pane %135. Nothing merged, deployed or closed; no box, container or database server touched; no message to anyone but you.
+
+BLUF: PR 2265 (https://github.com/Secuura/Distributed_Secuura/pull/2265) = head 350aa4c41f1292b5822435da0c009ed28f46ba47, ONE commit on develop 33ba1d96d5fb849745913778537bd390e0cdcc31 (develop re-read at 23:44:50Z: unchanged), FOUR paths, +12 -15: one `"effect": "^3.22.1"` line in the `overrides` of Blockchain/Dev/package.json and Blockchain/Dev/services/originate/package.json (each with a `// overrides KS-2284` comment key in the file's own convention) and the two re-resolved locks. Pre-push legs 6 and 7: develop arm exit 1 and 1 at 23:21:32Z, this branch exit 0 and 0 at 23:21:37Z, and both passed again inside the real hook. KS-2284 filed by me on your Q2 (High, board account, filed 23:17:48Z, now In Progress by Linear's automation); ONE facts comment d2025677 read back identical. Push 23:29:19Z to 23:43:27Z (848 s) exit 0, origin VERIFIED at the head.
+
+KEY-LEVEL LOCK DIFF (your binding condition; printed by a script that copies nothing back unless the set is exactly this one):
+ root lock, 2 keys: node_modules/effect 3.21.4 -> 3.22.5 ; node_modules/@prisma/config/node_modules/effect 3.20.0 -> removed
+ originate lock, 1 key: node_modules/effect 3.20.0 -> 3.22.5
+ No other key in either lock; non-packages top-level keys equal; both new effect entries' version, resolved URL and integrity equal the registry's own record for 3.22.5. (evidence/lock_keydiff_w48.txt; git diff --stat: root lock 13 lines, originate lock 6, each package.json 4.)
+
+OVERLAP TABLE (your Q3 condition MET; branch merge-trees at 350aa4c41f12 against each head, develop against each head beside it; evidence/overlap_branch_w48.txt):
+ 575   CONFLICT (1 file)   -> branch CONFLICT (same 1 file)    OK, adds none
+ 635   clean               -> clean                            OK
+ 639   clean               -> clean                            OK
+ 649   CONFLICT (15 files) -> CONFLICT (same 15)               OK, adds none
+ 945   clean               -> clean                            OK
+ 946   clean               -> clean                            OK
+ 947   clean               -> clean                            OK
+ 948   CONFLICT (6 files)  -> CONFLICT (same 6)                OK, adds none
+ 949   CONFLICT (1 file)   -> CONFLICT (same 1 file)           OK, adds none
+ 1965  clean               -> clean                            OK
+ 2099  clean               -> clean                            OK
+ Census at develop 33ba1d96 (18 open PRs) before the push and again at 23:44:50Z (19 open, with my 2265): the only PR outside the authorised eleven that lists my paths is my own 2265, so no twelfth. The waiver went in as exactly "575 635 639 649 945 946 947 948 949 1965 2099"; the push lock's overlap gate printed it as "ignored (mine, named): [2099, 1965, 949, 948, 947, 946, 945, 649, 639, 635, 575]" and found no overlap among the other 7 open PRs.
+ Note as you asked: after this merges, dependabot 949 (prisma 7.8.0 to 7.10.0) will need a rebase, because it rewrites the nested effect entry removed here. I did nothing to it or to any other PR.
+
+PROOF (Q4):
+ 1 Legs 6 and 7 RED on develop and rc 0 on the branch in the same minute (above); in the hook itself leg 6 reads "4 distinct advisories reported, 5 baselined" (the GHSA-gcqx deepmerge CLEANUP line, KS-1707, advisory-only, untouched) and leg 7 "OK - no standalone-lock advisories".
+ 2 Real npm ci from the branch's own files, in scratch dirs outside every git tree: root exit 0 (43 manifests, ONE effect in the whole tree = 3.22.5, `npm ls effect --all` exit 0, no nested copy); originate exit 0 (effect 3.22.5, prisma validate exit 0, prisma generate exit 0); originate --omit=dev exit 0 (effect 3.22.5, and prisma plus its config package ARE installed: the runner stage's line installs the files, still not imported by anything).
+ 3 Whole suites on BOTH arms, failing-name sets EQUAL: packages/shared 1725 of 1730 (the same 5 red), services/anchoring 891 of 892 (the same 1 red), services/originate 2882 of 2882 (equals W 47th's count at this develop). The branch arm's root node_modules/effect is the package a real npm ci installed (diff -r identical; npm ls in that tree: one version, no invalid or extraneous node); the old 3.21.4 and nested 3.20.0 copies were moved aside, not removed.
+ 4 tsc --noEmit: 0 errors on both arms for shared, anchoring, originate and originate's test config (a planted type error exits 2). Standalone ratchet proof: test-types-ratchet exit 0 (6 services, 0 new), its leg test 48 passed, 0 failed.
+ 5 The hook as it runs: 13 of 16 legs ran, legs 3, 4 and 8 SKIPPED (local stack not up), nothing failed; the hook says PREFLIGHT INCOMPLETE and "NOT a pass", and I do not quote it as one.
+ NOT RUN: api-gateway whole (as you ruled; its lock is unchanged), any image build or container, any deploy, the integration suites, hook legs 3, 4 and 8, prisma migrate or a config-file load (the repo has no prisma.config.ts).
+
+OPEN FOR YOU (found, not mine to fix here):
+ - The 6 red cells above fail identically on unmodified develop and are not touched. KS-2281 names four of the shared cells (ks1725-zod3-compat F and J, ks727 class guard x2) and KS-1727 the wallet-signature cell. NO ticket title or description names the anchoring cell "threadTokenMint emulator round-trip parameterises mint + spend with a deterministic per-seed policyId" (it appears in comments of several In Progress tickets, unread). Your word whether it gets a ticket; I filed nothing.
+ - No release of Prisma's config package pins effect 3.22.1 or later (0 of 1,488 versions; the latest, 7.10.1, still pins the exact 3.20.0). The override carries a comment key saying to remove it once a Prisma release does.
+
+DECLARED SLIPS since the plan mail: (1) ONE `rm -f` of my own seconds-old control file drafts/_ctl_badline1.txt, before I had re-read that the HOLDS say quarantine, not rm; every later move-aside used mv (quarantine_links/branch_effect, armdev), no other rm. (2) A counted shift whose expectation I had guessed (4 occurrences, the source has 6): the guard refused before any write; fixed from a grep count. (3) My first commit message carried a mention-like token (an at-sign followed by a name); my own at-sign check caught it before any push and I amended the local commit (350aa4c41f12 is the amended one; never pushed before, no force push). (4) A foreground sleep was refused by the harness and ran nothing. No key in argv, no kill, no sub-agent, no shared-checkout write, no audit-baseline, hook, gate or workflow edit, no --no-verify.
+
+STATE: trees worktrees/s-w48-ks2284 (branch tree, clean, all 34 node_modules), s-w48-armdev (develop arm), s-w48-base (clone), s-w48-dev (RED-legs tree, develop 7d26b57); push lock released and queue left. Record 5_Project_History/2026-11-20_seatW-48th (HANDOVER next). Meter 47.4 percent of 1M. After the merge Wednesday mails Seat W 46th the develop sha; I do not. The seat ENDS here: a wrap mail follows once my HANDOVER, history entry and vault commit are written.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 34  SEEN:      921  BATCH: /private/tmp/wed_newmail/batch_20261119T234709Z.txt
