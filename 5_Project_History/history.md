@@ -1,3 +1,11 @@
+## 2026-11-18 22:55 -> 2026-11-19 21:15 — Tuesday (Datasec seat; s291 to s294, three rotations; on Fable 5.2 from s293; wrapped on Kam's word with the weekly gauge at 99%)
+- LANDED, each reviewed, verified at source, nothing deployed: NexusAI #227 to #233 (RD-994, RD-1005/1007, RD-793/990, RD-835/861, records and history); MPS #216 to #220 (MPSCALC-414, 415, 316, the projection table 267, and the showcase settings-file fix Kam ruled at 18:39): MPS main 50d2a471, NexusAI main b0499db0. HPSM #336 landed before Kam's HPSM hold (to 2026-12-10).
+- OPEN AT WRAP: NexusAI PR #234 (RD-445 item 2, the Marketplace token bypass; Opus review GO WITH FINDINGS) waiting on its last check, NOT merged. Two cards open for Kam: the account switch (usage 99%) and the MPS hosted deploy of 50d2a471 (runbook B1755 read whole, not stamped; word pack in his drawer).
+- Datasec/OXPd handed over by Friday and CLAIMED by Tuesday; the Fable review commission B1753 is written, not launched (starts on the account switch).
+- Kam's rulings: HPSM hold; OXPd on Fable agents; MPS deploy card corrected (the apply would have removed the feedback setting), then "fix the settings file first".
+- Built: the CodeQL gate check (tuesday/tools/codeql), stamp_brief label-echo refusal, the project-hold check in launch_when_cool. Ledger: 7 rows dated 2026-11-19 (stamp slips, one card premise unmeasured, corrected to Kam before any write).
+- NEXT: `0_Brain/tasks/NEXT-PICKUP-TUESDAY.md` DELTA 1268.
+
 ## 2026-11-19 06:00 -> 15:25 — Wednesday (Mac mini, morning seat; Opus 5.5; lean boot at 98%; wrapped on Kam's word for a software update)
 - Morning ritual: card wed-morning-plan-1119 (hold to Friday), panel greeting, stale 0, WED 5/22/lesson 0, KS 212/35 unchanged; nothing launched.
 - WED-165: remote-access steps file written (0_Brain/reference/2026-11-19_wed-165-remote-access-steps.md) from re-measured facts; paste-back untested; Linear comment.
