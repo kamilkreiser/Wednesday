@@ -78979,9 +78979,9 @@
   ],
   "recommended": "a",
   "ts": "2026-11-20T07:14:17.208425+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-20T08:33:31.277439+11:00",
   "prior_rulings_overridden": [
    "2026-08-17 20:10",
    "2026-08-17 20:15",
@@ -79052,6 +79052,48 @@
    "CARD datasec-morning-plan-1117",
    "CARD datasec-morning-plan-1118",
    "CARD datasec-morning-plan-1119"
+  ]
+ },
+ {
+  "id": "secuura-ks1107-production-read-no-readonly-path-1120",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1107 production read: our agents have no read-only way into production. Who runs it?",
+  "bluf": "Secuura/Blockchain. You ruled the KS-1107 existing-joiners query may run read-only on production (07:10). The deploy agent (D 76th) measured that it cannot: this project holds keys only for Kintsugi and demo, no record names a production host, and no SELECT-only role that can read past row security exists (the repo creates secuura_app, secuura_auth_lookup and app_owner; none fits). An owner or admin login is not read-only, so it has not been used. Nothing ran on production. The query text is ready and already reviewed (gate 381: a sound candidate design). (Prior-ruling gate: this does not re-ask your 07:10 ruling on secuura-ks1107-existing-joiners-query-production-1119; it reports that its premise, a read-only path, does not exist. The other ten matches share only the words path, read or production.)",
+  "default_action": "If no answer in 48 hours: option c. Nothing runs on production; Wednesday re-raises it at the next production deploy.",
+  "options": [
+   {
+    "key": "a",
+    "label": "You run it yourself where you have access (recommended)",
+    "detail": "I send you the query and a one-line read-only wrapper (BEGIN READ ONLY ... ROLLBACK). You run it once on production and paste the counts, or save the output for me. No agent touches production. The result stays off mail and tickets; a follow-up on any account is a new card."
+   },
+   {
+    "key": "b",
+    "label": "Create a dedicated read-only role on production",
+    "detail": "A production change: a new SELECT-only role that can read past row security, plus a way in for one agent. Yours to approve and set up; then one Opus seat runs the query once."
+   },
+   {
+    "key": "c",
+    "label": "Do not run it for now",
+    "detail": "The fix (PR 2259) is merged and stops new cases; existing joiners stay unchecked on KS-1107."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T08:50:11.352230+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-738-approval-path",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD secuura-ks1370-validate-when-the-revoke-check-cannot-read",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1822-read-gate-probe-fault-fail-open-1030",
+   "CARD secuura-ks1233-redis-ttl-read-1104",
+   "CARD secuura-ks1234-production-307-1104",
+   "CARD secuura-ks-946-path-spellings-limiter-accept-p3-1106",
+   "CARD secuura-ks365-gosu-read-result-1106",
+   "CARD secuura-ks1081-template-flips-secrets-production-path-1106",
+   "CARD secuura-ks1107-existing-joiners-query-production-1119"
   ]
  }
 ]
