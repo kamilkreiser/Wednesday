@@ -1,0 +1,54 @@
+{
+  "id": "mps-hosted-deploy-main-317bbb14-1119",
+  "client_project": "Datasec/MPS Commercial Calculator",
+  "title": "MPS: put the latest changes on the hosted calculator?",
+  "bluf": "Eighteen small changes have landed since the last hosted deploy on 16 November. Only one changes the live site: a saved place for quote templates, which you ruled on 16 November, with a warning if it is blank. The rest are tests and notes. All checks on main are green. The test login's secret was still expired on 16 November, so the three seller checks cannot run. Deploy now, without those three checks?",
+  "options": [
+    {
+      "key": "a",
+      "label": "Deploy now, without the three seller checks again",
+      "detail": "Backup first. Apply the template setting, put the package on the site, check the files match, create one test template, restart, and see it listed. The one new warning sentence for operators goes as written. Every other check runs. The same rules as 16 November: roll forward only, stop if the start is refused or a check is unproven."
+    },
+    {
+      "key": "b",
+      "label": "Wait until the test login's secret is renewed",
+      "detail": "No deploy until you have done the renewal on the other card. Templates stay lost at each restart until then."
+    },
+    {
+      "key": "c",
+      "label": "Do not deploy now",
+      "detail": "Nothing changes. The template place stays unset and saved templates are lost at each restart."
+    }
+  ],
+  "recommended": "a",
+  "default": "Nothing is deployed. The template place stays unset. Tuesday asks again with the next batch of changes.",
+  "detail": "Read at source 2026-11-19 between 17:04 and 17:10 AEDT by drafter A (read-only; no az, no request to any app host).\nVERIFIED\n1. Code main of datasecau/MPS-Commercial-Calculator is 317bbb14c7258023b1d2855a9bcce1b9b07b93f6 (gh api -X GET git/ref/heads/main under the project's own GH_CONFIG_DIR, 17:04:55; control: pulls/9999 answers 404). 0 open pull requests. compare 5e800095...main: ahead 18, behind 0, 27 files. The ci push run and the Push-on-main run of that commit read success.\n2. The 18 commits (titles read): one changes the live site: MPSCALC-372, 'Showcase infra sets the template store path under /home/data/ and the API warns when it is blank' (infra/modules/showcase.bicep, src/MpsCalc.Api/Program.cs, Templates/TemplateStore.cs). The others are tests, the dev stub, docs and notes (the files under src/ besides those are Dtos.cs +2/-1, MpsCalc.Api.csproj +2/-1 and PriceBookImporter.cs +1/-1, which I did not open). I did not read the diffs.\n3. Standing rule: each hosted deploy has its own card (CLARIFICATIONS.md line 324 'Nothing deploys or changes on the hosted site without its own card'; C-164: 'it does not make a later deploy approved (the next MPS deploy has its own card)'). The deploy tool is scripts/deploy-from-ci.sh (header read at main: fetch, then deploy with a read-only pre-check of the hosted overlay, a refusal of an older package, the zip deploy, then a live check of the files against the package).\n4. The infrastructure step is separate: C-172 says the setting reaches the site only by an infrastructure apply, 'a card of its own because the infrastructure file replaces every app setting on each apply', and that the deploy should create one synthetic template, restart, and list it (the acceptance check of MPSCALC-372).\n5. The new operator sentence (a log line, no customer document): 'The template store is in memory: MpsCalc:Templates:Path is blank, so every template is lost at the next restart.' C-172: shown to the product owner on the panel, no word back, shipped as drafted, 'This entry records no approval of them'.\n6. Prior rulings on the secret question: card mpscalc-deploy-seed-secret-expired-1112 (a, 2026-11-12 18:36) and mpscalc-deploy-seed-secret-again-1116 (a, 2026-11-16 10:25:36), each 'Deploy without the three seller checks'; the 1116 card says 'the 12 November ruling covered that night's deploy only', and C-165 reads that 'the next MPS deploy needs its own word on the same question unless the secret is renewed first.' So this deploy needs the question asked a third time.\n7. The sweep's list of 11 tickets that wait on a deploy or the secret is too wide. Each ticket's latest comment read 2026-11-19: MPSCALC-372 waits on this deploy (acceptance: a template survives a restart on the hosted site). MPSCALC-224 waits on a host read at the next deploy (the 2026-11-16 comment says the host patch line was read, 10.0.15, and the package copy was not). MPSCALC-187 (hosted restart proof) is approval-class and needs its own hosted brief. MPSCALC-395 waits on the secret (see the other card). MPSCALC-103, 222 and 226: their latest comments (2026-11-15) say the refusal was built (MPS #192) and the tickets stay open for other clauses (older readers that tolerate unknown class names, runbook wording), and C-166 records #192 as deployed on 2026-11-16; they do not wait on this deploy. MPSCALC-135, 251 and 297: end-to-end test tickets, comments say 'nothing is put on a host', they wait on test legs not on a deploy. MPSCALC-173: its open clause is the seed identity's role, not a deploy. MPSCALC-144 (large-format catalogue items, data step on the hosted inventory): his 2026-10-17 ruling b waits for MPSCALC-202 and 203 to be live; both tickets read Done today (203 on 2026-11-11, 202 on 2026-11-15) and #192 reached the host on 2026-11-16 (relayed), so the wait looks over: Tuesday may re-raise that data step; it is not part of this card.\nREPORTED, UNVERIFIED (no az, no host request allowed)\n- That the hosted showcase runs main 5e800095: reported by C-166 from the deploy record of 2026-11-16 11:31 to 11:34 AEDT, 'relayed'. Not probed. The older line in CLARIFICATIONS.md 1708 (hosted runs e027ebd0, hold 'not ruled') is out of date; the sweep relied on it.\n- That the seed identity's secret is still expired: last measured at 11:25 AEDT on 2026-11-16 (HTTP 401, AADSTS7000222) by the deploy record; MPSCALC-395 comment 41292. Nothing later.\n- The state of the hosted site's settings, the data store and the backup.\n- Whether the 18 commits hold any customer-facing word: only the one log sentence above was found by title; diffs not read.",
+  "prior": "decision_queue.sh prior (id mps-hosted-deploy-and-seed-secret-1119, 86 messages matched; read 2026-11-19 17:04): the ruled MPS deploy cards, all 'ALREADY RULED' for their own commit and none for this one: mps-hosted-deploy-main-e027ebd-1022 (a), mpscalc-hosted-deploy-words-1112 (a), mpscalc-staff-words-31-deploy-1112 (a), mpscalc-deploy-seed-secret-expired-1112 (a, 2026-11-12 18:36), datasec-demo-deploy-round-apply-1116 (a, 2026-11-16 10:24: 'Composer and MPS demos now; HPSM stays out; NexusAI waits'), mpscalc-deploy-seed-secret-again-1116 (a, 2026-11-16 10:25:36), mpscalc-showcase-template-path-1116 (a, 2026-11-16 16:37: 'Store templates in /home/data/templates/ and warn when blank'; ships 'with the next MPS deploy, which has its own card'). CLARIFICATIONS.md C-164, C-165, C-166, C-171, C-172 and line 1708 read. My reading: the template path itself is ruled (1116); the deploy of main 317bbb14 is NOT ruled; the secret question was ruled twice for one deploy each and is not ruled for this one. This is a real card.",
+  "frees": {
+    "waits_on_this_deploy": [
+      "MPSCALC-372"
+    ],
+    "gets_its_next_read_at_this_deploy": [
+      "MPSCALC-224"
+    ],
+    "needs_its_own_hosted_brief_may_ride_along_only_if_he_says_so": [
+      "MPSCALC-187"
+    ],
+    "not_waiting_on_a_deploy_despite_sweep": [
+      "MPSCALC-103",
+      "MPSCALC-222",
+      "MPSCALC-226",
+      "MPSCALC-135",
+      "MPSCALC-251",
+      "MPSCALC-297",
+      "MPSCALC-173"
+    ],
+    "wait_on_the_secret_card_instead": [
+      "MPSCALC-395"
+    ],
+    "separate_re_raise_for_tuesday": [
+      "MPSCALC-144"
+    ]
+  },
+  "default_action": "Nothing is deployed. The template place stays unset. Tuesday asks again with the next batch of changes."
+}

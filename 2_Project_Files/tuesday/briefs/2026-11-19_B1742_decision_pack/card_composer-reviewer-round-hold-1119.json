@@ -1,0 +1,67 @@
+{
+  "id": "composer-reviewer-round-hold-1119",
+  "client_project": "Datasec/Security Composer",
+  "title": "Composer: has the reviewer's review round finished?",
+  "bluf": "You told us to hold the new content release until the reviewer's current review round ends. Nothing in our records says it has ended. Do you know if it has? If it has, three held tickets can start and the release can be timed later. If it has not, nothing changes. Either way, no release can go out today, because the new content has not been built yet.",
+  "options": [
+    {
+      "key": "a",
+      "label": "The round has ended",
+      "detail": "Tuesday records the end. The Essential Eight mapping review and three tickets (19, 20, 92) may start. The new content release may be cut once it is built, and it still needs its own deploy card. When that release is deployed, engagements on the running release turn read-only, including the reviewer's review engagement."
+    },
+    {
+      "key": "b",
+      "label": "Still running: keep holding",
+      "detail": "Nothing changes. Tell Tuesday what ends it, a date or a message from the reviewer, so we stop asking. Build work that is allowed on branches goes on."
+    },
+    {
+      "key": "c",
+      "label": "Do nothing now",
+      "detail": "The hold stands as ruled. Tuesday asks again in one week."
+    }
+  ],
+  "recommended": "b",
+  "default": "Nothing changes. The hold stands. Tuesday asks again in one week. Build work that is allowed on branches is not affected.",
+  "detail": "Read at source 2026-11-19 between 16:59 and 17:08 AEDT by drafter A (read-only).\nVERIFIED\n1. The hold is ruled, three times. C-92 (Composer CLARIFICATIONS.md line 1682; card composer-sro-vic-gap-10-decisions-1020 K6 option a, ruled 2026-10-20 14:00:26 AEDT): \"The new content release (L1+L2) ... When? (a) After Paul's current review round\" and \"Forbids: cutting or deploying that release, or rebuilding the examples, before Kam says the round has ended.\" C-99 (line 1762; card composer-e8-mapping-review-1023 option b, ruled 2026-10-23 11:32:53): the Essential Eight mapping review is held \"until the reviewer's current review round ends\"; line 1771: \"Not settled here: when the round ends (C-92 and C-71 COMP-1 (b) still say the owner says so)\". C-71 COMP-1 (b) (line 1286; card composer-decisions-pack-1012 option a, ruled 2026-10-12 20:12:54).\n2. No end is recorded. I read every entry heading from C-100 to C-153 (last entry 2026-11-18) and searched the whole file for round, review-round and reviewer phrases. The only hits that name the reviewer's round are the three rulings above and their copies in tickets. Other 'round' hits are code-review rounds (NO GO/GO gates), unrelated. Positive control: the same search finds lines 1682, 1762, 1771 and 1788. Limit: I did not read every entry whole.\n3. Jira PCOMP read 2026-11-19 (GET): PCOMP-19, 20 and 92 are Backlog, label held, last updated 2026-10-23, each pointing at the round. PCOMP-94 (send the five questions to the reviewer): Backlog, label needs-kam, last comment 40996 of 2026-11-11 14:39: \"The send stays the project owner's own act ... The ticket stays in Backlog until the questions are sent.\" So the records do not show the questions were sent.\n4. The sweep's count of 13 is too high for the round itself. Ticket text read 2026-11-19: only PCOMP-19, 20 and 92 hold on the round. PCOMP-31 to 35 (content lane L1) say they wait on PCOMP-29 (L0-1, 'Not started', no hold on it) and that the round only times the release; PCOMP-36 to 39 (lane L2) wait on L1 not built; PCOMP-29 itself carries no hold. C-92 says \"Permits now: L1 and L2 may be built and merged on branches.\" The 17 behind them (PCOMP-42, 45 to 51, 53 to 61) each cite an unbuilt earlier lane or a sibling-project seat, none cites the round.\n5. Consequence: even if the round has ended, no content release exists to cut today (L0-1 not started per its ticket). Ending the round frees 19, 20 and 92 and lets the release be timed later; it does not deploy anything. A deploy stays on its own card.\nREPORTED, UNVERIFIED\n- Whether the reviewer's round has ended: only the product owner knows. Whether he sent the five questions: reported only by the absence of a record.\n- The state of the L1 code branch (PCOMP-36 comment of 2026-10-23 14:58 says its branch is under hold); I did not read the code repo for it.\n- The number of read-only demo engagements a release would cause now: C-71 said 4 of 20 on 2026-10-12; C-152 says 20 engagements on 2026-11-16; no host probed.\nNOTE FOR TUESDAY (not for the card): L0-1 (PCOMP-29) needs the item catalogue that lives on a sibling project's worktree branches; its ticket calls that the coordinator's call. The build chain L0-1, L1, L2 can start on branches now without the product owner.",
+  "prior": "decision_queue.sh prior (id composer-reviewer-round-hold-1119, 139 messages matched; read 2026-11-19 17:00): no card says the round ended. Relevant ruled cards, quoted: composer-decisions-pack-1012 (a, 2026-10-12 20:12:54) carrying COMP-1 'Deploying it makes 4 of the demo's 20 engagements read-only, including Paul's review engagement. When? ... (b) After Paul's current review round'; composer-sro-vic-gap-10-decisions-1020 (a, 2026-10-20 14:01) K6; composer-e8-mapping-review-1023 (b, 2026-10-23 11:32:53) 'Hold it until Paul's current review round ends'; composer-send-five-questions-1023 (a, 2026-10-23 11:32:24) 'I will send it today' (delivered as an email to him, not a record of the send to the reviewer). Grep of CLARIFICATIONS.md: C-92 line 1682, C-99 lines 1762 to 1771. My reading: he already ruled that the release waits for the round; he did NOT rule when the round ends and said he would say so. So the ruling is made and only the fact is open; this is a card about the fact, not about the policy.",
+  "frees": {
+    "directly_if_a": [
+      "PCOMP-19",
+      "PCOMP-20",
+      "PCOMP-92"
+    ],
+    "release_timing_only_if_a": [
+      "PCOMP-31",
+      "PCOMP-32",
+      "PCOMP-33",
+      "PCOMP-34",
+      "PCOMP-35",
+      "PCOMP-36",
+      "PCOMP-37",
+      "PCOMP-38",
+      "PCOMP-39"
+    ],
+    "behind_them_not_held_by_the_round": [
+      "PCOMP-42",
+      "PCOMP-45",
+      "PCOMP-46",
+      "PCOMP-47",
+      "PCOMP-48",
+      "PCOMP-49",
+      "PCOMP-50",
+      "PCOMP-51",
+      "PCOMP-53",
+      "PCOMP-54",
+      "PCOMP-55",
+      "PCOMP-56",
+      "PCOMP-57",
+      "PCOMP-58",
+      "PCOMP-59",
+      "PCOMP-60",
+      "PCOMP-61"
+    ],
+    "sweep_listed_13": "19 20 29 31 32 33 34 35 36 37 38 39 92; only 19, 20, 92 hold on the round; 29 has no hold",
+    "note": "PCOMP-29 is in the sweep's 13 but its ticket carries no hold"
+  },
+  "default_action": "Nothing changes. The hold stands. Tuesday asks again in one week. Build work that is allowed on branches is not affected."
+}
