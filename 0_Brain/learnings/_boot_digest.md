@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-19 15:32 from 283 lesson files (1,201,933 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-19 15:49 from 284 lesson files (1,204,395 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8152,4 +8152,17 @@ sections (open the file for these): How to apply
 10. **Queue, don't fire.** A stamped kit joins the queue. The next launch waiter starts only after the previous waiter's exit and its rung-5 read. *(s282 11-16)*
 
 **At the merge, the stamp's sibling:** read the printed check table, not the ALL GREEN line. It must name every job the repo expects (`pr_checks_wait.sh --min-checks N`). *(s287 11-18)*
+
+
+## OXPd runs on the newest Fable, and the Tuesday seat now boots on Fable
+`2026-11-19_oxpd-runs-on-the-newest-fable-tuesday-boots-on-fable.md` · instruction · 2026-11-19 · status: live
+
+**Kam's words, verbatim:** *"Friday has been working on a claude to claude agent while away and also on an oxpd projects. she is backing up now.  once ready, she will send you notes to claim and start on the oxpd project.  i would like you to switch to latest fable and use fable agents when working on this project"*
+
+sections (open the file for these): The rule · Why · Exception and failure direction
+
+## The rule
+- **Datasec/OXPd:** every agent Tuesday starts for this project (drafters, builders, gates, analysts) runs on the NEWEST Fable, read from `0_Brain/dashboard/data/models_latest.json` at the launch (`claude-fable-5-2` on 2026-11-19), set AT LAUNCH (`SEAT_MODEL_ENV` for a cockpit seat, `model` on an in-session agent); never `/model` into a pane. This overrides the model-routing table's Sonnet/Opus rows for OXPd only, by Kam's word.
+- **The Tuesday seat itself** boots on the `fable` alias with `opus` as the availability fallback: one line in `Launch_Wednesday.command` beside Friday's (commit 2026-11-19, backup `.pre-1119-tuesdayfable`), tested by arms (tuesday fable, friday unchanged, wednesday opus). It takes effect at the next rotation; the rung-5 check reads the pane's model field after it.
+- **The OXPd handover:** Friday holds the project under her own grant (EXPIRING-GRANTS, Friday's OXPd row: analysis, architecture document, plan and questions; NOT a build). When Friday's notes arrive in tuesday-agent@, Tuesday reads them at source, claims `Datasec/OXPd` (WED-OWNERSHIP, check then claim), and starts. What Tuesday may do there is what the notes and Kam's words cover: the Friday row's NOT-covered list (no build, no library change, no Azure, GitHub or HP portal action, no message to HP or any human, no spend) is read as still standing until Kam widens it.
 
