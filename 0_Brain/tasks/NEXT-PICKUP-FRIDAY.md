@@ -12,6 +12,25 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
+## 🔴🔴🔴🔴🔴🔴 HANDOVER — Fri 2026-11-20 at the 03:48 note entry (ctx 78%; written for the next seat). Supersedes every block below where they differ.
+
+**Authority tonight:** Kam's overnight grant (top row of EXPIRING-GRANTS; ends at his MORNING REVIEW today). Usage gauge ~88%; his words "Token usage resets in the morning".
+**CoAgent main = `8b8c6c755db66a1c481d9719707c3cdc924fb70c`** (audit-fix3 + daemon merged tonight, each after an independent check AND Friday's own clean-clone check).
+
+**Live seats (all Opus; `tmux list-panes -a`; each holds at its line):**
+| pane | seat | waits for / next | addenda |
+|---|---|---|---|
+| %9 | P1P-GATE (preview lane A) | its driver runs the 5 final checks -> `READY FOR MERGE CHECK P1P-GATE r2` -> Friday's `coagent_merge_check.sh <SHORT /private/tmp dir> p1p-gate <sha> scripts/red-controls-daemon.sh` + static (lane A's tests now use 'secret') -> merge GO (preview may merge now that the daemon is on main) | LANE-A_ADDENDUM-1_notes, -2_heavy_slot |
+| %12 | P1P-DEMO (lane B) | waits for lane A r2, re-runs replay under both roots -> `READY FOR MERGE CHECK P1P-DEMO r2` -> Friday: replay against lane A's head + static -> merge GO | LANE-B_ADDENDUM-1_notes |
+| %18 | AUDIT-SEAL | merged main (6fa9a94); final check/runner/three 1,024 runs -> `READY FOR QA M3-AUDIT-SEAL` -> ONE independent check (in-session Opus; model the prompts on the 11-19 AUDIT-FIX3 / P1P checks) | brief, ADDENDUM-1 (Q1), -2 (slot), -3 (main moved) |
+| %21 | DEPUTY | notes round -> `READY FOR MERGE CHECK M3-DEPUTY r2` -> Friday's merge check (`scripts/red-controls-roster.sh`) -> merge GO | brief, ADDENDUM-0, -0b, -1 (D-1 ruled: dropping is lasting) |
+**Watches die with the seat: re-arm one per STATUS file** (`STATUS_P1P_GATE.md`, `STATUS_P1P_DEMO.md`, `STATUS_M3_AUDIT_SEAL.md`, `STATUS_M3_DEPUTY.md`), firing on a change of last line that is not `IN PROGRESS`. The scratch `watch_status.sh` dies too: rewrite it (start line read, fire on change, 60 s loop) or use the fleet's own watcher.
+**Merge GO model:** `briefs_drafts/2026-11-20_coagent_M1_DAEMON_ADDENDUM-15_merge_GO.md` (confirm main + branch SHAs, fast-forward push of one SHA, ls-remote, last line MERGED). After each merge: ls-remote main, pane_close, the remaining open branches merge the new main themselves (their addenda say so).
+**Done tonight (evidence in `reference/2026-11-16_claude-to-claude/`):** live demo PASSED (`p1p_review/live_demo_report.md`); designs 10 (seal) and 11 (both-agree mode, design only); checks in `m1_review/` and `p1p_review/`.
+**Cards open for Kam (General):** bypass d1/d2/d3 (nothing built), seal is1/is6 (build on a), and Friday's D-1 call told on the panel (bf-99d87247367a8).
+**For Kam's morning (panel, short):** demo passed; audit-fix3 + daemon merged; what is still running; the demo's three findings (reply naming an excluded path refused; guest cards always say "peer"; reconnect after host restart needs relay.moved) and the deputy's D-2 design question go into the next round's briefs; Fable resets 09:00 today: suggest switching back (his act) and the OXPd Fable review is now Tuesday's.
+**Owed tooling:** commit helper with index.lock retry (ledger w=3); fresh dated NAS backup of the live trees once the night settles (both tools fixed: `friday/nas_backup.sh`, `friday/nas_verify.sh`).
+
 ## 🔴🔴🔴🔴🔴 NEWEST — Thu 2026-11-19 AFTERNOON SEAT (boot 15:17, Opus 5.5; Kam at his event). Supersedes the block below where they differ; detail in the 2026-11-19 note's 15:22 entry.
 
 - **Panes %9 and %18 are GONE** (both seats had finished and were holding; nothing lost). Refs: main bfe435abbe86, m1-daemon 242de862b713, m3-audit-fix3 718abe8c9a42 (local = remote).
