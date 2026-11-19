@@ -1,0 +1,41 @@
+[Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-590 round 2 (Seat W 38th)
+Seat W 38th
+
+READY FOR GATE KS-590 round 2. TIER 2 (test-only). I stop here: nothing merged, deployed or run on a stack or box, and no ticket state moved by me.
+
+PR 2257: https://github.com/Secuura/Distributed_Secuura/pull/2257 (open, not draft, base develop)
+New head 73671cd50391e650e74b1b3005a11b989b646956: ONE new commit on the PR's own branch feature/ks-590-systemtest-public-verify-view-regression, on top of round 1's f4c372d24aabd115dc2cc5d48a0abdf445d93c17. A plain fast-forward, no force, no new PR. Built on develop 06328efa17703b41ddd0107046b00c82dd235a92, which had not moved at the BRIEF, at my re-pin before the push, or at the driver's gate (09:10:46Z). The push went through the shared queue and the existing-branch driver: rc 0, 6 s, VERIFIED 09:10:55Z by ls-remote, lock released, queue left. The commit is 6 files, +357 -21 (the PR now reads 2 commits, 8 files).
+
+The three findings, each with its red-first cells (red on the old code by assertion, green after):
+- G379-2257-1, a leak inside a longer value or a number passed. The account email now matches as a case-insensitive substring; the email local part and any user id as a whole token (not preceded or followed by a letter or digit); a value under 4 characters only as the whole value; strings and numbers are both read, in objects, lists and lists in lists. Your rule (b), R1, R2, R4 to R6. Cells U8 (12) and U9 (12): 'issued by jane.doe' and 'jane.doe (Acme Pty)' fire, 'Administration Pty' stays clean against 'admin', the embedded id, the upper-case id, an int and a float id, a 3-character value, an id followed by a digit.
+- G379-2257-2, an empty forbidden map made the check silent. New forbidden_map_violations: an empty or incomplete map (no email, no local part or no user id) is a violation named by what is missing; the live row 4 body calls it first; forbidden_for and the check share the label constants. Cells U11 (5) and three row 4 drives over MockTransport (empty map red, map without an id red, an embedded local part in every caller's answer red) plus a link cell.
+- G379-2257-3, the nested-list scan was unpinned. Cells U10 (4): an object in a list, a list in a list, a number in a list in a list, a list inside onChainMetadata. These are green on the old code by design (it already scanned lists); their proof is the gate's mutant o3, now 5 cells red.
+Not in this change, said once: G379-2257-4 (the other tenant's caller is the super-admin under the override header).
+
+Two things said once, as you ruled. A local part glued to a letter ('xjane.doe') is NOT caught, by design; a cell pins that gap with your sentence beside it. And if the real super-admin token carries no id claim, the live row 4 cell will go red with the forbidden-map message: a harness fact, unmeasured because live is NOT RUN.
+
+Evidence (the full block is the new "Round 2 (gate 379 fix)" section of the PR body):
+- Red first: with the matcher unchanged and the map check stubbed, the three unit files held 105 cells: 21 failed, 84 passed, all 21 by AssertionError (0 import, type, name or attribute errors; the grep had a planted control). 15 of the 36 new cells are green on the old code by design (controls, the pinned gap, short-value cells, the two list cells, the link). After the fix: 106 passed (69 of round 1 plus 37 new; the mixed-case forbidden-value cell came after the first green).
+- Mutants, 19, each one counted replacement with its real red set, all killed, none survived, sha256 of the five owned files equal before and after: m1 to m6 re-run (m1 re-pointed to the new matcher): 10, 1, 1, 1, 1, 3 red; the gate's o3: 5; the exact-equality mutant (old == restored): 12; mine: minimum length removed 2, ids as substrings 3, numbers not scanned 5, the map check returning nothing 6, the local part as a substring 2, trailing token boundary removed 3, leading boundary removed 2, the row 4 body not calling the map check 2, answer text not case-folded 4, forbidden value not case-folded 1, answer text not trimmed 1.
+- tests/unit/ and tests/functional/, same command, load1 3.7 to 4.4: develop 43 failed, 4442 passed, 65 errors; round 1 head 43 failed, 4511 passed, 65 errors; this head 43 failed, 4548 passed, 65 errors. +37 over round 1. The 108 red ids are identical in all three (0 differing lines; a planted difference showed).
+- ruff format --check (6 files already formatted) and ruff check (all checks passed) on round 1's 5 files plus the new one; mypy no issues in the 6; planted controls fired (F841; [return-value]). docs-fragments check OK, a planted unclosed div turned it red and the byte-equal restore turned it green; its ADVISORY lines are identical in pristine develop. Largest owned file 233 logical lines (cap 400).
+- Overlap: 33 open PRs, only 2257 lists a path of the write set or anything under systemTest/schemathesis/ (control: it lists the 5 paths it already holds); the driver's gate read 32 other PRs and 0 of the 6 paths.
+- THE HOOK PRINTED NOTHING, so there is no closing line to quote: run by hand over the exact push range it exits 0 with 0 bytes in under a second, and the real push ran it the same way.
+- PR body: ONE edit, as you ruled, a "Round 2 (gate 379 fix)" block inside Test Evidence; round 1's block is unchanged; read back equal; title and head checked. KS-590: ONE facts comment 35405ae0, read back exact, state In Review before and after.
+
+live NOT RUN, as in round 1: the live cells L2 to L5 and row 1; whether two registrations can share a content_hash through the public API stays UNMEASURED.
+
+Declared:
+1. One more new file than round 1: tests/unit/support/test_verify_public_view_leaks.py holds U8 to U11. My choice to keep the matcher cells together, not forced by the cap.
+2. The cheat and flow fragments of this ticket are edited (MUST 8): the offline command lists the new file and the rule is stated.
+3. The overlap gate refuses on any open PR listing a path, the PR's own included, so my launcher passes OVL_IGNORE_PRS with 2257 and nothing else; the independent census above says no other PR overlaps.
+4. I ran W 37th's tree read-only for the round 1 tier figures (clean before and after) and ran its docs check script and lin.py unedited. My clonefile scratch copy of the package alone gave a wrong tier figure (174 red ids, no repo around it); I kept that run, labelled, and did not use it.
+5. Three slips of mine, all caught and re-run, the first runs kept beside the corrected ones: my first G379-2257-2 probe leaked to one caller only (the pair check hid the finding); my first overlap census expected the new file in PR 2257 and so read its own control as failed (the census itself was right); and mypy's first invocation passed six names as one path under zsh.
+6. The venv is a copy one step behind the pins (ruff 0.17.1, mypy 2.4.0, schemathesis 4.32.1, pytest 9.1.1; no venv here meets them); node v26.8.1 is not an LTS line. The package quality command and its 90 percent coverage gate were not run.
+7. systemTest/CLAUDE.md narrative lists were not edited (the partition excludes that file), as in round 1.
+
+Candidate filings: none new.
+
+Next row: the tier-2 gate on PR 2257 at 73671cd50391, then your GO naming the head SHA. Wrap mail follows.
+
+NEW-ROWS: 2  ROWS-IN-DIGEST: 35  SEEN:      762  BATCH: /private/tmp/wed_newmail/batch_20261119T091510Z.txt
