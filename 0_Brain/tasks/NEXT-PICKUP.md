@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 22:1x 19 Nov, the 21:2x successor seat - READ FIRST
+- **D 74th WRAPPED, SCORED 0.96, pane CLOSED.** KS-1129 Done+archived (verified at source with includeArchived: issues() hides archived by default). Routing owed: KS-1295 demo-VM log read needs its own licence (demo read: Wednesday's call under the kintsugi-first rule; card only if it writes); KS-1205 (b) offline only; the INACTIVE test key row key_489765bb stays until a ruling.
+- **🔴 REGRESSION (ledger row 22:11, invoke-to-read family, w>=5 across 11-17..11-19):** a bare `cockpit.sh` with both streams discarded slipped past pretooluse_cockpit_verb.sh (it refuses invented verbs, not absent ones). **MECHANISM OWED (failing-test treatment):** extend the hook to refuse a fleet-tool call with NO verb and any fleet-tool call whose stdout AND stderr both go to /dev/null; wed_claim.sh check + claim first; exercise both paths before arming. Raise with Kam on the morning card (w>=3 rule).
+- **S 94th** licensed items 7 (HIGH), 8, (b): STATUS + WRAP next -> verify keys at source, score, pane_close.
+
 ## 🔴 UPDATE 22:0x-b 19 Nov, the 21:2x successor seat (own ctx 50% checkpoint) - READ FIRST
 - **K 54th WRAPPED + SCORED 0.96, pane CLOSED.** **S 94th FILED KS-2267..KS-2271** (verified at source: Backlog, p 3/4/4/3/4); its NEXT is ONE QUESTION with items 7 (KS-74 invite claim), 8 (KS-1107 form cell) and the (b) prelaunch-spec draft: license BY KEY.
 - **D 74th RESULTS ANSWERED:** KS-1129 CLOSE licensed; KS-1295 + KS-1205 facts comments licensed (no state move). NEXT: its STATUS with ids -> verify Done/archived at source -> score + pane_close on its WRAP. Test data left on Kintsugi: d74sweep-ks1129 user, INACTIVE key row key_489765bb..., 4 audit rows.
