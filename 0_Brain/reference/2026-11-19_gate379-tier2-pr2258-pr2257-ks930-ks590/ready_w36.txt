@@ -1,0 +1,33 @@
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-930 (Seat W 36th)
+Seat W 36th
+
+READY FOR GATE KS-930 (Seat W 36th). TIER 2, code-only: a developer pre-push guard, nothing deploys from it.
+
+PR 2258: https://github.com/Secuura/Distributed_Secuura/pull/2258 · head e8f1b607b3d1252eee4315334c90c58e92b64d01 · branch feature/ks-930-relink-guard-wrapper-spelled-installs · one commit on develop 06328efa1770 (unmoved at the launch gate 08:09:10Z and at the driver gate 08:09:34Z) · 4 files, +332/-36 · open, not draft. ONE facts comment on KS-930 (id ef75b0a1-53f3-407f-9bdc-c309062c8ae3), read back exact; KS-930 is still In Review and I moved nothing. Nothing merged, deployed or closed.
+
+THE CHANGE (check-shared-relink.sh only; every changed line carries a why-comment with KS-930; no apostrophe entered the single-quoted awk program, checked on the diff with a positive control): every word of a RUN segment is read (manager = a word that ENDS in npm, yarn or pnpm after a left boundary outside [A-Za-z0-9_.-]); the JSON exec form is normalised; a line the guard cannot classify AFTER the re-link denies the stage with its own message; cache joins the read-only verbs; echo and printf are not token-scanned unless the segment holds a backtick (your N1 ruling, variant B; a dollar-paren substitution needed no clause, the parentheses already split it).
+
+RED FIRST. 26 cells added before the fix, guard unchanged: 120 passed, 20 failed, every red is "expected exit 1, got 0" except the cache cell ("expected exit 0, got 1"), so none is a script error. After: 140 passed, 0 failed, 0 skipped.
+
+SUITES, once each, load1 logged. BEFORE on develop 4436ced55 (load1 3.39): main 114/0/0, case 6/0/0, derived_claims 17/0, tooling_tokens 6/0. AFTER on the branch: main 140/0/0 (load1 2.82), case 6/0/0, derived_claims 17/0, tooling_tokens 6/0 (load1 3.13). The leg-14 run inside the hook read 140/0/0 again.
+
+MUTANTS (predictions written into the runner before the first run; real red set; guard sha256 b09f725d7b34aca5 equal before and after every one): m1 token scan reverted: 17 red (the twelve, if / for / braces, sh -c, echo with backticks), JSON cell green; m2 boundary dropped: 1 red (the existing mynpm cell); m3 JSON normalisation dropped: 1 red; m4 cache dropped: 1 red; m5 every following word a write: 6 red (N5, cache, four existing read-only and probe cells); m6 heredoc arm removed: 1 red; m7 printer exemption removed: 2 red (echo, printf); m8 trailing-argument rule removed: 3 red (the KS-945 argument cell and two F-6 / R2 cells); m9 backtick switch-off removed: 1 red. Each mutant has a named firing cell.
+
+R5, REAL TREE, both modes, before and after: identical, rc 0, 25 files, 4 copy / 21 re-install, dev-tree 25 of 25 clean. Dockerfile blob hash equal across both trees. Census with a positive control: 125 leading manager words in the class, 0 wrapped. Probe of 39 fixtures: 22 differ from the wanted verdict on develop, 5 after (the bounds below).
+
+HOOK (the one push, 832 s): 13 of 16 legs ran. Leg 13 ran my changed guard on the real tree and printed: OK — 25 Dockerfile(s) consume shared-builder; all re-link the shared package in the final stage after the last node_modules write and before USER (package name shortened here, no at-sign in mail). / derived: 4 copy a builder's node_modules, 21 re-install their own. / dev-tree (KS-490): 25 of 25 clean. Leg 12 OK (127 suites reached), leg 14 ran every suite, leg 15 OK, leg 16 OK. Legs 3, 4 and 8 were NOT RUN (no local stack on :6882). The closing block, verbatim:
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+
+DOCS: fragment pair KS-930-relink-guard-wrapper-spelled-installs in cheat and flow. docs-fragments.mjs check: OK; a planted unclosed div turned it red (rc 1), restored by content (sha256 equal). Two ADVISORY lines (flow 6249, cheat 6235) read identically on pristine develop.
+
+YOUR RULINGS, each answered: R1 token scan built; R2: sh -c "npm ci" falls out with no extra code (own cell), npx create-* untouched (rc 0 before and after); R3 residue stated by name on the ticket and in the PR, KS-930 NOT claimed done; R4 cache with the cache-then-install control; R5 real tree identical in both modes; N1 variant B with the substitution cell, the backtick cell and m7; the echo-piped-into-sh residue named in the PR body.
+
+NOT RUN: Schemathesis and Akto pre-merge sweeps, Playwright, k6 (no product code, no API surface, no stack; the two acknowledgment boxes are UNTICKED on purpose); hook legs 3, 4, 8; check:test-types (no TS touched, not applicable); shellcheck (no leg runs it). Migrations and config: none.
+
+RESIDUE, named in the PR: a heredoc that contains the re-link and a runtime stage that is not the last FROM (R3); echo npm ci piped into sh and a bare corepack yarn with no verb read clean; apk add nodejs npm curl and a harmless heredoc would false-block if placed after the re-link (0 such lines in the 25 class files; not pinned as cells, W36-S3); KS-956 and KS-2089 untouched. OPEN, not mine, for you to route (said once): RUN npm pkg get name false-blocks on develop today (the pkg verb is not on the allowlist).
+
+MY OWN SLIPS (none reached the PR): (1) early in the boot I wrote one scratch status file under the system temp folder instead of the scratchpad, then moved it; (2) my derived survey script had a comment swallowing a closing parenthesis, bash -n caught it before any run; (3) my Linear boot script declared an unused GraphQL variable (HTTP 400), fixed and re-run; (4) the first mutant batch met load1 9.79 from another seat, the runner refused m4 to m9 as NO RESULT while its summary line printed "0 red", which is not a result: I made it wait for load1 below 8 and re-ran those six; (5) lin.py refused my first comment body for naming a seat, reworded. No cd, no rm, no key in argv. A hidden file .derive_probe.tmp sits in REC/tools from my derive tool (to quarantine at wrap).
+
+NEXT ROW (not mine): the tier-2 gate on PR 2258, then your GO naming the head SHA. The seat wraps now; the wrap mail follows.

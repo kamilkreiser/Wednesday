@@ -1,0 +1,38 @@
+[Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-590 (Seat W 37th)
+Seat W 37th
+
+READY FOR GATE KS-590. TIER 2 (test-only). I stop here: nothing merged, deployed, run on a box or stack, and no ticket state moved by me.
+
+PR 2257: https://github.com/Secuura/Distributed_Secuura/pull/2257 (open, not draft, base develop, one PR for this head)
+Head f4c372d24aabd115dc2cc5d48a0abdf445d93c17, ONE commit, branch feature/ks-590-systemtest-public-verify-view-regression, built on develop 06328efa17703b41ddd0107046b00c82dd235a92. Develop had not moved at the push (my ls-remote 08:18:52Z; the driver's own gate 08:23:40Z), so there is nothing to re-pin; the two prefix checks (systemTest/schemathesis/ and originate verification*) read 0 and PR 2249's squash is an ancestor (ahead 32, behind 0, control reversed reads behind). Open-PR census at 08:18Z: 31 PRs, 0 on my write set, planted control systemTest/akto/ reads PR 2052.
+7 files, +1708, all new: 5 Python files under systemTest/schemathesis/tests/ and a cheat and flow fragment pair (new slug; the PR 2249 pair untouched). One push through the queue: rc 0, 5 s, VERIFIED 08:23:48Z, lock released and queue left. KS-590 facts comment 72e7c8d5 posted and read back exact; state In Review before and after.
+
+What each row became (each cell says which version it asserts against):
+- Row 1, v1 by hash, real anchoring only: isAnchored stays true with a resolvable 64-hex tx after certification propagates. Excluded on a local target by design.
+- Row 2, v1 and v2: v1 repeats itself; v2 lists every registration and matches[0] is v1's answer.
+- Row 3, v2: count equals the number registered, no fieldsWithheld marker is true.
+- Row 4 RE-AIMED, v1 and v2: every caller gets the same public view (title as registered, company name or null, no person-derived value, certifierOrganizationId null with the key kept).
+- Row 5 RE-AIMED, v1 and v2: another tenant's signed-in caller receives the anonymous answer, equal modulo verifiedAt.
+Kam's three quotes (07:03:38, card b 09:17:09, card a 11:12:46) are verbatim in the PR body, the predicates' docstring and beside the assertions. I found no reading that makes a different row 4 or 5 correct.
+
+Evidence (full Test Evidence block in the PR body):
+- Red first: predicates stubbed to return an empty list: 36 failed, 28 passed, all 36 by AssertionError, 0 import or collection errors; filled: 64 passed; row 1's five body drives added after: 69.
+- Mutants m1 to m5 as briefed, plus my extra m6 on row 1: each killed by the cell aimed at it (m1 U2 email-local-part and a row 4 drive; m2 U2 certifier-org-id; m3 U1; m4 U3; m5 U4; m6 two U6 cells and a row 1 drive). Unmutated control 69 passed. sha256 of all four owned files equal before and after.
+- tests/unit/ and tests/functional/, same command on develop and on the branch: develop 43 failed, 4442 passed, 65 errors (57.34 s, load1 3.5 to 3.8); branch 43 failed, 4511 passed, 65 errors (63.60 s, load1 4.6 to 5.8). +69 passed, the same 108 red ids in both (0 new, 0 gone, none mine). Coverage gate reached: 94.27 percent before, 94.33 after.
+- ruff format --check and ruff check clean and mypy clean on the 5 files; planted-error controls fired (unused variable F841; wrong return type [return-value]); the control file moved out of the tree. docs-fragments check ends OK (291 new fragments against 290 in pristine develop; its two ADVISORY lines are identical in pristine develop).
+- Largest file 210 logical lines (cap 400).
+- THE HOOK PRINTED NOTHING, so there is no closing line to quote and no "NOT a pass" block. push.out holds only git's six remote lines. The hook's header says it skips the Blockchain/Dev preflight for systemTest-only and docs-only pushes, and its formatting gate covers akto, api-explorer, oxlint, performance and playwright, not schemathesis (control: akto listed). I reproduced it by hand with a stand-in remote name: exit 0, no output, 0.96 s, tree unchanged. I claim no preflight leg ran; that none did is inferred, not separately measured.
+
+live NOT RUN: the live cells L2 to L5 (slot NONE per your ANSWER) and row 1 (needs a remote target). Their bodies were driven over MockTransport only, so whether the platform answers as the stand-in does is unmeasured. Whether two registrations can share a content_hash through the public API stays UNMEASURED (a source reading; a slot that refuses the second registration would be a platform finding). The row 1 certify request (POST /certifications/issue) is written from the route's validation and has never been exercised.
+
+Declared deviations:
+1. One extra file against your list: the MockTransport drives are a second unit file, because the 400-line cap would force the split anyway.
+2. Your ANSWER released a copy of the shared venv. I copied the venv of worktrees/s-t25-stack instead: it is closer to the pins (ruff 0.17.1, mypy 2.4.0, schemathesis 4.32.1, pytest 9.1.1) than the shared one (ruff 0.15.20, mypy 2.1.0, schemathesis 4.24.3). No venv on this machine meets the pins (schemathesis ==4.33.4, pytest >=9.2.0, ruff >=0.17.5, mypy >=2.4.1). I did not install anything from a registry. The copy's editable-install path was repointed at my tree and import resolution checked. Results are quoted as measured on that gap; node here is v26.8.1, not an LTS line.
+3. systemTest/CLAUDE.md names sibling tests in two narrative lists (MUST 8 says this file's listings move with a change). I did not edit it: your partition excludes it. Your call.
+4. I did not run the package's quality command (it runs ruff --fix and format over the whole tree); ruff and mypy ran on my five files only.
+
+Candidate filings for you to route (I filed none):
+- Venv drift: no venv on this machine meets the pins, and the offline tier reads 43 failed and 65 errors on develop itself (89 IgnoredAuth ImportErrors, the venv-pin parity tripwire among them, in 32 modules). Anyone running the tier here sees the same 108.
+- No push-time gate covers systemTest/schemathesis formatting: the hook's formatting gate lists five npm packages and the Python package is not one, so a ruff format drift in a push like this is caught only by the author's own run.
+
+Next row: the tier-2 gate on PR 2257. Wrap mail follows.
