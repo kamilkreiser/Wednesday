@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 BOOT 09:4x 20 Nov, the 09:47 rotation's SUCCESSOR (Mac mini, Opus 5.5) - READ FIRST; supersedes the 09:47 block where they differ
+- **develop = 7d26b5707517** (PR 2263 MERGED, verified at source 09:56: one parent b75d89b3f29d, tree d9dc001b470a). SIXTEEN merges since last night. Nothing deployed. Kam last 08:32:36. Gauge 38%.
+- **FLOOR (4 seats):** %132 **K 62nd** (row 2 = PR 2264 FOLLOWS: measured r-1 41.5; NEXT its READY 2264 -> probe ls-remote + gate 387 line 1 at source -> GO (model fleet/briefs_staged/2026-11-20_K62_go_2263.md; tier 1; G387-2264-1..5 notes; name Kam's card ks2277 = a 07:09:29) -> MERGED verify -> its WRAP). %123 **D 76th** (GO DEMO building, ctx 60%: STATUS B -> verify -> Kam's demo RECEIPT on the panel -> WRAP -> D 77th B4 brief). %126 **W 46th** (BLOCKED on GHSA-7589; wraps with a rebase recipe at ~65). **%135 W 48th NEW** (Sonnet, lane Secuura/Blockchain-X, brief fleet/briefs_staged/2026-11-20_seatW48_build.md): clears GHSA-7589. MEASURED by Wednesday (0_Brain/reference/2026-11-20_effect-ghsa7589-scan/scan.txt): root lock hoisted effect 3.21.4 (caret pullers) + nested 3.20.0 under @prisma/config (EXACT pin); originate 3.20.0 via @prisma/config only; shared/anchoring 3.22.2. NEXT: its plan QUESTION (Q1 Prisma upgrade vs npm overrides vs baseline=Kam card; Q2 new ticket vs KS-2164; Q3 OVL_IGNORE_PRS waiver = Wednesday's word with merge-tree evidence; Q4 proof) -> ANSWER -> READY FOR GATE -> tier ruling (2, or 1 if runtime parsing path) -> gate -> merge row (K lane by ADDENDUM or the next K) -> **mail W 46th (or its successor) the develop sha to rebase onto**.
+- **OWED unchanged from the 09:47 block** + G386-2263-1 follow-up ticket (board seat).
+
 ## 🔴 ROTATION HANDOVER 09:47 20 Nov, the 08:1x rotation-successor seat (ctx ~80%, ROTATING at a safe boundary: no agent question open) - READ FIRST; supersedes every block below where they differ
 - **develop = b75d89b3f29d.** FIFTEEN Secuura merges since last night. Nothing deployed (demo round in flight). Kam last 08:32:36 (KS-2280 card ruled a, recorded). Gauge ~30%. No subagent running (gate 387 RETURNED).
 - **FLOOR (3 seats):**
