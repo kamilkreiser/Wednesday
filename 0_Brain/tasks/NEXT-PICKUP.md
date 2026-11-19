@@ -8,9 +8,19 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 68% 04:0x 20 Nov, the 02:5x rotation-successor seat - READ FIRST; supersedes every block below where they differ
+- **develop = 70a0d984ac70.** Kam silent since 18:38:54 yesterday. Gauge 22%.
+- **FLOOR (3 seats):**
+  - %99 **B 207th**: GO SENT 03:59 for PR 2052 (KS-1081, tier 1, UNION= four paths; fleet/briefs_staged/2026-11-20_B207_go_2052.md; expected tree 4d0abe3b14ba). NEXT: its MERGED -> VERIFY AT SOURCE (one parent 70a0d984ac70, tree 4d0abe3b14ba3d75ce6228d1fb639691308040a0) -> its WRAP naming ROWS DONE -> score + pane_close.
+  - %93 **K 58th**: READY for PR 2153 (16:59Z) HELD by Wednesday's ANSWER 04:01 (fleet/briefs_staged/2026-11-20_K58_answer_hold_2153.md): after B's MERGED it re-pins and sends a SHORT delta READY (one-row allowance up to meter 60) -> Wednesday probes + GOs (subject it asked: `GO: merge PR 2153 at 7a061f5e3f01 on develop <new pin12> (Seat K 58th)`; GO names the developer-visible banner change, G299-2153-1/-2 notes, -3 wording, -4..-6 info; squash `QA gate GO WITH NOTES; merge GO pinned to 7a061f5e3f01.`) -> MERGED (verify) -> WRAP naming PR 2154.
+  - %102 **W 43rd** (Sonnet build, KS-2283 F1 test-only; brief fleet/briefs_staged/2026-11-20_seatW43_build.md): plan QUESTION next (measures G12, chooses the assertion from measured text, asks about the fragment sentence). Tier decided at its READY (G1 vs G2).
+  - S 99th WRAPPED, scored 0.97, pane closed (KS-2283 filed; KS-2277 + KS-1936 comments).
+- **OWED:** fleet_ack answered for B 207th + S 99th plan QUESTIONS (refused on collector lag twice); **MORNING CARD 06:00** (counts; people-waiting KS-1076, KS-683, KS-607; eight open Secuura cards; gate 259 N2 for his eyes; tonight's merges; the invoke-to-read regression + its hook fix; the deploy precondition for PR 2052); wrap duty: ledger edited (03:40 row) -> both digests + rules_card --check; pickup fold.
+
 ## 🔴 UPDATE 03:3x 20 Nov, the 02:5x rotation-successor seat (ctx ~60%) - READ FIRST
 - **develop = 70a0d984ac70** (PR 2260 KS-1936 MERGED by K 58th 16:24Z; Wednesday verified at source 03:27: one parent 6ebd769a0301, tree 036976c22254). Seven merges tonight.
 - **FLOOR (3 seats):** %93 **K 58th** (PR 2153 row 1 legs running; re-measures before its READY, wraps naming 2153 if >= 58). %96 **S 99th** (Sonnet board: KS-2277 correcting comment, gate 383 F1/F2 follow-up ticket, KS-1936 facts comment; plan QUESTION with drafts -> licence BY ITEM; brief fleet/briefs_staged/2026-11-20_seatS99_board.md). %99 **B 207th** (Sonnet merge, PR 2052 alone, STAMP B207-W1..W10; plan QUESTION next). ONE GO at a time across K and B.
+- **03:40: B 207th plan CONFIRMED** (fleet/briefs_staged/2026-11-20_B207_answer_plan.md; +read memory note 68-144). **OWED: re-run `fleet_ack.sh answered "QUESTION: plan confirmation (Seat B 207th)" ...` (refused at 03:40: collector lag). Wrap duty: ledger edited (row 03:40) -> both digests + rules_card --check.**
 - **NEW for the MORNING CARD:** gate 259 N2 (PR 2052's production guard refuses LOG_LEVEL=debug, CARDANO_NETWORK=preview, a rate limit of 10000: wider than his card's words; for his eyes, not a hold). **NEW DEPLOY PRECONDITION (B207-W3):** any deploy of a build containing PR 2052 first has the D seat read-only check that box's .env for the eight refused values under NODE_ENV=production.
 
 ## 🔴 CHECKPOINT 50% 03:0x 20 Nov, the 02:5x rotation-successor seat - READ FIRST; supersedes every block below where they differ
