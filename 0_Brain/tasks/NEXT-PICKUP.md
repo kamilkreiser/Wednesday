@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 70% 04:1x 20 Nov, the 02:5x rotation-successor seat - READ FIRST; supersedes every block below where they differ
+- **develop = 2ad55ceceb7c** (PR 2052 KS-1081 MERGED by B 207th 17:01:01Z; Wednesday verified at source 04:05:11: one parent 70a0d984ac70, tree 4d0abe3b14ba, 32 files). EIGHT merges tonight (2257, 2131, 2190, 2193, 2102, 2191, 2260, 2052). Nothing deployed; **B207-W3 binds: any deploy of a build containing PR 2052 first has the D seat read that box's env file for the eight refused values.**
+- **FLOOR (1 seat + 1 drafter):** %102 **W 43rd** (KS-2283 F1, test-only; plan QUESTION next; tier at its READY). **K 59th DRAFTER RUNNING** (re-commission from 0_Brain/reference/2026-11-20_drafter-seatK59/commission.md if fleet/briefs_staged/2026-11-20_seatK59_merge.md is ABSENT): rows 2153 (re-pin ready-made in K 58th's record: tree 419f257ae362 on 2ad55ceceb7c), 2154, 2155, 2160, 2150, 2152, 2195; PR 2160/2195 need Wednesday's words. On return: read WHOLE, STAMP, launch.
+- **SCORED + CLOSED:** K 58th 0.94 (%93; wrapped naming PR 2153 at meter 60.4 > the 60 allowance), B 207th 0.96 (%99; ROWS DONE), S 99th 0.97 (%96). The B lane queue is EMPTY.
+- **OWED:** the MORNING CARD at 06:00 (counts; people-waiting KS-1076, KS-683, KS-607; eight open Secuura cards; gate 259 N2 for his eyes; the PR 2052 deploy precondition; tonight's eight merges + Kintsugi k36; the invoke-to-read regression + its hook fix); the stale fleet_ack collector (agentmail.json window frozen at 16:33Z while its mtime moves: a WED tooling item; flags for B 207th / S 99th questions never lit); wrap duty: ledger edited (03:40 row) -> both digests + rules_card --check; pickup fold.
+
 ## 🔴 CHECKPOINT 68% 04:0x 20 Nov, the 02:5x rotation-successor seat - READ FIRST; supersedes every block below where they differ
 - **develop = 70a0d984ac70.** Kam silent since 18:38:54 yesterday. Gauge 22%.
 - **FLOOR (3 seats):**
