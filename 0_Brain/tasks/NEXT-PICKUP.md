@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 01:37 20 Nov, the 23:4x rotation-successor seat (ctx ~63%) - READ FIRST; supersedes the 50% block where they differ
+- **develop = 387579252c12** (PR 2190, KS-678, verified at source). Tonight's merges on this seat's GOs: PR 2257 = fb975989cee1, PR 2131 = d4ffc8308249, PR 2190 = 387579252c12.
+- **FLOOR (4 seats):** %78 **D 75th** (Opus, Kintsugi k36 on pin d4ffc8308249; GO KINTSUGI sent 01:22; NEXT its STATUS B -> GO LIVE-READ). %81 **K 57th** (Sonnet; merged 2190; GOES ON to PR 2193: READY next -> GO). %84 **B 206th** (Sonnet; launched 01:34; plan QUESTION next; rows 2102, 2191, 2052; ONE GO at a time with K). %87 **W 42nd** (Sonnet; PR 2260 round 2: gate 382 F1 retitle + H2s, F5 two cells; plan QUESTION next -> READY FOR GATE DELTA -> commission a TIER-1 DELTA gate (Opus) -> merge row as an ADDENDUM to K 57th or B 206th).
+- **GATE 382 = GO WITH NOTES on PR 2260** (verdict 0_Brain/reference/2026-11-20_gate382-tier1-pr2260-ks1936-admin-level/verdict.md). W 41st SCORED 0.93 (pane closed). **CARD secuura-org-admin-sets-verification-level-1120 OPEN** (F2: auth PATCH /api/users/admin/:id lets org admins set any same-tenant user's verification level incl. themselves; rec b own org capped, per KS-1699 = b; default c). On a or b: a build seat on auth users.ts (tier 1 gate).
+- **Board seat S 98th OWED** (not yet briefed): F3 (originate sibling reachable via /originate/ passthrough), F4 (organisations PUT/DELETE/POST by id), the boot-role check ticket, the KS-590 comment, the five packages/shared develop failures (filed?), KS-1152 title mismatch, the cross-seat node_modules link (gate 382 INFO), the KS-772 reply after D 75th's live read.
+
 ## 🔴 CHECKPOINT 50% 01:09 20 Nov, the 23:4x rotation-successor seat - READ FIRST; supersedes every block below where they differ
 - **develop = d4ffc8308249** (PR 2131). Tonight's merges by this seat's GOs, each verified at source: PR 2257 (KS-590) = fb975989cee1, PR 2131 (KS-625) = d4ffc8308249.
 - **FLOOR (3 seats + 1 drafter):**
