@@ -1,0 +1,39 @@
+17:29:28
+MUTANT M1 APPLIED
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.65s
+test v5_v4_a_hostile_peers_positions_and_acknowledgements_never_leave_a_wait_without_a_clock ... FAILED
+test result: FAILED. 45 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 493.86s
+MUTANT M1 RESTORED
+MUTANT M1 test exit 101
+17:37:47
+MUTANT M2 APPLIED
+test g5_1c_same_forgery_then_an_honest_peer_still_gets_the_message ... FAILED
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s
+test v5_v4_a_hostile_peers_positions_and_acknowledgements_never_leave_a_wait_without_a_clock ... FAILED
+test result: FAILED. 45 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 502.00s
+MUTANT M2 RESTORED
+MUTANT M2 test exit 101
+17:46:16
+MUTANT M3 APPLIED
+test g5_4_r4_8_desync_status_after_the_pump_passed_the_gap ... FAILED
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.66s
+test result: ok. 46 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 500.24s
+MUTANT M3 RESTORED
+MUTANT M3 test exit 101
+17:54:40
+MUTANT M4 APPLIED
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.65s
+test result: ok. 46 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 504.85s
+MUTANT M4 RESTORED
+MUTANT M4 test exit 0
+status-lines=       0
+
+[exited with code 0]
+M1: thread 'v5_v4_a_hostile_peers_positions_and_acknowledgements_never_leave_a_wait_without_a_clock' (2265831) panicked at crates/coagent-daemon/tests/support/model.rs:1421:13:
+M1: V5/V4 hostile peer (R5-1): rule `skips_clock_fired` was never reached (reach is counted)
+M2: thread 'g5_1c_same_forgery_then_an_honest_peer_still_gets_the_message' (2317870) panicked at crates/coagent-daemon/tests/gate_r5_model.rs:210:5:
+M2: V4 (R4-8 rule): after the peer's forged positions, an honest peer did not get the queued message within 120 s: outbox 1 in_flight 0 skips_left 0 desync_out true pos Some(256) proven true connected true peer_full false next_deadline Some(0ns) lost_outbound 256 resyncs {}
+M2: thread 'v5_v4_a_hostile_peers_positions_and_acknowledgements_never_leave_a_wait_without_a_clock' (2318663) panicked at crates/coagent-daemon/tests/support/model.rs:1421:13:
+M2: V5/V4 hostile peer (R5-1): rule `skips_clock_fired` was never reached (reach is counted)
+M3: thread 'g5_4_r4_8_desync_status_after_the_pump_passed_the_gap' (2369975) panicked at crates/coagent-daemon/tests/gate_r5_model.rs:326:5:
+M3: G5-4 (row 54 status): the pump passed every missing number (next_out 301 send_next 301) but desync is still shown

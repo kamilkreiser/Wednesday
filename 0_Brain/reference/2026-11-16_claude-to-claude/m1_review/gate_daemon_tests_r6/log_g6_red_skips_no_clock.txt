@@ -1,0 +1,59 @@
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:35:1
+   |
+35 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+   Compiling coagent-daemon v0.0.1 (/private/tmp/claude-501/gd6/t6/crates/coagent-daemon)
+warning: coagent-daemon@0.0.1: RED CONTROL BUILD: coagent_red="skips_no_clock" (a deliberately broken variant)
+    Finished `test` profile [unoptimized] target(s) in 1.87s
+     Running tests/gate_r6_model.rs (/private/tmp/claude-501/gd6/target_t/debug/build/coagent-daemon/2f6f051125b62267/out/gate_r6_model-2f6f051125b62267)
+
+running 3 tests
+G6-2 after full/room 0: outbox 0 in_flight 128 skips_left 128 skips_spent_at None next_out 129 send_next 1001 pos Some(0) proven true connected true peer_full false next_deadline Some(14.7s) lost_outbound 128 resyncs {}
+G6-2 after the forged ack: outbox 0 in_flight 128 skips_left 128 skips_spent_at None next_out 257 send_next 1001 pos Some(0) proven true connected true peer_full false next_deadline Some(15s) lost_outbound 256 resyncs {}
+G6-1: 1 cycles, fired by row 54's clock 0; per cycle (frames side 0 -> peer, spent->RESYNC, cycle time): [(256, 60.9s, 61.5s)]
+G6-1: total 61.5s, frames side 0 -> peer 256 (4.2/s); T-RTO resyncs {}; reconnects 0
+G6-2: honest peer after one forged ack: delivered false in 120s; budget spent with nothing in flight seen true; longest wait with no deadline 119.5s; outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(5.2s) next_out 385 send_next 1002 pos Some(1000) proven true connected true peer_full false next_deadline None lost_outbound 384 resyncs {}
+
+thread 'g6_2_one_forged_ack_at_the_top_then_an_honest_peer' (2262076) panicked at crates/coagent-daemon/tests/gate_r6_model.rs:358:5:
+G6-2 (V5): waited 119.5s with no deadline
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test g6_2_one_forged_ack_at_the_top_then_an_honest_peer ... FAILED
+G6-1 honest: delivered all 1 false in 120s; outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+cycle 0: V5: side 0 at 5.9s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+cycle 0: V5: side 0 at 6s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+cycle 0: V5: side 0 at 6.1s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+cycle 0: V5: side 0 at 6.2s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+cycle 0: V5: side 0 at 6.3s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+cycle 0: no RESYNC within 60 s of the trim pattern: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+V4: not delivered in 120 s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+
+thread 'g6_1_row54_clock_fires_after_every_new_channel_and_stays_bounded' (2262075) panicked at crates/coagent-daemon/tests/gate_r6_model.rs:293:5:
+G6-1 (V5/V4, row 54 clock): cycle 0: V5: side 0 at 5.9s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(4.9s) next_out 257 send_next 1002 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}
+test g6_1_row54_clock_fires_after_every_new_channel_and_stays_bounded ... FAILED
+test g6_3_generated_hostile_peer_with_messages_and_long_silences has been running for over 60 seconds
+G6-3: 120 seeds; ticks with the budget spent and nothing in flight 6039; row 54 clock fired 0; hostile messages 297; cuts 431
+V5 seed 7: side 0 at 9.5s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(7.9s) next_out 257 send_next 402 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}; last ops [(9.4s, SenderSend), (7.3s, Trim), (4.7s, Ack(933)), (4.4s, Full(1, 1)), (2.9s, Msg(4))]
+V5 seed 7: side 0 at 9.6s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(7.9s) next_out 257 send_next 402 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}; last ops [(9.4s, SenderSend), (7.3s, Trim), (4.7s, Ack(933)), (4.4s, Full(1, 1)), (2.9s, Msg(4))]
+V5 seed 7: side 0 at 22s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(17.7s) next_out 257 send_next 403 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 913 resyncs {}; last ops [(21.9s, SenderSend), (19.8s, Silent(35)), (19.1s, Drop(2)), (17.1s, Trim), (15.1s, Trim), (14.7s, HonestSend), (13.6s, Ack(1)), (12.8s, Full(18446744073709551615, 0))]
+V5 seed 7: side 0 at 22.1s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(17.7s) next_out 257 send_next 403 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 913 resyncs {}; last ops [(21.9s, SenderSend), (19.8s, Silent(35)), (19.1s, Drop(2)), (17.1s, Trim), (15.1s, Trim), (14.7s, HonestSend), (13.6s, Ack(1)), (12.8s, Full(18446744073709551615, 0))]
+V5 seed 7: side 0 at 22.2s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(17.7s) next_out 257 send_next 403 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 913 resyncs {}; last ops [(21.9s, SenderSend), (19.8s, Silent(35)), (19.1s, Drop(2)), (17.1s, Trim), (15.1s, Trim), (14.7s, HonestSend), (13.6s, Ack(1)), (12.8s, Full(18446744073709551615, 0))]
+
+thread 'g6_3_generated_hostile_peer_with_messages_and_long_silences' (2262077) panicked at crates/coagent-daemon/tests/gate_r6_model.rs:567:5:
+G6-3 (V5/V4 hostile peer): V5 seed 7: side 0 at 9.5s: outbox 1 in_flight 0 skips_left 0 skips_spent_at Some(7.9s) next_out 257 send_next 402 pos Some(256) proven true connected true peer_full false next_deadline None lost_outbound 256 resyncs {}; last ops [(9.4s, SenderSend), (7.3s, Trim), (4.7s, Ack(933)), (4.4s, Full(1, 1)), (2.9s, Msg(4))]
+test g6_3_generated_hostile_peer_with_messages_and_long_silences ... FAILED
+
+failures:
+
+failures:
+    g6_1_row54_clock_fires_after_every_new_channel_and_stays_bounded
+    g6_2_one_forged_ack_at_the_top_then_an_honest_peer
+    g6_3_generated_hostile_peer_with_messages_and_long_silences
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 76.24s
+
+error: test failed, to rerun pass `-p coagent-daemon --test gate_r6_model`

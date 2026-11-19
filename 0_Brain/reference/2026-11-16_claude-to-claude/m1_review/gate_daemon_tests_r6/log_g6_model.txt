@@ -1,0 +1,27 @@
+warning: unused workspace dependency `rand_core`
+  --> Cargo.toml:35:1
+   |
+35 | rand_core = { version = "=0.6.4", features = ["getrandom"] }
+   | ^^^^^^^^^
+   |
+   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `rand_core`
+warning: workspace (manifest) generated 1 warning
+    Finished `test` profile [unoptimized] target(s) in 0.21s
+     Running tests/gate_r6_model.rs (/private/tmp/claude-501/gd6/target_t/debug/build/coagent-daemon/2f6f051125b62267/out/gate_r6_model-2f6f051125b62267)
+
+running 3 tests
+G6-2 after full/room 0: outbox 0 in_flight 128 skips_left 128 skips_spent_at None next_out 129 send_next 1001 pos Some(0) proven true connected true peer_full false next_deadline Some(14.7s) lost_outbound 128 resyncs {}
+G6-2 after the forged ack: outbox 0 in_flight 128 skips_left 128 skips_spent_at None next_out 257 send_next 1001 pos Some(0) proven true connected true peer_full false next_deadline Some(15s) lost_outbound 256 resyncs {}
+G6-2: honest peer after one forged ack: delivered true in 16.6s; budget spent with nothing in flight seen true; longest wait with no deadline 0ns; outbox 1 in_flight 1 skips_left 256 skips_spent_at None next_out 1002 send_next 1002 pos Some(1000) proven true connected true peer_full false next_deadline Some(14.9s) lost_outbound 384 resyncs {"T-RTO": 1}
+test g6_2_one_forged_ack_at_the_top_then_an_honest_peer ... ok
+G6-1: 12 cycles, fired by row 54's clock 12; per cycle (frames side 0 -> peer, spent->RESYNC, cycle time): [(256, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s), (258, 15.1s, 15.7s)]
+G6-1: total 201.6s, frames side 0 -> peer 3116 (15.5/s); T-RTO resyncs {"T-RTO": 12}; reconnects 12
+G6-1 honest: delivered all 12 true in 1.3s; outbox 1 in_flight 1 skips_left 256 skips_spent_at None next_out 1013 send_next 1013 pos Some(1011) proven true connected true peer_full false next_deadline Some(14.9s) lost_outbound 3072 resyncs {"T-RTO": 12}
+test g6_1_row54_clock_fires_after_every_new_channel_and_stays_bounded ... ok
+test g6_3_generated_hostile_peer_with_messages_and_long_silences has been running for over 60 seconds
+G6-3: 120 seeds; ticks with the budget spent and nothing in flight 4094; row 54 clock fired 7; hostile messages 297; cuts 431
+test g6_3_generated_hostile_peer_with_messages_and_long_silences ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 76.56s
+
