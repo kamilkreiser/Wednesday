@@ -1,0 +1,5 @@
+# Replace PRNUM with the pull request number everywhere below (and in squash-subject.txt) before running. Nothing deploys on merge.
+# 1. Wait for the hosted checks on the PR head (9 expected: package, CodeQL, python, dotnet, web, Analyze actions/csharp/python/javascript-typescript).
+bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/MPS-Commercial-Calculator PRNUM 39f0c0c3eca15011f8dc22dd2a9646cc4f1f1ca2 --min-checks 9
+# 2. Only when every check is success and hosted CodeQL shows no alert: head-pinned squash.
+gh pr merge PRNUM -R datasecau/MPS-Commercial-Calculator --squash --match-head-commit 39f0c0c3eca15011f8dc22dd2a9646cc4f1f1ca2 --subject "The purchase result shows the server's projection table to callers who receive it, in a new table (MPSCALC-267) (#PRNUM)" --body-file /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-19_B1752_verify/squash-body.txt
