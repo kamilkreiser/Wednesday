@@ -1,0 +1,111 @@
+cb6ddf0a | [M00] `date` run by the drafter -> Thu 19 Nov 2026 18:40:40, 18:41:08, 18:41:15, 18:45:04, 18:51:32, 18:52:34 AEDT (each printed in the same action as the read it dates)
+8daa7a82 | [M01] gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/ref/heads/main --jq .object.sha (project GH_CONFIG_DIR, kamilDatasec active) at 18:41:15 -> e036c9661afab6f4339b53095afd37eb06026d5c
+9bb9f1aa | not a matched literal: the closing parenthesis of the instruction `env -C '<dir>' <command>` (B1741 kit line 7 form); nothing for a seat to match
+f9e73e09 | instruction (a forbidden path), not a matched literal; the drafter read nothing under any .local/ (its reads are listed in the report)
+0a056e4f | instruction (a forbidden path), not a matched literal; the drafter read nothing under Source_Documents/
+92f24add | grep -n -F BRIEF_SEAT_LEVEL /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh -> :29 comment 'BRIEF_SEAT_LEVEL=sonnet|opus (default opus)', :31 LEVEL="${BRIEF_SEAT_LEVEL:-opus}"
+5a1688ae | same grep -> line 31 reads LEVEL="${BRIEF_SEAT_LEVEL:-opus}" (count 1 at :31)
+3e7f4526 | same grep -> the token ${BRIEF_SEAT_LEVEL:-opus} on brief_seat.sh:31
+47c0db32 | [M02] bash decision_queue.sh show mps-deploy-apply-would-remove-feedback-setting-1119 > d1750/card.txt 2>&1 (rc 0, 13 lines) at 18:41:08 -> 'status:  ruled   (Datasec/MPS Commercial Calculator)'; 'ruling:  choice='a'  ruled_ts=2026-11-19T18:39:18.369089+11:00'
+4029ae18 | [M02] python over d1750/card.txt and the kit: the bluf (724 chars), option a label (45) and detail (278) each occur verbatim inside double quotes in the kit -> True, True, True; control: the bluf with one word altered -> False
+a337084e | [M10] the drafter's GET-only helper d1750/tools/jget.py reads JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN from the project .env in-process; asserts the three names present; prints no value -> ran, no credential printed
+cf688cad | [M10] python3 -I -B d1750/tools/jget.py jql 'project = MPSCALC AND ( key = MPSCALC-361 )' -> count 1; MPSCALC-361 | Done
+3d7a30a4 | [M10] jget jql 'project = MPSCALC AND ( text ~ "budgetStartDate" )' at 18:45 -> count 0 (control MPSCALC-361 Done; the same helper found 16 for Feedback__Path)
+ee6c4417 | [M11] python over d1750/prs_all.tsv (218 PRs, paginated; controls #204 and #10 present -> True True), pattern 'Feedback__Path|feedback path|feedback folder' over branch/title/body -> 0
+85f69a5d | [M11] same program, 'budgetStartDate|budget start' -> 0
+4beb6c2c | [M11] same program, 'MPSCALC_API_CLIENT_ID|MPSCALC_SPA_CLIENT_ID|client ids?\b' -> 0; [M10] jget 'text ~ "client id" AND text ~ "bicep"' -> count 0
+5bf3b544 | [M11] same program, 'showcase\.bicep|bicepparam' -> 0; [M10] jget 'text ~ "showcase.bicep"' -> count 2 (MPSCALC-372, MPSCALC-62)
+f5f73921 | [M03] grep -n -F REPLACES d1750/base/infra/modules/showcase.bicep -> 58:// this resource REPLACES the site's app settings on every deploy. ...
+23ada096 | awk 'NR==146' .../Briefs/2026-10-13_B73_STATUS.md -> the line holds `AZURE_CONFIG_DIR=<project>/4_Credentials/.azure az webapp config appsettings set -g mpscalc-showcase-rg -n app-mpscalc-showcase-u6agl3edszqvs --settings MpsCalc__Feedback__Path=/home/data/feedback/ -o none` -> **rc 0**
+ce7250ce | grep -n over tree src/MpsCalc.Api/Feedback/FeedbackStore.cs -> 206: if (string.IsNullOrWhiteSpace(configuredPath)); 208: return Unavailable(); (203 OpenHosted)
+5443e23a | same grep -> 208:            return Unavailable();
+5ae00a26 | same grep -> 187: public static FeedbackStore Unavailable() => new(null); 194 and 208 return Unavailable();
+51e1d684 | grep -rn -I -F Feedback over tree src/MpsCalc.Api/appsettings*.json -> one hit: appsettings.Development.json:7 "Feedback": { "Path": "../../.local/feedback/" } (control: the same grep found the line, so the other files hold 0)
+ce5d3558 | same grep -> the value ../../.local/feedback/ at appsettings.Development.json:7
+673083d3 | [M07] python over every file of the tree at e036c966: occurrences of the two appIds (read in-process from B14_STATUS.md:112-113, never printed) -> api 0 files 0, spa 0 files 0; control tenant id ec01829b-... -> 5 occurrences in 4 files (infra/README.md:3 among them)
+93582e41 | [M12] gh api -X GET commits?sha=main&path=infra/env/showcase.bicepparam -> 1 commit: 2dd7594b 2026-10-10 B14: infra (Bicep)... (#10); main.bicep -> the same 1 commit; showcase.bicep -> 3 (87dc2623, a168bada, 2dd7594b)
+dcd997f3 | Read of tree infra/modules/showcase.bicep lines 57-59 -> :58 '... REPLACES the site's app settings on every deploy. No value is a secret: ...', :59 '// connection string in this design. Tenant and app ids are identifiers, not credentials.'
+9e37cbb8 | grep -n -i budget .../Briefs/2026-10-10_B14_STATUS.md -> 87: | Microsoft.Consumption/budgets | budget-mpscalc-showcase: 50 ..., start 2026-10-01 ...
+31812442 | grep -n -F 'consumption budget show' B14_STATUS.md -> 80: ## Resources (live; ids read back with `az group show`, `az resource list`, `az consumption budget show`)
+ce8f6de3 | [M09] /usr/bin/grep -c -F budgetStartDate d1750/base/infra/tests/test_infra.py -> 0 (control: resourceGroupName -> 1)
+84b3247b | [M09] /usr/bin/grep -c -F apiClientId d1750/base/infra/tests/test_infra.py -> 0 (same control 1)
+96b64577 | [M09] /usr/bin/grep -c -F spaClientId d1750/base/infra/tests/test_infra.py -> 0 (same control 1)
+bfab0796 | grep -n -E over tree scripts/tests/test_deploy_pre1.py -> 163: with open(BICEP, ...); 164: m = re.search(r"MpsCalc__CatalogueOverlay__Path:\s*'([^']+)'", f.read())
+86160c7f | same grep -> the regex text at test_deploy_pre1.py:164
+a45a2a0e | RELAYED: .../Briefs/2026-11-16_B1627_STATUS.md:36 'test_validate_script.py Ran 6 OK' (a real run); [M09] ast count of test methods in tree infra/tests/test_validate_script.py -> 6
+ccfb3838 | RELAYED: B1627_STATUS.md:36 '`validate.sh` rc 0, last line `== validate: OK`' (the seat's real run of bash infra/scripts/validate.sh)
+2fe7e944 | RELAYED: B1627_STATUS.md:36 and :45 '== validate: OK'; source: grep -n tree infra/scripts/validate.sh -> 31: echo "== validate: OK"
+21997ade | RELAYED: B1627_STATUS.md:36 'scripts/tests/test_deploy_pre1.py Ran 44 OK in 48 s'; [M09] ast count -> 44
+9ab375da | unittest's own summary line 'Ran N tests'; RELAYED B1627_STATUS.md:43 'Ran 29 tests, FAILED (failures=1)' and :45 'Ran 29 tests OK'
+76abca95 | rule from /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/DRAFTER_RULES.md:95 (a filter or run that matches nothing returns rc 0: STOP on a total of 0); no selector is used in this kit
+82169924 | [M05] d1750/tools/predict.py: the head name set with MpsCalc__QuoteStore__Path dropped -> 'removed ['MpsCalc__QuoteStore__Path']' (control fired)
+0172e57c | RELAYED: B14_STATUS.md:96 '(`utcNow` budget start = the same 2026-10-01; server-set endDate/freeOffer fields; `sku.tier`' (grep -n printed :95-:97)
+d8a504df | RELAYED: B14_STATUS.md:96-97 '`sku.tier` Basic made explicit'
+bb5ad97a | [M15] ls -la '<project>/.tools/' | grep -E 'bicep|heavy-lock|git-lock|b1750|total' -> only 'total 128' and the bicep-v0.48.1 line: .heavy-lock-* 0
+3262738d | [M15] same listing -> .git-lock 0
+09e9b66b | [M15] same listing -> b1750 0
+1000fc59 | [M15] same listing -> bicep-v0.48.1 1 (control fired); ls of the folder -> bicep 116883328 bytes
+500b89bd | git -C '<project>/2_Project_Files' --no-optional-locks config --local --get user.name | wc -c -> 12 (value not printed)
+0b94c85c | git -C ... config --local --get user.email | wc -c -> 29 (value not printed)
+b2e6a961 | same: user.email present, 29 bytes with the newline
+62c4a8fd | instruction (a banned environment variable family), not a matched literal; DRAFTER_RULES.md:64
+9a7f8e3d | instruction (banned), not a matched literal; DRAFTER_RULES.md:64
+41898658 | [M03] grep -n -E over d1750/base/infra/main.bicep -> 20/21 apiClientId, 23/24 spaClientId, 36/37 budgetStartDate (utcNow at :37)
+c0121138 | same grep -> 36:@description('First day of the budget\'s first month (yyyy-MM-01).')
+e88849de | same grep -> 37:param budgetStartDate string = utcNow('yyyy-MM-01')
+bba7f36d | [M08] /usr/bin/grep -c -F build-params d1750/edit/infra/README.md -> 2 (base 1: the line-20 comment); the new sentence is E5a's
+afc70cd6 | [M08] E5a NEW block names MPSCALC_API_CLIENT_ID; source tree infra/env/showcase.bicepparam:8 readEnvironmentVariable('MPSCALC_API_CLIENT_ID', '')
+0e487c7c | [M08] /usr/bin/grep -c -F env/showcase.app-setting-names.txt d1750/edit/infra/README.md -> 1
+160cb9e9 | grep -n over d1750/base/docs/API.md -> 1009: | `MpsCalc__CatalogueOverlay__Path` = ... (count 1)
+b30b58b8 | awk 'NR==1010' d1750/base/docs/API.md -> length 0 (blank line)
+ac910a33 | grep -n -> 1011: **Deploy order for the overlay (B22).** Code first, setting second. ...
+84a5c922 | grep -n -F '{Key}' tree src/MpsCalc.Api/Feedback/FeedbackLog.cs -> 34: ... "Feedback is OFF: {Key} is empty, so every submission answers 503 FEEDBACK_STORE_UNAVAILABLE."
+60cab3bb | RELAYED: B1627_STATUS.md:13 'Bicep CLI version 0.48.1 (cec7951cf6)' (that seat's real run); not run by the drafter
+a92b60d0 | RELAYED: B1627_STATUS.md:8 'Python 3.14.10'; the seat prints its own
+fc4440ea | instruction (the variable name the tests read: tree infra/tests/test_infra.py:55 os.environ.get("BICEP")); not a matched output
+e70a767a | RELAYED: B1627_STATUS.md:36 validate.sh rc 0 last line '== validate: OK' at base efe6cdd5 with ids unset; at e036c966 the infra files differ from efe6cdd5 only by #204's one line (DERIVED); UNMEASURED by the drafter
+237bd98c | source: tree infra/scripts/validate.sh:31 echo "== validate: OK"; RELAYED B1627_STATUS.md:36
+81c6557a | rule DRAFTER_RULES.md:95; instruction
+43fc0cd4 | [M09] ast count of test methods in d1750/edit/infra/tests/test_infra.py -> 35 (base 29: 8+16+2+3; head 12+16+2+2+3); DERIVED as a run, never run
+ba577b67 | [M09] ast count tree infra/tests/test_validate_script.py -> 6; RELAYED B1627 Ran 6 OK
+9ee319fb | [M09] ast count tree scripts/tests/test_deploy_pre1.py -> 44; RELAYED B1627 Ran 44 OK
+4dc39816 | instruction: two SYNTHETIC GUIDs (the web tests use ...00b as their synthetic SPA id: tree web/src/auth/entra/msalClient.test.ts:9); not run by the drafter
+570cdf11 | source validate.sh:31; RELAYED B1627_STATUS.md:45
+a1abfd97 | source: grep -n tree infra/scripts/validate.sh -> 24: echo "== $label: OK (0 warnings)"
+16f5f0ed | unittest summary line; RELAYED B1627_STATUS.md:46 mutants 'each Ran 29, failures=1'
+6c5d4d44 | [M08] /usr/bin/grep -c -F @minLength: d1750/edit/infra/main.bicep -> 2, base -> 0
+8bd52365 | grep -n -F 'resource appSettings' d1750/base/infra/modules/showcase.bicep -> 60: resource appSettings 'Microsoft.Web/sites/config@2024-11-01' = {
+699173ae | [M05] d1750/tools/predict.py parses that block -> base 17 names, head 18
+e11b6e1d | [M08] the drafter's analogue: git diff --no-index --numstat over the 6 files -> exactly the 6 + the NEW file; the seat's grep -c -v -x is an instruction with its control
+32238255 | instruction with a planted control (B1741 kit Step 4(c) form); the drafter's own path list check -> 7 paths
+c4a8e8d2 | [M08] d1750/tools/predict.py: added lines 123, non-ASCII lines 0
+749b1b32 | printf 'a\xe2\x80\x8bb\n' | LC_ALL=C /usr/bin/grep -c -v -x -E '[ -~]*' -> 1 (control fires); anchors at base -> 0
+610bd8a6 | [M08] python re (?<![A-Za-z])kam(?![a-z]) on 'x_by_kam_y' -> True (fires); ban-list hits over added text -> {}
+cef6def0 | [M08] B-number pattern over added text -> 0; control on 'x (B14 C-1) y' -> True
+8a6640aa | [M08] GUID-shaped strings in added text -> 0
+16a12492 | instruction (gitleaks canary then range); gitleaks NOT RUN by the drafter
+67df2ab5 | [M08] count of 'az bicep' in d1750/edit/infra/README.md -> 0
+24e34e4a | same -> 0
+d5984834 | /usr/bin/grep -c -i -F bicep tree infra/scripts/validate.sh -> 9
+82b0bd96 | instruction (NOT RUN list)
+332db950 | [M11] gh api -X GET git/matching-refs/heads/b1750 --jq length -> 0; control heads/b1741 -> 1
+1646c642 | last-line format of the B1741 and B1627 kits (B1627_STATUS.md:107 'READY B1627: 8c64a895...')
+568144a2 | instruction (read-back verb)
+24c6a063 | standing-line format (DRAFTER_RULES.md:71)
+d44ed44b | [M01] the same command printed e036c966 at 18:41:15
+be4aab8b | [M10] -> MPSCALC-361 | Done
+3e4cf21b | table labels of the B1627 kit's PRIOR WORK line; the drafter's own reading: WORK on all six items (feedback 0 in the file, @minLength 0, utcNow 1, the list absent, the two docs rows 0 and 0, control overlay row 1)
+fcb20abb | same
+b9b3dad6 | same
+dc0ca294 | [M08] git diff --no-index --numstat base vs edit infra/main.bicep -> 10 6
+dd58ce5d | [M08] same for infra/env/showcase.bicepparam -> 4 4
+a1b5a2ef | [M12] gh api -X GET branches (paginated) -> 241 names; grep -c -E '^b1[6-7][0-9]{2}/|infra|showcase|templ|feedback|budget' -> 39
+f55f53de | same
+8a64ecf8 | same
+3053ffc4 | same
+8e640a87 | same
+69c486b6 | UNMEASURED by the drafter (no tmux read); said so in the kit
+122e16b5 | last-line format, not a count
+7311b00a | instruction fragment
+eebc557e | instruction fragment
+1240f580 | [M08] python byte count d1750/base/infra/main.bicep -> non-ASCII 3; edit -> 3
