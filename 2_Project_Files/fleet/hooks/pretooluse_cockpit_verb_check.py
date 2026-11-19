@@ -7,6 +7,13 @@ import sys
 
 COCKPIT_RE = re.compile(r"/cockpit/cockpit\.sh[\"']?(?:\s+(\S+))?")
 FLEET_RE = re.compile(r"(?:2_Project_Files/(?:fleet|tools)/\S*\.sh|/(?:fleet|tools|cockpit)/[A-Za-z0-9_.-]+\.sh)")
+# A tool counts only in COMMAND POSITION of a segment: optional ( { , VAR=x assignments, nohup/time/exec/command,
+# then bash/sh/zsh or the path itself. A path that is an ARGUMENT (grep, sed, cat, ls, true reading the file) is
+# not a run (2026-11-20 00:0x: the first version refused a grep over cockpit.sh's own source).
+PREFIX = r"^\s*[({]*\s*(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(?:(?:nohup|time|exec|command)\s+)*(?:(?:bash|sh|zsh)\s+)?[\"']?"
+CMDPOS_COCKPIT_RE = re.compile(PREFIX + r"\S*/cockpit/cockpit\.sh[\"']?(?:\s+(\S+))?")
+CMDPOS_FLEET_RE = re.compile(PREFIX + r"\S*/(?:fleet|tools|cockpit)/[A-Za-z0-9_.-]+\.sh")
+SEG_SPLIT = re.compile(r"\|\||&&|;|\||\n|\$\(|`")
 HEREDOC_RE = re.compile(r"<<-?\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]")
 
 
@@ -36,7 +43,10 @@ def stderr_gone(seg):
 def check(cmd, verbs):
     t = strip_quoted_heredocs(cmd)
     probs = []
-    for m in COCKPIT_RE.finditer(t):
+    for seg in SEG_SPLIT.split(t):
+        m = CMDPOS_COCKPIT_RE.match(seg)
+        if not m:
+            continue
         w = m.group(1)
         if w is None or not re.match(r"[A-Za-z_]", w):
             probs.append("cockpit.sh with NO verb (next word: %s)" % (w or "end of command"))
@@ -44,8 +54,8 @@ def check(cmd, verbs):
             v = re.match(r"[A-Za-z_][A-Za-z0-9_-]*", w).group(0)
             if v not in verbs:
                 probs.append("cockpit.sh invented verb: %s" % v)
-    for seg in re.split(r"\|\||&&|;|\||\n", t):
-        if FLEET_RE.search(seg) and stdout_null(seg) and stderr_gone(seg):
+    for seg in SEG_SPLIT.split(t):
+        if CMDPOS_FLEET_RE.match(seg) and stdout_null(seg) and stderr_gone(seg):
             probs.append("fleet tool with stdout AND stderr discarded: %s" % seg.strip()[:160])
     return probs
 
@@ -62,6 +72,9 @@ def selftest():
         T + " %0 >/dev/null 2>&1",
         "bash " + T + " %0 &>/dev/null",
         "x=1; bash " + C + " ; echo done",
+        "FOO=1 nohup bash " + C + " 2>/dev/null",
+        "(" + T + " %0 >/dev/null 2>&1)",
+        "echo $(" + C + " --help)",
     ]
     quiet = [
         "bash " + C + " say --mail 'subj' 2>&1 | tail -3",
@@ -71,6 +84,10 @@ def selftest():
         "cat > /tmp/f <<'EOF'\n" + C + " 2>/dev/null >/dev/null\n" + T + " >/dev/null 2>&1\nEOF\necho ok",
         "bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/note_entry.sh --stdin <<'EOF'\nran cockpit.sh --help by mistake\nEOF",
         "bash " + T + " %0 > /tmp/out.txt",
+        "/usr/bin/grep -n -i -E 'say\\)|--mail' " + C + " | head -8",
+        "sed -n '1,40p' " + C,
+        "true " + C + " --help",
+        "ls -l " + T + " >/dev/null 2>&1",
     ]
     bad = 0
     for c in fire:
