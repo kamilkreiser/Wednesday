@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 18:4x 19 Nov, the afternoon seat - READ FIRST
+- **FLOOR (4, all Sonnet):** %7 K 52nd (PR 2252 merge; SET-UP closed, legs next, READY -> GO naming head 62124803a881 + G378 F1/F2/F5 notes); %10 S 92nd (close the 168 all-merged In Progress, first 15 in plan; ADDENDUM 1 adds KS-968); %13 W 36th (KS-930 relink guard build; plan Q = R3 heredoc/non-final-stage scope); %16 W 37th (KS-590 systemTest regression, pane -X, mails as -X; plan Q = slot, Wednesday's reading OFFLINE-ONLY). S 91st WRAPPED, scored 0.96, pane closed.
+- **Kam 18:38:54 ruled secuura-ks968-admin-first-boot-1119 = a.** OWED by Wednesday BEFORE ANY production deploy of the auth code: a read-only check of which admin rows production holds (production = Kam's; card it at that time).
+- **Wrap duty (ledger edited this seat):** regenerate BOTH digests + rules_card --check.
+- KS-961 (PR 887 NO GO gate 308; Actions retired; Peter's approval) undecided: card or fix round, Wednesday's call.
+
 ## 🔴 UPDATE 16:5x 19 Nov, the afternoon seat (booted 15:3x after Kam's software update) - READ FIRST
 - **Kam ruled secuura-board-grant-reask-1119 = a (16:49:14): grant RENEWED to Fri 27 Nov, run the queue now.** EXPIRING-GRANTS row updated.
 - **develop 4436ced55274** (Peter's PRs 2253-2256, harness bumps, 11-17 UTC). PR 2252 head 62124803a881 unchanged; gate 378 GWN stands.
