@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 21:3x 19 Nov, the 21:2x successor seat (ctx ~31%, booted BOUNDED: rules index in place of the digest) - READ FIRST; supersedes the blocks below where they differ
+- **FLOOR (4 seats + 1 drafter):**
+  - %37 **W 39th** (Opus, KS-1107): commit a0e58b942c22 built and green; ANSWERED its overlap QUESTION: ONE push with OVL_IGNORE_PRS="2073 2099 2131", spec file only (fleet/briefs_staged/2026-11-19_W39_answer_overlap.md). NEXT: READY FOR GATE KS-1107 -> commission a TIER-1 OPUS gate (shape: 0_Brain/reference/2026-11-17_gate378-tier1-pr2252-ks2253-redis-url-mask/commission.md) -> merge via a K seat (K 54th does NOT own it: next K seat or an addendum) -> tell Peter on KS-1107 (BLUF) after.
+  - %42 **K 54th** (Sonnet, C5): brief STAMPED K54-W1..W7 (fleet/briefs_staged/2026-11-19_seatK54_merge.md; pre-stamp copy .pre-stamp). NEXT: plan QUESTION -> ANSWER -> SET-UP STATUS (says which kit-date branch it took) -> READY 2194 -> GO naming head fef6e751bf7a + pin + G318-2194-1..3 notes -> MERGED -> WRAP naming PR 2257 expected (row 2 only if its own r <= 52.0 and READY forecast < 58).
+  - %45 **S 94th** (Sonnet, board): FILES tonight's follow-ups (admin create-user form; G379-2258 notes + npm pkg get; G380-2257 notes; originate initEventBus whole-URL log, search KS-2253 first; schemathesis venv below pins + mypy scope; 'no format gate' only if its source is found). NEXT: plan QUESTION with drafts -> license BY ITEM.
+  - %48 **D 74th** (Opus, Kintsugi sweep #2): KS-1295 (read-only log), KS-1129 (existing anchored test doc only; new anchor NOT licensed), KS-1205 (throwaway connector key PROPOSED: rule scope, revocation, erasure-grace reach in the ANSWER). NEXT: plan QUESTION -> ANSWER.
+  - **B 204th RE-DRAFTER** (Sonnet subagent of THIS seat; dies with a rotation -> re-commission from 0_Brain/reference/2026-11-19_drafter-seatB204r/commission.md if fleet/briefs_staged/2026-11-19_seatB204_merge.md is ABSENT). Then: read whole, STAMP (row order is Wednesday's), launch B 204th (Sonnet, C5) beside K 54th: ONE GO at a time.
+- **CARDS OPEN for Kam (unchanged):** secuura-demo-round-gateway-redis-1119, secuura-kintsugi-dead-redis-copies-cleanup-1119, secuura-prod-redis-password-in-log-1119.
+- **OWED (W, cheap, when the floor is quiet):** the decisions.json client-isolation mechanism (WED item); the October-grant register/index disagreement; KS-968 production admin-row read-only check BEFORE any production deploy of auth.
+- **Wrap duty (ledger edited this seat, typed-clock row):** regenerate BOTH digests + rules_card --check.
+
 ## 🔴 ROTATION HANDOVER 21:1x 19 Nov, the afternoon seat (ctx ~79%, ROTATING) - READ FIRST; supersedes every block below where they differ
 - **Kam is active tonight on a new account (gauge ~7%).** His words today: 16:49:14 card secuura-board-grant-reask-1119 = a ("Renew to Fri 27 Nov and run the queue now"; grant register row renewed); 18:00:32 "please work through as many secuura tickets as you can.  you have a new login with all credits"; 18:38:54 card secuura-ks968-admin-first-boot-1119 = a. No message since 18:38:54 (kam_rulings_today).
 - **FLOOR at rotation (2 seats + 1 drafter):**
