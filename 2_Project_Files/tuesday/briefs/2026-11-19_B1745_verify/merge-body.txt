@@ -1,0 +1,24 @@
+RD-835: every CSV the dashboard downloads quoted a value and doubled its inner
+quotes, and nothing else, so a printer, device or user name that began with
+= + - @ tab or carriage return opened as a live formula in a spreadsheet. One
+shared function, csvCell, now writes the cell of all ten CSV writers (the eight
+export closures, the recent prints export and the AI reply export). A value a
+spreadsheet would read as a formula gets a single quote in front of it, inside
+the quotes. A plain number (digits, an optional sign, one decimal point, an
+optional percent sign) and a run of dashes are left as they were, so negative
+costs, percentages and the empty-cell marker export as before.
+
+RD-861: the settings validation dialog and its quick question twin, the
+first-run connection test and the workspace save panel wrote server, AI and
+error text as HTML. Each value now goes through the file's own escapeHtml. The
+user table wrote a user name into data-arg and title attributes through an
+escape that leaves quote characters alone, so a name holding a double quote
+could end the attribute and add its own; a new escapeAttrValue writes both
+quote characters as entities for the row, the info button and its class.
+
+Two new test files: 22 cells for the CSV helper and the ten writers, 20 for the
+three dialogs and the attribute break. Other attribute and raw-name sites in
+index.js are left for a follow-up. The choices are this change's defaults. Not
+deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

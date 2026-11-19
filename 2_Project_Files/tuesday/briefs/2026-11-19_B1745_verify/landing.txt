@@ -1,0 +1,42 @@
+Landing for the CSV formula-cell helper and the browser text escapes (repo datasecau/Reporting_Dashboard_Au).
+MERGE COMMIT, head-pinned. Never squash, never rebase.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-19_B1745_verify'
+
+0. Re-read before acting: the branch head must still be ca11062972e3cab9d713b1d1fdcb6cfd874db854.
+   Main read 64b9840f254c9510cbbf7f2da4306438e5e85852 at the gate (it moved from the lane's base 9373976e by the
+   history pull request #232, HISTORY.md only; none of the six paths moved; the merge-tree of main and head is clean).
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/b1737%2Fnexusai-lane-nf-browser-escapes --jq .commit.sha
+   If main moved again: list the paths main changed since 64b9840f; any of the six paths (static/js/index.js,
+   static/js/settings.js, static/js/first-run-setup.js, the two new __tests__ files, scripts/verify-expected-counts.json)
+   is a re-gate, anything else is noted and the landing goes on.
+   LANDING HOLD: the branch carries this change's defaults (one shared csvCell with a number exemption and a dash
+   exemption, ten CSV writers, escapeAttrValue beside escapeHtml, the two identical-statement twins fixed, the other
+   attribute and raw-name sites left out); land only with those answers in hand.
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1737/nexusai-lane-nf-browser-escapes --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks with a background wait that EXITS; --min-checks 7: at least 7 checks must have run and all
+   must pass (Build, CodeQL javascript/python/actions, gitleaks, npm audit and the rest); fewer than 7 is a stop:
+   gh pr checks <PR> -R datasecau/Reporting_Dashboard_Au --watch --fail-fast   (run in the background; it exits)
+   The hosted Build runs the verify on the PR merge ref, so its counts pair must read 6128/386 (the branch's committed
+   pair; #232 changed no test). CodeQL must show no new alert (the gate's local run: see VERDICT.md, CodeQL row).
+   No open alert sits in the three scripts today; none is claimed closed, moved or changed.
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit as a merge commit:
+   gh pr merge <PR> -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit ca11062972e3cab9d713b1d1fdcb6cfd874db854 --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing: the merge touches static/** and __tests__/** and scripts/**, which deploy-demo.yml does NOT
+   path-ignore (read at the head: it ignores only '**.md', 'docs/**' and 'tests/**'), so a Deploy demo run starts on
+   main. Its build and deploy jobs MUST read skipped (both gated on vars.CI_DEPLOY_ENABLED; the last three runs on
+   main read build=skipped, deploy=skipped). Anything other than skipped is a stop-and-report. Do not dispatch,
+   re-run or touch a variable. deploy.yml is workflow_dispatch only and does not start.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert; existing alerts open and unchanged.
+Not deployed. No Jira from the landing seat (the records seat posts after: RD-835 and RD-861 comments, and the
+follow-up ticket whose content is VERDICT.md's still-open list).
