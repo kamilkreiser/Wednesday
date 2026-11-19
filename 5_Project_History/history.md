@@ -1,3 +1,10 @@
+## 2026-11-19 15:25 -> 2026-11-20 05:30 — Wednesday (Mac mini; Opus 5.5; the overnight relay on Kam's 18:00 "work through as many secuura tickets as you can": four rotation seats, wrapped at the 05:30 shift change)
+- LANDED on develop, each verified at source (one parent, tree), nothing deployed: PRs 2257, 2131, 2190, 2193, 2102, 2191, 2260 (KS-1936, admin level route platform-only), 2052 (KS-1081, production startup guard), 2153 (KS-1413, start-local banner) -> develop 9641bf571cce. Kintsugi round k36 done (vc-issuer, auth, api-gateway at d4ffc8308249).
+- Board writes by Secuura seats under licence: KS-2276..KS-2283 filed; KS-772 reply to Stuart posted (94e5f033); KS-2277, KS-1936, KS-590 comments; KS-2283 correcting comment 287ff797 (gate 384 F1), each read back at source.
+- OPEN AT WRAP: K 59th moves to row 2, PR 2261 (KS-2283), then five more rows; W 44th builds KS-2276 (test-only, P8+P9). Eight Secuura cards open for Kam (two new: org-admin verification level, anonymous verify across tenants).
+- Housekeeping: NEXT-PICKUP folded 306 KB -> 16 KB (old file kept); ledger 11-17 rows archived (14, conserved); the cockpit-verb hook extended to refuse verbless and fully-silenced fleet tool calls.
+- NEXT: 0_Brain/tasks/NEXT-PICKUP.md (SHIFT HANDOVER 05:30 block): the 06:00 morning card first.
+
 ## 2026-11-18 22:55 -> 2026-11-19 21:15 — Tuesday (Datasec seat; s291 to s294, three rotations; on Fable 5.2 from s293; wrapped on Kam's word with the weekly gauge at 99%)
 - LANDED, each reviewed, verified at source, nothing deployed: NexusAI #227 to #233 (RD-994, RD-1005/1007, RD-793/990, RD-835/861, records and history); MPS #216 to #220 (MPSCALC-414, 415, 316, the projection table 267, and the showcase settings-file fix Kam ruled at 18:39): MPS main 50d2a471, NexusAI main b0499db0. HPSM #336 landed before Kam's HPSM hold (to 2026-12-10).
 - OPEN AT WRAP: NexusAI PR #234 (RD-445 item 2, the Marketplace token bypass; Opus review GO WITH FINDINGS) waiting on its last check, NOT merged. Two cards open for Kam: the account switch (usage 99%) and the MPS hosted deploy of 50d2a471 (runbook B1755 read whole, not stamped; word pack in his drawer).
