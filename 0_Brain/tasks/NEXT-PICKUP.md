@@ -8,6 +8,16 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATION HANDOVER 02:51 20 Nov, the 23:4x (19 Nov) rotation-successor seat (ctx ~78%, ROTATING at a safe boundary) - READ FIRST; supersedes every block below where they differ
+- **develop = 6ebd769a0301.** Six merges tonight, each verified at source: PR 2257, 2131, 2190, 2193, 2102, 2191. Kintsugi round k36 DONE (vc-issuer, auth, api-gateway at d4ffc8308249). Kam silent since 18:38:54 (kam_rulings_today 02:4x). Gauge ~19%.
+- **FIRST WORK (in order):**
+  1. **K 58th brief: read WHOLE, STAMP, launch** (fleet/briefs_staged/2026-11-20_seatK58_merge.md, 49,999 B, blank STAMP; 7 rows from PR 2153 tier 1). **Add PR 2260 (KS-1936) as ROW 0**: head a36828a28ce1, gates 382 + 383 GO WITH NOTES (verdicts in 0_Brain/reference/2026-11-20_gate382-.../ and 2026-11-20_gate383-.../); its GO names gate 382's notes and gate 383 F1/F2 LOW; re-measure its overlap with the K rows (PR 2159 shares admin.ts and is unmerged). Answer W-2 (re-key clean) and W-4 (one develop-side check_shared_relink cell failing on both arms: not a hold); name the drafter's `pkill -f` slip (kill by ancestry, never by name). Launch Sonnet, C5.
+  2. **S 98th (%90) WRAP**: it was wrapping at 15:48Z+. Score it (all eight writes verified at source by Wednesday 02:49: KS-2277..KS-2282 filed; comments 051a11b8 on KS-590 and 94e5f033 on KS-772), then pane_close (identify any blocking pid first).
+  3. **B 207th drafter**: PR 2052 alone (KS-1081, tier 1, four-path UNION; B 206th's HANDOVER holds the b206 -> b207 recipe; commission shape 0_Brain/reference/2026-11-20_drafter-seatB206/commission.md; re-key b206 -> b207, th -> th both; B 207th IS in the matcher and is removed).
+- **OWED:** a board seat: ONE correcting comment on KS-2277 (its body says 'the draft reply is with Wednesday'; the reply is posted as 94e5f033); gate 383 F1 (assert the malformed-body cell's precondition is not BAD_REQUEST) and F2 (PR 2260's body still says the originate sibling 'looks shadowed') as follow-ups AFTER PR 2260 merges; the demo gateway runtime-role read (with the demo round). **MORNING CARD 06:00** (counts; people-waiting KS-1076, KS-683, KS-607; KS-772 now ANSWERED; the eight open Secuura cards; six merges + Kintsugi k36; the invoke-to-read regression and its hook fix).
+- **CARDS OPEN for Kam (8):** secuura-ks2277-anonymous-verify-other-tenants-1120 (new, rec a), secuura-org-admin-sets-verification-level-1120 (new, rec b), and the six from 11-19.
+- **Wrap duties DONE this seat:** retro in the 11-20 note; both digests regenerated + rules_card --check (ledger edited: two rows); ledger 3c archive is the 05:30 shift change's.
+
 ## 🔴 CHECKPOINT 70% 02:20 20 Nov, the 23:4x rotation-successor seat - READ FIRST; supersedes every block below where they differ
 - **develop = 6ebd769a0301.** Six merges tonight on this seat's GOs, each verified at source: 2257 (KS-590), 2131 (KS-625), 2190 (KS-678), 2193 (KS-1497), 2102 (KS-1864), 2191 (KS-1090). **Kintsugi k36 DONE** (vc-issuer, auth, api-gateway at d4ffc8308249; verify matrix PASS).
 - **FLOOR (1 seat + 2 subagents):**

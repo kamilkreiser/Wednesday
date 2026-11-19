@@ -78848,5 +78848,55 @@
    "CARD secuura-demo-five-accounts-gain-admin-1117",
    "CARD secuura-ks968-admin-first-boot-1119"
   ]
+ },
+ {
+  "id": "secuura-ks2277-anonymous-verify-other-tenants-1120",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2277: a public verify only sees the default tenant's documents. Which way do we fix it?",
+  "bluf": "Secuura/Blockchain, no action needed tonight. PRIOR RULINGS (override reason): the gate matched shared words; none decides this. Your KS-1991 = a picked which registration counts as the original, which only matters once the registry is read (multi-tenant mode); your 16 Nov 'anyone, including anonymous' is the precedent for a. Stuart asked on KS-772 why a public look-up of one file did not list ISS3's copy; we answered him tonight. Measured on Kintsugi and confirmed by reading the code: an anonymous verify runs in the default tenant, so a document registered under any OTHER tenant is invisible (row-level security hides it; in single-tenant mode the cross-tenant registry is never read). That contradicts your rule that verification can be read by anyone, and it blocks S's switch to v2. Not measured: originate's own database role on Kintsugi. If you do not answer, nothing changes.",
+  "default_action": "c: nothing changes; KS-2277 waits.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Read across tenants for public verify",
+    "detail": "The anonymous verify read runs under the reviewed platform scope, so it lists every tenant's registrations of the file. A code change in originate, gated as a security change (tier 1), Kintsugi first. Matches your 16 Nov rule."
+   },
+   {
+    "key": "b",
+    "label": "Turn on multi-tenant mode",
+    "detail": "Run the deployment with MULTI_TENANCY_ENABLED true so the registry supplies the list. A deployment change with per-tenant-database consequences (KS-1336 is its readiness ticket); bigger and riskier."
+   },
+   {
+    "key": "c",
+    "label": "Not now",
+    "detail": "Nothing changes; KS-2277 stays in the backlog and S stays on v1."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T02:50:29.502319+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-04 09:51",
+   "2026-09-09 12:13",
+   "2026-09-09 12:15",
+   "2026-09-14 13:04",
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1114-verify-title-strategy",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks1352-revoked-credentials-still-verify",
+   "CARD secuura-ks1628-retire-deprecated-verify-route-1019",
+   "CARD secuura-ks590-verify-disclosure-four-questions-1102",
+   "CARD secuura-ks1536-bare-admin-loses-all-tenants-1107",
+   "CARD secuura-ks1991-verify-presents-later-copy-fix-1110",
+   "CARD secuura-ks1699-verify-audience-1113",
+   "CARD secuura-verify-public-withheld-names-1116",
+   "CARD secuura-cert-verify-anyone-or-signed-in-1116",
+   "CARD secuura-cert-verify-anonymous-billing-1116",
+   "CARD secuura-verify-names-personal-data-1116",
+   "CARD general-c2c-verify-words-tries-1117"
+  ]
  }
 ]
