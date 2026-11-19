@@ -39,6 +39,25 @@ Built on main while the ticket reads open: RD-532, RD-577, PCOMP-52. Answered bu
    opened left for them to close. MPS first, AFTER lane M-G is drafted (same board). Not HPSM.
 7. RD-300 and RD-564 (Declined, counted open): left as they are; a note for the next NexusAI records pass.
 
+## Tuesday's rulings on the two MPS tickets whose own text makes the choice the coordinator's (added by s293 after reading both tickets whole by Jira GET, 2026-11-19)
+- **MPSCALC-314 (autosave writes a history event and a revision per typing pause): RULED by Tuesday: a MINIMUM GAP between
+  saves, in the web autosave only.** Of the three options the gate named: the quiet interval (2000 ms) was itself ruled
+  and is not changed; server coalescing changes what the history records and touches the draft save (a larger lane with
+  its own gate) and is not chosen; a minimum gap bounds the writes without changing what one save means. Shape for the
+  kit: after a save, the next autosave waits until at least the gap has passed since the last one; a change made inside
+  the gap is NEVER lost: one trailing save fires when the gap ends, and a save still fires at once on leaving the screen,
+  on blur of the window, on unload, and on an explicit save. Gap value: 10 seconds as the default (22 saves a minute of
+  paused typing become at most 6), a named constant beside AUTOSAVE_QUIET_MS. The drafter must measure, before freezing
+  it, what the screen shows as "saved" state during the gap (if it shows a saved mark while a change is pending, that is
+  a STOP: no new customer word is added by this lane) and which existing tests pin one save per quiet interval. The
+  ticket's acceptance cell stands: a counting fake fails above one save request per gap. Web-only; gate G2. This is
+  Tuesday's decision under the ticket's own text; it is not the product owner's and is reversible in one constant.
+- **MPSCALC-360 (usageOnly): NOT confirmed yet.** It is number-affecting (tier 1). The reading to confirm is "usage-only
+  component lines carry volume only into the one deal-level calculation (D-06 a)". Tuesday has not read D-06 a,
+  MPSCALC-253's Detail line or docs/ENGINE.md rows X-25 to X-28, so no confirmation is written. OWED: a read-only
+  analyst lays out the reading with two worked examples from the engine's own register rows; Tuesday then confirms in
+  writing or cards it.
+
 ## Cards for Kam (NOT yet posted)
 Each candidate decision becomes a card only after Tuesday reads its section of the sweep document and runs
 `decision_queue.sh prior` on its subject (he may have ruled it; a hold he set is his to lift). One card per decision,
