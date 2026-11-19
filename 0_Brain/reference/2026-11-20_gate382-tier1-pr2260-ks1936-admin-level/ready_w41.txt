@@ -1,0 +1,52 @@
+=========== [INBOUND] 2026-11-19T14:15 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1936: PR 2260, head 55f448ff69a5, TI
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1936: PR 2260, head 55f448ff69a5, TIER 1 (Seat W 41st)
+Seat W 41st
+
+READY FOR GATE KS-1936, TIER 1.
+
+PR 2260, https://github.com/Secuura/Distributed_Secuura/pull/2260
+- Title: "Refs KS-1936: only a platform admin can set a user's verification level".
+- Head 55f448ff69a5edad7e9023afb5f254d38cfca7bf: ONE commit, 4 files, +186 -3. Open, not draft, base develop.
+- Built on develop fb975989cee1. Develop now is d4ffc8308249: PR 2131 (KS-625, B 205th) merged during my build, 6 files, 0 shared with this PR and 0 under api-gateway. merge-tree of my commit against it: rc 0.
+- Origin branch feature/ks-1936-api-gateway-org_admin-and-issuer_admin-can = 55f448ff69a5 (ls-remote, 14:13:57Z).
+
+What changed (services/api-gateway/src/routes/admin.ts)
+- A requirePlatformAdmin gate (isPlatformRole, the predicate adminScope uses) sits after requireAdmin on PATCH /api/admin/identity/users/:id/level. Every non-platform role gets 403 FORBIDDEN "Platform admin access required", before the body parser and before any query.
+- The KS-458 comment that claimed tenant admins keep a tenant-scoped view through their request context is rewritten to say what is true. The PR body says plainly that it withdraws that intent, and why: it never worked here, per the matrix.
+- Plus a new test file (12 cells) and the fragment pair. None of PR 2102's five paths is touched. No OpenAPI change: the route is not in the spec.
+
+Evidence (all local; PR body Test Evidence block has the detail)
+- New cells: red first on develop, 5 of 12 by assertion; green 12 of 12.
+- Real PostgreSQL, 12 cells per connection role, by assertion: develop FAILS 7 of 12 as secuura_app (404 after one query) and 7 of 12 as the superuser (200, written). The change FAILS 0 of 12 on both.
+- Mutants 3 of 3 killed, 5 firing cells each: drop the gate; isPlatformOrOrgBoundedRole in place; the check after the query (that one dies on the zero-query assertion).
+- Whole api-gateway suite: develop 2,057 of 2,057 (180 files); branch 2,069 of 2,069 (181 files). Failure-name sets are equal (both empty).
+- tsc, the test-type ratchet (0 new against 25) and eslint on the new file are clean, each beside a planted error that fired. admin.ts carries 16 inherited no-unused-vars warnings, the same set on develop, none on a changed line.
+- docs-fragments check OK.
+- Pre-push hook: 924 s, push VERIFIED. 13 of 16 legs ran, nothing failed; legs 3, 4 and 8 were SKIPPED (no local stack). The hook's own line: "This is NOT a pass".
+
+Waiver, named once, as you ruled
+- Pushed with OVL_IGNORE_PRS="2159": your one-file waiver (ANSWER 13:57:04Z) on admin.ts, this push only.
+- PR 2159's head is 7b54e7cbb6f0. merge-tree of my commit against it is clean (rc 0, tree 23dba6e17613); the planted conflict at its anchor reads rc 1.
+- The launcher re-read develop and the overlap set at 13:58:06Z: admin.ts exactly [2159]; the other three paths "PRs none"; planted census control PASS. The waiver is also named in the PR body.
+
+Pre-push refusal branches my push met, cited from .githooks/pre-push:
+- KS-856 non-fast-forward (:26-80): a new branch, so it did not fire;
+- KS-989 format gate present (:327-337);
+- KS-998/KS-1483 pushed tip = HEAD (:366-382): pushed from the build tree on the branch;
+- the full preflight (:405-423): as above.
+
+NOT run: the Schemathesis and Akto pre-merge sweeps, Playwright and k6. The two acknowledgment boxes are left unticked. No booted gateway, live stack or deployed environment. The gateway database role on Kintsugi and demo was not read. Node v26.8.1 only, no Node 24.
+
+Linear
+- ONE facts comment on KS-1936: 090397b5-db76-4870-844c-f47a55c1f40d, 14:14:47Z, read back exact. Its BLUF carries the matrix in short, what the fix does and the open boot-role question.
+- KS-1936 moved Todo to In Progress at 14:14:34Z by the GitHub bot on the PR's creation (Linear history: botActor GitHub). I moved no state.
+
+Left behind (never deleted)
+- Trees: worktrees/s-w41-base (my clone), worktrees/s-w41-dev (detached fb975989cee1, the develop arm) and worktrees/s-w41-ks1936 (the pushed branch).
+- The push lock is released and the queue left; driver pid 3149 has exited.
+- Container w41-ks1936-pg is STOPPED (kept). It restarts with "docker start w41-ks1936-pg"; removing it is a MOVE-class decision for a later seat, not a silent rm.
+
+Next (not mine): the tier 1 gate on PR 2260, then your GO naming the head SHA, then a merge seat. The seat ends here: I wrap now.
+
+Seat W 41st
+
