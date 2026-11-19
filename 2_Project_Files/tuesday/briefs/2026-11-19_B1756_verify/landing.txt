@@ -1,0 +1,43 @@
+Landing for the Marketplace webhook token check that refuses the skip flag in production (repo datasecau/Reporting_Dashboard_Au).
+MERGE COMMIT, head-pinned. Never squash, never rebase.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-19_B1756_verify'
+
+0. Re-read before acting: the branch head must still be 18c490c653fee13346d98779ba63222a77c83f00 and main
+   b0499db08dafc08313e855faf7c2ce4f7f9f0bcc (the lane's base; ahead 3, behind 0; merge-tree of main and head is clean
+   and equals the head tree b94d4fdac9a6892622832fa1ef233478206d51f6).
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/b1739%2Fnexusai-lane-nj-marketplace-jwt-bypass --jq .commit.sha
+   If main moved: list the paths main changed since b0499db0; backend/marketplaceJwt.js, backend/marketplace-api.js,
+   the new __tests__ file or scripts/verify-expected-counts.json among them is a re-gate (the counts file conflicts
+   if another lane changed it: re-gate); anything else is noted and the landing goes on.
+   LANDING HOLD: the branch carries Tuesday's defaults (refuse in production and keep the flag; the case-insensitive
+   trimmed NODE_ENV test; the factory-time log line; the exact log wording; mocked jose and logger; RD-445 left open
+   for items 1, 3 and 4). None is the product owner's. Land only with those answers in hand.
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1739/nexusai-lane-nj-marketplace-jwt-bypass --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks with a background wait that EXITS (at least 7 checks must have run and all must pass):
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/Reporting_Dashboard_Au PRNUM 18c490c653fee13346d98779ba63222a77c83f00 60 90 --min-checks 7
+   The hosted Build runs the verify on the PR merge ref: its counts pair must read 6148/387 (the gate's local verify
+   at the head read VERDICT: PASS 6148/387; see VERDICT.md). CodeQL must show no new alert (the gate's local run:
+   rc 0, KEPT high+ 0, NEW high+ 0). No open hosted alert sits in backend/marketplaceJwt.js or
+   backend/marketplace-api.js today (22 open on main, 0 in either file); none is claimed closed, moved or changed.
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit as a merge commit:
+   gh pr merge PRNUM -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit 18c490c653fee13346d98779ba63222a77c83f00 --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing: the merge touches backend/**, __tests__/** and scripts/**, which deploy-demo.yml does NOT
+   path-ignore (read at the head, .github/workflows/deploy-demo.yml:29-32: it ignores only '**.md', 'docs/**' and
+   'tests/**'), so a Deploy demo run starts on main. Its build and deploy jobs MUST read skipped (both gated on
+   vars.CI_DEPLOY_ENABLED, deploy-demo.yml:53 and :91; the last three runs on main, b0499db0, 9373976e and 46050e25,
+   read skipped, and the newest run's jobs read build=skipped, deploy=skipped). Anything other than skipped is a
+   stop-and-report. Do not dispatch, re-run or touch a variable. deploy.yml is workflow_dispatch only and does not start.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert; existing alerts open and unchanged.
+Not deployed. No Jira from the landing seat (the records seat posts after: an RD-445 comment for item 2; the ticket
+stays open for items 1, 3 and 4).
