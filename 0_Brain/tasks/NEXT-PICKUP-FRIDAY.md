@@ -12,7 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
-## 🔴🔴🔴🔴 NEWEST — WRAPPED Thu 2026-11-19 about 08:05 on Kam's terminal word ("please start wrapping up as I have to go to the event in about 30 min"). Supersedes every block below where they differ.
+## 🔴🔴🔴🔴🔴 NEWEST — Thu 2026-11-19 AFTERNOON SEAT (boot 15:17, Opus 5.5; Kam at his event). Supersedes the block below where they differ; detail in the 2026-11-19 note's 15:22 entry.
+
+- **Panes %9 and %18 are GONE** (both seats had finished and were holding; nothing lost). Refs: main bfe435abbe86, m1-daemon 242de862b713, m3-audit-fix3 718abe8c9a42 (local = remote).
+- **AUDIT-FIX3 STOP Q1 ruled by Friday: permitted as made**, list closed at those two lines: `briefs_drafts/2026-11-19_coagent_M3_AUDIT-FIX3_ADDENDUM-1_Q1_ruling.md` (pushed b85ef0be72).
+- **TWO SHORT CHECKS RUNNING as in-session Opus agents of this seat (they die with it):** DAEMON r6 at 242de86 -> `m1_review/gate_M1_DAEMON_r6_verdict.md` (work dir /private/tmp/claude-501/gd6); AUDIT-FIX3 at 718abe8 -> `m1_review/gate_M3_AUDIT_FIX3_verdict.md` (work dir /private/tmp/claude-501/ga3). Verdict file missing or first line still IN PROGRESS after a seat death = re-commission (inputs are listed in the 15:22 note entry). NO GO = card for Kam. GO = relaunch a seat for the notes step (merge then-current main in; audit-fix3 also swaps its Q1 comment per addendum 1 item 3), then Friday's `coagent_merge_check.sh`, merge GO, ls-remote, pane_close. Merge order: whichever is GO first; the other merges new main in at its notes step. DEPUTY after the daemon merges.
+- Datasec/OXPd unchanged: Fable review pass after 2026-11-20 09:00 (C-5).
+
+## 🔴🔴🔴🔴 EARLIER — WRAPPED Thu 2026-11-19 about 08:05 on Kam's terminal word ("please start wrapping up as I have to go to the event in about 30 min"). Supersedes every block below where they differ.
 
 - **Model:** Kam, terminal: "fable limit reached until tomorrow". Fable resets 2026-11-20 09:00. Kam ran `/model` in this pane and the host saved Opus 5.5 as the GLOBAL default for new sessions (his act; told to him). Launch seats with SEAT_MODEL_ENV, never /model.
 - **CoAgent (General/Claude to Claude), both seats HOLDING, nothing running inside Friday:**
