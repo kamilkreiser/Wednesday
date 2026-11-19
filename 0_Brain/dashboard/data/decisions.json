@@ -78251,5 +78251,142 @@
    "CARD datasec-weekly-usage-99pct-switch-1030",
    "CARD mpscalc-150-usage-section-placement-1115"
   ]
+ },
+ {
+  "id": "secuura-kintsugi-dead-redis-copies-cleanup-1119",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura Kintsugi: the old Redis password now sits only in dead copies. Tidy them up?",
+  "bluf": "Secuura/Blockchain. Kintsugi's Redis password was changed tonight and the old one is refused, so every copy of it left on the box is dead. The deploy agent listed them and removed nothing, because removal is yours to decide: 33 old gateway log captures and 2 old settings backups readable by any user on the box, plus 31 private settings copies. The rollback copy and the file holding the new password are kept until you say. (Checked: your 17 Nov card ordered the rotation itself, not what happens to old copies; the other matches are different subjects.)",
+  "default_action": "If no answer in 48 hours: option c, nothing is moved. The old password already no longer works.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Quarantine the dead copies, keep the rollback for a day (recommended)",
+    "detail": "A deploy agent moves the 33 log captures and the 33 old settings copies into one dated, owner-only quarantine folder on Kintsugi (nothing deleted), tightens the folder to owner-only, and removes the scratch file holding the new password. The rollback copy stays one more day, then joins the quarantine."
+   },
+   {
+    "key": "b",
+    "label": "Delete them outright",
+    "detail": "Permanent removal of the dead copies. Under your never-delete rule this needs your word; nothing can be recovered afterwards."
+   },
+   {
+    "key": "c",
+    "label": "Leave everything as it is",
+    "detail": "The copies stay where they are; they hold a password that no longer works."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-19T20:11:44.212051+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-ci-dead-19-days-blocks-your-own-ruling",
+   "CARD wed-schedulers-dead-since-0907",
+   "CARD secuura-kintsugi-whole-estate-rebuild",
+   "CARD secuura-kintsugi-build-cache-prune",
+   "CARD secuura-kintsugi-refresh-notice-release",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD secuura-ks1084-part-b-api-batch-surface-unauthenticated-dead",
+   "CARD secuura-kintsugi-deploy-for-31oct-1005",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-kintsugi-issuer-account-how",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD wed-devmaster-drive-cleanup-1019",
+   "CARD secuura-deploy-tip-kintsugi-and-post-1022",
+   "CARD secuura-kintsugi-ssh-rule-stale-ip-1022",
+   "CARD secuura-kintsugi-deploy-notice-1022",
+   "CARD secuura-kintsugi-admin-published-default-1027",
+   "CARD secuura-kintsugi-disk-15gb-builder-prune-1031",
+   "CARD secuura-kintsugi-second-prune-all-cache-1101",
+   "CARD secuura-kintsugi-third-prune-for-train-round-1101",
+   "CARD secuura-kintsugi-disk-train-round-rollback-images-1101",
+   "CARD secuura-ks601-kintsugi-split-close-1102",
+   "CARD secuura-auth-lockout-failopen-redis-down-1103",
+   "CARD secuura-ks1233-redis-ttl-read-1104",
+   "CARD secuura-devmaster-9gib-free-cleanup-1104",
+   "CARD secuura-ks-657-dead-shared-cache-code-1106",
+   "CARD secuura-ks657-redis-security-store-delete-1107",
+   "CARD secuura-ks1952-redis-down-doctype-rules-1110",
+   "CARD secuura-k26-kintsugi-notice-1112",
+   "CARD general-c2c-repo-public-cleanup-1117",
+   "CARD secuura-gateway-redis-password-in-log-1117"
+  ]
+ },
+ {
+  "id": "secuura-demo-round-gateway-redis-1119",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura demo: bring demo up to Kintsugi's code and change demo's Redis password?",
+  "bluf": "Secuura/Blockchain. I need your go-ahead to deploy to demo. Kintsugi now runs develop 06328efa1770 and is verified. Demo is 23 merged changes behind (160 files, measured read-only from git); none is a database migration or a build-file change. It includes the gateway fix that stops the Redis password reaching the start-up log, and the anchoring fix Stuart is waiting for on KS-2196. Your 17 Nov answer already covers changing demo's Redis password once its log line is checked. Each deploy to demo is yours to approve. (Checked: your 4 Nov stop on demo redeploys was lifted on 16 Nov, 'Deploy everything so all systems are up to date', and demo was last deployed on 17 Nov on your 'Deploy'; this is the next round.)",
+  "default_action": "If no answer: option c. Nothing is deployed to demo without your go-ahead.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Deploy to demo, then change demo's Redis password (recommended)",
+    "detail": "An Opus deploy agent measures demo read-only first, sends me the list of what changes and its rollback point, then deploys the same code Kintsugi runs. It checks demo's start-up line is masked, then changes demo's Redis password the same no-refusal way. Afterwards: a receipt to you, and Stuart's KS-2196 anchor can be re-submitted."
+   },
+   {
+    "key": "b",
+    "label": "Deploy to demo only, no password change yet",
+    "detail": "Same deploy; the password stays as it is for now."
+   },
+   {
+    "key": "c",
+    "label": "Hold demo",
+    "detail": "Demo stays as it is. Stuart's KS-2196 keeps waiting."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-19T20:12:14.456233+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-07 06:42",
+   "2026-09-08 11:41",
+   "2026-09-08 14:05",
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-demo-service-persona-switch-2026-09-03",
+   "CARD secuura-demo-service-crash-loop",
+   "CARD secuura-demo-stop-needs-kams-own-word",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-f5-demo-interim-mitigation",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-demo-row-060-remediation",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1041-demo-container-recreate",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1369-gateway-proxy-crash-guard-shape",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
+   "CARD secuura-demo-disk-too-small-to-rebuild-1007",
+   "CARD secuura-demo-deploy-ks695-uatps-precondition-1020",
+   "CARD secuura-demo-smoke-provisioning-key-unbounded-1020",
+   "CARD secuura-demo-smoke-key-revoke-after-measure-1020",
+   "CARD secuura-demo-kam-user-published-default-1027",
+   "CARD secuura-pr1970-gateway-failopen-1103",
+   "CARD secuura-auth-lockout-failopen-redis-down-1103",
+   "CARD secuura-pr1989-round3-go-hold-demo-accounts-1104",
+   "CARD secuura-ks1233-redis-ttl-read-1104",
+   "CARD secuura-ks1401-058-merge-demo-billing-1104",
+   "CARD secuura-ks2031-demo-timestamp-mock-row-1106",
+   "CARD secuura-ks657-redis-security-store-delete-1107",
+   "CARD secuura-ks1372-gateway-lockout-wire-or-retire-1109",
+   "CARD secuura-ks1952-redis-down-doctype-rules-1110",
+   "CARD secuura-ks1855-gateway-standin-routes-1110",
+   "CARD secuura-demo-five-accounts-gain-admin-1117",
+   "CARD secuura-gateway-redis-password-in-log-1117"
+  ]
  }
 ]
