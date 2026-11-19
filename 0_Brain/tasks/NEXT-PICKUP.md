@@ -8,6 +8,18 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 HANDOVER 07:5x 20 Nov, the 06:0x MORNING seat at its 70% checkpoint - READ FIRST; supersedes every block below where they differ
+- **develop = 718b15bbeb20** (PR 2262 squash). THIRTEEN Secuura merges since last night, each verified at source (this seat: PR 2155 = 2f9899b750e8, PR 2262 = 718b15bbeb20). Nothing deployed. Kam last on the board 07:10:22 (nine cards ruled 07:09-07:10, all recorded; kam_rulings 07:54:16, reconcile 0). Gauge ~26%. FLOOR: NO seat panes (only %0 wednesday, %1 fleet-monitor).
+- **IN FLIGHT: GATE 386** (Opus subagent of THIS seat; dies with a rotation): PR 2263 (KS-2280) head 2e8b9fffd91f; commission + READY in 0_Brain/reference/2026-11-20_gate386-tier1-ks2280-db-role-guard/. If verdict.md is ABSENT after a rotation: re-commission it from commission.md (one Agent call, Opus).
+- **FIRST WORK for the successor, in order:**
+  1. **K 61st**: read WHOLE + stamp checklist + STAMP + launch Sonnet: fleet/briefs_staged/2026-11-20_seatK61_merge.md (49,989 B; rows PR 2150 then PR 2152; K 60th's record has the k60 -> k61 recipe). If gate 386 is GO by then, add PR 2263 as a row in the STAMP (tier 1; after PR 2150) or by ADDENDUM later.
+  2. **D 76th**: read WHOLE + STAMP (carry Wednesday's six W-item rulings, written in the block below this one's RULED-BY-KAM block) + launch OPUS: fleet/briefs_staged/2026-11-20_seatD76_demo_round.md. Kam's three ops rulings (demo round, Kintsugi quarantine, KS-1107 production read LAST, STOP if only an owner login).
+  3. **The four BUILDS Kam ruled 07:09-07:10** (KS-2277 cross-tenant public verify; org-admin verification level capped; KS-2275 verified-only document reads; KS-2272 invite claim by link): a W 46th drafter that partitions them by path against PR 2150, 2152, 2160, 2195, 2159, 2263 and launches the first disjoint one(s) on Opus; read each card with decision_queue show (option detail = spec).
+  4. Gate 385's P10/P11 follow-up cells (vc-issuer ks625 test; PR 2262 merged): a small Sonnet test-only lane.
+  5. Route rights_holders (migration 027: no FORCE RLS, outside 038/039; W 45th's finding) as a ticket via a board seat.
+- **SCORES this seat:** W 44th 0.93, K 60th 0.95, W 45th 0.96 (provisional on gate 386).
+- **OWED unchanged:** fleet_ack collector 12-row window (WED tooling); weekly consolidation lapsed since 10-19; INDEX.md refresh; the 21 Nov wake for Kintsugi's rollback file into quarantine (~07:10 2026-11-21).
+
 ## 🔴 KAM RULED NINE CARDS 07:09-07:10 20 Nov (live board, view=wednesday; each recorded with decision_queue.sh rule, HTTP 200) - RULED BY KAM, NOT YET IN AN ARTEFACT: every one needs a seat; READ FIRST
 Verbatim (kam_msgs.sh, source=live):
 - 07:09:22 "Decision wed-morning-plan-1120: a — Carry on with the plan"
