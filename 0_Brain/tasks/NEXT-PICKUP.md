@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 22:0x-b 19 Nov, the 21:2x successor seat (own ctx 50% checkpoint) - READ FIRST
+- **K 54th WRAPPED + SCORED 0.96, pane CLOSED.** **S 94th FILED KS-2267..KS-2271** (verified at source: Backlog, p 3/4/4/3/4); its NEXT is ONE QUESTION with items 7 (KS-74 invite claim), 8 (KS-1107 form cell) and the (b) prelaunch-spec draft: license BY KEY.
+- **D 74th RESULTS ANSWERED:** KS-1129 CLOSE licensed; KS-1295 + KS-1205 facts comments licensed (no state move). NEXT: its STATUS with ids -> verify Done/archived at source -> score + pane_close on its WRAP. Test data left on Kintsugi: d74sweep-ks1129 user, INACTIVE key row key_489765bb..., 4 audit rows.
+- **B 204th (%51) PLAN ANSWERED:** set-up + row 1 PR 2073 released on develop db427bf4c0e1. NEXT: SET-UP STATUS -> READY 2073 -> GO (name gate 257 F1 as a NOTE; three-path UNION=) -> MERGED. Then the OWED Kam card on gate 257 F1 (legacy keys without a connector id).
+- **K 55th DRAFTER running** (Sonnet subagent; dies with a rotation -> re-commission from 0_Brain/reference/2026-11-19_drafter-seatK55/commission.md if fleet/briefs_staged/2026-11-19_seatK55_merge.md is ABSENT). Row 1 PR 2259 (KS-1107). On return: read whole, STAMP, launch (Sonnet C5), tell B 204th a K seat is live.
+- **CARD open:** secuura-ks1107-existing-joiners-query-production-1119 (default c).
+
 ## 🔴 CHECKPOINT 50% 22:0x 19 Nov, the 21:2x successor seat - READ FIRST; supersedes the 21:3x block below where they differ
 - **MERGED tonight by this seat's GOs:** PR 2194 (KS-1663) = db427bf4c0e1 (verified at source: one parent 86bfeda9e3e1, tree 9b301f0d45bd). develop is now **db427bf4c0e1**.
 - **GATE 381: PR 2259 (KS-1107) GO WITH NOTES (tier 1)** at head a0e58b942c22 (verdict 0_Brain/reference/2026-11-19_gate381-tier1-pr2259-ks1107-register-org/verdict.md). W 39th SCORED 0.95. **NEXT: K 55th** takes PR 2259 FIRST (tier 1; the GO names F1, F3, F5, F6 as notes; re-measure the spec yaml if 2073/2131 merged first), then PR 2257 and K 54th's remaining rows. Commission its drafter on K 54th's WRAP (re-key k54 -> k55: own `th`->`th`, lineage `rd`->`th`; MEASURE).
