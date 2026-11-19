@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 50% 05:1x 20 Nov, the 04:5x rotation-successor seat - READ FIRST; supersedes every block below where they differ
+- **develop = 2ad55ceceb7c** (W 44th drafter's API read ~05:1x). Kam silent since 18:38:54 (kam_rulings_today 05:10:59; reconcile 0). Gauge 24%. Inbox: 0 inbound new at 05:1x.
+- **FLOOR (3 seats):** %105 **K 59th** (merge; rows 2153, 2261, 2154, 2155, 2160, 2150, 2152, 2195; NEXT unchanged from the 04:5x block). %108 **S 100th** (Sonnet board; brief fleet/briefs_staged/2026-11-20_seatS100_board.md, STAMPED 05:03; rung 5 MET 05:1x (pane reading PR 2261 at 6a71bf74c614); NEXT: plan QUESTION with the KS-2283 draft + the KS-2173/G328 report -> licence by item -> ONE comment -> STATUS -> WRAP). %111 **W 44th** (Sonnet build, KS-2276 test-only; brief fleet/briefs_staged/2026-11-20_seatW44_build.md, STAMPED 05:09 with W44-W1..W3; rung 5 OWED; NEXT: plan QUESTION (M1 measured first) -> ANSWER -> build -> READY FOR GATE -> tier (expect 2) -> gate -> merge row by ADDENDUM to K 59th).
+- **MORNING CARD at 06:00 still OWED** (content in the 04:5x block below; add: S 100th and W 44th launched).
+- **OWED unchanged:** fleet_ack collector window size (12 rows; older questions never flag); weekly consolidation lapsed since 10-19.
+
 ## 🔴 BOOT 05:0x 20 Nov, the 04:5x rotation-successor seat - READ FIRST; supersedes every block below where they differ
 - **develop = 2ad55ceceb7c** (per the 04:5x handover; re-probe before any GO). Kam silent since 18:38:54 (19 Nov). Gauge 24%. Capacity ROOM.
 - **FLOOR: %105 K 59th** (rows 2153, 2261 by ADDENDUM 1, 2154, 2155, 2160, 2150, 2152, 2195). Its 17:55Z STATUS (set-up closed, no question) read; no reply owed. NEXT for it unchanged from the 04:5x block below.
