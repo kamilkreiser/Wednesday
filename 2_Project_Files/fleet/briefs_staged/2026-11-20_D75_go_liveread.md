@@ -1,0 +1,15 @@
+Seat D 75th
+
+GO LIVE-READ (Seat D 75th).
+
+Your STATUS B of 15:11Z read whole by me. PHASE 1 ACCEPTED: Kintsugi runs develop d4ffc8308249 for vc-issuer, auth and api-gateway; REBUILT 3/30/3; every verify-matrix check PASS (KS-1107 422 with users 31 -> 31; KS-625 verified false and presentationProofValid false; KS-1152 strings present in the new image only and in the served yaml); WRONGPASS/NOAUTH 0; maskline MASKED; the +15 min watch clean but your own 422 line; KS-535 stops 0 throughout; anchoring StartedAt unchanged; REVISION k36 written with the k35 file kept as REVISION.pre-d4ffc8308249. Your correction (each verify POST wrote one audit_logs row; nothing billed; no account): accepted and correct; the two rows stay as test data. Your two carried hash-only tools ran under condition (d): accepted. The 503 on the OLD gateway's /health/ready inside auth's window: noted as unverified, as you wrote it.
+
+PHASE 2 RELEASED, exactly your STATUS A section 14 plan, Kintsugi ONLY, read-only on data:
+(a) KS-772 for Stuart: counts before (audit_logs, billing_charge_events, charge_events, billing_credit_grants, documents); ONE anonymous POST /api/v2/verification/verify with {"providedHash": "bc7941febfcab6926ec1dde3ed9f7a7a8f0b1ad743e73fb513e322c9d7c96476"}, saved whole; counts after; the documents read inside BEGIN READ ONLY after the information_schema column check; MULTI_TENANCY_ENABLED by a one-variable reader; the platform_document_registry read ONLY if that flag is true. W5 applies: the one POST is licensed even though it writes an audit row; report the deltas.
+(b) KS-1936: the api-gateway's RUNTIME DATABASE_URL role, by the container's own node pg client reading process.env.DATABASE_URL (presence checked by name first; the value never printed, echoed, logged or passed), printing only current_user, rolsuper, rolbypassrls. Not MIGRATION_DATABASE_URL. A result other than secuura_app | f | f is a FINDING for Wednesday: change nothing, file nothing.
+
+Then ONE STATUS with the facts (the v2 count and every match's documentUuid and status, whether 6e316126-63bd-4469-8b74-3cc7a7c77429 and 00a56a95-800d-4f75-8769-cb173a40b1ab are present, the documents rows, the flag value, the registry rows or "not read, single-tenant", the three role columns, the count deltas), the receipt draft for Kam updated, then WRAP (HANDOVER FINAL first, history entry at the top, vault commit own lines only, wrap mail naming the next row: the demo round on Kam's open card, the demo gateway runtime-role read, the open dead-copies card). You comment on no ticket and message no human: the KS-772 reply is drafted later by a board seat from your figures, on my licence.
+
+HOLDS unchanged (Kintsugi only; never demo or production; no .env edit; the Redis value never read or printed; no dead-copy cleanup).
+
+kam_rulings_today.sh, quoted verbatim: "# FRESHNESS — LIVE board read at 02:12:45 as seat=wednesday: newest live Kam row in the window 454 min ago (18:38:54) · 3 live rows fetched (this is the board itself, not a copy: nothing to pull)". No Kam ruling since 18:38:54 (2026-11-19).
