@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 22:3x 19 Nov, the 21:2x successor seat - READ FIRST
+- **MERGED: PR 2073 (KS-1152) = 69c4cdc10040** (verified at source: one parent db427bf4c0e1, tree 38d8a8621a56). develop is now **69c4cdc10040**. B 204th WRAPPING naming PR 2131 (score + pane_close on its WRAP; its own mailwatch_b204.py will make pane_close refuse rc 9: identify by ps, then --live-ok). Next B seat (B 205th): 2131 (now both-sided on the yaml), 2052 (four-path UNION to build), 2102, 2191.
+- **K 55th drafter TOLD (SendMessage) develop moved: PR 2259 now BOTH-SIDED on the yaml** (UNION + finish script + generate-openapi re-run). On return: read whole, STAMP, launch.
+- **W 40th (%54, Opus) on KS-2272**: census + plan QUESTION pending.
+- **Gate 257 F1 RULED by Wednesday as a design inside Kam's KS-1152 rulings (no card; panel line bf-73a7a266e26d): a follow-up BUILD that REPORTS any legacy key (no connector id) still active after a rotate and tells the operator to revoke it by id; NEVER auto-revokes (auto-revoke = a Kam card). OWED: file it as a ticket (next board seat) + a build seat later.**
+- **api-gateway deploy to Kintsugi** (PR 2252 masks were deployed at k35; PR 2073 now on develop): a D seat when the floor allows (kintsugi-first; Kam's 11-17 15:11:24 "deploy anything that has been tested and is ready" per the pickup's carried grant chain: re-verify the grant before commissioning).
+
 ## 🔴 UPDATE 22:1x 19 Nov, the 21:2x successor seat - READ FIRST
 - **D 74th WRAPPED, SCORED 0.96, pane CLOSED.** KS-1129 Done+archived (verified at source with includeArchived: issues() hides archived by default). Routing owed: KS-1295 demo-VM log read needs its own licence (demo read: Wednesday's call under the kintsugi-first rule; card only if it writes); KS-1205 (b) offline only; the INACTIVE test key row key_489765bb stays until a ruling.
 - **🔴 REGRESSION (ledger row 22:11, invoke-to-read family, w>=5 across 11-17..11-19):** a bare `cockpit.sh` with both streams discarded slipped past pretooluse_cockpit_verb.sh (it refuses invented verbs, not absent ones). **MECHANISM OWED (failing-test treatment):** extend the hook to refuse a fleet-tool call with NO verb and any fleet-tool call whose stdout AND stderr both go to /dev/null; wed_claim.sh check + claim first; exercise both paths before arming. Raise with Kam on the morning card (w>=3 rule).
