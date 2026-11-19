@@ -1,0 +1,28 @@
+Landing for the data-source administrator check and the audit path fix (repo datasecau/Reporting_Dashboard_Au).
+MERGE COMMIT, head-pinned. Never squash, never rebase.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-19_B1736_verify'
+
+0. Re-read before acting: main must still be 295f989ec26f926d5f00c5ad3d58a56d2a405fa8 and the branch head f06b080e3ffce9f6be869e66eb7b0e6ab0dac1d5
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/b1733%2Fnexusai-lane-ns-datasource-admin --jq .commit.sha
+   If main moved: re-gate (compare ahead/behind and paths) before landing.
+   LANDING HOLD: the branch carries Tuesday's defaults (Q-1 to Q-9 in the kit's STAMP slot); land only with those answers in hand.
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1733/nexusai-lane-ns-datasource-admin --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks with a background wait that EXITS; --min-checks 7: at least 7 checks must have run and all must pass (Build, CodeQL, gitleaks, npm audit and the rest); fewer than 7 is a stop:
+   gh pr checks <PR> -R datasecau/Reporting_Dashboard_Au --watch --fail-fast   (run in the background; it exits)
+   CodeQL must show no new alert (the gate's local run against base 295f989e: 29 results at base and head, KEPT 0, NEW 0, rc 0). The open alerts on backend/server.js below line 15947 move down by the inserted lines (3, 6, 9 or 12); none is claimed closed or changed.
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit as a merge commit:
+   gh pr merge <PR> -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit f06b080e3ffce9f6be869e66eb7b0e6ab0dac1d5 --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing: the merge touches backend/** and __tests__/**, which deploy-demo.yml does not path-ignore (it ignores only **.md, docs/** and tests/**), so a Deploy demo run starts on main. Its build and deploy jobs MUST read skipped (gated on vars.CI_DEPLOY_ENABLED). Anything other than skipped is a stop-and-report. Do not dispatch, re-run or touch a variable.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert; existing alerts open and unchanged apart from the line shift.
+Not deployed. No Jira from the landing seat (the records seat posts after: RD-793 and RD-990 comments, and follow-ups for the two /test routes plus discover-tables and describe-table (Medium), the Entra router's own row, and the requestPath pathname fix (Minor)).
