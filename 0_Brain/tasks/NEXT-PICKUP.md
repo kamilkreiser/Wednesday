@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 20:4x-b 19 Nov, the afternoon seat (ctx ~75%) - READ FIRST
+- **PR 2258 MERGED** 86bfeda9e3e1 (verified at source: one parent 06328efa1770, tree 088c9442815d, 4 files). K 53rd SCORED 0.96, pane CLOSED.
+- **FLOOR:** %34 S 93rd (Sonnet): row 1 FILE the org-join defect (High) after a search -> its STATUS mail names the key -> Wednesday commissions an OPUS build (row C3, auth surface; consumer census first; tier-1 Opus gate); row 2 the pre-filtered closes (plan QUESTION -> licence by key).
+- **K 54th DRAFTER running** (Sonnet subagent of THIS seat; dies with a rotation -> re-commission from 0_Brain/reference/2026-11-19_drafter-seatK54/commission.md if fleet/briefs_staged/2026-11-19_seatK54_merge.md is ABSENT): row 1 PR 2194, row 2 PR 2257 (gate 380), then the rest, on develop 86bfeda9e3e1.
+- Tonight's tally: merged PR 2252, PR 2258; closed KS-1380, KS-968, KS-1968, KS-2038; Kintsugi k35 deploy + Redis rotation; PR 2257 gated GO (round 2).
+
 ## 🔴 UPDATE 20:4x 19 Nov, the afternoon seat (ctx ~72%) - READ FIRST
 - **CLOSED tonight by the live-check sweep:** KS-1968, KS-2038 (D 73rd 0.96; Wednesday re-read Done+archived). KS-1187 OPEN (grace mode is Kam's 11-05 ruling: flip after 30 clean days), KS-1673, KS-1284 OPEN. Test data left on Kintsugi: 3 d73sweep- users + transfer 1073200f (D 73rd HANDOVER).
 - **K 53rd (%28): GO SENT for PR 2258** (fleet/briefs_staged/2026-11-19_K53_go_2258.md, 20:4x). NEXT: MERGED mail -> verify squash at source (one parent 06328efa1770, tree 088c9442815d) -> score + pane_close on its WRAP (row line expects WRAP naming PR 2194).
