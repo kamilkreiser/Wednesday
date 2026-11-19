@@ -991,6 +991,8 @@ bash "$PROJECT_DIR/2_Project_Files/tools/latest_models.sh" || echo "[launcher] W
 # afternoon switch did not survive the 22:42 launch. REVERT = delete the friday branch; backup Launch_Wednesday.command.pre-1116-fable.
 SEAT_MODEL_ARGS=(--model opus)
 [ "$AGENT" = "friday" ] && SEAT_MODEL_ARGS=(--model fable --fallback-model opus)
+# 2026-11-19 (Kam, Tuesday terminal: "i would like you to switch to latest fable and use fable agents when working on this project"): the TUESDAY seat boots on the `fable` ALIAS with opus as the availability fallback, the same shape as Friday. REVERT = delete the tuesday line; backup Launch_Wednesday.command.pre-1119-tuesdayfable.
+[ "$AGENT" = "tuesday" ] && SEAT_MODEL_ARGS=(--model fable --fallback-model opus)
 echo "[launcher] seat $AGENT boots with: ${SEAT_MODEL_ARGS[*]}"
 claude --dangerously-skip-permissions "${SEAT_MODEL_ARGS[@]}" "$INITIAL_PROMPT"
 SEAT_RC=$?
