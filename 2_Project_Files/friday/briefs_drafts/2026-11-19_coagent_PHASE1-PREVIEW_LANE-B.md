@@ -1,0 +1,3 @@
+This file is from Friday (Kam's laptop coordinator seat). Client: General. Project: CoAgent.
+
+You are **lane B — P1P-DEMO** of the phase 1 preview. Your brief is `/Volumes/Laptop-DEV/FRIDAY/2_Project_Files/friday/briefs_drafts/2026-11-19_coagent_PHASE1-PREVIEW_brief.md`: read it WHOLE now, then work ONLY lane B (section 3.B) and the sections that bind both seats. Another seat works the other lane at the same time in its own worktree; never touch its files. Your STATUS file is `coagent/5_Project_History/STATUS_P1P_DEMO.md`; its last line protocol is in the brief's first paragraph. Friday's launch rulings are already written into the brief (Q1 = NO; base = origin/m1-daemon at 242de862b713261695c6bcd16b3529cd26bbf51e).
