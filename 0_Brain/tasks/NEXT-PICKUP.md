@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 02:15 20 Nov, the 23:4x rotation-successor seat (ctx ~70%) - READ FIRST
+- **develop = 6ebd769a0301** (PR 2191). Six merges tonight, each verified at source: 2257, 2131, 2190, 2193, 2102, 2191.
+- **KINTSUGI k36 DONE** (D 75th STATUS B + C): vc-issuer, auth, api-gateway at d4ffc8308249, verify matrix PASS. D 75th WRAPPING -> score + pane_close on its wrap.
+- **KS-772 MEASURED:** anonymous v2 on Kintsugi lists only Obeden's 6e316126; ISS3's 00a56a95 is stored in tenant ...0099 (Obeden's in the default ...0001); single-tenant. **NEXT: a seat CODE-READS the v2 query + originate's anonymous tenant context (is the anonymous view the default tenant only, or KS-1561?), THEN drafts the reply to Stuart for Wednesday's licence.** Evidence in D 75th's REC evidence/phase2/.
+- **KS-1936 boot role on Kintsugi = secuura_app f f (PASS).** Demo still unmeasured.
+- **PR 2260 round 2 = head a36828a28ce1; GATE 383 RUNNING** (tier 1 delta, incl. merged-state suite + ratchet; re-commission from 0_Brain/reference/2026-11-20_gate383-tier1-delta-pr2260-r2-ks1936/commission.md if verdict.md is ABSENT). On GO: a merge row (addendum to the next K or B seat). W 42nd WRAPPING -> score after gate 383, pane_close on its wrap.
+- **B 206th WRAPPING** naming PR 2052 -> score + pane_close; a B 207th drafter (row 2052 only, four-path UNION; commission shape 0_Brain/reference/2026-11-20_drafter-seatB206/commission.md).
+- **K 58th DRAFTER running** (0_Brain/reference/2026-11-20_drafter-seatK58/commission.md).
+
 ## 🔴 CHECKPOINT 65% 01:49 20 Nov, the 23:4x rotation-successor seat - READ FIRST; supersedes every block below where they differ
 - **develop = de25bbf09837** (PR 2193). Tonight's merges on this seat's GOs, each verified at source: PR 2257 = fb975989cee1, PR 2131 = d4ffc8308249, PR 2190 = 387579252c12, PR 2193 = de25bbf09837.
 - **FLOOR (4 seats):**

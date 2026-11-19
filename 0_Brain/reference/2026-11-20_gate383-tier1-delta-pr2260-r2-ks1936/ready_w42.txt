@@ -1,0 +1,43 @@
+=========== [INBOUND] 2026-11-19T15:13 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE DELTA KS-1936: PR 2260, head a36828a28c
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE DELTA KS-1936: PR 2260, head a36828a28ce1, TIER 1 delta (Seat W 42nd)
+Seat W 42nd
+
+READY FOR GATE DELTA KS-1936 (Seat W 42nd). TIER 1 delta. PR 2260, NEW head a36828a28ce16d616358cabd4a589c7f2cfbcebe (short a36828a28ce1), one commit on the gated head 55f448ff69a5edad7e9023afb5f254d38cfca7bf. Answers gate 382's F1 and F5 only. Nothing merged, deployed, closed or moved; admin.ts is byte-identical to the gated head (0 diff lines).
+
+WHAT CHANGED (3 files, +43 -9; the PR is now +220 -3 in 4 files)
+- the PR's test file: helper patchRaw plus two RED cells (12 -> 14 cells), each with a comment naming KS-1936, gate 382 F5 and what it pins.
+- both docs fragments: the H2 now names the one route (flow: "Only a platform admin can use PATCH /api/admin/identity/users/:id/level (KS-1936, api-gateway, TIER 1)"; cheat: same words with the mdash form), and the figure lines follow the 14 cells with measured values. Nothing in the title, H2s, body or Linear comment says anything about any other route (your ANSWER: F2 stays on Kam's card).
+- PR title (gh pr edit), read back exact: "Refs KS-1936: only a platform admin can use PATCH /api/admin/identity/users/:id/level".
+
+THE TWO CELLS
+- "RED ks1936 org-admin with a malformed JSON body is refused with 403 (not 400) and no query": precondition first (the same unterminated body as system-admin answers 400, so the cell is not vacuous), then org-admin: 403, FORBIDDEN, 0 queries. Kills M6.
+- "RED ks1936 org-admin carrying x-user-role SYSTEM_ADMIN is still refused with 403 and no query": valid body {"verificationLevel":"HIGH"}, org-admin token plus that header: 403, FORBIDDEN, 0 queries. Kills M8.
+
+EVIDENCE (my own tree worktrees/s-w42-ks1936, node v26.8.1, counted replacement on admin.ts, sha256 of admin.ts equal before and after every run: 00814053d343eef8...)
+- 12 round-1 cells at the gated head, before I edited the test file: BASE 12 of 12; M0 (develop's admin.ts) 5 fail; M1, M2, M3 5 fail each; M6 12 of 12 green (SURVIVES); M8 12 of 12 green (SURVIVES). Gate 382's table reproduced.
+- 14 cells at the new head: BASE 14 of 14; M0 7 fail (the 5 tenant-role cells plus the 2 new ones; the 7 controls green); M1, M2, M3 7 fail each; M6 exactly 1 fail (the malformed-body cell); M8 exactly 1 fail (the header cell).
+- Whole api-gateway suite, one arm after the other: develop 387579252c12 (detached tree s-w42-dev) 2,057 of 2,057 in 180 files (44 s); new head 2,071 of 2,071 in 181 files (35 s); failure-name sets equal (both empty). 1-minute load at the start of each arm 7.85 (gate: under 8), so the seconds are from a loaded host.
+- tsc for api-gateway rc 0, 0 errors; planted error rc 2, 1 error naming routes/admin.ts. eslint --max-warnings 0 on the test file: 0 errors, 0 warnings; planted rc 1 with no-debugger and no-unused-vars. Test-file type ratchet: 219 files examined, 181 under __tests__, 25 errors all baselined, 0 new, 0 stale; planted rc 1 naming the test file. (admin.ts is not touched, so its 16 inherited eslint warnings are not mine and I did not run eslint on it.)
+- docs-fragments.mjs check ends OK (flow 117 legacy + 295 new, cheat 112 legacy + 295 new; lint clean; html_docs_check passes); planted unclosed div: rc 1 naming my flow fragment; restored by content, sha256 equal (34304238cfb85d5d); green again. The ADVISORY lines (committed pages differ from the render) also appear when the same check runs on pristine develop.
+
+PUSH (existing-branch driver, counted copy of W 38th's; gatetest first, then real)
+- gatetest 14:54Z passed every gate and stopped before the push. Real: 14:55:26Z to 15:09:48Z = 862 s, rc 0, ls-remote read back a36828a28ce1 (VERIFIED), lock released, queue left.
+- Develop gate (develop was de25bbf09837 at the push): 13 moved files against the branch's 4, 0 shared outside the two shared docs, planted control 1 = 0 + 1. Overlap gate: 26 open PRs, none lists any of my 3 paths; OVL_IGNORE_PRS was 2260 only. No merge of develop into the branch.
+- Hook (.githooks/pre-push): leg 1 read "OK — spec is in sync" (TMPDIR 51 characters). Closing text verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / legs 3 4 8 — local stack not up; you can clear this by starting it. / This is NOT a pass. Do not quote it as one — say which legs ran." Legs 3, 4 and 8 are the OpenAPI-driven ones; this route is not in the spec; round 1 skipped the same three. Branches met and not taken: lines 57 to 82 (non-fast-forward refusal; origin held 55f448ff69a5, an ancestor), line 135 (already-on-the-remote skip), lines 333 to 337 (formatting gate missing). Banner at line 397.
+
+PR AND TICKET
+- PR body (10,473 -> 14,274 characters): a "Round 2 (gate 382, F1 and F5)" block inserted before the single "## Test Evidence" line; round 1's text is an exact prefix and an exact suffix; read back equal. MY SLIP, repaired: my first PATCH stored one extra trailing newline (I had read the body through a tool that appends one); I noticed on the read-back, repaired it with a second PATCH guarded on the exact state I had created, and the final read-back is exact. The body was PATCHed twice within about a minute.
+- Linear: ONE comment on KS-1936, id cfa7d65c at 15:11:39Z, read back identical; the ticket is still In Progress (I moved nothing); no closing keyword anywhere.
+
+OVERLAP AND MERGE (develop is now 6ebd769a0301cd7cef9da63dcad1fc7706c11219)
+- Develop is 5 commits past PR 2260's base fb975989cee1, 27 files, 0 of the PR's 4 paths (control: the first moved path is detected). 25 open PRs read: the test file and both fragments are in 2260 only; admin.ts is in 2159 and 2260 (not touched by me).
+- merge-tree of the new head onto that develop: rc 0, tree 036976c22254. Planted control (a scratch commit on develop adding the same test path with other bytes, built with plumbing, never pushed): rc 1, conflict named. I did NOT re-run merge-tree against PR 2159: admin.ts is byte-identical to the gated head and 2159 lists none of my three paths. mergeable_state reads unstable (no checks run), and I do not cite it as a pass.
+
+NOT RUN: a booted gateway, any live stack or deployed environment, the four platform suites, Node 24 (this host: v26.8.1, as in round 1), the real-PostgreSQL probe (admin.ts did not change). No box, no deploy, no database at all this round (the cells use a stub).
+
+MEASURED AT AN OLDER DEVELOP (read this one): the suite and the type ratchet figures above were measured at develop 387579252c12. Develop then moved 3 more commits (via de25bbf09837 to 6ebd769a0301), and I read that compare list afterwards: it DOES include four api-gateway test files (rateLimitEnforce, ks1374 global limiter at demo limit, ks1464 limiter key hygiene, ks695 erase connector door) and the type-ratchet baselines for api-gateway and originate (scripts/typecheck-tests). I did NOT re-measure the suite or the ratchet at that develop, and no suite was run on the merged state. merge-tree is clean (rc 0), which says nothing about test counts. If you want a merged-state api-gateway suite and ratchet run before the gate, say so; it is about 8 minutes. Otherwise whoever merges re-measures, as the merge row requires.
+
+NOT MINE, NOT TOUCHED: gate 382 F2 (Kam's card), F3, F4, F7.
+
+HOUSEKEEPING: own trees worktrees/s-w42-base (clone, objects shared from W 41st's base), s-w42-ks1936 (branch at a36828a28ce1, clean) and s-w42-dev (detached 387579252c12); W 41st's three trees only read. Gate 382's absolute self-link node_modules/node_modules was MOVED ASIDE in my two copies (kept under evidence/quarantine_links, never deleted; a scan found 0 foreign absolute links left). No container started, no push lock held, no watcher armed. Record: 5_Project_History/2026-11-20_seatW-42nd/. I wrap next (HANDOVER, history, vault, wrap mail).
+
