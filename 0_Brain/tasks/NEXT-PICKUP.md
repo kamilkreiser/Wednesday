@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 70% 02:20 20 Nov, the 23:4x rotation-successor seat - READ FIRST; supersedes every block below where they differ
+- **develop = 6ebd769a0301.** Six merges tonight on this seat's GOs, each verified at source: 2257 (KS-590), 2131 (KS-625), 2190 (KS-678), 2193 (KS-1497), 2102 (KS-1864), 2191 (KS-1090). **Kintsugi k36 DONE** (vc-issuer, auth, api-gateway at d4ffc8308249; verify matrix PASS).
+- **FLOOR (1 seat + 2 subagents):**
+  - %90 **S 98th** (Sonnet, board): KS-772 code read + DRAFT reply (NOT posted), file gate 382 F3/F4 + the boot-role check, ONE KS-590 comment, the five develop failures (filed?), report KS-1152 title + CLAUDE.md leg-16 drift. NEXT: plan QUESTION with drafts -> licence BY KEY -> STATUS -> WRAP -> score + pane_close. The KS-772 reply is posted only on Wednesday's separate licence after reading the draft.
+  - **GATE 383** (Opus subagent, tier 1 delta on PR 2260 head a36828a28ce1 + merged-state suite/ratchet; re-commission from 0_Brain/reference/2026-11-20_gate383-tier1-delta-pr2260-r2-ks1936/commission.md if verdict.md is ABSENT). On GO: score W 42nd (deferred), then a merge row for PR 2260 (addendum to K 58th, or a small merge seat).
+  - **K 58th DRAFTER** (Sonnet subagent; re-commission from 0_Brain/reference/2026-11-20_drafter-seatK58/commission.md if fleet/briefs_staged/2026-11-20_seatK58_merge.md is ABSENT). On return: read WHOLE, STAMP, launch (7 rows from PR 2153, tier 1).
+- **NOT YET COMMISSIONED:** a **B 207th** drafter for PR 2052 alone (tier 1, four-path UNION, no leg model; B 206th's HANDOVER holds the b206 -> b207 recipe; commission shape 0_Brain/reference/2026-11-20_drafter-seatB206/commission.md). The **demo round** waits on Kam's card secuura-demo-round-gateway-redis-1119.
+- **CARDS OPEN for Kam (7):** secuura-org-admin-sets-verification-level-1120 (new tonight, rec b), plus the six from 11-19.
+- **SCORED tonight:** S 97th 0.96, K 56th 0.96, B 205th 0.95, W 41st 0.93, K 57th 0.97, D 75th 0.96, B 206th 0.97; W 42nd DEFERRED to gate 383.
+- **MORNING CARD 06:00** (counts; people-waiting KS-1076, KS-683, KS-607, KS-772; the seven open cards; the invoke-to-read regression and its hook fix; six merges; Kintsugi k36). **Wrap duties at rotation:** both digests + rules_card --check (ledger edited this seat: two rows); the retro in the 11-20 note; ledger 3c archive at the 05:30 shift change.
+
 ## 🔴 UPDATE 02:15 20 Nov, the 23:4x rotation-successor seat (ctx ~70%) - READ FIRST
 - **develop = 6ebd769a0301** (PR 2191). Six merges tonight, each verified at source: 2257, 2131, 2190, 2193, 2102, 2191.
 - **KINTSUGI k36 DONE** (D 75th STATUS B + C): vc-issuer, auth, api-gateway at d4ffc8308249, verify matrix PASS. D 75th WRAPPING -> score + pane_close on its wrap.
