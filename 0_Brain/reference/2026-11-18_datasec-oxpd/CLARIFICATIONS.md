@@ -194,3 +194,25 @@ Live board, view=tuesday, card datasec-oxpd-thirteen-defaults-1120, his tap verb
 > 2026-11-20T09:38:43.436000+11:00 [live] | Decision datasec-oxpd-thirteen-defaults-1120: a — Accept the defaults for now
 
 The option's detail, word for word from the card: "The design proceeds on each default; I bring each question back before the phase it blocks." The thirteen are questions 1 to 6 and 9 to 15 of `05_readiness-to-build.md` (OQ-1 to OQ-6 and OQ-9 to OQ-15 in the documents). Each stays an OPEN question on its default: this answer accepts the defaults for now and rules none of them.
+
+## C-33
+
+Live board, view=tuesday, 2026-11-20T10:22:20.717000+11:00, with six attachments (CypherSharePoint-main.zip twice, CypherSharePoint-main_2.zip, CommonValueLibraryCypher-master-2.zip, two PDF prints of the organisation's repository list), his words verbatim (kam_msgs, live):
+
+> here are the Sharepoint repo.  and a screenshot of the orgs repositories.  I was not sure what you meant by gateway
+
+This answers the SharePoint half of the card datasec-oxpd-sharepoint-source-1120 (OQ-7): the source is supplied. The gateway half is not answered: he asks what was meant. The files are kept outside git under `2_Project_Files/fleet/state/kam_attachments_1120/` (the archives hold a keystore file: location only, never opened).
+
+## C-34
+
+Live board, view=tuesday, 2026-11-20T10:22:30.516000+11:00, his words verbatim (kam_msgs, live):
+
+> I have a printer that can run oxpd
+
+Which model, firmware and OXPd generation (1.x or 2) it is has not been said: asked, not assumed.
+
+## C-35
+
+Live board, view=tuesday, 2026-11-20T10:23:04.108000+11:00, his words verbatim (kam_msgs, live):
+
+> I am looking for a reader and will connect my old windows PC to see if its suitable.  I can also run a windows emulator on your machine
