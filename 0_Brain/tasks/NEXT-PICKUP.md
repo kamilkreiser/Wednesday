@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 18:5x 19 Nov, the afternoon seat - READ FIRST
+- **PR 2252 MERGED** 06328efa1770 (verified at source). K 52nd SCORED 0.96, pane CLOSED; NEXT K seat (K 53rd) owes rows 2-11 (2194 first) on a fresh drafter: re-pin, commission from 0_Brain/reference/2026-11-19_drafter-seatK52/commission.md shape.
+- **FLOOR:** %10 S 92nd, %13 W 36th (ANSWERED: N1 = variant B, R3 residue), %16 W 37th (ANSWERED: offline-only), **%19 D 72nd (Opus, Kintsugi k35 gateway deploy -> STATUS A -> GO KINTSUGI naming pin 06328efa1770 -> STATUS B with ROTATION PLAN -> GO ROTATE ruling W4/W5)**. Brief fleet/briefs_staged/2026-11-19_seatD72_kintsugi_k35.md (STAMPED D72-W1..W7). D 71st's GO shape: 2026-11-17_D71_go_kintsugi.md.
+- **Cards open for Kam:** secuura-prod-redis-password-in-log-1119 (production only; demo is already ruled by the 11-17 card = a, rotate on each box incl. demo after its line is measured).
+- **OWED (W):** the October deploy grant: register row 46 says extended until further notice (10-19), the rules index says dead (10-31). Resolve from the source (Kam's words after 10-19); fix whichever is wrong. Not relied on meanwhile.
+- **fleet_ack OWED** for W36 plan, W36 N1, W37 plan (collector had not ticked at 18:5x).
+
 ## 🔴 UPDATE 18:4x 19 Nov, the afternoon seat - READ FIRST
 - **FLOOR (4, all Sonnet):** %7 K 52nd (PR 2252 merge; SET-UP closed, legs next, READY -> GO naming head 62124803a881 + G378 F1/F2/F5 notes); %10 S 92nd (close the 168 all-merged In Progress, first 15 in plan; ADDENDUM 1 adds KS-968); %13 W 36th (KS-930 relink guard build; plan Q = R3 heredoc/non-final-stage scope); %16 W 37th (KS-590 systemTest regression, pane -X, mails as -X; plan Q = slot, Wednesday's reading OFFLINE-ONLY). S 91st WRAPPED, scored 0.96, pane closed.
 - **Kam 18:38:54 ruled secuura-ks968-admin-first-boot-1119 = a.** OWED by Wednesday BEFORE ANY production deploy of the auth code: a read-only check of which admin rows production holds (production = Kam's; card it at that time).
