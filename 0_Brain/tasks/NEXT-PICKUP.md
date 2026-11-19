@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 UPDATE 22:4x 19 Nov, the 21:2x successor seat (ctx 64%) - READ FIRST
+- **K 55th LAUNCHED (%60, Sonnet)** on PR 2259 (KS-1107) ONLY; brief fleet/briefs_staged/2026-11-19_seatK55_merge.md STAMPED K55-W1..W8. Row 1 READY may run to PACE 60 (Wednesday's threshold); >= 60 at SET-UP: it waits for Wednesday. First UNION= use in the K lane (yaml; finish script from B 204th's). NEXT: plan QUESTION -> ANSWER -> SET-UP -> READY 2259 -> GO (tier 1; F1/F3/F5/F6 notes) -> MERGED -> WRAP naming PR 2257. Then: K 56th (rows 2257 + nine) and B 205th (2131 first: yaml UNION after 2259) drafters; W 41st on KS-2272 only on Kam's card a/b.
+- **W 40th WRAPPED, SCORED 0.97, pane CLOSED** (also fixed the project MEMORY.md over-limit item).
+- **S 95th (%57)** filing the originate unverified-email SIBLING + the KS-1152 legacy-key follow-up.
+
 ## 🔴 UPDATE 22:3x-b 19 Nov, the 21:2x successor seat (ctx ~60%) - READ FIRST
 - **B 204th WRAPPED, SCORED 0.95, pane CLOSED.** Next B seat (B 205th): 2131 (yaml UNION), 2052 (four-path UNION to build), 2102, 2191 on develop 69c4cdc10040; its HANDOVER FINAL in 5_Project_History/2026-11-19_seatB-204th/. Drafter commission shape: 0_Brain/reference/2026-11-19_drafter-seatB204r/commission.md (re-key b204 -> b205: own th->th, lineage rd->th).
 - **W 40th (%54) WRAPPING after its plan** (KS-2272 design: option (iv) claim-by-link on the reset flow; HANDOVER is the build recipe). **CARD secuura-ks2272-invite-claim-by-link-1119** (rec a = link + 202, b = link + 409, default c not now). On a or b AND PR 2259 merged: a W seat builds from W 40th's HANDOVER (tier-1 Opus gate after).
