@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 65% 01:49 20 Nov, the 23:4x rotation-successor seat - READ FIRST; supersedes every block below where they differ
+- **develop = de25bbf09837** (PR 2193). Tonight's merges on this seat's GOs, each verified at source: PR 2257 = fb975989cee1, PR 2131 = d4ffc8308249, PR 2190 = 387579252c12, PR 2193 = de25bbf09837.
+- **FLOOR (4 seats):**
+  - %78 **D 75th** (Opus): Kintsugi k36 deploy of vc-issuer, auth, api-gateway on pin d4ffc8308249 (GO KINTSUGI 01:22). NEXT: STATUS B -> verify the receipt -> `GO LIVE-READ (Seat D 75th)` (KS-772 for Stuart, gateway runtime role) -> STATUS -> wrap. Then a board seat redrafts S 97th's T3 with the measured numbers for Wednesday's licence.
+  - %81 **K 57th** (Sonnet): merged 2190 + 2193; WRAPPING naming PR 2153 (tier 1). NEXT: score + pane_close on its wrap; a K 58th drafter (rows 2153, 2154, 2155, 2160, 2150, 2152, 2195; commission shape 0_Brain/reference/2026-11-20_drafter-seatK57/commission.md, re-key k57 -> k58 th->th both).
+  - %84 **B 206th** (Sonnet): set-up closed; row 1 PR 2102 legs; READY next (the window is open: re-pin to de25bbf09837). Rows 2191, 2052 after.
+  - %87 **W 42nd** (Sonnet): PR 2260 round 2 (plan confirmed 01:44): push -> READY FOR GATE DELTA KS-1936 -> commission a TIER-1 DELTA gate (Opus; shape 0_Brain/reference/2026-11-20_gate382-tier1-pr2260-ks1936-admin-level/commission.md, delta only: F1 + F5 commit) -> merge row as an ADDENDUM to B 206th or the next K seat.
+- **CARD OPEN:** secuura-org-admin-sets-verification-level-1120 (gate 382 F2; rec b; default c). Six earlier Secuura cards still open.
+- **Board seat S 98th OWED** (not briefed): gate 382 F3 (originate sibling via /originate/), F4 (organisations PUT/DELETE/POST), the boot-role check ticket, the KS-590 comment, the five packages/shared develop failures (filed?), KS-1152 title mismatch, the cross-seat node_modules link, then the KS-772 reply.
+- **MORNING CARD 06:00** and **wrap duties** as in the 50% block below.
+
 ## 🔴 UPDATE 01:37 20 Nov, the 23:4x rotation-successor seat (ctx ~63%) - READ FIRST; supersedes the 50% block where they differ
 - **develop = 387579252c12** (PR 2190, KS-678, verified at source). Tonight's merges on this seat's GOs: PR 2257 = fb975989cee1, PR 2131 = d4ffc8308249, PR 2190 = 387579252c12.
 - **FLOOR (4 seats):** %78 **D 75th** (Opus, Kintsugi k36 on pin d4ffc8308249; GO KINTSUGI sent 01:22; NEXT its STATUS B -> GO LIVE-READ). %81 **K 57th** (Sonnet; merged 2190; GOES ON to PR 2193: READY next -> GO). %84 **B 206th** (Sonnet; launched 01:34; plan QUESTION next; rows 2102, 2191, 2052; ONE GO at a time with K). %87 **W 42nd** (Sonnet; PR 2260 round 2: gate 382 F1 retitle + H2s, F5 two cells; plan QUESTION next -> READY FOR GATE DELTA -> commission a TIER-1 DELTA gate (Opus) -> merge row as an ADDENDUM to K 57th or B 206th).
