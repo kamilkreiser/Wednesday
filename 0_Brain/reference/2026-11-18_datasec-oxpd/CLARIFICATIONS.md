@@ -304,3 +304,13 @@ Live board, view=tuesday, a tap on the decision datasec-oxpd-ci-second-review-no
 > 2026-11-20T15:41:32.210000+11:00 [live] | Decision datasec-oxpd-ci-second-review-nogo-1120: a — One more small round, then merge
 
 The option's detail as the card printed it: "A third seat applies the fix the reviewer measured (one commit), a third review checks only that, then I open the pull request. Adds about an hour. Nothing else changes." Tuesday's reading, nothing wider: ONE more round on the CI skeleton (the second scan reads every kind of stored object, not file contents only), one review of only that, then the first pull request. It is not a word on the organisation's ruleset, on CodeQL or on any repository setting.
+
+## C-47
+
+Live board, view=tuesday, two messages, verbatim (kam_msgs, live):
+
+> 2026-11-20T16:28:27.335000+11:00 [live] | I will review the doc carefully but as its long and detailed it will take me a little while.  Please put any questions that are stopping you working on the fleet activity board.
+
+> 2026-11-20T16:28:48.665000+11:00 [live] | 1) yes, anything about my printer can be changed, wiped or configured
+
+Tuesday's reading, nothing wider: (1) "the doc" is the questions document sent at about 16:10 the same day (registers/QUESTIONS_BY_OWNER); he reads it in his own time and nothing waits for that. (2) An instruction: any question that STOPS work goes on the fleet activity board as a card (one decision each, with a default); questions that stop nothing stay in the document. (3) An answer to the second half of item P2 of that document: his printer (C-34, C-39) may be changed, wiped or configured, so it may be put into developer mode. NOT answered by it: the firmware version on its panel, and so which OXPd generation it runs (the first half of P2 stays open). It is not read as leave to do anything to any other device, nor as a word on HP's developer key, which is still needed before developer mode (H5).
