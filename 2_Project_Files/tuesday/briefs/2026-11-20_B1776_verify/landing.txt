@@ -1,0 +1,51 @@
+Landing for the data-source role checks and the audit pathname rule (RD-1011, RD-1012, RD-1013), repo datasecau/Reporting_Dashboard_Au.
+MERGE COMMIT, head-pinned. Never squash, never rebase.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1776_verify'
+
+0. Re-read before acting: the branch head must still be 8af88ee80b47a5f57c8f176690111047a8678e4e and main
+   b169b8a0eee8eaac594e98918c2ccaff91164dcf (the lane's base; ahead 7, behind 0; merge-tree of main and head is clean
+   and equals the head tree f5f7094e9981516890032a9e74785f7b3f4b3366).
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/b1762%2Fnexusai-lane-nk-datasource-role-checks --jq .commit.sha
+   If main moved: list the paths main changed since b169b8a0. Any of the 14 paths of this branch among them is a
+   re-gate (backend/server.js, backend/services/capabilities.js, backend/services/accessAudit.js,
+   backend/routes/entraProvisioning.js, the two docs/role-capabilit* files, the seven __tests__ files,
+   scripts/verify-expected-counts.json; the counts file conflicts if another lane changed it). Anything else is noted
+   and the landing goes on.
+   LANDING HOLD: the branch carries the coordinator's defaults (refuse all four routes, the two reads included;
+   percent-encoded paths recorded as sent and no dot segment resolved; the permission table keeps config.read for the
+   two reads; the RD-793 key leaves the pending list; four old-answer tests rewritten). None is the product owner's.
+   RD-1011's question to the product owner (must the two read routes stay open to a viewer) is open. Land only with
+   the coordinator's answers in hand.
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1762/nexusai-lane-nk-datasource-role-checks --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks with a background wait that EXITS (at least 7 checks must have run and all must pass):
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/Reporting_Dashboard_Au PRNUM 8af88ee80b47a5f57c8f176690111047a8678e4e 60 90 --min-checks 7
+   The hosted Build runs the verify on Node 24 on the PR merge ref: its counts pair must read 6195/390 (the gate's
+   local verify at the head on Node 24 is in VERDICT.md).
+   CodeQL: the gate's local run read rc 0 (KEPT high+ 0, NEW high+ 0). WATCH alerts 67 and 68
+   (js/missing-token-validation, high): at the head their related location "request handler" for
+   POST /api/setup/data-sources/:id/test spans backend/server.js:17394-17583 and holds the three added lines
+   17395-17397 (start line not added; no code-flow step in the handler). Pull request 231 passed the hosted check with
+   the same geometry (three lines added just inside the same two alerts' region of the next handler). If the hosted
+   CodeQL check reports either alert on this PR, it is a landing blocker: STOP, never dismiss, never comment on the
+   alert; the reshape goes to Tuesday (VERDICT.md, CODEQL section, gives the shape).
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit as a merge commit:
+   gh pr merge PRNUM -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit 8af88ee80b47a5f57c8f176690111047a8678e4e --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing: the merge touches backend/**, __tests__/** and scripts/**, which deploy-demo.yml does NOT
+   path-ignore (read at the head, .github/workflows/deploy-demo.yml:29-32: it ignores only '**.md', 'docs/**' and
+   'tests/**'), so a Deploy demo run starts on main. Its build and deploy jobs MUST read skipped (both gated on
+   vars.CI_DEPLOY_ENABLED, deploy-demo.yml:53 and :91; the last three runs on main, c0552240, b0499db0 and 9373976e,
+   read skipped, and the newest run's jobs read build=skipped, deploy=skipped). Anything other than skipped is a
+   stop-and-report. Do not dispatch, re-run or touch a variable. deploy.yml is workflow_dispatch only and does not start.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert; existing alerts open and unchanged (22 open on main at the gate).
+Not deployed. No Jira from the landing seat (the records seat posts after; see FOR-RECORDS.md).
