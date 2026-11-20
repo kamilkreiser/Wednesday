@@ -240,3 +240,11 @@ Live board, view=tuesday, card datasec-oxpd-sensitivity-labels-1120, his tap ver
 > 2026-11-20T11:44:48.964000+11:00 [live] | Decision datasec-oxpd-sensitivity-labels-1120: a — Leave it out, as today
 
 The option's detail, word for word from the card: "The rebuild matches the shipped app. The feature is listed as a possible later addition." So sensitivity labels (choose a label when scanning; block printing of a file labelled Do Not Print), written and switched off in the SharePoint source 4.4.6, are NOT in the rebuild's requirements. The "not ruled" mark on them in `02_architecture.md` (B1760) is answered by this entry; the documents' wording is updated at the next correction pass.
+
+## C-39
+
+Live board, view=tuesday, a note on card datasec-oxpd-which-printer-1120 with no option chosen, verbatim (kam_msgs, live):
+
+> 2026-11-20T11:45:16.080000+11:00 [live] | Decision datasec-oxpd-which-printer-1120 note: I have the map m577m
+
+Tuesday's reading, said back to him on the board and open to his correction: the model is an HP MFP M577 ("map" read as MFP through dictation; the trailing letter is not understood). NOT answered by the note: the firmware version, and whether the printer may be wiped for developer mode. Which OXPd generation an M577 covers is NOT established here: no source was opened for it. Until the firmware version is known the phase-0 list keeps one printer of each generation as still to be confirmed (the card's own default).
