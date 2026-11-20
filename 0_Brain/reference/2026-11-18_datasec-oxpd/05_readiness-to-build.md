@@ -9,6 +9,7 @@ Datasec / OXPd, 2026-11-20. For the product owner. Written after the independent
    - **Your word to start building.** Everything so far was analysis and design. Building is a new ask.
    - **The phase-0 kit** (list below): printers, a Windows PC, card readers, a test Microsoft tenant, HP developer access, and two pieces of source code that are not in the library.
    - **Two answers that the first weeks depend on:** whether the card key found in the library is the one live printers use today (question 8), and where the SharePoint app's source is (question 7). The other thirteen questions block nothing in phase 0, and each has a default the design uses meanwhile.
+   - **Update, later on 2026-11-20:** you sent the SharePoint source and it has been read (question 7 below). That answer is in. The source of the sign-in gateway, asked for in the same message, is still needed: you asked what was meant, and the question has been put to you again. Of the "two pieces of source code" in the kit line above, one is now in hand.
 3. **The first step is not product code.** It is phase 0: a lab, and thirteen short tests on real printers and a real tenant that prove the assumptions the design rests on. Some unit-level work needs no hardware and can start the day you say go (list below).
 4. **One thing to know before you commit a date to anyone:** the newer printers (OXPd 2) cannot reach a customer until HP delivers four things, and HP has given a date for none of them: production firmware, a platform version its validation accepts, a signing service whose output installs, and its turnaround. The older printers (OXPd 1.x) have no such dependency on HP.
 
@@ -64,10 +65,16 @@ Recommendation: approve, except the token write-back, which should wait for its 
 Blocks: the phase 3 exit.
 
 **7. Where is the source code that builds the SharePoint app?**
+**Answered in part on 2026-11-20.**
+- **Answered:** you supplied the SharePoint source (the repository `CypherSharePoint-main`, version 4.4.6) and a newer copy of the shared library. Both have been read. SharePoint is a separate app with its own code, not a variant of OneDrive. The design and the plan now follow the code: seven requirement rows were added, and two points where the manual and the code disagree were corrected (the code has no limit of four metadata fields at scan, and the app ships in eight languages, not six). Detail: `analysis/A8_sharepoint-app-and-common-library.md` and `review/B1760_APPLIED.md`.
+- **Still open:** the source of the sign-in gateway (the Function App in the customer's Azure that the phone app talks to). You asked what was meant by "gateway"; the question has been asked again and is not answered. Nothing you sent is the gateway.
+- **Found in the SharePoint code and yours to decide, not yet asked as a numbered question:** sensitivity labels (choose a label when scanning, block printing of a "Do Not Print" label) are written and switched off. The design leaves them out unless you say they ship.
+
+What the question said before the answer, kept for the record:
 The suite ships SharePoint as its own app. Nothing in the library builds it.
 Options: (a) supply the repository or branch; (b) confirm it is built from the OneDrive code at another revision, and which.
 Recommendation: ask the Workpath team this week. Default: SharePoint is built from the manual alone, and its match with Workpath is unverified at source.
-Blocks: part of phase 0 (the source read), then phase 3.
+Blocks: part of phase 0 (the source read), then phase 3. (No longer blocks either: the source is in and read. The gateway source blocks the phone sign-in work of phase 3, as question 10 says.)
 
 **8. Is the card key in the library the one fielded printers and phone apps use today?**
 You said the keys in the library are old and rotated. That sentence was general. This key is compiled into the 4.4.1 source the shipped apps are built from, every stored card and every installed phone app depends on it, and it cannot be rotated without re-enrolling cards and releasing the phone app. Location: `HPAuthenticationManager-main`, files `util/CardValidator.kt` line 10 and `util/Encryptor.kt` line 12 (the same value in both).
@@ -130,8 +137,8 @@ Blocks: nothing.
 | 9 | One Workpath printer with the current suite, in the test tenant | The team |
 | 10 | Card readers: one of each of the eight products in the product's reader table. The six USB ids are not six readers: four products share one id | You or the team |
 | 11 | A test Microsoft tenant with: Custom Security Attributes licensed; the HP Authentication Manager registration set up as customers have it; Universal Print licences; the "Onboarding Azure Services" deployment; a Printer Administrator test account with MFA; a test user whose mail address differs from the sign-in name; Conditional Access policies to test against; a tenant admin available for those tests | The team |
-| 12 | The source code of the customer gateway (the Function App). It is in none of the library's repositories | The Workpath team |
-| 13 | The source code that builds the SharePoint app (question 7) | The Workpath team |
+| 12 | The source code of the customer gateway (the Function App). It is in none of the library's repositories. **Still needed** (asked again on 2026-11-20) | The Workpath team |
+| 13 | The source code that builds the SharePoint app (question 7). **Received 2026-11-20 and read** | Done |
 | 14 | From HP, in writing: the confirmation you reported; App Center / validation access and the contact behind it; dates for the four items in the BLUF; and whether a first signing round is possible with fewer than seven tested printer groups | You and HP |
 | 15 | The card key the fielded product uses, and the licence installation credentials, through a secure channel (after question 8) | You |
 | 16 | Two Linux and two Windows server hosts (virtual machines will do) for the two-server test and the packaging tests | The team |
@@ -148,7 +155,7 @@ These need no printer, no tenant and no answer. They still need item 1, your wor
 | WP0.3 | Repository layout, Linux and Windows build legs, secret scanning, the check that fails a release containing HP's beta library |
 | WP0.4 | Our own newer-printer clients and test stubs generated from HP's specifications; older-printer stubs from HP's published service descriptions |
 | WP0.5 | Drafting the questions to HP (sending them is yours) |
-| WP0.6 | Reading the OneDrive source that is in the library (the SharePoint half waits for item 13) |
+| WP0.6 | Reading the OneDrive source that is in the library (the SharePoint half was done on 2026-11-20, once item 13 arrived) |
 | WP1.1 | Device registry, database for both packagings, local secret store |
 | WP1.3 | Card decoders written from the Workpath decoding code (the comparison with real readers waits for the lab) |
 | WP1.4, WP1.5 | Sign-in state machine and token broker against a simulated Microsoft service |
@@ -162,7 +169,8 @@ These need no printer, no tenant and no answer. They still need item 1, your wor
 
 - **Nothing has been run on a printer, a simulator or a tenant.** Every statement about how a printer behaves comes from HP's documents, the source code or forum history. That is what the thirteen phase-0 tests are for.
 - **HP's written confirmation is not in the library.** The only evidence for it is your answer.
-- **Sources that are not in the library**, so nothing about them could be checked: the customer gateway (Function App); the phone app; the SharePoint app; the customer's Log Analytics rule that decides which report columns are accepted; the job-record field names (inside a compiled HP library); HP's simulator guide; Microsoft's documentation on deleting a cloud printer.
+- **Sources that are not in the library**, so nothing about them could be checked: the customer gateway (Function App); the phone app; the SharePoint app (received and read on 2026-11-20: see the next point); the customer's Log Analytics rule that decides which report columns are accepted; the job-record field names (inside a compiled HP library); HP's simulator guide; Microsoft's documentation on deleting a cloud printer.
+- **The SharePoint source was read, not run.** About 55 of its 220 source files were read; nothing was built and nothing was checked on a printer. The shared library the app is built with is a compiled file one to three versions older than the library source that was read. Three features in the code look switched off (quick access, "remember me", sensitivity labels); a look at a printer running SharePoint 4.4.6 would confirm it.
 - **The OneDrive source has not been read in full.** The original analysis never wrote that half; it is a phase-0 work package.
 - **Claims resting on a report line only.** The reviewers traced most claims to the line of an analysis report and opened the library itself for a minority (about 15 of 63 on the printer platforms, about 30 of 144 on security). The corrections applied in this pass were each opened at the cited line; unchanged text was not re-traced.
 - **The option text of your 25 answers** was read from the board's data file, not from the board export. The numbered record of your answers holds only the label you tapped; copying the full option text into that record is still to be done.
@@ -170,5 +178,7 @@ These need no printer, no tenant and no answer. They still need item 1, your wor
 - **One piece of general knowledge, not from the library:** that a sign-in token obtained by the server may not work at a Workpath printer. A phase-0 test settles it.
 - **Sizes of the new work packages and the scores of the nine new risks** are estimates made in this pass, not measured.
 - **The library copy that was read** is the backup copy; it was not compared file by file with the original on the laptop drive.
+
+Details of the SharePoint update of 2026-11-20: `review/B1760_APPLIED.md` and `analysis/A8_sharepoint-app-and-common-library.md`.
 
 Details: one row per review finding in `review/B1757_APPLIED.md`; the changes themselves in the change logs at the end of `02_architecture.md` and `03_plan-of-attack-and-build.md`.
