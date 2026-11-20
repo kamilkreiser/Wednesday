@@ -1,0 +1,92 @@
+THIS HEAD DOES NOT MERGE ONTO TODAY'S MAIN AS IT IS. It meets the logging change (already on main) in one file,
+Datasec.Suite.slnx: a three-way merge of main c56f3f3b015fae8d47288aa9d6c636ecd8fe2191 and this head reports one conflict, in
+that file and nowhere else (VERDICT.md, item 4). A pull request opened for this head will read not mergeable. Resolving it
+needs a NEW commit on the branch, and a new commit is a head no gate has read. Section 2 says what that commit must hold and
+what must be read before it lands. Do not land any head other than the one a gate read.
+
+Reviewed head: ec75619ed6e97f1fc0bbacb87660eae3fdbe4dca (two commits on the branch b1788/wp42-ipp-encoder: 9f4238ad, read by
+the first gate, and ec75619e, read by this one). main today: c56f3f3b015fae8d47288aa9d6c636ecd8fe2191.
+
+Environment for every line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+
+0. THE PULL REQUEST TEXT. Title: pr-title.txt. Body: pr-body.md. Both were exported through the workflow's own function as a
+   commit message and scanned with the workflow's options (VERDICT.md, item 6). Change a word of either and that proof is
+   gone: scan again before use. Both are true of this head and of a resolution commit that changes only the solution file.
+
+1. THE CHECK WAIT (head pinned). Read until every row is completed, then require every conclusion to be success or skipped:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/<HEAD>/check-runs --jq '.check_runs[] | [.name, .status, .conclusion, .app.slug] | @tsv'
+
+   MEASURED on this head (2026-11-21 08:21 AEDT): 4 rows from the push event, linux, windows, secret-scan, rules, each
+   completed success. MEASURED on the head of the last merged pull request (number 2): 11 rows, the four jobs from the push
+   event, the same four from the pull_request event, Analyze (csharp), Analyze (python) and the CodeQL result row of the
+   code-scanning application. MEASURED on the commit of main: 10 rows, the four jobs, Analyze (csharp) and Analyze (python)
+   twice each, Analyze (actions) and Upload Results; the default setup now reads the languages actions, csharp and python.
+   So on this pull request wait for AT LEAST 8 rows from the ci workflow, the Analyze rows of every language the default
+   setup lists, and the CodeQL result row, and read every other row to its end. Read check RUNS, never check suites. No rule
+   of the repository requires the ci rows (the required list is empty): this wait is the only guard for them. The
+   code-scanning rule IS enforced; read it by
+
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/merge&state=open' --jq '.[] | [.number, .rule.id, .rule.security_severity_level, .most_recent_instance.location.path] | @tsv'
+
+   The head must read the reviewed sha. clean = go on to line 3. dirty (the conflict of section 2), blocked, or any open
+   alert = STOP: an alert is fixed in the code by a new commit and a new gate; it is never dismissed and the rule is never
+   bypassed. The secret-scan job of every run reads every branch of the origin: a red there can come from another lane's
+   branch.
+
+2. THE SOLUTION FILE (measured today: the conflict is real). The ordering rule, the same in every kit of the wave: keep every
+   added line, and inside each Folder block order the Project lines by the ORDINAL (byte) order of their Path values. Built
+   by program from the two sides' own lines, the merged file must read, byte for byte (13 lines, 699 bytes, sha256
+   df48c25f0a60cfd6fca65912d866b15b70ca0efdb701b00d23cba3fcc841179d, the same bytes the first gate wrote for this case):
+
+   <Solution>
+     <Folder Name="/src/">
+       <Project Path="src/Datasec.Suite.Core/Datasec.Suite.Core.csproj" />
+       <Project Path="src/Datasec.Suite.Logging/Datasec.Suite.Logging.csproj" />
+       <Project Path="src/Datasec.Suite.Server/Datasec.Suite.Server.csproj" />
+       <Project Path="src/Datasec.Suite.UniversalPrint/Datasec.Suite.UniversalPrint.csproj" />
+     </Folder>
+     <Folder Name="/tests/">
+       <Project Path="tests/Datasec.Suite.Core.Tests/Datasec.Suite.Core.Tests.csproj" />
+       <Project Path="tests/Datasec.Suite.Logging.Tests/Datasec.Suite.Logging.Tests.csproj" />
+       <Project Path="tests/Datasec.Suite.UniversalPrint.Tests/Datasec.Suite.UniversalPrint.Tests.csproj" />
+     </Folder>
+   </Solution>
+
+   (shown here with three more spaces of indent than the file has: the file's own lines start at column 1, 3 and 5, LF line
+   ends, a final newline.) No other file meets: Directory.Packages.props changed on main only, and every other path of this
+   lane is new. In the gate's scratch copy the resolved tree (main plus this head, the file above) was built and tested:
+   build 0 warnings, 0 errors; test total 476, failed 0 (main's hosted linux leg reads total 192 today; this branch 285,
+   of which 1 is the base test both share). That tree is NOT a commit anyone has pushed.
+   Whoever makes the resolution commit (a seat on the branch, by a brief; never this gate): ONE commit on top of
+   ec75619ed6e97f1fc0bbacb87660eae3fdbe4dca whose only change against a three-way merge of main is that this file reads as
+   above (a merge commit of main into the branch, or a fast-forward commit that changes this file and nothing else, as the
+   brief says). Then: its own hosted run (the four jobs success; in linux and windows "total: 476", which is main's 192 plus
+   this lane's 284, and "failed: 0"), and a gate reading of exactly that one commit (that its diff against the merge of main and
+   ec75619e is empty but for the file above, byte for byte) before line 3 is run with ITS sha in place of the one below.
+
+3. THE SQUASH MERGE (one parent, head pinned; put the pull request number in place of PRNUM in the subject first):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit ec75619ed6e97f1fc0bbacb87660eae3fdbe4dca --subject "$(sed 's/#PRNUM/#<the number>/' '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-21_B1819_verify/squash-subject.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-21_B1819_verify/squash-body.txt'
+
+   As written this line can only land the reviewed head, and the reviewed head conflicts with main: GitHub refuses the merge
+   until section 2 is done, and then the head has moved and the pin refuses it. That is the intended stop. After section 2
+   and its gate reading, the same line with the resolution commit's sha40 in place of ec75619e lands the branch.
+   Give BOTH the subject and the body: the repository's own default for a squash is the commit's or the pull request's title
+   and the list of commit messages, and only the two files above are the reviewed text. The squash message becomes a stored
+   commit object that the second scan of every later run reads. The repository does not delete the branch on merge: the lane
+   branch stays on the origin, and every run of every lane goes on reading it, until someone removes it.
+
+4. AFTER THE MERGE, on main: one new commit with ONE parent. The push starts the ci workflow (4 jobs) and the code-scanning
+   workflow. Read:
+   - ci: the four jobs success; in linux and windows "total: 476" (the count the resolved tree gave; more if another lane
+     landed first) and "failed: 0"; "GUARD: clean (10 files)" and "GUARD: clean (11 files)" (the server does not reference this library,
+     so the two published folders do not grow); in rules "RULES: clean (<n> files)" with n = the tracked files of the new
+     main, and "UNIT-TEST FLOOR: ran 53, floor 53"; in secret-scan the planted-control line with "25 of 25", the
+     NEUTRAL-SCAN line with "objects of this commit not among them 0", and "no leaks found" 3 times.
+   - code scanning: gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/analyses?per_page=10' shows an analysis for each
+     language of the default setup on the new commit; gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?state=open'
+     --jq length prints 0.
+   A merge to main deploys nothing: the repository holds one workflow of its own and it has no deploy, release or upload
+   step (the code-scanning application's own Upload Results row uploads analysis results to GitHub, nothing else).

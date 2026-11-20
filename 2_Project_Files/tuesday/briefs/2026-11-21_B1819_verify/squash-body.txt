@@ -1,0 +1,52 @@
+A library (src/Datasec.Suite.UniversalPrint, folder Ipp) and its tests
+(tests/Datasec.Suite.UniversalPrint.Tests, 137 methods, 284 cells).
+
+Nothing in it talks to anything: no connection, no address, no token,
+no key. The server does not reference it yet. Every byte fixture is
+PROVISIONAL: built by reading the public encoding standard and the
+Workpath app's source, compared with no captured bytes.
+
+The reader takes one IPP packet from a stream and stops at the end
+tag. What is not a well-formed packet ends in one exception type. A
+packet over 1 MiB is refused; collections nest at most 32 deep; a
+value tag it does not know is kept. The delimiters 0x01, 0x02, 0x04,
+0x05 and 0x06 to 0x0f start a group that keeps its tag; 0x00 is
+refused. Within its bound it may allocate many times the bytes it
+reads. The writer refuses a name or a value over 32767 bytes.
+
+Two request builders, Get-Jobs and Acknowledge-Job, with the address
+of the service, the device host and the port as parameters and no
+default. As in the Workpath app, Acknowledge-Job carries no
+printer-uri. Not measured by anyone: the version (2.0), the request
+id (1) and the two leading attributes of Get-Jobs. Three name lists
+(14 creatable, 30 blocked, 48 watched in five sets), each compared
+whole by a test, six success codes, and the difference of two
+snapshots.
+
+The document stream asks for a range, requires status 206 and a
+Content-Range that starts at the offset asked, drops the IPP packet of
+every answer and yields document bytes only, never more than the
+total. A failed read is followed by a wait and a new fetch at the
+offset reached, three retries at one offset; the waits are functions
+the caller hands in and nothing sleeps. Once closed, from any thread,
+it fetches nothing, waits for nothing, returns no count and disposes
+every answer; a read in flight ends in ObjectDisposedException. One
+read at a time: a second read is refused. A body that reports more
+than it was asked for is a fetch error. The limits are named in the
+stream's comment: a fetch or a wait in flight at a close runs to its
+end, a body read that never ends stays pending, and the start of each
+caller function is under a short lock that a close also takes. As in
+the Workpath app, a failed fetch or a bad answer is not retried and
+the IPP status of an answer is not checked. Differs from the app: the
+unit word in any letter case, digits only, status 416 as a typed
+error, a look at the close before every wait.
+
+Two lines added to Datasec.Suite.slnx; no package, no workflow line.
+The root README lists are updated later.
+
+Every choice inside this change was made by the build's coordinator or
+by the builder; none is a product decision. Not tested: anything
+against a printer, a tenant, the print service or a real HTTP client.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
