@@ -538,7 +538,7 @@ Source for the table: `ASM/src/Core/Workpath/PackageManagement/WorkpathDeviceCli
 | Location | What is there |
 |---|---|
 | `HPAM-A/app/build.gradle.kts:35-38` | release keystore file name, store password, key alias and key password hardcoded |
-| `HPAM-A/datasec_printer_keystore` | the release signing keystore itself is committed. This key is the trust anchor of the inter-app token service (4.8) |
+| `HPAM-A/[keystore file name withheld]` | the release signing keystore itself is committed. This key is the trust anchor of the inter-app token service (4.8) |
 | `HPAM-A/app/notes:15-31` | test account e-mail addresses of a real person and plaintext passwords; line 66 repeats the keystore password; lines 7-19 show internal device IP addresses; line 70-71 an Azure subscription path and an id |
 | `HPAM-A/config.properties` | populated values for an API key, client id, tenant id, an app registration secret, SignalR endpoint, reporting string, licence endpoint (commented alternates included) |
 | `J/util/CardValidator.kt:10`, `J/util/Encryptor.kt:12` | one 256-bit AES/HMAC key hardcoded, used both for the CSA card blob and for the QR payload |

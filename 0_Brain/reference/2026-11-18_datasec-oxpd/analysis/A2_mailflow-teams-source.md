@@ -444,7 +444,7 @@ All through the Graph Java SDK on one OkHttp client (timeouts 60 s connect, 180 
 |---|---|
 | A client secret, client id, resource URI and service base URL for a PDF conversion API are hardcoded | `MF/app/src/main/java/com/hp/print/mailflowas/microsoft/download/GotenbergCloudRenderingRequestJob.kt:36-39` |
 | A tenant id is hardcoded in a token endpoint path | `MF/app/src/main/java/com/hp/print/mailflowas/microsoft/download/AuthenticateGotenberg.kt:11` |
-| Release-signing keystore committed to the repository | `MF/app/datasec_printer_keystore`; `TM/datasec_printer_keystore` |
+| Release-signing keystore committed to the repository | `MF/app/[keystore file name withheld]`; `TM/[keystore file name withheld]` |
 | Keystore password, key alias and key password hardcoded in the build script | `MF/app/build.gradle.kts:34-37`; `TM/app/build.gradle.kts:29-32` |
 | Entra application (client) ids hardcoded as build fields | `MF/app/build.gradle.kts:61,84`; `TM/app/build.gradle.kts:53,75` (and a commented-out test id at `:54`) |
 | Redirect URIs that embed application ids | `MFa/microsoft/constants/MSConstants.kt:3`; `TMa/auth/AppAuthConstants.kt:4` |

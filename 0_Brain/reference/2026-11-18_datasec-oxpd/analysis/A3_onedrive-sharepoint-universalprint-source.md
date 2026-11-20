@@ -435,7 +435,7 @@ Universal Print:
 
 | Item | Location | Note |
 |---|---|---|
-| Android signing keystore, committed | `UP/app/datasec_printer_keystore` | binary, not opened |
+| Android signing keystore, committed | `UP/app/[keystore file name withheld]` | binary, not opened |
 | Keystore store password, key alias and key password, hard-coded | `UP/app/build.gradle.kts:36-38` | the same keystore file name appears in the OneDrive tree |
 | Default Entra application (client) id, hard-coded | `UP/app/build.gradle.kts:52` | an identifier, not a secret; listed because the brief names tenant and app ids |
 | HP Workpath app UUID, hard-coded | `UP/packaging_release/hpk.xml`, `UPJ/common/Constants.kt:35` | identifier |

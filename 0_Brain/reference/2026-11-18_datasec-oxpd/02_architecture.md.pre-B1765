@@ -616,7 +616,7 @@ Rate limits and audit on card lookups per device and per card (a card alone is a
 
 | Location (library-relative) | What | Report |
 |---|---|---|
-| `HPAM - Docs and Notes/Source Code/*/datasec_printer_keystore` (5 copies) and the `build.gradle.kts` lines naming its passwords | Release signing keystore and passwords | [A1 §8.1], [A2 §9], [A3 §8], [A4 §8] |
+| `HPAM - Docs and Notes/Source Code/*/[keystore file name withheld]` (5 copies) and the `build.gradle.kts` lines naming its passwords | Release signing keystore and passwords | [A1 §8.1], [A2 §9], [A3 §8], [A4 §8] |
 | `.../HPAuthenticationManager-main/config.properties`, `app/notes`, `app/moc_file/*.cfg`, `app/src/test/resources/*.cfg` | Client ids, an app secret, API keys, test accounts with passwords | [A1 §8.1] |
 | `.../HPAuthenticationManager-main/app/src/main/java/.../util/CardValidator.kt:10`, `.../util/Encryptor.kt:12` | Hardcoded card-blob / QR key | [A1 §8.1] |
 | `.../MailFlow-main/.../GotenbergCloudRenderingRequestJob.kt:36-39`, `AuthenticateGotenberg.kt:11` | Conversion API client secret and tenant id | [A2 §9] |
