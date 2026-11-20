@@ -81359,5 +81359,55 @@
   ],
   "delivered_artefact": "OXPd_2 pull request 2, squash-merged to main as c56f3f3b (one parent 7bf37526) after the delta review B1814 and GitHub's checks and code scan",
   "delivered_ts": "2026-11-20T22:06:55.429359+11:00"
+ },
+ {
+  "id": "general-c2c-win-ipc-check-nogo-1120",
+  "client_project": "General/Claude to Claude",
+  "title": "Windows connection piece: the independent check says NO GO on one hole that matters only with a second Windows account",
+  "bluf": "Claude to Claude (General). The checker confirmed nothing changed for the Mac, and the never-run Windows part reads as safe on your own machine: every failure it found ends in a refusal. The one hole (the checker's reading of the code, not run, because no Windows machine has run it yet): your programs recognise the background program by its process number. A program of ANOTHER Windows account could set up a fake connection point and wait until that number is reused by one of your programs; your permission hook would then talk to the fake one, which could approve everything. Today, on main, there is no such check at all, so this is not a new hole, only a narrower one. The checker's fix is small and stays inside the Windows file: check who owns the connection point itself. Plus four small items (a missing test case, a weak test for the second account, a loop that should pause after a refusal, some documentation lines).",
+  "default_action": "The branch stays unmerged and its builder holds at its ready line; nothing is sent to it. The background program's Windows work waits for this piece either way.",
+  "options": [
+   {
+    "key": "a",
+    "label": "One fix round, then a short re-check",
+    "detail": "The builder fixes the hole as the checker describes, plus the four small items; a short second check of the fix only. Nothing on the Mac changes."
+   },
+   {
+    "key": "b",
+    "label": "Accept it for the first link on my own machine, and say so",
+    "detail": "Merge now with the limit written in the docs; the fix is required before any Windows build reaches a machine with a second account."
+   },
+   {
+    "key": "c",
+    "label": "Park it",
+    "detail": "Leave the branch unmerged until the Windows machine has run its first tests."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T22:20:26.579672+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd361-blocker-vs-nogo-cap",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD nexusai-round4-nogo-selfheal-round5",
+   "CARD composer-pr85-round2-nogo-one-line-1021",
+   "CARD hpsmpoc-telemetry-round3-nogo-stop-1022",
+   "CARD hpsmpoc-telemetry-round4-nogo-ended-1022",
+   "CARD mpscalc-pr102-cap-nogo-third-round-1024",
+   "CARD mps-117-null-class-strict-nogo-1026",
+   "CARD composer-94-extra-round-nogo-1026",
+   "CARD mps-117-round-cap-nogo-1026",
+   "CARD mps-118-round-cap-nogo-1026",
+   "CARD mps-null-class-three-rows-gate-nogo-1027",
+   "CARD mps-feedback-triage-round-cap-nogo-1027",
+   "CARD hpsmpoc-focus-ring-round3-nogo-1103",
+   "CARD composer-deploy-md-255-sentence-round1-nogo-1103",
+   "CARD hpsmpoc-focus-ring-round4-nogo-1103",
+   "CARD datasec-oxpd-ci-second-review-nogo-1120",
+   "CARD datasec-oxpd-logging-second-review-nogo-1120"
+  ]
  }
 ]
