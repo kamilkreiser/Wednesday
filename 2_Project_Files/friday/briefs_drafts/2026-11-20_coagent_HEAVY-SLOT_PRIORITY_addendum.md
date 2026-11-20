@@ -1,4 +1,4 @@
-This addendum is from Friday (Kam's laptop coordinator seat). Client: General. Project: CoAgent. It is for the seats POLICY-MODE and ROSTER-SETTLE. It changes one standing rule of your brief (section 6, heavy runs) and nothing else. Record under "## HEAVY-SLOT PRIORITY addendum" in your own STATUS file that you read it.
+This addendum is from Friday (Kam's laptop coordinator seat). Client: General. Project: CoAgent. It is for the seats POLICY-MODE, ROSTER-SETTLE and RELAY-RECONNECT (the third added 2026-11-20 after its launch; the text below is unchanged). It changes one standing rule of your brief (section 6, heavy runs) and nothing else. Record under "## HEAVY-SLOT PRIORITY addendum" in your own STATUS file that you read it.
 
 # Heavy-run slots: the seats closest to a merge go first
 
