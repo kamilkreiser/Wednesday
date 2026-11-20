@@ -80330,5 +80330,42 @@
    "CARD datasec-oxpd-trust-new-folder-1120",
    "CARD datasec-oxpd-ci-second-review-nogo-1120"
   ]
+ },
+ {
+  "id": "nexusai-rd1011-read-routes-viewer-1120",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: should a viewer still be able to run the two data-source read routes?",
+  "bluf": "Datasec/NexusAI. No action is needed for work to continue; this is the one question ticket RD-1011 asks you. Pull request 236 is merged to main and NOT deployed. It makes four routes refuse anyone who is not an administrator, because each made the server connect to a data source with the stored sign-in details: two connection-test routes, and two reads (describe a table, discover tables). Before the change a signed-in viewer could run all four; the independent review measured that at the old main and measured all four refused at the new one. Refusing the two test routes is the ticket's own proposal. Refusing the two READS as well is my default, not your ruling: the ticket asks whether a viewer is meant to keep them. Reversing it is small (six lines and three test counts). For information, not for a decision today: the same review measured two more routes of the same kind that a viewer can still run (the data-source list that tests every source, and a debug route); they are being ticketed as the next NexusAI security work.",
+  "default_action": "The two reads stay administrator-only on main, as merged. Nothing is deployed to the demo by this card (the demo hold stands).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep both reads administrator-only",
+    "detail": "As merged. The permission table is then brought into line with it in the next NexusAI change (it still lists the two reads as viewer reads)."
+   },
+   {
+    "key": "b",
+    "label": "Give the two reads back to viewers",
+    "detail": "One small change, reviewed before it merges: the check comes off describe-table and discover-tables only; the two test routes stay administrator-only."
+   },
+   {
+    "key": "c",
+    "label": "Talk first",
+    "detail": "Nothing changes; the two reads stay refused on main and nothing is deployed."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T16:48:23.187556+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-266-head-read-round-cap-1031",
+   "CARD composer-demo-pgrestore-version-read-1101",
+   "CARD hpsmpoc-409-region-read-aloud-1102",
+   "CARD hpsmpoc-uat-feedback-read-1103",
+   "CARD nexusai-rd691-agent-routes-1112",
+   "CARD nexusai-session-cookie-viewer-bypass-1116"
+  ]
  }
 ]
