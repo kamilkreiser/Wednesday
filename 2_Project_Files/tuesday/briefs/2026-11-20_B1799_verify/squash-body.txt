@@ -1,0 +1,43 @@
+A library (src/Datasec.Suite.UniversalPrint, folder Ipp) and its tests
+(tests/Datasec.Suite.UniversalPrint.Tests, 106 methods, 216 cells).
+
+Nothing in it talks to anything: no connection, no address, no token,
+no key. The server does not reference it yet. Every byte fixture is
+PROVISIONAL: built by reading the public encoding standard and the
+Workpath app's source, compared with no captured bytes.
+
+The reader takes one IPP packet from a stream and stops at the end
+tag. What is not a well-formed packet ends in one exception type. A
+packet over 1 MiB is refused; collections nest at most 32 deep; a
+value tag it does not know is kept. It takes four attribute groups
+(operation, job, printer, unsupported) and refuses an answer that
+holds another group delimiter. The writer refuses a name or a value
+over 32767 bytes.
+
+Two request builders, Get-Jobs and Acknowledge-Job, with the address
+of the service, the device host and the port as parameters and no
+default. As in the Workpath app, Acknowledge-Job carries no
+printer-uri. Not measured by anyone: the version (2.0), the request
+id (1) and the two leading attributes of Get-Jobs. Three name lists
+(14 creatable, 30 blocked, 48 watched in five sets), six success
+codes, and the difference of two snapshots.
+
+The document stream asks for a range, requires status 206 and a
+Content-Range that starts at the offset asked, drops the IPP packet of
+every answer and yields document bytes only, never more than the
+total. A failed read is followed by a wait and a new fetch at the
+offset reached, three retries at one offset; the waits are functions
+the caller hands in and nothing sleeps. As in the Workpath app, a
+failed fetch or a bad answer is not retried and the IPP status of an
+answer is not checked. Differs from the app: the unit word in any
+letter case, digits only, status 416 as a typed error.
+
+Two lines added to Datasec.Suite.slnx; no package, no workflow line.
+The root README lists are updated later.
+
+Every choice inside this change was made by the build's coordinator or
+by the builder; none is a product decision. Not tested: anything
+against a printer, a tenant or the print service. Nothing is deployed;
+nothing was sent.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
