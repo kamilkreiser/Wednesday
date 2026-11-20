@@ -1,0 +1,135 @@
+LANDING FORM for the local secret store lane. Reviewed head: bf1a4a24492f7849705e48cbc1d4938e15f30c56 (two commits on
+main 7bf375268b9975ac9ece66579f7471ba7dbab11d: 42f926d51082c67b6c87a521d9234836a7c9525e, then the reviewed fix commit) on the
+branch b1789/wp11-local-secret-store. Gate verdict: GO WITH FINDINGS at that head (VERDICT.md).
+
+THIS HEAD CANNOT LAND AS IT IS. main is now c56f3f3b015fae8d47288aa9d6c636ecd8fe2191 (the logging lane, pull request 2) and
+the branch is behind it: a three-way merge of main and this head CONFLICTS in Datasec.Suite.slnx, two hunks, one in each
+Folder block (measured by `git merge-tree --write-tree` in the gate's scratch clone; every other path merges clean). GitHub
+cannot squash a pull request whose head conflicts with its base. So the branch needs ONE MORE COMMIT that changes
+Datasec.Suite.slnx only. That commit makes a head this gate did NOT read; it is a seat's to make, never the gate's, and it
+is landed only after a check of that delta (step 0). Two lanes land before this one, in this order: the print-protocol
+lane (b1788, its resolution commit in flight), then the card decoders (pull request 3, open). Make this lane's commit
+after both have landed, on the main that results, so the solution file is resolved once.
+
+Never land a head a gate or a delta check did not read: if the branch or main moves after the check, stop.
+
+Environment for every gh line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+Every line below is a GET except the one merge line of step 4.
+
+0. THE RESOLUTION COMMIT AND ITS DELTA CHECK (before any pull request merge).
+   (a) The commit is made on top of bf1a4a24492f7849705e48cbc1d4938e15f30c56 (a merge of main into the branch, or a rebase
+       onto main that keeps both commits' trees but for the solution file: say which). It changes Datasec.Suite.slnx and
+       NOTHING of this lane else: every path under the lane's two folders is byte-equal to this reviewed head, i.e.
+       `git diff bf1a4a24492f7849705e48cbc1d4938e15f30c56 <NEW_HEAD> -- src/Datasec.Suite.Secrets tests/Datasec.Suite.Secrets.Tests`
+       prints nothing, and every other path of <NEW_HEAD> is byte-equal to the main it was made on.
+   (b) The solution file at <NEW_HEAD> must read EXACTLY one of the files below, by the ordering rule of the wave: keep
+       every added line, and inside each Folder block the Project lines stand in the ORDINAL (byte) order of their Path
+       values. Compare by sha256 of the whole file (LF endings, final newline, two-space indents as main's file has):
+
+   (b1) on main as it is now (c56f3f3: Core, Logging, Server; tests Core, Logging): 13 lines, 671 bytes,
+        sha256 begins a564e91847b851c4
+
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Datasec.Suite.Core/Datasec.Suite.Core.csproj" />
+    <Project Path="src/Datasec.Suite.Logging/Datasec.Suite.Logging.csproj" />
+    <Project Path="src/Datasec.Suite.Secrets/Datasec.Suite.Secrets.csproj" />
+    <Project Path="src/Datasec.Suite.Server/Datasec.Suite.Server.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Datasec.Suite.Core.Tests/Datasec.Suite.Core.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.Logging.Tests/Datasec.Suite.Logging.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.Secrets.Tests/Datasec.Suite.Secrets.Tests.csproj" />
+  </Folder>
+</Solution>
+
+   (b2) after the print-protocol lane has landed (adds UniversalPrint): 15 lines, 869 bytes, sha256 begins caa4af8a32c6ac8a
+
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Datasec.Suite.Core/Datasec.Suite.Core.csproj" />
+    <Project Path="src/Datasec.Suite.Logging/Datasec.Suite.Logging.csproj" />
+    <Project Path="src/Datasec.Suite.Secrets/Datasec.Suite.Secrets.csproj" />
+    <Project Path="src/Datasec.Suite.Server/Datasec.Suite.Server.csproj" />
+    <Project Path="src/Datasec.Suite.UniversalPrint/Datasec.Suite.UniversalPrint.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Datasec.Suite.Core.Tests/Datasec.Suite.Core.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.Logging.Tests/Datasec.Suite.Logging.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.Secrets.Tests/Datasec.Suite.Secrets.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.UniversalPrint.Tests/Datasec.Suite.UniversalPrint.Tests.csproj" />
+  </Folder>
+</Solution>
+
+   (b3) after the print-protocol lane AND the card decoders have landed (the expected case): 17 lines, 1031 bytes,
+        sha256 begins a94ad1ac414a9fb3 (byte-equal to the round-1 review's file of all four lanes)
+
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Datasec.Suite.Cards/Datasec.Suite.Cards.csproj" />
+    <Project Path="src/Datasec.Suite.Core/Datasec.Suite.Core.csproj" />
+    <Project Path="src/Datasec.Suite.Logging/Datasec.Suite.Logging.csproj" />
+    <Project Path="src/Datasec.Suite.Secrets/Datasec.Suite.Secrets.csproj" />
+    <Project Path="src/Datasec.Suite.Server/Datasec.Suite.Server.csproj" />
+    <Project Path="src/Datasec.Suite.UniversalPrint/Datasec.Suite.UniversalPrint.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Datasec.Suite.Cards.Tests/Datasec.Suite.Cards.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.Core.Tests/Datasec.Suite.Core.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.Logging.Tests/Datasec.Suite.Logging.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.Secrets.Tests/Datasec.Suite.Secrets.Tests.csproj" />
+    <Project Path="tests/Datasec.Suite.UniversalPrint.Tests/Datasec.Suite.UniversalPrint.Tests.csproj" />
+  </Folder>
+</Solution>
+
+   (c) MEASURED by the gate for (b1) only: main c56f3f3 merged with this head and the solution file set to (b1) restores
+       locked, builds with 0 warnings and 0 errors and tests total 260, failed 0, succeeded 256, skipped 4 (main alone:
+       192, 0 failed; this lane adds 68). (b2) and (b3) are by rule, not built: the delta check builds and tests the
+       merge it reads.
+   (d) Then the new head's hosted push run: the four jobs success; the Linux and Windows test summaries hold the totals
+       of the merged solution with failed 0. Pin <NEW_HEAD> in every line below in place of the reviewed head.
+
+1. THE PULL REQUEST TEXT. Title: pr-title.txt. Body: pr-body.md. Both were exported through the workflow's own function as
+   a commit message and scanned with the workflow's options (VERDICT.md, section 6). Change a word and scan again.
+
+2. THE CHECK WAIT (head pinned). Read until every row is completed, then require every conclusion success or skipped:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/<NEW_HEAD>/check-runs --jq '.check_runs[] | [.name, .status, .conclusion, .app.slug] | @tsv'
+
+   MEASURED on the last merged pull request (number 2, head afc4e194): 11 rows: linux, windows, secret-scan, rules, each
+   twice (push and pull_request), Analyze (csharp), Analyze (python), and CodeQL from github-advanced-security; all
+   success. MEASURED on main c56f3f3 after it: also Analyze (actions). So wait for AT LEAST 8 ci rows AND the code-scanning
+   rows (Analyze for each language the default setup lists, and the CodeQL result row); read every row to its end. Read
+   check RUNS, never check suites. The ci rows are required by no rule of the repository: this wait is their only guard.
+   The code-scanning rule IS enforced; read it by
+
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/merge&state=open' --jq '.[] | [.number, .rule.id, .rule.security_severity_level, .most_recent_instance.location.path] | @tsv'
+
+   The head must read <NEW_HEAD>; mergeable true and state clean = go on. Any open alert, or blocked = STOP: an alert is
+   fixed in the code by a new commit and a new check, never dismissed, and the rule is never bypassed. The gate expects no
+   alert from these files (VERDICT.md, section 5: a reading of the queries; code scanning NOT RUN by the gate).
+
+3. LAST READ BEFORE THE MERGE: the branch ref equals <NEW_HEAD>; main equals the main the delta check merged with.
+
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/b1789 --jq '.[] | [.ref, .object.sha] | @tsv'
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/main --jq '.[] | [.ref, .object.sha] | @tsv'
+
+4. THE SQUASH (one parent, head pinned; the subject with the real number in place of PRNUM; the body exactly the file):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit <NEW_HEAD> --subject "$(sed 's/#PRNUM/#'PRNUM'/' squash-subject.txt)" --body-file squash-body.txt
+
+   squash-subject.txt ends with (#PRNUM); squash-body.txt ends with its one attribution line. Do not add --admin or any
+   bypass. If the merge is refused, stop and read why.
+
+5. AFTER, on main (GET only): the new main commit has ONE parent (the main before it); its tree holds
+   src/Datasec.Suite.Secrets/ (21 files) and tests/Datasec.Suite.Secrets.Tests/ (17 files) as at this head; its
+   Datasec.Suite.slnx is the file of step 0 (b) for the main it landed on; its push run reads the four jobs success
+   with failed 0 and the code-scanning rows success; the open code-scanning alerts on main read 0.
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/main --jq '[.sha, (.parents | length), .commit.message[0:120]] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/heads/main&state=open' --jq 'length'
+
+A merge deploys nothing: the repository's one workflow (.github/workflows/ci.yml) builds, tests and scans and has no deploy
+step, and the server does not reference the library. No
+setting is changed by any line above.

@@ -1,0 +1,44 @@
+A library (src/Datasec.Suite.Secrets) and its tests
+(tests/Datasec.Suite.Secrets.Tests, 68 tests; four run on Windows
+only and eighteen on Unix only).
+
+The server does not reference the library yet, so it protects nothing
+until a later change wires it in. The published folders are
+unchanged.
+
+What it does. A caller puts bytes, up to 1 MiB, under a name in a
+partition and reads them back. Each value is encrypted and
+authenticated by ASP.NET Core Data Protection (taken from the shared
+framework, no package) with the library's default algorithms, and is
+tied to its partition, its name and its version. A record is one
+file, named by the SHA-256 of the name. After a successful start
+every call returns or throws the library's one typed error.
+
+The key ring, one per partition, is encrypted at rest: on Windows by
+DPAPI-NG; elsewhere with AES-256-GCM under a 32-byte key file that
+must be a plain file with no permission for group or other. The data
+protection library is given no folder and makes no key: the store
+hands it only the entries it has read and checked. The whole ring is
+checked at the start and around every key operation, and before every
+write the ring on disk must be byte for byte the one last checked. A
+key is made only at the first start of an empty partition and by
+RotateKey; keys do not end by time. RevokeOlderKeys refuses while a
+record is still under a key it would revoke, unless told to abandon
+those records.
+
+Limits. The key file is not sealed: its owner and an administrator
+can read it, and its link check is by path. No TPM, no Key Vault
+provider, no escrow, nothing for a pair of servers; records are
+files. One process per partition. An older stored form of a record
+put back reads. Whoever can write the store's folders can deny
+service; on Windows the library sets no access list on them, and the
+key ring there is only as safe as that list. Windows ran
+on a hosted build runner only, with the descriptor LOCAL=user; the
+default descriptor was refused on that runner. Every limit is listed
+in the library's README.
+
+Every choice inside this change was made by the build's
+coordinator or by the builder; none is a product decision. Nothing
+is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
