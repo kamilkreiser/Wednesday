@@ -288,3 +288,19 @@ Live board, view=tuesday, a note on card datasec-infra-hpam-committed-access-key
 > 2026-11-20T12:03:40.075000+11:00 [live] | Decision datasec-infra-hpam-committed-access-keys-1120 note: I will flag this to the other team.  add this to the Jira ticket.  please keep going with our stuff
 
 Tuesday's reading: he tells the team that owns the older back end himself; Tuesday does nothing to the keys or the repository; "the Jira ticket" is the master list OXPD2-1, where the point is now comment 41405 (no value recorded); OXPd work carries on.
+
+## C-45
+
+Live board, view=tuesday, a message, verbatim (kam_msgs, live):
+
+> 2026-11-20T15:41:24.134000+11:00 [live] | thank you!  this is really taking shape.  please keep building everything you can without the printer.  In relation to the questions - 1)this is a Datasec Project.  Datasec created and owns HPAM (authentication) and all workflow apps.  This OXPd project is also owned by Datasec.  HP owns the printers, firmware.  Datasec is in control over all aspects of this build on top of OXPd.  I am the CTO of Datasec and architected the initial solution.  Please rework the questions document so we have a list for the Datasec team (there is currently an entire product team working on the warpath apps), the build team for OXPd up to MVP (we will leverage the work path team but hand it over for them to manage commercial deployment once ready) and HP
+
+Tuesday's reading, nothing wider: (1) the no-hardware building continues (his word of C-42 restated: "keep building everything you can without the printer"). (2) Ownership, as his statement of fact for every document of this project: Datasec created and owns HPAM (authentication) and all the workflow apps, and owns this OXPd project; HP owns the printers and the firmware; Datasec controls every aspect of the build on top of OXPd; he is Datasec's CTO and architected the initial solution. (3) An instruction: rework the questions document into three lists: for the Datasec team (a product team works on the Workpath apps today), for the OXPd build team up to MVP (the build draws on the Workpath team and hands the product to them for commercial deployment once ready), and for HP. Tuesday's own reading of two words, offered for correction: "warpath" and "work path" are both the Workpath apps and their team. What it changes is for the reworked document to say (which questions are Datasec's own to answer and no longer HP's); it is not read as a ruling on any single question, on HP's licence terms or on what is sent to HP: sending stays his.
+
+## C-46
+
+Live board, view=tuesday, a tap on the decision datasec-oxpd-ci-second-review-nogo-1120, verbatim (kam_msgs, live):
+
+> 2026-11-20T15:41:32.210000+11:00 [live] | Decision datasec-oxpd-ci-second-review-nogo-1120: a — One more small round, then merge
+
+The option's detail as the card printed it: "A third seat applies the fix the reviewer measured (one commit), a third review checks only that, then I open the pull request. Adds about an hour. Nothing else changes." Tuesday's reading, nothing wider: ONE more round on the CI skeleton (the second scan reads every kind of stored object, not file contents only), one review of only that, then the first pull request. It is not a word on the organisation's ruleset, on CodeQL or on any repository setting.
