@@ -314,3 +314,13 @@ Live board, view=tuesday, two messages, verbatim (kam_msgs, live):
 > 2026-11-20T16:28:48.665000+11:00 [live] | 1) yes, anything about my printer can be changed, wiped or configured
 
 Tuesday's reading, nothing wider: (1) "the doc" is the questions document sent at about 16:10 the same day (registers/QUESTIONS_BY_OWNER); he reads it in his own time and nothing waits for that. (2) An instruction: any question that STOPS work goes on the fleet activity board as a card (one decision each, with a default); questions that stop nothing stay in the document. (3) An answer to the second half of item P2 of that document: his printer (C-34, C-39) may be changed, wiped or configured, so it may be put into developer mode. NOT answered by it: the firmware version on its panel, and so which OXPd generation it runs (the first half of P2 stays open). It is not read as leave to do anything to any other device, nor as a word on HP's developer key, which is still needed before developer mode (H5).
+
+## C-48
+
+Live board, view=tuesday, two messages, verbatim (kam_msgs, live):
+
+> 2026-11-20T16:29:48.989000+11:00 [live] | the MVP needs to be a product equivalent version of what is currently live with work path deployments with work path apps and HPAM
+
+> 2026-11-20T16:29:59.442000+11:00 [live] | only in ODPd infrastructure
+
+Tuesday's reading, nothing wider: this answers the first half of item P4 of the questions document (what "MVP" contains). The MVP is the product equivalent of what is live today in Workpath deployments (the Workpath apps and HPAM), on OXPd infrastructure ("ODPd" read as OXPd; "work path" as Workpath: both readings are Tuesday's). It agrees with the plan as it stands: one release, release 1, a full match of what the Workpath apps ship today (C-16; item B2 of the document), so no phase is cut out as a smaller MVP and item B15 needs no proposal on content. NOT answered by it: the second half of P4, the point at which the product is handed to the Workpath team and who takes the pilot and the HP submission. Whether "only in OXPd infrastructure" also rules on anything else (for example that nothing of the customer's Azure side may change) is NOT read into it: C-27 ("May change") stands.
