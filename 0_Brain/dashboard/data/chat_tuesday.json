@@ -11520,5 +11520,12 @@
   "project": "Datasec",
   "ts": "2026-11-20T22:00:58.379728+11:00",
   "text": "Datasec/OXPd. Checked, from the review's reading of both tools' files (section 3 of the deployment report, which I have now read; neither tool was run). You are right, they do not do the same thing.\n\nThe HPK Deployment Utility, the one you attached, version 3.0.0 with files dated 9 October, is a Windows app that launches HP's command-line tool once per action and reads its console text.\n\nThe HP AuthSuite Manager, version 1.1.0 with files dated 11 November, is the newer one and does much more. It talks to the printer's package service directly. It has an applications library, discovery of printers by address range that reads firmware and Workpath status, device groups with a password per device, jobs that install, update or uninstall, a Windows service that runs scheduled jobs unattended, and results per run. It is also the one a customer manual names. Today it accepts only the six Workpath apps, so it would need an OXPd executor and a package kind for our signed bundle.\n\nSo, on your word, whichever is newer: the HP AuthSuite Manager is the deployment tool for this project, and the design section that measured only the older utility will be redone against it. That it is the successor is read from versions and file dates, not from any document. That answers the second point, so it needs no card."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-20T22:01:55.708870+11:00",
+  "text": "Datasec/OXPd. Recorded on P6, in your words: clients deploy to their own tenant and our solution is subservient to the source of truth they use, currently Entra. That part is settled and goes into the clarifications verbatim.\n\nMy reading of it, together with your earlier answer that internet is essential for now and a local server is phase 2: in phase 1 the OXPd server itself runs in the client's own Azure subscription, not on a machine at their site. I am not building on that reading until you confirm it, because it reverses a decision you ruled earlier: one server per site on the customer's network, chosen because, by the design's notes, the older printers cannot be reached through address translation.\n\nOne question, yes or no: in phase 1, does the OXPd server run in the client's Azure subscription? If yes, the design is reworked around it and reaching the older printers from Azure becomes a test for Monday. If no, the server stays on site and simply signs in against their tenant."
  }
 ]
