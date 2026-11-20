@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-20 18:49 from 285 lesson files (1,207,990 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 232. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-20 19:07 from 285 lesson files (1,208,709 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 232. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
 
@@ -8062,6 +8062,8 @@ sections (open the file for these): How to apply · First application (same minu
 8. **After the stamp, before the launch:** check `wc -c` (never 0) and `tail -n 1` against the kit's own Step-0 rule for its last line. A rewrite is built and ENCODED first, written to a temp file, then `os.replace`d. Never `open(path,'w')` on the live kit. *(s283 11-16; s286 11-17)*
 9. **Lane still live?** Before commissioning or stamping a lane taken from a sweep, grep the pickup and today's note for the lane id and its keys, and read every DROPPED or HELD line. *(s278 11-15)*
 10. **Queue, don't fire.** A stamped kit joins the queue. The next launch waiter starts only after the previous waiter's exit and its rung-5 read. *(s282 11-16)*
+
+11. **What lies outside the frame.** For every kit whose property says "every", "all", "no value" or "none", write one line at the stamp naming three things the property's subject is handed that are NOT the tested shape (for a repository scan: commit and tag messages, names, refs; for a logging filter: a dictionary of another type, a list of pairs, a name that holds no listed stem), and check that the kit covers each or names it a limit. For a security surface (a filter, a deny-list, a scanner, a parser) the drafter's commission carries the same question as a required section from round 1. *(B1774 11-20 s297; B1787 11-20, w=2: the rule sat in a ledger row and the next stamp of the same kind did not meet it)*
 
 **At the merge, the stamp's sibling:** read the printed check table, not the ALL GREEN line. It must name every job the repo expects (`pr_checks_wait.sh --min-checks N`). *(s287 11-18)*
 

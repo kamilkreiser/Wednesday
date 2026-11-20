@@ -1,0 +1,53 @@
+DO NOT LAND THIS HEAD. The gate reads NO GO at 2c231b44e2a3c15e486e4b5da8a5f7e17639c58d (VERDICT.md: one Blocker, two Majors).
+The lines below are the landing FORM for this lane, pinned to the reviewed head so that they can land nothing else. The gate of
+the fix round writes them again for the new head, with texts that are true at that head. No pull request is opened for this head.
+
+Reviewed head: 2c231b44e2a3c15e486e4b5da8a5f7e17639c58d on main 7bf375268b9975ac9ece66579f7471ba7dbab11d (one commit on the
+branch b1787/wp110-logging-denylist). Never land a head a gate did not read: if the branch or main moves, stop.
+
+Environment for every line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+
+0. THE PULL REQUEST TEXT. Title: pr-title.txt. Body: pr-body.md. Both were exported through the workflow's own function as a
+   commit message and scanned with the workflow's options (VERDICT.md, the row "The texts through the function"). Change a word
+   of either and that proof is gone: scan again before use.
+
+1. THE CHECK WAIT (head pinned). Read until every row is completed, then require every conclusion to be success or skipped:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/2c231b44e2a3c15e486e4b5da8a5f7e17639c58d/check-runs --jq '.check_runs[] | [.name, .status, .conclusion, .app.slug] | @tsv'
+
+   MEASURED on the last merged pull request (number 1, read 2026-11-20 18:55 AEDT): its head carried 8 check rows, all from
+   GitHub Actions, all completed success: linux, windows, secret-scan, rules from the push event (run 44680821033) and the same
+   four from the pull_request event (run 44684936169). No code-scanning row existed on it: the default setup listed no language
+   until after that merge. MEASURED on this head today: 4 rows, the push event (run 44695261723), each completed success.
+   EXPECTED on this pull request and UNMEASURED on any pull request of this repository: the 4 push rows, 4 more from the
+   pull_request event, and for the first time code scanning: Analyze (csharp) and Analyze (python) from the dynamic workflow
+   "CodeQL" (the rows the commit of main carries today, with a third, Adjust Configuration, skipped there), and a result row from
+   the code-scanning application. So wait for AT LEAST 8 rows from the ci workflow and read every other row to its end.
+   Read check RUNS, never check suites. No rule of the repository requires the ci rows (the required list is empty): this wait is
+   the only guard for them. The code-scanning rule IS enforced: read it by
+
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/merge&state=open' --jq '.[] | [.number, .rule.id, .rule.security_severity_level, .most_recent_instance.location.path] | @tsv'
+
+   The head must read the reviewed sha. clean = go on to line 2. blocked, or any open alert = STOP: an alert is fixed in the code
+   by a new commit and a new gate; it is never dismissed and the rule is never bypassed (CODEQL-FIRST-PR.md).
+   The secret-scan job of every run reads every branch of the origin: a red there can come from another lane's branch.
+
+2. THE SQUASH MERGE (one parent, head pinned; put the pull request number in place of PRNUM in the subject first):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit 2c231b44e2a3c15e486e4b5da8a5f7e17639c58d --subject "$(sed 's/#PRNUM/#<the number>/' '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1796_verify/squash-subject.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1796_verify/squash-body.txt'
+
+   Give BOTH the subject and the body: the repository's own default for a squash is the commit's or the pull request's title and
+   the list of commit messages, and only the two files above are the reviewed text. The squash message becomes a stored commit
+   object that the second scan of every later run reads. The repository does not delete the branch on merge: the lane branch
+   stays on the origin, and every run of every lane goes on reading it, until someone removes it.
+
+3. AFTER THE MERGE, on main: one new commit with ONE parent (7bf375268b9975ac9ece66579f7471ba7dbab11d). The push starts the ci
+   workflow (4 jobs) and the code-scanning workflow. Read:
+   - ci: the four jobs success; in linux and windows the line "total: 43" (1 test of the base and 42 of this change) and
+     "failed: 0"; in rules "RULES: clean (45 files)" and "UNIT-TEST FLOOR: ran 53, floor 53"; in secret-scan the planted-control
+     line with "25 of 25", the NEUTRAL-SCAN line with "objects of this commit not among them 0", and "no leaks found" 3 times.
+   - code scanning: gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/analyses?per_page=10' shows an analysis for csharp and one
+     for python on the new commit; gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?state=open' --jq length prints 0.
+   A merge to main deploys nothing: the repository holds one workflow of its own and it has no deploy, release or upload step.
+   The three lanes that follow rebase onto the new main (VERDICT.md, item 12, says which of their lines will meet these).

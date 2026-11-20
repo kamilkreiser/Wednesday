@@ -1,0 +1,42 @@
+A logging library (src/Datasec.Suite.Logging) and its tests
+(tests/Datasec.Suite.Logging.Tests, 42 test cells).
+
+The host does not log through this library yet. Until a later change
+wires the host to it, the deny-list protects nothing.
+
+The deny-list: one public way to build a logger; every sink sits
+behind the list; no setting switches it off. Six classes (token,
+session handle, card string, mail content, file name, password) with
+21 name stems, as data in one file. A property name is on the list
+when, in lower case and without separators, it contains a stem; its
+value is replaced by the fixed text [removed:<class>]. A value of an
+unknown kind, or nested deeper than 32 levels, is left out.
+
+Not stopped by the list: a value in the text of a message template, in
+the message of an exception, used as a dictionary key, or under a name
+that holds no stem (an object logged as one string and a positional
+placeholder among them). An entry under a listed key is removed only
+when the logging package captured the collection as a dictionary;
+other key and value collections pass.
+
+The log scanner: reads every file of a folder and its sub-folders and
+reports each known value (as it is, JSON-escaped, percent-encoded,
+base64, URL-safe base64) and every string in the compact form of a
+JSON Web Token. A scan that read nothing is not clean; a file it
+cannot read is a finding. A finding does not repeat the value or the
+line, but it prints the file's path as it is. Not seen: a value split
+over two lines, compressed files, other encodings, base64 of a longer
+text that holds the value.
+
+Packages, pinned exactly and locked by content hash: Serilog [4.4.0]
+and Serilog.Sinks.File [7.0.0], each Apache-2.0 by its own metadata.
+
+Two lines added to Datasec.Suite.slnx and two to
+Directory.Packages.props. The root README lists are updated later.
+
+Every choice inside this change was made by the build's coordinator or
+by the builder; none is a product decision. Not tested: logs of a real
+sign-in; the packages against known vulnerabilities (the restore's own
+audit is the only check). Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>

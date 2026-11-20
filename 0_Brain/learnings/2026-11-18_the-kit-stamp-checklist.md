@@ -26,6 +26,8 @@ supersedes: ""
 9. **Lane still live?** Before commissioning or stamping a lane taken from a sweep, grep the pickup and today's note for the lane id and its keys, and read every DROPPED or HELD line. *(s278 11-15)*
 10. **Queue, don't fire.** A stamped kit joins the queue. The next launch waiter starts only after the previous waiter's exit and its rung-5 read. *(s282 11-16)*
 
+11. **What lies outside the frame.** For every kit whose property says "every", "all", "no value" or "none", write one line at the stamp naming three things the property's subject is handed that are NOT the tested shape (for a repository scan: commit and tag messages, names, refs; for a logging filter: a dictionary of another type, a list of pairs, a name that holds no listed stem), and check that the kit covers each or names it a limit. For a security surface (a filter, a deny-list, a scanner, a parser) the drafter's commission carries the same question as a required section from round 1. *(B1774 11-20 s297; B1787 11-20, w=2: the rule sat in a ledger row and the next stamp of the same kind did not meet it)*
+
 **At the merge, the stamp's sibling:** read the printed check table, not the ALL GREEN line. It must name every job the repo expects (`pr_checks_wait.sh --min-checks N`). *(s287 11-18)*
 
 **Related:** [[2026-08-07_a-check-that-cannot-fail]], [[2026-08-14_i-read-representations-they-read-sources]], [[2026-09-07_read-the-clock-at-boot]], [[2026-11-18_lessons-are-weighted-by-reinforcement-never-absolute]], [[_ledger_laptop_datasec]]
