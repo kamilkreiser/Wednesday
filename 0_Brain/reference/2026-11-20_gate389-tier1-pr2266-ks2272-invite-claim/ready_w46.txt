@@ -1,0 +1,71 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261120T011237Z.txt)
+     1	[INBOUND] 2026-11-20T01:12 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2272 (Seat W 46th)
+=========== [INBOUND] 2026-11-20T01:12 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2272 (Seat W 46th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2272 (Seat W 46th)
+Seat W 46th
+READY FOR GATE KS-2272. TIER 1 (G1: the auth front door, account takeover; an Opus gate).
+
+PR 2266: https://github.com/Secuura/Distributed_Secuura/pull/2266
+- "Refs KS-2272: register on an invited address answers 202 and mails a one-time link; following it claims the account".
+- Open, not draft, base develop. Head bd7f05bf01ae944ec106876343c998a07c182b1f: ONE commit on develop 35d67793740137b5014a516731ab6391af9f4b89 (PR 2265, KS-2284).
+- Exactly the 11 ruled paths, +695 -62. No closing keyword.
+- Develop at this READY (01:11:56Z): 35d677937401 = the PR's base.
+- Linear: ONE facts comment on KS-2272, id 1f9b68e5, read back identical. Nothing merged, deployed or closed.
+
+YOUR WAIVER CONDITIONS (ruling 5)
+(a) merge-tree of head bd7f05bf01ae against PR 2099's LIVE head 8967de8b17558890dc4ace2732cb8350768df601 = rc 0.
+    - Planted control: a scratch commit editing PR 2099's first yaml hunk line (3779) = rc 1, CONFLICT in the yaml.
+    - The head against develop 35d677937401 = rc 0.
+(b) The PR body states that whichever of PR 2099 and this PR merges SECOND regenerates the yaml.
+The waiver OVL_IGNORE_PRS=2099 was set inside my launcher, for the yaml only. The census read only PR 2099 on that one path, and no PR on the other ten.
+
+WHAT IT DOES (your rulings 1 to 3)
+- register on an INVITED address:
+  - answers 202 {"success":true,"message":"Check your email to finish setting up your account."}, byte-identical for every invited address;
+  - no token, no cookie, no session, no user-row write; the posted password is never hashed or stored.
+- After the 202: issueInviteClaimLink mails the stub's STORED address. userRepo.issueInviteClaimToken is one statement:
+  - while a live token is under 600 s old: no write, no mail;
+  - otherwise: retire every older unused token of that user, then insert the new one.
+- reset-password on an INVITED row:
+  - ONE updateUserOrThrow on the token row's user {passwordHash, ACTIVE, emailVerified true, OWNER};
+  - then the revocation, then the consume LAST.
+- Fresh address 201; ACTIVE/SUSPENDED/DEACTIVATED/PENDING 409; the KS-82 and KS-1107 422s first.
+- auth.openapi.ts: register 202 and the reset-password description; the yaml regenerated (+14 at 17232/17374).
+- Two fragments, KS-2272-invite-claim-by-link.html.
+- In the body:
+  - the forgot-password consequence (ruling 1);
+  - "moves WHEN, not WHAT" (ruling 8);
+  - the T1/T2/T3 old assertions quoted (ruling 4);
+  - the six outside-auth items.
+
+EVIDENCE
+- Red first, on develop code: every new R and E cell failed by assertion, in both body forms; so did T1, T3 C2 and T2 C3.
+  - T2 R1, R2 and C1 PASS on develop: reset already confirmed its write. Mutant M9 reddens them.
+  - R8 of my plan is labelled C5: it passes on develop by design and is M5's firing cell.
+- Green: 36 of 36 in the new file (20 route cells, 16 E cells = the REAL statement on PGlite over the four DDL copies); 90 of 90 over the four touched test files.
+- Mutants: 14 of 14 killed, every one compiling (tsc 0), product sha256 restored after each. That is your M1 to M8 plus M7b (unscoped retire), M8b (mail without a token), M9 (unconfirmed write), M10 (request spelling), M11 (no verified flag), M12 (every reset activates). The E cells were added because route cells over the in-memory repo could not see a SQL mutant.
+- REBASED figures (head bd7f05bf01ae vs develop 35d677937401):
+  - auth suite whole: develop 1956/1956 in 161 files, branch 1992/1992 in 162; failure-name sets equal, both empty;
+  - tsc 0 (planted 1);
+  - eslint: my files clean; one inherited no-unused-vars in auth.integration.test.ts, identical on develop; planted no-debugger fired;
+  - test-type ratchet: 41 baselined, 0 new, 0 stale, 162 test files (planted refused);
+  - standalone ratchet: 6 services OK, leg test 48/0;
+  - check:openapi OK; fragments OK (planted FAIL).
+  The red, green and mutant runs were on the f8c15a52 base with a byte-identical diff (the rebase's diff-of-diffs is 0 lines).
+- Rebase (your ruling (a), 22:45:40Z): dbf4b6ca9e75 -> bd7f05bf01ae onto 35d677937401. The move shares 0 of my paths.
+  - The branch tree's root and originate node_modules were re-cloned, lock-checked, from s-w48-ks2284: effect 3.22.5, nested 3.20.0 gone. The stale trees were moved aside (evidence/quarantine_nm_prebump).
+  - shared dist was rebuilt in both trees (PR 2263 had landed).
+  - Correction: my rebase script's "effect pins" control printed 0 because its grep read only '+' lines and "effect" sits on a context line. I measured the lock diff directly instead (3.21.4 -> 3.22.5, nested 3.20.0 removed).
+- Push 2: 00:57:19Z to 01:10:41Z (802 s), rc 0, ls-remote VERIFIED bd7f05bf01ae. Hook: 13 of 16 legs ran, nothing failed; 3, 4 and 8 SKIPPED (no local stack): NOT a full pass. Legs 6 and 7 OK; 14 = 130 shell suites passed, 0 failed; 16 = 0 new.
+- Push 1 (pre-rebase, 22:25Z to 22:41Z) was refused by legs 6 and 7 on GHSA-7589 and reached nothing.
+
+NOT RUN: the four platform suites; a booted service, the gateway, any live or deployed environment; a delivered mail; the link's page (none exists); the mobile app and the admin dashboard; any real database role (PGlite runs as its superuser, no RLS bound claimed); Node 24 (measured on v26.8.1).
+
+RESIDUALS stated in the PR:
+- createUser's ON CONFLICT upsert: a stub created in the instant between register's lookup and insert takes the caller's hash, but the row stays INVITED (login refuses it, and the link overwrites the hash).
+- The cooldown has no row lock: two same-instant calls can both send.
+- forgot-password is outside the one-live-link rule (ruled out of this PR).
+
+Records: 5_Project_History/2026-11-20_seatW-46th/ (HANDOVER.md, evidence/, push/out_real2/, drafts/). The seat ENDS at this READY; I wrap next. Meter 51.6 of 1M.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 37  SEEN:      938  BATCH: /private/tmp/wed_newmail/batch_20261120T011237Z.txt
