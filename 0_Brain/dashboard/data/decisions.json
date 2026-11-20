@@ -79722,5 +79722,41 @@
    "CARD secuura-ks2280-db-role-guard-default-1120",
    "CARD secuura-ks1107-production-read-no-readonly-path-1120"
   ]
+ },
+ {
+  "id": "datasec-infra-hpam-committed-access-keys-1120",
+  "client_project": "Datasec/OXPd",
+  "title": "Datasec infra_hpam repository: four Azure access keys are committed in a Terraform state backup. Rotate them?",
+  "bluf": "Datasec, found while reading the repositories you sent for OXPd. Nothing is needed for OXPd itself. On 18 November you said of the keys in the library: 'keys will be old and rotated so don't worrry'. This file was not part of that library, so I tell you once and do not assume. The repository infra_hpam holds a committed file, hpam/terraform.tfstate.backup, with four access keys for an Azure App Configuration store (primary and secondary, read and write, each with a connection string). The reader reports that store holds the Keycloak, database and registry credentials of the older back end. I checked the file myself by structure only: four key entries, each with a secret of 44 characters; no value was displayed or copied. Whether the keys still work is not measured; I have not tried them and will not. Anyone who can read that repository can read them. I touch nothing. (Override note: the queue matched five earlier cards on the words access and keys, all HPSM or MPS sign-in subjects; none is about this file.)",
+  "default_action": "If you do not answer, Tuesday treats the keys as live, never copies or uses them, and does nothing else.",
+  "options": [
+   {
+    "key": "a",
+    "label": "I will have them rotated",
+    "detail": "You or the platform owner regenerate the four keys in Azure and remove the state backup from the repository. Tuesday does nothing further."
+   },
+   {
+    "key": "b",
+    "label": "Already rotated or the store is gone",
+    "detail": "The same answer as for the library keys: they are dead. Tuesday records that and treats the file as history."
+   },
+   {
+    "key": "c",
+    "label": "Check for me, read-only",
+    "detail": "Tuesday checks, read-only, whether that App Configuration store still exists. It needs a sign-in to the subscription that holds it, which Tuesday does not have; you would name it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T12:02:03.217035+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-showcase-phone-access",
+   "CARD hpsmpoc-sm-fta-external-access-1006",
+   "CARD hpsmpoc-made-before-the-keys-customers-1011",
+   "CARD mpscalc-paul-calculator-access-1012",
+   "CARD hpsmpoc-sm-access-for-paul-1020"
+  ]
  }
 ]
