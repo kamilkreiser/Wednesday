@@ -324,3 +324,11 @@ Live board, view=tuesday, two messages, verbatim (kam_msgs, live):
 > 2026-11-20T16:29:59.442000+11:00 [live] | only in ODPd infrastructure
 
 Tuesday's reading, nothing wider: this answers the first half of item P4 of the questions document (what "MVP" contains). The MVP is the product equivalent of what is live today in Workpath deployments (the Workpath apps and HPAM), on OXPd infrastructure ("ODPd" read as OXPd; "work path" as Workpath: both readings are Tuesday's). It agrees with the plan as it stands: one release, release 1, a full match of what the Workpath apps ship today (C-16; item B2 of the document), so no phase is cut out as a smaller MVP and item B15 needs no proposal on content. NOT answered by it: the second half of P4, the point at which the product is handed to the Workpath team and who takes the pilot and the HP submission. Whether "only in OXPd infrastructure" also rules on anything else (for example that nothing of the customer's Azure side may change) is NOT read into it: C-27 ("May change") stands.
+
+## C-49
+
+Live board, view=tuesday, a note on the decision datasec-oxpd-simulator-windows-host-1120, no option chosen, verbatim (kam_msgs, live):
+
+> 2026-11-20T16:58:41.770000+11:00 [live] | Decision datasec-oxpd-simulator-windows-host-1120 note: its plugged into the network via cable to this switch and wifi to the network / internet.  currently updating OS
+
+The card asked which Windows machine hosts HP's two simulators (his old Windows PC, a four-hour Azure trial, an Azure machine, or park it). Tuesday's reading, nothing wider: "its" is his old Windows PC (C-35); he is using it for the simulators, which is the card's option a in effect, though he tapped no option; it has a cable to the same switch as this machine and wifi to the network and the internet; its operating system is being updated now. So no Azure machine is created and nothing is spent. NOT said by it: the PC's processor, memory or disk, whether virtualisation is switched on in its firmware settings, its Windows edition, or that Tuesday may reach it over the network (no access has been given and none is assumed). Noted for the set-up: HP's forum record (analysis B3 line 351) says Wi-Fi adapters may not support what the simulator's network needs, so the simulator should use the cabled adapter.
