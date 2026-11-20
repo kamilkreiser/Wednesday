@@ -29,7 +29,8 @@ fi
 # after launch leaves the seat's FIRST turn on Opus. BRIEF_SEAT_LEVEL=sonnet|opus (default opus) picks the level;
 # the id is still read from models_latest.json, never typed. Any other value REFUSES.
 LEVEL="${BRIEF_SEAT_LEVEL:-opus}"
-case "$LEVEL" in opus|sonnet) ;; *) echo "brief_seat: REFUSED — BRIEF_SEAT_LEVEL '$LEVEL' is not opus or sonnet" >&2; exit 2 ;; esac
+# fable added 2026-11-20 (s296): the product owner's instruction of 2026-11-19 puts every Datasec/OXPd agent on the newest Fable.
+case "$LEVEL" in opus|sonnet|fable) ;; *) echo "brief_seat: REFUSED — BRIEF_SEAT_LEVEL '$LEVEL' is not opus, sonnet or fable" >&2; exit 2 ;; esac
 MODEL="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["levels"][sys.argv[2]]["model_id"])' "$TREE/0_Brain/dashboard/data/models_latest.json" "$LEVEL")" \
   || { echo "brief_seat: could not read the $LEVEL model id from models_latest.json" >&2; exit 2; }
 [ "${BRIEF_SEAT_PRINT_MODEL:-0}" = 1 ] && { echo "brief_seat: model=$MODEL (level $LEVEL; print-only, nothing launched)"; exit 0; }
@@ -44,5 +45,5 @@ echo "brief_seat: dir=$DIR"; echo "brief_seat: brief=$BRIEF"; echo "brief_seat: 
 echo "brief_seat: gh=$(gh api user -q .login 2>&1 | head -1)"
 PROMPT="ultrathink
 
-You are a build seat launched by Tuesday (Kam's Datasec coordinator seat) in the project folder $(basename "$DIR"). Friday handed this project to Tuesday on 2026-10-15; Tuesday is your coordinator now. Read ./CLAUDE.md and 1_Project_Definition/CLARIFICATIONS.md first, then execute the brief ${BRIEF} exactly (it lives in Tuesday's tree, read-only to you). Your wrap is the STATUS file the brief names; questions go to tuesday-agent@agentmail.to. Never delete (quarantine). Secrets stay in 4_Credentials/ and 3_Access_Keys/."
+You are a build seat launched by Tuesday (Kam's Datasec coordinator seat) in the project folder $(basename "$DIR"). Tuesday is your coordinator. Read ./CLAUDE.md and 1_Project_Definition/CLARIFICATIONS.md first, then execute the brief ${BRIEF} exactly (it lives in Tuesday's tree, read-only to you). Your wrap is the STATUS file the brief names; questions go to tuesday-agent@agentmail.to. Never delete (quarantine). Secrets stay in 4_Credentials/ and 3_Access_Keys/."
 exec claude --dangerously-skip-permissions --model "$MODEL" "$PROMPT"

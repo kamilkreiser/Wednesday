@@ -264,3 +264,19 @@ Live board, view=tuesday, a note on card datasec-oxpd-card-key-live-1120 with no
 > 2026-11-20T11:52:45.575000+11:00 [live] | Decision datasec-oxpd-card-key-live-1120 note: start a list of questions and points to clarify (create a master Jira ticket for it)
 
 Tuesday's reading, said back to him on the board and open to his correction: questions and points to clarify are kept in ONE master list, a Jira ticket on the OXPD2 board, not as one card each; the card-key question is NOT answered by the note and is the first item on that list. Done: OXPD2-1 "MASTER: questions and points to clarify (OXPd 2)" created (Task, Backlog, 24 items in four groups: needs an answer first 6, open on a default 13, to raise with HP 2, answered 3). From now a new OXPd question is added to OXPD2-1; a card is still used for a decision that must stop work (a start, a spend, anything irreversible).
+
+## C-42
+
+Live board, view=tuesday, card datasec-oxpd-start-phase0-1120, his tap and note verbatim (kam_msgs, live):
+
+> 2026-11-20T11:54:33.488000+11:00 [live] | Decision datasec-oxpd-start-phase0-1120: a — Start the no-hardware work now | note: start but all kit is in hand.  not configured but if you can configure or guide me, we can do that in parallel.
+
+The option's detail, word for word from the card: "I set up the project folder and a private repository under the Datasec GitHub organisation, and Fable agents start the twelve work packages that need no printer, tenant or answer. Nothing goes to HP or any person, no Azure, no spend." THIS IS HIS WORD TO BUILD, within that detail. Tuesday's reading of the note, said back to him and open to his correction: he holds the phase-0 kit (the printers, the Windows PC, the readers and the rest of the 17-item list), none of it is set up yet, and he wants the set-up done alongside the build, by Tuesday where a seat can reach it and by step-by-step guidance to him where it needs his hands. Which of the 17 items he holds is NOT listed in the note: asked item by item on the master list (OXPD2-1), not assumed. Still his, unchanged by this tap: anything to HP or any person, any spend, any Azure resource (the option says no Azure), production of any kind.
+
+## C-43
+
+Live board, view=tuesday, 2026-11-20T11:55:29.514000+11:00, with one attachment (`HPK-Deployment-Utility-main.zip`), his words verbatim (kam_msgs, live):
+
+> also, Datasec has a deployment utility so you should use this or amend it so we can use it for this project
+
+A design requirement: deployment for OXPd uses Datasec's existing HPK Deployment Utility, amended where OXPd needs it, in place of a new installer. Measured by Tuesday: the archive unpacks to 139 files (a .NET solution `HPK.Deployment.Utility.sln`, `src`, `external_tools`); `diff -rq` against the copy in the library backup that report A5 analysed prints 0 differing files (139 files on each side). So its source is already read (A5); what is NOT yet done is the design work: which OXPd steps (older and newer printers, the server) it can carry as it is, and what must be amended. That goes into the next correction pass of 02 and 03 and onto the master list (OXPD2-1).
