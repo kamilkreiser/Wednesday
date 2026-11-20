@@ -1,0 +1,13 @@
+The infra test checked the names of the seven app settings the template computes
+(audience, scope, instance, tenant, allowed hosts and the two sign-in ids) but
+not their value, and four literals not at all, so a changed expression stayed
+green. The compiler does not evaluate an expression, so the test now pins the
+compiled expression string of each (the allowed hosts as a shape that leaves the
+site API version free), the four unpinned literals, and the two ids as the
+module call passes them. Each row is proved by a changed line of the template
+source, compiled again, and by a changed value of the compiled template.
+
+Only the test file changes; the template and the committed name list are
+byte-unchanged.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
