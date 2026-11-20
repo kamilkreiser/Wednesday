@@ -1,0 +1,42 @@
+The unpriced full proposal and the unpriced short form now print the part code
+the server sent in front of the description of a line item. The six places are:
+the stream cards, the fleet detail cell, the office table, the optional items
+and the software rows of the full proposal; the detail cell and the software
+table of the short form. The separator is one space and no word is added. A
+code that is absent, null, empty, only spaces, or the same text as the
+description prints as before. (included) and (credit) stay at the end of the
+line. The three option words are unchanged.
+
+The priced documents are unchanged to the byte. Eight captures of the priced
+render of the base are committed and compared byte for byte, for the default
+render and for priced={true}.
+
+The no-price check reads more. It reads the value of every attribute, each text
+node on its own line, and the whole-dollar forms of each figure as whole tokens.
+It removes a part code before the scan only where a code can start: the start
+of a text, the start of a text node, or right after a quantity and the
+multiplication sign. Anything before that place, and every attribute value,
+stays in the scanned text, so an amount whose tail equals a line's code is
+found. There is no list of allowed codes. The no-new-word check is exact; its
+one named exception applies to the short form only.
+
+The limits of the checks, as they are:
+- A part code printed in its own place is read as data, whatever it holds: a
+  code that equals an amount, or contains one, prints and reads clean there. The
+  same text printed anywhere else is still found.
+- A figure with cents printed rounded, re-grouped or abbreviated (57,941 for
+  57940.50, 57 940, 57.9k) is not read by the price check; the no-new-word check
+  flags the new text instead.
+- A figure staff type into a free-text narrative field is their own text and is
+  not scrubbed.
+Known gap, for a follow-up: the last sentence of the first limit does not hold
+for a description that begins with another line's code and description when
+that code equals an amount, or for sent text holding a control character; the
+no-new-word check flags both.
+
+A long unbroken code in the first stream card of a proposal with many packages
+makes the printed PDF scale down; a follow-up lets a code break there. Not built
+here: the rental documents, which stay priced, and a durable record of the
+choice. MPSCALC-278 stays open on its third clause.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
