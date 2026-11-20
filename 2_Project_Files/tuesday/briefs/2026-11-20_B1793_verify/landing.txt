@@ -1,0 +1,53 @@
+Landing for the chat error text and stream error event change (RD-1008), repo datasecau/Reporting_Dashboard_Au.
+MERGE COMMIT, head-pinned. Never squash, never rebase.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1793_verify'
+
+0. Re-read before acting: the branch head must still be b0c914dee0932c55f16374f98b6f853a96df4b14 and main
+   74b58fd5f623ac825133e1980e8b2d8763b2c108 (the merge of pull request 237, HISTORY.md only). The gate measured:
+   main...head diverged, ahead 5, behind 2, merge base 98e6a4d72f5745a17438bdd2788cff5872f6fcaf, 7 paths; a trial
+   merge of the head into a commit holding main's exact tree (d9e56e5bda1b9c642c147ecb7209615234fd4936, rebuilt from
+   the GitHub blobs and equal by sha) is clean and its tree differs from the head's tree by HISTORY.md only.
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/b1771%2Fnexusai-lane-nm-chat-error-text --jq .commit.sha
+   If main moved again: list the paths main changed since 74b58fd5. Any of the 7 paths of this branch among them is a
+   re-gate (backend/server.js, static/js/index.js, __tests__/rd1005-chat-message-not-text.test.js, the three
+   __tests__/rd1008-*.test.js files, scripts/verify-expected-counts.json; the counts file conflicts if another lane
+   changed it). Anything else is noted and the landing goes on.
+   LANDING HOLD: the branch carries the coordinator's defaults (six comparisons of the code string become class
+   checks, three of them rethrow sites the ticket does not name; one import line at the top of server.js; the page's
+   own escapeHtml on one token; the two health reads and the adapter's own code check left; one old-answer test
+   rewritten; the chat-region sibling writes listed, not fixed). None is the product owner's. Land only with the
+   coordinator's answers in hand.
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1771/nexusai-lane-nm-chat-error-text --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks with a background wait that EXITS (at least 7 checks must have run and all must pass):
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/Reporting_Dashboard_Au PRNUM b0c914dee0932c55f16374f98b6f853a96df4b14 60 90 --min-checks 7
+   The hosted Build runs the verify on Node 24 on the PR merge ref (main 74b58fd5 plus this branch): its counts pair
+   must read 6216/393 (the gate's local verify at the head on Node 24 is in VERDICT.md). The merge ref differs from
+   the gate's verified tree by HISTORY.md only; four tests read HISTORY.md, and pull request 237's own Build passed on
+   that HISTORY.md.
+   CodeQL: the gate's local run read rc 0 (KEPT high+ 0, NEW high+ 0, results 29 and 29). Main moved in HISTORY.md
+   only, which no CodeQL language here scans, so the hosted check sees the same JavaScript as the gate. No open alert's
+   location, related location or data-flow step lies on a line this branch adds (0 of 1648 locations read in each
+   SARIF). If the hosted CodeQL check reports any alert on this PR, it is a landing blocker: STOP, never dismiss,
+   never comment on the alert; report to Tuesday.
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit as a merge commit:
+   gh pr merge PRNUM -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit b0c914dee0932c55f16374f98b6f853a96df4b14 --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing: the merge touches backend/**, static/**, __tests__/** and scripts/**, which deploy-demo.yml does NOT
+   path-ignore (read at the head, .github/workflows/deploy-demo.yml:29-32: it ignores only '**.md', 'docs/**' and
+   'tests/**'), so a Deploy demo run starts on main. Its build and deploy jobs MUST read skipped (both gated on
+   vars.CI_DEPLOY_ENABLED, deploy-demo.yml:53 and :91; the last three runs on main, 98e6a4d7, c0552240 and b0499db0,
+   read skipped, and the newest run's jobs read build=skipped, deploy=skipped). Anything other than skipped is a
+   stop-and-report. Do not dispatch, re-run or touch a variable. deploy.yml is workflow_dispatch only and does not start.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert; existing alerts open and unchanged (22 open on main at the gate,
+   read by gh api at most_recent_instance commit 74b58fd5). No alert is expected to close.
+Not deployed. No Jira from the landing seat (the records seat posts after; see FOR-RECORDS.md).

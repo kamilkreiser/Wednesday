@@ -1,0 +1,12 @@
+RD-1008: the chat routes keep an error's own words only when the error is the AI adapter's own redirect refusal
+class, never because of a code string an AI endpoint can put in its error body. Six places in the server test the
+class now. On GET /api/chat/stream such an endpoint error now reads the constant "Error processing chat message".
+On POST /api/chat and POST /api/chat/stream it no longer stops the rule-based fallback, so the user gets the
+ordinary fallback answer, as for any other endpoint error. A real redirect refusal reads exactly as before on all
+three routes. The chat page now writes a stream error event's message as text.
+
+The class check, the six places, the import line and the page's own escape on one token are defaults of the
+coordinator, not a ruling. The other chat-region page writes and the adapter's own code check are listed for
+follow-up and not changed. Not deployed.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
