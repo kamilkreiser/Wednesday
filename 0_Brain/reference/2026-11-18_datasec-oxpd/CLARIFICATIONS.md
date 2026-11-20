@@ -248,3 +248,11 @@ Live board, view=tuesday, a note on card datasec-oxpd-which-printer-1120 with no
 > 2026-11-20T11:45:16.080000+11:00 [live] | Decision datasec-oxpd-which-printer-1120 note: I have the map m577m
 
 Tuesday's reading, said back to him on the board and open to his correction: the model is an HP MFP M577 ("map" read as MFP through dictation; the trailing letter is not understood). NOT answered by the note: the firmware version, and whether the printer may be wiped for developer mode. Which OXPd generation an M577 covers is NOT established here: no source was opened for it. Until the firmware version is known the phase-0 list keeps one printer of each generation as still to be confirmed (the card's own default).
+
+## C-40
+
+Live board, view=tuesday, 2026-11-20T11:50:08.527000+11:00, with five attachments, his words verbatim (kam_msgs, live):
+
+> here are the repos
+
+The five files as fetched by Tuesday: `hpam-api-main.zip`, `hpam-marketplace-main.zip`, `infra_hpam-main.zip`, `OXPd1_solution-master.zip`, and a two-page PDF print of the GitHub page of the repository OXPD1 ("HP Authentication Suite OXPD V1.8"), whose text shows an empty repository. Not among them: `cc-api`. This answers the card datasec-oxpd-gateway-and-oxpd1-repos-1120 in part. The files are kept outside git under `2_Project_Files/fleet/state/kam_attachments_1120b/` (the back-end archive holds a local settings file: location only, never quoted).
