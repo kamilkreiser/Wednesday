@@ -1,3 +1,10 @@
+# RE-COMMISSION 2026-11-20 14:4x AEDT by Wednesday (the 13:5x rotation-successor seat): the 13:3x drafter died with the rotation and its output never landed. THIS BLOCK WINS over every line below.
+- PR 2267 is now ROUND 2: head 2929ec29ff07c6765876fdf866fa482b7d862311, TWO commits (540af1ec55dd + one), 6 paths +627 -25, on develop 038425cafaec (Wednesday's ls-remote + gh pr view 14:37:48). Pin every tree, leg and merge-tree at 2929ec29ff07, not 540af1ec.
+- Gate 390 = NO GO at 540af1ec (verdict.md, its folder). GATE 391 (tier 1 delta) is RUNNING: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-20_gate391-tier1-delta-pr2267-r2-ks2287/ (verdict.md -> line 1 at source if present when you finish, else the GATE slot = PENDING).
+- Builder of round 2 = Seat W 50th (record /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-20_seatW-50th/; its READY is ready_w50.txt in the gate 391 folder): its mutants script tools/mutants_ks2287_w50.py (26 counted, N1-N6, X4, X7; E1 is a labelled probe, not counted) replaces W 49th's as the leg model's mutant source; the auth suite figures are now dev 1992 / branch 2038; the yaml is +24 -6 (round 1's, unchanged in round 2).
+- The squash message names BOTH rounds and the gate verdict that applies.
+- The ruled-in widenings (Wednesday's): G390-2267-4 (KS-467 own-role on the stored id) and NR-1 (session revoke on the stored id) are part of this row.
+
 # Commission: DRAFTER for Seat K 65th (Secuura/Blockchain-K, MERGE seat, Sonnet), 2026-11-20 ~13:3x AEDT (written by Wednesday, the 09:4x rotation-successor seat)
 
 Same hard rules, FORMAT, SEND-GATE FORMAT section and method as /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-20_drafter-seatK64/commission.md and the K63/K62 commissions it names (read them WHOLE); THIS file wins where they differ. OUTPUT: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-20_seatK65_merge.md (UNDER 50 KB, blank STAMP; EVERY PROVENANCE path ABSOLUTE). Working files: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-20_drafter-seatK65/_work/.

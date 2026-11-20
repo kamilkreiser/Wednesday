@@ -1,0 +1,133 @@
+=========== [INBOUND] 2026-11-20T03:37 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2287 round 2 (Seat W 50th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2287 round 2 (Seat W 50th)
+Seat W 50th
+
+READY FOR GATE KS-2287 round 2 (Seat W 50th). TIER 1, delta re-gate on Opus.
+
+PR 2267: https://github.com/Secuura/Distributed_Secuura/pull/2267
+- Head 2929ec29ff07c6765876fdf866fa482b7d862311: ONE new commit on 540af1ec55dd, plain fast-forward, no force push.
+- Develop at the READY: 038425cafaecfb29e800e0a9187d76f9fddc3622 (ls-remote 03:36:27Z; unchanged since my boot; PR 2099 head unchanged at 8967de8b1755). gh at the same minute: PR 2267 OPEN, head 2929ec29ff07, 2 commits, 6 files +627 -25, MERGEABLE.
+- PR totals now: 6 paths, +627 -25 (round 1 was +531 -19). This commit: users.ts +22 -8, and the KS-2287 test file +82 -6.
+- I merged nothing, deployed nothing, and posted nothing on the board except the PR body edit.
+- Record: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-20_seatW-50th/
+
+WHAT CHANGED (the closed list: items 1-5 + NR-1, per your ANSWER of 03:11:55Z)
+- Items 1 and 2, G390-2267-1 (HIGH) and G390-2267-4, in services/auth/src/routes/users.ts:
+  - A new helper, isSameUserId(a, b): both strings, compared with toLowerCase on each side.
+  - Right after the tenant 404: const callerIsTarget = isSameUserId(target.id, adminId). target.id is the row's stored id; adminId is the token's id.
+  - The KS-467 own-role rule moved there (Q-A = a): `if (safeUpdates.role && callerIsTarget)`, same 403 "Cannot change your own role".
+  - The KS-2287 level self rule is now `if (callerIsTarget)`.
+  - The three behaviour changes you accepted are stated in the PR body's round-2 section.
+- NR-1: `revokeAllUserSessions(target.id)` replaces the raw path id.
+- Item 4: cells only, no product code.
+- Item 5: auth.openapi.ts and the yaml are UNCHANGED. They already promised "no caller may change its own role" and "never on itself", and this round makes both true. So nothing was regenerated in this round.
+
+ITEM 3, THE SWEEP (report only; nothing fixed; head 540af1ec, src without tests)
+- services/auth, by-id route, path id against the caller's id: only users.ts:802 and users.ts:872, i.e. items 1-2. Both are fixed.
+- Other caller-id comparisons, none reachable by a spelling:
+  - authenticate.ts:227 requireOwnership: zero callers; an allow rule (owner OR admin), so a spelling could only deny.
+  - oauth.ts:1262 `app.createdBy === req.user?.userId`: stored value against the token.
+  - auth.ts:1557 `existingUser.id !== req.user!.userId`: row against token.
+  - users.ts:1439 and :1468: memory-store filters keyed by the caller's own user.id.
+- services/api-gateway: verification.ts:462 `approverValue !== userId`. A stored workflow value; an allow rule (or admin).
+- Positive control beside the zeros: the same grep found the 2 "Cannot change your own" lines.
+
+CELLS (W 49th's file; 46 cells, was 37)
+- Harness: the by-id mock (getUserById, getUserByIdPlatformScope, merge) now matches case-insensitively, as Postgres does on the UUID column. Every seeded id is lower case.
+- Two new ids with hex letters (ADMIN_A1_HEX, USER_A1_HEX), because the old ids are mostly digits and upper-casing them changes nothing.
+- Red first, on round 1's product code with the new cells: 46 cells, 5 failed by assertion, 41 passed (evidence/red_r2.json).
+  - The four upper-case self cells (own id upper in the path; token upper with the path lower; one pair each for the level and the role) answered 200 instead of 403.
+  - NR-1: revoke was called with the upper-case id.
+  - The 37 round-1 cells passed unchanged under the new harness.
+- Green: 46/46; with ks467-user-admin-isolation, 84/84 (evidence/green_r2.json).
+- Controls, green on both codes: own id in upper case with the own level resent plus a new name = 200; another own-organisation user named by an upper-case id = 200, with STANDARD written to that row.
+- Item 4 pins, green on both codes: create with null from an ORG_ADMIN = 201 BASIC; create with NONE = 403. They were added as rows of the existing it.each tables.
+
+MUTANTS (tools/mutants_ks2287_w50.py r2: W 49th's engine by counted derive; evidence/mutants_r2_stdout.txt, matrix_r2.json)
+- 26 counted: W 49th's 19 re-run, with M4's anchor moved to the new self line, plus 7 new. Every one compiles (tsc 0) and every one is killed. users.ts is restored by sha256 after each one, ending at 62d321cc86e3.
+- N1, the level self rule's raw-text compare restored: killed by the two upper-case level cells.
+- N2, the own-role rule's raw-text compare restored: killed by the two upper-case role cells.
+- N3, the helper's fold dropped: killed by the two token-upper cells.
+- N5, the moved own-role rule dropped: killed by the two upper-case role cells and KS-467's own-role cell.
+- N6, revoke on the raw id: killed by NR-1.
+- X4, the gate's spelling, create refuses null: killed by the create-null row.
+- X7, the gate's spelling, create allows NONE: killed by the create-NONE row.
+- E1, the labelled probe (the helper fed the raw path id): SURVIVED, as predicted. It is equivalent at this head because zod's guid() admits only the 8-4-4-4-12 form. Reported, not counted.
+
+SUITES AND STATIC (evidence/suites_S2_stdout.txt, static_stdout.txt)
+- Whole auth suite, dev arm s-w49-dev at 038425cafaec: 1992/1992 in 162 files.
+- Branch arm at 2929ec29ff07: 2038/2038 in 163 files. That is 2029 + 9: my plan said 2037 before NR-1 was ruled in. Both failure sets empty.
+- tsc 0 (planted 1).
+- eslint on users.ts, auth.openapi.ts and the test file: 0 and 0, branch and dev (planted: no-debugger, no-unused-vars).
+- Test-type ratchet: 41 baselined, 0 new, 0 stale, 163 files (planted refused).
+- Standalone ratchet: 6 services OK. Leg test: 48 passed, 0 failed.
+- fragments OK (planted FAIL).
+- check:openapi: CHECK PASS, 422 examples resolve.
+
+MERGE-TREES (your carried Q6 licence, condition i; evidence/merge_tree_*.out; PR 2099's head re-read by ls-remote at 03:18:13Z)
+- 2929ec29ff07 vs PR 2099's live head 8967de8b17558890dc4ace2732cb8350768df601: rc 0 (tree d3e99bf9fbad).
+- Planted control, scratch commit 65693282c354 on PR 2099's head (a yaml line this PR also edits; never pushed): rc 1, "CONFLICT (content): Merge conflict in Blockchain/Dev/docs/openapi/secuura-api.yaml".
+- vs develop 038425cafaec: rc 0.
+- Condition ii: the PR body still says whichever merges second regenerates the yaml. Round 1's paragraph is kept, and the round-2 section repeats it.
+
+PUSH
+- Existing-branch driver: W 42nd's kit by counted re-key (tools/rekey_push_w50.py). The two gates are byte-equal (develop_gate 599337a6923f, overlap_gate d3af1bc78efc).
+- PATHSFILE = the PR's 6 paths. OVL_IGNORE_PRS=[2267 2099]: the own PR plus your licence.
+- gatetest at 03:20:44Z to 03:21:06Z passed: develop unmoved; 17 open PRs, none touches any of the 6 paths apart from the two named; lock released.
+- Real push 03:21:46Z to 03:35:49Z (843 s), rc 0, plain fast-forward 540af1ec5..2929ec29f. ls-remote VERIFIED 2929ec29ff07 on origin; lock released (push/out_real/status.txt). The pre-push preflight ran 13 of 16 legs and nothing failed; legs 3, 4 and 8 were SKIPPED (no local stack). The hook itself says that is NOT a full pass.
+
+PR BODY EDIT (done; push/pr_body_before.md, pr_body_after.md, pr_body_readback.md)
+- Three counted edits plus a round-2 section inserted before "Residuals, stated":
+  - +24 -6, with a note that round 1 said +30 -4;
+  - "either casing" now covers SUPER_ADMIN only, noting that lower-case system_admin is refused at PATCH (pre-existing);
+  - "never on itself" says round 2 closed it.
+- Round 1's head (1,773 B) and tail (7,111 B) are byte-kept.
+- PATCH rc 0. Read-back is byte-equal: 20,495 B, sha256 50ac77a6962a (was 12,324 B, sha256 5f360d00b4cf). The body was compared whole through the JSON, never --jq, so no trailing newline was added.
+
+THE e94e5ef8 EDIT: DRAFT ONLY, NOT POSTED (you post it after gate 391, on your word)
+- Draft file: drafts/ks2287_comment_e94e5ef8_edited.md. The live comment is unchanged: 3,083 B, sha256 e8cb86751a2a, editedAt null.
+- Full text between the lines:
+----------
+**Facts (Seat W 49th, build seat, 2026-11-20; EDITED by Seat W 50th after round 2, gate 390 — the original text said "never on itself" while an upper-case spelling of the caller's own id got past that rule):** PR 2267 is open for KS-2287: https://github.com/Secuura/Distributed_Secuura/pull/2267 (branch `feature/ks-2287-auth-an-org_admin-can-set-any-verification`). Round 1 was head `540af1ec55dd`, one commit on develop `038425cafaec`, branched after PR 2266 merged. Round 2 is head `2929ec29ff07`, one new commit on top, no force push. Nothing is merged or deployed. The QA gate re-reads it next, at tier 1 (delta).
+
+**What it does (Kam's card secuura-org-admin-sets-verification-level-1120 = b, "Own organisation, capped"; design ruled by Wednesday):**
+- Both admin routes, PATCH /api/users/admin/:id and POST /api/users/admin/create, now check the level for every caller: one of NONE, BASIC, SOCIAL, STANDARD, ENHANCED, HIGH, GOVERNMENT (ASCII case-insensitive, stored as the canonical name), else 400.
+- A caller that is not a platform admin (ORG_ADMIN, and the bare admin string on PATCH) may change a level only for a user of its own organisation, never on itself, and only up to STANDARD; anything else is 403. Lowering inside the cap passes. "Itself" is decided on the target row's stored id against the token's id, both case-folded, so no spelling of its own id gets past it (round 2).
+- Its organisation is read from its users row, not the token claim; the target's is its stored organisation, before the same request's organizationId change. No organisation on either side is never the same. A foreign-tenant target still answers 404.
+- Resending the level a user already holds is not a change (the admin dashboard resends it on every save).
+- Create gives the new user no organisation, so a non-platform caller may only leave the level at BASIC (null included; NONE is 403).
+- Platform admins keep their reach apart from the value check.
+
+**Round 2 (gate 390 = NO GO at 540af1ec55dd):**
+- Round 1's self rule compared the raw path text with the token's id. An ORG_ADMIN that sent its own id in upper case passed it and could raise its own level to STANDARD in one request. That is fixed.
+- The older KS-467 "no caller changes its own role" rule had the same gap. It now runs after the lookup, on the stored id (ruled in by Wednesday).
+- A suspend or role change sent to an upper-case id wrote the row but revoked no sessions, because sessions are keyed by the stored id. It now revokes the stored id's sessions (ruled in by Wednesday).
+- A sweep of auth and the gateway found no other place where a path id is compared with the caller's id.
+
+**Tests:**
+- Round 1: a new file with 37 cells, 25 red by assertion on develop and 12 controls; 19 of 19 mutants killed, each compiling.
+- Round 2: 9 more cells, 46 in the file. 5 were red on round 1's code (the four upper-case self cells and the session-revoke cell); create with null and NONE are pinned. 26 of 26 mutants killed, each compiling. One labelled probe survived as expected: the path id and the stored id are equivalent at this head.
+- Whole auth suite: develop 1,992 of 1,992; branch 2,038 of 2,038 at round 2 (2,029 at round 1); failure sets equal (empty).
+- tsc, eslint, the test-type ratchet and the fragments check are clean, each with a planted control; check:openapi passes.
+
+**Spec:** both routes' descriptions in auth.openapi.ts; the yaml regenerated in round 1 and unchanged in round 2 (it already promised "never on itself", now true). The yaml is also PR 2099's path, under Wednesday's licence. Merge-tree against PR 2099's head `8967de8b1755` is clean, and the planted control conflicts. Whichever of the two merges second regenerates the yaml.
+
+**Push:** round 1 was pushed 02:14:01Z to 02:27:12Z (791 s), rc 0, verified on origin. Round 2 was pushed 03:21:46Z to 03:35:49Z (843 s), rc 0, verified on origin; the preflight again ran 13 of 16 legs and nothing failed. The pre-push preflight skips legs 3, 4 and 8 without a local stack, so neither push is a full preflight pass.
+
+**Residuals, routed by Wednesday (not in this PR):**
+- An organisation admin can still move any tenant user between organisations, so the organisation rule can be walked round in two requests (to Kam as a decision).
+- The verification-review approve path still lets a same-tenant ORG_ADMIN raise a user above STANDARD (to Kam as a decision).
+- The admin dashboard's level select still offers enhanced, high and government to organisation admins (ticket).
+- Organisation admins with no organisation can set no level; the auth demo seed's three have none (ticket).
+
+**Not measured:** a booted service, the gateway, the admin dashboard, any live or deployed environment, any real database or Redis, the four platform suites, Node 24.
+----------
+
+NOTICED
+- The branch tree holds an absolute symlink node_modules/node_modules that points at its OWN node_modules. It was made at 02:19Z, during W 49th's push, and points at no other seat's tree. I left it in place.
+
+NOT RUN
+- The four platform suites, a booted auth or gateway, a real Postgres or Redis (NR-1 is a code read plus a mocked-revoke cell), the admin dashboard, any deployed environment, Node 24.
+
+The seat ends at this READY. A HANDOVER is next in the record, then a wrap mail.
+
