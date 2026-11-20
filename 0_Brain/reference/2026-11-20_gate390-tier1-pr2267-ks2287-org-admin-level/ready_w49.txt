@@ -1,0 +1,48 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261120T022856Z.txt)
+     1	[INBOUND] 2026-11-20T02:28 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2287 (Seat W 49th)
+=========== [INBOUND] 2026-11-20T02:28 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2287 (Seat W 49th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2287 (Seat W 49th)
+Seat W 49th
+READY FOR GATE KS-2287. TIER 1 (an authorisation rule on a user-editing route; an Opus gate).
+
+PR 2267: https://github.com/Secuura/Distributed_Secuura/pull/2267
+- "Refs KS-2287: an organisation admin sets a verification level only in its own organisation, never on itself, and at most STANDARD".
+- Open, not draft, base develop. Head 540af1ec55ddcf495c04039e38e29988dfd664e7: ONE commit on develop 038425cafaecfb29e800e0a9187d76f9fddc3622 (PR 2266's squash; branched after it merged, as held).
+- Exactly the 6 ruled paths, +531 -19. No closing keyword.
+- Develop at this READY (02:28:06Z, ls-remote): 038425cafaec = the PR's base.
+- Linear: ONE facts comment on KS-2287, id e94e5ef8, read back identical. Nothing merged, deployed or closed.
+
+YOUR WAIVER CONDITIONS (Q6)
+(i) merge-tree of head 540af1ec55dd against PR 2099's LIVE head 8967de8b17558890dc4ace2732cb8350768df601 = rc 0.
+    - Planted control: a scratch commit on PR 2099's head editing a yaml line this PR also edits (the create request's verificationLevel description) = rc 1, CONFLICT in the yaml.
+    - The head against develop 038425cafaec = rc 0.
+(ii) The PR body states that whichever of PR 2099 and this PR merges SECOND regenerates the yaml.
+The waiver OVL_IGNORE_PRS=2099 was set inside my launcher, for the yaml only. The census at launch (02:13:39Z, 18 open PRs) read PR 2099 on the yaml and no PR on the other five paths; planted control PASS.
+
+WHAT IT DOES (your rulings)
+- Q2 value check, every caller, both routes: one of the seven names, ASCII fold, canonical name written; else 400 "Invalid verificationLevel. Must be one of: ...". The cap is computed on the canonical name (indexOf -1 would otherwise pass an unknown string; M10 shows it).
+- Q1 non-platform callers (!isPlatformAdmin: ORG_ADMIN on both, bare admin on PATCH). On PATCH, on a real change (Q2c: a resent stored level is not a change):
+  - self: 403 "Cannot change your own verification level" (Q3 a);
+  - above STANDARD: 403 "Only a platform admin can set a verification level above STANDARD"; lowering inside the cap passes (Q2b a);
+  - own organisation: caller's users ROW (platform scope) against the target's STORED organisation, both non-null and equal, else 403 "Only an admin of the user's own organisation can set its verification level" (Q4). Placed after the tenant 404.
+- CREATE (Q4 a): non-platform caller: absent, null, empty or BASIC only, else 403 "Only a platform admin can choose a verification level when creating a user". Organisation assignment unchanged.
+- Platform admins: not capped, not organisation-bound, may set their own level.
+- auth.openapi.ts: both routes' descriptions, field descriptions and 400/403 texts; yaml regenerated (+30 -4: the two routes and the two request schemas). Two fragments KS-2287-org-admin-verification-level-capped.html.
+- PR body carries N1 to N4 under "Residuals, stated".
+
+EVIDENCE
+- BASE: develop 038425cafaec auth whole 1992/1992 in 162 files (equal to K 64th's figure). Earlier BASE at 35d677937401: 1956/1956 in 161.
+- Red first (branch tree at 038425cafaec, users.ts untouched): 25 of 37 new cells failed by assertion; 12 controls passed. Green: 37/37; with ks467 (same routes) 75/75.
+- Mutants: 19 of 19 killed, each compiling (tsc 0), product sha256 restored after each: your M1 to M15 plus M10c (create value check), M16/M16c (raw write on each door), M17 (Q2b option b; kills the lowering control). Controls with no dedicated mutant: NONE/BASIC/SOCIAL inside the cap and the create default; each passes on both arms.
+- Auth suite whole, both arms: develop 1992/1992 (162 files), branch 2029/2029 (163 files); failure-name sets equal, both empty.
+- tsc 0 (planted 1); eslint 0/0 on the three files, the two existing ones also 0/0 on develop (planted no-debugger, no-unused-vars); test-type ratchet 41 baselined, 0 new, 0 stale, 163 files (planted refused); standalone ratchet 6 services OK, leg test 48/0; fragments OK (planted FAIL); check:openapi CHECK PASS.
+- No SQL and no userRepo edit, so no PGlite cell (said in the PR).
+- Push: 02:14:01Z to 02:27:12Z (791 s), rc 0, ls-remote VERIFIED 540af1ec55dd; lock released, queue left. Hook: 13 of 16 legs ran, nothing failed; legs 3, 4 and 8 SKIPPED (local stack not up): NOT a full pass. Leg 16: auth 0 new, 163 test files. No gatetest was run first (straight to the real push; it re-runs the same gates under the lock).
+
+NOT RUN: the four platform suites; a booted service, the gateway's forward, any live or deployed environment; the admin dashboard; any real database; Node 24 (measured on v26.8.1).
+
+RESIDUALS (in the PR body, routed by you): N1 organisation moves (Kam), N2 review-approve path (Kam), N3 dashboard select (ticket), N4 org admins with no organisation (ticket).
+
+I deploy nothing. Record: 5_Project_History/2026-11-20_seatW-49th/. Meter 39.5% of 1M.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 37  SEEN:      949  BATCH: /private/tmp/wed_newmail/batch_20261120T022856Z.txt
