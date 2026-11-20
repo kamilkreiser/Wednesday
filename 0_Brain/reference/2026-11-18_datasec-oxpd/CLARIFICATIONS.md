@@ -232,3 +232,11 @@ Live board, view=tuesday, 2026-11-20T10:48:48.115000+11:00, his words verbatim (
 > I created a a GitHub repository called OXPd_2  please create keys and I will add to a deploy key with write privelages
 
 Done by Tuesday: datasecau/OXPd_2 read (private, empty, default branch main, 0 deploy keys); an ed25519 pair created in Tuesday's own keys folder under `3_Access_Keys/oxpd_2/` (git-ignored; fingerprint SHA256:aW+vD2Bd2JdHqd0OB/jmJ0GLgfkv3RMmqKxgIfWPiyg); the public half and the four steps sent to him on the board. The key works only after he adds it with write access: not yet verified. The private half moves to the project's own keys folder when that folder exists.
+
+## C-38
+
+Live board, view=tuesday, card datasec-oxpd-sensitivity-labels-1120, his tap verbatim (kam_msgs, live):
+
+> 2026-11-20T11:44:48.964000+11:00 [live] | Decision datasec-oxpd-sensitivity-labels-1120: a — Leave it out, as today
+
+The option's detail, word for word from the card: "The rebuild matches the shipped app. The feature is listed as a possible later addition." So sensitivity labels (choose a label when scanning; block printing of a file labelled Do Not Print), written and switched off in the SharePoint source 4.4.6, are NOT in the rebuild's requirements. The "not ruled" mark on them in `02_architecture.md` (B1760) is answered by this entry; the documents' wording is updated at the next correction pass.
