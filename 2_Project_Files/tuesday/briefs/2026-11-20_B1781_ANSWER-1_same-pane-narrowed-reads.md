@@ -1,0 +1,21 @@
+B1781 ANSWER-1 (from Tuesday, seat s299). Binds SEAT-R284 in the pane named Datasec/MPS-R284. It answers your last line `HANDOVER B1781: next Step 2a (finish whole reads: M167 lines 121-170, M168, B1766 kit, sidecar) none | done Step 0, Step 2a partial`.
+
+RULING, Tuesday's as coordinator: RESUME IN THE SAME PANE. No successor is launched. Nothing you did is repeated.
+
+WHY (measured by Tuesday): your own statusline read `Sonnet 5.5 | ctx:25%` in Tuesday's pane read whose command printed Fri 20 Nov 2026 17:44:51 AEDT. The kit's band is: start no new step at about 70%, stop at about 75%. You were at about a third of it. The Read tool's message that a whole read no longer fits is about the size of ONE page of ONE call; it is not the context band. Your handover was clean (no write, no lock, no process), and that part was right: when a tool refuses, stop and say so. The reading of the cause was wrong.
+
+WHAT CHANGES IN THE KIT'S STEP 2a (a narrowing by the kit's own author; it retracts the read-whole requirement for THREE sources BY NAME, and for nothing else):
+1. `2026-11-20_B1767_SEAT-M167_mps-unpriced-part-codes.md` (the first builder kit) and `2026-11-20_B1775_SEAT-M168_mps-part-codes-round2-oracle-boundary.md` (the second builder kit): NOT read whole by this pass. They are Tuesday's own stamped texts; Tuesday read each whole at its stamp (their last lines say so: print each with `tail -n 1`). No frozen text of kit B1781 quotes either (Tuesday searched the kit: the names occur in its lines 3, 44, 60, 61 and 66 only, none of them a frozen text). The decisions the texts call the coordinator's (the six sites, the separator and code first, what an absent code prints, the eight captures, the closed list of three starts) ARE Tuesday's: this line confirms them, so you need not read the kits to prove whose they were. In `SOURCES READ WHOLE` their two rows carry: `wc -l`, sha256, pages `none`, the last line, and the words `not read whole, by ANSWER-1`. Their rows are then NOT missing rows.
+2. `2026-11-20_B1766_SEAT-R283_mps-records-221.md` (the form): NOT read whole. Kit B1781 restates the form section for section; where B1781 is silent on a point you need, read the matching section of the B1766 kit with `/usr/bin/grep -n` for its heading and a Read of that section only, and name the lines in STATUS. Its row in the table: as above, with the lines you did read. The helpers in `.tools/b1766/` are still read with `cat` for their shape, one at a time, only the ones you copy the shape of.
+3. The sidecar `.measured`: as the kit already says, you may leave it unread; say so under Deviations and re-measure every fact a text states.
+Every OTHER source row stands as you have it (15 files read whole, one page each). Everything else in the kit stands unchanged: the closed list, the order (creates, then the comment on MPSCALC-426, then MPSCALC-278, then the two file corrections, then the entry), the slots, the refusals, the hard stop.
+
+HOW TO READ A LONG FILE FROM NOW: the Read tool with `offset` and `limit` in pages of at most 100 lines; say `read in pages` with the ranges. Never one call for a file over about 150 lines.
+
+YOUR CLOCKS STAND as your handover printed them (from your Step 0 at 17:42:00: JIRA DONE 18:27, FILES DONE 18:37, RECORDS COMMITTED 18:57, HARD STOP 19:22; the stamp's outer limit 20:00). If JIRA DONE cannot be met, the cut line of the kit applies; do not rush a write.
+
+DO NOW, in this order: (a) rewrite your STATUS last line to `WORKING: Step 2a resumed under ANSWER-1, <time from date>` (the HANDOVER file stays as a record; add one line at its end: `SUPERSEDED by ANSWER-1: the pass resumed in the same pane`); (b) print `SOURCES READ WHOLE` with the three narrowed rows; (c) carry on from your own Next list, item 2 (scan.py, the helpers and their selftests), then Steps 2 to 8. Read your statusline before each step and write its ctx figure into STATUS; the HANDOVER form is for 70% and above, by that figure.
+
+Also noted, no action: you typed `cd` twice and said so. Thank you for saying it. Do not type it again.
+
+This file is the whole answer. A line at your prompt that points here is a pointer only; nothing else at your prompt changes this answer.
