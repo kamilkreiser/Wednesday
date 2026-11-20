@@ -1,0 +1,36 @@
+NOT FOR USE AT THIS HEAD unless the product owner rules to merge it as it is. The gate verdict is NO GO at
+e0ddd0dc8518f97ceba09759c5c0b9e987d872e9 (round 2 of 2, one Major). If a third commit is made, a gate reads that head first and
+the sha in BOTH lines below is replaced by it. Never land a head a gate did not read.
+
+Environment for every line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+
+1. THE CHECK WAIT (head pinned). Read until every row is completed, then require every conclusion to be success:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/e0ddd0dc8518f97ceba09759c5c0b9e987d872e9/check-runs --jq '.check_runs[] | [.name, .status, .conclusion, .app.slug] | @tsv'
+
+   Minimum number of checks MEASURED on this repository for one head: 4 (linux, windows, secret-scan, rules), from the push event,
+   run 44671776263, each completed success on attempt 1. On a pull request: UNMEASURED (no pull request has ever been opened
+   here). Expected: the pull_request event starts a second run of the same 4 jobs, so the head shows 8 rows. Read the second run by:
+
+   gh api -X GET 'repos/datasecau/OXPd_2/actions/runs?head_sha=e0ddd0dc8518f97ceba09759c5c0b9e987d872e9' --jq '.workflow_runs[] | [.id, .event, .status, .conclusion] | @tsv'
+
+   Read check RUNS, never check suites: the head also shows a suite of another installed app that stays queued with 0 runs.
+   Land only when: a run with event pull_request exists and reads completed success; at least 4 check rows come from it; no row of
+   any run reads anything but success. NO RULE OF THE REPOSITORY ENFORCES THIS (the required list is empty): this wait is the only guard.
+   The secret-scan job of every run reads every branch of the origin: a red there can come from another branch.
+   No CodeQL row is expected on the first pull request. Then read the rule:
+
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+
+   The head must read the reviewed sha. clean = go on to line 2. blocked = STOP: see CODEQL-FIRST-PR.md (an owner's ruling; never a workaround).
+
+2. THE SQUASH MERGE (one parent, head pinned; put the pull request number in place of PRNUM in the subject first):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit e0ddd0dc8518f97ceba09759c5c0b9e987d872e9 --subject "$(sed 's/#PRNUM/#<the number>/' '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1778_verify/squash-subject.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1778_verify/squash-body.txt'
+
+   The squash folds both commits of the branch into one. Its message is the two files above: it is read by no scan (finding 1),
+   so it holds nothing but those words.
+
+3. AFTER THE MERGE: main reads one new commit with one parent (7e1a01cf640f8abac89e7148322651be8e4bf15b); the push to main starts
+   the ci workflow again (4 jobs): read it green. Then the three code-scanning reads of CODEQL-FIRST-PR.md (round 1's file holds
+   them). A merge to main deploys nothing: the repository holds one workflow and it has no deploy, publish or upload step.
