@@ -1,0 +1,51 @@
+A library (src/Datasec.Suite.Secrets) and its tests
+(tests/Datasec.Suite.Secrets.Tests, 25 tests; three run on Windows
+only and five on Unix only).
+
+The server does not reference the library yet, so it protects nothing
+until a later change wires it in. The two published folders are
+unchanged.
+
+What it does. A caller puts bytes under a name in a partition and
+reads them back. Each value is encrypted and authenticated by ASP.NET
+Core Data Protection (taken from the shared framework, no package)
+with the library's default algorithms, AES-256-CBC with HMAC-SHA256,
+and is tied to its partition, its name and its version number. A
+record is one file, named by the SHA-256 of the name. A read gives
+the bytes or the library's one typed error; an empty value is
+refused. Names follow one rule and are never used as paths.
+
+The key ring, one per partition, is encrypted at rest: on Windows by
+DPAPI-NG; elsewhere with AES-256-GCM (a fresh 12-byte nonce, a
+16-byte tag) under a 32-byte key file that must be a plain file with
+no permission for group or other. A store does not start over a key
+ring that holds an entry it cannot open. Rotation is three calls:
+RotateKey, Rewrap, RevokeOlderKeys.
+
+Limits. The key file is not sealed: its owner and an administrator of
+the machine can read it. No TPM, no Key Vault provider, no escrow,
+nothing for a pair of servers. Records are files, not database rows.
+One process per partition. On Windows no access list is set, and only
+the descriptor LOCAL=user was run, on a hosted build runner; the
+default descriptor needs a domain controller by the public
+documentation and was not shown to work. RevokeOlderKeys does not
+check that a re-wrap ran: records left behind stop reading.
+
+Known at this head and not right yet. A key file with no protection,
+put into the key folder, is accepted and used for later writes. The
+key ring is checked at start only: a running store, and a rotation,
+carry on over a ring that was damaged or emptied. An older record of
+the same name can be put back and reads. A named pipe in place of a
+record makes a read wait for ever; some file errors leave as plain
+I/O errors that name a path.
+
+Left of the work package: the device registry, the database and its
+migrations, the clock checks, the wiring into the server, a
+database-backed record store, the Key Vault provider, a sealed key.
+
+Two lines added to Datasec.Suite.slnx; no package, no workflow line.
+Every choice inside this change was made by the build's coordinator
+or by the builder; none is a product decision. Nothing is deployed;
+nothing was sent.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>

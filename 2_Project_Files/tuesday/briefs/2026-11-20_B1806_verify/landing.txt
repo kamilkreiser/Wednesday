@@ -1,0 +1,89 @@
+DO NOT LAND THIS HEAD. The gate reads NO GO at 6499bd19bc73f56acc69101935bcbff163291a92 (VERDICT.md: one Blocker, one Major).
+The lines below are the landing FORM for this lane, pinned to the reviewed head so that they can land nothing else. The gate of
+the fix round writes them again for the new head, with texts that are true at that head. No pull request is opened for this head.
+
+Reviewed head: 6499bd19bc73f56acc69101935bcbff163291a92 on main 7bf375268b9975ac9ece66579f7471ba7dbab11d (one commit on the
+branch b1786/wp13-card-decoders). Never land a head a gate did not read: if the branch or main moves, stop.
+
+Environment for every line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+
+0. THE PULL REQUEST TEXT. Title: pr-title.txt. Body: pr-body.md. Both were exported through the workflow's own function as a
+   commit message and scanned with the workflow's options (VERDICT.md, the last section). Change a word of either and that
+   proof is gone: scan again before use.
+
+1. THE CHECK WAIT (head pinned). Read until every row is completed, then require every conclusion to be success or skipped:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/6499bd19bc73f56acc69101935bcbff163291a92/check-runs --jq '.check_runs[] | [.name, .status, .conclusion, .app.slug] | @tsv'
+
+   MEASURED on this head today (2026-11-20 20:42 AEDT): 4 rows from the push event (run 44708556257), linux, windows, secret-scan,
+   rules, each completed success, each from GitHub Actions. MEASURED on the one merged pull request (number 1): 8 rows, the four
+   jobs from the push event and the same four from the pull_request event (RELAYED from the earlier gates of this repository;
+   not re-read today). MEASURED on the commit of main today: 7 rows, the four jobs and Analyze (csharp), Analyze (python), each
+   success, and Adjust Configuration, skipped. EXPECTED on this pull request and UNMEASURED on any pull request of this
+   repository: the 4 push rows, 4 more from the pull_request event, and from the dynamic workflow "CodeQL" the rows
+   Analyze (csharp) and Analyze (python), with a result row from the code-scanning application. So wait for AT LEAST 8 rows from
+   the ci workflow and read every other row to its end. Read check RUNS, never check suites. No rule of the repository requires
+   the ci rows (the required list is empty): this wait is the only guard for them. The code-scanning rule IS enforced; read it by
+
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/merge&state=open' --jq '.[] | [.number, .rule.id, .rule.security_severity_level, .most_recent_instance.location.path] | @tsv'
+
+   The head must read the reviewed sha. clean = go on to line 3. blocked, or any open alert = STOP: an alert is fixed in the code
+   by a new commit and a new gate; it is never dismissed and the rule is never bypassed.
+   The secret-scan job of every run reads every branch of the origin: a red there can come from another lane's branch.
+
+2. THE SOLUTION FILE IF ANOTHER LANE OF THE WAVE LANDS FIRST. This branch then no longer merges as it is: its two added lines
+   meet the other lane's added lines in Datasec.Suite.slnx. The ordering rule, the same in every kit of the wave: keep every
+   added line, and inside each Folder block order the Project lines by the ORDINAL (byte) order of their Path values. By that
+   order this lane's two lines are the FIRST line of each block whichever lanes are already there:
+
+     src block:   Cards < Core < Logging < Secrets < Server < UniversalPrint
+     tests block: Cards.Tests < Core.Tests < Logging.Tests < Secrets.Tests < UniversalPrint.Tests
+
+   (ordinal order of the eleven Path values, printed by a program from the solution files of main and of the four lane branches
+   as the origin held them at 20:19 AEDT; control: the same program applied to main alone gives main's file, and to this lane
+   alone gives this head's file.) With the logging lane landed first and this lane after it the file must read, byte for byte
+   (13 lines, 663 bytes, sha256 14c81d88aa7e35e92666491bd9619adffd07b3a6fdb03d4bd947a5b58d75db4c):
+
+   <Solution>
+     <Folder Name="/src/">
+       <Project Path="src/Datasec.Suite.Cards/Datasec.Suite.Cards.csproj" />
+       <Project Path="src/Datasec.Suite.Core/Datasec.Suite.Core.csproj" />
+       <Project Path="src/Datasec.Suite.Logging/Datasec.Suite.Logging.csproj" />
+       <Project Path="src/Datasec.Suite.Server/Datasec.Suite.Server.csproj" />
+     </Folder>
+     <Folder Name="/tests/">
+       <Project Path="tests/Datasec.Suite.Cards.Tests/Datasec.Suite.Cards.Tests.csproj" />
+       <Project Path="tests/Datasec.Suite.Core.Tests/Datasec.Suite.Core.Tests.csproj" />
+       <Project Path="tests/Datasec.Suite.Logging.Tests/Datasec.Suite.Logging.Tests.csproj" />
+     </Folder>
+   </Solution>
+
+   With all three other lanes landed first (17 lines, 1031 bytes, sha256
+   a94ad1ac414a9fb3eca2142f150fb254e8219f54bee96752a3e0cef26e21c8d6) the src block reads Cards, Core, Logging, Secrets, Server,
+   UniversalPrint and the tests block Cards.Tests, Core.Tests, Logging.Tests, Secrets.Tests, UniversalPrint.Tests.
+
+   (the file is shown here with three more spaces of indent than it has: its own lines start at column 1, 3 and 5.)
+   A branch brought onto a later main is a NEW head: it needs its own hosted run and its own gate reading before it lands. This
+   lane adds no line to Directory.Packages.props, so it meets no other lane there. Nothing else of this lane touches a shared
+   file. The total of tests then reads the other lanes' cells plus this lane's 131 plus the 1 of the base.
+
+3. THE SQUASH MERGE (one parent, head pinned; put the pull request number in place of PRNUM in the subject first):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit 6499bd19bc73f56acc69101935bcbff163291a92 --subject "$(sed 's/#PRNUM/#<the number>/' '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1806_verify/squash-subject.txt')" --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1806_verify/squash-body.txt'
+
+   Give BOTH the subject and the body: the repository's own default for a squash is the commit's or the pull request's title and
+   the list of commit messages, and only the two files above are the reviewed text. The squash message becomes a stored commit
+   object that the second scan of every later run reads. The repository does not delete the branch on merge: the lane branch
+   stays on the origin, and every run of every lane goes on reading it, until someone removes it.
+
+4. AFTER THE MERGE, on main: one new commit with ONE parent. The push starts the ci workflow (4 jobs) and the code-scanning
+   workflow. Read:
+   - ci: the four jobs success; in linux and windows the line "total: 132" when this lane lands on main as it is today (1 test
+     of the base and 131 of this change; more when another lane landed first) and "failed: 0"; "GUARD: clean (10 files)" and
+     "GUARD: clean (11 files)" (the server does not reference this library, so the two published folders do not grow); in rules
+     "RULES: clean (58 files)" on today's main and "UNIT-TEST FLOOR: ran 53, floor 53"; in secret-scan the planted-control line
+     with "25 of 25", the NEUTRAL-SCAN line with "objects of this commit not among them 0", and "no leaks found" 3 times.
+   - code scanning: gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/analyses?per_page=10' shows an analysis for csharp and one
+     for python on the new commit; gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?state=open' --jq length prints 0.
+   A merge to main deploys nothing: the repository holds one workflow of its own and it has no deploy, release or upload step.
