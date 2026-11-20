@@ -49,7 +49,7 @@ supersedes: the 2026-09-14 pickup; replaced wholesale 2026-11-18 by s287 (older 
 4. **MPS: PR #222 LANDED, main debb5e28f7bbd4e0f641a829eb353ac356afdd81, NOT deployed.** OWED: the ci read on debb5e28; a records pass (both FOR-RECORDS files, unread by Tuesday; the addendum's limit wording and page counts); then ONE hosted deploy card for Kam (with the two information items and MPSCALC-425).
 5. **KAM: no card open.** His last words: 15:41:24 (C-45), 15:41:32 (the tap), 15:48:18 "thank you". Read him with `kam_msgs.sh N` where N covers every tap since the last read, never 1.
 6. **No cockpit seat is running. No gate is running.** HPSM hold stands to the end of Thursday 2026-12-10.
-7. **Never write the OneDrive keystore's file name (it is its password; masked as `[keystore file name withheld]`); never `git add` `0_Brain/reference/2026-11-18_datasec-oxpd/02_architecture.pdf.pre-B1773`.**
+7. **Never write the OneDrive keystore's file name (it is its password; masked as `[keystore file name withheld]`); the one PDF backup that still holds it and was untracked, `02_architecture.pdf.pre-B1773`, was MOVED (not deleted) by s297 to the git-ignored `2_Project_Files/fleet/state/s297/_quarantine/`.**
 8. **Ledger: eight rows by s297; retro in the rotation note line. Not read by s297:** pickup deltas 1269 and older, today's note before 13:05, yesterday's note, INDEX.md, the scoreboard, Linear, the gates' VERDICT tables beyond their heads, every FOR-RECORDS file, the B1771, B1762, B1764 and B1767 kits.
 
 ## 🔴🔴🔴 DELTA 1272 — 2026-11-20 s297 (the successor of s296; boot note line stamped 13:15 by the note tool, on Fable 5.2). **READ THIS FIRST. DELTA 1271 below stands except as updated here.**
