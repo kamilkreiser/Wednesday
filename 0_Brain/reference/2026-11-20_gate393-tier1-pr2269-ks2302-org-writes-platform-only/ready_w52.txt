@@ -1,0 +1,53 @@
+=========== [INBOUND] 2026-11-20T06:08 | Secuura/Blockchain-X | [Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-2302 (Seat W 52nd)
+[Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-2302 (Seat W 52nd)
+Seat W 52nd
+READY FOR GATE KS-2302. TIER 1 (a destructive authorisation gap; Opus gate).
+
+PR 2269: https://github.com/Secuura/Distributed_Secuura/pull/2269
+- Head 3423d65bbad6a12be92dcd9b96b887fc7a82ed19: ONE commit on develop 90ef2cf004e39676fe7afde2c12313dcf71a8995 (PR 2267's squash).
+- 4 paths, +266 -1:
+  - services/originate/src/routes/adminConfig.ts (+31 -1);
+  - the new cell file ks2302-organization-writes-are-platform-only.test.ts (206);
+  - two fragments (cheat, flow).
+- Nothing in services/auth. No yaml, package.json or lockfile.
+Push: 05:49:19Z to 06:07:15Z (1,076 s), rc 0, VERIFIED at 06:07:19Z (push/out_real/status.txt). Pre-push preflight: 13/16 legs ran, legs 3, 4 and 8 SKIPPED (no local stack), nothing failed. That is not a pass of those three legs.
+Facts comment on KS-2302: id 41fd8578, 06:08:28Z, read back identical (push/linear_comment_record.txt). PR record: push/pr_record.json; the read-back found no problems (state open, base develop, 1 commit, 4 files)
+Develop at this mail: 90ef2cf004e3 (ls-remote 06:08:32Z, unchanged since boot).
+
+WHAT IT DOES (as ruled in your ANSWER 05:36:08Z: Q1 a, Q2 a, Q2b a, Q3 403, Q4 as written, Q5 a, Q6 a):
+- New helper refuseUnlessPlatform(req, res, route). It asks the shared isPlatformRole. Any other caller gets requireRole's exact body, {success:false,error:{code:'FORBIDDEN',message:'Insufficient permissions'}}, and a warning logged with the route and the role.
+- Five call sites, each the FIRST statement inside the handler's try: DELETE and PUT /organizations/:id, POST /organizations, POST /backfill-certification-metadata, POST /migrate-tenant-data. In the last one `_req` became `req`.
+- The router comment names the rule. Platform admins run the same statements in the same order.
+
+EVIDENCE (Test Evidence block in the PR body; REC evidence/):
+- Red first on develop code (branch tree before the apply): 9 of 28 red by assertion, 19 controls green (red_ks2302.json). The same 9 were red in my pre-ANSWER dry run on the measure tree.
+- Green: 28/28 (green_ks2302.json).
+- Mutants: 13 compiling, 13 killed, tsc 0 each (matrix_m1.json, matrix_m2.json), run in the measure tree, which was put back to develop with porcelain 0 afterwards.
+  - M10 (the migrate guard removed) failed TS6133 because it left `req` unread, so it tested nothing. M10b (`void req`) replaces it and is killed; M10 is not counted.
+  - M5 (inverted) also reddens 11 cells in the six existing adminConfig files.
+- Whole originate suite (suites_S2_stdout.txt), failure sets both empty:
+  - dev 90ef2cf0: 2882/2882, 235 files;
+  - branch: 2910/2910, 236 files.
+- Static (static_ks2302.json), each beside a planted control that fired:
+  - tsc 0;
+  - eslint 0/0 on both files, and adminConfig.ts 0/0 on dev;
+  - check.cjs services/originate: 0 baseline, 0 new;
+  - fragments OK;
+  - check:openapi CHECK PASS.
+- Standalone ratchet pair in the branch tree: 6 services OK; 48 passed, 0 failed.
+- Gatetest 05:48:29Z to 05:48:51Z: all gates passed. Overlap: 19 open PRs, none on any of the 4 paths, planted control PASS, no OVL_IGNORE_PRS.
+
+RESIDUALS STATED IN THE PR:
+- R1: the non-atomic cascade. This is yours to route to a board seat as its own ticket (Q6 a); I filed nothing.
+- R2: the KS-2235 reads and KS-2278.
+- R3: a not-found PUT or DELETE still answers 200.
+- R4: a non-UUID id still answers 500 (platform callers only now).
+- R5: the gateway's unauthenticated /originate/ mount, which the guard covers.
+- R6: seed-demo-users is unchanged.
+
+NOT RUN: the four platform suites, a booted service, the gateway forward, any live stack or deployed environment, real database, RLS or FK behaviour, Node 24 (this machine runs Node v26.8.1).
+
+The seat ENDS at this READY: nothing merged, deployed or closed. KS-2302 may read In Progress; if so, Linear's GitHub link moved it, not this seat.
+If the gate returns findings: fix on this branch in worktrees/s-w52-ks2302 with ONE new commit, no force push, using the existing-branch driver (W 50th's kit). Then re-run mutants_ks2302_w52.py, static_ks2302_w52.py and suites_w52.sh on both arms.
+Meter: 33.9% at this mail (21.8 at the plan mail).
+
