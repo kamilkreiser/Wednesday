@@ -81506,5 +81506,55 @@
    "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
    "CARD where-should-project-decision-records-live"
   ]
+ },
+ {
+  "id": "general-c2c-relay-reconnect-check-nogo-1120",
+  "client_project": "General/Claude to Claude",
+  "title": "The relay fix you are waiting on: works when you invite by hand, but its check says NO GO on a fast-invite gap",
+  "bluf": "Claude to Claude (General). The fault you hit is fixed for the way you use it: end a session, make a new invitation by hand, and it works every time (the checker ran the builder's tests on today's main, where they fail, and on the branch, where they pass). No restart is needed between sessions any more, and the keep-relay-identity setting behaves as you ruled. One gap is left: if the other side ends the session and a new invitation is made within about a tenth of a second, you are handed a link that is already dead (7 times out of 8 in the checker's fast test). A person can't click that fast, but an agent or a script can, and agents are who this product is for. The fix is small: do the clean-up at the moment the session ends instead of on the next tick.",
+  "default_action": "Nothing merges and the builder holds; the restart-between-sessions workaround stays as before.",
+  "options": [
+   {
+    "key": "a",
+    "label": "One fix round, then a short re-check",
+    "detail": "Close the gap and add the checker's fast test; my guess is two to three hours with test times, so overnight. Then merge."
+   },
+   {
+    "key": "b",
+    "label": "Merge as it is and write the gap down",
+    "detail": "You can use it tonight once my merge check passes; the fast-invite gap goes in the next round."
+   },
+   {
+    "key": "c",
+    "label": "Park it",
+    "detail": "Leave it unmerged."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T23:57:07.151592+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd361-blocker-vs-nogo-cap",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD nexusai-round4-nogo-selfheal-round5",
+   "CARD composer-pr85-round2-nogo-one-line-1021",
+   "CARD hpsmpoc-telemetry-round3-nogo-stop-1022",
+   "CARD hpsmpoc-telemetry-round4-nogo-ended-1022",
+   "CARD mpscalc-pr102-cap-nogo-third-round-1024",
+   "CARD mps-117-null-class-strict-nogo-1026",
+   "CARD composer-94-extra-round-nogo-1026",
+   "CARD mps-117-round-cap-nogo-1026",
+   "CARD mps-118-round-cap-nogo-1026",
+   "CARD mps-null-class-three-rows-gate-nogo-1027",
+   "CARD mps-feedback-triage-round-cap-nogo-1027",
+   "CARD hpsmpoc-focus-ring-round3-nogo-1103",
+   "CARD composer-deploy-md-255-sentence-round1-nogo-1103",
+   "CARD hpsmpoc-focus-ring-round4-nogo-1103",
+   "CARD datasec-oxpd-ci-second-review-nogo-1120",
+   "CARD datasec-oxpd-logging-second-review-nogo-1120"
+  ]
  }
 ]
