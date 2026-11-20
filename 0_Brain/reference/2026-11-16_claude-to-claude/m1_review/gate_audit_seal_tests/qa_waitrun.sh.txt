@@ -1,0 +1,31 @@
+#!/bin/bash
+# waitrun.sh <script|test> <log> <tree> <target> <cmd...>
+# Starts the command only when fewer than 2 heavy runs are live machine-wide. Count = processes
+# matching the brief's exact pattern (this includes my own check.sh / runner, typed "script") plus
+# my own active "test" runs (marker files, counted from the moment they start, so a cargo build
+# phase is counted too). One start decision at a time (mkdir mutex), re-checked every 60 s.
+Q=/private/tmp/claude-501/qseal
+TYPE="$1"; LOG="$2"; shift 2
+mkdir -p $Q/active
+while :; do
+  if mkdir $Q/start.lock 2>/dev/null; then
+    a=$(ps -ax -o command= | grep -E '^(/bin/)?bash scripts/(check\.sh|red-controls-[a-z]+\.sh|test-daemon\.sh|test-p1p\.sh)' | wc -l)
+    b=$(ls $Q/active | grep -c '\.test$')
+    c=$((a + b))
+    if [ "$c" -lt 2 ]; then
+      echo "START $(date '+%F %T') heavy-before=$c (pattern=$a my-tests=$b)" > "$LOG"
+      touch "$Q/active/$$.$TYPE"
+      bash $Q/run.sh "$@" >> "$LOG" 2>&1 &
+      pid=$!
+      sleep 15
+      rmdir $Q/start.lock
+      wait $pid
+      rc=$?
+      rm -f "$Q/active/$$.$TYPE"
+      echo "exit=$rc END $(date '+%F %T')" >> "$LOG"
+      exit 0
+    fi
+    rmdir $Q/start.lock
+  fi
+  sleep 60
+done

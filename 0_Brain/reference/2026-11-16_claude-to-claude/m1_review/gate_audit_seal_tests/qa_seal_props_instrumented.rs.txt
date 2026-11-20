@@ -1,0 +1,2176 @@
+//! M3 AUDIT-SEAL: the generated property of design 10 §6.2, over generated sessions (proptest).
+//!
+//! **Alphabet.** The input alphabet of `tests/a3_props.rs` (`Kind` :84-121, `Op` :211-280) is
+//! reused BY COPY, adapted to a harness in which every other member is a whole `SessionAudit` (so
+//! each peer can seal its own log, invisibly to V, and keep sending): a peer's events (in bursts,
+//! resent from where V stands), a replay, a gap, a forked event and checkpoint (from a second chain
+//! of the same key), checkpoints, countersignatures (latest, stale, by a non-member, by a removed
+//! member), cross-check records (broadcast, addressed, addressed to another member, from a removed
+//! reporter), bad signatures, roster operations (add, remove, re-add, a new key in a used slot,
+//! replay, fork, an old version), own records, `record_for`, `resume`, archive-and-release; plus
+//! every symbol §6.2 adds: `CheckpointNow`, `SealExport`, `SealCommit`, `SealExportThenInterleave`,
+//! `SealCommitStoreFailsAt(j)`, `SealCommitStopsAt(j)` + {`Resume`, `ResumeWithAnchor(pre)`,
+//! `ResumeWithAnchor(post)`}, `CollectFailsAt(j)`, `ReplayPreSeal`, `CountersignPreSealHead`,
+//! `PeerSeal`, and V removed from and re-added to the roster (S5's "V off the roster", N1's state).
+//!
+//! **Invariants**, after every step, each with its own assertion text `seal property <name>`: I1
+//! (control always fits), I2 (seats do not interfere, seal steps kept: the case is run twice), I3
+//! (bounds and exact accounting over the logical store; the Segment record within its slot), I4
+//! (resume ≡ live at every step and every stop), I5 (export and verify, format 2 or 3, the own
+//! chain's start reported), (d1) (the free part holds only own-choice records and checkpoints
+//! covering no requested event), S1 to S9.
+//!
+//! `SEAL_CASES` sets the number of cases (default 48: red control `seal_cut_by_other_seat` first acts
+//! in case 33 of the committed seed, because it needs another reporter's cross-check record before a
+//! seal); `SEAL_SEED=<0..=255>` another seed (unset: the committed seed, proptest's
+//! `deterministic_rng`), modelled on `FIX_QAM1_SEED`. Every fixture is generated here from the fixed
+//! test identities; every store is in memory.
+mod common;
+#[path = "seal_common/mod.rs"]
+mod seal_common;
+
+use std::cell::RefCell;
+use std::collections::{BTreeMap, BTreeSet};
+
+use coagent_audit::anchor::AuditAnchor;
+use coagent_audit::budget::{Table, SEATS, SEGMENT_SLOT_MAX};
+use coagent_audit::bundle::{verify, verify_segments, Bundle, Record};
+use coagent_audit::chain::AuditEvent;
+use coagent_audit::checkpoint::SignedHead;
+use coagent_audit::redact::PatternRedactor;
+use coagent_audit::segment::normalise;
+use coagent_audit::session::{SessionAudit, StoreLimits};
+use coagent_audit::store::{MemStore, Part, Store, StoreKey};
+use coagent_audit::tiers::ShareLevel;
+use coagent_audit::AuditError;
+use coagent_proto::bytes::KeyId;
+use coagent_proto::canonical;
+use coagent_roster::SignedRoster;
+use common::*;
+use proptest::prelude::*;
+use proptest::test_runner::{Config, TestRunner};
+use seal_common::{ev, Probe};
+
+const IDS: usize = 12;
+const V: usize = 1;
+const OUTSIDER: usize = 11;
+const CLOSING_B: usize = 516;
+
+// ------------------------------------------------------------------------------------------------
+// The alphabet (a3_props's, copied and adapted; then design 10 §6.2's additions)
+// ------------------------------------------------------------------------------------------------
+
+#[derive(Debug, Clone)]
+enum Op {
+    /// `big`: a 3,000-byte summary (as a3_props's 4,000-byte one)
+    Event {
+        who: u8,
+        burst: u8,
+        big: bool,
+    },
+    Replay {
+        who: u8,
+    },
+    Gap {
+        who: u8,
+    },
+    ForkEvent {
+        who: u8,
+    },
+    Head {
+        who: u8,
+    },
+    ForkHead {
+        who: u8,
+    },
+    /// 0 latest, 1 stale, 2 non-member, 3 removed member
+    Countersign {
+        who: u8,
+        kind: u8,
+    },
+    /// 0 broadcast, 1 addressed to V, 2 addressed to another member, 3 removed reporter
+    HeadsSeen {
+        who: u8,
+        kind: u8,
+    },
+    /// 0 event, 1 checkpoint
+    BadSig {
+        who: u8,
+        what: u8,
+    },
+    /// 0 add a new key, 1 remove, 2 re-add, 3 a new key in a used slot, 4 replay, 5 fork, 6 an old
+    /// version
+    Roster {
+        kind: u8,
+        who: u8,
+    },
+    OwnRecord {
+        burst: u8,
+        big: bool,
+    },
+    RecordFor {
+        who: u8,
+        burst: u8,
+    },
+    Resume,
+    /// V lowers its own limits to `eighths`/8 of what is in force (accepted when no owed checkpoint
+    /// loses its room; how a full free part refuses even a checkpoint: A19)
+    Lower {
+        eighths: u8,
+    },
+    Release {
+        who: u8,
+    },
+    // design 10 §6.2
+    CheckpointNow,
+    SealExport,
+    SealCommit {
+        step0: bool,
+    },
+    SealExportThenInterleave(Box<Op>),
+    SealCommitStoreFailsAt(u8),
+    /// stop after call j; then 0 `resume`, 1 `resume_with_anchor(pre)`, 2 `(post)`
+    SealCommitStopsAt(u8, u8),
+    CollectFailsAt(u8),
+    /// 0 a peer's event, 1 a peer's checkpoint, 2 a countersignature
+    ReplayPreSeal(u8),
+    CountersignPreSealHead {
+        who: u8,
+    },
+    PeerSeal {
+        who: u8,
+    },
+    /// V removed from the roster, or re-added into a slot (preferring one an earlier occupant used)
+    VictimRoster {
+        readd: bool,
+        slot: u8,
+    },
+}
+
+fn op_peer() -> impl Strategy<Value = Op> {
+    prop_oneof![
+        10 => (any::<u8>(), 1u8..12, prop::bool::weighted(0.4))
+            .prop_map(|(who, burst, big)| Op::Event { who, burst, big }),
+        1 => any::<u8>().prop_map(|who| Op::Replay { who }),
+        1 => any::<u8>().prop_map(|who| Op::Gap { who }),
+        1 => any::<u8>().prop_map(|who| Op::ForkEvent { who }),
+        5 => any::<u8>().prop_map(|who| Op::Head { who }),
+        1 => any::<u8>().prop_map(|who| Op::ForkHead { who }),
+        3 => (any::<u8>(), 0u8..4).prop_map(|(who, kind)| Op::Countersign { who, kind }),
+        6 => (any::<u8>(), 0u8..4).prop_map(|(who, kind)| Op::HeadsSeen { who, kind }),
+        1 => (any::<u8>(), 0u8..2).prop_map(|(who, what)| Op::BadSig { who, what }),
+    ]
+}
+
+fn op_all() -> impl Strategy<Value = Op> {
+    prop_oneof![
+        24 => op_peer(),
+        4 => (0u8..7, any::<u8>()).prop_map(|(kind, who)| Op::Roster { kind, who }),
+        6 => (1u8..6, prop::bool::weighted(0.3)).prop_map(|(burst, big)| Op::OwnRecord { burst, big }),
+        6 => (any::<u8>(), 1u8..4).prop_map(|(who, burst)| Op::RecordFor { who, burst }),
+        1 => Just(Op::Resume),
+        1 => any::<u8>().prop_map(|who| Op::Release { who }),
+        1 => (1u8..8).prop_map(|eighths| Op::Lower { eighths }),
+        3 => Just(Op::CheckpointNow),
+        1 => Just(Op::SealExport),
+        6 => any::<bool>().prop_map(|step0| Op::SealCommit { step0 }),
+        2 => op_peer().prop_map(|o| Op::SealExportThenInterleave(Box::new(o))),
+        1 => (0u8..4).prop_map(Op::SealCommitStoreFailsAt),
+        6 => (0u8..4, 0u8..3).prop_map(|(j, how)| Op::SealCommitStopsAt(j, how)),
+        2 => (1u8..4).prop_map(Op::CollectFailsAt),
+        1 => (0u8..3).prop_map(Op::ReplayPreSeal),
+        1 => any::<u8>().prop_map(|who| Op::CountersignPreSealHead { who }),
+        2 => any::<u8>().prop_map(|who| Op::PeerSeal { who }),
+        3 => (any::<bool>(), 0u8..8).prop_map(|(readd, slot)| Op::VictimRoster { readd, slot }),
+    ]
+}
+
+#[derive(Debug, Clone)]
+struct Case {
+    members: usize,
+    seat: (usize, usize),
+    /// which peer's seat P2 (I2) watches (an index among the first members other than V)
+    p2: u8,
+    ops: Vec<Op>,
+}
+
+fn case() -> impl Strategy<Value = Case> {
+    (
+        2usize..=8,
+        prop_oneof![Just(8_000usize), Just(24_000usize), Just(48_000usize)],
+        prop_oneof![Just(16usize), Just(64usize), Just(128usize)],
+        any::<u8>(),
+        prop::collection::vec(op_all(), 15..60),
+    )
+        .prop_map(|(members, b, r, p2, ops)| Case {
+            members,
+            seat: (b, r),
+            p2,
+            ops,
+        })
+}
+
+// ------------------------------------------------------------------------------------------------
+// The harness
+// ------------------------------------------------------------------------------------------------
+
+type Reach = BTreeMap<&'static str, u64>;
+
+thread_local! {
+    /// QA gate: keys V released (their pre-release objects are A-m6's, not a seal's)
+    static QA_RELEASED: RefCell<BTreeSet<KeyId>> = const { RefCell::new(BTreeSet::new()) };
+    static REACH: RefCell<Reach> = const { RefCell::new(BTreeMap::new()) };
+}
+
+fn reach(k: &'static str) {
+    REACH.with(|r| *r.borrow_mut().entry(k).or_default() += 1);
+}
+
+fn fail(name: &str, what: String) -> Result<(), TestCaseError> {
+    Err(TestCaseError::fail(format!("seal property {name}: {what}")))
+}
+
+macro_rules! check {
+    ($cond:expr, $name:expr, $($arg:tt)*) => {
+        if !$cond {
+            return fail($name, format!($($arg)*));
+        }
+    };
+}
+
+fn probe(inner: MemStore) -> Probe {
+    Probe {
+        inner,
+        st: Default::default(),
+    }
+}
+
+struct Sim {
+    w: World,
+    v: SessionAudit<Probe>,
+    limits: StoreLimits,
+    peers: Vec<Option<SessionAudit<MemStore>>>,
+    forks: Vec<Option<SessionAudit<MemStore>>>,
+    /// the roster version (1-based) at which each identity first became a member (0: never)
+    first_v: Vec<usize>,
+    /// the last slot each identity held
+    last_slot: Vec<Option<u8>>,
+    /// peers that hold V's whole stream so far (S6's observers)
+    synced: Vec<bool>,
+    /// the slot P2 watches, and in the second run, the only peer slot whose inputs are kept
+    p2_slot: Option<u8>,
+    keep_only: Option<u8>,
+    // the model
+    accepted: BTreeMap<StoreKey, Vec<Vec<u8>>>,
+    files: Vec<Bundle>,
+    release_files: Vec<Bundle>,
+    own_heads_ever: BTreeMap<u64, SignedHead>,
+    own_hdr_ever: BTreeMap<u64, Vec<u8>>,
+    requested_ever: BTreeSet<u64>,
+    pre_seal: Vec<PreSeal>,
+    /// (op index, the causer's slot, refused LogFull) for every peer input
+    refusals: Vec<(usize, u8, bool)>,
+    last_anchor: AuditAnchor,
+    last_segment: u64,
+    /// how many committed files S2 has checked as a whole set
+    files_checked: usize,
+    /// V's physical store after the previous step
+    last_phys: BTreeMap<StoreKey, Vec<u8>>,
+    /// stops made in this case (the stop index cycles through 0, 1, 2, 3 so that every call index
+    /// of `seal_commit` is reached)
+    stops: usize,
+    /// I2: after every step, the limits in force and the watched seat's usage (`None` while it is
+    /// V's own slot)
+    seat_trace: Vec<(StoreLimits, Option<(usize, usize)>)>,
+}
+
+#[derive(Clone)]
+enum PreSeal {
+    Event(AuditEvent),
+    Head(SignedHead),
+    Cs(coagent_audit::checkpoint::Countersignature),
+}
+
+fn logical_of(s: &MemStore, w: &World) -> Vec<(StoreKey, Vec<u8>)> {
+    let mut l = s.list(&w.s).unwrap();
+    l.sort_by_key(|a| a.0);
+    normalise(l).unwrap()
+}
+
+fn decode(b: &[u8]) -> Record {
+    canonical::decode(b).unwrap()
+}
+
+impl Sim {
+    fn new(c: &Case) -> Sim {
+        let w = World::new(160, IDS, c.members);
+        let mut v = seal_common::start_on(&w, V, Probe::default(), 1_000_000);
+        let limits = StoreLimits {
+            bytes: c.seat.0 * SEATS,
+            records: c.seat.1 * SEATS,
+        };
+        v.try_set_limits(limits).unwrap();
+        let limits = v.limits();
+        let mut peers: Vec<Option<SessionAudit<MemStore>>> = (0..IDS).map(|_| None).collect();
+        let mut first_v = vec![0usize; IDS];
+        let mut last_slot = vec![None; IDS];
+        let mut synced = vec![false; IDS];
+        for i in 0..c.members {
+            first_v[i] = 1;
+            last_slot[i] = Some(i as u8);
+            if i == V {
+                continue;
+            }
+            let mut p = seal_common::start_on(&w, i, MemStore::new(), 1_000_000);
+            p.set_share_level(w.key(V), ShareLevel::Full);
+            v.set_share_level(w.key(i), ShareLevel::Full);
+            peers[i] = Some(p);
+            synced[i] = true;
+        }
+        let others: Vec<usize> = (0..c.members).filter(|i| *i != V).collect();
+        let p2_slot = Some(others[c.p2 as usize % others.len()] as u8);
+        let last_anchor = v.anchor();
+        Sim {
+            w,
+            v,
+            limits,
+            peers,
+            forks: (0..IDS).map(|_| None).collect(),
+            first_v,
+            last_slot,
+            synced,
+            p2_slot,
+            keep_only: None,
+            accepted: BTreeMap::new(),
+            files: Vec::new(),
+            release_files: Vec::new(),
+            own_heads_ever: BTreeMap::new(),
+            own_hdr_ever: BTreeMap::new(),
+            requested_ever: BTreeSet::new(),
+            pre_seal: Vec::new(),
+            refusals: Vec::new(),
+            last_anchor,
+            last_segment: 0,
+            files_checked: 0,
+            last_phys: BTreeMap::new(),
+            stops: 0,
+            seat_trace: Vec::new(),
+        }
+    }
+
+    fn key(&self, i: usize) -> KeyId {
+        self.w.key(i)
+    }
+
+    fn roster_body(&self) -> &coagent_roster::RosterBody {
+        &self.w.rosters.last().unwrap().body
+    }
+
+    fn is_member(&self, i: usize) -> bool {
+        let k = self.key(i);
+        self.roster_body().members.iter().any(|m| m.key_id == k)
+    }
+
+    fn slot_of(&self, i: usize) -> Option<u8> {
+        let k = self.key(i);
+        self.roster_body()
+            .members
+            .iter()
+            .find(|m| m.key_id == k)
+            .map(|m| m.slot)
+    }
+
+    /// The peers (current members other than V), in id order.
+    fn current_peers(&self) -> Vec<usize> {
+        (0..IDS)
+            .filter(|i| *i != V && self.peers[*i].is_some() && self.is_member(*i))
+            .collect()
+    }
+
+    fn pick_peer(&self, who: u8) -> Option<usize> {
+        let p = self.current_peers();
+        (!p.is_empty()).then(|| p[who as usize % p.len()])
+    }
+
+    /// Is an input of peer `i` kept in this run (P2's second run keeps only one slot's)?
+    fn kept(&self, i: usize) -> bool {
+        match self.keep_only {
+            None => true,
+            Some(s) => self.slot_of(i).or(self.last_slot[i]) == Some(s),
+        }
+    }
+
+    fn now(&self, step: usize) -> coagent_audit::time::AuditTime {
+        t(1_000 + step as u64 * 10)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // deliveries
+    // ---------------------------------------------------------------------------------------------
+
+    /// V receives peer `i`'s events from the next number V expects, up to the peer's top.
+    fn peer_events_to_v(&mut self, i: usize, step: usize, idx: usize) {
+        let k = self.key(i);
+        let now = self.now(step);
+        let next = self.v.peer(&k).map_or(1, |c| c.next_seq());
+        let top = self.peers[i].as_ref().unwrap().own().seq();
+        let sealed = self.peers[i].as_ref().unwrap().segment() > 0;
+        let slot = self.slot_of(i).unwrap_or(0);
+        for seq in next..=top {
+            let Some(e) = self.peers[i]
+                .as_ref()
+                .unwrap()
+                .outgoing(seq)
+                .into_iter()
+                .find(|(to, _)| *to == self.key(V))
+                .map(|(_, e)| e)
+            else {
+                break;
+            };
+            let got = self.v.receive(&self.w.ids[V], &e, now);
+            self.refusals
+                .push((idx, slot, got == Err(AuditError::LogFull)));
+            match got {
+                Ok(_) => {
+                    if sealed {
+                        reach("a peer seal observed by V (an event)");
+                    }
+                    self.pre_seal.push(PreSeal::Event(e));
+                }
+                Err(_) => break,
+            }
+        }
+    }
+
+    /// Peer `i` checkpoints; every other peer and V receive it; V's countersignature goes back.
+    fn peer_head(&mut self, i: usize, step: usize, idx: usize) {
+        let now = self.now(step);
+        let p = self.peers[i].as_mut().unwrap();
+        if p.own().seq() == 0 {
+            return;
+        }
+        let Ok(h) = p.checkpoint_now(&self.w.ids[i], now) else {
+            return;
+        };
+        let sealed = p.segment() > 0;
+        for j in 0..IDS {
+            if j == i || j == V {
+                continue;
+            }
+            if let Some(q) = self.peers[j].as_mut() {
+                let _ = q.receive_head(&self.w.ids[j], &h);
+            }
+        }
+        let got = self.v.receive_head(&self.w.ids[V], &h);
+        let slot = self.slot_of(i).unwrap_or(0);
+        self.refusals
+            .push((idx, slot, got.as_ref().err() == Some(&AuditError::LogFull)));
+        if let Ok(cs) = got {
+            if sealed {
+                reach("a peer seal observed by V (a checkpoint)");
+            }
+            self.pre_seal.push(PreSeal::Head(h));
+            let _ = self.peers[i].as_mut().unwrap().add_countersignature(&cs);
+        }
+    }
+
+    /// V's own event `seq` to every peer; S6 for the observers.
+    fn deliver_v(&mut self, seq: u64, step: usize) -> Result<(), TestCaseError> {
+        let now = self.now(step);
+        // S6: V's new event chains to V's previous statement (its previous event, or the checkpoint
+        // its chain starts at), as every peer checks
+        if let Some(e) = self.v.own().event(seq) {
+            let want = if seq == 1 {
+                Some(coagent_proto::bytes::Digest32([0; 32]))
+            } else if let Some(p) = self.v.own().event(seq - 1) {
+                p.header.hash().ok()
+            } else {
+                self.v
+                    .own()
+                    .checkpoints()
+                    .iter()
+                    .find(|c| c.head.author_seq == seq - 1)
+                    .map(|c| c.head.hash)
+            };
+            check!(
+                want == Some(e.header.prev_hash),
+                "S6",
+                "V's event {seq} does not chain to its previous statement (segment {}): a peer would refuse it",
+                self.v.segment()
+            );
+        }
+        let out = self.v.outgoing(seq);
+        let v_member = self.is_member(V);
+        for i in 0..IDS {
+            if i == V || self.peers[i].is_none() {
+                continue;
+            }
+            let e = out
+                .iter()
+                .find(|(to, _)| *to == self.key(i))
+                .map(|(_, e)| e.clone());
+            let p = self.peers[i].as_mut().unwrap();
+            let p_has_v = p.roster().member_keys().contains(&self.w.key(V));
+            match e {
+                Some(e) => {
+                    let got = p.receive(&self.w.ids[i], &e, now);
+                    if self.synced[i] && v_member && p_has_v {
+                        if self.v.segment() > 0 {
+                            reach("S6: a peer received V's event after V sealed");
+                        }
+                        check!(
+                            got.is_ok(),
+                            "S6",
+                            "observer {i} refused V's event {seq} (V's segment {}): {got:?}",
+                            self.v.segment()
+                        );
+                    } else if got.is_err() {
+                        self.synced[i] = false;
+                    }
+                }
+                None => self.synced[i] = false,
+            }
+        }
+        Ok(())
+    }
+
+    /// V checkpoints and every peer countersigns; S6 for the observers.
+    fn v_checkpoint(&mut self, step: usize) -> Result<Option<SignedHead>, TestCaseError> {
+        let now = self.now(step);
+        let h = match self.v.checkpoint_now(&self.w.ids[V], now) {
+            Ok(h) => h,
+            Err(e) => {
+                reach_err("V checkpoint refused", &e);
+                return Ok(None);
+            }
+        };
+        for i in 0..IDS {
+            if i == V || self.peers[i].is_none() {
+                continue;
+            }
+            let im = self.is_member(i);
+            let p = self.peers[i].as_mut().unwrap();
+            let got = p.receive_head(&self.w.ids[i], &h);
+            let obs = self.synced[i] && p.roster().member_keys().contains(&self.w.key(V)) && im;
+            if obs && got.is_err() {
+                fail(
+                    "S6",
+                    format!("observer {i} refused V's checkpoint: {got:?}"),
+                )?;
+            }
+            if let Ok(cs) = got {
+                let a = self.v.add_countersignature(&cs);
+                if obs {
+                    if self.v.segment() > 0 {
+                        reach("S6: V took a countersignature after its seal");
+                    }
+                    if !(a.is_ok() || a == Err(AuditError::NotNewer)) {
+                        fail(
+                            "S6",
+                            format!(
+                                "V refused observer {i}'s countersignature of its checkpoint {}: {a:?}",
+                                h.author_seq
+                            ),
+                        )?;
+                    }
+                }
+                if a.is_ok() {
+                    self.pre_seal.push(PreSeal::Cs(cs));
+                }
+            }
+        }
+        Ok(Some(h))
+    }
+
+    /// Peer `i`'s second chain (same key, another store), taken out; put it back with `forks[i]`.
+    fn take_fork(&mut self, i: usize) -> SessionAudit<MemStore> {
+        if self.forks[i].is_none() {
+            let v = self.first_v[i].max(1);
+            let mut f = SessionAudit::start(
+                MemStore::new(),
+                &self.w.ids[i],
+                &self.w.ids[0].verified(),
+                &self.w.rosters[v - 1],
+                every(1_000_000),
+                Box::new(PatternRedactor),
+                t(0),
+            )
+            .unwrap();
+            for r in &self.w.rosters[v..] {
+                let _ = f.apply_roster(r);
+            }
+            f.set_share_level(self.w.key(V), ShareLevel::Full);
+            self.forks[i] = Some(f);
+        }
+        self.forks[i].take().unwrap()
+    }
+
+    fn apply_roster_all(&mut self, r: &SignedRoster) -> Result<(), TestCaseError> {
+        let got = self.v.apply_roster(r);
+        check!(
+            got.as_ref().err() != Some(&AuditError::LogFull),
+            "I1",
+            "a roster version was refused for space: {got:?}"
+        );
+        for p in self.peers.iter_mut().flatten() {
+            let _ = p.apply_roster(r);
+        }
+        for p in self.forks.iter_mut().flatten() {
+            let _ = p.apply_roster(r);
+        }
+        Ok(())
+    }
+
+    /// After a roster version was pushed to the world: membership bookkeeping, new peers' audits.
+    fn after_roster(&mut self) {
+        let n = self.w.rosters.len();
+        for i in 0..IDS {
+            if let Some(s) = self.slot_of(i) {
+                self.last_slot[i] = Some(s);
+                if self.first_v[i] == 0 {
+                    self.first_v[i] = n;
+                }
+                if i != V && self.peers[i].is_none() && i != OUTSIDER {
+                    let mut p = SessionAudit::start(
+                        MemStore::new(),
+                        &self.w.ids[i],
+                        &self.w.ids[0].verified(),
+                        &self.w.rosters[n - 1],
+                        every(1_000_000),
+                        Box::new(PatternRedactor),
+                        t(0),
+                    )
+                    .unwrap();
+                    p.set_share_level(self.w.key(V), ShareLevel::Full);
+                    self.v.set_share_level(self.w.key(i), ShareLevel::Full);
+                    self.peers[i] = Some(p);
+                }
+            } else if i != V {
+                self.synced[i] = false;
+            }
+        }
+        if !self.is_member(V) {
+            for s in self.synced.iter_mut() {
+                *s = false;
+            }
+        }
+    }
+
+    fn free_slot(&self, avoid: Option<u8>) -> Option<u8> {
+        let used: BTreeSet<u8> = self.roster_body().members.iter().map(|m| m.slot).collect();
+        (0..SEATS as u8).find(|s| !used.contains(s) && Some(*s) != avoid)
+    }
+}
+
+/// An event with a 3,000-byte summary.
+fn big_ev() -> coagent_audit::chain::EventInput<'static> {
+    static BIG: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    coagent_audit::chain::EventInput {
+        kind: "big.ev",
+        summary: Some(BIG.get_or_init(|| "a".repeat(3_000)).as_str()),
+        full: None,
+    }
+}
+
+fn reach_err(what: &'static str, _e: &AuditError) {
+    reach(what);
+}
+
+// ------------------------------------------------------------------------------------------------
+// One case
+// ------------------------------------------------------------------------------------------------
+
+fn run_case(c: &Case, keep_only: Option<u8>) -> Result<Sim, TestCaseError> {
+    QA_RELEASED.with(|r| r.borrow_mut().clear());
+    let mut s = Sim::new(c);
+    s.keep_only = keep_only;
+    for (idx, op) in c.ops.iter().enumerate() {
+        let at = |e: TestCaseError| {
+            TestCaseError::fail(format!(
+                "{e} [step {idx} of the run keeping {keep_only:?}: {op:?}]"
+            ))
+        };
+        step(&mut s, op, idx).map_err(at)?;
+        invariants(&mut s, op).map_err(at)?;
+        let sl = s.p2_slot.unwrap_or(0);
+        let entry = (s.v.status().own_slot != sl).then(|| s.v.seat_usage(sl));
+        s.seat_trace.push((s.v.limits(), entry));
+    }
+    let segs = s.files.len() as u64 + 1;
+    if segs >= 3 {
+        reach("a case with at least three segments");
+    }
+    Ok(s)
+}
+
+/// Every peer's slot is P2's when its inputs are kept.
+fn step(s: &mut Sim, op: &Op, idx: usize) -> Result<(), TestCaseError> {
+    let at = idx;
+    let now = s.now(at);
+    match op {
+        Op::Event { who, burst, big } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            for _ in 0..*burst {
+                let p = s.peers[i].as_mut().unwrap();
+                p.record(&s.w.ids[i], if *big { big_ev() } else { ev("p.ev") }, now)
+                    .unwrap();
+            }
+            s.peer_events_to_v(i, at, idx);
+            reach("peer events");
+        }
+        Op::Replay { who } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            let k = s.key(i);
+            if let Some(n) = s.v.peer(&k).and_then(|c| c.top_event_seq()) {
+                if let Some(e) = s.v.peer(&k).and_then(|c| c.event(n)).cloned() {
+                    let before = s.v.store_usage();
+                    let got = s.v.receive(&s.w.ids[V], &e, now);
+                    check!(got.is_err(), "I3", "a replay was accepted");
+                    check!(
+                        s.v.store_usage() == before,
+                        "I3",
+                        "a replay changed the store"
+                    );
+                    reach("replay");
+                }
+            }
+        }
+        Op::Gap { who } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            let k = s.key(i);
+            let p = s.peers[i].as_mut().unwrap();
+            p.record(&s.w.ids[i], ev("p.ev"), now).unwrap();
+            let top = p.record(&s.w.ids[i], ev("p.ev"), now).unwrap();
+            let next = s.v.peer(&k).map_or(1, |c| c.next_seq());
+            if top > next {
+                if let Some((_, e)) = p
+                    .outgoing(top)
+                    .into_iter()
+                    .find(|(to, _)| *to == s.w.key(V))
+                {
+                    let got = s.v.receive(&s.w.ids[V], &e, now);
+                    check!(got.is_err(), "I3", "a gap was accepted");
+                    reach("gap");
+                }
+            }
+        }
+        Op::ForkEvent { who } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            let k = s.key(i);
+            let Some(top) = s.v.peer(&k).and_then(|c| c.top_event_seq()) else {
+                return Ok(());
+            };
+            let mut f = s.take_fork(i);
+            while f.own().seq() < top {
+                if f.record(&s.w.ids[i], ev("fork"), now).is_err() {
+                    break;
+                }
+            }
+            let e = f
+                .outgoing(top)
+                .into_iter()
+                .find(|(to, _)| *to == s.w.key(V));
+            s.forks[i] = Some(f);
+            if let Some((_, e)) = e {
+                let got = s.v.receive(&s.w.ids[V], &e, now);
+                check!(
+                    got.as_ref().err() != Some(&AuditError::LogFull),
+                    "I1",
+                    "a fork was answered LogFull"
+                );
+                if matches!(
+                    got,
+                    Err(AuditError::Receive(
+                        coagent_audit::received::ReceiveError::Fork(_)
+                    ))
+                ) {
+                    reach("fork evidence");
+                }
+            }
+        }
+        Op::Head { who } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            s.peer_head(i, at, idx);
+            reach("peer checkpoint");
+        }
+        Op::ForkHead { who } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            let k = s.key(i);
+            let Some(top) =
+                s.v.peer(&k)
+                    .and_then(|c| c.top_head().max(c.top_event_seq()))
+            else {
+                return Ok(());
+            };
+            let mut f = s.take_fork(i);
+            while f.own().seq() < top {
+                if f.record(&s.w.ids[i], ev("fork"), now).is_err() {
+                    break;
+                }
+            }
+            let h = if f.own().seq() == top {
+                f.checkpoint_now(&s.w.ids[i], now).ok()
+            } else {
+                None
+            };
+            s.forks[i] = Some(f);
+            {
+                if let Some(h) = h {
+                    let got = s.v.receive_head(&s.w.ids[V], &h);
+                    check!(
+                        got.as_ref().err() != Some(&AuditError::LogFull),
+                        "I1",
+                        "a forked checkpoint was answered LogFull"
+                    );
+                    reach("forked checkpoint");
+                }
+            }
+        }
+        Op::Countersign { who, kind } => {
+            let hs: Vec<SignedHead> =
+                s.v.own()
+                    .checkpoints()
+                    .iter()
+                    .map(|c| c.head.clone())
+                    .collect();
+            let Some(latest) = hs.last().cloned() else {
+                return Ok(());
+            };
+            match kind {
+                0 | 1 => {
+                    let Some(i) = s.pick_peer(*who) else {
+                        return Ok(());
+                    };
+                    if !s.kept(i) {
+                        return Ok(());
+                    }
+                    let h = if *kind == 0 {
+                        latest
+                    } else {
+                        hs[*who as usize % hs.len()].clone()
+                    };
+                    let p = s.peers[i].as_mut().unwrap();
+                    if let Ok(cs) = p.receive_head(&s.w.ids[i], &h) {
+                        let _ = s.v.add_countersignature(&cs);
+                        reach("countersignature");
+                    }
+                }
+                2 => {
+                    let cs = latest.countersign(&s.w.ids[OUTSIDER]).unwrap();
+                    check!(
+                        s.v.add_countersignature(&cs).is_err(),
+                        "I3",
+                        "a non-member countersigned"
+                    );
+                }
+                _ => {
+                    let removed: Vec<usize> = (0..IDS)
+                        .filter(|i| *i != V && s.peers[*i].is_some() && !s.is_member(*i))
+                        .collect();
+                    if let Some(i) = removed.first().copied() {
+                        if s.kept(i) {
+                            let cs = latest.countersign(&s.w.ids[i]).unwrap();
+                            let _ = s.v.add_countersignature(&cs);
+                            reach("countersignature by a removed member");
+                        }
+                    }
+                }
+            }
+        }
+        Op::HeadsSeen { who, kind } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            let p = s.peers[i].as_mut().unwrap();
+            let hs = match kind {
+                0 => p.heads_seen(&s.w.ids[i]),
+                1 => p.heads_seen_for(&s.w.ids[i], &s.w.key(V)),
+                _ => p.heads_seen_for(&s.w.ids[i], &s.w.key(0)),
+            };
+            if let Ok(hs) = hs {
+                let got = s.v.receive_heads_seen(&hs);
+                check!(
+                    got.as_ref().err() != Some(&AuditError::LogFull),
+                    "I1",
+                    "a cross-check record was answered LogFull"
+                );
+                if got.is_ok() {
+                    reach("cross-check record kept");
+                }
+            }
+        }
+        Op::BadSig { who, what } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            let before = s.v.store_usage();
+            let p = s.peers[i].as_ref().unwrap();
+            if *what == 0 {
+                if let Some((_, mut e)) = p.own().events().last().and_then(|e| {
+                    p.outgoing(e.header.author_seq)
+                        .into_iter()
+                        .find(|(to, _)| *to == s.w.key(V))
+                }) {
+                    e.header.sig.0[0] ^= 1;
+                    let _ = s.v.receive(&s.w.ids[V], &e, now);
+                }
+            } else if let Some(c) = p.own().checkpoints().last() {
+                let mut h = c.head.clone();
+                h.sig.0[0] ^= 1;
+                let _ = s.v.receive_head(&s.w.ids[V], &h);
+            }
+            check!(
+                s.v.store_usage() == before,
+                "I3",
+                "a bad signature changed the store"
+            );
+        }
+        Op::Roster { kind, who } => roster_op(s, *kind, *who)?,
+        Op::VictimRoster { readd, slot } => {
+            if *readd {
+                if !s.is_member(V) {
+                    // prefer a slot an earlier occupant used (N1's state), never P2's slot
+                    let used: BTreeSet<u8> =
+                        s.roster_body().members.iter().map(|m| m.slot).collect();
+                    let earlier: Vec<u8> = (0..IDS)
+                        .filter(|i| *i != V && !s.is_member(*i))
+                        .filter_map(|i| s.last_slot[i])
+                        .filter(|sl| !used.contains(sl) && Some(*sl) != s.p2_slot)
+                        .collect();
+                    let target = earlier
+                        .first()
+                        .copied()
+                        .or_else(|| s.free_slot(s.p2_slot))
+                        .filter(|_| *slot < 8);
+                    if let Some(t) = target {
+                        let r = s.w.add(V, t);
+                        s.apply_roster_all(&r)?;
+                        s.after_roster();
+                        reach("V re-added");
+                    }
+                }
+            } else if s.is_member(V) {
+                let r = s.w.remove(V);
+                s.apply_roster_all(&r)?;
+                s.after_roster();
+                reach("V removed");
+            }
+        }
+        Op::OwnRecord { burst, big } => {
+            for _ in 0..*burst {
+                let input = if *big { big_ev() } else { ev("v.ev") };
+                let e = s.v.own().prepare(&s.w.ids[V], input, now).unwrap();
+                let size = 4 + canonical::encode(&Record::OwnEvent(e)).unwrap().len();
+                match s.v.record(&s.w.ids[V], input, now) {
+                    Ok(seq) => s.deliver_v(seq, at)?,
+                    Err(AuditError::LogFull) => {
+                        // I1 = P1(c): refused only when the free part or the seat has no room
+                        let f = s.v.free_usage();
+                        let fl = s.v.limits().free_part();
+                        let me = s.v.status().own_slot;
+                        let st = s.v.seat_usage(me);
+                        let pl = s.v.limits().per_peer();
+                        let no_room = f.0 + size + CLOSING_B > fl.0
+                            || f.1 + 2 > fl.1
+                            || st.0 + size + CLOSING_B > pl.0
+                            || st.1 + 2 > pl.1;
+                        check!(
+                            no_room,
+                            "I1",
+                            "an own free record of {size} bytes was refused with room: free {f:?} of {fl:?}, seat {st:?} of {pl:?}"
+                        );
+                        reach("own record refused (free part full)");
+                        break;
+                    }
+                    Err(e) => return fail("I1", format!("own record refused: {e:?}")),
+                }
+            }
+        }
+        Op::RecordFor { who, burst } => {
+            let Some(g) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(g) {
+                return Ok(());
+            }
+            for _ in 0..*burst {
+                let k = s.key(g);
+                match s.v.record_for(&s.w.ids[V], &k, ev("v.req"), now) {
+                    Ok(seq) => {
+                        s.requested_ever.insert(seq);
+                        s.deliver_v(seq, at)?;
+                        reach("record_for");
+                    }
+                    Err(_) => break,
+                }
+            }
+        }
+        Op::CheckpointNow => {
+            s.v_checkpoint(at)?;
+        }
+        Op::Lower { eighths } => {
+            let l = s.v.limits();
+            let low = StoreLimits {
+                bytes: l.bytes / 8 * *eighths as usize,
+                records: l.records / 8 * *eighths as usize,
+            };
+            match s.v.try_set_limits(low) {
+                Ok(_) => {
+                    s.limits = s.v.limits();
+                    reach("V lowered its limits");
+                }
+                Err(e) => {
+                    let d = format!("{e:?}");
+                    let d = d.split(['(', ' ', '{']).next().unwrap_or("").to_string();
+                    reach(Box::leak(format!("QA Lower refused: {d}").into_boxed_str()));
+                }
+            }
+        }
+        Op::Resume => {
+            let store = s.v.store().inner.clone();
+            let mut r = seal_common::resume_as(&s.w, V, probe(store)).map_err(|e| {
+                TestCaseError::fail(format!("seal property I4: resume refused: {e:?}"))
+            })?;
+            let _ = r.try_set_limits(s.limits);
+            for i in 0..IDS {
+                if i != V && s.peers[i].is_some() {
+                    r.set_share_level(s.key(i), ShareLevel::Full);
+                }
+            }
+            s.v = r;
+            reach("resume");
+        }
+        Op::Release { who } => {
+            // chosen from the roster alone (not from which chains V holds: I2)
+            let removed: Vec<usize> = (0..IDS)
+                .filter(|i| *i != V && s.first_v[*i] > 0 && !s.is_member(*i))
+                .collect();
+            if removed.is_empty() {
+                return Ok(());
+            }
+            let i = removed[*who as usize % removed.len()];
+            let k = s.key(i);
+            match s.v.archive_and_release(&s.w.ids[V], &k) {
+                Ok(f) => {
+                    QA_RELEASED.with(|r| r.borrow_mut().insert(k));
+                    s.release_files.push(f);
+                    reach("release");
+                }
+                Err(e) => return fail("S1", format!("release of a removed key refused: {e:?}")),
+            }
+        }
+        Op::SealExport => {
+            let before = s.v.store().inner.list(&s.w.s).unwrap();
+            let a = s.v.anchor();
+            let _ = s.v.seal_export(&s.w.ids[V]);
+            check!(
+                s.v.store().inner.list(&s.w.s).unwrap() == before && s.v.anchor() == a,
+                "S4",
+                "seal_export changed the member"
+            );
+            reach("seal_export alone");
+        }
+        Op::SealCommit { step0 } => {
+            if *step0 {
+                s.v_checkpoint(at)?;
+            }
+            seal(s, at, None)?;
+        }
+        Op::SealExportThenInterleave(inner) => {
+            let plan = match s.v.seal_export(&s.w.ids[V]) {
+                Ok(p) => p,
+                Err(AuditError::NothingToSeal) => {
+                    // the peer's input happens whatever V's plan was (else whether it is delivered
+                    // would depend on other seats' records: I2), then V seals
+                    step(s, inner, idx)?;
+                    return seal(s, at, None);
+                }
+                Err(e) => return fail("S5", format!("seal_export refused: {e:?}")),
+            };
+            let a0 = s.v.anchor();
+            let seg0 = s.v.segment();
+            step(s, inner, idx)?;
+            check!(
+                s.v.segment() == seg0,
+                "S4",
+                "the segment number changed at a peer's input ({inner:?}) between seal_export and seal_commit"
+            );
+            let a1 = s.v.anchor();
+            let got = s.v.seal_commit(&s.w.ids[V], &plan, now);
+            if a1 != a0 {
+                reach("stale plan (interleaved)");
+                check!(
+                    got == Err(AuditError::SealStale),
+                    "S1",
+                    "a plan made before the store changed was committed: {got:?}"
+                );
+                check!(
+                    s.v.anchor() == a1,
+                    "S1",
+                    "a refused stale commit changed the member"
+                );
+                // the daemon makes a fresh plan
+                seal(s, at, None)?;
+            } else {
+                check!(got.is_ok(), "S5", "a fresh plan was refused: {got:?}");
+                s.files.push(plan.bundle);
+                after_commit(s, true)?;
+            }
+        }
+        Op::SealCommitStoreFailsAt(j) => seal(s, at, Some((*j as usize, false)))?,
+        Op::CollectFailsAt(j) => seal(s, at, Some((*j as usize, false)))?,
+        Op::SealCommitStopsAt(j, how) => {
+            // the stop index cycles 0, 1, 2, 3 within a case (the drawn index only offsets the
+            // restart choice), so every call index of `seal_commit` is reached
+            let _ = j;
+            let j = s.stops % 4;
+            s.stops += 1;
+            stop(s, at, j, *how)?
+        }
+        Op::ReplayPreSeal(kind) => {
+            if s.v.segment() == 0 {
+                return Ok(());
+            }
+            let cands: Vec<PreSeal> = s
+                .pre_seal
+                .iter()
+                .filter(|x| {
+                    matches!(
+                        (kind, x),
+                        (0, PreSeal::Event(_)) | (1, PreSeal::Head(_)) | (2, PreSeal::Cs(_))
+                    )
+                })
+                .filter(|x| {
+                    let au = match x {
+                        PreSeal::Event(e) => Some(e.header.author),
+                        PreSeal::Head(h) => Some(h.author),
+                        PreSeal::Cs(_) => None,
+                    };
+                    let rel = au.is_some_and(|a| QA_RELEASED.with(|r| r.borrow().contains(&a)));
+                    if rel {
+                        reach("QA replay skipped: author released earlier (A-m6)");
+                    }
+                    !rel
+                })
+                .cloned()
+                .collect();
+            if let Some(x) = cands.first() {
+                let before = logical_of(&s.v.store().inner, &s.w);
+                let a = s.v.anchor();
+                match x {
+                    PreSeal::Event(e) => {
+                        let au = e.header.author;
+                        let held_before = s.v.peer(&au).map(|c| (c.next_seq(), c.anchor().map(|h| h.author_seq)));
+                        let got = s.v.receive(&s.w.ids[V], e, now);
+                        let after = logical_of(&s.v.store().inner, &s.w);
+                        if after != before {
+                            let bk: BTreeSet<_> = before.iter().map(|x| x.0).collect();
+                            let ak: BTreeSet<_> = after.iter().map(|x| x.0).collect();
+                            let idx = (0..IDS).find(|i| s.key(*i) == au);
+                            eprintln!("QA REPLAY DIAG: author idx {idx:?} seq {} got {got:?}; chain before (next_seq, anchor) {held_before:?}; member now {}; slot {:?}; segment {}; G starts {:?}; added {:?}; removed {:?}",
+                                e.header.author_seq, idx.map_or(false, |i| s.is_member(i)), idx.and_then(|i| s.slot_of(i)), s.v.segment(),
+                                after.iter().chain(before.iter()).find_map(|(k, b)| (k.part == Part::Fixed(Table::Segment)).then(|| match decode(b) { Record::Segment(g) => g.starts.iter().map(|h| (h.author == au, h.author_seq)).collect::<Vec<_>>(), _ => vec![] })),
+                                ak.difference(&bk).collect::<Vec<_>>(), bk.difference(&ak).collect::<Vec<_>>());
+                        }
+                    }
+                    PreSeal::Head(h) => {
+                        let _ = s.v.receive_head(&s.w.ids[V], h);
+                    }
+                    PreSeal::Cs(c) => {
+                        let _ = s.v.add_countersignature(c);
+                    }
+                }
+                // a replay after a seal stores nothing new (a record identical to one held is the
+                // same record)
+                let after = logical_of(&s.v.store().inner, &s.w);
+                check!(
+                    after == before && s.v.anchor() == a,
+                    "replay",
+                    "a pre-seal object replayed after the seal changed the store"
+                );
+                reach("pre-seal replay");
+            }
+        }
+        Op::CountersignPreSealHead { who } => {
+            let start = s.v.own().checkpoints().first().map(|c| c.head.author_seq);
+            if s.v.segment() == 0 {
+                return Ok(());
+            }
+            let Some(st) = start else { return Ok(()) };
+            let old: Vec<SignedHead> = s
+                .own_heads_ever
+                .values()
+                .filter(|h| h.author_seq < st)
+                .cloned()
+                .collect();
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if old.is_empty() || !s.kept(i) {
+                return Ok(());
+            }
+            let h = &old[*who as usize % old.len()];
+            let cs = h.countersign(&s.w.ids[i]).unwrap();
+            let before = logical_of(&s.v.store().inner, &s.w);
+            let got = s.v.add_countersignature(&cs);
+            check!(
+                got.is_err(),
+                "replay",
+                "a countersignature of a pre-seal checkpoint was taken"
+            );
+            check!(
+                logical_of(&s.v.store().inner, &s.w) == before,
+                "replay",
+                "a countersignature of a pre-seal checkpoint changed the store"
+            );
+            reach("countersignature of a pre-seal checkpoint");
+        }
+        Op::PeerSeal { who } => {
+            let Some(i) = s.pick_peer(*who) else {
+                return Ok(());
+            };
+            if !s.kept(i) {
+                return Ok(());
+            }
+            let before = s.v.anchor();
+            let p = s.peers[i].as_mut().unwrap();
+            if let Ok(plan) = p.seal_export(&s.w.ids[i]) {
+                match p.seal_commit(&s.w.ids[i], &plan, now) {
+                    Ok(_) => reach("peer sealed"),
+                    // counted, and asserted zero when the property has passed: V's own invariants
+                    // are this property's subject, and are reported first
+                    Err(_) => reach("peer seal refused"),
+                }
+            }
+            check!(s.v.anchor() == before, "S4", "a peer's seal changed V");
+        }
+    }
+    Ok(())
+}
+
+fn roster_op(s: &mut Sim, kind: u8, who: u8) -> Result<(), TestCaseError> {
+    match kind {
+        0 | 3 => {
+            // a new key: into a free slot (kind 0), or into a slot an earlier occupant used (3)
+            let fresh: Vec<usize> = (2..OUTSIDER).filter(|i| s.first_v[*i] == 0).collect();
+            let Some(i) = fresh.first().copied() else {
+                return Ok(());
+            };
+            let used: BTreeSet<u8> = s.roster_body().members.iter().map(|m| m.slot).collect();
+            let slot = if kind == 3 {
+                (0..IDS)
+                    .filter(|j| !s.is_member(*j))
+                    .filter_map(|j| s.last_slot[j])
+                    .find(|sl| !used.contains(sl))
+            } else {
+                s.free_slot(None)
+            };
+            let Some(slot) = slot else { return Ok(()) };
+            let r = s.w.add(i, slot);
+            s.apply_roster_all(&r)?;
+            s.after_roster();
+            reach(if kind == 3 {
+                "roster: new key in a used slot"
+            } else {
+                "roster: add"
+            });
+        }
+        1 => {
+            let cands: Vec<usize> = s.current_peers().into_iter().filter(|i| *i != 0).collect();
+            if cands.is_empty() {
+                return Ok(());
+            }
+            let i = cands[who as usize % cands.len()];
+            let r = s.w.remove(i);
+            s.apply_roster_all(&r)?;
+            s.after_roster();
+            reach("roster: remove");
+        }
+        2 => {
+            let cands: Vec<usize> = (2..OUTSIDER)
+                .filter(|i| s.first_v[*i] > 0 && !s.is_member(*i))
+                .collect();
+            let Some(i) = cands.first().copied() else {
+                return Ok(());
+            };
+            let used: BTreeSet<u8> = s.roster_body().members.iter().map(|m| m.slot).collect();
+            let slot = s.last_slot[i]
+                .filter(|sl| !used.contains(sl))
+                .or_else(|| s.free_slot(None));
+            let Some(slot) = slot else { return Ok(()) };
+            let r = s.w.add(i, slot);
+            s.apply_roster_all(&r)?;
+            s.after_roster();
+            reach("roster: re-add");
+        }
+        4 => {
+            let r = s.w.rosters.last().unwrap().clone();
+            s.apply_roster_all(&r)?;
+            reach("roster: replay");
+        }
+        5 => {
+            // a second, different version of the newest number (a fork): kept as the conflict
+            if s.w.rosters.len() < 2 {
+                return Ok(());
+            }
+            let Some(slot) = s.free_slot(None) else {
+                return Ok(());
+            };
+            let base = s.w.rosters.clone();
+            let last = base.last().unwrap().clone();
+            s.w.rosters.pop();
+            let alt = s.w.next_roster(|b, ids| {
+                let v = b.version;
+                b.members.push(member(
+                    &ids[OUTSIDER - 1],
+                    coagent_roster::Role::Guest,
+                    slot,
+                    v,
+                ));
+            });
+            s.w.rosters = base;
+            if alt != last {
+                let got = s.v.apply_roster(&alt);
+                check!(
+                    got.as_ref().err() != Some(&AuditError::LogFull),
+                    "I1",
+                    "a roster fork was answered LogFull"
+                );
+                reach("roster: fork");
+            }
+        }
+        _ => {
+            let n = s.w.rosters.len();
+            let r = s.w.rosters[who as usize % n].clone();
+            let got = s.v.apply_roster(&r);
+            check!(
+                got.as_ref().err() != Some(&AuditError::LogFull),
+                "I1",
+                "an old roster version was answered LogFull"
+            );
+            reach("roster: old version");
+        }
+    }
+    Ok(())
+}
+
+/// The state V is in when it seals (S5's states, for the reach counts).
+fn seal_states(s: &Sim) -> Vec<&'static str> {
+    let st = s.v.status();
+    let mut v = Vec::new();
+    if st
+        .seats
+        .iter()
+        .enumerate()
+        .any(|(i, p)| i as u8 != st.own_slot && p.state == coagent_audit::budget::PartState::Full)
+    {
+        v.push("seal in S5 state: full seats");
+    }
+    if st.free.state == coagent_audit::budget::PartState::Full {
+        v.push("seal in S5 state: full free part");
+    }
+    let own = s.v.usage_of(coagent_audit::session::Payer::Own);
+    if s.v.seat_usage(st.own_slot).0 > own.0 {
+        v.push("seal in S5 state: N1's state");
+    }
+    if owing(s) {
+        v.push("seal in S5 state: a checkpoint owed");
+    }
+    if !s.is_member(V) {
+        v.push("seal in S5 state: V off the roster");
+    }
+    v
+}
+
+/// Is a checkpoint owed (a requested event after the last own checkpoint, from the store keys)?
+fn owing(s: &Sim) -> bool {
+    let l = logical_of(&s.v.store().inner, &s.w);
+    let start =
+        s.v.own()
+            .checkpoints()
+            .first()
+            .map_or(0, |c| c.head.author_seq);
+    let last = l
+        .iter()
+        .filter(|(k, _)| k.part == Part::OwnHead)
+        .map(|(k, _)| k.n)
+        .max()
+        .unwrap_or(0)
+        .max(start);
+    l.iter()
+        .any(|(k, _)| matches!(k.part, Part::OwnEvent(Some(_))) && k.n > last)
+}
+
+/// A seal: export then commit; `fail` = (call j, false): the store fails call j only.
+fn seal(s: &mut Sim, step: usize, fail_at: Option<(usize, bool)>) -> Result<(), TestCaseError> {
+    let states = seal_states(s);
+    let plan = match s.v.seal_export(&s.w.ids[V]) {
+        Ok(p) => p,
+        Err(AuditError::NothingToSeal) => {
+            reach("NothingToSeal");
+            return Ok(());
+        }
+        Err(e) => {
+            return fail(
+                "S5",
+                format!("seal_export refused in states {states:?}: {e:?}"),
+            )
+        }
+    };
+    let limits = s.v.limits();
+    let pre = s.v.anchor();
+    if let Some((j, _)) = fail_at {
+        s.v.store().arm(None, Some(j), false);
+    }
+    let got = s.v.seal_commit(&s.w.ids[V], &plan, s.now(step));
+    if fail_at.is_some() {
+        s.v.store().disarm();
+    }
+    match got {
+        Err(AuditError::Store(_)) if fail_at.is_some_and(|(j, _)| j == 0) => {
+            reach("seal_commit: the commit put failed");
+            check!(
+                s.v.anchor() == pre,
+                "S1",
+                "a failed commit put changed the member"
+            );
+            let again = s.v.seal_commit(&s.w.ids[V], &plan, s.now(step));
+            check!(
+                again.is_ok(),
+                "S5",
+                "the same plan was refused after a failed put: {again:?}"
+            );
+            s.files.push(plan.bundle.clone());
+            after_seal(s, &plan, limits, true)?;
+        }
+        Ok(info) => {
+            for st in &states {
+                reach(st);
+            }
+            s.files.push(plan.bundle.clone());
+            let clean = fail_at.is_none() || info.garbage_left == 0;
+            if !clean {
+                reach("collection failed: garbage left");
+            }
+            after_seal(s, &plan, limits, clean)?;
+        }
+        Err(e) => {
+            // S1 before S5: what the refused commit left must still be conserved
+            conservation(s, &s.v.store().inner.clone())?;
+            return fail(
+                "S5",
+                format!("seal_commit refused in states {states:?}: {e:?}"),
+            );
+        }
+    }
+    Ok(())
+}
+
+fn after_seal(
+    s: &mut Sim,
+    plan: &coagent_audit::segment::SealPlan,
+    limits: StoreLimits,
+    clean: bool,
+) -> Result<(), TestCaseError> {
+    // S7: the limits in force are kept
+    check!(
+        s.v.limits() == limits,
+        "S7",
+        "seal_commit changed the limits: {limits:?} -> {:?}",
+        s.v.limits()
+    );
+    // S8: the plan's post anchor is the member's anchor
+    check!(
+        s.v.anchor() == plan.post_anchor,
+        "S8",
+        "the post anchor is not the member's anchor"
+    );
+    after_commit(s, clean)
+}
+
+fn after_commit(s: &mut Sim, clean: bool) -> Result<(), TestCaseError> {
+    // S9: after a commit whose store calls all succeeded, the physical store is the logical one
+    if clean {
+        let phys = {
+            let mut l = s.v.store().inner.list(&s.w.s).unwrap();
+            l.sort_by_key(|a| a.0);
+            l
+        };
+        check!(
+            normalise(phys.clone()).unwrap() == phys,
+            "S9",
+            "garbage left after a clean commit"
+        );
+    }
+    // S7: an owed checkpoint still has room in its allowance and in the seat
+    if owing(s) {
+        let me = s.v.status().own_slot;
+        let st = s.v.seat_usage(me);
+        let pl = s.v.limits().per_peer();
+        check!(
+            st.0 + CLOSING_B <= pl.0
+                || s.v.seat_usage(me).0 > s.v.usage_of(coagent_audit::session::Payer::Own).0,
+            "S7",
+            "an owed checkpoint has no room in the seat after a seal: {st:?} of {pl:?}"
+        );
+    }
+    s.pre_seal.retain(|_| true);
+    Ok(())
+}
+
+/// A stop after call j of `seal_commit`; then a restart by `how`.
+fn stop(s: &mut Sim, step: usize, j: usize, how: u8) -> Result<(), TestCaseError> {
+    let states = seal_states(s);
+    let plan = match s.v.seal_export(&s.w.ids[V]) {
+        Ok(p) => p,
+        Err(AuditError::NothingToSeal) => return Ok(()),
+        Err(e) => return fail("S5", format!("seal_export refused: {e:?}")),
+    };
+    let pre = s.v.anchor();
+    s.v.store().arm(Some(j), None, false);
+    let _ = s.v.seal_commit(&s.w.ids[V], &plan, s.now(step));
+    let (calls, _) = s.v.store().disarm();
+    let snap = s.v.store().inner.clone();
+    let committed = snap.list(&s.w.s).unwrap().iter().any(|(k, b)| {
+        k.part == Part::Fixed(Table::Segment)
+            && matches!(decode(b), Record::Segment(g) if g.segment == plan.segment)
+    });
+    if j <= calls {
+        reach(match j {
+            0 => "stop at seal_commit call 0",
+            1 => "stop at seal_commit call 1",
+            2 => "stop at seal_commit call 2",
+            3 => "stop at seal_commit call 3",
+            _ => "stop at seal_commit call 4+",
+        });
+    }
+    if committed {
+        s.files.push(plan.bundle.clone());
+        for st in &states {
+            reach(st);
+        }
+    }
+    // S1 on the stopped store
+    conservation(s, &snap)?;
+    // I4: the stopped store resumes, as the post-seal member if committed, the pre-seal one if not
+    let r = seal_common::resume_as(&s.w, V, probe(snap.clone()));
+    let r = match r {
+        Ok(r) => r,
+        Err(e) => {
+            return fail(
+                "I4",
+                format!(
+                "a store stopped after call {j} (committed {committed}) cannot be resumed: {e:?}"
+            ),
+            )
+        }
+    };
+    let want = if committed { &plan.post_anchor } else { &pre };
+    check!(
+        &r.anchor() == want,
+        "I4",
+        "the store stopped after call {j} (committed {committed}) resumes as another member"
+    );
+    // S8: the anchors
+    let with = |a: &AuditAnchor| {
+        SessionAudit::resume_with_anchor(
+            probe(snap.clone()),
+            a,
+            s.w.s,
+            &s.w.ids[V],
+            &s.w.ids[0].verified(),
+            every(1_000_000),
+            Box::new(PatternRedactor),
+            t(70_000),
+        )
+    };
+    let post_ok = with(&plan.post_anchor).is_ok();
+    let pre_ok = with(&pre).is_ok();
+    check!(
+        post_ok == committed,
+        "S8",
+        "the post anchor {} the store stopped after call {j} (committed {committed})",
+        if post_ok { "accepted" } else { "refused" }
+    );
+    check!(
+        pre_ok == !committed,
+        "S8",
+        "the pre anchor {} the store stopped after call {j} (committed {committed})",
+        if pre_ok { "accepted" } else { "refused" }
+    );
+    // S8: a live record removed is refused by the anchor
+    if committed {
+        let l = logical_of(&snap, &s.w);
+        if let Some((k, _)) = l
+            .iter()
+            .rev()
+            .find(|(k, _)| matches!(k.part, Part::PeerEvent(_) | Part::OwnEvent(_)))
+        {
+            let mut cut = snap.clone();
+            cut.remove(&s.w.s, k).unwrap();
+            let got = SessionAudit::resume_with_anchor(
+                probe(cut),
+                &plan.post_anchor,
+                s.w.s,
+                &s.w.ids[V],
+                &s.w.ids[0].verified(),
+                every(1_000_000),
+                Box::new(PatternRedactor),
+                t(70_000),
+            );
+            check!(
+                got.is_err(),
+                "S8",
+                "the post anchor accepted a store with a live record removed"
+            );
+            reach("S8: a stopped store with a live record removed refused");
+        }
+    }
+    // restart by `how` (a refused restart falls back to the anchor that fits, as the daemon does)
+    let mut nv = match how {
+        0 => r,
+        1 => with(&pre)
+            .or_else(|_| with(&plan.post_anchor))
+            .map_err(|e| TestCaseError::fail(format!("seal property S8: neither anchor: {e:?}")))?,
+        _ => with(&plan.post_anchor)
+            .or_else(|_| with(&pre))
+            .map_err(|e| TestCaseError::fail(format!("seal property S8: neither anchor: {e:?}")))?,
+    };
+    let _ = nv.try_set_limits(s.limits);
+    for i in 0..IDS {
+        if i != V && s.peers[i].is_some() {
+            nv.set_share_level(s.key(i), ShareLevel::Full);
+        }
+    }
+    s.v = nv;
+    Ok(())
+}
+
+// ------------------------------------------------------------------------------------------------
+// Invariants after every step
+// ------------------------------------------------------------------------------------------------
+
+/// S1: every record ever accepted is in the logical store, in a committed segment file or a
+/// release file, or was replaced in place by a newer record of its slot.
+fn conservation(s: &Sim, store: &MemStore) -> Result<(), TestCaseError> {
+    let logical: BTreeMap<StoreKey, Vec<u8>> = logical_of(store, &s.w).into_iter().collect();
+    let mut in_files: BTreeSet<Vec<u8>> = BTreeSet::new();
+    for f in s.files.iter().chain(s.release_files.iter()) {
+        for r in f.unsealed_records() {
+            in_files.insert(canonical::encode(&r).unwrap());
+        }
+    }
+    for (k, versions) in &s.accepted {
+        for b in versions {
+            if logical.get(k) == Some(b) || in_files.contains(b) {
+                continue;
+            }
+            // a slot replaced in place by a newer record (a later countersignature, cross-check
+            // record, newest checkpoint, anchor, Segment record) is not a loss
+            if let (Part::Fixed(_), Some(cur)) = (k.part, logical.get(k)) {
+                if cur != b {
+                    continue;
+                }
+            }
+            if matches!(k.part, Part::Fixed(Table::Segment)) {
+                continue;
+            }
+            return fail(
+                "S1",
+                format!("an accepted record {k:?} is in neither the store nor a committed file"),
+            );
+        }
+    }
+    Ok(())
+}
+
+fn invariants(s: &mut Sim, op: &Op) -> Result<(), TestCaseError> {
+    let phys = s.v.store().inner.clone();
+    let logical = logical_of(&phys, &s.w);
+    // ---- S3: no own number signed twice. V's own numbering never falls below a number it has
+    // signed (its next event would sign that number again)
+    if let Some((top, _)) = s.own_hdr_ever.iter().next_back() {
+        check!(
+            s.v.own().seq() >= *top,
+            "S3",
+            "V's own chain is at {} but it signed number {top}: its next event would sign a number twice",
+            s.v.own().seq()
+        );
+    }
+    for e in s.v.own().events() {
+        let b = canonical::encode(&e.header).unwrap();
+        let n = e.header.author_seq;
+        match s.own_hdr_ever.get(&n) {
+            Some(x) if *x != b => {
+                return fail("S3", format!("own number {n} signed twice (two headers)"))
+            }
+            _ => {
+                s.own_hdr_ever.insert(n, b);
+            }
+        }
+    }
+    for f in &s.files {
+        for e in &f.own_events {
+            let b = canonical::encode(&e.header).unwrap();
+            if let Some(x) = s.own_hdr_ever.get(&e.header.author_seq) {
+                check!(
+                    *x == b,
+                    "S3",
+                    "own number {} signed twice across files",
+                    e.header.author_seq
+                );
+            }
+        }
+    }
+    for c in s.v.own().checkpoints() {
+        match s.own_heads_ever.get(&c.head.author_seq) {
+            Some(h) if *h != c.head => {
+                return fail(
+                    "S3",
+                    format!("own checkpoint {} signed twice", c.head.author_seq),
+                )
+            }
+            _ => {
+                s.own_heads_ever.insert(c.head.author_seq, c.head.clone());
+            }
+        }
+    }
+    // ---- S4: only V's seal (or a release) changes the segment number or lowers a numbered run
+    let seal_step = matches!(
+        op,
+        Op::SealCommit { .. }
+            | Op::SealExportThenInterleave(_)
+            | Op::SealCommitStoreFailsAt(_)
+            | Op::SealCommitStopsAt(..)
+            | Op::CollectFailsAt(_)
+    );
+    let release_step = matches!(op, Op::Release { .. });
+    let anchor = s.v.anchor();
+    if !seal_step {
+        check!(
+            s.v.segment() == s.last_segment,
+            "S4",
+            "the segment number changed at a step that is not V's seal ({op:?})"
+        );
+        if !release_step {
+            for run in &s.last_anchor.runs {
+                let now = anchor
+                    .runs
+                    .iter()
+                    .find(|r| r.part == run.part && r.author == run.author)
+                    .map_or(0, |r| r.count);
+                check!(
+                    now >= run.count,
+                    "S4",
+                    "a numbered run ({:?}) was lowered at a step that is not V's seal ({op:?})",
+                    run.part
+                );
+            }
+        }
+    }
+    // accepted records (the model of S1): what the logical store holds, and, at a step that is
+    // not a seal, every record newly written to the store (a record the logical view drops as soon
+    // as it is written is still accepted). A slot replaced in place keeps only its newest record:
+    // the older one was superseded, not lost.
+    let mut fresh: Vec<(StoreKey, Vec<u8>)> = logical.clone();
+    if !seal_step {
+        let mut phys_l = phys.list(&s.w.s).unwrap();
+        phys_l.retain(|(k, b)| s.last_phys.get(k) != Some(b));
+        fresh.extend(phys_l);
+    }
+    for (k, b) in &fresh {
+        let v = s.accepted.entry(*k).or_default();
+        if matches!(k.part, Part::Fixed(_)) {
+            if v.last() != Some(b) {
+                *v = vec![b.clone()];
+            }
+        } else if !v.contains(b) {
+            v.push(b.clone());
+        }
+        if matches!(k.part, Part::OwnEvent(Some(_))) {
+            s.requested_ever.insert(k.n);
+        }
+    }
+    s.last_phys = phys.list(&s.w.s).unwrap().into_iter().collect();
+    // ---- S1
+    conservation(s, &phys)?;
+    // ---- I3: bounds and exact accounting over the logical store
+    let sum: usize = logical.iter().map(|(_, b)| 4 + b.len()).sum();
+    check!(
+        s.v.store_usage() == (sum, logical.len()),
+        "I3",
+        "store usage {:?} is not the logical store's ({sum}, {})",
+        s.v.store_usage(),
+        logical.len()
+    );
+    let st = s.v.status();
+    let mut parts = (0usize, 0usize);
+    for slot in 0..SEATS as u8 {
+        let u = s.v.seat_usage(slot);
+        parts = (parts.0 + u.0, parts.1 + u.1);
+    }
+    for (table, (used, slots), (bytes, aside)) in &st.fixed {
+        check!(
+            used <= slots && bytes <= aside,
+            "I3",
+            "fixed table {table:?} over its bound"
+        );
+        parts = (parts.0 + bytes, parts.1 + used);
+    }
+    check!(
+        parts == (sum, logical.len()),
+        "I3",
+        "the parts' usages {parts:?} do not sum to the logical store ({sum}, {})",
+        logical.len()
+    );
+    if let Some((_, b)) = logical
+        .iter()
+        .find(|(k, _)| k.part == Part::Fixed(Table::Segment))
+    {
+        check!(
+            4 + b.len() <= SEGMENT_SLOT_MAX,
+            "I3",
+            "Segment record above its slot"
+        );
+    }
+    // ---- (d1): the free part holds only own-choice records and checkpoints covering no request; the
+    // own start lives in the Segment slot, so no own record at or below it is in the own seat (A24)
+    let own_start_n = logical.iter().find_map(|(k, b)| match (k.part, decode(b)) {
+        (Part::Fixed(Table::Segment), Record::Segment(g)) => g.own_start.map(|h| h.author_seq),
+        _ => None,
+    });
+    if let Some(n0) = own_start_n {
+        if let Some((k, _)) = logical
+            .iter()
+            .find(|(k, _)| matches!(k.part, Part::OwnHead | Part::OwnEvent(_)) && k.n <= n0)
+        {
+            return fail(
+                "(d1)",
+                format!(
+                    "own record {:?} {} at or below the own start {n0} is charged to the own seat",
+                    k.part, k.n
+                ),
+            );
+        }
+    }
+    let mut expect_free = 0usize;
+    for (k, b) in &logical {
+        match k.part {
+            Part::OwnEvent(None) => expect_free += 4 + b.len(),
+            Part::OwnHead => {
+                let prev = s
+                    .own_heads_ever
+                    .range(..k.n)
+                    .next_back()
+                    .map_or(0, |(n, _)| *n);
+                if s.requested_ever.range(prev + 1..=k.n).next().is_none() {
+                    expect_free += 4 + b.len();
+                }
+            }
+            _ => {}
+        }
+    }
+    check!(
+        s.v.free_usage().0 == expect_free,
+        "(d1)",
+        "the free part holds {} bytes; own-choice records and checkpoints covering no request: {expect_free}",
+        s.v.free_usage().0
+    );
+    // ---- I4: resume ≡ live
+    let mut r = match seal_common::resume_as(&s.w, V, probe(phys.clone())) {
+        Ok(r) => r,
+        Err(e) => return fail("I4", format!("resume refused the live store: {e:?}")),
+    };
+    check!(
+        r.anchor() == anchor,
+        "I4",
+        "the resumed member's anchor differs"
+    );
+    check!(
+        r.segment() == s.v.segment(),
+        "I4",
+        "the resumed member's segment differs"
+    );
+    check!(
+        r.free_usage() == s.v.free_usage(),
+        "I4",
+        "the resumed member's free part differs"
+    );
+    let _ = r.try_set_limits(s.v.limits());
+    if r.limits() == s.v.limits() {
+        check!(
+            r.status() == s.v.status(),
+            "I4",
+            "the resumed member's status differs"
+        );
+    }
+    let ex = s.v.export(&s.w.ids[V]);
+    let rex = r.export(&s.w.ids[V]);
+    check!(ex == rex, "I4", "the resumed member exports other bytes");
+    // ---- I5: export and verify
+    let b = match ex {
+        Ok(b) => b,
+        Err(e) => return fail("I5", format!("export refused: {e:?}")),
+    };
+    let rep = match verify(&b) {
+        Ok(r) => r,
+        Err(e) => {
+            return fail(
+                "I5",
+                format!("export does not verify (segment {}): {e:?}", s.v.segment()),
+            )
+        }
+    };
+    let start = b
+        .segment
+        .as_ref()
+        .and_then(|g| g.own_start.as_ref())
+        .map_or(0, |h| h.author_seq);
+    check!(
+        rep.own.first_seq == start + 1,
+        "I5",
+        "verify reports the own chain from {} but it starts at {}",
+        rep.own.first_seq,
+        start + 1
+    );
+    check!(
+        (b.meta.format == 3) == (s.v.segment() > 0),
+        "I5",
+        "format {} at segment {}",
+        b.meta.format,
+        s.v.segment()
+    );
+    check!(
+        rep.attestations == s.v.own().attestations(),
+        "I5",
+        "verify's attestations differ from the author's"
+    );
+    // ---- S2: continuity of every committed file and the current export. The whole set (and the
+    // probes) when a file was added; otherwise the last file and the current export (the earlier
+    // pairs are committed files, already checked, and cannot change).
+    let grew = s.files.len() != s.files_checked;
+    if !s.files.is_empty() && !grew {
+        let pair = [s.files[s.files.len() - 1].clone(), b.clone()];
+        if let Err(e) = verify_segments(&pair) {
+            return fail(
+                "S2",
+                format!("verify_segments refused the last file and the export: {e:?}"),
+            );
+        }
+    }
+    if !s.files.is_empty() && grew {
+        s.files_checked = s.files.len();
+        let mut set = s.files.clone();
+        set.push(b.clone());
+        let r2 = verify_segments(&set);
+        let r2 = match r2 {
+            Ok(r) => r,
+            Err(e) => return fail("S2", format!("verify_segments refused the files: {e:?}")),
+        };
+        for f in &s.files {
+            for e in verify(f).unwrap().equivocations {
+                check!(
+                    r2.equivocations.contains(&e),
+                    "S2",
+                    "an equivocation a file holds is not reported"
+                );
+            }
+        }
+        // probes: a broken link, dropped evidence
+        let mut forged = b.clone();
+        if let Some(g) = forged.segment.as_mut() {
+            g.prev.0[0] ^= 1;
+            forged.reseal(&s.w.ids[V]).unwrap();
+            let mut set = s.files.clone();
+            set.push(forged);
+            check!(
+                verify_segments(&set).is_err(),
+                "S2",
+                "verify_segments accepted a set whose last file does not link to the one before"
+            );
+            reach("S2 probe: broken link");
+        }
+        if s.files.last().is_some_and(|f| !f.evidence.is_empty()) {
+            let mut forged = b.clone();
+            forged.evidence.clear();
+            forged.reseal(&s.w.ids[V]).unwrap();
+            let mut set = s.files.clone();
+            set.push(forged);
+            check!(
+                verify_segments(&set).is_err(),
+                "S2",
+                "verify_segments accepted a set whose last file drops evidence held earlier"
+            );
+            reach("S2 probe: dropped evidence");
+        }
+    }
+    s.last_anchor = anchor;
+    s.last_segment = s.v.segment();
+    Ok(())
+}
+
+// ------------------------------------------------------------------------------------------------
+// The test
+// ------------------------------------------------------------------------------------------------
+
+fn runner() -> TestRunner {
+    let cases: u32 = std::env::var("SEAL_CASES")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(48);
+    TestRunner::new_with_rng(
+        Config {
+            cases,
+            failure_persistence: None,
+            // no shrinking: the failure reported is the first one met, on its own invariant
+            max_shrink_iters: 0,
+            ..Config::default()
+        },
+        // `SEAL_SEED=<0..=255>` seeds ChaCha with that byte 32 times (as `FIX_QAM1_SEED`); unset,
+        // the committed seed
+        match std::env::var("SEAL_SEED")
+            .ok()
+            .and_then(|s| s.parse::<u8>().ok())
+        {
+            Some(b) => proptest::test_runner::TestRng::from_seed(
+                proptest::test_runner::RngAlgorithm::ChaCha,
+                &[b; 32],
+            ),
+            None => proptest::test_runner::TestRng::deterministic_rng(
+                proptest::test_runner::RngAlgorithm::ChaCha,
+            ),
+        },
+    )
+}
+
+/// The reach design 10 §6.2 requires, asserted above zero.
+const MUST_REACH: &[&str] = &[
+    "seal in S5 state: full seats",
+    "seal in S5 state: full free part",
+    "seal in S5 state: N1's state",
+    "seal in S5 state: a checkpoint owed",
+    "seal in S5 state: V off the roster",
+    "stop at seal_commit call 0",
+    "stop at seal_commit call 1",
+    "stop at seal_commit call 2",
+    "a case with at least three segments",
+    "a peer seal observed by V (an event)",
+];
+
+/// Design 10 §6.2: I1 to I5, (d1) and S1 to S9 after every step of every generated schedule; I2 by
+/// running each case twice (once whole, once with only the watched slot's peer inputs kept).
+#[test]
+fn seal_prop_every_invariant_after_every_step() {
+    REACH.with(|r| r.borrow_mut().clear());
+    let mut r = runner();
+    let cases = r.config().cases;
+    let res = r.run(&case(), |c| {
+        let a = run_case(&c, None).map_err(|e| { eprintln!("QA FAILING CASE: {c:?}"); e })?;
+        // I2 (P2): the watched seat's charges and refusals depend on its own inputs alone
+        if let Some(slot) = a.p2_slot {
+            let v_slot = a.v.status().own_slot;
+            if v_slot != slot {
+                let b = run_case(&c, Some(slot))?;
+                // after every step, not only at the end (P2 holds at every step), while both runs
+                // have the same limits in force: P2 compares charges under one set of limits L, and
+                // whether V's own limit change is accepted depends, by the ruled limit rule (R5-m1,
+                // QA-m1), on the checkpoints its requesters are owed, so after a change accepted in
+                // one run and refused in the other the seats are measured against different limits
+                let same = a
+                    .seat_trace
+                    .iter()
+                    .zip(b.seat_trace.iter())
+                    .take_while(|(x, y)| x.0 == y.0)
+                    .count();
+                if same < a.seat_trace.len() {
+                    reach("I2: the runs' limits diverged (a limit change refused in one run only)");
+                    let d = format!("{:?}", c.ops[same]);
+                    let d = d.split(['(', ' ', '{']).next().unwrap_or("").to_string();
+                    reach(Box::leak(format!("QA I2 limits first differ after op: {d}").into_boxed_str()));
+                    // were the seat charges equal up to that step, and do they differ later?
+                    let later = a.seat_trace.iter().zip(b.seat_trace.iter()).skip(same).any(|(x, y)| x.1 != y.1);
+                    if later {
+                        reach("QA I2 seats differ after the limits diverged");
+                    }
+                }
+                for (k, (x, y)) in a.seat_trace.iter().zip(b.seat_trace.iter()).take(same).enumerate() {
+                    if let (Some(x), Some(y)) = (x.1, y.1) {
+                        if x != y {
+                            return Err(TestCaseError::fail(format!(
+                                "seal property I2: after step {k} ({:?}) seat {slot}'s charges depend on other seats' inputs: {x:?} vs {y:?}",
+                                c.ops[k]
+                            )));
+                        }
+                    }
+                }
+                let ra: Vec<_> = a.refusals.iter().filter(|x| x.1 == slot && x.0 < same).collect();
+                let rb: Vec<_> = b.refusals.iter().filter(|x| x.1 == slot && x.0 < same).collect();
+                let ends_equal = same == a.seat_trace.len();
+                if (ends_equal && a.v.seat_usage(slot) != b.v.seat_usage(slot)) || ra != rb {
+                    return Err(TestCaseError::fail(format!(
+                        "seal property I2: seat {slot}'s charges or LogFull refusals depend on other seats' inputs: {:?} vs {:?}",
+                        a.v.seat_usage(slot),
+                        b.v.seat_usage(slot)
+                    )));
+                }
+                reach("I2: second run compared");
+            }
+        }
+        Ok(())
+    });
+    let reached = REACH.with(|r| r.borrow().clone());
+    eprintln!("seal property: {cases} cases");
+    for (k, n) in &reached {
+        eprintln!("seal reach: {k}: {n}");
+    }
+    if let Err(e) = res {
+        panic!("{e}");
+    }
+    let peer_refused = reached.get("peer seal refused").copied().unwrap_or(0);
+    assert_eq!(
+        peer_refused, 0,
+        "seal property S5 (peer): a peer's own seal was refused {peer_refused} times"
+    );
+    for k in MUST_REACH {
+        assert!(
+            reached.get(k).copied().unwrap_or(0) > 0,
+            "seal property never reached: {k} (at {cases} cases)"
+        );
+    }
+}

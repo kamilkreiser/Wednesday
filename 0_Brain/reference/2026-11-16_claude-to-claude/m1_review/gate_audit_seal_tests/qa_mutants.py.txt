@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+# mut.py <tree> <mutant id>|restore : applies ONE exact-once replacement in the mutant tree (a copy
+# of 841c445), or restores the touched files from the pristine clone.
+import sys, shutil
+tree, mid = sys.argv[1], sys.argv[2]
+PRISTINE = "/private/tmp/claude-501/qseal/clone"
+S = "crates/coagent-audit/src/"
+MUTS = {
+    # I2, seal-specific: a peer is cut only when EVERY held author has a checkpoint (coordination;
+    # seat s's cut then depends on other authors' inputs)
+    "m1_cut_needs_all_peers": (S + "session.rs",
+        "            if let Some(h) = cut {\n                if c.anchor().is_none_or(|a| h.author_seq > a.author_seq) {",
+        "            if let Some(h) = cut.filter(|_| self.peers.values().all(|o| o.newest_head().is_some())) {\n                if c.anchor().is_none_or(|a| h.author_seq > a.author_seq) {"),
+    # normalisation drops the countersignatures OF the own start too
+    "m2_attest_drop_start": (S + "segment.rs",
+        "Record::Countersig(c) => c.author_seq >= n,",
+        "Record::Countersig(c) => c.author_seq > n,"),
+    # release deletes oldest first after the tombstone
+    "m3_release_oldest_first": (S + "session.rs",
+        "doomed.sort_by_key(|k| std::cmp::Reverse((k.n, k.part)));",
+        "doomed.sort_by_key(|k| (k.n, k.part));"),
+    # verify_segments: own link never checked
+    "m4_no_own_link": (S + "bundle.rs",
+        "if !(p.own_heads.iter().any(|x| x == h) || p_start == Some(h)) {",
+        "if false {"),
+    # normalisation keeps a newest-checkpoint slot equal to the start
+    "m5_latest_kept_at_start": (S + "segment.rs",
+        "Record::PeerHead(h) => h.author_seq > *n,",
+        "Record::PeerHead(h) => h.author_seq >= *n,"),
+    # the stale check compares only the numbered runs (slot replacements missed)
+    "m6_stale_runs_only": (S + "session.rs",
+        "if self.anchor() != plan.pre_anchor && !cfg!(coagent_audit_red = \"seal_no_stale_check\") {",
+        "if self.anchor().runs != plan.pre_anchor.runs && !cfg!(coagent_audit_red = \"seal_no_stale_check\") {"),
+    # seal_export takes the own start one checkpoint too old (second newest)
+    "m7_verify_peer_start_unchecked": (S + "bundle.rs",
+        "                if h.verify_sig(dev).is_err() {\n                    return Err(at_h(\"peer start signature\"));",
+        "                if false {\n                    return Err(at_h(\"peer start signature\"));"),
+}
+files = sorted({v[0] for v in MUTS.values()})
+for f in files:
+    shutil.copyfile(f"{PRISTINE}/{f}", f"{tree}/{f}")
+if mid == "restore":
+    print("restored"); sys.exit(0)
+f, old, new = MUTS[mid]
+src = open(f"{tree}/{f}").read()
+n = src.count(old)
+if n != 1:
+    print(f"MUTANT NOT APPLIED {mid}: {n} occurrences"); sys.exit(1)
+open(f"{tree}/{f}", "w").write(src.replace(old, new, 1))
+print(f"MUTANT APPLIED {mid} in {f}")
