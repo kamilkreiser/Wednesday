@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATION NOW ~17:0x 20 Nov, the 13:5x rotation successor (ctx ~81%) - READ FIRST; the 16:2x block below + its 16:3x/16:4x UPDATE lines are current except where this says otherwise
+- **🔴 FIRST WORK: GATE 392 = PR 2268 (KS-2300) GO WITH NOTES at 98d1032ffa21** (verdict 0_Brain/reference/2026-11-20_gate392-tier1-pr2268-ks2300-org-admin-review/verdict.md, line 1 read at source 17:07). Commission the **K 66th DRAFTER** (Sonnet; shape 0_Brain/reference/2026-11-20_drafter-seatK65/commission.md; template K 65th's STAMPED brief fleet/briefs_staged/2026-11-20_seatK65_merge.md + its record 5_Project_History/2026-11-20_seatK-65th/; ONE row PR 2268 at 98d1032ffa21 on develop 90ef2cf004e3 (re-probe); gate 392 notes G392-2268-1..4 as NOTES; PR 2099 shares the yaml: K-lane overlap scan ALLOW=[2099] yaml-only + merge-trees + plants, licensed at the merge; one-round squash line `QA gate GO WITH NOTES; merge GO pinned to 98d1032ffa21.`) -> read WHOLE -> STAMP -> launch Sonnet -> GO (model fleet/briefs_staged/2026-11-20_K65_go_2267.md; name Kam's cards N2 a 15:41:40, N1 b 15:41:58 and card b 07:09:36 verbatim; the consequence: org-less org admins approve nothing) -> MERGED verify at source.
+- **W 51st WRAPPED, SCORED 0.96** (pane closed). FLOOR: **%177 W 52nd** only (KS-2302 build, answered 16:4x; next its READY -> tier-1 Opus gate -> K merge after K 66th).
+- G392-2268-1's one cell (org-less admin whose token claims the subject's org approves STANDARD -> 403) goes to KS-2301 by a board seat comment, or into the next auth round.
+- Wrap duties DONE this seat: ledger row 15:38, both digests regenerated 16:2x, rules_card --check OK (370), retro in the 11-20 note (16:25). No ledger edit since.
+
 ## 🔴 ROTATION HANDOVER ~16:2x 20 Nov, the 13:5x rotation successor (ctx ~80%, rotating at the next safe boundary) - READ FIRST; supersedes every block below where they differ
 - **develop = 90ef2cf004e3** (PR 2267 KS-2287 merged, verified at source 15:41:45). TWENTY Secuura merges since last night. **Kintsugi k37 DONE** (api-gateway, originate, nft-certificate, timestamping at 038425cafaec; auth HELD for KS-2294; live LC1 KS-772 count 1 -> 2; D 79th record 2026-11-20_seatD-79th). Kam last 15:42:04. Gauge 76%.
 - **FLOOR (2 seats):**
