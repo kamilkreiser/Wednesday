@@ -1,0 +1,14 @@
+Autosave sent one save per typing pause longer than the quiet interval,
+and every save writes a history event and a revision (22 in a minute of
+paused typing). After a save request, the next autosave now waits until a
+minimum gap has passed (a named constant, 10 seconds, beside the quiet
+interval); a change made inside the gap is sent by one trailing save when
+the gap ends and the quiet interval after the last edit has passed. The
+first save of a visit, leaving the screen and every explicit save still
+send at once. A change pending inside the gap is sent when the gap ends;
+closing the tab inside the gap is covered by the existing unsaved-changes
+prompt, as before. The quiet interval, the server and the screen's words
+are unchanged. This is the coordinator's default under the ticket's own
+text, reversible in one constant.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
