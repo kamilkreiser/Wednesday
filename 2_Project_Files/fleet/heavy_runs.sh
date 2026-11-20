@@ -16,7 +16,7 @@
 #   heavy_runs.sh --selftest -> runs the counting function on fixed process tables; exit 0 = all arms pass
 # Exit: 0 ok · 2 usage · 3 ps failed (never prints a number it could not measure).
 set -u
-PATTERN='^(/bin/)?bash (scripts/(check\.sh|red-controls-[a-z-]+\.sh|test-daemon\.sh|test-p1p\.sh)|crates/coagent-[a-z]+/red-controls\.sh)'
+PATTERN='^(/bin/)?bash (scripts/(check\.sh|red-controls-[a-z-]+\.sh|test-daemon\.sh|test-p1p\.sh|windows/build\.sh)|crates/coagent-[a-z]+/red-controls\.sh)'
 
 # stdin: lines "pid ppid etime command…"; stdout: the lines that are JOBS (parent not a match).
 jobs_of() {
@@ -40,7 +40,9 @@ selftest() {
   got=$(printf '40 1 00:01 grep -E bash scripts/check.sh\n41 1 00:01 vim scripts/check.sh\n42 1 00:09 bash -c until bash scripts/check.sh\n' | jobs_of | /usr/bin/wc -l | /usr/bin/tr -d ' '); [ "$got" = 0 ] || { echo "FAIL arm5 lookalikes: $got"; fails=1; }
   # arm 6: mixed: 3 jobs + 1 child -> 3
   got=$(printf '50 1 60:00 bash scripts/check.sh\n51 1 26:00 /bin/bash scripts/test-daemon.sh 3\n52 1 07:00 bash crates/coagent-policy/red-controls.sh\n53 52 00:02 bash crates/coagent-policy/red-controls.sh\n' | jobs_of | /usr/bin/wc -l | /usr/bin/tr -d ' '); [ "$got" = 3 ] || { echo "FAIL arm6 mixed: $got"; fails=1; }
-  [ "$fails" = 0 ] && { echo "heavy_runs selftest: 6 arms pass"; return 0; }
+  # arm 7: the Windows kit build is a job -> 1
+  got=$(printf '60 1 03:00 bash scripts/windows/build.sh\n' | jobs_of | /usr/bin/wc -l | /usr/bin/tr -d ' '); [ "$got" = 1 ] || { echo "FAIL arm7 windows build: $got"; fails=1; }
+  [ "$fails" = 0 ] && { echo "heavy_runs selftest: 7 arms pass"; return 0; }
   return 1
 }
 
