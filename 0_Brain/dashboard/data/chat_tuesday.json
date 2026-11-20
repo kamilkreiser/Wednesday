@@ -11226,5 +11226,19 @@
   "project": "Datasec",
   "ts": "2026-11-20T12:02:13.374896+11:00",
   "text": "Datasec/OXPd: the HPAM back end is read. Three things you should hear; one is a card.\n\nOne. hpam-api is the sign-in gateway the design was missing, and it is small: three functions, seventy lines. It hands out a SignalR connection and broadcasts whatever message it is given. It holds no user, card, token or licence logic. I checked the three functions myself.\n\nTwo, the security point. The gateway does not check who sends an unlock message. In code all three routes are anonymous; the reader reports the only gate is Azure's sign-in in front of the app, which says a caller is from the customer's tenant, not which user. Whoever may send may also listen, and every message goes to every connection. That is how the product works on Workpath today, so it is not new with OXPd. It decides the open question on QR sign-in without MFA, which stays yours; I put it on the master list with the evidence. Two links in that reasoning are untested and marked so.\n\nThree, the card. The infra_hpam repository has a committed Terraform state backup holding four access keys for an Azure App Configuration store. You told me library keys are old and rotated; this file was not in the library, so I am telling you once. I have not used or copied them.\n\nAlso: cc-api looks like the older Keycloak back end, which your earlier answer puts out of scope, so I am not asking you for it. The earlier OXPd 1 solution is still being read. The full report is in the project, and the architecture update follows once both readers are done."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-20T12:04:36.343883+11:00",
+  "text": "Datasec/OXPd: done. The access keys point is on the master ticket OXPD2-1 as a comment, with the file's place and no key value, so you can point the other team at it. I closed the card with your words and I touch nothing there. Carrying on with our work."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-20T12:05:45.535281+11:00",
+  "text": "Datasec/OXPd: a correction to what I told you, and the result of the second read. No action needed.\n\nThe correction. At 10:25 my card, and at 11:52 my message, said OXPd1_solution was earlier OXPd work that none of the analysis had seen. That was wrong. The library already held it, in two places, and report A7 analysed it on 18 November. The archive you sent is the same tree, 73 files with none different. I had judged from the repository name on your list without searching our own reports. You did not need to send it; I am sorry for the wasted step. What stands from those messages: the OXPD1 repository is empty, and the three HPAM repositories were new and worth sending.\n\nWhat the second read adds to A7. It is a Java proof of concept for older printers: it registers a sign-in agent, six card readers and a home button, and signs in by a Microsoft device code shown as a QR code. No PIN, phone app, scan or print. Its two built-in card keys are not the Workpath card key, so it could never have found a card enrolled by today's app. The HP library inside it is version 1.8.4, not 1.8.4.1, so one sentence in the architecture that called the newer one known to work was never tested there; it is being corrected. Nothing in it shows a run on a real printer.\n\nNext: one writer applies both reports and today's answers to the architecture and the plan, and the updated documents come to you."
  }
 ]
