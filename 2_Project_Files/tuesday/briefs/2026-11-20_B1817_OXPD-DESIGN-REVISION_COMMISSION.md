@@ -9,6 +9,7 @@ Tracked so a successor can launch or RE-COMMISSION (model fable; every agent of 
 4. 22:03:25: "one server per site on the customer's network is not inconsistent with them deploying through azure in their tenant.  Phase 1 will be hosted through azure and this offers different hosting options for the client"
 5. 22:03:48: "OXPd runs in the clients azure subscription"
 6. 22:04:02: "please go ahead and revise all docs and start building"
+7. 22:11:05 (added by Tuesday s303 after stage 1 was launched; it changes the DELIVERY of stage 2 only, no design sentence): "email me the PDF and doc version of the docs when they are finished and continue building what you can" (Tuesday reads "doc version" as a Word document, .docx: each stage-2 agent also produces a Word version of its revised document beside the PDF, by the method the project's existing Word deliverable `Registers/QUESTIONS_BY_OWNER_v2_2026-11-20.docx` was made with, or says plainly that it could not and why; Tuesday emails both forms of all three.)
 And his notes of 21:04 the same evening, 33 paragraphs, verbatim at `/Volumes/Datasec_DEV/TUESDAY/0_Brain/reference/2026-11-20_kam-oxpd-questions-notes/kam_notes_verbatim_2026-11-20_2104.txt` (read whole: his answers P2, P3, P4, A2, A4 to A9, A11, A12, A15 to A24).
 **What stays HIS and is NOT granted by "start building" (Tuesday told him so on the board, bf-48eb91ef820c): anything that creates Azure resources or costs money; anything sent to HP or to any person. A document never says he decided more than the words above say.**
 
