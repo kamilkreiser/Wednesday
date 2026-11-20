@@ -1,0 +1,13 @@
+diff --git a/crates/coagent-policy/src/engine.rs b/crates/coagent-policy/src/engine.rs
+index d0be221..d6ff091 100644
+--- a/crates/coagent-policy/src/engine.rs
++++ b/crates/coagent-policy/src/engine.rs
+@@ -862,7 +862,7 @@ fn refused_class(action: &Action, a: &Assessment) -> Option<RefusedClass> {
+     // not resolved; shell-text mentions and free-text words are out (docs §11)
+     let unresolved = action.targets.iter().any(|t| match t {
+         Target::Path { role, path } => {
+-            !matches!(role, PathRole::Mentioned | PathRole::InText)
++            !matches!(role, PathRole::Mentioned | PathRole::InText | PathRole::Cwd)
+                 && !matches!(path, NormPath::Certain { .. })
+         }
+         _ => false,

@@ -1,0 +1,13 @@
+diff --git a/crates/coagent-policy/src/engine.rs b/crates/coagent-policy/src/engine.rs
+index d0be221..e033bdc 100644
+--- a/crates/coagent-policy/src/engine.rs
++++ b/crates/coagent-policy/src/engine.rs
+@@ -468,7 +468,7 @@ fn assess(action: &Action, state: &State) -> Assessment {
+                 // POLICY-MODE (review F-7): a READ of a file the hard-deny list protects for writes (the gate's own
+                 // configuration and data). Today the hard-deny match is made only for writes and command text.
+                 if matches!(role, PathRole::Read | PathRole::SearchRoot { .. })
+-                    && first_hit(&state.hard_deny, &sp, mode).is_some()
++                    && first_hit(&state.hard_deny, &sp, Mode::Exact).is_some()
+                 {
+                     a.gate_read = true;
+                 }

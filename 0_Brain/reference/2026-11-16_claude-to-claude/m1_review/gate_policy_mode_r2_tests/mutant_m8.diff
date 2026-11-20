@@ -1,0 +1,16 @@
+diff --git a/crates/coagent-policy/src/engine.rs b/crates/coagent-policy/src/engine.rs
+index d0be221..a0d4ef3 100644
+--- a/crates/coagent-policy/src/engine.rs
++++ b/crates/coagent-policy/src/engine.rs
+@@ -457,9 +457,8 @@ fn assess(action: &Action, state: &State) -> Assessment {
+                                 .cloned()
+                                 .collect(),
+                         );
+-                        let later_by_name = (*role == PathRole::Mentioned)
+-                            .then(|| first_hit_by_name(&later, &sp))
+-                            .flatten();
++                        let later_by_name: Option<&crate::rules::Compiled> = None;
++                        let _ = (*role == PathRole::Mentioned);
+                         if first_hit(&later, &sp, t3_mode).or(later_by_name).is_some() {
+                             a.later_run = true;
+                         }

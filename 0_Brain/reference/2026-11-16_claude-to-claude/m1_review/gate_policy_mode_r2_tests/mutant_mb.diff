@@ -1,0 +1,13 @@
+diff --git a/crates/coagent-policy/src/engine.rs b/crates/coagent-policy/src/engine.rs
+index d0be221..b78dfd2 100644
+--- a/crates/coagent-policy/src/engine.rs
++++ b/crates/coagent-policy/src/engine.rs
+@@ -872,7 +872,7 @@ fn refused_class(action: &Action, a: &Assessment) -> Option<RefusedClass> {
+         && action
+             .targets
+             .iter()
+-            .any(|t| matches!(t, Target::Url { host: None, .. }));
++            .any(|t| matches!(t, Target::Url { host: Some(h), .. } if h.is_empty()));
+     #[allow(unused_mut)]
+     let mut found = [
+         has(&|r| matches!(r, Reason::CredentialPath(_) | Reason::CredentialFolder(_))),
