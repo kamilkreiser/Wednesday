@@ -340,3 +340,11 @@ Live board, view=tuesday, a note on the decision datasec-oxpd-hp-developer-acces
 > 2026-11-20T16:59:37.603000+11:00 [live] | Decision datasec-oxpd-hp-developer-access-1120 note: I have an account.  tell me what you need or if you need more I can log into the web and you or Claude desktop can do it
 
 The card asked who can get HP's debug bridge service key, the simulator image and its guide (ask the product team; get them himself; send HP the lab-access message; park it). Tuesday's reading, nothing wider: he holds an HP developer account himself, so the account question of item A21 is answered for the developer portal (the App Center enrolment, the HP contact and the agreement of A21 are NOT answered by it); he will fetch what is needed when told exactly what (the card's option b in effect), and he offers, if more is needed, to sign in on the web himself so that an agent can work in that signed-in session. NOT taken from it without a further word: any agent action on HP's portal. Tuesday's default is that he downloads the named items himself; the offered browser route is used only for an item the portal refuses him, with him signed in and watching, and nothing is submitted to HP in his name beyond the key request and the downloads he names. The key is a secret: it is never put on the board, in a ticket or in a document.
+
+## C-51
+
+Live board, view=tuesday, a tap with a note on the decision datasec-oxpd-printer-firmware-version-1120, verbatim (kam_msgs, live):
+
+> 2026-11-20T17:00:24.919000+11:00 [live] | Decision datasec-oxpd-printer-firmware-version-1120: c — Not now | note: lets wait until Monday with the printer but if more of a priority I will move it and get it ready
+
+The option's detail as the card printed it: "The printer stays out of the plan until you say; the no-hardware work continues." Tuesday's reading, nothing wider: the printer waits until Monday 2026-11-23 (the weekday derived by `date -j`); he offers to bring it forward if it is a priority. Tuesday's answer to him: it is not a priority before Monday; nothing in the work that needs no hardware waits on it. On Monday the first ask is the firmware version on its panel (the open half of item P2 of the questions document).
