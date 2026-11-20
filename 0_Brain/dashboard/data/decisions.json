@@ -79675,5 +79675,48 @@
    "CARD secuura-kintsugi-dead-redis-copies-cleanup-1119",
    "CARD secuura-demo-round-gateway-redis-1119"
   ]
+ },
+ {
+  "id": "secuura-ks1107-prod-role-how-reached-1120",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1107 production read: which database is production, and does an agent reach it or do you run the query?",
+  "bluf": "Secuura/Blockchain. No action needed until you choose. You picked the read-only production role (11:43). The setup steps are ready (the panel document: a role that reads three tables only, never emails or passwords, expires in two days, with teardown). Two things only you know: which database is production for this, and how an agent reaches it. Our records name no production host, and the Azure database the repo defines sits on a private network a Mac cannot reach without a tunnel or jump box. Nothing touches production until you act. (Checked: your 11:43 answer chose the role; this asks only what the role needs, and option a carries your choice.)",
+  "default_action": "If no answer: option c. Nothing runs on production without your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "An agent runs it: I set up the role and a way in (recommended: your 11:43 choice)",
+    "detail": "You follow steps A and B of the document (create the role; put one connection line in the project's private settings file; open a tunnel or firewall rule if needed), post one panel line, then one Opus agent runs the reviewed query once, read-only, and reports counts only. You tear down afterwards (step D)."
+   },
+   {
+    "key": "b",
+    "label": "I run the one query myself and paste the counts instead",
+    "detail": "I send you the query wrapped read-only. You run it once where you already have access (for example inside a running service with az containerapp exec) and paste back four numbers. No new role, no network change, no agent touches production."
+   },
+   {
+    "key": "c",
+    "label": "Hold for now",
+    "detail": "Nothing runs. The fix that stops new cases is merged (PR 2259); existing joiners stay unchecked on KS-1107 until the next production deploy, when I raise it again."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T11:49:32.451814+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks713-mcp-prod",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-advisories-high-and-prod-reaching",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013",
+   "CARD secuura-ks-1536-platform-admin-role-one-list-1106",
+   "CARD secuura-ks2063-add-session-end-on-role-change-1106",
+   "CARD secuura-prod-redis-password-in-log-1119",
+   "CARD secuura-ks1107-existing-joiners-query-production-1119",
+   "CARD secuura-ks2280-db-role-guard-default-1120",
+   "CARD secuura-ks1107-production-read-no-readonly-path-1120"
+  ]
  }
 ]
