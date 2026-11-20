@@ -6,7 +6,7 @@ Every Agent-tool drafter Tuesday commissions for a Datasec kit reads this file f
 names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned it.
 
 ## What you produce
-- ONE brief file `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/<date>_B<NNN>_SEAT-<seat>_<topic>.md`
+- ONE brief file `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/<date>_B<NNN>_SEAT-<seat>_<topic>.md`
   and ONE report `<date>_B<NNN>_DRAFTER-REPORT.md` beside it. Write ONLY those two files, with the
   Write/Edit tools. Never use Artifact, Docs, mail, chat, or any publish/upload tool (10-18 Artifact row).
 - Copy the SHAPE of the template kit you are given (STATUS-file channel, fact marks MEASURED / RELAYED /
@@ -28,7 +28,7 @@ names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned
    checkout, commit, any ref write (10-20 merge-tree row). A project's local checkout may be stale: read origin
    (ls-remote, `gh api -X GET`).
 4. `gh` is `-X GET` only, under the project's own `GH_CONFIG_DIR`
-   (`/Volumes/Laptop-DEV/!CODING/Datasec/<Project>/4_Credentials/.gh-config`). No HTTP to any hosted, demo or
+   (`/Volumes/Datasec_DEV/!CODING/Datasec/<Project>/4_Credentials/.gh-config`). No HTTP to any hosted, demo or
    production host, not even GET (10-16 production row). No az, ssh, docker.
 5. Never type `cd` (a hook refuses it). Absolute single-quoted paths (`!CODING` contains `!`). `/usr/bin/grep`.
    Read a tool's usage from its header (`sed -n 1,40p`), never by invoking it (10-18, 10-24 probe rows).
@@ -65,14 +65,14 @@ names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned
 - **Toolchains are named by PATH, not only by pin.** A kit that says "dotnet must be 10.0.404" or "node must be major 24" also names the project's own drive-local binaries (`<project>/.tools/dotnet-<ver>/` as `DOTNET_ROOT` + first on `PATH`; `<project>/.tools/node24/bin` first on `PATH`), each with its `--version` printed at drafting. The machine's default dotnet/node differ from the pins. (Added 2026-11-15 by s278: H166 B1577 STOPPED at Step 0 asking to install toolchains that were already in `HPSM-POC/.tools/`; B1572's kit named `DOTNET_ROOT` and its seat never asked.)
 - **Every long kit carries a context band and a handover form.** Any kit whose work may not fit one window (a guide, a multi-row chain, a walk with many captures) says: at about 70% context start no new part; at about 75% stop at a safe boundary (files whole, processes stopped by pid, ports free) and write `<date>_B<n>_HANDOVER.md` (done / in hand / next / processes left / decisions a successor keeps) with last line `HANDOVER B<n>: next <part> <step> | done <parts>`. (Added 2026-11-11 by s265: U4 reached 51% with only its inventory done and no band; fixed by ADDENDUM-1.)
 - **Records seats** land their own records branch; a ref write in a project repo is never Tuesday's (10-23 self-land row).
-- **Model row** from `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/specs/model-routing.md` (Sonnet first on this seat
+- **Model row** from `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/specs/model-routing.md` (Sonnet first on this seat
   unless the table says Opus), with the line number; the model id from
-  `/Volumes/Laptop-DEV/TUESDAY/0_Brain/dashboard/data/models_latest.json`.
+  `/Volumes/Datasec_DEV/TUESDAY/0_Brain/dashboard/data/models_latest.json`.
 - **Standing lines** every Datasec kit carries: PRIOR-WORK CHECK (a READY without a PRIOR WORK section is returned);
   no message to any human; Jira writes only where the kit's scope says so; never delete (quarantine); HPSM-POC kits also
   carry "This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools,
   SIEM); next-phase items are stored and architected only".
-- **The launch line** follows the template: `WED_USAGE_STOP=100 bash .../fleet/cockpit/cockpit.sh add <Datasec/Name> "bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '<project dir>' '<kit path>'"`
+- **The launch line** follows the template: `WED_USAGE_STOP=100 bash .../fleet/cockpit/cockpit.sh add <Datasec/Name> "bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '<project dir>' '<kit path>'"`
   with `BRIEF_SEAT_LEVEL=sonnet` or `BRIEF_SEAT_LEVEL=opus` ALWAYS written inside the quotes, matching the model row.
   **`brief_seat.sh` defaults to Opus** (line 24): a launch line without the level runs a Sonnet-routed seat on Opus.
   (Corrected 2026-10-25 10:3x: this line first said "add the level only when Opus", and B651/B652 launched on Opus.)
@@ -98,3 +98,4 @@ Three seats halted in one evening on literals a kit told them to match that nobo
 - **No test run while a lane holds that project's lock,** unless the commission allows it by name; say in the report what you ran, where, and at what load.
 - **Security Composer deploy kits REFUSE a changed content release (the product owner's ruling of 2026-11-20 on card `composer-pr85-land-held-deploys-1120`, option a, label: "Land it after a refresh and a fresh review; deploys of a changed content release stay refused").** Every kit that deploys Security Composer to ANY host carries, as a REFUSE-AT-ONCE item checked before any write: read `content/release-demo/CONTENT_HASH` (and `content/release-draft/CONTENT_HASH`) at the commit to deploy and the value the target host runs (by the project's records, with the line that says so, or by the kit's own read-only measurement of the host where the deploy card allows one); if they differ, the kit STOPS unless a Stamp slot quotes the product owner's OWN card for that release (card id, option, his words, printed by Tuesday with `decision_queue.sh show`). The standing push-to-demo grant does NOT cover a changed content release. At the ruling main held a value beginning `05070f1d` and held pull request 85 a value beginning `5db37614` (GitHub read by Tuesday 2026-11-20 19:40:28 AEDT): re-measure, never copy. A kit that proves the two files unchanged by blob sha against the last deployed commit says so with both shas. *(written 2026-11-20 by the seat that received the ruling, before pull request 85 lands)*
 - **When your report says a check of the kit was NOT run, run each STOP-severity check once on your own prototype output and print PASS with its control FIRED, or mark the check in the kit as never run on a real output** (then a failure the seat can trace to the kit's own wording is a `STOPPED: NEEDS TUESDAY` question, never the seat's to amend). *(ledger 2026-11-20, kit B1801: a no-copy check that failed on the commissioned output's own ids)*
+- **A scan the kit reports as RUN is run in the scanner the SEAT will use.** When a kit tells its seat to scan texts with a named project scanner (for a records kit: the copy under the project's last stamped records kit, for example `.tools/b1688/scripts/textscan_b1552.py` with its own name list), your pre-stamp scan of every Jira body and record span runs THAT file (a copy), and your report names the file. A scan by a program of your own is marked "drafter's list, not the project's" in the kit's RAN section. *(ledger 2026-11-20, kit B1808: a comment body held the company word, banned by the project's scanner and absent from the drafter's list; the seat stopped before any write.)*
