@@ -1,0 +1,29 @@
+NO DEPLOY OF ANY COMPOSER HOST MAY SHIP THIS MAIN WITHOUT THE PRODUCT OWNER'S OWN CARD.
+After this squash, main carries a CHANGED content release (both content/release-demo and content/release-draft differ from main b4681297).
+The instrument that tells a changed release, run by every deploy order before it ships (rc 1 = changed = REFUSE):
+  git diff --quiet <last deployed sha> <sha to deploy> -- content/release-demo content/release-draft
+Its three rows, re-run by the reviewer on 2026-11-21:
+  b4681297 -> 2a58dc5d   rc 1  (changed: the refusal fires)
+  308b7aa6 -> b4681297   rc 0  (main's own 43 commits changed no release: the rule does not over-fire)
+  b4681297 -> b4681297   rc 0
+  (also b4681297 -> tree e9ded89d, the tree this squash puts on main: rc 1)
+Item counts cannot tell: the demo release keeps 55 items / 123 controls while its hash changes. Only the hash and the bytes tell.
+What the live demo runs was NOT measured (no request to a hosted site). The records relay main b4681297 with release 05070f1d... on it.
+
+LANDING (coordinator's steps; the reviewer ran none of them)
+Pinned head: 2a58dc5d9c62cc021b01e3fe5ebdcd09e76d7f9a (tree e9ded89d6e2137a126525b0304f2a71d8c7d456a), base main b4681297d974ac3d8e74a4a12baeb9ea41962c52.
+0. Re-read immediately before: pulls/85 head == 2a58dc5d9c62cc021b01e3fe5ebdcd09e76d7f9a, main == b4681297d974ac3d8e74a4a12baeb9ea41962c52, mergeable_state clean,
+   check runs on the head = CodeQL, Analyze (csharp), Analyze (javascript-typescript), each completed success; open code-scanning alerts on refs/pull/85/head = 0.
+   If the head or main moved: STOP. A head nobody reviewed is never landed.
+1. Apply the reviewed title and body (files in this folder): pr-title.txt, pr-body.md. Then mark the pull request ready for review.
+2. Merge, from this folder's two text files:
+   gh pr merge 85 --repo datasecau/Datasec-Security-Composer --squash --match-head-commit 2a58dc5d9c62cc021b01e3fe5ebdcd09e76d7f9a --subject "$(cat squash-subject.txt)" --body-file squash-body.txt
+   (--match-head-commit makes GitHub refuse the merge if the head moved.)
+3. Read after the merge:
+   - pulls/85: merged true, merge_commit_sha = <new main>.
+   - refs/heads/main = <new main>, one parent b4681297d974ac3d8e74a4a12baeb9ea41962c52; tree of <new main> == e9ded89d6e2137a126525b0304f2a71d8c7d456a.
+   - the stored message of <new main>: subject == squash-subject.txt, one Co-Authored-By trailer, name/brief/seat/ticket/card scans 0.
+   - git diff --quiet b4681297 <new main> -- content/release-demo content/release-draft  -> rc 1 (record it beside the deploy refusal).
+   - check runs on <new main> (poll until completed; expected the Analyze legs completed success) and open code-scanning alerts on refs/heads/main (expected 0).
+   - The pull request's head branch: keep it (nothing in this landing deletes it; do not pass --delete-branch).
+4. Nothing deploys. The release is not cut. The examples are not rebuilt.
