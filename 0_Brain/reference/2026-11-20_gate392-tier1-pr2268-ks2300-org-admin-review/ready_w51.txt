@@ -1,0 +1,72 @@
+=========== [INBOUND] 2026-11-20T05:32 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2300 (Seat W 51st)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2300 (Seat W 51st)
+Seat W 51st
+
+READY FOR GATE KS-2300 (Seat W 51st). TIER 1 (authorisation rules on user-editing routes; Opus gate).
+
+THE PR
+- PR 2268: https://github.com/Secuura/Distributed_Secuura/pull/2268
+  - open, base develop, head 98d1032ffa21914338419ca323e20dd719eeb4fe;
+  - ONE commit on develop 90ef2cf004e39676fe7afde2c12313dcf71a8995 (PR 2267's squash), still develop by ls-remote at the READY;
+  - 9 paths, +527 -22 (push/paths_ks2300.txt). Record: push/pr_record.json.
+- Branch feature/ks-2300-auth-an-organisation-admin-can-approve (Linear's branchName).
+- Push: 05:16:26Z to 05:30:20Z (834 s), rc 0, VERIFIED (push/out_real/status.txt).
+  - Gatetest first: all gates passed (develop unmoved; no overlap except the licensed yaml).
+  - Hook: 13/16 legs ran; 3 SKIPPED (no local stack on 6882); nothing failed.
+- Ticket KS-2300, filed after your ANSWER and before the push: High, Backlog, board account.
+  - Title read back equal. The description reads back with Linear's markdown normalisation only: bold split around code spans, "-" bullets turned into "*", two blank lines added. Diffed; no content lost (push/ticket_readback.md).
+  - The four checklist lines include Q1c.
+- ONE facts comment on KS-2300: 97be504c, read back identical (push/linear_comment_record.txt).
+
+WHAT IT DOES (users.ts, 4 counted edits; your rulings)
+- Review, approve, for a non-platform caller:
+  - the cap is the first rule of the branch, before the KS-1236 read: canonicalVerificationLevel + withinOrgAdminLevelCap; an unknown stored target is refused; 403 "Only a platform admin can approve a verification request above STANDARD";
+  - then the Q1c bound: the reviewer's users row organisation must equal the subject's stored organisation, both non-null; 403 "Only an admin of the user's own organisation can approve its verification request".
+  - Nothing is saved and the request stays PENDING. A reject is not capped and keeps the tenant bound only.
+- Self-review (approve and reject): isSameUserId(subject.id, the token's userId), right after the tenant check; 403 "Cannot review your own verification request". Platform admins are unchanged.
+- PATCH: a real organizationId change by a non-platform caller is 403 "Only a platform admin can change a user's organisation", decided before the KS-467 lookup.
+  - Equal (not a change): the stored id in any case, or null over nothing stored.
+  - A change: null over a stored value.
+  - Helper isSameOrganizationId.
+- Consequence, stated in the ticket, the PR body and both fragments: org admins with no organisation (KS-2299) can approve nothing.
+
+EVIDENCE (evidence/)
+- Red first, on develop's users.ts with the test changes (cells_RED.json): 23 of 133 red.
+  - 19 of the 31 new cells: cap 6, self 4, organisation 5, approve bound 4. The other 12 are controls.
+  - 4 of the 5 rewrites. The ks1236 rewrite is green on develop by design: it keeps KS-1236's 400 for a tenant admin, at a STANDARD target.
+- Green: 133/133 (cells_GREEN.json). tsc 0.
+- Mutants: 20 of 20 killed, each compiling (matrix_m1.json, plus matrix_m1b.json for M11). The set is M1-M17 plus labelled extras M5b (cap moved after the stale check), M17b (empty organisations as equal) and M17c (token claim wins).
+  - M11 failed to compile on the first run (TS6133: the helper left unused). I rewrote it to keep the helper referenced; it compiled and was killed.
+- Suites: dev 2038/2038 (163 files), branch 2069/2069 (164 files). Failure sets equal, both empty (suites_S2_stdout.txt).
+- Static, each beside a planted control that fired (static_ks2300.json):
+  - tsc 0;
+  - eslint 0/0 on the six TS files (and on the five that exist on develop);
+  - test-type ratchet: 41 in the baseline, 0 new, 164 test files examined;
+  - docs-fragments OK;
+  - check:openapi CHECK PASS. Its planted control is this head's auth.openapi.ts over develop's yaml in my throwaway probe tree: CHECK FAIL. The probe was restored clean.
+  - Standalone ratchet: 6 services OK. Leg test: 48 passed, 0 failed.
+- Five existing cells rewritten in place, each with its reason beside it, as named in the plan:
+  - ks467: three cells (and submitRequest gains a targetLevel argument);
+  - ks1236: one cell;
+  - ks1536: one cell.
+
+THE 2099 LICENCE: both conditions met
+- (i) git merge-tree --write-tree of 98d1032ffa21 against PR 2099's LIVE head 8967de8b17558890dc4ace2732cb8350768df601 (open; gh api read, fetched head equal): rc 0.
+  - Planted control: a local commit a3cc761b7b66 on PR 2099's head rewriting the same yaml line (organizationId's description), never pushed, no ref: rc 1, CONFLICT in secuura-api.yaml.
+  - Against develop now: rc 0.
+- (ii) The PR body states that whichever of the two merges second regenerates the yaml.
+- The launcher set OVL_IGNORE_PRS=2099 itself, citing your ANSWER 05:01:34Z Q6. Its census showed PR 2099 on the yaml only, and none on the other 8 paths.
+
+CORRECTIONS, stated
+- PATHS: my plan said "PATHS (8)", but its list held nine paths (the two fragments sat on one line). The PR carries exactly those nine and no other path.
+- Door 10 is KS-2302 (filed 05:19:09Z). My PR body first said it was "not yet filed when this PR opened", which was wrong. I edited the body to name KS-2302 and read it back equal. The facts comment says "its own ticket" without the number; I left it as posted.
+- I added the check:openapi planted control after the static script, which had none for that leg; the plan promised one for every leg.
+
+RESIDUALS (PR body, "Residuals, stated")
+- KS-2279 (gateway organisation delete) and KS-2302 (originate organisation delete).
+- The door census.
+- KS-2298 and KS-2299 unchanged.
+- The review route stays unregistered in the spec (the file's header lists it as deferred).
+
+STATE: nothing merged, deployed or closed by this seat. KS-2300 reads In Progress (read 05:3xZ): Linear's GitHub link moved it when the branch appeared, not this seat. Trees: worktrees/s-w51-ks2300 (branch tree, clean at 98d1032ffa21, all 34 node_modules), s-w51-dev (90ef2cf, clean), s-w51-probe (90ef2cf, clean, throwaway), s-w51-base (my clone). Meter: 46.8% of 1M at the PR. I wrap after this mail (HANDOVER, history entry, vault commit, wrap mail).
+
