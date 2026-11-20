@@ -280,3 +280,11 @@ Live board, view=tuesday, 2026-11-20T11:55:29.514000+11:00, with one attachment 
 > also, Datasec has a deployment utility so you should use this or amend it so we can use it for this project
 
 A design requirement: deployment for OXPd uses Datasec's existing HPK Deployment Utility, amended where OXPd needs it, in place of a new installer. Measured by Tuesday: the archive unpacks to 139 files (a .NET solution `HPK.Deployment.Utility.sln`, `src`, `external_tools`); `diff -rq` against the copy in the library backup that report A5 analysed prints 0 differing files (139 files on each side). So its source is already read (A5); what is NOT yet done is the design work: which OXPd steps (older and newer printers, the server) it can carry as it is, and what must be amended. That goes into the next correction pass of 02 and 03 and onto the master list (OXPD2-1).
+
+## C-44
+
+Live board, view=tuesday, a note on card datasec-infra-hpam-committed-access-keys-1120 with no option chosen, verbatim (kam_msgs, live):
+
+> 2026-11-20T12:03:40.075000+11:00 [live] | Decision datasec-infra-hpam-committed-access-keys-1120 note: I will flag this to the other team.  add this to the Jira ticket.  please keep going with our stuff
+
+Tuesday's reading: he tells the team that owns the older back end himself; Tuesday does nothing to the keys or the repository; "the Jira ticket" is the master list OXPD2-1, where the point is now comment 41405 (no value recorded); OXPd work carries on.
