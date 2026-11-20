@@ -19578,5 +19578,12 @@
   "project": "Secuura",
   "ts": "2026-11-20T11:45:52.163571+11:00",
   "text": "Got it: a dedicated read-only role on production for the KS-1107 check. That change is yours to make, so I'm preparing the exact steps for you: the role limited to the tables the one query reads, and how one agent connects. Nothing touches production until you've done it and said so. I'll bring them as a short document with each step on its own line."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini",
+  "project": "Secuura",
+  "ts": "2026-11-20T11:48:39.084402+11:00",
+  "text": "The KS-1107 setup steps are in the attached document; nothing has touched production. The role reads only three tables, never emails or passwords, and expires after two days, with teardown steps at the end.\n\nTwo catches. First, Azure's Postgres admin probably can't grant the usual bypass-row-security right, so the document uses the platform-scope setting the code already relies on instead. Second, we have no record of how an agent reaches production: if it's private-network only, the simplest route is you running the one query yourself and pasting back counts, which is close to the option you didn't pick.\n\nOne question when you're ready: which database is production for this, and can an agent reach it, or would you rather run it yourself? Nothing happens until you say.\n📎 file in the live drawer: setup_steps.md (id f-edc1f0c3d6)"
  }
 ]
