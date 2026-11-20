@@ -16,7 +16,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **Authority:** Kam, live board 09:28:59: "fable switched.  please keep going with the Claude to Claude project" (top row of EXPIRING-GRANTS; today only; no deploy, publish, spend).
 **Kam's rulings today (all in the store; NO card is open for him):** seal is1 = a, is6 = a; bypass d1 = a, d2 = a (shell only with the sandbox on), d3 = a (every member); `general-c2c-relay-identity-in-session-1120` = a (from memory within one session); `general-c2c-deputy-d2-settle-on-change-1120` = a (your next change settles it).
-**CoAgent main = `32beb563837341560b908d9ba5b0a60de240d860`** (deputy merged 08:12). Friday's clone of it: /private/tmp/claude-501/mcdep/clone (scratch; re-clone if gone).
+**UPDATE at the 12:37 note entry: LANE A MERGED. CoAgent main = `b7e8da4a58daf37817936f947fa655c712ac19d1`** (pane %9 closed; evidence `m1_review/merge_check_p1p_gate_r3/`). **RELAY-RECONNECT is LAUNCHED: pane %32** (brief `2026-11-20_coagent_RELAY-RECONNECT_brief.md`, Opus) -> `READY FOR QA RELAY-RECONNECT` -> ONE independent check (tier 1) -> notes -> merge method; watch STATUS_RELAY_RECONNECT.md. The %9 row and the 'Staged, NOT launched' line below are superseded by this line. (Earlier: main was `32beb56`, deputy merged 08:12.) Friday's clone of it: /private/tmp/claude-501/mcdep/clone (scratch; re-clone if gone).
 **Live seats (`tmux list-panes -a`; all Opus; each holds at its line):**
 | pane | seat | state / next |
 |---|---|---|
