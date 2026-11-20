@@ -12,6 +12,24 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
+## 🟥 CURRENT STATE — Sat 2026-11-21 00:0x, written at the 70% checkpoint (seat on Opus 5.5). READ THIS BLOCK FIRST; every block below it is history.
+
+**Kam's standing words in force:** "lets prioritise the work on windows" (Fri 18:49); "you might need to use opus for the next 24 hours as fable credits are expiring" (Fri ~22:06: NO FABLE agents or seats until Sat ~22:06, top row of EXPIRING-GRANTS); authority past midnight = the 2026-11-18 13:44 row ("don't stop. keep working through the Claude to Claude project", no end stated). Quiet hours 23:00-06:00: no voice.
+**CoAgent main = `16e83fbe5592658ddcda769d7827895941eca678`** (Fri merges: deputy, preview gate, preview demo, seal, roster-settle). Friday's clean-clone check.sh at that exact SHA: 1,287 / 0 / 21 over 169 lines (the BASELINE for any new brief; evidence m1_review/merge_check_roster_settle_r2/).
+**FOUR CARDS OPEN for Kam (General/Claude to Claude); every builder holds behind one; default on all = nothing merges, nothing sent:**
+| card | seat | rec | on his answer |
+|---|---|---|---|
+| `general-c2c-relay-reconnect-check-nogo-1120` | %32 RELAY-RECONNECT (READY at baa9a11) | a | a: fix addendum from verdict `gate_RELAY_RECONNECT_verdict.md` RR-1 (+RR-2 test, RR-8 doc), merge main 16e83fb, then a SHORT re-check as its own pane, then Friday's merge check, TELL KAM AT ONCE. b: notes round (merge main, BACKLOG the gap), Friday's merge check, merge GO. |
+| `general-c2c-win-ipc-check-nogo-1120` | %35 WIN-IPC (READY at e5e8633) | a | a: fix addendum from `gate_WIN_IPC_verdict.md` §9 and §12 (M-1 pipe-owner check, m-1..m-4, N-1), merge main, short re-check pane. b: docs addendum, merge check, GO. |
+| `general-c2c-policy-mode-recheck-nogo-1120` | %26 POLICY-MODE (READY r2 at 443549c) | b | b: docs + pinning-test addendum from `gate_POLICY_MODE_r2_verdict.md` §12, merge main, check.sh, Friday's merge check (runner `crates/coagent-policy/red-controls.sh`), GO. a: third round (his word). |
+| `general-c2c-win-kit-cache-outside-project-1120` | %47 W-KIT (STOP Q1) | a | a: addendum 3: cache default `/Volumes/Laptop-DEV/coagent-xwin-cache`, copy the 1.1 GB it has (no new download), carry on from brief §5 item 5; add the folder to PORTABILITY/doctor. |
+**Order when answers come:** relay-reconnect first (Kam waits on it). W-DAEMON (draft read whole and ruled, `…W-DAEMON_brief_DRAFT.md`, 21:25 note entry) launches only after BOTH relay-reconnect AND win-ipc are on main.
+**Running in this seat (dies with it):** ONE Opus drafter finalising `briefs_drafts/2026-11-20_coagent_AUDIT-HOST_brief_DRAFT.md` (re-commission from the 23:59 note entry of 2026-11-20). Then: read whole, fill <<BASELINE>> with the figure above, generate by program, launch on Opus (row C3).
+**Live panes:** %26, %32, %35, %47 (all holding). Closed tonight: %29, %38, %41, %44. Watches in this seat: none needed while all builders hold on cards; re-arm a watch on a seat's STATUS file when you send it work.
+**Tools built Fri:** `2_Project_Files/fleet/heavy_runs.sh` (counts heavy JOBS; byte-wise; fails toward FULL; 8-arm selftest). Every brief uses it.
+**Caution at %47:** Kam's terminal focus sits on that pane; its slash menu has twice put text in the input. Zoom and read the typed line itself before every Enter.
+**Mail:** both inboxes quiet (nothing after the Fri 05:30 shift-change broadcast).
+
 ## 🔴🔴🔴🔴🔴🔴🔴🔴🔴 NEWEST — Fri 2026-11-20, written at the 65% checkpoint just after the 13:55 note entry (seat on Fable 5.2). This block is the current state; the 50% block below it is kept for its method lines and is superseded where they differ. Detail: today's note, entries 07:12 to 13:55.
 
 **Authority:** Kam, live board 09:28:59 "fable switched.  please keep going with the Claude to Claude project" (top row of EXPIRING-GRANTS, today only; no deploy, publish, spend). **No card is open for him.** His seven rulings today are all in the store.
