@@ -80371,5 +80371,48 @@
    "CARD nexusai-rd691-agent-routes-1112",
    "CARD nexusai-session-cookie-viewer-bypass-1116"
   ]
+ },
+ {
+  "id": "secuura-org-delete-with-users-ks2306-1120",
+  "client_project": "Secuura/Blockchain",
+  "title": "Deleting an organisation that still has users (KS-2306)",
+  "bluf": "Secuura/Blockchain: when a platform admin deletes an organisation that still has users, the delete today stops halfway: its documents, rights holders and member rows are gone, the organisation and its users remain, and the admin sees a generic error (read from the code and database schema on develop, not run; ticket KS-2306). We will make the delete all-or-nothing whichever way you choose; that part is a plain bug fix. The question is what should happen to the users. Only platform admins can reach this route once the KS-2302 fix merges (gated today), and nothing in our dashboard calls it. Default if you do not answer: a. (Not a repeat: your 15:41 'Platform admins only' ruled who may MOVE people between organisations; this is what happens to users when a platform admin DELETES their organisation.)",
+  "default_action": "a: build the 409 refusal together with the all-or-nothing fix, through the normal gate; nothing reaches any deployed box without your usual deploy word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Refuse while users remain (recommended)",
+    "detail": "Answer 'organisation still has users' (409) before touching anything; nothing is deleted. An admin moves or removes the users first, then deletes. Nothing is destroyed and nothing is irreversible."
+   },
+   {
+    "key": "b",
+    "label": "Detach the users",
+    "detail": "Users stay but lose their organisation, then the organisation is deleted. Note: since today's approval rules, an organisation admin with no organisation can approve nothing, so detached admins lose that power."
+   },
+   {
+    "key": "c",
+    "label": "Delete the users too",
+    "detail": "Delete the users with the organisation, as the route's own comment says. Irreversible: accounts, and anything tied to them, go."
+   },
+   {
+    "key": "d",
+    "label": "Leave it for now",
+    "detail": "Only the all-or-nothing fix; with users present the delete then fails whole with the same generic error, and nothing is half-deleted."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-20T17:43:54.918208+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks789-ci-is-the-hard-gate-with-no-ci",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1861-what-tenant-delete-means-1031",
+   "CARD wed-disk-25gib-delete-merged-gate-clones-1106",
+   "CARD secuura-ks657-redis-security-store-delete-1107",
+   "CARD secuura-org-admin-moves-users-between-orgs-1120"
+  ]
  }
 ]
