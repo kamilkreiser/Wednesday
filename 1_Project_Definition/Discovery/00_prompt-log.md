@@ -2865,3 +2865,7 @@ Done: recorded as R-BROWSER in reference/2026-11-16_claude-to-claude/00_requirem
 > (23:07) please generate a key for me.
 
 *Note:* d7 recorded as a + R-IDENTITY-P2 in the requirements; all 17 Claude to Claude cards ruled (b on groups, native Windows, relay, outside review; c on the old download); Fable design revision commissioned; deploy key pair generated in Friday's own 3_Access_Keys and the public half given on the panel.
+
+## 2026-11-21 (Tuesday s304)
+- ~14:30 Tuesday terminal, verbatim: "the fable limits are killing the flow and causing problems.  Do not use fable any more unless you flag it is necessary.  Continue this project using the latest opus model" — launcher tuesday->fable line removed; lesson 2026-11-21_no-fable-unless-flagged-opus-is-the-default.md.
+- ~16:57 Tuesday terminal, verbatim: "please use as many agents as you can manage to work on the OXPd project" — seven Opus drafters commissioned (B1832-B1837, B1816 amendment 2); reinforcement on lesson 2026-09-13_as-many-agents-as-possible-partitioned-by-code.md.
