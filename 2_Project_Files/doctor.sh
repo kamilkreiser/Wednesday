@@ -72,6 +72,8 @@ fi
 # --- Cockpit engine (PORTABILITY items 13-14) ---
 command -v tmux >/dev/null && ok "tmux $(tmux -V | awk '{print $2}')" || warn "tmux missing" "brew install tmux — fleet cockpit disabled without it (PORTABILITY 13)"
 [ -d /Applications/iTerm.app ] && ok "iTerm2" || warn "iTerm2 missing" "brew install --cask iterm2 — cockpit glass (PORTABILITY 14); plain 'tmux attach' still works"
+# CoAgent Windows build cache (PORTABILITY 30, Friday 2026-11-21): machine-local, granted outside the project
+if [ "$(basename "$PROJECT_DIR")" = "FRIDAY" ]; then [ -f /Volumes/Laptop-DEV/coagent-xwin-cache/xwin/DONE ] && ok "CoAgent Windows build cache present" || warn "CoAgent Windows build cache missing (/Volumes/Laptop-DEV/coagent-xwin-cache)" "PORTABILITY 30: scripts/windows/build.sh --fill-cache (network, ~1 GB)"; fi
 command -v brew >/dev/null && ok "homebrew" || warn "homebrew missing" "needed to install tmux/iTerm2 — https://brew.sh"
 
 # --- Scheduler (PORTABILITY item 12, machine-local launchd) ---

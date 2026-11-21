@@ -555,3 +555,10 @@ Kam 2026-11-12 11:36: the Spark screens open Secuura tickets nightly (proposals 
 - **Why:** ledger 2026-11-15 (w=2 of the 11-11 MPS #181 row): the gate standard's CodeQL pre-scan rows are a list of past misses, so MPS #192 passed two gates and then failed hosted CodeQL on a new query. Gates now run CodeQL's own pack locally when the CLI is present (`tuesday/briefs/2026-11-10_GATE-VERIFIER-STANDARD.md` step 7).
 - **Bring-up on a new machine:** it travels with the drive. If missing: `curl -sSL` `codeql-bundle-osx64.tar.gz` and its `.checksum.txt` from `https://github.com/github/codeql-action/releases/download/codeql-bundle-v<ver>/`, compare `shasum -a 256` to the checksum, `tar -xzf` into `2_Project_Files/tools/codeql/`. `doctor.sh` runs `codeql resolve languages` and warns unless javascript, csharp and python are present (both paths tested 2026-11-15: OK, and WARN with the exec bit removed).
 - **Degrades to:** gates fall back to the pre-scan rows only.
+
+## 30. CoAgent Windows build cache — MACHINE-LOCAL, outside the project (Friday seat, 2026-11-21)
+- **What:** `/Volumes/Laptop-DEV/coagent-xwin-cache` (about 1.1 GB): cargo-xwin's Microsoft CRT/SDK cache for the CoAgent Windows build kit (`scripts/windows/build.sh`, merged to CoAgent main at `a034263`). Cache files only.
+- **Why outside the project:** cargo-xwin 0.23.1 refuses a cache path with a space, and every project path has spaces. Kam granted exactly this one folder (card `general-c2c-win-kit-cache-outside-project-1120` = a, 2026-11-21 08:09: "Yes: one cache folder at the top of the drive").
+- **Bring-up on a new machine:** it is on the Laptop-DEV drive, so it travels with the drive. If missing, `build.sh --fill-cache` re-downloads it (network, about 1 GB); `--offline` refuses without its `xwin/DONE` marker.
+- **Removal:** quarantine the folder (it is only a cache), never delete.
+- **Degrades to:** no Windows `.exe` builds on the Mac until refilled. `doctor.sh` warns if the folder or its marker is missing.
