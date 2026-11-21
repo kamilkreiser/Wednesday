@@ -19,6 +19,14 @@ What to do
   4. Send that file to Friday through the live board's file drawer (or copy
      it back onto this stick and plug the stick into the laptop).
 
+Mail link (optional, 21 Nov)
+  Download agentmail_key.txt from the board and put it in the folder
+  Friday-Windows inside your user folder (C:\Users\<you>\Friday-Windows),
+  next to the brief. With it, the helper can email Friday and read
+  Friday's replies. The key reaches ONLY the helper's own inbox
+  (friday-windows-agent@agentmail.to), read and send, nothing else.
+  Do not paste it anywhere.
+
 That is all Windows needs today. The CoAgent programs come later, the same
 way, once they pass their checks.
 
