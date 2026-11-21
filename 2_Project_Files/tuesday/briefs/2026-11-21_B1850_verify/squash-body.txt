@@ -1,0 +1,35 @@
+Repository rule R5 (build/repo_rules.py), hash half: a tracked file is
+skipped only when its exact path and its exact sha256 are one
+well-formed line of the tracked list contracts/oxpd2/inputs.sha256
+("<64 lower-case hex>  hp/<path>", read below contracts/oxpd2/). This
+covers HP's 37 specification inputs under contracts/oxpd2/hp/. A line
+of any other shape, a path listed twice or an untracked list exempts
+nothing; changed bytes, listed bytes at another path and a listed path
+outside hp/ are still reported. The extension half exempts nothing.
+
+The hash half never opens a key folder of the supplied source: folders
+named certificates, certs, cert, keys or key (any case) are removed
+from the walk before descent, files named *.key, *.pem, *.pfx, *.p12,
+*.jks or *.keystore are skipped by name before any stat or open, and a
+supplied root that is such a folder, by its own name or through a link
+(resolved with os.path.realpath), is not walked. The run prints how
+many files it hashed, skipped and exempted.
+
+Tests: seven new cells in build/tests/test_repo_rules.py, with
+subtests for a key-folder root given with a trailing separator, a
+trailing "/." or as a link, a stat recorder for key files, and a listed
+path outside hp/. A test variable that code scanning read as sensitive
+is renamed (its value is synthetic). FLOOR in ci.yml moves from 53 to
+60, so the rules job now prints "Ran 60 tests" and "UNIT-TEST FLOOR:
+ran 60, floor 60".
+
+Limits: the exemption is as wide as the list, and a change to the list
+needs a reader; a renamed copy of a key-folder file is not caught by
+the hash half; folders and files outside the named sets are hashed;
+only the supplied root's own last name is checked, so a root below a
+key folder is walked; the hosted rules job does not run the hash half.
+
+No C#, project, lock, package, HP input or solution-file line changes.
+Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

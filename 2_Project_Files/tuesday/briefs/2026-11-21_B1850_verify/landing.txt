@@ -1,0 +1,129 @@
+LANDING FORM for OXPd 2 repository rule R5 (the HP inputs exemption by path and sha256, the key-folder prune, and its
+follow-up commit). Head to land: 2229f68bea9a873be01ced0eeda84803f4d66cf1 on the branch b1836/r5-hp-inputs-exemption,
+TWO commits: 28d2852d261e819ce760112690a2af9eaf908d43 (one parent 5e36d8dca42966395ea3dd014c7f788409eb585f) and
+2229f68b (one parent 28d2852d). Gate verdict: GO WITH FINDINGS (VERDICT.md in this folder; every finding is Minor or
+records; none blocks the merge). Round 2 of 2.
+
+MAIN AT THE GATE: 0804860b8993f6d7fd393cb64c44afcd2f9c8f05 (read by GET 18:36:39 AEDT 2026-11-21; open pull requests 0;
+open code-scanning alerts on main 0). MAIN MOVED after the branch was cut: the branch is ahead 2, behind 1 (merge base
+5e36d8dc). The one commit on main the branch lacks (pull request 7) changes 11 files under contracts/oxpd2/generator,
+src/Datasec.Suite.Adapters.Oxpd2/Generated and tests/Datasec.Suite.Contracts.Tests, none under build/ or .github/.
+The gate measured `git merge-tree --write-tree 0804860b 2229f68b`: rc 0, clean, tree
+602ed3b601c915211f47be65ec1fa3a4b5b231a0 (293 files; build/ and .github/ equal the head's trees, contracts/, src/ and
+tests/ equal main's). On that tree: `python3 -I build/repo_rules.py <tree>` RULES: clean (293 files), rc 0;
+build/tests Ran 60 tests, OK; local CodeQL 2.27.4, both Python suites, 0 results. The head's push run 44880248372 read
+by GET: four jobs success, linux and windows total 894 twice, failed 0, skipped 4 / 19, RULES: clean (291 files),
+Ran 60 tests, UNIT-TEST FLOOR: ran 60, floor 60, the two PLANTED-CONTROL lines and no leaks found. Main 0804860b's push
+run 44878961329: total 899 on both legs, skipped 4 / 19, RULES: clean (293 files), Ran 53 tests, floor 53, and the
+three Analyze rows success.
+
+Never land a head or a merge a gate did not read: if the branch moves off 2229f68b, stop. If main moves off 0804860b
+before the merge, follow MAIN MOVES AGAIN below before step 5.
+
+Environment for every gh line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+Every line below is a GET except opening the pull request, the one re-trigger of step 2 if it is needed, and the one
+merge line of step 5.
+
+1. THE PULL REQUEST TEXT. Title: pr-title.txt. Body: pr-body.md (what R5 now does for the 37 HP inputs, the prune of
+   key folders, the follow-up commit, the limits said plainly, FLOOR 53 -> 60, the records still owed). Each text was
+   exported through the workflow's own neutral_export function as a commit message and scanned with the workflow's
+   options (VERDICT.md, item 8). Change a word and scan again.
+
+2. PROVE WHICH MERGE THE PULL REQUEST'S CHECKS BUILT (required: main moved). Opening the pull request starts
+   pull_request runs on its merge ref. Take the run id of the pull_request run of the ci workflow on the head (event
+   pull_request, head_sha 2229f68bea9a873be01ced0eeda84803f4d66cf1) and check it against main 0804860b:
+
+   gh api -X GET 'repos/datasecau/OXPd_2/actions/runs?head_sha=2229f68bea9a873be01ced0eeda84803f4d66cf1&event=pull_request' --jq '.workflow_runs[] | [.id, .name, .status, .conclusion, .created_at] | @tsv'
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_retrigger.sh --check datasecau/OXPd_2 <run id> 2229f68bea9a873be01ced0eeda84803f4d66cf1 0804860b8993f6d7fd393cb64c44afcd2f9c8f05
+
+   rc 0 (MATCH: the job log's line `HEAD is now at ... Merge 2229f68b... into 0804860b...`) = go on. rc 3 (STALE) = run
+   the default mode once (`pr_retrigger.sh datasecau/OXPd_2 PRNUM`; it closes and reopens the pull request) and check
+   the NEW run again. rc 4 (no Merge line) is NOT a match. The branch's push run 44880248372 (event push) built the
+   head alone, not the merge: it is not this proof.
+
+3. THE CHECK WAIT (head pinned, distinct NAMES). Run as a tracked background task:
+
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/OXPd_2 PRNUM 2229f68bea9a873be01ced0eeda84803f4d66cf1 60 40 --min-checks 8
+
+   8 = the distinct check NAMES of a pull request of this repository (linux, windows, secret-scan, rules, Analyze
+   (actions), Analyze (csharp), Analyze (python), CodeQL), read by the gate at 18:40:40 AEDT on pull request 7's head
+   9d496955: 12 rows, 8 names. The head 2229f68b already carries 4 rows (4 names, all success) from its push run, so
+   a wait that ended before the pull_request run's own four ci rows existed would read the push rows: after rc 0,
+   expect 12 rows on the head, and confirm with the jobs read below that the run id of step 2 (event pull_request)
+   has its four jobs success. If step 2 needed a re-trigger, add --accept-superseded only for the run that re-trigger
+   replaced, and say so. rc 0 = every row success, neutral or skipped; rc 5 (MIXED) or 1 = stop and read. The
+   pull_request legs must read, in their job logs (by GET, from the run id of step 2):
+   linux and windows `total: 899` and `failed: 0` (linux `skipped: 4`, windows `skipped: 19`); rules
+   `RULES: clean (293 files)`, `Ran 60 tests`, `UNIT-TEST FLOOR: ran 60, floor 60`; secret-scan its two
+   PLANTED-CONTROL lines and `no leaks found`:
+
+   gh api -X GET 'repos/datasecau/OXPd_2/actions/runs/<run id>/jobs' --jq '.jobs[] | [.id, .name, .conclusion] | @tsv'
+   gh api -X GET repos/datasecau/OXPd_2/actions/jobs/<job id>/logs | grep -E 'total: |failed: |skipped: |RULES: |Ran 60 tests|UNIT-TEST FLOOR|PLANTED-CONTROL|no leaks found'
+
+   The ci rows are required by no rule of the repository: this wait is their only guard. The code-scanning rule IS
+   enforced. The default setup stores a pull request's analyses on refs/pull/N/HEAD (pull request 7: three analyses on
+   refs/pull/7/head at commit 9d496955, none on refs/pull/7/merge, where an alert read prints 0 with nothing analysed).
+   So read the analyses first (the positive control: a python analysis at the head's sha must exist), then the alerts:
+
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/analyses?ref=refs/pull/PRNUM/head&per_page=10' --jq '.[] | [.commit_sha, .category, .results_count, .created_at] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/head&state=open' --jq 'length'
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+
+   Required: a `/language:python` row at commit 2229f68bea9a873be01ced0eeda84803f4d66cf1 with results_count 0 (and the
+   actions and csharp rows at the same sha); open alerts 0; the head 2229f68bea9a873be01ced0eeda84803f4d66cf1;
+   mergeable true and state clean. No python row at the head's sha = not yet analysed: wait, never read it as 0. Any
+   open alert, a python results_count above 0, or blocked = STOP: an alert is fixed in the code by a new commit and a
+   new gate, never dismissed, and the rule is never bypassed. The local CodeQL 2.27.4 read 0 results in both Python
+   suites on the head and on the merge tree (and 3 + 3 on 28d2852d, the control); the hosted analysis is the
+   authority, and if it disagrees, hosted wins and the disagreement goes to Tuesday.
+
+4. LAST READ BEFORE THE MERGE: the branch ref equals 2229f68bea9a873be01ced0eeda84803f4d66cf1; main equals
+   0804860b8993f6d7fd393cb64c44afcd2f9c8f05 (or the new main that MAIN MOVES AGAIN below measured and step 2 proved).
+
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/b1836 --jq '.[] | [.ref, .object.sha] | @tsv'
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/main --jq '.[] | [.ref, .object.sha] | @tsv'
+
+5. THE SQUASH (one parent, head pinned; the subject with the real number in place of PRNUM; the body exactly the file):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit 2229f68bea9a873be01ced0eeda84803f4d66cf1 --subject "$(sed 's/#PRNUM/#'PRNUM'/' squash-subject.txt)" --body-file squash-body.txt
+
+   squash-subject.txt ends with (#PRNUM); squash-body.txt ends with its one attribution line. The squash folds both
+   commits of the branch into one commit on main. Do not add --admin or any bypass. If the merge is refused, stop and
+   read why.
+
+6. AFTER, on main (GET only): the new main commit has ONE parent (0804860b) and its tree is
+   602ed3b601c915211f47be65ec1fa3a4b5b231a0 (the measured merge tree; 293 files); its push run reads the four jobs
+   success with total 899 on both legs, failed 0, skipped 4 / 19, RULES: clean (293 files), Ran 60 tests,
+   UNIT-TEST FLOOR: ran 60, floor 60, and the three Analyze rows success; the open code-scanning alerts on main read 0.
+   These hold only if no other lane landed first (then the tree is the measured merge of MAIN MOVES AGAIN, and the
+   totals are that main's own).
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/main --jq '[.sha, (.parents | length), .commit.tree.sha, .commit.message[0:130]] | @tsv'
+   python3 -I /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s304/d1844/gate/hosted.py <new main sha40> <a new log folder> --wait --total 899 --rules 293 --skipped-linux 4 --skipped-windows 19 --ran 60
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/heads/main&state=open' --jq 'length'
+
+   (hosted.py prints the three Analyze rows and does not fail on them; it requires the four ci jobs. sha256 of that
+   copy: f929194e6a73983a735c88a5ced47080e77b610f9be37b2685a1bcc34598ffc4.)
+
+WHAT CHANGES FOR SEATS STILL BUILDING ON THIS REPOSITORY: once this lands, main's ci.yml holds FLOOR=60 and
+build/tests holds 60 tests, so every later hosted rules job of this repository (push runs of main, and pull_request
+runs on a merge with the new main) prints `Ran 60 tests` and `UNIT-TEST FLOOR: ran 60, floor 60` in place of 53. A
+kit, a hosted.py call or a landing form that still requires `--ran 53` or `floor 53` on a run built on the new main
+will FAIL on that row: change it to 60. A push run of a branch cut before this landing still prints 53 (the branch's
+own tree). A lane that adds a test cell under build/tests moves FLOOR in the same commit, from 60. A local run of
+build/repo_rules.py with --source-documents now prints three RULES-NOTE lines (hashed, skipped, exempted) and no
+longer reports the 37 HP inputs; it never opens the SDK's key folder. The hosted rules job still prints
+`R5 hash half NOT RUN`.
+
+MAIN MOVES AGAIN (another lane lands first). Open lanes at the gate touch none of build/** or ci.yml (RELAYED, the
+kit's partition). If main moves off 0804860b:
+(a) do not merge on this reading; (b) measure `git merge-tree --write-tree <new main> 2229f68bea9a873be01ced0eeda84803f4d66cf1`
+in a scratch clone: rc 0 and no path under build/ or .github/ changed by the other side since 5e36d8dc = go on, anything
+else = STOP and a new gate; (c) run pr_retrigger.sh in its default mode once and `--check` the new run against the NEW
+main sha (rc 0 required); (d) the expected totals become the new main's own push-run numbers on each leg (this head
+adds no C# test), `RULES: clean (<new main's count> files)` (this head adds no file), and the rules job
+`Ran 60 tests` and `floor 60`; (e) steps 3 to 6 with those numbers; the new main commit's tree is then the measured
+merge tree of (b), not 602ed3b6.
+
+A merge deploys nothing: the repository's one workflow (.github/workflows/ci.yml) builds, tests and scans and has no
+deploy step. No setting is changed by any line above.
