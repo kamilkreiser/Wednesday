@@ -83,7 +83,7 @@ echo  Starting the session now. Type  /exit  to leave it.
 echo.
 
 cd /d "%FRIDAY_WORK%"
-call "%CLAUDE_EXE%" --model %FRIDAY_MODEL% --dangerously-skip-permissions "You are Friday's Windows checking seat. Read the file FRIDAY-WINDOWS-BRIEF.txt in this folder, whole, and follow it."
+call "%CLAUDE_EXE%" --model %FRIDAY_MODEL% --dangerously-skip-permissions "You are Friday's Windows checking seat. Read the file FRIDAY-WINDOWS-BRIEF.txt in this folder, whole, and follow it. If agentmail_key.txt is in this folder, read your inbox next, newest first: work orders from Friday arrive there."
 echo.
 echo  Session ended. The report, if one was written, is in:
 echo    %FRIDAY_WORK%\machine-report.md
@@ -186,6 +186,8 @@ rem ============================================================================
 ::B first try of the project inside WSL. Do not start either yourself.
 ::B
 ::B Mail to Friday (only if agentmail_key.txt is in this folder)
+::B At every start, read your inbox (newest first) before anything else: a mail
+::B from friday-laptop-agent@ titled WO-n is a work order. Do it as written.
 ::B Your inbox: friday-windows-agent@agentmail.to. Friday: friday-laptop-agent@agentmail.to.
 ::B The key in agentmail_key.txt reaches ONLY your own inbox (read and send).
 ::B Never print, copy, paste or show the key; read it from the file inside the command.
