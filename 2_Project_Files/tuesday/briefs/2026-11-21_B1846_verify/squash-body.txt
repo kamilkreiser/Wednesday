@@ -1,0 +1,33 @@
+Three follow-ups to the OXPd 2 contracts, all made in the generator
+(contracts/oxpd2/generator). Five files under
+src/Datasec.Suite.Adapters.Oxpd2/Generated are regenerated from it and
+none is edited by hand. Tests are in tests/Datasec.Suite.Contracts.Tests
+(5 new tests; the suite totals 899).
+
+Read-only lists. Oxpd2Schema.Properties, Oxpd2Schema.EnumValues,
+Oxpd2InboundOperation.RequestContentTypes and
+Oxpd2InboundCatalogue.Operations now each return one ReadOnlyCollection
+made once, and the parser reads the private arrays. Before this, a
+cast-and-write in the process could change the result of every later
+parse. A reflection walk over the runtime, the catalogue and every
+reachable schema fails if any public list-shaped member can be written
+to; a second cell shows that a cast-and-write is refused and that a
+later parse gives the same result.
+
+A bounded body limit. Oxpd2ParseLimits refuses a maxBodyBytes above
+Oxpd2ParseLimits.HighestMaxBodyBytes (System.Array.MaxLength - 1) with
+ArgumentOutOfRangeException. This is a behaviour change: a limit such
+as int.MaxValue - 1, accepted before, is now refused when the limits
+are made. A client at the highest accepted limit reads a small answer
+without an exception; such a limit used to overflow.
+
+The Unicode length rule. Row N9 gains astral-character strings at and
+past maxLength and minLength. String lengths are counted in Unicode
+scalar values, and N9 would now fail if they were counted in UTF-16
+units.
+
+Parse results are otherwise unchanged. No HP input, project file, lock
+file, package, workflow or solution-file line changes. Nothing is
+deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
