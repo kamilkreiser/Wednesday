@@ -8,8 +8,8 @@ What this is
   one item at a time. No passwords, keys or logins are on this stick.
 
 What to do
-  1. Copy the folder Friday-Windows-Kit from this stick to the Windows
-     Desktop (or run it straight from the stick).
+  1. Copy the WHOLE folder Friday-Windows-Kit from this stick to the
+     Windows PC (for example the Desktop), and run it from there.
   2. Double-click Launch_Friday_Windows.cmd.
      - If Claude Code is not installed, it offers the official installer
        (no Administrator rights needed). Say Y.
@@ -19,13 +19,12 @@ What to do
   4. Send that file to Friday through the live board's file drawer (or copy
      it back onto this stick and plug the stick into the laptop).
 
-Mail link (optional, 21 Nov)
-  Download agentmail_key.txt from the board and put it in the folder
-  Friday-Windows inside your user folder (C:\Users\<you>\Friday-Windows),
-  next to the brief. With it, the helper can email Friday and read
-  Friday's replies. The key reaches ONLY the helper's own inbox
-  (friday-windows-agent@agentmail.to), read and send, nothing else.
-  Do not paste it anywhere.
+Mail link (21 Nov)
+  agentmail_key.txt is in this folder. Keep it beside the launcher: the
+  launcher copies it into its work folder by itself. With it, the helper
+  can email Friday and read Friday's replies. The key reaches ONLY the
+  helper's own inbox (friday-windows-agent@agentmail.to), read and send,
+  nothing else. Do not paste it anywhere.
 
 That is all Windows needs today. The CoAgent programs come later, the same
 way, once they pass their checks.

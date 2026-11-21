@@ -72,6 +72,10 @@ if exist "%BRIEF%" del "%BRIEF%"
 for /f "tokens=1* delims= " %%a in ('findstr /b /c:"::B" "%~f0"') do echo(%%b>>"%BRIEF%"
 if not exist "%BRIEF%" goto :nobrief
 echo  Brief written: %BRIEF%
+rem ---- mail key: if agentmail_key.txt sits beside this launcher, copy it into the work folder ----
+if exist "%~dp0agentmail_key.txt" copy /y "%~dp0agentmail_key.txt" "%FRIDAY_WORK%\agentmail_key.txt" >nul
+if exist "%FRIDAY_WORK%\agentmail_key.txt" echo  Mail key: in place (the helper can email Friday).
+if not exist "%FRIDAY_WORK%\agentmail_key.txt" echo  Mail key: not found beside this launcher (no mail; that is fine).
 echo.
 echo  If this is the first run, a browser opens for the Claude login.
 echo  Starting the session now. Type  /exit  to leave it.
