@@ -1,0 +1,88 @@
+LANDING FORM for the OXPd 2 contracts lane (the 37 inputs, the generated clients and callback models, the gateway
+stub). Head to land: 48120e5889599baccce88bc2a782df720c1f2e8c on the branch b1829/wp04-oxpd2-clients, ONE commit, one
+parent ddbdf8009d0df77d084ef4834bb78d7c4a80b5b0 (the main it was cut from). Gate verdict: GO WITH FINDINGS
+(VERDICT.md in this folder; every finding is Minor or records; none blocks the merge).
+
+MAIN HAS MOVED SINCE THE HEAD WAS CUT. main is now bb91433481718652bf808884fb56a7ffa2754386 (the secret store, pull
+request 5, one parent ddbdf800). The gate measured the merge with THAT main:
+- `git merge-tree --write-tree bb914334 48120e58`: rc 0, CLEAN, tree da108e115460495ae1db5e5800a51864ed080c02.
+- The two sides share one path, Datasec.Suite.slnx, and their lines sit in different places of it; the merged file
+  holds all 13 project lines in ordinal order of their Path values (19 lines, sha256
+  765755d67948466e594c545afcb69950d6d980581711c2f732967826de7c8f2a). The merged tree equals main's 151 entries with
+  the head's 140 added paths and that solution file: 291 entries, 0 differing from the prediction.
+- The merged tree, in the gate's own run (closed proxy, locked restore, audit off): build 0 warnings, 0 errors; tests
+  total 894, failed 0, succeeded 890, skipped 4 (the store's Windows-only tests, skipped on the gate's Mac);
+  894 = 762 (main bb914334) + 132 (this lane) = 826 (this head) + 68 (the store's test project).
+- The PR's checks have NOT yet run on that merge: the four green check runs of 48120e58 are its push runs, built on
+  the old main ddbdf800. So the pull request's own checks must run against the CURRENT main, and it must be proved
+  which merge they built (step 2).
+
+Never land a head or a merge a gate did not read: if the branch moves off 48120e58, or main moves off bb914334 before
+the merge, stop and have the new merge measured.
+
+Environment for every gh line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+Every line below is a GET except opening the pull request, the one re-trigger of step 2 if it is needed, and the one
+merge line of step 5.
+
+1. THE PULL REQUEST TEXT. Title: pr-title.txt. Body: pr-body.md. Both were exported through the workflow's own
+   neutral_export function as a commit message and scanned with the workflow's options (VERDICT.md, item 8). Change a
+   word and scan again.
+
+2. THE CHECKS AGAINST THE CURRENT MAIN. Opening the pull request starts pull_request runs on its merge ref. Prove which
+   merge they built before trusting them:
+
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_retrigger.sh --check datasecau/OXPd_2 <run id> 48120e5889599baccce88bc2a782df720c1f2e8c bb91433481718652bf808884fb56a7ffa2754386
+
+   rc 0 (MATCH: the job log's line `HEAD is now at ... Merge 48120e58... into bb914334...`) = go on. rc 3 (STALE) =
+   run the default mode once (`pr_retrigger.sh datasecau/OXPd_2 PRNUM`; it closes and reopens the pull request) and
+   check again. rc 4 (no Merge line) is NOT a match.
+
+3. THE CHECK WAIT (head pinned). Read until every row is completed, then require every conclusion success or skipped:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/48120e5889599baccce88bc2a782df720c1f2e8c/check-runs --jq '.check_runs[] | [.name, .status, .conclusion, .app.slug] | @tsv'
+
+   MEASURED on the last merged pull request (number 5, head 9826559d): 12 rows: linux, windows, secret-scan, rules,
+   each twice (push and pull_request), Analyze (actions), Analyze (csharp), Analyze (python) and CodeQL. MEASURED on
+   main bb914334: 7 rows (the four ci jobs and the three Analyze rows), all success. So wait for AT LEAST 8 ci rows AND
+   the code-scanning rows; read check RUNS, never suites. The pull_request legs must read, in their logs:
+   linux and windows `total: 894` and `failed: 0` (the merged total above; the Windows leg may skip a different set
+   than the Linux leg, the total is the same); rules `RULES: clean (291 files)`, `Ran 53 tests`,
+   `UNIT-TEST FLOOR: ran 53, floor 53`; secret-scan its two PLANTED-CONTROL lines and `no leaks found`. The ci rows
+   are required by no rule of the repository: this wait is their only guard. The code-scanning rule IS enforced:
+
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/merge&state=open' --jq '.[] | [.number, .rule.id, .rule.security_severity_level, .most_recent_instance.location.path] | @tsv'
+
+   The head must read 48120e5889599baccce88bc2a782df720c1f2e8c; mergeable true and state clean = go on. Any open
+   alert, or blocked = STOP: an alert is fixed in the code by a new commit and a new gate, never dismissed, and the
+   rule is never bypassed. NO code scan has run on this branch (0 analyses for its ref, read 2026-11-21 15:57 AEDT); it
+   runs on the pull request and is the authority. The C# scan could not be run locally (the extractor does not run on
+   this arm64 machine).
+
+4. LAST READ BEFORE THE MERGE: the branch ref equals 48120e5889599baccce88bc2a782df720c1f2e8c; main equals
+   bb91433481718652bf808884fb56a7ffa2754386 (the main the gate merged with). If main moved, stop: the pull request then
+   merges a tree nobody read.
+
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/b1829 --jq '.[] | [.ref, .object.sha] | @tsv'
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/main --jq '.[] | [.ref, .object.sha] | @tsv'
+
+5. THE SQUASH (one parent, head pinned; the subject with the real number in place of PRNUM; the body exactly the file):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit 48120e5889599baccce88bc2a782df720c1f2e8c --subject "$(sed 's/#PRNUM/#'PRNUM'/' squash-subject.txt)" --body-file squash-body.txt
+
+   squash-subject.txt ends with (#PRNUM); squash-body.txt ends with its one attribution line. Do not add --admin or any
+   bypass. If the merge is refused, stop and read why.
+
+6. AFTER, on main (GET only): the new main commit has ONE parent (bb914334); its tree is
+   da108e115460495ae1db5e5800a51864ed080c02, so it holds contracts/oxpd2/ (37 inputs, inputs.sha256, .gitattributes,
+   3 generator files), src/Datasec.Suite.Adapters.Oxpd2/ (project file, lock file, Generated/ with 86 files) and
+   tests/Datasec.Suite.Contracts.Tests/ (10 files) as at this head, beside the secret store, and the solution file
+   above; its push run reads the four jobs success with total 894 on both legs and failed 0, RULES: clean (291 files),
+   and the code-scanning rows success; the open code-scanning alerts on main read 0 (they read 0 on bb914334 at
+   15:57 AEDT). These counts hold unless another lane lands first (then this merge cannot land: step 4).
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/main --jq '[.sha, (.parents | length), .commit.tree.sha, .commit.message[0:120]] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/heads/main&state=open' --jq 'length'
+
+A merge deploys nothing: the repository's one workflow (.github/workflows/ci.yml) builds, tests and scans and has no
+deploy step, and the server does not reference the adapter. No setting is changed by any line above.

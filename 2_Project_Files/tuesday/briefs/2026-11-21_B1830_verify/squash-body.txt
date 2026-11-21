@@ -1,0 +1,52 @@
+Three parts and their tests (tests/Datasec.Suite.Contracts.Tests,
+132 tests).
+
+The inputs. contracts/oxpd2/hp holds 37 of HP's OXPd 2 Beta 10
+specification files, byte for byte: the 16 service bundles, the five
+service-target specifications and the 16 type files they reach.
+contracts/oxpd2/inputs.sha256 names each with its SHA-256. Tests
+recompute every fingerprint and resolve every reference between the
+files. Keeping these files in this private repository was agreed by
+the project's owner; nothing else of the supplied files is copied.
+The repository's rule check against copies of supplied files is
+unchanged: run locally with the supplied folder it reports exactly
+these 37 files; the hosted rule job has no such folder.
+
+The generated code. A generator written in C# (contracts/oxpd2/
+generator, base class library only) writes
+src/Datasec.Suite.Adapters.Oxpd2/Generated: 16 clients with 201
+methods, models for the 10 JSON operations of the five service
+targets, and one bounded parser. A test regenerates the folder and
+compares it byte for byte on both build legs.
+
+The parser. Every body ends in a value or a refusal that names a kind
+and a path of schema names, never a byte of the body. The size check
+(1 MiB by default) runs before any JSON is read; nesting is bounded
+(32 by default); duplicate keys, comments, trailing commas and a
+second value are refused; types, required properties, enum values and
+the schema's bounds are checked; unknown properties are ignored.
+Limits: patterns and formats are not checked; an enum value the
+inputs do not list is refused, so a newer firmware's new value is
+refused until the inputs are regenerated; a null for an optional
+property is refused; multipart and other non-JSON bodies are not
+parsed.
+
+The clients take the caller's HttpClient and carry no token, no
+Authorization header, no retry and no refresh. Path and query values
+are escaped; an empty or dot path value is refused. Bodies of
+non-success answers are not parsed.
+
+The gateway stub lives in the test project only, listens on 127.0.0.1
+port 0, serves the three routes and the hub, and checks no
+Authorization header. Every payload, token and address in the tests is
+synthetic.
+
+Not proved here: contract tests against simulator responses; how a
+printer fills any field; token handling and the callback credential
+check. The server does not reference the adapter. No package,
+workflow or build line changes; the solution file gains two lines.
+Every choice about the inputs, the generator, the parser, the clients
+and the stub was made inside the build. Nothing is deployed; nothing
+was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
