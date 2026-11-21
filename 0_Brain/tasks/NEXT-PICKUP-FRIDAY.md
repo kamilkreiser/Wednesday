@@ -12,7 +12,20 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
-## 🟥 CURRENT STATE — Sat 2026-11-21 08:1x, written for the ROTATION at ~79% (seat on Opus 5.5). READ THIS BLOCK FIRST; every block below is history. (The 00:0x block it replaces is kept under "superseded" below.)
+## 🟥 CURRENT STATE — Sat 2026-11-21 14:3x (seat resumed on Opus after a ~6 h Fable stall). READ THIS BLOCK FIRST; every block below is history.
+
+**Kam's standing words:** "lets prioritise the work on windows" (Fri 18:49); NEW STANDING (Sat ~14:20): "use opus from now on so no need to use fable unless you flag its necessary" (lesson `2026-11-21_friday-runs-on-opus-fable-only-when-flagged`; the 24 h grant row is superseded). Authority: the 2026-11-18 13:44 row. No card open for Kam. Owed by Kam: the Windows machine report (asked again 14:2x; timeline PDF shared, `reference/…/16_build-timeline-2026-11-21.md`, dates promised there: policy ~17:00, relay ~19-20:00, win-ipc ~21:00, w-kit tonight, audit-host ~Sun midday, W-DAEMON launch tonight once relay AND win-ipc are on main).
+**Main = `16e83fb`.** Live work (all launched by this seat):
+| pane | seat | head | next -> Friday's act |
+|---|---|---|---|
+| %56 | QA-RELAY-RECONNECT-R2 (Opus) | 104dd39 | verdict `m1_review/gate_RELAY_RECONNECT_r2_verdict.md` -> GO: Friday's merge check `coagent_merge_check.sh <SHORT dir> relay-reconnect 104dd394c390b614410cdba76ac45eeffa6bb220 scripts/red-controls-daemon.sh` + static -> merge GO addendum to %32 -> ls-remote -> TELL KAM AT ONCE -> close %32, %56. NO GO = card. |
+| %59 | QA-WIN-IPC-R2 (Opus) | 329fb5f | verdict `gate_WIN_IPC_r2_verdict.md` (it also rules the builder's extra DQ1 README sentence) -> GO: merge (after relay) : merge GO addendum must first merge then-current main and re-run its light checks + check.sh, then Friday's merge check. |
+| (bg shell, dies with seat) | Friday's merge check of POLICY-MODE r3 | 4b3c627 | work dir /private/tmp/claude-501/mcpm3, out /private/tmp/claude-501/mcpm3.out (last line `exit N`). exit 0 -> static (no src change since 443549c) -> merge GO addendum to %26 -> ls-remote -> close %26. Re-run with a NEW short dir after a seat death. |
+| %62 | QA-W-KIT (Sonnet, row G2) | c7aabcd | verdict `gate_W_KIT_verdict.md` -> GO: merge GO to %47; add `/Volumes/Laptop-DEV/coagent-xwin-cache` to PORTABILITY.md + doctor; quarantine the duplicate `$COAGENT_TOOLS/xwin-cache` (ruled (a) in the check brief). |
+| %50 | AUDIT-HOST fix round (ADDENDUM-1, delivered 14:29; card marked delivered) | 35f7e89 | `READY FOR QA AUDIT-HOST r2` -> short re-check pane (Opus) -> merge ONLY after win-ipc and w-kit; its merge addendum merges then-current main. |
+Every merge moves main: each later branch merges then-current main in its merge round. Watches: scratch `watch_any.sh` on STATUS_QA_RELAY_RECONNECT_R2 / QA_WIN_IPC_R2 / AUDIT_HOST / W_KIT (dies with seat; re-arm, add STATUS_QA_W_KIT).
+
+## (superseded) CURRENT STATE — Sat 2026-11-21 08:1x, written for the ROTATION at ~79% (seat on Opus 5.5). (The 00:0x block it replaces is kept under "superseded" below.)
 
 **Kam's standing words in force:** "lets prioritise the work on windows" (Fri 18:49); NO FABLE agents or seats until Sat ~22:06 (Fri ~22:06, top row of EXPIRING-GRANTS); authority: the 2026-11-18 13:44 row ("don't stop. keep working through the Claude to Claude project", no end stated). Kam answered all four cards at 08:08-08:09 Sat (recorded, receipted bf-0b4fa6b0c72d0, delivered).
 **CoAgent main = `16e83fbe5592658ddcda769d7827895941eca678`.** Baseline: Friday's clean-clone check.sh at that SHA, 1,287 / 0 / 21 over 169 lines.
