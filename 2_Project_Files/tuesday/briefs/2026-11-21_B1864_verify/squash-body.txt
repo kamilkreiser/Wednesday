@@ -1,0 +1,37 @@
+Adds ISecretStoreInventory to the local secret store (work package
+WP1.1): ListAll() and DeleteUnreadable(recordId), and one line that
+registers it. ListNames, the record store, the key ring and every
+existing test file are unchanged.
+
+ListAll() judges every record as ListNames does and returns the names
+that read plus one entry per record that does not, by its id and, only
+where its stored form parses, follows the name rule and hashes to its
+id, the name it states. That stated name is not authenticated: whoever
+can write the records folder can plant one. On an open store ListAll
+throws only for a failure of the record store itself (StorageFailed).
+
+DeleteUnreadable(recordId) refuses an id that is not 64 lower-case hex
+characters (InvalidName). Then, under the store's lock, it first runs
+the key-ring check every write runs (KeyNotAvailable, nothing removed,
+when the ring on disk changed), reads the record again and removes it
+only when its bytes were read in full and fail as a record: they do not
+parse, the stated name does not hash to the id, the name breaks the
+rule, or the value does not open with the keys this store holds. A
+record that reads, or is absent, returns false. A file the store cannot
+open or read (no file descriptor left, held open without read sharing,
+mode 000) or no plain record file (empty, too large, a link, a pipe, a
+folder) is never removed: StorageFailed, and an operator moves it.
+
+Limits, stated in the README: the removal is for good; it still removes
+records under a key this store revoked while the way back is open; a
+decryption failure that is not the record's own (for example DPAPI-NG
+not available on Windows at that moment) reads as a record that does
+not open, and the record is removed (not measured); with a second
+process over the partition and no ring change, the re-check is atomic
+only against this store's callers. Nothing in the product calls the
+removal yet, and the host does not use the store yet.
+
+21 new tests (920 on the branch). No package, workflow or build line
+changes. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
