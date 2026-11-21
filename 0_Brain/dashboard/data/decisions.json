@@ -81995,6 +81995,76 @@
    "CARD datasec-oxpd-logging-second-review-nogo-1120",
    "CARD datasec-oxpd-fable-limit-98pct-1120",
    "CARD datasec-oxpd-hp-spec-files-in-repo-1121"
+  ],
+  "delivered_artefact": "tuesday/briefs/2026-11-21_B1856_SEAT-X15_oxpd2-wp11-registry-and-state-database-full.md (stamped 20:50 by s306; S4 Q24-Q26 and S8 carry the ruling)",
+  "delivered_ts": "2026-11-21T20:51:38.631461+11:00"
+ },
+ {
+  "id": "datasec-oxpd-firmware-unknown-value-callbacks-1121",
+  "client_project": "Datasec/OXPd",
+  "title": "OXPd: when a printer's callback carries a value we do not know (after a firmware update), refuse it or accept it?",
+  "bluf": "No action needed tonight: the build keeps today's safe behaviour unless you choose otherwise. The printer-callback code being built now (the adapter lane) reads each callback strictly: if a printer sends a value its published specification does not list, or an empty value where one is expected, the whole callback is refused. A reviewer found this earlier today: after a firmware update adds one new value, every such callback from that printer would be refused, and what the printer then does (retry or drop) is not measured. Monday's printer test is the first chance to see real traffic. Who decides: you (product behaviour). (Override note: the queue matched 37 earlier OXPd cards on the word OXPd, and the firmware-version card of 20 Nov on the word firmware; I read each: that card asked which firmware your printer runs, the thirteen-defaults card predates this finding, and none covers this question.)",
+  "default_action": "a: keep refusing; the adapter lane builds the strict reading tonight and it can be relaxed later in one place",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep refusing for now",
+    "detail": "Strict reading stays; we revisit after Monday's printer test shows real callbacks"
+   },
+   {
+    "key": "b",
+    "label": "Accept unknown values",
+    "detail": "Callbacks are read tolerantly: an unknown value is kept as 'unknown' and the rest of the callback is used (a later lane, needs its own design and review)"
+   },
+   {
+    "key": "c",
+    "label": "Decide after Monday",
+    "detail": "Same as a until you have seen the printer test"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-21T20:54:21.660974+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD datasec-oxpd-q01-hp-confirm-m365-1118",
+   "CARD datasec-oxpd-q02-phone-signin-step-1118",
+   "CARD datasec-oxpd-q03-card-interop-1118",
+   "CARD datasec-oxpd-q04-azure-backend-frozen-1118",
+   "CARD datasec-oxpd-q05-server-location-1118",
+   "CARD datasec-oxpd-q06-reuse-entra-registration-1118",
+   "CARD datasec-oxpd-q07-store-device-admin-pw-1118",
+   "CARD datasec-oxpd-q08-card-reader-models-1118",
+   "CARD datasec-oxpd-q09-printer-generations-1118",
+   "CARD datasec-oxpd-q10-site-size-1118",
+   "CARD datasec-oxpd-q11-licensing-model-1118",
+   "CARD datasec-oxpd-q12-other-vendor-coexist-1118",
+   "CARD datasec-oxpd-q13-legacy-keycloak-1118",
+   "CARD datasec-oxpd-q14-server-packaging-1118",
+   "CARD datasec-oxpd-q15-release-one-scope-1118",
+   "CARD datasec-oxpd-q16-scan-print-behaviour-1118",
+   "CARD datasec-oxpd-q17-universal-print-model-1118",
+   "CARD datasec-oxpd-q18-pull-sharing-ipps-1118",
+   "CARD datasec-oxpd-q19-workpath-deploy-today-1118",
+   "CARD datasec-oxpd-q20-hp-code-rights-1118",
+   "CARD datasec-oxpd-q21-job-audit-supplies-1118",
+   "CARD datasec-oxpd-q22-tls-certificate-1118",
+   "CARD datasec-oxpd-q23-admin-view-location-1118",
+   "CARD datasec-oxpd-q24-no-mfa-token-storage-1118",
+   "CARD datasec-oxpd-q25-test-devices-1118",
+   "CARD datasec-oxpd-start-phase0-1120",
+   "CARD datasec-oxpd-sharepoint-source-1120",
+   "CARD datasec-oxpd-thirteen-defaults-1120",
+   "CARD datasec-oxpd-gateway-and-oxpd1-repos-1120",
+   "CARD datasec-oxpd-sensitivity-labels-1120",
+   "CARD datasec-oxpd-trust-new-folder-1120",
+   "CARD datasec-oxpd-ci-second-review-nogo-1120",
+   "CARD datasec-oxpd-printer-firmware-version-1120",
+   "CARD datasec-oxpd-logging-second-review-nogo-1120",
+   "CARD datasec-oxpd-fable-limit-98pct-1120",
+   "CARD datasec-oxpd-hp-spec-files-in-repo-1121",
+   "CARD datasec-oxpd-lane-b-database-packages-1121"
   ]
  }
 ]
