@@ -1,0 +1,20 @@
+The generated parser of the five service-target specifications (the
+calls a printer makes into the server) now reads an enum value the
+specification does not list as the enum's new first member
+Unrecognized (value 0, the default, never a listed member) and uses the
+rest of the callback; matching is exact on the wire name. An optional
+property sent as null reads as absent and does not count toward
+minProperties or maxProperties. A required property absent or null, a
+null array item and a null body stay refused; a duplicate key whose
+first value is null is now refused DuplicateKey. The raw text of an
+unlisted value is not kept; a new six-argument TryParse reports the
+count and the paths of the first 16. The 16 device clients stay strict.
+The runtime's own enum converter writes only listed wire names and
+refuses Unrecognized and any unnamed value.
+
+Changed in the generator and regenerated (11 generated files); the
+adapter's README sentence and one test row moved into a delivery case;
+12 new tests. No package, lock file, workflow or product code of the
+adapter changes. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

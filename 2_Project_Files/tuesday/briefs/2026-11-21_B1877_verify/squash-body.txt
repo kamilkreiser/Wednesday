@@ -1,0 +1,43 @@
+Adds the OXPd 2 adapter beyond its generated clients (work package
+WP1.2, in part). The host does not use it yet.
+
+Device/: a per-device solution-token holder. The access value is kept
+in memory only and zeroed when replaced or forgotten; the refresh
+value lives only in the vault. A refresh runs before the first call
+when no access value is held and after a 401, never on a timer, bounded
+by RefreshTimeout. On a 401 the request is refreshed once and sent once
+more; a second 401 marks the device NeedsRepair. Refreshes of one
+serial run one at a time, and a request that waited for one uses its
+result, its access value or its failure, so concurrent 401s and
+requests that arrive during a refresh cause one refresh. A rotated
+refresh value is written to the vault before its access value is used.
+A grant copies its values and refuses an access value that cannot go
+into a header. Forget during a refresh leaves nothing stored and the
+refresh ends NoRefreshValue.
+
+Callbacks/: per-device callback credentials (32 random bytes shown
+once as 43 base64url characters, only their SHA-256 stored, compared in
+fixed time); Issue and Forget take effect for every check that starts
+after they return. A handler of five printer callbacks checks the
+credential before any member of the body is touched, then the
+operation, the content type, a bounded and timed read, the generated
+parser, a stale-read guard on card reads, the sink under a deadline and
+the answer parsed again. Fourteen typed outcomes, the last BodyFailed
+(a body stream that throws); HandleAsync throws only
+ArgumentNullException and the caller's own cancellation.
+
+Limits, stated in the README or the pull request: StoreRefreshValue
+during a refresh is followed by that refresh's result, for a request
+that waited on it too; an access value handed out before Forget may be
+sent once; the vault call of a rotation and of Forget runs under the
+serial's lock; whether a serial is enrolled may be told by the timing of
+the vault lookup; a credential digest read but not cached is dropped
+without being zeroed; a refresh answered after RefreshTimeout is
+discarded with any rotated refresh value; a 401 after a failed refresh
+gets that failure; a stored hash of the wrong length reads as an unknown
+device; a vault binding must return a fresh copy from TryGet.
+
+57 new tests. No package, lock file, workflow, build, generated code or
+contract test changes. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
