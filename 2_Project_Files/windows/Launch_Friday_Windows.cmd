@@ -11,7 +11,7 @@ rem  copy the text in this window to Friday's panel.
 rem ============================================================================
 
 rem ---- settings you may change ------------------------------------------------
-set "FRIDAY_MODEL=claude-fable-5-2"
+set "FRIDAY_MODEL=claude-opus-5-5"
 set "FRIDAY_WORK=%USERPROFILE%\Friday-Windows"
 rem -----------------------------------------------------------------------------
 
