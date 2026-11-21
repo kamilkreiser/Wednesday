@@ -3,7 +3,7 @@ date: 2026-11-19
 type: instruction
 tier: W
 source: Kam, typed into the Tuesday terminal, 2026-11-19 (s292, about 15:47 AEDT by the statusline read beside it)
-status: live
+status: superseded (by 2026-11-21_no-fable-unless-flagged-opus-is-the-default.md, Kam 2026-11-21)
 ---
 
 # OXPd runs on the newest Fable, and the Tuesday seat now boots on Fable

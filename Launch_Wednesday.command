@@ -992,7 +992,9 @@ bash "$PROJECT_DIR/2_Project_Files/tools/latest_models.sh" || echo "[launcher] W
 SEAT_MODEL_ARGS=(--model opus)
 [ "$AGENT" = "friday" ] && SEAT_MODEL_ARGS=(--model fable --fallback-model opus)
 # 2026-11-19 (Kam, Tuesday terminal: "i would like you to switch to latest fable and use fable agents when working on this project"): the TUESDAY seat boots on the `fable` ALIAS with opus as the availability fallback, the same shape as Friday. REVERT = delete the tuesday line; backup Launch_Wednesday.command.pre-1119-tuesdayfable.
-[ "$AGENT" = "tuesday" ] && SEAT_MODEL_ARGS=(--model fable --fallback-model opus)
+# 2026-11-21 (Kam, Tuesday terminal, after /model to Opus 5.5: "the fable limits are killing the flow and causing problems.  Do not use fable any more unless you flag it is necessary.  Continue this project using the latest opus model"):
+# the 2026-11-19 tuesday->fable line is REMOVED; Tuesday boots on the `opus` alias (newest Opus) like Wednesday. Fable only on a flagged, Kam-approved per-task need.
+# Lesson 2026-11-21_no-fable-unless-flagged-opus-is-the-default.md. REVERT = restore the 11-19 line from backup Launch_Wednesday.command.pre-1121-tuesdayopus.
 echo "[launcher] seat $AGENT boots with: ${SEAT_MODEL_ARGS[*]}"
 claude --dangerously-skip-permissions "${SEAT_MODEL_ARGS[@]}" "$INITIAL_PROMPT"
 SEAT_RC=$?

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-21 14:27 from 286 lesson files (1,212,113 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 4 · W 232. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-21 14:34 from 287 lesson files (1,215,262 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 4 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (4) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md
 
@@ -8101,7 +8101,7 @@ sections (open the file for these): How to apply · First application (same minu
 
 
 ## OXPd runs on the newest Fable, and the Tuesday seat now boots on Fable
-`2026-11-19_oxpd-runs-on-the-newest-fable-tuesday-boots-on-fable.md` · instruction · 2026-11-19 · status: live · tier: W
+`2026-11-19_oxpd-runs-on-the-newest-fable-tuesday-boots-on-fable.md` · instruction · 2026-11-19 · status: superseded (by 2026-11-21_no-fable-unless-flagged-opus-is-the-default.md, Kam 2026-11-21) · tier: W
 
 **Kam's words, verbatim:** *"Friday has been working on a claude to claude agent while away and also on an oxpd projects. she is backing up now.  once ready, she will send you notes to claim and start on the oxpd project.  i would like you to switch to latest fable and use fable agents when working on this project"*
 
@@ -8123,4 +8123,18 @@ sections (open the file for these): The rule · Why · Exception and failure dir
 - The 2026-11-16 "suggest when to switch to the newest Fable" lesson still applies, but only as a flag. The suggestion goes to Kam with a reason, and the default stays Opus.
 - If the seat itself ever boots on Fable (the launcher default), say so at boot and ask Kam. Don't switch it myself.
 - This covers Friday only. Tuesday's OXPd Fable rule and Wednesday's seat are not changed by it.
+
+
+## No Fable on the Tuesday seat or its agents unless I flag that it is necessary; the newest Opus is the default
+`2026-11-21_no-fable-unless-flagged-opus-is-the-default.md` · instruction · 2026-11-21 · status: live · tier: W · supersedes: 2026-11-19_oxpd-runs-on-the-newest-fable-tuesday-boots-on-fable.md
+
+**Kam's words, verbatim:** *"the fable limits are killing the flow and causing problems.  Do not use fable any more unless you flag it is necessary.  Continue this project using the latest opus model"*
+
+sections (open the file for these): The rule · Why · The failure behind it (ledger row 2026-11-21) · Exception
+
+## The rule
+- **The Tuesday seat boots on the newest Opus.** `Launch_Wednesday.command`: the 2026-11-19 `tuesday -> --model fable --fallback-model opus` line is removed; Tuesday takes the shared `--model opus` line, and `ANTHROPIC_DEFAULT_OPUS_MODEL` (set from `models_latest.json`, `claude-opus-5-5` today) makes that alias the newest Opus. Backup `.pre-1121-tuesdayopus`. Checked by arms: tuesday opus, wednesday opus, friday unchanged.
+- **Every agent I start, on every Datasec project (OXPd included), runs on Opus or lower by the routing table** (`2_Project_Files/fleet/specs/model-routing.md`): `model: opus` (or sonnet where the table says so) on an in-session agent, `BRIEF_SEAT_LEVEL=opus` / `SEAT_MODEL_ENV` for a cockpit seat. Commissions written before today that say "model fable" (B1753, B1812, and any other) are launched on Opus; the commission's wording does not override this.
+- **Fable is used only after I FLAG it.** I raise it on the board as a card: the task, why Opus is not enough for it, and what it costs (the Fable allowance is what stalls the flow). I do not launch on Fable on the strength of my own flag; Kam rules the card. This narrows [[2026-11-16_suggest-when-to-switch-to-the-newest-fable]] for this seat: suggestions are for real necessity only, not routine design or review work.
+- **The 2026-11-27 "Fable is back" event in EXPIRING-GRANTS no longer returns anything to Fable.** That row is closed by this word.
 
