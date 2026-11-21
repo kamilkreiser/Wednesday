@@ -12,7 +12,22 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
-## 🟥 CURRENT STATE — Sat 2026-11-21 14:3x (seat resumed on Opus after a ~6 h Fable stall). READ THIS BLOCK FIRST; every block below is history.
+## 🟥 CURRENT STATE — Sat 2026-11-21 ~19:00, the 50% checkpoint (seat on Opus 5.5). READ THIS BLOCK FIRST; every block below is history.
+
+**Kam's standing words:** Windows first (Fri 18:49); Opus everywhere, Fable only when I flag it and he agrees (lesson 2026-11-21_friday-runs-on-opus-fable-only-when-flagged; he will switch accounts if needed); seats on his PC launch with --dangerously-skip-permissions (lesson 2026-11-21_windows-helper-launches-without-permission-prompts); "work with the PC to build things" (EXPIRING-GRANTS top row; admin, registry, firewall and accounts are named to him first). Authority: the 2026-11-18 13:44 row. **No card open.** Usage ~74% (gate stops launches at 90%).
+**CoAgent main = `a034263b474d775d0e965e6234d7a446efc45425`** (tonight: relay-reconnect 104dd39 at 17:3x, W-KIT a034263 at 17:40; Kam told for both).
+| lane | state | Friday's next act |
+|---|---|---|
+| POLICY-MODE %26 | READY FOR MERGE CHECK r4 at `1f58dce5da8e7d189e699ba70eff4b8a18ec46e9` | Friday's clean check.sh RUNNING (bg shell, dies with the seat): work dir /private/tmp/claude-501/mcpm4, out /private/tmp/claude-501/mcpm4.out (last line `exit N`). Green -> evidence into m1_review/merge_check_policy_mode_r4/ -> merge GO addendum 7 (model: RELAY ADDENDUM-6 / W-KIT ADDENDUM-5; fast-forward of exactly 1f58dce) -> ls-remote -> tell Kam -> close %26. Re-run with a NEW dir after a seat death (no runner arg). |
+| WIN-IPC %35 | check.sh running on `0348272` (main a034263 merged) | After POLICY merges: a merge-in addendum (merge main 1f58dce, NO own check.sh needed) -> Friday's clean check.sh of that merged head (covers both) -> merge GO. Then WO-1's notes (same-user pipe-instance squatting; accept may hand a closed connection first) go to the W-DAEMON brief + BACKLOG. |
+| AUDIT-HOST %50 | notes done 1bf4f4e; holding for MERGED WIN-IPC | Its ADDENDUM-2 tells it to merge main, check.sh + runner -> READY FOR MERGE CHECK AUDIT-HOST r3 -> Friday's clean check (check.sh + scripts/red-controls-audit-host.sh) -> merge GO. P-r2-1 is in its BACKLOG (fix before L8). |
+| W-DAEMON | draft read and ruled (`briefs_drafts/2026-11-20_coagent_W-DAEMON_brief_DRAFT.md`) | Issue once WIN-IPC is on main: generate by program; ADD the PC (a strong i7 with VS2022: native build and RUNS on the PC via a WO-2 mail with a fresh bundle, C:\c2c reused) and the WO-1 notes; baseline = Friday's check of then-main. |
+| Windows PC | WO-1 DONE (26/0/1 on real Windows), HOLDING for WO-2 | mail friday-windows-agent@ (scoped key in 4_Credentials/.env WINDOWS_AGENT_AGENTMAIL_KEY); Kam starts it with "check your mail and do WO-n" until the PC's master launcher copy is refreshed. |
+**Watches (die with the seat; re-arm):** scratch watch_any.sh on STATUS_WIN_IPC + STATUS_AUDIT_HOST (+ STATUS_POLICY_MODE after its merge GO); mail_watch.sh for friday-windows-agent@ mail. Holding panes: use fleet/cockpit/wake_ack.sh %N once, not a reply per wake.
+**ETA posted to Kam (bf-8a94b48690cc6):** policy ~20:15, win-ipc ~21:45, audit-host ~midnight.
+**Flake on record:** recovery_differential U-D4 (slot 1 model 41 vs relay 40) failed once under load in the relay merge check, passed 5/5 alone; BACKLOG via GATE-BIND with R2-1/R2-2.
+
+## (superseded) CURRENT STATE — Sat 2026-11-21 14:3x (seat resumed on Opus after a ~6 h Fable stall).
 
 **Kam's standing words:** "lets prioritise the work on windows" (Fri 18:49); NEW STANDING (Sat ~14:20): "use opus from now on so no need to use fable unless you flag its necessary" (lesson `2026-11-21_friday-runs-on-opus-fable-only-when-flagged`; the 24 h grant row is superseded). Authority: the 2026-11-18 13:44 row. No card open for Kam. Owed by Kam: the Windows machine report (asked again 14:2x; timeline PDF shared, `reference/…/16_build-timeline-2026-11-21.md`, dates promised there: policy ~17:00, relay ~19-20:00, win-ipc ~21:00, w-kit tonight, audit-host ~Sun midday, W-DAEMON launch tonight once relay AND win-ipc are on main).
 **Main = `16e83fb`.** Live work (all launched by this seat):
