@@ -82199,5 +82199,78 @@
    "CARD datasec-oxpd-lane-b-database-packages-1121",
    "CARD datasec-oxpd-firmware-unknown-value-callbacks-1121"
   ]
+ },
+ {
+  "id": "datasec-oxpd-sqlserver-driver-identity-packages-1121",
+  "client_project": "Datasec/OXPd",
+  "title": "OXPd database: the standard SQL Server driver brings Microsoft's sign-in packages with it. Keep them?",
+  "bluf": "No action needed tonight: the default keeps them. The state database lane uses Microsoft's own SQL Server driver (Microsoft.Data.SqlClient 6.1.7). That driver always brings along Microsoft's cloud sign-in libraries: Azure.Identity 1.17.1, Azure.Core 1.50.0, the Microsoft identity client 4.84.2 with its broker and helpers, and six identity-model packages. A reviewer checked every package against nuget.org's own published hash (74 of 74 equal) and found that only the driver itself loads in our tests; the sign-in libraries are used only if a customer connects to SQL Server by signing in with Entra ID (read from the packages' documentation, not run). They sit in the database library only, not in the server program today. A telemetry package seen in the list (Application Insights) belongs to the test tools only and was already there. Who decides: you (what ships in the server's dependencies). (Override note: your 'Fetch them once' ruling covered the four packages and their dependencies, but its card named only Entity Framework Core and the PostgreSQL driver, never these sign-in libraries, and the lane's own kit left their staying open for you; the other matches are other subjects.)",
+  "default_action": "a: keep the standard driver and its sign-in libraries",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep them (standard driver)",
+    "detail": "They come with Microsoft's supported driver; they also allow Entra ID sign-in to a customer's SQL Server later"
+   },
+   {
+    "key": "b",
+    "label": "Remove them",
+    "detail": "Means a different, non-standard way to talk to SQL Server; a new lane, a new package question, and no Entra sign-in to SQL Server"
+   },
+   {
+    "key": "c",
+    "label": "Decide later",
+    "detail": "Keep them for now; ask again before the first customer release"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-21T22:28:49.102823+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD rd104-gh-identity-acceptance-false-premise",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD attio-digest-setting-agent-write-vision-identity-1101",
+   "CARD nexusai-records-commit-identity-1116",
+   "CARD datasec-oxpd-q01-hp-confirm-m365-1118",
+   "CARD datasec-oxpd-q02-phone-signin-step-1118",
+   "CARD datasec-oxpd-q03-card-interop-1118",
+   "CARD datasec-oxpd-q04-azure-backend-frozen-1118",
+   "CARD datasec-oxpd-q05-server-location-1118",
+   "CARD datasec-oxpd-q06-reuse-entra-registration-1118",
+   "CARD datasec-oxpd-q07-store-device-admin-pw-1118",
+   "CARD datasec-oxpd-q08-card-reader-models-1118",
+   "CARD datasec-oxpd-q09-printer-generations-1118",
+   "CARD datasec-oxpd-q10-site-size-1118",
+   "CARD datasec-oxpd-q11-licensing-model-1118",
+   "CARD datasec-oxpd-q12-other-vendor-coexist-1118",
+   "CARD datasec-oxpd-q13-legacy-keycloak-1118",
+   "CARD datasec-oxpd-q14-server-packaging-1118",
+   "CARD datasec-oxpd-q15-release-one-scope-1118",
+   "CARD datasec-oxpd-q16-scan-print-behaviour-1118",
+   "CARD datasec-oxpd-q17-universal-print-model-1118",
+   "CARD datasec-oxpd-q18-pull-sharing-ipps-1118",
+   "CARD datasec-oxpd-q19-workpath-deploy-today-1118",
+   "CARD datasec-oxpd-q20-hp-code-rights-1118",
+   "CARD datasec-oxpd-q21-job-audit-supplies-1118",
+   "CARD datasec-oxpd-q22-tls-certificate-1118",
+   "CARD datasec-oxpd-q23-admin-view-location-1118",
+   "CARD datasec-oxpd-q24-no-mfa-token-storage-1118",
+   "CARD datasec-oxpd-q25-test-devices-1118",
+   "CARD datasec-oxpd-start-phase0-1120",
+   "CARD datasec-oxpd-sharepoint-source-1120",
+   "CARD datasec-oxpd-thirteen-defaults-1120",
+   "CARD datasec-oxpd-gateway-and-oxpd1-repos-1120",
+   "CARD datasec-oxpd-sensitivity-labels-1120",
+   "CARD datasec-oxpd-trust-new-folder-1120",
+   "CARD datasec-oxpd-ci-second-review-nogo-1120",
+   "CARD datasec-oxpd-printer-firmware-version-1120",
+   "CARD datasec-oxpd-logging-second-review-nogo-1120",
+   "CARD datasec-oxpd-fable-limit-98pct-1120",
+   "CARD datasec-oxpd-hp-spec-files-in-repo-1121",
+   "CARD datasec-oxpd-lane-b-database-packages-1121",
+   "CARD datasec-oxpd-firmware-unknown-value-callbacks-1121"
+  ]
  }
 ]

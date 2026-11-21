@@ -1,0 +1,26 @@
+Adds two libraries for work package WP1.1. Datasec.Suite.Devices holds
+the device model and its value rules (serial key upper-cased by the
+invariant culture, canonical addresses, lower-case DNS names, closed
+vocabularies, store references by name only, JSON-object capability
+snapshots of at most 262,144 bytes), the registry interface and the
+clock check (300 seconds inclusive; no answer or a failure is unknown,
+never within). It references no package and no project.
+
+Datasec.Suite.Data holds one EF Core model with a migration set for
+PostgreSQL and one for SQL Server, the EF registry (a stale update saves
+nothing; every stored time is UTC; unknown stored text fails the read)
+and an audit log that only grows through the library. The idempotent
+script of each provider is committed as a test snapshot.
+
+Limits, stated in the READMEs: no run against a real PostgreSQL or SQL
+Server yet; the test schema on SQLite comes from the model; ExecuteUpdate,
+ExecuteDelete and raw SQL bypass the audit guard and no database grant or
+trigger exists; the clocks are interfaces only; no sessions, jobs or
+Universal Print tables; the server does not use either library yet.
+
+The EF Core 10.0.15 and Npgsql provider 10.0.4 packages came into the
+project's package cache by one recorded fetch; every later restore is
+offline. 144 new tests. No workflow or build line changes. Nothing is
+deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
