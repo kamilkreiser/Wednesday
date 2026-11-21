@@ -39,6 +39,11 @@ except Exception:
 SEAT = os.environ.get("INBOX_SEAT", "tuesday")
 OWN = os.environ.get("INBOX_OWN") or (SEAT + "-agent")
 ALLOWED = {OWN, "coagent"}
+# FRIDAY ONLY (Kam, live board 2026-11-21 16:29:06, card general-c2c-inbox-guard-windows-address-1121, verbatim:
+# "a — Add that one address for Friday only"): the Windows agent's own General inbox, so Friday can make its
+# inbox-scoped key and read what it sends. Tuesday and Wednesday are unchanged.
+if SEAT == "friday":
+    ALLOWED.add("friday-windows-agent")
 bad = []
 for m in re.finditer(r"agentmail\.to/v[0-9]+/inboxes/([^/\s\"'?]+)", cmd):  # the API path only: prose that mentions an inbox is not a read (2026-11-13 false positive on a note)
     who = m.group(1)
