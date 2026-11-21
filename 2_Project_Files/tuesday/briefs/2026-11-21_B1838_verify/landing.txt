@@ -1,0 +1,75 @@
+LANDING FORM for the OXPd 2 session and token broker lane. Head to land: 70c1fad55128667e62fa5379719dfc6e0ba3ac1b on the
+branch b1831/wp15-token-broker, ONE commit, one parent 5e36d8dca42966395ea3dd014c7f788409eb585f, which IS main as read by
+GET at 17:23 AEDT 2026-11-21 (compare main...head: ahead 1, behind 0, 35 files). Land only when BOTH readers of this lane
+are GO or GO WITH FINDINGS (this reader: VERDICT.md in this folder; the second reader: 2026-11-21_B1839_verify/VERDICT.md).
+
+THE MERGE THE GATE MEASURED. Because the head sits directly on main 5e36d8dc, the merge with that main IS the head's tree:
+the gate's own run of it (closed proxy, locked restore, audit off) built with 0 warnings and 0 errors and ran the whole
+suite: total 947, failed 0, succeeded 943, skipped 4 (894 of main plus 53 of this lane; the 4 are the secret store's
+Windows-only tests). The hosted push run of the head (run 44873292565) reads the same 947 on both legs.
+
+IF ANOTHER LANE LANDS FIRST (main moves off 5e36d8dc): this merge must be RE-MEASURED before it lands. The pull request's
+merge ref is then a tree nobody read: run the pull request's checks against the new main (step 2), require the merged
+totals to equal the new main's total plus 53 on both legs, and have the solution file checked: it must hold every
+project line of both sides in ordinal order of the Path values (this lane's two lines go after Server in /src/ and after
+Secrets.Tests in /tests/). A conflict in any file is a stop: a resolution commit is a new head and needs a new gate.
+
+Environment for every gh line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+Every line below is a GET except opening the pull request, the one re-trigger of step 2 if it is needed, and the merge
+line of step 5.
+
+1. THE PULL REQUEST TEXT. Title: pr-title.txt. Body: pr-body.md. Both were exported through the workflow's own
+   neutral_export as commit messages and scanned with the workflow's options (VERDICT.md, item 8). Change a word and
+   scan again.
+
+2. THE CHECKS ON THE MERGE INTO THE THEN-CURRENT MAIN. Opening the pull request starts pull_request runs on its merge
+   ref. Prove which merge they built before trusting them, with the pull_request run's id:
+
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_retrigger.sh --check datasecau/OXPd_2 <run id> 70c1fad55128667e62fa5379719dfc6e0ba3ac1b <main sha read now>
+
+   rc 0 (MATCH: the job log's `HEAD is now at ... Merge 70c1fad5... into <main>`) = go on. rc 3 (STALE) = run the
+   default mode once (`pr_retrigger.sh datasecau/OXPd_2 PRNUM`; it closes and reopens the pull request) and check
+   again. rc 4 (no Merge line) is NOT a match.
+
+3. THE CHECK WAIT (head pinned; run in the background, its exit is the wake):
+
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/OXPd_2 PRNUM 70c1fad55128667e62fa5379719dfc6e0ba3ac1b 30 45 --min-checks 8
+
+   --min-checks 8 = the distinct check NAMES on the last merged pull request (number 6, head 48120e58, read by GET
+   17:24 AEDT): linux, windows, rules, secret-scan (each twice: push and pull_request), Analyze (actions), Analyze
+   (csharp), Analyze (python), CodeQL. rc 5 (MIXED) is not green. The pull_request legs must read in their logs: linux
+   and windows `total: 947` (if main is still 5e36d8dc) and `failed: 0`; rules `RULES: clean (325 files)`,
+   `Ran 53 tests`, `UNIT-TEST FLOOR: ran 53, floor 53`; secret-scan its two PLANTED-CONTROL lines and `no leaks found`.
+   The ci rows are required by no rule of the repository: this wait is their only guard. The code-scanning rule IS:
+
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/merge&state=open' --jq '.[] | [.number, .rule.id, .rule.security_severity_level, .most_recent_instance.location.path] | @tsv'
+
+   The head must read 70c1fad55128667e62fa5379719dfc6e0ba3ac1b; mergeable true and state clean = go on. CodeQL must
+   report 0 open alerts. Any open alert, or blocked = STOP: an alert is fixed in the code by a new commit and a new
+   gate, never dismissed, and the rule is never bypassed. NO code scan has run on this branch (0 analyses for its ref,
+   read 17:23 AEDT); the C# scan cannot run on this arm64 machine, so the pull request's scan is the only C# proof.
+
+4. LAST READ BEFORE THE MERGE: the branch ref equals 70c1fad55128667e62fa5379719dfc6e0ba3ac1b and main equals the main
+   the step-2 run merged with. If main moved after step 2, go back to step 2.
+
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/b1831 --jq '.[] | [.ref, .object.sha] | @tsv'
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/main --jq '.[] | [.ref, .object.sha] | @tsv'
+
+5. THE SQUASH (one parent, head pinned; the subject with the real number in place of PRNUM; the body exactly the file):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit 70c1fad55128667e62fa5379719dfc6e0ba3ac1b --subject "$(sed 's/#PRNUM/#'PRNUM'/' squash-subject.txt)" --body-file squash-body.txt
+
+   No --admin and no bypass. If the merge is refused, stop and read why.
+
+6. AFTER, on main (GET only): the new main commit has ONE parent (the main of step 4); if that parent is 5e36d8dc its
+   tree equals the head's tree 81628cbb9045c56ac784ebd7f981502822e91172 (325 tracked files); it holds
+   src/Datasec.Suite.Sessions (22 files) and tests/Datasec.Suite.Sessions.Tests (12 files) as at this head and the 21-line solution file; its push run
+   reads the four jobs success with total 947 on both legs, failed 0, RULES: clean (325 files), and the code-scanning
+   rows success; the open code-scanning alerts on main read 0 (0 on 5e36d8dc at 17:23 AEDT).
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/main --jq '[.sha, (.parents | length), .commit.tree.sha, .commit.message[0:120]] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/heads/main&state=open' --jq 'length'
+
+A merge deploys nothing: the repository's one workflow (.github/workflows/ci.yml) builds, tests and scans and has no
+deploy step, and the server does not reference the broker.
