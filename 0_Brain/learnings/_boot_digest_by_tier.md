@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-21 17:02 from 288 lesson files (1,217,278 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 5 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-21 18:11 from 288 lesson files (1,217,921 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 5 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (5) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md · 2026-11-21_windows-helper-launches-without-permission-prompts.md
 
@@ -5397,7 +5397,7 @@ sections (open the file for these): What the grant covers — Wednesday's readin
 **His words, verbatim (2026-09-13 09:1x AEST):**
 > *"this is a new standing rule for all projects - please spin up as many agents as possible to complete the task as long as multiple agents do not create a problem with development through multiple agents working on the same code base.  Also as an FYI - the kreiser.org credits will most likely run out soon and will reset in 3 hours"*
 
-sections (open the file for these): What it widens, and what it does not · How to apply · EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"* · EXTENSION 2026-10-26 ~08:5x — Kam, Wednesday's terminal (on the laptop), verbatim: *"use the maximum number of agents and always try to have the spark running thorugh tickets"*
+sections (open the file for these): What it widens, and what it does not · How to apply · EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"* · EXTENSION 2026-10-26 ~08:5x — Kam, Wednesday's terminal (on the laptop), verbatim: *"use the maximum number of agents and always try to have the spark running thorugh tickets"* · Reinforced 2026-11-21 (Kam, Tuesday terminal, about 16:57 AEDT, verbatim): *"please use as many agents as you can manage to work on the OXPd project"*
 
 ## How to apply
 1. **Every morning sweep and every checkpoint asks: how many DISJOINT lanes exist right now?** — and

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-21 17:02 from 288 lesson files (1,217,068 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-21 18:11 from 288 lesson files (1,217,711 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5451,7 +5451,7 @@ sections (open the file for these): What the grant covers — Wednesday's readin
 **His words, verbatim (2026-09-13 09:1x AEST):**
 > *"this is a new standing rule for all projects - please spin up as many agents as possible to complete the task as long as multiple agents do not create a problem with development through multiple agents working on the same code base.  Also as an FYI - the kreiser.org credits will most likely run out soon and will reset in 3 hours"*
 
-sections (open the file for these): What it widens, and what it does not · How to apply · EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"* · EXTENSION 2026-10-26 ~08:5x — Kam, Wednesday's terminal (on the laptop), verbatim: *"use the maximum number of agents and always try to have the spark running thorugh tickets"*
+sections (open the file for these): What it widens, and what it does not · How to apply · EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"* · EXTENSION 2026-10-26 ~08:5x — Kam, Wednesday's terminal (on the laptop), verbatim: *"use the maximum number of agents and always try to have the spark running thorugh tickets"* · Reinforced 2026-11-21 (Kam, Tuesday terminal, about 16:57 AEDT, verbatim): *"please use as many agents as you can manage to work on the OXPd project"*
 
 ## How to apply
 1. **Every morning sweep and every checkpoint asks: how many DISJOINT lanes exist right now?** — and
