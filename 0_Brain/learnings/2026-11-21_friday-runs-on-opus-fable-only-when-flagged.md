@@ -19,3 +19,5 @@ supersedes: "2026-11-16_architecture-agents-run-on-the-newest-fable (on the Frid
 - This covers Friday only. Tuesday's OXPd Fable rule and Wednesday's seat are not changed by it.
 
 **Related:** [[2026-11-16_architecture-agents-run-on-the-newest-fable]], [[2026-11-16_suggest-when-to-switch-to-the-newest-fable]], [[2026-10-18_model-routing-v10-approved-route-by-the-table]], [[../people/kam]]
+
+**Reinforced 2026-11-21 14:36:23 (live board, verbatim):** "the timeline looks fantastic.  thank you.  please keep going and if you need fable let me know and I will log into a new account.  Also, tell me when you need the windows machine". So a Fable flag is cheap for him (he signs into another account); still flag first, never assume.
