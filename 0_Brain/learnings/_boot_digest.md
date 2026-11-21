@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-21 19:48 from 288 lesson files (1,217,711 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-21 20:07 from 289 lesson files (1,219,292 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8199,6 +8199,17 @@ sections (open the file for these): The rule · Why · Exception and failure dir
 - **Datasec/OXPd:** every agent Tuesday starts for this project (drafters, builders, gates, analysts) runs on the NEWEST Fable, read from `0_Brain/dashboard/data/models_latest.json` at the launch (`claude-fable-5-2` on 2026-11-19), set AT LAUNCH (`SEAT_MODEL_ENV` for a cockpit seat, `model` on an in-session agent); never `/model` into a pane. This overrides the model-routing table's Sonnet/Opus rows for OXPd only, by Kam's word.
 - **The Tuesday seat itself** boots on the `fable` alias with `opus` as the availability fallback: one line in `Launch_Wednesday.command` beside Friday's (commit 2026-11-19, backup `.pre-1119-tuesdayfable`), tested by arms (tuesday fable, friday unchanged, wednesday opus). It takes effect at the next rotation; the rung-5 check reads the pane's model field after it.
 - **The OXPd handover:** Friday holds the project under her own grant (EXPIRING-GRANTS, Friday's OXPd row: analysis, architecture document, plan and questions; NOT a build). When Friday's notes arrive in tuesday-agent@, Tuesday reads them at source, claims `Datasec/OXPd` (WED-OWNERSHIP, check then claim), and starts. What Tuesday may do there is what the notes and Kam's words cover: the Friday row's NOT-covered list (no build, no library change, no Azure, GitHub or HP portal action, no message to HP or any human, no spend) is read as still standing until Kam widens it.
+
+
+## A helper I put on hold gets the next useful job, not an open-ended wait
+`2026-11-21_a-holding-helper-gets-the-next-useful-job.md` · correction · 2026-11-21 · status: live
+
+**The lesson:** When a helper finishes a job and the next planned job is blocked, I don't send it a bare "hold". I give it the most useful unblocked job straight away, and tell Kam the one line to type if it needs restarting. A capable machine sitting idle while Kam watches is waste he notices.
+
+**How to apply:**
+- When a helper reports "done", ask what it can usefully do NOW with what exists: run tests, measure, read and report. Give it that, so its hold only starts when nothing useful is left.
+- For a helper only Kam can restart (the PC seat), tell him the exact line to type in the same message.
+- The same applies to project seats that hold for a merge: if a holding seat could do bounded, useful, non-conflicting work, give it that work.
 
 
 ## Friday runs on Opus; Fable only when I flag it and Kam agrees
