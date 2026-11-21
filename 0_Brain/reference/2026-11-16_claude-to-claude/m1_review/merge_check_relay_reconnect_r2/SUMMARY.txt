@@ -1,0 +1,17 @@
+Friday's clean-clone merge check of relay-reconnect at 104dd394c390b614410cdba76ac45eeffa6bb220 (2026-11-21, started 15:07, ended 17:25)
+
+check.sh: exit 0, CHECK OK; 1,335 passed / 0 failed / 21 ignored over 179 result lines (summed by program) = the builder's r2 figure.
+scripts/red-controls-daemon.sh: exit 1. All rows RED as required (RR-A5 included); the FINAL CLEAN RUN failed ONE test:
+  model_relay_state_delivers_what_a_real_relay_process_delivers (tests/recovery_differential.rs:244, U-D4 differential):
+  slot 1: model 41 items, real relay process 40 items.
+Diagnosis (no-skip rule: re-run alone before believing):
+  - the test file is UNCHANGED by the branch (diff vs main 16e83fb: 0 lines); it came from main (commit 809eb36);
+  - the branch changes nothing in crates/coagent-relay or crates/coagent-daemon/src/recovery.rs (diff stat empty);
+  - the same test PASSED inside this check's own check.sh run (check.log line ~1298);
+  - re-run ALONE 5 times in the same clone and toolchain, heavy count 1 each time: 5 of 5 passed (flake_reruns_alone.txt);
+  - the builder's three test-daemon runs and the independent r2 re-check were green;
+  - the failing pass ran at ~17:25, while the audit-host re-check's red runner was also on the machine.
+  Ruling: a timing-sensitive differential test that already exists on main, failing under machine load; not a fault of this branch. Recorded for BACKLOG (owner: the next lane that owns the daemon's tests, GATE-BIND).
+Static: scope 21 files +5,328 -65 vs main 16e83fb (= the builder's and the re-check's figure); main is an ancestor; root Cargo.toml/Cargo.lock: 0 diff lines.
+ls-remote at 17:2x: main = 16e83fb, relay-reconnect = 104dd39.
+Decision: MERGE GO for 104dd394c390b614410cdba76ac45eeffa6bb220 only.
