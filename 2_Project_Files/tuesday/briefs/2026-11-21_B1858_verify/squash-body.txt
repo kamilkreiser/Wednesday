@@ -1,0 +1,32 @@
+Adds src/Datasec.Suite.Graph, the one shared HTTP layer for the Graph
+calls of the app modules (work package WP3.8), its test project (197
+tests) and two lines of the solution file.
+
+The layer sends only through the caller's HttpClient and keeps no token,
+token source, upload address or body in any field: a token source is
+passed into each call. A call uses one token and at most one refresh on
+a 401. 429 and 503 are retried within MaxThrottleRetries, MaxRetryAfter
+and MaxTotalWait (defaults 3, 30 s, 60 s); every wait honours the
+caller's cancellation. Authorization goes only to the base address's
+origin, never to an upload session address. Next links are followed only
+on the base origin, with loop and page bounds; delta links are returned,
+never followed. Upload pieces go by PUT with exact Content-Range, and
+retries read the session's status and resume from the range it names,
+within bounded retries. Bodies are read up to MaxResponseBytes. Every
+failure is a GraphCallException of one of 12 kinds with no inner
+exception, and the log events carry no path, query, header value, body
+byte or token.
+
+A string or a property name of a page or an upload answer that is not
+valid UTF-8, holds an overlong form or holds an unpaired surrogate
+escape ends as MalformedResponse: two guarded regions catch exactly
+InvalidOperationException, the reader's refusal, at the seven reads
+that turn answer text into .NET text; no body byte reaches a text.
+
+How Microsoft Graph really answers is not measured: every answer in the
+tests is synthetic, and a tenant test is still needed. The host does
+not use the layer yet; the adapter over the token broker is later work.
+No package, workflow or build line changes. Nothing is deployed;
+nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
