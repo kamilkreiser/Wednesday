@@ -2,7 +2,7 @@
 date: 2026-11-16
 type: preference
 source: "Kam, Friday's terminal, 2026-11-16 ~14:5x, verbatim: 'I would like your help on a new version of an old project.  In a moment i will switch you to fable and I would like the architecture agents you use to analyse and design this project to also use the latest fable'"
-status: live
+status: superseded
 supersedes: ""
 tier: W
 ---
@@ -16,3 +16,5 @@ tier: W
 2. In-session subagents: the Agent tool with `model: "fable"`. Cockpit panes: `/model <id from the file>` right after launch, and say so in the brief.
 3. Scope is ANALYSIS and DESIGN for this project. Build, test and gate seats still route by model-routing.md unless Kam extends it; ask, don't widen.
 4. Every launch names this file as the reason for the model choice.
+
+**Superseded on the Friday seat 2026-11-21** by [[2026-11-21_friday-runs-on-opus-fable-only-when-flagged]] (Kam: "use opus from now on so no need to use fable unless you flag its necessary").

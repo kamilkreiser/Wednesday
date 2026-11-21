@@ -7,9 +7,9 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-21 08:16 from 285 lesson files (1,209,589 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 3 · W 232. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-21 14:27 from 286 lesson files (1,212,113 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 4 · W 232. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
-**UNTAGGED (3) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md
+**UNTAGGED (4) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7884,7 +7884,7 @@ OWN inbox: the inbox her merge seat reports READY and MERGED to.
 
 
 ## Architecture agents for the new-version project run on the NEWEST Fable — the same level as the seat
-`2026-11-16_architecture-agents-run-on-the-newest-fable.md` · preference · 2026-11-16 · status: live · tier: W
+`2026-11-16_architecture-agents-run-on-the-newest-fable.md` · preference · 2026-11-16 · status: superseded · tier: W
 
 **The lesson:** For the new version of the old project Kam brought to Friday on 2026-11-16, every agent Friday uses to ANALYSE or DESIGN it (architecture, discovery, design review) runs on the newest Fable, the same model Kam switches the Friday seat to. This is a named exception to the routing table (`fleet/specs/model-routing.md`), where Fable has no worker row: Kam's word is the authority, and the row it supersedes is the "Opus 5.5 for every agent" override, for this project's architecture work only.
 
@@ -7893,6 +7893,8 @@ OWN inbox: the inbox her merge seat reports READY and MERGED to.
 2. In-session subagents: the Agent tool with `model: "fable"`. Cockpit panes: `/model <id from the file>` right after launch, and say so in the brief.
 3. Scope is ANALYSIS and DESIGN for this project. Build, test and gate seats still route by model-routing.md unless Kam extends it; ask, don't widen.
 4. Every launch names this file as the reason for the model choice.
+
+**Superseded on the Friday seat 2026-11-21** by [[2026-11-21_friday-runs-on-opus-fable-only-when-flagged]] (Kam: "use opus from now on so no need to use fable unless you flag its necessary").
 
 
 ## Secuura: audit records and verification are PUBLIC to read; only the creator (and uses the smart contract expressly allows) may WRITE them. A standing rule for every related task and ticket
@@ -8109,4 +8111,16 @@ sections (open the file for these): The rule · Why · Exception and failure dir
 - **Datasec/OXPd:** every agent Tuesday starts for this project (drafters, builders, gates, analysts) runs on the NEWEST Fable, read from `0_Brain/dashboard/data/models_latest.json` at the launch (`claude-fable-5-2` on 2026-11-19), set AT LAUNCH (`SEAT_MODEL_ENV` for a cockpit seat, `model` on an in-session agent); never `/model` into a pane. This overrides the model-routing table's Sonnet/Opus rows for OXPd only, by Kam's word.
 - **The Tuesday seat itself** boots on the `fable` alias with `opus` as the availability fallback: one line in `Launch_Wednesday.command` beside Friday's (commit 2026-11-19, backup `.pre-1119-tuesdayfable`), tested by arms (tuesday fable, friday unchanged, wednesday opus). It takes effect at the next rotation; the rung-5 check reads the pane's model field after it.
 - **The OXPd handover:** Friday holds the project under her own grant (EXPIRING-GRANTS, Friday's OXPd row: analysis, architecture document, plan and questions; NOT a build). When Friday's notes arrive in tuesday-agent@, Tuesday reads them at source, claims `Datasec/OXPd` (WED-OWNERSHIP, check then claim), and starts. What Tuesday may do there is what the notes and Kam's words cover: the Friday row's NOT-covered list (no build, no library change, no Azure, GitHub or HP portal action, no message to HP or any human, no spend) is read as still standing until Kam widens it.
+
+
+## Friday runs on Opus; Fable only when I flag it and Kam agrees
+`2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md` · preference · 2026-11-21 · status: live · tier: UNTAGGED · supersedes: 2026-11-16_architecture-agents-run-on-the-newest-fable (on the Friday seat); the FRIDAY 24-hour Opus row in tasks/EXPIRING-GRANTS.md (now standing, not time-scoped)
+
+**The lesson:** On the Friday seat, every seat, check and in-session agent I launch runs on the newest Opus. Where the routing table says Sonnet, it runs on Sonnet. Nothing runs on Fable by default, and that includes the architecture and design-review agents the 2026-11-16 lesson had put on Fable. If a particular job truly needs Fable (hard design, security, or a diagnosis Opus has failed), I flag it to Kam with the reason, and I use Fable only after his yes.
+
+**How to apply:**
+- At launch, pass the Opus level (`general_seat.sh … opus`, `SEAT_MODEL_ENV`/`BRIEF_SEAT_LEVEL` = the opus id from `0_Brain/dashboard/data/models_latest.json`). Never type an id from memory, and never `/model` a pane.
+- The 2026-11-16 "suggest when to switch to the newest Fable" lesson still applies, but only as a flag. The suggestion goes to Kam with a reason, and the default stays Opus.
+- If the seat itself ever boots on Fable (the launcher default), say so at boot and ask Kam. Don't switch it myself.
+- This covers Friday only. Tuesday's OXPd Fable rule and Wednesday's seat are not changed by it.
 
