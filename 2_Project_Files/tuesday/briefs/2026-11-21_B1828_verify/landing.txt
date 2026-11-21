@@ -1,0 +1,75 @@
+LANDING FORM for the local secret store lane. Head to land: 9826559d7e00d473cd119da622a26dcaf48f922b on the branch
+b1789/wp11-local-secret-store, on main ddbdf8009d0df77d084ef4834bb78d7c4a80b5b0. The commits on the branch beyond main:
+42f926d51082c67b6c87a521d9234836a7c9525e (the library), bf1a4a24492f7849705e48cbc1d4938e15f30c56 (the fix commit; the
+second verdict, GO WITH FINDINGS, read it), and 9826559d7e00d473cd119da622a26dcaf48f922b, a MERGE commit whose first
+parent is bf1a4a24 and whose second parent is main ddbdf800. Delta check of that merge commit: GO WITH FINDINGS
+(VERDICT.md in this folder).
+
+THE RESOLUTION, RECORDED (in place of the old "THIS HEAD CANNOT LAND" paragraph and its step 0). main moved after the
+second verdict (the logging lane, pull request 2; the print-protocol lane, pull request 4; the card decoders, pull
+request 3), and a three-way merge of main and bf1a4a24 conflicted in Datasec.Suite.slnx only. The merge commit
+9826559d resolves it: Datasec.Suite.slnx is the second verdict's block for the case "after the print-protocol lane AND
+the card decoders" (17 lines, 1031 bytes, sha256 a94ad1ac414a9fb3eca2142f150fb254e8219f54bee96752a3e0cef26e21c8d6,
+blob 0791300ab2b36e31e98b8ae8f4b08efc4a543b5b: main's file plus exactly the library's two lines, by ordinal order of the
+Path values); the tree of 9826559d is 4a6fd8501706a01b9966fc897ef4c1b965834796, equal entry by entry to main's tree
+with the branch's 39 paths laid over at bf1a4a24's blobs and the solution file as that block. A delta check read it:
+`git diff bf1a4a24492f7849705e48cbc1d4938e15f30c56 9826559d7e00d473cd119da622a26dcaf48f922b -- src/Datasec.Suite.Secrets
+tests/Datasec.Suite.Secrets.Tests` prints nothing; main's 89 changed paths are blob-equal to main's; the merged tree
+restores locked, builds with 0 warnings and 0 errors and tests total 762, failed 0, succeeded 758, skipped 4; the
+hosted push run of 9826559d reads the four jobs success (linux and windows total 762 each, failed 0).
+
+Never land a head a gate or a delta check did not read: if the branch or main moves after the check, stop.
+
+Environment for every gh line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+Every line below is a GET except the one merge line of step 4.
+
+1. THE PULL REQUEST TEXT. Title: pr-title.txt. Body: pr-body.md. Both were exported through the workflow's own function as
+   a commit message and scanned with the workflow's options (VERDICT.md, item 4). Change a word and scan again.
+
+2. THE CHECK WAIT (head pinned). Read until every row is completed, then require every conclusion success or skipped:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/9826559d7e00d473cd119da622a26dcaf48f922b/check-runs --jq '.check_runs[] | [.name, .status, .conclusion, .app.slug] | @tsv'
+
+   MEASURED on the last merged pull requests: number 4 (head ce38c25e): 12 rows: linux, windows, secret-scan, rules,
+   each twice (push and pull_request), Analyze (actions), Analyze (csharp), Analyze (python), and CodeQL from
+   github-advanced-security; number 3 (head 9fe53569): 20 rows (the four ci jobs four times each, the three Analyze rows,
+   CodeQL); all success. MEASURED on main ddbdf800 after them: 7 rows (the four ci jobs, the three Analyze rows). So wait
+   for AT LEAST 8 ci rows AND the code-scanning rows (Analyze for each language the default setup lists, and the CodeQL
+   result row); read every row to its end. Read check RUNS, never check suites. The ci rows are required by no rule of
+   the repository: this wait is their only guard. The code-scanning rule IS enforced; read it by
+
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/merge&state=open' --jq '.[] | [.number, .rule.id, .rule.security_severity_level, .most_recent_instance.location.path] | @tsv'
+
+   The head must read 9826559d7e00d473cd119da622a26dcaf48f922b; mergeable true and state clean = go on. Any open alert,
+   or blocked = STOP: an alert is fixed in the code by a new commit and a new check, never dismissed, and the rule is
+   never bypassed. No code scan has run on this branch (0 analyses for its ref, read 2026-11-21 15:11 AEDT); it runs on
+   the pull request and is the authority.
+
+3. LAST READ BEFORE THE MERGE: the branch ref equals 9826559d7e00d473cd119da622a26dcaf48f922b; main equals
+   ddbdf8009d0df77d084ef4834bb78d7c4a80b5b0 (the main the merge commit and the delta check read). If main moved, stop:
+   the pull request then merges a tree nobody read.
+
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/b1789 --jq '.[] | [.ref, .object.sha] | @tsv'
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/main --jq '.[] | [.ref, .object.sha] | @tsv'
+
+4. THE SQUASH (one parent, head pinned; the subject with the real number in place of PRNUM; the body exactly the file):
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit 9826559d7e00d473cd119da622a26dcaf48f922b --subject "$(sed 's/#PRNUM/#'PRNUM'/' squash-subject.txt)" --body-file squash-body.txt
+
+   squash-subject.txt ends with (#PRNUM); squash-body.txt ends with its one attribution line. Do not add --admin or any
+   bypass. If the merge is refused, stop and read why.
+
+5. AFTER, on main (GET only): the new main commit has ONE parent (ddbdf800); its tree is the tree of 9826559d
+   (4a6fd8501706a01b9966fc897ef4c1b965834796), so it holds src/Datasec.Suite.Secrets/ (21 files) and
+   tests/Datasec.Suite.Secrets.Tests/ (17 files) as at this head and the Datasec.Suite.slnx of the block above; its push
+   run reads the four jobs success with total 762 on both legs and failed 0, RULES: clean (151 files), and the
+   code-scanning rows success; the open code-scanning alerts on main read 0 (they read 0 on ddbdf800 at 15:11 AEDT).
+   These counts hold unless another lane lands first (then this head cannot land: step 3).
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/main --jq '[.sha, (.parents | length), .commit.tree.sha, .commit.message[0:120]] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/heads/main&state=open' --jq 'length'
+
+A merge deploys nothing: the repository's one workflow (.github/workflows/ci.yml) builds, tests and scans and has no deploy
+step, and the server does not reference the library. No
+setting is changed by any line above.
