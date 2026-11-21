@@ -12,7 +12,7 @@ status: live
 - Open the family file in families/ or the lesson itself the moment a rule fires or a diagnosis needs its cases.
 - Lessons that say the same thing are merged into one line; the count carries their combined reinforcement.
 
-Counts: 287 lessons, 374 rule lines, 314 on this card, 1 enforced, 12 dead, 25 superseded, 22 other-seat-only
+Counts: 288 lessons, 375 rule lines, 314 on this card, 2 enforced, 12 dead, 25 superseded, 22 other-seat-only
 
 ## Most reinforced (read these first)
 - [×773, seat ×26] Before stating any fact in a brief, score, report or ack: take it from a read made in the same action, never a widget, board column, error string, capped query or my earlier prose; name the instrument inline. Never state a mechanism I have not read. — `2026-08-14_i-read-representations-they-read-sources.md`
@@ -201,8 +201,8 @@ Counts: 287 lessons, 374 rule lines, 314 on this card, 1 enforced, 12 dead, 25 s
 - [×13] When a builder's READY lands: name the QA tier in the brief (full: security, data destruction, deploys, human handovers; code-only: tests, docs, config, gated follow-ups; none: hygiene). After 2 NO GO on a class: ship closed, ticket rest; round 3 needs Kam. — `2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md`
 - [×7] When I accept delegated work: diff what was delivered against the brief and Kam's in-pane asks item by item, run one independent probe of the headline claim myself, and commission the refine round myself; only his signature classes go to Kam for approval. — `2026-08-10_own-the-spec-not-just-the-escalation.md`
 - [×6] When posting a correction on a ticket a client reads: it is a new claim set. Hold it until the PR's gate has read it, give every sentence its instrument or 'unmeasured', say less, and edit the wrong comment rather than stacking. — `2026-09-29_a-correction-to-a-client-is-a-new-claim-gate-it-like-code.md`
-- [×1] Datasec GitHub repos: only a commit CodeQL scanned on a PR lands on main (head-pinned squash merge or fast-forward of that commit). Seats push branches only. Fix alerts in code, never dismiss; never seek a ruleset bypass. — `2026-09-29_datasec-github-commits-go-through-codeql.md`
-- [×1] Before a head-pinned merge: read the printed check TABLE and confirm it names every job that repo expects (tuesday/tools/pr_checks_wait.sh --min-checks N, N from the last merged PR); never merge on the ALL GREEN line. A finished set of 1 is not the set. — `2026-09-29_datasec-github-commits-go-through-codeql.md` (rule 2)
+- [×2, seat ×1] Datasec GitHub repos: only a commit CodeQL scanned on a PR lands on main (head-pinned squash merge or fast-forward of that commit). Seats push branches only. Fix alerts in code, never dismiss; never seek a ruleset bypass. — `2026-09-29_datasec-github-commits-go-through-codeql.md`
+- [×2, seat ×1] Before a head-pinned merge: read the printed check TABLE and confirm it names every job that repo expects (tuesday/tools/pr_checks_wait.sh --min-checks N, N from the last merged PR); never merge on the ALL GREEN line. A finished set of 1 is not the set. — `2026-09-29_datasec-github-commits-go-through-codeql.md` (rule 2)
 - [new] Batch QA gates: one session covers file-disjoint changes of the same tier; re-pin just before launch; never re-gate an unchanged diff; resume after harness fault; tier honestly. A round 2 after a real finding is fine; never cut gates on signature classes. — `2026-09-18_minimise-gate-duplication-batch-them.md`
 - [new] When a change adds an early return, gate or switched call site in a shared function: enumerate its callers' negative-asserting cells (not just the diff) and confirm each still reaches the check it is named for; prove with a paired mutation. — `2026-09-20_an-early-return-disarms-tests-outside-the-diff.md`
 - [new] When reporting a test disarmed by an earlier gate: say both halves (the product may be correct; the guard is now unexercised, a coverage defect). The fix is usually one line in the FIXTURE to satisfy the new gate, not a change to the policy. — `2026-09-20_an-early-return-disarms-tests-outside-the-diff.md` (rule 3)
@@ -412,6 +412,7 @@ Counts: 287 lessons, 374 rule lines, 314 on this card, 1 enforced, 12 dead, 25 s
 
 ## Enforced by a tool (the tool remembers; one line each)
 - When a seat is launched by a rotation (--self or --dead): a hard preflight failure never stops it. Log it, put the failu… — enforced by `Launch_Wednesday.command` — `2026-11-16_preflight-failure-must-not-kill-a-rotation.md`
+- Any Claude Code session I set up on Kam's Windows PC launches with --dangerously-skip-permissions (his choice); the brie… — enforced by `2_Project_Files/windows/Launch_Friday_Windows.cmd` — `2026-11-21_windows-helper-launches-without-permission-prompts.md`
 
 ## Not on this card
 - dead: 2026-09-07_deploy-grant-and-fix-the-visible-data.md, 2026-09-07_production-ban-lifted-for-the-week.md, 2026-09-10_deploy-both-boxes-grant-expires-sunday.md, 2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once.md, 2026-09-18_no-claude-agents-local-model-only-until-sunday.md, 2026-10-05_october-deploy-both-boxes-when-ready.md, 2026-10-06_use-to-100pct-spark-all-tickets-one-or-two-deployers.md, 2026-10-08_new-account-push-merge-test-as-much-as-possible.md, 2026-10-08_use-to-100pct-raise-gate-merge-seats-only.md, 2026-10-10_today-mainly-spark-and-sonnet-double-check-everything.md, 2026-10-28_never-keep-the-spark-idle-quota-and-capability-data.md, 2026-11-16_grant-build-coagent-overnight-until-the-morning-review.md

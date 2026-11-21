@@ -7,9 +7,9 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-21 14:37 from 287 lesson files (1,215,602 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 4 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-21 17:02 from 288 lesson files (1,217,278 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 5 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
-**UNTAGGED (4) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md
+**UNTAGGED (5) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md · 2026-11-21_windows-helper-launches-without-permission-prompts.md
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -8137,4 +8137,15 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 - **Every agent I start, on every Datasec project (OXPd included), runs on Opus or lower by the routing table** (`2_Project_Files/fleet/specs/model-routing.md`): `model: opus` (or sonnet where the table says so) on an in-session agent, `BRIEF_SEAT_LEVEL=opus` / `SEAT_MODEL_ENV` for a cockpit seat. Commissions written before today that say "model fable" (B1753, B1812, and any other) are launched on Opus; the commission's wording does not override this.
 - **Fable is used only after I FLAG it.** I raise it on the board as a card: the task, why Opus is not enough for it, and what it costs (the Fable allowance is what stalls the flow). I do not launch on Fable on the strength of my own flag; Kam rules the card. This narrows [[2026-11-16_suggest-when-to-switch-to-the-newest-fable]] for this seat: suggestions are for real necessity only, not routine design or review work.
 - **The 2026-11-27 "Fable is back" event in EXPIRING-GRANTS no longer returns anything to Fable.** That row is closed by this word.
+
+
+## Seats I start on Kam's Windows PC launch with permission prompts off
+`2026-11-21_windows-helper-launches-without-permission-prompts.md` · preference · 2026-11-21 · status: live · tier: UNTAGGED
+
+**The lesson:** Any Claude Code session I set up to start on Kam's Windows PC (the checking seat, and later CoAgent test seats there) launches with `--dangerously-skip-permissions`. That is the real flag; he wrote "--dangerously-bypass-permission", and I checked the exact name with `claude --help`. The brief's own rules then carry the safety: install or change nothing without his yes typed at the keyboard, delete nothing, and never touch the firewall, registry or accounts. I don't add prompts back, and I don't argue the choice again.
+
+**How to apply:**
+- `2_Project_Files/windows/Launch_Friday_Windows.cmd` passes `--dangerously-skip-permissions` and prints a line saying prompts are off. Every future Windows launcher I write does the same.
+- Keep the brief's "ask the owner in chat before any install or change" rule. With prompts off, it is the only guard.
+- This covers Windows seats on his PC only. Mac seats keep their own launch settings.
 

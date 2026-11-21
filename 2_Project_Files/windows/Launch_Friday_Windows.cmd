@@ -78,11 +78,12 @@ if exist "%FRIDAY_WORK%\agentmail_key.txt" echo  Mail key: in place (the helper 
 if not exist "%FRIDAY_WORK%\agentmail_key.txt" echo  Mail key: not found beside this launcher (no mail; that is fine).
 echo.
 echo  If this is the first run, a browser opens for the Claude login.
+echo  Permission prompts are OFF (the owner's choice, 2026-11-21): the helper still asks you in chat before installing anything.
 echo  Starting the session now. Type  /exit  to leave it.
 echo.
 
 cd /d "%FRIDAY_WORK%"
-call "%CLAUDE_EXE%" --model %FRIDAY_MODEL% "You are Friday's Windows checking seat. Read the file FRIDAY-WINDOWS-BRIEF.txt in this folder, whole, and follow it."
+call "%CLAUDE_EXE%" --model %FRIDAY_MODEL% --dangerously-skip-permissions "You are Friday's Windows checking seat. Read the file FRIDAY-WINDOWS-BRIEF.txt in this folder, whole, and follow it."
 echo.
 echo  Session ended. The report, if one was written, is in:
 echo    %FRIDAY_WORK%\machine-report.md
