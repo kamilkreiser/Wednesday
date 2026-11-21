@@ -1,0 +1,33 @@
+Adds src/Datasec.Suite.Sessions, the session and token broker of the
+server (component C6, work package WP1.5), its test project (74 tests)
+and two lines of the solution file.
+
+The broker holds and hands out tokens another component obtained. A
+session is keyed by device serial, platform and platform session id; one
+live session per device. An OXPd 1.x session gets a 32-byte random
+handle, of which only the SHA-256 is kept, bound to its device. The
+access token is handed out only through one method that compares the
+subject the grant states with the session user. Refresh happens only by
+calling ITokenRefresher: lazily inside a 5-minute margin and on demand,
+one call per session at a time. The call starts on the thread pool, so
+the 30-second bound on the broker's TimeProvider covers the whole call,
+also a refresher that blocks before it returns its task. An answer is
+kept only when it is valid for the same subject; after a refresh the
+idle deadline is checked again before a token is handed out. Every
+deadline is held on the wall clock and the monotonic clock. Each live
+session has one record, encrypted by the secret store, under
+sessions/<random id>; it is erased when the session ends, the writer
+clears every buffer it outgrows, and the constructor restores records
+inside a 10-minute restart window.
+
+The broker never decodes, parses or mints a token, has no sign-in flow,
+no timer and no logging, and the host does not use it yet. Limits are
+stated in its README: after a time-out a refresher that ignores
+cancellation can overlap the next call; a wall clock set back before a
+restart can lengthen a restored session's idle life by at most the
+step; a blocking event handler blocks the callers of that refresh; one
+unreadable record in its partition stops it from starting until the
+record is moved aside. No package, workflow or build line changes.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

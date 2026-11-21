@@ -1,0 +1,1504 @@
+using System.Buffers.Text;
+using System.Security.Cryptography;
+using System.Text;
+using Datasec.Suite.Secrets;
+
+namespace Datasec.Suite.Sessions.Tests;
+
+// The independent reader's own probes (scratch only; never part of the lane).
+internal static class ReaderReport
+{
+    private static readonly object Sync = new();
+    internal const string FilePath = "/private/tmp/b1852-gate/out/probes.txt";
+
+    internal static void Line(string text)
+    {
+        lock (Sync)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+            File.AppendAllText(FilePath, DateTime.UtcNow.ToString("HH:mm:ss.fff") + " " + text + "\n");
+        }
+    }
+}
+
+internal sealed class Texts
+{
+    private readonly List<string> _all = new();
+
+    internal void Add(object? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        lock (_all)
+        {
+            _all.Add(value.ToString() ?? string.Empty);
+            if (value is Exception e)
+            {
+                _all.Add(e.Message);
+            }
+        }
+    }
+
+    internal static List<byte[]> Forms(byte[] needle)
+    {
+        var forms = RawScan.FormsOf(needle);
+        forms.Add(Encoding.Unicode.GetBytes(Encoding.Latin1.GetString(needle)));
+        forms.Add(Encoding.BigEndianUnicode.GetBytes(Encoding.Latin1.GetString(needle)));
+        // base64 of the needle at each alignment inside a longer stream: the full groups only.
+        for (var skip = 0; skip < 3 && needle.Length - skip >= 6; skip++)
+        {
+            var part = needle.AsSpan(skip).ToArray();
+            var b64 = Convert.ToBase64String(part);
+            var whole = (part.Length / 3) * 4;
+            var core = b64.Substring(4, whole - 8);
+            if (core.Length >= 8)
+            {
+                forms.Add(Encoding.ASCII.GetBytes(core));
+                forms.Add(Encoding.ASCII.GetBytes(core.Replace('+', '-').Replace('/', '_')));
+            }
+        }
+
+        return forms;
+    }
+
+    internal int Check(IEnumerable<byte[]> needles, string cell)
+    {
+        List<string> copy;
+        lock (_all)
+        {
+            copy = _all.ToList();
+        }
+
+        var i = 0;
+        foreach (var needle in needles)
+        {
+            foreach (var form in Forms(needle))
+            {
+                var asText = Encoding.Latin1.GetString(form);
+                foreach (var t in copy)
+                {
+                    Assert.False(t.Contains(asText, StringComparison.OrdinalIgnoreCase), cell + ": needle " + i + " found in a text");
+                }
+            }
+
+            i++;
+        }
+
+        return copy.Count;
+    }
+
+    internal static bool FolderHolds(string folder, byte[] needle)
+    {
+        var forms = Forms(needle);
+        foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+        {
+            var content = File.ReadAllBytes(file);
+            foreach (var form in forms)
+            {
+                if (content.AsSpan().IndexOf(form) >= 0)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    internal static void StoreClean(StoreRoot root, string cell, IEnumerable<byte[]> needles)
+    {
+        var marker = Encoding.ASCII.GetBytes("reader-control-" + Guid.NewGuid().ToString("N"));
+        var control = Path.Combine(root.Root, "reader-control.txt");
+        Directory.CreateDirectory(root.Root);
+        File.WriteAllBytes(control, marker);
+        try
+        {
+            Assert.True(FolderHolds(root.Root, marker), cell + ": control not found");
+            var i = 0;
+            foreach (var n in needles)
+            {
+                Assert.False(FolderHolds(root.Root, n), cell + ": needle " + i + " in clear under the store root");
+                i++;
+            }
+        }
+        finally
+        {
+            File.Delete(control);
+        }
+    }
+}
+
+internal sealed class BlockingRefresher : ITokenRefresher
+{
+    internal readonly ManualResetEventSlim Gate = new(false);
+    internal int Calls;
+    internal Func<TokenGrant>? Answer;
+
+    public Task<TokenGrant> RefreshAsync(SessionKey session, ReadOnlyMemory<byte> renewalState, string subject, CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref Calls);
+        Gate.Wait(TimeSpan.FromSeconds(20));
+        return Task.FromResult(Answer!());
+    }
+}
+
+internal sealed class ScriptRefresher : ITokenRefresher
+{
+    internal Func<SessionKey, ReadOnlyMemory<byte>, string, CancellationToken, Task<TokenGrant>> Body = (_, _, _, _) => Task.FromResult<TokenGrant>(null!);
+    internal int Calls;
+    internal readonly List<ReadOnlyMemory<byte>> Renewals = new();
+
+    public Task<TokenGrant> RefreshAsync(SessionKey session, ReadOnlyMemory<byte> renewalState, string subject, CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref Calls);
+        lock (Renewals)
+        {
+            Renewals.Add(renewalState);
+        }
+
+        return Body(session, renewalState, subject, cancellationToken);
+    }
+}
+
+internal sealed class KeepingStore : ISessionRecordStore
+{
+    private readonly ISessionRecordStore _inner;
+    internal readonly List<byte[]> Loaded = new();
+    internal bool FailList;
+
+    internal KeepingStore(ISessionRecordStore inner)
+    {
+        _inner = inner;
+    }
+
+    public void Save(string id, ReadOnlySpan<byte> record) => _inner.Save(id, record);
+
+    public bool TryLoad(string id, out byte[]? record)
+    {
+        var r = _inner.TryLoad(id, out record);
+        if (record is not null)
+        {
+            Loaded.Add(record);
+        }
+
+        return r;
+    }
+
+    public bool Delete(string id) => _inner.Delete(id);
+
+    public IReadOnlyList<string> ListIds() => FailList ? throw new IOException("planted listing failure") : _inner.ListIds();
+}
+
+public sealed class ZReaderProbes
+{
+    private static CancellationToken Ct => TestContext.Current.CancellationToken;
+
+    private static async Task<(AccessToken? Token, TokenBrokerException? Refusal)> Try(Func<Task<AccessToken>> call, Texts texts)
+    {
+        try
+        {
+            var t = await call();
+            texts.Add(t);
+            return (t, null);
+        }
+        catch (TokenBrokerException e)
+        {
+            texts.Add(e);
+            Assert.Null(e.InnerException);
+            return (null, e);
+        }
+    }
+
+    private static TokenBrokerException? TrySync(Action call, Texts texts)
+    {
+        try
+        {
+            call();
+            return null;
+        }
+        catch (TokenBrokerException e)
+        {
+            texts.Add(e);
+            Assert.Null(e.InnerException);
+            return e;
+        }
+    }
+
+    // ---------- H1 to H4: handles ----------
+    [Fact]
+    public async Task R_handles_never_issued_altered_ended_or_on_another_device_are_one_not_found()
+    {
+        using var kit = new Kit();
+        var texts = new Texts();
+        var issued = kit.SignIn(1, SessionPlatform.Oxpd1).Handle!.Value;
+        var other = kit.SignIn(2, SessionPlatform.Oxpd1).Handle!.Value;
+        texts.Add(issued);
+        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+        var v = issued.Value;
+        var candidates = new List<string?>();
+        for (var i = 0; i < 1000; i++)
+        {
+            candidates.Add(Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(32)));
+        }
+
+        foreach (var n in new[] { 0, 1, 42, 44, 10000 })
+        {
+            candidates.Add(new string('A', n));
+        }
+
+        foreach (var c in "+/= \t\0é​.~")
+        {
+            candidates.Add(v.Substring(0, 21) + c + v.Substring(22));
+        }
+
+        var altered = 0;
+        for (var p = 0; p < 43; p++)
+        {
+            foreach (var c in alphabet)
+            {
+                if (c != v[p])
+                {
+                    candidates.Add(v.Substring(0, p) + c + v.Substring(p + 1));
+                    altered++;
+                }
+            }
+        }
+
+        var bytes = Base64Url.DecodeFromChars(v);
+        bytes[^1]++;
+        candidates.Add(Base64Url.EncodeToString(bytes));
+        candidates.Add(v + "=");
+        candidates.Add(v + "\n");
+        candidates.Add(" " + v.Substring(1));
+        candidates.Add(new string(v.Select(ch => char.IsUpper(ch) ? char.ToLowerInvariant(ch) : char.ToUpperInvariant(ch)).ToArray()));
+        candidates.Add(null);
+        var messages = new HashSet<string>(StringComparer.Ordinal);
+        var calls = 0;
+        foreach (var cand in candidates)
+        {
+            var h = cand is null ? default : new SessionHandle(cand);
+            var (t1, r1) = await Try(() => kit.Broker.GetTokenAsync(h, Data.Serial(1), Ct), texts);
+            var (t2, r2) = await Try(() => kit.Broker.GetNewTokenAsync(h, Data.Serial(1), Ct), texts);
+            Assert.Null(t1);
+            Assert.Null(t2);
+            Assert.Equal(TokenBrokerError.SessionNotFound, r1!.Reason);
+            Assert.Equal(TokenBrokerError.SessionNotFound, r2!.Reason);
+            Assert.False(kit.Broker.SignOut(h, Data.Serial(1)));
+            messages.Add(r1.Message);
+            messages.Add(r2.Message);
+            calls += 3;
+        }
+
+        // the right handle with another device serial, by case, by one more character; another device's handle
+        foreach (var serial in new[] { Data.Serial(2), Data.Serial(1).ToLowerInvariant(), Data.Serial(1) + "X", "SERIAL001" })
+        {
+            var (t, r) = await Try(() => kit.Broker.GetTokenAsync(issued, serial, Ct), texts);
+            Assert.Null(t);
+            Assert.Equal(TokenBrokerError.SessionNotFound, r!.Reason);
+            Assert.False(kit.Broker.SignOut(issued, serial));
+            messages.Add(r.Message);
+            calls += 2;
+        }
+
+        var (tx, rx) = await Try(() => kit.Broker.GetTokenAsync(other, Data.Serial(1), Ct), texts);
+        Assert.Null(tx);
+        messages.Add(rx!.Message);
+        Assert.Single(messages);
+        Assert.Equal(0, kit.Refresher.Calls);
+        using (var good = await kit.Broker.GetTokenAsync(issued, Data.Serial(1), Ct))
+        {
+            Assert.True(good.AsSpan().SequenceEqual(Data.Access(1)), "handle: the issued handle stopped working");
+        }
+
+        // ended: sign-out, new sign-in, expiry by sweep, subject mismatch at a refresh
+        Assert.True(kit.Broker.SignOut(issued, Data.Serial(1)));
+        Assert.Equal(TokenBrokerError.SessionNotFound, (await Try(() => kit.Broker.GetTokenAsync(issued, Data.Serial(1), Ct), texts)).Refusal!.Reason);
+        var h3 = kit.SignIn(3, SessionPlatform.Oxpd1).Handle!.Value;
+        kit.SignIn(3, SessionPlatform.Oxpd1);
+        Assert.Equal(TokenBrokerError.SessionNotFound, (await Try(() => kit.Broker.GetTokenAsync(h3, Data.Serial(3), Ct), texts)).Refusal!.Reason);
+        var h4 = kit.SignIn(4, SessionPlatform.Oxpd1, idle: TimeSpan.FromSeconds(5)).Handle!.Value;
+        kit.Clock.Advance(TimeSpan.FromSeconds(6));
+        kit.Broker.Sweep();
+        Assert.Equal(TokenBrokerError.SessionNotFound, (await Try(() => kit.Broker.GetTokenAsync(h4, Data.Serial(4), Ct), texts)).Refusal!.Reason);
+        var h5 = kit.SignIn(5, SessionPlatform.Oxpd1).Handle!.Value;
+        kit.Refresher.Answer = FakeRefresher.Gives(() => new TokenGrant(Data.Access(55), Data.Renewal(55), Data.User(6), kit.Now + Data.Life));
+        Assert.Equal(TokenBrokerError.SubjectMismatch, (await Try(() => kit.Broker.GetNewTokenAsync(h5, Data.Serial(5), Ct), texts)).Refusal!.Reason);
+        Assert.Equal(TokenBrokerError.SessionNotFound, (await Try(() => kit.Broker.GetTokenAsync(h5, Data.Serial(5), Ct), texts)).Refusal!.Reason);
+        var scanned = texts.Check(new[] { Encoding.ASCII.GetBytes(v), Base64Url.DecodeFromChars(v), Data.Access(1), Data.Renewal(1), Encoding.UTF8.GetBytes(Data.User(1)), Encoding.UTF8.GetBytes(Data.Serial(1)), Encoding.UTF8.GetBytes(Data.PlatformSession(1)) }, "handles");
+        ReaderReport.Line("H1-H4 handles: candidates " + candidates.Count + " (random 1000, altered one place " + altered + "), broker calls " + calls + ", distinct messages " + messages.Count + ", texts scanned " + scanned);
+    }
+
+    // ---------- H5, H11, Q9: subjects ----------
+    private static List<string> NearSubjects()
+    {
+        var user = Data.User(1);
+        var list = new List<string>();
+        for (var i = 0; i < user.Length; i++)
+        {
+            list.Add(user.Substring(0, i) + (char)(user[i] + 1) + user.Substring(i + 1));
+            if (char.IsLetter(user[i]))
+            {
+                list.Add(user.Substring(0, i) + char.ToUpperInvariant(user[i]) + user.Substring(i + 1));
+            }
+        }
+
+        list.Add(user + " ");
+        list.Add(" " + user);
+        list.Add(user.ToUpperInvariant());
+        list.Add(user + "\0");
+        list.Add(string.Empty);
+        return list;
+    }
+
+    [Fact]
+    public async Task R_subjects_that_differ_by_one_character_case_or_normal_form_are_refused_at_sign_in_and_end_a_session_at_refresh()
+    {
+        var texts = new Texts();
+        var rows = NearSubjects();
+        rows.Add("rené@example.test");
+        var composed = "rené@example.test";
+        var decomposed = "rené@example.test";
+        var signIns = 0;
+        var refreshes = 0;
+        foreach (var s in rows)
+        {
+            using var kit = new Kit();
+            var user = s == composed ? decomposed : Data.User(1);
+            using (var g = new TokenGrant(Data.Access(1), Data.Renewal(1), s, kit.Now + Data.Life))
+            {
+                var r = TrySync(() => kit.Broker.SignIn(Data.Key(1), user, Data.Idle, g), texts);
+                Assert.Equal(TokenBrokerError.SubjectMismatch, r!.Reason);
+            }
+
+            Assert.Empty(kit.SessionNames());
+            Assert.Empty(kit.Events);
+            signIns++;
+            using (var g2 = new TokenGrant(Data.Access(2), Data.Renewal(2), user, kit.Now + Data.Life))
+            {
+                kit.Broker.SignIn(Data.Key(2), user, Data.Idle, g2);
+            }
+
+            kit.Refresher.Answer = FakeRefresher.Gives(() => new TokenGrant(Data.Access(22), Data.Renewal(22), s, kit.Now + Data.Life));
+            var (t, rr) = await Try(() => kit.Broker.GetNewTokenAsync(Data.Key(2), Ct), texts);
+            Assert.Null(t);
+            Assert.Equal(TokenBrokerError.SubjectMismatch, rr!.Reason);
+            Assert.Empty(kit.SessionNames());
+            Assert.Contains(kit.Events, e => e.Kind == SessionEventKind.SignedOut && e.Reason == SignOutReason.SubjectMismatch);
+            Texts.StoreClean(kit.Root, "subject", new[] { Data.Access(2), Data.Access(22), Data.Renewal(2), Data.Renewal(22) });
+            refreshes++;
+        }
+
+        texts.Check(new[] { Encoding.UTF8.GetBytes(Data.User(1)), Encoding.UTF8.GetBytes(Data.User(2)), Data.Access(22) }, "subjects");
+        ReaderReport.Line("H5/H11 subjects: " + rows.Count + " near subjects, sign-ins refused " + signIns + ", refresh answers that ended the session " + refreshes);
+    }
+
+    // ---------- H7 to H10, H8: refreshers ----------
+    private sealed record Shape(string Name, Func<Kit, Func<CancellationToken, Task<TokenGrant>>> Make, TokenBrokerError? Expect, bool Accepted);
+
+    [Fact]
+    public async Task R_refreshers_that_throw_return_garbage_or_answer_wrongly_end_in_a_typed_refusal_or_the_right_token()
+    {
+        var texts = new Texts();
+        var max = new TokenBrokerOptions().MaxTokenPartBytes;
+        var leakText = Encoding.UTF8.GetString(Data.Access(1)) + " " + Data.User(1);
+        TokenGrant G(Kit k, byte[] a, byte[] r, string s, DateTimeOffset e) => new(a, r, s, e);
+        var shapes = new List<Shape>
+        {
+            new("throws async with token text", k => _ => Task.FromException<TokenGrant>(new InvalidOperationException(leakText)), TokenBrokerError.RefreshFailed, false),
+            new("cancelled task", k => _ => Task.FromCanceled<TokenGrant>(new CancellationToken(true)), TokenBrokerError.RefreshFailed, false),
+            new("own TimeoutException", k => _ => Task.FromException<TokenGrant>(new TimeoutException(leakText)), TokenBrokerError.RefreshFailed, false),
+            new("null grant", k => _ => Task.FromResult<TokenGrant>(null!), TokenBrokerError.RefreshAnswerRefused, false),
+            new("disposed grant", k => _ => { var g = G(k, Data.Access(9), Data.Renewal(9), Data.User(1), k.Now + Data.Life); g.Dispose(); return Task.FromResult(g); }, TokenBrokerError.RefreshAnswerRefused, false),
+            new("expiry now", k => _ => Task.FromResult(G(k, Data.Access(9), Data.Renewal(9), Data.User(1), k.Now)), TokenBrokerError.RefreshAnswerRefused, false),
+            new("expiry minus 1 tick", k => _ => Task.FromResult(G(k, Data.Access(9), Data.Renewal(9), Data.User(1), k.Now.AddTicks(-1))), TokenBrokerError.RefreshAnswerRefused, false),
+            new("expiry MinValue", k => _ => Task.FromResult(G(k, Data.Access(9), Data.Renewal(9), Data.User(1), DateTimeOffset.MinValue)), TokenBrokerError.RefreshAnswerRefused, false),
+            new("expiry plus 1 tick", k => _ => Task.FromResult(G(k, Data.Access(9), Data.Renewal(9), Data.User(1), k.Now.AddTicks(1))), null, true),
+            new("expiry MaxValue", k => _ => Task.FromResult(G(k, Data.Access(9), Data.Renewal(9), Data.User(1), DateTimeOffset.MaxValue)), null, true),
+            new("access exactly the cap", k => _ => Task.FromResult(G(k, Enumerable.Repeat((byte)7, max).ToArray(), Data.Renewal(9), Data.User(1), k.Now + Data.Life)), null, true),
+            new("access cap plus 1", k => _ => Task.FromResult(G(k, new byte[max + 1], Data.Renewal(9), Data.User(1), k.Now + Data.Life)), TokenBrokerError.TokenTooLarge, false),
+            new("renewal cap plus 1", k => _ => Task.FromResult(G(k, Data.Access(9), new byte[max + 1], Data.User(1), k.Now + Data.Life)), TokenBrokerError.TokenTooLarge, false),
+            new("empty access", k => _ => Task.FromResult(G(k, Array.Empty<byte>(), Data.Renewal(9), Data.User(1), k.Now + Data.Life)), TokenBrokerError.RefreshAnswerRefused, false),
+            new("empty renewal", k => _ => Task.FromResult(G(k, Data.Access(9), Array.Empty<byte>(), Data.User(1), k.Now + Data.Life)), null, true),
+            new("another subject by case", k => _ => Task.FromResult(G(k, Data.Access(9), Data.Renewal(9), Data.User(1).ToUpperInvariant(), k.Now + Data.Life)), TokenBrokerError.SubjectMismatch, false),
+            new("empty subject", k => _ => Task.FromResult(G(k, Data.Access(9), Data.Renewal(9), string.Empty, k.Now + Data.Life)), TokenBrokerError.SubjectMismatch, false),
+        };
+        var counted = 0;
+        foreach (var shape in shapes)
+        {
+            using var kit = new Kit();
+            kit.SignIn(1);
+            kit.Refresher.Answer = shape.Make(kit);
+            var (t, r) = await Try(() => kit.Broker.GetNewTokenAsync(Data.Key(1), Ct), texts);
+            if (shape.Accepted)
+            {
+                Assert.True(t is not null, shape.Name + ": expected a token");
+                Assert.False(t!.AsSpan().SequenceEqual(Data.Access(1)), shape.Name + ": the old token came back");
+                t.Dispose();
+            }
+            else
+            {
+                Assert.True(r is not null && r.Reason == shape.Expect, shape.Name + ": reason " + r?.Reason);
+                if (shape.Expect == TokenBrokerError.SubjectMismatch)
+                {
+                    Assert.Empty(kit.SessionNames());
+                }
+                else
+                {
+                    // the held grant is unchanged and handed out while valid
+                    using var held = await kit.Broker.GetTokenAsync(Data.Key(1), Ct);
+                    Assert.True(held.AsSpan().SequenceEqual(Data.Access(1)), shape.Name + ": held grant changed");
+                    Assert.Single(kit.SessionNames());
+                }
+            }
+
+            Assert.Equal(1, kit.Refresher.Calls);
+            counted++;
+        }
+
+        // the interface method itself throws, or returns no task (not an async method)
+        var direct = new (string Name, Func<SessionKey, ReadOnlyMemory<byte>, string, CancellationToken, Task<TokenGrant>> Body)[]
+        {
+            ("throws from the interface call", (_, _, _, _) => throw new InvalidOperationException(leakText)),
+            ("returns a null task", (_, _, _, _) => null!),
+            ("throws OperationCanceledException from the call", (_, _, _, _) => throw new OperationCanceledException(leakText)),
+        };
+        foreach (var (name, body) in direct)
+        {
+            var root = new StoreRoot();
+            try
+            {
+                var clock = new TestClock();
+                using var store = root.Open();
+                var script = new ScriptRefresher { Body = body };
+                using var broker = new TokenBroker(new TokenBrokerOptions(), new SecretStoreSessionRecordStore(store), script, clock);
+                using (var g = new TokenGrant(Data.Access(1), Data.Renewal(1), Data.User(1), clock.GetUtcNow() + Data.Life))
+                {
+                    broker.SignIn(Data.Key(1), Data.User(1), Data.Idle, g);
+                }
+
+                var (t, r) = await Try(() => broker.GetNewTokenAsync(Data.Key(1), Ct), texts);
+                Assert.True(t is null && r!.Reason == TokenBrokerError.RefreshFailed, name + ": " + r?.Reason);
+                var (t2, _) = await Try(() => broker.GetNewTokenAsync(Data.Key(1), Ct), texts);
+                Assert.Null(t2);
+                Assert.Equal(2, script.Calls);
+                using var held = await broker.GetTokenAsync(Data.Key(1), Ct);
+                Assert.True(held.AsSpan().SequenceEqual(Data.Access(1)), name + ": held grant changed");
+                counted++;
+            }
+            finally
+            {
+                root.Dispose();
+            }
+        }
+
+        texts.Check(new[] { Data.Access(1), Data.Access(9), Data.Renewal(1), Encoding.UTF8.GetBytes(Data.User(1)) }, "refreshers");
+        ReaderReport.Line("H7-H10 refresher shapes: " + counted + " each a typed refusal or the new token (incl. a throw from the interface call itself, a null task, a cancelled task, the refresher's own TimeoutException, disposed/expired/oversize/empty/other-subject answers); texts scanned clean");
+    }
+
+    [Fact]
+    public async Task R_hanging_late_and_boundary_refreshers_are_bounded_on_the_broker_clock()
+    {
+        var texts = new Texts();
+        // answers just before the bound: accepted
+        using (var kit = new Kit())
+        {
+            kit.SignIn(1);
+            var release = new TaskCompletionSource();
+            using var answer = new TokenGrant(Data.Access(31), Data.Renewal(31), Data.User(1), kit.Now + Data.Life);
+            kit.Refresher.Answer = FakeRefresher.IgnoresCancellation(release.Task, new TokenGrant(Data.Access(31), Data.Renewal(31), Data.User(1), kit.Now + Data.Life));
+            var call = kit.Broker.GetNewTokenAsync(Data.Key(1), Ct);
+            await Expect.Eventually(() => kit.Clock.LiveTimers == 1, "bound");
+            kit.Clock.Advance(TimeSpan.FromSeconds(30) - TimeSpan.FromTicks(1));
+            Assert.False(call.IsCompleted);
+            release.SetResult();
+            using var got = await Expect.Guarded(call, "bound");
+            Assert.True(got.AsSpan().SequenceEqual(Data.Access(31)), "bound: an answer one tick before the bound was not accepted");
+        }
+
+        // at exactly the bound: timed out; the late answer is disposed and never stored
+        using (var kit = new Kit())
+        {
+            kit.SignIn(1);
+            var release = new TaskCompletionSource();
+            var late = new TokenGrant(Data.Access(32), Data.Renewal(32), Data.User(1), kit.Now + Data.Life);
+            kit.Refresher.Answer = FakeRefresher.IgnoresCancellation(release.Task, late);
+            var call = kit.Broker.GetNewTokenAsync(Data.Key(1), Ct);
+            await Expect.Eventually(() => kit.Clock.LiveTimers == 1, "exact");
+            kit.Clock.Advance(TimeSpan.FromSeconds(30));
+            await Expect.GuardedRefusal(TokenBrokerError.RefreshTimedOut, call, "exact");
+            Assert.True(kit.Refresher.TokenOfCall(0).IsCancellationRequested);
+            release.SetResult();
+            await Expect.Eventually(() => Expect.AllZero(late.AccessBytes), "exact late disposed");
+            kit.Restart();
+            using var held = await kit.Broker.GetTokenAsync(Data.Key(1), Ct);
+            Assert.True(held.AsSpan().SequenceEqual(Data.Access(1)), "exact: the late answer was stored");
+            Texts.StoreClean(kit.Root, "late", new[] { Data.Access(32), Data.Renewal(32) });
+        }
+
+        // a re-entrant refresher that awaits the broker's own refresh of the same session: bounded
+        using (var kit = new Kit())
+        {
+            kit.SignIn(1);
+            var inner = 0;
+            kit.Refresher.Answer = async ct =>
+            {
+                Interlocked.Increment(ref inner);
+                using var t = await kit.Broker.GetNewTokenAsync(Data.Key(1), CancellationToken.None);
+                return new TokenGrant(Data.Access(33), Data.Renewal(33), Data.User(1), kit.Now + Data.Life);
+            };
+            var call = kit.Broker.GetNewTokenAsync(Data.Key(1), Ct);
+            await Expect.Eventually(() => kit.Clock.LiveTimers == 1, "reentrant");
+            kit.Clock.Advance(TimeSpan.FromSeconds(31));
+            await Expect.GuardedRefusal(TokenBrokerError.RefreshTimedOut, call, "reentrant");
+            Assert.Equal(1, kit.Refresher.Calls);
+            using var held = await kit.Broker.GetTokenAsync(Data.Key(1), Ct);
+            Assert.True(held.AsSpan().SequenceEqual(Data.Access(1)), "reentrant: held grant changed");
+        }
+
+        ReaderReport.Line("H8: an answer 1 tick before the bound accepted; at the bound RefreshTimedOut, refresher token cancelled, late answer zeroed and not stored (restart reads the old token); a re-entrant refresher bounded (1 call)");
+    }
+
+    [Fact]
+    public async Task R_a_refresher_that_blocks_its_calling_thread_before_returning_a_task()
+    {
+        var root = new StoreRoot();
+        var clock = new TestClock();
+        using var store = root.Open();
+        var refresher = new BlockingRefresher();
+        using var broker = new TokenBroker(new TokenBrokerOptions(), new SecretStoreSessionRecordStore(store), refresher, clock);
+        try
+        {
+            using (var g = new TokenGrant(Data.Access(1), Data.Renewal(1), Data.User(1), clock.GetUtcNow() + Data.Life))
+            {
+                broker.SignIn(Data.Key(1), Data.User(1), Data.Idle, g);
+            }
+
+            using (var g = new TokenGrant(Data.Access(2), Data.Renewal(2), Data.User(2), clock.GetUtcNow() + Data.Life))
+            {
+                broker.SignIn(Data.Key(2), Data.User(2), Data.Idle, g);
+            }
+
+            refresher.Answer = () => new TokenGrant(Data.Access(41), Data.Renewal(41), Data.User(1), clock.GetUtcNow() + Data.Life);
+            var started = DateTime.UtcNow;
+            var call = Task.Run(() => broker.GetNewTokenAsync(Data.Key(1), CancellationToken.None), Ct);
+            await Expect.Eventually(() => Volatile.Read(ref refresher.Calls) == 1, "blocking");
+            clock.Advance(TimeSpan.FromSeconds(31));
+            var first = await Task.WhenAny(call, Task.Delay(TimeSpan.FromSeconds(3), Ct));
+            var hung = !ReferenceEquals(first, call);
+            var timers = clock.LiveTimers;
+            // other calls while the refresher blocks
+            var t0 = DateTime.UtcNow;
+            using (var other = await broker.GetTokenAsync(Data.Key(2), Ct))
+            {
+                Assert.True(other.AsSpan().SequenceEqual(Data.Access(2)), "blocking: another session failed");
+            }
+
+            var signedOut = broker.SignOut(Data.Key(1));
+            var otherMs = (DateTime.UtcNow - t0).TotalMilliseconds;
+            refresher.Gate.Set();
+            TokenBrokerError? reason = null;
+            try
+            {
+                using var tok = await Expect.Guarded(call, "blocking");
+            }
+            catch (TokenBrokerException e)
+            {
+                reason = e.Reason;
+            }
+
+            var names = store.ListNames().Count(e => e.Name.StartsWith("sessions/", StringComparison.Ordinal));
+            ReaderReport.Line("SYNC-BLOCK refresher: caller still waiting 3 s (real) after the test clock passed the 30 s bound: " + hung
+                + "; timers made while blocked " + timers + "; another session and SignOut answered in " + otherMs.ToString("F0") + " ms (signed out " + signedOut + ")"
+                + "; after release the caller got " + (reason?.ToString() ?? "a token") + "; session records left " + names + " (the other session's)");
+            Assert.Equal(1, names);
+        }
+        finally
+        {
+            refresher.Gate.Set();
+            root.Dispose();
+        }
+    }
+
+    // ---------- H12, H13: 1000 concurrent callers ----------
+    [Fact]
+    public async Task R_a_thousand_concurrent_renewals_make_one_call_and_a_sign_out_during_it_leaves_nothing()
+    {
+        using (var kit = new Kit())
+        {
+            kit.SignIn(1);
+            kit.Refresher.Hold();
+            kit.Refresher.Answer = FakeRefresher.Gives(() => new TokenGrant(Data.Access(51), Data.Renewal(51), Data.User(1), kit.Now + Data.Life));
+            var joined = 0;
+            var tasks = Enumerable.Range(0, 1000).Select(i => Task.Run(() =>
+            {
+                var t = i % 3 == 0 ? kit.Broker.GetNewTokenAsync(Data.Key(1), Ct) : kit.Broker.GetNewTokenAsync(Data.Key(1), Ct);
+                Interlocked.Increment(ref joined);
+                return t;
+            }, Ct)).ToArray();
+            await Expect.Eventually(() => Volatile.Read(ref joined) == 1000, "1000 join");
+            kit.Refresher.Release();
+            var all = await Task.WhenAll(tasks);
+            Assert.Equal(1, kit.Refresher.Calls);
+            Assert.All(all, t => Assert.True(t.AsSpan().SequenceEqual(Data.Access(51)), "1000: bytes differ"));
+            foreach (var t in all)
+            {
+                t.Dispose();
+            }
+        }
+
+        using (var kit = new Kit())
+        {
+            kit.SignIn(1);
+            kit.Refresher.Hold();
+            var answer = new TokenGrant(Data.Access(52), Data.Renewal(52), Data.User(1), kit.Now + Data.Life);
+            kit.Refresher.Answer = FakeRefresher.Gives(() => answer);
+            var joined = 0;
+            var tasks = Enumerable.Range(0, 1000).Select(_ => Task.Run(async () =>
+            {
+                var t = kit.Broker.GetNewTokenAsync(Data.Key(1), Ct);
+                Interlocked.Increment(ref joined);
+                try
+                {
+                    using var x = await t;
+                    return (TokenBrokerError?)null;
+                }
+                catch (TokenBrokerException e)
+                {
+                    return e.Reason;
+                }
+            }, Ct)).ToArray();
+            await Expect.Eventually(() => Volatile.Read(ref joined) == 1000, "signout join");
+            Assert.True(kit.Broker.SignOut(Data.Key(1)));
+            kit.Refresher.Release();
+            var reasons = await Task.WhenAll(tasks);
+            Assert.All(reasons, r => Assert.Equal(TokenBrokerError.SessionNotFound, r));
+            Assert.Equal(1, kit.Refresher.Calls);
+            Assert.True(Expect.AllZero(answer.AccessBytes), "signout: the answer was not disposed");
+            Assert.Empty(kit.SessionNames());
+            Texts.StoreClean(kit.Root, "signout", new[] { Data.Access(52), Data.Renewal(52), Data.Access(1) });
+        }
+
+        ReaderReport.Line("H12/H13: 1000 concurrent renewals -> 1 refresher call, 1000 equal tokens; 1000 waiters + sign-out during the refresh -> 1000 SessionNotFound, answer zeroed, no record, raw scan clean");
+    }
+
+    // ---------- H14: clocks ----------
+    [Fact]
+    public async Task R_a_step_of_either_clock_never_lengthens_a_session_or_a_token()
+    {
+        var texts = new Texts();
+        var rows = 0;
+        // idle: 30 min. Each row steps one clock and moves the other past the idle deadline (or not).
+        var idleRows = new (string Name, Action<TestClock> Step, bool ExpectExpired)[]
+        {
+            ("wall back 1 h, monotonic +31 min", c => { c.MoveWall(TimeSpan.FromHours(-1)); c.AdvanceMonotonic(TimeSpan.FromMinutes(31)); }, true),
+            ("wall back 10 y, monotonic +31 min", c => { c.MoveWall(TimeSpan.FromDays(-3650)); c.AdvanceMonotonic(TimeSpan.FromMinutes(31)); }, true),
+            ("monotonic back 1 d, wall +31 min", c => { c.AdvanceMonotonic(TimeSpan.FromDays(-1)); c.MoveWall(TimeSpan.FromMinutes(31)); }, true),
+            ("wall +1 d only", c => c.MoveWall(TimeSpan.FromDays(1)), true),
+            ("wall +10 y only", c => c.MoveWall(TimeSpan.FromDays(3650)), true),
+            ("monotonic +31 min only", c => c.AdvanceMonotonic(TimeSpan.FromMinutes(31)), true),
+            ("both +29 min", c => c.Advance(TimeSpan.FromMinutes(29)), false),
+            ("wall back 1 h only", c => c.MoveWall(TimeSpan.FromHours(-1)), false),
+        };
+        foreach (var row in idleRows)
+        {
+            using var kit = new Kit();
+            kit.SignIn(1);
+            row.Step(kit.Clock);
+            var (t, r) = await Try(() => kit.Broker.GetTokenAsync(Data.Key(1), Ct), texts);
+            if (row.ExpectExpired)
+            {
+                Assert.True(r?.Reason == TokenBrokerError.SessionExpired, row.Name + ": " + (r?.Reason.ToString() ?? "token"));
+                Assert.Empty(kit.SessionNames());
+            }
+            else
+            {
+                Assert.True(t is not null, row.Name + ": " + r?.Reason);
+                t!.Dispose();
+            }
+
+            rows++;
+        }
+
+        // token: life 1 h, idle 2 h, margin 5 min. Inside the margin on either clock -> exactly one refresh.
+        var lifeRows = new (string Name, Action<TestClock> Step, int Calls)[]
+        {
+            ("wall back 1 h, monotonic +56 min", c => { c.MoveWall(TimeSpan.FromHours(-1)); c.AdvanceMonotonic(TimeSpan.FromMinutes(56)); }, 1),
+            ("monotonic back 1 d, wall +56 min", c => { c.AdvanceMonotonic(TimeSpan.FromDays(-1)); c.MoveWall(TimeSpan.FromMinutes(56)); }, 1),
+            ("wall +56 min only", c => c.MoveWall(TimeSpan.FromMinutes(56)), 1),
+            ("monotonic +56 min only", c => c.AdvanceMonotonic(TimeSpan.FromMinutes(56)), 1),
+            ("both +54 min", c => c.Advance(TimeSpan.FromMinutes(54)), 0),
+            ("wall back 1 d only", c => c.MoveWall(TimeSpan.FromDays(-1)), 0),
+        };
+        foreach (var row in lifeRows)
+        {
+            using var kit = new Kit();
+            kit.SignIn(1, idle: TimeSpan.FromHours(2));
+            kit.Refresher.Answer = FakeRefresher.Gives(() => new TokenGrant(Data.Access(61), Data.Renewal(61), Data.User(1), kit.Now + Data.Life));
+            row.Step(kit.Clock);
+            var (t, r) = await Try(() => kit.Broker.GetTokenAsync(Data.Key(1), Ct), texts);
+            Assert.True(t is not null, row.Name + ": " + r?.Reason);
+            Assert.True(kit.Refresher.Calls == row.Calls, row.Name + ": calls " + kit.Refresher.Calls);
+            t!.Dispose();
+            rows++;
+        }
+
+        // expired token, failing refresher: never handed out whichever clock says so
+        foreach (var step in new Action<TestClock>[] { c => c.MoveWall(TimeSpan.FromMinutes(61)), c => c.AdvanceMonotonic(TimeSpan.FromMinutes(61)) })
+        {
+            using var kit = new Kit();
+            kit.SignIn(1, idle: TimeSpan.FromHours(2));
+            kit.Refresher.Answer = FakeRefresher.Throws("synthetic failure");
+            step(kit.Clock);
+            var (t, r) = await Try(() => kit.Broker.GetTokenAsync(Data.Key(1), Ct), texts);
+            Assert.Null(t);
+            Assert.Equal(TokenBrokerError.RefreshFailed, r!.Reason);
+            rows++;
+        }
+
+        ReaderReport.Line("H14 clocks: " + rows + " rows (wall back 1 h / 10 y / 1 d, forward 1 d / 10 y, monotonic back 1 d / forward), no life lengthened, expired tokens never handed out");
+    }
+
+    [Fact]
+    public async Task R_a_wall_clock_set_back_while_running_and_a_restart_inside_the_window()
+    {
+        using var kit = new Kit();
+        kit.SignIn(1);                              // idle 30 min, activity at true t0
+        kit.Clock.Advance(TimeSpan.FromMinutes(1));
+        kit.Clock.MoveWall(TimeSpan.FromMinutes(-25)); // the wall set back 25 min while the server runs
+        kit.Clock.Advance(TimeSpan.FromMinutes(28)); // true idle 29 min; wall idle 4 min
+        kit.Restart();
+        var restored = kit.Broker.LastRestore.Restored;
+        kit.Clock.Advance(TimeSpan.FromMinutes(20)); // true idle 49 min, past the 30 min idle timeout
+        var (t, r) = await Try(() => kit.Broker.GetTokenAsync(Data.Key(1), Ct), new Texts());
+        ReaderReport.Line("D7 across a restart: wall set back 25 min while running, restart at true idle 29 min (wall idle 4 min): restored " + restored
+            + "; at true idle 49 min (idle timeout 30 min) a read gives " + (t is not null ? "A TOKEN" : r!.Reason.ToString()));
+        t?.Dispose();
+    }
+
+    // ---------- H15: restart over records of every kind ----------
+    private static string Hex() => Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16));
+
+    private static byte[] Record(IEnumerable<(string Name, string Raw)> members)
+    {
+        return Encoding.UTF8.GetBytes("{" + string.Join(",", members.Select(m => "\"" + m.Name + "\":" + m.Raw)) + "}");
+    }
+
+    private static List<(string Name, string Raw)> Template(string id, int n, DateTimeOffset now, SessionPlatform platform = SessionPlatform.Oxpd2)
+    {
+        var hash = platform == SessionPlatform.Oxpd1 ? "\"" + Convert.ToBase64String(SHA256.HashData(Encoding.ASCII.GetBytes("handle-" + n))) + "\"" : "null";
+        return new List<(string, string)>
+        {
+            ("format", "1"),
+            ("id", "\"" + id + "\""),
+            ("serial", "\"" + Data.Serial(n) + "\""),
+            ("platform", ((int)platform).ToString()),
+            ("platformSession", "\"" + Data.PlatformSession(n) + "\""),
+            ("handleSha256", hash),
+            ("user", "\"" + Data.User(n) + "\""),
+            ("idleMilliseconds", "1800000"),
+            ("access", "\"" + Convert.ToBase64String(Data.Access(n)) + "\""),
+            ("renewal", "\"" + Convert.ToBase64String(Data.Renewal(n)) + "\""),
+            ("subject", "\"" + Data.User(n) + "\""),
+            ("expiresAt", (now + Data.Life).ToUnixTimeMilliseconds().ToString()),
+            ("lastActivity", (now - TimeSpan.FromMinutes(1)).ToUnixTimeMilliseconds().ToString()),
+            ("written", (now - TimeSpan.FromMinutes(1)).ToUnixTimeMilliseconds().ToString()),
+        };
+    }
+
+    private static List<(string Name, string Raw)> With(List<(string Name, string Raw)> t, string name, string? raw)
+    {
+        var copy = t.ToList();
+        var i = copy.FindIndex(m => m.Name == name);
+        if (raw is null)
+        {
+            copy.RemoveAt(i);
+        }
+        else
+        {
+            copy[i] = (name, raw);
+        }
+
+        return copy;
+    }
+
+    [Fact]
+    public async Task R_restart_over_records_that_break_each_rule_restores_only_the_good_ones_and_deletes_the_rest()
+    {
+        using var kit = new Kit();
+        var a = kit.SignIn(1);
+        var b = kit.SignIn(2, SessionPlatform.Oxpd1);
+        kit.SignIn(3);
+        var now = kit.Now;
+        var bad = new List<(string Name, byte[] Bytes, string Id, int Device)>();
+        var device = 100;
+        void Add(string name, Func<string, int, List<(string Name, string Raw)>> make)
+        {
+            var id = Hex();
+            device++;
+            bad.Add((name, Record(make(id, device)), id, device));
+        }
+
+        void AddRaw(string name, byte[] bytes)
+        {
+            device++;
+            bad.Add((name, bytes, Hex(), device));
+        }
+
+        Add("format 2", (id, n) => With(Template(id, n, now), "format", "2"));
+        Add("format as text", (id, n) => With(Template(id, n, now), "format", "\"1\""));
+        Add("format 1.0", (id, n) => With(Template(id, n, now), "format", "1.0"));
+        Add("format not first", (id, n) => { var t = Template(id, n, now); var f = t[0]; t.RemoveAt(0); t.Add(f); return t; });
+        Add("id of another record", (id, n) => With(Template(id, n, now), "id", "\"" + Hex() + "\""));
+        Add("id upper case", (id, n) => With(Template(id, n, now), "id", "\"" + id.ToUpperInvariant() + "\""));
+        Add("id null", (id, n) => With(Template(id, n, now), "id", "null"));
+        Add("serial with a space", (id, n) => With(Template(id, n, now), "serial", "\"SERIAL 0001\""));
+        Add("serial empty", (id, n) => With(Template(id, n, now), "serial", "\"\""));
+        Add("serial 129", (id, n) => With(Template(id, n, now), "serial", "\"" + new string('S', 129) + "\""));
+        Add("serial null", (id, n) => With(Template(id, n, now), "serial", "null"));
+        Add("platform 0", (id, n) => With(Template(id, n, now), "platform", "0"));
+        Add("platform 3", (id, n) => With(Template(id, n, now), "platform", "3"));
+        Add("platform as text", (id, n) => With(Template(id, n, now), "platform", "\"1\""));
+        Add("oxpd1 without a hash", (id, n) => With(Template(id, n, now), "platform", "2"));
+        Add("oxpd1 hash 31 bytes", (id, n) => With(With(Template(id, n, now), "platform", "2"), "handleSha256", "\"" + Convert.ToBase64String(new byte[31]) + "\""));
+        Add("oxpd2 with a hash", (id, n) => With(Template(id, n, now), "handleSha256", "\"" + Convert.ToBase64String(new byte[32]) + "\""));
+        Add("hash missing", (id, n) => With(Template(id, n, now), "handleSha256", null));
+        Add("user empty", (id, n) => With(With(Template(id, n, now), "user", "\"\""), "subject", "\"\""));
+        Add("user null", (id, n) => With(Template(id, n, now), "user", "null"));
+        Add("subject by case", (id, n) => With(Template(id, n, now), "subject", "\"" + Data.User(n).ToUpperInvariant() + "\""));
+        Add("subject of another user", (id, n) => With(Template(id, n, now), "subject", "\"" + Data.User(n + 500) + "\""));
+        Add("subject null", (id, n) => With(Template(id, n, now), "subject", "null"));
+        Add("idle 0", (id, n) => With(Template(id, n, now), "idleMilliseconds", "0"));
+        Add("idle over 24 h", (id, n) => With(Template(id, n, now), "idleMilliseconds", "86400001"));
+        Add("idle negative", (id, n) => With(Template(id, n, now), "idleMilliseconds", "-1"));
+        Add("idle Int64 max", (id, n) => With(Template(id, n, now), "idleMilliseconds", long.MaxValue.ToString()));
+        Add("idle as fraction", (id, n) => With(Template(id, n, now), "idleMilliseconds", "1800000.5"));
+        Add("access empty", (id, n) => With(Template(id, n, now), "access", "\"\""));
+        Add("access not base64", (id, n) => With(Template(id, n, now), "access", "\"***\""));
+        Add("access as number", (id, n) => With(Template(id, n, now), "access", "7"));
+        Add("access over the cap", (id, n) => With(Template(id, n, now), "access", "\"" + Convert.ToBase64String(new byte[262145]) + "\""));
+        Add("renewal over the cap", (id, n) => With(Template(id, n, now), "renewal", "\"" + Convert.ToBase64String(new byte[262145]) + "\""));
+        Add("expiry Int64 max", (id, n) => With(Template(id, n, now), "expiresAt", long.MaxValue.ToString()));
+        Add("last activity in the future", (id, n) => With(Template(id, n, now), "lastActivity", (now + TimeSpan.FromSeconds(1)).ToUnixTimeMilliseconds().ToString()));
+        Add("written in the future", (id, n) => With(Template(id, n, now), "written", (now + TimeSpan.FromSeconds(1)).ToUnixTimeMilliseconds().ToString()));
+        Add("idle passed", (id, n) => With(Template(id, n, now), "lastActivity", (now - TimeSpan.FromMinutes(31)).ToUnixTimeMilliseconds().ToString()));
+        Add("idle exactly", (id, n) => With(With(Template(id, n, now), "idleMilliseconds", "300000"), "lastActivity", (now - TimeSpan.FromMinutes(5)).ToUnixTimeMilliseconds().ToString()));
+        Add("window passed", (id, n) => With(With(Template(id, n, now), "idleMilliseconds", "3600000"), "lastActivity", (now - TimeSpan.FromMinutes(11)).ToUnixTimeMilliseconds().ToString()));
+        Add("extra member", (id, n) => { var t = Template(id, n, now); t.Add(("extra", "1")); return t; });
+        Add("duplicate member", (id, n) => { var t = Template(id, n, now); t.Add(("user", "\"" + Data.User(n) + "\"")); return t; });
+        Add("member missing", (id, n) => With(Template(id, n, now), "written", null));
+        Add("deep value", (id, n) => With(Template(id, n, now), "user", new string('[', 100000) + new string(']', 100000)));
+        AddRaw("trailing data", Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(Record(Template("x", 1, now))) + "{}"));
+        AddRaw("not json", Encoding.UTF8.GetBytes("synthetic not a record"));
+        AddRaw("json array", Encoding.UTF8.GetBytes("[1,2,3]"));
+        AddRaw("comment", Encoding.UTF8.GetBytes("/*c*/{\"format\":1}"));
+        AddRaw("bom", new byte[] { 0xEF, 0xBB, 0xBF }.Concat(Encoding.UTF8.GetBytes("{\"format\":1}")).ToArray());
+        AddRaw("invalid utf8", new byte[] { 0x7B, 0x22, 0xC3, 0x28, 0x22, 0x3A, 0x31, 0x7D });
+        AddRaw("one byte", new byte[] { 0x7B });
+        var trailingFixed = bad.FindIndex(x => x.Name == "trailing data");
+        var tf = bad[trailingFixed];
+        bad[trailingFixed] = (tf.Name, Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(Record(Template(tf.Id, tf.Device, now))) + "{}"), tf.Id, tf.Device);
+        // a control: a well-formed record of a new device is restored
+        var controlId = Hex();
+        kit.Store.Put("sessions/" + controlId, Record(Template(controlId, 99, now)));
+        foreach (var x in bad)
+        {
+            kit.Store.Put("sessions/" + x.Id, x.Bytes);
+        }
+
+        kit.Store.Put("sessions/" + Hex() + "0", Encoding.UTF8.GetBytes("synthetic 33-hex name"));
+        kit.Store.Put("other/reader-name", Encoding.UTF8.GetBytes("synthetic other name"));
+        var namesBefore = kit.Store.ListNames().Select(e => e.Name).ToList();
+        kit.Restart();
+        var lr = kit.Broker.LastRestore;
+        var namesAfter = kit.Store.ListNames().Select(e => e.Name).ToHashSet(StringComparer.Ordinal);
+        var survived = bad.Where(x => namesAfter.Contains("sessions/" + x.Id)).Select(x => x.Name).ToList();
+        var restoredBad = bad.Where(x => kit.Broker.StateOf(new SessionKey(Data.Serial(x.Device), SessionPlatform.Oxpd2, Data.PlatformSession(x.Device))) is not null
+            || kit.Broker.StateOf(new SessionKey(Data.Serial(x.Device), SessionPlatform.Oxpd1, Data.PlatformSession(x.Device))) is not null).Select(x => x.Name).ToList();
+        ReaderReport.Line("H15 restart: " + bad.Count + " bad records + 1 control + 3 live; LastRestore restored " + lr.Restored + " expired " + lr.Expired + " unreadable " + lr.Unreadable + " deleted " + lr.Deleted
+            + "; bad records left in the store: [" + string.Join("; ", survived) + "]; bad records restored: [" + string.Join("; ", restoredBad) + "]");
+        Assert.Empty(survived);
+        Assert.Empty(restoredBad);
+        Assert.Equal(4, lr.Restored);
+        Assert.Equal(bad.Count, lr.Deleted);
+        Assert.Equal(bad.Count, lr.Expired + lr.Unreadable);
+        Assert.Contains("other/reader-name", namesAfter);
+        var oddLeft = namesAfter.Count(nm => nm.StartsWith("sessions/", StringComparison.Ordinal) && nm.Length == 9 + 33);
+        Assert.True(oddLeft == 1, "restart: the 33-hex name was touched");
+        Assert.NotNull(kit.Broker.StateOf(new SessionKey(Data.Serial(99), SessionPlatform.Oxpd2, Data.PlatformSession(99))));
+        using var tb = await kit.Broker.GetTokenAsync(b.Handle!.Value, Data.Serial(2), Ct);
+        Assert.True(tb.AsSpan().SequenceEqual(Data.Access(2)), "restart: handle broke");
+        Assert.Contains(a.SessionId, string.Join(",", namesAfter));
+        Assert.True(namesBefore.Count == namesAfter.Count + bad.Count, "restart: name counts");
+    }
+
+    [Fact]
+    public void R_restart_with_one_byte_flipped_at_every_place_of_a_record_file()
+    {
+        using var kit = new Kit();
+        kit.SignIn(1);
+        kit.SignIn(2, SessionPlatform.Oxpd1);
+        var before = kit.Root.RecordFiles();
+        kit.SignIn(3);
+        var target = Assert.Single(kit.Root.RecordFiles().Except(before));
+        var original = File.ReadAllBytes(target);
+        int refused = 0, startedDeleted = 0, startedOther = 0, storeRefused = 0;
+        var startedPlaces = new List<int>();
+        kit.Broker.Dispose();
+        kit.Store.Dispose();
+        var options = new TokenBrokerOptions();
+        for (var i = 0; i < original.Length; i++)
+        {
+            var bytes = (byte[])original.Clone();
+            bytes[i] ^= (byte)(1 << (i % 8));
+            File.WriteAllBytes(target, bytes);
+            var files = kit.Root.RecordFiles().Select(f => (f, File.ReadAllBytes(f))).ToList();
+            LocalSecretStore store;
+            try
+            {
+                store = kit.Root.Open();
+            }
+            catch (SecretStoreException)
+            {
+                storeRefused++;
+                continue;
+            }
+
+            using var storeScope = store;
+            try
+            {
+                using var broker = new TokenBroker(options, new SecretStoreSessionRecordStore(store), kit.Refresher, kit.Clock);
+                var lr = broker.LastRestore;
+                if (lr.Restored == 2 && lr.Unreadable == 1 && lr.Deleted == 1 && !File.Exists(target))
+                {
+                    startedDeleted++;
+                }
+                else
+                {
+                    startedOther++;
+                }
+
+                startedPlaces.Add(i);
+                // put the files back as they were for the next place
+                foreach (var (f, c) in files)
+                {
+                    File.WriteAllBytes(f, c);
+                }
+            }
+            catch (TokenBrokerException e)
+            {
+                Assert.Equal(TokenBrokerError.StoreFailed, e.Reason);
+                Assert.Null(e.InnerException);
+                foreach (var (f, c) in files)
+                {
+                    Assert.True(File.ReadAllBytes(f).AsSpan().SequenceEqual(c), "flip " + i + ": a record file changed on a refused start");
+                }
+
+                refused++;
+            }
+        }
+
+        File.WriteAllBytes(target, original);
+        ReaderReport.Line("R03 every place: record file " + original.Length + " bytes; refused StoreFailed with every file byte-equal " + refused
+            + "; started with the bad record deleted and the 2 others restored " + startedDeleted + "; started otherwise " + startedOther + "; the store itself refused to open " + storeRefused
+            + (startedPlaces.Count > 0 ? " at places " + string.Join(",", startedPlaces.Take(40)) : string.Empty));
+        Assert.Equal(0, startedOther);
+    }
+
+    // ---------- H17: store failures ----------
+    [Fact]
+    public async Task R_store_failures_on_write_read_delete_and_listing_end_in_a_typed_refusal()
+    {
+        var texts = new Texts();
+        // write at sign-in
+        using (var kit = new Kit(faulty: true))
+        {
+            kit.Faulty!.FailSave = true;
+            var r = TrySync(() => kit.SignIn(1), texts);
+            Assert.Equal(TokenBrokerError.StoreFailed, r!.Reason);
+            Assert.Null(kit.Broker.StateOf(Data.Key(1)));
+            Assert.Empty(kit.Events);
+        }
+
+        // write at an accepted refresh and at activity
+        using (var kit = new Kit(faulty: true))
+        {
+            kit.SignIn(1);
+            kit.Faulty!.FailSave = true;
+            kit.Refresher.Answer = FakeRefresher.Gives(() => new TokenGrant(Data.Access(71), Data.Renewal(71), Data.User(1), kit.Now + Data.Life));
+            using (var t = await kit.Broker.GetNewTokenAsync(Data.Key(1), Ct))
+            {
+                Assert.True(t.AsSpan().SequenceEqual(Data.Access(71)), "write fail at refresh");
+            }
+
+            using (var t = await kit.Broker.GetTokenAsync(Data.Key(1), Ct))
+            {
+                Assert.True(t.AsSpan().SequenceEqual(Data.Access(71)), "write fail at activity");
+            }
+
+            kit.Faulty.FailSave = false;
+            kit.Broker.Touch(Data.Key(1));
+            kit.Restart();
+            using var after = await kit.Broker.GetTokenAsync(Data.Key(1), Ct);
+            Assert.True(after.AsSpan().SequenceEqual(Data.Access(71)), "the healed write did not carry the new grant");
+        }
+
+        // delete at sign-out, at a new sign-in, at expiry by a read and by Sweep
+        string[] where = { "sign-out", "new sign-in", "expiry read", "expiry sweep", "subject at refresh" };
+        foreach (var w in where)
+        {
+            using var kit = new Kit(faulty: true);
+            kit.SignIn(1, idle: TimeSpan.FromSeconds(10));
+            kit.Faulty!.FailDelete = true;
+            TokenBrokerException? r = null;
+            switch (w)
+            {
+                case "sign-out":
+                    r = TrySync(() => kit.Broker.SignOut(Data.Key(1)), texts);
+                    break;
+                case "new sign-in":
+                    r = TrySync(() => kit.SignIn(1), texts);
+                    break;
+                case "expiry read":
+                    kit.Clock.Advance(TimeSpan.FromSeconds(11));
+                    r = (await Try(() => kit.Broker.GetTokenAsync(Data.Key(1), Ct), texts)).Refusal;
+                    break;
+                case "expiry sweep":
+                    kit.Clock.Advance(TimeSpan.FromSeconds(11));
+                    r = TrySync(() => kit.Broker.Sweep(), texts);
+                    break;
+                default:
+                    kit.Refresher.Answer = FakeRefresher.Gives(() => new TokenGrant(Data.Access(72), Data.Renewal(72), Data.User(2), kit.Now + Data.Life));
+                    r = (await Try(() => kit.Broker.GetNewTokenAsync(Data.Key(1), Ct), texts)).Refusal;
+                    break;
+            }
+
+            var live = kit.Broker.StateOf(Data.Key(1)) is not null;
+            var recordsWhileFailing = kit.SessionNames().Count;
+            kit.Faulty.FailDelete = false;
+            kit.Broker.Sweep();
+            ReaderReport.Line("H17 delete failure at " + w + ": the call gave " + (r?.Reason.ToString() ?? "no refusal") + "; a session live for device 1 afterwards " + live + "; records while failing " + recordsWhileFailing + "; after healing and Sweep " + kit.SessionNames().Count);
+            Assert.NotNull(r);
+            Assert.Empty(kit.SessionNames());
+        }
+
+        // read at restore
+        using (var kit = new Kit())
+        {
+            kit.SignIn(1);
+            kit.SignIn(2);
+            kit.CloseBroker();
+            var failing = new FakeRecordStore(new SecretStoreSessionRecordStore(kit.Store)) { FailLoad = true };
+            using var b2 = new TokenBroker(new TokenBrokerOptions(), failing, kit.Refresher, kit.Clock);
+            var lr = b2.LastRestore;
+            ReaderReport.Line("H17 read failure at restore: LastRestore restored " + lr.Restored + " unreadable " + lr.Unreadable + " deleted " + lr.Deleted + "; session records left " + kit.SessionNames().Count);
+            Assert.Equal(2, lr.Unreadable);
+            Assert.Equal(2, lr.Deleted);
+            Assert.Empty(kit.SessionNames());
+        }
+
+        // listing at restore
+        var root = new StoreRoot();
+        try
+        {
+            using var store = root.Open();
+            var keeping = new KeepingStore(new SecretStoreSessionRecordStore(store)) { FailList = true };
+            var e = Assert.Throws<TokenBrokerException>(() => new TokenBroker(new TokenBrokerOptions(), keeping, new FakeRefresher(), new TestClock()));
+            Assert.Equal(TokenBrokerError.StoreFailed, e.Reason);
+            Assert.Null(e.InnerException);
+        }
+        finally
+        {
+            root.Dispose();
+        }
+
+        texts.Check(new[] { Data.Access(1), Data.Access(71), Encoding.UTF8.GetBytes(Data.User(1)) }, "store failures");
+    }
+
+    // ---------- item 3: raw store files at each stage; disposal clears ----------
+    [Fact]
+    public async Task R_raw_store_files_hold_no_clear_secret_at_any_stage_and_disposal_clears_every_array()
+    {
+        using var kit = new Kit();
+        var a = kit.SignIn(1, SessionPlatform.Oxpd1);
+        var handle = a.Handle!.Value.Value;
+        var needles = new List<byte[]>
+        {
+            Data.Access(1), Data.Renewal(1), Encoding.UTF8.GetBytes(Data.User(1)), Encoding.UTF8.GetBytes(Data.PlatformSession(1)),
+            Encoding.UTF8.GetBytes(Data.Serial(1)), Encoding.ASCII.GetBytes(handle), Base64Url.DecodeFromChars(handle),
+            SHA256.HashData(Encoding.ASCII.GetBytes(handle)),
+        };
+        Texts.StoreClean(kit.Root, "after sign-in", needles);
+        var state1 = kit.Broker.StateOf(Data.Key(1, SessionPlatform.Oxpd1))!;
+        var held1 = state1.Grant;
+        kit.Refresher.Answer = FakeRefresher.Gives(() => new TokenGrant(Data.Access(81), Data.Renewal(81), Data.User(1), kit.Now + Data.Life));
+        using (await kit.Broker.GetNewTokenAsync(Data.Key(1, SessionPlatform.Oxpd1), Ct))
+        {
+        }
+
+        Assert.True(Expect.AllZero(held1.Access) && Expect.AllZero(held1.Renewal), "the replaced grant was not cleared");
+        needles.Add(Data.Access(81));
+        needles.Add(Data.Renewal(81));
+        Texts.StoreClean(kit.Root, "after refresh", needles);
+        var held2 = kit.Broker.StateOf(Data.Key(1, SessionPlatform.Oxpd1))!.Grant;
+        Assert.True(kit.Broker.SignOut(Data.Key(1, SessionPlatform.Oxpd1)));
+        Assert.True(Expect.AllZero(held2.Access) && Expect.AllZero(held2.Renewal), "the ended grant was not cleared");
+        Texts.StoreClean(kit.Root, "after sign-out", needles);
+        kit.SignIn(2, idle: TimeSpan.FromSeconds(5));
+        kit.Clock.Advance(TimeSpan.FromSeconds(6));
+        kit.Broker.Sweep();
+        kit.SignIn(3);
+        kit.SignIn(3);
+        kit.SignIn(4);
+        needles.AddRange(new[] { Data.Access(2), Data.Access(3), Data.Access(4), Data.Renewal(4), Encoding.UTF8.GetBytes(Data.User(4)) });
+        Texts.StoreClean(kit.Root, "after expiry and new sign-in", needles);
+        var held4 = kit.Broker.StateOf(Data.Key(4))!.Grant;
+        var held3 = kit.Broker.StateOf(Data.Key(3))!.Grant;
+        kit.CloseBroker();
+        Assert.True(Expect.AllZero(held4.Access) && Expect.AllZero(held3.Access), "broker disposal did not clear its grants");
+        kit.ReopenBroker();
+        Texts.StoreClean(kit.Root, "after restart", needles);
+        // grant and access token disposal
+        var g = new TokenGrant(Data.Access(5), Data.Renewal(5), Data.User(5), kit.Now + Data.Life);
+        var ga = g.AccessBytes;
+        var gr = g.RenewalBytes;
+        g.Dispose();
+        Assert.True(Expect.AllZero(ga) && Expect.AllZero(gr), "grant disposal");
+        var t = await kit.Broker.GetTokenAsync(Data.Key(4), Ct);
+        var tb = t.Bytes;
+        t.Dispose();
+        Assert.True(Expect.AllZero(tb), "access token disposal");
+        // the renewal copy given to the refresher, the refresher's answer, and the arrays the store hands back at restore
+        var root = new StoreRoot();
+        try
+        {
+            var clock = new TestClock();
+            using var store = root.Open();
+            var keeping = new KeepingStore(new SecretStoreSessionRecordStore(store));
+            var script = new ScriptRefresher();
+            TokenGrant? answer = null;
+            script.Body = (_, _, _, _) => Task.FromResult(answer = new TokenGrant(Data.Access(91), Data.Renewal(91), Data.User(1), clock.GetUtcNow() + Data.Life));
+            using (var broker = new TokenBroker(new TokenBrokerOptions(), keeping, script, clock))
+            {
+                using (var gg = new TokenGrant(Data.Access(1), Data.Renewal(1), Data.User(1), clock.GetUtcNow() + Data.Life))
+                {
+                    broker.SignIn(Data.Key(1), Data.User(1), Data.Idle, gg);
+                }
+
+                using (await broker.GetNewTokenAsync(Data.Key(1), Ct))
+                {
+                }
+
+                Assert.True(script.Renewals.All(m => m.ToArray().All(x => x == 0)), "the renewal copy given to the refresher was not cleared");
+                Assert.True(Expect.AllZero(answer!.AccessBytes) && Expect.AllZero(answer.RenewalBytes), "the refresher's answer was not cleared");
+            }
+
+            using (new TokenBroker(new TokenBrokerOptions(), keeping, script, clock))
+            {
+                Assert.NotEmpty(keeping.Loaded);
+                Assert.True(keeping.Loaded.All(x => x.All(b => b == 0)), "the record bytes read at restore were not cleared");
+            }
+        }
+        finally
+        {
+            root.Dispose();
+        }
+
+        ReaderReport.Line("item 3: raw store files clean after sign-in, refresh, sign-out, expiry, new sign-in, restart (" + needles.Count + " needles x " + Texts.Forms(Data.Access(1)).Count + " forms each incl. UTF-16 and base64 at 3 alignments); zero after disposal: replaced grant, ended grant, broker grants, TokenGrant, AccessToken, refresher renewal copy, refresher answer, record bytes at restore");
+    }
+
+    // ---------- D12: the record buffer growth ----------
+    [Theory]
+    [InlineData("ascii", 1)]
+    [InlineData("ascii", 64)]
+    [InlineData("plus", 40)]
+    [InlineData("plus", 60)]
+    [InlineData("accented", 40)]
+    public void R_the_record_writer_grows_its_buffer_only_when_the_estimate_is_short(string kind, int length)
+    {
+        using var kit = new Kit();
+        var user = kind switch
+        {
+            "ascii" => new string('u', length),
+            "plus" => new string('+', length),
+            _ => new string('é', length),
+        };
+        using (var g = new TokenGrant(Data.Access(1), Data.Renewal(1), user, kit.Now + Data.Life))
+        {
+            kit.Broker.SignIn(Data.Key(1), user, Data.Idle, g);
+        }
+
+        var state = kit.Broker.StateOf(Data.Key(1))!;
+        var capacity = 1024 + (((state.Grant.Access.Length + state.Grant.Renewal.Length) / 3) + 2) * 4 + (user.Length * 2) + (user.Length * 2);
+        SessionRecord.Write(state, kit.Now);
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var bytes = SessionRecord.Write(state, kit.Now);
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        var growth = allocated - capacity - bytes.Length;
+        SessionRecord.Write(state, kit.Now, out var report);
+        ReaderReport.Line("D12 writer report: user " + kind + " x" + length + ": growths " + report.Growths + ", every retired buffer cleared " + report.EveryRetiredCleared);
+        Assert.True(report.EveryRetiredCleared, "D12: a retired buffer was not cleared");
+        ReaderReport.Line("D12 record writer: user " + kind + " x" + length + ": estimate " + capacity + " B, record " + bytes.Length + " B, allocated " + allocated + " B, beyond estimate+record " + growth + " B" + (growth > 2048 ? " => the buffer GREW (an uncleared copy of the bytes written so far is left to the collector)" : string.Empty));
+    }
+
+    // ---------- seeded model-based fuzz ----------
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    [InlineData(12)]
+    [InlineData(13)]
+    [InlineData(14)]
+    [InlineData(15)]
+    [InlineData(16)]
+    [InlineData(17)]
+    [InlineData(18)]
+    [InlineData(19)]
+    [InlineData(20)]
+    public async Task R_seeded_operations_never_hand_out_a_token_of_another_subject_or_leave_a_record_of_an_ended_session(int seed)
+    {
+        var rng = new Random(seed * 7919);
+        using var kit = new Kit();
+        var live = new Dictionary<string, (SessionKey Key, int User, string Id, SessionHandle? Handle, long ActMono, DateTimeOffset ActWall, TimeSpan Idle)>(StringComparer.Ordinal);
+        var ended = new List<SessionHandle>();
+        var counter = 0;
+        var tokensOut = 0;
+        var refusals = new Dictionary<TokenBrokerError, int>();
+        var texts = new Texts();
+        var expiry = new Dictionary<string, (DateTimeOffset Exp, long RecvMono, DateTimeOffset RecvWall)>(StringComparer.Ordinal);
+        var restoredIds = new HashSet<string>(StringComparer.Ordinal);
+        var lengthened = 0;
+        long maxLater = 0;
+        var restarts = 0;
+        long Mono() => kit.Clock.GetTimestamp();
+        void SyncEvents(List<SessionEventArgs> seen)
+        {
+            foreach (var e in seen)
+            {
+                if (e.Kind == SessionEventKind.SignedOut)
+                {
+                    var hit = live.Where(p => p.Value.Id == e.SessionId).Select(p => p.Key).ToList();
+                    foreach (var h in hit)
+                    {
+                        if (live[h].Handle is { } hh)
+                        {
+                            ended.Add(hh);
+                        }
+
+                        live.Remove(h);
+                    }
+                }
+            }
+        }
+
+        byte[] Tok(int user, int n) => Encoding.UTF8.GetBytes("tk|" + Data.User(user) + "|" + n.ToString("D6"));
+        void CheckToken(AccessToken t, string serial)
+        {
+            var text = Encoding.UTF8.GetString(t.AsSpan());
+            Assert.True(live.ContainsKey(serial), "seed " + seed + ": a token for a device with no live session");
+            var expected = "tk|" + Data.User(live[serial].User) + "|";
+            Assert.True(text.StartsWith(expected, StringComparison.Ordinal), "seed " + seed + ": a token of another subject was handed out");
+            var (exp, recvMono, recvWall) = expiry[text];
+            Assert.True(exp > kit.Now, "seed " + seed + ": an expired token (wall) was handed out");
+            var s = live[serial];
+            if (!restoredIds.Contains(s.Id))
+            {
+                Assert.True((exp - recvWall) - kit.Clock.GetElapsedTime(recvMono) > TimeSpan.Zero, "seed " + seed + ": an expired token (monotonic) was handed out");
+            }
+
+            Assert.True(kit.Clock.GetElapsedTime(s.ActMono) < s.Idle && kit.Now - s.ActWall < s.Idle, "seed " + seed + ": a token of an idle session was handed out");
+            tokensOut++;
+        }
+
+        for (var step = 0; step < 300; step++)
+        {
+            var mark = kit.Events.Count;
+            var d = rng.Next(5);
+            var serial = Data.Serial(d);
+            var op = rng.Next(10);
+            if (op == 0 || !live.ContainsKey(serial) && op < 4)
+            {
+                var user = rng.Next(4);
+                var platform = rng.Next(2) == 0 ? SessionPlatform.Oxpd1 : SessionPlatform.Oxpd2;
+                var key = new SessionKey(serial, platform, "ps-" + rng.Next(3));
+                var idle = TimeSpan.FromMinutes(1 + rng.Next(40));
+                var statedUser = rng.Next(10) == 0 ? (user + 1) % 4 : user;
+                var n = ++counter;
+                var exp = kit.Now + TimeSpan.FromMinutes(rng.Next(-5, 90));
+                using var g = new TokenGrant(Tok(statedUser, n), Encoding.UTF8.GetBytes("rn|" + n), Data.User(statedUser), exp);
+                expiry[Encoding.UTF8.GetString(Tok(statedUser, n))] = (exp, Mono(), kit.Now);
+                SignInResult? res = null;
+                var r = TrySync(() => res = kit.Broker.SignIn(key, Data.User(user), idle, g), texts);
+                SyncEvents(kit.Events.Skip(mark).ToList());
+                if (r is null)
+                {
+                    Assert.Equal(user, statedUser);
+                    live[serial] = (key, user, res!.SessionId, res.Handle, Mono(), kit.Now, idle);
+                    texts.Add(res);
+                }
+                else
+                {
+                    Assert.True(r.Reason == TokenBrokerError.SubjectMismatch && statedUser != user, "seed " + seed + ": sign-in refused " + r.Reason);
+                }
+            }
+            else if (op <= 3)
+            {
+                var s = live.TryGetValue(serial, out var x) ? x : default;
+                var byHandle = s.Handle is not null && rng.Next(2) == 0;
+                var wrongKey = rng.Next(8) == 0;
+                var key = wrongKey ? s.Key with { PlatformSessionId = "ps-9" } : s.Key;
+                var force = op == 3;
+                var behaviour = rng.Next(8);
+                var n = ++counter;
+                var answerUser = behaviour == 1 ? (s.User + 1) % 4 : s.User;
+                var answerExp = behaviour == 2 ? kit.Now - TimeSpan.FromSeconds(1) : kit.Now + TimeSpan.FromMinutes(5 + rng.Next(60));
+                expiry[Encoding.UTF8.GetString(Tok(answerUser, n))] = (answerExp, Mono(), kit.Now);
+                var release = new TaskCompletionSource();
+                kit.Refresher.Answer = behaviour switch
+                {
+                    3 => FakeRefresher.Throws("synthetic"),
+                    4 => _ => Task.FromResult<TokenGrant>(null!),
+                    5 => FakeRefresher.HangsUntilCancelled(),
+                    6 => FakeRefresher.IgnoresCancellation(release.Task, new TokenGrant(Tok(answerUser, n), Encoding.UTF8.GetBytes("rn|" + n), Data.User(answerUser), answerExp)),
+                    _ => FakeRefresher.Gives(() => new TokenGrant(Tok(answerUser, n), Encoding.UTF8.GetBytes("rn|" + n), Data.User(answerUser), answerExp)),
+                };
+                var callsBefore = kit.Refresher.Calls;
+                Task<AccessToken> call;
+                try
+                {
+                    call = byHandle
+                        ? (force ? kit.Broker.GetNewTokenAsync(s.Handle!.Value, serial, Ct) : kit.Broker.GetTokenAsync(s.Handle!.Value, serial, Ct))
+                        : (force ? kit.Broker.GetNewTokenAsync(key.DeviceSerial is null ? Data.Key(d) : key, Ct) : kit.Broker.GetTokenAsync(key.DeviceSerial is null ? Data.Key(d) : key, Ct));
+                }
+                catch (TokenBrokerException e)
+                {
+                    call = Task.FromException<AccessToken>(e);
+                }
+
+                if (behaviour is 5 or 6)
+                {
+                    // Round 2 adaptation: the refresher's call now starts on the thread pool, so wait for it to enter
+                    // and for its bound to be armed before moving the clock (the same wait the lane's cells added).
+                    await Expect.Eventually(() => call.IsCompleted || (kit.Refresher.Calls > callsBefore && kit.Clock.LiveTimers > 0), "seed timer");
+                    if (!call.IsCompleted)
+                    {
+                        kit.Clock.Advance(TimeSpan.FromSeconds(30));
+                    }
+                }
+
+                var (t, r) = await Try(() => Expect.Guarded(call, "seed " + seed), texts);
+                release.TrySetResult();
+                SyncEvents(kit.Events.Skip(mark).ToList());
+                if (t is not null)
+                {
+                    CheckToken(t, serial);
+                    var cur = live[serial];
+                    live[serial] = (cur.Key, cur.User, cur.Id, cur.Handle, Mono(), kit.Now, cur.Idle);
+                    t.Dispose();
+                }
+                else
+                {
+                    refusals[r!.Reason] = refusals.TryGetValue(r.Reason, out var c) ? c + 1 : 1;
+                }
+            }
+            else if (op == 4)
+            {
+                if (live.TryGetValue(serial, out var s) && s.Handle is not null && rng.Next(2) == 0)
+                {
+                    kit.Broker.SignOut(s.Handle.Value, serial);
+                }
+                else if (ended.Count > 0 && rng.Next(3) == 0)
+                {
+                    Assert.False(kit.Broker.SignOut(ended[rng.Next(ended.Count)], serial), "seed " + seed + ": an ended handle signed out a session");
+                }
+                else
+                {
+                    kit.Broker.SignOut(live.TryGetValue(serial, out var s2) ? s2.Key : Data.Key(d));
+                }
+
+                SyncEvents(kit.Events.Skip(mark).ToList());
+            }
+            else if (op == 5)
+            {
+                var r = TrySync(() => kit.Broker.Touch(live.TryGetValue(serial, out var s) ? s.Key : Data.Key(d)), texts);
+                SyncEvents(kit.Events.Skip(mark).ToList());
+                if (r is null)
+                {
+                    var cur = live[serial];
+                    live[serial] = (cur.Key, cur.User, cur.Id, cur.Handle, Mono(), kit.Now, cur.Idle);
+                }
+            }
+            else if (op == 6)
+            {
+                kit.Broker.Sweep();
+                SyncEvents(kit.Events.Skip(mark).ToList());
+            }
+            else if (op == 7)
+            {
+                var m = rng.Next(4);
+                var by = TimeSpan.FromSeconds(rng.Next(1, 1200));
+                if (m == 0)
+                {
+                    kit.Clock.Advance(by);
+                }
+                else if (m == 1)
+                {
+                    kit.Clock.MoveWall(rng.Next(2) == 0 ? by : -by);
+                }
+                else
+                {
+                    kit.Clock.AdvanceMonotonic(by);
+                }
+            }
+            else if (op == 8 && rng.Next(4) == 0)
+            {
+                kit.Restart();
+                restarts++;
+                foreach (var p in live.ToList())
+                {
+                    var st = kit.Broker.StateOf(p.Value.Key);
+                    if (st is null)
+                    {
+                        if (p.Value.Handle is { } hh)
+                        {
+                            ended.Add(hh);
+                        }
+
+                        live.Remove(p.Key);
+                    }
+                    else
+                    {
+                        Assert.True(st.SessionUser == Data.User(p.Value.User) && st.Id == p.Value.Id, "seed " + seed + ": a restored session changed user or id");
+                        var later = st.LastActivityTimestamp - p.Value.ActMono;
+                        if (later > 0)
+                        {
+                            lengthened++;
+                            maxLater = Math.Max(maxLater, later);
+                        }
+
+                        restoredIds.Add(st.Id);
+                        live[p.Key] = (p.Value.Key, p.Value.User, p.Value.Id, p.Value.Handle, st.LastActivityTimestamp, st.LastActivityWall, p.Value.Idle);
+                    }
+                }
+            }
+
+            // the store holds exactly the records of the live sessions (no record of an ended session, none written after its delete)
+            var names = kit.SessionNames().Select(nm => nm.Substring(9)).OrderBy(x => x, StringComparer.Ordinal).ToList();
+            var ids = live.Values.Select(v => v.Id).OrderBy(x => x, StringComparer.Ordinal).ToList();
+            Assert.True(names.SequenceEqual(ids), "seed " + seed + " step " + step + ": store names differ from the live sessions (" + names.Count + " vs " + ids.Count + ")");
+        }
+
+        texts.Check(Enumerable.Range(0, 4).Select(u => Encoding.UTF8.GetBytes(Data.User(u))).Append(Encoding.UTF8.GetBytes("tk|")), "seed " + seed);
+        ReaderReport.Line("FUZZ seed " + seed + ": 300 steps, tokens handed out " + tokensOut + ", refusals " + string.Join(" ", refusals.OrderBy(p => p.Key).Select(p => p.Key + "=" + p.Value)) + ", refresher calls " + kit.Refresher.Calls + ", live at end " + live.Count + ", restarts " + restarts + ", restored sessions whose idle start moved later " + lengthened + " (max " + TimeSpan.FromTicks(maxLater) + ")");
+    }
+}
