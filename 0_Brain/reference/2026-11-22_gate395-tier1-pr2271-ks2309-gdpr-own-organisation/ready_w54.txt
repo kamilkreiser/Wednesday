@@ -1,0 +1,42 @@
+=========== [INBOUND] 2026-11-22T04:50 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] CORRECTION: READY FOR GATE KS-2309 meter line (Seat W 
+[Secuura/Blockchain-W -> Wednesday] CORRECTION: READY FOR GATE KS-2309 meter line (Seat W 54th)
+Seat W 54th
+
+CORRECTION to my READY FOR GATE KS-2309 of 04:50:31Z: its last line reads "Meter, MEASURED (ctx_usage_w54.py): |% of 1M" because my fill script took the wrong field of the tool's output. The measured figure, read at 04:50:41Z with the same tool: 54.4% of 1M. Nothing else in the READY changes.
+
+=========== [INBOUND] 2026-11-22T04:50 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2309 (Seat W 54th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2309 (Seat W 54th)
+Seat W 54th
+READY FOR GATE KS-2309. TIER 1 (cross-tenant personal data, read and write; Opus gate).
+
+PR 2271: https://github.com/Secuura/Distributed_Secuura/pull/2271
+- Head 4cec1424a1ccd47028667619240a5d3623bcacbc: ONE commit on develop 44c312fd120bc943cefec36bd9f04b5410da5092 (PR 2270's squash, your BUILD RELEASE).
+- 6 paths, exactly the ruled list: gdpr.ts; the new cell file ks2309-gdpr-subject-routes-are-own-organisation-only.test.ts (115 cells); adminConfig.ts (refresh guard + the Q6 comment); KS-2308's test file (P3 flip, 3 platform controls, N5, N6); two fragments. Nothing in auth or api-gateway; no yaml, gdprService.ts, package.json or lockfile.
+Push: 04:36:34Z to 04:49:42Z (788 s), rc 0, VERIFIED at 04:49:45Z (push/out_real_ks2309/status.txt). Pre-push preflight: 13/16 legs ran, legs 3, 4 and 8 SKIPPED (no local stack), nothing failed. That is not a pass of those three legs.
+Facts comment on KS-2309: id e9b1b36d, 04:50:13Z, read back identical (push/linear_comment_ks2309_record.txt). PR record: push/pr_record_ks2309.json; the read-back found no problems (open, base develop, 1 commit, 6 files, +401/-20).
+Develop at this mail: 44c312fd120b (ls-remote 04:50:30Z, unchanged since your release).
+
+RE-CHECKS AT THE RELEASE: D2 one parent ec3bee2ebbd8, tree abc36da16ada = PR 2270 head's tree (my prototype's base); gdpr.ts, adminConfig.ts and the ks2308 file blobs at D2 equal PR 2270 head's; locks equal the donor s-w51-ks2300's. The branch tree's four code and test files are byte-equal (sha256) to the prototype's.
+
+WHAT IT DOES (as ruled in your ANSWERs 03:55:14Z and 03:59:22Z):
+- mayActForSubject first in nine handlers: platform roles and self pass with no lookup; an ORG_ADMIN passes only when its users-row organization_id equals the subject's stored one, both non-null, read under the caller's tenant scope; the token claim never decides.
+- Anyone else gets the route's existing refusal before any service call; for an ORG_ADMIN an absent or malformed DSR id reads the same 403; PATCH decides before the body. Refused ORG_ADMINs are logged with route and role.
+- The users lookup loads the db module lazily (documents.ts precedent): the top-level import broke six existing suites at load in my prototype (DATABASE_URL). Disclosed in my STATUS of 04:10Z.
+- POST /pricing/refresh platform-only; the P3 flip is stated in the PR body as a ruled change.
+
+EVIDENCE (Test Evidence block in the PR body; REC evidence/), every figure equal to the prototype's:
+- Red on D2's code (rg_g394_w54.py on the branch tree, sources put back by sha256): ks2309 66 of 115 red, 49 controls green; ks2308 only P3 red (56 green). Green: 115/115 and 57/57; tsc 0. Red names equal to the prototype's.
+- Mutants (mutants_g394_w54.py on the byte-equal prototype at PR 2270's head, whose tree is D2's): 20 of 20 compiling killed (K1-K16, R1b, R2, N5, N6); all 22 rows field-equal to the prototype run; R1 (refresh guard removed) fails TS6133 and is not counted. Control: 481 tests over 18 files, 0 failed (matrix_g394_build1.json).
+- Whole originate suite, failure sets both empty: dev D2 2965/2965 (237 files); branch 3085/3085 (238 files), +120 = the 115 new cells plus, in KS-2308's file, the flipped P3 under a new name, three platform controls, N5 and N6; no test present on both arms changed status (suite_S3_*).
+- Static (static_ks2309.json), each beside a planted control that fired: tsc 0; eslint 0/0 on gdpr.ts, adminConfig.ts and both cell files (and gdpr.ts, adminConfig.ts 0/0 on dev); check.cjs 0 baseline 0 new; fragments OK; check:openapi CHECK PASS (g394_static_ks2309.json).
+- Standalone ratchet pair: 6 services OK; 48 passed, 0 failed (run with a subprocess cwd this time, no cd).
+- Gatetest: 04:34:36Z to 04:34:58Z, all gates passed; 18 open PRs, none on any of the 6 paths; planted control PASS; no OVL_IGNORE_PRS.
+
+RESIDUALS STATED IN THE PR: R1 /dsr/pending = KS-2310; R2 /deletion-log = KS-1696, /retention report only; R3 the VERIFIER GET 404/403 split on /dsr/:dsrId (pre-existing; nothing filed, as you ruled); R4 the lookup on a real Postgres under RLS, not established; R5 deployed use, not established.
+
+NOT RUN: the four platform suites, a booted service, the gateway forward, any live stack or deployed environment, a real database or RLS, Node 24 (this machine runs Node v26.8.1).
+
+The seat ENDS at this READY: nothing merged, deployed or closed.
+If the gate returns findings: fix on this branch in worktrees/s-w54-ks2309 with ONE new commit, no force push, using the existing-branch driver (W 50th's kit). Re-run rg_g394_w54.py, mutants_g394_w54.py (prototype or a tree synced from the branch), static_ks2309_w54.py and suites_w54.sh on both arms.
+Meter, MEASURED (ctx_usage_w54.py): |% of 1M at this mail.
+
