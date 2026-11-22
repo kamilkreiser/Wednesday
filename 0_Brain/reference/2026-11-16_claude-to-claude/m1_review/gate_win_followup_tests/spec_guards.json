@@ -1,0 +1,567 @@
+[
+ {
+  "name": "g_reparse_removed",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "    if win_is_reparse_point(md) {\n        return Err(DirError::WindowsRule(WinDirRefusal::ReparsePoint));\n    }\n    if !md.file_type().is_dir() {",
+    "    if !md.file_type().is_dir() {"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "g_reparse_inverted",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "    if win_is_reparse_point(md) {\n        return Err(DirError::WindowsRule",
+    "    if !win_is_reparse_point(md) {\n        return Err(DirError::WindowsRule"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "g_reparse_commented",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "    if win_is_reparse_point(md) {\n        return Err(DirError::WindowsRule(WinDirRefusal::ReparsePoint));\n    }\n",
+    "    // if win_is_reparse_point(md) {\n    //     return Err(DirError::WindowsRule(WinDirRefusal::ReparsePoint));\n    // }\n"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "g_sync_dropped",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "g_sync_after_rename",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "g_sync_commented",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        // f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "g_sync_comment_oneline",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        /* f.sync_all().map_err(io)?; */\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_sync_comment_multiline",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        /*\n        f.sync_all().map_err(io)?;\n        */\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_sync_cfg_any",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        #[cfg(any())]\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_sync_if_false",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        if false {\n            f.sync_all().map_err(io)?;\n        }\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "g_qb_sync_dropped",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        Ok(rel)",
+    "        f.write_all(bytes).map_err(io)?;\n        Ok(rel)"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "g_cfg_unix_removed",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/engine.rs",
+    "    if cfg!(unix) && sock.as_os_str().len() > MAX_SOCKET_PATH {",
+    "    if sock.as_os_str().len() > MAX_SOCKET_PATH {"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_brace_str_close_honest",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        let (mut f, tmp) = self.open_temp(name)?;\n        f.write_all(bytes).map_err(io)?;\n        f.sync_all",
+    "        let (mut f, tmp) = self.open_temp(name)?;\n        let _close = \"}\";\n        f.write_all(bytes).map_err(io)?;\n        f.sync_all"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_brace_str_open_sync_dropped",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        let _open = \"{\";\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_brace_char_open_qb_dropped",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        Ok(rel)",
+    "        f.write_all(bytes).map_err(io)?;\n        let _open = '{';\n        Ok(rel)"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_brace_comment_open_sync_dropped",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        /* { */\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_brace_str_close_in_check_dir",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "fn win_check_dir(md: &fs::Metadata) -> Result<(), DirError> {\n    if win_is_reparse_point(md) {\n        return Err(DirError::WindowsRule(WinDirRefusal::ReparsePoint));\n    }\n",
+    "fn win_check_dir(md: &fs::Metadata) -> Result<(), DirError> {\n    let _c = \"}\";\n"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_decoy_second_item",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "/// A folder of the walk: not a reparse point, and a directory.\n#[cfg(windows)]\nfn win_check_dir(md: &fs::Metadata) -> Result<(), DirError> {\n    if win_is_reparse_point(md) {\n        return Err(DirError::WindowsRule(WinDirRefusal::ReparsePoint));\n    }\n",
+    "#[cfg(windows)]\n#[allow(dead_code)]\nmod decoy {\n    use super::*;\n    #[cfg(windows)]\n    fn win_check_dir(md: &fs::Metadata) -> Result<(), DirError> {\n        if win_is_reparse_point(md) {\n            return Err(DirError::WindowsRule(WinDirRefusal::ReparsePoint));\n        }\n        Ok(())\n    }\n}\n\n/// A folder of the walk: not a reparse point, and a directory.\n#[cfg(all(windows))]\nfn win_check_dir(md: &fs::Metadata) -> Result<(), DirError> {\n"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_shadow_const",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "    use std::os::windows::fs::MetadataExt;\n    md.file_attributes()",
+    "    use std::os::windows::fs::MetadataExt;\n    const WIN_FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0;\n    md.file_attributes()"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_early_return_check_dir",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "fn win_check_dir(md: &fs::Metadata) -> Result<(), DirError> {\n    if win_is_reparse_point(md) {\n        return Err(DirError::WindowsRule(WinDirRefusal::ReparsePoint));\n    }\n",
+    "fn win_check_dir(md: &fs::Metadata) -> Result<(), DirError> {\n    match md.file_type().is_dir() {\n        true => return Ok(()),\n        false => {}\n    }\n    if win_is_reparse_point(md) {\n        return Err(DirError::WindowsRule(WinDirRefusal::ReparsePoint));\n    }\n"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_length_second_wrapped",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/engine.rs",
+    "    if cfg!(unix) && sock.as_os_str().len() > MAX_SOCKET_PATH {",
+    "    if sock.as_os_str().len()\n        > MAX_SOCKET_PATH\n    {\n        return Err(\"too long\".to_string());\n    }\n    if cfg!(unix) && sock.as_os_str().len() > MAX_SOCKET_PATH {"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "a_length_cfg_shadow",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/engine.rs",
+    "    if cfg!(unix) && sock.as_os_str().len() > MAX_SOCKET_PATH {",
+    "    macro_rules! cfg {\n        ($i:ident) => {\n            true\n        };\n    }\n    if cfg!(unix) && sock.as_os_str().len() > MAX_SOCKET_PATH {"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "h_rustfmt_wrap_sync",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all()\n            .map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "h_helper_fn_sync",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        f.write_all(bytes).map_err(io)?;\n        win_sync(&f)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ],
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "/// A folder of the walk: not a reparse point, and a directory.\n",
+    "#[cfg(windows)]\nfn win_sync(f: &std::fs::File) -> Result<(), DirError> {\n    f.sync_all().map_err(io)\n}\n\n/// A folder of the walk: not a reparse point, and a directory.\n"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "h_renamed_binding",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "        let (mut f, tmp) = self.open_temp(name)?;\n        f.write_all(bytes).map_err(io)?;\n        f.sync_all().map_err(io)?;\n        drop(f);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())",
+    "        let (mut file, tmp) = self.open_temp(name)?;\n        file.write_all(bytes).map_err(io)?;\n        file.sync_all().map_err(io)?;\n        drop(file);\n        fs::rename(&tmp, self.root.join(name)).map_err(io)?;\n        Ok(())"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "h_cfg_target_os",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "#[cfg(windows)]\nconst WIN_FILE_ATTRIBUTE_REPARSE_POINT",
+    "#[cfg(target_os = \"windows\")]\nconst WIN_FILE_ATTRIBUTE_REPARSE_POINT"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "h_length_let",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/engine.rs",
+    "    if cfg!(unix) && sock.as_os_str().len() > MAX_SOCKET_PATH {",
+    "    let sock_len = sock.as_os_str().len();\n    if cfg!(unix) && sock_len > MAX_SOCKET_PATH {"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ },
+ {
+  "name": "h_cfg_with_comment",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-daemon/src/datadir.rs",
+    "#[cfg(windows)]\nfn win_is_reparse_point",
+    "#[cfg(windows)] // the attribute bit\nfn win_is_reparse_point"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-daemon",
+   "--test",
+   "win_guards"
+  ]
+ }
+]

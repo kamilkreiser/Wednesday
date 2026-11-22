@@ -1,0 +1,166 @@
+[
+ {
+  "name": "r_slow_refusal_3s_base",
+  "sha": "33371921670acfcb6fc7634d0c4eacafa9800a8d",
+  "edits": [
+   [
+    "crates/coagent-relay/src/client.rs",
+    "                Err(e) => last = e.to_string(),",
+    "                Err(e) => {\n                    tokio::time::sleep(Duration::from_secs(3)).await;\n                    last = e.to_string()\n                }"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-relay",
+   "--test",
+   "candidates"
+  ],
+  "from_target": "b"
+ },
+ {
+  "name": "r_oversize_uncounted_base",
+  "sha": "33371921670acfcb6fc7634d0c4eacafa9800a8d",
+  "edits": [
+   [
+    "crates/coagent-relay/src/server.rs",
+    "    sh.counters.record_cut(why);\n",
+    "    if why != CutReason::Oversize {\n        sh.counters.record_cut(why);\n    }\n"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-relay",
+   "--test",
+   "abuse",
+   "oversize"
+  ],
+  "from_target": "b"
+ },
+ {
+  "name": "r_oversize_as_peerclosed_base",
+  "sha": "33371921670acfcb6fc7634d0c4eacafa9800a8d",
+  "edits": [
+   [
+    "crates/coagent-relay/src/server.rs",
+    "        WsError::Capacity(_) => CutReason::Oversize,",
+    "        WsError::Capacity(_) => CutReason::PeerClosed,"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-relay",
+   "--test",
+   "abuse",
+   "oversize"
+  ],
+  "from_target": "b"
+ },
+ {
+  "name": "r_clean_base",
+  "sha": "33371921670acfcb6fc7634d0c4eacafa9800a8d",
+  "edits": [],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-relay",
+   "--test",
+   "candidates",
+   "--test",
+   "abuse"
+  ],
+  "from_target": "b"
+ },
+ {
+  "name": "r_slow_refusal_3s_head",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-relay/src/client.rs",
+    "                Err(e) => last = e.to_string(),",
+    "                Err(e) => {\n                    tokio::time::sleep(Duration::from_secs(3)).await;\n                    last = e.to_string()\n                }"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-relay",
+   "--test",
+   "candidates"
+  ],
+  "from_target": "h"
+ },
+ {
+  "name": "r_oversize_uncounted_head",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-relay/src/server.rs",
+    "    sh.counters.record_cut(why);\n",
+    "    if why != CutReason::Oversize {\n        sh.counters.record_cut(why);\n    }\n"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-relay",
+   "--test",
+   "abuse",
+   "oversize"
+  ],
+  "from_target": "h"
+ },
+ {
+  "name": "r_oversize_as_peerclosed_head",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [
+   [
+    "crates/coagent-relay/src/server.rs",
+    "        WsError::Capacity(_) => CutReason::Oversize,",
+    "        WsError::Capacity(_) => CutReason::PeerClosed,"
+   ]
+  ],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-relay",
+   "--test",
+   "abuse",
+   "oversize"
+  ],
+  "from_target": "h"
+ },
+ {
+  "name": "r_clean_head",
+  "sha": "cf41a77e984b7e8e274ff4cc97136cf9d1987892",
+  "edits": [],
+  "cmd": [
+   "cargo",
+   "test",
+   "--locked",
+   "-p",
+   "coagent-relay",
+   "--test",
+   "candidates",
+   "--test",
+   "abuse"
+  ],
+  "from_target": "h"
+ }
+]
