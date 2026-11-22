@@ -80417,7 +80417,9 @@
    "CARD wed-disk-25gib-delete-merged-gate-clones-1106",
    "CARD secuura-ks657-redis-security-store-delete-1107",
    "CARD secuura-org-admin-moves-users-between-orgs-1120"
-  ]
+  ],
+  "delivered_artefact": "PR 2272 squash 82e51a4d9a2dcfa231a8f805766a1ae123146b4b on develop (KS-2306: 409 while users remain + one all-or-nothing unit; gate 396 GO WITH NOTES; verified at source 18:45:37; not deployed)",
+  "delivered_ts": "2026-11-22T18:45:55.146856+11:00"
  },
  {
   "id": "composer-review-round-ended-1120",
@@ -82702,6 +82704,67 @@
    "CARD wed-disk-25gib-delete-merged-gate-clones-1106",
    "CARD secuura-ks657-redis-security-store-delete-1107",
    "CARD secuura-org-delete-with-users-ks2306-1120"
+  ]
+ },
+ {
+  "id": "secuura-launcher-boot-cd-ssh-fix-1122",
+  "client_project": "Secuura/Blockchain",
+  "title": "May the Secuura agent fix its launcher's start-up steps that make agents change folder?",
+  "bluf": "Secuura/Blockchain: five merge agents in a row today broke the same rule at start-up, before reading their brief: they changed folder with cd (5, 1, 8, 6 and 9 times; one ended up sitting in the credentials folder), and one put mail keys on the command line and tried the vault's shared key. Nothing was damaged; each disclosed it and I corrected it by mail. The cause is the launcher's own start-up prompt, which agents follow first. Same shape as your 14 Sep ruling (card secuura-launcher-ssh-keepalive: delegate), which let the Secuura agent edit its own launcher. Not covered here: the start-up remote check over SSH, which you ruled on 22 Sep (card ...-top-line = c) and which stays. Default if you do not answer: c (no change; I keep correcting each agent by mail).",
+  "default_action": "c: no change to the launcher; Wednesday keeps correcting each agent by mail.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Let the Secuura agent fix it (recommended)",
+    "detail": "A Secuura agent edits its own Launch_Claude.command start-up prompt: absolute paths, no cd; keys read only inside scripts, never from the vault. Your 22 Sep ls-remote line untouched. Tested on one launch, then reported. Wednesday does not touch the file."
+   },
+   {
+    "key": "b",
+    "label": "Show me the change first",
+    "detail": "The agent drafts the edit as a diff for you; nothing changes until you approve it."
+   },
+   {
+    "key": "c",
+    "label": "Leave it as it is",
+    "detail": "Agents keep slipping at start-up; Wednesday keeps correcting each by mail."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-22T19:26:24.356980+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-21 09:56",
+   "2026-08-21 10:36",
+   "2026-08-21 10:57",
+   "2026-08-21 19:49",
+   "2026-08-28 09:33",
+   "2026-09-01 17:25",
+   "2026-09-02 17:34",
+   "2026-09-03 10:42",
+   "2026-09-03 10:42",
+   "2026-09-08 11:41",
+   "2026-09-08 11:50",
+   "2026-09-10 09:48",
+   "2026-09-10 09:48",
+   "2026-09-10 09:48",
+   "2026-09-14 21:47",
+   "2026-09-16 13:46",
+   "2026-09-16 18:49",
+   "2026-09-16 19:41",
+   "2026-09-18 09:16",
+   "CARD launcher-turn-end-line",
+   "CARD wed-ledger-boot-cost",
+   "CARD wed-boot-names-one-ledger-there-are-two",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD secuura-launcher-ssh-keepalive",
+   "CARD tuesday-boot-digest-outgrew-the-window",
+   "CARD secuura-launcher-boot-fetch-vs-parallel-seat-top-line",
+   "CARD general-friday-boot-on-fable-1116",
+   "CARD secuura-ks968-admin-first-boot-1119"
   ]
  }
 ]
