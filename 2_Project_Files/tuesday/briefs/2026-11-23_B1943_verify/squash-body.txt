@@ -1,0 +1,34 @@
+SignInActor raises its Audit event to each handler from the invocation
+list, each in its own try, in subscription order and with one arguments
+object, so a handler that throws no longer keeps a binding refusal from
+the handlers after it. A card user whose object id parses as the empty
+identifier, in any form Guid reads, is LookupFailed at the lookup:
+nothing is acquired, the printer is not told, nothing is audited and
+the signed-in user stays. The sign-in README names two limits: a tap can
+take effect up to about MaxTapAge plus four StepTimeout bounds after it
+arrived, and a printer sign-out queued behind a switch ends the new
+broker session.
+
+CloudDeviceTokenHolder no longer disposes the token object a
+registration holds when the issuer answers that registration's renewal
+with that same object. Within the bound such an answer is refused
+(TokenAnswerRefused) and the held token is kept, so it is served while
+its lifetime lasts and refused after. An answer that arrives after the
+bound is disposed under the registration's lock unless it is the object
+held at that moment, which is kept. A disposed answer is refused when
+it arrives and again under that lock just before it would be held, so a
+concurrent Invalidate can no longer get a disposed token held. The
+README names what the holder does not check: an issuer that keeps or
+changes a token it handed over, a copy the holder handed out answered
+back (a copy carries its registration; the holder does not check that),
+and one token object answered for two registrations. Not yet named: one
+object answered to two calls for one id across a Remove, where the old
+call's answer clears what the id holds again.
+
+Seven existing files under the SignIn and Universal Print Registration
+folders and their tests; no public member, project, lock, package or
+workflow file changes. C# totals plus 7 on both legs; skipped, unit
+tests and the rules count are unchanged. Nothing is deployed; nothing
+was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
