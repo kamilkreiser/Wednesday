@@ -500,19 +500,19 @@ No Jira write outside the closed list; **no sentence that anything is landed, fi
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (code main and the count of pull requests; pull requests 15 and 16, their heads and merge commits; every pane whose name holds OXPd; B1887's STATUS last line and the sha256 of the three record files and of CLAUDE.md after it; the highest clarification entry and the highest owed item; Jira: the census, OXPD2-1's comment ids; as Tuesday reads them): ____
-- JIRA (exactly WRITE or DRY; default DRY): ____
-- CREATE (exactly YES or NO; default NO; YES says Tuesday approves TKT-SUMMARY and TKT-P1 to TKT-P7 byte for byte as frozen, the labels and the parent, and that this seat files the ticket his label names): ____
-- CLAR (exactly WRITE or HOLD; default HOLD): ____
-- J-WORDS (CONFIRMED or HOLD; the board line of 09:35:13 compared with the live board, and card print J with the decision store): ____
-- K-WORDS (CONFIRMED or HOLD; the board line of 13:53:03 and card print K): ____
-- L-WORDS (CONFIRMED or HOLD; the board line of 14:57:38 and card print L): ____
-- M-WORDS (CONFIRMED or HOLD; the board line of 16:53:30 compared with the live board): ____
-- M-ENTRY (exactly WRITE or HOLD; default HOLD; the drafter recommends WRITE): ____
-- RECORDS (exactly WRITE or HOLD; default HOLD): ____
-- STOP-CHECKS (which of the never-run checks Tuesday accepts as never run on a real output, or what Tuesday ran): ____
-- Hard stop (the absolute outer limit AEDT): ____
+- STAMP: Tuesday s309 at 17:44. Kit read whole (518 lines in two Read pages) and the drafter's report whole. Tuesday's checks (fleet/state/s309/stamp1900/): THE FROZEN TABLE 29 of 29 equal (frozen.out); THE SOURCES 36 of 37 equal before R294's records (row 2 CLARIFICATIONS.md differed then, as the kit expects; rows 3 and 4 now differ too, written by R294). Answers: Q1 CREATE YES (Tuesday's decision: his ruling's label names the ticket, the project's CLAUDE.md neither grants nor refuses a records seat a create, and records kit B1785 created OXPD2-20 to OXPD2-24 under its own kit); Q2 the ticket's form as frozen; Q3 the re-worded ticket text approved byte for byte; Q4 M-ENTRY WRITE; Q5 the items named there are a later pass; Q6 P-4's allowance accepted. Decisions here are Tuesday's.
+- LAUNCH WINDOW: Launch at once after this stamp. WED_USAGE_STOP=100 rests on the weekend row of EXPIRING-GRANTS, which ends at the end of Sunday 2026-11-22: a launch after midnight drops it.
+- BASE (code main and the count of pull requests; pull requests 15 and 16, their heads and merge commits; every pane whose name holds OXPd; B1887's STATUS last line and the sha256 of the three record files and of CLAUDE.md after it; the highest clarification entry and the highest owed item; Jira: the census, OXPD2-1's comment ids; as Tuesday reads them): Tuesday's live reads just before this stamp: code main 185b9eef28f8ecbd87e92c6ae6cbe1025468c3e9; 16 pull requests, 0 open; pull request 15 head edaa1b70, merged as e1e8043d; pull request 16 head a9dc8cd9, merged as 185b9eef; panes %0 tuesday and two unnamed, none holds OXPd (R294's pane %189 closed after its READY was verified); B1887 STATUS last line 'READY B1887: 617c8ff44c2469b8b83ac3cceb6d034f1f18ae93' (manifest sha256 prefix equal, read by Tuesday); sha256 prefixes after R294: CLARIFICATIONS.md e1231d7f0615dad9, BACKLOG.md 22406c5f5522bb90, history.md 22c0432eeba71994, CLAUDE.md 1a2e5629c0e7b695 (equal to THE SOURCES row 1); highest clarification entry C-64; highest owed item 48 (48 owed lines); Jira: 24 issues, 0 Done (one page), OXPD2-1 Backlog with comments 41405 41406 41408 41412 41413 41414 41419 41447 41448 41449 41450 (the last four are R294's, per its STATUS).
+- JIRA (exactly WRITE or DRY; default DRY): WRITE
+- CREATE (exactly YES or NO; default NO; YES says Tuesday approves TKT-SUMMARY and TKT-P1 to TKT-P7 byte for byte as frozen, the labels and the parent, and that this seat files the ticket his label names): YES
+- CLAR (exactly WRITE or HOLD; default HOLD): WRITE
+- J-WORDS (CONFIRMED or HOLD; the board line of 09:35:13 compared with the live board, and card print J with the decision store): CONFIRMED
+- K-WORDS (CONFIRMED or HOLD; the board line of 13:53:03 and card print K): CONFIRMED
+- L-WORDS (CONFIRMED or HOLD; the board line of 14:57:38 and card print L): CONFIRMED
+- M-WORDS (CONFIRMED or HOLD; the board line of 16:53:30 compared with the live board): CONFIRMED
+- M-ENTRY (exactly WRITE or HOLD; default HOLD; the drafter recommends WRITE): WRITE
+- RECORDS (exactly WRITE or HOLD; default HOLD): WRITE
+- STOP-CHECKS (which of the never-run checks Tuesday accepts as never run on a real output, or what Tuesday ran): Tuesday accepts as never run on a real output, each as the kit lists it: the poster and its fence; the read-back of the created ticket; the census diff; HOLD R and HOLD R2 on the live files; entries J to M in the live register after B1887; the history entry; the landings check inside the seat's process; the C-x and OWED-x mappings on the files B1887 wrote; P-2 and P-5 on B1887's real output. A failure you can trace to the kit's wording is STOPPED: NEEDS TUESDAY. Tuesday ran: the four board lines against the live board (raw lengths 97, 101, 104, 88, each exact), the three card prints against decision_queue.sh show (exact), THE FROZEN TABLE, THE SOURCES hashes, the BASE reads above, and R294's READY at source (record-file hashes, headings C-58 to C-64, owed items to 48, OXPD2-1's four new comment ids, census 24 and 0 Done).
+- Hard stop (the absolute outer limit AEDT): 21:00 AEDT on Sunday 2026-11-22, or the kit's own Step-0 clock plus 90 minutes, whichever is earlier.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s309 (17:44): the whole kit in two Read pages and the drafter's report whole.
