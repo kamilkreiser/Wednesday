@@ -18,6 +18,25 @@ SUBJ="${1:-}"; BODY="${2:-}"; ATT="${3:-}"
 [ -z "$ATT" ] || [ -f "$ATT" ] || { echo "windows_wo_send: no attachment file at $ATT" >&2; exit 2; }
 BB=$(wc -c < "$BODY" | tr -d ' '); [ "$BB" -gt 200 ] || { echo "windows_wo_send: body is only $BB bytes; refusing" >&2; exit 2; }
 if grep -q '<<' "$BODY"; then echo "windows_wo_send: the body still holds a << placeholder; refusing" >&2; exit 2; fi
+# FOLDER GUARD (ledger 2026-11-23, w=2): WO-9 told the PC to USE the folders its own DO NOT TOUCH line named
+# (a generated order whose renames ran in the wrong order). A Windows folder that appears both on a line
+# beginning "DO NOT TOUCH" and on the line beginning "WHERE." refuses the send. WO_DRY=1 stops after the guard.
+python3 - "$BODY" <<'PY' || exit 2
+import re, sys
+t = open(sys.argv[1], encoding="utf-8").read().split("\n")
+pat = re.compile(r"[A-Za-z]:\\[A-Za-z0-9_\\\-]+")
+norm = lambda s: s.rstrip("\\.").lower()
+use = set(); keep = set()
+for l in t:
+    if l.startswith("WHERE."): use |= {norm(x) for x in pat.findall(l)}
+    if l.startswith("DO NOT TOUCH"): keep |= {norm(x) for x in pat.findall(l)}
+both = sorted(use & keep)
+print("folder guard: WHERE names %d folder(s), DO NOT TOUCH names %d, in both: %d" % (len(use), len(keep), len(both)))
+if both:
+    print("windows_wo_send: REFUSED: the order uses folder(s) it also says not to touch: " + ", ".join(both), file=sys.stderr)
+    sys.exit(1)
+PY
+[ -z "${WO_DRY:-}" ] || { echo "WO_DRY set: guard passed, nothing sent"; exit 0; }
 set -a; . "$ROOT/4_Credentials/.env"; set +a
 [ -n "${AGENTMAIL_API_KEY:-}" ] && [ -n "${WINDOWS_AGENT_AGENTMAIL_KEY:-}" ] || { echo "windows_wo_send: a mail key is missing in 4_Credentials/.env" >&2; exit 2; }
 T="$(mktemp -d "${TMPDIR:-/tmp}/wosend.XXXXXX")" || exit 2
