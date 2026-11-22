@@ -1,0 +1,28 @@
+EfDeviceRegistry.AddAsync now catches the DbUpdateException of its save,
+clears the context's tracker and reads the key again: a key now held is
+refused DuplicateDevice (another writer won the race between the check
+and the save); otherwise EF Core's own exception is rethrown. Either way
+the failed row no longer stays tracked, so the next audit append on the
+same context is written. Clearing the tracker also drops any other
+unsaved change the caller had on that context, as after a stale update.
+
+SuiteDbContext watches ChangeTracker.StateChanged and Tracked. While a
+save runs, an audit entry that becomes modified or removed, or starts to
+be tracked so, ends the save with AuditEntryChanged and the change is
+not written. Each save gives the in-save flag back as it found it, so a
+SavingChanges handler or a save interceptor that runs a save of its own
+first and then changes or removes saved entries is refused too; what
+that nested save already wrote stays written. A SavedChanges handler
+runs after the commit: an entry it changes is refused, but the save's
+own rows are already stored. Still open: an entry being added,
+ExecuteUpdate, ExecuteDelete, raw SQL and a command interceptor (each
+named in the README), and a hook that catches the refusal and goes on,
+whose change is then written (not yet named in the README).
+
+Six existing files under the Data library and its tests; no public
+member, error reason, migration, snapshot, package, project, lock or
+workflow file changes. C# totals plus 11 on both legs; skipped, unit
+tests and the rules count are unchanged. Nothing is deployed; nothing
+was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
