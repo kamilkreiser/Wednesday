@@ -24,7 +24,7 @@
 # Usage: safe_push.sh "<commit message>" [extra path to stage ...]
 #   chat_log.json and decisions.json are always staged BY NAME. Never `add -A`.
 # Exit: 0 pushed · 1 no commit message (bash's ${1:?}) · 2 usage/env, incl. a
-#       missing union helper · 3 pushed but HEAD != origin · 20/21 a union script
+#       missing union helper · 3 pushed but HEAD != origin, OR (B1907 r1) refused by the verify-folder scan: nothing committed or pushed · 20/21 a union script
 #       failed · 22 a conflict with no merge rule (hand it back, never guess) ·
 #       24 the pull FAILED with no conflicted file (git's own text printed; nothing pushed)
 # Exit codes MEASURED, not assumed: the first draft documented the no-message
@@ -83,10 +83,64 @@ done
 # 3. Stage them by NAME, plus whatever the caller asked for. chat_log.json is
 #    deliberately absent: it is derived and gitignored, so staging it would
 #    re-create the shared-file conflict this phase removed.
+PRE_STAGED="$(git -C "$W" -c core.quotePath=false diff --cached --name-only)"   # B1907: index before this call stages anything
 for f in $CHATFILES decisions; do
   [ -f "$W/$D/$f.json" ] && git -C "$W" add "$D/$f.json"
 done
 for p in "$@"; do git -C "$W" add "$p" || exit 2; done
+
+# 2026-11-22 (B1907; ledger rows 2026-11-22 s308 x2 + s309, w=3 REGRESSION): an agent's
+# tuesday/briefs/*_verify/ folder was committed AND pushed in the same call as a handover
+# file, and gitleaks ran only afterwards. Every scan was clean; the ORDER was wrong.
+# WHAT: after staging and BEFORE the commit, list what is staged (the index, not the
+# argument list, so a path staged any other way is caught too). If any staged path is under
+# 2_Project_Files/tuesday/briefs/*_verify/ (any depth), copy those INDEX blobs to a temp dir,
+# run a planted control (a fake ghp_ token MUST give rc 1 with a finding), then scan the
+# blobs. Any finding / rc other than 0,1 / control failure / missing scanner = REFUSE:
+# unstage exactly what THIS call staged, commit nothing, push nothing, exit 3.
+# No verify path staged = gitleaks is not called at all.
+# Test hook: SAFE_PUSH_GITLEAKS overrides the gitleaks path (tests only: arm CONTROL-FAIL).
+# Arms: FIRE, QUIET, NEUTRAL, CONTROL-FAIL, LEFT-OUT in fleet/state/s310/b1907/EVIDENCE.md.
+VSTAGED="$(git -C "$W" -c core.quotePath=false diff --cached --name-only)"   # R1 M1: quotePath=false so non-ASCII names match
+VSCAN="$(git -C "$W" -c core.quotePath=false diff --cached --name-only --diff-filter=d)"   # R1 M4: no deletions / old side of a rename (no blob to scan)
+STAGED_BY_CALL="$(printf '%s\n' "$VSTAGED" | grep -vxF -f <(printf '%s\n' "$PRE_STAGED") || true)"
+VPATHS="$(printf '%s\n' "$VSCAN" | grep -E '^2_Project_Files/tuesday/briefs/(.*/)?[^/]+_verify/' || true)"   # R1 M3: any depth
+if [ -n "$VPATHS" ]; then
+  VN="$(printf '%s\n' "$VPATHS" | wc -l | tr -d ' ')"
+  VT="$SC/verifyscan"; mkdir -p "$VT/blobs" "$VT/control" || { echo "cannot create $VT" >&2; exit 2; }
+  _vrefuse() {
+    echo "safe_push: REFUSED rc 3 — verify-folder scan: $1" >&2
+    echo "  report/evidence: $VT (report.json, control_report.json, scan.out)" >&2
+    # unstage exactly what this call staged (index as before the call)
+    printf '%s\n' "$STAGED_BY_CALL" | while IFS= read -r _p; do
+      [ -n "$_p" ] && git -C "$W" reset -q -- "$_p"
+    done
+    exit 3
+  }
+  if [ -n "${SAFE_PUSH_GITLEAKS:-}" ]; then GL="$SAFE_PUSH_GITLEAKS"
+  else command -v gitleaks >/dev/null 2>&1 || _vrefuse "gitleaks not found on PATH"; GL=/opt/homebrew/bin/gitleaks; fi
+  [ -x "$GL" ] || _vrefuse "gitleaks not executable at $GL"
+  # control: a fake token of the shape ghp_ + 36 alphanumerics, built in pieces so this file never holds one
+  printf 'token = "%s%s%s"\n' "ghp_" "aB3dE5fG7hJ9kL1mN3pQ5rS7" "tU9vW1xY3zA5" > "$VT/control/control.txt"
+  "$GL" dir --no-banner --redact --ignore-gitleaks-allow --exit-code 1 -i "$VT" --report-path "$VT/control_report.json" "$VT/control" > "$VT/control.out" 2>&1
+  VCRC=$?
+  if [ "$VCRC" -ne 1 ] || ! grep -q 'RuleID' "$VT/control_report.json" 2>/dev/null; then
+    cat "$VT/control.out" >&2
+    _vrefuse "scanner control did not fire (control rc $VCRC, expected 1 with a finding)"
+  fi
+  while IFS= read -r _p; do
+    [ -n "$_p" ] || continue
+    mkdir -p "$VT/blobs/$(dirname "$_p")" || exit 2
+    git -C "$W" show ":$_p" > "$VT/blobs/$_p" || _vrefuse "cannot read index blob $_p"
+  done <<< "$VPATHS"
+  "$GL" dir --no-banner --redact --ignore-gitleaks-allow --exit-code 1 -i "$VT" --report-path "$VT/report.json" "$VT/blobs" > "$VT/scan.out" 2>&1
+  VRC=$?
+  if [ "$VRC" -ne 0 ]; then
+    cat "$VT/scan.out" >&2
+    _vrefuse "gitleaks rc $VRC over $VN staged verify-folder file(s) (1 = finding, other = scanner failure)"
+  fi
+  echo "safe_push: verify-folder scan clean ($VN files, control fired)"
+fi
 
 if git -C "$W" diff --cached --quiet; then
   echo "safe_push: nothing staged"
@@ -210,5 +264,14 @@ fi
 
 git -C "$W" push 2>&1 | tail -2
 H="$(git -C "$W" rev-parse HEAD)"; O="$(git -C "$W" rev-parse origin/main)"
-if [ "$H" = "$O" ]; then echo "safe_push: HEAD == origin ($H)"; else
+# 2026-11-20 s299 (MECHANISM OWED): three 'pushed' claims for files that were not in the commit.
+# Print every tracked file still modified under the handover directories. Print only; never
+# changes the exit code.
+_notin() {
+  git -C "$W" status --porcelain --untracked-files=no -- 0_Brain/tasks/ 0_Brain/daily_tuesday/ \
+      0_Brain/daily/ 0_Brain/learnings/ 2_Project_Files/tuesday/briefs/ | while IFS= read -r _l; do
+    [ -n "$_l" ] && echo "NOT IN THIS PUSH: ${_l#???}"
+  done
+}
+if [ "$H" = "$O" ]; then echo "safe_push: HEAD == origin ($H)"; _notin; else
   echo "safe_push: WARNING HEAD $H != origin $O" >&2; exit 3; fi
