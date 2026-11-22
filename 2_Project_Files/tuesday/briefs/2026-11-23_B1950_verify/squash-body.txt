@@ -1,0 +1,24 @@
+The card store no longer lets a cancellation thrown by the blob maker
+itself leave untyped. The maker is not handed the caller's token, so
+the two catches around its two calls (SearchPrefix and Blob) take every
+exception it throws, a cancellation included, as CodecFailed, with no
+request after it and nothing written. The caller's own cancellation is
+unchanged: it leaves as the Graph layer raises it.
+
+Every answer the store reads (the search, the user read and both schema
+reads) comes through one parse, and right after it one walk of the
+whole answer refuses an answer in which any object, at any depth, holds
+a name twice: MalformedAnswer before anything of it is read, so no user
+is chosen, no count is made, no schema pass is kept and nothing is
+written. Names are compared ordinally after their escapes are read;
+names that differ only in case are not repeats. The set's own
+repeated-name check is folded into that walk. A repeated name in a
+part the store never reads also fails the call; whether Graph ever
+sends one is not measured. The README says both, with file and line.
+
+Seven existing files under the Identity library and its tests; no
+public member, project, lock, package or workflow file changes. C#
+totals plus 24 on both legs; skipped, unit tests and the rules count
+are unchanged. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,149 @@
+LANDING FORM for the OXPd 2 card store follow-ups (lane A2-F: kit B1944, seat X40; Q1 to Q6 the coordinator's stamp
+S4, Q1 and Q2 in words). Head to land: a56ed63bb2e39f6c9dbcdbdefd4eaf9dfdf07d07 on the branch
+b1944/a2-f-card-store-follow-ups, ONE commit on 394fa997826e3d102fafa6a0c05a4847132cb01a. The landing is ONE SQUASH:
+one parent on main. Gate verdict (G1, round 2 of 2 of lane A2): VERDICT.md in this folder (B1950). Land only when this
+folder's VERDICT.md reads GO or GO WITH FINDINGS. Who decides to land: the coordinator.
+
+Round 1 of lane A2 (gate B1941, GO WITH FINDINGS @ 75fb5fd) landed as pull request 27; its FOUND 1 and FOUND 2 are
+what this head closes. B1941's landing texts are NOT used.
+
+MAIN AT THE GATE: 394fa997826e3d102fafa6a0c05a4847132cb01a (pull request 28, lane F1; read by GET at 04:03 AEDT
+2026-11-23; tree b06d8049f745591ecd0ddbea7f6e8403cf9250bf). Open pull requests 0 (newest 28, closed, merged); pull
+requests from this branch, any state: 0. Main's push run 45040156344 reads PASS by hosted2.py at --total 1759 --rules
+551 --skipped-linux 4 --skipped-windows 21 (linux and windows 1759 twice, succeeded 1755 / 1738, GUARD clean 10 and 11
+files, RULES 551, Ran 111, floor 111; Analyze actions, csharp, python success). Open code-scanning alerts on main: 0.
+compare main...a56ed63b: ahead 1, behind 0, merge base 394fa997, exactly the seven owned paths:
+  src/Datasec.Suite.Identity/CsaReading.cs             +39 -6
+  src/Datasec.Suite.Identity/CsaStore.cs               +9 -3
+  src/Datasec.Suite.Identity/README.md                 +8 -3
+  tests/Datasec.Suite.Identity.Tests/EnrolTests.cs     +29 -0
+  tests/Datasec.Suite.Identity.Tests/FindTests.cs      +74 -0
+  tests/Datasec.Suite.Identity.Tests/ReadTests.cs      +25 -0
+  tests/Datasec.Suite.Identity.Tests/SchemaTests.cs    +25 -0
+
+THE HEAD THE GATE MEASURED (scratch clone fleet/state/s313/g1950/clone, push URL invalid://no-push, detached at the
+head): locked restore --force rc 0; build 0 Warning(s) 0 Error(s); whole solution total: 1783, failed: 0, succeeded:
+1779, skipped: 4; 44 mutants each red on exactly its cells, 44 undone; RULES: clean (551 files). Its tree is
+89af052ba7f721f8c59c4f5a7b56005faf227aa0 (551 files). The head's push run 45045417543 read by GET (hosted2.py
+--hardened-scan, rc 0): four jobs success, attempt 1; linux total 1783 twice, succeeded 1779, skipped 4, GUARD: clean
+(10 files); windows total 1783 twice, succeeded 1762, skipped 21, GUARD: clean (11 files); rules RULES: clean (551
+files), UNIT-TEST FLOOR: ran 111, floor 111; secret-scan every hardened row OK: HOSTED a56ed63b...: PASS. That push
+run has no Analyze rows: code scanning of the head is read on the pull request.
+
+Never land a head or a merge a gate did not read: if the branch moves off a56ed63b, stop. If main moves off 394fa997
+before the merge, follow MAIN MOVES below before step 5.
+
+Environment for every gh line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+Every line below is a GET except opening the pull request, the one re-trigger of step 2 if it is needed, and the one
+merge line of step 5.
+
+1. THE PULL REQUEST TEXT. Base main, head b1944/a2-f-card-store-follow-ups. Title: pr-title.txt (not the commit
+   subject; its byte count in VERDICT.md SCANS, under GitHub's 256). Body: pr-body.md (why; what changed; what proves
+   it; still open: VERDICT.md FOUND 1 and the named costs; who decides: the coordinator). Each text was scanned
+   (VERDICT.md, SCANS). Change a word and scan again.
+
+2. PROVE WHICH TREE THE PULL REQUEST'S CHECKS BUILT. With main still 394fa997 the branch is not behind, but the
+   pull_request run builds a merge ref; read that it is the head on 394fa997:
+
+   gh api -X GET 'repos/datasecau/OXPd_2/actions/runs?head_sha=a56ed63bb2e39f6c9dbcdbdefd4eaf9dfdf07d07&event=pull_request' --jq '.workflow_runs[] | [.id, .name, .status, .conclusion, .created_at] | @tsv'
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_retrigger.sh --check datasecau/OXPd_2 <run id> a56ed63bb2e39f6c9dbcdbdefd4eaf9dfdf07d07 <main sha40 at that moment>
+
+   rc 0 (MATCH: the job log's line `HEAD is now at ... Merge a56ed63b... into <main>...`) = go on. rc 3 (STALE) = run
+   the default mode once (`pr_retrigger.sh datasecau/OXPd_2 PRNUM`) and check the NEW run again. rc 4 (no Merge line)
+   is NOT a match.
+
+3. THE CHECK WAIT (head pinned, distinct NAMES). Run as a tracked background task:
+
+   GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config' bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/OXPd_2 PRNUM a56ed63bb2e39f6c9dbcdbdefd4eaf9dfdf07d07 60 40 --min-checks 8
+
+   8 = linux, windows, secret-scan, rules (push and pull_request runs), Analyze (actions), Analyze (csharp), Analyze
+   (python), CodeQL, all success. rc 0 = every row success, neutral or skipped; rc 5 (MIXED) or 1 = stop and read. Then
+   read the pull_request run's four jobs and their logs (by GET with --allow-escape-sequences; without it every count
+   reads 0):
+
+   gh api -X GET 'repos/datasecau/OXPd_2/actions/runs/<run id>/jobs' --jq '.jobs[] | [.id, .name, .conclusion] | @tsv'
+   gh api -X GET --allow-escape-sequences repos/datasecau/OXPd_2/actions/jobs/<job id>/logs | grep -i -E 'total: |failed: |succeeded: |skipped: |RULES: |GUARD: |Ran 111 tests|UNIT-TEST FLOOR|PLANTED-CONTROL|no leaks found|NEUTRAL-|failed Datasec\.'
+
+   Required on the merge ref with main 394fa997: linux `total: 1783` (twice), `failed: 0`, `succeeded: 1779`,
+   `skipped: 4`, `GUARD: clean (10 files)`; windows `total: 1783` (twice), `failed: 0`, `succeeded: 1762`, `skipped:
+   21`, `GUARD: clean (11 files)` (both MEASURED on the head's own push run); no `failed Datasec.` line on either leg
+   (anywhere in the line); rules `RULES: clean (551 files)`, `Ran 111 tests`, `UNIT-TEST FLOOR: ran 111, floor 111`;
+   secret-scan both PLANTED-CONTROL lines, `no leaks found`, `objects of this commit not among them 0`, both
+   NEUTRAL-EXPORT lines `wrong 0`, NEUTRAL-SCAN-REACH `not among the stored objects 0`. (Or hosted2.py on the merge
+   commit's sha with --total 1783 --rules 551 --skipped-linux 4 --skipped-windows 21 --unit 111 --floor 111
+   --hardened-scan.) Any red test = STOP: a new finding, never a re-run. A red on ONE leg alone of a new cell (E11,
+   F12, F13, K06, R07) is a STOP for the coordinator (the kit's platform line), never a skip or a retry.
+
+   CODE SCANNING: read the analyses FIRST (positive control: this change is C# under src/ and tests/, and the gate ran
+   no CodeQL locally), then the alerts:
+
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/analyses?ref=refs/pull/PRNUM/head&per_page=10' --jq '.[] | [.commit_sha, .category, .results_count, .created_at] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/head&state=open' --jq 'length'
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+
+   Required: a `/language:csharp` row at commit a56ed63bb2e39f6c9dbcdbdefd4eaf9dfdf07d07 with results_count 0 (and the
+   actions and python rows at the same sha); open alerts 0; the head a56ed63b...; mergeable true and state clean. No
+   csharp row at the head's sha = not yet analysed: wait, never read it as 0. Any open alert, a csharp results_count
+   above 0, or blocked = STOP: an alert is fixed in the code by a new commit and a new gate, never dismissed. What a
+   reader of the Analyze (csharp) rows looks for in THIS diff: two unfiltered `catch (Exception)` around a handed-in
+   object's calls (`CsaStore.cs:288`, `:305`); a recursive walk over `JsonElement` with a `HashSet<string>` per object
+   (`CsaReading.cs:155` to `:183`); in the tests, lambdas that throw a captured exception (`FindTests.cs`, F12) and raw
+   JSON bodies built by concatenation. Each is a deliberate shape; an alert on any of them is still a STOP.
+
+4. LAST READ BEFORE THE MERGE: the branch ref equals a56ed63b...; main equals 394fa997... (or the new main that MAIN
+   MOVES measured and step 2 proved).
+
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/b1944 --jq '.[] | [.ref, .object.sha] | @tsv'
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/main --jq '.[] | [.ref, .object.sha] | @tsv'
+
+5. THE SQUASH (one parent, head pinned; the real number in place of PRNUM; the body exactly the file). First run
+   `python3 -I build/squash_scan.py <subject file with the number> squash-body.txt --scanner /opt/homebrew/bin/gitleaks`
+   from a clone of main: last line `SQUASH-SCAN: clean` (the gate ran it with #29 in place of #PRNUM, from main
+   394fa997's build/: VERDICT.md SCANS).
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit a56ed63bb2e39f6c9dbcdbdefd4eaf9dfdf07d07 --subject "$(sed 's/#PRNUM/#'PRNUM'/' squash-subject.txt)" --body-file squash-body.txt
+
+   No --admin and no bypass. If the merge is refused, stop and read why.
+
+6. AFTER, on main (GET only): the new main commit has ONE parent (394fa997, or the new main of MAIN MOVES) and its
+   tree equals the measured tree (89af052ba7f721f8c59c4f5a7b56005faf227aa0, 551 files, when main was still 394fa997);
+   its push run reads four jobs success with the numbers of step 3, and the three Analyze rows success; open
+   code-scanning alerts on main 0. **main's push run must read PASS**:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/main --jq '[.sha, (.parents | length), .commit.tree.sha, .commit.message[0:130]] | @tsv'
+   python3 -I /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s313/g1950/gate/hosted2.py <new main sha40> <a new log folder> --wait --total 1783 --rules 551 --skipped-linux 4 --skipped-windows 21 --unit 111 --floor 111 --hardened-scan
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/heads/main&state=open' --jq 'length'
+
+   (hosted2.py sha256 5d98ac48ed9f90cc4f12368b697cb75d1cdf75d91cee3f4ce7bd389e49f79adb, the gate's copy.) A red here is
+   a NEW finding, never a re-run.
+
+MAIN MOVES (from 394fa997). At the gate's read no pull request is open. Lane F3 (kit B1945, branch
+b1945/f3-readme-limits at 6177b525b127025988ae122a62184bc699a9b5f4, parent 394fa997) may land first; its four paths
+(src/Datasec.Suite.Data/README.md, src/Datasec.Suite.UniversalPrint/Registration/README.md,
+tests/Datasec.Suite.Data.Tests/AuditSavedChangesLimitTests.cs,
+tests/Datasec.Suite.UniversalPrint.Tests/Registration/CloudDeviceTokenHolderLimitTests.cs) share none with this lane.
+(A) THIS LANE FIRST (main still 394fa997): steps 1 to 6 as written. The new main's tree is 89af052b. Totals on main
+    after: 1783 both legs, succeeded 1779 / 1762, skipped 4 / 21, RULES 551. Lane F3 then lands on the new main by its
+    own form (its totals plus 24, RULES 553).
+(B) LANE F3 FIRST, byte for byte its head 6177b525 (main moves to <F3 main>, one parent 394fa997, tree
+    f51df03648e745db31dedace71f4b1b05871b4e0):
+    (a) do not merge on this reading; (b) confirm `<F3 main>`'s tree is f51df036 and its parent 394fa997, and measure
+    `git merge-tree --write-tree <F3 main> a56ed63b...` in a scratch clone: rc 0 and tree
+    b8c476f003648cbbf7e19a348f71d376c190c8e7 (the gate measured exactly this merge from 6177b525: rc 0, no conflict,
+    tree b8c476f0; locally total: 1785, failed: 0, succeeded: 1781, skipped: 4; RULES: clean (553 files)) = go on;
+    (c) pr_retrigger.sh default mode once and `--check` the new run against the NEW main sha (rc 0 required);
+    (d) the expected totals: linux `total: 1785`, `succeeded: 1781`, `skipped: 4`; windows `total: 1785`, `succeeded:
+    1764` (PREDICTED: 1785 - 21; the gate measured 1785 on macOS only), `skipped: 21`; `RULES: clean (553 files)`;
+    Ran 111 and floor 111; GUARD 10 and 11; or, equivalently, F3 main's own push-run totals PLUS 24 on each leg, the
+    skipped counts and its RULES count unchanged; (e) steps 3 to 6 with those numbers; step 6's parent is <F3 main>
+    and its tree b8c476f0.
+(C) ANY OTHER LANDING FIRST (main moves and (B) does not hold): do not merge on this reading; measure `git merge-tree
+    --write-tree <new main> a56ed63b...`: rc 0, no conflict, AND `git diff --name-only 394fa997 <new main>` names no
+    path under src/Datasec.Suite.Identity/**, tests/Datasec.Suite.Identity.Tests/** or src/Datasec.Suite.Graph/**, and
+    no `.csproj`, `packages.lock.json`, `Directory.Packages.props`, `Directory.Build.props`, `global.json`,
+    `NuGet.config` or `.github/**` = go on with (B)(c) to (e) and the new main's own push-run totals plus 24; anything
+    else = STOP and a new gate.
+
+A merge deploys nothing: the repository's one workflow (.github/workflows/ci.yml) builds, tests and scans and has no
+deploy step, and the host does not use the Identity library (its README's first paragraph). No setting is changed by
+any line above. No Jira call in any line above; OXPD2-14 stays open.
