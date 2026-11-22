@@ -19,6 +19,10 @@
 # command position), `rm` as part of another word (`rmdir` is separate and NOT refused —
 # an empty directory holds nothing), `--rm` docker flags, `rm` inside single quotes passed
 # to another program (git grep 'rm ' …) — the regex anchors on command position.
+# (2026-11-23: the heredoc half was only CLAIMED until norm.py actually stripped quoted bodies; a body
+# line beginning with the verb was refused. Now stripped, EXCEPT when the opener feeds a shell that
+# reads stdin as a script — bare/-s bash|sh|zsh|dash|ksh, ssh, source/., or a pipe into one — whose
+# body executes and stays checked. Arms S..AC in tests/no_rm_arms.sh, with an ablation.)
 # Fail-open on the INSTRUMENT (a parse error passes, stated on stderr) so a hook bug cannot
 # brick every Bash call. Exit 2 = refused.
 INPUT=$(cat)

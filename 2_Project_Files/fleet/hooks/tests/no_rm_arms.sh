@@ -29,4 +29,16 @@ arm "O backticked prose (the 15:4x false positive)" $'bash /x/note_entry.sh --st
 arm "P backtick subst rm (NOT caught — accepted, stated)" 'echo `rm /Volumes/DevMASTER/WEDNESDAY/z`' 0
 arm "Q unlink project"         'unlink /Volumes/DevMASTER/WEDNESDAY/0_Brain/x.md' 2
 arm "R rm after pipe"          'ls | rm /Volumes/DevMASTER/WEDNESDAY/y' 2
+# 2026-11-23: quoted heredoc bodies are data UNLESS the opener feeds a shell reading stdin as a script.
+arm "S note line BEGINS with rm (the 02:0x false positive)" $'bash /x/note_entry.sh --stdin <<\'EOF\'\nrm -f was aimed at a path that did not exist; disclosed\nEOF' 0
+arm "T prose rm after ; and | in cat heredoc" $'cat > /private/tmp/x <<\'EOF\'\nit said; rm /Volumes/DevMASTER/WEDNESDAY/y | and stopped\nEOF' 0
+arm "U bash reads heredoc as script"  $'bash <<\'EOF\'\nrm /Volumes/DevMASTER/WEDNESDAY/y\nEOF' 2
+arm "V bash -s with args"             $'bash -s arg1 <<\'EOF\'\nrm /Volumes/DevMASTER/WEDNESDAY/y\nEOF' 2
+arm "W ssh heredoc"                   $'ssh box <<\'EOF\'\nrm /home/u/y\nEOF' 2
+arm "X real rm AFTER the heredoc end" $'cat > /private/tmp/x <<\'EOF\'\nhi\nEOF\nrm /Volumes/DevMASTER/WEDNESDAY/y' 2
+arm "Y unquoted heredoc not stripped" $'cat > /private/tmp/x <<EOF\nrm /Volumes/DevMASTER/WEDNESDAY/y\nEOF' 2
+arm "Z cat heredoc piped into sh"     $'cat <<\'EOF\' | sh\nrm /Volumes/DevMASTER/WEDNESDAY/y\nEOF' 2
+arm "AA <<- dash form into zsh"       $'zsh <<-\'EOF\'\n\trm /Volumes/DevMASTER/WEDNESDAY/y\n\tEOF' 2
+arm "AB double-quoted tag prose"      $'cat > /private/tmp/x <<"EOF"\nrm is never used here\nEOF' 0
+arm "AC source /dev/stdin heredoc"    $'source /dev/stdin <<\'EOF\'\nrm /Volumes/DevMASTER/WEDNESDAY/y\nEOF' 2
 echo "fails=$fails"; exit $(( fails > 0 ))

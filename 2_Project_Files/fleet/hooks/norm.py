@@ -19,6 +19,56 @@ def under_scratch(p):
 # command substitution is not used in this fleet's commands; markdown backticks are in every note.
 # A gate with false positives gets routed around, so the splitter loses the backtick (a backtick-
 # substituted rm is the one shape this hook now does not see — stated, accepted).
+# QUOTED HEREDOC BODIES ARE DATA (2026-11-23, Wednesday): the header always said prose inside a quoted
+# heredoc is not touched, but nothing stripped the body, so a note/brief line that BEGAN with the delete
+# verb (or carried it after `;` or `|`) was refused as a command (02:0x, a note_entry heredoc). Strip a
+# <<'TAG' / <<"TAG" body exactly as pretooluse_cockpit_verb_check.py does, with ONE exception that keeps
+# the guard sound: if any command on the opener line reads STDIN AS A SCRIPT (a shell with no script
+# argument or with -s, ssh, source/.), the body EXECUTES, so it is kept and checked. Unquoted heredocs
+# (<<EOF) are never stripped. Arms: tests/no_rm_arms.sh S..Z.
+HEREDOC_RE = re.compile(r"<<-?\s*(['\"])([A-Za-z_][A-Za-z0-9_]*)\1")
+SHELLS = {"bash", "sh", "zsh", "dash", "ksh"}
+SEG_RE = r'(?:;|&&|\|\||\||\$\()'
+
+def _head_and_rest(seg):
+    try:
+        toks = shlex.split(seg, posix=True)
+    except ValueError:
+        toks = seg.split()
+    i = 0
+    while i < len(toks) and (re.match(r'^[A-Za-z_][A-Za-z0-9_]*=', toks[i]) or toks[i] in ("sudo", "nohup", "exec", "command", "time", "env")):
+        i += 1
+    if i >= len(toks):
+        return "", []
+    return toks[i].rsplit("/", 1)[-1], toks[i+1:]
+
+def _reads_stdin_as_script(opener):
+    pre = re.sub(r"<<-?\s*(['\"])[A-Za-z_][A-Za-z0-9_]*\1", " ", opener)
+    for seg in re.split(SEG_RE, pre):
+        head, rest = _head_and_rest(seg.strip())
+        if head in ("ssh", "source", "."):
+            return True
+        if head in SHELLS:
+            if "-c" in rest:
+                continue
+            if "-s" in rest or not [a for a in rest if not a.startswith("-")]:
+                return True
+    return False
+
+def strip_quoted_heredocs(text):
+    out, lines, i = [], text.split("\n"), 0
+    while i < len(lines):
+        out.append(lines[i])
+        m = HEREDOC_RE.search(lines[i])
+        if m and not _reads_stdin_as_script(lines[i]):
+            tag = m.group(2)
+            i += 1
+            while i < len(lines) and lines[i].strip() != tag:
+                i += 1
+        i += 1
+    return "\n".join(out)
+
+cmd = strip_quoted_heredocs(cmd)
 segments = re.split(r'(?:^|\n|;|&&|\|\||\||\$\(|\bthen\b|\bdo\b)', cmd)
 problems = []
 for seg in segments:
