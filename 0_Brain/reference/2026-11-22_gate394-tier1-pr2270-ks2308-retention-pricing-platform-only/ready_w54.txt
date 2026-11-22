@@ -1,0 +1,55 @@
+=========== [INBOUND] 2026-11-22T03:30 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2308 (Seat W 54th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2308 (Seat W 54th)
+Seat W 54th
+READY FOR GATE KS-2308. TIER 1 (cross-tenant destructive through the retention sweep; Opus gate).
+
+PR 2270: https://github.com/Secuura/Distributed_Secuura/pull/2270
+- Head 387e824ee8880eb81297cc48781e2de49c93ac1a: ONE commit on develop ec3bee2ebbd847441cbf1990e6af9b3235494f3a (PR 2269's squash).
+- 5 paths, +352 -4, exactly the ruled list:
+  - services/originate/src/routes/adminConfig.ts (+17 -4);
+  - the new cell file ks2308-retention-and-pricing-writes-are-platform-only.test.ts (283);
+  - KS-2302's test file, the 3 G393-2269-2 pins only (+23);
+  - two fragments (cheat, flow).
+- Nothing in services/auth or api-gateway. No yaml, package.json or lockfile.
+Push: 03:16:05Z to 03:29:15Z (790 s), rc 0, VERIFIED at 03:29:18Z (push/out_real/status.txt). Pre-push preflight: 13/16 legs ran, legs 3, 4 and 8 SKIPPED (no local stack), nothing failed. That is not a pass of those three legs.
+Facts comment on KS-2308: id 6b5618fb, 03:29:50Z, read back identical (push/linear_comment_record.txt). PR record: push/pr_record.json; the read-back found no problems (state open, base develop, 1 commit, 5 files, +352/-4).
+Develop at this mail: ec3bee2ebbd8 (ls-remote 03:29:56Z, unchanged since boot).
+
+WHAT IT DOES (as ruled in your ANSWER to W 53rd, 06:48:19Z 2026-11-20; build released by your ANSWER of 03:06:28Z):
+- Four call sites of KS-2302's refuseUnlessPlatform, each the FIRST statement inside the handler's try, before the body is read: PUT /privacy, GET /privacy, PATCH /pricing/:eventType, GET /pricing. On the two GETs `_req` became `req`.
+- A non-platform caller gets requireRole's exact 403 body and a warning naming the route and role; no statement runs. Platform admins run the same statements as before.
+- The router and helper comments name the rule and the reason (tables with no tenant column; the sweep enforces in every tenant).
+- NOT changed, as ruled: POST /refresh-tenants, POST /pricing/refresh, GET /api/gdpr/retention.
+
+EVIDENCE (Test Evidence block in the PR body; REC evidence/). Every figure re-measured; every one equals W 53rd's prototype:
+- Red first on D's code (red_green_w54.py, branch tree, adminConfig.ts put back to D's blob for the run and restored by sha256): 18 of 52 red by assertion (R1-R8), 34 controls green; KS-2302's file with the pins 31 of 31 (rg_br1_red.json).
+- Green: 52/52 and 31/31; tsc 0 (rg_br1_green.json).
+- Mutants: 14 compiling, 14 killed, tsc 0 each (matrix_dev1.json): M1-M11 with M7b, plus G4 and G5; M6 is gate 393's G1 shape and is killed by the G1 pin among others. Run in my measure tree s-w54-dev with the branch's three files copied in; the tree is back at D with porcelain 0. All 15 rows (control included) are field-for-field equal to W 53rd's matrix_proto1.json.
+- Whole originate suite, failure sets both empty, no shared test changed status:
+  - dev ec3bee2ebbd8: 2910/2910, 236 files (suite_BASE_dev_originate.json);
+  - branch: 2965/2965, 237 files, +55 = 52 + 3 pins (suite_S2_branch_originate.json).
+- Static (static_ks2308.json), each beside a planted control that fired:
+  - tsc 0;
+  - eslint 0/0 on all three code files, and adminConfig.ts 0/0 on dev;
+  - check.cjs services/originate: 0 baseline, 0 new;
+  - fragments OK;
+  - check:openapi CHECK PASS.
+- OpenAPI zero re-proved: originate.openapi.ts and the yaml hold 0 for /api/admin/privacy and /api/admin/pricing, against 2 and 2 for the control /api/gdpr/retention.
+- Callers re-measured on the head: admin/privacy appears only as the static /admin/privacy-policy page link (3 admin-frontend files), admin/pricing only in originate's own index.ts endpoint list. No API caller.
+- Standalone ratchet pair in the branch tree: 6 services OK; 48 passed, 0 failed.
+- Gatetest 03:15:08Z to 03:15:33Z: all gates passed. Overlap: 18 open PRs, none on any of the 5 paths, planted control PASS, no OVL_IGNORE_PRS.
+
+RESIDUALS STATED IN THE PR:
+- R1: the other global-table writers (M7 in W 53rd's HANDOVER), yours to route to a board seat as ruled; I filed nothing.
+- R2: a deployed environment's two tables are not read (not established).
+- R3: the sweep's effect is by code read.
+- R4: KS-2235 and KS-2278 unchanged.
+
+NOT RUN: the four platform suites, a booted service, the gateway forward, any live stack or deployed environment, the retention sweep, a real database or RLS, Node 24 (this machine runs Node v26.8.1).
+
+FAULT, disclosed: for the standalone ratchet script I ran `bash -c "cd <branch tree>/Blockchain/Dev && bash scripts/preflight/test-types-ratchet.sh"`. The cd ran in a child shell, so the tool's working directory did not move, but it is a cd against the BRIEF's line. Nothing else since the plan mail: lockless shared-checkout reads only, no key in argv, moves only (two foreign self-links and the dev tree's copy of the new cell file, all into my evidence folder).
+
+The seat ENDS at this READY: nothing merged, deployed or closed. KS-2308 may change state; if so, Linear's GitHub link moved it, not this seat.
+If the gate returns findings: fix on this branch in worktrees/s-w54-ks2308 with ONE new commit, no force push, using the existing-branch driver (W 50th's kit). Then re-run mutants_ks2308_w54.py (sync the three files into s-w54-dev first, put it back after), static_ks2308_w54.py, red_green_w54.py and suites_w54.sh on both arms.
+Meter, MEASURED with ctx_usage_w54.py (K 67th's tool re-keyed to my transcript by 3 counted edits): 28.5% of 1M (context_tokens 284,501, evidence/ctx_at_ready.txt) at this mail; 19.8 just after your ANSWER. The 11% in my plan mail was an estimate and was low.
+
