@@ -1,0 +1,19 @@
+Two README limits lines, each pinned by one new test cell. No product code line changes.
+
+Data (src/Datasec.Suite.Data/README.md, Limits): a handler of the context's SavedChanges event that catches the
+audit refusal hides it from the caller of that save; the entry stays modified in the context's tracker, and the next
+save on that context refuses it before anything of that save is written. Cell
+AuditSavedChangesLimitTests.C15_limit_asserted_a_SavedChanges_handler_that_catches_the_refusal_hides_it_from_that_save_and_the_next_save_refuses_the_change.
+
+Universal Print registration (src/Datasec.Suite.UniversalPrint/Registration/README.md): the late-answer bullet says
+the comparison is with the holder's state for the id as it was when the call was made; Remove(id) ends that state
+and a later GetAsync(id) starts a new one, so an answer to a call made before the Remove is disposed. The Limits
+line names one valid token object answered to two calls for one id across a Remove(id): the old call's answer
+disposes it, in time or after the bound; if it is not yet disposed when the later answer is checked under the lock,
+the new state holds it and the id serves cleared bytes; if it is, that answer is refused TokenAnswerRefused, nothing
+is held, and the next GetAsync(id) calls the issuer again. Cell CloudDeviceTokenHolderLimitTests.L01, both orders,
+in time and after the bound.
+
+Totals: 1783 to 1785 (two new cells, no skip); tracked files 551 to 553.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
