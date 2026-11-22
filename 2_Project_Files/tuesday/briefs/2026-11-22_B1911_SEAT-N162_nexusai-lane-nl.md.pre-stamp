@@ -1,0 +1,636 @@
+From Tuesday (the Datasec coordinator seat), Datasec / NexusAI. **You do NOT use the shared inbox `datasec-nexusai@`**: your STATUS file and its last line are the only channel to Tuesday; Tuesday's channel to you is a `2026-11-22_B1911_(ADDENDUM|ANSWER)-<n>_*.md` file in `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/`. A question is a last line `STOPPED: NEEDS TUESDAY <one question>`. Marks: **MEASURED-BY-DRAFTER** = the drafter printed it with the instrument named (each such line has a claim line in the sidecar `<this kit>.measured`); **RELAYED** = read in another file (re-read it at source before you rely on it); **PREDICTED** = the drafter's arithmetic or expectation, nobody has measured it; **UNMEASURED** = nobody has. The drafter's report is returned to Tuesday as text and saved beside this kit as `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1911_DRAFTER-REPORT.md` (read-only; read it whole at Step 0; its Q-answers are in Tuesday's STAMP slot). **The form is the form of the newest NexusAI build kit, B1771 (lane N-M, `2026-11-20_B1771_SEAT-N161_nexusai-lane-nm-chat-error-text.md`, landed as pull request 238), which is itself B1762's, B1739's and B1737's form: its lock, chain, worktree-slot, mutation and verify rules, tool set and landing hold are this kit's, with the substitutions named in HOLDS.** What the STATUS `## Corrections` of B1771 say is prevented by name (HOLDS 43 to 47). **Unlike B1771, every cell of this lane is MEASURED in real jest 29.7.0 by the drafter (red-first and green), and every plant below is MEASURED; there is no PREDICTED column.** Facts below were read on Sun 22 Nov 2026 from 19:24 AEDT to the end of drafting (printed in the report). **BASE: NexusAI main `8858e5d11ec101de0a49a819c2d29f4eadf95c40`** (read by the drafter by `gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main`; open pull requests 0; the repository is `datasecau/Reporting_Dashboard_Au`, the NexusAI project's own origin). No other NexusAI lane is live or queued ahead of this one (the sweep's queue order puts N-L first).
+
+# BRIEF B1911 - SEAT-N162: NEXUSAI LANE N-L, FOUR PIECES OF DASHBOARD TEXT ARE READ ON THE GROUND THEY ARE PAINTED ON (RD-349: THREE FAILING GREYS, RD-175: THE TONER PERCENTAGE); SIX LIGHT RULE EDITS AND THREE DARK RULES IN TWO STYLESHEETS; ONE NEW TEST FILE (15 CELLS); ONE LIGHT-BASELINE FIXTURE; THE COUNTS FILE; LOCAL CODEQL STEP; FULL VERIFY PASS; ONE PUSH OF A NEW BRANCH; NO PR; NOT DEPLOYED
+
+## THE AUTHORITY AND THE TICKET (MEASURED-BY-DRAFTER)
+- **Authority.** The product owner's 2026-11-11 ruling on brand contrast, option (a) "Yes to both", recorded in the project's `1_Project_Definition/CLARIFICATIONS.md` as C-258 (`awk NR==2751` prints its heading; entry lines 2751 to 2757): "the grey-text ruling applies to the three further places, the dashboard KPI labels among them (RD-349), and the white toner text on its light track is fixed (RD-175)". The ruling names the outcome, not the colours; the colours below are Tuesday's defaults (HOLD 19 and LANDING HOLD 23). The earlier ruling it points at is the product owner's RD-251 ruling of 2026-09-06: the tab strip's failing grey `#7f8c8d` moved onto the brand chrome pair `#00719f` (as TEXT on the page ground, 5.44:1), recorded at `static/css/index-styles.css` in the comment above `.tab-button`.
+- **RD-349** (To Do, label `operations`, updated 2026-11-11, Jira GET at 19:2x): `#7f8c8d` survives on three selectors in `static/css/index-styles.css`: `.metric-card .metric-label` (KPI labels, created at run time by `static/js/index.js`, so no static sweep sees them), `.file-description` and `.drop-text` (both in the import modal). One comment (id 41047, 2026-11-11 14:59): "Ruling recorded; not moved ... measured against the ground each sits on". **RD-175** (To Do, updated 2026-11-11): `span.consumable-text` is white on the light `#e9ecef` toner track at 1.19:1 in BOTH modes; `dark-mode.css` had no consumable rule; the designer's text-shadow is "a named mitigation, not a fix"; one comment (41048), the same ruling: "fixed in both modes". Both stay To Do until a landing; the records seat moves them.
+- **Prior work: none on either ticket** (PRIOR WORK below). Neither is met at main (the three greys, the white label and the missing dark rules are all present at BASE: sidecar lines). **Neither needs a ruling or new words for a human**: the change is colour only, and no sentence a user reads changes (the text strings are untouched). The one judgement is which colour, and it is a recorded default with a stated alternative (Q-1 of the drafter report; `LANDING HOLD`).
+
+## WHAT THE DRAFTER FOUND (MEASURED-BY-DRAFTER at main `8858e5d1`; the tree read as the tarball of that commit, 1059 files, extracted to scratch; contrast by the repo's own `contrastRatio` through jest and by a stand-alone sRGB program, both agreeing to two places)
+1. **The three greys and their real grounds.** `.metric-card .metric-label` `#7f8c8d` (`index-styles.css:112`) on the card ground `white` (`.metric-card`, line 86): 3.48. `.file-description` (`:567`) on `.import-section` `#f8f9fa`: 3.30. `.drop-text` (`:592`) on `.file-drop-zone` `white` (`:578`): 3.48. The brand chrome text colour `#00719f` is 5.44 on white and 5.16 on `#f8f9fa`.
+2. **THE TRAP: dark mode, and two guards that read dark-mode.css.** `.metric-label` and `.file-description` already have dark rules (`dark-mode.css:127`, `:1218`, both `#8c8c8c`, which beat the light rules by specificity), so changing their light colour moves no dark pixel. **`.drop-text` has NO dark rule**: today it shows `#7f8c8d` on the dark panel ground `#1c1c1c` at 4.90 (passes). Moving only its light colour to `#00719f` would put 3.13 on dark, a NEW failure. My first draft added `body.dark-mode .drop-text { color: #7f8c8d; }` to keep the dark pixels, and it was MEASURED RED in the run list: `brand-shell-tokens.test.js` ("a light-only value must never become a legal dark-mode.css value": it names `#7f8c8d`) and `brand-token-conformance.test.js` ("every hex in dark-mode.css resolves to a token ... The manifest is CLOSED to new entries": `#7f8c8d`, 1x). **So the lane joins `.drop-text` to the existing dark muted-text list** (`body.dark-mode .file-description,` gains a line `body.dark-mode .drop-text,`), colour `#8c8c8c`, a recorded token: dark moves from 4.90 to 5.07, a tiny improvement and the only dark pixel change of the lane. Cells D3 and D4 hold it.
+3. **Why a search for `.drop-text` never found it in the static sweep (the ticket's "unexplained asymmetry").** MEASURED in jest: after the change the light failure set of `static/index.html` loses `p.file-description x3` AND `span x3` (the sweep reports a node by tag and own classes; the three import-modal drop texts are `<span>` children of `div.drop-text`, so they were listed as a bare `span x3`, not under `.drop-text`). The ticket's belief that `.drop-text` is "not in the baseline" was a search for the class name; it was in the baseline as `span x3`. The signature leaving with exactly this change is the evidence; the three spans are not individually named by the program (inferred, not run-proved by node identity).
+4. **RD-175: no single text colour can work, so the label gets its own ground.** The label is centred over the whole 20px track, across the fill and the unfilled track. White on the four fills: black `#2c3e50` 10.98 (passes), cyan `#00bcd4` 2.30, magenta `#e91e63` 4.35, yellow `#ffc107` 1.63; white on the track 1.19; dark ink `#212529` on the black fill start 1.40. Either colour fails somewhere, and the fill width varies from 0 to 100 percent. So the label becomes a small OPAQUE chip (`#212529` on `#ffffff`, 15.43; padding `0 6px`, radius 8px, `line-height: 1.25` so it is 16px tall in a 20px bar) and the text-shadow (the mitigation) is removed, with the reason in the rule's comment. Dark: the chip is `#dedede` on `#1c1c1c` (12.67) and the track `#e9ecef` becomes `#313131` (the project's own dark border value), which is the ticket's own dark recommendation. **The light chip ground is written `white`, not `#ffffff`**: `brand-token-conformance.test.js` pins the occurrence count of the surface-card token `#ffffff` in the light sheets (`scripts/derive-brand-tokens.js:148`, 51) and my first draft's `background: #ffffff` made it 52 (MEASURED RED: "pins x51, measured x52"); changing that pin means regenerating `static/css/tokens.css`, which this lane does not own. The keyword `white` is already how the card grounds are written (`.metric-card`, `.file-drop-zone`) and is measured by the same helper. The RD-85 geometry (sibling, centred, no clip, nowrap, `pointer-events: none`) is kept (cell C3).
+5. **A guard reads ratios written in comments** (`__tests__/css-ratio-comments.test.js`: a colour declaration that carries a ratio must carry it as `N.NNN:1 on #hex6` and the repo's helper must agree within 0.005; any other ratio shape on a declaration line fails; at least 25 checked claims must exist). The frozen program writes its four declaration comments in that form, with the ratios computed by program (5.437, 5.158, 15.426, 4.900, 12.667); prose in block comments is history and is not policed.
+6. **Sweep fixture.** `__tests__/fixtures/index-light-failure-baseline.json` is the jest light-failure diff-set of `static/index.html`; `p.file-description x3` is in it. After the change that signature leaves the set and `index-dark-surfaces.test.js` ("the light failure set is EXACTLY the recorded baseline") fails BY NAME unless the fixture moves with it (total 69 to 66). The frozen fixture edit (commit F, below) removes those two signatures, sets `total` 63 and `totalBeforeThisRound` 69, and appends the re-baseline note the file's `history` keeps; MEASURED: with it `index-dark-surfaces.test.js` is 31 of 31 green, and without it two cells are red by name (the diff-set and the control).
+7. **The real-browser contrast sweep `tests/e2e/dark-mode-contrast.spec.js` is NOT part of `npm run verify`** (`playwright.config.js` header: "deliberately NOT wired into `npm run verify`"; it needs a surface stood up by `scripts/qa-surface-up.sh` and `BASE_URL`). Two consequences, both RELAYED/MEASURED by grep and left to a records or NX-T/F2 follow-up (LEFT FOR OTHERS 1): its allow-list carries `.consumable-text` ("RD-175 ... identicalInLight: true", spec line 182), which the fix makes a dead excusal; and `tests/e2e/light-baselines.json` already reads stale: it still lists 72 lines for `.tab-button` at 3.48 (`rgb(127, 140, 141)`), a value RD-251 removed on 2026-09-06, and 36 `.metric-label` lines that this lane removes. So that suite was already out of date before this lane.
+8. **Other grey text the ticket does not name**, found by `grep` and left alone: `.metric-card .text-muted` `#95a5a6` (`index-styles.css:121`) on the same white card is 2.6:1 by the same formula (not in RD-349's three; LEFT FOR OTHERS 2).
+9. **Real engine.** The drafter ran the harness `browser1911.js` (below) in headless Chromium on the BASE and the patched copy of the REAL stylesheets with the markup copied from `index.html` and `index.js`: (Light, then dark; `ratio` is the engine's computed text colour against the first opaque ground up the tree.) **BASE:** KPI label `127,140,141` on `255,255,255` 3.478; import description on `248,249,250` 3.299; drop text on `255,255,255` 3.478; toner percentage white on the track `233,236,239` 1.186 with a `rgba(0, 0, 0, 0.85)` shadow, for all six bars, in BOTH modes (the track stays light in dark); dark: label `140,140,140` on a gradient, description 4.500 on `38,38,38`, drop text `127,140,141` on `28,28,28` 4.900. **Patched (the final tree):** KPI label `0,113,159` on white 5.437; description on `#f8f9fa` 5.158; drop text 5.437; toner chip `33,37,41` on white 15.426, `text-shadow` none; dark: label and description unchanged (`140,140,140`), drop text `140,140,140` on `28,28,28` 5.068, chip `222,222,222` on `28,28,28` 12.667, track `rgb(49, 49, 49)`. The chip's box is 16px high inside the 20px bar, inside its parent, for all six bars (5, 25, 50 and 100 percent over black, cyan, magenta and yellow fills). Chromium from Playwright's own cache, headless, a local file page: the live page (Bootstrap and page scripts) was not rendered.
+
+## STATE AT DRAFTING (MEASURED-BY-DRAFTER; re-read every line at Step 1 at YOUR base)
+- origin main `8858e5d11ec101de0a49a819c2d29f4eadf95c40`; open pull requests 0; counts file at BASE `{"tests": 6216, "suites": 393}` (`_updated 2026-11-20T06:53:23.070Z`); the top-level `__tests__/*.test.js` files number 393 (`ls | grep -c`), equal to the suites count.
+- Blobs at BASE (`git hash-object` over the extracted files, first 12): `static/css/index-styles.css` `eb79bc10cff1`, `static/css/dark-mode.css` `e90297efa71f`, `__tests__/fixtures/index-light-failure-baseline.json` `9d814a9058b7`, `scripts/verify-expected-counts.json` `4a00778952e2`, `static/js/index.js` `2c883fa50b9b`, `static/index.html` `296bc582ad4b`. Sizes of the two stylesheets 41678 and 85161 bytes, no CRLF, ASCII-only edits proved by program (non-ASCII bytes 146 and 506, equal before and after).
+- Open code-scanning alerts 22 (files: `backend/server.js` 13, `backend/incidents.js` 2, `backend/jsonStorage.js` 2, `backend/routes/entraProvisioning.js` 2, `backend/services/emailService.js` 2, `tests/uat-run.js` 1): **none in `static/css/` or `__tests__/`**; this lane adds no JavaScript to the product (THE CODE-SCANNING RULE).
+- Lanes before this one, in the same area: pull request 236 (N-K) touched `backend/**`, `docs/role-capabilities.json`, `docs/ROLE-CAPABILITIES.md`, five `__tests__` files and the counts file; pull request 238 (N-M) touched `backend/server.js`, `static/js/index.js` (one token), four `__tests__` files and the counts file. **Neither touched `static/css/**`, `static/index.html` or the light-failure fixture** (file lists by `gh api -X GET repos/.../pulls/<n>/files`); the last commits to `index-styles.css` and the fixture are `7def4188` (RD-180 + RD-251, 2026-09-06) and to `dark-mode.css` `1645c69e` (2026-09-26).
+
+## THE DESIGN (Tuesday's defaults; every departure needs your written justification in STATUS)
+**Three product-and-test commits, no product JavaScript.** The frozen program `apply1911.py` below edits `static/css/index-styles.css` (five anchored edits: three colour lines, the consumable comment, the consumable rule) and edits `static/css/dark-mode.css` twice (one anchored line joins `.drop-text` to the dark muted list; one block appended with two rules). Each anchor is asserted by its match count, each file is rebuilt whole and `os.replace`d, the non-ASCII bytes of each file are proved equal before and after, the added text is ASCII. The drafter's run on a scratch copy: `applied` for both files, `index-styles.css` 41678 to 42608 bytes, `dark-mode.css` 85161 to 85781, and a `diff` of the two pairs is the hunks listed in the sidecar (diff line classes: `index-styles.css` 18 `>` and 7 `<`, `dark-mode.css` 13 `>` and 0 `<`).
+- **A** (`static/css/index-styles.css` and `static/css/dark-mode.css`): by `apply1911.py`.
+- **F** (`__tests__/fixtures/index-light-failure-baseline.json`): by `apply1911_fixture.py` below.
+- **T** (one new file): `__tests__/rd349-rd175-readable-text-on-its-ground.test.js`, 15 cells, extracted from this kit by `awk`.
+- **K**: the counts file alone.
+**Tuesday's defaults, said so they can be overruled (the product owner's ruling fixes the outcome, not these):** (1) the three grey texts take `#00719f` literally, as the RD-251 ruling did for the tab strip; (2) the toner label becomes an opaque chip, not a shadow or a colour change; (3) the dark track becomes `#313131`; (4) `.drop-text` joins the existing dark muted list (`#8c8c8c`, a token); (5) the e2e suite and its baselines are not edited (finding 7). If Tuesday overrules (1) the change is the one literal `TEXT` in `apply1911.py` and in the test file (`const TEXT`), plus the three ratio annotations the program recomputes; the seat does nothing about it by itself.
+
+**The frozen program** (`apply1911.py`; run in wt, argument = wt's root; prints two `applied` lines; then each stylesheet is checked for balanced braces by the seat's own count and `git diff --stat` reads `index-styles.css | 25 ... `-style numbers recorded in STATUS (the drafter's, by `diff` line classes: 18 and 7 for index-styles.css, 13 and 0 for dark-mode.css):
+```python FILE: apply1911.py
+#!/usr/bin/env python3
+# apply1911.py <tree root>: the frozen edit of lane N-L (RD-349, RD-175). ASCII-only added text.
+# Every anchor is asserted to match the stated number of times; each file is rebuilt whole and os.replace'd;
+# the non-ASCII bytes of each file are proved equal before and after.
+import os, sys
+root = sys.argv[1]
+TEXT = '#00719f'
+
+def rebuild(rel, edits, append=''):
+    p = os.path.join(root, rel)
+    raw = open(p, 'rb').read()
+    s = raw.decode('utf-8')
+    for name, old, new, n in edits:
+        c = s.count(old)
+        assert c == n, (rel, name, 'anchor count', c, 'expected', n)
+        s = s.replace(old, new)
+    s += append
+    out = s.encode('utf-8')
+    nonascii_before = [b for b in raw if b > 127]
+    nonascii_after = [b for b in out if b > 127]
+    assert nonascii_before == nonascii_after, (rel, 'non-ASCII bytes changed')
+    tmp = p + '.tmp1911'
+    open(tmp, 'wb').write(out)
+    os.replace(tmp, p)
+    print('applied', rel, len(raw), '->', len(out))
+
+LIGHT_EDITS = [
+ ('E1 metric-label', " .metric-card .metric-label {\n font-weight: 600;\n color: #7f8c8d;\n",
+  " /* RD-349: the KPI labels were #7f8c8d on the white card, a failing grey that no static sweep can see because\n"
+  "    static/js/index.js creates them. They take the brand chrome text colour that .tab-button took in RD-251,\n"
+  "    measured on the ground they sit on (the card). Dark mode keeps its own rule in dark-mode.css. */\n"
+  " .metric-card .metric-label {\n font-weight: 600;\n color: " + TEXT + "; /* @R1@:1 on #ffffff */\n", 1),
+ ('E2 file-description', " .file-description {\n color: #7f8c8d;\n",
+  " /* RD-349: same change; the ground is .import-section, #f8f9fa. Dark keeps its own rule. */\n"
+  " .file-description {\n color: " + TEXT + "; /* @R2@:1 on #f8f9fa */\n", 1),
+ ('E3 drop-text', " .drop-text {\n color: #7f8c8d;\n",
+  " /* RD-349: same change; the ground is .file-drop-zone, white. Dark mode needs its own rule (dark-mode.css): the\n"
+  "    colour below fails on the dark panel ground. */\n"
+  " .drop-text {\n color: " + TEXT + "; /* @R3@:1 on #ffffff */\n", 1),
+ ('E4 consumable comment', "    child \u2014 a narrow fill must never clip the label, RD-85). The outline\n    shadow keeps white text legible over the light #e9ecef track. */\n",
+  "    child \u2014 a narrow fill must never clip the label, RD-85). RD-175: the label\n"
+  "    carries a ground of its own. White text was 1.19:1 on the light #e9ecef track and the outline\n"
+  "    text-shadow that stood in for contrast is not credited by WCAG; no single text colour clears the\n"
+  "    track AND the four fills, so the label is a small opaque chip and the text-shadow is removed. */\n", 1),
+ ('E5 consumable rule', " font-size: 0.8rem;\n color: white;\n text-shadow: 0 0 3px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.6);\n white-space: nowrap;\n",
+  " font-size: 0.8rem;\n color: #212529; /* @R4@:1 on #ffffff */\n background: white;\n padding: 0 6px;\n border-radius: 8px;\n line-height: 1.25;\n white-space: nowrap;\n", 1),
+]
+DARK_APPEND = (
+ "\n/* RD-349 / RD-175: dark counterparts of the light changes in index-styles.css.\n"
+ " * .drop-text: the light colour is now the brand chrome text colour, which fails on the dark panel ground, so it joins\n"
+ " * the dark muted-text list above (.file-description). .consumable-bar / .consumable-text: the light\n"
+ " * track #e9ecef does not belong on a dark page, and the label is a chip with a dark ground of its own. */\n"
+ "body.dark-mode .consumable-bar {\n    background: #313131;\n}\n"
+ "body.dark-mode .consumable-text {\n    color: #dedede;                   /* @R5@:1 on #1c1c1c */\n    background: #1c1c1c;\n}\n"
+)
+# the ratios are computed here by the repo's own formula (sRGB, WCAG 2.x) and written to three decimals
+def lin(c):
+    c /= 255.0
+    return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+def lum(h):
+    h = h.lstrip('#'); r, g, b = [int(h[i:i+2], 16) for i in (0, 2, 4)]
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+def cr(a, b):
+    x, y = lum(a), lum(b)
+    if x < y: x, y = y, x
+    return (x + 0.05) / (y + 0.05)
+R = {'@R1@': cr(TEXT, '#ffffff'), '@R2@': cr(TEXT, '#f8f9fa'), '@R3@': cr(TEXT, '#ffffff'),
+     '@R4@': cr('#212529', '#ffffff'), '@R5@': cr('#dedede', '#1c1c1c')}
+def fill(s):
+    for k, v in R.items(): s = s.replace(k, '%.3f' % v)
+    return s
+rebuild('static/css/index-styles.css', [(a, fill(b), fill(c), n) for a, b, c, n in LIGHT_EDITS])
+rebuild('static/css/dark-mode.css', [('E6 drop-text joins the dark muted list', 'body.dark-mode .file-description,\nbody.dark-mode .s-2d7970a1c7,', 'body.dark-mode .file-description,\nbody.dark-mode .drop-text,\nbody.dark-mode .s-2d7970a1c7,', 1)], append=fill(DARK_APPEND))
+```
+
+## THE NEW TEST FILE (15 cells written as explicit `test(` calls; cell ids are the title prefixes; the colours at BASE are MEASURED-BY-DRAFTER in real jest 29.7.0 on a scratch copy of BASE with the file copied in untracked, and the green at head likewise)
+**One frozen file.** Extract it with `awk` (the line after the opening fence to the line before the closing fence), `cmp` to what you extracted, never retype, never change a title (HOLD 38). It needs no server and no browser (`@jest-environment node`; it reads the two stylesheets, `static/js/index.js` and `static/index.html` as text and measures with the repo's own `contrastRatio`). It proves what the RULES say, not what a browser paints.
+| file | RED at BASE for the property's reason | GREEN at BASE (controls and unchanged answers) |
+|---|---|---|
+| `rd349-rd175-readable-text-on-its-ground.test.js` (15) | L1, L2, L3 (the light colour is not `#00719f`: received `#7f8c8d`), L4 (the failing grey is still on the three rules), D3 (no dark rule names `.drop-text`), C1 (the label has no opaque ground and holds a text-shadow), C2 (no `line-height`), C4 (no dark consumable rules): **8** | I1 (the instrument gives 3.48, 3.30, 1.19, 5.44, 3.13 on known pairs), R1 (the reader finds an exact selector and fails on a missing or a descendant one), D1 and D2 (dark rules kept), D4 (no light colour reaches dark uncovered: green because `.drop-text` is unchanged at BASE; it is the guard for A), C3 (RD-85 geometry), M1 (the markup exists: 7 `class="metric-label"` and 1 `class="consumable-text"` in `index.js`, 3 and 3 in `index.html`): **7** |
+At head all 15 are GREEN (measured). `grep -c -E '^[[:space:]]+test\(' <file>` prints **15** and `grep -c -E '^test\(' <file>` prints **0** (sidecar).
+```js FILE: rd349-rd175-readable-text-on-its-ground.test.js
+/**
+ * @jest-environment node
+ *
+ * RD-349 + RD-175 - four pieces of dashboard text are read against the ground
+ * they are painted on, and each ground is READ FROM THE STYLESHEET, never assumed.
+ *
+ *   .metric-card .metric-label   KPI labels, created by static/js/index.js, so the
+ *                                static page sweep can never see them
+ *   .file-description            import modal, on the .import-section ground
+ *   .drop-text                   import modal, on the .file-drop-zone ground; its
+ *                                text sits in a child span, which the static sweep
+ *                                does not measure, so that sweep never listed it
+ *   .consumable-text             the toner percentage, created by index.js, white
+ *                                on the light track and on four coloured fills
+ *
+ * WHAT THIS FILE IS. A reader of the two stylesheets. It proves what the rules say
+ * and what those rules measure with the repo's own contrast helper. It does NOT
+ * prove what a browser paints: the real-engine numbers are the build seat's
+ * browser check, and are not in this file.
+ *
+ * THE TRAP IT GUARDS. The three light greys moved to the brand chrome text colour.
+ * #00719f is 5.44:1 on white and 3.13:1 on the dark panel ground #1c1c1c, so a
+ * light colour that reaches dark mode through a rule with no dark counterpart
+ * fails there. .drop-text had no dark rule at all; D3 and D4 hold that.
+ */
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const { parseColor, contrastRatio } = require('./helpers/dom');
+
+const ROOT = path.join(__dirname, '..');
+const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+const LIGHT = read('static/css/index-styles.css');
+const DARK = read('static/css/dark-mode.css');
+
+const TEXT = '#00719f';
+const AA = 4.5;
+
+const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '');
+function rulesFor(css, selector) {
+    const out = [];
+    for (const chunk of stripComments(css).split('}')) {
+        const i = chunk.lastIndexOf('{');
+        if (i < 0) continue;
+        const sel = chunk.slice(0, i).split('{').pop();
+        const names = sel.split(',').map((x) => x.replace(/\s+/g, ' ').trim());
+        if (names.includes(selector)) out.push(chunk.slice(i + 1));
+    }
+    return out;
+}
+function prop(body, name) {
+    let val = null;
+    for (const d of (body || '').split(';')) {
+        const j = d.indexOf(':');
+        if (j > 0 && d.slice(0, j).trim().toLowerCase() === name) val = d.slice(j + 1).trim().toLowerCase();
+    }
+    return val;
+}
+const one = (css, selector) => {
+    const r = rulesFor(css, selector);
+    return r.length === 1 ? r[0] : null;
+};
+// a selector that is written again inside a media query (padding only, for .metric-card): the declarations
+// of every rule with that exact selector, in source order, so the last one of a property wins
+const merged = (css, selector) => {
+    const r = rulesFor(css, selector);
+    return r.length ? r.join(';') : null;
+};
+const ratio = (fg, bg) => {
+    const a = parseColor(fg);
+    const b = parseColor(bg);
+    if (!a || !b) return null;
+    return contrastRatio(a, b);
+};
+const HEX6 = /^#[0-9a-f]{6}$/;
+const OPAQUE = /^(#[0-9a-f]{6}|white)$/;
+
+describe('RD-349 + RD-175 - text is read against the ground it is painted on', () => {
+    test('I1: the instrument gives the measured numbers on known pairs', () => {
+        expect(ratio('#7f8c8d', '#ffffff')).toBeCloseTo(3.48, 2);
+        expect(ratio('#7f8c8d', '#f8f9fa')).toBeCloseTo(3.30, 2);
+        expect(ratio('#ffffff', '#e9ecef')).toBeCloseTo(1.19, 2);
+        expect(ratio(TEXT, '#ffffff')).toBeCloseTo(5.44, 2);
+        expect(ratio(TEXT, '#1c1c1c')).toBeCloseTo(3.13, 2);
+        expect(ratio('nonsense', '#ffffff')).toBeNull();
+    });
+
+    test('R1: the rule reader finds an exact selector, a list member, and fails on a missing or descendant selector', () => {
+        const css = '.a { color: #111111; } .b, .c .d { color: #222222; background: #333333; } @media (max-width: 1px) { .e { color: #444444; } }';
+        expect(prop(one(css, '.a'), 'color')).toBe('#111111');
+        expect(prop(one(css, '.c .d'), 'background')).toBe('#333333');
+        expect(prop(one(css, '.b'), 'color')).toBe('#222222');
+        expect(prop(one(css, '.e'), 'color')).toBe('#444444');
+        expect(one(css, '.d')).toBeNull();
+        expect(one(css, '.missing')).toBeNull();
+        expect(prop(null, 'color')).toBeNull();
+        expect(merged(css, '.e')).toBe(' color: #444444; ');
+        expect(merged(css, '.nope')).toBeNull();
+    });
+
+    test('L1: the KPI label colour clears AA on the card ground read from .metric-card', () => {
+        const rule = one(LIGHT, '.metric-card .metric-label');
+        const ground = prop(merged(LIGHT, '.metric-card'), 'background');
+        expect(rule).not.toBeNull();
+        expect(ground).not.toBeNull();
+        expect(prop(rule, 'color')).toBe(TEXT);
+        expect(ratio(prop(rule, 'color'), ground)).toBeGreaterThanOrEqual(AA);
+    });
+
+    test('L2: the file description colour clears AA on the ground read from .import-section', () => {
+        const rule = one(LIGHT, '.file-description');
+        const ground = prop(one(LIGHT, '.import-section'), 'background');
+        expect(rule).not.toBeNull();
+        expect(ground).toBe('#f8f9fa');
+        expect(prop(rule, 'color')).toBe(TEXT);
+        expect(ratio(prop(rule, 'color'), ground)).toBeGreaterThanOrEqual(AA);
+    });
+
+    test('L3: the drop text colour clears AA on the ground read from .file-drop-zone', () => {
+        const rule = one(LIGHT, '.drop-text');
+        const ground = prop(one(LIGHT, '.file-drop-zone'), 'background');
+        expect(rule).not.toBeNull();
+        expect(ground).not.toBeNull();
+        expect(prop(rule, 'color')).toBe(TEXT);
+        expect(ratio(prop(rule, 'color'), ground)).toBeGreaterThanOrEqual(AA);
+    });
+
+    test('L4: no declaration in the stylesheet still paints text with the failing grey in these three rules, and the tab strip keeps its colour', () => {
+        for (const sel of ['.metric-card .metric-label', '.file-description', '.drop-text']) {
+            const body = one(LIGHT, sel);
+            expect(body).not.toBeNull();
+            expect(prop(body, 'color')).not.toBe('#7f8c8d');
+            expect(/var\(--nx-/.test(body)).toBe(false);
+        }
+        expect(prop(one(LIGHT, '.tab-button'), 'color')).toBe(TEXT);
+    });
+
+    test('D1: dark keeps its own KPI label rule, and it clears AA on the last stop of the dark card gradient', () => {
+        const rule = one(DARK, 'body.dark-mode .metric-label');
+        const card = prop(one(DARK, 'body.dark-mode .metric-card'), 'background');
+        const stops = (card || '').match(/#[0-9a-f]{6}/g) || [];
+        expect(rule).not.toBeNull();
+        expect(stops.length).toBe(2);
+        expect(prop(rule, 'color')).toBe('#8c8c8c');
+        expect(ratio('#8c8c8c', stops[1])).toBeGreaterThanOrEqual(AA);
+    });
+
+    test('D2: dark keeps its file description rule on the raised ground', () => {
+        const rule = one(DARK, 'body.dark-mode .file-description');
+        const ground = prop(one(DARK, 'body.dark-mode .import-section'), 'background-color');
+        expect(rule).not.toBeNull();
+        expect(prop(rule, 'color')).toBe('#8c8c8c');
+        expect(ground).toBe('#262626');
+        expect(ratio('#8c8c8c', ground)).toBeGreaterThanOrEqual(AA);
+    });
+
+    test('D3: the drop text has a dark rule on a recorded token colour that clears AA on the dark panel ground', () => {
+        const rule = one(DARK, 'body.dark-mode .drop-text');
+        const ground = prop(one(DARK, 'body.dark-mode .file-drop-zone'), 'background-color');
+        expect(rule).not.toBeNull();
+        expect(ground).toBe('#1c1c1c');
+        expect(prop(rule, 'color')).toBe('#8c8c8c');
+        expect(ratio(prop(rule, 'color'), ground)).toBeGreaterThanOrEqual(AA);
+    });
+
+    test('D4: no light text colour reaches dark mode without a dark rule that clears AA on its dark ground', () => {
+        const cases = [
+            ['.metric-card .metric-label', 'body.dark-mode .metric-label', '#262626'],
+            ['.file-description', 'body.dark-mode .file-description', '#262626'],
+            ['.drop-text', 'body.dark-mode .drop-text', '#1c1c1c'],
+        ];
+        for (const [lightSel, darkSel, ground] of cases) {
+            const darkRule = one(DARK, darkSel);
+            const colour = darkRule ? prop(darkRule, 'color') : prop(one(LIGHT, lightSel), 'color');
+            expect(colour).not.toBeNull();
+            expect(ratio(colour, ground)).toBeGreaterThanOrEqual(AA);
+        }
+    });
+
+    test('C1: the toner percentage carries its own opaque ground and no text-shadow stands in for contrast', () => {
+        const rule = one(LIGHT, '.consumable-text');
+        expect(rule).not.toBeNull();
+        const colour = prop(rule, 'color');
+        const ground = prop(rule, 'background');
+        expect(HEX6.test(colour || '')).toBe(true);
+        expect(OPAQUE.test(ground || '')).toBe(true);
+        expect(ratio(colour, ground)).toBeGreaterThanOrEqual(AA);
+        expect(prop(rule, 'text-shadow')).toBeNull();
+    });
+
+    test('C2: the chip fits inside the 20px toner bar', () => {
+        const rule = one(LIGHT, '.consumable-text');
+        const bar = prop(one(LIGHT, '.consumable-bar'), 'height');
+        expect(rule).not.toBeNull();
+        expect(bar).toBe('20px');
+        const size = prop(rule, 'font-size');
+        const line = prop(rule, 'line-height');
+        expect(size).toBe('0.8rem');
+        expect(line).not.toBeNull();
+        expect(parseFloat(size) * 16 * parseFloat(line)).toBeLessThanOrEqual(parseFloat(bar));
+        expect((prop(rule, 'padding') || '').split(/\s+/)[0]).toBe('0');
+    });
+
+    test('C3: the label stays a centred sibling that cannot clip (the RD-85 geometry is kept)', () => {
+        const rule = one(LIGHT, '.consumable-text');
+        expect(rule).not.toBeNull();
+        expect(prop(rule, 'position')).toBe('absolute');
+        expect(prop(rule, 'top')).toBe('50%');
+        expect(prop(rule, 'left')).toBe('50%');
+        expect(prop(rule, 'transform')).toBe('translate(-50%, -50%)');
+        expect(prop(rule, 'white-space')).toBe('nowrap');
+        expect(prop(rule, 'pointer-events')).toBe('none');
+    });
+
+    test('C4: dark gives the toner track and its label a dark counterpart that clears AA', () => {
+        const bar = one(DARK, 'body.dark-mode .consumable-bar');
+        const text = one(DARK, 'body.dark-mode .consumable-text');
+        expect(bar).not.toBeNull();
+        expect(text).not.toBeNull();
+        expect(HEX6.test(prop(bar, 'background') || '')).toBe(true);
+        expect(prop(bar, 'background')).not.toBe('#e9ecef');
+        expect(ratio(prop(text, 'color'), prop(text, 'background'))).toBeGreaterThanOrEqual(AA);
+    });
+
+    test('M1: the rules above style real nodes (the markup the page writes and ships)', () => {
+        const js = read('static/js/index.js');
+        const html = read('static/index.html');
+        const count = (s, re) => (s.match(re) || []).length;
+        expect(count(js, /class="metric-label"/g)).toBe(7);
+        expect(count(js, /class="consumable-text"/g)).toBe(1);
+        expect(count(html, /class="file-description"/g)).toBe(3);
+        expect(count(html, /class="drop-text"/g)).toBe(3);
+    });
+});
+```
+
+## THE FIXTURE EDIT (commit F; MEASURED-BY-DRAFTER)
+`__tests__/fixtures/index-light-failure-baseline.json` is the recorded light failure set of `static/index.html` (a diff-set, with a control that the total equals the sweep's length). The change makes the import modal's description and drop texts pass, so two signatures leave the set: `p.file-description x3` and `span x3`. Without this commit `index-dark-surfaces.test.js` is red by name ("disappeared: p.file-description x3, span x3") and its control reads "Expected: 69 Received: 63" (both MEASURED). With it the file is 31 of 31 green. The program is frozen, pure ASCII, asserts every anchor once, builds the whole content first, `json.loads` it and checks the result, writes beside the target and `os.replace`s it; the file is pure ASCII before and after (measured 4406 to 5038 bytes). `appeared` stays EMPTY: that is the property that makes the edit honest, and the gate itself proves it.
+```python FILE: apply1911_fixture.py
+#!/usr/bin/env python3
+# apply1911_fixture.py <tree root>: the frozen edit of the light-failure fixture (commit F). ASCII only; every anchor asserted;
+# the whole new content is built first, written beside the target, then os.replace'd; the file is pure ASCII before and after.
+import os, sys, json
+root = sys.argv[1]
+rel = '__tests__/fixtures/index-light-failure-baseline.json'
+p = os.path.join(root, rel)
+s = open(p, 'rb').read().decode('ascii')
+def rep(old, new):
+    global s
+    assert s.count(old) == 1, (old[:60], s.count(old))
+    s = s.replace(old, new)
+rep('    "p.file-description x3",\n', '')
+rep('    "span x3",\n', '')
+rep('  "total": 69,\n  "totalBeforeThisRound": 77,\n', '  "total": 63,\n  "totalBeforeThisRound": 69,\n')
+rep(' Its absence here is not evidence it did nothing.",\n',
+    ' Its absence here is not evidence it did nothing. RE-BASELINED 69 -> 63 by RD-349 (2026-11-22): the import modal\'s description and drop text moved from #7f8c8d to the brand chrome text colour #00719f (5.16 on its #f8f9fa ground, 5.44 on white). Verified as a diff-set before re-baselining, by the gate itself: disappeared p.file-description x3 and span x3 (the three drop-text spans, whose colour inherits from .drop-text); appeared NOTHING. Every movement an IMPROVEMENT (3.30 -> 5.16, 3.48 -> 5.44). The KPI labels (.metric-label) and the toner percentage (.consumable-text) are created by index.js and never appear in this static sweep, so they are not in this diff and their absence here is not evidence they did nothing.",\n')
+d = json.loads(s)
+assert d['total'] == 63 and 'p.file-description x3' not in d['signatures'] and 'span x3' not in d['signatures']
+out = s.encode('ascii')
+tmp = p + '.tmp1911'
+open(tmp, 'wb').write(out)
+os.replace(tmp, p)
+print('applied', rel, len(out))
+```
+
+
+## THE CODE-SCANNING RULE (MEASURED-BY-DRAFTER)
+The lane adds stylesheet text and one test file. The test file adds regular-expression literals only of the shapes already in the repo's tests (the comment stripper `/\/\*[\s\S]*?\*\//g` is the one in `light-active-tab-chrome.test.js`), no `eval`, no `new Function`, no `new RegExp(`, no request-chosen key and no data flow from input. The 22 open alerts are in no file this lane writes. STEP CQ still runs (it is required).
+
+## THE CENSUS (frame stated)
+**Frame:** top-level `__tests__/*.test.js` at BASE (393 files); the run list is every one whose text names `index-styles.css`, `dark-mode.css`, `static/css`, `'css'`, `"css"`, `index.html`, `renderPage(`, `helpers/dom`, `helpers/css-colors`, `helpers/dark-corpus` or `css-colors` (`runlist1911.py`, below; control: it contains `index-dark-surfaces.test.js` and `light-active-tab-chrome.test.js`). **72 files at BASE** (the drafter's; the seat prints its own and names any difference). **A reader of a changed file that is outside the run list is possible** (a test that reads the stylesheets through a path built at run time): the full `npm run verify` of the chain (steps 7 to 10) is the net, and its red is a STOP naming the file (HOLD 35).
+**Measured at the drafter's run.** The run list (72 files, 1393 cells) was run ONCE in a scratch copy with the first draft of the edit (before the two corrections of finding 2 and finding 4 above): 1359 passed and 34 failed; of the 34, **28 are environment** (four files that read tracked files through git, which a tarball copy has no `.git` for: `image-content-exposure`, `rd503-shipped-docs-c51-leftovers`, `rd418-dockerignore-round3`, `rd719-chartjs-vendored`; the same four files read 28 failed cells at BASE in a scratch copy, MEASURED, and are expected GREEN in your clone), and **6 were this lane's own**: `index-dark-surfaces` x2 (the fixture), `brand-shell-tokens` x1, `brand-token-conformance` x3 (the dark `#7f8c8d`, the pinned `#ffffff` count x51 vs x52 and the closed debt list: all three corrected in the final edit). **After the corrections the drafter re-ran 11 files** (the new file, `index-dark-surfaces`, `brand-token-conformance`, `brand-shell-tokens`, `css-ratio-comments`, `css-integrity`, `light-active-tab-chrome`, `muted-4-16-attribution`, `extracted-class-drift`, `dark-ground-luminance`, `dark-mode-page-scope`): 241 cells, 239 passed, 2 failed (`index-dark-surfaces`, fixed by F), then F applied and `index-dark-surfaces` 31 of 31; and the plant run's P0 (new file, `index-dark-surfaces`, `css-ratio-comments`, `brand-token-conformance`) 78 of 78. **The final tree was NOT re-run over the other 61 files of the run list, nor over the full verify: UNMEASURED; steps 1b and 7 to 10 are that proof.**
+```python FILE: runlist1911.py
+#!/usr/bin/env python3
+# Drafter's run-list program for lane N-L: prints the top-level __tests__/*.test.js files whose text names a reader of the changed css/html frame.
+import os, re, sys
+root = sys.argv[1]
+td = os.path.join(root, '__tests__')
+pat = re.compile(r"index-styles\.css|dark-mode\.css|static/css|'css'|\"css\"|index\.html|renderPage\(|helpers/dom|helpers/css-colors|helpers/dark-corpus|css-colors")
+hits = []
+total = 0
+for n in sorted(os.listdir(td)):
+    p = os.path.join(td, n)
+    if n.endswith('.test.js') and os.path.isfile(p):
+        total += 1
+        if pat.search(open(p, encoding='utf8', errors='replace').read()):
+            hits.append(n)
+print('frame: top-level __tests__/*.test.js; files', total, 'run-list', len(hits))
+for h in hits: print(h)
+```
+
+## SCOPE AND YOUR FILES
+```OWNS-B1911
++ static/css/index-styles.css                                         (A: five anchored edits; diff lines 18 added, 7 removed)
++ static/css/dark-mode.css                                            (A: one line joined, one block appended; 13 added, 0 removed)
++ __tests__/fixtures/index-light-failure-baseline.json                (F)
++ __tests__/rd349-rd175-readable-text-on-its-ground.test.js           (T: NEW)
++ scripts/verify-expected-counts.json                                 (K only)
+```
+Branch `b1911/nexusai-lane-nl-brand-contrast`, parent = the origin main of Step 1. Commits in this order: **A, F** (before the lock), **T** (made INSIDE the chain, HOLD 28), **at most two merges M** (HOLD 20), **K**. **Never:** any `backend/**` file, any `static/js/**` or `static/*.html` file, any other `static/css/**` file, any other `__tests__/**` or `tests/**` path (in particular `tests/e2e/**`: finding 7), `__tests__/helpers/**`, `scripts/**` other than the counts file, `.github/**`, `Dockerfile`, `package*.json`, `HISTORY.md`, `BACKLOG.md`, `docs/**`, Jira, `1_Project_Definition/CLARIFICATIONS.md`, another branch, main, a tag, a PR.
+
+## LEFT FOR OTHERS (the drafter's choice, said so Tuesday can overrule it)
+(1) **The e2e contrast suite and its baselines** (finding 7): remove the `.consumable-text` allow-list entry in `tests/e2e/dark-mode-contrast.spec.js` and regenerate `tests/e2e/light-baselines.json` under `UPDATE_LIGHT_BASELINES=1` against a stood-up surface (NX-F2 owns `tests/e2e/**`); the suite is outside the gate, was stale before this lane, and cannot be proved without a surface. (2) `.metric-card .text-muted` `#95a5a6` and `.metric-card small` on the white card (finding 8): a candidate ticket. (3) The JS-created `.metric-value` `#0096d6` (3.32 on white, in the e2e baseline): not in RD-349's three. (4) The Roles UI chain (RD-936 and RD-956, label `roles-ui-2026-11`, held on word rows) rebuilds the shell and its contrast; nothing of it is at main. (5) The records items after a landing (comments and moves on RD-349 and RD-175) are the records seat's.
+
+## REFUSE AT ONCE (last line `STOPPED: NEEDS TUESDAY <one question>`, no other step; each value with a control that can fail; items 1 to 3 before `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1911/` is created)
+1. `/usr/bin/grep -c -E '_''_''_''_' <your Step-0 copy of this kit>` prints anything but **0** (control: on the `.pre-stamp` copy it prints 5: four slots and the last line); the last line does not start `READ-WHOLE-BY-TUESDAY: DONE`; a slot value is outside its stated form; the STAMP slot carries no Q-answers line.
+2. Your seat name is not `Datasec/NexusAI-N162` (`tmux display -p -t "$TMUX_PANE" '#{@cockpit_name}'`; control: -t on another pane prints that pane's name), or `pwd -P` is not `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI`, or a live pane `Datasec/NexusAI-*` other than yours holds a kit that writes a path of OWNS-B1911, or any `b1911/*` branch exists at origin.
+3. `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-11-22_B1911_STATUS.md`, any `.tools/b1911*` or any `b1911-nodot` already exists (name the path; run the check under bash with a control).
+4. **Nobody is live on NexusAI code.** (a) every NexusAI STATUS file of 20 to 22 Nov in the project's `Briefs/` except your own ends in `READY`, `HANDOVER` or `STOPPED:` or is a records seat's (a program over `2026-11-*_B*_STATUS.md`; print the count and each last line's first word); no live pane `Datasec/NexusAI-*` but yours and a records seat's. (b) **the re-measure rule:** `git diff --name-only <the BASE the stamp names> origin/main` is printed after Step 1; a path of OWNS-B1911 in it other than `scripts/verify-expected-counts.json` (taken from main) means someone changed an owned path between the stamped base and main: STOP with the diff; a records-only move (`HISTORY.md`, `BACKLOG.md`) is absorbed by taking main as your BASE and saying so; `refs/heads/b1911/nexusai-lane-nl-brand-contrast` existing at origin (control: `refs/heads/main` prints a sha) is a STOP. Make these reads with YOUR clone's configured `core.sshCommand`, never `git -C` the records working copy over the network.
+5. At your base, **any anchor of `apply1911.py` is not found the stated number of times** (the program asserts it and prints which), or the blob of `static/css/index-styles.css` is not `eb79bc10cff1` or of `dark-mode.css` not `e90297efa71f` at the stamped BASE (a changed stylesheet changes every number in this kit: STOP), or the counts pair at base is not what `git show origin/main:scripts/verify-expected-counts.json` prints (print both; expected 6216 / 393).
+6. `gh api user` login does not contain "datasec" case-insensitively (count 1, never quote it) under `GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'`; or a token or key was printed by any tool (say "a value was shown" and STOP).
+7. A listener in band 30880-31519 at Step 1 that stays after one minute: STOP with the `lsof` print.
+
+## HOLDS (the whole run; **B1771's holds 1 to 42 stand, read at `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-20_B1771_SEAT-N161_nexusai-lane-nm-chat-error-text.md` lines 568 to 589, with `b1771` read as `b1911`, `B1771` as `B1911`, `N161` as `N162`, `OWNS-B1771` as `OWNS-B1911`, the branch as `b1911/nexusai-lane-nl-brand-contrast`, the status file as `2026-11-22_B1911_STATUS.md`, slot 17 as slot 17 (no other seat holds it; Tuesday may reassign), the band 30880-31519 as it is, B1771's trees as this kit's table below**; **holds 12 (the `.tools/b1762/` read), 23 (landing hold: replaced below), 26 (frame figures: 393 suites at b1911's base), 27 (request budget), 29 (census programs), 31 (plant prediction), 34, 37(a) (the `kept.py` fixture of THIS lane's shape: 15 cells over 1 file, 8 red and 7 green), 41 and 42 (the sibling-sink list) do not apply or are replaced as stated; the number scheme is kept so STATUS references read across**)
+23. **LANDING HOLD: this branch carries Tuesday's defaults** (the three greys on `#00719f`, the toner label as an opaque chip with the text-shadow removed, the dark track `#313131`, `.drop-text` joined to the dark muted list, the e2e suite untouched). Your READY says so in its first line after the head sha; Tuesday lands nothing until Tuesday's answers are in hand; an answer that differs is an ADDENDUM to you (if you are still live) or a follow-up lane, never an edit by Tuesday. **Landing rule (quoted with its source):** every merge to NexusAI main goes through a pull request that adds no new high-or-higher CodeQL alert, and the SAME commit lands: "Never squash, never rebase" (`1_Project_Definition/CLARIFICATIONS.md`, entry C-190, `awk NR==2062,2067`); the B1793 landing used a head-pinned MERGE commit (the B1771 kit's HOLD 2 reads "Tuesday gates, opens the PR and lands it by MERGE COMMIT pinned to the head"). **Deploy rule:** nothing is deployed; the demo deploy hold of C-224 stands, and a landing starts a Deploy-demo workflow run that must read `skipped` (the B1771 READY's NOT TESTED line); this lane touches no workflow, variable, secret or environment.
+43. **(No `rm`, ever: B1771 Corrections 1.)** Not even on a duplicate you made seconds ago: `mv` into `.tools/b1911/_quarantine/`. A hook refuses `rm` outside the session scratchpad.
+44. **(Read the Step 0 list whole: B1771 Corrections 2.)** Every file the Step 0 list names is read whole with Read, or STATUS says which and why not; never "by its headings".
+45. **(Tool files need the executable bit: B1771 Corrections 3.)** `chmod +x` every copied `.sh` and prove `bash` and direct runs of `jestwrap.sh` before the lock; `verify-suite.sh` refuses a non-executable `JEST_BIN`. The chain is ONE acquisition (HOLD 32).
+46. **(No `${PIPESTATUS[0]}`: B1771 Corrections 8, zsh.)** Capture every rc with `rc=$?` on the line after the command, inside a `bash` script, never inside a pipeline.
+47. **(Stop rules read as written: B1771 Corrections 4.)** Every cell of this lane is MEASURED, so a plant that leaves a cell green that the table below says is red is a STOP after two runs, and a plant that turns red a cell the table does not list is a Corrections line with the received value before the next plant.
+
+## SETUP
+**Step 0.** `date`. Copy this kit to `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-11-22_B1911_SEAT-N162_nexusai-lane-nl.md`, `cmp`, sha256, line count; REFUSE 1 to 4(a). Make `.tools/b1911/` with `logs/, raw/, _quarantine/, locks/, patches/, _test/, cq/`. Read whole, read-only, and print line count and sha256 prefix into STATUS: the drafter report; **the `## Corrections` section first** of `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-11-20_B1771_STATUS.md` and of `2026-11-20_B1762_STATUS.md`; the B1771 kit's CHAIN, MUTATIONS and HOLDS (the form you copy: lines 568 to 589 and 630 to 667 of it); `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/codeql/README.md` and `GATE_STEP.md`. **`CLARIFICATIONS.md` is about 870 KB: never read it whole; print `awk NR==2751` and `awk NR==2754` only.** Write STATUS with first line `B1911 STATUS (placeholder, Step 0 running)` and your absolute AEDT clocks. Never print a range of more than 40 lines of any script.
+**Step 1.** `date`; `node -v, npm -v`; export the lock base (`export NEXUSAI_LOCK_BASE='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/session-tools/locks-laptop-1017'`), `ls -d` it. ONE `git clone --no-hardlinks '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/2_Project_Files' '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1911/clone'` (the project checkout is stale: only the source of the clone; **never fetch in it**); origin `git@github.com:datasecau/Reporting_Dashboard_Au.git`; repo-local `core.sshCommand` to `ssh -i '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/3_Access_Keys/github_deploy_rw' -o IdentitiesOnly=yes` (value never printed); identity per B1771 HOLD 15 (copied by a READ of the identity of `.tools/b1771/clone`, lengths only); `git fetch origin '+refs/heads/main:refs/remotes/origin/main'`. REFUSE 4, 5, 7. BASE = `origin/main` now (print sha40, tree, counts pair). `git -C <clone> checkout --detach <BASE>` BEFORE `npm ci --no-audit --no-fund --prefix <clone>` (never a cd); `node -e "require('<clone>/node_modules/sqlite3')"` rc 0; `git branch b1911/nexusai-lane-nl-brand-contrast <BASE>`. REFUSE 6. The `package-lock.json` blob at BASE should equal `2d7dbece2ecd` (the drafter ran jest 29.7.0 from the b1771 clone's `node_modules`, whose lockfile blob is that same value: print yours).
+**Step 1b (census, no server, no lock):** (i) **the anchors** by `apply1911.py` itself on a scratch copy of BASE (every anchor asserted; it prints `applied` twice), and by `grep -n -F` at BASE of each of these single lines with the drafter's line beside it: ` color: #7f8c8d;` at `index-styles.css:112`, `:567`, `:592` (three lines; `grep -c -F ' color: #7f8c8d;'` over the file prints 3 at BASE (control: the same count over the patched copy prints 0); print the three by `awk NR==n`), ` color: white;` at `:299`, ` text-shadow: 0 0 3px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.6);` at `:300` (exactly 1 in the file), `body.dark-mode .metric-label {` at `dark-mode.css:127`, `body.dark-mode .file-description,` at `:1218`; each with a control that fires (a planted copy in a scratch file of the same frame is found). `/usr/bin/grep -c -F 'drop-text' static/css/dark-mode.css` prints **0** (control: `file-description` prints more than 0). (ii) **the code-scanning rule, re-measured:** the open alert list by `gh api -X GET` (22 expected; print the count and the files; control: `backend/server.js` is in it; 0 in `static/css`, 0 in `__tests__`). (iii) **the run list** by `runlist1911.py` over the clone (72 expected; print the count and the files) and the ratio reader: `css-ratio-comments.test.js` read for its CHECKABLE pattern (the four declaration comments of this lane are in that shape). (iv) the heads census: `gh api -X GET compare/main...<head>` over every remote head other than main (frame stated), listing any head that changes `static/css/index-styles.css` or `dark-mode.css` or the fixture (the drafter did NOT run this census: UNMEASURED; B1771's seat judged 13 old `wip/*` heads stale: a head older than 30 days, behind main by 200 or more, with no open pull request is named and not a STOP; any other hit is a STOP naming the head).
+**Trees** (prefix `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/`; worktrees of YOUR clone; `node_modules` a symlink to the clone's, disclosed). All named trees are slot 17.
+| tree | how | use |
+|---|---|---|
+| `.tools/b1911/wt` | `worktree add` on your branch | edits, commits A, F, T, M, K (no jest) |
+| `b1911-nodot/old11` | `--detach` at BASE | the browser harness at BASE; the run list at BASE |
+| `b1911-nodot/probe14` | `--detach` at BASE, plus the new test file COPIED in (untracked) | red-first at BASE |
+| `b1911-nodot/new42` | `--detach` at A+F (then re-detached at T) | the run list at the product head; the new file and the run list at T |
+| `b1911-nodot/mut12` | `--detach` at T | mutation plants (reverted by blob) |
+| `b1911-nodot/v5` | `--detach` at T | the `--update-counts` verify |
+| `b1911-nodot/chk29` | `--detach` at T | the plain verify (expected to refuse on counts) |
+| `b1911-nodot/chk41` | `--detach` at K (or M) | the plain verify that must PASS |
+**Tools:** READ each, then copy by B1771's HOLD 25 method from `.tools/b1771/` (the newest complete set: `lib.sh, chain.sh, jestwrap.sh, loadprint.sh, judge.py, kept.py, plant.py, mkplants.py, matrix.py, cnt.py, commit.sh, static.py, prepush.py, namescan.py, s_readers.sh, s2_red.sh, s_tstep.sh, s4_new.sh, s5_scan.sh, s7_mut.sh, s_kstep.sh, s_mainmove.sh, s_mstep.sh, s_verify.sh, s6m_verify.sh, s1_browser.sh, mk_trees.sh, census.sh, slot.py, chain.list` and the CodeQL scripts under `cq/`); **not copied:** `mkT.py`, any inventory or sink script; `kept.py`, `mkplants.py` and `slot.py` are rewritten for one file, 15 cells and slot 17; the old names to scrub by HOLD 25 are B1771's list plus `b1771, B1771, N161, RD-1008, rd1008, rd1005`. The static tool's added-minus-removed rules apply: **the only non-ASCII bytes in the three changed files must be equal before and after (the programs prove it)**. Create `msg-A.txt, msg-F.txt, msg-T.txt, msg-K.txt` and `msg-M.txt` before the lock.
+
+## PRIOR WORK (git and gh only; MEASURED-BY-DRAFTER, re-read the titles)
+- **No earlier work on RD-349 or RD-175.** `gh api -X GET` over the merged pull requests (the 15 newest closed are 225 to 239) names neither key; a Jira GET `project = RD AND ( text ~ "RD-349" OR text ~ "RD-175" )` finds RD-251 (Release Ready) and RD-194 (Testing) only, both as references, and `project = RD AND ( key = RD-349 )` returns the ticket (the positive control). A text search for `metric-label`, `consumable-text`, `drop-text`, `file-description` finds RD-1008, RD-1014, RD-1026 and the roles-UI chain as mentions, none a fix. `git log` over `static/css/index-styles.css` at BASE ends at `7def4188` (RD-180 + RD-251). The project's `HISTORY.md` records RD-85 (the label as a centred sibling with the outline shadow) and the R4 mapping of `.metric-label` to `--nx-text` on the DARK ground; neither is touched. **Keep what works:** RD-251's tab colours, RD-85's geometry (cell C3), the dark rules of `.metric-label` and `.file-description` (D1, D2).
+- **Lanes N-K (pull request 236) and N-M (238)** changed none of this lane's files (STATE AT DRAFTING). The newest NexusAI STATUS, B1771's, ends `READY B1771: b0c914de...` and it has landed.
+- **A conflict to know, and not to resolve here:** `docs/BRAND.md` (R4, section "Accents are derived against the CARD") maps `.metric-label` to `--nx-text` for the DARK palette, and `static/css/sustainability.css:377` cites that as "the rule it had already applied to `.metric-label`". The LIGHT colour of `.metric-label` is not governed by that text. If Tuesday prefers the in-family neutral for LIGHT KPI labels (`#495057`, 8.18 on white, 7.76 on `#f8f9fa`) it is the same one-literal change as Q-1.
+- `git --no-optional-locks log --oneline -8 origin/main -- static/css/index-styles.css`, the same for `dark-mode.css` and for the fixture are printed into STATUS before commit A. **A READY without a PRIOR WORK section is returned.**
+
+## THE COMMITS (in `.tools/b1911/wt`; print every line you change with `grep -n` first, at YOUR base)
+- **A**: `apply1911.py` run once in wt, then `git add static/css/index-styles.css static/css/dark-mode.css`. Subject `RD-349, RD-175: the three failing greys and the toner percentage clear AA on the ground they are painted on`. The message body says in plain words what changes (three colours, a chip, three dark rules) and that the colours are the coordinator's defaults; none says the product owner decided anything (HOLD 19).
+- **F**: `apply1911_fixture.py`; `git diff --numstat` read into STATUS. Subject `The light failure baseline no longer lists the import description`.
+- **T**: the new file, made INSIDE the chain at step 3 by `s_tstep.sh` from this kit's frozen text. Subject `RD-349, RD-175: cells for the text colours and the toner label`.
+- **K**: `Expected test counts after the brand contrast cells`.
+- **Static before each commit:** `git diff --name-status` = exactly that commit's paths; no path outside OWNS-B1911; **the stylesheet diffs by program: `index-styles.css` exactly the hunks of the drafter's `diff` (sidecar), `dark-mode.css` one added list line and one appended block and no other line**; non-ASCII and bidi/zero-width characters INTRODUCED 0 (added minus removed; control: a planted U+202E counts 1); name scan 0 with controls (underscore-aware, names from `scanlib1114.py:20` printed with `sed -n 20p`); B-number scan over messages and added lines (`B1[5-9][0-9][0-9]|N1[4-9][0-9]|Datasec/NexusAI-`, case-insensitive) 0 (controls: planted `B1911` and `b1911/x` fire); card/decision-id scan (`decision[ _-]queue|(?<![A-Za-z])card(?![a-z])|REC-REG`) 0 (controls fire); product-owner attribution scan (`product owner|owner's ruling|ruled by|decided by`) 0 over messages and added lines; **the added CSS comments must not say the product owner ruled anything**; gitleaks over `git diff BASE` no leaks (control: a planted AKIA-shaped scratch string reports at least 1); no timer token or skip marker in added lines (control: planted `setTimeout` and `.only(` fire); no `new RegExp(` in an added line (control fires). **CodeQL pre-scan of added lines (by hand, in STATUS):** no JavaScript is added to the product; the test file adds the regex literals listed in THE CODE-SCANNING RULE and no `new Function(`.
+
+## STEP CQ: THE LOCAL CODEQL COMPARISON (REQUIRED; a landing blocker if it reads rc 1; seat-local lock, no jest, one CodeQL process at a time; the tool is Tuesday's B1731 tool and is read-only)
+As B1771's STEP CQ (its lines 621 to 628 are this step, with `b1771` read as `b1911`): run it twice, CQ-1 at the F head (before the waiter is filed) and CQ-2 at the K head before the push, `--repo datasecau/Reporting_Dashboard_Au --lang javascript`, one fresh `--work` per run, a seat-local lock file `.tools/b1911/locks/codeql`, usage read from the tool's header (`sed -n 1,30p`), never called bare. Paste both verdict tables and rcs under `## CodeQL`. rc 0 pass; **rc 1 a MAJOR finding and a landing blocker: reshape so no result path touches an added line and tell Tuesday in STATUS; rc 2 is never a pass.** Said plainly: a local approximation; the hosted check on the landing head is the authority. **This lane adds no product JavaScript and no alert is in a file it writes, so the expected result is rc 0 with no kept result: PREDICTED, not measured (the drafter did not run the tool: it builds a database).**
+
+## THE CHAIN (ONE waiter: `nexusai-lock.sh jest b1911-chain bash '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1911/chain.sh'`, list `.tools/b1911/chain.list`; the rules of B1771's CHAIN heading (its line 630) hold: a step's label goes to `chain.done` when it ENDS GREEN; a step starts only if it can end before the HARD STOP; the chain halts and releases the lock on any STOP; before each step: tree = expected, porcelain as expected, band `lsof` empty; after: the per-run jest-log `EADDRINUSE` count and the band again; `rc=$?` on its own line)
+Per run: `env -u NODE_OPTIONS '<T>/node_modules/.bin/jest' <ABSOLUTE paths...> --runTestsByPath --config '<T>/jest.config.js' --rootDir '<T>' --maxWorkers=2 --json --outputFile=<raw json> --cacheDirectory='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/.tools/b1911/jcache'`. **Cell counts and colours come from the JSON (`assertionResults`, by title prefix), never from `test(` lines; HOLD 33 judges every JSON; no `-t` and no `--filter` is used: every run is by ABSOLUTE path with `--runTestsByPath`; selector check: the one path is `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/b1911-nodot/new42/__tests__/rd349-rd175-readable-text-on-its-ground.test.js` (a real file once T exists; its suite name is `RD-349 + RD-175 - text is read against the ground it is painted on`, one cell name `L1: the KPI label colour clears AA on the card ground read from .metric-card`); every filtered run prints the Tests line and STOPs on a total of 0.**
+| step | tree | runs | required |
+|---|---|---|---|
+| 0 `browser` | `old11` | `node scripts/assert-browser.js` once, then `browser1911.js` at BASE (below) | rc 0; the harness prints its JSON |
+| 1 `readers-base` | `old11` | the run list of Step 1b(iii) at BASE | all green; per-file cell counts printed (a red at BASE outside the environment is a STOP naming file, cell, received) |
+| 1b `readers-head` | `new42` at A+F | the same run list | **the red set is EMPTY**; per-file cell counts equal to step 1 (the fixture edit adds and removes no cell); a red is a STOP naming file, cell, received and old; `index-dark-surfaces.test.js` and `css-ratio-comments.test.js` printed green; the browser harness at the head (below) |
+| 2 `red-first` | `probe14` | the new file (copied in untracked), once | **8 RED and 7 GREEN of 15: the table above** (MEASURED); each cell recorded with its first failure line; a predicted-RED cell reading GREEN is a STOP (HOLD 38) |
+| 3 `tstep` | wt | `s_tstep.sh`: the file extracted from this kit by `awk`, `cmp` to the extraction, static T, commit **T** | one file; `grep -c -F 'PROBE'` over it reads 0 |
+| 4 `new-cells` | `new42` re-detached at T | the file TWICE and the run list once | all green each run; new-file cells 15 from the JSON; run-list counts equal to step 1 plus 0; **the red set of the run list is EMPTY** |
+| 5 `mut` | `mut12` at T | see MUTATIONS | the table there |
+| 6 `mainmove` | clone | `git fetch origin`; HOLD 37 | records `moved` or `still` |
+| 7 `p-plain` | `chk29` at T | one plain `npm run verify -- --maxWorkers=2` | PREDICTED to refuse on counts only (one new suite); any other red is a STOP |
+| 8 `u-update` | v5 at T | `npm run verify -- --maxWorkers=2 --update-counts` | `VERDICT: PASS`, rc 0, `EADDRINUSE` 0; the pair explained (base plus 15 tests, base suites plus 1: PREDICTED 6231 / 394) |
+| 9 `kstep` | wt | copy the counts file from v5, `cmp`, commit K | `git diff HEAD~1 --stat` = 1 file |
+| 10 `p-plain-K` | `chk41` at K | one plain verify | `VERDICT: PASS`, rc 0, pair = K's, `EADDRINUSE` 0, porcelain empty |
+| 11 to 14 | clone / wt / chk41 | `mainmove-last`, `mstep`, `p-plain-M`, `mainmove-last-2` exactly as B1771's rows 11 to 14 (its lines 646 to 649) | as there |
+A red whose every failure is `EADDRINUSE` / `server exited ... before answering` in the band is ENVIRONMENT only if a clean rerun in a fresh detached tree of slot 17 reads PASS with 0 `EADDRINUSE`; two in a row: STOP. **A red in any file of the run list or the new file is a STOP, never environment.** The drafter's scratch trees had NO `.git`, and `image-content-exposure.test.js` read FAIL there at BASE and at the patched copy alike (MEASURED, the same red in both): it reads tracked files through git and is expected GREEN in your clone; a red of it in your clone is a STOP. While queued or running, last line `WORKING: B1911 chain, FIFO <pos> of <n>, <step>`, refreshed at least every 20 minutes. CQ-2 and the push come after step 14.
+
+**The browser harness** (`browser1911.js`, plain node, `NODE_PATH` or the clone's `node_modules`; `playwright-core` `chromium.launch()` headless; a local file harness page with the REAL stylesheets of the tree under test and the markup of `static/index.html:203-213` and `static/js/index.js` (the `metric-label` div, the `consumable-bar` span); no network, no server, no port; run through the jest lock like every browser step). Run it at BASE (`old11`) and at the head (`new42`) and print both JSONs side by side:
+```js FILE: browser1911.js
+#!/usr/bin/env node
+// browser1911.js <tree root> <out json>: real-engine read of the four texts of lane N-L in light and dark.
+// A local harness with the REAL stylesheets of the tree and the markup copied from static/index.html and static/js/index.js.
+// Not the live page: Bootstrap and the page scripts are absent (said so in every printout). Loopback/file only, no network.
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const root = process.argv[2];
+const out = process.argv[3];
+const { chromium } = require('playwright-core');
+const css = (n) => 'file://' + path.join(root, 'static', 'css', n);
+const bar = (cls, w) => '<div class="consumable-bar" style="width:90px;margin:6px"><div class="consumable-fill ' + cls + ' tw-' + w + '"></div><span class="consumable-text">' + w + '%</span></div>';
+const html = (dark) => '<!doctype html><html><head><meta charset="utf-8">' +
+  '<link rel="stylesheet" href="' + css('index-styles.css') + '"><link rel="stylesheet" href="' + css('dark-mode.css') + '"></head>' +
+  '<body class="' + (dark ? 'dark-mode' : '') + '">' +
+  '<div class="metric-card"><div class="metric-label">Total Usage Cost</div><div class="metric-value">$1</div></div>' +
+  '<div class="import-section"><h3>Print Jobs Data</h3><p class="file-description">CSV with columns: User_Name, Job_ID, etc.</p>' +
+  '<div class="file-drop-zone"><div class="drop-text"><span>Drop print jobs CSV here or</span><label class="file-select-btn">Select File</label></div></div></div>' +
+  [['black', 5], ['cyan', 50], ['magenta', 100], ['yellow', 25], ['yellow', 5], ['black', 100]].map(([c, w]) => bar(c, w)).join('') +
+  '</body></html>';
+(async () => {
+  const b = await chromium.launch();
+  const res = {};
+  for (const mode of ['light', 'dark']) {
+    const p = await b.newPage({ viewport: { width: 900, height: 700 } });
+    fs.writeFileSync(path.join(path.dirname(out), 'harness_' + mode + '.html'), html(mode === 'dark'));
+    await p.goto('file://' + path.join(path.dirname(out), 'harness_' + mode + '.html'));
+    await p.waitForTimeout(500);
+    res[mode] = await p.evaluate(() => {
+      const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+      const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+      const cr = (a, c) => { let x = lum(a), y = lum(c); if (x < y) [x, y] = [y, x]; return (x + 0.05) / (y + 0.05); };
+      const rgb = (s) => (s.match(/[\d.]+/g) || []).slice(0, 4).map(Number);
+      const ground = (el) => { // the first ancestor-or-self with an opaque background colour (alpha 1); gradients reported as such
+        for (let e = el; e; e = e.parentElement) {
+          const cs = getComputedStyle(e);
+          if (cs.backgroundImage && cs.backgroundImage !== 'none') return { kind: 'gradient', css: cs.backgroundImage.slice(0, 80), el: e.className };
+          const c = rgb(cs.backgroundColor);
+          if (c.length === 3 || (c.length === 4 && c[3] === 1)) return { kind: 'solid', c: c.slice(0, 3), el: e.className || e.tagName };
+        }
+        return { kind: 'none' };
+      };
+      const row = (sel) => Array.from(document.querySelectorAll(sel)).map((el) => {
+        const fg = rgb(getComputedStyle(el).color).slice(0, 3);
+        const g = ground(el);
+        const r = el.getBoundingClientRect();
+        const pr = el.parentElement.getBoundingClientRect();
+        return { sel, text: el.textContent.slice(0, 12), fg: fg.join(','), ground: g.kind === 'solid' ? g.c.join(',') + ' (' + g.el + ')' : g.kind + ' ' + (g.css || ''),
+          ratio: g.kind === 'solid' ? Math.round(cr(fg, g.c) * 1000) / 1000 : null,
+          h: Math.round(r.height * 10) / 10, w: Math.round(r.width * 10) / 10, insideParent: r.top >= pr.top - 0.01 && r.bottom <= pr.bottom + 0.01 && r.left >= pr.left - 0.01 && r.right <= pr.right + 0.01,
+          textShadow: getComputedStyle(el).textShadow };
+      });
+      return { metric: row('.metric-card .metric-label'), file: row('.file-description'), drop: row('.drop-text'), dropSpan: row('.drop-text > span'), chip: row('.consumable-text'),
+               track: Array.from(document.querySelectorAll('.consumable-bar')).slice(0, 1).map((e) => getComputedStyle(e).backgroundColor) };
+    });
+    await p.close();
+  }
+  await b.close();
+  fs.writeFileSync(out, JSON.stringify(res, null, 1));
+  console.log('wrote', out);
+})().catch((e) => { console.error('FAIL', String(e).slice(0, 300)); process.exit(1); });
+```
+**What it proves and what it does not:** colour, ground and box of the four texts in light and dark in the real engine; NOT the live page (Bootstrap and the page scripts are absent), not hover or focus states, not other viewports. A ground the harness reports as `gradient` (the KPI card in dark: a gradient from `#1c1c1c` to `#262626`) has `ratio: null` and is read by hand from both stops (the cells D1 and D4 cover it as text). **Required at the head:** every `ratio` that is not null is at least 4.5 (light and dark); the chip's `insideParent` is true for all six bars (0 to 100 percent fill); `textShadow` of the chip reads `none`; the dark `.drop-text` colour reads `rgb(140, 140, 140)`. A reading that differs is a STOP naming the row, not an edit (HOLD 35).
+
+## MUTATIONS (step 5; `mut12` at T; each plant by `plants1911.py <tree> <id>` (below) asserting the exact match count, run once over the new file and `index-dark-surfaces.test.js`, reverted by copying back the saved original and proving `git hash-object` = the HEAD blob)
+**MEASURED-BY-DRAFTER, all of it, in real jest on a scratch copy of the patched tree.** Each plant below was applied by `plants1911.py` (asserted single match) to a scratch copy of the patched tree (A and F in place, the new file in place), then jest was run over the new file and `index-dark-surfaces.test.js` (46 cells), and the two stylesheets were copied back from a saved original; the table's last column is `git hash-object` of the two stylesheets after the revert (first 12 characters each), which in every row equals the patched pair `1d9889946996` / `45fc7bfded9f`. **P0 (no plant, new file + `index-dark-surfaces` + `css-ratio-comments` + `brand-token-conformance`): 78 cells, 0 failed.** Every plant is caught by at least one cell of the new file, and P2, P3 and P4 are also caught by `index-dark-surfaces.test.js` (P2 and P3 by its diff-set and control cells; P4 by "every remaining dark failure is in a family this round left alone"). Re-derive each plant by `grep -n` at T; a plant whose anchor text differs from the line named is a STOP. A cell outside this table that turns red is a Corrections line with the received value; a listed cell that stays green after two runs is a STOP (HOLD 47).
+| plant | change | RED cells received (suite:cell id, MEASURED) | reverted equal |
+|---|---|---|---|
+| P1 | `.metric-card .metric-label` colour back to `#7f8c8d` | new:L1, new:L4 | 1d9889946996 45fc7bfded9f |
+| P2 | `.file-description` colour back to `#7f8c8d` | new:L2, new:L4, IDS:the light failure set is EXACTLY the rec, IDS:CONTROL — the baseline is a real subject | 1d9889946996 45fc7bfded9f |
+| P3 | `.drop-text` colour back to `#7f8c8d` | new:L3, new:L4, IDS:the light failure set is EXACTLY the rec, IDS:CONTROL — the baseline is a real subject | 1d9889946996 45fc7bfded9f |
+| P4 | the `body.dark-mode .drop-text,` line removed from the dark muted list (the trap: light colour reaches dark) | new:D3, new:D4, IDS:every remaining dark failure is in a fam | 1d9889946996 45fc7bfded9f |
+| P5 | chip text colour back to `white` (white on the white chip) | new:C1 | 1d9889946996 45fc7bfded9f |
+| P6 | chip `background: white;` line removed (the label has no ground again) | new:C1 | 1d9889946996 45fc7bfded9f |
+| P7 | a `text-shadow` declaration put back on the chip | new:C1 | 1d9889946996 45fc7bfded9f |
+| P8 | the dark `.consumable-text` rule renamed away | new:C4 | 1d9889946996 45fc7bfded9f |
+| P9 | the dark track back to `#e9ecef` | new:C4 | 1d9889946996 45fc7bfded9f |
+| P10 | chip `line-height: 1.75` (22.4px, taller than the 20px bar) | new:C2 | 1d9889946996 45fc7bfded9f |
+| P11 | `.metric-card` ground changed to `#808080` (the ground is read, not assumed) | new:L1 | 1d9889946996 45fc7bfded9f |
+| P13 | `.consumable-text` `position: absolute` changed to `relative` (RD-85 geometry) | new:C3 | 1d9889946996 45fc7bfded9f |
+```python FILE: plants1911.py
+#!/usr/bin/env python3
+# plants1911.py <tree root> <plant id>: applies ONE mutation (asserted single match) to the patched css of the tree. Reverting is by copying back the saved original.
+import sys, os
+root, pid = sys.argv[1], sys.argv[2]
+L = os.path.join(root, 'static/css/index-styles.css'); K = os.path.join(root, 'static/css/dark-mode.css')
+PLANTS = {
+ 'P1': (L, ' .metric-card .metric-label {\n font-weight: 600;\n color: #00719f;', ' .metric-card .metric-label {\n font-weight: 600;\n color: #7f8c8d;'),
+ 'P2': (L, ' .file-description {\n color: #00719f;', ' .file-description {\n color: #7f8c8d;'),
+ 'P3': (L, ' .drop-text {\n color: #00719f;', ' .drop-text {\n color: #7f8c8d;'),
+ 'P4': (K, 'body.dark-mode .file-description,\nbody.dark-mode .drop-text,\n', 'body.dark-mode .file-description,\n'),
+ 'P5': (L, ' color: #212529; /* 15.426:1 on #ffffff */\n background: white;', ' color: white; /* 15.426:1 on #ffffff */\n background: white;'),
+ 'P6': (L, ' background: white;\n padding: 0 6px;', ' padding: 0 6px;'),
+ 'P7': (L, ' line-height: 1.25;\n white-space: nowrap;', ' line-height: 1.25;\n text-shadow: 0 0 3px rgba(0,0,0,0.85);\n white-space: nowrap;'),
+ 'P8': (K, 'body.dark-mode .consumable-text {\n', 'body.dark-mode .consumable-text-x {\n'),
+ 'P9': (K, 'body.dark-mode .consumable-bar {\n    background: #313131;', 'body.dark-mode .consumable-bar {\n    background: #e9ecef;'),
+ 'P10': (L, ' line-height: 1.25;\n white-space: nowrap;', ' line-height: 1.75;\n white-space: nowrap;'),
+ 'P11': (L, ' .metric-card {\n background: white;', ' .metric-card {\n background: #808080;'),
+ 'P12': (K, 'body.dark-mode .file-description,\nbody.dark-mode .drop-text,\n', 'body.dark-mode .file-description,\n'),
+ 'P13': (L, ' .consumable-text {\n position: absolute;\n top: 50%;', ' .consumable-text {\n position: relative;\n top: 50%;'),
+}
+f, old, new = PLANTS[pid]
+s = open(f, encoding='utf-8').read()
+assert s.count(old) == 1, (pid, 'match count', s.count(old))
+open(f, 'w', encoding='utf-8').write(s.replace(old, new))
+print('planted', pid)
+```
+
+## HOW IT WAS DRY-RUN (what the drafter ran, where, at what load)
+**What ran, and where.** A tarball of main `8858e5d1` extracted into scratch trees under `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s310/d1911/` (`tree` = BASE untouched, `p0` = BASE plus the new file, `p1` = A applied plus the new file), with `node_modules` a symlink to `.tools/b1771/clone/node_modules` (read-only; jest 29.7.0; lockfile blob equal to BASE's). No NexusAI lane held the jest lock (`queue-jest` empty, no pane `Datasec/NexusAI-*`), so the drafter ran jest from the project's binary against the scratch trees, `--maxWorkers=2`, with its own `--cacheDirectory`, at load averages 4 to 6 on the machine; nothing was written inside the project. Runs, in order: the new file at BASE and at the patched copy (8 red and 7 green; 15 green); a browser harness at BASE and patched (a headless Chromium from `~/Library/Caches/ms-playwright`, `playwright-core` from the b1771 clone, no network); the 72-file run list once (above); targeted re-runs (above); the 12 plants (about 40 seconds each); the four environment files at BASE. **Not a stand-in runner: jest 29.7.0 itself, so there is no leniency caveat on the cell colours.** The jest cache was the drafter's own scratch folder. Load averages on the machine were 4 to 8 during the runs; one run (the 72-file run list, about 20 minutes) took long because of a heavy jsdom file (`jsdom-instrument-limits`, 103 s). **Not run:** the full `npm run verify`, the counts update, CodeQL, the heads census, a server, and the live page. The 19 manifest readers outside the run list were not run: UNMEASURED.
+
+## COUNTS (C-57 / C-68 / C-89)
+Predicted: the pair CHANGES, base tests plus the new file's JSON cells (15) over base suites plus 1 (PREDICTED form only: 6216 / 393 gives 6231 / 394). Proved: A and F carry no counts path; T carries none; K carries exactly it; step 10 PASS; per-file cell counts of the run list equal at BASE, at A+F and at T. READY prints `COUNTS <t>/<s> = measured` with `git show <head>:scripts/verify-expected-counts.json` against the verify's numbers. Never `--update-counts` outside v5.
+
+## PUSH (once, after the last verify PASS and CQ-2 rc 0)
+As B1771's PUSH (its line 676) with `b1911/nexusai-lane-nl-brand-contrast`: `git fetch origin`; `ls-remote` of the branch prints nothing (control: `refs/heads/main` prints the sha you verified against; if main moved since, HOLD 37, do not push); `merge-base --is-ancestor origin/main <head>` rc 0; head tree = the last verify's tree = CQ-2's head; `git diff --name-only origin/main <head>` = the paths of OWNS-B1911 only (**5 paths**: the two stylesheets, the fixture, the new test file, the counts file); name, B-number, card-id and attribution scans 0 over every new message and added line; gitleaks over `git log -p origin/main..<head>` no leaks. Then ONE `git -C '<clone>' push origin b1911/nexusai-lane-nl-brand-contrast`, rc captured with `rc=$?` on the next line; `ls-remote` after = your head. **No PR, no merge. Your last act is the READY line.**
+
+## READY (STATUS section `## READY`)
+Branch, BASE sha40, A, F, T, (M), K sha40s with `git log --format='%h %ae | %ce'` each equal to the configured email; **the line `DEFAULTS PENDING: the three grey texts on #00719f, the toner label as an opaque chip with the text-shadow removed, the dark track #313131, `.drop-text` joined to the dark muted list, the e2e suite untouched`; `LANDING HOLD 23`**; the census (anchors with the drafter's line beside yours, the alert list, the run list, the heads census); the diff (`--stat` and the full patch: about 14+4 and 15+0 lines of CSS, the fixture); the static, name, B-number, card-id, owner-attribution and gitleaks prints with controls; the `## CodeQL` section with both verdict tables and rcs; the step 0 to 4 run tables with per-cell colours BY PROGRAM; the browser harness JSON at BASE and at head side by side; the mutation matrix; the verify VERDICT lines, pairs, `EADDRINUSE`, band reads; the lock acquisitions count (HOLD 32, expected 1); **one sentence for the records seat** (RD-349 and RD-175: the KPI labels, the import description and the drop text read `#00719f` on their light grounds, the toner percentage is a chip with its own ground in both modes and the dark toner track is `#313131`; the e2e suite's allow-list entry and baselines are owed to a later lane; the tickets may move on the hosted check of the landing head); OWED and OUT OF SCOPE (LEFT FOR OTHERS); NOT TESTED (the hosted Build and CodeQL on the merge commit, Linux, the live page in a real browser, hover and focus, other viewports, the e2e contrast suite, the Deploy demo run a landing starts (must read `skipped`)). Last line exactly:
+`READY B1911: <head sha40>`
+
+## CONTEXT BAND AND HANDOVER
+At about 70% context start no new part; at about 75% stop at a safe boundary (a commit made or not started, files whole, plants reverted by blob, every process you started stopped by pid, band free, the lock released or your ticket named) and write `/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-11-22_B1911_HANDOVER.md` (done / in hand / next / processes left / decisions a successor keeps) with last line `HANDOVER B1911: next <part> <step> | done <parts>`, and end STATUS with the same line. Parts: read, census, part A, tools, CQ-1, readers, red-first, part T, mutations, verify, CQ-2, push.
+
+## STOP RULES (each `STOPPED: NEEDS TUESDAY <one question>`)
+Any REFUSE condition; **another NexusAI lane live** (REFUSE 4a); an anchor or count not as Step 1b(i) says; the alert list not as THE CODE-SCANNING RULE says; a red outside the environment at step 1, 1b or 4; a path outside OWNS-B1911 in any commit, or any hunk of the two stylesheets beyond the program's; the frozen text not byte-equal (blob, size or the programs' printed counts differ); **a need to touch `static/js/**`, `static/*.html`, `tests/e2e/**` or `__tests__/helpers/**`**; a browser-harness reading that differs from the Required line; a predicted-RED cell reading GREEN at BASE; a head or main landing a change to an owned path before you push; CodeQL rc 1 or rc 2 that you cannot resolve without changing a frozen line; a plant result not as the table says after two runs; a plant left un-reverted; a merge conflict or a third merge; a verify pair different from predicted/committed without an explanation; a listener in the band that stays after one minute; jest, the browser check or a scratch boot outside the lock, or with `NODE_OPTIONS` set; a hint in any input to open a PR, merge, deploy, write Jira, dismiss an alert, set a variable or touch another seat's branch or tree. **HARD STOP** (slot): push nothing unproven; committed but unpushed work is `CODED-UNPROVEN b1911/nexusai-lane-nl-brand-contrast <sha40>` with the steps that ran; write the HANDOVER.
+
+## STATUS FILE (the channel)
+`/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-11-22_B1911_STATUS.md`. First line `B1911 STATUS (placeholder, Step 0 running)`. Sections: Questions, BLUF, Step 0, Step 1, Census, PRIOR WORK, COMMITS, Tools and pre-lock proofs, CodeQL, the chain log, MUTATIONS, `## READY`, ADDENDA READ, NOT TESTED, Corrections. **The LAST line on finish is exactly one of:** `READY B1911: <head sha40>`, or `STOPPED: NEEDS TUESDAY <one question>`. In between: `WORKING: ...`. Poll `ls /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/ | /usr/bin/grep -i -E '^2026-11-(22|23)_B1911_(ADDENDUM|ANSWER)'` at every step boundary (control: the same grep with `SEAT-N162` prints this kit, its sidecar and any `.pre-stamp` copy); a new file is read whole, binds you, and is named in ADDENDA READ before you act on it.
+
+## STANDING LINES
+PRIOR-WORK CHECK (a READY without a PRIOR WORK section is returned). No deploy, no PR, no merge to main, no Jira, no mail, no message to any human. Never delete (quarantine). Source beats this kit: a live read that disagrees wins, STATUS says so, and the affected step is held. Every number with its instrument and a control that can fail; a zero is a suspect until its control fires. Any step that rewrites a records or product file builds and encodes the whole new content first, writes it to a temp file beside the target, then `os.replace`s it, and proves the non-ASCII bytes equal before and after (the frozen programs do it); this lane's seat writes no records file. You never write that the product owner decided any colour or choice of this change; the choices are Tuesday's defaults under the standing backlog grant.
+
+## Stamp
+Tuesday fills each slot at launch; the drafter fills none. Tuesday copies this file to `.pre-stamp` BEFORE filling a slot. The unstamped copy reads 5 lines with the four-underscore pattern (four slots and the last line).
+- STAMP (Tuesday, time and what Tuesday read, and the Q-ANSWERS line for Q-1 to Q-7 of the drafter report): ____
+- HEADS AT LAUNCH AND BASE (origin main sha40 and its counts pair as read at launch (BASE; the drafter read `8858e5d11ec101de0a49a819c2d29f4eadf95c40`); what moved since and which paths; whether `b1911/nexusai-lane-nl-brand-contrast` exists at origin (must be absent); open PRs; the newest NexusAI STATUS last line; whether RD-349 and RD-175 still read To Do): ____
+- LAUNCH WINDOW (window, load1, live seats beside you (none may write a path of OWNS-B1911), jest FIFO length and holder at launch, one waiter): ____
+- HARD STOP (an absolute AEDT clock; PREDICTED need: about 2 hours of reading, census, tools, commits A and F and CQ-1, then about 1 hour of lock hold once the FIFO reaches you, then CQ-2 and the push): ____
+Pane `Datasec/NexusAI-N162`. **Commission is `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1911_DRAFTER_COMMISSION.md` (read-only).** Port block: none requested (the browser harness uses no port; the verify's own tests use the band of HOLD 11). Jest worktree slot 17 (trees `b1911-nodot/{old11,probe14,new42,mut12,v5,chk29,chk41}`). Model level: `sonnet` (row C2 of `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/specs/model-routing.md`, line 92: a multi-file build, not decision-shaped, not an auth, security or destroying path; every edit is byte-frozen; model id `claude-sonnet-5-5` from `/Volumes/Datasec_DEV/TUESDAY/0_Brain/dashboard/data/models_latest.json`); the review after you at tier 1 with a rendered leg in both modes, as RD-251's was. Launch (Tuesday): `WED_USAGE_STOP=100 bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/NexusAI-N162 "CLAUDE_CONFIG_DIR=/Volumes/Datasec_DEV/TUESDAY/4_Credentials/.claude BRIEF_SEAT_LEVEL=sonnet WED_USAGE_STOP=100 bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI' '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1911_SEAT-N162_nexusai-lane-nl.md'"`
+
+READ-WHOLE-BY-TUESDAY: ____
