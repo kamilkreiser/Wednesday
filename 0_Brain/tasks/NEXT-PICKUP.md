@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 50% 08:02 MON 23 Nov, the 06:00 MORNING seat - READ FIRST; supersedes every block below
+- **develop = e29258fe0e576d96147732026e7c81343e253675** (PR 2280 / KS-2321 squash, VERIFIED at source 07:56:16: one parent 627f889a5437, tree 25b97a385159). Nothing deployed. Kam: 0 rulings today (07:52:20). Morning card wed-morning-plan-1123 + panel message posted 06:0x.
+- **LIVE:** **K 76th %264** (lane -K): row 2 = PR 2281 (KS-2322, NON-FF on e29258fe0e57, predicted tree 94981e2847cc; READY-2 line 62), then WRAP naming PR 2160 + PR 2282. ONE GO at a time; no mail to it between a GO and its MERGED. **W 66th %270** (lane -W): KS-2324 build (brief 2026-11-23_seatW66_build.md); plan QUESTION owed.
+- **WRAPPED + SCORED + CLOSED today:** W 63rd 0.96, W 64th 0.96, W 65th 0.95, S 110th 0.96 (KS-2323, KS-2324 filed; comments on KS-2321, KS-2322 x2, KS-2282: all verified on Linear).
+- **K 77th:** kit fleet/briefs_staged/2026-11-23_seatK77_merge.md RETURNED (blank STAMP, NOT read whole). Its engine is against K 76th's kit at 2405 files; K 76th's kit is already 2479 -> after K 76th WRAPS: resume the K77 drafter (or re-commission from 0_Brain/reference/2026-11-23_drafter-seatK77/commission.md) to re-key against K 76th's FINAL kit and re-measure pins on the REAL squashes; then read whole, STAMP (rows PR 2160 T1 gate 303 + PR 2282 T2 gate 406 + accepted fix round f91e906a2308; READY-2 line 62), launch.
+- **AFTER PR 2160 MERGES:** KS-2275 build lane (tier 1, Opus; card secuura-ks2275-unverified-email-document-reads-1119 = a: decision_queue show first) and KS-2036.
+- **RULINGS OWED / READINGS:** KS-2322 arm (b): Wednesday's reading = b2 (auth + api-gateway at leg 1, tightens nothing) as a scripts/ lane after PR 2281 merges; b1 would be a Kam card. KS-2323 (unregistered admin settings route, no caller): decision-shaped (point vs delete): card or a W ruling, not yet done. PR 2195: still Wednesday's carried hold (find reason or lift by the same rule as 2160). fleet_ack for K 76th's plan QUESTION: rc 3 x3 (collector lag), re-run.
+- **OWED (tooling/rituals):** INDEX.md refresh (not done today); weekly consolidation lapsed since 10-19; ledger row 07:28 (retyped branch name) written.
+
 ## 🔴 MORNING SEAT 06:11 MON 23 Nov (06:00 boot, Mac mini, Opus 5.5; ctx 28% by statusline at 06:1x) - READ FIRST; supersedes the 05:30 block where they differ
 - **develop = 627f889a5437** (ls-remote 06:04:18). Kam: 0 rulings today (06:01). Morning card **wed-morning-plan-1123** posted (HTTP 201; default a = carry on); panel message posted.
 - **IN FLIGHT (subagents of THIS seat: they DIE with a rotation; re-commission from the file if the output is ABSENT):**
