@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 SHIFT HANDOVER 05:30 MON 23 Nov, the 02:0x rotation's SUCCESSOR seat (overnight wrap, ctx ~56%) - READ FIRST; the 04:5x checkpoint block below is current except where this says otherwise
+- **develop = 627f889a5437** (PR 2279, verified at source 04:19:41). THIRTY Secuura merges since 11-19; nothing deployed. Kam silent all night (0 rulings).
+- **FLOOR (2 build seats, both plans ruled, both mid-build; their queues are live, so 05:30 is a CHECKPOINT for them, not a wrap):** **%255 W 63rd** (KS-2321): ONE commit 4688dafea2ff, push in flight at 18:18Z; NEXT its READY -> gate (tier 2). **%258 W 64th** (KS-2322): ONE local commit 78c1c8c56d2a, legs running behind the load gate; NEXT push -> READY -> gate (tier 2). Both idle wakes acked as by-design holds (background shells). A ghost suggestion 'push when the legs finish' sat at W 64th's prompt: never act on it.
+- **MERGE ORDER:** whichever READY lands first gets the first gate and a K 76th drafter (model 0_Brain/reference/2026-11-23_drafter-seatK75/commission.md; suffix th -> th); ONE GO at a time; the second row may be non-FF after the first merges (K 74th's two-pin shape).
+- **MORNING (06:00+), FIRST WORK:** (1) the summary-and-plan card (decision_queue.sh add; step 10a): summary = develop red closed; PRs 2275, 2277, 2278, 2279 merged and verified; 2276 + 2274 ready on his cards; KS-2319..KS-2322 filed; W 63rd + W 64th building; COUNTS awaiting Kam: Secuura/Blockchain 6 cards (KS-2313, launcher cd/ssh, KS-2314, KS-2315, KS-2316, KS-1701); (2) a short panel message to Kam (quiet hours held it all night); (3) the morning ticket sweep (step 10) + INDEX.md refresh; (4) verify each live seat's 05:30 checkpoint landed (rituals rule).
+- **ROUTE (no ticket yet):** deps-present.sh naming the nested @types/node dirs at leg 1 (W 64th's arm b; a ruling); updateIssuerSettings calls an unregistered route (W 63rd); the repo CLAUDE.md says leg 16 gates five services, it is six (W 64th).
+- **Wrap duties DONE this seat:** ledger 3c (11-19 + 11-20, 15 rows, 1911 == 1911); retro in the 11-23 note (05:30); both digests regenerated + rules_card --check OK (376 rows); handover mail to wednesday-agent@.
+
 ## 🔴 CHECKPOINT 50% 04:5x MON 23 Nov, the 02:0x rotation's SUCCESSOR seat - READ FIRST; supersedes every block below
 - **develop = 627f889a5437** (PR 2279, verified). Nothing deployed. Kam silent today (kam_rulings_today 04:15:45: 0 rows).
 - **IN FLIGHT (two parallel BUILD seats, path-disjoint, both plans ANSWERED, both building):**
