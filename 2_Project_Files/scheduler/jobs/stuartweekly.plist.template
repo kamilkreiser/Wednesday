@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- WEEKLY STUART-MEETING LIST (Kam 2026-11-23 10:22 "create this list every Monday morning by 10am and post on fleet activity card for me with link to download"). Wednesday seat ONLY (install_all_jobs.sh skips it elsewhere: Secuura is Wednesday's). Fires Monday 08:00 Australia/Sydney so a slow run still lands before 10:00. stuart_weekly.sh refuses a second card for the same Monday (marker .card_posted in the dated folder + the decision store). Its own log is <dated folder>/run.log; these two files catch only what the shell prints before it opens that log (PORTABILITY 22: launchd cannot open paths on the drive). claude -p runs from an INTERNAL-disk staging dir (measured: under launchd it hangs when it touches the drive). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.@SEAT@.stuartweekly</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>@PROJECT_DIR@/2_Project_Files/tools/stuart_weekly/stuart_weekly.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key><integer>1</integer>
+    <key>Hour</key><integer>8</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+  <key>RunAtLoad</key><false/>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>WED_AGENT</key><string>@SEAT@</string>
+    <key>TZ</key><string>Australia/Sydney</string>
+  </dict>
+  <key>StandardOutPath</key><string>@HOME@/Library/Logs/@SEAT@_stuartweekly.out</string>
+  <key>StandardErrorPath</key><string>@HOME@/Library/Logs/@SEAT@_stuartweekly.err</string>
+</dict>
+</plist>

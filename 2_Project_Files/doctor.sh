@@ -1362,6 +1362,25 @@ if [ "$_DOC_AGENT" = "wednesday" ]; then
   fi
 fi
 
+# --- weekly Stuart-meeting list (2026-11-23, Kam 10:22: "every Monday morning by 10am ... card with link to download") ----------------
+# Wednesday-seat launchd job com.wednesday.stuartweekly (Mon 08:00 Sydney). Machine-local (PORTABILITY 31): claude binary, Chrome + pandoc for md2pdf,
+# the Secuura Blockchain .env. Checks: scripts present, job loaded, last run's result (state/last_run_rc|at|note), last run not stale (>9 days).
+if [ "$_DOC_AGENT" = "wednesday" ]; then
+  _SW_DIR="$PROJECT_DIR/2_Project_Files/tools/stuart_weekly"
+  _SW_LAST="never run"; [ -f "$_SW_DIR/state/last_run_at" ] && _SW_LAST="$(cat "$_SW_DIR/state/last_run_at") - $(cat "$_SW_DIR/state/last_run_note" 2>/dev/null)"
+  if [ ! -f "$_SW_DIR/stuart_weekly.sh" ] || [ ! -f "$_SW_DIR/linear_fetch.py" ] || [ ! -f "$_SW_DIR/commission_research.md" ]; then
+    warn "Monday Stuart-list scripts missing" "restore 2_Project_Files/tools/stuart_weekly/ from git"
+  elif ! launchctl list 2>/dev/null | /usr/bin/grep -q "com.wednesday.stuartweekly"; then
+    warn "Monday Stuart-list job NOT loaded (last run: $_SW_LAST)" "bash 2_Project_Files/scheduler/install_all_jobs.sh (Wednesday tree, WED_AGENT unset) - the weekly list for Kam's Stuart meeting is not scheduled"
+  elif [ -f "$_SW_DIR/state/last_run_rc" ] && ! /usr/bin/grep -q '^rc=0$' "$_SW_DIR/state/last_run_rc"; then
+    warn "Monday Stuart-list last run FAILED ($_SW_LAST)" "read the newest 0_Brain/reference/*_stuart-meeting-items/run.log; re-run: bash 2_Project_Files/tools/stuart_weekly/stuart_weekly.sh (re-uses a finished research, posts once)"
+  elif [ -f "$_SW_DIR/state/last_run_at" ] && [ -z "$(find "$_SW_DIR/state/last_run_at" -mtime -9 2>/dev/null)" ]; then
+    warn "Monday Stuart-list has not run for 9+ days ($_SW_LAST)" "read ~/Library/Logs/wednesday_stuartweekly.err and the newest run.log"
+  else
+    ok "Monday Stuart-list job loaded (com.wednesday.stuartweekly; last run: $_SW_LAST)"
+  fi
+fi
+
 # ── PYTHON TOOLS REFERENCE ONLY NAMES THEY BIND (2026-09-20, Tuesday) ─────────
 # Patching reconcile_rulings.py I added os.environ to a module whose imports read
 # "import json, re, subprocess, sys", and verified it with ast.parse — which
