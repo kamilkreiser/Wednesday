@@ -1,0 +1,24 @@
+The Contracts cell C7 sent its first hub message as soon as both test
+clients had read the handshake answer. The SignalR server writes that
+answer before it adds the connection to the ones a send reaches, and a
+send in that gap is never delivered to that connection; one hosted
+Windows run failed C7 with "no hub message arrived within 5 s".
+
+The stub's hub now counts each connection in its own OnConnectedAsync,
+which the framework runs only after it has added the connection, and
+the shared C7 send body waits for that count to reach 2 before its
+first send. The 5 s read window and the 10 s guard are unchanged; there
+is no retry and no poll.
+
+A test seam, off by default, adds the k-th connection k x 500 ms late;
+one new cell runs the C7 body under it. Without the wait that cell
+fails by C7's own message; with it, it passes. Named limit: the count
+only rises, so a connection that drops before a send is still counted;
+no cell drops one.
+
+Two existing files under tests/Datasec.Suite.Contracts.Tests change; no
+src, project, lock, package or workflow file changes. C# totals plus 1
+on both legs; skipped, unit tests and the rules count are unchanged.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
