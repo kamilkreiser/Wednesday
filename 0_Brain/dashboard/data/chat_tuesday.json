@@ -11884,5 +11884,12 @@
   "project": "Datasec",
   "ts": "2026-11-22T19:19:45.110082+11:00",
   "text": "OXPd: lane F (the Universal Print registration material) is on main. Both reviewers said go with findings; the pull request's own checks and code scanning were all green; nothing deployed, there is no host. No action needed from you.\n\nOne thing to know: main's first run after the merge failed one test on Linux, in the token broker that landed yesterday, not in lane F's files. The same code passed that test twice before, so it fails only sometimes. I have not re-run it to get a green tick. An Opus agent is working out whether the broker or the test is at fault, and I will tell you what it finds."
+ },
+ {
+  "role": "wednesday",
+  "seat": "KamilsMacStudio",
+  "project": "Datasec",
+  "ts": "2026-11-22T19:30:11.750172+11:00",
+  "text": "OXPd follow-up: the failed test on main is a fault in the test, not in the token broker. The test hands out its two scripted answers in the order calls arrive. If the machine pauses one call at the wrong moment, the answers swap and the check fails. I checked the broker's code myself: it only keeps a new token when the refresh is still current and had no error, so nothing wrong is ever kept. It passed 2,500 runs here; a deliberate pause makes it fail every time, and the fix makes it pass every time. A test-only fix is being prepared and will be reviewed before it lands. No action needed from you.\n\nAlso done: the push tool now scans review folders for secrets before it commits, which closes today's repeated slip."
  }
 ]
