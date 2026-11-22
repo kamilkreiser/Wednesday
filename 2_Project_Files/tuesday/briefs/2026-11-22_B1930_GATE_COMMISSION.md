@@ -1,0 +1,16 @@
+# B1930 GATE COMMISSION (G1, Opus, in-session, READ-ONLY) -- Datasec / OXPd_2: lane D, the state database's duplicate race and the in-save audit refusal (owed item 43 (1) and (2), Q1 = b), branch b1921/d-audit-limit-duplicate-race at 69eeb1dc1e6a24747bcf0708a3cf85f33cfc51f5
+
+Commissioned by Tuesday (s311), written at 2026-11-22 22:35:28 +1100. Tier G1 (persistence and audit integrity), Opus by the project's `CLAUDE.md` line 7. Re-commission if `VERDICT.md` is absent (one Agent call, model opus: "read that commission whole and do it"). First line of `VERDICT.md`: `GATE B1930: GO`, `GO WITH FINDINGS` or `NO GO`, then `@ <head7> on main <main7>`. Return a 10-line summary.
+
+## WHAT TO REVIEW (read each yourself)
+- The kit `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1921_SEAT-X33_oxpd2-d-audit-limit-duplicate-race.md` (whole, in pages; its Stamp S4: **Q1 = b, Tuesday's call**, the in-save refusal through `ChangeTracker.StateChanged`/`Tracked` while a save runs) and the seat's record `/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/1_Project_Definition/Briefs/2026-11-22_B1921_STATUS.md` (whole).
+- Origin: Tuesday read at 22:34 compare main...69eeb1dc ahead 1, behind 1 (main is 0fc3344a: PR 21, the adapter README only), six files (EfDeviceRegistry.cs +17 -1, README.md +10 -2, SuiteDbContext.cs +42 -3, AuditTests.cs +72, RegistryTests.cs +55, TestKit.cs +27). Hosted PASS at 1587 both legs (the seat's STATUS).
+
+## WHAT TO DO
+1. Read the commit whole. The race fix: `throw;` keeps the original, the re-read of the key after `Clear()`, a cancellation during the re-read, the dropped unsaved changes (named). The in-save guard: is the `saving` flag correct under re-entrancy, an exception in the save, async and sync paths, two contexts on one connection, a `SaveChanges` called from inside a handler; does it refuse anything a legitimate library call does (every existing cell green); the residual limits (ExecuteUpdate/Delete, raw SQL, a command interceptor, an entry being added) named and asserted; public lines and schema equal (`surface.py` with its control).
+2. In a scratch clone of the head (push URL `invalid://no-push`; heavy jobs through the kit's `heavy.py`, one at a time): red-first of each patch on its base; the kit's mutants incl. `mNoStateChanged`; one probe of your own per rule.
+3. The merge with main 0fc3344a, totals 1581 + 6 = 1587, RULES 500; the head's hosted run by `hosted2.py` (`--total 1587 --rules 500 --skipped-linux 4 --skipped-windows 19 --unit 111 --floor 111 --hardened-scan`); `words.py` and gitleaks over the added lines and the message.
+4. Landing texts in the form of `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1924_verify/` with MAIN MOVES (lanes U, S, A1 may land first). Who decided: the coordinator (Q1 = b is Tuesday's, never the product owner's).
+
+## WRITE ONLY
+`/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1930_verify/` and scratch `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s311/g1930/`. READ-ONLY toward the project, Jira and GitHub; no pull request, no push; no `cd`; never delete; nothing under `Source_Documents/` or the NAS library; nothing to any human.
