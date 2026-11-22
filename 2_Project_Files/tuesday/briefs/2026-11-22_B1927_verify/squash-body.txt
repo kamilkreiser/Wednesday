@@ -1,0 +1,26 @@
+DeleteUnreadable now removes a record that does not open through a
+private RemoveUnopened: when the record's payload names a key of the
+verified ring that is not revoked, a 32-byte random probe must make a
+protect and unprotect round trip under the current key first, else
+StorageFailed and nothing is removed (cell U22: a good record was
+removed when the store's own protection, not the record, failed). A
+record under a key the ring does not hold, or holds only as revoked,
+is removed as before (U04 and U13 unchanged).
+
+A start over a partition folder that is a symbolic link is refused
+with StorageFailed (R18). FileSecretRecordStore checks its folder by
+path at the top of TryRead, Write, Delete and ListIds, so a record
+folder swapped for a link under a running store makes every record
+call StorageFailed (R19). Both checks are by path: a link swapped in
+between the look and the file operation is not seen (README limit).
+R17 and G03 pin two behaviours that were right but untested: a start
+over a revocation alone and no record is refused and makes no key, and
+the RevokeOlderKeys guard reads every record.
+
+Six existing files under the store's two folders; no public member,
+error reason, package, project, lock or workflow file changes. C#
+totals plus 5 on both legs; Windows skipped plus 2 (R18 and R19 make
+folder links, as R10's link half does, on Unix only); unit tests and
+the rules count unchanged. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
