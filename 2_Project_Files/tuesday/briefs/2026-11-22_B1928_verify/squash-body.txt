@@ -1,0 +1,29 @@
+A new library, Datasec.Suite.SignIn, and its test project. SignInActor
+is the sign-in state machine of one printer: one channel read by one
+loop, so the printer's events are taken one at a time in arrival order.
+A card tap follows the card paths: the same card signs its user out with
+no lookup, a card of the signed-in user signs out, another user's card
+signs the first out and the second in, and an unknown card signs the
+signed-in user out and is reported.
+
+A user is signed in on the printer and in the token broker only when the
+object id the identity service read from the token equals the card
+user's (both parsed as identifiers) and the grant's subject equals the
+card user's object id, checked before the printer is told anything.
+Otherwise the tap is refused, the Audit event is raised once with no
+identity in it, the printer is told and the grant is disposed. A tap
+whose age from its arrival to its turn is at least MaxTapAge, or whose
+stamp is from the future, is StaleTap and calls nothing; a tap the
+printer re-delivers after an outage is a named limit. Every identity and
+printer call is bounded by StepTimeout on the actor's TimeProvider, a
+newer tap drops an attempt not yet at the printer, and the display name
+comes in the four forms with their fallbacks.
+
+Thirty new files under the two new folders, two solution lines and two
+new lock files; no package, no workflow and no existing project or lock
+file changes. Nothing calls Microsoft, Graph or a printer, and the host
+does not use the library yet. C# totals plus 57 on both legs; skipped,
+unit tests and the rules floor are unchanged. Nothing is deployed;
+nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
