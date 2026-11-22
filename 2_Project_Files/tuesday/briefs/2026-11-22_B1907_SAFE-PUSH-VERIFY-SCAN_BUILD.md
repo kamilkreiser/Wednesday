@@ -1,0 +1,29 @@
+# B1907 BUILD (Sonnet, in-session) -- WED tooling: safe_push.sh refuses an unscanned agent verify folder, and names handover files left out of a push
+
+Commissioned by Tuesday (s310), written at 2026-11-22 19:17:30 +1100. Owner of the change: Tuesday (claim `safe_push` published by `wed_claim.sh` and mailed to the other coordinator, HTTP 200). Routing: row C8 of `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/specs/model-routing.md` (tooling with arms, Sonnet first). Return a 10-line summary; line 1 is `READY B1907` or `STOPPED B1907: <why>`.
+
+## WHY (read the rows, do not re-derive them)
+`/Volumes/Datasec_DEV/TUESDAY/0_Brain/learnings/_ledger_laptop_datasec.md`: the 2026-11-22 rows (s308 twice, s309 once: an agent's `tuesday/briefs/*_verify/` folder was committed and pushed in the same `safe_push.sh` call as a handover file and scanned with gitleaks only afterwards; every scan was clean, the ORDER was wrong; w=3 REGRESSION) and the 2026-11-20 s299 row (three 'pushed' claims for files that were not in the commit; MECHANISM OWED: print every tracked file still modified under the handover directories as `NOT IN THIS PUSH: <path>`).
+
+## THE CHANGE (one file: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tools/safe_push.sh`)
+A. **Scan before commit.** After the script stages its paths and BEFORE it commits: list the staged paths (`git diff --cached --name-only`, not the argument list, so a path staged any other way is caught too) that match `2_Project_Files/tuesday/briefs/*_verify/*` (any depth). If none: behave exactly as today and do not call gitleaks at all. If some: copy those staged blobs (`git show :<path>`, i.e. the index content, not the working tree) into a fresh temp directory and (1) run a planted control first: the same gitleaks invocation over a second temp directory holding one file with a fake GitHub token of the shape `ghp_` + 36 alphanumerics; it MUST return rc 1 with at least one finding, else REFUSE ("scanner control did not fire"); (2) scan the copied blobs with `/opt/homebrew/bin/gitleaks` (`command -v gitleaks` first; absent = REFUSE). A finding, any rc other than 0 and 1, or a control failure = REFUSE: print what failed and the gitleaks report path; then run `git reset -q -- <paths>` on exactly the paths this call staged (so the index is as before the call), commit nothing, push nothing, exit 3. On a clean scan print `safe_push: verify-folder scan clean (<n> files, control fired)` and continue. Use `gitleaks dir` (8.30.1 is installed) with `--no-banner --redact --exit-code 1 --report-path <tmp>/report.json`; read its own `--help` to confirm the flags before writing them.
+B. **Name what was left out.** After a successful push (and also after a 'nothing staged' exit), print one line `NOT IN THIS PUSH: <path>` for each tracked file still modified (`git status --porcelain`, tracked only) under `0_Brain/tasks/`, `0_Brain/daily_tuesday/`, `0_Brain/daily/`, `0_Brain/learnings/` and `2_Project_Files/tuesday/briefs/`. Print only; never change the exit code for this.
+Keep everything else byte-identical. macOS bash 3.2 (no `mapfile`, no `${x,,}`, no associative arrays). Never send stderr to /dev/null without printing it on failure. Comment block at the change: WHY (the two ledger rows by date), WHAT, the arms.
+
+## PRECONDITIONS (in this order)
+1. `pgrep -fl safe_push.sh`: if anything prints, STOP (never edit a running bash script). Re-check immediately before the edit.
+2. Backup: `cp -p safe_push.sh safe_push.sh.pre-1122-verifyscan` (never overwrite an existing backup of that name).
+3. Read the whole current script first.
+
+## ARMS (all in a SCRATCH CLONE, never the real repo; never push to github)
+Make a scratch clone of `/Volumes/Datasec_DEV/TUESDAY` under `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s310/b1907/` whose `origin` is a local bare repository you create beside it (`git clone --bare`, then point the scratch clone's origin at it). Copy the EDITED script into the clone and run it there. Each arm prints its rc, the last 5 lines of output, `git -C <clone> log -1 --format=%s`, and the bare repo's `main` sha before and after:
+- FIRE: a new file `2_Project_Files/tuesday/briefs/2026-01-01_B0000_verify/x.md` holding a fake `ghp_` token, passed as an extra path -> rc 3, REFUSE line, no new commit, bare main unchanged, `git diff --cached --name-only` empty after.
+- QUIET: the same folder with clean text -> rc 0, the scan-clean line, the file is in the new commit, bare main moved.
+- NEUTRAL: a change outside any verify folder -> rc 0, no gitleaks line at all, behaviour as before.
+- CONTROL-FAIL: run with `PATH` arranged so `gitleaks` resolves to a stub that always exits 0 (and the script's absolute path overridable ONLY by an env var you add for tests, e.g. `SAFE_PUSH_GITLEAKS`, documented in the comment) -> rc 3 with "scanner control did not fire".
+- LEFT-OUT: modify a tracked file under `0_Brain/tasks/` without passing it -> its `NOT IN THIS PUSH:` line prints.
+- Also run `bash -n` on the script and the ORIGINAL script's own behaviour for the NEUTRAL arm (same output apart from the new lines).
+Then install: atomic replace of the real `2_Project_Files/tools/safe_push.sh` (write `safe_push.sh.new`, `chmod` to the original's mode, `mv`), re-run `pgrep` first. Do NOT commit or push the real repo: Tuesday does that after reading your evidence.
+
+## WRITE ONLY
+The real `safe_push.sh` (+ its backup), and `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s310/b1907/` (clone, bare repo, `EVIDENCE.md` with every arm's printed output verbatim and a diff of old vs new script). Nothing else. No `cd` (a hook refuses it: use `git -C` and absolute paths); never delete (move to a `_quarantine_2026-11-22/` folder inside b1907/ if you must); no network except none (local bare remote only); nothing to any human; no other client's material.
