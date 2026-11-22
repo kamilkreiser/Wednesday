@@ -1,0 +1,24 @@
+DeleteRegistration now takes the attach lock, so a delete that arrives
+during an attach waits for it and the attach cannot put the removed
+record back (cell X02). The device-token issuer is called through
+Task.Run, so the IssueTimeout bound also covers an issuer that blocks
+before it returns its task (T11); an issuer that throws, or returns a
+null task, is TokenUnavailable. An answer the issuer has already
+disposed is TokenAnswerRefused (T12), through an internal IsDisposed.
+
+Rule 8 gains two clauses, both refused as IssuerNotTrusted: every
+element of the built chain, the configured issuer included, lies
+inside its own window on the library's clock, both ends included (C14,
+which the hosted Windows leg accepted without it; C16, a chain judged
+on the library's clock alone); and the certificate's signature value
+has the issuer's RSA modulus length and lies below it (C15, s + n,
+which macOS accepted without it). An issuer without an RSA key is not
+checked by the modulus clause. K06 and R05 hold two rules that were
+right but untested. The README states each behaviour and its limits.
+
+Eight existing files under the two Registration folders; no public
+member, error reason, package, project, lock or workflow file changes.
+C# totals plus 8 on both legs; skipped, unit tests and the rules count
+are unchanged. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
