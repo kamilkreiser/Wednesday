@@ -1,0 +1,17 @@
+# B1926 GATE COMMISSION (G2, Opus, in-session, READ-ONLY) -- Datasec / OXPd_2: lane E, the OXPd 2 adapter README's named limits (owed items 45 and 46), branch b1922/e-adapter-readme-limits at b1079275847295f24be070cd0b4fd7d129a08206
+
+Commissioned by Tuesday (s311), written at 2026-11-22 22:14:43 +1100. Tier G2 (docs; the gate's job is the TRUTH of each sentence against the code), Opus by the project's `CLAUDE.md` line 7. Re-commission if `VERDICT.md` is absent (one Agent call, model opus: "read that commission whole and do it"). First line of `VERDICT.md`: `GATE B1926: GO`, `GATE B1926: GO WITH FINDINGS` or `GATE B1926: NO GO`, then `@ <head7> on main <main7>`. Return a 10-line summary.
+
+## WHAT TO REVIEW (read each yourself)
+- The kit `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1922_SEAT-X34_oxpd2-e-adapter-readme-limits.md` (whole, its Stamp and FOR TUESDAY "THE GATE") and `2026-11-22_B1922_ANSWER-1_recut.md` (whole: the re-cut patch, 68 proof rows, E1, E9, E14 rewritten; E14 now follows the product owner's ruling C-63 of 2026-11-22 10:35, `CLARIFICATIONS.md:610-624`, read it at source).
+- The seat's record `/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/1_Project_Definition/Briefs/2026-11-22_B1922_STATUS.md` (whole; its DEVIATIONS 1 says its Step 1 baseline build was NOT run: say whether the survivor mutant of Step 4 ran, and run it yourself).
+- Origin: Tuesday read at 22:14 compare 4a0a9717...b1079275 ahead 1, behind 0, exactly `src/Datasec.Suite.Adapters.Oxpd2/README.md` +49 -1. **Main has since moved to 7b0f4f55 (pull request 20, lane T: two test files only).**
+
+## WHAT TO DO
+1. Read `4a0a9717..head` whole. Each of the 15 rows of the kit's REQUIRED SECTION against the code at BASE, by `proofs.py` (rows with the re-cut's `2-proofs.tsv`, `--control` first, `--census`) AND by reading each sentence beside its lines (a token on a line proves the line exists, not the sentence). Nothing may answer a question that is the product owner's, name who decided, or call C-63's subject open.
+2. In a scratch clone of the head (push URL `invalid://no-push`; heavy jobs through the kit's `heavy.py`, one at a time; other seats share the lock): build, the Adapters.Oxpd2 executable whole (58), the survivor mutant `mIssueNoBump` green and its positive control (with `mNoFill`) red on A06 only.
+3. The merge with main 7b0f4f55 (`git merge-tree --write-tree`) and its expected totals (main's 1581 + 0); the head's hosted run by `hosted2.py` (`--total 1579 --rules 500 --skipped-linux 4 --skipped-windows 19 --unit 111 --floor 111 --hardened-scan`); `words.py` and gitleaks (control first) over the added lines and the commit message.
+4. **Landing texts** into the verdict folder in the form of `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1923_verify/`, landing.txt with MAIN MOVES and the merge-ref totals 1581 (main 7b0f4f55 + 0). Who decided: the coordinator. Scan every landing text.
+
+## WRITE ONLY
+`/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1926_verify/` and scratch `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s311/g1926/`. READ-ONLY toward the project, Jira and GitHub (`gh api -X GET` only under `GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'`); no pull request, no push; no `cd`; never delete; nothing under `Source_Documents/` or the NAS library; nothing to any human.
