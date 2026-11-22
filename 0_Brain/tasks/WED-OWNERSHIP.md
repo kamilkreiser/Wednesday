@@ -234,4 +234,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-18 21:19 | Kamils-MacBook-Pro | Datasec/OXPd — Friday (laptop) | CLOSED |  2026-11-19 19:36 handed to Tuesday on Kam's word 2026-11-19; backup verified; handover 0_Brain/reference/2026-11-18_datasec-oxpd/04_handover-to-tuesday.md |
 | 2026-11-19 19:37 | KamilsMacStudio | Datasec/OXPd — Tuesday (Mac mini) | OPEN | |
 | 2026-11-19 23:54 | Kamils-Mac-mini | hook: refuse fleet tool with no verb or fully discarded output | CLOSED |  2026-11-19 23:56 done |
-| 2026-11-22 19:16 | KamilsMacStudio | safe_push | OPEN | |
+| 2026-11-22 19:16 | KamilsMacStudio | safe_push | CLOSED |  2026-11-22 19:29 landed 6e85d18a: verify-folder scan before commit (rc 3 refuses) + NOT IN THIS PUSH lines; gate B1910 + R1 |
