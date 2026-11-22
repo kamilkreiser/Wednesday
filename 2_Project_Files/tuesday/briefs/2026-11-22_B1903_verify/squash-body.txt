@@ -1,0 +1,22 @@
+web/src/proposal/proposal.css (one rule, layout only, no word, no figure):
+- MPSCALC-427: a part code with no break in it may now break inside the
+  cards of the full proposal (overflow-wrap: anywhere on the card items), so
+  one long code no longer widens the first column of stream cards. Real
+  catalogue part codes were measured first: 1878 values of 6 to 8
+  characters (lengths only).
+web/e2e/proposal-long-code.spec.ts and web/playwright.config.ts: a Chrome
+print of the unpriced full proposal of seven synthetic packages, once with a
+short code and once with a 60-character code that has no break, compares
+the page count, the layout overflow and the widths of the two card columns
+of the first row (12 pages and 297 px each for both; without the rule the
+long code gave 13 pages and columns of 469 px and 125 px). The spec runs in
+the stub-off end-to-end step only.
+web/src/proposal/unpriced.test.tsx (tests only): the no-price check decides
+the places a part code can start on the text before any strip (no cascade
+between two lines), removes U+0001 from text nodes and attribute values
+before it writes its own marks, and gains cells for the cascade, for U+0001
+in a description, a narrative field and an attribute value, and for a
+figure split across two text nodes (88 cells before, 94 after).
+No word of any document, no figure and no priced-document byte changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
