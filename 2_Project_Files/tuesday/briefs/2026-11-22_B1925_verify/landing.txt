@@ -1,0 +1,49 @@
+Landing for the readable dashboard text change (RD-349, RD-175), repo datasecau/Reporting_Dashboard_Au.
+MERGE COMMIT, head-pinned. Never squash, never rebase (C-190; the same commit lands).
+
+HOLD: gate B1925 read NO GO at head 081f4221f442bbd7ee68be6475f5f64280d558d5 (one Major: the chip text colour
+#212529 is not a brand token; VERDICT.md F-1). Do not run the steps below on this head. A re-cut head needs a re-gate;
+these texts then need the chip colour, its ratio (15.43 now) and the head sha replaced, and a fresh read.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-22_B1925_verify'
+HEAD=081f4221f442bbd7ee68be6475f5f64280d558d5
+
+0. Re-read before acting: branch b1911/nexusai-lane-nl-brand-contrast must read $HEAD and main
+   8858e5d11ec101de0a49a819c2d29f4eadf95c40 (the gate read: compare main...head "ahead", ahead 4, behind 0,
+   merge base = main, exactly 5 paths; 0 open pull requests).
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/b1911%2Fnexusai-lane-nl-brand-contrast --jq .commit.sha
+   If main moved: list the paths it changed since 8858e5d1. Any of the five paths of this branch among them
+   (static/css/index-styles.css, static/css/dark-mode.css, __tests__/fixtures/index-light-failure-baseline.json,
+   __tests__/rd349-rd175-readable-text-on-its-ground.test.js, scripts/verify-expected-counts.json; the counts file
+   conflicts if another lane changed it) is a re-gate. A move in HISTORY.md or BACKLOG.md only is noted and the
+   landing goes on.
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1911/nexusai-lane-nl-brand-contrast --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks with a background wait that EXITS. The repo's checks, read from the last merged PR (239, head
+   f5b83ac1) and the one before it (238, head b0c914de): 7 distinct names (8 runs; audit-production-deps runs twice):
+   CodeQL, build, scan, audit-production-deps, Analyze (javascript-typescript), Analyze (python), Analyze (actions).
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/Reporting_Dashboard_Au PRNUM $HEAD 60 90 --min-checks 7
+   The hosted build runs the verify on Node 24 on the PR merge ref; its counts pair must read 6231/394 (the gate's
+   own verify at the head on Node 24 read PASS 6231/394). CodeQL: the gate's local run read rc 0 (KEPT high+ 0,
+   NEW high+ 0, results 29 and 29); any alert
+   the hosted check reports on this PR is a landing blocker: STOP, never dismiss, never comment; report to Tuesday.
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit as a merge commit:
+   gh pr merge PRNUM -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit $HEAD --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing (C-224, the demo deploy hold, stands): the merge touches static/**, __tests__/** and scripts/**,
+   which .github/workflows/deploy-demo.yml does NOT path-ignore (it ignores only '**.md', 'docs/**' and 'tests/**',
+   deploy-demo.yml:29-32), so a Deploy demo run starts on main. Its build and deploy jobs MUST read skipped (both gated
+   on vars.CI_DEPLOY_ENABLED, deploy-demo.yml:53 and :91; the last three runs on main, 37cd9846, 98e6a4d7 and
+   c0552240, read skipped). Anything other than skipped is a stop-and-report. Do not dispatch, re-run or touch a
+   variable. deploy.yml does not start on a push.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert; the open alerts unchanged (22 open on main, none in static/css
+   or __tests__). Not deployed. No Jira from the landing seat: RD-349 and RD-175 move by the records seat after the
+   hosted checks of the landing head.
