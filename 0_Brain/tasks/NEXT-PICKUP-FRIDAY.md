@@ -12,7 +12,21 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
-## 🟥 CURRENT STATE — Sun 2026-11-22 ~21:40, the ROTATION at 80% (seat on Opus, new account). READ THIS FIRST.
+## 🟥 CURRENT STATE — Sun 2026-11-22, written after the note's 21:46 entry by the seat that booted after the rotation (Fable 5.2). READ THIS FIRST; the block below is superseded where they differ.
+
+**CoAgent main = `33371921670acfcb6fc7634d0c4eacafa9800a8d`** (ls-remote at boot). No build seat open. No card open. Kam, live board 20:04: "great progress. keep working on it and I am very much looking forward to testing it out tomorrow".
+**C1 (first Mac-to-Windows link) is PREPARED for Mon 2026-11-23:**
+- Both drafts read whole. Loopback dry run on the Mac PASSED at 3337192: `2_Project_Files/friday/coagent_c1_dry.sh` (it also rebuilds the binaries; it refuses if /private/tmp/c2c-dry exists: move that aside).
+- Host binaries: /private/tmp/claude-501/mcwd1/target/debug/{coagentd,coagent} (SCRATCH, lost on a reboot: re-derivable with that script; then check the sheet's BIN path).
+- **Kam's sheet:** `0_Brain/reference/2026-11-16_claude-to-claude/17_C1-first-link-sheet-2026-11-23.md` (three pasteable Terminal blocks, each run on loopback under zsh). Stick expected at /Volumes/Untitled: check the mount name that morning.
+- Friday's decisions (hers, not Kam's words): host on the Mac WITHOUT --gate; the 359-character invitation crosses as a one-line file on the USB stick, read by the PC's join.cmd; Kam starts and stops the Mac's relay himself.
+- **PC: WO-7** (`briefs_drafts/2026-11-23_windows-pc_WO-7_C1_guest.md`) + **ADDENDUM-1** (the missing cli build; Friday's fault, ledger 2026-11-22). PART 1 is running or done: read "[Windows agent - Friday] WO-7 results" (PART 1) WHOLE: test counts 7/1, 6/1, 13; the REHEARSAL answers (status ok exit 0; fake line = "invite not readable" exit 3; idle exit); the ROUTE line (which adapter reaches 192.168.7.98). A wrong rehearsal answer = fix the helper files with the seat before the session.
+- **NEXT:** when PART 1 is good, CARD Kam (General/Claude to Claude: ~30 min at both machines, the sheet attached as a file, the stick). On his time: re-read `ipconfig getifaddr en0` and the firewall state; he pastes Window 1 and 2; Friday reads /private/tmp/c2c-c1/r.log for the address and h.log for "started", then mails the PC "WO-7 PART 2: GO" with the address (send with `2_Project_Files/friday/windows_wo_send.sh`); invitation on Friday's word after the PC's status check; Friday runs the Mac half of C2 with ctl against /private/tmp/c2c-c1/h (a reply NEEDS re); record the times the relay listened.
+- Mail watch: scratch mail_watch.sh of an older session (dies with the seat). Re-arm after a rotation, or read the inbox at each checkpoint.
+**FOLLOW-UP lane:** an in-session Opus drafter is writing `briefs_drafts/2026-11-23_coagent_WIN-FOLLOWUP_brief_DRAFT.md` (dies with the seat; re-commission from the scope in the block below plus: stale preview/demo/windows.md, the reply-reads-as-chat.msg question). Read it WHOLE, rule its P-list, generate the brief, launch ONE seat on Opus (row C3), then ONE independent check.
+**Flag open with Kam (no answer needed):** the launcher boots this seat on Fable; his standing word is Opus by default. Agents launched from here run on Opus.
+
+## (superseded) 🟥 CURRENT STATE — Sun 2026-11-22 ~21:40, the ROTATION at 80% (seat on Opus, new account). READ THIS FIRST.
 
 **CoAgent main = `33371921670acfcb6fc7634d0c4eacafa9800a8d`** (W-DAEMON merged 21:3x; the Windows background program coagentd.exe builds and runs on Kam's PC; Kam told). **No lane is open. No seat pane is open** besides fleet panes. **No card open.**
 **FIRST WORK (Mon 2026-11-23 morning): C1, the first Mac-to-Windows link, with Kam (~30 min at the PC; he expects it).**
