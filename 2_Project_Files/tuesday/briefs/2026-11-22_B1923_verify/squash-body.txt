@@ -1,0 +1,22 @@
+The scan receiver maps a body whose read throws ObjectDisposedException
+to JobNotFound and any other body failure to ScanRefused; no test held
+the ObjectDisposedException arm. A new theory in ReceiverTests.cs
+(two rows) feeds a body that gives a part header and 2000 bytes, then
+throws: ObjectDisposedException ends JobNotFound, IOException ends
+ScanRefused, in both with no inner exception, the job and its folder
+gone and 0 reserved bytes. A private ThrowingBody stream serves it.
+
+Client models must refuse an optional root property sent as null
+(WrongType at its path); only the service-target models read such a
+null as absent. K8 in TolerantReadingTests.cs now walks every client
+model with an optional root property, sets the first one to null in a
+minimal body, requires the refusal, and asserts the walk checked more
+than 0 models. No new test case.
+
+Each check turns red against the product mutant it was written for and
+the old tests stay green under both. C# totals 1581 on both legs;
+skipped, unit tests and the workflow are unchanged. No product code,
+generator, package, solution, lock or workflow file changes. Nothing
+is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
