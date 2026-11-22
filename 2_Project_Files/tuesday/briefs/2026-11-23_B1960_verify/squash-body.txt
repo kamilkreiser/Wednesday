@@ -1,0 +1,22 @@
+The card store no longer leaves a call untyped when an answer holds a
+text the JSON reader cannot read. The one walk of the whole answer,
+which already read every name, now also reads every string value once,
+and the one parse catches InvalidOperationException beside
+JsonException: a name or a value whose escape is not a whole UTF-16
+character (a lone surrogate such as \uD800), anywhere in the search,
+the user read or either schema read, ends the call as MalformedAnswer
+before any value of that answer is used. No user is chosen, no blob is
+made, no schema pass is kept and nothing is written. The caller's own
+cancellation is unchanged: it leaves as the Graph layer raises it.
+
+The cost is named: such an escape in a value the store never reads also
+fails the call now, the same fail-closed rule as a name held twice.
+Whether Graph ever sends one is not measured. The README states the
+rule and its cost.
+
+Seven existing files under the Identity library and its tests; no
+public member, project, lock, package or workflow file changes. C#
+totals plus 23 on both legs; skipped, unit tests and the rules count
+are unchanged. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
