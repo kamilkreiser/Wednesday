@@ -1,0 +1,27 @@
+LocalSecretStore.DeleteUnreadable: under a key of the verified ring that
+is not revoked, after a passing probe the record is judged again, still
+under the store's lock. It is removed only while it still does not read;
+one that reads now is kept and the call returns false; one whose bytes
+are not handed over then is StorageFailed and stays. Records under a key
+the ring does not hold, or holds only as revoked, are removed as before.
+The README's residual is narrowed to a failure the probe does not see
+that lasts across both judgements: an older key that is not revoked and
+fails alone after the start.
+
+State database: a SavingChanges handler or a save interceptor that
+catches the audit refusal and goes on keeps its change, and the save
+writes it. This is now a named limit: the README's audit sentence and
+its Limits, and the watch's doc comment, say so, and a cell asserts it
+for the handler. No code line of the Data library changes.
+
+Adapter README: the inputs declare no map, but 150 object schemas
+declare neither properties nor additionalProperties; an inline one is
+generated as a raw JsonElement, a component as a model with no
+property, and a key a schema does not list is skipped when read.
+
+Seven existing files in three libraries; no public member, error
+reason, migration, snapshot, package, project, lock or workflow file
+changes. C# totals plus 2 on both legs; skipped, unit tests and the
+rules count are unchanged. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
