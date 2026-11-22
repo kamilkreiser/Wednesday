@@ -1,0 +1,284 @@
+diff --git a/crates/coagent-daemon/src/engine.rs b/crates/coagent-daemon/src/engine.rs
+index 1e0da1e..bf38f40 100644
+--- a/crates/coagent-daemon/src/engine.rs
++++ b/crates/coagent-daemon/src/engine.rs
+@@ -90,6 +90,13 @@ pub const GATE_MISSING_TEXT: &str = "no witnessed tool call: the gate did not se
+ /// Longest IPC socket path (macOS `sun_path` is 104 bytes including the terminating NUL).
+ pub const MAX_SOCKET_PATH: usize = 103;
+ 
++/// Windows (lane W-DAEMON, W-7): the answer to an `invite` with no outside relay, and the cause a
++/// restored host session records, because this build does not host a relay on Windows.
++pub const WINDOWS_NO_HOST_TEXT: &str = "this build cannot host a relay on Windows: start coagentd with --relay-url and --relay-pin for a relay hosted elsewhere, or join with the other side's line";
++
++/// Windows (lane W-DAEMON, W-8): `coagentd --gate` is refused with this text and exit code 2.
++pub const WINDOWS_GATE_REFUSED_TEXT: &str = "coagentd: --gate is not supported on Windows yet: the gate's Windows path rules and its hook have not been run there. Start without --gate; nothing on this machine is then checked by CoAgent";
++
+ /// Everything `run` needs.
+ #[derive(Clone)]
+ pub struct DaemonConfig {
+@@ -319,14 +326,26 @@ fn crypto_code(e: &CryptoError) -> &'static str {
+ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+     #[cfg(unix)]
+     let uid = util::current_uid().map_err(|e| format!("cannot read own uid ({:?})", e.kind()))?;
++    #[cfg(unix)]
+     let dir =
+         DataDir::open(&cfg.data_dir, uid).map_err(|e| format!("data directory refused: {e}"))?;
++    // Windows (lane W-DAEMON, W-2/W-3/W-10): the profile rule, then one line saying it is the only
++    // check. WRITTEN AND TYPE-CHECKED; RAN ON THE OWNER'S PC at `600a6a8` (tests/win_guest.rs; Friday's WO-4).
++    #[cfg(windows)]
++    let dir = DataDir::open_windows(&cfg.data_dir, std::env::var_os("USERPROFILE"))
++        .map_err(|e| format!("data directory refused: {e}"))?;
++    #[cfg(windows)]
++    log!("{}", crate::datadir::WINDOWS_DIR_NOTICE);
+     let store = FileStore::new(dir.clone());
+     // The single-instance lock comes FIRST (gate return G5): coagent-ipc's bind takes an exclusive
+     // lock in the data directory before anything else is read or created, so two daemons started
+     // at once on one directory cannot both create an identity; the second is refused here.
+-    let sock = dir.ipc_path();
+-    if sock.as_os_str().len() > MAX_SOCKET_PATH {
++    // The address comes from `coagent_ipc::endpoint_for_data_dir` (W-6); the length test is the
++    // Unix socket rule only (on Windows the pipe name's limit is the connection crate's own).
++    let sock = dir
++        .ipc_path()
++        .map_err(|_| "cannot name the IPC endpoint for the data directory".to_string())?;
++    if cfg!(unix) && sock.as_os_str().len() > MAX_SOCKET_PATH {
+         return Err(format!(
+             "data directory path too long for a Unix socket ({} bytes; the socket path must stay under {} bytes)",
+             sock.as_os_str().len(),
+@@ -335,6 +354,12 @@ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+     }
+     let listener = IpcListener::bind(&sock)
+         .map_err(|e| format!("cannot bind the IPC socket ({:?})", e.kind()))?;
++    // Windows (W-5, ADDENDUM 5): the Ctrl-C waiter is ARMED here, right after the single-instance
++    // lock and before anything is read or created, so it is in place before "started … ready" is
++    // logged. A Ctrl-C from here on is held for the loop, which stops cleanly at its first turn.
++    // (Unix: unchanged, made just before the loop.)
++    #[cfg(not(unix))]
++    let mut signals = StopSignals::new()?;
+     let id = match store.load_identity().map_err(|e| e.to_string())? {
+         Some(i) => i,
+         None => {
+@@ -424,13 +449,7 @@ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+     }
+ 
+     #[cfg(unix)]
+-    let (mut sigterm, mut sigint) = {
+-        use tokio::signal::unix::{signal, SignalKind};
+-        (
+-            signal(SignalKind::terminate()).map_err(|_| "cannot watch SIGTERM")?,
+-            signal(SignalKind::interrupt()).map_err(|_| "cannot watch SIGINT")?,
+-        )
+-    };
++    let mut signals = StopSignals::new()?;
+     let mut tick = tokio::time::interval(Duration::from_millis(100));
+     loop {
+         let stop_changed = async {
+@@ -447,8 +466,7 @@ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+             Some((g, ev)) = mb_rx.recv() => eng.on_mb(g, ev).await,
+             Some(ex) = relay_exit_rx.recv() => eng.on_relay_exited(ex).await,
+             _ = tick.tick() => eng.on_tick().await,
+-            _ = sigterm.recv() => { log!("SIGTERM received; stopping"); eng.quit = true; }
+-            _ = sigint.recv() => { log!("SIGINT received; stopping"); eng.quit = true; }
++            line = signals.recv() => { log!("{line}"); eng.quit = true; }
+             _ = stop_changed => { log!("stop requested; stopping"); eng.quit = true; }
+         }
+         if eng.crashed {
+@@ -471,6 +489,88 @@ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+     Ok(())
+ }
+ 
++/// The process's stop signals (W-5), made ONCE before the engine's loop and never re-made inside
++/// it. `recv` yields the log line of the signal that came. Unix: SIGTERM and SIGINT, as before.
++/// Windows: Ctrl-C through tokio's safe `tokio::signal::ctrl_c` (READ in the vendored
++/// `tokio-1.54.1/src/signal/ctrl_c.rs:59`). RAN ON THE OWNER'S PC at `07a9d13` (Friday's WO-5): one Ctrl-C
++/// stopped it cleanly, one ended it with no stop line (cause not known; `docs/DAEMON.md` 6a). Since then it
++/// is armed in `run` right after the lock, before "started" (WRITTEN AND TYPE-CHECKED; NEVER RUN on the PC
++/// yet). Its one future is kept here
++/// across loop turns, because it "will complete on the first received ctrl-c after the initial
++/// call to either `Future::poll` or `.await`" (the same file's doc comment). A closed console
++/// window, a logoff, Ctrl-Break or a kill from the task manager is NOT handled: the process ends without
++/// `shutdown`, which is the crash path of the recovery rules (`docs/DAEMON.md` rows 45 and 46).
++struct StopSignals {
++    #[cfg(unix)]
++    term: tokio::signal::unix::Signal,
++    #[cfg(unix)]
++    int: tokio::signal::unix::Signal,
++    #[cfg(not(unix))]
++    ctrl_c:
++        Option<std::pin::Pin<Box<dyn std::future::Future<Output = std::io::Result<()>> + Send>>>,
++}
++
++impl StopSignals {
++    fn new() -> Result<StopSignals, String> {
++        #[cfg(unix)]
++        {
++            use tokio::signal::unix::{signal, SignalKind};
++            Ok(StopSignals {
++                term: signal(SignalKind::terminate()).map_err(|_| "cannot watch SIGTERM")?,
++                int: signal(SignalKind::interrupt()).map_err(|_| "cannot watch SIGINT")?,
++            })
++        }
++        #[cfg(not(unix))]
++        {
++            // `ctrl_c()` registers tokio's console handler only when it is first polled (READ
++            // `tokio-1.54.1/src/signal/ctrl_c.rs:59-62`: the body `os_impl::ctrl_c()?.recv().await`
++            // runs on the first poll; `windows/sys.rs` `new` calls `SetConsoleCtrlHandler`). Until
++            // then a Ctrl-C ends the process the default way, with no stop path. So it is polled
++            // ONCE here, with a waker that does nothing: that registers the handler and this
++            // future's receiver now; the loop's own poll later gives it the real waker. If it is
++            // already complete (a Ctrl-C at that very moment, or an error), the result is kept.
++            let mut f: std::pin::Pin<
++                Box<dyn std::future::Future<Output = std::io::Result<()>> + Send>,
++            > = Box::pin(tokio::signal::ctrl_c());
++            let mut cx = std::task::Context::from_waker(std::task::Waker::noop());
++            if let std::task::Poll::Ready(r) = std::future::Future::poll(f.as_mut(), &mut cx) {
++                f = Box::pin(std::future::ready(r));
++            }
++            Ok(StopSignals { ctrl_c: Some(f) })
++        }
++    }
++
++    /// The next stop signal's log line. Cancel-safe: a turn of the loop that ends on another event
++    /// loses no signal (the Unix streams and the one Ctrl-C future live in `self`).
++    async fn recv(&mut self) -> &'static str {
++        #[cfg(unix)]
++        {
++            tokio::select! {
++                _ = self.term.recv() => "SIGTERM received; stopping",
++                _ = self.int.recv() => "SIGINT received; stopping",
++            }
++        }
++        #[cfg(not(unix))]
++        {
++            let Some(f) = self.ctrl_c.as_mut() else {
++                return std::future::pending().await;
++            };
++            let r = f.await;
++            self.ctrl_c = None;
++            match r {
++                Ok(()) => "Ctrl-C received; stopping",
++                Err(e) => {
++                    log!(
++                        "cannot watch Ctrl-C ({:?}): this daemon now stops only when idle or when it is ended",
++                        e.kind()
++                    );
++                    std::future::pending().await
++                }
++            }
++        }
++    }
++}
++
+ async fn accept_loop(
+     mut listener: IpcListener,
+     tx: mpsc::Sender<IpcReq>,
+@@ -837,6 +937,13 @@ impl Engine {
+         if s.rec.role != SessionRole::Convener || s.rec.external_relay || self.relay.is_some() {
+             return;
+         }
++        // W-7: this build does not host a relay on Windows (such a record exists there only if a
++        // data folder was carried over from another system). Logged once per change of cause, the
++        // retry clock armed, shown in `status`; every retry ends the same way.
++        if cfg!(windows) {
++            self.relay_start_failed(WINDOWS_NO_HOST_TEXT.to_string());
++            return;
++        }
+         let port = s.rec.relay_port.unwrap_or(0);
+         if let Err(t) = self.relay_identity_for_start() {
+             self.relay_start_failed(t);
+@@ -1269,7 +1376,7 @@ impl Engine {
+                 .unwrap_or_default());
+             v
+         });
+-        json!({
++        let mut reply = json!({
+             "key_id": self.id.key_id().to_hex(),
+             "pid": std::process::id(),
+             "contacts": contacts,
+@@ -1293,7 +1400,13 @@ impl Engine {
+                 },
+             },
+             "gate": if self.gate.is_some() { "on" } else { "off" },
+-        })
++        });
++        // W-10: on Windows only, the one check made on the data folder, in words. A non-Windows
++        // reply is byte-identical to the one before this lane.
++        if cfg!(windows) {
++            reply["data_dir_check"] = json!(crate::datadir::WINDOWS_DIR_NOTICE);
++        }
++        reply
+     }
+ 
+     fn session_active(&self) -> bool {
+@@ -1344,6 +1457,10 @@ impl Engine {
+                 "a session or pairing is already active",
+             );
+         }
++        // W-7: on Windows, with no outside relay, nothing is started and no identity is made.
++        if cfg!(windows) && self.cfg.external_relay.is_none() {
++            return Response::err(id, code::RELAY, WINDOWS_NO_HOST_TEXT);
++        }
+         if self.cfg.external_relay.is_none() && self.relay.is_none() {
+             if let Err(t) = self.relay_identity_for_start() {
+                 log!("cannot start the relay: {t}");
+diff --git a/crates/coagent-daemon/src/main.rs b/crates/coagent-daemon/src/main.rs
+index af4c68b..f95e369 100644
+--- a/crates/coagent-daemon/src/main.rs
++++ b/crates/coagent-daemon/src/main.rs
+@@ -7,6 +7,10 @@
+ //! coagentd ctl --data-dir <dir> '<one JSON request line>'      (prints the one response line)
+ //! coagentd relay-guard --coagent <path> --listen <addr>       (internal: see relay_child.rs)
+ //! ```
++//! Windows (lane W-DAEMON; WRITTEN AND TYPE-CHECKED; the refusals and the guest path RAN ON THE OWNER'S PC
++//! at `600a6a8`, see `docs/DAEMON.md` 6a): the data folder
++//! must be a full path inside the user profile folder (`USERPROFILE`), and that is the only check;
++//! `--gate` and `--keep-relay-identity` are refused; this build cannot host a relay there.
+ #![forbid(unsafe_code)]
+ 
+ use std::path::PathBuf;
+@@ -39,7 +43,17 @@ const USAGE: &str = "usage:
+         fingerprint, so anyone who has seen two of them can tell they are the same relay.
+         Whoever copies the file, or reads this program's memory, can stand where the relay
+         stands: they see who connects, when, and how much, and can drop traffic; they cannot
+-        read content or pair.";
++        read content or pair.
++
++  On Windows:
++  The data folder must be a full path (a drive letter, ':' and a separator) inside your user
++  profile folder (USERPROFILE); a relative path is refused. Windows: the data folder is inside
++  your user profile folder (USERPROFILE), and that is the only check. NOT checked: who owns the
++  folder, its access list, or whether Windows keeps other users out of your profile. For your own
++  machine only. --gate and --keep-relay-identity are refused. This build cannot host a relay:
++  start with --relay-url and --relay-pin for a relay hosted elsewhere, or join with the other
++  side's line. Ctrl-C stops it cleanly; closing its window does not (that is a crash, which the
++  state files are written to survive).";
+ 
+ fn main() {
+     let argv: Vec<String> = std::env::args().skip(1).collect();
+@@ -80,6 +94,12 @@ async fn daemon(argv: &[String]) -> i32 {
+     let mut it = argv.iter();
+     while let Some(a) = it.next() {
+         if a == "--gate" {
++            // W-8: refused on Windows (the gate judges paths by the Unix rules; its Windows path
++            // rules and its hook have not been run there).
++            if cfg!(windows) {
++                eprintln!("{}", coagent_daemon::engine::WINDOWS_GATE_REFUSED_TEXT);
++                return 2;
++            }
+             gate_on = true;
+             continue;
+         }
+@@ -214,7 +234,12 @@ async fn ctl(argv: &[String]) -> i32 {
+             return 2;
+         }
+     };
+-    let mut s = match coagent_ipc::connect(&datadir::ipc_path(&dir)).await {
++    // W-6: the address from the connection crate's one rule (`datadir::ipc_path`).
++    let Ok(addr) = datadir::ipc_path(&dir) else {
++        eprintln!("coagentd ctl: cannot name the connection for that data folder");
++        return 1;
++    };
++    let mut s = match coagent_ipc::connect(&addr).await {
+         Ok(s) => s,
+         Err(e) => {
+             eprintln!("coagentd ctl: cannot connect ({:?})", e.kind());

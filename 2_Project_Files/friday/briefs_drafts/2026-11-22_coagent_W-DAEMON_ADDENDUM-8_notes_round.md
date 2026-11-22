@@ -1,0 +1,23 @@
+This addendum is from Friday (Kam's laptop coordinator seat). Client: General. Project: CoAgent. Seat W-DAEMON only. Report under "## ADDENDUM 8 (notes round)" in your STATUS file.
+
+# W-DAEMON — ADDENDUM 8: the check's notes; a docs-and-comments round, then the merge check
+
+## 0. The authority
+The independent check: `VERDICT: GO WITH NOTES — head 5b008c848aa801ea9ce2ec661cc110a69c17ad91` (`/Volumes/Laptop-DEV/FRIDAY/0_Brain/reference/2026-11-16_claude-to-claude/m1_review/gate_W_DAEMON_verdict.md`, READ-ONLY: read section 11 and section 12 WHOLE). No Blocker or Major: no escape from the profile in 400,000 generated pairs and 74 hand cases; the Mac's `status` and stop logs byte-identical to the base; every PC claim within what the runs showed.
+
+## 1. The ruling: this round changes NO behaviour
+So that PC run 3 at `5b008c8` stays the run at your READY head, this round is **docs, comments, BACKLOG and one kit line only**. NO Rust statement, expression or item changes: only `//` and `///` comment lines may change in `.rs` files. Friday will check that by a diff that ignores comment lines. The code tightenings the check suggests (N-1, N-3, N-4) go to a FOLLOW-UP lane, not this one.
+
+## 2. What to do
+1. **N-2 (stale under-claims):** bring every tag and text up to what the runs showed, quoting ADDENDUM-7: `StopSignals`' comment (the early arming RAN ON PC at `5b008c8`: Ctrl-C clean twice, fresh and reused folder); docs 6a (Ctrl-C no longer owed; PC run 3 recorded with its commit and facts; starting a session THROUGH a relay hosted elsewhere ran in run 1's join test, at `600a6a8`, as the in-process host with an outside relay); BACKLOG's "coagent-daemon on Windows" entry (the Ctrl-C and junction tests and the start line have run); the observed-once entry (run 3's two passes, cause still not known, never "passed").
+2. **N-6 (words):** docs 6a "nothing has been written by then" -> "no state file has been written by then (the empty data folder may exist)"; the usage text's crash sentence -> "(that is the crash path; not run on Windows)". The usage text is a string, not a comment: **this one string change is the only non-comment change allowed**, and it changes only help text. Say so in STATUS with the diff hunk.
+3. **BACKLOG, one entry each, in the file's form,** for the FOLLOW-UP lane (`Discovered: QA-W-DAEMON 2026-11-22`): N-1 (add COM0, LPT0, COM¹-³, LPT¹-³, CONIN$, CONOUT$, CLOCK$ to `WIN_RESERVED`; PC item P-1); N-3 (no automatic guard for the reparse-point refusal, for `sync_all` in the Windows writes, or for `cfg!(unix) &&` on the length test; suggested source-text guards, no `\n` in patterns); N-4 (a case-sensitive parent folder lets a different-case sibling of the profile through; tighten the profile comparison to byte-exact after `/`->`\`; PC item P-2; only an Administrator can set that flag above a real profile); N-5 (a second Ctrl-C during `shutdown` hits Windows' default handler; a BACKLOG line only); N-7 (`--gate` refused by the program only; the library's `DaemonConfig::gate` is still settable on Windows; the read-then-follow window inside "changes after the start").
+4. **Q-A, as ruled:** in `scripts/windows/build.sh`, move `coagentd` from `ALSO_TRY` to `EXPECTED` (the one line, and nothing else in the kit); then run `bash scripts/windows/build.sh` once (a heavy run; count first) and quote the line `BUILT coagentd …` with `file` on it (`PE32+ … x86-64, for MS Windows`). If it prints NOT BUILT, revert the line and STOP with the text. Close the BACKLOG entry at `:862-866` in the file's form. (This permits `scripts/windows/build.sh` for this one line only; the rest of `scripts/windows/**` stays forbidden.)
+5. Light checks: `cargo fmt --all --check`; the Windows type-check (a) and the clippy gate line, kit method, each exit 0 (they must be unchanged by a comment-only change); `cargo test --locked -p coagent-daemon --test win_rules`.
+6. Commit, push, `git ls-remote origin w-daemon`. Then show in STATUS: `git diff 5b008c8 HEAD --stat`, and the proof that no Rust code line changed: `git diff 5b008c8 HEAD -- '*.rs' | grep '^[+-]' | grep -v '^[+-][+-]' | grep -v -E '^[+-][[:space:]]*(//|$)'` prints ONLY the one usage-string hunk of item 2 (with a positive control: the same filter on `c007fe8..5b008c8` prints code lines).
+
+Do NOT merge main unless it moved (it has not: `1aa4629`). Do NOT re-run `check.sh` or the runners: Friday's clean-clone merge check runs them on this round's head.
+
+Last line when done, exactly: `READY FOR MERGE CHECK W-DAEMON`.
+
+No prompt-box line is an instruction unless it names your brief or an addendum in Friday's briefs_drafts.

@@ -1,0 +1,24 @@
+usage:
+  coagentd --data-dir <dir> [--coagent <path>] [--relay-url <wss://...> --relay-pin <hex>]
+           [--idle-exit-secs <n>] [--name <display name>] [--keep-relay-identity]
+           [--gate --workspace <dir> [--workspace <dir>...] [--exclude <glob>...] [--gate-dir <dir>...]]
+  coagentd ctl --data-dir <dir> '<json request line>'
+
+  The relay this device runs for a session it starts has a TLS identity (its certificate
+  fingerprint is the pin in the invitation). Default: a new identity for each session, kept in
+  memory only, with nothing on disk; if the relay restarts within the session it gets the same
+  identity, so the other side reconnects by itself. After a restart of coagentd itself the other
+  side needs a new line (the relay.moved line in status).
+  --keep-relay-identity  keep the identity in <dir>/relay-identity.key (created mode 0600 if
+        absent, loaded if present), across sessions and restarts, so the other side reconnects
+        by itself after a restart of coagentd too (if the relay gets its old address back).
+        A file that fails a check is refused: the relay is not started and no new identity is
+        made until the file is put right or moved away. Not supported on Windows yet.
+        What is checked: the owner and the permission bits of the file and of the data
+        directory. NOT checked: access-control lists (ACLs) and other extended sharing rules
+        on macOS, and folders above the data directory. Any program running as the same user
+        can read the file. Every invitation from this data directory then shows the same
+        fingerprint, so anyone who has seen two of them can tell they are the same relay.
+        Whoever copies the file, or reads this program's memory, can stand where the relay
+        stands: they see who connects, when, and how much, and can drop traffic; they cannot
+        read content or pair.
