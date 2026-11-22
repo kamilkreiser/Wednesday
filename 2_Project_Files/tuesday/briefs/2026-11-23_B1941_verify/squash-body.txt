@@ -1,0 +1,36 @@
+A new library, Datasec.Suite.Identity, and its test project: the
+first part of the identity service. CsaStore keeps which cards a user
+holds in the tenant's custom security attributes, set
+HPAuthenticationSuite, attribute cardId, the names and limits the
+Workpath sign-in app uses, and reaches Graph only through the Graph
+layer with the app's token the caller hands in.
+
+FindUserByCardAsync: one search by the card's 62-character prefix
+(ConsistencyLevel eventual), then the whole 64-character blob made for
+each answered user's own mail and compared ordinally. Found only when
+exactly one user holds it; NotFound, AssociationInvalid or Ambiguous
+otherwise. A failed search is a typed GraphFailed, never "no user";
+an answer with a next page is Ambiguous, never "the first page is all".
+
+ReadAttributesAsync: one read of a user's set; one value per single
+value and per collection entry, annotations none; any other shape is
+MalformedAnswer and nothing is used.
+
+EnrolCardAsync: the schema check, a search that no other user holds
+the prefix, a read of the user, then ONE PATCH of the whole card
+collection, every held entry in order and the new blob at its end.
+At most 15 card entries and 50 values per user.
+
+EnsureSchemaAsync: the set and the card definition are checked, never
+created; a pass is kept for SchemaCacheLifetime (default 1 hour).
+
+The card blob is made by an ICardBlobCodec the caller hands in (it
+needs the card key, which this library never holds); its forms are
+checked before any of it reaches a request. No package, no logging,
+no timer, no request of its own, no POST, PUT or DELETE. The host does
+not use the library. Two solution lines and two new lock files; no
+existing file but the solution changes. C# totals plus 88 on both
+legs; skipped and unit tests unchanged; rules count plus 21. Nothing is
+deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
