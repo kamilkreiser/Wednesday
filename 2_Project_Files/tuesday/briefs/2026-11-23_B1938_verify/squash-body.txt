@@ -1,0 +1,26 @@
+SignInActor raises its Audit event to each handler from the invocation
+list, each in its own try, in subscription order and with one arguments
+object, so a handler that throws no longer keeps a binding refusal from
+the handlers after it. A card user whose object id parses as the empty
+identifier, in any form Guid reads, is LookupFailed at the lookup:
+nothing is acquired, the printer is not told, nothing is audited and
+the signed-in user stays. The sign-in README names two limits: a tap can
+take effect up to about MaxTapAge plus four StepTimeout bounds after it
+arrived, and a printer sign-out queued behind a switch ends the new
+broker session.
+
+CloudDeviceTokenHolder refuses a renewal answered with the token object
+it already holds (TokenAnswerRefused) and keeps that token as it is, so
+it is served while its lifetime lasts and refused after. Still open: a
+held object answered after the issue bound is disposed by the late
+answer path; a concurrent Invalidate between the disposed check and the
+hold can still hold a disposed answer; one object answered to two
+registrations is cleared for both when either lets it go.
+
+Seven existing files under the SignIn and Universal Print Registration
+folders and their tests; no public member, project, lock, package or
+workflow file changes. C# totals plus 6 on both legs; skipped, unit
+tests and the rules count are unchanged. Nothing is deployed; nothing
+was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
