@@ -1,0 +1,20 @@
+# Commission: QA GATE 403, TIER 2 (Sonnet), PR 2278 (KS-2318), 2026-11-23 (written by Wednesday, the 2026-11-22 21:3x rotation's successor seat)
+
+SHAPE: as /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-22_gate401-tier2-ks2281-shared-reds-mcp-errorhandler/commission.md and the commissions it points at (read WHOLE: method, hard limits, verdict format, FOUND / TESTED / HOW). Line 1 of your verdict = `PR 2278: <GO | GO WITH NOTES | NO GO> (at head <40-hex>; tier 2)`. Findings-only. Write verdict.md in this folder; own clone under this folder's _work only.
+
+TIER 2 (Sonnet): UI text only on the admin dashboard's organisation delete; no access, data or backend change. Any change of WHAT the request sends, of when the list reloads, or of any other helper's behaviour is a NO GO and the tier was wrong: say so on line 2.
+
+STANDING LEG: packages/shared vitest WHOLE on develop and the merged state: develop 7312e64dcf23 fails FIVE names (ks1725 F and J; ks727 corpus-2 x2; wallet-signature KS-278); the merged state must fail the SAME five (if PR 2277 has merged by your run, develop fails ONE: say which develop you ran). No new name.
+
+THE AUTHORITY: no Kam card governs KS-2318 (Low, filed 2026-11-22 by Seat S 108th). Wednesday's plan ruling: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-23_W61_answer_plan.md (helper returns {ok, error?} via describeFailure, the KS-1912 shape; keep "Failed to delete" for no message / non-JSON / network; text only; tier 2; the no-runner fact named plainly). The seat's plan is beside this file as plan_w61.txt.
+
+THE CHANGE (Wednesday read at source 00:49:07, git ls-remote + gh api): PR 2278 (https://github.com/Secuura/Distributed_Secuura/pull/2278), head fc8fb16d76213b39617433cca8e3f9fbca7008fc, ONE parent 7312e64dcf23 (FAST-FORWARD), tree 33fe1d99c00c, 3 files: frontend/admin/src/services/api.ts, frontend/admin/src/pages/Organizations.tsx, the new ks2318 cell file. READY beside this file as ready_w61.txt; record /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-23_seatW-61st/. Reproduce, do not cite.
+
+QUESTIONS (own clone, own measurement):
+Q1 THE BEHAVIOUR: the request deleteOrganization sends is byte-identical before and after (method, path, headers, body); only the return value and the page's text change. Every status the cells claim (200 / 409 / 404 / 500 / string error body / top-level message / no message / non-JSON / network / non-string / blank) shows the text the plan rules. Is any server text shown that could carry something it should not (a stack, an internal id)? Read what the two server routes (originate adminConfig.ts and the gateway admin.ts DELETE, at develop and at PR 2276's head dca995028acd) can put in error.message, and say.
+Q2 THE CELLS: 12 new cells (R1-R5 red on develop's code), 22 of 22 with the change; reproduce under the SAME harness config the seat names (sha256 b3fe391097a8), and say plainly that no repo runner exists; mutants: the seat's 9 plus your own (the page shows result.error even on success; the helper returns the placeholder text; a 2xx with ok:false body); name any survivor.
+Q3 WHOLE: admin cells, tsc, vite build, eslint on both arms; packages/shared standing leg; check:openapi; fragments. Overlap over every open PR on the 3 paths; merge-tree rc 0 with a planted control rc 1.
+Q4 WORDS: the PR body and the facts comment e7fd0751 on KS-2318 (read-only): any sentence that does not hold? The no-runner sentence and the three residuals present and accurate?
+
+HARD LIMITS: read-only on GitHub and Linear; no write in any !CODING path (own clone under _work); no fetch, pull or worktree add in another seat's checkout; no deployed database, box or container; no mail, send tool or launch; no cd; no rm (move to _work/_quarantine); never kill a process by name; /usr/bin/grep -i with a positive control beside every zero; never read mail or long lines through `cut -c`; all scratch (TMPDIR included) inside your _work.
+RETURN: verdict line 1, then a 10-line summary.

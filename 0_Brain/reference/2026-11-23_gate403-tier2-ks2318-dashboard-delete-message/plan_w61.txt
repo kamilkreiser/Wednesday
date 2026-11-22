@@ -1,0 +1,50 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-22T13:22:56.000Z
+Subject: [Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 61st)
+---
+Seat W 61st
+PLAN QUESTION, KS-2318 (build seat, Sonnet, pane Secuura/Blockchain-W; BRIEF 13:09:30Z). Measured at develop D = 7312e64dcf23 in my OWN clone (refs/w61/develop; ls-remote at boot equal to your pin). I wrote nothing outside my own trees and record folder; the daily note and the vault wait for your ANSWER.
+
+BLUF: two product lines in two files plus ONE new cell file. Tier 2 recommended. The 12 cells were measured red-first in a throwaway tree: on D's unchanged code 5 are red and 7 green; with the change 22 of 22 admin cells pass (10 existing + 12 new) and tsc reads 0 errors.
+
+MEASURED (all at D unless stated)
+- helper api.ts 915-920 returns res.ok; page Organizations.tsx 111-116 shows "Organization deleted" or "Failed to delete". Callers of deleteOrganization in the whole repo: ONE (Organizations.tsx:112; git grep gives the import, the call and the definition).
+- request() (api.ts 55-121) already hands back {ok:false, status, error}. At runtime error is the server's {code,message} OBJECT; a body with no message becomes the string "Request failed (<status>)"; a network failure is status 0 plus the browser's text. describeFailure (lib/settingsSavePayload.ts:116, already imported at api.ts:15) reads a string or an object's message, else its fallback.
+- Server answers, all shaped {success:false, error:{code,message}}. Gateway DELETE (the route the dashboard calls, admin.ts:1595) at D: 404 "Organization not found", 500 "Failed to delete organization", NO 409 yet (by reading, not run: an organisation with users either hits the FK error and lands in that 500 or, without the FK, is deleted). At PR 2276's head dca995028acd (read in my own clone, not the shared checkout): the same 404 and 500 plus 409 "Organization still has users". Originate DELETE (not called by the dashboard): 403 "Insufficient permissions", 409 "Organization still has users", 500 "Internal server error"; a missing organisation is HTTP 200 {success:false, message:"Not found"}.
+- Pattern to reuse, named: KS-1912 (develop d7dc7de43): deleteTenant and updateTenantStatus return {ok, error?} through describeFailure and ClientList shows result.error || 'Failed to ...'. Same three-file shape (test, page, api.ts). Others on the board: KS-1564 (ApiKeys, {ok:false,status,message} via failureMessage) and KS-1231 (settings).
+- Test setup: frontend/admin has NO runner in the repo (no vitest config, no test script, no vitest in its package.json). Three page tests exist (ks1105, ks1912, ks1913; 10 cells). They run under the HARNESS config spark/tiers/vitest_configs/frontend-admin.config.mjs (absolute --config, cwd = the admin package; sha256 b3fe391097a8, byte copy in my evidence), as KS-1912's PR said. I will say so in the Test Evidence.
+- BASE at D (my tree s-w61-dev, deps cloned from a lock-equal donor): admin 10 of 10 in 3 files; tsc 0 errors; vite build rc 0; packages/shared 1725 of 1730 with FIVE failing names (ks1725 F, ks1725 J, ks727 corpus-2 x2, wallet-signature KS-278), the five your brief names.
+- Census (one GraphQL query family, 21 open PRs, paging asserted): none touches api.ts or Organizations.tsx. 2159 holds lib/settingsSavePayload.ts (its five hunks sit at base lines 34 to 79 and describeFailure is at base line 116; its text at the PR head 7b54e7cbb6f0 reads identical; I only import it). 2276 holds gateway admin.ts. 639 and 948 touch the admin package.json only. No waiver needed.
+
+Q1 HELPER SHAPE
+deleteOrganization(id): Promise<{ ok: boolean; error?: string }>, the same shape as deleteTenant. On a failure it returns error = the server's text (through describeFailure), only when the server sent one. One caller (Organizations.tsx:112). The other 14 helpers that end in res.ok, request() and describeFailure stay untouched.
+
+Q2 PAGE (text only; the same snackbar, the same severity, no new colour, component, style or layout)
+message = result.ok ? 'Organization deleted' : result.error || 'Failed to delete'. What shows: success unchanged; 409 "Organization still has users" (arrives with PR 2276; originate's is the same text); 404 "Organization not found"; 500 "Failed to delete organization"; a body with no message, a non-JSON body (a 502 page) or a network failure: "Failed to delete" (today's text).
+ONE choice for you: to keep "today's text otherwise" the helper compares error with request()'s own placeholder "Request failed (<status>)" and with status 0. The plainer KS-1912 form would show "Request failed (502)" or the browser's "Failed to fetch" there instead. I recommend the brief's wording; cells F1 to F3 pin it, and a changed placeholder would turn them red.
+
+Q3 CELLS, MUTANTS, PATHS
+New file frontend/admin/src/__tests__/ks2318-organisations-page-shows-a-refused-delete.test.tsx (143 lines; the REAL page and the REAL api.ts, only fetch replaced, as KS-1912's). 12 cells, measured in throwaway tree s-w61-proto: C1 an accepted delete is sent to /api/users/admin/organizations/o1, shows the success style and the list reloads; C2 a cancelled delete sends nothing; R1 409, R2 404, R3 500, R4 plain-string error body, R5 top-level message body each show the server text (R1 also checks the error style and that the generic sentence is gone); F1 no message, F2 non-JSON body (no throw, page still standing), F3 network failure, F4 non-string message, F5 blank message each keep "Failed to delete". On D's unchanged code: R1 to R5 red, the other 7 green. With the change: 22 of 22; tsc 0 errors.
+Mutants after your ANSWER (each type-checked first, each to be killed by a named cell): helper drops the text; drops the placeholder check; drops the status-0 check; returns ok:true on a failure; page ignores result.error; page severity forced to success; describeFailure swapped for a string-only read; success text changed.
+PATHS (closed list): frontend/admin/src/services/api.ts (deleteOrganization only, +6 -2); frontend/admin/src/pages/Organizations.tsx (handleDeleteOrg only, 2 lines); the ONE new test file. No fragment expected: KS-1912 needed none; I will re-measure the docs-fragments check.
+
+Q4 TIER: 2 (UI text only; no access, data or backend change).
+
+AFTER THE ANSWER: branch feature/ks-2318-admin-dashboard-organisation-delete-shows from D (develop re-read first), counted edits byte-equal to the prototype, red-first then green, mutants, admin cells + tsc + build on both arms, packages/shared whole on both arms (failing set must stay the FIVE), static legs each planted, ONE commit, ONE push with the new-branch driver (13 pushlock arguments), the PR, ONE facts comment, READY with tier and a measured meter. Residuals I will name in the PR: the 14 other res.ok helpers; originate's HTTP-200 missing-organisation answer (not reached by the dashboard); no admin test runner in the repo; at D the gateway answers no 409, so the 409 text appears with PR 2276 and the page needs no change then.
+
+LAUNCHER PREFLIGHT WARNINGS, VERBATIM (4_Credentials/.launch_preflight_last.txt, copied at once into evidence/launch_preflight_w61.txt and compared equal):
+# launch 2026-11-22T13:09:35Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 1 other live session(s) on this project: PID 85357 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+F-02: I never seeded the keychain nor set the on-disk flag; my base clone and the two PR-head fetches used the repo's core.sshCommand and none was refused. PID 85357 reads as `claude daemon run` (started Sat 21 Nov 10:00 by ps), not as a seat session; the launcher lists no other session. Your BRIEF says a merge seat (K 73rd) may launch beside me: I act only on mail naming (Seat W 61st).
+
+FAULTS, disclosed: (1) the cwd print was NOT my first act: it came after the BRIEF was read (the BRIEF is only readable after several calls). (2) My Bash calls 1 to 3 used `cd` (project root, 2_Project_Files, the vault). (3) Call 2 ran three git reads in the shared checkout (rev-parse, status, ls-remote, the launcher's FIRST ACTIONS line) without GIT_OPTIONAL_LOCKS=0; HEAD 0e6479d7b6c0 and the 18 untracked lines read the same at boot and now; I did no checkout, fetch, pull, stash or write there. (4) I read your W 58th and W 60th briefs, W 57th's and W 60th's handovers and the harness vitest config from the WEDNESDAY folder, read only, as the BRIEF directs. No env name or value printed; the mail and Linear keys were read inside python only.
+
+Meter (kit tool ctx_usage_w57.py on my transcript): 30.7 of 1M at record 152. Trees: worktrees/s-w61-base (URL clone, refs/w61/develop = D, refs/w61/pr2276, refs/w61/pr2159), s-w61-dev (D, clean), s-w61-proto (THROWAWAY, never pushed). Record folder: 5_Project_History/2026-11-23_seatW-61st.
+MEANWHILE: waiting; a watcher is armed on (Seat W 61st). Nothing else is running.
+
