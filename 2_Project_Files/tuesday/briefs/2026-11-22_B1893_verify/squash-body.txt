@@ -1,0 +1,47 @@
+Follow-ups to the CI guards of work package WP0.3. Only Python files
+under build/, the workflow and the README change; nothing is deployed.
+
+Repository rules R6 to R8: R6 keeps every workflow file in spellings a
+line reader can follow (a comment never starts a block scalar; no
+quoted or explicit key, backslash, flow collection, indentation number,
+BASH_ENV or exported shell function); R7 refuses a NUL byte in any
+tracked file; R8 refuses the filter attribute in a tracked
+.gitattributes, split where git splits it. The whole workflow file is
+held to its reviewed text by a fingerprint.
+
+Three refusals in place of three readings: every byte of a workflow
+file is printable ASCII or a line feed; a line outside a block scalar
+that leaves a quoted value open at its end is refused; a double quote
+in a .gitattributes line that is not a comment line is refused.
+
+Squash message scan (build/squash_scan.py): the subject and body of a
+squash merge are scanned before the merge through the workflow's own
+export function and scanner options, after a planted control; a NUL
+byte or a failed step is exit 2.
+
+Second secret scan: every copy's length is checked against its object,
+the listing is counted by the lines read, and every object a ref
+reaches must be among the listed objects.
+
+Release guard: a release mode that refuses an untracked or empty
+deny-list; the library name in any binary; the CA name anywhere in a
+path; backslash member names; archive formats it does not open, by
+exact magic bytes; two more PEM labels and UTF-16 text.
+
+Known limits, carried by a follow-up ticket: the open-quote refusal
+misses a quote opened after an expression in a plain key (a${{: "b }})
+and a quote opened after a quote inside a plain key (k "x: "a), each
+followed by a continuation line indented less than its mapping. Both
+are parser-dependent (libyaml accepts them, the YAML 1.2 specification
+does not, GitHub's parser is not measured) and both existed before.
+The workflow fingerprint is the backstop: any edit of ci.yml is red
+until a person reads it and sets the new value. Other limits: R6 reads
+lines, not YAML; key: ${{ x }} | is not refused; G1 searches ASCII and
+UTF-16LE only; G3 does not see formats without magic bytes; the second
+scan does not see UTF-16, compressed content or a secret split over two
+lines; no quoted .gitattributes pattern can be written.
+
+111 planted controls in build/tests (FLOOR=111). No product code,
+package, solution or lock file changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
