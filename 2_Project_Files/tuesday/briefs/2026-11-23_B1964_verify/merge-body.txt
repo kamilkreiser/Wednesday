@@ -1,0 +1,13 @@
+RD-1030: in backend/services/capabilities.js, GET /api/data-sources/:id/describe-table and
+GET /api/data-sources/:id/discover-tables move from config.read, which a viewer holds, to the existing admin.read,
+which only the administrator role holds. The table now agrees with the 2026-11-20 ruling on RD-1011 (C-311) that keeps
+both reads administrator-only, and with the wire: both handlers run the administrator check as their first statement.
+No backend code reads the table, so no response changes. Cell P2 of the RD-1011 test expects admin.read and that no
+viewer role holds it; two census cells hold the opposite case of the pending list (a route the inventory refuses a
+viewer on must not sit under a capability the viewer holds) and prove that comparison can fail. The inventory and its
+page are unchanged; the rows of RD-1021 and RD-1022 stay under config.read. Suite counts 6237 tests in 394 suites.
+
+The choice of the existing capability and the placement of the rows are the coordinator's defaults.
+Not deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
