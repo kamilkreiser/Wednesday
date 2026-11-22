@@ -1,0 +1,53 @@
+Adds the job service of the OXPd 2 server without the converter (work
+package WP1.7, in part). The host does not use it yet: nothing is wired
+to an endpoint, and nothing calls Sweep or WipeSession.
+
+JobSpool: an encrypted spool of job files. Each job has its own 32-byte
+key, held in memory only and cleared when the job is wiped. Files are
+AES-256-GCM chunks whose tag is checked before a byte is handed out; a
+changed, cut, extended, reordered or moved file is SpoolCorrupt, and a
+reader that refused once refuses every later read. A job is wiped by
+WipeJob, WipeSession, a touch after its lifetime, Sweep, and at the
+start of a new spool. Caps count the plaintext written and are reserved
+across all jobs before a chunk reaches the disk.
+
+ScanReceiver: OpenScan makes a job and a 32-byte scan secret returned
+once; only its SHA-256 is kept, compared in fixed time, and every
+refusal of the secret or the job is the same JobNotFound. ReceiveAsync
+streams one multipart upload into the job within the caps and a time
+bound; a failed upload wipes the job. One upload per job at a time.
+
+PrintJobSender: SendAsync builds a Print-Job request from the IPP
+library's public types, writes it and the document through an
+IIppTransport and accepts only a valid answer to that request;
+TrackAsync polls Get-Job-Attributes until the state is final. The send
+and the answer's read are bounded.
+
+Every refusal is a JobServiceException with one of 18 reasons and a
+fixed message, never carrying a document byte, a secret, a file name or
+an id. A transport or answer stream that throws its own cancellation is
+TransportFailed. Every bound is armed before a caller's code runs, so a
+body, transport or answer stream that blocks its thread ends at its
+bound.
+
+Limits: deleting a file does not overwrite its blocks; the key lives in
+process memory; no timer (expired files stay until the next touch or
+Sweep); a bound cannot free a blocked thread; an answer whose close
+never completes ends ResponseTimedOut at the send bound; a caller's body
+that throws ObjectDisposedException ends JobNotFound; the test that
+looks for the secret's text does not see text kept as the state of a
+clock, a task, a cancellation token, source or registration, or an
+execution context, and the library keeps none there; one process per
+root; the real transport, what devices send and what printers accept
+are not here or not measured.
+
+The test that walks the receiver for the secret's text no longer enters
+a clock, a task, a cancellation token, source or registration, or an
+execution context, so other running tests cannot change a collection
+under it.
+
+120 new tests. The solution file gains the two job-service lines; no
+package, lock file of another project, workflow or build file changes.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
