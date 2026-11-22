@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 50% 04:5x MON 23 Nov, the 02:0x rotation's SUCCESSOR seat - READ FIRST; supersedes every block below
+- **develop = 627f889a5437** (PR 2279, verified). Nothing deployed. Kam silent today (kam_rulings_today 04:15:45: 0 rows).
+- **IN FLIGHT (two parallel BUILD seats, path-disjoint, both plans ANSWERED, both building):**
+  - **%255 W 63rd** (Sonnet, lane Secuura/Blockchain-W) for **KS-2321**: 14 admin api.ts helpers -> `{ ok, error? }` via ONE unexported refusalText(res); 15 caller text sites (17 call sites in 9 pages, three via import aliases; the 2 removeTenantKey sites unchanged); ~86 cells in 4 files under the outside harness config (sha256 b3fe391097a8), ~33 mutants; tier 2. Brief fleet/briefs_staged/2026-11-23_seatW63_build.md; ANSWER 2026-11-23_W63_answer_plan.md. NEXT: its READY -> gate (tier 2, Sonnet; model commission 0_Brain/reference/2026-11-23_gate403-tier2-ks2318-dashboard-delete-message/commission.md) -> K 76th drafter (suffix th -> th; model 0_Brain/reference/2026-11-23_drafter-seatK75/commission.md) -> stamp -> GO -> verify.
+  - **%258 W 64th** (Sonnet, lane Secuura/Blockchain-X) for **KS-2322**: SUITE-ONLY skip in preflight_test_types_ratchet_leg.test.sh decided from the lock (nested @types/node recorded but absent); the leg, deps-present.sh, preflight.sh and the hook UNTOUCHED (accepted pushes unchanged); one new ks2322 suite + fragments; tier 2. Finding wider than the ticket: auth fails too; KS-691 class. Brief 2026-11-23_seatW64_build.md; ANSWER 2026-11-23_W64_answer_plan.md. NEXT: its READY -> gate (tier 2) -> a K row AFTER W 63rd's (ONE GO at a time; second may be non-FF).
+  - fleet_ack: W 63rd cleared; **W 64th's plan QUESTION flag still owed** (collector lag: re-run `fleet_ack.sh answered "QUESTION: plan confirmation (Seat W 64th)" ...`).
+- **ROUTE (residuals, not yet tickets):** deps-present.sh naming the six nested @types/node dirs at leg 1 (W 64th's arm b: new leg-1 refusals; needs a ruling); updateIssuerSettings calls an unregistered route PUT /api/admin/settings/notifications (W 63rd).
+- **KS-2104 is NOT an agent lane** (Kam's card secuura-ks1410-issued-packages-keep-hole-1107 = a: count issued customer packages + a text for Stuart/Peter back to Kam first). The 04:2x block below said otherwise: corrected.
+- **MORNING (06:00+) OWED:** the summary-and-plan card (Secuura/Blockchain: 6 Kam cards); a short panel message to Kam (develop red closed; PRs 2275, 2277, 2278, 2279 merged; 2276 + 2274 ready on his cards; KS-2319..KS-2322 filed; W 63rd + W 64th building); the morning ticket sweep; INDEX.md refresh.
+- **Wrap duties owed at rotation:** ledger edited (2 rows 11-23) -> BOTH digests + rules_card --check; retro in the 11-23 note.
+
 ## 🔴 CHECKPOINT ~46% 04:2x MON 23 Nov, the 02:0x rotation's SUCCESSOR seat - READ FIRST; supersedes every block below
 - **develop = 627f889a5437** (PR 2279, KS-2317, merged + VERIFIED at source 04:19:41: ONE parent 8ce82fde5c8a, tree c75eee46f6ed). THIRTY Secuura merges since 11-19. Scored: W 62nd 0.95, K 75th 0.96, S 109th 0.96. Nothing deployed.
 - **FLOOR: EMPTY** (W 62nd, S 109th, K 75th all wrapped, panes closed). No subagent running. Capacity ROOM.
