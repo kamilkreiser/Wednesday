@@ -743,6 +743,24 @@ else
   fail "no-autostash hook or safe_pull.sh missing" "hand pulls can sweep decisions.json/chat streams into a stash again"
 fi
 
+# --- Recursive-scope hook (built 2026-11-05; found UNWIRED 2026-11-22 21:5x: it was never in the
+# template, so the renderer dropped it and five unbounded greps over fleet/state and 0_Brain/reference
+# ran in three days). Same three checks as above: exists, in the TRACKED template, FIRES and stays quiet.
+RS="$PROJECT_DIR/2_Project_Files/fleet/hooks/pretooluse_recursive_scope.sh"
+if [ -f "$RS" ]; then
+  rs_probe() { python3 -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.argv[1]}}))' "$1" | bash "$RS" >/dev/null 2>&1; echo $?; }
+  RS_BAD="$(rs_probe "grep -l x $PROJECT_DIR/2_Project_Files/fleet/state/*.log")"; RS_GOOD="$(rs_probe "grep -n x $PROJECT_DIR/2_Project_Files/fleet/state/_push.out")"
+  if ! grep -q 'pretooluse_recursive_scope' "$PROJECT_DIR/.claude/settings.template.json"; then
+    fail "recursive-scope hook NOT in settings.template.json" "it never fires — add it to the template"
+  elif [ "$RS_BAD" = 2 ] && [ "$RS_GOOD" = 0 ]; then
+    ok "recursive-scope hook armed" "refuses a glob over fleet/state, passes a named file"
+  else
+    fail "recursive-scope hook INERT or over-broad" "bad→$RS_BAD (want 2), good→$RS_GOOD (want 0) — run fleet/hooks/tests/recursive_scope_arms.sh"
+  fi
+else
+  fail "recursive-scope hook missing" "unbounded searches over the big trees run unrefused"
+fi
+
 # --- Chat streams (Phase 0, Kam's 2026-09-08 11:50 two-agent commission) ---------
 # chat_log.json is DERIVED from chat_legacy.json + one stream per writer, and it is
 # gitignored: a generated file that two seats both regenerate is what corrupted Kam's

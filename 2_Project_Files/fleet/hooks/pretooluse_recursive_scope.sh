@@ -23,7 +23,7 @@ except Exception as e:
     sys.exit(0)
 if "# scope-ok:" in cmd:
     sys.exit(0)
-TREE = re.compile(r"(0_Brain/reference|5_Project_History|local-model(/|\b)|/night(/|\b)|spark/runs)")
+TREE = re.compile(r"(0_Brain/reference|5_Project_History|local-model(/|\b)|/night(/|\b)|spark/runs|fleet/state(/|\b))")
 hits = []
 # split into simple commands on ; && || | and newlines
 for seg in re.split(r"\|\||&&|;|\||\n", cmd):
@@ -45,14 +45,17 @@ for seg in re.split(r"\|\||&&|;|\||\n", cmd):
         recursive = prog == "rg" or any(
             t in ("--recursive", "--dereference-recursive") or
             (not t.startswith("--") and re.search(r"[rR]", t[1:])) for t in flags)
-        if recursive and "--include" not in rest and "-g" not in flags and "--glob" not in rest:
+        # 2026-11-22 (ledger 21:4x, 5th in three days): a GLOB over the fleet log/state folder is the
+        # same costume without -r (`grep ... fleet/state/*.log`): refuse it even when not recursive.
+        globbed = re.search(r"fleet/state/\S*[*?]", rest) is not None
+        if globbed or (recursive and "--include" not in rest and "-g" not in flags and "--glob" not in rest):
             hits.append(seg.strip())
     elif prog in ("find", "bfs"):
         if "-maxdepth" not in rest:
             hits.append(seg.strip())
 if hits:
     print("REFUSED by pretooluse_recursive_scope.sh: an UNSCOPED recursive search over a big tree "
-          "(0_Brain/reference, 5_Project_History, local-model runs/night). Ledger 2026-11-05 w=3: these "
+          "(0_Brain/reference, 5_Project_History, local-model runs/night, fleet/state; a glob over fleet/state too). Ledger 2026-11-05 w=3: these "
           "ran 30 min to 2.5 h in the background, unwatched.\n"
           "Fix: grep -> add --include=<glob> and name a small dir; find -> add -maxdepth N. "
           "A deliberate wide search: add the comment  # scope-ok: <reason>  and, if the harness "

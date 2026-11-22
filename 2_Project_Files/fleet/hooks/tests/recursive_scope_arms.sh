@@ -17,7 +17,13 @@ run 2 "find /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History -nam
 run 2 "grep --recursive foo $B/2_Project_Files/local-model/spark/runs"
 run 2 "echo hi; grep -rn x $B/2_Project_Files/local-model/night | head"
 run 2 "rg foo $B/0_Brain/reference"
+run 2 "grep -o -E 'x' $B/2_Project_Files/fleet/state/*.log 2>/dev/null | tail -0"
+run 2 "grep -rn foo $B/2_Project_Files/fleet/state"
+run 2 "grep -l foo /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/state/_bal_*.out"
 # QUIET
+run 0 "grep -n foo $B/2_Project_Files/fleet/state/_push.out"
+run 0 "ls $B/2_Project_Files/fleet/state | head"
+run 0 "tail -5 $B/2_Project_Files/fleet/state/_push.out"
 run 0 "grep -rn --include='*.md' foo $B/0_Brain/reference/2026-11-05_ks-lane-plan"
 run 0 "grep -n foo $B/0_Brain/reference/2026-11-05_ks-lane-plan/SUMMARY.md"
 run 0 "find $B/0_Brain/reference -maxdepth 1 -name '2026-11-05*'"
