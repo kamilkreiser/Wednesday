@@ -18,7 +18,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 - Head `5b008c848aa801ea9ce2ec661cc110a69c17ad91`: READY FOR QA, and its independent check = **GO WITH NOTES** (`m1_review/gate_W_DAEMON_verdict.md`, read whole).
 - PC runs 3 of 3 used; run 3 (WO-6) all green AT 5b008c8, including Ctrl-C twice.
 - **NOW: ADDENDUM-8 notes round** (docs/comments/BACKLOG only, plus one usage string and Q-A's kit `EXPECTED` line with a `build.sh` run showing `BUILT coagentd`). Expected last line `READY FOR MERGE CHECK W-DAEMON`.
-**On that line, Friday:**
+**UPDATE 19:08: READY FOR MERGE CHECK at 33371921670acfcb6fc7634d0c4eacafa9800a8d; comment-only proof VERIFIED by Friday; merge check RUNNING (bg; /private/tmp/claude-501/mcwd1, out mcwd1.out; re-run with a NEW short dir after a seat death).** **On that line, Friday:**
 1. Verify the comment-only proof yourself in a scratch clone: `git diff 5b008c8 <head> -- '*.rs'`, code lines filtered out except the one usage-string hunk; the kit diff = one line.
 2. Run the clean merge check: `bash <FRIDAY>/2_Project_Files/friday/coagent_merge_check.sh /private/tmp/claude-501/mcwd1 w-daemon <head> scripts/red-controls-daemon.sh` (bg shell; ~2.5 h; baseline at 1aa4629 = 1,440/0/21/193, so expect 1,453 over 196; watch for the known U-D4 differential flake under load: re-run it alone before believing).
 3. Merge GO addendum (model `2026-11-22_coagent_AUDIT-HOST_ADDENDUM-3_merge_GO.md`), then ls-remote, tell Kam, close %68.
