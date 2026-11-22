@@ -1,0 +1,27 @@
+A new folder Registration/ in the Universal Print library and in its
+test project. RegistrationKeys makes an RSA-2048 key pair and a PKCS#10
+signing request (SHA-256, PKCS#1 v1.5, no extension) per registration,
+keeps the private key only as one record of the secret store, named
+uprint/ plus a random 32-hex id, and hands out the id, the request and
+the public key; no public member returns the private key. An issued
+certificate is kept in the same record only when it is exactly one DER
+certificate, carries the stored key, lies inside its window on the wall
+clock and chains to a configured issuer (custom root, no revocation
+check, no download, every status flag clear, at least two elements);
+with no issuer configured every certificate is refused, and a
+certificate is attached once. DeleteRegistration deletes the record.
+CloudDeviceTokenHolder holds one device token per registration in
+memory, renews it at 90% of its lifetime on the monotonic clock or after
+Invalidate with a copy of the held token, one bounded issuer call at a
+time, through an interface whose real implementation is later work.
+
+The second commit reads the public key and both validity dates inside
+the parse rule (a platform that parses them late refuses such bytes as
+malformed) and treats any failure of the chain build as not trusted.
+
+The library references the secret store; the restore rewrote four lock
+files by project entries only. No package, solution line or workflow
+changes. 54 new tests. Nothing calls Universal Print or any other
+service; nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
