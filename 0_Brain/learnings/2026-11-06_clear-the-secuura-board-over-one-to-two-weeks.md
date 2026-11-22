@@ -4,7 +4,7 @@ type: grant
 source: Kam, live board 2026-11-06 10:18:02 + 10:19:24 AEDT, view=wednesday
 status: live
 tier: W
-expires: EVENT — the Secuura board is clear; outer read Friday 2026-11-20 (two weeks), then re-ask
+expires: EVENT — the Secuura board is clear; outer read Friday 2026-11-27 (RENEWED by Kam 2026-11-19 16:49:14, card secuura-board-grant-reask-1119 = a, verbatim "Renew to Fri 27 Nov and run the queue now"; first outer read was Fri 2026-11-20), then re-ask
 ---
 
 # Grant: clear the Secuura board over the next one to two weeks — In Review and In Progress first; complete, merge, archive, and keep going until the board is clear
@@ -21,7 +21,7 @@ Baseline, Wednesday's paginated Linear read 2026-11-06 ~10:20 AEDT (team KS, sta
 1. **Order:** In Review, In Progress, then Todo and Backlog easy to hard.
 2. **"Clarify the board" is a deliverable of its own:** a per-ticket census with a reason per ticket, so each ticket is either in a named lane or has a named reason it is not.
 3. **"Until the board is clear" does not mean closing tickets to reach zero.** Done still means tested + works + deployed on kintsugi (the 2026-10-12 rule). A ticket with no live check possible stays open and is listed.
-4. **Time:** "1-2 weeks" read with an end EVENT (the board is clear) and an outer date of Friday 2026-11-20 (`date -j`: Friday). After that date, re-ask; do not renew by inference.
+4. **RENEWED 2026-11-19 16:49:14 (Kam, live board, card secuura-board-grant-reask-1119 = a): "Renew to Fri 27 Nov and run the queue now". Outer read is now Friday 2026-11-27; the 11-20 sentence below is the original reading, kept.** Original: **Time:** "1-2 weeks" read with an end EVENT (the board is clear) and an outer date of Friday 2026-11-20 (`date -j`: Friday). After that date, re-ask; do not renew by inference.
 
 **How to apply:**
 1. Every morning card carries the count against this baseline, by state, from a paginated read.
