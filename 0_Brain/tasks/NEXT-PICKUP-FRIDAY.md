@@ -12,7 +12,27 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
-## 🟥 CURRENT STATE — Sun 2026-11-22 ~15:15, the 70% checkpoint (seat on Opus, new account; usage low). READ THIS FIRST.
+## 🟥 CURRENT STATE — Sun 2026-11-22 ~19:05, written at 77% for the ROTATION (seat on Opus, new account; usage ~11%). READ THIS FIRST.
+
+**CoAgent main = `1aa4629b15881096b4a122da20bcbcb24bcf76a7`.** ONE lane open: **W-DAEMON %68** (Opus; brief `briefs_drafts/2026-11-21_coagent_W-DAEMON_brief.md` + ADDENDUM-1..8, all 2026-11-22 except the brief).
+- Head `5b008c848aa801ea9ce2ec661cc110a69c17ad91`: READY FOR QA, and its independent check = **GO WITH NOTES** (`m1_review/gate_W_DAEMON_verdict.md`, read whole).
+- PC runs 3 of 3 used; run 3 (WO-6) all green AT 5b008c8, including Ctrl-C twice.
+- **NOW: ADDENDUM-8 notes round** (docs/comments/BACKLOG only, plus one usage string and Q-A's kit `EXPECTED` line with a `build.sh` run showing `BUILT coagentd`). Expected last line `READY FOR MERGE CHECK W-DAEMON`.
+**On that line, Friday:**
+1. Verify the comment-only proof yourself in a scratch clone: `git diff 5b008c8 <head> -- '*.rs'`, code lines filtered out except the one usage-string hunk; the kit diff = one line.
+2. Run the clean merge check: `bash <FRIDAY>/2_Project_Files/friday/coagent_merge_check.sh /private/tmp/claude-501/mcwd1 w-daemon <head> scripts/red-controls-daemon.sh` (bg shell; ~2.5 h; baseline at 1aa4629 = 1,440/0/21/193, so expect 1,453 over 196; watch for the known U-D4 differential flake under load: re-run it alone before believing).
+3. Merge GO addendum (model `2026-11-22_coagent_AUDIT-HOST_ADDENDUM-3_merge_GO.md`), then ls-remote, tell Kam, close %68.
+**THEN C1 (the first Mac-to-Windows link):**
+- Read plan 15 section 2.4 and `preview/demo/windows.md` / `lan.md` at the new main.
+- Stage a WO for the PC: guest `coagentd.exe` dials out to a relay the Mac hosts on the home network (Kam ruled a "Yes, for each Windows test session").
+- Mac side: who runs the host? Not Friday's hands (manage, don't do): a small seat or the PC run's instructions plus Kam.
+- Card Kam for ~30 min at the PC.
+**FOLLOW-UP lane (not started; after the merge):** N-1, N-3, N-4 code tightenings + WINDOWS-FINDINGS.md (root `.gitattributes` eol=lf, relay test platform tolerance, cli test gating, a cargo fetch before the hygiene test, audit timing). Brief it, then launch on Opus.
+**Windows PC:** acts on mail by itself now (it picked up WO-5 unprompted). Work orders WO-1..WO-6 are in `briefs_drafts/2026-11-2x_windows-pc_WO-n_*.md`; results are in `reference/…/windows/`. Bundles are made in the scratch clone `/private/tmp/claude-501/wb/clone` (fetch the SHA from the project repo; `git bundle create`). Send with an attachment from `friday-laptop-agent@`.
+**Watches (die with the seat):** `watch_any.sh` STATUS_W_DAEMON; `mail_watch.sh` (scratch). Re-arm both after a rotation. Panes holding by design: `wake_ack.sh %N` once.
+**No card open.** Kam was told: merge likely late tonight, C1 tomorrow.
+
+## (superseded) 🟥 CURRENT STATE — Sun 2026-11-22 ~15:15, the 70% checkpoint (seat on Opus, new account; usage low). READ THIS FIRST.
 
 **CoAgent main = `1aa4629b15881096b4a122da20bcbcb24bcf76a7`** (five merges 21-22 Nov). **One lane open: W-DAEMON %68** (Opus; brief `briefs_drafts/2026-11-21_coagent_W-DAEMON_brief.md`, addenda 1-4). Its Mac finals at `07a9d134552f0336315da1408853339c30f4d64d` are done (check.sh 1,453/0/21/196; red 151/151). Its STATUS last line = `RUN ON PC REQUEST: 07a9d13 …` (PC run 2 = its READY candidate).
 **UPDATE 16:5x: PC RUN 3 (WO-6) ALL GREEN at 5b008c8 incl. Ctrl-C twice; ADDENDUM-7 delivered; card closed. Waiting for W-DAEMON host runs at 5b008c8 -> READY FOR QA W-DAEMON -> launch the STAGED QA (command in this block).** **UPDATE 15:3x: WO-5 done (26/0; junction PASS; Ctrl-C A1 FAIL, A2 PASS). The seat found the arming gap and fixed it at 5b008c848aa801ea9ce2ec661cc110a69c17ad91 (ADDENDUM-5/6). PC RUN 3 = WO-6 MAILED for 5b008c8 (Ctrl-C twice, watched); card general-c2c-wdaemon-ctrlc-twice-1122 for Kam. One extra PC run allowed if host runs at 5b008c8 force a new head. On WO-6 results: ADDENDUM-7 quoting everything whole; then READY -> launch the staged QA.** (older:) **PC run 2 = WO-5, mailed 15:10** (bundle sha256 FA7EE10E…; 3 commands + junction by the helper + ONE Ctrl-C by Kam). **Kam is AT THE PC now** (15:11 "typed and now watching PC"; card general-c2c-wdaemon-ctrlc-at-pc-1122 ruled a). Results come as "[Windows agent - Friday] WO-5 results" (mail_watch armed): then write W-DAEMON ADDENDUM-5 quoting EVERY result line, failures whole and ctrlc.log whole (model: ADDENDUM-3); the seat then writes READY FOR QA W-DAEMON.
