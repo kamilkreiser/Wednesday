@@ -22,7 +22,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 1. Verify the comment-only proof yourself in a scratch clone: `git diff 5b008c8 <head> -- '*.rs'`, code lines filtered out except the one usage-string hunk; the kit diff = one line.
 2. Run the clean merge check: `bash <FRIDAY>/2_Project_Files/friday/coagent_merge_check.sh /private/tmp/claude-501/mcwd1 w-daemon <head> scripts/red-controls-daemon.sh` (bg shell; ~2.5 h; baseline at 1aa4629 = 1,440/0/21/193, so expect 1,453 over 196; watch for the known U-D4 differential flake under load: re-run it alone before believing).
 3. Merge GO addendum (model `2026-11-22_coagent_AUDIT-HOST_ADDENDUM-3_merge_GO.md`), then ls-remote, tell Kam, close %68.
-**THEN C1 (the first Mac-to-Windows link):**
+**THEN C1 (the first Mac-to-Windows link):** **DRAFTS READY (20:1x, by an in-session agent, NOT yet read by Friday): `briefs_drafts/2026-11-23_C1_first-link_plan_DRAFT.md` (140 lines) and `…_windows-pc_WO-7_C1_guest_DRAFT.md` (67). READ BOTH WHOLE before issuing.** Its key calls:
+- The invitation line holds the link secret, so it NEVER goes in mail: Kam types or pastes it into a join.cmd on the PC.
+- The Mac side is run BY KAM from a 3-command sheet (relay, host daemon, invite); Friday runs only ctl status/messages against /private/tmp/c2c-c1.
+- The Mac at draft time: 192.168.7.98/22 on Wi-Fi, firewall off. Re-read it on the day.
+Settle BEFORE the session:
+1. the PC's route to the Mac (Wi-Fi 192.168.4.23 vs Ethernet 192.168.1.12; the /22 mask);
+2. how the ~300-char line crosses (a USB file or retyping; same room?). A loopback dry run on the Mac tonight would measure it;
+3. cmd JSON quoting ("{\"v\":1…}" form, never run);
+4. macOS host binaries from merged main in scratch, and a possible macOS "local network" prompt;
+5. D1: the host runs WITHOUT --gate (no agent on the Mac in C1).
+`windows.md` is stale in places (listed in the plan) for the project to fix later.
 - Read plan 15 section 2.4 and `preview/demo/windows.md` / `lan.md` at the new main.
 - Stage a WO for the PC: guest `coagentd.exe` dials out to a relay the Mac hosts on the home network (Kam ruled a "Yes, for each Windows test session").
 - Mac side: who runs the host? Not Friday's hands (manage, don't do): a small seat or the PC run's instructions plus Kam.
