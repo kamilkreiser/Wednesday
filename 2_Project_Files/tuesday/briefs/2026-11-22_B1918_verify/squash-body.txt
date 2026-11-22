@@ -1,0 +1,15 @@
+The red push run 45001737294 of main failed F13 on linux: its scripted
+refresher gave its two answers in the order in which the calls reached
+their answer, so a preempted timed-out call let the live second call
+take the late answer, which the broker legally kept. F13 now keys its
+answers on the call's index, so the late answer is always the timed-out
+call's. A new F13 cell holds the timed-out call, through a test-only
+seam of the fake refresher, until the second call has started its
+answer, so that interleaving runs on every run; it fails against the
+old arrival-order answers. The fake refresher records a call before it
+counts it, inside its one lock.
+
+Test-only: no file under src/, no package, project, lock or workflow
+change. One new test. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
