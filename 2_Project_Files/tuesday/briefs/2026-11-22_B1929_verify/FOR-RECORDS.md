@@ -1,0 +1,8 @@
+# B1929 FOR RECORDS (reader 2, D5 and D7; I wrote none of these into the project)
+
+1. **Backlog, fix forward (R2-1, LOW):** the `Audit` event should call each subscriber in its own try, so that one subscriber that throws cannot hide a binding refusal from the audit sink. Also add a cell with the throwing handler subscribed FIRST (B07 subscribes it second). Evidence: probe P05.
+2. **Backlog, fix forward (R2-2, LOW):** refuse `Guid.Empty` as a card user's object id and as a token object id. Cell: P01 and P01b as refusals.
+3. **README `## Limits` gains a line (I-4):** "`MaxTapAge` bounds the wait from arrival to the tap's turn, not the time until it takes effect: after the check, each step (lookup, sign-out of a switch, acquire, printer sign-in) may take up to `StepTimeout`, so a tap can take effect up to about `MaxTapAge` + 4 x `StepTimeout` after it arrived."
+4. **Backlog, a choice for Tuesday (I-1):** an option to refuse a grant whose access token is already disposed or empty BEFORE the printer is told (today the broker refuses it after the printer's sign-in, with one sign-out).
+5. **Backlog, the D7 named limit, its cost stated:** a re-delivered tap after an outage can sign an absent card user in on an unattended printer, or SWITCH the person standing at the printer to the absent user, or sign the same user out. The binding rule still holds (only the card's own user). It is caught later from the outage record or the read-sequence restart, after spike S1 (UNMEASURED whether and how a printer re-delivers).
+6. **Runbook:** the reader-2 probe file (`evidence/ZProbes.cs.txt`, 25 cases) can serve as a starting set of adversarial cells for D5 and D7 in a later round. P08 must accept both legal D8 orders.
