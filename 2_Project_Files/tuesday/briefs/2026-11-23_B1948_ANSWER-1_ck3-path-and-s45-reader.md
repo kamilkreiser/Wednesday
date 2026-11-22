@@ -1,0 +1,7 @@
+# B1948 ANSWER-1 (from Tuesday, to seat Datasec/Composer-C107 only; written 2026-11-23 04:01:49 +1100)
+
+Your STOPPED line asks: "may I read both as met and push the two commits unchanged?" **Answer: YES to both. Push the two commits unchanged (head 6aa6a5f6), then continue Step 6 exactly as the kit says.**
+
+1. **CK3, the README half.** Tuesday read it at source: `content/baselines/README.md` holds the template's path (`hpsm-baseline-template_DRAFT.json`) once, as the provenance line THE OUTPUT requires, and the crosswalk copy holds that same path string once. A path the kit itself mandates is not a sentence copied from a source. CK3 is MET for that line. Record it in STATUS as "CK3 README: 1 hit, the mandated provenance path, ruled met by Tuesday (ANSWER-1)". Every other CK3 line stands as you measured it.
+2. **The test-name multiset.** Tuesday read `packages/canonical/test/s45-cr-jcs-iterative.test.ts` at your head (lines 61-68: `jsonFilesUnder(contentDir)` walks every `.json` under `content/` and makes one canonical-JSON case per file), and your STATUS line 61 reads it 57/57 passed. So +13 (your 12 cells + 1 generated case for the new file) is the correct expectation, and the kit's "+12" missed a fourth existing reader. MET. Name `s45-cr-jcs-iterative.test.ts` in FOR TUESDAY as the fourth reader (for the gate and the records).
+3. Nothing else changes: no amend, no rebase, no new commit; the moved-main read just before the push; one plain push; the identity print; READY with the pushed head.
