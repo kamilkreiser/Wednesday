@@ -1,0 +1,28 @@
+THIS LANDING IS NOT A CONTENT RELEASE AND NOTHING DEPLOYS. The squash adds three files and changes no release file.
+The instrument every deploy order runs (rc 1 = changed release = REFUSE) must read rc 0 across this squash:
+  git diff --quiet 3638da611ce8483628b03b2550367b6eb15aa69c <new main> -- content/release-demo content/release-draft
+The reviewer re-measured the four release blobs at the pinned head against main: content/release-demo/CONTENT_HASH 23cd95f58dd0ceabecac0c3f5796aeba9b0edd62, content/release-draft/CONTENT_HASH 09d597c64f07d19c98aeb0859086499ea74300b7, content/release-draft/bundle.json 3ed9445ba35faed5f7e821161a58c8e9f54c931d, content/sources/SOURCES.json 30269393179065c9f023e0f0a0081cb9e8dd1449: each equal at both.
+What the live demo runs was NOT measured (no request to a hosted site).
+
+LANDING (coordinator's steps; the reviewer ran none of them). Who decided: the coordinator, on the coordinator's own gate. No text in this folder says the product owner decided anything about this lane.
+Pinned head: 6aa6a5f6ad56a41615fcd570af27cdbb8c8eb4d0 (tree 15701455d198fe479b878a0b85c098b88491cfca), base main 3638da611ce8483628b03b2550367b6eb15aa69c (tree e9ded89d6e2137a126525b0304f2a71d8c7d456a). The branch has no pull request yet; the head is pushed (remote ref equals the pin, read by GitHub API 2026-11-23).
+0. Re-read immediately before opening: refs/heads/b1948/composer-cw2-baselines == 6aa6a5f6ad56a41615fcd570af27cdbb8c8eb4d0; refs/heads/main == 3638da611ce8483628b03b2550367b6eb15aa69c (else apply MAIN MOVES below); open pull requests 0.
+   If the head moved: STOP. A head nobody reviewed is never landed. Never "update branch" (it adds a commit and moves the head).
+1. Open the pull request from the branch to main with pr-title.txt and pr-body.md (files in this folder). Read the check runs on the head: CodeQL, Analyze (csharp) and Analyze (javascript-typescript) each completed success; open code-scanning alerts on the pull request's ref = 0. Poll until completed; a missing or failed check is a STOP, never bypassed, no alert dismissed. Re-read pulls/<n>: head sha == the pin, mergeable_state clean.
+2. Merge, from this folder's two text files (main's newest squash subject ends with its pull request number; append yours):
+   gh pr merge <n> --repo datasecau/Datasec-Security-Composer --squash --match-head-commit 6aa6a5f6ad56a41615fcd570af27cdbb8c8eb4d0 --subject "$(cat squash-subject.txt) (#<n>)" --body-file squash-body.txt
+   (--match-head-commit makes GitHub refuse the merge if the head moved. Do not pass --delete-branch.)
+3. Read after the merge:
+   - pulls/<n>: merged true, merge_commit_sha = <new main>.
+   - refs/heads/main = <new main>, one parent 3638da611ce8483628b03b2550367b6eb15aa69c; tree of <new main> == 15701455d198fe479b878a0b85c098b88491cfca (when main did not move).
+   - git diff --name-only 3638da611ce8483628b03b2550367b6eb15aa69c <new main>: exactly content/baselines/README.md, content/baselines/default-baseline.json, packages/content/test/b1948-cw2-baselines.test.ts.
+   - the stored message of <new main>: subject == squash-subject.txt plus the number suffix, one Co-Authored-By trailer; scans for a word-bounded B-number (\b[Bb]\d{3,4}\b), PCOMP, a person's name, a seat id, a card id, the words "ruled", "ruling", "approved by": 0, each with a planted control.
+   - git diff --quiet 3638da61... <new main> -- content/release-demo content/release-draft -> rc 0 (record it).
+   - check runs on <new main> (poll until completed; the Analyze legs completed success) and open code-scanning alerts on refs/heads/main (expected 0).
+4. Nothing deploys. No release is cut. The examples are not rebuilt. The head branch is kept.
+
+MAIN MOVES (read refs/heads/main at step 0, again before the merge): if it is no longer 3638da61, ALL THREE must pass or STOP and re-gate:
+ (1) git diff --name-only 3638da61 <new main> names nothing under content/, packages/content/, packages/engine/test/, packages/db/migrations/, nor vitest.config.ts, .prettierignore, eslint.config.js, package.json, package-lock.json, docker/Dockerfile, scripts/ci.sh;
+ (2) the new main's content/release-draft/bundle.json blob == 3ed9445ba35faed5f7e821161a58c8e9f54c931d (else the file's item and field keys are stale);
+ (3) no other open pull request's file list holds a path of the three.
+If all three pass the reviewed head still stands (a squash of the same three files onto the moved main); the squash tree then differs from 15701455, so step 3's tree line becomes "new main's tree == the tree of <moved main> plus the three files" (compare file by file). The reviewer's runs were at base 3638da61 only; a move that touches anything listed in (1) voids them.

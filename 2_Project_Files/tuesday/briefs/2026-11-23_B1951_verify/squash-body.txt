@@ -1,0 +1,23 @@
+Adds content/baselines/default-baseline.json (format pc-baselines/1, status
+DRAFT) with its README, and one test that pins the file's shape.
+
+The file holds, for each of the 132 template rows: class, default severity,
+remediation, unsupported handling, the bundle items the row covers, and for
+each of the 28 variable rows the control decision that sets it. It also holds
+one entry per bundle field a row takes (350 of the 351 fields), with a target
+and the rule that gave it. Only 4 of the 34 boolean fields carry a value; 16
+sit on variable rows ("variable") and 14 wait for a reading of the template.
+33 remediation states and 21 plain-enable rows stay null with a flag. No
+sentence of any source is carried: every string but the title is free of
+whitespace.
+
+The values are derived, with the template and crosswalk cited by path and
+sha256 in the file. Nothing in the product reads the file. The existing
+canonical-JSON test over every content file now has one more case for it, and
+the engine fixture fence and secret scan walk it.
+
+Both CONTENT_HASH files, release-draft/bundle.json and content/sources are
+byte-identical to main, so this is not a content release and a deploy from
+this commit ships the same release as main.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
