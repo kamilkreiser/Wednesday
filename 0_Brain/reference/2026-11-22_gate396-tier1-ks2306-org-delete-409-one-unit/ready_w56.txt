@@ -1,0 +1,59 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-22T06:49:18.000Z
+Subject: [Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-2306 (Seat W 56th)
+---
+Seat W 56th
+READY FOR GATE KS-2306. TIER 1 (a data-destroying path; Opus gate, G1).
+
+PR 2272: https://github.com/Secuura/Distributed_Secuura/pull/2272
+- Head fd178433fc4f6615e191a698a0c9424fbcd462b8: ONE commit on develop 302361a30209334ad6f6fbfbab3082984fde2342 (PR 2271's squash, the BRIEF's D).
+- 5 paths, exactly the ruled list: adminConfig.ts; the new cell file ks2306-organisation-delete-is-one-unit-and-refused-while-users-remain.test.ts (19 cells); KS-2302's test file (P1 and the mock only); two fragments. +341 -23.
+Push: 06:33:59Z to 06:47:57Z (838 s), rc 0, VERIFIED at 06:48:00Z (push/out_real/status.txt). Pre-push preflight: 13/16 legs ran; legs 3, 4 and 8 SKIPPED (no local stack on 6882); nothing failed. That is not a pass of those three legs.
+PR read back: open, not draft, base develop, 1 commit, 5 files, +341/-23, title and body equal to the drafts (push/pr_record_ks2306.json).
+Facts comment on KS-2306: id defe7c85, 06:48:36Z, read back byte-equal; it names Kam's ruling (2026-11-20 18:49:24, card secuura-org-delete-with-users-ks2306-1120, "a — Refuse while users remain").
+Develop at this mail: 302361a30209 (gh api 06:48:44Z, unchanged since the BRIEF).
+KS-2306 reads In Progress (Backlog at my boot read). This seat did not move it, so Linear's GitHub link probably did.
+
+WHAT IT DOES (as ruled in your ANSWER 06:17:34Z):
+- One unit: runWithPlatformScope(() => withPlatformScopeTransaction(async (tx) => ...)), every statement on tx; none on the module client or through withTenant; db.ts unchanged.
+- In order: SELECT id FROM organizations WHERE id = $1 FOR UPDATE. No row: today's 200 'Not found', nothing deleted; the PR body states this as a behaviour change.
+- SELECT COUNT(*)::int AS n FROM users WHERE organization_id = $1. Above 0: 409 {success:false, error:{code:'CONFLICT', message:'Organization still has users'}}, zero deletes.
+- SELECT set_config('app.tenant_id', $1, true), then DELETE rights_holders, documents, organization_members, organizations.
+- Any throw rolls the unit back; fail500 as before.
+- ONE ADDITION beyond the plan, declared in my STATUS: an unreadable count (no row, null, not a number) throws, never reads as "no users". Number(null) is 0, so my first draft would have deleted on a null count. Cell C6 (three shapes) pins it; mutants M14 and M15 die on it.
+
+EVIDENCE (Test Evidence block in the PR body; REC evidence/):
+- Red first on D's code (measure tree at D, the two test files applied, handler untouched): 16 of 19 new cells red by assertion, 3 controls green (C5, PR 2269's guard). In KS-2302's file only the rewritten P1 is red (3 of 31). The headline C3 cell is red for the right reason on D: after the last statement fails, rights_holders (via withTenant), documents and members (module client) remain committed.
+- Green on the branch: 19/19 and 31/31.
+- Mutants (tools/mutants_ks2306_w56.py; evidence/matrix_dev1.json, matrix_dev2.json): 16 of 16 compiling KILLED, the control 50/50 first. M16 (has_users answered not_found at the source) fails TS2367 and is not counted; M16b (the 409 branch never taken) is its compiling form. One declaration slip of mine: I declared P1 would kill M5 (the count after the first delete), but P1 records queries and executes on separate mocks and cannot see the order. C1 and C2 kill M5.
+- Whole originate suite: dev D 3085/3085 (238 files); branch 3104/3104 (239). No failures on either arm. +19 tests and +1 file is exactly the new file; P1's 3 cells changed in place.
+- Static, each beside a planted control that fired: tsc 0; eslint 0/0 on all three originate files (dev arm adminConfig.ts 0/0 too); test-types check.cjs 0 new (333 files); fragments OK; check:openapi PASS. Ratchet pair (python subprocess cwd, no cd): 6 services OK; 48 passed, 0 failed.
+- Q4b real Postgres, OUTSIDE the PR (tools/pgprobe/, evidence/pgprobe/probe_out.txt; postgres:15 = 15.20; policy 027 verbatim, 039's template verbatim on organizations/users/documents; every unit run as secuura_app, non-owner, rolbypassrls f):
+  (i) bypass only: DELETE rights_holders removed 0 rows, the organisation was deleted, and 2 rights holders were left orphaned.
+  (ii) with app.tenant_id: 2 deleted, organisation B's row kept.
+  (iii) users FK present and a user, the four deletes without the 409: the FK error rolled everything back to the seed (1/2/1/1/1/1).
+  (iv) the user count reads 1 under the bypass and 0 with no setting.
+  Container w56-ks2306-pgprobe started with --tmpfs (no volume), then stopped and removed by name. docker ps -a and docker volume ls are byte-equal before and after (106 containers, 195 volumes; evidence/pgprobe/docker_ps_a_before.txt and _after.txt). No other container, volume or image was touched; nothing deployed was read.
+- Gatetest 06:33:04Z to 06:33:27Z: all gates passed; 18 open PRs, none on any of the 5 paths; planted overlap control PASS; no OVL_IGNORE_PRS.
+
+RESIDUALS STATED IN THE PR (not built):
+- R1: where the users FK is missing, a concurrent users insert by another service can still land between the count and the delete.
+- R2: the 5000 ms single-tenant Prisma timeout.
+- R3: other referrers still answer the generic 500 (now with nothing deleted); a 409 naming "dependent records" is unruled wording.
+- R4: the docker/init vs migrations FK drift = KS-2312.
+- R5: soft references keep their rows.
+
+FILED: KS-2312 (Medium, Backlog, facts only; board searched with 15 terms, 232 unique hits; KS-699 named as related, which you confirmed in your ANSWER of 06:38:37Z). No other ticket filed, no other comment posted.
+
+Faults, disclosed: the boot cd and the noisy census grep (both accepted). Since then:
+- Two of my own tools refused before writing and were fixed: derive2 v1 counted LINEAGE lines; apply v1's postcondition counted the handler's doc comment.
+- My own draft's Number(null) hole, caught before any run (above).
+- The M5 declaration slip (above).
+- Otherwise: no cd; lockless shared-checkout reads only, the shared checkout never written; no key in argv; moves only (the donor's foreign self-links into evidence/quarantine_links/, the measure tree's new cell file into evidence/moved_from_dev/).
+
+Trees: worktrees/s-w56-ks2306 (branch, clean at fd178433fc4f); worktrees/s-w56-dev (detached at D, porcelain 0); worktrees/s-w56-base (URL clone).
+If the gate returns findings: ONE new commit on this branch in s-w56-ks2306, no force push, with the existing-branch driver (W 50th's kit, re-keyed). Then re-run rg_ks2306_w56.py, mutants_ks2306_w56.py (dev tree with the cell files applied), static_ks2306_w56.py, suites both arms and the ratchet pair.
+Meter: 40.4 of 1M measured (tools/ctx_usage_w56.py), 44 min after launch.
+Nothing merged, deployed or closed by this seat. I keep the watcher armed for your word.
+
