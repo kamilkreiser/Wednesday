@@ -1,0 +1,38 @@
+Rule R6 of build/repo_rules.py refused a line that leaves a quoted value
+open at its end, but two spellings hid such a value from it: a quote
+opened after an expression in a plain key (a${{: "b }}), because the
+expression removal took the quote away, and a quote opened after a
+quote inside a plain key (k "x: "a), because the quote reading paired
+the two. A line outside a block scalar is now also refused when it
+holds an expression marker before its first colon and blank, and when
+a quoted scalar opens anywhere but at the line's first non-blank, after
+a sequence dash and a blank, or after a colon and a blank. The first
+refusal also closes a flow mapping hidden inside an expression in a
+key (a${{: {x: {permissions: write-all}}). Today's workflow is clean
+under both.
+
+Seven rows in existing planted controls: the two shapes in double and
+single quotes, each with quoted keys hidden below it, the hidden flow
+mapping, and two quiet lines (a quote inside an expression in a value,
+an expression after a colon inside a quoted value). No new test case:
+111 planted controls (FLOOR=111). The workflow file is unchanged.
+
+packaging/linux/Dockerfile names the base image by the digest the
+hosted linux job resolved for mcr.microsoft.com/dotnet/aspnet:10.0, so
+a later push of that tag no longer changes the image; a new base image
+is now a change of this line.
+
+The cost, stated plainly: outside a block scalar R6 now also refuses
+valid YAML that a person may write: a plain value with a quoted word
+after its first word (run: echo "x", if: a == 'b'), a key closed
+after an expression (a${{ x }}: b), a quoted value holding an
+expression and then a colon and a blank, a quoted value behind an
+anchor or a tag, and a comment line that holds an expression before
+its first colon and blank. Such a value is written inside ${{ }} or as
+a block scalar, and such a comment is reworded. Still not refused: a
+block indicator after an expression (key: ${{ x }} |).
+
+No product code, package, solution, lock or workflow file changes.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
