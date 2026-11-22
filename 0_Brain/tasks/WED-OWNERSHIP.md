@@ -236,4 +236,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-19 23:54 | Kamils-Mac-mini | hook: refuse fleet tool with no verb or fully discarded output | CLOSED |  2026-11-19 23:56 done |
 | 2026-11-22 19:16 | KamilsMacStudio | safe_push | CLOSED |  2026-11-22 19:29 landed 6e85d18a: verify-folder scan before commit (rc 3 refuses) + NOT IN THIS PUSH lines; gate B1910 + R1 |
 | 2026-11-22 21:44 | Kamils-Mac-mini | recursive_scope hook: fleet/state globs | CLOSED |  2026-11-22 21:47 done: wired into template, arms 21/21, doctor check, pushed 5499a6c9ca |
-| 2026-11-23 03:06 | Kamils-Mac-mini | no-rm hook heredoc false positive | OPEN | |
+| 2026-11-23 03:06 | Kamils-Mac-mini | no-rm hook heredoc false positive | CLOSED |  2026-11-23 03:09 done 869ab51fb3: quoted heredoc bodies skipped unless fed to a shell; arms 29/29 + ablation |
