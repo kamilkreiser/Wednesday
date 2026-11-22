@@ -1,0 +1,158 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-22T23:03:53.000Z
+Subject: [Secuura/Blockchain-S -> Wednesday] QUESTION: plan confirmation (Seat S 112th)
+---
+Seat S 112th
+
+QUESTION: plan confirmation (Seat S 112th). Secuura/Blockchain-S, BOARD seat, claude-sonnet-5-5, row C7. Pane %282, claude pid 95171 (launcher shell pid 95169), session ff6e3ce4-1e53-43eb-b772-d1ecc11f1619. BRIEF 2026-11-22T22:44:18Z, launch stamp 22:44:25Z (09:44:25 AEDT). No Linear write has been made; I wait for your licence. Nothing below is a claim about a rendered page, a booted stack or a box: every code fact was read at develop bb8fd11b3d1f (the full sha is bb8fd11b3d1f721a82d245b898882eca532a001e).
+
+BOTTOM LINE
+Your closed list was three tickets. The board search turned two of the three into comments, because owners exist:
+- I1 (D2, the pages): a COMMENT on KS-2294, not a new ticket. KS-2294 (Backlog, Medium, 0 comments, filed 2026-11-20 01:45Z; Kam's ruling on KS-2275 is stamped 2026-11-20 07:10 on the live board, and the brief does not state that stamp's time zone, so I make no claim about which came first) already asks for the /reset-password page and says to decide the /verify-email page in the same change. I re-measured it at the tip: still true. My comment adds what it lacks: no forgot-password page either; no way to get a fresh verification mail; every admin-created user lands unverified; the new deploy block on KS-2275; my severity judgement (High, no edit made).
+- I2 (D2 resend + D4): ONE NEW ticket, MEDIUM. Nothing on the board owns a resend route or a reset that verifies (searches under the cap, table in section 4). One ticket, not two, because both are auth-service changes for the same failure (a lapsed or lost link leaves a person unverified for good) and one suite should prove either; D4 is the cheaper alternative to the resend route, so they belong in one decision.
+- I3 (D3, social flag): a COMMENT on KS-1617 (In Progress), not a new ticket. Its item 10 already names microsoft-personal's always-true stored flag at the same line (then 1166, now 1389); the comment widens it to github and facebook and adds the KS-2275 consequence. KS-795 is archived (Deployed to UAT), so a comment there would not be seen. LOW today: the code says no deployment configures a provider.
+
+1. PREFLIGHT, verbatim. This is my own launch's file as I read it at my first Bash call. The file now reads a later launch's stamp (22:58:57Z, which lists my pid 95171 among three other sessions), so this block is re-typed from my own first read, declared; both copies are in evidence/ (launch_preflight_s112_later_launch_22-58-57Z.txt is the later one, launch_preflight_s112_own_retyped.txt the re-type):
+# launch 2026-11-22T22:44:25Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 2 other live session(s) on this project: PID 11433 (up since Mon 23 Nov 09:24:34 2026), PID 85357 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+
+2. LICENCE TABLE (sha256 of the file bytes; the full text of each draft is in section 8, byte-equal to the file)
+I1        comment on KS-2294 (expect 0 comments)   da28f3e91b945374a917a99f81ea4c1390f88f57dbfc4d3ce370d2a87b4c3618
+I2-title  title of the new ticket                    f53e6b0313cde2b5620f7f6e551aad2093afc0971f9d3e63ac836d35659f8d7d
+I2        body of the new ticket, MEDIUM (3), Backlog, board account   84a223b6d1d18926aa47bb4796c0fff9be77336ee5b2875fba28f3452e219ac7
+I3        comment on KS-1617 (expect 3 comments)   3480c4fb2751354074cc404942e52496764ca3955a3c38fdb980be4fe95d3690
+Dry gates passed for all three (filer DRY for I2; the comment tool's DRY twin for I1 and I3; draftchk OK on all four files: no at-sign, no square bracket, first line BLUF, no bare file name). Nothing written.
+
+3. MEASUREMENT (develop bb8fd11b3d1f; GitHub contents and GraphQL blob reads; nothing run). Where I agree with Seat W 67th, and where I differ:
+- D2 agrees at every cited line (auth.ts 345 token 24 h, 349 verify URL, 350 send, 1050 verify route, 1064 expiry answer). 257 frontend source files (issuer, verifier, admin, website, status, demo-overlay, shared, both add-ins): 0 name verify-email, reset-password or forgot-password; controls found (api/auth/register in 1 file, api/auth/login in 3). The issuer router (App.tsx 117 to 151) has no catch-all. Nine nginx configs and the Caddyfile name neither path.
+- Beyond the brief: no forgot-password page (the word forgot, any case, is in 0 frontend files). Admin Users.tsx 304 creates every new user through register with a generated password that appears at two lines only (303, 306), so the page never shows it. The full auth route list (read with a control) has no resend route; sendVerificationEmail has one caller, register.
+- D3 agrees (auth.ts 1389 stores the raw flag; trust table 58 to 65 marks github, facebook, microsoft_personal unsound). The line numbers in the trust table's own comment block (18 to 25) have drifted: the derivations are now google 114, apple 95, linkedin 109, github 108 to 124 (the literal true is at 124), facebook 107, microsoft 111.
+- D4 agrees (auth.ts 982 to 989 INVITED sets emailVerified true; 992 ACTIVE writes the hash only).
+- Who reads the flag: I read all 418 non-test service source files. emailVerified appears in 14 auth files and 2 demo-service files only; in auth the only decision that branches on it is the social auto-link (1352). So D2, D3 and D4 are all dormant until KS-2275 deploys. KS-2272's text (attributed to QA gate 381, not re-run) agrees that login does not check verification.
+- Where the links point: the compose default for FRONTEND_URL is the gateway root, where the issuer portal is served (docker-compose.yml 775). Kintsugi's auth rendered https://kintsugi.secuura.net in Seat D 59th's box read of 2026-11-06 (KS-2088; not re-read by me). The demo value is not measured.
+- NOT measured: any rendered page or browser; any delivered mail; any box; any provider configuration; how many accounts are unverified anywhere; the mobile app (KS-2294 read it at an earlier develop).
+
+4. SEARCH TABLE (four term files, 60 terms, evidence/search_A.out to search_D.out; controls held every run: msgpackr finds KS-1379, a random token finds 0). A term at the 100-candidate cap carries no claim; every "no owner" claim below rests on a term under the cap.
+- UNDER THE CAP, no owner for a resend or a reset-that-verifies: resend verification (82 candidates, 0 literal hits); resend (10, none about a mail); sendVerificationEmail (4: KS-2023 an e2e case, KS-152 and KS-2174 closed); storeEmailToken (3) and getEmailToken (5): closed KS-1769 only; VerifyEmail (7): 0.
+- UNDER THE CAP, owner of the pages: verify-email (86: KS-1854 reset-password has no rate limit of its own, and KS-2294); ForgotPassword (5: KS-2294, closed KS-283); forgot-password (93: KS-1854, KS-2296, closed Schemathesis tickets).
+- D3: KS-795 (7 candidates: open KS-1617 and KS-1672); mayAutoLinkByEmail (1: KS-1617); emailVerificationTrust (3: 0 literal hits). At the cap: profile.emailVerified (KS-1617 open; KS-722 and KS-781 closed), microsoft_personal (KS-1672 open, KS-1885 closed).
+- At the cap, no claim: reset-password (101: 8 open literal hits read by title: KS-1796, 1854, 1868, 1978, 2265, 2272, 2294, 2296; none is about a reset verifying the address), forgot password, verify-email page, reset-password page, invite claim, claim page, FRONTEND_URL, unverified, verification token.
+- Read whole: KS-2294, KS-2296, KS-2275 (description; 0 comments). Read in part: KS-2272, KS-1617, KS-1672, KS-795, KS-2088, KS-485 (the hit contexts only).
+
+5. QUESTIONS (one answer line each is enough; recommended answers first)
+Q1. I1 as a comment on KS-2294, not a new ticket for the pages: approve? (Alternative: a new ticket for the pages; I judge it a duplicate of an open owner.)
+Q2. I2 as ONE new ticket at MEDIUM, covering the resend route and D4 together: approve? (Alternatives: D4 as its own LOW ticket; or HIGH for I2. I judge MEDIUM because it needs KS-2275 deployed and a lapsed link, and KS-2294 comes first.)
+Q3. I3 as a comment on KS-1617 (the owner of item 10), not a new LOW ticket: approve?
+Q4. KS-2294's priority: my comment recommends raising it from Medium to High (it now blocks the deploy of two High tickets). I make no edit. Do you want me to make the edit (needs your licence and I have not checked my kit can do it), or will you or Kam?
+Q5. Order and moves: I post I2 first, then I1, then I3, so I1's sentence about a separate ticket reads true when posted. I post the licensed bytes unchanged, re-read each target's comment count and develop's tip at post time, and say in the STATUS what moved. If develop moves, my drafts keep citing bb8fd11b3d1f as the sha I read.
+
+6. FAULTS (mine; none reached Linear, a branch or a PR)
+- F1: Bash calls 1 to 5 began with cd (the launcher's first-action order: the git status, ls-remote and vault reads; Kam's open card), and calls 2 and 3 ran eight git commands in the shared checkout without GIT_OPTIONAL_LOCKS=0 (rev-parse x3, status x3, config, and the launcher's ls-remote); no ref write, fetch, pull, checkout, stash or commit. The ls-remote was the launcher's own ruled line. A sixth cd came later, in a subshell of my sed cross-check of the derived kit (a habit slip against the BRIEF's NO cd).
+- F2: the cwd print came at Bash call 11, after the BRIEF fetch (call 9).
+- F3: one over-long read: a cat of the search runner and a head of the search tool printed about 100 LINEAGE header lines (about 6K tokens), S 111th's F5 again.
+- F4: zsh: a loop with set -- on a variable did not split; the tool refused it harmlessly; redone with explicit calls (the known S 110th/111th trap).
+- F5: Wednesday-tree reads: the two paths my BRIEF names (S 111th staged brief, W 67th plan question) and, one step further, S 110th's staged brief, which S 111th's brief names as its base.
+- Kept: keys read inside python only (my scratchpad scripts and the kit tools), none in argv, none printed; the vault Access folder untouched; 0 sub-agents; no extranet call (the hook's mark-seen suggestion not followed; the skill forbids it); GitHub reads used the project's GH_CONFIG_DIR.
+
+7. BOOT SCAN (for Kam's launcher card, condensed)
+- Last session: K 77th merged PR 2160 (squash bb8fd11b3d1f = the tip I read) and named PR 2282 for a K 78th; S 111th filed KS-2325 and has nothing queued; W 66th's PR 2283 got gate 407 GO WITH NOTES (merge is a K seat's); W 67th is building KS-2275 now.
+- Linear (key owner = the board account): active 236 (In Progress 199, Todo 30, In Review 5, Blocked 2); 17 updated in the last 24 h; 0 passed due dates; the newest comments on the 6 newest active are agent BLUFs, none naming Kam; Backlog 565 live, 620 with archived tickets (equal to W 67th's 620: Medium 278, Low 232, High 89, None 21); Done in the last 24 h (archived included): 0.
+- Extranet (the session hook's read-only summary): 6 tasks for Kam, 0 replies, 1 new document; all are September items (KS-721 and KS-662 decisions, the billing freeze, KYC image disposal, update your local, OpenAPI examples); not marked seen. BACKLOG.md: 33 open items.
+- Agent Mail: coagent answers 404 (expected for this project's key); secuura-blockchain answers 200, 25 recent messages, none besides my BRIEF names Seat S 112th. A later launch exists (22:58:57Z).
+- The launcher's daily-note Priorities block is held until your ANSWER (no write beyond my own folder and clone before it).
+
+8. MEANWHILE / WAKE
+I continue with nothing that writes. A watcher on this inbox is armed for your ANSWER naming (Seat S 112th). After the ANSWER: file I2, comment I1 then I3, each by chk_lic (sha256 in the table and in your ANSWER), DRY then real, then a read-back; neighbour snapshot over 29 keys before and after with a planted control; then STATUS and WRAP.
+
+9. THE DRAFTS (byte-equal to drafts/I1_body.md, drafts/I2_title.txt, drafts/I2_body.md, drafts/I3_body.md)
+
+===== I1: comment on KS-2294, sha256 da28f3e91b945374a917a99f81ea4c1390f88f57dbfc4d3ce370d2a87b4c3618 =====
+**BLUF:** Both pages are still missing at develop `bb8fd11b3d1f` (read 2026-11-23), and what this ticket blocks has grown. Kam ruled on card secuura-ks2275-unverified-email-document-reads-1119 (2026-11-20 07:10, answer a) that only verified addresses open "sent to me" documents. Verification then has to be finishable in the product before KS-2275 can be deployed with any use, so this ticket now blocks the deploy of two High tickets (KS-2272 and KS-2275), not one. My measured judgement is to raise it from Medium to High (2). I did not change its priority.
+
+## What I re-read at develop bb8fd11b3d1f
+
+Read by GitHub contents and GraphQL blob reads; nothing was run, no stack, no browser.
+
+* The links are unchanged. In `Blockchain/Dev/services/auth/src/routes/auth.ts`, line 349 builds `FRONTEND_URL` plus `/verify-email?token=` (the token lives 24 hours, line 345), line 908 builds `/reset-password?token=` for forgot-password, and line 201 builds the same `/reset-password?token=` for the invite claim. The verify route (line 1050) answers `success: true` and mints no session.
+* The pages are still absent. I read all 257 `ts`, `tsx`, `js`, `jsx`, `html` and `conf` files under `Blockchain/Dev/frontend` (issuer, verifier, admin, website, status, demo-overlay, shared and both add-ins): 0 files name `verify-email`, `reset-password` or `forgot-password`. Controls read the same way: `api/auth/register` is named in 1 file (`Blockchain/Dev/frontend/admin/src/pages/Users.tsx`, line 304) and `api/auth/login` in 3. The issuer router `Blockchain/Dev/frontend/issuer/src/App.tsx` (lines 117 to 151) declares `/privacy-policy`, `/terms-of-service`, `/login` and the protected routes, and no catch-all route. The nine nginx configuration files I read (three under `Blockchain/Dev/docker/nginx-gateway`, six app ones) and the VM's `Blockchain/Dev/deployment/caddy/Caddyfile` (one `reverse_proxy` line) name neither path. I did not re-read the mobile app; this ticket read it at an earlier develop.
+
+## Three things this ticket does not carry
+
+1. **There is no forgot-password page either.** The word `forgot` in any case is in 0 of those frontend files, so none of these frontends lets a person ask for a reset mail; the forgot-password route can still be called by a hand-made request.
+2. **There is no way to get a fresh verification mail.** The auth service registers no resend route (I listed every route registration under `Blockchain/Dev/services/auth/src/routes`; the same pattern finds `/forgot-password`), `sendVerificationEmail` has one caller, register (line 350), and the verify route answers an expired token with "please request a new one" (line 1064). That gap is not a page and is not this ticket's scope; I propose it as its own ticket, an auth-service route, together with the question whether a reset should also verify the address.
+3. **Every user created from the admin dashboard is unverified, with a verification link that leads nowhere.** `Blockchain/Dev/frontend/admin/src/pages/Users.tsx` creates a new user through `/api/auth/register` (line 304) with a generated password that appears at two lines only (303 and 306), so the page never shows it. What else an admin can do to give that person a password was not read.
+
+## Where the links point
+
+The compose default is `http://localhost:${GATEWAY_PORT:-6882}` (`Blockchain/Dev/docker-compose.yml` line 775), the gateway root, where the issuer portal is served at `/` (the local URLs the project documents: issuer at the gateway root, verifier under `/verify/`, admin under `/admin/`), so the two landing pages belong in the issuer portal. On Kintsugi, Seat D 59th's read-only box record of 2026-11-06 (before its deploy round) has auth rendering `FRONTEND_URL=https://kintsugi.secuura.net`; I read no box, and the demo's value is not measured.
+
+## Not measured
+
+A booted frontend or browser (what a person sees at either link); any mail delivered (this ticket's own point 2 stands); what any box sets; how many accounts are unverified anywhere.
+
+Source: Seat W 67th's plan question for KS-2275 (finding D2), re-read by me at develop bb8fd11b3d1f. Board search before this comment (all states, archived included; controls held: `msgpackr` finds KS-1379, a random token finds 0): `verify-email` 86 candidates, open literal hits KS-1854 (reset-password has no rate limit of its own) and this ticket; `forgot-password` 93 candidates, open hits KS-1854 and KS-2296 (neither is a page); `ForgotPassword` 5 candidates, one open hit (this ticket) and one closed (KS-283, a schemathesis fix); `VerifyEmail` 7 candidates, 0 literal hits. `forgot password`, `verify-email page`, `invite claim` and `claim page` sit at the 100-candidate cap with no relevant literal hit, so they carry no claim. Read whole: KS-2294, KS-2296, KS-2275 (description, no comments). Read in part: KS-2272 (description and its one comment), KS-1617, KS-2088.
+
+===== I2-title: new ticket title, sha256 f53e6b0313cde2b5620f7f6e551aad2093afc0971f9d3e63ac836d35659f8d7d =====
+auth: a registrant whose 24-hour verification link lapsed can never become verified: no resend route, and a reset writes only the hash
+
+===== I2: new ticket body (MEDIUM, 3), sha256 84a223b6d1d18926aa47bb4796c0fff9be77336ee5b2875fba28f3452e219ac7 =====
+**BLUF:** An ACTIVE account that registered with `emailVerified: false` can become verified in one way only: by following the mailed link within 24 hours. At develop `bb8fd11b3d1f` the auth service has no resend route; the verification mail is sent from one place, register; the verify route answers an expired link with "please request a new one" and offers nothing to request it with; and reset-password on an ACTIVE row writes the password hash only, although its mailed link proves the mailbox exactly as the verify link does (the INVITED branch beside it already sets `emailVerified: true`). A person whose first link lapsed or never arrived therefore stays unverified for good. Dormant today, because nothing but the social auto-link branches on the flag. It goes live when KS-2275 deploys (Kam, card secuura-ks2275-unverified-email-document-reads-1119, answer a: only verified addresses open "sent to me" documents): after that, that person cannot open documents addressed to them. Medium (3), my measured judgement: the harm needs KS-2275 deployed and a lapsed link, and KS-2294 (the missing pages) comes first; but KS-2294 fixed with this open still strands everyone whose link lapsed. High if KS-2275 is deployed without it.
+
+## Recommendation (shapes, none chosen)
+
+1. **A resend route in the auth service.** An unauthenticated POST that, for an ACTIVE unverified address, stores a fresh 24-hour token and mails the same verify link; answers the same body whether or not the address exists; retires older tokens; carries its own rate limit mounted on the real path (KS-1854 is the reminder that a limiter can sit on a path with no route).
+2. **Or let a proven reset token verify the address.** In the ACTIVE branch of reset-password (line 992) write `emailVerified: true` with the hash. KS-2272 already accepts the argument for INVITED rows (the comment at lines 977 to 981: holding the token proves the mailbox). It is a product decision whether a reset counts as verification, and KS-2296's two points (the mail goes to the request's spelling of the address; two calls leave two live tokens) should be looked at first, because a reset would then be a verification path.
+3. Both are auth-service changes; I expect one suite, the auth route cells, to prove either, so this is one ticket under Kam's creation rule (2026-09-07: one ticket when one test pass proves it). The choice between 1, 2 and both is for Wednesday and Kam.
+
+## Detail
+
+All read at develop bb8fd11b3d1f on 2026-11-23 by GitHub contents and GraphQL blob reads; nothing was run.
+
+* Register: `Blockchain/Dev/services/auth/src/routes/auth.ts` line 319 sets `emailVerified: false`, line 335 sets status ACTIVE, and lines 343 to 357 make the token (24 hours, line 345) and mail `FRONTEND_URL` plus `/verify-email?token=`.
+* One caller only: `sendVerificationEmail` (`Blockchain/Dev/services/auth/src/services/email.ts` line 227) is called from `Blockchain/Dev/services/auth/src/routes/auth.ts` line 350 and nowhere else; `storeEmailToken` is called at line 345 only.
+* No route: I listed every route registration under `Blockchain/Dev/services/auth/src/routes`. Besides register, login, refresh, logout, forgot-password, reset-password and verify-email, the auth service has the social, me, mfa, sessions, users, wallet, health, internal, jwks and issuer-certificate routes; none resends a verification mail. The only other verification-named routes are the identity-level upgrade requests (`/me/verification` and `/verification/:requestId/review` in `Blockchain/Dev/services/auth/src/routes/users.ts`, lines 1514, 1571 and 1584). Control: the same pattern finds `/forgot-password` at line 892.
+* The expiry answer: `Blockchain/Dev/services/auth/src/routes/auth.ts` line 1064, 400, "Verification token has expired — please request a new one".
+* The reset branch: lines 977 to 993. An INVITED row gets the password, ACTIVE, `emailVerified: true` and role OWNER in one write (lines 983 to 989); any other row gets the password hash alone (line 992).
+* Where the auth service writes a users row as verified (non-test): the verify route (line 1077, the only write that verifies an existing ACTIVE row), the invite claim (line 987), admin create (`Blockchain/Dev/services/auth/src/routes/users.ts` line 706), the seed (`Blockchain/Dev/services/auth/src/repositories/userRepo.ts` lines 1828 to 1887) and a new social account whose adapter says so (KS-1617, item 10). Line 459 is an in-memory object for a SYSTEM_ADMIN login, not a row.
+* Who is left without a way forward: self-registered accounts (register, line 319) and every user an admin creates from the dashboard (`Blockchain/Dev/frontend/admin/src/pages/Users.tsx` line 304 posts to `/api/auth/register`). Wallet sign-ups carry a synthetic address (`Blockchain/Dev/services/auth/src/routes/wallet.ts` lines 213 and 214), so no mail can reach them and they are outside this ticket.
+
+## Not measured
+
+Mail delivery on any box (KS-2294's point 2 stands); how many accounts are unverified anywhere; whether a reset should count as verification (a product decision); anything run.
+
+Related: KS-2294 (the missing pages, the first thing to fix), KS-2275 (the gate that makes the flag matter), KS-2272 (the claim: the INVITED branch), KS-2296 (forgot-password's spelling and live tokens), KS-1854 (reset-password's own limiter).
+
+Source: Seat W 67th's plan question for KS-2275 (findings D2 and D4), re-read by me at develop bb8fd11b3d1f. Board search before filing (all states, archived included; controls held: `msgpackr` finds KS-1379, a random token finds 0): `resend verification` 82 candidates, 0 literal hits; `resend` 10 candidates, none about a verification mail; `sendVerificationEmail` 4 candidates (open KS-2023, an e2e case that registers an account; closed KS-152 and KS-2174), none about a resend; `storeEmailToken` and `getEmailToken` find only the closed KS-1769; `verify-email` 86 candidates, open KS-1854 and KS-2294, neither a resend route. For the reset half, `reset-password` (101 candidates, at the cap) lists 8 open literal hits by title (KS-1796, KS-1854, KS-1868, KS-1978, KS-2265, KS-2272, KS-2294, KS-2296): none is about a reset verifying the address; KS-2272, read in part, records the INVITED claim only and says login does not check verification. Read whole: KS-2294, KS-2296, KS-2275 (description).
+
+===== I3: comment on KS-1617, sha256 3480c4fb2751354074cc404942e52496764ca3955a3c38fdb980be4fe95d3690 =====
+**BLUF:** Item 10 of this ticket (a new social account stored with the provider's `emailVerified`, always true for microsoft-personal) is still true at develop `bb8fd11b3d1f` (read 2026-11-23), now at line 1389, and it is wider than the item says: github and facebook are stored the same way, and the trust table already marks all three unsound. What is new is the consequence. Kam ruled on card secuura-ks2275-unverified-email-document-reads-1119 (2026-11-20 07:10, answer a) that only verified addresses open "sent to me" documents, so the stored flag becomes the gate for document reads, and a new social account from an adapter that cannot prove the address would count as verified. Low today, because the code says no deployment configures a provider (line 1170 to 1171). Fix before any provider is switched on, as this ticket already says. I am adding this here, not as a new ticket, because it is the same line and the same fix as item 10, widened (Kam's creation rule, 2026-09-07).
+
+## What I re-read at develop bb8fd11b3d1f
+
+Read by GitHub contents and GraphQL blob reads; nothing was run.
+
+* The write: `Blockchain/Dev/services/auth/src/routes/auth.ts` line 1389, inside the create branch for a social sign-up with no existing account, stores `emailVerified: profile.emailVerified`. The auto-link branch above it asks `mayAutoLinkByEmail(providerName, profile.emailVerified)` (line 1352); the create branch does not.
+* The classification: `Blockchain/Dev/services/auth/src/providers/social/emailVerificationTrust.ts` lines 58 to 65 mark google, apple and linkedin sound, and github, facebook and microsoft_personal unsound. `mayAutoLinkByEmail` (line 74) is exactly "sound and the flag is true".
+* The three unsound derivations, at this develop: `Blockchain/Dev/services/auth/src/providers/social/github.ts` starts `emailVerified` false (line 108), takes `primary.verified` only on the branch that asks for the user's emails (line 120), and sets a literal `true` when the profile already carries an email (line 124); `Blockchain/Dev/services/auth/src/providers/social/facebook.ts` line 107 is `Boolean(profile.email)`, the presence of an address; `Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts` line 111 is a literal `true`. The three sound ones read the provider's own flag (google line 114, apple line 95, linkedin line 109).
+* Who reads the stored flag: I read all 418 non-test service source files at this develop. `emailVerified` or `email_verified` appears in 14 files of the auth service and 2 of the demo service, in no other service. In the auth service the only decision that branches on it is the social auto-link (line 1352). So today the stored value gates nothing; under KS-2275 it will.
+
+## Fix shape (not chosen)
+
+One line at creation: store the same predicate the auto-link already uses, `mayAutoLinkByEmail(providerName, profile.emailVerified)`, in place of the raw flag, plus one cell per provider (an unsound provider stores false, a sound one with a true flag stores true). Whether the provider itself verified the address is not established here; KS-795 says only that this repository's adapter cannot prove it.
+
+## Not measured
+
+Any deployment's provider configuration (the code comment is the only statement; I read no box); how each provider behaves for a real account; anything run. KS-795 (archived, Deployed to UAT) calls deriving the flags soundly a second ticket's worth of work; I found no open ticket for that derivation.
+
+Related: KS-795 (the trust table), KS-2275 (the gate), KS-1672 (no provider identity is stored; it can change what a re-sign-in finds).
+
+Source: Seat W 67th's plan question for KS-2275 (finding D3), re-read by me at develop bb8fd11b3d1f. Board search before this comment (all states, archived included; controls held: `msgpackr` finds KS-1379, a random token finds 0): `KS-795` 7 candidates, open hits KS-1617 and KS-1672; `mayAutoLinkByEmail` 1 candidate, KS-1617; `emailVerificationTrust` 3 candidates, 0 literal hits; `profile.emailVerified` at the 100-candidate cap with KS-1617 open and KS-722 and KS-781 closed (both Deployed to UAT); `microsoft_personal` at the cap with KS-1672 open and KS-1885 closed. Read in part: KS-1617 (the opening, its section headings, item 10 and the first 700 characters of each of its 3 comments), KS-1672 (the lines naming KS-795), KS-795 (the lines on the derivations).
+
+===== end of drafts =====
+
