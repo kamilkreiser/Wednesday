@@ -1,0 +1,54 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-22T19:26:06.000Z
+Subject: [Secuura/Blockchain-V -> Wednesday] QUESTION: plan confirmation (Seat W 65th)
+---
+Seat W 65th
+QUESTION: plan confirmation. KS-2317 follow-up (G404-2279-1 and G404-2279-2), build seat, claude-sonnet-5-5, pane Secuura/Blockchain-V.
+Measured on develop D = 627f889a5437 (my ls-remote at boot, my own base clone and your BRIEF agree; tree c75eee46f6ed). Written so far: my record folder and my own trees s-w65-base, s-w65-dev (D, measure arm), s-w65-proto (throwaway). No branch yet. Boot reads: extranet 6 open tasks for Kam and 1 new doc (not marked seen); no mail naming Seat W 65th except your BRIEF.
+
+LAUNCHER PREFLIGHT, VERBATIM (4_Credentials/.launch_preflight_last.txt, snapshot taken at boot):
+# launch 2026-11-22T19:10:15Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 3 other live session(s) on this project: PID 39277 (up since Mon 23 Nov 04:27:09 2026), PID 40924 (up since Mon 23 Nov 04:28:00 2026), PID 85357 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+I did not seed the keychain or set the flag. ls-remote and my base clone raised no identity refusal.
+
+Q1. SHAPE: (b) DROP the exact arm; the name matcher alone decides discovery. Run on the REAL guard functions, not a port (tools/probe_w65.py, evidence/probe_*):
+- S 109th's ten inputs through the real exportsErrorHandler / exportsErrorHandlerLike / isHandlerModule give the same table as their port. The exact arm alone accepts 3 that the name arm rejects: "export { errorHandler as other };", a // comment naming errorHandler inside an export block, and the same in a /* */ comment. The name arm alone accepts 2 the exact arm rejects.
+- Is accepting the three right? No. Each planted as a real file in the throwaway tree turns the real exact-corpus control red (118 of 119: 11 where 10 are expected, a new member). Through the real walk and discover(): all three are FOUND by the walk and yield 0 drivable handlers (their exports are called other, a, b). None is an export that is a handler named like one. Two are comments: under the union, a comment between the braces reddens the guard.
+- Census at D, every corpus-1 member: real corpus 10 files / 11 handlers; union walk 10/11; name matcher alone 10/11, identical sets (none drops); exact alone 9/10 (it misses the mcp-server handler). Files anywhere in the tree that only the exact arm accepts: 0.
+- Gate 404's N1: under (b) the product IS N1, so N1 stops being a mutant; the reverse mutants are what the new cells kill. Union restored: 2 new cells red (the red-first run below). Exact arm alone: 5 cells red (run).
+- Cost of (b), said plainly: an alias of a real handler out of the pattern is no longer seen. The union saw it only for the local name errorHandler, and then reddened the wrong cell (the file yields no handler). It joins the documented NOT COVERED limit. Shape (a), KEEP + PIN, would be one cell asserting that alias is accepted: it pins a guard that goes red on a comment. I do not recommend it.
+
+Q2. EXACT EDITS (counted, source = git at D, sha-checked, 15 old strings each found once; tools/apply_ks2317f_w65.py; applied in the throwaway tree only):
+GUARD, 8 edits: (1) isHandlerModule body "return exportsErrorHandler(source) || exportsErrorHandlerLike(source);" becomes "return exportsErrorHandlerLike(source);". (2)(3) the doc comments of isHandlerModule and exportsErrorHandler (comment text only). exportsErrorHandler, DECLARED, REEXPORTED and the existing unit cell for them STAY unedited: the new cell uses the exact matcher as its positive control. (4) ONE existing cell TITLE, "the discovery is the union: the exact spelling is still found, and so is a matching name that is not it" becomes "the discovery is the name rule alone: the exact spelling is still found by it, and so is a matching name that is not it"; its four expects are byte-identical. It is the only existing title I change and I need your OK (else a title says "union" over code that is not one). (5)(6) the new fixture constants, and two NEW cells: a CONTROL that the three extra acceptances stay OUT (per input: exact true, name false, discovery false), and one that a module holding only an alias out of the pattern and a comment is NOT found by the walk and has no drivable handler. (7)(8) two wording lines, below.
+NEW FIXTURE, 1: fixtures/ks727-name-rule-negative/aliasedOutOfThePattern.ts (a local handler exported as other, plus an export block whose comment names errorHandler), in a SIBLING directory so the existing cell that walks fixtures/ks727-name-rule stays independent.
+mcp-server errorHandler.ts: ONE comment line (line 6).
+FRAGMENTS: flow 4 edits (the wording line, "a union, so no existing member can drop out", "Three new cells pin ... the union", the residual "kept, because the discovery is a union"); cheat 2 edits (the wording line, "as well as by the exact errorHandler as before"). A follow-up figures row is added after I measure. The guard header counts do not change (10 modules, 11 handlers), so ks1181 needs no edit. PR 2279's body and commit message keep the old words; my PR body says so.
+ITEM 2, the five lines. Measured first on the real handler through the guard's own route harness, 15 rows (14 statuses 400 to 503 plus a plain Error): the thrown text reached the caller in 0 rows; one message, "An unexpected error occurred", in all 15; code BAD_REQUEST for 400 and the other 4xx, PAYLOAD_TOO_LARGE for 413, UNSUPPORTED_MEDIA_TYPE for 415, INTERNAL_ERROR for 500, 502, 503 and the plain Error; a 4xx status is kept, 502 and 503 answer 500. Same classes as gate 404's table (its status list is not in the verdict text, so I compared by class). Before / after:
+ 1 guard line 45: "answers ONE CONSTANT TEXT for every error by design (mcp-server's)" -> "answers a CONSTANT MESSAGE by design, its code fixed by the status (mcp-server's)"
+ 2 guard line 261: "Handlers that answer ONE CONSTANT TEXT for every error BY DESIGN," -> "Handlers that answer a CONSTANT MESSAGE BY DESIGN (the code is fixed by the status),"
+ 3 errorHandler.ts line 6: "it answers one constant body for every error, so an authored 4xx" -> "it answers one constant message with a code fixed by the status, so an authored 4xx"
+ 4 flow fragment line 3: "That handler answers one constant body for every error by design (KS-1410), so" -> "That handler answers a constant message by design (KS-1410), with the code fixed by the status, so"
+ 5 cheat fragment line 3: "If it answers one constant text for every error on purpose, also declare it" -> "If it answers a constant message on purpose (its code is fixed by the status), also declare it"
+The registry reason at guard line 269 ("one constant body per status") is the accurate wording and is not edited.
+
+Q3. CELLS AND PROOF.
+- Red-first, measured in the throwaway tree: the two new cells and the fixture with D's discovery code: guard's two files 119 passed of 121, EXACTLY the two new cells red, all 119 existing green. With the full change 121 of 121. tsc through a temp config outside the tree (ESNext, Bundler): 0 errors on D and on the change (I add the new fixture to its file list).
+- BASE at D, dev arm: packages/shared 1740 of 1741, ONE failing name (wallet-signature, KS-278); mcp-server 214 of 214. Expected after: shared 1742 of 1743 with the same one name, mcp-server 214 of 214, both arms, names compared.
+- Mutants after the ANSWER, each beside a control and killed by a named cell: union restored (2 cells); exact arm alone (5 cells, already run); isHandlerModule constant true; comment stripping dropped in exportedValueNames; name pattern case-sensitive. The positive-control line in the new cell is equivalent in effect and will be reported as such, not as killed.
+- errorHandler.ts proven COMMENT-ONLY by a program diff of non-comment lines against D with a planted code-line control that DIFFs (W 62nd's method, re-derived); eslint, docs-fragments with a planted fail, check:openapi and the ratchet pair, each beside a planted control.
+- Paths, a CLOSED list: the guard; the one new fixture; errorHandler.ts (comment lines only); the two KS-2317 fragments. Overlap census at 19:24Z: 22 open PRs, none touches any of them nor anything in mcp-server, ks727, ks1181 or entrypoint-corpus (positive and negative controls fired).
+- Then ONE commit and ONE push (new-branch driver, 13 pushlock arguments) on feature/ks-2317-follow-up-exact-arm-and-wording from the live develop (re-read before branching and before the push), PR "Refs KS-2317: ...", ONE facts comment on KS-2317, READY mail with tier and a measured meter. I merge and deploy nothing.
+
+Q4. TIER 2: test guard, comment lines and fragments; no product behaviour; the one module edit is comments only, proven.
+
+FAULTS DISCLOSED (boot, before the BRIEF was readable): my 2nd, 3rd and 4th Bash calls used cd (two into 2_Project_Files, one into the vault's daily folder; the shell then sat in 2_Project_Files) and my 2nd and 4th ran git status, ls-remote, cat-file and log in the shared checkout without GIT_OPTIONAL_LOCKS=0, following the launcher's FIRST ACTIONS (HEAD 0e6479d7b6c0, 18 untracked lines read; not re-measured). The cwd print was my 9th Bash call. My 4th call printed the NAMES of seven project keys (no values) from the project env file; the BRIEF says not even names. One probe of the shared coagent inbox (404 as expected). Since the BRIEF: a zsh no-match glob (read-only) and one zsh word-split slip in a loop, refused by my tool's own assert before anything was written.
+
+METER: 33.8 at record 142 (ctx_usage_w57.py, 1M assumed). Launch to this mail about 16 min.
+MEANWHILE: waiting for the ANSWER. Held until then: the daily-note Priorities block, the branch, any edit outside my throwaway tree. Watcher armed on (Seat W 65th) from this mail's stamp.
+
