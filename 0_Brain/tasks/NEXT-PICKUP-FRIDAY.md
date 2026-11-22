@@ -12,7 +12,31 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (machine: Kamils-MacBook-Pro).** Quote every path. This seat boots on Fable.
 
-## 🟥 CURRENT STATE — Sun 2026-11-22 ~19:05, written at 77% for the ROTATION (seat on Opus, new account; usage ~11%). READ THIS FIRST.
+## 🟥 CURRENT STATE — Sun 2026-11-22 ~21:40, the ROTATION at 80% (seat on Opus, new account). READ THIS FIRST.
+
+**CoAgent main = `33371921670acfcb6fc7634d0c4eacafa9800a8d`** (W-DAEMON merged 21:3x; the Windows background program coagentd.exe builds and runs on Kam's PC; Kam told). **No lane is open. No seat pane is open** besides fleet panes. **No card open.**
+**FIRST WORK (Mon 2026-11-23 morning): C1, the first Mac-to-Windows link, with Kam (~30 min at the PC; he expects it).**
+1. READ WHOLE `briefs_drafts/2026-11-23_C1_first-link_plan_DRAFT.md` (140 lines) and `…_windows-pc_WO-7_C1_guest_DRAFT.md` (67). Both were drafted by an in-session agent and are NOT yet read by Friday. Their key calls:
+   - The invitation line (the secret) NEVER goes by mail: Kam types or pastes it on the PC.
+   - Kam runs the 3 Mac host commands from a sheet.
+   - The host runs WITHOUT --gate (D1).
+2. Settle the 5 open facts listed under "THEN C1" in the 19:05 block below: the route, the line transport, cmd JSON quoting, macOS binaries from merged main, D1. Re-read the Mac's address that day. A loopback dry run on the Mac first is recommended.
+3. Bundle main 3337192 for the PC (scratch clone /private/tmp/claude-501/wb/clone; fetch the SHA from the project repo; `git bundle create`), issue WO-7, and card Kam with the Mac sheet.
+**THEN:** a FOLLOW-UP lane:
+- the code notes N-1, N-3, N-4 (in BACKLOG, from gate_W_DAEMON_verdict.md);
+- WINDOWS-FINDINGS.md (`reference/…/windows/`): root .gitattributes eol=lf, relay test platform tolerance, cli test gating, a cargo fetch before the hygiene test, audit timing;
+- the stale lines in preview/demo/windows.md.
+Brief, launch on Opus, ONE independent check. Then C2 (Claude Code on each side) and C3 (the gate on Windows) per plan 15.
+**Windows PC:** acts on its own mail (it picked up WO-5 unprompted). WO-1..WO-6 are in briefs_drafts; results are in reference/…/windows/. It holds C:\c2c (toolchain, clones) and C:\wdc3 and C:\wdjt (test folders; Kam may remove them).
+**Kam's standing words:**
+- Opus everywhere; Fable only when flagged (he switches accounts).
+- PC seats launch with --dangerously-skip-permissions.
+- Friday instructs the PC on anything for CoAgent (EXPIRING-GRANTS top row).
+- A helper that finishes gets the next useful job.
+- After an account switch, answer every seat's "autocompact at 400k?" dialog with Escape.
+**Scratch (dies on reboot):** /private/tmp/claude-501/{mcwd1,qwd,wb,...}: work dirs, nothing owed.
+
+## (superseded) 🟥 CURRENT STATE — Sun 2026-11-22 ~19:05, written at 77% for the ROTATION (seat on Opus, new account; usage ~11%). READ THIS FIRST.
 
 **CoAgent main = `1aa4629b15881096b4a122da20bcbcb24bcf76a7`.** ONE lane open: **W-DAEMON %68** (Opus; brief `briefs_drafts/2026-11-21_coagent_W-DAEMON_brief.md` + ADDENDUM-1..8, all 2026-11-22 except the brief).
 - Head `5b008c848aa801ea9ce2ec661cc110a69c17ad91`: READY FOR QA, and its independent check = **GO WITH NOTES** (`m1_review/gate_W_DAEMON_verdict.md`, read whole).
