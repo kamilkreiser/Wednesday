@@ -1,0 +1,63 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-22T11:39:09.000Z
+Subject: [Secuura/Blockchain-X -> Wednesday] READY FOR GATE KS-2313 (Seat W 59th)
+---
+Seat W 59th
+
+READY FOR GATE KS-2313. TIER 1.
+
+PR 2276 https://github.com/Secuura/Distributed_Secuura/pull/2276
+- Head 13aa345653c0 (13aa345653c03dd1b92e63ea5f46e5c4fcee626a): ONE commit on develop c8fd1653a5dc. 7 paths (push/paths_ks2313.txt), +571 -16.
+- Branch feature/ks-2313-the-admin-dashboards-organisation-delete, tree worktrees/s-w59-ks2313 (clean).
+Direction: card secuura-dashboard-org-delete-same-rule-1122, default a, pending Kam's ruling; the PR body says so. The MERGE GO stays with you. I merged nothing and deployed nothing. The only database touched was in-process PGlite inside the test file.
+
+THE CHANGE (as approved, Q1 + Q1b A):
+- admin.ts: an optional `transaction` in AdminRouteDeps and its destructure. The DELETE handler runs as one unit, adminScope(req, () => transaction(client => ...)):
+  - lock FOR UPDATE: no row answers 404;
+  - fail-closed COUNT(*)::int;
+  - users remain: 409 CONFLICT 'Organization still has users' (PR 2272's bytes);
+  - set_config('app.tenant_id', id, true);
+  - DELETE rights_holders, then DELETE organizations, exactly one row or rollback.
+  - Unwired: 500, no statement.
+- index.ts: imports transaction from ./db and passes it in.
+- ks1868 x2: buildRouter injects a transaction stand-in (same query fn; the count reads 0). C2's one-statement pin is inverted to the five-statement unit; the PR body names the inversion.
+
+YOUR MEASUREMENT: no STOP. transaction() (db.ts:66-68) and queryWithTenantGuc (tenant-guc.ts:189-190) both send scopeConfigStatement()'s SELECT set_config('app.tenant_scope_bypass', 'platform_admin', true), with no values, on their own client right after BEGIN (evidence/guc_measure_D.txt). C6 is widened as you asked: U6a runs the REAL db.ts query() and the route's unit over one mocked pg Pool and asserts the identical bypass statement, after BEGIN and before the lock, on the unit's client. U6b: a tenant admin's unit carries no scope GUC. The bypass-GUC mutant (M14b, db.ts transaction() skips applyTenantGuc, compiling form) is killed by U6a, U2 and 7 more.
+
+FIGURES (measured)
+- New file ks2313-gateway-organisation-delete-is-one-unit.test.ts, 24 cells:
+  - U (18): the route whole over the real db.ts, recording pg Pool.
+  - E (6): PGlite as a NOLOGIN NOBYPASSRLS role, under migration 027 run whole and 039's tenant_isolation template read from the file.
+  - Red on D: 17, each for its named reason. E2 on D: organisation gone, rh 2 left. E1 on D: 500 at the users FK. E3 (no users FK) on D: 200 with the user orphaned.
+  - Controls green on both arms (7): C4 absent 404, C5a 401, C5b 403, C10 db down, E0 fixture bites, E4 a document FK rolls the rights holders back, E5 a tenant admin sees no organisation (404).
+  - ks1868 C2 x2: red on D, green on the branch. Branch: 50/50 across the three files (evidence/rg_redD.*, rg_greenB.*).
+- Mutants: 15 of 15 compiling, all killed (evidence/mutants_m1.json, mutants_m2.json). M1, M9, M14 and M15 first failed tsc (TS2367/TS6133); their compiling forms M1b, M9b, M14b and M15b were killed.
+- Suites whole:
+  - api-gateway: D 2077/2077, branch 2101/2101.
+  - packages/shared: D 1724/1730, branch 1724/1730. The failing-name sets are IDENTICAL (your six: ks1536 G2; ks1725 F, J; ks727 corpus 2 x2; wallet-signature), and the G2 message is identical.
+- Static (evidence/ks2313_static.json), each beside a planted control that fired:
+  - tsc api-gateway: 0.
+  - eslint: 0 errors. The same 16 + 2 pre-existing warnings on both arms (admin.ts no-unused-vars, lines shifted +3; index.ts no-namespace + an unused disable). The 3 cell files are clean.
+  - test-types: 0 new. fragments: OK. check:openapi: PASS.
+- Ratchet pair: OK (6 services) + 48/0.
+- Push: 11:21:35Z-11:38:20Z, 1005 s, rc 0, VERIFIED (origin branch = 13aa345653c0; push/out_real/status.txt). Pre-push preflight INCOMPLETE: 13 of 16 legs ran, legs 3, 4 and 8 SKIPPED (no local stack), nothing failed. That is not a full pass, and the PR body says so. The gatetest ran at 11:19-11:20Z and all its gates passed.
+- Waiver, both conditions met in the push run (push/real_launch.log):
+  - (1) merge-tree of 13aa345653c0 vs PR 2159 7b54e7cbb6f0: rc 0. The planted conflict on admin.ts:1192: rc 1 with a CONFLICT in admin.ts.
+  - (2) census: only PR 2159, only admin.ts. index.ts and every other path read "-> PRs none".
+  - OVL_IGNORE_PRS=2159 is set by the launcher, never inherited.
+- Linear: ONE facts comment on KS-2313, 7f4a0237 (11:39:00Z, read back identical), read back.
+
+STOP CHECK (BRIEF): not triggered. The 409 count needs no KS-2279 bound: organizations and users share one 039 policy, and this router runs only under the platform scope or none. The PR says it does not fix KS-2279.
+
+RESIDUALS (in the PR body, for you to route):
+- The dashboard shows "Failed to delete" for the 409 (api.ts deleteOrganization returns res.ok only).
+- Documents and member rows are not deleted; a "dependent records" 409 wording is unbuilt.
+- No FK, so a concurrent users insert is unblocked on a compose-built database.
+- rights_holders.tenant_id = organisation id is 027's premise, as in PR 2272.
+- No spec :id path.
+
+Traps recorded (HANDOVER): I edited a bash script while bash was running it (my BASE run's summary tail broke; the JSON was whole). The launcher preflight file was overwritten by S 107th's launch 12 s after mine.
+
+METER: 42.6 of 1M at this mail. HANDOVER: 5_Project_History/2026-11-22_seatW-59th/HANDOVER.md.
+

@@ -1,0 +1,37 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-22T11:21:51.000Z
+Subject: [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-1536 (Seat W 58th)
+---
+Seat W 58th
+
+READY FOR GATE KS-1536 (Seat W 58th). TIER 2 (your ANSWER, Q4). Nothing is merged or deployed by this seat.
+
+PR 2275 https://github.com/Secuura/Distributed_Secuura/pull/2275
+- Head 4c361b9cffd737156add09b175c959ad99362a43, ONE commit on develop c8fd1653a5dc9b79c41f752b29afb296910831a4 (PR 2273's squash; develop read unmoved by the push gate at 11:06:17Z).
+- Branch feature/ks-1536-one-role-vocabulary-seven-divergent-lists (Linear's branchName). 4 paths, +160 -1, exactly your Q3 list: routes/gdpr.ts, the new ks1536 gdpr cell file, the cheat and flow fragments (push/paths_ks1536.txt).
+- PR read back: open, not draft, base develop, 1 commit, 4 files, head equal to origin's.
+
+THE EDIT, as approved (Q1, shape B)
+- gdpr.ts:186 is now `const GDPR_PLATFORM_ROLES = GDPR_ADMIN_ROLES.filter(isPlatformRole);`, with one barrel import line and a 4-line comment that quotes no role. Lines 191 and 196 are unchanged. The baseline JSON is untouched.
+- The committed gdpr.ts and cell file are byte-equal to the measured prototype (sha256 2fb0d3c5c3ec3099, b606217542d5d1d3).
+
+EVIDENCE (full Test Evidence block in the PR)
+- RED FIRST is the guard: packages/shared ks1536-one-role-vocabulary is 1 failed and 98 passed on develop (G2, the one line "services/originate/src/routes/gdpr.ts: 7 > 6"), and 99 of 99 on this head. gdpr.ts counts 6 lists, its baseline.
+- THE CELLS ARE PINS, as you asked me to say: 34 of 34 on develop's gdpr.ts AND on this head, by design, because the platform set must not change. They cover P1 (the three platform spellings act for another user's subject with no lookup, 6), P2 (eleven other spellings, including system_admin, Super_Admin and platform_admin, get the exact 403 with no service call and no lookup, 22), P3 and P4 (ORG_ADMIN is bounded by ONE lookup, refused on another organisation's subject and admitted on its own, 4) and P5 (self control, 2).
+- MUTANTS: 7 of 7 compiling, all KILLED. M1 is the direct isPlatformRole swap (10 cells red); M2 lets ORG_ADMIN through the filter (4); M3 admits every admin role (4); M4 admits none (6); M5 appends platform_admin (2); M6 drops the platform line (6); M7 asks isPlatformRole directly in mayActForSubject only (10). My first M2-M4 did not compile (TS6133, the import left unread) and were replaced, not counted. The guard on each mutant file sees only M5 (G1 and G2).
+- WHOLE SUITES, BOTH ARMS:
+  - packages/shared: develop 1,724 of 1,730; head 1,725 of 1,730. The failing-name diff is ONE line, G2. The other five reds are unchanged: ks1725 F and J, ks727 corpus-2 x2, wallet-signature KS-278.
+  - originate: develop 3,171 of 3,171 in 242 files; head 3,205 of 3,205 in 243 files.
+- STATIC, each beside a planted control that fired: tsc originate 0 errors; eslint 0 and 0 (both files, and develop's gdpr.ts); test-types originate 0 new; fragments OK; the ks1536 guard; check:openapi PASS. Ratchet pair: 6 services OK; leg test 48 passed, 0 failed.
+- PUSH: 11:06:17Z-11:20:35Z (858 s), rc 0, ls-remote VERIFIED at 11:20:38Z, through the repo's own core.sshCommand (no keychain seeded, no on-disk flag). Gatetest first passed every gate at 11:05:46Z. Pre-push preflight: 13 of 16 legs ran, nothing failed. Legs 3, 4 and 8 SKIPPED (no local stack); the preflight says that is not a pass. It does not run the KS-1536 vitest.
+- NOT RUN: the four platform suites, a booted service, any deployed environment, Node 24 (measured on Node 26.8.1).
+
+RESIDUAL, named in the PR body and in the ONE facts comment on KS-1536 (comment 2b4f7762, 11:21:22Z, read back identical; no ticket filed): originate holds two notions of role letter case (hasAnyRole's exact compare in gdpr.ts; isPlatformRole's fold in adminConfig.ts and certifications.ts), and a lower-case system_admin exists in the gateway's sample users (admin.ts:499). The PR also carries the 21-spelling role-set table (Q2).
+
+SLIP, disclosed: my COMMIT MESSAGE names the shared package with its at-sign (the package's npm name, in "imported from the ... barrel"). The PR body, the PR title and the Linear comment carry no at-sign (checked). Fixing the commit message would need a second commit or a force push, so I left it; your call if it matters.
+
+METER (MEASURED, tools/ctx_usage_w58.py, this session's transcript): 41.0 of 1M at the READY. Launch to READY 40 min.
+
+NEXT: I arm my watcher on (Seat W 58th) and wait for the gate's word or your next mail. I merge nothing and deploy nothing.
+
