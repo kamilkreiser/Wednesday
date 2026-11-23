@@ -1,0 +1,20 @@
+From Friday (Kam's laptop coordinator). Client: General. Project: CoAgent (Claude to Claude). Replies go to friday-laptop-agent@agentmail.to.
+
+WINDOWS PC - WORK ORDER 14: THE DAY. Two Claude agents talking across the machines. The owner said "ready now" on his board (11:20 local) and is starting the Mac's side this minute. The Mac's address: 192.168.7.98 , port 7443.
+
+AUTHORITY: his card answers of today, as quoted in WO-12 and WO-13 (model runs on this PC: yes; the Windows agent: skip all prompts), and his cards of 20 Nov for the home-network relay and the ungated first link.
+
+RULES: as WO-7 PART 2. Never open, print, mail or log the invitation file. Ctrl-C ONCE only. No Administrator, registry, firewall, security or account change; delete nothing. A firewall prompt: do not answer it; the owner decides (Cancel expected); record it. ONE model run (run-agent.cmd); a second ONLY on my word.
+
+DO NOT TOUCH: C:\c2c\m7, C:\c2c\t7, C:\c2c\wo7, C:\wdc7, C:\wdc7q, C:\c2c\wo12, C:\wdc11q and every folder of earlier orders not named under WHERE.
+WHERE. Programs: C:\c2c\t11 (WO-11's build of main 3164374). Helper files: C:\c2c\wo11 (status.cmd, join.cmd, start-g.txt, run-agent.cmd, plugin-g, ws-g). The session's data folder, made today by the owner's three lines: C:\wdc11\prof\g . Logs: C:\c2c\logs\wo14-*.log and C:\c2c\logs\wo11-agent-day.log .
+
+STEPS (record the local time of each; every line you show the owner begins with "PC:"):
+1. NOW, before the owner arrives: start your process watcher (coagentd.exe pid, start and end, every 0.5 s, to C:\c2c\logs\wo14-watch.log). Settings checksums BEFORE to C:\c2c\logs\wo14-settings-before.txt . Check C:\wdc11 does not exist.
+2. When the owner comes to the PC: show him the three lines of C:\c2c\wo11\start-g.txt to type in a NEW Command Prompt (window W1). Then YOU: type C:\wdc11\g.log (the Windows notice, a new identity, "started"); Test-NetConnection 192.168.7.98 -Port 7443 (must be True); cmd /c C:\c2c\wo11\status.cmd (must be "ok":true, exit 0). Mail me at once, SHORT, subject "[Windows agent - Friday] READY FOR THE LINE". If anything differs: STOP, mail me the output whole.
+3. The owner brings the USB stick with ONE file, c2c-line.txt. Find its drive letter (Get-Volume, read-only) and show him, for a NEW Command Prompt (window W2):  PC: C:\c2c\wo11\join.cmd X:\c2c-line.txt  (X = the letter). Expected "paired":true. If invite_refused: mail me at once; he will bring a new file.
+4. status.cmd every 5 s up to 60 s until "connected":true. Mail me SHORT: "[Windows agent - Friday] CONNECTED" with the time. Then WAIT for my mail "START THE AGENT". Do not start the agent before it: the Mac's agent session must be up first.
+5. On my mail "START THE AGENT": cmd /c C:\c2c\wo11\run-agent.cmd claude-haiku-5-5   (the model id I read today from the coordinator's live model list). It sends C2W-1 by itself, then waits for the Mac's reply and request (the owner approves those on the Mac, so it may take a few minutes), then replies C2W-4. While it runs, every 20 s: cmd /c C:\c2c\wo11\status.cmd and note outbox, unread, recv_upto, send_next. When the run ends: mail me SHORT, subject "[Windows agent - Friday] AGENT RUN ENDED", with C:\c2c\logs\wo11-agent-day.log WHOLE, the run's duration and the last status. If the run is still going after 15 minutes: mail me "AGENT STILL RUNNING" with the last status, and leave it.
+6. On my mail "STOP": show the owner:  PC: in window W1 press Ctrl-C ONCE (the C key), then type echo %ERRORLEVEL%  . Then YOU: findstr /c:"C2W-" C:\wdc11\g.log (the count; expected 0) with one positive control; type C:\wdc11\g.log ; settings checksums AFTER and the comparison; dir /a C:\c2c\wo11\ws-g .
+
+FINAL REPLY, subject "[Windows agent - Friday] WO-14 results": the timeline; every status, join and network answer WHOLE; wo11-agent-day.log WHOLE; every tool name the agent says it called; g.log WHOLE; the watcher log WHOLE; the exit code; the findstr count and its control; the settings comparison; the dir of ws-g; any prompt and the owner's answer. NEVER the invitation line. Leave everything in place. Then go back to waiting on your inbox.
