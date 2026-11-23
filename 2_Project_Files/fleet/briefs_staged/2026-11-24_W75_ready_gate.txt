@@ -1,0 +1,86 @@
+=========== [INBOUND] 2026-11-23T23:18 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE: PR 2294 (KS-2339, tier 1) on develop e
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE: PR 2294 (KS-2339, tier 1) on develop e3e79b7317f1 (Seat W 75th)
+Seat W 75th
+
+READY FOR GATE: PR 2294 (github.com/Secuura/Distributed_Secuura/pull/2294) (KS-2339), TIER 1, head 604f8ff60f8c73be25c8a9bd941da026fcfddc3b, ONE commit on develop e3e79b7317f14ebccc8bb14e2001bdbf85e517fb, branch feature/ks-2339-api-gateway-has-no-route-for-the-issuer. I merged nothing and deployed nothing.
+
+BUILT AS RULED (your ANSWER 22:39:31Z): THE ONE DESIGN, the closed list of 8 paths, every sub-question as ruled.
+- originate signatories.ts:
+  - one gate in the file: signatoryWriteArm, decideSignatoryWrite (exported), callerRowOrganizationId (the users ROW, same client as the write), signatoryRowOrganizationId and signatoryWriteGate;
+  - the order is 400, then 401, then the role 403, then the membership 403;
+  - the organisation 403 is the same for another organisation's id and for an absent or malformed id; a platform role keeps the 404;
+  - the org arm's UPDATE WHERE carries its organisation (NULL scope for a platform role).
+- api-gateway proxy.ts: three explicit POSTs at 809 to 811, each with authenticateToken(true), then signatoryAdminCheck (the twin of workflowAdminCheck), then a UUID check plus encodeURIComponent, then ONE bounded forward helper.
+  - The helper reads the raw body capped at 1mb (413), forwards a body a parser already read, and sends Authorization, x-tenant-id, the vouch and the 60 s signal. It relays the status and answers 502 on a throw.
+- No new product file, no yaml, no packages/shared change, no new role list.
+- The PR body states the ruled role-vocabulary sentence (ASCII case variants admitted, bounded by membership, real tokens unmeasured).
+
+EVIDENCE (5_Project_History/2026-11-24_seatW-75th/evidence)
+- Suites WHOLE, develop then branch:
+  - packages/shared: 1746/1747 and 1746/1747. The same single failure on both, KS-278 wallet-signature.
+  - originate: 3610/3610 (248 files), then 3738/3738 (249).
+  - api-gateway: 2401/2401 (185 files), then 2531/2531 (186), re-run after fix 2 below.
+  - check:test-types for the gateway: 15 baseline errors, 0 new, on both arms.
+  - Files: suites_dev_run.txt, suites_branch_run.txt, suites_branch2_run.txt.
+- Red-first (redfirst_v2.txt), OUT-OF-RULE 0:
+  - 164 RED cells fail on develop and pass on the branch (gateway 74, originate 90); 79 twins pass on both.
+  - Coupled files: ks1868 passes on both arms; ks955 (6) and ks1240b (10) fail on develop only for the three new routes.
+- Mutants: 23 of 23 killed, each by a NAMED cell, each compiling (mutants_v1.txt, v2, v3). The 9 gateway mutants were re-run after fix 2: 9 of 9.
+- Static (static_v2.txt):
+  - tsc for originate and api-gateway: 0 errors on both arms.
+  - eslint on the changed files: 0 errors; warnings equal per file (proxy.ts 4 and 4).
+  - The ratchet: 0 new.
+  - 5 planted controls (tsc x2, eslint x2, ratchet x1) each failed their leg and were restored by sha256.
+- RLS (rls_probe_branch.txt): the branch's exact SQL, extracted by program, run as a non-superuser under 039's policy on the stopped-and-restarted container s-w75-rls:
+  - the users read returns the caller's organisation, and an absent row reads empty;
+  - an org-scoped revoke or reinstate updates 0 rows of another organisation and 1 of its own;
+  - a NULL scope updates the row.
+- Push run (push_run_real.txt), the same run as the push:
+  - census: 17 open PRs, 114 rows; no PR names my 8 paths; the positive control (PR 2099 on the yaml) fired;
+  - merge-tree both orders clean (tree ae12f792ebd6, equal to the head's own tree);
+  - 2 planted merge controls, rc 1 in both orders;
+  - develop by gh api: e3e79b7317f1, unmoved.
+- Push and PR: pushed by my detached driver 23:02:15Z to 23:16:38Z, rc 0. origin branch = 604f8ff60f8c, verified by ls-remote. The repo pre-push hook: PREFLIGHT INCOMPLETE, 13 of 16 legs ran, 3 SKIPPED (legs 3, 4, 8: local stack not up), nothing failed; leg 16, six services, 0 new each. PR 2294 was created by create_pr_w75.py (base develop, 1 commit, 8 files, +670 -7); title and body were read back through urllib and are equal to my files, with no self-hold phrase. My first create call stopped before any create (I passed the record folder instead of the record file; 0 PRs existed for the head, checked), then succeeded. The GitHub integration attached the PR and moved KS-2339 to In Progress. Develop re-read by gh api at 10:18:07 +1100: e3e79b7317f14ebccc8bb14e2001bdbf85e517fb (unmoved).
+- Linear: ONE facts comment on KS-2339, d90b1164 at 2026-11-23T23:17:47Z, read back identical to the file; the ticket holds 2 comments (08fbe7a5, d90b1164), read back.
+
+NOT RUN / NOT MEASURED
+- No single run reached gateway, then originate, then a database. I did not build the chain cell: it would need the gateway suite to import originate's router across packages, under the gateway's test-type ratchet, so it was not cheap.
+- No live stack, Schemathesis, Akto, Playwright or k6.
+- Prisma's typed-parameter binding (the SQL was replayed with PREPARE).
+- Multi-tenant mode.
+- Whether a real token carries a case-variant org role.
+- The Kintsugi organisation census (carried).
+
+LISTED, NOT CHANGED (in the PR body and the facts comment)
+- ApprovalQueue approve and pending, with my section (g) facts; the follow-up is yours.
+- PATCH /:id and the three reads.
+- The nominee's organisation.
+- The platform tenant write.
+- revoked_by.
+- Nominate's UUID validation.
+- The issuer page T7.
+- admin/create's uncapped raw read.
+- The yaml.
+
+DEPLOY NOTE: the three actions go from 404 for everyone to working for platform admins and own-organisation org or issuer admins; an org-less org admin is refused; on Kintsugi org admins nominate for no one until organisations are assigned.
+
+FAULTS SINCE THE PLAN (mine, all caught before any result was used)
+- F5: my new originate cell file first spread [path, body] into send(path, user, body) in the wrong order. ts-jest refused to compile it, and I fixed it with a sendTo helper.
+- F6: two cells were labelled RED but pass on develop (a malformed id runs no signatory query on either arm). The red-first classifier caught them and I relabelled them twin.
+- F7: M1 and M3 first died of unused-variable compile errors (the brief's trap). I kept the variables with void, and both were then killed by their named cells.
+- F8: proxy.ts first added a 5th eslint warning (an unused catch binding). The eslint leg caught it; fix 2 changed it to catch with no binding, and the gateway suite, static legs and gateway mutants were re-run.
+- F9: my first gateway cells also recorded the app's background health GETs, and pinned 403 for the Unicode spoofs, which authenticateToken actually answers 401. Both were measured and fixed before red-first.
+- F10: one edit-script refusal (the test source held raw Unicode, not escapes). Nothing was written; both test sources are now ASCII-only.
+- F11: a git log format string printed the commit author's display name to my local tool output only. Nothing left the machine.
+- Config, as licensed and nothing else, in my own clone s-w75-base: core.sshCommand (read back equal, never printed) and core.hooksPath=.githooks. The author values came through GIT_AUTHOR_* and GIT_COMMITTER_* for the one commit; no user.name or user.email was written.
+
+TREES
+- s-w75-base: my clone at develop, the develop arm, pristine.
+- s-w75-ks2339: the branch at the head, porcelain 0.
+- s-w75-dev: the develop arm plus the 6 test files, the red-first host.
+- s-w75-mut: the plant host, a mirror of the branch, every plant restored by sha256.
+- Container s-w75-rls: postgres:15-alpine, STOPPED, not removed (listed for Kam).
+
+Meter: percent if window=1000000: 46.0 | if window=200000: 229.9 (>100 means the window is not 200K) (context_tokens=459759  (input=2 cache_read=459090 cache_create=667)), read 10:18:07 +1100
+Watchers: the push waiter exited on push.rc; 0 watcher processes alive before this mail; I arm am_await_w75.py for your verdict right after sending
+

@@ -1,0 +1,147 @@
+=========== [QUESTION] 2026-11-23T22:37 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 75th)
+[Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 75th)
+Seat W 75th
+
+QUESTION: plan confirmation, KS-2339 (signatory write routes plus Kam's role and membership checks). TIER 1. Design first; no code written. I WAIT for your ANSWER.
+
+STOP ITEMS FIRST
+- Overlap on my closed list: NONE. Census re-run at plan time 09:35:28 to 09:35:31 +1100 (by date): 17 open PRs, 114 file rows, files paginated until hasNextPage false (evidence/census_plan.txt). The same two hits as the drafter, neither on my list: PR 2099 (yaml only; my list does not touch the yaml) and PR 2159 (api-gateway routes/admin.ts; not on my list). Positive control: the matcher returns PR 2099's yaml hit. No open PR path names ks2339 (0; control: ks-2060 = 4).
+- Develop e3e79b7317f14ebccc8bb14e2001bdbf85e517fb, unmoved: gh api ref 09:35:38 and the shared checkout's ls-remote 09:35:41 (by date), both that sha.
+- Ordinal re-measured at boot: history.md 'seat w 75th' = 0, 'seat w 74th' = 1 (control); no seatW-75th folder existed. I am W 75th.
+- KS-2339 read live 09:27:36 (project key inside python, comments sorted by createdAt): ONE comment, Seat S 119th's ruling comment, id 08fbe7a5, created 2026-11-23T22:26:34.911Z. Its BLUF: "Kam ruled option a on who may write on the Signatories page: platform admins and the organisation's own admins." It quotes the card's option detail verbatim. Ticket state Backlog, High.
+- Scope sentence (the ticket's BLUF): "The issuer portal's Signatories page sends three writes through the api-gateway: POST /api/signatories (nominate), POST /api/signatories/:id/revoke and POST /api/signatories/:id/reinstate. The gateway has no route for any of them, so each ends at its terminal 404 object and Nominate, Revoke and Reinstate cannot succeed through the gateway for any caller."
+
+THE NARROWING (decisions I am NOT making)
+Kam's card names three actions: nominate, revoke and reinstate. I build those three routes and their checks in ONE PR. Each of the following is LISTED, NOT built, and a sub-question below: ApprovalQueue's approve and pending routes; PATCH /:id and the three reads; whether the nominee must belong to the organisation; the tenant a platform admin writes; the yaml; isPlatformRole; any new shared export; the frontend; deploy.
+
+Q1. MEASUREMENTS (my own clone worktrees/s-w75-base, URL clone, develop detached at e3e79b73, porcelain 0; content never from the shared checkout)
+(a) Originate signatories.ts, 518 lines, read in my tree: the only gate is authenticate() at line 22; "role" appears 0 times (control: authenticate 4). Nominate (58 to 146): the validators need organizationId and userId to be non-empty strings (not UUIDs); 401 at 77; INSERT 87 to 106 writes the BODY's organization_id and user_id; 23505 gives 409. Revoke (403 to 465): UPDATE ... WHERE id AND tenant_id AND status active (425 to 436); 0 rows gives 404; no organisation read; revoked_by not written. Reinstate (467 to 518): the same shape, status revoked. The :id param is checked only with isString().notEmpty(), so a non-UUID id reaches a ::uuid cast. All three use ((req as any).db || prisma).
+(b) Gateway proxy.ts: the GET at 725 (authenticateToken(true); Authorization, x-tenant-id when present, the vouch; a 60 s signal; jsonOrEmpty; status relayed; 502 BAD_GATEWAY). admin/create at 489 reads req.body, or the RAW stream with NO size cap (data += chunk). index.ts 400 lists /api/signatories in proxyPaths, so no parser runs on it; the default parsed limit is 1mb (index.ts 412); the terminal 404 is at 1170 to 1177. workflowAdminCheck (1151) asks isPlatformOrOrgBoundedRole. It is a const declared AFTER line 725 inside createProxyRoutes, so a route at 725 cannot reuse it: I would add a twin middleware that asks the same predicate.
+(c) The RLS question, MEASURED on a real Postgres (throwaway postgres:15-alpine container s-w75-rls, no published port; tools/rls_probe_w75.py, evidence/rls_probe.txt).
+  - Setup: 039's own policy DO block (lines 81 to 138, extracted by program), FORCE RLS confirmed on users and signatories, minimal tables.
+  - Probes: a NON-superuser login role replays the sequence both originate clients send under a scope: BEGIN, set_config(app.current_tenant_id, T, true), the query, COMMIT. I read that sequence in shared tenant-guc.ts queryWithTenantGuc 178 to 205 and db.ts getGucPrisma 184 to 195.
+  - Results: the caller's users row under the matching tenant gives 1 row with its organisation. With no scope: 0 rows (fail-closed). A caller row in another tenant: 0 rows. An org-less caller: 1 row, organisation NULL. Platform bypass: 1 row. The signatory row's organisation under the tenant: 1 row. Revoke with the CALLER's organisation added to the WHERE: UPDATE 0 on another organisation's row, UPDATE 1 on its own (rolled back). A non-UUID id in the cast: ERROR invalid input syntax (a 500 today). Superuser control: 3 rows.
+  - Which client: req.db is set only when MULTI_TENANCY_ENABLED is 'true' (originate index.ts 231 to 245). Compose defaults it to false at 6 sites (docker-compose.yml 196, 486, 509, 583, 692, 758), so on that config req.db is unset and ((req as any).db || prisma) IS prisma. I recommend the SAME client as the write. Not measured: the db.ts code itself against this database, and multi-tenant mode.
+(d) Develop-arm suites WHOLE in my tree (tools/suites_w75.py, evidence/suites_dev_run.txt, 09:29:16 to 09:30:48):
+  - packages/shared vitest: 88 files, 1747 tests, 1746 passed, 1 failed. The failure is KS-278 wallet-signature only.
+  - originate jest: 248 files, 3610 of 3610 passed.
+  - api-gateway vitest: 185 files, 2401 of 2401 passed.
+  - check:test-types for api-gateway: 15 errors, all 15 in the baseline, 0 new.
+  - The tree's porcelain after the run: 0.
+(e) Role vocabulary (read in my tree): auth UserRole = OWNER, ISSUER_ADMIN, ISSUER_APPROVER, VERIFIER, ORG_ADMIN, SYSTEM_ADMIN. In shared keyRevokePolicy.ts: PLATFORM_ROLES 60, ORG_BOUNDED_ROLES 77, isPlatformRole 140 (ASCII fold, non-string false), isPlatformOrOrgBoundedRole 153 (ASCII fold over both sets), and isOrgBoundedRole 84 (Unicode toUpperCase: never used here). The ks1536 G2 and ks1701 G1 sweeps skip __tests__ folders and .test. files: both carry planted controls that prove it (ks1536 lines 104 and 160, ks1701 lines 42 and 145). So my cells may name platform spellings, and my product code names none.
+(f) Pinned tests, read: see Q2. The registry tests: ks1293 (originate) pins one env key; my files do not touch it. Of the four gateway tests that read proxy.ts text, three pin other mounts (ks843, ks1699v, ks689), so a new route leaves them as they are. The fourth is ks1240b, a coupled edit.
+(g) The ApprovalQueue, read: the component calls GET /api/workflows/pending/me (line 65) and POST /api/workflows/steps/:id/approve (92). The backend is transfer workflows.ts 167 (approve: the approver comes from the token, "No role widens this", per its comment at 172) and 213 (pending/me reads the caller's own steps). The gateway's /api/workflows routes are the Redis store, a different thing.
+(h) Shared checkout (2_Project_Files): develop HEAD 0e6479d7b6c0, 194 commits behind origin develop and 0 ahead (counted in my clone), 18 porcelain lines, all untracked. Not pulled (KS-907).
+
+THE ONE DESIGN
+1. ORIGINATE IS THE AUTHORITY. In signatories.ts, ONE pure function, exported for its truth-table cell, called by all three handlers: decide(role, callerOrg, targetOrg) returns allow, refuse-role or refuse-org.
+   - isPlatformRole(role): allow, for any organisation, with no row read.
+   - Else isPlatformOrOrgBoundedRole(role) (the org arm, as sub-question 3): allow only when callerOrg and targetOrg are both non-empty strings and equal after the shared normaliseOrgId fold. Otherwise refuse-org.
+   - Else refuse-role.
+   Handler order: validators (400, as built), then the 401 (as built), then the ROLE gate (403), then the MEMBERSHIP gate (403), then the write.
+   - The caller's organisation comes from its users ROW, read with the same client as the write: SELECT organization_id::text FROM users WHERE id = caller::uuid. The read runs only for the org arm. A missing row is refused. A non-UUID caller id is refused without a query.
+   - Nominate judges the BODY's organizationId.
+   - Revoke and reinstate:
+     - For a platform role, the UPDATE runs as built.
+     - For the org arm, a non-UUID :id is refused 403 without a query. Otherwise a SELECT organization_id FROM signatories WHERE id AND tenant_id, run BEFORE the UPDATE. An absent row or another organisation's row is refused 403 with the SAME body. On its own organisation the UPDATE gains AND organization_id = callerOrg::uuid (belt and braces, measured in (c)), and 0 rows keep the built 404.
+   - The handlers' catch blocks are unchanged.
+2. GATEWAY: three EXPLICIT routes beside the GET at 725 (no wildcard, no mount, no PATCH): POST /api/signatories, POST /api/signatories/:id/revoke and POST /api/signatories/:id/reinstate.
+   - Each runs, in order: authenticateToken(true) (unauthenticated 401, never forwarded); a coarse role gate twin of workflowAdminCheck (isPlatformOrOrgBoundedRole; 403 FORBIDDEN "Admin access required"; nothing forwarded); for :id, a UUID check before the id is placed in the upstream URL (400, never forwarded), plus encodeURIComponent.
+   - The reason for the UUID check is read, not run: Express decodes percent-escapes in params, so a raw id holding an encoded slash and dot segments could rewrite the upstream path that carries the vouch.
+   - ONE helper with ONE fetch: POST, Content-Type application/json, the caller's Authorization, x-tenant-id when present, the vouch for originate, a 60 s signal, jsonOrEmpty, status relayed verbatim, 502 BAD_GATEWAY on a throw.
+   - The body is read from the raw stream, capped at the gateway's own 1mb default, with 413 above the cap. No parser runs.
+   - The membership check cannot run at the gateway, which has no users-row read; that is why the organisation cells run at originate.
+3. PROOF.
+   - Gateway cells run through the REAL gateway app over loopback, in front of a stub originate that records method, path, body and headers (the ks955 and ks1084 idiom: RS256 tokens).
+   - Originate cells run through the REAL signatoriesRouter with a mocked authenticate and a mocked prisma that records each SQL text and its values (the ks593 and ks1868 idiom).
+   - Proposed, if it proves cheap: ONE chain cell per action. The real gateway app forwards to a loopback server that mounts the real signatoriesRouter with the REAL authenticate (JWT_PUBLIC_KEY fallback, originate middleware/auth.ts line 54) and a mocked prisma. Not measured yet.
+   - I will re-run the RLS probe on the branch's exact SQL text.
+   - Said plainly: no single run reaches gateway, then originate, then a real database.
+
+Q2. CLOSED PATH LIST (8 files: 2 product, 4 pinned tests, 2 new tests; no new product file; no yaml; no packages/shared)
+1. services/originate/src/routes/signatories.ts. BEFORE: authenticate only; the body's organisation is written; revoke and reinstate select by id plus tenant. AFTER: the decision function, the role gate, the membership gate (users row; the signatory row for revoke and reinstate), and the organisation added to the org arm's UPDATE WHERE.
+2. services/api-gateway/src/routes/proxy.ts. BEFORE: the GET only. AFTER: the three POST routes, the role-gate twin, the UUID check and one forward helper.
+3. originate __tests__/ks1868-signatories-nominate-catch-o77p2-unreadable-throw.test.ts. Coupled, one line (49): the mocked user gains role SYSTEM_ADMIN, so the new 403 does not pre-empt the database-throw path it drives (a platform role reads no row).
+4. originate __tests__/ks1868-signatories-write-routes-p2-unreadable-throw.test.ts. Coupled, one line (64), the same reason; its PATCH rows are unaffected.
+5. api-gateway __tests__/ks955-hand-forwards-carry-the-vouch.test.ts. Coupled: ROUTES (line 46) gains the three POSTs, each of which must carry the vouch. Its token is ISSUER_ADMIN, which passes the coarse gate.
+6. api-gateway __tests__/ks1240b-every-hand-built-gateway-fetch-is-bounded.test.ts. Coupled: the proxy.ts census (line 112) goes from 5 bounded fetches to 6 (one helper). The route table (270 to 273) gains three rows; its injected user is SYSTEM_ADMIN.
+7. NEW originate __tests__/ks2339-signatory-writes-are-platform-or-own-organisation-admin.test.ts.
+8. NEW api-gateway __tests__/ks2339-gateway-routes-the-signatory-writes.test.ts.
+Unchanged, with before and after: ks1868 read-routes and ks593 (they drive the reads only); ks1084, ks1238, ks570 (a new route that carries authenticateToken(true) passes the introspection); the gateway's ks1536 test.
+Guards per file, before to after (to be re-measured on the branch):
+- ks1536 baseline json: signatories.ts and proxy.ts are not listed, 0 to 0.
+- ks1701 G1: 0 to 0 for both files.
+- ks2125: no change.
+- ks781 LEG F, proxy.ts: routes 1 to 1, because the raw stream is not a parser.
+- ks1240b, proxy.ts: 5 to 6 (coupled edit).
+- check:test-types for the gateway: 0 new to 0 new.
+No baseline number rises.
+
+Q3. CELLS, MUTANTS, PROOF PLAN
+Cells: the brief's list, for EACH of nominate, revoke and reinstate:
+- Platform admins (SYSTEM_ADMIN, SUPER_ADMIN, Super_Admin, system_admin) act on a second organisation and are allowed.
+- ORG_ADMIN and ISSUER_ADMIN on their OWN organisation: allowed.
+- Both on ANOTHER organisation: 403, and no INSERT or UPDATE is called.
+- Nominate naming another organisation in the body, with userId equal to the caller's own: refused.
+- An org-less admin, and a caller with no users row: refused.
+- Refused: OWNER, VERIFIER, ISSUER_APPROVER, connector, admin, ADMIN, platform_admin, the U+0131 and U+017F spoofs (percent-encoded in any header), an array role and no role.
+- Unauthenticated: 401 at the gateway (stub not called) and at originate.
+- On an absent id: a platform admin gets 404 as built; a bound admin gets the same 403 as for another organisation.
+- Reinstate of an active signatory: 404 kept.
+- A stale-claim cell: the token claims organisation X, the row says Y, and the target is X: refused.
+- Gateway only: non-UUID and encoded-slash ids give 400 and are not forwarded; a body over 1mb gives 413 and is not forwarded; status relay (201, 403, 404, 409); 502 when originate is down; timeout.
+- Red-first on develop for every gateway route cell (develop answers 404 NOT_FOUND) and for every refusal cell at originate. Twins keep to status and side effect.
+Mutants: the brief's 13, plus (14) the gateway UUID check removed, killed by the encoded-slash cell, and (15) the body cap removed, killed by the 413 cell. Each mutant is anchored on its site's opening line with exactly one hit, compiles, and is killed by a named cell; a mutant that removes an import's last use keeps void x.
+Static legs, planted controls shown: tsc, eslint on every changed file, the ratchet, check:test-types. Suites WHOLE on both arms side by side: packages/shared, originate, api-gateway. Develop's sets are above; the branch must fail exactly KS-278.
+
+Q4. TIER 1 (a role and organisation gate on a signatory write surface). The round ends at READY FOR GATE; I merge nothing and deploy nothing.
+
+SUB-QUESTIONS, one at a time, each with my recommendation
+1. ApprovalQueue approve and pending (the NARROWING). The two routes in (g) reach transfer: approve takes the approver from the token, and pending/me reads the caller's own steps. The component is not mounted in the issuer app. KS-2052 (In Progress; PR 2243 merged) owns the transfer side. RECOMMEND: do not build; no ruling covers who may approve. You decide whether a Kam card or a ticket follows.
+2. Where the authority sits. RECOMMEND: originate is authoritative (role, membership and the write), and the gateway adds a coarse gate that asks the same shared predicate, as defence in depth.
+3. Role vocabulary. RECOMMEND: the platform arm is isPlatformRole; the org arm is isPlatformOrOrgBoundedRole AND NOT isPlatformRole. It reuses the shared predicates and adds no list. Its cost: it admits org_admin and issuer_admin in any ASCII case. The membership check bounds that, and I did not measure whether any token carries a case variant. ALTERNATIVE: the org arm EXACT (ORG_ADMIN or ISSUER_ADMIN), which needs a local two-name list (W 72nd's precedent for non-platform arms). Never isOrgBoundedRole, bare admin or ADMIN, platform_admin, or DOCUMENT_WRITE_ROLES.
+4. The caller's organisation. RECOMMEND: its users ROW (as KS-2309 does in originate gdpr.ts and as PR 2288 does in auth), never the token claim. A mutant and a stale-claim cell prove it. The token-claim sites (adminConfig.ts 1144, documents.ts 576) are not the pattern.
+5. Refusal shape and order. RECOMMEND: validators 400, then 401, then the role 403, then the membership 403. All refusals are 403 FORBIDDEN. The role refusal has one message, and the organisation refusal one message, identical for another organisation's id and for an absent or malformed id, so a bound caller cannot probe ids. A platform admin keeps the built 404 for an absent id.
+6. Gateway body handling and ks781 LEG F. RECOMMEND: the raw-stream forward (no parser; LEG F stays at routes 1), capped at 1mb with a 413. LISTED, not fixed: admin/create's raw read at 489 has no cap. Raising routes to 4 would be an exposure bound only you raise; I do not propose it.
+7. LISTED, NOT built, each yours to decide:
+   - PATCH /:id (originate 324; no role; it stays unrouted, so it is not reachable through the gateway);
+   - the three reads (154, 210, 270);
+   - whether the nominee userId must belong to the organisation (not ruled);
+   - the tenant a platform admin writes (the INSERT's tenant comes from the request; the organisation's tenant is never checked);
+   - revoke not writing revoked_by;
+   - nominate's organizationId and userId not validated as UUIDs (a platform admin's malformed value still reaches the cast: the KS-593 class);
+   - the issuer page T7 (Signatories.tsx line 95 sends the user's own id when it has no organisation).
+   RECOMMEND: none built in this PR.
+8. The yaml. RECOMMEND: OUT of this PR. The spec is not what blocks the writes (/api/workflows has no spec lines and works); adding the paths makes the gateway's method and auth gates apply, and brings the PR 2099 overlap.
+9. The coupled test edits (Q2 items 3 to 6). RECOMMEND: as listed, each with its reason in the PR body.
+10. Licences I need (the STAMP licenses MEASURE and this QUESTION only, so I have written NO config).
+   - At push time, in my own clone only: repo-local core.sshCommand, copied from the shared checkout by config --get and read back equal (value never printed), and core.hooksPath=.githooks.
+   - The author values go through GIT_AUTHOR_* and GIT_COMMITTER_* for the ONE commit, read from the shared checkout. No user.name or user.email is written anywhere.
+   - The branch is the ticket's own feature/ks-2339-api-gateway-has-no-route-for-the-issuer, cut from the develop your ANSWER names.
+   - The kit is copied from W 74th's and W 72nd's tools by counted derive, never edited in place.
+   - Also: may the stopped container s-w75-rls stay as it is for the branch re-run, and be listed at the wrap?
+
+DEPLOY NOTE (for the D seat)
+- Before this change, the three actions answer 404 at the gateway for everyone. After it, they work for platform admins and for organisation or issuer admins of their own organisation.
+- An admin with no organisation is refused, and the issuer page sends the user's own id when there is no organisation (T7), so that caller sees a refusal.
+- A platform admin with no organisation who nominates from the page sends a user id as the organisation and hits the FK (a 500).
+- W 72nd found all 3 Kintsugi ORG_ADMINs have no organisation (carried, not re-measured), so on Kintsugi org admins would nominate for no one until organisations are assigned.
+
+FAULTS DISCLOSED (mine)
+F1. Bash call 1 began with a cd to the project root (the harness cwd did not change). It read the brief-first feedback memory note ALONE together with the preflight file; the seat-boot note was never opened. The cwd print came at call 4: calls 2 and 3 were the inbox list and the BRIEF fetch.
+F2. Self-caught tool errors before any write: two counted-derive refusals (my expected counts were wrong; nothing was written), a python extractor error (the END$$ spelling), a BSD cat -A and a cut illegal-byte error.
+F3. An ls-remote from my own clone answered "Permission denied (publickey)". My clone has no ssh command by design (no config write before your ANSWER); this is not a deploy-key refusal. Develop was read through gh api and the shared checkout's ls-remote instead.
+F4. A judgment call, disclosed: the RLS measurement created a docker container (s-w75-rls, postgres:15-alpine, no published port). It is now stopped and not removed.
+
+LAUNCHER PREFLIGHT WARNINGS (verbatim, copied at boot from 4_Credentials/.launch_preflight_last.txt)
+# launch 2026-11-23T22:25:04Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 2 other live session(s) on this project: PID 90580 (up since Tue 24 Nov 09:11:13 2026), PID 29302 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+
+Meter: percent if window=1000000: 24.3 | if window=200000: 121.7 (>100 means the window is not 200K) (context_tokens=243456  (input=2 cache_read=242956 cache_create=498)), read 09:37:54 +1100
+Record: 5_Project_History/2026-11-24_seatW-75th/ (tools, evidence, mail). Waiting for your ANSWER; no code before it.
+
