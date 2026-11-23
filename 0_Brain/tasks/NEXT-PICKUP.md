@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 STATE 10:34 Tue 24 Nov, the 09:05 rotation's SUCCESSOR (statusline ctx:64%) - READ FIRST; supersedes every block below where they differ
+- **develop = e3e79b7317f14ebccc8bb14e2001bdbf85e517fb** (unmoved, gh as kksecura 10:33:22). Kam: nothing since 08:57.
+- **GATE 418 = GO WITH NOTES** at PR 2294 head 604f8ff60f8c73be25c8a9bd941da026fcfddc3b (tier 1; verdict 0_Brain/reference/2026-11-24_gate418-tier1-ks2339-signatory-writes/verdict.md; 0 Blocker, 0 Major, 8 Notes). NO fix round.
+- **LIVE: W 75th %387 OPUS** WRAPPING (told 23:33:04Z). NEXT: its WRAP -> score (strong: design measured, RLS probe, 164 RED cells, 23 mutants; deduct F4 container-without-asking) -> pane_close (identify its watcher by command line).
+- **IN FLIGHT: K 90th DRAFTER** (Agent, Sonnet): 0_Brain/reference/2026-11-24_drafter-seatK90/commission.md -> fleet/briefs_staged/2026-11-24_seatK90_merge.md (PR 2294, FF, tier 1, gate 418 the one authority, K 89th's six kit gaps fixed). Dies with a rotation: re-commission from the file. Then read WHOLE, stamp, launch Sonnet (row C5) after W 75th's pane closes -> plan -> READY -> verify at source -> GO (FF; develop + head re-asserted in the sending command; shape fleet/briefs_staged/2026-11-24_K89_go_2293.md) -> MERGED verify (one parent = pin, tree = expected).
+- **AFTER the merge:** a D seat round k44 for originate + api-gateway (Kintsugi first; also measure whether PR 2293's packages/shared comment moved /shared/dist bytes); a board seat for the ApprovalQueue follow-up + W 75th's LISTED siblings (ticket, not built); Kam's panel receipt when the routes are live on Kintsugi.
+- **OWED (unchanged):** KS-2342 census; PRs 2195/2159 need Wednesday's words; launcher first-action trap; Mon 2026-11-30 Stuart card; weekly consolidation lapsed since 10-19; INDEX refresh (last 11-20); container s-w75-rls listed for Kam's word.
+- **NO AGENT QUESTION OPEN.**
+
 ## 🔴 STATE 10:20 Tue 24 Nov, the 09:05 rotation's SUCCESSOR (statusline ctx:62%) - READ FIRST; supersedes every block below where they differ
 - **develop = e3e79b7317f14ebccc8bb14e2001bdbf85e517fb** (unmoved, gh as kksecura 10:18:36). Kam: nothing since 08:57.
 - **LIVE: W 75th %387 OPUS** HOLDING (told by mail 23:19:28Z): PR 2294 (KS-2339, tier 1), head 604f8ff60f8c73be25c8a9bd941da026fcfddc3b, 8 files = the closed list (verified at source); READY saved fleet/briefs_staged/2026-11-24_W75_ready_gate.txt.
