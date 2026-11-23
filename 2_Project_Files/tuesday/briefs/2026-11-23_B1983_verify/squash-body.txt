@@ -1,0 +1,27 @@
+A new library, Datasec.Suite.Jobs.Transport, holds HttpIppTransport,
+the HTTPS implementation of the job library's IIppTransport. It is its
+own assembly because the job library references no network code (its
+cells L04 and J04); it references the job library only and adds no
+package. The Jobs test project references it, so the root restore,
+build and test reach it with no solution line yet.
+
+One exchange is one POST of application/ipp to the host, port and path
+of the printer address (ipps://host:port/path, or https://). Plain ipp
+and http are refused before any connection; user information, a query
+or a fragment are refused. TLS trust is one pin: the SHA-256 of the
+leaf certificate the printer presents, compared in fixed time; the
+chain is not consulted, so an issuer's pin never admits its leaf. A
+refused handshake sends no request. HTTP/1.1 only, a new connection per
+request (Connection: close, no pooled connection), the body streamed
+chunked and written at most once, no proxy, no redirect, no cookie, no
+retry. Only a 200 application/ipp answer is handed back. Every failure
+of the exchange is one IppTransportException with a fixed message.
+
+Fifteen cells (30 cases) against a TLS stub printer on 127.0.0.1 that
+the tests start, with certificates made in the test. C# totals plus 30
+on both legs, the rules count plus 7. No device or printer has been
+reached: which port and path a printer model answers on, chunked
+bodies and HTTP authentication there are not measured.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
