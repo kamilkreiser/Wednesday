@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 70% 00:08 TUE 24 Nov, the 22:39 (23 Nov) rotation's SUCCESSOR - READ FIRST; supersedes every block below where they differ
+- **develop = 7af256b71a3bbd1c31193df4b62487c6ddcd2020** (PR 2289 KS-1701 squash, VERIFIED at source 00:06:01: ONE parent 8c2c24d37074, tree 789505563da2 = the GO's). THIRTEEN merges on 23 Nov. Card secuura-platform-role-spellings-ks1701-1123 --delivered. Kam: nothing new since 20:56:50 (23 Nov).
+- **K 85th %345 SONNET: MERGED, WRAP NEXT** -> read WHOLE, score, pane_close (its mail watcher may need --live-ok after identifying it by command line, as D 83rd's did).
+- **LIVE: W 72nd %342 OPUS** PR 2290 (KS-2316 follow-up: stub org scope, create cap up to STANDARD, auth admin gates ask the shared check), head 341185aab5a704992c64a4b944745142378c48a5, 1 commit, 16 files; READY FOR GATE tier 1; told to wait for the verdict (fleet/briefs_staged/2026-11-23_W72_answer_gate_running.md).
+- **SUBAGENT IN FLIGHT (dies with a rotation; re-commission from the file if no verdict.md):** GATE 414 TIER 1 OPUS: 0_Brain/reference/2026-11-24_gate414-tier1-ks2316-auth-followup/commission.md -> verdict.md. Its Q5 decides whether PR 2290 merges onto the MOVED develop 7af256b71a3b as it stands (both PRs touch the ks1536 json; the ks1701 guard is now on develop; the deferred lowering). NEXT: verdict -> W 72nd fix round (incl. any rebase/ks1701 lowering) or WRAP -> a K 86th drafter (shape 0_Brain/reference/2026-11-23_drafter-seatK85/commission.md; ADD 'every stage's rc is its script's rc, never its last echo') -> merge -> mark both 20:57 cards --delivered (secuura-users-stub-org-scope-ks2316-1123, secuura-org-admin-create-level-cap-ks2316-1123).
+- **DEPLOY (later, a D seat):** k42 = PR 2289's services (+billing, vc-issuer) and, once merged, PR 2290's auth (auth stays HELD on Kintsugi until mail: Kam's 16:18 ruling b on secuura-kintsugi-mail-delivery-1123; NO card owed).
+- **OWED:** as the 65% block (KS-2314 + KS-2331 to Done; the KS-1591 Unicode-fold ticket; the originate 502 label) + the 22:35 block's list.
+- **NO AGENT QUESTION OPEN.**
+
 ## 🔴 CHECKPOINT 65% 23:52 MON 23 Nov, the 22:39 rotation's SUCCESSOR - READ FIRST; supersedes every block below where they differ
 - **develop = 8c2c24d37074ecaffe9139e4719b19d1a1418595.** Kam: nothing new since 20:56:50. Panel receipt for k41 posted (bf-7c3ec0905350).
 - **KINTSUGI k41 DONE** (D 83rd WRAPPED, SCORED 0.95, pane %339 CLOSED): issuer a50544f06917, admin 3db089d03264, originate 99a169774149, gateway b2a1d1c7b931 at 8c2c24d37074; auth HELD; rollback tag pre-20261123k41. The D GO's 'nothing merges before your build' promise is DISCHARGED.
