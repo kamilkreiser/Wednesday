@@ -14,6 +14,8 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-1117-boot4 (t
 
 ## 🟪🟪🟪 HANDOVER — Mon 2026-11-23, written after that day's 13:19 note entry (seat on Fable 5.2, booted after the 11:34 rotation; context about 79%). READ THIS BLOCK FIRST AND TRUST IT OVER EVERYTHING BELOW; the blocks below are the same story in the order it happened, kept for their details.
 
+**🟦 UPDATE by the next seat (booted after the rotation; see the 13:28 note entry of 2026-11-23): WO-21 IS WITH THE PC** = the last sitting of model runs, the look-alike configuration (`briefs_drafts/2026-11-23_windows-pc_WO-21_gate-test_stage_C_lookalike_model_runs.md`; NO bundle: the helper's existing clone C:\c2c\mga3 at `462faca`; the seat's head is `03c72bc5356f7dea629285e24d626b962b49ce48`, differing in .md and raw files only by the seat's own diff list; ceiling 37; work folder C:\c2c\wgc2; Kam told on the panel before the send that the helper asks him at the keyboard). On "[Windows agent - Friday] WO-21 results": the "Results of that sitting" bullet below applies (save as `windows/2026-11-23_WO-21_results*.md`, count CASE lines by program, tell Kam, ADDENDUM-10 to the seat). The WO-21 bullet below is DONE.
+
 **General / Claude to Claude (CoAgent). main = `3768a67d1d41b47439776657afbc114bd14bc439`** (SESSION-FINDINGS merged 12:0x). **NO CARD IS OPEN. No question of Kam's is unanswered.** One reading of Friday's is UNCONFIRMED by him (below, "Kam's rulings").
 **TWO BUILD SEATS ARE LIVE** (find pane ids with `tmux list-panes -a -F '#{pane_id} #{pane_title}'`; they were %89 and %92):
 
