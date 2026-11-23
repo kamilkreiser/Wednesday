@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 70% 15:29 MON 23 Nov, the 13:11 rotation's SUCCESSOR - READ FIRST; supersedes every block below
+- **develop = b8470f5fd331** (unchanged since the 67% block). NINE merges today.
+- **LIVE:** **W 69th %306 OPUS** HOLDING for GATE 410 (told by mail; acked). **D 81st %312 OPUS** Kintsugi k39 under GO KINTSUGI (fleet/briefs_staged/2026-11-23_D81_go_kintsugi.md): OPTION (i) issuer-frontend + api-gateway ONLY; auth + originate HELD (R3: Kintsugi auth has NO mail transport); disk: no clear, build only if >= 60,000 -> its STATUS B -> GO LIVE-CHECK (LC-C only; KS-2294 'a mailed link opens one' stays UNMEASURED: no mail) -> panel receipt to Kam (its section 6 consequences under (i)) -> WRAP.
+- **SUBAGENT IN FLIGHT (dies with a rotation; re-commission from the file if no verdict.md):** GATE 410 TIER 1 OPUS on PR 2286 (KS-2314, head 1d906e3c0a57): 0_Brain/reference/2026-11-23_gate410-tier1-ks2314-platform-config-writes-platform-only/commission.md -> verdict.md -> W 69th fix round or WRAP -> a K 82nd (K 81st's FINAL kit manifest sha16 040ed311d2536d3e, 2857 rows; own 81 -> 82 is st -> nd).
+- **KAM CARD OPEN:** secuura-kintsugi-mail-delivery-1123 (rec a: set up mail on Kintsugi; default c: keep auth + originate held). On (a)/(b): a later D round ships what he picks.
+- **OWED:** k40 build-cache-clear Kam card before k40 (draft in 0_Brain/reference/2026-11-23_drafter-seatD81-kintsugi-k39/notes.md); S 115th board seat after gate 410 (issuer ORG_ADMIN Document Types/Workflows screens + DocumentTypesManager error-object crash; admin 'Platform Name' field; KS-2294 pointer to KS-2327..2330; stale 'merge to follow' on KS-2315/KS-2313); KS-2316 and KS-1701 lanes; launcher fix for the seat-boot memory read; Mon 2026-11-30 weekly Stuart card check; Stuart's answers tonight -> route.
+
 ## 🔴 CHECKPOINT 67% 15:07 MON 23 Nov, the 13:11 rotation's SUCCESSOR - READ FIRST; supersedes every block below
 - **develop = b8470f5fd331759f770aca7ae6077442773cf396** (PR 2285 KS-2294 squash, VERIFIED at source 14:46:02: tree fecc7e5ce3f3, one parent c673846dc3c2, 12 files). NINE merges today (2280, 2281, 2160, 2282, 2283, 2276, 2274, 2284, 2285).
 - **SCORED + CLOSED this seat:** K 80th 0.96, W 68th 0.93, K 81st 0.95.
