@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 STATE 07:27 Tue 24 Nov, the 07:21 rotation's SUCCESSOR, morning (statusline ctx:46% after the full brain load) - READ FIRST; supersedes the 07:21 block where they differ
+- **develop = bcc2d8a53ffd5e9da60550df52884c552b2174ad** (GitHub API 07:25:47). Kam: nothing since 20:56:50 (23 Nov). K 88th MERGED mail read WHOLE (saved fleet/briefs_staged/2026-11-24_K88_merged_2292.txt); its WRAP NOT YET IN (pane %372 mid-wrap at ctx 50%). NEXT on it: WRAP -> score -> pane_close (identify its watcher by command line).
+- **IN FLIGHT: k43 DRAFTER** (Agent, Sonnet): 0_Brain/reference/2026-11-24_drafter-seatD85-kintsugi-k43/commission.md -> fleet/briefs_staged/2026-11-24_seatD85_kintsugi_k43.md (issuer-frontend for PR 2291; pin bcc2d8a53ffd or 9a3f05ed2834 by measurement; auth HELD; KINTSUGI ONLY). Then read WHOLE, stamp, launch D 85th OPUS (row C6) after K 88th's pane closes.
+- **IN FLIGHT: W 74th DRAFTER** (Agent, Sonnet): 0_Brain/reference/2026-11-24_drafter-seatW74-ks2341/commission.md -> fleet/briefs_staged/2026-11-24_seatW74_ks2341_build.md (KS-2341 one-line scoped eslint-disable; STOP pre-named: BACKLOG.md line 892 tick). Then read WHOLE, stamp, launch Sonnet (row C2). Both drafters DIE with a rotation: re-commission from the files if the outputs are missing.
+- **OWED (unchanged):** KS-2342 census after KS-2341; Kam's two cards (KS-2331, KS-2339) when he rules; launcher first-action trap (project launcher work); PRs 2195/2159 need Wednesday's words; Mon 2026-11-30 Stuart card; weekly consolidation lapsed since 10-19; INDEX refresh.
+- **NO AGENT QUESTION OPEN.**
+
 ## 🔴 ROTATING NOW 07:21 Tue 24 Nov, the 01:31 rotation's SUCCESSOR, morning session (statusline ctx:80%) - READ FIRST; the ROTATION HANDOVER block below is current except where this says otherwise
 - **PR 2292 (KS-2333) MERGED + VERIFIED at source 07:20:56: develop = bcc2d8a53ffd5e9da60550df52884c552b2174ad** (ONE parent 9a3f05ed2834 = the pin, tree ea1ee5c9234f = the GO's expected MERGE tree, 3 files). Three merges today: 2290, 2291, 2292.
 - **FIRST WORK: K 88th %372 SONNET: its MERGED then WRAP mail** -> read WHOLE, score (scoreboard row at the top), pane_close (identify any live python by command line; --live-ok only if it is its own post-wrap watcher).
