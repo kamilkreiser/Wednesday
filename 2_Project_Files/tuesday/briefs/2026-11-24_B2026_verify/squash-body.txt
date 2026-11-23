@@ -1,0 +1,43 @@
+Four corrections to the lab tool's oxpd1 write and undo-owed verbs, with
+six new cells (19 cases) against a stub on 127.0.0.1.
+
+oxpd1 undo-owed says "nothing is owed" (exit 0) only when it read at
+least one undo list, every list holds an entry line, every line was
+read and no undo is owed. A folder that holds undo-list.tsv itself is a
+run folder and is refused before anything is read (exit 2). When no
+folder directly inside the folder given holds a list it prints "no undo
+list was read" and ends with exit 11. A list that is empty or holds
+only its header is named unreadable (exit 11).
+
+The read before an executed register now visits every child element of
+the read's result. Any element that is not AuthenticationAgentRecord in
+the result's own namespace, and any record without exactly one id
+there, ends the run with exit 10 and nothing written. A device that
+holds other agents only is still written to.
+
+--agent-name is refused (exit 2, before any folder or connection) when
+it holds a character XML 1.0 cannot carry: U+FFFE, U+FFFF or half of a
+surrogate pair alone. A well-formed pair is taken.
+
+The printed undo command carries every connection option of its
+register: --password-name, the pins, --soap-port, --addressing and
+--timeout-seconds, defaults included.
+
+The README states the new rules and four more limits: the order of
+undo-owed follows the recorded clock (ties by folder name), its owed
+line names the host and the id only, the host is compared as typed,
+and whether .NET sends a request again on a failed pooled connection
+is unmeasured.
+
+C# totals plus 19 on both legs, the rules count unchanged (no file is
+added). No project file, lock file, package, workflow line or path of
+the OXPd 1.x client changes. Still open, measured against the stub: a
+result is read by its child elements only (text, a comment or an
+attribute in it is not read), and inside a record an id of another
+namespace or another element is not read, so the register is sent
+past them; U+FFFF in the host of --agent-service or --prompt-page passes
+the parser and fails in the envelope writer; a run folder undo-owed
+cannot open is counted as a folder without a list. No device has been
+reached. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

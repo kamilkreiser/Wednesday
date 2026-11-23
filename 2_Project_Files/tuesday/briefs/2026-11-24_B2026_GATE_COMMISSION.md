@@ -1,0 +1,17 @@
+# B2026 GATE COMMISSION (G1 on FABLE, one reader, in-session, READ-ONLY) -- Datasec / OXPd_2: lane W2 ROUND 2 OF 2 (kit B2021, seat X61): gate B2016's FOUND 1 to 4 fixed in the lab tool
+
+Commissioned by Tuesday (s320). Tier G1, round 2 of 2 of lane W2 (round 1: gate B2016, GO WITH FINDINGS @ 67c24d1). **Model FABLE:** the product owner's word, Tuesday terminal 2026-11-24 about 08:12, "Use fable to review once you are ready." (C-79; EXPIRING-GRANTS row: Fable reviews only). Re-commission if `VERDICT.md` is absent. First line of `VERDICT.md`: `GATE B2026: GO`, `GO WITH FINDINGS` or `NO GO`, then `@ <head7> on main <main7>`. Return a 10-line summary. **Round 2 of 2: a NO GO here goes to Tuesday, who ships what is closed and tickets the rest (the two-NO-GO cap); grade each finding Blocker / Major / Minor / Info.**
+
+## FORM, FENCES AND DEPTH: identical to gate B2016's commission
+Read whole first: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-24_B2016_GATE_COMMISSION.md` (WHAT TO DO 1-6, WRITE ONLY, the fences). Everything there applies, with this lane's names in place of B2011's: kit `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-24_B2021_SEAT-X61_oxpd2-w2r2.md` (stamped by Tuesday 09:08; S2 BASE b0b26b60 with 2093/657; S4 Q1 a and Q2 a in words) and its drafter report `2026-11-24_B2021_DRAFTER-REPORT.md`; seat record `/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/1_Project_Definition/Briefs/2026-11-24_B2021_STATUS.md` (whole); the seat's tools `<project>/.tools/b2021/gate/`, logs `<project>/.tools/b2021/logs/`; branch `b2021/w2-lab-write-fixes` (the head the STATUS READY line names; re-read it by `gh api -X GET`); expected 2112 total / 0 failed, RULES 657.
+Round 1's verdict, your yardstick: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-24_B2016_verify/` (VERDICT.md, FOR-RECORDS.md).
+
+## WHAT ROUND 2 MUST ANSWER FIRST (each with its measurement, before anything else)
+1. **FOUND 1 closed?** Can `undo-owed` still print `nothing is owed` or exit 0 having read no entry? B2016's four shapes, and the kit's FOR TUESDAY list: a folder of symbolic links, a list file that is a folder, a list unreadable by permission, and any other you find.
+2. **FOUND 2 closed?** Does ANY child shape of the read's result outside HP's record shape let the register through: attributes, processing instructions, comments, mixed content, a record with an `id` of another namespace beside one of its own?
+3. **FOUND 3 and 4 closed?** Does a name XML cannot carry still reach the envelope writer, including through `--agent-service` and `--prompt-page` (the kit's H12, UNMEASURED)? Does the printed undo, run as printed, reach a device with options other than its register's?
+4. **What the fixes may have broken:** every landed cell of round 1 still green; the README sentences against the code at the head.
+These four lines decide whether Tuesday may lift the hold on `oxpd1 write --execute` (FOUND 1 and 2 are its lift conditions). Say so plainly in VERDICT.md's first five lines.
+
+## WRITE ONLY
+`/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-24_B2026_verify/` (VERDICT.md, FOR-RECORDS.md, landing.txt, pr-title.txt, pr-body.md, squash-subject.txt, squash-body.txt) and scratch `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s320/g2026/`. Main at drafting: b0b26b60; if main moved, give the MAIN MOVES form. Who decided: the coordinator (Tuesday), never the product owner.
