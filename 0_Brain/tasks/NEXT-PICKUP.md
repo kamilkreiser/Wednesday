@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 70% 12:53 MON 23 Nov, the 10:19 rotation's SUCCESSOR - READ FIRST; supersedes every block below
+- **develop = 8b0a768f28d4642fb3d4153171fe846595d69b5d** (PR 2274 squash, VERIFIED 12:29:58). SEVEN merges today (2280, 2281, 2160, 2282, 2283, 2276, 2274). Kam's KS-2313 + KS-2315 cards marked --delivered. Kintsugi k38 (8389ed294629) DONE; PRs 2276/2274 NOT on Kintsugi yet. **Next Kintsugi round: card 1006's cache clear FIRST** (free 66,559 MB vs 60,000 gate).
+- **LIVE:** **W 68th %294 OPUS** (KS-2294 pages, PR 2285 head 7c5b2f7d184d; waiting for GATE 409). **S 114th %300** (board: eleven licensed writes posting: T1 tokens-in-query MEDIUM, T2 KS-528 guard LOW, T4 rights-holder invite dead link + unread token MEDIUM, T5 issuer Login 'unreachable' for every failure MEDIUM, comment KS-2296, KS-2294 title, KS-1863 pointer) -> its STATUS: verify on Linear -> WRAP -> score + pane_close.
+- **SUBAGENTS IN FLIGHT (die with a rotation; re-commission from the file if output absent):** GATE 409 (Opus, tier 1) on PR 2285 -> verdict.md in 0_Brain/reference/2026-11-23_gate409-tier1-ks2294-verify-reset-forgot-pages/ -> W 68th fix round or WRAP -> a K seat. K 80th DRAFTER (Sonnet) -> fleet/briefs_staged/2026-11-23_seatK80_merge.md (commission 0_Brain/reference/2026-11-23_drafter-seatK80/commission.md; ONE row PR 2284 KS-2275) -> read WHOLE, stamp, launch K 80th; add PR 2285 as a row only if its gate is GO before the stamp.
+- **OWED:** Mon 2026-11-30 ~10:00 verify the first real weekly Stuart card + drawer file. Wednesday routes later: KS-2294 pointer to the new keys; stale 'merge to follow' clauses on KS-2315/KS-2313 comments. Queued lanes: KS-2314, KS-2316 (Opus design-first); KS-1701 after PR 2284; launcher cd/ssh fix (card secuura-launcher-boot-cd-ssh-fix-1122); KS-2325.
+- **Ledger today (this seat):** 10:29 capacity chained with a launch; 12:24 typed x-digit clock in a handover heading (tool-caught).
+
 ## 🔴 CHECKPOINT 65% 12:24 MON 23 Nov, the 10:19 rotation's SUCCESSOR - READ FIRST; supersedes every block below
 - **develop = bde7a70d054ed791da5df58f4f1f87fb119e685a** (PR 2276 squash, VERIFIED 12:12:39). Six merges today (2280, 2281, 2160, 2282, 2283, 2276). Kam's dashboard-delete card marked --delivered.
 - **KINTSUGI k38 DONE** (D 80th, scored 0.96, closed): runs 8389ed294629 on admin-frontend, mcp-server, originate, api-gateway; auth HELD (KS-2294); demo untouched (Stuart's nod). Panel receipt posted. **NEXT KINTSUGI ROUND needs card 1006's cache clear FIRST** (free 66,559 MB vs 60,000 gate); carries PR 2276 (gateway code), PR 2274, PR 2284 when merged.

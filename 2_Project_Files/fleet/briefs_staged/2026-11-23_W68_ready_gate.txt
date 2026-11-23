@@ -1,0 +1,102 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-23T01:37:47.000Z
+Subject: [Secuura/Blockchain-W -> Wednesday] READY FOR GATE KS-2294 (Seat W 68th)
+---
+Seat W 68th
+READY FOR GATE KS-2294. TIER 1 (Opus gate): pages that carry the reset, verify and claim tokens, and the claim-and-activate path.
+
+- PR 2285: https://github.com/Secuura/Distributed_Secuura/pull/2285
+  * Head 7c5b2f7d184de83a6c4e436c94a0335d24fd8174, ONE commit. Its parent is develop bde7a70d054ed791da5df58f4f1f87fb119e685a.
+  * Branch feature/ks-2294-the-reset-verify-and-invite-claim-mail-links. Tree worktrees/s-w68-ks2294, clean.
+  * 12 paths, all frontend/issuer, exactly the ruled closed list items 1-12 (push/paths_ks2294.txt). +1479 -0. Item 13 (fragments) was never asked for: the hook passed without it.
+  * Read back: open, base develop, 1 commit, 12 files, the only PR for this head. KS-2294 moved to In Progress when the PR linked (the GitHub integration).
+- Push: the second attempt, as ruled.
+  * 01:22:11Z to 01:36:27Z, 856 s, rc 0, VERIFIED by ls-remote: origin holds 7c5b2f7d.
+  * The hook ran 13 of 16 legs and nothing failed. Legs 3, 4 and 8 were SKIPPED (no local stack). Leg 14 shell suites: 131/131.
+  * Output: push/real2/push.out.
+- The first attempt (00:46:44Z, rc 1) was refused by leg 14 and landed nothing. Fix A followed your 01:04:48Z ANSWER, with your note wording. The guard file is untouched.
+- Develop moved during my local preflight: 8389ed294629 became bde7a70d054e (PR 2276, KS-2313, api-gateway only).
+  * As ruled, I rebased. merge-tree rc 0.
+  * The content of my 12 paths is byte-identical to the pre-rebase head d8ce2f79.
+  * Re-measured on the rebased tree: issuer whole 79/79, cells 59/59, guard 27/27.
+- Facts comment on KS-2294: id 141113d6, 01:37:09Z, read back identical; KS-2294 now has 3 comments. It states:
+  * the narrowing: item 2, mail delivery, stays open for a deploy seat or Kam;
+  * the D3 residual (access logs, Referer, the address bar before mount; a sibling ticket via you);
+  * the D4 residual (KS-2326 named);
+  * the found-outside items: the reset mail says 1 hour vs the 24 h token, the dead /register?invite= link, Login's error text, and the KS-528 guard's hole (your board item).
+
+LEG 14 AND PREFLIGHT READINGS
+- The KS-528 guard (scripts/__tests__/react_router_v7_portals.test.sh): develop 27/27; the refused commit 26/27 (G3, G6); the pushed head 27/27.
+- My local FULL preflight on d8ce2f79 (byte-identical content, base 8389ed29), push/preflight_local_d8ce2f79.out:
+  * rc 0 in 882 s;
+  * 13/16 legs ran, nothing failed;
+  * legs 3, 4 and 8 skipped (no local stack): its own words, "not a pass";
+  * shell suites 131/131.
+- On the rebased head the push hook ran the same preflight with the same result.
+
+FIGURES (REC/evidence)
+- Red first at develop 8389ed29: route cells 8/8 red by assertion, page files red at load. Two earlier invalid red runs were harness reasons, now stubbed in the routes cell with the reason written there.
+- Cells: 59/59 (verify 18, reset 22, forgot 11, routes 8). Issuer vitest whole: 20/20 at develop, 79/79 on the branch.
+- Mutants, FINAL cells (mutants_run3_final.txt): 19/19 killed, control 59/59 before and after, host CHECK OK. Each with the cells that killed it:
+  * M1: V2.
+  * M2/M2r: V7/R7.
+  * M3/M3r: V6/R6.
+  * M4: 6 cells.
+  * M5: 15.
+  * M6: V3.
+  * M7: R9 x2.
+  * M8: R8, R8b.
+  * M9: V8.
+  * M10: V13.
+  * M11: V10.
+  * M12: R5b.
+  * M13: V13, R14.
+  * M14: V3, R4, F3.
+  * M15: R8b.
+  * M16: F4.
+  * M17: 6.
+  * No equivalents.
+- packages/shared whole: 1742/1743 on both arms, the single KS-278 name.
+- Static (planted.json), clean then planted:
+  * tsc: 0, then 2.
+  * eslint: identical to develop (0 errors, the same 11 warnings, none in my paths), then 1 on a planted debugger.
+  * build: 0, then 1 on an unresolved import.
+  * bundle: 267.1 KB (develop 264.8, budget 450), then 1 at a 1 KB budget.
+- Browser proof, Playwright against my throwaway local stack (proof_01-04.png, proof_console_all.txt, evidence/playwright_mcp):
+  * verify 200: the row went to verified;
+  * reuse: 404;
+  * expired: the D4 text, and the row stays unverified;
+  * the sign-in link to forgot: the neutral text;
+  * reset: a weak password got the real 422, a strong one on the same token was set, and sign-in worked;
+  * D5: the signed-in session was ended;
+  * invite claim: invited/unverified/user became active/verified/owner, and sign-in worked;
+  * 0 of 6 tokens in 51 console logs and 51 snapshots.
+  * NOT covered: the gateway (CSRF, limiters) and nginx.
+
+WHAT THE GATE CAN REUSE
+- Trees:
+  * BASE: worktrees/s-w68-dev, at 8389ed29; develop has since moved, by api-gateway only.
+  * Throwaway host: worktrees/s-w68-proto, CHECK OK and byte-equal to the branch for the 12 paths. Never push it.
+  * Base clone: worktrees/s-w68-base.
+- Tools in REC/tools:
+  * apply_ks2294_w68.py ("check" only before a commit: it re-derives the App and Login edits from the tree's HEAD);
+  * cells_w68.py (filter "__tests__/ks2294-");
+  * mutants_w68.py;
+  * planted_w68.py;
+  * issuer_legs_w68.sh;
+  * preflight_local_w68.py;
+  * proof_up_w68.py + exec_w68.py + proof_w68.py.
+- Containers, RUNNING and offered to the gate, both labelled secuura.seat=w68:
+  * w68-ks2294-pg on 127.0.0.1:53477;
+  * w68-ks2294-redis on 127.0.0.1:53685.
+  At my wrap I STOP them, never remove.
+
+FAULTS (HANDOVER):
+- Boot: 3 cd calls before the BRIEF; two tracked template lines printed with their example values; W 67th's LINEAGE line shifted and restored; the first tsc leg pointed at the wrong path.
+- Since: a stray "cd /dev/null"; a helper printed 300 characters of a register body holding a throwaway local access token; one command printed a .env variable name with a presence count (no value).
+- My miss: leg 14 was not in my own legs before the first push. Said plainly; the full preflight now runs before a push.
+
+METER: 54.2 of 1M at record 2195 (transcript usage, measured 01:37:46Z)
+I merge nothing and deploy nothing. Watcher armed on (Seat W 68th).
+
