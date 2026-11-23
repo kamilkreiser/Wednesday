@@ -1,0 +1,27 @@
+# COMMISSION: draft the brief for the next Seat C (Secuura/Blockchain-C), KS-2331, a build seat on Opus
+
+Commissioned by Wednesday (the 17:03 rotation's successor seat), 2026-11-23. You are a DRAFTER: you READ and WRITE ONE FILE. You launch nothing, mail nobody, write nothing to Linear, GitHub or any project folder.
+
+## OUTPUT (the only file you write)
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-23_seatC_ks2331_build.md`
+Then reply with: the path, its line count, the PARTITION result and the ORDINAL at the top, and a list of every fact in the brief with the command or file you read it from. Say plainly anything you could not measure.
+
+## THE SHAPE TO COPY
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-23_seatW70_ks2316_design.md` (read WHOLE; same project, today, the newest build brief). Same sections and standing lines (no cd; credentials inside a python script, never argv; GIT_OPTIONAL_LOCKS=0 on shared-checkout git reads; the shared checkout is STALE, read code at the live develop through the GitHub API or the seat's own tree; the launcher's boot ls-remote is Kam's ruled line; shared inbox warning; after any compaction re-read the brief and STATUS whole; MEASURE FIRST then ONE plan QUESTION then WAIT; red-first + mutants; ONE commit ONE push; READY FOR GATE with the tier). Change only what this ticket needs. Every timestamp you write comes from `date` in a command, never typed.
+
+## THE TICKET
+- KS-2331 on the Secuura Linear board (read-only: the Linear key from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env` INSIDE a python script, never printed; GraphQL, key in Authorization header without Bearer; description and ALL comments with `comments(first:50)` sorted client-side). Filed today by Seat S 115th from gate 410's G410-2286-3 and Seat W 69th's finding. Quote its BLUF verbatim. Its two halves: (a) the issuer's DocumentTypesManager renders an object-shaped `error` as a React child and crashes to the error boundary (render the error's message as text; the delete and WorkflowsManager's create/delete ignore the status: show the refusal); (b) the issuer's ORG_ADMIN menu offers Document Types and Workflows, whose writes are platform-admin only since KS-2314 (PR 2286, squash a5ce6ee8b662).
+- AUTHORITY: no Kam card names KS-2331. Half (a) is a defect fix inside Kam's KS-2314 ruling (`decision_queue.sh show secuura-platform-config-who-may-write-ks2314-1122` = a: platform admins only write the five kinds); quote that verbatim under RULED BY KAM. Half (b) (hiding or keeping the two menu items for ORG_ADMIN) is a product choice: the brief tells the seat to MEASURE what ORG_ADMIN can still do on those screens (reads) and to put (b) as a plan sub-question with a recommendation; Wednesday decides whether it needs a Kam card. Wednesday's own ruling (quote it as Wednesday's, never Kam's): KS-2314's gateway half does not reach a box before this ticket's fix lands.
+
+## MEASURE (read-only)
+1. develop by `git -C /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files ls-remote origin refs/heads/develop` (GIT_OPTIONAL_LOCKS=0); Wednesday read a5ce6ee8b662f697b2b5fa405f5c67cea67aebc0 at 17:42:53.
+2. The code at that develop via `GH_CONFIG_DIR='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.gh-config' gh api repos/Secuura/Distributed_Secuura/contents/Blockchain/Dev/<path>?ref=<sha>` (read-only): `frontend/issuer/src/components/admin/DocumentTypesManager.tsx`, `WorkflowsManager.tsx`, `frontend/issuer/src/components/Layout.tsx`, `frontend/issuer/src/App.tsx`, and whatever error-text helper the issuer already has (grep for one; prefer reusing it over a new one). Record line numbers at that sha.
+3. PARTITION: every OPEN PR's files (`gh api .../pulls?state=open --paginate` then each `/files`), naming any that touches the lane's paths; and the live seat: Seat W 70th (pane Secuura/Blockchain-W, Opus) builds KS-2316 in `services/auth/src/routes/users.ts` and auth tests: this lane must touch NOTHING under services/. Expected lane paths: frontend/issuer only (plus its tests).
+4. ORDINAL: the newest 'Seat C <n>' in `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md` (`/usr/bin/grep -o -i -E 'seat c [0-9]+(st|nd|rd|th)'`, then pick the highest number) and `ls -d .../5_Project_History/*_seatC-*`; the new seat is that plus one, with the right suffix; the brief says RE-MEASURE.
+5. The issuer test harness: how existing issuer component tests run (vitest config, a jsdom test to copy), so the brief names the red-first cell shape (an object error renders as text, no boundary; a string error unchanged as control).
+
+## ROUTING
+Model claude-opus-5-5 (read from `/Volumes/DevMASTER/WEDNESDAY/0_Brain/dashboard/data/models_latest.json`, never typed). Tier: expect TIER 2 for half (a) (a frontend error-display fix, no auth change) and say if half (b) raises it. Usage gauge: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/dashboard/data/usage_wednesday.json`.
+
+## HOLDS to carry
+Client-facing words = ticket comments only; no deploy (a D seat's, under Kam's grant); demo only with Stuart's nod; tickets on Peter or Stuart stay theirs; no 'do not merge' self-hold sentence in the PR body; a sibling found outside the ticket is LISTED and STOPPED on, never fixed; a "while I was there" extension is a STOP question; no new colours (the issuer's existing styles only).
