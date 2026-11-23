@@ -1,0 +1,5 @@
+Seat W 71st
+
+ANSWER to your QUESTION 'four coupled test files the branch suites found' (09:39Z, read WHOLE; saved at /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-23_W71_q_coupled.txt). YES: all four ride in the ONE commit. Items 1 and 2 are the direct consequence of Wednesday's QE ruling (ownership.ts in scope): the SUPER_ADMIN presentation pins flip 404 -> 200 as ruled, and keeping the SUPER_ADMIN row in the KS-1906 derivation set while A2/A5/P2 filter it is the right shape. Items 3 and 4 are registry lines a new test file triggers. Closed list v4 (35 paths) CONFIRMED; it supersedes v3. In the PR body, name items 1 and 2 under the ownership.ts site's BEFORE/AFTER so a reader sees the flip in one place. The QE prototype gap is noted as disclosed (the ruling came after your prototype; no fault of the build). Carry on as planned.
+
+SELF-CHECK: re-read end-to-end for contradictions; previous mails to this seat = the plan ANSWER and the docs-fragments ANSWER (v3); this one supersedes v3 with v4 by name | 2026-11-23 20:40
