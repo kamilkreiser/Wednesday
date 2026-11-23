@@ -1,0 +1,30 @@
+=========== [INBOUND] 2026-11-23T21:38 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS B: k43 PHASE 1 complete, issuer-frontend live o
+[Secuura/Blockchain-D -> Wednesday] STATUS B: k43 PHASE 1 complete, issuer-frontend live on Kintsugi at bcc2d8a53ffd (Seat D 85th)
+Seat D 85th
+
+STATUS B, Kintsugi round k43: PHASE 1 COMPLETE. One service, no prune, auth held. Kintsugi only; demo not touched (no step, read or probe); production not touched. Waiting for GO LIVE-CHECK (Seat D 85th).
+
+BLUF: Kintsugi runs develop bcc2d8a53ffd5e9da60550df52884c552b2174ad for issuer-frontend (a50544f06917 -> 6007e9c2b02d, container 874fcfdc6739, StartedAt 21:22:03.660Z, running/healthy, restarts 0). KS-2336 (PR 2291) is in the running bundle; nothing else moved. +15 watch clean.
+
+Phase 1 record (details in STATUS 1 and 2; evidence/kintsugi/):
+- Build 21:10:58Z, one batch of one, rc 0; free 86,806 -> 86,759 MB. verify_build REBUILT 1 / UNCHANGED 32 / NOIMAGE 3.
+- contentfp: issuer CHANGED, 70 paths (68 renamed hashed js, index.html, the manifest), none outside the D85-Q2 class; every other row IDENTICAL; UNEXPECTED_ROWS 0.
+- LC-A, both columns, built image = running container: the six mounted sentences EQUAL (occurrences 1,1,1,2,2,2); old .error||"<sentence>" shape 1 -> 0 at all six; new refusalText call shape 0 -> 1 at all six; unmounted 0 = 0; controls equal.
+- Swap 21:22:01Z to 21:22:09Z, VERDICT OK; window 8.1 s by docker's own State.Health (no GET); censuscmp2 moved == {issuer-frontend}, untouched 34 of 35.
+- a4x: only issuer-frontend's StartedAt moved. api-gateway container 50864df1958a, image 264682d7bb8c, StartedAt 2026-11-23T16:00:29.957868736Z UNMOVED; auth 3c7d4d1a756a 2026-11-19T14:55:28Z UNMOVED; anchoring 2026-11-15T22:47:15.950724269Z UNMOVED (endgw EQUAL); admin-frontend 3db089d03264 UNMOVED.
+- REVISION head revision=bcc2d8a53ffd..., round_stamp k43, 294,128 B, sha16 1da5bdc0d55f9248, 47 revision lines; REVISION.pre-bcc2d8a53ffd-k43 = the k42 file (288,578, 35e7f0a7e0b31bf6); older .pre-* byte-identical.
+- KS-535 stops 0 at ITEM 0, before the build, after it, before the swap, mid-swap, after it and after the round.
+- +15 watch (21:22:01Z to 21:37:16Z): error-level 0 on vc-issuer, billing, originate, api-gateway, transfer, security, anchoring, auth (planted parser controls fire 1/0/1/0); restarts 0 on all nine read incl. issuer-frontend; OOM 0 over 737 readable lines. The issuer's log is nginx text the JSON parser cannot level, so I counted it directly (counts only, planted controls fire): 42 lines since its start, nginx [error]/[emerg]/[crit]/[alert] 0, 5xx 0, 4xx 0 (32 are the healthcheck's own requests). admin-frontend (control): 2 nginx error lines in its whole life since 12:27Z, at 14:xx and 20:xx UTC, both BEFORE this round; 0 since the swap; neither names the issuer.
+- End: batch.k43.done RC=0, swap.k43.done RC=0 SWAPPED=1; no runner alive; tracker 59 / 058; non_final 0; binds SAME; free 86,734 MB (well above 60,000; the k44 disk line is not a concern).
+- Files left on Kintsugi, nothing deleted: .rebuild-seatD85 (16 uploaded tools, batch.k43 and swap.k43 logs/progress/done, swaporder_k43.txt, the phase0 map, revision_entry_k43.txt, revision_tamper_copy_k43.txt, ctl/ order files); the pre-20261123k43 tag on 33 images. No envcopy.
+- Rollback (only on your word): docker tag dev-issuer-frontend:pre-20261123k43 dev-issuer-frontend:latest, then docker compose -p dev --profile phase2 up -d --no-deps --force-recreate issuer-frontend.
+
+For your panel receipt to Kam (BRIEF section 8, now measured where I could):
+- KS-2336 is deployed on Kintsugi in issuer-frontend. The Issuer Portal now shows the gateway's own message, or a fixed fallback sentence, instead of crashing when a request is refused with an error object. Screens a user reaches today: the document page's anchor action, the share dialog, the signatories page. The other five components are not in the bundle at all (tree-shaken; their sentences count 0 before and after), so users see no change there.
+- Unit-proven (gate 415, jsdom). The real browser behaviour on a refusal is UNMEASURED live (no login, no render, no GET).
+- Signatories nominate, revoke and reinstate still do not work (no gateway write route, gate 415 G415-6): they now show a message instead of crashing.
+- KS-2333: a test guard, nothing deployed. KS-2316 and its follow-up: NOT on Kintsugi (auth held, no mail transport).
+- The Issuer Portal was unavailable for about 8 seconds during the swap; no API service was touched.
+
+Phase 2 plan on your GO LIVE-CHECK: LC-A in the running container (lcafe running, both columns; image id read from the container); LC-B the census again (i0extra, orgadm, padm2) EQUAL to ITEM 0. No login, token, render, GET, account or audit row.
+

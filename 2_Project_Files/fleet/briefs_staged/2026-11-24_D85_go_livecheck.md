@@ -1,0 +1,7 @@
+Seat D 85th
+
+Your STATUS B (21:38Z; saved at /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-24_D85_status_b.txt; read WHOLE by Wednesday) is ACCEPTED: PHASE 1 complete; Kintsugi runs develop bcc2d8a53ffd for issuer-frontend (6007e9c2b02d, container 874fcfdc6739, running/healthy, restarts 0); verify_build 1/32/3, contentfp 70 paths all in class, LC-A every row as predicted in the built image and the running container; window 8.1 s; only issuer-frontend's StartedAt moved; REVISION k43; KS-535 stops 0 throughout; +15 watch clean (the nginx log counted directly with planted controls). Your figures stand on your reads.
+
+GO LIVE-CHECK (Seat D 85th): run your Phase 2 plan exactly as written: LC-A in the running container (lcafe running, both columns, the image id read from the container); LC-B the census (i0extra, orgadm, padm2) EQUAL to ITEM 0. No login, no token, no render, no GET, no account, no audit row. Kintsugi only.
+
+Then STATUS C, then WRAP as your brief's section 16 (HANDOVER FINAL first with the per-service bases after this round, next stamp k44, priors 32; the BusyBox grep finding in the KIT section; the swaplaunch right-reason miss in DECLARED). Next rows to name in the wrap: auth HELD (needs mail delivery on Kintsugi); PR 2293 (KS-2341, a comment in packages/shared source) is being merged by Seat K 89th now: a k44 D seat measures whether any image changes; PR 2099 (open); PRs 2195 and 2159 (need Wednesday's words); DEMO only with Stuart's nod.

@@ -1,0 +1,8 @@
+Seat K 89th
+
+ANSWER to your plan confirmation (21:44Z; saved at /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-24_K89q_D85wrap_batch.txt; read WHOLE by Wednesday). PLAN CONFIRMED AS WRITTEN at develop bcc2d8a53ffd5e9da60550df52884c552b2174ad (read by Wednesday from the GitHub API in the command that wrote this mail; still FF). Proceed: the re-key, the hand tool, the FF derive (pin and the head's own full tree as arguments), your clone and worktrees, the measures under the load gate, ONE STATUS at SET-UP CLOSED with the measured READY forecast, then READY; then WAIT for the GO.
+
+Your readings stand on your reads: kit manifest EQUAL (3348 rows, c0bf6d9f19c0ba95, the planted control fires); 25 of 25 tool sha16 equal to the BRIEF; PR 2293 head 5d6dd085cb78 = gate 417's, one key in the title; the donor HEAD = the PR head, porcelain 0 (the 97-blob equality re-run comes at set-up, as you plan).
+The preflight's two other sessions: PID 17274 (since 07:35) is consistent with Seat D 85th's launch, which has now WRAPPED and whose pane Wednesday is closing; PID 29302 is not settled by you and not by Wednesday: not a STOP (your item (a)), say so in DECLARED.
+Your boot faults are received as declared (the launcher's first-action text: Wednesday's owed launcher work). The launcher's 'show Kam the plan' line is answered by this mail: Wednesday's GO counts as Kam's word for starting work inside his standing grants (card secuura-wednesday-go-counts-as-kams-word-1030 = a); Kam keeps his veto. Mail goes to Wednesday only.
+Live seats after this mail: none but you (Seat D 85th wrapped).
