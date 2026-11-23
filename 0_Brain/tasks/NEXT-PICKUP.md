@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 50% 04:05 Tue 24 Nov, the 01:31 rotation's SUCCESSOR (statusline ctx:50%) - READ FIRST; supersedes every block below where they differ
+- **develop = aff83df1b23d** (unmoved). Kam: nothing since 20:56:50 (23 Nov). k42 DEPLOYED on Kintsugi (D 84th 0.96, closed).
+- **LIVE: C 46th %357 SONNET** WRAPPING (PR 2291 KS-2336 at head 1dbf0e8ea9ac; gate 415 GO WITH NOTES, NO fix round, NO docs fragment: fleet/briefs_staged/2026-11-24_C46_answer_gate415_wrap.md). NEXT: its WRAP -> score + pane_close (identify any watcher by command line).
+- **LIVE: S 117th %360 SONNET** WRAPPING (KS-2339 High filed, KS-2330 comment 74d1dd1c, KS-2314 archived: all VERIFIED at source by Wednesday). NEXT: its WRAP -> score + pane_close.
+- **IN FLIGHT: K 87th DRAFTER** (Agent, Sonnet): 0_Brain/reference/2026-11-24_drafter-seatK87/commission.md -> fleet/briefs_staged/2026-11-24_seatK87_merge.md; dies with a rotation: RE-COMMISSION from the file if the output is missing. Then: read WHOLE, stamp, launch K 87th Sonnet (row C5), plan -> READY -> verify at source -> GO (develop + head re-asserted in the sending command; shape fleet/briefs_staged/2026-11-24_K86_go_2290.md, no waiver) -> MERGED verify.
+- **06:00:** post the k42 receipt (0_Brain/reference/2026-11-24_k42-receipt/panel_receipt_draft.md; ADD the overnight board line: KS-2339 High filed for the signatories write routes) via chat_reply.sh; morning sweep + morning card; CARDS: (1) KS-2331 browser check as an ORG_ADMIN (default stays open); (2) WHO MAY nominate/revoke/reinstate signatories and for which organisation (originate checks authentication only; KS-2339) before any gateway forward (default: no forward until ruled).
+- **OWED (next board seat):** a backend ticket for G415-3 (transfer delegations create/revoke + workflows approve return raw error.message as 400). Plus the unchanged list (launcher items; PRs 2195/2159; Mon 2026-11-30 Stuart card; consolidation lapsed since 10-19; INDEX refresh).
+- **NO AGENT QUESTION OPEN.**
+
 ## 🔴 STATE 03:24 Tue 24 Nov, the 01:31 rotation's SUCCESSOR (statusline ctx:44%) - READ FIRST; supersedes every block below where they differ
 - **develop = aff83df1b23d** (unmoved). Kam: nothing since 20:56:50 (23 Nov).
 - **DONE this seat:** K 86th 0.95 closed; S 116th 0.96 closed (KS-2314 Done; KS-2333..KS-2338 filed; KS-1803 evidence; KS-2331 HELD OPEN on its own browser-run How to confirm); **Kintsugi k42 DEPLOYED** by D 84th 0.96 closed (vc-issuer, billing, originate, api-gateway at aff83df1b23d = KS-1701; auth HELD; LC-A/LC-B equal; gateway container now 50864df1958a; next stamp k43).

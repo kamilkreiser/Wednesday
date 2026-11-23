@@ -1,0 +1,221 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-23T16:58:53.000Z
+Subject: [Secuura/Blockchain-S -> Wednesday] QUESTION: plan confirmation and drafts for licence (Seat S 117th)
+---
+Seat S 117th
+
+QUESTION: plan confirmation and drafts for licence. Board seat, claude-sonnet-5-5, row C7, pane Secuura/Blockchain-S. NOTHING has been written to Linear, GitHub, the extranet or any box. Everything below is read-only work plus files in my own record folder.
+
+BRIEF: subject "BRIEF (Seat S 117th): board seat, closed list of three", stamp 2026-11-23T16:41:07Z, five seconds before my launch stamp 16:41:12Z. I read it to its PROVENANCE line (line 39) and S 116th's HANDOVER whole. Ordinal re-measured on history: seat s 116th 1, seat s 117th 0. REC: 5_Project_History/2026-11-24_seatS-117th/.
+
+PIN USED: develop aff83df1b23d3de29479034d1882b7601aac5510 (gh api ref read at 16:51:54Z; unchanged since the BRIEF). PR 2291 read at 16:51:54Z: open, head 1dbf0e8ea9ac, 1 commit, 10 files, mergeable_state unstable. Every cited line below was re-read at the pin through the GitHub contents API or my blob fetches (40 gateway source files, 95 issuer source files, 70 nginx, compose and deployment files, 2 backend route files); nothing is quoted from the BRIEF or from C 46th's plan unread. The two staged files the BRIEF names (C 46th's plan QUESTION and READY mail) and the archive-rule learning were read WHOLE from the Wednesday folder, read-only.
+
+## 1. BLUF: where my reads differ from the BRIEF (Q1 to Q3 ask you to rule)
+
+(a) ITEM 2. The BRIEF says ONE new Low ticket. KS-2330 (Backlog, Medium 3, board account, filed 2026-11-23T01:53Z) already records the cause: its BLUF says every failed API call in the issuer portal reaches its caller as a plain message-and-code object with no response, because the interceptor sanitises every exit; it counts 15 readers of the response in 8 issuer files (naming ShareDialog, RecertifyDialog and DocumentDetail) and says it did not read them; its "Suggested direction" is the contract choice (pass the original error through, or read the sanitised shape). By your owner rule I recommend an EVIDENCE COMMENT on KS-2330 (draft C2). The BRIEF's new Low ticket is drafted too (T2), for you to choose instead, never both.
+
+(b) ITEM 1 is narrower than the BRIEF reads. The approve and pending half is already on the board: KS-2052 (In Progress) says twice that the gateway does not carry the steps path (its text relays Seat W 29th's reading; its comment 12c9785e states it) and its comment be785962 that ApprovalQueue has no render site. So T1 covers the signatories writes only and points at KS-2052 for the rest. Also: KS-712 (Deployed to UAT, archived, Peter's) is the only prior mention of the signatories gap ("code exists, gateway does not route it ... worth a separate decision", 2026-08-28); I found no ticket that took that decision.
+
+(c) ITEM 1, one more fact that changes how the ticket reads (it is in T1; Q3 asks whether it also gets its own ticket). Originate's signatories routes check authentication only: no role is read in the file, and nominate inserts the request body's organisationId and userId with no check that the caller belongs to that organisation. nginx answers /originate/ with a 404 in all three configs, so the missing gateway route is today the only thing in front of those writes. The fix in the BRIEF's shape (add the forwards) is therefore a ruling on who may write, not plumbing; T1 says so.
+
+(d) ITEM 3. KS-2314's creator and assignee are the board account (no client human): the BRIEF's STOP does not fire. The kit had no archive tool; archive_s117.py is new (DRY by default, allow-list KS-2314 only, 13 planted controls, 13 of 13 as expected).
+
+Small corrections, all re-read: the gateway DOES have POST /api/workflows/:workflowId/approve and /reject (routes/verification.ts lines 627 and 364), which are different paths from ApprovalQueue's steps path and its pending path (the gateway has neither); index.ts line 400 is the body-parser skip list (proxyPaths), a list that names the path but registers no handler.
+
+## 2. Launcher preflight (verbatim)
+
+# launch 2026-11-23T16:41:12Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 2 other live session(s) on this project: PID 62060 (up since Tue 24 Nov 02:35:05 2026), PID 85357 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+
+## 3. Faults, disclosed (all before the BRIEF unless stated)
+
+* Two Bash calls began with a cd (into 2_Project_Files, then into 4_Credentials); the harness moved my working directory each time. The first also ran git status, rev-parse and ls-remote in the shared checkout WITHOUT GIT_OPTIONAL_LOCKS=0 and without GH_CONFIG_DIR set (the launcher's boot ls-remote is Kam's ruled line; the missing lock variable is the slip). Read-only; no fetch, pull, checkout or write; HEAD and the untracked set unchanged.
+* The cwd print was NOT my first act: it came in my sixth Bash call, after the BRIEF fetch.
+* The second call also printed the NAMES of the variables in the project .env (no values). The BRIEF's rule says never print them.
+* I read the feedback memory note about BRIEF-first, the 2026-11-24 daily note and the first 250 lines of the 2026-11-23 daily note before the BRIEF. The seat-boot memory note was NOT opened.
+* After the BRIEF: no cd, no key in argv (every keyed call reads the project .env inside python), no gh auth status, no rm (nothing removed or moved), 0 sub-agents, no extranet call beyond the launcher hook's summary and no api/seen, GitHub reads only through the project GH_CONFIG_DIR. One zsh word-split slip (a command stored in a variable) failed before it ran. My own draft builder refused a bare file name (api.ts) before anything was written; fixed with the path. The Wednesday-folder reads are the three files the BRIEF names.
+* Kit declared changes (evidence/declared_changes.md): S117-D0 (13 tools derived by a counted shift, same-day form, python counts equal grep counts, 0 failures; tree_s117 by the same count), S117-D1 (the comment tool's DRY twin, allow-list KS-2330, REAL forced False; the REAL comment tool's allow-list is EMPTY), N1 ctx_s117.py (read-only), N2 build_drafts_s117.py, N3 archive_s117.py (new), N4 am_s117.py (copied).
+
+## 4. Method and the live search
+
+* One live snapshot of every KS issue at 16:42Z: 2,327 issues (max KS-2338, 1,487 archived), title, description and ALL comments; three tickets needed paging past 50 comments (KS-1868 90, KS-772 144, KS-485 148), so no comment is unread. Local literal search; the controls held before any result counted: positive msgpackr finds KS-1379, a nonsense token finds 0, and the case-sensitive U+0131 term finds 2 tickets where the case-insensitive one finds all 2,327.
+* Terms searched, all states, archived included (full output in evidence/srch_item1_a_s117.out, srch_item1_b_s117.out, srch_item1_c_s117.out, srch_item2_a_s117.out, srch_item2_b_s117.out). Item 1: signatories with gateway (14 tickets), proxy (10), route (19), 404 (9), spec (7), role (10), ORG_ADMIN (6), membership (0), "any authenticated" (0); nominate (5); reinstate (10); the path /api/signatories (8); workflows/steps (2); steps/ (2); pending/me (3); ApprovalQueue (3); "approve and gateway" (89, read by title only); "no route" (83, same); unrouted (9); client-errors (8); "code exists, gateway" (1); "authorised signator" (1). Item 2: sanitizeErrorForUser (1), API_ERROR (2), interceptor (12), err.response with issuer (4), response?.data?.error (2), sanitizeError (1), ShareDialog (4), RecertifyDialog (2), DocumentDetail with error (4), csrf with issuer (29, read by title), "CSRF_ and code" (15, same), "dead branch" (6), "fallback and issuer" (93, read by title).
+* Matching passages read for every candidate whose hit was not clear from its title: KS-40 (the pending/me hit is a different route, /api/disclosure/requests/pending/me), KS-712, KS-593, KS-1084, KS-2052, KS-772, KS-485, KS-2312, KS-486, KS-2229, KS-1945, KS-2331, KS-2294; KS-2330 and KS-2336 WHOLE (comment 6daf6763 read live).
+
+## 5. Per item: search, measurement, proposal
+
+ITEM 1 (the gateway has no signatories write routes). Open tickets that mention signatories with gateway, proxy, route or 404: KS-485, KS-593, KS-772, KS-1083, KS-1084, KS-1868, KS-1945, KS-2312, KS-2331, KS-2336. Read: none says the three writes are unrouted except KS-2336's facts comment (the source). KS-593 comment 4cb5d5ca says GET /api/signatories/check answers 404 at the gateway (a different route). KS-1084 is about the GET's tenant header. The only prior statement is KS-712's description line (closed). KS-2052 owns the approve and pending half. So: no open owner; T1 is a NEW ticket. Measured at the pin (T1 carries every line number): one signatories handler in 40 gateway source files (GET, proxy.ts 725, control found at 1173); the spec has 0 of 41,696 lines (control 27); the method gate and auth gate act only on spec paths (index.ts 1095 to 1097 and 1109), so a POST falls to the terminal 404 (index.ts 1170 to 1177); no nginx or compose config names the path; originate has seven routes at /api/signatories (index.ts 313), the gateway forwards one. NOT measured by anyone (said in T1): a live run through a gateway. Priority: High (2) as you proposed; my reason is three of the routed page's four calls cannot succeed through the gateway; against it, no live run and the intent is unknown (KS-712 said "dead code or an unrouted service"). Q2.
+
+ITEM 2 (issuer DocumentDetail, ShareDialog, RecertifyDialog). Search finds ONE open owner of the interceptor's behaviour: KS-2330 (whole read above). KS-2336 and KS-2331 hold the render crash. Measured at the pin: all three sites call the axios api instance, so every failure is the interceptor's no-response object (api.ts 206 to 217, 231 to 235, 275); each always shows its fixed sentence (RecertifyDialog's names a cause, "ensure the document has been verified first", for every failure); PR 2291 changes DocumentDetail 277 and ShareDialog 101 only to a safe read (per its plan and facts comment; I did not read its diff) and does not touch RecertifyDialog. New facts for the owner: the CSRF branch tests the code at the top level while all five gateway CSRF refusals nest it under error (csrf.ts 385, 409, 429, 439, 459; checked by program, 5 of 5 nested); sanitizeError maps status to a fixed table sentence (every 409 reads "This document has already been certified."), so showing err.message is not the server's words; DocumentUpload already falls back to err.message and its two code branches cannot fire. Proposal: C2, the evidence comment on KS-2330 (Q1). T2 (Low 4) only if you rule it.
+
+ITEM 3 (archive KS-2314). Done since 2026-11-23T15:19:21Z; creator and assignee the board account; not archived; 3 comments (38cc481d, 735781cd, closing 79555ab4, newest); the closing comment is a BLUF and holds the exact words "no live check possible: needs an org-admin session and a browser". Rule read whole (the 2026-10-10 learning): archive a Done ticket that owes no live run; a seat with the project's identity does it. Tool: archive_s117.py (DRY by default; DRY allow-list KS-2314; REAL needs a declared edit naming your ANSWER). Controls 13 of 13 (evidence/archive_tool_controls_s117.txt): positive DRY; a key outside the list; not Done (In Progress and Backlog); client-human creator (KS-2264 and KS-712, both Peter's); already archived; wrong comment count; unknown closing comment; closing comment not newest; newest comment without the words (KS-771); REAL refused while the allow-list is empty; REAL with a plant refused. Read-only schema introspection: issueArchive and issueUnarchive exist. Four other Done tickets are not archived (KS-2266, KS-2264, KS-1763 are Peter's; KS-771 is the board account's with no closing words): not mine, named for your routing.
+
+## 6. Licence table (sha256 of the exact file bytes; the filer and the comment tool post these bytes and nothing else)
+
+- T1-title bf319bd39b226cc89ab9c768290ea1ba5a7ca114ee2ee9fa9ed6fb8ae6965161
+- T1 e7e20603fd1ed7467c83f5db6d4bcd6c662bfa954539ca7a33fe84d9fc3bfce6
+- C2 cbe0cb38246c86134c282fbf2a4314ba43d15331d297a733ae67052f91b8b4ba
+- T2-title c1b12179e25e5492db840f855506d8878235193faf3b9b722127168b7dbd057f
+- T2 a5f4b3900007228d1537bdee196784e45f4b17198b34e682c591ecc3c93a039d
+- A3 cf5e6355db2af009795835fea99ed9395cce2f0e077dfd19d7b989bd970ab71c
+(ids T1-title, T1, C2, T2-title, T2, A3; the files are under drafts/)
+
+Priorities proposed: T1 High 2 (Q2); T2 Low 4 only if you choose it over C2. Every ticket is filed on the board account, Backlog, by the filer (priority and assign-board required; DRY passed for both: "gates passed, nothing written"). The comment tool's DRY twin passed C2 on KS-2330 (0 comments, gates passed) and refused the three planted controls (wrong sha, key outside the list, wrong comment count). The REAL comment tool and the REAL archive tool both start with an EMPTY allow-list.
+
+## 7. LISTED, not drafted (the list is closed, so I stop on these)
+
+L1. Originate's signatories writes have no role check and nominate takes organisationId and userId from the body with no membership check (signatories.ts lines 22, 77, 80 to 105; for revoke and reinstate I read only the declarations and the 401). It is latent today because the gateway has no route. No ticket records it (signatories with role, ORG_ADMIN, membership and "any authenticated" found nothing). T1 carries it as the precondition for the fix; a separate Security ticket is yours to rule (Q3).
+L2. The issuer's CSRF message table: errorHandler.ts line 97 tests serverCode === 'CSRF_INVALID' and the table key is CSRF_INVALID (line 51); the gateway emits CSRF_ORIGIN_INVALID, CSRF_TOKEN_MISSING, CSRF_TOKEN_MISMATCH and CSRF_TOKEN_INVALID. The name never matches, on top of the nesting. One sentence could join C2 if you license it (Q4); I did not draft it in.
+L3. PR 2291 does not touch RecertifyDialog line 61 (C 46th listed it as a sibling). C2 and T2 name it; nothing else is proposed.
+
+## 8. Questions (my recommended answer first in each)
+
+Q1 (item 2). Which shape? Recommended: C2, the evidence comment on KS-2330 (the owner exists and asks for exactly these readers); T2 and T2-title NOT licensed. Alternative: license T2 and T2-title (Low 4) and not C2.
+Q2 (item 1 priority). Recommended: High (2) as you proposed, with the reason in section 5. Alternative: Medium (3).
+Q3 (L1). Recommended: no separate ticket now; T1's "Who may write has to be decided first" section carries it. Alternative: I draft a separate Security ticket in a follow-up round (nothing is written for it now).
+Q4 (L2). Recommended: leave it out (closed list). Alternative: add the one sentence; I redraft C2 and the sha changes.
+Q5 (order). Recommended: T1 first, then C2, then the ONE archive (A3) LAST, only after both read back; neighbour snapshot before (done at 16:56Z, 29 keys) and after with a planted control; a race check that exactly one new ticket exists; STATUS after the last read-back. I re-read PR 2291 and develop before each post; the dated words "read OPEN at 16:53Z" stay true as dated if it merges first, and I say so in the STATUS.
+Q6 (archive). Recommended: license A3 as written: DRY just before, ONE real run after a declared edit sets ARCHIVE_ALLOWED to KS-2314, read-back by id, undo noted (issueUnarchive).
+Q7. Watch: I watch the inbox for mail naming (Seat S 117th) and act only on that.
+
+## 9. Launcher boot report (for your routing; nothing here needs a reply)
+
+* Linear (read 16:43Z): 245 active for the board account (204 In Progress, 32 Todo, 6 In Review, 3 Blocked); newest updated KS-2336 (In Progress since C 46th's PR 2291), KS-1701, KS-2316, KS-2331, KS-2315. Backlog 626: Urgent 0, High 87, Medium 281, Low 237, None 21. Done in the last 24 h: 1 (KS-2314, moved by S 116th at 15:19Z). Comments naming Kam and due dates were not checked (no query for them).
+* Extranet (the launcher hook's summary, nothing else called): 6 tasks for Kam (decisions KS-721, KS-662 and KYC image disposal; the GitHub Actions billing task; Dev update your local; OpenAPI inline examples), 0 new replies, 1 document dated 2026-09-11. Not marked seen (Kam 2026-09-05: tickets are the channel).
+* Agent Mail: the project inbox shows the BRIEF to me plus mail for C 46th (READY FOR GATE KS-2336, ANSWER, gate 415 running) and D 84th (wrap); none is mine. The shared coagent inbox was not probed (the K 86th note says it answers 404).
+* Uncommitted project changes: none by me; the shared checkout shows untracked files only (read once, see section 3).
+
+## 10. The drafts (each file below is exactly what the tool will post; the sha256 is of the file's bytes)
+
+=== T1-title | drafts/T1_title.txt | sha256 bf319bd39b226cc89ab9c768290ea1ba5a7ca114ee2ee9fa9ed6fb8ae6965161 | 131 bytes
+api-gateway has no route for the issuer Signatories page's three writes (nominate, revoke, reinstate): each ends at the 404 object
+
+=== T1 | drafts/T1_body.md | sha256 e7e20603fd1ed7467c83f5db6d4bcd6c662bfa954539ca7a33fe84d9fc3bfce6 | 7585 bytes
+**BLUF:** The issuer portal's Signatories page sends three writes through the api-gateway: POST `/api/signatories` (nominate), POST `/api/signatories/:id/revoke` and POST `/api/signatories/:id/reinstate`. The gateway has no route for any of them, so each ends at its terminal 404 object and Nominate, Revoke and Reinstate cannot succeed through the gateway for any caller. The page is routed and in the built bundle, and originate serves all three routes, so the gap is in one layer. Read from code at develop `aff83df1b23d`, not run: no gateway was started and nobody has measured it live. Proposed High (2): three of the page's four calls cannot work. Seat C 46th found it while building KS-2336 (its facts comment 6daf6763 lists it as a separate defect); the filing seat re-read every point below at the pin.
+
+## What the code does (develop `aff83df1b23d`; paths under `Blockchain/Dev/`)
+
+* **The page.** `frontend/issuer/src/components/Signatories.tsx` takes `API_URL` as `/api` (line 51) and sends the list GET (line 106) and three POSTs: nominate (line 130), revoke (line 158) and reinstate (line 180). The page is routed (`frontend/issuer/src/App.tsx` lines 37 and 152) and in the menu (`frontend/issuer/src/components/Layout.tsx` line 57). Seat C 46th's vite build of the issuer (44 files) found its text in the built bundle.
+* **The gateway has one signatories route.** A case-insensitive search of the 40 non-test source files under `services/api-gateway/src/` finds a signatories handler in one place only: `GET /api/signatories` at `services/api-gateway/src/routes/proxy.ts` line 725 (authenticated, forwards to originate). Control: the same kind of search finds the workflow writes, for example `router.post('/api/workflows'` at line 1173 of that file. The path is also in the body-parser skip list (`services/api-gateway/src/index.ts` line 400), which names proxied paths but registers no handler. A search for wildcard and bare `/api` mounts finds no forward to originate (the only two `app.all` calls are stubs for `/api/integrations`, `services/api-gateway/src/index.ts` lines 953 and 956).
+* **Nothing else routes it.** The OpenAPI spec the gateway loads (`docs/openapi/secuura-api.yaml`, 41,696 lines) has 0 lines that name signatories (control: 27 lines name `/api/documents`). The spec is not what blocks the writes: `/api/workflows` has 0 spec lines too and its routes work. The gateway's method gate and auth gate act only on paths that are in the spec (`services/api-gateway/src/index.ts` lines 1095 to 1097 and 1109), so a POST here is not refused early and falls through to the terminal handler. All three nginx configs under `docker/nginx-gateway/` send `/api/` to the gateway pool (`docker/nginx-gateway/nginx.conf` lines 184 to 185, `docker/nginx-gateway/nginx-production.conf` lines 347 to 349, `docker/nginx-gateway/nginx-demo.conf` line 418) and answer `/originate/` with a 404. Of 70 nginx, compose and deployment files at the pin (tests excluded), the only lines that name signatories are five lines of a table definition in `deployment/azure/migrate/init.sql`.
+* **The answer.** `services/api-gateway/src/index.ts` lines 1170 to 1177 answer 404 with `{ success: false, error: { code: 'NOT_FOUND', message: 'Route POST /api/signatories not found', details: { documentation: '/api' } } }`. The message carries the method and path, and `error` is an object.
+* **Originate has the routes.** `services/originate/src/routes/signatories.ts`, mounted at `/api/signatories` (`services/originate/src/index.ts` line 313): POST nominate (line 58), GET list (154), GET `/check` (210), GET `/:id` (270), PATCH `/:id` (324), POST `/:id/revoke` (403) and POST `/:id/reinstate` (467). The gateway forwards only the list. The page calls only the list and the three POSTs; I did not look for callers of the other three.
+
+## Effect
+
+* Every press of Nominate, Revoke or Reinstate gets that 404 object. Before PR 2291 (KS-2336) the page stored the object and crashed to "Something went wrong"; with PR 2291 (read OPEN at 16:53Z, not merged) it shows the message "Route POST /api/signatories not found". The action does not happen either way.
+* No authorised signatory can be nominated, revoked or reinstated through the gateway by any caller, not only through the portal.
+* KS-712 (closed) listed `/api/signatories/*` (6) among routes where "code exists, gateway does not route it", called it "either dead code or an unrouted service" and said it was "worth a separate decision". I found no ticket that took that decision.
+
+## Who may write has to be decided first
+
+Originate checks authentication only on these routes: `signatoriesRouter.use(authenticate())` at line 22 and a 401 in each of the four write handlers (nominate line 77, PATCH 342, revoke 418, reinstate 479). No role is read anywhere in the file. The nominate handler takes `organizationId` and `userId` from the request body and inserts them (lines 80 to 105) with no check that the caller belongs to that organisation. nginx does not expose originate, so the missing gateway route is today the only thing in front of these writes. Adding the forwards is therefore a ruling on who may nominate, revoke and reinstate, and for which organisation, not only plumbing. I read the nominate handler through its error branches (lines 58 to 137); for revoke and reinstate I read the declarations and the 401 only.
+
+## Not measured
+
+A live run through a gateway; any deployed environment (a proxy in front of the gateway on a box could differ, and none is in the repo); callers other than the issuer page; whether the absence is intended.
+
+## How to confirm
+
+On a running stack, POST a JSON body to `/api/signatories` through the gateway with a valid token (`http://localhost:6882` locally): expect 404 with code `NOT_FOUND` and the message above. A GET on the same path with a valid `organizationId` answers from originate (KS-593 comment 4cb5d5ca read it as 200 through the edge on 2026-10-12).
+
+## Options, not chosen
+
+(a) Add the three write forwards (PATCH too, if wanted) in `services/api-gateway/src/routes/proxy.ts` beside the GET at line 725, with `authenticateToken(true)` as the GET has and the same tenant and vouch headers it forwards, plus the role rule for each write that the ruling above sets; add the paths to `docs/openapi/secuura-api.yaml`, after which the gateway's method and auth gates and the Akto and Schemathesis scans cover them. (b) Record that the page is not meant to write through the gateway and remove the three actions from it.
+
+## Related
+
+KS-2336 (the build that found it; PR 2291). KS-2052 (ApprovalQueue's approve and pending routes: the gateway does not carry them either; they are the transfer service's, at `services/transfer/src/routes/workflows.ts` lines 167 and 213, and the component is not mounted in the issuer app; the gateway's `/api/workflows/:workflowId/approve` and `/reject` in `services/api-gateway/src/routes/verification.ts` lines 627 and 364 are different paths; this ticket does not cover them). KS-712 (closed; named the unrouted `/api/signatories/*`).
+
+Searched the board before filing (all states, archived included; the tool's controls held): signatories with gateway (14 tickets), proxy (10), route (19) and 404 (9); nominate (5); reinstate (10); the path `/api/signatories` (8); workflows/steps (2); pending/me (3); ApprovalQueue (3); unrouted (9); "code exists, gateway" (1); signatories with role (10). Only KS-712 (closed) says the writes are unrouted, and no open ticket records the signatories writes. KS-2052 holds the approve and pending half.
+
+=== C2 | drafts/C2_comment.md | sha256 cbe0cb38246c86134c282fbf2a4314ba43d15331d297a733ae67052f91b8b4ba | 5629 bytes
+**BLUF:** Facts for this ticket's open question about the other callers. Three more issuer sites read `err.response?.data?.error` and always show their fixed sentence for the reason this ticket gives (the interceptor rejects with no `response`): DocumentDetail line 277 (anchor), ShareDialog line 101 and RecertifyDialog line 61. Nothing crashes at these three. Two more facts bear on the contract choice: the interceptor's CSRF branch can never match the gateway's body, and `sanitizeError` turns a status into a fixed sentence, so showing `err.message` is not showing the server's words. Read from code at develop `aff83df1b23d`, not run. Seat S 117th adds this from Seat C 46th's measurement on KS-2336 (facts comment 6daf6763), re-read at the pin; I changed nothing else and no priority.
+
+## The three sites (read at develop `aff83df1b23d`; paths under `Blockchain/Dev/`)
+
+* `frontend/issuer/src/components/DocumentDetail.tsx` line 277, the catch of `api.post` on the anchor route: `setError(err.response?.data?.error || 'Failed to anchor document')`.
+* `frontend/issuer/src/components/ShareDialog.tsx` line 101, the catch of `api.post` on the share route: the fallback is 'Failed to share document. Please try again.'
+* `frontend/issuer/src/components/RecertifyDialog.tsx` lines 59 to 63, the catch of `api.post` on the recertify route: the fallback is 'Failed to issue verification certificate. Ensure the document has been verified first.' That sentence names a cause and is shown for every failure, a 500 or an expired session included.
+
+All three use the axios `api` instance, so every failure passes the response interceptor in `frontend/issuer/src/services/api.ts` and is rejected as `{ message, code }` with no `response` (the 429 branch at lines 206 to 217, the 401 branch for `/auth/` URLs at 231 to 235, and the last line at 275). With nothing to read, each site always shows its fixed sentence. Nothing crashes at these three. PR 2291 (KS-2336, read OPEN at 16:53Z, not merged), per its plan and facts comment, changes DocumentDetail 277 and ShareDialog 101 to read `refusalText(err.response?.data, fallback)`, which makes an object-shaped body safe but leaves what is shown unchanged while `err.response` is undefined; it does not touch RecertifyDialog.
+
+## The other readers in the same eight files
+
+* `frontend/issuer/src/components/DocumentUpload.tsx` lines 259 to 272 read `err.response?.data?.error` and then fall back to `err.message`, so this site shows the sanitised sentence, not a fixed one. Its two branches on `INSUFFICIENT_VERIFICATION_LEVEL` and `AUTH_PROVIDER_NOT_ALLOWED` (lines 265 to 269, the "Upgrade your identity" and "log in with a supported provider" suffixes) take the code from `err.response`, so they cannot fire through the interceptor.
+* `frontend/issuer/src/context/AuthContext.tsx` lines 230 to 231 read `response?.status` or `statusCode`; a sanitised rejection carries neither (only the 429 object carries `statusCode`). I did not analyse the effect.
+* `frontend/issuer/src/utils/errorHandler.ts` is the sanitiser itself (below). At this pin the pattern `.response.data` or `.response.status` is on 16 lines in these eight files (`services/api.ts` 5, `utils/errorHandler.ts` 3, `components/Login.tsx` 2, `components/DocumentUpload.tsx` 2, `context/AuthContext.tsx` 1, `components/ShareDialog.tsx` 1, `components/RecertifyDialog.tsx` 1, `components/DocumentDetail.tsx` 1).
+
+## Two facts for the contract choice
+
+1. The interceptor's CSRF branch (`frontend/issuer/src/services/api.ts` lines 220 to 227) tests `code` at the top level of the response body (`data?.code?.startsWith('CSRF_')`). Every CSRF refusal the gateway sends nests the code under `error` (`services/api-gateway/src/middleware/csrf.ts` lines 385, 409, 429, 439 and 459, each inside an `error: {` object), so the branch, which reloads the page, never matches. A CSRF 403 falls to the last line and is rejected sanitised.
+2. `sanitizeError` (`frontend/issuer/src/utils/errorHandler.ts` line 66) does not pass the server's words on. It maps the code or the status to a fixed sentence from a table (lines 17, 18, 32 and 42 hold four of them; the status switch is lines 85 to 116). Showing `err.message` at a site therefore shows that sentence: a 403 gives "You do not have permission to perform this action.", every 409 gives "This document has already been certified.", and a 500, 502 or 503 gives "Service is temporarily unavailable. Please try again later." It reads the server's code at the top level of the body (`error.response.data.code`, line 77), which the gateway's nested `error.code` never fills, so the status switch does the work.
+
+So the two directions this ticket's "Suggested direction" names each have a price. Passing the response through lets a site read the server's own text, and gives up what the interceptor's last-line comment says it is for ("Return sanitized error to prevent information leakage", line 274). Reading `err.message` is safe but is a fixed sentence by status, and a 409 always reads as "already certified".
+
+## Not measured
+
+A browser or any run; callers outside the issuer app; whether the gateway between the browser and a service changes a status.
+
+Searched the board before writing (all states, archived included; the tool's controls held): `sanitizeErrorForUser` (1 ticket), `API_ERROR` (2), `interceptor` (12), `err.response` with issuer (4), `ShareDialog` (4), `RecertifyDialog` (2), `response?.data?.error` (2), `sanitizeError` (1). This ticket is the only open one that records the interceptor's behaviour; KS-2336 and KS-2331 hold the render crash at the fetch sites.
+
+=== T2-title | drafts/T2_title.txt | sha256 c1b12179e25e5492db840f855506d8878235193faf3b9b722127168b7dbd057f | 141 bytes
+issuer DocumentDetail, ShareDialog and RecertifyDialog always show their fixed sentence: the response interceptor leaves no response to read
+
+=== T2 | drafts/T2_body.md | sha256 a5f4b3900007228d1537bdee196784e45f4b17198b34e682c591ecc3c93a039d | 6367 bytes
+**BLUF:** Three issuer sites read `err.response?.data?.error` for the sentence they show on a failed action: DocumentDetail line 277 (anchor), ShareDialog line 101 and RecertifyDialog line 61. The axios response interceptor rejects every failure as `{ message, code }` with no `response`, so each always shows its fixed sentence, never the server's words and never the interceptor's own message. A display limitation, not a crash. Read from code at develop `aff83df1b23d`, not run. KS-2330 owns the interceptor's contract (it records the same cause for the sign-in page and counts 15 readers it did not read); this ticket records what these three do and is filed only if the board wants them tracked apart from it. Proposed Low (4). Seat C 46th found it while building KS-2336 (facts comment 6daf6763); the filing seat re-read it at the pin.
+
+## The three sites (read at develop `aff83df1b23d`; paths under `Blockchain/Dev/`)
+
+* `frontend/issuer/src/components/DocumentDetail.tsx` line 277, the catch of `api.post` on the anchor route: `setError(err.response?.data?.error || 'Failed to anchor document')`.
+* `frontend/issuer/src/components/ShareDialog.tsx` line 101, the catch of `api.post` on the share route: the fallback is 'Failed to share document. Please try again.'
+* `frontend/issuer/src/components/RecertifyDialog.tsx` lines 59 to 63, the catch of `api.post` on the recertify route: the fallback is 'Failed to issue verification certificate. Ensure the document has been verified first.' That sentence names a cause and is shown for every failure, a 500 or an expired session included.
+
+All three use the axios `api` instance, so every failure passes the response interceptor in `frontend/issuer/src/services/api.ts` and is rejected as `{ message, code }` with no `response` (the 429 branch at lines 206 to 217, the 401 branch for `/auth/` URLs at 231 to 235, and the last line at 275). With nothing to read, each site always shows its fixed sentence. Nothing crashes at these three. PR 2291 (KS-2336, read OPEN at 16:53Z, not merged), per its plan and facts comment, changes DocumentDetail 277 and ShareDialog 101 to read `refusalText(err.response?.data, fallback)`, which makes an object-shaped body safe but leaves what is shown unchanged while `err.response` is undefined; it does not touch RecertifyDialog.
+
+## The other readers in the same eight files
+
+* `frontend/issuer/src/components/DocumentUpload.tsx` lines 259 to 272 read `err.response?.data?.error` and then fall back to `err.message`, so this site shows the sanitised sentence, not a fixed one. Its two branches on `INSUFFICIENT_VERIFICATION_LEVEL` and `AUTH_PROVIDER_NOT_ALLOWED` (lines 265 to 269, the "Upgrade your identity" and "log in with a supported provider" suffixes) take the code from `err.response`, so they cannot fire through the interceptor.
+* `frontend/issuer/src/context/AuthContext.tsx` lines 230 to 231 read `response?.status` or `statusCode`; a sanitised rejection carries neither (only the 429 object carries `statusCode`). I did not analyse the effect.
+* `frontend/issuer/src/utils/errorHandler.ts` is the sanitiser itself (below). At this pin the pattern `.response.data` or `.response.status` is on 16 lines in these eight files (`services/api.ts` 5, `utils/errorHandler.ts` 3, `components/Login.tsx` 2, `components/DocumentUpload.tsx` 2, `context/AuthContext.tsx` 1, `components/ShareDialog.tsx` 1, `components/RecertifyDialog.tsx` 1, `components/DocumentDetail.tsx` 1).
+
+## Two facts for the contract choice
+
+1. The interceptor's CSRF branch (`frontend/issuer/src/services/api.ts` lines 220 to 227) tests `code` at the top level of the response body (`data?.code?.startsWith('CSRF_')`). Every CSRF refusal the gateway sends nests the code under `error` (`services/api-gateway/src/middleware/csrf.ts` lines 385, 409, 429, 439 and 459, each inside an `error: {` object), so the branch, which reloads the page, never matches. A CSRF 403 falls to the last line and is rejected sanitised.
+2. `sanitizeError` (`frontend/issuer/src/utils/errorHandler.ts` line 66) does not pass the server's words on. It maps the code or the status to a fixed sentence from a table (lines 17, 18, 32 and 42 hold four of them; the status switch is lines 85 to 116). Showing `err.message` at a site therefore shows that sentence: a 403 gives "You do not have permission to perform this action.", every 409 gives "This document has already been certified.", and a 500, 502 or 503 gives "Service is temporarily unavailable. Please try again later." It reads the server's code at the top level of the body (`error.response.data.code`, line 77), which the gateway's nested `error.code` never fills, so the status switch does the work.
+
+So the two directions this ticket's "Suggested direction" names each have a price. Passing the response through lets a site read the server's own text, and gives up what the interceptor's last-line comment says it is for ("Return sanitized error to prevent information leakage", line 274). Reading `err.message` is safe but is a fixed sentence by status, and a 409 always reads as "already certified".
+
+## How to confirm
+
+On a stack, make the anchor, share or recertify call fail (an expired session, a document the caller may not share) and read the alert text: it is the fixed sentence above. Or a cell that rejects `{ message, code }` from `api.post` and reads the dialog. Not run.
+
+## Options, not chosen
+
+Settle the interceptor's contract once under KS-2330, then these three follow it. If a site is to change first: show `err.message` where `response` is absent, with the table sentence caveat above.
+
+## Related
+
+KS-2330 (the interceptor's contract; the sign-in page). KS-2336 (PR 2291 makes the read safe at DocumentDetail 277 and ShareDialog 101; it leaves what is shown unchanged). KS-2331 (the Document Types page's twin of the render crash).
+
+## Not measured
+
+A browser or any run; callers outside the issuer app; whether the gateway between the browser and a service changes a status.
+
+Searched the board before filing (all states, archived included; the tool's controls held): `sanitizeErrorForUser` (1 ticket), `API_ERROR` (2), `interceptor` (12), `err.response` with issuer (4), `ShareDialog` (4), `RecertifyDialog` (2), `response?.data?.error` (2), `sanitizeError` (1). The only open ticket that records the interceptor's behaviour is KS-2330.
+
+=== A3 | drafts/A3_archive.txt | sha256 cf5e6355db2af009795835fea99ed9395cce2f0e077dfd19d7b989bd970ab71c | 759 bytes
+ARCHIVE KS-2314 ONLY (Seat S 117th, licence token).
+Tool: tools/archive_s117.py, DRY by default; REAL only with KS-2314 in its allow-list, which a declared edit names after the licence.
+Gates the tool enforces before the one real call: team KS; creator and assignee are the board account; state Done (type completed); not archived; live comment count equal to --expect-comments (3); closing comment 79555ab4 exists, is the newest, was written by the key owner, starts with the BLUF marker and holds the words "no live check possible: needs an org-admin session and a browser".
+After the call: read back by id (archivedAt set, state still Done, comment count and description sha256 unchanged). Undo: issueUnarchive for the same id.
+No other ticket is touched.
+
+=== END OF DRAFTS (Seat S 117th)
+
