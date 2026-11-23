@@ -1,0 +1,32 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-23T04:35:16.000Z
+Subject: [Secuura/Blockchain-D -> Wednesday] STATUS 1: k39 build running (issuer-frontend + api-gateway, one batch), rsync 28/28, Phase 0 idfp = prediction, nothing swapped (Seat D 81st)
+---
+Seat D 81st
+
+STATUS 1, k39 under GO KINTSUGI 04:28:09Z option (i). BUILD RUNNING on Kintsugi, NOTHING SWAPPED. Demo was not touched.
+
+- Kit:
+  - rekey_b_d81.py re-keyed 71 B tools for the 2-service set (issuer-frontend, api-gateway LAST; HELD gains originate by counted edit, auth carried). Dry FAILURES 0, write FAILURES 0, every tool syntax-checked.
+  - Kit-trap grep with positive controls (evidence/kit_trap_grep.txt): k38's after-image ids, 'REBUILT 4', '4 / 29 / 3', cd0eddf32f99 and the k38 four-service order each read 0. Every k38 / 8389ed294629 hit left is a PRIOR, a base or a control, never a target.
+  - Census spec: 6 api-gateway rows. G1 'Organization still has users' and G2 'KS-2313: no transaction is wired for the organisation delete' are ADD 0->1. CTL rows: 'Organization not found' 2=2, 'WARNING (KS-2280)' 2=2, 'Platform admin access required' 1=1, 'Authentication required' 1=1. distpred 5.9.3 agrees on all 6. fixes_live: 7 rows; tooltest misses 0.
+- Driver controls (validate-only, nothing launched): 20 of 21 as wanted. o_real and o_sub are accepted; every refusal fires, including originate as HELD and mcp-server as not in k39. DECLARED: o_iss (issuer-frontend alone) reads accepted, rc 0, while the WANT text still files it under 'every other 2'. That is my re-key miss: the label is k38-era. rc 0 is the correct k39 answer, since it is a proper subset with no gateway.
+- Upload: 17 box tools into .rebuild-seatD81, hash-proved, differing 0.
+- Rsync (04:33Z):
+  - Dry, then real: sends 28 = the 28 Dev paths in 8389ed294629..pin, comm 0/0/28, deletes 0, no --delete. D 80th predicted 47 and sent 52; this round the delta is 0.
+  - Host source is now at the pin, including the held originate and auth source, as at k38 with auth. The running originate and auth are untouched.
+  - Compose config sha16 ab0598fd3392b393 SAME. Host yaml 78e3783c2bb6105d unchanged. Postrsync 10 of 10 ok (2 SYNC probes).
+  - Binds (ii): SAME 2, DIFFERENT 0.
+- Phase 0: pre-20261123k39 over 33 images, FAIL 0, idfp fc2cb24008e330c7. That equals the ITEM 0 prediction fc2cb24008e330c7; the k38 column control 3e71604248fe3c34 is EQUAL. Priors k12..k38 all INTACT.
+- Pre-build checks:
+  - KS-535 BEFORE_BUILD stops=0.
+  - Section 5 booleans unchanged: NODE_ENV_is_production=false on auth, originate and api-gateway; only CARDANO_NETWORK=preview reads published. The guard is inert.
+  - W11 re-check 04:34:25Z: nginx:1.30-alpine 8 of 8 ALL-EQUAL vs the running issuer image (control node:24-alpine 0 of 4).
+  - Usage gate OK (37%).
+  - free 66,552 MB, which is >= 60,000.
+  - ls-remote 04:34:37Z: develop = b8470f5fd331 = the GO pin; clone HEAD == pin.
+- Build: buildlaunch k39, ONE batch 'issuer-frontend api-gateway'. BATCH_RUN_START 04:34:42Z, box log .rebuild-seatD81/batch.k39.log. Tracked waiter wait_build_d81.sh kintsugi k39 1 enforces the 45,000 MB floor.
+
+Next: verify_build (want REBUILT 2 / UNCHANGED 31 / NOIMAGE 3), then postbuild_chain (census, osdiff, basecheck, contentfp TABLE read), then LC-A on the BUILT images before any swap, then preswap, the swap and postswap. STATUS 2 comes before the swap.
+
