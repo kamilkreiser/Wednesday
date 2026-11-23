@@ -1,0 +1,30 @@
+# COMMISSION: draft the brief for Seat W 70th (Secuura/Blockchain-W), KS-2316, design-first build on Opus
+
+Commissioned by Wednesday (the 17:03 rotation's successor seat), 2026-11-23. You are a DRAFTER: you READ and WRITE ONE FILE. You launch nothing, mail nobody, write nothing to Linear, GitHub or any project folder.
+
+## OUTPUT (the only file you write)
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-23_seatW70_ks2316_design.md`
+Then reply with: the path, its line count, the PARTITION result (section MEASURE 2) at the top, and a list of every fact in the brief with the command or file you read it from. Say plainly anything you could not measure.
+
+## THE SHAPE TO COPY
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-23_seatW69_ks2314_design.md` (read WHOLE; it is the previous W seat's brief, same project, same kind of change). Same sections, same standing lines (no cd; credentials read inside a python script, never argv; GIT_OPTIONAL_LOCKS=0 on shared-checkout git reads; the launcher's boot ls-remote is Kam's ruled line; shared inbox warning; MEASURE FIRST then ONE plan QUESTION then WAIT; red-first + mutants; ONE commit ONE push; READY FOR GATE tier 1). Also add this line to its boot section: "After any context compaction, re-read this brief and your STATUS file WHOLE before writing anything more." Change only what this ticket needs. Every timestamp you write comes from `date` in a command, never typed.
+
+## THE TICKET AND THE RULING
+- Ticket: KS-2316 on the Secuura Linear board (read-only: source `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env` INSIDE a python script for the Linear key; never print it; GraphQL, key in Authorization header without Bearer; read the description and ALL comments with `comments(first:50)` sorted client-side). Quote its scope sentence verbatim in the brief.
+- Kam's ruling, read it with `bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/decision_queue.sh show secuura-org-admin-user-writes-scope-ks2316-1122`: "Decision secuura-org-admin-user-writes-scope-ks2316-1122: a — Own organisation only (recommended)", ruled 2026-11-23 10:13:00 +11:00. Option a's detail and the card's default are the spec: an organisation admin may change (status, role, name) and create users only in its OWN organisation; an organisation admin with no organisation changes no one; platform admins are unchanged. Copy the verbatim ruling text from the `show` output, and put it under RULED BY KAM, NOT YET IN AN ARTEFACT. The card names Kam's two 20 Nov rulings (verification level own-org capped; moving users between organisations platform-only): find their card ids with `decision_queue.sh list ruled` (read-only) and quote them too.
+- Platform-admin check: Kam's KS-1701 ruling (`decision_queue.sh show secuura-platform-role-spellings-ks1701-1123` = a: every platform-admin check uses the ONE shared check). The brief tells the seat to use the shared check (`isPlatformRole`, packages/shared) for any "is this caller a platform admin" test it writes.
+
+## MEASURE (read-only, in the shared checkout `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files`, GIT_OPTIONAL_LOCKS=0, git read verbs only: show, grep, ls-tree, log, ls-remote; NEVER fetch/pull/worktree/checkout. The checkout's local develop is STALE (about 186 commits behind): read files at the live develop through the GitHub API instead, `GH_CONFIG_DIR='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.gh-config' gh api repos/Secuura/Distributed_Secuura/contents/<path>?ref=<sha>`, read-only)
+1. develop's sha: `git -C <checkout> ls-remote origin refs/heads/develop` (Wednesday read a5ce6ee8b662f697b2b5fa405f5c67cea67aebc0 at 17:42:53, the PR 2286 squash; re-read it).
+2. The user-write routes the ticket names (create user, edit user: status, role, name) in every service that serves them (api-gateway, originate, auth, any other): file paths, line numbers and the current organisation/tenant check on each, read at develop. Then the PARTITION: list the paths this lane will touch and check them against (a) every OPEN PR's files (`gh api repos/Secuura/Distributed_Secuura/pulls?state=open --paginate` then each PR's `/files`, read-only), naming any PR that touches the lane's paths; (b) the KS-1701 lane that follows this one (originate `middleware/auth.ts` requireRole/hasAnyRole and the `adminConfig.ts` router gate): say whether this lane must touch either. If the lane overlaps anything, say so at the top of your reply.
+3. The seat ordinal: `/usr/bin/grep -o -i -c 'seat w 69th'` and `'seat w 70th'` over `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md` (69th as positive control); the brief says RE-MEASURE.
+4. The two earlier rulings' code (verification-level cap, move-between-organisations): find where they were built (git log --grep on the ticket keys the cards name, read-only) so the brief points the seat at the shape already used for "own organisation" checks.
+
+## ROUTING
+Model claude-opus-5-5 (read from `/Volumes/DevMASTER/WEDNESDAY/0_Brain/dashboard/data/models_latest.json`, never typed): row C3 (a build on an access DESIGN surface). Usage gauge: read `/Volumes/DevMASTER/WEDNESDAY/0_Brain/dashboard/data/usage_wednesday.json`.
+
+## LIVE SEATS (for the brief's parallel-seats line; seats share one inbox)
+Seat D 82nd (pane Secuura/Blockchain-D, Opus): Kintsugi k40 deploy, no code. Seat S 115th (pane Secuura/Blockchain-S, Sonnet): Linear board writes only. Seat K 82nd is wrapping (PR 2286 merged as a5ce6ee8b662).
+
+## HOLDS to carry
+Client-facing words = ticket comments only; no deploy (the deploy is a D seat's under Kam's grant); demo only with Stuart's nod; tickets on Peter or Stuart stay theirs; no 'do not merge' self-hold sentence in the PR body; the shared packages/shared guards run on both arms (the 11-22 develop-red lesson: packages/shared vitest whole, incl. the ks1536 one-role-vocabulary guard); a sibling found outside the ruled scope is LISTED and STOPPED on, never fixed (the 11-18 closed-list lesson); a "while I was there" extension is a STOP question.

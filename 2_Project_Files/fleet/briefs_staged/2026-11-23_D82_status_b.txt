@@ -1,0 +1,76 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261123T065257Z.txt)
+     1	[INBOUND] 2026-11-23T06:52 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS B: k40 PHASE 1 COMPLETE, originate 4218506b35e4
+=========== [INBOUND] 2026-11-23T06:52 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS B: k40 PHASE 1 COMPLETE, originate 4218506b35e4
+[Secuura/Blockchain-D -> Wednesday] STATUS B: k40 PHASE 1 COMPLETE, originate 4218506b35e4 at b8470f5fd331 on Kintsugi, every check green, +15 watch clean, auth HELD; waiting for GO LIVE-CHECK (Seat D 82nd)
+Seat D 82nd
+
+STATUS B, Kintsugi round k40, PHASE 1 COMPLETE. Kintsugi runs originate 4218506b35e4 built at b8470f5fd331759f770aca7ae6077442773cf396 (KS-2315 PR 2274 + KS-2275 PR 2284). Auth is HELD, at 3c7d4d1a756a, StartedAt 2026-11-19T14:55:28Z, unmoved. Demo was not touched (no step, read or probe). Production was not touched. Waiting for your GO LIVE-CHECK (Seat D 82nd).
+
+== 1. Card a (the ONE prune; mail/05)
+- `docker builder prune -f`, cache only, 05:53:52Z to 06:07:47Z, rc 0, 49.29 GB reclaimed.
+- free_mb 65,504 -> 107,554. Build cache 94.37 -> 45.08 GB.
+- Image-id set, repo:tag set and volume list all UNCHANGED (the fingerprint control fires). The once-only marker is written.
+
+== 2. Build (06:08:37Z -> 06:26:04Z, one batch [originate], rc 0)
+- The build cost ~5.7 GB on a cold cache; free was 101,848 MB after it, and the floor was never hit.
+- verify_build: REBUILT 1 (originate 2ea845b14490 -> 4218506b35e4), UNCHANGED 32, NOIMAGE 3 = the prediction. migrations UNCHANGED (5c9f2e27d989, the pre-existing :latest != rollback note).
+- basecheck v2: 0 stops (alpine 3.24.1, node v24.19.0, both images). osdiff: 1 differing path, /etc/hostname.
+- contentfp TABLE: originate /app/dist CHANGED, 180 -> 183 files, 9 changed, all under the stems (routes/certifications., routes/documents., routes/systemErrors., utils/callerEmailVerified.). /shared/dist IDENTICAL. UNEXPECTED_ROWS=0.
+- Census (spec 10 rows + NOFILE): tooltest 11/11 = base; pre 11/11; post 0 mismatches, 0 running mismatches, 0 prediction misses.
+- LC-A (lcaorig_d82), rollback image -> built image -> RUNNING container:
+  - systemErrors.js: the 'SYSTEM_ADMIN', 'ORG_ADMIN' pair 4 -> 0 -> 0; requireRole)('SYSTEM_ADMIN') 0 -> 4 -> 4; CTL 'Error resolved' 1/1/1; nonsense 0.
+  - documents.js: callerEmailIsVerified 0 -> 3 -> 3; CTL 'Document not found' 18/18/18.
+  - certifications.js: callerEmailIsVerified 0 -> 1 -> 1; CTL wasCreatedByConnector 1/1/1.
+  - utils/callerEmailVerified.js: absent -> present -> present (SELECT email_verified 1, email_verified 5).
+  - Every number equals the transpileModule prediction (evidence/lcaorig_predictions.txt).
+- latestproof: :latest == built 4218506b35e4; running == rollback before the swap.
+
+== 3. Swap (06:36:42Z -> 06:36:50Z)
+- NONFINAL gate 0. VERDICT originate OK: new container af16e12d008d, image 4218506b35e4, healthy, 0 restarts, StartedAt 06:36:44.678Z.
+- healthwin: 6.4 s from the last old healthy (06:36:43.863Z) to the first new healthy (06:36:50.237Z). One no-answer read at 06:36:45.959Z; HTTP 200 from 06:36:48.154Z, a gap of ~4.3 s.
+- swapset: held-but-rebuilt [], SWAP 1. The HELD control (a planted rebuilt auth) prints ['auth'] and is not swapped. ordval: the real order is accepted; the transfer/status-frontend control is refused.
+
+== 4. Post-swap (bphase6, e9run, fatal, rreaders)
+- censuscmp2: moved == {originate} (1 of 35), both controls true.
+- a4x and swaplog continuity: only originate's StartedAt moved. Unchanged:
+  - anchoring 2026-11-15T22:47:15.950724269Z;
+  - auth 2026-11-19T14:55:28Z;
+  - issuer-frontend 04:52:42Z (a2dc43513fb6);
+  - api-gateway 04:52:50Z;
+  - admin-frontend, mcp-server and the rest. INFRA_MOVED 0.
+- Binds (iii): both SAME. KS-535 (ITEM0, BEFORE_BUILD, AFTER_BUILD, BEFORE_SWAPS, MID, AFTER_SWAPS): stops 0 at every step.
+- Postswap: 28 on :latest, 0 mismatched, 4 held excluded; 0 unhealthy. Tracker 59 / 058; anchor_store non-final 0. Anchoring REAL (Blockfrost), MOCK 0, emitter-guard ACTIVE.
+- Redis (Q4): WRONGPASS 0 / NOAUTH 0 on the new originate since its StartedAt (control: 30 lines). REDIS_URL SET in originate, api-gateway and auth: the new originate read the live value. maskline: the gateway's [Redis] Connecting line is MASKED (the gateway was not recreated).
+- Vouch: GATEWAY_VOUCH_SECRET sha16 9c2fbbcc7351b60b on both api-gateway and the new originate. [gateway-provenance] ACTIVE 1, FAIL-CLOSED 0, DISABLED 0.
+- FATAL 'Production configuration errors' on the new originate: 0; error-level 0. /health/ready answers 200 for both originate and api-gateway.
+- penv AFTER (section 5): originate NODE_ENV_is_production=false, only CARDANO_NETWORK published. Inert.
+- mailenv AFTER: auth mail_transport_configured=false, unchanged.
+- Q8 AFTER, through the new originate's own DATABASE_URL: secuura_app, rolsuper false, rolbypassrls false, users SELECT true. Controls: documents true, nonsense ERROR 42P01, read-only on.
+- Not from this swap: the unswapped gateway holds 1 error-level line since 04:52:50Z, before 06:36:00Z, and 0 since. It is '[client-log] [error]', consistent with D 81st's 05:08Z render. Counted only.
+
+== 5. REVISION (D82-W4, Q9)
+- The k40 entry (49 lines, 5,932 B, sha16 2c2b9a911a18cb61) was uploaded hash-equal and written by revwrite_d82: preserved copy byte-identical, head-1 PASS, tamper control fired.
+- REVISION is now 275,827 B, sha16 23cd78c34a0354d0, head revision=b8470f5fd331... It is told apart from k39's entry by its line round_stamp=k40 and deployed_at=2026-11-23T06:36:42Z. revision= lines 43 -> 44.
+- REVISION.pre-b8470f5fd331-k40 = the k39 file (269,895 B, f6ceb2eab8520ce6). REVISION.pre-b8470f5fd331 (the k38 file, 264,295 B, 8df526455951c90e), REVISION.pre-8389ed294629 (c25c571b81ace6fb) and every older .pre-* are byte-identical to their ITEM 0 readings.
+- The tamper copy was moved to .rebuild-seatD82/revision_tamper_copy_k40.txt, byte-equal.
+
+== 6. +15 min watch (watch15, Mac-side, window 06:36:42Z -> 06:51:42Z)
+- Read at 06:51:55Z (errlines3, restarts, OOM; evidence/kintsugi/E14_watch15.txt).
+- error-level 0 on originate (30 lines) and on the controls: api-gateway (64), issuer-frontend (30), transfer (61), security (63), anchoring (123), billing (0). The planted-line controls behave (2 of 2 wanted hits, 0 of 2 wanted misses).
+- Restarts 0, all 7 running and healthy. OOM 0 over the last 20 minutes, a real read with 824 lines behind it. mem_avail 5,333 MB, load 0.21.
+- End of round (bphase7): KS-535 AFTER_ROUND stops 0. batch.k40.done RC=0, swap.k40.done RC=0 SWAPPED=1. Gateway VERIFIED_TOKEN_CLAIM_REFUSED 0 (control 0). anchoring StartedAt EQUAL. i0db: tracker 59/058, non-final 0; moved since the k39 pre-tag = 3 (issuer-frontend and api-gateway at k39, originate now).
+
+== 7. Disk
+free_mb: ITEM 0 65,505; after Phase 0 65,504; before the prune 65,504; after the prune 107,554; after the build 101,848; after the swap 101,833; end 101,832.
+
+== 8. Rollback (only on your word)
+docker tag dev-originate:pre-20261123k40 dev-originate:latest, then docker compose -p dev --profile phase2 up -d --no-deps --force-recreate originate. It would re-open KS-2315's cross-tenant read and re-admit unverified recipients.
+
+== 9. Phase 2 plan (only on GO LIVE-CHECK (Seat D 82nd))
+- LC-A: done in the running container (above); re-read once with census post.
+- LC-B: users by role, unverified by role, status, recipientEmail documents and matches, re-read through i0extra_d82 with the nonsense-column control. They must equal ITEM 0, because nothing writes.
+- Q8 re-read.
+- No login, no token, no render, no issuer GET, no audit row.
+- LC-D labels: KS-2315 and KS-2275 deployed on Kintsugi (image + running container, census equal) and unit-proven (gates 398, 408). The live 403 and the hidden-document refusals are UNMEASURED live (D82-W5).
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 39  SEEN:     1067  BATCH: /private/tmp/wed_newmail/batch_20261123T065257Z.txt

@@ -1,0 +1,29 @@
+=========== [INBOUND] 2026-11-23T06:54 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS C: k40 PHASE 2 done, LC-A in the running origin
+[Secuura/Blockchain-D -> Wednesday] STATUS C: k40 PHASE 2 done, LC-A in the running originate = predictions, LC-B equal to ITEM 0, Q8 unchanged; no login/token/render/issuer GET/audit row; WRAP next (Seat D 82nd)
+Seat D 82nd
+
+STATUS C, Kintsugi round k40, PHASE 2 under your GO LIVE-CHECK 06:53:23Z. Read-only. No login, no token, no render, no issuer GET, no audit_logs row. Demo and production untouched. Evidence: evidence/phase2/.
+
+LC-A (06:53:51Z, re-read once):
+- census post (fixes_live_d82, stamp pre-20261123k40): 11 rows, 0 mismatches, 0 running mismatches, 0 prediction misses.
+- lcaorig_d82 in the RUNNING secuura-originate (image 4218506b35e4, StartedAt 06:36:44.678Z):
+  - systemErrors.js: the 'SYSTEM_ADMIN', 'ORG_ADMIN' pair 0; requireRole)('SYSTEM_ADMIN') 4; CTL 'Error resolved' 1; nonsense 0.
+  - documents.js: callerEmailIsVerified 3; CTL 'Document not found' 18.
+  - certifications.js: callerEmailIsVerified 1; CTL wasCreatedByConnector 1.
+  - utils/callerEmailVerified.js: present, SELECT email_verified 1.
+  - These equal the built image and the predictions; the rollback image reads 4 / 0 / 0 / 0 / absent.
+LC-B (i0extra_d82; role and status names and counts only):
+- users 31 by role: issuer_admin 6, org_admin 3, owner 9, system_admin 2, user 9, verifier 2.
+- email_verified NOT TRUE: 14 (owner 5, user 9); TRUE 17. status: active 22, invited 9.
+- documents 76; metadata.recipientEmail non-empty 0, so the documents matching an unverified user = 0 (0 users), and a verified user 0.
+- CONTROL: the nonexistent column ERRORs.
+- Every count EQUALS ITEM 0 (05:40Z) and D 81st's 05:09Z reading: nothing wrote.
+Q8 (q8role_d82 through the new originate's own DATABASE_URL, one READ ONLY transaction, rolled back):
+- role_is_secuura_app true, rolsuper false, rolbypassrls false, users SELECT true.
+- CONTROLS: documents SELECT true; the nonsense table ERROR 42P01; transaction_read_only on.
+LC-D (honest labels):
+- KS-2315 (PR 2274) and KS-2275 (PR 2284): DEPLOYED on Kintsugi, in the image and the running container, census equal. Unit-proven by gates 398 and 408 (GO WITH NOTES). The live refusals (an org admin's 403 on /api/system-errors, the hidden "sent to me" document for an unverified recipient) are UNMEASURED live (D82-W5).
+- KS-2275's reach today: 14 unverified users, 9 invited stubs, 0 documents addressed to anyone, so nobody loses a document today. A NEW document addressed to any of the 14 is hidden from them, and the 9 invited users become unverified when they claim at the held auth (routes/auth.ts 289/299 at d4ffc8308249). Kintsugi has no mail transport and no resend route (KS-2326).
+- Not shipping: auth (KS-2272, KS-1970, KS-2287, KS-2300) HELD.
+Next: WRAP per your GO (HANDOVER FINAL with FOR A SUCCESSOR, history, kit notes, quarantine, vault commit, the wrap mail).
+
