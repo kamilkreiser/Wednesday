@@ -1,0 +1,28 @@
+The lab tool gains its first command that is not read-only:
+print <host> --run <new folder> --pin <sha256> --port <631 or 443>
+[--path] [--pages] [--timeout-seconds] [--execute]. Without --execute
+it is a dry run: it makes the document, prints its size, its SHA-256
+and the printer address, and connects to nothing. With --execute it
+sends ONE Print-Job through PrintJobSender over HttpIppTransport (the
+pinned leaf certificate, TLS and HTTP/1.1 only, no proxy, no redirect,
+no retry) and never sends it again, whatever the answer. The pin and
+the port are required; there is no first-contact mode in this command.
+
+The document is made in memory (SyntheticPdf.cs): A4 pages of one text
+line each, a true cross-reference table, ASCII only, the same bytes for
+the same page count; no file is read. The run folder must be new and
+gets one file, summary.txt, the printed lines; no pin and no document
+byte. ReasonKeepingTransport keeps the transport's failure reason (the
+sender reports every transport failure as TransportFailed), so a wrong
+pin exits 4 and a refused connection exits 7.
+
+The Lab project now references Datasec.Suite.Jobs.Transport (its two
+lock files gain the project entry); cell P13's registry list is
+["probe", "print"]; the probe channel's comment and the Lab README say
+what only probe does. 26 new cases against a stub printer on 127.0.0.1;
+C# totals plus 26 on both legs, the rules count plus 6. No printer or
+device has been reached; the port, path, chunked body, authentication
+and rendering on a real printer are not measured. Nothing is deployed;
+nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
