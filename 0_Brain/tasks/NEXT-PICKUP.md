@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 70% 18:16 MON 23 Nov, the 17:03 rotation's SUCCESSOR - READ FIRST; supersedes every block below
+- **develop = a5ce6ee8b662** (PR 2286 KS-2314, verified 17:42:53). Kam: nothing new since 16:18:18; reconcile 0. Kintsugi k40 DONE (receipt + both 16:18 cards delivered). KS-2314's gateway half waits on KS-2331.
+- **LIVE:** **W 70th %324 OPUS** KS-2316: plan CONFIRMED (fleet/briefs_staged/2026-11-23_W70_answer_plan.md + the KS-2300 twin narrowing _W70_answer_twin.md) -> building (one product file auth users.ts; 11 pinned cells updated; 15 mutants; socket proof on its own loopback stack) -> READY FOR GATE tier 1 -> commission an OPUS tier-1 gate (shape: 0_Brain/reference/2026-11-23_gate410-*/commission.md) -> fix round or WRAP -> K seat. **C 45th %327 SONNET** KS-2331: plan CONFIRMED (fleet/briefs_staged/2026-11-23_C45_answer_plan.md: option 1, no menu edit; network-error extension accepted) -> building (DocumentTypesManager, WorkflowsManager, new utils/refusalText.ts, one test file) -> READY FOR GATE tier 2 -> a Sonnet tier-2 gate (routing table) -> K seat. Then KS-2314's gateway half may deploy (a D seat, Kintsugi; demo only on Stuart's nod).
+- **KAM CARDS OPEN (posted this seat, both default a):** secuura-org-admin-create-level-cap-ks2316-1123 (keep BASIC on create); secuura-org-admin-doctypes-workflows-menu-ks2331-1123 (keep the two issuer menu items read-only). Neither holds a build.
+- **NEXT LANE:** KS-1701 (originate requireRole/hasAnyRole + adminConfig router gate -> the shared check); disjoint from W 70th (auth) and C 45th (issuer). Then a board seat for W 70th's QH items (Users page Edit/Block on sibling rows; object error rendered as a React child; the page's Add cannot create users: READ NOT RUN).
+- **OWED:** launcher seat-boot-memory fix; drafter leg TMPDIR length; the brief-vs-repo env-file rule tension (C 45th); Mon 2026-11-30 weekly Stuart card check; Stuart's answers tonight -> route; weekly consolidation lapsed since 10-19; INDEX refresh.
+- **NO SUBAGENTS IN FLIGHT.**
+
 ## 🔴 CHECKPOINT 66% 18:01 MON 23 Nov, the 17:03 rotation's SUCCESSOR - READ FIRST; supersedes every block below
 - **develop = a5ce6ee8b662f697b2b5fa405f5c67cea67aebc0** (PR 2286 KS-2314 squash, VERIFIED at source 17:42:53: one parent b8470f5fd331, tree 66d4ebda7d45, 9 files). TEN merges today. Kam's KS-2314 card --delivered.
 - **KINTSUGI k40 DONE** (D 82nd 0.96, closed): originate 4218506b35e4 at b8470f5fd331 (KS-2315 + KS-2275); auth HELD (no mail transport; Kam's 'ship without mail' covered this round only); build cache 45.08 GB, 0 reclaimable, so any next prune = a NEW Kam card. Panel receipt posted (bf-0846236b8722). BOTH 16:18 cards --delivered. **KS-2314's gateway half (develop a5ce6ee8b662) must NOT reach a box before KS-2331 lands** (Wednesday's ruling).
