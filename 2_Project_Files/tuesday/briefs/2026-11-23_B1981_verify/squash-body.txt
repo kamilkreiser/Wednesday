@@ -1,0 +1,26 @@
+The host maps its first routes. GET /health answers 200 "ok" over HTTP
+or HTTPS and reads nothing. POST /oxpd2/devices/{serial}/{target}/{operation}
+hands the five OXPd 2 callbacks to the adapter's Oxpd2CallbackHandler
+and writes each of its 14 outcomes as a status by one table; only an
+answered callback writes a body. POST /oxpd2/devices/{serial}/notifications
+checks the device's callback credential first, bounds the body at
+1048576 bytes, hands the bytes to a sink unparsed and zeroes them.
+
+Both OXPd 2 routes answer 403 to a request that did not come over
+HTTPS, before anything else the route reads. The serial of the path
+names the device; the per-device credential, in exactly one
+Authorization header, is the only proof. IDeviceSecretVault is bound to
+the local secret store, resolved at each call, so a host with no
+Secrets configuration still starts and answers 503 to every OXPd 2
+call. The listening addresses and the TLS certificate come from the
+framework's Kestrel configuration section. The callback sink throws and
+the notification sink keeps nothing until the sign-in and install work
+binds real ones.
+
+A new test project, tests/Datasec.Suite.Server.Tests, starts the host
+on 127.0.0.1 port 0 with a throwaway certificate and runs 13 cells.
+Limits are named in the Server README: what a device sends to these
+routes and what it does with each status are UNMEASURED; no
+forwarded-header handling. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

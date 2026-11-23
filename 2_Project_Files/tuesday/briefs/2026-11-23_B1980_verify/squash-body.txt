@@ -1,0 +1,25 @@
+A new library, Datasec.Suite.Adapters.Oxpd1, reads an HP OXPd 1.x
+(FutureSmart 5) device and writes nothing to it: a GET of the DevMgmt
+discovery tree, and five SOAP 1.2 reads (GetManufacturerInfo,
+GetCustomerInfo, GetAuthenticationAgentRecords, GetOwnedAccessoryRecords,
+GetSignInMethods) from a closed enum, each sent to the binding's service
+with the binding's action. It is written by hand over HttpClient and
+XmlWriter, with no package.
+
+A certificate is accepted only when the SHA-256 of its DER bytes is one of
+the pins, on every handshake; no redirect is followed, no proxy is used,
+and only HTTP/1.1 is spoken. The admin password is read from a named
+setting at each call and is masked in the record (written through the
+suite's logger, behind the deny-list) and in the returned answer. Every
+call ends in one typed outcome.
+
+HP's 14 OXPd 1.x service descriptions are kept byte for byte under
+contracts/oxpd1/hp with a fingerprint list; the library reads none of them
+at run time. The tests run against a stub device on 127.0.0.1 whose routes
+and actions are read from those files; nothing was run against a printer.
+
+Two new projects and their two lock files; no existing file changes. The
+solution file holds both projects, so the hosted legs run their cells.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

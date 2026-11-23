@@ -1,0 +1,34 @@
+The OXPd 2 adapter gains a third hand-written part, DeviceAuth/: a
+client for one device's token resource and the token holder's refresh
+endpoint over it. Each call is one form-encoded POST over https to the
+device root plus a configurable token path (default
+/cdm/oauth2/v1/token), through the client's own handler: no proxy, no
+redirect followed (a 3xx is Redirected), no cookie. TLS trust is a pin
+and nothing else: the SHA-256 of the certificate the device presents,
+compared in fixed time; any other certificate, its issuer included,
+ends the handshake before a request is sent.
+
+Three grants: the administrator password grant (the access value held
+in memory only and zeroed on Dispose), the install-code exchange with
+the solution client id and a refresh value requested, sent only while
+the code is inside its window (default 5 minutes on the client's
+clock), and the refresh. The answer is read strictly (status 200, a
+bounded body, a JSON object with no repeated name, printable ASCII
+values); 400 and 401 are a refusal, which the refresh endpoint returns
+as null so the holder marks the device for repair; every other failure
+throws. The form is written as bytes and zeroed when the call ends; the
+endpoint reads the refresh bytes before it returns its task.
+
+The wire field names are those of OAuth 2.0; what a device answers,
+which of the two documented paths it serves, and whether its refresh
+needs the client id, are not measured: no device, simulator or printer
+has answered this client. The README names the limits.
+
+Nine files added (eight under DeviceAuth/, one test file of 16 cells,
+28 cases, against a TLS stub on 127.0.0.1); the adapter README and one
+doc comment on IDeviceSecretVault.TryGet change. No project, lock,
+package, solution or workflow file changes. C# totals plus 28 on both
+legs, the rules count plus 9; skipped counts and unit tests unchanged.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
