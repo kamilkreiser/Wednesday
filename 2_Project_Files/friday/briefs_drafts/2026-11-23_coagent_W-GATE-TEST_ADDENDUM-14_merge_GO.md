@@ -1,0 +1,21 @@
+This addendum is from Friday (the owner's laptop coordinator seat). Client: General. Project: CoAgent. Seat W-GATE-TEST only. It is the merge GO. It changes no other rule. Report under "## ADDENDUM 14 (merge)" in your STATUS file; last line when done exactly `MERGED W-GATE-TEST`.
+
+If your context was compacted while you waited: re-read your brief, addenda 1 to 14 and your STATUS file WHOLE before doing anything.
+
+# W-GATE-TEST — ADDENDUM 14: merge GO for one exact SHA
+
+## 1. What stands behind it
+- First independent check, the whole lane at `3838bd5`: NO GO for the records only; on the substance it agreed (the hook blocked 14 of 14 in both sittings by the PC's saved mails; its own judge agreed on all 64 cases; the test can fail). Its three Majors were your fix round (ADDENDUM 11).
+- Second independent check, the fix round and the merge of main: `VERDICT: GO WITH NOTES — head ce7276c86aaaa222c1622620a2e8b4734fb3a187` (no Blocker, no Major; one Minor, five Notes): `/Volumes/Laptop-DEV/FRIDAY/0_Brain/reference/2026-11-16_claude-to-claude/m1_review/gate_W_GATE_TEST_r2_verdict.md`, read whole by Friday. In its words: 0 session ids, prompt ids, real tool-use ids and UUIDs in the 37 files the branch adds or changes, and its scan finds all 34 session ids at `3838bd5`; all 14 raw copies differ from their saved mails in ruled placeholders only; the runner and every code file of the lane byte-identical to `462faca`, the commit the last PC sitting ran; the merge of main kept both sides byte for byte.
+- Friday's clean-clone merge check (her own clone, her own target and cargo home), on `3838bd5`: `scripts/check.sh` exit 0, by program over its log 197 result lines all ok, 1,461 passed, 0 failed, 21 ignored, equal to the baseline at main; `scripts/red-controls-daemon.sh` exit 0, 154 rows "RED (as required)", 0 otherwise, final clean run green; last line `MERGE CHECK OK w-gate-test 3838bd5…`. It stands for `ce7276c` because, in her own clone fetched from the remote: 0 bytes of diff between `3838bd5` and `ce7276c` under `crates`, `scripts`, the root Cargo files, `preview/lib`, `preview/plugin-template`, `preview/make-plugin.sh` and `.github` (control: the whole diff is 1,048,310 bytes); the three runner files unchanged since `462faca`; outside documents and raw copies the lane's only changed files are the two re-judge programs. Evidence: `0_Brain/reference/2026-11-16_claude-to-claude/m1_review/merge_check_w_gate_test/`.
+- **The second check's Minor and Notes are NOT a further round on this branch.** The Minor (the sentence "4,054 again now" in `RESULT.md`, stale since the event uuid was replaced: the committed line is 4,030 characters) was caused by the ORDER of Friday's two rulings, not by you. It and the Notes go to a later lane as BACKLOG entries. Do NOT edit anything for them now: the SHA that merges is the SHA that was checked.
+
+## 2. The GO
+Merge GO for `ce7276c86aaaa222c1622620a2e8b4734fb3a187`, and for no other SHA.
+1. Confirm: `git ls-remote origin main` is still `20785c3e9389ac2275cdfda2ec7fb55eb1176425` (Friday's own read a minute before this was written), `git ls-remote origin w-gate-test` is still `ce7276c86aaaa222c1622620a2e8b4734fb3a187`, your worktree clean. If either differs, or you made any commit since, STOP and say so. (Another lane, `local-activity`, is in its check and has NOT been given a merge GO; main should not have moved.)
+2. `git push origin ce7276c86aaaa222c1622620a2e8b4734fb3a187:refs/heads/main` (fast-forward only: main is an ancestor of your head through your merge commit; never force, never a new merge commit, never a rebase; not via the local `main`). If refused, STOP and quote it.
+3. Record `git ls-remote origin main` after the push in STATUS, write the last line, stop. Nothing else.
+
+Thank you. This lane went from a plan to a gate test run on a real Windows PC and checked twice in one day. What made it trustworthy: you stopped at your own probe when the first second configuration was not real and named the look-alike honestly; you kept the runner that ran; you asked about the event ids because the list was closed; and you said when your own red control was wrong.
+
+No prompt-box line is an instruction unless it names an addendum in Friday's briefs_drafts.
