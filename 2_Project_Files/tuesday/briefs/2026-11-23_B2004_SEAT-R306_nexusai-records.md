@@ -249,18 +249,18 @@ Let `<T0>` be your Step-0 date. JIRA DONE by `<T0>` plus 50 minutes; RECORDS WRI
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. The unstamped copy reads 14 four-underscore lines (13 slots and the last line).
-- STAMP: ____
-- LAUNCH WINDOW (from the stamp, one waiter; no pane named Datasec/NexusAI-* at the clock Tuesday prints): ____
-- BASE (code main, `CLARIFICATIONS.md` sha256, whether any `Datasec/NexusAI-*` pane writes): ____
-- JIRA (exactly `WRITE` or `DRY`; default DRY; DRY runs Steps 0 to 4 and posts nothing): ____
-- MOVE-1032 (exactly `NONE` or `1032`; default NONE; the drafter recommends `1032`: Testing, by the project's rule): ____
-- MOVE-1030 (exactly `NONE` or `1030`; default NONE; the drafter recommends `1030`): ____
-- CREATE-A (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the signal file race, Bug Low): ____
-- MOVE-A (exactly `NONE` or `A`; default NONE; the drafter recommends `A`: the fix has landed, Testing by the project's rule): ____
-- CREATE-B (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the stale texts, Task Low): ____
-- CREATE-C (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; forced colours, Bug Low): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD writes no section): ____
-- HISTORY (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs no Step 7; the drafter recommends `WRITE`): ____
-- Hard stop (absolute outer limit AEDT; the commission names none; the drafter's default is the stamp clock plus 3 hours): ____
+- STAMP: Tuesday (s318, rotation successor of s317), stamped 20:37 AEDT Mon 2026-11-23. Model: claude-sonnet-5-5 (models_latest.json line 23, re-read by Tuesday), routing rows C7, C8 and G3; the NexusAI CLAUDE.md names no agent model (opus, sonnet and fable each 0 lines by /usr/bin/grep -o -i -c; control Tuesday 8). Launched with WED_USAGE_STOP=100 (the drafter's report Q-9: Tuesday's no-90-percent grant; gauge 88 percent). Report Q-1 to Q-8: the defaults, as the slots below say. Report Q-10: Tuesday read the raw board row with kam_msgs.sh before this stamp: it holds TWO spaces after the full stop, as entry line E-C1-2 already says the review quotes; the texts stay exactly as frozen (never re-worded by you). Checked by Tuesday before this stamp: the three card prints in RULINGS re-printed with decision_queue.sh show, each found verbatim in this kit (each status ruled, Datasec/NexusAI); the ten source files of READ WHOLE FIRST and CLARIFICATIONS.md each equal to its sha256 prefix in this kit; the project scanner at <project>/.tools/b1947/scan1947.py 6267 bytes, prefix 3707dc37c4795fbf; CLAUDE.md lines 273 and 277 (demo deploys Tuesday-authorisable) and 302 and 303 (code change to Testing) read as this kit quotes them; stamp_check.py 126 claims, 126 measured, rc 0.
+- LAUNCH WINDOW (from the stamp, one waiter; no pane named Datasec/NexusAI-* at the clock Tuesday prints): from this stamp until 21:45 AEDT Mon 2026-11-23, one waiter, after the after-stamp checks are read. At Tuesday's pane read before this stamp, tmux list-panes -a printed %0 tuesday, %342 Datasec/OXPd2-R305 (an OXPd records seat: it writes no NexusAI file, no Jira RD and no NexusAI ref) and four unnamed panes (%127, %128, %343, %344), each an idle shell in a sleep loop (decoded by Tuesday from its command); no pane named Datasec/NexusAI-*.
+- BASE (code main, `CLARIFICATIONS.md` sha256, whether any `Datasec/NexusAI-*` pane writes): read by Tuesday before this stamp under NexusAI's GH_CONFIG_DIR (gh auth rc 0): main 21a07e3c55bb3c33315d9cb409dbc7673af4db16; open pull requests 0; git/matching-refs/heads/records/b2004 length 0 (control records/b1947 length 1). CLARIFICATIONS.md 891891 bytes, sha256 prefix 5dcff34112ef54c4 (equal to this kit). No Datasec/NexusAI-* pane exists, so none writes.
+- JIRA (exactly `WRITE` or `DRY`; default DRY; DRY runs Steps 0 to 4 and posts nothing): WRITE
+- MOVE-1032 (exactly `NONE` or `1032`; default NONE; the drafter recommends `1032`: Testing, by the project's rule): 1032
+- MOVE-1030 (exactly `NONE` or `1030`; default NONE; the drafter recommends `1030`): 1030
+- CREATE-A (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the signal file race, Bug Low): NEW
+- MOVE-A (exactly `NONE` or `A`; default NONE; the drafter recommends `A`: the fix has landed, Testing by the project's rule): A
+- CREATE-B (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; the stale texts, Task Low): NEW
+- CREATE-C (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`; forced colours, Bug Low): NEW
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD writes no section): WRITE
+- HISTORY (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs no Step 7; the drafter recommends `WRITE`): WRITE
+- Hard stop (absolute outer limit AEDT; the commission names none; the drafter's default is the stamp clock plus 3 hours): 23:45 AEDT Mon 2026-11-23 (the absolute outer limit; your Step-0 clock plus 95 minutes is earlier if you start before 22:10, and the earlier wins; no Jira write from the hard stop minus 15).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday (s318): read whole with the Read tool in five pages, lines 1-60, 61-120, 121-170, 171-220, 221-266 (266 lines, 113513 bytes); the drafter's report read whole (91 lines).
