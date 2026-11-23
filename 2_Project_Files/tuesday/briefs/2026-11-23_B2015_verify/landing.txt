@@ -1,0 +1,13 @@
+LANDING B2015 (Tuesday lands; NexusAI does not). Branch b2013/rd1031-contrast-suite-upkeep, head 6e803935c8452df44473f78f1d2f5eeb22340ee8, base main 0e33bb8e4846b4d829a60e3ba7299cdb60a38da5. Gate verdict in VERDICT.md of this folder.
+
+0. Re-read before acting (gh api -X GET, GH_CONFIG_DIR of the NexusAI project): main still 0e33bb8e...; branch ref still 6e803935...; open PRs 0. If main moved, apply HOLD 20 of the B2013 kit: HISTORY.md, BACKLOG.md, 1_Project_Definition/**, docs/**, __tests__/**, scripts/verify-expected-counts.json may move; a move touching tests/e2e/**, static/**, backend/**, playwright.config.js or package*.json is a re-gate.
+1. Open the PR (Tuesday): head b2013/rd1031-contrast-suite-upkeep, base main, title from pr-title.txt, body from pr-body.md. No other branch, no draft toggling.
+2. Wait for the 7 check names that PR 245 (last merged) shows, all success (read at head 3fbe07a8 of PR 245, 8 rows, audit-production-deps appears twice):
+   CodeQL | scan | audit-production-deps | build | Analyze (python) | Analyze (actions) | Analyze (javascript-typescript)
+   Read them by gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/6e803935c8452df44473f78f1d2f5eeb22340ee8/check-runs. A name missing from this PR that PR 245 had is a question, not a pass (a tests-only diff may be path-filtered: read the workflow before accepting). A red or a pending one is not landed over.
+3. Land by MERGE COMMIT pinned to the head, never squash, never rebase (C-190, NexusAI 1_Project_Definition/CLARIFICATIONS.md, awk NR==2062,2067: "Never squash, never rebase"):
+   gh api -X PUT repos/datasecau/Reporting_Dashboard_Au/pulls/<n>/merge -f merge_method=merge -f sha=6e803935c8452df44473f78f1d2f5eeb22340ee8
+   The sha pin makes GitHub refuse if the head moved. Do not delete the branch.
+4. After: main's new head has parents 0e33bb8e and 6e803935; git diff --name-only on it is the two tests/e2e paths.
+5. Deploy: both paths are under tests/**, which deploy-demo.yml lines 26-32 ignore (paths-ignore '**.md', 'docs/**', 'tests/**'), so NO Deploy demo run is expected for the merge commit (PR 245's merge 0e33bb8e had none; control: 21a07e3c, which changed static/, had one, conclusion skipped). If a Deploy demo run DOES appear for the merge commit: do not re-run, approve, cancel or set vars.CI_DEPLOY_ENABLED; read its conclusion and jobs (the last 8 read skipped); if it is skipped, record it as an anomaly in the records pass (it means the paths-ignore did not apply); if it is running or success, STOP and tell Kam, because something would be deploying from a tests-only merge.
+6. Records pass afterwards: FOR-RECORDS.md. Nothing else from this lane is owed to production.
