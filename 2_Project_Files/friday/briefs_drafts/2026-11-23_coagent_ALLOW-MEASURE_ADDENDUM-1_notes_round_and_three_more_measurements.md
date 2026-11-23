@@ -1,0 +1,34 @@
+This addendum is from Friday (the owner's laptop coordinator seat). Client: General. Project: CoAgent. It belongs to the brief `2026-11-23_coagent_ALLOW-MEASURE_brief.md`. Seat ALLOW-MEASURE only.
+
+# ALLOW-MEASURE ADDENDUM 1: the check's verdict (GO WITH NOTES), the notes round, and three more measurements
+
+**The independent check of `d76a83bd4bffbcb366e5e7d8f65e1d76743ed51d` is GO WITH NOTES, and its OWN reproduction AGREES with your M1.** Read it WHOLE before anything else: `/Volumes/Laptop-DEV/FRIDAY/0_Brain/reference/2026-11-16_claude-to-claude/m1_review/gate_ALLOW_MEASURE_verdict.md` (250 lines, READ-ONLY; its scripts and its redacted reproduction are in `gate_allow_measure_tests/` beside it). Friday read it whole. 20 rows: 19 supported, 1 over-claimed, 0 wrong. No Blocker, no Major. It also strengthened your M3: it resolved, by hash, the request Claude Code recorded as sent right after the hook and found the system message in none of its parts and the control field in it. Declining the classifier pair was right, it says, and Friday agrees. Thank you: careful work, plainly reported.
+
+The owner has ruled since your brief (the head of design note 21 has his words): on ALLOW terminal commands may run unasked, with one extra question asked of the owner at the switch (allowed too, or still approve each); the always-refused list holds; the other side sees the mode as one word. Context only; it changes nothing in how you measure.
+
+## Part 1: the notes round (words and small files only; a CLOSED list)
+1. **F1 (RULED: fix).** M2's upper bounds: use the last frame WITHOUT the text to the first frame WITHOUT it, as you did for the title bound: under 0.95 s in the default case and under 1.55 s in the fresh case, "seen in 1 and 2 frames". Correct `RESULT.md` (the M2 row and R3), BACKLOG entry 4 and the `docs/M0-OUTCOMES.md` line, and state the bound rule once.
+2. **F2 (RULED: fix).** BACKLOG entries 1 and 2 keep their FACTS and hand their conclusions to the design round: entry 1 says "another same-user pty (a tmux pane made by the runner)", not "a terminal window", and puts "a typed terminal confirmation must not be counted as agent-proof" as a point for the design round; entry 2 drops its "Scope:" implementation choice and says what a result lane must handle. Fix the `docs/DAEMON.md` line pointer the check names.
+3. **F3 (RULED: fix).** Write down the limits of the M7 additions: the opening command ran because the hook answered allow (in APPROVE it would be asked first); Claude Code's sandbox was off in every run (0 sandbox lines in the 12 debug logs: count them yourself); the device path was given to the agent in the prompt, discovery was not measured. Qualify R7 as the check words it. Keep the conclusion.
+4. **F4 (RULED: fix).** Say in `cases.md` that the four M1 runs used the stub before the environment-logging line was added, that its printed output is unchanged, and cite the debug lines that show it.
+5. **N2 and N3 (RULED: fix the redaction).** Add `msg_` ids, the shell-escaped and the URL-encoded forms of the workspace path to `redact.py`'s classes, with a selftest arm each; re-redact the committed raw files; show the counts before and after and that no line that carried a verdict changed (the check's meaning check is your model).
+6. **N4, N5, N6, N7 (RULED: add the lines).** Keep the 17th-run refusal's printed output in the spike folder; one line on Claude Code's builtin hook modules in the isolation section; say what was inferred and not recorded in M7 (and record it in the new runs below); add the stale tmux socket and the empty scratchpad folders to your side-effects list (move them into your scratch folder; delete nothing).
+7. **N1 (RULED: one line in RESULT.md, a point for the design):** the start mode may depend on the account or server, so the product must read the mode from the hook's own input at run time and never assume it.
+
+## Part 2: three more measurements (RULED BY FRIDAY; the ceiling rises from 16 to 20 model runs in all; you have used 12)
+Same rig, same rules (controls in the same sitting, VOID rule, per-run settings file, checksums before and after, your own private tmux server, redaction before commit).
+- **M8: a hook `ask` in the mode a fresh session starts in here ("auto"): does the owner get a dialog?** The product's APPROVE mode rests on this for anyone who starts Claude Code without a mode flag. Hook answers `ask` in the real hook's shape; one `Write`, one `Bash`; interactive; with the no-hook control beside it. Up to 2 runs. Record what the dialog says and whether the call waits for the key.
+- **M9: does a hook allow beat the auto mode's own reviewer?** Choose ONE call that the reviewer does not skip (your own logs show which calls it skips; pick the mildest call that it does review, and say how you chose it; nothing destructive, nothing outside your scratch folder, nothing that touches the network). Control: no hook, the reviewer decides. Case: hook allow. One pair, 2 runs. **For this pair only, the reviewer's request may go to the larger model that Claude Code itself selects and will not let us pin (your debug WARN line): that is Claude Code's choice, not ours; your own prompts still use the smallest model. Record the model name the reviewer used and how many reviewer requests were made.** The owner has been told on his board that this pair is being allowed.
+- **M10: with Claude Code's sandbox ON, can a command the agent runs still open another same-user pty by its device path?** One run, hook allow, the M7-agentpane case repeated with the sandbox enabled in the per-run settings (read the documentation for how; quote the line). If the sandbox cannot be turned on for a single run without touching the owner's settings, do not improvise: `STOP Q1` with what you found.
+- Up to 3 spare runs for VOID repeats. The runner refuses the 21st.
+
+## Final (before the new last line)
+- Everything of the brief's section 6 again on the new head (scope, 0 bytes of product diff, the run count from the runner, settings checksums identical, names scan with controls, your private tmux gone, no process left); `git fetch origin` and a merge of `origin/main` into your branch if it moved (never rebase; another lane also appends to `BACKLOG.md` and `docs/M0-OUTCOMES.md`: keep both sides).
+- STATUS gains "ADDENDUM 1": each note's old and new text; the M8, M9, M10 rows in the table's form; the UNVERIFIED list updated.
+- Push `allow-measure` only; record `git ls-remote origin allow-measure main`.
+
+Friday then has the three new rows checked (a short check of those rows and of the redaction change), runs her merge check and sends the merge GO for one SHA.
+
+After ANY context compaction, re-read the brief, this addendum and your STATUS whole before writing anything more.
+
+The last line, when all of it is done, exactly: `READY FOR QA ALLOW-MEASURE r2` with the head SHA in the line above it.
