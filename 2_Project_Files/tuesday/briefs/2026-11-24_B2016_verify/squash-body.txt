@@ -1,0 +1,36 @@
+The lab tool's oxpd1 command gains two verbs.
+
+oxpd1 write makes ONE write of the OXPd 1.x client's Oxpd1Writer per
+run: RegisterSignInAgent (with a name, an agent service and a prompt
+page) or UnregisterSignInAgent (an id only), first-run step 5's pair.
+Without --execute it is a dry run: it prints the address, the action,
+the envelope and the undo's command, opens no credentials file and
+connects to nothing. --pin is required. An executed register first
+reads the device's sign-in agent records (GetAuthenticationAgentRecords)
+and writes nothing when a record holds the same id (compared as a UUID)
+or an id it cannot read (exit 10), or when the read is refused, faults,
+times out or ends in any other way. The first 401 or 403 ends the run
+with the read verb's own words, now one shared constant; a register
+sends the password at most twice, an unregister once, nothing is
+retried. Every executed write is entered in the run folder's
+undo-list.tsv as Pending BEFORE it is sent and rewritten with its end
+after; the undo command is printed whenever the write may have taken
+effect. The lab refuses an address holding @ and a name holding a
+control character before any folder or connection.
+
+oxpd1 undo-owed <session folder> reads the undo list of every run
+folder directly inside the session, orders the writes by time, keeps
+a register owed until an unregister of the same id on the same host
+has answered after it, names an unreadable line by its place only, and
+exits 11 when anything is owed or unreadable. It sends nothing.
+
+39 new cases against a stub on 127.0.0.1: C# totals plus 39 on both
+legs, the rules count plus 1. No project file, lock file, package,
+workflow line or path of the OXPd 1.x client changes. Stated limits:
+step 5 only; nothing compares the list with the device; the read and
+the register are two requests; a run folder outside the session folder
+is not counted; a write failing after the run folder is made is not
+caught. No device has been reached. Nothing is deployed; nothing was
+sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

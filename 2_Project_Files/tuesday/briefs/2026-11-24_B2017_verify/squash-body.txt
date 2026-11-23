@@ -1,0 +1,41 @@
+Nine of HP's OXPd 1.x service-description files are added under
+contracts/oxpd1/hp/, byte for byte from the entries of the pinned SDK
+1.8.4.1 jar (sha256 f2bb325f...): for the Test, CertificateManagement
+and UIConfiguration services, each its SOAP 1.2 binding, its port-type
+file and its schema. Their imports close over the already committed
+common.xsd. The Test service's callback pair is left out: the device
+calls it, and first-run step 2 does not need it.
+
+contracts/oxpd1/inputs.sha256 lists the nine with their SHA-256 (14
+lines become 23, the first 14 unchanged, sorted by path). The two test
+pins that count the committed descriptions move with the list: the
+number of listed files (contract cell C01, 14 to 23) and the number of
+binding ports the stub reads (StubDevice.AddressingNamespace, 4 to 7).
+No other line of C# changes; no cell is added or loosened.
+
+The contracts README says which first-run step each service serves and
+what a later write must READ first, in HP's own words: IsServiceEnabled
+before EnableService (the Test service is off after every reboot, and a
+DisableService undo would turn off a service the run did not turn on);
+ExportCertificates before ImportCertificate (an import of a certificate
+already in the store has no effect, so a RemoveCertificate undo would
+remove one that was there); GetTopLevelButtonRecords before
+RegisterTopLevelButton (a matching guid overwrites the existing
+record). HP also writes that self-signed certificates are "not
+recommended/supported" in the OXPd CA certificate store. The adapter
+README's limits line now says these descriptions are committed; the
+library still makes none of these calls, and nothing in the repository
+calls the three services yet.
+
+Kept under the words recorded in the project's clarifications: "hp
+files have been provided to us"; "we can store them where we want (and
+will try to do it safely)" (2026-11-21, said of HP's OXPd 2
+specification files); "our license / commercial agreement allows us to
+use HP code as part of our code." (2026-11-23).
+
+C# totals unchanged on both legs (this change adds no case); the rules
+count plus 9. No project file, lock file, package or workflow line
+changes. No device has been reached. Nothing is deployed; nothing was
+sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
