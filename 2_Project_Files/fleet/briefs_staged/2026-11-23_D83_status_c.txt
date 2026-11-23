@@ -1,0 +1,42 @@
+[Secuura/Blockchain-D -> Wednesday] STATUS C: k41 PHASE 2 done, LC-A = built, LC-B equal ITEM 0; WRAP next (Seat D 83rd)
+Seat D 83rd
+
+STATUS C, Kintsugi round k41, PHASE 2 (GO LIVE-CHECK 12:44:48Z). Every Phase 2 read is done and green. The WRAP follows.
+
+What Phase 2 did not do: no login, no minted token, no headless render, no issuer or admin GET, no audit_logs row, no write, no step on demo. Evidence is in REC evidence/phase2/.
+
+== LC-A in the RUNNING containers (files read inside them by docker exec)
+- issuer-frontend (running a50544f06917, StartedAt 12:27:34Z):
+  - 'Failed to create workflow (' 1, 'Failed to delete workflow (' 1, 'Failed to delete (' 1.
+  - 'Network error' 2. The em-dash sentence 2 (raw em dash); the backslash-u2014 escaped form 0.
+  - role:"alert" 3.
+  - CTL 'Failed to load' 2. Nonsense literal 0.
+  - Every count equals the BUILT image's (STATUS 2), and the rollback read 0 for the three refusal literals.
+- admin-frontend (running 3db089d03264, StartedAt 12:27:42Z):
+  - settings-platform-only 1, the platform-settings sentence 1.
+  - CTL 'Failed to save settings' 1, 'Nothing was changed' 1. Nonsense 0.
+  - All equal to the built image's.
+- originate and api-gateway: the census re-read (fixes_live post) gives 15 rows. The running containers equal the built images, 0 mismatches, 0 prediction misses. For example, requirePlatformAdmin reads 34, workflowPlatformCheck 3 and refuseUnlessPlatform 25 in the running dist.
+
+== LC-B (read-only; the nonsense-column control ERRORs on both readers)
+- i0extra_d83.sh vs ITEM 0, line for line: EQUAL (5 count lines).
+  - users 31: issuer_admin 6, org_admin 3, owner 9, system_admin 2, user 9, verifier 2.
+  - email_verified not true 14 (owner 5, user 9). Status: active 22, invited 9.
+  - documents 76; recipientEmail 0; matches 0.
+- orgadm_d83.sh vs ITEM 0, line for line: EQUAL (16 lines). read_only=on, rolled back.
+  - ORG_ADMIN 3, all active, organisation NULL, tenant set. Bare ADMIN 0.
+  - Non-platform users with organisation NULL: 29 of 29.
+  - Organisation-bounded roles (ORG_ADMIN, ISSUER_ADMIN): 9. Platform roles: 2. Organisations 15.
+- Nothing writes, and nothing did.
+
+== LC-D labels (as written in STATUS B)
+- KS-2314 (PR 2286): DEPLOYED on Kintsugi.
+  - Proven by LC-A in the built images and the running containers, census equal, contentfp in class. Unit-proven by gate 410.
+  - The live 403 for an organisation admin, and the admin Settings page turning Save off on screen, are UNMEASURED live (D83-W5: they need an organisation-admin session and a browser).
+- KS-2331 (PR 2287): DEPLOYED on Kintsugi. LC-A in the running issuer bundle; unit-proven by gate 411 (jsdom, not a browser). The on-screen refusal words are UNMEASURED live.
+- KS-2316 (PR 2288): NOT DEPLOYED. Auth is held, so this is not a label for done. Only its openapi text is live, served by the gateway through the host bind.
+
+State left on Kintsugi: the REVISION k41 entry and the .rebuild-seatD83 files (STATUS B). No other write in Phase 2.
+
+Next: the WRAP (history entry, HANDOVER FINAL, memory note, vault commit of my daily-note block only, quarantine of my scratch), then the wrap mail.
+

@@ -1,0 +1,50 @@
+[Secuura/Blockchain-D -> Wednesday] STATUS 2: k41 four swapped and verified, +15 watch running (Seat D 83rd)
+Seat D 83rd
+
+STATUS 2, Kintsugi round k41. All four services are swapped and every post-swap check is green. The +15 watch reads at about 12:42:32Z; STATUS B follows it. No prune. Auth held. Demo untouched.
+
+- Build: 11:51:24Z to 12:11:20Z, rc 0, two batches of two. verify_build REBUILT 4 / UNCHANGED 29 / NOIMAGE 3 (= prediction). New images:
+  - issuer-frontend a2dc43513fb6 -> a50544f06917
+  - admin-frontend 516e67255f52 -> 3db089d03264
+  - originate 4218506b35e4 -> 99a169774149
+  - api-gateway 5bc566c9230b -> b2a1d1c7b931
+  - auth and migrations UNCHANGED. Free 101,822 -> 94,645 MB (about 7.2 GB).
+- Post-build:
+  - basecheck stops 0. KS-535 AFTER_BUILD stops=0.
+  - contentfp UNEXPECTED_ROWS=0. Every shared/dist root is IDENTICAL, and both frontends' CSS is IDENTICAL, as predicted.
+    - The issuer changed 70 hashed chunks under assets/ (one new file) plus .vite/manifest.json. Its entry chunk and index.html did NOT change; I had predicted they would. That is inside the class, in the safe direction.
+    - admin changed admin/assets index-*.js and auth-*.js plus admin/index.html. api-*.js did NOT change; I had predicted it would. Also inside the class.
+    - originate app/dist: 2 paths (adminConfig.js and .map). gateway app/dist: 6 (admin and proxy .js, .js.map, .d.ts.map). gateway app/docs: the yaml.
+  - Census pre: 15 rows, 0 mismatches, 0 prediction misses (requirePlatformAdmin 4->34, workflowPlatformCheck 0->3, refuseUnlessPlatform 12->25; CTLs equal).
+  - LC-A frontend literals (rollback -> built):
+    - 'Failed to create workflow (', 'Failed to delete workflow (', 'Failed to delete (': each 0->1.
+    - 'Network error' 1->2. The em-dash sentence 1->2, held as a RAW em dash; the backslash-u2014 escaped form reads 0->0.
+    - role:"alert" 1->3.
+    - admin: settings-platform-only 0->1, the platform-settings sentence 0->1. CTL 'Failed to save settings' 1=1, 'Nothing was changed' 1=1, nonsense 0.
+  - latestproof EQUAL for all four.
+- Pre-swap:
+  - swapset: REBUILT 4, held-but-rebuilt [], SWAP 4 with api-gateway last. Planted controls: a rebuilt auth prints held-but-rebuilt ['auth'] and is not swapped; a rebuilt transfer is REFUSED as unplaced.
+  - Order sha16 4b1c864ad688ef69. ordval OK. KS-535 stops=0, nonfinal 0, free 94,636 MB.
+- Swap: 12:27:32Z to 12:28:14Z (42 s), all four VERDICT OK, healthy, on the built images.
+  - KS-535 read after each swap: stops=0.
+  - H2 gate before the gateway: issuer running a50544f06917 = :latest, running/healthy.
+  - Windows (last old healthy to first new healthy; frontends with no HTTP read): issuer 8.7 s, admin 6.5 s, originate 7.0 s, gateway 8.9 s (new HTTP 200 at 12:28:08.4Z).
+- Post-swap:
+  - censuscmp2 OK: moved == the four, untouched 31 of 35.
+  - auth StartedAt 2026-11-19T14:55:28Z and anchoring 2026-11-15T22:47:15.950724269Z EQUAL.
+  - bindfiles (iii) exactly as ruled: yaml SAME at 3882229e7e9fcd92 (ino 1314758); nginx SAME at c3905a1ef162c82a.
+  - Census post: 0 mismatches, and the running containers equal the built images.
+  - KS-535 stops=0, nonfinal 0. Tracker 59 / 058.
+  - Vouch sha16 9c2fbbcc7351b60b equal on the new gateway and originate; gateway-provenance ACTIVE.
+  - maskline MASKED on the new gateway 7efe3842f822 (old 9765fad67526).
+  - WRONGPASS/NOAUTH 0 on the new originate (control 30 lines) and gateway (control 203 lines).
+  - FATAL 0 and error-level 0 on both; health/ready 200 on both.
+  - penv after: guard inert. Mail transport still false.
+  - Free 94,624 MB.
+- REVISION:
+  - Head revision=8c2c24d37074..., 282,158 B, sha16 485f482f29d344cc, revision= lines 44 -> 45.
+  - REVISION.pre-8c2c24d37074-k41 = the k40 file (275,827, 23cd78c34a0354d0). The k39, k38 and k37 backups re-read byte-identical.
+  - The tamper copy was moved into .rebuild-seatD83.
+
+Declared: the escaped em-dash LC-A row first held a real em dash, because my tool input decoded the escape. It was read-only. It is now built as a literal backslash-u2014 and re-read, and the v1 output is kept. The planted swapset controls first refused on the summary cross-check (my plant did not update the summary line); I re-planted with a consistent summary.
+

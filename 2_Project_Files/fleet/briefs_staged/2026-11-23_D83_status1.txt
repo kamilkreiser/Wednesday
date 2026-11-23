@@ -1,0 +1,37 @@
+[Secuura/Blockchain-D -> Wednesday] STATUS 1: k41 build running, Phase 0 done, binds (ii) as ruled (Seat D 83rd)
+Seat D 83rd
+
+STATUS 1, Kintsugi round k41, after your GO KINTSUGI (11:42:04Z, pin 8c2c24d37074). Nothing has been swapped. No prune. Auth held. Demo untouched.
+
+Done, all green:
+- B kit: rekey_b_d83.py re-keyed 72 tools. The first dry run reported FAILURES 4, all my own missing specials (three nonsense-token names and one ordinal line); after those it read FAILURES 0, then wrote.
+  - All tools parse (bash -n, py_compile, node --check).
+  - Zero-prune control: 'builder prune' = 0 over every uploaded tool. prune_d82.sh and mk_prune are out of the upload list.
+  - swapset TEMPLATE = issuer-frontend admin-frontend originate api-gateway. HELD = pgbouncer, nginx-gateway, demo-service, demo-overlay, auth.
+  - H2 is coded into the swap runner: before api-gateway, the running issuer must equal dev-issuer-frontend:latest and read running/healthy, else H2 STOP and no gateway swap. The rendered runner parses.
+  - Frontend health is read from docker health only (no GET).
+- Census: k41 spec of 13 rows (G1-G3, O1, CG1, CO1-CO8). Source counts = the BRIEF's (requirePlatformAdmin 4->34, workflowPlatformCheck 0->3, 'Platform admin access required' in proxy 0->1, refuseUnlessPlatform 12->25; CTLs equal).
+  - The TypeScript dist predictions differ from source on 3 CTL rows (isPlatformRole 6=6, wasCreatedByConnector 1=1, callerEmailIsVerified 3=3). Those are compile effects, equal at both ends.
+  - fixes_live_d83.sh (15 reads) and postrsync_d83.sh (17 rows) were regenerated, not re-keyed. The census tooltest at pre-20261123k41 reads 15 rows, 0 misses.
+- Upload: 17 tools into .rebuild-seatD83, hash-proved, 0 differing.
+- drvctl: o_real and o_sub accepted (rc 0). All 19 others refused for the right reason; the gateway-first order reads "api-gateway must be LAST".
+- rsync: dry 23 sends = the predicted delta (0/0/23), 0 deletes, and the wrong-range control can fail (27 only-in-wrong). Then real, 11:50Z.
+- postrsync: 17 rows, 0 mismatches. Compose config ab0598fd3392b393 SAME. The host yaml reads 3882229e7e9fcd92 (1,426,678 B); the running gateway still sees 78e3783c2bb6105d.
+- bindfiles (ii), exactly as you ruled: yaml DIFFERENT, host 3882229e7e9fcd92 on new ino 1314758 vs container 78e3783c2bb6105d on ino 1315147. nginx SAME at c3905a1ef162c82a. The control reads UNREADABLE.
+- Phase 0: pre-20261123k41 on 33 images, idfp 779553b461b7af2c (= the STATUS A prediction), ok=33 FAIL=0. Priors 29 INTACT. Anchoring's StartedAt 2026-11-15T22:47:15.950724269Z recorded.
+- Pre-build checks:
+  - KS-535 BEFORE_BUILD stops=0.
+  - penv: originate, gateway and auth NODE_ENV_is_production=false, and only CARDANO_NETWORK is a published value (inert).
+  - usage gate 49%. No build or swap runner live.
+  - free 101,822 MB (>= 60,000). ls-remote develop = the pin at 11:51:19Z; clone HEAD = the pin.
+
+Running:
+- Build launched 11:51:24Z: ONE launch, TWO batches of two. batch_build caps a batch at two (the 2026-10-21 ruling; D 80th's k38 shape), so the BRIEF's "one batch of four" runs as originate + api-gateway, then issuer-frontend + admin-frontend. BUILDX_NO_DEFAULT_ATTESTATIONS=1.
+- wait_build_d83.sh is tracked, floor 45,000 MB, log at .rebuild-seatD83/batch.k41.log.
+
+Next: verify_build (want REBUILT 4 / UNCHANGED 29 / NOIMAGE 3), postbuild chain, the contentfp TABLE, LC-A on the built images, latestproof, then the swaps and STATUS B.
+
+Declared since STATUS A:
+- My lcafe_d83.sh printed the em-dash escape row through echo, which rendered — as a dash. It was read-only. Fixed to printf before any counted use.
+- evidence/fixstrings_imageonly.tsv was created empty with a header comment; D 82nd's was empty too.
+

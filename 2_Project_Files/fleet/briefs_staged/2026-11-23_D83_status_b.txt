@@ -1,0 +1,66 @@
+[Secuura/Blockchain-D -> Wednesday] STATUS B: k41 PHASE 1 COMPLETE, waiting for GO LIVE-CHECK (Seat D 83rd)
+Seat D 83rd
+
+STATUS B, Kintsugi round k41. PHASE 1 IS COMPLETE.
+
+Kintsugi now runs develop 8c2c24d37074 for issuer-frontend, admin-frontend, originate and api-gateway. That covers KS-2314 (platform-only config writes) and KS-2331 (issuer refusal words). Auth is HELD, so KS-2316 is NOT on Kintsugi. No prune. Demo had no step, read or probe. Production untouched.
+
+BLUF: every gate green from the build through the +15 watch. Nothing to roll back, nothing open. STATUS 2 (12:3xZ) carries the build, swap and post-swap figures; this mail adds the watch and the round's end.
+
+== Since STATUS 2
+- +15 watch (E14_watch15.txt, read 12:42:43Z over the window from 12:27:32Z):
+  - error-level 0 on issuer-frontend, admin-frontend, originate, api-gateway and the controls transfer, security, anchoring, billing. The four planted parser controls behave.
+  - restarts 0 on all eight, every one running/healthy.
+  - OOM 0, a real read over 1,164 lines.
+  - Billing logged 0 lines in the window; it is a quiet control.
+- Health window, 300 s, ended 12:32:29Z with all four new containers running/healthy. The frontends were read by docker health only, no GET.
+- bphase7, the round's end:
+  - KS-535 AFTER_ROUND stops=0.
+  - batch.k41.done RC=0; swap.k41.done RC=0 SWAPPED=4. My runners alive: 0 (control sshd 3).
+  - endgw: the gateway StartedAt 12:28:03Z, image b2a1d1c7b931, VERIFIED_TOKEN_CLAIM_REFUSED=0. Anchoring StartedAt EQUAL (not restarted).
+  - Final i0db: 33 dev containers; moved since the k40 pre-tag = 4 (the four). The same 5 non-:latest as at ITEM 0. auth 3c7d4d1a756a, StartedAt 2026-11-19T14:55:28Z, EQUAL.
+  - Tracker 59 / 058, has_059 0. anchor_store 64 (confirmed 61, failed 3), non_final 0. Free 94,623 MB.
+  - Its REVISION line reads the k41 head 8c2c24d37074 (282,158 B, 485f482f29d344cc). Its printed "want b8470f5fd331" is the carried ITEM 0 expectation, not a miss.
+
+== The round in one place (all figures in STATUS 1, STATUS 2 and REC evidence/)
+- Pin 8c2c24d37074, the GO's. Develop was re-read equal to it before the build (11:51:19Z).
+- Rollback tag pre-20261123k41: 33 images, idfp 779553b461b7af2c. Priors 30 now (k12..k41).
+- verify_build REBUILT 4 / UNCHANGED 29 / NOIMAGE 3. contentfp UNEXPECTED_ROWS=0. Census 0 mismatches at pre and post. censuscmp2 moved == the four.
+- Binds exactly per the D83-Q1 ruling: (ii) yaml DIFFERENT, then (iii) SAME at 3882229e7e9fcd92; nginx SAME throughout.
+- H2 gate passed before the gateway swap.
+- Vouch equal, provenance ACTIVE, the Redis line MASKED, WRONGPASS/NOAUTH 0, FATAL 0.
+- REVISION: the k41 entry is the head; REVISION.pre-8c2c24d37074-k41 is the k40 file; older backups byte-identical; revision= lines 45. How to tell it from k40's entry: the head line names 8c2c24d37074 (k40's named b8470f5fd331), round_stamp=k41, deployed_at 2026-11-23T12:27:32Z.
+- Disk: 101,824 at ITEM 0, 101,822 before the build, 94,645 after it, 94,624 after the swaps, 94,623 at the end. That is above 60,000, so no k42 disk line is needed.
+
+== Files left on Kintsugi, nothing deleted
+- .rebuild-seatD83, holding:
+  - the 17 uploaded tools;
+  - the batch.k41 and swap.k41 logs, progress and done files;
+  - swaporder_k41.txt;
+  - the phase0 map;
+  - revision_entry_k41.txt;
+  - revision_tamper_copy_k41.txt;
+  - ctl/ order files.
+- The pre-20261123k41 tag on 33 images. No envcopy.
+
+== Rollback (only on your word; GATEWAY FIRST)
+docker tag dev-<svc>:pre-20261123k41 dev-<svc>:latest, then docker compose -p dev --profile phase2 up -d --no-deps --force-recreate <svc>. Order: api-gateway, originate, admin-frontend, issuer-frontend. Rolling the issuer back before the gateway re-opens the crash on a refusal.
+
+== PHASE 2 PLAN (only on GO LIVE-CHECK (Seat D 83rd))
+- LC-A in the RUNNING containers:
+  - lcafe_d83.sh running: the frontend literals read as files inside the running containers, no GET.
+  - The node rows are already census-confirmed running == built at E5 (0 mismatches); I re-read them once.
+- LC-B: i0extra_d83.sh and orgadm_d83.sh re-read (read-only, nonsense-column control). They must EQUAL ITEM 0: users 31 by role 6/3/9/2/9/2, unverified 14, invited 9, documents 76, recipientEmail 0, ORG_ADMIN 3 all organisation NULL, non-platform org NULL 29, org-bounded 9.
+- No login, no minted token, no headless render, no issuer or admin GET, no audit_logs row.
+- LC-D labels:
+  - KS-2314 and KS-2331: deployed on Kintsugi (LC-A in the images and running containers, census equal) and unit-proven (gates 410 and 411; jsdom for the issuer). The live 403 for an organisation admin and the on-screen refusal words are UNMEASURED live (D83-W5).
+  - KS-2316: NOT DEPLOYED (auth held).
+
+== For your receipt to Kam (unchanged from STATUS A, now deployed)
+- KS-2314: platform-wide configuration is written by platform admins only. On Kintsugi the 9 organisation-bounded admins (ISSUER_ADMIN 6, ORG_ADMIN 3) lose those writes. The admin Settings page turns Save off after a refusal and says so.
+- KS-2331: the issuer's Document Types and Workflows screens show the gateway's refusal words instead of crashing or doing nothing. Display only.
+- API docs: since the gateway's recreate at 12:28:03Z, the gateway serves the pin's yaml through the host bind. It describes KS-2316's own-organisation user writes, which are NOT live (auth held).
+- KS-2316 is merged but held with auth. Before any auth swap, Kam needs the Q6 census on his card: all 3 ORG_ADMINs and all 29 non-platform users have no organisation.
+
+Waiting for GO LIVE-CHECK (Seat D 83rd).
+

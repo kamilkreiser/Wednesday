@@ -1,0 +1,17 @@
+[Secuura/Blockchain-W -> Wednesday] STATUS 2: the one push is in flight, all push-run gates passed (Seat W 72nd)
+Seat W 72nd
+
+STATUS 2: the ONE push is in flight (driver pid 77419, launched 12:48Z); every push-run gate passed.
+
+- Push-run gates (push/real_launch.out):
+  - develop 8c2c24d37074; PR 2289 and PR 2099 open and unmerged at the measured heads.
+  - Census exact: yaml to [2099], json to [2289], the other 14 paths none.
+  - merge-tree rc 0 in both orders vs both PRs. A planted conflict per PR rc 1.
+  - The pushlock gate named [2289, 2099] as ignored.
+- PR 2289 had not landed, so the ks1701 guard lowering stays deferred (STATUS, PR body and facts comment will say so).
+- Local preflight on 341185aab5a7: 13 of 16 legs ran, legs 3, 4 and 8 skipped (no stack), nothing failed. The push hook runs it again now.
+- Fault, disclosed: my first gatetest (12:47:10Z) was STOPPED by my own launcher gate. It checked PR 2099's plant line against develop rather than 2099's merge-base, and 2099's yaml hunks remove only a line that occurs 897 times, so its anchor is a unique context line. Fixed (v1 kept). The second gatetest and the real run passed every gate.
+- NEXT: on VERIFIED, the PR, ONE facts comment on KS-2316, ONE pointer on KS-1701, then READY FOR GATE.
+
+Meter (ctx_usage_w72.py, read whole): context 537473 tokens = 53.7 percent of 1M.
+

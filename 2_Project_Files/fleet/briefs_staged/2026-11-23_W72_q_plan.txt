@@ -1,0 +1,188 @@
+[Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 72nd)
+Seat W 72nd
+
+QUESTION: plan confirmation. Auth follow-up lane: KS-2316's two follow-up rulings (the stub, the STANDARD cap on create) and the auth sites KS-1701 deferred. Measured at develop 8c2c24d37074 (= the BRIEF's pin; ls-remote 12:12:35Z: develop unchanged, PR 2289 OPEN at c8468d288024, PR 2099 at 8967de8b1755). No code is written to any tree that will be pushed. The two THROWAWAY trees (s-w72-proto, s-w72-pred) are measurement only and never pushed. WAITING for your ANSWER.
+
+STOP FINDING FIRST (it contradicts STOP ITEM 1's deferral of the ks1536 baseline json):
+- packages/shared ks2125-role-list-baseline-is-tight-for-oauth-and-users.test.ts is on develop and is NOT in PR 2289. It pins the baseline json EQUAL to the list count for oauth.ts and users.ts (R1, R2), and C1 requires oauth.ts to hold at least one list.
+- Measured on the proto: with the product edits and NO json edit, shared fails ks2125 R1, R2 and C1 (proto1: 1739/1743).
+- With the json lowered (users.ts 9 to 3; the oauth.ts and authenticate.ts entries removed) and ks2125 rewritten (C1 keeps "users.ts holds lists" and proves the real oauth.ts was read; R1 reads an absent entry as 0), shared is 1742/1743. The one failure is KS-278 wallet-signature, the same name develop fails (develop 1742/1743).
+- So the json cannot wait for PR 2289: this PR fails shared without it.
+- Overlap measured with git merge-tree in my clone, from commit objects built through a temporary index (no ref):
+  - mine plus PR 2289: rc 0 in both orders, same tree 88ee83053267. Shared path: the json only. The merged json parses: 20 files, total 36.
+  - Planted control, a one-line edit on a json line PR 2289 itself changes (asserted to occur exactly once): rc 1 in both orders.
+  - Predicted post-merge tree (mine plus 2289, s-w72-pred): shared 1746/1747, KS-278 only. PR 2289's ks1701 G1, G1r and G2 pass on my lowered numbers.
+- RECOMMEND: the json and the ks2125 edit ride in THIS PR. Only the ks1701 guard lowering (file (b), which exists only on PR 2289's branch) is deferred until 2289 merges. It is housekeeping: it passes as it stands on the lower counts, measured on the predicted merge.
+
+Q1 MEASUREMENTS AND THE ONE DESIGN
+- Census (frame services/auth/src, non-test, .ts .tsx .js .mjs .cjs):
+  - P1 case-insensitive system_admin|super_admin: 37 lines in 9 files (= drafter). Positive control: users.ts 500, 556, 612, 644.
+  - P2 quoted ORG_ADMIN|ISSUER_ADMIN|admin|ADMIN: 33 lines in 6 files, all lines; 23 in 4 excluding P1 lines. The drafter said 30; its exact regex was not given.
+  - The callers of requireRole, hasAnyRole and requireSelfOrRole: definitions only, no product caller (as the drafter found).
+- Guard port (ks1536 G2 sweep) at develop: swept 52 = baseline 52, 29 files (positive control).
+- Develop baselines: auth 2151/2151 (510 files); shared 1742/1743 (KS-278 only).
+- Classification:
+  - S1 to S7: MIXED.
+  - S8: MIXED, dead code.
+  - S9: PURE, dead code.
+  - S10: MIXED, shared by /lookup.
+  - S11: MIXED sibling.
+- Design for S1 to S9: per site, isPlatformRole (via the local isPlatformAdmin / isOauthPlatformAdmin wrappers, or a direct import in authenticate.ts) for the platform arm, and EXACT names for the rest. No new list, no new shared predicate, isPlatformRole untouched. The bounded predicates are not used, so org_admin and issuer_admin stay refused.
+- Each local ADMIN_ROLES keeps its name (ks1536-users line 346) and now names only the tenant-scoped admins.
+- Stub (ruling 1):
+  - The ORG_ADMIN caller (as the route's existing folded callerRole reads it) has its placeholder written with ITS organisation, read from its users row via callerRowOrganizationId (never the token).
+  - An ORG_ADMIN with no organisation is refused 403 FORBIDDEN "Only an admin who belongs to an organisation can create placeholder users". The order is sub-question (e).
+  - userRepo.createInvitedStub takes one more optional parameter, organizationId. createUser already writes organization_id (userRepo 724), so no column is needed.
+  - Platform admins, ISSUER_ADMIN (sub-question b), connector tokens and scope-only callers are unchanged.
+- Cap (ruling 2): the BASIC-only test becomes !withinOrgAdminLevelCap(createLevel). The message becomes the editor's: "Only a platform admin can set a verification level above STANDARD". The stale "pending a ruling" comment is rewritten.
+
+Q2 EXACT PATHS (CLOSED LIST v1, 16 paths + 1 held; evidence/closed_paths_v1.txt)
+Product:
+- services/auth/src/routes/users.ts
+- services/auth/src/routes/oauth.ts
+- services/auth/src/middleware/authenticate.ts
+- services/auth/src/repositories/userRepo.ts
+- services/auth/src/auth.openapi.ts (three create-route strings: 1144-1145, 1158, 1185)
+- docs/openapi/secuura-api.yaml (regenerated)
+  - develop generate-openapi --check rc 0; proto before regeneration rc 1; after rc 0.
+  - 5 yaml lines change, in hunks at 13380, 18059 and 18120.
+Forced shared:
+- packages/shared/src/__tests__/ks1536-inline-role-lists.baseline.json
+- packages/shared/src/__tests__/ks2125-role-list-baseline-is-tight-for-oauth-and-users.test.ts
+Pinned tests, the ruled flips. The proto auth run is 2139/2151, the 12 failures all ruled:
+- ks1210-oauth-app-scopes-and-ownership (E2)
+- ks1536-oauth-platform-gate-asks-the-shared-platform-role ("gate 2 does not move" x4)
+- ks1536-users-routes-ask-the-shared-platform-role ("the outer list refuses it first" x3)
+- ks2287-org-admin-sets-verification-level-capped (create at NONE, SOCIAL, STANDARD x3)
+- ks2316-org-admin-user-writes-own-organisation-only (ruling QE x1)
+New cells (names provisional):
+- ks2316-stub-places-org-admin-placeholders-in-its-organisation.test.ts
+- ks2316-org-admin-creates-users-up-to-standard.test.ts
+- ks1701-auth-admin-gates-ask-the-shared-check.test.ts
+HELD for PR 2289: packages/shared ks1701-no-hand-written-platform-comparisons.test.ts. Its ALLOWED becomes authenticate.ts 1 to 0 and users.ts 1 to 0. Its FROZEN_BASELINE becomes users.ts 9 to 3, oauth.ts 1 to 0 and authenticate.ts 1 to 0.
+Each site's BEFORE and AFTER spelling set:
+- S1 users GET / (500), S2 /admin/list (556), S3 /admin/organizations (612):
+  - BEFORE exact SYSTEM_ADMIN, ORG_ADMIN, ISSUER_ADMIN, admin, super_admin, SUPER_ADMIN.
+  - AFTER isPlatformRole or exact ORG_ADMIN, ISSUER_ADMIN, admin.
+  - GAIN: system_admin, System_Admin, Super_Admin and every other ASCII case. Nobody loses.
+- S4 POST /admin/create (644):
+  - BEFORE exact SYSTEM_ADMIN, ORG_ADMIN, super_admin, SUPER_ADMIN.
+  - AFTER isPlatformRole or exact ORG_ADMIN. Same gain.
+- S5 PATCH /admin/:id (777):
+  - BEFORE exact SYSTEM_ADMIN, ORG_ADMIN, admin, super_admin, SUPER_ADMIN.
+  - AFTER isPlatformRole or exact ORG_ADMIN, admin.
+- S6 verification review (1626):
+  - BEFORE exact SYSTEM_ADMIN, ORG_ADMIN, super_admin, SUPER_ADMIN.
+  - AFTER isPlatformRole or exact ORG_ADMIN.
+- S7 oauth gate 2 (1246, 1254):
+  - BEFORE exact the six.
+  - AFTER isOauthPlatformAdmin (= isPlatformRole) or exact ORG_ADMIN, ISSUER_ADMIN, admin.
+- S8 requireOwnership (228):
+  - BEFORE exact SYSTEM_ADMIN, ORG_ADMIN, super_admin, SUPER_ADMIN.
+  - AFTER isPlatformRole or exact ORG_ADMIN.
+- S9 requireSameOrganization (249):
+  - BEFORE exact SYSTEM_ADMIN, super_admin, SUPER_ADMIN.
+  - AFTER isPlatformRole.
+- Everywhere: platform_admin, the dotless-i and long-s spoofs, arrays and undefined stay refused.
+Guard, before to after:
+- ks1536 per file: users.ts 9 to 3 (S10's list stays), authenticate.ts 1 to 0, oauth.ts 1 to 0, issuerCerts.ts 1 (S11 untouched), password.ts 1. Total 52 to 44.
+- ks1701 G1 comparisons in auth: authenticate.ts 1 to 0, users.ts 1 to 0, password.ts 1.
+Overlap (open-PR census 12:10:52Z, GraphQL, files paginated: 18 open, 149 file rows):
+- Hits only PR 2289 (the json, plus the held ks1701 guard) and PR 2099 (the yaml).
+- Dependabot 948, 649 and 575 touch auth package.json, which is not in the list.
+
+Q3 CELLS, MUTANTS, PROOF
+Cells, red-first, as the BRIEF lists them:
+- Per gate S1 to S9, the full matrix. Admitted: SYSTEM_ADMIN, system_admin, System_Admin, SUPER_ADMIN, super_admin, Super_Admin, sUPER_ADMIN. Refused: platform_admin, OWNER, the two URI-encoded spoofs, an array, undefined. ADMIN and admin keep their existing outcome per site. ORG_ADMIN, org_admin and ISSUER_ADMIN are per site. No token is 401. A twin sits beside each flipped cell.
+- Stub: an ORG_ADMIN with an organisation (201, the row carries it); an ORG_ADMIN with none (403, repo not called); a platform admin; existing same-tenant (200 alreadyExisted); different tenant (404); a connector token; a scope-only token; a reserved wallet email (400); a missing caller row (403).
+- Create: NONE, BASIC, SOCIAL and STANDARD admitted for an ORG_ADMIN; ENHANCED, HIGH and GOVERNMENT 403; a platform admin all seven; invalid 400; non-string 400; the new user carries the level and the caller's organisation.
+- Gate 2: a platform variant sees another user's app; ORG_ADMIN, ISSUER_ADMIN and admin as before; an unrelated user 404; the creator 200.
+Mutants (each compiling, each killed by a named cell, anchored on the site's own line with one hit asserted):
+- one site per gate reverted to its old list;
+- a lower-case platform spelling refused;
+- platform_admin admitted;
+- ORG_ADMIN admitted at S9;
+- org_admin admitted (the bounded predicate);
+- a spoof admitted (a full toUpperCase);
+- the stub's organisation check removed;
+- the organisation taken from the token;
+- the stub refusal moved across the lookup (direction per sub-question e);
+- the stub's organisation not passed to the repo;
+- the repo ignoring the parameter;
+- the cap raised to ENHANCED;
+- the cap back to BASIC;
+- NONE refused;
+- a connector refused at the stub;
+- ISSUER_ADMIN bound at the stub;
+- the json users.ts raised back to 4 (killed by ks2125 R2).
+Proof:
+- The real users and oauth routers driven over a loopback listener with authenticate mocked (the W 70th/71st shape) and the repo mocked.
+- The middleware S8 and S9 unit-called.
+- NOT reached: a real database (the organization_id write is read from code), the gateway, a signed connector token, originate's mapping of the new 403.
+
+Q4 TIER: 1. A role gate on user creation, a stub mint and OAuth app ownership; I measured nothing that lowers it.
+
+SUB-QUESTIONS, one at a time, each with my recommendation:
+1. (C) ks1210 gate 2:
+   - BEFORE exact the six; AFTER isOauthPlatformAdmin or exact ORG_ADMIN, ISSUER_ADMIN, admin.
+   - GAIN: every other ASCII case of SYSTEM_ADMIN or SUPER_ADMIN (system_admin included) now sees and changes other users' OAuth apps. Nobody loses.
+   - E2 rewrite: users.ts first ADMIN_ROLES equals ['ORG_ADMIN', 'ISSUER_ADMIN', 'admin']; oauth's tenant list equals it; and both files' platform arm asks the shared check (source pins on the two gate lines).
+   - getAppById (services/oauth.ts 171) has no app-layer tenant filter. The read is bounded only by RLS on oauth_apps, not measured against a database. A variant gains exactly what an exact SYSTEM_ADMIN holds today.
+   - RECOMMEND: move S7 together with S1 in this PR.
+2. (A-a) Connector and scope-only callers at the stub:
+   - Measured: login tokens carry default scopes only for OWNER; connector tokens carry role 'connector'; OAuth tokens carry the user's role plus granted scopes.
+   - RECOMMEND: the rule binds a caller by its ROLE (ORG_ADMIN), so an OAuth token of an ORG_ADMIN user is bound, while connector and scope-only callers stay exactly as built (the ks564, ks1653 and ks1402 cells pass on the proto).
+3. (A-b) ISSUER_ADMIN at the stub:
+   - Measured: originate's issue and transfer gates are DOCUMENT_WRITE_ROLES (ISSUER_ADMIN, ORG_ADMIN, SYSTEM_ADMIN, SUPER_ADMIN).
+   - The seeds hold 6 ISSUER_ADMIN (the demo login among them) against 3 ORG_ADMIN, none with an organisation. So ISSUER_ADMIN is the usual issuer.
+   - RECOMMEND: NOT bound (the card says "org admin"; PR 2288 binds ORG_ADMIN and bare admin only). Binding it changes who may issue: a Kam card.
+4. (e) Order at the stub (the BRIEF's design refuses before any lookup):
+   - Measured consequence: an org-less ORG_ADMIN could then not even RESOLVE an existing recipient. Its holderEmail issuance fails for every recipient. Originate maps a non-404 stub refusal to 502 BAD_GATEWAY "Could not resolve recipient via users/stub" (certifications.ts 407; documents.ts 2089, after a resolveByHash retry).
+   - /lookup already tells the same caller whether an address exists in its tenant, so refusing before the lookup hides nothing more.
+   - RECOMMEND: resolve first and refuse only the INSERT. That is the card's words, "cannot make one". The repo is told "no organisation, no insert" and the route answers 403.
+   - Option 2 is the BRIEF's order, if you prefer one rule for the door.
+   - Either way, the originate 502 label is LISTED (an originate file, not this lane).
+5. (B-a) NONE at the cap:
+   - Measured: refused today (ks2287's NONE cell pins the 403).
+   - RECOMMEND: admit it, as the editor does.
+6. S10 and S11:
+   - RECOMMEND: S10 untouched at BOTH doors (the stub's admission set is not what ruling 1 changes, and /lookup shares the list), and S11 untouched.
+   - Both LISTED as the KS-1591 Unicode-fold class for one follow-up.
+   - The stub's ORG_ADMIN binding reads S10's folded callerRole, so every spelling S10 admits as ORG_ADMIN is bound: stricter, never looser.
+7. The PR 2099 yaml overlap:
+   - Measured: rc 0 in both orders (tree a5eb0b686bcd).
+   - Planted control on a line 2099 changes (one occurrence asserted): rc 1 in both orders.
+   - Hunks at 13380, 18059 and 18120 against 2099's 3776 to 4211.
+   - RECOMMEND: waive. If 2099 lands first, I regenerate.
+8. The other open items, recommended as written in the BRIEF:
+   - (c) an existing same-tenant user in another organisation is still resolved (cell it);
+   - (d) platform admins unchanged;
+   - (f) no OpenAPI entry for /stub (grep: 0) and none added;
+   - (g) /lookup LISTED and STOPPED.
+   - Ticket: the facts comment on KS-2316, with one pointer line on KS-1701.
+   - Branch proposed: feature/ks-2316-stub-org-scope-create-cap-auth-platform-spellings.
+
+Deploy note for the D seat:
+- Once deployed, case-variant platform admins GAIN access at S1 to S9.
+- An ORG_ADMIN's placeholder lands in its organisation.
+- An org-less ORG_ADMIN gets 403 at the stub; via originate that is 502.
+- Create admits up to STANDARD.
+- On Kintsugi all 3 ORG_ADMINs have no organisation (Seat D 83rd's census).
+
+Launcher preflight, VERBATIM (evidence/launch_preflight_copy.txt):
+# launch 2026-11-23T11:55:54Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 2 other live session(s) on this project: PID 87112 (up since Mon 23 Nov 22:18:43 2026), PID 85357 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+
+Faults, disclosed:
+1. My first two Bash calls began with a cd to the project root (the cwd already; it did not move).
+2. The first call also printed the seat-boot memory note before the BRIEF was read. The output was persisted, and about 2K of it reached context.
+3. The first planted merge control (a sed form) failed on BSD sed. It was replaced by a python tool, and both controls then gave rc 1.
+4. My first Read in my dev tree injected its CLAUDE.md (the known ~14K trap).
+
+Meter (ctx_usage_w72.py, read whole, at send): context 314484 tokens = 31.4 percent of 1M.
+
