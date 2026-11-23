@@ -1,0 +1,37 @@
+The host maps its first routes. GET /health answers 200 "ok" over HTTP
+or HTTPS and reads nothing. POST /oxpd2/devices/{serial}/{target}/{operation}
+hands the five OXPd 2 callbacks to the adapter's Oxpd2CallbackHandler
+and writes each of its 14 outcomes as a status by one table; only an
+answered callback writes a body. POST /oxpd2/devices/{serial}/notifications
+checks the device's callback credential first, bounds the body at
+1048576 bytes, hands the bytes to a sink unparsed and zeroes them.
+
+Both OXPd 2 routes answer 403 to a request that did not come over
+HTTPS, before the host's own code reads anything else. The serial of
+the path names the device; the per-device credential, on exactly one
+Authorization header line, is the only proof: with none, or with two or
+more lines, the host hands over no credential and the answer is 401
+while the vault answers. IDeviceSecretVault is bound to the local
+secret store, resolved at each call, so a host with no Secrets
+configuration still starts and answers 503 to every OXPd 2 call. The
+listening addresses and the TLS certificate come from the framework's
+Kestrel configuration section. The callback sink throws and the
+notification sink keeps nothing until the sign-in and install work
+binds real ones.
+
+A new test project, tests/Datasec.Suite.Server.Tests, starts the host
+on 127.0.0.1 port 0 with a throwaway certificate and runs 15 cells;
+two of them write raw TLS requests with two Authorization lines, in
+both orders, on each OXPd 2 route. Datasec.Suite.slnx gains the test
+project and the Jobs transport project, so both legs run the 15 cells
+and the Release build compiles the transport in Release. C# totals
+plus 15 on both legs, the rules count plus 11.
+
+Limits are named in the Server README: what a device sends to these
+routes and what it does with each status are UNMEASURED; no
+forwarded-header handling; at Debug, Kestrel's BadRequests category
+logs the text of a header line it cannot parse, value included. The
+root README's two Server lines describe the host as it now is.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
