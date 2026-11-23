@@ -1,6 +1,8 @@
 # B2027 JIRA-DRAFTS: Workpath questions for Steve M (drafts only, nothing written to Jira)
 
-BLUF: 26 ticket drafts. T-01 to T-25 cover the 28 Workpath items Kam marked "create a Jira ticket (with the question) and assign to Steve M - 2 week time request" (W21 to W24 are one ticket, as he grouped them). T-26 is the w8 technical-document ask, "assign to Steve M but for him to assign to Artur M".
+BLUF: 29 ticket drafts. T-01 to T-25 cover the 28 Workpath items Kam marked "create a Jira ticket (with the question) and assign to Steve M - 2 week time request" (W21 to W24 are one ticket, as he grouped them). T-26 is the w8 technical-document ask, "assign to Steve M but for him to assign to Artur M". **Round 3:** T-27 to T-29 are the Reporting items W41 to W43, added on Kam's tap of 10:34 on the card about them: "b — Steve M's: ticket them".
+
+**Round 2** (after Fable review B2028; the round-1 file is `JIRA-DRAFTS.r1.md`). Every description is addressed to Steve M. Kam's words are quoted as "Kam (product owner):", and no ticket says "You said" or "You asked". The pack's references (design sections, C-numbers, sources) that Steve M cannot open are moved out of the description into a first comment for the build team. T-23 lists the eight behaviours and the UUID question in full. T-03, T-04, T-05, T-12 and T-13 carry their own BLUF line, because they ask for kit, not for a fact.
 
 **No Jira write of any kind was made by this seat.** A project seat creates these later from this file.
 
@@ -12,7 +14,7 @@ BLUF: 26 ticket drafts. T-01 to T-25 cover the 28 Workpath items Kam marked "cre
 - **Due date:** 2026-12-08 (Tuesday), from `date -j -v+14d +%Y-%m-%d` and `date -j`.
 
 **How these relate to the master list OXPD2-1 (C-41).** OXPD2-1, "MASTER: questions and points to clarify (OXPd 2)", is the one list his C-41 made. His answers now route each Workpath question to a ticket of its own, assigned to Steve M (s3: "Work path items all assigned to Steve and delegated by him").
-Tuesday's reading and recommendation: OXPD2-1 stays the index. Each draft is a Task linked to OXPD2-1 ("relates to"), and one comment on OXPD2-1 lists the 26 new keys against the pack ids, so nothing leaves the master list without a pointer (ANSWERS-MAP, X10).
+Tuesday's reading and recommendation: OXPD2-1 stays the index. Each draft is a Task linked to OXPD2-1 ("relates to"), and one comment on OXPD2-1 lists the 29 new keys against the pack ids, so nothing leaves the master list without a pointer (ANSWERS-MAP, X10).
 Not recommended: making them sub-tasks of OXPD2-1. A kanban board usually hides sub-tasks, and Steve M must see them.
 
 **"1 question per question".** His rule of 2026-11-20 (C-58 paragraph 3: "Rephrase questions so its 1 question per question") is read by Tuesday as one ticket per pack item for "w30 - w40". So that range is eleven tickets, T-14 to T-24. The one exception is his own grouping of W21 to W24 into one ask ("ask Steve M how it works"): it is his later and more specific word, so it is one ticket.
@@ -28,17 +30,19 @@ Not recommended: making them sub-tasks of OXPD2-1. A kanban board usually hides 
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w1 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w1 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W1. Is the store build of HPAM and of the phone app made from the 4.4.1 source unchanged, so that the card key compiled into that source is the live key?
 
-Why the build needs it: The first item on the master list since C-41. You said the keys in the library are old and rotated (C-3). This one is compiled into the shipped source and cannot be rotated without re-enrolling cards, so we ask the team to confirm. Card sign-in in phase 1 waits on it. Design text it feeds: 02 section 6.2 and D5 (the card key, OQ-8); 03 section 3, E1.3; 03 WP1.3. Sources in the pack: 05:105-109 (question 8); 03 section 8.3; C-41.
+Why the build needs it: The first item on the master list (Jira OXPD2-1). Kam said the keys in the library are old and rotated. This one is compiled into the shipped source and cannot be rotated without re-enrolling cards, so we ask the team to confirm. Card sign-in in phase 1 waits on it.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 6.2 and D5 (the card key, OQ-8); 03 section 3, E1.3; 03 WP1.3. Sources in the pack: 05:105-109 (question 8); 03 section 8.3; C-41.
 
 ## T-02 (pack W2)
 
@@ -48,17 +52,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w2 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w2 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W2. Which family of card-decoding routines produced the card strings today's customers have stored: the older one (firmware before Android 12) or the newer one (Android 12 firmware)?
 
-Why the build needs it: The two give different strings from the same card in 7 of 13 compared inputs. Cards enrolled under the other family would read as not known on every OXPd printer, though nobody would be signed in as someone else. Built today: the older routines. Design text it feeds: 02 D9; 03 WP1.3, spike S3. Sources in the pack: Jira OXPD2-1 comment 41450 (RP-1); WP1.3.
+Why the build needs it: The two give different strings from the same card in 7 of 13 compared inputs. Cards enrolled under the other family would read as not known on every OXPd printer, though nobody would be signed in as someone else. Built today: the older routines.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 D9; 03 WP1.3, spike S3. Sources in the pack: Jira OXPD2-1 comment 41450 (RP-1); WP1.3.
 
 ## T-03 (pack W3)
 
@@ -68,17 +74,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). The build cannot plan its lab and pilot work without this.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w3 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w3 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W3. For each printer in the Workpath product owner's lab: model and firmware version.
 
-Why the build needs it: Fills phase-0 kit items 4, 7, 8 and 9: one FutureSmart 6, one FutureSmart 5 without Workpath, one FutureSmart 4.7 and one Workpath printer with the current suite. Design text it feeds: 03 section 3, phase 0 (kit items 4, 7, 8, 9); 03 WP0.1. Sources in the pack: C-58 paragraph 8; QUESTIONS_BY_OWNER v2 A23-7; FQ-16; 05:228-233.
+Why the build needs it: Fills phase-0 kit items 4, 7, 8 and 9: one FutureSmart 6, one FutureSmart 5 without Workpath, one FutureSmart 4.7 and one Workpath printer with the current suite.
 
 Format wanted: D (a document or file) (a table). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 03 section 3, phase 0 (kit items 4, 7, 8, 9); 03 WP0.1. Sources in the pack: C-58 paragraph 8; QUESTIONS_BY_OWNER v2 A23-7; FQ-16; 05:228-233.
 
 ## T-04 (pack W4)
 
@@ -88,17 +96,19 @@ Format wanted: D (a document or file) (a table). Reply in this ticket; a short a
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). The build cannot plan its lab and pilot work without this.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w4 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w4 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W4. When and where can the build use a FutureSmart 6 printer that may be put into developer mode?
 
-Why the build needs it: Every OXPd 2 claim is untested until one exists (by HP's firmware notes the M577 is OXPd 1.x). Kit items 4 and 17. Design text it feeds: 03 section 3, phase 0 (spike S4, kit items 4, 17); 02 section 4. Sources in the pack: 05:228 (kit item 4); 05:241 (kit item 17); B1996 design review 5 point 10.
+Why the build needs it: Every OXPd 2 claim is untested until one exists (by HP's firmware notes the M577 is OXPd 1.x). Kit items 4 and 17.
 
 Format wanted: T (a test account or device) + A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 03 section 3, phase 0 (spike S4, kit items 4, 17); 02 section 4. Sources in the pack: 05:228 (kit item 4); 05:241 (kit item 17); B1996 design review 5 point 10.
 
 ## T-05 (pack W6)
 
@@ -108,17 +118,19 @@ Format wanted: T (a test account or device) + A (an answer in words). Reply in t
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). The build cannot plan its lab and pilot work without this.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w6 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w6 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W6. Which card readers can the lab lend: one of each of the eight products in the reader table?
 
-Why the build needs it: The card decoders (pull request 3) are checked against golden values only. Real readers settle them (spike S3, exit test E1.3). Design text it feeds: 02 D9 and section 3.2 (the reader table); 03 spike S3, E1.3. Sources in the pack: 05:234 (kit item 10); BACKLOG.md owed item 41.
+Why the build needs it: The card decoders (pull request 3) are checked against golden values only. Real readers settle them (spike S3, exit test E1.3).
 
 Format wanted: T (a test account or device). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 D9 and section 3.2 (the reader table); 03 spike S3, E1.3. Sources in the pack: 05:234 (kit item 10); BACKLOG.md owed item 41.
 
 ## T-06 (pack W9)
 
@@ -128,19 +140,21 @@ Format wanted: T (a test account or device). Reply in this ticket; a short answe
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w9 - no but discussion shoudl be had.  create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w9 - no but discussion shoudl be had.  create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
-Kam's word on this point (2026-11-24, verbatim): "no but discussion shoudl be had". The ticket asks the team to confirm and to say what a discussion should cover.
+Kam's own answer is "no", and he wants a discussion; please confirm or correct the "no".
 
 The question, exactly as the kick-off pack asks it:
 
 > W9. Do customers on V4.4 see the Passkey button, and which sign-in method does it use?
 
-Why the build needs it: No document shows the button. Requirement F12 is kept but not built until this is known. Design text it feeds: 02 section 3.2, F12; 02 change log B1817 / R4-35 (N-11); 03 section 3, phase 3 item 1 (passkey). Ticket T-06. Sources in the pack: 02 change log, B1817 open questions (N-11).
+Why the build needs it: No document shows the button. Requirement F12 is kept but not built until this is known.
 
 Format wanted: A (an answer in words) + screenshot. Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.2, F12; 02 change log B1817 / R4-35 (N-11); 03 section 3, phase 3 item 1 (passkey). Sources in the pack: 02 change log, B1817 open questions (N-11).
 
 ## T-07 (pack W10)
 
@@ -150,17 +164,19 @@ Format wanted: A (an answer in words) + screenshot. Reply in this ticket; a shor
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w10 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w10 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W10. The Conditional Access policy templates customers use, and the "Passwordless MFA" fix as customers are given it.
 
-Why the build needs it: Today a policy for Android or iOS catches the printer. Whether an OXPd printer matches the same platform is UNMEASURED (spike S7). Design text it feeds: 02 section 7.1 (Conditional Access); 03 spike S7. Sources in the pack: 02 section 7.1.
+Why the build needs it: Today a policy for Android or iOS catches the printer. Whether an OXPd printer matches the same platform is UNMEASURED (spike S7).
 
 Format wanted: D (a document or file). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 7.1 (Conditional Access); 03 spike S7. Sources in the pack: 02 section 7.1.
 
 ## T-08 (pack W11)
 
@@ -170,17 +186,19 @@ Format wanted: D (a document or file). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w11 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w11 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W11. The Microsoft Graph permissions a customer tenant has actually consented to, from a customer tenant or the deployment guide.
 
-Why the build needs it: The permission names are inferred, not read from code. This sets the first-run scope check and OneDrive's "Shared with me" (OP-20). Design text it feeds: 02 section 7.2; 03 section 0.4 (first-run scope check); OneDrive "Shared with me" (OP-20). Sources in the pack: 02 section 7.2; 05:185 (OP-20).
+Why the build needs it: The permission names are inferred, not read from code. This sets the first-run scope check and OneDrive's "Shared with me" (OP-20).
 
 Format wanted: C (a configuration or sample data). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 7.2; 03 section 0.4 (first-run scope check); OneDrive "Shared with me" (OP-20). Sources in the pack: 02 section 7.2; 05:185 (OP-20).
 
 ## T-09 (pack W16)
 
@@ -190,19 +208,21 @@ Format wanted: C (a configuration or sample data). Reply in this ticket; a short
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w16 - be very specific with the ask.  create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w16 - be very specific with the ask.  create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
-Kam asked for this ask to be "very specific". So: name the one tool customers are given today (product name, version number, and where a customer downloads it), say whether the other tool is still given to anyone, and say which one the Workpath team maintains. Our copies: HP AuthSuite Manager 1.1.0 and the HPK Deployment Utility 3.0.0 (from HPK-Deployment-Utility-main, sent 2026-11-20).
+Kam asked for this ask to be "very specific". So: name the one tool customers are given today (product name, version number, and where a customer downloads it), and say whether the other tool is still given to anyone. Our copies: HP AuthSuite Manager 1.1.0 and the HPK Deployment Utility 3.0.0 (from HPK-Deployment-Utility-main, sent 2026-11-20).
 
 The question, exactly as the kick-off pack asks it:
 
 > W16. Which deployment tool do customers get today: HP AuthSuite Manager or the HPK Deployment Utility?
 
-Why the build needs it: Needed for Q14. "Newer" points to the Manager by file date and to the Utility by version number. Design text it feeds: 02 section 8.7, D26; 03 WP0.10. Sources in the pack: 05:201 (P-6, N-9); 02 section 8.7.
+Why the build needs it: Needed for Q14. "Newer" points to the Manager by file date and to the Utility by version number.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 8.7, D26; 03 WP0.10. Sources in the pack: 05:201 (P-6, N-9); 02 section 8.7.
 
 ## T-10 (pack W19)
 
@@ -212,17 +232,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w19 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w19 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W19. A walkthrough of the Manager by its authors, four points, one line each in the box: (1) does it import existing .cfg files; (2) how could a package kind beside the six fixed Workpath ids be added; (3) its job database; (4) its password and TLS handling.
 
-Why the build needs it: Sizes the OXPd amendment (WP0.10, WP5.8). Whether the Manager reads .cfg files is UNMEASURED. Design text it feeds: 02 sections 3.5 and 8.7; 03 WP0.10, WP5.8. Sources in the pack: 02 section 3.5, 02 section 8.7; WP0.10:42-50, 87-91.
+Why the build needs it: Sizes the OXPd amendment (WP0.10, WP5.8). Whether the Manager reads .cfg files is UNMEASURED.
 
 Format wanted: S (a walkthrough session). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 sections 3.5 and 8.7; 03 WP0.10, WP5.8. Sources in the pack: 02 section 3.5, 02 section 8.7; WP0.10:42-50, 87-91.
 
 ## T-11 (pack W21, W22, W23, W24)
 
@@ -232,9 +254,9 @@ Format wanted: S (a walkthrough session). Reply in this ticket; a short answer i
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the questions below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the questions below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w21, w22, w23 & W24 - ask Steve M how it works. create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w21, w22, w23 & W24 - ask Steve M how it works. create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 Kam grouped these four into one ask: "ask Steve M how it works". The four questions below are the pack's, unchanged; one answer that covers all four is enough.
 
@@ -248,9 +270,11 @@ The questions, exactly as the kick-off pack asks them:
 >
 > W24. What does a Workpath printer do when its licence expires?
 
-Why the build needs it: This bears on Q33 and on the two licence-server options (A6). Not sent. Nothing shows how a printer app checks a licence, so the server's licence check is designed from the old back end. Fielded printers appear to fall back to a 20-day temporary state [A5]. The same behaviour is planned for OXPd (C-20). Design text it feeds: 02 section 7.5 (licence service); 03 section 3, phase 5 (licence). Sources in the pack: QUESTIONS_BY_OWNER v2 A6-2; FQ-11; 02 section 7.5; QUESTIONS_BY_OWNER v2 A6-3.
+Why the build needs it: This bears on Q33 and on the two licence-server options (A6). The licence portal's source has not been given to the build. Nothing shows how a printer app checks a licence, so the server's licence check is designed from the old back end. Fielded printers appear to fall back to a 20-day temporary state [A5]. The same behaviour is planned for OXPd (C-20).
 
 Format wanted: A (an answer in words); D (a document or file) (repository access). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 7.5 (licence service); 03 section 3, phase 5 (licence). Sources in the pack: QUESTIONS_BY_OWNER v2 A6-2; FQ-11; 02 section 7.5; QUESTIONS_BY_OWNER v2 A6-3.
 
 ## T-12 (pack W26)
 
@@ -260,17 +284,19 @@ Format wanted: A (an answer in words); D (a document or file) (repository access
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). The build cannot plan its lab and pilot work without this.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w26 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w26 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W26. What defect level does the team accept before calling a Workpath pilot a success?
 
-Why the build needs it: Needed for Q5. Your answer A24 gives the aim and no number; the questions document put the number to the team because they hold today's practice. Design text it feeds: 03 section 3, phase 6 (pilot exit, Q5). Sources in the pack: QUESTIONS_BY_OWNER v2 A24; FQ-15.
+Why the build needs it: Kam's answer gives the aim (as close to commercial ready as possible) and no number; the team holds today's practice.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 03 section 3, phase 6 (pilot exit, Q5). Sources in the pack: QUESTIONS_BY_OWNER v2 A24; FQ-15.
 
 ## T-13 (pack W27)
 
@@ -280,17 +306,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). The build cannot plan its lab and pilot work without this.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w27 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w27 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W27. How does the team track new HP firmware today and re-test the Workpath apps on it?
 
-Why the build needs it: Needed for Q38. Design text it feeds: 02 section 4 (firmware); 03 section 5 (test strategy); Q38. Sources in the pack: C-61.
+Why the build needs it: Needed for Q38.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 4 (firmware); 03 section 5 (test strategy); Q38. Sources in the pack: C-61.
 
 ## T-14 (pack W30)
 
@@ -300,17 +328,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W30. Is OneDrive's "Shared with me" in the shipped OneDrive 4.4? The release notes say it was removed.
 
-Why the build needs it: It is in the rebuild on the strength of the source alone (C-16). Design text it feeds: 02 section 3.9 (F37) and change log B1817 (N-10). Sources in the pack: 02 change log, B1817 open questions (N-10).
+Why the build needs it: It is in the rebuild on the strength of the source alone (C-16).
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.9 (F37) and change log B1817 (N-10). Sources in the pack: 02 change log, B1817 open questions (N-10).
 
 ## T-15 (pack W31)
 
@@ -320,17 +350,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W31. On a panel set to a language other than English, do the OneDrive and SharePoint apps show their own screens in that language?
 
-Why the build needs it: English is the phase-1 language (A18). The answer decides whether that is less than a full match. Design text it feeds: 02 section 3 (A18, English for Phase 1); 03 WP3.12. Sources in the pack: FQ-1 (a follow-up question on the master list, Jira OXPD2-1); 05:186 (OP-21); C-58 paragraph 26 (A18).
+Why the build needs it: English is the phase-1 language (A18). The answer decides whether that is less than a full match.
 
 Format wanted: A (an answer in words) + photo. Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3 (A18, English for Phase 1); 03 WP3.12. Sources in the pack: FQ-1 (a follow-up question on the master list, Jira OXPD2-1); 05:186 (OP-21); C-58 paragraph 26 (A18).
 
 ## T-16 (pack W32)
 
@@ -340,17 +372,19 @@ Format wanted: A (an answer in words) + photo. Reply in this ticket; a short ans
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W32. Has any shipped Mailflow version shown "quick messages" on the panel?
 
-Why the build needs it: They are switched off in the code and left out (05 question 3). You said you would ask the team (A19). Design text it feeds: 02 section 3.3 (Mailflow). Sources in the pack: FQ-2, FQ-3; C-58 paragraph 27 (A19).
+Why the build needs it: They are switched off in the code and left out of the rebuild. Kam said he would ask the team.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.3 (Mailflow). Sources in the pack: FQ-2, FQ-3; C-58 paragraph 27 (A19).
 
 ## T-17 (pack W33)
 
@@ -360,9 +394,9 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 Asked only if T-16 is answered yes.
 
@@ -370,9 +404,11 @@ The question, exactly as the kick-off pack asks it:
 
 > W33. If yes, which version (a photo is enough)?
 
-Why the build needs it:  Design text it feeds: 02 section 3.3 (Mailflow). Sources in the pack: FQ-2, FQ-3; C-58 paragraph 27 (A19).
+Why the build needs it: Quick messages are switched off in the code and left out of the rebuild; if a shipped version showed them, the rebuild must too.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.3 (Mailflow). Sources in the pack: FQ-2, FQ-3; C-58 paragraph 27 (A19).
 
 ## T-18 (pack W34)
 
@@ -382,17 +418,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W34. In SharePoint 4.4.6, how many of a library's custom fields can be filled in at the panel when scanning? The manual says four; the code has no limit.
 
-Why the build needs it: Sets the SharePoint scan screen. You asked for this follow-up (A20). Design text it feeds: 02 section 3.8 (SharePoint). Sources in the pack: FQ-4; C-58 paragraph 28 (A20).
+Why the build needs it: Sets the SharePoint scan screen. Kam asked for this follow-up.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.8 (SharePoint). Sources in the pack: FQ-4; C-58 paragraph 28 (A20).
 
 ## T-19 (pack W35)
 
@@ -402,17 +440,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W35. In OneDrive, does pressing Back at the list of sites show a sign-out confirmation screen on a printer?
 
-Why the build needs it: The code has the screen; nobody has seen it on a printer (A20). Design text it feeds: 02 section 3.9 (OneDrive). Sources in the pack: FQ-5; C-58 paragraph 28 (A20).
+Why the build needs it: The code has the screen; nobody has seen it on a printer (A20).
 
 Format wanted: A (an answer in words) + photo. Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.9 (OneDrive). Sources in the pack: FQ-5; C-58 paragraph 28 (A20).
 
 ## T-20 (pack W36)
 
@@ -422,17 +462,19 @@ Format wanted: A (an answer in words) + photo. Reply in this ticket; a short ans
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W36. A walkthrough of the panel's admin menu as customers use it for card emulation and app settings.
 
-Why the build needs it: DEV-15 and DEV-16 (Q31) move both to the server console. The team knows how often customers use them at the panel. Design text it feeds: 02 sections 3.2 and 3.3; DEV-15, DEV-16 (Q31). Sources in the pack: 02 section 3.2, 02 section 3.3; DEVIATION-REGISTER_DRAFT.md:33-34.
+Why the build needs it: DEV-15 and DEV-16 (Q31) move both to the server console. The team knows how often customers use them at the panel.
 
 Format wanted: S (a walkthrough session). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 sections 3.2 and 3.3; DEV-15, DEV-16 (Q31). Sources in the pack: 02 section 3.2, 02 section 3.3; DEVIATION-REGISTER_DRAFT.md:33-34.
 
 ## T-21 (pack W37)
 
@@ -442,17 +484,19 @@ Format wanted: S (a walkthrough session). Reply in this ticket; a short answer i
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W37. Do the HID OMNIKEY 076B:5428 and Inepro 1DA6:0110 readers decode on a Workpath printer today?
 
-Why the build needs it: They are kept in the reader table only if Workpath decodes them today. Design text it feeds: 02 section 3.2 (reader table). Sources in the pack: 02 section 3.2.
+Why the build needs it: They are kept in the reader table only if Workpath decodes them today.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.2 (reader table). Sources in the pack: 02 section 3.2.
 
 ## T-22 (pack W38)
 
@@ -462,17 +506,19 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W38. The current meanings of error codes AI01 to AI09 and the help article they point to.
 
-Why the build needs it: The help texts come from the old back end. Requirement F21. Design text it feeds: 02 section 3.2 (F21). Sources in the pack: 02 section 3.2.
+Why the build needs it: The help texts come from the old back end. Requirement F21.
 
 Format wanted: D (a document or file). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.2 (F21). Sources in the pack: 02 section 3.2.
 
 ## T-23 (pack W39)
 
@@ -482,17 +528,21 @@ Format wanted: D (a document or file). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W39. A review of eight "as coded" behaviours of today's Universal Print release code, plus one UUID-parsing question. Which are intended and which are bugs?
 
-Why the build needs it: The rebuild copies them unless told otherwise. Examples: Acknowledge-Job carries no printer-uri, and a failed open is never retried. Design text it feeds: 02 section 3.4; 03 phase 4. Sources in the pack: Briefs/2026-11-20_B1788_STATUS.md:274-284; Briefs/2026-11-20_B1810_STATUS.md:317.
+The eight behaviours, each read from the release code and none run: (a) Acknowledge-Job carries no printer-uri. (b) A failed open of a document is never retried (a status other than 206, a missing or mismatched Content-Range, a missing body, a fetch that throws, or a first packet that fails to parse ends the document). (c) Status 416 returns from the open with no body, and the next statement uses the missing body. (d) The IPP status inside each fetched part is never looked at. (e) The unit word of Content-Range in upper or mixed case reads as missing. (f) The 10000 ms cap of the back-off is never reached; the longest wait is 8000 ms plus jitter. (g) printer-name is in both the blocked list (never sent) and the watched defaults. (h) The waits are 1000, 2000 and 4000 ms plus 0 to 299 ms, where the analysis report says 0.5 to 10 s. The UUID question: what does the printer's parser return for a text of five short dash-separated groups (only the 36-character form loses its dashes in the code)? For each: intended, or a bug.
+
+Why the build needs it: The rebuild copies them unless told otherwise. Examples: Acknowledge-Job carries no printer-uri, and a failed open is never retried.
 
 Format wanted: A (an answer in words) (per item). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.4; 03 phase 4. Sources in the pack: Briefs/2026-11-20_B1788_STATUS.md:274-284; Briefs/2026-11-20_B1810_STATUS.md:317.
 
 ## T-24 (pack W40)
 
@@ -502,17 +552,19 @@ Format wanted: A (an answer in words) (per item). Reply in this ticket; a short 
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 The question, exactly as the kick-off pack asks it:
 
 > W40. Does the Universal Print service ever answer with an attribute group other than operation, job, printer or unsupported?
 
-Why the build needs it: The reader now tolerates other groups. The answer says whether that path is ever used. The team's logs may show it. Design text it feeds: 02 section 3.4; 03 WP4.2. Sources in the pack: Jira OXPD2-1 comment 41450 (RP-6); Briefs/2026-11-20_B1788_STATUS.md:285-287.
+Why the build needs it: The reader now tolerates other groups. The answer says whether that path is ever used. The team's logs may show it.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 3.4; 03 WP4.2. Sources in the pack: Jira OXPD2-1 comment 41450 (RP-6); Briefs/2026-11-20_B1788_STATUS.md:285-287.
 
 ## T-25 (pack W48)
 
@@ -522,9 +574,9 @@ Format wanted: A (an answer in words). Reply in this ticket; a short answer is e
 
 **Description**
 
-BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
 
-Kam's instruction for this item (2026-11-24, verbatim): "w48 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
+Kam (product owner), 2026-11-24, verbatim: "w48 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request"
 
 Never put the password itself in this ticket or its answers: a yes or no, and who owns that printer, is enough.
 
@@ -532,31 +584,101 @@ The question, exactly as the kick-off pack asks it:
 
 > W48. Is the printer admin password in the earlier OXPd 1 repository's README the live password of a lab printer?
 
-Why the build needs it: Treated as live and never copied. Whoever owns that printer should change it. Design text it feeds: 02 section 6.6 (secret locations); 05 OP-14. Sources in the pack: 05:179 (OP-14).
+Why the build needs it: Treated as live and never copied. Whoever owns that printer should change it.
 
 Format wanted: A (an answer in words). Reply in this ticket; a short answer is enough where the format is A.
 
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 6.6 (secret locations); 05 OP-14. Sources in the pack: 05:179 (OP-14).
+
 ## T-26 (pack W8, the technical-document half)
 
-- **Summary**: Workpath ask for Artur M via Steve M: swim-lane diagrams of every V4.4 Workpath sign-in path
+- **Summary** (92 characters): Workpath ask for Artur M via Steve M: swim-lane diagrams of every V4.4 Workpath sign-in path
 - **Project** OXPD2 · **Issue type** Task · **Assignee** Steven Molnar (Steve M), accountId `626881c70f0cc0006f8ee5c9`, for him to assign to Artur M · **Due date** 2026-12-08 (Tuesday) · **Labels** `oxpd-workpath-question` · **Link** relates to OXPD2-1
 - **Serves** WP1.4 and phase 3 sign-in completeness; F7 to F12, F20 (02 section 5.5)
 
 **Description**
 
-BLUF: Kam asks for a technical document of every sign-in path of today's product, as swim-lane diagrams, prepared by Artur M; you assign it to him (Kam: "Utilisation of the work path team should go through Steve first").
+Steve, BLUF: Kam asks for a technical document of every sign-in path of today's product, as swim-lane diagrams, prepared by Artur M; you assign it to him (Kam (product owner): "Utilisation of the work path team should go through Steve first").
 
-Kam's instruction (2026-11-24, verbatim): "w8 - you have videos and documentation on this.  If more information is necessary list the action on me and I will arrange.  You will need to specify what format is best.  If its a technical doc (swim lane diagrams) create a Jira ticket and assign to Steve M but for him to assign to Artur M. Utilisation of the work path team should go through Steve first"
+Kam (product owner), 2026-11-24, verbatim: "w8 - you have videos and documentation on this.  If more information is necessary list the action on me and I will arrange.  You will need to specify what format is best.  If its a technical doc (swim lane diagrams) create a Jira ticket and assign to Steve M but for him to assign to Artur M. Utilisation of the work path team should go through Steve first"
 
 What the build needs, as the kick-off pack asks it:
 
 > W8. A walkthrough of every sign-in path on a V4.4 Workpath printer: MFA and No-MFA, card, QR, BLE, security key and first-use self-registration, under each setup option.
 
-Why the build needs it: You called this critical (P3: "It is critical you understand and document these"). The design holds 11 Lightning Talk transcripts and the manuals, with no video file and no screen seen (B1812 records). It unblocks Q23 to Q27 and test 1. Design text it feeds: 02 section 5.5 (sign-in flows) and section 1; 03 section 3, phase 3 item 1; 03 section 8.5 (N-1, N-3). Sources in the pack: C-58 paragraph 12; 02 section 1; 02 change log, B1817 open questions; Review/B1812_Q_FOR-RECORDS:198-212.
+Why the build needs it: Kam called this critical ("It is critical you understand and document these"). The design holds 11 Lightning Talk transcripts and the manuals, with no video file and no screen seen. It unblocks the design of the sign-in on the printer panel and its first test.
 
 Format wanted: one swim-lane diagram per path (lanes: user, printer panel, HPAM app on the printer, Microsoft Entra, the customer's gateway, the phone app where used), for MFA and No-MFA, card, QR, BLE, security key and first-use self-registration, under each setup option; PDF or image files attached here. Where a step differs by setup option, one note on the diagram is enough.
 
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 5.5 (sign-in flows) and section 1; 03 section 3, phase 3 item 1; 03 section 8.5 (N-1, N-3). Sources in the pack: C-58 paragraph 12; 02 section 1; 02 change log, B1817 open questions; Review/B1812_Q_FOR-RECORDS:198-212.
+
 Note for the seat that writes it: Artur M's account was found by read (Artur Menchenko, accountId `6188db6dabad3c0071c2cb75`, assignable on OXPD2) but is NOT set as assignee: Kam's words route it through Steve M.
 
+## T-27 (pack W41)
 
-Counted by program: 26 ticket drafts (T-01 to T-26) covering 28 ticketed pack items plus the W8 technical-document ask; every summary under 120 characters.
+- **Summary** (105 characters): Workpath question: the Log Analytics job record fields (StatisticsJobData, Supply), or real exported rows
+- **Project** OXPD2 · **Issue type** Task · **Assignee** Steven Molnar (Steve M), accountId `626881c70f0cc0006f8ee5c9` · **Due date** 2026-12-08 (Tuesday) · **Labels** `oxpd-workpath-question` · **Link** relates to OXPD2-1
+- **Serves** WP0.8 (reporting record map); F63
+
+**Description**
+
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+
+Kam (product owner), 2026-11-24, verbatim: "reporting - managed by Kamil.  all actions / questions directed to Kamil on fleet activity" and, on the board on 2026-11-24 (tap at 10:34), "b — Steve M's: ticket them"
+
+The question, exactly as the kick-off pack asks it:
+
+> W41. The field list of the job record the apps send to Log Analytics (StatisticsJobData and Supply), or real exported rows from a test or customer workspace.
+
+Why the build needs it: The field list exists only inside a compiled HP SDK, so the build's map of the report rows is unmeasured in 47 places.
+
+Format wanted: C (a configuration or sample data). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 sections 3.5 and 5.9; 03 WP0.8 (Design/WP0.8 draft). Sources in the pack: WP0.8:12, 21-35, 45, 61-64.
+
+## T-28 (pack W42)
+
+- **Summary** (97 characters): Workpath question: has any customer changed the data-collection rule or tables from the template?
+- **Project** OXPD2 · **Issue type** Task · **Assignee** Steven Molnar (Steve M), accountId `626881c70f0cc0006f8ee5c9` · **Due date** 2026-12-08 (Tuesday) · **Labels** `oxpd-workpath-question` · **Link** relates to OXPD2-1
+- **Serves** WP0.8 (reporting record map); F63
+
+**Description**
+
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+
+Kam (product owner), 2026-11-24, verbatim: "reporting - managed by Kamil.  all actions / questions directed to Kamil on fleet activity" and, on the board on 2026-11-24 (tap at 10:34), "b — Steve M's: ticket them"
+
+The question, exactly as the kick-off pack asks it:
+
+> W42. Has any customer changed the data-collection rule or tables from the template?
+
+Why the build needs it: A customer's live rule may differ from the template, and the report rows have to match what those queries read.
+
+Format wanted: C (a configuration or sample data). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 5.9; 03 WP0.8. Sources in the pack: WP0.8:51-57, 70.
+
+## T-29 (pack W43)
+
+- **Summary** (75 characters): Workpath question: which queries do the customer reports and workbooks run?
+- **Project** OXPD2 · **Issue type** Task · **Assignee** Steven Molnar (Steve M), accountId `626881c70f0cc0006f8ee5c9` · **Due date** 2026-12-08 (Tuesday) · **Labels** `oxpd-workpath-question` · **Link** relates to OXPD2-1
+- **Serves** WP0.8 (reporting record map); F63
+
+**Description**
+
+Steve, BLUF: Kam asks the Workpath team, through you, to answer the question below within two weeks (by Tuesday 2026-12-08). Today the OXPd 2 design rests on a reading of code, a document or a transcript for this point; your answer replaces that reading.
+
+Kam (product owner), 2026-11-24, verbatim: "reporting - managed by Kamil.  all actions / questions directed to Kamil on fleet activity" and, on the board on 2026-11-24 (tap at 10:34), "b — Steve M's: ticket them"
+
+The question, exactly as the kick-off pack asks it:
+
+> W43. Which queries do the customer reports and workbooks run?
+
+Why the build needs it: 
+
+Format wanted: C (a configuration or sample data). Reply in this ticket; a short answer is enough where the format is A.
+
+**First comment, for the build team (references; not part of the description):** design text it feeds: 02 section 5.9; 03 WP0.8. Sources in the pack: WP0.8:51-57, 70.
+
+
+Counted by program: 29 ticket drafts (T-01 to T-29) covering 31 pack items (the 28 he ticketed in his file, plus W41 to W43 by his 10:34 tap) plus the W8 technical-document ask (T-26); every summary under 120 characters.

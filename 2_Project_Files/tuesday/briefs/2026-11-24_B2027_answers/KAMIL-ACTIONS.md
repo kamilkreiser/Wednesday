@@ -2,6 +2,8 @@
 
 Written by the B2027 seat (Opus) for Tuesday, 2026-11-24. These are drafts only: nothing was posted to his board or sent to anyone.
 
+**Round 2** (after Fable review B2028; the round-1 file is `KAMIL-ACTIONS.r1.md`). Since his file, two of these are ruled by his own taps (Tuesday's decision store, verbatim): KD-3 at 10:19, "a — OXPd 1.x ships first: re-plan to the dates"; KD-2 at 10:27, "b — 1.9 means our 1.x line". Both are marked RULED below.
+
 **Who Kamil is.** By Tuesday's reading, "Kamil" in his file is Kam himself. The OXPD2 project's lead in Jira is "Kamil Kreiser", and his Azure sign-in is kamil@datasec-rd.com (C-36).
 
 **His rule in the file** (verbatim, no item id): "reporting - managed by Kamil.  all actions / questions directed to Kamil on fleet activity". Tuesday's reading (ANSWERS-MAP U1, reading (b)): actions and questions about the agents' work come to him, on the board as today. Work for the Workpath team goes through Steve M (w8: "Utilisation of the work path team should go through Steve first"; s3).
@@ -40,7 +42,7 @@ These are HP asks H5 and H3 in `Registers/HP_QUESTIONS_DRAFT.md`.
 **We recommend:** send all eight, and make three edits first:
 - Strike H6's licence points. C-74 settled them ("our license / commercial agreement allows us to use HP code as part of our code"), so asking HP again invites an answer that could cut across your own ruling. This is ANSWERS-MAP X13: say "keep" and H6 goes whole.
 - In H2, cut item 1 ("Is Datasec already enrolled in HP App Center ... who at Datasec has to hold the master administrator account") down to the enrolment's scope for OXPd 2. You answered the rest this morning (w44 "yes"; w45 "Steve M").
-- Add to H7 a request for the OXPd 1.9 files, since your target names 1.9 (KD-2).
+- H7 stays as drafted (HP's own OXPd 1.x roadmap). Your 10:27 tap settled that "1.9" is our 1.x line, so no SDK request is added (KD-2).
 Tuesday prepares the edited text for you to paste. Nothing goes out in your name from any agent.
 
 **Default until then:** nothing is sent. The drafts stay as they are.
@@ -103,19 +105,21 @@ Without them the OXPd report map (WP0.8) is UNMEASURED in 47 places. Your w15 sa
 
 ## Following from his words, not named by him as actions (Tuesday's)
 
-### KD-1. Azure for development: confirm the subscription and the tenant, and what may be created (q12, w7)
+### KD-1. Azure for development: confirm the subscription and the tenant, and what may be created (q12, w7). RULED 10:32: "b — No, keep the agent-controllable environment"
 
-**His words (verbatim):** "q12 - ... Use the same subscription as HPSM-Poc.  Tied to kamil@datasec-rd.com" and "w7 - we build against kamil@datasec-rd.com.  full environment simulated.  Using my printer so we control.  Final testing will be done against Datasec testing lab"
+**His words (verbatim, q12 shortened):** "q12 - ... Use the same subscription as HPSM-Poc.  Tied to kamil@datasec-rd.com" and "w7 - we build against kamil@datasec-rd.com.  full environment simulated.  Using my printer so we control.  Final testing will be done against Datasec testing lab"
 
-**BLUF:** Your words put OXPd development in HPSM-POC's subscription. Tuesday's v2 login steps already point there (subscription `a6b8fe11`, directory `ec01829b`, where you are a guest). But your C-75 tap named "the agent-controllable Datasec environment" (ANSWERS-MAP X1). "Full environment simulated" means a test customer set-up: Entra changes, Conditional Access, Universal Print licences and the "Onboarding Azure Services" deployment. That goes beyond the one test VM you approved.
+**BLUF:** Your words put OXPd development in HPSM-POC's subscription. Tuesday's v2 login steps already point there (subscription `a6b8fe11`, directory `ec01829b`, where you are a guest). But your C-75 tap named "the agent-controllable Datasec environment" (ANSWERS-MAP X1). "full environment simulated" means a test customer set-up: Entra changes, Conditional Access, Universal Print licences and the "Onboarding Azure Services" deployment. That goes beyond the one test VM you approved.
 
-**The one thing needed from you:** run the v2 login steps (already with you). Say on the board that HPSM-POC's subscription replaces "the agent-controllable environment" of C-75.
+**The one thing needed from you:** run the v2 login steps (already with you). Say on the board that HPSM-POC's subscription replaces "the agent-controllable Datasec environment" of C-75.
 
 **We recommend:** keep OXPd's agent login confined to its own resource group in that subscription, as the v2 steps do. Put the simulated customer environment to you on one card, with its parts, its cost and its directory, before anything is created.
 
 **Default until then:** only the one test VM (C-78), after your login and the home rehearsal. Nothing else in Azure, and nothing of HPSM-POC is touched (its hold stands).
 
-### KD-2. OXPd 1.9: the files (w53, s4)
+**RULED 10:32:** his tap, from `decision_queue.sh show datasec-oxpd-kd1-azure-hpsm-subscription-1124` (choice b, ruled 10:32:56): "No, keep the agent-controllable environment" (option detail: "Tuesday re-issues the steps."). His note with it, as Tuesday relays it (the store's print shows the choice only, no note): "create a new resource group under kamil@datase-rd.com. issue new steps so agents have full control to spin up and create services/ vms etc". Tuesday's reading, as Tuesday's: new steps (v3) were issued with a group oxpd2-dev-rg, and Kam picks the subscription in their step 3.
+
+### KD-2. OXPd 1.9: the files (w53, s4). RULED 10:27: "b — 1.9 means our 1.x line"
 
 **His words (verbatim):** "w53 - the project files should have included 1.9" and "s4 - OXPd 1.9 by 20 Dec OXPd 2 by 12 Jan"
 
@@ -127,7 +131,9 @@ Without them the OXPd report map (WP0.8) is UNMEASURED in 47 places. Your w15 sa
 
 **Default until then:** the build continues on SDK 1.8.4.1.
 
-### KD-3. The two dates against one release (s4, q2)
+**Ruled:** his tap at 10:27 (decision store 10:27:16), verbatim: "b — 1.9 means our 1.x line" (option detail: "No SDK needed."). "1.9" is Datasec's OXPd 1.x line; the build stays on SDK 1.8.4.1. Nothing more is needed from him on this card.
+
+### KD-3. The two dates against one release (s4, q2). RULED 10:19: "a — OXPd 1.x ships first: re-plan to the dates"
 
 **BLUF:** 20 December for OXPd 1.x and 12 January for OXPd 2 mean two releases. The design (D33) says one release for both, and no date (ANSWERS-MAP X2, X4, and its deadlines paragraph). Q6 (do older printers ship alone if HP is late?) and Q5 (the pilot's exit) are not answered.
 
@@ -137,6 +143,8 @@ Without them the OXPd report map (WP0.8) is UNMEASURED in 47 places. Your w15 sa
 
 **Default until then:** D33 and 03's order stand. Your dates are recorded as targets.
 
+**Ruled:** his tap at 10:19 (decision store 10:19:45), verbatim: "a — OXPd 1.x ships first: re-plan to the dates" (option detail: "Tuesday brings the dated plan."). It answers Q6 (a). The dated re-plan is 03 section 0.5 (under Fable review B2029; see 03 section 0.5). Still open: Q5, the pilot's exit.
+
 ---
 
-Already open and on you from before this file (not re-carded here): the M577's admin password (C-77), and a test tenant user with Authenticator for the first panel sign-in test (C-76; by w7 the build now builds the test tenant itself, which is KD-1).
+Already open and on you from before this file (not re-carded here): the M577's admin password (C-77), and a test tenant user with Authenticator for the first panel sign-in test (C-76; by Tuesday's reading of w7 the build makes its own test set-up (KD-1); the test user with Authenticator is still needed from you).

@@ -1,7 +1,9 @@
 # B2027 ANSWERS-MAP: Kam's written answers to the OXPd 2 kick-off pack (2026-11-24 morning)
 
+**Round 2** (after Fable review B2028: every finding applied; the round-1 file is `ANSWERS-MAP.r1.md`). **Since his file, two taps of his on the board settle two points** (Tuesday's decision store, verbatim): 10:19, the card on his two dates: "a — OXPd 1.x ships first: re-plan to the dates" (option detail "Tuesday brings the dated plan."), which answers Q6 and settles X2; 10:27, the card on the 1.9 files: "b — 1.9 means our 1.x line" (option detail "No SDK needed."), which settles X3 and U4. The dated re-plan is 03 section 0.5 (under Fable review B2029; its verdict: see 03 section 0.5).
+
 Written by the B2027 seat (Opus) for Tuesday, 2026-11-24. Read only: nothing was sent to anyone and no record of the project was changed.
-**His file:** live board 2026-11-24 09:55:19 (view=tuesday), saved at `0_Brain/reference/2026-11-24_kam-oxpd-answers/answers.txt` (sha256 `aec5d79a…6c21eb`; the .rtf beside it converts to the same text, compared by `diff`, 0 differences). 53 non-empty lines: a title, one sentence ("Many of the qustions for tonight can be answered by me. Here are the responses for the ones I can provide."), 51 answer lines.
+**His file:** live board 2026-11-24 09:55:19 (view=tuesday), saved at `0_Brain/reference/2026-11-24_kam-oxpd-answers/answers.txt` (sha256 `aec5d79a…6c21eb`; the .rtf beside it converts to the same text, compared by `diff`, 0 differences). 53 non-empty lines: a title, one sentence ("Many of the qustions for tonight can be answered by me.  Here are the responses for the ones I can provide."), 51 answer lines.
 **The ids are the ROUND-2 pack's** (`tuesday/briefs/2026-11-24_OXPd-meeting-pack/2026-11-24_OXPd-kickoff-meeting-pack.md`). The r1 copy was not used. Every line was checked against the round-2 item of its number, and the words fit the question, for example w5 "Steve M" for "Who is at that printer's panel during the tests?", w13 for the Universal Print redirect question, w44 to w53 one by one. Spacing and case were read as written: "w 18" is W18, "Q3" is Q3, "W47" is W47, "W24" is W24, and "w30 - w40" is W30 to W40.
 **Everything in the columns "What it settles" and "Design text touched" is Tuesday's reading**, not his words. 02 = `Design/02_architecture.md`, 03 = `Design/03_plan-of-attack-and-build.md`, both as revised at 08:34 to 08:38 today. A section is named, not a line.
 **Kamil:** Tuesday's reading is that "Kamil" in his file is Kam himself. Jira's project lead for OXPD2 is "Kamil Kreiser", and his Azure sign-in is kamil@datasec-rd.com (C-36).
@@ -13,25 +15,26 @@ None is resolved here. Each says what the build does meanwhile, and that is the 
 ### Contradictions
 
 **X1. Which Azure subscription and tenant (q12, w7) against C-75's option, and the tenant rule.**
-His words: q12 "Use the same subscription as HPSM-Poc. Tied to kamil@datasec-rd.com"; w7 "we build against kamil@datasec-rd.com. full environment simulated."
+His words: q12 "Use the same subscription as HPSM-Poc.  Tied to kamil@datasec-rd.com"; w7 "we build against kamil@datasec-rd.com.  full environment simulated."
 They differ from the option he tapped in C-75: "Create one small resource in the agent-controllable Datasec environment". The agent-controllable environment is tenant `d500ebad`, and kamil@datasec-rd.com has no account there (Tuesday's v2 login steps say so). HPSM-POC's subscription is `a6b8fe11`, in tenant `ec01829b` (kamildatasecrd.onmicrosoft.com), where he signs in as a guest. Those figures come from Tuesday's `OXPD-AZURE-LOGIN-STEPS-FOR-KAM_v2-HPSM-DIRECTORY.md`, citing HPSM-POC's own C-07. HPSM-POC itself was not opened (the hold).
 Three related points:
 - He already asked for the HPSM-POC directory before this file (that is why v2 of the login steps exists), so q12 confirms a correction Tuesday is acting on. It also widens it from the one test VM to "during development".
-- That tenant is not one of the five Datasec environments the workspace CLAUDE.md lists, so which environment it belongs to is UNRESOLVED and must not be asserted.
+- That tenant's id (`ec01829b`) is not among the three tenant ids the workspace CLAUDE.md gives; which of the five environments it is, if any, is UNRESOLVED and must not be asserted.
 - C-36 ("windows environment will be the same environment used by HPSM") already pointed to the same place.
 Not granted by his words: any Azure resource beyond the one test VM of C-75 and C-78, any spend (Universal Print licences, a simulated customer tenant), any change to an Entra directory (C-42; restated in C-56, C-60, C-68, C-69, C-71).
 Default meanwhile: only the C-78 test VM, in `a6b8fe11` as the v2 steps have it, after his own login steps and the home rehearsal. OXPd's login stays confined to its own resource group, and HPSM-POC's hold stands. The "full environment simulated" of w7 goes to him on a card (cost and tenant) before anything is created.
 
 **X2. Two target dates (s4) against one release for both platforms (D33) and against "no dates" (03).**
 His words: s4 "OXPd 1.9 by 20 Dec OXPd 2 by 12 Jan"; q2 "Target date 12 January".
-Two dates mean two deliveries. 02 D33 is firm: "(b): OXPd 2 is not held back; both adapters are built in parallel and both ship in release 1". 03 section 1 BLUF item 2 says "Release 1 is everything, on both platforms", and item 5 says "no dates are given because HP's signing turnaround and device availability dominate the schedule". Read so, s4 is in effect option (a) of Q6, which he did not answer.
-Default meanwhile: D33 and the plan's order stand. The two dates are recorded as his targets, not as plan commitments, and D33 goes back to him with Q6.
+Two dates mean two deliveries. 02 D33 is firm: "(b): OXPd 2 is not held back; both adapters are built in parallel and both ship in release 1". 03 section 1 BLUF item 2 says "Release 1 is everything, on both platforms", and item 5 says "no dates are given because HP's signing turnaround and device availability dominate the schedule". Read so, s4 is in effect option (a) of Q6, which he did not answer. This is the call 03 section 1 leaves to him ("whether OXPd 1.x ships alone is Kam's call then"), and the split the pack itself recommended (S4's and Q6's recommendations), so it changes D33 by his word rather than against the plan's intent. What is new and unplanned is the OXPd 2 date (X4).
+**Since ruled:** his 10:19 tap, "a — OXPd 1.x ships first: re-plan to the dates", answers Q6 (a). D33 is changed by his word; the dated re-plan is 03 section 0.5.
 
 **X3. "OXPd 1.9" (s4, w53) against the design's platform facts.**
 His words: s4 "OXPd 1.9 by 20 Dec"; w53 "the project files should have included 1.9".
-02 section 4 says "OXPd 1.9 'soon' since 2017, treat as absent". 02 section 2 row P16 lists "OXPd 1.x SDK 1.8.4.1 (`OXPdLib`), Demos 1.9". The OXPd 1.x contracts on main are built from 1.8.4.1 (pull requests 37 and 43).
+02 section 4 says "OXPd 1.9 'soon' since 2017, treat as absent". 05:139 dates HP's "soon" to March 2026; 02 section 4 dates it to 2017: the project's own two documents differ. 02 section 2 row P16 lists "OXPd 1.x SDK 1.8.4.1 (`OXPdLib`), Demos 1.9". The OXPd 1.x contracts on main are built from 1.8.4.1 (pull requests 37 and 43).
 Read by this seat, to depth 5, in the library copy under `Source_Documents/2026-11-19_library-from-friday-nas-backup/OXPd/OXPd1-NET-Java/`: `Demos/hp-ext-oxpd-demos-1.9`, `SDK/hp-ext-XX-oxpd-1.8.4` and `SDK/hp-ext-XX-oxpd-1.8.4.1`. There is no SDK 1.9.
-Default meanwhile: the build continues on 1.8.4.1. KD-2 (KAMIL-ACTIONS) asks him for the 1.9 files, and HP ask H7 stands.
+w53 ("the project files should have included 1.9") differs from the records in the same way: question 12 of 05 ("anything newer than 1.8.4.1") is open, and the library holds no SDK 1.9 (this absorbs round 1's X12).
+**Since ruled:** his 10:27 tap, "b — 1.9 means our 1.x line" (detail "No SDK needed."). "1.9" is Datasec's OXPd 1.x line; the build stays on SDK 1.8.4.1; HP ask H7 stands for HP's own roadmap.
 
 **X4. 12 January for OXPd 2 "fully tested, documented and listed" (q2, s4) against the four undated HP items and the certification rule.**
 What gates any OXPd 2 customer install: 02 D33 and 03 section 1 BLUF item 3 name four HP items, none dated: production firmware, an accepted platform version, a signing service whose output installs, and the turnaround.
@@ -73,11 +76,7 @@ Default meanwhile: each ticket "relates to" OXPD2-1, and one comment on OXPD2-1 
 The pack's BLUF and B1812 say the build holds the captions of 11 Lightning Talks and no video file, "so no screen has been seen". He offered to re-share in C-58 (P3).
 Default meanwhile: treated as not held. KA-4 asks him for the video files in a named format.
 
-**X12. w53 against the records:** see X3. The project's question 12 of 05 ("anything newer than 1.8.4.1") is open, and the library holds no SDK 1.9.
-
-**X13. q39 "everything goes out now" against the pack's note on H6.**
-This contradicts no ruling of his. The pack recommended that H6 drop its licence points, which C-74 answered ("our license / commercial agreement allows us to use HP code as part of our code"). "Everything" sends H6 whole.
-Default meanwhile: KA-2 asks him whether to strike H6's licence points. Nothing is sent by anyone but him.
+*(X12 of round 1 is folded into X3; X13 is now note N1 under "Smaller points": both kept as numbers so earlier references still resolve.)*
 
 **X14. w9 "no" (Passkey button) against F12, which is kept.**
 Under C-16 and C-48 (a product equivalent of what is live), customers not seeing the button would take F12 out. But he asks for a discussion and a ticket.
@@ -88,15 +87,25 @@ W15 asks whether Universal Print counts are reported for Secure printers only. H
 "Nexus" is new to the records. Tuesday's reading is that it is Datasec's NexusAI product; this is not certain.
 Default meanwhile: DEV-17 as drafted.
 
+**X16. s2 "1 - 2 days" against "2 week time request" on every ticket.** Two response times for the same contact. Tuesday's reading: 1 to 2 days for a quick question, two weeks for a ticketed item. Not certain. Default meanwhile: tickets due 2026-12-08; anything that blocks a lane is asked as a quick question and expected in 2 days.
+
+**X17. q34 "we have multiple printers ready" against the records.** By the records the only printer the build can reach is the M577 (OXPd 1.x), and its first run waits for its admin password (C-77); C-42's note also says "all kit is in hand". Which printers, where, and of which generation is not said (W3, ticket T-03). Default meanwhile: the M577 only, within C-72.
+
+**Count:** 15 contradictions (X1 to X11, X14 to X17), one note (N1), and X12 folded into X3. X2 and X3 have since been settled by his taps.
+
 Smaller points, checked and found consistent: q14 (a) agrees with C-60 message 2 and C-58 A15. W13 agrees with q22. w46 agrees with Q3. W28's "not relevant" leaves 02 section 5.8's sizing inferred. W44 and W45 agree with C-50 and C-58 paragraph 6.
+
+- **N1 (round 1's X13). q39 "everything goes out now" and the pack's note on H6.** Not a contradiction of any ruling. The pack recommended that H6 drop its licence points, which C-74 answered ("our license / commercial agreement allows us to use HP code as part of our code"); "everything" sends H6 whole. KA-2 asks him whether to strike them. Nothing is sent by anyone but him.
+- **N2.** Q3 ("Steve M (who will be part of the dev)"), s3 ("Work path items all assigned to Steve and delegated by him") and q2 (hand-over "to Steve Molnar as product owner of Workpath apps") together make Steve M part of the dev, the owner of all Workpath items, and the person the product is handed to. 03 section 7 has no such role. A tension in the team model, not a contradiction.
 
 ### Ids that cannot be mapped with certainty
 
 - **U1, the line with no id:** "reporting - managed by Kamil.  all actions / questions directed to Kamil on fleet activity". It sits between w30 - w40 and w44, where W41 to W43 (Reporting) are. There are two readings: (a) W41 to W43 are his to manage; (b) a standing rule that agent-fleet actions and questions go to him. Default: (b) is applied (every action in KAMIL-ACTIONS is his), and W41 to W43 keep their boxes, open for the room.
 - **U2, w15:** the id is certain, but the words do not answer W15's question (X15). They read like an answer to the Reporting items W41 to W43. The default is above.
 - **U3, q1 and q13:** the ids are certain, but neither picks one of its question's options (X8, X5). Default: each question's "meanwhile".
-- **U4, "OXPd 1.9"** (s4, w53): it may mean HP's OXPd 1.9 SDK or firmware (not held), or Datasec's name for the OXPd 1.x product line. Default: X3.
+- **U4, "OXPd 1.9"** (s4, w53): SETTLED since by his 10:27 tap ("b — 1.9 means our 1.x line"): Datasec's OXPd 1.x line, not HP's SDK.
 - **U5, "against kamil@datasec-rd.com"** (w7) and "Tied to kamil@datasec-rd.com" (q12): it may mean that account's home directory, or the HPSM-POC directory where it is a guest. Default: X1.
+- **U6, w17 and w 18:** the ids are certain; the tool they speak of is the one W16 names, and W16 is not answered (ticket T-09). Default: which tool Steve M releases, and which one builds on a clean Windows machine, is open until T-09 is answered.
 
 ## 2. The deadlines, and what they do to 03's plan (Tuesday's reading)
 
@@ -104,37 +113,38 @@ His dates are 20 December 2026 for "OXPd 1.9" (a Sunday, 26 days from today) and
 
 03 gives no dates (section 1 BLUF item 5). It runs phases 0 to 6 in order: spikes on real printers and a tenant, one thin slice on each generation, full parity in phase 3 (C-16), Universal Print, two packagings, and certification with a four-week pilot.
 
-Today nothing has run on a device (03 section 0.1). The only printer in hand is OXPd 1.x, and its first run waits for its admin password.
+Today nothing has run on a device (03 section 0.1). By the records the only printer the build can reach is the M577 (OXPd 1.x), and its first run waits for its admin password. His q34 says "we have multiple printers ready": which, where and of which generation is not said (W3, T-03; X17).
 
 The dates do three things to the plan, read but not decided here:
 1. They make the older-printer path the lead and a release of its own: the pack's Q35 order (03 section 0.4, and the design review's A7), and D33 reversed in effect (X2).
-2. They make the four-week pilot and the seven-group HP certification impossible before 20 December unless phase 6 is cut or run beside phase 3. That is the owner's call: Q5 and Q6, unanswered.
+2. They make the four-week pilot and the seven-group HP certification impossible before 20 December unless phase 6 is cut or run beside phase 3. That is the owner's call: Q6 is now answered (his 10:19 tap, (a)); Q5 is not.
 3. They make OXPd 2 by 12 January depend wholly on HP (H3 and H5 go out now, per q39 and q34), on a device or the simulator in the lab (W4, ticketed for 8 December), and on a Marketplace listing whose review time is UNMEASURED.
 
 The 26 tickets fall due on Tuesday 8 December. That leaves 12 days before 20 December to use the parity answers (W30 to W40) and the card-key answers (W1, W2), and both sit on phase 1's path.
 
-03 needs a dated re-plan put to him. It is not done here.
+The dated re-plan he asked for at 10:19 is 03 section 0.5 (under Fable review B2029; see 03 section 0.5). It is not repeated here.
 
 ## 3. The map, one row per answer
 
 | His id | The pack's question (round 2, quoted) | His words (verbatim) | What it settles (Tuesday's reading) | Design text touched |
 |---|---|---|---|---|
 | **S1** | Who on the Workpath team is the one contact for the build's questions? | s1 - Steve M | The build's one contact on the Workpath team is Steve M (Jira: Steven Molnar, found by read). Agrees with w8 "Utilisation of the work path team should go through Steve first". | 03 section 7 (team and agent model); 03 section 0.4 (the "needs from the team" column) |
-| **S2** | How fast can the build expect an answer from that contact? | s2 - 1 - 2 days | An answer from Steve M is expected in 1 to 2 days. Tuesday's reading: that is the pace for quick questions; the ticketed items carry his separate "2 week time request". | 03 section 6 (dependencies); 03 section 0.4 |
+| **S2** | How fast can the build expect an answer from that contact? | s2 - 1 - 2 days | An answer from Steve M is expected in 1 to 2 days. It differs from the "2 week time request" on every ticket: see X16. | 03 section 6 (dependencies); 03 section 0.4 |
 | **S3** | After tonight, how do questions reach the team: the master list (Jira OXPD2-1), or another channel? | s3 - jira.  All dev work assigned to us.  Work path items all assigned to Steve and delegated by him | Option (a), Jira. New: all dev work is assigned to the build team; every Workpath item is assigned to Steve M, who delegates it. See contradiction X10 (one master list, C-41). | 03 section 7; 03 section 8 (the master list OXPD2-1); the project CLAUDE.md rule "a new question is added there" |
-| **S4** | Is there a target date that sets the pace? | s4 - OXPd 1.9 by 20 Dec OXPd 2 by 12 Jan | Two target dates: OXPd 1.9 by 20 Dec 2026 (a Sunday) and OXPd 2 by 12 Jan 2027 (a Tuesday). See X2, X3, X4 and the deadlines paragraph. | 02 D33 (both platforms in one release); 02 section 4 (OXPd 1.9 "treat as absent"); 03 section 1 BLUF items 2, 3 and 5 ("no dates are given"); 03 section 3 (phases 0 to 6); 03 section 0.4 |
+| **S4** | Is there a target date that sets the pace? | s4 - OXPd 1.9 by 20 Dec OXPd 2 by 12 Jan | Two target dates: OXPd 1.9 by 20 Dec 2026 (a Sunday) and OXPd 2 by 12 Jan 2027 (a Tuesday). See X2, X3, X4 and the deadlines paragraph. Since ruled: his 10:19 tap (Q6, OXPd 1.x ships first) and his 10:27 tap ("1.9" is the 1.x line). | 02 D33 (both platforms in one release); 02 section 4 (OXPd 1.9 "treat as absent"); 03 section 1 BLUF items 2, 3 and 5 ("no dates are given"); 03 section 3 (phases 0 to 6); 03 section 0.4 |
 | **S5** | Is there a first customer in view? | s5 - no | No first customer is in view. The pilot site, its printers and its tenant (Q4, Q5) have no candidate. | 03 section 3, phase 6 (pilot); 03 section 4, WP6.x |
 | **S6** | How much of the team's time may the build ask for each week? | s6 - as many as required to met deadlines | No cap on the team's time: "as many as required" to meet the dates. Tuesday's reading: it covers the Workpath team's time asked through Steve M (w8), not a grant of anything his rules keep (HP, spend, Azure). | 03 section 7 |
 | **Q1** | From tomorrow, beyond the no-hardware work, what printer and lab work may the build do without asking you each time? | q1 - Steve M has multiple printers and a full test lab.  He will be in charge of testing. | Names Steve M, with "multiple printers and a full test lab", as in charge of testing. It does not pick option (a), (b) or (c) of Q1. Tuesday's reading with w7: development testing on Kam's own printer (agents drive it, C-72), final testing in Steve M's lab. Q1's scope question stays open; see X8. | 03 section 7; 03 section 3, phase 0 (kit) and WP0.1 (lab); 03 section 0.4 steps 3 and 7 |
 | **Q2** | At what point is the product handed to the Workpath team? | q2 - after fully tested, documented and listed in the Azure marketplace.  Target date 12 January.  Handed to Steve Molnar as product owner of Workpath apps | Hand-over to Steve Molnar, as product owner of the Workpath apps, after the product is fully tested, documented and listed in the Azure Marketplace; target 12 January (2027, by the meeting's date). Later than the pack's option (b): after the listing, not before the HP submission. See X4. | 03 section 3, phase 6 (release) and section 1 BLUF; 03 section 7; 02 section 8 (deployment methodologies, the Marketplace route) |
 | **Q3** | Who prepares and sends the submission to HP for signing: the build team or the Workpath team? | Q3 - Steve M (who will be part of the dev) | Steve M prepares the HP signing submission, and is part of the dev. Closest to option (b) (the Workpath team), with Steve M inside the build. | 03 section 3, E1.9 and phase 6 (E6.5); 03 WP0.5; 02 section 8.2 (signing paragraph); 02 section 10, R10 |
+| **Q6** | If HP's signed OXPd 2 bundle is late at the release gate, do the older printers (OXPd 1.x) ship alone? | (not in his file: his board tap of 2026-11-24 10:19, verbatim) a — OXPd 1.x ships first: re-plan to the dates | Option (a): OXPd 1.x ships first, and the plan is re-cut to his dates. This is the call 03 section 1 left to him and the split the pack recommended (Q6, S4). The dated re-plan is in 03 section 0.5 (under Fable review B2029). | 02 D33; 03 section 1 BLUF items 2, 3 and 5; 03 section 0.5 (the dated re-plan); 03 section 3, phase 6 |
 | **Q12** | In phase 1, what shape is "hosted through Azure"? | q12 - clients will deploy the solution through the Azure marketplace using services and components automatically deployed by the configuration scripts we create and submit.  During development, we will mirror this structure as closely as possible so the deployment is tested through dev.  Use the same subscription as HPSM-Poc.  Tied to kamil@datasec-rd.com | Clients deploy through the Azure Marketplace, with services and components deployed by configuration scripts Datasec writes and submits; development mirrors that structure; the development subscription is HPSM-POC's, "Tied to kamil@datasec-rd.com". It does not pick (i), (ii) or (iii) by name. Tuesday's reading: a server in the client's Azure deployed from the Marketplace, that is (i) or (iii), not (ii). The OXPd 1.x two-way traffic on port 7627 is not addressed by his words; test 2 (C-75, C-78) is still the measure. See X1 and X6. | 02 D1 (where the solution runs), D23 (packaging); 02 section 8.1 (installing the server), 8.6 (several sites); 03 section 8.5 (P-4, N-5); 03 section 0.4 step 6 (S14); 03 section 3, phase 5 |
 | **Q13** | Which packagings ship in release 1, now that phase 1 is hosted in Azure? | q13 - phase 1 needs to be a fully operational build. | "phase 1 needs to be a fully operational build". It names no packaging, so Q13 (which packagings ship) is not answered by its words. Tuesday's reading: his "Phase 1" is the first release, hosted in Azure (C-60, C-58 A5), which must be complete, as C-16 and C-48 already say. See X5. | 02 D23, D34; 03 section 1 BLUF item 2; 03 section 3, phase 5 |
 | **Q14** | Which deployment tool carries OXPd: HP AuthSuite Manager, or the HPK Deployment Utility? | q14 - option a as reccomended | Option (a): HP AuthSuite Manager, with OXPd as a separate app (the default and the recommendation). Agrees with C-60 message 2 ("whichever is newer"), C-58 A15 and D26. | 02 D26; 02 section 8.7; 03 WP0.10, WP5.8; 03 section 8.5 (N-9, P-6). Q15 to Q18 can now be read against (a) |
 | **Q22** | Does each customer register their own Universal Print app, or does the server use Datasec's registration? | q22 - Datasec guides (through doc and paid work) on setup by everything about work path and OXPd is done by the client in their own app / tenant | Each client registers and runs everything in its own app and tenant; Datasec guides the set-up "through doc and paid work". Tuesday's reading ("by" read as "but"): option (b), each customer registers its own Universal Print app. See X7. | 02 section 7.1 (the OQ-9 paragraph: the server reuses Datasec's multi-tenant CLIENT_ID_UP), 7.3, 5.6.5; 03 section 3, phase 4; 03 WP4.1; 03 section 8.5 (N-14) |
 | **Q32** | For older printers, does the shipped product use HP's own OXPdLib library or Datasec's own client? | q32 - left for kickoff  | Not answered: "left for kickoff". C-74 left the same choice for the kick-off. Still for the room. | 02 component C3 and K-1 (change log B2019); 03 WP2.1 |
-| **Q34** | How do we get an OXPd 2 printer or HP's simulator into the lab? | q34 - we have multiple printers ready.  Versions prior to OXPd 2 can be tested now.  We will chase HP for OXPD 2 tools, packages, firmware.  Please list this as an action on Kamil | He has several printers ready; OXPd 1.x ("versions prior to OXPd 2") can be tested now; the OXPd 2 tools, packages and firmware come from HP, and chasing HP is an action on Kamil. Tuesday's reading: route (b) of Q34 (HP), owned by Kamil; no date, so Q36's date stays open. Kamil is the product owner himself (Jira lead "Kamil Kreiser"; kamil@datasec-rd.com). See X9. | 03 section 3, phase 0 (spike S4, kit items 3, 4, 17); 03 WP0.5; 03 section 0.4 step 7; 02 section 4; 02 section 10, R10 |
-| **Q39** | Which of the eight drafted HP asks (H1 to H8, listed at the end of Part 2) do you send now? | q39 - everything goes out now.  Add as a task for Kamil. | All eight drafted HP asks (H1 to H8) go out now; sending them is a task for Kamil. See X13 (H6's licence points). | 03 WP0.5 (Registers/HP_QUESTIONS_DRAFT.md); 03 section 1 BLUF item 3; 02 D33 (the four undated HP items, H3) |
+| **Q34** | How do we get an OXPd 2 printer or HP's simulator into the lab? | q34 - we have multiple printers ready.  Versions prior to OXPd 2 can be tested now.  We will chase HP for OXPD 2 tools, packages, firmware.  Please list this as an action on Kamil | He has several printers ready (which, where and of which generation is not said: X17); OXPd 1.x ("Versions prior to OXPd 2") can be tested now; the OXPd 2 tools, packages and firmware come from HP, and chasing HP is an action on Kamil. Tuesday's reading: route (b) of Q34 (HP), owned by Kamil; no date, so Q36's date stays open. Kamil is the product owner himself (Jira lead "Kamil Kreiser"; kamil@datasec-rd.com). See X9. | 03 section 3, phase 0 (spike S4, kit items 3, 4, 17); 03 WP0.5; 03 section 0.4 step 7; 02 section 4; 02 section 10, R10 |
+| **Q39** | Which of the eight drafted HP asks (H1 to H8, listed at the end of Part 2) do you send now? | q39 - everything goes out now.  Add as a task for Kamil. | All eight drafted HP asks (H1 to H8) go out now; sending them is a task for Kamil. See the note on H6's licence points (N1, formerly X13). | 03 WP0.5 (Registers/HP_QUESTIONS_DRAFT.md); 03 section 1 BLUF item 3; 02 D33 (the four undated HP items, H3) |
 | **W1** | Is the store build of HPAM and of the phone app made from the 4.4.1 source unchanged, so that the card key compiled into that source is the live key? | w1 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-01). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 6.2 and D5 (the card key, OQ-8); 03 section 3, E1.3; 03 WP1.3 |
 | **W2** | Which family of card-decoding routines produced the card strings today's customers have stored: the older one (firmware before Android 12) or the newer one (Android 12 firmware)? | w2 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-02). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 D9; 03 WP1.3, spike S3 |
 | **W3** | For each printer in the Workpath product owner's lab: model and firmware version. | w3 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-03). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 03 section 3, phase 0 (kit items 4, 7, 8, 9); 03 WP0.1 |
@@ -143,15 +153,15 @@ The 26 tickets fall due on Tuesday 8 December. That leaves 12 days before 20 Dec
 | **W6** | Which card readers can the lab lend: one of each of the eight products in the reader table? | w6 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-05). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 D9 and section 3.2 (the reader table); 03 spike S3, E1.3 |
 | **W7** | A test Microsoft tenant set up as customers have it: the HPAM registration, Universal Print licences, the "Onboarding Azure Services" deployment, Conditional Access policies, and a test user with Authenticator. | w7 - we build against kamil@datasec-rd.com.  full environment simulated.  Using my printer so we control.  Final testing will be done against Datasec testing lab | The build builds its own test environment against kamil@datasec-rd.com, simulating the customer's whole set-up; on Kam's printer, "so we control"; final testing in Datasec's testing lab. So W7 is not asked of the Workpath team. What "against kamil@datasec-rd.com" means (that account's home tenant, or the HPSM-POC directory where it is a guest) is not certain: see X1. Building it needs Azure and Entra changes and Universal Print licences, which stay his on a card (C-42, C-75). | 03 section 3, phase 0 (kit item 11); 03 WP0.1; 03 section 0.4 steps 4 and 6; 02 section 7.1 (Conditional Access, spike S7) |
 | **W8** | A walkthrough of every sign-in path on a V4.4 Workpath printer: MFA and No-MFA, card, QR, BLE, security key and first-use self-registration, under each setup option. | w8 - you have videos and documentation on this.  If more information is necessary list the action on me and I will arrange.  You will need to specify what format is best.  If its a technical doc (swim lane diagrams) create a Jira ticket and assign to Steve M but for him to assign to Artur M. Utilisation of the work path team should go through Steve first | His statement: the build already holds videos and documentation on the sign-in paths; if more is needed, an action on him, in a format the build names; technical documents (swim-lane diagrams) go by a Jira ticket to Steve M for him to give to Artur M; the Workpath team is used through Steve first. See X11 (the records hold captions, no video file). | 02 section 5.5 (sign-in flows); 02 section 1; 03 section 3, phase 3 item 1 (sign-in completeness); 03 section 8.5 (N-1, N-3). Ticket T-26; Kamil action KA-4 |
-| **W9** | Do customers on V4.4 see the Passkey button, and which sign-in method does it use? | w9 - no but discussion shoudl be had.  create a Jira ticket (with the question) and assign to Steve M - 2 week time request | "no": Tuesday's reading, customers on V4.4 do not see the Passkey button. Then a discussion, and a ticket. See X14. | 02 section 3.2, F12; 02 change log B1817 / R4-35 (N-11); 03 section 3, phase 3 item 1 (passkey). Ticket T-06 |
+| **W9** | Do customers on V4.4 see the Passkey button, and which sign-in method does it use? | w9 - no but discussion shoudl be had.  create a Jira ticket (with the question) and assign to Steve M - 2 week time request | "no": Tuesday's reading, customers on V4.4 do not see the Passkey button. Then a discussion, and a ticket (T-06). See X14. | 02 section 3.2, F12; 02 change log B1817 / R4-35 (N-11); 03 section 3, phase 3 item 1 (passkey) |
 | **W10** | The Conditional Access policy templates customers use, and the "Passwordless MFA" fix as customers are given it. | w10 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-07). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 7.1 (Conditional Access); 03 spike S7 |
 | **W11** | The Microsoft Graph permissions a customer tenant has actually consented to, from a customer tenant or the deployment guide. | w11 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-08). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 7.2; 03 section 0.4 (first-run scope check); OneDrive "Shared with me" (OP-20) |
 | **W12** | Who owns and administers Datasec's Universal Print app registration? | w12 - Steve M.  But we will create our own as per w7 during dev | Steve M owns Datasec's Universal Print registration. During development the build creates its own, as in w7. Agrees with Q22 (each customer its own). | 02 section 7.1 (the OQ-9 paragraph); 03 WP4.1 |
-| **W13** | Can Datasec add a permission or a redirect address to it without asking each customer? | w13 - I don’t think its relevant any more | "I don't think its relevant any more". Tuesday's reading: because of q22, each customer registers its own, so adding to Datasec's registration does not arise. | 02 section 7.1 |
+| **W13** | Can Datasec add a permission or a redirect address to it without asking each customer? | w13 - I don’t think its relevant any more | "I don’t think its relevant any more". Tuesday's reading: because of q22, each customer registers its own, so adding to Datasec's registration does not arise. | 02 section 7.1 |
 | **W15** | Are Universal Print job status and page counts reported for Secure printers only today, or for Direct and Standard as well? | w15 - all reporting is done through microsoft log analytics.  Clients can use Nexus for added clarity and reports but they have choice | All reporting goes through Microsoft Log Analytics; clients may also use Nexus for more, by their choice. It does not say whether Universal Print counts are reported for Secure printers only or for all three, which is what W15 asks, so DEV-17 (Q31) is not settled. See X15. | 02 sections 3.4, 3.5 and 5.9; 03 WP0.8 (Design/WP0.8 draft); Registers/DEVIATION-REGISTER_DRAFT.md DEV-17 |
 | **W16** | Which deployment tool do customers get today: HP AuthSuite Manager or the HPK Deployment Utility? | w16 - be very specific with the ask.  create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-09). The question stays open; the pack's "meanwhile" stands until the ticket is answered. His words add "be very specific with the ask". | 02 section 8.7, D26; 03 WP0.10 |
-| **W17** | Who owns and releases that tool? | w17 - Steve M | Steve M owns and releases the deployment tool. | 02 section 8.7; 03 WP5.8 |
-| **W18** | Does it build today on a clean Windows machine? | w 18 - yes | "yes": the tool builds today on a clean Windows machine (the Workpath team's statement through him; not measured by the build). | 02 section 8.7; 03 WP0.10 |
+| **W17** | Who owns and releases that tool? | w17 - Steve M | Steve M owns and releases the deployment tool. Which of the two tools is not settled until W16 (T-09) is answered. See U6. | 02 section 8.7; 03 WP5.8 |
+| **W18** | Does it build today on a clean Windows machine? | w 18 - yes | "yes": his answer; which of the two tools it speaks of waits on W16 (T-09). Not measured by the build. See U6. | 02 section 8.7; 03 WP0.10 |
 | **W19** | A walkthrough of the Manager by its authors, four points, one line each in the box: (1) does it import existing .cfg files; (2) how could a package kind beside the six fixed Workpath ids be added; (3) its job database; (4) its password and TLS handling. | w19 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-10). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 sections 3.5 and 8.7; 03 WP0.10, WP5.8 |
 | **W20** | How many customers deployed the Azure side through the Marketplace offer, and how many through the script? | w20 - not many through marketplace but its the path we want to push | Few customers deployed the Azure side through the Marketplace offer, but the Marketplace is the path Datasec wants to push. No numbers. Tuesday's reading: gateway changes still ship both ways (Marketplace and script) until counts exist. | 02 section 7 (gateway, D11); 02 section 8.1; 05 OP-8 and N-17 |
 | **W21** | Does any customer run their own licence server today? | w21, w22, w23 & W24 - ask Steve M how it works. create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-11, one ticket for W21 to W24 as he grouped them, "ask Steve M how it works"). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 7.5 (licence service); 03 section 3, phase 5 (licence) |
@@ -161,7 +171,7 @@ The 26 tickets fall due on Tuesday 8 December. That leaves 12 days before 20 Dec
 | **W26** | What defect level does the team accept before calling a Workpath pilot a success? | w26 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-12). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 03 section 3, phase 6 (pilot exit, Q5) |
 | **W27** | How does the team track new HP firmware today and re-test the Workpath apps on it? | w27 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-13). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 4 (firmware); 03 section 5 (test strategy); Q38 |
 | **W28** | Real fleet sizes, sign-ins per hour and peak load at today's largest customers. | w28 - not relevant as client environment | "not relevant as client environment". Tuesday's reading: no fleet figures will come from the team; the server is sized in each client's own Azure. The design's sizing (4 vCPU, 8 GB) and the E6.3 load figures stay inferred. | 02 sections 5.8 and 8.1; 03 section 3, E6.3 |
-| **W29** | Datasec's runbook for moving a customer from one sign-in solution to another (Workpath to OXPd). | w29 - needs discussion.  action on Kamil | "needs discussion. action on Kamil". Not answered; an action on him (KA-3) and for the room. | 02 section 8.5; 03 section 3, phase 5 |
+| **W29** | Datasec's runbook for moving a customer from one sign-in solution to another (Workpath to OXPd). | w29 - needs discussion.  action on Kamil | "needs discussion.  action on Kamil". Not answered; an action on him (KA-3) and for the room. | 02 section 8.5; 03 section 3, phase 5 |
 | **W30** | Is OneDrive's "Shared with me" in the shipped OneDrive 4.4? The release notes say it was removed. | w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-14). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 3.9 (F37) and change log B1817 (N-10) |
 | **W31** | On a panel set to a language other than English, do the OneDrive and SharePoint apps show their own screens in that language? | w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-15). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 3 (A18, English for Phase 1); 03 WP3.12 |
 | **W32** | Has any shipped Mailflow version shown "quick messages" on the panel? | w30 - w40 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-16). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 3.3 (Mailflow) |
@@ -178,10 +188,132 @@ The 26 tickets fall due on Tuesday 8 December. That leaves 12 days before 20 Dec
 | **W46** | How are Workpath bundles validated and signed today? | w46 - submitted to HP validation team for testing and approval. then listed in app distribution catalogue | Workpath bundles are submitted to HP's validation team for testing and approval, then listed in HP's app distribution catalogue. | 02 section 8.2 (signing paragraph); 03 section 3, E1.9 and phase 6 (E6.5) |
 | **W47** | Is the Intune edition of the phone app needed, and if so where is its source? | W47 - no | "no": the Intune edition of the phone app is not needed. | 02 section 3 (phone app; 05:278) |
 | **W48** | Is the printer admin password in the earlier OXPd 1 repository's README the live password of a lab printer? | w48 - create a Jira ticket (with the question) and assign to Steve M - 2 week time request | Routed, not answered: a Jira ticket for Steve M with a two-week time request (T-25). The question stays open; the pack's "meanwhile" stands until the ticket is answered. | 02 section 6.6 (secret locations); 05 OP-14 |
-| **W49** | Where did the two card keys written into the earlier OXPd 1 build come from? | w49 - this would have been part of testing.  ignore | "this would have been part of testing. ignore": the two card keys in the earlier OXPd 1 build are test values; the point is dropped. | 02 section 6.6; 05 OP-16 |
+| **W49** | Where did the two card keys written into the earlier OXPd 1 build come from? | w49 - this would have been part of testing.  ignore | "this would have been part of testing.  ignore": the two card keys in the earlier OXPd 1 build are test values; the point is dropped. | 02 section 6.6; 05 OP-16 |
 | **W50** | (Your own check, A12.) Was the earlier OXPd 1 code ever run on a physical printer? | w50 - no | "no": the earlier OXPd 1 code never ran on a physical printer. Agrees with the design's treatment (nothing in it proven on hardware). | 02 section 2 (prior work); 05 OP-15 |
-| **W51** | Which "emulator" did its author use? | w51 - prior work did not go far.  ignore it | "prior work did not go far. ignore it": which emulator is dropped. | 02 section 2; 05 OP-15 |
-| **W53** | Has the team received from HP any OXPd 1.x SDK newer than 1.8.4.1? | w53 - the project files should have included 1.9 | "the project files should have included 1.9". The library copy holds HP's OXPd 1.x Demos 1.9 and the SDK 1.8.4 and 1.8.4.1, no SDK 1.9 (directory read, depth 5). See X3 and X12. | 02 section 4 ("OXPd 1.9 soon since 2017, treat as absent"); 02 section 2, row P16; 03 section 8 (question 12 of 05); HP ask H7 |
+| **W51** | Which "emulator" did its author use? | w51 - prior work did not go far.  ignore it | "prior work did not go far.  ignore it": which emulator is dropped. | 02 section 2; 05 OP-15 |
+| **W53** | Has the team received from HP any OXPd 1.x SDK newer than 1.8.4.1? | w53 - the project files should have included 1.9 | "the project files should have included 1.9". Since ruled by his 10:27 tap: "b — 1.9 means our 1.x line". The library copy holds HP's OXPd 1.x Demos 1.9 and the SDK 1.8.4 and 1.8.4.1, no SDK 1.9 (directory read, depth 5). See X3 and X12. | 02 section 4 ("OXPd 1.9 soon since 2017, treat as absent"); 02 section 2, row P16; 03 section 8 (question 12 of 05); HP ask H7 |
 | *(no id)* | (none: the line sits between w30 - w40 and w44, where the Reporting items W41 to W43 are) | reporting - managed by Kamil.  all actions / questions directed to Kamil on fleet activity | Not mapped with certainty: U1. W41 to W43 stay open. | 02 section 5.9; 03 WP0.8 |
 
-Counted by program: 51 answer lines in his file, 63 pack items mapped (S 6, Q 10, W 47), 1 line with no id. Part 1 items with no word of his: 43; Part 2: 6.
+Counted by program: 51 answer lines in his file, 63 pack items mapped (S 6, Q 10, W 47), 1 line with no id; plus Q6, answered by his 10:19 tap (64 rows in all). Part 1 items with no word of his: 43; Part 2: 6.
+
+## 4. Pack v4: what was left out, what was kept
+
+Kam, live board 10:37, verbatim: "for the the meeting pack don't include questions that have already been assigned, answered or actioned". This version holds only what is still open. 66 of pack v3's 112 numbered items are left out as answered, assigned or actioned (32 answered by your file or your taps, 31 ticketed to Steve M, 1 actioned on a card of yours, 2 sent to HP), and so are the eight HP asks (H1 to H8), which you are sending. Counted by program. Also left out: the eight HP asks H1 to H8 (being sent, KA-1 and KA-2). Rows marked "(reading)" are Tuesday's readings, not his words.
+
+| Pack v3 id | Left out because |
+|---|---|
+| S1 | answered by your file |
+| S2 | answered by your file |
+| S3 | answered by your file |
+| S4 | answered by your file |
+| S5 | answered by your file |
+| S6 | answered by your file |
+| Q2 | answered by your file |
+| Q3 | answered by your file |
+| Q6 | answered by your tap of 10:19 |
+| Q14 | answered by your file |
+| Q19 | answered by your tap of 10:32 on KD-1: "b — No, keep the agent-controllable environment"; test hosts in Azure go there, with the cost on a card first (reading) |
+| Q22 | answered by your file |
+| Q34 | answered by your file; carded KA-1 (you chase HP) |
+| Q35 | answered in effect by your q34 and your tap of 10:19 (reading) |
+| Q36 | actioned: carded KA-1, you chase HP for the OXPd 2 tools (reading) |
+| Q39 | answered by your file; the HP asks go out (KA-2) |
+| Q40 | sent to HP: H1 asks HP for its confirmation in writing (reading) |
+| Q41 | sent to HP: H1 asks HP for its confirmation in writing (reading) |
+| W1 | ticketed to Steve M (T-01) |
+| W2 | ticketed to Steve M (T-02) |
+| W3 | ticketed to Steve M (T-03) |
+| W4 | ticketed to Steve M (T-04) |
+| W5 | answered by your file |
+| W6 | ticketed to Steve M (T-05) |
+| W7 | answered by your file |
+| W8 | answered by your file; carded KA-4 and ticketed (T-26) |
+| W9 | ticketed to Steve M (T-06) |
+| W10 | ticketed to Steve M (T-07) |
+| W11 | ticketed to Steve M (T-08) |
+| W12 | answered by your file |
+| W13 | answered by your file |
+| W16 | ticketed to Steve M (T-09) |
+| W17 | answered by your file |
+| W18 | answered by your file |
+| W19 | ticketed to Steve M (T-10) |
+| W20 | answered by your file |
+| W21 | ticketed to Steve M (T-11) |
+| W22 | ticketed to Steve M (T-11) |
+| W23 | ticketed to Steve M (T-11) |
+| W24 | ticketed to Steve M (T-11) |
+| W26 | ticketed to Steve M (T-12) |
+| W27 | ticketed to Steve M (T-13) |
+| W28 | answered by your file |
+| W30 | ticketed to Steve M (T-14) |
+| W31 | ticketed to Steve M (T-15) |
+| W32 | ticketed to Steve M (T-16) |
+| W33 | ticketed to Steve M (T-17) |
+| W34 | ticketed to Steve M (T-18) |
+| W35 | ticketed to Steve M (T-19) |
+| W36 | ticketed to Steve M (T-20) |
+| W37 | ticketed to Steve M (T-21) |
+| W38 | ticketed to Steve M (T-22) |
+| W39 | ticketed to Steve M (T-23) |
+| W40 | ticketed to Steve M (T-24) |
+| W41 | ticketed to Steve M (T-27), your tap of 10:34 |
+| W42 | ticketed to Steve M (T-28), your tap of 10:34 |
+| W43 | ticketed to Steve M (T-29), your tap of 10:34 |
+| W44 | answered by your file |
+| W45 | answered by your file |
+| W46 | answered by your file |
+| W47 | answered by your file |
+| W48 | ticketed to Steve M (T-25) |
+| W49 | answered by your file |
+| W50 | answered by your file |
+| W51 | answered by your file |
+| W53 | answered by your file |
+
+| Pack v3 id | Pack v4 id | Why it is still open |
+|---|---|---|
+| Q1 | Q1 | your words pick no option |
+| Q4 | Q2 | no word of his yet; not ticketed, carded or sent to HP |
+| Q5 | Q3 | no word of his yet; not ticketed, carded or sent to HP |
+| Q7 | Q4 | no word of his yet; not ticketed, carded or sent to HP |
+| Q8 | Q5 | no word of his yet; not ticketed, carded or sent to HP |
+| Q9 | Q6 | no word of his yet; not ticketed, carded or sent to HP |
+| Q10 | Q7 | no word of his yet; not ticketed, carded or sent to HP |
+| Q11 | Q8 | no word of his yet; not ticketed, carded or sent to HP |
+| Q12 | Q9 | your words pick no option |
+| Q13 | Q10 | your words pick no option |
+| Q15 | Q11 | no word of his yet; not ticketed, carded or sent to HP |
+| Q16 | Q12 | no word of his yet; not ticketed, carded or sent to HP |
+| Q17 | Q13 | no word of his yet; not ticketed, carded or sent to HP |
+| Q18 | Q14 | no word of his yet; not ticketed, carded or sent to HP |
+| Q20 | Q15 | no word of his yet; not ticketed, carded or sent to HP |
+| Q21 | Q16 | no word of his yet; not ticketed, carded or sent to HP |
+| Q23 | Q17 | no word of his yet; not ticketed, carded or sent to HP |
+| Q24 | Q18 | no word of his yet; not ticketed, carded or sent to HP |
+| Q25 | Q19 | no word of his yet; not ticketed, carded or sent to HP |
+| Q26 | Q20 | no word of his yet; not ticketed, carded or sent to HP |
+| Q27 | Q21 | no word of his yet; not ticketed, carded or sent to HP |
+| Q28 | Q22 | no word of his yet; not ticketed, carded or sent to HP |
+| Q29 | Q23 | no word of his yet; not ticketed, carded or sent to HP |
+| Q30 | Q24 | no word of his yet; not ticketed, carded or sent to HP |
+| Q31 | Q25 | no word of his yet; not ticketed, carded or sent to HP |
+| Q32 | Q26 | you left it for the kick-off |
+| Q33 | Q27 | no word of his yet; not ticketed, carded or sent to HP |
+| Q37 | Q28 | no word of his yet; not ticketed, carded or sent to HP |
+| Q38 | Q29 | no word of his yet; not ticketed, carded or sent to HP |
+| Q42 | Q30 | no word of his yet; not ticketed, carded or sent to HP |
+| Q43 | Q31 | no word of his yet; not ticketed, carded or sent to HP |
+| Q44 | Q32 | no word of his yet; not ticketed, carded or sent to HP |
+| Q45 | Q33 | no word of his yet; not ticketed, carded or sent to HP |
+| Q46 | Q34 | no word of his yet; not ticketed, carded or sent to HP |
+| Q47 | Q35 | no word of his yet; not ticketed, carded or sent to HP |
+| Q48 | Q36 | no word of his yet; not ticketed, carded or sent to HP |
+| Q49 | Q37 | no word of his yet; not ticketed, carded or sent to HP |
+| Q50 | Q38 | no word of his yet; not ticketed, carded or sent to HP |
+| Q51 | Q39 | no word of his yet; not ticketed, carded or sent to HP |
+| Q52 | Q40 | no word of his yet; not ticketed, carded or sent to HP |
+| Q53 | Q41 | no word of his yet; not ticketed, carded or sent to HP |
+| W14 | W1 | no word of his yet; not ticketed, carded or sent to HP |
+| W15 | W2 | your words do not answer the question asked |
+| W25 | W3, W4, W5 (split, one question per question) | no word of his yet; not ticketed, carded or sent to HP |
+| W29 | W6 | the migration runbook: you chose to take it in tonight's meeting (KA-3, a) |
+| W52 | W7 | no word of his yet; not ticketed, carded or sent to HP |
