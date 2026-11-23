@@ -1,0 +1,35 @@
+The lab tool reaches the OXPd 1.x read client through a new command,
+oxpd1, with two verbs. Neither writes to a device.
+
+oxpd1 read <host> --run <new folder> --credentials-file <file>
+[--pin <sha256>]... [--read] [--addressing 2005|2004]: without --pin a
+first contact through the lab's own channel prints the certificate of
+each port and sends nothing. With one or two pins it reads the password
+from the credentials file only (one NAME=value line, default name
+OXPD_TEST_PRINTER_ADMIN_PASSWORD; a missing file, name or value ends
+the run, exit 7, before any connection), fetches the discovery tree
+with no credentials, then makes ONE read carrying HTTP Basic for admin.
+Whatever that read ends in, the run stops: a refused password (401 or
+403) exits 6 with a message naming the five-attempt lockout, any other
+end exits 8. No option carries a password.
+
+oxpd1 lab-cert <host name> --run <new folder> [--days 30]: RSA 2048,
+a development CA that signs one server certificate (subject and the
+only alternative name the host name, server authentication, not a CA)
+and is discarded unwritten; ca.crt, server.crt and server.key (owner
+read and write only on macOS and Linux) are written. An IP address in
+any form, a wildcard, a trailing dot, a port and localhost are refused.
+Both verbs refuse a run folder inside a git work tree (exit 9).
+
+The client gains one public option, Oxpd1ClientOptions.Addressing
+(Version200508 by default, Version200408 on request, an undefined value
+refused), which writes the four addressing headers in the 2004/08
+namespace with its /role/anonymous ReplyTo. The Lab project references
+the client (its two lock files gain the entry); the registry lists of
+cells P13 and R11 gain "oxpd1". 36 new cases against a stub on
+127.0.0.1: C# totals plus 36 on both legs, the rules count plus 8.
+No device has been reached; what an OXPd 1.x device accepts (addressing
+version, certificate, host name resolution) is not measured. Nothing is
+deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
