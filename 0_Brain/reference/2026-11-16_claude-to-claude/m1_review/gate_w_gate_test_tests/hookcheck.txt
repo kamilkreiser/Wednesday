@@ -1,0 +1,22 @@
+PASS hookcheck allow          exit=0 (want 0) elapsed=0.47s (want 0-5) stub-log-lines=1
+      stdout='{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"coagent W1 stub daemon says allow"}}\n'
+      stderr=''
+PASS hookcheck deny           exit=0 (want 0) elapsed=0.00s (want 0-5) stub-log-lines=1
+      stdout='{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"coagent W1 stub daemon says deny"}}\n'
+      stderr=''
+PASS hookcheck unreachable    exit=2 (want 2) elapsed=0.00s (want 0-5) stub-log-lines=0
+      stdout=''
+      stderr='coagent gate: daemon unreachable or refused - call blocked\n'
+PASS hookcheck killed-before  exit=2 (want 2) elapsed=0.00s (want 0-5) stub-log-lines=0
+      stdout=''
+      stderr='coagent gate: daemon unreachable or refused - call blocked\n'
+PASS hookcheck hang           exit=2 (want 2) elapsed=10.01s (want 9.5-13) stub-log-lines=1
+      stdout=''
+      stderr='coagent gate: daemon unreachable or refused - call blocked\n'
+PASS hookcheck killed-midcall exit=2 (want 2) elapsed=0.00s (want 0-9) (stub killed 0.06 s after start; elapsed counted from the kill) stub-log-lines=1
+      stdout=''
+      stderr='coagent gate: daemon unreachable or refused - call blocked\n'
+PASS hookcheck crash-role     exit=1 (want 1) elapsed=0.00s (want 0-5) stub-log-lines=0
+      stdout=''
+      stderr=''
+HOOKCHECK PASS: 0 failed of 7

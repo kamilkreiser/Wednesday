@@ -1,0 +1,103 @@
+ROW a          plain (reference)                          expect=inside    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:\\w4\\ws\\a.txt"
+ROW b          plain (reference)                          expect=inside    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:\\w4\\ws\\sub\\b.txt"
+ROW new        plain, missing file                        expect=inside    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:\\w4\\ws\\new.txt"
+ROW rel        relative                                   expect=same:a    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "a.txt"
+ROW relsub     relative                                   expect=same:b    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "sub\\b.txt"
+ROW dotdot     dot-dot inside                             expect=same:a    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:\\w4\\ws\\sub\\..\\a.txt"
+ROW dotdotout  dot-dot out                                expect=outside   fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "C:\\w4\\ws\\..\\outside\\secret.txt"
+ROW reldotdot  relative dot-dot out                       expect=outside   fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "..\\outside\\secret.txt"
+ROW dblsep     doubled separator                          expect=same:a    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:\\w4\\ws\\\\a.txt"
+ROW case       case                                       expect=same:a    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:\\W4\\WS\\A.TXT"
+ROW casenew    case, missing file                         expect=inside    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:\\W4\\WS\\NEW2.TXT"
+ROW drivecase  case of the drive letter                   expect=same:a    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "c:\\w4\\ws\\a.txt"
+ROW fwd        forward slashes                            expect=same:a    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:/w4/ws/a.txt"
+ROW mixed      mixed slashes                              expect=same:b    fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:/w4/ws/sub\\b.txt"
+ROW drel       drive-relative                             expect=critical  fixture=-         pure=Uncertain (drive-relative path (C:foo))                                => DIFFERENT-SAFE  ** FINDING **
+      spelling "C:a.txt"
+ROW drel2      drive-relative, bare drive                 expect=uncertain fixture=-         pure=Uncertain (drive-relative path (C:foo))                                => MATCH
+      spelling "C:"
+ROW rootrel    root-relative (current drive)              expect=uncertain fixture=-         pure=Uncertain (root-relative or MSYS-style path without a drive letter)    => MATCH
+      spelling "\\w4\\ws\\a.txt"
+ROW unc        UNC                                        expect=critical  fixture=-         pure=Critical (UNC (network or device) path)                                => MATCH
+      spelling "\\\\localhost\\C$\\w4\\ws\\a.txt"
+ROW uncfwd     UNC, forward slashes                       expect=critical  fixture=-         pure=Critical (UNC (network or device) path)                                => MATCH
+      spelling "//localhost/C$/w4/ws/a.txt"
+ROW verbatim   \\?\ verbatim prefix                       expect=critical  fixture=-         pure=Critical (device or verbatim namespace prefix)                         => MATCH
+      spelling "\\\\?\\C:\\w4\\ws\\a.txt"
+ROW verbfwd    \\?\ with forward slashes                  expect=critical  fixture=-         pure=Critical (device or verbatim namespace prefix)                         => MATCH
+      spelling "//?/C:/w4/ws/a.txt"
+ROW device     \\.\ device namespace                      expect=critical  fixture=-         pure=Critical (device or verbatim namespace prefix)                         => MATCH
+      spelling "\\\\.\\C:\\w4\\ws\\a.txt"
+ROW ntpfx      \??\ object-manager prefix                 expect=critical  fixture=-         pure=Critical (device or verbatim namespace prefix)                         => MATCH
+      spelling "\\??\\C:\\w4\\ws\\a.txt"
+ROW short      8.3 short name (real)                      expect=uncertain fixture=shortname pure=Uncertain (possible 8.3 short name (NAME~1))                           => MATCH
+      spelling "C:\\w4\\ws\\LONGFI~1.TXT"
+ROW shortsyn   8.3 short name (made-up spelling)          expect=uncertain fixture=-         pure=Uncertain (possible 8.3 short name (NAME~1))                           => MATCH
+      spelling "C:\\w4\\ws\\LONGFI~1.TXT"
+ROW tdot       trailing dot                               expect=uncertain fixture=-         pure=Uncertain (trailing dot or space in a component (Windows strips it))   => MATCH
+      spelling "C:\\w4\\ws\\a.txt."
+ROW tspace     trailing space                             expect=uncertain fixture=-         pure=Uncertain (trailing dot or space in a component (Windows strips it))   => MATCH
+      spelling "C:\\w4\\ws\\a.txt "
+ROW tdotdir    trailing dot on a folder                   expect=uncertain fixture=-         pure=Uncertain (trailing dot or space in a component (Windows strips it))   => MATCH
+      spelling "C:\\w4\\ws\\sub.\\b.txt"
+ROW ads        alternate data stream                      expect=critical  fixture=-         pure=Critical (alternate data stream suffix (':'))                          => MATCH
+      spelling "C:\\w4\\ws\\a.txt:secret"
+ROW adsdata    default stream                             expect=critical  fixture=-         pure=Critical (alternate data stream suffix (':'))                          => MATCH
+      spelling "C:\\w4\\ws\\a.txt::$DATA"
+ROW adsdir     stream on a folder                         expect=critical  fixture=-         pure=Critical (alternate data stream suffix (':'))                          => MATCH
+      spelling "C:\\w4\\ws\\sub:s\\b.txt"
+ROW nul        reserved name                              expect=critical  fixture=-         pure=Critical (reserved device name)                                        => MATCH
+      spelling "C:\\w4\\ws\\NUL"
+ROW con        reserved name with extension               expect=critical  fixture=-         pure=Critical (reserved device name)                                        => MATCH
+      spelling "C:\\w4\\ws\\con.txt"
+ROW com1       reserved name, space before the extension  expect=critical  fixture=-         pure=Critical (reserved device name)                                        => MATCH
+      spelling "C:\\w4\\ws\\COM1 .log"
+ROW lptsup     reserved name, superscript digit           expect=critical  fixture=-         pure=Critical (reserved device name)                                        => MATCH
+      spelling "C:\\w4\\ws\\LPT¹"
+ROW conin      reserved name CONIN$                       expect=critical  fixture=-         pure=Critical (reserved device name)                                        => MATCH
+      spelling "C:\\w4\\ws\\CONIN$"
+ROW clock      CLOCK$                                     expect=info      fixture=-         pure=Plain (text rules pass it)                                             => INFO
+      spelling "C:\\w4\\ws\\CLOCK$"
+ROW jout       junction to outside                        expect=outside   fixture=junction  pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "C:\\w4\\ws\\jout\\secret.txt"
+ROW joutnew    junction to outside, missing file          expect=outside   fixture=junction  pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "C:\\w4\\ws\\jout\\new.txt"
+ROW jin        junction to inside                         expect=same:b    fixture=junction  pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS
+      spelling "C:\\w4\\ws\\jin\\b.txt"
+ROW dlout      directory symbolic link to outside         expect=outside   fixture=symlink   pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "C:\\w4\\ws\\dlout\\secret.txt"
+ROW lout       file symbolic link to outside              expect=outside   fixture=symlink   pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "C:\\w4\\ws\\lout.txt"
+ROW dangle     dangling symbolic link                     expect=uncertain fixture=symlink   pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "C:\\w4\\ws\\dangle"
+ROW hardlink   hard link to an outside file               expect=info      fixture=hardlink  pure=Plain (text rules pass it)                                             => INFO
+      spelling "C:\\w4\\ws\\hl.txt"
+ROW msys       MSYS /c/... spelling                       expect=uncertain fixture=-         pure=Uncertain (root-relative or MSYS-style path without a drive letter)    => MATCH
+      spelling "/c/w4/ws/a.txt"
+ROW msysbare   MSYS bare drive                            expect=uncertain fixture=-         pure=Uncertain (root-relative or MSYS-style path without a drive letter)    => MATCH
+      spelling "/c"
+ROW tilde      home                                       expect=outside   fixture=files     pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "~\\x.txt"
+ROW tildeuser  another user's home                        expect=uncertain fixture=-         pure=Plain (text rules pass it)                                             => NEEDS-WINDOWS (the text rules pass it: the OS decides)
+      spelling "~someone\\x.txt"
+ROW wild       wildcard                                   expect=uncertain fixture=-         pure=Uncertain (wildcard or reserved character)                             => MATCH
+      spelling "C:\\w4\\ws\\*.txt"
+ROW ctrl       control character                          expect=uncertain fixture=-         pure=Uncertain (control character in path)                                  => MATCH
+      spelling "C:\\w4\\ws\\a\u{1}.txt"
+ROW empty      empty                                      expect=uncertain fixture=-         pure=Uncertain (empty path)                                                 => MATCH
+      spelling ""
+W4 PURE (text rules only, made-up root C:\w4): 51 rows; decided here 27; need a Windows disk 22; info 2; FINDINGS 1

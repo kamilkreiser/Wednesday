@@ -1,0 +1,45 @@
+PASS  selftest the table has 32 cases per set-up (6 write + 6 powershell + 10 fail-closed x 2 modes): 32
+PASS  selftest cases.md holds exactly the table generated from cases.tsv
+PASS  selftest W1 on G1's own stream default-control-nohook -> PASS (G1's verdict: PASS)
+PASS  selftest W2 on G1's own stream default-control-hookallow -> PASS (G1's verdict: PASS)
+PASS  selftest W3 on G1's own stream default-deny -> PASS (G1's verdict: PASS)
+PASS  selftest W4 on G1's own stream bypass-control-nohook -> PASS (G1's verdict: PASS)
+PASS  selftest W5 on G1's own stream bypass-control-hookallow -> PASS (G1's verdict: PASS)
+PASS  selftest W6 on G1's own stream bypass-deny -> PASS (G1's verdict: PASS)
+PASS  selftest F1b on G2's own stream control-nohook -> PASS (G2's verdict: PASS)
+PASS  selftest F2b on G2's own stream control-daemon-alive-allow -> PASS (G2's verdict: PASS)
+PASS  selftest F3b on G2's own stream killed-before -> PASS (G2's verdict: PASS)
+PASS  selftest F4b on G2's own stream killed-midcall -> PASS (G2's verdict: PASS)
+PASS  selftest F5b on G2's own stream crash-onfailure-block -> PASS (G2's verdict: PASS)
+PASS  selftest F6b on G2's own stream control-crash-onfailure-unset -> PASS (G2's verdict: PASS)
+PASS  selftest F7b on G2's own stream missing-binary -> PASS (G2's verdict: PASS)
+PASS  selftest F8b on G2's own stream control-missing-binary-onfailure-unset -> PASS (G2's verdict: PASS)
+PASS  selftest F9b on G2's own stream timeout-onfailure-block -> PASS (G2's verdict: PASS)
+PASS  selftest F10b on G2's own stream control-timeout-onfailure-unset -> PASS (G2's verdict: PASS)
+PASS  selftest RED expectation flipped (W3 expects created) -> FAIL: FAIL
+PASS  selftest whole text read: F5b text check ok -> PASS
+PASS  selftest RED text cut to 200 characters (the old fault) -> FAIL
+PASS  selftest RED mode: G1's default-mode stream judged as a bypass case -> FAIL
+PASS  selftest RED witness: W6 with no daemon log -> FAIL
+PASS  selftest RED file: W6 with the file present -> FAIL, blocking=True
+PASS  selftest VOID: a stream with no tool call -> VOID (never PASS)
+PASS  selftest probe on G1's macOS stream (Bash listed, no PowerShell) -> real=False: Bash is still listed: Git Bash was found; set-up B is NOT real
+PASS  selftest probe on a made-up init listing ['PowerShell', 'Write', 'Read'] -> real=True
+PASS  selftest probe on a made-up init listing ['Bash', 'PowerShell', 'Write'] -> real=False
+PASS  selftest probe on a made-up init listing ['Write'] -> real=False
+PASS  selftest RED settings sums: a changed settings.json is seen (1 file)
+PASS  selftest set-up B hides Git's folders (git.exe; under Git) and keeps the others, a non-Git bash included
+PASS  selftest set-up A hides nothing
+PASS  selftest set-up B passes --tools = set-up A's 27 tools minus Bash and Monitor (25), with PowerShell and Write; set-up A passes nothing
+PASS  selftest RED probe: no Bash but Monitor still listed -> not real
+PASS  selftest probe on the no-Git tool list itself -> real
+PASS  selftest a launcher of the PC's shape resolves to bin\claude.exe (not the later claude.exe): npm/node_modules/@anthropic-ai/claude-code/bin/claude.exe
+PASS  selftest RED a launcher with an interpreter and a script argument is refused: REFUSED: the launcher claude.cmd is not of npm's one-program shape (program lines 0; other lines ['"%dp0%\\node.exe" "%dp0%\\node_modules\\@anthropic-ai\\claude-code\\bin\\cli.js" %*'])
+PASS  selftest RED a launcher with one more line is refused: REFUSED: the launcher claude.cmd is not of npm's one-program shape (program lines 1; other lines ['IF EXIST "%dp0%\\node.exe" ( "%dp0%\\node.exe" )'])
+PASS  selftest RED a version mismatch (launcher vs program) is refused: REFUSED: version check failed: launcher '2.1.330 (Claude Code)' (exit 0), program '2.1.76 (Claude Code)' (exit 0)
+PASS  selftest RED a missing program is refused: REFUSED: the program the launcher names does not exist: <tmp>/missing/node_modules/@anthropic-ai/claude-code/bin/claude.exe
+PASS  selftest an explicit .exe (-Claude) is taken with the same version check
+PASS  selftest RED the extensionless shim given explicitly is refused: REFUSED: the claude found first (claude) is neither an .exe nor an npm .cmd shim
+PASS  selftest RED a program of another version than the work order names is refused: REFUSED: the program prints '2.1.76 (Claude Code)', the work order expects '2.1.330 (Claude Code)'
+PASS  selftest RED a failing --version is refused
+SELFTEST PASS: 0 failed (temporary files in the system's temporary folder, made by this run)

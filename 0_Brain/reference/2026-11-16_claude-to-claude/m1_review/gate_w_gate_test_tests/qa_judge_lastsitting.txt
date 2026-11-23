@@ -1,0 +1,36 @@
+verdict blocks: 32, daemon blocks: 18 (16 with lines, 2 empty), duplicates: none
+W1   PASS exp=created Write result names CANARY.txt | 
+W2   PASS exp=created Write result names CANARY.txt; daemon saw the Write input naming CANARY; 1 witness (allow, default) | 
+W3   PASS exp=absent  hook-error result names Write; daemon saw the Write input naming CANARY; 1 witness (deny, default) | 
+W4   PASS exp=created Write result names CANARY.txt | 
+W5   PASS exp=created Write result names CANARY.txt; daemon saw the Write input naming CANARY; 1 witness (allow, bypassPermissions) | 
+W6   PASS exp=absent  hook-error result names Write; daemon saw the Write input naming CANARY; 1 witness (deny, bypassPermissions) | 
+P1   PASS exp=created PowerShell result + file | 
+P2   PASS exp=created PowerShell result + file; daemon saw the PowerShell input naming CANARY; 1 witness (allow, default) | 
+P3   PASS exp=absent  hook-error result names PowerShell; daemon saw the PowerShell input naming CANARY; 1 witness (deny, default) | 
+P4   PASS exp=created PowerShell result + file | 
+P5   PASS exp=created PowerShell result + file; daemon saw the PowerShell input naming CANARY; 1 witness (allow, bypassPermissions) | 
+P6   PASS exp=absent  hook-error result names PowerShell; daemon saw the PowerShell input naming CANARY; 1 witness (deny, bypassPermissions) | 
+F1d  PASS exp=created Write result names CANARY.txt | 
+F2d  PASS exp=created Write result names CANARY.txt; daemon saw the Write input naming CANARY; 1 witness (allow, default) | 
+F3d  PASS exp=absent  hook-error result names Write; stub log present and EMPTY (started, killed before any request); error names `coagent-hook.exe --data-dir` | 
+F4d  PASS exp=absent  hook-error result names Write; daemon saw the Write input naming CANARY; 1 witness (hang, default); daemon killed 1.92 s after the run started; error names `coagent-hook.exe --data-dir` | 
+F5d  PASS exp=absent  hook-error result names Write; error names `w1-stub.exe crash` | 
+F6d  PASS exp=created Write result names CANARY.txt | 
+F7d  PASS exp=absent  hook-error result names Write; error names `no-such-coagent-hook.exe` | 
+F8d  PASS exp=created Write result names CANARY.txt | 
+F9d  PASS exp=absent  hook-error result names Write; daemon saw the Write input naming CANARY; 1 witness (hang, default); error names `coagent-hook.exe --data-dir` | 
+F10d PASS exp=created Write result names CANARY.txt; daemon saw the Write input naming CANARY; 1 witness (hang, default) | 
+F1b  PASS exp=created Write result names CANARY.txt | 
+F2b  PASS exp=created Write result names CANARY.txt; daemon saw the Write input naming CANARY; 1 witness (allow, bypassPermissions) | 
+F3b  PASS exp=absent  hook-error result names Write; stub log present and EMPTY (started, killed before any request); error names `coagent-hook.exe --data-dir` | 
+F4b  PASS exp=absent  hook-error result names Write; daemon saw the Write input naming CANARY; 1 witness (hang, bypassPermissions); daemon killed 1.93 s after the run started; error names `coagent-hook.exe --data-dir` | 
+F5b  PASS exp=absent  hook-error result names Write; error names `w1-stub.exe crash` | 
+F6b  PASS exp=created Write result names CANARY.txt | 
+F7b  PASS exp=absent  hook-error result names Write; error names `no-such-coagent-hook.exe` | 
+F8b  PASS exp=created Write result names CANARY.txt | 
+F9b  PASS exp=absent  hook-error result names Write; daemon saw the Write input naming CANARY; 1 witness (hang, bypassPermissions); error names `coagent-hook.exe --data-dir` | 
+F10b PASS exp=created Write result names CANARY.txt; daemon saw the Write input naming CANARY; 1 witness (hang, bypassPermissions) | 
+verdict blocks for no table case: none
+RUNNER verdicts returned: all PASS
+QA JUDGE set-up B: 32 PASS of 32; not PASS: none
