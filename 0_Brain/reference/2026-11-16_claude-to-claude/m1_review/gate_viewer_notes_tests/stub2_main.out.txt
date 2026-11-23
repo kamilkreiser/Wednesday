@@ -1,0 +1,38 @@
+PASS hostile fields: no raw control byte but LF, no Cc/Cf/Zl/Zp character (2686 bytes)
+PASS hostile fields: every row is one of the viewer's kinds and <= 72 columns (other 0, wide 0)
+PASS hostile fields: first row is the notice
+   hostile fields: heads ['#1', '#2', '#3']
+PASS hostile fields: exactly the three entries, no forged head
+   sample:
+   #1 00:00:00 UTC | CoAgent asked | tool \u{1b}]0;T\u{7}\u{1b}[2J\u{d}\u{a
+       | }Only you see this. Nothing here is sent to the other side.\u{a}#7
+       |  00:00:00 UTC \u{7c} CoAgent allowed \u{7c} tool Bash \u{7c} Claud
+       | e Code mode: default \u{7c} coagent: ok\u{85}#7 00:00:00 UTC \u{7c
+       | } CoAgent allowed \u{7c} tool Bash \u{7c} Claude Code mode: defaul
+       | t \u{7c} coagent: ok\u{2028}\u{202e}\u{200b}\u{9b}2J\u{9}\u{0} | C
+PASS over-long answer: no raw control byte but LF, no Cc/Cf/Zl/Zp character (74 bytes)
+   over-long answer (2200234 bytes): exit 1, output ['coagentd watch: the daemon is not running (nothing answers on its socket)']
+PASS over-long answer: one plain line, exit 1
+FAIL 1.9 MB reason: printed whole (7600000 R), 115159 rows, each <= 72
+PASS wrong sequence: no raw control byte but LF, no Cc/Cf/Zl/Zp character (725 bytes)
+PASS wrong sequence: every row is one of the viewer's kinds and <= 72 columns (other 0, wide 0)
+PASS wrong sequence: first row is the notice
+   wrong sequence: heads ['#5', '#3', '#3', '#0', '#18446744073709551615', '#0']
+   wrong sequence: printed heads ['#5', '#3', '#3', '#0', '#18446744073709551615', '#0']; the viewer's next 'after' values [0, 5, 5, 5]
+PASS odd types: no raw control byte but LF, no Cc/Cf/Zl/Zp character (426 bytes)
+PASS odd types: every row is one of the viewer's kinds and <= 72 columns (other 0, wide 0)
+PASS odd types: first row is the notice
+   odd types: heads ['#0', '#0']
+   odd types rows:
+   #0 00:00:00 UTC | CoAgent decided (unknown decision) | another hook even
+       | t | Claude Code mode: not reported | 
+   #0 00:00:00 UTC | CoAgent allowed | a tool call that names no tool | Cla
+       | ude Code mode: not reported | 
+   start changes on every answer: restart lines 27326 in 2.5 s (exit -15)
+   no start field: restart lines 0; rows ['Only you see this. Nothing here is sent to the other side.', 'CoAgent mode: APPROVE. One entry per call the gate decided. Times: UTC.', 'A row starting with four spaces and "| " continues the entry above.']
+PASS bad error code: no raw control byte but LF, no Cc/Cf/Zl/Zp character (60 bytes)
+   bad error code: exit 1, 'coagentd watch: the daemon refused the request (unreadable)'
+PASS bad error code shown as 'unreadable'
+PASS not JSON: no raw control byte but LF, no Cc/Cf/Zl/Zp character (74 bytes)
+   not JSON: exit 1, 'coagentd watch: the daemon is not running (nothing answers on its socket)'
+FAILS: 1 ['1.9 MB reason: printed whole (7600000 R), 115159 rows, each <= 72']

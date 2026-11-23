@@ -1,0 +1,42 @@
+  after absent (args {}): {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  args absent: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  args null: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  after 0: {"v":1,"id":5,"ok":true,"result":{"dropped":0,"last":0,"lines":[],"more":false,"next":0,"start":"0b9f3869004f64dc81cb86c712c6a971"}}
+  after huge u64: {"v":1,"id":5,"ok":true,"result":{"dropped":0,"last":0,"lines":[],"more":false,"next":0,"start":"0b9f3869004f64dc81cb86c712c6a971"}}
+  after > u64: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  after 1e30: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  after -1: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  after string: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  after float 1.5: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  after 1.0: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  after null: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  after bool: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  extra field: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+  args array: {"v":1,"id":5,"ok":true,"result":{"dropped":0,"last":0,"lines":[],"more":false,"next":0,"start":"0b9f3869004f64dc81cb86c712c6a971"}}
+  args string: {"v":1,"id":5,"ok":false,"error":{"code":"bad_args","message":"arguments missing or invalid"}}
+PASS after=u64::MAX on an empty record: ok, no lines, dropped 0
+PASS daemon alive after the argument shapes
+  large event decision: ask reason bytes 61355
+PASS walk from 0: contiguous (1000 lines in 16 pages)
+PASS 1101 decided -> 1000 kept, first seq 102, dropped 101
+PASS largest answer 20163 < MAX_RESPONSE_LINE 2074720
+PASS after=1050: 1051..1101, dropped 0
+PASS after=last: empty, next=last, more false
+PASS after>last: empty, last told
+PASS after 120 large: contiguous, 68 kept, first 1154, 4 pages
+PASS dropped 1153 = first kept - 1
+PASS largest answer 1045230 bytes < 2074720
+  burst: 1000 activity requests + 200 gate decisions in 18.1s; errors 0; max answer 1045215
+PASS burst: no error, every concurrent gate decision answered ask
+PASS after the burst: last 1421, contiguous
+  200 KB activity request: connection BrokenPipeError(32, 'Broken pipe')
+PASS daemon alive after the long request
+PASS status identical before/after 50 activity calls
+PASS no file in the data dir created or modified by 20 activity calls (3 files)
+PASS after a restart: empty record, last 0 < the reader's after
+PASS no --gate: {"v": 1, "id": 5, "ok": false, "error": {"code": "gate_off", "message": "the daemon was not started with --gate"}}
+  idle 3 s, polled by activity every 0.2 s: exited after 3.317781925201416
+PASS idle with activity polling: exits
+  idle 3 s, polled by status every 0.2 s: exited after None
+PASS idle with status polling: stays alive
+FAILS: 0 []

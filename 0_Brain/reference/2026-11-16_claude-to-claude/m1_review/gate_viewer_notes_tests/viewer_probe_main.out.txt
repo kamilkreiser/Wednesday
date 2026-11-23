@@ -1,0 +1,55 @@
+  large reason event: deny reason bytes 146
+PASS no raw control byte but LF in 30085 bytes of viewer output
+PASS no format/control/separator character (Cf, Cc, Zl, Zp) in the output: []
+PASS line 1 is exactly the notice
+PASS line 2 is the header
+PASS one printed line per decision (108 of 108)
+FAIL every line is the notice, the header, or starts with '#<seq>'
+PASS notice at line 1 and before every 20 more entries: [0, 101, 212, 307, 388, 449]…
+PASS each repeated notice is followed by an entry
+PASS no line starts with the notice text unless it IS the notice
+PASS printed seq numbers 1..n in order
+  longest printed line 72 bytes
+PASS viewer cwd, HOME, TMPDIR empty
+  gate off: 3 coagentd watch: the gate is off: this daemon was not started with --gate, so nothing on this machine is checked by CoAgent and there is nothing to show
+PASS gate off: one line, exit 3
+  no daemon: exit 1 after 0.00s: 'coagentd watch: the daemon is not running (nothing answers on its socket)' stderr ''
+PASS no daemon: says so, exit 1
+  daemon stopped with SIGSTOP: viewer exited after 5.064346075057983, exit 1: 'coagentd watch: the daemon does not answer (5 s); nothing more will be shown'
+PASS a hung daemon is said within GONE_BOUND (6.5 s)
+  daemon SIGKILLed: viewer exit 1 after 0.02s, last line 'coagentd watch: the daemon stopped; nothing more will be shown'
+PASS killed daemon: viewer exits 1
+  restart under the viewer, output:
+    Only you see this. Nothing here is sent to the other side.
+    CoAgent mode: APPROVE. One entry per call the gate decided. Times: UTC.
+    A row starting with four spaces and "| " continues the entry above.
+    #1 12:02:32 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/old0
+    #2 12:02:32 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/old1
+    #3 12:02:32 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/old2
+    coagentd watch: the daemon restarted; the lines before it are gone
+    #1 12:02:33 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/new0
+    #2 12:02:33 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/new1
+    #3 12:02:33 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/new2
+    #4 12:02:33 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/new3
+    #5 12:02:33 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/new4
+    #6 12:02:33 UTC | CoAgent asked | tool Read | Claude Code mode: default 
+        | | coagent asks: Read (Read, T0); targets: Read: /private/tmp/claud
+        | e-501/qvn/x/tm_vp/w/new5
+  new-daemon lines shown 6 of 6; restart or stop said: True
+FAILS: 1 ["every line is the notice, the header, or starts with '#<seq>'"]
