@@ -1,0 +1,167 @@
+This brief is from Friday (the owner's laptop coordinator seat). Client: General. Project: CoAgent. You are a NEW seat, LOCAL-ACTIVITY, with no memory of earlier seats; you run on Opus. You have no mailbox: questions go in your STATUS file `coagent/5_Project_History/STATUS_LOCAL_ACTIVITY.md` (in `/Volumes/Laptop-DEV/!CODING/Claude to Claude/`). Its last line always begins with exactly one of `IN PROGRESS`, `STOP Q<n>`, `READY FOR QA LOCAL-ACTIVITY`. Refresh it at least every 20 minutes. New branch `local-activity`, new worktree `coagent/worktrees/local-activity`, cut from `origin/main` (`20785c3e9389ac2275cdfda2ec7fb55eb1176425` when this was sent: confirm with `git ls-remote origin main`; a descendant is fine and EXPECTED soon, because the lane `w-gate-test` is about to merge: it adds only `spikes/W1-windows-exec-hook/`, `spikes/W4-windows-paths/`, `preview/plugin-template-windows/` and appended lines in `BACKLOG.md` and `docs/M0-OUTCOMES.md`, no product file; say which commit you cut from). The LOCAL branch `main` of `coagent/2_Project_Files` is at an older commit (`18005d6` when this was drafted): never cut from it.
+
+> Drafted by an in-session agent, read whole by Friday, its eleven open points ruled by her in section 3a. Where this body says "(FR-n)" the ruling is in 3a.
+
+# LOCAL-ACTIVITY: the first slice of the local activity view (note 21's lane L1)
+
+**Headline promise this lane is tested against: the gate decides and answers exactly as on main. No change to any hook answer, to the policy crate, to the hook binary, to the plugin template or to the MCP server. The ONE new behaviour: the daemon keeps, in memory only, one display-safe line per gate decision, and a new local viewer, `coagentd watch`, shows those lines to the owner in a second terminal window, under a small notice. Nothing of it is sent to the peer, written to disk, written to the daemon's log, or offered to the agent as a tool.**
+
+## 1. Why, in five lines
+- The owner ruled how the product's two modes and two views work (section 2). In both modes the owner watches what Claude does on his machine; only he sees it.
+- The measurement lane ALLOW-MEASURE (merged at `20785c3`, `spikes/U-B1-hook-allow-silent/RESULT.md`) found: Claude Code's dialog for a file write in auto mode did NOT show the gate's reason (row M8); a terminal command's text leaves Claude Code's pane in about a second (row M2); and Claude Code's mode differs by session and must be read from the hook (row M1-fresh-ctl, conclusion N1).
+- So the owner needs CoAgent's OWN window showing, for every call the gate decides, what the gate decided and why. Today the daemon logs only `gate: <decision>` to stderr, on purpose without the command (`crates/coagent-daemon/src/engine.rs:1914-1915`).
+- This lane builds that window for the gate as it is today (APPROVE only; ALLOW is not built). It is the first thing of the modes design the owner can see.
+- Design sources: note 21 section 8 row L1 and the fold, note 22.
+
+## 2. RULED BY THE OWNER (verbatim, from `coagent/1_Project_Definition/CLARIFICATIONS.md`)
+- C-1 (2026-11-23 10:24): "This is an acceptable risk during development.  Naturally, the final product will have the two modes we discussed - allow and monitor, approve and monitor"
+- C-2 (12:10): "one user clicks allow, Claude on that machine keeps displaying what its doing but no longer asks for permission.  the other user can do the same or approve each action depending on their choice.  The choice lasts the entire session but can be changed at any time"
+- C-3 (12:13:06): "The other side should see instructions sent to it and communication between Claudes.  But what happens on your machine is for your eyes."
+- C-3 (12:13:40): "and there should be a message to tell the user that.  Not big but there"
+- C-4 (12:33:07): "Decision general-c2c-mode-visible-to-peer-1123: a — Yes, one word in the shared conversation view" (belongs to the CONVERSATION view, not this lane).
+- C-5 (12:33:20): "Decision general-c2c-allow-terminal-commands-1123: a — Yes, all terminal commands run unasked on allow"
+- C-6 (12:34:16): "maybe a separate question to confirm whether terminal commands should also be allowed or require approval"; (12:34:46): "once the first terminal command after allow"; (12:35:07): "ignore my last message.  go with your suggestion". **Friday's reading, unconfirmed by the owner:** the product asks, at the switch to ALLOW, whether terminal commands are also allowed; until answered it keeps asking. (Not built in this lane: there is no switch yet.)
+
+## 3. RULED BY FRIDAY (only what note 21's head records, `0_Brain/reference/2026-11-16_claude-to-claude/21_modes-and-views-design_DRAFT.md:11`)
+- P1 YES: every session starts in APPROVE. (Here APPROVE is the only mode that exists.)
+- P3 YES: a LOCAL ACTIVITY line has time, tool, kind, target, decision, reason, result when captured. This slice carries part of it; see section 4 and FR-1.
+- P8 YES: the mode is never read from disk.
+- P9: the notice's WORDING is the owner's; variant 2 is Friday's recommendation, "shown to him with the first on-screen build, not shipped as final". Variant 2's LOCAL ACTIVITY line (note 21:56): "Only you see this. Nothing here is sent to the other side."
+- P10 YES: LOCAL ACTIVITY never enters the shared audit chain.
+
+## 3a. RULED BY FRIDAY for this lane (the drafter's FR-1 to FR-11; these are hers, not the owner's)
+- **FR-1 = (a).** Kind and target come only through the gate's reason. `gate.rs` is not touched. Whether an excluded path may be named in the owner's own view is a later ruling, not yours.
+- **FR-2 = (a).** An IPC command over the daemon's own socket, memory only. The same-user limit is stated in `docs/DAEMON.md`, not in the notice.
+- **FR-3 = (a).** The notice is the first line and is repeated as a plain line every 20 activity lines.
+- **FR-4 = (a).** The notice text is exactly: "Only you see this. Nothing here is sent to the other side." One constant, with a comment that the wording is pending the owner. Nothing is added to it.
+- **FR-5 = yes.** A new variable `COAGENT_RED_LA` in the daemon's `build.rs` and rows appended to `scripts/red-controls-daemon.sh`.
+- **FR-6 = (a).** The `activity` command does NOT reset the idle timer. Because of that, ADD property 12 (below): when the daemon is gone or the socket cannot be reached, the viewer says so in one plain line and exits with a non-zero code; it never sits silent on a dead daemon.
+- **FR-7 = (a).** No subagent mark in this slice.
+- **FR-8 = (a).** Model runs: NONE. No `claude` call of any kind.
+- **FR-9 = no.** The spike's own files are not edited; section 9 writes record entries only.
+- **FR-10:** done by Friday (her ruling stands: the coordinator's model-list path in the measurement spike stays, for the sweep before any publication). Nothing for you.
+- **FR-11:** the viewer is `coagentd watch` (daemon crate). `coagent-cli` is not touched.
+
+**Property 12 (added by Friday, belongs to section 5).** A dead or unreachable daemon is said, not hidden: with no daemon on the socket, and with a daemon that exits while the viewer runs, `coagentd watch` prints one plain line naming that ("the daemon is not running" / "the daemon stopped") and exits non-zero within a bounded time (state the bound). Test `la_daemon_gone` (both cases, real binaries). Red `watch_silent_on_dead_daemon`: the viewer keeps polling and prints nothing; the test fails on its time bound. Promise: none. Protected: none.
+
+## 4. What you build: the first slice, and what it leaves out
+**Built:**
+1. `crates/coagent-daemon/src/activity.rs` (new): a bounded in-memory log of activity lines, owned by the engine. Each line: a sequence number (no gaps), the daemon's wall-clock time, the hook event name (fixed strings only: `PreToolUse`, `ConfigChange`, `other`), the tool name and Claude Code's `permission_mode` as the event gave them (each through `coagent_policy::text::visible`, `crates/coagent-policy/src/text.rs:40`), and the gate's `decision` and `reason` exactly as `Gate::decide` returned them (`crates/coagent-daemon/src/gate.rs:173-180`; the reason is display-safe by the policy's contract, `gate.rs:176`, `crates/coagent-policy/src/engine.rs:257-263`).
+2. One call in `cmd_gate` (`engine.rs:1904-1920`), after `g.decide(…)` (`:1913`) and next to the `log!` at `:1915`, that adds the line. The verdict and the response are not touched.
+3. A read-only IPC command `activity {after: <seq>}` (`crates/coagent-daemon/src/ipc.rs`, `Command` at `:92-141`, `parse_request` arms at `:235-281`) answering at most 64 lines after `after`, the next sequence number, and how many older lines were dropped. Without `--gate` it answers the error `gate_off`, as `gate` does (`engine.rs:1910-1912`). It is added to the read-only set at `engine.rs:1152` (`changes_state`), and it does not reset the idle timer at `engine.rs:1150` (FR-6).
+4. `coagentd watch --data-dir <dir>` (new `crates/coagent-daemon/src/watch.rs`, dispatched from `crates/coagent-daemon/src/main.rs:72-76`, one line added to `USAGE` at `:23-56`): polls `activity` over the socket (one connection per request, as `coagent-mcp` does, `docs/DAEMON.md` §3 "One request in flight per connection"), prints the notice, a header with CoAgent's mode ("APPROVE"; ALLOW does not exist yet), then one plain line per entry: time, "CoAgent allowed / asked / refused / blocked", tool, "Claude Code mode: <as reported | not reported>", reason in full. It accepts no input and draws with no cursor control.
+5. Docs: `docs/DAEMON.md` §3 (one table row) and §8 (a subsection "Local activity", with the limits of section 8 below, and rows in the tests table at `:888-911`).
+
+**Left out of this slice, and why:**
+- Kind and target for ALLOWED and REFUSED calls. For an ask, the gate's reason already carries them (`render_card`, `gate.rs:511-539`: tool, kind, tier, reasons, command, targets). For an allow or a deny the reason does not, and the policy's `Action` that holds them is internal to `Gate::pre_tool_use` (`gate.rs:326-379`), the file this lane must not change (FR-1). REASONED: in APPROVE today almost every call asks (the daemon learns no answers, `docs/DAEMON.md:809-811`, so session approvals and resource memory never fire; no grant is installed), so most lines carry kind and target through the reason.
+- The result column (P3 "result when captured"): it needs the hook registered for `PostToolUse` AND `PostToolUseFailure` (RESULT.md row M6) in `preview/plugin-template/hooks/hooks.json.tmpl`, and the gate taught to answer those events, which today it denies (`gate.rs:322`). Both are forbidden here.
+- The CONVERSATION view, the peer's one-word mode (C-4), the mode switch and ALLOW (note 21 lanes L2 to L6).
+- A kept record across restarts (note 21 R16, P10; lane L7). This slice keeps lines in memory only: a daemon restart empties the view.
+- Windows: `coagentd --gate` is refused there (`crates/coagent-daemon/src/main.rs:96-102`), so there is nothing to show; the viewer says so (property 10).
+- A subagent mark from the hook's `agent_id`/`agent_type` (RESULT.md row M5) (FR-7).
+
+## 5. Properties (each: the test, its red control, what it does to the headline promise, protected files)
+Red controls use a NEW variable `COAGENT_RED_LA`, listed in `crates/coagent-daemon/build.rs` as the lanes RELAY-RECONNECT and W-DAEMON did (`build.rs:122-151`), rows appended to `scripts/red-controls-daemon.sh` (FR-5). Each red variant is a `cfg(coagent_red = "…")` branch in the real code; each must turn exactly its own test red. Tests drive the REAL `coagent-hook` and `coagentd` binaries with hand-made events in the recorded payload shape, as `crates/coagent-daemon/tests/p1p_support/mod.rs:503-528` builds them; no model, no Claude Code.
+
+1. **One line per decision, in order.** Every event the daemon decides (PreToolUse allow, ask, deny; ConfigChange block; another event; an unreadable PreToolUse) gives exactly one line, sequence numbers without gaps, and each line's decision equals what the hook printed. Test `la_every_decision`. Red `activity_skips_config_change`: ConfigChange not recorded, the count fails.
+   Promise: adds a record; no answer changes (property 11 proves it). Protected: none touched.
+2. **The gate's own reason, in full, for every asked call, file edits included (M8).** For each line, `reason` equals byte for byte the `permissionDecisionReason` (or ConfigChange `reason`) the hook printed for that call. A Write inside the workspace gives a line whose reason starts `coagent asks: Write (Edit, T1)` and names the target path (the prefix `p1p_ask_in_workspace.rs:16-18` pins); a Bash command with a marker in it gives the whole command text. Test `la_reason_is_the_gates`. Red `activity_reason_cut`: keeps only the text before the first "; ", so targets and command are lost; the test fails on the Write and the Bash.
+   Promise: display only. Protected: `p1p_ask_in_workspace.rs` pins the card's prefix; `render_card` is NOT changed, so it stays green.
+3. **The view never depends on Claude Code's dialog text.** A line is built only from the event the hook forwarded and the daemon's verdict. Test `la_source_audit` (a source check in the style of `tests/release_audit.rs`, over `src/activity.rs` and `src/watch.rs`): no read of `transcript_path`, no file read, no terminal device; plus property 2's test runs with no Claude Code process at all. Red: a mutated source copy that reads `transcript_path` fails the audit (mutation inside the test, as `release_audit.rs:29-35` does; no build variable needed).
+   Promise: none. Protected: none.
+4. **The mode shown is the one the hook reported.** The line carries `permission_mode` exactly as the event gave it, display-safe; absent → `null` in IPC and "not reported" in the viewer; never filled in. Test `la_mode_as_reported`: events with `auto`, `default`, `dontAsk`, `plan`, a value with control characters, and none. Its own helper builds the no-mode event (`p1p_support::pre_tool_use` always sets one, `p1p_support/mod.rs:509`). Red `activity_mode_assumed`: an absent mode shown as `default`.
+   Promise: none. Protected: none.
+5. **Nothing of it reaches the other side** (C-3: "what happens on your machine is for your eyes"). Two daemons paired over loopback (`p1p_support::Run::pair`, `p1p_support/mod.rs:260-277`), A gated. A decides N events whose tool inputs carry unique markers. Then: B's `inbox_read` pages, B's `status` and B's stderr contain 0 markers; A's message counters in `status` (outbox, sent; name them at your base from `docs/DAEMON.md` §3, the `status` row) are equal before and after the N decisions. Test `la_nothing_to_peer`. Red `activity_to_peer`: each line also queued as a `chat` to the peer; markers appear at B; the test fails.
+   Promise: proves "nothing is sent to the peer". Protected: none.
+6. **Nothing of it on disk, in the log, or in the agent's tools.** After N marked decisions: 0 markers in every file of A's data directory read as bytes; A's stderr carries only `gate: <decision>` for these calls (`p1p_support::Run::finish(&markers)` checks stderr, `p1p_support/mod.rs:289-325`); the MCP tools list stays exactly `["send", "inbox_read", "wait"]` (already pinned, `tests/acceptance.rs:55-59`, `tests/gate/gate_attacks.rs:379`); no file under `crates/coagent-mcp/` names the `activity` command (source check). Test `la_nothing_kept`. Red `activity_to_stderr` (the line logged) and `activity_on_disk` (the line appended to a file in the data directory): each fails it.
+   Promise: proves "not written to disk, not logged, not a tool". Protected: `acceptance.rs` and `gate_attacks.rs` pin the three MCP tools: this lane must leave them as they are.
+7. **Display-safe output.** The viewer's output holds no raw control byte (other than the line feed), no bidirectional or zero-width character. Test `la_viewer_bytes`: a tool name and a mode carrying `ESC ]2;TITLE BEL` and U+202E show escaped as `\u{1b}` and `\u{202e}`. Red `activity_unescaped`: the tool name not passed through `text::visible`; a raw ESC reaches the output; the test fails.
+   Promise: none. Protected: none.
+8. **The notice, small but there** (C-3: "and there should be a message to tell the user that.  Not big but there"). The viewer's first line is the notice; it is repeated as a plain line at a fixed cadence (FR-3); the text is one constant marked "wording pending the owner (P9)" (FR-4). Test `la_notice`. Red `watch_no_notice`.
+   Promise: none. Protected: none.
+9. **Honest words and bounds.** A line says what CoAgent decided ("allowed / asked / refused / blocked"), never "ran" (the gate does not see the outcome; RESULT.md row M9 and its limit). At most 1000 lines and 4 MiB of line text are kept, oldest out, and the viewer says "<k> older lines dropped"; one `activity` answer holds at most 64 lines and stays under `limits::MAX_RESPONSE_LINE` (`crates/coagent-daemon/src/limits.rs:75`). Test `la_bounded` (1005 events, some with a large command). Red `activity_unbounded` and `watch_says_ran`.
+   Promise: none. Protected: none.
+10. **Gate off and Windows.** Without `--gate`, `activity` answers `gate_off` and the viewer prints one plain line saying the gate is off and nothing is checked; on Windows (no gate) the viewer prints the same. Test `la_gate_off` (Unix; the Windows text is a constant checked by a unit test). Red `activity_when_gate_off`: answers `ok` with an empty list; the test fails.
+   Promise: none. Protected: `tests/p1p_m1_unchanged.rs:29,40` pins `status.gate`: not touched.
+11. **The headline: the gate is unchanged.** `git diff origin/main...HEAD -- crates/coagent-policy crates/coagent-hook crates/coagent-mcp crates/coagent-daemon/src/gate.rs preview Cargo.lock` is EMPTY; `scripts/test-p1p.sh` passes unchanged; every existing `COAGENT_RED_P1P` row is still red (`RED_ONLY='^(hook_|gate_unknown|witness_|waiter_|taint_|configchange_)'`, `scripts/test-p1p.sh:9-11`); `tests/release_audit.rs` passes (it counts `release::release(` in `engine.rs` exactly once and anchors on `fn unread(&self) -> usize {`, `release_audit.rs:42-56`: do not add either string).
+   Promise: this IS the promise. Protected: `release_audit.rs`, `win_guards.rs` (reads `engine.rs` for comparisons with `MAX_SOCKET_PATH`, `win_guards.rs:39`: add none), `tests/ipc.rs:43-46` and the unit test in `ipc.rs` (use `"shell"` and `"rm -rf"` as unknown commands: do not name the new command either).
+
+## 6. Files
+**Owned, new:** `crates/coagent-daemon/src/activity.rs`; `crates/coagent-daemon/src/watch.rs`; `crates/coagent-daemon/tests/la_*.rs` (one file per property, or fewer, said in STATUS); `crates/coagent-daemon/tests/la_support/mod.rs` if you need helpers beyond `p1p_support` (use `p1p_support` through `mod p1p_support;` without editing it).
+**Owned, existing (each edit as small as it can be):**
+- `crates/coagent-daemon/src/engine.rs`: the engine's activity field; one call in `cmd_gate`; one dispatch arm next to `:1219`; the read-only set at `:1152`; the idle rule at `:1150` (FR-6). Nothing else.
+- `crates/coagent-daemon/src/ipc.rs`: the `Activity` variant, its argument struct, its parse arm, one case in the unit test.
+- `crates/coagent-daemon/src/lib.rs`: two `pub mod` lines (it has `#![deny(missing_docs)]`: document them).
+- `crates/coagent-daemon/src/main.rs`: `Some("watch")` and one `USAGE` line.
+- `crates/coagent-daemon/build.rs`: the `LA_RED` list and its block (FR-5).
+- `scripts/red-controls-daemon.sh`: appended `COAGENT_RED_LA` rows only (FR-5).
+- `docs/DAEMON.md`: §3 row, §8 subsection, test-table rows.
+- `BACKLOG.md`: appended entries (section 9 and anything you find). `docs/M0-OUTCOMES.md`: one appended dated section.
+**Must NOT be touched:** everything else, and above all:
+- the gate's decision logic and the always-refused list: `crates/coagent-daemon/src/gate.rs` (whole), every file under `crates/coagent-policy/` (the decision order in `src/engine.rs`, the refused classes `RefusedClass::ALL` in `src/bypass.rs:98`, `src/patterns.rs`, `src/known.rs`, `src/action.rs`, `src/rules.rs`, `src/shell/`, `src/path/`), and `docs/POLICY.md`;
+- `crates/coagent-hook/**` (including its `build.rs`, which carries the same `P1P_RED` list), `crates/coagent-mcp/**`, `crates/coagent-cli/**` (kept untouched, `docs/DAEMON.md:770-771`);
+- `preview/**`, `spikes/**` (the spike's files are NOT edited: section 9 writes record entries only), `scripts/` except the one script named, root `Cargo.toml`, `Cargo.lock`, `.gitattributes`;
+- the protected helpers `crates/coagent-daemon/tests/common/mod.rs` (BACKLOG.md:793-796) and `crates/coagent-daemon/tests/p1p_support/mod.rs` (its own header: `tests/common/` "is not touched"), and every existing test file.
+No new dependency: if one seems needed, `STOP Q<n>` with the reason. No `unsafe` (`#![forbid(unsafe_code)]` in `lib.rs`).
+
+**Grep of the base for check files that pin a list or a name this lane could change** (done by the drafter at `20785c3`; repeat it at your base and quote it in STATUS): `tests/acceptance.rs:55-59` (MCP tool names, exactly three), `tests/gate/gate_attacks.rs:379` (three tools), `tests/ipc.rs:43-46` and `src/ipc.rs:340-380` (unknown command names), `tests/release_audit.rs:42-56` (counts and anchors in `engine.rs`), `tests/win_guards.rs:39,722` (reads `engine.rs`), `tests/p1p_m1_unchanged.rs:29,40` (`status.gate`), `tests/p1p_ask_in_workspace.rs:16-18` (the card prefix), `crates/coagent-policy/tests/qa_strict_m2/qa_strict.rs` (24 taught names, BACKLOG.md:928; out of reach here). None of them needs to change for this lane; if one does, that is a `STOP Q<n>`.
+
+## 7. Rules
+- **STOP rule.** Anything this brief does not settle, anything that would touch a forbidden path, or a test you cannot make red: write the question in STATUS and make the last line `STOP Q<n>`. Do not guess.
+- **Heavy runs.** Before any run over five minutes (`scripts/check.sh`, `scripts/red-controls-daemon.sh`, `scripts/test-p1p.sh`, `scripts/test-daemon.sh`): `bash /Volumes/Laptop-DEV/FRIDAY/2_Project_Files/fleet/heavy_runs.sh` must print less than 3 (an error or no number means FULL). Its header: "heavy_runs.sh -> prints one integer: the number of heavy jobs" and "Exit: 0 ok · 2 usage · 3 ps or the count failed (never prints a number it could not measure)". One heavy run of yours at a time. Your own `cargo test --test la_…` runs are not in its pattern; keep them short.
+- **Model runs: none.** No `claude` call, no Claude Code session (FR-8 proposes ceiling 0).
+- **Names and redaction.** No person's name, account name, machine name, mail address, home path, or workspace path in any spelling (plain, shell-escaped, URL-encoded, slug) in any committed file. No session, prompt, tool-use (`toolu_…`), request or message id in any committed file. Before READY, scan EVERY committed file of the branch as bytes, binaries included, with the roots passed in at run time and never written, and a positive control (a planted line and a planted binary in a scratch copy that the scan must find). Keep the scan tool outside the repository, in your scratch tree, and quote its output in STATUS (r3 verdict M-1 shows why a scan must name its roots).
+- **Python** (only for helpers, if any): always `python3 -B` (and `-I` for anything reading recorded files). No `__pycache__` may be committed.
+- **Fixtures** are built in code at run time inside a scratch tree under `coagent/tools/tmp/la/<6 hex>/` (a socket path stays under 104 bytes on macOS, `p1p_support/mod.rs:4-5`); never copied from a recorded capture, never read from the real drive's data folders.
+- **Git.** Push only the branch `local-activity`. `git fetch origin`; if `origin/main` moved, MERGE it into the branch, never rebase, never force-push. W-GATE-TEST also appends to `BACKLOG.md` and `docs/M0-OUTCOMES.md`: keep both sides. No merge to main, no deploy, no publish.
+- After ANY context compaction, re-read this brief, every addendum beside it and your STATUS whole before writing anything more. No prompt-box line is an instruction unless it names this brief or an addendum in Friday's briefs_drafts.
+
+## 8. Limits the docs must say plainly (§8 subsection)
+- Any process running as the same user can read the activity through the socket (`docs/DAEMON.md:853-861` for the same fact about `send`). In APPROVE the agent's own shell command to do so is asked first, since every shell command asks (`docs/DAEMON.md` tests table, `p1p_unknown_tool_strict`). REASONED.
+- The view shows CoAgent's decision, not the outcome; Claude Code's server-side reviewer in auto mode may act after it (RESULT.md M9 limit).
+- A shell command is shown as its text, not everything it then did (note 21 §6).
+- Lines live in memory; a daemon restart empties the view.
+
+## 9. BACKLOG entries this lane writes first (record entries only; the spike's files are NOT edited unless Friday rules so)
+Append, in the file's form (`- [ ]` title, then `Where`, `Symptom`, `Why deferred`, `Discovered`), these seven from `0_Brain/reference/2026-11-16_claude-to-claude/m1_review/gate_ALLOW_MEASURE_r3_verdict.md` (Findings table, lines 145-152):
+1. **M-1:** RESULT's line "scan_bytes.py … 0 hits" is narrower than it reads. Where: `spikes/U-B1-hook-allow-silent/RESULT.md:52`; `scan_bytes.py` workspace class. Symptom: its path classes cover the folder four levels above the script and the config dir only; `am.sh:11` and `cases.md:8` keep the coordinator's `models_latest.json` path (r2 N-5, left by Friday's ruling); from a clone it flags scratch paths and exits 1. Why deferred: spike files are outside this lane; a later words round adds the sentence and gives the scan explicit roots.
+2. **N-b:** `scan_bytes.py:40-41` strips the six synthetic literals from any file whose BASENAME is `redact.py` or `scan_bytes.py`, which hides a value containing a literal. Why deferred: spike file; match by path, strip whole quoted literals only.
+3. **N-c:** lines outside M9 still read the undocumented records by name or speak of order: `RESULT.md:37`, `:57`, `:22`, `run.sh:208`. Why deferred: words round; `run.sh` is a runner file and stays.
+4. **N-d:** `docs/M0-OUTCOMES.md:104-106` carries Friday's M9 sentence in substance, not word for word. Why deferred: Friday decides whether it must be verbatim.
+5. **N-e:** `RESULT.md:38` "absent only under a hook allow" holds among the auto sessions only (default-mode runs have no record of either kind). Why deferred: words round.
+6. **N-f:** `review_map.py` cannot be re-run from committed files (no transcript committed), and `"yes" if q in ctx` would mark a record with no request as "context sent". Why deferred: spike file; docstring and a guard.
+7. **N-g:** 88 lines in 35 committed raw files carry Claude Code `toolu_…` tool-use ids, in no redaction class. Why deferred: the pre-publication sweep decides whether `toolu_` joins the classes.
+(The r3 Note N-a is ruled by Friday: see 3a, FR-10.)
+
+**And these five from the gate-test lane's second check** (`0_Brain/reference/2026-11-16_claude-to-claude/m1_review/gate_W_GATE_TEST_r2_verdict.md`, Findings table), to be written ONLY if your base contains that lane (the folder `spikes/W1-windows-exec-hook/` exists at your base); if it does not, say so in STATUS and Friday carries them to a later lane:
+8. **m1:** `spikes/W1-windows-exec-hook/RESULT.md:134-135` says the committed stage C init line is "4,054 again now"; at the lane's final commit it is 4,030 characters (the event uuid was replaced after that sentence was written; the PC's own figure 4,054 is right). Why deferred: the lane merged at its checked commit; a words round fixes the sentence.
+9. **n2:** `spikes/W1-windows-exec-hook/raw/README.md:1` "Empty until then." is stale: the folder holds 14 copies. Why deferred: words round.
+10. **n3:** the BACKLOG history-sweep line of that lane does not name the two init-event uuids kept in history (in the commits it already names for other classes). Why deferred: add when the line is next touched.
+11. **n4:** the 14 raw headers name their saved mails by a coordinator-folder-relative path. Why deferred: the pre-publication sweep weighs it.
+12. **n5:** counts of older session ids on main differ by definition (99 by the first check, 59 by the second's narrower one; 673 distinct UUIDs in files identical to main). Why deferred: the sweep goes by "any UUID", not by a count.
+
+## 10. Final (before READY FOR QA LOCAL-ACTIVITY)
+- Property 11's diff, empty, quoted; `git diff --name-only origin/main...HEAD` lists only the paths of section 6.
+- `cargo fmt --all --check`, `cargo clippy -p coagent-daemon --all-targets --locked -- -D warnings`, every `la_*` test, `scripts/test-p1p.sh`, `cargo test -p coagent-daemon --test release_audit --test ipc --test acceptance --test win_guards`: commands and whole result lines in STATUS. The new tests also run in `scripts/check.sh` step 3/4 (`cargo test --workspace --locked`, `check.sh:13`); Friday's clean-clone merge check runs it whole.
+- Each `COAGENT_RED_LA` row red on its own test, and the clean run green (the script's own final run); every existing `COAGENT_RED_P1P` row still red.
+- One captured viewer screen (from a test run, redacted: no ids, no paths) in STATUS, so Friday can show the owner the notice wording (P9).
+- The byte scan of section 7 with its positive control.
+- STATUS, in sections: what was built (each file, purpose, line count); every property with its test, its red control and the run; every statement tagged READ (path:line), RAN (where, date, build), REASONED or UNVERIFIED, every UNVERIFIED in one list; NOT DONE; STOPs.
+- `git ls-remote origin local-activity main` recorded. The last line, when all of it is done, exactly: `READY FOR QA LOCAL-ACTIVITY` with the head SHA in the line above it.
+
+---
+
+## The drafter's eleven open points
+Ruled in section 3a. The drafter's full text of each, with the alternatives, is kept in `2026-11-23_coagent_LOCAL-ACTIVITY_brief_DRAFT.md` beside this file (history, not instructions).
+
+**Checked by Friday at `20785c3` before sending** (her own read of the lines): `engine.rs:1149-1152` (`on_ipc`, `last_activity`, `changes_state`), `:1219` (the `Gate` dispatch arm), `:1903-1921` (`cmd_gate` and its log line); `main.rs:72-76` and `:96-102`; `build.rs:122-124` (the `RR_RED` list); `gate.rs:322`; `tests/acceptance.rs:55-59`; the script names under `scripts/`. Every other pointer in this brief is the drafter's: those it did not open are listed below. Where a pointer does not match what you find at your base, say so in STATUS and go by the code.
+
+## NOT READ / NOT ESTABLISHED by this drafter
+Opened at `20785c3` (git show, read-only), with the lines used: `crates/coagent-hook/src/main.rs` whole (`:208-235` mapping and output shape); `crates/coagent-daemon/src/gate.rs` whole (`:173-180` `Verdict`, `:322` other events denied, `:326-379` `pre_tool_use`, `:366` `decide`, `:489-507` `verdict`, `:511-539` `render_card`); `engine.rs:1140-1162`, `:1877-1935` and lines found by search (`:98`, `:171`, `:277`, `:1150`, `:1152`, `:1219`, `:1915`, `:2811`); `ipc.rs:92-141`, `:150-283`, `:330-380`; `main.rs:20-80`, `:94-103`; `lib.rs`, `log.rs` whole; `build.rs:1-151` (lists) and its env blocks by search; `limits.rs` constants by search; `wire.rs:1-40`; `crates/coagent-policy/src/action.rs:120-195`, `engine.rs:160-200`, `:255-300`, `:650-675`, `text.rs:1-60`, `bypass.rs:1-40` and `:98` by search, `lib.rs` exports by search; `preview/plugin-template/hooks/hooks.json.tmpl` whole; `docs/DAEMON.md` §3 (`:158-208`), §8 (`:756-918`), `:50-65`; `docs/POLICY.md:36-120`; `scripts/check.sh:1-20`, `scripts/test-p1p.sh:1-30`, `scripts/red-controls-daemon.sh:170-200`; `tests/p1p_support/mod.rs:1-40`, `:255-345`, `:500-530`; `tests/release_audit.rs:1-60`; `src/release_audit.rs:1-60`; `tests/acceptance.rs:45-65`; `tests/ipc.rs:30-60`; `tests/containment.rs:150-180`; `tests/gate/gate_attacks.rs:375-400`; `tests/p1p_ask_in_workspace.rs` whole; `ls-tree` of `crates/`, `crates/coagent-daemon`, `crates/coagent-hook`, `preview/plugin-template`, `scripts/`.
+NOT opened (pointers in this brief that rest on search hits or on others' text only):
+- `tests/common/mod.rs` (grep only; "protected" from BACKLOG.md:793-796); `tests/win_guards.rs` beyond `:11`, `:33-40`, `:263`, `:722`; `tests/p1p_m1_unchanged.rs` beyond `:29`, `:40`; `crates/coagent-hook/build.rs` (its shared list per the daemon's `build.rs:103-104`); `crates/coagent-mcp/` sources (only `Cargo.toml:14` and the `usage` lines of `main.rs` by search).
+- The exact names of `status`'s sent and outbox counters (property 5 tells the seat to name them at its base).
+- Whether the `Engine` struct can hold the activity log without touching anything `release_audit.rs` checks beyond the two strings named: REASONED from `release_audit.rs:42-56` only.
+- `engine.rs`'s `fn unread` and the rest of the IPC dispatch (`:1162-1230`) beyond the arms listed.
+- Which calls the gate allows in APPROVE today: REASONED from `docs/POLICY.md:36-113` and `docs/DAEMON.md:809-811`, not run.
+- The spike's raw captures, the hooks documentation, spikes U1, U2, U4, U9; design files 03, 05, 06, 11, 12 of the reference folder.
