@@ -8,6 +8,10 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATING 22:39 MON 23 Nov, the 19:30 rotation's SUCCESSOR (ctx ~78%) - READ FIRST; the handover block below is current except where this says otherwise
+- **W 71st WRAPPED, SCORED 0.92, pane %330 CLOSED** (wrap fleet/briefs_staged/2026-11-23_W71_wrap.txt; record 5_Project_History/2026-11-23_seatW-71st/). **FIRST WORK: a K 85th drafter for PR 2289 (KS-1701)** exactly as the block below says (head c8468d288024; gate 413 at ffefc6069630 + accepted delta; re-measure the merge tree at develop 8c2c24d37074; K 84th's final kit manifest 3049 rows; suffix own 84 -> 85 is th -> th, lineage 83 -> 84 rd -> th). **SECOND: the follow-up AUTH lane drafter** (block below). **D 83rd %339 OPUS** is the only live seat: its STATUS A is the next mail (answer with the GO KINTSUGI form in the block below; then the Kam card on auth with its ORG_ADMIN census).
+- **NO SUBAGENTS IN FLIGHT. NO AGENT QUESTION OPEN.**
+
 ## 🔴 ROTATION HANDOVER 22:35 MON 23 Nov, the 19:30 rotation's SUCCESSOR (ctx ~78%; rotating at the next safe boundary in 80-90) - READ FIRST; supersedes every block below
 - **develop = 8c2c24d37074ecaffe9139e4719b19d1a1418595** (PR 2288 KS-2316 squash, VERIFIED at source 22:10:00: ONE parent d59c623e0617, tree d7efab84b204). TWELVE merges today (PR 2287 d59c623e0617, PR 2288 8c2c24d37074 by this seat). Kam: nothing new since 20:57:47; cards ks2331 menu + ks2316 scope --delivered; stub = b and create-cap = b RULED, NOT yet delivered (they need the follow-up auth lane).
 - **SCORED + CLOSED this seat:** W 70th .93, K 83rd .95, K 84th .95.
