@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 50% 09:14 Tue 24 Nov, the 09:05 rotation's SUCCESSOR (statusline ctx:51%) - READ FIRST; supersedes every block below where they differ
+- **develop = e3e79b7317f14ebccc8bb14e2001bdbf85e517fb** (ls-remote 09:09:46 through the project's own key; gh's global identity now reads KamORG454, NOT Secuura's: use the project GH_CONFIG_DIR). Kam: 3 rulings 08:57, all ruled in the store; reconcile: nothing to rule.
+- **DONE this seat:** K 89th WRAP read WHOLE, SCORED 0.95 (scoreboard top), pane %381 CLOSED (--live-ok for its own watch.py, pid identified by command line).
+- **LIVE: S 119th %384 SONNET** board seat (brief fleet/briefs_staged/2026-11-24_seatS119_board.md): KS-2331 -> Done + 'no live check possible' + archive leaf-only; KS-2339 Kam's ruling verbatim as a comment. NEXT: its plan QUESTION with drafts by sha256 -> licence -> STATUS (comment ids) -> Wednesday runs decision_queue.sh --delivered on secuura-ks2331-close-or-browser-check-1124 and secuura-signatories-who-may-write-ks2339-1124 naming the comment ids -> WRAP, score, pane_close.
+- **IN FLIGHT: W 75th DRAFTER** (Agent, Sonnet): 0_Brain/reference/2026-11-24_drafter-seatW75-ks2339/commission.md -> fleet/briefs_staged/2026-11-24_seatW75_ks2339_design.md (KS-2339: gateway routes + role/membership checks in ONE PR; ApprovalQueue approve/pending a STOP question only; Opus build, tier-1 gate). Dies with a rotation: re-commission from the file if the output is missing. Then read WHOLE, stamp, launch OPUS (row security-design).
+- **OWED (unchanged):** k44 (does PR 2293's comment move /shared/dist bytes in any node image); KS-2342 census; next K drafter must carry K 89th's six kit gaps (its WRAP, saved copy owed: saved at fleet/briefs_staged/2026-11-24_K89_wrap.txt); PRs 2195/2159 need Wednesday's words; launcher first-action trap; Mon 2026-11-30 Stuart card; weekly consolidation lapsed since 10-19 (by-tier digest 731 KB); INDEX refresh (last 11-20).
+- **NO AGENT QUESTION OPEN.**
+
 ## 🔴 ROTATING NOW 09:05 Tue 24 Nov, the 07:21 rotation's SUCCESSOR (statusline ctx:80%) - READ FIRST; the KAM RULED 08:59 and ROTATION HANDOVER 08:47 blocks below are current except where this says otherwise
 - **PR 2293 (KS-2341) MERGED + VERIFIED at source 09:04:29: develop = e3e79b7317f14ebccc8bb14e2001bdbf85e517fb** (ONE parent bcc2d8a53ffd = the pin, tree 8ea5657d5a53 = the GO's expected, FF, 1 file). Four merges today: 2290, 2291, 2292, 2293.
 - **FIRST WORK: K 89th %381 SONNET: its WRAP mail** -> read WHOLE, score (scoreboard row at the top), pane_close (identify any live python watcher by command line; --live-ok only for its own).
