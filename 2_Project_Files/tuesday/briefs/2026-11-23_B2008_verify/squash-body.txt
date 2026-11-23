@@ -1,0 +1,35 @@
+Oxpd1Writer, a new public class of the OXPd 1.x adapter, makes the two
+writes of first-run step 5 over an Oxpd1Client it does not own:
+RegisterAuthenticationAgent and UnregisterAuthenticationAgent of the
+committed Authentication binding, and no other operation.
+
+Every Oxpd1WriteCall is a dry run unless its Execute is set: a dry run
+reads no setting, opens no connection and returns the envelope it would
+send. An executed call goes through the client's internal
+SendWriteAsync and its one SendAsync (the same pinned handler,
+time-out, answer bounds and record as a read): ONE request carrying
+HTTP Basic admin, no retry. Applied is Yes on the empty response
+element; No when nothing was sent (no setting, a refused pin) or the
+device refused the credentials (401, 403); Unknown on every other end.
+A register's result carries its undo, the unregister of the same id
+(itself a dry run), whenever Applied is Yes or Unknown: HP's
+description says an unregister of an id the device does not hold
+succeeds with no effect. The undo leaves the device as it was only when
+that id was not registered before (a register replaces a record of the
+same id).
+
+The sign-in agent record carries no credentials and takes absolute
+https addresses without user information, at most 256 characters; both
+request bodies validate against HP's committed schema. Oxpd1Client's
+public methods are unchanged (the two reads and Dispose) and the
+reads' envelopes are byte for byte as before; its record line now
+reads "OXPd 1.x call". 13 new cases against the stub on 127.0.0.1: C#
+totals plus 13 on both legs, the rules count plus 2.
+
+Steps 2, 3 and 4 of the first-run list are not built: their operations
+are in no committed file under contracts/oxpd1/. The writer counts
+nothing across calls; stopping after a refused password is the
+caller's. No device has been reached. Nothing is deployed; nothing was
+sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
