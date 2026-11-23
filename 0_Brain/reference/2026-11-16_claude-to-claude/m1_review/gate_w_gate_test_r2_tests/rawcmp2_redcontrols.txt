@@ -1,0 +1,36 @@
+### red 1: body line 53, false -> true
+== stageB_WO-18_part2.txt   lines  1004= 1004  sha MATCH  unexplained 1  header-vs-body count mismatches 0
+     !! line 53: ORIG '   "is_error": false,' | COPY '   "is_error": true,'
+TOTAL replaced: {'<session-id>': 66, '<prompt-id>': 32, '<event-uuid>': 2, '<tool-use-id>': 97, '<coordinator-mailbox>': 5, '<work-folder-slug>-': 34, '<work-folder-name>': 5, '<WORK-FOLDER>': 2, '<work-folder>': 275}
+RAW COPIES: unexplained + header mismatches: 1
+### red 2: body line 145 'false' -> '<session-id>' (a placeholder standing for a non-UUID)
+== stageB_WO-18_part2.txt   lines  1004= 1004  sha MATCH  unexplained 1  header-vs-body count mismatches 1
+     !! line 145: no class-true match. COPY '   "is_error": <session-id>,'
+     !! <session-id> header 12 body 13
+RAW COPIES: unexplained + header mismatches: 2
+### red 3: on session line 2, one '<session-id>' -> '<prompt-id>' (count shifts to wrong class)
+== stageB_WO-18_part2.txt   lines  1004= 1004  sha MATCH  unexplained 0  header-vs-body count mismatches 1
+     !! <session-id> header None body 12
+RAW COPIES: unexplained + header mismatches: 1
+### red 4: <tool-use-id> -> <session-id> on its line
+== stageB_WO-18_part2.txt   lines  1004= 1004  sha MATCH  unexplained 0  header-vs-body count mismatches 1
+     !! <tool-use-id> header None body 17
+RAW COPIES: unexplained + header mismatches: 1
+### red 3 (body): line  '<session-id>' -> '<prompt-id>' (placeholder of the wrong name)
+== stageB_WO-18_part2.txt   lines  1004= 1004  sha MATCH  unexplained 0  header-vs-body count mismatches 0
+RAW COPIES: unexplained + header mismatches: 0
+### red 4 (body): line 52 '<tool-use-id>' -> '<session-id>' (a toolu id under a UUID class)
+== stageB_WO-18_part2.txt   lines  1004= 1004  sha MATCH  unexplained 1  header-vs-body count mismatches 2
+     !! line 52: no class-true match. COPY '   "id": "<session-id>",'
+     !! <session-id> header 12 body 13
+     !! <tool-use-id> header 17 body 16
+RAW COPIES: unexplained + header mismatches: 3
+### red 3 (body): line 96 '"session_id":"<session-id>"' -> '"session_id":"<prompt-id>"' (same pattern class, wrong name: caught by the header counts)
+== stageB_WO-18_part2.txt   lines  1004= 1004  sha MATCH  unexplained 0  header-vs-body count mismatches 2
+     !! <session-id> header 12 body 11
+     !! <prompt-id> header 6 body 7
+RAW COPIES: unexplained + header mismatches: 2
+### red 5 (body): line 96 'F10b' -> 'F10x' (one changed word in a placeholder-carrying line)
+== stageB_WO-18_part2.txt   lines  1004= 1004  sha MATCH  unexplained 1  header-vs-body count mismatches 0
+     !! line 96: no class-true match. COPY '{"cmd":"gate","event":{"cwd":"<work-folder>\\\\wgb\\\\A\\\\F10x","effort":{"level":"medium"},"hook_event_name":"PreToolUse","permission_mode":"bypassPermissions","pro'
+RAW COPIES: unexplained + header mismatches: 1
