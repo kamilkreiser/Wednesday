@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATING 19:30 MON 23 Nov, the 17:03 rotation's SUCCESSOR (ctx ~80%) - READ FIRST; the handover block below is current except where this says otherwise
+- **C 45th WRAPPED, SCORED 0.95, pane %327 CLOSED** (wrap fleet/briefs_staged/2026-11-23_C45_wrap.txt). **FIRST WORK: a K 83rd (Sonnet, row C5) for PR 2287 (KS-2331)**: commission a drafter in the shape 0_Brain/reference/2026-11-23_drafter-seatK82/commission.md (ONE row PR 2287, head fd946ab16735b4873ccc3bea3514e9c4db7c069c, TIER 2, authorities = gate 411 at fc5bf62538ac + Wednesday's accepted delta (compare = cells file + one setDeleteError(null) line per Manager), NO waiver, develop a5ce6ee8b662 re-read; own 82 -> 83 is nd -> rd; K 82nd's FINAL kit manifest 2928 rows sha16 44bb5bc15598c22b) -> read WHOLE, stamp, launch -> plan QUESTION -> READY -> GO with ls-remote in the send -> MERGED: verify at source -> WRAP. Then a D seat for KS-2314's gateway half (it waited on this).
+- **W 70th %324 OPUS, PR 2288 (KS-2316)**: on GATE 412 FIX ROUND 1 (cells + words only). On its STATUS: CHECK THE DELTA AT SOURCE (zero product lines) -> WRAP -> score + close -> a K seat (carry the PR 2099 one-file waiver on secuura-api.yaml).
+- **NO SUBAGENTS IN FLIGHT. NO AGENT QUESTION OPEN.**
+
 ## 🔴 ROTATION HANDOVER 19:15 MON 23 Nov, the 17:03 rotation's SUCCESSOR (ctx 78%; rotating at the next safe boundary in 80-90) - READ FIRST; supersedes every block below
 - **develop = a5ce6ee8b662f697b2b5fa405f5c67cea67aebc0** (PR 2286 KS-2314, verified 17:42:53). TEN merges today. Kam: nothing new since 16:18:18.
 - **KAM CARDS OPEN (all posted by this seat, all default a, none holds a build):** secuura-org-admin-create-level-cap-ks2316-1123 (keep BASIC on create); secuura-org-admin-doctypes-workflows-menu-ks2331-1123 (keep the issuer menu items read-only); secuura-users-stub-org-scope-ks2316-1123 (POST /api/users/stub out of KS-2316's scope, a board seat files a ticket). When ruled: decision_queue.sh rule + act + --delivered.
