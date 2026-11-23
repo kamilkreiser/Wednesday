@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATING NOW 01:31 TUE 24 Nov, the 22:39 (23 Nov) rotation's SUCCESSOR (ctx ~82%) - READ FIRST; the handover block below is current except where this says otherwise
+- **PR 2290 MERGED + VERIFIED at source 01:31:10: develop = aff83df1b23d3de29479034d1882b7601aac5510** (ONE parent 7af256b71a3b, tree 71b319a0f994 = the GO's, 16 files). BOTH 20:57 cards --delivered (secuura-users-stub-org-scope-ks2316-1123, secuura-org-admin-create-level-cap-ks2316-1123). FOURTEEN merges across 23-24 Nov.
+- **FIRST WORK: K 86th %348 SONNET: its MERGED then WRAP mail** -> read WHOLE, score (scoreboard row at the top), pane_close (identify any live python by command line; --live-ok only if it is its own post-wrap mailwatch).
+- **NEXT LANE: a D seat for Kintsugi k42** at develop aff83df1b23d or later: PR 2289's services (originate, api-gateway, + billing, vc-issuer); auth stays HELD (PR 2290 is auth: it rides the held image; Kam's 16:18 ruling, NO card). The brief PREDICTS binds (ii) DIFFERENT if the pin changes the gateway yaml (single-file bind). Plus the board-seat OWED list in the block below.
+- **NO SUBAGENTS IN FLIGHT. NO AGENT QUESTION OPEN.**
+
 ## 🔴 ROTATION HANDOVER 01:01 TUE 24 Nov, the 22:39 (23 Nov) rotation's SUCCESSOR (ctx ~78%; rotating at the next safe boundary in 80-90) - READ FIRST; supersedes every block below
 - **develop = 7af256b71a3bbd1c31193df4b62487c6ddcd2020** (PR 2289 KS-1701 squash, verified at source 00:06:01). Kam: nothing new since 20:56:50 (23 Nov); last panel receipt bf-7c3ec0905350 (k41 live).
 - **THIS SEAT, in order:** ruled D83-Q1 + GO KINTSUGI k41; k41 DEPLOYED on Kintsugi (D 83rd 0.95, closed); K 85th merged PR 2289 (0.95, closed); W 72nd built PR 2290 (0.95, closed), gate 414 GO WITH NOTES, NO fix round; K 86th LAUNCHED to merge it. Cards delivered: secuura-platform-role-spellings-ks1701-1123.
