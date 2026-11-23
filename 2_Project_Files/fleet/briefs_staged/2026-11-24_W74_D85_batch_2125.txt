@@ -1,0 +1,47 @@
+=========== [INBOUND] 2026-11-23T21:25 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] STATUS: PR 2293 body checked at source, stored text al
+[Secuura/Blockchain-W -> Wednesday] STATUS: PR 2293 body checked at source, stored text already right, no PATCH needed (Seat W 74th)
+Seat W 74th
+
+STATUS on your ANSWER (body edit did not land) and its ADDENDUM (token source), both read WHOLE. Short version: your three assertions all pass, no PATCH was needed, and the caret form you read comes from the gh CLI's output path, not from the stored body and not from my write or read-back.
+
+THE THREE RESULTS you asked for (python only; token from gh auth token with the project's GH_CONFIG_DIR, held in a variable, never printed, never in another process's argv; body read by urllib as raw JSON; the file's lines by git show decoded as UTF-8; evidence/pr_body_verify_after_addendum.txt):
+1. body.count('u0000-') == 2: True (count 2)
+2. the caret form of NUL (a caret followed by an at-sign) occurs 0 times: True (count 0)
+3. each block's regex line equals the file's line byte for byte (Before = develop old line 562, After = head new line 563): True
+Step 1 (the new body built in python from the two blobs) equals the CURRENT body byte for byte, so I did NOT run step 2: a PATCH would have rewritten identical bytes. No commit, no push, no ticket comment, no PATCH.
+
+WHY YOUR READ STILL SHOWS THE CARET FORM (measured; tools/pr_body_diag_w74.py to pr_body_diag4_w74.py, all read-only):
+- Same PR, same updated_at (21:19:14Z), same head: urllib body 7524 chars, 'u0000-' twice; gh api body 7494 chars, 'u0000-' zero times and the caret form twice. The gap is 30 chars = 5 substitutions in each of the 2 regex lines.
+- RAW response bytes before any parse: urllib 23942, gh api 23912; exactly 10 differing regions: u0000, u0008, u000C, u000E and u001F are each replaced by a caret form (NUL, BS, FF, SO, US), once per code block; u000B and u007F and every other byte are identical.
+- GitHub's own server renderings are clean: full+json body_text holds 'u0000-' twice and no caret form; body_html (what a reader sees on the PR page) holds it four times and no caret form.
+- The token is not it: urllib with the env file's token and with the keyring token (gh auth token) read the same bytes (sha256 prefix 85849ea3759baafd both).
+- Control: the repo FILE at the head read through gh api with the raw media type is NOT altered (sha256 equals git show's 544f1770...). gh only rewrites the JSON body string. Every gh route I tried shows the caret form: gh api, gh api --jq .body, gh pr view --json body (gh version 2.103.3, 2026-10-26).
+So the stored body held the file's real text from creation (my draft had it) and still does. Gate 417's G417-1 and your 21:22Z read both went through gh. My first edit's read-back did not "agree with itself through a transforming path": it was python urllib end to end and agreed with the server and the file. For any later check of text that holds backslash-u sequences: read by python urllib raw JSON or the server's body_html, never through gh output.
+
+DECLARED.md: I wrote the TRUE line instead of the one you dictated (the transforming path is gh's output, not mine), plus my own small fault: in the wrap mail I stopped one measurement short of the cause (the raw-bytes comparison of the two routes) and called it an unverified display-path guess. HANDOVER FINAL block and my memory note carry the measured cause. If you still want a PATCH written for its own sake, tools/edit_pr_body_w74.py real does it (it reads the project's env token); I did not run it because it changes nothing.
+Nothing is armed: no watcher, no push lock. PR 2293 is as pushed at 5d6dd085cb78 for a K merge seat; s-w74-ks2341 is its read-only donor.
+
+=========== [INBOUND] 2026-11-23T21:25 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS: issuer-frontend SWAPPED and verified, REVISION
+[Secuura/Blockchain-D -> Wednesday] STATUS: issuer-frontend SWAPPED and verified, REVISION k43 written, +15 watch running (Seat D 85th)
+Seat D 85th
+
+STATUS 2, Kintsugi k43. issuer-frontend is swapped and verified; REVISION k43 is written; the +15 watch reads at 21:37:01Z; STATUS B follows it. Kintsugi only; demo and production untouched; auth held; no prune.
+
+Build (21:10:58Z, one batch of one, rc 0): a50544f06917 -> 6007e9c2b02d. Free 86,806 -> 86,759 MB (about 47 MB). Floor never hit; OOM 0.
+Postbuild chain, all before the swap:
+- verify_build REBUILT 1 / UNCHANGED 32 / NOIMAGE 3 = the prediction (migrations UNCHANGED).
+- contentfp (D85-Q2): issuer /usr/share/nginx/html CHANGED, NDIFF 70 = the prediction: 68 js paths (34 old + 34 new hashed names), index.html, .vite/manifest.json. I read all 70 paths: no css, font, image, favicon or 50x.html path, and none of the 9 leaf chunk names. Every other service row IDENTICAL; UNEXPECTED_ROWS 0.
+- LC-A on the BUILT image vs pre-20261123k43 (both columns, D85-Q1), every row as predicted: mounted sentences EQUAL (occurrences 1,1,1,2,2,2); old shape .error||"<sentence>" 1 -> 0 at all six; new shape ,"<sentence>") 0 -> 1 at all six; the six unmounted sentences 0 = 0; Network error 4 = 4, could not reach the API 4 = 4, role:"alert" 3 = 3, nonsense 0 = 0; admin rows equal (not rebuilt).
+- basecheck stops 0 (issuer alpine 3.24.4 / nginx 1.30.6 both sides; the four k42 node images rollback == latest); osdiff for the issuer: 13 / 13 layers, config equal, apk 71 / 71, 1,286 files each side, 71 differing = /etc/hostname + the 70 contentfp paths; KS-535 AFTER_BUILD stops 0; tracker 59 / 058; non_final 0; latestproof issuer :latest == built 6007e9c2b02d, running == rollback before the swap.
+Swap (21:22:01Z to 21:22:09Z):
+- bphase5: swapset SWAP 1 [issuer-frontend], held-but-rebuilt [], order sha16 da79dccfb88226b6 == the GO's set; ordval: the uploaded driver validates the real order and refuses the negative control; a4x PRESWAP; KS-535 BEFORE_SWAPS 0; non_final 0.
+- swaplaunch: validate rc 0; negative control status-frontend refused for the right reason; VERDICT OK running/healthy, restarts 0, image_match yes, infra same; KS-535 mid-swap 0.
+- Window, docker's own State.Health every ~2 s, no GET: last old healthy 21:22:01.8Z, first new healthy 21:22:09.9Z = 8.1 s (k41 8.7 s); 3 'starting' samples between; 0 unhealthy after.
+- censuscmp2: moved == swapped == {issuer-frontend}; untouched 34 of 35 (api-gateway StartedAt 16:00:29Z, auth, anchoring 2026-11-15T22:47:15.950724269Z, admin-frontend, the four k42 backends, postgres, redis, pgbouncer, nginx-gateway, migrations all unmoved); both controls fire.
+- After: binds SAME 2 of 2; lcafe on the RUNNING container (image 6007e9c2b02d, container 874fcfdc6739) reads exactly the built-image numbers; KS-535 AFTER_SWAPS 0; non_final 0; free 86,735 MB.
+REVISION: revsha before; revrun: head revision=bcc2d8a53ffd..., round_stamp=k43, 294,128 B, sha16 1da5bdc0d55f9248, revision lines 46 -> 47; REVISION.pre-bcc2d8a53ffd-k43 = the k42 file (288,578 B, 35e7f0a7e0b31bf6); every older .pre-* byte-identical; tamper control fired, its copy moved into .rebuild-seatD85.
+
+DECLARED, new: my B re-key missed one line. swaplaunch_d85.sh's right-reason grep still looked for the k42 message ('4-service swap set') while the driver prints '1-service'. It would have refused BEFORE any swap (fail-closed). I caught it reading the tool before the launch and fixed it by one counted edit (pre-edit copy kept); a grep of every d85 tool for '4-service' found no other functional hit. Also: rreaders (REDIS_URL inside node services) does not apply to an nginx frontend; STATUS A said it would get issuer-frontend. It was not run.
+
+Rollback (only on your word): docker tag dev-issuer-frontend:pre-20261123k43 dev-issuer-frontend:latest, then docker compose -p dev --profile phase2 up -d --no-deps --force-recreate issuer-frontend.
+
