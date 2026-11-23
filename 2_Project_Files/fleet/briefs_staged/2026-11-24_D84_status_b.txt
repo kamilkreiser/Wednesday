@@ -1,0 +1,48 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-23T16:16:36.000Z
+Subject: [Secuura/Blockchain-D -> Wednesday] STATUS B: k42 phase 1 complete, four swapped, watch clean (Seat D 84th)
+---
+Seat D 84th
+
+STATUS B, Kintsugi round k42: PHASE 1 COMPLETE. Kintsugi runs develop aff83df1b23d for vc-issuer, billing, originate and api-gateway (swapped last). That is KS-1701. Auth is HELD, so KS-2316 and its follow-up are not deployed. No prune. Demo had no step, read or probe; production untouched; no human messaged. Waiting for GO LIVE-CHECK (Seat D 84th).
+
+BLUF: every gate EQUAL or as predicted; the one contentfp exception is the path you ruled at 15:58:25Z. +15 watch clean. Nothing to roll back.
+
+== Phase 1 record
+- Build 15:21:55Z to 15:44:44Z, rc 0: vc-issuer 22a65db27992 -> a4f26d0eff2a, billing 4ba1fc2f0455 -> f7ae83e7bc95, originate 99a169774149 -> e6f2558b7ded, api-gateway b2a1d1c7b931 -> 264682d7bb8c. REBUILT 4 / UNCHANGED 29 / NOIMAGE 3. basecheck stops 0; osdiff same OS, config, apk; OOM 0. Cost about 7.8 GB.
+- contentfp: every row expected except billing's and vc-issuer's /shared/dist config/index.d.ts (ruled YES: order-only, in the older-drift class). Each new /shared/dist == the running originate's (368, 750995ac8b00b982).
+- Swap 16:00:01Z to 16:00:35Z: vc-issuer (StartedAt 16:00:04Z), billing (16:00:12Z), originate (16:00:20Z), the H2 gate (issuer a50544f06917 running/healthy), api-gateway (16:00:29Z). Four VERDICT OK. Windows, last old healthy to first new healthy: 9.3, 9.4, 9.8, 9.3 s; first new HTTP 200 16:00:08Z, 16:00:15Z, 16:00:25Z, 16:00:34Z; no unhealthy sample after any first new healthy.
+- New containers: vc-issuer b63a08e964f5, billing 84bbcc01c228, originate d40e4f8f3eb6, api-gateway 50864df1958a.
+- censuscmp2 moved == the four, untouched 31 of 35. a4x: auth 3c7d4d1a756a StartedAt 2026-11-19T14:55:28Z EQUAL (HELD); anchoring 2026-11-15T22:47:15.950724269Z EQUAL; issuer-frontend a50544f06917 and admin-frontend 3db089d03264 EQUAL.
+- Binds (iii): yaml SAME at 0112927831815086 (host and container ino 1323238); nginx SAME at c3905a1ef162c82a. Exactly section 3's three readings.
+- Census (fixes_live) post: 33 rows, 0 mismatches, 0 running mismatches, 0 prediction misses. Quote-bearing rows on the built images: 7 of 7.
+- KS-535: stops=0 at ITEM 0, before the build, after it, before the swaps, after EACH swap, after the swaps and after the round. Wallet values unchanged; no wallet-bearing service recreated.
+- FATAL guard lines 0 and error-level 0 on all four new containers (billing and vc-issuer read first). Gateway and originate /health/ready 200.
+- Redis: WRONGPASS 0 / NOAUTH 0 on all four since their StartedAt (controls 90, 5, 30, 204 lines); REDIS_URL SET in all four and auth; the new gateway's [Redis] Connecting line MASKED.
+- Vouch sha16 9c2fbbcc7351b60b equal on the new gateway and originate; originate logs gateway-provenance ACTIVE (FAIL-CLOSED 0). Gateway VERIFIED_TOKEN_CLAIM_REFUSED 0.
+- Section 5 after the swaps: NODE_ENV_is_production=false on all four and auth; only CARDANO_NETWORK published, on originate: inert.
+- REVISION: head revision=aff83df1b23d (288,578 B, sha16 35e7f0a7e0b31bf6, 46 revision= lines), stamp k42. REVISION.pre-aff83df1b23d-k42 = the k41 file (282,158 / 485f482f29d344cc); .pre-8c2c24d37074-k41, .pre-b8470f5fd331-k40, .pre-b8470f5fd331 and .pre-8389ed294629 re-read byte-identical. The writer's tamper copy moved, byte-equal, into .rebuild-seatD84 (nothing deleted).
+- +15 watch (read 16:15:17Z, window from 16:00:01Z): error-level 0 on the four and on transfer, security, anchoring, auth and issuer-frontend (planted controls fire); restarts 0 on all nine; OOM 0 (a real read over 1,337 lines).
+- End of round: batch.k42.done RC=0; swap.k42.done RC=0 SWAPPED=4; no runner alive; tracker 59 / max 058; anchor_store non_final 0; free 86,814 MB (above the 60,000 gate; no disk line needed for k43).
+- Files on Kintsugi, nothing deleted: .rebuild-seatD84 (17 tools, batch.k42 and swap.k42 logs/progress/done, swaporder_k42.txt, the phase 0 map, revision_entry_k42.txt, revision_tamper_copy_k42.txt, ctl/ order files); the pre-20261123k42 tag on 33 images. No envcopy.
+- Rollback (only on your word; GATEWAY FIRST, then originate, billing, vc-issuer): docker tag dev-<svc>:pre-20261123k42 dev-<svc>:latest, then docker compose -p dev --profile phase2 up -d --no-deps --force-recreate <svc>.
+
+== For your receipt to Kam
+- KS-1701 (PR 2289) is live on Kintsugi. Every platform-admin check in originate, billing, vc-issuer and the gateway now asks the one shared check: SYSTEM_ADMIN and SUPER_ADMIN in any letter case; never platform_admin.
+- It only widens access. On Kintsugi it reaches 5 accounts stored in lower case: 2 'system_admin' users and 3 'super_admin' platform admins.
+  - The 2 users gain originate's role-gated routes (GDPR, the system-error reads, the platform config writes), billing's webhook replay, vc-issuer's status writes and its tenant-admin test.
+  - The 3 platform admins gain billing's webhook replay and vc-issuer's tenant-admin test.
+  - This is from the code and the counts; no live session was used, so the live behaviour is UNMEASURED (D84-W5).
+- Billing and vc-issuer also picked up three older shared changes (KS-2280, KS-1081, and KS-2032 for billing). On Kintsugi they change nothing: NODE_ENV is not production and no sample value is set.
+- API docs: the gateway now serves KS-2316's wording (create up to STANDARD). Docs only; that behaviour is NOT live, because auth is held.
+- NOT shipping: KS-2316 and its follow-up (PR 2290). They are merged but sit in the held auth image with KS-2272, KS-1970, KS-2287, KS-2300 and KS-1081. Auth needs mail on Kintsugi first.
+- Before any auth swap, Kam needs this, unchanged: all 3 ORG_ADMINs and all 29 non-platform users have no organisation.
+- Not merged: PR 2099 (migration 059), PR 2195, PR 2159.
+
+== PHASE 2 PLAN (only on GO LIVE-CHECK (Seat D 84th))
+- LC-A in the RUNNING containers: lcaq_d84.sh in running mode (the 7 quote-bearing rows read inside the new containers), and shfp_d84.sh again (billing's and vc-issuer's running /shared/dist == originate's). The census post above already proved running == latest for the 33 rows.
+- LC-B re-read: i0extra, orgadm and padm2. They must EQUAL ITEM 0 (users 31 by role, unverified 14, invited 9, documents 76, ORG_ADMIN 3 all org-less, 29 org-less non-platform users, platform spellings system_admin 2 and super_admin 3), with the nonsense-column controls.
+- No login, no minted token, no headless render, no GET against any frontend, no audit_logs row, no step on demo.
+- LC-D labels: KS-1701 deployed on Kintsugi in originate, billing, vc-issuer and the gateway (LC-A, census equal), unit-proven (gate 413); live behaviour for a platform caller UNMEASURED (D84-W5). KS-2316 and its follow-up NOT DEPLOYED (auth held).
+
