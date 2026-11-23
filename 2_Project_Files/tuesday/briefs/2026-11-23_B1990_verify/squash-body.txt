@@ -1,0 +1,39 @@
+A new library, Datasec.Suite.Adapters.Oxpd1, reads an HP OXPd 1.x
+(FutureSmart 5) device and writes nothing to it: a GET of the DevMgmt
+discovery tree, and five SOAP 1.2 reads (GetManufacturerInfo,
+GetCustomerInfo, GetAuthenticationAgentRecords, GetOwnedAccessoryRecords,
+GetSignInMethods) from a closed enum, each sent to the binding's service
+with the binding's action and WS-Addressing 1.0 headers. It is written by
+hand over HttpClient and XmlWriter, with no package.
+
+A certificate is accepted only when the SHA-256 of its DER bytes is one of
+the pins, on every handshake; no redirect is followed, no proxy is used,
+and only HTTP/1.1 is spoken. An answer is read strictly and bounded: in
+bytes, and in depth (an element deeper than 64 is refused while the
+answer is read, before any tree is built). The connection, the request
+and the body read are bounded by the time-out, which the options refuse
+unless it is positive, finite and at most five minutes; the parse and the
+masking after the body are bounded by size and depth.
+
+The admin password is read from a named setting at each call. It is
+scrubbed from the joined text and the attribute values of the returned
+answer and the fault code, and a scrubbed value reads [removed:password],
+the logging deny-list's own text, held by the library as a read-only
+field. A masked answer that still holds the password ends the call as
+MalformedAnswer; namespace names and attribute values, a namespace
+declaration's included, are compared as they are, unescaped. The record
+is written through the suite's logger, behind the deny-list, and holds the
+read, the URL, the outcome, the status, the scrubbed request and the
+masked answer: it names no setting. Every call ends in one typed outcome.
+
+HP's 14 OXPd 1.x service descriptions are kept byte for byte under
+contracts/oxpd1/hp with a fingerprint list; the library reads none of them
+at run time. The tests run against a stub device on 127.0.0.1 whose routes,
+actions and addressing namespace are read from those files; nothing was
+run against a printer.
+
+Two new projects with their lock files, and their two lines in the
+solution file, so the hosted legs run their cells. No other file changes.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
