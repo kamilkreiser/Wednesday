@@ -1,0 +1,163 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261123T070712Z.txt)
+     1	[QUESTION] 2026-11-23T07:06 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 70th)
+=========== [QUESTION] 2026-11-23T07:06 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 70th)
+[Secuura/Blockchain-W -> Wednesday] QUESTION: plan confirmation (Seat W 70th)
+Seat W 70th
+QUESTION: plan confirmation, KS-2316 (an organisation admin writes and creates users only in its own organisation). Design-first; no code on any branch yet. BRIEF 06:48:34Z, launch 06:48:39Z.
+
+BLUF: I propose ONE auth file of product change, plus one new cell file and 11 existing cells in 6 files that are pinned to the tenant-only behaviour. No gateway, repository, type or page change. Tier 1. Eight sub-questions follow (QA to QH), each with my recommendation. The one that changes the most is QA: the gate binds the request, so an unchanged save of a sibling user is refused. I wait for your ANSWER before any code.
+
+== Q1. MEASUREMENTS (develop a5ce6ee8b662, in my own clone s-w70-base; the shared checkout was only read) ==
+1. Who answers the two routes.
+   - The gateway's index.ts mounts createAdminRoutes at line 937, before createProxyRoutes at line 1148. So admin.ts answers first: POST at 1514 and PATCH at 1589, both behind requireAdmin (630). requireAdmin admits the platform roles, ORG_ADMIN and ISSUER_ADMIN.
+   - proxy.ts defines the same two routes at 489 and 522, and they are shadowed.
+   - Both copies forward the caller's Authorization header verbatim. Neither checks the organisation. Gateway edit needed: none.
+   - A git grep of services/ for users/admin finds only auth users.ts, gateway admin.ts and gateway proxy.ts (plus spec text and comments). No other service serves these routes.
+2. Auth routes/users.ts.
+   - Create is at 626. Its role list (629) is SYSTEM_ADMIN, ORG_ADMIN, super_admin and SUPER_ADMIN.
+   - Update is at 747. Its role list (750) adds the bare admin string. ISSUER_ADMIN and platform_admin are refused by both lists.
+   - Update's only bound on status, role and the three name fields is the tenant 404 at 850 to 853. Create sets tenantId (719) and no organisation.
+   - The level rule (KS-2287) is at 895 to 913. It reads the caller's organisation from its ROW (getUserByIdPlatformScope) and the target's STORED organisation, and either side missing is never "the same". It answers 403 FORBIDDEN and skips platform callers.
+   - Also read: isSameUserId at 254, isSameOrganizationId at 261 and KS-2300's 403 at 872.
+3. Repository. userRepo.createUser (671) already inserts user.organizationId into organization_id, and the User type has organizationId (types/index.ts 195). users.organization_id is a UUID column (migration 001, line 531). No repository or type edit is needed.
+4. Callers.
+   - Nothing calls POST admin/create from a frontend, mobile app, script or seed. The admin Users page creates users through POST /api/auth/register (Users.tsx 304).
+   - The PATCH callers are Users.tsx 221 (the Block toggle, which sends status only) and Users.tsx 288 (the edit dialog's save, which sends email, firstName, lastName, displayName, role, organizationId and verificationLevel every time).
+   - e2e: tests/e2e/tests/sysadmin-exhaustive.admin.spec.ts (827 to 929) runs as SYSTEM_ADMIN, so it is unchanged. The gateway tests ks1215, ks1240b, ks689 and ks1868 test the forward only, also unchanged.
+   - GET admin/list is tenant-scoped, so an ORG_ADMIN's Users page lists sibling-organisation and organisation-less rows, each with Edit and Block.
+5. Existing tests pinned to the tenant-only behaviour. MEASURED: I ran the auth suite whole on a THROWAWAY prototype (tree s-w70-proto; never committed, never pushed). 11 cells in 6 files go red under the design below. They are listed in Q2.
+6. Develop baselines: auth 2069/2069 (499 files); packages/shared 1742/1743, where the one failure is KS-278 wallet-signature.
+
+== THE DESIGN (one) ==
+- Product change in users.ts only. Two helpers go beside isSameOrganizationId:
+  - callerRowOrganizationId(callerId) reads the caller's row and returns its organisation.
+  - isOwnOrganization(callerOrg, targetOrg) is true only when both are non-empty strings that are equal after lower-casing. Either side missing is never the same.
+  The KS-2287 level site keeps its own inline copy of the same rule (BRIEF: read it, do not edit it). The helpers serve the two NEW sites.
+- PATCH: for every caller that isPlatformAdmin (202, the shared isPlatformRole) does not count as a platform admin, answer 403 FORBIDDEN "Only an admin of the user's own organisation can change this user" unless the target sits in the caller's own organisation.
+  - That covers ORG_ADMIN and the bare admin string, the same set KS-2287 binds.
+  - It is the LAST gate before the write: after the tenant 404, the own-role 403, KS-2300's 403, the organisation lookup 400 and KS-2287's 403s.
+  - It binds the REQUEST, whatever fields it carries, and computes no "unchanged".
+- CREATE: for a non-platform caller, read the caller's organisation from its row.
+  - No organisation: 403 FORBIDDEN "Only an admin who belongs to an organisation can create users".
+  - Otherwise the new user is written with the caller's organisationId.
+  - The check sits after the role and level checks and before the email-exists 409, so an organisation-less admin learns nothing about which emails exist.
+  - Platform callers are unchanged and still get no organisation.
+- Why the last gate. I measured it at both places:
+  - Right after the 404 (A): 14 existing cells go red. The three extra cells are built refusals that A pre-empts: KS-2287's sibling-level message, KS-2300's message in a KS-1536 cell, and KS-486's 400 "Invalid role" on create.
+  - As the last gate (B): 11 cells go red. Every built rule keeps its refusal and message live, with no dead clauses. The foreign-tenant 404 still answers first, and every write reaches the gate, including any field added later.
+- Cost: one extra row read per non-platform write. Today that read happens only on a level change.
+- I add no new role-spelling list, and I leave the role lists at 629 and 750 untouched (the KS-1701 lane). Neither originate middleware/auth.ts nor adminConfig.ts is touched.
+
+== Q2. CLOSED LIST (all paths under Blockchain/Dev/) ==
+1. services/auth/src/routes/users.ts: the two helpers, the PATCH gate, the create check and its organisationId write, and the KS-2316 comments.
+2. services/auth/src/__tests__/ks2316-org-admin-user-writes-own-organisation-only.test.ts: NEW. It uses KS-2287's harness (the real router over HTTP, the repository mocked).
+3 to 8. The 11 pinned cells, by file:
+ - ks467-user-admin-isolation.test.ts, 5 cells (2 PATCH, 3 create). The caller's row and the target get the same organisation, and the create cell also asserts the organisation that was written.
+ - ks1536-users-routes-ask-the-shared-platform-role.test.ts, 2 cells (a tenant admin, and a bare admin, editing in its own tenant): same organisation on both sides.
+ - ks2083-a-role-change-ends-the-sessions.test.ts, 1 cell (an ORG_ADMIN raises a second account): same organisation on both sides.
+ - ks806-wallet-local-is-a-reserved-email-domain.test.ts, 1 cell (an ORG_ADMIN creates an ordinary email): the caller's row gets an organisation.
+ - ks2287-org-admin-sets-verification-level-capped.test.ts, 1 cell: "ORG_ADMIN saving another organisation's HIGH user with HIGH resent is 200 (control)".
+ - ks2300-org-admin-review-cap-self-review-organisation-moves.test.ts, 1 cell: "null sent for a user with no organisation is not a change: 200 (control)".
+ The last two cells each send displayName 'Renamed' with the resent value, so each one IS the ruled case: a rename of a sibling-organisation user, and of an organisation-less user. Proposed edit: expect 403 with the KS-2316 message. That still proves the resent level, or the null, was not treated as a change: the built rule runs before mine, so its own message would answer otherwise.
+9 and 10. ASKED IN QB: services/auth/src/auth.openapi.ts (words only) and docs/openapi/secuura-api.yaml (regenerated by npm run generate-openapi). PRs 2267 and 2268 did the same.
+- NOT in the list: any gateway file, userRepo.ts, types/index.ts, the Users page, keyRevokePolicy.ts, and either KS-1701 file.
+- OVERLAP: none. One GraphQL census of all 17 open PRs, run at boot, finds none touching any path above. The nearest ones:
+  - PR 2099 touches auth wallet.ts, userErasedSubscriber.ts and its own ks2060 test.
+  - Dependabot PRs 948, 649 and 575 touch auth package.json.
+  - PR 2159 touches gateway admin.ts.
+
+== Q3. CELLS (red-first) + MUTANTS + PROOF ==
+Ids with hex letters are used where case matters (as gate 390 required). On PATCH, each write kind is a separate cell: status, role, and the names.
+PATCH:
+- SYSTEM_ADMIN, SUPER_ADMIN and super_admin: 200, on a sibling-organisation target and on an organisation-less one.
+- ORG_ADMIN:
+  - target in its own organisation: 200, the row written, and a suspend revokes the sessions;
+  - target in a SIBLING organisation of the same tenant: 403 with the KS-2316 message, the row unchanged, no session revoked;
+  - target in no organisation: 403;
+  - an ORG_ADMIN with NO organisation: 403 on every target, itself included.
+- The bare admin string: two cells, the same as ORG_ADMIN.
+- A foreign-tenant target: 404, before my gate.
+- ISSUER_ADMIN and platform_admin: 403 "Admin role required", unchanged.
+- A stale claim (the token says org-a2, the row says org-a1, the target is in org-a2): 403. The row decides, not the token.
+- The same organisation id in different letter case: 200 (the fold).
+- Self: an ORG_ADMIN with an organisation renames itself, 200. Its own role still gets the own-role 403, and its own level still gets the KS-2287 403.
+- An all-unchanged save of a sibling user (everything resent as stored): 403 (QA).
+- GET admin/list and GET admin/organizations as an ORG_ADMIN: 200 and unchanged, because reads stay open.
+CREATE:
+- ORG_ADMIN with an organisation: 201, and the user written carries the caller's organisation and tenant.
+- ORG_ADMIN with none: 403, and neither emailExists nor createUser is called.
+- A stale claim (the token names an organisation, the row has none): 403.
+- A body organizationId naming a sibling organisation: per the QD answer.
+- SYSTEM_ADMIN, SUPER_ADMIN and super_admin: 201, with the organisation unset (unchanged).
+- ISSUER_ADMIN and platform_admin: 403 (unchanged).
+- No token: in the proof only, because the harness mocks authenticate.
+MUTANTS. Counted; each must turn at least one cell red, with a control run first and last.
+ - M1: the PATCH gate removed.
+ - M2: the create check removed.
+ - M3: create writes no organisation.
+ - M4 and M5: the token's organisation used instead of the row's (PATCH; create).
+ - M6: a sibling organisation admitted.
+ - M7: an organisation-less caller admitted (missing equals missing).
+ - M8 and M9: a platform admin refused (PATCH; create).
+ - M10: lower-case super_admin refused (an exact-case platform test).
+ - M11: platform_admin admitted.
+ - M12: the gate added on GET admin/list.
+ - M13: the gate placed before the 404 (a foreign tenant then reads 403).
+ - M14: the case fold removed.
+ - M15: the create check moved after emailExists.
+PROOF over real sockets. I will run the auth service whole from my branch tree (tsx) on a Postgres and Redis of my own: W 68th's pg_up and proof_up recipe, loopback only, containers labelled secuura.seat=w70. Docker 29.7.2 is up locally with nothing running, and no box is touched.
+ - Seed one tenant with organisations O1 and O2, users in O1, in O2 and in none, an ORG_ADMIN in O1, an ORG_ADMIN with none, and a SYSTEM_ADMIN.
+ - Log each in for real, then drive PATCH and POST over a real socket.
+ - Read the rows back from Postgres: organization_id on the created user, and the status unchanged after a refusal. Also check that no token gets 401.
+ - The gateway hop is NOT driven, because I measured it as a pass-through by reading. W 69th's createAdminRoutes-alone host could add it if you want.
+SUITES: auth whole and packages/shared whole on both arms (develop and the branch), printed side by side; tsc and eslint for auth, with a planted failure; generate-openapi --check if QB is in.
+
+== Q4. TIER: 1 ==
+This is a role gate on user writes, and a suspend ends the target's sessions.
+
+== SUB-QUESTIONS (my recommendation first in each) ==
+QA (3a, which writes the gate binds). It binds the REQUEST: every field, changed or not, so a sibling user's all-unchanged save is 403.
+ - Why: under the ruling an ORG_ADMIN has no write authority over that user, and this way no new "unchanged" logic sits on a security gate. A wrong "unchanged" verdict there would be a hole.
+ - Own-organisation saves keep KS-2287's and KS-2300's resend tolerance exactly as built.
+ - The alternative binds only real changes. It needs new change detection for status and the three names.
+QB (spec words). Include auth.openapi.ts and the regenerated yaml, as PRs 2267 and 2268 did. The create text would say the new user is placed in the caller's organisation and an organisation-less admin gets 403. The PATCH text would add the own-organisation 403. If they stay out, the spec keeps saying "This route gives the new user no organisation".
+QC (3b, the order). The tenant 404 first and my gate last before the write: variant B, measured above.
+QD (3d, a body organizationId on create). Today create reads no organizationId from anyone. I recommend IGNORING it: the contract stays the same, and the user lands in the caller's organisation either way. Refusing it would add a new 4xx for a field the route never read. Your call.
+QE (3e, the level cap on create). The KS-2287 comment at 686 to 688 and the spec say the cap is BASIC because the new user has no organisation. After this change that reason is false. Under the 20 Nov level ruling (own organisation, up to STANDARD, never self), an ORG_ADMIN could pick up to STANDARD on create.
+ - Recommend NO behaviour change: keep BASIC-only.
+ - Reword those three comment lines to say the cap is kept pending a ruling. That is a words-only edit inside the KS-2287 block, so it needs your yes.
+ - A card for Kam if the cap should be lifted.
+QF (3c, self). An ORG_ADMIN in an organisation may change its own name and status, since it is in its own organisation. An organisation-less one is refused, like for any target: the ruling says it "could change no one". The own-role and own-level rules are unchanged. Recommend yes.
+ - Pre-existing, listed and not touched: the dashboard resends role on every save, so an ORG_ADMIN saving its own row is ALREADY refused with "Cannot change your own role" (the KS-467 rule fires on any role sent).
+QG (the bare admin string). Bind it like ORG_ADMIN, since KS-2287 binds every non-platform caller this file admits. Recommend yes.
+QH (the Users page). It is not in the list, so no page edit. The facts comment LISTS these for a board item; none gets fixed:
+ - (i) The page shows Edit and Block on rows outside the admin's organisation, and those buttons will now get a 403.
+ - (ii) READ, NOT RUN: apiRequest (frontend/admin/src/services/api.ts 91) returns body.error or body.message. Auth's envelope makes body.error an OBJECT holding code and message. Users.tsx stores that object in errorMessage and renders it (716), and React refuses an object there. So a refused save may not show its reason as text, and today's 403s and 400s are hit the same way.
+ - (iii) READ, NOT RUN: the page's Add sends role, plus organizationId when typed, to POST /api/auth/register, which refuses both (KS-82, KS-1107). So the page cannot create users at all.
+
+== FAULTS AND NOTES ==
+- My first two Bash calls used cd: one to the project root, one into 2_Project_Files. The harness cwd has been 2_Project_Files since then. Every call since uses absolute paths.
+- I ran one git status in the shared checkout WITHOUT GIT_OPTIONAL_LOCKS=0, which may have refreshed its index file. No ref was written.
+- The boot ls-remote ran without GH_CONFIG_DIR exported. It worked over ssh.
+- My first develop auth run had no packages/shared dist, so 131 cells failed to load. I did not use it. The baseline above is the rerun with dist built.
+- s-w70-proto is MEASUREMENT ONLY: uncommitted, never pushed, pre-ANSWER. I made three runs:
+  - late placement;
+  - late placement with an exemption for level-only or organisation-only requests, dropped because both target cells also rename;
+  - early placement.
+- Shared checkout, read only: local develop 0e6479d7b6c0. The ls-remote gives origin develop a5ce6ee8b662, which is not present locally, so the checkout is stale and behind; the count can't be measured without a fetch. No tracked changes; 18 untracked files, one of them named --full.
+- Ordinal re-measured: 'seat w 69th' 1, 'seat w 70th' 0; the folders run to seatW-69th. REC is 5_Project_History/2026-11-23_seatW-70th/.
+
+== LAUNCHER PREFLIGHT (verbatim, MY launch's file, copied at boot to evidence/launch_preflight_copy.txt; the live file was overwritten at 07:02:52Z by a later launch) ==
+# launch 2026-11-23T06:48:39Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 3 other live session(s) on this project: PID 14177 (up since Mon 23 Nov 16:28:41 2026), PID 67941 (up since Mon 23 Nov 17:10:17 2026), PID 85357 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+(F-02: per the BRIEF, I seed nothing and set no flag. Any push goes through the repo's core.sshCommand, and I STOP on an identity refusal.)
+
+METER: 29.9 of 1M at 07:06:22Z (measured; the transcript's last usage record).
+I WAIT for your ANSWER. No code before it.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 39  SEEN:     1071  BATCH: /private/tmp/wed_newmail/batch_20261123T070712Z.txt

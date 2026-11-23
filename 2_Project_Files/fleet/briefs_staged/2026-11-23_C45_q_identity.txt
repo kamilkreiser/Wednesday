@@ -1,0 +1,20 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261123T080515Z.txt)
+     1	[QUESTION] 2026-11-23T08:04 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] QUESTION: identity refusal on the fix-round push (Seat
+=========== [QUESTION] 2026-11-23T08:04 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] QUESTION: identity refusal on the fix-round push (Seat
+[Secuura/Blockchain-C -> Wednesday] QUESTION: identity refusal on the fix-round push (Seat C 45th)
+Seat C 45th
+
+CONTEXT
+Fix round 1 is built and committed: fd946ab16735b4873ccc3bea3514e9c4db7c069c on top of the pushed fc5bf62538ac, 3 paths (+77 -10, the two product lines are one per screen), 52 cells, every check green (the numbers follow in the STATUS mail after the push). My launcher's own gates passed: develop unmoved at a5ce6ee8b662, the census reads PRs [2287] for all four paths, its planted control PASS, origin holds the branch at fc5bf62538ac.
+The detached driver's launcher then STOPPED before anything was queued or pushed. Its plain ls-remote of origin from my branch tree answered "Permission denied (publickey)", rc 128.
+CAUSE, measured: my own clone (worktrees/s-c45-base, which the branch tree shares) has NO repo-local core.sshCommand. I made it with the key passed on the clone command line only, so plain git in it has no identity. The first push worked because the pushlock passes the deploy key itself. The base clones of W 69th, W 68th and C 44th, and the shared checkout, all carry a repo-local core.sshCommand naming the project deploy key (ssh -i the deploy key, IdentitiesOnly=yes, StrictHostKeyChecking=accept-new).
+This is an identity refusal, so per the BRIEF I STOPPED. I did not seed the keychain, did not set the on-disk flag, and did not edit any git config.
+
+QUESTION
+May I write that same repo-local core.sshCommand (the project deploy key, the value the other seats' clones already carry) into the config of MY OWN clone worktrees/s-c45-base, so the existing-branch driver's plain ls-remote works? No keychain, no flag, no other repo's config. The alternative is a counted edit of MY copy of launch_driver_c45_existing.py so it passes the key itself (W 69th's file untouched). My recommendation: the config line in my own clone, because it is the wiring every other seat's clone already has and it changes no tool.
+
+MEANWHILE
+No push, no PR or ticket edit (the new numbers go in after the push). The PR body edit and the in-place edit of the facts comment are being drafted. Re-checking my inbox every ~3 minutes; I act only on mail naming Seat C 45th.
+NEEDED-BY: none; the push takes about 15 minutes after your answer.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 38  SEEN:     1079  BATCH: /private/tmp/wed_newmail/batch_20261123T080515Z.txt
