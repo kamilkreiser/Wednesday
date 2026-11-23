@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 70% 21:35 MON 23 Nov, the 19:30 rotation's SUCCESSOR - READ FIRST; the 65% block below is current except where this says otherwise
+- **develop = d59c623e0617** (unchanged since PR 2287). Kam: nothing new since 20:57:47; all three 20:5x cards ruled in the store; the menu card --delivered.
+- **LIVE: K 84th %336 SONNET** (ONE row PR 2288 KS-2316; brief fleet/briefs_staged/2026-11-23_seatK84_merge.md STAMPED 21:32; launched 10:34:07Z): plan QUESTION owed (rung 6) -> ANSWER -> STATUS -> READY -> GO (expected tree d7efab84b204ba3f3cf269622c9db9cbeeb1e6ef at pin d59c623e0617; refs re-asserted via gh API in the sending command; shape fleet/briefs_staged/2026-11-23_K83_go_2287.md) -> MERGED: verify at source, mark secuura-org-admin-user-writes-scope-ks2316-1122 --delivered -> WRAP.
+- **LIVE: W 71st %330 OPUS** HOLDING for GATE 413 (PR 2289 KS-1701, head ffefc6069630, 35 paths; duplicate comment a0f9e65f edited to a pointer per its report).
+- **SUBAGENT IN FLIGHT (dies with a rotation; re-commission from the file if no verdict.md):** GATE 413 TIER 1 OPUS on PR 2289: 0_Brain/reference/2026-11-23_gate413-tier1-ks1701-platform-admin-asks-the-shared-check/commission.md -> verdict.md -> W 71st fix round or WRAP -> a K seat (after K 84th; KS-1701 paths disjoint from PR 2288).
+- **THEN:** the deploy round (D seat, Kintsugi: KS-2314 gateway + KS-2331 + KS-2316, later KS-1701) and the follow-up AUTH lane (stub route + STANDARD cap + W 71st's deferred auth KS-1701 sites) after PR 2288 merges.
+
 ## 🔴 CHECKPOINT 65% 21:11 MON 23 Nov, the 19:30 rotation's SUCCESSOR - READ FIRST; supersedes every block below
 - **develop = d59c623e061756a3419a54a648db62b164ef04ed** (PR 2287 KS-2331 squash, VERIFIED at source 21:02:06: ONE parent a5ce6ee8b662, tree d98760f5824d). ELEVEN merges today.
 - **KAM RULED 20:56-20:57 (verbatim, all recorded):** menu card ks2331 = a 'Keep them, read-only' (--delivered: PR 2287); secuura-users-stub-org-scope-ks2316-1123 = b 'Cover it too'; secuura-org-admin-create-level-cap-ks2316-1123 = b 'Allow up to STANDARD on create'. Both b options say 'built and reviewed after KS-2316 merges' -> PR 2288 merges AS REVIEWED; ONE follow-up AUTH lane after it (stub route own-org + STANDARD cap on create), plus W 71st's deferred auth KS-1701 sites (users.ts lists, oauth.ts + ks1210 coupling, authenticate.ts): partition them (same file users.ts) or one Opus seat for all. Mark both cards --delivered when that lane merges. Panel receipt bf-0a6dc8212dd1.
