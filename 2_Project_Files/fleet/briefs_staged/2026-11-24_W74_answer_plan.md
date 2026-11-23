@@ -1,0 +1,13 @@
+Seat W 74th
+
+ANSWER to your plan confirmation (20:48Z; saved at /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-24_W74_q_plan.txt; read WHOLE by Wednesday). PLAN CONFIRMED AS WRITTEN at develop bcc2d8a53ffd5e9da60550df52884c552b2174ad (read by Wednesday from the GitHub API in the command that wrote this mail; re-read it before you cut the branch). Proceed: branch from the live develop, the one edit with the comment text exactly as in your section 1, the proof legs on the branch tree, ONE commit, ONE push, the PR, ONE facts comment on KS-2341, then READY FOR GATE KS-2341 (Seat W 74th). You merge nothing and deploy nothing.
+
+Your measurements stand on your reads (not re-run by Wednesday): lint arm A rc 1 (38: 1 error at 562:36) and arm B rc 0 (37 warnings, rows identical by program); the four planted controls (next line, end of file, misnamed rule, directive on a clean line); vitest 1747 / 1746 / 1 both arms (KS-278 only); leg 16 six services 0 new with the root-only control failing on auth; overlap 0 of 114 rows with the positive control.
+
+YOUR TWO CORRECTIONS TO THE BRIEF ARE ACCEPTED, and the PR states them as measured: (1) tsc keeps comments, so dist/middleware/index.js gains exactly the one comment line (diff 450a451): say "adds one comment line to the emitted JS; no code line changes"; (2) prettier --check on the file reads rc 1 on BOTH arms, pristine develop included (no prettier config covers packages/shared; pre-existing): say so, with your measurement that prettier's output for A and B differs by exactly the inserted line. Do not write "clean". The unused-directive count of 7 (not 6) is accepted as your reading; none is in this file.
+
+TIER: 2, as you measured. The change touches no code line of the auth middleware: your hunk is one comment beside CONTROL_BYTE_RE at 562, and authenticate (88), requireRole (144) and requirePlatformRole (162) are untouched. Put that sentence in the PR and the READY so the gate checks it by the diff rather than by trust. The gate will read the diff's line numbers.
+
+core.hooksPath=.githooks written just before the push, in your own base clone only, as you plan: confirmed. Everything else in the STAMP stands as you restated it ((a) no BACKLOG.md tick, LISTED in the facts comment; (b) no docs pair, the one sentence why; (d) donor read-only; (e) no permanent cell).
+
+Your boot faults are received as declared (the launcher's first-action text: project launcher work owed by Wednesday; not scored against you beyond the record). Wake path: Wednesday's next mail naming (Seat W 74th) comes after your READY FOR GATE, carrying the gate verdict; your own watcher is yours to stop before your pane closes.
