@@ -1,0 +1,74 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261123T071419Z.txt)
+     1	[QUESTION] 2026-11-23T07:13 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] QUESTION: plan confirmation (Seat C 45th)
+=========== [QUESTION] 2026-11-23T07:13 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] QUESTION: plan confirmation (Seat C 45th)
+[Secuura/Blockchain-C -> Wednesday] QUESTION: plan confirmation (Seat C 45th)
+Seat C 45th
+
+CONTEXT
+Build seat on KS-2331 (claude-sonnet-5-5, pane Secuura/Blockchain-C). Measured read-only in my own clone worktrees/s-c45-base, detached at develop a5ce6ee8b662 (the boot ls-remote equals it; the shared checkout sits at 0e6479d7b6c0 and I did not pull or fetch there). No lane file edited, no code before your ANSWER. Ordinal re-measured: highest seat c in history.md is 44, no seatC-45 folder existed, so 45th is free. Record: 5_Project_History/2026-11-23_seatC-45th/ (BRIEF.txt, evidence/).
+
+Q1 MEASUREMENTS AND DESIGN FOR HALF (a)
+(1) The crash, reproduced in jsdom with the real components under the real ErrorBoundary and a stubbed fetch (probe moved out of the tree, results in evidence/):
+- Document Types create refused with the gateway 403 body: "Something went wrong" page takes over (RED). Same for an object error with no message (500 body).
+- Control, string error: renders as text, form stays open, no boundary.
+- No error key: "Failed to create (500)" shows. Non-JSON body: "Failed to create (502)" shows. Both hold today.
+- Document Types delete 403 and delete 200 give identical output (DELETE, a reload GET, nothing shown; no red node). Workflows create 403 and create 201 are identical (form closes and clears, reload, nothing shown). Workflows delete 403 and 200 are identical.
+- What the error page offers: two buttons, Try Again (resets the boundary) and Go to Dashboard (sets location to /), ErrorBoundary.tsx 104-112; a production build also posts the error to /api/client-errors, lines 45-60. Code read, not run in a browser.
+(2) Helper: I grepped all of issuer src (positive control: sanitizeError is found in errorHandler.ts, DocumentDetail.tsx, api.ts). Nothing fits. sanitizeError (errorHandler.ts:66) maps Axios errors and Error messages to canned text and returns the generic server text for a plain body, so it hides "Platform admin access required". readAuthLinkOutcome (services/authLinks.ts:44, message read at 56) reads error.message else top-level message but not a string error, and importing it pulls the axios api module into these screens. GovernanceDashboard.tsx 238 and 266 do body?.error?.message ?? fallback inline, which would drop a string error. So reuse is not possible; smallest new helper: src/utils/refusalText.ts, one pure function refusalText(body, fallback), about 15 lines: a non-empty string error as is; else error.message when a non-empty string; else the fallback.
+(3) What to show: the gateway's own words (error.message). The gateway bodies on these routes are fixed strings: 401 and 403 ("Authentication required", "Invalid token", "Admin access required", "Platform admin access required") and the doc-type 500s ("Failed to create document type" etc., admin.ts 766, 782, 809, 823), so nothing internal is exposed. NOT measured: the body of an unhandled throw from proxy.ts's /api/workflows handlers (no try/catch, 1166-1197); the helper falls back to status text whenever the body has no string message. Fallback lines: Document Types create keeps "Failed to create (status)"; new ones: "Failed to delete (status)", "Failed to create workflow (status)", "Failed to delete workflow (status)".
+Where each is shown: Document Types create keeps the in-form line (126). Document Types delete gets its own page-level line under the header, because the in-form line sits inside the showCreate block (probe: no red node when the form is closed). Workflows gets a new error state: in-form line for create, page-level line for delete. Style is the existing "text-sm text-red-400", no new colour. A refused create keeps the form open with its fields; a refused delete does not reload (nothing changed); a later success clears the line.
+One extension, STRIKE it if unwanted: these same try blocks end in an empty catch, so a thrown fetch is silent (Workflows create and delete, Document Types delete) and the Workflows form closes as if it worked. I plan to show the existing text "Network error — could not reach the API" there. If you say STRIKE I leave the catches and list them.
+
+Q2 PATHS, a CLOSED list, all under Blockchain/Dev/frontend/issuer/
+1. src/components/admin/DocumentTypesManager.tsx (edit)
+2. src/components/admin/WorkflowsManager.tsx (edit)
+3. NEW src/utils/refusalText.ts
+4. NEW src/__tests__/ks2331-manager-refusals.test.tsx (helper cells and component cells in this one file)
+Not touched: Layout.tsx, App.tsx (unless your ANSWER says so), anything under services/, frontend/admin, packages/. Every changed line carries a KS-2331 comment with the prior behaviour (repo rule 5d).
+Docs fragments (test-discipline section 4): none planned. The last two issuer vitest commits, KS-2294 b8470f5fd and KS-2095 6911aa643, carried no file under Projects Documents. Say so if you want two fragments anyway.
+Overlap: none. 17 open PRs, 114 file rows read 07:06Z, 0 hits on any lane path. The only issuer rows are dependabot package.json bumps 639, 947, 948. Positive control: PR 2159 shows on gateway admin.ts. Siblings found outside the ticket, to be LISTED in the facts comment and not fixed: the same data.error-or-fallback read at Signatories.tsx 114, 148, 171, 189; MicrosoftVerification.tsx 118; ApprovalQueue.tsx 116; DelegationManager.tsx 136, 163; ExportDialog.tsx 151; ReportViewer.tsx 98 (read, not run; I did not measure which of those routes answer an object body).
+Baseline on develop a5ce6ee8b662, local macOS arm64, Node v26.8.1: issuer suite 7 files, 95 of 95 pass (2.8 s); tsc --noEmit rc 0; eslint 0 errors, 11 warnings (all in files I do not touch). The repo says LTS only; Node 26's LTS status is NOT checked against the vendor schedule, and the Test Evidence block will say so.
+
+Q3 CELLS (red first on the unfixed components, each inside the real ErrorBoundary), MUTANTS, PROOF
+C1 object error on a failed create: message shown, boundary absent (RED today). C1b object error with no message: fallback line, no boundary (RED).
+C2 string error renders unchanged (GREEN before and after). C3 no error key gives "Failed to create (status)", non-JSON gives it too (GREEN both).
+C4 refused Document Types delete shows its message with the create form closed (RED). C5 Workflows refused create shows its message, form stays open with its fields (RED). C6 Workflows refused delete shows its message (RED). C7 successful create and delete still clear, reload and show no error (GREEN both).
+C8 a later success clears a standing error line (Document Types create and delete, Workflows). C9 helper unit cells (string, object with message, object without, empty message, non-string message, null, array): RED because the module is absent on develop, and I say so.
+Mutants, each must turn a named cell red: M1 extraction back to the raw object (C1, C1b); M2 delete status check removed from Document Types (C4); M3 removed from Workflows create (C5); M4 removed from Workflows delete (C6); M5 success treated as an error (C7); M6 error line left after a later success (C8); M7 Workflows form cleared on refusal (C5); M8 helper drops a string error (C2, C9).
+Proof: jsdom only, the real components and the real boundary, fetch stubbed with the gateway's exact 403 body. A real-browser run against a refusing gateway is NOT planned: it needs the local stack built from develop plus an ORG_ADMIN login, a cost I have not measured. The READY mail and the facts comment will say "browser run not done". Say if you want it.
+Then the issuer suite WHOLE on both arms side by side, tsc and eslint legs with planted controls, ONE commit, ONE push by the new-branch driver, PR "Refs KS-2331: ...".
+
+Q4 TIER
+TIER 2 for half (a): error text on two issuer screens, no auth, no data, no gateway, no services. Option 1 below adds no role check and stays TIER 2.
+
+HALF (b), ONE SUB-QUESTION: keep or hide ORG_ADMIN's two menu items?
+Measured at a5ce6ee8b662, read from code, not run:
+- ORG_ADMIN keeps the READS: Document Types list (admin.ts 709, requireAdmin) and Workflows list (proxy.ts 1166, workflowAdminCheck). Writes are platform-only: admin.ts 751, 771, 787, 814 and proxy.ts 1173, 1194 (403 body is the object body above). The gateway's own comment says these records carry no organisation and every tenant reads them. So for an ORG_ADMIN both screens are a read-only reference today.
+- Layout.tsx 93-95: ORG_ADMIN or org_admin gets the org menu (items at 43 and 44); OWNER, owner, holder get the holder menu; every other role, platform admins included, gets the issuer menu, which lists NEITHER screen. So the one role the menu offers these screens to is the one role whose writes the gateway refuses, and a platform admin has no menu path to them. The routes (App.tsx 153, 154) sit under ProtectedLayout (66-82), which checks only sign-in, so hiding an item leaves the URL reachable.
+- No platform-role spelling exists anywhere in issuer src (grep of the whole tree; positive control Layout.tsx shows ORG_ADMIN twice). user.role is a plain string (AuthContext.tsx:26). The issuer's "shared" vite alias points at frontend/shared/src, not packages/shared, and its package.json does not depend on the shared package that holds isPlatformRole. So any client-side platform check would be a NEW spelling list or a new dependency: that is a STOP under the KS-1701 ruling.
+Options:
+1. Keep the items and make the screens honest (half (a) only). ORG_ADMIN keeps the read-only reference, every refused write shows "Platform admin access required". No role check, no Layout or App edit. Cost: ORG_ADMIN still sees Add Type, New Workflow and the trash buttons, which always refuse.
+2. Hide the two items from ORG_ADMIN (delete Layout lines 43 and 44). Loses the read-only reference, routes stay reachable by URL, edits Layout.tsx (outside my list without your ANSWER). No role check; still TIER 2.
+3. Keep the items and hide or disable the write controls for non-platform roles. Needs a client-side platform check: STOP and a question first; TIER 1 by the brief's own test.
+My recommendation: 1 in this PR, because it is the defect fix inside Kam's KS-2314 ruling and it unblocks the deploy order. Whether ORG_ADMIN should keep a read-only reference at all (1 versus 2) is a product choice, so I would send it to Kam as a card; I will not decide it. If you rule 2, it is a two-line Layout edit plus one Layout cell, and no spec drives the issuer's two routes: tests/ and systemTest/ hold 31 gotos at document-types or /workflows, and every one goes through the admin dashboard's base (a literal /admin, or ADMIN_URL from getAdminUrl, whose body I did not open; the test titles read /admin/document-types). Grep on spelling, not run.
+
+LAUNCHER PREFLIGHT WARNINGS, VERBATIM (file 4_Credentials/.launch_preflight_last.txt)
+# launch 2026-11-23T07:02:52Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 2 other live session(s) on this project: PID 46979 (up since Mon 23 Nov 17:48:39 2026), PID 85357 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+Acted on: no keychain seeding, no on-disk flag; the repo core.sshCommand served ls-remote and my own clone (no identity refusal). No pull in the shared checkout.
+
+MY SLIPS THIS BOOT (before I had read the BRIEF)
+- Two cd commands (one moved the shell into 2_Project_Files; I moved it back). Absolute paths and git -C since.
+- One git status in the shared checkout without GIT_OPTIONAL_LOCKS=0. Read-only command, but it can refresh the index stat cache. No ref write. 18 untracked paths were listed there (systemTest docs and two conflict snapshots), no tracked change.
+- I read two keys from the project env file inside python scripts, never printed and never in argv, as the BRIEF says. The repo's own CLAUDE.md in my tree says never open an env file in a session; the two rules pull in different directions.
+
+MEANWHILE
+Waiting on your ANSWER, no code. Inbox re-checked every ~3 minutes; I act only on mail naming Seat C 45th. Approval-class items: none in this plan.
+NEEDED-BY: none.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 39  SEEN:     1073  BATCH: /private/tmp/wed_newmail/batch_20261123T071419Z.txt

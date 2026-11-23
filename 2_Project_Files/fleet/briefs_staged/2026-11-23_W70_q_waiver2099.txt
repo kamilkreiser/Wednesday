@@ -1,0 +1,25 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261123T073845Z.txt)
+     1	[QUESTION] 2026-11-23T07:37 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] QUESTION: PR 2099 waiver on secuura-api.yaml (Seat W 7
+=========== [QUESTION] 2026-11-23T07:37 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] QUESTION: PR 2099 waiver on secuura-api.yaml (Seat W 7
+[Secuura/Blockchain-W -> Wednesday] QUESTION: PR 2099 waiver on secuura-api.yaml (Seat W 70th)
+Seat W 70th
+QUESTION: a PR 2099 waiver on one file. The gatetest STOPPED my push at gate (b) at 07:36:30Z (push/gatetest1.out). Open PR 2099 (KS-2060, last updated 2026-11-08) also touches Blockchain/Dev/docs/openapi/secuura-api.yaml, the regenerated spec QB put in my list. The census reads none for my other 9 paths, and its planted control PASSed. Develop was still a5ce6ee8b662 by gh api.
+
+MY FAULT: the plan's "Overlap: none" was measured on the paths I watched at boot. The yaml entered the list only with your QB answer, and I did not re-run the census on it. The gate caught it before any push.
+
+MEASURED (evidence/merge2099_both_orders_run2.txt, plumbing only, in my own clone; nothing pushed):
+- PR 2099's three yaml hunks sit in the components section (around lines 3779 to 4218). Mine are in the two path descriptions (around 18055 to 18249).
+- Order 1 (my commit 88d31bd3a5fd first, then PR 2099 head 8967de8b1755): rc 0, tree 850215f5cab2.
+- Order 2 (PR 2099 squash simulated on develop, which is itself rc 0, then my commit): rc 0, the SAME tree.
+- In the merged yaml, the change against my commit equals PR 2099's own yaml change (12 +/- lines, in order), and my 4 KS-2316 lines are present.
+- Planted control in the same run: an edit to the first line PR 2099 replaces, anchored by its unique 3-line context, CONFLICTS (rc 1).
+- Correction inside my own tool: run 1's planted control was NOT valid. Its plant line matched 897 lines, the setup failed, and its rc 1 was not a conflict. Its line-count check was also meaningless. Run 2 fixed both, and only run 2 is quoted above.
+
+Question: may I push with a one-file waiver for PR 2099 on secuura-api.yaml? That would be W 55th's waiver launcher form, as W 69th used for PR 2159: OVL_IGNORE_PRS=2099 set only by the waiver launcher, which re-runs merge-tree on the real commit plus a planted conflict control in the same run and STOPs if either is not as above.
+- Recommendation: yes.
+- The alternative, dropping the yaml from the PR, is not viable: the preflight's leg 1 (spec drift) and the --check would fail on auth.openapi.ts's new words.
+
+Also ready (preflight local on 88d31bd3a5fd, push/preflight_local_88d31bd3.out): rc 0, 908 s, 13/16 legs ran, nothing failed. Legs 3, 4 and 8 were skipped (local stack not up). Shell suites 131/131; test type-check 0 new errors against the baseline.
+Meanwhile: BLOCKED on the push. I am preparing the waiver launcher and will not run it before your ANSWER.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 40  SEEN:     1076  BATCH: /private/tmp/wed_newmail/batch_20261123T073845Z.txt

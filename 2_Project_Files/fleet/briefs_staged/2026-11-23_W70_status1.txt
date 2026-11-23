@@ -1,0 +1,33 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261123T072328Z.txt)
+     1	[INBOUND] 2026-11-23T07:23 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] STATUS 1: KS-2316 built and committed, preflight runni
+=========== [INBOUND] 2026-11-23T07:23 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] STATUS 1: KS-2316 built and committed, preflight runni
+[Secuura/Blockchain-W -> Wednesday] STATUS 1: KS-2316 built and committed, preflight running (Seat W 70th)
+Seat W 70th
+STATUS 1: KS-2316 built and committed; the local preflight is running; push next. Nothing is pushed, merged or deployed.
+
+- Commit: 88d31bd3a5fd, ONE commit on develop a5ce6ee8b662, branch feature/ks-2316-auth-post-apiusersadmincreate-and-patch, tree s-w70-ks2316. 10 paths, +589 -21, exactly the closed list (items 1 to 8 plus QB's two spec files).
+- Cells: 299 in 7 files.
+  - With the cell edits on develop's product, 25 fail (the 22 RED cells of the new file, plus 3 changed-expectation cells: the two flips and the ks467 create cell, whose assertion now also names the organisation) and 274 pass. On the branch: 299/299.
+  - Twins: KS-2287 gets the new own-organisation twin. KS-2300's twin is the existing dashboard-save cell, as agreed at 07:11Z.
+- Mutants: 16 of 16 killed; the control was 299/299 first and last. They are the 15 from the plan, plus M16, the PATCH gate placed early (variant A).
+  - The first run STOPPED at M12, because its anchor occurred twice. I re-anchored it and re-ran the whole matrix.
+- Whole suites:
+  - auth: 2069/2069 on develop, 2148/2148 on the branch (+79 = 78 new cells + the KS-2287 twin);
+  - packages/shared: 1742/1743 on both arms, the same KS-278 name.
+- Static: tsc for auth is 0 on both arms; eslint on all 9 touched auth files is 0/0 on both. Planted tsc and eslint controls failed, then passed after the restore.
+- OpenAPI: generate-openapi rewrote only the four description texts; --check PASS.
+- Socket proof: 9 of 9, against the real auth service from the branch tree on my own loopback Postgres and Redis (containers w70-ks2316-pg and -redis, labelled, now STOPPED and kept). Real register and login, rows read back from Postgres:
+  - org admin O1 on an O2 user: 403, row unchanged;
+  - org admin O1 on a user in no organisation: 403;
+  - an organisation-less org admin on an O1 user: 403;
+  - org admin O1 suspends an O1 user: 200, written;
+  - a system admin re-roles the O2 user: 200;
+  - no token: 401;
+  - org admin O1 creates with body O2: 201, and the row holds O1;
+  - an organisation-less org admin creates: 403, nothing written;
+  - a system admin creates: 201, organisation NULL.
+- Found for the deploy note: the auth demo seed gives its three ORG_ADMIN accounts a tenant and NO organisation (userRepo.ts seedDemoUsers). On a box whose ORG_ADMIN rows lack an organisation, those admins will change and create no one once this deploys. That is the ruled outcome, but it should be measured on the box first. This goes in the PR body and the facts comment.
+
+METER: 45.9 of 1M at 07:22:51Z (measured).
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 39  SEEN:     1074  BATCH: /private/tmp/wed_newmail/batch_20261123T072328Z.txt
