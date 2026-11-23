@@ -52,6 +52,23 @@ else
   exit 2
 fi
 [ -n "$TEXT" ] || { echo "note_entry: refusing empty text" >&2; exit 2; }
+# X-DIGIT CLOCK GUARD (2026-11-23; Friday ledger w=3 on 2026-11-22, after "07:5x", "~09:3x" and "21:5x" were typed
+# into durable text): a clock with an x in it (12:5x, 9:0x, 21:xx) is COMPOSED by construction — no instrument prints
+# one. REFUSED, rc 3, before anything is written. A time inside prose is pasted from the command that read it, or
+# left out. QUOTING text that already carries one (a grant row, an older note, this rule's own examples):
+# NOTE_ALLOW_XCLOCK='<why>' lets the entry through and the reason is appended to the line, so the exception is owned.
+# Selftest: tools/note_entry_xclock_selftest.sh (fire, quiet and override arms, on a scratch note).
+XCLOCKS="$(printf '%s\n' "$TEXT" | /usr/bin/grep -o -i -E '(^|[^0-9A-Za-z:])([01]?[0-9]|2[0-3]):([0-5]x|xx)([^0-9A-Za-z]|$)' | tr '\n' ' ' || true)"
+if [ -n "$XCLOCKS" ]; then
+  if [ -n "${NOTE_ALLOW_XCLOCK:-}" ]; then
+    TEXT="$TEXT [x-clock quoted, not composed: $NOTE_ALLOW_XCLOCK]"
+  else
+    echo "note_entry: REFUSED — the body holds a clock with an x digit: $XCLOCKS" >&2
+    echo "  A time in prose is pasted from the command that read it, or left out (the line is stamped for you)." >&2
+    echo "  Quoting text that already carries one: NOTE_ALLOW_XCLOCK='<why>' note_entry.sh --stdin …" >&2
+    exit 3
+  fi
+fi
 for RF in ${RECEIPTS[@]+"${RECEIPTS[@]}"}; do
   RL="$(/usr/bin/grep -v -E '^[[:space:]]*$' "$RF" | tail -n 1)"
   TEXT="$TEXT [receipt $(basename "$RF"): $RL]"
