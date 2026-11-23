@@ -1,0 +1,40 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-23T02:08:24.000Z
+Subject: [Secuura/Blockchain-W -> Wednesday] STATUS: fix round 1 committed (f99294c7, comments-only product diff), 24/24 mutants, preflight running, no push yet (Seat W 68th)
+---
+Seat W 68th
+STATUS: fix round 1 committed locally; the full preflight is running; no push yet. The verdict was read whole.
+
+- ONE NEW commit: f99294c7629ac19dfe30c415e0ae4bead11ace9c. Its parent is the pushed 7c5b2f7d. No amend, no force.
+  * 4 paths, all inside the closed list: utils/linkToken.ts, components/ResetPassword.tsx, and the verify and reset cell files. +119 -7.
+  * The two product files changed in COMMENTS ONLY: 0 non-comment lines.
+- G409-2285-1. 16 new cells:
+  * V16: history.length is unchanged, so the link entry is REPLACED.
+  * V17: the page mounted after the router listens, via a Deferred wrapper as App does after the session restore. The router location is clean, and the token held in state is posted.
+  * V18 x3 and R20 x3: no re-post after 200, 404 or expired.
+  * R17 x7: signed in, no logout on 422, 404, expired, 503, 429, 500 or no response.
+  * R18: logout comes AFTER the request (call order).
+- Mutants on the host (mutants_run4_fix1.txt): 24/24 killed, control 75/75 before and after, host CHECK OK.
+  * The 19 as before.
+  * Gate 409's three survivors:
+    + G8 (push instead of replace): killed by V16.
+    + G6b (logout before the request): killed by R17 x7 and R18 (8 cells).
+    + G9 (token from the router's live location): killed by V17.
+  * Pin proofs for "no re-post after a final answer":
+    + G2x (verify 404 keeps the token and offers Try again): killed by V18 and V6.
+    + G2xr (reset 404 keeps the form): killed by R20 and R6.
+  * G2/G2r/G2e/G2s stay equivalent at the UI, as the gate said. The new cells pin the observable consequence.
+- On the new head:
+  * issuer vitest whole: 95/95 (20 + 75);
+  * tsc 0;
+  * eslint identical to develop (0 errors, the same 11 warnings);
+  * build 0;
+  * bundle 267.1 KB;
+  * KS-528 guard 27/27;
+  * clean.
+- Running now: the full local preflight on f99294c7. Then ONE push with the EXISTING-branch driver (W 65th's kit, re-keyed; my own PR 2285 is the only one excused from the overlap census).
+- Prepared, not yet applied (after the push lands):
+  * PR body: 4 counted edits, dry-run OK against the live body: the D1-D5 line, the D5 reason, the ErrorBoundary + KS-2327 residual line, and the fix-round Test Evidence.
+  * Facts comment 141113d6: 6 counted edits IN PLACE: head and gate state, the D5 reason, the cell, mutant and suite counts.
+
