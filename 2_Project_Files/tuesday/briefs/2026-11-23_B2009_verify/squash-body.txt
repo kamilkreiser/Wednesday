@@ -1,0 +1,36 @@
+The lab tool's four parsers (probe, print, oxpd1 read, oxpd1 lab-cert)
+now share one helper for their usage errors, ParserWords: a word the
+parser does not know is named by its position only, so a pin or a
+password typed where an option name belongs, as --password=<value> or
+as a stray word, is not printed. An option of the command given last
+with no value is still named.
+
+A blank --run (each command) and a blank --credentials-file (oxpd1
+read) are usage errors, exit 2. A run folder that cannot be made (an
+I/O failure or no permission) ends in exit 5, as one that exists; the
+reason names the exception's type only. A credentials file that cannot
+be read (no permission, a dangling link, held by another program) ends
+oxpd1 read in exit 7 before any connection, as a missing one does.
+
+probe refuses --plain-discovery-tree without --pin (exit 2), so a run
+without a pin is a first contact that sends nothing.
+
+The masking catches ArgumentException, so a JSON answer holding one
+name twice is not shown (its type and length only), and a body is read
+by its first byte only when it has no type: a typed body of another
+kind is not shown.
+
+Two doc comments now say what the code does (the command table, the
+device channel). The two registry cells check the command names by
+contains (distinct, every usage listed, print right after probe), so a
+later command needs no line in them.
+
+34 new cases against stubs on 127.0.0.1: C# totals plus 34 on both
+legs, the rules count plus 2. No project file, lock file, package or
+workflow line changes. Stated limits: a word typed as the value of a
+known option is taken as that value (--run's is printed as the run
+folder); a write failing after the run folder is made is not caught;
+with --pin the plain call can go out before a handshake checked the
+pin. No device has been reached. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
