@@ -238,4 +238,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-11-22 21:44 | Kamils-Mac-mini | recursive_scope hook: fleet/state globs | CLOSED |  2026-11-22 21:47 done: wired into template, arms 21/21, doctor check, pushed 5499a6c9ca |
 | 2026-11-23 03:06 | Kamils-Mac-mini | no-rm hook heredoc false positive | CLOSED |  2026-11-23 03:09 done 869ab51fb3: quoted heredoc bodies skipped unless fed to a shell; arms 29/29 + ablation |
 | 2026-11-23 10:24 | Kamils-Mac-mini | stuart-weekly-monday-list | CLOSED |  2026-11-23 10:58 built 80714f1066, installed com.wednesday.stuartweekly Mon 08:00, doctor check ok; first real share + card post unmeasured until Mon 2026-11-30 |
-| 2026-11-23 11:43 | Kamils-MBP | note_entry.sh: refuse a body holding a clock with an x digit (Friday ledger 2026-11-22 w=3) — Friday (laptop) | OPEN | |
+| 2026-11-23 11:43 | Kamils-MBP | note_entry.sh: refuse a body holding a clock with an x digit (Friday ledger 2026-11-22 w=3) — Friday (laptop) | CLOSED |  2026-11-23 11:44 done: guard + tools/note_entry_xclock_selftest.sh; run the selftest once in each seat's tree after pulling |
