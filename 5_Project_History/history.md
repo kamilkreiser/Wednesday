@@ -1,3 +1,9 @@
+## 2026-11-24 06:00 -> 06:30 — Tuesday (Datasec seat; s320, boot-only; Opus 5.5; wrapped on Kam's word "please wrap up I will log into a new account in 12 hours"; weekly gauge 99%)
+- Boot reads done (rules card, seat ledger, pickup live blocks, grants, today's note); nothing live, nothing launched.
+- Posted: morning card `datasec-morning-plan-1124` (open, rec a), board summary bf-373128507f26, wrap receipt bf-88de4514ac26.
+- Open on Kam: `datasec-weekly-usage-97pct-1123` (he signs in a new account in ~12 h), the OXPd Azure sign-in steps, the M577 password.
+- NEXT: 0_Brain/tasks/NEXT-PICKUP-TUESDAY.md DELTA 1388 -> DELTA 1386 (a5).
+
 ## 2026-11-23 22:42 -> 2026-11-24 05:30 — Tuesday (Datasec seat; s319, one session, no rotation; Opus 5.5; wrapped at the 05:30 shift change with the queue dry and the weekly gauge at 99%)
 - LANDED, each reviewed, verified at source, nothing deployed: OXPd PR 42 closed (main e39396f9 HOSTED PASS); OXPd PR 43 (lane CT: HP's Test, CertificateManagement and UIConfiguration descriptions for first-run steps 2-4, nine files byte for byte from the pinned SDK jar; G2 Opus B2017 GO WITH FINDINGS, Info only) -> main c5b103ee; OXPd PR 44 (lane W2: lab `oxpd1 write` + print-only `undo-owed`; G1 Opus B2016 GO WITH FINDINGS, 1 Major) -> main b0b26b60, HOSTED PASS 2093/657; NexusAI PR 245 Build closed; NexusAI PR 246 (RD-1031 contrast suite upkeep; G2 Sonnet B2015 GO WITH FINDINGS) -> main d96a83d3 by merge commit, no Deploy demo.
 - Records: OXPd B2010 (seat R308) READY 103fec2d: C-77 (his 20:55 password note), C-78 (his 20:56 Azure tap), six owed items ticked, 93-97 filed; the m577 card delivered to C-77.
