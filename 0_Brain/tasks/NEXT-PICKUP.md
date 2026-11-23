@@ -8,7 +8,7 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
-## 🔴 CHECKPOINT 65% 12:2x MON 23 Nov, the 10:19 rotation's SUCCESSOR - READ FIRST; supersedes every block below
+## 🔴 CHECKPOINT 65% 12:24 MON 23 Nov, the 10:19 rotation's SUCCESSOR - READ FIRST; supersedes every block below
 - **develop = bde7a70d054ed791da5df58f4f1f87fb119e685a** (PR 2276 squash, VERIFIED 12:12:39). Six merges today (2280, 2281, 2160, 2282, 2283, 2276). Kam's dashboard-delete card marked --delivered.
 - **KINTSUGI k38 DONE** (D 80th, scored 0.96, closed): runs 8389ed294629 on admin-frontend, mcp-server, originate, api-gateway; auth HELD (KS-2294); demo untouched (Stuart's nod). Panel receipt posted. **NEXT KINTSUGI ROUND needs card 1006's cache clear FIRST** (free 66,559 MB vs 60,000 gate); carries PR 2276 (gateway code), PR 2274, PR 2284 when merged.
 - **LIVE:** **K 79th %297** (ROW B PR 2274 next: READY-2 -> GO one at a time with ls-remote asserted; then WRAP; then a K 80th for PR 2284 KS-2275, gate 408 GO WITH NOTES + words fix accepted). **W 68th %294 OPUS** (KS-2294 pages, frontend/issuer; second push running on rebased head 7c5b2f7d184d; then READY FOR GATE tier 1 -> commission an Opus gate, shape of gate 408's commission).
