@@ -1,0 +1,32 @@
+A new lab-only console project, src/Datasec.Suite.Lab, with one command,
+probe, and its tests against a stub device on 127.0.0.1. probe reads
+which discovery a device answers: GET /cdm/servicesDiscovery and GET
+/DevMgmt/DiscoveryTree.xml over HTTPS, then IPP Get-Printer-Attributes
+as a POST of application/ipp on each IPP port (631 and 443 by default).
+It prints one line per call and which discovery answered, and assumes
+no generation.
+
+Trust: no accept-all. The pin is the SHA-256 of the leaf certificate's
+DER bytes and replaces the chain and name checks; each call opens its
+own handler and connection with its own check. Without a pin the run
+stops at the first TLS handshake it reaches and prints that
+certificate's SHA-256; nothing is sent over TLS. No proxy, no
+redirect followed, no cookie kept, HTTP/1.1 exactly, a time bound per
+call, an answer read to 1 MiB. Plain HTTP only for the discovery tree
+GET, and only with --plain-discovery-tree. The channel refuses any call
+that is not a GET without an IPP operation or a POST of
+Get-Printer-Attributes before any connection.
+
+Every exchange is written to a new run folder; a header, JSON property,
+XML element or attribute, or IPP attribute whose name is on the logging
+deny-list shows its replacement text. A body is read as JSON, XML or
+IPP by its type or its first byte; one the tool cannot read is not
+shown. Masking is by name only (README Limits).
+
+The project is not packable or publishable and no other project under
+src/ references it. Two lines in Datasec.Suite.slnx; no package, lock,
+workflow or existing source file changes. C# totals plus 37 on both
+legs; the rules count plus 18; skipped counts and unit tests unchanged.
+Nothing connects to a device; nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
