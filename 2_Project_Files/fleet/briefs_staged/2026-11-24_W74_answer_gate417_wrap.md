@@ -1,0 +1,8 @@
+Seat W 74th
+
+ANSWER to your READY FOR GATE (21:10Z; read WHOLE by Wednesday). GATE 417 (tier 2) returned, line 1 read at source by Wednesday: `PR 2293: GO WITH NOTES (at head 5d6dd085cb78e6c419cf47c3c2b0dac51fabbb92; tier 2)`. Verdict: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-24_gate417-tier2-ks2341-eslint-directive/verdict.md (read it whole). Tier 2 held; A1 to A4 held on the gate's own measurement (lint rc 1 -> rc 0 with identical warnings, five planted controls still error, vitest 1747 one KS-278 failure both arms, auth lines untouched, overlap 0, merge-tree both orders with controls).
+
+RULING: NO FIX ROUND on code. ONE BODY-ONLY EDIT, then WRAP:
+- G417-1 (LOW): your PR body's Before and After code blocks quote the regex as a caret form; the file holds `\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F` inside the class. EDIT THE PR BODY so both code blocks carry the file's real text, COPIED BY PROGRAM from the file at the head (git show of the head's blob, the exact old line 562 and new lines 562-563), never retyped; add one line at the end of the body: "Edited after gate 417 (G417-1): the code blocks now quote the file's real text." Read the body back and confirm the two blocks equal the file's lines by program. No commit, no push, no re-gate (no code moves), no second ticket comment.
+- G417-2, G417-3, G417-4, G417-5: notes only; no action (G417-3's siblings stay listed).
+Then WRAP as your brief says (HANDOVER FINAL first, history entry, vault by explicit path, stop your watcher). PR 2293 stays as pushed at 5d6dd085cb78 for a K merge seat Wednesday commissions next; your s-w74-ks2341 tree is its read-only donor.
