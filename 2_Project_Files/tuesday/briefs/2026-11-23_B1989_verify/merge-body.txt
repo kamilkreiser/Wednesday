@@ -1,0 +1,21 @@
+RD-1032: in light mode the cyan, magenta and yellow toner fills (static/css/index-styles.css) are now the flat brand-token
+colours #0a8793 (--nx-role-partner-manager), #b44752 (--nx-role-security) and #b57a13 (--nx-role-partner-tech), which read
+3.61, 4.47 and 3.08 to 1 on the #e9ecef toner track, against 1.74, 2.58 and 1.29 at the lowest stop before (BRAND.md R8,
+WCAG 1.4.11: 3:1 for a graphic). Each rule carries the hex with the token named beside it, because tokens.css is linked by
+no page and a var(--nx-*) there would paint nothing (RD-234). The black fill is unchanged.
+
+Dark mode paints what it painted before. The six old gradient stops are kept as --toner-* properties in the light sheet's
+:root and dark-mode.css has one rule per fill that paints the same gradient from them, because dark-mode.css may hold no hex
+of its own (RD-182) and the light sheet may not name the dark state (RD-158). In a real browser the dark computed styles
+and pixels are identical before and after and the light fills change.
+
+scripts/derive-brand-tokens.js names --nx-surface-raised, the toner track, as a ground of the three tokens (graphic use
+only), static/css/tokens.css is regenerated (comment text only, no value moves), docs/BRAND.md says so, and cell C5 of the
+RD-175 test reads a dark stop through the --toner-* properties. A new test file pins both themes. Suite counts 6245 tests in
+395 suites. The cartridge table's colour dots (SUPPLY_COLOURS in static/js/index.js) are not changed.
+
+The three colours and the light-only scope were settled before the build; the shape of the change (literal hex, the dark
+rule through the --toner-* properties, the BRAND.md bullet) is the coordinator's default.
+Not deployed.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>

@@ -1,0 +1,63 @@
+Landing for the light toner fills change (RD-1032), repo datasecau/Reporting_Dashboard_Au.
+MERGE COMMIT, head-pinned. Never squash, never rebase (C-190; the same commit lands).
+Gate B1989 (round 1 of 2) at head 97a07e65d675960e937b6742981af5d338d427d7: see VERDICT.md line 1 for the verdict.
+Nothing here is run until Tuesday reads VERDICT.md; a NO GO there means these steps are not run.
+LANDING HOLD 23 of the seat's kit: the branch carries Tuesday's six defaults (literal hex with the token named beside it,
+the dark rule shape through the --toner-* properties, flat light fills, the BRAND.md bullet, black untouched, the
+SUPPLY_COLOURS dots untouched). The gate read all six at the branch and found none wrong (VERDICT.md, DEFAULTS); the hold
+is lifted by Tuesday's reading of VERDICT.md. The three colours and "light only, dark unchanged" are the product owner's
+ruling; every other choice is the coordinator's.
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-23_B1989_verify'
+HEAD=97a07e65d675960e937b6742981af5d338d427d7
+
+0. Re-read before acting: branch b1977/rd1032-light-toner-fills must read $HEAD and main
+   85b39c77b84573757d26113cf094325b5b80c182 (the gate read both at 15:14 AEDT 2026-11-23: compare main...head
+   "ahead", ahead 2, behind 0, merge base = main, exactly 8 paths; 0 open pull requests).
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/branches/b1977%2Frd1032-light-toner-fills' --jq .commit.sha
+   If main moved: list the paths it changed since 85b39c77. Any of the eight paths of this branch
+   (static/css/index-styles.css, static/css/dark-mode.css, static/css/tokens.css, scripts/derive-brand-tokens.js,
+   docs/BRAND.md, __tests__/rd349-rd175-readable-text-on-its-ground.test.js,
+   __tests__/rd1032-light-toner-fills-clear-their-track.test.js, scripts/verify-expected-counts.json),
+   static/js/index.js, any other stylesheet under static/css/, any other file under __tests__/ or scripts/ (a test
+   added or removed moves the counts pair 6245/395), or any file the run list names, is a re-gate. A move in HISTORY.md,
+   BACKLOG.md, 1_Project_Definition/** or docs/** other than docs/BRAND.md is noted and the landing goes on.
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1977/rd1032-light-toner-fills --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks with a background wait that EXITS. The repo's checks, read at 15:20 from the head of the last
+   merged code PR (242, head 27d49f70, merge 85b39c77): 7 distinct names, all success: CodeQL, build, scan,
+   audit-production-deps, Analyze (javascript-typescript), Analyze (python), Analyze (actions). (A branch push alone
+   starts audit-production-deps, scan and build runs on the head; the 7 names appear with the pull request.)
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/Reporting_Dashboard_Au PRNUM $HEAD 60 90 --min-checks 7
+   The hosted build runs the verify on Node 24 on the PR merge ref; its pair must read `Tests: 6245 passed` and
+   `Test Suites: 395 passed` (the committed scripts/verify-expected-counts.json at $HEAD; the seat's two full verifies at
+   A and K both measured 6245/395; the gate's own full verify at K: see VERDICT.md). Read it from the build job's
+   "Run tests (verify gate)" step. NOTE (read at 15:20): the first hosted Build run on PR 242's head 27d49f70 ended
+   "failure" at that step after 65 minutes (run 45068925824, attempt 1) while a later Build run on the same head was
+   success; if this PR's Build reads failure, read the step's log before anything else and report to Tuesday (never
+   re-run it from this seat). CodeQL: the seat's local run (rc 0, no new, no kept) and the gate's are in VERDICT.md; any
+   alert the hosted check reports on this PR, i.e. any alert not in main's open set of 22, is a landing blocker:
+   STOP, never dismiss, never comment; report to Tuesday.
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit as a merge commit:
+   gh pr merge PRNUM -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit $HEAD --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing (C-224, the demo deploy hold, stands): the merge touches static/**, scripts/** and __tests__/**, which
+   .github/workflows/deploy-demo.yml does NOT path-ignore (it ignores only '**.md', 'docs/**' and 'tests/**',
+   deploy-demo.yml:29-32), so a Deploy demo run starts on main. BOTH of its jobs, build and deploy, MUST read skipped
+   (both gated on vars.CI_DEPLOY_ENABLED, deploy-demo.yml:53 and :91; the last four runs on main, 45099235994
+   (85b39c77), 45090779073 (df72a283), 45042817352 (50b7c40c) and 44709694341 (37cd9846), concluded skipped, re-read
+   15:20; the newest merge commit's check runs read build skipped and deploy skipped). Anything other than skipped is
+   a stop-and-report. Do not dispatch, re-run or touch a variable. deploy.yml does not start on a push.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert; the open alerts unchanged (22 open on main at 15:20: 13
+   backend/server.js, 2 each backend/incidents.js, backend/jsonStorage.js, backend/routes/entraProvisioning.js,
+   backend/services/emailService.js, 1 tests/uat-run.js; none in a path of this branch). NOT DEPLOYED: the product
+   owner's word "deploy" is a separate decision (C-220, C-224) and a separate route. No Jira from the landing seat:
+   RD-1032 moves by the records seat after the hosted checks of the landing head (FOR-RECORDS.md).
