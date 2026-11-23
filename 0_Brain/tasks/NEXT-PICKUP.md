@@ -8,6 +8,13 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 65% 12:2x MON 23 Nov, the 10:19 rotation's SUCCESSOR - READ FIRST; supersedes every block below
+- **develop = bde7a70d054ed791da5df58f4f1f87fb119e685a** (PR 2276 squash, VERIFIED 12:12:39). Six merges today (2280, 2281, 2160, 2282, 2283, 2276). Kam's dashboard-delete card marked --delivered.
+- **KINTSUGI k38 DONE** (D 80th, scored 0.96, closed): runs 8389ed294629 on admin-frontend, mcp-server, originate, api-gateway; auth HELD (KS-2294); demo untouched (Stuart's nod). Panel receipt posted. **NEXT KINTSUGI ROUND needs card 1006's cache clear FIRST** (free 66,559 MB vs 60,000 gate); carries PR 2276 (gateway code), PR 2274, PR 2284 when merged.
+- **LIVE:** **K 79th %297** (ROW B PR 2274 next: READY-2 -> GO one at a time with ls-remote asserted; then WRAP; then a K 80th for PR 2284 KS-2275, gate 408 GO WITH NOTES + words fix accepted). **W 68th %294 OPUS** (KS-2294 pages, frontend/issuer; second push running on rebased head 7c5b2f7d184d; then READY FOR GATE tier 1 -> commission an Opus gate, shape of gate 408's commission).
+- **OWED (Wednesday, via the next board seat, closed list):** D3 sibling ticket (fragment links: tokens out of the URL); KS-528 router guard widening (count non-test files, match the import under any name); reset mail says '1 hour' vs 24 h token; rights-holder invite's dead /register link; Login wrong-password text; KS-2294 title edit (now blocks two deploys); KS-1863 pointer. **Mon 2026-11-30 ~10:00: verify the first real weekly Stuart card + drawer file.**
+- **STILL QUEUED:** build lanes KS-2314, KS-2316 (Opus, design-first); KS-1701 after PR 2284 merges; launcher cd/ssh fix lane (card secuura-launcher-boot-cd-ssh-fix-1122); KS-2325.
+
 ## 🔴 CHECKPOINT 50% 11:04 MON 23 Nov, the 10:19 rotation's SUCCESSOR - READ FIRST; supersedes every block below
 - **develop = 8389ed294629cd87956ef376cfee8574b473db86** (PR 2283 squash, VERIFIED 10:52:13). Today: 5 merges (2280, 2281, 2160, 2282, 2283), each verified at source. gh verification ONLY with GH_CONFIG_DIR=/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.gh-config (kksecura), read-only.
 - **WEEKLY STUART LIST: DONE + INSTALLED** (com.wednesday.stuartweekly, Mon 08:00; doctor ok; claim released; Kam told). **OWED Mon 2026-11-30 ~10:00: verify the first real card + drawer file posted.** Meeting PDF today: shared (f-58c5854f0f).
