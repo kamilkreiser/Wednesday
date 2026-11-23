@@ -1,0 +1,50 @@
+Landing for the signal file read fix (lane NX-SR), repo datasecau/Reporting_Dashboard_Au.
+MERGE COMMIT, head-pinned. Never squash, never rebase (C-190; the same commit lands).
+Gate B1975 (round 1 of 2) at head d37db35c9bb99cf39136448a05f1a39ef214313e: see VERDICT.md line 1.
+Nothing here is run until Tuesday reads VERDICT.md; a NO GO there means these steps are not run.
+LANDING HOLD 23 of the seat's kit: the branch carries Tuesday's four defaults (test-side in both readers, preload
+unchanged, one commit with no counts change, no ticket key in the commit).
+
+export GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'
+V='/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-23_B1975_verify'
+HEAD=d37db35c9bb99cf39136448a05f1a39ef214313e
+
+0. Re-read before acting: branch b1966/nexusai-signal-read-race must read $HEAD and main
+   3c3be156e8ea36ad297fdadd3055c6e00252ba38 (gate read 10:32 AEDT 2026-11-23: compare main...head "ahead", ahead 1,
+   behind 0, merge base = main, exactly 2 paths).
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/main --jq .commit.sha
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/branches/b1966%2Fnexusai-signal-read-race --jq .commit.sha
+   If main moved: list the paths changed since 3c3be156. A move touching either of the two test files,
+   __tests__/helpers/rd615-slow-audit-flush-preload.js, __tests__/helpers/rd395-server-harness.js or
+   __tests__/helpers/rd525-live-store.js is a re-gate; a test added or removed elsewhere moves the counts pair
+   (6235 / 394) and is a re-gate. HISTORY.md, BACKLOG.md, 1_Project_Definition/** and docs/** only: note it and go on.
+   Open pull request 242 (b1958/nexusai-nx-p-permission-table, head 27d49f70) shares no path; its merge ref is rebuilt
+   on the new main after this lands (Tuesday's step).
+
+1. Open the PR:
+   gh pr create -R datasecau/Reporting_Dashboard_Au --base main --head b1966/nexusai-signal-read-race --title "$(cat "$V/pr-title.txt")" --body-file "$V/pr-body.md"
+
+2. Wait for the checks with a background wait that EXITS. Read at 10:35 from the head of PR 242: 7 distinct names, 8
+   runs (audit-production-deps twice): CodeQL, build, scan, audit-production-deps, Analyze (javascript-typescript),
+   Analyze (python), Analyze (actions).
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/Reporting_Dashboard_Au PRNUM $HEAD 60 90 --min-checks 7
+   The hosted build's counts pair must read 6235 / 394 (scripts/verify-expected-counts.json unchanged, blob 32146fe9377e;
+   the seat's plain verify at this head read 6235 / 394 PASS; the gate ran no full verify). CodeQL: the gate's local run
+   is in VERDICT.md; any alert the hosted check reports that is not in main's open set of 22 is a landing blocker:
+   STOP, never dismiss, never comment; report to Tuesday.
+
+3. Put the PR number into merge-subject.txt in place of (#PRNUM), then land the SAME commit as a merge commit:
+   gh pr merge PRNUM -R datasecau/Reporting_Dashboard_Au --merge --match-head-commit $HEAD --subject "$(cat "$V/merge-subject.txt")" --body-file "$V/merge-body.txt"
+
+4. After landing (C-224 stands): __tests__/** is NOT in deploy-demo.yml's paths-ignore ('**.md', 'docs/**', 'tests/**',
+   lines 29-32), so a Deploy demo run starts on main. BOTH jobs, build and deploy, MUST read skipped (gated on
+   vars.CI_DEPLOY_ENABLED, lines 53 and 91; the last four runs on main (45042817352, 44709694341, 44679971602,
+   44620339933) concluded skipped, the newest one's jobs read build skipped, deploy skipped, re-read 10:34). Anything
+   else is a stop-and-report. Do not dispatch, re-run or touch a variable.
+   gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --branch main -L 1
+   gh run view <run-id> -R datasecau/Reporting_Dashboard_Au --json jobs --jq '.jobs[] | [.name,.conclusion] | @tsv'
+
+5. CodeQL on the merge commit on main: no new alert; the 22 open alerts unchanged (13 backend/server.js, 2 each
+   backend/incidents.js, backend/jsonStorage.js, backend/routes/entraProvisioning.js, backend/services/emailService.js,
+   1 tests/uat-run.js; none under __tests__/; re-read 10:34). Not deployed. No Jira from the landing seat.
+6. Then rebuild PR 242's merge ref on the new main (Tuesday's step; its hosted build is the red this lane answers).

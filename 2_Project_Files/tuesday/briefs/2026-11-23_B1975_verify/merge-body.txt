@@ -1,0 +1,11 @@
+Tests: __tests__/rd711-audit-flush-serialised.test.js and
+__tests__/rd615-audit-flush-cannot-resurrect-erased-entries.test.js read the slow-audit-flush preload's signal file the
+moment it existed. The preload creates the file and then writes it, so a read in between saw an empty file and
+JSON.parse threw "Unexpected end of JSON input" (one hosted build, four cells of rd711 from one beforeAll throw).
+Both readers now count the signal as given only once its text parses; a read that throws is polled again inside the
+wait bound each test already had, so a signal that never parses still fails the cell by value. The preload, the
+cells and the counts file are unchanged (6235 tests in 394 suites).
+
+The test-side choice is the coordinator's default. Not deployed.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
