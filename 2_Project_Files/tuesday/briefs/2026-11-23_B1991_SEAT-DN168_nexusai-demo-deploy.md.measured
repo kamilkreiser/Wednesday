@@ -1,0 +1,99 @@
+948444e0 | AZURE_CONFIG_DIR=<P>/4_Credentials/.azure az account show -o json (15:57) -> rc 0; tenant d500ebad, sub 0c57ab37 'Azure subscription 1', user.type servicePrincipal, user a71b85e7 (first 8 only; saved fleet/state/s316/d1991/az_account.json)
+1f39efaa | az ad sp show --id <user.name> --query displayName -o tsv (in-process, id not printed) -> rc 0, nexusai-claude-deploy
+f8779680 | az group show -n nexusai-dev-rg --query '{id,location,state}' -> rc 0; id subscription segment 0c57ab37, rg nexusai-dev-rg, australiaeast, Succeeded
+ab3f03ca | az storage account show -n stnexusaidmjy25ipoih5eo -g nexusai-dev-rg --query '{name,rg,kind,state}' -> stnexusaidmjy25ipoih5eo, nexusai-dev-rg, StorageV2, Succeeded
+e19353af | printf %s 17fc6c5157d5446cc015e97555fdc1ffcdc986ee | shasum -a 256 | cut -c1-16 -> def3ac7e654fdacd
+eb46cc85 | curl -s -m 20 -w HTTP https://nexusaidev-app.../api/health (15:59:02 AEDT) -> HTTP 200 {"status":"OK","timestamp":"2026-11-23T04:59:02.196Z","version":"2.2.1","build":"def3ac7e654fdacd"}; and the printf line above -> def3ac7e654fdacd (equal)
+bf53122b | echo 17fc6c5157d5446cc015e97555fdc1ffcdc986ee | shasum -a 256 | cut -c1-16 -> c0f6d84d7051eb09 (the control differs from def3ac7e654fdacd, as the guide says)
+e6ef8832 | echo 17fc6c5157d5446cc015e97555fdc1ffcdc986ee | shasum -a 256 | cut -c1-16 -> c0f6d84d7051eb09
+0388c143 | az monitor activity-log list -g nexusai-dev-rg --start-time 2026-10-16T05:00:00Z --end-time 2026-11-23T06:00:00Z --max-events 5000 (all statuses) -> 37 events; counted by program
+c22a12d1 | same activity-log read, Counter over (op,status,day) -> Microsoft.App/containerApps/write: 1 Started + 1 Accepted, both 2026-10-16; no containerApps/write on any later day (saved actlog_since_1016_all.json)
+ae4e68c9 | /usr/bin/grep -c '_''___' <this kit, unstamped> -> 10 (the control that fires; the stamped copy must read 0)
+45d76615 | GH_CONFIG_DIR=<P>/4_Credentials/.gh-config gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/244 --jq '.merged' -> false at drafting (PR open, head 97a07e65, mergeable_state unstable); the seat requires true: UNMEASURED until it lands
+281675a2 | same command -> false at drafting; `true` is the seat's pass condition after the landing, not observed (UNMEASURED)
+f254b11b | gh api -X GET .../pulls/244 --jq '{merge_commit_sha,...}' -> field present, 94fad51d3279ee6fe8a98c20abcc7cdd865e478e (GitHub's test merge while open; the real value exists only after landing)
+137636a9 | /usr/bin/grep -c -i -F '<hex>' on index-styles.css saved by gh api -X GET contents?ref= at 97a07e65 and 85b39c77 -> see the three lines below
+c79d26df | grep -c -i -F '#0a8793' -> 97a07e65: 1 (line 272); 85b39c77: 0
+0d9ae842 | grep -c -i -F '#b44752' -> 97a07e65: 1 (line 273); 85b39c77: 0
+44dc4852 | grep -c -i -F '#b57a13' -> 97a07e65: 1 (line 274); 85b39c77: 0
+f11099b6 | gh api -X GET .../pulls/244/commits -> 0ab1ea39 (parent 85b39c77), 97a07e65d675960e937b6742981af5d338d427d7 (parent 0ab1ea39): head is 97a07e65
+ba07d132 | gh api -X GET .../branches/main --jq .commit.sha -> 85b39c77b84573757d26113cf094325b5b80c182 (merge of #242), the base of PR 244 (pulls/244 base.sha equal)
+5f7b1027 | gh api -X GET commits/85b39c77.../check-runs --jq names -> 8 runs; 'deploy | completed/skipped' present once
+721d6e27 | same -> deploy completed/skipped; build completed/skipped (the deploy-demo workflow's build job) and build completed/success (the push build)
+d625c024 | same read at 85b39c77 -> 8 runs: build skipped, Analyze (python/actions/javascript-typescript) success, deploy skipped, build success, scan success, audit-production-deps success
+2d9decff | same -> two runs named build: one completed/skipped, one completed/success
+f6b6dc7d | GH_CONFIG_DIR=... gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/variables --jq '{total_count, names:[.variables[].name]}' -> {"names":[],"total_count":0}
+2bf98b7b | same command -> {"names":[],"total_count":0}
+b13e1b78 | same command, field total_count -> 0
+4d0c571c | every drafter az call carried AZURE_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.azure' -> rc 0 each; folder exists (ls -la 4_Credentials shows .azure, drwx------)
+0337e52e | instruction text (the seat prints its own variable once), not a matched output; no value to measure
+a8de97a3 | instruction text (names the seat's tool), not a matched output
+6d683756 | az role assignment list --assignee <sp id, in-process> --all --query '[].{role,scope}' -> rc 0; 3 rows
+1397e53c | same -> 3 of 3 rows roleDefinitionName Contributor
+4bbe9480 | same -> scopes resourceGroups/nexusai-dev-rg, resourceGroups/nexusai-staging-rg, resourceGroups/nexusai-marketplace-validate (0 subscription-scope rows)
+f424e6a7 | UNMEASURED: id1991.py is the seat's own tool, not yet written; the kit requires its control to print MISMATCH (the seat proves it)
+94da4964 | instruction (echo "$AZURE_CONFIG_DIR" must name <P>/4_Credentials/.azure); the drafter passed the variable inline on every call, rc 0
+866fe005 | az containerapp show -n nexusaidev-app -g nexusai-dev-rg -o json (15:58) -> rc 0; read in memory: Succeeded, Running, Single, latestRevisionName/latestReadyRevisionName nexusaidev-app--0000100, fqdn nexusaidev-app.politeforest-b008d469.australiaeast.azurecontainerapps.io, traffic [latestRevision True weight 100], registry nexusaidevacrfa39.azurecr.io by identity, 6 secret names, nexusai-api image @sha256:c12c43e5..., cpu 0.5 mem 1Gi, redis redis:7.4-alpine, env 22 / secretRefs 5, scale 1/1, volume nexusai-data AzureFile nexusai-files, identity SystemAssigned (the raw dump's 22 env values were then masked in place)
+bfa1b3be | az containerapp show ... --query "properties.template.containers[?name=='nexusai-api'] | [0].env[].[name, secretRef]" -o tsv -> 22 lines; 5 with a secretRef name (e.g. AZURE_OPENAI_API_KEY aoai-key), 17 print None (e.g. NODE_ENV None)
+891db986 | instruction fragment (Step 2.3 expected tuple), measured as the next line
+2df76aa9 | az containerapp revision list -n nexusaidev-app -g nexusai-dev-rg --query "[?properties.active].{n,i,t,h,r}" -o tsv -> exactly 1 line: nexusaidev-app--0000100 | nexusaidevacrfa39.azurecr.io/nexusai@sha256:c12c43e538f1274c1a7ba180f2cdfd595be63ec16eee0e45c690903734e08e4f | 100 | Healthy | RunningAtMaxScale
+69de6e5c | az acr manifest list-metadata -n nexusai -r nexusaidevacrfa39 --orderby time_desc --top 8 -> rc 0; the manifest tagged 2.2.1-s99o-17fc6c5 has digest sha256:c12c43e538f1274c1a7ba180f2cdfd595be63ec16eee0e45c690903734e08e4f (created 2026-10-16T05:16:46Z). The exact contains() query form is the guide's (lines 156-157), not run by the drafter in that form: UNMEASURED form, MEASURED value
+0d8752a0 | same read -> sha256:c12c43e538f1274c1a7ba180f2cdfd595be63ec16eee0e45c690903734e08e4f
+9b16b597 | quoted from DEPLOYMENT_GUIDE.md at 85b39c77 line 160 (`-n` is the REPOSITORY, `-r` is the REGISTRY) -> grep -n confirms line 160
+dffbcdf8 | the guide's query shape (lines 156-157) with the tag filled; value measured by the top-8 listing above -> c12c43e5... is the one manifest with that tag
+aae97a73 | az acr show -n nexusaidevacrfa39 --query '{rg,loginServer,sku,adminUserEnabled,...}' -> nexusai-dev-rg, nexusaidevacrfa39.azurecr.io, Basic, false, australiaeast, Succeeded, publicNetworkAccess Enabled
+f259f2df | same -> sku Basic
+67be37de | same -> adminUserEnabled false
+ba0771e9 | az acr manifest list-metadata (top 8, time_desc) -> rc 0 (a preview warning on stderr: "Command group 'acr manifest' is in preview")
+2ff07e24 | top-8 listing (at drafting) -> no manifest tagged 85b39c77... or any 40-hex tag; the S2 tag is unknown until landing (UNMEASURED for S2 itself)
+db5db400 | same listing -> tag 2.2.1-s99o-17fc6c5 present on sha256:c12c43e5...
+8e16a987 | az storage account show -n stnexusaidmjy25ipoih5eo -g nexusai-dev-rg -> Succeeded; share-backup.sh line 4 names SA=stnexusaidmjy25ipoih5eo SH=nexusai-data (cat of the 18-line script)
+88e98216 | ls -A <2026-10-16 backup> | wc -l -> 56; grep -c '^_' -> 5; wc -l _sha256.txt -> 51; listing file rows 51, dir rows 3; HANDOVER-S99O.md:9 quoted "51 root files"
+e177a521 | instruction (the seat's compare), no output to match
+29be9b4e | instruction (names a check not needed); no output to match
+5420f3db | git -C <P>/2_Project_Files --no-optional-locks rev-parse --abbrev-ref HEAD -> main; origin/main (local) 50b7c40c; config core.sshCommand names /Volumes/Laptop-DEV/... ; ls -d /Volumes/Laptop-DEV -> No such file or directory. Porcelain of the seat's fresh clone UNMEASURED (it does not exist yet)
+83690611 | build-commit-sha.sh at 85b39c77 (gh api -X GET contents, 56 lines): lines 40-53 test `git status --porcelain` empty and HEAD =~ ^[0-9a-f]{40}$ -> read with the Read tool
+8341eb82 | seat's own run (status --porcelain | wc -l -> 0 expected on a fresh clone): UNMEASURED by the drafter (no clone made)
+d823ad51 | seat's own run: UNMEASURED by the drafter
+3c3208a1 | query shape of the guide with <S2>; the top-8 listing shows no such tag today -> nothing (the expected empty answer before the build)
+c8eb2c52 | same as 3c3208a1
+37dc9a70 | revision list (active) -> nexusaidev-app--0000100 is the one active name; the new name must differ from it
+5f8a7d2b | az containerapp show -> latestRevisionName nexusaidev-app--0000100
+024b447e | revision list (active) -> healthState Healthy
+3e46586c | revision list (active) -> runningState RunningAtMaxScale (starts 'Running'); swap-17fc6c5.log line 'ONLY active ... Healthy RunningAtMaxScale'
+c562da1b | az containerapp revision list -n nexusaidev-app -g nexusai-dev-rg --all --query "[?name=='nexusaidev-app--0000100'].{a,t,r}" -o tsv -> True 100 RunningAtMaxScale today (after the swap it must read False 0)
+66804acd | revision list --all (15:58) -> the 100 inactive revisions read active False, traffic 0 (e.g. nexusaidev-app--s81j-220-fdda330 False 0 Stopped)
+f68e6866 | cat session-tools/s99o/deploy/swap-17fc6c5.log -> '=== 2026-10-16T05:17:12Z swap' and '2026-10-16T05:18:54Z ONLY active' (1 min 42 s); DEPLOYMENT_GUIDE.md lines 170-171 '66.1 seconds' and '112 seconds'
+e46aa256 | same as c562da1b -> True	100	RunningAtMaxScale
+800d8cc5 | curl -s -m 20 .../api/health (15:59:02 AEDT) -> HTTP 200, status OK, version 2.2.1, build def3ac7e654fdacd
+c0edc6cd | same -> "version":"2.2.1"
+32d5829f | gh api -X GET contents/package.json?ref=85b39c77... --jq .version -> 2.2.1
+5e65e43d | same command form with ref 85b39c77 -> 2.2.1 (S2's value UNMEASURED until landing)
+5434e2c1 | same -> 2.2.1
+be27917f | same -> ref 85b39c77 reads 2.2.1
+112008d4 | seat's comparison over its own two files; the drafter's single env-pairs read printed 22 lines (fleet/state/s316/d1991/env-pairs.tsv) -> comm of a file with itself prints nothing (property of comm; the seat's real pair is UNMEASURED)
+fa13a5f9 | instruction (cmp of two seat files); S99O's env-names-before/after.json were cmp-equal (mail-07-deployed.txt item 3) -> RELAYED
+e09bc11e | az containerapp logs show -n nexusaidev-app -g nexusai-dev-rg --revision nexusaidev-app--0000100 --container nexusai-api --type console --tail 300 --format text -> rc 0, 302 lines; 'Persistence sentinel' 0 in this tail (the container booted 38 days ago, its boot lines are older than 300 lines: the NEW revision's tail right after boot is where they appear); boot-log-0000100.txt: 'Persistence sentinel intact + HMAC verified' 1, 'Demo seed: loaded' 1, 'Received SIGTERM, flushing audit buffer before exit' 1
+bedb291e | grep -n -i 'Log Analytics' session-tools/s99o/mail-07-deployed.txt -> item 1 names 'Received SIGTERM scheduling shutdown at 05:18:46Z (Log Analytics 4b806734)'
+a500e8b2 | mail-07-deployed.txt item 5 (RELAYED): /css/dark-mode.css 200 and byte-equal on 2026-10-16; the drafter sent no GET to it
+ebd18e3e | mail-07-deployed.txt item 5 (RELAYED): /css/tokens.css 200 and byte-equal on 2026-10-16; the drafter sent no GET to it
+0812e141 | the seat's download; the drafter did not GET /css/index-styles.css (UNMEASURED whether it answers 200 without sign-in)
+d73c7dd3 | grep -c -i -F '#0a8793' -> PR head copy 1, 85b39c77 copy 0 (the control)
+e7e37599 | grep -c -i -F '#b44752' -> PR head copy 1, 85b39c77 copy 0
+977efc3b | grep -c -i -F '#b57a13' -> PR head copy 1, 85b39c77 copy 0
+3946fa74 | the Step 0.5 file the seat saves; the drafter's equivalent fleet/state/s316/d1991/index-styles.css.97a07e65 holds each hex 1
+8e3bcbdf | fleet/state/s316/d1991/index-styles.css.85b39c77 -> each of the three hex 0; '#26c6da' 1 (the old light stop, positive control)
+f1846f2b | az containerapp revision activate --help, az containerapp ingress traffic set --help, az containerapp update --help, az acr build --help, az containerapp logs show --help (az 2.92.0) -> rc 0 each (saved help_*.txt)
+2541c1da | az containerapp revision activate --help -> 'az containerapp revision activate : Activate a revision.' '--revision [Required] : Name of the revision.'; ingress traffic set --help -> '--revision-weight' (line 8)
+6e69402a | quoted from the commission B1991 item 3 ('ROLLBACK block (re-activate the previous revision and move traffic back...)'); grep -c -F in the commission -> 1
+f324647a | the kit's own STOPPED line form; no tool prints it
+2aa06417 | UNMEASURED: the drafter sent no GET to /css/index-styles.css; the file is served from static/css/ (Dockerfile:44 COPY static/ ./static/) as S99O measured for /css/tokens.css
+8ccc0ce5 | cat session-tools/s99o/share-backup.sh line 8 -> K=$(az storage account keys list -n $SA -g nexusai-dev-rg --query '[0].value' -o tsv ...); activity log 2026-10-16 shows Microsoft.Storage/storageAccounts/listKeys/action Started+Succeeded x2
+8a54a514 | share-backup.sh lines 9 and 13 -> az storage file list ... and az storage file download ... (read verbs on the share)
+6492ef17 | deploy-demo.yml at 85b39c77 line 53 -> 'github.event.inputs.image_tag' (workflow_dispatch trigger present); 260 runs all skipped (RELAYED B1978)
+a8a7c1d3 | standing line from DRAFTER_RULES ('never GIT_AUTHOR_* / GIT_COMMITTER_*'); grep -c -F 'GIT_AUTHOR_' in B1792 kit -> 1
+64245fe0 | same standing line; not an output
+d16a8cc9 | standing instrument line; not an output
+3598b7af | standing line (never type cd); not an output
+6502b7df | a STATUS heading the seat writes; not an output
+5783b7db | revision list (active) -> nexusaidev-app--0000100 (the record the STATUS section must name)
