@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 ROTATION HANDOVER 08:47 Tue 24 Nov, the 07:21 rotation's SUCCESSOR, morning (statusline ctx:77%; rotating at the next safe boundary in 80-90) - READ FIRST; supersedes every block below
+- **develop = bcc2d8a53ffd5e9da60550df52884c552b2174ad** (GitHub API 08:4x). Kam: nothing since 20:56:50 (23 Nov). His k43 RECEIPT is POSTED (live-board HTTP 201 bf-4a1f3bb30ae2).
+- **DONE this seat (scored, closed):** K 88th 0.94 (PR 2292 merged), W 74th 0.96 (KS-2341 built, PR 2293; it REFUTED Wednesday on the PR body: the gh CLI rewrites backslash-u escapes; read bodies by python urllib), D 85th 0.96 (Kintsugi k43: issuer-frontend at bcc2d8a53ffd LIVE; KS-2336 live; auth HELD; next stamp k44, priors 32). Gate 417 = GO WITH NOTES (G417-1 WITHDRAWN).
+- **LIVE: K 89th %381 SONNET** merge seat, ONE row PR 2293 (KS-2341, tier 2), head 5d6dd085cb78e6c419cf47c3c2b0dac51fabbb92, FF at develop bcc2d8a53ffd, expected tree = the head's own 8ea5657d5a53b9b1ad23edbdb034649eed9d1cb8 (if develop moves: the new merge tree, re-measured); ONE authority gate 417 at the head; no waiver; no extra title key. Brief fleet/briefs_staged/2026-11-24_seatK89_merge.md STAMPED; PLAN CONFIRMED (fleet/briefs_staged/2026-11-24_K89_answer_plan.md). NEXT: STATUS at SET-UP CLOSED -> READY -> verify PR 2293 at source (gh is fine for head/state/files; the BODY only by urllib) -> GO in the brief's exact form (shape fleet/briefs_staged/2026-11-24_K87_go_2291.md, FF; develop + head re-asserted in the sending command) -> MERGED verify (one parent = pin, tree = expected) -> WRAP, score, pane_close (identify its watcher by command line).
+- **AFTER the merge:** a k44 D seat (packages/shared source comment: measure whether /shared/dist bytes move in any node image; tsc keeps comments) only if something changes; KS-2342 census (no lint leg in the push path; Kam's two cards KS-2331/KS-2339 still open, defaults stand).
+- **OWED (unchanged):** the launcher first-action trap (every seat today: cd, key in argv, env names, unlocked reads; project launcher work); PRs 2195/2159 need Wednesday's words; Mon 2026-11-30 Stuart card; weekly consolidation lapsed since 10-19 (and the by-tier digest is 731 KB); INDEX refresh.
+- **NO SUBAGENTS IN FLIGHT. NO AGENT QUESTION OPEN.**
+
 ## 🔴 CHECKPOINT 70% 08:22 Tue 24 Nov, the 07:21 rotation's SUCCESSOR (statusline ctx:70%) - READ FIRST; supersedes every block below where they differ
 - **develop = bcc2d8a53ffd** (unmoved at 08:11:46). Kam: nothing since 20:56:50 (23 Nov).
 - **LIVE: D 85th %375 OPUS** k43 (GO KINTSUGI sent 08:03; build launched 21:10:58Z, STATUS 1 read). NEXT: STATUS B (post-swap) -> read WHOLE -> GO LIVE-CHECK (Seat D 85th) -> STATUS C -> panel receipt to Kam via chat_reply --project Secuura (its brief section 8) -> WRAP, score, pane_close.
