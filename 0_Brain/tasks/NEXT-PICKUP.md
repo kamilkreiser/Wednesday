@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 STATE 09:32 Tue 24 Nov, the 09:05 rotation's SUCCESSOR (statusline ctx:58%) - READ FIRST; supersedes every block below where they differ
+- **develop = e3e79b7317f14ebccc8bb14e2001bdbf85e517fb** (unmoved; S 119th's guard read it at five stamps to 22:26:29Z). Kam: nothing since 08:57; receipt posted on the panel (bf-d15825fdef17) + a one-line correction (bf-684204016b84: 'no AGENT seat is licensed', not 'nobody').
+- **DONE this seat (scored, closed):** K 89th 0.95 (pane %381 closed); S 119th 0.93 (pane %384 closed): KS-2331 Done + archived (comment 9d92f56f), KS-2339 ruling comment 08fbe7a5, both VERIFIED at source by Wednesday; BOTH 08:57 cards --delivered (store delivered_ts 09:29).
+- **LIVE: W 75th %387 OPUS** (row C3, tier 1 expected) KS-2339 design-first build, brief fleet/briefs_staged/2026-11-24_seatW75_ks2339_design.md (STAMPED; drafter commission 0_Brain/reference/2026-11-24_drafter-seatW75-ks2339/commission.md). NEXT: its plan QUESTION (nine sub-questions, ApprovalQueue first) -> ANSWER each with a recommendation (keep: ApprovalQueue NOT built; originate authoritative; caller org from the users ROW; raw-stream gateway forward so ks781 LEG F stays routes: 1; yaml OUT; PATCH/reads/nominee membership/tenant LISTED not built) -> build -> READY FOR GATE -> commission a TIER 1 OPUS gate -> K merge seat (K drafter must carry K 89th's six kit gaps: fleet/briefs_staged/2026-11-24_K89_wrap.txt).
+- **Capacity at 09:32: FULL (load1 9.6)**: next lane only on ROOM.
+- **OWED (unchanged):** k44 (does PR 2293's comment move /shared/dist bytes in any node image); KS-2342 census; PRs 2195/2159 need Wednesday's words; launcher first-action trap (S 119th and K 89th both hit it today: cd, key in argv, reads before the brief); Mon 2026-11-30 Stuart card; weekly consolidation lapsed since 10-19; INDEX refresh (last 11-20).
+- **NO SUBAGENTS IN FLIGHT. NO AGENT QUESTION OPEN.**
+
 ## 🔴 CHECKPOINT 50% 09:14 Tue 24 Nov, the 09:05 rotation's SUCCESSOR (statusline ctx:51%) - READ FIRST; supersedes every block below where they differ
 - **develop = e3e79b7317f14ebccc8bb14e2001bdbf85e517fb** (ls-remote 09:09:46 through the project's own key; gh's global identity now reads KamORG454, NOT Secuura's: use the project GH_CONFIG_DIR). Kam: 3 rulings 08:57, all ruled in the store; reconcile: nothing to rule.
 - **DONE this seat:** K 89th WRAP read WHOLE, SCORED 0.95 (scoreboard top), pane %381 CLOSED (--live-ok for its own watch.py, pid identified by command line).
