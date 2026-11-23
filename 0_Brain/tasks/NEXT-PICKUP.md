@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 73% 00:32 TUE 24 Nov, the 22:39 (23 Nov) rotation's SUCCESSOR - READ FIRST; supersedes every block below where they differ
+- **develop = 7af256b71a3bbd1c31193df4b62487c6ddcd2020** (PR 2289). Kam: nothing new since 20:56:50 (23 Nov).
+- **K 85th WRAPPED, SCORED 0.95, pane %345 CLOSED.** D 83rd WRAPPED 0.95, CLOSED (k41 live on Kintsugi).
+- **GATE 414 DONE:** 'PR 2290: GO WITH NOTES (at head 341185aab5a704992c64a4b944745142378c48a5; tier 1)'; merges onto 7af256b71a3b AS IT STANDS (tree 71b319a0 both orders). NO FIX ROUND ruled (fleet/briefs_staged/2026-11-23_W72_answer_gate414_wrap.md). **LIVE: W 72nd %342 OPUS: WRAPPING** -> read WHOLE, score, pane_close (identify any live watcher by command line; --live-ok if it is its own).
+- **SUBAGENT IN FLIGHT (dies with a rotation; re-commission from the file if no output):** K 86th DRAFTER, ONE row PR 2290 at develop 7af256b71a3b, ONE authority gate 414 at the head, ONE-file PR 2099 yaml waiver re-measured at READY, the stage-rc standing line: 0_Brain/reference/2026-11-24_drafter-seatK86/commission.md -> fleet/briefs_staged/2026-11-24_seatK86_merge.md. On return: read WHOLE, stamp, capacity read ALONE, launch SONNET (row C5) -> plan Q -> READY -> GO (refs re-asserted in the sending command; shape fleet/briefs_staged/2026-11-23_K85_go_2289.md, WITH a waiver paragraph like 2026-11-23_K84_go_2288.md) -> MERGED verify at source -> mark --delivered: secuura-users-stub-org-scope-ks2316-1123 AND secuura-org-admin-create-level-cap-ks2316-1123.
+- **OWED (new):** the ks1701 guard lowering follow-up (G414-2290-1: ALLOWED authenticate.ts 1->0, users.ts 1->0; FROZEN_BASELINE users.ts 9->3, oauth.ts 1->0, authenticate.ts 1->0); fix legsB85.sh's stage rc in the drafter kit copy. Plus the 65% block's list (KS-2314 + KS-2331 to Done; the KS-1591 Unicode-fold ticket; the originate 502 label) and the 22:35 block's.
+- **NO AGENT QUESTION OPEN.**
+
 ## 🔴 CHECKPOINT 70% 00:08 TUE 24 Nov, the 22:39 (23 Nov) rotation's SUCCESSOR - READ FIRST; supersedes every block below where they differ
 - **develop = 7af256b71a3bbd1c31193df4b62487c6ddcd2020** (PR 2289 KS-1701 squash, VERIFIED at source 00:06:01: ONE parent 8c2c24d37074, tree 789505563da2 = the GO's). THIRTEEN merges on 23 Nov. Card secuura-platform-role-spellings-ks1701-1123 --delivered. Kam: nothing new since 20:56:50 (23 Nov).
 - **K 85th %345 SONNET: MERGED, WRAP NEXT** -> read WHOLE, score, pane_close (its mail watcher may need --live-ok after identifying it by command line, as D 83rd's did).

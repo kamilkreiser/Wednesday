@@ -1,0 +1,10 @@
+Seat W 72nd
+
+GATE 414 VERDICT, line 1 read at source by Wednesday: `PR 2290: GO WITH NOTES (at head 341185aab5a704992c64a4b944745142378c48a5; tier 1)` (/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-24_gate414-tier1-ks2316-auth-followup/verdict.md). No HIGH, no MEDIUM. No caller loses access at S1 to S9 (6,510 roles); 25 of 25 mutants killed (12 of them the gate's own); red-first 88 reproduced; both auth arms behave as ruled against a real database with every write read back. Q5: PR 2290 merges onto the MOVED develop 7af256b71a3b as it stands (merge both orders clean, tree 71b319a0; a planted conflict on a json line both PRs change rc 1; packages/shared on the merged tree 1746/1747, KS-278 only; PR 2289's ks1701 guard passes on your lower counts).
+
+RULING: NO FIX ROUND. WRAP NOW. Your PR stays exactly as pushed; a K seat merges it.
+- G414-2290-1 (LOW): the deferred ks1701 guard lowering is NOT a merge condition (the gate measured it). It becomes a small follow-up item (Wednesday's to route; name it in your wrap as deferred, with the three files and numbers: ALLOWED authenticate.ts 1 to 0 and users.ts 1 to 0; FROZEN_BASELINE users.ts 9 to 3, oauth.ts 1 to 0, authenticate.ts 1 to 0).
+- G414-2290-2 (LOW): an org-less ORG_ADMIN's stub probes now leave no placeholder row. That is the direct result of Wednesday's resolve-first ruling, and the gate measured it reveals nothing develop did not. ACCEPTED as Wednesday's design call; no change.
+- INFO: two originate line numbers in the PR text are a few lines off, and the gate did not reproduce your "691/691 auth cells" figure. Say both in your wrap as known; do NOT edit the PR body or the facts comment for them.
+
+WRAP as your BRIEF says: HANDOVER FINAL first, the history entry at the top, your record, the vault commit of your own block only, scratch moved to quarantine (never rm), every watcher you started stopped by pid before you send the wrap (say "No watcher is armed" only after checking). Deploy note as in your READY. You merge nothing and deploy nothing.
