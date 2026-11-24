@@ -158,15 +158,15 @@ Size in bytes and the first 16 hex of sha256, printed by python at drafting (the
 
 ## Stamp
 Tuesday fills each slot at launch; one word, clock, list or quoted sentence each. The unstamped copy reads one four-underscore line per slot below plus the last line.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (root `main` head, code `main` head, pull request 133's squash sha, the gate's line 1, PCOMP-130's comment count; each a 40-hex token, a short sha, a number or a quoted line, read by Tuesday): ____
-- JIRA (`WRITE` or `DRY`; the drafter recommends `WRITE`): ____
-- COMMENTS (`PCOMP-130` or `NONE`; approves TEXT-130 byte for byte, `model-routing.md:97`; the drafter recommends `PCOMP-130`): ____
-- MOVES (`NONE`, or `PCOMP-130`; a move needs the key in COMMENTS and its table MET by program; the coordinator's decision recorded at commissioning is the review's FOR-RECORDS item 1, move on landing; the drafter recommends `PCOMP-130`): ____
-- RECORDS (`WRITE` or `DRY`; `WRITE` allows the worktree, the one commit and, with REC-MERGE, the merge): ____
-- REC-MERGE (`MERGE` or `HOLD`; default `HOLD`): ____
-- STATE-ROWS (`APPEND` or `NONE`; default `NONE`; `APPEND` appends the sentence on row #496; the drafter recommends `APPEND`): ____
-- HARD STOP (clock; READY aimed at your Step-0 date plus 75 minutes; the earlier of that and this clock wins): ____
+- STAMP: 12:27 2026-11-24 by Tuesday s322 (successor of s321). Drafter defaults Q1-Q6 taken as written: Q1 no ticket for Note N1 (a note in OPEN-133); Q3 the move of PCOMP-130 on landing is the coordinator's call (review FOR-RECORDS item 1, the PCOMP-67 precedent), recorded as such; Q4 seat R312, pane Datasec/Composer-R312; Q5 stale descriptions and comments untouched. Stamp checks run by Tuesday before this stamp: kit read whole (Read tool, two pages, 173 lines); stamp_check.py 189 of 189 measured, rc 0; four-underscore lines 11 before the stamp; brief_seat.sh:31 reads LEVEL="${BRIEF_SEAT_LEVEL:-opus}" (so the level stays inside the quotes); the C-155 refusal phrase counts 3 in the Composer CLARIFICATIONS.md, heading at :2912; pickup line 9 holds both quoted halves (1 and 1, control 0). No STOP-severity check of this kit was run by Tuesday on a real output beyond the drafter's prototypes: the NEVER RUN list stands as written.
+- LAUNCH WINDOW: from this stamp to 13:30 AEDT on 2026-11-24; a launch after 13:30 re-measures BASE first.
+- BASE (root `main` head, code `main` head, pull request 133's squash sha, the gate's line 1, PCOMP-130's comment count; each a 40-hex token, a short sha, a number or a quoted line, read by Tuesday): root main 413685b7d8bd2c5bdf8d2ce3d4b2129fddbfd71f (git rev-parse, Tuesday, after 12:22:43); code main d06508f8a69267542b92959a2048198055a7b473 (gh api GET branches/main, Tuesday, 12:22:43 run, account kamilDatasec, control pulls/9999 404); pull request 133 merged true, merge_commit_sha d06508f8a69267542b92959a2048198055a7b473 (same run); open pull requests 0; head 7e10c623 check runs CodeQL, Analyze (csharp), Analyze (javascript-typescript) all completed success (Tuesday GET, 12:22:55 run); the gate's line 1 "GATE B2035: GO @ 7e10c62 on main 8b9ab20" (head -1, Tuesday); B2033 STATUS last line "READY B2033: 7e10c623da45ba66c02fcff89185f1f6f247ccc9" (tail -1, Tuesday); PCOMP-130 comment count 0 (the DRAFTER's Jira GET at 12:08:32, not re-read by Tuesday: REFUSE 6 is the seat's re-read).
+- JIRA (`WRITE` or `DRY`; the drafter recommends `WRITE`): WRITE
+- COMMENTS (`PCOMP-130` or `NONE`; approves TEXT-130 byte for byte, `model-routing.md:97`; the drafter recommends `PCOMP-130`): PCOMP-130
+- MOVES (`NONE`, or `PCOMP-130`; a move needs the key in COMMENTS and its table MET by program; the coordinator's decision recorded at commissioning is the review's FOR-RECORDS item 1, move on landing; the drafter recommends `PCOMP-130`): PCOMP-130
+- RECORDS (`WRITE` or `DRY`; `WRITE` allows the worktree, the one commit and, with REC-MERGE, the merge): WRITE
+- REC-MERGE (`MERGE` or `HOLD`; default `HOLD`): MERGE
+- STATE-ROWS (`APPEND` or `NONE`; default `NONE`; `APPEND` appends the sentence on row #496; the drafter recommends `APPEND`): APPEND
+- HARD STOP (clock; READY aimed at your Step-0 date plus 75 minutes; the earlier of that and this clock wins): 14:30 AEDT on 2026-11-24 (Tuesday's deadline for this pass; the earlier of it and your Step-0 date plus 75 minutes wins for READY).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 12:27 2026-11-24 by Tuesday s322 (Read tool, lines 1-77 and 78-173, kit at 77269 bytes before this stamp).
