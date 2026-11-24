@@ -1,0 +1,12 @@
+# B2082 COMMISSION (in-session, READ-ONLY) -- Datasec: "can we provide access to Security Manager to other members of the Datasec company?"
+
+Kam, live board 2026-11-25 10:48:09 (view=tuesday), verbatim: "can we provide access to security manager to other members of the Datasec company?". Tuesday's receipt: bf-833655a0948e (told him nothing changes without his word).
+
+## Find, read-only, with the source of every fact
+1. WHICH "Security Manager": most likely HP Security Manager (the HP product) as Datasec runs it. Find every instance Datasec has: search (scoped: maxdepth or --include) `/Volumes/Datasec_DEV/!CODING/Datasec/` project CLAUDE.md, CLARIFICATIONS.md (grep only), SETUP_RUNBOOK.md, BACKLOG.md and 5_Project_History/history.md files for 'Security Manager', 'HPSM' + 'VM', 'Bastion', 'RDP', 'hpsm-' resource names; also `/Volumes/Datasec_DEV/TUESDAY/0_Brain/learnings/` lesson `2026-10-03_hp-security-manager-azure-deploy-grant.md` and `/Volumes/Datasec_DEV/TUESDAY/0_Brain/reference/` (scoped grep, --include='*.md', maxdepth 2). If there is more than one candidate (the HP product vs the HPSM-POC web app, or a demo vs UAT), list each.
+2. For each instance: where it runs (Azure tenant id and subscription BY NAME/ID FROM THE RECORDS, resource group, VM or app; never run az), how a person reaches it (web console URL shape, RDP/Bastion, VPN), how sign-in works (Windows local accounts, AD/Entra, HP SM's own users and roles), who has access today per the records, licensing limits on users/seats if recorded, and what HP's docs in the project library say about adding users and roles (cite file and page).
+3. Options for giving other Datasec staff access, each with: what it takes (steps, by whom), security implications (least privilege, MFA, shared accounts are a no), cost, and whether it touches a tenant/production/demo the workspace rules treat as Kam's (workspace CLAUDE.md hard rule 4: never mix tenants; HP SM demo for HP is client-facing). Recommend one.
+4. Note: HPSM-POC is on hold until 2026-12-10 (Kam 2026-11-19); this is a read-only answer to his new question, nothing is built or changed.
+
+## Output
+`/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-25_B2082_hpsm-access/ANSWER.md`: BLUF first (yes/no/depends in one sentence, then the recommended option), then per instance facts with sources, then options. Read-only everywhere; no az, no gh, no Jira writes, no RDP/HTTP to any host; no `cd`; never delete; secrets by location only; nothing to any human; nothing of another client. Return a 10-line summary.
