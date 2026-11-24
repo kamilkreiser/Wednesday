@@ -1,11 +1,14 @@
-IN PROGRESS
+VERDICT: GO WITH NOTES — head 59de2d3f42d0b13a1d98b184a9ba3e7a9860a7dd
 
 # Independent check: CoAgent `policy-owner-mode` (the owner's ALLOW as a second origin of the policy's dark mode)
 
 Checker: the one independent check (QA-POLICY-OWNER-MODE). Work dir `/private/tmp/claude-501/qpom` (own clone, two detached worktrees of it `base/` and `head/`, own empty target dirs and cargo home with the toolchain LINKED as `coagent_merge_check.sh` does). The project folder was only read (git read verbs with `--no-optional-locks`), except my status file. Copies of every script and harness: `m1_review/gate_policy_owner_mode_tests/`.
 
 ## BLUF
-(written at the end)
+1. **With the mode off, the gate is unchanged.** Over two million decisions per tree (two seeds, card texts included), the old and new code gave byte-identical answers, and so did the daemon-level replay (257 records, 0 differ). The shared decision steps are the old code word for word.
+2. **Nothing can switch it on.** No other crate names the new mode or its entry point; no test switch is in a normal build; the daemon binary does not contain the new entry point (it does contain the two new texts, as it already contained the old mode's texts).
+3. **ALLOW refuses what it must, as the gate defines it.** Every one of the 16 refused classes, in both terminal positions, on every surface, through my own 125 hostile rows: 0 failures. Only the exact `Bash` tool gets the terminal allow; no look-alike name or `command` field does; earlier denials and unbound sessions are untouched. All 71 red controls are red.
+4. **Not covered / to tell the owner:** with terminal commands allowed, a terminal command can read any file it does not name, including files on the exclusion list when it searches a whole folder (`grep -r key .`), and can send, push or delete without asking; a few spellings of an agent program (`npx @anthropic-ai/claude-code`, `claude.exe`) are not caught. Both are Minor here because nothing is switched on, but the first must be decided before the switch lane.
 
 ## 0. Head and base (TESTED)
 - `git ls-remote` on the GitHub remote (own clone, deploy key, 2026-11-24 18:0x): `policy-owner-mode` = `59de2d3f42d0b13a1d98b184a9ba3e7a9860a7dd`, `main` = `039b9875b69918c2a83e95d84f7f8169358b59d5`, as briefed. `git merge-base --is-ancestor 039b987 59de2d3` exit 0; merge base = `039b987` itself. Two commits: `6c450dd` (the lane), `59de2d3` (wording).
@@ -92,7 +95,9 @@ Checker: the one independent check (QA-POLICY-OWNER-MODE). Work dir `/private/tm
 - The 12 changed files WHOLE at the head: 60 hits; the same files at the base: 60 hits; a line-by-line check: **every one of the 60 head hits is in a line byte-identical to a line of the base file** (0 not). In kind: 45 are the coordinator seat's name in older lines of `BACKLOG.md`, `docs/M0-OUTCOMES.md`, `docs/POLICY.md` (among them the builder's `BACKLOG.md:240`, `docs/M0-OUTCOMES.md:115`, `docs/POLICY.md:237` = main's `:216`); 15 are my slug forms matching ordinary words (a folder-name slug matching "coding", the home root's slug matching "users"). The builder's fourth hit, `BACKLOG.md:712`, is a system temp-root path in an older line (main's). So the builder's 4 are main's lines, as reported.
 
 ## 6. The red controls (TESTED)
-(PENDING: run started 18:30:08 from my clone root)
+- `bash crates/coagent-policy/red-controls.sh` once, started as that relative command from my clean clone's root at `59de2d3` (own empty `CARGO_TARGET_DIR`, test tmp under my work dir), heavy count 1 at start (another seat's daemon red run), 18:30:08 → 19:11:23: **71 rows, 71 `RED OK`, 0 `RED MISSING`** (the 60 older rows all still red); `GREEN normal build: all coagent-policy tests pass` / `RED CONTROLS: all 71 went red; normal build green`, exit 0. Normal build: 36 `test result:` lines, **270 passed, 0 failed, 0 ignored**. Log copied as `red.log`.
+- The 11 new rows, each `cfg` branch READ (§3, `owner_mode.rs`) and its first panic line from my run: `red_owner_terminal_default_allowed` (Default → `Allowed`) → `T25-DEFAULT: TerminalCommands::default()`; `red_owner_before_hard_deny` (mode_steps before [6]) → `T25-HARD-DENY: the owner mode changed a hard deny for Write (StillAsk)`; `red_owner_before_closed_link` (before [7]) → `T25-CLOSED-LINK: …`; `red_owner_skips_refused` ([7c] off for the owner only) → t25 `T25-REFUSED: Read … not refused as Credential` and t26 `(c) refused {"a tool the gate has not been taught"} allowed: seed 0xa110e0e20261123 case 15`; `red_owner_still_ask_allows_bash` (`terminal_on = true`) → `T25-STILL-ASK: Bash at Console sandbox On was not today's decision`; `red_owner_shell_needs_sandbox` (`sandbox_ok = sandbox == On`) → `T25-BASH: npm test at Console with sandbox Off not allowed`; `red_owner_shell_any_tool` (`is_owner_terminal_command` → true) → t25 `T25-BASH-ONLY: PowerShell at Console sandbox On …` and t26 `(d) … tool "Monitor" … "git push"`; `red_owner_unbound_session` (`applies` → true) → `T25-UNBOUND: Read with sessions {"other"}`; `red_owner_text_as_both_agree` → `T25-TEXT: the owner allow is not the owner's own variant`. **Each fails at its own tagged assertion, for its own reason**, and each switches off exactly one property (READ). Equal to the builder's report. (The runner checks "non-zero exit and `test result: FAILED`" and prints, not matches, the panic line; the reading above is mine.)
+- `bash scripts/test-p1p.sh` (same way, own target dir): `run 1/1: exit 0/0, 16 tests ok, 27 s` / `ALL 1 RUNS GREEN`, exit 0. `bash scripts/test-p1p.sh --red`: `P1P-4b red_catch_all_t2 … p1p_unknown_tool_strict RED (as required): NoSuchTool: coagent asks: NoSuchTool (Other, T2) …` / `clean p1p_unknown_tool_strict: green`, exit 0.
 
 ## H. Every hostile input I tried
 **H1. The owner mode, row by row** (`zz_qpom_attack.rs`; each row checked at 3 surfaces x 3 sandbox states; shown: `Surface::Console`, sandbox On; "judgement" is my oracle's verdict for all 9 combinations; Info rows are recorded, not asserted, and are judged in the findings).
@@ -300,6 +305,15 @@ No Blocker, no Major.
 - n-5. `t27`'s scan cannot see a `.rs` file pulled in from outside `src`/`tests`/`build.rs` (`#[path]`, `include!`, `examples/`, `benches/`), a non-`.rs` include, or a crate outside `crates/` (§5). Aliases, re-exports and raw identifiers are found. Lane L5 must widen it when it changes it.
 - n-6. Property 5: under `StillAsk`, EVERY shell call that carries a refused class is refused instead of asked, not only `dangerouslyDisableSandbox` (§7(a)). No harm found; Friday's acceptance should name the whole set. Docs rule 35 says it.
 - n-7. Docs §11's terminal bullet gives the `grep -r` example but not the glob form, and does not say in words that sending, pushing and deleting by terminal command are unasked too; §7(b) has plain words for the owner.
+
+## Slips and housekeeping
+- I ran `cargo fetch --locked` once inside a subshell `cd` (the brief says never use `cd`); every later run used `--manifest-path` or a `chdir`-and-exec wrapper. One temporary file was briefly written under `/tmp` and moved into my work dir at once.
+- My first differential harness lacked card reason texts; fixed and re-run (§2).
+- Heavy runs: red-controls.sh and test-p1p, one at a time, started at a heavy count of 1. The release differential ran before them, alone among my runs.
+- Left in place, nothing deleted: `/private/tmp/claude-501/qpom` (clone, worktrees `base`, `head`, `plantA`, `plantB`, target dirs, about 9 GB of differential output, D2 roots). No process of mine is left running. In the project folder I wrote only my status file.
+
+## Severity count
+Blocker 0 · Major 0 · Minor 2 (m-1, m-2) · Note 7 (n-1 to n-7).
 
 ## What was NOT checked
 | Item | Why |
