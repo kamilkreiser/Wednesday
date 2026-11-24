@@ -291,14 +291,14 @@ RECORDS DONE by your Step-0 clock plus 45 minutes, HARD STOP plus 75 (the Stamp'
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. The unstamped copy reads 10 such lines (the slot lines and the last line).
-- STAMP (what Tuesday read whole and re-printed at source, and the clock): ____
-- LAUNCH WINDOW (until; panes whose name holds OXPd2 and write the records files at the stamp): ____
-- BASE (the four files' and the register's sha256 against B2045's manifest; B2045's READY line; no B2054 folder or STATUS; the highest C-number and owed number; `main` and open pull requests, as Tuesday reads them): ____
-- RECORDS (exactly WRITE or HOLD; default HOLD): ____
-- TICK95 (exactly TICK or LEAVE; default TICK): ____
-- Q-ANSWERS (Q1 to Q8; defaults as written): ____
-- STOP-CHECKS (which of the never-run checks Tuesday accepts as never run on a real output, or what Tuesday ran): ____
-- Hard stop (the absolute outer limit AEDT): ____
-- MODEL RECEIPT (level; `BRIEF_SEAT_LEVEL=` inside the quotes; model id per the project's `CLAUDE.md` line 7): ____
+- STAMP (what Tuesday read whole and re-printed at source, and the clock): Tuesday s324 read this kit whole with the Read tool (lines 1-174 and 175-305, every line) and the drafter report whole at 19:56; re-hashed all 25 SOURCES rows by program (25 EQUAL, 0 DIFF); stamp_check.py 110 claims, 110 measured, rc 0; dry-filled TICKS, REAS-TICKS and WRITE-DATE into H-HEAD, H-REC, H-OWNER and the Closed lines by eye: no doubled word or id.
+- LAUNCH WINDOW (until; panes whose name holds OXPd2 and write the records files at the stamp): until the Hard stop below; panes at the stamp: %0 tuesday plus two unnamed windows; no Datasec/OXPd2- pane, so none writes the records files.
+- BASE (the four files' and the register's sha256 against B2045's manifest; B2045's READY line; no B2054 folder or STATUS; the highest C-number and owed number; `main` and open pull requests, as Tuesday reads them): CLAUDE.md, BACKLOG.md, history.md, CLARIFICATIONS.md and the register each EQUAL to SOURCES rows 1-5 (which equal B2045's READY.manifest per the kit); B2045 STATUS last line 'READY B2045: 4c9f8d39... | C-84 | ... new owed 118'; no .tools/b2054 and no B2054 STATUS; highest C-number C-84 and owed 118 as the kit states (not re-counted by Tuesday); GitHub under the project's .gh-config (kamilDatasec): main 89a10a1ba26a16aae7996e059d548bf53531fd44, newest PRs 47 46 45 44 43 all closed (no 48).
+- RECORDS (exactly WRITE or HOLD; default HOLD): WRITE
+- TICK95 (exactly TICK or LEAVE; default TICK): TICK
+- Q-ANSWERS (Q1 to Q8; defaults as written): Q1 Opus (the project's CLAUDE.md line 7 wins; Tuesday's commission named Sonnet in error, withdrawn by name here); Q2 TICK (item 95's own Why-deferred offers the README route; the text says the code still hangs); Q3 none; Q4 tick 83 and file 120; Q5 seven items as frozen; Q6 as frozen: kit B2053 is NOT stamped, built or landed at this stamp; Q7 none; Q8 GET only.
+- STOP-CHECKS (which of the never-run checks Tuesday accepts as never run on a real output, or what Tuesday ran): Tuesday accepts as never run on a real output: the seat's helper and selftest, HOLD R on the live files, the tick proof on the live BACKLOG.md, HOLD R2, the stop after a partial write; the seat runs each and a failure traceable to the kit's wording is a question to Tuesday.
+- Hard stop (the absolute outer limit AEDT): 22:00 AEDT Tue 2026-11-24
+- MODEL RECEIPT (level; `BRIEF_SEAT_LEVEL=` inside the quotes; model id per the project's `CLAUDE.md` line 7): opus; BRIEF_SEAT_LEVEL=opus inside the quotes as written; model id claude-opus-5-5 per the kit (models_latest.json line 17, MEASURED-BY-DRAFTER), the project's CLAUDE.md line 7.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE by Tuesday s324 at 19:56
