@@ -1,0 +1,172 @@
+72a5db72 | awk '/^## Corrections/' over Briefs/2026-11-25_B2069_STATUS.md and B2074_STATUS.md -> heading present in both (items 1-4 and 1-6 printed); a section name, not a matched output
+1e8b024f | B2069 STATUS ## Corrections item 1 read at drafting: 'the open-PR count was read with `gh pr list ...`'; names the verb to avoid, no output to match
+82395022 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls?state=open --jq length (08:20:26) -> 1 (number 253)
+4b779489 | prose naming the dot-free prefix; slot.py over the four b2076-nodot paths -> dots 0 each (control .tools/b2076/clone -> dots 1)
+77d9f56a | prose (a folder prefix); v2076.sh scratch copy on a path holding /. -> REFUSED: a dot-segment in the tree path, rc 2
+cb6ddf0a | date (first of drafting) -> Wed 25 Nov 2026 08:07:32 AEDT; the report's last line prints the closing date
+c61fbc90 | git -C d2076/clone diff --quiet 11149d3f 4d8713e5 -- backend __tests__ scripts static package.json package-lock.json jest.config.js .github; echo rc -> rc=0 (control: compare/11149d3f...4d8713e5 files HISTORY.md, ahead 2)
+47c0db32 | bash tools/decision_queue.sh show datasec-nexusai-datasources-all-roles-fields-1125 > d2076/card.txt; grep -c of the id -> 1; card printed status ruled, choice a
+3a974c63 | grep -c -F 'Refuse the route to roles the permission table excludes, keep fields as they are for allowed roles, review before merge, nothing deployed' d2076/card.txt -> 1
+5f0baf74 | grep -n -F 'function decide(' capabilities.js at 4d8713e5 -> 249; lines 257, 258 printed (const held = ROLE_CAPABILITIES[role]; if (!held) return 'forbidden';)
+2aac3c0c | gh api -X GET repos/.../actions/workflows/333076536/runs?per_page=20 -> total_count 266; workflow 333076536 is Deploy demo (deploy-demo.yml)
+4eca5e6a | git show 4d8713e5:.github/workflows/deploy-demo.yml, awk lines 26-32, 53, 91, 95 printed (on:, paths-ignore:, the two if: lines, environment: demo)
+e51939b9 | gh api -X GET .../actions/workflows/333076536/runs?per_page=20 --jq conclusions grouped (08:20:26) -> skipped:20, total_count 266
+ac89e0e5 | same call -> 266 skipped:20
+e894ca7a | git clone --no-hardlinks --no-checkout '!CODING/.../.tools/b2074/clone' d2076/clone; cat-file -t 4d8713e5, 9d4ddb7f, 11149d3f in the source clone -> commit, commit, commit
+8383f4f2 | git -C d2076/clone rev-parse HEAD 'HEAD^{tree}' after checkout --detach 4d8713e5 -> 4d8713e5353d589a8680d328e2e00a69b8ea7480 e2ba7bf677c8dcfe3c3cfc407c94a5214d852b93 (GitHub commit GET tree equal)
+f0d266da | git -C d2076/clone rev-parse 9d4ddb7f^{tree} -> 7cf36cd5faed0b187330c1c91cf9dbacdc2fd190; gh api matching-refs/heads/b2074 -> refs/heads/b2074/rd1017-rd975-audit-action-business-hours 9d4ddb7f52ad2f23777d8b662abce0cbd1662b9f
+16a43235 | git worktree add -q --detach d2076/t/rf 4d8713e5 (literal paths) -> made; slot.py -> slot 10 dots 0
+4e0c01d2 | prose naming the instrument; every pointer of findings 1-4 printed by grep -n -F over raw/server-main.js, raw/cap-main.js, raw/index-main.js (git show 4d8713e5:<path>)
+ca112dc7 | grep -n -F "app.get('/api/data-sources', async (req, res) => {" raw/server-main.js -> 15691; at 9d4ddb7f (git show) -> 15694
+2669b1ce | grep -c -F 'jsonStorage.getAllDataSources()' raw/server-main.js -> 2 (lines 5188 getRegisteredTables and 15693 the list handler; sed -n 15693p printed it)
+7b393bd5 | sed -n 15695p raw/server-main.js -> const safe = sources.map(s => ({ ...s, clientSecret: s.clientSecret ? '***' : null }));
+66732e6a | grep -n -F 'const READS_TODAY = [' raw/cap-main.js -> 107
+d5f239e5 | sed -n 107p raw/cap-main.js -> READS_TODAY holds 'config.read'; program over ROLE_CAPABILITIES -> excluded [end_user, partner_manager, partner_technician]
+7aaae794 | program over ROLE_CAPABILITIES (test file's ALLOWED_NON_ADMIN, printed by the jest titles R2) -> viewer, print_operations, finance, security, executive, department_manager
+7f554551 | sed -n 110p raw/cap-main.js -> admin: Object.keys(CAPABILITIES).filter((c) => !CAPABILITIES[c].ownCredential),
+f5607767 | grep -n -F 'partner_manager: []' raw/cap-main.js -> 118
+881631d8 | grep -n -F 'partner_technician: []' raw/cap-main.js -> 119
+7434abc0 | R2 jest titles in raw/p2-green.json -> R2 print_operations passed (one of 6 R2 rows)
+32001926 | grep -n -F 'function decide(' raw/cap-main.js -> 249
+8b114397 | grep -n -F "if (!held) return 'forbidden';" raw/cap-main.js -> 258
+8c4685d8 | grep -n -F '    const held = ROLE_CAPABILITIES[role];' raw/cap-main.js -> 257
+50acbbba | sed -n 254p raw/cap-main.js -> if (mode === 'open') return 'allow';
+7bb86feb | grep -n -F ' * STATUS: DESIGN ONLY.' raw/cap-main.js -> 6
+6e1a9a0b | grep -n -F 'const user = await jsonStorage.getAuthorizedUser(session.email);' raw/server-main.js -> 2787 3078 (2787 is the middleware, sed 2770-2800 read)
+936842e0 | grep -n -F "req.user.role = user.role || 'viewer';" -> 2790; "req.user.role = 'viewer';" -> 2793
+3c09850e | git -C d2076/clone grep -n -i newUserRole -> static/js/settings.js:3165 only (1 line; control: editUserRole prints 3207 and 3219)
+ed1dc1fe | same command -> 1 line, static/js/settings.js:3165
+ded601fd | sed -n 316,318p static/index.html at 4d8713e5 -> select id=regionFilter, option value=all All Regions, /select
+db0e31d4 | git -C d2076/clone grep -n regionFilter -- static -> static/index.html:316 (control: static/js/index.js:4285 printed)
+0d9dcf68 | git -C d2076/clone grep -n -i -E 'api/data-sources' -- static (minus setup/data-sources) -> admin.js 17 18 246 269 283, index.js 4288, first-run-setup.js 1900 1997 2022 (sub-routes)
+fff5ec78 | prose fragment between two backticked literals; the command it describes is claim 0d9dcf68
+e3363fe5 | prose fragment; the lines it lists are claim 0d9dcf68's print
+12f9012b | prose (the pattern); claim 0d9dcf68
+a3ad5acf | python program over every config.read route handler of raw/server-main.js (35 routes from capabilities.js) -> 7 routes with a hit (data-sources, data-sources/:id, log-analytics/diagnostics, models/active, setup/status, setup/validate-all, service-check)
+f4b68639 | grep -n -F "app.get('/api/setup/status', async (req, res) => {" raw/server-main.js -> 14608
+98e0ef1d | grep -n -F 'logAnalyticsWorkspaceId: logAnalyticsStatus.workspaceId || null,' -> 14630
+e245fea8 | awk NR>=14608 && NR<=14705 | grep -n logAnalyticsApiEndpoint -> relative 24 = 14631
+51507a2d | the same program -> GET /api/log-analytics/diagnostics line 15397-15531: ['apiEndpoint', 'workspaceId']
+e51313a7 | the same program -> apiEndpoint in diagnostics, models/active, setup/status, setup/validate-all, service-check
+f0aa5d61 | grep -c -F ROLE_CAPABILITIES raw/server-main.js -> 0 (control: requireAdminFor 51); after apply in t/lwork -> the helper reads permissionTable.ROLE_CAPABILITIES
+3ca01c25 | grep -c -F "held.includes('config.read')" t/lwork/backend/server.js -> 1
+8d7c7e59 | grep -c -F "'Data source settings are not available to this role'" t/lwork/backend/server.js -> 1; raw/server-main.js -> 0
+7dfe5a36 | grep -n -F -A1 the two check lines in raw/scratchN2 after apply -> 15712 and 15725, each followed by '    try {' (S1 asserts the line after the registration is the check)
+7f2c519d | git hash-object frozen/rd1040-...test.js -> d3623cfb89ee06cffe8920ecd8ad874928712935; wc -lc -> 337 19633
+4b336003 | /usr/bin/grep -c -E '^[[:space:]]+test(\.each)?\(' frozen test file -> 14; '^test' -> 0; '^[[:space:]]+test\.each\(' -> 2; jest numTotalTests -> 21
+116f4fe5 | raw/p2-green.json D1 passed; at main (p1-rf.json) D1 failed (mine.length >= 1 false)
+27686662 | D1 asserts d.path === '/api/data-sources'; passed in p1-green, p2-green, laneT green
+f8150c67 | accessAudit.js denialReason(403) -> 'forbidden' (sed 31-35 read); D1 passed
+f2b27b51 | F1 passed in p1-green/p2-green: options [['all','All Regions']] (one option)
+69c55d9c | prose naming the route; grep -n -F registration -> 15691 at main
+b5e3d6f7 | prose naming the route; grep -n -F registration -> 15703 at main
+d6eb4567 | grep -n -F "'GET /api/data-sources', 'GET /api/data-sources/:id'," raw/cap-main.js -> 155 (inside the config.read block, line 151)
+ac5f39b6 | same as d6eb4567 -> 155
+030e67e3 | python3 -I -B frozen/apply2076.py raw/scratchN2 apply (second) > raw/second-apply.txt; tail -1 -> AssertionError: ('mark count before', 'apply', 1, 'function refuseDataSourceReadForRole('), rc 1
+fa50b9ab | apply2076.py raw/scratchN2 revert -> 'revert backend/server.js bytes 1141869 -> 1140567 lines 22841 -> 22822 nonascii 3913', hash-object a7426b07a96377f3ab57ba7813997a8d3180013c; second revert rc 1
+d2d361f1 | lsof -nP -iTCP:<band> -sTCP:LISTEN | wc -l at 08:44 for 30240-30879, 28960-29599, 29600-30239, 24480-25119 -> 0 0 0 0 (control: machine-wide 12)
+3046c9c5 | prose (a folder); the table's shas from shasum -a 256 over d2076/frozen/* at drafting
+2fd6f90a | shasum -a 256 d2076/frozen/* -> the nine values of the table (printed by program, copied)
+4ef6bf9d | diff d2074/frozen/v2074.sh d2076/frozen/v2076.sh -> 2c2 and 5c5 only (v2074/b2074 -> v2076/b2076)
+267a704b | same diff -> lines 2 and 5 only
+e0b1ed50 | same diff -> lines 2 and 5 only
+995b497c | same diff -> lines 2 and 5 only
+4c023565 | same diff -> exactly two change hunks (2c2, 5c5)
+86576945 | grep -c -F "const permissionTable = require('./services/capabilities');" t/lwork/backend/server.js -> 1; raw/server-main.js -> 0
+4575a5cf | the kit's question form, copied from kit B2074 line 75; no output to match
+77d06c36 | seat-side check; prose names the command (not runnable by the drafter in the seat's pane)
+b714f08c | tmux list-panes -a -F '#{@cockpit_name}' at 08:20 -> tuesday + 2 unnamed (0 Datasec/NexusAI-*)
+eabb4e80 | ls -d '!CODING/.../.tools/b2074' -> exists (control-yes); ls -d .tools/b2076* -> no matches
+a7532d99 | gh api -X GET .../git/ref/heads/main --jq .object.sha -> 4d8713e5353d589a8680d328e2e00a69b8ea7480 (the seat reads it with ls-remote)
+993a74b1 | prose (a git config key the seat sets); B2074 kit Step 1 form
+4f94dcef | GH_CONFIG_DIR=... gh api user --jq .login | /usr/bin/grep -c -i datasec -> 1 (08:20)
+f28a0cb7 | same -> 1
+7f0a3de0 | prose (the tool); claim d2d361f1
+e30801a2 | slot.py (realpath split on /, parts starting with .) -> b2076-nodot/{rf,work,vupd,chk} dots 0; .tools/b2076/clone dots 1
+286dfb79 | prose fragment of the same check (e30801a2)
+9ec1a4b7 | prose fragment of the same check (e30801a2)
+52af663e | prose (a hold); no output
+a31b0485 | prose (a zsh modifier example, from kit B2074 HOLDS); no output
+43376ea5 | prose (a hold, B2074 Corrections 4); no output
+3cd92b9e | prose (an environment variable the seat never sets); no output
+49798079 | prose (an environment variable the seat never sets); no output
+429a5ace | git -C d2076/clone merge-base --is-ancestor 9d4ddb7f 9d4ddb7f -> rc 0; against 4d8713e5 (NX-S2 not landed) -> rc 1
+01c412e4 | git -C d2076/clone diff --name-only 9d4ddb7f 4d8713e5 -> HISTORY.md plus the 4 NX-S2 paths (shows the check fires on a BASE without NX-S2's content); the merge of 253 PREDICTED HISTORY.md only
+fccafc60 | a step label of the chain, not an output
+9ef40602 | the seat's command after Step 1; not runnable before BASE exists
+d60ff2f4 | gh api runs GET -> workflow 333076536 Deploy demo, 266 runs
+30435c81 | awk NR==53, NR==91 over deploy-demo.yml at 4d8713e5 -> both lines hold vars.CI_DEPLOY_ENABLED == 'true'
+d13bab80 | cat -n '!CODING/.../.tools/b2074/runlane.sh' -> 6 lines; lines 2 to 5 export, PATH, unset, the lock call with b2074-lane
+4ba74161 | prose (the substitution b2074 -> b2076)
+783672ee | jwhole.py reads '<project>/4_Credentials/.env' in-process (copied from d2074); RD-1040 read 08:07:59, no token printed
+9e421eda | awk NR==2067 CLARIFICATIONS.md -> '  2. Merge path: ... Never squash, never rebase ([[C-68]]) ...'
+9222363d | grep -n -i -F 'RD-1040' CLARIFICATIONS.md -> 3247 3248 3251 3252 (inside C-324 and C-325)
+ea975d6b | same grep -> 4 lines
+d64c816f | /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tools/node-v24.22.2-darwin-arm64/bin/node -v -> v24.22.2
+0bd36204 | same -> v24.22.2
+a1cfc994 | git --no-optional-locks -C '.tools/b2074/clone' config --get user.email | tr -d newline | wc -c -> 46; user.name -> 12
+d62faa96 | same -> 46 and 12
+86a647a0 | the seat's command (B2074 Step 1 form); not run by the drafter (node_modules symlinked to the B2032 drafter's npm ci)
+7f1dd803 | shasum -a 256 package-lock.json at 4d8713e5 (t/rf), at 9d4ddb7f (t/n2rf) and the B2032 clone -> 37e5add354e539f97e54 each
+b830418b | python3 -I -B frozen/apply2076.py raw/scratchN2 apply (git show 9d4ddb7f:backend/server.js) -> rc 0
+debaaf5a | same run printed -> apply backend/server.js bytes 1140567 -> 1141869 lines 22822 -> 22841 nonascii 3913
+a9e4b9c6 | same; git hash-object -> 6f811c1736facd31558dd1f9b713ddb887fe8a16; second apply rc 1
+4d5e025c | grep -n -F 'REQUEST_DENIED' raw/server-main.js -> 456 500 506 529 533 566 (456 the key, 506 the recordDenial call, the rest comments)
+6324b4cc | gh api pulls?state=open -> 253 head 9d4ddb7f base 4d8713e5
+7a27af4c | python3 -I -B frozen/static2076.py t/wt A frozen/msg-A.txt <4 names> > raw/static-A.out -> rc 0
+73b20e39 | tail -1 raw/static-A.out -> STATIC A PASS (14 OK lines)
+2ee495fa | sed -n 20p session-tools/b1375/scanlib1114.py | wc -c -> 149; the four names read by program (namescan.py form), never imported
+8a3f0209 | node --check t/wt/backend/server.js and the new file -> rc 0 (node-check-ok)
+3f830696 | git -C t/wt diff --cached | gitleaks stdin --no-banner (staged A) -> no leaks found
+b92e257c | same -> no leaks found; staged K -> no leaks found; log -p 9d4ddb7f..ff66c989 -> no leaks found
+fed45177 | a generated AKIA+16 key id and 40-character secret (random, seed 2076) in raw/plant.txt -> gitleaks rc 1; plant moved to d2076/_quarantine/plant.txt
+99a741c1 | gitleaks stdin --no-banner < raw/plant.txt -> leaks found: 2
+7bd84d8d | python3 -I -B frozen/static2076.py t/wt K raw/msg-K.filled.txt <4 names> > raw/static-K.out -> rc 0
+b84c18c8 | tail -1 raw/static-K.out -> STATIC K PASS (13 OK lines)
+fcacea5e | git -C t/wt log --format='%H %P' -2 -> K ff66c989 parent 3eeece68; A 3eeece68 parent 9d4ddb7f
+4024a55e | cat -n '.tools/b2074/cq/runcq.sh' -> 5 lines (T=..b2074, the tool call with --base/--head typed, rc, cq.rc)
+01dc56b0 | prose (the substitution)
+16220801 | the drafter's CQ call used --base 9d4ddb7f... --head ff66c989... -> cq rc=0
+d413241b | prose fragment
+7c1c9d7c | lane scratch: git -C t/lrf status --porcelain -> '?? __tests__/rd1040-...test.js' only; t/lwork -> ' M backend/server.js' and that ?? line
+67fdcd05 | prose fragment of 7c1c9d7c
+9c8a6071 | the scratch run of the same call (tag d2076-lane, script lane-scratch.sh = lane2076.sh with T=, RF=, W= changed: diff shows lines 9 and 10 only) -> lock acquired after 0s
+f17fd5ec | cat d2076/laneT/lane.out -> the lines below
+24eb0ad9 | laneT/lane.out -> rf jest rc=1
+8e3a4a60 | laneT/lane.out -> judge rf rc=0
+cbb75438 | laneT/lane.out -> green suites listed 59
+e880ea06 | a log path of the seat's run; the drafter's equivalent laneT/logs/verify-update.log
+fd2786c0 | grep -E VERDICT laneT/logs/verify-update.log -> VERDICT: PASS (non-ASCII dash) 6362/6362 tests passed across 401 suites (jest exit 0)
+3507eef7 | a log path of the seat's plain run; not run by the drafter (UNMEASURED, PREDICTED equal pair)
+5df03d4c | not run by the drafter at K (UNMEASURED); the update run at A printed VERDICT: PASS
+c75c9694 | a word the seat writes; no output
+f5d00e7f | grep -n -E '^describe\(' frozen test file -> 281: describe('RD-1040 open mode, the source, and the dashboard region filter', ...
+04f4b83a | python3 -I -B frozen/judge2076.py raw/p2-rf.json rf -> first line 'OK   collected tests > 0 (a filter that matches nothing returns rc 0) numTotalTests 21'
+02dad96d | git clone --no-hardlinks --no-checkout of it -> d2076/clone (rc 0)
+4803bfbe | tail -1 laneT/logs/judge-redproof.log -> JUDGE redproof PASS
+513f27bc | judge2076.py raw/p2-green.json rf | tail -1 -> JUDGE rf FAIL
+f3e6462c | judge2076.py raw/p2-green.json redproof | tail -1 -> JUDGE redproof FAIL
+984df820 | judge2076.py raw/p2-rf.json green | tail -1 -> JUDGE green FAIL
+561523a6 | grep -E '^Tests:' laneT/logs/verify-update.log -> Tests:       6362 passed, 6362 total
+bd30ba6a | grep VERDICT laneT/logs/verify-update.log -> VERDICT: PASS ... 6362/6362 tests passed across 401 suites (jest exit 0)
+7e679fd8 | /usr/bin/grep -c VERDICT laneT/logs/verify-update.log -> 1; EADDRINUSE -> 0; ^PASS -> 401; ^FAIL -> 0
+fe614485 | git -C t/vupd diff -- scripts/verify-expected-counts.json -> tests 6341 -> 6362
+c5a8be0a | same diff -> suites 400 -> 401
+18d4000f | same diff -> _updated changed; nothing else
+853dd589 | bash v-scratch.sh update d2076/.dotprobe (holding __tests__) -> REFUSED: a dot-segment in the tree path, rc 2 (probe dir moved to _quarantine/dotprobe)
+675abfbf | bash v-scratch.sh bogus t/vupd -> REFUSED: mode, rc 2
+7b754468 | static2076.py t/wt A frozen/msg-K.txt <names> | tail -1 -> STATIC A FAIL
+da97159e | same -> STATIC A FAIL
+83cc6972 | raw/static-K.out -> STATIC K PASS, 13 OK lines
+063dd396 | tail -1 raw/static-K.out -> STATIC K PASS
+f1733f3b | node --check of both A files -> rc 0
+4eff6e0f | gh api -X GET .../git/matching-refs/heads/b2076 --jq length (08:20) -> 0 (control: b2074 -> 1)
+5d3075c2 | gh api git/ref/heads/main -> 4d8713e5353d589a8680d328e2e00a69b8ea7480
+c0c02763 | the seat's push check after its BASE; the drafter's prototype: merge-base --is-ancestor 9d4ddb7f ff66c989 PREDICTED rc 0 (K's grandparent is 9d4ddb7f by git log)
+5a1f4ea6 | git -C t/wt log --format='%H %P | %ae %ce' -2 -> both commits author = committer (the scratch identity, never pushed)
+ebc16459 | prose fragment
+d1b41a28 | prose (not tested); static/index.html exists at 4d8713e5 (grep regionFilter printed line 316)
+a8bc7a0d | prose (not tested)
+b8278403 | a section heading the seat writes
+79121f7e | ls tuesday/briefs | grep -c N173 -> 0 before this kit (control: N172 -> 3); after: this kit and its sidecar
+47624c5c | prose (Tuesday's copy name)
