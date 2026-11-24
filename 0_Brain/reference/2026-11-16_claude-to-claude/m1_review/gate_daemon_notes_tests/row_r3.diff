@@ -1,0 +1,31 @@
+diff --git a/crates/coagent-daemon/src/engine.rs b/crates/coagent-daemon/src/engine.rs
+index b4691fd..e50b3f6 100644
+--- a/crates/coagent-daemon/src/engine.rs
++++ b/crates/coagent-daemon/src/engine.rs
+@@ -2178,14 +2178,6 @@ impl Engine {
+             // DAEMON-NOTES (G25, FR-3): an invitation on this device's own relay whose mailbox
+             // connection dropped waits for the relay child's exit notice (`on_relay_exited` then
+             // fails it with the truthful text) for at most `MB_DOWN_GRACE` (`on_tick`).
+-            MbEvent::Down(_)
+-                if waiting
+-                    && p.role == PairingRole::Inviter
+-                    && self.cfg.external_relay.is_none()
+-                    && self.relay.is_some() =>
+-            {
+-                p.mb_down.get_or_insert_with(now);
+-            }
+             MbEvent::PeerLeft | MbEvent::Down(_) if waiting => {
+                 self.fail_pairing_with(None, "the other side left the mailbox")
+                     .await
+@@ -2933,10 +2925,7 @@ impl Engine {
+                 && p.role == PairingRole::Inviter
+                 && self.cfg.external_relay.is_none()
+         });
+-        if waiting_invite {
+-            self.fail_pairing_with(None, RELAY_STOPPED_INVITE_TEXT)
+-                .await;
+-        }
++        let _ = waiting_invite;
+         // If the GUARD died (e.g. SIGKILL), the relay may still be running, orphaned: stop it by
+         // the pid it reported (gate return G9).
+         // RED CONTROL `orphan_on_guard_kill`: the broken variant leaves it.

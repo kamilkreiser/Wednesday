@@ -1,0 +1,14 @@
+diff --git a/crates/coagent-daemon/src/engine.rs b/crates/coagent-daemon/src/engine.rs
+index b4691fd..0123e97 100644
+--- a/crates/coagent-daemon/src/engine.rs
++++ b/crates/coagent-daemon/src/engine.rs
+@@ -357,9 +357,6 @@ fn crypto_code(e: &CryptoError) -> &'static str {
+ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+     // W-8 for library callers (DAEMON-NOTES): the same rule as `coagentd --gate`, before anything
+     // is opened or created.
+-    if let Some(t) = gate_refusal(cfg!(windows), cfg.gate.is_some()) {
+-        return Err(t.to_string());
+-    }
+     #[cfg(unix)]
+     let uid = util::current_uid().map_err(|e| format!("cannot read own uid ({:?})", e.kind()))?;
+     #[cfg(unix)]

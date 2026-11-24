@@ -1,0 +1,22 @@
+diff --git a/crates/coagent-daemon/src/invite.rs b/crates/coagent-daemon/src/invite.rs
+index cb653aa..5139c82 100644
+--- a/crates/coagent-daemon/src/invite.rs
++++ b/crates/coagent-daemon/src/invite.rs
+@@ -3,13 +3,10 @@
+ //! relay candidates (URL + certificate pin), the mailbox id and the 256-bit link secret. Everything
+ //! after `#` is a URL fragment, which a browser never sends to a server.
+ //!
+-//! A second blob kind, `relay.moved`, carries new relay candidates for an existing session when the
+-//! joiner's stored candidate no longer reaches the convener's relay: after a restart of the
+-//! convener's whole program without `--keep-relay-identity` (a new certificate), when a saved
+-//! identity was replaced or moved away, or when the relay came back on another port. A relay child
+-//! restarted within the session keeps its certificate (`relay_child`), so it needs no line. It
+-//! carries no secret: a wrong pin can only send the joiner to a relay that cannot complete the
+-//! session's handshake.
++//! A second blob kind, `relay.moved`, carries new relay candidates for an existing session after the
++//! convener's relay restarted with a new certificate (the restarted `coagent relay` generates a new
++//! one; see DESIGN QUESTIONS in STATUS). It carries no secret: a wrong pin can only send the joiner to
++//! a relay that cannot complete the session's handshake.
+ 
+ use coagent_crypto::pake::LinkSecret;
+ use coagent_proto::bytes::SessionId;

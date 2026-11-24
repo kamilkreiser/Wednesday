@@ -1,0 +1,12 @@
+diff --git a/crates/coagent-mcp/src/main.rs b/crates/coagent-mcp/src/main.rs
+index 236fa6c..4577e19 100644
+--- a/crates/coagent-mcp/src/main.rs
++++ b/crates/coagent-mcp/src/main.rs
+@@ -297,6 +297,7 @@ fn wait_timeout(args: &Value) -> Result<u64, &'static str> {
+         Some(v) => v
+             .as_u64()
+             .map(|t| t.clamp(1, WAIT_MAX_S))
++            .or(Some(WAIT_DEFAULT_S))
+             .ok_or(WAIT_TIMEOUT_TYPE_TEXT),
+     }
+ }

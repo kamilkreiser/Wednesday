@@ -1,0 +1,19 @@
+diff --git a/crates/coagent-daemon/src/main.rs b/crates/coagent-daemon/src/main.rs
+index 61122be..4bbe347 100644
+--- a/crates/coagent-daemon/src/main.rs
++++ b/crates/coagent-daemon/src/main.rs
+@@ -183,14 +183,6 @@ async fn daemon(argv: &[String]) -> i32 {
+                 .to_lowercase();
+             // DAEMON-NOTES (G25): an empty value is refused here, before anything starts, instead
+             // of failing later at `invite` with no reason (C2-REHEARSAL F7).
+-            if url.trim().is_empty() {
+-                eprintln!("{RELAY_URL_EMPTY}");
+-                return 2;
+-            }
+-            if pin.is_empty() {
+-                eprintln!("{RELAY_PIN_EMPTY}");
+-                return 2;
+-            }
+             cfg.external_relay = Some(RelayCandidate { url, pin })
+         }
+         (None, None) => {}
