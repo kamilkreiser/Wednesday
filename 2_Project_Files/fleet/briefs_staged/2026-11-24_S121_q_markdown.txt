@@ -1,0 +1,20 @@
+=========== [QUESTION] 2026-11-24T05:08 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] QUESTION: KS-2364 (G3b) stored with a Markdown change;
+[Secuura/Blockchain-S -> Wednesday] QUESTION: KS-2364 (G3b) stored with a Markdown change; how to correct (Seat S 121st)
+Seat S 121st
+
+QUESTION: how to correct KS-2364 (G3b), which the filer created and then flagged PROBLEM on its read-back (2026-11-24T05:08:11Z).
+
+Context:
+- I posted G3b ONCE with exactly your licensed bytes (title sha 8a53f3d9006d..., body sha 58ac82891ff1...). It is KS-2364 (Backlog, Low (4), board account). The race count shows exactly one new issue (11 above KS-2353); I did not retry and nothing else was written.
+- The filer's read-back said "description normalised equal=False" and it STOPPED, as designed. Character-level proof (tools/opcodes_s121.py, record evidence/opcodes_G3b.txt): the stored text differs from the licensed body in exactly two replaced pairs and the one trimmed trailing newline. In the quoted PR-title wording of gate 419's item 2 the raw name __proto__ (underscores, outside a code span) was stored as **proto**, because Linear reads double underscores as bold. So KS-2364 now quotes the old title as "...a category named **proto**, constructor or prototype" with the word proto in bold and the underscores gone.
+- Cause is mine: the sentence you licensed is fine; the hazard was already in the G3 text I drafted (the verbatim gate quote), and my gates did not check Markdown emphasis. I have now added tools/md_hazard_s121.py (planted controls held) and run it on every draft: ONLY G3 and G3b hold the hazard. The ten earlier tickets and all five comments are clean, which agrees with their passing opcode proofs (the only differences there are Linear's one inserted newline and the trimmed trailing newline).
+- Effect: KS-2364's subject (the flow fragment says nine more, count is seven), its sources and its whole body are intact; only the quote of an already corrected PR title reads wrongly. Nothing else on the board changed.
+
+Question (one): which of these do you want?
+- (A) RECOMMENDED: update KS-2364's description to G3c = G3b with __proto__ put inside a code span in that one quote (two backtick inserts, nothing else; proof by program; md_hazard says clean). G3c body sha256 f774fdbf8857c9ad4c24882612b147da5616f2e06967f6f2b5c8c357c226d84b, 2747 bytes; title unchanged (sha 8a53f3d9006d...). I have no description-update tool, so I would derive one from the filer (issueUpdate on the description only), declare it, and gate it like the others: your licence checked by sha, guard, DRY, ONE real run, re-read by the opcode proof (want only the newline insert and trim), allow-list of ONE key, planted controls. That is a new kind of write, hence the question.
+- (B) one corrective comment on KS-2364 saying the quoted name reads __proto__ (the comment tool exists; the comment would itself need a code span).
+- (C) leave KS-2364 as stored and record it in the wrap (the quote stays misrendered).
+
+Meanwhile: preparing the wrap (HANDOVER, history entry, daily-note result, vault commit); the wrap MAIL waits for your answer. If I hear nothing by about 05:30Z I take (C), the safest reading (no further board write), say so in the wrap, and close.
+Needed-by: about 05:30Z.
+
