@@ -8,6 +8,15 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 11:16 Tue 24 Nov, the 09:05 rotation's SUCCESSOR (statusline ctx:67%) - READ FIRST; supersedes every block below where they differ
+- **develop = e3e79b7317f14ebccc8bb14e2001bdbf85e517fb** (unmoved, the K 90th drafter's end read). Kam: nothing since 08:57 (FRESHNESS 11:15:35).
+- **DONE this seat (scored, closed):** K 89th 0.95, S 119th 0.93, W 75th 0.95. Gate 418 = GO WITH NOTES on PR 2294 (0 Blocker, 0 Major, 8 Notes). Both 08:57 cards delivered.
+- **LIVE: K 90th %390 SONNET** merge seat, ONE row PR 2294 (KS-2339, tier 1), head 604f8ff60f8c73be25c8a9bd941da026fcfddc3b, FF at develop e3e79b7317f1, expected tree = the head's own ae12f792ebd656854aa693d8eb27ed42ea39feb7; ONE authority gate 418 at the head; no waiver; one title key. Brief fleet/briefs_staged/2026-11-24_seatK90_merge.md STAMPED 11:15:52. NEXT: rung-5 read (waiter armed) -> plan QUESTION -> ANSWER -> STATUS SET-UP CLOSED -> READY -> verify PR 2294 at source (gh as kksecura under the project GH_CONFIG_DIR; the BODY only by urllib) -> GO in the brief's exact form (shape fleet/briefs_staged/2026-11-24_K89_go_2293.md; develop + head re-asserted in the sending command; access reading named) -> MERGED verify (one parent = pin, tree = expected) -> WRAP, score, pane_close.
+- **AFTER the merge:** a D seat round k44 (originate + api-gateway to Kintsugi; measure whether PR 2293's packages/shared comment moved any image) -> Kam's panel receipt when live; a board seat: the ApprovalQueue follow-up (KS-2052) + W 75th's LISTED siblings as ticket(s), searched first.
+- **Kam's word owed (list at wrap / a card if he asks):** container s-w75-rls (stopped), throwaway trees s-w75-dev and s-w75-mut.
+- **OWED (unchanged):** KS-2342 census; PRs 2195/2159 need Wednesday's words; launcher first-action trap (every seat today); Mon 2026-11-30 Stuart card; weekly consolidation lapsed since 10-19; INDEX refresh (last 11-20).
+- **NO SUBAGENTS IN FLIGHT. NO AGENT QUESTION OPEN.**
+
 ## 🔴 STATE 10:34 Tue 24 Nov, the 09:05 rotation's SUCCESSOR (statusline ctx:64%) - READ FIRST; supersedes every block below where they differ
 - **develop = e3e79b7317f14ebccc8bb14e2001bdbf85e517fb** (unmoved, gh as kksecura 10:33:22). Kam: nothing since 08:57.
 - **GATE 418 = GO WITH NOTES** at PR 2294 head 604f8ff60f8c73be25c8a9bd941da026fcfddc3b (tier 1; verdict 0_Brain/reference/2026-11-24_gate418-tier1-ks2339-signatory-writes/verdict.md; 0 Blocker, 0 Major, 8 Notes). NO fix round.
