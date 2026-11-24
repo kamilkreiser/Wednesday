@@ -1,0 +1,34 @@
+A new project, Datasec.Suite.OneDrive, lists the children of the root
+of the signed-in user's drive, or of one folder by its item id, through
+GraphClient.SendAsync of the shared Graph layer. It makes one kind of
+Graph call, Microsoft's list-children (v1.0): me/drive/root/children or
+me/drive/items/{id}/children, each with a narrow $select. An item id
+outside the id rule (1 to 256 ASCII letters, digits or ! . _ -, not . or
+..) sends nothing.
+
+The module walks the pages itself: a next link is requested only when it
+is https on the base address's host and port, with no user info, and its
+path is one of four children forms (me/drive/root, me/drive/items/{id},
+drives/{id}/root, drives/{id}/items/{id}, then /children). Any other
+link ends the listing as NextLinkElsewhere and is never requested; a
+link already requested ends it as PagingLoop; the page bound is the
+layer's default of 100. The recent and shared-with-me calls, which
+Microsoft marks deprecated, and every search call are not built.
+
+An item that is not an object, has an id outside the rule or listed
+twice, an empty name, both a folder and a file facet, or a size, date,
+child count or remoteItem of the wrong shape ends the listing as
+MalformedItem: nothing is left out silently. An item with a remoteItem
+facet is listed and never followed. Failure texts and ToString hold
+kinds, counts and sizes only, never a name or an id. The token source is
+passed into each call and never kept.
+
+A new test project: 11 cells (49 cases) against an in-process fake
+handler and the layer's own client; every cell that can fail failed by
+its assertion first; 15 mutants each turn exactly their cells red. Two
+new lock files hold only packages already in the repository; the
+solution file gains two lines. C# totals plus 49 on both legs; the rules
+count plus 12. No tenant, no token and no Microsoft host was called.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

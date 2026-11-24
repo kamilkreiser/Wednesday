@@ -1,0 +1,28 @@
+The release guard judges two more certificate forms against the
+development CA deny-list. A PEM block labelled PKCS7, CMS or PKCS #7
+SIGNED DATA (a PKCS#7 bundle of certificates, the shape of a .p7b
+file) is decoded and searched like a certificate block: a listed
+certificate inside it is G2, and such a block that does not decode is
+G3, as for the three certificate labels. While the list holds a
+fingerprint, base64 text without PEM markers (a JSON x5c value, a bare,
+line-wrapped or indented base64 run in a file, a ZIP member or UTF-16
+text) is decoded at each of its four alignments and searched for a
+listed DER certificate. Lines may be joined by CR LF, LF or the
+characters backslash n or backslash r backslash n, with any spaces or
+tabs before or after each line end; every line but the last holds at
+least 16 base64 characters and the last at least 1, so a wrapped
+certificate whose last line is short is read whole. With the empty list
+the new rule does nothing: both publish folders read the same guard
+lines as before (14 and 15 files). The docstring names the shapes still
+not seen: the URL-safe alphabet, a JSON-escaped slash, any other line
+end (a lone CR, an XML character reference between lines), an empty or
+short line before the last line, a split across two strings, base64 of
+base64, a run under 128 characters, and the empty list.
+
+Six new cases (five failed first by their assertion, one is a quiet
+pin), so the workflow's FLOOR rises from 111 to 117 as the planted controls
+rule requires; no job fingerprint moves. Sixteen mutants each turn
+exactly their cases red. No C# file, package, lock file or project file
+changes. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
