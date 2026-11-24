@@ -1,0 +1,29 @@
+DeviceTokenClient now refuses, when it is made and before any
+connection, a device root whose AbsolutePath is not exactly "/"
+(DeviceAuthException InvalidArgument), beside the earlier rule on user,
+query, fragment and host; a root with a path was taken and its path
+dropped. Its handler's TLS options add a chain policy with
+DisableCertificateDownloads on and RevocationMode NoCheck beside the
+earlier CertificateRevocationCheckMode NoCheck; trust is still the pin
+alone. An internal property, TlsOptions, returns the handler's own
+SslOptions for the cells. Two new cells against the TLS stub on
+127.0.0.1: DA17 (five roots with a path refused; a root with "/" or no
+slash taken, its call at /cdm/oauth2/v1/token) and DA18 (the options
+read back, and one pinned call to a leaf whose issuer is never sent).
+Each failed on main's own settings by its assertion. C# totals plus 2
+on both legs; the rules count unchanged (no file added).
+
+Text only, no code: the doc comment of IppTransportError.ConnectFailed
+and the transport README (a handshake still running at ConnectTimeout
+ends as Failed; a cancellation by the caller's token leaves as the
+platform's OperationCanceledException; a call after Dispose or with a
+null argument throws before anything is sent); the server README (401
+while the vault answers; a vault that throws makes it 503; the callback
+paragraph rewrapped, no word changed); the OXPd 2 adapter README (the
+root rule, the chain policy and its limits, and the other exceptions
+and the body-read bound of a generated client). What a platform fetches
+during the handshake with the policy set is not measured on Linux or
+Windows. No device has been reached. Nothing is deployed; nothing was
+sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

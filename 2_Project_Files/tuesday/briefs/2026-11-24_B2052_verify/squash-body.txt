@@ -1,0 +1,32 @@
+The OXPd 1.x client gains two reads of HP's committed Test binding,
+IsServiceEnabled (its answer is HP's "enabled" element, an xs:boolean)
+and GetScreenCapture, and two writes, EnableTestService and
+DisableTestService (HP's empty EnableService and DisableService
+elements; the disable is the enable's undo, a disable has none). The
+read-only check of the catalogue now admits an operation whose name
+starts with Get or is exactly IsServiceEnabled (NonGetRead); the closed
+list and the action rule are unchanged. Over every operation of the
+seven committed bindings, no other name without Get passes (T01, T02).
+
+The lab's "oxpd1 write --write EnableTestService" is a dry run unless
+--execute. Executed, it reads IsServiceEnabled first and writes nothing
+when the service is already on (exit 0, no undo owed) or when the read
+is refused, faults or answers a value that is not a boolean; otherwise
+it enters the enable in the undo list, sends ONE EnableService and
+prints the disable. A disable makes no read. undo-owed owes a disable
+for each enable that may have applied until a disable on the same host
+has answered after it. "oxpd1 read --read GetScreenCapture" saves the
+decoded bytes whole as panel.png in the run folder when they start with
+the PNG signature, prints the name, size and SHA-256, never the bytes,
+and ends exit 8 otherwise; the read verb takes the reads by name only.
+The two WS-Addressing sentences state the one device reading; the
+default is unchanged.
+
+18 new cells (39 cases) against stubs on 127.0.0.1; four counts of
+earlier cells move with the two new reads and two new writes. Every new
+cell that can fail on the first shape failed by its assertion first;
+16 mutants each turn exactly their cells red. C# totals plus 39 on both
+legs; the rules count plus 2 (two test files added). No device has been
+reached. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
