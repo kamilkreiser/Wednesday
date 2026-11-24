@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-24 11:05 from 289 lesson files (1,219,899 B). M 43 · MIXED 5 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-24 13:20 from 290 lesson files (1,222,257 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (6) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_a-holding-helper-gets-the-next-useful-job.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md · 2026-11-21_windows-helper-launches-without-permission-prompts.md
 
@@ -8159,4 +8159,16 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 - `2_Project_Files/windows/Launch_Friday_Windows.cmd` passes `--dangerously-skip-permissions` and prints a line saying prompts are off. Every future Windows launcher I write does the same.
 - Keep the brief's "ask the owner in chat before any install or change" rule. With prompts off, it is the only guard.
 - This covers Windows seats on his PC only. Mac seats keep their own launch settings.
+
+
+## OXPd's Jira board always carries the latest architecture and plan documents, and Kam's own actions as tickets
+`2026-11-24_oxpd-jira-holds-the-latest-design-docs-and-kams-actions.md` · preference · 2026-11-24 · status: live · tier: P (Datasec/OXPd)
+
+**The lesson:** On Datasec/OXPd, whenever `02_architecture` or `03_plan-of-attack-and-build` gets a new version, its latest Word and PDF go onto the OXPD2 Jira board in the same work unit, where anyone on the project can reference them. Kam's own action items ("actions on Kamil") are Jira tickets assigned to him, not only fleet-activity cards.
+
+**How to apply:**
+- Every kit that produces a new version of 02 or 03 (Word + PDF) carries a step, or the next records/Jira kit does, that attaches the new files to the OXPD2 reference issue and says which version (date, source commit or file sha256) is current. The old attachments stay; the issue says which one is latest.
+- Every action Kam puts on himself for OXPd becomes an OXPD2 ticket assigned to Kam (Jira's "Kamil Kreiser"), with its BLUF and the one thing needed; a card may still go to the fleet-activity board when a decision is needed. When his action is done (his word), the ticket is moved by a records pass.
+- Scope: Datasec/OXPd only. Do not retrofit other projects' boards without his word (a rule for creation is not a mandate to retrofit).
+- Jira writes go through a project seat's kit (create, attach, assign; never delete), never by Tuesday's own hand.
 

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-24 11:05 from 289 lesson files (1,219,689 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-24 13:20 from 290 lesson files (1,222,047 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8247,4 +8247,16 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 - `2_Project_Files/windows/Launch_Friday_Windows.cmd` passes `--dangerously-skip-permissions` and prints a line saying prompts are off. Every future Windows launcher I write does the same.
 - Keep the brief's "ask the owner in chat before any install or change" rule. With prompts off, it is the only guard.
 - This covers Windows seats on his PC only. Mac seats keep their own launch settings.
+
+
+## OXPd's Jira board always carries the latest architecture and plan documents, and Kam's own actions as tickets
+`2026-11-24_oxpd-jira-holds-the-latest-design-docs-and-kams-actions.md` · preference · 2026-11-24 · status: live
+
+**The lesson:** On Datasec/OXPd, whenever `02_architecture` or `03_plan-of-attack-and-build` gets a new version, its latest Word and PDF go onto the OXPD2 Jira board in the same work unit, where anyone on the project can reference them. Kam's own action items ("actions on Kamil") are Jira tickets assigned to him, not only fleet-activity cards.
+
+**How to apply:**
+- Every kit that produces a new version of 02 or 03 (Word + PDF) carries a step, or the next records/Jira kit does, that attaches the new files to the OXPD2 reference issue and says which version (date, source commit or file sha256) is current. The old attachments stay; the issue says which one is latest.
+- Every action Kam puts on himself for OXPd becomes an OXPD2 ticket assigned to Kam (Jira's "Kamil Kreiser"), with its BLUF and the one thing needed; a card may still go to the fleet-activity board when a decision is needed. When his action is done (his word), the ticket is moved by a records pass.
+- Scope: Datasec/OXPd only. Do not retrofit other projects' boards without his word (a rule for creation is not a mandate to retrofit).
+- Jira writes go through a project seat's kit (create, attach, assign; never delete), never by Tuesday's own hand.
 
