@@ -1,0 +1,17 @@
+=========== [INBOUND] 2026-11-24T02:10 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS 2: build verified as predicted, swap launched (
+[Secuura/Blockchain-D -> Wednesday] STATUS 2: build verified as predicted, swap launched (Seat D 86th)
+Seat D 86th
+
+STATUS 2, Kintsugi k44: build verified, every reading equal to the STATUS A prediction; swap launched 02:10:28Z (originate, then api-gateway last). Results follow in STATUS B.
+
+- Build: ONE batch of TWO, 01:37:07Z to about 01:57Z, rc 0. Free 86,729 -> 79,520 MB (about 7.2 GB; floor never touched).
+- verify_build: REBUILT 2 / UNCHANGED 31 / NOIMAGE 3. originate e6f2558b7ded -> 803f4b7cbb3e; api-gateway 264682d7bb8c -> 06b954b346a0. migrations not built.
+- basecheck v2 stops 0 (both alpine 3.24.1, node v24.19.0, equal to the rollbacks). osdiff: layers 20/20 and 17/17, config equal, apk equal, node_modules 0 differing; only the predicted dist and shared files, the shared source copy, and /etc/hostname plus /var/log/apk.log (the same build noise as k42).
+- contentfp (all services, stamp pre-20261124k44): UNEXPECTED_ROWS 0. originate app/dist CHANGED NDIFF 3 (routes/signatories.d.ts, .js, .js.map); originate shared/dist CHANGED NDIFF 3 (middleware/index.d.ts.map, .js, .js.map); api-gateway app/dist CHANGED NDIFF 3 (routes/proxy.d.ts.map, .js, .js.map); api-gateway shared/dist CHANGED NDIFF 3; api-gateway app/docs IDENTICAL; every other service and root IDENTICAL. D86-Q1 rule met exactly.
+- shfp (re-aimed): new originate and new gateway 368 c2fd2fd88ea0cb3b = the prediction; both rollbacks 750995ac8b00b982; running billing and vc-issuer 750995ac8b00b982 (unmoved); nonexistent image 0 rows.
+- LC-A on the BUILT images (lca_d86 images): 31 rows, 0 mismatches (rollback = base, :latest = the predicted occurrence counts; planted counter 3). latestproof: both :latest == built ids; running == rollback before the swap.
+- KS-535 AFTER_BUILD and BEFORE_SWAPS stops=0. tracker 59/058; anchors non-final 0; auth, anchoring, issuer-frontend unmoved.
+- bphase5: swapset from the box's verify_build -> order originate, api-gateway (sha16 af388302658ad2e2), held-but-rebuilt []; ordval real rc 0, negative control rc 2 for the right reason; a4x PRESWAP and preswap read; vouch sha16 9c2fbbcc7351b60b on both, originate gateway-provenance ACTIVE=1; free 79,519.
+- REVISION before the swap (revsha): head bcc2d8a53ffd 294,128 1da5bdc0d55f9248; .pre-b69addc39652-k44 ABSENT; the six older .pre-* equal.
+- swaplaunch: exact order accepted, negative control refused for the right reason, NONFINAL 0, runner launched 02:10:28Z. healthwin sampling both services every 2 s (docker exec GET of /health/ready, no POST); wait_swap tracked.
+

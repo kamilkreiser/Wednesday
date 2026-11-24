@@ -1,0 +1,15 @@
+=========== [INBOUND] 2026-11-24T01:37 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS 1: build running, rsync and Phase 0 done (Seat 
+[Secuura/Blockchain-D -> Wednesday] STATUS 1: build running, rsync and Phase 0 done (Seat D 86th)
+Seat D 86th
+
+STATUS 1, Kintsugi k44: GO 01:33:24Z received and read back; plan steps 1 to 4 done; the build is running. Nothing swapped.
+
+- Step 0: GO pin b69addc39652d5532d8e497aff0e2386db125c83 == my clone HEAD; develop by ls-remote at 01:36:52Z and 01:37:03Z still the pin.
+- Step 1 (bphase1): upload 16 tools into the new .rebuild-seatD86, differing 0 (hash-proved). drvctl on the box: o_real (originate, api-gateway) validated rc 0; all 20 others refused rc 2, incl. o_sub issuer-frontend ("not in this round's 2-service swap set") and o_order (api-gateway must be LAST).
+- F9 (new, declared): the FIRST rsync DRY (01:34:17Z) read MISMATCH 2/0/9. Two extra sends: services/api-gateway/logs/combined.log and error.log, written into MY clone by my api-gateway vitest run (gitignored, and rsync excludes dist but not logs). It failed closed and nothing was sent. I MOVED the logs dir (mv -n) to my scratchpad quarantine; the only other ignored path in the clone is packages/shared/dist (excluded). Re-run DRY 01:34:45Z: 9 sends, 0/0/9, deletes 0, wrong-range control fires (11).
+- Step 2 (bphase2, 01:35:00Z to 01:35:52Z): rsync REAL 9 sends 0/0/9, deletes 0, VERDICT OK. postrsync 11 rows, 0 mismatches (5 sync probes now read the pin, 6 controls). Compose config sha16 ab0598fd3392b393 SAME; host yaml 0112927831815086 = PIN = BASE; bindfiles (ii) 2 of 2 SAME. Box date 20261124; Phase 0 pre-20261124k44 ok=33 FAIL=0, idfp e02333b1344a16b2 (= my ITEM 0 prediction). KS-535 BEFORE_BUILD stops=0 (695d09df873ff42b len 158, preview, simulate UNSET).
+- Step 3: penv PREBUILD and mailenv identical to ITEM 0 (NODE_ENV_is_production false everywhere; only the planted controls read true). No build or swap runner live (6 patterns 0, sshd control 3). Usage gate OK, 76 percent.
+- Step 4: lca_d86 mode pre: 31 rows, 0 mismatches (running and :latest at the base; planted counter 3). Free 86,729 MB >= 60,000. buildlaunch k44: ONE batch of TWO [originate api-gateway], started 01:37:07Z on the box. wait_build_d86 tracked from the Mac, floor 45,000 MB.
+
+Next: postbuild chain (verify_build want REBUILT 2 / UNCHANGED 31 / NOIMAGE 3), contentfp TABLE (NDIFF 3 per changed root), shfp, latestproof, lca images, KS-535; then bphase5 and the swaps. Forecast build 15 to 25 min (UNMEASURED).
+
