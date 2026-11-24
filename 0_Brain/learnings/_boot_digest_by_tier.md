@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-24 13:20 from 290 lesson files (1,222,257 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-24 13:31 from 290 lesson files (1,222,257 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (6) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_a-holding-helper-gets-the-next-useful-job.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md · 2026-11-21_windows-helper-launches-without-permission-prompts.md
 
