@@ -1,0 +1,19 @@
+=========== [INBOUND] 2026-11-24T02:29 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS C: k44 phase 2 complete, LC-A 31/31, LC-B equal
+[Secuura/Blockchain-D -> Wednesday] STATUS C: k44 phase 2 complete, LC-A 31/31, LC-B equal, no request (Seat D 86th)
+Seat D 86th
+
+STATUS C, Kintsugi k44: PHASE 2 COMPLETE (GO LIVE-CHECK 02:27:59Z; reads 02:28:20Z to ~02:29:30Z). Option 1: no request to any of the three routes, no login, token, render or GET, no account, no audit_logs row. Kintsugi only. Wrap follows.
+
+LC-A (lca_d86 running pre-20261124k44; occurrence counts, literal via environment; evidence/phase2/lca_running.txt): 31 rows, 0 mismatches. In the RUNNING containers and on :latest every row reads the new count; the rollback image dev-<svc>:pre-20261124k44 reads the base. originate dist/routes/signatories.js: signatoryWriteGate 5 (rollback 0), signatoryWriteArm 5, decideSignatoryWrite 4, ROLE_REFUSAL 3, ORG_REFUSAL 3, orgScope 7, isPlatformOrOrgBoundedRole 2, normaliseOrgId 2, the own-organisation refusal sentence 1; controls 9/1/3/14 equal; negative 0. api-gateway dist/routes/proxy.js: signatoryAdminCheck 4, forwardSignatoryWrite 4, signatoryActionPath 3, SIGNATORY_ID 2, readSignatoryBody 2, the revoke and reinstate paths 1 each, "Signatory ID must be a UUID" 1, "Request body too large" 1 (all rollback 0); controls 3/1 equal; negative 0. /shared/dist/middleware/index.js in both: the eslint-disable-next-line no-control-regex comment 1 (rollback 0); positive control requirePlatformRole 3 = 3. Planted counter 3.
+shfpr inside the running containers: originate and api-gateway 368 c2fd2fd88ea0cb3b; billing and vc-issuer 750995ac8b00b982 (unmoved); transfer 26b434f47556042a (control differs).
+
+LC-B (read-only transactions, nonsense-column controls ERROR): orgadm, padm2 and sigcnt byte-EQUAL to ITEM 0 after timestamp normalisation; i0extra census block EQUAL. Users 31 = issuer_admin 6, org_admin 3, owner 9, system_admin 2, user 9, verifier 2; email not verified 14; invited 9; ORG_ADMIN 3 all organisation NULL; non-platform users with organisation NULL 29; documents 76; platform_admins 3 super_admin/active (secuura_platform); signatories 0.
+
+LC-C: NOT run (D86-W5 option 1).
+
+LC-D honest labels:
+- KS-2339: DEPLOYED on Kintsugi in originate (803f4b7cbb3e) and api-gateway (06b954b346a0); LC-A in the running containers; census EQUAL; unit- and chain-proven (gate 418). What a platform admin or an organisation admin actually sees on a nominate, revoke or reinstate is UNMEASURED live (no request made). Today the nine organisation-arm users have no organisation, so they would be refused 403; only the 2 system_admin users (and the 3 super_admin platform admins, if they can sign in to the issuer portal: UNMEASURED) could act.
+- KS-2341: a comment inside the two rebuilt images (3 /shared/dist files), no behaviour; no other service rebuilt for it.
+- KS-2316 and its follow-up: NOT DEPLOYED (auth HELD; no mail on Kintsugi).
+- State left on Kintsugi: the REVISION k44 entry; .rebuild-seatD86 (16 tools, batch.k44 and swap.k44 logs/progress/done, swaporder_k44.txt, the phase0 map, revision_entry_k44.txt, revision_tamper_copy_k44.txt, ctl/ order files); the pre-20261124k44 tag on 33 images; the two new images and containers; the 9 synced source files. No audit_logs row, no account, no data change, no prune, nothing deleted.
+

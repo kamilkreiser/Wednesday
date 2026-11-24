@@ -1,0 +1,19 @@
+=========== [INBOUND] 2026-11-24T02:26 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS B: k44 phase 1 complete, originate and api-gate
+[Secuura/Blockchain-D -> Wednesday] STATUS B: k44 phase 1 complete, originate and api-gateway live at b69addc39652 (Seat D 86th)
+Seat D 86th
+
+STATUS B, Kintsugi k44: PHASE 1 COMPLETE. Kintsugi runs develop b69addc39652d5532d8e497aff0e2386db125c83 for originate and api-gateway (KS-2339 + the KS-2341 comment). Auth HELD. No prune. Demo untouched. Waiting for GO LIVE-CHECK (Seat D 86th).
+
+- Images: originate e6f2558b7ded -> 803f4b7cbb3e (container d6360440f1b1, StartedAt 02:10:31.404Z); api-gateway 264682d7bb8c -> 06b954b346a0 (container 8ce0577aa4e3, StartedAt 02:10:45.173Z). REBUILT 2 / UNCHANGED 31 / NOIMAGE 3.
+- Proof (STATUS 2 and 3 carry the detail): contentfp UNEXPECTED_ROWS 0 with NDIFF exactly 3 per changed root (D86-Q1); /shared/dist c2fd2fd88ea0cb3b in both new images and both running containers; LC-A 31 rows, 0 mismatches, on the built images AND in the running containers; censuscmp2 moved == {originate, api-gateway}, untouched 33 of 35; a4x: no other row moved.
+- Swap 02:10:29Z to 02:10:56Z, both VERDICT OK, the H2 check passed live (issuer-frontend 6007e9c2b02d running/healthy) before the gateway. Windows: originate 9.0 s, gateway 8.8 s; 0 unhealthy samples after.
+- +15 watch (02:10:29Z to 02:25:40Z): error-level 0 on originate, api-gateway, vc-issuer, billing, transfer, security, anchoring, auth, issuer-frontend (4 planted parser controls fire); restarts 0 on all nine; OOM 0 over 1,272 readable lines.
+- bphase7: KS-535 AFTER_ROUND stops=0; batch.k44.done RC=0, swap.k44.done RC=0 SWAPPED=2; runners alive 0 (sshd control 3); endgw: VERIFIED_TOKEN_CLAIM_REFUSED 0; anchoring StartedAt EQUAL. Final i0db: auth 3c7d4d1a756a 2026-11-19T14:55:28Z, anchoring 2026-11-15T22:47:15.950724269Z, issuer-frontend 6007e9c2b02d, admin-frontend 3db089d03264, vc-issuer a4f26d0eff2a, billing f7ae83e7bc95 all unmoved; tracker 59 / 058, has_059 0; anchor_store 64, non-final 0.
+- Redis and vouch: WRONGPASS 0, NOAUTH 0, REDIS_URL SET, the new gateway's Redis line MASKED; vouch sha16 9c2fbbcc7351b60b on both; originate gateway-provenance ACTIVE; FATAL 0; penv and mailenv equal to ITEM 0 (mail_transport_configured false).
+- REVISION head revision=b69addc39652, round_stamp=k44, 301,029 B, sha16 581668c8eb6fe2d3, revision= lines 48; REVISION.pre-b69addc39652-k44 = the k43 file (294,128, 1da5bdc0d55f9248); the six older .pre-* byte-identical.
+- Disk: free 86,730 (ITEM 0) -> 86,729 (before the build) -> 79,520 (after) -> 79,503 (end). Above 60,000: no disk line for the next row. Build cache 66.18 GB, 15.43 GB reclaimable.
+- Rollback (only on your word, GATEWAY FIRST): docker tag dev-api-gateway:pre-20261124k44 dev-api-gateway:latest; docker compose -p dev --profile phase2 up -d --no-deps --force-recreate api-gateway; then the same two lines for originate. It re-closes the three routes.
+- Faults since the GO: F9 (rsync dry caught my test-run logs, fail-closed, moved) and F10 (e9run through boxrun, nothing ran on the box); both in DECLARED.md. No request to any route, no login, no token, no audit row, no write beyond the deploy.
+
+Phase 2 plan (on your GO LIVE-CHECK only, D86-W5 option 1): LC-A = lca_d86 running pre-20261124k44 (running and :latest at the new counts, the rollback image at the base) plus shfpr inside the running containers; LC-B = i0extra, orgadm, padm2, sigcnt EQUAL to ITEM 0; LC-D labels as BRIEF section 11. LC-C NOT run. Then STATUS C and the wrap.
+
