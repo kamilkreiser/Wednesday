@@ -1,0 +1,12 @@
+RD-1017, RD-975: suite counts 6341 tests in 400 suites, written by the project's own command
+
+scripts/verify-expected-counts.json is the output of npm run verify -- --maxWorkers=2 --update-counts at the commit before this one.
+
+RD-1017, RD-975: the data-source audit entries get a defined action; the business-hours report reads the job's start time first
+
+RD-1017. The audit entries written when an administrator adds a data source (POST /api/setup/data-sources) or removes one (DELETE /api/setup/data-sources/:id) named their action AUDIT_ACTIONS.SETTINGS_CHANGE, a key the object did not hold, so each entry's action was undefined: the audit export's action filter could never return them and its action column read empty for them. The object now holds SETTINGS_CHANGE, so both entries carry the action SETTINGS_CHANGE; their details are unchanged (add_data_source or remove_data_source, the data source id and name). This is a new action tag: from this change an export filtered by SETTINGS_CHANGE returns these entries, which no filter could return before. Every AUDIT_ACTIONS name the server reads is now a key of the object.
+
+RD-975. The business-hours report judged each job by the first of its date fields that parses, and created_at, the time the row was stored, stood first, so a row stored at night was judged by the time it was stored and not by the time it was printed. The report now tries the job's own start fields first and created_at last, the order its sibling readers already use; a row with no readable start field is still judged by created_at. The other readers that try created_at first (the user-count report and the statistics reader) are not changed.
+
+Two new test files hold the cells. RD-1017: every AUDIT_ACTIONS name read in backend/server.js is a key; on the real server an administrator adds and removes a source and the export filtered by SETTINGS_CHANGE returns both entries, in JSON and in CSV, with no stored secret in any entry. RD-975: the shipped report, lifted from backend/server.js, lists a job started at 23:00 and stored at 10:00 and does not list one started at 10:00 and stored at 23:00; a row with only created_at, or with a start field that does not parse, is still judged by created_at.
+

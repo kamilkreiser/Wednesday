@@ -1,0 +1,127 @@
+72a5db72 | grep -n -i '^## Corrections' Briefs/2026-11-24_B2042_STATUS.md -> line 199 (heading exists; a section name, not a matched output)
+a9c49b34 | prose around a pointer (b2069-nodot paths); kit text, no output to match; dot-segment rule measured: v2069.sh on a .tools path -> REFUSED: a dot-segment in the tree path, rc 2
+665c0532 | git -C d2069/clone show ba8418c6:scripts/verify-expected-counts.json -> "tests": 6300
+04552112 | same read -> "suites": 397
+1ac9632d | git show ba8418c6:scripts/verify-expected-counts.json (run at drafting) -> tests 6300, suites 397, _updated 2026-11-24T04:15:35.817Z
+6a500d47 | git -C .tools/b2055/wt cat-file -t ba8418c6f10b... -> commit; rev-parse ba8418c6^{tree} -> 1b46ff223163e8d0b12ae7389f458243e92b0196
+42174bff | git -C .tools/b2055/wt rev-parse 'ba8418c6f10b3f3633ac606aa155f55be0eaa1b8^{tree}' -> 1b46ff223163e8d0b12ae7389f458243e92b0196
+ea923b80 | gh api -X GET repos/.../commits/e29117548b9c... --jq .commit.tree.sha -> 1b46ff223163e8d0b12ae7389f458243e92b0196 (equal to the rev-parse above)
+47c0db32 | bash tools/decision_queue.sh show <the RD-1021 viewer card id> > d2069/card.txt -> rc 0, 13 lines, id grep -c 1, ruling: choice='b'
+bf3fb7d3 | grep -c -F 'Viewer-safe list as a follow-up' d2069/card.txt -> 1 (control: id line count 1)
+34207389 | grep -c -F 'A new ticket: viewers see the sources without the live connection test, from the route that never connects.' d2069/card.txt -> 1
+2aac3c0c | git show ba8418c6:.github/workflows/deploy-demo.yml | awk NR==24 -> name: Deploy demo
+4eca5e6a | awk over that file at ba8418c6 -> 26 on:, 29 paths-ignore:, 30-32 '**.md' 'docs/**' 'tests/**', 53 and 91 vars.CI_DEPLOY_ENABLED == 'true', 95 environment: demo
+e51939b9 | gh api -X GET 'repos/.../actions/workflows/333076536/runs?per_page=20' --jq conclusions -> [265,{"skipped":20}]
+ac89e0e5 | same call -> total_count 265, 20 of 20 skipped
+167b996e | git show ba8418c6:backend/server.js | grep -n -i -F "app.get('/api/data-sources', async" -> 15691
+de32d8b1 | sed -n 15691,15701p server.js at ba8418c6 -> const sources = await jsonStorage.getAllDataSources(); jsonStorage.js grep -n -F 'async getAllDataSources() {' -> 4168 (returns this.readFile(...))
+5bd12c52 | grep -n -i -F "clientSecret: s.clientSecret ? '***' : null" server.js at ba8418c6 -> 15695
+eb4369e3 | apply2069.py NEW_1 holds 'if (r.status === 403) { await loadViewerDataSources(list, loading); return; }'; cell S1 green at the edited tree (logs/green1.json 23/23) and red at BASE (logs/rf.json)
+256f235f | cell T1 green in the edited tree: asked == ['/api/setup/data-sources', '/api/data-sources'] (logs/green1.json 23 passed)
+ba7a5eb1 | cell T6 green: errorText 'HTTP 403' after a 403 from /api/data-sources (logs/green1.json)
+cadf9638 | cell T5 green: list text 'No data sources configured.' (logs/green1.json)
+de113a9a | grep -c -F 'Connection status and source settings are shown to administrators.' t/work/static/js/admin.js -> 1 (in apply2069.py NEW_2); not asserted by a cell (T2 reads card text only)
+a6e255a7 | grep -c -E '^[[:space:]]+test(\.each)?\(' frozen test file -> 15; grep -c -E '^test' -> 0; '^[[:space:]]+test\.each\(' -> 1; '^describe\(' -> 2; jest numTotalTests 23
+76c61db9 | W1 cells green x9 (logs/green1.json); committed inventory row GET /api/data-sources statusByMode -> anonymous 401 viewer 200 administrator 200 open 200, gateInHandler []
+22cee9f9 | capabilities.js at ba8418c6 awk NR==155 -> 'GET /api/data-sources', 'GET /api/data-sources/:id', (in the config.read block opened at line 151)
+97f6b587 | cell T2 green (logs/green1.json): card texts ['rd1036 alpha primary', 'rd1036 beta disabled']; red at BASE (logs/rf.json)
+a39c85b8 | same cell T2 -> 'rd1036 beta disabled'
+c2283fc6 | grep -E '^VERDICT' logs/verify-proto.log -> VERDICT: PASS (tool dash) 6323/6323 tests passed across 398 suites (jest exit 0); count of VERDICT lines 1
+af7cd0d8 | grep -E '^VERDICT' logs/verify-proto-run1-contaminated.log -> VERDICT: FAIL (tool dash) jest exited non-zero (1)
+93ccc84b | git -C t/work diff scripts/verify-expected-counts.json after the verify -> "tests": 6323 (was 6300)
+8e22cb24 | same diff -> "suites": 398 (was 397)
+8c4ab6d2 | same diff -> _updated 2026-11-24T04:15:35.817Z -> 2026-11-24T14:24:42.928Z; no other key moved (static2069.py K: K moves only the keys _updated, tests and suites -> OK)
+f2a26bab | property text; W1 x9 green, A2 green (0 connects, 0 reads) in logs/green1.json
+bfeba006 | python3 apply2069.py raw/scratchBASE apply (second time) -> AssertionError: ('anchor count', 0, 'static/js/admin.js', ...) rc 1
+2e65bbde | apply2069.py scratchBASE revert -> revert static/js/admin.js bytes 28332 -> 26563 (first spelling); final: t/work revert -> bytes 28338 -> 26563; git hash-object -> dabc44069fe71e34ff9cd8059a5d739956e69163; second revert -> AssertionError anchor count 0, rc 1
+b6c7fb2f | lsof -nP -iTCP:27040-27679 / 23840-24479 / 28320-28959 -sTCP:LISTEN at 00:36:55 -> 0, 0, 0 rows (control: all listeners 14)
+c98cc313 | pointer to the seat's folder; the drafter's folder d2069/frozen holds the 9 files of the table (wc -c listed each)
+070175e1 | shasum -a 256 on each of the 9 frozen files -> the table's values (printed 01:2x, after the last edit)
+3ed6b7d6 | diff s322/d2042/frozen/v2042.sh d2069/frozen/v2069.sh -> 2c2 and 5c5 only
+8240ef08 | same diff -> b2042 on lines 2 and 5 of v2042.sh
+0bd48873 | same diff -> v2069 on line 2 of v2069.sh
+a2d8a1a5 | same diff -> b2069 on lines 2 and 5 of v2069.sh
+10160d9e | diff exit shows 2 hunks (2c2, 5c5)
+b9b827c8 | server.js grep -n at ba8418c6 -> 15691 (left for others)
+86e2525b | server.js grep -n -F "app.get('/api/data-sources/:id', async" at ba8418c6 -> 15703
+8d7e9030 | the seat's stop form; the kit's own last-line form, not a matched output
+d1e6d0dc | pwd -P is the seat's read; project path ls -d '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI' -> exists
+2fe56bdb | tmux list-panes -a -F '#{@cockpit_name}' at 00:27 -> Datasec/OXPd2-X71 and tuesday; Datasec/NexusAI-* 0
+59584983 | bash test -e '.tools/b2042' -> yes; '.tools/b2069' -> no; 'b2069-nodot' -> no; Briefs/2026-11-25_B2069_STATUS.md -> no
+dc472f85 | gh api -X GET repos/.../git/ref/heads/main --jq .object.sha at 00:22:34 -> e29117548b9c41159d2e375fd3f889ec3d1b732d; matching-refs/heads/main at 01:2x -> the same
+db93e7f0 | gh api -X GET repos/.../git/matching-refs/heads/main --jq '.[0].object.sha' -> e29117548b9c41159d2e375fd3f889ec3d1b732d (prints a sha)
+95fb5211 | git -C .tools/b2042/clone config --get core.sshCommand | wc -c -> 107 (set; value not printed)
+dc69c5db | GH_CONFIG_DIR set to that path; gh api -X GET user --jq .login | grep -c -i datasec -> 1
+be19d355 | same -> 1
+882f20de | lsof as b6c7fb2f -> 0 rows per band
+7c338790 | python3 split of realpath on '/' -> parts starting '.': d2069/t/work 0; '.tools/b2042/clone' 1 (control)
+7c3d259e | same program -> '.tools' is the only part starting with '.' in .tools/b2042/clone
+12359f0f | same program, control fires (1)
+ed54a93d | hold text; zsh modifier fault quoted from B2042 STATUS Corrections 1 (sed -n 200p -> 'typed $BASE:static/... which zsh read as a :s modifier')
+36e17eb7 | sed -n 200p Briefs/2026-11-24_B2042_STATUS.md | grep -c -i ':s` modifier' -> 1
+b0888912 | the hold's instrument; /usr/bin/grep exists (ls -l /usr/bin/grep)
+4d6f1f54 | hold text (forbidden env vars), DRAFTER_RULES line 64; not an output
+8ccf631a | hold text, DRAFTER_RULES line 64; not an output
+7eb2f728 | step label of THE CHAIN (step 8 mainmove-last); not an output
+73dda819 | compare 04a6b89d...e2911754 via gh -> ahead 7 behind 0, 4 files (the same instrument at drafting)
+6e365c29 | deploy-demo.yml line 24 -> name: Deploy demo
+409a0a3c | awk NR==53 and NR==91 deploy-demo.yml at ba8418c6 -> both hold vars.CI_DEPLOY_ENABLED == 'true'
+282f1f17 | cat .tools/b2042/runlane.sh -> 6 lines; lines 2-5: export NEXUSAI_LOCK_BASE, PATH node, unset NODE_OPTIONS, nexusai-lock.sh jest b2042-lane ... > lane.out; line 6 echo lock-wrapper rc
+03a5e40d | substitution target b2069; .tools/b2069 absent at drafting (test -e -> no)
+268f8070 | jwhole.py read the project .env in-process; printed 'RD-1036 desc chars 3540 comments 0 status To Do'; no token printed
+739e0c4b | awk NR==2067 CLARIFICATIONS.md | grep -c -i 'Never squash, never rebase' -> 1
+4cbcc048 | awk NR==3222 CLARIFICATIONS.md | grep -c -i 'C-320' -> 1; NR==3223 holds 'What it does not decide'
+7ad8c2ff | PATH node-v24.22.2 first; node -v -> v24.22.2
+5a7b5a8c | node -v -> v24.22.2
+a09f0516 | git -C .tools/b2042/clone config --get user.email | tr -d newline | wc -c -> 46; user.name -> 12
+33ae5046 | same -> 46 and 12
+b9b891fe | the seat's install; drafter's node_modules is the B2032 drafter's npm ci (UNMEASURED by this drafter)
+61bd60b7 | shasum -a 256 d2069/clone/package-lock.json (ba8418c6) -> 37e5add354e539f97e54d0d921385acc6ec7dfd145667bc275ebfcf80063edc6
+fa6732f8 | python3 -I -B frozen/apply2069.py t/work apply (final file) -> apply static/js/admin.js bytes 26563 -> 28338 lines 563 -> 590 nonascii 38
+7ab14156 | same run and t/lwork apply -> apply static/js/admin.js bytes 26563 -> 28338 lines 563 -> 590 nonascii 38
+85062b34 | second apply -> AssertionError anchor count 0, rc 1
+0acc6a66 | gh api -X GET 'repos/.../pulls?state=closed&per_page=6' -> 247 b2032/rd1021-data-source-routes-admin merged 2026-11-24T02:52:56Z merge 04a6b89dcd14
+5f7c2db6 | capabilities.js at ba8418c6 awk NR==184 -> 'GET /api/setup/data-sources', 'GET /api/debug/data-sources', (admin.read block, line 174)
+3d4005a0 | names.py | xargs -0 python3 -I -B frozen/static2069.py t/wt A frozen/msg-A.txt -> 13 OK lines, last STATIC A PASS
+18c54e19 | same -> STATIC A PASS (control: the same with msg-K.txt -> FAIL on the product-owner line, STATIC A FAIL)
+82a7b560 | sed -n 20p session-tools/b1375/scanlib1114.py | wc -c -> 149 (four plain names, lengths 5 7 3 5, by names.py; not printed)
+39cc1549 | git -C t/wt diff --cached | gitleaks stdin --no-banner (staged A) -> no leaks found
+0c70f84d | same -> INF no leaks found; staged K -> no leaks found; git log -p ba8418c6..3b42367d -> no leaks found
+9f9497bb | printf a generated aws_access_key_id = AKIA... line plus aws_secret_access_key = ... line | gitleaks stdin --no-banner -> WRN leaks found: 2
+69ea8a1e | same -> leaks found: 2
+d4d111ca | names.py | xargs -0 static2069.py t/wt K raw/msg-K.filled.txt -> 13 OK, STATIC K PASS
+27dfb5f8 | same -> STATIC K PASS
+8b31841f | git -C t/wt log --format='%H %P' -2 -> 3b42367d.. parent fe660415..; fe660415.. parent ba8418c6..
+e590f8da | cat .tools/b2042/cq/runcq.sh -> T='.../.tools/b2042'; W="$T/cq/cq1"; the tool call; rc=$?; echo cq rc
+a7e47a0e | substitution target b2069
+f1eafae4 | the drafter's run: --base ba8418c6f10b3f3633ac606aa155f55be0eaa1b8 --head 3b42367dc240e9d28ba2e4edffaac8a07bb5910b -> cq rc=0
+beb525e2 | prose between the tool call and rc=$?; runcq.sh of B2042 has rc=$? on its next line
+3a8471e8 | lane-scratch.sh (lane2069.sh with only T=, RF=, W= pointed at scratch; diff -> lines 9-10 only) under no lock -> lane rc=0
+0f8be279 | laneT/logs/lane.out written by the run at 00:57:27-01:02:20
+9bff011f | cat laneT/logs/lane.out -> rf jest rc=1
+74ea5075 | same -> judge rf rc=0
+845d83c3 | same -> green suites listed 27
+71cb7604 | v2069.sh writes $T/logs/verify-update.log (line 10 of v2069.sh); the drafter's own vproto.sh wrote logs/verify-proto.log
+f013a972 | grep -c '^VERDICT: PASS' logs/verify-proto.log -> 1
+5e67a2f3 | v2069.sh line 12 writes $T/logs/verify-plain.log (UNMEASURED: the plain verify was not run by the drafter)
+dbd173e9 | PREDICTED for the plain run (the update run read VERDICT: PASS 6323/398)
+b7d7f3d9 | step 8's outcome word; main unmoved between 00:22:34 and 01:2x (matching-refs/heads/main -> e2911754 both times)
+a8313ee6 | judge2069.py on logs/rf.json -> first line 'OK   collected tests > 0 (a filter that matches nothing returns rc 0) numTotalTests 23'
+7f44fcca | git clone -q --no-hardlinks --no-checkout .tools/b2055/wt d2069/clone -> exit 0; cat-file -t ba8418c6 -> commit
+9000f890 | as 6a500d47
+22716ed4 | git -C d2069/clone checkout --detach ba8418c6...; rev-parse HEAD^{tree} -> 1b46ff223163e8d0b12ae7389f458243e92b0196
+365ff4ba | tail -1 laneT/logs/judge-redproof.log -> JUDGE redproof PASS (rf PASS, green PASS)
+75816281 | judge2069.py logs/green27.json rf -> JUDGE rf FAIL
+441f18db | judge2069.py logs/green1.json redproof -> JUDGE redproof FAIL
+a9a0f55d | judge2069.py logs/rf.json green -> JUDGE green FAIL
+0392698b | bash frozen/v2069.sh update '.../.tools/b2042/clone' -> REFUSED: a dot-segment in the tree path, rc=2
+d5c6d48e | bash frozen/v2069.sh bogus t/work -> REFUSED: mode, rc=2
+8ebe0793 | grep '^VERDICT' logs/verify-proto-run1-contaminated.log -> VERDICT: FAIL (tool dash) jest exited non-zero (1)
+5581f164 | same line -> jest exited non-zero (1); Tests: 2 failed, 6321 passed, 6323 total
+2258fbc4 | gh api -X GET repos/.../git/matching-refs/heads/b2069 --jq length -> 0 (the seat's ls-remote is its own read)
+2a8e1e51 | matching-refs/heads/main -> e29117548b9c41159d2e375fd3f889ec3d1b732d
+fb9c4d2d | the seat's check at K; drafter: K 3b42367d descends from ba8418c6 (log --format=%P chain), BASE e2911754's tree equal
+3b08f074 | git -C t/wt log --format='%h %ae | %ce' -1 -> 3b42367 drafter-scratch@invalid.test | drafter-scratch@invalid.test (scratch identity; the seat's must be the repo's)
+9abbf094 | STATUS section heading the seat writes; B2042 STATUS holds '## READY' (grep -c -i '^## READY' -> 1)
+26800752 | ls tuesday/briefs | grep -i -c 'SEAT-N171' -> 2 (this kit and its .measured), before any .pre-stamp
+f3b0379d | no .pre-stamp copy exists at drafting (Tuesday makes it at the stamp)

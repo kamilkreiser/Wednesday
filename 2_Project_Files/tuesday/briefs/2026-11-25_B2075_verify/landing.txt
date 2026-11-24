@@ -1,0 +1,61 @@
+B2075 LANDING TEXT for Tuesday. Gate G2 (Sonnet, round 1 of 2): see VERDICT.md for the grade; this text assumes GO or GO WITH FINDINGS with no Blocker.
+Repo datasecau/Reporting_Dashboard_Au. Branch b2074/rd1017-rd975-audit-action-business-hours.
+HEAD (pin) 9d4ddb7f52ad2f23777d8b662abce0cbd1662b9f. Main at gate 4d8713e5353d589a8680d328e2e00a69b8ea7480 (pull request 252, HISTORY.md only).
+Every gh call is made with GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'.
+
+0. RE-MEASURE BEFORE OPENING
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha
+     -> 4d8713e5353d589a8680d328e2e00a69b8ea7480. If main has moved again: git diff --name-only 4d8713e5..<new main> must touch none of
+        backend/**, __tests__/**, scripts/**, static/**, package*.json, jest.config.js, .github/**. A move that touches
+        scripts/verify-expected-counts.json or backend/server.js always needs the lane sent back to a seat (K and the anchors would conflict).
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/matching-refs/heads/b2074 --jq '.[].object.sha'  -> 9d4ddb7f... only
+   gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/pulls?state=open' --jq length                       -> 0
+   gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/compare/main...b2074/rd1017-rd975-audit-action-business-hours' --jq '[.ahead_by,.behind_by,(.files|length)]'
+     -> [2,2,4]  (behind 2 = the PR 252 merge and its one commit, HISTORY.md only; the merge below is clean: the gate built it in scratch.)
+
+1. OPEN THE PR (Tuesday opens it; the seat did not)
+   gh pr create --repo datasecau/Reporting_Dashboard_Au --base main --head b2074/rd1017-rd975-audit-action-business-hours \
+     --title "$(cat '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-25_B2075_verify/pr-title.txt')" \
+     --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-25_B2075_verify/pr-body.md'
+   Then: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/<N> --jq '[.head.sha,.base.sha,.mergeable,.commits,.changed_files]'
+     -> head 9d4ddb7f52ad2f23777d8b662abce0cbd1662b9f, base 4d8713e5..., mergeable true, commits 2, changed_files 4.
+
+2. WAIT FOR THE CHECKS (a background task; its exit wakes you)
+   bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh' datasecau/Reporting_Dashboard_Au <N> 9d4ddb7f52ad2f23777d8b662abce0cbd1662b9f 60 40 --min-checks 7
+   7 DISTINCT names, measured by the gate at 07:5x AEDT on 25 Nov: PR 251 head c1a99d4b and PR 252 head 96831e51 each carried 8 check runs over 7
+   names (CodeQL | scan | build | audit-production-deps x2 | Analyze (actions) | Analyze (javascript-typescript) | Analyze (python)).
+   This branch's head today carries 1 run (audit-production-deps, push), as B2069's did before its PR opened.
+   Two runs of the same name on one head is the tool's MIXED case (rc 5): expected for audit-production-deps; if it reads rc 5, read both runs before any step.
+   Exit 0 = all green. Exit 1 and exit 5 are each a STOP; read the run, never re-run blindly.
+   C-190: the PR must add no new high-or-higher CodeQL alert (local comparison read NEW 0 / KEPT 0, rc 0). The hosted CodeQL check is the one that counts:
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/alerts?ref=refs/pull/<N>/head&state=open&per_page=100' \
+       --jq '[.[] | select(.most_recent_instance.location.path=="backend/server.js")] | length'
+       -> 13 expected (the same 13, start lines 391 1470 1488 3102 3102 3344 3354 3364 3624 3624 3624 3635 16870; none at 432-462 or 13740-13920). Whole repo: 22 open before opening.
+     A 14th alert, or any alert whose start line is 458-462 or 13774-13790, is a STOP.
+
+3. LAND: A MERGE COMMIT PINNED TO THE HEAD. NEVER SQUASH, NEVER REBASE.
+   Rule: C-190 (CLARIFICATIONS.md line 2067): "Never squash, never rebase".
+   gh pr merge <N> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit 9d4ddb7f52ad2f23777d8b662abce0cbd1662b9f
+   Then: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/<N> --jq .merge_commit_sha   (call it M)
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/<M> --jq '[.parents[].sha]'
+           -> [4d8713e5353d589a8680d328e2e00a69b8ea7480 (or the main before the merge), 9d4ddb7f52ad2f23777d8b662abce0cbd1662b9f]: two parents; one parent = squashed or rebased: STOP.
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha -> M
+   The merge tree on main 4d8713e5 was built in scratch by the gate (merge commit 24bd05df): full verify on it read VERIFY_RESULT_PLACEHOLDER.
+
+4. DEPLOY DEMO: READ ONLY. NOTHING DEPLOYS UNDER THIS LANDING. THE C-224 DEMO HOLD STANDS.
+   .github/workflows/deploy-demo.yml at main 4d8713e5: `on:` line 26, push to main (27-28), `paths-ignore:` line 29 ('**.md', 'docs/**', 'tests/**').
+   This merge touches backend/server.js, __tests__/** and scripts/**: none ignored, so the push STARTS a `Deploy demo` run (workflow id 333076536).
+   Both jobs need vars.CI_DEPLOY_ENABLED == 'true' (build: line 53; deploy: line 91, also bound to environment `demo`, line 95). The gate read the repo's
+   Actions variables list: empty (`actions/variables` -> []). The last 20 runs of the workflow all read skipped (newest 45440511193, head 11149d3f, push, 2026-11-24T16:43:55Z).
+   Read the outcome:
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/333076536/runs?head_sha=<M>' --jq '.workflow_runs[] | [.id,.event,.status,.conclusion] | @tsv'
+       Expect one push run, usually completed/skipped within a minute. If none appears after about 5 minutes read runs?per_page=5 and say so. Do not dispatch one.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<run id>/jobs' --jq '.jobs[] | [.name,.status,.conclusion] | @tsv'
+       Expected: build completed skipped, deploy completed skipped. BOTH must read skipped.
+   IF EITHER JOB RUNS (queued, in_progress, waiting, success), THE SWITCH IS ON:
+     - Do NOT approve the pending deployment; do not cancel, re-run or dispatch. Approving or rejecting is approval-class: card it to the product owner
+       under the C-224 hold with the run id and the job states. Record in the records pass that the switch read ON at <M>.
+   Make no HTTP request to the demo site in any case.
+
+5. AFTER THE LANDING
+   Hand FOR-RECORDS.md to the records pass (RD-1017 and RD-975 comments and moves; RD-577 records-only; RD-974 as the next lane with rd798 in its partition).

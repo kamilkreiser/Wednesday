@@ -1,0 +1,133 @@
+72a5db72 | grep -n -i '^## Corrections' Briefs/2026-11-25_B2069_STATUS.md -> heading exists (awk '/^## Corrections/,0' printed items 1 to 4; item 1 is the gh pr count); a section name, not a matched output
+1e8b024f | B2069 STATUS ## Corrections item 1 read at drafting: 'the open-PR count was read with `gh pr list ...`'; kit text names the verb to avoid, no output to match
+82395022 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls?state=open --jq length (06:05:58) -> 0
+a9c49b34 | prose around the dot-free rule; measured: v2074.sh (scratch copy, only T= changed) on a path holding /. -> REFUSED: a dot-segment in the tree path, rc 2
+665c0532 | git -C d2074/clone show '11149d3f...:scripts/verify-expected-counts.json' -> "tests": 6323
+04552112 | same read -> "suites": 398
+03bb06fc | cat d2074/clone/scripts/verify-expected-counts.json (checkout at 11149d3f) -> tests 6323, suites 398, _updated 2026-11-24T15:04:21.209Z
+ced30549 | jest --json over rd798 in d2074/t/x974 (probe edit), raw/p2-x974.json -> numTotalTests 65, failed titles ['C-BODY-HOURS LIVE - the window state mov...', 'C-BODY-HOURS OUT 190 - at a night hour t...'] (2)
+f4a7cfde | grep -n -i -F "'Job_Start_Time_UTC'" backend/seedDemoData.js at BASE -> 34 (the COLUMNS list holds Job_Start_Time_UTC, no Job_Start_Time); grep -rn over backend for an alias assignment of Job_Start_Time -> 0 (control: dateFields at 6121 printed)
+47f1dbed | grep -c -F <each quoted RD-1017 sentence> d2074/jira/RD-1017.txt -> 1, 1, 1, 1 (description, recommendation, acceptance)
+e0728b9e | git show 11149d3f:.github/workflows/deploy-demo.yml read at lines 26-32, 53, 91, 95 (workflow id 333076536 = Deploy demo by the runs GET)
+11517b5a | awk over deploy-demo.yml at BASE -> 26 on:, 29 paths-ignore:, 30-32 '**.md' 'docs/**' 'tests/**', 53 and 91 vars.CI_DEPLOY_ENABLED == 'true', 95 environment: demo
+e6eaa33a | gh api -X GET 'repos/.../actions/workflows/333076536/runs?per_page=20' -> total_count 266, conclusions skipped:20
+ff44ee9f | same call -> 266 skipped:20
+09baea33 | git -C '!CODING/.../2_Project_Files' cat-file -t 11149d3f... -> commit; clone --no-hardlinks into d2074/clone then cat-file -t -> commit
+a0c95445 | gh api -X GET .../git/ref/heads/main --jq .object.sha (06:05:58) -> 11149d3f38b0dacab95b2397aea6bca64f0c819f
+f28f7f21 | git -C d2074/clone worktree list -> clone, t/rf, t/work (detached 11149d3), t/wt [proto2074]; later t/x974, t/vupd
+be058dc5 | python program over server.js at BASE (AUDIT_ACTIONS object keys vs AUDIT_ACTIONS.<name> reads) -> keys 18, distinct used 17, uses 39, undefined ['SETTINGS_CHANGE']
+c43abc25 | same program -> undefined ['SETTINGS_CHANGE']; grep -n -F 'auditLog(AUDIT_ACTIONS.SETTINGS_CHANGE' server.js at BASE -> 17366 17616
+a8d8e056 | grep -c -E '^test' on each new file -> 0 and 0; grep -c -E '^[[:space:]]+test\(' -> 10 and 8
+ea136b88 | cell S1 red at BASE (raw/p2-rf.json: undefinedNames ['SETTINGS_CHANGE'], names 17), green edited (raw/p2-green.json)
+9231cf86 | cell S2 green edited: key [{key: SETTINGS_CHANGE, value: SETTINGS_CHANGE}] once, writers 2; red at BASE: key []
+7992eff7 | cell C1 green at BASE and edited: detailsAction add_data_source then remove_data_source, name 'rd1017 source', hasId true
+558db956 | cell C2 green at both: sourceRows of the CONFIG_CHANGE export 0; secret split counts [0,0,0,0]
+fb1def32 | git hash-object frozen/rd975-business-hours-report-reads-job-start-first.test.js -> b9d5caeb550810e5e2fcd98cd79f6f0d7c97fd47 (123 lines, 7254 bytes)
+d526d6bd | cell B3 red at BASE (users 1, time 2026-11-23T12:00:00.000Z) and green edited (users 0)
+f83bfcc7 | grep -E '^VERDICT' laneT/logs/verify-update.log -> VERDICT: PASS (tool dash) 6341/6341 tests passed across 400 suites (jest exit 0)
+82d6b3f6 | grep -c -E '^VERDICT' laneT/logs/verify-update.log -> 1
+54835d35 | git -C t/vupd diff scripts/verify-expected-counts.json -> "tests": 6323 -> 6341
+f5158b9f | same diff -> "suites": 398 -> 400
+57f16577 | same diff -> _updated 2026-11-24T15:04:21.209Z -> 2026-11-24T19:39:05.749Z; 3 insertions, 3 deletions, no other key
+2fc1b66d | grep -n -F 'async function loadAuditBufferFromDisk' server.js at BASE -> 339; 'audit-buffer.json' -> 344, 379
+b63f31f7 | grep -n -F 'logger.info(`[AUDIT] ${action}`' server.js at BASE -> 318
+3e305dcd | PREDICTED from line 318 with action 'SETTINGS_CHANGE'; not asserted by a cell (kit says so)
+40bc1f2a | PREDICTED from line 318 with an undefined action at BASE (template literal prints undefined); not run
+1baf997e | python regex auditLog\(\s*(?:[A-Za-z_]+\s*\|\|\s*)?'([A-Z_]+)' over server.js at BASE -> {'DATA_SOURCE_ENDPOINT_REJECT': 1, 'DATA_SOURCE_ALLOWLIST_REJECT': 3}; ALLOWLIST lines 15827, 15854, 17279
+4f338d74 | sed -n 13777,13779p server.js at BASE -> 'if (log[field] && log[field].trim()) {' (read, not run with a non-string)
+3b8d174e | awk NR==13775 server.js at BASE -> const dateFields = ['created_at', 'Job_Start_Time', ...]
+ff254458 | grep -n -F 'Job_Start_Time_UTC TEXT' backend/simpleDb.js -> 67; awk NR==1138 backend/azureLogAnalytics.js -> return isNaN(date.getTime()) ? val : date.toISOString();
+973bc6dc | node: new Date('2026-11-23') is UTC midnight by the ECMAScript date-only rule; not run in a cell (kit: as at BASE)
+25beb882 | seedDemoData.js line 34 holds Job_Start_Time_UTC; cell B3 (seeded shape) green edited
+840cfea0 | rd798 in the 28-suite green (raw/p2-green.json numFailedTests 0) at the edited tree; its test titles include 'C-BODY-HOURS IN 198 201 - ...' (grep -n -F at BASE)
+9102d28a | same green run; title 'C-BODY-HOURS OUT 198 201 - ...' present at BASE (grep -c -F -> 1)
+0f6235fe | apply2074.py raw/scratchBASE apply (second time) -> AssertionError: ('mark count before', 'apply', 1, "SETTINGS_CHANGE: 'SETTINGS_CHANGE',") rc 1
+bb002a7f | apply2074.py scratchBASE revert -> 'revert backend/server.js bytes 1140567 -> 1140305 lines 22822 -> 22819 nonascii 3913', hash-object -> 6d8e5139054787bad2c4cdf63cbc9576a32c62da; second revert -> AssertionError ('mark count before', 'revert', 0, ...) rc 1
+e3c84987 | slot.py over '!CODING/Datasec/NexusAI/b2074-nodot/chk' -> slot 15 band 29600-30239 dots 0 (rf 7, work 7, vupd 16; controls b2042 rf 0, work 7, b2069 rf 11)
+688e5e91 | kit instruction (a path the seat makes); frozen folder d2074/frozen listed 10 files at drafting
+201d6254 | shasum/hashlib sha256 of each frozen file printed into THE DESIGN table by program at drafting
+65a66dbd | diff d2069/frozen/v2069.sh d2074/frozen/v2074.sh -> changed lines 2c2 and 5c5 only
+7ecab7c2 | same diff -> lines 2 and 5 only
+484b76d2 | same diff -> lines 2 and 5 only
+40dc3fe0 | same diff -> lines 2 and 5 only
+383a6bd9 | same diff -> 2c2, 5c5
+2db5a83a | kit text (a design question for the next seat); seedDemoData.js line 34 measured
+e41feda5 | the channel form, copied from kit B2069 line 69; no output to match
+956a006a | kit check for the seat; no drafter output (the seat's own pwd)
+2988dbe3 | tmux list-panes -a -F '#{pane_id} #{@cockpit_name}' at 06:09 -> Datasec/NexusAI-R321 and tuesday only (NexusAI build panes 0)
+d95b5923 | ls -d '!CODING/Datasec/NexusAI/.tools/b2069' -> exists (control-yes); .tools/b2074, b2074-nodot and the B2074 STATUS -> No such file
+e8ee43d1 | gh api -X GET .../git/ref/heads/main -> 11149d3f38b0dacab95b2397aea6bca64f0c819f (06:05:58)
+41c652aa | gh api -X GET .../git/matching-refs/heads/b2074 --jq length -> 0 (control heads/b2069 -> 1); refs/heads/main prints a sha by the ref GET
+5bb21fa4 | kit instruction; the seat sets it; no drafter output
+da0e8584 | GH_CONFIG_DIR set to that path; gh api -X GET user --jq .login | grep -c -i datasec -> 1
+385e4a94 | same -> 1
+f36b9680 | lsof -nP -iTCP:<band> -sTCP:LISTEN at 06:18:32 -> 0 rows in 24480-25119, 30240-30879, 29600-30239; machine-wide 12
+b68d4ed2 | slot.py (os.path.realpath split on /, parts starting with '.') -> '.tools/b2074/clone' dots 1 (control fires); b2074-nodot trees dots 0
+1ce28785 | same program -> dots 1 for .tools path
+969c3ea5 | same program -> control .tools/b2074/clone reads 1
+16b973a3 | HOLD text; the drafter's own zsh run of git show $B:scripts/... printed 'fatal: ambiguous argument ...founts.json' (the :s modifier fired), the fault this line guards
+005618dd | same: '$B:scripts' was read as a :s modifier by zsh in the drafter's shell (output 'fatal: ambiguous argument '11149d3f...ounts.json'')
+59514ff4 | rule text; every drafter count used /usr/bin/grep with a control
+92140ed7 | rule text; no override used (the drafter's scratch identity was a repo-local config in its own clone)
+7a98088a | rule text; no override used
+f6e2c38d | chain step 8 label; no output to match
+d2f8f506 | gh api -X GET compare/11149d3f...records/b2073-history -> ahead 1, behind 0, files HISTORY.md (the only pending move)
+93ec9fa2 | workflow name read in deploy-demo.yml at BASE; runs GET total 266
+09813e3e | awk NR==53 and NR==91 deploy-demo.yml at BASE -> both hold vars.CI_DEPLOY_ENABLED == 'true'
+4097de72 | cat -n .tools/b2069/runlane.sh -> lines 2-5 export NEXUSAI_LOCK_BASE, PATH, unset NODE_OPTIONS, the lock call; line 6 echo lock-wrapper rc
+69bcbc5d | same file read; substitution b2069 -> b2074 is the seat's
+d02648b7 | jwhole.py reads '!CODING/Datasec/NexusAI/4_Credentials/.env' in-process; printed only key, char counts and status (RD-1017 desc chars 4409 comments 0 status To Do)
+da96e6b5 | awk 'NR==2067' CLARIFICATIONS.md | grep -c -F 'Never squash, never rebase' -> 1
+77e5049f | grep -n -i -E 'RD-1017\b|RD-975\b' CLARIFICATIONS.md -> RD-975 at 2605 (Related), RD-1017 at 3113, 3134, 3146, 3168 (Related lines); no entry decides the tag
+088fb94f | same grep -> RD-1017 on 4 Related lines
+813e91c5 | node -v with the PATH of jt.sh (lane log start line) -> v24.22.2
+9d5eb953 | laneT/lane.out start line -> node v24.22.2
+2e6e7cee | git --no-optional-locks -C .tools/b2069/clone config --get user.email | tr -d newline | wc -c -> 46; user.name -> 12
+2034cf74 | same -> 46 and 12
+15d0482e | kit instruction for the seat; the drafter's node_modules is a symlink to the B2032 drafter's npm ci (disclosed)
+8d2cbc38 | shasum -a 256 d2074/clone/package-lock.json | cut -c1-16 -> 37e5add354e539f9 (same for d2032/clone)
+b288101c | python3 -I -B frozen/apply2074.py raw/scratchBASE apply -> rc 0
+60d61826 | same run -> apply backend/server.js bytes 1140305 -> 1140567 lines 22819 -> 22822 nonascii 3913
+84f4dc10 | same -> hash-object a7426b07a96377f3ab57ba7813997a8d3180013c; second apply rc 1
+77029020 | python3 -I -B frozen/static2074.py t/wt A frozen/msg-A.txt <4 names> -> 14 OK lines, STATIC A PASS, rc 0
+8fd181dd | same run -> STATIC A PASS
+d7b6955d | sed -n 20p scanlib1114.py | cut -c1-40 -> the person pattern line; names parsed: 4
+d7dc99d2 | node --check of backend/server.js and both new files in t/wt -> rc 0 x3
+965b1e0f | git -C t/wt diff --cached | gitleaks stdin --no-banner -> no leaks found
+acb6d492 | same -> 'no leaks found' (A staged, K staged, log -p 11149d3f..51b1be10)
+3f0a65e9 | printf of a generated aws_access_key_id = AKIA... plus aws_secret_access_key = ... | gitleaks stdin --no-banner -> leaks found: 2
+de0484fc | same -> WRN leaks found: 2
+1b2e3fd2 | python3 -I -B frozen/static2074.py t/wt K raw/msg-K.filled.txt <4 names> -> 13 OK lines, STATIC K PASS, rc 0
+fdfee268 | same -> STATIC K PASS
+9d913960 | git -C t/wt rev-parse HEAD HEAD^ after K -> 51b1be10e89cdcf76d45fffcf1c113809b4c373d, 92cc03c4248c5f686b8fc238c30e08043cd57798; after A -> 92cc03c4..., 11149d3f...
+cccdfb01 | cat -n .tools/b2069/cq/runcq.sh -> lines 2-5 (T, the tool call with --base/--head, rc=$?, echo cq rc)
+e8ac84e4 | same file read
+bdd5c54b | pr_codeql_check.sh --base 11149d3f... --head 51b1be10e89c... -> rc 0
+e1693156 | same run: cq.out tail -> RESULT rc 0 PASS (KEPT high+ 0, NEW high+ 0); cq.err 0 bytes
+bfd00950 | lane-scratch.sh (frozen lane2074.sh with only T=, RF=, W= changed: diff prints lines 9-10) under nexusai-lock.sh jest d2074-lane-scratch -> lock acquired after 0s, lock-wrapper rc=0
+570cf5a1 | cat laneT/lane.out -> the rc lines below
+db96e7bb | laneT/lane.out -> rf jest rc=1
+d7c1eba7 | laneT/lane.out -> judge rf rc=0
+53d0e335 | laneT/lane.out -> green suites listed 28
+2b7207e4 | laneT/logs/verify-update.log written by v-scratch.sh update t/vupd
+ad254d52 | grep -E '^VERDICT' laneT/logs/verify-update.log -> VERDICT: PASS (dash) 6341/6341 tests passed across 400 suites (jest exit 0)
+d832c471 | UNMEASURED: the plain verify was not run by the drafter (kit says so)
+0a268043 | PREDICTED for the plain run; the update run read VERDICT: PASS
+ac5ee257 | chain step 8 word copied from B2069's chain; no output to match
+90b42edc | grep -n -F "describe('RD-975 controls: the rows the change must not move'" frozen rd975 test -> 91; jest titles in raw/p2-green.json carry it
+602fce25 | python3 frozen/judge2074.py raw/p2-rf.json rf -> first line 'OK   collected tests > 0 (a filter that matches nothing returns rc 0) numTotalTests 18'
+05c06d69 | tail -1 laneT/logs/judge-redproof.log -> JUDGE redproof PASS
+378ebcaf | judge2074.py raw/p2-green.json rf -> JUDGE rf FAIL
+7e1ffee6 | judge2074.py raw/p2-green.json redproof -> JUDGE redproof FAIL
+a80eb750 | judge2074.py raw/p2-rf.json green -> JUDGE green FAIL
+be1f1b1e | bash v-scratch.sh update '.../d2074/t/../t/vupd' -> REFUSED: a dot-segment in the tree path, rc 2
+b7fe3955 | bash v-scratch.sh bogus t/vupd -> REFUSED: mode, rc 2
+a8f9309e | node --check x3 in t/wt -> rc 0
+eb165422 | gh api -X GET .../git/matching-refs/heads/b2074 --jq length -> 0 (the GET equivalent at drafting)
+e5fc0f54 | gh api -X GET .../git/ref/heads/main -> 11149d3f...
+48799fb7 | git -C t/wt merge-base --is-ancestor 11149d3f... 51b1be10... -> rc 0 (prototype K descends from BASE; diff --name-only BASE K -> the four paths)
+43848a86 | git -C t/wt log --format='%h %ae | %ce' -1 -> scratch identity drafter-scratch@invalid.test on both sides (the seat's will be the repo identity)
+bbc20751 | cells S1, S2, W1-W3 red at BASE (raw/p2-rf.json) and green edited; the 5 names are frozen in judge2074.py REDS
+eef11f60 | section name copied from B2069's form; no output to match
+51d57bc9 | ls tuesday/briefs | grep -i -E 'SEAT-N172' -> this kit and its .measured sidecar (2 lines)
+b72ef629 | Tuesday makes the .pre-stamp copy at the stamp; none exists at drafting (ls -> 2 lines, kit and sidecar)
