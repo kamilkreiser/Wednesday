@@ -1,0 +1,281 @@
+=========== [QUESTION] 2026-11-24T02:48 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] QUESTION: plan confirmation and drafts for licence (Se
+[Secuura/Blockchain-S -> Wednesday] QUESTION: plan confirmation and drafts for licence (Seat S 120th)
+Seat S 120th
+
+QUESTION: plan confirmation and drafts for licence. Board seat, claude-sonnet-5-5, row C7, pane Secuura/Blockchain-S. NOTHING has been written to Linear, GitHub, the extranet or any box. Everything below is read-only work plus files in my own record folder (REC).
+
+BRIEF: subject "BRIEF board seat (Seat S 120th): KS-2339 listed siblings", stamp 2026-11-24T02:30:08Z, three seconds before my launch stamp 02:30:11Z. I read it whole (54 lines; PROVENANCE at 45, STAMP at 51), then S 119th's HANDOVER whole, S 118th's HANDOVER whole, comment d90b1164 whole from Linear, gate 418's verdict whole, and Seat D 86th's HANDOVER whole. Ordinal re-measured with /usr/bin/grep -o -i -c over history.md at 2026-11-24T02:31:03Z: seat s 119th 1 (control), seat s 120th 0. REC: 5_Project_History/2026-11-24_seatS-120th/ (machine date 2026-11-24).
+
+PIN USED: develop b69addc39652d5532d8e497aff0e2386db125c83 (my own git ls-remote through the project's configured key at 2026-11-24T02:35:26Z; equal to your BRIEF). PR 2294: merged=true, merged_at 2026-11-24T00:44:42Z, head 604f8ff60f8c, squash b69addc39652 with one parent e3e79b7317f1, 8 files. I re-read develop before each write once licensed.
+
+LAUNCHER PREFLIGHT WARNINGS, VERBATIM (the file 4_Credentials/.launch_preflight_last.txt, copied to evidence/launch_preflight_s120_snapshot.txt):
+# launch 2026-11-24T02:30:11Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 2 other live session(s) on this project: PID 39590 (up since Tue 24 Nov 12:02:06 2026), PID 29302 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+Not acted on: F-02 (your BRIEF: never seed the keychain or set the on-disk flag). KS-907 honoured: no checkout, pull, fetch or ref write in the shared checkout; two ls-remotes only, the launcher's boot line (your ruled line) and one of mine at 02:35:26Z with GIT_OPTIONAL_LOCKS=0 and the project GH_CONFIG_DIR.
+
+## 1. BLUF
+
+All eight rows are filed as NEW tickets in my drafts, none is covered by an existing ticket, and every one is proposed Low (4). Four things need your eye before you licence: (1) item 1 is NEW only because KS-2052 does not carry the routing decision or the who-may-approve question (Q1); (2) item 8's premise is weaker than d90b1164 says: the uncapped read in the gateway's proxy handler looks SHADOWED by a capped route in the admin router that mounts first (Q2); (3) the BRIEF says each ticket is related-to KS-2339 and the filer sets no relation (Q3); (4) item 9 cannot carry a sha256 until the new ids exist (Q5). Three further defects I saw are LISTED and STOPPED on (section 7). If nobody files first, T1 to T8 take KS-2343 to KS-2350 (the board's highest key at my 02:33:27Z pull was KS-2342).
+
+## 2. The source list, quoted by program from comment d90b1164 (the eight in-scope rows, then the one not ticketed)
+
+Row 1: * ApprovalQueue's approve and pending routes. The issuer component calls GET `/api/workflows/pending/me` and POST `/api/workflows/steps/:id/approve`. The backend is the transfer service: approve takes the approver from the token, and pending/me reads the caller's own steps. The component is not mounted, KS-2052 owns that side, and no ruling covers who may approve.
+Row 2: * PATCH `/api/signatories/:id` and the three reads. PATCH has no role check and is still not routed at the gateway.
+Row 3: * Whether the nominee must belong to the organisation (not ruled).
+Row 4: * The tenant a platform admin writes: it is never checked against the organisation's.
+Row 5: * Revoke does not record `revoked_by`.
+Row 6: * Nominate's ids are not validated as UUIDs; a malformed one from a platform admin is a 500.
+Row 7: * The page sends the user's own id as the organisation when it has none.
+Row 8: * The gateway's `admin/create` reads an uncapped raw body.
+Row 9 (NOT ticketed, kept out by ruling): * The OpenAPI spec has no signatories paths (kept out by ruling).
+
+## 3. Read table (live reads 2026-11-24T02:31Z to 02:46Z)
+
+KS-2339: state In Progress; priority High (2); assignee and creator the board account (not Peter or Stuart); parent none; children 0; relations 0; inverse relations 0; comments 2 (08fbe7a5 from S 119th, d90b1164); attachments 1 (PR 2294); subscribers 1; created 2026-11-23T17:00:43Z; updated 2026-11-23T23:17:35Z. So item 9 passes the stop test on assignee, and a leaf check would pass today.
+Board snapshot: evidence/board_live_s120.json, pulled 02:32:54Z to 02:33:27Z, 2,331 issues (1,489 archived), highest key KS-2342. This is the BEFORE for the neighbour check; I will pull a fresh one immediately ahead of the first write.
+PR 2294 at GitHub (read 02:39:40Z): merged true; head 604f8ff60f8c is the head gate 418 read, so there is NO first-head trap here (unlike S 119th trap a); the squash is the develop head; a compare of head against squash shows 1 ahead, 1 behind, 8 files (a squash, as expected).
+
+## 4. Search table per item (every open and closed ticket, archived included; both controls held on every run: msgpackr hits KS-1379, a random token hits 0, the U+0131 control 2 against 2331)
+
+Item 1 ApprovalQueue routes. Terms: ApprovalQueue 4 (KS-2052, KS-2336, KS-2339 open; 1 closed); workflows/pending 2 (KS-2052, KS-2339); pending/me 4 (KS-2052, KS-2222, KS-2339 open; 1 closed); workflows/steps 4 open (KS-2052, KS-2223, KS-2339, KS-2340); steps/:id/approve (regex) 2 (KS-2052, KS-2339); who may approve 3 open (KS-2052, KS-2223, KS-2339). Read: KS-2052 whole (description and four comments, including the two tails I first cut), KS-2223, KS-2340 and KS-2222 (the approve, gateway and ruling lines; windows). VERDICT: NEW, narrowed (Q1). KS-2052 holds the approver-from-the-token fix (PR 2243, merged 2026-11-15) and says twice the gateway does not carry the steps path with reach unmeasured; it holds no routing decision and no who-may-approve question; none of the four tickets records a ruling from Kam on who may approve.
+Item 2 PATCH and the three reads. Terms: PATCH near signator (regex) 1 (KS-2339); signatories/:id 1 (KS-2339); signator 27 (12 open, 15 closed); signator near role, admin or authori (regex) 4 (KS-1084, KS-1945, KS-2339, 1 closed). Windows read in KS-593, KS-1084, KS-1945, KS-2229, KS-2312, KS-23, KS-779. VERDICT: NEW.
+Item 3 nominee must belong. Terms: nominee 1 (KS-2339); nominate with organi 4 (KS-1945, KS-2339 open; 2 closed); nominee with tenant 1; belong to the/an/its organi (regex) 3 (KS-2316, KS-2334, KS-2339; the matching window of KS-2316 read, KS-2334 by title only; neither is about signatories); membership with organi 12 (5 open, titles scanned). VERDICT: NEW.
+Item 4 tenant a platform admin writes. Terms: tenant with signator 19 (9 open); nominate with tenant 3 (KS-1945, KS-2339 open; 1 closed); platform admin with nominat 1 (KS-2339); platform admin with tenant 68 (39 open, 29 closed; the open titles scanned, none on signatories; the closed ones not scanned). Read: KS-23 (Done 2026-05: tenant from req.tenantId, the design this item questions), KS-2312, KS-1945. VERDICT: NEW.
+Item 5 revoked_by. Terms: revoked_by 1 (KS-2339); revokedBy 0; who revoked 0; revoked by with signator 0; reinstated_by 0. VERDICT: NEW.
+Item 6 UUID validation. Terms: nominate with uuid 2 (KS-2339 open; 1 closed); malformed with nominat 2 (KS-2339 open; 1 closed). Read: KS-593 comment 3875d9f9 (the GET list with a malformed id, since fixed; comment 4cb5d5ca measured 400 live) and KS-1945 (the 409 branch). VERDICT: NEW.
+Item 7 issuer page fallback. Terms: own id as the organi 1 (KS-2339); issuer with signatories and organi 5 (KS-2312, KS-2339 open; 3 closed); org-less with issuer 14 (KS-1533, KS-1574, KS-1581, KS-2063 open, all keys or tokens); x-user-id with signator 1 (KS-1084). Read: KS-779 (the matching windows: the measurement lines and the recorded-as-intentionally-org-less comment, not every line), KS-2299 (title only), KS-2312 (the signatories line). VERDICT: NEW.
+Item 8 admin/create raw body. Terms: admin/create 35 (13 open); raw body 7 (6 open); uncapped 12 (5 open); express.raw 4 (1 open); body size or limit or cap (regex) 5 (2 open); data += chunk 0; req.on('data' 0; admin/create near cap, limit or size (regex) 2 (KS-2339, and KS-2316 which is a false hit: its text says a SEARCH "hit its cap of 100"). Matching windows read in KS-2316, KS-2325, KS-807, KS-1724, KS-2267 and KS-593. VERDICT: NEW.
+
+## 5. Code-site reads at the pin (each read from the source at develop b69addc39652 through GitHub blob fetches; saved under evidence/; lines quoted in the drafts)
+
+originate routes/signatories.ts (612 lines), all seven routes: nominate 133, list GET 234, check GET 290, GET by id 350, PATCH 404, revoke 483, reinstate 554; router-wide authenticate() at line 24; the write gate called at 157, 506 and 572 only. api-gateway routes/proxy.ts: signatories GET 725 and POSTs 809 to 811; admin/create forward 489 to 512 and PATCH 522; workflows 1230 to 1258. api-gateway routes/admin.ts: admin/create 1514, PATCH 1589, mockBodyParser 592 to 595. api-gateway index.ts: proxyPaths 391 to 403 (signatories at 400, users at 402), mount order 940 (admin) before 1151 (proxy). transfer routes/workflows.ts: approve 167, pending/me 213. issuer Signatories.tsx 95, 109, 137; App.tsx 152; Layout.tsx 57; ApprovalQueue.tsx 65, 92, 99 and its only references. Migrations: 001 lines 812, 813, 822; docker init 03 lines 216 to 233; 012 lines 18 and 63. Not re-read, said so in the drafts where it matters: pg, the gateway errorHandler, KS-689.
+Gate 418 whole: GO WITH NOTES at head 604f8ff60f8c (tier 1); G418-3 (nominee), G418-6 (platform admin non-UUID), and the reachability list (PATCH, PUT, DELETE, GET on /:id and GET /check answer 404 at the gateway, nothing forwarded) are what T2, T3 and T6 cite.
+
+## 6. Drafts (bytes inlined below; no trailing newline; sha256 from the files in drafts/). Each passes the filer's own gates in DRY (title 20 to 140 chars, BLUF first, no at-sign, no backslash-backtick, no bare file name; evidence/dry_tickets_s120.txt, DRY_FINISHED, nothing written) and tools/build_tickets_s120.py's copy of them with five planted controls refused for their own reasons.
+
+| id | row | priority (proposed) | title sha256 | body sha256 | body bytes |
+|---|---|---|---|---|---|
+| T1 | 1 | Low (4) | e47e342dace480e689bb84e537f0896566a0fff41549cb38066c49193c5097d5 | 386924cbf46c3143d4965bbdc8c753cbdec4a321c4d9c18bc2598f5028f38076 | 3365 |
+| T2 | 2 | Low (4) | 309171b180587ba7608b8a3634309beff2b014b7dcf41120807d5ef5b1002b77 | 976bd9fe6a2333bccdde921755c4485ce177076654a343c20df5d57c9f99d559 | 3278 |
+| T3 | 3 | Low (4) | b0f6d670ee92a329ec70b20a9b0b4a406c4d26ac0515648287fc644eeab33198 | e7324b0b075330bdd345e7da6dd3b1f33a9d7e714a9a2621982ccd0f28714886 | 2789 |
+| T4 | 4 | Low (4) | db25cc8f63feba6f104841daeee1cf50902a7151a1d2131aa3d50b54e120474d | 196a347c779e8d0efca2477f09d22f3a9ad8992eff960932eac176ec8e695c35 | 2861 |
+| T5 | 5 | Low (4) | 50115e3d5ba440f12bf5d4aa7bf56c3bd8574e7e2df58cfee7c3d404d5fa5ca3 | 80f078a429966f2cbc19e96255f786c3f75eeecb5f967ccde36bd20c28d3c9ce | 1572 |
+| T6 | 6 | Low (4) | 62872201d75221556eaec19d22c3a3ab5703a7d26e13897d6b55a40f1d38b2a2 | f5c2d23d09a978f984aa1fe74eda12b066cabd0eb1074f6833e73b41055d6599 | 2175 |
+| T7 | 7 | Low (4) | 8a46336324b424557d435abf124406679c97c6d258a450be094240fd9fcc78f5 | 75b1882c0033446edf686c20c909622a434c3ec27bd36496eea5ae8cc058e820 | 2667 |
+| T8 | 8 | Low (4) | 4e586b5d54bb05e01e8edb94b04dc7db5a200f6505886bd7dca71ad89a8ef9c2 | f3a2e29a98b40e4c8c59f5dc7fa881dbe35881c448f6a1313eec6984e973ebc6 | 2993 |
+
+--- T1, title sha256 e47e342dace480e689bb84e537f0896566a0fff41549cb38066c49193c5097d5 ---
+issuer ApprovalQueue calls two transfer routes the gateway does not carry, and no ruling says who may approve a step
+--- T1, body sha256 386924cbf46c3143d4965bbdc8c753cbdec4a321c4d9c18bc2598f5028f38076 (3365 bytes) ---
+**BLUF:** The issuer's ApprovalQueue component calls `GET /api/workflows/pending/me` and `POST /api/workflows/steps/:id/approve`. Both routes exist only in the transfer service and the gateway carries neither, so a browser cannot reach them. **This needs a ruling from Kam on who may approve a workflow step before any gateway route or component work is built.** Priority Low (proposed): the component is not mounted anywhere in the issuer, and the routes are unreachable through the gateway.
+
+**Source:** KS-2339 comment d90b1164 (2026-11-23T23:17:47Z), section "Listed, not changed (each needs its own decision)", row 1. Related: KS-2339 (PR 2294).
+
+**Where** (develop `b69addc39652`, read 2026-11-24 by Seat S 120th; nothing was run):
+* `Blockchain/Dev/frontend/issuer/src/components/transfer/ApprovalQueue.tsx` line 65 fetches `/api/workflows/pending/me`; line 92 posts to `/api/workflows/steps/${id}/approve` with `approverId` in the body (line 99). The component has no render site: across the 99 non-test issuer source files its only references are its own file and the export at `Blockchain/Dev/frontend/issuer/src/components/transfer/index.ts` line 9.
+* `Blockchain/Dev/services/transfer/src/routes/workflows.ts` line 167 is the approve route: the approver is the token's user, a body `approverId` that is not the caller's own id gets 403, and the route's comment ends "No role widens this". Line 213 is `pending/me`, the caller's own steps.
+* The gateway has no route for either path. Its `/api/workflows` routes are `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts` lines 1230, 1237, 1251 and 1258 (admin list, create, get, delete) and `Blockchain/Dev/services/api-gateway/src/routes/verification.ts` lines 364 and 627 (`/:workflowId/reject` and `/:workflowId/approve`, one path segment each). A search of the 40 non-test gateway source files for `workflows/pending` and `workflows/steps` finds nothing.
+
+**The open question:** who may approve. Today's code (PR 2243, under KS-2052) lets only the step's assignee approve, by token. KS-2052, KS-2223, KS-2340 and KS-2222 were read for a ruling from Kam on who may approve; none holds one (they carry Wednesday's priority rulings and the KS-1410 class ruling). So the board states no rule beyond what PR 2243 built.
+
+**What already exists, not repeated here:** KS-2052 (In Progress) holds the approver-from-the-token fix and says twice that the gateway does not carry the steps path, with reachability unmeasured; KS-2223 holds the delegation half; KS-2340 holds the raw 400 message on the approve route.
+
+**Not established:** any run; whether any environment holds workflow step rows (KS-2052: unmeasured); whether the transfer service is deployed on the demo VM (a gateway comment says "not deployed on Azure", not re-checked, per KS-2340).
+
+**Board search before filing** (2026-11-24, whole board, 2,331 issues, all states including archived; the positive control (msgpackr hits KS-1379) and the negative control (a random token hits 0) held): `ApprovalQueue` 4 tickets (KS-2052, KS-2336, KS-2339 open; 1 closed); `pending/me` 4 (KS-2052, KS-2222, KS-2339 open; 1 closed); `workflows/steps` 4 open (KS-2052, KS-2223, KS-2339, KS-2340); `who may approve` 3 open (KS-2052, KS-2223, KS-2339). Read: KS-2052 whole (description and four comments), KS-2223 and KS-2340 (the approve and gateway lines).
+--- end T1 ---
+--- T2, title sha256 309171b180587ba7608b8a3634309beff2b014b7dcf41120807d5ef5b1002b77 ---
+originate PATCH /api/signatories/:id and the three signatory reads check no role and no organisation; the gateway routes only the list
+--- T2, body sha256 976bd9fe6a2333bccdde921755c4485ce177076654a343c20df5d57c9f99d559 (3278 bytes) ---
+**BLUF:** In the originate service the signatories router checks one thing router-wide: a valid token. `PATCH /api/signatories/:id` and the three GET routes (`/`, `/check`, `/:id`) never read the caller's role or organisation; only the three writes KS-2339 gated (nominate, revoke, reinstate) do. At the gateway only the list GET is routed. Priority Low (proposed): no live bypass is shown, because the PATCH and the other two reads have no gateway route (gate 418 measured 404 with nothing forwarded). A higher priority is arguable for the routed list read, which by reading answers any signed-in caller in the tenant for any organisation id; I did not run it.
+
+**Source:** KS-2339 comment d90b1164 (2026-11-23T23:17:47Z), section "Listed, not changed (each needs its own decision)", row 2. Related: KS-2339 (PR 2294).
+
+**Where** (develop `b69addc39652`, read 2026-11-24 by Seat S 120th; nothing was run):
+* `Blockchain/Dev/services/originate/src/routes/signatories.ts` line 24 is the only router-wide check, `signatoriesRouter.use(authenticate())`. The role-and-organisation gate `signatoryWriteGate` is called at lines 157 (nominate), 506 (revoke) and 572 (reinstate) and nowhere else in the file.
+* PATCH `/:id` (line 404) validates displayName, title, documentTypes and canDelegate and has no gate. Its UPDATE (lines 456 to 460) is `WHERE id = ... AND tenant_id = ...`, so any signed-in caller in the same tenant can change another organisation's signatory's display name, title, document types and `can_delegate`.
+* The reads: `GET /` (line 234) takes `organizationId` from the query and filters on the tenant and that organisation (lines 265 and 266); `GET /check` (line 290) and `GET /:id` (line 350) filter on the tenant. None reads the caller's role or organisation.
+* Gateway, `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts`: GET at line 725 (signed in) and the three POSTs at lines 809 to 811 (role-gated). Nothing for PATCH, `/check` or `/:id`. Gate 418 (verdict at PR 2294's head `604f8ff60f8c`, an in-process chain proof) measured PATCH, PUT, DELETE and GET on `/:id`, and GET `/check`, as 404 with nothing forwarded.
+
+**Reach:** the PATCH and the two other reads are reachable only by a caller that talks to originate without the gateway, or after someone adds a gateway route for them. The list GET is reachable today.
+
+**Not established:** any run; whether anything outside the gateway can reach originate on a deployed box; whether the reads are meant to be open to every signed-in user (not ruled: KS-2339's ruling covers the three writes only).
+
+**Also related:** KS-593 (comment 3875d9f9, 2026-08-28: the list GET answered a raw 500 for a malformed organizationId; comment 4cb5d5ca, 2026-10-12, measured 400 live after the `.isUUID()` now at line 236); KS-1084 (the gateway's list GET forwards the tenant).
+
+**Board search before filing** (2026-11-24, whole board, 2,331 issues, all states including archived; the positive control (msgpackr hits KS-1379) and the negative control (a random token hits 0) held): `PATCH` near `signator` (regex) 1 ticket (KS-2339 only); `signatories/:id` 1 (KS-2339 only); `signator` 27 (12 open, 15 closed or archived), windows read in KS-593, KS-1084, KS-1945, KS-2229, KS-2312, KS-23 and KS-779: none holds this.
+--- end T2 ---
+--- T3, title sha256 b0f6d670ee92a329ec70b20a9b0b4a406c4d26ac0515648287fc644eeab33198 ---
+originate nominate never reads the nominee: any user id is accepted for an organisation, with no organisation or tenant test
+--- T3, body sha256 e7324b0b075330bdd345e7da6dd3b1f33a9d7e714a9a2621982ccd0f28714886 (2789 bytes) ---
+**BLUF:** Nominate judges only the organisation named in the body and never reads the nominee. An organisation's admin can name any user id, from another organisation or another tenant, as that organisation's authorised signatory. **This needs a ruling from Kam on whether the nominee must belong to the organisation, and on what "belong" reads from, before any build.** Priority Low (proposed): it does not let an admin act for another organisation (the row is its own organisation's).
+
+**Source:** KS-2339 comment d90b1164 (2026-11-23T23:17:47Z), section "Listed, not changed (each needs its own decision)", row 3 ("Whether the nominee must belong to the organisation (not ruled)"). Related: KS-2339 (PR 2294).
+
+**Where** (develop `b69addc39652`, read 2026-11-24 by Seat S 120th; nothing was run):
+* `Blockchain/Dev/services/originate/src/routes/signatories.ts` line 157 calls the gate with the body's `organizationId` as the target (`async () => organizationId`). `userId` is validated only as a non-empty string (line 137) and goes straight to the INSERT (line 175). No query reads the nominee's users row: not that it exists, not its organisation, not its tenant.
+* On a migrated database `signatories.user_id` is `REFERENCES users(id)` (`Blockchain/Dev/migrations/001_initial-schema.sql` line 813), so a nonexistent user fails on the foreign key and, because the catch maps only code 23505 to 409 (line 211), answers 500; a real user of another organisation or tenant passes. On a database built from `Blockchain/Dev/docker/init/03-service-tables.sql` (the table at line 216) there are no foreign keys, so even a nonexistent id is accepted; KS-2312 records that class.
+* Gate 418 recorded it as G418-3 (Note): "An ORG_ADMIN of A can name any userId, a user of B or of another tenant, as A's signatory ... Follow-up only."
+
+**What the ruling decides, and one constraint on it:** whether the nominee must belong to the organisation, and what that is read from. KS-779 measured on the demo VM on 2026-09-03 (not re-measured) that `users.organization_id` was NULL for all 30 accounts and `organization_members` held 0 rows; KS-2299 records the seeded organisation admins carrying no organisation. A membership test against either source would refuse every nominee on that data.
+
+**Not established:** any run; whether a users row carries a tenant to compare; the data on Kintsugi today.
+
+**Board search before filing** (2026-11-24, whole board, 2,331 issues, all states including archived; the positive control (msgpackr hits KS-1379) and the negative control (a random token hits 0) held): `nominee` 1 ticket (KS-2339 only); `nominat` with `organi` 4 (KS-1945 and KS-2339 open; 2 closed; KS-1945's text read: the 409 branch, a different defect); `nominee` with `tenant` 1 (KS-2339 only).
+--- end T3 ---
+--- T4, title sha256 db25cc8f63feba6f104841daeee1cf50902a7151a1d2131aa3d50b54e120474d ---
+originate nominate writes the request's tenant on the signatory row and never checks it against the organisation's tenant
+--- T4, body sha256 196a347c779e8d0efca2477f09d22f3a9ad8992eff960932eac176ec8e695c35 (2861 bytes) ---
+**BLUF:** Nominate stamps the signatory row with the tenant of the request and the organisation from the body, and never reads the organisation's tenant. For a platform admin, who may act for any organisation under Kam's ruling on KS-2339, the two can differ. By reading, the row then sits in the admin's tenant under another tenant's organisation, and the tenant-filtered reads for that organisation would not show it. Priority Low (proposed): only platform admins reach it, and nothing was run.
+
+**Source:** KS-2339 comment d90b1164 (2026-11-23T23:17:47Z), section "Listed, not changed (each needs its own decision)", row 4 ("The tenant a platform admin writes: it is never checked against the organisation's"). Related: KS-2339 (PR 2294).
+
+**Where** (develop `b69addc39652`, read 2026-11-24 by Seat S 120th; nothing was run):
+* `Blockchain/Dev/services/originate/src/routes/signatories.ts` lines 48 to 53: `getReqTenantId` returns the request's tenant, or the default `a0000000-0000-4000-8000-000000000001`. Nominate reads it at line 164 and writes it as `tenant_id` at line 173, beside the body's `organizationId` at line 174. The file never queries the organizations table (0 mentions of it), and the nominee's tenant is not read either.
+* For an organisation-arm admin the gate compares the body organisation with the caller's own organisation (lines 86 to 93 and 116 to 126), so tenant and organisation agree only if the caller's organisation lies in the caller's tenant; that is not tested either.
+* The list read filters `s.tenant_id` on the request's tenant and `s.organization_id` on the query (lines 265 and 266), which is why a row written under the wrong tenant would not show for the organisation's own admins (by reading).
+* Design history: `Blockchain/Dev/migrations/012_peer_tables_tenant_isolation.sql` (lines 18 and 63) back-filled `signatories.tenant_id` from `user_id` to `users.tenant_id`, the nominee's tenant; KS-23 (Done, 2026-05) then made every statement in this route take the tenant from `req.tenantId`.
+* A SUPER_ADMIN tenant override reaches originate as the override tenant (gate 418, cell C12), so an override is one way a platform admin writes in the organisation's tenant; without it the row takes the admin's own tenant.
+
+**Not established:** any run; whether the organizations table carries a tenant to compare against (not read); multi-tenant mode (gate 418: not measured).
+
+**Board search before filing** (2026-11-24, whole board, 2,331 issues, all states including archived; the positive control (msgpackr hits KS-1379) and the negative control (a random token hits 0) held): `tenant` with `signator` 19 tickets (9 open); windows read in KS-23, KS-1945, KS-2312, KS-1084, KS-593 and KS-779; none holds it. `nominate` with `tenant` 3 (KS-1945 and KS-2339 open; 1 closed); `platform admin` with `nominat` 1 (KS-2339 only).
+--- end T4 ---
+--- T5, title sha256 50115e3d5ba440f12bf5d4aa7bf56c3bd8574e7e2df58cfee7c3d404d5fa5ca3 ---
+originate revoke never records revoked_by: the column exists, and only a log line names who revoked a signatory
+--- T5, body sha256 80f078a429966f2cbc19e96255f786c3f75eeecb5f967ccde36bd20c28d3c9ce (1572 bytes) ---
+**BLUF:** The signatories table has a `revoked_by` column and the revoke route never writes it; the revoking user appears only in a log line. After a revoke the row says when (`revoked_at`) and why (`revocation_reason`) but not who. Priority Low (proposed): an audit gap with no access effect.
+
+**Source:** KS-2339 comment d90b1164 (2026-11-23T23:17:47Z), section "Listed, not changed (each needs its own decision)", row 5. Related: KS-2339 (PR 2294).
+
+**Where** (develop `b69addc39652`, read 2026-11-24 by Seat S 120th; nothing was run):
+* `Blockchain/Dev/migrations/001_initial-schema.sql` line 822: `revoked_by UUID REFERENCES users(id)`. `Blockchain/Dev/docker/init/03-service-tables.sql` line 228: `revoked_by UUID`.
+* `Blockchain/Dev/services/originate/src/routes/signatories.ts` lines 511 to 521: the revoke UPDATE sets `status`, `revoked_at`, `revocation_reason` and `updated_at`; `revoked_by` is not in it (0 mentions of `revoked_by` in the file). Line 530, `logger.info('Signatory revoked', { id, revokedBy: actor.id, reason })`, is the only place the actor is recorded.
+
+**Not established:** any run; whether a trigger or another service fills the column (only the route file and the SQL files were read); how long the log line is kept.
+
+**Board search before filing** (2026-11-24, whole board, 2,331 issues, all states including archived; the positive control (msgpackr hits KS-1379) and the negative control (a random token hits 0) held): `revoked_by` 1 ticket (KS-2339 only); `revokedBy` 0; `who revoked` 0; `revoked by` with `signator` 0; `reinstated_by` 0.
+--- end T5 ---
+--- T6, title sha256 62872201d75221556eaec19d22c3a3ab5703a7d26e13897d6b55a40f1d38b2a2 ---
+originate nominate: a non-UUID organizationId or userId reaches the ::uuid cast in the INSERT and answers a generic 500
+--- T6, body sha256 f5c2d23d09a978f984aa1fe74eda12b066cabd0eb1074f6833e73b41055d6599 (2175 bytes) ---
+**BLUF:** Nominate validates `organizationId` and `userId` only as non-empty strings. A value that is not a UUID reaches the `::uuid` cast in the INSERT, Postgres rejects it, and the route answers a generic 500 ("Failed to nominate signatory") instead of a 400. For a platform admin the organisation id is never compared first, so a malformed `organizationId` reaches the cast (gate 418, G418-6); `userId` is compared for no one. Priority Low (proposed): the answer leaks nothing, and only a platform admin or an own-organisation admin gets that far.
+
+**Source:** KS-2339 comment d90b1164 (2026-11-23T23:17:47Z), section "Listed, not changed (each needs its own decision)", row 6. Related: KS-2339 (PR 2294).
+
+**Where** (develop `b69addc39652`, read 2026-11-24 by Seat S 120th; nothing was run):
+* `Blockchain/Dev/services/originate/src/routes/signatories.ts` lines 136 and 137: `.isString().notEmpty()` only. The list and check routes in the same file use `.isUUID()` (lines 236, 293 and 294).
+* Lines 118 to 121: the platform arm is admitted with no lookup. Line 157 is the gate; lines 174 and 175 are the casts. The catch (lines 205 to 229) maps only code 23505 to 409; anything else is the generic 500.
+* An organisation-arm admin who sends a malformed body organisation is refused 403 by the comparison before the cast (gate 418, G418-4); the nominee `userId` has no such comparison, so a malformed `userId` from an own-organisation admin reaches the cast too (by reading).
+
+**Also related:** KS-593 (comment 3875d9f9: the list GET answered a raw 500 for a malformed organizationId; since fixed); KS-1945 (the 409 branch of this same catch tests error code 23505, which the Prisma client may never raise; a different defect on the same route).
+
+**Not established:** any run; the exact database error a malformed value raises.
+
+**Board search before filing** (2026-11-24, whole board, 2,331 issues, all states including archived; the positive control (msgpackr hits KS-1379) and the negative control (a random token hits 0) held): `nominat` with `uuid` 2 tickets (KS-2339 open; 1 closed); `malformed` with `nominat` 2 (KS-2339 open; 1 closed); `nominee` 1 (KS-2339 only).
+--- end T6 ---
+--- T7, title sha256 8a46336324b424557d435abf124406679c97c6d258a450be094240fd9fcc78f5 ---
+issuer Signatories page sends the user's own id as the organisation when the user has none
+--- T7, body sha256 75b1882c0033446edf686c20c909622a434c3ec27bd36496eea5ae8cc058e820 (2667 bytes) ---
+**BLUF:** The Signatories page computes its organisation as `user?.organizationId || user?.id` and uses it for both the list and the nominate body. A user with no organisation, which is the usual case for the seeded organisation admins and for platform admins, therefore sends their own user id as `organizationId`. An organisation-arm admin gets the 403 KS-2339 built; for a platform admin the gate admits the request and the value reaches the INSERT. Priority Low (proposed).
+
+**Source:** KS-2339 comment d90b1164 (2026-11-23T23:17:47Z), section "Listed, not changed (each needs its own decision)", row 7. Related: KS-2339 (PR 2294; its deploy note carries the refusal).
+
+**Where** (develop `b69addc39652`, read 2026-11-24 by Seat S 120th; nothing was run):
+* `Blockchain/Dev/frontend/issuer/src/components/Signatories.tsx` line 95: `const orgId = user?.organizationId || user?.id;`. Line 109 puts it in the list URL (`?organizationId=`); line 137 puts it in the nominate body as `organizationId`. The page is mounted: route at `Blockchain/Dev/frontend/issuer/src/App.tsx` line 152, nav entry at `Blockchain/Dev/frontend/issuer/src/components/Layout.tsx` line 57.
+* Consequence, by reading: for a platform admin with no organisation the nominate INSERT receives a user id as `organization_id`. On a migrated database the foreign key to organizations (`Blockchain/Dev/migrations/001_initial-schema.sql` line 812) refuses it and the route answers 500; on a database built from `Blockchain/Dev/docker/init/03-service-tables.sql` (no foreign keys; KS-2312) the row would be accepted under an organisation that is a user id. The list for that user asks for `organizationId` equal to their own id and returns nothing.
+* How common: KS-779 (measured on the demo VM 2026-09-03, not re-measured) found every org-bounded account without an organisation; the deploy note on KS-2339 carries that the 3 ORG_ADMINs on Kintsugi had none at last count (carried, not re-measured).
+
+**Not established:** any run; what the page shows the user on the refusal; whether a platform admin's session carries an organisation.
+
+**Also related:** KS-779, KS-2299 (organisation-less admins), KS-2312 (no foreign keys on a compose-built database).
+
+**Board search before filing** (2026-11-24, whole board, 2,331 issues, all states including archived; the positive control (msgpackr hits KS-1379) and the negative control (a random token hits 0) held): `own id as the organi` 1 ticket (KS-2339 only); `issuer` with `signatories` and `organi` 5 (KS-2312 and KS-2339 open; 3 closed); `org-less` with `issuer` 14 (4 open: KS-1533, KS-1574, KS-1581, KS-2063, all about keys or tokens, not this page).
+--- end T7 ---
+--- T8, title sha256 4e586b5d54bb05e01e8edb94b04dc7db5a200f6505886bd7dca71ad89a8ef9c2 ---
+api-gateway: the hand-built POST /api/users/admin/create forward in proxy.ts reads the request stream with no size cap
+--- T8, body sha256 f3a2e29a98b40e4c8c59f5dc7fa881dbe35881c448f6a1313eec6984e973ebc6 (2993 bytes) ---
+**BLUF:** `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts` lines 489 to 512 read the raw request stream into a string with no byte limit (`data += chunk`, line 500) whenever no parser has read the body, and forward it to the auth service. The PATCH beside it (lines 522 onward) does the same. By mount order a second, capped route for the same path in `Blockchain/Dev/services/api-gateway/src/routes/admin.ts` answers first, so this read looks unreachable; I did not run it. Priority Low (proposed).
+
+**Source:** KS-2339 comment d90b1164 (2026-11-23T23:17:47Z), section "Listed, not changed (each needs its own decision)", row 8 ("The gateway's `admin/create` reads an uncapped raw body"). Related: KS-2339 (PR 2294).
+
+**Where** (develop `b69addc39652`, read 2026-11-24 by Seat S 120th; nothing was run):
+* `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts` line 489 registers `POST /api/users/admin/create`; lines 493 to 503 are "Read body from raw request if not parsed": when `req.body` is empty the handler awaits `req.on('data', chunk => data += chunk)` with no size count and no error handler, then forwards the string (line 504 onward).
+* `/api/users` is in the gateway's `proxyPaths` (`Blockchain/Dev/services/api-gateway/src/index.ts` line 402), so the gateway's JSON parser (1 MB, line 412) does not run for it (`shouldParseBody`, line 407).
+* A second registration of the same path and method: `Blockchain/Dev/services/api-gateway/src/routes/admin.ts` line 1514, `router.post('/api/users/admin/create', requireAdmin, mockBodyParser, ...)`, where `mockBodyParser` wraps a 1 MB bounded parser (lines 592 to 595). `createAdminRoutes` is mounted at `Blockchain/Dev/services/api-gateway/src/index.ts` line 940 and `createProxyRoutes` at line 1151, so the `routes/admin.ts` route is registered first and answers or refuses before the `routes/proxy.ts` handler could run. The PATCH pair is `routes/admin.ts` line 1589 and `routes/proxy.ts` line 522.
+* For comparison, the signatories forward in the same file (lines 762 to 777) caps its raw read at 1 MiB and answers 413.
+
+**Not established:** any run; whether the `routes/admin.ts` route always answers before the `routes/proxy.ts` one (read from mount order only). Gate 418 did not test this path; it lists "admin/create's uncapped read" as listed by the builder, outside the gate.
+
+**Also related:** KS-1724 (request-body caps at the gateway parser), KS-807 (the control-byte guard and raw bodies), KS-2316 (the auth-side checks on this route). The route's own comment cites KS-689 (not read).
+
+**Board search before filing** (2026-11-24, whole board, 2,331 issues, all states including archived; the positive control (msgpackr hits KS-1379) and the negative control (a random token hits 0) held): `admin/create` 35 tickets (13 open); `raw body` 7 (6 open); `uncapped` 12; `express.raw` 4; `data += chunk` 0; `req.on('data'` 0; windows read in KS-2316, KS-2325, KS-807, KS-1724, KS-2267 and KS-593: none names this read.
+--- end T8 ---
+
+## 7. Questions
+
+Q1. Item 1: NEW (my recommendation) or COVERED-BY KS-2052? KS-2052 is a defect ticket whose remaining half moved to KS-2223; it says the gateway does not carry the steps path but holds no decision to route it and nothing on who may approve. T1 is a decision ticket whose BLUF says "needs a ruling from Kam on who may approve before any build" and does not propose the ruling. If you rule COVERED, I draft ONE comment on KS-2052 carrying the ApprovalQueue calls and the open who-may-approve question, licensed separately, and file seven tickets.
+Q2. Item 8: file T8 as drafted (Low), or hold it? By reading, the proxy handler's uncapped read at lines 489 to 512 is shadowed: the admin router (index.ts line 940) registers the same method and path first, with requireAdmin and a 1 MB bounded parser (admin.ts line 1514), and it answers or refuses before the proxy handler could run. The ticket says so and says nothing was run. My recommendation: file it as drafted, because the uncapped code is live source on the line d90b1164 named, and the fix question (delete the duplicate or cap it) is for the owner.
+Q3. Relation links. Your BRIEF says each ticket is "related-to KS-2339". The filer sets no relation and no seat has written one; each body cites KS-2339 by id and the source comment. A Linear related-link needs a NEW write tool (issueRelationCreate, DRY first), one call per ticket, 8 calls, and it puts 8 relations on KS-2339, which S 119th's leaf check counts before an archive (children and relations both read 0 today). Default if you say nothing: NO relation, citations in the text only.
+Q4. Priorities. All eight are Low (4) under your rule "Low unless an auth bypass". T2 is the only arguable one: the PATCH has no role check but no gateway route (gate 418 measured 404), so it is not a live bypass; the routed list GET answers any signed-in caller in the tenant for any organisation id (by reading, not run). I propose Low and say in the ticket that a higher priority is arguable. Your call.
+Q5. Item 9 (KS-2339 to Done, then archived as on KS-2331). Passes today: assignee is the board account, 0 children, 0 relations. The draft closing comment C9 is below with the eight new ids as placeholders, so its sha256 cannot be final. Plan: after T1 to T8 read back, I build C9 from the real ids, compute its sha256 and send it in the STATUS; your item 9 ANSWER then names Done, archive and that sha256 (the licence needs the exact bytes). Facts in C9, each re-read: PR 2294 squash and head (GitHub, 02:39Z); gate 418 verdict at the merged head; running build k44 from Seat D 86th's HANDOVER (originate 803f4b7cbb3e, api-gateway 06b954b346a0, swap 02:10:29Z to 02:10:56Z, Phase 2 31 of 31). The unit-test line is D 86th's record of its suites at the pin; I ran no test and C9 says so. KS-2339 must carry no other comment between C9 and the Done move (the Done tool and the archive tool both check that C9 is the newest). Say if you want a different order.
+Q6. LISTED, not drafted, STOPPED on (each read in code, none run): (a) PATCH writes document_types as jsonb (originate signatories.ts line 445) into a TEXT[] column (migrations 001 line 816; docker init 03 line 222), so any PATCH carrying documentTypes would fail; latent because the PATCH is unrouted; (b) nominate builds the text[] literal by string concatenation from unvalidated documentTypes elements (line 166; only isArray is checked), so a quote or brace in an element breaks the literal; (c) reinstate has no reinstated_by column (only reinstated_at) and the actor is in a log line only (line 596), the sibling of T5. Do you want any as a ticket? Default: none.
+
+C9 DRAFT, shown for reading only (placeholders {T1} to {T8} stay until the ids exist; sha256 of this v0 text 4c753e0b4a0e5010e2fd711a9358038f928332e3d4bf9be716dbdfc6f5a62d2f, 3437 bytes; NOT for licence):
+--- C9 v0 ---
+**BLUF:** Moving this ticket to Done under Kam's Done rule (card `secuura-done-rule-unit-pinned-deployed-no-live-check`, option a: close when unit tests pass on develop and the fix is in the running Kintsugi build). PR 2294 is merged on develop, and the running Kintsugi originate and api-gateway hold it. The closing words: no live check possible: needs a browser run as an organisation admin on Kintsugi.
+
+## The ruling
+
+* Kam, live board, 2026-11-24 08:57, verbatim: "Decision secuura-signatories-who-may-write-ks2339-1124: a — Platform admins and the organisation's own admins". Delivered in comment 08fbe7a5 on this ticket.
+
+## What merged
+
+* PR 2294 (https://github.com/Secuura/Distributed_Secuura/pull/2294): squash `b69addc39652d5532d8e497aff0e2386db125c83`, merged 2026-11-24T00:44:42Z, one parent `e3e79b7317f1`. Head at merge `604f8ff60f8c`, one commit, 8 files. Read from the PR and the commit through GitHub, 2026-11-24.
+* On develop now: the squash is the develop head (ls-remote 2026-11-24T02:35Z), so nothing has landed since.
+
+## Gate and unit evidence
+
+* Gate 418 (tier 1) returned GO WITH NOTES at head `604f8ff60f8c`, the head that merged (`/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-24_gate418-tier1-ks2339-signatory-writes/verdict.md`). No Blocker, no Major; a chain proof through the real gateway and the real originate router, 36 of 36 cells; 16 of 16 mutants killed. Re-derived figures: originate 3610 of 3610 on develop and 3738 of 3738 on the head; api-gateway 2401 of 2401 and 2531 of 2531; packages/shared 1746 of 1747 on both arms, the one failure being the known KS-278 wallet test.
+* What the gate did not test, in its own words: no real Postgres, no RLS run, no multi-tenant mode, no live stack, no real token with a case-variant role.
+* Unit tests at the develop pin: Seat D 86th's HANDOVER (`/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-24_seatD-86th/HANDOVER.md`, line 47) records its suites at `b69addc39652`: shared 1747 / 1746 / 1 (KS-278 only), originate 3738 of 3738, api-gateway 2531 of 2531. This seat ran no test.
+
+## Deployed
+
+* Kintsugi round k44, Seat D 86th (same HANDOVER, lines 4 and 6): built from develop `b69addc39652`; originate `e6f2558b7ded` to `803f4b7cbb3e`, api-gateway `264682d7bb8c` to `06b954b346a0`, gateway last; swap 2026-11-24 02:10:29Z to 02:10:56Z; the H2 gate passed live. Phase 2 (GO LIVE-CHECK 02:27:59Z): running 31 of 31, running equals the new image, with no request, login, token, render, GET or audit row.
+
+## No live check possible
+
+* No live check possible: needs a browser run as an organisation admin on Kintsugi. The ticket's How to confirm describes it. No agent seat is licensed to log in to Kintsugi, and the organisation-level admins there have no organisation (carried from comment d90b1164, "the 3 ORG_ADMINs had no organisation at last count", not re-measured by this seat), so even a licensed login could not exercise the organisation arm.
+
+## Not closed by this move
+
+* The eight rows of comment d90b1164's "Listed, not changed" list now each have their own ticket: {T1}, {T2}, {T3}, {T4}, {T5}, {T6}, {T7}, {T8}. The ninth row, the OpenAPI spec's missing signatories paths, was kept out by ruling.
+* Organisations for the organisation-arm users on Kintsugi are Kam's data work (Seat D 86th's HANDOVER, successor item 6); until they exist, those callers are refused, as the deploy note on this ticket says.
+--- end C9 v0 ---
+
+## 8. Licence check and order (what I will do on your ANSWER)
+
+I accept only an ANSWER naming (Seat S 120th) whose LICENSED bullets carry, for each ticket I may post, the exact sha256 of the title and of the body, in your format "- T1-title <64 hex>" and "- T1 <64 hex>", checked by a tool with planted refusals (a wrong hash, a missing bullet, a following questions list). Order T1 to T8; priorities as you rule; for each: guard (develop unmoved at the pin or, if it moved, compare every path cited), licence check, filer DRY, ONE real run; then an independent read-back with planted controls; a race check that nothing else was filed in between; a fresh whole-board snapshot just before the first write and one after the last (expect exactly the new tickets). The comment tool allow-list stays empty and the archive tool allow-list stays empty until a declared edit names your ANSWER.
+
+Tools, all declared in DECLARED.md before use: S120-D0 counted shift of S 119th's 19 tools and S 118th's 9 (mk_derive_s120.py, 0 failures, 28 files; dry then real); S120-N1 show_s120.py (read only); S120-N2 build_tickets_s120.py; S120-N3 plan_builder_s120.py. Still to adapt after your ANSWER, each DRY first: the ticket post script (derived from S 118th's, id list T1 to T3 becomes T1 to T8), the licence checker for tickets, the guard pins, the re-read tool. Derived but unused: build_drafts_s120.py and build_plan_s120.py (comment-specific templates from S 119th).
+
+## 9. Faults of mine, disclosed (all before any licence; nothing written)
+
+F1: my first Bash call began with `cd` into 2_Project_Files and ran git rev-parse and git status WITHOUT GIT_OPTIONAL_LOCKS=0 (an index-refreshing read in the shared checkout), then the launcher's ls-remote; the harness cwd moved there and every later call used absolute paths; my cwd print was Bash call 4. F2: before the BRIEF I read the vault CLAUDE.md, the voice file and the BRIEF-first feedback note (that note alone, in a batch with those; the seat-boot note was never opened). F3: my first T8 draft wrote proxy.ts and admin.ts as bare file names; the builder's gate refused it before any file was written, and I path-qualified them. F4: the first Linear board count from the snapshot printed 0 Done in 24 hours because the snapshot has no completedAt; I used the board tool instead (section 10).
+Kept: keys read inside python only, none printed or in argv; no .env variable names printed; the vault Access folder untouched; 0 sub-agents; no extranet call beyond the launcher hook's summary and NO seen call (the project CLAUDE.md forbids it); no fetch or ref write in the shared checkout; no rm; every timestamp from date.
+
+## 10. Board read, for the record (the launcher's Linear, extranet and mail steps)
+
+Linear read 2026-11-24T02:45:46Z: 247 tickets assigned to the board account in started or unstarted states (Blocked 3, In Progress 205, In Review 7, Todo 32); backlog 627 (Urgent 0, High 87, Medium 282, Low 237, None 21); Done in the last 24 hours: 2 (KS-2331 at 2026-11-23T22:25:56Z, KS-2314 at 15:19:21Z, both by the board account). The newest active tickets are KS-2339 and KS-2341; I read the comments only of the tickets in my closed list, not of the 247. Nothing in that read is mine to act on.
+Extranet (the launcher hook's summary, not re-run): 6 tasks for Kam, 0 new replies, 1 new document; none touches this brief and I did not act on them. Agent Mail: the project inbox lists 15 recent rows; the only one naming Seat S 120th is the BRIEF; the others are Seat D 86th's round k44 traffic and Seat K 90th's PR 2294 merge, which are not mine. The shared coagent inbox was not queried (your BRIEF routes mail to you only).
+
+Meanwhile: continuing with read-only work (adapting the post, licence and re-read tools for T1 to T8, DRY only) and my vault daily-note block; no Linear write. I wait for your ANSWER naming (Seat S 120th) and re-check the inbox every few minutes. Needed-by: none; Kam's grant runs to Fri 27 Nov.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-11-24T02:48:08Z
+
