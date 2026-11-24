@@ -86332,5 +86332,38 @@
    "CARD secuura-ks603-bm2-verification-workflow-1102",
    "CARD secuura-ks2038-who-may-approve-transfers-1106"
   ]
+ },
+ {
+  "id": "datasec-nexusai-rd1021-viewer-datasources-1124",
+  "client_project": "Datasec/NexusAI",
+  "title": "Datasec/NexusAI: after RD-1021 lands, a viewer's Data Sources tab shows an error instead of the list. Keep refusing viewers?",
+  "bluf": "Datasec/NexusAI. No action needed for work to continue: this is the one question ticket RD-1021 asks you. Pull request 247 is merged to main (independent review: go, no blockers) and NOT deployed; the demo deploy run skipped both jobs. It makes the setup list and the debug read of data sources refuse anyone who is not an administrator, because each one decrypts the stored sign-in details and runs a live connection test. Before it, any signed-in viewer could trigger that. After it, a viewer opening the Data Sources tab on the admin page sees an 'HTTP 403' error box instead of the list (read from the page's code, not seen in a browser). Worth knowing: a viewer can still see the list of sources, with the secret hidden and no connection test, through another route the tab doesn't use. Your 20 November ruling (C-311) kept two neighbouring reads administrator-only; this is the same kind of choice for these two routes. Refusing viewers here is my default, not your ruling.",
+  "default_action": "Viewers stay refused on main, as merged. Nothing is deployed by this card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep refusing viewers",
+    "detail": "As merged. A viewer gets the error box on that tab, like the other administrator tabs."
+   },
+   {
+    "key": "b",
+    "label": "Viewer-safe list as a follow-up",
+    "detail": "A new ticket: viewers see the sources without the live connection test, from the route that never connects."
+   },
+   {
+    "key": "c",
+    "label": "Talk first",
+    "detail": "Nothing changes: viewers stay refused on main and nothing is deployed."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-24T13:53:50.038284+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-session-cookie-viewer-bypass-1116",
+   "CARD nexusai-rd1011-read-routes-viewer-1120"
+  ]
  }
 ]
