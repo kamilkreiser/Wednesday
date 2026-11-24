@@ -1,0 +1,101 @@
+=========== [QUESTION] 2026-11-24T01:31 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] QUESTION: plan confirmation (Seat D 86th)
+[Secuura/Blockchain-D -> Wednesday] QUESTION: plan confirmation (Seat D 86th)
+Seat D 86th
+
+STATUS A + plan confirmation, Kintsugi round k44. Two services, no prune, auth held, this changes who may do what.
+Everything below is read-only on the box (ITEM 0); nothing written on Kintsugi; nothing pushed; demo not touched (not this seat's).
+Launch 01:02:06Z, BRIEF 01:02:01Z (stamped 12:01:52 +1100), this mail about 01:33Z. Waiting for GO KINTSUGI (Seat D 86th).
+
+## 1. Launcher preflight warnings (VERBATIM, launch_preflight_verbatim.txt)
+# launch 2026-11-24T01:02:06Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 1 other live session(s) on this project: PID 29302 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+Read: PID 29302 is the claude DAEMON (ps: /Users/kamil/.local/bin/claude daemon run, parent 1, up 3h54m), not a seat. Your STAMP says no other seat is live; nothing contradicts it.
+F-02 did not bite: my clone used the project deploy key through clone_d86.sh's explicit ssh command.
+
+## 2. Declared faults (also in DECLARED.md)
+F1. Bash call 1 carried a cd into the project root and cat'd the brief-first memory note TOGETHER with the seat-boot note, before the BRIEF. The 119.7 KB output was persisted to a file by the harness; only a 2 KB preview (the preflight plus the head of the brief-first note) reached my context, and I then read only the brief-first note's How-to-apply section out of that file. BRIEF fetched by Bash call 3 (python, key read inside). No other cd in any call.
+F2. One zsh `set -- $spec` loop in a direct call (the declared no-split trap) for padm2 and sigcnt: boxrun refused both ("tool does not parse"), nothing ran on the box; redone from a bash file (i0more_d86.sh).
+F3. A zsh "no matches found" glob aborted one local listing loop (no effect); redone from a bash file.
+F4. clone_d86.sh (the carried D-lane clone tool, as D 85th) wrote repo-local core.sshCommand into MY scratchpad clone only. No other config write. The shared checkout 2_Project_Files was not touched at all (no status, no ls-remote, no fetch): your standing line beats the launcher's first-action text.
+F5. rm -r of my own scratchpad throwaway dir swapctl/ after a control run that had two bugs in my control script (run 1 kept as evidence/swapctl_k44.run1.txt). Local scratch only.
+F6. bphase3_d86.sh: one counted edit after the re-key (the pre-build LC-A step calls lca_d86.sh in mode `pre`, not `running`); pre-edit copy tools/_source_copies/bphase3_d86.pre-fix.sh.
+F7. Launcher steps: Linear read-only (linread_d86: 11 tickets + a not-found control; KS-2339, KS-2341 In Progress); extranet not touched (the session-start hook auto-read it; no seen POST); daily note at wrap. No message to any human, no ticket comment.
+
+## 3. ITEM 0 (Q2 to Q6, Q11, KS-535, tracker, binds) — all EQUAL to the BRIEF's carried values
+- Box date (boxdate) 20261124 -> Phase 0 stamp pre-20261124k44. Stamps pre-2026112[2-7]k44 and pre-20261124k45 read 0. .rebuild-seatD86 absent, seatD86-envcopy absent; .rebuild-seatD85 present (control).
+- Q2 REVISION head revision=bcc2d8a53ffd5e9da60550df52884c552b2174ad, 294,128 B, sha16 1da5bdc0d55f9248, revision= lines 47. The six named .pre-* files all equal: -k43 288,578 35e7f0a7e0b31bf6; -k42 282,158 485f482f29d344cc; -k41 275,827 23cd78c34a0354d0; -k40 269,895 f6ceb2eab8520ce6; .pre-b8470f5fd331 264,295 8df526455951c90e; .pre-8389ed294629 258,279 c25c571b81ace6fb (51 REVISION.pre-* names in all). REVISION.pre-b69addc39652(-k44) absent. Priors 32 of 32 INTACT incl pre-20261123k43:33:e88ded16f6a903d9.
+- Q3 running (image, container, StartedAt), every one as the BRIEF: originate e6f2558b7ded d40e4f8f3eb6 2026-11-23T16:00:20.98Z; api-gateway 264682d7bb8c 50864df1958a 16:00:29.96Z; vc-issuer a4f26d0eff2a b63a08e964f5; billing f7ae83e7bc95 84bbcc01c228; issuer-frontend 6007e9c2b02d 874fcfdc6739 2026-11-23T21:22:03Z healthy; admin-frontend 3db089d03264 9ca1f9f5fbfc; auth 3c7d4d1a756a 0caf516df8f1 2026-11-19T14:55:28.33Z; anchoring 3a6a53d4b268 709ef17abe58 2026-11-15T22:47:15.950724269Z. Moved since the k43 pre-tag: 1 (issuer-frontend, expected). Restarts 0 on all of them.
+- Q4 free_mb 86,730 (gate 60,000; k43 end 86,734). Build cache 60.67 GB, 10.99 GB reclaimable. No prune.
+- Q6 census EQUAL to k43 (orgadm output byte-identical after timestamp normalisation): users 31 = issuer_admin 6, org_admin 3, owner 9, system_admin 2, user 9, verifier 2; email not verified 14; invited 9; ORG_ADMIN 3, all organisation NULL; non-platform users with organisation NULL 29; documents 76; organisations 15; platform_admins 3, all super_admin/active (database secuura_platform). NEW read (sigcnt_d86, read-only transaction, names only, nonsense column ERRORs): signatories total 0, no row in any status.
+- mail_transport_configured=false (auth, gateway). FRONTEND_URL: auth path root true, host Kintsugi true; gateway path root true, host Kintsugi false (identical to k43's reading).
+- Q11 penv ITEM0: NODE_ENV_is_production=false on originate, api-gateway, billing, vc-issuer, auth; only CARDANO_NETWORK published, on originate (inert); controls fire; FATAL lines 0.
+- KS-535 ITEM0 stops=0: anchoring and nft-certificate mnemonic 695d09df873ff42b len 158, blockfrost 142098c9528d0188, preview, simulate UNSET; wallet-connector mnemonic UNSET; DEMO values absent.
+- Tracker 59 / max 058, has_059 0. anchor_store 64 (confirmed 61, failed 3), non-final 0.
+- Compose file sha16 89eea522d1a2ccf0, config ab0598fd3392b393. yaml host 0112927831815086 = bound container copy (same inode); nginx conf c3905a1ef162c82a; single-file binds 2 of 2 SAME.
+- shfpr at ITEM 0 (the instrument, before the round): running originate, gateway, billing, vc-issuer all 750995ac8b00b982; transfer 26b434f47556042a (older; control differs).
+
+## 4. Q1, Q7: the set at the pin
+- develop by ls-remote 01:09:25Z = b69addc39652d5532d8e497aff0e2386db125c83 = the pin; clone HEAD equal, tree ae12f792ebd6.
+- First-parent bcc2d8a53ffd..pin = 2 commits; 9 files, all under Blockchain/Dev, 6 tests; packages/ 1 (non-test 1); infra 0; .sql 0 (60 at the pin, max 058, 059 count 0).
+- Pin-rule map: e3e79b7317f1 = PR 2293 (KS-2341) gate 417 GO WITH NOTES tier 2; b69addc39652 = PR 2294 (KS-2339) gate 418 GO WITH NOTES tier 1; both MERGED, IN-PIN. PR 2099, 2195, 2159 OPEN.
+- Deploy-block grep (/usr/bin/grep -a -c -i deploy): gate 417 = 1 (line 49, the not-run list: not a block); gate 418 = 0.
+- Own code owed at the pin, every service against its base: originate (aff83df1b23d) src/routes/signatories.ts; api-gateway (aff83df1b23d) src/routes/proxy.ts; no other non-held service owes own code. HELD and carried: auth (8 files), anchoring (anchorOverwriteGuard.ts), tenant-provisioning, demo-service; migrations rides originate's Dockerfile, one-shot, not built (UNCHANGED).
+- The .dockerignore view says 29 of 33 images would change on a rebuild (k43: 21): the 8 extra are the KS-2341 comment in packages/shared/src/middleware/index.ts, which every image that copies packages/shared sees. D86-W6 rules no rebuild for it; option (i) shared-only holds. So: exactly {originate, api-gateway}.
+- yaml sha16 0112927831815086 at bcc2d8a53ffd, at e3e79b7317f1 and at the pin; no yaml, compose, docker/ or migrations path in the range.
+
+## 5. Q5 / H4 / D86-W10: the three suites at the pin, my clone, Node v26.8.1
+- packages/shared vitest: 1747 tests, 1746 passed, 1 failed = exactly "verifyMessageSignature (CIP-8/CIP-30) — KS-278 accepts a valid wallet signature over the message" (2 failed suite rows, the same as D 85th's k43 run). GREEN by the rule.
+- originate jest: 3738 of 3738. api-gateway vitest: 2531 of 2531. Gate 418's numbers exactly. No red name: no QUESTION.
+
+## 6. Q10: predictions from MY two local Docker-layout builds (base bcc2d8a53ffd, pin b69addc39652; dlb_d86 + pred_d86)
+- /shared/dist (368 files): base 750995ac8b00b982 = the running originate's (the build reproduces the image byte for byte); pin c2fd2fd88ea0cb3b = the drafter's prediction. Exactly 3 files differ: middleware/index.js (26,076 -> 26,237 B), index.js.map (15,714 -> 15,727), index.d.ts.map (same size). index.d.ts identical.
+- originate /app/dist (183 files both): exactly 3 differ: routes/signatories.js, .js.map, .d.ts.
+- api-gateway /app/dist (152 tsc files; 154 in the image with the 2 copied html): exactly 3 differ: routes/proxy.js, .js.map, .d.ts.map (same size, new bytes). proxy.d.ts IDENTICAL.
+- So contentfp's expected TABLE: originate /app/dist CHANGED NDIFF 3 (routes/signatories.*), originate /shared/dist CHANGED NDIFF 3 (middleware/index.*), api-gateway /app/dist CHANGED NDIFF 3 (routes/proxy.*), api-gateway /shared/dist CHANGED NDIFF 3, api-gateway /app/docs IDENTICAL. contentfp's class is a prefix, so I will also read NDIFF itself: anything but 3 per changed root is a STOP and a QUESTION.
+- Compiled OCCURRENCE counts (str.count on the built files; the box tool lca_d86 uses an awk index() loop, literal via environment, proved on a planted 'aXa aXa aXa' = 3): EVERY row equals the drafter's floor. originate signatories.js: signatoryWriteGate 0->5, signatoryWriteArm 0->5, decideSignatoryWrite 0->4, ROLE_REFUSAL 0->3, ORG_REFUSAL 0->3, orgScope 0->7, isPlatformOrOrgBoundedRole 0->2, normaliseOrgId 0->2, the quote-bearing refusal sentence 0->1; controls getReqTenantId 9, "not found or already revoked" 1, "UPDATE signatories" 3, "Failed to" 14. api-gateway proxy.js: signatoryAdminCheck 0->4, forwardSignatoryWrite 0->4, signatoryActionPath 0->3, SIGNATORY_ID 0->2, readSignatoryBody 0->2, the revoke and reinstate paths 0->1 each, "Signatory ID must be a UUID" 0->1, "Request body too large" 0->1; controls createProxyRoutes 3, "Third-party verifiers" 1. Shared index.js: "eslint-disable-next-line no-control-regex" (case-insensitive) 0->1; positive control requirePlatformRole 3->3 (the BRIEF's "eslint-disable" reads 0 at the base, so it cannot be the control).
+- The RUNNING containers already read every base value (blist_d86, docker exec, ITEM 0): 28 of 28 rows with a want equal.
+
+## 7. Kit (re-keyed, all LOCAL; nothing uploaded)
+- rekey_mail_d86: send 85th 2 / d85 0 / tails 0; watch 34 / 1 / 60 (perl-counted first); watcher selftest 77 of 77. Watcher armed: watch_d86.py pid 44447, tracked task, since 01:02:01Z, window 3 h.
+- rekey_i0_d86: 30 tools, FAILURES 0 (dry then write; every REVIEW line read).
+- rekey_rev_d86: revwrite, revrun (proposed pin b69addc39652), revsha; FAILURES 0. revdry_d86 (throwaway copy, 4 arms): arm 1 rc 0, REVISION.pre-b69addc39652-k44 == the planted k43 file, the six planted .pre-* byte-identical 6 of 6, head = the pin, revision= lines 2 -> 3, no plain .pre-b69addc39652; arm 2 control (D 85th's writer) names it -k43; arm 3 REFUSED rc 2, nothing changed; arm 4 wrong head REFUSED rc 2, nothing changed. The tamper copies now land in the throwaway dir (mktemp template), not in /var/folders.
+- rekey_b_d86: 72 tools, dry FAILURES 0 then written; order sha16 af388302658ad2e2 (old da79dccfb88226b6 asserted). Excluded: the frontend tools (olist, lcafe, rekey_fe and the issuer build tools), postrsync (generated again: 11 rows, 5 sync probes on signatories.ts, proxy.ts, shared middleware), lcaq (replaced by lca_d86, occurrence counts, modes pre / images / running), shfp and shfpr (written fresh and RE-AIMED: new originate == new gateway == c2fd2fd88ea0cb3b; rollbacks and running billing, vc-issuer == 750995ac8b00b982), the REVISION kit, the vault committers.
+- Trap grep (trapgrep_d86, case-insensitive, 122 tools, controls on D 85th's 130): "1-service" 0, da79dccfb88226b6 0, "REBUILT 1 / 32 / 3" 0, a50544f06917 only in my control script, 50864df1958a only as maskline's OLD id (correct: the BEFORE gateway container), 6007e9c2b02d only in the H2 block and a4x's held list; every k43 / pre-20261123k43 / bcc2d8a53ffd hit read: priors, backups, controls and the host base. Zero-prune: 'builder prune' over the 122 k44 tools = 0; control prune_d82.sh = 2.
+
+## 8. Q8: the set in FIVE places, dry-proved (swapctl_d86, evidence/swapctl_k44.txt)
+(1) swapset TEMPLATE ("originate api-gateway"), order[-1]=="api-gateway" assert live; HELD list unchanged. Planted arms: main -> REBUILT 2, held-but-rebuilt [], order "originate api-gateway" (sha16 af388302658ad2e2); +auth -> held-but-rebuilt ['auth'], not swapped; +transfer -> REFUSED unplaced ['transfer']; +issuer-frontend -> REFUSED unplaced ['issuer-frontend'].
+(2)+(3) swap_driver allow-list originate|api-gateway, echo "2-service". New driver vs D 85th's: [originate, api-gateway] validated (old REFUSED); [issuer-frontend] REFUSED "not in this round's 2-service swap set" (old validated): the BRIEF's new control; [api-gateway, originate] REFUSED "must be LAST"; [auth], [transfer], [status-frontend, api-gateway] REFUSED by the allow-list; [migrations] REFUSED one-shot; duplicate REFUSED.
+(4) swaplaunch: exact order printf 'originate\napi-gateway\n' accepted ONLY that file; [api-gateway] alone, [issuer-frontend], [api-gateway, originate] all REFUSED there. Right-reason grep now "2-service" and it matches the driver's refusal of the negative control. Note: the DRIVER alone accepts a one-service subset ([api-gateway] or [originate]); swaplaunch's exact-order line is what makes "never the gateway alone" hold. It is the only launcher.
+(5) H2 block: rendered the runner from the inner heredoc (46 lines, bash -n OK; 3 lines name 6007e9c2b02d, 0 name a50544f06917), extracted the block and ran it with a stub docker: issuer 6007e9c2b02d running/healthy -> passes to the swap line; a50544f06917 -> STOP why=H2 "the issuer is not still the k43 build 6007e9c2b02d and healthy -- the gateway is NOT swapped"; 6007e9c2b02d but unhealthy -> STOP why=H2. Originate before the gateway: the runner breaks on a non-zero swap_one (its own health gate), so the gateway is never reached after a failed originate.
+
+## 9. Q12: does the unauthenticated POST write an audit row? YES (read-only, source at the pin; NOT tested)
+audit.ts line 58 AUDITED_METHODS = POST, PUT, PATCH, DELETE, one INSERT INTO audit_logs; index.ts mounts csrf at 379-380, createAuditMiddleware at 593, the proxy routes at 1151, the 404 handler at 1171; proxy.ts 809-811 the three POST routes, each authenticateToken(true) then signatoryAdminCheck. So a bare POST passes CSRF, reaches the audit middleware, and writes one row whatever the status (401 new, 404 old). Recommendation: D86-W5 option 1 (no request, no row), as stamped.
+
+## 10. Phase 1 plan (only on GO KINTSUGI (Seat D 86th) naming the pin)
+0. Re-read develop and check the GO's pin == my clone HEAD; a pin other than b69addc39652 = re-key rekey_b and rekey_rev (they assert the pin) and re-derive; a set other than {originate, api-gateway} = STOP.
+1. bash tools/bphase1_d86.sh: b1 upload (creates .rebuild-seatD86, 16 box tools, hash-proved), b2 drvctl (validate-only controls: o_real 0, every other 2), b4 rsync DRY (want 9 sends, 0 deletes, the wrong-range control).
+2. bash tools/bphase2_d86.sh: b5 rsync REAL (D 79th's flags, no --delete); b6 postrsync (compose config before ab0598fd3392b393, 5 sync probes, yaml PIN = BASE 0112927831815086); b7 bindfiles (ii SAME: the yaml does not change); b8a boxdate (must read 20261124); b8 Phase 0 pre-20261124k44 over 33 images, priors 33 with the new idfp stated (predicted e02333b1344a16b2); b9 KS-535 BEFORE.
+3. penv PREBUILD, mailenv; usage gate; no build or swap runner live.
+4. bash tools/bphase3_d86.sh (c1 lca pre: running and :latest at the base; c2 free) then bash tools/bphase4_d86.sh (c6 free >= 60,000 or STOP; c8 buildlaunch k44: ONE batch of TWO, originate api-gateway, BUILDX_NO_DEFAULT_ATTESTATIONS=1); wait_build_d86.sh as a TRACKED task, floor 45,000 MB. Forecast 15 to 25 min and 5 to 8 GB (UNMEASURED; the comment invalidates npm ci and prisma generate layers).
+5. postbuild_chain_d86.sh pre-20261124k44 (census, osdiff, basecheck v2, verify_build: want REBUILT 2 / UNCHANGED 31 / NOIMAGE 3; C9 lca images: rollback = base, :latest = the prediction), then catvb, contentfp (the TABLE of section 6), shfp_d86.sh pre-20261124k44, latestproof originate:<built> api-gateway:<built>, KS-535, nonfinal, tracker.
+6. bash tools/bphase5_d86.sh: swapset from the box's verify_build, order == originate then api-gateway, upfile + ordval (validate-only and the negative control), a4x PRESWAP, preswap, KS-535, nonfinal, free.
+7. swaplaunch_d86.sh (NONFINAL gate first; exact order; the H2 block in the runner) -> wait_swap_d86.sh TRACKED; healthwin (GET of /health/ready by docker exec, never a POST). Rollback only on your word, GATEWAY FIRST: docker tag dev-api-gateway:pre-20261124k44 dev-api-gateway:latest, docker compose -p dev --profile phase2 up -d --no-deps --force-recreate api-gateway; then the same for originate. A rollback re-closes the three routes.
+8. bash tools/bphase6_d86.sh (swaplog/prog/win, postswap, a4x POSTSWAP: only originate and api-gateway move; censuscmp2 moved == 2; bindfiles iii; lca running; KS-535 after; nonfinal; free); then redisauth (no WRONGPASS/NOAUTH since each new StartedAt), rreaders (REDIS_URL set), maskline (NEW gateway id12; 50864df1958a is the OLD), vouch sha16 equal on the new gateway and originate (9c2fbbcc7351b60b) and "gateway-provenance ACTIVE", fatal 0, penv POSTSWAP, shfpr (new pair c2fd2fd88ea0cb3b; billing, vc-issuer 750995ac8b00b982).
+9. revrun_d86.sh (REVISION.pre-b69addc39652-k44 = the k43 file; head revision=b69addc39652, round_stamp=k44; revision= lines 47 -> 48), revsha. Then watch15 (+15 min, tracked, planted parser controls) and bphase7, then STATUS B.
+
+## 11. Phase 2 plan (only on GO LIVE-CHECK (Seat D 86th) after STATUS B)
+LC-A: lca_d86.sh running pre-20261124k44 (running AND :latest = the new counts; the rollback image = the base) and shfpr inside the running containers. LC-B: i0extra, orgadm, padm2, sigcnt EQUAL to this ITEM 0. LC-C: NOT run (option 1: no request, no audit row). LC-D labels as section 11. No login, token, render or GET to any frontend.
+
+## 12. Questions (none blocks; defaults in brackets)
+D86-Q1. contentfp's expected class is a path prefix; I add the rule "NDIFF must be exactly 3 for each changed root" (from my two builds). [accept: any other NDIFF = STOP + QUESTION]
+D86-Q2. "Never the gateway alone" rests on swaplaunch's exact-order line (proved), not on the driver, which validates a one-service subset. [accept as proved; no driver edit]
+D86-Q3. F4, my clone's repo-local core.sshCommand (the carried clone tool). [accept as declared]
+
+Forecast: GO to build launch about 8 min; build 15 to 25; verify and LC-A 10 to 15; swaps about 1; REVISION about 10; +15 watch; STATUS B about 55 to 70 min after the GO (UNMEASURED). Context: about 20 percent of 1M (estimated from the transcript, not a meter reading).
+Evidence: 5_Project_History/2026-11-24_seatD-86th/ (evidence/, tools/, mail/).
+
