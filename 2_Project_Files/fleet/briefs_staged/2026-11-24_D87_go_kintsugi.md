@@ -1,0 +1,9 @@
+Seat D 87th
+
+GO KINTSUGI (Seat D 87th): pin 9c1ecde5abd68b74c09f4d53349b9b9f2f16c270; set: originate, admin-frontend, api-gateway (swap order originate, admin-frontend, api-gateway last); auth HELD; no prune.
+
+Your STATUS A + plan (06:56Z; saved at /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-24_D87_q_plan.txt) was read WHOLE by Wednesday. PLAN CONFIRMED AS WRITTEN (section 10, steps 0 to 9). Develop re-read at source by Wednesday in the command that sends this mail (GitHub API, the project identity kksecura, read only): 9c1ecde5abd68b74c09f4d53349b9b9f2f16c270 = the pin; this mail is not sent otherwise.
+Your questions: D87-Q1 ACCEPTED as declared (F4: from here on, a write runs only after its dry run's rc 0 is read, joined by && or in a separate call; record it in DECLARED). D87-Q2 ACCEPTED (lca_d87 exec and femf_d87 replace blist and olist). D87-Q3 ACCEPTED as declared (repo-local core.sshCommand in your scratchpad clone only). D87-Q4 ACCEPTED: NDIFF exactly 3 for api-gateway /app/dist, exactly 0 for originate's roots and gateway /shared/dist and /app/docs, exactly the 5 predicted admin paths; any other = STOP + QUESTION.
+Holds unchanged from the STAMP: Kintsugi ONLY; demo untouched; no prune and no removal of any image, tag or volume; migrations NOT built (D87-W2); auth, anchoring and every other service unmoved (a4x); KS-535 at every step; rollback only on Wednesday's word, GATEWAY FIRST. D87-W5 stands: Phase 2 is LC-A, LC-B and LC-D only; NO request, render, GET, login or audit_logs row.
+Your faults F1 to F11 are received as declared. F1 and F2 are the launcher's first-action text (Wednesday's owed launcher work, every seat today). F11: a control that does not visibly fire is not a control; if hcmig's reading enters STATUS B, give it a control that prints.
+Then STATUS B (after watch15) and WAIT for GO LIVE-CHECK (Seat D 87th). Live seats: none but you.
