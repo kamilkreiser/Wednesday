@@ -11,16 +11,23 @@
 # Usage:
 #   kam_watch.sh               watch (60 s poll, 4 h max); prints every UNSEEN item and exits 0 on the first
 #   kam_watch.sh --pending     print unseen items now and exit (0 = none, 1 = some); never waits
-#   kam_watch.sh --mark-seen   mark everything currently visible as seen (run ONLY after reading it all)
+#   kam_watch.sh --mark-seen   mark ONLY the keys the last --pending print listed. REFUSES (rc 4) if no --pending print
+#                              in the last 120 s, or (rc 5) if the board now shows an unseen key that print did not list
+#                              (a row that landed after the read). Run `--pending` first, read it, then `--mark-seen`.
 # State: 2_Project_Files/fleet/state/kam_watch_seen.txt (gitignored), one key per line.
 # Read-only towards the board: it only reads; marking seen is a local file.
 set -u
 T=/Volumes/Datasec_DEV/TUESDAY/2_Project_Files
-STATE="$T/fleet/state/kam_watch_seen.txt"
+# KAM_WATCH_STATE_DIR / KAM_WATCH_FIXTURE: test overrides only (fixture = a file of "current" key lines used instead of the board).
+SD="${KAM_WATCH_STATE_DIR:-$T/fleet/state}"
+STATE="$SD/kam_watch_seen.txt"
+PENDING="$SD/kam_watch_pending.txt"   # line 1: epoch of the last --pending print; then the keys that print listed
+MAXAGE="${KAM_WATCH_MAXAGE:-120}"
 PY="$T/dashboard-cloud/.venv/bin/python"
-touch "$STATE"
+mkdir -p "$SD"; touch "$STATE"
 
 current() {
+  if [ -n "${KAM_WATCH_FIXTURE:-}" ]; then cat "$KAM_WATCH_FIXTURE"; return; fi
   # messages: every [live]/[local] row of today, keyed by its whole line plus its occurrence number
   bash "$T/tools/kam_rulings_today.sh" 2>/dev/null | /usr/bin/grep -E '\[(live|local)\]' | awk '{c[$0]++; print "MSG\t" c[$0] "\t" $0}'
   # uploads: files Kam put in the drawer today (id is unique)
@@ -31,9 +38,18 @@ current() {
 unseen() { current | while IFS= read -r k; do /usr/bin/grep -q -x -F -- "$k" "$STATE" || printf '%s\n' "$k"; done; }
 
 case "${1:-}" in
-  --mark-seen) n=0; current | while IFS= read -r k; do /usr/bin/grep -q -x -F -- "$k" "$STATE" || { printf '%s\n' "$k" >> "$STATE"; }; done
-               echo "marked; state holds $(wc -l < "$STATE" | tr -d ' ') keys"; exit 0 ;;
-  --pending)   u=$(unseen); if [ -n "$u" ]; then echo "UNSEEN:"; printf '%s\n' "$u" | cut -f3-; exit 1; else echo "none unseen"; exit 0; fi ;;
+  --mark-seen) if [ ! -f "$PENDING" ]; then echo "REFUSED: no --pending print on record. Run: bash $0 --pending, read it, then --mark-seen." >&2; exit 4; fi
+               pe=$(head -1 "$PENDING" | tr -d ' '); now=$(date +%s)
+               case "$pe" in ''|*[!0-9]*) echo "REFUSED: pending record unreadable. Run: bash $0 --pending" >&2; exit 4;; esac
+               age=$((now - pe))
+               if [ "$age" -gt "$MAXAGE" ] || [ "$age" -lt 0 ]; then echo "REFUSED: last --pending print was ${age}s ago (limit ${MAXAGE}s). Run: bash $0 --pending, read it, then --mark-seen." >&2; exit 4; fi
+               extra=$(unseen | while IFS= read -r k; do tail -n +2 "$PENDING" | /usr/bin/grep -q -x -F -- "$k" || printf '%s\n' "$k"; done)
+               if [ -n "$extra" ]; then echo "REFUSED: the board now shows unseen row(s) the last --pending print did not list (landed after your read):" >&2; printf '%s\n' "$extra" | cut -f3- >&2; echo "Run: bash $0 --pending, read it, then --mark-seen." >&2; exit 5; fi
+               tail -n +2 "$PENDING" | while IFS= read -r k; do /usr/bin/grep -q -x -F -- "$k" "$STATE" || printf '%s\n' "$k" >> "$STATE"; done
+               : > "$PENDING"
+               echo "marked only the keys the --pending print listed; state holds $(wc -l < "$STATE" | tr -d ' ') keys"; exit 0 ;;
+  --pending)   u=$(unseen); { date +%s; [ -n "$u" ] && printf '%s\n' "$u"; } > "$PENDING.tmp" && mv "$PENDING.tmp" "$PENDING"
+               if [ -n "$u" ]; then echo "UNSEEN:"; printf '%s\n' "$u" | cut -f3-; exit 1; else echo "none unseen"; exit 0; fi ;;
 esac
 
 # control: the instrument must see at least one message today, or it is blind.

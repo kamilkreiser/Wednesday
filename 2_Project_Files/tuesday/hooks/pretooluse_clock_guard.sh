@@ -1,5 +1,5 @@
 #!/bin/bash
-# pretooluse_clock_guard.sh — PreToolUse hook (matcher: Edit|Write|MultiEdit), Tuesday seat only: REFUSE a NEW typed
+# pretooluse_clock_guard.sh — PreToolUse hook (matcher: Bash|Edit|Write|MultiEdit; Bash added 2026-11-25 for COMMISSION heredocs), Tuesday seat only: REFUSE a NEW typed
 # clock estimate such as "12:5x" or "13:1X" written into the seat's own memory files.
 #
 # WHY (ledger _ledger_laptop_datasec.md 2026-11-18, s290, the typed-clock family, w=3 IN ONE SESSION): note_alone.sh and
@@ -33,6 +33,29 @@ except Exception:
     print("clock_guard: hook input unparseable; the check did NOT run", file=sys.stderr); sys.exit(0)
 tool = data.get("tool_name", ""); ti = data.get("tool_input") or {}
 fp = ti.get("file_path") or ""
+# COMMISSION extension (2026-11-25, ledger s322/s325 w=3): a commission file may not hold an estimated clock at all
+COMM = re.compile(r"tuesday/briefs/[^/\s\"\x27]*_COMMISSION\.md$")
+COMM_CLOCK = re.compile(r"[0-9]:[0-5][xX]")
+COMM_BASH = re.compile(r"(?:>>?|\btee\b(?:\s+-a)?)\s*[\"\x27]?[^\s\"\x27|;&]*tuesday/briefs/[^/\s\"\x27|;&]*_COMMISSION\.md")
+def comm_refuse(found):
+    print("REFUSED by pretooluse_clock_guard.sh: a COMMISSION file may not hold a typed estimated clock " + repr(found) +
+          " (ledger w=3, 2026-11-25). Name a bracket of printed times (\"between the 12:36 note line and this commission\") "
+          "or print `date` in the same command and copy it. Nothing was written.", file=sys.stderr)
+    sys.exit(2)
+if tool == "Bash":
+    cmd = ti.get("command") or ""
+    if COMM_BASH.search(cmd):
+        f = COMM_CLOCK.findall(cmd)
+        if f: comm_refuse(f)
+    sys.exit(0)
+if tool in ("Edit", "Write", "MultiEdit") and COMM.search(fp):
+    news = []
+    if tool == "Edit": news = [ti.get("new_string", "")]
+    elif tool == "MultiEdit": news = [e.get("new_string", "") for e in (ti.get("edits") or [])]
+    else: news = [ti.get("content", "")]
+    f = COMM_CLOCK.findall("\n".join(news))
+    if f: comm_refuse(f)
+    sys.exit(0)
 if tool not in ("Edit", "Write", "MultiEdit") or not TARGET.search(fp):
     sys.exit(0)
 def toks(s):
