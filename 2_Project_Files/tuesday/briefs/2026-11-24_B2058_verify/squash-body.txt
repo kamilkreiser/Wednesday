@@ -1,0 +1,27 @@
+The OXPd 1.x client reads the IsServiceEnabled answer only in HP's
+shape: one enabled element alone among the response's elements, with no
+child element and no attribute but a namespace declaration (a TextOnly
+flag on that catalogue row only). A false inside or split by a child
+element, an element beside enabled, or xsi:nil on it now ends
+MalformedAnswer, so the lab's executed enable writes nothing and ends
+exit 8. CDATA, a comment inside the text and white space around it are
+read as HP's schema reads them.
+
+The lab's run folder rule reads the path as written and then again with
+the symbolic links among its existing folders resolved (at most 40), so
+a run folder reached through a link into a git work tree is refused
+(exit 9) for oxpd1 read, write and lab-cert. A panel capture whose
+decoded bytes hold the password's UTF-8 bytes is not saved (exit 8).
+The README sentences say what the code does, with the limits: the check
+looks for the UTF-8 bytes only, the client's record still holds the
+answer's base64 text, and the rule is checked once before the folder is
+made.
+
+4 new cells (18 cases) against stubs on 127.0.0.1; one line of the lab
+stub becomes the fallback of a new hook; no other line of an earlier
+cell changes. Every new cell that can fail failed by its assertion
+first; 10 mutants each turn exactly their cells red. C# totals plus 18
+on both legs; the rules count unchanged. No device has been reached.
+Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
