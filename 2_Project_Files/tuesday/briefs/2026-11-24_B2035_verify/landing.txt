@@ -1,0 +1,28 @@
+THIS LANDING IS NOT A CONTENT RELEASE AND NOTHING DEPLOYS. The squash changes one test file and no release file.
+The instrument every deploy order runs (rc 1 = changed release = REFUSE) must read rc 0 across this squash:
+  git diff --quiet 8b9ab200b09f9a859c3b25b6441813546338d3dd <new main> -- content/release-demo content/release-draft
+The reviewer re-measured the four release blobs at the pinned head against main: content/release-demo/CONTENT_HASH 23cd95f58dd0ceabecac0c3f5796aeba9b0edd62, content/release-draft/CONTENT_HASH 09d597c64f07d19c98aeb0859086499ea74300b7, content/release-draft/bundle.json 3ed9445ba35faed5f7e821161a58c8e9f54c931d, content/sources/SOURCES.json 30269393179065c9f023e0f0a0081cb9e8dd1449: each equal at both.
+What the live demo runs was NOT measured (no request to a hosted site).
+
+LANDING (coordinator steps; the reviewer ran none of them). Who decided: the coordinator, on the coordinator's own gate. No text in this folder says the product owner decided anything about this lane.
+Pinned head: 7e10c623da45ba66c02fcff89185f1f6f247ccc9, one commit, base main 8b9ab200b09f9a859c3b25b6441813546338d3dd (tree dccab9832a1c18c6619c67a28b43a7d0774e4fee). Branch b2033/pcomp130-plant-every-alternative; pull request 133 is open (head sha equals the pin at 2026-11-24 11:41, mergeable_state clean).
+0. Re-read immediately before the merge: pulls/133 head.sha == 7e10c623da45ba66c02fcff89185f1f6f247ccc9; refs/heads/main == 8b9ab200b09f9a859c3b25b6441813546338d3dd (else MAIN MOVES below); the branch ref equals the pin.
+   If the head moved: STOP. A head nobody reviewed is never landed. Never "update branch".
+1. Checks on the head, read by name: the expected set (re-read from PR 132's head ceff5cf4) is CodeQL (github-advanced-security), Analyze (javascript-typescript) and Analyze (csharp), each completed success; the same three read completed success on this head at 11:41. Open code-scanning alerts on the pull request ref = 0 (main: 0). A missing or failed check is a STOP, never bypassed, no alert dismissed. Re-read pulls/133: head sha == the pin, mergeable_state clean.
+2. Merge:
+   gh pr merge 133 --repo datasecau/Datasec-Security-Composer --squash --match-head-commit 7e10c623da45ba66c02fcff89185f1f6f247ccc9 --subject "$(cat squash-subject.txt) (#133)" --body-file squash-body.txt
+   (main's newest squash subject ends with its number, #132; append yours. Do not pass --delete-branch.)
+3. Read after the merge:
+   - pulls/133: merged true, merge_commit_sha = <new main>.
+   - refs/heads/main = <new main>, one parent 8b9ab200b09f9a859c3b25b6441813546338d3dd; tree of <new main> == the head's tree (read it from the commit 7e10c623 when main did not move).
+   - git diff --name-only 8b9ab200... <new main>: exactly packages/content/test/b330-sm316-qgate.test.ts; blob 09c3945dc71e6676a3fc9f7381b06e2b3936d2ce.
+   - stored message of <new main>: subject == squash-subject.txt plus " (#133)", one Co-Authored-By trailer; scans for a word-bounded B-number, PCOMP, a person name, a seat id, a card id, the words ruled, ruling, approved by: 0, each with a planted control.
+   - git diff --quiet 8b9ab200... <new main> -- content/release-demo content/release-draft -> rc 0 (record it).
+   - check runs on <new main> (poll until completed; the Analyze legs success) and open code-scanning alerts on refs/heads/main (expected 0).
+4. Nothing deploys. No release is cut. The examples are not rebuilt. The head branch is kept.
+
+MAIN MOVES (read refs/heads/main at step 0 and before the merge): if it is no longer 8b9ab200, ALL THREE must pass or STOP and re-gate:
+ (1) git diff --name-only 8b9ab200 <new main> names nothing under content/, packages/content/, packages/db/migrations/, nor vitest.config.ts, .prettierignore, eslint.config.js, package.json, package-lock.json, docker/Dockerfile, scripts/ci.sh;
+ (2) the new main file packages/content/test/b330-sm316-qgate.test.ts blob == 1d575680f7d18f127197a72033e4119e877ae7c4;
+ (3) no other open pull request file list holds that path.
+If all pass the reviewed head stands; the squash tree then differs from the head's, so the tree line of step 3 becomes "moved main tree plus the one file". The reviewer runs were at base 8b9ab200 only; a move touching anything in (1) voids them.
