@@ -1,0 +1,6 @@
+# QA-AUDIT-HOST-FIX test files (independent check of `audit-host-fix`, head 5b3a395)
+- `src_tests_qahf.rs` -> `crates/coagent-audit-host/src/tests/qahf.rs`, plus one line `mod qahf;` in `src/tests/mod.rs`. Fault schedules (exhaustive singles+pairs, persistent, generated; seed 0x9a7fc0de5eed0b1e, QAHF_CASES/QAHF_SEED), N-3, N-r2-2, N-4 at a re-open, dirty-state inside a seal, release retry.
+- `tests_qahf_notes.rs` -> `crates/coagent-audit-host/tests/qahf_notes.rs`: N-2 lock shapes and race, N-4 damages.
+- `run.py`: runs a command in the clone root with an own cargo home/target (no shell cd). `controls.sh`: the generated run under the two G01 red variants. `item6.sh`, `wincheck.sh`: sections 6 and 7. `bytescan.py`: words on the command line only. `classes.py`: class table from a run log.
+- Run: `COAGENT_AUDIT_HOST_SCRATCH=<dir> CARGO_TARGET_DIR=<dir> python3 -B run.py cargo test --release --locked -p coagent-audit-host --lib -- tests::qahf:: --nocapture --test-threads 1`
+- `logs/`: the runs quoted in the verdict (`QAHF CLASS` lines stripped from main_run.log; they are in `main_run_classes.md` aggregated). `exh1_measure_bug.log` is the first run with my own wrong receive measure, kept.
