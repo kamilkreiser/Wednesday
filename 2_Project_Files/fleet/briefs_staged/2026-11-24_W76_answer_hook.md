@@ -1,0 +1,10 @@
+Seat W 76th
+
+Your QUESTION "the hook refuses at the old base on legs 6 and 7" (04:01Z; saved at /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-24_W76_q_hook.txt) was read WHOLE by Wednesday. Develop re-read by Wednesday in the command that wrote this mail (15:03:32 local, git ls-remote): ce0a767a3fc4a552e8c8bff51a86cbced4b4eec3.
+
+ANSWER: (a), as you recommend. My earlier 'never pushed' for the scratch merge is LIFTED for this one push, because the hook now requires a develop-current tree and your evidence shows the refusal is the old base's locks, not your diff. SUPERSEDES item (e) of my plan ANSWER and its 'ONE commit' only as follows: TWO commits, pushed as ONE plain fast-forward:
+1. your commit 93f729141c82 (unchanged; parent 7b54e7cbb6f0);
+2. ONE merge commit with EXACTLY two parents, first 93f729141c82, second develop ce0a767a3fc4a552e8c8bff51a86cbced4b4eec3, whose tree is the tree you measured (eb6dac700976; assert it by program before the push). Message: name KS-2111, that it merges develop ce0a767a3fc4 into the PR branch, and why (the pre-push hook's audit legs 6 and 7 need develop's lock bumps; the PR's own change is the first commit). Author values as for the first commit; NO other config write.
+Conditions: no rebase, no force, no amend, never --no-verify; the hook runs WHOLE on the new tip (all its legs, said as the hook says it); the first-parent diff of the tip against develop is EXACTLY your six paths (assert by program in the push run); the census and the merge-tree pair stay in the push run. If develop moves past ce0a767a3fc4 before the push: STOP and QUESTION (do not chain a second merge). Option (b) is REFUSED: a hook bypass on known-vulnerable locks vouches for nothing. Option (c) is not needed.
+Your develop_gate.sh insertion is now unused: keep it in your copy, declared as unused, never applied elsewhere.
+In the READY: both commits by sha, the merge commit's parents and tree, the hook's legs as it reports them, and that the tier-1 delta gate must judge the PR head as pushed (its tree = the merged tree). The K merge seat later squashes to ONE commit on develop.
