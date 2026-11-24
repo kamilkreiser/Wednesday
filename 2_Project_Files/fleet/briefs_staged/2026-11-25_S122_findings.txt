@@ -1,0 +1,60 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-24T20:16:20.000Z
+Subject: [Secuura/Blockchain-S -> Wednesday] FINDINGS: rotated key erase scope
+---
+Seat S 122nd
+
+FINDINGS: rotated key erase scope. Read-only code read at develop 9c1ecde5abd68b74c09f4d53349b9b9f2f16c270 (commit time 2026-11-24T16:56:54+11:00), in my own clone at /private/tmp/claude-501/-Volumes-DevMASTER--CODING-Secuura-Blockchain/b4f56d3b-a7f0-4eb6-a695-efdb1ab2ee9d/scratchpad/clone. Mail time 2026-11-24T20:15:49Z. This answers card secuura-rotated-key-erase-scope-1125 = a, for your relay to Kam. Nothing was written to Linear, GitHub, the extranet or any box, and no request went to any running stack. Every file:line below was checked against the pinned source by program (tools/cites_s122.py: 45 cites, 0 failed, 2 planted controls fired). Paths are under Blockchain/Dev/; GW = services/api-gateway/src, SEC = services/security/src.
+
+1. THE ANSWER, two sentences for Kam
+A rotate copies nothing from the old key: it mints a brand-new key from a fixed list in the gateway (nine scopes, subjects:erase is the ninth) at 3,000 requests an hour, so a key rotated on this code carries both, unless the admin's request names its own scopes list (that list is used as given) or the host sets the rate-limit environment variable to another number.
+For dev-ps's re-key that means the new key gets erase and 3,000 an hour, but a key minted before KS-869 (6 Sep) has no connector id, so the rotate will not switch it off: that older key stays live with the scopes and the limit it was minted with (by the KS-1195 notes, 1,000 an hour and no erase) until someone revokes it by its id, and the reply says so ("rotated: false" plus a warning) only when none of the connector's older keys carried an id.
+
+2. TABLE a to d (answer / file:line at the pin / confidence)
+a. Are the old key's scopes copied to the new key? NO. The new key's scopes are the request body's scopes list if it is a non-empty list of strings (a platform admin can send one; a provisioning connector may not, and may not rotate), otherwise the constant S_CONNECTOR_SCOPES: documents:write, documents:read, documents:share, documents:revoke, documents:transfer-custody, certifications:write, anchors:read, anchors:write, subjects:erase. The security service stores whatever list it is handed, and its mint policy puts no scope check on a platform-admin caller. Nothing on the rotate path reads the old key's scopes; the only thing it does to an old key is the retire UPDATE.
+   GW/routes/platform.ts:643-647 (constant; subjects:erase at :646), :671 (rotate flag), :677 and :687 (connector callers refused), :694-696 (the choice), :892 (sent); SEC/index.ts:753 (schema), :1535 (stored as given), :502 (insert), :2194 (validate returns the stored list); SEC/provisioningPolicy.ts:97 (admin early return). Confidence HIGH.
+b. Is 3,000 a property of the key, the organisation, the scope or global? Of the KEY, and it is set fresh at every mint, never copied: the gateway sends rateLimit 3000 and rateLimitWindow 3600 in the mint body; security stores both on the key row; the gateway reads them back from validate and counts per key (a Redis bucket per key, window = the key's own). Defined in ONE place for register-connector: GW/routes/platform.ts:190 (default 3000), :204 (window 3600), :224 (env PLATFORM_S_CONNECTOR_RATE_LIMIT; a value outside 1 to 10000 or not an integer logs and falls back to 3000, :192-193 and :223-239). It is NOT the same number on every path: security's own mint default is 1000 (SEC/index.ts:754), the gateway falls back to 100 per 60 s for a key with no stored limit (GW/middleware/auth.ts:320-321; rateLimitEnforce.ts:71-72), and a separate per-IP global limiter sits in front (GW/index.ts:493-505: 300 a minute unless NODE_ENV is development, dev, demo, test or staging, then 10,000; env RATE_LIMIT_MAX_REQUESTS; API-key callers are not exempt, rateLimitSkip.ts:48-57).
+   Per-key store/enforce: SEC/index.ts:503; GW/middleware/auth.ts:643; rateLimitEnforce.ts:228, :247, :282. Confidence HIGH for the code; the live env values are not measured.
+c. Keys minted before KS-869 (no connector id)? The NEW key is unaffected: it gets the same scopes and 3,000 as above, because nothing about it depends on the old key. The OLD key is not touched: the retire matches only connector_id = platform-s:<externalRef> in the same tenant (SEC/index.ts:239 and :246), and a key with no connector id never matches. Nothing in the repo backfills connector_id: the only write path is the upsert's COALESCE (SEC/index.ts:500), which can fill a key that is still live in memory, and a restart empties memory; startup-migrations.ts:440-442 only creates the table. So the rotate answers HTTP 200 with rotated: false, priorKeysRevoked: 0 and a rotationWarning (code PRIOR_KEY_STILL_ACTIVE, text "revoke it by its id"), and logs a warn line: GW/routes/platform.ts:954-967, :176-179, :980.
+   GAP worth Kam seeing: if at least ONE key of that connector does carry the id and another does not, the retire count is 1 or more, so the reply says rotated: true with NO warning while the id-less key stays active (platform.ts:954, :980).
+   Dates from git (commit times at the pin, not deploy times): KS-869 persisted connector_id in 0c559490f, 2026-09-06 15:02 +10:00 (merged 50913d2c3, 16:17); subjects:erase joined the mint set in 4111f409e, 2026-09-06 10:59 +10:00; revoke-on-rotate (KS-577) is 47b2b60f2, 2026-09-07. So by date a 20-21 Aug key has no connector id, no erase scope and the 1,000 default. Confidence HIGH for the code; MEDIUM on what a given deployed key holds (live data, not read).
+d. Tests that pin it today (none run, see below):
+   - GW/__tests__/ks1195-register-connector-mints-the-ruled-rate-limit.test.ts: "ROTATE: an explicit rotate of an existing organisation mints at the new ceiling" (:215) and "ROTATE-WINDOW: a rotate carries the same one-hour window" (:227). Drives the real router against local stubs. Pins (b).
+   - GW/__tests__/ks843-erasure-scope-gate.test.ts: "F-2 the connector mint set equals the agreed contract set EXACTLY" (:227). It READS platform.ts source and compares the nine-scope list; its own comment says it does not drive a rotate (:237-242). Pins the constant in (a), not the path.
+   - GW/__tests__/ks1152-register-connector-says-when-the-old-key-lives.test.ts: "R6 a count of 0 on an EXISTING organisation: 200, rotated false ... the no-prior-key warning" (:224). Pins the reply in (c). The id-matching of the retire itself is pinned on real PostgreSQL by SEC/__tests__/ks1152-rotate-retry-retires-the-key-it-returned.integration.test.ts (the "control round 2, a 0" cell, as platform.ts:171-173 says), and SEC/__tests__/ks869-connector-id-persisted.test.ts:97 pins the COALESCE rule.
+   - I found NO test that compares an old key's scopes with a rotated key's, and none that drives a rotate through to the stored scopes and limit (ks843 F-2 is source-structural). Of the eleven security test files that mention rotate and scopes I read the case names of ks869 only; the PostgreSQL integration test is cited from a phrase match plus platform.ts:171-173, not read, and I did not read the other nine.
+   NOT RUN: the gateway and security suites need installed dependencies, and packages/shared carries an npmrc whose auth line is an environment placeholder for a non-default registry (checked by count only, never printed), so an install would need a credential, which the BRIEF rules out; the PostgreSQL cells need a database.
+e. Plain words: see section 1.
+
+RELATED FACT (beyond a to d, it changes what Stuart's "S does nothing until" means): the erase route gate is requireScopeOrRole with the switch SUBJECTS_ERASE_SCOPE_ENFORCED UNSET by default, so at this sha a connector-role key WITHOUT subjects:erase is still admitted and logged (GW/routes/proxy.ts:860-866 and :930; GW/middleware/scopes.ts:139; test ks843 "GRACE", :83). S's old key can still erase today; if the switch is flipped it is refused; a rotated key passes either way. The comment says the switch is flipped once the log shows S on a rotated key (proxy.ts:865).
+
+3. EVIDENCE (short excerpts, pinned source, no secret values)
+platform.ts:694-696
+  const scopes = Array.isArray(body.scopes) && body.scopes.every(s => typeof s === 'string') && body.scopes.length > 0
+    ? (body.scopes as string[])
+    : S_CONNECTOR_SCOPES;
+platform.ts:892-899, the mint body sent to security: scopes, rateLimit: resolveConnectorRateLimit(), rateLimitWindow: CONNECTOR_RATE_LIMIT_WINDOW_SECONDS, connectorId: `platform-s:${externalRef}`, then rotate (:906)
+SEC/index.ts:1535-1537, the stored key: scopes: data.scopes, rateLimit: data.rateLimit, rateLimitWindow: data.rateLimitWindow
+SEC/index.ts:239, the retire: UPDATE svc_api_keys SET is_active = false WHERE connector_id = $1 AND tenant_id = $2::uuid AND id <> $3 AND is_active = true
+platform.ts:954 and :980: noPriorKeyRetired = rotate && existing.rows.length > 0 && priorKeysRevoked === 0 ; rotated: ... && priorKeysRevoked >= 1
+platform.ts:978: the reply's scopes field is the REQUESTED list, not a read-back of what security stored (security's own reply at SEC/index.ts:1592 is not passed on). So the rotate reply cannot prove the stored scopes; validate (SEC/index.ts:2194-2195) returns the stored ones.
+Search terms and counts (whole tree, files/lines): register-connector 45/116; register_connector 4/18; registerConnector 0/0; rotate 230/969; subjects:erase 32/73; connector_id 38/134; connectorId 120/491; KS-869 7/11; 3000 309/607 (one rate-limit definition after narrowing). Full table with caveats: evidence/search_table.md in my REC. Caveat: this git grep build ignores backslash-b and backslash-s in extended patterns, so the first gateway rateLimit scan and test-name listing were lower bounds; every cite above was read at its line.
+Your BRIEF's figures: 3,000 an hour CONFIRMED (platform.ts:190); KS-869 on 6 Sep CONFIRMED by commit date; "keys minted 20-21 Aug" cannot be checked from code (live data). KS-2114, PS-740 and PS-1751 appear nowhere in the repo, so I did not read them; KS-1152, KS-577, KS-843 and KS-1195 appear in the code comments I read.
+
+4. WHAT WAS NOT MEASURED
+- Live data: what any deployed key (dev-ps or any other) holds: scopes, rate limit, connector id, active flag, created date. No running stack, host or database was touched.
+- Which build each host runs, so whether the deployed gateway and security include 4111f409e, 0c559490f and 47b2b60f2.
+- Environment on any host: PLATFORM_S_CONNECTOR_RATE_LIMIT, RATE_LIMIT_MAX_REQUESTS, SUBJECTS_ERASE_SCOPE_ENFORCED, NODE_ENV. The repo's compose and example env files set neither of the first and third (non-test, non-md grep at the pin found code only).
+- KS-869 backfill state on deployed hosts: the repo has no backfill; whether anyone ran manual SQL on a deployed database is unknown.
+- Any test run (reason in d). No code was executed.
+- The key-list route's output shape (SEC/index.ts:1614) and the per-IP limiter's key generator (the config at GW/index.ts:493-505 names none, so I take the library default; not checked).
+- Linear: I read nothing from it; I took Stuart's question as quoted in your BRIEF.
+
+5. WORTH DOING, NOT DONE (stopped here, per your STOP rule)
+- A read-only look at dev-ps's real key rows (scopes, rate_limit, connector_id, is_active, created_at) before any rotate: it settles which case in (c) applies. It is a request to a running stack, so it needs Kam's go.
+- If dev-ps is rotated: send NO scopes field in the body; read the stored scopes back through validate or the key list (the rotate reply echoes the request); then revoke any id-less older key by its id.
+- A product call for Kam: should the reply say rotated: true when an id-less key remains (the gap in c)?
+- One test that drives a rotate through security and asserts the stored scopes and limit (none exists).
+- Whether any host has SUBJECTS_ERASE_SCOPE_ENFORCED set, and what its grace log shows.
+
