@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 CHECKPOINT 70% 16:30 Tue 24 Nov, the 13:22 rotation's SUCCESSOR (statusline ctx:70%) - READ FIRST; supersedes the 65% block where they differ
+- **S 121st DONE** (KS-2354..KS-2364 + comments KS-2343/KS-2345/KS-1988/KS-1391 + the KS-2364 description fix; all VERIFIED on Linear; scored 0.95; pane %405 closed; its watcher pid 18505 left to expire). Both Kam rulings are in their tickets; card KS-2343 marked DELIVERED.
+- **LIVE: K 92nd %408 (Sonnet C5)**, PR 2159 merge, brief fleet/briefs_staged/2026-11-24_seatK92_merge.md STAMPED (W-14 no gate re-read; W-15 the TWO-GATE squash line as derived). NEXT: rung 5 -> plan QUESTION -> ANSWER -> STATUS -> READY -> GO with develop ce0a767a3fc4 + head 3acc187676aa ASSERTED in the sending command, Expected tree eb6dac7009761b526d9db83f5872aeffef9f9174 (the head's own tree while develop is ce0a767a3fc4), the two-gate squash line quoted -> MERGED -> verify at source -> WRAP, score, pane_close.
+- **NO DRAFTERS IN FLIGHT.** USAGE 88%: K 92nd was the last planned launch. At 90%: no new launch (in-flight finish). THEN (if usage allows, else after the renewal): ONE Kintsugi round k45 (originate/migrations for PR 2195 + api-gateway and admin-frontend for PR 2159), Kintsugi only, auth held, demo only with Stuart's nod; board-brief template gains md_hazard + opcode checks (S 121st's advice).
+
 ## 🔴 CHECKPOINT 65% 16:08 Tue 24 Nov, the 13:22 rotation's SUCCESSOR (statusline ctx:65%) - READ FIRST; supersedes every block below where they differ
 - **develop = ce0a767a3fc4a552e8c8bff51a86cbced4b4eec3** (PR 2195 squash, VERIFIED). KS-2339 Done + archived.
 - **Kam today:** 08:57 three card rulings; 15:16 KS-2343 = a (DELIVERED: comment c37753a2); 15:18 KS-2345 NOTE (card withdrawn quoting him; on the ticket as comment 5aa0a693; design ticket KS-2354). Both receipted on the panel. No card open for him.
