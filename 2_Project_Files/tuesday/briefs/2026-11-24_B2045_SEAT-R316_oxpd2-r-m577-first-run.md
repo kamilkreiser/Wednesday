@@ -352,16 +352,16 @@ RECORDS DONE by your Step-0 clock plus 60 minutes, HARD STOP plus 90 (the Stamp'
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. The unstamped copy reads 12 such lines (the slot lines and the last line).
-- STAMP (what Tuesday read whole and re-printed at source, his 14:03 to 14:58 words re-printed with `kam_rulings_today.sh`): ____
-- LAUNCH WINDOW (now or after; every pane whose name holds OXPd): ____
-- BASE (the four files' and the register's sha256 against B2041's manifest; B2044's READY line; no B2045 folder or STATUS; the highest C-number and owed number; OXPD2-60's status and comment total; the Jira census; as Tuesday reads them): ____
-- RECORDS (exactly WRITE or HOLD; default HOLD): ____
-- JIRA (exactly WRITE or HOLD; default HOLD): ____
-- OXPD2-60 (exactly DONE or LEAVE; default DONE): ____
-- TICK112 (exactly TICK or LEAVE; default TICK): ____
-- Q-ANSWERS (Q1 to Q7; defaults as written): ____
-- STOP-CHECKS (which of the never-run checks Tuesday accepts as never run on a real output, or what Tuesday ran): ____
-- Hard stop (the absolute outer limit AEDT): ____
-- MODEL RECEIPT (level opus; `BRIEF_SEAT_LEVEL=opus` inside the quotes): ____
+- STAMP (what Tuesday read whole and re-printed at source, his 14:03 to 14:58 words re-printed with `kam_rulings_today.sh`): 15:13 2026-11-24 by Tuesday s322. Read whole with the Read tool (lines 1-89, 90-229, 229-367). His 14:03 to 14:58 words re-printed with kam_rulings_today.sh this session (rows 14:03 x3, 14:05, 14:06, 14:07, 14:56 tap + 14:56 message + 14:57 photo, 14:58 network tap; the 14:58:37 NexusAI tap is another project's, not in C-84). Tuesday read his photo: the page reads 'lab synthetic page 1 of 1'.
+- LAUNCH WINDOW (now or after; every pane whose name holds OXPd): now until 16:00 AEDT on 2026-11-24; panes whose name holds OXPd2: 0 at 15:13 (X62 closed 14:50).
+- BASE (the four files' and the register's sha256 against B2041's manifest; B2044's READY line; no B2045 folder or STATUS; the highest C-number and owed number; OXPD2-60's status and comment total; the Jira census; as Tuesday reads them): read by Tuesday by program at 15:13:01: CLAUDE.md ce5c1f69, BACKLOG.md 7d598ca7, history.md 840d92fa, CLARIFICATIONS.md bda1e11c, register e2621f1b, each found in .tools/b2041/READY.manifest; B2044's last line 'READY B2044: password set and verified | rows 0 1 5 6 done | rows 2 3 4 not built'; no .tools/b2045, no B2045 STATUS; highest C-83, highest owed 117. OXPD2-60's status and comment total and the Jira census are the DRAFTER's GETs (14:57:56-14:58:52), not re-read by Tuesday: P-8 is your re-read.
+- RECORDS (exactly WRITE or HOLD; default HOLD): WRITE
+- JIRA (exactly WRITE or HOLD; default HOLD): WRITE
+- OXPD2-60 (exactly DONE or LEAVE; default DONE): LEAVE
+- TICK112 (exactly TICK or LEAVE; default TICK): TICK
+- Q-ANSWERS (Q1 to Q7; defaults as written): Q1 WRITE. Q2 as frozen (address left out). Q3 LEAVE, NOT the default: OXPD2-60's own description says 'Done when: you say so on this ticket'; he has not, so the comment goes on and the ticket stays open for him to close. Q4 TICK (B2044's STATUS shows the three preconditions; P-9 re-checks them). Q5 as frozen. Q6 as frozen. Q7 as frozen.
+- STOP-CHECKS (which of the never-run checks Tuesday accepts as never run on a real output, or what Tuesday ran): Tuesday accepts the NEVER RUN list as never run on a real output (b2045.py and its selftest; the fence, skip, comment and move rules against live Jira; HOLD R and R2 on the live files; a stop after a partial write): a failure traceable to this kit's wording is a STOPPED: NEEDS TUESDAY question. Tuesday ran: the BASE reads above.
+- Hard stop (the absolute outer limit AEDT): 17:00 AEDT on 2026-11-24.
+- MODEL RECEIPT (level opus; `BRIEF_SEAT_LEVEL=opus` inside the quotes): level opus; BRIEF_SEAT_LEVEL=opus inside the quotes; model id claude-opus-5-5 per OXPd CLAUDE.md line 7.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 15:13 2026-11-24 by Tuesday s322 (Read tool, 367 lines, 88803 bytes before this stamp).
