@@ -8,6 +8,11 @@ supersede: REPLACED WHOLESALE 2026-11-13 12:1x by the 11:5x seat at its 50% chec
 
 # NEXT PICKUP, Fri 13 Nov 2026 (Mac mini seat)
 
+## 🔴 STATE 06:57 Wed 25 Nov, MORNING (the 17:29 (11-24) successor continuing) - READ FIRST; supersedes the 18:55 block where they differ
+- **KAM RULED 06:56 (both in the store, tapped-but-open none):** wed-morning-plan-1125 = a (carry on: fleet paused until usage allows); secuura-rotated-key-erase-scope-1125 = a (a seat READS the code first and tells Kam what a rotate does today with the old key's scopes incl. subjects:erase and its rate limit; NOTHING is posted to Stuart until Kam rules again).
+- **FIRST LAUNCH WHEN USAGE ALLOWS (renewal ~4 days, or Kam switches accounts):** ONE Sonnet board/read seat, read-only: register-connector's rotate path on current develop -> a measured answer (scopes copied or not, rate limit copied or not, file:line) -> Wednesday posts it to Kam as a card follow-up, then marks secuura-rotated-key-erase-scope-1125 --delivered. The same seat can carry the OWED board items (k44-window issuer nginx ticket, G319/G419 siblings).
+- **OPEN for Kam:** secuura-demo-pk-anchor-resubmit-1125 (Stuart's re-submit on demo-pk; rec a after the renewal).
+
 ## 🔴 STATE 18:55 Tue 24 Nov, the 17:29 rotation's SUCCESSOR (fleet IDLE; usage 91%) - READ FIRST; supersedes every block below
 - **k45 DONE**: D 87th (Opus) put develop 9c1ecde5abd6 on Kintsugi for originate (0cbdb52712f8), admin-frontend (4d09d1f5b169), api-gateway (69e3951e64b1); REVISION k45; next stamp k46. KS-2111 live on Kintsugi (live 400 + live page UNMEASURED); KS-1988/KS-2075 baked in originate but INERT (dev-migrations not rebuilt). Kam's receipt posted bf-b07043ce7a5d. STATUS A/1/B/C + WRAP saved under fleet/briefs_staged/2026-11-24_D87_*. Scored 0.95; pane %411 closed.
 - **FLOOR: no seats, no drafters, no agent question open. NO card open for Kam (decision_queue list open = 0).** USAGE 91% (statusline): NO new launches until the renewal (~4d 18h). Nothing in flight.
