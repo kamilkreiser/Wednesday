@@ -86264,5 +86264,73 @@
   ],
   "delivered_artefact": "OXPd_2 CLARIFICATIONS C-83 (line 1040) + design 02/03/05 (lane D B2037 rounds 2-6) + OXPD2-55 attachments 23951-23954 and comment 41468, B2040 READY 92715942; note 'rebuild without graph' still open (owed 117)",
   "delivered_ts": "2026-11-24T13:31:23.988833+11:00"
+ },
+ {
+  "id": "secuura-nominee-must-belong-ks2345-1124",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2345 (Low): must a nominated signatory belong to the organisation?",
+  "bluf": "Your ruling is needed before anyone builds a nominee check. Since KS-2339 went live, an organisation admin can nominate signatories for their own organisation, but nominate never checks the NOMINEE: any user id, from another organisation or another tenant, is accepted. Gate 418 listed this as a follow-up (G418-3). One constraint: on the boxes, the organisation-level users have no organisation assigned (Kintsugi measured today by Seat D 86th; demo measured 3 Sep), so a 'must belong' check would refuse every nominee until organisations are assigned, which is yours. Filed by Seat S 120th as KS-2345; nothing was run.",
+  "default_action": "Nothing is built; KS-2345 stays in Backlog and nominate keeps accepting any user id (only platform admins can act on Kintsugi today). The stale-card mail reaches you after 48 hours.",
+  "options": [
+   {
+    "key": "a",
+    "label": "The nominee must belong to the same organisation",
+    "detail": "A build seat adds the check, tier 1 gate; on today's data it refuses every nominee until organisations are assigned."
+   },
+   {
+    "key": "b",
+    "label": "The nominee must be in the same tenant only",
+    "detail": "Weaker, but works on today's data; organisation membership can be added later."
+   },
+   {
+    "key": "c",
+    "label": "No nominee check for now",
+    "detail": "KS-2345 stays in the backlog with this ruling recorded on it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-24T14:05:08.885718+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-who-may-approve-workflow-step-ks2343-1124",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2343 (Low): does your KS-2038 transfer rule also decide who may approve a workflow step?",
+  "bluf": "Your ruling is needed only if you want the issuer's approval queue wired up; nothing breaks while it waits. The issuer has an approval-queue component that calls two transfer-service routes (pending steps, approve a step) which the gateway does not carry, and the component is not mounted anywhere. Today's code (PR 2243) lets only the step's named approver approve, from their login. On 6 Nov you ruled KS-2038 = a, the party rule for approving transfers; it does not say whether it covers workflow steps, so this card asks that and does not re-ask KS-2038 (the prior-rulings matches were read: KS-2038 and KS-1087 are transfer and credential approvals, not workflow steps). Filed by Seat S 120th as KS-2343; nothing was run.",
+  "default_action": "Nothing is built: the component is unmounted and the routes unreachable, so waiting costs nothing. KS-2343 stays in Backlog; the stale-card mail reaches you after 48 hours.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, the KS-2038 party rule governs; keep only the step's named approver, and route the two paths when the queue is wanted",
+    "detail": "A build seat adds the two gateway routes with the same checks; tier 1 gate; Kintsugi first."
+   },
+   {
+    "key": "b",
+    "label": "Widen it",
+    "detail": "the organisation's own admins may also approve steps for their organisation:Needs the organisation data that is not yet assigned on Kintsugi; a design seat first."
+   },
+   {
+    "key": "c",
+    "label": "Leave it unbuilt for now",
+    "detail": "KS-2343 stays in the backlog with this ruling recorded on it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-24T14:05:45.274879+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD wed-model-routing-v10-approve-1018",
+   "CARD secuura-ks1087-workflow-approve-credential-1102",
+   "CARD secuura-ks603-bm2-verification-workflow-1102",
+   "CARD secuura-ks2038-who-may-approve-transfers-1106"
+  ]
  }
 ]
