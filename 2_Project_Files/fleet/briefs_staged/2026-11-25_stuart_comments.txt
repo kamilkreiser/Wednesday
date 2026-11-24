@@ -1,0 +1,39 @@
+===== KS-772 Review stream: S<->K integration contract | stuart comments since 11-24: 1
+--- 2026-11-24T06:01:49.118Z
+**Please re-submit `anchor_c3d42601` on demo-pk.** (KS-2196)
+
+* **The fix looks to be on demo-pk.** Per your 20 Nov note, demo-pk runs develop `d4ffc8308249`, which contains the KS-2196 fix `918f5e6d3`. On 20 Nov, uat-ps's document 31 had a declare and a sign one second apart, and both confirmed (S rows 198 and 199). That is the case that failed on 13 Nov.
+* **The anchor is still failed.** `anchor_c3d42601-…` is uat-ps document 27's sign from 13 Nov 06:34 UTC. S's six-hourly revisits are reads, the last on 24 Nov between 00:53 and 01:12 UTC, so nothing on S's side will re-send it.
+* **What clears with it.** Once it confirms, S's next poll records it, and S rows 132, 134, 135 and 140, which ride on it, clear too.
+
+Please reply here with the time of the re-submit and its transaction hash, and I will check the rows.
+
+**Also new today:** KS-2365. On 20 Nov, demo-pk answered 404 to an anchor POST for a version it had created a moment before (uat-ps document 31's watermark, `doc-1795153122701-5c90a633`). By the code, `/version` writes the connector's provenance row without awaiting it. S's half is PS-1749.
+===== KS-2196 anchoring prices an anchor transaction without Conway's reference-script fee, so an anchor that selects a reference-script wallet UTxO is refused FeeTooSmallUTxO and goes terminal (demo-pk anchor_c3d42601, sign, 2026-11-13) | stuart comments since 11-24: 1
+--- 2026-11-24T06:05:44.138Z
+Re-submit of `anchor_c3d42601` asked for on KS-772 today (24 Nov 06:01 UTC). demo-pk's develop `d4ffc8308249` contains this fix, and a declare and a sign one second apart confirmed on uat-ps on 20 Nov. The sign anchor and the four events riding on it (S rows 131, 132, 134, 135 and 140) are still parked; S last revisited them on 24 Nov between 00:53 and 01:12 UTC.
+===== KS-843 KS-695 F5: build the dedicated `subjects:erase` scope gate on POST /api/gdpr/erasures — Kam ruled it 2026-09-03 and it has never been built | stuart comments since 11-24: 1
+--- 2026-11-24T06:05:42.479Z
+**The re-key path for dev-ps's 7 oldest keys, as K stands today** (S organisations 3 to 9, minted 20 and 21 Aug).
+
+1. A platform admin calls `register-connector` with `rotate: true` for each organisation. A provisioning key cannot rotate, and a re-register without rotate returns no key.
+2. Those keys predate KS-869 (6 Sep), so they most likely carry no connector id. The rotate should therefore answer `rotated: false`, `priorKeysRevoked: 0` and `PRIOR_KEY_STILL_ACTIVE`, and the old key must be revoked by its id (KS-1152, KS-2114).
+3. The new key goes into S at `/AdminConnectorKeys` (PS-740). PS-1751 makes S keep the old key's id for step 2.
+
+Still open for Kamil (item 6 on KS-772): does a rotated key carry `subjects:erase` and the 3,000-an-hour limit? S does nothing until that is answered.
+===== KS-577 rotate: true mints a new key but never revokes the old one — implement revoke-on-rotate and agree the cutover window | stuart comments since 11-24: 1
+--- 2026-11-24T06:05:40.646Z
+**Platform S on the cutover shape (done-when 1).** On 12 Nov 2026 Stuart ruled **instant cutover, no grace period**. It was item 7 of the list on KS-772 and was not yet recorded here.
+
+**What S does today** (PS-740, Deployed to UAT; read at S develop `0128784`):
+
+* After a rotate, S's next calls for that organisation get `401 Invalid API key`.
+* Two such answers more than 60 s apart move S's row to `KeyInvalid`, shown on `/Health`.
+* The organisation's anchor rows stay unanchored and are re-sent once a key works. K never accepted those calls, so re-sending is safe.
+* The admin pastes the new key at `/AdminConnectorKeys`. The row goes back to `Provisioned` and S's key cache is cleared, with no restart needed.
+
+So option 1's cost is a backlog for the minutes between the rotate and the paste, not lost anchors.
+
+**Open on the S side:** PS-1751. S overwrites the stored key id on replace, so the admin has no record of the old key's id when a rotate answers `PRIOR_KEY_STILL_ACTIVE` (KS-1152, KS-2114). The runbook will say to read `rotated` and `rotationWarning`.
+
+KS-583 step 4 and the validate-path check can now run against the inlet. That needs a platform admin to rotate one organisation on Kintsugi, paired with dev-ps.
